@@ -3,5 +3,5 @@
 class SandboxApplication : public ProjectA::Application {};
 
 ProjectA::Application* ProjectA::createApplication() {
-	return new SandboxApplication;
+	return new SandboxApplication();
 }
