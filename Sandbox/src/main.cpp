@@ -1,7 +1,7 @@
-namespace ProjectA {
-	__declspec(dllimport) void test();
-}
+#include "ProjectA.hpp"
 
-int main() {
-	ProjectA::test();
+class SandboxApplication : public ProjectA::Application {};
+
+ProjectA::Application* ProjectA::createApplication() {
+	return new SandboxApplication;
 }
