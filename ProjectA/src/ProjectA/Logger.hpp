@@ -3,17 +3,18 @@
 #include <memory>
 #include "core.hpp"
 #include "spdlog/spdlog.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/fmt/ostr.h"
 
 namespace ProjectA {
 	class API Logger {
+		private:
+			static std::shared_ptr<spdlog::logger> coreLogger;
+			static std::shared_ptr<spdlog::logger> clientLogger;
+
 		public:
 			static void initialize();
 			inline static std::shared_ptr<spdlog::logger>& getCoreLogger();
 			inline static std::shared_ptr<spdlog::logger>& getClientLogger();
-		private:
-			static std::shared_ptr<spdlog::logger> coreLogger;
-			static std::shared_ptr<spdlog::logger> clientLogger;
 	};
 }
 

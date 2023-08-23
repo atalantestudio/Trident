@@ -4,11 +4,20 @@
     <Filter Include="ProjectA">
       <UniqueIdentifier>{1DB858A2-0985-B3AD-329E-A1551ECAE83B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ProjectA\Event">
+      <UniqueIdentifier>{2E1B210B-1AE9-1411-037D-8537EFE9F075}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ProjectA.hpp" />
     <ClInclude Include="src\ProjectA\Application.hpp">
       <Filter>ProjectA</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Event\Event.hpp">
+      <Filter>ProjectA\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Event\KeyEvent.hpp">
+      <Filter>ProjectA\Event</Filter>
     </ClInclude>
     <ClInclude Include="src\ProjectA\Logger.hpp">
       <Filter>ProjectA</Filter>

@@ -9,3 +9,5 @@
 #else
 	#error Operating system not supported.
 #endif
+
+#define BIT_SHIFT_ID(id) (1 << id)

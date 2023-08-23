@@ -1,4 +1,5 @@
 #include "Logger.hpp"
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 namespace ProjectA {
 	std::shared_ptr<spdlog::logger> Logger::coreLogger;
