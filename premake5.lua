@@ -17,6 +17,9 @@ project "ProjectA"
 	targetdir ("bin/%{prj.name}/" .. outputdir)
 	objdir ("obj/%{prj.name}/" .. outputdir)
 
+	pchheader "pch.hpp"
+	pchsource "%{prj.name}/src/pch.cpp"
+
 	files {
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/src/**.hpp",

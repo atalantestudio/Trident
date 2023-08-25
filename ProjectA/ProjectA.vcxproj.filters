@@ -13,10 +13,19 @@
     <ClInclude Include="src\ProjectA\Application.hpp">
       <Filter>ProjectA</Filter>
     </ClInclude>
+    <ClInclude Include="src\ProjectA\Event\ApplicationEvent.hpp">
+      <Filter>ProjectA\Event</Filter>
+    </ClInclude>
     <ClInclude Include="src\ProjectA\Event\Event.hpp">
       <Filter>ProjectA\Event</Filter>
     </ClInclude>
     <ClInclude Include="src\ProjectA\Event\KeyEvent.hpp">
+      <Filter>ProjectA\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Event\MouseEvent.hpp">
+      <Filter>ProjectA\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Event\WindowEvent.hpp">
       <Filter>ProjectA\Event</Filter>
     </ClInclude>
     <ClInclude Include="src\ProjectA\Logger.hpp">
@@ -28,9 +37,7 @@
     <ClInclude Include="src\ProjectA\entry_point.hpp">
       <Filter>ProjectA</Filter>
     </ClInclude>
-    <ClInclude Include="src\ProjectA\Event\MouseEvent.hpp" />
-    <ClInclude Include="src\ProjectA\Event\ApplicationEvent.hpp" />
-    <ClInclude Include="src\ProjectA\Event\WindowEvent.hpp" />
+    <ClInclude Include="src\pch.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ProjectA\Application.cpp">
@@ -39,5 +46,6 @@
     <ClCompile Include="src\ProjectA\Logger.cpp">
       <Filter>ProjectA</Filter>
     </ClCompile>
+    <ClCompile Include="src\pch.cpp" />
   </ItemGroup>
 </Project>
