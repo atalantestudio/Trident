@@ -28,6 +28,9 @@
     <ClInclude Include="src\ProjectA\entry_point.hpp">
       <Filter>ProjectA</Filter>
     </ClInclude>
+    <ClInclude Include="src\ProjectA\Event\MouseEvent.hpp" />
+    <ClInclude Include="src\ProjectA\Event\ApplicationEvent.hpp" />
+    <ClInclude Include="src\ProjectA\Event\WindowEvent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ProjectA\Application.cpp">

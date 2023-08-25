@@ -2,6 +2,7 @@
 
 #include "ProjectA/core.hpp"
 #include <functional>
+#include <string>
 
 namespace ProjectA {
 	enum class EventType {
@@ -12,24 +13,24 @@ namespace ProjectA {
 		KeyPressed,
 		KeyReleased,
 		MouseMoved,
-		MouseLeftPressed,
-		MouseLeftReleased,
-		MouseRightPressed,
-		MouseRightReleased,
+		MouseButtonPressed,
+		MouseButtonReleased,
 		MouseScrolled,
-		WindowClose,
-		WindowFocus,
+		WindowClosed,
+		WindowFocused,
 		WindowFocusLost,
 		WindowMoved,
-		WindowResize,
+		WindowResized,
 	};
 
 	enum EventCategory {
 		None = 0,
-		Input = BIT_SHIFT_ID(0),
-		Keyboard = BIT_SHIFT_ID(1),
-		Mouse = BIT_SHIFT_ID(2),
-		MouseButton = BIT_SHIFT_ID(3),
+		_Application = BIT_SHIFT_ID(0),
+		Input = BIT_SHIFT_ID(1),
+		Keyboard = BIT_SHIFT_ID(2),
+		Mouse = BIT_SHIFT_ID(3),
+		MouseButton = BIT_SHIFT_ID(4),
+		Window = BIT_SHIFT_ID(5),
 	};
 
 	class API Event {
@@ -39,10 +40,12 @@ namespace ProjectA {
 			bool handled = false;
 
 		public:
-			// Pure virtual functions (must be implemented by the child classes)
-			// virtual const char* getName() const = 0;
 			virtual EventType getType() const = 0;
 			virtual int getCategories() const = 0;
+			virtual const char* getName() const = 0;
+			virtual std::string toString() const {
+				return getName();
+			}
 
 			inline bool hasCategory(EventCategory category) const {
 				return getCategories() & category;
@@ -63,9 +66,27 @@ namespace ProjectA {
 			bool dispatch(EventFunction<T> function) {
 				if (event.getType() != T::getType()) return false;
 
-				event.handled = function(*((T*) &event));
+				event.handled = function(*reinterpret_cast<T*>(&event));
 
 				return true;
 			}
 	};
+
+	#define EVENT_CATEGORY(category) \
+		virtual int getCategories() const override { \
+			return category; \
+		}
+
+	#define EVENT_TYPE(type) \
+		static EventType getStaticType() { \
+			return EventType::##type; \
+		} \
+		\
+		virtual EventType getType() const override { \
+			return getStaticType(); \
+		} \
+		\
+		virtual const char* getName() const override { \
+			return #type; \
+		}
 }

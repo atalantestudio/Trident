@@ -1,5 +1,4 @@
 #include "Application.hpp"
-#include "Logger.hpp"
 
 namespace ProjectA {
 	Application::Application() {}

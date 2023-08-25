@@ -148,8 +148,11 @@
   <ItemGroup>
     <ClInclude Include="src\ProjectA.hpp" />
     <ClInclude Include="src\ProjectA\Application.hpp" />
+    <ClInclude Include="src\ProjectA\Event\ApplicationEvent.hpp" />
     <ClInclude Include="src\ProjectA\Event\Event.hpp" />
     <ClInclude Include="src\ProjectA\Event\KeyEvent.hpp" />
+    <ClInclude Include="src\ProjectA\Event\MouseEvent.hpp" />
+    <ClInclude Include="src\ProjectA\Event\WindowEvent.hpp" />
     <ClInclude Include="src\ProjectA\Logger.hpp" />
     <ClInclude Include="src\ProjectA\core.hpp" />
     <ClInclude Include="src\ProjectA\entry_point.hpp" />
