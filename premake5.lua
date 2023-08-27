@@ -9,6 +9,8 @@ workspace "ProjectA"
 		"Release",
 	}
 
+include "ProjectA/vendor"
+
 project "ProjectA"
 	location "ProjectA"
 	kind "SharedLib"
@@ -28,6 +30,12 @@ project "ProjectA"
 	includedirs {
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/spdlog/include",
+		"%{prj.name}/vendor/glfw/include",
+	}
+
+	links {
+		"GLFW",
+		"opengl32.lib",
 	}
 
 	filter "system:windows"
