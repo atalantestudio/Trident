@@ -8,27 +8,27 @@ namespace ProjectA {
 			ApplicationEvent() {}
 
 		public:
-			EVENT_CATEGORY(EventCategory::_Application)
+			EVENT_CATEGORY(EventCategoryApplication)
 	};
 
 	class ApplicationRenderEvent : public ApplicationEvent {
 		public:
 			ApplicationRenderEvent() {}
 
-			EVENT_TYPE(ApplicationRender)
+			EVENT_TYPE(EventTypeApplicationRender)
 	};
 
 	class ApplicationTickEvent : public ApplicationEvent {
 		public:
 			ApplicationTickEvent() {}
 
-			EVENT_TYPE(ApplicationTick)
+			EVENT_TYPE(EventTypeApplicationTick)
 	};
 
 	class ApplicationUpdateEvent : public ApplicationEvent {
 		public:
 			ApplicationUpdateEvent() {}
 
-			EVENT_TYPE(ApplicationUpdate)
+			EVENT_TYPE(EventTypeApplicationUpdate)
 	};
 }

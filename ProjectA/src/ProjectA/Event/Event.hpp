@@ -6,31 +6,31 @@
 
 namespace ProjectA {
 	enum class EventType {
-		None = 0,
-		ApplicationRender,
-		ApplicationTick,
-		ApplicationUpdate,
-		KeyPressed,
-		KeyReleased,
-		MouseMoved,
-		MouseButtonPressed,
-		MouseButtonReleased,
-		MouseScrolled,
-		WindowClosed,
-		WindowFocused,
-		WindowFocusLost,
-		WindowMoved,
-		WindowResized,
+		EventTypeNone = 0,
+		EventTypeApplicationRender,
+		EventTypeApplicationTick,
+		EventTypeApplicationUpdate,
+		EventTypeKeyPressed,
+		EventTypeKeyReleased,
+		EventTypeMouseMoved,
+		EventTypeMouseButtonPressed,
+		EventTypeMouseButtonReleased,
+		EventTypeMouseScrolled,
+		EventTypeWindowClosed,
+		EventTypeWindowFocused,
+		EventTypeWindowFocusLost,
+		EventTypeWindowMoved,
+		EventTypeWindowResized,
 	};
 
 	enum EventCategory {
-		None = 0,
-		_Application = BIT_SHIFT_ID(0),
-		Input = BIT_SHIFT_ID(1),
-		Keyboard = BIT_SHIFT_ID(2),
-		Mouse = BIT_SHIFT_ID(3),
-		MouseButton = BIT_SHIFT_ID(4),
-		Window = BIT_SHIFT_ID(5),
+		EventCategoryNone = 0,
+		EventCategoryApplication = BIT_SHIFT_ID(0),
+		EventCategoryInput = BIT_SHIFT_ID(1),
+		EventCategoryKeyboard = BIT_SHIFT_ID(2),
+		EventCategoryMouse = BIT_SHIFT_ID(3),
+		EventCategoryMouseButton = BIT_SHIFT_ID(4),
+		EventCategoryWindow = BIT_SHIFT_ID(5),
 	};
 
 	class API Event {

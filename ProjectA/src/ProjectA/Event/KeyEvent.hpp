@@ -11,7 +11,7 @@ namespace ProjectA {
 			KeyEvent(int keyCode) : keyCode(keyCode) {}
 
 		public:
-			EVENT_CATEGORY(EventCategory::Input | EventCategory::Keyboard)
+			EVENT_CATEGORY(EventCategoryInput | EventCategoryKeyboard)
 
 			inline int getKeyCode() const {
 				return keyCode;
@@ -25,7 +25,7 @@ namespace ProjectA {
 		public:
 			KeyPressedEvent(int keyCode, int pressCount) : KeyEvent(keyCode), pressCount(pressCount) {}
 
-			EVENT_TYPE(KeyPressed)
+			EVENT_TYPE(EventTypeKeyPressed)
 
 			inline int getPressCount() const {
 				return pressCount;
@@ -43,7 +43,7 @@ namespace ProjectA {
 		public:
 			KeyReleasedEvent(int keyCode) : KeyEvent(keyCode) {}
 
-			EVENT_TYPE(KeyReleased)
+			EVENT_TYPE(EventTypeKeyReleased)
 
 			std::string toString() const override {
 				std::stringstream stream;

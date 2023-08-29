@@ -19,8 +19,8 @@ namespace ProjectA {
 				return y;
 			}
 
-			EVENT_TYPE(MouseMoved)
-			EVENT_CATEGORY(EventCategory::Input | EventCategory::Mouse)
+			EVENT_TYPE(EventTypeMouseMoved)
+			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
 			std::string toString() const override {
 				std::stringstream stream;
@@ -37,7 +37,7 @@ namespace ProjectA {
 			MouseButtonEvent(int button) : button(button) {}
 
 		public:
-			EVENT_CATEGORY(EventCategory::Input | EventCategory::Mouse)
+			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
 			inline int getButton() const {
 				return button;
@@ -48,7 +48,7 @@ namespace ProjectA {
 		public:
 			MouseButtonPressedEvent(int button) : MouseButtonEvent(button) {}
 
-			EVENT_TYPE(MouseButtonPressed)
+			EVENT_TYPE(EventTypeMouseButtonPressed)
 
 			std::string toString() const {
 				std::stringstream stream;
@@ -62,7 +62,7 @@ namespace ProjectA {
 		public:
 			MouseButtonReleasedEvent(int button) : MouseButtonEvent(button) {}
 
-			EVENT_TYPE(MouseButtonReleased)
+			EVENT_TYPE(EventTypeMouseButtonReleased)
 
 			std::string toString() const {
 				std::stringstream stream;
@@ -87,8 +87,8 @@ namespace ProjectA {
 				return yOffset;
 			}
 
-			EVENT_TYPE(MouseScrolled)
-			EVENT_CATEGORY(EventCategory::Input | EventCategory::Mouse)
+			EVENT_TYPE(EventTypeMouseScrolled)
+			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
 			std::string toString() const override {
 				std::stringstream stream;
