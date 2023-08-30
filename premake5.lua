@@ -30,7 +30,7 @@ project "ProjectA"
 	includedirs {
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/spdlog/include",
-		"%{prj.name}/vendor/glfw/include",
+		"%{prj.name}/vendor/glfw/glfw/include",
 	}
 
 	links {
@@ -39,9 +39,9 @@ project "ProjectA"
 	}
 
 	filter "system:windows"
+		systemversion "latest"
 		cppdialect "C++latest"
 		staticruntime "On"
-		systemversion "latest"
 
 		defines {
 			"WINDOWS",
@@ -87,9 +87,9 @@ project "Sandbox"
 	}
 
 	filter "system:windows"
+		systemversion "latest"
 		cppdialect "C++latest"
 		staticruntime "On"
-		systemversion "latest"
 
 		defines "WINDOWS"
 

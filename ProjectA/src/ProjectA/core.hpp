@@ -10,4 +10,23 @@
 	#error Operating system not supported.
 #endif
 
+#ifdef ASSERTS
+	#define CORE_ASSERT(condition, ...) { \
+		if (!condition) { \
+			LOG_CORE_ERROR("Assertion failed: {0}", __VA_ARGS); \
+			__debugbreak(); \
+		} \
+	}
+
+	#define CLIENT_ASSERT(condition, ...) { \
+		if (!condition) { \
+			LOG_CLIENT_ERROR("Assertion failed: {0}", __VA_ARGS); \
+			__debugbreak(); \
+		} \
+	}
+#else
+	#define CORE_ASSERT(condition, ...)
+	#define CLIENT_ASSERT(condition, ...)
+#endif
+
 #define BIT_SHIFT_ID(id) (1 << id)

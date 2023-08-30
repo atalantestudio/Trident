@@ -5,8 +5,8 @@
 
 	int main() {
 		ProjectA::Logger::initialize();
-		LOG_CORE_INFO("Initialized core logging");
-		LOG_CLIENT_INFO("Initialized client logging");
+		LOG_CORE_TRACE("Initialized core logging");
+		LOG_CLIENT_TRACE("Initialized client logging");
 
 		ProjectA::Application* application = ProjectA::createApplication();
 		application->run();
