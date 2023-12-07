@@ -10,17 +10,14 @@ namespace ProjectA {
 		EventTypeApplicationRender,
 		EventTypeApplicationTick,
 		EventTypeApplicationUpdate,
-		EventTypeKeyPressed,
-		EventTypeKeyReleased,
-		EventTypeMouseMoved,
-		EventTypeMouseButtonPressed,
-		EventTypeMouseButtonReleased,
-		EventTypeMouseScrolled,
-		EventTypeWindowClosed,
-		EventTypeWindowFocused,
-		EventTypeWindowFocusLost,
-		EventTypeWindowMoved,
-		EventTypeWindowResized,
+		EventTypeKeyPress,
+		EventTypeKeyRelease,
+		EventTypeMouseMove,
+		EventTypeMouseButtonPress,
+		EventTypeMouseButtonRelease,
+		EventTypeMouseScroll,
+		EventTypeWindowClose,
+		EventTypeWindowResize,
 	};
 
 	enum EventCategory {
@@ -64,13 +61,19 @@ namespace ProjectA {
 
 			template<typename T>
 			bool dispatch(EventFunction<T> function) {
-				if (event.getType() != T::getType()) return false;
+				if (event.getType() != T::getStaticType()) {
+					return false;
+				}
 
 				event.handled = function(*reinterpret_cast<T*>(&event));
 
 				return true;
 			}
 	};
+
+	inline std::ostream& operator << (std::ostream& stream, const Event& event) {
+		return stream << event.toString();
+	}
 
 	#define EVENT_CATEGORY(category) \
 		virtual int getCategories() const override { \

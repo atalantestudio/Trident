@@ -10,8 +10,8 @@ namespace ProjectA {
 
 			struct GLFWData {
 				std::string title;
-				unsigned int width, height;
-				bool vSync;
+				unsigned int width = 0, height = 0;
+				bool vSync = false;
 				EventCallback callback;
 			};
 

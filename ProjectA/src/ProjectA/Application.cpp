@@ -5,6 +5,7 @@
 namespace ProjectA {
 	Application::Application() {
 		window = std::unique_ptr<WindowInterface>(WindowInterface::create());
+		window->setEventCallback(BIND_FUNCTION(Application::eventCallback));
 	}
 
 	Application::~Application() {}
@@ -16,5 +17,18 @@ namespace ProjectA {
 
 			window->update();
 		}
+	}
+
+	void Application::eventCallback(Event& event) {
+		LOG_CORE_TRACE("{0}", event);
+
+		EventDispatcher dispatcher(event);
+		dispatcher.dispatch<WindowCloseEvent>(BIND_FUNCTION(Application::windowCloseEventCallback));
+	}
+
+	bool Application::windowCloseEventCallback(WindowCloseEvent& event) {
+		running = false;
+
+		return true;
 	}
 }

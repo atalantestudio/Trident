@@ -12,42 +12,21 @@ namespace ProjectA {
 			EVENT_CATEGORY(EventCategoryWindow)
 	};
 
-	class WindowClosedEvent : public WindowEvent {
+	class WindowCloseEvent : public WindowEvent {
 		public:
-			WindowClosedEvent() {}
+			WindowCloseEvent() {}
 
-			EVENT_TYPE(EventTypeWindowClosed)
+			EVENT_TYPE(EventTypeWindowClose)
 	};
 
-	class WindowFocusedEvent : public WindowEvent {
-		public:
-			WindowFocusedEvent() {}
-
-			EVENT_TYPE(EventTypeWindowFocused)
-	};
-
-	class WindowFocusLostEvent : public WindowEvent {
-		public:
-			WindowFocusLostEvent() {}
-
-			EVENT_TYPE(EventTypeWindowFocusLost)
-	};
-
-	class WindowMovedEvent : public WindowEvent {
-		public:
-			WindowMovedEvent() {}
-
-			EVENT_TYPE(EventTypeWindowMoved)
-	};
-
-	class WindowResizedEvent : public WindowEvent {
+	class WindowResizeEvent : public WindowEvent {
 		private:
 			int width, height;
 
 		public:
-			WindowResizedEvent(int width, int height) : width(width), height(height) {}
+			WindowResizeEvent(int width, int height) : width(width), height(height) {}
 
-			EVENT_TYPE(EventTypeWindowResized)
+			EVENT_TYPE(EventTypeWindowResize)
 
 			std::string toString() const {
 				std::stringstream stream;

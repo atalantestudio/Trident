@@ -30,3 +30,5 @@
 #endif
 
 #define BIT_SHIFT_ID(id) (1 << id)
+
+#define BIND_FUNCTION(function) std::bind(&function, this, std::placeholders::_1)

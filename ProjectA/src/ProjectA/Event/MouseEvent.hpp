@@ -4,12 +4,12 @@
 #include "Event.hpp"
 
 namespace ProjectA {
-	class API MouseMovedEvent : public Event {
+	class API MouseMoveEvent : public Event {
 		private:
 			float x, y;
 
 		public:
-			MouseMovedEvent(float x, float y) : x(x), y(y) {}
+			MouseMoveEvent(float x, float y) : x(x), y(y) {}
 
 			inline float getX() const {
 				return x;
@@ -19,7 +19,7 @@ namespace ProjectA {
 				return y;
 			}
 
-			EVENT_TYPE(EventTypeMouseMoved)
+			EVENT_TYPE(EventTypeMouseMove)
 			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
 			std::string toString() const override {
@@ -44,11 +44,11 @@ namespace ProjectA {
 			}
 	};
 
-	class API MouseButtonPressedEvent : public MouseButtonEvent {
+	class API MouseButtonPressEvent : public MouseButtonEvent {
 		public:
-			MouseButtonPressedEvent(int button) : MouseButtonEvent(button) {}
+			MouseButtonPressEvent(int button) : MouseButtonEvent(button) {}
 
-			EVENT_TYPE(EventTypeMouseButtonPressed)
+			EVENT_TYPE(EventTypeMouseButtonPress)
 
 			std::string toString() const {
 				std::stringstream stream;
@@ -58,11 +58,11 @@ namespace ProjectA {
 			}
 	};
 
-	class API MouseButtonReleasedEvent : public MouseButtonEvent {
+	class API MouseButtonReleaseEvent : public MouseButtonEvent {
 		public:
-			MouseButtonReleasedEvent(int button) : MouseButtonEvent(button) {}
+			MouseButtonReleaseEvent(int button) : MouseButtonEvent(button) {}
 
-			EVENT_TYPE(EventTypeMouseButtonReleased)
+			EVENT_TYPE(EventTypeMouseButtonRelease)
 
 			std::string toString() const {
 				std::stringstream stream;
@@ -72,12 +72,12 @@ namespace ProjectA {
 			}
 	};
 
-	class API MouseScrolledEvent : public Event {
+	class API MouseScrollEvent : public Event {
 		private:
 			float xOffset, yOffset;
 
 		public:
-			MouseScrolledEvent(float xOffset, float yOffset) : xOffset(xOffset), yOffset(yOffset) {}
+			MouseScrollEvent(float xOffset, float yOffset) : xOffset(xOffset), yOffset(yOffset) {}
 
 			inline float getXOffset() const {
 				return xOffset;
@@ -87,7 +87,7 @@ namespace ProjectA {
 				return yOffset;
 			}
 
-			EVENT_TYPE(EventTypeMouseScrolled)
+			EVENT_TYPE(EventTypeMouseScroll)
 			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
 			std::string toString() const override {
