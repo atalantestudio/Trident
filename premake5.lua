@@ -54,14 +54,17 @@ project "ProjectA"
 
 	filter "configurations:Debug"
 		defines "DEBUG"
+		buildoptions "/MDd"
 		symbols "On"
 
 	filter "configurations:Profile"
 		defines "PROFILE"
+		buildoptions "/MD"
 		optimize "On"
 
 	filter "configurations:Release"
 		defines "RELEASE"
+		buildoptions "/MD"
 		optimize "On"
 
 project "Sandbox"
@@ -95,12 +98,15 @@ project "Sandbox"
 
 	filter "configurations:Debug"
 		defines "DEBUG"
+		buildoptions "/MDd"
 		symbols "On"
 
 	filter "configurations:Profile"
 		defines "PROFILE"
+		buildoptions "/MD"
 		optimize "On"
 
 	filter "configurations:Release"
 		defines "RELEASE"
+		buildoptions "/MD"
 		optimize "On"

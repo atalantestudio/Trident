@@ -37,6 +37,12 @@
     <ClInclude Include="src\ProjectA\Event\WindowEvent.hpp">
       <Filter>ProjectA\Event</Filter>
     </ClInclude>
+    <ClInclude Include="src\ProjectA\Layer.hpp">
+      <Filter>ProjectA</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\LayerStack.hpp">
+      <Filter>ProjectA</Filter>
+    </ClInclude>
     <ClInclude Include="src\ProjectA\Logger.hpp">
       <Filter>ProjectA</Filter>
     </ClInclude>
@@ -56,6 +62,12 @@
       <Filter>Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\ProjectA\Application.cpp">
+      <Filter>ProjectA</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Layer.cpp">
+      <Filter>ProjectA</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\LayerStack.cpp">
       <Filter>ProjectA</Filter>
     </ClCompile>
     <ClCompile Include="src\ProjectA\Logger.cpp">

@@ -2,6 +2,7 @@
 
 #include "core.hpp"
 #include "Event/WindowEvent.hpp"
+#include "LayerStack.hpp"
 #include "WindowInterface.hpp"
 
 namespace ProjectA {
@@ -9,17 +10,19 @@ namespace ProjectA {
 		private:
 			std::unique_ptr<WindowInterface> window;
 			bool running = true;
+			LayerStack layerStack;
 
 		private:
 			bool windowCloseEventCallback(WindowCloseEvent& event);
 
 		public:
 			Application();
-
 			virtual ~Application();
 
 			void run();
-			void eventCallback(Event& event);
+			void listen(Event& event);
+			void pushLayer(Layer* layer);
+			void pushOverlay(Layer* overlay);
 	};
 
 	Application* createApplication();

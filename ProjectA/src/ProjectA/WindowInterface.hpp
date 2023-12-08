@@ -21,15 +21,10 @@ namespace ProjectA {
 			virtual ~WindowInterface() {}
 
 			virtual unsigned int getWidth() const = 0;
-
 			virtual unsigned int getHeight() const = 0;
-
 			virtual bool isVSyncEnabled() const = 0;
-
 			virtual void setEventCallback(const EventCallback& callback) = 0;
-
 			virtual void setVSyncState(bool state) = 0;
-
 			virtual void update() = 0;
 	};
 }

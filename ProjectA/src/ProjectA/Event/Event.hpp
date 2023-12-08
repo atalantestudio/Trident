@@ -33,10 +33,9 @@ namespace ProjectA {
 	class API Event {
 		friend class EventDispatcher;
 
-		protected:
+		public:
 			bool handled = false;
 
-		public:
 			virtual EventType getType() const = 0;
 			virtual int getCategories() const = 0;
 			virtual const char* getName() const = 0;

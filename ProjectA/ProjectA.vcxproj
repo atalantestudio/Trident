@@ -84,6 +84,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/MDd %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -110,6 +111,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/MD %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -137,6 +139,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/MD %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -160,6 +163,8 @@
     <ClInclude Include="src\ProjectA\Event\KeyEvent.hpp" />
     <ClInclude Include="src\ProjectA\Event\MouseEvent.hpp" />
     <ClInclude Include="src\ProjectA\Event\WindowEvent.hpp" />
+    <ClInclude Include="src\ProjectA\Layer.hpp" />
+    <ClInclude Include="src\ProjectA\LayerStack.hpp" />
     <ClInclude Include="src\ProjectA\Logger.hpp" />
     <ClInclude Include="src\ProjectA\WindowInterface.hpp" />
     <ClInclude Include="src\ProjectA\core.hpp" />
@@ -169,6 +174,8 @@
   <ItemGroup>
     <ClCompile Include="src\Platform\Windows\Window.cpp" />
     <ClCompile Include="src\ProjectA\Application.cpp" />
+    <ClCompile Include="src\ProjectA\Layer.cpp" />
+    <ClCompile Include="src\ProjectA\LayerStack.cpp" />
     <ClCompile Include="src\ProjectA\Logger.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
