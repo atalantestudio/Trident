@@ -29,12 +29,14 @@ project "ProjectA"
 
 	includedirs {
 		"%{prj.name}/src",
-		"%{prj.name}/vendor/spdlog/include",
+		"%{prj.name}/vendor/glad/include",
 		"%{prj.name}/vendor/glfw/glfw/include",
+		"%{prj.name}/vendor/spdlog/include",
 	}
 
 	links {
-		"GLFW",
+		"glad",
+		"glfw",
 		"opengl32.lib",
 	}
 
@@ -46,6 +48,7 @@ project "ProjectA"
 		defines {
 			"WINDOWS",
 			"BUILD_DLL",
+			"GLFW_INCLUDE_NONE",
 		}
 
 		postbuildcommands {

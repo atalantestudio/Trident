@@ -1,6 +1,6 @@
 #include "pch.hpp"
 #include "Application.hpp"
-#include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
 namespace ProjectA {
 	Application::Application() {

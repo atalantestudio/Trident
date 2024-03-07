@@ -4,9 +4,11 @@
 #include "ProjectA/Event/MouseEvent.hpp"
 #include "ProjectA/Event/WindowEvent.hpp"
 #include "Window.hpp"
+#include <glad/glad.h>
 
 namespace ProjectA {
 	static bool glfwInitialized = false;
+
 	static void glfwErrorCallback(int error, const char* description) {
 		LOG_CORE_ERROR("GLFW error ({0}): {1}", error, description);
 	}
@@ -55,6 +57,11 @@ namespace ProjectA {
 		window = glfwCreateWindow((int) glfwData.width, (int) glfwData.height, glfwData.title.c_str(), nullptr, nullptr);
 
 		glfwMakeContextCurrent(window);
+
+		int gladLoadStatus = gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+
+		CORE_ASSERT(gladLoadStatus, "Could not initialize GLAD");
+
 		glfwSetWindowUserPointer(window, &glfwData);
 
 		setVSyncState(true);

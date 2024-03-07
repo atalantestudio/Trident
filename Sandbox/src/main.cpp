@@ -5,7 +5,7 @@ class TestLayer : public ProjectA::Layer {
 		TestLayer() : Layer("Test") {}
 
 		void update() override {
-			LOG_CORE_INFO("From TestLayer: update");
+			// LOG_CORE_INFO("From TestLayer: update");
 		}
 
 		void listen(ProjectA::Event& event) override {
