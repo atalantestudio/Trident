@@ -18,7 +18,7 @@ project "glad"
 
 	filter "system:windows"
 		systemversion "latest"
-		staticruntime "On"
+		staticruntime "on"
 
 	filter {"system:windows", "configurations:Release"}
 		buildoptions "/MT"
@@ -51,7 +51,7 @@ project "glfw"
 
 	filter "system:windows"
 		systemversion "latest"
-		staticruntime "On"
+		staticruntime "on"
 
 		defines {
 			"_GLFW_WIN32",
@@ -98,7 +98,7 @@ project "imgui"
 
 	filter "system:windows"
 		systemversion "latest"
-		staticruntime "On"
+		staticruntime "on"
 
 	filter {"system:windows", "configurations:Release"}
 		buildoptions "/MT"

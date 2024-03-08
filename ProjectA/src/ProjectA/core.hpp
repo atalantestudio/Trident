@@ -10,6 +10,10 @@
 	#error Operating system not supported.
 #endif
 
+#ifdef DEBUG
+	#define ASSERTS
+#endif
+
 #ifdef ASSERTS
 	#define CORE_ASSERT(condition, ...) { \
 		if (!condition) { \

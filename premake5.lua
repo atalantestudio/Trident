@@ -15,6 +15,7 @@ project "ProjectA"
 	location "ProjectA"
 	kind "SharedLib"
 	language "C++"
+	staticruntime "off"
 
 	targetdir ("bin/%{prj.name}/" .. outputdir)
 	objdir ("obj/%{prj.name}/" .. outputdir)
@@ -45,7 +46,6 @@ project "ProjectA"
 	filter "system:windows"
 		systemversion "latest"
 		cppdialect "C++latest"
-		staticruntime "On"
 
 		defines {
 			"WINDOWS",
@@ -60,23 +60,24 @@ project "ProjectA"
 
 	filter "configurations:Debug"
 		defines "DEBUG"
-		buildoptions "/MDd"
-		symbols "On"
+		runtime "Debug"
+		symbols "on"
 
 	filter "configurations:Profile"
 		defines "PROFILE"
-		buildoptions "/MD"
-		optimize "On"
+		runtime "Release"
+		optimize "on"
 
 	filter "configurations:Release"
 		defines "RELEASE"
-		buildoptions "/MD"
-		optimize "On"
+		runtime "Release"
+		optimize "on"
 
 project "Sandbox"
 	location "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
+	staticruntime "off"
 
 	targetdir ("bin/%{prj.name}/" .. outputdir)
 	objdir ("obj/%{prj.name}/" .. outputdir)
@@ -98,21 +99,20 @@ project "Sandbox"
 	filter "system:windows"
 		systemversion "latest"
 		cppdialect "C++latest"
-		staticruntime "On"
 
 		defines "WINDOWS"
 
 	filter "configurations:Debug"
 		defines "DEBUG"
-		buildoptions "/MDd"
-		symbols "On"
+		runtime "Debug"
+		symbols "on"
 
 	filter "configurations:Profile"
 		defines "PROFILE"
-		buildoptions "/MD"
-		optimize "On"
+		runtime "Release"
+		optimize "on"
 
 	filter "configurations:Release"
 		defines "RELEASE"
-		buildoptions "/MD"
-		optimize "On"
+		runtime "Release"
+		optimize "on"
