@@ -4,32 +4,6 @@
 #include "Event.hpp"
 
 namespace ProjectA {
-	class API MouseMoveEvent : public Event {
-		private:
-			float x, y;
-
-		public:
-			MouseMoveEvent(float x, float y) : x(x), y(y) {}
-
-			inline float getX() const {
-				return x;
-			}
-
-			inline float getY() const {
-				return y;
-			}
-
-			EVENT_TYPE(EventTypeMouseMove)
-			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
-
-			std::string toString() const override {
-				std::stringstream stream;
-				stream << getName() << ": " << x << ", " << y;
-
-				return stream.str();
-			}
-	};
-
 	class API MouseButtonEvent : public Event {
 		protected:
 			int button;
@@ -67,6 +41,32 @@ namespace ProjectA {
 			std::string toString() const {
 				std::stringstream stream;
 				stream << getName() << ": " << button;
+
+				return stream.str();
+			}
+	};
+
+	class API MouseMoveEvent : public Event {
+		private:
+			float x, y;
+
+		public:
+			MouseMoveEvent(float x, float y) : x(x), y(y) {}
+
+			inline float getX() const {
+				return x;
+			}
+
+			inline float getY() const {
+				return y;
+			}
+
+			EVENT_TYPE(EventTypeMouseMove)
+				EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
+
+				std::string toString() const override {
+				std::stringstream stream;
+				stream << getName() << ": " << x << ", " << y;
 
 				return stream.str();
 			}

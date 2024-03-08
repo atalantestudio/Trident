@@ -52,4 +52,18 @@ namespace ProjectA {
 				return stream.str();
 			}
 	};
+
+	class API KeyTypeEvent : public KeyEvent {
+		public:
+			KeyTypeEvent(int keyCode) : KeyEvent(keyCode) {}
+
+			EVENT_TYPE(EventTypeKeyType)
+
+			std::string toString() const override {
+				std::stringstream stream;
+				stream << getName() << ": " << getKeyCode();
+
+				return stream.str();
+			}
+	};
 }

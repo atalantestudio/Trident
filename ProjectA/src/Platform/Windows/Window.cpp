@@ -114,8 +114,16 @@ namespace ProjectA {
 			}
 		});
 
+		glfwSetCharCallback(window, [](GLFWwindow* window, unsigned int keyCode) {
+			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
+
+			KeyTypeEvent event(keyCode);
+
+			data.callback(event);
+		});
+
 		glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
-			GLFWData& data = *(GLFWData*)glfwGetWindowUserPointer(window);
+			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
 
 			switch (action) {
 				case GLFW_PRESS: {

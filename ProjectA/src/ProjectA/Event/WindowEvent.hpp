@@ -26,6 +26,14 @@ namespace ProjectA {
 		public:
 			WindowResizeEvent(int width, int height) : width(width), height(height) {}
 
+			inline int getWidth() const {
+				return width;
+			}
+
+			inline int getHeight() const {
+				return height;
+			}
+
 			EVENT_TYPE(EventTypeWindowResize)
 
 			std::string toString() const {
