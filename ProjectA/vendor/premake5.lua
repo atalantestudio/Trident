@@ -73,3 +73,32 @@ project "glfw"
 
 	filter {"system:windows", "configurations:Release"}
 		buildoptions "/MT"
+
+project "imgui"
+	location "imgui"
+	kind "StaticLib"
+	language "C++"
+
+	targetdir ("../../bin/ProjectA/" .. outputdir .. "/%{prj.name}")
+	objdir ("../../obj/ProjectA/" .. outputdir .. "/%{prj.name}")
+
+	files {
+		"%{prj.name}/imconfig.h",
+		"%{prj.name}/imgui.h",
+		"%{prj.name}/imgui.cpp",
+		"%{prj.name}/imgui_draw.cpp",
+		"%{prj.name}/imgui_interval.h",
+		"%{prj.name}/imgui_tables.cpp",
+		"%{prj.name}/imgui_widgets.cpp",
+		"%{prj.name}/imstb_rectpack.h",
+		"%{prj.name}/imstb_textedit.h",
+		"%{prj.name}/imstb_truetype.h",
+		"%{prj.name}/imgui_demo.cpp",
+	}
+
+	filter "system:windows"
+		systemversion "latest"
+		staticruntime "On"
+
+	filter {"system:windows", "configurations:Release"}
+		buildoptions "/MT"

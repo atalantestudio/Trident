@@ -17,6 +17,7 @@ class SandboxApplication : public ProjectA::Application {
 	public:
 		SandboxApplication() {
 			pushLayer(new TestLayer());
+			pushOverlay(new ProjectA::ImGuiLayer());
 		}
 
 		~SandboxApplication() {}

@@ -31,12 +31,14 @@ project "ProjectA"
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/glad/include",
 		"%{prj.name}/vendor/glfw/glfw/include",
+		"%{prj.name}/vendor/imgui",
 		"%{prj.name}/vendor/spdlog/include",
 	}
 
 	links {
 		"glad",
 		"glfw",
+		"imgui",
 		"opengl32.lib",
 	}
 
@@ -49,6 +51,7 @@ project "ProjectA"
 			"WINDOWS",
 			"BUILD_DLL",
 			"GLFW_INCLUDE_NONE",
+			"IMGUI_IMPL_OPENGL_LOADER_CUSTOM",
 		}
 
 		postbuildcommands {

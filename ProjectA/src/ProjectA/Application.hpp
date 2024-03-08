@@ -8,6 +8,8 @@
 namespace ProjectA {
 	class API Application {
 		private:
+			static Application* instance;
+
 			std::unique_ptr<WindowInterface> window;
 			bool running = true;
 			LayerStack layerStack;
@@ -23,6 +25,14 @@ namespace ProjectA {
 			void listen(Event& event);
 			void pushLayer(Layer* layer);
 			void pushOverlay(Layer* overlay);
+
+			inline WindowInterface& getWindow() {
+				return *window;
+			}
+
+			static inline Application& get() {
+				return *instance;
+			}
 	};
 
 	Application* createApplication();

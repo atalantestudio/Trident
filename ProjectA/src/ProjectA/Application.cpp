@@ -3,7 +3,13 @@
 #include <glad/glad.h>
 
 namespace ProjectA {
+	Application* Application::instance = nullptr;
+
 	Application::Application() {
+		CORE_ASSERT(!instance, "The Application instance already exists.")
+
+		instance = this;
+
 		window = std::unique_ptr<WindowInterface>(WindowInterface::create());
 		window->setEventCallback(BIND_FUNCTION(Application::listen));
 	}
@@ -35,8 +41,8 @@ namespace ProjectA {
 
 		LOG_CORE_TRACE("{0}", event);
 
-		for (auto i = layerStack.end(); i != layerStack.begin() + 1; i--) {
-			(*i)->listen(event);
+		for (auto i = layerStack.end(); i != layerStack.begin();) {
+			(*--i)->listen(event);
 
 			if (event.handled) {
 				break;
@@ -46,9 +52,13 @@ namespace ProjectA {
 
 	void Application::pushLayer(Layer* layer) {
 		layerStack.pushLayer(layer);
+
+		layer->attach();
 	}
 
 	void Application::pushOverlay(Layer* overlay) {
 		layerStack.pushOverlay(overlay);
+
+		overlay->attach();
 	}
 }
