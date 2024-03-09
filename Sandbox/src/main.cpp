@@ -4,13 +4,8 @@ class TestLayer : public ProjectA::Layer {
 	public:
 		TestLayer() : Layer("Test") {}
 
-		void update() override {
-			// LOG_CORE_INFO("From TestLayer: update");
-		}
-
-		void listen(ProjectA::Event& event) override {
-			LOG_CORE_TRACE("From TestLayer: {0}", event);
-		}
+		void update() override {}
+		void listen(ProjectA::Event& event) override {}
 };
 
 class SandboxApplication : public ProjectA::Application {

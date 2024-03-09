@@ -65,6 +65,10 @@
       <Filter>ProjectA</Filter>
     </ClInclude>
     <ClInclude Include="src\pch.hpp" />
+    <ClInclude Include="src\Platform\Windows\Input.hpp" />
+    <ClInclude Include="src\ProjectA\InputInterface.hpp" />
+    <ClInclude Include="src\ProjectA\key_codes.hpp" />
+    <ClInclude Include="src\ProjectA\mouse_buttons.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.cpp">
@@ -89,5 +93,6 @@
       <Filter>ProjectA</Filter>
     </ClCompile>
     <ClCompile Include="src\pch.cpp" />
+    <ClCompile Include="src\Platform\Windows\Input.cpp" />
   </ItemGroup>
 </Project>

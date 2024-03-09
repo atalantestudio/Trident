@@ -163,9 +163,11 @@
     <ClInclude Include="src\ProjectA\Event\WindowEvent.hpp" />
     <ClInclude Include="src\ProjectA\ImGui\ImGuiLayer.hpp" />
     <ClInclude Include="src\ProjectA\InputInterface.hpp" />
+    <ClInclude Include="src\ProjectA\key_codes.hpp" />
     <ClInclude Include="src\ProjectA\Layer.hpp" />
     <ClInclude Include="src\ProjectA\LayerStack.hpp" />
     <ClInclude Include="src\ProjectA\Logger.hpp" />
+    <ClInclude Include="src\ProjectA\mouse_buttons.hpp" />
     <ClInclude Include="src\ProjectA\WindowInterface.hpp" />
     <ClInclude Include="src\ProjectA\core.hpp" />
     <ClInclude Include="src\ProjectA\entry_point.hpp" />
