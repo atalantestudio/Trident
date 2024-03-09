@@ -90,7 +90,7 @@ namespace ProjectA {
 	bool ImGuiLayer::onKeyPress(KeyPressEvent& event) {
 		ImGuiIO& io = ImGui::GetIO();
 
-		io.AddKeyEvent(ImGuiKey(event.getKeyCode()), true);
+		io.KeysDown[event.getKeyCode()] = true;
 		io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
 		io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
 		io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
@@ -102,7 +102,7 @@ namespace ProjectA {
 	bool ImGuiLayer::onKeyRelease(KeyReleaseEvent& event) {
 		ImGuiIO& io = ImGui::GetIO();
 
-		io.AddKeyEvent(ImGuiKey(event.getKeyCode()), false);
+		io.KeysDown[event.getKeyCode()] = false;
 
 		return false;
 	}
