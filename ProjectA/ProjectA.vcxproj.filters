@@ -1,14 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Platform">
+      <UniqueIdentifier>{2AC788B4-1694-E3BF-3FAD-D1672BD9184E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform\OpenGL">
+      <UniqueIdentifier>{1E7D2C1D-8A08-9AE1-9319-1DD6FF23F6E1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform\Windows">
+      <UniqueIdentifier>{64FBD71A-50F4-F66C-7926-DCF1657ED678}</UniqueIdentifier>
+    </Filter>
     <Filter Include="ProjectA">
       <UniqueIdentifier>{1DB858A2-0985-B3AD-329E-A1551ECAE83B}</UniqueIdentifier>
     </Filter>
     <Filter Include="ProjectA\Event">
       <UniqueIdentifier>{2E1B210B-1AE9-1411-037D-8537EFE9F075}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ProjectA\ImGui">
+      <UniqueIdentifier>{070F640B-F3DC-5711-DC70-C837C8DD3376}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Platform\Windows\Window.hpp">
+      <Filter>Platform\Windows</Filter>
+    </ClInclude>
     <ClInclude Include="src\ProjectA.hpp" />
     <ClInclude Include="src\ProjectA\Application.hpp">
       <Filter>ProjectA</Filter>
@@ -28,7 +43,19 @@
     <ClInclude Include="src\ProjectA\Event\WindowEvent.hpp">
       <Filter>ProjectA\Event</Filter>
     </ClInclude>
+    <ClInclude Include="src\ProjectA\ImGui\ImGuiLayer.hpp">
+      <Filter>ProjectA\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Layer.hpp">
+      <Filter>ProjectA</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\LayerStack.hpp">
+      <Filter>ProjectA</Filter>
+    </ClInclude>
     <ClInclude Include="src\ProjectA\Logger.hpp">
+      <Filter>ProjectA</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\WindowInterface.hpp">
       <Filter>ProjectA</Filter>
     </ClInclude>
     <ClInclude Include="src\ProjectA\core.hpp">
@@ -40,7 +67,22 @@
     <ClInclude Include="src\pch.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.cpp">
+      <Filter>Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Windows\Window.cpp">
+      <Filter>Platform\Windows</Filter>
+    </ClCompile>
     <ClCompile Include="src\ProjectA\Application.cpp">
+      <Filter>ProjectA</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\ImGui\ImGuiLayer.cpp">
+      <Filter>ProjectA\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Layer.cpp">
+      <Filter>ProjectA</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\LayerStack.cpp">
       <Filter>ProjectA</Filter>
     </ClCompile>
     <ClCompile Include="src\ProjectA\Logger.cpp">

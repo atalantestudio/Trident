@@ -2,6 +2,7 @@ outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
 
 workspace "ProjectA"
 	architecture "x64"
+	startproject "Sandbox"
 
 	configurations {
 		"Debug",
@@ -15,6 +16,7 @@ project "ProjectA"
 	location "ProjectA"
 	kind "SharedLib"
 	language "C++"
+	staticruntime "off"
 
 	targetdir ("bin/%{prj.name}/" .. outputdir)
 	objdir ("obj/%{prj.name}/" .. outputdir)
@@ -29,45 +31,54 @@ project "ProjectA"
 
 	includedirs {
 		"%{prj.name}/src",
+		"%{prj.name}/vendor/glad/include",
+		"%{prj.name}/vendor/glfw/glfw/include",
+		"%{prj.name}/vendor/imgui",
 		"%{prj.name}/vendor/spdlog/include",
-		"%{prj.name}/vendor/glfw/include",
 	}
 
 	links {
-		"GLFW",
+		"glad",
+		"glfw",
+		"imgui",
 		"opengl32.lib",
 	}
 
 	filter "system:windows"
-		cppdialect "C++latest"
-		staticruntime "On"
 		systemversion "latest"
+		cppdialect "C++latest"
 
 		defines {
 			"WINDOWS",
 			"BUILD_DLL",
+			"GLFW_INCLUDE_NONE",
+			"IMGUI_IMPL_OPENGL_LOADER_CUSTOM",
 		}
 
 		postbuildcommands {
-			("{COPY} %{cfg.buildtarget.relpath} ../bin/Sandbox/" .. outputdir),
+			("{COPY} %{cfg.buildtarget.relpath} \"../bin/Sandbox/" .. outputdir .. "/\""),
 		}
 
 	filter "configurations:Debug"
 		defines "DEBUG"
-		symbols "On"
+		runtime "Debug"
+		symbols "on"
 
 	filter "configurations:Profile"
 		defines "PROFILE"
-		optimize "On"
+		runtime "Release"
+		optimize "on"
 
 	filter "configurations:Release"
 		defines "RELEASE"
-		optimize "On"
+		runtime "Release"
+		optimize "on"
 
 project "Sandbox"
 	location "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
+	staticruntime "off"
 
 	targetdir ("bin/%{prj.name}/" .. outputdir)
 	objdir ("obj/%{prj.name}/" .. outputdir)
@@ -87,20 +98,22 @@ project "Sandbox"
 	}
 
 	filter "system:windows"
-		cppdialect "C++latest"
-		staticruntime "On"
 		systemversion "latest"
+		cppdialect "C++latest"
 
 		defines "WINDOWS"
 
 	filter "configurations:Debug"
 		defines "DEBUG"
-		symbols "On"
+		runtime "Debug"
+		symbols "on"
 
 	filter "configurations:Profile"
 		defines "PROFILE"
-		optimize "On"
+		runtime "Release"
+		optimize "on"
 
 	filter "configurations:Release"
 		defines "RELEASE"
-		optimize "On"
+		runtime "Release"
+		optimize "on"

@@ -54,20 +54,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>bin\windows_x86_64_Debug\</OutDir>
-    <IntDir>obj\windows_x86_64_Debug\</IntDir>
+    <OutDir>..\..\..\bin\ProjectA\windows_x86_64_Debug\glfw\</OutDir>
+    <IntDir>..\..\..\obj\ProjectA\windows_x86_64_Debug\glfw\</IntDir>
     <TargetName>glfw</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
-    <OutDir>bin\windows_x86_64_Profile\</OutDir>
-    <IntDir>obj\windows_x86_64_Profile\</IntDir>
+    <OutDir>..\..\..\bin\ProjectA\windows_x86_64_Profile\glfw\</OutDir>
+    <IntDir>..\..\..\obj\ProjectA\windows_x86_64_Profile\glfw\</IntDir>
     <TargetName>glfw</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>bin\windows_x86_64_Release\</OutDir>
-    <IntDir>obj\windows_x86_64_Release\</IntDir>
+    <OutDir>..\..\..\bin\ProjectA\windows_x86_64_Release\glfw\</OutDir>
+    <IntDir>..\..\..\obj\ProjectA\windows_x86_64_Release\glfw\</IntDir>
     <TargetName>glfw</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
@@ -78,7 +78,6 @@
       <PreprocessorDefinitions>_GLFW_WIN32;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>-std=c11 -lgdi32 %(AdditionalOptions)</AdditionalOptions>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
@@ -92,7 +91,6 @@
       <PreprocessorDefinitions>_GLFW_WIN32;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>-std=c11 -lgdi32 %(AdditionalOptions)</AdditionalOptions>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
@@ -106,7 +104,7 @@
       <PreprocessorDefinitions>_GLFW_WIN32;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>-std=c11 -lgdi32 /MT %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/MT %(AdditionalOptions)</AdditionalOptions>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
@@ -117,6 +115,7 @@
     <ClInclude Include="glfw\include\GLFW\glfw3.h" />
     <ClInclude Include="glfw\include\GLFW\glfw3native.h" />
     <ClInclude Include="glfw\src\glfw_config.h" />
+    <ClInclude Include="glfw\src\internal.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glfw\src\context.c" />
@@ -124,11 +123,17 @@
     <ClCompile Include="glfw\src\init.c" />
     <ClCompile Include="glfw\src\input.c" />
     <ClCompile Include="glfw\src\monitor.c" />
+    <ClCompile Include="glfw\src\null_init.c" />
+    <ClCompile Include="glfw\src\null_joystick.c" />
+    <ClCompile Include="glfw\src\null_monitor.c" />
+    <ClCompile Include="glfw\src\null_window.c" />
     <ClCompile Include="glfw\src\osmesa_context.c" />
+    <ClCompile Include="glfw\src\platform.c" />
     <ClCompile Include="glfw\src\vulkan.c" />
     <ClCompile Include="glfw\src\wgl_context.c" />
     <ClCompile Include="glfw\src\win32_init.c" />
     <ClCompile Include="glfw\src\win32_joystick.c" />
+    <ClCompile Include="glfw\src\win32_module.c" />
     <ClCompile Include="glfw\src\win32_monitor.c" />
     <ClCompile Include="glfw\src\win32_thread.c" />
     <ClCompile Include="glfw\src\win32_time.c" />

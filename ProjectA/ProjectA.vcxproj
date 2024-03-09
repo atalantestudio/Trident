@@ -79,11 +79,11 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WINDOWS;BUILD_DLL;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WINDOWS;BUILD_DLL;GLFW_INCLUDE_NONE;IMGUI_IMPL_OPENGL_LOADER_CUSTOM;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor\glad\include;vendor\glfw\glfw\include;vendor\imgui;vendor\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -94,7 +94,7 @@
       <ImportLibrary>..\bin\ProjectA\windows_x86_64_Debug\ProjectA.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>IF EXIST ..\bin\ProjectA\windows_x86_64_Debug\ProjectA.dll\ (xcopy /Q /E /Y /I ..\bin\ProjectA\windows_x86_64_Debug\ProjectA.dll ..\bin\Sandbox\windows_x86_64_Debug &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\ProjectA\windows_x86_64_Debug\ProjectA.dll ..\bin\Sandbox\windows_x86_64_Debug &gt; nul)</Command>
+      <Command>IF EXIST ..\bin\ProjectA\windows_x86_64_Debug\ProjectA.dll\ (xcopy /Q /E /Y /I ..\bin\ProjectA\windows_x86_64_Debug\ProjectA.dll "..\bin\Sandbox\windows_x86_64_Debug\" &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\ProjectA\windows_x86_64_Debug\ProjectA.dll "..\bin\Sandbox\windows_x86_64_Debug\" &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
@@ -102,14 +102,14 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WINDOWS;BUILD_DLL;PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WINDOWS;BUILD_DLL;GLFW_INCLUDE_NONE;IMGUI_IMPL_OPENGL_LOADER_CUSTOM;PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor\glad\include;vendor\glfw\glfw\include;vendor\imgui;vendor\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -121,7 +121,7 @@
       <ImportLibrary>..\bin\ProjectA\windows_x86_64_Profile\ProjectA.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>IF EXIST ..\bin\ProjectA\windows_x86_64_Profile\ProjectA.dll\ (xcopy /Q /E /Y /I ..\bin\ProjectA\windows_x86_64_Profile\ProjectA.dll ..\bin\Sandbox\windows_x86_64_Profile &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\ProjectA\windows_x86_64_Profile\ProjectA.dll ..\bin\Sandbox\windows_x86_64_Profile &gt; nul)</Command>
+      <Command>IF EXIST ..\bin\ProjectA\windows_x86_64_Profile\ProjectA.dll\ (xcopy /Q /E /Y /I ..\bin\ProjectA\windows_x86_64_Profile\ProjectA.dll "..\bin\Sandbox\windows_x86_64_Profile\" &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\ProjectA\windows_x86_64_Profile\ProjectA.dll "..\bin\Sandbox\windows_x86_64_Profile\" &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -129,14 +129,14 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WINDOWS;BUILD_DLL;RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WINDOWS;BUILD_DLL;GLFW_INCLUDE_NONE;IMGUI_IMPL_OPENGL_LOADER_CUSTOM;RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor\glad\include;vendor\glfw\glfw\include;vendor\imgui;vendor\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
@@ -148,10 +148,12 @@
       <ImportLibrary>..\bin\ProjectA\windows_x86_64_Release\ProjectA.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>IF EXIST ..\bin\ProjectA\windows_x86_64_Release\ProjectA.dll\ (xcopy /Q /E /Y /I ..\bin\ProjectA\windows_x86_64_Release\ProjectA.dll ..\bin\Sandbox\windows_x86_64_Release &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\ProjectA\windows_x86_64_Release\ProjectA.dll ..\bin\Sandbox\windows_x86_64_Release &gt; nul)</Command>
+      <Command>IF EXIST ..\bin\ProjectA\windows_x86_64_Release\ProjectA.dll\ (xcopy /Q /E /Y /I ..\bin\ProjectA\windows_x86_64_Release\ProjectA.dll "..\bin\Sandbox\windows_x86_64_Release\" &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\ProjectA\windows_x86_64_Release\ProjectA.dll "..\bin\Sandbox\windows_x86_64_Release\" &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Platform\Windows\Input.hpp" />
+    <ClInclude Include="src\Platform\Windows\Window.hpp" />
     <ClInclude Include="src\ProjectA.hpp" />
     <ClInclude Include="src\ProjectA\Application.hpp" />
     <ClInclude Include="src\ProjectA\Event\ApplicationEvent.hpp" />
@@ -159,21 +161,38 @@
     <ClInclude Include="src\ProjectA\Event\KeyEvent.hpp" />
     <ClInclude Include="src\ProjectA\Event\MouseEvent.hpp" />
     <ClInclude Include="src\ProjectA\Event\WindowEvent.hpp" />
+    <ClInclude Include="src\ProjectA\ImGui\ImGuiLayer.hpp" />
+    <ClInclude Include="src\ProjectA\InputInterface.hpp" />
+    <ClInclude Include="src\ProjectA\Layer.hpp" />
+    <ClInclude Include="src\ProjectA\LayerStack.hpp" />
     <ClInclude Include="src\ProjectA\Logger.hpp" />
+    <ClInclude Include="src\ProjectA\WindowInterface.hpp" />
     <ClInclude Include="src\ProjectA\core.hpp" />
     <ClInclude Include="src\ProjectA\entry_point.hpp" />
     <ClInclude Include="src\pch.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.cpp" />
+    <ClCompile Include="src\Platform\Windows\Input.cpp" />
+    <ClCompile Include="src\Platform\Windows\Window.cpp" />
     <ClCompile Include="src\ProjectA\Application.cpp" />
+    <ClCompile Include="src\ProjectA\ImGui\ImGuiLayer.cpp" />
+    <ClCompile Include="src\ProjectA\Layer.cpp" />
+    <ClCompile Include="src\ProjectA\LayerStack.cpp" />
     <ClCompile Include="src\ProjectA\Logger.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="vendor\glad\glad.vcxproj">
+      <Project>{DD62977C-C999-980D-7286-7E105E9C140F}</Project>
+    </ProjectReference>
     <ProjectReference Include="vendor\glfw\glfw.vcxproj">
       <Project>{9563977C-819A-980D-2A87-7E10169D140F}</Project>
+    </ProjectReference>
+    <ProjectReference Include="vendor\imgui\imgui.vcxproj">
+      <Project>{0098A80F-6CAC-D0C0-352E-7420A101CDF1}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

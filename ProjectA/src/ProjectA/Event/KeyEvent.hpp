@@ -11,21 +11,21 @@ namespace ProjectA {
 			KeyEvent(int keyCode) : keyCode(keyCode) {}
 
 		public:
-			EVENT_CATEGORY(EventCategory::Input | EventCategory::Keyboard)
+			EVENT_CATEGORY(EventCategoryInput | EventCategoryKeyboard)
 
 			inline int getKeyCode() const {
 				return keyCode;
 			}
 	};
 
-	class API KeyPressedEvent : public KeyEvent {
+	class API KeyPressEvent : public KeyEvent {
 		private:
 			int pressCount;
 
 		public:
-			KeyPressedEvent(int keyCode, int pressCount) : KeyEvent(keyCode), pressCount(pressCount) {}
+			KeyPressEvent(int keyCode, int pressCount) : KeyEvent(keyCode), pressCount(pressCount) {}
 
-			EVENT_TYPE(KeyPressed)
+			EVENT_TYPE(EventTypeKeyPress)
 
 			inline int getPressCount() const {
 				return pressCount;
@@ -39,11 +39,25 @@ namespace ProjectA {
 			}
 	};
 
-	class API KeyReleasedEvent : public KeyEvent {
+	class API KeyReleaseEvent : public KeyEvent {
 		public:
-			KeyReleasedEvent(int keyCode) : KeyEvent(keyCode) {}
+			KeyReleaseEvent(int keyCode) : KeyEvent(keyCode) {}
 
-			EVENT_TYPE(KeyReleased)
+			EVENT_TYPE(EventTypeKeyRelease)
+
+			std::string toString() const override {
+				std::stringstream stream;
+				stream << getName() << ": " << getKeyCode();
+
+				return stream.str();
+			}
+	};
+
+	class API KeyTypeEvent : public KeyEvent {
+		public:
+			KeyTypeEvent(int keyCode) : KeyEvent(keyCode) {}
+
+			EVENT_TYPE(EventTypeKeyType)
 
 			std::string toString() const override {
 				std::stringstream stream;

@@ -11,6 +11,8 @@
 #include <utility>
 #include <vector>
 
+#include "ProjectA/Logger.hpp"
+
 #ifdef WINDOWS
-	#include <windows.h>
+	#include <Windows.h>
 #endif

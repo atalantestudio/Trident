@@ -4,12 +4,54 @@
 #include "Event.hpp"
 
 namespace ProjectA {
-	class API MouseMovedEvent : public Event {
+	class API MouseButtonEvent : public Event {
+		protected:
+			int button;
+
+			MouseButtonEvent(int button) : button(button) {}
+
+		public:
+			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
+
+			inline int getButton() const {
+				return button;
+			}
+	};
+
+	class API MouseButtonPressEvent : public MouseButtonEvent {
+		public:
+			MouseButtonPressEvent(int button) : MouseButtonEvent(button) {}
+
+			EVENT_TYPE(EventTypeMouseButtonPress)
+
+			std::string toString() const {
+				std::stringstream stream;
+				stream << getName() << ": " << button;
+
+				return stream.str();
+			}
+	};
+
+	class API MouseButtonReleaseEvent : public MouseButtonEvent {
+		public:
+			MouseButtonReleaseEvent(int button) : MouseButtonEvent(button) {}
+
+			EVENT_TYPE(EventTypeMouseButtonRelease)
+
+			std::string toString() const {
+				std::stringstream stream;
+				stream << getName() << ": " << button;
+
+				return stream.str();
+			}
+	};
+
+	class API MouseMoveEvent : public Event {
 		private:
 			float x, y;
 
 		public:
-			MouseMovedEvent(float x, float y) : x(x), y(y) {}
+			MouseMoveEvent(float x, float y) : x(x), y(y) {}
 
 			inline float getX() const {
 				return x;
@@ -19,10 +61,10 @@ namespace ProjectA {
 				return y;
 			}
 
-			EVENT_TYPE(MouseMoved)
-			EVENT_CATEGORY(EventCategory::Input | EventCategory::Mouse)
+			EVENT_TYPE(EventTypeMouseMove)
+				EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
-			std::string toString() const override {
+				std::string toString() const override {
 				std::stringstream stream;
 				stream << getName() << ": " << x << ", " << y;
 
@@ -30,54 +72,12 @@ namespace ProjectA {
 			}
 	};
 
-	class API MouseButtonEvent : public Event {
-		protected:
-			int button;
-
-			MouseButtonEvent(int button) : button(button) {}
-
-		public:
-			EVENT_CATEGORY(EventCategory::Input | EventCategory::Mouse)
-
-			inline int getButton() const {
-				return button;
-			}
-	};
-
-	class API MouseButtonPressedEvent : public MouseButtonEvent {
-		public:
-			MouseButtonPressedEvent(int button) : MouseButtonEvent(button) {}
-
-			EVENT_TYPE(MouseButtonPressed)
-
-			std::string toString() const {
-				std::stringstream stream;
-				stream << getName() << ": " << button;
-
-				return stream.str();
-			}
-	};
-
-	class API MouseButtonReleasedEvent : public MouseButtonEvent {
-		public:
-			MouseButtonReleasedEvent(int button) : MouseButtonEvent(button) {}
-
-			EVENT_TYPE(MouseButtonReleased)
-
-			std::string toString() const {
-				std::stringstream stream;
-				stream << getName() << ": " << button;
-
-				return stream.str();
-			}
-	};
-
-	class API MouseScrolledEvent : public Event {
+	class API MouseScrollEvent : public Event {
 		private:
 			float xOffset, yOffset;
 
 		public:
-			MouseScrolledEvent(float xOffset, float yOffset) : xOffset(xOffset), yOffset(yOffset) {}
+			MouseScrollEvent(float xOffset, float yOffset) : xOffset(xOffset), yOffset(yOffset) {}
 
 			inline float getXOffset() const {
 				return xOffset;
@@ -87,8 +87,8 @@ namespace ProjectA {
 				return yOffset;
 			}
 
-			EVENT_TYPE(MouseScrolled)
-			EVENT_CATEGORY(EventCategory::Input | EventCategory::Mouse)
+			EVENT_TYPE(EventTypeMouseScroll)
+			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
 			std::string toString() const override {
 				std::stringstream stream;

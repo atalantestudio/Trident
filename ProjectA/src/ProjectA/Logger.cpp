@@ -15,12 +15,4 @@ namespace ProjectA {
 		clientLogger = spdlog::stdout_color_mt("CLIENT");
 		clientLogger->set_level(spdlog::level::trace);
 	}
-
-	std::shared_ptr<spdlog::logger>& Logger::getCoreLogger() {
-		return coreLogger;
-	}
-
-	std::shared_ptr<spdlog::logger>& Logger::getClientLogger() {
-		return clientLogger;
-	}
 }
