@@ -7,3 +7,6 @@
 [submodule "ProjectA/vendor/imgui"]
 	path = ProjectA/vendor/imgui
 	url = git@github.com:TheCherno/imgui
+[submodule "ProjectA/vendor/glm"]
+	path = ProjectA/vendor/glm
+	url = git@github.com:g-truc/glm.git

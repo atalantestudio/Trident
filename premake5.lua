@@ -27,12 +27,15 @@ project "ProjectA"
 	files {
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/src/**.hpp",
+		"%{prj.name}/vendor/glm/glm/**.hpp",
+		"%{prj.name}/vendor/glm/glm/**.inl",
 	}
 
 	includedirs {
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/glad/include",
 		"%{prj.name}/vendor/glfw/glfw/include",
+		"%{prj.name}/vendor/glm",
 		"%{prj.name}/vendor/imgui",
 		"%{prj.name}/vendor/spdlog/include",
 	}
@@ -90,6 +93,7 @@ project "Sandbox"
 
 	includedirs {
 		"ProjectA/src",
+		"ProjectA/vendor/glm",
 		"ProjectA/vendor/spdlog/include",
 	}
 
