@@ -152,6 +152,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Platform\Windows\Input.hpp" />
     <ClInclude Include="src\Platform\Windows\Window.hpp" />
     <ClInclude Include="src\ProjectA.hpp" />
     <ClInclude Include="src\ProjectA\Application.hpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="src\ProjectA\Event\MouseEvent.hpp" />
     <ClInclude Include="src\ProjectA\Event\WindowEvent.hpp" />
     <ClInclude Include="src\ProjectA\ImGui\ImGuiLayer.hpp" />
+    <ClInclude Include="src\ProjectA\InputInterface.hpp" />
     <ClInclude Include="src\ProjectA\Layer.hpp" />
     <ClInclude Include="src\ProjectA\LayerStack.hpp" />
     <ClInclude Include="src\ProjectA\Logger.hpp" />
@@ -171,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.cpp" />
+    <ClCompile Include="src\Platform\Windows\Input.cpp" />
     <ClCompile Include="src\Platform\Windows\Window.cpp" />
     <ClCompile Include="src\ProjectA\Application.cpp" />
     <ClCompile Include="src\ProjectA\ImGui\ImGuiLayer.cpp" />

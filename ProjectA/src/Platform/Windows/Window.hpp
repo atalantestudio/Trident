@@ -25,6 +25,10 @@ namespace ProjectA {
 			Window(const WindowData& data);
 			virtual ~Window();
 
+			inline virtual void* getNativeWindow() const {
+				return window;
+			}
+
 			inline unsigned int getWidth() const override {
 				return data.width;
 			}

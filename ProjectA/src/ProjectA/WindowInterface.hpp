@@ -20,6 +20,7 @@ namespace ProjectA {
 
 			virtual ~WindowInterface() {}
 
+			virtual void* getNativeWindow() const = 0;
 			virtual unsigned int getWidth() const = 0;
 			virtual unsigned int getHeight() const = 0;
 			virtual bool isVSyncEnabled() const = 0;
