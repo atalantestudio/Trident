@@ -56,7 +56,7 @@ project "ProjectA"
 		}
 
 		postbuildcommands {
-			("{COPY} %{cfg.buildtarget.relpath} ../bin/Sandbox/" .. outputdir),
+			("{COPY} %{cfg.buildtarget.relpath} \"../bin/Sandbox/" .. outputdir .. "/\""),
 		}
 
 	filter "configurations:Debug"
