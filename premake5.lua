@@ -2,6 +2,7 @@ outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
 
 workspace "ProjectA"
 	architecture "x64"
+	startproject "Sandbox"
 
 	configurations {
 		"Debug",
