@@ -1,8 +1,7 @@
 #pragma once
 
+#include "pch.hpp"
 #include "ProjectA/core.hpp"
-#include <functional>
-#include <string>
 
 namespace ProjectA {
 	enum class EventType {

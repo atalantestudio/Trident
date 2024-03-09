@@ -2,6 +2,7 @@
 
 #include "core.hpp"
 #include "Event/WindowEvent.hpp"
+#include "ImGui/ImGuiLayer.hpp"
 #include "LayerStack.hpp"
 #include "WindowInterface.hpp"
 
@@ -11,6 +12,7 @@ namespace ProjectA {
 			static Application* instance;
 
 			std::unique_ptr<WindowInterface> window;
+			ImGuiLayer* imGuiLayer;
 			bool running = true;
 			LayerStack layerStack;
 

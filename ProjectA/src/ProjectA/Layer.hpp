@@ -19,6 +19,7 @@ namespace ProjectA {
 			virtual void attach() {}
 			virtual void detach() {}
 			virtual void update() {}
+			virtual void renderImGui() {}
 			virtual void listen(Event& event) {}
 	};
 }

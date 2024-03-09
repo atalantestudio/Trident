@@ -1,6 +1,5 @@
 #pragma once
 
-#include <sstream>
 #include "Event.hpp"
 
 namespace ProjectA {

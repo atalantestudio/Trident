@@ -2,13 +2,12 @@
 
 #include "core.hpp"
 #include "Layer.hpp"
-#include <vector>
 
 namespace ProjectA {
 	class API LayerStack {
 		private:
 			std::vector<Layer*> layers;
-			std::vector<Layer*>::iterator layerInsertionIterator;
+			unsigned int layerInsertionIndex = 0;
 
 		public:
 			LayerStack();

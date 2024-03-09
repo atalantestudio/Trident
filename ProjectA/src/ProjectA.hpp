@@ -6,7 +6,7 @@
 #include "ProjectA/Logger.hpp"
 
 #include "ProjectA/key_codes.hpp"
-#include "ProjectA/mouse_buttons.hpp"
+#include "ProjectA/mouse_button_codes.hpp"
 
 #include "ProjectA/ImGui/ImGuiLayer.hpp"
 

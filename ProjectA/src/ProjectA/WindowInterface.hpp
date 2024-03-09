@@ -1,7 +1,7 @@
 #pragma once
 
-#include "pch.hpp"
 #include "core.hpp"
+#include "pch.hpp"
 #include "Event/Event.hpp"
 
 namespace ProjectA {

@@ -12,6 +12,10 @@ namespace ProjectA {
 
 		window = std::unique_ptr<WindowInterface>(WindowInterface::create());
 		window->setEventCallback(BIND_FUNCTION(Application::listen));
+
+		imGuiLayer = new ImGuiLayer();
+
+		pushOverlay(imGuiLayer);
 	}
 
 	Application::~Application() {}
@@ -30,6 +34,14 @@ namespace ProjectA {
 			for (Layer* layer : layerStack) {
 				layer->update();
 			}
+
+			imGuiLayer->begin();
+
+			for (Layer* layer : layerStack) {
+				layer->renderImGui();
+			}
+
+			imGuiLayer->end();
 
 			window->update();
 		}

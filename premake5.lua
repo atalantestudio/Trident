@@ -42,7 +42,7 @@ project "ProjectA"
 
 	links {
 		"glad",
-		"glfw",
+		"GLFW",
 		"imgui",
 		"opengl32.lib",
 	}
@@ -55,7 +55,6 @@ project "ProjectA"
 			"WINDOWS",
 			"BUILD_DLL",
 			"GLFW_INCLUDE_NONE",
-			"IMGUI_IMPL_OPENGL_LOADER_CUSTOM",
 		}
 
 		postbuildcommands {
@@ -93,6 +92,7 @@ project "Sandbox"
 
 	includedirs {
 		"ProjectA/src",
+		"ProjectA/vendor",
 		"ProjectA/vendor/glm",
 		"ProjectA/vendor/spdlog/include",
 	}
