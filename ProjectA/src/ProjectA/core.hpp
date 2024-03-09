@@ -17,14 +17,14 @@
 #ifdef ASSERTS
 	#define CORE_ASSERT(condition, ...) { \
 		if (!condition) { \
-			LOG_CORE_ERROR("Assertion failed: {0}", __VA_ARGS); \
+			LOG_CORE_ERROR("Assertion failed: {0}", __VA_ARGS__); \
 			__debugbreak(); \
 		} \
 	}
 
 	#define CLIENT_ASSERT(condition, ...) { \
 		if (!condition) { \
-			LOG_CLIENT_ERROR("Assertion failed: {0}", __VA_ARGS); \
+			LOG_CLIENT_ERROR("Assertion failed: {0}", __VA_ARGS__); \
 			__debugbreak(); \
 		} \
 	}
