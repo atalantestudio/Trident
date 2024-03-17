@@ -14,6 +14,7 @@ namespace ProjectA {
 		int gladLoadStatus = gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
 		CORE_ASSERT(gladLoadStatus, "Could not initialize GLAD");
+		LOG_CORE_INFO("{0} {1} {2}", (const char*) glGetString(GL_VENDOR), (const char*) glGetString(GL_RENDERER), (const char*) glGetString(GL_VERSION));
 	}
 
 	void OpenGLContext::swapBuffers() {

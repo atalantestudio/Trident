@@ -16,6 +16,10 @@ namespace ProjectA {
 			bool running = true;
 			LayerStack layerStack;
 
+			unsigned int vertexArray;
+			unsigned int vertexBuffer;
+			unsigned int indexBuffer;
+
 		private:
 			bool windowCloseEventCallback(WindowCloseEvent& event);
 
