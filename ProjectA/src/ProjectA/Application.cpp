@@ -28,7 +28,7 @@ namespace ProjectA {
 
 	void Application::run() {
 		while (running) {
-			glClearColor(1, .2, 0, 1);
+			glClearColor(1.f, .2f, 0.f, 1.f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			for (Layer* layer : layerStack) {

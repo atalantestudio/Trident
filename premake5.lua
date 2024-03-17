@@ -14,9 +14,10 @@ include "ProjectA/vendor"
 
 project "ProjectA"
 	location "ProjectA"
-	kind "SharedLib"
+	kind "StaticLib"
 	language "C++"
-	staticruntime "off"
+	cppdialect "C++17"
+	staticruntime "on"
 
 	targetdir ("bin/%{prj.name}/" .. outputdir)
 	objdir ("obj/%{prj.name}/" .. outputdir)
@@ -47,18 +48,17 @@ project "ProjectA"
 		"opengl32.lib",
 	}
 
+	defines {
+		"_CRT_SECURE_NO_WARNINGS",
+	}
+
 	filter "system:windows"
 		systemversion "latest"
-		cppdialect "C++latest"
 
 		defines {
 			"WINDOWS",
 			"BUILD_DLL",
 			"GLFW_INCLUDE_NONE",
-		}
-
-		postbuildcommands {
-			("{COPY} %{cfg.buildtarget.relpath} \"../bin/Sandbox/" .. outputdir .. "/\""),
 		}
 
 	filter "configurations:Debug"
@@ -80,7 +80,8 @@ project "Sandbox"
 	location "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
-	staticruntime "off"
+	cppdialect "C++17"
+	staticruntime "on"
 
 	targetdir ("bin/%{prj.name}/" .. outputdir)
 	objdir ("obj/%{prj.name}/" .. outputdir)
@@ -103,7 +104,6 @@ project "Sandbox"
 
 	filter "system:windows"
 		systemversion "latest"
-		cppdialect "C++latest"
 
 		defines "WINDOWS"
 

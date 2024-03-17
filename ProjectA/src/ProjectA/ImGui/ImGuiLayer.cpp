@@ -62,7 +62,7 @@ namespace ProjectA {
 		ImGuiIO& io = ImGui::GetIO();
 		WindowInterface& window = Application::get().getWindow();
 
-		io.DisplaySize = ImVec2(window.getWidth(), window.getHeight());
+		io.DisplaySize = ImVec2((float) window.getWidth(), (float) window.getHeight());
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
