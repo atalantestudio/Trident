@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ProjectA/Renderer/Context.hpp"
 #include "ProjectA/WindowInterface.hpp"
 #include <GLFW/glfw3.h>
 
@@ -7,6 +8,7 @@ namespace ProjectA {
 	class Window : public WindowInterface {
 		private:
 			GLFWwindow* window;
+			Context* context;
 
 			struct GLFWData {
 				std::string title;

@@ -1,4 +1,5 @@
 #include "pch.hpp"
+#include "Platform/OpenGL/OpenGLContext.hpp"
 #include "ProjectA/Event/KeyEvent.hpp"
 #include "ProjectA/Event/MouseEvent.hpp"
 #include "ProjectA/Event/WindowEvent.hpp"
@@ -55,11 +56,8 @@ namespace ProjectA {
 
 		window = glfwCreateWindow((int) glfwData.width, (int) glfwData.height, glfwData.title.c_str(), nullptr, nullptr);
 
-		glfwMakeContextCurrent(window);
-
-		int gladLoadStatus = gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
-
-		CORE_ASSERT(gladLoadStatus, "Could not initialize GLAD");
+		context = new OpenGLContext(window);
+		context->initialize();
 
 		glfwSetWindowUserPointer(window, &glfwData);
 
@@ -166,6 +164,7 @@ namespace ProjectA {
 
 	void Window::update() {
 		glfwPollEvents();
-		glfwSwapBuffers(window);
+
+		context->swapBuffers();
 	}
 }
