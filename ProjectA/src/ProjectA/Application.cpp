@@ -39,6 +39,35 @@ namespace ProjectA {
 		unsigned short indices[3] = {0, 1, 2};
 
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+		const std::string& vertexShaderSource = R"(
+			#version 330 core
+
+			layout(location = 0) in vec3 a_position;
+
+			out vec3 v_position;
+
+			void main() {
+				gl_Position = vec4(a_position, 1.);
+
+				v_position = a_position;
+			}
+		)";
+
+		const std::string& fragmentShaderSource = R"(
+			#version 330 core
+
+			in vec3 v_position;
+
+			layout(location = 0) out vec4 FragColor;
+
+			void main() {
+				FragColor = vec4(v_position * .5 + .5, 1.);
+				// FragColor = vec4(.8, .2, .2, 1.);
+			}
+		)";
+
+		shader.reset(new Shader(vertexShaderSource, fragmentShaderSource));
 	}
 
 	Application::~Application() {}
@@ -53,6 +82,8 @@ namespace ProjectA {
 		while (running) {
 			glClearColor(.1f, .1f, .1f, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
+
+			shader->bind();
 
 			glBindVertexArray(vertexArray);
 			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, nullptr);

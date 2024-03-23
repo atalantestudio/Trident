@@ -4,6 +4,7 @@
 #include "Event/WindowEvent.hpp"
 #include "ImGui/ImGuiLayer.hpp"
 #include "LayerStack.hpp"
+#include "Renderer/Shader.hpp"
 #include "WindowInterface.hpp"
 
 namespace ProjectA {
@@ -19,6 +20,8 @@ namespace ProjectA {
 			unsigned int vertexArray;
 			unsigned int vertexBuffer;
 			unsigned int indexBuffer;
+
+			std::unique_ptr<Shader> shader;
 
 		private:
 			bool windowCloseEventCallback(WindowCloseEvent& event);

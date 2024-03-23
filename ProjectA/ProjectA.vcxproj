@@ -159,6 +159,7 @@
     <ClInclude Include="src\ProjectA\Layer.hpp" />
     <ClInclude Include="src\ProjectA\LayerStack.hpp" />
     <ClInclude Include="src\ProjectA\Logger.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\Shader.hpp" />
     <ClInclude Include="src\ProjectA\WindowInterface.hpp" />
     <ClInclude Include="src\ProjectA\core.hpp" />
     <ClInclude Include="src\ProjectA\entry_point.hpp" />
@@ -595,6 +596,7 @@
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\glad\glad.vcxproj">
