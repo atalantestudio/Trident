@@ -4,7 +4,9 @@
 #include "Event/WindowEvent.hpp"
 #include "ImGui/ImGuiLayer.hpp"
 #include "LayerStack.hpp"
+#include "Renderer/IndexBuffer.hpp"
 #include "Renderer/Shader.hpp"
+#include "Renderer/VertexBuffer.hpp"
 #include "WindowInterface.hpp"
 
 namespace ProjectA {
@@ -18,9 +20,9 @@ namespace ProjectA {
 			LayerStack layerStack;
 
 			unsigned int vertexArray;
-			unsigned int vertexBuffer;
-			unsigned int indexBuffer;
 
+			std::unique_ptr<IndexBuffer> indexBuffer;
+			std::unique_ptr<VertexBuffer> vertexBuffer;
 			std::unique_ptr<Shader> shader;
 
 		private:

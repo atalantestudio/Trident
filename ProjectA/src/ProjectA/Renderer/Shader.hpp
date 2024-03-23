@@ -9,9 +9,11 @@ namespace ProjectA {
 
 		public:
 			Shader(const std::string& vertexShaderSource, const std::string& fragmentShaderSource);
+
 			~Shader();
 
 			void bind() const;
+
 			void unbind() const;
 	};
 }

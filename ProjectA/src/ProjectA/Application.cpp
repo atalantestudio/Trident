@@ -20,25 +20,20 @@ namespace ProjectA {
 		glGenVertexArrays(1, &vertexArray);
 		glBindVertexArray(vertexArray);
 
-		glGenBuffers(1, &vertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-
 		float vertices[9] = {
 			-.5f, -.5f, 0,
 			.5f, -.5f, 0,
 			0, .5f, 0
 		};
 
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		vertexBuffer.reset(VertexBuffer::create(vertices, sizeof(vertices)));
+
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 
-		glGenBuffers(1, &indexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		uint32_t indices[3] = {0, 1, 2};
 
-		unsigned short indices[3] = {0, 1, 2};
-
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		indexBuffer.reset(IndexBuffer::create(indices, 3));
 
 		const std::string& vertexShaderSource = R"(
 			#version 330 core
@@ -83,10 +78,12 @@ namespace ProjectA {
 			glClearColor(.1f, .1f, .1f, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			indexBuffer->bind();
+			vertexBuffer->bind();
 			shader->bind();
 
 			glBindVertexArray(vertexArray);
-			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, nullptr);
+			glDrawElements(GL_TRIANGLES, indexBuffer->getCount(), GL_UNSIGNED_INT, nullptr);
 
 			for (Layer* layer : layerStack) {
 				layer->update();
