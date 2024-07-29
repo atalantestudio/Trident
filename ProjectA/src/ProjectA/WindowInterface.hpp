@@ -1,7 +1,7 @@
 #pragma once
 
-#include "pch.hpp"
 #include "core.hpp"
+#include "pch.hpp"
 #include "Event/Event.hpp"
 
 namespace ProjectA {
@@ -18,7 +18,7 @@ namespace ProjectA {
 
 			using EventCallback = std::function<void (Event&)>;
 
-			virtual ~WindowInterface() {}
+			virtual ~WindowInterface() = default;
 
 			virtual void* getNativeWindow() const = 0;
 			virtual unsigned int getWidth() const = 0;

@@ -12,9 +12,58 @@ namespace ProjectA {
 
 		window = std::unique_ptr<WindowInterface>(WindowInterface::create());
 		window->setEventCallback(BIND_FUNCTION(Application::listen));
-	}
 
-	Application::~Application() {}
+		imGuiLayer = new ImGuiLayer();
+
+		pushOverlay(imGuiLayer);
+
+		glGenVertexArrays(1, &vertexArray);
+		glBindVertexArray(vertexArray);
+
+		float vertices[9] = {
+			-.5f, -.5f, 0,
+			.5f, -.5f, 0,
+			0, .5f, 0
+		};
+
+		vertexBuffer.reset(VertexBuffer::create(vertices, sizeof(vertices)));
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+
+		uint32_t indices[3] = {0, 1, 2};
+
+		indexBuffer.reset(IndexBuffer::create(indices, 3));
+
+		const std::string& vertexShaderSource = R"(
+			#version 330 core
+
+			layout(location = 0) in vec3 a_position;
+
+			out vec3 v_position;
+
+			void main() {
+				gl_Position = vec4(a_position, 1.);
+
+				v_position = a_position;
+			}
+		)";
+
+		const std::string& fragmentShaderSource = R"(
+			#version 330 core
+
+			in vec3 v_position;
+
+			layout(location = 0) out vec4 FragColor;
+
+			void main() {
+				FragColor = vec4(v_position * .5 + .5, 1.);
+				// FragColor = vec4(.8, .2, .2, 1.);
+			}
+		)";
+
+		shader.reset(new Shader(vertexShaderSource, fragmentShaderSource));
+	}
 
 	bool Application::windowCloseEventCallback(WindowCloseEvent& event) {
 		running = false;
@@ -24,12 +73,27 @@ namespace ProjectA {
 
 	void Application::run() {
 		while (running) {
-			glClearColor(1, .2, 0, 1);
+			glClearColor(.1f, .1f, .1f, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
+
+			indexBuffer->bind();
+			vertexBuffer->bind();
+			shader->bind();
+
+			glBindVertexArray(vertexArray);
+			glDrawElements(GL_TRIANGLES, indexBuffer->getCount(), GL_UNSIGNED_INT, nullptr);
 
 			for (Layer* layer : layerStack) {
 				layer->update();
 			}
+
+			imGuiLayer->begin();
+
+			for (Layer* layer : layerStack) {
+				layer->renderImGui();
+			}
+
+			imGuiLayer->end();
 
 			window->update();
 		}
@@ -38,8 +102,6 @@ namespace ProjectA {
 	void Application::listen(Event& event) {
 		EventDispatcher dispatcher(event);
 		dispatcher.dispatch<WindowCloseEvent>(BIND_FUNCTION(Application::windowCloseEventCallback));
-
-		LOG_CORE_TRACE("{0}", event);
 
 		for (auto i = layerStack.end(); i != layerStack.begin();) {
 			(*--i)->listen(event);
@@ -52,13 +114,9 @@ namespace ProjectA {
 
 	void Application::pushLayer(Layer* layer) {
 		layerStack.pushLayer(layer);
-
-		layer->attach();
 	}
 
 	void Application::pushOverlay(Layer* overlay) {
 		layerStack.pushOverlay(overlay);
-
-		overlay->attach();
 	}
 }

@@ -2,7 +2,11 @@
 
 #include "core.hpp"
 #include "Event/WindowEvent.hpp"
+#include "ImGui/ImGuiLayer.hpp"
 #include "LayerStack.hpp"
+#include "Renderer/IndexBuffer.hpp"
+#include "Renderer/Shader.hpp"
+#include "Renderer/VertexBuffer.hpp"
 #include "WindowInterface.hpp"
 
 namespace ProjectA {
@@ -11,15 +15,22 @@ namespace ProjectA {
 			static Application* instance;
 
 			std::unique_ptr<WindowInterface> window;
+			ImGuiLayer* imGuiLayer;
 			bool running = true;
 			LayerStack layerStack;
+
+			unsigned int vertexArray;
+
+			std::unique_ptr<IndexBuffer> indexBuffer;
+			std::unique_ptr<VertexBuffer> vertexBuffer;
+			std::unique_ptr<Shader> shader;
 
 		private:
 			bool windowCloseEventCallback(WindowCloseEvent& event);
 
 		public:
 			Application();
-			virtual ~Application();
+			virtual ~Application() = default;
 
 			void run();
 			void listen(Event& event);

@@ -2,9 +2,7 @@
 #include "LayerStack.hpp"
 
 namespace ProjectA {
-	LayerStack::LayerStack() {
-		layerInsertionIterator = layers.begin();
-	}
+	LayerStack::LayerStack() {}
 
 	LayerStack::~LayerStack() {
 		for (Layer* layer : layers) {
@@ -13,28 +11,42 @@ namespace ProjectA {
 	}
 
 	void LayerStack::pushLayer(Layer* layer) {
-		layerInsertionIterator = layers.emplace(layerInsertionIterator, layer);
+		layers.emplace(layers.begin() + layerInsertionIndex, layer);
+
+		layerInsertionIndex++;
+
+		layer->attach();
 	}
 
 	void LayerStack::pushOverlay(Layer* overlay) {
 		layers.emplace_back(overlay);
+
+		overlay->attach();
 	}
 
 	void LayerStack::removeLayer(Layer* layer) {
 		auto iterator = std::find(layers.begin(), layers.end(), layer);
 
-		if (iterator != layers.end()) {
-			layers.erase(iterator);
-
-			layerInsertionIterator--;
+		if (iterator == layers.end()) {
+			return;
 		}
+
+		layers.erase(iterator);
+
+		layerInsertionIndex--;
+
+		layer->detach();
 	}
 
 	void LayerStack::removeOverlay(Layer* overlay) {
 		auto iterator = std::find(layers.begin(), layers.end(), overlay);
 
-		if (iterator != layers.end()) {
-			layers.erase(iterator);
+		if (iterator == layers.end()) {
+			return;
 		}
+
+		layers.erase(iterator);
+
+		overlay->detach();
 	}
 }

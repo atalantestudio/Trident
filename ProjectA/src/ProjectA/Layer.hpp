@@ -10,7 +10,7 @@ namespace ProjectA {
 
 		public:
 			Layer(const std::string& debugName = "Layer");
-			virtual ~Layer();
+			virtual ~Layer() = default;
 
 			inline const std::string& getDebugName() const {
 				return debugName;
@@ -19,6 +19,7 @@ namespace ProjectA {
 			virtual void attach() {}
 			virtual void detach() {}
 			virtual void update() {}
+			virtual void renderImGui() {}
 			virtual void listen(Event& event) {}
 	};
 }

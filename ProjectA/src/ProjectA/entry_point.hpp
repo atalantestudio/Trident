@@ -5,6 +5,7 @@
 
 	int main() {
 		ProjectA::Logger::initialize();
+
 		LOG_CORE_TRACE("Initialized core logging");
 		LOG_CLIENT_TRACE("Initialized client logging");
 

@@ -14,9 +14,10 @@ include "ProjectA/vendor"
 
 project "ProjectA"
 	location "ProjectA"
-	kind "SharedLib"
+	kind "StaticLib"
 	language "C++"
-	staticruntime "off"
+	cppdialect "C++17"
+	staticruntime "on"
 
 	targetdir ("bin/%{prj.name}/" .. outputdir)
 	objdir ("obj/%{prj.name}/" .. outputdir)
@@ -27,36 +28,37 @@ project "ProjectA"
 	files {
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/src/**.hpp",
+		"%{prj.name}/vendor/glm/glm/**.hpp",
+		"%{prj.name}/vendor/glm/glm/**.inl",
 	}
 
 	includedirs {
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/glad/include",
 		"%{prj.name}/vendor/glfw/glfw/include",
+		"%{prj.name}/vendor/glm",
 		"%{prj.name}/vendor/imgui",
 		"%{prj.name}/vendor/spdlog/include",
 	}
 
 	links {
 		"glad",
-		"glfw",
+		"GLFW",
 		"imgui",
 		"opengl32.lib",
 	}
 
+	defines {
+		"_CRT_SECURE_NO_WARNINGS",
+	}
+
 	filter "system:windows"
 		systemversion "latest"
-		cppdialect "C++latest"
 
 		defines {
 			"WINDOWS",
 			"BUILD_DLL",
 			"GLFW_INCLUDE_NONE",
-			"IMGUI_IMPL_OPENGL_LOADER_CUSTOM",
-		}
-
-		postbuildcommands {
-			("{COPY} %{cfg.buildtarget.relpath} \"../bin/Sandbox/" .. outputdir .. "/\""),
 		}
 
 	filter "configurations:Debug"
@@ -78,7 +80,8 @@ project "Sandbox"
 	location "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
-	staticruntime "off"
+	cppdialect "C++17"
+	staticruntime "on"
 
 	targetdir ("bin/%{prj.name}/" .. outputdir)
 	objdir ("obj/%{prj.name}/" .. outputdir)
@@ -90,6 +93,8 @@ project "Sandbox"
 
 	includedirs {
 		"ProjectA/src",
+		"ProjectA/vendor",
+		"ProjectA/vendor/glm",
 		"ProjectA/vendor/spdlog/include",
 	}
 
@@ -99,7 +104,6 @@ project "Sandbox"
 
 	filter "system:windows"
 		systemversion "latest"
-		cppdialect "C++latest"
 
 		defines "WINDOWS"
 

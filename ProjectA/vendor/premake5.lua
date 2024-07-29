@@ -2,6 +2,7 @@ project "glad"
 	location "glad"
 	kind "StaticLib"
 	language "C"
+	staticruntime "on"
 
 	targetdir ("../../bin/ProjectA/" .. outputdir .. "/%{prj.name}")
 	objdir ("../../obj/ProjectA/" .. outputdir .. "/%{prj.name}")
@@ -18,15 +19,20 @@ project "glad"
 
 	filter "system:windows"
 		systemversion "latest"
-		staticruntime "on"
 
-	filter {"system:windows", "configurations:Release"}
-		buildoptions "/MT"
+	filter "configurations:Debug"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Release"
+		runtime "Release"
+		optimize "on"
 
 project "glfw"
 	location "glfw"
 	kind "StaticLib"
 	language "C"
+	staticruntime "on"
 
 	targetdir ("../../bin/ProjectA/" .. outputdir .. "/%{prj.name}")
 	objdir ("../../obj/ProjectA/" .. outputdir .. "/%{prj.name}")
@@ -51,7 +57,6 @@ project "glfw"
 
 	filter "system:windows"
 		systemversion "latest"
-		staticruntime "on"
 
 		defines {
 			"_GLFW_WIN32",
@@ -71,13 +76,20 @@ project "glfw"
 			"%{prj.name}/%{prj.name}/src/win32_window.c",
 		}
 
-	filter {"system:windows", "configurations:Release"}
-		buildoptions "/MT"
+	filter "configurations:Debug"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Release"
+		runtime "Release"
+		optimize "on"
 
 project "imgui"
 	location "imgui"
 	kind "StaticLib"
 	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
 
 	targetdir ("../../bin/ProjectA/" .. outputdir .. "/%{prj.name}")
 	objdir ("../../obj/ProjectA/" .. outputdir .. "/%{prj.name}")
@@ -98,7 +110,11 @@ project "imgui"
 
 	filter "system:windows"
 		systemversion "latest"
-		staticruntime "on"
 
-	filter {"system:windows", "configurations:Release"}
-		buildoptions "/MT"
+	filter "configurations:Debug"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Release"
+		runtime "Release"
+		optimize "on"
