@@ -65,8 +65,6 @@ namespace ProjectA {
 		shader.reset(new Shader(vertexShaderSource, fragmentShaderSource));
 	}
 
-	Application::~Application() {}
-
 	bool Application::windowCloseEventCallback(WindowCloseEvent& event) {
 		running = false;
 

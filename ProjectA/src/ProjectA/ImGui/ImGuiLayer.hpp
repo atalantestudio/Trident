@@ -12,7 +12,7 @@ namespace ProjectA {
 
 		public:
 			ImGuiLayer();
-			~ImGuiLayer();
+			~ImGuiLayer() = default;
 
 			virtual void attach() override;
 			virtual void detach() override;

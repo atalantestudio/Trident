@@ -10,7 +10,7 @@ namespace ProjectA {
 
 		public:
 			Layer(const std::string& debugName = "Layer");
-			virtual ~Layer();
+			virtual ~Layer() = default;
 
 			inline const std::string& getDebugName() const {
 				return debugName;

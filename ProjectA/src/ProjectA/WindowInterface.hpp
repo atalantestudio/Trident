@@ -18,7 +18,7 @@ namespace ProjectA {
 
 			using EventCallback = std::function<void (Event&)>;
 
-			virtual ~WindowInterface() {}
+			virtual ~WindowInterface() = default;
 
 			virtual void* getNativeWindow() const = 0;
 			virtual unsigned int getWidth() const = 0;

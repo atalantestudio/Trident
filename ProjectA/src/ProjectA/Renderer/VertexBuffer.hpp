@@ -8,7 +8,7 @@ namespace ProjectA {
 		public:
 			static VertexBuffer* create(float* vertices, uint32_t size);
 
-			virtual ~VertexBuffer() {}
+			virtual ~VertexBuffer() = default;
 
 			virtual void bind() const = 0;
 

@@ -8,7 +8,7 @@ namespace ProjectA {
 		public:
 			static IndexBuffer* create(uint32_t* indices, uint32_t count);
 
-			virtual ~IndexBuffer() {}
+			virtual ~IndexBuffer() = default;
 
 			virtual uint32_t getCount() const = 0;
 

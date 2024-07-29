@@ -30,7 +30,7 @@ namespace ProjectA {
 
 		public:
 			Application();
-			virtual ~Application();
+			virtual ~Application() = default;
 
 			void run();
 			void listen(Event& event);

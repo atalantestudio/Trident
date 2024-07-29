@@ -11,8 +11,6 @@
 namespace ProjectA {
 	ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {}
 
-	ImGuiLayer::~ImGuiLayer() {}
-
 	void ImGuiLayer::attach() {
 		IMGUI_CHECKVERSION();
 
