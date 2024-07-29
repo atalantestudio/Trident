@@ -116,13 +116,9 @@ namespace ProjectA {
 
 	void Application::pushLayer(Layer* layer) {
 		layerStack.pushLayer(layer);
-
-		layer->attach();
 	}
 
 	void Application::pushOverlay(Layer* overlay) {
 		layerStack.pushOverlay(overlay);
-
-		overlay->attach();
 	}
 }
