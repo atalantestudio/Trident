@@ -146,8 +146,11 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLIndexBuffer.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexBuffer.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\BufferElement.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\BufferLayout.hpp" />
     <ClInclude Include="src\ProjectA\Renderer\IndexBuffer.hpp" />
     <ClInclude Include="src\ProjectA\Renderer\Renderer.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\ShaderType.hpp" />
     <ClInclude Include="src\ProjectA\Renderer\VertexBuffer.hpp" />
     <ClInclude Include="src\ProjectA\Renderer\Context.hpp" />
     <ClInclude Include="src\Platform\Windows\Input.hpp" />
@@ -603,6 +606,8 @@
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\BufferElement.cpp" />
+    <ClCompile Include="src\ProjectA\Renderer\BufferLayout.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\IndexBuffer.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\Renderer.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\Shader.cpp" />

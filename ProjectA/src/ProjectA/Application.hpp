@@ -29,6 +29,10 @@ namespace ProjectA {
 			bool windowCloseEventCallback(WindowCloseEvent& event);
 
 		public:
+			static inline Application& get() {
+				return *instance;
+			}
+
 			Application();
 			virtual ~Application() = default;
 
@@ -39,10 +43,6 @@ namespace ProjectA {
 
 			inline WindowInterface& getWindow() {
 				return *window;
-			}
-
-			static inline Application& get() {
-				return *instance;
 			}
 	};
 

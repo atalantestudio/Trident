@@ -13,11 +13,11 @@ namespace ProjectA {
 		public:
 			static void initialize();
 
-			inline static std::shared_ptr<spdlog::logger>& getCoreLogger() {
+			static inline std::shared_ptr<spdlog::logger>& getCoreLogger() {
 				return coreLogger;
 			}
 
-			inline static std::shared_ptr<spdlog::logger>& getClientLogger() {
+			static inline std::shared_ptr<spdlog::logger>& getClientLogger() {
 				return clientLogger;
 			}
 	};

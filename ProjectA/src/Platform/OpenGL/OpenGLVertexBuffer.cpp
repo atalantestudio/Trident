@@ -15,6 +15,14 @@ namespace ProjectA {
 		glDeleteBuffers(1, &id);
 	}
 
+	const BufferLayout& OpenGLVertexBuffer::getLayout() const {
+		return layout;
+	}
+
+	void OpenGLVertexBuffer::setLayout(const BufferLayout& layout) {
+		this->layout = layout;
+	}
+
 	void OpenGLVertexBuffer::bind() const {
 		glBindBuffer(GL_ARRAY_BUFFER, id);
 	}
