@@ -25,7 +25,7 @@ namespace ProjectA {
 	}
 
 	void LayerStack::removeLayer(Layer* layer) {
-		auto iterator = std::find(layers.begin(), layers.end(), layer);
+		auto iterator = std::find(layers.begin(), layers.begin() + layerInsertionIndex, layer);
 
 		if (iterator == layers.end()) {
 			return;
@@ -39,7 +39,7 @@ namespace ProjectA {
 	}
 
 	void LayerStack::removeOverlay(Layer* overlay) {
-		auto iterator = std::find(layers.begin(), layers.end(), overlay);
+		auto iterator = std::find(layers.begin() + layerInsertionIndex, layers.end(), overlay);
 
 		if (iterator == layers.end()) {
 			return;
