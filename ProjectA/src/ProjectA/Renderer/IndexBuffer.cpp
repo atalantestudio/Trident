@@ -10,6 +10,7 @@ namespace ProjectA {
 				CORE_ASSERT(false, "Graphics::None is not supported yet.")
 
 				return nullptr;
+
 			case GraphicsAPI::OpenGL:
 				return new OpenGLIndexBuffer(indices, count);
 		}

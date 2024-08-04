@@ -6,6 +6,7 @@
 #include "LayerStack.hpp"
 #include "Renderer/IndexBuffer.hpp"
 #include "Renderer/Shader.hpp"
+#include "Renderer/VertexArray.hpp"
 #include "Renderer/VertexBuffer.hpp"
 #include "WindowInterface.hpp"
 
@@ -19,11 +20,11 @@ namespace ProjectA {
 			bool running = true;
 			LayerStack layerStack;
 
-			unsigned int vertexArray;
+			std::unique_ptr<Shader> triangleShader;
+			std::shared_ptr<VertexArray> triangleVertexArray;
 
-			std::unique_ptr<IndexBuffer> indexBuffer;
-			std::unique_ptr<VertexBuffer> vertexBuffer;
-			std::unique_ptr<Shader> shader;
+			std::unique_ptr<Shader> squareShader;
+			std::shared_ptr<VertexArray> squareVertexArray;
 
 		private:
 			bool windowCloseEventCallback(WindowCloseEvent& event);

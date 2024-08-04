@@ -3,38 +3,6 @@
 #include <glad/glad.h>
 
 namespace ProjectA {
-	// For debug purposes
-	static GLenum getShaderType(ShaderType type) {
-		switch (type) {
-			case ShaderType::Bool:
-				return GL_BOOL;
-			case ShaderType::Int:
-				return GL_INT;
-			case ShaderType::Int2:
-				return GL_INT;
-			case ShaderType::Int3:
-				return GL_INT;
-			case ShaderType::Int4:
-				return GL_INT;
-			case ShaderType::Float:
-				return GL_FLOAT;
-			case ShaderType::Float2:
-				return GL_FLOAT;
-			case ShaderType::Float3:
-				return GL_FLOAT;
-			case ShaderType::Float4:
-				return GL_FLOAT;
-			case ShaderType::Mat3:
-				return GL_FLOAT;
-			case ShaderType::Mat4:
-				return GL_FLOAT;
-		}
-
-		CORE_ASSERT(false, "Unknown ShaderType");
-
-		return 0;
-	}
-
 	Application* Application::instance = nullptr;
 
 	Application::Application() {
@@ -49,58 +17,74 @@ namespace ProjectA {
 
 		pushOverlay(imGuiLayer);
 
-		glGenVertexArrays(1, &vertexArray);
-		glBindVertexArray(vertexArray);
+		///
+		/// Triangle
+		///
 
-		// [position, color]
-		float vertices[3 * 7] = {
-		   -0.5f, -0.5f, 0,     0.8f, 0.2f, 0.8f, 1.0f,
-			0.5f, -0.5f, 0,     0.2f, 0.3f, 0.8f, 1.0f,
-			0,     0.5f, 0,     0.8f, 0.8f, 0.2f, 1.0f
+		triangleVertexArray.reset(VertexArray::create());
+
+		float triangleVertices[3 * 7] = {
+		   -0.5f, -0.5f,  0.0f,     0.8f,  0.2f,  0.8f,  1.0f,
+			0.5f, -0.5f,  0.0f,     0.2f,  0.3f,  0.8f,  1.0f,
+			0.0f,  0.5f,  0.0f,     0.8f,  0.8f,  0.2f,  1.0f
 		};
 
-		vertexBuffer.reset(VertexBuffer::create(vertices, sizeof(vertices)));
+		std::shared_ptr<VertexBuffer> triangleVertexBuffer;
+		triangleVertexBuffer.reset(VertexBuffer::create(triangleVertices, sizeof(triangleVertices)));
+		triangleVertexBuffer->setLayout({
+			{
+				ShaderType::Float3, "a_position", false
+			},
+			{
+				ShaderType::Float4, "a_color", false
+			}
+		});
 
-		{
-			BufferLayout layout({
-				{
-					ShaderType::Float3,
-					"a_position",
-					false
-				},
-				{
-					ShaderType::Float4,
-					"a_color",
-					false
-				}
-			});
+		triangleVertexArray->addVertexBuffer(triangleVertexBuffer);
 
-			vertexBuffer->setLayout(layout);
-		}
+		uint32_t triangleIndices[3] = {
+			0, 1, 2
+		};
 
-		const auto& layout = vertexBuffer->getLayout();
+		std::shared_ptr<IndexBuffer> triangleIndexBuffer;
+		triangleIndexBuffer.reset(IndexBuffer::create(triangleIndices, sizeof(triangleIndices) / sizeof(uint32_t)));
 
-		uint32_t attributeIndex = 0;
+		triangleVertexArray->setIndexBuffer(triangleIndexBuffer);
 
-		for (const auto& element : layout) {
-			glEnableVertexAttribArray(attributeIndex);
-			glVertexAttribPointer(
-				attributeIndex,
-				getShaderTypeComponentCount(element.type),
-				getShaderType(element.type),
-				element.normalized ? GL_TRUE : GL_FALSE,
-				layout.getStride(),
-				(const void*) element.offset
-			);
+		///
+		/// Square
+		///
 
-			attributeIndex++;
-		}
+		squareVertexArray.reset(VertexArray::create());
 
-		uint32_t indices[3] = {0, 1, 2};
+		float squareVertices[3 * 4] = {
+		   -0.75f, -0.75f,  0.0f,
+			0.75f, -0.75f,  0.0f,
+			0.75f,  0.75f,  0.0f,
+		   -0.75f,  0.75f,  0.0f
+		};
 
-		indexBuffer.reset(IndexBuffer::create(indices, 3));
+		std::shared_ptr<VertexBuffer> squareVertexBuffer;
+		squareVertexBuffer.reset(VertexBuffer::create(squareVertices, sizeof(squareVertices)));
+		squareVertexBuffer->setLayout({
+			{
+				ShaderType::Float3, "a_position", false
+			}
+		});
 
-		const std::string& vertexShaderSource = R"(
+		squareVertexArray->addVertexBuffer(squareVertexBuffer);
+
+		uint32_t squareIndices[6] = {
+			0, 1, 2,
+			2, 3, 0
+		};
+
+		std::shared_ptr<IndexBuffer> squareIndexBuffer;
+		squareIndexBuffer.reset(IndexBuffer::create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+
+		squareVertexArray->setIndexBuffer(squareIndexBuffer);
+
+		const std::string& triangleVertexShaderSource = R"(
 			#version 330 core
 
 			layout(location = 0) in vec3 a_position;
@@ -110,14 +94,14 @@ namespace ProjectA {
 			out vec4 v_color;
 
 			void main() {
-				gl_Position = vec4(a_position, 1.);
+				gl_Position = vec4(a_position, 1.0);
 
 				v_position = a_position;
 				v_color = a_color;
 			}
 		)";
 
-		const std::string& fragmentShaderSource = R"(
+		const std::string& triangleFragmentShaderSource = R"(
 			#version 330 core
 
 			in vec3 v_position;
@@ -130,7 +114,35 @@ namespace ProjectA {
 			}
 		)";
 
-		shader.reset(new Shader(vertexShaderSource, fragmentShaderSource));
+		triangleShader.reset(new Shader(triangleVertexShaderSource, triangleFragmentShaderSource));
+
+		const std::string& squareVertexShaderSource = R"(
+			#version 330 core
+
+			layout(location = 0) in vec3 a_position;
+
+			out vec3 v_position;
+
+			void main() {
+				gl_Position = vec4(a_position, 1.0);
+
+				v_position = a_position;
+			}
+		)";
+
+		const std::string& squareFragmentShaderSource = R"(
+			#version 330 core
+
+			in vec3 v_position;
+
+			layout(location = 0) out vec4 FragColor;
+
+			void main() {
+				FragColor = vec4(0.2, 0.3, 0.8, 1.0);
+			}
+		)";
+
+		squareShader.reset(new Shader(squareVertexShaderSource, squareFragmentShaderSource));
 	}
 
 	bool Application::windowCloseEventCallback(WindowCloseEvent& event) {
@@ -144,12 +156,15 @@ namespace ProjectA {
 			glClearColor(.1f, .1f, .1f, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			indexBuffer->bind();
-			vertexBuffer->bind();
-			shader->bind();
+			squareShader->bind();
+			squareVertexArray->bind();
 
-			glBindVertexArray(vertexArray);
-			glDrawElements(GL_TRIANGLES, indexBuffer->getCount(), GL_UNSIGNED_INT, nullptr);
+			glDrawElements(GL_TRIANGLES, squareVertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
+
+			triangleShader->bind();
+			triangleVertexArray->bind();
+
+			glDrawElements(GL_TRIANGLES, triangleVertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
 
 			for (Layer* layer : layerStack) {
 				layer->update();
