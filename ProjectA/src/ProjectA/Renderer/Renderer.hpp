@@ -1,18 +1,18 @@
 #pragma once
 
+#include "RenderCommand.hpp"
+
 namespace ProjectA {
-	enum class GraphicsAPI {
-		None = 0,
-		OpenGL = 1,
-	};
-
 	class Renderer {
-		private:
-			static GraphicsAPI graphicsAPI;
-
 		public:
-			static inline GraphicsAPI getGraphicsAPI() {
-				return graphicsAPI;
+			static inline RendererAPI::GraphicsAPI getGraphicsAPI() {
+				return RendererAPI::getGraphicsAPI();
 			}
+
+			static void beginScene();
+
+			static void endScene();
+
+			static void submit(const std::shared_ptr<VertexArray>& vertexArray);
 	};
 }

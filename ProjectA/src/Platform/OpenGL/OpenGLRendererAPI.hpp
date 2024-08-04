@@ -1,0 +1,14 @@
+#pragma once
+
+#include "ProjectA/Renderer/RendererAPI.hpp"
+
+namespace ProjectA {
+	class OpenGLRendererAPI : public RendererAPI {
+		public:
+			virtual void setClearColor(const vec4<float>& color) const override;
+
+			virtual void clear() const override;
+
+			virtual void drawIndexed(const std::shared_ptr<VertexArray>& vertexArray) const override;
+	};
+}

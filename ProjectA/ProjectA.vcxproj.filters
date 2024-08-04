@@ -1363,6 +1363,10 @@
     <ClInclude Include="src\ProjectA\Renderer\ShaderType.hpp" />
     <ClInclude Include="src\ProjectA\Renderer\VertexArray.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\RendererAPI.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\RenderCommand.hpp" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.hpp" />
+    <ClInclude Include="src\math\vec4.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Platform\Windows\Input.cpp">
@@ -1403,5 +1407,9 @@
     <ClCompile Include="src\ProjectA\Renderer\BufferLayout.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
+    <ClCompile Include="src\ProjectA\Renderer\RendererAPI.cpp" />
+    <ClCompile Include="src\ProjectA\Renderer\RenderCommand.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
+    <ClCompile Include="src\math\vec4.cpp" />
   </ItemGroup>
 </Project>

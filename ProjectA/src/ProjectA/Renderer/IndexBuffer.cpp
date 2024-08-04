@@ -6,12 +6,12 @@
 namespace ProjectA {
 	IndexBuffer* IndexBuffer::create(uint32_t* indices, uint32_t count) {
 		switch (Renderer::getGraphicsAPI()) {
-			case GraphicsAPI::None:
+			case RendererAPI::GraphicsAPI::None:
 				CORE_ASSERT(false, "Graphics::None is not supported yet.")
 
 				return nullptr;
 
-			case GraphicsAPI::OpenGL:
+			case RendererAPI::GraphicsAPI::OpenGL:
 				return new OpenGLIndexBuffer(indices, count);
 		}
 	}

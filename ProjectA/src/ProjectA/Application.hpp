@@ -35,11 +35,15 @@ namespace ProjectA {
 			}
 
 			Application();
+
 			virtual ~Application() = default;
 
 			void run();
+
 			void listen(Event& event);
+
 			void pushLayer(Layer* layer);
+
 			void pushOverlay(Layer* overlay);
 
 			inline WindowInterface& getWindow() {

@@ -1,6 +1,6 @@
 #include "pch.hpp"
 #include "Application.hpp"
-#include <glad/glad.h>
+#include "Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	Application* Application::instance = nullptr;
@@ -153,18 +153,22 @@ namespace ProjectA {
 
 	void Application::run() {
 		while (running) {
-			glClearColor(.1f, .1f, .1f, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
+			vec4<float> clearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+			RenderCommand::setClearColor(clearColor);
+			RenderCommand::clear();
+
+			Renderer::beginScene();
 
 			squareShader->bind();
-			squareVertexArray->bind();
 
-			glDrawElements(GL_TRIANGLES, squareVertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
+			Renderer::submit(squareVertexArray);
 
 			triangleShader->bind();
-			triangleVertexArray->bind();
 
-			glDrawElements(GL_TRIANGLES, triangleVertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
+			Renderer::submit(triangleVertexArray);
+
+			Renderer::endScene();
 
 			for (Layer* layer : layerStack) {
 				layer->update();
