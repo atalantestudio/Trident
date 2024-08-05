@@ -180,26 +180,5 @@ namespace ProjectA {
 		return stream << "(" << vector.x << ", " << vector.y << ", " << vector.z << ", " << vector.w << ")";
 	}
 
-	template vec4<float>::vec4(float, float, float, float);
-	template vec4<float>::vec4(const vec4&);
-	template vec4<float>::vec4(const vec4&&);
-	template vec4<float>& vec4<float>::operator =(const vec4& v);
-	template vec4<float>&& vec4<float>::operator +(const vec4&) const &;
-	template vec4<float>&& vec4<float>::operator +(const vec4&) &&;
-	template vec4<float>& vec4<float>::operator +=(const vec4&);
-	template vec4<float>&& vec4<float>::operator -() const &;
-	template vec4<float>&& vec4<float>::operator -() &&;
-	template vec4<float>&& vec4<float>::operator -(const vec4&) const &;
-	template vec4<float>&& vec4<float>::operator -(const vec4&) &&;
-	template vec4<float>& vec4<float>::operator -=(const vec4&);
-	template vec4<float>&& vec4<float>::operator *(const vec4&) const &;
-	template vec4<float>&& vec4<float>::operator *(const vec4&) &&;
-	template vec4<float>& vec4<float>::operator *=(const vec4&);
-	template vec4<float>&& vec4<float>::operator /(const vec4&) const &;
-	template vec4<float>&& vec4<float>::operator /(const vec4&) &&;
-	template vec4<float>& vec4<float>::operator /=(const vec4&);
-	template bool vec4<float>::operator ==(const vec4&) const;
-	template vec4<float>& vec4<float>::normalize();
-	template float vec4<float>::dot(const vec4&) const;
-	template float vec4<float>::length() const;
+	template class vec4<float>;
 }
