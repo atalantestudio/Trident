@@ -1,10 +1,185 @@
 #include "ProjectA.hpp"
 
 class TestLayer : public ProjectA::Layer {
-	public:
-		TestLayer() : Layer("Test") {}
+	private:
+		std::shared_ptr<ProjectA::Shader> triangleShader;
+		std::shared_ptr<ProjectA::VertexArray> triangleVertexArray;
 
-		void update() override {}
+		std::shared_ptr<ProjectA::Shader> squareShader;
+		std::shared_ptr<ProjectA::VertexArray> squareVertexArray;
+
+		ProjectA::OrthographicCamera camera;
+		ProjectA::vec3<float> cameraPosition;
+		float cameraRotation;
+		float cameraMoveVelocity;
+		float cameraRotationVelocity;
+
+	public:
+		TestLayer() : Layer("Test"), camera(-1.6f, 1.6f, -0.9f, 0.9f, -1.0f, 1.0f), cameraPosition(0.0f, 0.0f, 0.0f), cameraRotation(0.0f), cameraMoveVelocity(0.01f), cameraRotationVelocity(2.0f) {
+			///
+			/// Triangle
+			///
+
+			triangleVertexArray.reset(ProjectA::VertexArray::create());
+
+			float triangleVertices[3 * 7] = {
+			   -0.5f, -0.5f,  0.0f,     0.8f,  0.2f,  0.8f,  1.0f,
+				0.5f, -0.5f,  0.0f,     0.2f,  0.3f,  0.8f,  1.0f,
+				0.0f,  0.5f,  0.0f,     0.8f,  0.8f,  0.2f,  1.0f
+			};
+
+			std::shared_ptr<ProjectA::VertexBuffer> triangleVertexBuffer;
+			triangleVertexBuffer.reset(ProjectA::VertexBuffer::create(triangleVertices, sizeof(triangleVertices)));
+			triangleVertexBuffer->setLayout({
+				{
+					ProjectA::ShaderType::Float3, "a_position", false
+				},
+				{
+					ProjectA::ShaderType::Float4, "a_color", false
+				}
+			});
+
+			triangleVertexArray->addVertexBuffer(triangleVertexBuffer);
+
+			uint32_t triangleIndices[3] = {
+				0, 1, 2
+			};
+
+			std::shared_ptr<ProjectA::IndexBuffer> triangleIndexBuffer;
+			triangleIndexBuffer.reset(ProjectA::IndexBuffer::create(triangleIndices, sizeof(triangleIndices) / sizeof(uint32_t)));
+
+			triangleVertexArray->setIndexBuffer(triangleIndexBuffer);
+
+			///
+			/// Square
+			///
+
+			squareVertexArray.reset(ProjectA::VertexArray::create());
+
+			float squareVertices[3 * 4] = {
+			   -0.75f, -0.75f,  0.0f,
+				0.75f, -0.75f,  0.0f,
+				0.75f,  0.75f,  0.0f,
+			   -0.75f,  0.75f,  0.0f
+			};
+
+			std::shared_ptr<ProjectA::VertexBuffer> squareVertexBuffer;
+			squareVertexBuffer.reset(ProjectA::VertexBuffer::create(squareVertices, sizeof(squareVertices)));
+			squareVertexBuffer->setLayout({
+				{
+					ProjectA::ShaderType::Float3, "a_position", false
+				}
+			});
+
+			squareVertexArray->addVertexBuffer(squareVertexBuffer);
+
+			uint32_t squareIndices[6] = {
+				0, 1, 2,
+				2, 3, 0
+			};
+
+			std::shared_ptr<ProjectA::IndexBuffer> squareIndexBuffer;
+			squareIndexBuffer.reset(ProjectA::IndexBuffer::create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+
+			squareVertexArray->setIndexBuffer(squareIndexBuffer);
+
+			const std::string& triangleVertexShaderSource = R"(
+				#version 330 core
+
+				layout(location = 0) in vec3 a_position;
+				layout(location = 1) in vec4 a_color;
+
+				uniform mat4 u_viewProjection;
+
+				out vec3 v_position;
+				out vec4 v_color;
+
+				void main() {
+					gl_Position = u_viewProjection * vec4(a_position, 1.0f);
+
+					v_position = a_position;
+					v_color = a_color;
+				}
+			)";
+
+			const std::string& triangleFragmentShaderSource = R"(
+				#version 330 core
+
+				in vec3 v_position;
+				in vec4 v_color;
+
+				layout(location = 0) out vec4 FragColor;
+
+				void main() {
+					FragColor = v_color;
+				}
+			)";
+
+			triangleShader.reset(new ProjectA::Shader(triangleVertexShaderSource, triangleFragmentShaderSource));
+
+			const std::string& squareVertexShaderSource = R"(
+				#version 330 core
+
+				layout(location = 0) in vec3 a_position;
+
+				uniform mat4 u_viewProjection;
+
+				out vec3 v_position;
+
+				void main() {
+					gl_Position = u_viewProjection * vec4(a_position, 1.0f);
+
+					v_position = a_position;
+				}
+			)";
+
+			const std::string& squareFragmentShaderSource = R"(
+				#version 330 core
+
+				in vec3 v_position;
+
+				layout(location = 0) out vec4 FragColor;
+
+				void main() {
+					FragColor = vec4(0.2f, 0.3f, 0.8f, 1.0f);
+				}
+			)";
+
+			squareShader.reset(new ProjectA::Shader(squareVertexShaderSource, squareFragmentShaderSource));
+		}
+
+		void update() override {
+			if (ProjectA::InputInterface::isKeyPressed(KEY_LEFT)) {
+				cameraPosition[0] -= cameraMoveVelocity;
+			} else if (ProjectA::InputInterface::isKeyPressed(KEY_RIGHT)) {
+				cameraPosition[0] += cameraMoveVelocity;
+			}
+
+			if (ProjectA::InputInterface::isKeyPressed(KEY_UP)) {
+				cameraPosition[1] += cameraMoveVelocity;
+			} else if (ProjectA::InputInterface::isKeyPressed(KEY_DOWN)) {
+				cameraPosition[1] -= cameraMoveVelocity;
+			}
+
+			if (ProjectA::InputInterface::isKeyPressed(KEY_A)) {
+				cameraRotation += cameraRotationVelocity;
+			} else if (ProjectA::InputInterface::isKeyPressed(KEY_D)) {
+				cameraRotation -= cameraRotationVelocity;
+			}
+
+			ProjectA::RenderCommand::setClearColor(ProjectA::vec4<float>(0.1f, 0.1f, 0.1f, 1.0f));
+			ProjectA::RenderCommand::clear();
+
+			camera.setPosition(cameraPosition);
+			camera.setRotation(cameraRotation);
+
+			ProjectA::Renderer::beginScene(camera);
+				ProjectA::Renderer::submit(squareShader, squareVertexArray);
+				ProjectA::Renderer::submit(triangleShader, triangleVertexArray);
+			ProjectA::Renderer::endScene();
+		}
+
+		virtual void renderImGui() override {}
 
 		void listen(ProjectA::Event& event) override {}
 };

@@ -1,18 +1,13 @@
 #pragma once
 
 #include "core.hpp"
-#include "Camera/OrthographicCamera.hpp"
 #include "Event/WindowEvent.hpp"
 #include "ImGui/ImGuiLayer.hpp"
 #include "LayerStack.hpp"
-#include "Renderer/IndexBuffer.hpp"
-#include "Renderer/Shader.hpp"
-#include "Renderer/VertexArray.hpp"
-#include "Renderer/VertexBuffer.hpp"
 #include "WindowInterface.hpp"
 
 namespace ProjectA {
-	class API Application {
+	class Application {
 		private:
 			static Application* instance;
 
@@ -20,14 +15,6 @@ namespace ProjectA {
 			ImGuiLayer* imGuiLayer;
 			bool running = true;
 			LayerStack layerStack;
-
-			std::shared_ptr<Shader> triangleShader;
-			std::shared_ptr<VertexArray> triangleVertexArray;
-
-			std::shared_ptr<Shader> squareShader;
-			std::shared_ptr<VertexArray> squareVertexArray;
-
-			OrthographicCamera camera;
 
 		private:
 			bool windowCloseEventCallback(WindowCloseEvent& event);
