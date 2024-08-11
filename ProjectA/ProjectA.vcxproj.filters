@@ -1366,7 +1366,11 @@
     <ClInclude Include="src\ProjectA\Renderer\RendererAPI.hpp" />
     <ClInclude Include="src\ProjectA\Renderer\RenderCommand.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.hpp" />
-    <ClInclude Include="src\math\vec4.hpp" />
+    <ClInclude Include="src\math\mat\mat4x4.hpp" />
+    <ClInclude Include="src\ProjectA\Camera\OrthographicCamera.hpp" />
+    <ClInclude Include="src\ProjectA\Camera\Camera.hpp" />
+    <ClInclude Include="src\math\vec\vec3.hpp" />
+    <ClInclude Include="src\math\vec\vec4.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Platform\Windows\Input.cpp">
@@ -1410,6 +1414,10 @@
     <ClCompile Include="src\ProjectA\Renderer\RendererAPI.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\RenderCommand.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
-    <ClCompile Include="src\math\vec4.cpp" />
+    <ClCompile Include="src\math\mat\mat4x4.cpp" />
+    <ClCompile Include="src\ProjectA\Camera\Camera.cpp" />
+    <ClCompile Include="src\ProjectA\Camera\OrthographicCamera.cpp" />
+    <ClCompile Include="src\math\vec\vec3.cpp" />
+    <ClCompile Include="src\math\vec\vec4.cpp" />
   </ItemGroup>
 </Project>

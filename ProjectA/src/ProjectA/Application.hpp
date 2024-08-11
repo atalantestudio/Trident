@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core.hpp"
+#include "Camera/OrthographicCamera.hpp"
 #include "Event/WindowEvent.hpp"
 #include "ImGui/ImGuiLayer.hpp"
 #include "LayerStack.hpp"
@@ -20,11 +21,13 @@ namespace ProjectA {
 			bool running = true;
 			LayerStack layerStack;
 
-			std::unique_ptr<Shader> triangleShader;
+			std::shared_ptr<Shader> triangleShader;
 			std::shared_ptr<VertexArray> triangleVertexArray;
 
-			std::unique_ptr<Shader> squareShader;
+			std::shared_ptr<Shader> squareShader;
 			std::shared_ptr<VertexArray> squareVertexArray;
+
+			OrthographicCamera camera;
 
 		private:
 			bool windowCloseEventCallback(WindowCloseEvent& event);

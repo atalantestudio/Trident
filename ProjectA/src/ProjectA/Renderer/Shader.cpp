@@ -94,4 +94,14 @@ namespace ProjectA {
 	void Shader::unbind() const {
 		glUseProgram(0);
 	}
+
+	void Shader::uploadUniform(const std::string& name, const mat4x4<float>& matrix) const {
+		GLint location = glGetUniformLocation(program, name.c_str());
+
+		if (location == -1) {
+			return;
+		}
+
+		glUniformMatrix4fv(location, 1, GL_FALSE, matrix.entries);
+	}
 }

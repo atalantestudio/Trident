@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math/vec4.hpp"
+#include "math/vec/vec4.hpp"
 #include "VertexArray.hpp"
 
 namespace ProjectA {

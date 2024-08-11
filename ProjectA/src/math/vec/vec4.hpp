@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 namespace ProjectA {
 	template<typename T>
 	struct vec4 {

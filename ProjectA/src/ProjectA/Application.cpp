@@ -5,7 +5,7 @@
 namespace ProjectA {
 	Application* Application::instance = nullptr;
 
-	Application::Application() {
+	Application::Application() : camera(-1.6f, 1.6f, -0.9f, 0.9f, -1.0f, 1.0f) {
 		CORE_ASSERT(!instance, "The Application instance already exists.")
 
 		instance = this;
@@ -90,11 +90,13 @@ namespace ProjectA {
 			layout(location = 0) in vec3 a_position;
 			layout(location = 1) in vec4 a_color;
 
+			uniform mat4 u_viewProjection;
+
 			out vec3 v_position;
 			out vec4 v_color;
 
 			void main() {
-				gl_Position = vec4(a_position, 1.0);
+				gl_Position = u_viewProjection * vec4(a_position, 1.0f);
 
 				v_position = a_position;
 				v_color = a_color;
@@ -121,10 +123,12 @@ namespace ProjectA {
 
 			layout(location = 0) in vec3 a_position;
 
+			uniform mat4 u_viewProjection;
+
 			out vec3 v_position;
 
 			void main() {
-				gl_Position = vec4(a_position, 1.0);
+				gl_Position = u_viewProjection * vec4(a_position, 1.0f);
 
 				v_position = a_position;
 			}
@@ -138,7 +142,7 @@ namespace ProjectA {
 			layout(location = 0) out vec4 FragColor;
 
 			void main() {
-				FragColor = vec4(0.2, 0.3, 0.8, 1.0);
+				FragColor = vec4(0.2f, 0.3f, 0.8f, 1.0f);
 			}
 		)";
 
@@ -158,16 +162,11 @@ namespace ProjectA {
 			RenderCommand::setClearColor(clearColor);
 			RenderCommand::clear();
 
-			Renderer::beginScene();
+			Renderer::beginScene(camera);
+				camera.setPosition(vec3<float>(0.5f, 0.5f, 0.0f));
 
-			squareShader->bind();
-
-			Renderer::submit(squareVertexArray);
-
-			triangleShader->bind();
-
-			Renderer::submit(triangleVertexArray);
-
+				Renderer::submit(squareShader, squareVertexArray);
+				Renderer::submit(triangleShader, triangleVertexArray);
 			Renderer::endScene();
 
 			for (Layer* layer : layerStack) {

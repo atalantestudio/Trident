@@ -3,19 +3,13 @@
 
 namespace ProjectA {
 	template<typename T>
-	vec4<T>::vec4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {
-		std::cout << "Default: " << (*this) << std::endl;
-	}
+	vec4<T>::vec4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
 
 	template<typename T>
-	vec4<T>::vec4(const vec4& v) : x(v.x), y(v.y), z(v.z), w(v.w) {
-		std::cout << "Copy: " << (*this) << std::endl;
-	}
+	vec4<T>::vec4(const vec4& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
 
 	template<typename T>
-	vec4<T>::vec4(const vec4&& v) : x(v.x), y(v.y), z(v.z), w(v.w) {
-		std::cout << "Move: " << (*this) << std::endl;
-	}
+	vec4<T>::vec4(const vec4&& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
 
 	template<typename T>
 	vec4<T>& vec4<T>::operator =(const vec4& v) {
@@ -23,8 +17,6 @@ namespace ProjectA {
 		y = v.y;
 		z = v.z;
 		w = v.w;
-
-		std::cout << "Assign: " << (*this) << std::endl;
 
 		return *this;
 	}

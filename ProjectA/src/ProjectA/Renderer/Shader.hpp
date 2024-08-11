@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "math/mat/mat4x4.hpp"
 
 namespace ProjectA {
 	class Shader {
@@ -15,5 +16,7 @@ namespace ProjectA {
 			void bind() const;
 
 			void unbind() const;
+
+			void uploadUniform(const std::string& name, const mat4x4<float>& matrix) const;
 	};
 }
