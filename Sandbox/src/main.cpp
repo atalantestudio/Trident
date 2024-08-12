@@ -15,7 +15,14 @@ class TestLayer : public ProjectA::Layer {
 		float cameraRotationVelocity;
 
 	public:
-		TestLayer() : Layer("Test"), camera(-1.6f, 1.6f, -0.9f, 0.9f, -1.0f, 1.0f), cameraPosition(0.0f, 0.0f, 0.0f), cameraRotation(0.0f), cameraMoveVelocity(4.0f), cameraRotationVelocity(180.0f) {
+		TestLayer() :
+			Layer("Test"),
+			camera(-1.6f, 1.6f, -0.9f, 0.9f, -1.0f, 1.0f),
+			cameraPosition(0.0f, 0.0f, 0.0f),
+			cameraRotation(0.0f),
+			cameraMoveVelocity(4.0f),
+			cameraRotationVelocity(180.0f)
+		{
 			///
 			/// Triangle
 			///
@@ -57,10 +64,10 @@ class TestLayer : public ProjectA::Layer {
 			squareVertexArray.reset(ProjectA::VertexArray::create());
 
 			float squareVertices[3 * 4] = {
-			   -0.75f, -0.75f,  0.0f,
-				0.75f, -0.75f,  0.0f,
-				0.75f,  0.75f,  0.0f,
-			   -0.75f,  0.75f,  0.0f
+			   -0.5f, -0.5f,  0.0f,
+				0.5f, -0.5f,  0.0f,
+				0.5f,  0.5f,  0.0f,
+			   -0.5f,  0.5f,  0.0f
 			};
 
 			std::shared_ptr<ProjectA::VertexBuffer> squareVertexBuffer;
@@ -90,12 +97,13 @@ class TestLayer : public ProjectA::Layer {
 				layout(location = 1) in vec4 a_color;
 
 				uniform mat4 u_viewProjection;
+				uniform mat4 u_transform; // TODO: Change to attribute
 
 				out vec3 v_position;
 				out vec4 v_color;
 
 				void main() {
-					gl_Position = vec4(a_position, 1.0f) * u_viewProjection;
+					gl_Position = vec4(a_position, 1.0f) * u_transform * u_viewProjection;
 
 					v_position = a_position;
 					v_color = a_color;
@@ -123,11 +131,12 @@ class TestLayer : public ProjectA::Layer {
 				layout(location = 0) in vec3 a_position;
 
 				uniform mat4 u_viewProjection;
+				uniform mat4 u_transform; // TODO: Change to attribute
 
 				out vec3 v_position;
 
 				void main() {
-					gl_Position = vec4(a_position, 1.0f) * u_viewProjection;
+					gl_Position = vec4(a_position, 1.0f) * u_transform * u_viewProjection;
 
 					v_position = a_position;
 				}
@@ -163,9 +172,9 @@ class TestLayer : public ProjectA::Layer {
 				cameraPosition[1] -= cameraMoveVelocity * deltaTime;
 			}
 
-			if (ProjectA::InputInterface::isKeyPressed(KEY_A)) {
+			if (ProjectA::InputInterface::isKeyPressed(KEY_Q)) {
 				cameraRotation += cameraRotationVelocity * deltaTime;
-			} else if (ProjectA::InputInterface::isKeyPressed(KEY_D)) {
+			} else if (ProjectA::InputInterface::isKeyPressed(KEY_E)) {
 				cameraRotation -= cameraRotationVelocity * deltaTime;
 			}
 
@@ -175,9 +184,31 @@ class TestLayer : public ProjectA::Layer {
 			camera.setPosition(cameraPosition);
 			camera.setRotation(cameraRotation);
 
+			const ProjectA::mat4x4<float> scale(
+				0.1, 0, 0, 0,
+				0, 0.1, 0, 0,
+				0, 0, 0.1, 0,
+				0, 0, 0, 1
+			);
+
 			ProjectA::Renderer::beginScene(camera);
-				ProjectA::Renderer::submit(squareShader, squareVertexArray);
-				ProjectA::Renderer::submit(triangleShader, triangleVertexArray);
+
+			for (int y = 0; y < 20; y++) {
+				for (int x = 0; x < 20; x++) {
+					ProjectA::vec3<float> position(x * 0.11, y * 0.11, 0);
+					ProjectA::mat4x4<float> transform = ProjectA::mat4x4<float>::translate(position) * scale;
+
+					ProjectA::Renderer::submit(squareShader, squareVertexArray, transform);
+				}
+			}
+
+			ProjectA::Renderer::submit(triangleShader, triangleVertexArray, ProjectA::mat4x4<float>(
+				1, 0, 0, 0,
+				0, 1, 0, 0,
+				0, 0, 1, 0,
+				0, 0, 0, 1
+			));
+
 			ProjectA::Renderer::endScene();
 		}
 

@@ -18,6 +18,6 @@ namespace ProjectA {
 
 			static void endScene();
 
-			static void submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray);
+			static void submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const mat4x4<float>& transform);
 	};
 }
