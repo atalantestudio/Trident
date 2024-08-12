@@ -15,7 +15,7 @@ class TestLayer : public ProjectA::Layer {
 		float cameraRotationVelocity;
 
 	public:
-		TestLayer() : Layer("Test"), camera(-1.6f, 1.6f, -0.9f, 0.9f, -1.0f, 1.0f), cameraPosition(0.0f, 0.0f, 0.0f), cameraRotation(0.0f), cameraMoveVelocity(0.01f), cameraRotationVelocity(2.0f) {
+		TestLayer() : Layer("Test"), camera(-1.6f, 1.6f, -0.9f, 0.9f, -1.0f, 1.0f), cameraPosition(0.0f, 0.0f, 0.0f), cameraRotation(0.0f), cameraMoveVelocity(4.0f), cameraRotationVelocity(180.0f) {
 			///
 			/// Triangle
 			///
@@ -95,7 +95,7 @@ class TestLayer : public ProjectA::Layer {
 				out vec4 v_color;
 
 				void main() {
-					gl_Position = u_viewProjection * vec4(a_position, 1.0f);
+					gl_Position = vec4(a_position, 1.0f) * u_viewProjection;
 
 					v_position = a_position;
 					v_color = a_color;
@@ -127,7 +127,7 @@ class TestLayer : public ProjectA::Layer {
 				out vec3 v_position;
 
 				void main() {
-					gl_Position = u_viewProjection * vec4(a_position, 1.0f);
+					gl_Position = vec4(a_position, 1.0f) * u_viewProjection;
 
 					v_position = a_position;
 				}
@@ -148,23 +148,25 @@ class TestLayer : public ProjectA::Layer {
 			squareShader.reset(new ProjectA::Shader(squareVertexShaderSource, squareFragmentShaderSource));
 		}
 
-		void update() override {
+		void update(float deltaTime) override {
+			LOG_CLIENT_TRACE("DeltaTime: {0}s", deltaTime);
+
 			if (ProjectA::InputInterface::isKeyPressed(KEY_LEFT)) {
-				cameraPosition[0] -= cameraMoveVelocity;
+				cameraPosition[0] -= cameraMoveVelocity * deltaTime;
 			} else if (ProjectA::InputInterface::isKeyPressed(KEY_RIGHT)) {
-				cameraPosition[0] += cameraMoveVelocity;
+				cameraPosition[0] += cameraMoveVelocity * deltaTime;
 			}
 
 			if (ProjectA::InputInterface::isKeyPressed(KEY_UP)) {
-				cameraPosition[1] += cameraMoveVelocity;
+				cameraPosition[1] += cameraMoveVelocity * deltaTime;
 			} else if (ProjectA::InputInterface::isKeyPressed(KEY_DOWN)) {
-				cameraPosition[1] -= cameraMoveVelocity;
+				cameraPosition[1] -= cameraMoveVelocity * deltaTime;
 			}
 
 			if (ProjectA::InputInterface::isKeyPressed(KEY_A)) {
-				cameraRotation += cameraRotationVelocity;
+				cameraRotation += cameraRotationVelocity * deltaTime;
 			} else if (ProjectA::InputInterface::isKeyPressed(KEY_D)) {
-				cameraRotation -= cameraRotationVelocity;
+				cameraRotation -= cameraRotationVelocity * deltaTime;
 			}
 
 			ProjectA::RenderCommand::setClearColor(ProjectA::vec4<float>(0.1f, 0.1f, 0.1f, 1.0f));

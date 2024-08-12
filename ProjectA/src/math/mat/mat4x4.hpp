@@ -10,8 +10,9 @@ namespace ProjectA {
 
 		public:
 			static mat4x4<float> orthographic(float, float, float, float, float, float);
-			static mat4x4<T> translate(const vec3<T>&);
-			/// TODO: Rotation factory
+			static mat4x4<float> translate(const vec3<float>&);
+			/// TODO: Expand to X/Y
+			static mat4x4<float> rotateZ(float);
 			/// TODO: Scale factory
 
 			mat4x4(T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T);

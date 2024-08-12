@@ -4,7 +4,9 @@
 
 namespace ProjectA {
 	void OrthographicCamera::computeView() {
-		mat4x4<float> inverseTransform = mat4x4<float>::translate(position).invert();
+		mat4x4<float> inverseTransform = mat4x4<float>::translate(position);
+		inverseTransform *= mat4x4<float>::rotateZ(rotation * M_PI / 180.0f);
+		inverseTransform.invert();
 
 		view = inverseTransform;
 		viewProjection = projection * view;

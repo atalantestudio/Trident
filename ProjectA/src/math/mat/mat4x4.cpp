@@ -17,13 +17,24 @@ namespace ProjectA {
 		);
 	}
 
-	template<typename T>
-	mat4x4<T> mat4x4<T>::translate(const vec3<T>& position) {
+	mat4x4<float> mat4x4<float>::translate(const vec3<float>& position) {
 		return mat4x4(
-			1, 0, 0, 0,
-			0, 1, 0, 0,
+			1, 0, 0, position[0],
+			0, 1, 0, position[1],
+			0, 0, 1, position[2],
+			0, 0, 0, 1
+		);
+	}
+
+	mat4x4<float> mat4x4<float>::rotateZ(float angle) {
+		float c = cos(angle);
+		float s = sin(angle);
+
+		return mat4x4(
+			c, s, 0, 0,
+		   -s, c, 0, 0,
 			0, 0, 1, 0,
-			position[0], position[1], position[2], 1
+			0, 0, 0, 1
 		);
 	}
 

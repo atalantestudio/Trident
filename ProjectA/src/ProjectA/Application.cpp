@@ -1,11 +1,12 @@
 #include "pch.hpp"
 #include "Application.hpp"
 #include "Renderer/Renderer.hpp"
+#include <GLFW/glfw3.h>
 
 namespace ProjectA {
 	Application* Application::instance = nullptr;
 
-	Application::Application() {
+	Application::Application() : lastFrameTime(0.0f) {
 		CORE_ASSERT(!instance, "The Application instance already exists.")
 
 		instance = this;
@@ -26,8 +27,13 @@ namespace ProjectA {
 
 	void Application::run() {
 		while (running) {
+			float time = (float) glfwGetTime();
+			float deltaTime = time - lastFrameTime;
+
+			lastFrameTime = time;
+
 			for (Layer* layer : layerStack) {
-				layer->update();
+				layer->update(deltaTime);
 			}
 
 			imGuiLayer->begin();

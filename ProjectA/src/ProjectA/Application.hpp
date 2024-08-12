@@ -16,6 +16,8 @@ namespace ProjectA {
 			bool running = true;
 			LayerStack layerStack;
 
+			float lastFrameTime;
+
 		private:
 			bool windowCloseEventCallback(WindowCloseEvent& event);
 

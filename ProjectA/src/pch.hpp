@@ -1,8 +1,11 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
+
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>

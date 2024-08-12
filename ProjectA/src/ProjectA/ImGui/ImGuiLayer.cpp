@@ -41,12 +41,14 @@ namespace ProjectA {
 	void ImGuiLayer::detach() {
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
+
 		ImGui::DestroyContext();
 	}
 
 	void ImGuiLayer::begin() {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
+
 		ImGui::NewFrame();
 	}
 
