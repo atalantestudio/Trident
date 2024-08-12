@@ -158,8 +158,6 @@ class TestLayer : public ProjectA::Layer {
 		}
 
 		void update(float deltaTime) override {
-			LOG_CLIENT_TRACE("DeltaTime: {0}s", deltaTime);
-
 			if (ProjectA::InputInterface::isKeyPressed(KEY_LEFT)) {
 				cameraPosition[0] -= cameraMoveVelocity * deltaTime;
 			} else if (ProjectA::InputInterface::isKeyPressed(KEY_RIGHT)) {
@@ -184,7 +182,7 @@ class TestLayer : public ProjectA::Layer {
 			camera.setPosition(cameraPosition);
 			camera.setRotation(cameraRotation);
 
-			const ProjectA::mat4x4<float> scale(
+			static const ProjectA::mat4x4<float> scale(
 				0.1, 0, 0, 0,
 				0, 0.1, 0, 0,
 				0, 0, 0.1, 0,

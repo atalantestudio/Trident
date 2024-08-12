@@ -95,6 +95,18 @@ namespace ProjectA {
 		glUseProgram(0);
 	}
 
+	void Shader::uploadUniform(const std::string& name, const vec4<float>& vector) const {
+		GLint location = glGetUniformLocation(program, name.c_str());
+
+		if (location == -1) {
+			return;
+		}
+
+		float entries[4] = {vector.x, vector.y, vector.z, vector.w};
+
+		glUniform4fv(location, 1, entries);
+	}
+
 	void Shader::uploadUniform(const std::string& name, const mat4x4<float>& matrix) const {
 		GLint location = glGetUniformLocation(program, name.c_str());
 
