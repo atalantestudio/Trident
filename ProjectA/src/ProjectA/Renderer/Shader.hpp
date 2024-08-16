@@ -5,7 +5,8 @@
 namespace ProjectA {
 	class Shader {
 		public:
-			static Shader* create(const std::string& vertexShaderSource, const std::string& fragmentShaderSource);
+			static Ref<Shader> create(const std::string& vertexShaderSource, const std::string& fragmentShaderSource);
+			static Ref<Shader> create(const std::string& path);
 
 			virtual ~Shader() = default;
 

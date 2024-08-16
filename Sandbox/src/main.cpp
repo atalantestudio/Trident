@@ -140,7 +140,7 @@ class TestLayer : public ProjectA::Layer {
 				}
 			)";
 
-			triangleShader.reset(ProjectA::Shader::create(triangleVertexShaderSource, triangleFragmentShaderSource));
+			triangleShader = ProjectA::Shader::create(triangleVertexShaderSource, triangleFragmentShaderSource);
 
 			/// 
 			/// Square shader
@@ -171,45 +171,9 @@ class TestLayer : public ProjectA::Layer {
 				}
 			)";
 
-			squareShader.reset(ProjectA::Shader::create(squareVertexShaderSource, squareFragmentShaderSource));
+			squareShader = ProjectA::Shader::create(squareVertexShaderSource, squareFragmentShaderSource);
 
-			/// 
-			/// Texture shader
-			/// 
-
-			const std::string& textureVertexShaderSource = R"(
-				#version 330 core
-
-				layout(location = 0) in vec3 a_position;
-				layout(location = 1) in vec2 a_uv;
-
-				uniform mat4 u_viewProjection;
-				uniform mat4 u_transform;
-
-				out vec2 v_uv;
-
-				void main() {
-					gl_Position = vec4(a_position, 1.0f) * u_transform * u_viewProjection;
-
-					v_uv = a_uv;
-				}
-			)";
-
-			const std::string& textureFragmentShaderSource = R"(
-				#version 330 core
-
-				in vec2 v_uv;
-
-				uniform sampler2D u_texture;
-
-				layout(location = 0) out vec4 FragColor;
-
-				void main() {
-					FragColor = texture(u_texture, v_uv);
-				}
-			)";
-
-			textureShader.reset(ProjectA::Shader::create(textureVertexShaderSource, textureFragmentShaderSource));
+			textureShader = ProjectA::Shader::create("assets/shaders/texture.glsl");
 
 			plasterWallTexture = ProjectA::Texture2D::create("assets/textures/plasterwall030c.jpg");
 			decalGraffitiTexture = ProjectA::Texture2D::create("assets/textures/decalgraffiti001d.png");
