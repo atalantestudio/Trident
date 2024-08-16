@@ -4,11 +4,11 @@
 
 class TestLayer : public ProjectA::Layer {
 	private:
-		std::shared_ptr<ProjectA::Shader> triangleShader;
-		std::shared_ptr<ProjectA::VertexArray> triangleVertexArray;
+		ProjectA::Ref<ProjectA::Shader> triangleShader;
+		ProjectA::Ref<ProjectA::VertexArray> triangleVertexArray;
 
-		std::shared_ptr<ProjectA::Shader> squareShader;
-		std::shared_ptr<ProjectA::VertexArray> squareVertexArray;
+		ProjectA::Ref<ProjectA::Shader> squareShader;
+		ProjectA::Ref<ProjectA::VertexArray> squareVertexArray;
 
 		ProjectA::OrthographicCamera camera;
 		ProjectA::vec3<float> cameraPosition;
@@ -40,7 +40,7 @@ class TestLayer : public ProjectA::Layer {
 				0.0f,  0.5f,  0.0f,     0.8f,  0.8f,  0.2f,  1.0f
 			};
 
-			std::shared_ptr<ProjectA::VertexBuffer> triangleVertexBuffer;
+			ProjectA::Ref<ProjectA::VertexBuffer> triangleVertexBuffer;
 			triangleVertexBuffer.reset(ProjectA::VertexBuffer::create(triangleVertices, sizeof(triangleVertices)));
 			triangleVertexBuffer->setLayout({
 				{
@@ -57,7 +57,7 @@ class TestLayer : public ProjectA::Layer {
 				0, 1, 2
 			};
 
-			std::shared_ptr<ProjectA::IndexBuffer> triangleIndexBuffer;
+			ProjectA::Ref<ProjectA::IndexBuffer> triangleIndexBuffer;
 			triangleIndexBuffer.reset(ProjectA::IndexBuffer::create(triangleIndices, sizeof(triangleIndices) / sizeof(uint32_t)));
 
 			triangleVertexArray->setIndexBuffer(triangleIndexBuffer);
@@ -75,7 +75,7 @@ class TestLayer : public ProjectA::Layer {
 			   -0.5f,  0.5f,  0.0f
 			};
 
-			std::shared_ptr<ProjectA::VertexBuffer> squareVertexBuffer;
+			ProjectA::Ref<ProjectA::VertexBuffer> squareVertexBuffer;
 			squareVertexBuffer.reset(ProjectA::VertexBuffer::create(squareVertices, sizeof(squareVertices)));
 			squareVertexBuffer->setLayout({
 				{
@@ -90,7 +90,7 @@ class TestLayer : public ProjectA::Layer {
 				2, 3, 0
 			};
 
-			std::shared_ptr<ProjectA::IndexBuffer> squareIndexBuffer;
+			ProjectA::Ref<ProjectA::IndexBuffer> squareIndexBuffer;
 			squareIndexBuffer.reset(ProjectA::IndexBuffer::create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 
 			squareVertexArray->setIndexBuffer(squareIndexBuffer);

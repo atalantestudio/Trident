@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #ifdef WINDOWS
 	#ifdef DYNAMIC_LINK
 		#ifdef BUILD_DLL
@@ -40,3 +42,11 @@
 #define BIT_SHIFT_ID(id) (1 << id)
 
 #define BIND_FUNCTION(function) std::bind(&function, this, std::placeholders::_1)
+
+namespace ProjectA {
+	template<typename T>
+	using Ref = std::shared_ptr<T>;
+
+	template<typename T>
+	using Scope = std::unique_ptr<T>;
+}

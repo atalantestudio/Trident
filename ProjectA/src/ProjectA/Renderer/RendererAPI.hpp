@@ -23,6 +23,6 @@ namespace ProjectA {
 
 			virtual void clear() const = 0;
 
-			virtual void drawIndexed(const std::shared_ptr<VertexArray>& vertexArray) const = 0;
+			virtual void drawIndexed(const Ref<VertexArray>& vertexArray) const = 0;
 	};
 }

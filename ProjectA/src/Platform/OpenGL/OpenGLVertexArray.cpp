@@ -50,15 +50,15 @@ namespace ProjectA {
 		glBindVertexArray(0);
 	}
 
-	const std::vector<std::shared_ptr<VertexBuffer>>& OpenGLVertexArray::getVertexBuffers() const {
+	const std::vector<Ref<VertexBuffer>>& OpenGLVertexArray::getVertexBuffers() const {
 		return vertexBuffers;
 	}
 
-	const std::shared_ptr<IndexBuffer>& OpenGLVertexArray::getIndexBuffer() const {
+	const Ref<IndexBuffer>& OpenGLVertexArray::getIndexBuffer() const {
 		return indexBuffer;
 	}
 
-	void OpenGLVertexArray::addVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer) {
+	void OpenGLVertexArray::addVertexBuffer(const Ref<VertexBuffer>& vertexBuffer) {
 		CORE_ASSERT(vertexBuffer->getLayout().getElements().size(), "Vertex buffer has no layout");
 
 		bind();
@@ -85,7 +85,7 @@ namespace ProjectA {
 		vertexBuffers.push_back(vertexBuffer);
 	}
 
-	void OpenGLVertexArray::setIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer) {
+	void OpenGLVertexArray::setIndexBuffer(const Ref<IndexBuffer>& indexBuffer) {
 		bind();
 		indexBuffer->bind();
 

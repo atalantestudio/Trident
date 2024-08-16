@@ -16,7 +16,7 @@ namespace ProjectA {
 				rendererApi->clear();
 			}
 
-			static inline void drawIndexed(const std::shared_ptr<VertexArray>& vertexArray) {
+			static inline void drawIndexed(const Ref<VertexArray>& vertexArray) {
 				rendererApi->drawIndexed(vertexArray);
 			}
 	};

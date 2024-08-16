@@ -13,7 +13,7 @@ namespace ProjectA {
 		Renderer::camera = nullptr;
 	}
 
-	void Renderer::submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const mat4x4<float>& transform) {
+	void Renderer::submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const mat4x4<float>& transform) {
 		shader->bind();
 
 		std::dynamic_pointer_cast<OpenGLShader>(shader)->uploadUniform("u_viewProjection", Renderer::camera->getViewProjection());

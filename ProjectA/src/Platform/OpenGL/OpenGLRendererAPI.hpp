@@ -9,6 +9,6 @@ namespace ProjectA {
 
 			virtual void clear() const override;
 
-			virtual void drawIndexed(const std::shared_ptr<VertexArray>& vertexArray) const override;
+			virtual void drawIndexed(const Ref<VertexArray>& vertexArray) const override;
 	};
 }
