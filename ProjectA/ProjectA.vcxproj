@@ -149,6 +149,7 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLIndexBuffer.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.hpp" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLShader.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexBuffer.hpp" />
     <ClInclude Include="src\ProjectA\Camera\OrthographicCamera.hpp" />
@@ -608,6 +609,7 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLIndexBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexBuffer.cpp" />
     <ClCompile Include="src\Platform\Windows\Input.cpp" />

@@ -1,4 +1,6 @@
+#include "imgui/imgui.h"
 #include "ProjectA.hpp"
+#include "Platform/OpenGL/OpenGLShader.hpp"
 
 class TestLayer : public ProjectA::Layer {
 	private:
@@ -14,6 +16,8 @@ class TestLayer : public ProjectA::Layer {
 		float cameraMoveVelocity;
 		float cameraRotationVelocity;
 
+		ProjectA::vec3<float> squareColor;
+
 	public:
 		TestLayer() :
 			Layer("Test"),
@@ -21,7 +25,8 @@ class TestLayer : public ProjectA::Layer {
 			cameraPosition(0.0f, 0.0f, 0.0f),
 			cameraRotation(0.0f),
 			cameraMoveVelocity(4.0f),
-			cameraRotationVelocity(180.0f)
+			cameraRotationVelocity(180.0f),
+			squareColor(0.2f, 0.3f, 0.8f)
 		{
 			///
 			/// Triangle
@@ -123,7 +128,7 @@ class TestLayer : public ProjectA::Layer {
 				}
 			)";
 
-			triangleShader.reset(new ProjectA::Shader(triangleVertexShaderSource, triangleFragmentShaderSource));
+			triangleShader.reset(ProjectA::Shader::create(triangleVertexShaderSource, triangleFragmentShaderSource));
 
 			const std::string& squareVertexShaderSource = R"(
 				#version 330 core
@@ -147,14 +152,16 @@ class TestLayer : public ProjectA::Layer {
 
 				in vec3 v_position;
 
+				uniform vec3 u_color;
+
 				layout(location = 0) out vec4 FragColor;
 
 				void main() {
-					FragColor = vec4(0.2f, 0.3f, 0.8f, 1.0f);
+					FragColor = vec4(u_color, 1.0f);
 				}
 			)";
 
-			squareShader.reset(new ProjectA::Shader(squareVertexShaderSource, squareFragmentShaderSource));
+			squareShader.reset(ProjectA::Shader::create(squareVertexShaderSource, squareFragmentShaderSource));
 		}
 
 		void update(float deltaTime) override {
@@ -191,6 +198,9 @@ class TestLayer : public ProjectA::Layer {
 
 			ProjectA::Renderer::beginScene(camera);
 
+			std::dynamic_pointer_cast<ProjectA::OpenGLShader>(squareShader)->bind();
+			std::dynamic_pointer_cast<ProjectA::OpenGLShader>(squareShader)->uploadUniform("u_color", squareColor);
+
 			for (int y = 0; y < 20; y++) {
 				for (int x = 0; x < 20; x++) {
 					ProjectA::vec3<float> position(x * 0.11, y * 0.11, 0);
@@ -210,7 +220,11 @@ class TestLayer : public ProjectA::Layer {
 			ProjectA::Renderer::endScene();
 		}
 
-		virtual void renderImGui() override {}
+		virtual void renderImGui() override {
+			ImGui::Begin("Settings");
+				ImGui::ColorPicker3("Square color", squareColor.entries);
+			ImGui::End();
+		}
 
 		void listen(ProjectA::Event& event) override {}
 };

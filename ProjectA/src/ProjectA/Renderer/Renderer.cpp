@@ -1,4 +1,5 @@
 #include "pch.hpp"
+#include "Platform/OpenGL/OpenGLShader.hpp"
 #include "Renderer.hpp"
 
 namespace ProjectA {
@@ -14,8 +15,9 @@ namespace ProjectA {
 
 	void Renderer::submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const mat4x4<float>& transform) {
 		shader->bind();
-		shader->uploadUniform("u_viewProjection", Renderer::camera->getViewProjection());
-		shader->uploadUniform("u_transform", transform);
+
+		std::dynamic_pointer_cast<OpenGLShader>(shader)->uploadUniform("u_viewProjection", Renderer::camera->getViewProjection());
+		std::dynamic_pointer_cast<OpenGLShader>(shader)->uploadUniform("u_transform", transform);
 
 		vertexArray->bind();
 

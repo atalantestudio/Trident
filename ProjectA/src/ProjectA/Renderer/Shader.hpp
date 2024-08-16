@@ -1,25 +1,15 @@
 #pragma once
 
 #include <string>
-#include "math/mat/mat4x4.hpp"
-#include "math/vec/vec4.hpp"
 
 namespace ProjectA {
 	class Shader {
-		private:
-			uint32_t program;
-
 		public:
-			Shader(const std::string& vertexShaderSource, const std::string& fragmentShaderSource);
+			static Shader* create(const std::string& vertexShaderSource, const std::string& fragmentShaderSource);
 
-			~Shader();
+			virtual ~Shader() = default;
 
-			void bind() const;
-
-			void unbind() const;
-
-			void uploadUniform(const std::string& name, const vec4<float>& vector) const;
-
-			void uploadUniform(const std::string& name, const mat4x4<float>& matrix) const;
+			virtual void bind() const = 0;
+			virtual void unbind() const = 0;
 	};
 }

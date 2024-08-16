@@ -3,7 +3,7 @@
 namespace ProjectA {
 	template<typename T>
 	class vec3 {
-		private:
+		public:
 			T entries[3];
 
 		public:

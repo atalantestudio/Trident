@@ -1371,6 +1371,7 @@
     <ClInclude Include="src\ProjectA\Camera\Camera.hpp" />
     <ClInclude Include="src\math\vec\vec3.hpp" />
     <ClInclude Include="src\math\vec\vec4.hpp" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Platform\Windows\Input.cpp">
@@ -1419,5 +1420,6 @@
     <ClCompile Include="src\ProjectA\Camera\OrthographicCamera.cpp" />
     <ClCompile Include="src\math\vec\vec3.cpp" />
     <ClCompile Include="src\math\vec\vec4.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
   </ItemGroup>
 </Project>
