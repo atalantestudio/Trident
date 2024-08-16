@@ -8,6 +8,10 @@ namespace ProjectA {
 			static RendererAPI* rendererApi;
 
 		public:
+			static inline void initialize() {
+				rendererApi->initialize();
+			}
+
 			static inline void setClearColor(const vec4<float>& color) {
 				rendererApi->setClearColor(color);
 			}

@@ -5,6 +5,10 @@
 namespace ProjectA {
 	Camera* Renderer::camera = nullptr;
 
+	void Renderer::initialize() {
+		RenderCommand::initialize();
+	}
+
 	void Renderer::beginScene(Camera& camera) {
 		Renderer::camera = &camera;
 	}

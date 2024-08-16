@@ -19,6 +19,8 @@ namespace ProjectA {
 				return graphicsApi;
 			}
 
+			virtual void initialize() = 0;
+
 			virtual void setClearColor(const vec4<float>& color) const = 0;
 
 			virtual void clear() const = 0;

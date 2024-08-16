@@ -14,6 +14,8 @@ namespace ProjectA {
 		window = std::unique_ptr<WindowInterface>(WindowInterface::create());
 		window->setEventCallback(BIND_FUNCTION(Application::listen));
 
+		Renderer::initialize();
+
 		imGuiLayer = new ImGuiLayer();
 
 		pushOverlay(imGuiLayer);

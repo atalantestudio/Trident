@@ -76,12 +76,12 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WINDOWS;BUILD_DLL;GLFW_INCLUDE_NONE;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\glad\include;vendor\glfw\glfw\include;vendor\glm;vendor\imgui;vendor\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WINDOWS;BUILD_DLL;GLFW_INCLUDE_NONE;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor\glad\include;vendor\glfw\glfw\include;vendor\glm;vendor\imgui;vendor\spdlog\include;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
@@ -97,15 +97,15 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WINDOWS;BUILD_DLL;GLFW_INCLUDE_NONE;PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\glad\include;vendor\glfw\glfw\include;vendor\glm;vendor\imgui;vendor\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WINDOWS;BUILD_DLL;GLFW_INCLUDE_NONE;PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor\glad\include;vendor\glfw\glfw\include;vendor\glm;vendor\imgui;vendor\spdlog\include;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
@@ -122,15 +122,15 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>WINDOWS;BUILD_DLL;GLFW_INCLUDE_NONE;RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\glad\include;vendor\glfw\glfw\include;vendor\glm;vendor\imgui;vendor\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WINDOWS;BUILD_DLL;GLFW_INCLUDE_NONE;RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src;vendor\glad\include;vendor\glfw\glfw\include;vendor\glm;vendor\imgui;vendor\spdlog\include;vendor\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
@@ -143,31 +143,19 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\math\mat\mat4x4.hpp" />
-    <ClInclude Include="src\math\vec\vec3.hpp" />
-    <ClInclude Include="src\math\vec\vec4.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLIndexBuffer.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.hpp" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLTexture2D.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.hpp" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexBuffer.hpp" />
-    <ClInclude Include="src\ProjectA\Camera\OrthographicCamera.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\BufferElement.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\BufferLayout.hpp" />
-    <ClInclude Include="src\ProjectA\Camera\Camera.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\IndexBuffer.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\RenderCommand.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\Renderer.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\RendererAPI.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\ShaderType.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\VertexArray.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\VertexBuffer.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\Context.hpp" />
     <ClInclude Include="src\Platform\Windows\Input.hpp" />
     <ClInclude Include="src\Platform\Windows\Window.hpp" />
     <ClInclude Include="src\ProjectA.hpp" />
     <ClInclude Include="src\ProjectA\Application.hpp" />
+    <ClInclude Include="src\ProjectA\Camera\Camera.hpp" />
+    <ClInclude Include="src\ProjectA\Camera\OrthographicCamera.hpp" />
     <ClInclude Include="src\ProjectA\Event\ApplicationEvent.hpp" />
     <ClInclude Include="src\ProjectA\Event\Event.hpp" />
     <ClInclude Include="src\ProjectA\Event\KeyEvent.hpp" />
@@ -178,12 +166,27 @@
     <ClInclude Include="src\ProjectA\Layer.hpp" />
     <ClInclude Include="src\ProjectA\LayerStack.hpp" />
     <ClInclude Include="src\ProjectA\Logger.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\BufferElement.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\BufferLayout.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\Context.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\IndexBuffer.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\RenderCommand.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\Renderer.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\RendererAPI.hpp" />
     <ClInclude Include="src\ProjectA\Renderer\Shader.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\ShaderType.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\Texture.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\Texture2D.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\VertexArray.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\VertexBuffer.hpp" />
     <ClInclude Include="src\ProjectA\WindowInterface.hpp" />
     <ClInclude Include="src\ProjectA\core.hpp" />
     <ClInclude Include="src\ProjectA\entry_point.hpp" />
     <ClInclude Include="src\ProjectA\key_codes.hpp" />
     <ClInclude Include="src\ProjectA\mouse_button_codes.hpp" />
+    <ClInclude Include="src\math\mat\mat4x4.hpp" />
+    <ClInclude Include="src\math\vec\vec3.hpp" />
+    <ClInclude Include="src\math\vec\vec4.hpp" />
     <ClInclude Include="src\pch.hpp" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
     <ClInclude Include="vendor\glm\glm\detail\_features.hpp" />
@@ -601,15 +604,14 @@
     <ClInclude Include="vendor\glm\glm\vec3.hpp" />
     <ClInclude Include="vendor\glm\glm\vec4.hpp" />
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp" />
+    <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\math\mat\mat4x4.cpp" />
-    <ClCompile Include="src\math\vec\vec3.cpp" />
-    <ClCompile Include="src\math\vec\vec4.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLIndexBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLTexture2D.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexBuffer.cpp" />
     <ClCompile Include="src\Platform\Windows\Input.cpp" />
@@ -622,9 +624,6 @@
     <ClCompile Include="src\ProjectA\Layer.cpp" />
     <ClCompile Include="src\ProjectA\LayerStack.cpp" />
     <ClCompile Include="src\ProjectA\Logger.cpp" />
-    <ClCompile Include="src\pch.cpp">
-      <PrecompiledHeader>Create</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="src\ProjectA\Renderer\BufferElement.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\BufferLayout.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\IndexBuffer.cpp" />
@@ -632,8 +631,16 @@
     <ClCompile Include="src\ProjectA\Renderer\Renderer.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\RendererAPI.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\Shader.cpp" />
+    <ClCompile Include="src\ProjectA\Renderer\Texture2D.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\VertexBuffer.cpp" />
+    <ClCompile Include="src\math\mat\mat4x4.cpp" />
+    <ClCompile Include="src\math\vec\vec3.cpp" />
+    <ClCompile Include="src\math\vec\vec4.cpp" />
+    <ClCompile Include="src\pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="vendor\stb_image\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\glad\glad.vcxproj">

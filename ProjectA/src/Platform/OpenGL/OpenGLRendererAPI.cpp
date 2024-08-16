@@ -3,6 +3,11 @@
 #include <glad/glad.h>
 
 namespace ProjectA {
+	void OpenGLRendererAPI::initialize() {
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+
 	void OpenGLRendererAPI::setClearColor(const vec4<float>& color) const {
 		glClearColor(color.x, color.y, color.z, color.w);
 	}

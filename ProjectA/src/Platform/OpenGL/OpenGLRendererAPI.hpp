@@ -5,6 +5,8 @@
 namespace ProjectA {
 	class OpenGLRendererAPI : public RendererAPI {
 		public:
+			virtual void initialize() override;
+
 			virtual void setClearColor(const vec4<float>& color) const override;
 
 			virtual void clear() const override;

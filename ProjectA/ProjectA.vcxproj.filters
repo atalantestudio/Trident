@@ -7,17 +7,35 @@
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Platform\OpenGL">
+      <UniqueIdentifier>{35A49437-A105-7245-2A73-B8F796D3A804}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Platform\Windows">
       <UniqueIdentifier>{5B054582-4794-CE4B-F0B2-E246DC20DFF1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\ProjectA">
       <UniqueIdentifier>{14BBD2D2-001E-6277-A9A3-9A2D95E52DFA}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\ProjectA\Camera">
+      <UniqueIdentifier>{0C918A83-78F2-6791-0160-AE436DC09E50}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\ProjectA\Event">
       <UniqueIdentifier>{653B0569-511F-C6BE-BA7F-C011A682B040}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\ProjectA\ImGui">
       <UniqueIdentifier>{3E2F4869-2A13-09BF-9373-03127F76F340}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ProjectA\Renderer">
+      <UniqueIdentifier>{3AB5739E-A621-2F99-6F15-C7F6DB405101}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\math">
+      <UniqueIdentifier>{46A033CF-326D-8EDA-5B86-7C8247B2C368}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\math\mat">
+      <UniqueIdentifier>{B7F51185-A358-A129-4CDE-D9DF38206DAC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\math\vec">
+      <UniqueIdentifier>{731C1285-5F7F-A129-0805-DADFF4466DAC}</UniqueIdentifier>
     </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
@@ -40,8 +58,32 @@
     <Filter Include="vendor\glm\glm\gtx">
       <UniqueIdentifier>{B3A6A76B-9F8A-68C1-08EB-6214F4ED5243}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\stb_image">
+      <UniqueIdentifier>{0DA0BA59-F998-D9AB-22CB-BE300E23B9B7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLContext.hpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLIndexBuffer.hpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.hpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLShader.hpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLTexture2D.hpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.hpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexBuffer.hpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
     <ClInclude Include="src\Platform\Windows\Input.hpp">
       <Filter>src\Platform\Windows</Filter>
     </ClInclude>
@@ -53,6 +95,12 @@
     </ClInclude>
     <ClInclude Include="src\ProjectA\Application.hpp">
       <Filter>src\ProjectA</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Camera\Camera.hpp">
+      <Filter>src\ProjectA\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Camera\OrthographicCamera.hpp">
+      <Filter>src\ProjectA\Camera</Filter>
     </ClInclude>
     <ClInclude Include="src\ProjectA\Event\ApplicationEvent.hpp">
       <Filter>src\ProjectA\Event</Filter>
@@ -84,6 +132,45 @@
     <ClInclude Include="src\ProjectA\Logger.hpp">
       <Filter>src\ProjectA</Filter>
     </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\BufferElement.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\BufferLayout.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\Context.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\IndexBuffer.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\RenderCommand.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\Renderer.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\RendererAPI.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\Shader.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\ShaderType.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\Texture.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\Texture2D.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\VertexArray.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\VertexBuffer.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\ProjectA\WindowInterface.hpp">
       <Filter>src\ProjectA</Filter>
     </ClInclude>
@@ -98,6 +185,15 @@
     </ClInclude>
     <ClInclude Include="src\ProjectA\mouse_button_codes.hpp">
       <Filter>src\ProjectA</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\mat\mat4x4.hpp">
+      <Filter>src\math\mat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\vec\vec3.hpp">
+      <Filter>src\math\vec</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\vec\vec4.hpp">
+      <Filter>src\math\vec</Filter>
     </ClInclude>
     <ClInclude Include="src\pch.hpp">
       <Filter>src</Filter>
@@ -1350,30 +1446,32 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
-    <ClInclude Include="src\ProjectA\Renderer\Context.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\Shader.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\VertexBuffer.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\IndexBuffer.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\Renderer.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLContext.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLIndexBuffer.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexBuffer.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\BufferElement.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\BufferLayout.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\ShaderType.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\VertexArray.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\RendererAPI.hpp" />
-    <ClInclude Include="src\ProjectA\Renderer\RenderCommand.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.hpp" />
-    <ClInclude Include="src\math\mat\mat4x4.hpp" />
-    <ClInclude Include="src\ProjectA\Camera\OrthographicCamera.hpp" />
-    <ClInclude Include="src\ProjectA\Camera\Camera.hpp" />
-    <ClInclude Include="src\math\vec\vec3.hpp" />
-    <ClInclude Include="src\math\vec\vec4.hpp" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLShader.hpp" />
+    <ClInclude Include="vendor\stb_image\stb_image.h">
+      <Filter>vendor\stb_image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLIndexBuffer.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLTexture2D.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexBuffer.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\Windows\Input.cpp">
       <Filter>src\Platform\Windows</Filter>
     </ClCompile>
@@ -1382,6 +1480,12 @@
     </ClCompile>
     <ClCompile Include="src\ProjectA\Application.cpp">
       <Filter>src\ProjectA</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Camera\Camera.cpp">
+      <Filter>src\ProjectA\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Camera\OrthographicCamera.cpp">
+      <Filter>src\ProjectA\Camera</Filter>
     </ClCompile>
     <ClCompile Include="src\ProjectA\ImGui\ImGuiBuild.cpp">
       <Filter>src\ProjectA\ImGui</Filter>
@@ -1398,28 +1502,50 @@
     <ClCompile Include="src\ProjectA\Logger.cpp">
       <Filter>src\ProjectA</Filter>
     </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\BufferElement.cpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\BufferLayout.cpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\IndexBuffer.cpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\RenderCommand.cpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\Renderer.cpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\RendererAPI.cpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\Shader.cpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\Texture2D.cpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\VertexArray.cpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\VertexBuffer.cpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\mat\mat4x4.cpp">
+      <Filter>src\math\mat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\vec\vec3.cpp">
+      <Filter>src\math\vec</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\vec\vec4.cpp">
+      <Filter>src\math\vec</Filter>
+    </ClCompile>
     <ClCompile Include="src\pch.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\ProjectA\Renderer\Shader.cpp" />
-    <ClCompile Include="src\ProjectA\Renderer\IndexBuffer.cpp" />
-    <ClCompile Include="src\ProjectA\Renderer\VertexBuffer.cpp" />
-    <ClCompile Include="src\ProjectA\Renderer\Renderer.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLIndexBuffer.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexBuffer.cpp" />
-    <ClCompile Include="src\ProjectA\Renderer\BufferElement.cpp" />
-    <ClCompile Include="src\ProjectA\Renderer\BufferLayout.cpp" />
-    <ClCompile Include="src\ProjectA\Renderer\VertexArray.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
-    <ClCompile Include="src\ProjectA\Renderer\RendererAPI.cpp" />
-    <ClCompile Include="src\ProjectA\Renderer\RenderCommand.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
-    <ClCompile Include="src\math\mat\mat4x4.cpp" />
-    <ClCompile Include="src\ProjectA\Camera\Camera.cpp" />
-    <ClCompile Include="src\ProjectA\Camera\OrthographicCamera.cpp" />
-    <ClCompile Include="src\math\vec\vec3.cpp" />
-    <ClCompile Include="src\math\vec\vec4.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
+    <ClCompile Include="vendor\stb_image\stb_image.cpp">
+      <Filter>vendor\stb_image</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -10,6 +10,11 @@ class TestLayer : public ProjectA::Layer {
 		ProjectA::Ref<ProjectA::Shader> squareShader;
 		ProjectA::Ref<ProjectA::VertexArray> squareVertexArray;
 
+		ProjectA::Ref<ProjectA::Shader> textureShader;
+
+		ProjectA::Ref<ProjectA::Texture2D> plasterWallTexture;
+		ProjectA::Ref<ProjectA::Texture2D> decalGraffitiTexture;
+
 		ProjectA::OrthographicCamera camera;
 		ProjectA::vec3<float> cameraPosition;
 		float cameraRotation;
@@ -68,11 +73,11 @@ class TestLayer : public ProjectA::Layer {
 
 			squareVertexArray.reset(ProjectA::VertexArray::create());
 
-			float squareVertices[3 * 4] = {
-			   -0.5f, -0.5f,  0.0f,
-				0.5f, -0.5f,  0.0f,
-				0.5f,  0.5f,  0.0f,
-			   -0.5f,  0.5f,  0.0f
+			float squareVertices[5 * 4] = {
+			   -0.5f, -0.5f,  0.0f,     0.0f, 0.0f,
+				0.5f, -0.5f,  0.0f,     1.0f, 0.0f,
+				0.5f,  0.5f,  0.0f,     1.0f, 1.0f,
+			   -0.5f,  0.5f,  0.0f,     0.0f, 1.0f
 			};
 
 			ProjectA::Ref<ProjectA::VertexBuffer> squareVertexBuffer;
@@ -80,6 +85,9 @@ class TestLayer : public ProjectA::Layer {
 			squareVertexBuffer->setLayout({
 				{
 					ProjectA::ShaderType::Float3, "a_position", false
+				},
+				{
+					ProjectA::ShaderType::Float2, "a_uv", false
 				}
 			});
 
@@ -87,13 +95,17 @@ class TestLayer : public ProjectA::Layer {
 
 			uint32_t squareIndices[6] = {
 				0, 1, 2,
-				2, 3, 0
+				0, 2, 3
 			};
 
 			ProjectA::Ref<ProjectA::IndexBuffer> squareIndexBuffer;
 			squareIndexBuffer.reset(ProjectA::IndexBuffer::create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 
 			squareVertexArray->setIndexBuffer(squareIndexBuffer);
+
+			/// 
+			/// Triangle shader
+			/// 
 
 			const std::string& triangleVertexShaderSource = R"(
 				#version 330 core
@@ -130,27 +142,25 @@ class TestLayer : public ProjectA::Layer {
 
 			triangleShader.reset(ProjectA::Shader::create(triangleVertexShaderSource, triangleFragmentShaderSource));
 
+			/// 
+			/// Square shader
+			/// 
+
 			const std::string& squareVertexShaderSource = R"(
 				#version 330 core
 
 				layout(location = 0) in vec3 a_position;
 
 				uniform mat4 u_viewProjection;
-				uniform mat4 u_transform; // TODO: Change to attribute
-
-				out vec3 v_position;
+				uniform mat4 u_transform;
 
 				void main() {
 					gl_Position = vec4(a_position, 1.0f) * u_transform * u_viewProjection;
-
-					v_position = a_position;
 				}
 			)";
 
 			const std::string& squareFragmentShaderSource = R"(
 				#version 330 core
-
-				in vec3 v_position;
 
 				uniform vec3 u_color;
 
@@ -162,6 +172,50 @@ class TestLayer : public ProjectA::Layer {
 			)";
 
 			squareShader.reset(ProjectA::Shader::create(squareVertexShaderSource, squareFragmentShaderSource));
+
+			/// 
+			/// Texture shader
+			/// 
+
+			const std::string& textureVertexShaderSource = R"(
+				#version 330 core
+
+				layout(location = 0) in vec3 a_position;
+				layout(location = 1) in vec2 a_uv;
+
+				uniform mat4 u_viewProjection;
+				uniform mat4 u_transform;
+
+				out vec2 v_uv;
+
+				void main() {
+					gl_Position = vec4(a_position, 1.0f) * u_transform * u_viewProjection;
+
+					v_uv = a_uv;
+				}
+			)";
+
+			const std::string& textureFragmentShaderSource = R"(
+				#version 330 core
+
+				in vec2 v_uv;
+
+				uniform sampler2D u_texture;
+
+				layout(location = 0) out vec4 FragColor;
+
+				void main() {
+					FragColor = texture(u_texture, v_uv);
+				}
+			)";
+
+			textureShader.reset(ProjectA::Shader::create(textureVertexShaderSource, textureFragmentShaderSource));
+
+			plasterWallTexture = ProjectA::Texture2D::create("assets/textures/plasterwall030c.jpg");
+			decalGraffitiTexture = ProjectA::Texture2D::create("assets/textures/decalgraffiti001d.png");
+
+			textureShader->bind();
+			std::dynamic_pointer_cast<ProjectA::OpenGLShader>(textureShader)->uploadUniform("u_texture", 0);
 		}
 
 		void update(float deltaTime) override {
@@ -189,7 +243,7 @@ class TestLayer : public ProjectA::Layer {
 			camera.setPosition(cameraPosition);
 			camera.setRotation(cameraRotation);
 
-			static const ProjectA::mat4x4<float> scale(
+			static const ProjectA::mat4x4<float> squareScale(
 				0.1, 0, 0, 0,
 				0, 0.1, 0, 0,
 				0, 0, 0.1, 0,
@@ -198,24 +252,30 @@ class TestLayer : public ProjectA::Layer {
 
 			ProjectA::Renderer::beginScene(camera);
 
-			std::dynamic_pointer_cast<ProjectA::OpenGLShader>(squareShader)->bind();
+			squareShader->bind();
 			std::dynamic_pointer_cast<ProjectA::OpenGLShader>(squareShader)->uploadUniform("u_color", squareColor);
 
 			for (int y = 0; y < 20; y++) {
 				for (int x = 0; x < 20; x++) {
 					ProjectA::vec3<float> position(x * 0.11, y * 0.11, 0);
-					ProjectA::mat4x4<float> transform = ProjectA::mat4x4<float>::translate(position) * scale;
+					ProjectA::mat4x4<float> transform = ProjectA::mat4x4<float>::translate(position) * squareScale;
 
 					ProjectA::Renderer::submit(squareShader, squareVertexArray, transform);
 				}
 			}
 
-			ProjectA::Renderer::submit(triangleShader, triangleVertexArray, ProjectA::mat4x4<float>(
-				1, 0, 0, 0,
-				0, 1, 0, 0,
-				0, 0, 1, 0,
+			static const ProjectA::mat4x4<float> textureScale(
+				1.5, 0, 0, 0,
+				0, 1.5, 0, 0,
+				0, 0, 1.5, 0,
 				0, 0, 0, 1
-			));
+			);
+
+			plasterWallTexture->bind(0);
+			ProjectA::Renderer::submit(textureShader, squareVertexArray, textureScale);
+
+			decalGraffitiTexture->bind(0);
+			ProjectA::Renderer::submit(textureShader, squareVertexArray, textureScale);
 
 			ProjectA::Renderer::endScene();
 		}

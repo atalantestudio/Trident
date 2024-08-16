@@ -10,6 +10,8 @@ namespace ProjectA {
 			static Camera* camera;
 
 		public:
+			static void initialize();
+
 			static inline RendererAPI::GraphicsAPI getGraphicsAPI() {
 				return RendererAPI::getGraphicsAPI();
 			}

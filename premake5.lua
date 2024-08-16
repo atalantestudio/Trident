@@ -30,6 +30,8 @@ project "ProjectA"
 		"%{prj.name}/src/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
+		"%{prj.name}/vendor/stb_image/**.cpp",
+		"%{prj.name}/vendor/stb_image/**.h",
 	}
 
 	includedirs {
@@ -39,6 +41,7 @@ project "ProjectA"
 		"%{prj.name}/vendor/glm",
 		"%{prj.name}/vendor/imgui",
 		"%{prj.name}/vendor/spdlog/include",
+		"%{prj.name}/vendor/stb_image",
 	}
 
 	links {
