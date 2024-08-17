@@ -4,7 +4,7 @@
 #include "Shader.hpp"
 
 namespace ProjectA {
-	Ref<Shader> Shader::create(const std::string& vertexShader, const std::string& fragmentShader) {
+	Ref<Shader> Shader::create(const std::string& vertexShaderSource, const std::string& fragmentShaderSource, const std::string& name) {
 		switch (Renderer::getGraphicsAPI()) {
 			case RendererAPI::GraphicsAPI::None:
 				CORE_ASSERT(false, "Graphics::None is not supported yet.")
@@ -12,7 +12,7 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return std::make_shared<OpenGLShader>(vertexShader, fragmentShader);
+				return std::make_shared<OpenGLShader>(vertexShaderSource, fragmentShaderSource, name);
 		}
 	}
 

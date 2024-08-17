@@ -174,6 +174,7 @@
     <ClInclude Include="src\ProjectA\Renderer\Renderer.hpp" />
     <ClInclude Include="src\ProjectA\Renderer\RendererAPI.hpp" />
     <ClInclude Include="src\ProjectA\Renderer\Shader.hpp" />
+    <ClInclude Include="src\ProjectA\Renderer\ShaderLibrary.hpp" />
     <ClInclude Include="src\ProjectA\Renderer\ShaderType.hpp" />
     <ClInclude Include="src\ProjectA\Renderer\Texture.hpp" />
     <ClInclude Include="src\ProjectA\Renderer\Texture2D.hpp" />
@@ -631,6 +632,7 @@
     <ClCompile Include="src\ProjectA\Renderer\Renderer.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\RendererAPI.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\Shader.cpp" />
+    <ClCompile Include="src\ProjectA\Renderer\ShaderLibrary.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\Texture2D.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\VertexArray.cpp" />
     <ClCompile Include="src\ProjectA\Renderer\VertexBuffer.cpp" />

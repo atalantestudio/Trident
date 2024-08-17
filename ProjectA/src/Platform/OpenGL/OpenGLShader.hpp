@@ -11,6 +11,7 @@ namespace ProjectA {
 	class OpenGLShader : public Shader {
 		private:
 			uint32_t program;
+			std::string name;
 
 		private:
 			std::string readFile(const std::string& path) const;
@@ -19,13 +20,15 @@ namespace ProjectA {
 			void compile(const std::unordered_map<GLenum, std::string>&);
 
 		public:
-			OpenGLShader(const std::string& vertexShaderSource, const std::string& fragmentShaderSource);
+			OpenGLShader(const std::string& vertexShaderSource, const std::string& fragmentShaderSource, const std::string& name);
 			OpenGLShader(const std::string& path);
 
 			virtual ~OpenGLShader();
 
 			virtual void bind() const override;
 			virtual void unbind() const override;
+
+			virtual const std::string& getName() const override;
 
 			void uploadUniform(const std::string& name, int) const;
 			void uploadUniform(const std::string& name, float) const;

@@ -17,7 +17,7 @@ namespace ProjectA {
 	}
 
 	std::string OpenGLShader::readFile(const std::string& path) const {
-		std::ifstream input(path, std::ios::in);
+		std::ifstream input(path, std::ios::in | std::ios::binary);
 
 		if (!input) {
 			LOG_CORE_ERROR("Could not open file \"{0}\".", path);
@@ -45,8 +45,6 @@ namespace ProjectA {
 		size_t shaderTypeTokenLength = strlen(shaderTypeToken);
 		size_t position = source.find(shaderTypeToken, 0);
 
-		LOG_CORE_TRACE("Pos: {0}/{1}", position, std::string::npos);
-
 		while (position != std::string::npos) {
 			size_t eol = source.find_first_of("\r\n", position);
 
@@ -70,7 +68,11 @@ namespace ProjectA {
 
 	void OpenGLShader::compile(const std::unordered_map<GLenum, std::string>& shaderSources) {
 		GLuint program = glCreateProgram();
-		std::vector<GLuint> shaders(shaderSources.size());
+
+		CORE_ASSERT(shaderSources.size() > 2, "Only 2-shader files are supported.");
+
+		std::array<GLuint, 2> shaders;
+		uint32_t index = 0;
 
 		for (auto&& [shaderType, shaderSource] : shaderSources) {
 			const GLchar* source = shaderSource.c_str();
@@ -99,7 +101,9 @@ namespace ProjectA {
 
 			glAttachShader(program, shader);
 
-			shaders.push_back(shader);
+			shaders[index] = shader;
+
+			index++;
 		}
 
 		glLinkProgram(program);
@@ -135,7 +139,7 @@ namespace ProjectA {
 		this->program = program;
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& vertexShaderSource, const std::string& fragmentShaderSource) : program(0) {
+	OpenGLShader::OpenGLShader(const std::string& vertexShaderSource, const std::string& fragmentShaderSource, const std::string& name) : program(0), name(name) {
 		std::unordered_map<GLenum, std::string> shaderSources;
 
 		shaderSources[GL_VERTEX_SHADER] = vertexShaderSource;
@@ -146,6 +150,27 @@ namespace ProjectA {
 
 	OpenGLShader::OpenGLShader(const std::string& path) : program(0) {
 		compile(preprocess(readFile(path)));
+
+		size_t lastSlash = path.find_last_of("/\\");
+
+		if (lastSlash == std::string::npos) {
+			lastSlash = 0;
+		} else {
+			lastSlash += 1;
+		}
+
+		size_t lastDot = path.rfind('.');
+		size_t count = 0;
+
+		if (lastDot == std::string::npos) {
+			count = path.size() - lastSlash;
+		} else {
+			count = lastDot - lastSlash;
+		}
+
+		std::string name = path.substr(lastSlash, count);
+
+		this->name = name;
 	}
 
 	OpenGLShader::~OpenGLShader() {
@@ -158,6 +183,10 @@ namespace ProjectA {
 
 	void OpenGLShader::unbind() const {
 		glUseProgram(0);
+	}
+
+	const std::string& OpenGLShader::getName() const {
+		return name;
 	}
 
 	void OpenGLShader::uploadUniform(const std::string& name, int value) const {

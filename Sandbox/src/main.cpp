@@ -4,13 +4,12 @@
 
 class TestLayer : public ProjectA::Layer {
 	private:
+		ProjectA::ShaderLibrary shaderLibrary;
 		ProjectA::Ref<ProjectA::Shader> triangleShader;
 		ProjectA::Ref<ProjectA::VertexArray> triangleVertexArray;
 
 		ProjectA::Ref<ProjectA::Shader> squareShader;
 		ProjectA::Ref<ProjectA::VertexArray> squareVertexArray;
-
-		ProjectA::Ref<ProjectA::Shader> textureShader;
 
 		ProjectA::Ref<ProjectA::Texture2D> plasterWallTexture;
 		ProjectA::Ref<ProjectA::Texture2D> decalGraffitiTexture;
@@ -140,7 +139,7 @@ class TestLayer : public ProjectA::Layer {
 				}
 			)";
 
-			triangleShader = ProjectA::Shader::create(triangleVertexShaderSource, triangleFragmentShaderSource);
+			triangleShader = ProjectA::Shader::create(triangleVertexShaderSource, triangleFragmentShaderSource, "triangle");
 
 			/// 
 			/// Square shader
@@ -171,9 +170,9 @@ class TestLayer : public ProjectA::Layer {
 				}
 			)";
 
-			squareShader = ProjectA::Shader::create(squareVertexShaderSource, squareFragmentShaderSource);
+			squareShader = ProjectA::Shader::create(squareVertexShaderSource, squareFragmentShaderSource, "square");
 
-			textureShader = ProjectA::Shader::create("assets/shaders/texture.glsl");
+			auto textureShader = shaderLibrary.load("assets/shaders/texture.glsl");
 
 			plasterWallTexture = ProjectA::Texture2D::create("assets/textures/plasterwall030c.jpg");
 			decalGraffitiTexture = ProjectA::Texture2D::create("assets/textures/decalgraffiti001d.png");
@@ -234,6 +233,8 @@ class TestLayer : public ProjectA::Layer {
 				0, 0, 1.5, 0,
 				0, 0, 0, 1
 			);
+
+			auto textureShader = shaderLibrary.get("texture");
 
 			plasterWallTexture->bind(0);
 			ProjectA::Renderer::submit(textureShader, squareVertexArray, textureScale);
