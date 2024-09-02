@@ -142,7 +142,7 @@ namespace ProjectA {
 		});
 
 		glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
-			GLFWData& data = *(GLFWData*)glfwGetWindowUserPointer(window);
+			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
 
 			MouseMoveEvent event((float) xpos, (float) ypos);
 
@@ -150,7 +150,7 @@ namespace ProjectA {
 		});
 
 		glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
-			GLFWData& data = *(GLFWData*)glfwGetWindowUserPointer(window);
+			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
 
 			MouseScrollEvent event((float) xoffset, (float) yoffset);
 

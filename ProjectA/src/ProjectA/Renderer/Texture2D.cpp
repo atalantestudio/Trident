@@ -13,6 +13,6 @@ namespace ProjectA {
 
 			case RendererAPI::GraphicsAPI::OpenGL:
 				return std::make_shared<OpenGLTexture2D>(path);
-;		}
+		}
 	}
 }
