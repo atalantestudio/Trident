@@ -10,7 +10,7 @@ namespace ProjectA {
 		position(0, 0, 0),
 		speed(zoomLevel),
 		rotation(0),
-		rotationSpeed(180),
+		rotationSpeed(90),
 		camera(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1) {}
 
 	void OrthographicCameraController::update(float deltaTime) {

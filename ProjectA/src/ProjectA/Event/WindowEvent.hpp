@@ -18,6 +18,7 @@ namespace ProjectA {
 			EVENT_TYPE(EventTypeWindowClose)
 	};
 
+	/// TODO: Create vec2<int> for this case?
 	class WindowResizeEvent : public WindowEvent {
 		private:
 			int width, height;
@@ -35,11 +36,8 @@ namespace ProjectA {
 
 			EVENT_TYPE(EventTypeWindowResize)
 
-			std::string toString() const {
-				std::stringstream stream;
-				stream << getName() << ": " << width << ", " << height;
-
-				return stream.str();
+			inline std::ostream& operator <<(std::ostream& stream) const override {
+				return stream << getName() << ": " << width << ", " << height;
 			}
 	};
 }

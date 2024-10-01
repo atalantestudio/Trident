@@ -29,8 +29,6 @@ namespace ProjectA {
 				return projection;
 			}
 
-			//void setProjection(const mat4x4<float>)
-
 			inline const mat4x4<float>& getViewProjection() const {
 				return viewProjection;
 			}

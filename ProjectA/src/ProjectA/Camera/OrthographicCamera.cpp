@@ -3,7 +3,8 @@
 #include "math/mat/mat4x4.hpp"
 
 namespace ProjectA {
-	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top, float nearPlane, float farPlane) : Camera(mat4x4<float>::orthographic(left, right, bottom, top, nearPlane, farPlane)) {}
+	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top, float nearPlane, float farPlane) :
+		Camera(mat4x4<float>::orthographic(left, right, bottom, top, nearPlane, farPlane)) {}
 
 	void OrthographicCamera::updateView(const vec3<float>& position, float rotation) {
 		mat4x4<float> inverseTransform = mat4x4<float>::translate(position);

@@ -30,11 +30,8 @@ namespace ProjectA {
 				return pressCount;
 			}
 
-			std::string toString() const override {
-				std::stringstream stream;
-				stream << getName() << ": " << getKeyCode() << " (" << getPressCount() << " repeats)";
-
-				return stream.str();
+			inline std::ostream& operator <<(std::ostream& stream) const override {
+				return stream << getName() << ": " << getKeyCode() << " (" << getPressCount() << " repeats)";
 			}
 	};
 
@@ -44,11 +41,8 @@ namespace ProjectA {
 
 			EVENT_TYPE(EventTypeKeyRelease)
 
-			std::string toString() const override {
-				std::stringstream stream;
-				stream << getName() << ": " << getKeyCode();
-
-				return stream.str();
+			inline std::ostream& operator <<(std::ostream& stream) const override {
+				return stream << getName() << ": " << getKeyCode();
 			}
 	};
 
@@ -58,11 +52,8 @@ namespace ProjectA {
 
 			EVENT_TYPE(EventTypeKeyType)
 
-			std::string toString() const override {
-				std::stringstream stream;
-				stream << getName() << ": " << getKeyCode();
-
-				return stream.str();
+			inline std::ostream& operator <<(std::ostream& stream) const override {
+				return stream << getName() << ": " << getKeyCode();
 			}
 	};
 }

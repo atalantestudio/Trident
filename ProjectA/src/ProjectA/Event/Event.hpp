@@ -39,12 +39,13 @@ namespace ProjectA {
 			virtual EventType getType() const = 0;
 			virtual int getCategories() const = 0;
 			virtual const char* getName() const = 0;
-			virtual std::string toString() const {
-				return getName();
-			}
 
 			inline bool hasCategory(EventCategory category) const {
 				return getCategories() & category;
+			}
+
+			virtual inline std::ostream& operator <<(std::ostream& stream) const {
+				return stream << getName();
 			}
 	};
 
@@ -66,10 +67,6 @@ namespace ProjectA {
 				return true;
 			}
 	};
-
-	inline std::ostream& operator << (std::ostream& stream, const Event& event) {
-		return stream << event.toString();
-	}
 
 	#define EVENT_CATEGORY(category) \
 		virtual int getCategories() const override { \
