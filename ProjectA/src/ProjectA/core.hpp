@@ -41,7 +41,7 @@
 
 #define BIT_SHIFT_ID(id) (1 << id)
 
-#define BIND_FUNCTION(function) std::bind(&function, this, std::placeholders::_1)
+#define BIND(function) std::bind(&function, this, std::placeholders::_1)
 
 namespace ProjectA {
 	template<typename T>

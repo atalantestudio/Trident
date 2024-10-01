@@ -49,22 +49,19 @@ namespace ProjectA {
 	};
 
 	class EventDispatcher {
-		template<typename T>
-		using EventFunction = std::function<bool (T&)>;
-
 		private:
 			Event& event;
 
 		public:
 			EventDispatcher(Event& event) : event(event) {}
 
-			template<typename T>
-			bool dispatch(EventFunction<T> function) {
+			template<typename T, typename F>
+			bool dispatch(const F& function) {
 				if (event.getType() != T::getStaticType()) {
 					return false;
 				}
 
-				event.handled = function(*reinterpret_cast<T*>(&event));
+				event.handled = function(static_cast<T&>(event));
 
 				return true;
 			}

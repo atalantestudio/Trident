@@ -14,24 +14,14 @@ class TestLayer : public ProjectA::Layer {
 		ProjectA::Ref<ProjectA::Texture2D> plasterWallTexture;
 		ProjectA::Ref<ProjectA::Texture2D> decalGraffitiTexture;
 
-		ProjectA::OrthographicCamera camera;
-		ProjectA::vec3<float> cameraPosition;
-		float cameraRotation;
-		float cameraMoveVelocity;
-		float cameraRotationVelocity;
+		ProjectA::OrthographicCameraController cameraController;
+		//float speed = 4.0f;
+		//float rotationSpeed = 180.0f;
 
 		ProjectA::vec3<float> squareColor;
 
 	public:
-		TestLayer() :
-			Layer("Test"),
-			camera(-1.6f, 1.6f, -0.9f, 0.9f, -1.0f, 1.0f),
-			cameraPosition(0.0f, 0.0f, 0.0f),
-			cameraRotation(0.0f),
-			cameraMoveVelocity(4.0f),
-			cameraRotationVelocity(180.0f),
-			squareColor(0.2f, 0.3f, 0.8f)
-		{
+		TestLayer() : Layer("Test"), cameraController(1280.0f / 720.0f), squareColor(0.2f, 0.3f, 0.8f) {
 			///
 			/// Triangle
 			///
@@ -89,6 +79,12 @@ class TestLayer : public ProjectA::Layer {
 					ProjectA::ShaderType::Float2, "a_uv", false
 				}
 			});
+
+			/// BufferLayout design test
+			/* vertexBuffer.setLayout({
+				Attribute<vec3<float>>("a_position"),
+				Attribute<vec2<float>>("a_uv"),
+			}); */
 
 			squareVertexArray->addVertexBuffer(squareVertexBuffer);
 
@@ -182,29 +178,10 @@ class TestLayer : public ProjectA::Layer {
 		}
 
 		void update(float deltaTime) override {
-			if (ProjectA::InputInterface::isKeyPressed(KEY_LEFT)) {
-				cameraPosition[0] -= cameraMoveVelocity * deltaTime;
-			} else if (ProjectA::InputInterface::isKeyPressed(KEY_RIGHT)) {
-				cameraPosition[0] += cameraMoveVelocity * deltaTime;
-			}
-
-			if (ProjectA::InputInterface::isKeyPressed(KEY_UP)) {
-				cameraPosition[1] += cameraMoveVelocity * deltaTime;
-			} else if (ProjectA::InputInterface::isKeyPressed(KEY_DOWN)) {
-				cameraPosition[1] -= cameraMoveVelocity * deltaTime;
-			}
-
-			if (ProjectA::InputInterface::isKeyPressed(KEY_Q)) {
-				cameraRotation += cameraRotationVelocity * deltaTime;
-			} else if (ProjectA::InputInterface::isKeyPressed(KEY_E)) {
-				cameraRotation -= cameraRotationVelocity * deltaTime;
-			}
+			cameraController.update(deltaTime);
 
 			ProjectA::RenderCommand::setClearColor(ProjectA::vec4<float>(0.1f, 0.1f, 0.1f, 1.0f));
 			ProjectA::RenderCommand::clear();
-
-			camera.setPosition(cameraPosition);
-			camera.setRotation(cameraRotation);
 
 			static const ProjectA::mat4x4<float> squareScale(
 				0.1, 0, 0, 0,
@@ -213,7 +190,7 @@ class TestLayer : public ProjectA::Layer {
 				0, 0, 0, 1
 			);
 
-			ProjectA::Renderer::beginScene(camera);
+			ProjectA::Renderer::beginScene(cameraController.getCamera());
 
 			squareShader->bind();
 			std::dynamic_pointer_cast<ProjectA::OpenGLShader>(squareShader)->uploadUniform("u_color", squareColor);
@@ -251,7 +228,9 @@ class TestLayer : public ProjectA::Layer {
 			ImGui::End();
 		}
 
-		void listen(ProjectA::Event& event) override {}
+		void listen(ProjectA::Event& event) override {
+			cameraController.onEvent(event);
+		}
 };
 
 class SandboxApplication : public ProjectA::Application {

@@ -3,13 +3,13 @@
 #include "Renderer.hpp"
 
 namespace ProjectA {
-	Camera* Renderer::camera = nullptr;
+	const Camera* Renderer::camera = nullptr;
 
 	void Renderer::initialize() {
 		RenderCommand::initialize();
 	}
 
-	void Renderer::beginScene(Camera& camera) {
+	void Renderer::beginScene(const Camera& camera) {
 		Renderer::camera = &camera;
 	}
 

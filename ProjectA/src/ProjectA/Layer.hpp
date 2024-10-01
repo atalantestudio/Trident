@@ -20,6 +20,8 @@ namespace ProjectA {
 			virtual void detach() {}
 			virtual void update(float deltaTime) {}
 			virtual void renderImGui() {}
+
+			/// TODO: Rename to onEvent?
 			virtual void listen(Event& event) {}
 	};
 }

@@ -5,19 +5,10 @@
 
 namespace ProjectA {
 	class OrthographicCamera : public Camera {
-		private:
-			/// Rotation along the Z axis
-			float rotation;
-
-			void computeView();
-
 		public:
-			OrthographicCamera(float, float, float, float, float, float);
+			OrthographicCamera(float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
-			void setPosition(const vec3<float>& position) override;
-
-			float getRotation() const;
-
-			void setRotation(float rotation);
+			void updateView(const vec3<float>& position, float rotation);
+			void updateProjection(float left, float right, float bottom, float top, float nearPlane, float farPlane);
 	};
 }

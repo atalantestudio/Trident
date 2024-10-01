@@ -1450,6 +1450,7 @@
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
     <ClInclude Include="src\ProjectA\Renderer\ShaderLibrary.hpp" />
+    <ClInclude Include="src\ProjectA\Camera\Controller\OrthographicCameraController.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp">
@@ -1549,5 +1550,6 @@
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
     <ClCompile Include="src\ProjectA\Renderer\ShaderLibrary.cpp" />
+    <ClCompile Include="src\ProjectA\Camera\Controller\OrthographicCameraController.cpp" />
   </ItemGroup>
 </Project>

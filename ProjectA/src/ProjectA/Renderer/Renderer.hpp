@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class Renderer {
 		public:
-			static Camera* camera;
+			static const Camera* camera;
 
 		public:
 			static void initialize();
@@ -16,7 +16,7 @@ namespace ProjectA {
 				return RendererAPI::getGraphicsAPI();
 			}
 
-			static void beginScene(Camera& camera);
+			static void beginScene(const Camera& camera);
 
 			static void endScene();
 

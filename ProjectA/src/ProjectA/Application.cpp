@@ -12,7 +12,7 @@ namespace ProjectA {
 		instance = this;
 
 		window = std::unique_ptr<WindowInterface>(WindowInterface::create());
-		window->setEventCallback(BIND_FUNCTION(Application::listen));
+		window->setEventCallback(BIND(Application::listen));
 
 		Renderer::initialize();
 
@@ -51,8 +51,9 @@ namespace ProjectA {
 	}
 
 	void Application::listen(Event& event) {
-		EventDispatcher dispatcher(event);
-		dispatcher.dispatch<WindowCloseEvent>(BIND_FUNCTION(Application::windowCloseEventCallback));
+		EventDispatcher eventDispatcher(event);
+
+		eventDispatcher.dispatch<WindowCloseEvent>(BIND(Application::windowCloseEventCallback));
 
 		for (auto i = layerStack.end(); i != layerStack.begin();) {
 			(*--i)->listen(event);

@@ -2,6 +2,7 @@
 
 #include "math/mat/mat4x4.hpp"
 
+/// TODO: Check order of view and projection members
 namespace ProjectA {
 	class Camera {
 		protected:
@@ -14,32 +15,24 @@ namespace ProjectA {
 			/// Row-major ordering
 			mat4x4<float> viewProjection;
 
-			vec3<float> position;
-
-		private:
-			/// Degrees
-			float fieldOfView;
-
-			/// Width / height
-			float aspectRatio;
-
 		public:
+			/// TODO: Take 2nd argument for view matrix?
 			Camera(const mat4x4<float>& projection);
 
 			~Camera() = default;
 
-			const mat4x4<float>& getView() const;
+			inline const mat4x4<float>& getView() const {
+				return view;
+			}
 
-			const mat4x4<float>& getProjection() const;
+			inline const mat4x4<float>& getProjection() const {
+				return projection;
+			}
 
-			const mat4x4<float>& getViewProjection() const;
+			//void setProjection(const mat4x4<float>)
 
-			const vec3<float>& getPosition() const;
-
-			virtual void setPosition(const vec3<float>& position);
-
-			float getFieldOfView() const;
-
-			float getAspectRatio() const;
+			inline const mat4x4<float>& getViewProjection() const {
+				return viewProjection;
+			}
 	};
 }
