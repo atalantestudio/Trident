@@ -8,6 +8,10 @@ namespace ProjectA {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
+	void OpenGLRendererAPI::setViewport(std::int32_t x, std::int32_t y, std::uint32_t width, std::uint32_t height) const {
+		glViewport(x, y, width, height);
+	}
+
 	void OpenGLRendererAPI::setClearColor(const vec4<float>& color) const {
 		glClearColor(color.x, color.y, color.z, color.w);
 	}

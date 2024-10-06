@@ -13,13 +13,12 @@ namespace ProjectA {
 
 			std::unique_ptr<WindowInterface> window;
 			ImGuiLayer* imGuiLayer;
-			bool running = true;
 			LayerStack layerStack;
 
-			float lastFrameTime;
+			bool running = true;
+			bool minimized = false;
 
-		private:
-			bool windowCloseEventCallback(WindowCloseEvent& event);
+			float lastFrameTime;
 
 		public:
 			static inline Application& get() {
@@ -41,6 +40,10 @@ namespace ProjectA {
 			inline WindowInterface& getWindow() {
 				return *window;
 			}
+
+		private:
+			bool onWindowClose(WindowCloseEvent& event);
+			bool onWindowResize(WindowResizeEvent& event);
 	};
 
 	Application* createApplication();

@@ -21,12 +21,6 @@ namespace ProjectA {
 		pushOverlay(imGuiLayer);
 	}
 
-	bool Application::windowCloseEventCallback(WindowCloseEvent& event) {
-		running = false;
-
-		return true;
-	}
-
 	void Application::run() {
 		while (running) {
 			float time = (float) glfwGetTime();
@@ -34,8 +28,10 @@ namespace ProjectA {
 
 			lastFrameTime = time;
 
-			for (Layer* layer : layerStack) {
-				layer->update(deltaTime);
+			if (!minimized) {
+				for (Layer* layer : layerStack) {
+					layer->update(deltaTime);
+				}
 			}
 
 			imGuiLayer->begin();
@@ -53,7 +49,8 @@ namespace ProjectA {
 	void Application::listen(Event& event) {
 		EventDispatcher eventDispatcher(event);
 
-		eventDispatcher.dispatch<WindowCloseEvent>(BIND(Application::windowCloseEventCallback));
+		eventDispatcher.dispatch<WindowCloseEvent>(BIND(Application::onWindowClose));
+		eventDispatcher.dispatch<WindowResizeEvent>(BIND(Application::onWindowResize));
 
 		for (auto i = layerStack.end(); i != layerStack.begin();) {
 			(*--i)->listen(event);
@@ -70,5 +67,25 @@ namespace ProjectA {
 
 	void Application::pushOverlay(Layer* overlay) {
 		layerStack.pushOverlay(overlay);
+	}
+
+	bool Application::onWindowClose(WindowCloseEvent& event) {
+		running = false;
+
+		return true;
+	}
+
+	bool Application::onWindowResize(WindowResizeEvent& event) {
+		if (event.getWidth() == 0 || event.getHeight() == 0) {
+			minimized = true;
+
+			return false;
+		}
+
+		minimized = false;
+
+		Renderer::onWindowResize(event.getWidth(), event.getHeight());
+
+		return false;
 	}
 }

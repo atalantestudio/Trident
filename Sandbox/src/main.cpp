@@ -15,8 +15,6 @@ class TestLayer : public ProjectA::Layer {
 		ProjectA::Ref<ProjectA::Texture2D> decalGraffitiTexture;
 
 		ProjectA::OrthographicCameraController cameraController;
-		//float speed = 4.0f;
-		//float rotationSpeed = 180.0f;
 
 		ProjectA::vec3<float> squareColor;
 
@@ -80,7 +78,7 @@ class TestLayer : public ProjectA::Layer {
 				}
 			});
 
-			/// BufferLayout design test
+			// TODO: Design BufferLayout
 			/* vertexBuffer.setLayout({
 				Attribute<vec3<float>>("a_position"),
 				Attribute<vec2<float>>("a_uv"),
