@@ -2,21 +2,21 @@
 
 #include "math/mat/mat4x4.hpp"
 
-/// TODO: Check order of view and projection members
+// TODO: Check order of view and projection members
 namespace ProjectA {
 	class Camera {
 		protected:
-			/// Row-major ordering
+			// Row-major ordering
 			mat4x4<float> view;
 
-			/// Row-major ordering
+			// Row-major ordering
 			mat4x4<float> projection;
 
-			/// Row-major ordering
+			// Row-major ordering
 			mat4x4<float> viewProjection;
 
 		public:
-			/// TODO: Take 2nd argument for view matrix?
+			// TODO: Take 2nd argument for view matrix?
 			Camera(const mat4x4<float>& projection);
 
 			~Camera() = default;

@@ -20,9 +20,9 @@ namespace ProjectA {
 		std::ifstream input(path, std::ios::in | std::ios::binary);
 
 		if (!input) {
-			LOG_CORE_ERROR("Could not open file \"{0}\".", path);
+			LOG_CORE_FATAL("Could not open file \"{0}\".", path);
 
-			return 0;
+			return nullptr;
 		}
 
 		std::string result;
@@ -94,7 +94,7 @@ namespace ProjectA {
 				glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
 				glDeleteShader(shader);
 
-				LOG_CORE_ERROR("Shader compilation failed: {0}", infoLog.data());
+				LOG_CORE_FATAL("Shader compilation failed: {0}", infoLog.data());
 
 				break;
 			}
@@ -127,7 +127,7 @@ namespace ProjectA {
 
 			glDeleteProgram(program);
 
-			LOG_CORE_ERROR("Program compilation failed: {0}", infoLog.data());
+			LOG_CORE_FATAL("Program compilation failed: {0}", infoLog.data());
 
 			return;
 		}

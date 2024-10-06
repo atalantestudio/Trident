@@ -23,8 +23,12 @@ namespace ProjectA {
 
 			EVENT_TYPE(EventTypeMouseButtonPress)
 
-			inline std::ostream& operator <<(std::ostream& stream) const override {
-				return stream << getName() << ": " << button;
+			inline std::string toString() const override {
+				std::stringstream stream;
+
+				stream << getName() << ": " << button;
+
+				return stream.str();
 			}
 	};
 
@@ -34,12 +38,16 @@ namespace ProjectA {
 
 			EVENT_TYPE(EventTypeMouseButtonRelease)
 
-			inline std::ostream& operator <<(std::ostream& stream) const override {
-				return stream << getName() << ": " << button;
+			inline std::string toString() const override {
+				std::stringstream stream;
+
+				stream << getName() << ": " << button;
+
+				return stream.str();
 			}
 	};
 
-	/// TODO: Use vec2<float>
+	// TODO: Use vec2<float>
 	class API MouseMoveEvent : public Event {
 		private:
 			float x, y;
@@ -58,12 +66,16 @@ namespace ProjectA {
 			EVENT_TYPE(EventTypeMouseMove)
 			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
-			inline std::ostream& operator <<(std::ostream& stream) const override {
-				return stream << getName() << ": " << x << ", " << y;
+			inline std::string toString() const override {
+				std::stringstream stream;
+
+				stream << getName() << ": " << x << ", " << y;
+
+				return stream.str();
 			}
 	};
 
-	/// TODO: Use vec2<float>
+	// TODO: Use vec2<float>
 	class API MouseScrollEvent : public Event {
 		private:
 			float xOffset, yOffset;
@@ -82,8 +94,12 @@ namespace ProjectA {
 			EVENT_TYPE(EventTypeMouseScroll)
 			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
-			inline std::ostream& operator <<(std::ostream& stream) const override {
-				return stream << getName() << ": " << xOffset << ", " << yOffset;
+			inline std::string toString() const override {
+				std::stringstream stream;
+
+				stream << getName() << ": " << xOffset << ", " << yOffset;
+
+				return stream.str();
 			}
 	};
 }

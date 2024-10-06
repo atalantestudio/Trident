@@ -4,7 +4,7 @@
 #include "math/vec/vec4.hpp"
 #include "ProjectA/Renderer/Shader.hpp"
 
-/// TODO: Temporary fix for glad/glad.h not usable in Sandbox
+// TODO: Temporary fix for glad/glad.h not usable in Sandbox
 typedef unsigned int GLenum;
 
 namespace ProjectA {

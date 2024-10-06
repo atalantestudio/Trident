@@ -33,6 +33,11 @@ namespace ProjectA {
 	class API Event {
 		friend class EventDispatcher;
 
+		private:
+			virtual std::string toString() const {
+				return getName();
+			}
+
 		public:
 			bool handled = false;
 
@@ -44,8 +49,8 @@ namespace ProjectA {
 				return getCategories() & category;
 			}
 
-			virtual inline std::ostream& operator <<(std::ostream& stream) const {
-				return stream << getName();
+			friend std::ostream& operator <<(std::ostream& stream, const Event& event) {
+				return stream << event.toString();
 			}
 	};
 
