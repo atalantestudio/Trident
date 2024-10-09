@@ -19,6 +19,9 @@
     <Filter Include="src\ProjectA\Camera">
       <UniqueIdentifier>{0C918A83-78F2-6791-0160-AE436DC09E50}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\ProjectA\Camera\Controller">
+      <UniqueIdentifier>{1F5D03A1-0B83-CD07-F4C8-52D3E08DF2D3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\ProjectA\Event">
       <UniqueIdentifier>{653B0569-511F-C6BE-BA7F-C011A682B040}</UniqueIdentifier>
     </Filter>
@@ -99,6 +102,9 @@
     <ClInclude Include="src\ProjectA\Camera\Camera.hpp">
       <Filter>src\ProjectA\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="src\ProjectA\Camera\Controller\OrthographicCameraController.hpp">
+      <Filter>src\ProjectA\Camera\Controller</Filter>
+    </ClInclude>
     <ClInclude Include="src\ProjectA\Camera\OrthographicCamera.hpp">
       <Filter>src\ProjectA\Camera</Filter>
     </ClInclude>
@@ -154,6 +160,9 @@
       <Filter>src\ProjectA\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\ProjectA\Renderer\Shader.hpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ProjectA\Renderer\ShaderLibrary.hpp">
       <Filter>src\ProjectA\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\ProjectA\Renderer\ShaderType.hpp">
@@ -1449,8 +1458,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\ProjectA\Renderer\ShaderLibrary.hpp" />
-    <ClInclude Include="src\ProjectA\Camera\Controller\OrthographicCameraController.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp">
@@ -1485,6 +1492,9 @@
     </ClCompile>
     <ClCompile Include="src\ProjectA\Camera\Camera.cpp">
       <Filter>src\ProjectA\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ProjectA\Camera\Controller\OrthographicCameraController.cpp">
+      <Filter>src\ProjectA\Camera\Controller</Filter>
     </ClCompile>
     <ClCompile Include="src\ProjectA\Camera\OrthographicCamera.cpp">
       <Filter>src\ProjectA\Camera</Filter>
@@ -1525,6 +1535,9 @@
     <ClCompile Include="src\ProjectA\Renderer\Shader.cpp">
       <Filter>src\ProjectA\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\ProjectA\Renderer\ShaderLibrary.cpp">
+      <Filter>src\ProjectA\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\ProjectA\Renderer\Texture2D.cpp">
       <Filter>src\ProjectA\Renderer</Filter>
     </ClCompile>
@@ -1549,7 +1562,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\ProjectA\Renderer\ShaderLibrary.cpp" />
-    <ClCompile Include="src\ProjectA\Camera\Controller\OrthographicCameraController.cpp" />
   </ItemGroup>
 </Project>

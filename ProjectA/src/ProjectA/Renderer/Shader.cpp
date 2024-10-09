@@ -14,6 +14,8 @@ namespace ProjectA {
 			case RendererAPI::GraphicsAPI::OpenGL:
 				return std::make_shared<OpenGLShader>(vertexShaderSource, fragmentShaderSource, name);
 		}
+
+		return nullptr;
 	}
 
 	Ref<Shader> Shader::create(const std::string& path) {
@@ -26,5 +28,7 @@ namespace ProjectA {
 			case RendererAPI::GraphicsAPI::OpenGL:
 				return std::make_shared<OpenGLShader>(path);
 		}
+
+		return nullptr;
 	}
 }

@@ -9,7 +9,7 @@ namespace ProjectA {
 	void OrthographicCamera::updateView(const vec3<float>& position, float rotation) {
 		mat4x4<float> inverseTransform = mat4x4<float>::translate(position);
 		// TODO: rad() or radians()
-		inverseTransform *= mat4x4<float>::rotateZ(rotation * M_PI / 180.0f);
+		inverseTransform *= mat4x4<float>::rotateZ(rotation * (float) M_PI / 180.0f);
 		inverseTransform.invert();
 
 		view = inverseTransform;

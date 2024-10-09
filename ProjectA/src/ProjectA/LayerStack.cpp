@@ -15,13 +15,13 @@ namespace ProjectA {
 
 		layerInsertionIndex++;
 
-		layer->attach();
+		layer->bind();
 	}
 
 	void LayerStack::pushOverlay(Layer* overlay) {
 		layers.emplace_back(overlay);
 
-		overlay->attach();
+		overlay->bind();
 	}
 
 	void LayerStack::removeLayer(Layer* layer) {
@@ -35,7 +35,7 @@ namespace ProjectA {
 
 		layerInsertionIndex--;
 
-		layer->detach();
+		layer->unbind();
 	}
 
 	void LayerStack::removeOverlay(Layer* overlay) {
@@ -47,6 +47,6 @@ namespace ProjectA {
 
 		layers.erase(iterator);
 
-		overlay->detach();
+		overlay->unbind();
 	}
 }

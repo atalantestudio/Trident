@@ -14,6 +14,8 @@ namespace ProjectA {
 			case RendererAPI::GraphicsAPI::OpenGL:
 				return new OpenGLVertexArray();
 		}
+
+		return nullptr;
 	}
 
 	VertexArray::~VertexArray() {}

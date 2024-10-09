@@ -31,7 +31,7 @@ namespace ProjectA {
 
 			void run();
 
-			void listen(Event& event);
+			void onEvent(Event& event);
 
 			void pushLayer(Layer* layer);
 

@@ -14,6 +14,8 @@ namespace ProjectA {
 		}
 
 		CORE_ASSERT(false, "Unhandled shader type \"{0}\".", shaderType);
+
+		return 0;
 	}
 
 	std::string OpenGLShader::readFile(const std::string& path) const {
@@ -22,7 +24,7 @@ namespace ProjectA {
 		if (!input) {
 			LOG_CORE_FATAL("Could not open file \"{0}\".", path);
 
-			return nullptr;
+			return 0;
 		}
 
 		std::string result;
@@ -196,7 +198,7 @@ namespace ProjectA {
 			return;
 		}
 
-		glUniform1f(location, value);
+		glUniform1i(location, value);
 	}
 
 	void OpenGLShader::uploadUniform(const std::string& name, float value) const {

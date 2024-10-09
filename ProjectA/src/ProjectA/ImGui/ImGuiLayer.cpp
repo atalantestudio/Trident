@@ -11,7 +11,7 @@
 namespace ProjectA {
 	ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {}
 
-	void ImGuiLayer::attach() {
+	void ImGuiLayer::bind() {
 		IMGUI_CHECKVERSION();
 
 		ImGui::CreateContext();
@@ -38,7 +38,7 @@ namespace ProjectA {
 		ImGui_ImplOpenGL3_Init("#version 410");
 	}
 
-	void ImGuiLayer::detach() {
+	void ImGuiLayer::unbind() {
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 

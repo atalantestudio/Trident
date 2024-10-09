@@ -12,7 +12,7 @@ namespace ProjectA {
 		instance = this;
 
 		window = std::unique_ptr<WindowInterface>(WindowInterface::create());
-		window->setEventCallback(BIND(Application::listen));
+		window->setEventCallback(BIND(Application::onEvent));
 
 		Renderer::initialize();
 
@@ -46,14 +46,14 @@ namespace ProjectA {
 		}
 	}
 
-	void Application::listen(Event& event) {
+	void Application::onEvent(Event& event) {
 		EventDispatcher eventDispatcher(event);
 
 		eventDispatcher.dispatch<WindowCloseEvent>(BIND(Application::onWindowClose));
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(Application::onWindowResize));
 
 		for (auto i = layerStack.end(); i != layerStack.begin();) {
-			(*--i)->listen(event);
+			(*--i)->onEvent(event);
 
 			if (event.handled) {
 				break;

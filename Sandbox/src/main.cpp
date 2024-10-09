@@ -80,8 +80,8 @@ class TestLayer : public ProjectA::Layer {
 
 			// TODO: Design BufferLayout
 			/* vertexBuffer.setLayout({
-				Attribute<vec3<float>>("a_position"),
-				Attribute<vec2<float>>("a_uv"),
+				Attribute<vec3<f32>>("a_position"),
+				Attribute<vec2<f32>>("a_uv"),
 			}); */
 
 			squareVertexArray->addVertexBuffer(squareVertexBuffer);
@@ -226,7 +226,7 @@ class TestLayer : public ProjectA::Layer {
 			ImGui::End();
 		}
 
-		void listen(ProjectA::Event& event) override {
+		void onEvent(ProjectA::Event& event) override {
 			cameraController.onEvent(event);
 		}
 };

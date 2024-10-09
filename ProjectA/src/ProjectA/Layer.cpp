@@ -2,5 +2,5 @@
 #include "Layer.hpp"
 
 namespace ProjectA {
-	Layer::Layer(const std::string& debugName) : debugName(debugName) {}
+	Layer::Layer(const std::string& name) : name(name) {}
 }

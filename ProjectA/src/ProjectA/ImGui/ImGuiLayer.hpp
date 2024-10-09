@@ -14,8 +14,8 @@ namespace ProjectA {
 			ImGuiLayer();
 			~ImGuiLayer() = default;
 
-			virtual void attach() override;
-			virtual void detach() override;
+			virtual void bind() override;
+			virtual void unbind() override;
 			void begin();
 			virtual void renderImGui() override;
 			void end();

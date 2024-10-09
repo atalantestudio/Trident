@@ -172,5 +172,5 @@ namespace ProjectA {
 		return stream << "(" << vector.x << ", " << vector.y << ", " << vector.z << ", " << vector.w << ")";
 	}
 
-	template class vec4<float>;
+	template struct vec4<float>;
 }

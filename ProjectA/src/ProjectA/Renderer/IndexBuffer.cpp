@@ -14,5 +14,7 @@ namespace ProjectA {
 			case RendererAPI::GraphicsAPI::OpenGL:
 				return new OpenGLIndexBuffer(indices, count);
 		}
+
+		return nullptr;
 	}
 }
