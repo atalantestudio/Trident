@@ -2,6 +2,20 @@
 
 #include <memory>
 
+#ifdef _WIN32
+	#ifdef _WIN64
+		#define WINDOWS
+	#else
+		#error "x86 builds are not supported."
+	#endif
+#elif defined(__linux__)
+	#define LINUX
+
+	#error "Operating system not supported."
+#else
+	#error "Unknown operating system."
+#endif
+
 #ifdef WINDOWS
 	#ifdef DYNAMIC_LINK
 		#ifdef BUILD_DLL
@@ -13,7 +27,7 @@
 		#define API
 	#endif
 #else
-	#error Operating system not supported.
+	#error "Operating system not supported."
 #endif
 
 #ifdef DEBUG

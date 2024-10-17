@@ -80,7 +80,7 @@ namespace ProjectA {
 
 	#define EVENT_TYPE(type) \
 		static EventType getStaticType() { \
-			return EventType::##type; \
+			return EventType::type; \
 		} \
 		\
 		virtual EventType getType() const override { \

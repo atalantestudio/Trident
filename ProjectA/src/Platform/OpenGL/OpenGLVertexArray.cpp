@@ -34,7 +34,7 @@ namespace ProjectA {
 		return 0;
 	}
 
-	OpenGLVertexArray::OpenGLVertexArray() {
+	OpenGLVertexArray::OpenGLVertexArray() : vertexBufferIndex(0) {
 		glCreateVertexArrays(1, &id);
 	}
 
@@ -64,22 +64,20 @@ namespace ProjectA {
 		bind();
 		vertexBuffer->bind();
 
-		uint32_t attributeIndex = 0;
-
 		const auto& layout = vertexBuffer->getLayout();
 
 		for (auto& element : layout) {
-			glEnableVertexAttribArray(attributeIndex);
+			glEnableVertexAttribArray(vertexBufferIndex);
 			glVertexAttribPointer(
-				attributeIndex,
+				vertexBufferIndex,
 				getShaderTypeComponentCount(element.type),
 				getShaderType(element.type),
 				element.normalized ? GL_TRUE : GL_FALSE,
 				layout.getStride(),
-				(const void*) element.offset
+				(const void*) (std::intptr_t) element.offset
 			);
 
-			attributeIndex++;
+			vertexBufferIndex++;
 		}
 
 		vertexBuffers.push_back(vertexBuffer);

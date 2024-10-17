@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class VertexArray {
 		public:
-			static VertexArray* create();
+			static Ref<VertexArray> create();
 
 			virtual ~VertexArray();
 

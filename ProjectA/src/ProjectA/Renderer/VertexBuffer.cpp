@@ -4,7 +4,7 @@
 #include "VertexBuffer.hpp"
 
 namespace ProjectA {
-	VertexBuffer* VertexBuffer::create(float* vertices, uint32_t size) {
+	Ref<VertexBuffer> VertexBuffer::create(float* vertices, uint32_t size) {
 		switch (Renderer::getGraphicsAPI()) {
 			case RendererAPI::GraphicsAPI::None:
 				CORE_ASSERT(false, "Graphics::None is not supported yet.")
@@ -12,7 +12,7 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return new OpenGLVertexBuffer(vertices, size);
+				return std::make_shared<OpenGLVertexBuffer>(vertices, size);
 		}
 
 		return nullptr;

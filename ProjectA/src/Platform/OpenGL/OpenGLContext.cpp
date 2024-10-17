@@ -15,6 +15,14 @@ namespace ProjectA {
 
 		CORE_ASSERT(gladLoadStatus, "Could not initialize GLAD");
 		LOG_CORE_INFO("{0} {1} {2}", (const char*) glGetString(GL_VENDOR), (const char*) glGetString(GL_RENDERER), (const char*) glGetString(GL_VERSION));
+
+		/* #ifdef ASSERTS
+			GLint majorVersion;
+			GLint minorVersion;
+
+			glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
+			glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
+		#endif */
 	}
 
 	void OpenGLContext::swapBuffers() {

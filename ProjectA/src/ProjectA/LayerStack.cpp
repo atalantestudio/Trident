@@ -6,6 +6,8 @@ namespace ProjectA {
 
 	LayerStack::~LayerStack() {
 		for (Layer* layer : layers) {
+			layer->unbind();
+
 			delete layer;
 		}
 	}
@@ -27,7 +29,7 @@ namespace ProjectA {
 	void LayerStack::removeLayer(Layer* layer) {
 		auto iterator = std::find(layers.begin(), layers.begin() + layerInsertionIndex, layer);
 
-		if (iterator == layers.end()) {
+		if (iterator == layers.begin() + layerInsertionIndex) {
 			return;
 		}
 

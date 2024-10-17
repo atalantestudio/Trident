@@ -1,6 +1,9 @@
 #include "imgui/imgui.h"
 #include "ProjectA.hpp"
+#include "ProjectA/entry_point.hpp"
 #include "Platform/OpenGL/OpenGLShader.hpp"
+
+#include "Layer/SandboxLayer.hpp"
 
 class TestLayer : public ProjectA::Layer {
 	private:
@@ -24,7 +27,7 @@ class TestLayer : public ProjectA::Layer {
 			/// Triangle
 			///
 
-			triangleVertexArray.reset(ProjectA::VertexArray::create());
+			triangleVertexArray = ProjectA::VertexArray::create();
 
 			float triangleVertices[3 * 7] = {
 			   -0.5f, -0.5f,  0.0f,     0.8f,  0.2f,  0.8f,  1.0f,
@@ -32,8 +35,8 @@ class TestLayer : public ProjectA::Layer {
 				0.0f,  0.5f,  0.0f,     0.8f,  0.8f,  0.2f,  1.0f
 			};
 
-			ProjectA::Ref<ProjectA::VertexBuffer> triangleVertexBuffer;
-			triangleVertexBuffer.reset(ProjectA::VertexBuffer::create(triangleVertices, sizeof(triangleVertices)));
+			ProjectA::Ref<ProjectA::VertexBuffer> triangleVertexBuffer = ProjectA::VertexBuffer::create(triangleVertices, sizeof(triangleVertices));
+
 			triangleVertexBuffer->setLayout({
 				{
 					ProjectA::ShaderType::Float3, "a_position", false
@@ -45,12 +48,11 @@ class TestLayer : public ProjectA::Layer {
 
 			triangleVertexArray->addVertexBuffer(triangleVertexBuffer);
 
-			uint32_t triangleIndices[3] = {
+			std::uint32_t triangleIndices[3] = {
 				0, 1, 2
 			};
 
-			ProjectA::Ref<ProjectA::IndexBuffer> triangleIndexBuffer;
-			triangleIndexBuffer.reset(ProjectA::IndexBuffer::create(triangleIndices, sizeof(triangleIndices) / sizeof(uint32_t)));
+			ProjectA::Ref<ProjectA::IndexBuffer> triangleIndexBuffer = ProjectA::IndexBuffer::create(triangleIndices, sizeof(triangleIndices) / sizeof(uint32_t));
 
 			triangleVertexArray->setIndexBuffer(triangleIndexBuffer);
 
@@ -58,17 +60,18 @@ class TestLayer : public ProjectA::Layer {
 			/// Square
 			///
 
-			squareVertexArray.reset(ProjectA::VertexArray::create());
+			squareVertexArray = ProjectA::VertexArray::create();
 
 			float squareVertices[5 * 4] = {
-			   -0.5f, -0.5f,  0.0f,     0.0f, 0.0f,
-				0.5f, -0.5f,  0.0f,     1.0f, 0.0f,
-				0.5f,  0.5f,  0.0f,     1.0f, 1.0f,
-			   -0.5f,  0.5f,  0.0f,     0.0f, 1.0f
+				// Position              // UV
+				-0.5f, -0.5f,  0.0f,     0.0f, 0.0f,
+				 0.5f, -0.5f,  0.0f,     1.0f, 0.0f,
+				 0.5f,  0.5f,  0.0f,     1.0f, 1.0f,
+				-0.5f,  0.5f,  0.0f,     0.0f, 1.0f
 			};
 
-			ProjectA::Ref<ProjectA::VertexBuffer> squareVertexBuffer;
-			squareVertexBuffer.reset(ProjectA::VertexBuffer::create(squareVertices, sizeof(squareVertices)));
+			ProjectA::Ref<ProjectA::VertexBuffer> squareVertexBuffer = ProjectA::VertexBuffer::create(squareVertices, sizeof(squareVertices));
+
 			squareVertexBuffer->setLayout({
 				{
 					ProjectA::ShaderType::Float3, "a_position", false
@@ -91,8 +94,7 @@ class TestLayer : public ProjectA::Layer {
 				0, 2, 3
 			};
 
-			ProjectA::Ref<ProjectA::IndexBuffer> squareIndexBuffer;
-			squareIndexBuffer.reset(ProjectA::IndexBuffer::create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+			ProjectA::Ref<ProjectA::IndexBuffer> squareIndexBuffer = ProjectA::IndexBuffer::create(squareIndices, sizeof(squareIndices) / sizeof(std::uint32_t));
 
 			squareVertexArray->setIndexBuffer(squareIndexBuffer);
 
@@ -182,10 +184,10 @@ class TestLayer : public ProjectA::Layer {
 			ProjectA::RenderCommand::clear();
 
 			static const ProjectA::mat4x4<float> squareScale(
-				0.1, 0, 0, 0,
-				0, 0.1, 0, 0,
-				0, 0, 0.1, 0,
-				0, 0, 0, 1
+				0.1f, 0.0f, 0.0f, 0.0f,
+				0.0f, 0.1f, 0.0f, 0.0f,
+				0.0f, 0.0f, 0.1f, 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f
 			);
 
 			ProjectA::Renderer::beginScene(cameraController.getCamera());
@@ -193,9 +195,9 @@ class TestLayer : public ProjectA::Layer {
 			squareShader->bind();
 			std::dynamic_pointer_cast<ProjectA::OpenGLShader>(squareShader)->uploadUniform("u_color", squareColor);
 
-			for (int y = 0; y < 20; y++) {
-				for (int x = 0; x < 20; x++) {
-					ProjectA::vec3<float> position(x * 0.11, y * 0.11, 0);
+			for (std::uint32_t y = 0; y < 20; y++) {
+				for (std::uint32_t x = 0; x < 20; x++) {
+					ProjectA::vec3<float> position(x * 0.11f, y * 0.11f, 0.0f);
 					ProjectA::mat4x4<float> transform = ProjectA::mat4x4<float>::translate(position) * squareScale;
 
 					ProjectA::Renderer::submit(squareShader, squareVertexArray, transform);
@@ -203,10 +205,10 @@ class TestLayer : public ProjectA::Layer {
 			}
 
 			static const ProjectA::mat4x4<float> textureScale(
-				1.5, 0, 0, 0,
-				0, 1.5, 0, 0,
-				0, 0, 1.5, 0,
-				0, 0, 0, 1
+				1.5f, 0.0f, 0.0f, 0.0f,
+				0.0f, 1.5f, 0.0f, 0.0f,
+				0.0f, 0.0f, 1.5f, 0.0f,
+				0.0f, 0.0f, 0.0f, 1.0f
 			);
 
 			auto textureShader = shaderLibrary.get("texture");
@@ -234,7 +236,8 @@ class TestLayer : public ProjectA::Layer {
 class SandboxApplication : public ProjectA::Application {
 	public:
 		SandboxApplication() {
-			pushLayer(new TestLayer());
+			//pushLayer(new TestLayer());
+			pushLayer(new SandboxLayer());
 		}
 
 		~SandboxApplication() {}

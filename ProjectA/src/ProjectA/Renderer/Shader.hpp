@@ -1,6 +1,7 @@
 #pragma once
 
-#include <string>
+#include "pch.hpp"
+#include "ProjectA/core.hpp"
 
 namespace ProjectA {
 	class Shader {

@@ -4,7 +4,7 @@
 #include "IndexBuffer.hpp"
 
 namespace ProjectA {
-	IndexBuffer* IndexBuffer::create(uint32_t* indices, uint32_t count) {
+	Ref<IndexBuffer> IndexBuffer::create(uint32_t* indices, uint32_t count) {
 		switch (Renderer::getGraphicsAPI()) {
 			case RendererAPI::GraphicsAPI::None:
 				CORE_ASSERT(false, "Graphics::None is not supported yet.")
@@ -12,7 +12,7 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return new OpenGLIndexBuffer(indices, count);
+				return std::make_shared<OpenGLIndexBuffer>(indices, count);
 		}
 
 		return nullptr;

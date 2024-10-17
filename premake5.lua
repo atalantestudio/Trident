@@ -10,6 +10,10 @@ workspace "ProjectA"
 		"Release",
 	}
 
+	flags {
+		"MultiProcessorCompile",
+	}
+
 include "ProjectA/vendor"
 
 project "ProjectA"
@@ -59,7 +63,6 @@ project "ProjectA"
 		systemversion "latest"
 
 		defines {
-			"WINDOWS",
 			"BUILD_DLL",
 			"GLFW_INCLUDE_NONE",
 		}
@@ -107,8 +110,6 @@ project "Sandbox"
 
 	filter "system:windows"
 		systemversion "latest"
-
-		defines "WINDOWS"
 
 	filter "configurations:Debug"
 		defines "DEBUG"

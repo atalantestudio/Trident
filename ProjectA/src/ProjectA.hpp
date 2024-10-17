@@ -26,5 +26,3 @@
 #include "ProjectA/Renderer/Texture2D.hpp"
 #include "ProjectA/Renderer/VertexArray.hpp"
 #include "ProjectA/Renderer/VertexBuffer.hpp"
-
-#include "ProjectA/entry_point.hpp"

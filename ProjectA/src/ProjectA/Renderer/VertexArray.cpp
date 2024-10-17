@@ -4,7 +4,7 @@
 #include "VertexArray.hpp"
 
 namespace ProjectA {
-	VertexArray* VertexArray::create() {
+	Ref<VertexArray> VertexArray::create() {
 		switch (Renderer::getGraphicsAPI()) {
 			case RendererAPI::GraphicsAPI::None:
 				CORE_ASSERT(false, "Graphics::None is not supported yet.")
@@ -12,7 +12,7 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return new OpenGLVertexArray();
+				return std::make_shared<OpenGLVertexArray>();
 		}
 
 		return nullptr;

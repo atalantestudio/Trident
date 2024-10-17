@@ -136,6 +136,7 @@ namespace ProjectA {
 
 		for (auto shader : shaders) {
 			glDetachShader(program, shader);
+			glDeleteShader(shader);
 		}
 
 		this->program = program;
