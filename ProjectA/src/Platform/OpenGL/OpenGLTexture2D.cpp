@@ -4,7 +4,28 @@
 #include "OpenGLTexture2D.hpp"
 
 namespace ProjectA {
-	OpenGLTexture2D::OpenGLTexture2D(const std::string& path) : debugPath(path) {
+	OpenGLTexture2D::OpenGLTexture2D(std::size_t width, std::size_t height) :
+		internalFormat(GL_RGBA8),
+		format(GL_RGBA),
+		width(width),
+		height(height),
+		debugPath("")
+	{
+		glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+
+		glTextureStorage2D(texture, 1, internalFormat, width, height);
+
+		glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+
+	OpenGLTexture2D::OpenGLTexture2D(const std::string& path) :
+		internalFormat(GL_RGBA8),
+		format(GL_RGBA),
+		debugPath(path)
+	{
 		int x;
 		int y;
 		int channelCount;
@@ -18,23 +39,22 @@ namespace ProjectA {
 		width = x;
 		height = y;
 
-		GLenum internalFormat = 0;
-		GLenum format = 0;
-
 		if (channelCount == 3) {
 			internalFormat = GL_RGB8;
 			format = GL_RGB;
-		} else if (channelCount == 4) {
-			internalFormat = GL_RGBA8;
-			format = GL_RGBA;
 		}
 
-		CORE_ASSERT(internalFormat & format, "Texture format not supported");
+		CORE_ASSERT(channelCount == 3 || channelCount == 4, "Texture format not supported");
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+
 		glTextureStorage2D(texture, 1, internalFormat, width, height);
+
 		glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 		glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 
 		stbi_image_free(data);
@@ -54,5 +74,13 @@ namespace ProjectA {
 
 	void OpenGLTexture2D::bind(uint32_t slot) const {
 		glBindTextureUnit(slot, texture);
+	}
+
+	void OpenGLTexture2D::unbind() const {
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void OpenGLTexture2D::setData(const void* data) const {
+		glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	}
 }

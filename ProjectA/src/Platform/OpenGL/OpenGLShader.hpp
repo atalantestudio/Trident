@@ -1,6 +1,8 @@
 #pragma once
 
 #include "math/mat/mat4x4.hpp"
+#include "math/vec/vec2.hpp"
+#include "math/vec/vec3.hpp"
 #include "math/vec/vec4.hpp"
 #include "ProjectA/Renderer/Shader.hpp"
 
@@ -30,10 +32,11 @@ namespace ProjectA {
 
 			virtual const std::string& getName() const override;
 
-			void uploadUniform(const std::string& name, int) const;
-			void uploadUniform(const std::string& name, float) const;
-			void uploadUniform(const std::string& name, const vec3<float>&) const;
-			void uploadUniform(const std::string& name, const vec4<float>&) const;
-			void uploadUniform(const std::string& name, const mat4x4<float>&) const;
+			virtual void setUniform(const std::string& name, int value) const override;
+			virtual void setUniform(const std::string& name, float value) const override;
+			virtual void setUniform(const std::string& name, const vec2<float>& value) const override;
+			virtual void setUniform(const std::string& name, const vec3<float>& value) const override;
+			virtual void setUniform(const std::string& name, const vec4<float>& value) const override;
+			virtual void setUniform(const std::string& name, const mat4x4<float>& value) const override;
 	};
 }

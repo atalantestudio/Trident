@@ -9,11 +9,11 @@ namespace ProjectA {
 			T entries[16];
 
 		public:
+			static mat4x4<float> identity();
 			static mat4x4<float> orthographic(float, float, float, float, float, float);
 			static mat4x4<float> translate(const vec3<float>&);
-			// TODO: Expand to X/Y
-			static mat4x4<float> rotateZ(float);
-			// TODO: Scale factory
+			static mat4x4<float> rotateZ(float); // TODO: Expand to X/Y
+			static mat4x4<float> scale(const vec3<float>&);
 
 			mat4x4(T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T);
 			mat4x4(const mat4x4&);

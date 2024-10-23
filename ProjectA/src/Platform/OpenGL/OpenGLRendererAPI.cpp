@@ -6,6 +6,8 @@ namespace ProjectA {
 	void OpenGLRendererAPI::initialize() {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glEnable(GL_DEPTH_TEST);
 	}
 
 	void OpenGLRendererAPI::setViewport(std::int32_t x, std::int32_t y, std::uint32_t width, std::uint32_t height) const {

@@ -17,7 +17,7 @@
 #include "ProjectA/ImGui/ImGuiLayer.hpp"
 
 // Rendering misc
-// TODO: Sort
+#include "ProjectA/Renderer/2D/Renderer2D.hpp"
 #include "ProjectA/Renderer/IndexBuffer.hpp"
 #include "ProjectA/Renderer/RenderCommand.hpp"
 #include "ProjectA/Renderer/Renderer.hpp"

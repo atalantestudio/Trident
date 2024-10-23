@@ -54,12 +54,6 @@ namespace ProjectA {
 		ImGui::NewFrame();
 	}
 
-	void ImGuiLayer::renderImGui() {
-		static bool show = true;
-
-		ImGui::ShowDemoWindow(&show);
-	}
-
 	void ImGuiLayer::end() {
 		ImGuiIO& io = ImGui::GetIO();
 		WindowInterface& window = Application::get().getWindow();

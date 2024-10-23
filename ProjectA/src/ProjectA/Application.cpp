@@ -1,6 +1,8 @@
 #include "pch.hpp"
 #include "Application.hpp"
+#include "Renderer/2D/Renderer2D.hpp"
 #include "Renderer/Renderer.hpp"
+
 #include <GLFW/glfw3.h>
 
 namespace ProjectA {
@@ -15,6 +17,7 @@ namespace ProjectA {
 		window->setEventCallback(BIND(Application::onEvent));
 
 		Renderer::initialize();
+		Renderer2D::construct();
 
 		imGuiLayer = new ImGuiLayer();
 

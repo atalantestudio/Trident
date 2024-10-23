@@ -17,7 +17,6 @@ namespace ProjectA {
 			virtual void bind() override;
 			virtual void unbind() override;
 			void begin();
-			virtual void renderImGui() override;
 			void end();
 	};
 }

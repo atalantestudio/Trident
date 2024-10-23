@@ -2,14 +2,20 @@
 
 #include "ProjectA.hpp"
 
+struct ProfileResult {
+	const char* name;
+	float duration;
+};
+
 class SandboxLayer : public ProjectA::Layer {
 	private:
-		ProjectA::Ref<ProjectA::VertexArray> squareVertexArray;
-		ProjectA::Ref<ProjectA::Shader> colorShader;
-
 		ProjectA::OrthographicCameraController cameraController;
 
 		ProjectA::vec4<float> squareColor = {0.2f, 0.3f, 0.8f, 1.0f};
+
+		ProjectA::Ref<ProjectA::Texture2D> texture;
+
+		std::vector<ProfileResult> profileResults = {};
 
 	public:
 		SandboxLayer();

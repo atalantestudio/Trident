@@ -192,7 +192,7 @@ namespace ProjectA {
 		return name;
 	}
 
-	void OpenGLShader::uploadUniform(const std::string& name, int value) const {
+	void OpenGLShader::setUniform(const std::string& name, int value) const {
 		GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
@@ -202,7 +202,7 @@ namespace ProjectA {
 		glUniform1i(location, value);
 	}
 
-	void OpenGLShader::uploadUniform(const std::string& name, float value) const {
+	void OpenGLShader::setUniform(const std::string& name, float value) const {
 		GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
@@ -212,7 +212,17 @@ namespace ProjectA {
 		glUniform1f(location, value);
 	}
 
-	void OpenGLShader::uploadUniform(const std::string& name, const vec3<float>& value) const {
+	void OpenGLShader::setUniform(const std::string& name, const vec2<float>& value) const {
+		GLint location = glGetUniformLocation(program, name.c_str());
+
+		if (location == -1) {
+			return;
+		}
+
+		glUniform2f(location, value.x, value.y);
+	}
+
+	void OpenGLShader::setUniform(const std::string& name, const vec3<float>& value) const {
 		GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
@@ -222,7 +232,7 @@ namespace ProjectA {
 		glUniform3f(location, value[0], value[1], value[2]);
 	}
 
-	void OpenGLShader::uploadUniform(const std::string& name, const vec4<float>& value) const {
+	void OpenGLShader::setUniform(const std::string& name, const vec4<float>& value) const {
 		GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
@@ -232,7 +242,7 @@ namespace ProjectA {
 		glUniform4f(location, value.x, value.y, value.z, value.w);
 	}
 
-	void OpenGLShader::uploadUniform(const std::string& name, const mat4x4<float>& value) const {
+	void OpenGLShader::setUniform(const std::string& name, const mat4x4<float>& value) const {
 		GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {

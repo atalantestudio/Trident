@@ -2,6 +2,15 @@
 #include "mat4x4.hpp"
 
 namespace ProjectA {
+	mat4x4<float> mat4x4<float>::identity() {
+		return {
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1
+		};
+	}
+
 	/// Document left-handedness
 	/// Document parameters
 	mat4x4<float> mat4x4<float>::orthographic(float l, float r, float b, float t, float n, float f) {
@@ -18,24 +27,33 @@ namespace ProjectA {
 	}
 
 	mat4x4<float> mat4x4<float>::translate(const vec3<float>& position) {
-		return mat4x4(
+		return {
 			1, 0, 0, position[0],
 			0, 1, 0, position[1],
 			0, 0, 1, position[2],
 			0, 0, 0, 1
-		);
+		};
 	}
 
 	mat4x4<float> mat4x4<float>::rotateZ(float angle) {
 		float c = cos(angle);
 		float s = sin(angle);
 
-		return mat4x4(
+		return {
 			c, s, 0, 0,
 		   -s, c, 0, 0,
 			0, 0, 1, 0,
 			0, 0, 0, 1
-		);
+		};
+	}
+
+	mat4x4<float> mat4x4<float>::scale(const vec3<float>& scale) {
+		return {
+			scale[0], 0, 0, 0,
+			0, scale[1], 0, 0,
+			0, 0, scale[2], 0,
+			0, 0, 0, 1
+		};
 	}
 
 	/// Argument naming (_--)
