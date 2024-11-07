@@ -9,6 +9,8 @@ namespace ProjectA {
 	}
 
 	void OpenGLContext::initialize() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glfwMakeContextCurrent(window);
 
 		int gladLoadStatus = gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
@@ -26,6 +28,8 @@ namespace ProjectA {
 	}
 
 	void OpenGLContext::swapBuffers() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glfwSwapBuffers(window);
 	}
 }

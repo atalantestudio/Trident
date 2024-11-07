@@ -25,6 +25,7 @@ namespace ProjectA {
 
 		public:
 			Window(const WindowData& data);
+
 			virtual ~Window();
 
 			virtual inline void* getNativeWindow() const {

@@ -20,3 +20,5 @@ namespace ProjectA {
 			~Profiler();
 	};
 }
+
+#define PROFILER(path) ::ProjectA::Profiler profiler(path)

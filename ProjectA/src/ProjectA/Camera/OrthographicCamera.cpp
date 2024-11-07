@@ -7,6 +7,8 @@ namespace ProjectA {
 		Camera(mat4x4<float>::orthographic(left, right, bottom, top, nearPlane, farPlane)) {}
 
 	void OrthographicCamera::updateView(const vec3<float>& position, float rotation) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		mat4x4<float> inverseTransform = mat4x4<float>::translate(position);
 		// TODO: rad() or radians()
 		inverseTransform *= mat4x4<float>::rotateZ(rotation * (float) M_PI / 180.0f);
@@ -17,6 +19,8 @@ namespace ProjectA {
 	}
 
 	void OrthographicCamera::updateProjection(float left, float right, float bottom, float top, float nearPlane, float farPlane) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		projection = mat4x4<float>::orthographic(left, right, bottom, top, nearPlane, farPlane);
 		viewProjection = projection * view;
 	}

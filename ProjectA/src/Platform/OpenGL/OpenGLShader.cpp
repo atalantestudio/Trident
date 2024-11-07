@@ -5,6 +5,8 @@
 
 namespace ProjectA {
 	static GLenum shaderTypeFromString(const std::string& shaderType) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		if (shaderType == "vertex") {
 			return GL_VERTEX_SHADER;
 		}
@@ -19,6 +21,8 @@ namespace ProjectA {
 	}
 
 	std::string OpenGLShader::readFile(const std::string& path) const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		std::ifstream input(path, std::ios::in | std::ios::binary);
 
 		if (!input) {
@@ -41,6 +45,8 @@ namespace ProjectA {
 	}
 
 	std::unordered_map<GLenum, std::string> OpenGLShader::preprocess(const std::string& source) const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		std::unordered_map<GLenum, std::string> shaderSources;
 
 		const char* shaderTypeToken = "#type";
@@ -69,6 +75,8 @@ namespace ProjectA {
 	}
 
 	void OpenGLShader::compile(const std::unordered_map<GLenum, std::string>& shaderSources) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		GLuint program = glCreateProgram();
 
 		CORE_ASSERT(shaderSources.size() > 2, "Only 2-shader files are supported.");
@@ -143,6 +151,8 @@ namespace ProjectA {
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& vertexShaderSource, const std::string& fragmentShaderSource, const std::string& name) : program(0), name(name) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		std::unordered_map<GLenum, std::string> shaderSources;
 
 		shaderSources[GL_VERTEX_SHADER] = vertexShaderSource;
@@ -152,6 +162,8 @@ namespace ProjectA {
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& path) : program(0) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		compile(preprocess(readFile(path)));
 
 		size_t lastSlash = path.find_last_of("/\\");
@@ -177,14 +189,20 @@ namespace ProjectA {
 	}
 
 	OpenGLShader::~OpenGLShader() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glDeleteProgram(program);
 	}
 
 	void OpenGLShader::bind() const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glUseProgram(program);
 	}
 
-	void OpenGLShader::unbind() const {
+	void OpenGLShader::unbind() const {		
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glUseProgram(0);
 	}
 
@@ -193,6 +211,8 @@ namespace ProjectA {
 	}
 
 	void OpenGLShader::setUniform(const std::string& name, int value) const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
@@ -203,6 +223,8 @@ namespace ProjectA {
 	}
 
 	void OpenGLShader::setUniform(const std::string& name, float value) const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
@@ -213,6 +235,8 @@ namespace ProjectA {
 	}
 
 	void OpenGLShader::setUniform(const std::string& name, const vec2<float>& value) const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
@@ -223,6 +247,8 @@ namespace ProjectA {
 	}
 
 	void OpenGLShader::setUniform(const std::string& name, const vec3<float>& value) const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
@@ -233,6 +259,8 @@ namespace ProjectA {
 	}
 
 	void OpenGLShader::setUniform(const std::string& name, const vec4<float>& value) const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
@@ -243,6 +271,8 @@ namespace ProjectA {
 	}
 
 	void OpenGLShader::setUniform(const std::string& name, const mat4x4<float>& value) const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {

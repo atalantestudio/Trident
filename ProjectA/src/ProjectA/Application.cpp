@@ -9,6 +9,8 @@ namespace ProjectA {
 	Application* Application::instance = nullptr;
 
 	Application::Application() : lastFrameTime(0.0f) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		CORE_ASSERT(!instance, "The Application instance already exists.")
 
 		instance = this;
@@ -24,14 +26,27 @@ namespace ProjectA {
 		pushOverlay(imGuiLayer);
 	}
 
+	Application::~Application() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		Renderer::destruct();
+		Renderer2D::destruct();
+	}
+
 	void Application::run() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		while (running) {
+			PROFILE_SCOPE("Run loop");
+
 			float time = (float) glfwGetTime();
 			float deltaTime = time - lastFrameTime;
 
 			lastFrameTime = time;
 
 			if (!minimized) {
+				PROFILE_SCOPE("Update layers");
+
 				for (Layer* layer : layerStack) {
 					layer->update(deltaTime);
 				}
@@ -39,8 +54,12 @@ namespace ProjectA {
 
 			imGuiLayer->begin();
 
-			for (Layer* layer : layerStack) {
-				layer->renderImGui();
+			{
+				PROFILE_SCOPE("Render layer ImGuis");
+
+				for (Layer* layer : layerStack) {
+					layer->renderImGui();
+				}
 			}
 
 			imGuiLayer->end();
@@ -49,7 +68,25 @@ namespace ProjectA {
 		}
 	}
 
+	void Application::pushLayer(Layer* layer) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		layerStack.pushLayer(layer);
+
+		layer->bind();
+	}
+
+	void Application::pushOverlay(Layer* overlay) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		layerStack.pushOverlay(overlay);
+
+		overlay->bind();
+	}
+
 	void Application::onEvent(Event& event) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		EventDispatcher eventDispatcher(event);
 
 		eventDispatcher.dispatch<WindowCloseEvent>(BIND(Application::onWindowClose));
@@ -64,14 +101,6 @@ namespace ProjectA {
 		}
 	}
 
-	void Application::pushLayer(Layer* layer) {
-		layerStack.pushLayer(layer);
-	}
-
-	void Application::pushOverlay(Layer* overlay) {
-		layerStack.pushOverlay(overlay);
-	}
-
 	bool Application::onWindowClose(WindowCloseEvent& event) {
 		running = false;
 
@@ -79,6 +108,8 @@ namespace ProjectA {
 	}
 
 	bool Application::onWindowResize(WindowResizeEvent& event) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		if (event.getWidth() == 0 || event.getHeight() == 0) {
 			minimized = true;
 

@@ -11,6 +11,8 @@ namespace ProjectA {
 		height(height),
 		debugPath("")
 	{
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glCreateTextures(GL_TEXTURE_2D, 1, &texture);
 
 		glTextureStorage2D(texture, 1, internalFormat, width, height);
@@ -26,13 +28,20 @@ namespace ProjectA {
 		format(GL_RGBA),
 		debugPath(path)
 	{
-		int x;
-		int y;
-		int channelCount;
+		PROFILE_SCOPE(__FUNCSIG__);
 
 		stbi_set_flip_vertically_on_load(1);
 
-		stbi_uc* data = stbi_load(path.c_str(), &x, &y, &channelCount, 0);
+		int x;
+		int y;
+		int channelCount;
+		stbi_uc* data;
+
+		{
+			PROFILE_SCOPE("OpenGLTexture2D/stbi_load");
+
+			data = stbi_load(path.c_str(), &x, &y, &channelCount, 0);
+		}
 
 		CORE_ASSERT(data, "Could not load texture");
 
@@ -61,6 +70,8 @@ namespace ProjectA {
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glDeleteTextures(1, &texture);
 	}
 
@@ -73,14 +84,20 @@ namespace ProjectA {
 	}
 
 	void OpenGLTexture2D::bind(uint32_t slot) const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glBindTextureUnit(slot, texture);
 	}
 
 	void OpenGLTexture2D::unbind() const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	void OpenGLTexture2D::setData(const void* data) const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	}
 }

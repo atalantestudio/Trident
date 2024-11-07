@@ -16,14 +16,10 @@ namespace ProjectA {
 		layers.emplace(layers.begin() + layerInsertionIndex, layer);
 
 		layerInsertionIndex++;
-
-		layer->bind();
 	}
 
 	void LayerStack::pushOverlay(Layer* overlay) {
 		layers.emplace_back(overlay);
-
-		overlay->bind();
 	}
 
 	void LayerStack::removeLayer(Layer* layer) {

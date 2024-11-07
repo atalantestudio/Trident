@@ -11,19 +11,19 @@
 		ProjectA::Application* application;
 
 		{
-			ProjectA::Profiler profiler("Log/ProfileStart.json");
+			PROFILER("Log/ProfileStart.json");
 
 			application = ProjectA::createApplication();
 		}
 
 		{
-			ProjectA::Profiler profiler("Log/ProfileRun.json");
+			PROFILER("Log/ProfileRun.json");
 
 			application->run();
 		}
 
 		{
-			ProjectA::Profiler profiler("Log/ProfileEnd.json");
+			PROFILER("Log/ProfileEnd.json");
 
 			delete application;
 		}

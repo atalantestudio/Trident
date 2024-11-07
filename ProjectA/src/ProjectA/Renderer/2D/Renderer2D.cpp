@@ -15,6 +15,8 @@ namespace ProjectA {
 	static Renderer2DStorage* storage;
 
 	void Renderer2D::construct() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		storage = new Renderer2DStorage();
 
 		storage->vertexArray = VertexArray::create();
@@ -59,22 +61,30 @@ namespace ProjectA {
 	}
 
 	void Renderer2D::destruct() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		delete storage;
 	}
 
 	void Renderer2D::beginScene(const OrthographicCamera& camera) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		storage->colorTextureShader->bind();
 		storage->colorTextureShader->setUniform("u_viewProjection", camera.getViewProjection());
 		storage->colorTextureShader->setUniform("u_texture", 0);
 	}
 
-	void Renderer2D::endScene() {}
+	void Renderer2D::endScene() {
+		PROFILE_SCOPE(__FUNCSIG__);
+	}
 
 	void Renderer2D::drawQuad(const vec2<float>& position, const vec2<float>& size, const vec4<float>& color) {
 		drawQuad({position.x, position.y, 0.0f}, size, color);
 	}
 
 	void Renderer2D::drawQuad(const vec3<float>& position, const vec2<float>& size, const vec4<float>& color) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		vec3<float> scale = vec3<float>(size.x, size.y, 1.0f);
 		mat4x4<float> transform = mat4x4<float>::translate(position) * mat4x4<float>::scale(scale);
 
@@ -95,6 +105,8 @@ namespace ProjectA {
 	}
 
 	void Renderer2D::drawTexturedQuad(const vec3<float>& position, const vec2<float>& size, const Ref<Texture2D>& texture) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		vec3<float> scale = vec3<float>(size.x, size.y, 1.0f);
 		mat4x4<float> transform = mat4x4<float>::translate(position) * mat4x4<float>::scale(scale);
 

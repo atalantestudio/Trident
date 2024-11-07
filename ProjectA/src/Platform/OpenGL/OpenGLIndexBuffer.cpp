@@ -4,6 +4,8 @@
 
 namespace ProjectA {
 	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count) : count(count) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glCreateBuffers(1, &id);
 
 		bind();
@@ -12,6 +14,8 @@ namespace ProjectA {
 	}
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glDeleteBuffers(1, &id);
 	}
 
@@ -20,10 +24,14 @@ namespace ProjectA {
 	}
 
 	void OpenGLIndexBuffer::bind() const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
 	}
 
 	void OpenGLIndexBuffer::unbind() const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 }

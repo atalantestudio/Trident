@@ -4,6 +4,8 @@
 
 namespace ProjectA {
 	OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint32_t size) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glCreateBuffers(1, &id);
 
 		bind();
@@ -12,6 +14,8 @@ namespace ProjectA {
 	}
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glDeleteBuffers(1, &id);
 	}
 
@@ -24,10 +28,14 @@ namespace ProjectA {
 	}
 
 	void OpenGLVertexBuffer::bind() const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glBindBuffer(GL_ARRAY_BUFFER, id);
 	}
 
 	void OpenGLVertexBuffer::unbind() const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }

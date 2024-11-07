@@ -27,7 +27,7 @@ namespace ProjectA {
 
 			Application();
 
-			virtual ~Application() = default;
+			virtual ~Application();
 
 			void run();
 

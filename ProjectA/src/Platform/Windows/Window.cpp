@@ -30,12 +30,16 @@ namespace ProjectA {
 	}
 
 	void Window::setVSyncState(bool state) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glfwSwapInterval(state ? 1 : 0);
 
 		data.vSync = state;
 	}
 
 	void Window::initialize(const WindowData& data) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		GLFWData& glfwData = this->data;
 
 		glfwData.title = data.title;
@@ -45,7 +49,13 @@ namespace ProjectA {
 		LOG_CORE_TRACE("Created {0}x{1} \"{2}\" window", glfwData.width, glfwData.height, glfwData.title);
 
 		if (!glfwInitialized) {
-			int success = glfwInit();
+			int success;
+
+			{
+				PROFILE_SCOPE("glfwInit");
+
+				success = glfwInit();
+			}
 
 			CORE_ASSERT(success, "Could not initialize GLFW");
 
@@ -54,7 +64,11 @@ namespace ProjectA {
 			glfwInitialized = true;
 		}
 
-		window = glfwCreateWindow((int) glfwData.width, (int) glfwData.height, glfwData.title.c_str(), nullptr, nullptr);
+		{
+			PROFILE_SCOPE("glfwCreateWindow");
+
+			window = glfwCreateWindow((int) glfwData.width, (int) glfwData.height, glfwData.title.c_str(), nullptr, nullptr);
+		}
 
 		context = new OpenGLContext(window);
 		context->initialize();
@@ -159,10 +173,14 @@ namespace ProjectA {
 	}
 
 	void Window::terminate() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glfwDestroyWindow(window);
 	}
 
 	void Window::update() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		glfwPollEvents();
 
 		context->swapBuffers();
