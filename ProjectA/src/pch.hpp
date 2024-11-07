@@ -16,6 +16,10 @@
 
 #include "ProjectA/Logger.hpp"
 
+// TODO: Profile-only PCH header?
+#include "ProjectA/Profile/Profiler.hpp"
+#include "ProjectA/Profile/Timer.hpp"
+
 #ifdef WINDOWS
 	#include <Windows.h>
 #endif

@@ -1,17 +1,31 @@
 #pragma once
 
+#include "ProjectA/Profile/Profiler.hpp"
+
 #ifdef WINDOWS
 	extern ProjectA::Application* ProjectA::createApplication();
 
 	int main() {
 		ProjectA::Logger::initialize();
 
-		LOG_CORE_TRACE("Initialized core logging");
-		LOG_CLIENT_TRACE("Initialized client logging");
+		ProjectA::Application* application;
 
-		ProjectA::Application* application = ProjectA::createApplication();
-		application->run();
+		{
+			ProjectA::Profiler profiler("Log/ProfileStart.json");
 
-		delete application;
+			application = ProjectA::createApplication();
+		}
+
+		{
+			ProjectA::Profiler profiler("Log/ProfileRun.json");
+
+			application->run();
+		}
+
+		{
+			ProjectA::Profiler profiler("Log/ProfileEnd.json");
+
+			delete application;
+		}
 	}
 #endif
