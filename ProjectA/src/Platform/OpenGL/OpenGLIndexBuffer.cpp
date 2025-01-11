@@ -1,6 +1,8 @@
 #include "pch.hpp"
-#include "OpenGLIndexBuffer.hpp"
+
 #include <glad/glad.h>
+
+#include "OpenGLIndexBuffer.hpp"
 
 namespace ProjectA {
 	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count) : count(count) {

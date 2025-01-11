@@ -1,8 +1,6 @@
 #pragma once
 
-// TODO: Profile-only PCH header?
-#include <string>
-#include <thread>
+#include "pch.hpp"
 
 namespace ProjectA {
 	struct ProfileEvent {

@@ -1,7 +1,7 @@
 #include "pch.hpp"
 #include "Platform/OpenGL/OpenGLVertexBuffer.hpp"
-#include "Renderer.hpp"
-#include "VertexBuffer.hpp"
+#include "ProjectA/Renderer/Renderer.hpp"
+#include "ProjectA/Renderer/VertexBuffer.hpp"
 
 namespace ProjectA {
 	Ref<VertexBuffer> VertexBuffer::create(float* vertices, uint32_t size) {

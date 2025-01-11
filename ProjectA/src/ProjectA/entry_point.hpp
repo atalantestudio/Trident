@@ -27,5 +27,7 @@
 
 			delete application;
 		}
+
+		return 0;
 	}
 #endif

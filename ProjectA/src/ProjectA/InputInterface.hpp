@@ -9,8 +9,10 @@ namespace ProjectA {
 
 		protected:
 			virtual bool isKeyPressedImpl(int keyCode) = 0;
+
 			virtual bool isMouseButtonPressedImpl(int button) = 0;
-			virtual std::pair<float, float> getMousePositionImpl() = 0;
+
+			virtual vec2<float> getMousePositionImpl() = 0;
 
 		public:
 			static inline bool isKeyPressed(int keyCode) {
@@ -21,7 +23,7 @@ namespace ProjectA {
 				return instance->isMouseButtonPressedImpl(button);
 			}
 
-			static inline std::pair<float, float> getMousePosition() {
+			static inline vec2<float> getMousePosition() {
 				return instance->getMousePositionImpl();
 			}
 	};

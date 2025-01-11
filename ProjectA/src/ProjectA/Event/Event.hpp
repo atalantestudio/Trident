@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pch.hpp"
+
 #include "ProjectA/core.hpp"
 
 namespace ProjectA {

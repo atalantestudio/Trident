@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Camera.hpp"
-#include "math/vec/vec3.hpp"
 
 namespace ProjectA {
 	class OrthographicCamera : public Camera {

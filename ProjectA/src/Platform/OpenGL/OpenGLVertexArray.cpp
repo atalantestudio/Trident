@@ -1,6 +1,8 @@
 #include "pch.hpp"
-#include "OpenGLVertexArray.hpp"
+
 #include <glad/glad.h>
+
+#include "OpenGLVertexArray.hpp"
 
 namespace ProjectA {
 	static GLenum getShaderType(ShaderType type) {

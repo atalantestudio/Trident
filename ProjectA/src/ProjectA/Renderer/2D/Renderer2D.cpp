@@ -1,5 +1,5 @@
 #include "pch.hpp"
-#include "math/mat/mat4x4.hpp"
+
 #include "ProjectA/Renderer/2D/Renderer2D.hpp"
 #include "ProjectA/Renderer/RenderCommand.hpp"
 #include "ProjectA/Renderer/Shader.hpp"
@@ -100,11 +100,11 @@ namespace ProjectA {
 		storage->defaultTexture->unbind();
 	}
 
-	void Renderer2D::drawTexturedQuad(const vec2<float>& position, const vec2<float>& size, const Ref<Texture2D>& texture) {
-		drawTexturedQuad({position.x, position.y, 0.0f}, size, texture);
+	void Renderer2D::drawTexturedQuad(const vec2<float>& position, const vec2<float>& size, const Ref<Texture2D>& texture, float textureSize = 1.0f) {
+		drawTexturedQuad({position.x, position.y, 0.0f}, size, texture, textureSize);
 	}
 
-	void Renderer2D::drawTexturedQuad(const vec3<float>& position, const vec2<float>& size, const Ref<Texture2D>& texture) {
+	void Renderer2D::drawTexturedQuad(const vec3<float>& position, const vec2<float>& size, const Ref<Texture2D>& texture, float textureSize = 1.0f) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		vec3<float> scale = vec3<float>(size.x, size.y, 1.0f);
@@ -112,6 +112,7 @@ namespace ProjectA {
 
 		storage->colorTextureShader->setUniform("u_transform", transform);
 		storage->colorTextureShader->setUniform("u_color", {1.0f, 1.0f, 1.0f, 1.0f});
+		storage->colorTextureShader->setUniform("u_texture_size", textureSize);
 
 		texture->bind(0);
 

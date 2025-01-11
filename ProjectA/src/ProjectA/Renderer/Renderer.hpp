@@ -1,8 +1,10 @@
 #pragma once
 
+#include "pch.hpp"
+
 #include "ProjectA/Camera/Camera.hpp"
-#include "RenderCommand.hpp"
-#include "Shader.hpp"
+#include "ProjectA/Renderer/RenderCommand.hpp"
+#include "ProjectA/Renderer/Shader.hpp"
 
 namespace ProjectA {
 	class Renderer {

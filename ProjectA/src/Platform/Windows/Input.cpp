@@ -1,7 +1,9 @@
 #include "pch.hpp"
-#include "ProjectA/Application.hpp"
-#include "Input.hpp"
+
 #include <GLFW/glfw3.h>
+
+#include "Platform/Windows/Input.hpp"
+#include "ProjectA/Application.hpp"
 
 namespace ProjectA {
 	InputInterface* InputInterface::instance = new Input();
@@ -20,7 +22,7 @@ namespace ProjectA {
 		return buttonState == GLFW_PRESS;
 	}
 
-	std::pair<float, float> Input::getMousePositionImpl() {
+	vec2<float> Input::getMousePositionImpl() {
 		auto window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
 		double x, y;
 

@@ -1,4 +1,3 @@
-#include "pch.hpp"
 #include "mat4x4.hpp"
 
 namespace ProjectA {
@@ -36,8 +35,8 @@ namespace ProjectA {
 	}
 
 	mat4x4<float> mat4x4<float>::rotateZ(float angle) {
-		float c = cos(angle);
-		float s = sin(angle);
+		float c = std::cos(angle);
+		float s = std::sin(angle);
 
 		return {
 			c, s, 0, 0,

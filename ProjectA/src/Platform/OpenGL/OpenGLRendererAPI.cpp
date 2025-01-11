@@ -1,6 +1,8 @@
 #include "pch.hpp"
-#include "OpenGLRendererAPI.hpp"
+
 #include <glad/glad.h>
+
+#include "OpenGLRendererAPI.hpp"
 
 namespace ProjectA {
 	void OpenGLRendererAPI::initialize() {

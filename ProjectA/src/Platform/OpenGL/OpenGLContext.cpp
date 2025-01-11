@@ -1,7 +1,9 @@
 #include "pch.hpp"
-#include "OpenGLContext.hpp"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include "OpenGLContext.hpp"
 
 namespace ProjectA {
 	OpenGLContext::OpenGLContext(GLFWwindow* window) : window(window) {

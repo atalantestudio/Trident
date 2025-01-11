@@ -1,5 +1,6 @@
 #include "pch.hpp"
-#include "Renderer.hpp"
+
+#include "ProjectA/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	const Camera* Renderer::camera = nullptr;

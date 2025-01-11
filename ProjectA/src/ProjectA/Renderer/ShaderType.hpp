@@ -1,7 +1,5 @@
 #pragma once
 
-#include "pch.hpp"
-
 namespace ProjectA {
 	enum ShaderType {
 		None = 0,

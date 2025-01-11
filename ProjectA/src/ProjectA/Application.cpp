@@ -1,9 +1,10 @@
 #include "pch.hpp"
-#include "Application.hpp"
-#include "Renderer/2D/Renderer2D.hpp"
-#include "Renderer/Renderer.hpp"
 
 #include <GLFW/glfw3.h>
+
+#include "ProjectA/Application.hpp"
+#include "ProjectA/Renderer/2D/Renderer2D.hpp"
+#include "ProjectA/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	Application* Application::instance = nullptr;

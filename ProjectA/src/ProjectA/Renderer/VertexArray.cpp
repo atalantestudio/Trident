@@ -1,7 +1,8 @@
 #include "pch.hpp"
+
 #include "Platform/OpenGL/OpenGLVertexArray.hpp"
-#include "Renderer.hpp"
-#include "VertexArray.hpp"
+#include "ProjectA/Renderer/Renderer.hpp"
+#include "ProjectA/Renderer/VertexArray.hpp"
 
 namespace ProjectA {
 	Ref<VertexArray> VertexArray::create() {

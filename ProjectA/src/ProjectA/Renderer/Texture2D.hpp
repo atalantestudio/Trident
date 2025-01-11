@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include "ProjectA/core.hpp"
 #include "Texture.hpp"
 

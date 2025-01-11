@@ -1,8 +1,5 @@
 #pragma once
 
-// TODO: Profile-only PCH header?
-#include <chrono>
-
 #include "ProjectA/Profile/ProfileEvent.hpp"
 
 namespace ProjectA {

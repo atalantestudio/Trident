@@ -1,6 +1,5 @@
 #pragma once
 
-#include "math/vec/vec3.hpp"
 #include "ProjectA/Camera/OrthographicCamera.hpp"
 #include "ProjectA/Event/Event.hpp"
 #include "ProjectA/Event/MouseEvent.hpp"

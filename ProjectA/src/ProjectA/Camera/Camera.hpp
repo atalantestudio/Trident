@@ -1,7 +1,5 @@
 #pragma once
 
-#include "math/mat/mat4x4.hpp"
-
 // TODO: Check order of view and projection members
 namespace ProjectA {
 	class Camera {
@@ -16,7 +14,7 @@ namespace ProjectA {
 			mat4x4<float> viewProjection;
 
 		public:
-			// TODO: Take 2nd argument for view matrix?
+			// TODO: Accept view matrix as 2nd argument?
 			Camera(const mat4x4<float>& projection);
 
 			~Camera() = default;

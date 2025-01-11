@@ -1,5 +1,6 @@
 #include "pch.hpp"
-#include "BufferLayout.hpp"
+
+#include "ProjectA/Renderer/BufferLayout.hpp"
 
 namespace ProjectA {
 	BufferLayout::BufferLayout() {}

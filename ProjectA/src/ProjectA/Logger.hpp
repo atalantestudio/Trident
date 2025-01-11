@@ -1,8 +1,9 @@
 #pragma once
 
 #include "core.hpp"
-#include "spdlog/spdlog.h"
-#include "spdlog/fmt/ostr.h"
+
+#include <spdlog/fmt/ostr.h>
+#include <spdlog/spdlog.h>
 
 namespace ProjectA {
 	class API Logger {

@@ -1,9 +1,5 @@
 #pragma once
 
-#include "math/mat/mat4x4.hpp"
-#include "math/vec/vec2.hpp"
-#include "math/vec/vec3.hpp"
-#include "math/vec/vec4.hpp"
 #include "ProjectA/Renderer/Shader.hpp"
 
 // TODO: Temporary fix for glad/glad.h not usable in Sandbox

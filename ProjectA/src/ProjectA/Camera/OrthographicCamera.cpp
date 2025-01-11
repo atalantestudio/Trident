@@ -1,6 +1,6 @@
 #include "pch.hpp"
-#include "OrthographicCamera.hpp"
-#include "math/mat/mat4x4.hpp"
+
+#include "ProjectA/Camera/OrthographicCamera.hpp"
 
 namespace ProjectA {
 	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top, float nearPlane, float farPlane) :
@@ -10,7 +10,7 @@ namespace ProjectA {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		mat4x4<float> inverseTransform = mat4x4<float>::translate(position);
-		// TODO: rad() or radians()
+		// TODO: radians()
 		inverseTransform *= mat4x4<float>::rotateZ(rotation * (float) M_PI / 180.0f);
 		inverseTransform.invert();
 

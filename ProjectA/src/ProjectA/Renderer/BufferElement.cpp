@@ -1,5 +1,6 @@
 #include "pch.hpp"
-#include "BufferElement.hpp"
+
+#include "ProjectA/Renderer/BufferElement.hpp"
 
 namespace ProjectA {
 	BufferElement::BufferElement(ShaderType type, const std::string& name, bool normalized) :

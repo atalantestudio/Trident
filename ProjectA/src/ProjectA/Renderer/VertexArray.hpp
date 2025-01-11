@@ -1,8 +1,7 @@
 #pragma once
 
-#include "pch.hpp"
-#include "IndexBuffer.hpp"
-#include "VertexBuffer.hpp"
+#include "ProjectA/Renderer/IndexBuffer.hpp"
+#include "ProjectA/Renderer/VertexBuffer.hpp"
 
 namespace ProjectA {
 	class VertexArray {

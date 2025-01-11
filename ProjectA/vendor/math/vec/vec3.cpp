@@ -1,4 +1,3 @@
-#include "pch.hpp"
 #include "vec3.hpp"
 
 namespace ProjectA {
@@ -23,7 +22,7 @@ namespace ProjectA {
 
 	template<typename T>
 	T vec3<T>::length() const {
-		return sqrt(dot(*this));
+		return std::sqrt(dot(*this));
 	}
 
 	template<typename T>

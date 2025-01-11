@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string>
-#include <unordered_map>
-
 #include "ProjectA/core.hpp"
 #include "Shader.hpp"
 

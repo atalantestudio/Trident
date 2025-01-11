@@ -1,7 +1,6 @@
 #pragma once
 
-#include "math/vec/vec4.hpp"
-#include "VertexArray.hpp"
+#include "ProjectA/Renderer/VertexArray.hpp"
 
 namespace ProjectA {
 	class RendererAPI {

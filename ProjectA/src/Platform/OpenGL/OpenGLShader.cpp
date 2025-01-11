@@ -1,7 +1,8 @@
 #include "pch.hpp"
-#include <fstream>
+
 #include <glad/glad.h>
-#include "OpenGLShader.hpp"
+
+#include "Platform/OpenGL/OpenGLShader.hpp"
 
 namespace ProjectA {
 	static GLenum shaderTypeFromString(const std::string& shaderType) {
@@ -28,7 +29,7 @@ namespace ProjectA {
 		if (!input) {
 			LOG_CORE_FATAL("Could not open file \"{0}\".", path);
 
-			return 0;
+			CORE_ASSERT(false, "Could not open file");
 		}
 
 		std::string result;

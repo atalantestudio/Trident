@@ -1,4 +1,5 @@
-#include "imgui/imgui.h"
+#include <imgui/imgui.h>
+
 #include "Platform/OpenGL/OpenGLShader.hpp"
 #include "ProjectA/Renderer/2D/Renderer2D.hpp"
 
@@ -34,7 +35,7 @@ void SandboxLayer::update(float deltaTime) {
 		ProjectA::Renderer2D::beginScene(cameraController.getCamera());
 		ProjectA::Renderer2D::drawQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, {0.8f, 0.2f, 0.3f, 1.0f});
 		ProjectA::Renderer2D::drawQuad({0.5f, -0.5f}, {0.5f, 0.75f}, {0.2f, 0.3f, 0.8f, 1.0f});
-		ProjectA::Renderer2D::drawTexturedQuad({0.0f, 0.0f, 0.1f}, {10.0f, 10.0f}, texture);
+		ProjectA::Renderer2D::drawTexturedQuad({0.0f, 0.0f, 0.1f}, {10.0f, 10.0f}, texture, 2.0f);
 		ProjectA::Renderer2D::endScene();
 	}
 }

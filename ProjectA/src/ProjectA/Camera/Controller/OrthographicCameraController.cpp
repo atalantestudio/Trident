@@ -1,4 +1,5 @@
 #include "pch.hpp"
+
 #include "ProjectA/Camera/Controller/OrthographicCameraController.hpp"
 #include "ProjectA/InputInterface.hpp"
 #include "ProjectA/key_codes.hpp"
@@ -49,7 +50,7 @@ namespace ProjectA {
 	bool OrthographicCameraController::onMouseScroll(MouseScrollEvent& event) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		zoomLevel -= event.getYOffset() / 2;
+		zoomLevel -= event.getOffset().y / 2;
 		zoomLevel = std::max(zoomLevel, 0.25f);
 
 		speed = zoomLevel;

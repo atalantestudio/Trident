@@ -1,6 +1,8 @@
 #include "pch.hpp"
-#include "OpenGLVertexBuffer.hpp"
+
 #include <glad/glad.h>
+
+#include "OpenGLVertexBuffer.hpp"
 
 namespace ProjectA {
 	OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint32_t size) {

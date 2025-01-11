@@ -1,7 +1,8 @@
 #include "pch.hpp"
+
 #include "Platform/OpenGL/OpenGLTexture2D.hpp"
-#include "Renderer.hpp"
-#include "Texture2D.hpp"
+#include "ProjectA/Renderer/Renderer.hpp"
+#include "ProjectA/Renderer/Texture2D.hpp"
 
 namespace ProjectA {
 	Ref<Texture2D> Texture2D::create(std::size_t width, std::size_t height) {

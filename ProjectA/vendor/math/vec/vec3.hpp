@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cmath>
+#include <utility>
+
 namespace ProjectA {
 	template<typename T>
 	class vec3 {

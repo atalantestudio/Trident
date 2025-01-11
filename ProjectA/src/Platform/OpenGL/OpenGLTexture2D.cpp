@@ -1,6 +1,8 @@
 #include "pch.hpp"
+
 #include <glad/glad.h>
-#include "stb_image.h"
+#include <stb_image.h>
+
 #include "OpenGLTexture2D.hpp"
 
 namespace ProjectA {

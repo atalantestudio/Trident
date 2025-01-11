@@ -1,7 +1,8 @@
 #include "pch.hpp"
+
 #include "Platform/OpenGL/OpenGLShader.hpp"
-#include "Renderer.hpp"
-#include "Shader.hpp"
+#include "ProjectA/Renderer/Renderer.hpp"
+#include "ProjectA/Renderer/Shader.hpp"
 
 namespace ProjectA {
 	Ref<Shader> Shader::create(const std::string& vertexShaderSource, const std::string& fragmentShaderSource, const std::string& name) {

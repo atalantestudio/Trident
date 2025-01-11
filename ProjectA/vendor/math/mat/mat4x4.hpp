@@ -1,6 +1,9 @@
 #pragma once
 
-#include "math/vec/vec3.hpp"
+#include <algorithm>
+#include <cmath>
+
+#include "vec/vec3.hpp"
 
 namespace ProjectA {
 	template<typename T>

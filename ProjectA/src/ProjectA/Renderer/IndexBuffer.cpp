@@ -1,7 +1,8 @@
 #include "pch.hpp"
+
 #include "Platform/OpenGL/OpenGLIndexBuffer.hpp"
-#include "Renderer.hpp"
-#include "IndexBuffer.hpp"
+#include "ProjectA/Renderer/IndexBuffer.hpp"
+#include "ProjectA/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	Ref<IndexBuffer> IndexBuffer::create(uint32_t* indices, uint32_t count) {

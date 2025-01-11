@@ -47,20 +47,15 @@ namespace ProjectA {
 			}
 	};
 
-	// TODO: Use vec2<float>
 	class API MouseMoveEvent : public Event {
 		private:
-			float x, y;
+			vec2<float> position;
 
 		public:
-			MouseMoveEvent(float x, float y) : x(x), y(y) {}
+			MouseMoveEvent(float x, float y) : position(x, y) {}
 
-			inline float getX() const {
-				return x;
-			}
-
-			inline float getY() const {
-				return y;
+			inline const vec2<float>& getPosition() const {
+				return position;
 			}
 
 			EVENT_TYPE(EventTypeMouseMove)
@@ -69,26 +64,21 @@ namespace ProjectA {
 			inline std::string toString() const override {
 				std::stringstream stream;
 
-				stream << getName() << ": " << x << ", " << y;
+				stream << getName() << ": " << position.x << ", " << position.y;
 
 				return stream.str();
 			}
 	};
 
-	// TODO: Use vec2<float>
 	class API MouseScrollEvent : public Event {
 		private:
-			float xOffset, yOffset;
+			vec2<float> offset;
 
 		public:
-			MouseScrollEvent(float xOffset, float yOffset) : xOffset(xOffset), yOffset(yOffset) {}
+			MouseScrollEvent(float xOffset, float yOffset) : offset(xOffset, yOffset) {}
 
-			inline float getXOffset() const {
-				return xOffset;
-			}
-
-			inline float getYOffset() const {
-				return yOffset;
+			inline const vec2<float>& getOffset() const {
+				return offset;
 			}
 
 			EVENT_TYPE(EventTypeMouseScroll)
@@ -97,7 +87,7 @@ namespace ProjectA {
 			inline std::string toString() const override {
 				std::stringstream stream;
 
-				stream << getName() << ": " << xOffset << ", " << yOffset;
+				stream << getName() << ": " << offset.x << ", " << offset.y;
 
 				return stream.str();
 			}

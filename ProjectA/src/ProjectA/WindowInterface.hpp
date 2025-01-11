@@ -1,8 +1,7 @@
 #pragma once
 
-#include "core.hpp"
-#include "pch.hpp"
-#include "Event/Event.hpp"
+#include "ProjectA/core.hpp"
+#include "ProjectA/Event/Event.hpp"
 
 namespace ProjectA {
 	struct WindowData {
