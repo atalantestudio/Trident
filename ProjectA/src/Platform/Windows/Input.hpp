@@ -1,5 +1,9 @@
 #pragma once
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#include "ProjectA/Application.hpp"
 #include "ProjectA/InputInterface.hpp"
 
 namespace ProjectA {

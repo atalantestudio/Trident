@@ -1,8 +1,13 @@
 #pragma once
 
+#include <GLFW/glfw3.h>
+
+#include "Platform/OpenGL/OpenGLContext.hpp"
+#include "ProjectA/Event/KeyEvent.hpp"
+#include "ProjectA/Event/MouseEvent.hpp"
+#include "ProjectA/Event/WindowEvent.hpp"
 #include "ProjectA/Renderer/Context.hpp"
 #include "ProjectA/WindowInterface.hpp"
-#include <GLFW/glfw3.h>
 
 namespace ProjectA {
 	class Window : public WindowInterface {
@@ -12,7 +17,8 @@ namespace ProjectA {
 
 			struct GLFWData {
 				std::string title;
-				unsigned int width = 0, height = 0;
+				unsigned int width = 0;
+				unsigned int height = 0;
 				bool vSync = false;
 				EventCallback callback;
 			};

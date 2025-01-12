@@ -1,12 +1,6 @@
 #include "pch.hpp"
 
-#include <glad/glad.h>
-
-#include "Platform/OpenGL/OpenGLContext.hpp"
-#include "ProjectA/Event/KeyEvent.hpp"
-#include "ProjectA/Event/MouseEvent.hpp"
-#include "ProjectA/Event/WindowEvent.hpp"
-#include "Window.hpp"
+#include "Platform/Windows/Window.hpp"
 
 namespace ProjectA {
 	static bool glfwInitialized = false;

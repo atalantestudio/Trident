@@ -13,9 +13,9 @@ namespace ProjectA {
 
 	class API WindowInterface {
 		public:
-			static WindowInterface* create(const WindowData& data = WindowData());
+			using EventCallback = std::function<void(Event&)>;
 
-			using EventCallback = std::function<void (Event&)>;
+			static WindowInterface* create(const WindowData& data = WindowData());
 
 			virtual ~WindowInterface() = default;
 

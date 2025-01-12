@@ -32,8 +32,6 @@ project "ProjectA"
 	files {
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/src/**.hpp",
-		"%{prj.name}/vendor/glm/glm/**.hpp",
-		"%{prj.name}/vendor/glm/glm/**.inl",
 		"%{prj.name}/vendor/math/**.cpp",
 		"%{prj.name}/vendor/math/**.hpp",
 		"%{prj.name}/vendor/stb_image/**.cpp",
@@ -44,7 +42,6 @@ project "ProjectA"
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/glad/include",
 		"%{prj.name}/vendor/glfw/glfw/include",
-		"%{prj.name}/vendor/glm",
 		"%{prj.name}/vendor/imgui",
 		"%{prj.name}/vendor/math",
 		"%{prj.name}/vendor/spdlog/include",
@@ -103,7 +100,6 @@ project "Sandbox"
 	includedirs {
 		"ProjectA/src",
 		"ProjectA/vendor",
-		"ProjectA/vendor/glm",
 		"ProjectA/vendor/math",
 		"ProjectA/vendor/spdlog/include",
 	}

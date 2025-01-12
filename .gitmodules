@@ -15,5 +15,5 @@
 
 [submodule "ProjectA/vendor/glm"]
 	path = ProjectA/vendor/glm
-	url = git@github.com:g-truc/glm.git
+	url = git@github.com:g-truc/glm
 	branch = master
