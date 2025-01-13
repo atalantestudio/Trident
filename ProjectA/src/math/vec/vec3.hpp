@@ -10,6 +10,7 @@ namespace ProjectA {
 			T entries[3];
 
 		public:
+			vec3() = default;
 			vec3(T, T, T);
 			vec3(const vec3&);
 			vec3(const vec3&&) noexcept;

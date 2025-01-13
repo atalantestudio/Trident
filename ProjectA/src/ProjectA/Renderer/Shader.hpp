@@ -16,6 +16,7 @@ namespace ProjectA {
 			virtual void unbind() const = 0;
 
 			virtual void setUniform(const std::string& name, int value) const = 0;
+			virtual void setUniform(const std::string& name, const int* value, uint32 count) const = 0;
 			virtual void setUniform(const std::string& name, float value) const = 0;
 			virtual void setUniform(const std::string& name, const vec2<float>& value) const = 0;
 			virtual void setUniform(const std::string& name, const vec3<float>& value) const = 0;

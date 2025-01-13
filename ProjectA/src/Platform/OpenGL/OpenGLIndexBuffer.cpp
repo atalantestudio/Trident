@@ -5,14 +5,15 @@
 #include "Platform/OpenGL/OpenGLIndexBuffer.hpp"
 
 namespace ProjectA {
-	OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32_t* indices, uint32_t count) : count(count) {
+	OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32* indices, uint32 count) : count(count) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glCreateBuffers(1, &id);
 
 		bind();
 
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, id);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(uint32) * count, indices, GL_STATIC_DRAW);
 	}
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer() {

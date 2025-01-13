@@ -8,7 +8,7 @@ namespace ProjectA {
 			uint32_t count;
 
 		public:
-			OpenGLIndexBuffer(const uint32_t* indices, uint32_t count);
+			OpenGLIndexBuffer(const uint32* indices, uint32 count);
 
 			virtual ~OpenGLIndexBuffer();
 

@@ -4,11 +4,9 @@
 
 #include <algorithm>
 #include <array>
-#include <chrono> // Logger
 #include <cmath>
 #include <fstream> // std::ofstream (profile-only)
 #include <functional>
-#include <iomanip> // Logger
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -19,23 +17,29 @@
 #include <utility>
 #include <vector>
 
+#ifdef BUILD_MODE_DEBUG
+	#include <chrono>
+	#include <iomanip>
+#endif
+
 #ifdef WINDOWS
 	#include <Windows.h>
-
-	#undef DELETE
-	#undef ERROR
 #endif
+
+#undef assert
+#undef DELETE
+#undef ERROR
 
 #include "ProjectA/types.hpp"
 
-#undef assert
+#ifdef BUILD_MODE_DEBUG
+	#include "ProjectA/Logger/Logger.hpp"
+#endif
 
-// TODO: Debug only
-#include "ProjectA/Logger/Logger.hpp"
-
-// TODO: Profile-only
-#include "ProjectA/Profile/Profiler.hpp"
-#include "ProjectA/Profile/Timer.hpp"
+#ifdef BUILD_MODE_PROFILE
+	#include "ProjectA/Profile/Profiler.hpp"
+	#include "ProjectA/Profile/Timer.hpp"
+#endif
 
 // TODO: Replace by maths library
 #include "math/math.hpp"

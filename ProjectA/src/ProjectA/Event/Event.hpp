@@ -43,7 +43,7 @@ namespace ProjectA {
 			bool handled = false;
 
 			virtual EventType getType() const = 0;
-			virtual int getCategories() const = 0;
+			virtual int32 getCategories() const = 0;
 			virtual const char* getName() const = 0;
 
 			inline bool hasCategory(EventCategory category) const {
@@ -75,7 +75,7 @@ namespace ProjectA {
 	};
 
 	#define EVENT_CATEGORY(category) \
-		virtual int getCategories() const override { \
+		virtual int32 getCategories() const override { \
 			return category; \
 		}
 

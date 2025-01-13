@@ -13,6 +13,28 @@ namespace ProjectA {
 	vec4<T>::vec4(const vec4&& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
 
 	template<typename T>
+	const T vec4<T>::operator [](unsigned int index) const {
+		switch (index) {
+			default:
+			case 0: return x;
+			case 1: return y;
+			case 2: return z;
+			case 3: return w;
+		}
+	}
+
+	template<typename T>
+	T& vec4<T>::operator [](unsigned int index) {
+		switch (index) {
+			default:
+			case 0: return x;
+			case 1: return y;
+			case 2: return z;
+			case 3: return w;
+		}
+	}
+
+	template<typename T>
 	vec4<T>& vec4<T>::operator =(const vec4& v) {
 		x = v.x;
 		y = v.y;

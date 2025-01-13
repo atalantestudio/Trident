@@ -19,15 +19,15 @@ namespace ProjectA {
 		public:
 			static Scope<Input> create();
 
-			static inline bool isKeyPressed(KeyCode keyCode) {
+			static bool isKeyPressed(KeyCode keyCode) {
 				return instance->isKeyPressedImpl(keyCode);
 			}
 
-			static inline bool isMouseButtonPressed(MouseButton button) {
+			static bool isMouseButtonPressed(MouseButton button) {
 				return instance->isMouseButtonPressedImpl(button);
 			}
 
-			static inline vec2<float> getMousePosition() {
+			static vec2<float> getMousePosition() {
 				return instance->getMousePositionImpl();
 			}
 	};

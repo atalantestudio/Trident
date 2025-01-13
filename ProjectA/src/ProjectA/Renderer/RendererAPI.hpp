@@ -17,7 +17,7 @@ namespace ProjectA {
 			static Scope<RendererAPI> create();
 
 		public:
-			static inline GraphicsAPI getGraphicsAPI() {
+			static GraphicsAPI getGraphicsAPI() {
 				return graphicsApi;
 			}
 
@@ -29,6 +29,6 @@ namespace ProjectA {
 
 			virtual void clear() const = 0;
 
-			virtual void drawIndexed(const ref<VertexArray>& vertexArray) const = 0;
+			virtual void drawIndexed(const ref<VertexArray>& vertexArray, uint32 indexCount) const = 0;
 	};
 }

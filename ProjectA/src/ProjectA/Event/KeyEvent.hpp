@@ -13,7 +13,7 @@ namespace ProjectA {
 		public:
 			EVENT_CATEGORY(EventCategoryInput | EventCategoryKeyboard)
 
-			inline KeyCode getKeyCode() const {
+			KeyCode getKeyCode() const {
 				return keyCode;
 			}
 	};
@@ -27,11 +27,11 @@ namespace ProjectA {
 
 			EVENT_TYPE(EventTypeKeyPress)
 
-			inline int32 getPressCount() const {
+			int32 getPressCount() const {
 				return pressCount;
 			}
 
-			inline std::string toString() const override {
+			std::string toString() const override {
 				std::stringstream stream;
 
 				stream << getName() << ": " << getKeyCode() << " (" << getPressCount() << " repeats)";
@@ -46,7 +46,7 @@ namespace ProjectA {
 
 			EVENT_TYPE(EventTypeKeyRelease)
 
-			inline std::string toString() const override {
+			std::string toString() const override {
 				std::stringstream stream;
 
 				stream << getName() << ": " << getKeyCode();
@@ -61,7 +61,7 @@ namespace ProjectA {
 
 			EVENT_TYPE(EventTypeKeyType)
 
-			inline std::string toString() const override {
+			std::string toString() const override {
 				std::stringstream stream;
 
 				stream << getName() << ": " << getKeyCode();

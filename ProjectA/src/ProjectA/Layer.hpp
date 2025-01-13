@@ -14,7 +14,7 @@ namespace ProjectA {
 
 			virtual ~Layer() = default;
 
-			inline const std::string& getName() const {
+			const std::string& getName() const {
 				return name;
 			}
 

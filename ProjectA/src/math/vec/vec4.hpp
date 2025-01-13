@@ -8,11 +8,13 @@ namespace ProjectA {
 	struct vec4 {
 		T x, y, z, w;
 
+		vec4() = default;
 		vec4(T, T, T, T);
-
 		vec4(const vec4&);
-
 		vec4(const vec4&&);
+
+		const T operator [](unsigned int) const;
+		T& operator [](unsigned int);
 
 		vec4& operator =(const vec4&);
 

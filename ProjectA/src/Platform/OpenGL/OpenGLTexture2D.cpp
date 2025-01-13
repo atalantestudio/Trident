@@ -112,4 +112,8 @@ namespace ProjectA {
 
 		glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	}
+
+	bool OpenGLTexture2D::operator ==(const Texture& other) const {
+		return texture == ((OpenGLTexture2D&) other).texture;
+	}
 }

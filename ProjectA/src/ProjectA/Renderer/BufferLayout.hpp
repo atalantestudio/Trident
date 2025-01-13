@@ -14,11 +14,11 @@ namespace ProjectA {
 			BufferLayout();
 			BufferLayout(const std::initializer_list<BufferElement>& elements);
 
-			inline const std::vector<BufferElement>& getElements() const {
+			const std::vector<BufferElement>& getElements() const {
 				return elements;
 			}
 
-			inline uint32_t getStride() const {
+			uint32_t getStride() const {
 				return stride;
 			}
 

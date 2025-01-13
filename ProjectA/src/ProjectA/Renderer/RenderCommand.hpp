@@ -8,24 +8,24 @@ namespace ProjectA {
 			static Scope<RendererAPI> rendererApi;
 
 		public:
-			static inline void initialize() {
+			static void initialize() {
 				rendererApi->initialize();
 			}
 
-			static inline void setViewport(std::int32_t x, std::int32_t y, std::uint32_t width, std::uint32_t height) {
+			static void setViewport(std::int32_t x, std::int32_t y, std::uint32_t width, std::uint32_t height) {
 				rendererApi->setViewport(x, y, width, height);
 			}
 
-			static inline void setClearColor(const vec4<float>& color) {
+			static void setClearColor(const vec4<float32>& color) {
 				rendererApi->setClearColor(color);
 			}
 
-			static inline void clear() {
+			static void clear() {
 				rendererApi->clear();
 			}
 
-			static inline void drawIndexed(const ref<VertexArray>& vertexArray) {
-				rendererApi->drawIndexed(vertexArray);
+			static void drawIndexed(const ref<VertexArray>& vertexArray, uint32 indexCount) {
+				rendererApi->drawIndexed(vertexArray, indexCount);
 			}
 	};
 }

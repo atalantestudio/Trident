@@ -35,21 +35,21 @@ namespace ProjectA {
 
 			virtual ~WindowsWindow();
 
-			virtual inline void* getNativeWindow() const {
+			virtual void* getNativeWindow() const {
 				return window;
 			}
 
-			inline unsigned int getWidth() const override {
+			unsigned int getWidth() const override {
 				return data.width;
 			}
 
-			inline unsigned int getHeight() const override {
+			unsigned int getHeight() const override {
 				return data.height;
 			}
 
 			bool isVSyncEnabled() const override;
 
-			inline void setEventCallback(const EventCallback& callback) override {
+			void setEventCallback(const EventCallback& callback) override {
 				data.callback = callback;
 			}
 

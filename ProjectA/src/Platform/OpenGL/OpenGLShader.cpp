@@ -5,6 +5,7 @@
 #include "Platform/OpenGL/OpenGLShader.hpp"
 
 namespace ProjectA {
+	// TODO: Refactor
 	static GLenum shaderTypeFromString(const std::string& shaderType) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
@@ -90,27 +91,35 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(shaderSources.size() > 2, "Only 2-shader files are supported.");
 
-		std::array<GLuint, 2> shaders;
+		std::array<GLuint, 2> shaders{};
 		uint32_t index = 0;
 
 		for (auto&& [shaderType, shaderSource] : shaderSources) {
 			const GLchar* source = shaderSource.c_str();
-			GLint compileStatus = 0;
 
 			GLuint shader = glCreateShader(shaderType);
 
 			glShaderSource(shader, 1, &source, 0);
 			glCompileShader(shader);
+
+			GLint compileStatus;
+
 			glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
 
 			if (compileStatus == GL_FALSE) {
-				GLint maxLength = 0;
+				GLint maxLength;
 
-				glGetShaderiv(shader, GL_COMPILE_STATUS, &maxLength);
+				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+				if (maxLength == 0) {
+					ENGINE_FATAL("Shader compilation failed (no info log provided)");
+
+					break;
+				}
 
 				std::vector<GLchar> infoLog(maxLength);
 
-				glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+				glGetShaderInfoLog(shader, maxLength, nullptr, infoLog.data());
 				glDeleteShader(shader);
 
 				ENGINE_FATAL("Shader compilation failed: []", infoLog.data());
@@ -127,29 +136,37 @@ namespace ProjectA {
 
 		glLinkProgram(program);
 
-		GLint linkStatus = 0;
+		GLint linkStatus;
 
-		glGetProgramiv(program, GL_LINK_STATUS, (int*) &linkStatus);
+		glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
 
 		if (linkStatus == GL_FALSE) {
-			GLint maxLength = 0;
+			GLint maxLength;
 
-			glGetProgramiv(program, GL_LINK_STATUS, &maxLength);
+			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+
+			if (maxLength == 0) {
+				ENGINE_FATAL("Program linking failed (no info log provided)");
+
+				return;
+			}
 
 			std::vector<GLchar> infoLog(maxLength);
 
-			glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
+			glGetProgramInfoLog(program, maxLength, nullptr, infoLog.data());
 
-			for (auto shader : shaders) {
+			for (GLuint shader : shaders) {
 				glDeleteShader(shader);
 			}
 
 			glDeleteProgram(program);
 
-			ENGINE_FATAL("Program compilation failed: []", infoLog.data());
+			ENGINE_FATAL("Program linking failed: []", infoLog.data());
 
 			return;
 		}
+
+		ENGINE_INFO("Shader program compiled and linked successfully.");
 
 		for (auto shader : shaders) {
 			glDetachShader(program, shader);
@@ -225,10 +242,22 @@ namespace ProjectA {
 		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			throw std::runtime_error("OpenGL location not found.");
+			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing.", name);
 		}
 
 		glUniform1i(location, value);
+	}
+
+	void OpenGLShader::setUniform(const std::string& name, const int* value, uint32 count) const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		const GLint location = glGetUniformLocation(program, name.c_str());
+
+		if (location == -1) {
+			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing.", name);
+		}
+
+		glUniform1iv(location, count, value);
 	}
 
 	void OpenGLShader::setUniform(const std::string& name, float value) const {
@@ -237,7 +266,7 @@ namespace ProjectA {
 		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			throw std::runtime_error("OpenGL location not found.");
+			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing", name);
 		}
 
 		glUniform1f(location, value);
@@ -249,7 +278,7 @@ namespace ProjectA {
 		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			throw std::runtime_error("OpenGL location not found.");
+			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing", name);
 		}
 
 		glUniform2f(location, value.x, value.y);
@@ -261,7 +290,7 @@ namespace ProjectA {
 		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			throw std::runtime_error("OpenGL location not found.");
+			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing", name);
 		}
 
 		glUniform3f(location, value[0], value[1], value[2]);
@@ -273,7 +302,7 @@ namespace ProjectA {
 		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			throw std::runtime_error("OpenGL location not found.");
+			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing", name);
 		}
 
 		glUniform4f(location, value.x, value.y, value.z, value.w);
@@ -285,7 +314,7 @@ namespace ProjectA {
 		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			throw std::runtime_error("OpenGL location not found.");
+			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing", name);
 		}
 
 		glUniformMatrix4fv(location, 1, GL_FALSE, value.entries);

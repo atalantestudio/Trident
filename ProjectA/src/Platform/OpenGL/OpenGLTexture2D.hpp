@@ -27,5 +27,7 @@ namespace ProjectA {
 			virtual uint32 getHeight() const override;
 
 			virtual void setData(const void* data, uint32 size) const override;
+
+			virtual bool operator ==(const Texture& other) const override;
 	};
 }

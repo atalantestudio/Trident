@@ -52,12 +52,16 @@ namespace ProjectA {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void OpenGLRendererAPI::drawIndexed(const ref<VertexArray>& vertexArray) const {
+	void OpenGLRendererAPI::drawIndexed(const ref<VertexArray>& vertexArray, uint32 indexCount) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
+		if (indexCount == 0) {
+			indexCount = vertexArray->getIndexBuffer()->getCount();
+		}
 
-		// TODO: Why?
+		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+
+		// Unbind texture at index 0.
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }

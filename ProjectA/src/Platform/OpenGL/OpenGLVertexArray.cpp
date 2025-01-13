@@ -38,7 +38,7 @@ namespace ProjectA {
 		return 0;
 	}
 
-	OpenGLVertexArray::OpenGLVertexArray() : vertexBufferIndex(0) {
+	OpenGLVertexArray::OpenGLVertexArray() {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glCreateVertexArrays(1, &id);
@@ -80,18 +80,35 @@ namespace ProjectA {
 
 		const auto& layout = vertexBuffer->getLayout();
 
-		for (auto& element : layout) {
-			glEnableVertexAttribArray(vertexBufferIndex);
-			glVertexAttribPointer(
-				vertexBufferIndex,
-				getShaderTypeComponentCount(element.type),
-				getShaderType(element.type),
-				element.normalized ? GL_TRUE : GL_FALSE,
-				layout.getStride(),
-				(const void*) element.offset
-			);
+		GLuint attributeIndex = 0;
 
-			vertexBufferIndex++;
+		for (auto& element : layout) {
+			glEnableVertexAttribArray(attributeIndex);
+
+			const GLenum shaderType = getShaderType(element.type);
+
+			if (shaderType == GL_INT) {
+				glVertexAttribIPointer(
+					attributeIndex,
+					getShaderTypeComponentCount(element.type),
+					shaderType,
+					layout.getStride(),
+					(const void*) element.offset
+				);
+			}
+			else {
+				// Assume float.
+				glVertexAttribPointer(
+					attributeIndex,
+					getShaderTypeComponentCount(element.type),
+					shaderType,
+					element.normalized ? GL_TRUE : GL_FALSE,
+					layout.getStride(),
+					(const void*) element.offset
+				);
+			}
+
+			attributeIndex++;
 		}
 
 		vertexBuffers.push_back(vertexBuffer);

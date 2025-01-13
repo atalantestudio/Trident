@@ -13,7 +13,7 @@ namespace ProjectA {
 		public:
 			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
-			inline MouseButton getButton() const {
+			MouseButton getButton() const {
 				return button;
 			}
 	};
@@ -24,7 +24,7 @@ namespace ProjectA {
 
 			EVENT_TYPE(EventTypeMouseButtonPress)
 
-			inline std::string toString() const override {
+			std::string toString() const override {
 				std::stringstream stream;
 
 				stream << getName() << ": " << button;
@@ -39,7 +39,7 @@ namespace ProjectA {
 
 			EVENT_TYPE(EventTypeMouseButtonRelease)
 
-			inline std::string toString() const override {
+			std::string toString() const override {
 				std::stringstream stream;
 
 				stream << getName() << ": " << button;
@@ -50,19 +50,19 @@ namespace ProjectA {
 
 	class MouseMoveEvent : public Event {
 		private:
-			vec2<float> position;
+			vec2<float32> position;
 
 		public:
-			MouseMoveEvent(float x, float y) : position(x, y) {}
+			MouseMoveEvent(float32 x, float32 y) : position(x, y) {}
 
-			inline const vec2<float>& getPosition() const {
+			const vec2<float32>& getPosition() const {
 				return position;
 			}
 
 			EVENT_TYPE(EventTypeMouseMove)
 			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
-			inline std::string toString() const override {
+			std::string toString() const override {
 				std::stringstream stream;
 
 				stream << getName() << ": " << position.x << ", " << position.y;
@@ -73,19 +73,19 @@ namespace ProjectA {
 
 	class MouseScrollEvent : public Event {
 		private:
-			vec2<float> offset;
+			vec2<float32> offset;
 
 		public:
-			MouseScrollEvent(float xOffset, float yOffset) : offset(xOffset, yOffset) {}
+			MouseScrollEvent(float32 xOffset, float32 yOffset) : offset(xOffset, yOffset) {}
 
-			inline const vec2<float>& getOffset() const {
+			const vec2<float>& getOffset() const {
 				return offset;
 			}
 
 			EVENT_TYPE(EventTypeMouseScroll)
 			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
-			inline std::string toString() const override {
+			std::string toString() const override {
 				std::stringstream stream;
 
 				stream << getName() << ": " << offset.x << ", " << offset.y;

@@ -31,10 +31,13 @@ void SandboxLayer::update(float deltaTime) {
 	{
 		PROFILE_SCOPE("Draw");
 
+		// NOTE: Z axis is reversed (+ points towards the screen).
 		ProjectA::Renderer2D::beginScene(cameraController.getCamera());
-		ProjectA::Renderer2D::drawRotatedQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, ProjectA::radians(-45.0f), {0.8f, 0.2f, 0.3f, 1.0f});
+		//ProjectA::Renderer2D::drawRotatedQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, ProjectA::radians(-45.0f), {0.8f, 0.2f, 0.3f, 1.0f});
+		ProjectA::Renderer2D::drawQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, {0.8f, 0.2f, 0.3f, 1.0f});
 		ProjectA::Renderer2D::drawQuad({0.5f, -0.5f}, {0.5f, 0.75f}, {0.2f, 0.3f, 0.8f, 1.0f});
-		ProjectA::Renderer2D::drawQuad({0.0f, 0.0f, 0.1f}, {10.0f, 10.0f}, texture, 10.0f); // Z axis is reversed (+ points towards the screen)
+		ProjectA::Renderer2D::drawQuad({-5.0f, -5.0f, 0.1f}, {10.0f, 10.0f}, texture, 10.0f);
+		ProjectA::Renderer2D::drawQuad({-0.5f, -0.5f, 0.01f}, {1.0f, 1.0f}, texture, 20.0f);
 		ProjectA::Renderer2D::endScene();
 	}
 }
@@ -43,7 +46,7 @@ void SandboxLayer::renderImGui() {
 	PROFILE_SCOPE(__FUNCSIG__);
 
 	ImGui::Begin("Settings");
-	ImGui::ColorEdit4("Square color", (std::float_t*) &squareColor);
+	ImGui::ColorEdit4("Color", &color[0]);
 	ImGui::End();
 }
 

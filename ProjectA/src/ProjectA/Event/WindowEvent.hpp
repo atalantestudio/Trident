@@ -18,19 +18,20 @@ namespace ProjectA {
 			EVENT_TYPE(EventTypeWindowClose)
 	};
 
-	// TODO: Create vec2<int> for this case?
 	class WindowResizeEvent : public WindowEvent {
 		private:
-			int width, height;
+			// TODO: Replace with vec2<int32> (or better, vec2<uint32>).
+			uint32 width;
+			uint32 height;
 
 		public:
-			WindowResizeEvent(int width, int height) : width(width), height(height) {}
+			WindowResizeEvent(uint32 width, uint32 height) : width(width), height(height) {}
 
-			inline int getWidth() const {
+			uint32 getWidth() const {
 				return width;
 			}
 
-			inline int getHeight() const {
+			uint32 getHeight() const {
 				return height;
 			}
 

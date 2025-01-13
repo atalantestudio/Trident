@@ -23,7 +23,7 @@ namespace ProjectA {
 			float lastFrameTime;
 
 		public:
-			static inline Application& get() {
+			static Application& get() {
 				return *instance;
 			}
 
@@ -37,7 +37,7 @@ namespace ProjectA {
 
 			void pushOverlay(Layer* overlay);
 
-			inline Window& getWindow() {
+			Window& getWindow() {
 				return *window;
 			}
 

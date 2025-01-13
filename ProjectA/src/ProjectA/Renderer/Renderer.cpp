@@ -34,7 +34,7 @@ namespace ProjectA {
 
 		vertexArray->bind();
 
-		RenderCommand::drawIndexed(vertexArray);
+		RenderCommand::drawIndexed(vertexArray, vertexArray->getIndexBuffer()->getCount());
 	}
 
 	void Renderer::onWindowResize(uint32 width, uint32 height) {
