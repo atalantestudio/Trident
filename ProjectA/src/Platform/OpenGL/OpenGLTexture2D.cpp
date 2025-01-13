@@ -6,7 +6,7 @@
 #include "OpenGLTexture2D.hpp"
 
 namespace ProjectA {
-	OpenGLTexture2D::OpenGLTexture2D(std::size_t width, std::size_t height) :
+	OpenGLTexture2D::OpenGLTexture2D(GLsizei width, GLsizei height) :
 		internalFormat(GL_RGBA8),
 		format(GL_RGBA),
 		width(width),
@@ -45,7 +45,7 @@ namespace ProjectA {
 			data = stbi_load(path.c_str(), &x, &y, &channelCount, 0);
 		}
 
-		CORE_ASSERT(data, "Could not load texture");
+		ENGINE_ASSERT(data, "Could not load texture");
 
 		width = x;
 		height = y;
@@ -55,7 +55,7 @@ namespace ProjectA {
 			format = GL_RGB;
 		}
 
-		CORE_ASSERT(channelCount == 3 || channelCount == 4, "Texture format not supported");
+		ENGINE_ASSERT(channelCount == 3 || channelCount == 4, "Texture format not supported");
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &texture);
 
@@ -77,12 +77,12 @@ namespace ProjectA {
 		glDeleteTextures(1, &texture);
 	}
 
-	uint32_t OpenGLTexture2D::getWidth() const {
-		return width;
+	uint32 OpenGLTexture2D::getWidth() const {
+		return static_cast<uint32>(width);
 	}
 
-	uint32_t OpenGLTexture2D::getHeight() const {
-		return height;
+	uint32 OpenGLTexture2D::getHeight() const {
+		return static_cast<uint32>(height);
 	}
 
 	void OpenGLTexture2D::bind(uint32_t slot) const {

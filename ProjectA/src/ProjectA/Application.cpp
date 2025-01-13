@@ -12,7 +12,7 @@ namespace ProjectA {
 	Application::Application() : lastFrameTime(0.0f) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		CORE_ASSERT(!instance, "The Application instance already exists.")
+		ENGINE_ASSERT(!instance, "The Application instance already exists.")
 
 		instance = this;
 

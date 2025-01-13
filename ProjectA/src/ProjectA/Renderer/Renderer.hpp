@@ -24,7 +24,7 @@ namespace ProjectA {
 
 			static void endScene();
 
-			static void submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const mat4x4<float>& transform);
+			static void submit(const ref<Shader>& shader, const ref<VertexArray>& vertexArray, const mat4x4<float>& transform);
 
 			static void onWindowResize(std::uint32_t width, std::uint32_t height);
 	};

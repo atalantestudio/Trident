@@ -5,10 +5,10 @@
 #include "ProjectA/Renderer/Shader.hpp"
 
 namespace ProjectA {
-	Ref<Shader> Shader::create(const std::string& vertexShaderSource, const std::string& fragmentShaderSource, const std::string& name) {
+	ref<Shader> Shader::create(const std::string& vertexShaderSource, const std::string& fragmentShaderSource, const std::string& name) {
 		switch (Renderer::getGraphicsAPI()) {
 			case RendererAPI::GraphicsAPI::None:
-				CORE_ASSERT(false, "Graphics::None is not supported yet.")
+				ENGINE_ASSERT(false, "Graphics::None is not supported yet.")
 
 				return nullptr;
 
@@ -19,10 +19,10 @@ namespace ProjectA {
 		return nullptr;
 	}
 
-	Ref<Shader> Shader::create(const std::string& path) {
+	ref<Shader> Shader::create(const std::string& path) {
 		switch (Renderer::getGraphicsAPI()) {
 			case RendererAPI::GraphicsAPI::None:
-				CORE_ASSERT(false, "Graphics::None is not supported yet.")
+				ENGINE_ASSERT(false, "Graphics::None is not supported yet.")
 
 				return nullptr;
 

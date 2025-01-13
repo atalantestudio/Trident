@@ -3,7 +3,7 @@
 #include "ProjectA/Renderer/ShaderLibrary.hpp"
 
 namespace ProjectA {
-	Ref<Shader> ShaderLibrary::load(const std::string& path) {
+	ref<Shader> ShaderLibrary::load(const std::string& path) {
 		auto shader = Shader::create(path);
 
 		add(shader);
@@ -11,7 +11,7 @@ namespace ProjectA {
 		return shader;
 	}
 
-	Ref<Shader> ShaderLibrary::load(const std::string& path, const std::string& name) {
+	ref<Shader> ShaderLibrary::load(const std::string& path, const std::string& name) {
 		auto shader = Shader::create(path);
 
 		add(shader, name);
@@ -19,18 +19,18 @@ namespace ProjectA {
 		return shader;
 	}
 
-	Ref<Shader> ShaderLibrary::get(const std::string& name) const {
-		CORE_ASSERT((shaders.find(name) != shaders.end()), "Could not find shader name \"{0}\" in the shader library.", name);
+	ref<Shader> ShaderLibrary::get(const std::string& name) const {
+		ENGINE_ASSERT((shaders.find(name) != shaders.end()), "Could not find shader name \"{0}\" in the shader library.", name);
 
 		return shaders.at(name);
 	}
 
-	void ShaderLibrary::add(const Ref<Shader>& shader) {
+	void ShaderLibrary::add(const ref<Shader>& shader) {
 		add(shader, shader->getName());
 	}
 
-	void ShaderLibrary::add(const Ref<Shader>& shader, const std::string& name) {
-		CORE_ASSERT((shaders.find(name) == shaders.end()), "Found duplicate shader name.");
+	void ShaderLibrary::add(const ref<Shader>& shader, const std::string& name) {
+		ENGINE_ASSERT((shaders.find(name) == shaders.end()), "Found duplicate shader name.");
 
 		shaders[name] = shader;
 	}

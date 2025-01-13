@@ -3,12 +3,17 @@
 #define _USE_MATH_DEFINES
 
 #include <algorithm>
+#include <array>
+#include <chrono> // Logger
+#include <fstream> // std::ofstream (profile-only)
 #include <functional>
+#include <iomanip> // Logger
 #include <iostream>
 #include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <thread> // std::thread::id (profile-only)
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -20,14 +25,16 @@
 	#undef ERROR
 #endif
 
-#include "ProjectA/Logger.hpp"
-
 // TODO: Replace by maths library
-#include "mat/mat4x4.hpp"
-#include "vec/vec2.hpp"
-#include "vec/vec3.hpp"
-#include "vec/vec4.hpp"
+#include "math/math.hpp"
 
-// TODO: Profile-only PCH header?
+#include "ProjectA/types.hpp"
+
+#undef assert
+
+// TODO: Debug only
+#include "ProjectA/Logger/Logger.hpp"
+
+// TODO: Profile-only
 #include "ProjectA/Profile/Profiler.hpp"
 #include "ProjectA/Profile/Timer.hpp"

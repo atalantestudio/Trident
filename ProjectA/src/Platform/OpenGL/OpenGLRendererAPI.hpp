@@ -13,6 +13,6 @@ namespace ProjectA {
 
 			virtual void clear() const override;
 
-			virtual void drawIndexed(const Ref<VertexArray>& vertexArray) const override;
+			virtual void drawIndexed(const ref<VertexArray>& vertexArray) const override;
 	};
 }

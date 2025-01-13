@@ -6,10 +6,11 @@ namespace ProjectA {
 	struct BufferElement {
 		ShaderType type;
 		std::string name;
-		uint32_t size;
-		uint32_t offset;
+		std::uint32_t size;
+		std::size_t offset;
 		bool normalized;
 
+		BufferElement() = default;
 		BufferElement(ShaderType type, const std::string& name, bool normalized);
 	};
 }

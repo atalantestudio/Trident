@@ -3,10 +3,10 @@
 #include "Platform/Windows/Window.hpp"
 
 namespace ProjectA {
-	static bool glfwInitialized = false;
+	static std::uint8_t glfwWindowCount = 0;
 
 	static void glfwErrorCallback(int error, const char* description) {
-		LOG_CORE_ERROR("GLFW error ({0}): {1}", error, description);
+		ENGINE_ERROR("GLFW error ([]): []", error, description);
 	}
 
 	WindowInterface* WindowInterface::create(const WindowData& data) {
@@ -42,9 +42,9 @@ namespace ProjectA {
 		glfwData.width = data.width;
 		glfwData.height = data.height;
 
-		LOG_CORE_TRACE("Created {0}x{1} \"{2}\" window", glfwData.width, glfwData.height, glfwData.title);
+		ENGINE_TRACE("Created []x[] \"[]\" window", glfwData.width, glfwData.height, glfwData.title);
 
-		if (!glfwInitialized) {
+		if (glfwWindowCount == 0) {
 			int success;
 
 			{
@@ -53,17 +53,17 @@ namespace ProjectA {
 				success = glfwInit();
 			}
 
-			CORE_ASSERT(success, "Could not initialize GLFW");
+			ENGINE_ASSERT(success, "Could not initialize GLFW");
 
 			glfwSetErrorCallback(glfwErrorCallback);
-
-			glfwInitialized = true;
 		}
 
 		{
 			PROFILE_SCOPE("glfwCreateWindow");
 
 			window = glfwCreateWindow((int) glfwData.width, (int) glfwData.height, glfwData.title.c_str(), nullptr, nullptr);
+
+			glfwWindowCount++;
 		}
 
 		context = new OpenGLContext(window);
@@ -172,6 +172,14 @@ namespace ProjectA {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glfwDestroyWindow(window);
+
+		glfwWindowCount--;
+
+		if (glfwWindowCount == 0) {
+			ENGINE_INFO("Terminating GLFW.");
+
+			glfwTerminate();
+		}
 	}
 
 	void Window::update() {

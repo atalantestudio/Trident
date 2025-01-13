@@ -44,7 +44,6 @@ project "ProjectA"
 		"%{prj.name}/vendor/glfw/glfw/include",
 		"%{prj.name}/vendor/imgui",
 		"%{prj.name}/vendor/math",
-		"%{prj.name}/vendor/spdlog/include",
 		"%{prj.name}/vendor/stb_image",
 	}
 
@@ -68,17 +67,17 @@ project "ProjectA"
 		}
 
 	filter "configurations:Debug"
-		defines "DEBUG"
+		defines "BUILD_MODE_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Profile"
-		defines "PROFILE"
+		defines "BUILD_MODE_PROFILE"
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Release"
-		defines "RELEASE"
+		defines "BUILD_MODE_RELEASE"
 		runtime "Release"
 		optimize "on"
 
@@ -101,7 +100,6 @@ project "Sandbox"
 		"ProjectA/src",
 		"ProjectA/vendor",
 		"ProjectA/vendor/math",
-		"ProjectA/vendor/spdlog/include",
 	}
 
 	links {
@@ -112,16 +110,16 @@ project "Sandbox"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "DEBUG"
+		defines "BUILD_MODE_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Profile"
-		defines "PROFILE"
+		defines "BUILD_MODE_PROFILE"
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Release"
-		defines "RELEASE"
+		defines "BUILD_MODE_RELEASE"
 		runtime "Release"
 		optimize "on"

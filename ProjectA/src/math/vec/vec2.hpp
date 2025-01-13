@@ -7,7 +7,7 @@ namespace ProjectA {
 	struct vec2 {
 		T x, y;
 
-		vec2(T x, T y);
+		vec2(T x, T y) : x(x), y(y) {}
 	};
 
 	template struct vec2<float>;

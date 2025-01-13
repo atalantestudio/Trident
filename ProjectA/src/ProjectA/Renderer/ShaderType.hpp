@@ -42,7 +42,7 @@ namespace ProjectA {
 				return 4 * 4 * 4;
 		}
 
-		CORE_ASSERT(false, "Unknown ShaderType");
+		ENGINE_ASSERT(false, "Unknown ShaderType");
 
 		return 0;
 	}
@@ -73,7 +73,7 @@ namespace ProjectA {
 				return 4 * 4;
 		}
 
-		CORE_ASSERT(false, "Unknown ShaderType");
+		ENGINE_ASSERT(false, "Unknown ShaderType");
 
 		return 0;
 	}

@@ -6,15 +6,15 @@
 namespace ProjectA {
 	class ShaderLibrary {
 		private:
-			std::unordered_map<std::string, Ref<Shader>> shaders;
+			std::unordered_map<std::string, ref<Shader>> shaders;
 
 		public:
-			Ref<Shader> load(const std::string& path);
-			Ref<Shader> load(const std::string& path, const std::string& name);
+			ref<Shader> load(const std::string& path);
+			ref<Shader> load(const std::string& path, const std::string& name);
 
-			Ref<Shader> get(const std::string& name) const;
+			ref<Shader> get(const std::string& name) const;
 
-			void add(const Ref<Shader>& shader);
-			void add(const Ref<Shader>& shader, const std::string& name);
+			void add(const ref<Shader>& shader);
+			void add(const ref<Shader>& shader, const std::string& name);
 	};
 }

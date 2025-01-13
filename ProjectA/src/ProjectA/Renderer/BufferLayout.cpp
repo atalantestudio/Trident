@@ -28,7 +28,7 @@ namespace ProjectA {
 	void BufferLayout::updateStride() {
 		stride = 0;
 
-		for (auto& element : elements) {
+		for (BufferElement& element : elements) {
 			element.offset = stride;
 
 			stride += element.size;

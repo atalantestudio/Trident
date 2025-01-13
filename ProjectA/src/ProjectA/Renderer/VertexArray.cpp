@@ -5,10 +5,10 @@
 #include "ProjectA/Renderer/VertexArray.hpp"
 
 namespace ProjectA {
-	Ref<VertexArray> VertexArray::create() {
+	ref<VertexArray> VertexArray::create() {
 		switch (Renderer::getGraphicsAPI()) {
 			case RendererAPI::GraphicsAPI::None:
-				CORE_ASSERT(false, "Graphics::None is not supported yet.")
+				ENGINE_ASSERT(false, "Graphics::None is not supported yet.")
 
 				return nullptr;
 

@@ -3,11 +3,6 @@
 	url = git@github.com:glfw/glfw.git
 	branch = master
 
-[submodule "ProjectA/vendor/spdlog"]
-	path = ProjectA/vendor/spdlog
-	url = git@github.com:gabime/spdlog.git
-	branch = v1.x
-
 [submodule "ProjectA/vendor/imgui"]
 	path = ProjectA/vendor/imgui
 	url = git@github.com:TheCherno/imgui

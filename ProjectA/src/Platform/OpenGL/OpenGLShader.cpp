@@ -16,7 +16,7 @@ namespace ProjectA {
 			return GL_FRAGMENT_SHADER;
 		}
 
-		CORE_ASSERT(false, "Unhandled shader type \"{0}\".", shaderType);
+		ENGINE_ASSERT(false, "Unhandled shader type \"{0}\".", shaderType);
 
 		return 0;
 	}
@@ -27,9 +27,9 @@ namespace ProjectA {
 		std::ifstream input(path, std::ios::in | std::ios::binary);
 
 		if (!input) {
-			LOG_CORE_FATAL("Could not open file \"{0}\".", path);
+			ENGINE_FATAL("Could not open file \"[]\".", path);
 
-			CORE_ASSERT(false, "Could not open file");
+			ENGINE_ASSERT(false, "Could not open file");
 		}
 
 		std::string result;
@@ -57,7 +57,7 @@ namespace ProjectA {
 		while (position != std::string::npos) {
 			size_t eol = source.find_first_of("\r\n", position);
 
-			CORE_ASSERT(eol == std::string::npos, "Shader syntax error detected.");
+			ENGINE_ASSERT(eol == std::string::npos, "Shader syntax error detected.");
 
 			size_t begin = position + shaderTypeTokenLength + 1;
 
@@ -80,7 +80,7 @@ namespace ProjectA {
 
 		GLuint program = glCreateProgram();
 
-		CORE_ASSERT(shaderSources.size() > 2, "Only 2-shader files are supported.");
+		ENGINE_ASSERT(shaderSources.size() > 2, "Only 2-shader files are supported.");
 
 		std::array<GLuint, 2> shaders;
 		uint32_t index = 0;
@@ -105,7 +105,7 @@ namespace ProjectA {
 				glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
 				glDeleteShader(shader);
 
-				LOG_CORE_FATAL("Shader compilation failed: {0}", infoLog.data());
+				ENGINE_FATAL("Shader compilation failed: []", infoLog.data());
 
 				break;
 			}
@@ -138,7 +138,7 @@ namespace ProjectA {
 
 			glDeleteProgram(program);
 
-			LOG_CORE_FATAL("Program compilation failed: {0}", infoLog.data());
+			ENGINE_FATAL("Program compilation failed: []", infoLog.data());
 
 			return;
 		}

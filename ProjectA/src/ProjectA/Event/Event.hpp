@@ -23,12 +23,12 @@ namespace ProjectA {
 
 	enum EventCategory {
 		EventCategoryNone = 0,
-		EventCategoryApplication = BIT_SHIFT_ID(0),
-		EventCategoryInput = BIT_SHIFT_ID(1),
-		EventCategoryKeyboard = BIT_SHIFT_ID(2),
-		EventCategoryMouse = BIT_SHIFT_ID(3),
-		EventCategoryMouseButton = BIT_SHIFT_ID(4),
-		EventCategoryWindow = BIT_SHIFT_ID(5),
+		EventCategoryApplication = 1 << 0,
+		EventCategoryInput = 1 << 1,
+		EventCategoryKeyboard = 1 << 2,
+		EventCategoryMouse = 1 << 3,
+		EventCategoryMouseButton = 1 << 4,
+		EventCategoryWindow = 1 << 5,
 	};
 
 	class API Event {

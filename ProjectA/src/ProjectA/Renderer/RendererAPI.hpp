@@ -26,6 +26,6 @@ namespace ProjectA {
 
 			virtual void clear() const = 0;
 
-			virtual void drawIndexed(const Ref<VertexArray>& vertexArray) const = 0;
+			virtual void drawIndexed(const ref<VertexArray>& vertexArray) const = 0;
 	};
 }

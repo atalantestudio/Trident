@@ -8,7 +8,7 @@ class SandboxLayer : public ProjectA::Layer {
 
 		ProjectA::vec4<float> squareColor = {0.2f, 0.3f, 0.8f, 1.0f};
 
-		ProjectA::Ref<ProjectA::Texture2D> texture;
+		ProjectA::ref<ProjectA::Texture2D> texture;
 
 	public:
 		SandboxLayer();

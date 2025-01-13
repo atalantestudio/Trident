@@ -7,9 +7,9 @@
 
 namespace ProjectA {
 	struct Renderer2DStorage {
-		Ref<VertexArray> vertexArray;
-		Ref<Shader> colorTextureShader;
-		Ref<Texture2D> defaultTexture;
+		ref<VertexArray> vertexArray;
+		ref<Shader> colorTextureShader;
+		ref<Texture2D> defaultTexture;
 	};
 
 	static Renderer2DStorage* storage;
@@ -29,7 +29,7 @@ namespace ProjectA {
 			-0.5f,  0.5f,  0.0f,    0.0f, 1.0f
 		};
 
-		Ref<VertexBuffer> vertexBuffer = VertexBuffer::create(squareVertices, sizeof(squareVertices));
+		ref<VertexBuffer> vertexBuffer = VertexBuffer::create(squareVertices, sizeof(squareVertices));
 
 		vertexBuffer->setLayout({
 			{
@@ -47,7 +47,7 @@ namespace ProjectA {
 			0, 2, 3
 		};
 
-		Ref<IndexBuffer> squareIndexBuffer = IndexBuffer::create(squareIndices, sizeof(squareIndices) / sizeof(std::uint32_t));
+		ref<IndexBuffer> squareIndexBuffer = IndexBuffer::create(squareIndices, sizeof(squareIndices) / sizeof(std::uint32_t));
 
 		storage->vertexArray->setIndexBuffer(squareIndexBuffer);
 
@@ -100,11 +100,11 @@ namespace ProjectA {
 		storage->defaultTexture->unbind();
 	}
 
-	void Renderer2D::drawTexturedQuad(const vec2<float>& position, const vec2<float>& size, const Ref<Texture2D>& texture, float textureSize = 1.0f) {
+	void Renderer2D::drawTexturedQuad(const vec2<float>& position, const vec2<float>& size, const ref<Texture2D>& texture, float textureSize = 1.0f) {
 		drawTexturedQuad({position.x, position.y, 0.0f}, size, texture, textureSize);
 	}
 
-	void Renderer2D::drawTexturedQuad(const vec3<float>& position, const vec2<float>& size, const Ref<Texture2D>& texture, float textureSize = 1.0f) {
+	void Renderer2D::drawTexturedQuad(const vec3<float>& position, const vec2<float>& size, const ref<Texture2D>& texture, float textureSize = 1.0f) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		vec3<float> scale = vec3<float>(size.x, size.y, 1.0f);

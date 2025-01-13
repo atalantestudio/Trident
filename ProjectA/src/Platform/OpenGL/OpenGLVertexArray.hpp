@@ -7,8 +7,8 @@ namespace ProjectA {
 		private:
 			std::uint32_t id;
 			std::uint32_t vertexBufferIndex;
-			std::vector<Ref<VertexBuffer>> vertexBuffers;
-			Ref<IndexBuffer> indexBuffer;
+			std::vector<ref<VertexBuffer>> vertexBuffers;
+			ref<IndexBuffer> indexBuffer;
 
 		public:
 			OpenGLVertexArray();
@@ -19,12 +19,12 @@ namespace ProjectA {
 
 			virtual void unbind() const override;
 
-			virtual const std::vector<Ref<VertexBuffer>>& getVertexBuffers() const override;
+			virtual const std::vector<ref<VertexBuffer>>& getVertexBuffers() const override;
 
-			virtual const Ref<IndexBuffer>& getIndexBuffer() const override;
+			virtual const ref<IndexBuffer>& getIndexBuffer() const override;
 
-			virtual void addVertexBuffer(const Ref<VertexBuffer>& vertexBuffer) override;
+			virtual void addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) override;
 
-			virtual void setIndexBuffer(const Ref<IndexBuffer>& indexBuffer) override;
+			virtual void setIndexBuffer(const ref<IndexBuffer>& indexBuffer) override;
 	};
 }

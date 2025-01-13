@@ -24,7 +24,7 @@ namespace ProjectA {
 				rendererApi->clear();
 			}
 
-			static inline void drawIndexed(const Ref<VertexArray>& vertexArray) {
+			static inline void drawIndexed(const ref<VertexArray>& vertexArray) {
 				rendererApi->drawIndexed(vertexArray);
 			}
 	};

@@ -31,7 +31,7 @@ namespace ProjectA {
 				return GL_FLOAT;
 		}
 
-		CORE_ASSERT(false, "Unknown ShaderType");
+		ENGINE_ASSERT(false, "Unknown ShaderType");
 
 		return 0;
 	}
@@ -60,18 +60,18 @@ namespace ProjectA {
 		glBindVertexArray(0);
 	}
 
-	const std::vector<Ref<VertexBuffer>>& OpenGLVertexArray::getVertexBuffers() const {
+	const std::vector<ref<VertexBuffer>>& OpenGLVertexArray::getVertexBuffers() const {
 		return vertexBuffers;
 	}
 
-	const Ref<IndexBuffer>& OpenGLVertexArray::getIndexBuffer() const {
+	const ref<IndexBuffer>& OpenGLVertexArray::getIndexBuffer() const {
 		return indexBuffer;
 	}
 
-	void OpenGLVertexArray::addVertexBuffer(const Ref<VertexBuffer>& vertexBuffer) {
+	void OpenGLVertexArray::addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		CORE_ASSERT(vertexBuffer->getLayout().getElements().size(), "Vertex buffer has no layout");
+		ENGINE_ASSERT(vertexBuffer->getLayout().getElements().size(), "Vertex buffer has no layout");
 
 		bind();
 		vertexBuffer->bind();
@@ -86,7 +86,7 @@ namespace ProjectA {
 				getShaderType(element.type),
 				element.normalized ? GL_TRUE : GL_FALSE,
 				layout.getStride(),
-				(const void*) (std::intptr_t) element.offset
+				(const void*) element.offset
 			);
 
 			vertexBufferIndex++;
@@ -95,7 +95,7 @@ namespace ProjectA {
 		vertexBuffers.push_back(vertexBuffer);
 	}
 
-	void OpenGLVertexArray::setIndexBuffer(const Ref<IndexBuffer>& indexBuffer) {
+	void OpenGLVertexArray::setIndexBuffer(const ref<IndexBuffer>& indexBuffer) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		bind();

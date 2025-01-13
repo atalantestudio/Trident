@@ -4,10 +4,10 @@
 #include "ProjectA/Renderer/VertexBuffer.hpp"
 
 namespace ProjectA {
-	Ref<VertexBuffer> VertexBuffer::create(float* vertices, uint32_t size) {
+	ref<VertexBuffer> VertexBuffer::create(float* vertices, uint32_t size) {
 		switch (Renderer::getGraphicsAPI()) {
 			case RendererAPI::GraphicsAPI::None:
-				CORE_ASSERT(false, "Graphics::None is not supported yet.")
+				ENGINE_ASSERT(false, "Graphics::None is not supported yet.")
 
 				return nullptr;
 
