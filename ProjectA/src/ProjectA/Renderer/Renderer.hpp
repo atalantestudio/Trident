@@ -26,6 +26,6 @@ namespace ProjectA {
 
 			static void submit(const ref<Shader>& shader, const ref<VertexArray>& vertexArray, const mat4x4<float>& transform);
 
-			static void onWindowResize(std::uint32_t width, std::uint32_t height);
+			static void onWindowResize(uint32 width, uint32 height);
 	};
 }

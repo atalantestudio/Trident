@@ -3,8 +3,6 @@
 #include "ProjectA/LayerStack.hpp"
 
 namespace ProjectA {
-	LayerStack::LayerStack() {}
-
 	LayerStack::~LayerStack() {
 		for (Layer* layer : layers) {
 			layer->unbind();

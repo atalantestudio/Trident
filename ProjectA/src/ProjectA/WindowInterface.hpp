@@ -11,11 +11,11 @@ namespace ProjectA {
 		WindowData(const std::string& title = "Project A", unsigned int width = 1280, unsigned int height = 720): title(title), width(width), height(height) {}
 	};
 
-	class API WindowInterface {
+	class WindowInterface {
 		public:
 			using EventCallback = std::function<void(Event&)>;
 
-			static WindowInterface* create(const WindowData& data = WindowData());
+			static Scope<WindowInterface> create(const WindowData& data = WindowData());
 
 			virtual ~WindowInterface() = default;
 

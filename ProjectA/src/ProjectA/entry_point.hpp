@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ProjectA/core.hpp"
 #include "ProjectA/Profile/Profiler.hpp"
 
 #ifdef WINDOWS

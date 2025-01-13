@@ -2,9 +2,11 @@
 
 #include <glad/glad.h>
 
-#include "OpenGLVertexArray.hpp"
+#include "Platform/OpenGL/OpenGLVertexArray.hpp"
 
 namespace ProjectA {
+	// TODO: Replace with typename template
+	// Use primitive types and math library types
 	static GLenum getShaderType(ShaderType type) {
 		switch (type) {
 			case ShaderType::Bool:

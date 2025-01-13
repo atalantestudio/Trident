@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Event.hpp"
+#include "ProjectA/Event/Event.hpp"
 
 namespace ProjectA {
 	class WindowEvent : public Event {
 		protected:
-			WindowEvent() {}
+			WindowEvent() = default;
 
 		public:
 			EVENT_CATEGORY(EventCategoryWindow)
@@ -13,7 +13,7 @@ namespace ProjectA {
 
 	class WindowCloseEvent : public WindowEvent {
 		public:
-			WindowCloseEvent() {}
+			WindowCloseEvent() = default;
 
 			EVENT_TYPE(EventTypeWindowClose)
 	};

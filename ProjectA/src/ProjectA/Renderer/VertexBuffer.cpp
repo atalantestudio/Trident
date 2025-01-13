@@ -12,7 +12,7 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return std::make_shared<OpenGLVertexBuffer>(vertices, size);
+				return createRef<OpenGLVertexBuffer>(vertices, size);
 		}
 
 		return nullptr;

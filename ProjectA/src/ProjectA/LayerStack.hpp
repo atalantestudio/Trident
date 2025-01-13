@@ -1,16 +1,17 @@
 #pragma once
 
-#include "core.hpp"
-#include "Layer.hpp"
+#include "ProjectA/core.hpp"
+#include "ProjectA/Layer.hpp"
 
 namespace ProjectA {
-	class API LayerStack {
+	class LayerStack {
 		private:
 			std::vector<Layer*> layers;
 			unsigned int layerInsertionIndex = 0;
 
 		public:
-			LayerStack();
+			LayerStack() = default;
+
 			~LayerStack();
 
 			void pushLayer(Layer* layer);

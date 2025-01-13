@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Event.hpp"
+#include "ProjectA/Event/Event.hpp"
 
 namespace ProjectA {
-	class API MouseButtonEvent : public Event {
+	class MouseButtonEvent : public Event {
 		protected:
 			int button;
 
@@ -17,7 +17,7 @@ namespace ProjectA {
 			}
 	};
 
-	class API MouseButtonPressEvent : public MouseButtonEvent {
+	class MouseButtonPressEvent : public MouseButtonEvent {
 		public:
 			MouseButtonPressEvent(int button) : MouseButtonEvent(button) {}
 
@@ -32,7 +32,7 @@ namespace ProjectA {
 			}
 	};
 
-	class API MouseButtonReleaseEvent : public MouseButtonEvent {
+	class MouseButtonReleaseEvent : public MouseButtonEvent {
 		public:
 			MouseButtonReleaseEvent(int button) : MouseButtonEvent(button) {}
 
@@ -47,7 +47,7 @@ namespace ProjectA {
 			}
 	};
 
-	class API MouseMoveEvent : public Event {
+	class MouseMoveEvent : public Event {
 		private:
 			vec2<float> position;
 
@@ -70,7 +70,7 @@ namespace ProjectA {
 			}
 	};
 
-	class API MouseScrollEvent : public Event {
+	class MouseScrollEvent : public Event {
 		private:
 			vec2<float> offset;
 

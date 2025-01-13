@@ -8,7 +8,8 @@ namespace ProjectA {
 		public:
 			static ref<VertexArray> create();
 
-			virtual ~VertexArray();
+		public:
+			virtual ~VertexArray() = default;
 
 			virtual void bind() const = 0;
 

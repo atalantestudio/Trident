@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 
-#include "OpenGLRendererAPI.hpp"
+#include "Platform/OpenGL/OpenGLRendererAPI.hpp"
 
 namespace ProjectA {
 	void OpenGLRendererAPI::initialize() {
@@ -30,5 +30,8 @@ namespace ProjectA {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
+
+		// TODO: Why?
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }

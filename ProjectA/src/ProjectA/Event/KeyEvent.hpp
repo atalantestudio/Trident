@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Event.hpp"
+#include "ProjectA/Event/Event.hpp"
 
 namespace ProjectA {
-	class API KeyEvent : public Event {
+	class KeyEvent : public Event {
 		protected:
 			int keyCode;
 
@@ -17,7 +17,7 @@ namespace ProjectA {
 			}
 	};
 
-	class API KeyPressEvent : public KeyEvent {
+	class KeyPressEvent : public KeyEvent {
 		private:
 			int pressCount;
 
@@ -39,7 +39,7 @@ namespace ProjectA {
 			}
 	};
 
-	class API KeyReleaseEvent : public KeyEvent {
+	class KeyReleaseEvent : public KeyEvent {
 		public:
 			KeyReleaseEvent(int keyCode) : KeyEvent(keyCode) {}
 
@@ -54,7 +54,7 @@ namespace ProjectA {
 			}
 	};
 
-	class API KeyTypeEvent : public KeyEvent {
+	class KeyTypeEvent : public KeyEvent {
 		public:
 			KeyTypeEvent(int keyCode) : KeyEvent(keyCode) {}
 

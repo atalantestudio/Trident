@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Platform/OpenGL/OpenGLContext.hpp"
+
 #include "ProjectA/Event/KeyEvent.hpp"
 #include "ProjectA/Event/MouseEvent.hpp"
 #include "ProjectA/Event/WindowEvent.hpp"
@@ -13,7 +14,7 @@ namespace ProjectA {
 	class Window : public WindowInterface {
 		private:
 			GLFWwindow* window;
-			Context* context;
+			Scope<Context> context;
 
 			struct GLFWData {
 				std::string title;

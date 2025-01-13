@@ -14,6 +14,9 @@ namespace ProjectA {
 			static GraphicsAPI graphicsApi;
 
 		public:
+			static Scope<RendererAPI> create();
+
+		public:
 			static inline GraphicsAPI getGraphicsAPI() {
 				return graphicsApi;
 			}

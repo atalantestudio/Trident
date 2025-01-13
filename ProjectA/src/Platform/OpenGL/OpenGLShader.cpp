@@ -36,10 +36,18 @@ namespace ProjectA {
 
 		input.seekg(0, std::ios::end);
 
-		result.resize(input.tellg());
+		const std::size_t size = input.tellg();
+
+		if (size == -1) {
+			ENGINE_FATAL("Could not read file \"[]\".", path);
+
+			ENGINE_ASSERT(false, "Could not read file");
+		}
+
+		result.resize(size);
 
 		input.seekg(0, std::ios::beg);
-		input.read(&result[0], result.size());
+		input.read(&result[0], size);
 		input.close();
 
 		return result;
@@ -214,10 +222,10 @@ namespace ProjectA {
 	void OpenGLShader::setUniform(const std::string& name, int value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		GLint location = glGetUniformLocation(program, name.c_str());
+		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			return;
+			throw std::runtime_error("OpenGL location not found.");
 		}
 
 		glUniform1i(location, value);
@@ -226,10 +234,10 @@ namespace ProjectA {
 	void OpenGLShader::setUniform(const std::string& name, float value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		GLint location = glGetUniformLocation(program, name.c_str());
+		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			return;
+			throw std::runtime_error("OpenGL location not found.");
 		}
 
 		glUniform1f(location, value);
@@ -238,10 +246,10 @@ namespace ProjectA {
 	void OpenGLShader::setUniform(const std::string& name, const vec2<float>& value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		GLint location = glGetUniformLocation(program, name.c_str());
+		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			return;
+			throw std::runtime_error("OpenGL location not found.");
 		}
 
 		glUniform2f(location, value.x, value.y);
@@ -250,10 +258,10 @@ namespace ProjectA {
 	void OpenGLShader::setUniform(const std::string& name, const vec3<float>& value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		GLint location = glGetUniformLocation(program, name.c_str());
+		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			return;
+			throw std::runtime_error("OpenGL location not found.");
 		}
 
 		glUniform3f(location, value[0], value[1], value[2]);
@@ -262,10 +270,10 @@ namespace ProjectA {
 	void OpenGLShader::setUniform(const std::string& name, const vec4<float>& value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		GLint location = glGetUniformLocation(program, name.c_str());
+		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			return;
+			throw std::runtime_error("OpenGL location not found.");
 		}
 
 		glUniform4f(location, value.x, value.y, value.z, value.w);
@@ -274,10 +282,10 @@ namespace ProjectA {
 	void OpenGLShader::setUniform(const std::string& name, const mat4x4<float>& value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		GLint location = glGetUniformLocation(program, name.c_str());
+		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			return;
+			throw std::runtime_error("OpenGL location not found.");
 		}
 
 		glUniformMatrix4fv(location, 1, GL_FALSE, value.entries);

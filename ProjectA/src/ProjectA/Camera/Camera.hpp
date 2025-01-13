@@ -1,5 +1,8 @@
 #pragma once
 
+// TODO: Remove
+#include "math/mat/mat4x4.hpp"
+
 // TODO: Check order of view and projection members
 namespace ProjectA {
 	class Camera {

@@ -5,7 +5,7 @@
 #include "ProjectA/Logger/LogStructure.hpp"
 
 namespace ProjectA {
-	class API Logger {
+	class Logger {
 		private:
 			static constexpr std::size_t TIME_PADDING = 14;
 			static constexpr std::size_t LEVEL_NAME_PADDING = 5;

@@ -1,6 +1,7 @@
 #include "pch.hpp"
 
 #include "Platform/OpenGL/OpenGLTexture2D.hpp"
+
 #include "ProjectA/Renderer/Renderer.hpp"
 #include "ProjectA/Renderer/Texture2D.hpp"
 
@@ -13,7 +14,7 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return std::make_shared<OpenGLTexture2D>(width, height);
+				return createRef<OpenGLTexture2D>(width, height);
 		}
 
 		return nullptr;
@@ -27,7 +28,7 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return std::make_shared<OpenGLTexture2D>(path);
+				return createRef<OpenGLTexture2D>(path);
 		}
 
 		return nullptr;

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Event.hpp"
+#include "ProjectA/Event/Event.hpp"
 
 namespace ProjectA {
 	class ApplicationEvent : public Event {
 		protected:
-			ApplicationEvent() {}
+			ApplicationEvent() = default;
 
 		public:
 			EVENT_CATEGORY(EventCategoryApplication)
@@ -13,21 +13,21 @@ namespace ProjectA {
 
 	class ApplicationRenderEvent : public ApplicationEvent {
 		public:
-			ApplicationRenderEvent() {}
+			ApplicationRenderEvent() = default;
 
 			EVENT_TYPE(EventTypeApplicationRender)
 	};
 
 	class ApplicationTickEvent : public ApplicationEvent {
 		public:
-			ApplicationTickEvent() {}
+			ApplicationTickEvent() = default;
 
 			EVENT_TYPE(EventTypeApplicationTick)
 	};
 
 	class ApplicationUpdateEvent : public ApplicationEvent {
 		public:
-			ApplicationUpdateEvent() {}
+			ApplicationUpdateEvent() = default;
 
 			EVENT_TYPE(EventTypeApplicationUpdate)
 	};

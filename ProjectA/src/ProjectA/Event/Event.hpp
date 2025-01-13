@@ -31,7 +31,7 @@ namespace ProjectA {
 		EventCategoryWindow = 1 << 5,
 	};
 
-	class API Event {
+	class Event {
 		friend class EventDispatcher;
 
 		private:

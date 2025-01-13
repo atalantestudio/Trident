@@ -11,8 +11,8 @@ namespace ProjectA {
 	ref<Logger> Logger::clientLogger;
 
 	void Logger::initialize() {
-		engineLogger = std::make_shared<Logger>("ENGINE", LogLevel::ALL);
-		clientLogger = std::make_shared<Logger>("CLIENT", LogLevel::ALL);
+		engineLogger = createRef<Logger>("ENGINE", LogLevel::ALL);
+		clientLogger = createRef<Logger>("CLIENT", LogLevel::ALL);
 	}
 
 	void Logger::clear() {

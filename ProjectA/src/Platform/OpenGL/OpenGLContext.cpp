@@ -20,7 +20,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(gladLoadStatus, "Could not initialize GLAD");
 		ENGINE_INFO("[], [], []", (const char*) glGetString(GL_VENDOR), (const char*) glGetString(GL_RENDERER), (const char*) glGetString(GL_VERSION));
 
-		/* #ifdef ASSERTS
+		/* #ifdef ENABLE_ASSERTS
 			GLint majorVersion;
 			GLint minorVersion;
 

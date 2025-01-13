@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ProjectA/core.hpp"
+
 // Application
 #include "ProjectA/Application.hpp"
 #include "ProjectA/InputInterface.hpp"

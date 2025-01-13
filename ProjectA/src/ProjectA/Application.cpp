@@ -16,7 +16,7 @@ namespace ProjectA {
 
 		instance = this;
 
-		window = std::unique_ptr<WindowInterface>(WindowInterface::create());
+		window = WindowInterface::create();
 		window->setEventCallback(BIND(Application::onEvent));
 
 		Renderer::initialize();

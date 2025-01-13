@@ -1,9 +1,9 @@
 #pragma once
 
-#include "core.hpp"
+#include "ProjectA/core.hpp"
 
 namespace ProjectA {
-	class API InputInterface {
+	class InputInterface {
 		private:
 			static InputInterface* instance;
 

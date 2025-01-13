@@ -1,6 +1,7 @@
 #include "pch.hpp"
 
 #include "Platform/OpenGL/OpenGLVertexArray.hpp"
+
 #include "ProjectA/Renderer/Renderer.hpp"
 #include "ProjectA/Renderer/VertexArray.hpp"
 
@@ -13,11 +14,9 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return std::make_shared<OpenGLVertexArray>();
+				return createRef<OpenGLVertexArray>();
 		}
 
 		return nullptr;
 	}
-
-	VertexArray::~VertexArray() {}
 }

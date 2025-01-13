@@ -1,5 +1,3 @@
-#include "pch.hpp"
-
 #include "vec4.hpp"
 
 namespace ProjectA {

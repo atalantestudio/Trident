@@ -1,6 +1,8 @@
 #pragma once
 
 namespace ProjectA {
+	// TODO: Replace with typename template
+	// Use primitive types and math library types
 	enum ShaderType {
 		None = 0,
 		Bool,
@@ -16,6 +18,8 @@ namespace ProjectA {
 		Mat4,
 	};
 
+	// TODO: Replace with typename template
+	// Use primitive types and math library types
 	static uint32_t getShaderTypeSize(ShaderType type) {
 		switch (type) {
 			case ShaderType::Bool:

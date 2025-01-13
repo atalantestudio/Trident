@@ -1,9 +1,8 @@
 #include "pch.hpp"
 
-#include <glad/glad.h>
 #include <stb_image.h>
 
-#include "OpenGLTexture2D.hpp"
+#include "Platform/OpenGL/OpenGLTexture2D.hpp"
 
 namespace ProjectA {
 	OpenGLTexture2D::OpenGLTexture2D(GLsizei width, GLsizei height) :
@@ -54,6 +53,10 @@ namespace ProjectA {
 			internalFormat = GL_RGB8;
 			format = GL_RGB;
 		}
+		else if (channelCount == 4) {
+			internalFormat = GL_RGBA8;
+			format = GL_RGBA;
+		}
 
 		ENGINE_ASSERT(channelCount == 3 || channelCount == 4, "Texture format not supported");
 
@@ -97,8 +100,15 @@ namespace ProjectA {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void OpenGLTexture2D::setData(const void* data) const {
+	void OpenGLTexture2D::setData(const void* data, uint32 size) const {
 		PROFILE_SCOPE(__FUNCSIG__);
+
+		// TODO: Store channel count?
+		uint32 channelCount = format == GL_RGBA ? 4 : 3;
+
+		bool ok = size == (width * height * channelCount);
+
+		ENGINE_ASSERT(ok, "Data must be entire texture");
 
 		glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	}

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "RendererAPI.hpp"
+#include "ProjectA/Renderer/RendererAPI.hpp"
 
 namespace ProjectA {
 	class RenderCommand {
 		private:
-			static RendererAPI* rendererApi;
+			static Scope<RendererAPI> rendererApi;
 
 		public:
 			static inline void initialize() {

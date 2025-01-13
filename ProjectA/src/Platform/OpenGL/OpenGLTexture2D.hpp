@@ -8,10 +8,10 @@ namespace ProjectA {
 	class OpenGLTexture2D : public Texture2D {
 		private:
 			uint32_t texture;
-			GLenum internalFormat;
-			GLenum format;
 			GLsizei width;
 			GLsizei height;
+			GLenum internalFormat;
+			GLenum format;
 
 			std::string debugPath;
 
@@ -26,6 +26,6 @@ namespace ProjectA {
 			virtual uint32 getWidth() const override;
 			virtual uint32 getHeight() const override;
 
-			virtual void setData(const void* data) const override;
+			virtual void setData(const void* data, uint32 size) const override;
 	};
 }

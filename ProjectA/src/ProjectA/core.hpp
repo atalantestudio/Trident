@@ -4,37 +4,25 @@
 
 #ifdef _WIN32
 	#ifdef _WIN64
+		// TODO: Rename by PLATFORM_WINDOWS or similar
 		#define WINDOWS
 	#else
-		#error "x86 builds are not supported."
+		#error "Windows x86 builds are not supported."
 	#endif
 #elif defined(__linux__)
+	// TODO: Rename by PLATFORM_LINUX or similar
 	#define LINUX
 
-	#error "Operating system not supported."
+	#error "Operating system is not supported."
 #else
 	#error "Unknown operating system."
 #endif
 
-#ifdef WINDOWS
-	#ifdef DYNAMIC_LINK
-		#ifdef BUILD_DLL
-			#define API __declspec(dllexport)
-		#else
-			#define API __declspec(dllimport)
-		#endif
-	#else
-		#define API
-	#endif
-#else
-	#error "Operating system not supported."
-#endif
-
 #ifdef BUILD_MODE_DEBUG
-	#define ASSERTS
+	#define ENABLE_ASSERTS
 #endif
 
-#ifdef ASSERTS
+#ifdef ENABLE_ASSERTS
 	#define ENGINE_ASSERT(condition, ...) { \
 		if (!condition) { \
 			ENGINE_ERROR("Assertion failed: []", __VA_ARGS__); \

@@ -2,10 +2,10 @@
 
 #include <glad/glad.h>
 
-#include "OpenGLIndexBuffer.hpp"
+#include "Platform/OpenGL/OpenGLIndexBuffer.hpp"
 
 namespace ProjectA {
-	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indices, uint32_t count) : count(count) {
+	OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32_t* indices, uint32_t count) : count(count) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glCreateBuffers(1, &id);

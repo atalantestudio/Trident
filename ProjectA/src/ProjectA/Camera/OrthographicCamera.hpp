@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Camera.hpp"
+#include "ProjectA/Camera/Camera.hpp"
 
 namespace ProjectA {
 	class OrthographicCamera : public Camera {

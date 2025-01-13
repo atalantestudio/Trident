@@ -9,8 +9,8 @@ namespace ProjectA {
 		ENGINE_ERROR("GLFW error ([]): []", error, description);
 	}
 
-	WindowInterface* WindowInterface::create(const WindowData& data) {
-		return new Window(data);
+	Scope<WindowInterface> WindowInterface::create(const WindowData& data) {
+		return CreateScope<Window>(data);
 	}
 
 	Window::Window(const WindowData& data) {
@@ -66,7 +66,7 @@ namespace ProjectA {
 			glfwWindowCount++;
 		}
 
-		context = new OpenGLContext(window);
+		context = Context::create(window);
 		context->initialize();
 
 		glfwSetWindowUserPointer(window, &glfwData);

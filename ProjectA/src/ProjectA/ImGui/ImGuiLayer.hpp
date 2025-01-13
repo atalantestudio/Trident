@@ -6,7 +6,7 @@
 #include "ProjectA/Layer.hpp"
 
 namespace ProjectA {
-	class API ImGuiLayer : public Layer {
+	class ImGuiLayer : public Layer {
 		private:
 			float deltaTime = 0.0f;
 

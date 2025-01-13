@@ -1,15 +1,15 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES // cmath
 
 #include <algorithm>
 #include <array>
 #include <chrono> // Logger
+#include <cmath>
 #include <fstream> // std::ofstream (profile-only)
 #include <functional>
 #include <iomanip> // Logger
 #include <iostream>
-#include <math.h>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -25,9 +25,6 @@
 	#undef ERROR
 #endif
 
-// TODO: Replace by maths library
-#include "math/math.hpp"
-
 #include "ProjectA/types.hpp"
 
 #undef assert
@@ -38,3 +35,6 @@
 // TODO: Profile-only
 #include "ProjectA/Profile/Profiler.hpp"
 #include "ProjectA/Profile/Timer.hpp"
+
+// TODO: Replace by maths library
+#include "math/math.hpp"

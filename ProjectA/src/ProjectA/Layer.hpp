@@ -1,10 +1,10 @@
 #pragma once
 
-#include "core.hpp"
-#include "Event/Event.hpp"
+#include "ProjectA/core.hpp"
+#include "ProjectA/Event/Event.hpp"
 
 namespace ProjectA {
-	class API Layer {
+	class Layer {
 		protected:
 			// TODO: Don't include in release (and profile as well?)
 			std::string name;

@@ -37,7 +37,7 @@ namespace ProjectA {
 		RenderCommand::drawIndexed(vertexArray);
 	}
 
-	void Renderer::onWindowResize(std::uint32_t width, std::uint32_t height) {
+	void Renderer::onWindowResize(uint32 width, uint32 height) {
 		RenderCommand::setViewport(0, 0, width, height);
 	}
 }

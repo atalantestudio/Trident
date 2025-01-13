@@ -1,6 +1,7 @@
 #include "pch.hpp"
 
 #include "Platform/OpenGL/OpenGLShader.hpp"
+
 #include "ProjectA/Renderer/Renderer.hpp"
 #include "ProjectA/Renderer/Shader.hpp"
 
@@ -13,7 +14,7 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return std::make_shared<OpenGLShader>(vertexShaderSource, fragmentShaderSource, name);
+				return createRef<OpenGLShader>(vertexShaderSource, fragmentShaderSource, name);
 		}
 
 		return nullptr;
@@ -27,7 +28,7 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return std::make_shared<OpenGLShader>(path);
+				return createRef<OpenGLShader>(path);
 		}
 
 		return nullptr;

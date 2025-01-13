@@ -21,12 +21,12 @@ namespace ProjectA {
 
 		storage->vertexArray = VertexArray::create();
 
-		std::float_t squareVertices[4 * (3 + 2)] = {
+		float32 squareVertices[4 * (3 + 2)] = {
 			// Position             Texture coordinates
 			-0.5f, -0.5f,  0.0f,    0.0f, 0.0f,
 			 0.5f, -0.5f,  0.0f,    1.0f, 0.0f,
 			 0.5f,  0.5f,  0.0f,    1.0f, 1.0f,
-			-0.5f,  0.5f,  0.0f,    0.0f, 1.0f
+			-0.5f,  0.5f,  0.0f,    0.0f, 1.0f 
 		};
 
 		ref<VertexBuffer> vertexBuffer = VertexBuffer::create(squareVertices, sizeof(squareVertices));
@@ -42,22 +42,23 @@ namespace ProjectA {
 
 		storage->vertexArray->addVertexBuffer(vertexBuffer);
 
-		std::uint32_t squareIndices[6] = {
+		const uint32 squareIndices[6] = {
 			0, 1, 2,
 			0, 2, 3
 		};
 
-		ref<IndexBuffer> squareIndexBuffer = IndexBuffer::create(squareIndices, sizeof(squareIndices) / sizeof(std::uint32_t));
+		ref<IndexBuffer> squareIndexBuffer = IndexBuffer::create(squareIndices, sizeof(squareIndices) / sizeof(uint32));
 
 		storage->vertexArray->setIndexBuffer(squareIndexBuffer);
 
 		storage->colorTextureShader = Shader::create("assets/shaders/ColorTexture.glsl");
+		storage->colorTextureShader->bind();
+		storage->colorTextureShader->setUniform("u_texture", 0);
+
+		const uint32 defaultTextureData = 0xffffffff;
 
 		storage->defaultTexture = Texture2D::create(1, 1);
-
-		const std::uint32_t defaultTextureData = 0xffffffff;
-
-		storage->defaultTexture->setData(&defaultTextureData);
+		storage->defaultTexture->setData(&defaultTextureData, 4);
 	}
 
 	void Renderer2D::destruct() {
@@ -71,7 +72,6 @@ namespace ProjectA {
 
 		storage->colorTextureShader->bind();
 		storage->colorTextureShader->setUniform("u_viewProjection", camera.getViewProjection());
-		storage->colorTextureShader->setUniform("u_texture", 0);
 	}
 
 	void Renderer2D::endScene() {
@@ -85,41 +85,39 @@ namespace ProjectA {
 	void Renderer2D::drawQuad(const vec3<float>& position, const vec2<float>& size, const vec4<float>& color) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		vec3<float> scale = vec3<float>(size.x, size.y, 1.0f);
-		mat4x4<float> transform = mat4x4<float>::translate(position) * mat4x4<float>::scale(scale);
+		const vec3<float> scale = {size.x, size.y, 1.0f};
+		const mat4x4<float> transform = mat4x4<float>::translate(position) * mat4x4<float>::scale(scale);
 
-		storage->colorTextureShader->setUniform("u_transform", transform);
+		storage->colorTextureShader->bind();
 		storage->colorTextureShader->setUniform("u_color", color);
+		storage->colorTextureShader->setUniform("u_transform", transform);
 
 		storage->defaultTexture->bind(0);
 
 		storage->vertexArray->bind();
 
 		RenderCommand::drawIndexed(storage->vertexArray);
-
-		storage->defaultTexture->unbind();
 	}
 
-	void Renderer2D::drawTexturedQuad(const vec2<float>& position, const vec2<float>& size, const ref<Texture2D>& texture, float textureSize = 1.0f) {
-		drawTexturedQuad({position.x, position.y, 0.0f}, size, texture, textureSize);
+	void Renderer2D::drawQuad(const vec2<float>& position, const vec2<float>& size, const ref<Texture2D>& texture) {
+		drawQuad({position.x, position.y, 0.0f}, size, texture);
 	}
 
-	void Renderer2D::drawTexturedQuad(const vec3<float>& position, const vec2<float>& size, const ref<Texture2D>& texture, float textureSize = 1.0f) {
+	void Renderer2D::drawQuad(const vec3<float>& position, const vec2<float>& size, const ref<Texture2D>& texture) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		vec3<float> scale = vec3<float>(size.x, size.y, 1.0f);
-		mat4x4<float> transform = mat4x4<float>::translate(position) * mat4x4<float>::scale(scale);
+		const vec3<float> scale = {size.x, size.y, 1.0f};
+		const mat4x4<float> transform = mat4x4<float>::translate(position) * mat4x4<float>::scale(scale);
 
-		storage->colorTextureShader->setUniform("u_transform", transform);
+		storage->colorTextureShader->bind();
 		storage->colorTextureShader->setUniform("u_color", {1.0f, 1.0f, 1.0f, 1.0f});
-		storage->colorTextureShader->setUniform("u_texture_size", textureSize);
+		storage->colorTextureShader->setUniform("u_transform", transform);
+		//storage->textureShader->setUniform("u_texture_size", textureSize); // only available in ColorTexture shader
 
 		texture->bind(0);
 
 		storage->vertexArray->bind();
 
 		RenderCommand::drawIndexed(storage->vertexArray);
-
-		texture->unbind();
 	}
 }

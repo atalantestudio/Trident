@@ -1,10 +1,10 @@
 #pragma once
 
-#include "core.hpp"
-#include "Event/WindowEvent.hpp"
-#include "ImGui/ImGuiLayer.hpp"
-#include "LayerStack.hpp"
-#include "WindowInterface.hpp"
+#include "ProjectA/core.hpp"
+#include "ProjectA/Event/WindowEvent.hpp"
+#include "ProjectA/ImGui/ImGuiLayer.hpp"
+#include "ProjectA/LayerStack.hpp"
+#include "ProjectA/WindowInterface.hpp"
 
 namespace ProjectA {
 	class Application {
