@@ -18,25 +18,25 @@ namespace ProjectA {
 		std::string name = event.name;
 		std::replace(name.begin(), name.end(), '"', '\'');
 
-		// Write event name
+		// Write event name.
 		stream << "{\"name\":\"" << name << "\",";
 
-		// Write event category
+		// Write event category.
 		stream << "\"cat\":\"Scope\",";
 
-		// Write event type
+		// Write event type.
 		stream << "\"ph\":\"X\",";
 
-		// Write event time stamp
+		// Write event time stamp.
 		stream << "\"ts\":" << event.start << ',';
 
-		// Write event duration
+		// Write event duration.
 		stream << "\"dur\":" << (event.end - event.start) << ',';
 
-		// Write process ID
+		// Write process ID.
 		stream << "\"pid\":0,";
 
-		// Write thread ID
+		// Write thread ID.
 		stream << "\"tid\":" << event.threadId << '}';
 
 		eventCount++;
@@ -49,12 +49,12 @@ namespace ProjectA {
 			throw std::runtime_error("Couldn't open the profiler output stream.");
 		}
 
-		// Write header
+		// Write header.
 		stream << "{\"traceEvents\":[";
 	}
 
 	Profiler::~Profiler() {
-		// Write footer
+		// Write footer.
 		stream << "]}";
 
 		stream.close();

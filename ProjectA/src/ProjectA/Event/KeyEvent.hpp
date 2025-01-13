@@ -1,32 +1,33 @@
 #pragma once
 
 #include "ProjectA/Event/Event.hpp"
+#include "ProjectA/Input.hpp"
 
 namespace ProjectA {
 	class KeyEvent : public Event {
 		protected:
-			int keyCode;
+			KeyCode keyCode;
 
-			KeyEvent(int keyCode) : keyCode(keyCode) {}
+			KeyEvent(KeyCode keyCode) : keyCode(keyCode) {}
 
 		public:
 			EVENT_CATEGORY(EventCategoryInput | EventCategoryKeyboard)
 
-			inline int getKeyCode() const {
+			inline KeyCode getKeyCode() const {
 				return keyCode;
 			}
 	};
 
 	class KeyPressEvent : public KeyEvent {
 		private:
-			int pressCount;
+			int32 pressCount;
 
 		public:
-			KeyPressEvent(int keyCode, int pressCount) : KeyEvent(keyCode), pressCount(pressCount) {}
+			KeyPressEvent(KeyCode keyCode, int32 pressCount) : KeyEvent(keyCode), pressCount(pressCount) {}
 
 			EVENT_TYPE(EventTypeKeyPress)
 
-			inline int getPressCount() const {
+			inline int32 getPressCount() const {
 				return pressCount;
 			}
 
@@ -41,7 +42,7 @@ namespace ProjectA {
 
 	class KeyReleaseEvent : public KeyEvent {
 		public:
-			KeyReleaseEvent(int keyCode) : KeyEvent(keyCode) {}
+			KeyReleaseEvent(KeyCode keyCode) : KeyEvent(keyCode) {}
 
 			EVENT_TYPE(EventTypeKeyRelease)
 
@@ -56,7 +57,7 @@ namespace ProjectA {
 
 	class KeyTypeEvent : public KeyEvent {
 		public:
-			KeyTypeEvent(int keyCode) : KeyEvent(keyCode) {}
+			KeyTypeEvent(KeyCode keyCode) : KeyEvent(keyCode) {}
 
 			EVENT_TYPE(EventTypeKeyType)
 

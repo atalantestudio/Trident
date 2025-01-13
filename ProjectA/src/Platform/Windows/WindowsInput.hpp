@@ -4,14 +4,14 @@
 #include <GLFW/glfw3.h>
 
 #include "ProjectA/Application.hpp"
-#include "ProjectA/InputInterface.hpp"
+#include "ProjectA/Input.hpp"
 
 namespace ProjectA {
-	class Input : public InputInterface {
+	class WindowsInput : public Input {
 		protected:
-			bool isKeyPressedImpl(int keyCode) final override;
+			bool isKeyPressedImpl(KeyCode keyCode) final override;
 
-			bool isMouseButtonPressedImpl(int button) final override;
+			bool isMouseButtonPressedImpl(MouseButton button) final override;
 
 			vec2<float> getMousePositionImpl() final override;
 	};

@@ -1,8 +1,7 @@
 #include "pch.hpp"
 
 #include "ProjectA/Camera/Controller/OrthographicCameraController.hpp"
-#include "ProjectA/InputInterface.hpp"
-#include "ProjectA/key_codes.hpp"
+#include "ProjectA/Input.hpp"
 
 namespace ProjectA {
 	OrthographicCameraController::OrthographicCameraController(float aspectRatio) :
@@ -17,21 +16,21 @@ namespace ProjectA {
 	void OrthographicCameraController::update(float deltaTime) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		if (InputInterface::isKeyPressed(KEY_A)) {
+		if (Input::isKeyPressed(KeyCode::A)) {
 			position[0] -= speed * deltaTime;
-		} else if (InputInterface::isKeyPressed(KEY_D)) {
+		} else if (Input::isKeyPressed(KeyCode::D)) {
 			position[0] += speed * deltaTime;
 		}
 
-		if (InputInterface::isKeyPressed(KEY_W)) {
+		if (Input::isKeyPressed(KeyCode::W)) {
 			position[1] += speed * deltaTime;
-		} else if (InputInterface::isKeyPressed(KEY_S)) {
+		} else if (Input::isKeyPressed(KeyCode::S)) {
 			position[1] -= speed * deltaTime;
 		}
 
-		if (InputInterface::isKeyPressed(KEY_Q)) {
+		if (Input::isKeyPressed(KeyCode::Q)) {
 			rotation += rotationSpeed * deltaTime;
-		} else if (InputInterface::isKeyPressed(KEY_E)) {
+		} else if (Input::isKeyPressed(KeyCode::E)) {
 			rotation -= rotationSpeed * deltaTime;
 		}
 

@@ -1,25 +1,26 @@
 #pragma once
 
 #include "ProjectA/Event/Event.hpp"
+#include "ProjectA/Input.hpp"
 
 namespace ProjectA {
 	class MouseButtonEvent : public Event {
 		protected:
-			int button;
+			MouseButton button;
 
-			MouseButtonEvent(int button) : button(button) {}
+			MouseButtonEvent(MouseButton button) : button(button) {}
 
 		public:
 			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
-			inline int getButton() const {
+			inline MouseButton getButton() const {
 				return button;
 			}
 	};
 
 	class MouseButtonPressEvent : public MouseButtonEvent {
 		public:
-			MouseButtonPressEvent(int button) : MouseButtonEvent(button) {}
+			MouseButtonPressEvent(MouseButton button) : MouseButtonEvent(button) {}
 
 			EVENT_TYPE(EventTypeMouseButtonPress)
 
@@ -34,7 +35,7 @@ namespace ProjectA {
 
 	class MouseButtonReleaseEvent : public MouseButtonEvent {
 		public:
-			MouseButtonReleaseEvent(int button) : MouseButtonEvent(button) {}
+			MouseButtonReleaseEvent(MouseButton button) : MouseButtonEvent(button) {}
 
 			EVENT_TYPE(EventTypeMouseButtonRelease)
 

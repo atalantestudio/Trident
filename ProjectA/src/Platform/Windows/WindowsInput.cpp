@@ -1,25 +1,23 @@
 #include "pch.hpp"
 
-#include "Platform/Windows/Input.hpp"
+#include "Platform/Windows/WindowsInput.hpp"
 
 namespace ProjectA {
-	InputInterface* InputInterface::instance = new Input();
-
-	bool Input::isKeyPressedImpl(int keyCode) {
+	bool WindowsInput::isKeyPressedImpl(KeyCode keyCode) {
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
-		int keyState = glfwGetKey(window, keyCode);
+		const int keyState = glfwGetKey(window, static_cast<int32>(keyCode));
 
 		return keyState == GLFW_PRESS || keyState == GLFW_REPEAT;
 	}
 
-	bool Input::isMouseButtonPressedImpl(int button) {
+	bool WindowsInput::isMouseButtonPressedImpl(MouseButton button) {
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
-		int buttonState = glfwGetMouseButton(window, button);
+		const int buttonState = glfwGetMouseButton(window, static_cast<int32>(button));
 
 		return buttonState == GLFW_PRESS;
 	}
 
-	vec2<float> Input::getMousePositionImpl() {
+	vec2<float> WindowsInput::getMousePositionImpl() {
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
 		double x;
 		double y;

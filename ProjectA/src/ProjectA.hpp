@@ -2,15 +2,14 @@
 
 #include "ProjectA/core.hpp"
 
+// Math
+#include "math/math.hpp"
+
 // Application
 #include "ProjectA/Application.hpp"
-#include "ProjectA/InputInterface.hpp"
+#include "ProjectA/Input.hpp"
 #include "ProjectA/Layer.hpp"
 #include "ProjectA/Logger/Logger.hpp"
-
-// Input
-#include "ProjectA/key_codes.hpp"
-#include "ProjectA/mouse_button_codes.hpp"
 
 // Camera controller
 #include "ProjectA/Camera/Controller/OrthographicCameraController.hpp"

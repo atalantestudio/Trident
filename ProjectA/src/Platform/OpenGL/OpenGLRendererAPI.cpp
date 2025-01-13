@@ -5,7 +5,33 @@
 #include "Platform/OpenGL/OpenGLRendererAPI.hpp"
 
 namespace ProjectA {
+	#ifdef BUILD_MODE_DEBUG
+		void OpenGLRendererAPI::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+			switch (severity) {
+				case GL_DEBUG_SEVERITY_NOTIFICATION:
+					return ENGINE_INFO("GL: [] (source: [], type: [], id: [])", message, source, type, id);
+				case GL_DEBUG_SEVERITY_LOW:
+					return ENGINE_WARN("GL: [] (source: [], type: [], id: [])", message, source, type, id);
+				case GL_DEBUG_SEVERITY_MEDIUM:
+					return ENGINE_ERROR("GL: [] (source: [], type: [], id: [])", message, source, type, id);
+				case GL_DEBUG_SEVERITY_HIGH:
+					return ENGINE_FATAL("GL: [] (source: [], type: [], id: [])", message, source, type, id);
+			}
+		}
+	#endif
+
 	void OpenGLRendererAPI::initialize() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		#ifdef BUILD_MODE_DEBUG
+			glEnable(GL_DEBUG_OUTPUT);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+			glDebugMessageCallback(debugMessageCallback, nullptr);
+
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+		#endif
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

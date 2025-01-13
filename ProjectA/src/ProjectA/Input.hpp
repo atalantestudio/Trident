@@ -1,0 +1,34 @@
+#pragma once
+
+#include "ProjectA/core.hpp"
+#include "ProjectA/KeyCode.hpp"
+#include "ProjectA/MouseButton.hpp"
+
+namespace ProjectA {
+	class Input {
+		private:
+			static Scope<Input> instance;
+
+		protected:
+			virtual bool isKeyPressedImpl(KeyCode keyCode) = 0;
+
+			virtual bool isMouseButtonPressedImpl(MouseButton button) = 0;
+
+			virtual vec2<float> getMousePositionImpl() = 0;
+
+		public:
+			static Scope<Input> create();
+
+			static inline bool isKeyPressed(KeyCode keyCode) {
+				return instance->isKeyPressedImpl(keyCode);
+			}
+
+			static inline bool isMouseButtonPressed(MouseButton button) {
+				return instance->isMouseButtonPressedImpl(button);
+			}
+
+			static inline vec2<float> getMousePosition() {
+				return instance->getMousePositionImpl();
+			}
+	};
+}

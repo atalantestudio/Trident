@@ -16,7 +16,7 @@ namespace ProjectA {
 
 		instance = this;
 
-		window = WindowInterface::create();
+		window = Window::create();
 		window->setEventCallback(BIND(Application::onEvent));
 
 		Renderer::initialize();

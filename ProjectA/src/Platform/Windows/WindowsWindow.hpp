@@ -8,10 +8,10 @@
 #include "ProjectA/Event/MouseEvent.hpp"
 #include "ProjectA/Event/WindowEvent.hpp"
 #include "ProjectA/Renderer/Context.hpp"
-#include "ProjectA/WindowInterface.hpp"
+#include "ProjectA/Window.hpp"
 
 namespace ProjectA {
-	class Window : public WindowInterface {
+	class WindowsWindow : public Window {
 		private:
 			GLFWwindow* window;
 			Scope<Context> context;
@@ -31,9 +31,9 @@ namespace ProjectA {
 			virtual void terminate();
 
 		public:
-			Window(const WindowData& data);
+			WindowsWindow(const WindowData& data);
 
-			virtual ~Window();
+			virtual ~WindowsWindow();
 
 			virtual inline void* getNativeWindow() const {
 				return window;

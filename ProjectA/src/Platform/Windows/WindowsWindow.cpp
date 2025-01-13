@@ -1,6 +1,8 @@
 #include "pch.hpp"
 
-#include "Platform/Windows/Window.hpp"
+#include "Platform/Windows/WindowsWindow.hpp"
+
+#include "ProjectA/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	static std::uint8_t glfwWindowCount = 0;
@@ -9,23 +11,19 @@ namespace ProjectA {
 		ENGINE_ERROR("GLFW error ([]): []", error, description);
 	}
 
-	Scope<WindowInterface> WindowInterface::create(const WindowData& data) {
-		return CreateScope<Window>(data);
-	}
-
-	Window::Window(const WindowData& data) {
+	WindowsWindow::WindowsWindow(const WindowData& data) {
 		initialize(data);
 	}
 
-	Window::~Window() {
+	WindowsWindow::~WindowsWindow() {
 		terminate();
 	}
 
-	bool Window::isVSyncEnabled() const {
+	bool WindowsWindow::isVSyncEnabled() const {
 		return data.vSync;
 	}
 
-	void Window::setVSyncState(bool state) {
+	void WindowsWindow::setVSyncState(bool state) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glfwSwapInterval(state ? 1 : 0);
@@ -33,7 +31,7 @@ namespace ProjectA {
 		data.vSync = state;
 	}
 
-	void Window::initialize(const WindowData& data) {
+	void WindowsWindow::initialize(const WindowData& data) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		GLFWData& glfwData = this->data;
@@ -60,6 +58,12 @@ namespace ProjectA {
 
 		{
 			PROFILE_SCOPE("glfwCreateWindow");
+
+			#ifdef BUILD_MODE_DEBUG
+				if (Renderer::getGraphicsAPI() == RendererAPI::GraphicsAPI::OpenGL) {
+					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+				}
+			#endif
 
 			window = glfwCreateWindow((int) glfwData.width, (int) glfwData.height, glfwData.title.c_str(), nullptr, nullptr);
 
@@ -96,7 +100,7 @@ namespace ProjectA {
 
 			switch (action) {
 				case GLFW_PRESS: {
-					KeyPressEvent event(key, 0);
+					KeyPressEvent event(static_cast<KeyCode>(key), 0);
 
 					data.callback(event);
 
@@ -104,7 +108,7 @@ namespace ProjectA {
 				}
 
 				case GLFW_RELEASE: {
-					KeyReleaseEvent event(key);
+					KeyReleaseEvent event(static_cast<KeyCode>(key));
 
 					data.callback(event);
 
@@ -112,7 +116,7 @@ namespace ProjectA {
 				}
 
 				case GLFW_REPEAT: {
-					KeyPressEvent event(key, 1);
+					KeyPressEvent event(static_cast<KeyCode>(key), 1);
 
 					data.callback(event);
 
@@ -124,7 +128,7 @@ namespace ProjectA {
 		glfwSetCharCallback(window, [](GLFWwindow* window, unsigned int keyCode) {
 			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
 
-			KeyTypeEvent event(keyCode);
+			KeyTypeEvent event(static_cast<KeyCode>(keyCode));
 
 			data.callback(event);
 		});
@@ -134,7 +138,7 @@ namespace ProjectA {
 
 			switch (action) {
 				case GLFW_PRESS: {
-					MouseButtonPressEvent event(button);
+					MouseButtonPressEvent event(static_cast<MouseButton>(button));
 
 					data.callback(event);
 
@@ -142,7 +146,7 @@ namespace ProjectA {
 				}
 
 				case GLFW_RELEASE: {
-					MouseButtonReleaseEvent event(button);
+					MouseButtonReleaseEvent event(static_cast<MouseButton>(button));
 
 					data.callback(event);
 
@@ -168,7 +172,7 @@ namespace ProjectA {
 		});
 	}
 
-	void Window::terminate() {
+	void WindowsWindow::terminate() {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glfwDestroyWindow(window);
@@ -182,7 +186,7 @@ namespace ProjectA {
 		}
 	}
 
-	void Window::update() {
+	void WindowsWindow::update() {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glfwPollEvents();

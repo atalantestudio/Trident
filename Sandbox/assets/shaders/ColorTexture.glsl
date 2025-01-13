@@ -21,11 +21,11 @@ void main() {
 in vec2 v_uv;
 
 uniform vec4 u_color;
+uniform float u_tilingFactor;
 uniform sampler2D u_texture;
-//uniform float u_texture_size;
 
 layout(location = 0) out vec4 FragColor;
 
 void main() {
-	FragColor = texture(u_texture, v_uv /** u_texture_size*/) * u_color;
+	FragColor = texture(u_texture, v_uv * u_tilingFactor) * u_color;
 }

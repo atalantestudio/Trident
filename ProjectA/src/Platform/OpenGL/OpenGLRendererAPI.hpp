@@ -1,9 +1,16 @@
 #pragma once
 
+#include <glad/glad.h>
+
 #include "ProjectA/Renderer/RendererAPI.hpp"
 
 namespace ProjectA {
 	class OpenGLRendererAPI : public RendererAPI {
+		private:
+			#ifdef BUILD_MODE_DEBUG
+				static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+			#endif
+
 		public:
 			virtual void initialize() override;
 

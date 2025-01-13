@@ -13,5 +13,3 @@ namespace ProjectA {
 			~Timer();
 	};
 }
-
-#define PROFILE_SCOPE(name) ::ProjectA::Timer timer(name)

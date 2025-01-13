@@ -90,6 +90,7 @@ namespace ProjectA {
 
 		storage->colorTextureShader->bind();
 		storage->colorTextureShader->setUniform("u_color", color);
+		storage->colorTextureShader->setUniform("u_tilingFactor", 1.0f);
 		storage->colorTextureShader->setUniform("u_transform", transform);
 
 		storage->defaultTexture->bind(0);
@@ -99,20 +100,64 @@ namespace ProjectA {
 		RenderCommand::drawIndexed(storage->vertexArray);
 	}
 
-	void Renderer2D::drawQuad(const vec2<float>& position, const vec2<float>& size, const ref<Texture2D>& texture) {
-		drawQuad({position.x, position.y, 0.0f}, size, texture);
+	void Renderer2D::drawQuad(const vec2<float>& position, const vec2<float>& size, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
+		drawQuad({position.x, position.y, 0.0f}, size, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::drawQuad(const vec3<float>& position, const vec2<float>& size, const ref<Texture2D>& texture) {
+	void Renderer2D::drawQuad(const vec3<float>& position, const vec2<float>& size, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		const vec3<float> scale = {size.x, size.y, 1.0f};
 		const mat4x4<float> transform = mat4x4<float>::translate(position) * mat4x4<float>::scale(scale);
 
 		storage->colorTextureShader->bind();
-		storage->colorTextureShader->setUniform("u_color", {1.0f, 1.0f, 1.0f, 1.0f});
+		storage->colorTextureShader->setUniform("u_color", tintColor);
+		storage->colorTextureShader->setUniform("u_tilingFactor", tilingFactor);
 		storage->colorTextureShader->setUniform("u_transform", transform);
-		//storage->textureShader->setUniform("u_texture_size", textureSize); // only available in ColorTexture shader
+
+		texture->bind(0);
+
+		storage->vertexArray->bind();
+
+		RenderCommand::drawIndexed(storage->vertexArray);
+	}
+
+	void Renderer2D::drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 rotation, const vec4<float32>& color) {
+		drawRotatedQuad({position.x, position.y, 0.0f}, size, rotation, color);
+	}
+
+	void Renderer2D::drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 rotation, const vec4<float32>& color) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		const vec3<float> scale = {size.x, size.y, 1.0f};
+		const mat4x4<float> transform = mat4x4<float>::translate(position) * mat4x4<float>::rotateZ(rotation) * mat4x4<float>::scale(scale);
+
+		storage->colorTextureShader->bind();
+		storage->colorTextureShader->setUniform("u_color", color);
+		storage->colorTextureShader->setUniform("u_tilingFactor", 1.0f);
+		storage->colorTextureShader->setUniform("u_transform", transform);
+
+		storage->defaultTexture->bind(0);
+
+		storage->vertexArray->bind();
+
+		RenderCommand::drawIndexed(storage->vertexArray);
+	}
+
+	void Renderer2D::drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 rotation, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
+		drawRotatedQuad({position.x, position.y, 0.0f}, size, rotation, texture, tilingFactor, tintColor);
+	}
+
+	void Renderer2D::drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 rotation, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		const vec3<float> scale = {size.x, size.y, 1.0f};
+		const mat4x4<float> transform = mat4x4<float>::translate(position) * mat4x4<float>::rotateZ(rotation) * mat4x4<float>::scale(scale);
+
+		storage->colorTextureShader->bind();
+		storage->colorTextureShader->setUniform("u_color", tintColor);
+		storage->colorTextureShader->setUniform("u_tilingFactor", tilingFactor);
+		storage->colorTextureShader->setUniform("u_transform", transform);
 
 		texture->bind(0);
 

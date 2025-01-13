@@ -1,3 +1,5 @@
+// TODO: Don't use precompiled header here
+
 #include "vec3.hpp"
 
 namespace ProjectA {

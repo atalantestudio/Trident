@@ -1,7 +1,7 @@
 outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
 
 workspace "ProjectA"
-	architecture "x64"
+	architecture "x86_64"
 	startproject "Sandbox"
 
 	configurations {

@@ -13,12 +13,14 @@ namespace ProjectA {
 			static void beginScene(const OrthographicCamera& camera);
 			static void endScene();
 
-			// Draw colored quad
 			static void drawQuad(const vec2<float>& position, const vec2<float>& size, const vec4<float>& color);
 			static void drawQuad(const vec3<float>& position, const vec2<float>& size, const vec4<float>& color);
+			static void drawQuad(const vec2<float>& position, const vec2<float>& size, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
+			static void drawQuad(const vec3<float>& position, const vec2<float>& size, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
 
-			// Draw textured quad
-			static void drawQuad(const vec2<float>& position, const vec2<float>& size, const ref<Texture2D>& texture);
-			static void drawQuad(const vec3<float>& position, const vec2<float>& size, const ref<Texture2D>& texture);
+			static void drawRotatedQuad(const vec2<float>& position, const vec2<float>& size, float32 rotation, const vec4<float>& color);
+			static void drawRotatedQuad(const vec3<float>& position, const vec2<float>& size, float32 rotation, const vec4<float>& color);
+			static void drawRotatedQuad(const vec2<float>& position, const vec2<float>& size, float32 rotation, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
+			static void drawRotatedQuad(const vec3<float>& position, const vec2<float>& size, float32 rotation, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
 	};
 }

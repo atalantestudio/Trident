@@ -22,6 +22,7 @@
 #ifdef WINDOWS
 	#include <Windows.h>
 
+	#undef DELETE
 	#undef ERROR
 #endif
 

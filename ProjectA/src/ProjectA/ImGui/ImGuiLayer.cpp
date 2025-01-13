@@ -66,7 +66,7 @@ namespace ProjectA {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		ImGuiIO& io = ImGui::GetIO();
-		WindowInterface& window = Application::get().getWindow();
+		Window& window = Application::get().getWindow();
 
 		io.DisplaySize = ImVec2((float) window.getWidth(), (float) window.getHeight());
 
