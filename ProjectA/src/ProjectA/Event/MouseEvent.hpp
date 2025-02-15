@@ -50,12 +50,12 @@ namespace ProjectA {
 
 	class MouseMoveEvent : public Event {
 		private:
-			vec2<float32> position;
+			lyah::vec2<float32> position;
 
 		public:
 			MouseMoveEvent(float32 x, float32 y) : position(x, y) {}
 
-			const vec2<float32>& getPosition() const {
+			const lyah::vec2<float32>& getPosition() const {
 				return position;
 			}
 
@@ -65,7 +65,7 @@ namespace ProjectA {
 			std::string toString() const override {
 				std::stringstream stream;
 
-				stream << getName() << ": " << position.x << ", " << position.y;
+				stream << getName() << ": " << position[0] << ", " << position[1];
 
 				return stream.str();
 			}
@@ -73,12 +73,12 @@ namespace ProjectA {
 
 	class MouseScrollEvent : public Event {
 		private:
-			vec2<float32> offset;
+			lyah::vec2<float32> offset;
 
 		public:
 			MouseScrollEvent(float32 xOffset, float32 yOffset) : offset(xOffset, yOffset) {}
 
-			const vec2<float>& getOffset() const {
+			const lyah::vec2<float>& getOffset() const {
 				return offset;
 			}
 
@@ -88,7 +88,7 @@ namespace ProjectA {
 			std::string toString() const override {
 				std::stringstream stream;
 
-				stream << getName() << ": " << offset.x << ", " << offset.y;
+				stream << getName() << ": " << offset[0] << ", " << offset[1];
 
 				return stream.str();
 			}

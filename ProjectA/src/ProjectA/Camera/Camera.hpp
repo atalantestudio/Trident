@@ -1,36 +1,35 @@
 #pragma once
 
-// TODO: Remove
-#include "math/mat/mat4x4.hpp"
+#include "pch.hpp"
 
 // TODO: Check order of view and projection members
 namespace ProjectA {
 	class Camera {
 		protected:
 			// Row-major ordering
-			mat4x4<float> view;
+			lyah::mat4x4<float32> view;
 
 			// Row-major ordering
-			mat4x4<float> projection;
+			lyah::mat4x4<float32> projection;
 
 			// Row-major ordering
-			mat4x4<float> viewProjection;
+			lyah::mat4x4<float32> viewProjection;
 
 		public:
 			// TODO: Accept view matrix as 2nd argument?
-			Camera(const mat4x4<float>& projection);
+			Camera(const lyah::mat4x4<float32>& projection);
 
 			~Camera() = default;
 
-			inline const mat4x4<float>& getView() const {
+			inline const lyah::mat4x4<float32>& getView() const {
 				return view;
 			}
 
-			inline const mat4x4<float>& getProjection() const {
+			inline const lyah::mat4x4<float32>& getProjection() const {
 				return projection;
 			}
 
-			inline const mat4x4<float>& getViewProjection() const {
+			inline const lyah::mat4x4<float32>& getViewProjection() const {
 				return viewProjection;
 			}
 	};

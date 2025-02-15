@@ -3,7 +3,7 @@
 #include "ProjectA/core.hpp"
 
 // Math
-#include "math/math.hpp"
+#include "lyah/lyah.hpp"
 
 // Application
 #include "ProjectA/Application.hpp"

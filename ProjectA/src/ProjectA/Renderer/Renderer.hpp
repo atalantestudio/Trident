@@ -24,7 +24,7 @@ namespace ProjectA {
 
 			static void endScene();
 
-			static void submit(const ref<Shader>& shader, const ref<VertexArray>& vertexArray, const mat4x4<float>& transform);
+			static void submit(const ref<Shader>& shader, const ref<VertexArray>& vertexArray, const lyah::mat4x4<float>& transform);
 
 			static void onWindowResize(uint32 width, uint32 height);
 	};

@@ -58,7 +58,7 @@ namespace ProjectA {
 			format = GL_RGBA;
 		}
 
-		ENGINE_ASSERT(channelCount == 3 || channelCount == 4, "Texture format not supported");
+		ENGINE_ASSERT((channelCount == 3 || channelCount == 4), "Texture format not supported");
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &texture);
 

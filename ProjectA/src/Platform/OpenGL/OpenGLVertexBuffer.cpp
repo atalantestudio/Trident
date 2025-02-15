@@ -5,7 +5,7 @@
 #include "Platform/OpenGL/OpenGLVertexBuffer.hpp"
 
 namespace ProjectA {
-	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size) {
+	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32 size) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glCreateBuffers(1, &id);
@@ -15,7 +15,7 @@ namespace ProjectA {
 		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(float32* vertices, uint32_t size) {
+	OpenGLVertexBuffer::OpenGLVertexBuffer(float32* vertices, uint32 size) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glCreateBuffers(1, &id);

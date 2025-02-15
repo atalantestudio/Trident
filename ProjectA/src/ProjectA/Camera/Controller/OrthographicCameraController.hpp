@@ -10,7 +10,7 @@ namespace ProjectA {
 		private:
 			float aspectRatio;
 			float zoomLevel;
-			vec3<float> position;
+			lyah::vec3<float> position;
 			float speed;
 			float rotation;
 			float rotationSpeed;

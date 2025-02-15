@@ -16,16 +16,18 @@ namespace ProjectA {
 	void OrthographicCameraController::update(float deltaTime) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
+		float _position[2] = {position[0], position[1]};
+
 		if (Input::isKeyPressed(KeyCode::A)) {
-			position[0] -= speed * deltaTime;
+			_position[0] -= speed * deltaTime;
 		} else if (Input::isKeyPressed(KeyCode::D)) {
-			position[0] += speed * deltaTime;
+			_position[0] += speed * deltaTime;
 		}
 
 		if (Input::isKeyPressed(KeyCode::W)) {
-			position[1] += speed * deltaTime;
+			_position[1] += speed * deltaTime;
 		} else if (Input::isKeyPressed(KeyCode::S)) {
-			position[1] -= speed * deltaTime;
+			_position[1] -= speed * deltaTime;
 		}
 
 		if (Input::isKeyPressed(KeyCode::Q)) {
@@ -33,6 +35,8 @@ namespace ProjectA {
 		} else if (Input::isKeyPressed(KeyCode::E)) {
 			rotation -= rotationSpeed * deltaTime;
 		}
+
+		position = {_position[0], _position[1], position[2]};
 
 		camera.updateView(position, rotation);
 	}
@@ -49,7 +53,7 @@ namespace ProjectA {
 	bool OrthographicCameraController::onMouseScroll(MouseScrollEvent& event) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		zoomLevel -= event.getOffset().y / 2;
+		zoomLevel -= event.getOffset()[1] / 2;
 		zoomLevel = std::max(zoomLevel, 0.25f);
 
 		speed = zoomLevel;

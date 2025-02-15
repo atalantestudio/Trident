@@ -3,25 +3,24 @@
 #include "ProjectA/Camera/OrthographicCamera.hpp"
 
 namespace ProjectA {
-	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top, float nearPlane, float farPlane) :
-		Camera(mat4x4<float>::orthographic(left, right, bottom, top, nearPlane, farPlane)) {}
+	OrthographicCamera::OrthographicCamera(float32 left, float32 right, float32 bottom, float32 top, float32 nearPlane, float32 farPlane) :
+		Camera(lyah::mat4x4<float32>::orthographic(left, right, bottom, top, nearPlane, farPlane)) {}
 
-	void OrthographicCamera::updateView(const vec3<float>& position, float rotation) {
+	void OrthographicCamera::updateView(const lyah::vec3<float32>& position, float32 rotation) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		mat4x4<float> inverseTransform = mat4x4<float>::translate(position);
-		// TODO: radians()
-		inverseTransform *= mat4x4<float>::rotateZ(rotation * (float) M_PI / 180.0f);
-		inverseTransform.invert();
+		// LYAH TODO: Fix translation matrix: right-handed to left-handed
+		lyah::mat4x4<float32> transform = lyah::transpose(lyah::mat4x4<float32>::translation(position));
+		transform *= lyah::mat4x4<float32>::rotation({0.0f, 0.0f, 1.0f}, lyah::radians(rotation));
 
-		view = inverseTransform;
+		view = lyah::inverse(transform);
 		viewProjection = projection * view;
 	}
 
-	void OrthographicCamera::updateProjection(float left, float right, float bottom, float top, float nearPlane, float farPlane) {
+	void OrthographicCamera::updateProjection(float32 left, float32 right, float32 bottom, float32 top, float32 nearPlane, float32 farPlane) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		projection = mat4x4<float>::orthographic(left, right, bottom, top, nearPlane, farPlane);
+		projection = lyah::mat4x4<float32>::orthographic(left, right, bottom, top, nearPlane, farPlane);
 		viewProjection = projection * view;
 	}
 }

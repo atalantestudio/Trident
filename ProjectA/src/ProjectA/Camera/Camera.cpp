@@ -3,5 +3,5 @@
 #include "ProjectA/Camera/Camera.hpp"
 
 namespace ProjectA {
-	Camera::Camera(const mat4x4<float>& projection) : view(mat4x4<float>::identity()), projection(projection), viewProjection(projection) {}
+	Camera::Camera(const lyah::mat4x4<float32>& projection) : view(lyah::mat4x4<float32>::identity()), projection(projection), viewProjection(projection) {}
 }

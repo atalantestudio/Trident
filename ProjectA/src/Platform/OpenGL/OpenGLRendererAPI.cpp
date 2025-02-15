@@ -42,8 +42,8 @@ namespace ProjectA {
 		glViewport(x, y, width, height);
 	}
 
-	void OpenGLRendererAPI::setClearColor(const vec4<float>& color) const {
-		glClearColor(color.x, color.y, color.z, color.w);
+	void OpenGLRendererAPI::setClearColor(const lyah::vec4<float>& color) const {
+		glClearColor(color[0], color[1], color[2], color[3]);
 	}
 
 	void OpenGLRendererAPI::clear() const {

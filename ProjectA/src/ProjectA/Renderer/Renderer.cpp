@@ -25,7 +25,7 @@ namespace ProjectA {
 		Renderer::camera = nullptr;
 	}
 
-	void Renderer::submit(const ref<Shader>& shader, const ref<VertexArray>& vertexArray, const mat4x4<float>& transform) {
+	void Renderer::submit(const ref<Shader>& shader, const ref<VertexArray>& vertexArray, const lyah::mat4x4<float>& transform) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		shader->bind();

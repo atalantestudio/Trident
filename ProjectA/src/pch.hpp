@@ -1,5 +1,6 @@
 #pragma once
 
+// TODO: Remove
 #define _USE_MATH_DEFINES // cmath
 
 #include <algorithm>
@@ -30,16 +31,21 @@
 #undef DELETE
 #undef ERROR
 
+#include "lyah/lyah.hpp"
+
 #include "ProjectA/types.hpp"
+
+// Lyah polyfill: SIMD to scalar vector
+#include "ProjectA/vec_sts.hpp"
 
 #ifdef BUILD_MODE_DEBUG
 	#include "ProjectA/Logger/Logger.hpp"
+
+	// TODO: Include to string methods in Logger.cpp
+	#include "ProjectA/to_string.hpp"
 #endif
 
 #ifdef BUILD_MODE_PROFILE
 	#include "ProjectA/Profile/Profiler.hpp"
 	#include "ProjectA/Profile/Timer.hpp"
 #endif
-
-// TODO: Replace by maths library
-#include "math/math.hpp"

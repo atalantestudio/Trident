@@ -16,7 +16,7 @@ namespace ProjectA {
 				rendererApi->setViewport(x, y, width, height);
 			}
 
-			static void setClearColor(const vec4<float32>& color) {
+			static void setClearColor(const lyah::vec4<float32>& color) {
 				rendererApi->setClearColor(color);
 			}
 

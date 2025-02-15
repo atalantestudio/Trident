@@ -15,13 +15,13 @@ namespace ProjectA {
 			virtual void bind() const = 0;
 			virtual void unbind() const = 0;
 
-			virtual void setUniform(const std::string& name, int value) const = 0;
-			virtual void setUniform(const std::string& name, const int* value, uint32 count) const = 0;
-			virtual void setUniform(const std::string& name, float value) const = 0;
-			virtual void setUniform(const std::string& name, const vec2<float>& value) const = 0;
-			virtual void setUniform(const std::string& name, const vec3<float>& value) const = 0;
-			virtual void setUniform(const std::string& name, const vec4<float>& value) const = 0;
-			virtual void setUniform(const std::string& name, const mat4x4<float>& value) const = 0;
+			virtual void setUniform(const std::string& name, std::int32_t value) const = 0;
+			virtual void setUniform(const std::string& name, const std::int32_t* value, std::uint32_t count) const = 0;
+			virtual void setUniform(const std::string& name, std::float_t value) const = 0;
+			virtual void setUniform(const std::string& name, const lyah::vec2<std::float_t>& value) const = 0;
+			virtual void setUniform(const std::string& name, const lyah::vec3<std::float_t>& value) const = 0;
+			virtual void setUniform(const std::string& name, const lyah::vec4<std::float_t>& value) const = 0;
+			virtual void setUniform(const std::string& name, const lyah::mat4x4<std::float_t>& value) const = 0;
 
 			virtual const std::string& getName() const = 0;
 	};

@@ -66,7 +66,9 @@ namespace ProjectA {
 		while (position != std::string::npos) {
 			size_t eol = source.find_first_of("\r\n", position);
 
-			ENGINE_ASSERT(eol == std::string::npos, "Shader syntax error detected.");
+			const bool found = eol == std::string::npos;
+
+			ENGINE_ASSERT(!found, "Shader syntax error detected.");
 
 			size_t begin = position + shaderTypeTokenLength + 1;
 
@@ -89,7 +91,9 @@ namespace ProjectA {
 
 		GLuint program = glCreateProgram();
 
-		ENGINE_ASSERT(shaderSources.size() > 2, "Only 2-shader files are supported.");
+		const bool sourceCountCheck = shaderSources.size() > 2;
+
+		ENGINE_ASSERT(!sourceCountCheck, "Only 2-shader files are supported.");
 
 		std::array<GLuint, 2> shaders{};
 		uint32_t index = 0;
@@ -236,7 +240,7 @@ namespace ProjectA {
 		return name;
 	}
 
-	void OpenGLShader::setUniform(const std::string& name, int value) const {
+	void OpenGLShader::setUniform(const std::string& name, int32 value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		const GLint location = glGetUniformLocation(program, name.c_str());
@@ -248,7 +252,7 @@ namespace ProjectA {
 		glUniform1i(location, value);
 	}
 
-	void OpenGLShader::setUniform(const std::string& name, const int* value, uint32 count) const {
+	void OpenGLShader::setUniform(const std::string& name, const int32* value, uint32 count) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		const GLint location = glGetUniformLocation(program, name.c_str());
@@ -260,7 +264,7 @@ namespace ProjectA {
 		glUniform1iv(location, count, value);
 	}
 
-	void OpenGLShader::setUniform(const std::string& name, float value) const {
+	void OpenGLShader::setUniform(const std::string& name, float32 value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		const GLint location = glGetUniformLocation(program, name.c_str());
@@ -272,7 +276,7 @@ namespace ProjectA {
 		glUniform1f(location, value);
 	}
 
-	void OpenGLShader::setUniform(const std::string& name, const vec2<float>& value) const {
+	void OpenGLShader::setUniform(const std::string& name, const lyah::vec2<float32>& value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		const GLint location = glGetUniformLocation(program, name.c_str());
@@ -281,10 +285,10 @@ namespace ProjectA {
 			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing", name);
 		}
 
-		glUniform2f(location, value.x, value.y);
+		glUniform2f(location, value[0], value[1]);
 	}
 
-	void OpenGLShader::setUniform(const std::string& name, const vec3<float>& value) const {
+	void OpenGLShader::setUniform(const std::string& name, const lyah::vec3<float32>& value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		const GLint location = glGetUniformLocation(program, name.c_str());
@@ -296,7 +300,7 @@ namespace ProjectA {
 		glUniform3f(location, value[0], value[1], value[2]);
 	}
 
-	void OpenGLShader::setUniform(const std::string& name, const vec4<float>& value) const {
+	void OpenGLShader::setUniform(const std::string& name, const lyah::vec4<float32>& value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		const GLint location = glGetUniformLocation(program, name.c_str());
@@ -305,10 +309,10 @@ namespace ProjectA {
 			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing", name);
 		}
 
-		glUniform4f(location, value.x, value.y, value.z, value.w);
+		glUniform4f(location, value[0], value[1], value[2], value[3]);
 	}
 
-	void OpenGLShader::setUniform(const std::string& name, const mat4x4<float>& value) const {
+	void OpenGLShader::setUniform(const std::string& name, const lyah::mat4x4<float32>& value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		const GLint location = glGetUniformLocation(program, name.c_str());
@@ -317,6 +321,13 @@ namespace ProjectA {
 			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing", name);
 		}
 
-		glUniformMatrix4fv(location, 1, GL_FALSE, value.entries);
+		GLfloat entries[16]{};
+
+		_mm_store_ps(&entries[0], value[0].m);
+		_mm_store_ps(&entries[4], value[1].m);
+		_mm_store_ps(&entries[8], value[2].m);
+		_mm_store_ps(&entries[12], value[3].m);
+
+		glUniformMatrix4fv(location, 1, GL_FALSE, entries);
 	}
 }

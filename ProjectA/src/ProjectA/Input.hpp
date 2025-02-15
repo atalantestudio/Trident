@@ -14,7 +14,7 @@ namespace ProjectA {
 
 			virtual bool isMouseButtonPressedImpl(MouseButton button) = 0;
 
-			virtual vec2<float> getMousePositionImpl() = 0;
+			virtual lyah::vec2<float> getMousePositionImpl() = 0;
 
 		public:
 			static Scope<Input> create();
@@ -27,7 +27,7 @@ namespace ProjectA {
 				return instance->isMouseButtonPressedImpl(button);
 			}
 
-			static vec2<float> getMousePosition() {
+			static lyah::vec2<float> getMousePosition() {
 				return instance->getMousePositionImpl();
 			}
 	};

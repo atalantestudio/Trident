@@ -17,7 +17,7 @@ namespace ProjectA {
 		return buttonState == GLFW_PRESS;
 	}
 
-	vec2<float> WindowsInput::getMousePositionImpl() {
+	lyah::vec2<float> WindowsInput::getMousePositionImpl() {
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
 		double x;
 		double y;

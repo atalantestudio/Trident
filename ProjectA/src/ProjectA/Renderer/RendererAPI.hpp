@@ -25,7 +25,7 @@ namespace ProjectA {
 
 			virtual void setViewport(std::int32_t x, std::int32_t, std::uint32_t width, std::uint32_t height) const = 0;
 
-			virtual void setClearColor(const vec4<float>& color) const = 0;
+			virtual void setClearColor(const lyah::vec4<float>& color) const = 0;
 
 			virtual void clear() const = 0;
 

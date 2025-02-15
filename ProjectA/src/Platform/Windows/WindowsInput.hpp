@@ -13,6 +13,6 @@ namespace ProjectA {
 
 			bool isMouseButtonPressedImpl(MouseButton button) final override;
 
-			vec2<float> getMousePositionImpl() final override;
+			lyah::vec2<float> getMousePositionImpl() final override;
 	};
 }

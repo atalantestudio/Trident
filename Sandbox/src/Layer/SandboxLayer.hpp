@@ -5,7 +5,7 @@
 class SandboxLayer : public ProjectA::Layer {
 	private:
 		ProjectA::OrthographicCameraController cameraController;
-		ProjectA::vec4<float> color = {0.2f, 0.3f, 0.8f, 1.0f};
+		lyah::vec4<ProjectA::float32> color = {0.2f, 0.3f, 0.8f, 1.0f};
 		ProjectA::ref<ProjectA::Texture2D> texture;
 
 	public:
@@ -16,7 +16,7 @@ class SandboxLayer : public ProjectA::Layer {
 		void bind() override;
 		void unbind() override;
 
-		void update(float deltaTime) override;
+		void update(ProjectA::float32 deltaTime) override;
 
 		virtual void renderImGui() override;
 

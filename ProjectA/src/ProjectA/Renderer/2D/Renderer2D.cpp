@@ -7,11 +7,11 @@
 
 namespace ProjectA {
 	struct QuadVertex {
-		vec3<float32> position;
-		vec4<float32> color;
-		vec2<float32> uv;
-		int32 textureSlot;
-		float32 tilingFactor;
+		vec_sts<3> position;
+		vec_sts<4> color;
+		vec_sts<2> uv;
+		uint32 textureSlot = 0;
+		float32 tilingFactor = 0.0f;
 	};
 
 	struct Renderer2DStorage {
@@ -121,7 +121,6 @@ namespace ProjectA {
 
 		storage.vertexBuffer->copyData(storage.vertexBufferOrigin, sizeof(QuadVertex) * storage.quadCount * 4);
 
-		// Flush.
 		storage.vertexArray->bind();
 
 		for (uint32 slotIndex = 0; slotIndex < storage.currentSlotIndex; slotIndex++) {
@@ -131,14 +130,14 @@ namespace ProjectA {
 		RenderCommand::drawIndexed(storage.vertexArray, storage.quadCount * 6);
 	}
 
-	void Renderer2D::drawQuad(const vec2<float>& position, const vec2<float>& size, const vec4<float>& color) {
-		drawQuad({position.x, position.y, 0.0f}, size, color);
+	void Renderer2D::drawQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, const lyah::vec4<float32>& color) {
+		drawQuad({position[0], position[1], 0.0f}, size, color);
 	}
 
-	void Renderer2D::drawQuad(const vec3<float>& position, const vec2<float>& size, const vec4<float>& color) {
+	void Renderer2D::drawQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, const lyah::vec4<float32>& color) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		constexpr float32 textureSlot = 0.0f;
+		constexpr uint32 textureSlot = 0;
 		constexpr float32 tilingFactor = 1.0f;
 
 		storage.vertexBufferPointer->position = position;
@@ -172,20 +171,20 @@ namespace ProjectA {
 		storage.quadCount++;
 	}
 
-	void Renderer2D::drawQuad(const vec2<float>& position, const vec2<float>& size, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
-		drawQuad({position.x, position.y, 0.0f}, size, texture, tilingFactor, tintColor);
+	void Renderer2D::drawQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, const ref<Texture2D>& texture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
+		drawQuad({position[0], position[1], 0.0f}, size, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::drawQuad(const vec3<float>& position, const vec2<float>& size, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
+	void Renderer2D::drawQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, const ref<Texture2D>& texture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		const vec4<float32> color = {1.0f, 1.0f, 1.0f, 1.0f};
+		const lyah::vec4<float32> color = {1.0f, 1.0f, 1.0f, 1.0f};
 
-		int32 slotIndex = 0.0f;
+		uint32 slotIndex = 0;
 
 		for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
 			if (*texture.get() == *storage.textureSlots[i].get()) {
-				slotIndex = (int32) i;
+				slotIndex = i;
 
 				break;
 			}
@@ -230,15 +229,15 @@ namespace ProjectA {
 		storage.quadCount++;
 	}
 
-	void Renderer2D::drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 rotation, const vec4<float32>& color) {
-		//drawRotatedQuad({position.x, position.y, 0.0f}, size, rotation, color);
+	void Renderer2D::drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 rotation, const lyah::vec4<float32>& color) {
+		//drawRotatedQuad({position[0], position[1], 0.0f}, size, rotation, color);
 	}
 
-	void Renderer2D::drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 rotation, const vec4<float32>& color) {
+	void Renderer2D::drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 rotation, const lyah::vec4<float32>& color) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		/*const vec3<float> scale = {size.x, size.y, 1.0f};
-		const mat4x4<float> transform = mat4x4<float>::translate(position) * mat4x4<float>::rotateZ(rotation) * mat4x4<float>::scale(scale);
+		/*const vec3<float32> scale = {size[0], size[1], 1.0f};
+		const mat4x4<float32> transform = mat4x4<float32>::translate(position) * mat4x4<float32>::rotateZ(rotation) * mat4x4<float32>::scale(scale);
 
 		storage.colorTextureShader->bind();
 		storage.colorTextureShader->setUniform("u_color", color);
@@ -252,15 +251,15 @@ namespace ProjectA {
 		RenderCommand::drawIndexed(storage.vertexArray);*/
 	}
 
-	void Renderer2D::drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 rotation, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
-		//drawRotatedQuad({position.x, position.y, 0.0f}, size, rotation, texture, tilingFactor, tintColor);
+	void Renderer2D::drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 rotation, const ref<Texture2D>& texture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
+		//drawRotatedQuad({position[0], position[1], 0.0f}, size, rotation, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 rotation, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
+	void Renderer2D::drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 rotation, const ref<Texture2D>& texture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		/*const vec3<float> scale = {size.x, size.y, 1.0f};
-		const mat4x4<float> transform = mat4x4<float>::translate(position) * mat4x4<float>::rotateZ(rotation) * mat4x4<float>::scale(scale);
+		/*const vec3<float32> scale = {size[0], size[1], 1.0f};
+		const mat4x4<float32> transform = mat4x4<float32>::translate(position) * mat4x4<float32>::rotateZ(rotation) * mat4x4<float32>::scale(scale);
 
 		storage.colorTextureShader->bind();
 		storage.colorTextureShader->setUniform("u_color", tintColor);

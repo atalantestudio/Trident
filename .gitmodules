@@ -8,3 +8,7 @@
 	url = git@github.com:TheCherno/imgui
 	branch = docking
 
+[submodule "ProjectA/vendor/lyah"]
+	path = ProjectA/vendor/lyah
+	url = git@github.com:debaze/lyah
+	branch = main
