@@ -14,7 +14,7 @@ namespace ProjectA {
 		public:
 			static void initialize();
 
-			static void destruct();
+			static void destroy();
 
 			static RendererAPI::GraphicsAPI getGraphicsAPI() {
 				return RendererAPI::getGraphicsAPI();

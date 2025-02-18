@@ -20,55 +20,52 @@ namespace ProjectA {
 
 	// TODO: Replace with typename template
 	// Use primitive types and math library types
-	static uint32_t getShaderTypeSize(ShaderType type) {
+	static uint32 getShaderTypeSize(ShaderType type) {
 		switch (type) {
 			case ShaderType::Bool:
-				return 1;
+				return sizeof(bool);
 			case ShaderType::Int:
-				return 4;
+				return sizeof(int32);
 			case ShaderType::Int2:
-				return 4 * 2;
+				return sizeof(int32) * 2;
 			case ShaderType::Int3:
-				return 4 * 3;
+				return sizeof(int32) * 3;
 			case ShaderType::Int4:
-				return 4 * 4;
+				return sizeof(int32) * 4;
 			case ShaderType::Float:
-				return 4;
+				return sizeof(float32);
 			case ShaderType::Float2:
-				return 4 * 2;
+				return sizeof(float32) * 2;
 			case ShaderType::Float3:
-				return 4 * 3;
+				return sizeof(float32) * 3;
 			case ShaderType::Float4:
-				return 4 * 4;
+				return sizeof(float32) * 4;
 			case ShaderType::Mat3:
-				return 4 * 3 * 3;
+				return sizeof(float32) * 3 * 3;
 			case ShaderType::Mat4:
-				return 4 * 4 * 4;
+				return sizeof(float32) * 4 * 4;
 		}
 
-		ENGINE_ASSERT(false, "Unknown ShaderType");
+		ENGINE_ASSERT(false, "Unhandled shader type.");
 
 		return 0;
 	}
 
-	static uint32_t getShaderTypeComponentCount(ShaderType type) {
+	// TODO: Replace with typename template
+	// Use primitive types and math library types
+	static uint32 getShaderTypeComponentCount(ShaderType type) {
 		switch (type) {
 			case ShaderType::Bool:
-				return 1;
 			case ShaderType::Int:
-				return 1;
-			case ShaderType::Int2:
-				return 2;
-			case ShaderType::Int3:
-				return 3;
-			case ShaderType::Int4:
-				return 4;
 			case ShaderType::Float:
 				return 1;
+			case ShaderType::Int2:
 			case ShaderType::Float2:
 				return 2;
+			case ShaderType::Int3:
 			case ShaderType::Float3:
 				return 3;
+			case ShaderType::Int4:
 			case ShaderType::Float4:
 				return 4;
 			case ShaderType::Mat3:
@@ -77,7 +74,7 @@ namespace ProjectA {
 				return 4 * 4;
 		}
 
-		ENGINE_ASSERT(false, "Unknown ShaderType");
+		ENGINE_ASSERT(false, "Unhandled shader type.");
 
 		return 0;
 	}

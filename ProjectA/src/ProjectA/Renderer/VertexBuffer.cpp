@@ -1,4 +1,5 @@
 #include "pch.hpp"
+
 #include "Platform/OpenGL/OpenGLVertexBuffer.hpp"
 #include "ProjectA/Renderer/Renderer.hpp"
 #include "ProjectA/Renderer/VertexBuffer.hpp"

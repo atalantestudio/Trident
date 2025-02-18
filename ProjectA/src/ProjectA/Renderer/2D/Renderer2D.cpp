@@ -32,6 +32,9 @@ namespace ProjectA {
 		// TODO: Replace with assets/asset containers
 		std::array<ref<Texture2D>, MAX_TEXTURE_SLOTS> textureSlots;
 		uint32 currentSlotIndex = 1; // Skip default texture
+
+		lyah::vec4<float32> quadVertexPositions[4];
+		lyah::vec2<float32> quadVertexTextureCoordinates[4];
 	};
 
 	static Renderer2DStorage storage;
@@ -99,9 +102,19 @@ namespace ProjectA {
 		}
 
 		storage.colorTextureShader->setUniform("u_textures", textureSamplers, Renderer2DStorage::MAX_TEXTURE_SLOTS);
+
+		storage.quadVertexPositions[0] = {-0.5f, -0.5f, 0.0f, 1.0f};
+		storage.quadVertexPositions[1] = {-0.5f,  0.5f, 0.0f, 1.0f};
+		storage.quadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f};
+		storage.quadVertexPositions[3] = { 0.5f, -0.5f, 0.0f, 1.0f};
+
+		storage.quadVertexTextureCoordinates[0] = {0.0f, 0.0f};
+		storage.quadVertexTextureCoordinates[1] = {0.0f, 1.0f};
+		storage.quadVertexTextureCoordinates[2] = {1.0f, 1.0f};
+		storage.quadVertexTextureCoordinates[3] = {1.0f, 0.0f};
 	}
 
-	void Renderer2D::destruct() {
+	void Renderer2D::destroy() {
 		delete[] storage.vertexBufferOrigin;
 	}
 
@@ -137,34 +150,37 @@ namespace ProjectA {
 	void Renderer2D::drawQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, const lyah::vec4<float32>& color) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		constexpr uint32 textureSlot = 0;
+		constexpr uint32 textureIndex = 0;
 		constexpr float32 tilingFactor = 1.0f;
 
-		storage.vertexBufferPointer->position = position;
+		lyah::mat4x4<float32> transform = lyah::mat4x4<float32>::scaling({size[0], size[1], 1.0f});
+		transform *= lyah::mat4x4<float32>::translation(position);
+
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[0] * transform;
 		storage.vertexBufferPointer->color = color;
-		storage.vertexBufferPointer->uv = {0.0f, 0.0f};
-		storage.vertexBufferPointer->textureSlot = textureSlot;
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[0];
+		storage.vertexBufferPointer->textureSlot = textureIndex;
 		storage.vertexBufferPointer->tilingFactor = tilingFactor;
 		storage.vertexBufferPointer++;
 
-		storage.vertexBufferPointer->position = {position[0] + size[0], position[1], position[2]};
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[1] * transform;
 		storage.vertexBufferPointer->color = color;
-		storage.vertexBufferPointer->uv = {1.0f, 0.0f};
-		storage.vertexBufferPointer->textureSlot = textureSlot;
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[1];
+		storage.vertexBufferPointer->textureSlot = textureIndex;
 		storage.vertexBufferPointer->tilingFactor = tilingFactor;
 		storage.vertexBufferPointer++;
 
-		storage.vertexBufferPointer->position = {position[0] + size[0], position[1] + size[1], position[2]};
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[2] * transform;
 		storage.vertexBufferPointer->color = color;
-		storage.vertexBufferPointer->uv = {1.0f, 1.0f};
-		storage.vertexBufferPointer->textureSlot = textureSlot;
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[2];
+		storage.vertexBufferPointer->textureSlot = textureIndex;
 		storage.vertexBufferPointer->tilingFactor = tilingFactor;
 		storage.vertexBufferPointer++;
 
-		storage.vertexBufferPointer->position = {position[0], position[1] + size[1], position[2]};
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[3] * transform;
 		storage.vertexBufferPointer->color = color;
-		storage.vertexBufferPointer->uv = {0.0f, 1.0f};
-		storage.vertexBufferPointer->textureSlot = textureSlot;
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[3];
+		storage.vertexBufferPointer->textureSlot = textureIndex;
 		storage.vertexBufferPointer->tilingFactor = tilingFactor;
 		storage.vertexBufferPointer++;
 
@@ -198,30 +214,33 @@ namespace ProjectA {
 			storage.currentSlotIndex++;
 		}
 
-		storage.vertexBufferPointer->position = position;
+		lyah::mat4x4<float32> transform = lyah::mat4x4<float32>::scaling({size[0], size[1], 1.0f});
+		transform *= lyah::mat4x4<float32>::translation(position);
+
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[0] * transform;
 		storage.vertexBufferPointer->color = color;
-		storage.vertexBufferPointer->uv = {0.0f, 0.0f};
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[0];
 		storage.vertexBufferPointer->textureSlot = slotIndex;
 		storage.vertexBufferPointer->tilingFactor = tilingFactor;
 		storage.vertexBufferPointer++;
 
-		storage.vertexBufferPointer->position = {position[0] + size[0], position[1], position[2]};
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[1] * transform;
 		storage.vertexBufferPointer->color = color;
-		storage.vertexBufferPointer->uv = {1.0f, 0.0f};
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[1];
 		storage.vertexBufferPointer->textureSlot = slotIndex;
 		storage.vertexBufferPointer->tilingFactor = tilingFactor;
 		storage.vertexBufferPointer++;
 
-		storage.vertexBufferPointer->position = {position[0] + size[0], position[1] + size[1], position[2]};
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[2] * transform;
 		storage.vertexBufferPointer->color = color;
-		storage.vertexBufferPointer->uv = {1.0f, 1.0f};
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[2];
 		storage.vertexBufferPointer->textureSlot = slotIndex;
 		storage.vertexBufferPointer->tilingFactor = tilingFactor;
 		storage.vertexBufferPointer++;
 
-		storage.vertexBufferPointer->position = {position[0], position[1] + size[1], position[2]};
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[3] * transform;
 		storage.vertexBufferPointer->color = color;
-		storage.vertexBufferPointer->uv = {0.0f, 1.0f};
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[3];
 		storage.vertexBufferPointer->textureSlot = slotIndex;
 		storage.vertexBufferPointer->tilingFactor = tilingFactor;
 		storage.vertexBufferPointer++;
@@ -229,47 +248,108 @@ namespace ProjectA {
 		storage.quadCount++;
 	}
 
-	void Renderer2D::drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 rotation, const lyah::vec4<float32>& color) {
-		//drawRotatedQuad({position[0], position[1], 0.0f}, size, rotation, color);
+	void Renderer2D::drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 angle, const lyah::vec4<float32>& color) {
+		drawRotatedQuad({position[0], position[1], 0.0f}, size, angle, color);
 	}
 
-	void Renderer2D::drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 rotation, const lyah::vec4<float32>& color) {
+	void Renderer2D::drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 angle, const lyah::vec4<float32>& color) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		/*const vec3<float32> scale = {size[0], size[1], 1.0f};
-		const mat4x4<float32> transform = mat4x4<float32>::translate(position) * mat4x4<float32>::rotateZ(rotation) * mat4x4<float32>::scale(scale);
+		constexpr uint32 textureIndex = 0;
+		constexpr float32 tilingFactor = 1.0f;
 
-		storage.colorTextureShader->bind();
-		storage.colorTextureShader->setUniform("u_color", color);
-		storage.colorTextureShader->setUniform("u_tilingFactor", 1.0f);
-		storage.colorTextureShader->setUniform("u_transform", transform);
+		lyah::mat4x4<float32> transform = lyah::mat4x4<float32>::scaling({size[0], size[1], 1.0f});
+		transform *= lyah::mat4x4<float32>::rotation({0.0f, 0.0f, 1.0f}, angle);
+		transform *= lyah::mat4x4<float32>::translation(position);
 
-		storage.defaultTexture->bind(0);
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[0] * transform;
+		storage.vertexBufferPointer->color = color;
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[0];
+		storage.vertexBufferPointer->textureSlot = textureIndex;
+		storage.vertexBufferPointer->tilingFactor = tilingFactor;
+		storage.vertexBufferPointer++;
 
-		storage.vertexArray->bind();
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[1] * transform;
+		storage.vertexBufferPointer->color = color;
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[1];
+		storage.vertexBufferPointer->textureSlot = textureIndex;
+		storage.vertexBufferPointer->tilingFactor = tilingFactor;
+		storage.vertexBufferPointer++;
 
-		RenderCommand::drawIndexed(storage.vertexArray);*/
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[2] * transform;
+		storage.vertexBufferPointer->color = color;
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[2];
+		storage.vertexBufferPointer->textureSlot = textureIndex;
+		storage.vertexBufferPointer->tilingFactor = tilingFactor;
+		storage.vertexBufferPointer++;
+
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[3] * transform;
+		storage.vertexBufferPointer->color = color;
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[3];
+		storage.vertexBufferPointer->textureSlot = textureIndex;
+		storage.vertexBufferPointer->tilingFactor = tilingFactor;
+		storage.vertexBufferPointer++;
+
+		storage.quadCount++;
 	}
 
-	void Renderer2D::drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 rotation, const ref<Texture2D>& texture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
-		//drawRotatedQuad({position[0], position[1], 0.0f}, size, rotation, texture, tilingFactor, tintColor);
+	void Renderer2D::drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 angle, const ref<Texture2D>& texture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
+		drawRotatedQuad({position[0], position[1], 0.0f}, size, angle, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 rotation, const ref<Texture2D>& texture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
+	void Renderer2D::drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 angle, const ref<Texture2D>& texture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		/*const vec3<float32> scale = {size[0], size[1], 1.0f};
-		const mat4x4<float32> transform = mat4x4<float32>::translate(position) * mat4x4<float32>::rotateZ(rotation) * mat4x4<float32>::scale(scale);
+		uint32 slotIndex = 0;
 
-		storage.colorTextureShader->bind();
-		storage.colorTextureShader->setUniform("u_color", tintColor);
-		storage.colorTextureShader->setUniform("u_tilingFactor", tilingFactor);
-		storage.colorTextureShader->setUniform("u_transform", transform);
+		for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
+			if (*texture.get() == *storage.textureSlots[i].get()) {
+				slotIndex = i;
 
-		texture->bind(0);
+				break;
+			}
+		}
 
-		storage.vertexArray->bind();
+		if (slotIndex == 0) {
+			// Reserve new texture slot.
+			slotIndex = storage.currentSlotIndex;
 
-		RenderCommand::drawIndexed(storage.vertexArray);*/
+			storage.textureSlots[storage.currentSlotIndex] = texture;
+			storage.currentSlotIndex++;
+		}
+
+		lyah::mat4x4<float32> transform = lyah::mat4x4<float32>::scaling({size[0], size[1], 1.0f});
+		transform *= lyah::mat4x4<float32>::rotation({0.0f, 0.0f, 1.0f}, angle);
+		transform *= lyah::mat4x4<float32>::translation(position);
+
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[0] * transform;
+		storage.vertexBufferPointer->color = tintColor;
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[0];
+		storage.vertexBufferPointer->textureSlot = slotIndex;
+		storage.vertexBufferPointer->tilingFactor = tilingFactor;
+		storage.vertexBufferPointer++;
+
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[1] * transform;
+		storage.vertexBufferPointer->color = tintColor;
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[1];
+		storage.vertexBufferPointer->textureSlot = slotIndex;
+		storage.vertexBufferPointer->tilingFactor = tilingFactor;
+		storage.vertexBufferPointer++;
+
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[2] * transform;
+		storage.vertexBufferPointer->color = tintColor;
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[2];
+		storage.vertexBufferPointer->textureSlot = slotIndex;
+		storage.vertexBufferPointer->tilingFactor = tilingFactor;
+		storage.vertexBufferPointer++;
+
+		storage.vertexBufferPointer->position = storage.quadVertexPositions[3] * transform;
+		storage.vertexBufferPointer->color = tintColor;
+		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[3];
+		storage.vertexBufferPointer->textureSlot = slotIndex;
+		storage.vertexBufferPointer->tilingFactor = tilingFactor;
+		storage.vertexBufferPointer++;
+
+		storage.quadCount++;
 	}
 }

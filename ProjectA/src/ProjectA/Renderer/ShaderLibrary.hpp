@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ProjectA/core.hpp"
-#include "Shader.hpp"
+#include "ProjectA/Renderer/Shader.hpp"
 
 namespace ProjectA {
 	class ShaderLibrary {

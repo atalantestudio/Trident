@@ -11,7 +11,7 @@ namespace ProjectA {
 		RenderCommand::initialize();
 	}
 
-	void Renderer::destruct() {}
+	void Renderer::destroy() {}
 
 	void Renderer::beginScene(const Camera& camera) {
 		PROFILE_SCOPE(__FUNCSIG__);

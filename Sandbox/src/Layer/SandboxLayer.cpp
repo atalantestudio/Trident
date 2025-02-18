@@ -31,13 +31,19 @@ void SandboxLayer::update(ProjectA::float32 deltaTime) {
 	{
 		PROFILE_SCOPE("Draw");
 
+		static ProjectA::float32 angle = 0.0f;
+
+		angle += deltaTime;
+
 		// NOTE: Z axis is reversed (+ points towards the screen).
+		// TODO: Make positive rotation be clockwise
+		// TODO: Fix black squares on shapes
 		ProjectA::Renderer2D::beginScene(cameraController.getCamera());
-		//ProjectA::Renderer2D::drawRotatedQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, lyah::radians(-45.0f), {0.8f, 0.2f, 0.3f, 1.0f});
-		ProjectA::Renderer2D::drawQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, color);
+		ProjectA::Renderer2D::drawRotatedQuad({1.0f, 0.0f}, {0.8f, 0.8f}, lyah::radians(-45.0f), {0.8f, 0.2f, 0.3f, 1.0f});
+		ProjectA::Renderer2D::drawQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, {0.8f, 0.2f, 0.3f, 1.0f});
 		ProjectA::Renderer2D::drawQuad({0.5f, -0.5f}, {0.5f, 0.75f}, {0.2f, 0.3f, 0.8f, 1.0f});
-		ProjectA::Renderer2D::drawQuad({-5.0f, -5.0f, 0.1f}, {10.0f, 10.0f}, texture, 10.0f);
-		ProjectA::Renderer2D::drawQuad({-0.5f, -0.5f, 0.01f}, {1.0f, 1.0f}, texture, 20.0f);
+		ProjectA::Renderer2D::drawQuad({0.0f, 0.0f, 0.1f}, {10.0f, 10.0f}, texture, 10.0f);
+		ProjectA::Renderer2D::drawRotatedQuad({-2.0f, 0.0f, 0.0f}, {1.0f, 1.0f}, angle, texture, 20.0f);
 		ProjectA::Renderer2D::endScene();
 	}
 }

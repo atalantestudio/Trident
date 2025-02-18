@@ -1,9 +1,6 @@
 #pragma once
 
 namespace ProjectA {
-	// bool
-	// char
-
 	typedef std::byte byte;
 
 	typedef std::int8_t int8;
@@ -19,13 +16,14 @@ namespace ProjectA {
 	typedef std::float_t float32;
 	typedef std::double_t float64;
 
-	// void
+	// template<std::size_t C, typename T>
+	// using vec = lyah::vec<C, T>;
 
-	// TODO: vecC
+	// template<std::size_t M, std::size_t N, typename T>
+	// using mat = lyah::mat<M, N, T>;
 
-	// TODO: matRxC
-
-	// TODO: quat
+	// template<typename T>
+	// using quat = lyah::quat<T>;
 
 	template<typename T>
 	using ref = std::shared_ptr<T>;

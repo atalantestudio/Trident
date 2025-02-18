@@ -9,7 +9,7 @@ namespace ProjectA {
 			name,
 			std::this_thread::get_id(),
 			std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now()).time_since_epoch().count(),
-			0 // Event end is set on the timer's destruction
+			0, // Event end is set on the timer's destruction
 		})
 	{}
 

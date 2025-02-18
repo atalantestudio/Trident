@@ -30,8 +30,8 @@ namespace ProjectA {
 	Application::~Application() {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		Renderer::destruct();
-		Renderer2D::destruct();
+		Renderer::destroy();
+		Renderer2D::destroy();
 	}
 
 	void Application::run() {

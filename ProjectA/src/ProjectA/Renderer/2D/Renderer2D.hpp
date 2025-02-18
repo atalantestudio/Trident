@@ -8,7 +8,7 @@ namespace ProjectA {
 		public:
 			static void construct();
 
-			static void destruct();
+			static void destroy();
 
 			static void beginScene(const OrthographicCamera& camera);
 			static void endScene();
@@ -18,9 +18,9 @@ namespace ProjectA {
 			static void drawQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const lyah::vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
 			static void drawQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const lyah::vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
 
-			static void drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 rotation, const lyah::vec4<float32>& color);
-			static void drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 rotation, const lyah::vec4<float32>& color);
-			static void drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 rotation, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const lyah::vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
-			static void drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 rotation, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const lyah::vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
+			static void drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 angle, const lyah::vec4<float32>& color);
+			static void drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 angle, const lyah::vec4<float32>& color);
+			static void drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 angle, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const lyah::vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
+			static void drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 angle, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const lyah::vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
 	};
 }
