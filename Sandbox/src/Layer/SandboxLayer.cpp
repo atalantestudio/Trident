@@ -21,6 +21,8 @@ void SandboxLayer::update(ProjectA::float32 deltaTime) {
 
 	cameraController.update(deltaTime);
 
+	ProjectA::Renderer2D::resetStatistics();
+
 	{
 		PROFILE_SCOPE("Pre-draw");
 
@@ -42,8 +44,22 @@ void SandboxLayer::update(ProjectA::float32 deltaTime) {
 		ProjectA::Renderer2D::drawRotatedQuad({1.0f, 0.0f}, {0.8f, 0.8f}, lyah::radians(-45.0f), {0.8f, 0.2f, 0.3f, 1.0f});
 		ProjectA::Renderer2D::drawQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, {0.8f, 0.2f, 0.3f, 1.0f});
 		ProjectA::Renderer2D::drawQuad({0.5f, -0.5f}, {0.5f, 0.75f}, {0.2f, 0.3f, 0.8f, 1.0f});
-		ProjectA::Renderer2D::drawQuad({0.0f, 0.0f, 0.1f}, {10.0f, 10.0f}, texture, 10.0f);
+		ProjectA::Renderer2D::drawQuad({0.0f, 0.0f, 0.1f}, {20.0f, 20.0f}, texture, 10.0f);
 		ProjectA::Renderer2D::drawRotatedQuad({-2.0f, 0.0f, 0.0f}, {1.0f, 1.0f}, angle, texture, 20.0f);
+		ProjectA::Renderer2D::endScene();
+
+		ProjectA::Renderer2D::beginScene(cameraController.getCamera());
+
+		for (ProjectA::float32 y = -5.0f; y < 5.0f; y += 0.1f) {
+			for (ProjectA::float32 x = -5.0f; x < 5.0f; x += 0.1f) {
+				lyah::vec2<ProjectA::float32> position = {x, y};
+				lyah::vec2<ProjectA::float32> size = {0.45f, 0.45f};
+				lyah::vec4<ProjectA::float32> color = {(x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f};
+
+				ProjectA::Renderer2D::drawQuad(position, size, color);
+			}
+		}
+
 		ProjectA::Renderer2D::endScene();
 	}
 }
@@ -51,7 +67,14 @@ void SandboxLayer::update(ProjectA::float32 deltaTime) {
 void SandboxLayer::renderImGui() {
 	PROFILE_SCOPE(__FUNCSIG__);
 
+	ProjectA::Renderer2D::Statistics statistics = ProjectA::Renderer2D::getStatistics();
+
 	ImGui::Begin("Settings");
+	ImGui::Text("Per-frame statistics:");
+	ImGui::Text("Draw call count: %d", statistics.drawCallCount);
+	ImGui::Text("Quad count: %d", statistics.quadCount);
+	ImGui::Text("Total vertex count: %d", statistics.getTotalVertexCount());
+	ImGui::Text("Total index count: %d", statistics.getTotalIndexCount());
 	ImGui::ColorEdit4("Color", color.m.m128_f32);
 	ImGui::End();
 }

@@ -35,6 +35,8 @@ namespace ProjectA {
 
 		lyah::vec4<float32> quadVertexPositions[4];
 		lyah::vec2<float32> quadVertexTextureCoordinates[4];
+
+		Renderer2D::Statistics statistics;
 	};
 
 	static Renderer2DStorage storage;
@@ -141,6 +143,16 @@ namespace ProjectA {
 		}
 
 		RenderCommand::drawIndexed(storage.vertexArray, storage.quadCount * 6);
+
+		storage.statistics.drawCallCount++;
+	}
+
+	void Renderer2D::startNewBatch() {
+		endScene();
+
+		storage.quadCount = 0;
+		storage.vertexBufferPointer = storage.vertexBufferOrigin;
+		storage.currentSlotIndex = 1;
 	}
 
 	void Renderer2D::drawQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, const lyah::vec4<float32>& color) {
@@ -150,6 +162,10 @@ namespace ProjectA {
 	void Renderer2D::drawQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, const lyah::vec4<float32>& color) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
+		if (storage.quadCount >= storage.MAX_QUADS) {
+			startNewBatch();
+		}
+
 		constexpr uint32 textureIndex = 0;
 		constexpr float32 tilingFactor = 1.0f;
 
@@ -185,6 +201,8 @@ namespace ProjectA {
 		storage.vertexBufferPointer++;
 
 		storage.quadCount++;
+
+		storage.statistics.quadCount++;
 	}
 
 	void Renderer2D::drawQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, const ref<Texture2D>& texture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
@@ -194,7 +212,9 @@ namespace ProjectA {
 	void Renderer2D::drawQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, const ref<Texture2D>& texture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		const lyah::vec4<float32> color = {1.0f, 1.0f, 1.0f, 1.0f};
+		if (storage.quadCount >= storage.MAX_QUADS) {
+			startNewBatch();
+		}
 
 		uint32 slotIndex = 0;
 
@@ -218,34 +238,36 @@ namespace ProjectA {
 		transform *= lyah::mat4x4<float32>::translation(position);
 
 		storage.vertexBufferPointer->position = storage.quadVertexPositions[0] * transform;
-		storage.vertexBufferPointer->color = color;
+		storage.vertexBufferPointer->color = tintColor;
 		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[0];
 		storage.vertexBufferPointer->textureSlot = slotIndex;
 		storage.vertexBufferPointer->tilingFactor = tilingFactor;
 		storage.vertexBufferPointer++;
 
 		storage.vertexBufferPointer->position = storage.quadVertexPositions[1] * transform;
-		storage.vertexBufferPointer->color = color;
+		storage.vertexBufferPointer->color = tintColor;
 		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[1];
 		storage.vertexBufferPointer->textureSlot = slotIndex;
 		storage.vertexBufferPointer->tilingFactor = tilingFactor;
 		storage.vertexBufferPointer++;
 
 		storage.vertexBufferPointer->position = storage.quadVertexPositions[2] * transform;
-		storage.vertexBufferPointer->color = color;
+		storage.vertexBufferPointer->color = tintColor;
 		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[2];
 		storage.vertexBufferPointer->textureSlot = slotIndex;
 		storage.vertexBufferPointer->tilingFactor = tilingFactor;
 		storage.vertexBufferPointer++;
 
 		storage.vertexBufferPointer->position = storage.quadVertexPositions[3] * transform;
-		storage.vertexBufferPointer->color = color;
+		storage.vertexBufferPointer->color = tintColor;
 		storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[3];
 		storage.vertexBufferPointer->textureSlot = slotIndex;
 		storage.vertexBufferPointer->tilingFactor = tilingFactor;
 		storage.vertexBufferPointer++;
 
 		storage.quadCount++;
+
+		storage.statistics.quadCount++;
 	}
 
 	void Renderer2D::drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 angle, const lyah::vec4<float32>& color) {
@@ -254,6 +276,10 @@ namespace ProjectA {
 
 	void Renderer2D::drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 angle, const lyah::vec4<float32>& color) {
 		PROFILE_SCOPE(__FUNCSIG__);
+
+		if (storage.quadCount >= storage.MAX_QUADS) {
+			startNewBatch();
+		}
 
 		constexpr uint32 textureIndex = 0;
 		constexpr float32 tilingFactor = 1.0f;
@@ -291,6 +317,8 @@ namespace ProjectA {
 		storage.vertexBufferPointer++;
 
 		storage.quadCount++;
+
+		storage.statistics.quadCount++;
 	}
 
 	void Renderer2D::drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 angle, const ref<Texture2D>& texture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
@@ -299,6 +327,10 @@ namespace ProjectA {
 
 	void Renderer2D::drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 angle, const ref<Texture2D>& texture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
 		PROFILE_SCOPE(__FUNCSIG__);
+
+		if (storage.quadCount >= storage.MAX_QUADS) {
+			startNewBatch();
+		}
 
 		uint32 slotIndex = 0;
 
@@ -351,5 +383,15 @@ namespace ProjectA {
 		storage.vertexBufferPointer++;
 
 		storage.quadCount++;
+
+		storage.statistics.quadCount++;
+	}
+
+	Renderer2D::Statistics& Renderer2D::getStatistics() {
+		return storage.statistics;
+	}
+
+	void Renderer2D::resetStatistics() {
+		memset(&storage.statistics, 0, sizeof(Statistics));
 	}
 }
