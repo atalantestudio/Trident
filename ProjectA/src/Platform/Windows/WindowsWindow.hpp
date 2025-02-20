@@ -39,6 +39,7 @@ namespace ProjectA {
 				return window;
 			}
 
+			// TODO: Merge width and height into viewport
 			unsigned int getWidth() const override {
 				return data.width;
 			}

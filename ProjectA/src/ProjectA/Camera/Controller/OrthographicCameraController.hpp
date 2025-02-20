@@ -8,22 +8,31 @@
 namespace ProjectA {
 	class OrthographicCameraController {
 		private:
-			float aspectRatio;
-			float zoomLevel;
-			lyah::vec3<float> position;
-			float speed;
-			float rotation;
-			float rotationSpeed;
+			float32 aspectRatio;
+			float32 zoomLevel;
+			lyah::vec3<float32> position;
+			float32 speed;
+			float32 rotation;
+			float32 rotationSpeed;
+			lyah::vec4<float32> bounds;
 			OrthographicCamera camera;
 
 		public:
-			OrthographicCameraController(float aspectRatio);
+			OrthographicCameraController(float32 aspectRatio);
+
+			inline const lyah::vec3<float32>& getPosition() const {
+				return position;
+			}
+
+			inline const lyah::vec4<float32>& getBounds() const {
+				return bounds;
+			}
 
 			inline const OrthographicCamera& getCamera() const {
 				return camera;
 			}
 
-			void update(float deltaTime);
+			void update(float32 deltaTime);
 
 			void onEvent(Event& event);
 

@@ -4,19 +4,20 @@
 #include "ProjectA/Input.hpp"
 
 namespace ProjectA {
-	OrthographicCameraController::OrthographicCameraController(float aspectRatio) :
+	OrthographicCameraController::OrthographicCameraController(float32 aspectRatio) :
 		aspectRatio(aspectRatio),
 		zoomLevel(1),
 		position(0, 0, 0),
 		speed(zoomLevel),
 		rotation(0),
 		rotationSpeed(90),
-		camera(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1) {}
+		camera(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1),
+		bounds(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel) {}
 
-	void OrthographicCameraController::update(float deltaTime) {
+	void OrthographicCameraController::update(float32 deltaTime) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		float _position[2] = {position[0], position[1]};
+		float32 _position[2] = {position[0], position[1]};
 
 		if (Input::isKeyPressed(KeyCode::A)) {
 			_position[0] -= speed * deltaTime;
@@ -55,8 +56,8 @@ namespace ProjectA {
 
 		zoomLevel -= event.getOffset()[1] / 2;
 		zoomLevel = std::max(zoomLevel, 0.25f);
-
 		speed = zoomLevel;
+		bounds = {-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel};
 
 		camera.updateProjection(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1);
 
@@ -66,7 +67,8 @@ namespace ProjectA {
 	bool OrthographicCameraController::onWindowResize(WindowResizeEvent& event) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		aspectRatio = (float) event.getWidth() / (float) event.getHeight();
+		aspectRatio = (float32) event.getWidth() / (float32) event.getHeight();
+		bounds = {-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel};
 
 		camera.updateProjection(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1);
 

@@ -28,6 +28,8 @@
 #endif
 
 #undef assert
+#undef max
+#undef min
 #undef DELETE
 #undef ERROR
 
