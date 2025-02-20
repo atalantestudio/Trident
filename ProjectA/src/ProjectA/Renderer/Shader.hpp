@@ -2,7 +2,7 @@
 
 #include "pch.hpp"
 
-#include "ProjectA/core.hpp"
+#include "ProjectA/base.hpp"
 
 namespace ProjectA {
 	class Shader {

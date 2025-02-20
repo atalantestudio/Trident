@@ -1,12 +1,14 @@
 #pragma once
 
-#include "ProjectA/core.hpp"
+#include "ProjectA/base.hpp"
 
 #ifdef WINDOWS
 	extern ProjectA::Application* ProjectA::createApplication();
 
 	int main(int argc, char** argv) {
-		ProjectA::Logger::initialize();
+		#ifdef BUILD_MODE_DEBUG
+			ProjectA::Logger::initialize();
+		#endif
 
 		ProjectA::Application* application;
 

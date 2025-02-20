@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProjectA/core.hpp"
+#include "ProjectA/base.hpp"
 
 // Math
 #include "lyah/lyah.hpp"
@@ -9,7 +9,10 @@
 #include "ProjectA/Application.hpp"
 #include "ProjectA/Input.hpp"
 #include "ProjectA/Layer.hpp"
-#include "ProjectA/Logger/Logger.hpp"
+
+#ifdef BUILD_MODE_DEBUG
+	#include "ProjectA/Logger/Logger.hpp"
+#endif
 
 // Camera controller
 #include "ProjectA/Camera/Controller/OrthographicCameraController.hpp"

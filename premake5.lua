@@ -55,15 +55,11 @@ project "ProjectA"
 
 	defines {
 		"_CRT_SECURE_NO_WARNINGS",
+		"GLFW_INCLUDE_NONE",
 	}
 
 	filter "system:windows"
 		systemversion "latest"
-
-		defines {
-			"BUILD_DLL",
-			"GLFW_INCLUDE_NONE",
-		}
 
 	filter "configurations:Debug"
 		defines "BUILD_MODE_DEBUG"
@@ -75,10 +71,14 @@ project "ProjectA"
 		runtime "Release"
 		optimize "on"
 
+		excludes "%{prj.name}/src/%{prj.name}/Logger/Logger.cpp"
+
 	filter "configurations:Release"
 		defines "BUILD_MODE_RELEASE"
 		runtime "Release"
 		optimize "on"
+
+		excludes "%{prj.name}/src/%{prj.name}/Logger/Logger.cpp"
 
 project "Sandbox"
 	location "Sandbox"

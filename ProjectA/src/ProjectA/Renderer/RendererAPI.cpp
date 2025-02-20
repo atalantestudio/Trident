@@ -10,7 +10,7 @@ namespace ProjectA {
 	Scope<RendererAPI> RendererAPI::create() {
 		switch (graphicsApi) {
 			case RendererAPI::GraphicsAPI::None:
-				ENGINE_ASSERT(false, "Graphics::None is not supported yet.")
+				ENGINE_ASSERT(false, "Graphics::None is not supported yet.");
 
 				return nullptr;
 

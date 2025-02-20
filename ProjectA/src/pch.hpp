@@ -31,6 +31,8 @@
 #undef DELETE
 #undef ERROR
 
+#include "ProjectA/base.hpp"
+
 #include "lyah/lyah.hpp"
 
 #include "ProjectA/types.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProjectA/core.hpp"
+#include "ProjectA/base.hpp"
 #include "Texture.hpp"
 
 namespace ProjectA {

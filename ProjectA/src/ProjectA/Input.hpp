@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProjectA/core.hpp"
+#include "ProjectA/base.hpp"
 #include "ProjectA/KeyCode.hpp"
 #include "ProjectA/MouseButton.hpp"
 

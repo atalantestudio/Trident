@@ -93,12 +93,12 @@ namespace ProjectA {
 		eventDispatcher.dispatch<WindowCloseEvent>(BIND(Application::onWindowClose));
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(Application::onWindowResize));
 
-		for (auto i = layerStack.end(); i != layerStack.begin();) {
-			(*--i)->onEvent(event);
-
+		for (std::vector<Layer*>::reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); ++i) {
 			if (event.handled) {
 				break;
 			}
+
+			(*i)->onEvent(event);
 		}
 	}
 

@@ -41,9 +41,9 @@ namespace ProjectA {
 			case ShaderType::Float4:
 				return sizeof(float32) * 4;
 			case ShaderType::Mat3:
-				return sizeof(float32) * 3 * 3;
+				return sizeof(float32) * 3; // 3 * vec3
 			case ShaderType::Mat4:
-				return sizeof(float32) * 4 * 4;
+				return sizeof(float32) * 4; // 4 * vec4
 		}
 
 		ENGINE_ASSERT(false, "Unhandled shader type.");

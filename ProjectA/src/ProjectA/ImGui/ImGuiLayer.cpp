@@ -82,4 +82,11 @@ namespace ProjectA {
 			glfwMakeContextCurrent(currentContextBackup);
 		}
 	}
+
+	void ImGuiLayer::onEvent(Event& event) {
+		ImGuiIO& io = ImGui::GetIO();
+
+		event.handled |= event.hasCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		event.handled |= event.hasCategory(EventCategoryMouse) & io.WantCaptureMouse;
+	}
 }

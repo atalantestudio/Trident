@@ -18,5 +18,7 @@ namespace ProjectA {
 			virtual void unbind() override;
 			void begin();
 			void end();
+
+			virtual void onEvent(Event& event) override;
 	};
 }

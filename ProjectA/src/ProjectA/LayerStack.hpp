@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProjectA/core.hpp"
+#include "ProjectA/base.hpp"
 #include "ProjectA/Layer.hpp"
 
 namespace ProjectA {
@@ -25,6 +25,14 @@ namespace ProjectA {
 
 			std::vector<Layer*>::iterator end() {
 				return layers.end();
+			}
+
+			std::vector<Layer*>::reverse_iterator rbegin() {
+				return layers.rbegin();
+			}
+
+			std::vector<Layer*>::reverse_iterator rend() {
+				return layers.rend();
 			}
 	};
 }

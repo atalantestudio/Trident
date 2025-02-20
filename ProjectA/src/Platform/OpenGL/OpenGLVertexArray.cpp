@@ -82,33 +82,66 @@ namespace ProjectA {
 
 		GLuint attributeIndex = 0;
 
-		for (auto& element : layout) {
-			glEnableVertexAttribArray(attributeIndex);
+		for (const auto& element : layout) {
+			switch (element.type) {
+				case ShaderType::Float:
+				case ShaderType::Float2:
+				case ShaderType::Float3:
+				case ShaderType::Float4:
+					glEnableVertexAttribArray(attributeIndex);
+					glVertexAttribPointer(
+						attributeIndex,
+						getShaderTypeComponentCount(element.type),
+						getShaderType(element.type),
+						element.normalized ? GL_TRUE : GL_FALSE,
+						layout.getStride(),
+						(const void*) element.offset
+					);
 
-			const GLenum shaderType = getShaderType(element.type);
+					attributeIndex++;
 
-			if (shaderType == GL_INT) {
-				glVertexAttribIPointer(
-					attributeIndex,
-					getShaderTypeComponentCount(element.type),
-					shaderType,
-					layout.getStride(),
-					(const void*) element.offset
-				);
+					break;
+				case ShaderType::Bool:
+				case ShaderType::Int:
+				case ShaderType::Int2:
+				case ShaderType::Int3:
+				case ShaderType::Int4:
+					glEnableVertexAttribArray(attributeIndex);
+					glVertexAttribIPointer(
+						attributeIndex,
+						getShaderTypeComponentCount(element.type),
+						getShaderType(element.type),
+						layout.getStride(),
+						(const void*) element.offset
+					);
+
+					attributeIndex++;
+
+					break;
+				case ShaderType::Mat3:
+				case ShaderType::Mat4:
+					const uint8 count = getShaderTypeComponentCount(element.type);
+					const GLenum shaderType = getShaderType(element.type);
+					const GLboolean normalized = element.normalized ? GL_TRUE : GL_FALSE;
+					const uint32 stride = layout.getStride();
+
+					for (uint8 i = 0; i < count; i++) {
+						glEnableVertexAttribArray(attributeIndex);
+						glVertexAttribPointer(
+							attributeIndex,
+							count,
+							shaderType,
+							normalized,
+							stride,
+							(const void*) (sizeof(float32) * count * i)
+						);
+						glVertexAttribDivisor(attributeIndex, 1);
+
+						attributeIndex++;
+					}
+
+					break;
 			}
-			else {
-				// Assume float.
-				glVertexAttribPointer(
-					attributeIndex,
-					getShaderTypeComponentCount(element.type),
-					shaderType,
-					element.normalized ? GL_TRUE : GL_FALSE,
-					layout.getStride(),
-					(const void*) element.offset
-				);
-			}
-
-			attributeIndex++;
 		}
 
 		vertexBuffers.push_back(vertexBuffer);
