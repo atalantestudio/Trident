@@ -9,14 +9,14 @@
 namespace ProjectA {
 	Application* Application::instance = nullptr;
 
-	Application::Application() : lastFrameTime(0.0f) {
+	Application::Application(const std::string& name) : lastFrameTime(0.0f) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		ENGINE_ASSERT(!instance, "The Application instance already exists.")
 
 		instance = this;
 
-		window = Window::create();
+		window = Window::create(WindowData(name));
 		window->setEventCallback(BIND(Application::onEvent));
 
 		Renderer::initialize();

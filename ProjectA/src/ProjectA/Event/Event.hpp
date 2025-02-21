@@ -42,6 +42,9 @@ namespace ProjectA {
 		public:
 			bool handled = false;
 
+		public:
+			virtual ~Event() = default;
+
 			virtual EventType getType() const = 0;
 			virtual int32 getCategories() const = 0;
 			virtual const char* getName() const = 0;

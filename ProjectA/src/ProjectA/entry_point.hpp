@@ -2,7 +2,7 @@
 
 #include "ProjectA/base.hpp"
 
-#ifdef WINDOWS
+#ifdef PLATFORM_WINDOWS
 	extern ProjectA::Application* ProjectA::createApplication();
 
 	int main(int argc, char** argv) {

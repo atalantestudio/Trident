@@ -34,6 +34,9 @@ namespace ProjectA {
 
 			void setZoomLevel(float32 zoomLevel);
 
+			// TODO: Use vec2<int32>
+			void resize(const vec2<float32>& size);
+
 			void update(float32 deltaTime);
 
 			void onEvent(Event& event);

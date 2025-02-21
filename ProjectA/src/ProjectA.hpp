@@ -22,6 +22,7 @@
 
 // Rendering misc
 #include "ProjectA/Renderer/2D/Renderer2D.hpp"
+#include "ProjectA/Renderer/Framebuffer.hpp"
 #include "ProjectA/Renderer/IndexBuffer.hpp"
 #include "ProjectA/Renderer/RenderCommand.hpp"
 #include "ProjectA/Renderer/Renderer.hpp"

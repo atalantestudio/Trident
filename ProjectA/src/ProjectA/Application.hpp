@@ -10,11 +10,13 @@ int main(int argc, char** argv);
 
 namespace ProjectA {
 	class Application {
+		public:
+			ImGuiLayer* imGuiLayer;
+
 		private:
 			static Application* instance;
 
 			std::unique_ptr<Window> window;
-			ImGuiLayer* imGuiLayer;
 			LayerStack layerStack;
 
 			bool running = true;
@@ -27,7 +29,7 @@ namespace ProjectA {
 				return *instance;
 			}
 
-			Application();
+			Application(const std::string& name = "Application");
 
 			virtual ~Application();
 

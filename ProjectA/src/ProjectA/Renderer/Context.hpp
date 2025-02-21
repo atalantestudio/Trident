@@ -6,6 +6,8 @@ namespace ProjectA {
 			static Scope<Context> create(void* window);
 
 		public:
+			virtual ~Context() = default;
+
 			virtual void initialize() = 0;
 
 			virtual void swapBuffers() = 0;

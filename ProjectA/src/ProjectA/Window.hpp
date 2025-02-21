@@ -6,7 +6,8 @@
 namespace ProjectA {
 	struct WindowData {
 		std::string title;
-		unsigned int width, height;
+		uint32 width;
+		uint32 height;
 
 		WindowData(const std::string& title = "Project A", unsigned int width = 1280, unsigned int height = 720): title(title), width(width), height(height) {}
 	};

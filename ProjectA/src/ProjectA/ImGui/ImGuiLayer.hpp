@@ -8,7 +8,10 @@
 namespace ProjectA {
 	class ImGuiLayer : public Layer {
 		private:
-			float deltaTime = 0.0f;
+			float32 deltaTime = 0.0f;
+
+		public:
+			bool blockEvents = true;
 
 		public:
 			ImGuiLayer();
@@ -16,6 +19,7 @@ namespace ProjectA {
 
 			virtual void bind() override;
 			virtual void unbind() override;
+
 			void begin();
 			void end();
 

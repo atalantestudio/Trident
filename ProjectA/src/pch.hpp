@@ -23,7 +23,7 @@
 	#include <iomanip>
 #endif
 
-#ifdef WINDOWS
+#ifdef PLATFORM_WINDOWS
 	#include <Windows.h>
 #endif
 

@@ -4,14 +4,12 @@
 
 #ifdef _WIN32
 	#ifdef _WIN64
-		// TODO: Rename by PLATFORM_WINDOWS or similar
-		#define WINDOWS
+		#define PLATFORM_WINDOWS
 	#else
 		#error "Windows x86 builds are not supported."
 	#endif
 #elif defined(__linux__)
-	// TODO: Rename by PLATFORM_LINUX or similar
-	#define LINUX
+	#define PLATFORM_LINUX
 
 	#error "Operating system is not supported."
 #else
@@ -33,21 +31,25 @@
 	#define CLIENT_ERROR(...) ProjectA::Logger::clientLogger->error(__VA_ARGS__)
 	#define CLIENT_FATAL(...) ProjectA::Logger::clientLogger->fatal(__VA_ARGS__
 
-	#ifdef WINDOWS
+	#if defined(PLATFORM_WINDOWS)
 		#define DEBUGBREAK() __debugbreak()
+	#elif defined(PLATFORM_LINUX)
+		#include <signal.h>
+
+		#define DEBUGBREAK() raise(SIGTRAP)
 	#else
-		#error "Debugbreak not supported on this platform."
+		#error "debugbreak is not supported on this platform."
 	#endif
 
 	#define ENGINE_ASSERT(condition, ...) { \
-		if (!condition) { \
+		if (!(condition)) { \
 			ENGINE_ERROR("Assertion failed: []", __VA_ARGS__); \
 			DEBUGBREAK(); \
 		} \
 	}
 
 	#define CLIENT_ASSERT(condition, ...) { \
-		if (!condition) { \
+		if (!(condition)) { \
 			CLIENT_ERROR("Assertion failed: []", __VA_ARGS__); \
 			DEBUGBREAK(); \
 		} \

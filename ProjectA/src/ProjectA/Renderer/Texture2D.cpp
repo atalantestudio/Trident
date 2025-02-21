@@ -14,7 +14,7 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return createRef<OpenGLTexture2D>(width, height);
+				return createRef<OpenGLTexture2D>(static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 		}
 
 		return nullptr;

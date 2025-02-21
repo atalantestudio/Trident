@@ -1,8 +1,6 @@
-outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
-
 workspace "ProjectA"
 	architecture "x86_64"
-	startproject "Sandbox"
+	startproject "Editor"
 
 	configurations {
 		"Debug",
@@ -14,10 +12,15 @@ workspace "ProjectA"
 		"MultiProcessorCompile",
 	}
 
-include "ProjectA/vendor"
+outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
+
+group "Dependencies"
+	include "ProjectA/vendor"
+
+group ""
 
 project "ProjectA"
-	location "ProjectA"
+	location "%{prj.name}"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
@@ -28,6 +31,11 @@ project "ProjectA"
 
 	pchheader "pch.hpp"
 	pchsource "%{prj.name}/src/pch.cpp"
+
+	defines {
+		"_CRT_SECURE_NO_WARNINGS",
+		"GLFW_INCLUDE_NONE",
+	}
 
 	files {
 		"%{prj.name}/src/**.cpp",
@@ -53,11 +61,6 @@ project "ProjectA"
 		"opengl32.lib",
 	}
 
-	defines {
-		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE",
-	}
-
 	filter "system:windows"
 		systemversion "latest"
 
@@ -81,7 +84,50 @@ project "ProjectA"
 		excludes "%{prj.name}/src/%{prj.name}/Logger/Logger.cpp"
 
 project "Sandbox"
-	location "Sandbox"
+	location "%{prj.name}"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
+
+	targetdir ("bin/%{prj.name}/" .. outputdir)
+	objdir ("obj/%{prj.name}/" .. outputdir)
+
+	files {
+		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/src/**.hpp",
+	}
+
+	includedirs {
+		"ProjectA/src",
+		"ProjectA/vendor",
+		"ProjectA/vendor/lyah",
+	}
+
+	links {
+		"ProjectA",
+	}
+
+	filter "system:windows"
+		systemversion "latest"
+
+	filter "configurations:Debug"
+		defines "BUILD_MODE_DEBUG"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Profile"
+		defines "BUILD_MODE_PROFILE"
+		runtime "Release"
+		optimize "on"
+
+	filter "configurations:Release"
+		defines "BUILD_MODE_RELEASE"
+		runtime "Release"
+		optimize "on"
+
+project "Editor"
+	location "%{prj.name}"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"

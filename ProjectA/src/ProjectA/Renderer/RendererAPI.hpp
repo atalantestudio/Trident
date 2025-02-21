@@ -16,10 +16,11 @@ namespace ProjectA {
 		public:
 			static Scope<RendererAPI> create();
 
-		public:
 			static GraphicsAPI getGraphicsAPI() {
 				return graphicsApi;
 			}
+
+			virtual ~RendererAPI() = default;
 
 			virtual void initialize() = 0;
 

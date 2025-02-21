@@ -1,16 +1,13 @@
 #include "pch.hpp"
 
-#include <ProjectA/ImGui/ImGuiLayer.hpp>
+#include <glfw/glfw3.h>
 
 #include <imgui.h>
 #include <examples/imgui_impl_glfw.h>
 #include <examples/imgui_impl_opengl3.h>
 
 #include "ProjectA/Application.hpp"
-
-// TODO: Temporary
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "ProjectA/ImGui/ImGuiLayer.hpp"
 
 namespace ProjectA {
 	ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {}
@@ -23,7 +20,6 @@ namespace ProjectA {
 		ImGui::CreateContext();
 
 		ImGuiIO& io = ImGui::GetIO();
-		(void) io;
 
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -68,7 +64,7 @@ namespace ProjectA {
 		ImGuiIO& io = ImGui::GetIO();
 		Window& window = Application::get().getWindow();
 
-		io.DisplaySize = ImVec2((float) window.getWidth(), (float) window.getHeight());
+		io.DisplaySize = ImVec2(static_cast<float32>(window.getWidth()), static_cast<float32>(window.getHeight()));
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -84,7 +80,11 @@ namespace ProjectA {
 	}
 
 	void ImGuiLayer::onEvent(Event& event) {
-		ImGuiIO& io = ImGui::GetIO();
+		if (!blockEvents) {
+			return;
+		}
+
+		const ImGuiIO& io = ImGui::GetIO();
 
 		event.handled |= event.hasCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
 		event.handled |= event.hasCategory(EventCategoryMouse) & io.WantCaptureMouse;

@@ -20,6 +20,12 @@ namespace ProjectA {
 		updateProjection();
 	}
 
+	void OrthographicCameraController::resize(const vec2<float32>& size) {
+		aspectRatio = size[0] / size[1];
+
+		camera.updateProjection(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1);
+	}
+
 	void OrthographicCameraController::update(float32 deltaTime) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
@@ -72,9 +78,7 @@ namespace ProjectA {
 	bool OrthographicCameraController::onWindowResize(WindowResizeEvent& event) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		aspectRatio = (float32) event.getWidth() / (float32) event.getHeight();
-
-		updateProjection();
+		resize({static_cast<float32>(event.getWidth()), static_cast<float32>(event.getHeight())});
 
 		return true;
 	}
