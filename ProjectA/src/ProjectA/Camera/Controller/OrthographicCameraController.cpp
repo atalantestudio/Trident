@@ -14,6 +14,12 @@ namespace ProjectA {
 		camera(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1),
 		bounds(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel) {}
 
+	void OrthographicCameraController::setZoomLevel(float32 zoomLevel) {
+		this->zoomLevel = zoomLevel;
+
+		updateProjection();
+	}
+
 	void OrthographicCameraController::update(float32 deltaTime) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
@@ -57,9 +63,8 @@ namespace ProjectA {
 		zoomLevel -= event.getOffset()[1] / 2;
 		zoomLevel = std::max(zoomLevel, 0.25f);
 		speed = zoomLevel;
-		bounds = {-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel};
 
-		camera.updateProjection(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1);
+		updateProjection();
 
 		return true;
 	}
@@ -68,10 +73,15 @@ namespace ProjectA {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		aspectRatio = (float32) event.getWidth() / (float32) event.getHeight();
+
+		updateProjection();
+
+		return true;
+	}
+
+	void OrthographicCameraController::updateProjection() {
 		bounds = {-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel};
 
 		camera.updateProjection(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1);
-
-		return true;
 	}
 }

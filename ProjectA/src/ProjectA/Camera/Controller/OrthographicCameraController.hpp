@@ -32,6 +32,8 @@ namespace ProjectA {
 				return camera;
 			}
 
+			void setZoomLevel(float32 zoomLevel);
+
 			void update(float32 deltaTime);
 
 			void onEvent(Event& event);
@@ -39,5 +41,7 @@ namespace ProjectA {
 		private:
 			bool onMouseScroll(MouseScrollEvent& event);
 			bool onWindowResize(WindowResizeEvent& event);
+
+			void updateProjection();
 	};
 }

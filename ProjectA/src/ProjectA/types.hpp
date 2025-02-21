@@ -16,14 +16,32 @@ namespace ProjectA {
 	typedef std::float_t float32;
 	typedef std::double_t float64;
 
-	// template<std::size_t C, typename T>
-	// using vec = lyah::vec<C, T>;
+	template<std::size_t C, typename T>
+	using vec = lyah::vec<C, T>;
 
-	// template<std::size_t M, std::size_t N, typename T>
-	// using mat = lyah::mat<M, N, T>;
+	template<typename T>
+	using vec2 = lyah::vec2<T>;
 
-	// template<typename T>
-	// using quat = lyah::quat<T>;
+	template<typename T>
+	using vec3 = lyah::vec3<T>;
+
+	template<typename T>
+	using vec4 = lyah::vec4<T>;
+
+	template<std::size_t M, std::size_t N, typename T>
+	using mat = lyah::mat<M, N, T>;
+
+	template<typename T>
+	using mat2x2 = lyah::mat2x2<T>;
+
+	template<typename T>
+	using mat3x3 = lyah::mat3x3<T>;
+
+	template<typename T>
+	using mat4x4 = lyah::mat4x4<T>;
+
+	template<typename T>
+	using quat = lyah::quat<T>;
 
 	template<typename T>
 	using ref = std::shared_ptr<T>;

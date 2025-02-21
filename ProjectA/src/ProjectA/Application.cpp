@@ -85,6 +85,10 @@ namespace ProjectA {
 		overlay->bind();
 	}
 
+	void Application::close() {
+		running = false;
+	}
+
 	void Application::onEvent(Event& event) {
 		PROFILE_SCOPE(__FUNCSIG__);
 

@@ -10,6 +10,8 @@ namespace ProjectA {
 			virtual void bind(uint32 slot) const = 0;
 			virtual void unbind() const = 0;
 
+			virtual uint32 getId() const = 0;
+
 			virtual uint32 getWidth() const = 0;
 			virtual uint32 getHeight() const = 0;
 

@@ -27,6 +27,5 @@
 #include "ProjectA/Renderer/Renderer.hpp"
 #include "ProjectA/Renderer/Shader.hpp"
 #include "ProjectA/Renderer/ShaderLibrary.hpp"
-#include "ProjectA/Renderer/Texture2D.hpp"
 #include "ProjectA/Renderer/VertexArray.hpp"
 #include "ProjectA/Renderer/VertexBuffer.hpp"

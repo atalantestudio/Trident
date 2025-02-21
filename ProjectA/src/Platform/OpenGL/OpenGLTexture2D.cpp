@@ -80,6 +80,10 @@ namespace ProjectA {
 		glDeleteTextures(1, &texture);
 	}
 
+	uint32 OpenGLTexture2D::getId() const {
+		return texture;
+	}
+
 	uint32 OpenGLTexture2D::getWidth() const {
 		return static_cast<uint32>(width);
 	}

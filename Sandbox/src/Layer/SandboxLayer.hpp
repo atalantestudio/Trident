@@ -7,8 +7,13 @@
 class SandboxLayer : public ProjectA::Layer {
 	private:
 		ProjectA::OrthographicCameraController cameraController;
+
 		lyah::vec4<ProjectA::float32> color = {0.2f, 0.3f, 0.8f, 1.0f};
-		ProjectA::ref<ProjectA::Texture2D> texture;
+		ProjectA::ref<ProjectA::Texture2D> checkerboardTexture;
+		ProjectA::ref<ProjectA::Texture2D> rpgSpriteSheetTexture;
+
+		std::unordered_map<char, ProjectA::ref<ProjectA::Subtexture>> sprites;
+		ProjectA::ref<ProjectA::Subtexture> nullSprite;
 
 		ParticleProperties particleProperties;
 		ParticleSystem particleSystem;

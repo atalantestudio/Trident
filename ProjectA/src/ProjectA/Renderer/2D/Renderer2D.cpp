@@ -243,6 +243,58 @@ namespace ProjectA {
 		storage.statistics.quadCount++;
 	}
 
+	void Renderer2D::drawQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, const ref<Subtexture>& subtexture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
+		drawQuad({position[0], position[1], 0.0f}, size, subtexture, tilingFactor, tintColor);
+	}
+
+	void Renderer2D::drawQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, const ref<Subtexture>& subtexture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		constexpr uint32 quadVertexCount = 4;
+
+		if (storage.quadCount >= storage.MAX_QUADS) {
+			startNewBatch();
+		}
+
+		uint32 slotIndex = 0;
+
+		for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
+			if (*subtexture->texture.get() == *storage.textureSlots[i].get()) {
+				slotIndex = i;
+
+				break;
+			}
+		}
+
+		if (slotIndex == 0) {
+			if (storage.currentSlotIndex >= storage.MAX_TEXTURE_SLOTS) {
+				startNewBatch();
+			}
+
+			// Reserve new texture slot.
+			slotIndex = storage.currentSlotIndex;
+
+			storage.textureSlots[storage.currentSlotIndex] = subtexture->texture;
+			storage.currentSlotIndex++;
+		}
+
+		lyah::mat4x4<float32> transform = lyah::mat4x4<float32>::scaling({size[0], size[1], 1.0f});
+		transform *= lyah::mat4x4<float32>::translation(position);
+
+		for (uint32 i = 0; i < quadVertexCount; i++) {
+			storage.vertexBufferPointer->position = storage.quadVertexPositions[i] * transform;
+			storage.vertexBufferPointer->color = tintColor;
+			storage.vertexBufferPointer->uv = subtexture->coordinates[i];
+			storage.vertexBufferPointer->textureSlot = slotIndex;
+			storage.vertexBufferPointer->tilingFactor = tilingFactor;
+			storage.vertexBufferPointer++;
+		}
+
+		storage.quadCount++;
+
+		storage.statistics.quadCount++;
+	}
+
 	void Renderer2D::drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 angle, const lyah::vec4<float32>& color) {
 		drawRotatedQuad({position[0], position[1], 0.0f}, size, angle, color);
 	}
@@ -259,7 +311,7 @@ namespace ProjectA {
 		}
 
 		lyah::mat4x4<float32> transform = lyah::mat4x4<float32>::scaling({size[0], size[1], 1.0f});
-		transform *= lyah::mat4x4<float32>::rotation({0.0f, 0.0f, 1.0f}, angle);
+		transform *= lyah::mat4x4<float32>::rotation({0.0f, 0.0f, -1.0f}, angle);
 		transform *= lyah::mat4x4<float32>::translation(position);
 
 		for (uint32 i = 0; i < quadVertexCount; i++) {
@@ -312,13 +364,66 @@ namespace ProjectA {
 		}
 
 		lyah::mat4x4<float32> transform = lyah::mat4x4<float32>::scaling({size[0], size[1], 1.0f});
-		transform *= lyah::mat4x4<float32>::rotation({0.0f, 0.0f, 1.0f}, angle);
+		transform *= lyah::mat4x4<float32>::rotation({0.0f, 0.0f, -1.0f}, angle);
 		transform *= lyah::mat4x4<float32>::translation(position);
 
 		for (uint32 i = 0; i < quadVertexCount; i++) {
 			storage.vertexBufferPointer->position = storage.quadVertexPositions[i] * transform;
 			storage.vertexBufferPointer->color = tintColor;
 			storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[i];
+			storage.vertexBufferPointer->textureSlot = slotIndex;
+			storage.vertexBufferPointer->tilingFactor = tilingFactor;
+			storage.vertexBufferPointer++;
+		}
+
+		storage.quadCount++;
+
+		storage.statistics.quadCount++;
+	}
+
+	void Renderer2D::drawRotatedQuad(const lyah::vec2<float32>& position, const lyah::vec2<float32>& size, float32 angle, const ref<Subtexture>& subtexture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
+		drawRotatedQuad({position[0], position[1], 0.0f}, size, angle, subtexture, tilingFactor, tintColor);
+	}
+
+	void Renderer2D::drawRotatedQuad(const lyah::vec3<float32>& position, const lyah::vec2<float32>& size, float32 angle, const ref<Subtexture>& subtexture, float32 tilingFactor, const lyah::vec4<float32>& tintColor) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		constexpr uint32 quadVertexCount = 4;
+
+		if (storage.quadCount >= storage.MAX_QUADS) {
+			startNewBatch();
+		}
+
+		uint32 slotIndex = 0;
+
+		for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
+			if (*subtexture->texture.get() == *storage.textureSlots[i].get()) {
+				slotIndex = i;
+
+				break;
+			}
+		}
+
+		if (slotIndex == 0) {
+			if (storage.currentSlotIndex >= storage.MAX_TEXTURE_SLOTS) {
+				startNewBatch();
+			}
+
+			// Reserve new texture slot.
+			slotIndex = storage.currentSlotIndex;
+
+			storage.textureSlots[storage.currentSlotIndex] = subtexture->texture;
+			storage.currentSlotIndex++;
+		}
+
+		lyah::mat4x4<float32> transform = lyah::mat4x4<float32>::scaling({size[0], size[1], 1.0f});
+		transform *= lyah::mat4x4<float32>::rotation({0.0f, 0.0f, -1.0f}, angle);
+		transform *= lyah::mat4x4<float32>::translation(position);
+
+		for (uint32 i = 0; i < quadVertexCount; i++) {
+			storage.vertexBufferPointer->position = storage.quadVertexPositions[i] * transform;
+			storage.vertexBufferPointer->color = tintColor;
+			storage.vertexBufferPointer->uv = subtexture->coordinates[i];
 			storage.vertexBufferPointer->textureSlot = slotIndex;
 			storage.vertexBufferPointer->tilingFactor = tilingFactor;
 			storage.vertexBufferPointer++;

@@ -23,6 +23,8 @@ namespace ProjectA {
 			virtual void bind(uint32_t slot) const override;
 			virtual void unbind() const override;
 
+			virtual uint32 getId() const override;
+
 			virtual uint32 getWidth() const override;
 			virtual uint32 getHeight() const override;
 

@@ -37,6 +37,8 @@ namespace ProjectA {
 
 			void pushOverlay(Layer* overlay);
 
+			void close();
+
 			Window& getWindow() {
 				return *window;
 			}

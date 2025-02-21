@@ -2,8 +2,6 @@
 #include "Random.hpp"
 
 ParticleSystem::ParticleSystem(const ProjectA::uint32 maxParticles) : poolIndex(maxParticles - 1) {
-	CLIENT_ASSERT(maxParticles > 0, "Max particles should be > 1");
-
 	particlePool.resize(maxParticles);
 }
 
