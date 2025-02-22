@@ -3,7 +3,7 @@
 namespace ProjectA {
 	class Context {
 		public:
-			static Scope<Context> create(void* window);
+			static scope<Context> create(void* window);
 
 		public:
 			virtual ~Context() = default;

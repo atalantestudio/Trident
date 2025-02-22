@@ -169,7 +169,7 @@ namespace ProjectA {
 		const uint32 textureId = framebuffer->getColorAttachmentId();
 		const vec2<float32> size = framebuffer->descriptor.size;
 
-		ImGui::Image((void*) textureId, {size[0], size[1]}, {0.0f, 1.0f}, {1.0f, 0.0f});
+		ImGui::Image((void*) (std::uintptr_t) textureId, {size[0], size[1]}, {0.0f, 1.0f}, {1.0f, 0.0f});
 
 		ImGui::End();
 		ImGui::PopStyleVar();

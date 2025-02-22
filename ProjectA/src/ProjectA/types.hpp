@@ -51,12 +51,11 @@ namespace ProjectA {
 		return std::make_shared<T>(std::forward<U>(arguments)...);
 	}
 
-	// TODO: Deprecate?
 	template<typename T>
-	using Scope = std::unique_ptr<T>;
+	using scope = std::unique_ptr<T>;
 
 	template<typename T, typename... U>
-	constexpr Scope<T> CreateScope(U&&... arguments) {
+	constexpr scope<T> createScope(U&&... arguments) {
 		return std::make_unique<T>(std::forward<U>(arguments)...);
 	}
 }

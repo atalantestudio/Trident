@@ -5,7 +5,7 @@
 #include "Platform/OpenGL/OpenGLShader.hpp"
 
 namespace ProjectA {
-	// TODO: Refactor
+	// TODO: Change for enum
 	static GLenum shaderTypeFromString(const std::string& shaderType) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
@@ -17,7 +17,7 @@ namespace ProjectA {
 			return GL_FRAGMENT_SHADER;
 		}
 
-		ENGINE_ASSERT(false, "Unhandled shader type \"{0}\".", shaderType);
+		ENGINE_ASSERT(false, "Unhandled shader type \"[]\".", shaderType);
 
 		return 0;
 	}

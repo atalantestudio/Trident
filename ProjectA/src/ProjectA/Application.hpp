@@ -16,13 +16,12 @@ namespace ProjectA {
 		private:
 			static Application* instance;
 
+		private:
 			std::unique_ptr<Window> window;
 			LayerStack layerStack;
-
 			bool running = true;
 			bool minimized = false;
-
-			float lastFrameTime;
+			float32 lastFrameTime;
 
 		public:
 			static Application& get() {
@@ -33,6 +32,8 @@ namespace ProjectA {
 
 			virtual ~Application();
 
+			Window& getWindow();
+
 			void onEvent(Event& event);
 
 			void pushLayer(Layer* layer);
@@ -40,10 +41,6 @@ namespace ProjectA {
 			void pushOverlay(Layer* overlay);
 
 			void close();
-
-			Window& getWindow() {
-				return *window;
-			}
 
 		private:
 			void run();

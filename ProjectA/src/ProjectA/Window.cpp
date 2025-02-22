@@ -7,9 +7,9 @@
 #endif
 
 namespace ProjectA {
-	Scope<Window> Window::create(const WindowData& data) {
+	scope<Window> Window::create(const WindowData& data) {
 		#ifdef PLATFORM_WINDOWS
-			return CreateScope<WindowsWindow>(data);
+			return createScope<WindowsWindow>(data);
 		#else
 			ENGINE_ASSERT(false, "Platform not supported.");
 

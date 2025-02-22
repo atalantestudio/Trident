@@ -7,7 +7,7 @@
 namespace ProjectA {
 	RendererAPI::GraphicsAPI RendererAPI::graphicsApi = RendererAPI::GraphicsAPI::OpenGL;
 
-	Scope<RendererAPI> RendererAPI::create() {
+	scope<RendererAPI> RendererAPI::create() {
 		switch (graphicsApi) {
 			case RendererAPI::GraphicsAPI::None:
 				ENGINE_ASSERT(false, "Graphics::None is not supported yet.");
@@ -15,7 +15,7 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return CreateScope<OpenGLRendererAPI>();
+				return createScope<OpenGLRendererAPI>();
 		}
 
 		return nullptr;

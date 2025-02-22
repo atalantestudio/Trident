@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class Input {
 		public:
-			static Scope<Input> create();
+			static scope<Input> create();
 
 			static bool isKeyPressed(KeyCode keyCode);
 

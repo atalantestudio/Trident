@@ -1,37 +1,30 @@
 #pragma once
 
-// TODO: Remove
-#define _USE_MATH_DEFINES // cmath
-
-#include <algorithm>
 #include <array>
-#include <cmath>
-#include <fstream> // std::ofstream (profile-only)
+#include <fstream>
 #include <functional>
-#include <iostream>
-#include <memory>
 #include <sstream>
-#include <string>
-#include <thread> // std::thread::id (profile-only)
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
 
 #ifdef BUILD_MODE_DEBUG
 	#include <chrono>
 	#include <iomanip>
+	#include <iostream>
+#endif
+
+#ifdef BUILD_MODE_PROFILE
+	#include <algorithm>
+	#include <thread>
 #endif
 
 #ifdef PLATFORM_WINDOWS
 	#include <Windows.h>
-#endif
 
-#undef assert
-#undef max
-#undef min
-#undef DELETE
-#undef ERROR
+	#undef assert
+	#undef max
+	#undef min
+	#undef DELETE
+	#undef ERROR
+#endif
 
 #include "ProjectA/base.hpp"
 
@@ -45,7 +38,7 @@
 #ifdef BUILD_MODE_DEBUG
 	#include "ProjectA/Logger/Logger.hpp"
 
-	// TODO: Include to string methods in Logger.cpp
+	// TODO: Include ToString methods in Logger.cpp
 	#include "ProjectA/to_string.hpp"
 #endif
 

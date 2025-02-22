@@ -9,12 +9,15 @@ namespace ProjectA {
 		uint32 width;
 		uint32 height;
 
-		WindowData(const std::string& title = "Project A", unsigned int width = 1280, unsigned int height = 720): title(title), width(width), height(height) {}
+		WindowData(const std::string& title = "Project A", uint32 width = 1280, uint32 height = 720) :
+			title(title),
+			width(width),
+			height(height) {}
 	};
 
 	class Window {
 		public:
-			static Scope<Window> create(const WindowData& data = WindowData());
+			static scope<Window> create(const WindowData& data = WindowData());
 
 		public:
 			using EventCallback = std::function<void(Event&)>;
@@ -22,8 +25,8 @@ namespace ProjectA {
 			virtual ~Window() = default;
 
 			virtual void* getNativeWindow() const = 0;
-			virtual unsigned int getWidth() const = 0;
-			virtual unsigned int getHeight() const = 0;
+			virtual uint32 getWidth() const = 0;
+			virtual uint32 getHeight() const = 0;
 			virtual bool isVSyncEnabled() const = 0;
 			virtual void setEventCallback(const EventCallback& callback) = 0;
 			virtual void setVSyncState(bool state) = 0;

@@ -12,28 +12,20 @@ namespace ProjectA {
 			case ShaderType::Bool:
 				return GL_BOOL;
 			case ShaderType::Int:
-				return GL_INT;
 			case ShaderType::Int2:
-				return GL_INT;
 			case ShaderType::Int3:
-				return GL_INT;
 			case ShaderType::Int4:
 				return GL_INT;
 			case ShaderType::Float:
-				return GL_FLOAT;
 			case ShaderType::Float2:
-				return GL_FLOAT;
 			case ShaderType::Float3:
-				return GL_FLOAT;
 			case ShaderType::Float4:
-				return GL_FLOAT;
 			case ShaderType::Mat3:
-				return GL_FLOAT;
 			case ShaderType::Mat4:
 				return GL_FLOAT;
 		}
 
-		ENGINE_ASSERT(false, "Unknown ShaderType");
+		ENGINE_ASSERT(false, "Unknown shader type \"[]\".", type);
 
 		return 0;
 	}
@@ -73,16 +65,17 @@ namespace ProjectA {
 	void OpenGLVertexArray::addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		ENGINE_ASSERT(vertexBuffer->getLayout().getElements().size(), "Vertex buffer has no layout");
+		ENGINE_ASSERT(vertexBuffer->getLayout().getElements().size(), "Vertex buffer has no layout.");
 
 		bind();
+
 		vertexBuffer->bind();
 
-		const auto& layout = vertexBuffer->getLayout();
+		const BufferLayout& layout = vertexBuffer->getLayout();
 
 		GLuint attributeIndex = 0;
 
-		for (const auto& element : layout) {
+		for (const BufferElement& element : layout) {
 			switch (element.type) {
 				case ShaderType::Float:
 				case ShaderType::Float2:
@@ -151,6 +144,7 @@ namespace ProjectA {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		bind();
+
 		indexBuffer->bind();
 
 		this->indexBuffer = indexBuffer;

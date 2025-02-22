@@ -34,14 +34,18 @@ namespace ProjectA {
 		Renderer2D::destroy();
 	}
 
+	Window& Application::getWindow() {
+		return *window;
+	}
+
 	void Application::run() {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		while (running) {
 			PROFILE_SCOPE("Run loop");
 
-			float time = (float) glfwGetTime();
-			float deltaTime = time - lastFrameTime;
+			const float32 time = static_cast<float32>(glfwGetTime());
+			const float32 deltaTime = time - lastFrameTime;
 
 			lastFrameTime = time;
 
@@ -64,7 +68,6 @@ namespace ProjectA {
 			}
 
 			imGuiLayer->end();
-
 			window->update();
 		}
 	}

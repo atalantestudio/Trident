@@ -13,17 +13,17 @@
 namespace ProjectA {
 	class WindowsWindow : public Window {
 		private:
-			GLFWwindow* window;
-			Scope<Context> context;
-
 			struct GLFWData {
 				std::string title;
-				unsigned int width = 0;
-				unsigned int height = 0;
+				uint32 width = 0;
+				uint32 height = 0;
 				bool vSync = false;
 				EventCallback callback;
 			};
 
+		private:
+			GLFWwindow* window;
+			scope<Context> context;
 			GLFWData data;
 
 		private:
@@ -39,12 +39,12 @@ namespace ProjectA {
 				return window;
 			}
 
-			// TODO: Merge width and height into viewport
-			unsigned int getWidth() const override {
+			// TODO: Merge width and height into vec2<int32> viewport
+			uint32 getWidth() const override {
 				return data.width;
 			}
 
-			unsigned int getHeight() const override {
+			uint32 getHeight() const override {
 				return data.height;
 			}
 

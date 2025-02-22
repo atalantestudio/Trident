@@ -20,7 +20,7 @@ namespace ProjectA {
 
 	class WindowResizeEvent : public WindowEvent {
 		private:
-			// TODO: Replace with vec2<int32> (or better, vec2<uint32>).
+			// TODO: Use vec2<int32>
 			uint32 width;
 			uint32 height;
 

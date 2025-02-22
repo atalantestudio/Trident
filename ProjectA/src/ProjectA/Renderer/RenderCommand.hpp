@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class RenderCommand {
 		private:
-			static Scope<RendererAPI> rendererApi;
+			static scope<RendererAPI> rendererApi;
 
 		public:
 			static void initialize() {

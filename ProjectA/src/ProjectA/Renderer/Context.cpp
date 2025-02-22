@@ -6,7 +6,7 @@
 #include "ProjectA/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	Scope<Context> Context::create(void* window) {
+	scope<Context> Context::create(void* window) {
 		switch (Renderer::getGraphicsAPI()) {
 			case RendererAPI::GraphicsAPI::None:
 				ENGINE_ASSERT(false, "Graphics::None is not supported yet.")
@@ -14,7 +14,7 @@ namespace ProjectA {
 				return nullptr;
 
 			case RendererAPI::GraphicsAPI::OpenGL:
-				return CreateScope<OpenGLContext>(static_cast<GLFWwindow*>(window));
+				return createScope<OpenGLContext>(static_cast<GLFWwindow*>(window));
 		}
 
 		return nullptr;

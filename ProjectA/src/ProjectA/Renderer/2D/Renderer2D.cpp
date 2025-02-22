@@ -19,7 +19,7 @@ namespace ProjectA {
 		static constexpr uint32 MAX_INDICES = MAX_QUADS * 6;
 		static constexpr uint32 MAX_VERTICES = MAX_QUADS * 4;
 
-		// TODO: Capabilities class
+		// TODO: Renderer capabilities class
 		static constexpr uint32 MAX_TEXTURE_SLOTS = 32;
 
 		ref<Shader> colorTextureShader;
@@ -33,8 +33,8 @@ namespace ProjectA {
 		std::array<ref<Texture2D>, MAX_TEXTURE_SLOTS> textureSlots;
 		uint32 currentSlotIndex = 1; // Skip default texture
 
-		lyah::vec4<float32> quadVertexPositions[4];
-		lyah::vec2<float32> quadVertexTextureCoordinates[4];
+		vec4<float32> quadVertexPositions[4];
+		vec2<float32> quadVertexTextureCoordinates[4];
 
 		Renderer2D::Statistics statistics;
 	};
