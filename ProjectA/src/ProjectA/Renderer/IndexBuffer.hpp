@@ -6,7 +6,7 @@ namespace ProjectA {
 			uint32_t id;
 
 		public:
-			static IndexBuffer* create(uint32_t* indices, uint32_t count);
+			static ref<IndexBuffer> create(const uint32* indices, uint32 count);
 
 			virtual ~IndexBuffer() = default;
 

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Event.hpp"
+#include "ProjectA/Event/Event.hpp"
 
 namespace ProjectA {
 	class WindowEvent : public Event {
 		protected:
-			WindowEvent() {}
+			WindowEvent() = default;
 
 		public:
 			EVENT_CATEGORY(EventCategoryWindow)
@@ -13,30 +13,33 @@ namespace ProjectA {
 
 	class WindowCloseEvent : public WindowEvent {
 		public:
-			WindowCloseEvent() {}
+			WindowCloseEvent() = default;
 
 			EVENT_TYPE(EventTypeWindowClose)
 	};
 
 	class WindowResizeEvent : public WindowEvent {
 		private:
-			int width, height;
+			// TODO: Use vec2<int32>
+			uint32 width;
+			uint32 height;
 
 		public:
-			WindowResizeEvent(int width, int height) : width(width), height(height) {}
+			WindowResizeEvent(uint32 width, uint32 height) : width(width), height(height) {}
 
-			inline int getWidth() const {
+			uint32 getWidth() const {
 				return width;
 			}
 
-			inline int getHeight() const {
+			uint32 getHeight() const {
 				return height;
 			}
 
 			EVENT_TYPE(EventTypeWindowResize)
 
-			std::string toString() const {
+			inline std::string toString() const override {
 				std::stringstream stream;
+
 				stream << getName() << ": " << width << ", " << height;
 
 				return stream.str();

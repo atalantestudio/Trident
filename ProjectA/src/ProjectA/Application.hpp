@@ -1,49 +1,55 @@
 #pragma once
 
-#include "core.hpp"
-#include "Event/WindowEvent.hpp"
-#include "ImGui/ImGuiLayer.hpp"
-#include "LayerStack.hpp"
-#include "Renderer/IndexBuffer.hpp"
-#include "Renderer/Shader.hpp"
-#include "Renderer/VertexBuffer.hpp"
-#include "WindowInterface.hpp"
+#include "ProjectA/base.hpp"
+#include "ProjectA/Event/WindowEvent.hpp"
+#include "ProjectA/ImGui/ImGuiLayer.hpp"
+#include "ProjectA/LayerStack.hpp"
+#include "ProjectA/Window.hpp"
+
+int main(int argc, char** argv);
 
 namespace ProjectA {
-	class API Application {
+	class Application {
+		public:
+			ImGuiLayer* imGuiLayer;
+
 		private:
 			static Application* instance;
 
-			std::unique_ptr<WindowInterface> window;
-			ImGuiLayer* imGuiLayer;
-			bool running = true;
-			LayerStack layerStack;
-
-			unsigned int vertexArray;
-
-			std::unique_ptr<IndexBuffer> indexBuffer;
-			std::unique_ptr<VertexBuffer> vertexBuffer;
-			std::unique_ptr<Shader> shader;
-
 		private:
-			bool windowCloseEventCallback(WindowCloseEvent& event);
+			std::unique_ptr<Window> window;
+			LayerStack layerStack;
+			bool running = true;
+			bool minimized = false;
+			float32 lastFrameTime;
 
 		public:
-			Application();
-			virtual ~Application() = default;
-
-			void run();
-			void listen(Event& event);
-			void pushLayer(Layer* layer);
-			void pushOverlay(Layer* overlay);
-
-			inline WindowInterface& getWindow() {
-				return *window;
-			}
-
-			static inline Application& get() {
+			static Application& get() {
 				return *instance;
 			}
+
+			Application(const std::string& name = "Application");
+
+			virtual ~Application();
+
+			Window& getWindow();
+
+			void onEvent(Event& event);
+
+			void pushLayer(Layer* layer);
+
+			void pushOverlay(Layer* overlay);
+
+			void close();
+
+		private:
+			void run();
+
+			bool onWindowClose(WindowCloseEvent& event);
+			bool onWindowResize(WindowResizeEvent& event);
+
+		private:
+			friend int ::main(int argc, char** argv);
 	};
 
 	Application* createApplication();

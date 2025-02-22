@@ -1,89 +1,85 @@
 #pragma once
 
-#include "Event.hpp"
+#include "ProjectA/Event/Event.hpp"
+#include "ProjectA/Input.hpp"
 
 namespace ProjectA {
-	class API MouseButtonEvent : public Event {
+	class MouseButtonEvent : public Event {
 		protected:
-			int button;
+			MouseButton button;
 
-			MouseButtonEvent(int button) : button(button) {}
+			MouseButtonEvent(MouseButton button) : button(button) {}
 
 		public:
 			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
-			inline int getButton() const {
+			MouseButton getButton() const {
 				return button;
 			}
 	};
 
-	class API MouseButtonPressEvent : public MouseButtonEvent {
+	class MouseButtonPressEvent : public MouseButtonEvent {
 		public:
-			MouseButtonPressEvent(int button) : MouseButtonEvent(button) {}
+			MouseButtonPressEvent(MouseButton button) : MouseButtonEvent(button) {}
 
 			EVENT_TYPE(EventTypeMouseButtonPress)
 
-			std::string toString() const {
+			std::string toString() const override {
 				std::stringstream stream;
+
 				stream << getName() << ": " << button;
 
 				return stream.str();
 			}
 	};
 
-	class API MouseButtonReleaseEvent : public MouseButtonEvent {
+	class MouseButtonReleaseEvent : public MouseButtonEvent {
 		public:
-			MouseButtonReleaseEvent(int button) : MouseButtonEvent(button) {}
+			MouseButtonReleaseEvent(MouseButton button) : MouseButtonEvent(button) {}
 
 			EVENT_TYPE(EventTypeMouseButtonRelease)
 
-			std::string toString() const {
+			std::string toString() const override {
 				std::stringstream stream;
+
 				stream << getName() << ": " << button;
 
 				return stream.str();
 			}
 	};
 
-	class API MouseMoveEvent : public Event {
+	class MouseMoveEvent : public Event {
 		private:
-			float x, y;
+			lyah::vec2<float32> position;
 
 		public:
-			MouseMoveEvent(float x, float y) : x(x), y(y) {}
+			MouseMoveEvent(float32 x, float32 y) : position(x, y) {}
 
-			inline float getX() const {
-				return x;
-			}
-
-			inline float getY() const {
-				return y;
+			const lyah::vec2<float32>& getPosition() const {
+				return position;
 			}
 
 			EVENT_TYPE(EventTypeMouseMove)
-				EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
+			EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 
-				std::string toString() const override {
+			std::string toString() const override {
 				std::stringstream stream;
-				stream << getName() << ": " << x << ", " << y;
+
+				stream << getName() << ": " << position[0] << ", " << position[1];
 
 				return stream.str();
 			}
 	};
 
-	class API MouseScrollEvent : public Event {
+	class MouseScrollEvent : public Event {
 		private:
-			float xOffset, yOffset;
+			lyah::vec2<float32> offset;
 
 		public:
-			MouseScrollEvent(float xOffset, float yOffset) : xOffset(xOffset), yOffset(yOffset) {}
+			MouseScrollEvent(float32 xOffset, float32 yOffset) : offset(xOffset, yOffset) {}
 
-			inline float getXOffset() const {
-				return xOffset;
-			}
-
-			inline float getYOffset() const {
-				return yOffset;
+			const lyah::vec2<float>& getOffset() const {
+				return offset;
 			}
 
 			EVENT_TYPE(EventTypeMouseScroll)
@@ -91,7 +87,8 @@ namespace ProjectA {
 
 			std::string toString() const override {
 				std::stringstream stream;
-				stream << getName() << ": " << xOffset << ", " << yOffset;
+
+				stream << getName() << ": " << offset[0] << ", " << offset[1];
 
 				return stream.str();
 			}

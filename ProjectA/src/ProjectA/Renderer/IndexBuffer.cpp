@@ -1,17 +1,21 @@
 #include "pch.hpp"
+
 #include "Platform/OpenGL/OpenGLIndexBuffer.hpp"
-#include "Renderer.hpp"
-#include "IndexBuffer.hpp"
+#include "ProjectA/Renderer/IndexBuffer.hpp"
+#include "ProjectA/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	IndexBuffer* IndexBuffer::create(uint32_t* indices, uint32_t count) {
+	ref<IndexBuffer> IndexBuffer::create(const uint32* indices, uint32 count) {
 		switch (Renderer::getGraphicsAPI()) {
-			case GraphicsAPI::None:
-				CORE_ASSERT(false, "Graphics::None is not supported yet.")
+			case RendererAPI::GraphicsAPI::None:
+				ENGINE_ASSERT(false, "Graphics::None is not supported yet.")
 
 				return nullptr;
-			case GraphicsAPI::OpenGL:
-				return new OpenGLIndexBuffer(indices, count);
+
+			case RendererAPI::GraphicsAPI::OpenGL:
+				return createRef<OpenGLIndexBuffer>(indices, count);
 		}
+
+		return nullptr;
 	}
 }

@@ -1,23 +1,25 @@
 #include "pch.hpp"
 
-#include "ImGuiLayer.hpp"
-#include "ProjectA/Application.hpp"
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include <glfw/glfw3.h>
+
 #include <imgui.h>
+#include <examples/imgui_impl_glfw.h>
+#include <examples/imgui_impl_opengl3.h>
+
+#include "ProjectA/Application.hpp"
+#include "ProjectA/ImGui/ImGuiLayer.hpp"
 
 namespace ProjectA {
 	ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {}
 
-	void ImGuiLayer::attach() {
+	void ImGuiLayer::bind() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		IMGUI_CHECKVERSION();
 
 		ImGui::CreateContext();
 
 		ImGuiIO& io = ImGui::GetIO();
-		(void) io;
 
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -38,29 +40,31 @@ namespace ProjectA {
 		ImGui_ImplOpenGL3_Init("#version 410");
 	}
 
-	void ImGuiLayer::detach() {
+	void ImGuiLayer::unbind() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
+
 		ImGui::DestroyContext();
 	}
 
 	void ImGuiLayer::begin() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
+
 		ImGui::NewFrame();
 	}
 
-	void ImGuiLayer::renderImGui() {
-		static bool show = true;
-
-		ImGui::ShowDemoWindow(&show);
-	}
-
 	void ImGuiLayer::end() {
-		ImGuiIO& io = ImGui::GetIO();
-		WindowInterface& window = Application::get().getWindow();
+		PROFILE_SCOPE(__FUNCSIG__);
 
-		io.DisplaySize = ImVec2((float) window.getWidth(), (float) window.getHeight());
+		ImGuiIO& io = ImGui::GetIO();
+		Window& window = Application::get().getWindow();
+
+		io.DisplaySize = ImVec2(static_cast<float32>(window.getWidth()), static_cast<float32>(window.getHeight()));
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -73,5 +77,16 @@ namespace ProjectA {
 
 			glfwMakeContextCurrent(currentContextBackup);
 		}
+	}
+
+	void ImGuiLayer::onEvent(Event& event) {
+		if (!blockEvents) {
+			return;
+		}
+
+		const ImGuiIO& io = ImGui::GetIO();
+
+		event.handled |= event.hasCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		event.handled |= event.hasCategory(EventCategoryMouse) & io.WantCaptureMouse;
 	}
 }

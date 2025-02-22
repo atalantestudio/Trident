@@ -1,122 +1,133 @@
 #include "pch.hpp"
-#include "Application.hpp"
-#include <glad/glad.h>
+
+#include <GLFW/glfw3.h>
+
+#include "ProjectA/Application.hpp"
+#include "ProjectA/Renderer/2D/Renderer2D.hpp"
+#include "ProjectA/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	Application* Application::instance = nullptr;
 
-	Application::Application() {
-		CORE_ASSERT(!instance, "The Application instance already exists.")
+	Application::Application(const std::string& name) : lastFrameTime(0.0f) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		ENGINE_ASSERT(!instance, "The Application instance already exists.")
 
 		instance = this;
 
-		window = std::unique_ptr<WindowInterface>(WindowInterface::create());
-		window->setEventCallback(BIND_FUNCTION(Application::listen));
+		window = Window::create(WindowData(name));
+		window->setEventCallback(BIND(Application::onEvent));
+
+		Renderer::initialize();
+		Renderer2D::construct();
 
 		imGuiLayer = new ImGuiLayer();
 
 		pushOverlay(imGuiLayer);
-
-		glGenVertexArrays(1, &vertexArray);
-		glBindVertexArray(vertexArray);
-
-		float vertices[9] = {
-			-.5f, -.5f, 0,
-			.5f, -.5f, 0,
-			0, .5f, 0
-		};
-
-		vertexBuffer.reset(VertexBuffer::create(vertices, sizeof(vertices)));
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-
-		uint32_t indices[3] = {0, 1, 2};
-
-		indexBuffer.reset(IndexBuffer::create(indices, 3));
-
-		const std::string& vertexShaderSource = R"(
-			#version 330 core
-
-			layout(location = 0) in vec3 a_position;
-
-			out vec3 v_position;
-
-			void main() {
-				gl_Position = vec4(a_position, 1.);
-
-				v_position = a_position;
-			}
-		)";
-
-		const std::string& fragmentShaderSource = R"(
-			#version 330 core
-
-			in vec3 v_position;
-
-			layout(location = 0) out vec4 FragColor;
-
-			void main() {
-				FragColor = vec4(v_position * .5 + .5, 1.);
-				// FragColor = vec4(.8, .2, .2, 1.);
-			}
-		)";
-
-		shader.reset(new Shader(vertexShaderSource, fragmentShaderSource));
 	}
 
-	bool Application::windowCloseEventCallback(WindowCloseEvent& event) {
+	Application::~Application() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		Renderer::destroy();
+		Renderer2D::destroy();
+	}
+
+	Window& Application::getWindow() {
+		return *window;
+	}
+
+	void Application::run() {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		while (running) {
+			PROFILE_SCOPE("Run loop");
+
+			const float32 time = static_cast<float32>(glfwGetTime());
+			const float32 deltaTime = time - lastFrameTime;
+
+			lastFrameTime = time;
+
+			if (!minimized) {
+				PROFILE_SCOPE("Update layers");
+
+				for (Layer* layer : layerStack) {
+					layer->update(deltaTime);
+				}
+			}
+
+			imGuiLayer->begin();
+
+			{
+				PROFILE_SCOPE("Render layer ImGuis");
+
+				for (Layer* layer : layerStack) {
+					layer->renderImGui();
+				}
+			}
+
+			imGuiLayer->end();
+			window->update();
+		}
+	}
+
+	void Application::pushLayer(Layer* layer) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		layerStack.pushLayer(layer);
+
+		layer->bind();
+	}
+
+	void Application::pushOverlay(Layer* overlay) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		layerStack.pushOverlay(overlay);
+
+		overlay->bind();
+	}
+
+	void Application::close() {
+		running = false;
+	}
+
+	void Application::onEvent(Event& event) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		EventDispatcher eventDispatcher(event);
+
+		eventDispatcher.dispatch<WindowCloseEvent>(BIND(Application::onWindowClose));
+		eventDispatcher.dispatch<WindowResizeEvent>(BIND(Application::onWindowResize));
+
+		for (std::vector<Layer*>::reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); ++i) {
+			if (event.handled) {
+				break;
+			}
+
+			(*i)->onEvent(event);
+		}
+	}
+
+	bool Application::onWindowClose(WindowCloseEvent& event) {
 		running = false;
 
 		return true;
 	}
 
-	void Application::run() {
-		while (running) {
-			glClearColor(.1f, .1f, .1f, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
+	bool Application::onWindowResize(WindowResizeEvent& event) {
+		PROFILE_SCOPE(__FUNCSIG__);
 
-			indexBuffer->bind();
-			vertexBuffer->bind();
-			shader->bind();
+		if (event.getWidth() == 0 || event.getHeight() == 0) {
+			minimized = true;
 
-			glBindVertexArray(vertexArray);
-			glDrawElements(GL_TRIANGLES, indexBuffer->getCount(), GL_UNSIGNED_INT, nullptr);
-
-			for (Layer* layer : layerStack) {
-				layer->update();
-			}
-
-			imGuiLayer->begin();
-
-			for (Layer* layer : layerStack) {
-				layer->renderImGui();
-			}
-
-			imGuiLayer->end();
-
-			window->update();
+			return false;
 		}
-	}
 
-	void Application::listen(Event& event) {
-		EventDispatcher dispatcher(event);
-		dispatcher.dispatch<WindowCloseEvent>(BIND_FUNCTION(Application::windowCloseEventCallback));
+		minimized = false;
 
-		for (auto i = layerStack.end(); i != layerStack.begin();) {
-			(*--i)->listen(event);
+		Renderer::onWindowResize(event.getWidth(), event.getHeight());
 
-			if (event.handled) {
-				break;
-			}
-		}
-	}
-
-	void Application::pushLayer(Layer* layer) {
-		layerStack.pushLayer(layer);
-	}
-
-	void Application::pushOverlay(Layer* overlay) {
-		layerStack.pushOverlay(overlay);
+		return false;
 	}
 }

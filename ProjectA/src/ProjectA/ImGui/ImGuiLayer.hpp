@@ -6,18 +6,23 @@
 #include "ProjectA/Layer.hpp"
 
 namespace ProjectA {
-	class API ImGuiLayer : public Layer {
+	class ImGuiLayer : public Layer {
 		private:
-			float deltaTime = 0.0f;
+			float32 deltaTime = 0.0f;
+
+		public:
+			bool blockEvents = true;
 
 		public:
 			ImGuiLayer();
 			~ImGuiLayer() = default;
 
-			virtual void attach() override;
-			virtual void detach() override;
+			virtual void bind() override;
+			virtual void unbind() override;
+
 			void begin();
-			virtual void renderImGui() override;
 			void end();
+
+			virtual void onEvent(Event& event) override;
 	};
 }

@@ -1,18 +1,15 @@
 #include "ProjectA.hpp"
+#include "ProjectA/entry_point.hpp"
 
-class TestLayer : public ProjectA::Layer {
-	public:
-		TestLayer() : Layer("Test") {}
-
-		void update() override {}
-
-		void listen(ProjectA::Event& event) override {}
-};
+#include "Layer/SandboxLayer.hpp"
+#include "Random.hpp"
 
 class SandboxApplication : public ProjectA::Application {
 	public:
 		SandboxApplication() {
-			pushLayer(new TestLayer());
+			pushLayer(new SandboxLayer());
+
+			Random::initialize();
 		}
 
 		~SandboxApplication() {}

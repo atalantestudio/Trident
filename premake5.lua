@@ -1,8 +1,6 @@
-outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
-
 workspace "ProjectA"
-	architecture "x64"
-	startproject "Sandbox"
+	architecture "x86_64"
+	startproject "Editor"
 
 	configurations {
 		"Debug",
@@ -10,10 +8,19 @@ workspace "ProjectA"
 		"Release",
 	}
 
-include "ProjectA/vendor"
+	flags {
+		"MultiProcessorCompile",
+	}
+
+outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
+
+group "Dependencies"
+	include "ProjectA/vendor"
+
+group ""
 
 project "ProjectA"
-	location "ProjectA"
+	location "%{prj.name}"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
@@ -25,20 +32,26 @@ project "ProjectA"
 	pchheader "pch.hpp"
 	pchsource "%{prj.name}/src/pch.cpp"
 
+	defines {
+		"_CRT_SECURE_NO_WARNINGS",
+		"GLFW_INCLUDE_NONE",
+	}
+
 	files {
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/src/**.hpp",
-		"%{prj.name}/vendor/glm/glm/**.hpp",
-		"%{prj.name}/vendor/glm/glm/**.inl",
+		"%{prj.name}/vendor/lyah/lyah/**.hpp",
+		"%{prj.name}/vendor/stb_image/**.cpp",
+		"%{prj.name}/vendor/stb_image/**.h",
 	}
 
 	includedirs {
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/glad/include",
 		"%{prj.name}/vendor/glfw/glfw/include",
-		"%{prj.name}/vendor/glm",
 		"%{prj.name}/vendor/imgui",
-		"%{prj.name}/vendor/spdlog/include",
+		"%{prj.name}/vendor/lyah",
+		"%{prj.name}/vendor/stb_image",
 	}
 
 	links {
@@ -48,36 +61,33 @@ project "ProjectA"
 		"opengl32.lib",
 	}
 
-	defines {
-		"_CRT_SECURE_NO_WARNINGS",
-	}
-
 	filter "system:windows"
 		systemversion "latest"
 
-		defines {
-			"WINDOWS",
-			"BUILD_DLL",
-			"GLFW_INCLUDE_NONE",
-		}
-
 	filter "configurations:Debug"
-		defines "DEBUG"
+		defines "BUILD_MODE_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
+		excludes "%{prj.name}/src/%{prj.name}/Profile/**"
+
 	filter "configurations:Profile"
-		defines "PROFILE"
+		defines "BUILD_MODE_PROFILE"
 		runtime "Release"
 		optimize "on"
+
+		excludes "%{prj.name}/src/%{prj.name}/Logger/**"
 
 	filter "configurations:Release"
-		defines "RELEASE"
+		defines "BUILD_MODE_RELEASE"
 		runtime "Release"
 		optimize "on"
 
+		excludes "%{prj.name}/src/%{prj.name}/Logger/**"
+		excludes "%{prj.name}/src/%{prj.name}/Profile/**"
+
 project "Sandbox"
-	location "Sandbox"
+	location "%{prj.name}"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
@@ -94,8 +104,7 @@ project "Sandbox"
 	includedirs {
 		"ProjectA/src",
 		"ProjectA/vendor",
-		"ProjectA/vendor/glm",
-		"ProjectA/vendor/spdlog/include",
+		"ProjectA/vendor/lyah",
 	}
 
 	links {
@@ -105,19 +114,60 @@ project "Sandbox"
 	filter "system:windows"
 		systemversion "latest"
 
-		defines "WINDOWS"
-
 	filter "configurations:Debug"
-		defines "DEBUG"
+		defines "BUILD_MODE_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Profile"
-		defines "PROFILE"
+		defines "BUILD_MODE_PROFILE"
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Release"
-		defines "RELEASE"
+		defines "BUILD_MODE_RELEASE"
+		runtime "Release"
+		optimize "on"
+
+project "Editor"
+	location "%{prj.name}"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
+
+	targetdir ("bin/%{prj.name}/" .. outputdir)
+	objdir ("obj/%{prj.name}/" .. outputdir)
+
+	files {
+		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/src/**.hpp",
+	}
+
+	includedirs {
+		"ProjectA/src",
+		"ProjectA/vendor",
+		"ProjectA/vendor/lyah",
+	}
+
+	links {
+		"ProjectA",
+	}
+
+	filter "system:windows"
+		systemversion "latest"
+
+	filter "configurations:Debug"
+		defines "BUILD_MODE_DEBUG"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Profile"
+		defines "BUILD_MODE_PROFILE"
+		runtime "Release"
+		optimize "on"
+
+	filter "configurations:Release"
+		defines "BUILD_MODE_RELEASE"
 		runtime "Release"
 		optimize "on"

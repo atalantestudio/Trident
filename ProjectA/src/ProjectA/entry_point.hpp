@@ -1,17 +1,35 @@
 #pragma once
 
-#ifdef WINDOWS
+#include "ProjectA/base.hpp"
+
+#ifdef PLATFORM_WINDOWS
 	extern ProjectA::Application* ProjectA::createApplication();
 
-	int main() {
-		ProjectA::Logger::initialize();
+	int main(int argc, char** argv) {
+		#ifdef BUILD_MODE_DEBUG
+			ProjectA::Logger::initialize();
+		#endif
 
-		LOG_CORE_TRACE("Initialized core logging");
-		LOG_CLIENT_TRACE("Initialized client logging");
+		ProjectA::Application* application;
 
-		ProjectA::Application* application = ProjectA::createApplication();
-		application->run();
+		{
+			PROFILER("Log/ProfileStart.json");
 
-		delete application;
+			application = ProjectA::createApplication();
+		}
+
+		{
+			PROFILER("Log/ProfileRun.json");
+
+			application->run();
+		}
+
+		{
+			PROFILER("Log/ProfileEnd.json");
+
+			delete application;
+		}
+
+		return 0;
 	}
 #endif

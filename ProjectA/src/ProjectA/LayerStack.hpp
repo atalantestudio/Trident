@@ -1,16 +1,17 @@
 #pragma once
 
-#include "core.hpp"
-#include "Layer.hpp"
+#include "ProjectA/base.hpp"
+#include "ProjectA/Layer.hpp"
 
 namespace ProjectA {
-	class API LayerStack {
+	class LayerStack {
 		private:
 			std::vector<Layer*> layers;
 			unsigned int layerInsertionIndex = 0;
 
 		public:
-			LayerStack();
+			LayerStack() = default;
+
 			~LayerStack();
 
 			void pushLayer(Layer* layer);
@@ -24,6 +25,14 @@ namespace ProjectA {
 
 			std::vector<Layer*>::iterator end() {
 				return layers.end();
+			}
+
+			std::vector<Layer*>::reverse_iterator rbegin() {
+				return layers.rbegin();
+			}
+
+			std::vector<Layer*>::reverse_iterator rend() {
+				return layers.rend();
 			}
 	};
 }
