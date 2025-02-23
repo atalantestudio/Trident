@@ -15,10 +15,8 @@ namespace ProjectA {
 			bool normalized;
 
 		public:
-			// NOTE: The attribute name is not needed by the vertex array
-			// but is present here for tracking purposes.
 			template<typename T>
-			static BufferAttribute create(const std::string& name, const bool normalized = false) {
+			static BufferAttribute create(const bool normalized = false) {
 				return {getAttributeGlType<T>(), getAttributeSize<T>(), getAttributeComponentCount<T>(), 0, normalized};
 			}
 

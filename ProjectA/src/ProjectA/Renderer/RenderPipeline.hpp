@@ -1,7 +1,9 @@
 #pragma once
 
+#include "ProjectA/Renderer/IndexBuffer.hpp"
 #include "ProjectA/Renderer/PrimitiveTopology.hpp"
 #include "ProjectA/Renderer/ShaderModule.hpp"
+#include "ProjectA/Renderer/VertexBuffer.hpp"
 
 namespace ProjectA {
 	struct RenderPipelineDescriptor {
@@ -19,6 +21,14 @@ namespace ProjectA {
 			// TODO: Remove
 			virtual void bind() const = 0;
 			virtual void unbind() const = 0;
+
+			virtual const std::vector<ref<VertexBuffer>>& getVertexBuffers() const = 0;
+
+			virtual const ref<IndexBuffer>& getIndexBuffer() const = 0;
+
+			virtual void addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) = 0;
+
+			virtual void setIndexBuffer(const ref<IndexBuffer>& indexBuffer) = 0;
 
 			virtual void setUniform(const std::string& name, int32 value) const = 0;
 			virtual void setUniform(const std::string& name, const int32* value, uint32 count) const = 0;

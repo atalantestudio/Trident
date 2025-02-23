@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class VertexBuffer {
 		protected:
-			uint32_t id;
+			uint32 id;
 
 		public:
 			static ref<VertexBuffer> create(uint32 size);

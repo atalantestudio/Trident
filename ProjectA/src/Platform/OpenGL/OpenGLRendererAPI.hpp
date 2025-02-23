@@ -6,11 +6,6 @@
 
 namespace ProjectA {
 	class OpenGLRendererAPI : public RendererAPI {
-		private:
-			#ifdef BUILD_MODE_DEBUG
-				static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
-			#endif
-
 		public:
 			virtual void initialize() override;
 
@@ -20,6 +15,11 @@ namespace ProjectA {
 
 			virtual void clear() const override;
 
-			virtual void drawIndexed(const ref<VertexArray>& vertexArray, uint32 indexCount) const override;
+			virtual void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const override;
+
+		private:
+			#ifdef BUILD_MODE_DEBUG
+				static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+			#endif
 	};
 }

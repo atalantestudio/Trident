@@ -5,7 +5,6 @@
 #include "ProjectA/Renderer/RenderCommand.hpp"
 #include "ProjectA/Renderer/RenderPipeline.hpp"
 #include "ProjectA/Renderer/ShaderModule.hpp"
-#include "ProjectA/Renderer/VertexArray.hpp"
 
 namespace ProjectA {
 	struct QuadVertex {
@@ -25,7 +24,6 @@ namespace ProjectA {
 		static constexpr uint32 MAX_TEXTURE_SLOTS = 32;
 
 		ref<RenderPipeline> renderPipeline;
-		ref<VertexArray> vertexArray;
 		ref<VertexBuffer> vertexBuffer;
 		uint32 quadCount = 0;
 		QuadVertex* vertexBufferOrigin = nullptr;
@@ -58,18 +56,16 @@ namespace ProjectA {
 		storage.renderPipeline = RenderPipeline::create(descriptor);
 		storage.renderPipeline->bind();
 
-		storage.vertexArray = VertexArray::create();
-
 		storage.vertexBuffer = VertexBuffer::create(sizeof(QuadVertex) * Renderer2DStorage::MAX_VERTICES);
 		storage.vertexBuffer->setLayout({
-			BufferAttribute::create<vec3<float32>>("a_position"),
-			BufferAttribute::create<vec4<float32>>("a_color"),
-			BufferAttribute::create<vec2<float32>>("a_uv"),
-			BufferAttribute::create<int32>("a_texture"),
-			BufferAttribute::create<float32>("a_tilingFactor"),
+			BufferAttribute::create<vec3<float32>>(),	// a_position
+			BufferAttribute::create<vec4<float32>>(),	// a_color
+			BufferAttribute::create<vec2<float32>>(),	// a_uv
+			BufferAttribute::create<int32>(),			// a_texture
+			BufferAttribute::create<float32>(),			// a_tilingFactor
 		});
 
-		storage.vertexArray->addVertexBuffer(storage.vertexBuffer);
+		storage.renderPipeline->addVertexBuffer(storage.vertexBuffer);
 
 		storage.vertexBufferOrigin = new QuadVertex[Renderer2DStorage::MAX_VERTICES];
 
@@ -91,7 +87,7 @@ namespace ProjectA {
 
 		delete[] indices;
 
-		storage.vertexArray->setIndexBuffer(indexBuffer);
+		storage.renderPipeline->setIndexBuffer(indexBuffer);
 
 		const uint32 defaultTextureData = 0xffffffff;
 
@@ -141,13 +137,13 @@ namespace ProjectA {
 
 		storage.vertexBuffer->copyData(storage.vertexBufferOrigin, sizeof(QuadVertex) * storage.quadCount * 4);
 
-		storage.vertexArray->bind();
+		storage.renderPipeline->bind();
 
 		for (uint32 slotIndex = 0; slotIndex < storage.currentSlotIndex; slotIndex++) {
 			storage.textureSlots[slotIndex]->bind(slotIndex);
 		}
 
-		RenderCommand::drawIndexed(storage.vertexArray, storage.quadCount * 6);
+		RenderCommand::drawIndexed(storage.renderPipeline, storage.quadCount * 6);
 
 		storage.statistics.drawCallCount++;
 	}

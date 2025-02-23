@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProjectA/Renderer/VertexArray.hpp"
+#include "ProjectA/Renderer/RenderPipeline.hpp"
 
 namespace ProjectA {
 	class RendererAPI {
@@ -31,6 +31,6 @@ namespace ProjectA {
 
 			virtual void clear() const = 0;
 
-			virtual void drawIndexed(const ref<VertexArray>& vertexArray, uint32 indexCount) const = 0;
+			virtual void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const = 0;
 	};
 }

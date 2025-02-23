@@ -8,6 +8,9 @@ namespace ProjectA {
 		programObject(glCreateProgram()),
 		primitiveTopology(primitiveTopologies[static_cast<uint32>(descriptor.primitiveTopology)])
 	{
+		glCreateVertexArrays(1, &vertexArrayObject);
+		glBindVertexArray(vertexArrayObject);
+
 		glAttachShader(programObject, ((OpenGLShaderModule*) descriptor.vertexShaderModule.get())->object);
 		glAttachShader(programObject, ((OpenGLShaderModule*) descriptor.fragmentShaderModule.get())->object);
 		glLinkProgram(programObject);
@@ -44,11 +47,13 @@ namespace ProjectA {
 
 	OpenGLRenderPipeline::~OpenGLRenderPipeline() {
 		glDeleteProgram(programObject);
+		glDeleteVertexArrays(1, &vertexArrayObject);
 	}
 
 	void OpenGLRenderPipeline::bind() const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
+		glBindVertexArray(vertexArrayObject);
 		glUseProgram(programObject);
 	}
 
@@ -56,6 +61,98 @@ namespace ProjectA {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glUseProgram(0);
+		glBindVertexArray(0);
+	}
+
+	const std::vector<ref<VertexBuffer>>& OpenGLRenderPipeline::getVertexBuffers() const {
+		return vertexBuffers;
+	}
+
+	const ref<IndexBuffer>& OpenGLRenderPipeline::getIndexBuffer() const {
+		return indexBuffer;
+	}
+
+	void OpenGLRenderPipeline::addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		ENGINE_ASSERT(vertexBuffer->getLayout().attributes.size(), "Vertex buffer has no layout.");
+
+		bind();
+
+		vertexBuffer->bind();
+
+		const BufferLayout& layout = vertexBuffer->getLayout();
+
+		GLuint attributeIndex = 0;
+
+		for (const BufferAttribute& attribute : layout) {
+			switch (attribute.glType) {
+				case GL_FLOAT:
+					if (attribute.componentCount <= 4) {
+						// Scalar/vector
+						glEnableVertexAttribArray(attributeIndex);
+						glVertexAttribPointer(
+							attributeIndex,
+							static_cast<GLint>(attribute.componentCount),
+							attribute.glType,
+							attribute.normalized ? GL_TRUE : GL_FALSE,
+							layout.stride,
+							(const void*) attribute.offset
+						);
+
+						attributeIndex++;
+
+						break;
+					}
+					else {
+						// Matrix
+						const GLboolean normalized = attribute.normalized ? GL_TRUE : GL_FALSE;
+
+						for (uint32 i = 0; i < attribute.componentCount; i++) {
+							glEnableVertexAttribArray(attributeIndex);
+							glVertexAttribPointer(
+								attributeIndex,
+								static_cast<GLint>(attribute.componentCount),
+								attribute.glType,
+								normalized,
+								layout.stride,
+								(const void*) (sizeof(float32) * attribute.componentCount * i)
+							);
+							glVertexAttribDivisor(attributeIndex, 1);
+
+							attributeIndex++;
+						}
+
+						break;
+					}
+				case GL_BOOL:
+				case GL_INT:
+					glEnableVertexAttribArray(attributeIndex);
+					glVertexAttribIPointer(
+						attributeIndex,
+						static_cast<GLint>(attribute.componentCount),
+						attribute.glType,
+						layout.stride,
+						(const void*) attribute.offset
+					);
+
+					attributeIndex++;
+
+					break;
+			}
+		}
+
+		vertexBuffers.push_back(vertexBuffer);
+	}
+
+	void OpenGLRenderPipeline::setIndexBuffer(const ref<IndexBuffer>& indexBuffer) {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		bind();
+
+		indexBuffer->bind();
+
+		this->indexBuffer = indexBuffer;
 	}
 
 	void OpenGLRenderPipeline::setUniform(const std::string& name, int32 value) const {

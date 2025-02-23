@@ -24,7 +24,7 @@ namespace ProjectA {
 
 			static void endScene();
 
-			static void submit(const ref<RenderPipeline>& renderPipeline, const ref<VertexArray>& vertexArray, const mat4x4<float32>& transform);
+			static void submit(const ref<RenderPipeline>& renderPipeline, const mat4x4<float32>& transform);
 
 			static void onWindowResize(uint32 width, uint32 height);
 	};

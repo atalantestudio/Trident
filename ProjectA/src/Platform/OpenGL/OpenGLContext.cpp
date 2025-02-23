@@ -17,7 +17,7 @@ namespace ProjectA {
 
 		const int32 gladLoadStatus = gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
 
-		ENGINE_ASSERT(gladLoadStatus, "Could not initialize GLAD");
+		ENGINE_ASSERT(gladLoadStatus, "Failed to initialize GLAD.");
 
 		const GLubyte* gpuVendor = glGetString(GL_VENDOR);
 		const GLubyte* gpuRenderer = glGetString(GL_RENDERER);

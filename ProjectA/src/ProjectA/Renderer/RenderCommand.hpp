@@ -24,8 +24,11 @@ namespace ProjectA {
 				rendererApi->clear();
 			}
 
-			static void drawIndexed(const ref<VertexArray>& vertexArray, uint32 indexCount) {
-				rendererApi->drawIndexed(vertexArray, indexCount);
+			static void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) {
+				rendererApi->drawIndexed(renderPipeline, indexCount);
 			}
+
+			// TODO: RenderPassCommandEncoder
+			// void draw(const uint32 vertexCount, const uint32 instanceCount, const uint32 vertexOffset);
 	};
 }

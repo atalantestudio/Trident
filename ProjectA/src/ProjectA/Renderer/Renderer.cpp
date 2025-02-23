@@ -26,16 +26,14 @@ namespace ProjectA {
 		Renderer::camera = nullptr;
 	}
 
-	void Renderer::submit(const ref<RenderPipeline>& renderPipeline, const ref<VertexArray>& vertexArray, const mat4x4<float32>& transform) {
+	void Renderer::submit(const ref<RenderPipeline>& renderPipeline, const mat4x4<float32>& transform) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		renderPipeline->bind();
 		renderPipeline->setUniform("u_viewProjection", Renderer::camera->getViewProjection());
 		renderPipeline->setUniform("u_transform", transform);
 
-		vertexArray->bind();
-
-		RenderCommand::drawIndexed(vertexArray, vertexArray->getIndexBuffer()->getCount());
+		RenderCommand::drawIndexed(renderPipeline, renderPipeline->getIndexBuffer()->getCount());
 	}
 
 	void Renderer::onWindowResize(uint32 width, uint32 height) {
