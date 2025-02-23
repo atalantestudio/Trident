@@ -1,8 +1,10 @@
 #include "pch.hpp"
 
+#include "ProjectA/Loader/FileLoader.hpp"
 #include "ProjectA/Renderer/2D/Renderer2D.hpp"
 #include "ProjectA/Renderer/RenderCommand.hpp"
-#include "ProjectA/Renderer/Shader.hpp"
+#include "ProjectA/Renderer/RenderPipeline.hpp"
+#include "ProjectA/Renderer/ShaderModule.hpp"
 #include "ProjectA/Renderer/VertexArray.hpp"
 
 namespace ProjectA {
@@ -22,7 +24,7 @@ namespace ProjectA {
 		// TODO: Renderer capabilities class
 		static constexpr uint32 MAX_TEXTURE_SLOTS = 32;
 
-		ref<Shader> colorTextureShader;
+		ref<RenderPipeline> renderPipeline;
 		ref<VertexArray> vertexArray;
 		ref<VertexBuffer> vertexBuffer;
 		uint32 quadCount = 0;
@@ -44,8 +46,17 @@ namespace ProjectA {
 	void Renderer2D::construct() {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		storage.colorTextureShader = Shader::create("assets/shaders/ColorTexture.glsl");
-		storage.colorTextureShader->bind();
+		// TODO: Move renderer shader code out of Sandbox
+		const std::string colorTextureVertexShaderCode = FileLoader::load("assets/shaders/ColorTexture.vert.glsl");
+		const std::string colorTextureFragmentShaderCode = FileLoader::load("assets/shaders/ColorTexture.frag.glsl");
+
+		RenderPipelineDescriptor descriptor;
+		descriptor.vertexShaderModule = ShaderModule::create(ShaderStage::VERTEX, colorTextureVertexShaderCode);
+		descriptor.fragmentShaderModule = ShaderModule::create(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
+		descriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+
+		storage.renderPipeline = RenderPipeline::create(descriptor);
+		storage.renderPipeline->bind();
 
 		storage.vertexArray = VertexArray::create();
 
@@ -68,6 +79,12 @@ namespace ProjectA {
 			}
 		});
 
+		// TODO: Change BufferLayout API design
+		/* storage.vertexBuffer->setLayout({
+			Attribute<vec3<float32>>("a_position"),
+			Attribute<vec2<float32>>("a_uv"),
+		}); */
+
 		storage.vertexArray->addVertexBuffer(storage.vertexBuffer);
 
 		storage.vertexBufferOrigin = new QuadVertex[Renderer2DStorage::MAX_VERTICES];
@@ -86,7 +103,7 @@ namespace ProjectA {
 			indexOffset += 4;
 		}
 
-		ref<IndexBuffer> indexBuffer = IndexBuffer::create(indices, Renderer2DStorage::MAX_INDICES);
+		const ref<IndexBuffer> indexBuffer = IndexBuffer::create(indices, Renderer2DStorage::MAX_INDICES);
 
 		delete[] indices;
 
@@ -97,13 +114,13 @@ namespace ProjectA {
 		storage.textureSlots[0] = Texture2D::create(1, 1);
 		storage.textureSlots[0]->setData(&defaultTextureData, 4);
 
-		int32 textureSamplers[Renderer2DStorage::MAX_TEXTURE_SLOTS];
+		int32 textureSamplers[Renderer2DStorage::MAX_TEXTURE_SLOTS]{};
 
 		for (int32 i = 0; i < Renderer2DStorage::MAX_TEXTURE_SLOTS; i++) {
 			textureSamplers[i] = i;
 		}
 
-		storage.colorTextureShader->setUniform("u_textures", textureSamplers, Renderer2DStorage::MAX_TEXTURE_SLOTS);
+		storage.renderPipeline->setUniform("u_textures", textureSamplers, Renderer2DStorage::MAX_TEXTURE_SLOTS);
 
 		storage.quadVertexPositions[0] = {-0.5f, -0.5f, 0.0f, 1.0f};
 		storage.quadVertexPositions[1] = {-0.5f,  0.5f, 0.0f, 1.0f};
@@ -123,8 +140,8 @@ namespace ProjectA {
 	void Renderer2D::beginScene(const OrthographicCamera& camera) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		storage.colorTextureShader->bind();
-		storage.colorTextureShader->setUniform("u_viewProjection", camera.getViewProjection());
+		storage.renderPipeline->bind();
+		storage.renderPipeline->setUniform("u_viewProjection", camera.getViewProjection());
 
 		storage.quadCount = 0;
 		storage.vertexBufferPointer = storage.vertexBufferOrigin;

@@ -1,17 +1,22 @@
 #pragma once
 
-#include "pch.hpp"
-
-#include "ProjectA/base.hpp"
+#include "ProjectA/Renderer/PrimitiveTopology.hpp"
+#include "ProjectA/Renderer/ShaderModule.hpp"
 
 namespace ProjectA {
-	class Shader {
+	struct RenderPipelineDescriptor {
+		ref<ShaderModule> vertexShaderModule;
+		ref<ShaderModule> fragmentShaderModule;
+		PrimitiveTopology primitiveTopology;
+	};
+
+	class RenderPipeline {
 		public:
-			static ref<Shader> create(const std::string& vertexShaderSource, const std::string& fragmentShaderSource, const std::string& name);
-			static ref<Shader> create(const std::string& path);
+			static ref<RenderPipeline> create(const RenderPipelineDescriptor& descriptor);
 
-			virtual ~Shader() = default;
+			virtual ~RenderPipeline() = default;
 
+			// TODO: Remove
 			virtual void bind() const = 0;
 			virtual void unbind() const = 0;
 
@@ -22,7 +27,5 @@ namespace ProjectA {
 			virtual void setUniform(const std::string& name, const lyah::vec3<float32>& value) const = 0;
 			virtual void setUniform(const std::string& name, const lyah::vec4<float32>& value) const = 0;
 			virtual void setUniform(const std::string& name, const lyah::mat4x4<float32>& value) const = 0;
-
-			virtual const std::string& getName() const = 0;
 	};
 }

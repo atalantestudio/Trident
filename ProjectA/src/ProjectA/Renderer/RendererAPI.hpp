@@ -7,7 +7,8 @@ namespace ProjectA {
 		public:
 			enum class GraphicsAPI {
 				None = 0,
-				OpenGL = 1
+				OpenGL = 1,
+				Vulkan = 2,
 			};
 
 		private:

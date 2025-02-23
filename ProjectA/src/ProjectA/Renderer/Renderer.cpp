@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "ProjectA/Renderer/RenderCommand.hpp"
 #include "ProjectA/Renderer/Renderer.hpp"
 
 namespace ProjectA {
@@ -25,12 +26,12 @@ namespace ProjectA {
 		Renderer::camera = nullptr;
 	}
 
-	void Renderer::submit(const ref<Shader>& shader, const ref<VertexArray>& vertexArray, const lyah::mat4x4<float>& transform) {
+	void Renderer::submit(const ref<RenderPipeline>& renderPipeline, const ref<VertexArray>& vertexArray, const mat4x4<float32>& transform) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		shader->bind();
-		shader->setUniform("u_viewProjection", Renderer::camera->getViewProjection());
-		shader->setUniform("u_transform", transform);
+		renderPipeline->bind();
+		renderPipeline->setUniform("u_viewProjection", Renderer::camera->getViewProjection());
+		renderPipeline->setUniform("u_transform", transform);
 
 		vertexArray->bind();
 

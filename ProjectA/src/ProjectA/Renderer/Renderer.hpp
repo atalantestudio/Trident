@@ -3,8 +3,8 @@
 #include "pch.hpp"
 
 #include "ProjectA/Camera/Camera.hpp"
-#include "ProjectA/Renderer/RenderCommand.hpp"
-#include "ProjectA/Renderer/Shader.hpp"
+#include "ProjectA/Renderer/RendererAPI.hpp"
+#include "ProjectA/Renderer/RenderPipeline.hpp"
 
 namespace ProjectA {
 	class Renderer {
@@ -24,7 +24,7 @@ namespace ProjectA {
 
 			static void endScene();
 
-			static void submit(const ref<Shader>& shader, const ref<VertexArray>& vertexArray, const lyah::mat4x4<float>& transform);
+			static void submit(const ref<RenderPipeline>& renderPipeline, const ref<VertexArray>& vertexArray, const mat4x4<float32>& transform);
 
 			static void onWindowResize(uint32 width, uint32 height);
 	};

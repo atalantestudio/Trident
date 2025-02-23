@@ -16,6 +16,11 @@ namespace ProjectA {
 
 			case RendererAPI::GraphicsAPI::OpenGL:
 				return createScope<OpenGLRendererAPI>();
+
+			case RendererAPI::GraphicsAPI::Vulkan:
+				ENGINE_ASSERT(false, "Graphics::Vulkan is not supported yet.");
+
+				return nullptr;
 		}
 
 		return nullptr;

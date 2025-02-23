@@ -3,7 +3,9 @@
 #include "Platform/OpenGL/OpenGLShaderModule.hpp"
 
 namespace ProjectA {
-	OpenGLShaderModule::OpenGLShaderModule(const ShaderStage stage, const std::string& code) : ObjectWrapper(glCreateShader(shaderStages[static_cast<uint32>(stage)])) {
+	OpenGLShaderModule::OpenGLShaderModule(const ShaderStage stage, const std::string& code) :
+		ObjectWrapper(glCreateShader(shaderStages[static_cast<uint32>(stage)]))
+	{
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		const GLchar* const string = code.c_str();
@@ -20,7 +22,7 @@ namespace ProjectA {
 
 			glGetShaderiv(object, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-			std::vector<char> infoLog(infoLogLength);
+			std::vector<GLchar> infoLog(infoLogLength);
 
 			glGetShaderInfoLog(object, infoLogLength, nullptr, infoLog.data());
 

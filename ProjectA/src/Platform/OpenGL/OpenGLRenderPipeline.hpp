@@ -2,19 +2,20 @@
 
 #include <glad/glad.h>
 
-#include "ProjectA/Renderer/Shader.hpp"
-#include "ProjectA/Renderer/ShaderStage.hpp"
+#include "ProjectA/Renderer/RenderPipeline.hpp"
 
 namespace ProjectA {
-	class OpenGLShader : public Shader {
+	class OpenGLRenderPipeline : public RenderPipeline {
 		public:
-			OpenGLShader(const std::string& vertexShaderCode, const std::string& fragmentShaderCode, const std::string& name);
-			OpenGLShader(const std::string& path);
+			const GLuint programObject;
+			const GLenum primitiveTopology;
 
-			virtual ~OpenGLShader();
+		public:
+			OpenGLRenderPipeline(const RenderPipelineDescriptor& descriptor);
 
-			virtual const std::string& getName() const override;
+			~OpenGLRenderPipeline();
 
+			// TODO: Remove
 			virtual void bind() const override;
 			virtual void unbind() const override;
 
@@ -27,14 +28,15 @@ namespace ProjectA {
 			virtual void setUniform(const std::string& name, const mat4x4<float32>& value) const override;
 
 		private:
-			uint32 program;
-			std::string name;
+			static constexpr GLenum primitiveTopologies[5] = {
+				GL_POINTS,
+				GL_LINES,
+				GL_LINE_STRIP,
+				GL_TRIANGLES,
+				GL_TRIANGLE_STRIP,
+			};
 
 		private:
-			std::string readFile(const std::string& path) const;
-
-			std::unordered_map<ShaderStage, std::string> preprocess(const std::string& code) const;
-
-			void compile(const std::unordered_map<ShaderStage, std::string>& shaderCodes);
+			GLint getUniformLocation(const std::string& name) const;
 	};
 }
