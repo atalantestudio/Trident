@@ -9,31 +9,13 @@ namespace ProjectA {
 
 		vec_sts() = default;
 
-		vec_sts(lyah::vec2<float32> a) {
+		template<std::size_t C>
+		vec_sts(lyah::vec<C, float32> a) {
 			_mm_store_ps(m, a.m);
 		}
 
-		vec_sts(lyah::vec3<float32> a) {
-			_mm_store_ps(m, a.m);
-		}
-
-		vec_sts(lyah::vec4<float32> a) {
-			_mm_store_ps(m, a.m);
-		}
-
-		vec_sts& operator =(lyah::vec2<float32> a) {
-			_mm_store_ps(m, a.m);
-
-			return *this;
-		}
-
-		vec_sts& operator =(lyah::vec3<float32> a) {
-			_mm_store_ps(m, a.m);
-
-			return *this;
-		}
-
-		vec_sts& operator =(lyah::vec4<float32> a) {
+		template<std::size_t C>
+		vec_sts& operator =(lyah::vec<C, float32> a) {
 			_mm_store_ps(m, a.m);
 
 			return *this;

@@ -1,7 +1,7 @@
 #include "pch.hpp"
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include <glfw/glfw3.h>
 
 #include "Platform/OpenGL/OpenGLContext.hpp"
 
@@ -15,10 +15,16 @@ namespace ProjectA {
 
 		glfwMakeContextCurrent(window);
 
-		int gladLoadStatus = gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+		const int32 gladLoadStatus = gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
 
 		ENGINE_ASSERT(gladLoadStatus, "Could not initialize GLAD");
-		ENGINE_INFO("[], [], []", (const char*) glGetString(GL_VENDOR), (const char*) glGetString(GL_RENDERER), (const char*) glGetString(GL_VERSION));
+
+		const GLubyte* gpuVendor = glGetString(GL_VENDOR);
+		const GLubyte* gpuRenderer = glGetString(GL_RENDERER);
+		const GLubyte* gpuVersion = glGetString(GL_VERSION);
+
+		ENGINE_INFO("GPU: [] []", gpuVendor, gpuRenderer, gpuVersion);
+		ENGINE_INFO("GPU version: []", gpuVersion);
 
 		/* #ifdef ENABLE_ASSERTS
 			GLint majorVersion;

@@ -27,6 +27,7 @@
 #include "ProjectA/Renderer/RenderCommand.hpp"
 #include "ProjectA/Renderer/Renderer.hpp"
 #include "ProjectA/Renderer/Shader.hpp"
+#include "ProjectA/Renderer/ShaderModule.hpp"
 #include "ProjectA/Renderer/ShaderLibrary.hpp"
 #include "ProjectA/Renderer/VertexArray.hpp"
 #include "ProjectA/Renderer/VertexBuffer.hpp"

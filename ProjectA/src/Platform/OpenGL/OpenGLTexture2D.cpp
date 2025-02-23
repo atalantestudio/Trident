@@ -33,9 +33,9 @@ namespace ProjectA {
 
 		stbi_set_flip_vertically_on_load(1);
 
-		int x;
-		int y;
-		int channelCount;
+		int32 x;
+		int32 y;
+		int32 channelCount;
 		stbi_uc* data;
 
 		{
@@ -92,6 +92,19 @@ namespace ProjectA {
 		return static_cast<uint32>(height);
 	}
 
+	void OpenGLTexture2D::setData(const void* data, uint32 size) const {
+		PROFILE_SCOPE(__FUNCSIG__);
+
+		// TODO: Store channel count?
+		const uint32 channelCount = format == GL_RGBA ? 4 : 3;
+
+		const bool ok = size == (width * height * channelCount);
+
+		ENGINE_ASSERT(ok, "Data must be entire texture");
+
+		glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
+	}
+
 	void OpenGLTexture2D::bind(uint32_t slot) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
@@ -102,19 +115,6 @@ namespace ProjectA {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
-	void OpenGLTexture2D::setData(const void* data, uint32 size) const {
-		PROFILE_SCOPE(__FUNCSIG__);
-
-		// TODO: Store channel count?
-		uint32 channelCount = format == GL_RGBA ? 4 : 3;
-
-		bool ok = size == (width * height * channelCount);
-
-		ENGINE_ASSERT(ok, "Data must be entire texture");
-
-		glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	}
 
 	bool OpenGLTexture2D::operator ==(const Texture& other) const {

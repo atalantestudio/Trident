@@ -1,6 +1,6 @@
 #include "pch.hpp"
 
-#include <GLFW/glfw3.h>
+#include <glfw/glfw3.h>
 
 #include "ProjectA/Application.hpp"
 #include "ProjectA/Renderer/2D/Renderer2D.hpp"

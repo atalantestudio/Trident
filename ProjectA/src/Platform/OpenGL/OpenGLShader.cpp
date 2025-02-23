@@ -3,23 +3,24 @@
 #include <glad/glad.h>
 
 #include "Platform/OpenGL/OpenGLShader.hpp"
+#include "Platform/OpenGL/OpenGLShaderModule.hpp"
 
 namespace ProjectA {
 	// TODO: Change for enum
-	static GLenum shaderTypeFromString(const std::string& shaderType) {
+	static ShaderStage shaderStageFromString(const std::string& shaderStage) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		if (shaderType == "vertex") {
-			return GL_VERTEX_SHADER;
+		if (shaderStage == "vertex") {
+			return ShaderStage::VERTEX;
 		}
 
-		if (shaderType == "fragment") {
-			return GL_FRAGMENT_SHADER;
+		if (shaderStage == "fragment") {
+			return ShaderStage::FRAGMENT;
 		}
 
-		ENGINE_ASSERT(false, "Unhandled shader type \"[]\".", shaderType);
+		ENGINE_ASSERT(false, "Unhandled shader stage \"[]\".", shaderStage);
 
-		return 0;
+		return ShaderStage::VERTEX;
 	}
 
 	std::string OpenGLShader::readFile(const std::string& path) const {
@@ -54,89 +55,53 @@ namespace ProjectA {
 		return result;
 	}
 
-	std::unordered_map<GLenum, std::string> OpenGLShader::preprocess(const std::string& source) const {
+	std::unordered_map<ShaderStage, std::string> OpenGLShader::preprocess(const std::string& code) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		std::unordered_map<GLenum, std::string> shaderSources;
+		std::unordered_map<ShaderStage, std::string> shaderSources;
 
-		const char* shaderTypeToken = "#type";
-		size_t shaderTypeTokenLength = strlen(shaderTypeToken);
-		size_t position = source.find(shaderTypeToken, 0);
+		constexpr char* shaderStageToken = "#type";
+
+		std::size_t shaderStageTokenLength = strlen(shaderStageToken);
+		std::size_t position = code.find(shaderStageToken, 0);
 
 		while (position != std::string::npos) {
-			size_t eol = source.find_first_of("\r\n", position);
+			std::size_t eol = code.find_first_of("\r\n", position);
 
 			const bool found = eol == std::string::npos;
 
 			ENGINE_ASSERT(!found, "Shader syntax error detected.");
 
-			size_t begin = position + shaderTypeTokenLength + 1;
+			std::size_t begin = position + shaderStageTokenLength + 1;
 
-			std::string shaderTypeIdentifier = source.substr(begin, eol - begin);
-			GLenum shaderType = shaderTypeFromString(shaderTypeIdentifier);
+			// TODO: Don't automatically determine shader type
+			const std::string shaderStageIdentifier = code.substr(begin, eol - begin);
+			const ShaderStage shaderStage = shaderStageFromString(shaderStageIdentifier);
 
-			size_t nextLinePosition = source.find_first_not_of("\r\n", eol);
+			std::size_t nextLinePosition = code.find_first_not_of("\r\n", eol);
 
-			position = source.find(shaderTypeToken, nextLinePosition);
-			std::string shaderSource = source.substr(nextLinePosition, position - (nextLinePosition == std::string::npos ? source.size() - 1 : nextLinePosition));
+			position = code.find(shaderStageToken, nextLinePosition);
+			std::string shaderCode = code.substr(nextLinePosition, position - (nextLinePosition == std::string::npos ? code.size() - 1 : nextLinePosition));
 
-			shaderSources[shaderType] = shaderSource;
+			shaderSources[shaderStage] = shaderCode;
 		}
 
 		return shaderSources;
 	}
 
-	void OpenGLShader::compile(const std::unordered_map<GLenum, std::string>& shaderSources) {
+	void OpenGLShader::compile(const std::unordered_map<ShaderStage, std::string>& shaderCodes) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		GLuint program = glCreateProgram();
-
-		const bool sourceCountCheck = shaderSources.size() > 2;
+		const bool sourceCountCheck = shaderCodes.size() > 2;
 
 		ENGINE_ASSERT(!sourceCountCheck, "Only 2-shader files are supported.");
 
-		std::array<GLuint, 2> shaders{};
-		uint32_t index = 0;
+		const GLuint program = glCreateProgram();
+		const OpenGLShaderModule vertexShaderModule(ShaderStage::VERTEX, shaderCodes.at(ShaderStage::VERTEX));
+		const OpenGLShaderModule fragmentShaderModule(ShaderStage::FRAGMENT, shaderCodes.at(ShaderStage::FRAGMENT));
 
-		for (auto&& [shaderType, shaderSource] : shaderSources) {
-			const GLchar* source = shaderSource.c_str();
-
-			GLuint shader = glCreateShader(shaderType);
-
-			glShaderSource(shader, 1, &source, 0);
-			glCompileShader(shader);
-
-			GLint compileStatus;
-
-			glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
-
-			if (compileStatus == GL_FALSE) {
-				GLint maxLength;
-
-				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-
-				if (maxLength == 0) {
-					ENGINE_FATAL("Shader compilation failed (no info log provided)");
-
-					break;
-				}
-
-				std::vector<GLchar> infoLog(maxLength);
-
-				glGetShaderInfoLog(shader, maxLength, nullptr, infoLog.data());
-				glDeleteShader(shader);
-
-				ENGINE_FATAL("Shader compilation failed: []", infoLog.data());
-
-				break;
-			}
-
-			glAttachShader(program, shader);
-
-			shaders[index] = shader;
-
-			index++;
-		}
+		glAttachShader(program, vertexShaderModule.object);
+		glAttachShader(program, fragmentShaderModule.object);
 
 		glLinkProgram(program);
 
@@ -159,9 +124,8 @@ namespace ProjectA {
 
 			glGetProgramInfoLog(program, maxLength, nullptr, infoLog.data());
 
-			for (GLuint shader : shaders) {
-				glDeleteShader(shader);
-			}
+			vertexShaderModule.~OpenGLShaderModule();
+			fragmentShaderModule.~OpenGLShaderModule();
 
 			glDeleteProgram(program);
 
@@ -170,25 +134,23 @@ namespace ProjectA {
 			return;
 		}
 
-		ENGINE_INFO("Shader program compiled and linked successfully.");
+		ENGINE_TRACE("Linked shader program successfully.");
 
-		for (auto shader : shaders) {
-			glDetachShader(program, shader);
-			glDeleteShader(shader);
-		}
+		glDetachShader(program, vertexShaderModule.object);
+		glDetachShader(program, fragmentShaderModule.object);
 
 		this->program = program;
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& vertexShaderSource, const std::string& fragmentShaderSource, const std::string& name) : program(0), name(name) {
+	OpenGLShader::OpenGLShader(const std::string& vertexShaderCode, const std::string& fragmentShaderCode, const std::string& name) : program(0), name(name) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		std::unordered_map<GLenum, std::string> shaderSources;
+		std::unordered_map<ShaderStage, std::string> shaderCodes;
 
-		shaderSources[GL_VERTEX_SHADER] = vertexShaderSource;
-		shaderSources[GL_FRAGMENT_SHADER] = fragmentShaderSource;
+		shaderCodes[ShaderStage::VERTEX] = vertexShaderCode;
+		shaderCodes[ShaderStage::FRAGMENT] = fragmentShaderCode;
 
-		compile(shaderSources);
+		compile(shaderCodes);
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& path) : program(0) {
@@ -196,7 +158,7 @@ namespace ProjectA {
 
 		compile(preprocess(readFile(path)));
 
-		size_t lastSlash = path.find_last_of("/\\");
+		std::size_t lastSlash = path.find_last_of("/\\");
 
 		if (lastSlash == std::string::npos) {
 			lastSlash = 0;
@@ -204,8 +166,8 @@ namespace ProjectA {
 			lastSlash += 1;
 		}
 
-		size_t lastDot = path.rfind('.');
-		size_t count = 0;
+		std::size_t lastDot = path.rfind('.');
+		std::size_t count = 0;
 
 		if (lastDot == std::string::npos) {
 			count = path.size() - lastSlash;
@@ -213,15 +175,17 @@ namespace ProjectA {
 			count = lastDot - lastSlash;
 		}
 
-		std::string name = path.substr(lastSlash, count);
-
-		this->name = name;
+		name = path.substr(lastSlash, count);
 	}
 
 	OpenGLShader::~OpenGLShader() {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		glDeleteProgram(program);
+	}
+
+	const std::string& OpenGLShader::getName() const {
+		return name;
 	}
 
 	void OpenGLShader::bind() const {
@@ -236,15 +200,12 @@ namespace ProjectA {
 		glUseProgram(0);
 	}
 
-	const std::string& OpenGLShader::getName() const {
-		return name;
-	}
-
 	void OpenGLShader::setUniform(const std::string& name, int32 value) const {
 		PROFILE_SCOPE(__FUNCSIG__);
 
 		const GLint location = glGetUniformLocation(program, name.c_str());
 
+		// TODO: DRY
 		if (location == -1) {
 			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing.", name);
 		}
@@ -318,7 +279,7 @@ namespace ProjectA {
 		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
-			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing", name);
+			ENGINE_WARN("Location not found for uniform \"[]\". Uniform is either unused or non-existing.", name);
 		}
 
 		GLfloat entries[16]{};

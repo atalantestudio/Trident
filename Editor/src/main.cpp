@@ -1,12 +1,12 @@
 #include "ProjectA.hpp"
 #include "ProjectA/entry_point.hpp"
 
-#include "EditorLayer.hpp"
+#include "Layer/EditorLayer.hpp"
 
 namespace ProjectA {
 	class EditorApplication : public Application {
 		public:
-			EditorApplication() : Application("Editor") {
+			EditorApplication() : Application("ProjectA Editor") {
 				pushLayer(new EditorLayer());
 			}
 

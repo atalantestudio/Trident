@@ -3,7 +3,7 @@
 #include "ProjectA/base.hpp"
 
 #ifdef PLATFORM_WINDOWS
-	extern ProjectA::Application* ProjectA::createApplication();
+	extern ProjectA::Application* createApplication();
 
 	int main(int argc, char** argv) {
 		#ifdef BUILD_MODE_DEBUG

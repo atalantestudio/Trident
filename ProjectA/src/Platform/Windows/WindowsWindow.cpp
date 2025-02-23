@@ -40,10 +40,8 @@ namespace ProjectA {
 		glfwData.width = data.width;
 		glfwData.height = data.height;
 
-		ENGINE_TRACE("Created []x[] \"[]\" window", glfwData.width, glfwData.height, glfwData.title);
-
 		if (glfwWindowCount == 0) {
-			int success;
+			int32 success;
 
 			{
 				PROFILE_SCOPE("glfwInit");
@@ -65,7 +63,7 @@ namespace ProjectA {
 				}
 			#endif
 
-			window = glfwCreateWindow((int) glfwData.width, (int) glfwData.height, glfwData.title.c_str(), nullptr, nullptr);
+			window = glfwCreateWindow(static_cast<int32>(glfwData.width), static_cast<int32>(glfwData.height), glfwData.title.c_str(), nullptr, nullptr);
 
 			glfwWindowCount++;
 		}
