@@ -1,10 +1,9 @@
 #pragma once
 
 #include "ProjectA/base.hpp"
-#include "ProjectA/Renderer/Shader.hpp"
 
 namespace ProjectA {
-	class ShaderLibrary {
+	/*class ShaderLibrary {
 		private:
 			std::unordered_map<std::string, ref<Shader>> shaders;
 
@@ -16,5 +15,5 @@ namespace ProjectA {
 
 			void add(const ref<Shader>& shader);
 			void add(const ref<Shader>& shader, const std::string& name);
-	};
+	};*/
 }

@@ -62,28 +62,12 @@ namespace ProjectA {
 
 		storage.vertexBuffer = VertexBuffer::create(sizeof(QuadVertex) * Renderer2DStorage::MAX_VERTICES);
 		storage.vertexBuffer->setLayout({
-			{
-				ShaderType::Float3, "a_position", false
-			},
-			{
-				ShaderType::Float4, "a_color", false
-			},
-			{
-				ShaderType::Float2, "a_uv", false
-			},
-			{
-				ShaderType::Int, "a_texture", false
-			},
-			{
-				ShaderType::Float, "a_tilingFactor", false
-			}
+			BufferAttribute::create<vec3<float32>>("a_position"),
+			BufferAttribute::create<vec4<float32>>("a_color"),
+			BufferAttribute::create<vec2<float32>>("a_uv"),
+			BufferAttribute::create<int32>("a_texture"),
+			BufferAttribute::create<float32>("a_tilingFactor"),
 		});
-
-		// TODO: Change BufferLayout API design
-		/* storage.vertexBuffer->setLayout({
-			Attribute<vec3<float32>>("a_position"),
-			Attribute<vec2<float32>>("a_uv"),
-		}); */
 
 		storage.vertexArray->addVertexBuffer(storage.vertexBuffer);
 

@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class OpenGLVertexArray : public VertexArray {
 		private:
-			std::uint32_t id;
+			uint32 id;
 			std::vector<ref<VertexBuffer>> vertexBuffers;
 			ref<IndexBuffer> indexBuffer;
 

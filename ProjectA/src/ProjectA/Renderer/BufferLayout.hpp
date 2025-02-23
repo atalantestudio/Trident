@@ -2,31 +2,23 @@
 
 #include "pch.hpp"
 
-#include "ProjectA/Renderer/BufferElement.hpp"
+#include "ProjectA/Renderer/BufferAttribute.hpp"
 
 namespace ProjectA {
 	class BufferLayout {
-		private:
-			std::vector<BufferElement> elements;
-			uint32_t stride = 0;
+		public:
+			std::vector<BufferAttribute> attributes;
+			uint32 stride = 0;
 
 		public:
-			BufferLayout();
-			BufferLayout(const std::initializer_list<BufferElement>& elements);
+			BufferLayout() = default;
+			BufferLayout(const std::initializer_list<BufferAttribute>& attributes);
 
-			const std::vector<BufferElement>& getElements() const {
-				return elements;
-			}
+			std::vector<BufferAttribute>::iterator begin();
+			std::vector<BufferAttribute>::const_iterator begin() const;
 
-			uint32_t getStride() const {
-				return stride;
-			}
-
-			std::vector<BufferElement>::iterator begin();
-			std::vector<BufferElement>::const_iterator begin() const;
-
-			std::vector<BufferElement>::iterator end();
-			std::vector<BufferElement>::const_iterator end() const;
+			std::vector<BufferAttribute>::iterator end();
+			std::vector<BufferAttribute>::const_iterator end() const;
 
 		private:
 			void updateStride();

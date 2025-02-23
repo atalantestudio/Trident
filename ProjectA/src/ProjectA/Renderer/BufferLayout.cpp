@@ -3,35 +3,35 @@
 #include "ProjectA/Renderer/BufferLayout.hpp"
 
 namespace ProjectA {
-	BufferLayout::BufferLayout() {}
-
-	BufferLayout::BufferLayout(const std::initializer_list<BufferElement>& elements) : elements(elements) {
+	BufferLayout::BufferLayout(const std::initializer_list<BufferAttribute>& attributes) :
+		attributes(attributes)
+	{
 		updateStride();
 	}
 
-	std::vector<BufferElement>::iterator BufferLayout::begin() {
-		return elements.begin();
+	std::vector<BufferAttribute>::iterator BufferLayout::begin() {
+		return attributes.begin();
 	}
 
-	std::vector<BufferElement>::const_iterator BufferLayout::begin() const {
-		return elements.begin();
+	std::vector<BufferAttribute>::const_iterator BufferLayout::begin() const {
+		return attributes.begin();
 	}
 
-	std::vector<BufferElement>::iterator BufferLayout::end() {
-		return elements.end();
+	std::vector<BufferAttribute>::iterator BufferLayout::end() {
+		return attributes.end();
 	}
 
-	std::vector<BufferElement>::const_iterator BufferLayout::end() const {
-		return elements.end();
+	std::vector<BufferAttribute>::const_iterator BufferLayout::end() const {
+		return attributes.end();
 	}
 
 	void BufferLayout::updateStride() {
 		stride = 0;
 
-		for (BufferElement& element : elements) {
-			element.offset = stride;
+		for (BufferAttribute& attribute : attributes) {
+			attribute.offset = stride;
 
-			stride += element.size;
+			stride += attribute.size;
 		}
 	}
 }

@@ -3,7 +3,7 @@
 #include "ProjectA/Renderer/ShaderLibrary.hpp"
 
 namespace ProjectA {
-	ref<Shader> ShaderLibrary::load(const std::string& path) {
+	/*ref<Shader> ShaderLibrary::load(const std::string& path) {
 		auto shader = Shader::create(path);
 
 		add(shader);
@@ -33,5 +33,5 @@ namespace ProjectA {
 		ENGINE_ASSERT((shaders.find(name) == shaders.end()), "Found duplicate shader name.");
 
 		shaders[name] = shader;
-	}
+	}*/
 }

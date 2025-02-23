@@ -5,31 +5,6 @@
 #include "Platform/OpenGL/OpenGLVertexArray.hpp"
 
 namespace ProjectA {
-	// TODO: Replace with typename template
-	// Use primitive types and math library types
-	static GLenum getShaderType(ShaderType type) {
-		switch (type) {
-			case ShaderType::Bool:
-				return GL_BOOL;
-			case ShaderType::Int:
-			case ShaderType::Int2:
-			case ShaderType::Int3:
-			case ShaderType::Int4:
-				return GL_INT;
-			case ShaderType::Float:
-			case ShaderType::Float2:
-			case ShaderType::Float3:
-			case ShaderType::Float4:
-			case ShaderType::Mat3:
-			case ShaderType::Mat4:
-				return GL_FLOAT;
-		}
-
-		ENGINE_ASSERT(false, "Unknown shader type \"[]\".", type);
-
-		return 0;
-	}
-
 	OpenGLVertexArray::OpenGLVertexArray() {
 		PROFILE_SCOPE(__FUNCSIG__);
 
@@ -65,7 +40,7 @@ namespace ProjectA {
 	void OpenGLVertexArray::addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) {
 		PROFILE_SCOPE(__FUNCSIG__);
 
-		ENGINE_ASSERT(vertexBuffer->getLayout().getElements().size(), "Vertex buffer has no layout.");
+		ENGINE_ASSERT(vertexBuffer->getLayout().attributes.size(), "Vertex buffer has no layout.");
 
 		bind();
 
@@ -75,63 +50,58 @@ namespace ProjectA {
 
 		GLuint attributeIndex = 0;
 
-		for (const BufferElement& element : layout) {
-			switch (element.type) {
-				case ShaderType::Float:
-				case ShaderType::Float2:
-				case ShaderType::Float3:
-				case ShaderType::Float4:
-					glEnableVertexAttribArray(attributeIndex);
-					glVertexAttribPointer(
-						attributeIndex,
-						getShaderTypeComponentCount(element.type),
-						getShaderType(element.type),
-						element.normalized ? GL_TRUE : GL_FALSE,
-						layout.getStride(),
-						(const void*) element.offset
-					);
-
-					attributeIndex++;
-
-					break;
-				case ShaderType::Bool:
-				case ShaderType::Int:
-				case ShaderType::Int2:
-				case ShaderType::Int3:
-				case ShaderType::Int4:
-					glEnableVertexAttribArray(attributeIndex);
-					glVertexAttribIPointer(
-						attributeIndex,
-						getShaderTypeComponentCount(element.type),
-						getShaderType(element.type),
-						layout.getStride(),
-						(const void*) element.offset
-					);
-
-					attributeIndex++;
-
-					break;
-				case ShaderType::Mat3:
-				case ShaderType::Mat4:
-					const uint8 count = getShaderTypeComponentCount(element.type);
-					const GLenum shaderType = getShaderType(element.type);
-					const GLboolean normalized = element.normalized ? GL_TRUE : GL_FALSE;
-					const uint32 stride = layout.getStride();
-
-					for (uint8 i = 0; i < count; i++) {
+		for (const BufferAttribute& attribute : layout) {
+			switch (attribute.glType) {
+				case GL_FLOAT:
+					if (attribute.componentCount <= 4) {
+						// Scalar/vector
 						glEnableVertexAttribArray(attributeIndex);
 						glVertexAttribPointer(
 							attributeIndex,
-							count,
-							shaderType,
-							normalized,
-							stride,
-							(const void*) (sizeof(float32) * count * i)
+							static_cast<GLint>(attribute.componentCount),
+							attribute.glType,
+							attribute.normalized ? GL_TRUE : GL_FALSE,
+							layout.stride,
+							(const void*) attribute.offset
 						);
-						glVertexAttribDivisor(attributeIndex, 1);
 
 						attributeIndex++;
+
+						break;
 					}
+					else {
+						// Matrix
+						const GLboolean normalized = attribute.normalized ? GL_TRUE : GL_FALSE;
+
+						for (uint32 i = 0; i < attribute.componentCount; i++) {
+							glEnableVertexAttribArray(attributeIndex);
+							glVertexAttribPointer(
+								attributeIndex,
+								static_cast<GLint>(attribute.componentCount),
+								attribute.glType,
+								normalized,
+								layout.stride,
+								(const void*) (sizeof(float32) * attribute.componentCount * i)
+							);
+							glVertexAttribDivisor(attributeIndex, 1);
+
+							attributeIndex++;
+						}
+
+						break;
+					}
+				case GL_BOOL:
+				case GL_INT:
+					glEnableVertexAttribArray(attributeIndex);
+					glVertexAttribIPointer(
+						attributeIndex,
+						static_cast<GLint>(attribute.componentCount),
+						attribute.glType,
+						layout.stride,
+						(const void*) attribute.offset
+					);
+
+					attributeIndex++;
 
 					break;
 			}
