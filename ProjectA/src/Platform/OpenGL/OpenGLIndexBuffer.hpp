@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProjectA/Renderer/IndexBuffer.hpp"
+#include "Engine/Renderer/IndexBuffer.hpp"
 
 namespace ProjectA {
 	class OpenGLIndexBuffer : public IndexBuffer {

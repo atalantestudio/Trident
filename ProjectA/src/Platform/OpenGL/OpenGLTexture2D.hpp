@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 
-#include "ProjectA/Renderer/Texture2D.hpp"
+#include "Engine/Renderer/Texture2D.hpp"
 
 namespace ProjectA {
 	class OpenGLTexture2D : public Texture2D {

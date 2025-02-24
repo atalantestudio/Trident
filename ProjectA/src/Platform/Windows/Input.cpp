@@ -2,8 +2,8 @@
 
 #include <glfw/glfw3.h>
 
-#include "ProjectA/Application.hpp"
-#include "ProjectA/Input.hpp"
+#include "Engine/Application.hpp"
+#include "Engine/Input.hpp"
 
 namespace ProjectA {
 	bool Input::isKeyPressed(KeyCode keyCode) {

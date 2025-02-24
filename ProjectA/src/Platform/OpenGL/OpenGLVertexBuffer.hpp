@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProjectA/Renderer/VertexBuffer.hpp"
+#include "Engine/Renderer/VertexBuffer.hpp"
 
 namespace ProjectA {
 	class OpenGLVertexBuffer : public VertexBuffer {

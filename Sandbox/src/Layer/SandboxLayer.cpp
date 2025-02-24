@@ -1,6 +1,6 @@
 #include <imgui/imgui.h>
 
-#include "ProjectA/Renderer/2D/Renderer2D.hpp"
+#include "Engine/Renderer/2D/Renderer2D.hpp"
 
 #include "SandboxLayer.hpp"
 
@@ -30,7 +30,9 @@ void SandboxLayer::update(ProjectA::float32 deltaTime) {
 		ProjectA::RenderCommand::clear();
 	}
 
-	ProjectA::Renderer2D::beginScene(cameraController.getCamera());
+	ProjectA::Renderer2D::camera = &cameraController.getCamera();
+
+	ProjectA::Renderer2D::beginScene();
 
 	static ProjectA::float32 angle = 0.0f;
 
@@ -47,7 +49,7 @@ void SandboxLayer::update(ProjectA::float32 deltaTime) {
 	ProjectA::Renderer2D::drawRotatedQuad({-2.0f, 0.0f, 0.0f}, {1.0f, 1.0f}, angle, checkerboardTexture, 20.0f);
 	ProjectA::Renderer2D::endScene();
 
-	ProjectA::Renderer2D::beginScene(cameraController.getCamera());
+	ProjectA::Renderer2D::beginScene();
 
 	for (ProjectA::float32 y = -5.0f; y < 5.0f; y += 0.5f) {
 		for (ProjectA::float32 x = -5.0f; x < 5.0f; x += 0.5f) {

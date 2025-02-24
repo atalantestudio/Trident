@@ -1,35 +1,35 @@
 #pragma once
 
-#include "ProjectA/base.hpp"
+#include "Engine/base.hpp"
 
 // Math
 #include "lyah/lyah.hpp"
 
 // Application
-#include "ProjectA/Application.hpp"
-#include "ProjectA/Input.hpp"
-#include "ProjectA/Layer.hpp"
+#include "Engine/Application.hpp"
+#include "Engine/Input.hpp"
+#include "Engine/Layer.hpp"
 
 #ifdef BUILD_MODE_DEBUG
-	#include "ProjectA/Logger/Logger.hpp"
+	// Logger
+	#include "Engine/Logger/Logger.hpp"
 #endif
 
 // Camera controller
-#include "ProjectA/Camera/Controller/OrthographicCameraController.hpp"
+#include "Engine/Camera/Controller/OrthographicCameraController.hpp"
 
 // ImGui
-#include "ProjectA/ImGui/ImGuiLayer.hpp"
+#include "Engine/ImGui/ImGuiLayer.hpp"
 
 // Loader
-#include "ProjectA/Loader/FileLoader.hpp"
+#include "Engine/Loader/FileLoader.hpp"
 
 // Renderer
-#include "ProjectA/Renderer/2D/Renderer2D.hpp"
-#include "ProjectA/Renderer/Framebuffer.hpp"
-#include "ProjectA/Renderer/IndexBuffer.hpp"
-#include "ProjectA/Renderer/RenderCommand.hpp"
-#include "ProjectA/Renderer/RenderPipeline.hpp"
-#include "ProjectA/Renderer/Renderer.hpp"
-#include "ProjectA/Renderer/ShaderModule.hpp"
-// #include "ProjectA/Renderer/ShaderLibrary.hpp"
-#include "ProjectA/Renderer/VertexBuffer.hpp"
+#include "Engine/Renderer/2D/Renderer2D.hpp"
+#include "Engine/Renderer/Framebuffer.hpp"
+#include "Engine/Renderer/IndexBuffer.hpp"
+#include "Engine/Renderer/RenderCommand.hpp"
+#include "Engine/Renderer/RenderPipeline.hpp"
+#include "Engine/Renderer/Renderer.hpp"
+#include "Engine/Renderer/ShaderModule.hpp"
+#include "Engine/Renderer/VertexBuffer.hpp"

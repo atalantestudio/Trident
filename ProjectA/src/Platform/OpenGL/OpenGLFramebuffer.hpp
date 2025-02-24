@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProjectA/Renderer/Framebuffer.hpp"
+#include "Engine/Renderer/Framebuffer.hpp"
 
 namespace ProjectA {
 	class OpenGLFramebuffer : public Framebuffer {

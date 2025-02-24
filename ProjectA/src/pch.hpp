@@ -26,23 +26,23 @@
 	#undef ERROR
 #endif
 
-#include "ProjectA/base.hpp"
+#include "Engine/base.hpp"
 
 #include "lyah/lyah.hpp"
 
-#include "ProjectA/types.hpp"
+#include "Engine/types.hpp"
 
 // Lyah polyfill: SIMD to scalar vector
-#include "ProjectA/vec_sts.hpp"
+#include "Engine/vec_sts.hpp"
 
 #ifdef BUILD_MODE_DEBUG
-	#include "ProjectA/Logger/Logger.hpp"
+	#include "Engine/Logger/Logger.hpp"
 
 	// TODO: Include ToString methods in Logger.cpp
-	#include "ProjectA/to_string.hpp"
+	#include "Engine/to_string.hpp"
 #endif
 
 #ifdef BUILD_MODE_PROFILE
-	#include "ProjectA/Profile/Profiler.hpp"
-	#include "ProjectA/Profile/Timer.hpp"
+	#include "Engine/Profile/Profiler.hpp"
+	#include "Engine/Profile/Timer.hpp"
 #endif

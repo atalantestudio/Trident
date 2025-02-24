@@ -1,6 +1,6 @@
 #include <imgui/imgui.h>
 
-#include "ProjectA/Renderer/2D/Renderer2D.hpp"
+#include "Engine/Renderer/2D/Renderer2D.hpp"
 
 #include "EditorLayer.hpp"
 
@@ -47,6 +47,8 @@ namespace ProjectA {
 			RenderCommand::clear();
 		}
 
+		Renderer2D::camera = &cameraController.getCamera();
+
 		#if 1
 			static float32 angle = 0.0f;
 
@@ -56,7 +58,7 @@ namespace ProjectA {
 			// TODO: Inverse rotation direction?
 			// Z rotation is clockwise against axis (0, 0, -1).
 			// TODO: Fix black squares on shapes
-			Renderer2D::beginScene(cameraController.getCamera());
+			Renderer2D::beginScene();
 			Renderer2D::drawRotatedQuad({1.0f, 0.0f}, {0.8f, 0.8f}, lyah::radians(45.0f), {0.8f, 0.2f, 0.3f, 1.0f});
 			Renderer2D::drawQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, {0.8f, 0.2f, 0.3f, 1.0f});
 			Renderer2D::drawQuad({0.5f, -0.5f}, {0.5f, 0.75f}, color);
@@ -64,7 +66,7 @@ namespace ProjectA {
 			Renderer2D::drawRotatedQuad({-2.0f, 0.0f, 0.0f}, {1.0f, 1.0f}, angle, checkerboardTexture, 20.0f);
 			Renderer2D::endScene();
 
-			Renderer2D::beginScene(cameraController.getCamera());
+			Renderer2D::beginScene();
 
 			for (float32 y = -5.0f; y < 5.0f; y += 0.5f) {
 				for (float32 x = -5.0f; x < 5.0f; x += 0.5f) {

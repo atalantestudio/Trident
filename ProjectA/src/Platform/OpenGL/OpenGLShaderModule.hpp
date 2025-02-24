@@ -2,9 +2,9 @@
 
 #include <glad/glad.h>
 
-#include "ProjectA/ObjectWrapper.hpp"
-#include "ProjectA/Renderer/ShaderModule.hpp"
-#include "ProjectA/Renderer/ShaderStage.hpp"
+#include "Engine/ObjectWrapper.hpp"
+#include "Engine/Renderer/ShaderModule.hpp"
+#include "Engine/Renderer/ShaderStage.hpp"
 
 namespace ProjectA {
 	class OpenGLShaderModule : public ShaderModule, public ObjectWrapper<GLuint> {

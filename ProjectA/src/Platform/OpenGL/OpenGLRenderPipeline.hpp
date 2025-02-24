@@ -2,9 +2,9 @@
 
 #include <glad/glad.h>
 
-#include "ProjectA/Renderer/IndexBuffer.hpp"
-#include "ProjectA/Renderer/RenderPipeline.hpp"
-#include "ProjectA/Renderer/VertexBuffer.hpp"
+#include "Engine/Renderer/IndexBuffer.hpp"
+#include "Engine/Renderer/RenderPipeline.hpp"
+#include "Engine/Renderer/VertexBuffer.hpp"
 
 namespace ProjectA {
 	class OpenGLRenderPipeline : public RenderPipeline {

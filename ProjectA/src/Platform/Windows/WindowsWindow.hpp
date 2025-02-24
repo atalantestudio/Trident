@@ -4,11 +4,11 @@
 
 #include "Platform/OpenGL/OpenGLContext.hpp"
 
-#include "ProjectA/Event/KeyEvent.hpp"
-#include "ProjectA/Event/MouseEvent.hpp"
-#include "ProjectA/Event/WindowEvent.hpp"
-#include "ProjectA/Renderer/Context.hpp"
-#include "ProjectA/Window.hpp"
+#include "Engine/Event/KeyEvent.hpp"
+#include "Engine/Event/MouseEvent.hpp"
+#include "Engine/Event/WindowEvent.hpp"
+#include "Engine/Renderer/Context.hpp"
+#include "Engine/Window.hpp"
 
 namespace ProjectA {
 	class WindowsWindow : public Window {

@@ -69,22 +69,22 @@ project "ProjectA"
 		runtime "Debug"
 		symbols "on"
 
-		excludes "%{prj.name}/src/%{prj.name}/Profile/**"
+		excludes "%{prj.name}/src/Engine/Profile/**"
 
 	filter "configurations:Profile"
 		defines "BUILD_MODE_PROFILE"
 		runtime "Release"
 		optimize "on"
 
-		excludes "%{prj.name}/src/%{prj.name}/Logger/**"
+		excludes "%{prj.name}/src/Engine/Logger/**"
 
 	filter "configurations:Release"
 		defines "BUILD_MODE_RELEASE"
 		runtime "Release"
 		optimize "on"
 
-		excludes "%{prj.name}/src/%{prj.name}/Logger/**"
-		excludes "%{prj.name}/src/%{prj.name}/Profile/**"
+		excludes "%{prj.name}/src/Engine/Logger/**"
+		excludes "%{prj.name}/src/Engine/Profile/**"
 
 project "Sandbox"
 	location "%{prj.name}"
