@@ -7,17 +7,17 @@
 SandboxLayer::SandboxLayer() : Layer("Sandbox"), cameraController(1280.0f / 720.0f) {}
 
 void SandboxLayer::bind() {
-	PROFILE_SCOPE(__FUNCSIG__);
+	PROFILE_SCOPE(FUNC_SIG);
 
 	checkerboardTexture = ProjectA::Texture2D::create("assets/textures/checkerboard.png");
 }
 
 void SandboxLayer::unbind() {
-	PROFILE_SCOPE(__FUNCSIG__);
+	PROFILE_SCOPE(FUNC_SIG);
 }
 
 void SandboxLayer::update(ProjectA::float32 deltaTime) {
-	PROFILE_SCOPE(__FUNCSIG__);
+	PROFILE_SCOPE(FUNC_SIG);
 
 	cameraController.update(deltaTime);
 
@@ -26,8 +26,8 @@ void SandboxLayer::update(ProjectA::float32 deltaTime) {
 	{
 		PROFILE_SCOPE("Pre-draw");
 
-		ProjectA::RenderCommand::setClearColor({0.1f, 0.1f, 0.1f, 1.0f});
-		ProjectA::RenderCommand::clear();
+		ProjectA::Renderer::getRendererApi()->setClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+		ProjectA::Renderer::getRendererApi()->clear();
 	}
 
 	ProjectA::Renderer2D::camera = &cameraController.getCamera();
@@ -65,7 +65,7 @@ void SandboxLayer::update(ProjectA::float32 deltaTime) {
 }
 
 void SandboxLayer::renderImGui() {
-	PROFILE_SCOPE(__FUNCSIG__);
+	PROFILE_SCOPE(FUNC_SIG);
 
 	ProjectA::Renderer2D::Statistics statistics = ProjectA::Renderer2D::getStatistics();
 

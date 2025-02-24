@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32 size) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glCreateBuffers(1, &id);
 
@@ -16,7 +16,7 @@ namespace ProjectA {
 	}
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(float32* vertices, uint32 size) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glCreateBuffers(1, &id);
 
@@ -26,7 +26,7 @@ namespace ProjectA {
 	}
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glDeleteBuffers(1, &id);
 	}
@@ -46,13 +46,13 @@ namespace ProjectA {
 	}
 
 	void OpenGLVertexBuffer::bind() const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glBindBuffer(GL_ARRAY_BUFFER, id);
 	}
 
 	void OpenGLVertexBuffer::unbind() const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}

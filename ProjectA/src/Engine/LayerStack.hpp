@@ -7,7 +7,7 @@ namespace ProjectA {
 	class LayerStack {
 		private:
 			std::vector<Layer*> layers;
-			unsigned int layerInsertionIndex = 0;
+			uint32 layerInsertionIndex = 0;
 
 		public:
 			LayerStack() = default;

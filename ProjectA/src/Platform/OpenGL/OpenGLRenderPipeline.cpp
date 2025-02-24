@@ -51,14 +51,14 @@ namespace ProjectA {
 	}
 
 	void OpenGLRenderPipeline::bind() const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glBindVertexArray(vertexArrayObject);
 		glUseProgram(programObject);
 	}
 
 	void OpenGLRenderPipeline::unbind() const {		
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glUseProgram(0);
 		glBindVertexArray(0);
@@ -73,7 +73,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLRenderPipeline::addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		ENGINE_ASSERT(vertexBuffer->getLayout().attributes.size(), "Vertex buffer has no layout.");
 
@@ -146,7 +146,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLRenderPipeline::setIndexBuffer(const ref<IndexBuffer>& indexBuffer) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		bind();
 
@@ -156,7 +156,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLRenderPipeline::setUniform(const std::string& name, int32 value) const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLint location = getUniformLocation(name);
 
@@ -164,7 +164,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLRenderPipeline::setUniform(const std::string& name, const int32* value, uint32 count) const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLint location = getUniformLocation(name);
 
@@ -172,7 +172,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLRenderPipeline::setUniform(const std::string& name, float32 value) const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLint location = getUniformLocation(name);
 
@@ -180,7 +180,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLRenderPipeline::setUniform(const std::string& name, const lyah::vec2<float32>& value) const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLint location = getUniformLocation(name);
 
@@ -188,7 +188,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLRenderPipeline::setUniform(const std::string& name, const lyah::vec3<float32>& value) const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLint location = getUniformLocation(name);
 
@@ -196,7 +196,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLRenderPipeline::setUniform(const std::string& name, const lyah::vec4<float32>& value) const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLint location = getUniformLocation(name);
 
@@ -204,7 +204,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLRenderPipeline::setUniform(const std::string& name, const lyah::mat4x4<float32>& value) const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLint location = getUniformLocation(name);
 

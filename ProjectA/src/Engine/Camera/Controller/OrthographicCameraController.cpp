@@ -27,7 +27,7 @@ namespace ProjectA {
 	}
 
 	void OrthographicCameraController::update(float32 deltaTime) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		float32 _position[2] = {position[0], position[1]};
 
@@ -55,7 +55,7 @@ namespace ProjectA {
 	}
 
 	void OrthographicCameraController::onEvent(Event& event) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		EventDispatcher eventDispatcher(event);
 
@@ -64,7 +64,7 @@ namespace ProjectA {
 	}
 
 	bool OrthographicCameraController::onMouseScroll(MouseScrollEvent& event) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		zoomLevel -= event.getOffset()[1] / 2;
 		zoomLevel = std::max(zoomLevel, 0.25f);
@@ -76,7 +76,7 @@ namespace ProjectA {
 	}
 
 	bool OrthographicCameraController::onWindowResize(WindowResizeEvent& event) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		resize({static_cast<float32>(event.getWidth()), static_cast<float32>(event.getHeight())});
 

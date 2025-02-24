@@ -6,7 +6,7 @@ namespace ProjectA {
 	OpenGLShaderModule::OpenGLShaderModule(const ShaderStage stage, const std::string& code) :
 		ObjectWrapper(glCreateShader(shaderStages[static_cast<uint32>(stage)]))
 	{
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLchar* const string = code.c_str();
 
@@ -38,7 +38,7 @@ namespace ProjectA {
 	}
 
 	OpenGLShaderModule::~OpenGLShaderModule() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glDeleteShader(object);
 	}

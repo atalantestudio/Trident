@@ -4,7 +4,7 @@ namespace ProjectA {
 	template<typename T>
 	class ObjectWrapper {
 		public:
-			const T object;
+			T object;
 
 		protected:
 			ObjectWrapper(const T object) : object(object) {}

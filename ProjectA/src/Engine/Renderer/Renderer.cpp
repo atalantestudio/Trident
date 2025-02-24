@@ -1,30 +1,41 @@
 #include "pch.hpp"
 
-#include "Engine/Renderer/RenderCommand.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
+	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::OPENGL;
+
 	const Camera* Renderer::camera = nullptr;
 
-	void Renderer::initialize() {
-		PROFILE_SCOPE(__FUNCSIG__);
+	scope<RendererAPI> Renderer::rendererApi = RendererAPI::create();
 
-		RenderCommand::initialize();
+	void Renderer::initialize() {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		rendererApi->initialize();
 	}
 
 	void Renderer::destroy() {}
 
+	GraphicsAPI Renderer::getGraphicsApi() {
+		return graphicsApi;
+	}
+
+	scope<RendererAPI>& Renderer::getRendererApi() {
+		return rendererApi;
+	}
+
 	void Renderer::submit(const ref<RenderPipeline>& renderPipeline, const mat4x4<float32>& transform) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		renderPipeline->bind();
 		renderPipeline->setUniform("u_viewProjection", camera->getViewProjection());
 		renderPipeline->setUniform("u_transform", transform);
 
-		RenderCommand::drawIndexed(renderPipeline, renderPipeline->getIndexBuffer()->getCount());
+		rendererApi->drawIndexed(renderPipeline, renderPipeline->getIndexBuffer()->getCount());
 	}
 
 	void Renderer::onWindowResize(uint32 width, uint32 height) {
-		RenderCommand::setViewport(0, 0, width, height);
+		rendererApi->setViewport(0, 0, width, height);
 	}
 }

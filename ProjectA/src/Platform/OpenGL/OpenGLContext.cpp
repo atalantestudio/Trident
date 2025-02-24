@@ -7,11 +7,11 @@
 
 namespace ProjectA {
 	OpenGLContext::OpenGLContext(GLFWwindow* window) : window(window) {
-		ENGINE_ASSERT(window, "Window handle is null");
+		ENGINE_ASSERT(window, "Window handle is null.");
 	}
 
 	void OpenGLContext::initialize() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glfwMakeContextCurrent(window);
 
@@ -23,7 +23,7 @@ namespace ProjectA {
 		const GLubyte* gpuRenderer = glGetString(GL_RENDERER);
 		const GLubyte* gpuVersion = glGetString(GL_VERSION);
 
-		ENGINE_INFO("GPU: [] []", gpuVendor, gpuRenderer, gpuVersion);
+		ENGINE_INFO("GPU: [] []", gpuVendor, gpuRenderer);
 		ENGINE_INFO("GPU version: []", gpuVersion);
 
 		/* #ifdef ENABLE_ASSERTS
@@ -36,7 +36,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLContext::swapBuffers() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glfwSwapBuffers(window);
 	}

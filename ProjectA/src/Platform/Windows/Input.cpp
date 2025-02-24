@@ -6,7 +6,7 @@
 #include "Engine/Input.hpp"
 
 namespace ProjectA {
-	bool Input::isKeyPressed(KeyCode keyCode) {
+	bool Input::isKeyPressed(const KeyCode keyCode) {
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
 
 		const int32 keyState = glfwGetKey(window, static_cast<int32>(keyCode));
@@ -14,7 +14,7 @@ namespace ProjectA {
 		return keyState == GLFW_PRESS || keyState == GLFW_REPEAT;
 	}
 
-	bool Input::isMouseButtonPressed(MouseButton button) {
+	bool Input::isMouseButtonPressed(const MouseButton button) {
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
 
 		const int32 buttonState = glfwGetMouseButton(window, static_cast<int32>(button));
@@ -22,7 +22,7 @@ namespace ProjectA {
 		return buttonState == GLFW_PRESS;
 	}
 
-	vec2<float32> Input::getMousePosition() {
+	vec2<float64> Input::getMousePosition() {
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
 
 		float64 x;
@@ -30,6 +30,6 @@ namespace ProjectA {
 
 		glfwGetCursorPos(window, &x, &y);
 
-		return {static_cast<float32>(x), static_cast<float32>(y)};
+		return {x, y};
 	}
 }

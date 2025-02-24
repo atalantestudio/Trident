@@ -12,7 +12,7 @@ namespace ProjectA {
 		height(height),
 		debugPath("")
 	{
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &texture);
 
@@ -29,7 +29,7 @@ namespace ProjectA {
 		format(GL_RGBA),
 		debugPath(path)
 	{
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		stbi_set_flip_vertically_on_load(1);
 
@@ -75,7 +75,7 @@ namespace ProjectA {
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glDeleteTextures(1, &texture);
 	}
@@ -93,7 +93,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLTexture2D::setData(const void* data, uint32 size) const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		// TODO: Store channel count?
 		const uint32 channelCount = format == GL_RGBA ? 4 : 3;
@@ -106,13 +106,13 @@ namespace ProjectA {
 	}
 
 	void OpenGLTexture2D::bind(uint32_t slot) const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glBindTextureUnit(slot, texture);
 	}
 
 	void OpenGLTexture2D::unbind() const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}

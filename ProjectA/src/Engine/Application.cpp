@@ -10,9 +10,9 @@ namespace ProjectA {
 	Application* Application::instance = nullptr;
 
 	Application::Application(const std::string& name) : lastFrameTime(0.0f) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_ASSERT(!instance, "The Application instance already exists.")
+		ENGINE_ASSERT(!instance, "An application instance already exists.")
 
 		instance = this;
 
@@ -20,6 +20,7 @@ namespace ProjectA {
 		window->setEventCallback(BIND(Application::onEvent));
 
 		Renderer::initialize();
+
 		Renderer2D::construct();
 
 		imGuiLayer = new ImGuiLayer();
@@ -28,7 +29,7 @@ namespace ProjectA {
 	}
 
 	Application::~Application() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		Renderer::destroy();
 		Renderer2D::destroy();
@@ -39,7 +40,7 @@ namespace ProjectA {
 	}
 
 	void Application::run() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		while (running) {
 			PROFILE_SCOPE("Run loop");
@@ -73,7 +74,7 @@ namespace ProjectA {
 	}
 
 	void Application::pushLayer(Layer* layer) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		layerStack.pushLayer(layer);
 
@@ -81,7 +82,7 @@ namespace ProjectA {
 	}
 
 	void Application::pushOverlay(Layer* overlay) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		layerStack.pushOverlay(overlay);
 
@@ -93,7 +94,7 @@ namespace ProjectA {
 	}
 
 	void Application::onEvent(Event& event) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		EventDispatcher eventDispatcher(event);
 
@@ -116,7 +117,7 @@ namespace ProjectA {
 	}
 
 	bool Application::onWindowResize(WindowResizeEvent& event) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		if (event.getWidth() == 0 || event.getHeight() == 0) {
 			minimized = true;

@@ -2,7 +2,7 @@
 
 #include "Engine/Loader/FileLoader.hpp"
 #include "Engine/Renderer/2D/Renderer2D.hpp"
-#include "Engine/Renderer/RenderCommand.hpp"
+#include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
 
@@ -44,7 +44,7 @@ namespace ProjectA {
 	static Renderer2DStorage storage;
 
 	void Renderer2D::construct() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		// TODO: Move renderer shader code out of Sandbox
 		const std::string colorTextureVertexShaderCode = FileLoader::load("assets/shaders/ColorTexture.vert.glsl");
@@ -120,7 +120,7 @@ namespace ProjectA {
 	}
 
 	void Renderer2D::beginScene() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		storage.renderPipeline->bind();
 		storage.renderPipeline->setUniform("u_viewProjection", camera->getViewProjection());
@@ -131,7 +131,7 @@ namespace ProjectA {
 	}
 
 	void Renderer2D::endScene() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		if (storage.quadCount == 0) {
 			return;
@@ -145,7 +145,7 @@ namespace ProjectA {
 			storage.textureSlots[slotIndex]->bind(slotIndex);
 		}
 
-		RenderCommand::drawIndexed(storage.renderPipeline, storage.quadCount * 6);
+		Renderer::getRendererApi()->drawIndexed(storage.renderPipeline, storage.quadCount * 6);
 
 		storage.statistics.drawCallCount++;
 	}
@@ -163,7 +163,7 @@ namespace ProjectA {
 	}
 
 	void Renderer2D::drawQuad(const vec3<float32>& position, const vec2<float32>& size, const vec4<float32>& color) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		constexpr uint32 quadVertexCount = 4;
 		constexpr uint32 textureIndex = 0;
@@ -195,7 +195,7 @@ namespace ProjectA {
 	}
 
 	void Renderer2D::drawQuad(const vec3<float32>& position, const vec2<float32>& size, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		constexpr uint32 quadVertexCount = 4;
 
@@ -247,7 +247,7 @@ namespace ProjectA {
 	}
 
 	void Renderer2D::drawQuad(const vec3<float32>& position, const vec2<float32>& size, const ref<Subtexture>& subtexture, float32 tilingFactor, const vec4<float32>& tintColor) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		constexpr uint32 quadVertexCount = 4;
 
@@ -299,7 +299,7 @@ namespace ProjectA {
 	}
 
 	void Renderer2D::drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 angle, const vec4<float32>& color) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		constexpr uint32 quadVertexCount = 4;
 		constexpr uint32 textureIndex = 0;
@@ -332,7 +332,7 @@ namespace ProjectA {
 	}
 
 	void Renderer2D::drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 angle, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		constexpr uint32 quadVertexCount = 4;
 
@@ -385,7 +385,7 @@ namespace ProjectA {
 	}
 
 	void Renderer2D::drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 angle, const ref<Subtexture>& subtexture, float32 tilingFactor, const vec4<float32>& tintColor) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		constexpr uint32 quadVertexCount = 4;
 

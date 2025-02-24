@@ -12,24 +12,6 @@
 
 namespace ProjectA {
 	class WindowsWindow : public Window {
-		private:
-			struct GLFWData {
-				std::string title;
-				uint32 width = 0;
-				uint32 height = 0;
-				bool vSync = false;
-				EventCallback callback;
-			};
-
-		private:
-			GLFWwindow* window;
-			scope<Context> context;
-			GLFWData data;
-
-		private:
-			virtual void initialize(const WindowData& data);
-			virtual void terminate();
-
 		public:
 			WindowsWindow(const WindowData& data);
 
@@ -57,5 +39,25 @@ namespace ProjectA {
 			void setVSyncState(bool state) override;
 
 			void update() override;
+
+		private:
+			struct GLFWData {
+				std::string title;
+				// TODO: Use vec2<int32>
+				int32 width = 0;
+				int32 height = 0;
+				bool vSync = false;
+				EventCallback callback;
+			};
+
+		private:
+			GLFWwindow* window;
+			scope<Context> context;
+			GLFWData data;
+
+		private:
+			virtual void initialize(const WindowData& data);
+
+			virtual void terminate();
 	};
 }

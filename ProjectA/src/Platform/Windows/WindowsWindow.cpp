@@ -24,15 +24,15 @@ namespace ProjectA {
 	}
 
 	void WindowsWindow::setVSyncState(bool state) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
-		glfwSwapInterval(state ? 1 : 0);
+		glfwSwapInterval(static_cast<int32>(state));
 
 		data.vSync = state;
 	}
 
 	void WindowsWindow::initialize(const WindowData& data) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		GLFWData& glfwData = this->data;
 
@@ -58,12 +58,16 @@ namespace ProjectA {
 			PROFILE_SCOPE("glfwCreateWindow");
 
 			#ifdef BUILD_MODE_DEBUG
-				if (Renderer::getGraphicsAPI() == RendererAPI::GraphicsAPI::OpenGL) {
+				if (Renderer::graphicsApi == GraphicsAPI::OPENGL) {
 					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 				}
 			#endif
 
-			window = glfwCreateWindow(static_cast<int32>(glfwData.width), static_cast<int32>(glfwData.height), glfwData.title.c_str(), nullptr, nullptr);
+			if (Renderer::graphicsApi == GraphicsAPI::VULKAN) {
+				glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			}
+
+			window = glfwCreateWindow(glfwData.width, glfwData.height, glfwData.title.c_str(), nullptr, nullptr);
 
 			glfwWindowCount++;
 		}
@@ -75,7 +79,7 @@ namespace ProjectA {
 
 		setVSyncState(true);
 
-		glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height) {
+		glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) {
 			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
 			data.width = width;
 			data.height = height;
@@ -93,12 +97,12 @@ namespace ProjectA {
 			data.callback(event);
 		});
 
-		glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+		glfwSetKeyCallback(window, [](GLFWwindow* window, int32 keyCode, int32 scancode, int32 action, int32 mods) {
 			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
 
 			switch (action) {
 				case GLFW_PRESS: {
-					KeyPressEvent event(static_cast<KeyCode>(key), 0);
+					KeyPressEvent event(static_cast<KeyCode>(keyCode), 0);
 
 					data.callback(event);
 
@@ -106,7 +110,7 @@ namespace ProjectA {
 				}
 
 				case GLFW_RELEASE: {
-					KeyReleaseEvent event(static_cast<KeyCode>(key));
+					KeyReleaseEvent event(static_cast<KeyCode>(keyCode));
 
 					data.callback(event);
 
@@ -114,7 +118,7 @@ namespace ProjectA {
 				}
 
 				case GLFW_REPEAT: {
-					KeyPressEvent event(static_cast<KeyCode>(key), 1);
+					KeyPressEvent event(static_cast<KeyCode>(keyCode), 1);
 
 					data.callback(event);
 
@@ -123,7 +127,7 @@ namespace ProjectA {
 			}
 		});
 
-		glfwSetCharCallback(window, [](GLFWwindow* window, unsigned int keyCode) {
+		glfwSetCharCallback(window, [](GLFWwindow* window, uint32 keyCode) {
 			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
 
 			KeyTypeEvent event(static_cast<KeyCode>(keyCode));
@@ -131,7 +135,7 @@ namespace ProjectA {
 			data.callback(event);
 		});
 
-		glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
+		glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int32 button, int32 action, int32 mods) {
 			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
 
 			switch (action) {
@@ -153,25 +157,25 @@ namespace ProjectA {
 			}
 		});
 
-		glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
-			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
+		glfwSetCursorPosCallback(window, [](GLFWwindow* window, float64 xpos, float64 ypos) {
+			const GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
-			MouseMoveEvent event((float) xpos, (float) ypos);
+			MouseMoveEvent event(static_cast<float32>(xpos), static_cast<float32>(ypos));
 
 			data.callback(event);
 		});
 
-		glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
-			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
+		glfwSetScrollCallback(window, [](GLFWwindow* window, float64 xoffset, float64 yoffset) {
+			const GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
-			MouseScrollEvent event((float) xoffset, (float) yoffset);
+			MouseScrollEvent event(static_cast<float32>(xoffset), static_cast<float32>(yoffset));
 
 			data.callback(event);
 		});
 	}
 
 	void WindowsWindow::terminate() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glfwDestroyWindow(window);
 
@@ -185,7 +189,7 @@ namespace ProjectA {
 	}
 
 	void WindowsWindow::update() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glfwPollEvents();
 

@@ -7,17 +7,17 @@
 
 namespace ProjectA {
 	scope<Context> Context::create(void* window) {
-		switch (Renderer::getGraphicsAPI()) {
-			case RendererAPI::GraphicsAPI::None:
-				ENGINE_ASSERT(false, "Graphics::None is not supported yet.");
+		switch (Renderer::getGraphicsApi()) {
+			case GraphicsAPI::NONE:
+				ENGINE_ASSERT(false, "Graphics::NONE is not supported yet.");
 
 				return nullptr;
 
-			case RendererAPI::GraphicsAPI::OpenGL:
+			case GraphicsAPI::OPENGL:
 				return createScope<OpenGLContext>(static_cast<GLFWwindow*>(window));
 
-			case RendererAPI::GraphicsAPI::Vulkan:
-				ENGINE_ASSERT(false, "Graphics::Vulkan is not supported yet.");
+			case GraphicsAPI::VULKAN:
+				ENGINE_ASSERT(false, "Graphics::VULKAN is not supported yet.");
 
 				return nullptr;
 		}

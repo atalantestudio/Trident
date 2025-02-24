@@ -8,7 +8,7 @@ namespace ProjectA {
 	EditorLayer::EditorLayer() : Layer("Sandbox"), cameraController(1280.0f / 720.0f) {}
 
 	void EditorLayer::bind() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		checkerboardTexture = Texture2D::create("assets/textures/checkerboard.png");
 
@@ -21,11 +21,11 @@ namespace ProjectA {
 	}
 
 	void EditorLayer::unbind() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 	}
 
 	void EditorLayer::update(float32 deltaTime) {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		if (viewportWindowSize[0] > 0.0f && viewportWindowSize[1] > 0.0f && viewportWindowSize != framebuffer->descriptor.size) {
 			framebuffer->resize(viewportWindowSize);
@@ -43,8 +43,8 @@ namespace ProjectA {
 
 			framebuffer->bind();
 
-			RenderCommand::setClearColor({0.1f, 0.1f, 0.1f, 1.0f});
-			RenderCommand::clear();
+			Renderer::getRendererApi()->setClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+			Renderer::getRendererApi()->clear();
 		}
 
 		Renderer2D::camera = &cameraController.getCamera();
@@ -85,7 +85,7 @@ namespace ProjectA {
 	}
 
 	void EditorLayer::renderImGui() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		Renderer2D::Statistics statistics = Renderer2D::getStatistics();
 

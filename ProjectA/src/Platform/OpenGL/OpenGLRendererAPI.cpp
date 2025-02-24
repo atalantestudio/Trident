@@ -5,7 +5,7 @@
 
 namespace ProjectA {
 	void OpenGLRendererAPI::initialize() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		#ifdef BUILD_MODE_DEBUG
 			glEnable(GL_DEBUG_OUTPUT);
@@ -22,22 +22,22 @@ namespace ProjectA {
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	void OpenGLRendererAPI::setViewport(std::int32_t x, std::int32_t y, std::uint32_t width, std::uint32_t height) const {
+	void OpenGLRendererAPI::setViewport(int32 x, int32 y, uint32 width, uint32 height) const {
 		glViewport(x, y, width, height);
 	}
 
-	void OpenGLRendererAPI::setClearColor(const lyah::vec4<float>& color) const {
+	void OpenGLRendererAPI::setClearColor(const vec4<float32>& color) const {
 		glClearColor(color[0], color[1], color[2], color[3]);
 	}
 
 	void OpenGLRendererAPI::clear() const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void OpenGLRendererAPI::drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		if (indexCount == 0) {
 			indexCount = renderPipeline->getIndexBuffer()->getCount();

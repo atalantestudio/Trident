@@ -13,7 +13,7 @@ namespace ProjectA {
 	ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {}
 
 	void ImGuiLayer::bind() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		IMGUI_CHECKVERSION();
 
@@ -41,7 +41,7 @@ namespace ProjectA {
 	}
 
 	void ImGuiLayer::unbind() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
@@ -50,7 +50,7 @@ namespace ProjectA {
 	}
 
 	void ImGuiLayer::begin() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -59,7 +59,7 @@ namespace ProjectA {
 	}
 
 	void ImGuiLayer::end() {
-		PROFILE_SCOPE(__FUNCSIG__);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		ImGuiIO& io = ImGui::GetIO();
 		Window& window = Application::get().getWindow();

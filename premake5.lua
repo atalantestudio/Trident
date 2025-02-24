@@ -13,6 +13,7 @@ workspace "ProjectA"
 	}
 
 outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
+vulkansdk = "C:/VulkanSDK/1.3.296.0" -- TODO: Temporary path
 
 group "Dependencies"
 	include "ProjectA/vendor"
@@ -52,6 +53,11 @@ project "ProjectA"
 		"%{prj.name}/vendor/imgui",
 		"%{prj.name}/vendor/lyah",
 		"%{prj.name}/vendor/stb_image",
+		vulkansdk .. "/Include",
+	}
+
+	libdirs {
+		vulkansdk .. "/Lib",
 	}
 
 	links {
@@ -59,6 +65,7 @@ project "ProjectA"
 		"GLFW",
 		"imgui",
 		"opengl32.lib",
+		"vulkan-1.lib",
 	}
 
 	filter "system:windows"

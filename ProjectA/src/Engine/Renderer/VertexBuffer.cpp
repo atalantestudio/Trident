@@ -6,17 +6,17 @@
 
 namespace ProjectA {
 	ref<VertexBuffer> VertexBuffer::create(uint32 size) {
-		switch (Renderer::getGraphicsAPI()) {
-			case RendererAPI::GraphicsAPI::None:
-				ENGINE_ASSERT(false, "Graphics::None is not supported yet.");
+		switch (Renderer::getGraphicsApi()) {
+			case GraphicsAPI::NONE:
+				ENGINE_ASSERT(false, "Graphics::NONE is not supported yet.");
 
 				return nullptr;
 
-			case RendererAPI::GraphicsAPI::OpenGL:
+			case GraphicsAPI::OPENGL:
 				return createRef<OpenGLVertexBuffer>(size);
 
-			case RendererAPI::GraphicsAPI::Vulkan:
-				ENGINE_ASSERT(false, "Graphics::Vulkan is not supported yet.");
+			case GraphicsAPI::VULKAN:
+				ENGINE_ASSERT(false, "Graphics::VULKAN is not supported yet.");
 
 				return nullptr;
 		}
@@ -25,17 +25,17 @@ namespace ProjectA {
 	}
 
 	ref<VertexBuffer> VertexBuffer::create(float32* vertices, uint32 size) {
-		switch (Renderer::getGraphicsAPI()) {
-			case RendererAPI::GraphicsAPI::None:
-				ENGINE_ASSERT(false, "Graphics::None is not supported yet.");
+		switch (Renderer::getGraphicsApi()) {
+			case GraphicsAPI::NONE:
+				ENGINE_ASSERT(false, "Graphics::NONE is not supported yet.");
 
 				return nullptr;
 
-			case RendererAPI::GraphicsAPI::OpenGL:
+			case GraphicsAPI::OPENGL:
 				return createRef<OpenGLVertexBuffer>(vertices, size);
 
-			case RendererAPI::GraphicsAPI::Vulkan:
-				ENGINE_ASSERT(false, "Graphics::Vulkan is not supported yet.");
+			case GraphicsAPI::VULKAN:
+				ENGINE_ASSERT(false, "Graphics::VULKAN is not supported yet.");
 
 				return nullptr;
 		}

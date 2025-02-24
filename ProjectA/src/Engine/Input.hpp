@@ -9,10 +9,10 @@ namespace ProjectA {
 		public:
 			static scope<Input> create();
 
-			static bool isKeyPressed(KeyCode keyCode);
+			static bool isKeyPressed(const KeyCode keyCode);
 
-			static bool isMouseButtonPressed(MouseButton button);
+			static bool isMouseButtonPressed(const MouseButton button);
 
-			static vec2<float32> getMousePosition();
+			static vec2<float64> getMousePosition();
 	};
 }
