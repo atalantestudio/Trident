@@ -105,7 +105,7 @@ namespace ProjectA {
 		glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	}
 
-	void OpenGLTexture2D::bind(uint32_t slot) const {
+	void OpenGLTexture2D::bind(uint32 slot) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glBindTextureUnit(slot, texture);

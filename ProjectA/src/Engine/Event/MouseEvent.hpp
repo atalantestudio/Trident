@@ -50,12 +50,12 @@ namespace ProjectA {
 
 	class MouseMoveEvent : public Event {
 		private:
-			lyah::vec2<float32> position;
+			vec2<float32> position;
 
 		public:
 			MouseMoveEvent(float32 x, float32 y) : position(x, y) {}
 
-			const lyah::vec2<float32>& getPosition() const {
+			const vec2<float32>& getPosition() const {
 				return position;
 			}
 
@@ -73,12 +73,12 @@ namespace ProjectA {
 
 	class MouseScrollEvent : public Event {
 		private:
-			lyah::vec2<float32> offset;
+			vec2<float32> offset;
 
 		public:
 			MouseScrollEvent(float32 xOffset, float32 yOffset) : offset(xOffset, yOffset) {}
 
-			const lyah::vec2<float>& getOffset() const {
+			const vec2<float32>& getOffset() const {
 				return offset;
 			}
 

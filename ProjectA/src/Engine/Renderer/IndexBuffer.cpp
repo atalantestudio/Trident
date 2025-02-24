@@ -12,10 +12,8 @@ namespace ProjectA {
 				ENGINE_ASSERT(false, "Graphics::NONE is not supported yet.");
 
 				return nullptr;
-
 			case GraphicsAPI::OPENGL:
 				return createRef<OpenGLIndexBuffer>(indices, count);
-
 			case GraphicsAPI::VULKAN:
 				ENGINE_ASSERT(false, "Graphics::VULKAN is not supported yet.");
 

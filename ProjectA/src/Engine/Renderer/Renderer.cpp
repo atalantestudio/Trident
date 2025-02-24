@@ -13,6 +13,21 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		rendererApi->initialize();
+
+		switch (graphicsApi) {
+			case GraphicsAPI::NONE:
+				ENGINE_WARN("No GPU backend selected.");
+
+				break;
+			case GraphicsAPI::OPENGL:
+				ENGINE_INFO("Using OpenGL backend.");
+
+				break;
+			case GraphicsAPI::VULKAN:
+				ENGINE_INFO("Using Vulkan backend.");
+
+				break;
+		}
 	}
 
 	void Renderer::destroy() {}
@@ -29,7 +44,8 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		renderPipeline->bind();
-		renderPipeline->setUniform("u_viewProjection", camera->getViewProjection());
+		// TODO: Rename to "u_projectionView"
+		renderPipeline->setUniform("u_viewProjection", camera->getProjectionView());
 		renderPipeline->setUniform("u_transform", transform);
 
 		rendererApi->drawIndexed(renderPipeline, renderPipeline->getIndexBuffer()->getCount());

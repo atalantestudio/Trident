@@ -12,10 +12,8 @@ namespace ProjectA {
 				ENGINE_ASSERT(false, "Graphics::NONE is not supported yet.");
 
 				return nullptr;
-
 			case GraphicsAPI::OPENGL:
 				return createRef<OpenGLTexture2D>(static_cast<GLsizei>(width), static_cast<GLsizei>(height));
-
 			case GraphicsAPI::VULKAN:
 				ENGINE_ASSERT(false, "Graphics::VULKAN is not supported yet.");
 
@@ -31,10 +29,8 @@ namespace ProjectA {
 				ENGINE_ASSERT(false, "Graphics::NONE is not supported yet.");
 
 				return nullptr;
-
 			case GraphicsAPI::OPENGL:
 				return createRef<OpenGLTexture2D>(path);
-
 			case GraphicsAPI::VULKAN:
 				ENGINE_ASSERT(false, "Graphics::VULKAN is not supported yet.");
 

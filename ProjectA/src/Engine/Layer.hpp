@@ -21,7 +21,7 @@ namespace ProjectA {
 			virtual void bind() {}
 			virtual void unbind() {}
 
-			virtual void update(float deltaTime) {}
+			virtual void update(float32 deltaTime) {}
 
 			/// There is not a dedicated ImGui layer. Every layer can have its own ImGui window.
 			virtual void renderImGui() {}

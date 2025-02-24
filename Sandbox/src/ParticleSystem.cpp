@@ -32,12 +32,12 @@ void ParticleSystem::render(const ProjectA::OrthographicCamera& camera) {
 		}
 
 		const ProjectA::float32 remainingLife = particle.remainingLife / particle.lifetime;
-		const lyah::vec4<ProjectA::float32> color = lyah::lerp(particle.endColor, particle.startColor, remainingLife);
+		const ProjectA::vec4<ProjectA::float32> color = lyah::lerp(particle.endColor, particle.startColor, remainingLife);
 
 		// TODO [LYAH]: Scalar linear interpolation
 		const ProjectA::float32 size = (1 - remainingLife) * particle.endSize + remainingLife * particle.startSize;
 
-		const lyah::vec3<ProjectA::float32> position = {particle.position[0], particle.position[1], -0.2f};
+		const ProjectA::vec3<ProjectA::float32> position = {particle.position[0], particle.position[1], -0.2f};
 
 		ProjectA::Renderer2D::drawRotatedQuad(position, {size, size}, particle.rotation, color);
 	}

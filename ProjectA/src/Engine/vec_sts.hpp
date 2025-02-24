@@ -10,12 +10,12 @@ namespace ProjectA {
 		vec_sts() = default;
 
 		template<std::size_t C>
-		vec_sts(lyah::vec<C, float32> a) {
+		vec_sts(vec<C, float32> a) {
 			_mm_store_ps(m, a.m);
 		}
 
 		template<std::size_t C>
-		vec_sts& operator =(lyah::vec<C, float32> a) {
+		vec_sts& operator =(vec<C, float32> a) {
 			_mm_store_ps(m, a.m);
 
 			return *this;

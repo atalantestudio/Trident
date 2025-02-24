@@ -123,7 +123,8 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		storage.renderPipeline->bind();
-		storage.renderPipeline->setUniform("u_viewProjection", camera->getViewProjection());
+		// TODO: Rename to "u_projectionView"
+		storage.renderPipeline->setUniform("u_viewProjection", camera->getProjectionView());
 
 		storage.quadCount = 0;
 		storage.vertexBufferPointer = storage.vertexBufferOrigin;

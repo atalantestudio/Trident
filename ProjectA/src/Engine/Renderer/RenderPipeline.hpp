@@ -33,9 +33,9 @@ namespace ProjectA {
 			virtual void setUniform(const std::string& name, int32 value) const = 0;
 			virtual void setUniform(const std::string& name, const int32* value, uint32 count) const = 0;
 			virtual void setUniform(const std::string& name, float32 value) const = 0;
-			virtual void setUniform(const std::string& name, const lyah::vec2<float32>& value) const = 0;
-			virtual void setUniform(const std::string& name, const lyah::vec3<float32>& value) const = 0;
-			virtual void setUniform(const std::string& name, const lyah::vec4<float32>& value) const = 0;
-			virtual void setUniform(const std::string& name, const lyah::mat4x4<float32>& value) const = 0;
+			virtual void setUniform(const std::string& name, const vec2<float32>& value) const = 0;
+			virtual void setUniform(const std::string& name, const vec3<float32>& value) const = 0;
+			virtual void setUniform(const std::string& name, const vec4<float32>& value) const = 0;
+			virtual void setUniform(const std::string& name, const mat4x4<float32>& value) const = 0;
 	};
 }

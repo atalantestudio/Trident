@@ -5,14 +5,14 @@
 namespace ProjectA {
 	class OpenGLIndexBuffer : public IndexBuffer {
 		private:
-			uint32_t count;
+			uint32 count;
 
 		public:
 			OpenGLIndexBuffer(const uint32* indices, uint32 count);
 
 			virtual ~OpenGLIndexBuffer();
 
-			virtual uint32_t getCount() const override;
+			virtual uint32 getCount() const override;
 
 			virtual void bind() const override;
 

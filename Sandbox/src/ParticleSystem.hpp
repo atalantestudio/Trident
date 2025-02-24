@@ -15,10 +15,10 @@ class ParticleSystem {
 
 	private:
 		struct Particle {
-			lyah::vec2<ProjectA::float32> position;
-			lyah::vec2<ProjectA::float32> linearVelocity;
-			lyah::vec4<ProjectA::float32> startColor;
-			lyah::vec4<ProjectA::float32> endColor;
+			ProjectA::vec2<ProjectA::float32> position;
+			ProjectA::vec2<ProjectA::float32> linearVelocity;
+			ProjectA::vec4<ProjectA::float32> startColor;
+			ProjectA::vec4<ProjectA::float32> endColor;
 			ProjectA::float32 rotation = 0.0f;
 			ProjectA::float32 startSize;
 			ProjectA::float32 endSize;

@@ -22,7 +22,7 @@ namespace ProjectA {
 		glDeleteBuffers(1, &id);
 	}
 
-	uint32_t OpenGLIndexBuffer::getCount() const {
+	uint32 OpenGLIndexBuffer::getCount() const {
 		return count;
 	}
 

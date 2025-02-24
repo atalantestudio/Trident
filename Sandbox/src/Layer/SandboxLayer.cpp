@@ -53,9 +53,9 @@ void SandboxLayer::update(ProjectA::float32 deltaTime) {
 
 	for (ProjectA::float32 y = -5.0f; y < 5.0f; y += 0.5f) {
 		for (ProjectA::float32 x = -5.0f; x < 5.0f; x += 0.5f) {
-			lyah::vec2<ProjectA::float32> position = {x, y};
-			lyah::vec2<ProjectA::float32> size = {0.45f, 0.45f};
-			lyah::vec4<ProjectA::float32> color = {(x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f};
+			ProjectA::vec2<ProjectA::float32> position = {x, y};
+			ProjectA::vec2<ProjectA::float32> size = {0.45f, 0.45f};
+			ProjectA::vec4<ProjectA::float32> color = {(x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f};
 
 			ProjectA::Renderer2D::drawQuad(position, size, color);
 		}

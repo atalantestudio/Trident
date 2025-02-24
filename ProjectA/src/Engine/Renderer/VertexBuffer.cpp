@@ -11,10 +11,8 @@ namespace ProjectA {
 				ENGINE_ASSERT(false, "Graphics::NONE is not supported yet.");
 
 				return nullptr;
-
 			case GraphicsAPI::OPENGL:
 				return createRef<OpenGLVertexBuffer>(size);
-
 			case GraphicsAPI::VULKAN:
 				ENGINE_ASSERT(false, "Graphics::VULKAN is not supported yet.");
 
@@ -30,10 +28,8 @@ namespace ProjectA {
 				ENGINE_ASSERT(false, "Graphics::NONE is not supported yet.");
 
 				return nullptr;
-
 			case GraphicsAPI::OPENGL:
 				return createRef<OpenGLVertexBuffer>(vertices, size);
-
 			case GraphicsAPI::VULKAN:
 				ENGINE_ASSERT(false, "Graphics::VULKAN is not supported yet.");
 

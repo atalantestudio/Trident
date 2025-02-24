@@ -19,7 +19,7 @@ namespace ProjectA {
 
 			virtual void setData(const void* data, uint32 size) const override;
 
-			virtual void bind(uint32_t slot) const override;
+			virtual void bind(uint32 slot) const override;
 			virtual void unbind() const override;
 
 			virtual bool operator ==(const Texture& other) const override;

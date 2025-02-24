@@ -179,7 +179,7 @@ namespace ProjectA {
 		glUniform1f(location, value);
 	}
 
-	void OpenGLRenderPipeline::setUniform(const std::string& name, const lyah::vec2<float32>& value) const {
+	void OpenGLRenderPipeline::setUniform(const std::string& name, const vec2<float32>& value) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLint location = getUniformLocation(name);
@@ -187,7 +187,7 @@ namespace ProjectA {
 		glUniform2f(location, value[0], value[1]);
 	}
 
-	void OpenGLRenderPipeline::setUniform(const std::string& name, const lyah::vec3<float32>& value) const {
+	void OpenGLRenderPipeline::setUniform(const std::string& name, const vec3<float32>& value) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLint location = getUniformLocation(name);
@@ -195,7 +195,7 @@ namespace ProjectA {
 		glUniform3f(location, value[0], value[1], value[2]);
 	}
 
-	void OpenGLRenderPipeline::setUniform(const std::string& name, const lyah::vec4<float32>& value) const {
+	void OpenGLRenderPipeline::setUniform(const std::string& name, const vec4<float32>& value) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLint location = getUniformLocation(name);
@@ -203,7 +203,7 @@ namespace ProjectA {
 		glUniform4f(location, value[0], value[1], value[2], value[3]);
 	}
 
-	void OpenGLRenderPipeline::setUniform(const std::string& name, const lyah::mat4x4<float32>& value) const {
+	void OpenGLRenderPipeline::setUniform(const std::string& name, const mat4x4<float32>& value) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLint location = getUniformLocation(name);

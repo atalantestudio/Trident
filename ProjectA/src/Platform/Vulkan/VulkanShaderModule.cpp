@@ -11,7 +11,7 @@ namespace ProjectA {
 		shaderModuleCreateInfo.pNext = nullptr;
 		shaderModuleCreateInfo.flags = 0;
 		shaderModuleCreateInfo.codeSize = code.size();
-		shaderModuleCreateInfo.pCode = reinterpret_cast<const std::uint32_t*>(code.c_str());
+		shaderModuleCreateInfo.pCode = reinterpret_cast<const uint32*>(code.c_str());
 
 		if (vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, &object) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create shader module.");

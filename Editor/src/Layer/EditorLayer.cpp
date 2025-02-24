@@ -70,9 +70,9 @@ namespace ProjectA {
 
 			for (float32 y = -5.0f; y < 5.0f; y += 0.5f) {
 				for (float32 x = -5.0f; x < 5.0f; x += 0.5f) {
-					lyah::vec2<float32> position = {x, y};
-					lyah::vec2<float32> size = {0.45f, 0.45f};
-					lyah::vec4<float32> color = {(x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f};
+					vec2<float32> position = {x, y};
+					vec2<float32> size = {0.45f, 0.45f};
+					vec4<float32> color = {(x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f};
 
 					Renderer2D::drawQuad(position, size, color);
 				}
