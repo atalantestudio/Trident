@@ -7,12 +7,10 @@ namespace ProjectA {
 
 	const Camera* Renderer::camera = nullptr;
 
-	scope<RendererAPI> Renderer::rendererApi = RendererAPI::create();
+	scope<RendererAPI> Renderer::rendererApi = nullptr;
 
 	void Renderer::initialize() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		rendererApi->initialize();
 
 		switch (graphicsApi) {
 			case GraphicsAPI::NONE:
@@ -28,6 +26,8 @@ namespace ProjectA {
 
 				break;
 		}
+
+		rendererApi = RendererAPI::create();
 	}
 
 	void Renderer::destroy() {}

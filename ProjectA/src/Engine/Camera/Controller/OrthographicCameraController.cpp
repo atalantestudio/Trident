@@ -10,7 +10,7 @@ namespace ProjectA {
 		position(0, 0, 0),
 		speed(zoomLevel),
 		rotation(0),
-		rotationSpeed(90),
+		rotationSpeed(1),
 		camera(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1),
 		bounds(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel) {}
 

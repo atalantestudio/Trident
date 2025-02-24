@@ -6,14 +6,12 @@ struct GLFWwindow;
 
 namespace ProjectA {
 	class OpenGLContext : public Context {
-		private:
-			GLFWwindow* window;
-
 		public:
 			OpenGLContext(GLFWwindow* window);
 
-			void initialize() override;
+			void swapBuffers() const override;
 
-			void swapBuffers() override;
+		private:
+			GLFWwindow* window;
 	};
 }

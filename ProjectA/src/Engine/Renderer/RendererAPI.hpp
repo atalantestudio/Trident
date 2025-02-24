@@ -9,8 +9,6 @@ namespace ProjectA {
 
 			virtual ~RendererAPI() = default;
 
-			virtual void initialize() = 0;
-
 			virtual void setViewport(int32 x, int32, uint32 width, uint32 height) const = 0;
 
 			virtual void setClearColor(const vec4<float32>& color) const = 0;

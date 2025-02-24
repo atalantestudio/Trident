@@ -5,6 +5,8 @@
 #include <functional>
 #include <sstream>
 
+#include "Engine/base.hpp"
+
 #ifdef BUILD_MODE_DEBUG
 	#include <chrono>
 	#include <iomanip>
@@ -20,13 +22,13 @@
 	#include <Windows.h>
 
 	#undef assert
+	#undef far
 	#undef max
 	#undef min
+	#undef near
 	#undef DELETE
 	#undef ERROR
 #endif
-
-#include "Engine/base.hpp"
 
 #include "lyah/lyah.hpp"
 

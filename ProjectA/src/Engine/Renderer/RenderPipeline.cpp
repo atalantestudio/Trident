@@ -9,13 +9,13 @@ namespace ProjectA {
 	ref<RenderPipeline> RenderPipeline::create(const RenderPipelineDescriptor& descriptor) {
 		switch (Renderer::getGraphicsApi()) {
 			case GraphicsAPI::NONE:
-				ENGINE_ASSERT(false, "Graphics::NONE is not supported yet.");
+				ENGINE_ASSERT(false, "NONE is not supported yet.");
 
 				return nullptr;
 			case GraphicsAPI::OPENGL:
 				return createRef<OpenGLRenderPipeline>(descriptor);
 			case GraphicsAPI::VULKAN:
-				ENGINE_ASSERT(false, "Graphics::VULKAN is not supported yet.");
+				ENGINE_ASSERT(false, "VULKAN is not supported yet.");
 
 				return nullptr;
 		}

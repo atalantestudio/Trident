@@ -4,8 +4,10 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
+#include <vulkan/vulkan.h>
+
 namespace ProjectA {
-	static std::uint8_t glfwWindowCount = 0;
+	static uint8 glfwWindowCount = 0;
 
 	static void glfwErrorCallback(int error, const char* description) {
 		ENGINE_ERROR("GLFW error ([]): []", error, description);
@@ -26,7 +28,12 @@ namespace ProjectA {
 	void WindowsWindow::setVSyncState(bool state) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		glfwSwapInterval(static_cast<int32>(state));
+		if (Renderer::graphicsApi == GraphicsAPI::OPENGL) {
+			glfwSwapInterval(static_cast<int32>(state));
+		}
+		else if (Renderer::graphicsApi == GraphicsAPI::VULKAN) {
+			ENGINE_WARN("No support for swap interval with a Vulkan context.");
+		}
 
 		data.vSync = state;
 	}
@@ -44,26 +51,31 @@ namespace ProjectA {
 			int32 success;
 
 			{
-				PROFILE_SCOPE("glfwInit");
+				PROFILE_SCOPE("Initialize GLFW");
 
 				success = glfwInit();
 			}
 
-			ENGINE_ASSERT(success, "Could not initialize GLFW");
+			ENGINE_ASSERT(success, "Failed to initialize GLFW.");
 
 			glfwSetErrorCallback(glfwErrorCallback);
 		}
 
 		{
-			PROFILE_SCOPE("glfwCreateWindow");
+			PROFILE_SCOPE("Create GLFW window");
 
-			#ifdef BUILD_MODE_DEBUG
-				if (Renderer::graphicsApi == GraphicsAPI::OPENGL) {
+			if (Renderer::graphicsApi == GraphicsAPI::OPENGL) {
+				// Request OpenGL >= 3.3.
+				glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+				glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);				
+
+				#ifdef BUILD_MODE_DEBUG
 					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-				}
-			#endif
-
-			if (Renderer::graphicsApi == GraphicsAPI::VULKAN) {
+				#else
+					glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+				#endif
+			}
+			else if (Renderer::graphicsApi == GraphicsAPI::VULKAN) {
 				glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			}
 
@@ -73,14 +85,14 @@ namespace ProjectA {
 		}
 
 		context = Context::create(window);
-		context->initialize();
 
 		glfwSetWindowUserPointer(window, &glfwData);
 
 		setVSyncState(true);
 
 		glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) {
-			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
+			GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
+
 			data.width = width;
 			data.height = height;
 
@@ -90,7 +102,7 @@ namespace ProjectA {
 		});
 
 		glfwSetWindowCloseCallback(window, [](GLFWwindow* window) {
-			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
+			const GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			WindowCloseEvent event;
 
@@ -98,7 +110,7 @@ namespace ProjectA {
 		});
 
 		glfwSetKeyCallback(window, [](GLFWwindow* window, int32 keyCode, int32 scancode, int32 action, int32 mods) {
-			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
+			const GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			switch (action) {
 				case GLFW_PRESS: {
@@ -128,7 +140,7 @@ namespace ProjectA {
 		});
 
 		glfwSetCharCallback(window, [](GLFWwindow* window, uint32 keyCode) {
-			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
+			const GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			KeyTypeEvent event(static_cast<KeyCode>(keyCode));
 
@@ -136,7 +148,7 @@ namespace ProjectA {
 		});
 
 		glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int32 button, int32 action, int32 mods) {
-			GLFWData& data = *(GLFWData*) glfwGetWindowUserPointer(window);
+			const GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			switch (action) {
 				case GLFW_PRESS: {
@@ -182,7 +194,7 @@ namespace ProjectA {
 		glfwWindowCount--;
 
 		if (glfwWindowCount == 0) {
-			ENGINE_INFO("Terminating GLFW.");
+			ENGINE_TRACE("Terminating GLFW...");
 
 			glfwTerminate();
 		}

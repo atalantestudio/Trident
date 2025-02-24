@@ -27,7 +27,7 @@
 	#define CLIENT_INFO(...) ProjectA::Logger::clientLogger->info(__VA_ARGS__)
 	#define CLIENT_WARN(...) ProjectA::Logger::clientLogger->warn(__VA_ARGS__)
 	#define CLIENT_ERROR(...) ProjectA::Logger::clientLogger->error(__VA_ARGS__)
-	#define CLIENT_FATAL(...) ProjectA::Logger::clientLogger->fatal(__VA_ARGS__
+	#define CLIENT_FATAL(...) ProjectA::Logger::clientLogger->fatal(__VA_ARGS__)
 
 	#if defined(PLATFORM_WINDOWS)
 		#define DEBUGBREAK() __debugbreak()
@@ -52,6 +52,8 @@
 			DEBUGBREAK(); \
 		} \
 	}
+
+	#define DEBUG_ENABLE_VALIDATION_LAYERS
 #else
 	#define ENGINE_TRACE(...)
 	#define ENGINE_DEBUG(...)

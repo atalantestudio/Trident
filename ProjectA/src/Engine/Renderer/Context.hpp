@@ -8,8 +8,6 @@ namespace ProjectA {
 		public:
 			virtual ~Context() = default;
 
-			virtual void initialize() = 0;
-
-			virtual void swapBuffers() = 0;
+			virtual void swapBuffers() const = 0;
 	};
 }

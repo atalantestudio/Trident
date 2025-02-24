@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class OpenGLRendererAPI : public RendererAPI {
 		public:
-			virtual void initialize() override;
+			OpenGLRendererAPI();
 
 			virtual void setViewport(int32 x, int32, uint32 width, uint32 height) const override;
 

@@ -4,22 +4,19 @@
 #include "Platform/OpenGL/OpenGLRenderPipeline.hpp"
 
 namespace ProjectA {
-	void OpenGLRendererAPI::initialize() {
+	OpenGLRendererAPI::OpenGLRendererAPI() {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		#ifdef BUILD_MODE_DEBUG
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-
 			glDebugMessageCallback(debugMessageCallback, nullptr);
-
 			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
 		#endif
 
 		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 		glEnable(GL_DEPTH_TEST);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	void OpenGLRendererAPI::setViewport(int32 x, int32 y, uint32 width, uint32 height) const {
@@ -55,13 +52,21 @@ namespace ProjectA {
 		void OpenGLRendererAPI::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 			switch (severity) {
 				case GL_DEBUG_SEVERITY_NOTIFICATION:
-					return ENGINE_INFO("GL: [] (source: [], type: [], id: [])", message, source, type, id);
+					ENGINE_INFO("GL: [] (source: [], type: [], id: [])", message, source, type, id);
+
+					break;
 				case GL_DEBUG_SEVERITY_LOW:
-					return ENGINE_WARN("GL: [] (source: [], type: [], id: [])", message, source, type, id);
+					ENGINE_WARN("GL: [] (source: [], type: [], id: [])", message, source, type, id);
+
+					break;
 				case GL_DEBUG_SEVERITY_MEDIUM:
-					return ENGINE_ERROR("GL: [] (source: [], type: [], id: [])", message, source, type, id);
+					ENGINE_ERROR("GL: [] (source: [], type: [], id: [])", message, source, type, id);
+
+					break;
 				case GL_DEBUG_SEVERITY_HIGH:
-					return ENGINE_ERROR("GL: [] (source: [], type: [], id: [])", message, source, type, id);
+					ENGINE_ERROR("GL: [] (source: [], type: [], id: [])", message, source, type, id);
+
+					break;
 			}
 		}
 	#endif

@@ -17,9 +17,9 @@ namespace ProjectA {
 	void OrthographicCamera::updateView(const lyah::vec3<float32>& position, float32 rotation) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		// TODO [LYAH]: Fix translation matrix: right-handed to left-handed
-		mat4x4<float32> transform = lyah::transpose(mat4x4<float32>::translation(position));
-		transform *= mat4x4<float32>::rotation({0.0f, 0.0f, 1.0f}, lyah::radians(rotation));
+		// TODO: Remove transpose call
+		mat4x4<float32> transform = mat4x4<float32>::rotation({0.0f, 0.0f, 1.0f}, rotation);
+		transform *= lyah::transpose(mat4x4<float32>::translation(position));
 
 		view = lyah::inverse(transform);
 		projectionView = projection * view;

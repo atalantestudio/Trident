@@ -6,21 +6,26 @@
 #include "Engine/Renderer/2D/Renderer2D.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
+
 namespace ProjectA {
 	Application* Application::instance = nullptr;
 
 	Application::Application(const std::string& name) : lastFrameTime(0.0f) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_ASSERT(!instance, "An application instance already exists.")
+		ENGINE_ASSERT(!instance, "An application instance already exists.");
 
 		instance = this;
 
+		// Initialize GLFW and create window.
 		window = Window::create(WindowData(name));
+
 		window->setEventCallback(BIND(Application::onEvent));
 
+		// Initialize graphics API.
 		Renderer::initialize();
 
+		// Initialize 2D renderer.
 		Renderer2D::construct();
 
 		imGuiLayer = new ImGuiLayer();
