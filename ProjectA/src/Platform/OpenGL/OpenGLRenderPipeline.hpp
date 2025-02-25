@@ -2,9 +2,9 @@
 
 #include <glad/glad.h>
 
-#include "Engine/Renderer/IndexBuffer.hpp"
+#include "Engine/Renderer/Buffer/IndexBuffer.hpp"
+#include "Engine/Renderer/Buffer/VertexBuffer.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
-#include "Engine/Renderer/VertexBuffer.hpp"
 
 namespace ProjectA {
 	class OpenGLRenderPipeline : public RenderPipeline {
@@ -21,24 +21,24 @@ namespace ProjectA {
 			~OpenGLRenderPipeline();
 
 			// TODO: Remove
-			virtual void bind() const override;
-			virtual void unbind() const override;
+			void bind() const override;
+			void unbind() const override;
 
-			virtual const std::vector<ref<VertexBuffer>>& getVertexBuffers() const override;
+			const std::vector<ref<VertexBuffer>>& getVertexBuffers() const override;
 
-			virtual const ref<IndexBuffer>& getIndexBuffer() const override;
+			const ref<IndexBuffer>& getIndexBuffer() const override;
 
-			virtual void addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) override;
+			void addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) override;
 
-			virtual void setIndexBuffer(const ref<IndexBuffer>& indexBuffer) override;
+			void setIndexBuffer(const ref<IndexBuffer>& indexBuffer) override;
 
-			virtual void setUniform(const std::string& name, int32 value) const override;
-			virtual void setUniform(const std::string& name, const int32* value, uint32 count) const override;
-			virtual void setUniform(const std::string& name, float32 value) const override;
-			virtual void setUniform(const std::string& name, const vec2<float32>& value) const override;
-			virtual void setUniform(const std::string& name, const vec3<float32>& value) const override;
-			virtual void setUniform(const std::string& name, const vec4<float32>& value) const override;
-			virtual void setUniform(const std::string& name, const mat4x4<float32>& value) const override;
+			void setUniform(const std::string& name, int32 value) const override;
+			void setUniform(const std::string& name, const int32* value, uint32 count) const override;
+			void setUniform(const std::string& name, float32 value) const override;
+			void setUniform(const std::string& name, const vec2<float32>& value) const override;
+			void setUniform(const std::string& name, const vec3<float32>& value) const override;
+			void setUniform(const std::string& name, const vec4<float32>& value) const override;
+			void setUniform(const std::string& name, const mat4x4<float32>& value) const override;
 
 		private:
 			static constexpr GLenum primitiveTopologies[5] = {

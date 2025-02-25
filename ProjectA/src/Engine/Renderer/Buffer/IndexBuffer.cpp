@@ -2,7 +2,7 @@
 
 #include "Platform/OpenGL/OpenGLIndexBuffer.hpp"
 
-#include "Engine/Renderer/IndexBuffer.hpp"
+#include "Engine/Renderer/Buffer/IndexBuffer.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {

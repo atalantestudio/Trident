@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Engine/Renderer/Attribute.hpp"
-
 // TODO: Remove
 #include "Platform/OpenGL/Attribute.hpp"
+
+#include "Engine/Renderer/Buffer/Attribute.hpp"
 
 namespace ProjectA {
 	class BufferAttribute {

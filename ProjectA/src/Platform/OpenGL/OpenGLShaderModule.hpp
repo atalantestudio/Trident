@@ -7,7 +7,7 @@
 #include "Engine/Renderer/ShaderStage.hpp"
 
 namespace ProjectA {
-	class OpenGLShaderModule : public ObjectWrapper<GLuint>, public ShaderModule {
+	class OpenGLShaderModule : public ShaderModule, public ObjectWrapper<GLuint> {
 		public:
 			// Since there is no virtual constructor, each subclass of ShaderModule will have its own.
 			// Thus the constructors should be as close as possible to the actual API that's being used

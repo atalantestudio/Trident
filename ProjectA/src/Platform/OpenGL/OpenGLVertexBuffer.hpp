@@ -1,26 +1,26 @@
 #pragma once
 
-#include "Engine/Renderer/VertexBuffer.hpp"
+#include "Engine/Renderer/Buffer/VertexBuffer.hpp"
 
 namespace ProjectA {
 	class OpenGLVertexBuffer : public VertexBuffer {
-		private:
-			BufferLayout layout;
-
 		public:
 			OpenGLVertexBuffer(uint32 size);
 			OpenGLVertexBuffer(float32* vertices, uint32 size);
 
-			virtual ~OpenGLVertexBuffer();
+			~OpenGLVertexBuffer();
 
-			virtual const BufferLayout& getLayout() const override;
+			const BufferLayout& getLayout() const override;
 
-			virtual void setLayout(const BufferLayout& layout) override;
+			void setLayout(const BufferLayout& layout) override;
 
-			virtual void copyData(const void* data, uint32 size) override;
+			void copyData(const void* data, uint32 size) override;
 
-			virtual void bind() const override;
+			// TODO: Remove
+			void bind() const override;
+			void unbind() const override;
 
-			virtual void unbind() const override;
+		private:
+			BufferLayout layout;
 	};
 }

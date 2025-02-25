@@ -1,8 +1,9 @@
 #include "pch.hpp"
 
 #include "Platform/OpenGL/OpenGLVertexBuffer.hpp"
+
+#include "Engine/Renderer/Buffer/VertexBuffer.hpp"
 #include "Engine/Renderer/Renderer.hpp"
-#include "Engine/Renderer/VertexBuffer.hpp"
 
 namespace ProjectA {
 	ref<VertexBuffer> VertexBuffer::create(uint32 size) {

@@ -14,14 +14,14 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+		glCreateTextures(GL_TEXTURE_2D, 1, &object);
 
-		glTextureStorage2D(texture, 1, internalFormat, width, height);
+		glTextureStorage2D(object, 1, internalFormat, width, height);
 
-		glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTextureParameteri(object, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(object, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameteri(object, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(object, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& path) :
@@ -60,16 +60,16 @@ namespace ProjectA {
 
 		ENGINE_ASSERT((channelCount == 3 || channelCount == 4), "Texture format not supported");
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+		glCreateTextures(GL_TEXTURE_2D, 1, &object);
 
-		glTextureStorage2D(texture, 1, internalFormat, width, height);
+		glTextureStorage2D(object, 1, internalFormat, width, height);
 
-		glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTextureParameteri(object, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(object, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameteri(object, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(object, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
+		glTextureSubImage2D(object, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 
 		stbi_image_free(data);
 	}
@@ -77,11 +77,11 @@ namespace ProjectA {
 	OpenGLTexture2D::~OpenGLTexture2D() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		glDeleteTextures(1, &texture);
+		glDeleteTextures(1, &object);
 	}
 
 	uint32 OpenGLTexture2D::getId() const {
-		return texture;
+		return object;
 	}
 
 	uint32 OpenGLTexture2D::getWidth() const {
@@ -100,15 +100,15 @@ namespace ProjectA {
 
 		const bool ok = size == (width * height * channelCount);
 
-		ENGINE_ASSERT(ok, "Data must be entire texture");
+		ENGINE_ASSERT(ok, "Data must be entire texture.");
 
-		glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
+		glTextureSubImage2D(object, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	}
 
 	void OpenGLTexture2D::bind(uint32 slot) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		glBindTextureUnit(slot, texture);
+		glBindTextureUnit(slot, object);
 	}
 
 	void OpenGLTexture2D::unbind() const {
@@ -118,6 +118,6 @@ namespace ProjectA {
 	}
 
 	bool OpenGLTexture2D::operator ==(const Texture& other) const {
-		return texture == ((OpenGLTexture2D&) other).texture;
+		return object == ((OpenGLTexture2D&) other).object;
 	}
 }

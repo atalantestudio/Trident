@@ -28,9 +28,19 @@ namespace ProjectA {
 			static void onWindowResize(uint32 width, uint32 height);
 
 			// TODO: RenderPassCommandEncoder
-			// void draw(const uint32 vertexCount, const uint32 instanceCount, const uint32 vertexOffset);
+
+			// OpenGL: drawArrays/drawArraysInstanced
+			// void draw(const uint32 vertexCount, const uint32 instanceCount, const uint32 vertexOffset) const;
 
 		private:
 			static scope<RendererAPI> rendererApi;
+
+		// --- Start of new Renderer parent class ---
+
+		protected:
+			// ShaderModule createShaderModule() const;
+
+		public:
+			virtual void render() const = 0;
 	};
 }

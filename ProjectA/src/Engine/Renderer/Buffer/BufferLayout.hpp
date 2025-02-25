@@ -1,8 +1,6 @@
 #pragma once
 
-#include "pch.hpp"
-
-#include "Engine/Renderer/BufferAttribute.hpp"
+#include "Engine/Renderer/Buffer/BufferAttribute.hpp"
 
 namespace ProjectA {
 	class BufferLayout {

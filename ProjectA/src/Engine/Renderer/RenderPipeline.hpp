@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Engine/Renderer/IndexBuffer.hpp"
+#include "Engine/Renderer/Buffer/IndexBuffer.hpp"
+#include "Engine/Renderer/Buffer/VertexBuffer.hpp"
 #include "Engine/Renderer/PrimitiveTopology.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
-#include "Engine/Renderer/VertexBuffer.hpp"
 
 namespace ProjectA {
 	struct RenderPipelineDescriptor {

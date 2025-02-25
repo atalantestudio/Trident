@@ -94,6 +94,8 @@ namespace ProjectA {
 	}
 
 	VulkanInstance::~VulkanInstance() {
+		PROFILE_SCOPE(FUNC_SIG);
+
 		vkDestroyInstance(object, nullptr);
 	}
 
@@ -123,7 +125,9 @@ namespace ProjectA {
 	#endif
 
 	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-		void VulkanInstance::checkLayers() const {
+		void VulkanInstance::checkLayers() {
+			PROFILE_SCOPE(FUNC_SIG);
+
 			uint32 layerPropertyCount;
 
 			vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);

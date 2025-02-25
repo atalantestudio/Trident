@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Renderer/IndexBuffer.hpp"
+#include "Engine/Renderer/Buffer/IndexBuffer.hpp"
 
 namespace ProjectA {
 	class OpenGLIndexBuffer : public IndexBuffer {
@@ -10,12 +10,12 @@ namespace ProjectA {
 		public:
 			OpenGLIndexBuffer(const uint32* indices, uint32 count);
 
-			virtual ~OpenGLIndexBuffer();
+			~OpenGLIndexBuffer();
 
-			virtual uint32 getCount() const override;
+			uint32 getCount() const override;
 
-			virtual void bind() const override;
+			void bind() const override;
 
-			virtual void unbind() const override;
+			void unbind() const override;
 	};
 }

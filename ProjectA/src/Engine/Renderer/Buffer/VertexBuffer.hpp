@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Renderer/BufferLayout.hpp"
+#include "Engine/Renderer/Buffer/BufferLayout.hpp"
 
 namespace ProjectA {
 	class VertexBuffer {

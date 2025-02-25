@@ -4,13 +4,14 @@
 #include "Engine/Renderer/ShaderModule.hpp"
 
 namespace ProjectA {
-	class VulkanShaderModule : public ObjectWrapper<VkShaderModule>, public ShaderModule {
+	class VulkanShaderModule : public ShaderModule, public ObjectWrapper<VkPipelineShaderStageCreateInfo> {
 		public:
 			VulkanShaderModule(const VkDevice& device, const VkShaderStageFlagBits stage, const std::string& code);
 
 			~VulkanShaderModule() override;
 
 		private:
+			// Used by destructor.
 			const VkDevice& device;
 	};
 }

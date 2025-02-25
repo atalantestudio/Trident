@@ -43,9 +43,6 @@ namespace ProjectA {
 		const GLenum primitiveTopology = ((OpenGLRenderPipeline*) renderPipeline.get())->primitiveTopology;
 
 		glDrawElements(primitiveTopology, indexCount, GL_UNSIGNED_INT, nullptr);
-
-		// Unbind texture at index 0.
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	#ifdef BUILD_MODE_DEBUG

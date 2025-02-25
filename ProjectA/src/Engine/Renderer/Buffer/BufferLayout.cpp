@@ -1,6 +1,6 @@
 #include "pch.hpp"
 
-#include "Engine/Renderer/BufferLayout.hpp"
+#include "Engine/Renderer/Buffer/BufferLayout.hpp"
 
 namespace ProjectA {
 	BufferLayout::BufferLayout(const std::initializer_list<BufferAttribute>& attributes) :

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/Renderer/ShaderModule.hpp"
+
 namespace ProjectA {
 	class Context {
 		public:

@@ -12,15 +12,15 @@ namespace ProjectA {
 		public:
 			OpenGLFramebuffer(const FramebufferDescriptor& descriptor);
 
-			virtual ~OpenGLFramebuffer();
+			~OpenGLFramebuffer();
 
-			virtual uint32 getColorAttachmentId() const override;
-			virtual uint32 getDepthAttachmentId() const override;
+			uint32 getColorAttachmentId() const override;
+			uint32 getDepthAttachmentId() const override;
 
-			virtual void bind() override;
-			virtual void unbind() override;
+			void bind() override;
+			void unbind() override;
 
-			virtual void resize(const vec2<float32>& size) override;
+			void resize(const vec2<float32>& size) override;
 
 		private:
 			void reset();

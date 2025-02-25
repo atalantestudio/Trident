@@ -3,16 +3,16 @@
 #include "Platform/Vulkan/VulkanContext.hpp"
 
 namespace ProjectA {
-	VulkanContext::VulkanContext(GLFWwindow* window) : window(window) {
+	VulkanContext::VulkanContext(GLFWwindow* window) : window(window), instance(), device(instance.object) {
 		ENGINE_ASSERT(window, "Window handle is null.");
 	}
 
-	void VulkanContext::swapBuffers() const {
-		PROFILE_SCOPE(FUNC_SIG);
-	}
+	void VulkanContext::swapBuffers() const {}
 
 	// TODO: Call before creating VulkanInstance.
 	void VulkanContext::checkVulkanAvailability() {
+		PROFILE_SCOPE(FUNC_SIG);
+
 		const HMODULE vulkanDll = LoadLibrary(L"vulkan-1.dll");
 
 		if (vulkanDll == 0) {

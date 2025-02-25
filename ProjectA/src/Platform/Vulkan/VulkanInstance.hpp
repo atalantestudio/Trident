@@ -3,21 +3,21 @@
 #include <vulkan/vulkan.h>
 
 #include "Engine/ObjectWrapper.hpp"
+#include "Engine/Renderer/Instance.hpp"
 
 namespace ProjectA {
-	class VulkanInstance : public ObjectWrapper<VkInstance> {
+	class VulkanInstance : public Instance, public ObjectWrapper<VkInstance> {
 		public:
 			VulkanInstance();
 
-			~VulkanInstance();
+			~VulkanInstance() override;
 		private:
 			#ifdef BUILD_MODE_DEBUG
 				static VkBool32 debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
 			#endif
 
-		private:
 			#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-				void checkLayers() const;
+				static void checkLayers();
 			#endif
 
 		private:

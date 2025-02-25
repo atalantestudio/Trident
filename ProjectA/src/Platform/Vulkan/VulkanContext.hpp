@@ -3,6 +3,7 @@
 #include <glfw/glfw3.h>
 #include <vulkan/vulkan.h>
 
+#include "Platform/Vulkan/VulkanDevice.hpp"
 #include "Platform/Vulkan/VulkanInstance.hpp"
 
 #include "Engine/Renderer/Context.hpp"
@@ -20,5 +21,6 @@ namespace ProjectA {
 		private:
 			GLFWwindow* window;
 			VulkanInstance instance;
+			VulkanDevice device;
 	};
 }

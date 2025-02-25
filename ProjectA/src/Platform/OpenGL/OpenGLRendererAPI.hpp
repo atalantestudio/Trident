@@ -1,6 +1,8 @@
 #pragma once
 
-#include <glad/glad.h>
+#ifdef BUILD_MODE_DEBUG
+	#include <glad/glad.h>
+#endif
 
 #include "Engine/Renderer/RendererAPI.hpp"
 
@@ -9,13 +11,13 @@ namespace ProjectA {
 		public:
 			OpenGLRendererAPI();
 
-			virtual void setViewport(int32 x, int32, uint32 width, uint32 height) const override;
+			void setViewport(int32 x, int32, uint32 width, uint32 height) const override;
 
-			virtual void setClearColor(const vec4<float32>& color) const override;
+			void setClearColor(const vec4<float32>& color) const override;
 
-			virtual void clear() const override;
+			void clear() const override;
 
-			virtual void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const override;
+			void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const override;
 
 		private:
 			#ifdef BUILD_MODE_DEBUG
