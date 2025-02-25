@@ -19,6 +19,8 @@ namespace ProjectA {
 
 			void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const override;
 
+			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const override;
+
 		private:
 			#ifdef BUILD_MODE_DEBUG
 				static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);

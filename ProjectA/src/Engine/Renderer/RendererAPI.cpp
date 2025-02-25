@@ -1,9 +1,11 @@
 #include "pch.hpp"
 
-#include "Platform/OpenGL/OpenGLRendererAPI.hpp"
-
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/RendererAPI.hpp"
+
+#include "Platform/OpenGL/OpenGLRendererAPI.hpp"
+
+#include "Platform/Vulkan/VulkanRendererAPI.hpp"
 
 namespace ProjectA {
 	scope<RendererAPI> RendererAPI::create() {
@@ -15,9 +17,7 @@ namespace ProjectA {
 			case GraphicsAPI::OPENGL:
 				return createScope<OpenGLRendererAPI>();
 			case GraphicsAPI::VULKAN:
-				ENGINE_ASSERT(false, "VULKAN is not supported yet.");
-
-				return nullptr;
+				return createScope<VulkanRendererAPI>();
 		}
 
 		return nullptr;

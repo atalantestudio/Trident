@@ -12,7 +12,7 @@ namespace ProjectA {
 
 	// TODO: Automatically get enabled extension names.
 	const std::vector<const char*> VulkanInstance::enabledExtensionNames = {
-		#ifdef BUILD_MODE_DEBUG
+		#ifdef DEBUG_ENABLE_MESSENGER
 			VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
 		#endif
 	};
@@ -41,7 +41,7 @@ namespace ProjectA {
 		VkInstanceCreateInfo instanceCreateInfo{};
 		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 
-		#ifdef BUILD_MODE_DEBUG
+		#ifdef DEBUG_ENABLE_MESSENGER
 			VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo{};
 			debugUtilsMessengerCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 
@@ -99,7 +99,27 @@ namespace ProjectA {
 		vkDestroyInstance(object, nullptr);
 	}
 
-	#ifdef BUILD_MODE_DEBUG
+	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
+		void VulkanInstance::checkLayers() {
+			PROFILE_SCOPE(FUNC_SIG);
+
+			uint32 layerPropertyCount;
+
+			vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
+
+			std::vector<VkLayerProperties> layerProperties(layerPropertyCount);
+
+			vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
+
+			ENGINE_TRACE("Enabled layers:");
+
+			for (const VkLayerProperties& layerProperties : layerProperties) {
+				ENGINE_TRACE(layerProperties.layerName);
+			}
+		}
+	#endif
+
+	#ifdef DEBUG_ENABLE_MESSENGER
 		VkBool32 VulkanInstance::debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
 			switch (messageSeverity) {
 				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
@@ -121,26 +141,6 @@ namespace ProjectA {
 			}
 
 			return VK_FALSE;
-		}
-	#endif
-
-	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-		void VulkanInstance::checkLayers() {
-			PROFILE_SCOPE(FUNC_SIG);
-
-			uint32 layerPropertyCount;
-
-			vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
-
-			std::vector<VkLayerProperties> layerProperties(layerPropertyCount);
-
-			vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
-
-			ENGINE_TRACE("Enabled layers:");
-
-			for (const VkLayerProperties& layerProperties : layerProperties) {
-				ENGINE_TRACE(layerProperties.layerName);
-			}
 		}
 	#endif
 }

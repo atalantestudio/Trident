@@ -5,9 +5,6 @@
 
 namespace ProjectA {
 	class Renderer2D {
-		private:
-			static void startNewBatch();
-
 		public:
 			struct Statistics {
 				uint32 drawCallCount = 0;
@@ -26,7 +23,6 @@ namespace ProjectA {
 			static const OrthographicCamera* camera;
 
 		public:
-
 			static void construct();
 
 			static void destroy();
@@ -52,5 +48,8 @@ namespace ProjectA {
 			static Statistics& getStatistics();
 
 			static void resetStatistics();
+
+		private:
+			static void startNewBatch();
 	};
 }

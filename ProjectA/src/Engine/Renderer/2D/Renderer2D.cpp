@@ -46,13 +46,23 @@ namespace ProjectA {
 	void Renderer2D::construct() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		// TODO: Move renderer shader code out of Sandbox
-		const std::string colorTextureVertexShaderCode = FileLoader::load("assets/shaders/ColorTexture.vert.glsl");
-		const std::string colorTextureFragmentShaderCode = FileLoader::load("assets/shaders/ColorTexture.frag.glsl");
-
 		RenderPipelineDescriptor descriptor;
-		descriptor.vertexShaderModule = ShaderModule::create(ShaderStage::VERTEX, colorTextureVertexShaderCode);
-		descriptor.fragmentShaderModule = ShaderModule::create(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
+
+		if (Renderer::getGraphicsApi() == GraphicsAPI::OPENGL) {
+			const std::string colorTextureVertexShaderCode = FileLoader::load("assets/shaders/ColorTexture.vert");
+			const std::string colorTextureFragmentShaderCode = FileLoader::load("assets/shaders/ColorTexture.frag");
+
+			descriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
+			descriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
+		}
+		else if (Renderer::getGraphicsApi() == GraphicsAPI::VULKAN) {
+			const std::string colorTextureVertexShaderCode = FileLoader::load("assets/shaders/ColorTexture.vert.spv");
+			const std::string colorTextureFragmentShaderCode = FileLoader::load("assets/shaders/ColorTexture.frag.spv");
+
+			descriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
+			descriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
+		}
+
 		descriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 
 		storage.renderPipeline = RenderPipeline::create(descriptor);

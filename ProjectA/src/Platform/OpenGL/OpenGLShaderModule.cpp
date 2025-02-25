@@ -3,14 +3,14 @@
 #include "Platform/OpenGL/OpenGLShaderModule.hpp"
 
 namespace ProjectA {
-	OpenGLShaderModule::OpenGLShaderModule(const ShaderStage stage, const std::string& code) :
-		ObjectWrapper(glCreateShader(shaderStages[static_cast<uint32>(stage)]))
+	OpenGLShaderModule::OpenGLShaderModule(const GLenum stage, const GLchar* const code) :
+		ObjectWrapper(glCreateShader(stage))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const GLchar* const string = code.c_str();
+		ENGINE_DEBUG("[ShaderModule constructor]");
 
-		glShaderSource(object, 1, &string, nullptr);
+		glShaderSource(object, 1, &code, nullptr);
 		glCompileShader(object);
 
 		GLint compileStatus;

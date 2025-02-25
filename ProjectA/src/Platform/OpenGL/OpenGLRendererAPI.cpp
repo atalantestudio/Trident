@@ -2,6 +2,7 @@
 
 #include "Platform/OpenGL/OpenGLRendererAPI.hpp"
 #include "Platform/OpenGL/OpenGLRenderPipeline.hpp"
+#include "Platform/OpenGL/OpenGLShaderModule.hpp"
 
 namespace ProjectA {
 	OpenGLRendererAPI::OpenGLRendererAPI() {
@@ -43,6 +44,15 @@ namespace ProjectA {
 		const GLenum primitiveTopology = ((OpenGLRenderPipeline*) renderPipeline.get())->primitiveTopology;
 
 		glDrawElements(primitiveTopology, indexCount, GL_UNSIGNED_INT, nullptr);
+	}
+
+	ref<ShaderModule> OpenGLRendererAPI::createShaderModule(const ShaderStage stage, const std::string& code) const {
+		static constexpr GLenum shaderStages[2] = {
+			GL_VERTEX_SHADER,
+			GL_FRAGMENT_SHADER,
+		};
+
+		return createRef<OpenGLShaderModule>(shaderStages[static_cast<uint32>(stage)], static_cast<const GLchar* const>(code.c_str()));
 	}
 
 	#ifdef BUILD_MODE_DEBUG

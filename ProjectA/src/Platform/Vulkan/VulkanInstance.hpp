@@ -12,12 +12,12 @@ namespace ProjectA {
 
 			~VulkanInstance() override;
 		private:
-			#ifdef BUILD_MODE_DEBUG
-				static VkBool32 debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
-			#endif
-
 			#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
 				static void checkLayers();
+			#endif
+
+			#ifdef DEBUG_ENABLE_MESSENGER
+				static VkBool32 debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
 			#endif
 
 		private:

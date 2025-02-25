@@ -3,7 +3,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::OPENGL;
+	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::VULKAN;
 
 	const Camera* Renderer::camera = nullptr;
 
@@ -53,5 +53,11 @@ namespace ProjectA {
 
 	void Renderer::onWindowResize(uint32 width, uint32 height) {
 		rendererApi->setViewport(0, 0, width, height);
+	}
+
+	// --- Start of new Renderer parent class ---
+
+	ref<ShaderModule> Renderer::createShaderModule(const ShaderStage stage, const std::string& code) {
+		return rendererApi->createShaderModule(stage, code);
 	}
 }

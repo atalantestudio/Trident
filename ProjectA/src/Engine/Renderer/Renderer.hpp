@@ -37,8 +37,10 @@ namespace ProjectA {
 
 		// --- Start of new Renderer parent class ---
 
-		protected:
-			// ShaderModule createShaderModule() const;
+		// TODO: Make protected
+		public:
+			// TODO: Make non-static
+			static ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code);
 
 		public:
 			virtual void render() const = 0;

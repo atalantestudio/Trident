@@ -53,6 +53,7 @@
 		} \
 	}
 
+	#define DEBUG_ENABLE_MESSENGER
 	#define DEBUG_ENABLE_VALIDATION_LAYERS
 #else
 	#define ENGINE_TRACE(...)

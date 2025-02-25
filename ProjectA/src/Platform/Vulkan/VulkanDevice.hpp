@@ -16,5 +16,7 @@ namespace ProjectA {
 
 		private:
 			static int32 calculatePhysicalDeviceScore(const VkPhysicalDevice& physicalDevice);
+
+			static int32 findQueueFamilyIndex(const VkPhysicalDevice& physicalDevice);
 	};
 }

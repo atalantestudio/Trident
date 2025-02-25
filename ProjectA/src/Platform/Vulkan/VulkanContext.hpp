@@ -3,9 +3,6 @@
 #include <glfw/glfw3.h>
 #include <vulkan/vulkan.h>
 
-#include "Platform/Vulkan/VulkanDevice.hpp"
-#include "Platform/Vulkan/VulkanInstance.hpp"
-
 #include "Engine/Renderer/Context.hpp"
 
 namespace ProjectA {
@@ -16,11 +13,11 @@ namespace ProjectA {
 			void swapBuffers() const override;
 
 		private:
-			static void checkVulkanAvailability();
+			#ifdef PLATFORM_WINDOWS
+				static void checkVulkanAvailabilityWindows();
+			#endif
 
 		private:
 			GLFWwindow* window;
-			VulkanInstance instance;
-			VulkanDevice device;
 	};
 }

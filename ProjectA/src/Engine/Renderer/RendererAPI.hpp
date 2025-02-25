@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/Renderer/RenderPipeline.hpp"
+#include "Engine/Renderer/ShaderStage.hpp"
 
 namespace ProjectA {
 	class RendererAPI {
@@ -16,5 +17,7 @@ namespace ProjectA {
 			virtual void clear() const = 0;
 
 			virtual void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const = 0;
+
+			virtual ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const = 0;
 	};
 }
