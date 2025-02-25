@@ -24,6 +24,8 @@ namespace ProjectA {
 
 			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const override;
 
+			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const override;
+
 		private:
 			const VulkanInstance instance;
 			const VulkanDevice device;

@@ -10,11 +10,6 @@
 #include "Engine/Input.hpp"
 #include "Engine/Layer.hpp"
 
-#ifdef BUILD_MODE_DEBUG
-	// Logger
-	#include "Engine/Logger/Logger.hpp"
-#endif
-
 // Camera controller
 #include "Engine/Camera/Controller/OrthographicCameraController.hpp"
 

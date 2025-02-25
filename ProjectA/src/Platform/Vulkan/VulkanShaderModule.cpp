@@ -5,7 +5,11 @@
 #include "Platform/Vulkan/VulkanShaderModule.hpp"
 
 namespace ProjectA {
-	VulkanShaderModule::VulkanShaderModule(const VkDevice& device, const VkShaderStageFlagBits stage, const std::string& code) : device(device) {
+	VulkanShaderModule::VulkanShaderModule(const VkDevice& device, const VkShaderStageFlagBits stage, const std::string& code) :
+		device(device)
+	{
+		ENGINE_DEBUG("[VulkanShaderModule constructor]");
+
 		VkShaderModuleCreateInfo shaderModuleCreateInfo{};
 		shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		shaderModuleCreateInfo.pNext = nullptr;
@@ -26,6 +30,8 @@ namespace ProjectA {
 		object.module = shaderModule;
 		object.pName = "main";
 		object.pSpecializationInfo = nullptr;
+
+		ENGINE_TRACE("Created shader module successfully.");
 	}
 
 	VulkanShaderModule::~VulkanShaderModule() {

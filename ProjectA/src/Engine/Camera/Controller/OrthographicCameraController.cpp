@@ -29,27 +29,31 @@ namespace ProjectA {
 	void OrthographicCameraController::update(float32 deltaTime) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		float32 _position[2] = {position[0], position[1]};
+		float32 x = 0.0f;
+		float32 y = 0.0f;
 
 		if (Input::isKeyPressed(KeyCode::A)) {
-			_position[0] -= speed * deltaTime;
-		} else if (Input::isKeyPressed(KeyCode::D)) {
-			_position[0] += speed * deltaTime;
+			x -= speed * deltaTime;
+		}
+		else if (Input::isKeyPressed(KeyCode::D)) {
+			x += speed * deltaTime;
 		}
 
 		if (Input::isKeyPressed(KeyCode::W)) {
-			_position[1] += speed * deltaTime;
-		} else if (Input::isKeyPressed(KeyCode::S)) {
-			_position[1] -= speed * deltaTime;
+			y += speed * deltaTime;
+		}
+		else if (Input::isKeyPressed(KeyCode::S)) {
+			y -= speed * deltaTime;
 		}
 
 		if (Input::isKeyPressed(KeyCode::Q)) {
 			rotation += rotationSpeed * deltaTime;
-		} else if (Input::isKeyPressed(KeyCode::E)) {
+		}
+		else if (Input::isKeyPressed(KeyCode::E)) {
 			rotation -= rotationSpeed * deltaTime;
 		}
 
-		position = {_position[0], _position[1], position[2]};
+		position += {x, y, 0.0f};
 
 		camera.updateView(position, rotation);
 	}

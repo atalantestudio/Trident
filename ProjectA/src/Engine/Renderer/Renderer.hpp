@@ -23,7 +23,7 @@ namespace ProjectA {
 
 			static scope<RendererAPI>& getRendererApi();
 
-			static void submit(const ref<RenderPipeline>& renderPipeline, const mat4x4<float32>& transform);
+			//static void submit(const ref<RenderPipeline>& renderPipeline);
 
 			static void onWindowResize(uint32 width, uint32 height);
 
@@ -39,8 +39,11 @@ namespace ProjectA {
 
 		// TODO: Make protected
 		public:
-			// TODO: Make non-static
+			// TODO: Make non-static (and const)
 			static ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code);
+
+			// TODO: Make non-static (and const)
+			static ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor);
 
 		public:
 			virtual void render() const = 0;

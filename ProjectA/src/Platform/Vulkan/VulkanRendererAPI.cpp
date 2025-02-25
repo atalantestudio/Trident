@@ -14,4 +14,10 @@ namespace ProjectA {
 
 		return createRef<VulkanShaderModule>(device.object, shaderStages[static_cast<uint32>(stage)], code);
 	}
+
+	ref<RenderPipeline> VulkanRendererAPI::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
+		ENGINE_ASSERT(false, "TODO: VulkanRenderPipeline");
+
+		return nullptr;
+	}
 }

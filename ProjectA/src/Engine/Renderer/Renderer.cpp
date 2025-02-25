@@ -2,8 +2,12 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
+#include "Platform/OpenGL/OpenGLRendererAPI.hpp"
+
+#include "Platform/Vulkan/VulkanRendererAPI.hpp"
+
 namespace ProjectA {
-	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::VULKAN;
+	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::OPENGL;
 
 	const Camera* Renderer::camera = nullptr;
 
@@ -20,14 +24,18 @@ namespace ProjectA {
 			case GraphicsAPI::OPENGL:
 				ENGINE_INFO("Using OpenGL backend.");
 
+				rendererApi = createScope<OpenGLRendererAPI>();
+
 				break;
 			case GraphicsAPI::VULKAN:
 				ENGINE_INFO("Using Vulkan backend.");
 
+				rendererApi = createScope<VulkanRendererAPI>();
+
 				break;
 		}
 
-		rendererApi = RendererAPI::create();
+		ENGINE_ASSERT(rendererApi != nullptr, "GraphicsAPI::NONE is not supported.");
 	}
 
 	void Renderer::destroy() {}
@@ -40,16 +48,14 @@ namespace ProjectA {
 		return rendererApi;
 	}
 
-	void Renderer::submit(const ref<RenderPipeline>& renderPipeline, const mat4x4<float32>& transform) {
+	/*void Renderer::submit(const ref<RenderPipeline>& renderPipeline) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		renderPipeline->bind();
-		// TODO: Rename to "u_projectionView"
-		renderPipeline->setUniform("u_viewProjection", camera->getProjectionView());
-		renderPipeline->setUniform("u_transform", transform);
+		renderPipeline->setUniform("u_projectionView", camera->projectionView);
 
 		rendererApi->drawIndexed(renderPipeline, renderPipeline->getIndexBuffer()->getCount());
-	}
+	}*/
 
 	void Renderer::onWindowResize(uint32 width, uint32 height) {
 		rendererApi->setViewport(0, 0, width, height);
@@ -59,5 +65,9 @@ namespace ProjectA {
 
 	ref<ShaderModule> Renderer::createShaderModule(const ShaderStage stage, const std::string& code) {
 		return rendererApi->createShaderModule(stage, code);
+	}
+
+	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) {
+		return rendererApi->createRenderPipeline(descriptor);
 	}
 }

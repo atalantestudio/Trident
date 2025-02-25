@@ -55,6 +55,10 @@ namespace ProjectA {
 		return createRef<OpenGLShaderModule>(shaderStages[static_cast<uint32>(stage)], static_cast<const GLchar* const>(code.c_str()));
 	}
 
+	ref<RenderPipeline> OpenGLRendererAPI::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
+		return createRef<OpenGLRenderPipeline>(descriptor);
+	}
+
 	#ifdef BUILD_MODE_DEBUG
 		void OpenGLRendererAPI::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 			switch (severity) {

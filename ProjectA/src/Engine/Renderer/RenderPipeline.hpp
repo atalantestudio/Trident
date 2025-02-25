@@ -9,13 +9,11 @@ namespace ProjectA {
 	struct RenderPipelineDescriptor {
 		ref<ShaderModule> vertexShaderModule;
 		ref<ShaderModule> fragmentShaderModule;
-		PrimitiveTopology primitiveTopology;
+		PrimitiveTopology primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 	};
 
 	class RenderPipeline {
 		public:
-			static ref<RenderPipeline> create(const RenderPipelineDescriptor& descriptor);
-
 			virtual ~RenderPipeline() = default;
 
 			// TODO: Remove

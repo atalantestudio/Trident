@@ -65,7 +65,7 @@ namespace ProjectA {
 
 		descriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 
-		storage.renderPipeline = RenderPipeline::create(descriptor);
+		storage.renderPipeline = Renderer::createRenderPipeline(descriptor);
 		storage.renderPipeline->bind();
 
 		storage.vertexBuffer = VertexBuffer::create(sizeof(QuadVertex) * Renderer2DStorage::MAX_VERTICES);
@@ -133,8 +133,7 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		storage.renderPipeline->bind();
-		// TODO: Rename to "u_projectionView"
-		storage.renderPipeline->setUniform("u_viewProjection", camera->getProjectionView());
+		storage.renderPipeline->setUniform("u_projectionView", camera->projectionView);
 
 		storage.quadCount = 0;
 		storage.vertexBufferPointer = storage.vertexBufferOrigin;

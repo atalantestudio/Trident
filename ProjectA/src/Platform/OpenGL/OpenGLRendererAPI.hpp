@@ -21,6 +21,8 @@ namespace ProjectA {
 
 			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const override;
 
+			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const override;
+
 		private:
 			#ifdef BUILD_MODE_DEBUG
 				static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);

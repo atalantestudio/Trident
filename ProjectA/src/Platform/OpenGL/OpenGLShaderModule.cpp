@@ -8,7 +8,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_DEBUG("[ShaderModule constructor]");
+		ENGINE_DEBUG("[OpenGLShaderModule constructor]");
 
 		glShaderSource(object, 1, &code, nullptr);
 		glCompileShader(object);
@@ -26,7 +26,7 @@ namespace ProjectA {
 
 			glGetShaderInfoLog(object, infoLogLength, nullptr, infoLog.data());
 
-			ENGINE_ERROR("Shader compilation failed.\n[]", infoLog.data());
+			ENGINE_ERROR("Shader module compilation failed.\n[]", infoLog.data());
 
 			this->~OpenGLShaderModule();
 
@@ -34,7 +34,7 @@ namespace ProjectA {
 			return;
 		}
 
-		ENGINE_TRACE("Compiled shader successfully.");
+		ENGINE_TRACE("Compiled shader module successfully.");
 	}
 
 	OpenGLShaderModule::~OpenGLShaderModule() {

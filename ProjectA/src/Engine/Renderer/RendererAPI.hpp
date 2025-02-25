@@ -6,8 +6,6 @@
 namespace ProjectA {
 	class RendererAPI {
 		public:
-			static scope<RendererAPI> create();
-
 			virtual ~RendererAPI() = default;
 
 			virtual void setViewport(int32 x, int32, uint32 width, uint32 height) const = 0;
@@ -18,6 +16,10 @@ namespace ProjectA {
 
 			virtual void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const = 0;
 
+			// --- Graphics API provided by the engine ---
+
 			virtual ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const = 0;
+
+			virtual ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const = 0;
 	};
 }
