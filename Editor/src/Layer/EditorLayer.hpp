@@ -16,6 +16,8 @@ namespace ProjectA {
 			bool viewportWindowFocused = false;
 			bool viewportWindowHovered = false;
 
+			ECS ecs;
+
 		public:
 			EditorLayer();
 

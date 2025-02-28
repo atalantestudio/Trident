@@ -13,6 +13,9 @@
 // Camera controller
 #include "Engine/Camera/Controller/OrthographicCameraController.hpp"
 
+// ECS
+#include "Engine/ECS/ECS.hpp"
+
 // ImGui
 #include "Engine/ImGui/ImGuiLayer.hpp"
 

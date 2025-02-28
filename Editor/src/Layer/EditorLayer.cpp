@@ -1,10 +1,19 @@
 #include <imgui/imgui.h>
 
+#include "Engine/ECS/ECS.hpp"
 #include "Engine/Renderer/2D/Renderer2D.hpp"
 
 #include "EditorLayer.hpp"
 
 namespace ProjectA {
+	struct Position {
+		vec3<float32> position;
+	};
+
+	struct Velocity {
+		vec3<float32> velocity;
+	};
+
 	EditorLayer::EditorLayer() : Layer("Sandbox"), cameraController(1280.0f / 720.0f) {}
 
 	void EditorLayer::bind() {
@@ -18,10 +27,34 @@ namespace ProjectA {
 		framebufferDescriptor.size = {1280.0f, 720.0f};
 
 		framebuffer = Framebuffer::create(framebufferDescriptor);
+
+		const Entity e1 = ecs.createEntity();
+		const Entity e2 = ecs.createEntity();
+		const Entity e3 = ecs.createEntity();
+		ecs.allocateComponentPool<Position>();
+		ecs.allocateComponentPool<Velocity>();
+		Position pos;
+		pos.position = {1.0f, 2.0f, 3.0f};
+		ecs.setComponent<Position>(e1, pos);
+		ecs.setComponent<Position>(e2, pos);
+		ecs.setComponent<Position>(e3, pos);
 	}
 
 	void EditorLayer::unbind() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		const Entity e1 = 0;
+		const Entity e2 = 1;
+		const Entity e3 = 2;
+
+		Position& pos1 = ecs.getComponent<Position>(e2);
+		ComponentPool<Position>& pool = ecs.getComponentPool<Position>();
+
+		for (EntityComponent<Position>& pos : pool.entityComponents) {
+			pos.component.position *= 2.0f;
+
+			ENGINE_DEBUG("Pos: []", pos.component.position);
+		}
 	}
 
 	void EditorLayer::update(float32 deltaTime) {
