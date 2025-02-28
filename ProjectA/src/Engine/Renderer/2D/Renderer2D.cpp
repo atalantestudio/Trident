@@ -68,14 +68,15 @@ namespace ProjectA {
 		storage.renderPipeline = Renderer::createRenderPipeline(descriptor);
 		storage.renderPipeline->bind();
 
+		BufferLayout vertexBufferLayout;
+		vertexBufferLayout.add<vec3<float32>>(0, false);	// a_position
+		vertexBufferLayout.add<vec4<float32>>(0, false);	// a_color
+		vertexBufferLayout.add<vec2<float32>>(0, false);	// a_uv
+		vertexBufferLayout.add<int32>(0, false);			// a_texture
+		vertexBufferLayout.add<float32>(0, false);			// a_tilingFactor
+
 		storage.vertexBuffer = VertexBuffer::create(sizeof(QuadVertex) * Renderer2DStorage::MAX_VERTICES);
-		storage.vertexBuffer->setLayout({
-			BufferAttribute::create<vec3<float32>>(),	// a_position
-			BufferAttribute::create<vec4<float32>>(),	// a_color
-			BufferAttribute::create<vec2<float32>>(),	// a_uv
-			BufferAttribute::create<int32>(),			// a_texture
-			BufferAttribute::create<float32>(),			// a_tilingFactor
-		});
+		storage.vertexBuffer->setLayout(vertexBufferLayout);
 
 		storage.renderPipeline->addVertexBuffer(storage.vertexBuffer);
 

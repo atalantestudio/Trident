@@ -23,7 +23,7 @@ namespace ProjectA {
 		window->setEventCallback(BIND(Application::onEvent));
 
 		// Initialize graphics API.
-		Renderer::initialize();
+		Renderer::initialize(static_cast<GLFWwindow*>(window->getNativeWindow()));
 
 		// Initialize 2D renderer.
 		Renderer2D::construct();

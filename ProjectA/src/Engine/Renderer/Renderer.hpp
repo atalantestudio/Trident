@@ -1,11 +1,11 @@
 #pragma once
 
-#include "pch.hpp"
-
 #include "Engine/Camera/Camera.hpp"
 #include "Engine/Renderer/GraphicsAPI.hpp"
 #include "Engine/Renderer/RendererAPI.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
+
+typedef struct GLFWwindow GLFWwindow;
 
 namespace ProjectA {
 	class Renderer {
@@ -15,7 +15,7 @@ namespace ProjectA {
 			static const Camera* camera;
 
 		public:
-			static void initialize();
+			static void initialize(GLFWwindow* window);
 
 			static void destroy();
 

@@ -13,7 +13,7 @@ namespace ProjectA {
 
 	scope<RendererAPI> Renderer::rendererApi = nullptr;
 
-	void Renderer::initialize() {
+	void Renderer::initialize(GLFWwindow* window) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		switch (graphicsApi) {
@@ -30,7 +30,7 @@ namespace ProjectA {
 			case GraphicsAPI::VULKAN:
 				ENGINE_INFO("Using Vulkan backend.");
 
-				rendererApi = createScope<VulkanRendererAPI>();
+				rendererApi = createScope<VulkanRendererAPI>(window);
 
 				break;
 		}

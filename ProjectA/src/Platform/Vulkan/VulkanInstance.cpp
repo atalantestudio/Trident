@@ -1,5 +1,7 @@
 #include "pch.hpp"
 
+#include <glfw/glfw3.h>
+
 #include "Platform/Vulkan/VulkanInstance.hpp"
 
 namespace ProjectA {
@@ -10,36 +12,8 @@ namespace ProjectA {
 		#endif
 	};
 
-	// TODO: Automatically get enabled extension names.
-	const std::vector<const char*> VulkanInstance::enabledExtensionNames = {
-		#ifdef DEBUG_ENABLE_MESSENGER
-			VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
-		#endif
-	};
-
-	VulkanInstance::VulkanInstance() : ObjectWrapper(nullptr) {
+	VulkanInstance::VulkanInstance() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		// https://registry.khronos.org/vulkan/specs/latest/man/html/VkApplicationInfo.html
-		VkApplicationInfo applicationInfo{};
-		applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-
-		// TODO: Application name. Same as window name?
-		applicationInfo.pApplicationName = "ApplicationName";
-
-		// TODO: Application version.
-		applicationInfo.applicationVersion = VK_API_VERSION_1_0;
-
-		// TODO: Engine name.
-		applicationInfo.pEngineName = "EngineName";
-
-		// TODO: Engine version.
-		applicationInfo.engineVersion = VK_API_VERSION_1_0;
-
-		applicationInfo.apiVersion = VK_API_VERSION_1_0;
-
-		VkInstanceCreateInfo instanceCreateInfo{};
-		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo{};
@@ -61,7 +35,29 @@ namespace ProjectA {
 
 			debugUtilsMessengerCreateInfo.pfnUserCallback = debugUtilsMessengerUserCallback;
 			debugUtilsMessengerCreateInfo.pUserData = nullptr;
+		#endif
 
+		VkApplicationInfo applicationInfo{};
+		applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+
+		// TODO: Application name. Same as window name?
+		applicationInfo.pApplicationName = "ApplicationName";
+
+		// TODO: Application version.
+		applicationInfo.applicationVersion = VK_API_VERSION_1_0;
+
+		// TODO: Engine name.
+		applicationInfo.pEngineName = "EngineName";
+
+		// TODO: Engine version.
+		applicationInfo.engineVersion = VK_API_VERSION_1_0;
+
+		applicationInfo.apiVersion = VK_API_VERSION_1_0;
+
+		VkInstanceCreateInfo instanceCreateInfo{};
+		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+
+		#ifdef DEBUG_ENABLE_MESSENGER
 			instanceCreateInfo.pNext = &debugUtilsMessengerCreateInfo;
 		#else
 			instanceCreateInfo.pNext = nullptr;
@@ -78,18 +74,38 @@ namespace ProjectA {
 			instanceCreateInfo.ppEnabledLayerNames = nullptr;
 		#endif
 
+		uint32 glfwRequiredExtensionCount;
+
+		const char** glfwRequiredExtensionNames = glfwGetRequiredInstanceExtensions(&glfwRequiredExtensionCount);
+
+		enabledExtensionNames.assign(glfwRequiredExtensionNames, glfwRequiredExtensionNames + glfwRequiredExtensionCount);
+
+		#ifdef DEBUG_ENABLE_MESSENGER
+			enabledExtensionNames.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+		#endif
+
 		instanceCreateInfo.enabledExtensionCount = static_cast<uint32>(enabledExtensionNames.size());
 		instanceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
 
-		const VkResult result = vkCreateInstance(&instanceCreateInfo, nullptr, &object);
-
-		if (result != VK_SUCCESS) {
+		if (vkCreateInstance(&instanceCreateInfo, nullptr, &object) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create Vulkan instance.");
 		}
 
+		#ifdef DEBUG_ENABLE_MESSENGER
+			const PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(object, "vkCreateDebugUtilsMessengerEXT"));
+
+			if (vkCreateDebugUtilsMessengerEXT == nullptr) {
+				throw std::runtime_error("Vulkan debug messenger extension not present.");
+			}
+
+			if (vkCreateDebugUtilsMessengerEXT(object, &debugUtilsMessengerCreateInfo, nullptr, &debugUtilsMessenger) != VK_SUCCESS) {
+				throw std::runtime_error("Failed to create Vulkan debug messenger.");
+			}
+		#endif
+
 		#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
 			// TODO: Check layers before creating instance?
-			checkLayers();
+			checkInstanceLayers();
 		#endif
 	}
 
@@ -97,10 +113,20 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		vkDestroyInstance(object, nullptr);
+
+		#ifdef DEBUG_ENABLE_MESSENGER
+			const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(object, "vkDestroyDebugUtilsMessengerEXT"));
+
+			if (vkDestroyDebugUtilsMessengerEXT == nullptr) {
+				return;
+			}
+
+			vkDestroyDebugUtilsMessengerEXT(object, debugUtilsMessenger, nullptr);
+		#endif
 	}
 
 	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-		void VulkanInstance::checkLayers() {
+		void VulkanInstance::checkInstanceLayers() {
 			PROFILE_SCOPE(FUNC_SIG);
 
 			uint32 layerPropertyCount;
@@ -111,7 +137,7 @@ namespace ProjectA {
 
 			vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
 
-			ENGINE_TRACE("Enabled layers:");
+			ENGINE_TRACE("Instance layers:");
 
 			for (const VkLayerProperties& layerProperties : layerProperties) {
 				ENGINE_TRACE(layerProperties.layerName);

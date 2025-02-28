@@ -1,14 +1,20 @@
 #pragma once
 
+#include <glfw/glfw3.h>
+#include <vulkan/vulkan.h>
+
 #include "Engine/Renderer/RendererAPI.hpp"
 
 #include "Platform/Vulkan/VulkanDevice.hpp"
 #include "Platform/Vulkan/VulkanInstance.hpp"
+#include "Platform/Vulkan/VulkanRenderPass.hpp"
+#include "Platform/Vulkan/VulkanSurface.hpp"
+#include "Platform/Vulkan/VulkanSwapchain.hpp"
 
 namespace ProjectA {
 	class VulkanRendererAPI : public RendererAPI {
 		public:
-			VulkanRendererAPI();
+			VulkanRendererAPI(GLFWwindow* window);
 
 			// TODO: Implement
 			void setViewport(int32 x, int32, uint32 width, uint32 height) const override {}
@@ -28,6 +34,10 @@ namespace ProjectA {
 
 		private:
 			const VulkanInstance instance;
+			const VulkanPhysicalDevice physicalDevice;
+			const VulkanSurface surface;
 			const VulkanDevice device;
+			const VulkanSwapchain swapchain;
+			const VulkanRenderPass renderPass;
 	};
 }

@@ -1,11 +1,9 @@
 #include "pch.hpp"
 
-#include <vulkan/vulkan.h>
-
 #include "Platform/Vulkan/VulkanShaderModule.hpp"
 
 namespace ProjectA {
-	VulkanShaderModule::VulkanShaderModule(const VkDevice& device, const VkShaderStageFlagBits stage, const std::string& code) :
+	VulkanShaderModule::VulkanShaderModule(const VkDevice device, const VkShaderStageFlagBits stage, const std::string& code) :
 		device(device)
 	{
 		ENGINE_DEBUG("[VulkanShaderModule constructor]");
@@ -20,7 +18,7 @@ namespace ProjectA {
 		VkShaderModule shaderModule;
 
 		if (vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, &shaderModule) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create shader module.");
+			throw std::runtime_error("Failed to create Vulkan shader module.");
 		}
 
 		object.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -31,7 +29,7 @@ namespace ProjectA {
 		object.pName = "main";
 		object.pSpecializationInfo = nullptr;
 
-		ENGINE_TRACE("Created shader module successfully.");
+		ENGINE_TRACE("Created Vulkan shader module successfully.");
 	}
 
 	VulkanShaderModule::~VulkanShaderModule() {

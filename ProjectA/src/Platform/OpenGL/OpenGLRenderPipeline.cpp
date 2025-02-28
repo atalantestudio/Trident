@@ -2,6 +2,7 @@
 
 #include "Platform/OpenGL/OpenGLRenderPipeline.hpp"
 #include "Platform/OpenGL/OpenGLShaderModule.hpp"
+#include "Platform/OpenGL/VertexInputAttributeType.hpp"
 
 namespace ProjectA {
 	OpenGLRenderPipeline::OpenGLRenderPipeline(const RenderPipelineDescriptor& descriptor) :
@@ -75,7 +76,7 @@ namespace ProjectA {
 	void OpenGLRenderPipeline::addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_ASSERT(vertexBuffer->getLayout().attributes.size(), "Vertex buffer has no layout.");
+		ENGINE_ASSERT(vertexBuffer->getLayout().vertexAttributes.size(), "Vertex buffer has no layout.");
 
 		bind();
 
@@ -83,66 +84,35 @@ namespace ProjectA {
 
 		const BufferLayout& layout = vertexBuffer->getLayout();
 
-		GLuint attributeIndex = 0;
+		for (const VertexAttribute& vertexInputAttribute : layout) {
+			const GLenum type = getGlType(vertexInputAttribute.type);
+			const GLint size = getGlSize(vertexInputAttribute.type);
+			const void* offset = reinterpret_cast<const void*>(static_cast<std::uintptr_t>(vertexInputAttribute.offset));
 
-		for (const BufferAttribute& attribute : layout) {
-			switch (attribute.glType) {
+			glEnableVertexAttribArray(vertexInputAttribute.location);
+
+			switch (type) {
 				case GL_FLOAT:
-					if (attribute.componentCount <= 4) {
-						// Scalar/vector
-						glEnableVertexAttribArray(attributeIndex);
-						glVertexAttribPointer(
-							attributeIndex,
-							static_cast<GLint>(attribute.componentCount),
-							attribute.glType,
-							attribute.normalized ? GL_TRUE : GL_FALSE,
-							layout.stride,
-							(const void*) attribute.offset
-						);
+					glVertexAttribPointer(vertexInputAttribute.location, size, type, vertexInputAttribute.normalized, layout.stride, offset);
 
-						attributeIndex++;
-
-						break;
-					}
-					else {
-						// Matrix
-						const GLboolean normalized = attribute.normalized ? GL_TRUE : GL_FALSE;
-
-						for (uint32 i = 0; i < attribute.componentCount; i++) {
-							glEnableVertexAttribArray(attributeIndex);
-							glVertexAttribPointer(
-								attributeIndex,
-								static_cast<GLint>(attribute.componentCount),
-								attribute.glType,
-								normalized,
-								layout.stride,
-								(const void*) (sizeof(float32) * attribute.componentCount * i)
-							);
-							glVertexAttribDivisor(attributeIndex, 1);
-
-							attributeIndex++;
-						}
-
-						break;
-					}
-				case GL_BOOL:
+					break;
+				case GL_BYTE:
+				case GL_UNSIGNED_BYTE:
+				case GL_SHORT:
+				case GL_UNSIGNED_SHORT:
 				case GL_INT:
-					glEnableVertexAttribArray(attributeIndex);
-					glVertexAttribIPointer(
-						attributeIndex,
-						static_cast<GLint>(attribute.componentCount),
-						attribute.glType,
-						layout.stride,
-						(const void*) attribute.offset
-					);
+				case GL_UNSIGNED_INT:
+					glVertexAttribIPointer(vertexInputAttribute.location, size, type, layout.stride, offset);
 
-					attributeIndex++;
+					break;
+				case GL_DOUBLE:
+					glVertexAttribLPointer(vertexInputAttribute.location, size, type, layout.stride, offset);
 
 					break;
 			}
 		}
 
-		vertexBuffers.push_back(vertexBuffer);
+		vertexBuffers.emplace_back(vertexBuffer);
 	}
 
 	void OpenGLRenderPipeline::setIndexBuffer(const ref<IndexBuffer>& indexBuffer) {

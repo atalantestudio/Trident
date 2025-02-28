@@ -1,0 +1,81 @@
+#include "pch.hpp"
+
+#include "Platform/Vulkan/VulkanSwapchain.hpp"
+
+namespace ProjectA {
+	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VkDevice device) : device(device) {
+		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
+		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+		swapchainCreateInfo.pNext = nullptr;
+		swapchainCreateInfo.flags = 0;
+		swapchainCreateInfo.surface = surface.object;
+		swapchainCreateInfo.minImageCount = surface.capabilities.minImageCount;
+		swapchainCreateInfo.imageFormat = surface.format.format;
+		swapchainCreateInfo.imageColorSpace = surface.format.colorSpace;
+		swapchainCreateInfo.imageExtent = surface.capabilities.maxImageExtent;
+		swapchainCreateInfo.imageArrayLayers = 1;
+		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+		if (physicalDevice.graphicsQueueFamilyIndex == surface.presentQueueFamilyIndex) {
+			swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			swapchainCreateInfo.queueFamilyIndexCount = 0;
+			swapchainCreateInfo.pQueueFamilyIndices = nullptr;
+		}
+		else {
+			const uint32 queueFamilyIndices[] = {physicalDevice.graphicsQueueFamilyIndex, surface.presentQueueFamilyIndex};
+
+			swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+			swapchainCreateInfo.queueFamilyIndexCount = 2;
+			swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
+		}
+
+		swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		swapchainCreateInfo.queueFamilyIndexCount = 0;
+		swapchainCreateInfo.pQueueFamilyIndices = nullptr;
+		swapchainCreateInfo.preTransform = surface.capabilities.currentTransform;
+		swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+		swapchainCreateInfo.presentMode = surface.presentMode;
+		swapchainCreateInfo.clipped = VK_TRUE;
+		swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
+
+		if (vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &object) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create Vulkan swapchain.");
+		}
+
+		uint32 imageCount;
+
+		vkGetSwapchainImagesKHR(device, object, &imageCount, nullptr);
+
+		images.resize(imageCount);
+		imageViews.resize(imageCount);
+
+		vkGetSwapchainImagesKHR(device, object, &imageCount, images.data());
+
+		for (uint32 i = 0; i < imageCount; i++) {
+			VkImageViewCreateInfo imageViewCreateInfo{};
+			imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			imageViewCreateInfo.pNext = nullptr;
+			imageViewCreateInfo.flags = 0;
+			imageViewCreateInfo.image = images[i];
+			imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			imageViewCreateInfo.format = surface.format.format;
+			imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+			imageViewCreateInfo.subresourceRange.levelCount = 1;
+			imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+			imageViewCreateInfo.subresourceRange.layerCount = 1;
+
+			if (vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageViews[i]) != VK_SUCCESS) {
+				throw std::runtime_error("Failed to create image view.");
+			}
+		}
+	}
+
+	VulkanSwapchain::~VulkanSwapchain() {
+		vkDestroySwapchainKHR(device, object, nullptr);
+	}
+}

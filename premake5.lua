@@ -62,7 +62,7 @@ project "ProjectA"
 
 	links {
 		"glad",
-		"GLFW",
+		"glfw",
 		"imgui",
 		"opengl32.lib",
 		"vulkan-1.lib",

@@ -4,68 +4,73 @@
 #include "Platform/Vulkan/VulkanShaderModule.hpp"
 
 namespace ProjectA {
-	VulkanDevice::VulkanDevice(const VkInstance& instance) : ObjectWrapper(nullptr) {
+	// TODO: Pass enabled extension names as parameter.
+	const std::vector<const char*> VulkanDevice::enabledExtensionNames = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
+
+	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface) : ObjectWrapper(nullptr) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		uint32 physicalDeviceCount;
+		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 
-		vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
+		if (physicalDevice.graphicsQueueFamilyIndex == surface.presentQueueFamilyIndex) {
+			// Create one queue.
+			const float32 queuePriority = 1.0f;
 
-		if (physicalDeviceCount == 0) {
-			throw std::runtime_error("Could not find physical device(s).");
+			VkDeviceQueueCreateInfo queueCreateInfo{};
+			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			queueCreateInfo.pNext = nullptr;
+			queueCreateInfo.flags = 0;
+			queueCreateInfo.queueFamilyIndex = physicalDevice.graphicsQueueFamilyIndex;
+			queueCreateInfo.queueCount = 1;
+			queueCreateInfo.pQueuePriorities = &queuePriority;
+
+			queueCreateInfos.emplace_back(queueCreateInfo);
 		}
+		else {
+			// Create a graphics queue and a present queue.
+			const float32 graphicsQueuePriority = 1.0f;
 
-		std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+			VkDeviceQueueCreateInfo graphicsQueueCreateInfo{};
+			graphicsQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			graphicsQueueCreateInfo.pNext = nullptr;
+			graphicsQueueCreateInfo.flags = 0;
+			graphicsQueueCreateInfo.queueFamilyIndex = physicalDevice.graphicsQueueFamilyIndex;
+			graphicsQueueCreateInfo.queueCount = 1;
+			graphicsQueueCreateInfo.pQueuePriorities = &graphicsQueuePriority;
 
-		vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data());
+			queueCreateInfos.emplace_back(graphicsQueueCreateInfo);
 
-		uint32 bestPhysicalDeviceIndex = 0;
-		int32 bestPhysicalDeviceScore = calculatePhysicalDeviceScore(physicalDevices[bestPhysicalDeviceIndex]);
+			const float32 presentQueuePriority = 1.0f;
 
-		for (uint32 index = bestPhysicalDeviceIndex; index < physicalDevices.size(); index++) {
-			const int32 score = calculatePhysicalDeviceScore(physicalDevices[index]);
+			VkDeviceQueueCreateInfo presentQueueCreateInfo{};
+			presentQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			presentQueueCreateInfo.pNext = nullptr;
+			presentQueueCreateInfo.flags = 0;
+			presentQueueCreateInfo.queueFamilyIndex = surface.presentQueueFamilyIndex;
+			presentQueueCreateInfo.queueCount = 1;
+			presentQueueCreateInfo.pQueuePriorities = &presentQueuePriority;
 
-			if (score > bestPhysicalDeviceScore) {
-				bestPhysicalDeviceIndex = index;
-				bestPhysicalDeviceScore = score;
-			}
+			queueCreateInfos.emplace_back(presentQueueCreateInfo);
 		}
-
-		// Check the score of the best candidate.
-		if (bestPhysicalDeviceScore == 0) {
-			throw std::runtime_error("Could not select a suitable physical device.");
-		}
-
-		const VkPhysicalDevice& physicalDevice = physicalDevices[bestPhysicalDeviceIndex];
-
-		const int32 queueFamilyIndex = findQueueFamilyIndex(physicalDevice);
-		const float32 queuePriority = 1.0f;
-
-		VkDeviceQueueCreateInfo queueCreateInfo{};
-		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		queueCreateInfo.pNext = nullptr;
-		queueCreateInfo.flags = 0;
-		queueCreateInfo.queueFamilyIndex = queueFamilyIndex;
-		queueCreateInfo.queueCount = 1;
-		queueCreateInfo.pQueuePriorities = &queuePriority;
 
 		VkDeviceCreateInfo deviceCreateInfo{};
 		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		deviceCreateInfo.pNext = nullptr;
 		deviceCreateInfo.flags = 0;
-		deviceCreateInfo.queueCreateInfoCount = 1;
-		deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32>(queueCreateInfos.size());
+		deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
+		deviceCreateInfo.enabledExtensionCount = static_cast<uint32>(enabledExtensionNames.size());
+		deviceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
+		deviceCreateInfo.pEnabledFeatures = &physicalDevice.features;
 
-		// TODO: Specify enabled extensions
-		deviceCreateInfo.enabledExtensionCount = 0;
-		deviceCreateInfo.ppEnabledExtensionNames = nullptr;
-
-		// TODO: Specify enabled features
-		deviceCreateInfo.pEnabledFeatures = nullptr;
-
-		if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &object) != VK_SUCCESS) {
+		if (vkCreateDevice(physicalDevice.object, &deviceCreateInfo, nullptr, &object) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create device.");
 		}
+
+		vkGetDeviceQueue(object, physicalDevice.graphicsQueueFamilyIndex, 0, &graphicsQueue);
+		vkGetDeviceQueue(object, surface.presentQueueFamilyIndex, 0, &presentQueue);
 	}
 
 	VulkanDevice::~VulkanDevice() {
@@ -76,41 +81,5 @@ namespace ProjectA {
 
 	ShaderModule VulkanDevice::createShaderModule() const {
 		return VulkanShaderModule(object, VK_SHADER_STAGE_VERTEX_BIT, "");
-	}
-
-	int32 VulkanDevice::calculatePhysicalDeviceScore(const VkPhysicalDevice& physicalDevice) {
-		// TODO: Implement physical device score system.
-		return 1;
-	}
-
-	int32 VulkanDevice::findQueueFamilyIndex(const VkPhysicalDevice& physicalDevice) {
-		uint32 queueFamilyPropertyCount;
-
-		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyPropertyCount, nullptr);
-
-		if (queueFamilyPropertyCount == 0) {
-			throw std::runtime_error("Could not find device queues.");
-		}
-
-		std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertyCount);
-
-		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyPropertyCount, queueFamilyProperties.data());
-
-		int32 graphicsQueueFamilyIndex = 0;
-
-		// Find a queue family that handles graphics.
-		for (int32 index = 0; index < queueFamilyProperties.size(); index++) {
-			if (queueFamilyProperties[index].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-				graphicsQueueFamilyIndex = index;
-
-				break;
-			}
-
-			index++;
-		}
-
-		// TODO: Check surface support for found queue.
-
-		return graphicsQueueFamilyIndex;
 	}
 }
