@@ -3,10 +3,14 @@
 #include "Engine/Renderer/Buffer/BufferLayout.hpp"
 #include "Engine/Renderer/PipelineLayout.hpp"
 #include "Engine/Renderer/PrimitiveTopology.hpp"
+#include "Engine/Renderer/RenderPass.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
+#include "Engine/Renderer/Swapchain.hpp"
 
 namespace ProjectA {
 	struct RenderPipelineDescriptor {
+		ref<RenderPass> renderPass;
+		ref<Swapchain> swapchain;
 		ref<PipelineLayout> pipelineLayout;
 		BufferLayout vertexBufferLayout;
 		ref<ShaderModule> vertexShaderModule;
@@ -21,14 +25,6 @@ namespace ProjectA {
 			// TODO: Remove
 			virtual void bind() const = 0;
 			virtual void unbind() const = 0;
-
-			//virtual const std::vector<ref<VertexBuffer>>& getVertexBuffers() const = 0;
-
-			//virtual const ref<IndexBuffer>& getIndexBuffer() const = 0;
-
-			//virtual void addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) = 0;
-
-			//virtual void setIndexBuffer(const ref<IndexBuffer>& indexBuffer) = 0;
 
 			virtual void setUniform(const std::string& name, int32 value) const = 0;
 			virtual void setUniform(const std::string& name, const int32* value, uint32 count) const = 0;

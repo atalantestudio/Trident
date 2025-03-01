@@ -21,11 +21,17 @@ namespace ProjectA {
 
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) override;
 
+			ref<CommandBuffer> createCommandBuffer() const override;
+
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const override;
+
+			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const override;
 
 			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const override;
 
 			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const override;
+
+			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const override;
 
 		private:
 			#ifdef BUILD_MODE_DEBUG

@@ -32,6 +32,8 @@ namespace ProjectA {
 		vkGetBufferMemoryRequirements(device.object, object, &memoryRequirements);
 
 		device.allocateMemory(memoryRequirements);
+
+		vkBindBufferMemory(device.object, object, device.memory, 0);
 	}
 
 	VulkanBuffer::~VulkanBuffer() {

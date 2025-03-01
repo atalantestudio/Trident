@@ -15,7 +15,7 @@ namespace ProjectA {
 			static const Camera* camera;
 
 		public:
-			static void initialize(GLFWwindow* window);
+			static void initializeGraphicsApi(GLFWwindow* window);
 
 			static void destroy();
 
@@ -43,13 +43,22 @@ namespace ProjectA {
 			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
 
 			// TODO: Make non-static (and const)
+			static ref<CommandBuffer> createCommandBuffer();
+
+			// TODO: Make non-static (and const)
 			static ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor);
+
+			// TODO: Make non-static (and const)
+			static ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor);
 
 			// TODO: Make non-static (and const)
 			static ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor);
 
 			// TODO: Make non-static (and const)
 			static ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code);
+
+			// TODO: Make non-static (and const)
+			static ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor);
 
 		public:
 			virtual void render() const = 0;

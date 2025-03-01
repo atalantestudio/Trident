@@ -23,10 +23,12 @@ namespace ProjectA {
 		window->setEventCallback(BIND(Application::onEvent));
 
 		// Initialize graphics API.
-		Renderer::initialize(static_cast<GLFWwindow*>(window->getNativeWindow()));
+		Renderer::initializeGraphicsApi(static_cast<GLFWwindow*>(window->getNativeWindow()));
 
-		// Initialize 2D renderer.
-		Renderer2D::construct();
+		if (Renderer::graphicsApi == GraphicsAPI::OPENGL) {
+			// Initialize 2D renderer.
+			Renderer2D::construct();
+		}
 
 		imGuiLayer = new ImGuiLayer();
 
@@ -36,8 +38,9 @@ namespace ProjectA {
 	Application::~Application() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		Renderer::destroy();
-		Renderer2D::destroy();
+		if (Renderer::graphicsApi == GraphicsAPI::OPENGL) {
+			Renderer2D::destroy();
+		}
 	}
 
 	Window& Application::getWindow() {

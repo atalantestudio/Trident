@@ -13,7 +13,7 @@ namespace ProjectA {
 
 	scope<RendererAPI> Renderer::rendererApi = nullptr;
 
-	void Renderer::initialize(GLFWwindow* window) {
+	void Renderer::initializeGraphicsApi(GLFWwindow* window) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		switch (graphicsApi) {
@@ -37,8 +37,6 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(rendererApi != nullptr, "GraphicsAPI::NONE is not supported.");
 	}
-
-	void Renderer::destroy() {}
 
 	GraphicsAPI Renderer::getGraphicsApi() {
 		return graphicsApi;
@@ -67,8 +65,16 @@ namespace ProjectA {
 		return rendererApi->createBuffer(descriptor);
 	}
 
+	ref<CommandBuffer> Renderer::createCommandBuffer() {
+		return rendererApi->createCommandBuffer();
+	}
+
 	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) {
 		return rendererApi->createPipelineLayout(descriptor);
+	}
+
+	ref<RenderPass> Renderer::createRenderPass(const RenderPassDescriptor& descriptor) {
+		return rendererApi->createRenderPass(descriptor);
 	}
 
 	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) {
@@ -77,5 +83,9 @@ namespace ProjectA {
 
 	ref<ShaderModule> Renderer::createShaderModule(const ShaderStage stage, const std::string& code) {
 		return rendererApi->createShaderModule(stage, code);
+	}
+
+	ref<Swapchain> Renderer::createSwapchain(const SwapchainDescriptor& descriptor) {
+		return rendererApi->createSwapchain(descriptor);
 	}
 }

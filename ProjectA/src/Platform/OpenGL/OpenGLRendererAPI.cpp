@@ -46,13 +46,23 @@ namespace ProjectA {
 		glDrawElements(primitiveTopology, indexCount, GL_UNSIGNED_INT, nullptr);
 	}
 
-	// TODO: Implement openGL buffer creation.
+	// TODO: OpenGL generic buffer.
 	ref<Buffer> OpenGLRendererAPI::createBuffer(const BufferDescriptor& descriptor) {
 		return nullptr;
 	}
 
-	// TODO: Implement OpenGL pipeline layout creation.
+	// TODO: OpenGL command buffer.
+	ref<CommandBuffer> OpenGLRendererAPI::createCommandBuffer() const {
+		return nullptr;
+	}
+
+	// TODO: OpenGL pipeline layout.
 	ref<PipelineLayout> OpenGLRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
+		return nullptr;
+	}
+
+	// TODO: OpenGL render pass.
+	ref<RenderPass> OpenGLRendererAPI::createRenderPass(const RenderPassDescriptor& descriptor) const {
 		return nullptr;
 	}
 
@@ -61,12 +71,17 @@ namespace ProjectA {
 	}
 
 	ref<ShaderModule> OpenGLRendererAPI::createShaderModule(const ShaderStage stage, const std::string& code) const {
-		static constexpr GLenum shaderStages[2] = {
+		static constexpr GLenum shaderStages[] = {
 			GL_VERTEX_SHADER,
 			GL_FRAGMENT_SHADER,
 		};
 
 		return createRef<OpenGLShaderModule>(shaderStages[static_cast<uint32>(stage)], static_cast<const GLchar* const>(code.c_str()));
+	}
+
+	// TODO: OpenGL swapchain.
+	ref<Swapchain> OpenGLRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) const {
+		return nullptr;
 	}
 
 	#ifdef BUILD_MODE_DEBUG

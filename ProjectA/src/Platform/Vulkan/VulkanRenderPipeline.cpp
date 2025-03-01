@@ -2,11 +2,12 @@
 
 #include "Platform/Vulkan/VertexInputAttributeType.hpp"
 #include "Platform/Vulkan/VulkanPipelineLayout.hpp"
+#include "Platform/Vulkan/VulkanRenderPass.hpp"
 #include "Platform/Vulkan/VulkanRenderPipeline.hpp"
 #include "Platform/Vulkan/VulkanShaderModule.hpp"
 
 namespace ProjectA {
-	VulkanRenderPipeline::VulkanRenderPipeline(const VkDevice device, const VulkanSwapchain& swapchain, const VkRenderPass renderPass, const RenderPipelineDescriptor& descriptor) :
+	VulkanRenderPipeline::VulkanRenderPipeline(const VkDevice device, const RenderPipelineDescriptor& descriptor) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -69,17 +70,19 @@ namespace ProjectA {
 		inputAssemblyStateCreateInfo.topology = topologies[static_cast<uint32>(descriptor.primitiveTopology)];
 		inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
+		const VulkanSwapchain* swapchain = reinterpret_cast<const VulkanSwapchain*>(descriptor.swapchain.get());
+
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float32>(swapchain.imageExtent.width);
-		viewport.height = static_cast<float32>(swapchain.imageExtent.height);
+		viewport.width = static_cast<float32>(swapchain->imageExtent.width);
+		viewport.height = static_cast<float32>(swapchain->imageExtent.height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
 		VkRect2D scissor{};
 		scissor.offset = {0, 0};
-		scissor.extent = swapchain.imageExtent;
+		scissor.extent = swapchain->imageExtent;
 
 		VkPipelineViewportStateCreateInfo viewportStateCreateInfo{};
 		viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -169,7 +172,7 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 		graphicsPipelineCreateInfo.layout = reinterpret_cast<const VulkanPipelineLayout*>(descriptor.pipelineLayout.get())->object;
-		graphicsPipelineCreateInfo.renderPass = renderPass;
+		graphicsPipelineCreateInfo.renderPass = reinterpret_cast<const VulkanRenderPass*>(descriptor.renderPass.get())->object;
 		graphicsPipelineCreateInfo.subpass = 0;
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		graphicsPipelineCreateInfo.basePipelineIndex = -1;

@@ -1,9 +1,10 @@
 #include "pch.hpp"
 
+#include "Platform/Vulkan/VulkanRenderPass.hpp"
 #include "Platform/Vulkan/VulkanSwapchain.hpp"
 
 namespace ProjectA {
-	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VkDevice device) :
+	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VkDevice device, const SwapchainDescriptor& descriptor) :
 		device(device),
 		imageExtent(surface.capabilities.maxImageExtent)
 	{
@@ -53,6 +54,7 @@ namespace ProjectA {
 
 		images.resize(imageCount);
 		imageViews.resize(imageCount);
+		framebuffers.resize(imageCount);
 
 		vkGetSwapchainImagesKHR(device, object, &imageCount, images.data());
 
@@ -75,7 +77,22 @@ namespace ProjectA {
 			imageViewCreateInfo.subresourceRange.layerCount = 1;
 
 			if (vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageViews[i]) != VK_SUCCESS) {
-				throw std::runtime_error("Failed to create image view.");
+				throw std::runtime_error("Failed to create Vulkan swapchain image view.");
+			}
+
+			VkFramebufferCreateInfo framebufferCreateInfo{};
+			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferCreateInfo.pNext = nullptr;
+			framebufferCreateInfo.flags = 0;
+			framebufferCreateInfo.renderPass = reinterpret_cast<const VulkanRenderPass*>(descriptor.renderPass.get())->object;
+			framebufferCreateInfo.attachmentCount = 1;
+			framebufferCreateInfo.pAttachments = &imageViews[i];
+			framebufferCreateInfo.width = imageExtent.width;
+			framebufferCreateInfo.height = imageExtent.height;
+			framebufferCreateInfo.layers = 1;
+
+			if (vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &framebuffers[i]) != VK_SUCCESS) {
+				throw std::runtime_error("Failed to create Vulkan swapchain framebuffer.");
 			}
 		}
 	}
@@ -84,8 +101,10 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		for (uint32 i = 0; i < images.size(); i++) {
+			vkDestroyFramebuffer(device, framebuffers[i], nullptr);
 			vkDestroyImageView(device, imageViews[i], nullptr);
-			vkDestroyImage(device, images[i], nullptr);
+
+			// Images are implicitly destroyed by vkDestroySwapchainKHR.
 		}
 
 		vkDestroySwapchainKHR(device, object, nullptr);

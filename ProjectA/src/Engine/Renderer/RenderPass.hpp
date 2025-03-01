@@ -1,5 +1,10 @@
 #pragma once
 
 namespace ProjectA {
-	class RenderPass {};
+	struct RenderPassDescriptor {};
+
+	class RenderPass {
+		public:
+			virtual ~RenderPass() = default;
+	};
 }

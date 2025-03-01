@@ -112,8 +112,6 @@ namespace ProjectA {
 	VulkanInstance::~VulkanInstance() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		vkDestroyInstance(object, nullptr);
-
 		#ifdef DEBUG_ENABLE_MESSENGER
 			const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(object, "vkDestroyDebugUtilsMessengerEXT"));
 
@@ -123,6 +121,8 @@ namespace ProjectA {
 
 			vkDestroyDebugUtilsMessengerEXT(object, debugUtilsMessenger, nullptr);
 		#endif
+
+		vkDestroyInstance(object, nullptr);
 	}
 
 	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS

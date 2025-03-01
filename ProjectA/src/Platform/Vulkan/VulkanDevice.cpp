@@ -10,7 +10,8 @@ namespace ProjectA {
 	};
 
 	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface) :
-		physicalDevice(physicalDevice.object)
+		physicalDevice(physicalDevice.object),
+		memory(nullptr)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 

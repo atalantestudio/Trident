@@ -10,16 +10,17 @@
 namespace ProjectA {
 	class VulkanSwapchain : public Swapchain, public ObjectWrapper<VkSwapchainKHR> {
 		public:
-			VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VkDevice device);
+			VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VkDevice device, const SwapchainDescriptor& descriptor);
 
 			~VulkanSwapchain();
 
 		public:
 			const VkExtent2D imageExtent;
+			std::vector<VkImage> images;
+			std::vector<VkImageView> imageViews;
+			std::vector<VkFramebuffer> framebuffers;
 
 		private:
 			const VkDevice device;
-			std::vector<VkImage> images;
-			std::vector<VkImageView> imageViews;
 	};
 }

@@ -20,6 +20,7 @@ namespace ProjectA {
 
 		public:
 			VkDevice object;
+			VkDeviceMemory memory;
 
 		private:
 			static const std::vector<const char*> enabledExtensionNames;
@@ -28,6 +29,5 @@ namespace ProjectA {
 			const VkPhysicalDevice physicalDevice;
 			VkQueue graphicsQueue;
 			VkQueue presentQueue;
-			VkDeviceMemory memory;
 	};
 }
