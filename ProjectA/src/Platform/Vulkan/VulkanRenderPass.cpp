@@ -3,7 +3,11 @@
 #include "Platform/Vulkan/VulkanRenderPass.hpp"
 
 namespace ProjectA {
-	VulkanRenderPass::VulkanRenderPass(const VulkanSurface& surface, const VkDevice device) : device(device) {
+	VulkanRenderPass::VulkanRenderPass(const VulkanSurface& surface, const VkDevice device) :
+		device(device)
+	{
+		PROFILE_SCOPE(FUNC_SIG);
+
 		VkAttachmentDescription attachment{};
 		attachment.flags = 0;
 		attachment.format = surface.format.format;
@@ -57,6 +61,8 @@ namespace ProjectA {
 	}
 
 	VulkanRenderPass::~VulkanRenderPass() {
+		PROFILE_SCOPE(FUNC_SIG);
+
 		vkDestroyRenderPass(device, object, nullptr);
 	}
 }

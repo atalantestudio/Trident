@@ -19,6 +19,8 @@ namespace ProjectA {
 
 			void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const override;
 
+			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) override;
+
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const override;
 
 			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const override;

@@ -1,26 +1,47 @@
-#pragma once
-
-#include "Engine/Renderer/Buffer/VertexBuffer.hpp"
+#include "pch.hpp"
 
 namespace ProjectA {
-	class OpenGLVertexBuffer : public VertexBuffer {
-		public:
-			OpenGLVertexBuffer(uint32 size);
-			OpenGLVertexBuffer(float32* vertices, uint32 size);
+	/*OpenGLVertexBuffer::OpenGLVertexBuffer(uint32 size) {
+		PROFILE_SCOPE(FUNC_SIG);
 
-			~OpenGLVertexBuffer();
+		glCreateBuffers(1, &object);
 
-			const BufferLayout& getLayout() const override;
+		bind();
 
-			void setLayout(const BufferLayout& layout) override;
+		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+	}
 
-			void copyData(const void* data, uint32 size) override;
+	OpenGLVertexBuffer::OpenGLVertexBuffer(float32* vertices, uint32 size) {
+		PROFILE_SCOPE(FUNC_SIG);
 
-			// TODO: Remove
-			void bind() const override;
-			void unbind() const override;
+		glCreateBuffers(1, &object);
 
-		private:
-			BufferLayout layout;
-	};
+		bind();
+
+		glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+	}
+
+	OpenGLVertexBuffer::~OpenGLVertexBuffer() {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		glDeleteBuffers(1, &object);
+	}
+
+	void OpenGLVertexBuffer::copyData(const void* data, uint32 size) {
+		bind();
+
+		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+	}
+
+	void OpenGLVertexBuffer::bind() const {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		glBindBuffer(GL_ARRAY_BUFFER, object);
+	}
+
+	void OpenGLVertexBuffer::unbind() const {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}*/
 }

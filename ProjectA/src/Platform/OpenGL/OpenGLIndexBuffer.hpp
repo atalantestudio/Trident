@@ -1,21 +1,36 @@
-#pragma once
-
-#include "Engine/Renderer/Buffer/IndexBuffer.hpp"
+#include "pch.hpp"
 
 namespace ProjectA {
-	class OpenGLIndexBuffer : public IndexBuffer {
-		private:
-			uint32 count;
+	/*OpenGLIndexBuffer::OpenGLIndexBuffer(const uint32* indices, uint32 count) : count(count) {
+		PROFILE_SCOPE(FUNC_SIG);
 
-		public:
-			OpenGLIndexBuffer(const uint32* indices, uint32 count);
+		glCreateBuffers(1, &object);
 
-			~OpenGLIndexBuffer();
+		bind();
 
-			uint32 getCount() const override;
+		glBindBuffer(GL_ARRAY_BUFFER, object);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(uint32) * count, indices, GL_STATIC_DRAW);
+	}
 
-			void bind() const override;
+	OpenGLIndexBuffer::~OpenGLIndexBuffer() {
+		PROFILE_SCOPE(FUNC_SIG);
 
-			void unbind() const override;
-	};
+		glDeleteBuffers(1, &object);
+	}
+
+	uint32 OpenGLIndexBuffer::getCount() const {
+		return count;
+	}
+
+	void OpenGLIndexBuffer::bind() const {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object);
+	}
+
+	void OpenGLIndexBuffer::unbind() const {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}*/
 }

@@ -65,18 +65,18 @@ namespace ProjectA {
 		glBindVertexArray(0);
 	}
 
-	const std::vector<ref<VertexBuffer>>& OpenGLRenderPipeline::getVertexBuffers() const {
+	/*const std::vector<ref<VertexBuffer>>& OpenGLRenderPipeline::getVertexBuffers() const {
 		return vertexBuffers;
-	}
+	}*/
 
-	const ref<IndexBuffer>& OpenGLRenderPipeline::getIndexBuffer() const {
+	/*const ref<IndexBuffer>& OpenGLRenderPipeline::getIndexBuffer() const {
 		return indexBuffer;
-	}
+	}*/
 
-	void OpenGLRenderPipeline::addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) {
+	/*void OpenGLRenderPipeline::addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_ASSERT(vertexBuffer->getLayout().vertexAttributes.size(), "Vertex buffer has no layout.");
+		//ENGINE_ASSERT(vertexBuffer->getLayout().vertexAttributes.size(), "Vertex buffer has no layout.");
 
 		bind();
 
@@ -113,9 +113,9 @@ namespace ProjectA {
 		}
 
 		vertexBuffers.emplace_back(vertexBuffer);
-	}
+	}*/
 
-	void OpenGLRenderPipeline::setIndexBuffer(const ref<IndexBuffer>& indexBuffer) {
+	/*void OpenGLRenderPipeline::setIndexBuffer(const ref<IndexBuffer>& indexBuffer) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		bind();
@@ -123,7 +123,7 @@ namespace ProjectA {
 		indexBuffer->bind();
 
 		this->indexBuffer = indexBuffer;
-	}
+	}*/
 
 	void OpenGLRenderPipeline::setUniform(const std::string& name, int32 value) const {
 		PROFILE_SCOPE(FUNC_SIG);

@@ -14,23 +14,11 @@ namespace ProjectA {
 
 			~VulkanRenderPipeline();
 
-			// TODO: Remove
+			// --- TODO: Remove these implementations ---
+
 			void bind() const override;
 			void unbind() const override;
 
-			// TODO: Remove
-			const std::vector<ref<VertexBuffer>>& getVertexBuffers() const override;
-
-			// TODO: Remove
-			const ref<IndexBuffer>& getIndexBuffer() const override;
-
-			// TODO: Remove
-			void addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) override;
-
-			// TODO: Remove
-			void setIndexBuffer(const ref<IndexBuffer>& indexBuffer) override;
-
-			// TODO: Remove
 			void setUniform(const std::string& name, int32 value) const override;
 			void setUniform(const std::string& name, const int32* value, uint32 count) const override;
 			void setUniform(const std::string& name, float32 value) const override;

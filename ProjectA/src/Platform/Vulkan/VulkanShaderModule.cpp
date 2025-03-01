@@ -6,7 +6,7 @@ namespace ProjectA {
 	VulkanShaderModule::VulkanShaderModule(const VkDevice device, const VkShaderStageFlagBits stage, const std::string& code) :
 		device(device)
 	{
-		ENGINE_DEBUG("[VulkanShaderModule constructor]");
+		PROFILE_SCOPE(FUNC_SIG);
 
 		VkShaderModuleCreateInfo shaderModuleCreateInfo{};
 		shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -33,6 +33,8 @@ namespace ProjectA {
 	}
 
 	VulkanShaderModule::~VulkanShaderModule() {
+		PROFILE_SCOPE(FUNC_SIG);
+
 		vkDestroyShaderModule(device, object.module, nullptr);
 	}
 }

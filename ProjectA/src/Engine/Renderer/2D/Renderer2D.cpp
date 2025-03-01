@@ -2,6 +2,8 @@
 
 #include "Engine/Loader/FileLoader.hpp"
 #include "Engine/Renderer/2D/Renderer2D.hpp"
+#include "Engine/Renderer/Buffer/Buffer.hpp"
+#include "Engine/Renderer/Buffer/BufferUsage.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
@@ -27,7 +29,7 @@ namespace ProjectA {
 
 		ref<PipelineLayout> pipelineLayout;
 		ref<RenderPipeline> renderPipeline;
-		ref<VertexBuffer> vertexBuffer;
+		ref<Buffer> vertexBuffer;
 		uint32 quadCount = 0;
 		QuadVertex* vertexBufferOrigin = nullptr;
 		QuadVertex* vertexBufferPointer = nullptr;
@@ -74,7 +76,7 @@ namespace ProjectA {
 		renderPipelineDescriptor.vertexBufferLayout.add<vec4<float32>>(0, false);	// a_color
 		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);	// a_uv
 		renderPipelineDescriptor.vertexBufferLayout.add<int32>(0, false);			// a_texture
-		renderPipelineDescriptor.vertexBufferLayout.add<float32>(0, false);		// a_tilingFactor
+		renderPipelineDescriptor.vertexBufferLayout.add<float32>(0, false);			// a_tilingFactor
 
 		renderPipelineDescriptor.pipelineLayout = storage.pipelineLayout;
 
@@ -98,10 +100,14 @@ namespace ProjectA {
 		storage.renderPipeline = Renderer::createRenderPipeline(renderPipelineDescriptor);
 		storage.renderPipeline->bind();
 
-		storage.vertexBuffer = VertexBuffer::create(sizeof(QuadVertex) * Renderer2DStorage::MAX_VERTICES);
-		storage.vertexBuffer->setLayout(renderPipelineDescriptor.vertexBufferLayout);
+		BufferDescriptor vertexBufferDescriptor{};
+		vertexBufferDescriptor.size = sizeof(QuadVertex) * Renderer2DStorage::MAX_VERTICES;
+		vertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
 
-		storage.renderPipeline->addVertexBuffer(storage.vertexBuffer);
+		storage.vertexBuffer = Renderer::createBuffer(vertexBufferDescriptor);
+		//storage.vertexBuffer->setLayout(renderPipelineDescriptor.vertexBufferLayout);
+
+		//storage.renderPipeline->addVertexBuffer(storage.vertexBuffer);
 
 		storage.vertexBufferOrigin = new QuadVertex[Renderer2DStorage::MAX_VERTICES];
 
@@ -119,11 +125,17 @@ namespace ProjectA {
 			indexOffset += 4;
 		}
 
-		const ref<IndexBuffer> indexBuffer = IndexBuffer::create(indices, Renderer2DStorage::MAX_INDICES);
+		BufferDescriptor indexBufferDescriptor{};
+		indexBufferDescriptor.size = Renderer2DStorage::MAX_INDICES;
+		indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
+
+		const ref<Buffer> indexBuffer = Renderer::createBuffer(indexBufferDescriptor);
+
+		indexBuffer->write(static_cast<const void*>(indices));
 
 		delete[] indices;
 
-		storage.renderPipeline->setIndexBuffer(indexBuffer);
+		//storage.renderPipeline->setIndexBuffer(indexBuffer);
 
 		const uint32 defaultTextureData = 0xffffffff;
 
@@ -171,7 +183,7 @@ namespace ProjectA {
 			return;
 		}
 
-		storage.vertexBuffer->copyData(storage.vertexBufferOrigin, sizeof(QuadVertex) * storage.quadCount * 4);
+		//storage.vertexBuffer->copyData(storage.vertexBufferOrigin, sizeof(QuadVertex) * storage.quadCount * 4);
 
 		storage.renderPipeline->bind();
 

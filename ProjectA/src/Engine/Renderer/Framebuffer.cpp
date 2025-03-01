@@ -22,6 +22,4 @@ namespace ProjectA {
 
 		return nullptr;
 	}
-
-	Framebuffer::Framebuffer(const FramebufferDescriptor& descriptor) : descriptor(descriptor) {}
 }

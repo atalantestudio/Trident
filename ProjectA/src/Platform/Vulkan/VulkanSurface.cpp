@@ -8,6 +8,8 @@ namespace ProjectA {
 		format(),
 		presentMode()
 	{
+		PROFILE_SCOPE(FUNC_SIG);
+
 		// TODO: If no debug messenger, this fails with "Vulkan instance missing VK_KHR_win32_surface extension".
 		glfwCreateWindowSurface(instance, window, nullptr, &object);
 
@@ -80,6 +82,8 @@ namespace ProjectA {
 	}
 
 	VulkanSurface::~VulkanSurface() {
+		PROFILE_SCOPE(FUNC_SIG);
+
 		vkDestroySurfaceKHR(instance, object, nullptr);
 	}
 }

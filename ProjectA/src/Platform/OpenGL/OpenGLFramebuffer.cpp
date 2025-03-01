@@ -7,7 +7,7 @@
 namespace ProjectA {
 	static const uint32 maxFramebufferSize = 8192;
 
-	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferDescriptor& descriptor) : Framebuffer(descriptor) {
+	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferDescriptor& descriptor) {
 		reset();
 	}
 

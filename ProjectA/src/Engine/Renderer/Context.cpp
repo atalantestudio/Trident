@@ -1,10 +1,10 @@
 #include "pch.hpp"
 
-#include "Platform/OpenGL/OpenGLContext.hpp"
-#include "Platform/Vulkan/VulkanContext.hpp"
-
 #include "Engine/Renderer/Context.hpp"
 #include "Engine/Renderer/Renderer.hpp"
+
+#include "Platform/OpenGL/OpenGLContext.hpp"
+#include "Platform/Vulkan/VulkanContext.hpp"
 
 namespace ProjectA {
 	scope<Context> Context::create(void* window) {

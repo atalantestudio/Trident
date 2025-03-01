@@ -37,16 +37,21 @@ namespace ProjectA {
 	void OpenGLRendererAPI::drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		if (indexCount == 0) {
+		/*if (indexCount == 0) {
 			indexCount = renderPipeline->getIndexBuffer()->getCount();
-		}
+		}*/
 
 		const GLenum primitiveTopology = ((OpenGLRenderPipeline*) renderPipeline.get())->primitiveTopology;
 
 		glDrawElements(primitiveTopology, indexCount, GL_UNSIGNED_INT, nullptr);
 	}
 
-	// TODO: OpenGL pipeline layout.
+	// TODO: Implement openGL buffer creation.
+	ref<Buffer> OpenGLRendererAPI::createBuffer(const BufferDescriptor& descriptor) {
+		return nullptr;
+	}
+
+	// TODO: Implement OpenGL pipeline layout creation.
 	ref<PipelineLayout> OpenGLRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
 		return nullptr;
 	}

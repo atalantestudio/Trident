@@ -8,6 +8,8 @@ namespace ProjectA {
 	VulkanPipelineLayout::VulkanPipelineLayout(const VkDevice device, const PipelineLayoutDescriptor& descriptor) :
 		device(device)
 	{
+		PROFILE_SCOPE(FUNC_SIG);
+
 		std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
 
 		for (const DescriptorSetLayout& layout : descriptor.layouts) {
@@ -57,6 +59,8 @@ namespace ProjectA {
 	}
 
 	VulkanPipelineLayout::~VulkanPipelineLayout() {
+		PROFILE_SCOPE(FUNC_SIG);
+
 		vkDestroyPipelineLayout(device, object, nullptr);
 	}
 }

@@ -14,8 +14,6 @@ namespace ProjectA {
 		public:
 			static ref<Framebuffer> create(const FramebufferDescriptor& descriptor);
 
-			Framebuffer(const FramebufferDescriptor& descriptor);
-
 			virtual ~Framebuffer() = default;
 
 			virtual uint32 getColorAttachmentId() const = 0;

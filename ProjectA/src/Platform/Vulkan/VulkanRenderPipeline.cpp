@@ -9,6 +9,8 @@ namespace ProjectA {
 	VulkanRenderPipeline::VulkanRenderPipeline(const VkDevice device, const VulkanSwapchain& swapchain, const VkRenderPass renderPass, const RenderPipelineDescriptor& descriptor) :
 		device(device)
 	{
+		PROFILE_SCOPE(FUNC_SIG);
+
 		const std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
 			reinterpret_cast<const VulkanShaderModule*>(descriptor.vertexShaderModule.get())->object,
 			reinterpret_cast<const VulkanShaderModule*>(descriptor.fragmentShaderModule.get())->object,
@@ -180,32 +182,15 @@ namespace ProjectA {
 	}
 
 	VulkanRenderPipeline::~VulkanRenderPipeline() {
+		PROFILE_SCOPE(FUNC_SIG);
+
 		vkDestroyPipeline(device, object, nullptr);
 	}
 
 	// --- TODO: Remove these implementations ---
 
 	void VulkanRenderPipeline::bind() const {}
-
 	void VulkanRenderPipeline::unbind() const {}
-
-	const std::vector<ref<VertexBuffer>>& VulkanRenderPipeline::getVertexBuffers() const {
-		ENGINE_ASSERT(false, "TODO");
-
-		std::vector<ref<VertexBuffer>> a;
-
-		return a;
-	}
-
-	const ref<IndexBuffer>& VulkanRenderPipeline::getIndexBuffer() const {
-		ENGINE_ASSERT(false, "TODO");
-
-		return 0;
-	}
-
-	void VulkanRenderPipeline::addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) {}
-
-	void VulkanRenderPipeline::setIndexBuffer(const ref<IndexBuffer>& indexBuffer) {}
 
 	void VulkanRenderPipeline::setUniform(const std::string& name, int32 value) const {}
 	void VulkanRenderPipeline::setUniform(const std::string& name, const int32* value, uint32 count) const {}

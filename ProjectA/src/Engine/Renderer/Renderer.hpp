@@ -40,6 +40,9 @@ namespace ProjectA {
 		// TODO: Make protected
 		public:
 			// TODO: Make non-static (and const)
+			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
+
+			// TODO: Make non-static (and const)
 			static ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor);
 
 			// TODO: Make non-static (and const)

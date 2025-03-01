@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/Renderer/Buffer/Buffer.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 #include "Engine/Renderer/ShaderStage.hpp"
 
@@ -17,6 +18,8 @@ namespace ProjectA {
 			virtual void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const = 0;
 
 			// --- Graphics API provided by the engine ---
+
+			virtual ref<Buffer> createBuffer(const BufferDescriptor& descriptor) = 0;
 
 			virtual ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const = 0;
 

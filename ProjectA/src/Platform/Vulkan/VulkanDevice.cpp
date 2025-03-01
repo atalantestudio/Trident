@@ -9,7 +9,9 @@ namespace ProjectA {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
 
-	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface) : ObjectWrapper(nullptr) {
+	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface) :
+		physicalDevice(physicalDevice.object)
+	{
 		PROFILE_SCOPE(FUNC_SIG);
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -76,10 +78,51 @@ namespace ProjectA {
 	VulkanDevice::~VulkanDevice() {
 		PROFILE_SCOPE(FUNC_SIG);
 
+		vkFreeMemory(object, memory, nullptr);
 		vkDestroyDevice(object, nullptr);
 	}
 
-	ShaderModule VulkanDevice::createShaderModule() const {
-		return VulkanShaderModule(object, VK_SHADER_STAGE_VERTEX_BIT, "");
+	void VulkanDevice::allocateMemory(const VkMemoryRequirements& memoryRequirements) {
+		VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties{};
+
+		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &physicalDeviceMemoryProperties);
+
+		const VkMemoryPropertyFlags memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+		uint32 memoryTypeIndex;
+		bool found = false;
+
+		for (uint32 i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; i++) {
+			if ((memoryRequirements.memoryTypeBits & (1 << i)) && (physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & memoryPropertyFlags) == memoryPropertyFlags) {
+				memoryTypeIndex = i;
+				found = true;
+
+				break;
+			}
+		}
+
+		if (!found) {
+			throw std::runtime_error("Failed to find suitable memory type for the buffer.");
+		}
+
+		VkMemoryAllocateInfo memoryAllocateInfo{};
+		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		memoryAllocateInfo.pNext = nullptr;
+		memoryAllocateInfo.allocationSize = memoryRequirements.size;
+		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
+
+		if (vkAllocateMemory(object, &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to allocate memory for the buffer.");
+		}
+	}
+
+	void VulkanDevice::writeBuffer(const uint64 size, const void* data) const {
+		void* destination;
+
+		vkMapMemory(object, memory, 0, size, 0, &destination);
+
+		memcpy(destination, data, static_cast<std::size_t>(size));
+
+		vkUnmapMemory(object, memory);
 	}
 }

@@ -63,6 +63,10 @@ namespace ProjectA {
 
 	// --- Start of new Renderer parent class ---
 
+	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
+		return rendererApi->createBuffer(descriptor);
+	}
+
 	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) {
 		return rendererApi->createPipelineLayout(descriptor);
 	}

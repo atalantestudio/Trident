@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Platform/Vulkan/VulkanBuffer.hpp"
 #include "Platform/Vulkan/VulkanRendererAPI.hpp"
 #include "Platform/Vulkan/VulkanRenderPipeline.hpp"
 #include "Platform/Vulkan/VulkanShaderModule.hpp"
@@ -23,6 +24,12 @@ namespace ProjectA {
 		// 8. Create render pass.
 		// 9. Create pipeline layout.
 		// 10. Create graphics pipeline.
+		// 11. Create buffer.
+		// 12. Allocate memory for the buffer.
+	}
+
+	ref<Buffer> VulkanRendererAPI::createBuffer(const BufferDescriptor& descriptor) {
+		return createRef<VulkanBuffer>(physicalDevice.object, device, descriptor);
 	}
 
 	ref<PipelineLayout> VulkanRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {

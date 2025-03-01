@@ -3,7 +3,12 @@
 #include "Platform/Vulkan/VulkanSwapchain.hpp"
 
 namespace ProjectA {
-	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VkDevice device) : device(device), imageExtent(surface.capabilities.maxImageExtent) {
+	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VkDevice device) :
+		device(device),
+		imageExtent(surface.capabilities.maxImageExtent)
+	{
+		PROFILE_SCOPE(FUNC_SIG);
+
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
 		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		swapchainCreateInfo.pNext = nullptr;
@@ -76,6 +81,13 @@ namespace ProjectA {
 	}
 
 	VulkanSwapchain::~VulkanSwapchain() {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		for (uint32 i = 0; i < images.size(); i++) {
+			vkDestroyImageView(device, imageViews[i], nullptr);
+			vkDestroyImage(device, images[i], nullptr);
+		}
+
 		vkDestroySwapchainKHR(device, object, nullptr);
 	}
 }
