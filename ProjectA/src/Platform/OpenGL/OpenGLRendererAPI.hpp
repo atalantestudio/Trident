@@ -19,9 +19,11 @@ namespace ProjectA {
 
 			void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const override;
 
-			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const override;
+			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const override;
 
 			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const override;
+
+			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const override;
 
 		private:
 			#ifdef BUILD_MODE_DEBUG

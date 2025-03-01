@@ -7,7 +7,7 @@
 #include "Platform/Vulkan/VulkanRendererAPI.hpp"
 
 namespace ProjectA {
-	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::OPENGL;
+	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::VULKAN;
 
 	const Camera* Renderer::camera = nullptr;
 
@@ -63,11 +63,15 @@ namespace ProjectA {
 
 	// --- Start of new Renderer parent class ---
 
-	ref<ShaderModule> Renderer::createShaderModule(const ShaderStage stage, const std::string& code) {
-		return rendererApi->createShaderModule(stage, code);
+	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) {
+		return rendererApi->createPipelineLayout(descriptor);
 	}
 
 	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) {
 		return rendererApi->createRenderPipeline(descriptor);
+	}
+
+	ref<ShaderModule> Renderer::createShaderModule(const ShaderStage stage, const std::string& code) {
+		return rendererApi->createShaderModule(stage, code);
 	}
 }

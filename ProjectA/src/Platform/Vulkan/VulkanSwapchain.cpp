@@ -3,7 +3,7 @@
 #include "Platform/Vulkan/VulkanSwapchain.hpp"
 
 namespace ProjectA {
-	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VkDevice device) : device(device) {
+	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VkDevice device) : device(device), imageExtent(surface.capabilities.maxImageExtent) {
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
 		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		swapchainCreateInfo.pNext = nullptr;
@@ -12,7 +12,7 @@ namespace ProjectA {
 		swapchainCreateInfo.minImageCount = surface.capabilities.minImageCount;
 		swapchainCreateInfo.imageFormat = surface.format.format;
 		swapchainCreateInfo.imageColorSpace = surface.format.colorSpace;
-		swapchainCreateInfo.imageExtent = surface.capabilities.maxImageExtent;
+		swapchainCreateInfo.imageExtent = imageExtent;
 		swapchainCreateInfo.imageArrayLayers = 1;
 		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 

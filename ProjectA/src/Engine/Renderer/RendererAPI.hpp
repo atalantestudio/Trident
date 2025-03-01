@@ -18,8 +18,10 @@ namespace ProjectA {
 
 			// --- Graphics API provided by the engine ---
 
-			virtual ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const = 0;
+			virtual ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const = 0;
 
 			virtual ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const = 0;
+
+			virtual ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const = 0;
 	};
 }

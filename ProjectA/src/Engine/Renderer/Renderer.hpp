@@ -40,10 +40,13 @@ namespace ProjectA {
 		// TODO: Make protected
 		public:
 			// TODO: Make non-static (and const)
-			static ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code);
+			static ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor);
 
 			// TODO: Make non-static (and const)
 			static ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor);
+
+			// TODO: Make non-static (and const)
+			static ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code);
 
 		public:
 			virtual void render() const = 0;

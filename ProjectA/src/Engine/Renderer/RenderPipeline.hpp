@@ -2,14 +2,17 @@
 
 #include "Engine/Renderer/Buffer/IndexBuffer.hpp"
 #include "Engine/Renderer/Buffer/VertexBuffer.hpp"
+#include "Engine/Renderer/PipelineLayout.hpp"
 #include "Engine/Renderer/PrimitiveTopology.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
 
 namespace ProjectA {
 	struct RenderPipelineDescriptor {
+		ref<PipelineLayout> pipelineLayout;
+		BufferLayout vertexBufferLayout;
 		ref<ShaderModule> vertexShaderModule;
 		ref<ShaderModule> fragmentShaderModule;
-		PrimitiveTopology primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		PrimitiveTopology primitiveTopology;
 	};
 
 	class RenderPipeline {

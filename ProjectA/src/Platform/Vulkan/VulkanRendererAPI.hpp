@@ -7,6 +7,7 @@
 
 #include "Platform/Vulkan/VulkanDevice.hpp"
 #include "Platform/Vulkan/VulkanInstance.hpp"
+#include "Platform/Vulkan/VulkanPipelineLayout.hpp"
 #include "Platform/Vulkan/VulkanRenderPass.hpp"
 #include "Platform/Vulkan/VulkanSurface.hpp"
 #include "Platform/Vulkan/VulkanSwapchain.hpp"
@@ -28,9 +29,11 @@ namespace ProjectA {
 			// TODO: Implement
 			void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const override {}
 
-			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const override;
+			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const override;
 
 			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const override;
+
+			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const override;
 
 		private:
 			const VulkanInstance instance;

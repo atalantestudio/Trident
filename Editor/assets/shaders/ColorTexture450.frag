@@ -11,7 +11,7 @@ struct VertexOutput {
 
 layout(location = 0) flat in VertexOutput fragment_input;
 
-layout(binding = 0) uniform sampler2D u_textures[32];
+layout(/*set = 1, */binding = 0) uniform sampler2D u_textures[32];
 
 layout(location = 0) out vec4 color;
 

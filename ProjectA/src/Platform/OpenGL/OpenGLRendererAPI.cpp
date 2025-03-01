@@ -46,6 +46,15 @@ namespace ProjectA {
 		glDrawElements(primitiveTopology, indexCount, GL_UNSIGNED_INT, nullptr);
 	}
 
+	// TODO: OpenGL pipeline layout.
+	ref<PipelineLayout> OpenGLRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
+		return nullptr;
+	}
+
+	ref<RenderPipeline> OpenGLRendererAPI::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
+		return createRef<OpenGLRenderPipeline>(descriptor);
+	}
+
 	ref<ShaderModule> OpenGLRendererAPI::createShaderModule(const ShaderStage stage, const std::string& code) const {
 		static constexpr GLenum shaderStages[2] = {
 			GL_VERTEX_SHADER,
@@ -53,10 +62,6 @@ namespace ProjectA {
 		};
 
 		return createRef<OpenGLShaderModule>(shaderStages[static_cast<uint32>(stage)], static_cast<const GLchar* const>(code.c_str()));
-	}
-
-	ref<RenderPipeline> OpenGLRendererAPI::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
-		return createRef<OpenGLRenderPipeline>(descriptor);
 	}
 
 	#ifdef BUILD_MODE_DEBUG

@@ -14,6 +14,9 @@ namespace ProjectA {
 
 			~VulkanSwapchain();
 
+		public:
+			const VkExtent2D imageExtent;
+
 		private:
 			const VkDevice device;
 			std::vector<VkImage> images;

@@ -25,6 +25,7 @@ namespace ProjectA {
 		// TODO: Renderer capabilities class
 		static constexpr uint32 MAX_TEXTURE_SLOTS = 32;
 
+		ref<PipelineLayout> pipelineLayout;
 		ref<RenderPipeline> renderPipeline;
 		ref<VertexBuffer> vertexBuffer;
 		uint32 quadCount = 0;
@@ -46,37 +47,59 @@ namespace ProjectA {
 	void Renderer2D::construct() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		RenderPipelineDescriptor descriptor;
+		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
+		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		cameraDescriptorSetLayoutBinding.descriptorCount = 1;
+		cameraDescriptorSetLayoutBinding.stageFlags = static_cast<uint32>(ShaderStage::VERTEX);
+
+		DescriptorSetLayoutBinding texturesDescriptorSetLayoutBinding{};
+		texturesDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		texturesDescriptorSetLayoutBinding.descriptorCount = 32;
+		texturesDescriptorSetLayoutBinding.stageFlags = static_cast<uint32>(ShaderStage::FRAGMENT);
+
+		DescriptorSetLayout cameraDescriptorSetLayout;
+		cameraDescriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding);
+
+		DescriptorSetLayout texturesDescriptorSetLayout;
+		texturesDescriptorSetLayout.bindings.emplace_back(texturesDescriptorSetLayoutBinding);
+
+		PipelineLayoutDescriptor pipelineLayoutDescriptor;
+		pipelineLayoutDescriptor.layouts.emplace_back(cameraDescriptorSetLayout);
+		pipelineLayoutDescriptor.layouts.emplace_back(texturesDescriptorSetLayout);
+
+		storage.pipelineLayout = Renderer::createPipelineLayout(pipelineLayoutDescriptor);
+
+		RenderPipelineDescriptor renderPipelineDescriptor;
+		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);	// a_position
+		renderPipelineDescriptor.vertexBufferLayout.add<vec4<float32>>(0, false);	// a_color
+		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);	// a_uv
+		renderPipelineDescriptor.vertexBufferLayout.add<int32>(0, false);			// a_texture
+		renderPipelineDescriptor.vertexBufferLayout.add<float32>(0, false);		// a_tilingFactor
+
+		renderPipelineDescriptor.pipelineLayout = storage.pipelineLayout;
 
 		if (Renderer::getGraphicsApi() == GraphicsAPI::OPENGL) {
 			const std::string colorTextureVertexShaderCode = FileLoader::load("assets/shaders/ColorTexture.vert");
 			const std::string colorTextureFragmentShaderCode = FileLoader::load("assets/shaders/ColorTexture.frag");
 
-			descriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
-			descriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
+			renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
+			renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
 		}
 		else if (Renderer::getGraphicsApi() == GraphicsAPI::VULKAN) {
 			const std::string colorTextureVertexShaderCode = FileLoader::load("assets/shaders/ColorTexture.vert.spv");
 			const std::string colorTextureFragmentShaderCode = FileLoader::load("assets/shaders/ColorTexture.frag.spv");
 
-			descriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
-			descriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
+			renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
+			renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
 		}
 
-		descriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 
-		storage.renderPipeline = Renderer::createRenderPipeline(descriptor);
+		storage.renderPipeline = Renderer::createRenderPipeline(renderPipelineDescriptor);
 		storage.renderPipeline->bind();
 
-		BufferLayout vertexBufferLayout;
-		vertexBufferLayout.add<vec3<float32>>(0, false);	// a_position
-		vertexBufferLayout.add<vec4<float32>>(0, false);	// a_color
-		vertexBufferLayout.add<vec2<float32>>(0, false);	// a_uv
-		vertexBufferLayout.add<int32>(0, false);			// a_texture
-		vertexBufferLayout.add<float32>(0, false);			// a_tilingFactor
-
 		storage.vertexBuffer = VertexBuffer::create(sizeof(QuadVertex) * Renderer2DStorage::MAX_VERTICES);
-		storage.vertexBuffer->setLayout(vertexBufferLayout);
+		storage.vertexBuffer->setLayout(renderPipelineDescriptor.vertexBufferLayout);
 
 		storage.renderPipeline->addVertexBuffer(storage.vertexBuffer);
 

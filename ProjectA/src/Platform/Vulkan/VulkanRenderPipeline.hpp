@@ -5,10 +5,12 @@
 #include "Engine/ObjectWrapper.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 
+#include "Platform/Vulkan/VulkanSwapchain.hpp"
+
 namespace ProjectA {
 	class VulkanRenderPipeline : public RenderPipeline, public ObjectWrapper<VkPipeline> {
 		public:
-			VulkanRenderPipeline(const VkDevice device, const VkRenderPass renderPass, const RenderPipelineDescriptor& descriptor);
+			VulkanRenderPipeline(const VkDevice device, const VulkanSwapchain& swapchain, const VkRenderPass renderPass, const RenderPipelineDescriptor& descriptor);
 
 			~VulkanRenderPipeline();
 

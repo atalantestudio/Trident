@@ -21,19 +21,24 @@ namespace ProjectA {
 		// 6. Create device.
 		// 7. Create swapchain.
 		// 8. Create render pass.
-		// 9. Create graphics pipeline.
+		// 9. Create pipeline layout.
+		// 10. Create graphics pipeline.
+	}
+
+	ref<PipelineLayout> VulkanRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
+		return createRef<VulkanPipelineLayout>(device.object, descriptor);
+	}
+
+	ref<RenderPipeline> VulkanRendererAPI::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
+		return createRef<VulkanRenderPipeline>(device.object, swapchain, renderPass.object, descriptor);
 	}
 
 	ref<ShaderModule> VulkanRendererAPI::createShaderModule(const ShaderStage stage, const std::string& code) const {
-		static constexpr VkShaderStageFlagBits shaderStages[2] = {
+		static constexpr VkShaderStageFlagBits shaderStages[] = {
 			VK_SHADER_STAGE_VERTEX_BIT,
 			VK_SHADER_STAGE_FRAGMENT_BIT,
 		};
 
 		return createRef<VulkanShaderModule>(device.object, shaderStages[static_cast<uint32>(stage)], code);
-	}
-
-	ref<RenderPipeline> VulkanRendererAPI::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
-		return createRef<VulkanRenderPipeline>(device.object, renderPass.object, descriptor);
 	}
 }
