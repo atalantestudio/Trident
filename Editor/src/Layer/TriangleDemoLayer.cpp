@@ -59,36 +59,25 @@ namespace ProjectA {
 
 		device->resetFences();
 
-		commandBuffer->reset();
-
-		commandBuffer->begin();
-
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = renderPass;
 		beginRenderPassDescriptor.swapchain = swapchain;
 		beginRenderPassDescriptor.clearColor = {0.1f, 0.1f, 0.2f, 1.0f};
 		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
+		commandBuffer->reset();
+		commandBuffer->begin();
 		commandBuffer->beginRenderPass(beginRenderPassDescriptor);
-
 		commandBuffer->bindRenderPipeline(renderPipeline);
-
 		commandBuffer->bindVertexBuffer(vertexBuffer);
-
 		commandBuffer->setViewport({0.0f, static_cast<float32>(swapchain->getExtentHeight())}, {static_cast<float32>(swapchain->getExtentWidth()), -static_cast<float32>(swapchain->getExtentHeight())}, 0.0f, 1.0f);
-
 		commandBuffer->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
-
 		commandBuffer->draw(3, 1, 0);
-
 		commandBuffer->endRenderPass();
-
 		commandBuffer->end();
 
 		device->submit(commandBuffer);
-
 		device->present(swapchain, nextImageIndex);
-
 		device->waitIdle();
 	}
 
