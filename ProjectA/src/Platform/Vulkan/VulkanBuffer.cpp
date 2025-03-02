@@ -16,10 +16,7 @@ namespace ProjectA {
 		bufferCreateInfo.flags = 0;
 		bufferCreateInfo.size = size;
 		bufferCreateInfo.usage = getVkBufferUsageFlagBits(descriptor.usage);
-
-		// TODO: Automatically determine sharing mode.
 		bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
 		bufferCreateInfo.queueFamilyIndexCount = 0;
 		bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
@@ -32,8 +29,6 @@ namespace ProjectA {
 		vkGetBufferMemoryRequirements(device.object, object, &memoryRequirements);
 
 		device.allocateMemory(memoryRequirements);
-
-		vkBindBufferMemory(device.object, object, device.memory, 0);
 	}
 
 	VulkanBuffer::~VulkanBuffer() {
@@ -42,7 +37,11 @@ namespace ProjectA {
 		vkDestroyBuffer(device.object, object, nullptr);
 	}
 
-	void VulkanBuffer::write(const void* data) const {
+	void VulkanBuffer::write(const void* data, const uint64 size) const {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		vkBindBufferMemory(device.object, object, device.memory, 0);
+
 		device.writeBuffer(size, data);
 	}
 }

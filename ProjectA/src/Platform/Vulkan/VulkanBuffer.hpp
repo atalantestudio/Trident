@@ -13,7 +13,7 @@ namespace ProjectA {
 
 			~VulkanBuffer();
 
-			void write(const void* data) const override;
+			void write(const void* data, const uint64 size) const override;
 
 		public:
 			VkBuffer object;

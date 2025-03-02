@@ -56,8 +56,6 @@ namespace ProjectA {
 
 				break;
 			}
-
-			index++;
 		}
 
 		uint32 enabledExtensionCount = 0;

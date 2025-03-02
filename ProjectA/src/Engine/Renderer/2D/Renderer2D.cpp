@@ -98,7 +98,7 @@ namespace ProjectA {
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 
 		storage.renderPipeline = Renderer::createRenderPipeline(renderPipelineDescriptor);
-		storage.renderPipeline->bind();
+		//storage.renderPipeline->bind();
 
 		BufferDescriptor vertexBufferDescriptor{};
 		vertexBufferDescriptor.size = sizeof(QuadVertex) * Renderer2DStorage::MAX_VERTICES;
@@ -131,7 +131,7 @@ namespace ProjectA {
 
 		const ref<Buffer> indexBuffer = Renderer::createBuffer(indexBufferDescriptor);
 
-		indexBuffer->write(static_cast<const void*>(indices));
+		//indexBuffer->write(static_cast<const void*>(indices));
 
 		delete[] indices;
 
@@ -148,7 +148,7 @@ namespace ProjectA {
 			textureSamplers[i] = i;
 		}
 
-		storage.renderPipeline->setUniform("u_textures", textureSamplers, Renderer2DStorage::MAX_TEXTURE_SLOTS);
+		//storage.renderPipeline->setUniform("u_textures", textureSamplers, Renderer2DStorage::MAX_TEXTURE_SLOTS);
 
 		storage.quadVertexPositions[0] = {-0.5f, -0.5f, 0.0f, 1.0f};
 		storage.quadVertexPositions[1] = {-0.5f,  0.5f, 0.0f, 1.0f};
@@ -168,8 +168,8 @@ namespace ProjectA {
 	void Renderer2D::beginScene() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		storage.renderPipeline->bind();
-		storage.renderPipeline->setUniform("u_projectionView", camera->projectionView);
+		//storage.renderPipeline->bind();
+		//storage.renderPipeline->setUniform("u_projectionView", camera->projectionView);
 
 		storage.quadCount = 0;
 		storage.vertexBufferPointer = storage.vertexBufferOrigin;
@@ -185,13 +185,13 @@ namespace ProjectA {
 
 		//storage.vertexBuffer->copyData(storage.vertexBufferOrigin, sizeof(QuadVertex) * storage.quadCount * 4);
 
-		storage.renderPipeline->bind();
+		//storage.renderPipeline->bind();
 
 		for (uint32 slotIndex = 0; slotIndex < storage.currentSlotIndex; slotIndex++) {
 			storage.textureSlots[slotIndex]->bind(slotIndex);
 		}
 
-		Renderer::getRendererApi()->drawIndexed(storage.renderPipeline, storage.quadCount * 6);
+		//Renderer::getRendererApi()->drawIndexed(storage.renderPipeline, storage.quadCount * 6);
 
 		storage.statistics.drawCallCount++;
 	}

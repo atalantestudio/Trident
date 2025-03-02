@@ -25,7 +25,9 @@ namespace ProjectA {
 			#endif
 
 		private:
-			static const std::vector<const char*> enabledLayerNames;
+			#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
+				static const std::vector<const char*> enabledLayerNames;
+			#endif
 
 			VkDebugUtilsMessengerEXT debugUtilsMessenger;
 	};

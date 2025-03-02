@@ -6,6 +6,8 @@ namespace ProjectA {
 	VulkanCommandPool::VulkanCommandPool(const VulkanPhysicalDevice& physicalDevice, const VkDevice device) :
 		device(device)
 	{
+		PROFILE_SCOPE(FUNC_SIG);
+
 		VkCommandPoolCreateInfo commandPoolCreateInfo{};
 		commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		commandPoolCreateInfo.pNext = nullptr;
@@ -18,6 +20,8 @@ namespace ProjectA {
 	}
 
 	VulkanCommandPool::~VulkanCommandPool() {
+		PROFILE_SCOPE(FUNC_SIG);
+
 		vkDestroyCommandPool(device, object, nullptr);
 	}
 }

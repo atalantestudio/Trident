@@ -51,19 +51,19 @@ namespace ProjectA {
 		glDeleteVertexArrays(1, &vertexArrayObject);
 	}
 
-	void OpenGLRenderPipeline::bind() const {
+	/*void OpenGLRenderPipeline::bind() const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glBindVertexArray(vertexArrayObject);
 		glUseProgram(programObject);
-	}
+	}*/
 
-	void OpenGLRenderPipeline::unbind() const {		
+	/*void OpenGLRenderPipeline::unbind() const {		
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glUseProgram(0);
 		glBindVertexArray(0);
-	}
+	}*/
 
 	/*const std::vector<ref<VertexBuffer>>& OpenGLRenderPipeline::getVertexBuffers() const {
 		return vertexBuffers;
@@ -125,7 +125,7 @@ namespace ProjectA {
 		this->indexBuffer = indexBuffer;
 	}*/
 
-	void OpenGLRenderPipeline::setUniform(const std::string& name, int32 value) const {
+	/*void OpenGLRenderPipeline::setUniform(const std::string& name, int32 value) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		const GLint location = getUniformLocation(name);
@@ -186,7 +186,7 @@ namespace ProjectA {
 		_mm_store_ps(&entries[12], value[3].m);
 
 		glUniformMatrix4fv(location, 1, GL_FALSE, entries);
-	}
+	}*/
 
 	GLint OpenGLRenderPipeline::getUniformLocation(const std::string& name) const {
 		const GLint location = glGetUniformLocation(programObject, name.c_str());

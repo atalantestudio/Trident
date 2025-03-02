@@ -17,32 +17,33 @@ namespace ProjectA {
 
 		pipelineLayout = Renderer::createPipelineLayout(pipelineLayoutDescriptor);
 
-		const std::string vertexShaderModuleCode = FileLoader::load("assets/shaders/TriangleDemo.vert.spv");
-		const std::string fragmentShaderModuleCode = FileLoader::load("assets/shaders/TriangleDemo.frag.spv");
+		const std::string vertexShaderModuleCode = FileLoader::load("assets/shaders/vert.spv");
+		const std::string fragmentShaderModuleCode = FileLoader::load("assets/shaders/frag.spv");
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.swapchain = swapchain;
 		renderPipelineDescriptor.renderPass = renderPass;
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
+		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
+		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
 		renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, vertexShaderModuleCode);
 		renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, fragmentShaderModuleCode);
-		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_STRIP;
+		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 
 		renderPipeline = Renderer::createRenderPipeline(renderPipelineDescriptor);
 
-		constexpr float32 vertexBufferData[] = {
-			-0.5, -0.5,
-			 0.5, -0.5,
-			 0.0,  0.5,
+		const std::vector<TriangleDemoVertex> vertexBufferData = {
+			{{-0.5f, -0.5f,  0.0f},    {1.0f, 0.0f, 0.0f}},
+			{{ 0.0f,  0.5f,  0.0f},    {0.0f, 1.0f, 0.0f}},
+			{{ 0.5f, -0.5f,  0.0f},    {0.0f, 0.0f, 1.0f}},
 		};
 
 		BufferDescriptor vertexBufferDescriptor{};
-		vertexBufferDescriptor.size = sizeof(float32) * 6;
+		vertexBufferDescriptor.size = sizeof(vertexBufferData) * sizeof(TriangleDemoVertex);
 		vertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
 
 		vertexBuffer = Renderer::createBuffer(vertexBufferDescriptor);
-		vertexBuffer->write(vertexBufferData);
+		vertexBuffer->write(vertexBufferData.data(), vertexBufferData.size() * sizeof(TriangleDemoVertex));
 
 		commandBuffer = Renderer::createCommandBuffer();
 	}
@@ -50,16 +51,23 @@ namespace ProjectA {
 	void TriangleDemoLayer::unbind() {}
 
 	void TriangleDemoLayer::update(float32 deltaTime) {
-		const vec2<float32> size = {1280.0f, 720.0f};
+		const ref<Device>& device = Renderer::getDevice();
+
+		device->waitForFences();
+
+		const uint32 nextImageIndex = device->acquireNextImage(swapchain);
+
+		device->resetFences();
+
+		commandBuffer->reset();
 
 		commandBuffer->begin();
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = renderPass;
 		beginRenderPassDescriptor.swapchain = swapchain;
-		beginRenderPassDescriptor.clearColor = {1.0f, 0.2f, 0.0f, 1.0f};
-		beginRenderPassDescriptor.depth = 0.0f;
-		beginRenderPassDescriptor.stencil = 0;
+		beginRenderPassDescriptor.clearColor = {0.1f, 0.1f, 0.2f, 1.0f};
+		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
 		commandBuffer->beginRenderPass(beginRenderPassDescriptor);
 
@@ -67,15 +75,21 @@ namespace ProjectA {
 
 		commandBuffer->bindVertexBuffer(vertexBuffer);
 
-		commandBuffer->setViewport({0.0f, 0.0f}, size, 0.0f, 1.0f);
+		commandBuffer->setViewport({0.0f, static_cast<float32>(swapchain->getExtentHeight())}, {static_cast<float32>(swapchain->getExtentWidth()), -static_cast<float32>(swapchain->getExtentHeight())}, 0.0f, 1.0f);
 
-		commandBuffer->setScissor(0, 0, 1280, 720);
+		commandBuffer->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 
 		commandBuffer->draw(3, 1, 0);
 
 		commandBuffer->endRenderPass();
 
 		commandBuffer->end();
+
+		device->submit(commandBuffer);
+
+		device->present(swapchain, nextImageIndex);
+
+		device->waitIdle();
 	}
 
 	void TriangleDemoLayer::renderImGui() {}

@@ -39,6 +39,8 @@ namespace ProjectA {
 
 		// TODO: Make protected
 		public:
+			static ref<Device> getDevice();
+
 			// TODO: Make non-static (and const)
 			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
 

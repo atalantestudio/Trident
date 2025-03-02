@@ -18,12 +18,14 @@ namespace ProjectA {
 
 	template<>
 	static inline uint32 getAttributeSize<vec2<float32>>() {
-		return sizeof(float32) * 2;
+		//return sizeof(float32) * 2;
+		return sizeof(float32) * 4;
 	}
 
 	template<>
 	static inline uint32 getAttributeSize<vec3<float32>>() {
-		return sizeof(float32) * 3;
+		//return sizeof(float32) * 3;
+		return sizeof(float32) * 4;
 	}
 
 	template<>

@@ -11,13 +11,7 @@ namespace ProjectA {
 		public:
 			OpenGLRendererAPI();
 
-			void setViewport(int32 x, int32, uint32 width, uint32 height) const override;
-
-			void setClearColor(const vec4<float32>& color) const override;
-
-			void clear() const override;
-
-			void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const override;
+			ref<Device> getDevice() const override;
 
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) override;
 

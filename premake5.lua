@@ -152,13 +152,22 @@ project "Editor"
 	}
 
 	includedirs {
+		"ProjectA/vendor/glfw/glfw/include", -- TODO: Temporary
 		"ProjectA/src",
 		"ProjectA/vendor",
 		"ProjectA/vendor/lyah",
+		vulkansdk .. "/Include", -- TODO: Temporary
+	}
+
+	libdirs {
+		vulkansdk .. "/Lib", -- TODO: Temporary
 	}
 
 	links {
+		"glfw", -- TODO: Temporary
+		"opengl32.lib", -- TODO: Temporary
 		"ProjectA",
+		"vulkan-1.lib", -- TODO: Temporary
 	}
 
 	filter "system:windows"

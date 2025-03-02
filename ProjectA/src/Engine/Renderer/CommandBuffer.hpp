@@ -11,6 +11,7 @@ namespace ProjectA {
 		vec4<float32> clearColor;
 		float32 depth;
 		uint32 stencil;
+		uint32 nextImageIndex;
 	};
 
 	class CommandBuffer {

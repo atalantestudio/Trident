@@ -17,7 +17,7 @@ namespace ProjectA {
 		glDeleteBuffers(1, &object);
 	}
 
-	void OpenGLBuffer::write(const void* data) const {
+	void OpenGLBuffer::write(const void* data, const std::size_t size) const {
 		glBindBuffer(binding, object);
 
 		glBufferData(binding, size, data, GL_STATIC_DRAW);

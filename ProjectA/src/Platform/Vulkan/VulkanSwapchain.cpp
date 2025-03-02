@@ -10,12 +10,14 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		const uint32 minImageCount = surface.capabilities.minImageCount + 1;
+
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
 		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		swapchainCreateInfo.pNext = nullptr;
 		swapchainCreateInfo.flags = 0;
 		swapchainCreateInfo.surface = surface.object;
-		swapchainCreateInfo.minImageCount = surface.capabilities.minImageCount;
+		swapchainCreateInfo.minImageCount = minImageCount;
 		swapchainCreateInfo.imageFormat = surface.format.format;
 		swapchainCreateInfo.imageColorSpace = surface.format.colorSpace;
 		swapchainCreateInfo.imageExtent = imageExtent;
@@ -35,9 +37,6 @@ namespace ProjectA {
 			swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
 		}
 
-		swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		swapchainCreateInfo.queueFamilyIndexCount = 0;
-		swapchainCreateInfo.pQueueFamilyIndices = nullptr;
 		swapchainCreateInfo.preTransform = surface.capabilities.currentTransform;
 		swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 		swapchainCreateInfo.presentMode = surface.presentMode;
@@ -108,5 +107,13 @@ namespace ProjectA {
 		}
 
 		vkDestroySwapchainKHR(device, object, nullptr);
+	}
+
+	uint32 VulkanSwapchain::getExtentWidth() const {
+		return imageExtent.width;
+	}
+
+	uint32 VulkanSwapchain::getExtentHeight() const {
+		return imageExtent.height;
 	}
 }

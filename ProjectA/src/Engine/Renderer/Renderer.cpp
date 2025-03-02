@@ -56,10 +56,14 @@ namespace ProjectA {
 	}*/
 
 	void Renderer::onWindowResize(uint32 width, uint32 height) {
-		rendererApi->setViewport(0, 0, width, height);
+		//rendererApi->setViewport(0, 0, width, height);
 	}
 
 	// --- Start of new Renderer parent class ---
+
+	ref<Device> Renderer::getDevice() {
+		return rendererApi->getDevice();
+	}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
 		return rendererApi->createBuffer(descriptor);

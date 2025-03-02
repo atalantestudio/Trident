@@ -28,8 +28,6 @@ namespace ProjectA {
 		object.module = shaderModule;
 		object.pName = "main";
 		object.pSpecializationInfo = nullptr;
-
-		ENGINE_TRACE("Created Vulkan shader module successfully.");
 	}
 
 	VulkanShaderModule::~VulkanShaderModule() {

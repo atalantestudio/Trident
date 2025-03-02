@@ -6,11 +6,11 @@
 
 namespace ProjectA {
 	// TODO: Pass enabled layer names as parameter.
-	const std::vector<const char*> VulkanInstance::enabledLayerNames = {
-		#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
+	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
+		const std::vector<const char*> VulkanInstance::enabledLayerNames = {
 			"VK_LAYER_KHRONOS_validation",
-		#endif
-	};
+		};
+	#endif
 
 	VulkanInstance::VulkanInstance() {
 		PROFILE_SCOPE(FUNC_SIG);
@@ -40,16 +40,16 @@ namespace ProjectA {
 		VkApplicationInfo applicationInfo{};
 		applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 
-		// TODO: Application name. Same as window name?
+		// TODO: Automatically determine application name. Same as window name?
 		applicationInfo.pApplicationName = "ApplicationName";
 
-		// TODO: Application version.
+		// TODO: Automatically determine application version.
 		applicationInfo.applicationVersion = VK_API_VERSION_1_0;
 
-		// TODO: Engine name.
+		// TODO: Automatically determine engine name.
 		applicationInfo.pEngineName = "EngineName";
 
-		// TODO: Engine version.
+		// TODO: Automatically determine engine version.
 		applicationInfo.engineVersion = VK_API_VERSION_1_0;
 
 		applicationInfo.apiVersion = VK_API_VERSION_1_0;
@@ -127,8 +127,6 @@ namespace ProjectA {
 
 	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
 		void VulkanInstance::checkInstanceLayers() {
-			PROFILE_SCOPE(FUNC_SIG);
-
 			uint32 layerPropertyCount;
 
 			vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
@@ -140,7 +138,7 @@ namespace ProjectA {
 			ENGINE_TRACE("Instance layers:");
 
 			for (const VkLayerProperties& layerProperties : layerProperties) {
-				ENGINE_TRACE(layerProperties.layerName);
+				ENGINE_TRACE("- []", layerProperties.layerName);
 			}
 		}
 	#endif

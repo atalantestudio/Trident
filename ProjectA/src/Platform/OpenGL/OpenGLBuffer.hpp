@@ -11,7 +11,7 @@ namespace ProjectA {
 
 			~OpenGLBuffer();
 
-			void write(const void* data) const override;
+			void write(const void* data, const std::size_t size) const override;
 
 		private:
 			GLuint object;

@@ -4,7 +4,9 @@
 
 #include "Engine/Renderer/Device.hpp"
 
+#include "Platform/Vulkan/VulkanFence.hpp"
 #include "Platform/Vulkan/VulkanPhysicalDevice.hpp"
+#include "Platform/Vulkan/VulkanSemaphore.hpp"
 #include "Platform/Vulkan/VulkanSurface.hpp"
 
 namespace ProjectA {
@@ -18,6 +20,18 @@ namespace ProjectA {
 
 			void writeBuffer(const uint64 size, const void* data) const;
 
+			void waitForFences() const override;
+
+			void resetFences() const override;
+
+			uint32 acquireNextImage(const ref<Swapchain>& swapchain) const override;
+
+			void submit(const ref<CommandBuffer>& commandBuffer) const override;
+
+			void present(const ref<Swapchain>& swapchain, const uint32 imageIndex) const override;
+
+			void waitIdle() const override;
+
 		public:
 			VkDevice object;
 			VkDeviceMemory memory;
@@ -29,5 +43,8 @@ namespace ProjectA {
 			const VkPhysicalDevice physicalDevice;
 			VkQueue graphicsQueue;
 			VkQueue presentQueue;
+			ref<VulkanSemaphore> acquireNextImageSemaphore;
+			ref<VulkanSemaphore> signalSemaphore;
+			ref<VulkanFence> flightFence;
 	};
 }

@@ -4,10 +4,12 @@
 
 #include "Engine/Renderer/CommandBuffer.hpp"
 
+#include "Platform/Vulkan/VulkanDevice.hpp"
+
 namespace ProjectA {
 	class VulkanCommandBuffer : public CommandBuffer {
 		public:
-			VulkanCommandBuffer(const VkDevice device, const VkCommandPool commandPool);
+			VulkanCommandBuffer(const VulkanDevice& device, const VkCommandPool commandPool);
 
 			~VulkanCommandBuffer();
 
@@ -35,7 +37,7 @@ namespace ProjectA {
 			VkCommandBuffer object;
 
 		private:
-			const VkDevice device;
+			const VulkanDevice& device;
 			const VkCommandPool commandPool;
 	};
 }

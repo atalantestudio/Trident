@@ -14,6 +14,9 @@ namespace ProjectA {
 
 			~VulkanSwapchain();
 
+			uint32 getExtentWidth() const override;
+			uint32 getExtentHeight() const override;
+
 		public:
 			const VkExtent2D imageExtent;
 			std::vector<VkImage> images;

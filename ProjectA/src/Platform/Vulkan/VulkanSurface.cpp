@@ -14,7 +14,7 @@ namespace ProjectA {
 		glfwCreateWindowSurface(instance, window, nullptr, &object);
 
 		{
-			VkBool32 supported = VK_FALSE;
+			VkBool32 supported;
 
 			vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice.object, physicalDevice.graphicsQueueFamilyIndex, object, &supported);
 
@@ -35,19 +35,19 @@ namespace ProjectA {
 
 			vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice.object, object, &formatCount, formats.data());
 
-			bool selectedFormat = false;
+			bool selected = false;
 
 			for (const VkSurfaceFormatKHR& format : formats) {
 				if (format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR && format.format == VK_FORMAT_B8G8R8A8_SRGB) {
 					this->format = format;
 
-					selectedFormat = true;
+					selected = true;
 
 					break;
 				}
 			}
 
-			if (!selectedFormat) {
+			if (!selected) {
 				format = formats[0];
 			}
 		}
@@ -62,19 +62,19 @@ namespace ProjectA {
 
 			vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice.object, object, &presentModeCount, presentModes.data());
 
-			bool selectedPresentMode = false;
+			bool selected = false;
 
 			for (const VkPresentModeKHR& presentMode : presentModes) {
 				if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
 					this->presentMode = presentMode;
 
-					selectedPresentMode = true;
+					selected = true;
 
 					break;
 				}
 			}
 
-			if (!selectedPresentMode) {
+			if (!selected) {
 				// VK_PRESENT_MODE_FIFO_KHR is guaranteed to be always available.
 				presentMode = VK_PRESENT_MODE_FIFO_KHR;
 			}

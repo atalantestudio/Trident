@@ -2,6 +2,7 @@
 
 #include "Engine/Renderer/Buffer/Buffer.hpp"
 #include "Engine/Renderer/CommandBuffer.hpp"
+#include "Engine/Renderer/Device.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 #include "Engine/Renderer/ShaderStage.hpp"
 
@@ -10,15 +11,7 @@ namespace ProjectA {
 		public:
 			virtual ~RendererAPI() = default;
 
-			virtual void setViewport(int32 x, int32, uint32 width, uint32 height) const = 0;
-
-			virtual void setClearColor(const vec4<float32>& color) const = 0;
-
-			virtual void clear() const = 0;
-
-			virtual void drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const = 0;
-
-			// --- Graphics API provided by the engine ---
+			virtual ref<Device> getDevice() const = 0;
 
 			// (Vulkan) This cannot be const because allocation alters the device's memory.
 			virtual ref<Buffer> createBuffer(const BufferDescriptor& descriptor) = 0;

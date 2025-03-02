@@ -11,8 +11,8 @@ namespace ProjectA {
 		instance(),
 		physicalDevice(instance.object),
 		surface(instance.object, physicalDevice, window),
-		device(physicalDevice, surface),
-		commandPool(physicalDevice, device.object)
+		device(createRef<VulkanDevice>(physicalDevice, surface)),
+		commandPool(physicalDevice, device->object)
 	{
 		// 1. Create instance.
 		// 2. Select physical device.
@@ -20,7 +20,7 @@ namespace ProjectA {
 		// 4. Check if the physical device supports the surface.
 		// 5. Get capabilities, extent, format and present mode of the surface with the physical device.
 		// 6. Create device.
-		// 7.Create command pool.
+		// 7. Create command pool.
 
 		// 1. Create swapchain.
 		// 2. Create render pass.
@@ -30,24 +30,28 @@ namespace ProjectA {
 		// 6. Allocate memory for the buffer.
 	}
 
+	ref<Device> VulkanRendererAPI::getDevice() const {
+		return device;
+	}
+
 	ref<Buffer> VulkanRendererAPI::createBuffer(const BufferDescriptor& descriptor) {
-		return createRef<VulkanBuffer>(physicalDevice.object, device, descriptor);
+		return createRef<VulkanBuffer>(physicalDevice.object, *device.get(), descriptor);
 	}
 
 	ref<CommandBuffer> VulkanRendererAPI::createCommandBuffer() const {
-		return createRef<VulkanCommandBuffer>(device.object, commandPool.object);
+		return createRef<VulkanCommandBuffer>(*device.get(), commandPool.object);
 	}
 
 	ref<PipelineLayout> VulkanRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
-		return createRef<VulkanPipelineLayout>(device.object, descriptor);
+		return createRef<VulkanPipelineLayout>(device->object, descriptor);
 	}
 
 	ref<RenderPass> VulkanRendererAPI::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		return createRef<VulkanRenderPass>(surface, device.object, descriptor);
+		return createRef<VulkanRenderPass>(surface, device->object, descriptor);
 	}
 
 	ref<RenderPipeline> VulkanRendererAPI::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
-		return createRef<VulkanRenderPipeline>(device.object, descriptor);
+		return createRef<VulkanRenderPipeline>(device->object, descriptor);
 	}
 
 	ref<ShaderModule> VulkanRendererAPI::createShaderModule(const ShaderStage stage, const std::string& code) const {
@@ -56,10 +60,10 @@ namespace ProjectA {
 			VK_SHADER_STAGE_FRAGMENT_BIT,
 		};
 
-		return createRef<VulkanShaderModule>(device.object, shaderStages[static_cast<uint32>(stage)], code);
+		return createRef<VulkanShaderModule>(device->object, shaderStages[static_cast<uint32>(stage)], code);
 	}
 
 	ref<Swapchain> VulkanRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return createRef<VulkanSwapchain>(physicalDevice, surface, device.object, descriptor);
+		return createRef<VulkanSwapchain>(physicalDevice, surface, device->object, descriptor);
 	}
 }

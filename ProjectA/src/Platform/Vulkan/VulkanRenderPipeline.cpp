@@ -29,17 +29,25 @@ namespace ProjectA {
 			vertexInputAttributeDescriptions.emplace_back(vertexInputAttributeDescription);
 		}
 
-		VkVertexInputBindingDescription bindingDescription{};
-		bindingDescription.binding = 0;
-		bindingDescription.stride = descriptor.vertexBufferLayout.stride;
-		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
 		VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo{};
 		vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 		vertexInputStateCreateInfo.pNext = nullptr;
 		vertexInputStateCreateInfo.flags = 0;
-		vertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;
-		vertexInputStateCreateInfo.pVertexBindingDescriptions = &bindingDescription;
+
+		if (vertexInputAttributeDescriptions.empty()) {
+			vertexInputStateCreateInfo.vertexBindingDescriptionCount = 0;
+			vertexInputStateCreateInfo.pVertexBindingDescriptions = nullptr;
+		}
+		else {
+			VkVertexInputBindingDescription vertexInputBindingDescription{};
+			vertexInputBindingDescription.binding = 0;
+			vertexInputBindingDescription.stride = descriptor.vertexBufferLayout.stride;
+			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+			vertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;
+			vertexInputStateCreateInfo.pVertexBindingDescriptions = &vertexInputBindingDescription;
+		}
+
 		vertexInputStateCreateInfo.vertexAttributeDescriptionCount = static_cast<uint32>(vertexInputAttributeDescriptions.size());
 		vertexInputStateCreateInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
 
@@ -108,7 +116,7 @@ namespace ProjectA {
 		rasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
 		rasterizationStateCreateInfo.lineWidth = 1.0f;
 
-		const VkSampleMask sampleMask = 0;
+		const VkSampleMask sampleMask = 1;
 
 		VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo{};
 		multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -189,17 +197,4 @@ namespace ProjectA {
 
 		vkDestroyPipeline(device, object, nullptr);
 	}
-
-	// --- TODO: Remove these implementations ---
-
-	void VulkanRenderPipeline::bind() const {}
-	void VulkanRenderPipeline::unbind() const {}
-
-	void VulkanRenderPipeline::setUniform(const std::string& name, int32 value) const {}
-	void VulkanRenderPipeline::setUniform(const std::string& name, const int32* value, uint32 count) const {}
-	void VulkanRenderPipeline::setUniform(const std::string& name, float32 value) const {}
-	void VulkanRenderPipeline::setUniform(const std::string& name, const vec2<float32>& value) const {}
-	void VulkanRenderPipeline::setUniform(const std::string& name, const vec3<float32>& value) const {}
-	void VulkanRenderPipeline::setUniform(const std::string& name, const vec4<float32>& value) const {}
-	void VulkanRenderPipeline::setUniform(const std::string& name, const mat4x4<float32>& value) const {}
 }

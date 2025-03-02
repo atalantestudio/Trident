@@ -20,30 +20,34 @@ namespace ProjectA {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
-	void OpenGLRendererAPI::setViewport(int32 x, int32 y, uint32 width, uint32 height) const {
+	/*void OpenGLRendererAPI::setViewport(int32 x, int32 y, uint32 width, uint32 height) const {
 		glViewport(x, y, width, height);
-	}
+	}*/
 
-	void OpenGLRendererAPI::setClearColor(const vec4<float32>& color) const {
+	/*void OpenGLRendererAPI::setClearColor(const vec4<float32>& color) const {
 		glClearColor(color[0], color[1], color[2], color[3]);
-	}
+	}*/
 
-	void OpenGLRendererAPI::clear() const {
+	/*void OpenGLRendererAPI::clear() const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
+	}*/
 
-	void OpenGLRendererAPI::drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const {
+	/*void OpenGLRendererAPI::drawIndexed(const ref<RenderPipeline>& renderPipeline, uint32 indexCount) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		/*if (indexCount == 0) {
+		if (indexCount == 0) {
 			indexCount = renderPipeline->getIndexBuffer()->getCount();
-		}*/
+		}
 
 		const GLenum primitiveTopology = ((OpenGLRenderPipeline*) renderPipeline.get())->primitiveTopology;
 
 		glDrawElements(primitiveTopology, indexCount, GL_UNSIGNED_INT, nullptr);
+	}*/
+
+	ref<Device> OpenGLRendererAPI::getDevice() const {
+		return nullptr;
 	}
 
 	// TODO: OpenGL generic buffer.
