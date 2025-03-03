@@ -7,14 +7,28 @@
 #include "Platform/Vulkan/VulkanRendererAPI.hpp"
 
 namespace ProjectA {
-	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::VULKAN;
+	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::NONE;
 
-	const Camera* Renderer::camera = nullptr;
+	GLFWwindow* Renderer::window = nullptr;
 
 	scope<RendererAPI> Renderer::rendererApi = nullptr;
 
-	void Renderer::initializeGraphicsApi(GLFWwindow* window) {
-		PROFILE_SCOPE(FUNC_SIG);
+	void Renderer::registerWindow(GLFWwindow* window) {
+		ENGINE_ASSERT(Renderer::window == nullptr, "The window has already been registered.");
+
+		Renderer::window = window;
+	}
+
+	GraphicsAPI Renderer::getGraphicsApi() {
+		return graphicsApi;
+	}
+
+	void Renderer::setGraphicsApi(const GraphicsAPI api) {
+		graphicsApi = api;
+	}
+
+	void Renderer::recreate() {
+		ENGINE_ASSERT(window != nullptr, "The window hasn't been registered.");
 
 		switch (graphicsApi) {
 			case GraphicsAPI::NONE:
@@ -35,61 +49,38 @@ namespace ProjectA {
 				break;
 		}
 
-		ENGINE_ASSERT(rendererApi != nullptr, "GraphicsAPI::NONE is not supported.");
+		ENGINE_ASSERT(rendererApi != nullptr, "Failed to create a corresponding renderer API.");
 	}
 
-	GraphicsAPI Renderer::getGraphicsApi() {
-		return graphicsApi;
-	}
-
-	scope<RendererAPI>& Renderer::getRendererApi() {
-		return rendererApi;
-	}
-
-	/*void Renderer::submit(const ref<RenderPipeline>& renderPipeline) {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		renderPipeline->bind();
-		renderPipeline->setUniform("u_projectionView", camera->projectionView);
-
-		rendererApi->drawIndexed(renderPipeline, renderPipeline->getIndexBuffer()->getCount());
-	}*/
-
-	void Renderer::onWindowResize(uint32 width, uint32 height) {
-		//rendererApi->setViewport(0, 0, width, height);
-	}
-
-	// --- Start of new Renderer parent class ---
-
-	ref<Device> Renderer::getDevice() {
+	ref<Device> Renderer::getDevice() const {
 		return rendererApi->getDevice();
 	}
 
-	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
+	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) const {
 		return rendererApi->createBuffer(descriptor);
 	}
 
-	ref<CommandBuffer> Renderer::createCommandBuffer() {
+	ref<CommandBuffer> Renderer::createCommandBuffer() const {
 		return rendererApi->createCommandBuffer();
 	}
 
-	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) {
+	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
 		return rendererApi->createPipelineLayout(descriptor);
 	}
 
-	ref<RenderPass> Renderer::createRenderPass(const RenderPassDescriptor& descriptor) {
+	ref<RenderPass> Renderer::createRenderPass(const RenderPassDescriptor& descriptor) const {
 		return rendererApi->createRenderPass(descriptor);
 	}
 
-	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) {
+	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
 		return rendererApi->createRenderPipeline(descriptor);
 	}
 
-	ref<ShaderModule> Renderer::createShaderModule(const ShaderStage stage, const std::string& code) {
+	ref<ShaderModule> Renderer::createShaderModule(const ShaderStage stage, const std::string& code) const {
 		return rendererApi->createShaderModule(stage, code);
 	}
 
-	ref<Swapchain> Renderer::createSwapchain(const SwapchainDescriptor& descriptor) {
+	ref<Swapchain> Renderer::createSwapchain(const SwapchainDescriptor& descriptor) const {
 		return rendererApi->createSwapchain(descriptor);
 	}
 }

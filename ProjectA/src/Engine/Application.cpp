@@ -17,18 +17,16 @@ namespace ProjectA {
 
 		instance = this;
 
+		Renderer::setGraphicsApi(GraphicsAPI::VULKAN);
+
 		// Initialize GLFW and create window.
 		window = Window::create(WindowData(name));
 
 		window->setEventCallback(BIND(Application::onEvent));
 
 		// Initialize graphics API.
-		Renderer::initializeGraphicsApi(static_cast<GLFWwindow*>(window->getNativeWindow()));
-
-		if (Renderer::graphicsApi == GraphicsAPI::OPENGL) {
-			// Initialize 2D renderer.
-			Renderer2D::construct();
-		}
+		Renderer::registerWindow(static_cast<GLFWwindow*>(window->getNativeWindow()));
+		Renderer::recreate();
 
 		imGuiLayer = new ImGuiLayer();
 
@@ -37,10 +35,6 @@ namespace ProjectA {
 
 	Application::~Application() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		if (Renderer::graphicsApi == GraphicsAPI::OPENGL) {
-			Renderer2D::destroy();
-		}
 	}
 
 	Window& Application::getWindow() {
@@ -135,7 +129,7 @@ namespace ProjectA {
 
 		minimized = false;
 
-		Renderer::onWindowResize(event.getWidth(), event.getHeight());
+		//Renderer::onWindowResize(event.getWidth(), event.getHeight());
 
 		return false;
 	}

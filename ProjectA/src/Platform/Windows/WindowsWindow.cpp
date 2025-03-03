@@ -28,10 +28,10 @@ namespace ProjectA {
 	void WindowsWindow::setVSyncState(bool state) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		if (Renderer::graphicsApi == GraphicsAPI::OPENGL) {
+		if (Renderer::getGraphicsApi() == GraphicsAPI::OPENGL) {
 			glfwSwapInterval(static_cast<int32>(state));
 		}
-		else if (Renderer::graphicsApi == GraphicsAPI::VULKAN) {
+		else if (Renderer::getGraphicsApi() == GraphicsAPI::VULKAN) {
 			ENGINE_WARN("No support for swap interval with a Vulkan context.");
 		}
 
@@ -64,7 +64,7 @@ namespace ProjectA {
 		{
 			PROFILE_SCOPE("Create GLFW window");
 
-			if (Renderer::graphicsApi == GraphicsAPI::OPENGL) {
+			if (Renderer::getGraphicsApi() == GraphicsAPI::OPENGL) {
 				// Request OpenGL >= 3.3.
 				glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 				glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);				
@@ -75,7 +75,7 @@ namespace ProjectA {
 					glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 				#endif
 			}
-			else if (Renderer::graphicsApi == GraphicsAPI::VULKAN) {
+			else if (Renderer::getGraphicsApi() == GraphicsAPI::VULKAN) {
 				glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			}
 

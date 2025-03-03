@@ -7,7 +7,7 @@ namespace ProjectA {
 		public:
 			TriangleDemoRenderer();
 
-			void render() const;
+			void render() const override;
 
 		private:
 			struct Vertex {

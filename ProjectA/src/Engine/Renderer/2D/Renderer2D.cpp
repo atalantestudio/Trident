@@ -69,7 +69,7 @@ namespace ProjectA {
 		pipelineLayoutDescriptor.layouts.emplace_back(cameraDescriptorSetLayout);
 		pipelineLayoutDescriptor.layouts.emplace_back(texturesDescriptorSetLayout);
 
-		storage.pipelineLayout = Renderer::createPipelineLayout(pipelineLayoutDescriptor);
+		//storage.pipelineLayout = Renderer::createPipelineLayout(pipelineLayoutDescriptor);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);	// a_position
@@ -84,27 +84,27 @@ namespace ProjectA {
 			const std::string colorTextureVertexShaderCode = FileLoader::load("assets/shaders/ColorTexture.vert");
 			const std::string colorTextureFragmentShaderCode = FileLoader::load("assets/shaders/ColorTexture.frag");
 
-			renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
-			renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
+			//renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
+			//renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
 		}
 		else if (Renderer::getGraphicsApi() == GraphicsAPI::VULKAN) {
 			const std::string colorTextureVertexShaderCode = FileLoader::load("assets/shaders/ColorTexture.vert.spv");
 			const std::string colorTextureFragmentShaderCode = FileLoader::load("assets/shaders/ColorTexture.frag.spv");
 
-			renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
-			renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
+			//renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
+			//renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
 		}
 
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 
-		storage.renderPipeline = Renderer::createRenderPipeline(renderPipelineDescriptor);
+		//storage.renderPipeline = Renderer::createRenderPipeline(renderPipelineDescriptor);
 		//storage.renderPipeline->bind();
 
 		BufferDescriptor vertexBufferDescriptor{};
 		vertexBufferDescriptor.size = sizeof(QuadVertex) * Renderer2DStorage::MAX_VERTICES;
 		vertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
 
-		storage.vertexBuffer = Renderer::createBuffer(vertexBufferDescriptor);
+		//storage.vertexBuffer = Renderer::createBuffer(vertexBufferDescriptor);
 		//storage.vertexBuffer->setLayout(renderPipelineDescriptor.vertexBufferLayout);
 
 		//storage.renderPipeline->addVertexBuffer(storage.vertexBuffer);
@@ -129,7 +129,7 @@ namespace ProjectA {
 		indexBufferDescriptor.size = Renderer2DStorage::MAX_INDICES;
 		indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
 
-		const ref<Buffer> indexBuffer = Renderer::createBuffer(indexBufferDescriptor);
+		//const ref<Buffer> indexBuffer = Renderer::createBuffer(indexBufferDescriptor);
 
 		//indexBuffer->write(static_cast<const void*>(indices));
 

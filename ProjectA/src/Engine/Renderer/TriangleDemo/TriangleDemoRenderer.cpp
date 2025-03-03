@@ -8,22 +8,22 @@ namespace ProjectA {
 	TriangleDemoRenderer::TriangleDemoRenderer() {
 		const RenderPassDescriptor renderPassDescriptor;
 
-		renderPass = Renderer::createRenderPass(renderPassDescriptor);
+		renderPass = createRenderPass(renderPassDescriptor);
 
 		SwapchainDescriptor swapchainDescriptor;
 		swapchainDescriptor.renderPass = renderPass;
 
-		swapchain = Renderer::createSwapchain(swapchainDescriptor);
+		swapchain = createSwapchain(swapchainDescriptor);
 
 		const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
-		pipelineLayout = Renderer::createPipelineLayout(pipelineLayoutDescriptor);
+		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
 		const std::string vertexShaderModuleCode = FileLoader::load("../ProjectA/src/Engine/Shader/TriangleDemo.vert.spv");
 		const std::string fragmentShaderModuleCode = FileLoader::load("../ProjectA/src/Engine/Shader/TriangleDemo.frag.spv");
 
-		const ref<ShaderModule> vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, vertexShaderModuleCode);
-		const ref<ShaderModule> fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, fragmentShaderModuleCode);
+		const ref<ShaderModule> vertexShaderModule = createShaderModule(ShaderStage::VERTEX, vertexShaderModuleCode);
+		const ref<ShaderModule> fragmentShaderModule = createShaderModule(ShaderStage::FRAGMENT, fragmentShaderModuleCode);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.swapchain = swapchain;
@@ -35,7 +35,7 @@ namespace ProjectA {
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 
-		renderPipeline = Renderer::createRenderPipeline(renderPipelineDescriptor);
+		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 
 		const std::vector<Vertex> vertexBufferData = {
 			{{-0.5f, -0.5f,  0.0f}, {1.0f, 0.0f, 0.0f}},
@@ -47,14 +47,14 @@ namespace ProjectA {
 		vertexBufferDescriptor.size = sizeof(Vertex) * vertexBufferData.size();
 		vertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
 
-		vertexBuffer = Renderer::createBuffer(vertexBufferDescriptor);
+		vertexBuffer = createBuffer(vertexBufferDescriptor);
 		vertexBuffer->write(vertexBufferData.data(), sizeof(Vertex) * vertexBufferData.size());
 
-		commandBuffer = Renderer::createCommandBuffer();
+		commandBuffer = createCommandBuffer();
 	}
 
 	void TriangleDemoRenderer::render() const {
-		const ref<Device>& device = Renderer::getDevice();
+		const ref<Device>& device = getDevice();
 
 		device->waitForFences();
 

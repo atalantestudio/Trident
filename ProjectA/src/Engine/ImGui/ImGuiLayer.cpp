@@ -38,7 +38,7 @@ namespace ProjectA {
 
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
 
-		if (Renderer::graphicsApi != GraphicsAPI::OPENGL) {
+		if (Renderer::getGraphicsApi() != GraphicsAPI::OPENGL) {
 			ENGINE_WARN("Only OpenGL ImGui layers are supported.");
 
 			return;
@@ -51,7 +51,7 @@ namespace ProjectA {
 	void ImGuiLayer::unbind() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		if (Renderer::graphicsApi != GraphicsAPI::OPENGL) {
+		if (Renderer::getGraphicsApi() != GraphicsAPI::OPENGL) {
 			return;
 		}
 
@@ -64,7 +64,7 @@ namespace ProjectA {
 	void ImGuiLayer::begin() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		if (Renderer::graphicsApi != GraphicsAPI::OPENGL) {
+		if (Renderer::getGraphicsApi() != GraphicsAPI::OPENGL) {
 			return;
 		}
 
@@ -77,7 +77,7 @@ namespace ProjectA {
 	void ImGuiLayer::end() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		if (Renderer::graphicsApi != GraphicsAPI::OPENGL) {
+		if (Renderer::getGraphicsApi() != GraphicsAPI::OPENGL) {
 			return;
 		}
 
@@ -101,7 +101,7 @@ namespace ProjectA {
 	}
 
 	void ImGuiLayer::onEvent(Event& event) {
-		if (Renderer::graphicsApi != GraphicsAPI::OPENGL) {
+		if (Renderer::getGraphicsApi() != GraphicsAPI::OPENGL) {
 			return;
 		}
 
