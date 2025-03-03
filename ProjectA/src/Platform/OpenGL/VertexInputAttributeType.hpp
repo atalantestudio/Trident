@@ -1,4 +1,4 @@
-#include "pch.hpp"
+#pragma once
 
 #include <glad/glad.h>
 

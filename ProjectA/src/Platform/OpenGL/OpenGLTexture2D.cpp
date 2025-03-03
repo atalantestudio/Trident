@@ -14,6 +14,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[OpenGLTexture2D]");
+
 		glCreateTextures(GL_TEXTURE_2D, 1, &object);
 
 		glTextureStorage2D(object, 1, internalFormat, width, height);
@@ -30,6 +32,8 @@ namespace ProjectA {
 		debugPath(path)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[OpenGLTexture2D]");
 
 		stbi_set_flip_vertically_on_load(1);
 
@@ -76,6 +80,8 @@ namespace ProjectA {
 
 	OpenGLTexture2D::~OpenGLTexture2D() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~OpenGLTexture2D]");
 
 		glDeleteTextures(1, &object);
 	}

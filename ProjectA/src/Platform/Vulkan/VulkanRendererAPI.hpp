@@ -22,7 +22,7 @@ namespace ProjectA {
 
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) override;
 
-			ref<CommandBuffer> createCommandBuffer() const override;
+			ref<CommandEncoder> createCommandEncoder() const override;
 
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const override;
 

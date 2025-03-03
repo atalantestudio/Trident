@@ -38,7 +38,7 @@ namespace ProjectA {
 			case GraphicsAPI::OPENGL:
 				ENGINE_INFO("Using OpenGL backend.");
 
-				rendererApi = createScope<OpenGLRendererAPI>();
+				rendererApi = createScope<OpenGLRendererAPI>(window);
 
 				break;
 			case GraphicsAPI::VULKAN:
@@ -60,8 +60,8 @@ namespace ProjectA {
 		return rendererApi->createBuffer(descriptor);
 	}
 
-	ref<CommandBuffer> Renderer::createCommandBuffer() const {
-		return rendererApi->createCommandBuffer();
+	ref<CommandEncoder> Renderer::createCommandEncoder() const {
+		return rendererApi->createCommandEncoder();
 	}
 
 	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {

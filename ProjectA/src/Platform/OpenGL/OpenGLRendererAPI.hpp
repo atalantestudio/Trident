@@ -1,21 +1,22 @@
 #pragma once
 
-#ifdef BUILD_MODE_DEBUG
-	#include <glad/glad.h>
-#endif
+#include <glfw/glfw3.h>
 
 #include "Engine/Renderer/RendererAPI.hpp"
+
+#include "Platform/OpenGL/OpenGLDevice.hpp"
+#include "Platform/OpenGL/OpenGLInstance.hpp"
 
 namespace ProjectA {
 	class OpenGLRendererAPI : public RendererAPI {
 		public:
-			OpenGLRendererAPI();
+			OpenGLRendererAPI(GLFWwindow* window);
 
 			ref<Device> getDevice() const override;
 
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) override;
 
-			ref<CommandBuffer> createCommandBuffer() const override;
+			ref<CommandEncoder> createCommandEncoder() const override;
 
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const override;
 
@@ -28,8 +29,8 @@ namespace ProjectA {
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const override;
 
 		private:
-			#ifdef BUILD_MODE_DEBUG
-				static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
-			#endif
+			GLFWwindow* window;
+			const OpenGLInstance instance;
+			ref<OpenGLDevice> device;
 	};
 }

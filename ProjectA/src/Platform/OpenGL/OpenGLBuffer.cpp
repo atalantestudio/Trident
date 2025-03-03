@@ -4,9 +4,13 @@
 #include "Platform/OpenGL/OpenGLBuffer.hpp"
 
 namespace ProjectA {
-	// TODO: Write correct binding.
-	OpenGLBuffer::OpenGLBuffer(const BufferDescriptor& descriptor) : binding(getGlBufferBinding(descriptor.usage)), size(descriptor.size) {
+	OpenGLBuffer::OpenGLBuffer(const BufferDescriptor& descriptor) :
+		target(getGlBufferTarget(descriptor.usage)),
+		size(descriptor.size)
+	{
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[OpenGLBuffer]");
 
 		glCreateBuffers(1, &object);
 	}
@@ -14,14 +18,16 @@ namespace ProjectA {
 	OpenGLBuffer::~OpenGLBuffer() {
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[~OpenGLBuffer]");
+
 		glDeleteBuffers(1, &object);
 	}
 
-	void OpenGLBuffer::write(const void* data, const std::size_t size) const {
-		glBindBuffer(binding, object);
+	void OpenGLBuffer::write(const void* data, const uint64 size) const {
+		glBindBuffer(target, object);
 
-		glBufferData(binding, size, data, GL_STATIC_DRAW);
+		glBufferData(target, size, data, GL_STATIC_DRAW);
 
-		glBindBuffer(binding, 0);
+		glBindBuffer(target, 0);
 	}
 }

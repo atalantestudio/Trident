@@ -46,6 +46,6 @@ namespace ProjectA {
 
 		vkBindBufferMemory(device.object, object, device.memory, 0);
 
-		device.writeBuffer(size, data);
+		device.writeBuffer(data, size);
 	}
 }

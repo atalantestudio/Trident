@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Engine/Renderer/Context.hpp"
+#include <glfw/glfw3.h>
 
-struct GLFWwindow;
+#include "Engine/Renderer/Context.hpp"
 
 namespace ProjectA {
 	class OpenGLContext : public Context {

@@ -2,20 +2,20 @@
 
 #include <glad/glad.h>
 
+#include "Engine/ObjectWrapper.hpp"
 #include "Engine/Renderer/Buffer/Buffer.hpp"
 
 namespace ProjectA {
-	class OpenGLBuffer : public Buffer {
+	class OpenGLBuffer : public Buffer, public ObjectWrapper<GLuint> {
 		public:
 			OpenGLBuffer(const BufferDescriptor& descriptor);
 
 			~OpenGLBuffer();
 
-			void write(const void* data, const std::size_t size) const override;
+			void write(const void* data, const uint64 size) const override;
 
-		private:
-			GLuint object;
+		public:
+			const GLenum target;
 			const GLsizeiptr size;
-			GLenum binding;
 	};
 }

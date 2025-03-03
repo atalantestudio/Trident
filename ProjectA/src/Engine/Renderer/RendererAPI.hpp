@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/Renderer/Buffer/Buffer.hpp"
-#include "Engine/Renderer/CommandBuffer.hpp"
+#include "Engine/Renderer/CommandEncoder.hpp"
 #include "Engine/Renderer/Device.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 #include "Engine/Renderer/ShaderStage.hpp"
@@ -16,7 +16,7 @@ namespace ProjectA {
 			// (Vulkan) This cannot be const because allocation alters the device's memory.
 			virtual ref<Buffer> createBuffer(const BufferDescriptor& descriptor) = 0;
 
-			virtual ref<CommandBuffer> createCommandBuffer() const = 0;
+			virtual ref<CommandEncoder> createCommandEncoder() const = 0;
 
 			virtual ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const = 0;
 

@@ -6,85 +6,45 @@
 
 namespace ProjectA {
 	OpenGLRenderPipeline::OpenGLRenderPipeline(const RenderPipelineDescriptor& descriptor) :
-		programObject(glCreateProgram()),
+		program(glCreateProgram()),
 		primitiveTopology(primitiveTopologies[static_cast<uint32>(descriptor.primitiveTopology)])
 	{
-		glCreateVertexArrays(1, &vertexArrayObject);
-		glBindVertexArray(vertexArrayObject);
+		PROFILE_SCOPE(FUNCSIG);
 
-		glAttachShader(programObject, ((OpenGLShaderModule*) descriptor.vertexShaderModule.get())->object);
-		glAttachShader(programObject, ((OpenGLShaderModule*) descriptor.fragmentShaderModule.get())->object);
-		glLinkProgram(programObject);
+		ENGINE_TRACE("[OpenGLRenderPipeline]");
+
+		glCreateVertexArrays(1, &vertexArray);
+		glBindVertexArray(vertexArray);
+
+		const GLuint vertexShaderModule = reinterpret_cast<const OpenGLShaderModule*>(descriptor.vertexShaderModule.get())->object;
+		const GLuint fragmentShaderModule = reinterpret_cast<const OpenGLShaderModule*>(descriptor.fragmentShaderModule.get())->object;
+
+		glAttachShader(program, vertexShaderModule);
+		glAttachShader(program, fragmentShaderModule);
+		glLinkProgram(program);
 
 		GLint linkStatus;
 
-		glGetProgramiv(programObject, GL_LINK_STATUS, &linkStatus);
+		glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
 
 		if (linkStatus == 0) {
 			GLint infoLogLength;
 
-			glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLogLength);
+			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
 
 			std::vector<GLchar> infoLog(infoLogLength);
 
-			glGetProgramInfoLog(programObject, infoLogLength, nullptr, infoLog.data());
-
-			//descriptor.vertexShaderModule.~ShaderModule();
-			//descriptor.fragmentShaderModule.~ShaderModule();
-
-			this->~OpenGLRenderPipeline();
+			glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog.data());
 
 			ENGINE_FATAL("Program linking failed.\n[]", infoLog.data());
 
-			// TODO: Throw instead of returning
-			return;
+			throw std::runtime_error("Failed to link OpenGL program.");
 		}
 
-		glDetachShader(programObject, ((OpenGLShaderModule*) descriptor.vertexShaderModule.get())->object);
-		glDetachShader(programObject, ((OpenGLShaderModule*) descriptor.fragmentShaderModule.get())->object);
+		glDetachShader(program, vertexShaderModule);
+		glDetachShader(program, fragmentShaderModule);
 
-		ENGINE_TRACE("Linked shader program successfully.");
-	}
-
-	OpenGLRenderPipeline::~OpenGLRenderPipeline() {
-		glDeleteProgram(programObject);
-		glDeleteVertexArrays(1, &vertexArrayObject);
-	}
-
-	/*void OpenGLRenderPipeline::bind() const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		glBindVertexArray(vertexArrayObject);
-		glUseProgram(programObject);
-	}*/
-
-	/*void OpenGLRenderPipeline::unbind() const {		
-		PROFILE_SCOPE(FUNC_SIG);
-
-		glUseProgram(0);
-		glBindVertexArray(0);
-	}*/
-
-	/*const std::vector<ref<VertexBuffer>>& OpenGLRenderPipeline::getVertexBuffers() const {
-		return vertexBuffers;
-	}*/
-
-	/*const ref<IndexBuffer>& OpenGLRenderPipeline::getIndexBuffer() const {
-		return indexBuffer;
-	}*/
-
-	/*void OpenGLRenderPipeline::addVertexBuffer(const ref<VertexBuffer>& vertexBuffer) {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		//ENGINE_ASSERT(vertexBuffer->getLayout().vertexAttributes.size(), "Vertex buffer has no layout.");
-
-		bind();
-
-		vertexBuffer->bind();
-
-		const BufferLayout& layout = vertexBuffer->getLayout();
-
-		for (const VertexAttribute& vertexInputAttribute : layout) {
+		for (const VertexAttribute& vertexInputAttribute : descriptor.vertexBufferLayout) {
 			const GLenum type = getGlType(vertexInputAttribute.type);
 			const GLint size = getGlSize(vertexInputAttribute.type);
 			const void* offset = reinterpret_cast<const void*>(static_cast<std::uintptr_t>(vertexInputAttribute.offset));
@@ -93,7 +53,8 @@ namespace ProjectA {
 
 			switch (type) {
 				case GL_FLOAT:
-					glVertexAttribPointer(vertexInputAttribute.location, size, type, vertexInputAttribute.normalized, layout.stride, offset);
+					glVertexAttribFormat(vertexInputAttribute.location, size, type, vertexInputAttribute.normalized, vertexInputAttribute.offset);
+					//glVertexAttribPointer(vertexInputAttribute.location, size, type, vertexInputAttribute.normalized, descriptor.vertexBufferLayout.stride, offset);
 
 					break;
 				case GL_BYTE:
@@ -102,28 +63,29 @@ namespace ProjectA {
 				case GL_UNSIGNED_SHORT:
 				case GL_INT:
 				case GL_UNSIGNED_INT:
-					glVertexAttribIPointer(vertexInputAttribute.location, size, type, layout.stride, offset);
+					glVertexAttribIFormat(vertexInputAttribute.location, size, type, vertexInputAttribute.offset);
+					//glVertexAttribIPointer(vertexInputAttribute.location, size, type, descriptor.vertexBufferLayout.stride, offset);
 
 					break;
 				case GL_DOUBLE:
-					glVertexAttribLPointer(vertexInputAttribute.location, size, type, layout.stride, offset);
+					glVertexAttribLFormat(vertexInputAttribute.location, size, type, vertexInputAttribute.offset);
+					//glVertexAttribLPointer(vertexInputAttribute.location, size, type, descriptor.vertexBufferLayout.stride, offset);
 
 					break;
 			}
+
+			glVertexAttribBinding(vertexInputAttribute.location, vertexInputAttribute.binding);
 		}
+	}
 
-		vertexBuffers.emplace_back(vertexBuffer);
-	}*/
+	OpenGLRenderPipeline::~OpenGLRenderPipeline() {
+		PROFILE_SCOPE(FUNCSIG);
 
-	/*void OpenGLRenderPipeline::setIndexBuffer(const ref<IndexBuffer>& indexBuffer) {
-		PROFILE_SCOPE(FUNC_SIG);
+		ENGINE_TRACE("[~OpenGLRenderPipeline]");
 
-		bind();
-
-		indexBuffer->bind();
-
-		this->indexBuffer = indexBuffer;
-	}*/
+		glDeleteProgram(program);
+		glDeleteVertexArrays(1, &vertexArray);
+	}
 
 	/*void OpenGLRenderPipeline::setUniform(const std::string& name, int32 value) const {
 		PROFILE_SCOPE(FUNC_SIG);
@@ -186,10 +148,10 @@ namespace ProjectA {
 		_mm_store_ps(&entries[12], value[3].m);
 
 		glUniformMatrix4fv(location, 1, GL_FALSE, entries);
-	}*/
+	}
 
 	GLint OpenGLRenderPipeline::getUniformLocation(const std::string& name) const {
-		const GLint location = glGetUniformLocation(programObject, name.c_str());
+		const GLint location = glGetUniformLocation(program, name.c_str());
 
 		if (location == -1) {
 			ENGINE_ERROR("Location not found for uniform \"[]\". Uniform is either unused or non-existing.", name);
@@ -199,5 +161,5 @@ namespace ProjectA {
 		}
 
 		return location;
-	}
+	}*/
 }

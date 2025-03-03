@@ -1,7 +1,7 @@
 #include "pch.hpp"
 
 #include "Platform/Vulkan/VulkanBuffer.hpp"
-#include "Platform/Vulkan/VulkanCommandBuffer.hpp"
+#include "Platform/Vulkan/VulkanCommandEncoder.hpp"
 #include "Platform/Vulkan/VulkanRendererAPI.hpp"
 #include "Platform/Vulkan/VulkanRenderPipeline.hpp"
 #include "Platform/Vulkan/VulkanShaderModule.hpp"
@@ -38,8 +38,8 @@ namespace ProjectA {
 		return createRef<VulkanBuffer>(physicalDevice.object, *device.get(), descriptor);
 	}
 
-	ref<CommandBuffer> VulkanRendererAPI::createCommandBuffer() const {
-		return createRef<VulkanCommandBuffer>(*device.get(), commandPool.object);
+	ref<CommandEncoder> VulkanRendererAPI::createCommandEncoder() const {
+		return createRef<VulkanCommandEncoder>(*device.get(), commandPool.object);
 	}
 
 	ref<PipelineLayout> VulkanRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {

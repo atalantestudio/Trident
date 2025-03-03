@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Engine/ObjectWrapper.hpp"
 #include "Engine/Renderer/Device.hpp"
 
 #include "Platform/Vulkan/VulkanFence.hpp"
@@ -10,7 +11,7 @@
 #include "Platform/Vulkan/VulkanSurface.hpp"
 
 namespace ProjectA {
-	class VulkanDevice : public Device {
+	class VulkanDevice : public Device, public ObjectWrapper<VkDevice> {
 		public:
 			VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface);
 
@@ -18,7 +19,7 @@ namespace ProjectA {
 
 			void allocateMemory(const VkMemoryRequirements& memoryRequirements);
 
-			void writeBuffer(const uint64 size, const void* data) const;
+			void writeBuffer(const void* data, const uint64 size) const;
 
 			void waitForFences() const override;
 
@@ -33,7 +34,6 @@ namespace ProjectA {
 			void waitIdle() const override;
 
 		public:
-			VkDevice object;
 			VkDeviceMemory memory;
 
 		private:

@@ -1,24 +1,20 @@
 #include "pch.hpp"
 
+#include "Platform/OpenGL/OpenGLBuffer.hpp"
+#include "Platform/OpenGL/OpenGLCommandEncoder.hpp"
+#include "Platform/OpenGL/OpenGLPipelineLayout.hpp"
 #include "Platform/OpenGL/OpenGLRendererAPI.hpp"
+#include "Platform/OpenGL/OpenGLRenderPass.hpp"
 #include "Platform/OpenGL/OpenGLRenderPipeline.hpp"
 #include "Platform/OpenGL/OpenGLShaderModule.hpp"
+#include "Platform/OpenGL/OpenGLSwapchain.hpp"
 
 namespace ProjectA {
-	OpenGLRendererAPI::OpenGLRendererAPI() {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		#ifdef BUILD_MODE_DEBUG
-			glEnable(GL_DEBUG_OUTPUT);
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-			glDebugMessageCallback(debugMessageCallback, nullptr);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
-		#endif
-
-		glEnable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
+	OpenGLRendererAPI::OpenGLRendererAPI(GLFWwindow* window) :
+		window(window),
+		instance(),
+		device(createRef<OpenGLDevice>())
+	{}
 
 	/*void OpenGLRendererAPI::setViewport(int32 x, int32 y, uint32 width, uint32 height) const {
 		glViewport(x, y, width, height);
@@ -47,27 +43,23 @@ namespace ProjectA {
 	}*/
 
 	ref<Device> OpenGLRendererAPI::getDevice() const {
-		return nullptr;
+		return device;
 	}
 
-	// TODO: OpenGL generic buffer.
 	ref<Buffer> OpenGLRendererAPI::createBuffer(const BufferDescriptor& descriptor) {
-		return nullptr;
+		return createRef<OpenGLBuffer>(descriptor);
 	}
 
-	// TODO: OpenGL command buffer.
-	ref<CommandBuffer> OpenGLRendererAPI::createCommandBuffer() const {
-		return nullptr;
+	ref<CommandEncoder> OpenGLRendererAPI::createCommandEncoder() const {
+		return createRef<OpenGLCommandEncoder>();
 	}
 
-	// TODO: OpenGL pipeline layout.
 	ref<PipelineLayout> OpenGLRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
-		return nullptr;
+		return createRef<OpenGLPipelineLayout>(descriptor);
 	}
 
-	// TODO: OpenGL render pass.
 	ref<RenderPass> OpenGLRendererAPI::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		return nullptr;
+		return createRef<OpenGLRenderPass>(descriptor);
 	}
 
 	ref<RenderPipeline> OpenGLRendererAPI::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
@@ -83,31 +75,7 @@ namespace ProjectA {
 		return createRef<OpenGLShaderModule>(shaderStages[static_cast<uint32>(stage)], static_cast<const GLchar* const>(code.c_str()));
 	}
 
-	// TODO: OpenGL swapchain.
 	ref<Swapchain> OpenGLRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return nullptr;
+		return createRef<OpenGLSwapchain>(window, descriptor);
 	}
-
-	#ifdef BUILD_MODE_DEBUG
-		void OpenGLRendererAPI::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-			switch (severity) {
-				case GL_DEBUG_SEVERITY_NOTIFICATION:
-					ENGINE_INFO("GL: [] (source: [], type: [], id: [])", message, source, type, id);
-
-					break;
-				case GL_DEBUG_SEVERITY_LOW:
-					ENGINE_WARN("GL: [] (source: [], type: [], id: [])", message, source, type, id);
-
-					break;
-				case GL_DEBUG_SEVERITY_MEDIUM:
-					ENGINE_ERROR("GL: [] (source: [], type: [], id: [])", message, source, type, id);
-
-					break;
-				case GL_DEBUG_SEVERITY_HIGH:
-					ENGINE_ERROR("GL: [] (source: [], type: [], id: [])", message, source, type, id);
-
-					break;
-			}
-		}
-	#endif
 }

@@ -6,10 +6,12 @@
 #include "Platform/OpenGL/OpenGLContext.hpp"
 
 namespace ProjectA {
-	OpenGLContext::OpenGLContext(GLFWwindow* window) : window(window) {
+	OpenGLContext::OpenGLContext(GLFWwindow* window) :
+		window(window)
+	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_ASSERT(window, "Window handle is null.");
+		ENGINE_ASSERT(window != nullptr, "Window handle is null.");
 
 		glfwMakeContextCurrent(window);
 
@@ -17,18 +19,18 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(gladLoadStatus, "Failed to initialize GLAD.");
 
-		const GLubyte* gpuVendor = glGetString(GL_VENDOR);
+		/*GLint majorVersion;
+		GLint minorVersion;
+
+		glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
+		glGetIntegerv(GL_MINOR_VERSION, &minorVersion);*/
+
+		/*const GLubyte* gpuVendor = glGetString(GL_VENDOR);
 		const GLubyte* gpuRenderer = glGetString(GL_RENDERER);
 		const GLubyte* gpuVersion = glGetString(GL_VERSION);
 
 		ENGINE_INFO("GPU: [] []", gpuVendor, gpuRenderer);
-		ENGINE_INFO("GPU version: []", gpuVersion);
-
-		/* GLint majorVersion;
-		GLint minorVersion;
-
-		glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
-		glGetIntegerv(GL_MINOR_VERSION, &minorVersion); */
+		ENGINE_INFO("GPU version: []", gpuVersion);*/
 	}
 
 	void OpenGLContext::swapBuffers() const {

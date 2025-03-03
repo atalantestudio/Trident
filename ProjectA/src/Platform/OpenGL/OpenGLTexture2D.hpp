@@ -4,6 +4,7 @@
 
 #include "Engine/Renderer/Texture2D.hpp"
 
+// TODO: Old API
 namespace ProjectA {
 	class OpenGLTexture2D : public Texture2D {
 		public:

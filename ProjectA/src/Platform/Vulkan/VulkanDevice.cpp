@@ -133,7 +133,7 @@ namespace ProjectA {
 		}
 	}
 
-	void VulkanDevice::writeBuffer(const uint64 size, const void* data) const {
+	void VulkanDevice::writeBuffer(const void* data, const uint64 size) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		void* destination;

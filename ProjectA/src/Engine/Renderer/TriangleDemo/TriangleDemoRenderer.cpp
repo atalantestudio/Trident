@@ -19,8 +19,26 @@ namespace ProjectA {
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
-		const std::string vertexShaderModuleCode = FileLoader::load("../ProjectA/src/Engine/Shader/TriangleDemo.vert.spv");
-		const std::string fragmentShaderModuleCode = FileLoader::load("../ProjectA/src/Engine/Shader/TriangleDemo.frag.spv");
+		std::string vertexShaderModulePath;
+		std::string fragmentShaderModulePath;
+
+		switch (getGraphicsApi()) {
+			case GraphicsAPI::NONE:
+				throw std::runtime_error("TriangleDemo must use either OpenGL or Vulkan.");
+			case GraphicsAPI::OPENGL:
+				vertexShaderModulePath = "../ProjectA/src/Engine/Shader/TriangleDemo.vert";
+				fragmentShaderModulePath = "../ProjectA/src/Engine/Shader/TriangleDemo.frag";
+
+				break;
+			case GraphicsAPI::VULKAN:
+				vertexShaderModulePath = "../ProjectA/src/Engine/Shader/TriangleDemo.vert.spv";
+				fragmentShaderModulePath = "../ProjectA/src/Engine/Shader/TriangleDemo.frag.spv";
+
+				break;
+		}
+
+		const std::string vertexShaderModuleCode = FileLoader::load(vertexShaderModulePath);
+		const std::string fragmentShaderModuleCode = FileLoader::load(fragmentShaderModulePath);
 
 		const ref<ShaderModule> vertexShaderModule = createShaderModule(ShaderStage::VERTEX, vertexShaderModuleCode);
 		const ref<ShaderModule> fragmentShaderModule = createShaderModule(ShaderStage::FRAGMENT, fragmentShaderModuleCode);
@@ -29,8 +47,7 @@ namespace ProjectA {
 		renderPipelineDescriptor.swapchain = swapchain;
 		renderPipelineDescriptor.renderPass = renderPass;
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false); // Position
-		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false); // Color
+		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
@@ -38,9 +55,9 @@ namespace ProjectA {
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 
 		const std::vector<Vertex> vertexBufferData = {
-			{{-0.5f, -0.5f,  0.0f}, {1.0f, 0.0f, 0.0f}},
-			{{ 0.0f,  0.5f,  0.0f}, {0.0f, 1.0f, 0.0f}},
-			{{ 0.5f, -0.5f,  0.0f}, {0.0f, 0.0f, 1.0f}},
+			{{-0.5f, -0.5f,  0.0f}},
+			{{ 0.0f,  0.5f,  0.0f}},
+			{{ 0.5f, -0.5f,  0.0f}},
 		};
 
 		BufferDescriptor vertexBufferDescriptor{};
@@ -50,7 +67,7 @@ namespace ProjectA {
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 		vertexBuffer->write(vertexBufferData.data(), sizeof(Vertex) * vertexBufferData.size());
 
-		commandBuffer = createCommandBuffer();
+		commandEncoder = createCommandEncoder();
 	}
 
 	void TriangleDemoRenderer::render() const {
@@ -68,26 +85,20 @@ namespace ProjectA {
 		beginRenderPassDescriptor.clearColor = {0.1f, 0.1f, 0.2f, 1.0f};
 		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
-		const vec2<float32> origin = {
-			0.0f,
-			static_cast<float32>(swapchain->getExtentHeight()),
-		};
+		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
+		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
-		const vec2<float32> size = {
-			static_cast<float32>(swapchain->getExtentWidth()),
-			-static_cast<float32>(swapchain->getExtentHeight()),
-		};
+		commandEncoder->reset();
+		commandEncoder->begin();
+		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
+		commandEncoder->bindRenderPipeline(renderPipeline);
+		commandEncoder->bindVertexBuffer(vertexBuffer, sizeof(Vertex));
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+		commandEncoder->draw(3, 1, 0);
+		commandEncoder->endRenderPass();
 
-		commandBuffer->reset();
-		commandBuffer->begin();
-		commandBuffer->beginRenderPass(beginRenderPassDescriptor);
-		commandBuffer->bindRenderPipeline(renderPipeline);
-		commandBuffer->bindVertexBuffer(vertexBuffer);
-		commandBuffer->setViewport(origin, size, 0.0f, 1.0f);
-		commandBuffer->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
-		commandBuffer->draw(3, 1, 0);
-		commandBuffer->endRenderPass();
-		commandBuffer->end();
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 		device->submit(commandBuffer);
 		device->present(swapchain, nextImageIndex);

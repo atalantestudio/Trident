@@ -12,7 +12,6 @@ namespace ProjectA {
 		private:
 			struct Vertex {
 				vec3<float32> position;
-				vec3<float32> color;
 			};
 
 		private:
@@ -21,6 +20,6 @@ namespace ProjectA {
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
 			ref<Buffer> vertexBuffer;
-			ref<CommandBuffer> commandBuffer;
+			ref<CommandEncoder> commandEncoder;
 	};
 }

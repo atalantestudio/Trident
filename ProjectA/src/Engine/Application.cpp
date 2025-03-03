@@ -6,7 +6,6 @@
 #include "Engine/Renderer/2D/Renderer2D.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
-
 namespace ProjectA {
 	Application* Application::instance = nullptr;
 
@@ -17,7 +16,7 @@ namespace ProjectA {
 
 		instance = this;
 
-		Renderer::setGraphicsApi(GraphicsAPI::VULKAN);
+		Renderer::setGraphicsApi(GraphicsAPI::OPENGL);
 
 		// Initialize GLFW and create window.
 		window = Window::create(WindowData(name));

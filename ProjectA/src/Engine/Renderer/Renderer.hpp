@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/Renderer/Buffer/Buffer.hpp"
-#include "Engine/Renderer/CommandBuffer.hpp"
+#include "Engine/Renderer/CommandEncoder.hpp"
 #include "Engine/Renderer/Device.hpp"
 #include "Engine/Renderer/GraphicsAPI.hpp"
 #include "Engine/Renderer/PipelineLayout.hpp"
@@ -31,7 +31,7 @@ namespace ProjectA {
 
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const;
 
-			ref<CommandBuffer> createCommandBuffer() const;
+			ref<CommandEncoder> createCommandEncoder() const;
 
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const;
 

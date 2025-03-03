@@ -8,7 +8,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_DEBUG("[OpenGLShaderModule constructor]");
+		ENGINE_TRACE("[OpenGLShaderModule]");
 
 		glShaderSource(object, 1, &code, nullptr);
 		glCompileShader(object);
@@ -28,17 +28,14 @@ namespace ProjectA {
 
 			ENGINE_ERROR("Shader module compilation failed.\n[]", infoLog.data());
 
-			this->~OpenGLShaderModule();
-
-			// TODO: Throw instead of returning
-			return;
+			throw std::runtime_error("Failed to create OpenGL shader module.");
 		}
-
-		ENGINE_TRACE("Compiled shader module successfully.");
 	}
 
 	OpenGLShaderModule::~OpenGLShaderModule() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~OpenGLShaderModule]");
 
 		glDeleteShader(object);
 	}
