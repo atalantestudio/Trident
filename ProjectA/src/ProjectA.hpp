@@ -32,18 +32,6 @@
 #include "Engine/Renderer/ShaderModule.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
 
-// TODO: Temporary (debug)
-#include "Platform/Vulkan/VulkanBuffer.hpp"
-#include "Platform/Vulkan/VulkanCommandBuffer.hpp"
-#include "Platform/Vulkan/VulkanCommandPool.hpp"
-#include "Platform/Vulkan/VulkanDevice.hpp"
-#include "Platform/Vulkan/VulkanFence.hpp"
-#include "Platform/Vulkan/VulkanInstance.hpp"
-#include "Platform/Vulkan/VulkanPhysicalDevice.hpp"
-#include "Platform/Vulkan/VulkanPipelineLayout.hpp"
-#include "Platform/Vulkan/VulkanRenderPass.hpp"
-#include "Platform/Vulkan/VulkanRenderPipeline.hpp"
-#include "Platform/Vulkan/VulkanSemaphore.hpp"
-#include "Platform/Vulkan/VulkanShaderModule.hpp"
-#include "Platform/Vulkan/VulkanSurface.hpp"
-#include "Platform/Vulkan/VulkanSwapchain.hpp"
+#ifdef BUILD_MODE_DEBUG
+	#include "Engine/Renderer/TriangleDemo/TriangleDemoRenderer.hpp"
+#endif

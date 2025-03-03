@@ -3,19 +3,9 @@
 #include "ProjectA.hpp"
 
 namespace ProjectA {
-	struct TriangleDemoVertex {
-		vec3<float32> position;
-		vec3<float32> color;
-	};
-
 	class TriangleDemoLayer : public Layer {
 		private:
-			ref<RenderPass> renderPass;
-			ref<Swapchain> swapchain;
-			ref<PipelineLayout> pipelineLayout;
-			ref<RenderPipeline> renderPipeline;
-			ref<Buffer> vertexBuffer;
-			ref<CommandBuffer> commandBuffer;
+			TriangleDemoRenderer renderer;
 
 		public:
 			TriangleDemoLayer();

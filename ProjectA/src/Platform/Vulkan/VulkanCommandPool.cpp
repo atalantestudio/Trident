@@ -8,6 +8,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[VulkanCommandPool]");
+
 		VkCommandPoolCreateInfo commandPoolCreateInfo{};
 		commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		commandPoolCreateInfo.pNext = nullptr;
@@ -21,6 +23,8 @@ namespace ProjectA {
 
 	VulkanCommandPool::~VulkanCommandPool() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanCommandPool]");
 
 		vkDestroyCommandPool(device, object, nullptr);
 	}

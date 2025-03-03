@@ -10,6 +10,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[VulkanSwapchain]");
+
 		const uint32 minImageCount = surface.capabilities.minImageCount + 1;
 
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
@@ -98,6 +100,8 @@ namespace ProjectA {
 
 	VulkanSwapchain::~VulkanSwapchain() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanSwapchain]");
 
 		for (uint32 i = 0; i < images.size(); i++) {
 			vkDestroyFramebuffer(device, framebuffers[i], nullptr);

@@ -10,6 +10,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[VulkanBuffer]");
+
 		VkBufferCreateInfo bufferCreateInfo{};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferCreateInfo.pNext = nullptr;
@@ -33,6 +35,8 @@ namespace ProjectA {
 
 	VulkanBuffer::~VulkanBuffer() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanBuffer]");
 
 		vkDestroyBuffer(device.object, object, nullptr);
 	}

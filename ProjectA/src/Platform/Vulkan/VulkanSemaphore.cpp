@@ -8,6 +8,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[VulkanSemaphore]");
+
 		VkSemaphoreCreateInfo semaphoreCreateInfo{};
 		semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 		semaphoreCreateInfo.pNext = nullptr;
@@ -20,6 +22,8 @@ namespace ProjectA {
 
 	VulkanSemaphore::~VulkanSemaphore() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanSemaphore]");
 
 		vkDestroySemaphore(device, object, nullptr);
 	}

@@ -8,6 +8,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[VulkanFence]");
+
 		VkFenceCreateInfo fenceCreateInfo{};
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceCreateInfo.pNext = nullptr;
@@ -20,6 +22,8 @@ namespace ProjectA {
 
 	VulkanFence::~VulkanFence() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanFence]");
 
 		vkDestroyFence(device, object, nullptr);
 	}

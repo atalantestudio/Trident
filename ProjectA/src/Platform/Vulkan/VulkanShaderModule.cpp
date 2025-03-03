@@ -8,6 +8,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[VulkanShaderModule]");
+
 		VkShaderModuleCreateInfo shaderModuleCreateInfo{};
 		shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		shaderModuleCreateInfo.pNext = nullptr;
@@ -32,6 +34,8 @@ namespace ProjectA {
 
 	VulkanShaderModule::~VulkanShaderModule() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanShaderModule]");
 
 		vkDestroyShaderModule(device, object.module, nullptr);
 	}

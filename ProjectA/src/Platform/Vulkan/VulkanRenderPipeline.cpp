@@ -12,6 +12,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[VulkanRenderPipeline]");
+
 		const std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
 			reinterpret_cast<const VulkanShaderModule*>(descriptor.vertexShaderModule.get())->object,
 			reinterpret_cast<const VulkanShaderModule*>(descriptor.fragmentShaderModule.get())->object,
@@ -194,6 +196,8 @@ namespace ProjectA {
 
 	VulkanRenderPipeline::~VulkanRenderPipeline() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanRenderPipeline]");
 
 		vkDestroyPipeline(device, object, nullptr);
 	}

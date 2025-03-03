@@ -13,6 +13,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[VulkanCommandBuffer]");
+
 		VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
 		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		commandBufferAllocateInfo.pNext = nullptr;
@@ -27,6 +29,8 @@ namespace ProjectA {
 
 	VulkanCommandBuffer::~VulkanCommandBuffer() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanCommandBuffer]");
 
 		vkFreeCommandBuffers(device.object, commandPool, 1, &object);
 	}
@@ -54,6 +58,7 @@ namespace ProjectA {
 
 		_mm_store_ps(clearValue.color.float32, descriptor.clearColor.m);
 
+		// TODO: Find default values for depth and stencil.
 		//clearValue.depthStencil.depth = descriptor.depth;
 		//clearValue.depthStencil.stencil = descriptor.stencil;
 

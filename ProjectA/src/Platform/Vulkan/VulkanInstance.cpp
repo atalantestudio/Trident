@@ -15,6 +15,8 @@ namespace ProjectA {
 	VulkanInstance::VulkanInstance() {
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[VulkanInstance]");
+
 		#ifdef DEBUG_ENABLE_MESSENGER
 			VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo{};
 			debugUtilsMessengerCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -111,6 +113,8 @@ namespace ProjectA {
 
 	VulkanInstance::~VulkanInstance() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanInstance]");
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(object, "vkDestroyDebugUtilsMessengerEXT"));

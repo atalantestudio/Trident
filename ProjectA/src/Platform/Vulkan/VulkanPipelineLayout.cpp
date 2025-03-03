@@ -10,6 +10,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[~VulkanPipelineLayout]");
+
 		std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
 
 		for (const DescriptorSetLayout& layout : descriptor.layouts) {
@@ -60,6 +62,8 @@ namespace ProjectA {
 
 	VulkanPipelineLayout::~VulkanPipelineLayout() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanPipelineLayout]");
 
 		vkDestroyPipelineLayout(device, object, nullptr);
 	}

@@ -17,6 +17,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[VulkanDevice]");
+
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 
 		if (physicalDevice.graphicsQueueFamilyIndex == surface.presentQueueFamilyIndex) {
@@ -84,6 +86,8 @@ namespace ProjectA {
 
 	VulkanDevice::~VulkanDevice() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanDevice]");
 
 		flightFence.~shared_ptr();
 		signalSemaphore.~shared_ptr();

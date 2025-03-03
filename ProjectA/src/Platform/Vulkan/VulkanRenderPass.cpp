@@ -8,6 +8,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		ENGINE_TRACE("[VulkanRenderPass]");
+
 		VkAttachmentDescription attachment{};
 		attachment.flags = 0;
 		attachment.format = surface.format.format;
@@ -62,6 +64,8 @@ namespace ProjectA {
 
 	VulkanRenderPass::~VulkanRenderPass() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanRenderPass]");
 
 		vkDestroyRenderPass(device, object, nullptr);
 	}
