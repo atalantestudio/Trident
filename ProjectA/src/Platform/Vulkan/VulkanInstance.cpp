@@ -139,10 +139,10 @@ namespace ProjectA {
 
 			vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
 
-			ENGINE_TRACE("Instance layers:");
+			//ENGINE_TRACE("Instance layers:");
 
 			for (const VkLayerProperties& layerProperties : layerProperties) {
-				ENGINE_TRACE("- []", layerProperties.layerName);
+				//ENGINE_TRACE("- []", layerProperties.layerName);
 			}
 		}
 	#endif

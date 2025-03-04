@@ -3,12 +3,11 @@
 #include "pch.hpp"
 
 namespace ProjectA {
+	typedef uint32 Entity;
 	typedef uint32 ComponentType;
 
 	static constexpr ComponentType MAX_COMPONENT_POOLS = 64;
 	static constexpr ComponentType MAX_COMPONENT_PER_ENTITY = 64;
-
-	typedef uint32 Entity;
 
 	static constexpr Entity MAX_ENTITIES = 100000;
 
@@ -20,7 +19,6 @@ namespace ProjectA {
 
 	class Pool {};
 
-	// Sparse set implementation
 	template<typename T>
 	class ComponentPool : public Pool {
 		public:
@@ -32,7 +30,7 @@ namespace ProjectA {
 
 		public:
 			ComponentPool() {
-				ENGINE_DEBUG("[ComponentPool constructor]");
+				ENGINE_TRACE("[ComponentPool]");
 
 				entityToComponentIndex.resize(MAX_ENTITIES);
 
@@ -141,11 +139,12 @@ namespace ProjectA {
 				return entity;
 			}
 
+			// Allocates space for a pool of component type T.
 			template<typename T>
-			void allocateComponentPool() {
+			void defineComponent() {
 				ENGINE_ASSERT(componentPools.size() < MAX_COMPONENT_POOLS, "Component pool limit reached.");
 
-				const Entity componentPoolIndex = getComponentPoolIndex<T>();
+				const uint32 componentPoolIndex = getComponentPoolIndex<T>();
 
 				if (componentPoolIndex < componentPools.size()) {
 					ENGINE_WARN("Component type is already registered.");
@@ -153,7 +152,7 @@ namespace ProjectA {
 					return;
 				}
 
-				ENGINE_TRACE("Allocating space for new component pool at index [].", componentPoolIndex);
+				ENGINE_TRACE("Allocating space for new component pool (index = []).", componentPoolIndex);
 
 				// Allocate space for new pool.
 				componentPools.resize(componentPools.size() + 1);
@@ -190,16 +189,16 @@ namespace ProjectA {
 			}
 
 		private:
-			static Entity getNextComponentPoolIndex() {
-				static Entity componentPoolIndex = 0;
+			static uint32 getNextComponentPoolIndex() {
+				static uint32 componentPoolIndex = 0;
 
 				return componentPoolIndex++;
 			}
 
 			// Returns a unique index for each distinct type T.
 			template<typename T>
-			static Entity getComponentPoolIndex() {
-				static Entity componentPoolIndex = getNextComponentPoolIndex();
+			static uint32 getComponentPoolIndex() {
+				static uint32 componentPoolIndex = getNextComponentPoolIndex();
 
 				return componentPoolIndex;
 			}

@@ -16,8 +16,8 @@ namespace ProjectA {
 		glCreateVertexArrays(1, &vertexArray);
 		glBindVertexArray(vertexArray);
 
-		const GLuint vertexShaderModule = reinterpret_cast<const OpenGLShaderModule*>(descriptor.vertexShaderModule.get())->object;
-		const GLuint fragmentShaderModule = reinterpret_cast<const OpenGLShaderModule*>(descriptor.fragmentShaderModule.get())->object;
+		const GLuint vertexShaderModule = static_cast<const OpenGLShaderModule*>(descriptor.vertexShaderModule.get())->object;
+		const GLuint fragmentShaderModule = static_cast<const OpenGLShaderModule*>(descriptor.fragmentShaderModule.get())->object;
 
 		glAttachShader(program, vertexShaderModule);
 		glAttachShader(program, fragmentShaderModule);
@@ -47,14 +47,13 @@ namespace ProjectA {
 		for (const VertexAttribute& vertexInputAttribute : descriptor.vertexBufferLayout) {
 			const GLenum type = getGlType(vertexInputAttribute.type);
 			const GLint size = getGlSize(vertexInputAttribute.type);
-			const void* offset = reinterpret_cast<const void*>(static_cast<std::uintptr_t>(vertexInputAttribute.offset));
+			const GLvoid* offset = reinterpret_cast<const GLvoid*>(static_cast<std::uintptr_t>(vertexInputAttribute.offset));
 
 			glEnableVertexAttribArray(vertexInputAttribute.location);
 
 			switch (type) {
 				case GL_FLOAT:
 					glVertexAttribFormat(vertexInputAttribute.location, size, type, vertexInputAttribute.normalized, vertexInputAttribute.offset);
-					//glVertexAttribPointer(vertexInputAttribute.location, size, type, vertexInputAttribute.normalized, descriptor.vertexBufferLayout.stride, offset);
 
 					break;
 				case GL_BYTE:
@@ -64,12 +63,10 @@ namespace ProjectA {
 				case GL_INT:
 				case GL_UNSIGNED_INT:
 					glVertexAttribIFormat(vertexInputAttribute.location, size, type, vertexInputAttribute.offset);
-					//glVertexAttribIPointer(vertexInputAttribute.location, size, type, descriptor.vertexBufferLayout.stride, offset);
 
 					break;
 				case GL_DOUBLE:
 					glVertexAttribLFormat(vertexInputAttribute.location, size, type, vertexInputAttribute.offset);
-					//glVertexAttribLPointer(vertexInputAttribute.location, size, type, descriptor.vertexBufferLayout.stride, offset);
 
 					break;
 			}

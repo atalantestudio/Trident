@@ -8,6 +8,9 @@ namespace ProjectA {
 			Scene();
 
 			~Scene();
+
+			void onUpdate(const float32 deltaTime);
+
 		private:
 			ECS ecs;
 	};

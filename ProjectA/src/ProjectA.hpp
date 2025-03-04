@@ -14,6 +14,9 @@
 #include "Engine/Camera/Controller/OrthographicCameraController.hpp"
 
 // ECS
+#include "Engine/ECS/Component/SpriteComponent.hpp"
+#include "Engine/ECS/Component/Transform2DComponent.hpp"
+#include "Engine/ECS/Component/Transform3DComponent.hpp"
 #include "Engine/ECS/ECS.hpp"
 
 // ImGui
@@ -31,6 +34,9 @@
 #include "Engine/Renderer/RenderPipeline.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
+
+// Scene
+#include "Engine/Scene/Scene.hpp"
 
 #ifdef BUILD_MODE_DEBUG
 	#include "Engine/Renderer/TriangleDemo/TriangleDemoRenderer.hpp"

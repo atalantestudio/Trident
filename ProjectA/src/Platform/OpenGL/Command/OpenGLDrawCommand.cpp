@@ -3,19 +3,19 @@
 #include "Platform/OpenGL/Command/OpenGLDrawCommand.hpp"
 
 namespace ProjectA {
-	OpenGLDrawCommand::OpenGLDrawCommand(const GLenum primitiveTopology, const GLsizei vertexCount, const GLsizei instanceCount, const GLint vertexOffset) :
-		primitiveTopology(primitiveTopology),
-		vertexCount(vertexCount),
-		instanceCount(instanceCount),
-		vertexOffset(vertexOffset)
+	OpenGLDrawCommand::OpenGLDrawCommand(const GLenum mode, const GLint first, const GLsizei count, const GLsizei instancecount) :
+		mode(mode),
+		first(first),
+		count(count),
+		instancecount(instancecount)
 	{}
 
 	void OpenGLDrawCommand::execute() const {
-		if (instanceCount > 1) {
-			glDrawArraysInstanced(primitiveTopology, vertexOffset, vertexCount, instanceCount);
+		if (instancecount > 1) {
+			glDrawArraysInstanced(mode, first, count, instancecount);
 		}
 		else {
-			glDrawArrays(primitiveTopology, vertexOffset, vertexCount);
+			glDrawArrays(mode, first, count);
 		}
 	}
 }

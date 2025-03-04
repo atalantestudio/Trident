@@ -3,9 +3,12 @@
 #include <glad/glad.h>
 
 #include "Platform/OpenGL/Command/OpenGLBeginRenderPassCommand.hpp"
+#include "Platform/OpenGL/Command/OpenGLBindIndexBufferCommand.hpp"
 #include "Platform/OpenGL/Command/OpenGLBindRenderPipelineCommand.hpp"
 #include "Platform/OpenGL/Command/OpenGLBindVertexBufferCommand.hpp"
 #include "Platform/OpenGL/Command/OpenGLDrawCommand.hpp"
+#include "Platform/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
+#include "Platform/OpenGL/IndexType.hpp"
 #include "Platform/OpenGL/OpenGLCommandBuffer.hpp"
 #include "Platform/OpenGL/OpenGLCommandEncoder.hpp"
 
@@ -23,13 +26,21 @@ namespace ProjectA {
 	}
 
 	void OpenGLCommandEncoder::bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) {
-		this->renderPipeline = reinterpret_cast<const OpenGLRenderPipeline*>(renderPipeline.get());
+		this->renderPipeline = static_cast<const OpenGLRenderPipeline*>(renderPipeline.get());
 
 		commandBuffer.emplace_back(createRef<OpenGLBindRenderPipelineCommand>(this->renderPipeline));
 	}
 
+	void OpenGLCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, const uint64 offset, const IndexType indexType) {
+		indexOffset = static_cast<uint32>(offset);
+		this->indexType = getGlIndexType(indexType);
+		indexTypeSize = getGlIndexTypeSize(indexType);
+
+		commandBuffer.emplace_back(createRef<OpenGLBindIndexBufferCommand>(static_cast<const OpenGLBuffer*>(indexBuffer.get())->object));
+	}
+
 	void OpenGLCommandEncoder::bindVertexBuffer(const ref<Buffer>& vertexBuffer, const uint32 stride) {
-		commandBuffer.emplace_back(createRef<OpenGLBindVertexBufferCommand>(reinterpret_cast<const OpenGLBuffer*>(vertexBuffer.get()), stride));
+		commandBuffer.emplace_back(createRef<OpenGLBindVertexBufferCommand>(static_cast<const OpenGLBuffer*>(vertexBuffer.get()), stride));
 	}
 
 	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) {}
@@ -37,7 +48,11 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::setScissor(const int32 xOffset, const int32 yOffset, const uint32 width, const uint32 height) {}
 
 	void OpenGLCommandEncoder::draw(const uint32 vertexCount, const uint32 instanceCount, const uint32 vertexOffset) {
-		commandBuffer.emplace_back(createRef<OpenGLDrawCommand>(renderPipeline->primitiveTopology, vertexCount, instanceCount, vertexOffset));
+		commandBuffer.emplace_back(createRef<OpenGLDrawCommand>(renderPipeline->primitiveTopology, vertexOffset, vertexCount, instanceCount));
+	}
+
+	void OpenGLCommandEncoder::drawIndexed(const uint32 indexCount, const uint32 instanceCount, const uint32 indexOffset) {
+		commandBuffer.emplace_back(createRef<OpenGLDrawIndexedCommand>(renderPipeline->primitiveTopology, indexCount, indexType, reinterpret_cast<const GLvoid*>(static_cast<std::uintptr_t>(this->indexOffset + indexOffset * indexTypeSize)), instanceCount));
 	}
 
 	void OpenGLCommandEncoder::endRenderPass() const {}
@@ -47,7 +62,10 @@ namespace ProjectA {
 	}
 
 	void OpenGLCommandEncoder::reset() {
-		renderPipeline = nullptr;
 		commandBuffer.clear();
+		renderPipeline = nullptr;
+		indexOffset = 0;
+		indexType = 0;
+		indexTypeSize = 0;
 	}
 }

@@ -17,8 +17,9 @@ namespace ProjectA {
 	void OrthographicCamera::updateView(const lyah::vec3<float32>& position, float32 rotation) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		// TODO: Remove transpose call
 		mat4x4<float32> transform = mat4x4<float32>::rotation({0.0f, 0.0f, 1.0f}, rotation);
+
+		// TODO: Get rid of transpose.
 		transform *= lyah::transpose(mat4x4<float32>::translation(position));
 
 		view = lyah::inverse(transform);

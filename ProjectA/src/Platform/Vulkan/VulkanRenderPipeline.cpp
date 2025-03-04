@@ -15,8 +15,8 @@ namespace ProjectA {
 		ENGINE_TRACE("[VulkanRenderPipeline]");
 
 		const std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
-			reinterpret_cast<const VulkanShaderModule*>(descriptor.vertexShaderModule.get())->object,
-			reinterpret_cast<const VulkanShaderModule*>(descriptor.fragmentShaderModule.get())->object,
+			static_cast<const VulkanShaderModule*>(descriptor.vertexShaderModule.get())->object,
+			static_cast<const VulkanShaderModule*>(descriptor.fragmentShaderModule.get())->object,
 		};
 
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
@@ -80,7 +80,7 @@ namespace ProjectA {
 		inputAssemblyStateCreateInfo.topology = topologies[static_cast<uint32>(descriptor.primitiveTopology)];
 		inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
-		const VulkanSwapchain* swapchain = reinterpret_cast<const VulkanSwapchain*>(descriptor.swapchain.get());
+		const VulkanSwapchain* swapchain = static_cast<const VulkanSwapchain*>(descriptor.swapchain.get());
 
 		VkViewport viewport{};
 		viewport.x = 0.0f;
@@ -181,8 +181,8 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.pDepthStencilState = nullptr;
 		graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
-		graphicsPipelineCreateInfo.layout = reinterpret_cast<const VulkanPipelineLayout*>(descriptor.pipelineLayout.get())->object;
-		graphicsPipelineCreateInfo.renderPass = reinterpret_cast<const VulkanRenderPass*>(descriptor.renderPass.get())->object;
+		graphicsPipelineCreateInfo.layout = static_cast<const VulkanPipelineLayout*>(descriptor.pipelineLayout.get())->object;
+		graphicsPipelineCreateInfo.renderPass = static_cast<const VulkanRenderPass*>(descriptor.renderPass.get())->object;
 		graphicsPipelineCreateInfo.subpass = 0;
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		graphicsPipelineCreateInfo.basePipelineIndex = -1;

@@ -14,6 +14,7 @@ namespace ProjectA {
 		ENGINE_TRACE("[VulkanSurface]");
 
 		// TODO: If no debug messenger, this fails with "Vulkan instance missing VK_KHR_win32_surface extension".
+		// TODO: Replace with https://registry.khronos.org/vulkan/specs/latest/man/html/vkCreateWin32SurfaceKHR.html.
 		glfwCreateWindowSurface(instance, window, nullptr, &object);
 
 		{

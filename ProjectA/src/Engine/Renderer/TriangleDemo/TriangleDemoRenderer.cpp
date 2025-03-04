@@ -56,7 +56,8 @@ namespace ProjectA {
 
 		const std::vector<Vertex> vertexBufferData = {
 			{{-0.5f, -0.5f,  0.0f}},
-			{{ 0.0f,  0.5f,  0.0f}},
+			{{-0.5f,  0.5f,  0.0f}},
+			{{ 0.5f,  0.5f,  0.0f}},
 			{{ 0.5f, -0.5f,  0.0f}},
 		};
 
@@ -66,6 +67,18 @@ namespace ProjectA {
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 		vertexBuffer->write(vertexBufferData.data(), sizeof(Vertex) * vertexBufferData.size());
+
+		const std::vector<uint16> indexBufferData = {
+			0, 1, 2,
+			0, 2, 3,
+		};
+
+		BufferDescriptor indexBufferDescriptor{};
+		indexBufferDescriptor.size = sizeof(uint16) * indexBufferData.size();
+		indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
+
+		indexBuffer = createBuffer(indexBufferDescriptor);
+		indexBuffer->write(indexBufferData.data(), sizeof(uint16) * indexBufferData.size());
 
 		commandEncoder = createCommandEncoder();
 	}
@@ -92,10 +105,11 @@ namespace ProjectA {
 		commandEncoder->begin();
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
+		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(vertexBuffer, sizeof(Vertex));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
-		commandEncoder->draw(3, 1, 0);
+		commandEncoder->drawIndexed(6, 1, 0);
 		commandEncoder->endRenderPass();
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();

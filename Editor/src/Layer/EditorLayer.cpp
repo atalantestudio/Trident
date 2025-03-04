@@ -31,8 +31,8 @@ namespace ProjectA {
 		const Entity e1 = ecs.createEntity();
 		const Entity e2 = ecs.createEntity();
 		const Entity e3 = ecs.createEntity();
-		ecs.allocateComponentPool<Position>();
-		ecs.allocateComponentPool<Velocity>();
+		ecs.defineComponent<Position>();
+		ecs.defineComponent<Velocity>();
 		Position pos;
 		pos.position = {1.0f, 2.0f, 3.0f};
 		ecs.setComponent<Position>(e1, pos);
@@ -57,7 +57,7 @@ namespace ProjectA {
 		}
 	}
 
-	void EditorLayer::update(float32 deltaTime) {
+	void EditorLayer::update(const float32 deltaTime) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		if (viewportWindowSize[0] > 0.0f && viewportWindowSize[1] > 0.0f && viewportWindowSize != framebuffer->descriptor.size) {
@@ -71,14 +71,10 @@ namespace ProjectA {
 
 		Renderer2D::resetStatistics();
 
-		{
-			PROFILE_SCOPE("Pre-draw");
+		framebuffer->bind();
 
-			framebuffer->bind();
-
-			//Renderer::getRendererApi()->setClearColor({0.1f, 0.1f, 0.1f, 1.0f});
-			//Renderer::getRendererApi()->clear();
-		}
+		//Renderer::getRendererApi()->setClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+		//Renderer::getRendererApi()->clear();
 
 		Renderer2D::camera = &cameraController.getCamera();
 

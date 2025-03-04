@@ -19,7 +19,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLDevice::submit(const ref<CommandBuffer>& commandBuffer) const {
-		const OpenGLCommandBuffer& buffer = *reinterpret_cast<const OpenGLCommandBuffer*>(commandBuffer.get());
+		const OpenGLCommandBuffer& buffer = *static_cast<const OpenGLCommandBuffer*>(commandBuffer.get());
 
 		for (const ref<OpenGLCommand>& command : buffer) {
 			command->execute();

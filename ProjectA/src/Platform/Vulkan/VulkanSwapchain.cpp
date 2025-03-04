@@ -85,7 +85,7 @@ namespace ProjectA {
 			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferCreateInfo.pNext = nullptr;
 			framebufferCreateInfo.flags = 0;
-			framebufferCreateInfo.renderPass = reinterpret_cast<const VulkanRenderPass*>(descriptor.renderPass.get())->object;
+			framebufferCreateInfo.renderPass = static_cast<const VulkanRenderPass*>(descriptor.renderPass.get())->object;
 			framebufferCreateInfo.attachmentCount = 1;
 			framebufferCreateInfo.pAttachments = &imageViews[i];
 			framebufferCreateInfo.width = imageExtent.width;

@@ -30,7 +30,7 @@ namespace ProjectA {
 
 		vkGetBufferMemoryRequirements(device.object, object, &memoryRequirements);
 
-		device.allocateMemory(memoryRequirements);
+		memoryTypeIndex = device.allocateMemory(memoryRequirements);
 	}
 
 	VulkanBuffer::~VulkanBuffer() {
@@ -44,8 +44,8 @@ namespace ProjectA {
 	void VulkanBuffer::write(const void* data, const uint64 size) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		vkBindBufferMemory(device.object, object, device.memory, 0);
+		vkBindBufferMemory(device.object, object, device.getMemory(memoryTypeIndex), 0);
 
-		device.writeBuffer(data, size);
+		device.writeBuffer(data, size, memoryTypeIndex);
 	}
 }

@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Platform/Vulkan/IndexType.hpp"
 #include "Platform/Vulkan/VulkanBuffer.hpp"
 #include "Platform/Vulkan/VulkanCommandBuffer.hpp"
 #include "Platform/Vulkan/VulkanCommandEncoder.hpp"
@@ -52,20 +53,16 @@ namespace ProjectA {
 	void VulkanCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const VulkanSwapchain* swapchain = reinterpret_cast<const VulkanSwapchain*>(descriptor.swapchain.get());
+		const VulkanSwapchain* swapchain = static_cast<const VulkanSwapchain*>(descriptor.swapchain.get());
 
 		VkClearValue clearValue{};
 
 		_mm_store_ps(clearValue.color.float32, descriptor.clearColor.m);
 
-		// TODO: Find default values for depth and stencil.
-		//clearValue.depthStencil.depth = descriptor.depth;
-		//clearValue.depthStencil.stencil = descriptor.stencil;
-
 		VkRenderPassBeginInfo renderPassBeginInfo{};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassBeginInfo.pNext = nullptr;
-		renderPassBeginInfo.renderPass = reinterpret_cast<const VulkanRenderPass*>(descriptor.renderPass.get())->object;
+		renderPassBeginInfo.renderPass = static_cast<const VulkanRenderPass*>(descriptor.renderPass.get())->object;
 		renderPassBeginInfo.framebuffer = swapchain->framebuffers[descriptor.nextImageIndex];
 		renderPassBeginInfo.renderArea.offset = {0, 0};
 		renderPassBeginInfo.renderArea.extent = swapchain->imageExtent;
@@ -78,7 +75,13 @@ namespace ProjectA {
 	void VulkanCommandEncoder::bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, reinterpret_cast<const VulkanRenderPipeline*>(renderPipeline.get())->object);
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, static_cast<const VulkanRenderPipeline*>(renderPipeline.get())->object);
+	}
+
+	void VulkanCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, const uint64 offset, const IndexType indexType) {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		vkCmdBindIndexBuffer(commandBuffer, static_cast<const VulkanBuffer*>(indexBuffer.get())->object, offset, getVkIndexType(indexType));
 	}
 
 	void VulkanCommandEncoder::bindVertexBuffer(const ref<Buffer>& vertexBuffer, const uint32 stride) {
@@ -86,7 +89,7 @@ namespace ProjectA {
 
 		const VkDeviceSize offset = 0;
 
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &(reinterpret_cast<const VulkanBuffer*>(vertexBuffer.get())->object), &offset);
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &static_cast<const VulkanBuffer*>(vertexBuffer.get())->object, &offset);
 	}
 
 	void VulkanCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) {
@@ -119,6 +122,12 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		vkCmdDraw(commandBuffer, vertexCount, instanceCount, vertexOffset, 0);
+	}
+
+	void VulkanCommandEncoder::drawIndexed(const uint32 indexCount, const uint32 instanceCount, const uint32 indexOffset) {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, indexOffset, 0, 0);
 	}
 
 	void VulkanCommandEncoder::endRenderPass() const {

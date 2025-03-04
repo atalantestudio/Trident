@@ -9,7 +9,7 @@ namespace ProjectA {
 
 	void TriangleDemoLayer::unbind() {}
 
-	void TriangleDemoLayer::update(float32 deltaTime) {
+	void TriangleDemoLayer::update(const float32 deltaTime) {
 		renderer.render();
 	}
 

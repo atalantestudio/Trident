@@ -6,9 +6,9 @@ namespace ProjectA {
 	enum class GraphicsAPI : uint32 {
 		// CPU backend. Not supported for now.
 		NONE = 0,
-		// TODO: Target OpenGL >= 4.
+		// OpenGL 4.5.
 		OPENGL = 1,
-		// Vulkan. Not fully supported.
+		// Vulkan 1.
 		VULKAN = 2,
 	};
 }

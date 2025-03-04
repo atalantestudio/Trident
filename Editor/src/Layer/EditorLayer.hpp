@@ -18,6 +18,8 @@ namespace ProjectA {
 
 			ECS ecs;
 
+			ref<Scene> scene;
+
 		public:
 			EditorLayer();
 
@@ -26,7 +28,7 @@ namespace ProjectA {
 			void bind() override;
 			void unbind() override;
 
-			void update(float32 deltaTime) override;
+			void update(const float32 deltaTime) override;
 
 			virtual void renderImGui() override;
 

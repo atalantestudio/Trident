@@ -20,6 +20,7 @@ namespace ProjectA {
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
 			ref<Buffer> vertexBuffer;
+			ref<Buffer> indexBuffer;
 			ref<CommandEncoder> commandEncoder;
 	};
 }

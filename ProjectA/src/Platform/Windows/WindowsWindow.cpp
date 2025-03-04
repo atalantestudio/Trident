@@ -91,7 +91,7 @@ namespace ProjectA {
 		setVSyncState(true);
 
 		glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) {
-			GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
+			GLFWData& data = *static_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			data.width = width;
 			data.height = height;
@@ -102,7 +102,7 @@ namespace ProjectA {
 		});
 
 		glfwSetWindowCloseCallback(window, [](GLFWwindow* window) {
-			const GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
+			const GLFWData& data = *static_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			WindowCloseEvent event;
 
@@ -110,7 +110,7 @@ namespace ProjectA {
 		});
 
 		glfwSetKeyCallback(window, [](GLFWwindow* window, int32 keyCode, int32 scancode, int32 action, int32 mods) {
-			const GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
+			const GLFWData& data = *static_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			switch (action) {
 				case GLFW_PRESS: {
@@ -140,7 +140,7 @@ namespace ProjectA {
 		});
 
 		glfwSetCharCallback(window, [](GLFWwindow* window, uint32 keyCode) {
-			const GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
+			const GLFWData& data = *static_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			KeyTypeEvent event(static_cast<KeyCode>(keyCode));
 
@@ -148,7 +148,7 @@ namespace ProjectA {
 		});
 
 		glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int32 button, int32 action, int32 mods) {
-			const GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
+			const GLFWData& data = *static_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			switch (action) {
 				case GLFW_PRESS: {
@@ -170,7 +170,7 @@ namespace ProjectA {
 		});
 
 		glfwSetCursorPosCallback(window, [](GLFWwindow* window, float64 xpos, float64 ypos) {
-			const GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
+			const GLFWData& data = *static_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			MouseMoveEvent event(static_cast<float32>(xpos), static_cast<float32>(ypos));
 
@@ -178,7 +178,7 @@ namespace ProjectA {
 		});
 
 		glfwSetScrollCallback(window, [](GLFWwindow* window, float64 xoffset, float64 yoffset) {
-			const GLFWData& data = *reinterpret_cast<GLFWData*>(glfwGetWindowUserPointer(window));
+			const GLFWData& data = *static_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			MouseScrollEvent event(static_cast<float32>(xoffset), static_cast<float32>(yoffset));
 

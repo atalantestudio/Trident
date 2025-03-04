@@ -12,8 +12,7 @@ namespace ProjectA {
 	};
 
 	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface) :
-		physicalDevice(physicalDevice.object),
-		memory(nullptr)
+		physicalDevice(physicalDevice.object)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -93,11 +92,14 @@ namespace ProjectA {
 		signalSemaphore.~shared_ptr();
 		acquireNextImageSemaphore.~shared_ptr();
 
-		vkFreeMemory(object, memory, nullptr);
+		for (const uint32 memoryIndex : memoryTypeIndexToMemoryIndex) {
+			vkFreeMemory(object, memory[memoryIndex], nullptr);
+		}
+
 		vkDestroyDevice(object, nullptr);
 	}
 
-	void VulkanDevice::allocateMemory(const VkMemoryRequirements& memoryRequirements) {
+	uint32 VulkanDevice::allocateMemory(const VkMemoryRequirements& memoryRequirements) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties{};
@@ -122,27 +124,42 @@ namespace ProjectA {
 			throw std::runtime_error("Failed to find suitable memory type for the buffer.");
 		}
 
+		memoryTypeIndexToMemoryIndex.resize(memoryTypeIndex + 1);
+		memoryTypeIndexToMemoryIndex[memoryTypeIndex] = static_cast<uint32>(memory.size());
+
 		VkMemoryAllocateInfo memoryAllocateInfo{};
 		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		memoryAllocateInfo.pNext = nullptr;
 		memoryAllocateInfo.allocationSize = memoryRequirements.size;
 		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
 
-		if (vkAllocateMemory(object, &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS) {
+		VkDeviceMemory deviceMemory;
+
+		if (vkAllocateMemory(object, &memoryAllocateInfo, nullptr, &deviceMemory) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to allocate memory for the buffer.");
 		}
+
+		memory.emplace_back(deviceMemory);
+
+		return memoryTypeIndex;
 	}
 
-	void VulkanDevice::writeBuffer(const void* data, const uint64 size) const {
+	VkDeviceMemory VulkanDevice::getMemory(const uint32 memoryTypeIndex) const {
+		const uint32 memoryIndex = memoryTypeIndexToMemoryIndex[memoryTypeIndex];
+
+		return memory[memoryIndex];
+	}
+
+	void VulkanDevice::writeBuffer(const void* data, const uint64 size, const uint32 memoryTypeIndex) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		void* destination;
 
-		vkMapMemory(object, memory, 0, size, 0, &destination);
+		vkMapMemory(object, getMemory(memoryTypeIndex), 0, size, 0, &destination);
 
 		memcpy(destination, data, static_cast<std::size_t>(size));
 
-		vkUnmapMemory(object, memory);
+		vkUnmapMemory(object, getMemory(memoryTypeIndex));
 	}
 
 	void VulkanDevice::waitForFences() const {
@@ -163,7 +180,7 @@ namespace ProjectA {
 
 		uint32 imageIndex;
 
-		const VkResult result = vkAcquireNextImageKHR(object, reinterpret_cast<const VulkanSwapchain*>(swapchain.get())->object, UINT64_MAX, acquireNextImageSemaphore->object, VK_NULL_HANDLE, &imageIndex);
+		const VkResult result = vkAcquireNextImageKHR(object, static_cast<const VulkanSwapchain*>(swapchain.get())->object, UINT64_MAX, acquireNextImageSemaphore->object, VK_NULL_HANDLE, &imageIndex);
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 			throw std::runtime_error("TODO: Recreate swapchain.");
@@ -188,7 +205,7 @@ namespace ProjectA {
 		submitInfo.pWaitSemaphores = &acquireNextImageSemaphore->object;
 		submitInfo.pWaitDstStageMask = &waitDstStageMask;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &reinterpret_cast<const VulkanCommandBuffer*>(commandBuffer.get())->object;
+		submitInfo.pCommandBuffers = &static_cast<const VulkanCommandBuffer*>(commandBuffer.get())->object;
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = &signalSemaphore->object;
 
@@ -206,7 +223,7 @@ namespace ProjectA {
 		presentInfo.waitSemaphoreCount = 1;
 		presentInfo.pWaitSemaphores = &signalSemaphore->object;
 		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = &reinterpret_cast<const VulkanSwapchain*>(swapchain.get())->object;
+		presentInfo.pSwapchains = &static_cast<const VulkanSwapchain*>(swapchain.get())->object;
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr;
 

@@ -21,5 +21,6 @@ namespace ProjectA {
 
 		private:
 			const VulkanDevice& device;
+			uint32 memoryTypeIndex;
 	};
 }

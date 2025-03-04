@@ -7,14 +7,14 @@
 namespace ProjectA {
 	class OpenGLDrawCommand : public OpenGLCommand {
 		public:
-			OpenGLDrawCommand(const GLenum primitiveTopology, const GLsizei vertexCount, const GLsizei instanceCount, const GLint vertexOffset);
+			OpenGLDrawCommand(const GLenum mode, const GLint first, const GLsizei count, const GLsizei instancecount);
 
 			void execute() const override;
 
 		private:
-			const GLenum primitiveTopology;
-			const GLsizei vertexCount;
-			const GLsizei instanceCount;
-			const GLint vertexOffset;
+			const GLenum mode;
+			const GLint first;
+			const GLsizei count;
+			const GLsizei instancecount;
 	};
 }
