@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Engine/ECS/Component/Transform2DComponent.hpp"
 #include "Engine/Loader/FileLoader.hpp"
 #include "Engine/Renderer/Buffer/BufferUsage.hpp"
 #include "Engine/Renderer/GUI/GUIRenderer.hpp"
@@ -69,20 +70,13 @@ namespace ProjectA {
 		positionVertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
 
 		positionVertexBuffer = createBuffer(positionVertexBufferDescriptor);
-		positionVertexBuffer->write(positionVertexBufferData.data(), sizeof(vec3<float32>) * positionVertexBufferData.size());
-
-		const std::vector<mat3x3<float32>> transformVertexBufferData = {
-			mat3x3<float32>::scaling({64.0f, 64.0f}) * mat3x3<float32>::translation({16.0f, 0.0f}),
-			mat3x3<float32>::scaling({128.0f, 48.0f}) * mat3x3<float32>::translation({16.0f, 80.0f}),
-			mat3x3<float32>::scaling({256.0f, 512.0f}) * mat3x3<float32>::translation({80.0f, 128.0f}),
-		};
+		positionVertexBuffer->write(positionVertexBufferData.data(), 0, sizeof(vec3<float32>) * positionVertexBufferData.size());
 
 		BufferDescriptor transformVertexBufferDescriptor{};
-		transformVertexBufferDescriptor.size = sizeof(mat3x3<float32>) * transformVertexBufferData.size();
+		transformVertexBufferDescriptor.size = sizeof(Transform2DComponent) * MAX_QUADS;
 		transformVertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
 
 		transformVertexBuffer = createBuffer(transformVertexBufferDescriptor);
-		transformVertexBuffer->write(transformVertexBufferData.data(), sizeof(mat3x3<float32>) * transformVertexBufferData.size());
 
 		const std::vector<uint16> indexBufferData = {
 			0, 1, 2,
@@ -94,9 +88,31 @@ namespace ProjectA {
 		indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
-		indexBuffer->write(indexBufferData.data(), sizeof(uint16) * indexBufferData.size());
+		indexBuffer->write(indexBufferData.data(), 0, sizeof(uint16) * indexBufferData.size());
 
 		commandEncoder = createCommandEncoder();
+	}
+
+	void GUIRenderer::registerEntities(const ECS& ecs) {
+		const ComponentPool<Transform2DComponent>& transformComponentPool = ecs.getComponentPool<Transform2DComponent>();
+
+		if (transformComponentPool.componentCount >= MAX_QUADS) {
+			throw std::runtime_error("Too many alive components.");
+		}
+
+		const uint64 size = sizeof(Transform2DComponent);
+
+		uint64 offset = 0;
+
+		for (uint32 i = 0; i < transformComponentPool.componentCount; i++) {
+			const Transform2DComponent& transformComponent = transformComponentPool.components[i];
+
+			transformVertexBuffer->write(&transformComponent, offset, size);
+
+			offset += size;
+		}
+
+		instanceCount = transformComponentPool.componentCount;
 	}
 
 	void GUIRenderer::render() const {
@@ -123,10 +139,10 @@ namespace ProjectA {
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, positionVertexBuffer, sizeof(vec3<float32>));
-		commandEncoder->bindVertexBuffer(1, transformVertexBuffer, sizeof(mat3x3<float32>));
+		commandEncoder->bindVertexBuffer(1, transformVertexBuffer, sizeof(Transform2DComponent));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
-		commandEncoder->drawIndexed(6, 3, 0);
+		commandEncoder->drawIndexed(6, instanceCount, 0);
 		commandEncoder->endRenderPass();
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();

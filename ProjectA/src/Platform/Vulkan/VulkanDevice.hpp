@@ -17,12 +17,8 @@ namespace ProjectA {
 
 			~VulkanDevice() override;
 
-			// Returns the most suitable device memory type index for the allocated buffer.
-			uint32 allocateMemory(const VkMemoryRequirements& memoryRequirements);
-
-			VkDeviceMemory getMemory(const uint32 memoryTypeIndex) const;
-
-			void writeBuffer(const void* data, const uint64 size, const uint32 memoryTypeIndex) const;
+			// Returns a suitable device memory type index.
+			uint32 findMemoryType(const VkMemoryRequirements& memoryRequirements, const VkMemoryPropertyFlags memoryPropertyFlags) const;
 
 			void waitForFences() const override;
 
@@ -46,9 +42,5 @@ namespace ProjectA {
 			ref<VulkanSemaphore> acquireNextImageSemaphore;
 			ref<VulkanSemaphore> signalSemaphore;
 			ref<VulkanFence> flightFence;
-
-			// TODO: Replace with sparse set implementation?
-			std::vector<VkDeviceMemory> memory;
-			std::vector<uint32> memoryTypeIndexToMemoryIndex;
 	};
 }

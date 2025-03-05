@@ -5,6 +5,7 @@
 namespace ProjectA {
 	class GUILayer : public Layer {
 		private:
+			ECS ecs;
 			GUIRenderer renderer;
 
 		public:

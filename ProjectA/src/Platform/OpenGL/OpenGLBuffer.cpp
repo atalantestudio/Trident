@@ -13,6 +13,13 @@ namespace ProjectA {
 		ENGINE_TRACE("[OpenGLBuffer]");
 
 		glCreateBuffers(1, &object);
+
+		glBindBuffer(target, object);
+
+		// TODO: Set correct usage.
+		glBufferData(target, size, nullptr, GL_STATIC_DRAW);
+
+		glBindBuffer(target, 0);
 	}
 
 	OpenGLBuffer::~OpenGLBuffer() {
@@ -23,10 +30,10 @@ namespace ProjectA {
 		glDeleteBuffers(1, &object);
 	}
 
-	void OpenGLBuffer::write(const void* data, const uint64 size) const {
+	void OpenGLBuffer::write(const void* data, const uint64 offset, const uint64 size) const {
 		glBindBuffer(target, object);
 
-		glBufferData(target, size, data, GL_STATIC_DRAW);
+		glBufferSubData(target, offset, size, data);
 
 		glBindBuffer(target, 0);
 	}

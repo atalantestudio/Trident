@@ -12,6 +12,6 @@ namespace ProjectA {
 		public:
 			virtual ~Buffer() = default;
 
-			virtual void write(const void* data, const uint64 size) const = 0;
+			virtual void write(const void* data, const uint64 offset, const uint64 size) const = 0;
 	};
 }

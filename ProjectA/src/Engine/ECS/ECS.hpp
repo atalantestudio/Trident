@@ -6,27 +6,22 @@ namespace ProjectA {
 	typedef uint32 Entity;
 	typedef uint32 ComponentType;
 
-	static constexpr ComponentType MAX_COMPONENT_POOLS = 64;
-	static constexpr ComponentType MAX_COMPONENT_PER_ENTITY = 64;
-
 	static constexpr Entity MAX_ENTITIES = 100000;
 
-	template<typename T>
-	struct EntityComponent {
-		Entity entity;
-		T component;
-	};
+	static constexpr ComponentType MAX_COMPONENT_POOLS = 64;
+	static constexpr ComponentType MAX_COMPONENT_PER_ENTITY = 64;
 
 	class Pool {};
 
 	template<typename T>
 	class ComponentPool : public Pool {
 		public:
-			static constexpr Entity overflowComponentIndex = std::numeric_limits<Entity>::max();
-
 			std::vector<Entity> entityToComponentIndex; // Sparse array
-			std::vector<EntityComponent<T>> entityComponents; // Dense array
-			Entity aliveComponents = 0;
+			std::vector<uint32> componentIndexToEntity; // Dense array
+			std::vector<T> components; // Dense array
+
+			// Number of currently alive components.
+			uint32 componentCount = 0;
 
 		public:
 			ComponentPool() {
@@ -34,84 +29,79 @@ namespace ProjectA {
 
 				entityToComponentIndex.resize(MAX_ENTITIES);
 
-				// Fill entity -> component index with invalid ID.
-				for (Entity& i : entityToComponentIndex) {
-					i = overflowComponentIndex;
+				// Fill array with null index.
+				for (Entity& entity : entityToComponentIndex) {
+					entity = nullComponentIndex;
 				}
 			}
 
+			// TODO: Const variant.
 			// Returns the component of type T belonging to the provided entity.
-			// If the entity doesn't have a component of this type, null will be returned.
-			T* getComponent(const Entity entity) {
-				ENGINE_ASSERT(entity < MAX_ENTITIES, "Overflowing entity.");
+			T& getComponent(const Entity entity) {
+				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
 
 				const Entity componentIndex = entityToComponentIndex[entity];
 
-				if (componentIndex == overflowComponentIndex) {
-					ENGINE_ERROR("Entity [] has no components.", entity);
+				ENGINE_ASSERT(componentIndex != nullComponentIndex, "Entity [] has no components.", entity);
 
-					return nullptr;
-				}
-
-				return &(entityComponents[componentIndex].component);
+				return entityComponents[componentIndex].component;
 			}
 
+			// Sets or replaces the component of type T belonging to the provided entity.
 			void setComponent(const Entity entity, const T& component) {
-				ENGINE_ASSERT(entity < MAX_ENTITIES, "Overflowing entity.");
+				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
 
-				Entity componentIndex = entityToComponentIndex[entity];
+				const uint32 componentIndex = entityToComponentIndex[entity];
 
-				if (componentIndex == overflowComponentIndex) {
-					// Add component.
-					componentIndex = aliveComponents;
-
-					entityToComponentIndex[entity] = componentIndex;
-
-					EntityComponent<T> entityComponent{};
-					entityComponent.entity = entity;
-					entityComponent.component = component;
-
-					entityComponents.emplace_back(entityComponent);
-
-					// Account for one more alive entity component.
-					aliveComponents++;
-				}
-				else {
-					// Overwrite existing component.
-					entityComponents[componentIndex].component = component;
-				}
-			}
-
-			void resetComponent(const Entity entity) {
-				ENGINE_ASSERT(entity < MAX_ENTITIES, "Overflowing entity.");
-
-				const Entity componentIndex = entityToComponentIndex[entity];
-
-				if (componentIndex == overflowComponentIndex) {
-					ENGINE_WARN("Entity is already reset (no component found).");
+				if (componentIndex != nullComponentIndex) {
+					// Replace (overwrite) component.
+					components[componentIndex] = component;
 
 					return;
 				}
 
-				const EntityComponent& entityComponent = entityComponents[componentIndex];
-				const EntityComponent& lastEntityComponent = entityComponents.back();
+				// Set (add) component.
+				entityToComponentIndex[entity] = componentCount;
 
-				// Put the component to be deleted at the end of the list.
-				std::swap(entityComponent, lastEntityComponent);
+				components.emplace_back(component);
+				componentIndexToEntity.emplace_back(entity);
 
-				// Fix mapping of the swapped back component.
-				entityToComponentIndex[lastEntityComponent.entity] = componentIndex;
+				componentCount++;
+			}
+
+			// Erases the component of type T belonging to the provided entity.
+			void resetComponent(const Entity entity) {
+				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
+
+				const Entity componentIndex = entityToComponentIndex[entity];
+
+				if (componentIndex == nullComponentIndex) {
+					ENGINE_ERROR("The component for the entity [] is already reset.", entity);
+
+					return;
+				}
+
+				// Don't touch the deleted data; instead wait for another component to overwrite it.
+				componentCount--;
+
+				const T& component = components[componentIndex];
+				const T& lastComponent = components[componentCount];
+				const Entity lastComponentEntity = componentIndexToEntity[componentCount];
+
+				// Move the component to be deleted to the end of the list.
+				std::swap(component, lastComponent);
+
+				// Since the components have been swapped, the entity pointing to lastComponent
+				// now points to the component at componentIndex.
+				entityToComponentIndex[lastComponentEntity] = componentIndex;
 
 				// Reset the index of the component to be deleted.
-				entityToComponentIndex[entity] = overflowComponentIndex;
-
-				// Account for one less entity component.
-				// Don't touch the data; instead wait for another component to overwrite it.
-				aliveComponents--;
+				entityToComponentIndex[entity] = nullComponentIndex;
 			}
-	};
 
-	// TODO: Tag pool
+		private:
+			static constexpr uint32 nullComponentIndex = std::numeric_limits<Entity>::max();
+	};
 
 	class ECS {
 		public:
@@ -161,13 +151,14 @@ namespace ProjectA {
 				componentPools[componentPoolIndex] = std::make_unique<ComponentPool<T>>();
 			}
 
+			// TODO: Const variant.
 			template<typename T>
 			T& getComponent(const Entity entity) {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "Invalid entity.");
 
 				ComponentPool<T>& componentPool = getComponentPool<T>();
 
-				return *componentPool.getComponent(entity);
+				return componentPool.getComponent(entity);
 			}
 
 			template<typename T>

@@ -106,8 +106,9 @@ namespace ProjectA {
 		rasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
 
 		// TODO: Set correct cull mode.
-		//rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT;
+		rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_NONE;
+		//rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT; // TriangleDemoLayer requires back-face culling.
+		//rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT; // GUILayer requires front-face culling.
 
 		rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
 		rasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;

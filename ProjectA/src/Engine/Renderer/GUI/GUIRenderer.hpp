@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/ECS/ECS.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
@@ -7,7 +8,12 @@ namespace ProjectA {
 		public:
 			GUIRenderer();
 
+			void registerEntities(const ECS& ecs);
+
 			void render() const override;
+
+		private:
+			static constexpr uint32 MAX_QUADS = 64;
 
 		private:
 			ref<RenderPass> renderPass;
@@ -18,5 +24,7 @@ namespace ProjectA {
 			ref<Buffer> transformVertexBuffer;
 			ref<Buffer> indexBuffer;
 			ref<CommandEncoder> commandEncoder;
+
+			uint32 instanceCount = 0;
 	};
 }

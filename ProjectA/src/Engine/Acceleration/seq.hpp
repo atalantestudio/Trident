@@ -21,12 +21,12 @@ namespace ProjectA {
 			}
 
 			// Returns the number of elements in the sequence.
-			std::size_t count() const {
+			std::size_t count() const noexcept {
 				return _count;
 			}
 
 			// Returns the size in bytes of the sequence.
-			std::size_t size() const {
+			std::size_t size() const noexcept {
 				return sizeof(T) * _count;
 			}
 
@@ -52,7 +52,8 @@ namespace ProjectA {
 			}
 
 		private:
-			void resize() {
+			// Resizes the sequence according to its resize mode.
+			void resize() noexcept {
 				const std::size_t resizedCount = _count * (_count * resizeFactor + 2 * (1 - resizeFactor));
 				T* resizedArray = new T[resizedCount];
 

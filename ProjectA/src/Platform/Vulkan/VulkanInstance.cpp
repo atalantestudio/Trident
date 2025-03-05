@@ -5,7 +5,7 @@
 #include "Platform/Vulkan/VulkanInstance.hpp"
 
 namespace ProjectA {
-	// TODO: Pass enabled layer names as parameter.
+	// TODO: Client-side validation layer request.
 	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
 		const std::vector<const char*> VulkanInstance::enabledLayerNames = {
 			"VK_LAYER_KHRONOS_validation",

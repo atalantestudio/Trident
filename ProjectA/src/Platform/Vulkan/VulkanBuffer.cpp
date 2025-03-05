@@ -30,7 +30,20 @@ namespace ProjectA {
 
 		vkGetBufferMemoryRequirements(device.object, object, &memoryRequirements);
 
-		memoryTypeIndex = device.allocateMemory(memoryRequirements);
+		// HOST_COHERENT avoid caching.
+		const uint32 memoryTypeIndex = device.findMemoryType(memoryRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+		VkMemoryAllocateInfo memoryAllocateInfo{};
+		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		memoryAllocateInfo.pNext = nullptr;
+		memoryAllocateInfo.allocationSize = memoryRequirements.size;
+		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
+
+		if (vkAllocateMemory(device.object, &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to allocate memory.");
+		}
+
+		vkBindBufferMemory(device.object, object, memory, 0);
 	}
 
 	VulkanBuffer::~VulkanBuffer() {
@@ -39,13 +52,18 @@ namespace ProjectA {
 		ENGINE_TRACE("[~VulkanBuffer]");
 
 		vkDestroyBuffer(device.object, object, nullptr);
+		vkFreeMemory(device.object, memory, nullptr);
 	}
 
-	void VulkanBuffer::write(const void* data, const uint64 size) const {
+	void VulkanBuffer::write(const void* data, const uint64 offset, const uint64 size) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		vkBindBufferMemory(device.object, object, device.getMemory(memoryTypeIndex), 0);
+		void* destination;
 
-		device.writeBuffer(data, size, memoryTypeIndex);
+		vkMapMemory(device.object, memory, offset, size, 0, &destination);
+
+		memcpy(destination, data, static_cast<std::size_t>(size));
+
+		vkUnmapMemory(device.object, memory);
 	}
 }

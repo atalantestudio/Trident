@@ -6,7 +6,7 @@
 #include "Platform/Vulkan/VulkanSwapchain.hpp"
 
 namespace ProjectA {
-	// TODO: Pass enabled extension names as parameter.
+	// TODO: Client-side extension request.
 	const std::vector<const char*> VulkanDevice::enabledExtensionNames = {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 	};
@@ -92,74 +92,24 @@ namespace ProjectA {
 		signalSemaphore.~shared_ptr();
 		acquireNextImageSemaphore.~shared_ptr();
 
-		for (const uint32 memoryIndex : memoryTypeIndexToMemoryIndex) {
-			vkFreeMemory(object, memory[memoryIndex], nullptr);
-		}
-
 		vkDestroyDevice(object, nullptr);
 	}
 
-	uint32 VulkanDevice::allocateMemory(const VkMemoryRequirements& memoryRequirements) {
+	uint32 VulkanDevice::findMemoryType(const VkMemoryRequirements& memoryRequirements, const VkMemoryPropertyFlags memoryPropertyFlags) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties{};
 
 		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &physicalDeviceMemoryProperties);
 
-		const VkMemoryPropertyFlags memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-		uint32 memoryTypeIndex = 0;
-		bool found = false;
-
 		// Find suitable memory type.
-		for (; memoryTypeIndex < physicalDeviceMemoryProperties.memoryTypeCount; memoryTypeIndex++) {
+		for (uint32 memoryTypeIndex = 0; memoryTypeIndex < physicalDeviceMemoryProperties.memoryTypeCount; memoryTypeIndex++) {
 			if ((memoryRequirements.memoryTypeBits & (1 << memoryTypeIndex)) && (physicalDeviceMemoryProperties.memoryTypes[memoryTypeIndex].propertyFlags & memoryPropertyFlags) == memoryPropertyFlags) {
-				found = true;
-
-				break;
+				return memoryTypeIndex;
 			}
 		}
 
-		if (!found) {
-			throw std::runtime_error("Failed to find suitable memory type for the buffer.");
-		}
-
-		memoryTypeIndexToMemoryIndex.resize(memoryTypeIndex + 1);
-		memoryTypeIndexToMemoryIndex[memoryTypeIndex] = static_cast<uint32>(memory.size());
-
-		VkMemoryAllocateInfo memoryAllocateInfo{};
-		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		memoryAllocateInfo.pNext = nullptr;
-		memoryAllocateInfo.allocationSize = memoryRequirements.size;
-		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
-
-		VkDeviceMemory deviceMemory;
-
-		if (vkAllocateMemory(object, &memoryAllocateInfo, nullptr, &deviceMemory) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to allocate memory for the buffer.");
-		}
-
-		memory.emplace_back(deviceMemory);
-
-		return memoryTypeIndex;
-	}
-
-	VkDeviceMemory VulkanDevice::getMemory(const uint32 memoryTypeIndex) const {
-		const uint32 memoryIndex = memoryTypeIndexToMemoryIndex[memoryTypeIndex];
-
-		return memory[memoryIndex];
-	}
-
-	void VulkanDevice::writeBuffer(const void* data, const uint64 size, const uint32 memoryTypeIndex) const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		void* destination;
-
-		vkMapMemory(object, getMemory(memoryTypeIndex), 0, size, 0, &destination);
-
-		memcpy(destination, data, static_cast<std::size_t>(size));
-
-		vkUnmapMemory(object, getMemory(memoryTypeIndex));
+		throw std::runtime_error("Failed to find a suitable memory type.");
 	}
 
 	void VulkanDevice::waitForFences() const {
