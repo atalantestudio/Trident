@@ -19,6 +19,9 @@
 #include "Engine/ECS/Component/Transform3DComponent.hpp"
 #include "Engine/ECS/ECS.hpp"
 
+// GUI
+#include "Engine/Renderer/GUI/GUIRenderer.hpp"
+
 // ImGui
 #include "Engine/ImGui/ImGuiLayer.hpp"
 

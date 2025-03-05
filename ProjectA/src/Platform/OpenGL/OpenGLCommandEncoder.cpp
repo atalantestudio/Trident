@@ -8,6 +8,7 @@
 #include "Platform/OpenGL/Command/OpenGLBindVertexBufferCommand.hpp"
 #include "Platform/OpenGL/Command/OpenGLDrawCommand.hpp"
 #include "Platform/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
+#include "Platform/OpenGL/Command/OpenGLSetViewportCommand.hpp"
 #include "Platform/OpenGL/IndexType.hpp"
 #include "Platform/OpenGL/OpenGLCommandBuffer.hpp"
 #include "Platform/OpenGL/OpenGLCommandEncoder.hpp"
@@ -43,7 +44,17 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLBindVertexBufferCommand>(static_cast<const OpenGLBuffer*>(vertexBuffer.get()), stride));
 	}
 
-	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) {}
+	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) {
+		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(
+			// TODO: Use provided origin.
+			// TODO: Use vec2<int32>.
+			static_cast<GLint>(0.0f),
+			static_cast<GLint>(0.0f),
+			// TODO: Use vec2<int32>.
+			static_cast<GLsizei>(lyah::abs(size[0])),
+			static_cast<GLsizei>(lyah::abs(size[1]))
+		));
+	}
 
 	void OpenGLCommandEncoder::setScissor(const int32 xOffset, const int32 yOffset, const uint32 width, const uint32 height) {}
 

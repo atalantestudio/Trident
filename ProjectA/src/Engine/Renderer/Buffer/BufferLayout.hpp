@@ -2,32 +2,58 @@
 
 #include "Engine/Renderer/Buffer/Attribute.hpp"
 #include "Engine/Renderer/Buffer/VertexAttribute.hpp"
+#include "Engine/Renderer/Buffer/VertexBinding.hpp"
 
 namespace ProjectA {
 	class BufferLayout {
 		public:
+			std::vector<VertexBinding> vertexBindings;
 			std::vector<VertexAttribute> vertexAttributes;
-			uint32 stride = 0;
 
 		public:
+			void defineBinding(const uint32 index, const InputRate inputRate);
+
 			template<typename T>
-			void add(const uint32 binding, const bool normalized) {
+			void add(const uint32 bindingIndex, const bool normalized) {
 				VertexAttribute vertexAttribute{};
-				vertexAttribute.binding = binding;
+				vertexAttribute.binding = bindingIndex;
 				vertexAttribute.location = static_cast<uint32>(vertexAttributes.size());
 				vertexAttribute.type = getVertexInputAttributeType<T>();
 				vertexAttribute.normalized = normalized;
-				vertexAttribute.offset = stride;
+				vertexAttribute.offset = vertexBindings[bindingIndex].stride;
 
 				vertexAttributes.emplace_back(vertexAttribute);
-				stride += getAttributeSize<T>();
+
+				// TODO: Check that the vertex binding exists.
+				vertexBindings[bindingIndex].stride += getAttributeSize<T>();
 			}
 
-			// TODO: Helper macro for iterators.
-			std::vector<VertexAttribute>::const_iterator begin() const;
-			std::vector<VertexAttribute>::iterator begin();
+			template<>
+			void add<mat3x3<float32>>(const uint32 bindingIndex, const bool normalized) {
+				for (uint8 i = 0; i < 3; i++) {
+					add<vec3<float32>>(bindingIndex, normalized);
+				}
+			}
 
-			std::vector<VertexAttribute>::const_iterator end() const;
-			std::vector<VertexAttribute>::iterator end();
+			template<>
+			void add<mat3x3<float64>>(const uint32 bindingIndex, const bool normalized) {
+				for (uint8 i = 0; i < 3; i++) {
+					add<vec3<float64>>(bindingIndex, normalized);
+				}
+			}
+
+			template<>
+			void add<mat4x4<float32>>(const uint32 bindingIndex, const bool normalized) {
+				for (uint8 i = 0; i < 4; i++) {
+					add<vec4<float32>>(bindingIndex, normalized);
+				}
+			}
+
+			template<>
+			void add<mat4x4<float64>>(const uint32 bindingIndex, const bool normalized) {
+				for (uint8 i = 0; i < 4; i++) {
+					add<vec4<float64>>(bindingIndex, normalized);
+				}
+			}
 	};
 }

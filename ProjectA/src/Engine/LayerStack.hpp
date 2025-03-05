@@ -19,6 +19,7 @@ namespace ProjectA {
 			void removeLayer(Layer* layer);
 			void removeOverlay(Layer* overlay);
 
+			// TODO: Write helper macro for iterators.
 			std::vector<Layer*>::iterator begin() {
 				return layers.begin();
 			}

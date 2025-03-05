@@ -1,7 +1,5 @@
 #include "pch.hpp"
 
-#include <glad/glad.h>
-
 #include "Platform/OpenGL/Command/OpenGLBindRenderPipelineCommand.hpp"
 
 namespace ProjectA {

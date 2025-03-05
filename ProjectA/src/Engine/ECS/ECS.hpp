@@ -111,6 +111,8 @@ namespace ProjectA {
 			}
 	};
 
+	// TODO: Tag pool
+
 	class ECS {
 		public:
 			std::vector<Entity> availableEntities;

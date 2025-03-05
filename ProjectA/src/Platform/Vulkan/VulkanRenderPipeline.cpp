@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Platform/Vulkan/InputRate.hpp"
 #include "Platform/Vulkan/VertexInputAttributeType.hpp"
 #include "Platform/Vulkan/VulkanPipelineLayout.hpp"
 #include "Platform/Vulkan/VulkanRenderPass.hpp"
@@ -14,14 +15,20 @@ namespace ProjectA {
 
 		ENGINE_TRACE("[VulkanRenderPipeline]");
 
-		const std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
-			static_cast<const VulkanShaderModule*>(descriptor.vertexShaderModule.get())->object,
-			static_cast<const VulkanShaderModule*>(descriptor.fragmentShaderModule.get())->object,
-		};
+		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
+
+		for (const VertexBinding& vertexBinding : descriptor.vertexBufferLayout.vertexBindings) {
+			VkVertexInputBindingDescription vertexInputBindingDescription{};
+			vertexInputBindingDescription.binding = vertexBinding.index;
+			vertexInputBindingDescription.stride = vertexBinding.stride;
+			vertexInputBindingDescription.inputRate = getVkVertexInputRate(vertexBinding.inputRate);
+
+			vertexInputBindingDescriptions.emplace_back(vertexInputBindingDescription);
+		}
 
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
 
-		for (const VertexAttribute& vertexAttribute : descriptor.vertexBufferLayout) {
+		for (const VertexAttribute& vertexAttribute : descriptor.vertexBufferLayout.vertexAttributes) {
 			VkVertexInputAttributeDescription vertexInputAttributeDescription{};
 			vertexInputAttributeDescription.location = vertexAttribute.location;
 			vertexInputAttributeDescription.binding = vertexAttribute.binding;
@@ -35,21 +42,8 @@ namespace ProjectA {
 		vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 		vertexInputStateCreateInfo.pNext = nullptr;
 		vertexInputStateCreateInfo.flags = 0;
-
-		if (vertexInputAttributeDescriptions.empty()) {
-			vertexInputStateCreateInfo.vertexBindingDescriptionCount = 0;
-			vertexInputStateCreateInfo.pVertexBindingDescriptions = nullptr;
-		}
-		else {
-			VkVertexInputBindingDescription vertexInputBindingDescription{};
-			vertexInputBindingDescription.binding = 0;
-			vertexInputBindingDescription.stride = descriptor.vertexBufferLayout.stride;
-			vertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-			vertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;
-			vertexInputStateCreateInfo.pVertexBindingDescriptions = &vertexInputBindingDescription;
-		}
-
+		vertexInputStateCreateInfo.vertexBindingDescriptionCount = static_cast<uint32>(vertexInputBindingDescriptions.size());
+		vertexInputStateCreateInfo.pVertexBindingDescriptions = vertexInputBindingDescriptions.data();
 		vertexInputStateCreateInfo.vertexAttributeDescriptionCount = static_cast<uint32>(vertexInputAttributeDescriptions.size());
 		vertexInputStateCreateInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
 
@@ -110,7 +104,11 @@ namespace ProjectA {
 		rasterizationStateCreateInfo.depthClampEnable = VK_FALSE;
 		rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
 		rasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
-		rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+
+		// TODO: Set correct cull mode.
+		//rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+		rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_FRONT_BIT;
+
 		rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
 		rasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;
 		rasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f;
@@ -165,6 +163,11 @@ namespace ProjectA {
 		dynamicStateCreateInfo.flags = 0;
 		dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32>(dynamicStates.size());
 		dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
+
+		const std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
+			static_cast<const VulkanShaderModule*>(descriptor.vertexShaderModule.get())->object,
+			static_cast<const VulkanShaderModule*>(descriptor.fragmentShaderModule.get())->object,
+		};
 
 		VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo{};
 		graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;

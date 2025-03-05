@@ -3,15 +3,14 @@
 #include "ProjectA.hpp"
 
 namespace ProjectA {
-	class ECSDemoLayer : public Layer {
+	class GUILayer : public Layer {
 		private:
-			ECS ecs;
-			const Entity triangleEntity;
+			GUIRenderer renderer;
 
 		public:
-			ECSDemoLayer();
+			GUILayer();
 
-			virtual ~ECSDemoLayer() = default;
+			virtual ~GUILayer() = default;
 
 			void bind() override;
 			void unbind() override;

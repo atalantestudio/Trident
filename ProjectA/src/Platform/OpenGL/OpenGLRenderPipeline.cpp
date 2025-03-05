@@ -44,12 +44,10 @@ namespace ProjectA {
 		glDetachShader(program, vertexShaderModule);
 		glDetachShader(program, fragmentShaderModule);
 
-		for (const VertexAttribute& vertexInputAttribute : descriptor.vertexBufferLayout) {
+		for (const VertexAttribute& vertexInputAttribute : descriptor.vertexBufferLayout.vertexAttributes) {
 			const GLenum type = getGlType(vertexInputAttribute.type);
 			const GLint size = getGlSize(vertexInputAttribute.type);
 			const GLvoid* offset = reinterpret_cast<const GLvoid*>(static_cast<std::uintptr_t>(vertexInputAttribute.offset));
-
-			glEnableVertexAttribArray(vertexInputAttribute.location);
 
 			switch (type) {
 				case GL_FLOAT:
@@ -69,9 +67,18 @@ namespace ProjectA {
 					glVertexAttribLFormat(vertexInputAttribute.location, size, type, vertexInputAttribute.offset);
 
 					break;
+				default:
+					throw std::runtime_error("OpenGL vertex attribute type is not supported.");
 			}
 
 			glVertexAttribBinding(vertexInputAttribute.location, vertexInputAttribute.binding);
+			glEnableVertexAttribArray(vertexInputAttribute.location);
+
+			const VertexBinding& vertexBinding = descriptor.vertexBufferLayout.vertexBindings[vertexInputAttribute.binding];
+
+			if (vertexBinding.inputRate == InputRate::INSTANCE) {
+				glVertexBindingDivisor(vertexInputAttribute.location, 1);
+			}
 		}
 	}
 

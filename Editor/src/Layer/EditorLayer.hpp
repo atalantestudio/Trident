@@ -16,10 +16,6 @@ namespace ProjectA {
 			bool viewportWindowFocused = false;
 			bool viewportWindowHovered = false;
 
-			ECS ecs;
-
-			ref<Scene> scene;
-
 		public:
 			EditorLayer();
 
