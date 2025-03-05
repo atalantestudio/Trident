@@ -47,38 +47,44 @@ namespace ProjectA {
 		renderPipelineDescriptor.swapchain = swapchain;
 		renderPipelineDescriptor.renderPass = renderPass;
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::INSTANCE);
-		renderPipelineDescriptor.vertexBufferLayout.add<mat3x3<float32>>(0, false);
+		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
+		renderPipelineDescriptor.vertexBufferLayout.defineBinding(1, InputRate::INSTANCE);
+		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
+		renderPipelineDescriptor.vertexBufferLayout.add<mat3x3<float32>>(1, false);
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 
-		const mat3x3<float32> world0 =
-			mat3x3<float32>::scaling({64.0f, 64.0f}) *
-			mat3x3<float32>::translation({16.0f, 0.0f});
-		const mat3x3<float32> world1 =
-			mat3x3<float32>::scaling({128.0f, 48.0f}) *
-			mat3x3<float32>::translation({16.0f, 80.0f});
-		const mat3x3<float32> world2 =
-			mat3x3<float32>::scaling({256.0f, 512.0f}) *
-			mat3x3<float32>::translation({80.0f, 128.0f});
-
-		const std::vector<mat3x3<float32>> vertexBufferData = {
-			world0,
-			world1,
-			world2,
+		const std::vector<vec3<float32>> positionVertexBufferData = {
+			{0.0f, 0.0f, 1.0f},
+			{0.0f, 1.0f, 1.0f},
+			{1.0f, 1.0f, 1.0f},
+			{1.0f, 0.0f, 1.0f},
 		};
 
-		BufferDescriptor vertexBufferDescriptor{};
-		vertexBufferDescriptor.size = sizeof(mat3x3<float32>) * vertexBufferData.size();
-		vertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
+		BufferDescriptor positionVertexBufferDescriptor{};
+		positionVertexBufferDescriptor.size = sizeof(vec3<float32>) * positionVertexBufferData.size();
+		positionVertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
 
-		vertexBuffer = createBuffer(vertexBufferDescriptor);
-		vertexBuffer->write(vertexBufferData.data(), sizeof(mat3x3<float32>) * vertexBufferData.size());
+		positionVertexBuffer = createBuffer(positionVertexBufferDescriptor);
+		positionVertexBuffer->write(positionVertexBufferData.data(), sizeof(vec3<float32>) * positionVertexBufferData.size());
 
-		/*const std::vector<uint16> indexBufferData = {
+		const std::vector<mat3x3<float32>> transformVertexBufferData = {
+			mat3x3<float32>::scaling({64.0f, 64.0f}) * mat3x3<float32>::translation({16.0f, 0.0f}),
+			mat3x3<float32>::scaling({128.0f, 48.0f}) * mat3x3<float32>::translation({16.0f, 80.0f}),
+			mat3x3<float32>::scaling({256.0f, 512.0f}) * mat3x3<float32>::translation({80.0f, 128.0f}),
+		};
+
+		BufferDescriptor transformVertexBufferDescriptor{};
+		transformVertexBufferDescriptor.size = sizeof(mat3x3<float32>) * transformVertexBufferData.size();
+		transformVertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
+
+		transformVertexBuffer = createBuffer(transformVertexBufferDescriptor);
+		transformVertexBuffer->write(transformVertexBufferData.data(), sizeof(mat3x3<float32>) * transformVertexBufferData.size());
+
+		const std::vector<uint16> indexBufferData = {
 			0, 1, 2,
 			0, 2, 3,
 		};
@@ -88,7 +94,7 @@ namespace ProjectA {
 		indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
-		indexBuffer->write(indexBufferData.data(), sizeof(uint16) * indexBufferData.size());*/
+		indexBuffer->write(indexBufferData.data(), sizeof(uint16) * indexBufferData.size());
 
 		commandEncoder = createCommandEncoder();
 	}
@@ -115,11 +121,12 @@ namespace ProjectA {
 		commandEncoder->begin();
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
-		//commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
-		commandEncoder->bindVertexBuffer(vertexBuffer, sizeof(mat3x3<float32>));
+		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
+		commandEncoder->bindVertexBuffer(0, positionVertexBuffer, sizeof(vec3<float32>));
+		commandEncoder->bindVertexBuffer(1, transformVertexBuffer, sizeof(mat3x3<float32>));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
-		commandEncoder->draw(3, 3, 0);
+		commandEncoder->drawIndexed(6, 3, 0);
 		commandEncoder->endRenderPass();
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();

@@ -40,16 +40,20 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLBindIndexBufferCommand>(static_cast<const OpenGLBuffer*>(indexBuffer.get())->object));
 	}
 
-	void OpenGLCommandEncoder::bindVertexBuffer(const ref<Buffer>& vertexBuffer, const uint32 stride) {
-		commandBuffer.emplace_back(createRef<OpenGLBindVertexBufferCommand>(static_cast<const OpenGLBuffer*>(vertexBuffer.get()), stride));
+	void OpenGLCommandEncoder::bindVertexBuffer(const uint32 bindingIndex, const ref<Buffer>& vertexBuffer, const uint32 stride) {
+		commandBuffer.emplace_back(createRef<OpenGLBindVertexBufferCommand>(
+			bindingIndex,
+			static_cast<const OpenGLBuffer*>(vertexBuffer.get())->object,
+			stride
+		));
 	}
 
 	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) {
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(
 			// TODO: Use provided origin.
 			// TODO: Use vec2<int32>.
-			static_cast<GLint>(0.0f),
-			static_cast<GLint>(0.0f),
+			static_cast<GLint>(0),
+			static_cast<GLint>(0),
 			// TODO: Use vec2<int32>.
 			static_cast<GLsizei>(lyah::abs(size[0])),
 			static_cast<GLsizei>(lyah::abs(size[1]))

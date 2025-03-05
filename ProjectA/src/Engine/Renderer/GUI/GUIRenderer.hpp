@@ -14,8 +14,9 @@ namespace ProjectA {
 			ref<Swapchain> swapchain;
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
-			ref<Buffer> vertexBuffer;
-			//ref<Buffer> indexBuffer;
+			ref<Buffer> positionVertexBuffer;
+			ref<Buffer> transformVertexBuffer;
+			ref<Buffer> indexBuffer;
 			ref<CommandEncoder> commandEncoder;
 	};
 }

@@ -26,7 +26,7 @@ namespace ProjectA {
 
 			virtual void bindIndexBuffer(const ref<Buffer>& indexBuffer, const uint64 offset, const IndexType indexType) = 0;
 
-			virtual void bindVertexBuffer(const ref<Buffer>& vertexBuffer, const uint32 stride) = 0;
+			virtual void bindVertexBuffer(const uint32 bindingIndex, const ref<Buffer>& vertexBuffer, const uint32 stride) = 0;
 
 			virtual void setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) = 0;
 

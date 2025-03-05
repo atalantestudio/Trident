@@ -84,12 +84,12 @@ namespace ProjectA {
 		vkCmdBindIndexBuffer(commandBuffer, static_cast<const VulkanBuffer*>(indexBuffer.get())->object, offset, getVkIndexType(indexType));
 	}
 
-	void VulkanCommandEncoder::bindVertexBuffer(const ref<Buffer>& vertexBuffer, const uint32 stride) {
+	void VulkanCommandEncoder::bindVertexBuffer(const uint32 bindingIndex, const ref<Buffer>& vertexBuffer, const uint32 stride) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		const VkDeviceSize offset = 0;
 
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &static_cast<const VulkanBuffer*>(vertexBuffer.get())->object, &offset);
+		vkCmdBindVertexBuffers(commandBuffer, bindingIndex, 1, &static_cast<const VulkanBuffer*>(vertexBuffer.get())->object, &offset);
 	}
 
 	void VulkanCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) {

@@ -6,12 +6,13 @@
 namespace ProjectA {
 	class OpenGLBindVertexBufferCommand : public OpenGLCommand {
 		public:
-			OpenGLBindVertexBufferCommand(const OpenGLBuffer* vertexBuffer, const GLsizei stride);
+			OpenGLBindVertexBufferCommand(const GLuint bindingindex, const GLuint buffer, const GLsizei stride);
 
 			void execute() const override;
 
 		private:
-			const OpenGLBuffer* vertexBuffer;
+			const GLuint bindingindex;
+			const GLuint buffer;
 			const GLsizei stride;
 	};
 }

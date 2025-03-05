@@ -18,7 +18,7 @@ namespace ProjectA {
 
 			void bindIndexBuffer(const ref<Buffer>& indexBuffer, const uint64 offset, const IndexType indexType) override;
 
-			void bindVertexBuffer(const ref<Buffer>& vertexBuffer, const uint32 stride) override;
+			void bindVertexBuffer(const uint32 bindingIndex, const ref<Buffer>& vertexBuffer, const uint32 stride) override;
 
 			void setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) override;
 

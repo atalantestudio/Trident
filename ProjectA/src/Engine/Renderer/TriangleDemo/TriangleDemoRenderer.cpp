@@ -47,6 +47,7 @@ namespace ProjectA {
 		renderPipelineDescriptor.swapchain = swapchain;
 		renderPipelineDescriptor.renderPass = renderPass;
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
+		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
 		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
@@ -106,7 +107,7 @@ namespace ProjectA {
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
-		commandEncoder->bindVertexBuffer(vertexBuffer, sizeof(Vertex));
+		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 		commandEncoder->drawIndexed(6, 1, 0);

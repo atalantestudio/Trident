@@ -5,12 +5,13 @@
 #include "Platform/OpenGL/Command/OpenGLBindVertexBufferCommand.hpp"
 
 namespace ProjectA {
-	OpenGLBindVertexBufferCommand::OpenGLBindVertexBufferCommand(const OpenGLBuffer* vertexBuffer, const GLsizei stride) :
-		vertexBuffer(vertexBuffer),
+	OpenGLBindVertexBufferCommand::OpenGLBindVertexBufferCommand(const GLuint bindingindex, const GLuint buffer, const GLsizei stride) :
+		bindingindex(bindingindex),
+		buffer(buffer),
 		stride(stride)
 	{}
 
 	void OpenGLBindVertexBufferCommand::execute() const {
-		glBindVertexBuffer(0, vertexBuffer->object, 0, stride);
+		glBindVertexBuffer(bindingindex, buffer, 0, stride);
 	}
 }
