@@ -12,7 +12,11 @@ namespace ProjectA {
 
 			~OpenGLBuffer();
 
-			void write(const void* data, const uint64 offset, const uint64 size) const override;
+			void map(const uint64 offset, const uint64 size) override;
+
+			void write(const void* data, const uint64 offset, const uint64 size) override;
+
+			void unmap() override;
 
 		public:
 			const GLenum target;

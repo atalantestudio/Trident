@@ -5,9 +5,7 @@
 #include "Engine/ObjectWrapper.hpp"
 #include "Engine/Renderer/Device.hpp"
 
-#include "Platform/Vulkan/VulkanFence.hpp"
 #include "Platform/Vulkan/VulkanPhysicalDevice.hpp"
-#include "Platform/Vulkan/VulkanSemaphore.hpp"
 #include "Platform/Vulkan/VulkanSurface.hpp"
 
 namespace ProjectA {
@@ -20,15 +18,15 @@ namespace ProjectA {
 			// Returns a suitable device memory type index.
 			uint32 findMemoryType(const VkMemoryRequirements& memoryRequirements, const VkMemoryPropertyFlags memoryPropertyFlags) const;
 
-			void waitForFences() const override;
+			void waitForFence(const ref<Fence>& fence) const override;
 
-			void resetFences() const override;
+			void resetFence(const ref<Fence>& fence) const override;
 
-			uint32 acquireNextImage(const ref<Swapchain>& swapchain) const override;
+			uint32 acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore) const override;
 
-			void submit(const ref<CommandBuffer>& commandBuffer) const override;
+			void submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const override;
 
-			void present(const ref<Swapchain>& swapchain, const uint32 imageIndex) const override;
+			void present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, const uint32 imageIndex) const override;
 
 			void waitIdle() const override;
 
@@ -39,8 +37,5 @@ namespace ProjectA {
 			const VkPhysicalDevice physicalDevice;
 			VkQueue graphicsQueue;
 			VkQueue presentQueue;
-			ref<VulkanSemaphore> acquireNextImageSemaphore;
-			ref<VulkanSemaphore> signalSemaphore;
-			ref<VulkanFence> flightFence;
 	};
 }

@@ -58,6 +58,10 @@ namespace ProjectA {
 		if (vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &object) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create Vulkan pipeline layout.");
 		}
+
+		for (const VkDescriptorSetLayout descriptorSetLayout : descriptorSetLayouts) {
+			vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+		}
 	}
 
 	VulkanPipelineLayout::~VulkanPipelineLayout() {

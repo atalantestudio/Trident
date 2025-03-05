@@ -2,8 +2,10 @@
 
 #include "Platform/Vulkan/VulkanBuffer.hpp"
 #include "Platform/Vulkan/VulkanCommandEncoder.hpp"
+#include "Platform/Vulkan/VulkanFence.hpp"
 #include "Platform/Vulkan/VulkanRendererAPI.hpp"
 #include "Platform/Vulkan/VulkanRenderPipeline.hpp"
+#include "Platform/Vulkan/VulkanSemaphore.hpp"
 #include "Platform/Vulkan/VulkanShaderModule.hpp"
 
 namespace ProjectA {
@@ -34,12 +36,16 @@ namespace ProjectA {
 		return device;
 	}
 
-	ref<Buffer> VulkanRendererAPI::createBuffer(const BufferDescriptor& descriptor) {
-		return createRef<VulkanBuffer>(physicalDevice.object, *device.get(), descriptor);
+	ref<Buffer> VulkanRendererAPI::createBuffer(const BufferDescriptor& descriptor) const {
+		return createRef<VulkanBuffer>(physicalDevice.object, *device, descriptor);
 	}
 
 	ref<CommandEncoder> VulkanRendererAPI::createCommandEncoder() const {
-		return createRef<VulkanCommandEncoder>(*device.get(), commandPool.object);
+		return createRef<VulkanCommandEncoder>(*device, commandPool.object);
+	}
+
+	ref<Fence> VulkanRendererAPI::createFence() const {
+		return createRef<VulkanFence>(device->object);
 	}
 
 	ref<PipelineLayout> VulkanRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
@@ -52,6 +58,10 @@ namespace ProjectA {
 
 	ref<RenderPipeline> VulkanRendererAPI::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
 		return createRef<VulkanRenderPipeline>(device->object, descriptor);
+	}
+
+	ref<Semaphore> VulkanRendererAPI::createSemaphore() const {
+		return createRef<VulkanSemaphore>(device->object);
 	}
 
 	ref<ShaderModule> VulkanRendererAPI::createShaderModule(const ShaderStage stage, const std::string& code) const {

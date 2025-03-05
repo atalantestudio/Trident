@@ -44,6 +44,10 @@ namespace ProjectA {
 		}
 
 		vkBindBufferMemory(device.object, object, memory, 0);
+
+		if (descriptor.mapped) {
+			map(0, size);
+		}
 	}
 
 	VulkanBuffer::~VulkanBuffer() {
@@ -51,19 +55,33 @@ namespace ProjectA {
 
 		ENGINE_TRACE("[~VulkanBuffer]");
 
+		if (mappedRange != 0) {
+			unmap();
+		}
+
 		vkDestroyBuffer(device.object, object, nullptr);
 		vkFreeMemory(device.object, memory, nullptr);
 	}
 
-	void VulkanBuffer::write(const void* data, const uint64 offset, const uint64 size) const {
+	void VulkanBuffer::write(const void* data, const uint64 offset, const uint64 size) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		void* destination;
+		if (mappedRange == 0) {
+			throw std::runtime_error("Buffer mapped range is 0.");
+		}
 
-		vkMapMemory(device.object, memory, offset, size, 0, &destination);
+		std::memcpy(mappedRange, data, static_cast<std::size_t>(size));
+	}
 
-		memcpy(destination, data, static_cast<std::size_t>(size));
+	void VulkanBuffer::map(const uint64 offset, const uint64 size) {
+		if (vkMapMemory(device.object, memory, offset, size, 0, &mappedRange) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to map Vulkan buffer memory.");
+		}
+	}
 
+	void VulkanBuffer::unmap() {
 		vkUnmapMemory(device.object, memory);
+
+		mappedRange = 0;
 	}
 }

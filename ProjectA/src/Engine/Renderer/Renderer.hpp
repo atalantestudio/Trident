@@ -24,7 +24,7 @@ namespace ProjectA {
 			static void recreate();
 
 		public:
-			virtual void render() const = 0;
+			virtual void render() = 0;
 
 		protected:
 			ref<Device> getDevice() const;
@@ -33,11 +33,15 @@ namespace ProjectA {
 
 			ref<CommandEncoder> createCommandEncoder() const;
 
+			ref<Fence> createFence() const;
+
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const;
 
 			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const;
 
 			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const;
+
+			ref<Semaphore> createSemaphore() const;
 
 			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const;
 

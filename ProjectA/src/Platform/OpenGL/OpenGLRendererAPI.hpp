@@ -14,15 +14,19 @@ namespace ProjectA {
 
 			ref<Device> getDevice() const override;
 
-			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) override;
+			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const override;
 
 			ref<CommandEncoder> createCommandEncoder() const override;
+
+			ref<Fence> createFence() const override;
 
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const override;
 
 			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const override;
 
 			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const override;
+
+			ref<Semaphore> createSemaphore() const override;
 
 			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const override;
 

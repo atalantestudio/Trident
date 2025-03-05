@@ -5,7 +5,11 @@
 #include "Engine/Renderer/TriangleDemo/TriangleDemoRenderer.hpp"
 
 namespace ProjectA {
-	TriangleDemoRenderer::TriangleDemoRenderer() {
+	TriangleDemoRenderer::TriangleDemoRenderer() :
+		availableImageSemaphores(MAX_FRAMES_IN_FLIGHT),
+		finishedRenderSemaphores(MAX_FRAMES_IN_FLIGHT),
+		flightFences(MAX_FRAMES_IN_FLIGHT)
+	{
 		const RenderPassDescriptor renderPassDescriptor;
 
 		renderPass = createRenderPass(renderPassDescriptor);
@@ -66,7 +70,9 @@ namespace ProjectA {
 		vertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
+		vertexBuffer->map(0, sizeof(Vertex) * vertexBufferData.size());
 		vertexBuffer->write(vertexBufferData.data(), 0, sizeof(Vertex) * vertexBufferData.size());
+		vertexBuffer->unmap();
 
 		const std::vector<uint16> indexBufferData = {
 			0, 1, 2,
@@ -77,19 +83,27 @@ namespace ProjectA {
 		indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
+		indexBuffer->map(0, sizeof(uint16) * indexBufferData.size());
 		indexBuffer->write(indexBufferData.data(), 0, sizeof(uint16) * indexBufferData.size());
+		indexBuffer->unmap();
 
 		commandEncoder = createCommandEncoder();
+
+		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+			availableImageSemaphores[i] = createSemaphore();
+			finishedRenderSemaphores[i] = createSemaphore();
+			flightFences[i] = createFence();
+		}
 	}
 
-	void TriangleDemoRenderer::render() const {
+	void TriangleDemoRenderer::render() {
 		const ref<Device>& device = getDevice();
 
-		device->waitForFences();
+		device->waitForFence(flightFences[frameIndex]);
 
-		const uint32 nextImageIndex = device->acquireNextImage(swapchain);
+		const uint32 nextImageIndex = device->acquireNextImage(swapchain, availableImageSemaphores[frameIndex]);
 
-		device->resetFences();
+		device->resetFence(flightFences[frameIndex]);
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = renderPass;
@@ -113,8 +127,13 @@ namespace ProjectA {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->submit(commandBuffer);
-		device->present(swapchain, nextImageIndex);
+		device->submit(commandBuffer, availableImageSemaphores[frameIndex], finishedRenderSemaphores[frameIndex], flightFences[frameIndex]);
+		device->present(swapchain, finishedRenderSemaphores[frameIndex], nextImageIndex);
 		device->waitIdle();
+
+		frameIndex++;
+		frameIndex %= MAX_FRAMES_IN_FLIGHT;
+
+		CLIENT_DEBUG(frameIndex);
 	}
 }

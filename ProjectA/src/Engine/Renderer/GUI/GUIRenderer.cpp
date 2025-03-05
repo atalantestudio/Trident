@@ -6,7 +6,12 @@
 #include "Engine/Renderer/GUI/GUIRenderer.hpp"
 
 namespace ProjectA {
-	GUIRenderer::GUIRenderer() {
+	GUIRenderer::GUIRenderer() :
+		uniformBuffers(MAX_FRAMES_IN_FLIGHT),
+		availableImageSemaphores(MAX_FRAMES_IN_FLIGHT),
+		finishedRenderSemaphores(MAX_FRAMES_IN_FLIGHT),
+		flightFences(MAX_FRAMES_IN_FLIGHT)
+	{
 		const RenderPassDescriptor renderPassDescriptor;
 
 		renderPass = createRenderPass(renderPassDescriptor);
@@ -16,7 +21,16 @@ namespace ProjectA {
 
 		swapchain = createSwapchain(swapchainDescriptor);
 
-		const PipelineLayoutDescriptor pipelineLayoutDescriptor;
+		DescriptorSetLayoutBinding descriptorSetLayoutBinding{};
+		descriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		descriptorSetLayoutBinding.descriptorCount = 1;
+		descriptorSetLayoutBinding.stageFlags = static_cast<uint32>(ShaderStage::VERTEX);
+
+		DescriptorSetLayout descriptorSetLayout;
+		descriptorSetLayout.bindings.emplace_back(descriptorSetLayoutBinding);
+
+		PipelineLayoutDescriptor pipelineLayoutDescriptor;
+		pipelineLayoutDescriptor.layouts.emplace_back(descriptorSetLayout);
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
@@ -68,13 +82,17 @@ namespace ProjectA {
 		BufferDescriptor positionVertexBufferDescriptor{};
 		positionVertexBufferDescriptor.size = sizeof(vec3<float32>) * positionVertexBufferData.size();
 		positionVertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
+		positionVertexBufferDescriptor.mapped = false;
 
 		positionVertexBuffer = createBuffer(positionVertexBufferDescriptor);
+		positionVertexBuffer->map(0, sizeof(vec3<float32>) * positionVertexBufferData.size());
 		positionVertexBuffer->write(positionVertexBufferData.data(), 0, sizeof(vec3<float32>) * positionVertexBufferData.size());
+		positionVertexBuffer->unmap();
 
 		BufferDescriptor transformVertexBufferDescriptor{};
 		transformVertexBufferDescriptor.size = sizeof(Transform2DComponent) * MAX_QUADS;
 		transformVertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
+		transformVertexBufferDescriptor.mapped = false;
 
 		transformVertexBuffer = createBuffer(transformVertexBufferDescriptor);
 
@@ -86,9 +104,24 @@ namespace ProjectA {
 		BufferDescriptor indexBufferDescriptor{};
 		indexBufferDescriptor.size = sizeof(uint16) * indexBufferData.size();
 		indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
+		indexBufferDescriptor.mapped = false;
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
+		indexBuffer->map(0, sizeof(uint16) * indexBufferData.size());
 		indexBuffer->write(indexBufferData.data(), 0, sizeof(uint16) * indexBufferData.size());
+		indexBuffer->unmap();
+
+		BufferDescriptor uniformBufferDescriptor{};
+		uniformBufferDescriptor.size = sizeof(UniformBufferObject);
+		uniformBufferDescriptor.usage = static_cast<uint32>(BufferUsage::UNIFORM);
+		uniformBufferDescriptor.mapped = true;
+
+		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+			uniformBuffers[i] = createBuffer(uniformBufferDescriptor);
+			availableImageSemaphores[i] = createSemaphore();
+			finishedRenderSemaphores[i] = createSemaphore();
+			flightFences[i] = createFence();
+		}
 
 		commandEncoder = createCommandEncoder();
 	}
@@ -104,6 +137,8 @@ namespace ProjectA {
 
 		uint64 offset = 0;
 
+		transformVertexBuffer->map(0, size * MAX_QUADS);
+
 		for (uint32 i = 0; i < transformComponentPool.componentCount; i++) {
 			const Transform2DComponent& transformComponent = transformComponentPool.components[i];
 
@@ -112,17 +147,19 @@ namespace ProjectA {
 			offset += size;
 		}
 
+		transformVertexBuffer->unmap();
+
 		instanceCount = transformComponentPool.componentCount;
 	}
 
-	void GUIRenderer::render() const {
+	void GUIRenderer::render() {
 		const ref<Device>& device = getDevice();
 
-		device->waitForFences();
+		device->waitForFence(flightFences[frameIndex]);
 
-		const uint32 nextImageIndex = device->acquireNextImage(swapchain);
+		const uint32 nextImageIndex = device->acquireNextImage(swapchain, availableImageSemaphores[frameIndex]);
 
-		device->resetFences();
+		device->resetFence(flightFences[frameIndex]);
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = renderPass;
@@ -147,8 +184,25 @@ namespace ProjectA {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->submit(commandBuffer);
-		device->present(swapchain, nextImageIndex);
+		device->submit(commandBuffer, availableImageSemaphores[frameIndex], finishedRenderSemaphores[frameIndex], flightFences[frameIndex]);
+		device->present(swapchain, finishedRenderSemaphores[frameIndex], nextImageIndex);
 		device->waitIdle();
+
+		frameIndex++;
+		frameIndex %= MAX_FRAMES_IN_FLIGHT;
+	}
+
+	void GUIRenderer::updateUniformBufferObjects() const {
+		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
+		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+
+		UniformBufferObject uniformBufferObject{};
+		uniformBufferObject.projection = {
+			2.0f / width, 0.0f, 0.0f,
+			0.0f, -2.0f / height, 0.0f,
+			-1.0f, 1.0f, 1.0f,
+		};
+
+		uniformBuffers[frameIndex]->write(&uniformBufferObject, 0, sizeof(UniformBufferObject));
 	}
 }

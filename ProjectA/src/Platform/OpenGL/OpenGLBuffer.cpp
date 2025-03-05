@@ -30,11 +30,15 @@ namespace ProjectA {
 		glDeleteBuffers(1, &object);
 	}
 
-	void OpenGLBuffer::write(const void* data, const uint64 offset, const uint64 size) const {
+	void OpenGLBuffer::map(const uint64 offset, const uint64 size) {}
+
+	void OpenGLBuffer::write(const void* data, const uint64 offset, const uint64 size) {
 		glBindBuffer(target, object);
 
 		glBufferSubData(target, offset, size, data);
 
 		glBindBuffer(target, 0);
 	}
+
+	void OpenGLBuffer::unmap() {}
 }

@@ -64,6 +64,10 @@ namespace ProjectA {
 		return rendererApi->createCommandEncoder();
 	}
 
+	ref<Fence> Renderer::createFence() const {
+		return rendererApi->createFence();
+	}
+
 	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
 		return rendererApi->createPipelineLayout(descriptor);
 	}
@@ -74,6 +78,10 @@ namespace ProjectA {
 
 	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
 		return rendererApi->createRenderPipeline(descriptor);
+	}
+
+	ref<Semaphore> Renderer::createSemaphore() const {
+		return rendererApi->createSemaphore();
 	}
 
 	ref<ShaderModule> Renderer::createShaderModule(const ShaderStage stage, const std::string& code) const {
