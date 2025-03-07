@@ -1,5 +1,7 @@
 #include "pch.hpp"
 
+#include "Backend/OpenGL/OpenGLBuffer.hpp"
+#include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 #include "Backend/OpenGL/VertexInputAttributeType.hpp"
@@ -80,6 +82,22 @@ namespace ProjectA {
 
 			if (vertexBinding.inputRate == InputRate::INSTANCE) {
 				glVertexBindingDivisor(vertexInputAttribute.location, 1);
+			}
+		}
+
+		const OpenGLPipelineLayout* pipelineLayout = static_cast<const OpenGLPipelineLayout*>(descriptor.pipelineLayout.get());
+
+		// GLSL shaders are required to specify the block index and the binding,
+		// saving the calls to glGetUniformBlockIndex and glUniformBlockBinding.
+		for (const DescriptorSetLayout& descriptorSetLayout : pipelineLayout->descriptorSetLayouts) {
+			for (uint32 bindingIndex = 0; bindingIndex < descriptorSetLayout.bindings.size(); bindingIndex++) {
+				const DescriptorSetLayoutBinding& binding = descriptorSetLayout.bindings[bindingIndex];
+
+				for (uint32 bufferIndex = 0; bufferIndex < binding.buffers.size(); bufferIndex++) {
+					const OpenGLBuffer* buffer = static_cast<const OpenGLBuffer*>(binding.buffers[bufferIndex].get());
+
+					glBindBufferRange(GL_UNIFORM_BUFFER, bindingIndex, buffer->object, 0, buffer->size);
+				}
 			}
 		}
 	}

@@ -21,28 +21,28 @@ namespace ProjectA {
 
 		swapchain = createSwapchain(swapchainDescriptor);
 
-		//BufferDescriptor uniformBufferDescriptor{};
-		//uniformBufferDescriptor.size = sizeof(UniformBufferObject);
-		//uniformBufferDescriptor.usage = static_cast<uint32>(BufferUsage::UNIFORM);
-		//uniformBufferDescriptor.mapped = true;
+		BufferDescriptor uniformBufferDescriptor{};
+		uniformBufferDescriptor.size = sizeof(UniformBufferObject);
+		uniformBufferDescriptor.usage = static_cast<uint32>(BufferUsage::UNIFORM);
+		uniformBufferDescriptor.mapped = true;
 
 		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-			//cameraUniformBuffers[i] = createBuffer(uniformBufferDescriptor);
+			cameraUniformBuffers[i] = createBuffer(uniformBufferDescriptor);
 			availableImageSemaphores[i] = createSemaphore();
 			finishedRenderSemaphores[i] = createSemaphore();
 			flightFences[i] = createFence();
 		}
 
-		//DescriptorSetLayoutBinding descriptorSetLayoutBinding{};
-		//descriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		//descriptorSetLayoutBinding.stageFlags = static_cast<uint32>(ShaderStage::VERTEX);
-		//descriptorSetLayoutBinding.buffers = cameraUniformBuffers;
+		DescriptorSetLayoutBinding descriptorSetLayoutBinding{};
+		descriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		descriptorSetLayoutBinding.stageFlags = static_cast<uint32>(ShaderStage::VERTEX);
+		descriptorSetLayoutBinding.buffers = cameraUniformBuffers;
 
-		//DescriptorSetLayout descriptorSetLayout;
-		//descriptorSetLayout.bindings.emplace_back(descriptorSetLayoutBinding);
+		DescriptorSetLayout descriptorSetLayout;
+		descriptorSetLayout.bindings.emplace_back(descriptorSetLayoutBinding);
 
-		const PipelineLayoutDescriptor pipelineLayoutDescriptor;
-		//pipelineLayoutDescriptor.layouts.emplace_back(descriptorSetLayout);
+		PipelineLayoutDescriptor pipelineLayoutDescriptor;
+		pipelineLayoutDescriptor.layouts.emplace_back(descriptorSetLayout);
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
@@ -146,7 +146,7 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::render() {
-		//updateCameraUniform();
+		updateCameraUniform();
 
 		const ref<Device>& device = getDevice();
 
@@ -169,7 +169,7 @@ namespace ProjectA {
 		commandEncoder->begin();
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
-		//commandEncoder->bindDescriptorSets(frameIndex);
+		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, positionVertexBuffer, sizeof(vec3<float32>));
 		commandEncoder->bindVertexBuffer(1, transformVertexBuffer, sizeof(Transform2DComponent));
@@ -189,7 +189,7 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::updateCameraUniform() const {
-		/*const float32 width = static_cast<float32>(swapchain->getExtentWidth());
+		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
 		UniformBufferObject cameraUniformBufferObject;
@@ -199,6 +199,6 @@ namespace ProjectA {
 			-1.0f, 1.0f, 1.0f,
 		};
 
-		cameraUniformBuffers[frameIndex]->write(&cameraUniformBufferObject, 0, sizeof(UniformBufferObject));*/
+		cameraUniformBuffers[frameIndex]->write(&cameraUniformBufferObject, 0, sizeof(UniformBufferObject));
 	}
 }

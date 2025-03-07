@@ -14,12 +14,9 @@ namespace ProjectA {
 
 		glCreateBuffers(1, &object);
 
-		glBindBuffer(target, object);
-
-		// TODO: Set correct usage.
-		glBufferData(target, size, nullptr, GL_STATIC_DRAW);
-
-		glBindBuffer(target, 0);
+		if (descriptor.mapped) {
+			map(0, size);
+		}
 	}
 
 	OpenGLBuffer::~OpenGLBuffer() {
@@ -30,15 +27,20 @@ namespace ProjectA {
 		glDeleteBuffers(1, &object);
 	}
 
-	void OpenGLBuffer::map(const uint64 offset, const uint64 size) {}
+	void OpenGLBuffer::map(const uint64 offset, const uint64 size) {
+		glBindBuffer(target, object);
+
+		// TODO: Set correct usage.
+		glBufferData(target, size, nullptr, GL_STATIC_DRAW);
+	}
 
 	void OpenGLBuffer::write(const void* data, const uint64 offset, const uint64 size) {
 		glBindBuffer(target, object);
 
 		glBufferSubData(target, offset, size, data);
-
-		glBindBuffer(target, 0);
 	}
 
-	void OpenGLBuffer::unmap() {}
+	void OpenGLBuffer::unmap() {
+		glBindBuffer(target, object);
+	}
 }

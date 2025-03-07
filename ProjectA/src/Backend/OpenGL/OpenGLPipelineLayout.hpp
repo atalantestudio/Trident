@@ -7,7 +7,7 @@ namespace ProjectA {
 		public:
 			OpenGLPipelineLayout(const PipelineLayoutDescriptor& descriptor);
 
-		private:
+		public:
 			const std::vector<DescriptorSetLayout> descriptorSetLayouts;
 	};
 }

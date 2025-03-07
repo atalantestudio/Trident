@@ -1,5 +1,7 @@
 #include "pch.hpp"
 
+#include <glad/glad.h>
+
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 
 namespace ProjectA {
