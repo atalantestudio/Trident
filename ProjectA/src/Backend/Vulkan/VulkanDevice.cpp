@@ -182,7 +182,8 @@ namespace ProjectA {
 		const VkResult result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
 		if (result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR) {
-			throw std::runtime_error("TODO: Framebuffer has been resized.");
+			// TODO: Recreate swapchain?
+			return;
 		}
 
 		if (result != VK_SUCCESS) {

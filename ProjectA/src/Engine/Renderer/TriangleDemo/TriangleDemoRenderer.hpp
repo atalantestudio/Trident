@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Renderer/Renderer.hpp"
+#include "ProjectA.hpp"
 
 namespace ProjectA {
 	class TriangleDemoRenderer : public Renderer {
@@ -8,6 +8,10 @@ namespace ProjectA {
 			TriangleDemoRenderer();
 
 			void render() override;
+
+			void onEvent(Event& event) override;
+
+			bool onResize(const WindowResizeEvent& event);
 
 		private:
 			struct Vertex {

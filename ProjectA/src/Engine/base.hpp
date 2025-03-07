@@ -104,7 +104,10 @@
 	#define PROFILE_SCOPE(name)
 #endif
 
-#define BIND(function) std::bind(&function, this, std::placeholders::_1)
+#define BIND(function) \
+	[this](auto&&... arguments) -> decltype(auto) { \
+		return this->function(std::forward<decltype(arguments)>(arguments)...); \
+	}
 
 #define AS_FLAG(T) \
 	inline bool operator &(T a, T b) { \

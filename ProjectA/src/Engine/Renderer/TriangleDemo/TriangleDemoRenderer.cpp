@@ -1,7 +1,5 @@
 #include "pch.hpp"
 
-#include "Engine/Loader/FileLoader.hpp"
-#include "Engine/Renderer/Buffer/BufferUsage.hpp"
 #include "Engine/Renderer/TriangleDemo/TriangleDemoRenderer.hpp"
 
 namespace ProjectA {
@@ -145,5 +143,17 @@ namespace ProjectA {
 
 		frameIndex++;
 		frameIndex %= MAX_FRAMES_IN_FLIGHT;
+	}
+
+	void TriangleDemoRenderer::onEvent(Event& event) {
+		EventDispatcher eventDispatcher(event);
+
+		eventDispatcher.dispatch<WindowResizeEvent>(BIND(TriangleDemoRenderer::onResize));
+	}
+
+	bool TriangleDemoRenderer::onResize(const WindowResizeEvent& event) {
+		CLIENT_DEBUG("resize");
+
+		return true;
 	}
 }

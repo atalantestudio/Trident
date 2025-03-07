@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/Event/Event.hpp"
 #include "Engine/Renderer/Buffer/Buffer.hpp"
 #include "Engine/Renderer/CommandEncoder.hpp"
 #include "Engine/Renderer/Device.hpp"
@@ -25,6 +26,8 @@ namespace ProjectA {
 
 		public:
 			virtual void render() = 0;
+
+			virtual void onEvent(Event& event) = 0;
 
 		protected:
 			ref<Device> getDevice() const;

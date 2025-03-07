@@ -12,6 +12,8 @@ namespace ProjectA {
 
 			void render() override;
 
+			void onEvent(Event& event) override;
+
 		private:
 			void updateCameraUniform() const;
 

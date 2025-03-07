@@ -201,4 +201,6 @@ namespace ProjectA {
 
 		cameraUniformBuffers[frameIndex]->write(&cameraUniformBufferObject, 0, sizeof(UniformBufferObject));
 	}
+
+	void GUIRenderer::onEvent(Event& event) {}
 }
