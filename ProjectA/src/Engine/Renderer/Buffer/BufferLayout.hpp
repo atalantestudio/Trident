@@ -15,17 +15,19 @@ namespace ProjectA {
 
 			template<typename T>
 			void add(const uint32 bindingIndex, const bool normalized) {
+				// TODO: Check that the vertex binding exists.
+				VertexBinding& vertexBinding = vertexBindings[bindingIndex];
+
 				VertexAttribute vertexAttribute{};
 				vertexAttribute.binding = bindingIndex;
 				vertexAttribute.location = static_cast<uint32>(vertexAttributes.size());
 				vertexAttribute.type = getVertexInputAttributeType<T>();
 				vertexAttribute.normalized = normalized;
-				vertexAttribute.offset = vertexBindings[bindingIndex].stride;
+				vertexAttribute.offset = vertexBinding.stride;
 
 				vertexAttributes.emplace_back(vertexAttribute);
 
-				// TODO: Check that the vertex binding exists.
-				vertexBindings[bindingIndex].stride += getAttributeSize<T>();
+				vertexBinding.stride += getAttributeSize<T>();
 			}
 
 			template<>

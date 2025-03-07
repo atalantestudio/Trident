@@ -52,44 +52,56 @@ namespace ProjectA {
 		renderPipelineDescriptor.renderPass = renderPass;
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
+		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
 		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		renderPipelineDescriptor.cullMode = CullMode::BACK;
 
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 
-		const std::vector<Vertex> vertexBufferData = {
-			{{-0.5f, -0.5f,  0.0f}},
-			{{ 0.0f,  0.5f,  0.0f}},
-			{{ 0.5f, -0.5f,  0.0f}},
-		};
+		// Create vertex buffer.
+		{
+			seq<Vertex> vertices(3);
+			vertices[0].position = {-0.5f, -0.5f};
+			vertices[0].color = {1.0f, 0.0f, 0.0f};
+			vertices[1].position = {0.0f,  0.5f};
+			vertices[1].color = {0.0f, 1.0f, 0.0f};
+			vertices[2].position = {0.5f, -0.5f};
+			vertices[2].color = {0.0f, 0.0f, 1.0f};
 
-		BufferDescriptor vertexBufferDescriptor{};
-		vertexBufferDescriptor.size = sizeof(Vertex) * vertexBufferData.size();
-		vertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
+			BufferDescriptor vertexBufferDescriptor{};
+			vertexBufferDescriptor.size = vertices.size();
+			vertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
 
-		vertexBuffer = createBuffer(vertexBufferDescriptor);
-		vertexBuffer->map(0, sizeof(Vertex) * vertexBufferData.size());
-		vertexBuffer->write(vertexBufferData.data(), 0, sizeof(Vertex) * vertexBufferData.size());
-		vertexBuffer->unmap();
+			vertexBuffer = createBuffer(vertexBufferDescriptor);
+			vertexBuffer->map(0, vertices.size());
+			vertexBuffer->write(&vertices[0], 0, vertices.size());
+			vertexBuffer->unmap();
+		}
 
-		const std::vector<uint16> indexBufferData = {
-			0, 1, 2,
-		};
+		// Create index buffer.
+		{
+			seq<uint16> indices(3);
+			indices[0] = 0;
+			indices[1] = 1;
+			indices[2] = 2;
 
-		BufferDescriptor indexBufferDescriptor{};
-		indexBufferDescriptor.size = sizeof(uint16) * indexBufferData.size();
-		indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
+			BufferDescriptor indexBufferDescriptor{};
+			indexBufferDescriptor.size = indices.size();
+			indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
 
-		indexBuffer = createBuffer(indexBufferDescriptor);
-		indexBuffer->map(0, sizeof(uint16) * indexBufferData.size());
-		indexBuffer->write(indexBufferData.data(), 0, sizeof(uint16) * indexBufferData.size());
-		indexBuffer->unmap();
+			indexBuffer = createBuffer(indexBufferDescriptor);
+			indexBuffer->map(0, indices.size());
+			indexBuffer->write(&indices[0], 0, indices.size());
+			indexBuffer->unmap();
+		}
 
 		commandEncoder = createCommandEncoder();
 
-		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		for (std::size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 			availableImageSemaphores[i] = createSemaphore();
 			finishedRenderSemaphores[i] = createSemaphore();
 			flightFences[i] = createFence();
@@ -108,7 +120,7 @@ namespace ProjectA {
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = renderPass;
 		beginRenderPassDescriptor.swapchain = swapchain;
-		beginRenderPassDescriptor.clearColor = {0.1f, 0.1f, 0.2f, 1.0f};
+		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
@@ -133,7 +145,5 @@ namespace ProjectA {
 
 		frameIndex++;
 		frameIndex %= MAX_FRAMES_IN_FLIGHT;
-
-		CLIENT_DEBUG(frameIndex);
 	}
 }

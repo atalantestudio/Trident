@@ -35,6 +35,9 @@
 
 #include "Engine/types.hpp"
 
+// Acceleration data structures
+#include "Engine/Acceleration/seq.hpp"
+
 // Lyah polyfill: SIMD to scalar vector
 #include "Engine/vec_sts.hpp"
 

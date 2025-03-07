@@ -3,8 +3,8 @@
 #include "Engine/Renderer/Context.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
-#include "Platform/OpenGL/OpenGLContext.hpp"
-#include "Platform/Vulkan/VulkanContext.hpp"
+#include "Backend/OpenGL/OpenGLContext.hpp"
+#include "Backend/Vulkan/VulkanContext.hpp"
 
 namespace ProjectA {
 	scope<Context> Context::create(void* window) {

@@ -2,9 +2,9 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
-#include "Platform/OpenGL/OpenGLRendererAPI.hpp"
+#include "Backend/OpenGL/OpenGLRendererAPI.hpp"
 
-#include "Platform/Vulkan/VulkanRendererAPI.hpp"
+#include "Backend/Vulkan/VulkanRendererAPI.hpp"
 
 namespace ProjectA {
 	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::NONE;

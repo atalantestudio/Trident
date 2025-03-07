@@ -13,7 +13,7 @@ namespace ProjectA {
 		Transform2DComponent quad1TransformComponent;
 		quad1TransformComponent.transform =
 			mat3x3<float32>::scaling({64.0f, 64.0f}) *
-			mat3x3<float32>::translation({16.0f, 0.0f});
+			mat3x3<float32>::translation({0.0f, 0.0f});
 
 		ecs.setComponent<Transform2DComponent>(quad1Entity, quad1TransformComponent);
 

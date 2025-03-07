@@ -5,9 +5,6 @@
 // Math
 #include "lyah/lyah.hpp"
 
-// Acceleration structures
-#include "Engine/Acceleration/seq.hpp"
-
 // Application
 #include "Engine/Application.hpp"
 #include "Engine/Input.hpp"

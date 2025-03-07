@@ -5,6 +5,7 @@
 namespace ProjectA {
 	struct PipelineLayoutDescriptor {
 		std::vector<DescriptorSetLayout> layouts;
+		// TODO: Pass uniform buffers.
 	};
 
 	class PipelineLayout {

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Engine/Renderer/Buffer/BufferLayout.hpp"
+#include "Engine/Renderer/CullMode.hpp"
+#include "Engine/Renderer/FrontFace.hpp"
 #include "Engine/Renderer/PipelineLayout.hpp"
 #include "Engine/Renderer/PrimitiveTopology.hpp"
 #include "Engine/Renderer/RenderPass.hpp"
@@ -16,6 +18,8 @@ namespace ProjectA {
 		ref<ShaderModule> vertexShaderModule;
 		ref<ShaderModule> fragmentShaderModule;
 		PrimitiveTopology primitiveTopology;
+		CullMode cullMode;
+		FrontFace frontFace;
 	};
 
 	class RenderPipeline {

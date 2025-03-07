@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/Acceleration/seq.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
@@ -12,7 +11,8 @@ namespace ProjectA {
 
 		private:
 			struct Vertex {
-				vec3<float32> position;
+				vec2<float32> position;
+				vec3<float32> color;
 			};
 
 		private:
@@ -29,7 +29,6 @@ namespace ProjectA {
 			seq<ref<Semaphore>> availableImageSemaphores;
 			seq<ref<Semaphore>> finishedRenderSemaphores;
 			seq<ref<Fence>> flightFences;
-
 			uint32 frameIndex = 0;
 	};
 }

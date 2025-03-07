@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/Acceleration/seq.hpp"
 #include "Engine/ECS/ECS.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -14,7 +13,7 @@ namespace ProjectA {
 			void render() override;
 
 		private:
-			void updateUniformBufferObjects() const;
+			void updateCameraUniform() const;
 
 		private:
 			struct UniformBufferObject {
@@ -33,13 +32,12 @@ namespace ProjectA {
 			ref<Buffer> positionVertexBuffer;
 			ref<Buffer> transformVertexBuffer;
 			ref<Buffer> indexBuffer;
-			seq<ref<Buffer>> uniformBuffers;
-			seq<void*> uniformBufferMappedMemory;
+			std::vector<ref<Buffer>> cameraUniformBuffers;
+			std::vector<void*> uniformBufferMappedMemory;
 			ref<CommandEncoder> commandEncoder;
-			seq<ref<Semaphore>> availableImageSemaphores;
-			seq<ref<Semaphore>> finishedRenderSemaphores;
-			seq<ref<Fence>> flightFences;
-
+			std::vector<ref<Semaphore>> availableImageSemaphores;
+			std::vector<ref<Semaphore>> finishedRenderSemaphores;
+			std::vector<ref<Fence>> flightFences;
 			uint32 instanceCount = 0;
 			uint32 frameIndex = 0;
 	};

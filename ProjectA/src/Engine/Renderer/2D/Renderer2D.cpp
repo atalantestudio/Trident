@@ -51,25 +51,25 @@ namespace ProjectA {
 
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraDescriptorSetLayoutBinding.descriptorCount = 1;
+		//cameraDescriptorSetLayoutBinding.descriptorCount = 1;
 		cameraDescriptorSetLayoutBinding.stageFlags = static_cast<uint32>(ShaderStage::VERTEX);
 
 		DescriptorSetLayoutBinding texturesDescriptorSetLayoutBinding{};
 		texturesDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		texturesDescriptorSetLayoutBinding.descriptorCount = 32;
+		//texturesDescriptorSetLayoutBinding.descriptorCount = 32;
 		texturesDescriptorSetLayoutBinding.stageFlags = static_cast<uint32>(ShaderStage::FRAGMENT);
 
 		DescriptorSetLayout cameraDescriptorSetLayout;
-		cameraDescriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding);
+		cameraDescriptorSetLayout.bindings[0] = cameraDescriptorSetLayoutBinding;
 
 		DescriptorSetLayout texturesDescriptorSetLayout;
-		texturesDescriptorSetLayout.bindings.emplace_back(texturesDescriptorSetLayoutBinding);
+		texturesDescriptorSetLayout.bindings[0] = texturesDescriptorSetLayoutBinding;
 
 		PipelineLayoutDescriptor pipelineLayoutDescriptor;
-		pipelineLayoutDescriptor.layouts.emplace_back(cameraDescriptorSetLayout);
-		pipelineLayoutDescriptor.layouts.emplace_back(texturesDescriptorSetLayout);
+		pipelineLayoutDescriptor.layouts[0] = cameraDescriptorSetLayout;
+		pipelineLayoutDescriptor.layouts[1] = texturesDescriptorSetLayout;
 
-		//storage.pipelineLayout = Renderer::createPipelineLayout(pipelineLayoutDescriptor);
+		//storage.pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);	// a_position

@@ -7,7 +7,7 @@
 
 namespace ProjectA {
 	GUIRenderer::GUIRenderer() :
-		uniformBuffers(MAX_FRAMES_IN_FLIGHT),
+		cameraUniformBuffers(MAX_FRAMES_IN_FLIGHT),
 		availableImageSemaphores(MAX_FRAMES_IN_FLIGHT),
 		finishedRenderSemaphores(MAX_FRAMES_IN_FLIGHT),
 		flightFences(MAX_FRAMES_IN_FLIGHT)
@@ -21,16 +21,28 @@ namespace ProjectA {
 
 		swapchain = createSwapchain(swapchainDescriptor);
 
-		DescriptorSetLayoutBinding descriptorSetLayoutBinding{};
-		descriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		descriptorSetLayoutBinding.descriptorCount = 1;
-		descriptorSetLayoutBinding.stageFlags = static_cast<uint32>(ShaderStage::VERTEX);
+		//BufferDescriptor uniformBufferDescriptor{};
+		//uniformBufferDescriptor.size = sizeof(UniformBufferObject);
+		//uniformBufferDescriptor.usage = static_cast<uint32>(BufferUsage::UNIFORM);
+		//uniformBufferDescriptor.mapped = true;
 
-		DescriptorSetLayout descriptorSetLayout;
-		descriptorSetLayout.bindings.emplace_back(descriptorSetLayoutBinding);
+		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+			//cameraUniformBuffers[i] = createBuffer(uniformBufferDescriptor);
+			availableImageSemaphores[i] = createSemaphore();
+			finishedRenderSemaphores[i] = createSemaphore();
+			flightFences[i] = createFence();
+		}
 
-		PipelineLayoutDescriptor pipelineLayoutDescriptor;
-		pipelineLayoutDescriptor.layouts.emplace_back(descriptorSetLayout);
+		//DescriptorSetLayoutBinding descriptorSetLayoutBinding{};
+		//descriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		//descriptorSetLayoutBinding.stageFlags = static_cast<uint32>(ShaderStage::VERTEX);
+		//descriptorSetLayoutBinding.buffers = cameraUniformBuffers;
+
+		//DescriptorSetLayout descriptorSetLayout;
+		//descriptorSetLayout.bindings.emplace_back(descriptorSetLayoutBinding);
+
+		const PipelineLayoutDescriptor pipelineLayoutDescriptor;
+		//pipelineLayoutDescriptor.layouts.emplace_back(descriptorSetLayout);
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
@@ -63,29 +75,30 @@ namespace ProjectA {
 		renderPipelineDescriptor.renderPass = renderPass;
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
-		renderPipelineDescriptor.vertexBufferLayout.defineBinding(1, InputRate::INSTANCE);
 		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
+		renderPipelineDescriptor.vertexBufferLayout.defineBinding(1, InputRate::INSTANCE);
 		renderPipelineDescriptor.vertexBufferLayout.add<mat3x3<float32>>(1, false);
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		renderPipelineDescriptor.cullMode = CullMode::BACK;
 
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 
 		const std::vector<vec3<float32>> positionVertexBufferData = {
 			{0.0f, 0.0f, 1.0f},
-			{0.0f, 1.0f, 1.0f},
-			{1.0f, 1.0f, 1.0f},
 			{1.0f, 0.0f, 1.0f},
+			{1.0f, 1.0f, 1.0f},
+			{0.0f, 1.0f, 1.0f},
 		};
 
 		BufferDescriptor positionVertexBufferDescriptor{};
 		positionVertexBufferDescriptor.size = sizeof(vec3<float32>) * positionVertexBufferData.size();
 		positionVertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
-		positionVertexBufferDescriptor.mapped = false;
+		positionVertexBufferDescriptor.mapped = true;
 
 		positionVertexBuffer = createBuffer(positionVertexBufferDescriptor);
-		positionVertexBuffer->map(0, sizeof(vec3<float32>) * positionVertexBufferData.size());
 		positionVertexBuffer->write(positionVertexBufferData.data(), 0, sizeof(vec3<float32>) * positionVertexBufferData.size());
 		positionVertexBuffer->unmap();
 
@@ -96,31 +109,21 @@ namespace ProjectA {
 
 		transformVertexBuffer = createBuffer(transformVertexBufferDescriptor);
 
-		const std::vector<uint16> indexBufferData = {
-			0, 1, 2,
-			0, 2, 3,
-		};
+		// Create index buffer.
+		{
+			const std::vector<uint16> indexBufferData = {
+				0, 1, 2,
+				0, 2, 3,
+			};
 
-		BufferDescriptor indexBufferDescriptor{};
-		indexBufferDescriptor.size = sizeof(uint16) * indexBufferData.size();
-		indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
-		indexBufferDescriptor.mapped = false;
+			BufferDescriptor indexBufferDescriptor{};
+			indexBufferDescriptor.size = sizeof(uint16) * indexBufferData.size();
+			indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
+			indexBufferDescriptor.mapped = true;
 
-		indexBuffer = createBuffer(indexBufferDescriptor);
-		indexBuffer->map(0, sizeof(uint16) * indexBufferData.size());
-		indexBuffer->write(indexBufferData.data(), 0, sizeof(uint16) * indexBufferData.size());
-		indexBuffer->unmap();
-
-		BufferDescriptor uniformBufferDescriptor{};
-		uniformBufferDescriptor.size = sizeof(UniformBufferObject);
-		uniformBufferDescriptor.usage = static_cast<uint32>(BufferUsage::UNIFORM);
-		uniformBufferDescriptor.mapped = true;
-
-		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-			uniformBuffers[i] = createBuffer(uniformBufferDescriptor);
-			availableImageSemaphores[i] = createSemaphore();
-			finishedRenderSemaphores[i] = createSemaphore();
-			flightFences[i] = createFence();
+			indexBuffer = createBuffer(indexBufferDescriptor);
+			indexBuffer->write(indexBufferData.data(), 0, sizeof(uint16) * indexBufferData.size());
+			indexBuffer->unmap();
 		}
 
 		commandEncoder = createCommandEncoder();
@@ -133,26 +136,18 @@ namespace ProjectA {
 			throw std::runtime_error("Too many alive components.");
 		}
 
-		const uint64 size = sizeof(Transform2DComponent);
-
-		uint64 offset = 0;
-
-		transformVertexBuffer->map(0, size * MAX_QUADS);
-
-		for (uint32 i = 0; i < transformComponentPool.componentCount; i++) {
-			const Transform2DComponent& transformComponent = transformComponentPool.components[i];
-
-			transformVertexBuffer->write(&transformComponent, offset, size);
-
-			offset += size;
-		}
-
-		transformVertexBuffer->unmap();
-
 		instanceCount = transformComponentPool.componentCount;
+
+		const uint64 size = sizeof(Transform2DComponent) * instanceCount;
+
+		transformVertexBuffer->map(0, size);
+		transformVertexBuffer->write(transformComponentPool.components.data(), 0, size);
+		transformVertexBuffer->unmap();
 	}
 
 	void GUIRenderer::render() {
+		//updateCameraUniform();
+
 		const ref<Device>& device = getDevice();
 
 		device->waitForFence(flightFences[frameIndex]);
@@ -164,7 +159,7 @@ namespace ProjectA {
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = renderPass;
 		beginRenderPassDescriptor.swapchain = swapchain;
-		beginRenderPassDescriptor.clearColor = {0.1f, 0.1f, 0.2f, 1.0f};
+		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
@@ -174,6 +169,7 @@ namespace ProjectA {
 		commandEncoder->begin();
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
+		//commandEncoder->bindDescriptorSets(frameIndex);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, positionVertexBuffer, sizeof(vec3<float32>));
 		commandEncoder->bindVertexBuffer(1, transformVertexBuffer, sizeof(Transform2DComponent));
@@ -192,17 +188,17 @@ namespace ProjectA {
 		frameIndex %= MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void GUIRenderer::updateUniformBufferObjects() const {
-		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
+	void GUIRenderer::updateCameraUniform() const {
+		/*const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
-		UniformBufferObject uniformBufferObject{};
-		uniformBufferObject.projection = {
+		UniformBufferObject cameraUniformBufferObject;
+		cameraUniformBufferObject.projection = {
 			2.0f / width, 0.0f, 0.0f,
 			0.0f, -2.0f / height, 0.0f,
 			-1.0f, 1.0f, 1.0f,
 		};
 
-		uniformBuffers[frameIndex]->write(&uniformBufferObject, 0, sizeof(UniformBufferObject));
+		cameraUniformBuffers[frameIndex]->write(&cameraUniformBufferObject, 0, sizeof(UniformBufferObject));*/
 	}
 }

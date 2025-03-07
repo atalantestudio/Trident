@@ -1,11 +1,12 @@
 #include "pch.hpp"
 
-#include "Platform/OpenGL/OpenGLTexture2D.hpp"
+#include "Backend/OpenGL/OpenGLTexture2D.hpp"
 
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/Texture2D.hpp"
 
 namespace ProjectA {
+	// TODO: Remove.
 	ref<Texture2D> Texture2D::create(std::size_t width, std::size_t height) {
 		switch (Renderer::getGraphicsApi()) {
 			case GraphicsAPI::NONE:
@@ -23,6 +24,7 @@ namespace ProjectA {
 		return nullptr;
 	}
 
+	// TODO: Remove.
 	ref<Texture2D> Texture2D::create(const std::string& path) {
 		switch (Renderer::getGraphicsApi()) {
 			case GraphicsAPI::NONE:

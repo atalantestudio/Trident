@@ -24,6 +24,8 @@ namespace ProjectA {
 
 			virtual void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) = 0;
 
+			virtual void bindDescriptorSets(const uint32 descriptorSetIndex) const = 0;
+
 			virtual void bindIndexBuffer(const ref<Buffer>& indexBuffer, const uint64 offset, const IndexType indexType) = 0;
 
 			virtual void bindVertexBuffer(const uint32 bindingIndex, const ref<Buffer>& vertexBuffer, const uint32 stride) = 0;

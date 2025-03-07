@@ -35,7 +35,17 @@ namespace ProjectA {
 				}
 			}
 
-			// TODO: Const variant.
+			// Returns the component of type T belonging to the provided entity.
+			const T& getComponent(const Entity entity) const {
+				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
+
+				const Entity componentIndex = entityToComponentIndex[entity];
+
+				ENGINE_ASSERT(componentIndex != nullComponentIndex, "Entity [] has no components.", entity);
+
+				return entityComponents[componentIndex].component;
+			}
+
 			// Returns the component of type T belonging to the provided entity.
 			T& getComponent(const Entity entity) {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
@@ -46,6 +56,8 @@ namespace ProjectA {
 
 				return entityComponents[componentIndex].component;
 			}
+
+			// TODO: hasComponent.
 
 			// Sets or replaces the component of type T belonging to the provided entity.
 			void setComponent(const Entity entity, const T& component) {
@@ -84,12 +96,13 @@ namespace ProjectA {
 				// Don't touch the deleted data; instead wait for another component to overwrite it.
 				componentCount--;
 
-				const T& component = components[componentIndex];
-				const T& lastComponent = components[componentCount];
-				const Entity lastComponentEntity = componentIndexToEntity[componentCount];
+				T& component = components[componentIndex];
+				T& lastComponent = components[componentCount];
 
 				// Move the component to be deleted to the end of the list.
 				std::swap(component, lastComponent);
+
+				const Entity lastComponentEntity = componentIndexToEntity[componentCount];
 
 				// Since the components have been swapped, the entity pointing to lastComponent
 				// now points to the component at componentIndex.
@@ -179,6 +192,15 @@ namespace ProjectA {
 				}
 
 				return *static_cast<ComponentPool<T>*>(componentPools[componentPoolIndex].get());
+			}
+
+			template<typename T>
+			void resetComponent(const Entity entity) {
+				ENGINE_ASSERT(entity < MAX_ENTITIES, "Invalid entity.");
+
+				ComponentPool<T>& componentPool = getComponentPool<T>();
+
+				componentPool.resetComponent(entity);
 			}
 
 		private:
