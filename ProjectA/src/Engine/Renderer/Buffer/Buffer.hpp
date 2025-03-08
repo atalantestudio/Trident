@@ -10,16 +10,18 @@ namespace ProjectA {
 		BufferUsage usage;
 	};
 
+	typedef void* BufferMappedRange;
+
 	class Buffer {
 		public:
 			virtual ~Buffer() = default;
 
 			// TODO: Return the mapped range pointer?
-			virtual void map(const uint64 offset, const uint64 size) = 0;
+			virtual BufferMappedRange map(uint64 offset, uint64 size) const = 0;
 
 			// TODO: Remove to allow the client to use their own copy function?
-			virtual void write(const void* data, const uint64 offset, const uint64 size) = 0;
+			//virtual void write(void* data, uint64 offset, uint64 size) = 0;
 
-			virtual void unmap() = 0;
+			virtual void unmap() const = 0;
 	};
 }

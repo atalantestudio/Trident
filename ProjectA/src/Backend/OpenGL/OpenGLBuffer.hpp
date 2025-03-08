@@ -12,14 +12,13 @@ namespace ProjectA {
 
 			~OpenGLBuffer();
 
-			void map(const uint64 offset, const uint64 size) override;
+			BufferMappedRange map(uint64 offset, uint64 size) const override;
 
-			void write(const void* data, const uint64 offset, const uint64 size) override;
-
-			void unmap() override;
+			void unmap() const override;
 
 		public:
 			const GLenum target;
 			const GLsizeiptr size;
+			BufferMappedRange mappedRange = 0;
 	};
 }

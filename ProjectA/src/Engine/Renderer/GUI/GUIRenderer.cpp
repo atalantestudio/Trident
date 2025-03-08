@@ -8,6 +8,7 @@
 namespace ProjectA {
 	GUIRenderer::GUIRenderer() :
 		cameraUniformBuffers(MAX_FRAMES_IN_FLIGHT),
+		cameraUniformBufferMappedRanges(MAX_FRAMES_IN_FLIGHT),
 		availableImageSemaphores(MAX_FRAMES_IN_FLIGHT),
 		finishedRenderSemaphores(MAX_FRAMES_IN_FLIGHT),
 		flightFences(MAX_FRAMES_IN_FLIGHT)
@@ -26,11 +27,11 @@ namespace ProjectA {
 		uniformBufferDescriptor.usage = BufferUsage::UNIFORM;
 
 		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-			flightFences[i] = createFence();
 			cameraUniformBuffers[i] = createBuffer(uniformBufferDescriptor);
-			cameraUniformBuffers[i]->map(0, uniformBufferDescriptor.size);
+			cameraUniformBufferMappedRanges[i] = cameraUniformBuffers[i]->map(0, uniformBufferDescriptor.size);
 			availableImageSemaphores[i] = createSemaphore();
 			finishedRenderSemaphores[i] = createSemaphore();
+			flightFences[i] = createFence();
 		}
 
 		// Create color storage buffer.
@@ -111,12 +112,15 @@ namespace ProjectA {
 		};
 
 		BufferDescriptor positionVertexBufferDescriptor{};
-		positionVertexBufferDescriptor.size = sizeof(vec3<float32>) * positionVertexBufferData.size();
+		positionVertexBufferDescriptor.size = sizeof(vec4<float32>) * positionVertexBufferData.size();
 		positionVertexBufferDescriptor.usage = BufferUsage::VERTEX;
 
 		positionVertexBuffer = createBuffer(positionVertexBufferDescriptor);
-		positionVertexBuffer->map(0, positionVertexBufferDescriptor.size);
-		positionVertexBuffer->write(positionVertexBufferData.data(), 0, positionVertexBufferDescriptor.size);
+
+		BufferMappedRange positionVertexBufferMappedRange = positionVertexBuffer->map(0, positionVertexBufferDescriptor.size);
+
+		std::memcpy(positionVertexBufferMappedRange, positionVertexBufferData.data(), positionVertexBufferDescriptor.size);
+
 		positionVertexBuffer->unmap();
 
 		BufferDescriptor transformVertexBufferDescriptor{};
@@ -137,8 +141,11 @@ namespace ProjectA {
 			indexBufferDescriptor.usage = BufferUsage::INDEX;
 
 			indexBuffer = createBuffer(indexBufferDescriptor);
-			indexBuffer->map(0, indexBufferDescriptor.size);
-			indexBuffer->write(indexBufferData.data(), 0, indexBufferDescriptor.size);
+
+			BufferMappedRange mappedRange = indexBuffer->map(0, indexBufferDescriptor.size);
+
+			std::memcpy(mappedRange, indexBufferData.data(), indexBufferDescriptor.size);
+
 			indexBuffer->unmap();
 		}
 
@@ -156,14 +163,18 @@ namespace ProjectA {
 
 		const uint64 size = sizeof(GUIComponent) * instanceCount;
 
-		transformVertexBuffer->map(0, size);
-		transformVertexBuffer->write(componentPool.components.data(), 0, size);
+		BufferMappedRange mappedRange = transformVertexBuffer->map(0, size);
+
+		std::memcpy(mappedRange, componentPool.components.data(), size);
+
 		transformVertexBuffer->unmap();
 	}
 
 	void GUIRenderer::registerColors(const std::vector<vec4<float32>>& colors) {
-		colorStorageBuffer->map(0, sizeof(vec4<float32>) * colors.size());
-		colorStorageBuffer->write(colors.data(), 0, sizeof(vec4<float32>) * colors.size());
+		BufferMappedRange mappedRange = colorStorageBuffer->map(0, sizeof(vec4<float32>) * colors.size());
+
+		std::memcpy(mappedRange, colors.data(), sizeof(vec4<float32>) * colors.size());
+
 		colorStorageBuffer->unmap();
 	}
 
@@ -221,7 +232,7 @@ namespace ProjectA {
 			-1.0f, 1.0f, 1.0f,
 		};
 
-		cameraUniformBuffers[frameIndex]->write(&cameraUniformBufferObject, 0, sizeof(UniformBufferObject));
+		std::memcpy(cameraUniformBufferMappedRanges[frameIndex], &cameraUniformBufferObject, sizeof(UniformBufferObject));
 	}
 
 	void GUIRenderer::onEvent(Event& event) {}

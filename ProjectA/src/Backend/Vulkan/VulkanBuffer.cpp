@@ -4,7 +4,7 @@
 #include "Backend/Vulkan/VulkanBuffer.hpp"
 
 namespace ProjectA {
-	VulkanBuffer::VulkanBuffer(const VkPhysicalDevice physicalDevice, VulkanDevice& device, const BufferDescriptor& descriptor) :
+	VulkanBuffer::VulkanBuffer(VkPhysicalDevice physicalDevice, const VulkanDevice& device, const BufferDescriptor& descriptor) :
 		device(device),
 		size(descriptor.size)
 	{
@@ -23,7 +23,7 @@ namespace ProjectA {
 		bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
 		if (vkCreateBuffer(device.object, &bufferCreateInfo, nullptr, &object) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create Vulkan buffer.");
+			throw std::runtime_error("Failed to create buffer.");
 		}
 
 		VkMemoryRequirements memoryRequirements;
@@ -51,38 +51,23 @@ namespace ProjectA {
 
 		ENGINE_TRACE("[~VulkanBuffer]");
 
-		if (mappedRange != 0) {
-			unmap();
-		}
+		// TODO: Unmap on destroy?
 
 		vkDestroyBuffer(device.object, object, nullptr);
 		vkFreeMemory(device.object, memory, nullptr);
 	}
 
-	void VulkanBuffer::write(const void* data, const uint64 offset, const uint64 size) {
-		PROFILE_SCOPE(FUNC_SIG);
+	BufferMappedRange VulkanBuffer::map(uint64 offset, uint64 size) const {
+		BufferMappedRange mappedRange;
 
-		if (mappedRange == 0) {
-			throw std::runtime_error("Buffer mapped range is 0.");
-		}
-
-		if (offset != 0) {
-			// TODO: Use provided offset.
-			ENGINE_WARN("Writing with ignored offset.");
-		}
-
-		std::memcpy(mappedRange, data, static_cast<std::size_t>(size));
-	}
-
-	void VulkanBuffer::map(const uint64 offset, const uint64 size) {
 		if (vkMapMemory(device.object, memory, offset, size, 0, &mappedRange) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to map Vulkan buffer memory.");
+			throw std::runtime_error("Failed to map buffer memory.");
 		}
+
+		return mappedRange;
 	}
 
-	void VulkanBuffer::unmap() {
+	void VulkanBuffer::unmap() const {
 		vkUnmapMemory(device.object, memory);
-
-		mappedRange = 0;
 	}
 }

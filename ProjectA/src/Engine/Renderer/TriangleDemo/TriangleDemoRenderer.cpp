@@ -71,12 +71,15 @@ namespace ProjectA {
 			vertices[2].color = {0.0f, 0.0f, 1.0f};
 
 			BufferDescriptor vertexBufferDescriptor{};
-			vertexBufferDescriptor.size = vertices.size();
+			vertexBufferDescriptor.size = sizeof(Vertex) * vertices.size();
 			vertexBufferDescriptor.usage = BufferUsage::VERTEX;
 
 			vertexBuffer = createBuffer(vertexBufferDescriptor);
-			vertexBuffer->map(0, vertices.size());
-			vertexBuffer->write(vertices.data(), 0, vertices.size());
+
+			BufferMappedRange mappedRange = vertexBuffer->map(0, vertexBufferDescriptor.size);
+
+			std::memcpy(mappedRange, vertices.data(), vertexBufferDescriptor.size);
+
 			vertexBuffer->unmap();
 		}
 
@@ -88,12 +91,15 @@ namespace ProjectA {
 			indices[2] = 2;
 
 			BufferDescriptor indexBufferDescriptor{};
-			indexBufferDescriptor.size = indices.size();
+			indexBufferDescriptor.size = sizeof(uint16) * indices.size();
 			indexBufferDescriptor.usage = BufferUsage::INDEX;
 
 			indexBuffer = createBuffer(indexBufferDescriptor);
-			indexBuffer->map(0, indices.size());
-			indexBuffer->write(indices.data(), 0, indices.size());
+
+			BufferMappedRange mappedRange = indexBuffer->map(0, indexBufferDescriptor.size);
+
+			std::memcpy(mappedRange, indices.data(), indexBufferDescriptor.size);
+
 			indexBuffer->unmap();
 		}
 

@@ -42,7 +42,7 @@ namespace ProjectA {
 			ref<Buffer> colorStorageBuffer;
 
 			// TODO: Remove?
-			chain<void*> uniformBufferMappedMemory;
+			chain<BufferMappedRange> cameraUniformBufferMappedRanges;
 
 			ref<CommandEncoder> commandEncoder;
 			chain<ref<Semaphore>> availableImageSemaphores;
