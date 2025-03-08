@@ -21,7 +21,7 @@ namespace ProjectA {
 		WINDOW_RESIZE,
 	};
 
-	enum EventCategory : uint32 {
+	enum class EventCategory : uint32 {
 		NONE = 0,
 		APPLICATION = 1 << 0,
 		INPUT = 1 << 1,
@@ -30,6 +30,8 @@ namespace ProjectA {
 		MOUSE_BUTTON= 1 << 4,
 		WINDOW = 1 << 5,
 	};
+
+	AS_FLAG(EventCategory)
 
 	class Event {
 		friend class EventDispatcher;
@@ -41,7 +43,7 @@ namespace ProjectA {
 			virtual ~Event() = default;
 
 			virtual EventType getType() const = 0;
-			virtual int32 getCategories() const = 0;
+			virtual uint32 getCategories() const = 0;
 			virtual const char* getName() const = 0;
 
 			inline bool hasCategory(EventCategory category) const {
@@ -78,8 +80,8 @@ namespace ProjectA {
 	};
 
 	#define EVENT_CATEGORY(category) \
-		virtual int32 getCategories() const override { \
-			return category; \
+		virtual uint32 getCategories() const override { \
+			return static_cast<uint32>(category); \
 		}
 
 	#define EVENT_TYPE(type) \

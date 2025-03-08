@@ -116,6 +116,10 @@
 	\
 	inline T operator |(T a, T b) { \
 		return static_cast<T>(static_cast<int32>(a) | static_cast<int32>(b)); \
+	} \
+	\
+	inline bool operator &(std::underlying_type<T>::type a, T b) { \
+		return a & static_cast<std::underlying_type<T>::type>(b); \
 	}
 
 #define AS_PRINTABLE(T) \
