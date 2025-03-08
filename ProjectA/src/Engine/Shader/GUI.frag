@@ -8,7 +8,7 @@ layout(location = 1) flat in uint v_textureIndex;
 layout(location = 0) out vec4 color;
 
 // std430
-layout(set = 1, binding = 0) buffer ColorBuffer {
+layout(set = 0, binding = 1) buffer ColorBuffer {
 	vec4 colors[];
 };
 

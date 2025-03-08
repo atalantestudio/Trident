@@ -53,15 +53,12 @@ namespace ProjectA {
 		colorDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
 		colorDescriptorSetLayoutBinding.buffers = {colorStorageBuffer};
 
-		DescriptorSetLayout cameraDescriptorSetLayout;
-		cameraDescriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding); // Camera at set 0, binding 0.
-
-		DescriptorSetLayout colorDescriptorSetLayout;
-		colorDescriptorSetLayout.bindings.emplace_back(colorDescriptorSetLayoutBinding); // Color buffer at set 1, binding 0.
+		DescriptorSetLayout cameraAndColorDescriptorSetLayout;
+		cameraAndColorDescriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding); // Camera at set 0, binding 0.
+		cameraAndColorDescriptorSetLayout.bindings.emplace_back(colorDescriptorSetLayoutBinding); // Color buffer at set 0, binding 1.
 
 		PipelineLayoutDescriptor pipelineLayoutDescriptor;
-		pipelineLayoutDescriptor.layouts.emplace_back(cameraDescriptorSetLayout);
-		pipelineLayoutDescriptor.layouts.emplace_back(colorDescriptorSetLayout);
+		pipelineLayoutDescriptor.layouts.emplace_back(cameraAndColorDescriptorSetLayout);
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
