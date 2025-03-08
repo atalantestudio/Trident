@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Camera/OrthographicCamera.hpp"
+#include "Engine/Camera/OrthographicCamera3D.hpp"
 #include "Engine/Renderer/Subtexture.hpp"
 
 namespace ProjectA {
@@ -20,7 +20,7 @@ namespace ProjectA {
 			};
 
 		public:
-			static const OrthographicCamera* camera;
+			static const OrthographicCamera3D* camera;
 
 		public:
 			static void construct();

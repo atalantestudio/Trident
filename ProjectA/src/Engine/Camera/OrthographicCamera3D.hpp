@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Engine/Camera/Camera.hpp"
+#include "Engine/Camera/Camera3D.hpp"
 
 namespace ProjectA {
-	class OrthographicCamera : public Camera {
+	class OrthographicCamera3D : public Camera3D {
 		public:
-			OrthographicCamera(float32 left, float32 right, float32 bottom, float32 top, float32 nearPlane, float32 farPlane);
+			OrthographicCamera3D(float32 left, float32 right, float32 bottom, float32 top, float32 nearPlane, float32 farPlane);
 
 			void updateProjection(float32 left, float32 right, float32 bottom, float32 top, float32 nearPlane, float32 farPlane);
 

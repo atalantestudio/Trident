@@ -4,7 +4,7 @@
 
 // TODO: Check order of view and projection members
 namespace ProjectA {
-	class Camera {
+	class Camera3D {
 		public:
 			mat4x4<float32> projection;
 			mat4x4<float32> view;
@@ -12,8 +12,8 @@ namespace ProjectA {
 
 		public:
 			// TODO: Accept view matrix as 2nd argument?
-			Camera(const mat4x4<float32>& projection);
+			Camera3D(const mat4x4<float32>& projection);
 
-			~Camera() = default;
+			~Camera3D() = default;
 	};
 }

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Engine/Camera/OrthographicCamera.hpp"
+#include "Engine/Camera/OrthographicCamera3D.hpp"
 #include "Engine/Event/Event.hpp"
 #include "Engine/Event/MouseEvent.hpp"
 #include "Engine/Event/WindowEvent.hpp"
 
 namespace ProjectA {
-	class OrthographicCameraController {
+	class OrthographicCamera3DController {
 		private:
 			float32 aspectRatio;
 			float32 zoomLevel;
@@ -15,10 +15,10 @@ namespace ProjectA {
 			float32 rotation;
 			float32 rotationSpeed;
 			vec4<float32> bounds;
-			OrthographicCamera camera;
+			OrthographicCamera3D camera;
 
 		public:
-			OrthographicCameraController(float32 aspectRatio);
+			OrthographicCamera3DController(float32 aspectRatio);
 
 			inline const vec3<float32>& getPosition() const {
 				return position;
@@ -28,7 +28,7 @@ namespace ProjectA {
 				return bounds;
 			}
 
-			inline const OrthographicCamera& getCamera() const {
+			inline const OrthographicCamera3D& getCamera() const {
 				return camera;
 			}
 

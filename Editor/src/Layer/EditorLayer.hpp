@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class EditorLayer : public Layer {
 		private:
-			OrthographicCameraController cameraController;
+			OrthographicCamera3DController cameraController;
 
 			ref<Framebuffer> framebuffer;
 

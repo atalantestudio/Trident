@@ -1,10 +1,10 @@
 #include "pch.hpp"
 
-#include "Engine/Camera/Controller/OrthographicCameraController.hpp"
+#include "Engine/Camera/Controller/OrthographicCamera3DController.hpp"
 #include "Engine/Input.hpp"
 
 namespace ProjectA {
-	OrthographicCameraController::OrthographicCameraController(float32 aspectRatio) :
+	OrthographicCamera3DController::OrthographicCamera3DController(float32 aspectRatio) :
 		aspectRatio(aspectRatio),
 		zoomLevel(1),
 		position(0, 0, 0),
@@ -14,19 +14,19 @@ namespace ProjectA {
 		camera(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1),
 		bounds(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel) {}
 
-	void OrthographicCameraController::setZoomLevel(float32 zoomLevel) {
+	void OrthographicCamera3DController::setZoomLevel(float32 zoomLevel) {
 		this->zoomLevel = zoomLevel;
 
 		updateProjection();
 	}
 
-	void OrthographicCameraController::resize(const vec2<float32>& size) {
+	void OrthographicCamera3DController::resize(const vec2<float32>& size) {
 		aspectRatio = size[0] / size[1];
 
 		camera.updateProjection(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1);
 	}
 
-	void OrthographicCameraController::update(float32 deltaTime) {
+	void OrthographicCamera3DController::update(float32 deltaTime) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		float32 x = 0.0f;
@@ -58,16 +58,16 @@ namespace ProjectA {
 		camera.updateView(position, rotation);
 	}
 
-	void OrthographicCameraController::onEvent(Event& event) {
+	void OrthographicCamera3DController::onEvent(Event& event) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		EventDispatcher eventDispatcher(event);
 
-		eventDispatcher.dispatch<MouseScrollEvent>(BIND(OrthographicCameraController::onMouseScroll));
-		eventDispatcher.dispatch<WindowResizeEvent>(BIND(OrthographicCameraController::onWindowResize));
+		eventDispatcher.dispatch<MouseScrollEvent>(BIND(OrthographicCamera3DController::onMouseScroll));
+		eventDispatcher.dispatch<WindowResizeEvent>(BIND(OrthographicCamera3DController::onWindowResize));
 	}
 
-	bool OrthographicCameraController::onMouseScroll(MouseScrollEvent& event) {
+	bool OrthographicCamera3DController::onMouseScroll(MouseScrollEvent& event) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		zoomLevel -= event.getOffset()[1] / 2;
@@ -79,7 +79,7 @@ namespace ProjectA {
 		return true;
 	}
 
-	bool OrthographicCameraController::onWindowResize(WindowResizeEvent& event) {
+	bool OrthographicCamera3DController::onWindowResize(WindowResizeEvent& event) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		resize({static_cast<float32>(event.getWidth()), static_cast<float32>(event.getHeight())});
@@ -87,7 +87,7 @@ namespace ProjectA {
 		return true;
 	}
 
-	void OrthographicCameraController::updateProjection() {
+	void OrthographicCamera3DController::updateProjection() {
 		bounds = {-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel};
 
 		camera.updateProjection(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1);

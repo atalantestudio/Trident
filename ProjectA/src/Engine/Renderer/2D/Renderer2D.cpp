@@ -9,7 +9,7 @@
 #include "Engine/Renderer/ShaderModule.hpp"
 
 namespace ProjectA {
-	const OrthographicCamera* Renderer2D::camera = nullptr;
+	const OrthographicCamera3D* Renderer2D::camera = nullptr;
 
 	struct QuadVertex {
 		vec_sts<3> position;

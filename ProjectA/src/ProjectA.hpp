@@ -10,8 +10,8 @@
 #include "Engine/Input.hpp"
 #include "Engine/Layer.hpp"
 
-// Camera controller
-#include "Engine/Camera/Controller/OrthographicCameraController.hpp"
+// 3D camera controller
+#include "Engine/Camera/Controller/OrthographicCamera3DController.hpp"
 
 // ECS
 #include "Engine/ECS/Component/GUIComponent.hpp"
