@@ -14,6 +14,7 @@
 #include "Engine/Camera/Controller/OrthographicCameraController.hpp"
 
 // ECS
+#include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/ECS/Component/SpriteComponent.hpp"
 #include "Engine/ECS/Component/Transform2DComponent.hpp"
 #include "Engine/ECS/Component/Transform3DComponent.hpp"

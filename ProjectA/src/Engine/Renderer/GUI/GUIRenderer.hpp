@@ -10,6 +10,8 @@ namespace ProjectA {
 
 			void registerEntities(const ECS& ecs);
 
+			void registerColors(const std::vector<vec4<float32>>& colors);
+
 			void render() override;
 
 			void onEvent(Event& event) override;
@@ -24,6 +26,8 @@ namespace ProjectA {
 
 		private:
 			static constexpr uint32 MAX_QUADS = 64;
+			static constexpr uint32 MAX_COLORS = 32;
+			static constexpr uint32 MAX_TEXTURES = 32;
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
 
 		private:
@@ -35,6 +39,7 @@ namespace ProjectA {
 			ref<Buffer> transformVertexBuffer;
 			ref<Buffer> indexBuffer;
 			std::vector<ref<Buffer>> cameraUniformBuffers;
+			ref<Buffer> colorStorageBuffer;
 			std::vector<void*> uniformBufferMappedMemory;
 			ref<CommandEncoder> commandEncoder;
 			std::vector<ref<Semaphore>> availableImageSemaphores;

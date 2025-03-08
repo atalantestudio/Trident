@@ -88,6 +88,7 @@ namespace ProjectA {
 			}
 
 			std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+			std::vector<VkDescriptorBufferInfo> descriptorBufferInfos;
 
 			for (uint32 setLayoutIndex = 0; setLayoutIndex < descriptor.layouts.size(); setLayoutIndex++) {
 				const DescriptorSetLayout& setLayout = descriptor.layouts[setLayoutIndex];
@@ -96,13 +97,30 @@ namespace ProjectA {
 					const DescriptorSetLayoutBinding& binding = setLayout.bindings[bindingIndex];
 
 					for (uint32 bufferIndex = 0; bufferIndex < binding.buffers.size(); bufferIndex++) {
-						const ref<Buffer>& buffer = binding.buffers[bufferIndex];
+						const VulkanBuffer* buffer = static_cast<const VulkanBuffer*>(binding.buffers[bufferIndex].get());
 
 						VkDescriptorBufferInfo descriptorBufferInfo{};
-						descriptorBufferInfo.buffer = static_cast<const VulkanBuffer*>(buffer.get())->object;
+						descriptorBufferInfo.buffer = buffer->object;
 						descriptorBufferInfo.offset = 0;
-						descriptorBufferInfo.range = static_cast<const VulkanBuffer*>(buffer.get())->size;
+						descriptorBufferInfo.range = buffer->size;
 
+						descriptorBufferInfos.emplace_back(descriptorBufferInfo);
+					}
+				}
+			}
+
+			uint32 writeDescriptorSetIndex = 0;
+
+			for (uint32 setLayoutIndex = 0; setLayoutIndex < descriptor.layouts.size(); setLayoutIndex++) {
+				const DescriptorSetLayout& setLayout = descriptor.layouts[setLayoutIndex];
+
+				for (uint32 bindingIndex = 0; bindingIndex < setLayout.bindings.size(); bindingIndex++) {
+					const DescriptorSetLayoutBinding& binding = setLayout.bindings[bindingIndex];
+
+					for (uint32 bufferIndex = 0; bufferIndex < binding.buffers.size(); bufferIndex++) {
+						const VulkanBuffer* buffer = static_cast<const VulkanBuffer*>(binding.buffers[bufferIndex].get());
+
+						// 1 write descriptor set per descriptor set and per binding index.
 						VkWriteDescriptorSet writeDescriptorSet{};
 						writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 						writeDescriptorSet.pNext = nullptr;
@@ -112,10 +130,12 @@ namespace ProjectA {
 						writeDescriptorSet.descriptorCount = 1;
 						writeDescriptorSet.descriptorType = getVkDescriptorType(binding.descriptorType);
 						writeDescriptorSet.pImageInfo = nullptr;
-						writeDescriptorSet.pBufferInfo = &descriptorBufferInfo;
+						writeDescriptorSet.pBufferInfo = &descriptorBufferInfos[writeDescriptorSetIndex];
 						writeDescriptorSet.pTexelBufferView = nullptr;
 
 						writeDescriptorSets.emplace_back(writeDescriptorSet);
+
+						writeDescriptorSetIndex++;
 					}
 				}
 			}

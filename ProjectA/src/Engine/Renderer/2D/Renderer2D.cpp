@@ -52,12 +52,12 @@ namespace ProjectA {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		//cameraDescriptorSetLayoutBinding.descriptorCount = 1;
-		cameraDescriptorSetLayoutBinding.stageFlags = static_cast<uint32>(ShaderStage::VERTEX);
+		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
 
 		DescriptorSetLayoutBinding texturesDescriptorSetLayoutBinding{};
 		texturesDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 		//texturesDescriptorSetLayoutBinding.descriptorCount = 32;
-		texturesDescriptorSetLayoutBinding.stageFlags = static_cast<uint32>(ShaderStage::FRAGMENT);
+		texturesDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
 
 		DescriptorSetLayout cameraDescriptorSetLayout;
 		cameraDescriptorSetLayout.bindings[0] = cameraDescriptorSetLayoutBinding;
@@ -102,7 +102,7 @@ namespace ProjectA {
 
 		BufferDescriptor vertexBufferDescriptor{};
 		vertexBufferDescriptor.size = sizeof(QuadVertex) * Renderer2DStorage::MAX_VERTICES;
-		vertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
+		vertexBufferDescriptor.usage = BufferUsage::VERTEX;
 
 		//storage.vertexBuffer = Renderer::createBuffer(vertexBufferDescriptor);
 		//storage.vertexBuffer->setLayout(renderPipelineDescriptor.vertexBufferLayout);
@@ -127,7 +127,7 @@ namespace ProjectA {
 
 		BufferDescriptor indexBufferDescriptor{};
 		indexBufferDescriptor.size = Renderer2DStorage::MAX_INDICES;
-		indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
+		indexBufferDescriptor.usage = BufferUsage::INDEX;
 
 		//const ref<Buffer> indexBuffer = Renderer::createBuffer(indexBufferDescriptor);
 

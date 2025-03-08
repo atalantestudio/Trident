@@ -2,8 +2,10 @@
 
 #include <glad/glad.h>
 
+#include "Engine/Renderer/Buffer/BufferUsage.hpp"
+
 namespace ProjectA {
-	static GLenum getGlBufferTarget(const uint32 bufferUsage) {
+	static GLenum getGlBufferTarget(const BufferUsage bufferUsage) {
 		static constexpr GLenum glBufferTargets[] = {
 			GL_UNIFORM_BUFFER,
 			GL_SHADER_STORAGE_BUFFER,
@@ -12,6 +14,6 @@ namespace ProjectA {
 			GL_DRAW_INDIRECT_BUFFER,
 		};
 
-		return glBufferTargets[bufferUsage];
+		return glBufferTargets[static_cast<uint32>(bufferUsage)];
 	}
 }

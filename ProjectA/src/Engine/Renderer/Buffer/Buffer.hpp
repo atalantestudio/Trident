@@ -2,10 +2,12 @@
 
 #include "pch.hpp"
 
+#include "Engine/Renderer/Buffer/BufferUsage.hpp"
+
 namespace ProjectA {
 	struct BufferDescriptor {
 		uint64 size;
-		uint32 usage; // From BufferUsage enum.
+		BufferUsage usage;
 		bool mapped;
 	};
 

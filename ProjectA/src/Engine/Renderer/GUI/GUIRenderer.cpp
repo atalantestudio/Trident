@@ -1,6 +1,6 @@
 #include "pch.hpp"
 
-#include "Engine/ECS/Component/Transform2DComponent.hpp"
+#include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/Loader/FileLoader.hpp"
 #include "Engine/Renderer/Buffer/BufferUsage.hpp"
 #include "Engine/Renderer/GUI/GUIRenderer.hpp"
@@ -23,7 +23,7 @@ namespace ProjectA {
 
 		BufferDescriptor uniformBufferDescriptor{};
 		uniformBufferDescriptor.size = sizeof(UniformBufferObject);
-		uniformBufferDescriptor.usage = static_cast<uint32>(BufferUsage::UNIFORM);
+		uniformBufferDescriptor.usage = BufferUsage::UNIFORM;
 		uniformBufferDescriptor.mapped = true;
 
 		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -33,16 +33,35 @@ namespace ProjectA {
 			flightFences[i] = createFence();
 		}
 
-		DescriptorSetLayoutBinding descriptorSetLayoutBinding{};
-		descriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		descriptorSetLayoutBinding.stageFlags = static_cast<uint32>(ShaderStage::VERTEX);
-		descriptorSetLayoutBinding.buffers = cameraUniformBuffers;
+		// Create color storage buffer.
+		{
+			BufferDescriptor colorStorageBufferDescriptor{};
+			colorStorageBufferDescriptor.size = sizeof(vec4<float32>) * MAX_COLORS;
+			colorStorageBufferDescriptor.usage = BufferUsage::STORAGE;
+			colorStorageBufferDescriptor.mapped = false;
 
-		DescriptorSetLayout descriptorSetLayout;
-		descriptorSetLayout.bindings.emplace_back(descriptorSetLayoutBinding);
+			colorStorageBuffer = createBuffer(colorStorageBufferDescriptor);
+		}
+
+		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
+		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
+		cameraDescriptorSetLayoutBinding.buffers = cameraUniformBuffers;
+
+		DescriptorSetLayoutBinding colorDescriptorSetLayoutBinding{};
+		colorDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		colorDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		colorDescriptorSetLayoutBinding.buffers = {colorStorageBuffer};
+
+		DescriptorSetLayout cameraDescriptorSetLayout;
+		cameraDescriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding); // Camera at set 0, binding 0.
+
+		DescriptorSetLayout colorDescriptorSetLayout;
+		colorDescriptorSetLayout.bindings.emplace_back(colorDescriptorSetLayoutBinding); // Color buffer at set 1, binding 0.
 
 		PipelineLayoutDescriptor pipelineLayoutDescriptor;
-		pipelineLayoutDescriptor.layouts.emplace_back(descriptorSetLayout);
+		pipelineLayoutDescriptor.layouts.emplace_back(cameraDescriptorSetLayout);
+		pipelineLayoutDescriptor.layouts.emplace_back(colorDescriptorSetLayout);
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
@@ -78,6 +97,8 @@ namespace ProjectA {
 		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
 		renderPipelineDescriptor.vertexBufferLayout.defineBinding(1, InputRate::INSTANCE);
 		renderPipelineDescriptor.vertexBufferLayout.add<mat3x3<float32>>(1, false);
+		renderPipelineDescriptor.vertexBufferLayout.add<uint32>(1, false);
+		renderPipelineDescriptor.vertexBufferLayout.add<uint32>(1, false);
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
@@ -95,7 +116,7 @@ namespace ProjectA {
 
 		BufferDescriptor positionVertexBufferDescriptor{};
 		positionVertexBufferDescriptor.size = sizeof(vec3<float32>) * positionVertexBufferData.size();
-		positionVertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
+		positionVertexBufferDescriptor.usage = BufferUsage::VERTEX;
 		positionVertexBufferDescriptor.mapped = true;
 
 		positionVertexBuffer = createBuffer(positionVertexBufferDescriptor);
@@ -103,8 +124,8 @@ namespace ProjectA {
 		positionVertexBuffer->unmap();
 
 		BufferDescriptor transformVertexBufferDescriptor{};
-		transformVertexBufferDescriptor.size = sizeof(Transform2DComponent) * MAX_QUADS;
-		transformVertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
+		transformVertexBufferDescriptor.size = sizeof(GUIComponent) * MAX_QUADS;
+		transformVertexBufferDescriptor.usage = BufferUsage::VERTEX;
 		transformVertexBufferDescriptor.mapped = false;
 
 		transformVertexBuffer = createBuffer(transformVertexBufferDescriptor);
@@ -118,7 +139,7 @@ namespace ProjectA {
 
 			BufferDescriptor indexBufferDescriptor{};
 			indexBufferDescriptor.size = sizeof(uint16) * indexBufferData.size();
-			indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
+			indexBufferDescriptor.usage = BufferUsage::INDEX;
 			indexBufferDescriptor.mapped = true;
 
 			indexBuffer = createBuffer(indexBufferDescriptor);
@@ -130,19 +151,25 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::registerEntities(const ECS& ecs) {
-		const ComponentPool<Transform2DComponent>& transformComponentPool = ecs.getComponentPool<Transform2DComponent>();
+		const ComponentPool<GUIComponent>& componentPool = ecs.getComponentPool<GUIComponent>();
 
-		if (transformComponentPool.componentCount >= MAX_QUADS) {
+		if (componentPool.componentCount >= MAX_QUADS) {
 			throw std::runtime_error("Too many alive components.");
 		}
 
-		instanceCount = transformComponentPool.componentCount;
+		instanceCount = componentPool.componentCount;
 
-		const uint64 size = sizeof(Transform2DComponent) * instanceCount;
+		const uint64 size = sizeof(GUIComponent) * instanceCount;
 
 		transformVertexBuffer->map(0, size);
-		transformVertexBuffer->write(transformComponentPool.components.data(), 0, size);
+		transformVertexBuffer->write(componentPool.components.data(), 0, size);
 		transformVertexBuffer->unmap();
+	}
+
+	void GUIRenderer::registerColors(const std::vector<vec4<float32>>& colors) {
+		colorStorageBuffer->map(0, sizeof(vec4<float32>) * colors.size());
+		colorStorageBuffer->write(colors.data(), 0, sizeof(vec4<float32>) * colors.size());
+		colorStorageBuffer->unmap();
 	}
 
 	void GUIRenderer::render() {
@@ -172,7 +199,7 @@ namespace ProjectA {
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, positionVertexBuffer, sizeof(vec3<float32>));
-		commandEncoder->bindVertexBuffer(1, transformVertexBuffer, sizeof(Transform2DComponent));
+		commandEncoder->bindVertexBuffer(1, transformVertexBuffer, sizeof(GUIComponent));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 		commandEncoder->drawIndexed(6, instanceCount, 0);

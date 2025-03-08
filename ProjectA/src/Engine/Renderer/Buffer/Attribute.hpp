@@ -31,28 +31,36 @@ namespace ProjectA {
 		return sizeof(int32);
 	}
 
+	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
 	static inline uint32 getAttributeSize<uint32>() {
-		return sizeof(uint32);
+		//return sizeof(uint32);
+		return sizeof(uint32) * 2;
+		//return sizeof(uint32) * 4;
 	}
 
+	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
 	static inline uint32 getAttributeSize<float32>() {
-		return sizeof(float32);
+		//return sizeof(float32);
+		return sizeof(float32) * 4;
 	}
 
+	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
 	static inline uint32 getAttributeSize<vec2<float32>>() {
 		//return sizeof(float32) * 2;
 		return sizeof(float32) * 4;
 	}
 
+	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
 	static inline uint32 getAttributeSize<vec3<float32>>() {
 		//return sizeof(float32) * 3;
 		return sizeof(float32) * 4;
 	}
 
+	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
 	static inline uint32 getAttributeSize<vec4<float32>>() {
 		return sizeof(float32) * 4;
@@ -73,12 +81,14 @@ namespace ProjectA {
 		return sizeof(float64);
 	}
 
+	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
 	static inline uint32 getAttributeSize<vec2<float64>>() {
 		//return sizeof(float64) * 2;
 		return sizeof(float64) * 4;
 	}
 
+	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
 	static inline uint32 getAttributeSize<vec3<float64>>() {
 		//return sizeof(float64) * 3;

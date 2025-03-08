@@ -86,9 +86,9 @@ namespace ProjectA {
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			pipelineLayout->object,
 
-			// TODO: Fix multiple descriptor set binding.
-			descriptorSetIndex,
-			1,
+			// TODO: Allow custom descriptor set range to be bound.
+			0,
+			static_cast<uint32>(pipelineLayout->descriptorSets.size()),
 
 			pipelineLayout->descriptorSets.data(),
 			0,

@@ -6,36 +6,50 @@ namespace ProjectA {
 	{}
 
 	void GUILayer::bind() {
-		ecs.defineComponent<Transform2DComponent>();
+		ecs.defineComponent<GUIComponent>();
 
 		const Entity quad1Entity = ecs.createEntity();
 
-		Transform2DComponent quad1TransformComponent;
-		quad1TransformComponent.transform =
+		GUIComponent quad1GuiComponent;
+		quad1GuiComponent.transform =
 			mat3x3<float32>::scaling({64.0f, 64.0f}) *
 			mat3x3<float32>::translation({0.0f, 0.0f});
+		quad1GuiComponent.colorIndex = 0;
+		quad1GuiComponent.textureIndex = 0;
 
-		ecs.setComponent<Transform2DComponent>(quad1Entity, quad1TransformComponent);
+		ecs.setComponent<GUIComponent>(quad1Entity, quad1GuiComponent);
 
 		const Entity quad2Entity = ecs.createEntity();
 
-		Transform2DComponent quad2TransformComponent;
-		quad2TransformComponent.transform =
+		GUIComponent quad2GuiComponent;
+		quad2GuiComponent.transform =
 			mat3x3<float32>::scaling({128.0f, 48.0f}) *
 			mat3x3<float32>::translation({16.0f, 80.0f});
+		quad2GuiComponent.colorIndex = 1;
+		quad2GuiComponent.textureIndex = 0;
 
-		ecs.setComponent<Transform2DComponent>(quad2Entity, quad2TransformComponent);
+		ecs.setComponent<GUIComponent>(quad2Entity, quad2GuiComponent);
 
 		const Entity quad3Entity = ecs.createEntity();
 
-		Transform2DComponent quad3TransformComponent;
-		quad3TransformComponent.transform =
+		GUIComponent quad3GuiComponent;
+		quad3GuiComponent.transform =
 			mat3x3<float32>::scaling({256.0f, 512.0f}) *
 			mat3x3<float32>::translation({80.0f, 128.0f});
+		quad3GuiComponent.colorIndex = 2;
+		quad3GuiComponent.textureIndex = 0;
 
-		ecs.setComponent<Transform2DComponent>(quad3Entity, quad3TransformComponent);
+		ecs.setComponent<GUIComponent>(quad3Entity, quad3GuiComponent);
 
 		renderer.registerEntities(ecs);
+
+		const std::vector<vec4<float32>> colors = {
+			{1.0f, 1.0f, 1.0f, 1.0f},
+			{1.0f, 0.2f, 0.0f, 1.0f},
+			{0.1f, 0.1f, 0.2f, 1.0f},
+		};
+
+		renderer.registerColors(colors);
 	}
 
 	void GUILayer::unbind() {}

@@ -2,8 +2,10 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Engine/Renderer/Buffer/BufferUsage.hpp"
+
 namespace ProjectA {
-	static VkBufferUsageFlagBits getVkBufferUsageFlagBits(const uint32 bufferUsage) {
+	static VkBufferUsageFlagBits getVkBufferUsageFlagBits(const BufferUsage bufferUsage) {
 		static constexpr VkBufferUsageFlagBits vkBufferUsageFlagBits[] = {
 			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -12,6 +14,6 @@ namespace ProjectA {
 			VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT,
 		};
 
-		return vkBufferUsageFlagBits[bufferUsage];
+		return vkBufferUsageFlagBits[static_cast<uint32>(bufferUsage)];
 	}
 }

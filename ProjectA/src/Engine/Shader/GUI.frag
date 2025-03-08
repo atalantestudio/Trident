@@ -2,8 +2,16 @@
 
 precision mediump float;
 
+layout(location = 0) flat in uint v_colorIndex;
+layout(location = 1) flat in uint v_textureIndex;
+
 layout(location = 0) out vec4 color;
 
+// std430
+layout(set = 1, binding = 0) buffer ColorBuffer {
+	vec4 colors[];
+};
+
 void main() {
-	color = vec4(1.0, 0.2, 0.0, 1.0);
+	color = colors[v_colorIndex];
 }

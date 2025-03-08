@@ -72,7 +72,7 @@ namespace ProjectA {
 
 			BufferDescriptor vertexBufferDescriptor{};
 			vertexBufferDescriptor.size = vertices.size();
-			vertexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::VERTEX);
+			vertexBufferDescriptor.usage = BufferUsage::VERTEX;
 
 			vertexBuffer = createBuffer(vertexBufferDescriptor);
 			vertexBuffer->map(0, vertices.size());
@@ -89,7 +89,7 @@ namespace ProjectA {
 
 			BufferDescriptor indexBufferDescriptor{};
 			indexBufferDescriptor.size = indices.size();
-			indexBufferDescriptor.usage = static_cast<uint32>(BufferUsage::INDEX);
+			indexBufferDescriptor.usage = BufferUsage::INDEX;
 
 			indexBuffer = createBuffer(indexBufferDescriptor);
 			indexBuffer->map(0, indices.size());

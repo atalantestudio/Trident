@@ -96,7 +96,7 @@ namespace ProjectA {
 				for (uint32 bufferIndex = 0; bufferIndex < binding.buffers.size(); bufferIndex++) {
 					const OpenGLBuffer* buffer = static_cast<const OpenGLBuffer*>(binding.buffers[bufferIndex].get());
 
-					glBindBufferRange(GL_UNIFORM_BUFFER, bindingIndex, buffer->object, 0, buffer->size);
+					glBindBufferRange(buffer->target, bindingIndex, buffer->object, 0, buffer->size);
 				}
 			}
 		}

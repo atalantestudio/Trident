@@ -157,8 +157,6 @@ namespace ProjectA {
 					return;
 				}
 
-				ENGINE_TRACE("Allocating space for new component pool (index = []).", componentPoolIndex);
-
 				// Allocate space for new pool.
 				componentPools.resize(componentPools.size() + 1);
 				componentPools[componentPoolIndex] = std::make_unique<ComponentPool<T>>();
