@@ -44,10 +44,6 @@ namespace ProjectA {
 		}
 
 		vkBindBufferMemory(device.object, object, memory, 0);
-
-		if (descriptor.mapped) {
-			map(0, size);
-		}
 	}
 
 	VulkanBuffer::~VulkanBuffer() {

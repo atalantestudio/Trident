@@ -24,10 +24,10 @@ namespace ProjectA {
 		BufferDescriptor uniformBufferDescriptor{};
 		uniformBufferDescriptor.size = sizeof(UniformBufferObject);
 		uniformBufferDescriptor.usage = BufferUsage::UNIFORM;
-		uniformBufferDescriptor.mapped = true;
 
 		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 			cameraUniformBuffers[i] = createBuffer(uniformBufferDescriptor);
+			cameraUniformBuffers[i]->map(0, uniformBufferDescriptor.size);
 			availableImageSemaphores[i] = createSemaphore();
 			finishedRenderSemaphores[i] = createSemaphore();
 			flightFences[i] = createFence();
@@ -38,7 +38,6 @@ namespace ProjectA {
 			BufferDescriptor colorStorageBufferDescriptor{};
 			colorStorageBufferDescriptor.size = sizeof(vec4<float32>) * MAX_COLORS;
 			colorStorageBufferDescriptor.usage = BufferUsage::STORAGE;
-			colorStorageBufferDescriptor.mapped = false;
 
 			colorStorageBuffer = createBuffer(colorStorageBufferDescriptor);
 		}
@@ -114,16 +113,15 @@ namespace ProjectA {
 		BufferDescriptor positionVertexBufferDescriptor{};
 		positionVertexBufferDescriptor.size = sizeof(vec3<float32>) * positionVertexBufferData.size();
 		positionVertexBufferDescriptor.usage = BufferUsage::VERTEX;
-		positionVertexBufferDescriptor.mapped = true;
 
 		positionVertexBuffer = createBuffer(positionVertexBufferDescriptor);
-		positionVertexBuffer->write(positionVertexBufferData.data(), 0, sizeof(vec3<float32>) * positionVertexBufferData.size());
+		positionVertexBuffer->map(0, positionVertexBufferDescriptor.size);
+		positionVertexBuffer->write(positionVertexBufferData.data(), 0, positionVertexBufferDescriptor.size);
 		positionVertexBuffer->unmap();
 
 		BufferDescriptor transformVertexBufferDescriptor{};
 		transformVertexBufferDescriptor.size = sizeof(GUIComponent) * MAX_QUADS;
 		transformVertexBufferDescriptor.usage = BufferUsage::VERTEX;
-		transformVertexBufferDescriptor.mapped = false;
 
 		transformVertexBuffer = createBuffer(transformVertexBufferDescriptor);
 
@@ -137,10 +135,10 @@ namespace ProjectA {
 			BufferDescriptor indexBufferDescriptor{};
 			indexBufferDescriptor.size = sizeof(uint16) * indexBufferData.size();
 			indexBufferDescriptor.usage = BufferUsage::INDEX;
-			indexBufferDescriptor.mapped = true;
 
 			indexBuffer = createBuffer(indexBufferDescriptor);
-			indexBuffer->write(indexBufferData.data(), 0, sizeof(uint16) * indexBufferData.size());
+			indexBuffer->map(0, indexBufferDescriptor.size);
+			indexBuffer->write(indexBufferData.data(), 0, indexBufferDescriptor.size);
 			indexBuffer->unmap();
 		}
 

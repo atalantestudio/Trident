@@ -16,7 +16,7 @@ namespace ProjectA {
 	template<typename T>
 	class ComponentPool : public Pool {
 		public:
-			std::vector<Entity> entityToComponentIndex; // Sparse array
+			std::array<Entity, MAX_ENTITIES> entityToComponentIndex; // Sparse array
 			std::vector<uint32> componentIndexToEntity; // Dense array
 			std::vector<T> components; // Dense array
 
@@ -26,8 +26,6 @@ namespace ProjectA {
 		public:
 			ComponentPool() {
 				ENGINE_TRACE("[ComponentPool]");
-
-				entityToComponentIndex.resize(MAX_ENTITIES);
 
 				// Fill array with null index.
 				for (Entity& entity : entityToComponentIndex) {

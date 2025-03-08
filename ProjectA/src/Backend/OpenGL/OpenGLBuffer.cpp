@@ -13,10 +13,6 @@ namespace ProjectA {
 		ENGINE_TRACE("[OpenGLBuffer]");
 
 		glCreateBuffers(1, &object);
-
-		if (descriptor.mapped) {
-			map(0, size);
-		}
 	}
 
 	OpenGLBuffer::~OpenGLBuffer() {
