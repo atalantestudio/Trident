@@ -8,6 +8,6 @@ namespace ProjectA {
 	struct DescriptorSetLayoutBinding {
 		DescriptorType descriptorType;
 		ShaderStage stageFlags;
-		std::vector<ref<Buffer>> buffers;
+		chain<ref<Buffer>> buffers;
 	};
 }

@@ -54,6 +54,9 @@ namespace ProjectA {
 	template<typename T>
 	using ref = std::shared_ptr<T>;
 
+	template<typename T>
+	using chain = std::vector<T>;
+
 	template<typename T, typename... U>
 	constexpr ref<T> createRef(U&&... arguments) {
 		return std::make_shared<T>(std::forward<U>(arguments)...);

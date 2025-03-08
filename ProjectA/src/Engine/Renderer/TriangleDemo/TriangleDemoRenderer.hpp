@@ -30,9 +30,9 @@ namespace ProjectA {
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
 			ref<CommandEncoder> commandEncoder;
-			seq<ref<Semaphore>> availableImageSemaphores;
-			seq<ref<Semaphore>> finishedRenderSemaphores;
-			seq<ref<Fence>> flightFences;
+			chain<ref<Semaphore>> availableImageSemaphores;
+			chain<ref<Semaphore>> finishedRenderSemaphores;
+			chain<ref<Fence>> flightFences;
 			uint32 frameIndex = 0;
 	};
 }

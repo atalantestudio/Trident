@@ -26,11 +26,11 @@ namespace ProjectA {
 		uniformBufferDescriptor.usage = BufferUsage::UNIFORM;
 
 		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+			flightFences[i] = createFence();
 			cameraUniformBuffers[i] = createBuffer(uniformBufferDescriptor);
 			cameraUniformBuffers[i]->map(0, uniformBufferDescriptor.size);
 			availableImageSemaphores[i] = createSemaphore();
 			finishedRenderSemaphores[i] = createSemaphore();
-			flightFences[i] = createFence();
 		}
 
 		// Create color storage buffer.
@@ -50,7 +50,7 @@ namespace ProjectA {
 		DescriptorSetLayoutBinding colorDescriptorSetLayoutBinding{};
 		colorDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
 		colorDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		colorDescriptorSetLayoutBinding.buffers = {colorStorageBuffer};
+		colorDescriptorSetLayoutBinding.buffers.emplace_back(colorStorageBuffer);
 
 		DescriptorSetLayout cameraAndColorDescriptorSetLayout;
 		cameraAndColorDescriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding); // Camera at set 0, binding 0.

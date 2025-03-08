@@ -38,13 +38,16 @@ namespace ProjectA {
 			ref<Buffer> positionVertexBuffer;
 			ref<Buffer> transformVertexBuffer;
 			ref<Buffer> indexBuffer;
-			std::vector<ref<Buffer>> cameraUniformBuffers;
+			chain<ref<Buffer>> cameraUniformBuffers;
 			ref<Buffer> colorStorageBuffer;
-			std::vector<void*> uniformBufferMappedMemory;
+
+			// TODO: Remove?
+			chain<void*> uniformBufferMappedMemory;
+
 			ref<CommandEncoder> commandEncoder;
-			std::vector<ref<Semaphore>> availableImageSemaphores;
-			std::vector<ref<Semaphore>> finishedRenderSemaphores;
-			std::vector<ref<Fence>> flightFences;
+			chain<ref<Semaphore>> availableImageSemaphores;
+			chain<ref<Semaphore>> finishedRenderSemaphores;
+			chain<ref<Fence>> flightFences;
 			uint32 instanceCount = 0;
 			uint32 frameIndex = 0;
 	};

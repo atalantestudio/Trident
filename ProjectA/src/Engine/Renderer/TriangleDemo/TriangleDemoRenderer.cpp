@@ -62,7 +62,7 @@ namespace ProjectA {
 
 		// Create vertex buffer.
 		{
-			seq<Vertex> vertices(3);
+			chain<Vertex> vertices(3);
 			vertices[0].position = {-0.5f, -0.5f};
 			vertices[0].color = {1.0f, 0.0f, 0.0f};
 			vertices[1].position = {0.0f,  0.5f};
@@ -76,13 +76,13 @@ namespace ProjectA {
 
 			vertexBuffer = createBuffer(vertexBufferDescriptor);
 			vertexBuffer->map(0, vertices.size());
-			vertexBuffer->write(&vertices[0], 0, vertices.size());
+			vertexBuffer->write(vertices.data(), 0, vertices.size());
 			vertexBuffer->unmap();
 		}
 
 		// Create index buffer.
 		{
-			seq<uint16> indices(3);
+			chain<uint16> indices(3);
 			indices[0] = 0;
 			indices[1] = 1;
 			indices[2] = 2;
@@ -93,7 +93,7 @@ namespace ProjectA {
 
 			indexBuffer = createBuffer(indexBufferDescriptor);
 			indexBuffer->map(0, indices.size());
-			indexBuffer->write(&indices[0], 0, indices.size());
+			indexBuffer->write(indices.data(), 0, indices.size());
 			indexBuffer->unmap();
 		}
 

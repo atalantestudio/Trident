@@ -135,9 +135,9 @@ namespace ProjectA {
 
 			vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
 
-			seq<VkLayerProperties> layerProperties(layerPropertyCount);
+			chain<VkLayerProperties> layerProperties(layerPropertyCount);
 
-			vkEnumerateInstanceLayerProperties(&layerPropertyCount, &layerProperties[0]);
+			vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
 
 			/*ENGINE_TRACE("Instance layers:");
 
