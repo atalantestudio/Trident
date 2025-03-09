@@ -23,7 +23,7 @@ void ParticleSystem::update(ProjectA::float32 deltaTime) {
 	}
 }
 
-void ParticleSystem::render(const ProjectA::OrthographicCamera& camera) {
+void ParticleSystem::render(const ProjectA::OrthographicCamera3D& camera) {
 	ProjectA::Renderer2D::beginScene();
 
 	for (const Particle& particle : particlePool) {

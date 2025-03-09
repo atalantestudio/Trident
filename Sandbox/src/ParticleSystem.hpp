@@ -9,7 +9,7 @@ class ParticleSystem {
 		ParticleSystem(ProjectA::uint32 maxParticles);
 
 		void update(ProjectA::float32 deltaTime);
-		void render(const ProjectA::OrthographicCamera& camera);
+		void render(const ProjectA::OrthographicCamera3D& camera);
 
 		void emitParticle(const ParticleProperties& properties);
 

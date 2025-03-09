@@ -8,6 +8,8 @@ namespace ProjectA {
 	{}
 
 	void OpenGLBindRenderPipelineCommand::execute() const {
+		glBindVertexArray(renderPipeline->vertexArray);
+
 		glUseProgram(renderPipeline->program);
 
 		glFrontFace(renderPipeline->frontFace);

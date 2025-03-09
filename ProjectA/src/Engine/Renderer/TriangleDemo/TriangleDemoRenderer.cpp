@@ -158,8 +158,6 @@ namespace ProjectA {
 	}
 
 	bool TriangleDemoRenderer::onResize(const WindowResizeEvent& event) {
-		CLIENT_DEBUG("resize");
-
 		return true;
 	}
 }

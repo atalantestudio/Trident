@@ -9,7 +9,7 @@ layout(location = 0) flat out uint v_colorIndex;
 layout(location = 1) flat out uint v_textureIndex;
 
 layout(set = 0, binding = 0) uniform Camera {
-	mat3 projection;
+	mat3x3 projection;
 } camera;
 
 void main() {

@@ -43,7 +43,8 @@ namespace ProjectA {
 	template<>
 	static inline uint32 getAttributeSize<float32>() {
 		//return sizeof(float32);
-		return sizeof(float32) * 4;
+		return sizeof(float32) * 2;
+		//return sizeof(float32) * 4;
 	}
 
 	// NOTE: Alignment WITHOUT relaxed block layout.

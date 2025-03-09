@@ -19,6 +19,5 @@ namespace ProjectA {
 		public:
 			const GLenum target;
 			const GLsizeiptr size;
-			BufferMappedRange mappedRange = 0;
 	};
 }

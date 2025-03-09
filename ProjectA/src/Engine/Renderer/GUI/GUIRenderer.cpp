@@ -22,13 +22,13 @@ namespace ProjectA {
 
 		swapchain = createSwapchain(swapchainDescriptor);
 
-		BufferDescriptor uniformBufferDescriptor{};
-		uniformBufferDescriptor.size = sizeof(UniformBufferObject);
-		uniformBufferDescriptor.usage = BufferUsage::UNIFORM;
+		BufferDescriptor cameraUniformBufferDescriptor{};
+		cameraUniformBufferDescriptor.size = sizeof(UniformBufferObject);
+		cameraUniformBufferDescriptor.usage = BufferUsage::UNIFORM;
 
 		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-			cameraUniformBuffers[i] = createBuffer(uniformBufferDescriptor);
-			cameraUniformBufferMappedRanges[i] = cameraUniformBuffers[i]->map(0, uniformBufferDescriptor.size);
+			cameraUniformBuffers[i] = createBuffer(cameraUniformBufferDescriptor);
+			cameraUniformBufferMappedRanges[i] = cameraUniformBuffers[i]->map(0, cameraUniformBufferDescriptor.size);
 			availableImageSemaphores[i] = createSemaphore();
 			finishedRenderSemaphores[i] = createSemaphore();
 			flightFences[i] = createFence();
@@ -51,7 +51,7 @@ namespace ProjectA {
 		DescriptorSetLayoutBinding colorDescriptorSetLayoutBinding{};
 		colorDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
 		colorDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		colorDescriptorSetLayoutBinding.buffers.emplace_back(colorStorageBuffer);
+		colorDescriptorSetLayoutBinding.buffers = {colorStorageBuffer};
 
 		DescriptorSetLayout cameraAndColorDescriptorSetLayout;
 		cameraAndColorDescriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding); // Camera at set 0, binding 0.
@@ -104,24 +104,27 @@ namespace ProjectA {
 
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 
-		const std::vector<vec3<float32>> positionVertexBufferData = {
-			{0.0f, 0.0f, 1.0f},
-			{1.0f, 0.0f, 1.0f},
-			{1.0f, 1.0f, 1.0f},
-			{0.0f, 1.0f, 1.0f},
-		};
+		// Create position vertex buffer.
+		{
+			const std::vector<vec3<float32>> vertexPositions = {
+				{0.0f, 0.0f, 1.0f},
+				{1.0f, 0.0f, 1.0f},
+				{1.0f, 1.0f, 1.0f},
+				{0.0f, 1.0f, 1.0f},
+			};
 
-		BufferDescriptor positionVertexBufferDescriptor{};
-		positionVertexBufferDescriptor.size = sizeof(vec4<float32>) * positionVertexBufferData.size();
-		positionVertexBufferDescriptor.usage = BufferUsage::VERTEX;
+			BufferDescriptor bufferDescriptor{};
+			bufferDescriptor.size = sizeof(vec3<float32>) * vertexPositions.size();
+			bufferDescriptor.usage = BufferUsage::VERTEX;
 
-		positionVertexBuffer = createBuffer(positionVertexBufferDescriptor);
+			positionVertexBuffer = createBuffer(bufferDescriptor);
 
-		BufferMappedRange positionVertexBufferMappedRange = positionVertexBuffer->map(0, positionVertexBufferDescriptor.size);
+			BufferMappedRange mappedRange = positionVertexBuffer->map(0, bufferDescriptor.size);
 
-		std::memcpy(positionVertexBufferMappedRange, positionVertexBufferData.data(), positionVertexBufferDescriptor.size);
+			std::memcpy(mappedRange, vertexPositions.data(), bufferDescriptor.size);
 
-		positionVertexBuffer->unmap();
+			positionVertexBuffer->unmap();
+		}
 
 		BufferDescriptor transformVertexBufferDescriptor{};
 		transformVertexBufferDescriptor.size = sizeof(GUIComponent) * MAX_QUADS;
@@ -131,20 +134,20 @@ namespace ProjectA {
 
 		// Create index buffer.
 		{
-			const std::vector<uint16> indexBufferData = {
+			const std::vector<uint16> indices = {
 				0, 1, 2,
 				0, 2, 3,
 			};
 
-			BufferDescriptor indexBufferDescriptor{};
-			indexBufferDescriptor.size = sizeof(uint16) * indexBufferData.size();
-			indexBufferDescriptor.usage = BufferUsage::INDEX;
+			BufferDescriptor bufferDescriptor{};
+			bufferDescriptor.size = sizeof(uint16) * indices.size();
+			bufferDescriptor.usage = BufferUsage::INDEX;
 
-			indexBuffer = createBuffer(indexBufferDescriptor);
+			indexBuffer = createBuffer(bufferDescriptor);
 
-			BufferMappedRange mappedRange = indexBuffer->map(0, indexBufferDescriptor.size);
+			BufferMappedRange mappedRange = indexBuffer->map(0, bufferDescriptor.size);
 
-			std::memcpy(mappedRange, indexBufferData.data(), indexBufferDescriptor.size);
+			std::memcpy(mappedRange, indices.data(), bufferDescriptor.size);
 
 			indexBuffer->unmap();
 		}
@@ -170,16 +173,18 @@ namespace ProjectA {
 		transformVertexBuffer->unmap();
 	}
 
-	void GUIRenderer::registerColors(const std::vector<vec4<float32>>& colors) {
-		BufferMappedRange mappedRange = colorStorageBuffer->map(0, sizeof(vec4<float32>) * colors.size());
+	void GUIRenderer::registerColors(const std::vector<vec4<float32>>& colors) const {
+		const std::size_t size = sizeof(vec4<float32>) * colors.size();
 
-		std::memcpy(mappedRange, colors.data(), sizeof(vec4<float32>) * colors.size());
+		BufferMappedRange mappedRange = colorStorageBuffer->map(0, size);
+
+		std::memcpy(mappedRange, colors.data(), size);
 
 		colorStorageBuffer->unmap();
 	}
 
 	void GUIRenderer::render() {
-		updateCameraUniform();
+		updateCamera();
 
 		const ref<Device>& device = getDevice();
 
@@ -221,7 +226,7 @@ namespace ProjectA {
 		frameIndex %= MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void GUIRenderer::updateCameraUniform() const {
+	void GUIRenderer::updateCamera() const {
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 

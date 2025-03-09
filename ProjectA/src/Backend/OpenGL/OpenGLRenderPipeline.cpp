@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Backend/OpenGL/DescriptorType.hpp"
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
@@ -72,7 +73,7 @@ namespace ProjectA {
 
 					break;
 				default:
-					throw std::runtime_error("OpenGL vertex attribute type is not supported.");
+					throw std::runtime_error("Vertex attribute type is not supported.");
 			}
 
 			glVertexAttribBinding(vertexInputAttribute.location, vertexInputAttribute.binding);
@@ -89,14 +90,29 @@ namespace ProjectA {
 
 		// GLSL shaders are required to specify the block index and the binding,
 		// saving the calls to glGetUniformBlockIndex and glUniformBlockBinding.
-		for (const DescriptorSetLayout& descriptorSetLayout : pipelineLayout->descriptorSetLayouts) {
+		for (uint32 setIndex = 0; setIndex < pipelineLayout->descriptorSetLayouts.size(); setIndex++) {
+			const DescriptorSetLayout& descriptorSetLayout = pipelineLayout->descriptorSetLayouts[setIndex];
+
 			for (uint32 bindingIndex = 0; bindingIndex < descriptorSetLayout.bindings.size(); bindingIndex++) {
 				const DescriptorSetLayoutBinding& binding = descriptorSetLayout.bindings[bindingIndex];
 
-				for (uint32 bufferIndex = 0; bufferIndex < binding.buffers.size(); bufferIndex++) {
-					const OpenGLBuffer* buffer = static_cast<const OpenGLBuffer*>(binding.buffers[bufferIndex].get());
+				for (const ref<Buffer>& buffer : binding.buffers) {
+					const OpenGLBuffer* glBuffer = static_cast<const OpenGLBuffer*>(buffer.get());
 
-					glBindBufferRange(buffer->target, bindingIndex, buffer->object, 0, buffer->size);
+					/*switch (glBuffer->target) {
+						case GL_UNIFORM_BUFFER:
+							glUniformBlockBinding(program, setIndex, bindingIndex);
+
+							break;
+						case GL_SHADER_STORAGE_BUFFER:
+							glShaderStorageBlockBinding(program, setIndex, bindingIndex);
+
+							break;
+						default:
+							throw std::runtime_error("Buffer target not supported.");
+					}*/
+
+					glBindBufferRange(getGlDescriptorType(binding.descriptorType), bindingIndex, glBuffer->object, 0, glBuffer->size);
 				}
 			}
 		}
@@ -110,80 +126,4 @@ namespace ProjectA {
 		glDeleteProgram(program);
 		glDeleteVertexArrays(1, &vertexArray);
 	}
-
-	/*void OpenGLRenderPipeline::setUniform(const std::string& name, int32 value) const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		const GLint location = getUniformLocation(name);
-
-		glUniform1i(location, value);
-	}
-
-	void OpenGLRenderPipeline::setUniform(const std::string& name, const int32* value, uint32 count) const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		const GLint location = getUniformLocation(name);
-
-		glUniform1iv(location, count, value);
-	}
-
-	void OpenGLRenderPipeline::setUniform(const std::string& name, float32 value) const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		const GLint location = getUniformLocation(name);
-
-		glUniform1f(location, value);
-	}
-
-	void OpenGLRenderPipeline::setUniform(const std::string& name, const vec2<float32>& value) const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		const GLint location = getUniformLocation(name);
-
-		glUniform2f(location, value[0], value[1]);
-	}
-
-	void OpenGLRenderPipeline::setUniform(const std::string& name, const vec3<float32>& value) const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		const GLint location = getUniformLocation(name);
-
-		glUniform3f(location, value[0], value[1], value[2]);
-	}
-
-	void OpenGLRenderPipeline::setUniform(const std::string& name, const vec4<float32>& value) const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		const GLint location = getUniformLocation(name);
-
-		glUniform4f(location, value[0], value[1], value[2], value[3]);
-	}
-
-	void OpenGLRenderPipeline::setUniform(const std::string& name, const mat4x4<float32>& value) const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		const GLint location = getUniformLocation(name);
-
-		GLfloat entries[16]{};
-
-		_mm_store_ps(&entries[0], value[0].m);
-		_mm_store_ps(&entries[4], value[1].m);
-		_mm_store_ps(&entries[8], value[2].m);
-		_mm_store_ps(&entries[12], value[3].m);
-
-		glUniformMatrix4fv(location, 1, GL_FALSE, entries);
-	}
-
-	GLint OpenGLRenderPipeline::getUniformLocation(const std::string& name) const {
-		const GLint location = glGetUniformLocation(program, name.c_str());
-
-		if (location == -1) {
-			ENGINE_ERROR("Location not found for uniform \"[]\". Uniform is either unused or non-existing.", name);
-
-			// TODO: Throw instead of returning
-			return -1;
-		}
-
-		return location;
-	}*/
 }

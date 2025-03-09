@@ -17,7 +17,9 @@ namespace ProjectA {
 		glBindBuffer(target, object);
 
 		// TODO: Set correct usage flag.
-		glBufferData(target, size, nullptr, GL_STATIC_DRAW);
+		// GL_DYNAMIC_DRAW must be used with persistently mapped buffers,
+		// such as a camera uniform buffer.
+		glBufferData(target, size, nullptr, GL_DYNAMIC_DRAW);
 	}
 
 	OpenGLBuffer::~OpenGLBuffer() {
@@ -32,20 +34,16 @@ namespace ProjectA {
 		glBindBuffer(target, object);
 
 		// TODO: Set correct access flag.
-		return glMapBuffer(target, GL_WRITE_ONLY);
+		// GL_MAP_INVALIDATE_RANGE_BIT must be used with persistently mapped buffers,
+		// such as a camera uniform buffer.
+		return glMapBufferRange(target, offset, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
 	}
-
-	/*void OpenGLBuffer::write(const void* data, const uint64 offset, const uint64 size) {
-		glBindBuffer(target, object);
-
-		glBufferSubData(target, offset, size, data);
-	}*/
 
 	void OpenGLBuffer::unmap() const {
 		glBindBuffer(target, object);
 
-		glUnmapBuffer(target);
-
-		glBindBuffer(target, 0);
+		if (!glUnmapBuffer(target)) {
+			throw std::runtime_error("Failed to unmap buffer.");
+		}
 	}
 }

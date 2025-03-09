@@ -10,14 +10,14 @@ namespace ProjectA {
 
 			void registerEntities(const ECS& ecs);
 
-			void registerColors(const std::vector<vec4<float32>>& colors);
+			void registerColors(const std::vector<vec4<float32>>& colors) const;
 
 			void render() override;
 
 			void onEvent(Event& event) override;
 
 		private:
-			void updateCameraUniform() const;
+			void updateCamera() const;
 
 		private:
 			struct UniformBufferObject {
@@ -28,7 +28,7 @@ namespace ProjectA {
 			static constexpr uint32 MAX_QUADS = 64;
 			static constexpr uint32 MAX_COLORS = 32;
 			static constexpr uint32 MAX_TEXTURES = 32;
-			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
+			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 1;
 
 		private:
 			ref<RenderPass> renderPass;
@@ -40,10 +40,7 @@ namespace ProjectA {
 			ref<Buffer> indexBuffer;
 			chain<ref<Buffer>> cameraUniformBuffers;
 			ref<Buffer> colorStorageBuffer;
-
-			// TODO: Remove?
 			chain<BufferMappedRange> cameraUniformBufferMappedRanges;
-
 			ref<CommandEncoder> commandEncoder;
 			chain<ref<Semaphore>> availableImageSemaphores;
 			chain<ref<Semaphore>> finishedRenderSemaphores;
