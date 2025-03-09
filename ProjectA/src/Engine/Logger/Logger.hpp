@@ -45,11 +45,12 @@ namespace ProjectA {
 			void format(std::string_view pattern, T&& argument, U&&... arguments) {
 				const std::size_t offset = pattern.find(argumentInjectionPattern);
 
+				stream << pattern.substr(0, offset);
+
 				if (offset == std::string::npos) {
 					return;
 				}
 
-				stream << pattern.substr(0, offset);
 				stream << argument;
 
 				format(pattern.substr(offset + argumentInjectionPattern.size()), arguments...);
