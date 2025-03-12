@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Engine/Filesystem/FileLoader.hpp"
 #include "Engine/Renderer/TriangleDemo/TriangleDemoRenderer.hpp"
 
 namespace ProjectA {

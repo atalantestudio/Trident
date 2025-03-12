@@ -17,7 +17,7 @@ namespace ProjectA {
 
 			void update(const float32 deltaTime) override;
 
-			virtual void renderImGui() override;
+			void renderImGui() override;
 
 			void onEvent(Event& event) override;
 	};

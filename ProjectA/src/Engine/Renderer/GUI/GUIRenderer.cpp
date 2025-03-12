@@ -1,7 +1,7 @@
 #include "pch.hpp"
 
 #include "Engine/ECS/Component/GUIComponent.hpp"
-#include "Engine/Loader/FileLoader.hpp"
+#include "Engine/Filesystem/FileLoader.hpp"
 #include "Engine/Renderer/Buffer/BufferUsage.hpp"
 #include "Engine/Renderer/GUI/GUIRenderer.hpp"
 

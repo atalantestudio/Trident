@@ -20,14 +20,14 @@
 #include "Engine/ECS/Component/Transform3DComponent.hpp"
 #include "Engine/ECS/ECS.hpp"
 
+// Filesystem
+#include "Engine/Filesystem/PNGFileLoader.hpp"
+
 // GUI
 #include "Engine/Renderer/GUI/GUIRenderer.hpp"
 
 // ImGui
 #include "Engine/ImGui/ImGuiLayer.hpp"
-
-// Loader
-#include "Engine/Loader/FileLoader.hpp"
 
 // Renderer
 #include "Engine/Renderer/2D/Renderer2D.hpp"
