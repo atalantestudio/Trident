@@ -6,10 +6,18 @@ namespace ProjectA {
 			typedef uint8 acc_t;
 
 		public:
-			BitStream(const acc_t* stream, uint64 size);
+			BitStream(const uint8* stream, uint64 size);
 
+			// Returns the next bits from the stream.
+			// The bit count must be less than or equal to MAX_READ_OR_PEEK_BIT_COUNT.
 			template<typename T>
-			T read(uint32 bitCount) {
+			T read(uint8 bitCount) {
+				ENGINE_ASSERT(bitCount <= sizeof(T) * 8, "BitStream: Cannot read [] bits for a []-bit type.", static_cast<int32>(bitCount), sizeof(T) * 8);
+				ENGINE_ASSERT(bitCount <= MAX_READ_OR_PEEK_BIT_COUNT, "BitStream: Cannot read more than [] bits at once.", MAX_READ_OR_PEEK_BIT_COUNT);
+				ENGINE_ASSERT(bitCount <= getRemainingSize(), "BitStream: Attempted to read [] bits, but only [] were left.", static_cast<int32>(bitCount), getRemainingSize());
+
+				return 0;
+
 				/*ENGINE_ASSERT(bitCount <= sizeof(bitBuffer) * 8, "BitStream: Cannot read more than [] bits at a time.", sizeof(bitBuffer) * 8);
 
 				// Read until the bit buffer has enough bits.
@@ -32,35 +40,24 @@ namespace ProjectA {
 				return value;*/
 			}
 
-			// Returns the next bits without incrementing the offsets.
-			// The bit count must be less than or equal to PEEK_LIMIT.
-			acc_t peek(uint8 bitCount) const {
-				/*ENGINE_ASSERT(bitCount <= PEEK_LIMIT, "BitStream: Cannot peek more than [] bits at once.", static_cast<uint16>(PEEK_LIMIT));
-				// TODO: Remaining stream size assertion.
+			// Returns the next bits from the stream without updating the offsets.
+			// The bit count must be less than or equal to MAX_PEEK_BIT_COUNT.
+			template<typename T>
+			T peek(uint8 bitCount) const {
+				ENGINE_ASSERT(bitCount <= sizeof(T) * 8, "BitStream: Cannot peek [] bits for a []-bit type.", static_cast<int32>(bitCount), sizeof(T) * 8);
+				ENGINE_ASSERT(bitCount <= MAX_READ_OR_PEEK_BIT_COUNT, "BitStream: Cannot peek more than [] bits at once.", MAX_READ_OR_PEEK_BIT_COUNT);
+				ENGINE_ASSERT(bitCount <= getRemainingSize(), "BitStream: Attempted to peek [] bits, but only [] were left.", static_cast<int32>(bitCount), getRemainingSize());
 
-				const uint8 remainingBufferBits = PEEK_LIMIT - relativeBitOffset;
+				// Pick what's left of the bit buffer.
+				T value = bitBuffer;
 
-				if (relativeBitOffset == 0) {
-					// Bit buffer is empty - can't take bits from it.
-				}
+				// Right shift the next byte(s) of the stream.
+				value |= (*(acc_t*)(stream + sizeof(acc_t))) << (8 - bitOffset);
 
-				acc_t value = 0;
+				// Mask the rest.
+				value &= (1 << bitCount) - 1;
 
-				const acc_t mask = (static_cast<acc_t>(1) << bitCount) - 1;
-
-				if (relativeBitOffset > 0 && remainingBufferBits >= bitCount) {
-					// Take what we need from the bit buffer and mask the rest.
-					value = bitBuffer & mask;
-				}
-
-				// Read from the stream without advancing the pointer.
-				const acc_t next8Bytes = *((acc_t*) (stream + ptr));
-
-				value |= (next8Bytes);
-
-				value &= mask;
-
-				return value;*/
+				return value;
 			}
 
 			// Advances by the provided bit count without reading the values.
@@ -72,11 +69,10 @@ namespace ProjectA {
 			}
 
 		private:
-			static constexpr uint8 MAX_READ_BITS = sizeof(acc_t) * 8;
-			static constexpr uint8 MAX_PEEKED_BITS = sizeof(acc_t) * 8;
+			static constexpr uint8 MAX_READ_OR_PEEK_BIT_COUNT = 64;
 
 		private:
-			const acc_t* stream;
+			const uint8* stream;
 
 			// Size of the stream in bytes.
 			uint64 size;
