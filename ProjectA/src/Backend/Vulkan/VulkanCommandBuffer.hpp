@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Engine/ObjectWrapper.hpp"
+#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/Renderer/CommandBuffer.hpp"
 
 namespace ProjectA {

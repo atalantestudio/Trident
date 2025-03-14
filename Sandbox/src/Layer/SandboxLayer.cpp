@@ -41,7 +41,7 @@ void SandboxLayer::update(ProjectA::float32 deltaTime) {
 	// Z axis is reversed (+ points towards the screen).
 	// TODO: Inverse rotation direction?
 	// Z rotation is clockwise against axis (0, 0, -1).
-	// TODO: Fix black squares on shapes
+	// TODO: Fix black squares on shapes.
 	ProjectA::Renderer2D::drawRotatedQuad({1.0f, 0.0f}, {0.8f, 0.8f}, lyah::radians(45.0f), {0.8f, 0.2f, 0.3f, 1.0f});
 	ProjectA::Renderer2D::drawQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, {0.8f, 0.2f, 0.3f, 1.0f});
 	ProjectA::Renderer2D::drawQuad({0.5f, -0.5f}, {0.5f, 0.75f}, {0.2f, 0.3f, 0.8f, 1.0f});

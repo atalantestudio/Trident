@@ -9,7 +9,7 @@
 namespace ProjectA {
 	class VulkanBuffer : public Buffer, public ObjectWrapper<VkBuffer> {
 		public:
-			// TODO: Use staging buffer with vertex and index buffers.
+			// TODO: Implement staging buffer with vertex and index buffers.
 			VulkanBuffer(VkPhysicalDevice physicalDevice, const VulkanDevice& device, const BufferDescriptor& descriptor);
 
 			~VulkanBuffer();

@@ -21,6 +21,8 @@
 #include "Engine/ECS/ECS.hpp"
 
 // Filesystem
+#include "Engine/Filesystem/BitStream.hpp"
+#include "Engine/Filesystem/File.hpp"
 #include "Engine/Filesystem/PNGFileLoader.hpp"
 
 // GUI

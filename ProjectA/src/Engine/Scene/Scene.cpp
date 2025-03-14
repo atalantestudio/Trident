@@ -6,4 +6,6 @@ namespace ProjectA {
 	Scene::Scene() {}
 
 	Scene::~Scene() {}
+
+	void Scene::onUpdate(float32 deltaTime) {}
 }

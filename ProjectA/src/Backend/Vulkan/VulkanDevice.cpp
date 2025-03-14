@@ -182,7 +182,7 @@ namespace ProjectA {
 		const VkResult result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
 		if (result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR) {
-			// TODO: Recreate swapchain?
+			// TODO: Recreate swapchain here.
 			return;
 		}
 

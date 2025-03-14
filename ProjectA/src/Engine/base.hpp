@@ -41,14 +41,14 @@
 
 	#define ENGINE_ASSERT(condition, ...) { \
 		if (!(condition)) { \
-			ENGINE_ERROR("Assertion failed: []", __VA_ARGS__); \
+			ENGINE_ERROR(__VA_ARGS__); \
 			DEBUGBREAK(); \
 		} \
 	}
 
 	#define CLIENT_ASSERT(condition, ...) { \
 		if (!(condition)) { \
-			CLIENT_ERROR("Assertion failed: []", __VA_ARGS__); \
+			CLIENT_ERROR(__VA_ARGS__); \
 			DEBUGBREAK(); \
 		} \
 	}

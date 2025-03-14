@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/ObjectWrapper.hpp"
+#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/Renderer/CommandBuffer.hpp"
 
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"

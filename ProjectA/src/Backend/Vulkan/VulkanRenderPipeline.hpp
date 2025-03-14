@@ -5,7 +5,7 @@
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"
 #include "Backend/Vulkan/VulkanSwapchain.hpp"
 
-#include "Engine/ObjectWrapper.hpp"
+#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 
 namespace ProjectA {

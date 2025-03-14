@@ -193,7 +193,7 @@ namespace ProjectA {
 			throw std::runtime_error("Failed to create Vulkan render pipeline.");
 		}
 
-		// TODO: Destroy shader modules here.
+		// TODO: Can destroy shader modules here.
 	}
 
 	VulkanRenderPipeline::~VulkanRenderPipeline() {

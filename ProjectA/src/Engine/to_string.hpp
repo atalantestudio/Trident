@@ -3,7 +3,7 @@
 #include "pch.hpp"
 
 namespace ProjectA {
-	// Trims whitespace.
+	// Trims whitespace - white lines not included.
 	inline std::string trim(const std::string& string) {
 		const std::size_t firstNotSpace = string.find_first_not_of(' ');
 
@@ -15,8 +15,6 @@ namespace ProjectA {
 
 		return string.substr(firstNotSpace, (lastNotSpace - firstNotSpace + 1));
 	}
-
-	// TODO: White line trim
 
 	#ifdef BUILD_MODE_DEBUG
 		inline std::ostringstream& operator <<(std::ostringstream& stream, __m128 m) {

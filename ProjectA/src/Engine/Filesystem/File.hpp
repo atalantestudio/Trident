@@ -47,7 +47,7 @@ namespace ProjectA {
 				}
 
 				value = bitBuffer & ((1 << bitCount) - 1);
-				bitUnderflow |= (remainingBitBufferCount < bitCount);
+				//const bool bitUnderflow = (remainingBitBufferCount < bitCount);
 
 				return value;
 			}
@@ -73,6 +73,5 @@ namespace ProjectA {
 			std::ifstream stream;
 			uint8 bitBuffer = 0;
 			uint8 remainingBitBufferCount = 0;
-			bool bitUnderflow = false;
 	};
 }

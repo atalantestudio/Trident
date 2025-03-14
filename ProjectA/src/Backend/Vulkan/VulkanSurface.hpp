@@ -4,7 +4,7 @@
 #include <vulkan/vulkan.h>
 #include <glfw/glfw3.h>
 
-#include "Engine/ObjectWrapper.hpp"
+#include "Engine/API/ObjectWrapper.hpp"
 
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 

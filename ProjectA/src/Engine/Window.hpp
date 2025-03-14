@@ -16,6 +16,7 @@ namespace ProjectA {
 			height(height) {}
 	};
 
+	// TODO: OpenGLWindow and VulkanWindow.
 	class Window {
 		public:
 			static scope<Window> create(const WindowData& data = WindowData());

@@ -8,7 +8,6 @@ namespace ProjectA {
 		MINUS			= 45,	// -
 		PERIOD			= 46,	// .
 		SLASH			= 47,	// /
-
 		DIGIT_0			= 48,
 		DIGIT_1			= 49,
 		DIGIT_2			= 50,
@@ -19,10 +18,8 @@ namespace ProjectA {
 		DIGIT_7			= 55,
 		DIGIT_8			= 56,
 		DIGIT_9			= 57,
-
 		SEMICOLON		= 59,	// ;
 		EQUAL			= 61,	// =
-
 		A				= 65,
 		B				= 66,
 		C				= 67,
@@ -49,15 +46,12 @@ namespace ProjectA {
 		X				= 88,
 		Y				= 89,
 		Z				= 90,
-
 		LEFT_BRACKET	= 91,	// [
 		BACKSLASH		= 92,	// '\'
 		RIGHT_BRACKET	= 93,	// ]
 		GRAVE_ACCENT	= 96,	// `
-
 		WORLD_1			= 161,
 		WORLD_2			= 162,
-
 		ESCAPE			= 256,
 		ENTER			= 257,
 		TAB				= 258,
@@ -77,7 +71,6 @@ namespace ProjectA {
 		NUM_LOCK		= 282,
 		PRINT_SCREEN	= 283,
 		PAUSE			= 284,
-
 		F1				= 290,
 		F2				= 291,
 		F3				= 292,
@@ -103,7 +96,6 @@ namespace ProjectA {
 		F23				= 312,
 		F24				= 313,
 		F25				= 314,
-
 		KEYPAD_0		= 320,
 		KEYPAD_1		= 321,
 		KEYPAD_2		= 322,
@@ -121,7 +113,6 @@ namespace ProjectA {
 		KEYPAD_ADD		= 334,
 		KEYPAD_ENTER	= 335,
 		KEYPAD_EQUAL	= 336,
-
 		LEFT_SHIFT		= 340,
 		LEFT_CONTROL	= 341,
 		LEFT_ALT		= 342,

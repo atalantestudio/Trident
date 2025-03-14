@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 
-#include "Engine/ObjectWrapper.hpp"
+#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
 
 namespace ProjectA {

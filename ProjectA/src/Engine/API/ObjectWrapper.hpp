@@ -7,8 +7,12 @@ namespace ProjectA {
 			T object;
 
 		protected:
-			ObjectWrapper() : object{} {}
+			ObjectWrapper() :
+				object{}
+			{}
 
-			ObjectWrapper(const T object) : object(object) {}
+			ObjectWrapper(const T& object) :
+				object(object)
+			{}
 	};
 }

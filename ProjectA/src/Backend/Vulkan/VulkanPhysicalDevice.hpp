@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Engine/ObjectWrapper.hpp"
+#include "Engine/API/ObjectWrapper.hpp"
 
 namespace ProjectA {
 	class VulkanPhysicalDevice : public ObjectWrapper<VkPhysicalDevice> {

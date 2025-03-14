@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Engine/ObjectWrapper.hpp"
+#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/Renderer/Device.hpp"
 
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"

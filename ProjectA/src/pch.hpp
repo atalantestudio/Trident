@@ -23,12 +23,12 @@
 	#include <Windows.h>
 
 	#undef assert
+	#undef DELETE
+	#undef ERROR
 	#undef far
 	#undef max
 	#undef min
 	#undef near
-	#undef DELETE
-	#undef ERROR
 #endif
 
 #include "lyah/lyah.hpp"

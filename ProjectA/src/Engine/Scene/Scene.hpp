@@ -9,7 +9,7 @@ namespace ProjectA {
 
 			~Scene();
 
-			void onUpdate(const float32 deltaTime);
+			void onUpdate(float32 deltaTime);
 
 		private:
 			ECS ecs;

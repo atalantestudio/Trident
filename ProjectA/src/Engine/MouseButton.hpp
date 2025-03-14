@@ -11,7 +11,7 @@ namespace ProjectA {
 		BUTTON_6 = 6,
 		BUTTON_7 = 7,
 
-		// Aliases
+		// Aliases.
 		BUTTON_LAST = BUTTON_7,
 		BUTTON_LEFT = BUTTON_0,
 		BUTTON_RIGHT = BUTTON_1,
