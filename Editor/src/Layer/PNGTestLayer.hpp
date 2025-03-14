@@ -16,11 +16,9 @@ namespace ProjectA {
 
 				BitStream stream(&data[0], size);
 
-				uint16 peek = stream.peek<uint16>(11);
-				//stream.jump(3);
-				//stream.jump(7);
-				//stream.jump(2);
-				//stream.jump(5);
+				stream.jump(3);
+				uint8 readOrPeek = stream.read<uint8>(8);
+				stream.jump(8);
 			}
 
 			virtual ~PNGTestLayer() = default;
