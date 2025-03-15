@@ -8,7 +8,7 @@ namespace ProjectA {
 		size(size),
 		bitOffset(0)
 	{
-		refillBitBuffer();
+		bitBuffer = *(acc_t*)(stream + byteOffset);
 	}
 
 	void BitStream::jump(uint64 bitCount) {
@@ -23,8 +23,7 @@ namespace ProjectA {
 
 			bitOffset = 0;
 			byteOffset += sizeof(acc_t) * jumpByteCount;
-
-			refillBitBuffer();
+			bitBuffer = *(acc_t*)(stream + byteOffset);
 		}
 
 		jumpBitCount = (jumpBitCount + bitCount) % (sizeof(acc_t) * 8);
@@ -35,13 +34,5 @@ namespace ProjectA {
 
 	uint64 BitStream::getRemainingSize() const {
 		return (size - byteOffset) * 8 - bitOffset;
-	}
-
-	void BitStream::refillBitBuffer() {
-		bitBuffer = *(acc_t*)(stream + byteOffset);
-
-		if (swapEndianness) {
-			bitBuffer = _byteswap_uint64(bitBuffer);
-		}
 	}
 }

@@ -28,7 +28,7 @@ namespace ProjectA {
 		BitStream stream(chain.data(), chain.size());
 
 		readSignature2(stream);
-		//readChunk2(stream);
+		readChunk2(stream);
 	}
 
 	void PNGFileLoader::readSignature(File& file) {
@@ -390,10 +390,7 @@ namespace ProjectA {
 		static constexpr uint8 signature[] = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
 
 		for (uint8 i = 0; i < 8; i += 1) {
-			const uint8 s = signature[i];
-			const uint8 read = stream.read<uint8>(8);
-
-			if (read != s) {
+			if (stream.read<uint8>(8) != signature[i]) {
 				throw std::runtime_error("Failed to verify file signature.");
 			}
 		}
@@ -401,8 +398,7 @@ namespace ProjectA {
 
 	void PNGFileLoader::readChunk2(BitStream& stream) {
 		Chunk Chunk;
-		Chunk.ByteLength = stream.read<uint32>(32);
-		File::swapEndianness(&Chunk.ByteLength);
+		Chunk.ByteLength = stream.read<uint32>(32, true);
 		Chunk.Type = stream.read<uint32>(32);
 
 		switch (Chunk.Type) {
@@ -422,9 +418,49 @@ namespace ProjectA {
 				break;
 		}
 
-		Chunk.CRC = stream.read<uint32>(32);
-		File::swapEndianness(&Chunk.CRC);
+		Chunk.CRC = stream.read<uint32>(32, true);
 	}
 
-	void PNGFileLoader::readIHDR2(BitStream& stream) {}
+	void PNGFileLoader::readIHDR2(BitStream& stream) {
+		const uint32 Width = stream.read<uint32>(32, true);
+		const uint32 Height = stream.read<uint32>(32, true);
+
+		if (Width == 0) {
+			throw std::runtime_error("Width must be > 0.");
+		}
+
+		if (Height == 0) {
+			throw std::runtime_error("Height must be > 0.");
+		}
+
+		const uint8 BitDepth = stream.read<uint8>(8);
+
+		if (BitDepth != 1 && BitDepth != 2 && BitDepth != 4 && BitDepth != 8 && BitDepth != 16) {
+			throw std::runtime_error("Invalid bit depth value.");
+		}
+
+		const uint8 ColorType = stream.read<uint8>(8);
+
+		if (ColorType != 0 && ColorType != 2 && ColorType != 3 && ColorType != 4 && ColorType != 6) {
+			throw std::runtime_error("Invalid color type value.");
+		}
+
+		const uint8 CompressionMethod = stream.read<uint8>(8);
+
+		if (CompressionMethod != 0) {
+			throw std::runtime_error("Invalid compression method value (must be 0).");
+		}
+
+		const uint8 FilterMethod = stream.read<uint8>(8);
+
+		if (FilterMethod != 0) {
+			throw std::runtime_error("Invalid filter method value (must be 0).");
+		}
+
+		const uint8 InterlaceMethod = stream.read<uint8>(8);
+
+		if (InterlaceMethod != 0 && InterlaceMethod != 1) {
+			throw std::runtime_error("Invalid interlace method value (must be 0 or 1).");
+		}
+	}
 }
