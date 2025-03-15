@@ -1,6 +1,7 @@
 #pragma once
 #pragma pack(push, 1)
 
+#include "Engine/Filesystem/BitStream.hpp"
 #include "Engine/Filesystem/File.hpp"
 
 namespace ProjectA {
@@ -19,6 +20,7 @@ namespace ProjectA {
 	class PNGFileLoader {
 		public:
 			static void load(const std::string& path);
+			static void load2(const std::string& path);
 
 		private:
 			struct Chunk {
@@ -107,6 +109,14 @@ namespace ProjectA {
 			static uint32 reverseBits(uint32 value, uint32 bitCount);
 
 			static void readIEND(File& file);
+
+			// --- load2 methods ---
+
+			static void readSignature2(BitStream& stream);
+
+			static void readChunk2(BitStream& stream);
+
+			static void readIHDR2(BitStream& stream);
 
 		private:
 			static constexpr HuffmanEntry lengthExtra[] = {

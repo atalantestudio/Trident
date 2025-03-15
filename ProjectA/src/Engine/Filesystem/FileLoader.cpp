@@ -17,7 +17,7 @@ namespace ProjectA {
 		return buffer;
 	}
 
-	/*chain<uint8> FileLoader::loadBuffer(const std::string& path) {
+	chain<uint8> FileLoader::loadChain(const std::string& path) {
 		std::ifstream file(path, std::ios::binary);
 
 		if (!file.is_open()) {
@@ -30,11 +30,11 @@ namespace ProjectA {
 
 		file.seekg(0, std::ios::beg);
 
-		chain<uint8> buffer(size);
+		chain<uint8> chain(size);
 
-		file.read(static_cast<char*>(static_cast<void*>(buffer.data())), size);
+		file.read(static_cast<char*>(static_cast<void*>(chain.data())), size);
 		file.close();
 
-		return buffer;
-	}*/
+		return chain;
+	}
 }

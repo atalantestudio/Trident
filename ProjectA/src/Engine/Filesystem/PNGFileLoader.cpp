@@ -23,6 +23,14 @@ namespace ProjectA {
 		}
 	}
 
+	void PNGFileLoader::load2(const std::string& path) {
+		chain<uint8> chain = FileLoader::loadChain(path);
+		BitStream stream(chain.data(), chain.size());
+
+		readSignature2(stream);
+		//readChunk2(stream);
+	}
+
 	void PNGFileLoader::readSignature(File& file) {
 		static const chain<uint8> formatSignature = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
 
@@ -358,6 +366,7 @@ namespace ProjectA {
 		return Entry.symbol;
 	}
 
+	// TODO: Replace with intrinsic.
 	uint32 PNGFileLoader::reverseBits(uint32 value, uint32 bitCount) {
 		uint32 reversedValue = 0;
 
@@ -374,4 +383,48 @@ namespace ProjectA {
 	void PNGFileLoader::readIEND(File& file) {
 		ENGINE_WARN("TODO: Handle IEND chunk.");
 	}
+
+	// --- load2 methods ---
+
+	void PNGFileLoader::readSignature2(BitStream& stream) {
+		static constexpr uint8 signature[] = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
+
+		for (uint8 i = 0; i < 8; i += 1) {
+			const uint8 s = signature[i];
+			const uint8 read = stream.read<uint8>(8);
+
+			if (read != s) {
+				throw std::runtime_error("Failed to verify file signature.");
+			}
+		}
+	}
+
+	void PNGFileLoader::readChunk2(BitStream& stream) {
+		Chunk Chunk;
+		Chunk.ByteLength = stream.read<uint32>(32);
+		File::swapEndianness(&Chunk.ByteLength);
+		Chunk.Type = stream.read<uint32>(32);
+
+		switch (Chunk.Type) {
+			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IHDR"):
+				ENGINE_TRACE("Reading IHDR chunk.");
+
+				readIHDR2(stream);
+
+				break;
+			default:
+				char* TypeString = static_cast<char*>(static_cast<void*>(&Chunk.Type));
+
+				ENGINE_WARN("Encountered unhandled chunk type \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
+
+				stream.jump(Chunk.ByteLength * 8ULL);
+
+				break;
+		}
+
+		Chunk.CRC = stream.read<uint32>(32);
+		File::swapEndianness(&Chunk.CRC);
+	}
+
+	void PNGFileLoader::readIHDR2(BitStream& stream) {}
 }
