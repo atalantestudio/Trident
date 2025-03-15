@@ -2,6 +2,7 @@
 #pragma pack(push, 1)
 
 #include "Engine/Filesystem/BitStream.hpp"
+#include "Engine/Filesystem/ByteStream.hpp"
 #include "Engine/Filesystem/File.hpp"
 
 namespace ProjectA {
@@ -20,7 +21,6 @@ namespace ProjectA {
 	class PNGFileLoader {
 		public:
 			static void load(const std::string& path);
-			static void load2(const std::string& path);
 
 		private:
 			struct Chunk {
@@ -78,45 +78,24 @@ namespace ProjectA {
 				uint8 FLEVEL : 2;
 			};
 
-			/*struct ZLibBlockHeader {
-				// Set if and only if this is the last block in the data set.
-				uint8 BFINAL : 1;
-
-				// Specifies how the data is compressed.
-				uint8 BTYPE : 2;
-			};
-
-			struct ZlibBlockFormat {
-				uint16 HDIST : 5;
-				uint16 HCLEN : 4;
-			};*/
-
 		private:
-			static void readSignature(File& file);
+			static void readSignature(ByteStream& stream);
 
-			static void readChunk(File& file);
+			static void readChunk(ByteStream& stream);
 
-			static void readIHDR(File& file);
+			static void readIHDR(ByteStream& stream);
 
-			static void readIDAT(File& file);
+			static void readIDAT(ByteStream& stream);
 
-			static Huffman buildHuffman(uint32 maxCodeBitLength);
+			//static Huffman buildHuffman(uint32 maxCodeBitLength);
 
-			static void computeHuffman(Huffman& huffman, uint32 symbolCount, uint32* codeLengths);
+			//static void computeHuffman(Huffman& huffman, uint32 symbolCount, uint32* codeLengths);
 
-			static uint32 huffmanDecode(File& file, const Huffman& huffman);
+			//static uint32 huffmanDecode(File& file, const Huffman& huffman);
 
-			static uint32 reverseBits(uint32 value, uint32 bitCount);
+			//static uint32 reverseBits(uint32 value, uint32 bitCount);
 
-			static void readIEND(File& file);
-
-			// --- load2 methods ---
-
-			static void readSignature2(BitStream& stream);
-
-			static void readChunk2(BitStream& stream);
-
-			static void readIHDR2(BitStream& stream);
+			static void readIEND(ByteStream& stream);
 
 		private:
 			static constexpr HuffmanEntry lengthExtra[] = {

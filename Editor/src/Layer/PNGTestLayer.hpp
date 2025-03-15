@@ -6,7 +6,7 @@ namespace ProjectA {
 	class PNGTestLayer : public Layer {
 		public:
 			PNGTestLayer() : Layer("PNGTest") {
-				PNGFileLoader::load2("assets/textures/checkerboard.png");
+				PNGFileLoader::load("assets/textures/checkerboard.png");
 			}
 
 			virtual ~PNGTestLayer() = default;

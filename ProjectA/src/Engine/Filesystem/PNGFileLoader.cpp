@@ -14,108 +14,108 @@ namespace ProjectA {
 	uint16 PNGFileLoader::reversedBits[1 << 13] = {};
 
 	void PNGFileLoader::load(const std::string& path) {
-		File file(path);
+		const chain<uint8> buffer = FileLoader::loadChain(path);
+		ByteStream stream(buffer.data(), buffer.size());
 
-		readSignature(file);
+		readSignature(stream);
 
-		while (!file.eof()) {
-			readChunk(file);
+		while (stream.getRemainingByteSize() != 0) {
+			readChunk(stream);
+		}
+
+		ENGINE_TRACE("Done.");
+	}
+
+	void PNGFileLoader::readSignature(ByteStream& stream) {
+		static constexpr uint8 SIGNATURE[] = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
+
+		for (uint8 i = 0; i < 8; i += 1) {
+			ENGINE_ASSERT(stream.read<uint8>() == SIGNATURE[i], "PNGFileLoader: Failed to verify file signature.");
 		}
 	}
 
-	void PNGFileLoader::load2(const std::string& path) {
-		chain<uint8> chain = FileLoader::loadChain(path);
-		BitStream stream(chain.data(), chain.size());
-
-		readSignature2(stream);
-		readChunk2(stream);
-	}
-
-	void PNGFileLoader::readSignature(File& file) {
-		static const chain<uint8> formatSignature = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
-
-		const chain<uint8> fileSignature = file.read<uint8>(8);
-
-		if (fileSignature != formatSignature) {
-			throw std::runtime_error("Failed to verify file signature.");
-		}
-	}
-
-	void PNGFileLoader::readChunk(File& file) {
+	void PNGFileLoader::readChunk(ByteStream& stream) {
 		Chunk Chunk;
-		Chunk.ByteLength = file.read<uint32>();
-		File::swapEndianness(&Chunk.ByteLength);
-		Chunk.Type = file.read<uint32>();
+		Chunk.ByteLength = stream.read<uint32>(true);
+		Chunk.Type = stream.read<uint32>();
 
 		switch (Chunk.Type) {
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IHDR"):
 				ENGINE_TRACE("Reading IHDR chunk.");
 
-				readIHDR(file);
+				readIHDR(stream);
 
 				break;
-			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IDAT"):
+			/*case PNG_CHUNK_TYPE_STRING_TO_UINT32("IDAT"):
 				ENGINE_TRACE("Reading IDAT chunk.");
 
-				readIDAT(file);
+				readIDAT(stream);
 
-				break;
+				break;*/
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IEND"):
 				ENGINE_TRACE("Reading IEND chunk.");
 
-				readIEND(file);
+				readIEND(stream);
 
 				break;
 			default:
 				char* TypeString = static_cast<char*>(static_cast<void*>(&Chunk.Type));
 
-				ENGINE_WARN("Encountered unhandled chunk type \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
+				ENGINE_WARN("Ignored unhandled chunk \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
 
-				file.read<uint8>(Chunk.ByteLength);
+				stream.jump(Chunk.ByteLength);
 
 				break;
 		}
 
-		Chunk.CRC = file.read<uint32>();
-		File::swapEndianness(&Chunk.CRC);
+		Chunk.CRC = stream.read<uint32>(true);
 	}
 
-	void PNGFileLoader::readIHDR(File& file) {
-		PNGIHDR IHDR = file.read<PNGIHDR>();
+	void PNGFileLoader::readIHDR(ByteStream& stream) {
+		const uint32 Width = stream.read<uint32>(true);
 
-		File::swapEndianness(&IHDR.Width);
-		File::swapEndianness(&IHDR.Height);
-
-		if (IHDR.Width == 0) {
+		if (Width == 0) {
 			throw std::runtime_error("Width must be > 0.");
 		}
 
-		if (IHDR.Height == 0) {
+		const uint32 Height = stream.read<uint32>(true);
+
+		if (Height == 0) {
 			throw std::runtime_error("Height must be > 0.");
 		}
 
-		if (IHDR.BitDepth != 1 && IHDR.BitDepth != 2 && IHDR.BitDepth != 4 && IHDR.BitDepth != 8 && IHDR.BitDepth != 16) {
+		const uint8 BitDepth = stream.read<uint8>();
+
+		if (BitDepth != 1 && BitDepth != 2 && BitDepth != 4 && BitDepth != 8 && BitDepth != 16) {
 			throw std::runtime_error("Invalid bit depth value.");
 		}
 
-		if (IHDR.ColorType != 0 && IHDR.ColorType != 2 && IHDR.ColorType != 3 && IHDR.ColorType != 4 && IHDR.ColorType != 6) {
+		const uint8 ColorType = stream.read<uint8>();
+
+		if (ColorType != 0 && ColorType != 2 && ColorType != 3 && ColorType != 4 && ColorType != 6) {
 			throw std::runtime_error("Invalid color type value.");
 		}
 
-		if (IHDR.CompressionMethod != 0) {
+		const uint8 CompressionMethod = stream.read<uint8>();
+
+		if (CompressionMethod != 0) {
 			throw std::runtime_error("Invalid compression method value (must be 0).");
 		}
 
-		if (IHDR.FilterMethod != 0) {
+		const uint8 FilterMethod = stream.read<uint8>();
+
+		if (FilterMethod != 0) {
 			throw std::runtime_error("Invalid filter method value (must be 0).");
 		}
 
-		if (IHDR.InterlaceMethod != 0 && IHDR.InterlaceMethod != 1) {
+		const uint8 InterlaceMethod = stream.read<uint8>();
+
+		if (InterlaceMethod != 0 && InterlaceMethod != 1) {
 			throw std::runtime_error("Invalid interlace method value (must be 0 or 1).");
 		}
 	}
 
-	void PNGFileLoader::readIDAT(File& file) {
+	/*void PNGFileLoader::readIDAT(ByteStream& stream) {
 		const CMF_FLG cmfFlg = file.read<CMF_FLG>();
 
 		if (cmfFlg.CM != 8) {
@@ -292,9 +292,9 @@ namespace ProjectA {
 				}
 			}
 		}
-	}
+	}*/
 
-	Huffman PNGFileLoader::buildHuffman(uint32 maxCodeBitLength) {
+	/*Huffman PNGFileLoader::buildHuffman(uint32 maxCodeBitLength) {
 		ENGINE_ASSERT(maxCodeBitLength > 0 && maxCodeBitLength <= 16, "maxCodeBitLength too small or too large.");
 
 		Huffman huffman;
@@ -303,9 +303,9 @@ namespace ProjectA {
 		huffman.entries.resize(huffman.entryCount);
 
 		return huffman;
-	}
+	}*/
 
-	void PNGFileLoader::computeHuffman(Huffman& huffman, uint32 symbolCount, uint32* codeLengths) {
+	/*void PNGFileLoader::computeHuffman(Huffman& huffman, uint32 symbolCount, uint32* codeLengths) {
 		uint32 bl_count[16] = {};
 
 		// 1.
@@ -351,9 +351,9 @@ namespace ProjectA {
 				huffman.entries[index].symbol = i;
 			}
 		}
-	}
+	}*/
 
-	uint32 PNGFileLoader::huffmanDecode(File& file, const Huffman& huffman) {
+	/*uint32 PNGFileLoader::huffmanDecode(File& file, const Huffman& huffman) {
 		// Read as many bits as possible for a code.
 		const uint32 Index = file.peekBits(huffman.maxCodeBitLength);
 
@@ -364,10 +364,10 @@ namespace ProjectA {
 		file.discardBits(Entry.usedBits);
 
 		return Entry.symbol;
-	}
+	}*/
 
 	// TODO: Replace with intrinsic.
-	uint32 PNGFileLoader::reverseBits(uint32 value, uint32 bitCount) {
+	/*uint32 PNGFileLoader::reverseBits(uint32 value, uint32 bitCount) {
 		uint32 reversedValue = 0;
 
 		for (uint32 bitIndex = 0; bitIndex < (bitCount * 0.5); bitIndex++) {
@@ -378,89 +378,9 @@ namespace ProjectA {
 		}
 
 		return reversedValue;
-	}
+	}*/
 
-	void PNGFileLoader::readIEND(File& file) {
+	void PNGFileLoader::readIEND(ByteStream& stream) {
 		ENGINE_WARN("TODO: Handle IEND chunk.");
-	}
-
-	// --- load2 methods ---
-
-	void PNGFileLoader::readSignature2(BitStream& stream) {
-		static constexpr uint8 signature[] = {0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
-
-		for (uint8 i = 0; i < 8; i += 1) {
-			if (stream.read<uint8>(8) != signature[i]) {
-				throw std::runtime_error("Failed to verify file signature.");
-			}
-		}
-	}
-
-	void PNGFileLoader::readChunk2(BitStream& stream) {
-		Chunk Chunk;
-		Chunk.ByteLength = stream.read<uint32>(32, true);
-		Chunk.Type = stream.read<uint32>(32);
-
-		switch (Chunk.Type) {
-			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IHDR"):
-				ENGINE_TRACE("Reading IHDR chunk.");
-
-				readIHDR2(stream);
-
-				break;
-			default:
-				char* TypeString = static_cast<char*>(static_cast<void*>(&Chunk.Type));
-
-				ENGINE_WARN("Encountered unhandled chunk type \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
-
-				stream.jump(Chunk.ByteLength * 8ULL);
-
-				break;
-		}
-
-		Chunk.CRC = stream.read<uint32>(32, true);
-	}
-
-	void PNGFileLoader::readIHDR2(BitStream& stream) {
-		const uint32 Width = stream.read<uint32>(32, true);
-		const uint32 Height = stream.read<uint32>(32, true);
-
-		if (Width == 0) {
-			throw std::runtime_error("Width must be > 0.");
-		}
-
-		if (Height == 0) {
-			throw std::runtime_error("Height must be > 0.");
-		}
-
-		const uint8 BitDepth = stream.read<uint8>(8);
-
-		if (BitDepth != 1 && BitDepth != 2 && BitDepth != 4 && BitDepth != 8 && BitDepth != 16) {
-			throw std::runtime_error("Invalid bit depth value.");
-		}
-
-		const uint8 ColorType = stream.read<uint8>(8);
-
-		if (ColorType != 0 && ColorType != 2 && ColorType != 3 && ColorType != 4 && ColorType != 6) {
-			throw std::runtime_error("Invalid color type value.");
-		}
-
-		const uint8 CompressionMethod = stream.read<uint8>(8);
-
-		if (CompressionMethod != 0) {
-			throw std::runtime_error("Invalid compression method value (must be 0).");
-		}
-
-		const uint8 FilterMethod = stream.read<uint8>(8);
-
-		if (FilterMethod != 0) {
-			throw std::runtime_error("Invalid filter method value (must be 0).");
-		}
-
-		const uint8 InterlaceMethod = stream.read<uint8>(8);
-
-		if (InterlaceMethod != 0 && InterlaceMethod != 1) {
-			throw std::runtime_error("Invalid interlace method value (must be 0 or 1).");
-		}
 	}
 }

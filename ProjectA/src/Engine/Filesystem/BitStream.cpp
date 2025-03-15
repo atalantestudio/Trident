@@ -12,7 +12,7 @@ namespace ProjectA {
 	}
 
 	void BitStream::jump(uint64 bitCount) {
-		ENGINE_ASSERT(bitCount <= getRemainingSize(), "BitStream: Attempted to jump [] bits, but only [] were left.", bitCount, getRemainingSize());
+		ENGINE_ASSERT(bitCount <= getRemainingBitSize(), "BitStream: Attempted to jump [] bits, but only [] were left.", bitCount, getRemainingBitSize());
 
 		uint8 jumpBitCount = 0;
 
@@ -32,7 +32,7 @@ namespace ProjectA {
 		bitBuffer >>= jumpBitCount;
 	}
 
-	uint64 BitStream::getRemainingSize() const {
+	uint64 BitStream::getRemainingBitSize() const {
 		return (size - byteOffset) * 8 - bitOffset;
 	}
 }

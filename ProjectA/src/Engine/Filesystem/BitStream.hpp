@@ -8,7 +8,7 @@ namespace ProjectA {
 		public:
 			BitStream(const uint8* stream, uint64 size);
 
-			// Advances by the provided bit count without reading the values.
+			// Advances by the provided bit count.
 			// Usage:
 			// - The bit count must be <= the remaining bits in the stream.
 			void jump(uint64 bitCount);
@@ -23,7 +23,7 @@ namespace ProjectA {
 			T peek(uint8 bitCount, bool swapEndianness = false) const {
 				ENGINE_ASSERT(bitCount <= sizeof(T) * 8, "BitStream: Cannot peek [] bits for a []-bit type.", static_cast<int32>(bitCount), sizeof(T) * 8);
 				ENGINE_ASSERT(bitCount <= MAX_READ_OR_PEEK_BIT_COUNT, "BitStream: Cannot peek more than [] bits at once.", MAX_READ_OR_PEEK_BIT_COUNT);
-				ENGINE_ASSERT(bitCount <= getRemainingSize(), "BitStream: Attempted to peek [] bits, but only [] were left.", static_cast<int32>(bitCount), getRemainingSize());
+				ENGINE_ASSERT(bitCount <= getRemainingBitSize(), "BitStream: Attempted to peek [] bits, but only [] were left.", static_cast<int32>(bitCount), getRemainingBitSize());
 
 				T value = static_cast<T>(bitBuffer);
 
@@ -61,7 +61,7 @@ namespace ProjectA {
 			T read(uint8 bitCount, bool swapEndianness = false) {
 				ENGINE_ASSERT(bitCount <= sizeof(T) * 8, "BitStream: Cannot read [] bits for a []-bit type.", static_cast<int32>(bitCount), sizeof(T) * 8);
 				ENGINE_ASSERT(bitCount <= MAX_READ_OR_PEEK_BIT_COUNT, "BitStream: Cannot read more than [] bits at once.", MAX_READ_OR_PEEK_BIT_COUNT);
-				ENGINE_ASSERT(bitCount <= getRemainingSize(), "BitStream: Attempted to read [] bits, but only [] were left.", static_cast<int32>(bitCount), getRemainingSize());
+				ENGINE_ASSERT(bitCount <= getRemainingBitSize(), "BitStream: Attempted to read [] bits, but only [] were left.", static_cast<int32>(bitCount), getRemainingBitSize());
 
 				T value = static_cast<T>(bitBuffer);
 
@@ -110,7 +110,7 @@ namespace ProjectA {
 			}
 
 		private:
-			uint64 getRemainingSize() const;
+			uint64 getRemainingBitSize() const;
 
 		private:
 			static constexpr uint8 MAX_READ_OR_PEEK_BIT_COUNT = 64;
