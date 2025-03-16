@@ -5,6 +5,12 @@ namespace ProjectA {
 		public:
 			ByteStream(const uint8* stream, uint64 size);
 
+			const uint8* getStream() const;
+
+			uint64 getByteOffset() const;
+
+			uint64 getRemainingByteSize() const;
+
 			// Advances by the provided byte count.
 			// Usage:
 			// - The byte count must be <= the remaining bytes in the stream.
@@ -57,8 +63,6 @@ namespace ProjectA {
 
 				return value;
 			}
-
-			uint64 getRemainingByteSize() const;
 
 		private:
 			const uint8* stream;

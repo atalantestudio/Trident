@@ -6,9 +6,13 @@ namespace ProjectA {
 			typedef uint64 acc_t;
 
 		public:
-			BitStream(const uint8* stream, uint64 size);
+			BitStream(const uint8* stream, uint64 byteSize);
 
-			// Advances by the provided bit count.
+			const uint8* getBytePosition() const;
+
+			uint64 getRemainingBitSize() const;
+
+			// Advances the offsets by the provided bit count.
 			// Usage:
 			// - The bit count must be <= the remaining bits in the stream.
 			void jump(uint64 bitCount);
@@ -109,8 +113,8 @@ namespace ProjectA {
 				return value & ((1ULL << bitCount) - 1);
 			}
 
-		private:
-			uint64 getRemainingBitSize() const;
+			// Advance the offsets to the end of the stream.
+			void close();
 
 		private:
 			static constexpr uint8 MAX_READ_OR_PEEK_BIT_COUNT = 64;
@@ -124,7 +128,7 @@ namespace ProjectA {
 			acc_t bitBuffer;
 
 			// Size of the stream in bytes.
-			uint64 size;
+			uint64 byteSize;
 
 			// Offset of the currently read byte.
 			uint64 byteOffset = 0;

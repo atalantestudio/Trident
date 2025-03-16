@@ -8,13 +8,21 @@ namespace ProjectA {
 		size(size)
 	{}
 
-	void ByteStream::jump(uint64 byteCount) {
-		ENGINE_ASSERT(byteCount <= getRemainingByteSize(), "ByteStream: Attempted to jump [] bytes, but only [] were left.", byteCount, getRemainingByteSize());
+	const uint8* ByteStream::getStream() const {
+		return stream;
+	}
 
-		byteOffset += byteCount;
+	uint64 ByteStream::getByteOffset() const {
+		return byteOffset;
 	}
 
 	uint64 ByteStream::getRemainingByteSize() const {
 		return size - byteOffset;
+	}
+
+	void ByteStream::jump(uint64 byteCount) {
+		ENGINE_ASSERT(byteCount <= getRemainingByteSize(), "ByteStream: Attempted to jump [] bytes, but only [] were left.", byteCount, getRemainingByteSize());
+
+		byteOffset += byteCount;
 	}
 }
