@@ -79,7 +79,7 @@ namespace ProjectA {
 
 			BufferMappedRange mappedRange = vertexBuffer->map(0, vertexBufferDescriptor.size);
 
-			std::memcpy(mappedRange, vertices.data(), vertexBufferDescriptor.size);
+			std::copy(&vertices[0], &vertices[0] + vertexBufferDescriptor.size, (Vertex*)mappedRange);
 
 			vertexBuffer->unmap();
 		}

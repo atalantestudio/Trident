@@ -14,7 +14,7 @@ namespace ProjectA {
 		uint32 CRC = 0;
 	};
 
-	struct PNGIHDR {
+	struct PNG_IHDR {
 		// Width of the image in pixels.
 		// Zero is an invalid value.
 		uint32 Width;
@@ -147,8 +147,6 @@ namespace ProjectA {
 				{16385, 13}, // 28
 				{25577, 13}, // 29
 			};
-
-			static uint16 reversedBits[1 << 13];
 	};
 }
 

@@ -12,8 +12,6 @@ namespace ProjectA {
 		(static_cast<uint32>(type[3]) << 24) \
 	)
 
-	uint16 PNGFileLoader::reversedBits[1 << 13] = {};
-
 	void PNGFileLoader::load(const std::string& path) {
 		const chain<uint8> buffer = FileLoader::loadChain(path);
 		ByteStream stream(buffer.data(), buffer.size());
@@ -191,7 +189,7 @@ namespace ProjectA {
 
 				output.resize(previousSize + LEN);
 
-				std::memcpy(&output[previousSize], source, LEN);
+				std::copy(source, source + LEN, &output[previousSize]);
 
 				break;
 			}
@@ -323,16 +321,15 @@ namespace ProjectA {
 						distance += extraBits;
 					}
 
-					int32 sourceIndex = static_cast<int32>(output.size()) - 1 - distance;
+					const std::size_t previousSize = output.size();
+
+					uint8* sourceIndex = &output[previousSize - 1] - distance;
 
 					ENGINE_ASSERT(sourceIndex >= 0, "The source index is underflowing.");
 
-					while (length > 0) {
-						output.emplace_back(output[sourceIndex]);
+					output.resize(previousSize + length);
 
-						sourceIndex += 1;
-						length -= 1;
-					}
+					std::copy(sourceIndex, sourceIndex + length, &output[previousSize]);
 				}
 
 				break;

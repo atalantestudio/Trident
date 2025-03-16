@@ -121,6 +121,8 @@ namespace ProjectA {
 
 			BufferMappedRange mappedRange = positionVertexBuffer->map(0, bufferDescriptor.size);
 
+			// TODO: Replace with
+			// std::copy(vertexPositions.front(), vertexPositions.back(), mappedRange);
 			std::memcpy(mappedRange, vertexPositions.data(), bufferDescriptor.size);
 
 			positionVertexBuffer->unmap();
@@ -168,6 +170,8 @@ namespace ProjectA {
 
 		BufferMappedRange mappedRange = transformVertexBuffer->map(0, size);
 
+		// TODO: Replace with
+		// std::copy(componentPool.components.begin(), componentPool.components.begin() + size, mappedRange);
 		std::memcpy(mappedRange, componentPool.components.data(), size);
 
 		transformVertexBuffer->unmap();
@@ -178,6 +182,8 @@ namespace ProjectA {
 
 		BufferMappedRange mappedRange = colorStorageBuffer->map(0, size);
 
+		// TODO: Replace with
+		// std::copy(colors.data(), colors.data() + size, mappedRange);
 		std::memcpy(mappedRange, colors.data(), size);
 
 		colorStorageBuffer->unmap();
@@ -237,6 +243,8 @@ namespace ProjectA {
 			-1.0f, 1.0f, 1.0f,
 		};
 
+		// TODO: Replace with
+		// std::copy(&cameraUniformBufferObject, &cameraUniformBufferObject + sizeof(UniformBufferObject), cameraUniformBufferMappedRanges[frameIndex]);
 		std::memcpy(cameraUniformBufferMappedRanges[frameIndex], &cameraUniformBufferObject, sizeof(UniformBufferObject));
 	}
 
