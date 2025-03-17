@@ -14,7 +14,7 @@ namespace ProjectA {
 		uint32 CRC = 0;
 	};
 
-	struct PNG_IHDR {
+	struct PNGProperties {
 		// Width of the image in pixels.
 		// Zero is an invalid value.
 		uint32 Width;
@@ -62,21 +62,26 @@ namespace ProjectA {
 		uint8 FLEVEL : 2;
 	};
 
+	struct PNGImage {
+		PNGProperties properties;
+		chain<uint8> data;
+	};
+
 	// Based on https://www.w3.org/TR/2003/REC-PNG-20031110.
 	class PNGFileLoader {
 		public:
-			static void load(const std::string& path);
+			static PNGImage load(const std::string& path);
 
 		private:
 			static void readSignature(ByteStream& stream);
 
-			static void readChunk(ByteStream& stream);
+			static void readChunk(ByteStream& stream, PNGProperties& properties, chain<uint8>& finalOutput);
 
-			static void readIHDR(ByteStream& stream);
+			static void readIHDR(ByteStream& stream, PNGProperties& properties);
 
-			static void readIDAT(ByteStream& stream, uint32 byteLength);
+			static void readIDAT(ByteStream& stream, uint32 byteLength, const PNGProperties& properties, chain<uint8>& finalOutput);
 
-			static void readZlibStream(BitStream& stream);
+			static chain<uint8> readZlibStream(BitStream& stream);
 
 			static void readZlibBlock(BitStream& stream, uint8& BFINAL, chain<uint8>& output);
 

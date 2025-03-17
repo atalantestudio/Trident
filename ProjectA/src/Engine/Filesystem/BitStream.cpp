@@ -12,7 +12,9 @@ namespace ProjectA {
 	}
 
 	const uint8* BitStream::getBytePosition() const {
-		return stream + byteOffset;
+		ENGINE_ASSERT(bitOffset % 8 == 0, "BitStream: Failed to return the byte offset: the bit offset is not a multiple of 8.");
+
+		return stream + byteOffset + bitOffset / 8;
 	}
 
 	uint64 BitStream::getRemainingBitSize() const {

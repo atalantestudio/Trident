@@ -2,6 +2,7 @@
 
 #include "Engine/Filesystem/FileLoader.hpp"
 #include "Engine/Filesystem/HuffmanCodeDictionary.hpp"
+#include "Engine/Filesystem/PNG/FilterType.hpp"
 #include "Engine/Filesystem/PNGFileLoader.hpp"
 
 namespace ProjectA {
@@ -12,17 +13,20 @@ namespace ProjectA {
 		(static_cast<uint32>(type[3]) << 24) \
 	)
 
-	void PNGFileLoader::load(const std::string& path) {
+	PNGImage PNGFileLoader::load(const std::string& path) {
 		const chain<uint8> buffer = FileLoader::loadChain(path);
 		ByteStream stream(buffer.data(), buffer.size());
 
 		readSignature(stream);
 
+		chain<uint8> finalOutput;
+		PNGImage image;
+
 		while (stream.getRemainingByteSize() > 0) {
-			readChunk(stream);
+			readChunk(stream, image.properties, image.data);
 		}
 
-		ENGINE_TRACE("Done.");
+		return image;
 	}
 
 	void PNGFileLoader::readSignature(ByteStream& stream) {
@@ -33,7 +37,7 @@ namespace ProjectA {
 		}
 	}
 
-	void PNGFileLoader::readChunk(ByteStream& stream) {
+	void PNGFileLoader::readChunk(ByteStream& stream, PNGProperties& properties, chain<uint8>& finalOutput) {
 		Chunk Chunk;
 		Chunk.ByteLength = stream.read<uint32>(true);
 		Chunk.Type = stream.read<uint32>();
@@ -42,13 +46,13 @@ namespace ProjectA {
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IHDR"):
 				ENGINE_TRACE("Reading IHDR chunk.");
 
-				readIHDR(stream);
+				readIHDR(stream, properties);
 
 				break;
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IDAT"):
 				ENGINE_TRACE("Reading IDAT chunk.");
 
-				readIDAT(stream, Chunk.ByteLength);
+				readIDAT(stream, Chunk.ByteLength, properties, finalOutput);
 
 				break;
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IEND"):
@@ -70,59 +74,115 @@ namespace ProjectA {
 		Chunk.CRC = stream.read<uint32>(true);
 	}
 
-	void PNGFileLoader::readIHDR(ByteStream& stream) {
-		const uint32 Width = stream.read<uint32>(true);
+	void PNGFileLoader::readIHDR(ByteStream& stream, PNGProperties& properties) {
+		properties.Width = stream.read<uint32>(true);
 
-		if (Width == 0) {
+		if (properties.Width == 0) {
 			throw std::runtime_error("Width must be > 0.");
 		}
 
-		const uint32 Height = stream.read<uint32>(true);
+		properties.Height = stream.read<uint32>(true);
 
-		if (Height == 0) {
+		if (properties.Height == 0) {
 			throw std::runtime_error("Height must be > 0.");
 		}
 
-		const uint8 BitDepth = stream.read<uint8>();
+		properties.BitDepth = stream.read<uint8>();
 
-		if (BitDepth != 1 && BitDepth != 2 && BitDepth != 4 && BitDepth != 8 && BitDepth != 16) {
+		if (properties.BitDepth != 1 && properties.BitDepth != 2 && properties.BitDepth != 4 && properties.BitDepth != 8 && properties.BitDepth != 16) {
 			throw std::runtime_error("Invalid bit depth value.");
 		}
 
-		const uint8 ColorType = stream.read<uint8>();
+		properties.ColorType = stream.read<uint8>();
 
-		if (ColorType != 0 && ColorType != 2 && ColorType != 3 && ColorType != 4 && ColorType != 6) {
+		if (properties.ColorType != 0 && properties.ColorType != 2 && properties.ColorType != 3 && properties.ColorType != 4 && properties.ColorType != 6) {
 			throw std::runtime_error("Invalid color type value.");
 		}
 
-		const uint8 CompressionMethod = stream.read<uint8>();
+		properties.CompressionMethod = stream.read<uint8>();
 
-		if (CompressionMethod != 0) {
+		if (properties.CompressionMethod != 0) {
 			throw std::runtime_error("Invalid compression method value (must be 0).");
 		}
 
-		const uint8 FilterMethod = stream.read<uint8>();
+		properties.FilterMethod = stream.read<uint8>();
 
-		if (FilterMethod != 0) {
+		if (properties.FilterMethod != 0) {
 			throw std::runtime_error("Invalid filter method value (must be 0).");
 		}
 
-		const uint8 InterlaceMethod = stream.read<uint8>();
+		properties.InterlaceMethod = stream.read<uint8>();
 
-		if (InterlaceMethod != 0 && InterlaceMethod != 1) {
+		if (properties.InterlaceMethod != 0 && properties.InterlaceMethod != 1) {
 			throw std::runtime_error("Invalid interlace method value (must be 0 or 1).");
 		}
 	}
 
-	void PNGFileLoader::readIDAT(ByteStream& byteStream, uint32 byteLength) {
+	void PNGFileLoader::readIDAT(ByteStream& byteStream, uint32 byteLength, const PNGProperties& properties, chain<uint8>& finalOutput) {
 		BitStream bitStream(byteStream.getStream() + byteStream.getByteOffset(), byteLength);
 
-		readZlibStream(bitStream);
+		chain<uint8> output = readZlibStream(bitStream);
 
 		byteStream.jump(byteLength);
+
+		ENGINE_ASSERT(properties.BitDepth == 8, "Only a BitDepth of 8 is supported.");
+
+		finalOutput.resize(static_cast<std::size_t>(properties.Width * properties.Height * 4));
+
+		uint8* source = &output[0];
+		uint8* destination = &finalOutput[0];
+
+		// TODO: Refactor with SIMD (vec4<int32>).
+		for (uint32 y = 0; y < properties.Height; y += 1) {
+			const FilterType filterType = static_cast<FilterType>(*source);
+
+			source += 1;
+
+			uint32 a = 0;
+			uint32 b = 0;
+			uint32 c = 0;
+
+			switch (filterType) {
+				case FilterType::NONE:
+					ENGINE_DEBUG("FilterType::NONE");
+
+					for (uint32 x = 0; x < properties.Width; x += 1) {
+						*(uint32*) destination = *(uint32*) source;
+
+						destination += 4;
+						source += 4;
+					}
+
+					// TODO: Replace with
+					// std::copy(&output[y * (properties.Height + 1) + 1], &output[y * (properties.Height + 1) + properties.Width + 1], finalOutput[y * properties.Height]);
+					//std::memcpy(&finalOutput[y * properties.Height], &output[y * (properties.Height + 1) + 1], properties.Width);
+
+					break;
+				case FilterType::SUB:
+					ENGINE_DEBUG("TODO: FilterType::SUB");
+
+					break;
+				case FilterType::UP:
+					ENGINE_DEBUG("TODO: FilterType::UP");
+
+					break;
+				case FilterType::AVERAGE:
+					ENGINE_DEBUG("TODO: FilterType::AVERAGE");
+
+					break;
+				case FilterType::PAETH:
+					ENGINE_DEBUG("TODO: FilterType::PAETH");
+
+					break;
+				default:
+					ENGINE_ASSERT(false, "Unhandled filter type [].", static_cast<uint16>(filterType));
+
+					break;
+			}
+		}
 	}
 
-	void PNGFileLoader::readZlibStream(BitStream& stream) {
+	chain<uint8> PNGFileLoader::readZlibStream(BitStream& stream) {
 		// Compression method.
 		const uint8 CM = stream.read<uint8>(4);
 
@@ -154,6 +214,8 @@ namespace ProjectA {
 		}
 
 		stream.close();
+
+		return output;
 	}
 
 	void PNGFileLoader::readZlibBlock(BitStream& stream, uint8& BFINAL, chain<uint8>& output) {
@@ -163,7 +225,7 @@ namespace ProjectA {
 
 		const uint8 BTYPE = stream.read<uint8>(2);
 
-		ENGINE_ASSERT(BTYPE != 0b11, "[] is a reserved BTYPE value.", BTYPE);
+		ENGINE_ASSERT(BTYPE != 0b11, "0b11 is a reserved BTYPE value.");
 
 		HuffmanCodeDictionary literalLengthDictionary(15);
 		HuffmanCodeDictionary distanceDictionary(15);
