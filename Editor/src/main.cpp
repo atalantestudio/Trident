@@ -2,13 +2,13 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Layer/PNGTestLayer.hpp"
+#include "Layer/DemoLayer.hpp"
 
 namespace ProjectA {
 	class EditorApplication : public Application {
 		public:
 			EditorApplication() : Application("ProjectA Editor") {
-				pushLayer(new PNGTestLayer());
+				pushLayer(new DemoLayer());
 			}
 
 			~EditorApplication() {}

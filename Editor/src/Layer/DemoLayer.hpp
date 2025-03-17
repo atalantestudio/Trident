@@ -3,14 +3,14 @@
 #include "ProjectA.hpp"
 
 namespace ProjectA {
-	class TriangleDemoLayer : public Layer {
+	class DemoLayer : public Layer {
 		private:
 			TriangleDemoRenderer renderer;
 
 		public:
-			TriangleDemoLayer();
+			DemoLayer();
 
-			virtual ~TriangleDemoLayer() = default;
+			virtual ~DemoLayer() = default;
 
 			void bind() override;
 			void unbind() override;

@@ -1,7 +1,7 @@
 #include "pch.hpp"
 
+#include "Engine/Debug/TriangleDemo/TriangleDemoRenderer.hpp"
 #include "Engine/Filesystem/FileLoader.hpp"
-#include "Engine/Renderer/TriangleDemo/TriangleDemoRenderer.hpp"
 
 namespace ProjectA {
 	TriangleDemoRenderer::TriangleDemoRenderer() :
