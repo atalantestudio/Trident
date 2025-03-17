@@ -29,13 +29,13 @@ namespace ProjectA {
 			case GraphicsAPI::NONE:
 				throw std::runtime_error("TriangleDemo must use either OpenGL or Vulkan.");
 			case GraphicsAPI::OPENGL:
-				vertexShaderModulePath = "../ProjectA/src/Engine/Shader/TriangleDemo.vert";
-				fragmentShaderModulePath = "../ProjectA/src/Engine/Shader/TriangleDemo.frag";
+				vertexShaderModulePath = "../ProjectA/src/Engine/Debug/TriangleDemo/Shader/TriangleDemo.vert";
+				fragmentShaderModulePath = "../ProjectA/src/Engine/Debug/TriangleDemo/Shader/TriangleDemo.frag";
 
 				break;
 			case GraphicsAPI::VULKAN:
-				vertexShaderModulePath = "../ProjectA/src/Engine/Shader/TriangleDemo.vert.spv";
-				fragmentShaderModulePath = "../ProjectA/src/Engine/Shader/TriangleDemo.frag.spv";
+				vertexShaderModulePath = "../ProjectA/src/Engine/Debug/TriangleDemo/Shader/TriangleDemo.vert.spv";
+				fragmentShaderModulePath = "../ProjectA/src/Engine/Debug/TriangleDemo/Shader/TriangleDemo.frag.spv";
 
 				break;
 		}
@@ -79,7 +79,7 @@ namespace ProjectA {
 
 			BufferMappedRange mappedRange = vertexBuffer->map(0, vertexBufferDescriptor.size);
 
-			std::copy(&vertices[0], &vertices[0] + vertexBufferDescriptor.size, (Vertex*)mappedRange);
+			std::copy(vertices.begin(), vertices.end(), static_cast<Vertex*>(mappedRange));
 
 			vertexBuffer->unmap();
 		}
@@ -99,7 +99,7 @@ namespace ProjectA {
 
 			BufferMappedRange mappedRange = indexBuffer->map(0, indexBufferDescriptor.size);
 
-			std::memcpy(mappedRange, indices.data(), indexBufferDescriptor.size);
+			std::copy(indices.begin(), indices.end(), static_cast<uint16*>(mappedRange));
 
 			indexBuffer->unmap();
 		}

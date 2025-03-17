@@ -34,8 +34,5 @@ namespace ProjectA {
 			chain<ref<Semaphore>> finishedRenderSemaphores;
 			chain<ref<Fence>> flightFences;
 			uint32 frameIndex = 0;
-
-			// test
-			ref<Buffer> colorUniformBuffer;
 	};
 }
