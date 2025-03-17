@@ -153,9 +153,7 @@ namespace ProjectA {
 						source += 4;
 					}
 
-					// TODO: Replace with
 					// std::copy(&output[y * (properties.Height + 1) + 1], &output[y * (properties.Height + 1) + properties.Width + 1], finalOutput[y * properties.Height]);
-					//std::memcpy(&finalOutput[y * properties.Height], &output[y * (properties.Height + 1) + 1], properties.Width);
 
 					break;
 				case FilterType::SUB:

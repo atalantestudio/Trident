@@ -121,9 +121,7 @@ namespace ProjectA {
 
 			BufferMappedRange mappedRange = positionVertexBuffer->map(0, bufferDescriptor.size);
 
-			// TODO: Replace with
-			// std::copy(vertexPositions.front(), vertexPositions.back(), mappedRange);
-			std::memcpy(mappedRange, vertexPositions.data(), bufferDescriptor.size);
+			std::copy(vertexPositions.begin(), vertexPositions.end(), static_cast<vec3<float32>*>(mappedRange));
 
 			positionVertexBuffer->unmap();
 		}
@@ -149,7 +147,7 @@ namespace ProjectA {
 
 			BufferMappedRange mappedRange = indexBuffer->map(0, bufferDescriptor.size);
 
-			std::memcpy(mappedRange, indices.data(), bufferDescriptor.size);
+			std::copy(indices.begin(), indices.end(), static_cast<uint16*>(mappedRange));
 
 			indexBuffer->unmap();
 		}
@@ -166,25 +164,17 @@ namespace ProjectA {
 
 		instanceCount = componentPool.componentCount;
 
-		const uint64 size = sizeof(GUIComponent) * instanceCount;
+		BufferMappedRange mappedRange = transformVertexBuffer->map(0, sizeof(GUIComponent) * instanceCount);
 
-		BufferMappedRange mappedRange = transformVertexBuffer->map(0, size);
-
-		// TODO: Replace with
-		// std::copy(componentPool.components.begin(), componentPool.components.begin() + size, mappedRange);
-		std::memcpy(mappedRange, componentPool.components.data(), size);
+		std::copy(componentPool.components.begin(), componentPool.components.begin() + instanceCount, static_cast<GUIComponent*>(mappedRange));
 
 		transformVertexBuffer->unmap();
 	}
 
 	void GUIRenderer::registerColors(const std::vector<vec4<float32>>& colors) const {
-		const std::size_t size = sizeof(vec4<float32>) * colors.size();
+		BufferMappedRange mappedRange = colorStorageBuffer->map(0, sizeof(vec4<float32>) * colors.size());
 
-		BufferMappedRange mappedRange = colorStorageBuffer->map(0, size);
-
-		// TODO: Replace with
-		// std::copy(colors.data(), colors.data() + size, mappedRange);
-		std::memcpy(mappedRange, colors.data(), size);
+		std::copy(colors.begin(), colors.end(), static_cast<vec4<float32>*>(mappedRange));
 
 		colorStorageBuffer->unmap();
 	}
@@ -243,9 +233,7 @@ namespace ProjectA {
 			-1.0f, 1.0f, 1.0f,
 		};
 
-		// TODO: Replace with
-		// std::copy(&cameraUniformBufferObject, &cameraUniformBufferObject + sizeof(UniformBufferObject), cameraUniformBufferMappedRanges[frameIndex]);
-		std::memcpy(cameraUniformBufferMappedRanges[frameIndex], &cameraUniformBufferObject, sizeof(UniformBufferObject));
+		std::copy(&cameraUniformBufferObject, &cameraUniformBufferObject + 1, static_cast<UniformBufferObject*>(cameraUniformBufferMappedRanges[frameIndex]));
 	}
 
 	void GUIRenderer::onEvent(Event& event) {}
