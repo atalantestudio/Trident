@@ -15,7 +15,7 @@ namespace ProjectA {
 
 		glfwMakeContextCurrent(window);
 
-		const int32 gladLoadStatus = gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
+		const sint32 gladLoadStatus = gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
 
 		ENGINE_ASSERT(gladLoadStatus, "Failed to initialize GLAD.");
 

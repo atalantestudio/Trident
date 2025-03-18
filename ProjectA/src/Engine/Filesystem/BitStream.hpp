@@ -25,9 +25,9 @@ namespace ProjectA {
 			// - The bit count must be <= the remaining bits in the stream.
 			template<typename T>
 			T peek(uint8 bitCount, bool swapEndianness = false) const {
-				ENGINE_ASSERT(bitCount <= sizeof(T) * 8, "BitStream: Cannot peek [] bits for a []-bit type.", static_cast<int32>(bitCount), sizeof(T) * 8);
+				ENGINE_ASSERT(bitCount <= sizeof(T) * 8, "BitStream: Cannot peek [] bits for a []-bit type.", static_cast<sint32>(bitCount), sizeof(T) * 8);
 				ENGINE_ASSERT(bitCount <= MAX_READ_OR_PEEK_BIT_COUNT, "BitStream: Cannot peek more than [] bits at once.", MAX_READ_OR_PEEK_BIT_COUNT);
-				ENGINE_ASSERT(bitCount <= getRemainingBitSize(), "BitStream: Attempted to peek [] bits, but only [] were left.", static_cast<int32>(bitCount), getRemainingBitSize());
+				ENGINE_ASSERT(bitCount <= getRemainingBitSize(), "BitStream: Attempted to peek [] bits, but only [] were left.", static_cast<sint32>(bitCount), getRemainingBitSize());
 
 				T value = static_cast<T>(bitBuffer);
 
@@ -63,9 +63,9 @@ namespace ProjectA {
 			// - The bit count must be <= the remaining bits in the stream.
 			template<typename T>
 			T read(uint8 bitCount, bool swapEndianness = false) {
-				ENGINE_ASSERT(bitCount <= sizeof(T) * 8, "BitStream: Cannot read [] bits for a []-bit type.", static_cast<int32>(bitCount), sizeof(T) * 8);
+				ENGINE_ASSERT(bitCount <= sizeof(T) * 8, "BitStream: Cannot read [] bits for a []-bit type.", static_cast<sint32>(bitCount), sizeof(T) * 8);
 				ENGINE_ASSERT(bitCount <= MAX_READ_OR_PEEK_BIT_COUNT, "BitStream: Cannot read more than [] bits at once.", MAX_READ_OR_PEEK_BIT_COUNT);
-				ENGINE_ASSERT(bitCount <= getRemainingBitSize(), "BitStream: Attempted to read [] bits, but only [] were left.", static_cast<int32>(bitCount), getRemainingBitSize());
+				ENGINE_ASSERT(bitCount <= getRemainingBitSize(), "BitStream: Attempted to read [] bits, but only [] were left.", static_cast<sint32>(bitCount), getRemainingBitSize());
 
 				T value = static_cast<T>(bitBuffer);
 

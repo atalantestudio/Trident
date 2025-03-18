@@ -24,7 +24,7 @@ namespace ProjectA {
 
 			void setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) override;
 
-			void setScissor(const int32 xOffset, const int32 yOffset, const uint32 width, const uint32 height) override;
+			void setScissor(const sint32 xOffset, const sint32 yOffset, const uint32 width, const uint32 height) override;
 
 			void draw(const uint32 vertexCount, const uint32 instanceCount, const uint32 vertexOffset) override;
 

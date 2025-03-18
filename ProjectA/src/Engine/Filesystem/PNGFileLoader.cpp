@@ -132,7 +132,7 @@ namespace ProjectA {
 		uint8* source = &output[0];
 		uint8* destination = &finalOutput[0];
 
-		// TODO: Refactor with SIMD (vec4<int32>).
+		// TODO: Refactor with SIMD (vec4<sint32>).
 		for (uint32 y = 0; y < properties.Height; y += 1) {
 			const FilterType filterType = static_cast<FilterType>(*source);
 
@@ -219,7 +219,7 @@ namespace ProjectA {
 	void PNGFileLoader::readZlibBlock(BitStream& stream, uint8& BFINAL, chain<uint8>& output) {
 		BFINAL = stream.read<uint8>(1);
 
-		ENGINE_DEBUG("BFINAL = []", static_cast<int32>(BFINAL));
+		ENGINE_DEBUG("BFINAL = []", static_cast<sint32>(BFINAL));
 
 		const uint8 BTYPE = stream.read<uint8>(2);
 

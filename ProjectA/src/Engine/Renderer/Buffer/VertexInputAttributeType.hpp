@@ -39,7 +39,7 @@ namespace ProjectA {
 	static VertexInputAttributeType getVertexInputAttributeType();
 
 	template<>
-	static inline VertexInputAttributeType getVertexInputAttributeType<int8>() {
+	static inline VertexInputAttributeType getVertexInputAttributeType<sint8>() {
 		return VertexInputAttributeType::R8_SINT;
 	}
 
@@ -49,7 +49,7 @@ namespace ProjectA {
 	}
 
 	template<>
-	static inline VertexInputAttributeType getVertexInputAttributeType<int16>() {
+	static inline VertexInputAttributeType getVertexInputAttributeType<sint16>() {
 		return VertexInputAttributeType::R16_SINT;
 	}
 
@@ -59,7 +59,7 @@ namespace ProjectA {
 	}
 
 	template<>
-	static inline VertexInputAttributeType getVertexInputAttributeType<int32>() {
+	static inline VertexInputAttributeType getVertexInputAttributeType<sint32>() {
 		return VertexInputAttributeType::R32_SINT;
 	}
 
@@ -74,7 +74,7 @@ namespace ProjectA {
 	}
 
 	/* template<>
-	static inline VertexInputAttributeType getVertexInputAttributeType<vec2<int32>>() {
+	static inline VertexInputAttributeType getVertexInputAttributeType<vec2<sint32>>() {
 		return VertexInputAttributeType::R32G32_SINT;
 	} */
 
@@ -89,7 +89,7 @@ namespace ProjectA {
 	}
 
 	/* template<>
-	static inline VertexInputAttributeType getVertexInputAttributeType<vec3<int32>>() {
+	static inline VertexInputAttributeType getVertexInputAttributeType<vec3<sint32>>() {
 		return VertexInputAttributeType::R32G32B32_SINT;
 	} */
 
@@ -104,7 +104,7 @@ namespace ProjectA {
 	}
 
 	/* template<>
-	static inline VertexInputAttributeType getVertexInputAttributeType<vec4<int32>>() {
+	static inline VertexInputAttributeType getVertexInputAttributeType<vec4<sint32>>() {
 		return VertexInputAttributeType::R32G32B32A32_SINT;
 	} */
 
@@ -119,7 +119,7 @@ namespace ProjectA {
 	}
 
 	template<>
-	static inline VertexInputAttributeType getVertexInputAttributeType<int64>() {
+	static inline VertexInputAttributeType getVertexInputAttributeType<sint64>() {
 		return VertexInputAttributeType::R64_SINT;
 	}
 
@@ -134,7 +134,7 @@ namespace ProjectA {
 	}
 
 	/* template<>
-	static inline VertexInputAttributeType getVertexInputAttributeType<vec2<int64>>() {
+	static inline VertexInputAttributeType getVertexInputAttributeType<vec2<sint64>>() {
 		return VertexInputAttributeType::R64G64_SINT;
 	} */
 
@@ -149,7 +149,7 @@ namespace ProjectA {
 	}
 
 	/* template<>
-	static inline VertexInputAttributeType getVertexInputAttributeType<vec3<int64>>() {
+	static inline VertexInputAttributeType getVertexInputAttributeType<vec3<sint64>>() {
 		return VertexInputAttributeType::R64G64B64_SINT;
 	} */
 
@@ -164,7 +164,7 @@ namespace ProjectA {
 	}
 
 	/* template<>
-	static inline VertexInputAttributeType getVertexInputAttributeType<vec4<int64>>() {
+	static inline VertexInputAttributeType getVertexInputAttributeType<vec4<sint64>>() {
 		return VertexInputAttributeType::R64G64B64A64_SINT;
 	} */
 

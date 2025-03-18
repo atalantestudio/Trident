@@ -23,7 +23,7 @@ namespace ProjectA {
 			virtual void bind() = 0;
 			virtual void unbind() = 0;
 
-			// TODO: Use vec2<int32>
+			// TODO: Use vec2<sint32>
 			virtual void resize(const vec2<float32>& size) = 0;
 	};
 }

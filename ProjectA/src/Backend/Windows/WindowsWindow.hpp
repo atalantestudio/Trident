@@ -21,7 +21,7 @@ namespace ProjectA {
 				return window;
 			}
 
-			// TODO: Merge width and height into vec2<int32> viewport
+			// TODO: Merge width and height into vec2<sint32> viewport
 			uint32 getWidth() const override {
 				return data.width;
 			}
@@ -43,9 +43,9 @@ namespace ProjectA {
 		private:
 			struct GLFWData {
 				std::string title;
-				// TODO: Use vec2<int32>
-				int32 width = 0;
-				int32 height = 0;
+				// TODO: Use vec2<sint32>
+				sint32 width = 0;
+				sint32 height = 0;
 				bool vSync = false;
 				EventCallback callback;
 			};

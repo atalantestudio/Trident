@@ -8,8 +8,8 @@ namespace ProjectA {
 
 		ENGINE_TRACE("[OpenGLSwapchain]");
 
-		int32 width;
-		int32 height;
+		sint32 width;
+		sint32 height;
 
 		glfwGetWindowSize(window, &width, &height);
 

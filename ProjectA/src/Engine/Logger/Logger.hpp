@@ -70,7 +70,7 @@ namespace ProjectA {
 
 				clear();
 
-				const int32 logLevelIndex = static_cast<int32>(logLevel) - 1;
+				const sint32 logLevelIndex = static_cast<sint32>(logLevel) - 1;
 				const std::string ansiSet = "\033[" + std::to_string(LOG_LEVEL_BACKGROUND_COLORS[logLevelIndex]) + ';' + std::to_string(LOG_LEVEL_FOREGROUND_COLORS[logLevelIndex]) + 'm';
 				std::size_t padding = 0;
 				std::size_t indentSize = 0;

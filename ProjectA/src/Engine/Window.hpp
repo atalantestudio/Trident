@@ -6,11 +6,11 @@
 namespace ProjectA {
 	struct WindowData {
 		std::string title;
-		// TODO: Use vec2<int32>
-		int32 width;
-		int32 height;
+		// TODO: Use vec2<sint32>
+		sint32 width;
+		sint32 height;
 
-		WindowData(const std::string& title = "Project A", int32 width = 1280, int32 height = 720) :
+		WindowData(const std::string& title = "Project A", sint32 width = 1280, sint32 height = 720) :
 			title(title),
 			width(width),
 			height(height) {}

@@ -53,16 +53,16 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) {
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(
 			// TODO: Use provided origin.
-			// TODO: Use vec2<int32>.
+			// TODO: Use vec2<sint32>.
 			static_cast<GLint>(0),
 			static_cast<GLint>(0),
-			// TODO: Use vec2<int32>.
+			// TODO: Use vec2<sint32>.
 			static_cast<GLsizei>(lyah::abs(size[0])),
 			static_cast<GLsizei>(lyah::abs(size[1]))
 		));
 	}
 
-	void OpenGLCommandEncoder::setScissor(const int32 xOffset, const int32 yOffset, const uint32 width, const uint32 height) {}
+	void OpenGLCommandEncoder::setScissor(const sint32 xOffset, const sint32 yOffset, const uint32 width, const uint32 height) {}
 
 	void OpenGLCommandEncoder::draw(const uint32 vertexCount, const uint32 instanceCount, const uint32 vertexOffset) {
 		commandBuffer.emplace_back(createRef<OpenGLDrawCommand>(renderPipeline->primitiveTopology, vertexOffset, vertexCount, instanceCount));

@@ -20,7 +20,7 @@ namespace ProjectA {
 		public:
 			virtual ~Texture() = default;
 
-			// TODO: Use vec2<int32>.
+			// TODO: Use vec2<sint32>.
 			virtual uint32 getWidth() const = 0;
 			virtual uint32 getHeight() const = 0;
 

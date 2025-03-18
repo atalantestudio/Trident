@@ -20,14 +20,14 @@ namespace ProjectA {
 
 	class KeyPressEvent : public KeyEvent {
 		private:
-			int32 pressCount;
+			sint32 pressCount;
 
 		public:
-			KeyPressEvent(KeyCode keyCode, int32 pressCount) : KeyEvent(keyCode), pressCount(pressCount) {}
+			KeyPressEvent(KeyCode keyCode, sint32 pressCount) : KeyEvent(keyCode), pressCount(pressCount) {}
 
 			EVENT_TYPE(EventType::KEY_PRESS)
 
-			int32 getPressCount() const {
+			sint32 getPressCount() const {
 				return pressCount;
 			}
 

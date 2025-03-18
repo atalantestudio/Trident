@@ -124,7 +124,7 @@ namespace ProjectA {
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 	}
 
-	void VulkanCommandEncoder::setScissor(const int32 xOffset, const int32 yOffset, const uint32 width, const uint32 height) {
+	void VulkanCommandEncoder::setScissor(const sint32 xOffset, const sint32 yOffset, const uint32 width, const uint32 height) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		VkRect2D scissor{};

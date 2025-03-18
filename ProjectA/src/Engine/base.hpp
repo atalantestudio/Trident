@@ -111,11 +111,11 @@
 
 #define AS_FLAG(T) \
 	inline bool operator &(T a, T b) { \
-		return static_cast<bool>(static_cast<int32>(a) & static_cast<int32>(b)); \
+		return static_cast<bool>(static_cast<sint32>(a) & static_cast<sint32>(b)); \
 	} \
 	\
 	inline T operator |(T a, T b) { \
-		return static_cast<T>(static_cast<int32>(a) | static_cast<int32>(b)); \
+		return static_cast<T>(static_cast<sint32>(a) | static_cast<sint32>(b)); \
 	} \
 	\
 	inline bool operator &(std::underlying_type<T>::type a, T b) { \
@@ -124,5 +124,5 @@
 
 #define AS_PRINTABLE(T) \
 	inline std::ostream& operator <<(std::ostream& stream, T a) { \
-		return stream << static_cast<int32>(a); \
+		return stream << static_cast<sint32>(a); \
 	}

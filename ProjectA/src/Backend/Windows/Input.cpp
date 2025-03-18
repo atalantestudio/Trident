@@ -9,7 +9,7 @@ namespace ProjectA {
 	bool Input::isKeyPressed(const KeyCode keyCode) {
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
 
-		const int32 keyState = glfwGetKey(window, static_cast<int32>(keyCode));
+		const sint32 keyState = glfwGetKey(window, static_cast<sint32>(keyCode));
 
 		return keyState == GLFW_PRESS || keyState == GLFW_REPEAT;
 	}
@@ -17,7 +17,7 @@ namespace ProjectA {
 	bool Input::isMouseButtonPressed(const MouseButton button) {
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
 
-		const int32 buttonState = glfwGetMouseButton(window, static_cast<int32>(button));
+		const sint32 buttonState = glfwGetMouseButton(window, static_cast<sint32>(button));
 
 		return buttonState == GLFW_PRESS;
 	}

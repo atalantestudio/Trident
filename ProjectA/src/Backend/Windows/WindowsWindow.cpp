@@ -29,7 +29,7 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		if (Renderer::getGraphicsApi() == GraphicsAPI::OPENGL) {
-			glfwSwapInterval(static_cast<int32>(state));
+			glfwSwapInterval(static_cast<sint32>(state));
 		}
 		else if (Renderer::getGraphicsApi() == GraphicsAPI::VULKAN) {
 			ENGINE_WARN("No support for swap interval with a Vulkan context.");
@@ -48,7 +48,7 @@ namespace ProjectA {
 		glfwData.height = data.height;
 
 		if (glfwWindowCount == 0) {
-			int32 success;
+			sint32 success;
 
 			{
 				PROFILE_SCOPE("Initialize GLFW");
@@ -90,7 +90,7 @@ namespace ProjectA {
 
 		setVSyncState(true);
 
-		glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int32 width, int32 height) {
+		glfwSetWindowSizeCallback(window, [](GLFWwindow* window, sint32 width, sint32 height) {
 			GLFWData& data = *static_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			data.width = width;
@@ -109,7 +109,7 @@ namespace ProjectA {
 			data.callback(event);
 		});
 
-		glfwSetKeyCallback(window, [](GLFWwindow* window, int32 keyCode, int32 scancode, int32 action, int32 mods) {
+		glfwSetKeyCallback(window, [](GLFWwindow* window, sint32 keyCode, sint32 scancode, sint32 action, sint32 mods) {
 			const GLFWData& data = *static_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			switch (action) {
@@ -147,7 +147,7 @@ namespace ProjectA {
 			data.callback(event);
 		});
 
-		glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int32 button, int32 action, int32 mods) {
+		glfwSetMouseButtonCallback(window, [](GLFWwindow* window, sint32 button, sint32 action, sint32 mods) {
 			const GLFWData& data = *static_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
 			switch (action) {

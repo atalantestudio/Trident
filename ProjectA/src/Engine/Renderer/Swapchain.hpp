@@ -11,7 +11,7 @@ namespace ProjectA {
 		public:
 			virtual ~Swapchain() = default;
 
-			// TODO: Use vec2<int32>.
+			// TODO: Use vec2<sint32>.
 			virtual uint32 getExtentWidth() const = 0;
 			virtual uint32 getExtentHeight() const = 0;
 	};

@@ -75,7 +75,7 @@ namespace ProjectA {
 		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);	// a_position
 		renderPipelineDescriptor.vertexBufferLayout.add<vec4<float32>>(0, false);	// a_color
 		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);	// a_uv
-		renderPipelineDescriptor.vertexBufferLayout.add<int32>(0, false);			// a_texture
+		renderPipelineDescriptor.vertexBufferLayout.add<sint32>(0, false);			// a_texture
 		renderPipelineDescriptor.vertexBufferLayout.add<float32>(0, false);			// a_tilingFactor
 
 		renderPipelineDescriptor.pipelineLayout = storage.pipelineLayout;
@@ -142,9 +142,9 @@ namespace ProjectA {
 		//storage.textureSlots[0] = Texture::create(1, 1);
 		//storage.textureSlots[0]->setData(&defaultTextureData, 4);
 
-		int32 textureSamplers[Renderer2DStorage::MAX_TEXTURE_SLOTS]{};
+		sint32 textureSamplers[Renderer2DStorage::MAX_TEXTURE_SLOTS]{};
 
-		for (int32 i = 0; i < Renderer2DStorage::MAX_TEXTURE_SLOTS; i++) {
+		for (sint32 i = 0; i < Renderer2DStorage::MAX_TEXTURE_SLOTS; i++) {
 			textureSamplers[i] = i;
 		}
 

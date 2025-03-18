@@ -7,8 +7,8 @@ namespace ProjectA {
 	static uint32 getAttributeSize();
 
 	template<>
-	static inline uint32 getAttributeSize<int8>() {
-		return sizeof(int8);
+	static inline uint32 getAttributeSize<sint8>() {
+		return sizeof(sint8);
 	}
 
 	template<>
@@ -17,8 +17,8 @@ namespace ProjectA {
 	}
 
 	template<>
-	static inline uint32 getAttributeSize<int16>() {
-		return sizeof(int16);
+	static inline uint32 getAttributeSize<sint16>() {
+		return sizeof(sint16);
 	}
 
 	template<>
@@ -27,8 +27,8 @@ namespace ProjectA {
 	}
 
 	template<>
-	static inline uint32 getAttributeSize<int32>() {
-		return sizeof(int32);
+	static inline uint32 getAttributeSize<sint32>() {
+		return sizeof(sint32);
 	}
 
 	// NOTE: Alignment WITHOUT relaxed block layout.
@@ -68,8 +68,8 @@ namespace ProjectA {
 	}
 
 	template<>
-	static inline uint32 getAttributeSize<int64>() {
-		return sizeof(int64);
+	static inline uint32 getAttributeSize<sint64>() {
+		return sizeof(sint64);
 	}
 
 	template<>

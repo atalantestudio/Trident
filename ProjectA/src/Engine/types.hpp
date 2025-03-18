@@ -5,12 +5,6 @@ namespace ProjectA {
 
 	// TODO: void* any typedef?
 
-	// TODO: int(8|16|32|64) is deprecated in favor of sint(8|16|32|64).
-	typedef std::int8_t int8;
-	typedef std::int16_t int16;
-	typedef std::int32_t int32;
-	typedef std::int64_t int64;
-
 	typedef std::int8_t sint8;
 	typedef std::int16_t sint16;
 	typedef std::int32_t sint32;
