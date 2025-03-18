@@ -104,6 +104,8 @@
 	#define PROFILE_SCOPE(name)
 #endif
 
+#define BIT(index) 1 << index
+
 #define BIND(function) \
 	[this](auto&&... arguments) -> decltype(auto) { \
 		return this->function(std::forward<decltype(arguments)>(arguments)...); \

@@ -35,7 +35,9 @@ namespace ProjectA {
 
 		private:
 			const VkPhysicalDevice physicalDevice;
-			VkQueue graphicsQueue;
 			VkQueue presentQueue;
+
+		public:
+			VkQueue graphicsQueue;
 	};
 }

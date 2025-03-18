@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	// Returns the number of component per generic vertex attribute.
-	static GLint getGlSize(const VertexInputAttributeType type) {
+	static GLint getGlSize(VertexInputAttributeType type) {
 		static constexpr GLint glSizes[] = {
 			1,
 			1,
@@ -35,7 +35,7 @@ namespace ProjectA {
 		return glSize;
 	}
 
-	static GLenum getGlType(const VertexInputAttributeType type) {
+	static GLenum getGlType(VertexInputAttributeType type) {
 		static constexpr GLenum glTypes[] = {
 			GL_BYTE,
 			GL_UNSIGNED_BYTE,

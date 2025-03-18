@@ -3,11 +3,15 @@
 #include "pch.hpp"
 
 namespace ProjectA {
-	enum class BufferUsage : uint32 {
-		UNIFORM = 0,
-		STORAGE = 1,
-		INDEX = 2,
-		VERTEX = 3,
-		INDIRECT = 4,
+	enum class BufferUsage : uint16 {
+		TRANSFER_SRC = BIT(0),
+		TRANSFER_DST = BIT(1),
+		UNIFORM = BIT(4),
+		STORAGE = BIT(5),
+		INDEX = BIT(6),
+		VERTEX = BIT(7),
+		INDIRECT = BIT(8),
 	};
+
+	AS_FLAG(BufferUsage);
 }

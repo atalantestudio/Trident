@@ -10,7 +10,7 @@ namespace ProjectA {
 	class VulkanBuffer : public Buffer, public ObjectWrapper<VkBuffer> {
 		public:
 			// TODO: Implement staging buffer with vertex and index buffers.
-			VulkanBuffer(VkPhysicalDevice physicalDevice, const VulkanDevice& device, const BufferDescriptor& descriptor);
+			VulkanBuffer(VkPhysicalDevice physicalDevice, VkCommandPool commandPool, const VulkanDevice& device, const BufferDescriptor& descriptor);
 
 			~VulkanBuffer();
 
@@ -18,11 +18,14 @@ namespace ProjectA {
 
 			void unmap() const override;
 
+			void copy(const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) const override;
+
 		public:
 			const uint64 size;
 
 		private:
 			const VulkanDevice& device;
 			VkDeviceMemory memory;
+			VkCommandPool commandPool;
 	};
 }

@@ -5,7 +5,7 @@
 #include "Engine/Renderer/DescriptorType.hpp"
 
 namespace ProjectA {
-	static VkDescriptorType getVkDescriptorType(const DescriptorType descriptorType) {
+	static VkDescriptorType getVkDescriptorType(DescriptorType descriptorType) {
 		static constexpr VkDescriptorType vkDescriptorTypes[] = {
 			VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,

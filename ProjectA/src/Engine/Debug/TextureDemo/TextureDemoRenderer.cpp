@@ -73,17 +73,25 @@ namespace ProjectA {
 			vertices[3].position = {0.5f, -0.5f};
 			vertices[3].uv = {1.0f, 0.0f};
 
-			BufferDescriptor vertexBufferDescriptor{};
-			vertexBufferDescriptor.size = sizeof(Vertex) * vertices.size();
-			vertexBufferDescriptor.usage = BufferUsage::VERTEX;
+			BufferDescriptor stagingBufferDescriptor{};
+			stagingBufferDescriptor.size = sizeof(Vertex) * vertices.size();
+			stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
 
-			vertexBuffer = createBuffer(vertexBufferDescriptor);
+			const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
 
-			BufferMappedRange mappedRange = vertexBuffer->map(0, vertexBufferDescriptor.size);
+			const BufferMappedRange mappedRange = stagingBuffer->map(0, stagingBufferDescriptor.size);
 
 			std::copy(vertices.begin(), vertices.end(), static_cast<Vertex*>(mappedRange));
 
-			vertexBuffer->unmap();
+			stagingBuffer->unmap();
+
+			BufferDescriptor vertexBufferDescriptor{};
+			vertexBufferDescriptor.size = stagingBufferDescriptor.size;
+			vertexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX;
+
+			vertexBuffer = createBuffer(vertexBufferDescriptor);
+
+			stagingBuffer->copy(vertexBuffer, 0, 0, stagingBufferDescriptor.size);
 		}
 
 		// Create index buffer.
@@ -96,13 +104,13 @@ namespace ProjectA {
 			indices[4] = 2;
 			indices[5] = 3;
 
-			BufferDescriptor indexBufferDescriptor{};
-			indexBufferDescriptor.size = sizeof(uint16) * indices.size();
-			indexBufferDescriptor.usage = BufferUsage::INDEX;
+			BufferDescriptor bufferDescriptor{};
+			bufferDescriptor.size = sizeof(uint16) * indices.size();
+			bufferDescriptor.usage = BufferUsage::INDEX;
 
-			indexBuffer = createBuffer(indexBufferDescriptor);
+			indexBuffer = createBuffer(bufferDescriptor);
 
-			BufferMappedRange mappedRange = indexBuffer->map(0, indexBufferDescriptor.size);
+			const BufferMappedRange mappedRange = indexBuffer->map(0, bufferDescriptor.size);
 
 			std::copy(indices.begin(), indices.end(), static_cast<uint16*>(mappedRange));
 

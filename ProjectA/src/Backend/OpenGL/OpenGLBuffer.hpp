@@ -16,6 +16,8 @@ namespace ProjectA {
 
 			void unmap() const override;
 
+			void copy(const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) const override;
+
 		public:
 			const GLenum target;
 			const GLsizeiptr size;

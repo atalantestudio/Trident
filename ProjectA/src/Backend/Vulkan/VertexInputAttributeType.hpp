@@ -5,7 +5,7 @@
 #include "Engine/Renderer/Buffer/VertexInputAttributeType.hpp"
 
 namespace ProjectA {
-	static VkFormat getVkFormat(const VertexInputAttributeType vertexInputAttributeType) {
+	static VkFormat getVkFormat(VertexInputAttributeType vertexInputAttributeType) {
 		static constexpr VkFormat vkFormats[] = {
 			VK_FORMAT_R8_SINT,
 			VK_FORMAT_R8_UINT,

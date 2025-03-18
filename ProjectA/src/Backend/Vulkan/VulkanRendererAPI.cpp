@@ -37,7 +37,7 @@ namespace ProjectA {
 	}
 
 	ref<Buffer> VulkanRendererAPI::createBuffer(const BufferDescriptor& descriptor) const {
-		return createRef<VulkanBuffer>(physicalDevice.object, *device, descriptor);
+		return createRef<VulkanBuffer>(physicalDevice.object, commandPool.object, *device, descriptor);
 	}
 
 	ref<CommandEncoder> VulkanRendererAPI::createCommandEncoder() const {

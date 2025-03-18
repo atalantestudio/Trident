@@ -5,7 +5,7 @@
 #include "Engine/Renderer/DescriptorType.hpp"
 
 namespace ProjectA {
-	static GLenum getGlDescriptorType(const DescriptorType descriptorType) {
+	static GLenum getGlDescriptorType(DescriptorType descriptorType) {
 		static constexpr GLenum glDescriptorTypes[] = {
 			GL_SHADER_STORAGE_BUFFER,
 			GL_UNIFORM_BUFFER,

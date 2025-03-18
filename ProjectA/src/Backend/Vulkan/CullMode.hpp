@@ -5,7 +5,7 @@
 #include "Engine/Renderer/CullMode.hpp"
 
 namespace ProjectA {
-	static VkCullModeFlagBits getVkCullMode(const CullMode cullMode) {
+	static VkCullModeFlagBits getVkCullMode(CullMode cullMode) {
 		static constexpr VkCullModeFlagBits vkCullModes[] = {
 			VK_CULL_MODE_NONE,
 			VK_CULL_MODE_FRONT_BIT,
