@@ -73,25 +73,27 @@ namespace ProjectA {
 			vertices[3].position = {0.5f, -0.5f};
 			vertices[3].uv = {1.0f, 0.0f};
 
+			const uint64 size = sizeof(Vertex) * vertices.size();
+
 			BufferDescriptor stagingBufferDescriptor{};
-			stagingBufferDescriptor.size = sizeof(Vertex) * vertices.size();
+			stagingBufferDescriptor.size = size;
 			stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
 
 			const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
 
-			const BufferMappedRange mappedRange = stagingBuffer->map(0, stagingBufferDescriptor.size);
+			const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
 
 			std::copy(vertices.begin(), vertices.end(), static_cast<Vertex*>(mappedRange));
 
 			stagingBuffer->unmap();
 
 			BufferDescriptor vertexBufferDescriptor{};
-			vertexBufferDescriptor.size = stagingBufferDescriptor.size;
+			vertexBufferDescriptor.size = size;
 			vertexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX;
 
 			vertexBuffer = createBuffer(vertexBufferDescriptor);
 
-			stagingBuffer->copy(vertexBuffer, 0, 0, stagingBufferDescriptor.size);
+			stagingBuffer->copy(vertexBuffer, 0, 0, size);
 		}
 
 		// Create index buffer.
@@ -104,17 +106,27 @@ namespace ProjectA {
 			indices[4] = 2;
 			indices[5] = 3;
 
-			BufferDescriptor bufferDescriptor{};
-			bufferDescriptor.size = sizeof(uint16) * indices.size();
-			bufferDescriptor.usage = BufferUsage::INDEX;
+			const uint64 size = sizeof(uint16) * indices.size();
 
-			indexBuffer = createBuffer(bufferDescriptor);
+			BufferDescriptor stagingBufferDescriptor{};
+			stagingBufferDescriptor.size = size;
+			stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
 
-			const BufferMappedRange mappedRange = indexBuffer->map(0, bufferDescriptor.size);
+			const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
+
+			const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
 
 			std::copy(indices.begin(), indices.end(), static_cast<uint16*>(mappedRange));
 
-			indexBuffer->unmap();
+			stagingBuffer->unmap();
+
+			BufferDescriptor indexBufferDescriptor{};
+			indexBufferDescriptor.size = size;
+			indexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX;
+
+			indexBuffer = createBuffer(indexBufferDescriptor);
+
+			stagingBuffer->copy(indexBuffer, 0, 0, size);
 		}
 
 		commandEncoder = createCommandEncoder();
