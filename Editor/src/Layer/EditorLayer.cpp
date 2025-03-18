@@ -10,7 +10,7 @@ namespace ProjectA {
 	void EditorLayer::bind() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		checkerboardTexture = Texture2D::create("assets/textures/checkerboard.png");
+		//checkerboardTexture = Texture2D::create("assets/textures/checkerboard.png");
 
 		FramebufferDescriptor framebufferDescriptor;
 		framebufferDescriptor.renderToSwapchain = false;

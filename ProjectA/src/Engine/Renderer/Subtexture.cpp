@@ -3,7 +3,7 @@
 #include "Engine/Renderer/Subtexture.hpp"
 
 namespace ProjectA {
-	ref<Subtexture> Subtexture::createSprite(const ref<Texture2D>& texture, const vec2<float32>& position, const vec2<float32>& size, const vec2<float32>& unit) {
+	ref<Subtexture> Subtexture::createSprite(const ref<Texture>& texture, const vec2<float32>& position, const vec2<float32>& size, const vec2<float32>& unit) {
 		// TODO: Size getter in Texture
 		const vec2<float32> textureSize = {static_cast<float32>(texture->getWidth()), static_cast<float32>(texture->getHeight())};
 		const vec2<float32> min = position * size / textureSize;
@@ -15,7 +15,7 @@ namespace ProjectA {
 	// Coordinates order:
 	// 1 2
 	// 0 3
-	Subtexture::Subtexture(const ref<Texture2D>& texture, const vec2<float32>& min, const vec2<float32>& max) :
+	Subtexture::Subtexture(const ref<Texture>& texture, const vec2<float32>& min, const vec2<float32>& max) :
 		texture(texture),
 		coordinates{
 			{min[0], min[1]},

@@ -2,10 +2,10 @@
 
 #include <stb_image.h>
 
-#include "Backend/OpenGL/OpenGLTexture2D.hpp"
+#include "Backend/OpenGL/OpenGLTexture.hpp"
 
 namespace ProjectA {
-	OpenGLTexture2D::OpenGLTexture2D(GLsizei width, GLsizei height) :
+	OpenGLTexture::OpenGLTexture(GLsizei width, GLsizei height) :
 		internalFormat(GL_RGBA8),
 		format(GL_RGBA),
 		width(width),
@@ -14,7 +14,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[OpenGLTexture2D]");
+		ENGINE_TRACE("[OpenGLTexture]");
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &object);
 
@@ -26,14 +26,13 @@ namespace ProjectA {
 		glTextureParameteri(object, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(const std::string& path) :
+	OpenGLTexture::OpenGLTexture() :
 		internalFormat(GL_RGBA8),
-		format(GL_RGBA),
-		debugPath(path)
+		format(GL_RGBA)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[OpenGLTexture2D]");
+		ENGINE_TRACE("[OpenGLTexture]");
 
 		stbi_set_flip_vertically_on_load(1);
 
@@ -43,7 +42,7 @@ namespace ProjectA {
 		stbi_uc* data;
 
 		{
-			PROFILE_SCOPE("OpenGLTexture2D/stbi_load");
+			PROFILE_SCOPE("OpenGLTexture/stbi_load");
 
 			data = stbi_load(path.c_str(), &x, &y, &channelCount, 0);
 		}
@@ -78,27 +77,23 @@ namespace ProjectA {
 		stbi_image_free(data);
 	}
 
-	OpenGLTexture2D::~OpenGLTexture2D() {
+	OpenGLTexture::~OpenGLTexture() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[~OpenGLTexture2D]");
+		ENGINE_TRACE("[~OpenGLTexture]");
 
 		glDeleteTextures(1, &object);
 	}
 
-	uint32 OpenGLTexture2D::getId() const {
-		return object;
-	}
-
-	uint32 OpenGLTexture2D::getWidth() const {
+	uint32 OpenGLTexture::getWidth() const {
 		return static_cast<uint32>(width);
 	}
 
-	uint32 OpenGLTexture2D::getHeight() const {
+	uint32 OpenGLTexture::getHeight() const {
 		return static_cast<uint32>(height);
 	}
 
-	void OpenGLTexture2D::setData(const void* data, uint32 size) const {
+	void OpenGLTexture::setData(const void* data, uint32 size) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		// TODO: Store channel count?
@@ -111,19 +106,15 @@ namespace ProjectA {
 		glTextureSubImage2D(object, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	}
 
-	void OpenGLTexture2D::bind(uint32 slot) const {
+	/*void OpenGLTexture::bind(uint32 slot) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glBindTextureUnit(slot, object);
 	}
 
-	void OpenGLTexture2D::unbind() const {
+	void OpenGLTexture::unbind() const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
-	bool OpenGLTexture2D::operator ==(const Texture& other) const {
-		return object == ((OpenGLTexture2D&) other).object;
-	}
+	}*/
 }

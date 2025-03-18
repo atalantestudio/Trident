@@ -2,13 +2,13 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Layer/GUILayer.hpp"
+#include "Layer/DemoLayer.hpp"
 
 namespace ProjectA {
 	class EditorApplication : public Application {
 		public:
 			EditorApplication() : Application("ProjectA Editor") {
-				pushLayer(new GUILayer());
+				pushLayer(new DemoLayer());
 			}
 
 			~EditorApplication() {}

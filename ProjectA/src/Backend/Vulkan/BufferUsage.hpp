@@ -5,7 +5,7 @@
 #include "Engine/Renderer/Buffer/BufferUsage.hpp"
 
 namespace ProjectA {
-	static VkBufferUsageFlagBits getVkBufferUsageFlagBits(const BufferUsage bufferUsage) {
+	static VkBufferUsageFlagBits getVkBufferUsageFlagBits(BufferUsage bufferUsage) {
 		static constexpr VkBufferUsageFlagBits vkBufferUsageFlagBits[] = {
 			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -14,6 +14,6 @@ namespace ProjectA {
 			VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT,
 		};
 
-		return vkBufferUsageFlagBits[static_cast<uint32>(bufferUsage)];
+		return vkBufferUsageFlagBits[static_cast<sint32>(bufferUsage)];
 	}
 }

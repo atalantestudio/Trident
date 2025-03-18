@@ -35,7 +35,7 @@ namespace ProjectA {
 		QuadVertex* vertexBufferPointer = nullptr;
 
 		// TODO: Replace with assets/asset containers.
-		std::array<ref<Texture2D>, MAX_TEXTURE_SLOTS> textureSlots;
+		std::array<ref<Texture>, MAX_TEXTURE_SLOTS> textureSlots;
 		uint32 currentSlotIndex = 1; // Skip default texture.
 
 		vec4<float32> quadVertexPositions[4];
@@ -139,8 +139,8 @@ namespace ProjectA {
 
 		const uint32 defaultTextureData = 0xffffffff;
 
-		storage.textureSlots[0] = Texture2D::create(1, 1);
-		storage.textureSlots[0]->setData(&defaultTextureData, 4);
+		//storage.textureSlots[0] = Texture::create(1, 1);
+		//storage.textureSlots[0]->setData(&defaultTextureData, 4);
 
 		int32 textureSamplers[Renderer2DStorage::MAX_TEXTURE_SLOTS]{};
 
@@ -188,7 +188,7 @@ namespace ProjectA {
 		//storage.renderPipeline->bind();
 
 		for (uint32 slotIndex = 0; slotIndex < storage.currentSlotIndex; slotIndex++) {
-			storage.textureSlots[slotIndex]->bind(slotIndex);
+			//storage.textureSlots[slotIndex]->bind(slotIndex);
 		}
 
 		//Renderer::getRendererApi()->drawIndexed(storage.renderPipeline, storage.quadCount * 6);
@@ -236,11 +236,11 @@ namespace ProjectA {
 		storage.statistics.quadCount++;
 	}
 
-	void Renderer2D::drawQuad(const vec2<float32>& position, const vec2<float32>& size, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
+	void Renderer2D::drawQuad(const vec2<float32>& position, const vec2<float32>& size, const ref<Texture>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
 		drawQuad({position[0], position[1], 0.0f}, size, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::drawQuad(const vec3<float32>& position, const vec2<float32>& size, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
+	void Renderer2D::drawQuad(const vec3<float32>& position, const vec2<float32>& size, const ref<Texture>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		constexpr uint32 quadVertexCount = 4;
@@ -251,13 +251,13 @@ namespace ProjectA {
 
 		uint32 slotIndex = 0;
 
-		for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
+		/*for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
 			if (*texture.get() == *storage.textureSlots[i].get()) {
 				slotIndex = i;
 
 				break;
 			}
-		}
+		}*/
 
 		if (slotIndex == 0) {
 			if (storage.currentSlotIndex >= storage.MAX_TEXTURE_SLOTS) {
@@ -303,13 +303,13 @@ namespace ProjectA {
 
 		uint32 slotIndex = 0;
 
-		for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
+		/*for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
 			if (*subtexture->texture.get() == *storage.textureSlots[i].get()) {
 				slotIndex = i;
 
 				break;
 			}
-		}
+		}*/
 
 		if (slotIndex == 0) {
 			if (storage.currentSlotIndex >= storage.MAX_TEXTURE_SLOTS) {
@@ -373,11 +373,11 @@ namespace ProjectA {
 		storage.statistics.quadCount++;
 	}
 
-	void Renderer2D::drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 angle, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
+	void Renderer2D::drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 angle, const ref<Texture>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
 		drawRotatedQuad({position[0], position[1], 0.0f}, size, angle, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 angle, const ref<Texture2D>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
+	void Renderer2D::drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 angle, const ref<Texture>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		constexpr uint32 quadVertexCount = 4;
@@ -388,13 +388,13 @@ namespace ProjectA {
 
 		uint32 slotIndex = 0;
 
-		for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
+		/*for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
 			if (*texture.get() == *storage.textureSlots[i].get()) {
 				slotIndex = i;
 
 				break;
 			}
-		}
+		}*/
 
 		if (slotIndex == 0) {
 			if (storage.currentSlotIndex >= storage.MAX_TEXTURE_SLOTS) {
@@ -441,13 +441,13 @@ namespace ProjectA {
 
 		uint32 slotIndex = 0;
 
-		for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
+		/*for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
 			if (*subtexture->texture.get() == *storage.textureSlots[i].get()) {
 				slotIndex = i;
 
 				break;
 			}
-		}
+		}*/
 
 		if (slotIndex == 0) {
 			if (storage.currentSlotIndex >= storage.MAX_TEXTURE_SLOTS) {

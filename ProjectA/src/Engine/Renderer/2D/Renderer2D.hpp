@@ -32,16 +32,16 @@ namespace ProjectA {
 
 			static void drawQuad(const vec2<float32>& position, const vec2<float32>& size, const vec4<float32>& color);
 			static void drawQuad(const vec3<float32>& position, const vec2<float32>& size, const vec4<float32>& color);
-			static void drawQuad(const vec2<float32>& position, const vec2<float32>& size, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
-			static void drawQuad(const vec3<float32>& position, const vec2<float32>& size, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
+			static void drawQuad(const vec2<float32>& position, const vec2<float32>& size, const ref<Texture>& texture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
+			static void drawQuad(const vec3<float32>& position, const vec2<float32>& size, const ref<Texture>& texture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
 			static void drawQuad(const vec2<float32>& position, const vec2<float32>& size, const ref<Subtexture>& subtexture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
 			static void drawQuad(const vec3<float32>& position, const vec2<float32>& size, const ref<Subtexture>& subtexture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
 
 			// NOTE: Angle is in radians.
 			static void drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 angle, const vec4<float32>& color);
 			static void drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 angle, const vec4<float32>& color);
-			static void drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 angle, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
-			static void drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 angle, const ref<Texture2D>& texture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
+			static void drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 angle, const ref<Texture>& texture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
+			static void drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 angle, const ref<Texture>& texture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
 			static void drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 angle, const ref<Subtexture>& subtexture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
 			static void drawRotatedQuad(const vec3<float32>& position, const vec2<float32>& size, float32 angle, const ref<Subtexture>& subtexture, float32 tilingFactor = 1.0f, const vec4<float32>& tintColor = {1.0f, 1.0f, 1.0f, 1.0f});
 

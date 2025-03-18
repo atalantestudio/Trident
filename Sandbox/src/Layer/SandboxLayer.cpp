@@ -9,7 +9,7 @@ SandboxLayer::SandboxLayer() : Layer("Sandbox"), cameraController(1280.0f / 720.
 void SandboxLayer::bind() {
 	PROFILE_SCOPE(FUNC_SIG);
 
-	checkerboardTexture = ProjectA::Texture2D::create("assets/textures/checkerboard.png");
+	//checkerboardTexture = ProjectA::Texture2D::create("assets/textures/checkerboard.png");
 }
 
 void SandboxLayer::unbind() {
