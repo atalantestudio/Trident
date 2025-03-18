@@ -7,6 +7,7 @@
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
 #include "Backend/Vulkan/VulkanSemaphore.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
+#include "Backend/Vulkan/VulkanTexture.hpp"
 
 namespace ProjectA {
 	VulkanRendererAPI::VulkanRendererAPI(GLFWwindow* window) :
@@ -40,8 +41,8 @@ namespace ProjectA {
 		return createRef<VulkanBuffer>(physicalDevice.object, commandPool.object, *device, descriptor);
 	}
 
-	ref<CommandEncoder> VulkanRendererAPI::createCommandEncoder() const {
-		return createRef<VulkanCommandEncoder>(*device, commandPool.object);
+	ref<CommandEncoder> VulkanRendererAPI::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
+		return createRef<VulkanCommandEncoder>(*device, commandPool.object, descriptor);
 	}
 
 	ref<Fence> VulkanRendererAPI::createFence() const {
@@ -75,5 +76,9 @@ namespace ProjectA {
 
 	ref<Swapchain> VulkanRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) const {
 		return createRef<VulkanSwapchain>(physicalDevice, surface, device->object, descriptor);
+	}
+
+	ref<Texture> VulkanRendererAPI::createTexture(const TextureDescriptor& descriptor) const {
+		return createRef<VulkanTexture>(*device, descriptor);
 	}
 }

@@ -18,7 +18,16 @@ namespace ProjectA {
 
 		swapchain = createSwapchain(swapchainDescriptor);
 
-		const PipelineLayoutDescriptor pipelineLayoutDescriptor;
+		//DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding{};
+		//textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		//textureDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		//textureDescriptorSetLayoutBinding.buffers = {textureStorageBuffer};
+
+		//DescriptorSetLayout textureDescriptotSetLayout{};
+		//textureDescriptotSetLayout.bindings.emplace_back(textureDescriptorSetLayoutBinding);
+
+		PipelineLayoutDescriptor pipelineLayoutDescriptor;
+		//pipelineLayoutDescriptor.layouts.emplace_back();
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
@@ -93,7 +102,20 @@ namespace ProjectA {
 
 			vertexBuffer = createBuffer(vertexBufferDescriptor);
 
-			stagingBuffer->copy(vertexBuffer, 0, 0, size);
+			CommandBufferDescriptor commandBufferDescriptor{};
+			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+
+			commandEncoder->begin();
+			commandEncoder->copyBuffer(stagingBuffer, vertexBuffer, 0, 0, size);
+
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+			const ref<Device>& device = getDevice();
+
+			device->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->waitIdle();
 		}
 
 		// Create index buffer.
@@ -126,10 +148,37 @@ namespace ProjectA {
 
 			indexBuffer = createBuffer(indexBufferDescriptor);
 
-			stagingBuffer->copy(indexBuffer, 0, 0, size);
+			CommandBufferDescriptor commandBufferDescriptor{};
+			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+
+			commandEncoder->begin();
+			commandEncoder->copyBuffer(stagingBuffer, indexBuffer, 0, 0, size);
+
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+			const ref<Device>& device = getDevice();
+
+			device->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->waitIdle();
 		}
 
-		commandEncoder = createCommandEncoder();
+		// Create texture.
+		{
+			const chain<vec4<float32>> data = {
+				{255.0f, 0.0f, 0.0f, 255.0f}, {0.0, 0.0f, 255.0f, 255.0f},
+				{0.0f, 255.0f, 0.0f, 255.0f}, {255.0f, 255.0f, 255.0f, 255.0f},
+			};
+		}
+
+		// Create command encoder.
+		{
+			CommandBufferDescriptor commandBufferDescriptor{};
+			commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+
+			commandEncoder = createCommandEncoder(commandBufferDescriptor);
+		}
 
 		for (std::size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 			availableImageSemaphores[i] = createSemaphore();

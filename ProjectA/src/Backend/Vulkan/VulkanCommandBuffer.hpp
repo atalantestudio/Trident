@@ -8,6 +8,9 @@
 namespace ProjectA {
 	class VulkanCommandBuffer : public CommandBuffer, public ObjectWrapper<const VkCommandBuffer> {
 		public:
-			VulkanCommandBuffer(const VkCommandBuffer commandBuffer);
+			VulkanCommandBuffer(VkCommandBuffer commandBuffer, VkPipelineStageFlags pipelineStageFlags);
+
+		public:
+			const VkPipelineStageFlags pipelineStageFlags;
 	};
 }

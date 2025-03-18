@@ -5,6 +5,7 @@
 #include "Engine/Renderer/Device.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 #include "Engine/Renderer/ShaderStage.hpp"
+#include "Engine/Renderer/Texture.hpp"
 #include "Engine/Synchronization/Fence.hpp"
 #include "Engine/Synchronization/Semaphore.hpp"
 
@@ -17,7 +18,7 @@ namespace ProjectA {
 
 			virtual ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const = 0;
 
-			virtual ref<CommandEncoder> createCommandEncoder() const = 0;
+			virtual ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const = 0;
 
 			virtual ref<Fence> createFence() const = 0;
 
@@ -32,5 +33,7 @@ namespace ProjectA {
 			virtual ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const = 0;
 
 			virtual ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const = 0;
+
+			virtual ref<Texture> createTexture(const TextureDescriptor& descriptor) const = 0;
 	};
 }

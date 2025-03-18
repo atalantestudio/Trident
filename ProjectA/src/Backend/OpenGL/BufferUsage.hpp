@@ -37,5 +37,7 @@ namespace ProjectA {
 		if (bufferUsage & BufferUsage::TRANSFER_DST) {
 			return GL_COPY_WRITE_BUFFER;
 		}
+
+		throw std::runtime_error("Failed to convert buffer usage.");
 	}
 }

@@ -60,8 +60,8 @@ namespace ProjectA {
 		return rendererApi->createBuffer(descriptor);
 	}
 
-	ref<CommandEncoder> Renderer::createCommandEncoder() const {
-		return rendererApi->createCommandEncoder();
+	ref<CommandEncoder> Renderer::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
+		return rendererApi->createCommandEncoder(descriptor);
 	}
 
 	ref<Fence> Renderer::createFence() const {
@@ -90,5 +90,9 @@ namespace ProjectA {
 
 	ref<Swapchain> Renderer::createSwapchain(const SwapchainDescriptor& descriptor) const {
 		return rendererApi->createSwapchain(descriptor);
+	}
+
+	ref<Texture> Renderer::createTexture(const TextureDescriptor& descriptor) const {
+		return rendererApi->createTexture(descriptor);
 	}
 }

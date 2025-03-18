@@ -46,14 +46,4 @@ namespace ProjectA {
 			throw std::runtime_error("Failed to unmap buffer.");
 		}
 	}
-
-	void OpenGLBuffer::copy(const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) const {
-		glBindBuffer(GL_COPY_READ_BUFFER, object);
-		glBindBuffer(GL_COPY_WRITE_BUFFER, static_cast<OpenGLBuffer*>(destinationBuffer.get())->object);
-
-		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, sourceOffset, destinationOffset, size);
-
-		glBindBuffer(GL_COPY_READ_BUFFER, 0);
-		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
-	}
 }

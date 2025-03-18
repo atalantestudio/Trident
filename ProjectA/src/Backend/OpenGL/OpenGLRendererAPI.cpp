@@ -10,6 +10,7 @@
 #include "Backend/OpenGL/OpenGLSemaphore.hpp"
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
+#include "Backend/OpenGL/OpenGLTexture.hpp"
 
 namespace ProjectA {
 	OpenGLRendererAPI::OpenGLRendererAPI(GLFWwindow* window) :
@@ -30,8 +31,8 @@ namespace ProjectA {
 		return createRef<OpenGLFence>();
 	}
 
-	ref<CommandEncoder> OpenGLRendererAPI::createCommandEncoder() const {
-		return createRef<OpenGLCommandEncoder>();
+	ref<CommandEncoder> OpenGLRendererAPI::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
+		return createRef<OpenGLCommandEncoder>(descriptor);
 	}
 
 	ref<PipelineLayout> OpenGLRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
@@ -61,5 +62,9 @@ namespace ProjectA {
 
 	ref<Swapchain> OpenGLRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) const {
 		return createRef<OpenGLSwapchain>(window, descriptor);
+	}
+
+	ref<Texture> OpenGLRendererAPI::createTexture(const TextureDescriptor& descriptor) const {
+		return createRef<OpenGLTexture>(descriptor);
 	}
 }

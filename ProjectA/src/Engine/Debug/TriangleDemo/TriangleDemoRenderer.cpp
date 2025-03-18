@@ -91,7 +91,20 @@ namespace ProjectA {
 
 			vertexBuffer = createBuffer(vertexBufferDescriptor);
 
-			stagingBuffer->copy(vertexBuffer, 0, 0, size);
+			CommandBufferDescriptor commandBufferDescriptor{};
+			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+
+			commandEncoder->begin();
+			commandEncoder->copyBuffer(stagingBuffer, vertexBuffer, 0, 0, size);
+
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+			const ref<Device>& device = getDevice();
+
+			device->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->waitIdle();
 		}
 
 		// Create index buffer.
@@ -121,10 +134,29 @@ namespace ProjectA {
 
 			indexBuffer = createBuffer(indexBufferDescriptor);
 
-			stagingBuffer->copy(indexBuffer, 0, 0, size);
+			CommandBufferDescriptor commandBufferDescriptor{};
+			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+
+			commandEncoder->begin();
+			commandEncoder->copyBuffer(stagingBuffer, indexBuffer, 0, 0, size);
+
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+			const ref<Device>& device = getDevice();
+
+			device->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->waitIdle();
 		}
 
-		commandEncoder = createCommandEncoder();
+		// Create command encoder.
+		{
+			CommandBufferDescriptor commandBufferDescriptor{};
+			commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+
+			commandEncoder = createCommandEncoder(commandBufferDescriptor);
+		}
 
 		for (std::size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 			availableImageSemaphores[i] = createSemaphore();

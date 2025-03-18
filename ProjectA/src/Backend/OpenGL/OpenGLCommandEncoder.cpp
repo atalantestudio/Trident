@@ -6,6 +6,7 @@
 #include "Backend/OpenGL/Command/OpenGLBindIndexBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindRenderPipelineCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindVertexBufferCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLCopyBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetViewportCommand.hpp"
@@ -14,7 +15,7 @@
 #include "Backend/OpenGL/OpenGLCommandEncoder.hpp"
 
 namespace ProjectA {
-	OpenGLCommandEncoder::OpenGLCommandEncoder() {
+	OpenGLCommandEncoder::OpenGLCommandEncoder(const CommandBufferDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCSIG);
 
 		ENGINE_TRACE("[OpenGLCommandEncoder]");
@@ -47,6 +48,16 @@ namespace ProjectA {
 			bindingIndex,
 			static_cast<const OpenGLBuffer*>(vertexBuffer.get())->object,
 			stride
+		));
+	}
+
+	void OpenGLCommandEncoder::copyBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) {
+		commandBuffer.emplace_back(createRef<OpenGLCopyBufferCommand>(
+			static_cast<const OpenGLBuffer*>(sourceBuffer.get())->object,
+			static_cast<const OpenGLBuffer*>(destinationBuffer.get())->object,
+			sourceOffset,
+			destinationOffset,
+			size
 		));
 	}
 

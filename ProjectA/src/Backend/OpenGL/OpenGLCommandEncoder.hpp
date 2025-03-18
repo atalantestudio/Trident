@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class OpenGLCommandEncoder : public CommandEncoder {
 		public:
-			OpenGLCommandEncoder();
+			OpenGLCommandEncoder(const CommandBufferDescriptor& descriptor);
 
 			void begin() const override;
 
@@ -21,6 +21,8 @@ namespace ProjectA {
 			void bindIndexBuffer(const ref<Buffer>& indexBuffer, const uint64 offset, const IndexType indexType) override;
 
 			void bindVertexBuffer(const uint32 bindingIndex, const ref<Buffer>& vertexBuffer, const uint32 stride) override;
+
+			void copyBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) override;
 
 			void setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) override;
 

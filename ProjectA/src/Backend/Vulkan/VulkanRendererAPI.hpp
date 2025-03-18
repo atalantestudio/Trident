@@ -22,7 +22,7 @@ namespace ProjectA {
 
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const override;
 
-			ref<CommandEncoder> createCommandEncoder() const override;
+			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const override;
 
 			ref<Fence> createFence() const override;
 
@@ -37,6 +37,8 @@ namespace ProjectA {
 			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const override;
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const override;
+
+			ref<Texture> createTexture(const TextureDescriptor& descriptor) const override;
 
 		private:
 			const VulkanInstance instance;

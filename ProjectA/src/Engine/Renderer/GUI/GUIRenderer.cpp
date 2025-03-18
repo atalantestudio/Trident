@@ -152,7 +152,13 @@ namespace ProjectA {
 			indexBuffer->unmap();
 		}
 
-		commandEncoder = createCommandEncoder();
+		// Create command encoder.
+		{
+			CommandBufferDescriptor commandBufferDescriptor{};
+			commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+
+			commandEncoder = createCommandEncoder(commandBufferDescriptor);
+		}
 	}
 
 	void GUIRenderer::registerEntities(const ECS& ecs) {

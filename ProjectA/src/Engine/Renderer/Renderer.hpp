@@ -10,6 +10,7 @@
 #include "Engine/Renderer/RenderPass.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
+#include "Engine/Renderer/Texture.hpp"
 
 typedef struct GLFWwindow GLFWwindow;
 
@@ -34,7 +35,7 @@ namespace ProjectA {
 
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const;
 
-			ref<CommandEncoder> createCommandEncoder() const;
+			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const;
 
 			ref<Fence> createFence() const;
 
@@ -49,6 +50,8 @@ namespace ProjectA {
 			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const;
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const;
+
+			ref<Texture> createTexture(const TextureDescriptor& descriptor) const;
 
 		private:
 			static GraphicsAPI graphicsApi;

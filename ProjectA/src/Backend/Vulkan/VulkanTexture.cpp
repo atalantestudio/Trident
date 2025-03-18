@@ -7,7 +7,9 @@
 
 namespace ProjectA {
 	VulkanTexture::VulkanTexture(const VulkanDevice& device, const TextureDescriptor& descriptor) :
-		device(device)
+		device(device),
+		width(descriptor.width),
+		height(descriptor.height)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -19,8 +21,8 @@ namespace ProjectA {
 		imageCreateInfo.flags = 0;
 		imageCreateInfo.imageType = getVkImageType(descriptor.type);
 		imageCreateInfo.format = getVkFormat(descriptor.format);
-		imageCreateInfo.extent.width = descriptor.width;
-		imageCreateInfo.extent.height = descriptor.height;
+		imageCreateInfo.extent.width = width;
+		imageCreateInfo.extent.height = height;
 		imageCreateInfo.extent.depth = descriptor.depth;
 		imageCreateInfo.mipLevels = descriptor.mipLevelCount;
 		imageCreateInfo.arrayLayers = descriptor.arrayLayerCount;
@@ -65,5 +67,13 @@ namespace ProjectA {
 
 		vkDestroyImage(device.object, object, nullptr);
 		vkFreeMemory(device.object, memory, nullptr);
+	}
+
+	uint32 VulkanTexture::getWidth() const {
+		return width;
+	}
+
+	uint32 VulkanTexture::getHeight() const {
+		return height;
 	}
 }

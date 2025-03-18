@@ -14,8 +14,14 @@ namespace ProjectA {
 
 			~VulkanTexture();
 
+			uint32 getWidth() const override;
+
+			uint32 getHeight() const override;
+
 		private:
 			const VulkanDevice& device;
 			VkDeviceMemory memory;
+			const uint32 width;
+			const uint32 height;
 	};
 }

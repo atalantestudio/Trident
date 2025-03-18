@@ -148,20 +148,39 @@ namespace ProjectA {
 	void VulkanDevice::submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.pNext = nullptr;
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = &static_cast<const VulkanSemaphore*>(waitSemaphore.get())->object;
-		submitInfo.pWaitDstStageMask = &waitDstStageMask;
+
+		if (waitSemaphore == nullptr) {
+			submitInfo.waitSemaphoreCount = 0;
+			submitInfo.pWaitSemaphores = nullptr;
+		}
+		else {
+			submitInfo.waitSemaphoreCount = 1;
+			submitInfo.pWaitSemaphores = &static_cast<const VulkanSemaphore*>(waitSemaphore.get())->object;
+		}
+
+		submitInfo.pWaitDstStageMask = &static_cast<const VulkanCommandBuffer*>(commandBuffer.get())->pipelineStageFlags;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &static_cast<const VulkanCommandBuffer*>(commandBuffer.get())->object;
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &static_cast<const VulkanSemaphore*>(signalSemaphore.get())->object;
 
-		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, static_cast<const VulkanFence*>(fence.get())->object) != VK_SUCCESS) {
+		if (signalSemaphore == nullptr) {
+			submitInfo.signalSemaphoreCount = 0;
+			submitInfo.pSignalSemaphores = nullptr;
+		}
+		else {
+			submitInfo.signalSemaphoreCount = 1;
+			submitInfo.pSignalSemaphores = &static_cast<const VulkanSemaphore*>(signalSemaphore.get())->object;
+		}
+
+		VkFence vkFence = VK_NULL_HANDLE;
+
+		if (fence != nullptr) {
+			vkFence = static_cast<const VulkanFence*>(fence.get())->object;
+		}
+
+		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, vkFence) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to submit Vulkan graphics queue.");
 		}
 	}

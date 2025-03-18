@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Backend/Vulkan/CommandBufferUsage.hpp"
 #include "Backend/Vulkan/IndexType.hpp"
 #include "Backend/Vulkan/VulkanBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
@@ -8,9 +9,10 @@
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
 
 namespace ProjectA {
-	VulkanCommandEncoder::VulkanCommandEncoder(const VulkanDevice& device, const VkCommandPool commandPool) :
+	VulkanCommandEncoder::VulkanCommandEncoder(const VulkanDevice& device, const VkCommandPool commandPool, const CommandBufferDescriptor& descriptor) :
 		device(device),
-		commandPool(commandPool)
+		commandPool(commandPool),
+		commandBufferUsageFlag(getVkCommandBufferUsageFlag(descriptor.usage))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -42,7 +44,7 @@ namespace ProjectA {
 		VkCommandBufferBeginInfo commandBufferBeginInfo{};
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		commandBufferBeginInfo.pNext = nullptr;
-		commandBufferBeginInfo.flags = 0;
+		commandBufferBeginInfo.flags = commandBufferUsageFlag;
 		commandBufferBeginInfo.pInheritanceInfo = nullptr;
 
 		if (vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo) != VK_SUCCESS) {
@@ -110,6 +112,21 @@ namespace ProjectA {
 		vkCmdBindVertexBuffers(commandBuffer, bindingIndex, 1, &static_cast<const VulkanBuffer*>(vertexBuffer.get())->object, &offset);
 	}
 
+	void VulkanCommandEncoder::copyBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) {
+		VkBufferCopy bufferCopy{};
+		bufferCopy.srcOffset = sourceOffset;
+		bufferCopy.dstOffset = destinationOffset;
+		bufferCopy.size = size;
+
+		vkCmdCopyBuffer(
+			commandBuffer,
+			static_cast<const VulkanBuffer*>(sourceBuffer.get())->object,
+			static_cast<const VulkanBuffer*>(destinationBuffer.get())->object,
+			1,
+			&bufferCopy
+		);
+	}
+
 	void VulkanCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) {
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -161,7 +178,13 @@ namespace ProjectA {
 			throw std::runtime_error("Failed to end Vulkan command buffer.");
 		}
 
-		return createRef<VulkanCommandBuffer>(commandBuffer);
+		VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+
+		if (commandBufferUsageFlag & VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT) {
+			pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		}
+
+		return createRef<VulkanCommandBuffer>(commandBuffer, pipelineStageFlags);
 	}
 
 	void VulkanCommandEncoder::reset() {

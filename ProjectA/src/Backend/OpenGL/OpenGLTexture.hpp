@@ -5,21 +5,20 @@
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/Renderer/Texture.hpp"
 
-// TODO: Old API
 namespace ProjectA {
 	class OpenGLTexture : public Texture, public ObjectWrapper<GLuint> {
 		public:
-			OpenGLTexture(GLsizei width, GLsizei height);
+			OpenGLTexture(const TextureDescriptor& descriptor);
 
 			~OpenGLTexture();
 
 			uint32 getWidth() const override;
+
 			uint32 getHeight() const override;
 
 		private:
-			GLenum internalFormat;
-			GLenum format;
-			GLsizei width;
-			GLsizei height;
+			const GLenum target;
+			const GLsizei width;
+			const GLsizei height;
 	};
 }
