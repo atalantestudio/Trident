@@ -9,7 +9,6 @@ Cross-platform C++ game engine (3D, physics and audio) with integrated math and 
 - [ImGui](https://github.com/ocornut/imgui)
 - [Lyah](https://github.com/debaze/lyah)
 - [Premake](https://github.com/premake/premake-core)
-- [stb_image](https://github.com/nothings/stb/blob/master/stb_image.h)
 
 ## Install
 

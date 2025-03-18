@@ -42,8 +42,6 @@ project "ProjectA"
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/src/**.hpp",
 		"%{prj.name}/vendor/lyah/lyah/**.hpp",
-		"%{prj.name}/vendor/stb_image/**.cpp",
-		"%{prj.name}/vendor/stb_image/**.h",
 	}
 
 	includedirs {
@@ -52,7 +50,6 @@ project "ProjectA"
 		"%{prj.name}/vendor/glfw/glfw/include",
 		"%{prj.name}/vendor/imgui",
 		"%{prj.name}/vendor/lyah",
-		"%{prj.name}/vendor/stb_image",
 		vulkansdk .. "/Include",
 	}
 
