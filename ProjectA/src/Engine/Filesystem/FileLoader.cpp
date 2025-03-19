@@ -8,13 +8,13 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
 
-		const std::filesystem::path filePath = std::filesystem::path(path);
+		const std::filesystem::path absolutePath = std::filesystem::absolute(path);
 
 		stream.seekg(0, std::ios::end);
 
 		File file;
-		file.name = filePath.filename().string();
-		file.absolutePath = filePath.string();
+		file.name = absolutePath.filename().string();
+		file.absolutePath = absolutePath.string();
 		file.size = stream.tellg();
 		file.rawData.resize(file.size);
 
