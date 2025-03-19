@@ -21,10 +21,9 @@
 #include "Engine/ECS/ECS.hpp"
 
 // Filesystem
-#include "Engine/Filesystem/BitStream.hpp"
-#include "Engine/Filesystem/File.hpp"
 #include "Engine/Filesystem/FileLoader.hpp"
 #include "Engine/Filesystem/PNGFileLoader.hpp"
+#include "Engine/Filesystem/Stream/BitStream.hpp"
 
 // GUI
 #include "Engine/Renderer/GUI/GUIRenderer.hpp"

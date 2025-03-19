@@ -3,38 +3,56 @@
 #include "Engine/Filesystem/FileLoader.hpp"
 
 namespace ProjectA {
-	std::string FileLoader::load(const std::string& path) {
-		std::ifstream file(path, std::ios::binary);
+	File FileLoader::loadFile(const std::string& path) {
+		std::ifstream stream(path, std::ios::binary);
 
-		if (!file.is_open()) {
-			throw std::runtime_error("Failed to open file.");
-		}
+		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
 
-		const std::string buffer(std::istreambuf_iterator<char>(file), {});
+		const std::filesystem::path filePath = std::filesystem::path(path);
 
-		file.close();
+		stream.seekg(0, std::ios::end);
 
-		return buffer;
+		File file;
+		file.name = filePath.filename().string();
+		file.absolutePath = filePath.string();
+		file.size = stream.tellg();
+		file.rawData.resize(file.size);
+
+		stream.seekg(0, std::ios::beg);
+		stream.read(static_cast<char*>(static_cast<void*>(file.rawData.data())), file.size);
+		stream.close();
+
+		return file;
 	}
 
-	chain<uint8> FileLoader::loadChain(const std::string& path) {
-		std::ifstream file(path, std::ios::binary);
+	chain<uint8> FileLoader::loadByteBuffer(const std::string& path) {
+		std::ifstream stream(path, std::ios::binary);
 
-		if (!file.is_open()) {
-			throw std::runtime_error("Failed to open file.");
-		}
+		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
 
-		file.seekg(0, std::ios::end);
+		stream.seekg(0, std::ios::end);
 
-		const std::streampos size = file.tellg();
+		const std::streampos size = stream.tellg();
 
-		file.seekg(0, std::ios::beg);
+		stream.seekg(0, std::ios::beg);
 
 		chain<uint8> chain(size);
 
-		file.read(static_cast<char*>(static_cast<void*>(chain.data())), size);
-		file.close();
+		stream.read(static_cast<char*>(static_cast<void*>(chain.data())), size);
+		stream.close();
 
 		return chain;
+	}
+
+	std::string FileLoader::loadString(const std::string& path) {
+		std::ifstream stream(path, std::ios::binary);
+
+		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
+
+		const std::string buffer(std::istreambuf_iterator<char>(stream), {});
+
+		stream.close();
+
+		return buffer;
 	}
 }

@@ -16,7 +16,7 @@ namespace ProjectA {
 
 		instance = this;
 
-		Renderer::setGraphicsApi(GraphicsAPI::VULKAN);
+		Renderer::setGraphicsApi(GraphicsAPI::OPENGL);
 
 		// Initialize GLFW and create window.
 		window = Window::create(WindowData(name));

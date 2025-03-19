@@ -1,7 +1,7 @@
 #include "pch.hpp"
 
+#include "Engine/Filesystem/Compression/HuffmanCodeDictionary.hpp"
 #include "Engine/Filesystem/FileLoader.hpp"
-#include "Engine/Filesystem/HuffmanCodeDictionary.hpp"
 #include "Engine/Filesystem/PNG/FilterType.hpp"
 #include "Engine/Filesystem/PNGFileLoader.hpp"
 
@@ -13,20 +13,24 @@ namespace ProjectA {
 		(static_cast<uint32>(type[3]) << 24) \
 	)
 
-	PNGImage PNGFileLoader::load(const std::string& path) {
-		const chain<uint8> buffer = FileLoader::loadChain(path);
-		ByteStream stream(buffer.data(), buffer.size());
+	PNGFile PNGFileLoader::load(const std::string& path) {
+		const File file = FileLoader::loadFile(path);
+		ByteStream stream(file.rawData.data(), file.size);
 
 		readSignature(stream);
 
 		chain<uint8> finalOutput;
-		PNGImage image;
+		PNGFile pngFile;
+		pngFile.name = file.name;
+		pngFile.absolutePath = file.absolutePath;
+		pngFile.size = file.size;
+		pngFile.rawData = file.rawData;
 
 		while (stream.getRemainingByteSize() > 0) {
-			readChunk(stream, image.properties, image.data);
+			readChunk(stream, pngFile);
 		}
 
-		return image;
+		return pngFile;
 	}
 
 	void PNGFileLoader::readSignature(ByteStream& stream) {
@@ -37,7 +41,7 @@ namespace ProjectA {
 		}
 	}
 
-	void PNGFileLoader::readChunk(ByteStream& stream, PNGProperties& properties, chain<uint8>& finalOutput) {
+	void PNGFileLoader::readChunk(ByteStream& stream, PNGFile& file) {
 		Chunk Chunk;
 		Chunk.ByteLength = stream.read<uint32>(true);
 		Chunk.Type = stream.read<uint32>();
@@ -46,13 +50,13 @@ namespace ProjectA {
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IHDR"):
 				ENGINE_TRACE("Reading IHDR chunk.");
 
-				readIHDR(stream, properties);
+				readIHDR(stream, file);
 
 				break;
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IDAT"):
 				ENGINE_TRACE("Reading IDAT chunk.");
 
-				readIDAT(stream, Chunk.ByteLength, properties, finalOutput);
+				readIDAT(stream, Chunk.ByteLength, file);
 
 				break;
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IEND"):
@@ -64,76 +68,77 @@ namespace ProjectA {
 			default:
 				char* TypeString = static_cast<char*>(static_cast<void*>(&Chunk.Type));
 
-				ENGINE_WARN("Ignored unhandled chunk \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
+				ENGINE_WARN("Unhandled chunk \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
 
 				stream.jump(Chunk.ByteLength);
 
 				break;
 		}
 
+		// TODO: Verify CRC.
 		Chunk.CRC = stream.read<uint32>(true);
 	}
 
-	void PNGFileLoader::readIHDR(ByteStream& stream, PNGProperties& properties) {
-		properties.Width = stream.read<uint32>(true);
+	void PNGFileLoader::readIHDR(ByteStream& stream, PNGFile& file) {
+		file.width = stream.read<uint32>(true);
 
-		if (properties.Width == 0) {
+		if (file.width == 0) {
 			throw std::runtime_error("Width must be > 0.");
 		}
 
-		properties.Height = stream.read<uint32>(true);
+		file.height = stream.read<uint32>(true);
 
-		if (properties.Height == 0) {
+		if (file.height == 0) {
 			throw std::runtime_error("Height must be > 0.");
 		}
 
-		properties.BitDepth = stream.read<uint8>();
+		file.bitDepth = stream.read<uint8>();
 
-		if (properties.BitDepth != 1 && properties.BitDepth != 2 && properties.BitDepth != 4 && properties.BitDepth != 8 && properties.BitDepth != 16) {
+		if (file.bitDepth != 1 && file.bitDepth != 2 && file.bitDepth != 4 && file.bitDepth != 8 && file.bitDepth != 16) {
 			throw std::runtime_error("Invalid bit depth value.");
 		}
 
-		properties.ColorType = stream.read<uint8>();
+		file.colorType = stream.read<uint8>();
 
-		if (properties.ColorType != 0 && properties.ColorType != 2 && properties.ColorType != 3 && properties.ColorType != 4 && properties.ColorType != 6) {
+		if (file.colorType != 0 && file.colorType != 2 && file.colorType != 3 && file.colorType != 4 && file.colorType != 6) {
 			throw std::runtime_error("Invalid color type value.");
 		}
 
-		properties.CompressionMethod = stream.read<uint8>();
+		file.compressionMethod = stream.read<uint8>();
 
-		if (properties.CompressionMethod != 0) {
+		if (file.compressionMethod != 0) {
 			throw std::runtime_error("Invalid compression method value (must be 0).");
 		}
 
-		properties.FilterMethod = stream.read<uint8>();
+		file.filterMethod = stream.read<uint8>();
 
-		if (properties.FilterMethod != 0) {
+		if (file.filterMethod != 0) {
 			throw std::runtime_error("Invalid filter method value (must be 0).");
 		}
 
-		properties.InterlaceMethod = stream.read<uint8>();
+		file.interlaceMethod = stream.read<uint8>();
 
-		if (properties.InterlaceMethod != 0 && properties.InterlaceMethod != 1) {
+		if (file.interlaceMethod != 0 && file.interlaceMethod != 1) {
 			throw std::runtime_error("Invalid interlace method value (must be 0 or 1).");
 		}
 	}
 
-	void PNGFileLoader::readIDAT(ByteStream& byteStream, uint32 byteLength, const PNGProperties& properties, chain<uint8>& finalOutput) {
-		BitStream bitStream(byteStream.getStream() + byteStream.getByteOffset(), byteLength);
+	void PNGFileLoader::readIDAT(ByteStream& byteStream, uint32 chunkByteLength, PNGFile& file) {
+		BitStream bitStream(byteStream.getStream() + byteStream.getByteOffset(), chunkByteLength);
 
 		chain<uint8> output = readZlibStream(bitStream);
 
-		byteStream.jump(byteLength);
+		byteStream.jump(chunkByteLength);
 
-		ENGINE_ASSERT(properties.BitDepth == 8, "Only a BitDepth of 8 is supported.");
+		ENGINE_ASSERT(file.bitDepth == 8, "Only a bit depth of 8 is supported.");
 
-		finalOutput.resize(static_cast<std::size_t>(properties.Width * properties.Height * 4));
+		file.data.resize(static_cast<std::size_t>(file.width * file.height * 4));
 
 		uint8* source = &output[0];
-		uint8* destination = &finalOutput[0];
+		uint8* destination = &file.data[0];
 
 		// TODO: Refactor with SIMD (vec4<sint32>).
-		for (uint32 y = 0; y < properties.Height; y += 1) {
+		for (uint32 y = 0; y < file.height; y += 1) {
 			const FilterType filterType = static_cast<FilterType>(*source);
 
 			source += 1;
@@ -146,7 +151,7 @@ namespace ProjectA {
 				case FilterType::NONE:
 					ENGINE_DEBUG("FilterType::NONE");
 
-					for (uint32 x = 0; x < properties.Width; x += 1) {
+					for (uint32 x = 0; x < file.width; x += 1) {
 						*(uint32*) destination = *(uint32*) source;
 
 						destination += 4;

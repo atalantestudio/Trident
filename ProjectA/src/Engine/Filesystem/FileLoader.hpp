@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Engine/Filesystem/File/File.hpp"
+
 namespace ProjectA {
 	class FileLoader {
 		public:
-			static std::string load(const std::string& path);
-
-			static chain<uint8> loadChain(const std::string& path);
+			static File loadFile(const std::string& path);
+			static std::string loadString(const std::string& path);
+			static chain<uint8> loadByteBuffer(const std::string& path);
 	};
 }

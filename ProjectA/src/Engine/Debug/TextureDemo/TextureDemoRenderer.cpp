@@ -20,15 +20,8 @@ namespace ProjectA {
 
 		// Create texture.
 		{
-			const chain<uint8> data = {
-				0, 255, 0, 255, 255, 255, 255, 255, // green - white
-				255, 0, 0, 255, 0, 0, 255, 255, // red - blue
-			};
-
-			const uint32 width = 2;
-			const uint32 height = 2;
-			const uint32 depth = 1;
-			const uint64 size = sizeof(uint8) * data.size();
+			const PNGFile file = PNGFileLoader::load("../ProjectA/src/Engine/Debug/TextureDemo/Asset/TextureCompression0.png");
+			const uint64 size = sizeof(uint8) * file.data.size();
 
 			BufferDescriptor stagingBufferDescriptor{};
 			stagingBufferDescriptor.size = size;
@@ -38,7 +31,7 @@ namespace ProjectA {
 
 			const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
 
-			std::copy(data.begin(), data.end(), static_cast<uint8*>(mappedRange));
+			std::copy(file.data.begin(), file.data.end(), static_cast<uint8*>(mappedRange));
 
 			stagingBuffer->unmap();
 
@@ -46,9 +39,9 @@ namespace ProjectA {
 			textureDescriptor.type = TextureType::TEXTURE_2D;
 			textureDescriptor.format = TextureFormat::R8G8B8A8_SRGB;
 			textureDescriptor.usage = TextureUsage::TRANSFER_DST | TextureUsage::SAMPLED;
-			textureDescriptor.width = width;
-			textureDescriptor.height = height;
-			textureDescriptor.depth = depth;
+			textureDescriptor.width = file.width;
+			textureDescriptor.height = file.height;
+			textureDescriptor.depth = 1;
 			textureDescriptor.mipLevelCount = 1;
 			textureDescriptor.arrayLayerCount = 1;
 			textureDescriptor.sampleCount = 1;
@@ -62,7 +55,7 @@ namespace ProjectA {
 
 			commandEncoder->begin();
 			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL);
-			commandEncoder->copyBufferToTexture(stagingBuffer, texture, width, height, 0);
+			commandEncoder->copyBufferToTexture(stagingBuffer, texture, file.width, file.height, 0);
 			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
@@ -83,7 +76,7 @@ namespace ProjectA {
 		// Create sampler.
 		{
 			SamplerDescriptor samplerDescriptor{};
-			samplerDescriptor.magFilter = SamplerFilter::LINEAR;
+			samplerDescriptor.magFilter = SamplerFilter::NEAREST;
 			samplerDescriptor.minFilter = SamplerFilter::NEAREST;
 
 			sampler = createSampler(samplerDescriptor);
@@ -121,8 +114,8 @@ namespace ProjectA {
 				break;
 		}
 
-		const std::string vertexShaderModuleCode = FileLoader::load(vertexShaderModulePath);
-		const std::string fragmentShaderModuleCode = FileLoader::load(fragmentShaderModulePath);
+		const std::string vertexShaderModuleCode = FileLoader::loadString(vertexShaderModulePath);
+		const std::string fragmentShaderModuleCode = FileLoader::loadString(fragmentShaderModulePath);
 
 		const ref<ShaderModule> vertexShaderModule = createShaderModule(ShaderStage::VERTEX, vertexShaderModuleCode);
 		const ref<ShaderModule> fragmentShaderModule = createShaderModule(ShaderStage::FRAGMENT, fragmentShaderModuleCode);

@@ -2,6 +2,7 @@
 
 #include <array>
 #include <bitset>
+#include <filesystem>
 #include <fstream>
 #include <functional>
 #include <sstream>

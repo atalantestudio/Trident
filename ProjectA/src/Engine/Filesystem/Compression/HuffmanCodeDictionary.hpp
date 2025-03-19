@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Engine/Filesystem/BitStream.hpp"
-#include "Engine/Filesystem/HuffmanCodeEntry.hpp"
+#include "Engine/Filesystem/Compression/HuffmanCodeEntry.hpp"
+#include "Engine/Filesystem/Stream/BitStream.hpp"
 
 namespace ProjectA {
 	class HuffmanCodeDictionary {

@@ -1,6 +1,6 @@
 #include "pch.hpp"
 
-#include "Engine/Filesystem/HuffmanCodeDictionary.hpp"
+#include "Engine/Filesystem/Compression/HuffmanCodeDictionary.hpp"
 
 namespace ProjectA {
 	uint32 HuffmanCodeDictionary::reverseBits(uint32 value, uint8 count) {

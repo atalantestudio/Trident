@@ -3,6 +3,8 @@
 #include "pch.hpp"
 
 namespace ProjectA {
+	// TODO: Temporary polyfill.
+	// lyah::vec<C, T> should be capable of storing itself in buffers.
 	template<std::size_t C>
 	struct vec_sts {
 		float32 m[C];

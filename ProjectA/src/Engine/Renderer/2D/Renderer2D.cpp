@@ -81,15 +81,15 @@ namespace ProjectA {
 		renderPipelineDescriptor.pipelineLayout = storage.pipelineLayout;
 
 		if (Renderer::getGraphicsApi() == GraphicsAPI::OPENGL) {
-			const std::string colorTextureVertexShaderCode = FileLoader::load("assets/shaders/ColorTexture.vert");
-			const std::string colorTextureFragmentShaderCode = FileLoader::load("assets/shaders/ColorTexture.frag");
+			const std::string colorTextureVertexShaderCode = FileLoader::loadString("assets/shaders/ColorTexture.vert");
+			const std::string colorTextureFragmentShaderCode = FileLoader::loadString("assets/shaders/ColorTexture.frag");
 
 			//renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
 			//renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
 		}
 		else if (Renderer::getGraphicsApi() == GraphicsAPI::VULKAN) {
-			const std::string colorTextureVertexShaderCode = FileLoader::load("assets/shaders/ColorTexture.vert.spv");
-			const std::string colorTextureFragmentShaderCode = FileLoader::load("assets/shaders/ColorTexture.frag.spv");
+			const std::string colorTextureVertexShaderCode = FileLoader::loadString("assets/shaders/ColorTexture.vert.spv");
+			const std::string colorTextureFragmentShaderCode = FileLoader::loadString("assets/shaders/ColorTexture.frag.spv");
 
 			//renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
 			//renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);

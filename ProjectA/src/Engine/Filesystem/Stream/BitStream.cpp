@@ -1,6 +1,6 @@
 #include "pch.hpp"
 
-#include "Engine/Filesystem/BitStream.hpp"
+#include "Engine/Filesystem/Stream/BitStream.hpp"
 
 namespace ProjectA {
 	BitStream::BitStream(const uint8* stream, uint64 byteSize) :

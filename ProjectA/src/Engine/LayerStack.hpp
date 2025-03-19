@@ -5,10 +5,6 @@
 
 namespace ProjectA {
 	class LayerStack {
-		private:
-			std::vector<Layer*> layers;
-			uint32 layerInsertionIndex = 0;
-
 		public:
 			LayerStack() = default;
 
@@ -20,20 +16,13 @@ namespace ProjectA {
 			void removeOverlay(Layer* overlay);
 
 			// TODO: Write helper macro for iterators.
-			std::vector<Layer*>::iterator begin() {
-				return layers.begin();
-			}
+			std::vector<Layer*>::iterator begin();
+			std::vector<Layer*>::iterator end();
+			std::vector<Layer*>::reverse_iterator rbegin();
+			std::vector<Layer*>::reverse_iterator rend();
 
-			std::vector<Layer*>::iterator end() {
-				return layers.end();
-			}
-
-			std::vector<Layer*>::reverse_iterator rbegin() {
-				return layers.rbegin();
-			}
-
-			std::vector<Layer*>::reverse_iterator rend() {
-				return layers.rend();
-			}
+		private:
+			std::vector<Layer*> layers;
+			uint32 layerInsertionIndex = 0;
 	};
 }

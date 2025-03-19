@@ -1,10 +1,10 @@
 #pragma once
 #pragma pack(push, 1)
 
-#include "Engine/Filesystem/BitStream.hpp"
-#include "Engine/Filesystem/ByteStream.hpp"
-#include "Engine/Filesystem/File.hpp"
-#include "Engine/Filesystem/HuffmanCodeEntry.hpp"
+#include "Engine/Filesystem/Compression/HuffmanCodeEntry.hpp"
+#include "Engine/Filesystem/File/PNGFile.hpp"
+#include "Engine/Filesystem/Stream/BitStream.hpp"
+#include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
 	struct Chunk {
@@ -12,36 +12,6 @@ namespace ProjectA {
 		uint32 Type = 0;
 		chain<uint8> Data;
 		uint32 CRC = 0;
-	};
-
-	struct PNGProperties {
-		// Width of the image in pixels.
-		// Zero is an invalid value.
-		uint32 Width;
-
-		// Height of the image in pixels.
-		// Zero is an invalid value.
-		uint32 Height;
-
-		// Number of bytes per sample or per palette index (not per pixel).
-		// Valid values are 1, 2, 4, 8, and 16, although not all values are allowed for all color types.
-		uint8 BitDepth;
-
-		// PNG image type.
-		// Valid values are 0, 2, 3, 4, and 6.
-		uint8 ColorType;
-
-		// Method used to compress the image data.
-		// Only compression method 0 (deflate/inflate compression with a sliding window of at most 32768 bytes) is defined.
-		uint8 CompressionMethod;
-
-		// Preprocessing method applied to the image data before compression.
-		// Only filter method 0 (adaptive filtering with five basic filter types) is defined.
-		uint8 FilterMethod;
-
-		// Transmission order of the image data.
-		// Two values are defined: 0 (no interlace) or 1 (Adam7 interlace).
-		uint8 InterlaceMethod;
 	};
 
 	// Based on https://www.ietf.org/rfc/rfc1950.txt.
@@ -62,24 +32,19 @@ namespace ProjectA {
 		uint8 FLEVEL : 2;
 	};
 
-	struct PNGImage {
-		PNGProperties properties;
-		chain<uint8> data;
-	};
-
 	// Based on https://www.w3.org/TR/2003/REC-PNG-20031110.
 	class PNGFileLoader {
 		public:
-			static PNGImage load(const std::string& path);
+			static PNGFile load(const std::string& path);
 
 		private:
 			static void readSignature(ByteStream& stream);
 
-			static void readChunk(ByteStream& stream, PNGProperties& properties, chain<uint8>& finalOutput);
+			static void readChunk(ByteStream& stream, PNGFile& file);
 
-			static void readIHDR(ByteStream& stream, PNGProperties& properties);
+			static void readIHDR(ByteStream& stream, PNGFile& file);
 
-			static void readIDAT(ByteStream& stream, uint32 byteLength, const PNGProperties& properties, chain<uint8>& finalOutput);
+			static void readIDAT(ByteStream& stream, uint32 chunkByteLength, PNGFile& file);
 
 			static chain<uint8> readZlibStream(BitStream& stream);
 
