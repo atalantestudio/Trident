@@ -4,10 +4,13 @@
 #include "Backend/Vulkan/TextureType.hpp"
 #include "Backend/Vulkan/TextureUsage.hpp"
 #include "Backend/Vulkan/VulkanTexture.hpp"
+#include "Backend/Vulkan/VulkanTextureView.hpp"
 
 namespace ProjectA {
 	VulkanTexture::VulkanTexture(const VulkanDevice& device, const TextureDescriptor& descriptor) :
 		device(device),
+		type(descriptor.type),
+		format(descriptor.format),
 		width(descriptor.width),
 		height(descriptor.height)
 	{
@@ -21,8 +24,8 @@ namespace ProjectA {
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.pNext = nullptr;
 		imageCreateInfo.flags = 0;
-		imageCreateInfo.imageType = getVkImageType(descriptor.type);
-		imageCreateInfo.format = getVkFormat(descriptor.format);
+		imageCreateInfo.imageType = getVkImageType(type);
+		imageCreateInfo.format = getVkFormat(format);
 		imageCreateInfo.extent.width = width;
 		imageCreateInfo.extent.height = height;
 		imageCreateInfo.extent.depth = descriptor.depth;
@@ -77,5 +80,9 @@ namespace ProjectA {
 
 	uint32 VulkanTexture::getHeight() const {
 		return height;
+	}
+
+	ref<TextureView> VulkanTexture::createView(const TextureViewDescriptor& descriptor) const {
+		return createRef<VulkanTextureView>(device.object, *this, descriptor);
 	}
 }

@@ -18,6 +18,12 @@ namespace ProjectA {
 
 			uint32 getHeight() const override;
 
+			ref<TextureView> createView(const TextureViewDescriptor& descriptor) const override;
+
+		public:
+			const TextureType type;
+			const TextureFormat format;
+
 		private:
 			const VulkanDevice& device;
 			VkDeviceMemory memory;

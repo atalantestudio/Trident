@@ -16,6 +16,8 @@ namespace ProjectA {
 
 			uint32 getHeight() const override;
 
+			ref<TextureView> createView(const TextureViewDescriptor& descriptor) const override;
+
 		private:
 			const GLenum target;
 			const GLsizei width;

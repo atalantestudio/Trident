@@ -3,6 +3,7 @@
 #include "Engine/Renderer/TextureFormat.hpp"
 #include "Engine/Renderer/TextureType.hpp"
 #include "Engine/Renderer/TextureUsage.hpp"
+#include "Engine/Renderer/TextureView.hpp"
 
 namespace ProjectA {
 	struct TextureDescriptor {
@@ -24,5 +25,7 @@ namespace ProjectA {
 			// TODO: Use vec2<int32>.
 			virtual uint32 getWidth() const = 0;
 			virtual uint32 getHeight() const = 0;
+
+			virtual ref<TextureView> createView(const TextureViewDescriptor& descriptor) const = 0;
 	};
 }

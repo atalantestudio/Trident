@@ -8,6 +8,14 @@ namespace ProjectA {
 			VK_IMAGE_TYPE_2D,
 		};
 
-		return vkImageTypes[static_cast<sint32>(textureType)];
+		return vkImageTypes[static_cast<uint8>(textureType)];
+	}
+
+	static VkImageViewType getVkImageViewType(TextureType textureType) {
+		static constexpr VkImageViewType vkImageViewTypes[] = {
+			VK_IMAGE_VIEW_TYPE_2D,
+		};
+
+		return vkImageViewTypes[static_cast<uint8>(textureType)];
 	}
 }
