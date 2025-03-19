@@ -108,7 +108,7 @@ namespace ProjectA {
 			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
-			commandEncoder->copyBuffer(stagingBuffer, vertexBuffer, 0, 0, size);
+			commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, 0, 0, size);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -154,7 +154,7 @@ namespace ProjectA {
 			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
-			commandEncoder->copyBuffer(stagingBuffer, indexBuffer, 0, 0, size);
+			commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, 0, 0, size);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -170,6 +170,53 @@ namespace ProjectA {
 				{255.0f, 0.0f, 0.0f, 255.0f}, {0.0, 0.0f, 255.0f, 255.0f},
 				{0.0f, 255.0f, 0.0f, 255.0f}, {255.0f, 255.0f, 255.0f, 255.0f},
 			};
+
+			const uint32 width = 2;
+			const uint32 height = 2;
+			const uint32 depth = 1;
+			const uint64 size = sizeof(vec4<float32>) * data.size();
+
+			BufferDescriptor stagingBufferDescriptor{};
+			stagingBufferDescriptor.size = size;
+			stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+
+			const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
+
+			const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
+
+			std::copy(data.begin(), data.end(), static_cast<vec4<float32>*>(mappedRange));
+
+			stagingBuffer->unmap();
+
+			TextureDescriptor textureDescriptor;
+			textureDescriptor.type = TextureType::TEXTURE_2D;
+			textureDescriptor.format = TextureFormat::R8G8B8A8_SRGB;
+			textureDescriptor.usage = TextureUsage::TRANSFER_DST | TextureUsage::SAMPLED;
+			textureDescriptor.width = width;
+			textureDescriptor.height = height;
+			textureDescriptor.depth = depth;
+			textureDescriptor.mipLevelCount = 1;
+			textureDescriptor.arrayLayerCount = 1;
+			textureDescriptor.sampleCount = 1;
+
+			texture = createTexture(textureDescriptor);
+
+			CommandBufferDescriptor commandBufferDescriptor{};
+			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+
+			commandEncoder->begin();
+			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL);
+			commandEncoder->copyBufferToTexture(stagingBuffer, texture, width, height, depth);
+			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL);
+
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+			const ref<Device>& device = getDevice();
+
+			device->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->waitIdle();
 		}
 
 		// Create command encoder.

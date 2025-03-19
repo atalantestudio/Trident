@@ -6,6 +6,8 @@
 #include "Engine/Renderer/IndexType.hpp"
 #include "Engine/Renderer/RenderPass.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
+#include "Engine/Renderer/Texture.hpp"
+#include "Engine/Renderer/TextureLayout.hpp"
 
 namespace ProjectA {
 	struct CommandBufferDescriptor {
@@ -35,7 +37,11 @@ namespace ProjectA {
 
 			virtual void bindVertexBuffer(const uint32 bindingIndex, const ref<Buffer>& vertexBuffer, const uint32 stride) = 0;
 
-			virtual void copyBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) = 0;
+			virtual void copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) = 0;
+
+			virtual void copyBufferToTexture(const ref<Buffer>& sourceBuffer, const ref<Texture>& destinationTexture, uint32 width, uint32 height, uint32 depth) = 0;
+
+			virtual void setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout) const = 0;
 
 			virtual void setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) = 0;
 

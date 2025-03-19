@@ -15,6 +15,8 @@ namespace ProjectA {
 
 		ENGINE_TRACE("[VulkanTexture]");
 
+		ENGINE_ASSERT(descriptor.sampleCount >= 1 && descriptor.sampleCount <= 64, "Invalid sample count ([]).", descriptor.sampleCount);
+
 		VkImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.pNext = nullptr;
@@ -26,7 +28,7 @@ namespace ProjectA {
 		imageCreateInfo.extent.depth = descriptor.depth;
 		imageCreateInfo.mipLevels = descriptor.mipLevelCount;
 		imageCreateInfo.arrayLayers = descriptor.arrayLayerCount;
-		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(1 << (descriptor.sampleCount - 1));
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.usage = getVkImageUsageFlagBits(descriptor.usage);
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;

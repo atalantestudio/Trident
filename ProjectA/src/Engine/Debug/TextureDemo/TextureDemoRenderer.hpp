@@ -27,6 +27,7 @@ namespace ProjectA {
 			ref<RenderPipeline> renderPipeline;
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
+			ref<Texture> texture;
 			ref<CommandEncoder> commandEncoder;
 			chain<ref<Semaphore>> availableImageSemaphores;
 			chain<ref<Semaphore>> finishedRenderSemaphores;

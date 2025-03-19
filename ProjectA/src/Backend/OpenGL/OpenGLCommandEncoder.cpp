@@ -6,13 +6,15 @@
 #include "Backend/OpenGL/Command/OpenGLBindIndexBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindRenderPipelineCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindVertexBufferCommand.hpp"
-#include "Backend/OpenGL/Command/OpenGLCopyBufferCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLCopyBufferToBufferCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLCopyBufferToTextureCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetViewportCommand.hpp"
 #include "Backend/OpenGL/IndexType.hpp"
 #include "Backend/OpenGL/OpenGLCommandBuffer.hpp"
 #include "Backend/OpenGL/OpenGLCommandEncoder.hpp"
+#include "Backend/OpenGL/OpenGLTexture.hpp"
 
 namespace ProjectA {
 	OpenGLCommandEncoder::OpenGLCommandEncoder(const CommandBufferDescriptor& descriptor) {
@@ -51,8 +53,8 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::copyBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) {
-		commandBuffer.emplace_back(createRef<OpenGLCopyBufferCommand>(
+	void OpenGLCommandEncoder::copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) {
+		commandBuffer.emplace_back(createRef<OpenGLCopyBufferToBufferCommand>(
 			static_cast<const OpenGLBuffer*>(sourceBuffer.get())->object,
 			static_cast<const OpenGLBuffer*>(destinationBuffer.get())->object,
 			sourceOffset,
@@ -60,6 +62,18 @@ namespace ProjectA {
 			size
 		));
 	}
+
+	void OpenGLCommandEncoder::copyBufferToTexture(const ref<Buffer>& sourceBuffer, const ref<Texture>& destinationTexture, uint32 width, uint32 height, uint32 depth) {
+		commandBuffer.emplace_back(createRef<OpenGLCopyBufferToTextureCommand>(
+			static_cast<const OpenGLBuffer*>(sourceBuffer.get())->object,
+			static_cast<const OpenGLTexture*>(destinationTexture.get())->object,
+			width,
+			height,
+			depth
+		));
+	}
+
+	void OpenGLCommandEncoder::setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout) const {}
 
 	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) {
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(

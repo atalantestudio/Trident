@@ -1,9 +1,9 @@
 #include "pch.hpp"
 
-#include "Backend/OpenGL/Command/OpenGLCopyBufferCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLCopyBufferToBufferCommand.hpp"
 
 namespace ProjectA {
-	OpenGLCopyBufferCommand::OpenGLCopyBufferCommand(GLuint sourceBuffer, GLuint destinationBuffer, GLintptr sourceOffset, GLintptr destinationOffset, GLsizeiptr size) :
+	OpenGLCopyBufferToBufferCommand::OpenGLCopyBufferToBufferCommand(GLuint sourceBuffer, GLuint destinationBuffer, GLintptr sourceOffset, GLintptr destinationOffset, GLsizeiptr size) :
 		sourceBuffer(sourceBuffer),
 		destinationBuffer(destinationBuffer),
 		sourceOffset(sourceOffset),
@@ -11,7 +11,7 @@ namespace ProjectA {
 		size(size)
 	{}
 
-	void OpenGLCopyBufferCommand::execute() const {
+	void OpenGLCopyBufferToBufferCommand::execute() const {
 		glBindBuffer(GL_COPY_READ_BUFFER, sourceBuffer);
 		glBindBuffer(GL_COPY_WRITE_BUFFER, destinationBuffer);
 

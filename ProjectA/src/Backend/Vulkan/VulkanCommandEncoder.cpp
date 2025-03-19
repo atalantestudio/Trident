@@ -2,11 +2,13 @@
 
 #include "Backend/Vulkan/CommandBufferUsage.hpp"
 #include "Backend/Vulkan/IndexType.hpp"
+#include "Backend/Vulkan/TextureLayout.hpp"
 #include "Backend/Vulkan/VulkanBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
+#include "Backend/Vulkan/VulkanTexture.hpp"
 
 namespace ProjectA {
 	VulkanCommandEncoder::VulkanCommandEncoder(const VulkanDevice& device, const VkCommandPool commandPool, const CommandBufferDescriptor& descriptor) :
@@ -112,7 +114,7 @@ namespace ProjectA {
 		vkCmdBindVertexBuffers(commandBuffer, bindingIndex, 1, &static_cast<const VulkanBuffer*>(vertexBuffer.get())->object, &offset);
 	}
 
-	void VulkanCommandEncoder::copyBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) {
+	void VulkanCommandEncoder::copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) {
 		VkBufferCopy bufferCopy{};
 		bufferCopy.srcOffset = sourceOffset;
 		bufferCopy.dstOffset = destinationOffset;
@@ -124,6 +126,83 @@ namespace ProjectA {
 			static_cast<const VulkanBuffer*>(destinationBuffer.get())->object,
 			1,
 			&bufferCopy
+		);
+	}
+
+	void VulkanCommandEncoder::copyBufferToTexture(const ref<Buffer>& sourceBuffer, const ref<Texture>& destinationTexture, uint32 width, uint32 height, uint32 depth) {
+		VkBufferImageCopy bufferImageCopy{};
+		bufferImageCopy.bufferOffset = 0;
+		bufferImageCopy.bufferRowLength = 0;
+		bufferImageCopy.bufferImageHeight = 0;
+		bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		bufferImageCopy.imageSubresource.mipLevel = 0;
+		bufferImageCopy.imageSubresource.baseArrayLayer = 0;
+		bufferImageCopy.imageSubresource.layerCount = 1;
+		bufferImageCopy.imageOffset.x = 0;
+		bufferImageCopy.imageOffset.y = 0;
+		bufferImageCopy.imageOffset.z = 0;
+		bufferImageCopy.imageExtent.width = width;
+		bufferImageCopy.imageExtent.height = height;
+		bufferImageCopy.imageExtent.depth = depth;
+
+		vkCmdCopyBufferToImage(
+			commandBuffer,
+			static_cast<const VulkanBuffer*>(sourceBuffer.get())->object,
+			static_cast<const VulkanTexture*>(destinationTexture.get())->object,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1,
+			&bufferImageCopy
+		);
+	}
+
+	void VulkanCommandEncoder::setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout) const {
+		VkPipelineStageFlags sourceStage;
+		VkPipelineStageFlags destinationStage;
+
+		VkImageMemoryBarrier imageMemoryBarrier{};
+		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		imageMemoryBarrier.pNext = nullptr;
+
+		if (oldLayout == TextureLayout::UNDEFINED && newLayout == TextureLayout::TRANSFER_DST_OPTIMAL) {
+			imageMemoryBarrier.srcAccessMask = 0;
+			imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+			sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		}
+		else if (oldLayout == TextureLayout::TRANSFER_DST_OPTIMAL && newLayout == TextureLayout::SHADER_READ_ONLY_OPTIMAL) {
+			imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+			sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}
+		else {
+			throw std::runtime_error("Unhandled texture layout transition.");
+		}
+
+		imageMemoryBarrier.oldLayout = getVkImageLayout(oldLayout);
+		imageMemoryBarrier.newLayout = getVkImageLayout(newLayout);
+		imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		imageMemoryBarrier.image = static_cast<const VulkanTexture*>(texture.get())->object;
+		imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
+		imageMemoryBarrier.subresourceRange.levelCount = 1;
+		imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
+		imageMemoryBarrier.subresourceRange.layerCount = 1;
+
+		vkCmdPipelineBarrier(
+			commandBuffer,
+			sourceStage,
+			destinationStage,
+			0,
+			0,
+			nullptr,
+			0,
+			nullptr,
+			1,
+			&imageMemoryBarrier
 		);
 	}
 

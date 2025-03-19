@@ -4,9 +4,9 @@
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 
 namespace ProjectA {
-	class OpenGLCopyBufferCommand : public OpenGLCommand {
+	class OpenGLCopyBufferToBufferCommand : public OpenGLCommand {
 		public:
-			OpenGLCopyBufferCommand(GLuint sourceBuffer, GLuint destinationBuffer, GLintptr sourceOffset, GLintptr destinationOffset, GLsizeiptr size);
+			OpenGLCopyBufferToBufferCommand(GLuint sourceBuffer, GLuint destinationBuffer, GLintptr sourceOffset, GLintptr destinationOffset, GLsizeiptr size);
 
 			void execute() const override;
 

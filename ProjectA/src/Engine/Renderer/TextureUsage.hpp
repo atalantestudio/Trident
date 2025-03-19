@@ -2,11 +2,13 @@
 
 namespace ProjectA {
 	enum class TextureUsage : uint8 {
-		TRANSFER_SRC = 0,
-		TRANSFER_DST = 1,
-		SAMPLED = 2,
-		STORAGE = 3,
-		COLOR_ATTACHMENT = 4,
-		DEPTH_STENCIL_ATTACHMENT = 5,
+		TRANSFER_SRC = BIT(0),
+		TRANSFER_DST = BIT(1),
+		SAMPLED = BIT(2),
+		STORAGE = BIT(3),
+		COLOR_ATTACHMENT = BIT(4),
+		DEPTH_STENCIL_ATTACHMENT = BIT(5),
 	};
+
+	AS_FLAG(TextureUsage);
 }

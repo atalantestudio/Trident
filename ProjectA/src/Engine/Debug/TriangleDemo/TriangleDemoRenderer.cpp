@@ -97,7 +97,7 @@ namespace ProjectA {
 			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
-			commandEncoder->copyBuffer(stagingBuffer, vertexBuffer, 0, 0, size);
+			commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, 0, 0, size);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -140,7 +140,7 @@ namespace ProjectA {
 			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
-			commandEncoder->copyBuffer(stagingBuffer, indexBuffer, 0, 0, size);
+			commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, 0, 0, size);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
