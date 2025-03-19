@@ -12,12 +12,10 @@ namespace ProjectA {
 	{}
 
 	void OpenGLCopyBufferToTextureCommand::execute() const {
-		//glBindBuffer(GL_COPY_READ_BUFFER, sourceBuffer);
-		//glBindBuffer(GL_COPY_WRITE_BUFFER, destinationTexture);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, sourceBuffer);
 
-		//glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, sourceOffset, destinationOffset, size);
+		glTextureSubImage2D(destinationTexture, depth, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, static_cast<const void*>(0));
 
-		//glBindBuffer(GL_COPY_READ_BUFFER, 0);
-		//glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 	}
 }

@@ -17,11 +17,6 @@ namespace ProjectA {
 		glCreateTextures(target, 1, &object);
 
 		glTextureStorage2D(object, descriptor.mipLevelCount, GL_RGBA8, descriptor.width, descriptor.height);
-
-		glTextureParameteri(object, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(object, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTextureParameteri(object, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(object, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
 	OpenGLTexture::~OpenGLTexture() {
@@ -41,6 +36,6 @@ namespace ProjectA {
 	}
 
 	ref<TextureView> OpenGLTexture::createView(const TextureViewDescriptor& descriptor) const {
-		return createRef<OpenGLTextureView>(descriptor);
+		return createRef<OpenGLTextureView>(*this, descriptor);
 	}
 }

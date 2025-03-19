@@ -4,7 +4,9 @@
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
+#include "Backend/OpenGL/OpenGLSampler.hpp"
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
+#include "Backend/OpenGL/OpenGLTextureView.hpp"
 #include "Backend/OpenGL/VertexInputAttributeType.hpp"
 
 namespace ProjectA {
@@ -90,10 +92,10 @@ namespace ProjectA {
 
 		// GLSL shaders are required to specify the block index and the binding,
 		// saving the calls to glGetUniformBlockIndex and glUniformBlockBinding.
-		for (uint32 setIndex = 0; setIndex < pipelineLayout->descriptorSetLayouts.size(); setIndex++) {
+		for (uint32 setIndex = 0; setIndex < pipelineLayout->descriptorSetLayouts.size(); setIndex += 1) {
 			const DescriptorSetLayout& descriptorSetLayout = pipelineLayout->descriptorSetLayouts[setIndex];
 
-			for (uint32 bindingIndex = 0; bindingIndex < descriptorSetLayout.bindings.size(); bindingIndex++) {
+			for (uint32 bindingIndex = 0; bindingIndex < descriptorSetLayout.bindings.size(); bindingIndex += 1) {
 				const DescriptorSetLayoutBinding& binding = descriptorSetLayout.bindings[bindingIndex];
 
 				for (const ref<Buffer>& buffer : binding.buffers) {
@@ -113,6 +115,14 @@ namespace ProjectA {
 					}*/
 
 					glBindBufferRange(getGlDescriptorType(binding.descriptorType), bindingIndex, glBuffer->object, 0, glBuffer->size);
+				}
+
+				for (uint32 textureViewIndex = 0; textureViewIndex < binding.textureViews.size(); textureViewIndex += 1) {
+					const OpenGLTextureView* textureView = static_cast<const OpenGLTextureView*>(binding.textureViews[textureViewIndex].get());
+					const OpenGLSampler* sampler = static_cast<const OpenGLSampler*>(binding.samplers[textureViewIndex].get());
+
+					glBindTextureUnit(textureViewIndex, textureView->object);
+					glBindSampler(textureViewIndex, sampler->object);
 				}
 			}
 		}

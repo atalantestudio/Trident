@@ -62,7 +62,7 @@ namespace ProjectA {
 
 			commandEncoder->begin();
 			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL);
-			commandEncoder->copyBufferToTexture(stagingBuffer, texture, width, height, depth);
+			commandEncoder->copyBufferToTexture(stagingBuffer, texture, width, height, 0);
 			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
@@ -83,7 +83,7 @@ namespace ProjectA {
 		// Create sampler.
 		{
 			SamplerDescriptor samplerDescriptor{};
-			samplerDescriptor.magFilter = SamplerFilter::NEAREST;
+			samplerDescriptor.magFilter = SamplerFilter::LINEAR;
 			samplerDescriptor.minFilter = SamplerFilter::NEAREST;
 
 			sampler = createSampler(samplerDescriptor);

@@ -18,8 +18,10 @@ namespace ProjectA {
 
 			ref<TextureView> createView(const TextureViewDescriptor& descriptor) const override;
 
-		private:
+		public:
 			const GLenum target;
+
+		private:
 			const GLsizei width;
 			const GLsizei height;
 	};

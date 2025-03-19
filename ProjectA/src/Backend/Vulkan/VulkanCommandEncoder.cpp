@@ -140,10 +140,10 @@ namespace ProjectA {
 		bufferImageCopy.imageSubresource.layerCount = 1;
 		bufferImageCopy.imageOffset.x = 0;
 		bufferImageCopy.imageOffset.y = 0;
-		bufferImageCopy.imageOffset.z = 0;
+		bufferImageCopy.imageOffset.z = depth;
 		bufferImageCopy.imageExtent.width = width;
 		bufferImageCopy.imageExtent.height = height;
-		bufferImageCopy.imageExtent.depth = depth;
+		bufferImageCopy.imageExtent.depth = 1;
 
 		vkCmdCopyBufferToImage(
 			commandBuffer,
