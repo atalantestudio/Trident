@@ -80,6 +80,10 @@ namespace ProjectA {
 		return rendererApi->createRenderPipeline(descriptor);
 	}
 
+	ref<Sampler> Renderer::createSampler(const SamplerDescriptor& descriptor) const {
+		return rendererApi->createSampler(descriptor);
+	}
+
 	ref<Semaphore> Renderer::createSemaphore() const {
 		return rendererApi->createSemaphore();
 	}

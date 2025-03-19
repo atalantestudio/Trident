@@ -28,6 +28,8 @@ namespace ProjectA {
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
 			ref<Texture> texture;
+			ref<TextureView> textureView;
+			ref<Sampler> sampler;
 			ref<CommandEncoder> commandEncoder;
 			chain<ref<Semaphore>> availableImageSemaphores;
 			chain<ref<Semaphore>> finishedRenderSemaphores;

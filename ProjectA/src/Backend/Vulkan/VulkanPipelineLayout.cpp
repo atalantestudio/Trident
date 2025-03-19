@@ -4,6 +4,8 @@
 #include "Backend/Vulkan/ShaderStage.hpp"
 #include "Backend/Vulkan/VulkanBuffer.hpp"
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"
+#include "Backend/Vulkan/VulkanSampler.hpp"
+#include "Backend/Vulkan/VulkanTextureView.hpp"
 
 // Shaders have descriptor sets.
 // 1 descriptor set can have multiple bindings.
@@ -40,7 +42,15 @@ namespace ProjectA {
 
 				VkDescriptorPoolSize descriptorPoolSize{};
 				descriptorPoolSize.type = descriptorType;
-				descriptorPoolSize.descriptorCount = static_cast<uint32>(binding.buffers.size());
+
+				if (binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER) {
+					ENGINE_ASSERT(binding.textureViews.size() == binding.samplers.size(), "Mismatch between texture view count and sampler count.");
+
+					descriptorPoolSize.descriptorCount = static_cast<uint32>(binding.textureViews.size());
+				}
+				else {
+					descriptorPoolSize.descriptorCount = static_cast<uint32>(binding.buffers.size());
+				}
 
 				descriptorPoolSizes.emplace_back(descriptorPoolSize);
 			}
@@ -61,7 +71,7 @@ namespace ProjectA {
 			descriptorSetLayouts.emplace_back(descriptorSetLayout);
 		}
 
-		if (descriptorSetLayouts.size() != 0) {
+		if (descriptorSetLayouts.size() > 0) {
 			VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
 			descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 			descriptorPoolCreateInfo.pNext = nullptr;
@@ -89,6 +99,7 @@ namespace ProjectA {
 
 			std::vector<VkWriteDescriptorSet> writeDescriptorSets;
 			std::vector<VkDescriptorBufferInfo> descriptorBufferInfos;
+			std::vector<VkDescriptorImageInfo> descriptorImageInfos;
 
 			for (uint32 setLayoutIndex = 0; setLayoutIndex < descriptor.layouts.size(); setLayoutIndex++) {
 				const DescriptorSetLayout& setLayout = descriptor.layouts[setLayoutIndex];
@@ -106,6 +117,18 @@ namespace ProjectA {
 
 						descriptorBufferInfos.emplace_back(descriptorBufferInfo);
 					}
+
+					for (uint32 textureViewIndex = 0; textureViewIndex < binding.textureViews.size(); textureViewIndex++) {
+						const VulkanSampler* sampler = static_cast<const VulkanSampler*>(binding.samplers[textureViewIndex].get());
+						const VulkanTextureView* textureView = static_cast<const VulkanTextureView*>(binding.textureViews[textureViewIndex].get());
+
+						VkDescriptorImageInfo descriptorImageInfo{};
+						descriptorImageInfo.sampler = sampler->object;
+						descriptorImageInfo.imageView = textureView->object;
+						descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+						descriptorImageInfos.emplace_back(descriptorImageInfo);
+					}
 				}
 			}
 
@@ -118,8 +141,6 @@ namespace ProjectA {
 					const DescriptorSetLayoutBinding& binding = setLayout.bindings[bindingIndex];
 
 					for (uint32 bufferIndex = 0; bufferIndex < binding.buffers.size(); bufferIndex++) {
-						const VulkanBuffer* buffer = static_cast<const VulkanBuffer*>(binding.buffers[bufferIndex].get());
-
 						// 1 write descriptor set per descriptor set and per binding index.
 						VkWriteDescriptorSet writeDescriptorSet{};
 						writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -131,6 +152,25 @@ namespace ProjectA {
 						writeDescriptorSet.descriptorType = getVkDescriptorType(binding.descriptorType);
 						writeDescriptorSet.pImageInfo = nullptr;
 						writeDescriptorSet.pBufferInfo = &descriptorBufferInfos[writeDescriptorSetIndex];
+						writeDescriptorSet.pTexelBufferView = nullptr;
+
+						writeDescriptorSets.emplace_back(writeDescriptorSet);
+
+						writeDescriptorSetIndex++;
+					}
+
+					for (uint32 textureViewIndex = 0; textureViewIndex < binding.textureViews.size(); textureViewIndex++) {
+						// 1 write descriptor set per descriptor set and per binding index.
+						VkWriteDescriptorSet writeDescriptorSet{};
+						writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+						writeDescriptorSet.pNext = nullptr;
+						writeDescriptorSet.dstSet = descriptorSets[setLayoutIndex];
+						writeDescriptorSet.dstBinding = bindingIndex;
+						writeDescriptorSet.dstArrayElement = 0;
+						writeDescriptorSet.descriptorCount = 1;
+						writeDescriptorSet.descriptorType = getVkDescriptorType(binding.descriptorType);
+						writeDescriptorSet.pImageInfo = &descriptorImageInfos[writeDescriptorSetIndex];
+						writeDescriptorSet.pBufferInfo = nullptr;
 						writeDescriptorSet.pTexelBufferView = nullptr;
 
 						writeDescriptorSets.emplace_back(writeDescriptorSet);
@@ -162,7 +202,7 @@ namespace ProjectA {
 
 		ENGINE_TRACE("[~VulkanPipelineLayout]");
 
-		if (descriptorSetLayouts.size() != 0) {
+		if (descriptorSetLayouts.size() > 0) {
 			// TODO: Only OK if the pool has been created with the VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT flag.
 			//vkFreeDescriptorSets(device, descriptorPool, static_cast<uint32>(descriptorSets.size()), descriptorSets.data());
 

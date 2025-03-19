@@ -4,6 +4,7 @@
 #include "Engine/Renderer/CommandEncoder.hpp"
 #include "Engine/Renderer/Device.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
+#include "Engine/Renderer/Sampler.hpp"
 #include "Engine/Renderer/ShaderStage.hpp"
 #include "Engine/Renderer/Texture.hpp"
 #include "Engine/Synchronization/Fence.hpp"
@@ -27,6 +28,8 @@ namespace ProjectA {
 			virtual ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const = 0;
 
 			virtual ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const = 0;
+
+			virtual ref<Sampler> createSampler(const SamplerDescriptor& descriptor) const = 0;
 
 			virtual ref<Semaphore> createSemaphore() const = 0;
 

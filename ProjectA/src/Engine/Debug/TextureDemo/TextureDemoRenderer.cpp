@@ -18,16 +18,88 @@ namespace ProjectA {
 
 		swapchain = createSwapchain(swapchainDescriptor);
 
-		//DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding{};
-		//textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		//textureDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		//textureDescriptorSetLayoutBinding.buffers = {textureStorageBuffer};
+		// Create texture.
+		{
+			const chain<uint8> data = {
+				0, 255, 0, 255, 255, 255, 255, 255, // green - white
+				255, 0, 0, 255, 0, 0, 255, 255, // red - blue
+			};
 
-		//DescriptorSetLayout textureDescriptotSetLayout{};
-		//textureDescriptotSetLayout.bindings.emplace_back(textureDescriptorSetLayoutBinding);
+			const uint32 width = 2;
+			const uint32 height = 2;
+			const uint32 depth = 1;
+			const uint64 size = sizeof(uint8) * data.size();
+
+			BufferDescriptor stagingBufferDescriptor{};
+			stagingBufferDescriptor.size = size;
+			stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+
+			const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
+
+			const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
+
+			std::copy(data.begin(), data.end(), static_cast<uint8*>(mappedRange));
+
+			stagingBuffer->unmap();
+
+			TextureDescriptor textureDescriptor;
+			textureDescriptor.type = TextureType::TEXTURE_2D;
+			textureDescriptor.format = TextureFormat::R8G8B8A8_SRGB;
+			textureDescriptor.usage = TextureUsage::TRANSFER_DST | TextureUsage::SAMPLED;
+			textureDescriptor.width = width;
+			textureDescriptor.height = height;
+			textureDescriptor.depth = depth;
+			textureDescriptor.mipLevelCount = 1;
+			textureDescriptor.arrayLayerCount = 1;
+			textureDescriptor.sampleCount = 1;
+
+			texture = createTexture(textureDescriptor);
+
+			CommandBufferDescriptor commandBufferDescriptor{};
+			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+
+			commandEncoder->begin();
+			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL);
+			commandEncoder->copyBufferToTexture(stagingBuffer, texture, width, height, depth);
+			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL);
+
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+			const ref<Device>& device = getDevice();
+
+			device->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->waitIdle();
+		}
+
+		// Create texture view.
+		{
+			const TextureViewDescriptor textureViewDescriptor;
+
+			textureView = texture->createView(textureViewDescriptor);
+		}
+
+		// Create sampler.
+		{
+			SamplerDescriptor samplerDescriptor{};
+			samplerDescriptor.magFilter = SamplerFilter::NEAREST;
+			samplerDescriptor.minFilter = SamplerFilter::NEAREST;
+
+			sampler = createSampler(samplerDescriptor);
+		}
+
+		DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding{};
+		textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		textureDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		textureDescriptorSetLayoutBinding.samplers = {sampler};
+		textureDescriptorSetLayoutBinding.textureViews = {textureView};
+
+		DescriptorSetLayout textureDescriptorSetLayout{};
+		textureDescriptorSetLayout.bindings.emplace_back(textureDescriptorSetLayoutBinding);
 
 		PipelineLayoutDescriptor pipelineLayoutDescriptor;
-		//pipelineLayoutDescriptor.layouts.emplace_back();
+		pipelineLayoutDescriptor.layouts.emplace_back(textureDescriptorSetLayout);
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
@@ -164,61 +236,6 @@ namespace ProjectA {
 			device->waitIdle();
 		}
 
-		// Create texture.
-		{
-			const chain<vec4<float32>> data = {
-				{255.0f, 0.0f, 0.0f, 255.0f}, {0.0, 0.0f, 255.0f, 255.0f},
-				{0.0f, 255.0f, 0.0f, 255.0f}, {255.0f, 255.0f, 255.0f, 255.0f},
-			};
-
-			const uint32 width = 2;
-			const uint32 height = 2;
-			const uint32 depth = 1;
-			const uint64 size = sizeof(vec4<float32>) * data.size();
-
-			BufferDescriptor stagingBufferDescriptor{};
-			stagingBufferDescriptor.size = size;
-			stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
-
-			const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
-
-			const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
-
-			std::copy(data.begin(), data.end(), static_cast<vec4<float32>*>(mappedRange));
-
-			stagingBuffer->unmap();
-
-			TextureDescriptor textureDescriptor;
-			textureDescriptor.type = TextureType::TEXTURE_2D;
-			textureDescriptor.format = TextureFormat::R8G8B8A8_SRGB;
-			textureDescriptor.usage = TextureUsage::TRANSFER_DST | TextureUsage::SAMPLED;
-			textureDescriptor.width = width;
-			textureDescriptor.height = height;
-			textureDescriptor.depth = depth;
-			textureDescriptor.mipLevelCount = 1;
-			textureDescriptor.arrayLayerCount = 1;
-			textureDescriptor.sampleCount = 1;
-
-			texture = createTexture(textureDescriptor);
-
-			CommandBufferDescriptor commandBufferDescriptor{};
-			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
-
-			commandEncoder->begin();
-			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL);
-			commandEncoder->copyBufferToTexture(stagingBuffer, texture, width, height, depth);
-			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL);
-
-			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-			const ref<Device>& device = getDevice();
-
-			device->submit(commandBuffer, nullptr, nullptr, nullptr);
-			device->waitIdle();
-		}
-
 		// Create command encoder.
 		{
 			CommandBufferDescriptor commandBufferDescriptor{};
@@ -256,6 +273,7 @@ namespace ProjectA {
 		commandEncoder->begin();
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
+		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);

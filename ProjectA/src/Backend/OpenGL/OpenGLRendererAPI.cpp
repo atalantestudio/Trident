@@ -7,6 +7,7 @@
 #include "Backend/OpenGL/OpenGLRendererAPI.hpp"
 #include "Backend/OpenGL/OpenGLRenderPass.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
+#include "Backend/OpenGL/OpenGLSampler.hpp"
 #include "Backend/OpenGL/OpenGLSemaphore.hpp"
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
@@ -45,6 +46,10 @@ namespace ProjectA {
 
 	ref<RenderPipeline> OpenGLRendererAPI::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
 		return createRef<OpenGLRenderPipeline>(descriptor);
+	}
+
+	ref<Sampler> OpenGLRendererAPI::createSampler(const SamplerDescriptor& descriptor) const {
+		return createRef<OpenGLSampler>(descriptor);
 	}
 
 	ref<Semaphore> OpenGLRendererAPI::createSemaphore() const {

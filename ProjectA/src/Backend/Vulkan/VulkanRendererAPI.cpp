@@ -5,6 +5,7 @@
 #include "Backend/Vulkan/VulkanFence.hpp"
 #include "Backend/Vulkan/VulkanRendererAPI.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
+#include "Backend/Vulkan/VulkanSampler.hpp"
 #include "Backend/Vulkan/VulkanSemaphore.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 #include "Backend/Vulkan/VulkanTexture.hpp"
@@ -59,6 +60,10 @@ namespace ProjectA {
 
 	ref<RenderPipeline> VulkanRendererAPI::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
 		return createRef<VulkanRenderPipeline>(device->object, descriptor);
+	}
+
+	ref<Sampler> VulkanRendererAPI::createSampler(const SamplerDescriptor& descriptor) const {
+		return createRef<VulkanSampler>(device->object, descriptor);
 	}
 
 	ref<Semaphore> VulkanRendererAPI::createSemaphore() const {

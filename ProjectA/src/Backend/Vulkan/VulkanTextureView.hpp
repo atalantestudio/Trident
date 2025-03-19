@@ -2,6 +2,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Backend/Vulkan/VulkanTexture.hpp"
+
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/Renderer/TextureView.hpp"
 

@@ -9,6 +9,10 @@ namespace ProjectA {
 	VulkanTextureView::VulkanTextureView(VkDevice device, const VulkanTexture& texture, const TextureViewDescriptor& descriptor) :
 		device(device)
 	{
+		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[VulkanTextureView]");
+
 		VkImageViewCreateInfo imageViewCreateInfo{};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.pNext = nullptr;
@@ -32,6 +36,10 @@ namespace ProjectA {
 	}
 
 	VulkanTextureView::~VulkanTextureView() {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanTextureView]");
+
 		vkDestroyImageView(device, object, nullptr);
 	}
 }

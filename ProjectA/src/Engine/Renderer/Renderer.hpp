@@ -45,6 +45,8 @@ namespace ProjectA {
 
 			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const;
 
+			ref<Sampler> createSampler(const SamplerDescriptor& descriptor) const;
+
 			ref<Semaphore> createSemaphore() const;
 
 			ref<ShaderModule> createShaderModule(const ShaderStage stage, const std::string& code) const;

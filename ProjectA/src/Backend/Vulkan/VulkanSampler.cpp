@@ -1,0 +1,46 @@
+#include "pch.hpp"
+
+#include "Backend/Vulkan/SamplerFilter.hpp"
+#include "Backend/Vulkan/VulkanSampler.hpp"
+
+namespace ProjectA {
+	VulkanSampler::VulkanSampler(VkDevice device, const SamplerDescriptor& descriptor) :
+		device(device)
+	{
+        PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[VulkanSampler]");
+
+		VkSamplerCreateInfo samplerCreateInfo{};
+		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerCreateInfo.pNext = nullptr;
+        samplerCreateInfo.flags = 0;
+        samplerCreateInfo.magFilter = getVkFilter(descriptor.magFilter);
+        samplerCreateInfo.minFilter = getVkFilter(descriptor.minFilter);
+        samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+        samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerCreateInfo.mipLodBias = 0.0f;
+        samplerCreateInfo.anisotropyEnable = VK_FALSE;
+        samplerCreateInfo.maxAnisotropy = 1.0f;
+        samplerCreateInfo.compareEnable = VK_FALSE;
+        samplerCreateInfo.compareOp = VK_COMPARE_OP_NEVER;
+        samplerCreateInfo.minLod = 0;
+        samplerCreateInfo.maxLod = 0;
+        samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
+
+        if (vkCreateSampler(device, &samplerCreateInfo, nullptr, &object) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create sampler.");
+        }
+	}
+
+	VulkanSampler::~VulkanSampler() {
+        PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanSampler]");
+
+		vkDestroySampler(device, object, nullptr);
+	}
+}
