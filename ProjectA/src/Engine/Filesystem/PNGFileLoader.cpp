@@ -54,7 +54,7 @@ namespace ProjectA {
 
 			switch (filterType) {
 				case FilterType::NONE: {
-					ENGINE_DEBUG("Reconstructing unfiltered scanline [].", y);
+					//ENGINE_DEBUG("Reconstructing unfiltered scanline [].", y);
 
 					// TODO: Use std::copy here.
 					// std::copy(&output[y * (properties.Height + 1) + 1], &output[y * (properties.Height + 1) + properties.Width + 1], finalOutput[y * properties.Height]);
@@ -71,7 +71,7 @@ namespace ProjectA {
 					break;
 				}
 				case FilterType::SUB: {
-					ENGINE_DEBUG("Reconstructing scanline [] with sub filter.", y);
+					//ENGINE_DEBUG("Reconstructing scanline [] with sub filter.", y);
 
 					uint32 aPixel = 0;
 
@@ -81,33 +81,6 @@ namespace ProjectA {
 						destination[2] = applyAddFilter(source, (uint8*) &aPixel, 2);
 						destination[3] = applyAddFilter(source, (uint8*) &aPixel, 3);
 
-						// white: 255 255 255 255
-						// grey: 204 204 204 255
-
-						if (y == 0) {
-							ENGINE_DEBUG(
-								"source: [] [] [] []",
-								(int)source[0],
-								(int)source[1],
-								(int)source[2],
-								(int)source[3]
-							);
-							ENGINE_DEBUG(
-								"dest: [] [] [] []",
-								(int)destination[0],
-								(int)destination[1],
-								(int)destination[2],
-								(int)destination[3]
-							);
-							ENGINE_DEBUG(
-								"A: [] [] [] []",
-								(int)((uint8*)&aPixel)[0],
-								(int)((uint8*)&aPixel)[1],
-								(int)((uint8*)&aPixel)[2],
-								(int)((uint8*)&aPixel)[3]
-							);
-						}
-
 						aPixel = *(uint32*) destination;
 						destination += 4;
 						source += 4;
@@ -116,7 +89,7 @@ namespace ProjectA {
 					break;
 				}
 				case FilterType::UP: {
-					ENGINE_DEBUG("Reconstructing scanline [] with up filter.", y);
+					//ENGINE_DEBUG("Reconstructing scanline [] with up filter.", y);
 
 					uint8* bPixel = previousRow;
 
@@ -134,7 +107,7 @@ namespace ProjectA {
 					break;
 				}
 				case FilterType::AVERAGE: {
-					ENGINE_DEBUG("Reconstructing scanline [] with average filter.", y);
+					//ENGINE_DEBUG("Reconstructing scanline [] with average filter.", y);
 
 					uint32 aPixel = 0;
 					uint8* bPixel = previousRow;
@@ -154,7 +127,7 @@ namespace ProjectA {
 					break;
 				}
 				case FilterType::PAETH: {
-					ENGINE_DEBUG("Reconstructing scanline [] with Paeth filter.", y);
+					//ENGINE_DEBUG("Reconstructing scanline [] with Paeth filter.", y);
 
 					uint32 aPixel = 0;
 					uint8* bPixel = previousRow;

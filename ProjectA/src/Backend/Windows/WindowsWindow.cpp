@@ -9,7 +9,7 @@
 namespace ProjectA {
 	static uint8 glfwWindowCount = 0;
 
-	static void glfwErrorCallback(int error, const char* description) {
+	static void glfwErrorCallback(sint32 error, const char* description) {
 		ENGINE_ERROR("GLFW error ([]): []", error, description);
 	}
 
