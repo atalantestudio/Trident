@@ -11,6 +11,10 @@ namespace ProjectA {
 		bitBuffer = *(acc_t*)(stream + byteOffset);
 	}
 
+	uint64 BitStream::getBitOffset() const {
+		return byteOffset * 8 + bitOffset;
+	}
+
 	const uint8* BitStream::getBytePosition() const {
 		ENGINE_ASSERT(bitOffset % 8 == 0, "BitStream: Failed to return the byte offset: the bit offset is not a multiple of 8.");
 
@@ -19,6 +23,10 @@ namespace ProjectA {
 
 	uint64 BitStream::getRemainingBitSize() const {
 		return (byteSize - byteOffset) * 8 - bitOffset;
+	}
+
+	uint64 BitStream::getRemainingByteSize() const {
+		return byteSize - byteOffset;
 	}
 
 	void BitStream::jump(uint64 bitCount) {

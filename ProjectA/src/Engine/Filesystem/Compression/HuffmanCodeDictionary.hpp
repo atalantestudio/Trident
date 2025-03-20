@@ -6,17 +6,14 @@
 namespace ProjectA {
 	class HuffmanCodeDictionary {
 		public:
-			static uint32 reverseBits(uint32 value, uint8 count);
+			static uint32 reverseBits(uint32 value, uint32 bitCount);
 
 		public:
 			HuffmanCodeDictionary(uint8 maxCodeBitLength);
 
-			~HuffmanCodeDictionary();
-
 			// Giving the bit lengths of the codes for each symbol of the alphabet in order
 			// is sufficient to determine the actual codes.
-			// NOTE: The symbol count can technically be uint16.
-			void compute(const uint16* codeLengths, uint32 symbolCount);
+			void compute(const uint16* codeLengths, uint16 symbolCount);
 
 			uint16 decode(BitStream& stream) const;
 
@@ -25,7 +22,6 @@ namespace ProjectA {
 
 		private:
 			uint8 maxCodeBitLength;
-			uint32 codeEntryCount = 0;
-			HuffmanCodeEntry* codeEntries = nullptr;
+			chain<HuffmanCodeEntry> codeEntries;
 	};
 }

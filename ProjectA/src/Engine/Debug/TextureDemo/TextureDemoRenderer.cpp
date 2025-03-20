@@ -20,7 +20,11 @@ namespace ProjectA {
 
 		// Create texture.
 		{
-			const PNGFile file = PNGFileLoader::load("../ProjectA/src/Engine/Debug/TextureDemo/Asset/TextureCompression0.png");
+			// checkerboard_0 OK
+			// test_inflate_0 OK
+			// test_inflate2_0 OK
+			// test_inflate2_9 OK
+			const PNGFile file = PNGFileLoader::load("../ProjectA/src/Engine/Debug/TextureDemo/Asset/checkerboard_0.png");
 			const uint64 size = sizeof(uint8) * file.data.size();
 
 			BufferDescriptor stagingBufferDescriptor{};
@@ -35,7 +39,7 @@ namespace ProjectA {
 
 			stagingBuffer->unmap();
 
-			TextureDescriptor textureDescriptor;
+			TextureDescriptor textureDescriptor{};
 			textureDescriptor.type = TextureType::TEXTURE_2D;
 			textureDescriptor.format = TextureFormat::R8G8B8A8_SRGB;
 			textureDescriptor.usage = TextureUsage::TRANSFER_DST | TextureUsage::SAMPLED;
@@ -137,15 +141,16 @@ namespace ProjectA {
 
 		// Create vertex buffer.
 		{
+			// Texture coordinates are reversed manually.
 			chain<Vertex> vertices(4);
-			vertices[0].position = {-0.5f, -0.5f};
-			vertices[0].uv = {0.0f, 0.0f};
-			vertices[1].position = {-0.5f, 0.5f};
-			vertices[1].uv = {0.0f, 1.0f};
-			vertices[2].position = {0.5f,  0.5f};
-			vertices[2].uv = {1.0f, 1.0f};
-			vertices[3].position = {0.5f, -0.5f};
-			vertices[3].uv = {1.0f, 0.0f};
+			vertices[0].position = {-1.0f, -1.0f};
+			vertices[0].uv = {0.0f, 1.0f};
+			vertices[1].position = {-1.0f, 1.0f};
+			vertices[1].uv = {0.0f, 0.0f};
+			vertices[2].position = {1.0f, 1.0f};
+			vertices[2].uv = {1.0f, 0.0f};
+			vertices[3].position = {1.0f, -1.0f};
+			vertices[3].uv = {1.0f, 1.0f};
 
 			const uint64 size = sizeof(Vertex) * vertices.size();
 
@@ -256,7 +261,7 @@ namespace ProjectA {
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = renderPass;
 		beginRenderPassDescriptor.swapchain = swapchain;
-		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+		beginRenderPassDescriptor.clearColor = {1.0f, 1.0f, 1.0f, 1.0f};
 		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());

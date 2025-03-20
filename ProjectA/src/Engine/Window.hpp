@@ -10,7 +10,7 @@ namespace ProjectA {
 		sint32 width;
 		sint32 height;
 
-		WindowData(const std::string& title = "Project A", sint32 width = 1280, sint32 height = 720) :
+		WindowData(const std::string& title = "Project A", sint32 width = 800, sint32 height = 800) :
 			title(title),
 			width(width),
 			height(height) {}

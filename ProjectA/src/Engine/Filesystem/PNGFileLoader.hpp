@@ -42,15 +42,19 @@ namespace ProjectA {
 
 			static void readChunk(ByteStream& stream, PNGFile& file);
 
-			static void readIHDR(ByteStream& stream, PNGFile& file);
+			static void readIHDRChunk(ByteStream& stream, PNGFile& file);
 
-			static void readIDAT(ByteStream& stream, uint32 chunkByteLength, PNGFile& file);
+			static void readIDATChunk(ByteStream& stream, uint32 chunkByteLength, PNGFile& file);
 
-			static chain<uint8> readZlibStream(BitStream& stream);
+			static void readZlibStream(BitStream& stream, uint8* destination, const uint8* firstDestination, const uint8* lastDestination);
 
-			static void readZlibBlock(BitStream& stream, uint8& BFINAL, chain<uint8>& output);
+			static void readZlibBlock(BitStream& stream, uint8& BFINAL, uint8* destination, const uint8* firstDestination, const uint8* lastDestination);
 
-			static void readIEND(ByteStream& stream);
+			static void readIENDChunk(ByteStream& stream);
+
+			static uint8 applyAddFilter(uint8* x, uint8* aOrB, uint8 channelIndex);
+			static uint8 applyAverageFilter(uint8* x, uint8* a, uint8* b, uint8 channelIndex);
+			static uint8 applyPaethFilter(uint8* x, uint8* a, uint8* b, uint8* c, uint8 channelIndex);
 
 		private:
 			static constexpr HuffmanCodeEntry lengthExtra[] = {
@@ -115,7 +119,7 @@ namespace ProjectA {
 				{8193, 12}, // 26
 				{12289, 12}, // 27
 				{16385, 13}, // 28
-				{25577, 13}, // 29
+				{24577, 13}, // 29
 			};
 	};
 }

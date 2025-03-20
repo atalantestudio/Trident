@@ -5,6 +5,6 @@ namespace ProjectA {
 		uint16 symbolIndex = 0;
 
 		// Number of bits used for the symbol.
-		uint8 bitLength = 0;
+		uint16 bitLength = 0;
 	};
 }
