@@ -88,7 +88,7 @@ namespace ProjectA {
 		return rendererApi->createSemaphore();
 	}
 
-	ref<ShaderModule> Renderer::createShaderModule(const ShaderStage stage, const std::string& code) const {
+	ref<ShaderModule> Renderer::createShaderModule(const ShaderStage stage, const chain<uint8>& code) const {
 		return rendererApi->createShaderModule(stage, code);
 	}
 

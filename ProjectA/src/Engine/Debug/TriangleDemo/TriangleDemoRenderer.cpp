@@ -40,8 +40,8 @@ namespace ProjectA {
 				break;
 		}
 
-		const std::string vertexShaderModuleCode = FileLoader::loadString(vertexShaderModulePath);
-		const std::string fragmentShaderModuleCode = FileLoader::loadString(fragmentShaderModulePath);
+		const chain<uint8> vertexShaderModuleCode = FileLoader::loadByteBuffer(vertexShaderModulePath);
+		const chain<uint8> fragmentShaderModuleCode = FileLoader::loadByteBuffer(fragmentShaderModulePath);
 
 		const ref<ShaderModule> vertexShaderModule = createShaderModule(ShaderStage::VERTEX, vertexShaderModuleCode);
 		const ref<ShaderModule> fragmentShaderModule = createShaderModule(ShaderStage::FRAGMENT, fragmentShaderModuleCode);

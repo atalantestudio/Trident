@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class VulkanShaderModule : public ShaderModule, public ObjectWrapper<VkPipelineShaderStageCreateInfo> {
 		public:
-			VulkanShaderModule(const VkDevice device, const VkShaderStageFlagBits stage, const std::string& code);
+			VulkanShaderModule(const VkDevice device, const VkShaderStageFlagBits stage, const chain<uint8>& code);
 
 			~VulkanShaderModule() override;
 

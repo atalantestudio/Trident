@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 
 namespace ProjectA {
-	VulkanShaderModule::VulkanShaderModule(const VkDevice device, const VkShaderStageFlagBits stage, const std::string& code) :
+	VulkanShaderModule::VulkanShaderModule(const VkDevice device, const VkShaderStageFlagBits stage, const chain<uint8>& code) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -15,7 +15,7 @@ namespace ProjectA {
 		shaderModuleCreateInfo.pNext = nullptr;
 		shaderModuleCreateInfo.flags = 0;
 		shaderModuleCreateInfo.codeSize = code.size();
-		shaderModuleCreateInfo.pCode = reinterpret_cast<const uint32*>(code.c_str());
+		shaderModuleCreateInfo.pCode = reinterpret_cast<const uint32*>(code.data());
 
 		VkShaderModule shaderModule;
 

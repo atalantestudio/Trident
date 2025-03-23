@@ -43,16 +43,4 @@ namespace ProjectA {
 
 		return chain;
 	}
-
-	std::string FileLoader::loadString(const std::string& path) {
-		std::ifstream stream(path, std::ios::binary);
-
-		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
-
-		const std::string buffer(std::istreambuf_iterator<char>(stream), {});
-
-		stream.close();
-
-		return buffer;
-	}
 }

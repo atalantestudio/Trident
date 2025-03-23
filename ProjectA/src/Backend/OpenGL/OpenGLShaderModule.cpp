@@ -3,14 +3,17 @@
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 
 namespace ProjectA {
-	OpenGLShaderModule::OpenGLShaderModule(const GLenum stage, const GLchar* const code) :
+	OpenGLShaderModule::OpenGLShaderModule(const GLenum stage, const chain<uint8>& code) :
 		ObjectWrapper(glCreateShader(stage))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
 		ENGINE_TRACE("[OpenGLShaderModule]");
 
-		glShaderSource(object, 1, &code, nullptr);
+		const GLchar* const string = reinterpret_cast<const GLchar* const>(code.data());
+		const GLint length = code.size();
+
+		glShaderSource(object, 1, &string, &length);
 		glCompileShader(object);
 
 		GLint compileStatus;
