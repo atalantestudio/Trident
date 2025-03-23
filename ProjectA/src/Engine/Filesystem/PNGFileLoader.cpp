@@ -163,6 +163,7 @@ namespace ProjectA {
 	}
 
 	void PNGFileLoader::readSignature(ByteStream& stream) {
+		// TODO: Replace with memcmp or C++ equivalent.
 		ENGINE_ASSERT(stream.read<uint8>() == 0x89, "Failed to verify signature.");
 		ENGINE_ASSERT(stream.read<uint8>() == 0x50, "Failed to verify signature.");
 		ENGINE_ASSERT(stream.read<uint8>() == 0x4E, "Failed to verify signature.");
@@ -205,7 +206,7 @@ namespace ProjectA {
 				break;
 		}
 
-		// TODO: Verify CRC. See https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix.
+		// TODO: Check CRC. See https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix.
 		Chunk.CRC = stream.read<uint32>(true);
 	}
 
@@ -252,9 +253,8 @@ namespace ProjectA {
 			throw std::runtime_error("Invalid interlace method value (must be 0 or 1).");
 		}
 
-		// Current feature support.
-		ENGINE_ASSERT(file.bitDepth == 8, "Only a bit depth of 8 is supported.");
-		ENGINE_ASSERT(file.colorType == 6, "Only a color type of 6 (truecolor with alpha) is supported.");
+		ENGINE_ASSERT(file.bitDepth == 8, "Bit depth = [] is unhandled.", file.bitDepth);
+		ENGINE_ASSERT(file.colorType == 6, "Color type = [] is unhandled.", file.colorType);
 	}
 
 	void PNGFileLoader::readIDATChunk(ByteStream& stream, uint32 chunkByteLength, PNGFile& file) {
@@ -270,241 +270,21 @@ namespace ProjectA {
 		stream.jump(chunkByteLength);
 	}
 
-	void PNGFileLoader::readZlibStream(BitStream& stream, uint8* destination, const uint8* firstDestination, const uint8* lastDestination) {
-		// Compression method.
-		const uint8 CM = stream.read<uint8>(4);
-
-		ENGINE_ASSERT(CM == 8, "Unhandled CM value.");
-
-		// Compression info.
-		const uint8 CINFO = stream.read<uint8>(4);
-
-		ENGINE_ASSERT(CINFO <= 7, "CINFO > 7 is not allowed.");
-
-		// Check bits for CMF and FLG.
-		const uint8 FCHECK = stream.read<uint8>(5);
-
-		// Preset dictionary.
-		const uint8 FDICT = stream.read<uint8>(1);
-
-		ENGINE_ASSERT(FDICT == 0, "Preset dictionaries are not allowed by the PNG standard.");
-
-		// Compression level.
-		const uint8 FLEVEL = stream.read<uint8>(2);
-
-		uint8 BFINAL = 0;
-
-		while (BFINAL == 0) {
-			readZlibBlock(stream, BFINAL, destination, firstDestination, lastDestination);
-		}
-
-		stream.close();
-	}
-
-	void PNGFileLoader::readZlibBlock(BitStream& stream, uint8& BFINAL, uint8* destination, const uint8* firstDestination, const uint8* lastDestination) {
-		BFINAL = stream.read<uint8>(1);
-
-		const uint8 BTYPE = stream.read<uint8>(2);
-
-		ENGINE_DEBUG("Reading zlib block (BFINAL = [], BTYPE = []).", static_cast<sint32>(BFINAL), static_cast<sint32>(BTYPE));
-
-		ENGINE_ASSERT(BTYPE < 3, "Reserved BTYPE value.");
-
-		if (BTYPE == 0) {
-			// No compression.
-
-			stream.jump(5);
-
-			// LEN is the number of data bytes in the block.
-			uint16 LEN = stream.read<uint16>(16);
-
-			// NLEN is the one's complement of LEN.
-			const uint16 NLEN = stream.read<uint16>(16);
-
-			ENGINE_ASSERT(LEN == static_cast<uint16>(~NLEN), "Failed to verify NLEN ([]) as the one's complement of LEN ([]).", NLEN, LEN);
-
-			for (uint16 i = 0; i < LEN; i += 1) {
-				*destination++ = stream.read<uint8>(8);
-			}
-
-			return;
-		}
-
-		// Fixed or dynamic Huffman codes.
-
-		constexpr uint16 literalLengthDistanceTableCount = 512;
-
-		uint8 literalLengthDistanceTable[literalLengthDistanceTableCount] = {};
-
-		HuffmanCodeDictionary literalLengthDictionary(15);
-		HuffmanCodeDictionary distanceDictionary(15);
-
-		uint16 literalLengthCount;
-		uint8 distanceCount;
-
-		if (BTYPE == 1) {
-			// Fixed Huffman codes.
-
-			literalLengthCount = 288;
-			distanceCount = 32;
-
-			uint16 literalLengthIndex = 0;
-
-			for (uint16 bitCountIndex = 0; bitCountIndex < 5; bitCountIndex += 1) {
-				const BitCount bitCount = bitCounts[bitCountIndex];
-
-				while (literalLengthIndex <= bitCount.maxLiteralLengthIndex) {
-					literalLengthDistanceTable[literalLengthIndex] = bitCount.bitCount;
-					literalLengthIndex += 1;
-				}
-			}
-		}
-		else {
-			// Dynamic Huffman codes.
-
-			// Number of Literal/Length codes - 257. (257 - 286)
-			const uint16 HLIT = stream.read<uint16>(5);
-
-			ENGINE_ASSERT(HLIT <= 29, "[] is an invalid HLIT value.", HLIT);
-
-			// Number of Distance codes - 1. (1 - 32)
-			const uint8 HDIST = stream.read<uint8>(5);
-
-			// Number of Code Length codes - 4. (4 - 19)
-			const uint8 HCLEN = stream.read<uint8>(4);
-
-			literalLengthCount = HLIT + 257;
-			distanceCount = HDIST + 1;
-
-			static constexpr uint8 codeLengthIndexLookupTable[] = {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
-
-			// Code lengths for the code length alphabet,
-			// in the order given by codeLengthIndexLookupTable.
-			uint8 codeLengthCodeLengths[19] = {};
-
-			for (uint8 i = 0; i < HCLEN + 4; i += 1) {
-				codeLengthCodeLengths[codeLengthIndexLookupTable[i]] = stream.read<uint8>(3);
-			}
-
-			HuffmanCodeDictionary literalLengthCodeDictionary(7);
-
-			literalLengthCodeDictionary.compute(codeLengthCodeLengths, 19);
-
-			const uint16 lengthCount = literalLengthCount + distanceCount;
-			uint16 literalLengthIndex = 0;
-
-			ENGINE_ASSERT(lengthCount < literalLengthDistanceTableCount, "The length count is overflowing [] ([]).", lengthCount, literalLengthDistanceTableCount);
-
-			while (literalLengthIndex < lengthCount) {
-				const uint8 encodedCodeLength = static_cast<uint8>(literalLengthCodeDictionary.decode(stream));
-
-				ENGINE_ASSERT(encodedCodeLength <= 18, "Unhandled encoded code length ([]).", encodedCodeLength);
-
-				uint8 codeLength = 0;
-				uint8 repeatLength = 1;
-
-				if (encodedCodeLength <= 15) {
-					// Represent code lengths of 0 - 15.
-					codeLength = encodedCodeLength;
-				}
-				else if (encodedCodeLength == 16) {
-					// Copy the previous code length 3 - 6 times.
-					// The next 2 bits indicate repeat length.
-					ENGINE_ASSERT(literalLengthIndex > 0, "Literal/length count is 0.");
-
-					codeLength = literalLengthDistanceTable[literalLengthIndex - 1];
-					repeatLength = stream.read<uint8>(2) + 3;
-
-					ENGINE_ASSERT(repeatLength <= 6, "The repeat length is overflowing ([]).", repeatLength);
-				}
-				else if (encodedCodeLength == 17) {
-					// Repeat a code length of 0 for 3 - 10 times.
-					// The next 3 bits indicate repeat length.
-					repeatLength = stream.read<uint8>(3) + 3;
-
-					ENGINE_ASSERT(repeatLength <= 10, "The repeat length is overflowing ([]).", repeatLength);
-				}
-				else if (encodedCodeLength == 18) {
-					// Repeat a code length of 0 for 11 - 138 times.
-					// The next 7 bits indicate repeat length.
-					repeatLength = stream.read<uint8>(7) + 11;
-
-					ENGINE_ASSERT(repeatLength <= 138, "The repeat length is overflowing ([]).", repeatLength);
-				}
-
-				// TODO: Replace with memset.
-				while (repeatLength--) {
-					literalLengthDistanceTable[literalLengthIndex++] = codeLength;
-				}
-			}
-
-			ENGINE_ASSERT(literalLengthIndex == lengthCount, "Literal/length count ([]) should equal the length count ([]).", literalLengthIndex, lengthCount);
-		}
-
-		literalLengthDictionary.compute(&literalLengthDistanceTable[0], literalLengthCount);
-		distanceDictionary.compute(&literalLengthDistanceTable[literalLengthCount], distanceCount);
-
-		// TODO: Set max iteration count.
-		while (true) {
-			const uint16 literalLength = literalLengthDictionary.decode(stream);
-
-			if (literalLength <= 255) {
-				// Output literal.
-				*destination++ = static_cast<uint8>(literalLength);
-
-				continue;
-			}
-
-			if (literalLength == 256) {
-				// End of block.
-				break;
-			}
-
-			ENGINE_ASSERT(literalLength <= 285, "Literal/length should not exceed 285.");
-
-			const uint16 lengthExtraEntryIndex = literalLength - 257;
-			const HuffmanCode& lengthExtraEntry = lengthExtra[lengthExtraEntryIndex];
-			uint16 length = lengthExtraEntry.symbolIndex;
-
-			if (lengthExtraEntry.bitLength > 0) {
-				length += stream.read<uint16>(lengthExtraEntry.bitLength);
-			}
-
-			const uint16 distanceExtraEntryIndex = distanceDictionary.decode(stream);
-			const HuffmanCode& distanceExtraEntry = distanceExtra[distanceExtraEntryIndex];
-			uint16 distance = distanceExtraEntry.symbolIndex;
-
-			if (distanceExtraEntry.bitLength > 0) {
-				distance += stream.read<uint16>(distanceExtraEntry.bitLength);
-			}
-
-			const uint8* source = destination - distance;
-
-			ENGINE_ASSERT(source + length <= lastDestination, "");
-			ENGINE_ASSERT(destination + length <= lastDestination, "");
-			ENGINE_ASSERT(source >= firstDestination, "The source index is underflowing.");
-
-			while (length--) {
-				*destination++ = *source++;
-			}
-		}
-	}
-
 	uint8 PNGFileLoader::applyAddFilter(const uint8* x, uint8* aOrB, uint8 channelIndex) {
-		return ((uint8)x[channelIndex]) + ((uint8)aOrB[channelIndex]);
+		return (uint8) x[channelIndex] + (uint8) aOrB[channelIndex];
 	}
 
 	uint8 PNGFileLoader::applyAverageFilter(const uint8* x, uint8* a, uint8* b, uint8 channelIndex) {
-		const uint32 average = ((uint32)a[channelIndex] + (uint32)b[channelIndex]) / 2;
+		const uint32 average = ((uint32) a[channelIndex] + (uint32) b[channelIndex]) / 2;
 
-		return (uint8) x[channelIndex] + (uint8)average;
+		return (uint8) x[channelIndex] + (uint8) average;
 	}
 
 	// TODO: Use vec3<sint32>.
 	uint8 PNGFileLoader::applyPaethFilter(const uint8* x, uint8* aPixel, uint8* bPixel, uint8* cPixel, uint8 channelIndex) {
-		sint32 a = (sint32)aPixel[channelIndex];
-		sint32 b = (sint32)bPixel[channelIndex];
-		sint32 c = (sint32)cPixel[channelIndex];
+		const sint32 a = (sint32) aPixel[channelIndex];
+		const sint32 b = (sint32) bPixel[channelIndex];
+		const sint32 c = (sint32) cPixel[channelIndex];
 
 		const sint32 p = a + b - c;
 
@@ -525,6 +305,6 @@ namespace ProjectA {
 			paeth = b;
 		}
 
-		return (uint8)x[channelIndex] + (uint8)paeth;
+		return (uint8) x[channelIndex] + (uint8) paeth;
 	}
 }

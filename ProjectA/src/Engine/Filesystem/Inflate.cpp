@@ -298,6 +298,7 @@ namespace ProjectA {
 			const DistanceCode distanceCode = distanceCodes[distanceCodeIndex];
 			const uint16 distance = distanceCode.baseDistance + stream.read<uint16>(distanceCode.extraBitCount);
 
+			// TODO: Use iterator instead of raw pointer.
 			//const chain<uint8>::const_iterator source = data.end() - distance;
 			const uint8* source = data.data() + data.size() - distance;
 
@@ -306,7 +307,7 @@ namespace ProjectA {
 
 			//std::copy(source, source + length, std::back_inserter(data));
 			for (uint16 index = 0; index < length; index += 1) {
-				std::back_inserter(data) = *source;
+				data.emplace_back(*source);
 
 				source += 1;
 			}

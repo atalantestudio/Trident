@@ -21,27 +21,10 @@ namespace ProjectA {
 
 		// Create texture.
 		{
-			// Uncompressed:
-			// - checkerboard_0 (OK)
-			// - test_inflate_0 (OK)
-			// - test_inflate2_0 (OK)
-			// - test_inflate2_9 (OK)
-
-			// Fixed Huffman codes:
-			// - test_inflate_1 (OK)
-			// - test_inflate_2 (OK)
-			// - test_inflate_9 (OK)
-
-			// Dynamic Huffman codes:
-			// - checkerboard_9.png (OK)
-			// - decalgraffiti001d.png (OK)
-			// - Metallic Gold.png (OK)
-			// - RPGpack_sheet_2X.png (OK)
-
-			// Special cases:
+			// TODO:
 			// - checkerboard.png (colorType = 2, no alpha)
 
-			const PNGFile file = PNGFileLoader::load("../ProjectA/src/Engine/Debug/TextureDemo/Asset/RPGpack_sheet_2X.png");
+			const PNGFile file = PNGFileLoader::load("../ProjectA/src/Engine/Debug/TextureDemo/Asset/decalgraffiti001d.png");
 			const uint64 size = sizeof(uint8) * file.data.size();
 
 			BufferDescriptor stagingBufferDescriptor{};
