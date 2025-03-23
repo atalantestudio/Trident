@@ -44,8 +44,6 @@
 // Scene
 #include "Engine/Scene/Scene.hpp"
 
-// TODO: Include debug demos in a custom engine-side file.
-#ifdef BUILD_MODE_DEBUG
-	#include "Engine/Debug/TextureDemo/TextureDemoRenderer.hpp"
-	#include "Engine/Debug/TriangleDemo/TriangleDemoRenderer.hpp"
-#endif
+// TODO: Include debug demos in a custom engine-side file, in debug mode only.
+#include "Engine/Debug/TextureDemo/TextureDemoRenderer.hpp"
+#include "Engine/Debug/TriangleDemo/TriangleDemoRenderer.hpp"

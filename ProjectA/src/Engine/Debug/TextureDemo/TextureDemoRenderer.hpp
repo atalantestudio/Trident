@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProjectA.hpp"
+#include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	class TextureDemoRenderer : public Renderer {

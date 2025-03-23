@@ -11,13 +11,19 @@ namespace ProjectA {
 		bitBuffer = *(acc_t*)(stream + byteOffset);
 	}
 
+	uint64 BitStream::getByteOffset() const {
+		return byteOffset;
+	}
+
 	uint64 BitStream::getBitOffset() const {
 		return byteOffset * 8 + bitOffset;
 	}
 
-	const uint8* BitStream::getBytePosition() const {
-		ENGINE_ASSERT(bitOffset % 8 == 0, "BitStream: Failed to return the byte offset: the bit offset is not a multiple of 8.");
+	uint64 BitStream::getRelativeBitOffset() const {
+		return bitOffset;
+	}
 
+	const uint8* BitStream::getBytePosition() const {
 		return stream + byteOffset + bitOffset / 8;
 	}
 

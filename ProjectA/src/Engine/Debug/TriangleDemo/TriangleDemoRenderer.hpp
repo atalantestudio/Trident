@@ -1,6 +1,7 @@
 #pragma once
 
-#include "ProjectA.hpp"
+#include "Engine/Event/WindowEvent.hpp"
+#include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	class TriangleDemoRenderer : public Renderer {

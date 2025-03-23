@@ -2,6 +2,7 @@
 
 #include "Engine/Debug/TextureDemo/TextureDemoRenderer.hpp"
 #include "Engine/Filesystem/FileLoader.hpp"
+#include "Engine/Filesystem/PNGFileLoader.hpp"
 
 namespace ProjectA {
 	TextureDemoRenderer::TextureDemoRenderer() :
@@ -20,11 +21,27 @@ namespace ProjectA {
 
 		// Create texture.
 		{
-			// checkerboard_0 OK
-			// test_inflate_0 OK
-			// test_inflate2_0 OK
-			// test_inflate2_9 OK
-			const PNGFile file = PNGFileLoader::load("../ProjectA/src/Engine/Debug/TextureDemo/Asset/checkerboard_0.png");
+			// Uncompressed:
+			// - checkerboard_0 (OK)
+			// - test_inflate_0 (OK)
+			// - test_inflate2_0 (OK)
+			// - test_inflate2_9 (OK)
+
+			// Fixed Huffman codes:
+			// - test_inflate_1 (OK)
+			// - test_inflate_2 (OK)
+			// - test_inflate_9 (OK)
+
+			// Dynamic Huffman codes:
+			// - checkerboard_9.png (OK)
+			// - decalgraffiti001d.png (OK)
+			// - Metallic Gold.png (OK)
+			// - RPGpack_sheet_2X.png (OK)
+
+			// Special cases:
+			// - checkerboard.png (colorType = 2, no alpha)
+
+			const PNGFile file = PNGFileLoader::load("../ProjectA/src/Engine/Debug/TextureDemo/Asset/RPGpack_sheet_2X.png");
 			const uint64 size = sizeof(uint8) * file.data.size();
 
 			BufferDescriptor stagingBufferDescriptor{};

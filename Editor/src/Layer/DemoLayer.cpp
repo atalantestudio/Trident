@@ -2,7 +2,8 @@
 
 namespace ProjectA {
 	DemoLayer::DemoLayer() :
-		Layer("Demo")
+		Layer("Demo"),
+		renderer()
 	{}
 
 	void DemoLayer::bind() {}

@@ -2,14 +2,20 @@
 
 namespace ProjectA {
 	class BitStream {
-		public:
+		private:
 			typedef uint64 acc_t;
 
 		public:
 			BitStream(const uint8* stream, uint64 byteSize);
 
+			uint64 getByteOffset() const;
+
+			// Returns absolute bit offset.
 			uint64 getBitOffset() const;
 
+			uint64 getRelativeBitOffset() const;
+
+			// TODO: This returns the 8-byte offset instead of the byte offset?
 			const uint8* getBytePosition() const;
 
 			uint64 getRemainingBitSize() const;
@@ -54,7 +60,11 @@ namespace ProjectA {
 					}
 				}
 
-				value |= (*(acc_t*)(stream + sizeof(acc_t))) << (sizeof(acc_t) * 8 - bitOffset);
+				if (bitOffset > 0) {
+					const acc_t offset = sizeof(acc_t) * 8 - bitOffset;
+
+					value |= (*((acc_t*) (stream + byteOffset + sizeof(acc_t)))) << offset;
+				}
 
 				return value & ((1ULL << bitCount) - 1);
 			}
@@ -67,7 +77,14 @@ namespace ProjectA {
 			// - The bit count must be <= the remaining bits in the stream.
 			template<typename T>
 			T read(uint8 bitCount, bool swapEndianness = false) {
-				ENGINE_ASSERT(bitCount <= sizeof(T) * 8, "BitStream: Cannot read [] bits for a []-bit type.", static_cast<sint32>(bitCount), sizeof(T) * 8);
+				const T value = peek<T>(bitCount, swapEndianness);
+
+				jump(bitCount);
+
+				return value;
+
+				/*ENGINE_ASSERT(bitCount <= sizeof(T) *
+				8, "BitStream: Cannot read [] bits for a []-bit type.", static_cast<sint32>(bitCount), sizeof(T) * 8);
 				ENGINE_ASSERT(bitCount <= MAX_READ_OR_PEEK_BIT_COUNT, "BitStream: Cannot read more than [] bits at once.", MAX_READ_OR_PEEK_BIT_COUNT);
 				ENGINE_ASSERT(bitCount <= getRemainingBitSize(), "BitStream: Attempted to read [] bits, but only [] were left.", static_cast<sint32>(bitCount), getRemainingBitSize());
 
@@ -114,50 +131,8 @@ namespace ProjectA {
 				bitOffset += jumpBitCount;
 				bitBuffer >>= jumpBitCount;
 
-				return value & ((1ULL << bitCount) - 1);
+				return value & ((1ULL << bitCount) - 1);*/
 			}
-
-			// TODO: Avoid potential data loss warning.
-			// Returns the next bits from the stream.
-			// Usage:
-			// - The bit count must be <= 64.
-			// - The bit count must be <= MAX_READ_OR_PEEK_BIT_COUNT.
-			// - The bit count must be <= the remaining bits in the stream.
-			/*uint64 read(uint8 bitCount, bool swapEndianness = false) {
-				ENGINE_ASSERT(bitCount <= sizeof(uint64) * 8, "BitStream: Cannot read [] bits for a []-bit type.", static_cast<sint32>(bitCount), sizeof(uint64) * 8);
-				ENGINE_ASSERT(bitCount <= MAX_READ_OR_PEEK_BIT_COUNT, "BitStream: Cannot read more than [] bits at once.", MAX_READ_OR_PEEK_BIT_COUNT);
-				ENGINE_ASSERT(bitCount <= getRemainingBitSize(), "BitStream: Attempted to read [] bits, but only [] were left.", static_cast<sint32>(bitCount), getRemainingBitSize());
-
-				uint64 value = bitBuffer;
-
-				if (swapEndianness) {
-					value = _byteswap_uint64(value);
-				}
-
-				uint8 jumpBitCount = 0;
-
-				if (bitCount > static_cast<uint8>((sizeof(acc_t) * 8 - 1) - bitOffset)) {
-					jumpBitCount = bitOffset;
-
-					const uint64 jumpByteCount = (bitOffset + bitCount) / (sizeof(acc_t) * 8);
-
-					byteOffset += sizeof(acc_t) * jumpByteCount;
-					bitBuffer = *(acc_t*)(stream + byteOffset);
-
-					// TODO: If swapEndianness = true, a byteswap should happen here
-					// because the bit buffer has been refilled.
-					value |= bitBuffer << (sizeof(acc_t) * 8 - bitOffset);
-
-					bitOffset = 0;
-				}
-
-				jumpBitCount = (jumpBitCount + bitCount) % (sizeof(acc_t) * 8);
-
-				bitOffset += jumpBitCount;
-				bitBuffer >>= jumpBitCount;
-
-				return value & ((1ULL << bitCount) - 1);
-			}*/
 
 			// Advance the offsets to the end of the stream.
 			void close();

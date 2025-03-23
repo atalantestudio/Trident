@@ -2,6 +2,7 @@
 
 #include "Engine/Filesystem/Compression/HuffmanCodeDictionary.hpp"
 #include "Engine/Filesystem/FileLoader.hpp"
+#include "Engine/Filesystem/Inflate.hpp"
 #include "Engine/Filesystem/PNG/FilterType.hpp"
 #include "Engine/Filesystem/PNGFileLoader.hpp"
 
@@ -31,13 +32,13 @@ namespace ProjectA {
 
 		BitStream bitStream(pngFile.encodedData.data(), pngFile.encodedData.size());
 
-		pngFile.unfilteredData.resize(pngFile.width * pngFile.height * 4 + (pngFile.height * 1));
+		const uint32 finalSize = pngFile.width * pngFile.height * 4 + (pngFile.height * 1);
 
-		readZlibStream(bitStream, &pngFile.unfilteredData[0], &pngFile.unfilteredData[0], &pngFile.unfilteredData.back());
+		const chain<uint8> unfilteredData = inflate(bitStream, finalSize);
 
 		pngFile.data.resize(pngFile.width * pngFile.height * 4);
 
-		uint8* source = &pngFile.unfilteredData[0];
+		const uint8* source = &unfilteredData[0];
 		uint8* destination = &pngFile.data[0];
 
 		const uint32 rowLength = pngFile.width * 4 + 1;
@@ -193,8 +194,6 @@ namespace ProjectA {
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IEND"):
 				ENGINE_TRACE("Reading IEND chunk.");
 
-				readIENDChunk(stream);
-
 				break;
 			default:
 				const char* TypeString = static_cast<char*>(static_cast<void*>(&Chunk.Type));
@@ -275,12 +274,12 @@ namespace ProjectA {
 		// Compression method.
 		const uint8 CM = stream.read<uint8>(4);
 
-		if (CM != 8) {
-			throw std::runtime_error("Invalid CM (must be 8).");
-		}
+		ENGINE_ASSERT(CM == 8, "Unhandled CM value.");
 
 		// Compression info.
 		const uint8 CINFO = stream.read<uint8>(4);
+
+		ENGINE_ASSERT(CINFO <= 7, "CINFO > 7 is not allowed.");
 
 		// Check bits for CMF and FLG.
 		const uint8 FCHECK = stream.read<uint8>(5);
@@ -288,9 +287,7 @@ namespace ProjectA {
 		// Preset dictionary.
 		const uint8 FDICT = stream.read<uint8>(1);
 
-		if (FDICT != 0) {
-			throw std::runtime_error("Preset dictionaries are not supported.");
-		}
+		ENGINE_ASSERT(FDICT == 0, "Preset dictionaries are not allowed by the PNG standard.");
 
 		// Compression level.
 		const uint8 FLEVEL = stream.read<uint8>(2);
@@ -309,11 +306,12 @@ namespace ProjectA {
 
 		const uint8 BTYPE = stream.read<uint8>(2);
 
-		ENGINE_ASSERT(BTYPE != 0b11, "0b11 is a reserved BTYPE value.");
+		ENGINE_DEBUG("Reading zlib block (BFINAL = [], BTYPE = []).", static_cast<sint32>(BFINAL), static_cast<sint32>(BTYPE));
 
-		if (BTYPE == 0b00) {
+		ENGINE_ASSERT(BTYPE < 3, "Reserved BTYPE value.");
+
+		if (BTYPE == 0) {
 			// No compression.
-			ENGINE_DEBUG("Reading uncompressed zlib block.");
 
 			stream.jump(5);
 
@@ -332,138 +330,158 @@ namespace ProjectA {
 			return;
 		}
 
-		ENGINE_DEBUG("Reading zlib block compressed with fixed or dynamic Huffman codes.");
+		// Fixed or dynamic Huffman codes.
+
+		constexpr uint16 literalLengthDistanceTableCount = 512;
+
+		uint8 literalLengthDistanceTable[literalLengthDistanceTableCount] = {};
 
 		HuffmanCodeDictionary literalLengthDictionary(15);
 		HuffmanCodeDictionary distanceDictionary(15);
 
-		ENGINE_ASSERT(BTYPE != 0b01, "TODO: Fixed Huffman codes.");
+		uint16 literalLengthCount;
+		uint8 distanceCount;
 
-		// Number of Literal/Length codes - 257. (257 - 286)
-		const uint16 HLIT = stream.read<uint8>(5) + 257;
+		if (BTYPE == 1) {
+			// Fixed Huffman codes.
 
-		ENGINE_ASSERT(HLIT <= 286, "[] is an invalid HLIT value.", HLIT);
+			literalLengthCount = 288;
+			distanceCount = 32;
 
-		// Number of Distance codes - 1. (1 - 32)
-		const uint8 HDIST = stream.read<uint8>(5) + 1;
+			uint16 literalLengthIndex = 0;
 
-		ENGINE_ASSERT(HDIST <= 32, "[] is an invalid HDIST value.", HDIST);
+			for (uint16 bitCountIndex = 0; bitCountIndex < 5; bitCountIndex += 1) {
+				const BitCount bitCount = bitCounts[bitCountIndex];
 
-		// Number of Code Length codes - 4. (4 - 19)
-		const uint8 HCLEN = stream.read<uint8>(4) + 4;
-
-		ENGINE_ASSERT(HCLEN <= 19, "[] is an invalid HCLEN value.", HCLEN);
-
-		static constexpr uint8 codeLengthIndexLookupTable[] = {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
-
-		// Code lengths for the code length alphabet,
-		// in the order given by codeLengthIndexLookupTable.
-		uint16 codeLengthAlphabetCodeLengths[19] = {};
-
-		for (uint8 i = 0; i < HCLEN; i += 1) {
-			codeLengthAlphabetCodeLengths[codeLengthIndexLookupTable[i]] = stream.read<uint8>(3);
-		}
-
-		HuffmanCodeDictionary literalLengthCodeDictionary(7);
-
-		literalLengthCodeDictionary.compute(codeLengthAlphabetCodeLengths, 19);
-
-		constexpr uint16 literalLengthDistanceTableCount = 512;
-
-		uint16 literalLengthDistanceTable[literalLengthDistanceTableCount] = {};
-		uint16 literalLengthCount = 0;
-		const uint16 lengthCount = HLIT + HDIST;
-
-		ENGINE_ASSERT(lengthCount < literalLengthDistanceTableCount, "The length count is overflowing [] ([]).", lengthCount, literalLengthDistanceTableCount);
-
-		while (literalLengthCount < lengthCount) {
-			const uint16 encodedCodeLength = literalLengthCodeDictionary.decode(stream);
-
-			ENGINE_ASSERT(encodedCodeLength <= 18, "Unhandled encoded code length ([]).", encodedCodeLength);
-
-			uint16 codeLength = 0;
-			uint32 repeatLength = 1;
-
-			if (encodedCodeLength <= 15) {
-				// Represent code lengths of 0 - 15.
-				codeLength = encodedCodeLength;
-			}
-			else if (encodedCodeLength == 16) {
-				// Copy the previous code length 3 - 6 times.
-				// The next 2 bits indicate repeat length.
-				ENGINE_ASSERT(literalLengthCount > 0, "Literal/length count is 0.");
-
-				codeLength = literalLengthDistanceTable[literalLengthCount - 1];
-				repeatLength = stream.read<uint32>(2) + 3;
-
-				ENGINE_ASSERT(repeatLength <= 6, "The repeat length is overflowing ([]).", repeatLength);
-			}
-			else if (encodedCodeLength == 17) {
-				// Repeat a code length of 0 for 3 - 10 times.
-				// The next 3 bits indicate repeat length.
-				repeatLength = stream.read<uint32>(3) + 3;
-
-				ENGINE_ASSERT(repeatLength <= 10, "The repeat length is overflowing ([]).", repeatLength);
-			}
-			else if (encodedCodeLength == 18) {
-				// Repeat a code length of 0 for 11 - 138 times.
-				// The next 7 bits indicate repeat length.
-				repeatLength = stream.read<uint32>(7) + 11;
-
-				ENGINE_ASSERT(repeatLength <= 138, "The repeat length is overflowing ([]).", repeatLength);
-			}
-
-			while (repeatLength--) {
-				literalLengthDistanceTable[literalLengthCount++] = codeLength;
+				while (literalLengthIndex <= bitCount.maxLiteralLengthIndex) {
+					literalLengthDistanceTable[literalLengthIndex] = bitCount.bitCount;
+					literalLengthIndex += 1;
+				}
 			}
 		}
+		else {
+			// Dynamic Huffman codes.
 
-		ENGINE_ASSERT(literalLengthCount == lengthCount, "Literal/length count ([]) should equal the length count ([]).", literalLengthCount, lengthCount);
+			// Number of Literal/Length codes - 257. (257 - 286)
+			const uint16 HLIT = stream.read<uint16>(5);
 
-		literalLengthDictionary.compute(&literalLengthDistanceTable[0], HLIT);
-		distanceDictionary.compute(&literalLengthDistanceTable[HLIT], HDIST);
+			ENGINE_ASSERT(HLIT <= 29, "[] is an invalid HLIT value.", HLIT);
 
+			// Number of Distance codes - 1. (1 - 32)
+			const uint8 HDIST = stream.read<uint8>(5);
+
+			// Number of Code Length codes - 4. (4 - 19)
+			const uint8 HCLEN = stream.read<uint8>(4);
+
+			literalLengthCount = HLIT + 257;
+			distanceCount = HDIST + 1;
+
+			static constexpr uint8 codeLengthIndexLookupTable[] = {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
+
+			// Code lengths for the code length alphabet,
+			// in the order given by codeLengthIndexLookupTable.
+			uint8 codeLengthCodeLengths[19] = {};
+
+			for (uint8 i = 0; i < HCLEN + 4; i += 1) {
+				codeLengthCodeLengths[codeLengthIndexLookupTable[i]] = stream.read<uint8>(3);
+			}
+
+			HuffmanCodeDictionary literalLengthCodeDictionary(7);
+
+			literalLengthCodeDictionary.compute(codeLengthCodeLengths, 19);
+
+			const uint16 lengthCount = literalLengthCount + distanceCount;
+			uint16 literalLengthIndex = 0;
+
+			ENGINE_ASSERT(lengthCount < literalLengthDistanceTableCount, "The length count is overflowing [] ([]).", lengthCount, literalLengthDistanceTableCount);
+
+			while (literalLengthIndex < lengthCount) {
+				const uint8 encodedCodeLength = static_cast<uint8>(literalLengthCodeDictionary.decode(stream));
+
+				ENGINE_ASSERT(encodedCodeLength <= 18, "Unhandled encoded code length ([]).", encodedCodeLength);
+
+				uint8 codeLength = 0;
+				uint8 repeatLength = 1;
+
+				if (encodedCodeLength <= 15) {
+					// Represent code lengths of 0 - 15.
+					codeLength = encodedCodeLength;
+				}
+				else if (encodedCodeLength == 16) {
+					// Copy the previous code length 3 - 6 times.
+					// The next 2 bits indicate repeat length.
+					ENGINE_ASSERT(literalLengthIndex > 0, "Literal/length count is 0.");
+
+					codeLength = literalLengthDistanceTable[literalLengthIndex - 1];
+					repeatLength = stream.read<uint8>(2) + 3;
+
+					ENGINE_ASSERT(repeatLength <= 6, "The repeat length is overflowing ([]).", repeatLength);
+				}
+				else if (encodedCodeLength == 17) {
+					// Repeat a code length of 0 for 3 - 10 times.
+					// The next 3 bits indicate repeat length.
+					repeatLength = stream.read<uint8>(3) + 3;
+
+					ENGINE_ASSERT(repeatLength <= 10, "The repeat length is overflowing ([]).", repeatLength);
+				}
+				else if (encodedCodeLength == 18) {
+					// Repeat a code length of 0 for 11 - 138 times.
+					// The next 7 bits indicate repeat length.
+					repeatLength = stream.read<uint8>(7) + 11;
+
+					ENGINE_ASSERT(repeatLength <= 138, "The repeat length is overflowing ([]).", repeatLength);
+				}
+
+				// TODO: Replace with memset.
+				while (repeatLength--) {
+					literalLengthDistanceTable[literalLengthIndex++] = codeLength;
+				}
+			}
+
+			ENGINE_ASSERT(literalLengthIndex == lengthCount, "Literal/length count ([]) should equal the length count ([]).", literalLengthIndex, lengthCount);
+		}
+
+		literalLengthDictionary.compute(&literalLengthDistanceTable[0], literalLengthCount);
+		distanceDictionary.compute(&literalLengthDistanceTable[literalLengthCount], distanceCount);
+
+		// TODO: Set max iteration count.
 		while (true) {
 			const uint16 literalLength = literalLengthDictionary.decode(stream);
 
 			if (literalLength <= 255) {
 				// Output literal.
-				const uint32 output = literalLength & 0xFF;
-
-				*destination++ = (uint8) output;
+				*destination++ = static_cast<uint8>(literalLength);
 
 				continue;
 			}
 
 			if (literalLength == 256) {
-				// End of stream.
+				// End of block.
 				break;
 			}
 
 			ENGINE_ASSERT(literalLength <= 285, "Literal/length should not exceed 285.");
 
 			const uint16 lengthExtraEntryIndex = literalLength - 257;
-			const HuffmanCodeEntry& lengthExtraEntry = lengthExtra[lengthExtraEntryIndex];
-			uint32 length = lengthExtraEntry.symbolIndex;
+			const HuffmanCode& lengthExtraEntry = lengthExtra[lengthExtraEntryIndex];
+			uint16 length = lengthExtraEntry.symbolIndex;
 
 			if (lengthExtraEntry.bitLength > 0) {
-				length += stream.read<uint32>(static_cast<uint8>(lengthExtraEntry.bitLength));
+				length += stream.read<uint16>(lengthExtraEntry.bitLength);
 			}
 
 			const uint16 distanceExtraEntryIndex = distanceDictionary.decode(stream);
-			const HuffmanCodeEntry& distanceExtraEntry = distanceExtra[distanceExtraEntryIndex];
-			uint32 distance = distanceExtraEntry.symbolIndex;
+			const HuffmanCode& distanceExtraEntry = distanceExtra[distanceExtraEntryIndex];
+			uint16 distance = distanceExtraEntry.symbolIndex;
 
 			if (distanceExtraEntry.bitLength > 0) {
-				distance += stream.read<uint32>(static_cast<uint8>(distanceExtraEntry.bitLength));
+				distance += stream.read<uint16>(distanceExtraEntry.bitLength);
 			}
 
 			const uint8* source = destination - distance;
 
 			ENGINE_ASSERT(source + length <= lastDestination, "");
 			ENGINE_ASSERT(destination + length <= lastDestination, "");
-
-			// TODO: Fix this assert being fired.
 			ENGINE_ASSERT(source >= firstDestination, "The source index is underflowing.");
 
 			while (length--) {
@@ -472,22 +490,18 @@ namespace ProjectA {
 		}
 	}
 
-	void PNGFileLoader::readIENDChunk(ByteStream& stream) {
-		ENGINE_WARN("TODO: Handle IEND chunk.");
-	}
-
-	uint8 PNGFileLoader::applyAddFilter(uint8* x, uint8* aOrB, uint8 channelIndex) {
+	uint8 PNGFileLoader::applyAddFilter(const uint8* x, uint8* aOrB, uint8 channelIndex) {
 		return ((uint8)x[channelIndex]) + ((uint8)aOrB[channelIndex]);
 	}
 
-	uint8 PNGFileLoader::applyAverageFilter(uint8* x, uint8* a, uint8* b, uint8 channelIndex) {
+	uint8 PNGFileLoader::applyAverageFilter(const uint8* x, uint8* a, uint8* b, uint8 channelIndex) {
 		const uint32 average = ((uint32)a[channelIndex] + (uint32)b[channelIndex]) / 2;
 
 		return (uint8) x[channelIndex] + (uint8)average;
 	}
 
 	// TODO: Use vec3<sint32>.
-	uint8 PNGFileLoader::applyPaethFilter(uint8* x, uint8* aPixel, uint8* bPixel, uint8* cPixel, uint8 channelIndex) {
+	uint8 PNGFileLoader::applyPaethFilter(const uint8* x, uint8* aPixel, uint8* bPixel, uint8* cPixel, uint8 channelIndex) {
 		sint32 a = (sint32)aPixel[channelIndex];
 		sint32 b = (sint32)bPixel[channelIndex];
 		sint32 c = (sint32)cPixel[channelIndex];

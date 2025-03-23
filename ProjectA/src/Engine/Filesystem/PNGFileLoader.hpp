@@ -1,7 +1,7 @@
 #pragma once
 #pragma pack(push, 1)
 
-#include "Engine/Filesystem/Compression/HuffmanCodeEntry.hpp"
+#include "Engine/Filesystem/Compression/HuffmanCode.hpp"
 #include "Engine/Filesystem/File/PNGFile.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
@@ -50,14 +50,25 @@ namespace ProjectA {
 
 			static void readZlibBlock(BitStream& stream, uint8& BFINAL, uint8* destination, const uint8* firstDestination, const uint8* lastDestination);
 
-			static void readIENDChunk(ByteStream& stream);
-
-			static uint8 applyAddFilter(uint8* x, uint8* aOrB, uint8 channelIndex);
-			static uint8 applyAverageFilter(uint8* x, uint8* a, uint8* b, uint8 channelIndex);
-			static uint8 applyPaethFilter(uint8* x, uint8* a, uint8* b, uint8* c, uint8 channelIndex);
+			static uint8 applyAddFilter(const uint8* x, uint8* aOrB, uint8 channelIndex);
+			static uint8 applyAverageFilter(const uint8* x, uint8* a, uint8* b, uint8 channelIndex);
+			static uint8 applyPaethFilter(const uint8* x, uint8* a, uint8* b, uint8* c, uint8 channelIndex);
 
 		private:
-			static constexpr HuffmanCodeEntry lengthExtra[] = {
+			struct BitCount {
+				uint16 maxLiteralLengthIndex;
+				uint8 bitCount;
+			};
+
+			static constexpr BitCount bitCounts[] = {
+				{143, 8},
+				{255, 9},
+				{279, 7},
+				{287, 8},
+				{319, 5},
+			};
+
+			static constexpr HuffmanCode lengthExtra[] = {
 				{3, 0}, // 257
 				{4, 0}, // 258
 				{5, 0}, // 259
@@ -89,7 +100,7 @@ namespace ProjectA {
 				{258, 0}, // 285
 			};
 
-			static constexpr HuffmanCodeEntry distanceExtra[] = {
+			static constexpr HuffmanCode distanceExtra[] = {
 				{1, 0}, // 0
 				{2, 0}, // 1
 				{3, 0}, // 2
