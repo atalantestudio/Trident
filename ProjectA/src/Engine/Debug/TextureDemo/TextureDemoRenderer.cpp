@@ -24,7 +24,7 @@ namespace ProjectA {
 			// TODO:
 			// - checkerboard.png (colorType = 2, no alpha)
 
-			const PNGFile file = PNGFileLoader::load("../ProjectA/src/Engine/Debug/TextureDemo/Asset/decalgraffiti001d.png");
+			const PNGFile file = PNGFileLoader::load("../ProjectA/src/Engine/Debug/TextureDemo/Asset/Zelda.png");
 			const uint64 size = sizeof(uint8) * file.data.size();
 
 			BufferDescriptor stagingBufferDescriptor{};
