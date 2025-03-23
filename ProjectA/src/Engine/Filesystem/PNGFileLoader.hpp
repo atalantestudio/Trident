@@ -19,11 +19,11 @@ namespace ProjectA {
 		private:
 			static void readSignature(ByteStream& stream);
 
-			static void readChunk(ByteStream& stream, PNGFile& file);
+			static void readChunk(ByteStream& stream, PNGFile& file, chain<uint8>& compressedData);
 
 			static void readIHDRChunk(ByteStream& stream, PNGFile& file);
 
-			static void readIDATChunk(ByteStream& stream, uint32 chunkByteLength, PNGFile& file);
+			static void readIDATChunk(ByteStream& stream, uint32 chunkByteLength, chain<uint8>& compressedData);
 
 			static uint8 applyAddFilter(const uint8* x, uint8* aOrB, uint8 channelIndex);
 			static uint8 applyAverageFilter(const uint8* x, uint8* a, uint8* b, uint8 channelIndex);

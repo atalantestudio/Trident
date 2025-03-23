@@ -32,12 +32,6 @@ namespace ProjectA {
 		// Two values are defined: 0 (no interlace) or 1 (Adam7 interlace).
 		uint8 interlaceMethod;
 
-		// Compressed data (mix of all IDAT chunks).
-		chain<uint8> encodedData;
-
-		// Decompressed data without PNG filters applied.
-		chain<uint8> unfilteredData;
-
 		// Decompressed data with PNG filters applied.
 		chain<uint8> data;
 	};

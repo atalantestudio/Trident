@@ -26,11 +26,13 @@ namespace ProjectA {
 		pngFile.size = file.size;
 		pngFile.rawData = file.rawData;
 
+		chain<uint8> compressedData;
+
 		while (stream.getRemainingByteSize() > 0) {
-			readChunk(stream, pngFile);
+			readChunk(stream, pngFile, compressedData);
 		}
 
-		BitStream bitStream(pngFile.encodedData.data(), pngFile.encodedData.size());
+		BitStream bitStream(compressedData.data(), compressedData.size());
 
 		const uint32 finalSize = pngFile.width * pngFile.height * 4 + (pngFile.height * 1);
 
@@ -174,7 +176,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(stream.read<uint8>() == 0x0A, "Failed to verify signature.");
 	}
 
-	void PNGFileLoader::readChunk(ByteStream& stream, PNGFile& file) {
+	void PNGFileLoader::readChunk(ByteStream& stream, PNGFile& file, chain<uint8>& compressedData) {
 		Chunk Chunk;
 		Chunk.ByteLength = stream.read<uint32>(true);
 		Chunk.Type = stream.read<uint32>();
@@ -189,7 +191,7 @@ namespace ProjectA {
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IDAT"):
 				ENGINE_TRACE("Reading IDAT chunk.");
 
-				readIDATChunk(stream, Chunk.ByteLength, file);
+				readIDATChunk(stream, Chunk.ByteLength, compressedData);
 
 				break;
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IEND"):
@@ -257,13 +259,13 @@ namespace ProjectA {
 		ENGINE_ASSERT(file.colorType == 6, "Color type = [] is unhandled.", file.colorType);
 	}
 
-	void PNGFileLoader::readIDATChunk(ByteStream& stream, uint32 chunkByteLength, PNGFile& file) {
-		file.encodedData.resize(file.encodedData.size() + chunkByteLength);
+	void PNGFileLoader::readIDATChunk(ByteStream& stream, uint32 chunkByteLength, chain<uint8>& compressedData) {
+		compressedData.resize(compressedData.size() + chunkByteLength);
 
 		std::copy(
 			stream.getStream() + stream.getByteOffset(),
 			stream.getStream() + stream.getByteOffset() + chunkByteLength,
-			file.encodedData.end() - chunkByteLength
+			compressedData.end() - chunkByteLength
 		);
 
 		// Skip chunk data for the moment.
