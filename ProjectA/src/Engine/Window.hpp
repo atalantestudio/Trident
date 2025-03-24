@@ -28,8 +28,11 @@ namespace ProjectA {
 			virtual ~Window() = default;
 
 			virtual void* getNativeWindow() const = 0;
+
+			// TODO: Use vec2<sint32>.
 			virtual uint32 getWidth() const = 0;
 			virtual uint32 getHeight() const = 0;
+
 			virtual bool isVSyncEnabled() const = 0;
 			virtual void setEventCallback(const EventCallback& callback) = 0;
 			virtual void setVSyncState(bool state) = 0;

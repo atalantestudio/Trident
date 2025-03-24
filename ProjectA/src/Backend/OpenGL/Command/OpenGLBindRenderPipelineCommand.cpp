@@ -21,5 +21,10 @@ namespace ProjectA {
 			glEnable(GL_CULL_FACE);
 			glCullFace(renderPipeline->cullMode);
 		}
+
+		// TODO: Expose.
+		//glEnable(GL_BLEND);
+		//glEnable(GL_DEPTH_TEST);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 }

@@ -21,7 +21,6 @@ namespace ProjectA {
 				return window;
 			}
 
-			// TODO: Merge width and height into vec2<sint32> viewport
 			uint32 getWidth() const override {
 				return data.width;
 			}

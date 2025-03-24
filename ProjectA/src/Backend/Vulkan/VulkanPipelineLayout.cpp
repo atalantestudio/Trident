@@ -131,7 +131,6 @@ namespace ProjectA {
 				for (uint32 bindingIndex = 0; bindingIndex < layout.bindings.size(); bindingIndex++) {
 					const DescriptorSetLayoutBinding& binding = layout.bindings[bindingIndex];
 
-					// TODO: Fix overflow when one descriptor set has buffer and texture bindings.
 					for (uint32 bufferIndex = 0; bufferIndex < binding.buffers.size(); bufferIndex++) {
 						// 1 write descriptor set per descriptor set and per binding index.
 						VkWriteDescriptorSet writeDescriptorSet{};

@@ -52,8 +52,6 @@ namespace ProjectA {
 
 		ENGINE_TRACE("[~VulkanBuffer]");
 
-		// TODO: Unmap on destroy?
-
 		vkDestroyBuffer(device.object, object, nullptr);
 		vkFreeMemory(device.object, memory, nullptr);
 	}
