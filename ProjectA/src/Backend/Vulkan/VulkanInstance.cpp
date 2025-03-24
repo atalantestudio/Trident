@@ -141,7 +141,7 @@ namespace ProjectA {
 
 			/*ENGINE_TRACE("Instance layers:");
 
-			for (uint32 i = 0; i < layerPropertyCount; i++) {
+			for (uint32 i = 0; i < layerPropertyCount; i += 1) {
 				ENGINE_TRACE("- []", layerProperties[i].layerName);
 			}*/
 		}

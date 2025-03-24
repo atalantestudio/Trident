@@ -11,7 +11,7 @@ namespace ProjectA {
 		ENGINE_TRACE("[OpenGLShaderModule]");
 
 		const GLchar* const string = reinterpret_cast<const GLchar* const>(code.data());
-		const GLint length = code.size();
+		const GLint length = static_cast<GLint>(code.size());
 
 		glShaderSource(object, 1, &string, &length);
 		glCompileShader(object);

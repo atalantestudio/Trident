@@ -65,8 +65,8 @@ namespace ProjectA {
 		return createRef<OpenGLShaderModule>(shaderStages[static_cast<uint32>(stage)], code);
 	}
 
-	ref<Swapchain> OpenGLRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return createRef<OpenGLSwapchain>(window, descriptor);
+	ref<Swapchain> OpenGLRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) {
+		return createRef<OpenGLSwapchain>(descriptor);
 	}
 
 	ref<Texture> OpenGLRendererAPI::createTexture(const TextureDescriptor& descriptor) const {

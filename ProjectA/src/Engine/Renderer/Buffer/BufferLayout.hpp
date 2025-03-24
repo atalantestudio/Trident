@@ -32,28 +32,28 @@ namespace ProjectA {
 
 			template<>
 			void add<mat3x3<float32>>(const uint32 bindingIndex, const bool normalized) {
-				for (uint8 i = 0; i < 3; i++) {
+				for (uint8 i = 0; i < 3; i += 1) {
 					add<vec3<float32>>(bindingIndex, normalized);
 				}
 			}
 
 			template<>
 			void add<mat3x3<float64>>(const uint32 bindingIndex, const bool normalized) {
-				for (uint8 i = 0; i < 3; i++) {
+				for (uint8 i = 0; i < 3; i += 1) {
 					add<vec3<float64>>(bindingIndex, normalized);
 				}
 			}
 
 			template<>
 			void add<mat4x4<float32>>(const uint32 bindingIndex, const bool normalized) {
-				for (uint8 i = 0; i < 4; i++) {
+				for (uint8 i = 0; i < 4; i += 1) {
 					add<vec4<float32>>(bindingIndex, normalized);
 				}
 			}
 
 			template<>
 			void add<mat4x4<float64>>(const uint32 bindingIndex, const bool normalized) {
-				for (uint8 i = 0; i < 4; i++) {
+				for (uint8 i = 0; i < 4; i += 1) {
 					add<vec4<float64>>(bindingIndex, normalized);
 				}
 			}

@@ -3,11 +3,9 @@
 #include "Backend/Vulkan/VulkanSurface.hpp"
 
 namespace ProjectA {
-	VulkanSurface::VulkanSurface(const VkInstance instance, const VulkanPhysicalDevice& physicalDevice, GLFWwindow* window) :
+	VulkanSurface::VulkanSurface(VkInstance instance, const VulkanPhysicalDevice& physicalDevice, GLFWwindow* window) :
 		instance(instance),
-		format(),
-		presentMode(),
-		presentQueueFamilyIndex(0)
+		physicalDevice(physicalDevice.object)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -16,29 +14,62 @@ namespace ProjectA {
 		// TODO: If no debug messenger, this fails with "Vulkan instance missing VK_KHR_win32_surface extension".
 		// TODO: Replace with https://registry.khronos.org/vulkan/specs/latest/man/html/vkCreateWin32SurfaceKHR.html
 		// or its Linux variant.
-		glfwCreateWindowSurface(instance, window, nullptr, &object);
+		VkResult result = glfwCreateWindowSurface(instance, window, nullptr, &object);
 
-		{
-			VkBool32 supported;
-
-			vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice.object, physicalDevice.graphicsQueueFamilyIndex, object, &supported);
-
-			if (supported) {
-				presentQueueFamilyIndex = physicalDevice.graphicsQueueFamilyIndex;
-			}
+		if (result != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create surface.");
 		}
 
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice.object, object, &capabilities);
+		VkBool32 supported;
+
+		result = vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice.object, physicalDevice.graphicsQueueFamilyIndex, object, &supported);
+
+		if (result != VK_SUCCESS) {
+			throw std::runtime_error("Failed to get surface support.");
+		}
+
+		if (supported) {
+			presentQueueFamilyIndex = physicalDevice.graphicsQueueFamilyIndex;
+		}
+
+		update();
+	}
+
+	VulkanSurface::~VulkanSurface() {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanSurface]");
+
+		vkDestroySurfaceKHR(instance, object, nullptr);
+	}
+
+	void VulkanSurface::update() {
+		VkResult result;
+
+		// Get capabilities.
+		result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, object, &capabilities);
+
+		if (result != VK_SUCCESS) {
+			throw std::runtime_error("Failed to get surface capabilities.");
+		}
 
 		uint32 formatCount = 0;
 
-		vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice.object, object, &formatCount, nullptr);
+		result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, object, &formatCount, nullptr);
+
+		if (result != VK_SUCCESS) {
+			throw std::runtime_error("Failed to get surface format count.");
+		}
 
 		// Select format.
-		if (formatCount != 0) {
-			std::vector<VkSurfaceFormatKHR> formats(formatCount);
+		if (formatCount > 0) {
+			chain<VkSurfaceFormatKHR> formats(formatCount);
 
-			vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice.object, object, &formatCount, formats.data());
+			result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, object, &formatCount, formats.data());
+
+			if (result != VK_SUCCESS) {
+				throw std::runtime_error("Failed to get surface formats.");
+			}
 
 			bool selected = false;
 
@@ -59,13 +90,21 @@ namespace ProjectA {
 
 		uint32 presentModeCount = 0;
 
-		vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice.object, object, &presentModeCount, nullptr);
+		result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, object, &presentModeCount, nullptr);
+
+		if (result != VK_SUCCESS) {
+			throw std::runtime_error("Failed to get surface present mode count.");
+		}
 
 		// Select present mode.
-		if (presentModeCount != 0) {
-			std::vector<VkPresentModeKHR> presentModes(presentModeCount);
+		if (presentModeCount > 0) {
+			chain<VkPresentModeKHR> presentModes(presentModeCount);
 
-			vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice.object, object, &presentModeCount, presentModes.data());
+			result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, object, &presentModeCount, presentModes.data());
+
+			if (result != VK_SUCCESS) {
+				throw std::runtime_error("Failed to get surface present modes.");
+			}
 
 			bool selected = false;
 
@@ -84,13 +123,5 @@ namespace ProjectA {
 				presentMode = VK_PRESENT_MODE_FIFO_KHR;
 			}
 		}
-	}
-
-	VulkanSurface::~VulkanSurface() {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~VulkanSurface]");
-
-		vkDestroySurfaceKHR(instance, object, nullptr);
 	}
 }

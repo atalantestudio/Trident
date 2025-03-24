@@ -79,7 +79,7 @@ namespace ProjectA {
 		return createRef<VulkanShaderModule>(device->object, shaderStages[static_cast<uint32>(stage)], code);
 	}
 
-	ref<Swapchain> VulkanRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) const {
+	ref<Swapchain> VulkanRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) {
 		return createRef<VulkanSwapchain>(physicalDevice, surface, device->object, descriptor);
 	}
 

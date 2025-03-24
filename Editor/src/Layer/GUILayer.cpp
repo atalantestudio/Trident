@@ -60,5 +60,13 @@ namespace ProjectA {
 
 	void GUILayer::renderImGui() {}
 
-	void GUILayer::onEvent(Event& event) {}
+	void GUILayer::onEvent(Event& event) {
+		EventDispatcher eventDispatcher(event);
+
+		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
+	}
+
+	bool GUILayer::onWindowResize(WindowResizeEvent& event) {
+		return renderer.onResizeEvent(event);
+	}
 }

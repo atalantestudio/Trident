@@ -35,7 +35,7 @@ namespace ProjectA {
 
 			virtual ref<ShaderModule> createShaderModule(const ShaderStage stage, const chain<uint8>& code) const = 0;
 
-			virtual ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const = 0;
+			virtual ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) = 0;
 
 			virtual ref<Texture> createTexture(const TextureDescriptor& descriptor) const = 0;
 	};

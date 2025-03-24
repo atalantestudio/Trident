@@ -6,7 +6,7 @@ namespace ProjectA {
 	uint32 HuffmanCodeDictionary::reverseBits(uint32 value, uint32 bitCount) {
 		uint32 result = 0;
 
-		for (uint32 bitIndex = 0; bitIndex <= (bitCount / 2); ++bitIndex) {
+		for (uint32 bitIndex = 0; bitIndex <= (bitCount / 2); bitIndex += 1) {
 			uint32 inverse = (bitCount - (bitIndex + 1));
 
 			result |= ((value >> bitIndex) & 0x1) << inverse;

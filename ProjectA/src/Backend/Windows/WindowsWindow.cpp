@@ -81,7 +81,7 @@ namespace ProjectA {
 
 			window = glfwCreateWindow(glfwData.width, glfwData.height, glfwData.title.c_str(), nullptr, nullptr);
 
-			glfwWindowCount++;
+			glfwWindowCount += 1;
 		}
 
 		context = Context::create(window);

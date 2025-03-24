@@ -39,7 +39,7 @@ namespace ProjectA {
 		// Write thread ID.
 		stream << "\"tid\":" << event.threadId << '}';
 
-		eventCount++;
+		eventCount += 1;
 	}
 
 	Profiler::Profiler(const std::string& path) {

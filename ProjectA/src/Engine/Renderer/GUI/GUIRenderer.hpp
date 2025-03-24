@@ -14,7 +14,11 @@ namespace ProjectA {
 
 			void render() override;
 
+			void resize();
+
 			void onEvent(Event& event) override;
+
+			bool onResizeEvent(WindowResizeEvent& event);
 
 		private:
 			void updateCamera() const;
@@ -47,5 +51,6 @@ namespace ProjectA {
 			chain<ref<Fence>> flightFences;
 			uint32 instanceCount = 0;
 			uint32 frameIndex = 0;
+			bool needsResize = false;
 	};
 }

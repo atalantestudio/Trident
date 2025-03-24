@@ -21,7 +21,7 @@ namespace ProjectA {
 		uint32 bestPhysicalDeviceIndex = 0;
 		uint32 bestPhysicalDeviceScore = 0;
 
-		for (uint32 index = 0; index < physicalDevices.size(); index++) {
+		for (uint32 index = 0; index < physicalDevices.size(); index += 1) {
 			const uint32 score = calculateScore(physicalDevices[index]);
 
 			if (score >= bestPhysicalDeviceScore) {
@@ -50,7 +50,7 @@ namespace ProjectA {
 		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyPropertyCount, queueFamilyProperties.data());
 
 		// Find a queue family that handles graphics.
-		for (uint32 index = 0; index < queueFamilyProperties.size(); index++) {
+		for (uint32 index = 0; index < queueFamilyProperties.size(); index += 1) {
 			if (queueFamilyProperties[index].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
 				this->graphicsQueueFamilyIndex = index;
 
@@ -70,7 +70,7 @@ namespace ProjectA {
 
 		//ENGINE_TRACE("Device extensions:");
 
-		for (uint32 i = 0; i < extensionProperties.size(); i++) {
+		for (uint32 i = 0; i < extensionProperties.size(); i += 1) {
 			//ENGINE_TRACE("- [] (spec version: [])", extensionProperties[i].extensionName, extensionProperties[i].specVersion);
 
 			enabledExtensionNames[i] = extensionProperties[i].extensionName;

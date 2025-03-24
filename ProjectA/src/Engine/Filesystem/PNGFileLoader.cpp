@@ -52,7 +52,9 @@ namespace ProjectA {
 
 		// TODO: Refactor with SIMD (vec4<sint32>).
 		for (uint32 y = 0; y < pngFile.height; y += 1) {
-			const FilterType filterType = static_cast<FilterType>(*source++);
+			const FilterType filterType = static_cast<FilterType>(*source);
+
+			source += 1;
 
 			uint8* currentRow = destination;
 

@@ -20,7 +20,7 @@ namespace ProjectA {
 		for (const DescriptorSetLayout& layout : descriptor.layouts) {
 			std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
 
-			for (uint32 bindingIndex = 0; bindingIndex < layout.bindings.size(); bindingIndex++) {
+			for (uint32 bindingIndex = 0; bindingIndex < layout.bindings.size(); bindingIndex += 1) {
 				const DescriptorSetLayoutBinding& binding = layout.bindings[bindingIndex];
 				const VkDescriptorType descriptorType = getVkDescriptorType(binding.descriptorType);
 
@@ -106,7 +106,7 @@ namespace ProjectA {
 						descriptorBufferInfos.emplace_back(descriptorBufferInfo);
 					}
 
-					for (uint32 textureViewIndex = 0; textureViewIndex < binding.textureViews.size(); textureViewIndex++) {
+					for (uint32 textureViewIndex = 0; textureViewIndex < binding.textureViews.size(); textureViewIndex += 1) {
 						const VulkanSampler* sampler = static_cast<const VulkanSampler*>(binding.samplers[textureViewIndex].get());
 						const VulkanTextureView* textureView = static_cast<const VulkanTextureView*>(binding.textureViews[textureViewIndex].get());
 
@@ -125,13 +125,13 @@ namespace ProjectA {
 			uint32 bufferWriteDescriptorSetIndex = 0;
 			uint32 imageWriteDescriptorSetIndex = 0;
 
-			for (uint32 layoutIndex = 0; layoutIndex < descriptor.layouts.size(); layoutIndex++) {
+			for (uint32 layoutIndex = 0; layoutIndex < descriptor.layouts.size(); layoutIndex += 1) {
 				const DescriptorSetLayout& layout = descriptor.layouts[layoutIndex];
 
-				for (uint32 bindingIndex = 0; bindingIndex < layout.bindings.size(); bindingIndex++) {
+				for (uint32 bindingIndex = 0; bindingIndex < layout.bindings.size(); bindingIndex += 1) {
 					const DescriptorSetLayoutBinding& binding = layout.bindings[bindingIndex];
 
-					for (uint32 bufferIndex = 0; bufferIndex < binding.buffers.size(); bufferIndex++) {
+					for (uint32 bufferIndex = 0; bufferIndex < binding.buffers.size(); bufferIndex += 1) {
 						// 1 write descriptor set per descriptor set and per binding index.
 						VkWriteDescriptorSet writeDescriptorSet{};
 						writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -147,10 +147,10 @@ namespace ProjectA {
 
 						writeDescriptorSets.emplace_back(writeDescriptorSet);
 
-						bufferWriteDescriptorSetIndex++;
+						bufferWriteDescriptorSetIndex += 1;
 					}
 
-					for (uint32 textureViewIndex = 0; textureViewIndex < binding.textureViews.size(); textureViewIndex++) {
+					for (uint32 textureViewIndex = 0; textureViewIndex < binding.textureViews.size(); textureViewIndex += 1) {
 						// 1 write descriptor set per descriptor set and per binding index.
 						VkWriteDescriptorSet writeDescriptorSet{};
 						writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -166,7 +166,7 @@ namespace ProjectA {
 
 						writeDescriptorSets.emplace_back(writeDescriptorSet);
 
-						imageWriteDescriptorSetIndex++;
+						imageWriteDescriptorSetIndex += 1;
 					}
 				}
 			}

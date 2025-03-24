@@ -3,15 +3,14 @@
 #include <glfw/glfw3.h>
 #include <vulkan/vulkan.h>
 
-#include "Engine/Renderer/RendererAPI.hpp"
-
 #include "Backend/Vulkan/VulkanCommandPool.hpp"
 #include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanInstance.hpp"
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 #include "Backend/Vulkan/VulkanSurface.hpp"
-#include "Backend/Vulkan/VulkanSwapchain.hpp"
+
+#include "Engine/Renderer/RendererAPI.hpp"
 
 namespace ProjectA {
 	class VulkanRendererAPI : public RendererAPI {
@@ -38,14 +37,14 @@ namespace ProjectA {
 
 			ref<ShaderModule> createShaderModule(const ShaderStage stage, const chain<uint8>& code) const override;
 
-			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const override;
+			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) override;
 
 			ref<Texture> createTexture(const TextureDescriptor& descriptor) const override;
 
 		private:
 			const VulkanInstance instance;
 			const VulkanPhysicalDevice physicalDevice;
-			const VulkanSurface surface;
+			VulkanSurface surface;
 			const ref<VulkanDevice> device;
 			const VulkanCommandPool commandPool;
 	};

@@ -12,7 +12,7 @@ namespace ProjectA {
 
 			void onEvent(Event& event) override;
 
-			bool onResize(const WindowResizeEvent& event);
+			bool onWindowResize(const WindowResizeEvent& event);
 
 		private:
 			struct Vertex {

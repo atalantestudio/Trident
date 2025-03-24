@@ -14,7 +14,7 @@ namespace ProjectA {
 	void LayerStack::pushLayer(Layer* layer) {
 		layers.emplace(layers.begin() + layerInsertionIndex, layer);
 
-		layerInsertionIndex++;
+		layerInsertionIndex += 1;
 	}
 
 	void LayerStack::pushOverlay(Layer* overlay) {

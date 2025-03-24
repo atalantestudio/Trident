@@ -7,13 +7,15 @@
 namespace ProjectA {
 	class OpenGLSwapchain : public Swapchain {
 		public:
-			OpenGLSwapchain(GLFWwindow* window, const SwapchainDescriptor& descriptor);
+			OpenGLSwapchain(const SwapchainDescriptor& descriptor);
+
+			void recreate(const SwapchainDescriptor& descriptor) override;
 
 			uint32 getExtentWidth() const override;
 			uint32 getExtentHeight() const override;
 
 		private:
-			uint32 extentWidth;
-			uint32 extentHeight;
+			const uint32 extentWidth;
+			const uint32 extentHeight;
 	};
 }

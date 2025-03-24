@@ -14,8 +14,10 @@ namespace ProjectA {
 
 	void OpenGLDevice::resetFence(const ref<Fence>& fence) const {}
 
-	uint32 OpenGLDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore) const {
-		return 0;
+	Status OpenGLDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const {
+		nextImageIndex = 0;
+
+		return Status::SUCCESS;
 	}
 
 	void OpenGLDevice::submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
@@ -26,7 +28,9 @@ namespace ProjectA {
 		}
 	}
 
-	void OpenGLDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, const uint32 imageIndex) const {}
+	Status OpenGLDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, const uint32 imageIndex) const {
+		return Status::SUCCESS;
+	}
 
 	void OpenGLDevice::waitIdle() const {}
 }

@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Backend/Vulkan/Status.hpp"
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
 #include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanFence.hpp"
@@ -97,7 +98,7 @@ namespace ProjectA {
 		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &physicalDeviceMemoryProperties);
 
 		// Find suitable memory type.
-		for (uint32 memoryTypeIndex = 0; memoryTypeIndex < physicalDeviceMemoryProperties.memoryTypeCount; memoryTypeIndex++) {
+		for (uint32 memoryTypeIndex = 0; memoryTypeIndex < physicalDeviceMemoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
 			if ((memoryRequirements.memoryTypeBits & (1 << memoryTypeIndex)) && (physicalDeviceMemoryProperties.memoryTypes[memoryTypeIndex].propertyFlags & memoryPropertyFlags) == memoryPropertyFlags) {
 				return memoryTypeIndex;
 			}
@@ -119,10 +120,8 @@ namespace ProjectA {
 		vkResetFences(object, 1, &static_cast<const VulkanFence*>(fence.get())->object);
 	}
 
-	uint32 VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore) const {
+	Status VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		uint32 imageIndex;
 
 		// UINT64_MAX disables the timeout.
 		const VkResult result = vkAcquireNextImageKHR(
@@ -131,18 +130,10 @@ namespace ProjectA {
 			UINT64_MAX,
 			static_cast<const VulkanSemaphore*>(semaphore.get())->object,
 			VK_NULL_HANDLE,
-			&imageIndex
+			&nextImageIndex
 		);
 
-		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-			throw std::runtime_error("TODO: Recreate swapchain.");
-		}
-
-		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-			throw std::runtime_error("Failed to acquire next image from the Vulkan swapchain.");
-		}
-
-		return imageIndex;
+		return getStatus(result);
 	}
 
 	void VulkanDevice::submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
@@ -180,12 +171,14 @@ namespace ProjectA {
 			vkFence = static_cast<const VulkanFence*>(fence.get())->object;
 		}
 
-		if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, vkFence) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to submit Vulkan graphics queue.");
+		const VkResult result = vkQueueSubmit(graphicsQueue, 1, &submitInfo, vkFence);
+
+		if (result != VK_SUCCESS) {
+			throw std::runtime_error("Failed to submit queue.");
 		}
 	}
 
-	void VulkanDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, const uint32 imageIndex) const {
+	Status VulkanDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, const uint32 imageIndex) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		VkPresentInfoKHR presentInfo{};
@@ -200,14 +193,7 @@ namespace ProjectA {
 
 		const VkResult result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
-		if (result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR) {
-			// TODO: Recreate swapchain here.
-			return;
-		}
-
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("Failed to present Vulkan swapchain image.");
-		}
+		return getStatus(result);
 	}
 
 	void VulkanDevice::waitIdle() const {

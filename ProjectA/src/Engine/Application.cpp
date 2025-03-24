@@ -61,7 +61,7 @@ namespace ProjectA {
 			imGuiLayer->begin();
 
 			{
-				PROFILE_SCOPE("Render layer ImGuis");
+				PROFILE_SCOPE("Render layer ImGui");
 
 				for (Layer* layer : layerStack) {
 					layer->renderImGui();
@@ -101,7 +101,7 @@ namespace ProjectA {
 		eventDispatcher.dispatch<WindowCloseEvent>(BIND(Application::onWindowClose));
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(Application::onWindowResize));
 
-		for (std::vector<Layer*>::reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); ++i) {
+		for (std::vector<Layer*>::reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); i += 1) {
 			if (event.handled) {
 				break;
 			}

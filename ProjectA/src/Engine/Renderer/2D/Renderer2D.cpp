@@ -144,7 +144,7 @@ namespace ProjectA {
 
 		sint32 textureSamplers[Renderer2DStorage::MAX_TEXTURE_SLOTS]{};
 
-		for (sint32 i = 0; i < Renderer2DStorage::MAX_TEXTURE_SLOTS; i++) {
+		for (sint32 i = 0; i < Renderer2DStorage::MAX_TEXTURE_SLOTS; i += 1) {
 			textureSamplers[i] = i;
 		}
 
@@ -187,13 +187,13 @@ namespace ProjectA {
 
 		//storage.renderPipeline->bind();
 
-		for (uint32 slotIndex = 0; slotIndex < storage.currentSlotIndex; slotIndex++) {
+		for (uint32 slotIndex = 0; slotIndex < storage.currentSlotIndex; slotIndex += 1) {
 			//storage.textureSlots[slotIndex]->bind(slotIndex);
 		}
 
 		//Renderer::getRendererApi()->drawIndexed(storage.renderPipeline, storage.quadCount * 6);
 
-		storage.statistics.drawCallCount++;
+		storage.statistics.drawCallCount += 1;
 	}
 
 	void Renderer2D::startNewBatch() {
@@ -222,18 +222,18 @@ namespace ProjectA {
 		mat4x4<float32> transform = mat4x4<float32>::scaling({size[0], size[1], 1.0f});
 		transform *= mat4x4<float32>::translation(position);
 
-		for (uint32 i = 0; i < quadVertexCount; i++) {
+		for (uint32 i = 0; i < quadVertexCount; i += 1) {
 			storage.vertexBufferPointer->position = storage.quadVertexPositions[i] * transform;
 			storage.vertexBufferPointer->color = color;
 			storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[i];
 			storage.vertexBufferPointer->textureSlot = textureIndex;
 			storage.vertexBufferPointer->tilingFactor = tilingFactor;
-			storage.vertexBufferPointer++;
+			storage.vertexBufferPointer += 1;
 		}
 
-		storage.quadCount++;
+		storage.quadCount += 1;
 
-		storage.statistics.quadCount++;
+		storage.statistics.quadCount += 1;
 	}
 
 	void Renderer2D::drawQuad(const vec2<float32>& position, const vec2<float32>& size, const ref<Texture>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
@@ -251,7 +251,7 @@ namespace ProjectA {
 
 		uint32 slotIndex = 0;
 
-		/*for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
+		/*for (uint32 i = 0; i < storage.currentSlotIndex; i += 1) {
 			if (*texture.get() == *storage.textureSlots[i].get()) {
 				slotIndex = i;
 
@@ -268,24 +268,24 @@ namespace ProjectA {
 			slotIndex = storage.currentSlotIndex;
 
 			storage.textureSlots[storage.currentSlotIndex] = texture;
-			storage.currentSlotIndex++;
+			storage.currentSlotIndex += 1;
 		}
 
 		mat4x4<float32> transform = mat4x4<float32>::scaling({size[0], size[1], 1.0f});
 		transform *= mat4x4<float32>::translation(position);
 
-		for (uint32 i = 0; i < quadVertexCount; i++) {
+		for (uint32 i = 0; i < quadVertexCount; i += 1) {
 			storage.vertexBufferPointer->position = storage.quadVertexPositions[i] * transform;
 			storage.vertexBufferPointer->color = tintColor;
 			storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[i];
 			storage.vertexBufferPointer->textureSlot = slotIndex;
 			storage.vertexBufferPointer->tilingFactor = tilingFactor;
-			storage.vertexBufferPointer++;
+			storage.vertexBufferPointer += 1;
 		}
 
-		storage.quadCount++;
+		storage.quadCount += 1;
 
-		storage.statistics.quadCount++;
+		storage.statistics.quadCount += 1;
 	}
 
 	void Renderer2D::drawQuad(const vec2<float32>& position, const vec2<float32>& size, const ref<Subtexture>& subtexture, float32 tilingFactor, const vec4<float32>& tintColor) {
@@ -303,7 +303,7 @@ namespace ProjectA {
 
 		uint32 slotIndex = 0;
 
-		/*for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
+		/*for (uint32 i = 0; i < storage.currentSlotIndex; i += 1) {
 			if (*subtexture->texture.get() == *storage.textureSlots[i].get()) {
 				slotIndex = i;
 
@@ -320,24 +320,24 @@ namespace ProjectA {
 			slotIndex = storage.currentSlotIndex;
 
 			storage.textureSlots[storage.currentSlotIndex] = subtexture->texture;
-			storage.currentSlotIndex++;
+			storage.currentSlotIndex += 1;
 		}
 
 		mat4x4<float32> transform = mat4x4<float32>::scaling({size[0], size[1], 1.0f});
 		transform *= mat4x4<float32>::translation(position);
 
-		for (uint32 i = 0; i < quadVertexCount; i++) {
+		for (uint32 i = 0; i < quadVertexCount; i += 1) {
 			storage.vertexBufferPointer->position = storage.quadVertexPositions[i] * transform;
 			storage.vertexBufferPointer->color = tintColor;
 			storage.vertexBufferPointer->uv = subtexture->coordinates[i];
 			storage.vertexBufferPointer->textureSlot = slotIndex;
 			storage.vertexBufferPointer->tilingFactor = tilingFactor;
-			storage.vertexBufferPointer++;
+			storage.vertexBufferPointer += 1;
 		}
 
-		storage.quadCount++;
+		storage.quadCount += 1;
 
-		storage.statistics.quadCount++;
+		storage.statistics.quadCount += 1;
 	}
 
 	void Renderer2D::drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 angle, const vec4<float32>& color) {
@@ -359,18 +359,18 @@ namespace ProjectA {
 		transform *= mat4x4<float32>::rotation({0.0f, 0.0f, -1.0f}, angle);
 		transform *= mat4x4<float32>::translation(position);
 
-		for (uint32 i = 0; i < quadVertexCount; i++) {
+		for (uint32 i = 0; i < quadVertexCount; i += 1) {
 			storage.vertexBufferPointer->position = storage.quadVertexPositions[i] * transform;
 			storage.vertexBufferPointer->color = color;
 			storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[i];
 			storage.vertexBufferPointer->textureSlot = textureIndex;
 			storage.vertexBufferPointer->tilingFactor = tilingFactor;
-			storage.vertexBufferPointer++;
+			storage.vertexBufferPointer += 1;
 		}
 
-		storage.quadCount++;
+		storage.quadCount += 1;
 
-		storage.statistics.quadCount++;
+		storage.statistics.quadCount += 1;
 	}
 
 	void Renderer2D::drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 angle, const ref<Texture>& texture, float32 tilingFactor, const vec4<float32>& tintColor) {
@@ -388,7 +388,7 @@ namespace ProjectA {
 
 		uint32 slotIndex = 0;
 
-		/*for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
+		/*for (uint32 i = 0; i < storage.currentSlotIndex; i += 1) {
 			if (*texture.get() == *storage.textureSlots[i].get()) {
 				slotIndex = i;
 
@@ -405,25 +405,25 @@ namespace ProjectA {
 			slotIndex = storage.currentSlotIndex;
 
 			storage.textureSlots[storage.currentSlotIndex] = texture;
-			storage.currentSlotIndex++;
+			storage.currentSlotIndex += 1;
 		}
 
 		mat4x4<float32> transform = mat4x4<float32>::scaling({size[0], size[1], 1.0f});
 		transform *= mat4x4<float32>::rotation({0.0f, 0.0f, -1.0f}, angle);
 		transform *= mat4x4<float32>::translation(position);
 
-		for (uint32 i = 0; i < quadVertexCount; i++) {
+		for (uint32 i = 0; i < quadVertexCount; i += 1) {
 			storage.vertexBufferPointer->position = storage.quadVertexPositions[i] * transform;
 			storage.vertexBufferPointer->color = tintColor;
 			storage.vertexBufferPointer->uv = storage.quadVertexTextureCoordinates[i];
 			storage.vertexBufferPointer->textureSlot = slotIndex;
 			storage.vertexBufferPointer->tilingFactor = tilingFactor;
-			storage.vertexBufferPointer++;
+			storage.vertexBufferPointer += 1;
 		}
 
-		storage.quadCount++;
+		storage.quadCount += 1;
 
-		storage.statistics.quadCount++;
+		storage.statistics.quadCount += 1;
 	}
 
 	void Renderer2D::drawRotatedQuad(const vec2<float32>& position, const vec2<float32>& size, float32 angle, const ref<Subtexture>& subtexture, float32 tilingFactor, const vec4<float32>& tintColor) {
@@ -441,7 +441,7 @@ namespace ProjectA {
 
 		uint32 slotIndex = 0;
 
-		/*for (uint32 i = 0; i < storage.currentSlotIndex; i++) {
+		/*for (uint32 i = 0; i < storage.currentSlotIndex; i += 1) {
 			if (*subtexture->texture.get() == *storage.textureSlots[i].get()) {
 				slotIndex = i;
 
@@ -458,25 +458,25 @@ namespace ProjectA {
 			slotIndex = storage.currentSlotIndex;
 
 			storage.textureSlots[storage.currentSlotIndex] = subtexture->texture;
-			storage.currentSlotIndex++;
+			storage.currentSlotIndex += 1;
 		}
 
 		mat4x4<float32> transform = mat4x4<float32>::scaling({size[0], size[1], 1.0f});
 		transform *= mat4x4<float32>::rotation({0.0f, 0.0f, -1.0f}, angle);
 		transform *= mat4x4<float32>::translation(position);
 
-		for (uint32 i = 0; i < quadVertexCount; i++) {
+		for (uint32 i = 0; i < quadVertexCount; i += 1) {
 			storage.vertexBufferPointer->position = storage.quadVertexPositions[i] * transform;
 			storage.vertexBufferPointer->color = tintColor;
 			storage.vertexBufferPointer->uv = subtexture->coordinates[i];
 			storage.vertexBufferPointer->textureSlot = slotIndex;
 			storage.vertexBufferPointer->tilingFactor = tilingFactor;
-			storage.vertexBufferPointer++;
+			storage.vertexBufferPointer += 1;
 		}
 
-		storage.quadCount++;
+		storage.quadCount += 1;
 
-		storage.statistics.quadCount++;
+		storage.statistics.quadCount += 1;
 	}
 
 	Renderer2D::Statistics& Renderer2D::getStatistics() {

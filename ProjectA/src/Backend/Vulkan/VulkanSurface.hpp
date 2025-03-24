@@ -11,9 +11,11 @@
 namespace ProjectA {
 	class VulkanSurface : public ObjectWrapper<VkSurfaceKHR> {
 		public:
-			VulkanSurface(const VkInstance instance, const VulkanPhysicalDevice& physicalDevice, GLFWwindow* window);
+			VulkanSurface(VkInstance instance, const VulkanPhysicalDevice& physicalDevice, GLFWwindow* window);
 
 			~VulkanSurface();
+
+			void update();
 
 		public:
 			uint32 presentQueueFamilyIndex;
@@ -23,5 +25,6 @@ namespace ProjectA {
 
 		private:
 			const VkInstance instance;
+			const VkPhysicalDevice physicalDevice;
 	};
 }

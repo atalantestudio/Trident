@@ -33,6 +33,8 @@ namespace ProjectA {
 		protected:
 			ref<Device> getDevice() const;
 
+			void getWindowExtent(sint32& extentWidth, sint32& extentHeight) const;
+
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const;
 
 			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const;

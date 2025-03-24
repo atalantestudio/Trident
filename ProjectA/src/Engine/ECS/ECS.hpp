@@ -76,7 +76,7 @@ namespace ProjectA {
 				components.emplace_back(component);
 				componentIndexToEntity.emplace_back(entity);
 
-				componentCount++;
+				componentCount += 1;
 			}
 
 			// Erases the component of type T belonging to the provided entity.
@@ -136,7 +136,7 @@ namespace ProjectA {
 
 					entity = nextEntity;
 
-					nextEntity++;
+					nextEntity += 1;
 				}
 
 				return entity;
@@ -203,7 +203,11 @@ namespace ProjectA {
 			static uint32 getNextComponentPoolIndex() {
 				static uint32 componentPoolIndex = 0;
 
-				return componentPoolIndex++;
+				const uint32 index = componentPoolIndex;
+
+				componentPoolIndex += 1;
+
+				return index;
 			}
 
 			// Returns a unique index for each distinct type T.

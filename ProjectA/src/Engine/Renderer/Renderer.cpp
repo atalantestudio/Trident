@@ -1,10 +1,10 @@
 #include "pch.hpp"
 
-#include "Engine/Renderer/Renderer.hpp"
-
 #include "Backend/OpenGL/OpenGLRendererAPI.hpp"
 
 #include "Backend/Vulkan/VulkanRendererAPI.hpp"
+
+#include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::NONE;
@@ -54,6 +54,10 @@ namespace ProjectA {
 
 	ref<Device> Renderer::getDevice() const {
 		return rendererApi->getDevice();
+	}
+
+	void Renderer::getWindowExtent(sint32& extentWidth, sint32& extentHeight) const {
+		glfwGetWindowSize(window, &extentWidth, &extentHeight);
 	}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) const {

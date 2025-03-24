@@ -268,7 +268,7 @@ namespace ProjectA {
 			commandEncoder = createCommandEncoder(commandBufferDescriptor);
 		}
 
-		for (std::size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		for (std::size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i += 1) {
 			availableImageSemaphores[i] = createSemaphore();
 			finishedRenderSemaphores[i] = createSemaphore();
 			flightFences[i] = createFence();
@@ -280,7 +280,17 @@ namespace ProjectA {
 
 		device->waitForFence(flightFences[frameIndex]);
 
-		const uint32 nextImageIndex = device->acquireNextImage(swapchain, availableImageSemaphores[frameIndex]);
+		uint32 nextImageIndex;
+
+		const Status acquireNextImageStatus = device->acquireNextImage(swapchain, availableImageSemaphores[frameIndex], nextImageIndex);
+
+		if (acquireNextImageStatus == Status::ERROR_OUT_OF_DATE) {
+			throw std::runtime_error("TODO: Recreate swapchain.");
+		}
+
+		if (acquireNextImageStatus != Status::SUCCESS && acquireNextImageStatus != Status::SUBOPTIMAL) {
+			throw std::runtime_error("Failed to acquire next image.");
+		}
 
 		device->resetFence(flightFences[frameIndex]);
 
@@ -308,10 +318,22 @@ namespace ProjectA {
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 		device->submit(commandBuffer, availableImageSemaphores[frameIndex], finishedRenderSemaphores[frameIndex], flightFences[frameIndex]);
-		device->present(swapchain, finishedRenderSemaphores[frameIndex], nextImageIndex);
+
+		const Status presentStatus = device->present(swapchain, finishedRenderSemaphores[frameIndex], nextImageIndex);
+
+		if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE) {
+			ENGINE_DEBUG("TODO: Resize.");
+
+			return;
+		}
+
+		if (presentStatus == Status::ERROR_UNHANDLED) {
+			throw std::runtime_error("Unhandled present status.");
+		}
+
 		device->waitIdle();
 
-		frameIndex++;
+		frameIndex += 1;
 		frameIndex %= MAX_FRAMES_IN_FLIGHT;
 	}
 

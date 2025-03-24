@@ -4,13 +4,43 @@
 #include "Backend/Vulkan/VulkanSwapchain.hpp"
 
 namespace ProjectA {
-	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VkDevice device, const SwapchainDescriptor& descriptor) :
+	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, VulkanSurface& surface, VkDevice device, const SwapchainDescriptor& descriptor) :
+		physicalDevice(physicalDevice),
 		device(device),
-		imageExtent(surface.capabilities.maxImageExtent)
+		surface(surface)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
 		ENGINE_TRACE("[VulkanSwapchain]");
+
+		construct(descriptor);
+	}
+
+	VulkanSwapchain::~VulkanSwapchain() {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		ENGINE_TRACE("[~VulkanSwapchain]");
+
+		destruct();
+	}
+
+	void VulkanSwapchain::recreate(const SwapchainDescriptor& descriptor) {
+		destruct();
+		construct(descriptor);
+	}
+
+	uint32 VulkanSwapchain::getExtentWidth() const {
+		return imageExtent.width;
+	}
+
+	uint32 VulkanSwapchain::getExtentHeight() const {
+		return imageExtent.height;
+	}
+
+	void VulkanSwapchain::construct(const SwapchainDescriptor& descriptor) {
+		imageExtent = {descriptor.extentWidth, descriptor.extentHeight};
+
+		surface.update();
 
 		const uint32 minImageCount = surface.capabilities.minImageCount + 1;
 
@@ -45,21 +75,31 @@ namespace ProjectA {
 		swapchainCreateInfo.clipped = VK_TRUE;
 		swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
 
-		if (vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &object) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create Vulkan swapchain.");
+		VkResult result = vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &object);
+
+		if (result != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create swapchain.");
 		}
 
 		uint32 imageCount;
 
-		vkGetSwapchainImagesKHR(device, object, &imageCount, nullptr);
+		result = vkGetSwapchainImagesKHR(device, object, &imageCount, nullptr);
+
+		if (result != VK_SUCCESS) {
+			throw std::runtime_error("Failed to get swapchain image count.");
+		}
 
 		images.resize(imageCount);
 		imageViews.resize(imageCount);
 		framebuffers.resize(imageCount);
 
-		vkGetSwapchainImagesKHR(device, object, &imageCount, images.data());
+		result = vkGetSwapchainImagesKHR(device, object, &imageCount, images.data());
 
-		for (uint32 i = 0; i < imageCount; i++) {
+		if (result != VK_SUCCESS) {
+			throw std::runtime_error("Failed to get swapchain images.");
+		}
+
+		for (uint32 i = 0; i < imageCount; i += 1) {
 			// TODO: Replace with Texture and TextureView APIs.
 			VkImageViewCreateInfo imageViewCreateInfo{};
 			imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -78,8 +118,10 @@ namespace ProjectA {
 			imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 			imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-			if (vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageViews[i]) != VK_SUCCESS) {
-				throw std::runtime_error("Failed to create Vulkan swapchain image view.");
+			result = vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageViews[i]);
+
+			if (result != VK_SUCCESS) {
+				throw std::runtime_error("Failed to create swapchain image view.");
 			}
 
 			VkFramebufferCreateInfo framebufferCreateInfo{};
@@ -93,18 +135,16 @@ namespace ProjectA {
 			framebufferCreateInfo.height = imageExtent.height;
 			framebufferCreateInfo.layers = 1;
 
-			if (vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &framebuffers[i]) != VK_SUCCESS) {
-				throw std::runtime_error("Failed to create Vulkan swapchain framebuffer.");
+			result = vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &framebuffers[i]);
+
+			if (result != VK_SUCCESS) {
+				throw std::runtime_error("Failed to create swapchain framebuffer.");
 			}
 		}
 	}
 
-	VulkanSwapchain::~VulkanSwapchain() {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~VulkanSwapchain]");
-
-		for (uint32 i = 0; i < images.size(); i++) {
+	void VulkanSwapchain::destruct() {
+		for (uint32 i = 0; i < images.size(); i += 1) {
 			vkDestroyFramebuffer(device, framebuffers[i], nullptr);
 			vkDestroyImageView(device, imageViews[i], nullptr);
 
@@ -112,13 +152,5 @@ namespace ProjectA {
 		}
 
 		vkDestroySwapchainKHR(device, object, nullptr);
-	}
-
-	uint32 VulkanSwapchain::getExtentWidth() const {
-		return imageExtent.width;
-	}
-
-	uint32 VulkanSwapchain::getExtentHeight() const {
-		return imageExtent.height;
 	}
 }

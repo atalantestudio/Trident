@@ -21,5 +21,7 @@ namespace ProjectA {
 			void renderImGui() override;
 
 			void onEvent(Event& event) override;
+
+			bool onWindowResize(WindowResizeEvent& event);
 	};
 }
