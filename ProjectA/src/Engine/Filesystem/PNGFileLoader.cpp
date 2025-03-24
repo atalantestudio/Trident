@@ -16,6 +16,7 @@ namespace ProjectA {
 
 	PNGFile PNGFileLoader::load(const std::string& path) {
 		const File file = FileLoader::loadFile(path);
+
 		ByteStream stream(file.rawData.data(), file.size);
 
 		readSignature(stream);
@@ -57,25 +58,14 @@ namespace ProjectA {
 
 			switch (filterType) {
 				case FilterType::NONE: {
-					//ENGINE_DEBUG("Reconstructing unfiltered scanline [].", y);
+					std::copy(source, source + pngFile.width * 4, destination);
 
-					// TODO: Use std::copy here.
-					// std::copy(&output[y * (properties.Height + 1) + 1], &output[y * (properties.Height + 1) + properties.Width + 1], finalOutput[y * properties.Height]);
-					for (uint32 x = 0; x < pngFile.width; x += 1) {
-						destination[0] = source[0];
-						destination[1] = source[1];
-						destination[2] = source[2];
-						destination[3] = source[3];
-
-						destination += 4;
-						source += 4;
-					}
+					source += pngFile.width * 4;
+					destination += pngFile.width * 4;
 
 					break;
 				}
 				case FilterType::SUB: {
-					//ENGINE_DEBUG("Reconstructing scanline [] with sub filter.", y);
-
 					uint32 aPixel = 0;
 
 					for (uint32 x = 0; x < pngFile.width; x += 1) {
@@ -92,8 +82,6 @@ namespace ProjectA {
 					break;
 				}
 				case FilterType::UP: {
-					//ENGINE_DEBUG("Reconstructing scanline [] with up filter.", y);
-
 					uint8* bPixel = previousRow;
 
 					for (uint32 x = 0; x < pngFile.width; x += 1) {
@@ -110,8 +98,6 @@ namespace ProjectA {
 					break;
 				}
 				case FilterType::AVERAGE: {
-					//ENGINE_DEBUG("Reconstructing scanline [] with average filter.", y);
-
 					uint32 aPixel = 0;
 					uint8* bPixel = previousRow;
 
@@ -130,8 +116,6 @@ namespace ProjectA {
 					break;
 				}
 				case FilterType::PAETH: {
-					//ENGINE_DEBUG("Reconstructing scanline [] with Paeth filter.", y);
-
 					uint32 aPixel = 0;
 					uint8* bPixel = previousRow;
 					uint32 cPixel = 0;
@@ -183,20 +167,14 @@ namespace ProjectA {
 
 		switch (Chunk.Type) {
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IHDR"):
-				ENGINE_TRACE("Reading IHDR chunk.");
-
 				readIHDRChunk(stream, file);
 
 				break;
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IDAT"):
-				ENGINE_TRACE("Reading IDAT chunk.");
-
 				readIDATChunk(stream, Chunk.ByteLength, compressedData);
 
 				break;
 			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IEND"):
-				ENGINE_TRACE("Reading IEND chunk.");
-
 				break;
 			default:
 				const char* TypeString = static_cast<char*>(static_cast<void*>(&Chunk.Type));

@@ -121,8 +121,8 @@ namespace ProjectA {
 					const OpenGLTextureView* textureView = static_cast<const OpenGLTextureView*>(binding.textureViews[textureViewIndex].get());
 					const OpenGLSampler* sampler = static_cast<const OpenGLSampler*>(binding.samplers[textureViewIndex].get());
 
-					glBindTextureUnit(textureViewIndex, textureView->object);
-					glBindSampler(textureViewIndex, sampler->object);
+					glBindTextureUnit(bindingIndex, textureView->object);
+					glBindSampler(bindingIndex, sampler->object);
 				}
 			}
 		}

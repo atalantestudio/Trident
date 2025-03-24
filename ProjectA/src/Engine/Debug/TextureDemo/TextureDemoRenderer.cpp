@@ -19,11 +19,8 @@ namespace ProjectA {
 
 		swapchain = createSwapchain(swapchainDescriptor);
 
-		// Create texture.
+		// Load texture.
 		{
-			// TODO:
-			// - checkerboard.png (colorType = 2, no alpha)
-
 			const PNGFile file = PNGFileLoader::load("../ProjectA/src/Engine/Debug/TextureDemo/Asset/Zelda.png");
 			const uint64 size = sizeof(uint8) * file.data.size();
 
@@ -86,17 +83,43 @@ namespace ProjectA {
 			sampler = createSampler(samplerDescriptor);
 		}
 
+		// Create camera uniform buffer.
+		{
+			constexpr float32 aspectRatio = 1280.0f / 720.0f;
+
+			const mat4x4<float32> projection = lyah::mat4x4<float32>::orthographic(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+			const uint64 size = sizeof(projection);
+
+			BufferDescriptor bufferDescriptor{};
+			bufferDescriptor.size = size;
+			bufferDescriptor.usage = BufferUsage::UNIFORM;
+
+			cameraUniformBuffer = createBuffer(bufferDescriptor);
+
+			const BufferMappedRange mappedRange = cameraUniformBuffer->map(0, size);
+
+			std::copy(&projection, &projection + 1, static_cast<mat4x4<float32>*>(mappedRange));
+
+			cameraUniformBuffer->unmap();
+		}
+
+		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
+		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
+		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
+
 		DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding{};
 		textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 		textureDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
 		textureDescriptorSetLayoutBinding.samplers = {sampler};
 		textureDescriptorSetLayoutBinding.textureViews = {textureView};
 
-		DescriptorSetLayout textureDescriptorSetLayout{};
-		textureDescriptorSetLayout.bindings.emplace_back(textureDescriptorSetLayoutBinding);
+		DescriptorSetLayout descriptorSetLayout{};
+		descriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding);
+		descriptorSetLayout.bindings.emplace_back(textureDescriptorSetLayoutBinding);
 
 		PipelineLayoutDescriptor pipelineLayoutDescriptor;
-		pipelineLayoutDescriptor.layouts.emplace_back(textureDescriptorSetLayout);
+		pipelineLayoutDescriptor.layouts.emplace_back(descriptorSetLayout);
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
@@ -141,15 +164,18 @@ namespace ProjectA {
 
 		// Create vertex buffer.
 		{
+			const float32 w = static_cast<float32>(texture->getWidth()) / 1000.0f;
+			const float32 h = static_cast<float32>(texture->getHeight()) / 1000.0f;
+
 			// Texture coordinates are reversed manually.
 			chain<Vertex> vertices(4);
-			vertices[0].position = {-1.0f, -1.0f};
+			vertices[0].position = vec2<float32>(-w, -h) / 2.0f;
 			vertices[0].uv = {0.0f, 1.0f};
-			vertices[1].position = {-1.0f, 1.0f};
+			vertices[1].position = vec2<float32>(-w, h) / 2.0f;
 			vertices[1].uv = {0.0f, 0.0f};
-			vertices[2].position = {1.0f, 1.0f};
+			vertices[2].position = vec2<float32>(w, h) / 2.0f;
 			vertices[2].uv = {1.0f, 0.0f};
-			vertices[3].position = {1.0f, -1.0f};
+			vertices[3].position = vec2<float32>(w, -h) / 2.0f;
 			vertices[3].uv = {1.0f, 1.0f};
 
 			const uint64 size = sizeof(Vertex) * vertices.size();
@@ -261,7 +287,7 @@ namespace ProjectA {
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = renderPass;
 		beginRenderPassDescriptor.swapchain = swapchain;
-		beginRenderPassDescriptor.clearColor = {1.0f, 1.0f, 1.0f, 1.0f};
+		beginRenderPassDescriptor.clearColor = vec4<float32>(186.0f, 113.0f, 55.0f, 255.0f) / 255.0f;
 		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());

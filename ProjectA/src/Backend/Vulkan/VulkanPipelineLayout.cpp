@@ -7,13 +7,6 @@
 #include "Backend/Vulkan/VulkanSampler.hpp"
 #include "Backend/Vulkan/VulkanTextureView.hpp"
 
-// Shaders have descriptor sets.
-// 1 descriptor set can have multiple bindings.
-// Each binding has its own type, from UNIFORM to COMBINED_IMAGE_SAMPLER.
-// In this case the descriptor set 0 will have a UNIFORM at the binding 0.
-//
-// There is 1 descriptor pool per descriptor set.
-// The pool must match the type and sizes of the bindings in the set.
 namespace ProjectA {
 	VulkanPipelineLayout::VulkanPipelineLayout(const VkDevice device, const PipelineLayoutDescriptor& descriptor) :
 		device(device)
@@ -97,23 +90,18 @@ namespace ProjectA {
 				throw std::runtime_error("Failed to allocate descriptor sets.");
 			}
 
-			std::vector<VkWriteDescriptorSet> writeDescriptorSets;
-			std::vector<VkDescriptorBufferInfo> descriptorBufferInfos;
-			std::vector<VkDescriptorImageInfo> descriptorImageInfos;
+			chain<VkDescriptorBufferInfo> descriptorBufferInfos;
+			chain<VkDescriptorImageInfo> descriptorImageInfos;
 
-			for (uint32 setLayoutIndex = 0; setLayoutIndex < descriptor.layouts.size(); setLayoutIndex++) {
-				const DescriptorSetLayout& setLayout = descriptor.layouts[setLayoutIndex];
-
-				for (uint32 bindingIndex = 0; bindingIndex < setLayout.bindings.size(); bindingIndex++) {
-					const DescriptorSetLayoutBinding& binding = setLayout.bindings[bindingIndex];
-
-					for (uint32 bufferIndex = 0; bufferIndex < binding.buffers.size(); bufferIndex++) {
-						const VulkanBuffer* buffer = static_cast<const VulkanBuffer*>(binding.buffers[bufferIndex].get());
+			for (const DescriptorSetLayout& layout : descriptor.layouts) {
+				for (const DescriptorSetLayoutBinding& binding : layout.bindings) {
+					for (const ref<Buffer>& buffer : binding.buffers) {
+						const VulkanBuffer* vkBuffer = static_cast<const VulkanBuffer*>(buffer.get());
 
 						VkDescriptorBufferInfo descriptorBufferInfo{};
-						descriptorBufferInfo.buffer = buffer->object;
+						descriptorBufferInfo.buffer = vkBuffer->object;
 						descriptorBufferInfo.offset = 0;
-						descriptorBufferInfo.range = buffer->size;
+						descriptorBufferInfo.range = vkBuffer->size;
 
 						descriptorBufferInfos.emplace_back(descriptorBufferInfo);
 					}
@@ -132,31 +120,35 @@ namespace ProjectA {
 				}
 			}
 
-			uint32 writeDescriptorSetIndex = 0;
+			chain<VkWriteDescriptorSet> writeDescriptorSets;
 
-			for (uint32 setLayoutIndex = 0; setLayoutIndex < descriptor.layouts.size(); setLayoutIndex++) {
-				const DescriptorSetLayout& setLayout = descriptor.layouts[setLayoutIndex];
+			uint32 bufferWriteDescriptorSetIndex = 0;
+			uint32 imageWriteDescriptorSetIndex = 0;
 
-				for (uint32 bindingIndex = 0; bindingIndex < setLayout.bindings.size(); bindingIndex++) {
-					const DescriptorSetLayoutBinding& binding = setLayout.bindings[bindingIndex];
+			for (uint32 layoutIndex = 0; layoutIndex < descriptor.layouts.size(); layoutIndex++) {
+				const DescriptorSetLayout& layout = descriptor.layouts[layoutIndex];
 
+				for (uint32 bindingIndex = 0; bindingIndex < layout.bindings.size(); bindingIndex++) {
+					const DescriptorSetLayoutBinding& binding = layout.bindings[bindingIndex];
+
+					// TODO: Fix overflow when one descriptor set has buffer and texture bindings.
 					for (uint32 bufferIndex = 0; bufferIndex < binding.buffers.size(); bufferIndex++) {
 						// 1 write descriptor set per descriptor set and per binding index.
 						VkWriteDescriptorSet writeDescriptorSet{};
 						writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 						writeDescriptorSet.pNext = nullptr;
-						writeDescriptorSet.dstSet = descriptorSets[setLayoutIndex];
+						writeDescriptorSet.dstSet = descriptorSets[layoutIndex];
 						writeDescriptorSet.dstBinding = bindingIndex;
 						writeDescriptorSet.dstArrayElement = 0;
 						writeDescriptorSet.descriptorCount = 1;
 						writeDescriptorSet.descriptorType = getVkDescriptorType(binding.descriptorType);
 						writeDescriptorSet.pImageInfo = nullptr;
-						writeDescriptorSet.pBufferInfo = &descriptorBufferInfos[writeDescriptorSetIndex];
+						writeDescriptorSet.pBufferInfo = &descriptorBufferInfos[bufferWriteDescriptorSetIndex];
 						writeDescriptorSet.pTexelBufferView = nullptr;
 
 						writeDescriptorSets.emplace_back(writeDescriptorSet);
 
-						writeDescriptorSetIndex++;
+						bufferWriteDescriptorSetIndex++;
 					}
 
 					for (uint32 textureViewIndex = 0; textureViewIndex < binding.textureViews.size(); textureViewIndex++) {
@@ -164,18 +156,18 @@ namespace ProjectA {
 						VkWriteDescriptorSet writeDescriptorSet{};
 						writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 						writeDescriptorSet.pNext = nullptr;
-						writeDescriptorSet.dstSet = descriptorSets[setLayoutIndex];
+						writeDescriptorSet.dstSet = descriptorSets[layoutIndex];
 						writeDescriptorSet.dstBinding = bindingIndex;
 						writeDescriptorSet.dstArrayElement = 0;
 						writeDescriptorSet.descriptorCount = 1;
 						writeDescriptorSet.descriptorType = getVkDescriptorType(binding.descriptorType);
-						writeDescriptorSet.pImageInfo = &descriptorImageInfos[writeDescriptorSetIndex];
+						writeDescriptorSet.pImageInfo = &descriptorImageInfos[imageWriteDescriptorSetIndex];
 						writeDescriptorSet.pBufferInfo = nullptr;
 						writeDescriptorSet.pTexelBufferView = nullptr;
 
 						writeDescriptorSets.emplace_back(writeDescriptorSet);
 
-						writeDescriptorSetIndex++;
+						imageWriteDescriptorSetIndex++;
 					}
 				}
 			}

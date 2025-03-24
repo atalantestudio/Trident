@@ -27,6 +27,7 @@ namespace ProjectA {
 			ref<RenderPipeline> renderPipeline;
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
+			ref<Buffer> cameraUniformBuffer;
 			ref<Texture> texture;
 			ref<TextureView> textureView;
 			ref<Sampler> sampler;

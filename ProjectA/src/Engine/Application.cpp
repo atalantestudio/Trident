@@ -19,7 +19,7 @@ namespace ProjectA {
 		Renderer::setGraphicsApi(GraphicsAPI::OPENGL);
 
 		// Initialize GLFW and create window.
-		window = Window::create(WindowData(name));
+		window = Window::create(WindowData(name, 1280, 720));
 		window->setEventCallback(BIND(Application::onEvent));
 
 		// Initialize graphics API.

@@ -137,6 +137,7 @@ namespace ProjectA {
 			}
 
 			if (BFINAL) {
+				// TODO: Check Adler32. See https://datatracker.ietf.org/doc/html/rfc1950.
 				return data;
 			}
 		}
@@ -147,8 +148,6 @@ namespace ProjectA {
 	}
 
 	void parseUncompressedZlibBlock(BitStream& stream, chain<uint8>& data) {
-		ENGINE_DEBUG("Parsing uncompressed Zlib block.");
-
 		stream.jump(5);
 
 		/**
@@ -180,8 +179,6 @@ namespace ProjectA {
 		HuffmanCodeDictionary distanceDictionary(15);
 
 		if (BTYPE == 1) {
-			ENGINE_DEBUG("Parsing Zlib block compressed with fixed Huffman codes.");
-
 			literalLengthCodeCount = 288;
 			distanceCodeCount = 32;
 
@@ -191,8 +188,6 @@ namespace ProjectA {
 			std::fill(&literalLengthCodeLengths[288], &literalLengthCodeLengths[320], 5);
 		}
 		else {
-			ENGINE_DEBUG("Parsing Zlib block compressed with dynamic Huffman codes.");
-
 			// # of Literal/Length codes - 257 (257 - 286)
 			const uint8 HLIT = stream.read<uint8>(5);
 
