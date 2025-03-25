@@ -11,22 +11,33 @@ namespace ProjectA {
 
 		ENGINE_TRACE("[VulkanSurface]");
 
-		// TODO: If no debug messenger, this fails with "Vulkan instance missing VK_KHR_win32_surface extension".
-		// TODO: Replace with https://registry.khronos.org/vulkan/specs/latest/man/html/vkCreateWin32SurfaceKHR.html
-		// or its Linux variant.
-		VkResult result = glfwCreateWindowSurface(instance, window, nullptr, &object);
+		#ifdef PLATFORM_WINDOWS
+			const PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = static_cast<PFN_vkCreateWin32SurfaceKHR>(static_cast<void*>(vkGetInstanceProcAddr(instance, "vkCreateWin32SurfaceKHR")));
 
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create surface.");
-		}
+			ENGINE_ASSERT(vkCreateWin32SurfaceKHR != nullptr, "Failed to get address of PFN_vkCreateWin32SurfaceKHR.");
+
+			const HWND hwnd = GetActiveWindow(); 
+
+			VkWin32SurfaceCreateInfoKHR surfaceCreateInfo{};
+			surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+			surfaceCreateInfo.pNext = nullptr;
+			surfaceCreateInfo.flags = 0;
+			surfaceCreateInfo.hinstance = GetModuleHandle(nullptr);
+			surfaceCreateInfo.hwnd = glfwGetWin32Window(window);
+
+			// TODO: If no debug messenger, this fails with "Vulkan instance missing VK_KHR_win32_surface extension".
+			VkResult result = vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &object);
+
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan surface (code: []).", result);
+		#else
+			#error "Unhandled platform."
+		#endif
 
 		VkBool32 supported;
 
 		result = vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice.object, physicalDevice.graphicsQueueFamilyIndex, object, &supported);
 
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("Failed to get surface support.");
-		}
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan physical device surface support (code: []).", result);
 
 		if (supported) {
 			presentQueueFamilyIndex = physicalDevice.graphicsQueueFamilyIndex;
@@ -49,17 +60,13 @@ namespace ProjectA {
 		// Get capabilities.
 		result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, object, &capabilities);
 
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("Failed to get surface capabilities.");
-		}
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface capabilities (code: []).", result);
 
 		uint32 formatCount = 0;
 
 		result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, object, &formatCount, nullptr);
 
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("Failed to get surface format count.");
-		}
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface format count (code: []).", result);
 
 		// Select format.
 		if (formatCount > 0) {
@@ -67,9 +74,7 @@ namespace ProjectA {
 
 			result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, object, &formatCount, formats.data());
 
-			if (result != VK_SUCCESS) {
-				throw std::runtime_error("Failed to get surface formats.");
-			}
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface formats (code: []).", result);
 
 			bool selected = false;
 
@@ -92,9 +97,7 @@ namespace ProjectA {
 
 		result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, object, &presentModeCount, nullptr);
 
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("Failed to get surface present mode count.");
-		}
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface present mode count (code: []).", result);
 
 		// Select present mode.
 		if (presentModeCount > 0) {
@@ -102,9 +105,7 @@ namespace ProjectA {
 
 			result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, object, &presentModeCount, presentModes.data());
 
-			if (result != VK_SUCCESS) {
-				throw std::runtime_error("Failed to get surface present modes.");
-			}
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface present modes (code: []).", result);
 
 			bool selected = false;
 

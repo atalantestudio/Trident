@@ -4,14 +4,14 @@
 	#ifdef _WIN64
 		#define PLATFORM_WINDOWS
 	#else
-		#error "Windows x86 builds are not supported."
+		#error "Unhandled platform."
 	#endif
 #elif defined(__linux__)
 	#define PLATFORM_LINUX
 
-	#error "Unhandled operating system."
+	#error "Unhandled platform."
 #else
-	#error "Unhandled operating system."
+	#error "Unhandled platform."
 #endif
 
 #ifdef BUILD_MODE_DEBUG
@@ -29,30 +29,6 @@
 	#define CLIENT_ERROR(...) ProjectA::Logger::clientLogger->error(__VA_ARGS__)
 	#define CLIENT_FATAL(...) ProjectA::Logger::clientLogger->fatal(__VA_ARGS__)
 
-	#if defined(PLATFORM_WINDOWS)
-		#define DEBUGBREAK() __debugbreak()
-	#elif defined(PLATFORM_LINUX)
-		#include <signal.h>
-
-		#define DEBUGBREAK() raise(SIGTRAP)
-	#else
-		#error "debugbreak is not supported on this platform."
-	#endif
-
-	#define ENGINE_ASSERT(condition, ...) { \
-		if (!(condition)) { \
-			ENGINE_ERROR(__VA_ARGS__); \
-			DEBUGBREAK(); \
-		} \
-	}
-
-	#define CLIENT_ASSERT(condition, ...) { \
-		if (!(condition)) { \
-			CLIENT_ERROR(__VA_ARGS__); \
-			DEBUGBREAK(); \
-		} \
-	}
-
 	#define DEBUG_ENABLE_MESSENGER
 	#define DEBUG_ENABLE_VALIDATION_LAYERS
 #else
@@ -69,12 +45,31 @@
 	#define CLIENT_WARN(...)
 	#define CLIENT_ERROR(...)
 	#define CLIENT_FATAL(...)
-
-	#define DEBUGBREAK()
-
-	#define ENGINE_ASSERT(condition, ...)
-	#define CLIENT_ASSERT(condition, ...)
 #endif
+
+#if defined(PLATFORM_WINDOWS)
+	#define DEBUGBREAK() __debugbreak()
+#elif defined(PLATFORM_LINUX)
+	#include <signal.h>
+
+	#define DEBUGBREAK() raise(SIGTRAP)
+#else
+	#error "Unhandled platform."
+#endif
+
+#define ENGINE_ASSERT(condition, ...) { \
+	if (!(condition)) { \
+		ENGINE_ERROR(__VA_ARGS__); \
+		DEBUGBREAK(); \
+	} \
+}
+
+#define CLIENT_ASSERT(condition, ...) { \
+	if (!(condition)) { \
+		CLIENT_ERROR(__VA_ARGS__); \
+		DEBUGBREAK(); \
+	} \
+}
 
 #ifdef BUILD_MODE_PROFILE
 	#if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) || (defined(__ICC) && (__ICC >= 600)) || defined(__ghs__)

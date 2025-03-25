@@ -1,10 +1,10 @@
 #include "pch.hpp"
 
+#include <vulkan/vulkan.h>
+
 #include "Backend/Windows/WindowsWindow.hpp"
 
 #include "Engine/Renderer/Renderer.hpp"
-
-#include <vulkan/vulkan.h>
 
 namespace ProjectA {
 	static uint8 glfwWindowCount = 0;
