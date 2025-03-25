@@ -34,7 +34,7 @@ namespace ProjectA {
 			}
 
 			// Returns the component of type T belonging to the provided entity.
-			const T& getComponent(const Entity entity) const {
+			const T& getComponent(Entity entity) const {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
 
 				const Entity componentIndex = entityToComponentIndex[entity];
@@ -45,7 +45,7 @@ namespace ProjectA {
 			}
 
 			// Returns the component of type T belonging to the provided entity.
-			T& getComponent(const Entity entity) {
+			T& getComponent(Entity entity) {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
 
 				const Entity componentIndex = entityToComponentIndex[entity];
@@ -58,7 +58,7 @@ namespace ProjectA {
 			// TODO: hasComponent.
 
 			// Sets or replaces the component of type T belonging to the provided entity.
-			void setComponent(const Entity entity, const T& component) {
+			void setComponent(Entity entity, const T& component) {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
 
 				const uint32 componentIndex = entityToComponentIndex[entity];
@@ -80,7 +80,7 @@ namespace ProjectA {
 			}
 
 			// Erases the component of type T belonging to the provided entity.
-			void resetComponent(const Entity entity) {
+			void resetComponent(Entity entity) {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
 
 				const Entity componentIndex = entityToComponentIndex[entity];
@@ -162,7 +162,7 @@ namespace ProjectA {
 
 			// TODO: Const variant.
 			template<typename T>
-			T& getComponent(const Entity entity) {
+			T& getComponent(Entity entity) {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "Invalid entity.");
 
 				ComponentPool<T>& componentPool = getComponentPool<T>();
@@ -171,7 +171,7 @@ namespace ProjectA {
 			}
 
 			template<typename T>
-			void setComponent(const Entity entity, const T& component) {
+			void setComponent(Entity entity, const T& component) {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "Invalid entity.");
 
 				ComponentPool<T>& componentPool = getComponentPool<T>();
@@ -191,7 +191,7 @@ namespace ProjectA {
 			}
 
 			template<typename T>
-			void resetComponent(const Entity entity) {
+			void resetComponent(Entity entity) {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "Invalid entity.");
 
 				ComponentPool<T>& componentPool = getComponentPool<T>();

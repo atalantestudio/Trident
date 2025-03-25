@@ -8,7 +8,7 @@
 #include "Backend/Vulkan/VulkanTextureView.hpp"
 
 namespace ProjectA {
-	VulkanPipelineLayout::VulkanPipelineLayout(const VkDevice device, const PipelineLayoutDescriptor& descriptor) :
+	VulkanPipelineLayout::VulkanPipelineLayout(VkDevice device, const PipelineLayoutDescriptor& descriptor) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);

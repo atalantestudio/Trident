@@ -11,7 +11,7 @@ namespace ProjectA {
 
 		private:
 			#ifdef DEBUG_ENABLE_MESSENGER
-				static void debugMessageCallback(const GLenum source, const GLenum type, const GLuint id, const GLenum severity, const GLsizei length, const GLchar* message, const void* userParam);
+				static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 			#endif
 	};
 }

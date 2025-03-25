@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class OpenGLSetViewportCommand : public OpenGLCommand {
 		public:
-			OpenGLSetViewportCommand(const GLint x, const GLint y, const GLsizei width, const GLsizei height);
+			OpenGLSetViewportCommand(GLint x, GLint y, GLsizei width, GLsizei height);
 
 			void execute() const override;
 

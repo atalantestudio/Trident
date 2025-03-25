@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 
 namespace ProjectA {
-	VulkanRenderPass::VulkanRenderPass(const VulkanSurface& surface, const VkDevice device, const RenderPassDescriptor& descriptor) :
+	VulkanRenderPass::VulkanRenderPass(const VulkanSurface& surface, VkDevice device, const RenderPassDescriptor& descriptor) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);

@@ -5,9 +5,9 @@
 namespace ProjectA {
 	enum class LogStructure : uint8 {
 		NONE = 0,
-		TIME = 1 << 0,
-		LOGGER_NAME = 1 << 1,
-		LOG_LEVEL_NAME = 1 << 2,
+		TIME = BIT(0),
+		LOGGER_NAME = BIT(1),
+		LOG_LEVEL_NAME = BIT(2),
 	};
 
 	AS_FLAG(LogStructure);

@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/Command/OpenGLBindIndexBufferCommand.hpp"
 
 namespace ProjectA {
-	OpenGLBindIndexBufferCommand::OpenGLBindIndexBufferCommand(const GLuint indexBuffer) :
+	OpenGLBindIndexBufferCommand::OpenGLBindIndexBufferCommand(GLuint indexBuffer) :
 		indexBuffer(indexBuffer)
 	{}
 

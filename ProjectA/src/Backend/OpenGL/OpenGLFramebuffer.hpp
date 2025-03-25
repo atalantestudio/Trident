@@ -5,11 +5,6 @@
 // TODO: Revisit old API.
 namespace ProjectA {
 	class OpenGLFramebuffer : public Framebuffer {
-		private:
-			uint32 id;
-			uint32 colorAttachmentId;
-			uint32 depthAttachmentId;
-
 		public:
 			OpenGLFramebuffer(const FramebufferDescriptor& descriptor);
 
@@ -25,5 +20,10 @@ namespace ProjectA {
 
 		private:
 			void reset();
+
+		private:
+			uint32 id;
+			uint32 colorAttachmentId;
+			uint32 depthAttachmentId;
 	};
 }

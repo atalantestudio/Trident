@@ -7,9 +7,9 @@
 namespace ProjectA {
 	class Input {
 		public:
-			static bool isKeyPressed(const KeyCode keyCode);
+			static bool isKeyPressed(KeyCode keyCode);
 
-			static bool isMouseButtonPressed(const MouseButton button);
+			static bool isMouseButtonPressed(MouseButton button);
 
 			static vec2<float64> getMousePosition();
 	};

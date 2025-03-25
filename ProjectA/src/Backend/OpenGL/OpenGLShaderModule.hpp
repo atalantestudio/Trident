@@ -9,7 +9,7 @@ namespace ProjectA {
 	class OpenGLShaderModule : public ShaderModule, public ObjectWrapper<GLuint> {
 		public:
 			// The code string must be terminated.
-			OpenGLShaderModule(const GLenum stage, const chain<uint8>& code);
+			OpenGLShaderModule(GLenum stage, const chain<uint8>& code);
 
 			~OpenGLShaderModule() override;
 	};

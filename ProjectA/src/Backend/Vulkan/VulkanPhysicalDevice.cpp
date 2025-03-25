@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 
 namespace ProjectA {
-	VulkanPhysicalDevice::VulkanPhysicalDevice(const VkInstance instance) {
+	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		uint32 physicalDeviceCount;
@@ -79,7 +79,7 @@ namespace ProjectA {
 		vkGetPhysicalDeviceFeatures(object, &features);
 	}
 
-	uint32 VulkanPhysicalDevice::calculateScore(const VkPhysicalDevice physicalDevice) {
+	uint32 VulkanPhysicalDevice::calculateScore(VkPhysicalDevice physicalDevice) {
 		// TODO: Implement score system.
 		return 1;
 	}

@@ -10,7 +10,7 @@
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 
 namespace ProjectA {
-	VulkanRenderPipeline::VulkanRenderPipeline(const VkDevice device, const RenderPipelineDescriptor& descriptor) :
+	VulkanRenderPipeline::VulkanRenderPipeline(VkDevice device, const RenderPipelineDescriptor& descriptor) :
 		device(device),
 		pipelineLayout(static_cast<const VulkanPipelineLayout*>(descriptor.pipelineLayout.get()))
 	{

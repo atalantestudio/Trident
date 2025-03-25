@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class VulkanSemaphore : public Semaphore, public ObjectWrapper<VkSemaphore> {
 		public:
-			VulkanSemaphore(const VkDevice device);
+			VulkanSemaphore(VkDevice device);
 
 			~VulkanSemaphore();
 

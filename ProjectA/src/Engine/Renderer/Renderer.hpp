@@ -21,7 +21,7 @@ namespace ProjectA {
 
 			static GraphicsAPI getGraphicsApi();
 
-			static void setGraphicsApi(const GraphicsAPI api);
+			static void setGraphicsApi(GraphicsAPI api);
 
 			static void recreate();
 
@@ -51,7 +51,7 @@ namespace ProjectA {
 
 			ref<Semaphore> createSemaphore() const;
 
-			ref<ShaderModule> createShaderModule(const ShaderStage stage, const chain<uint8>& code) const;
+			ref<ShaderModule> createShaderModule(ShaderStage stage, const chain<uint8>& code) const;
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const;
 

@@ -59,7 +59,7 @@ namespace ProjectA {
 
 	void GUILayer::unbind() {}
 
-	void GUILayer::update(const float32 deltaTime) {
+	void GUILayer::update(float32 deltaTime) {
 		renderer.render();
 	}
 

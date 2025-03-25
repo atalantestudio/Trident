@@ -56,7 +56,7 @@ namespace ProjectA {
 		return createRef<OpenGLSemaphore>();
 	}
 
-	ref<ShaderModule> OpenGLRendererAPI::createShaderModule(const ShaderStage stage, const chain<uint8>& code) const {
+	ref<ShaderModule> OpenGLRendererAPI::createShaderModule(ShaderStage stage, const chain<uint8>& code) const {
 		static constexpr GLenum shaderStages[] = {
 			GL_VERTEX_SHADER,
 			GL_FRAGMENT_SHADER,

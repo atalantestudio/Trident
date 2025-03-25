@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanCommandPool.hpp"
 
 namespace ProjectA {
-	VulkanCommandPool::VulkanCommandPool(const VulkanPhysicalDevice& physicalDevice, const VkDevice device) :
+	VulkanCommandPool::VulkanCommandPool(const VulkanPhysicalDevice& physicalDevice, VkDevice device) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);

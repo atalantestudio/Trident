@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class OpenGLBindIndexBufferCommand : public OpenGLCommand {
 		public:
-			OpenGLBindIndexBufferCommand(const GLuint indexBuffer);
+			OpenGLBindIndexBufferCommand(GLuint indexBuffer);
 
 			void execute() const override;
 

@@ -14,7 +14,7 @@ namespace ProjectA {
 		projectionView = projection * view;
 	}
 
-	void OrthographicCamera3D::updateView(const lyah::vec3<float32>& position, float32 rotation) {
+	void OrthographicCamera3D::updateView(const vec3<float32>& position, float32 rotation) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		mat4x4<float32> transform = mat4x4<float32>::rotation({0.0f, 0.0f, 1.0f}, rotation);

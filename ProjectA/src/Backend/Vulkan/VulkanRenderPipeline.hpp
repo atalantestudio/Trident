@@ -11,7 +11,7 @@
 namespace ProjectA {
 	class VulkanRenderPipeline : public RenderPipeline, public ObjectWrapper<VkPipeline> {
 		public:
-			VulkanRenderPipeline(const VkDevice device, const RenderPipelineDescriptor& descriptor);
+			VulkanRenderPipeline(VkDevice device, const RenderPipelineDescriptor& descriptor);
 
 			~VulkanRenderPipeline();
 

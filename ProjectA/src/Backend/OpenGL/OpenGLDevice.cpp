@@ -28,7 +28,7 @@ namespace ProjectA {
 		}
 	}
 
-	Status OpenGLDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, const uint32 imageIndex) const {
+	Status OpenGLDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {
 		return Status::SUCCESS;
 	}
 

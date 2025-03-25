@@ -10,7 +10,7 @@
 namespace ProjectA {
 	class VulkanRenderPass : public RenderPass, public ObjectWrapper<VkRenderPass> {
 		public:
-			VulkanRenderPass(const VulkanSurface& surface, const VkDevice device, const RenderPassDescriptor& descriptor);
+			VulkanRenderPass(const VulkanSurface& surface, VkDevice device, const RenderPassDescriptor& descriptor);
 
 			~VulkanRenderPass();
 

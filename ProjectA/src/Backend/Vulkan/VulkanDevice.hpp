@@ -16,7 +16,7 @@ namespace ProjectA {
 			~VulkanDevice() override;
 
 			// Returns a suitable device memory type index.
-			uint32 findMemoryType(const VkMemoryRequirements& memoryRequirements, const VkMemoryPropertyFlags memoryPropertyFlags) const;
+			uint32 findMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) const;
 
 			void waitForFence(const ref<Fence>& fence) const override;
 
@@ -26,7 +26,7 @@ namespace ProjectA {
 
 			void submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const override;
 
-			Status present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, const uint32 imageIndex) const override;
+			Status present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const override;
 
 			void waitIdle() const override;
 

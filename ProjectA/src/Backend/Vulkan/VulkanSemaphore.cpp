@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanSemaphore.hpp"
 
 namespace ProjectA {
-	VulkanSemaphore::VulkanSemaphore(const VkDevice device) :
+	VulkanSemaphore::VulkanSemaphore(VkDevice device) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);

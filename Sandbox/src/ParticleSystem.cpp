@@ -1,7 +1,7 @@
 #include "ParticleSystem.hpp"
 #include "Random.hpp"
 
-ParticleSystem::ParticleSystem(const ProjectA::uint32 maxParticles) : poolIndex(maxParticles - 1) {
+ParticleSystem::ParticleSystem(ProjectA::uint32 maxParticles) : poolIndex(maxParticles - 1) {
 	particlePool.resize(maxParticles);
 }
 

@@ -20,7 +20,7 @@ namespace ProjectA {
 
 			virtual void submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const = 0;
 
-			virtual Status present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, const uint32 imageIndex) const = 0;
+			virtual Status present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const = 0;
 
 			virtual void waitIdle() const = 0;
 	};

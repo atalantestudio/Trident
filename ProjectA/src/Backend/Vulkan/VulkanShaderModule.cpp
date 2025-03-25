@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 
 namespace ProjectA {
-	VulkanShaderModule::VulkanShaderModule(const VkDevice device, const VkShaderStageFlagBits stage, const chain<uint8>& code) :
+	VulkanShaderModule::VulkanShaderModule(VkDevice device, VkShaderStageFlagBits stage, const chain<uint8>& code) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);

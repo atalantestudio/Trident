@@ -35,9 +35,9 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLBindRenderPipelineCommand>(this->renderPipeline));
 	}
 
-	void OpenGLCommandEncoder::bindDescriptorSets(const uint32 descriptorSetIndex) const {}
+	void OpenGLCommandEncoder::bindDescriptorSets(uint32 descriptorSetIndex) const {}
 
-	void OpenGLCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, const uint64 offset, const IndexType indexType) {
+	void OpenGLCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, IndexType indexType) {
 		indexOffset = static_cast<uint32>(offset);
 		this->indexType = getGlIndexType(indexType);
 		indexTypeSize = getGlIndexTypeSize(indexType);
@@ -45,7 +45,7 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLBindIndexBufferCommand>(static_cast<const OpenGLBuffer*>(indexBuffer.get())->object));
 	}
 
-	void OpenGLCommandEncoder::bindVertexBuffer(const uint32 bindingIndex, const ref<Buffer>& vertexBuffer, const uint32 stride) {
+	void OpenGLCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint32 stride) {
 		commandBuffer.emplace_back(createRef<OpenGLBindVertexBufferCommand>(
 			bindingIndex,
 			static_cast<const OpenGLBuffer*>(vertexBuffer.get())->object,
@@ -75,7 +75,7 @@ namespace ProjectA {
 
 	void OpenGLCommandEncoder::setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout) const {}
 
-	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) {
+	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(
 			// TODO: Use provided origin.
 			// TODO: Use vec2<sint32>.
@@ -87,13 +87,13 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::setScissor(const sint32 xOffset, const sint32 yOffset, const uint32 width, const uint32 height) {}
+	void OpenGLCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {}
 
-	void OpenGLCommandEncoder::draw(const uint32 vertexCount, const uint32 instanceCount, const uint32 vertexOffset) {
+	void OpenGLCommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) {
 		commandBuffer.emplace_back(createRef<OpenGLDrawCommand>(renderPipeline->primitiveTopology, vertexOffset, vertexCount, instanceCount));
 	}
 
-	void OpenGLCommandEncoder::drawIndexed(const uint32 indexCount, const uint32 instanceCount, const uint32 indexOffset) {
+	void OpenGLCommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) {
 		commandBuffer.emplace_back(createRef<OpenGLDrawIndexedCommand>(renderPipeline->primitiveTopology, indexCount, indexType, reinterpret_cast<const GLvoid*>(static_cast<std::uintptr_t>(this->indexOffset + indexOffset * indexTypeSize)), instanceCount));
 	}
 

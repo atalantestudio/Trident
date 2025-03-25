@@ -90,7 +90,7 @@ namespace ProjectA {
 		vkDestroyDevice(object, nullptr);
 	}
 
-	uint32 VulkanDevice::findMemoryType(const VkMemoryRequirements& memoryRequirements, const VkMemoryPropertyFlags memoryPropertyFlags) const {
+	uint32 VulkanDevice::findMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties{};
@@ -178,7 +178,7 @@ namespace ProjectA {
 		}
 	}
 
-	Status VulkanDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, const uint32 imageIndex) const {
+	Status VulkanDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		VkPresentInfoKHR presentInfo{};

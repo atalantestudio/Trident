@@ -4,7 +4,7 @@
 #include "Engine/Filesystem/FileLoader.hpp"
 #include "Engine/Filesystem/Inflate.hpp"
 #include "Engine/Filesystem/PNG/FilterType.hpp"
-#include "Engine/Filesystem/PNGFileLoader.hpp"
+#include "Engine/Filesystem/PNG/PNGFileLoader.hpp"
 
 namespace ProjectA {
 	#define PNG_CHUNK_TYPE_STRING_TO_UINT32(type) ( \

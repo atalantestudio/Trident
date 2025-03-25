@@ -33,7 +33,7 @@ namespace ProjectA {
 
 			virtual ref<Semaphore> createSemaphore() const = 0;
 
-			virtual ref<ShaderModule> createShaderModule(const ShaderStage stage, const chain<uint8>& code) const = 0;
+			virtual ref<ShaderModule> createShaderModule(ShaderStage stage, const chain<uint8>& code) const = 0;
 
 			virtual ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) = 0;
 

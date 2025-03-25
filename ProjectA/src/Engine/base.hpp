@@ -9,9 +9,9 @@
 #elif defined(__linux__)
 	#define PLATFORM_LINUX
 
-	#error "Operating system is not supported."
+	#error "Unhandled operating system."
 #else
-	#error "Unknown operating system."
+	#error "Unhandled operating system."
 #endif
 
 #ifdef BUILD_MODE_DEBUG

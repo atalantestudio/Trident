@@ -23,7 +23,7 @@ namespace ProjectA {
 		return graphicsApi;
 	}
 
-	void Renderer::setGraphicsApi(const GraphicsAPI api) {
+	void Renderer::setGraphicsApi(GraphicsAPI api) {
 		graphicsApi = api;
 	}
 
@@ -92,7 +92,7 @@ namespace ProjectA {
 		return rendererApi->createSemaphore();
 	}
 
-	ref<ShaderModule> Renderer::createShaderModule(const ShaderStage stage, const chain<uint8>& code) const {
+	ref<ShaderModule> Renderer::createShaderModule(ShaderStage stage, const chain<uint8>& code) const {
 		return rendererApi->createShaderModule(stage, code);
 	}
 

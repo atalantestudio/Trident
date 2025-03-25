@@ -2,15 +2,14 @@
 
 namespace ProjectA {
 	DemoLayer::DemoLayer() :
-		Layer("Demo"),
-		renderer()
+		Layer("Demo")
 	{}
 
 	void DemoLayer::bind() {}
 
 	void DemoLayer::unbind() {}
 
-	void DemoLayer::update(const float32 deltaTime) {
+	void DemoLayer::update(float32 deltaTime) {
 		renderer.render();
 	}
 

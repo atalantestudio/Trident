@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class VulkanFence : public Fence, public ObjectWrapper<VkFence> {
 		public:
-			VulkanFence(const VkDevice device);
+			VulkanFence(VkDevice device);
 
 			~VulkanFence();
 

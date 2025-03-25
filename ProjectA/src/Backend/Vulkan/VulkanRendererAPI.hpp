@@ -35,7 +35,7 @@ namespace ProjectA {
 
 			ref<Semaphore> createSemaphore() const override;
 
-			ref<ShaderModule> createShaderModule(const ShaderStage stage, const chain<uint8>& code) const override;
+			ref<ShaderModule> createShaderModule(ShaderStage stage, const chain<uint8>& code) const override;
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) override;
 

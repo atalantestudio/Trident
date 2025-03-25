@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class OpenGLDrawCommand : public OpenGLCommand {
 		public:
-			OpenGLDrawCommand(const GLenum mode, const GLint first, const GLsizei count, const GLsizei instancecount);
+			OpenGLDrawCommand(GLenum mode, GLint first, GLsizei count, GLsizei instancecount);
 
 			void execute() const override;
 

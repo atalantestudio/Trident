@@ -15,6 +15,6 @@ namespace ProjectA {
 			~VulkanTextureView();
 
 		private:
-			VkDevice device;
+			const VkDevice device;
 	};
 }

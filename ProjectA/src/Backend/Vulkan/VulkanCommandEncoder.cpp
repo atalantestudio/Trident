@@ -11,7 +11,7 @@
 #include "Backend/Vulkan/VulkanTexture.hpp"
 
 namespace ProjectA {
-	VulkanCommandEncoder::VulkanCommandEncoder(const VulkanDevice& device, const VkCommandPool commandPool, const CommandBufferDescriptor& descriptor) :
+	VulkanCommandEncoder::VulkanCommandEncoder(const VulkanDevice& device, VkCommandPool commandPool, const CommandBufferDescriptor& descriptor) :
 		device(device),
 		commandPool(commandPool),
 		commandBufferUsageFlag(getVkCommandBufferUsageFlag(descriptor.usage))
@@ -84,7 +84,7 @@ namespace ProjectA {
 		pipelineLayout = static_cast<const VulkanRenderPipeline*>(renderPipeline.get())->pipelineLayout;
 	}
 
-	void VulkanCommandEncoder::bindDescriptorSets(const uint32 descriptorSetIndex) const {
+	void VulkanCommandEncoder::bindDescriptorSets(uint32 descriptorSetIndex) const {
 		vkCmdBindDescriptorSets(
 			commandBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -100,13 +100,13 @@ namespace ProjectA {
 		);
 	}
 
-	void VulkanCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, const uint64 offset, const IndexType indexType) {
+	void VulkanCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, IndexType indexType) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		vkCmdBindIndexBuffer(commandBuffer, static_cast<const VulkanBuffer*>(indexBuffer.get())->object, offset, getVkIndexType(indexType));
 	}
 
-	void VulkanCommandEncoder::bindVertexBuffer(const uint32 bindingIndex, const ref<Buffer>& vertexBuffer, const uint32 stride) {
+	void VulkanCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint32 stride) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		const VkDeviceSize offset = 0;
@@ -206,7 +206,7 @@ namespace ProjectA {
 		);
 	}
 
-	void VulkanCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, const float32 minDepth, const float32 maxDepth) {
+	void VulkanCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		VkViewport viewport{};
@@ -220,7 +220,7 @@ namespace ProjectA {
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 	}
 
-	void VulkanCommandEncoder::setScissor(const sint32 xOffset, const sint32 yOffset, const uint32 width, const uint32 height) {
+	void VulkanCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		VkRect2D scissor{};
@@ -232,13 +232,13 @@ namespace ProjectA {
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
-	void VulkanCommandEncoder::draw(const uint32 vertexCount, const uint32 instanceCount, const uint32 vertexOffset) {
+	void VulkanCommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		vkCmdDraw(commandBuffer, vertexCount, instanceCount, vertexOffset, 0);
 	}
 
-	void VulkanCommandEncoder::drawIndexed(const uint32 indexCount, const uint32 instanceCount, const uint32 indexOffset) {
+	void VulkanCommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, indexOffset, 0, 0);

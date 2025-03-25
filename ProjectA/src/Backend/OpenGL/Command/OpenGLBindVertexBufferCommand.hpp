@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class OpenGLBindVertexBufferCommand : public OpenGLCommand {
 		public:
-			OpenGLBindVertexBufferCommand(const GLuint bindingindex, const GLuint buffer, const GLsizei stride);
+			OpenGLBindVertexBufferCommand(GLuint bindingindex, GLuint buffer, GLsizei stride);
 
 			void execute() const override;
 

@@ -12,9 +12,9 @@ namespace ProjectA {
 			VkPhysicalDeviceFeatures features;
 
 		public:
-			VulkanPhysicalDevice(const VkInstance instance);
+			VulkanPhysicalDevice(VkInstance instance);
 
 		private:
-			static uint32 calculateScore(const VkPhysicalDevice physicalDevice);
+			static uint32 calculateScore(VkPhysicalDevice physicalDevice);
 	};
 }

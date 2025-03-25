@@ -5,7 +5,7 @@
 #include "Backend/OpenGL/Command/OpenGLBindVertexBufferCommand.hpp"
 
 namespace ProjectA {
-	OpenGLBindVertexBufferCommand::OpenGLBindVertexBufferCommand(const GLuint bindingindex, const GLuint buffer, const GLsizei stride) :
+	OpenGLBindVertexBufferCommand::OpenGLBindVertexBufferCommand(GLuint bindingindex, GLuint buffer, GLsizei stride) :
 		bindingindex(bindingindex),
 		buffer(buffer),
 		stride(stride)

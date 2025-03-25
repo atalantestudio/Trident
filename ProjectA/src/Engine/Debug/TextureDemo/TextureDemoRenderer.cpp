@@ -2,7 +2,7 @@
 
 #include "Engine/Debug/TextureDemo/TextureDemoRenderer.hpp"
 #include "Engine/Filesystem/FileLoader.hpp"
-#include "Engine/Filesystem/PNGFileLoader.hpp"
+#include "Engine/Filesystem/PNG/PNGFileLoader.hpp"
 
 namespace ProjectA {
 	TextureDemoRenderer::TextureDemoRenderer() :
@@ -87,7 +87,7 @@ namespace ProjectA {
 		{
 			constexpr float32 aspectRatio = 1280.0f / 720.0f;
 
-			const mat4x4<float32> projection = lyah::mat4x4<float32>::orthographic(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+			const mat4x4<float32> projection = mat4x4<float32>::orthographic(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
 			const uint64 size = sizeof(projection);
 
 			BufferDescriptor bufferDescriptor{};

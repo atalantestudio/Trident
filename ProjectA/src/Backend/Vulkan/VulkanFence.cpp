@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanFence.hpp"
 
 namespace ProjectA {
-	VulkanFence::VulkanFence(const VkDevice device) :
+	VulkanFence::VulkanFence(VkDevice device) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);

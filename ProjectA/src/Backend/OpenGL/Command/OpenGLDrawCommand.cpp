@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
 
 namespace ProjectA {
-	OpenGLDrawCommand::OpenGLDrawCommand(const GLenum mode, const GLint first, const GLsizei count, const GLsizei instancecount) :
+	OpenGLDrawCommand::OpenGLDrawCommand(GLenum mode, GLint first, GLsizei count, GLsizei instancecount) :
 		mode(mode),
 		first(first),
 		count(count),

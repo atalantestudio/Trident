@@ -23,7 +23,7 @@
 
 // Filesystem
 #include "Engine/Filesystem/FileLoader.hpp"
-#include "Engine/Filesystem/PNGFileLoader.hpp"
+#include "Engine/Filesystem/PNG/PNGFileLoader.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 
 // GUI

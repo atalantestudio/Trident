@@ -19,7 +19,7 @@ namespace ProjectA {
 	}
 
 	#ifdef DEBUG_ENABLE_MESSENGER
-		void OpenGLInstance::debugMessageCallback(const GLenum source, const GLenum type, const GLuint id, const GLenum severity, const GLsizei length, const GLchar* message, const void* userParam) {
+		void OpenGLInstance::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 			switch (severity) {
 				case GL_DEBUG_SEVERITY_NOTIFICATION:
 					ENGINE_INFO("[] (source: [], type: [], id: [])", message, source, type, id);

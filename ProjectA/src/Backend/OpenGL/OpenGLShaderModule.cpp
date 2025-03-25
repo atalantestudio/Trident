@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 
 namespace ProjectA {
-	OpenGLShaderModule::OpenGLShaderModule(const GLenum stage, const chain<uint8>& code) :
+	OpenGLShaderModule::OpenGLShaderModule(GLenum stage, const chain<uint8>& code) :
 		ObjectWrapper(glCreateShader(stage))
 	{
 		PROFILE_SCOPE(FUNC_SIG);

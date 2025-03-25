@@ -11,10 +11,10 @@ namespace ProjectA {
 			chain<VertexAttribute> vertexAttributes;
 
 		public:
-			void defineBinding(const uint32 index, const InputRate inputRate);
+			void defineBinding(uint32 index, InputRate inputRate);
 
 			template<typename T>
-			void add(const uint32 bindingIndex, const bool normalized) {
+			void add(uint32 bindingIndex, bool normalized) {
 				// TODO: Check that the vertex binding exists.
 				VertexBinding& vertexBinding = vertexBindings[bindingIndex];
 
@@ -31,28 +31,28 @@ namespace ProjectA {
 			}
 
 			template<>
-			void add<mat3x3<float32>>(const uint32 bindingIndex, const bool normalized) {
+			void add<mat3x3<float32>>(uint32 bindingIndex, bool normalized) {
 				for (uint8 i = 0; i < 3; i += 1) {
 					add<vec3<float32>>(bindingIndex, normalized);
 				}
 			}
 
 			template<>
-			void add<mat3x3<float64>>(const uint32 bindingIndex, const bool normalized) {
+			void add<mat3x3<float64>>(uint32 bindingIndex, bool normalized) {
 				for (uint8 i = 0; i < 3; i += 1) {
 					add<vec3<float64>>(bindingIndex, normalized);
 				}
 			}
 
 			template<>
-			void add<mat4x4<float32>>(const uint32 bindingIndex, const bool normalized) {
+			void add<mat4x4<float32>>(uint32 bindingIndex, bool normalized) {
 				for (uint8 i = 0; i < 4; i += 1) {
 					add<vec4<float32>>(bindingIndex, normalized);
 				}
 			}
 
 			template<>
-			void add<mat4x4<float64>>(const uint32 bindingIndex, const bool normalized) {
+			void add<mat4x4<float64>>(uint32 bindingIndex, bool normalized) {
 				for (uint8 i = 0; i < 4; i += 1) {
 					add<vec4<float64>>(bindingIndex, normalized);
 				}

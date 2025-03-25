@@ -70,7 +70,7 @@ namespace ProjectA {
 		return createRef<VulkanSemaphore>(device->object);
 	}
 
-	ref<ShaderModule> VulkanRendererAPI::createShaderModule(const ShaderStage stage, const chain<uint8>& code) const {
+	ref<ShaderModule> VulkanRendererAPI::createShaderModule(ShaderStage stage, const chain<uint8>& code) const {
 		static constexpr VkShaderStageFlagBits shaderStages[] = {
 			VK_SHADER_STAGE_VERTEX_BIT,
 			VK_SHADER_STAGE_FRAGMENT_BIT,
