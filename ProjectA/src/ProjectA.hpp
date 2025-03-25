@@ -15,6 +15,7 @@
 
 // ECS
 #include "Engine/ECS/Component/GUIComponent.hpp"
+#include "Engine/ECS/Component/ScriptComponent.hpp"
 #include "Engine/ECS/Component/SpriteComponent.hpp"
 #include "Engine/ECS/Component/Transform2DComponent.hpp"
 #include "Engine/ECS/Component/Transform3DComponent.hpp"
@@ -40,9 +41,6 @@
 #include "Engine/Renderer/RenderPipeline.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
-
-// Scene
-#include "Engine/Scene/Scene.hpp"
 
 // TODO: Include debug demos in a custom engine-side file, in debug mode only.
 #include "Engine/Debug/TextureDemo/TextureDemoRenderer.hpp"

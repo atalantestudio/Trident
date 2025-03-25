@@ -3,9 +3,17 @@
 #include "ProjectA.hpp"
 
 namespace ProjectA {
+	class DemoScriptEntity : public ScriptEntity {
+		public:
+			void onConstruct() {
+				// TODO: Allow retrieving other components from this scriptable entity, e.g.:
+				//const GUIComponent& component = getComponent<GUIComponent>();
+				//ENGINE_DEBUG("Color index = []", component.colorIndex);
+			}
+	};
+
 	class GUILayer : public Layer {
 		private:
-			ECS ecs;
 			GUIRenderer renderer;
 
 		public:

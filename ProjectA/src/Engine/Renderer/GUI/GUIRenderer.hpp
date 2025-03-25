@@ -8,7 +8,9 @@ namespace ProjectA {
 		public:
 			GUIRenderer();
 
-			void registerEntities(const ECS& ecs);
+			~GUIRenderer();
+
+			void registerEntities();
 
 			void registerColors(const std::vector<vec4<float32>>& colors) const;
 
@@ -21,6 +23,10 @@ namespace ProjectA {
 			bool onResizeEvent(WindowResizeEvent& event);
 
 		private:
+			void updateScriptComponents() const;
+
+			void destroyScriptComponents() const;
+
 			void updateCamera() const;
 
 		private:
@@ -52,5 +58,8 @@ namespace ProjectA {
 			uint32 instanceCount = 0;
 			uint32 frameIndex = 0;
 			bool needsResize = false;
+
+		public:
+			ECS ecs;
 	};
 }
