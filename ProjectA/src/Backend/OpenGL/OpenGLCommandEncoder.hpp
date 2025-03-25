@@ -43,7 +43,7 @@ namespace ProjectA {
 			void reset() override;
 
 		private:
-			std::vector<ref<OpenGLCommand>> commandBuffer;
+			chain<ref<OpenGLCommand>> commandBuffer;
 			const OpenGLRenderPipeline* renderPipeline = nullptr;
 			GLuint indexOffset = 0;
 			GLenum indexType = 0;

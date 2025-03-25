@@ -7,8 +7,8 @@
 namespace ProjectA {
 	class BufferLayout {
 		public:
-			std::vector<VertexBinding> vertexBindings;
-			std::vector<VertexAttribute> vertexAttributes;
+			chain<VertexBinding> vertexBindings;
+			chain<VertexAttribute> vertexAttributes;
 
 		public:
 			void defineBinding(const uint32 index, const InputRate inputRate);

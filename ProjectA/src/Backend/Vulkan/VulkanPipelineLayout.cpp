@@ -15,10 +15,10 @@ namespace ProjectA {
 
 		ENGINE_TRACE("[VulkanPipelineLayout]");
 
-		std::vector<VkDescriptorPoolSize> descriptorPoolSizes;
+		chain<VkDescriptorPoolSize> descriptorPoolSizes;
 
 		for (const DescriptorSetLayout& layout : descriptor.layouts) {
-			std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+			chain<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
 
 			for (uint32 bindingIndex = 0; bindingIndex < layout.bindings.size(); bindingIndex += 1) {
 				const DescriptorSetLayoutBinding& binding = layout.bindings[bindingIndex];

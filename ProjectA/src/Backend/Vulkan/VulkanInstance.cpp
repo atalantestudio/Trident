@@ -7,7 +7,7 @@
 namespace ProjectA {
 	// TODO: Client-side validation layer request.
 	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-		const std::vector<const char*> VulkanInstance::enabledLayerNames = {
+		const chain<const char*> VulkanInstance::enabledLayerNames = {
 			"VK_LAYER_KHRONOS_validation",
 		};
 	#endif

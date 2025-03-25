@@ -17,8 +17,8 @@ namespace ProjectA {
 	class ComponentPool : public Pool {
 		public:
 			std::array<Entity, MAX_ENTITIES> entityToComponentIndex; // Sparse array
-			std::vector<uint32> componentIndexToEntity; // Dense array
-			std::vector<T> components; // Dense array
+			chain<uint32> componentIndexToEntity; // Dense array
+			chain<T> components; // Dense array
 
 			// Number of currently alive components.
 			uint32 componentCount = 0;
@@ -116,9 +116,9 @@ namespace ProjectA {
 
 	class ECS {
 		public:
-			std::vector<Entity> availableEntities;
+			chain<Entity> availableEntities;
 			Entity nextEntity = 0;
-			std::vector<std::unique_ptr<Pool>> componentPools;
+			chain<std::unique_ptr<Pool>> componentPools;
 
 		public:
 			Entity createEntity() {

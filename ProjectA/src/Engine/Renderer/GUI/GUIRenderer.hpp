@@ -12,7 +12,7 @@ namespace ProjectA {
 
 			void registerEntities();
 
-			void registerColors(const std::vector<vec4<float32>>& colors) const;
+			void registerColors(const chain<vec4<float32>>& colors) const;
 
 			void render() override;
 

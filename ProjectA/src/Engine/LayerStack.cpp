@@ -47,19 +47,19 @@ namespace ProjectA {
 		overlay->unbind();
 	}
 
-	std::vector<Layer*>::iterator LayerStack::begin() {
+	chain<Layer*>::iterator LayerStack::begin() {
 		return layers.begin();
 	}
 
-	std::vector<Layer*>::iterator LayerStack::end() {
+	chain<Layer*>::iterator LayerStack::end() {
 		return layers.end();
 	}
 
-	std::vector<Layer*>::reverse_iterator LayerStack::rbegin() {
+	chain<Layer*>::reverse_iterator LayerStack::rbegin() {
 		return layers.rbegin();
 	}
 
-	std::vector<Layer*>::reverse_iterator LayerStack::rend() {
+	chain<Layer*>::reverse_iterator LayerStack::rend() {
 		return layers.rend();
 	}
 }

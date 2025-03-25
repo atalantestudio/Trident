@@ -14,7 +14,7 @@ namespace ProjectA {
 			throw std::runtime_error("Could not find physical device(s).");
 		}
 
-		std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+		chain<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
 
 		vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data());
 
@@ -45,7 +45,7 @@ namespace ProjectA {
 			throw std::runtime_error("Could not find queues for this physical device.");
 		}
 
-		std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertyCount);
+		chain<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertyCount);
 
 		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyPropertyCount, queueFamilyProperties.data());
 
@@ -62,7 +62,7 @@ namespace ProjectA {
 
 		vkEnumerateDeviceExtensionProperties(object, nullptr, &enabledExtensionCount, nullptr);
 
-		std::vector<VkExtensionProperties> extensionProperties(enabledExtensionCount);
+		chain<VkExtensionProperties> extensionProperties(enabledExtensionCount);
 
 		vkEnumerateDeviceExtensionProperties(object, nullptr, &enabledExtensionCount, extensionProperties.data());
 

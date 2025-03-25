@@ -8,7 +8,7 @@ namespace ProjectA {
 	class VulkanPhysicalDevice : public ObjectWrapper<VkPhysicalDevice> {
 		public:
 			uint32 graphicsQueueFamilyIndex = 0;
-			std::vector<const char*> enabledExtensionNames;
+			chain<const char*> enabledExtensionNames;
 			VkPhysicalDeviceFeatures features;
 
 		public:

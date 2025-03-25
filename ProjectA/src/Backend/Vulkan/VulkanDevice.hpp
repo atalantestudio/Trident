@@ -31,7 +31,7 @@ namespace ProjectA {
 			void waitIdle() const override;
 
 		private:
-			static const std::vector<const char*> enabledExtensionNames;
+			static const chain<const char*> enabledExtensionNames;
 
 		private:
 			const VkPhysicalDevice physicalDevice;

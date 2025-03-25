@@ -3,15 +3,15 @@
 #include "Backend/OpenGL/OpenGLCommandBuffer.hpp"
 
 namespace ProjectA {
-	OpenGLCommandBuffer::OpenGLCommandBuffer(const std::vector<ref<OpenGLCommand>>& commandBuffer) :
+	OpenGLCommandBuffer::OpenGLCommandBuffer(const chain<ref<OpenGLCommand>>& commandBuffer) :
 		ObjectWrapper(commandBuffer)
 	{}
 
-	std::vector<ref<OpenGLCommand>>::const_iterator OpenGLCommandBuffer::begin() const {
+	chain<ref<OpenGLCommand>>::const_iterator OpenGLCommandBuffer::begin() const {
 		return object.begin();
 	}
 
-	std::vector<ref<OpenGLCommand>>::const_iterator OpenGLCommandBuffer::end() const {
+	chain<ref<OpenGLCommand>>::const_iterator OpenGLCommandBuffer::end() const {
 		return object.end();
 	}
 }

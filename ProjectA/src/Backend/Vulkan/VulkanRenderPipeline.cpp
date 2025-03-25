@@ -18,7 +18,7 @@ namespace ProjectA {
 
 		ENGINE_TRACE("[VulkanRenderPipeline]");
 
-		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
+		chain<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 
 		for (const VertexBinding& binding : descriptor.vertexBufferLayout.vertexBindings) {
 			VkVertexInputBindingDescription vertexInputBindingDescription{};
@@ -29,7 +29,7 @@ namespace ProjectA {
 			vertexInputBindingDescriptions.emplace_back(vertexInputBindingDescription);
 		}
 
-		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
+		chain<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
 
 		for (const VertexAttribute& attribute : descriptor.vertexBufferLayout.vertexAttributes) {
 			VkVertexInputAttributeDescription vertexInputAttributeDescription{};
@@ -151,7 +151,7 @@ namespace ProjectA {
 		colorBlendStateCreateInfo.blendConstants[2] = 0.0f;
 		colorBlendStateCreateInfo.blendConstants[3] = 0.0f;
 
-		const std::vector<VkDynamicState> dynamicStates = {
+		const chain<VkDynamicState> dynamicStates = {
 			VK_DYNAMIC_STATE_VIEWPORT,
 			VK_DYNAMIC_STATE_SCISSOR,
 		};
@@ -163,7 +163,7 @@ namespace ProjectA {
 		dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32>(dynamicStates.size());
 		dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
 
-		const std::vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
+		const chain<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
 			static_cast<const VulkanShaderModule*>(descriptor.vertexShaderModule.get())->object,
 			static_cast<const VulkanShaderModule*>(descriptor.fragmentShaderModule.get())->object,
 		};

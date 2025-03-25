@@ -16,13 +16,13 @@ namespace ProjectA {
 			void removeOverlay(Layer* overlay);
 
 			// TODO: Write helper macro for iterators.
-			std::vector<Layer*>::iterator begin();
-			std::vector<Layer*>::iterator end();
-			std::vector<Layer*>::reverse_iterator rbegin();
-			std::vector<Layer*>::reverse_iterator rend();
+			chain<Layer*>::iterator begin();
+			chain<Layer*>::iterator end();
+			chain<Layer*>::reverse_iterator rbegin();
+			chain<Layer*>::reverse_iterator rend();
 
 		private:
-			std::vector<Layer*> layers;
+			chain<Layer*> layers;
 			uint32 layerInsertionIndex = 0;
 	};
 }

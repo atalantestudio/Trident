@@ -13,11 +13,11 @@ namespace ProjectA {
 			~VulkanPipelineLayout();
 
 		public:
-			std::vector<VkDescriptorSet> descriptorSets;
+			chain<VkDescriptorSet> descriptorSets;
 
 		private:
 			const VkDevice device;
-			std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
+			chain<VkDescriptorSetLayout> descriptorSetLayouts;
 			VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
 	};
 }

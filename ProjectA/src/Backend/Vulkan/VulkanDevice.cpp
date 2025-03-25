@@ -10,7 +10,7 @@
 
 namespace ProjectA {
 	// TODO: Client-side extension request.
-	const std::vector<const char*> VulkanDevice::enabledExtensionNames = {
+	const chain<const char*> VulkanDevice::enabledExtensionNames = {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 	};
 
@@ -21,7 +21,7 @@ namespace ProjectA {
 
 		ENGINE_TRACE("[VulkanDevice]");
 
-		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+		chain<VkDeviceQueueCreateInfo> queueCreateInfos;
 
 		if (physicalDevice.graphicsQueueFamilyIndex == surface.presentQueueFamilyIndex) {
 			// Create one queue.

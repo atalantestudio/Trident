@@ -24,9 +24,9 @@ namespace ProjectA {
 
 		public:
 			VkExtent2D imageExtent;
-			std::vector<VkImage> images;
-			std::vector<VkImageView> imageViews;
-			std::vector<VkFramebuffer> framebuffers;
+			chain<VkImage> images;
+			chain<VkImageView> imageViews;
+			chain<VkFramebuffer> framebuffers;
 
 		private:
 			const VulkanPhysicalDevice& physicalDevice;

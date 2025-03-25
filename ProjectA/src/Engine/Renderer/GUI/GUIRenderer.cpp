@@ -115,7 +115,7 @@ namespace ProjectA {
 
 		// Create position vertex buffer.
 		{
-			const std::vector<vec3<float32>> vertexPositions = {
+			const chain<vec3<float32>> vertexPositions = {
 				{0.0f, 0.0f, 1.0f},
 				{1.0f, 0.0f, 1.0f},
 				{1.0f, 1.0f, 1.0f},
@@ -143,7 +143,7 @@ namespace ProjectA {
 
 		// Create index buffer.
 		{
-			const std::vector<uint16> indices = {
+			const chain<uint16> indices = {
 				0, 1, 2,
 				0, 2, 3,
 			};
@@ -193,7 +193,7 @@ namespace ProjectA {
 		transformVertexBuffer->unmap();
 	}
 
-	void GUIRenderer::registerColors(const std::vector<vec4<float32>>& colors) const {
+	void GUIRenderer::registerColors(const chain<vec4<float32>>& colors) const {
 		BufferMappedRange mappedRange = colorStorageBuffer->map(0, sizeof(vec4<float32>) * colors.size());
 
 		std::copy(colors.begin(), colors.end(), static_cast<vec4<float32>*>(mappedRange));

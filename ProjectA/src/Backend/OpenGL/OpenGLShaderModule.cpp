@@ -25,7 +25,7 @@ namespace ProjectA {
 
 			glGetShaderiv(object, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-			std::vector<GLchar> infoLog(infoLogLength);
+			chain<GLchar> infoLog(infoLogLength);
 
 			glGetShaderInfoLog(object, infoLogLength, nullptr, infoLog.data());
 
