@@ -7,14 +7,14 @@ namespace ProjectA {
 		ENGINE_ASSERT(window, "Window handle is null.");
 
 		#ifdef PLATFORM_WINDOWS
-			checkVulkanAvailabilityWindows();
+			checkWindowsVulkanAvailability();
 		#endif
 	}
 
 	void VulkanContext::swapBuffers() const {}
 
 	#ifdef PLATFORM_WINDOWS
-		void VulkanContext::checkVulkanAvailabilityWindows() {
+		void VulkanContext::checkWindowsVulkanAvailability() {
 			PROFILE_SCOPE(FUNC_SIG);
 
 			const HMODULE vulkanDll = LoadLibrary(L"vulkan-1.dll");

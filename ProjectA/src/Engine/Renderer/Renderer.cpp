@@ -23,6 +23,10 @@ namespace ProjectA {
 		return graphicsApi;
 	}
 
+	const scope<RendererAPI>& Renderer::getBackend() {
+		return rendererApi;
+	}
+
 	void Renderer::setGraphicsApi(GraphicsAPI api) {
 		graphicsApi = api;
 	}
@@ -52,55 +56,51 @@ namespace ProjectA {
 		ENGINE_ASSERT(rendererApi != nullptr, "Failed to create a corresponding renderer API.");
 	}
 
-	ref<Device> Renderer::getDevice() const {
+	ref<Device> Renderer::getDevice() {
 		return rendererApi->getDevice();
 	}
 
-	void Renderer::getWindowExtent(sint32& extentWidth, sint32& extentHeight) const {
+	void Renderer::getWindowExtent(sint32& extentWidth, sint32& extentHeight) {
 		glfwGetWindowSize(window, &extentWidth, &extentHeight);
 	}
 
-	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) const {
+	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
 		return rendererApi->createBuffer(descriptor);
 	}
 
-	ref<CommandEncoder> Renderer::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
+	ref<CommandEncoder> Renderer::createCommandEncoder(const CommandBufferDescriptor& descriptor) {
 		return rendererApi->createCommandEncoder(descriptor);
 	}
 
-	ref<Fence> Renderer::createFence() const {
+	ref<Fence> Renderer::createFence() {
 		return rendererApi->createFence();
 	}
 
-	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
+	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) {
 		return rendererApi->createPipelineLayout(descriptor);
 	}
 
-	ref<RenderPass> Renderer::createRenderPass(const RenderPassDescriptor& descriptor) const {
+	ref<RenderPass> Renderer::createRenderPass(const RenderPassDescriptor& descriptor) {
 		return rendererApi->createRenderPass(descriptor);
 	}
 
-	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
+	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) {
 		return rendererApi->createRenderPipeline(descriptor);
 	}
 
-	ref<Sampler> Renderer::createSampler(const SamplerDescriptor& descriptor) const {
+	ref<Sampler> Renderer::createSampler(const SamplerDescriptor& descriptor) {
 		return rendererApi->createSampler(descriptor);
 	}
 
-	ref<Semaphore> Renderer::createSemaphore() const {
+	ref<Semaphore> Renderer::createSemaphore() {
 		return rendererApi->createSemaphore();
 	}
 
-	ref<ShaderModule> Renderer::createShaderModule(ShaderStage stage, const chain<uint8>& code) const {
+	ref<ShaderModule> Renderer::createShaderModule(ShaderStage stage, const chain<uint8>& code) {
 		return rendererApi->createShaderModule(stage, code);
 	}
 
-	ref<Swapchain> Renderer::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return rendererApi->createSwapchain(descriptor);
-	}
-
-	ref<Texture> Renderer::createTexture(const TextureDescriptor& descriptor) const {
+	ref<Texture> Renderer::createTexture(const TextureDescriptor& descriptor) {
 		return rendererApi->createTexture(descriptor);
 	}
 }

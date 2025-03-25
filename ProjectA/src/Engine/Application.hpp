@@ -4,6 +4,7 @@
 #include "Engine/Event/WindowEvent.hpp"
 #include "Engine/ImGui/ImGuiLayer.hpp"
 #include "Engine/Layer/LayerStack.hpp"
+#include "Engine/Renderer/Swapchain.hpp"
 #include "Engine/Window.hpp"
 
 int main(int argc, char** argv);
@@ -11,28 +12,18 @@ int main(int argc, char** argv);
 namespace ProjectA {
 	class Application {
 		public:
-			ImGuiLayer* imGuiLayer;
-
-		private:
-			static Application* instance;
-
-		private:
-			std::unique_ptr<Window> window;
-			LayerStack layerStack;
-			bool running = true;
-			bool minimized = false;
-			float32 lastFrameTime;
+			static Application& get();
 
 		public:
-			static Application& get() {
-				return *instance;
-			}
-
 			Application(const std::string& name = "Application");
 
 			virtual ~Application();
 
 			Window& getWindow();
+
+			const ref<RenderPass>& getRenderPass() const;
+
+			const ref<Swapchain>& getSwapchain() const;
 
 			void onEvent(Event& event);
 
@@ -50,6 +41,24 @@ namespace ProjectA {
 
 		private:
 			friend int ::main(int argc, char** argv);
+
+		public:
+			ImGuiLayer* imGuiLayer;
+
+		private:
+			static Application* instance;
+
+		private:
+			scope<Window> window;
+			LayerStack layerStack;
+
+			// TODO: Use scope here?
+			ref<RenderPass> renderPass;
+			ref<Swapchain> swapchain;
+
+			bool running = true;
+			bool minimized = false;
+			float32 lastFrameTime = 0.0f;
 	};
 
 	Application* createApplication();

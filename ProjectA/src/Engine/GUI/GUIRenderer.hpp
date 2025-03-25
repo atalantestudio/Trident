@@ -42,8 +42,6 @@ namespace ProjectA {
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 1;
 
 		private:
-			ref<RenderPass> renderPass;
-			ref<Swapchain> swapchain;
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
 			ref<Buffer> positionVertexBuffer;

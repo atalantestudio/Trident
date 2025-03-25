@@ -118,7 +118,7 @@ namespace ProjectA {
 		public:
 			chain<Entity> availableEntities;
 			Entity nextEntity = 0;
-			chain<std::unique_ptr<Pool>> componentPools;
+			chain<scope<Pool>> componentPools;
 
 		public:
 			Entity createEntity() {
@@ -157,7 +157,7 @@ namespace ProjectA {
 
 				// Allocate space for new pool.
 				componentPools.resize(componentPools.size() + 1);
-				componentPools[componentPoolIndex] = std::make_unique<ComponentPool<T>>();
+				componentPools[componentPoolIndex] = createScope<ComponentPool<T>>();
 			}
 
 			// TODO: Const variant.

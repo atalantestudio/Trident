@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Engine/Application.hpp"
 #include "Engine/Debug/TriangleDemo/TriangleDemoRenderer.hpp"
 #include "Engine/Filesystem/FileLoader.hpp"
 
@@ -9,15 +10,6 @@ namespace ProjectA {
 		finishedRenderSemaphores(MAX_FRAMES_IN_FLIGHT),
 		flightFences(MAX_FRAMES_IN_FLIGHT)
 	{
-		const RenderPassDescriptor renderPassDescriptor;
-
-		renderPass = createRenderPass(renderPassDescriptor);
-
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.renderPass = renderPass;
-
-		swapchain = createSwapchain(swapchainDescriptor);
-
 		const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
@@ -47,8 +39,8 @@ namespace ProjectA {
 		const ref<ShaderModule> fragmentShaderModule = createShaderModule(ShaderStage::FRAGMENT, fragmentShaderModuleCode);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
-		renderPipelineDescriptor.swapchain = swapchain;
-		renderPipelineDescriptor.renderPass = renderPass;
+		renderPipelineDescriptor.swapchain = Application::get().getSwapchain();
+		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
 		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
@@ -172,7 +164,7 @@ namespace ProjectA {
 
 		uint32 nextImageIndex;
 
-		const Status acquireNextImageStatus = device->acquireNextImage(swapchain, availableImageSemaphores[frameIndex], nextImageIndex);
+		const Status acquireNextImageStatus = device->acquireNextImage(Application::get().getSwapchain(), availableImageSemaphores[frameIndex], nextImageIndex);
 
 		if (acquireNextImageStatus == Status::ERROR_OUT_OF_DATE) {
 			throw std::runtime_error("TODO: Recreate swapchain.");
@@ -185,13 +177,13 @@ namespace ProjectA {
 		device->resetFence(flightFences[frameIndex]);
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.renderPass = renderPass;
-		beginRenderPassDescriptor.swapchain = swapchain;
+		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
+		beginRenderPassDescriptor.swapchain = Application::get().getSwapchain();
 		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
-		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+		const float32 width = static_cast<float32>(Application::get().getSwapchain()->getExtentWidth());
+		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
 
 		commandEncoder->reset();
 		commandEncoder->begin();
@@ -200,7 +192,7 @@ namespace ProjectA {
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+		commandEncoder->setScissor(0, 0, Application::get().getSwapchain()->getExtentWidth(), Application::get().getSwapchain()->getExtentHeight());
 		commandEncoder->drawIndexed(3, 1, 0);
 		commandEncoder->endRenderPass();
 
@@ -208,7 +200,7 @@ namespace ProjectA {
 
 		device->submit(commandBuffer, availableImageSemaphores[frameIndex], finishedRenderSemaphores[frameIndex], flightFences[frameIndex]);
 
-		const Status presentStatus = device->present(swapchain, finishedRenderSemaphores[frameIndex], nextImageIndex);
+		const Status presentStatus = device->present(Application::get().getSwapchain(), finishedRenderSemaphores[frameIndex], nextImageIndex);
 
 		if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE) {
 			ENGINE_DEBUG("TODO: Resize.");

@@ -8,10 +8,10 @@ namespace ProjectA {
 		std::string title;
 
 		// TODO: Use vec2<sint32>.
-		sint32 width;
-		sint32 height;
+		uint32 width;
+		uint32 height;
 
-		WindowData(const std::string& title, sint32 width, sint32 height) :
+		WindowData(const std::string& title, uint32 width, uint32 height) :
 			title(title),
 			width(width),
 			height(height) {}

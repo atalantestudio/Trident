@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Engine/Application.hpp"
 #include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/ECS/Component/ScriptComponent.hpp"
 #include "Engine/Event/WindowEvent.hpp"
@@ -15,22 +16,6 @@ namespace ProjectA {
 		finishedRenderSemaphores(MAX_FRAMES_IN_FLIGHT),
 		flightFences(MAX_FRAMES_IN_FLIGHT)
 	{
-		const RenderPassDescriptor renderPassDescriptor;
-
-		renderPass = createRenderPass(renderPassDescriptor);
-
-		sint32 extentWidth;
-		sint32 extentHeight;
-
-		getWindowExtent(extentWidth, extentHeight);
-
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.renderPass = renderPass;
-		swapchainDescriptor.extentWidth = static_cast<uint32>(extentWidth);
-		swapchainDescriptor.extentHeight = static_cast<uint32>(extentHeight);
-
-		swapchain = createSwapchain(swapchainDescriptor);
-
 		BufferDescriptor cameraUniformBufferDescriptor{};
 		cameraUniformBufferDescriptor.size = sizeof(UniformBufferObject);
 		cameraUniformBufferDescriptor.usage = BufferUsage::UNIFORM;
@@ -96,8 +81,8 @@ namespace ProjectA {
 		const ref<ShaderModule> fragmentShaderModule = createShaderModule(ShaderStage::FRAGMENT, fragmentShaderModuleCode);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
-		renderPipelineDescriptor.swapchain = swapchain;
-		renderPipelineDescriptor.renderPass = renderPass;
+		renderPipelineDescriptor.swapchain = Application::get().getSwapchain();
+		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
 		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
@@ -211,7 +196,7 @@ namespace ProjectA {
 
 		uint32 nextImageIndex;
 
-		const Status acquireNextImageStatus = device->acquireNextImage(swapchain, availableImageSemaphores[frameIndex], nextImageIndex);
+		const Status acquireNextImageStatus = device->acquireNextImage(Application::get().getSwapchain(), availableImageSemaphores[frameIndex], nextImageIndex);
 
 		if (acquireNextImageStatus != Status::SUBOPTIMAL && acquireNextImageStatus != Status::SUCCESS) {
 			throw std::runtime_error("Failed to acquire next image.");
@@ -220,13 +205,13 @@ namespace ProjectA {
 		device->resetFence(flightFences[frameIndex]);
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.renderPass = renderPass;
-		beginRenderPassDescriptor.swapchain = swapchain;
+		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
+		beginRenderPassDescriptor.swapchain = Application::get().getSwapchain();
 		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
-		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+		const float32 width = static_cast<float32>(Application::get().getSwapchain()->getExtentWidth());
+		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
 
 		commandEncoder->reset();
 		commandEncoder->begin();
@@ -237,7 +222,7 @@ namespace ProjectA {
 		commandEncoder->bindVertexBuffer(0, positionVertexBuffer, sizeof(vec3<float32>));
 		commandEncoder->bindVertexBuffer(1, transformVertexBuffer, sizeof(GUIComponent));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+		commandEncoder->setScissor(0, 0, Application::get().getSwapchain()->getExtentWidth(), Application::get().getSwapchain()->getExtentHeight());
 		commandEncoder->drawIndexed(6, instanceCount, 0);
 		commandEncoder->endRenderPass();
 
@@ -245,7 +230,7 @@ namespace ProjectA {
 
 		device->submit(commandBuffer, availableImageSemaphores[frameIndex], finishedRenderSemaphores[frameIndex], flightFences[frameIndex]);
 
-		const Status presentStatus = device->present(swapchain, finishedRenderSemaphores[frameIndex], nextImageIndex);
+		const Status presentStatus = device->present(Application::get().getSwapchain(), finishedRenderSemaphores[frameIndex], nextImageIndex);
 
 		if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE || needsResize) {
 			resize();
@@ -274,11 +259,11 @@ namespace ProjectA {
 		device->waitIdle();
 
 		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.renderPass = renderPass;
+		swapchainDescriptor.renderPass = Application::get().getRenderPass();
 		swapchainDescriptor.extentWidth = static_cast<uint32>(extentWidth);
 		swapchainDescriptor.extentHeight = static_cast<uint32>(extentHeight);
 
-		swapchain->recreate(swapchainDescriptor);
+		Application::get().getSwapchain()->recreate(swapchainDescriptor);
 
 		needsResize = false;
 	}
@@ -314,8 +299,8 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::updateCamera() const {
-		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+		const float32 width = static_cast<float32>(Application::get().getSwapchain()->getExtentWidth());
+		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
 
 		UniformBufferObject cameraUniformBufferObject;
 		cameraUniformBufferObject.projection = {

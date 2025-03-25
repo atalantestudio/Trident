@@ -9,7 +9,6 @@
 #include "Engine/Renderer/RendererAPI.hpp"
 #include "Engine/Renderer/RenderPass.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
-#include "Engine/Renderer/Swapchain.hpp"
 #include "Engine/Renderer/Texture.hpp"
 
 typedef struct GLFWwindow GLFWwindow;
@@ -21,6 +20,8 @@ namespace ProjectA {
 
 			static GraphicsAPI getGraphicsApi();
 
+			static const scope<RendererAPI>& getBackend();
+
 			static void setGraphicsApi(GraphicsAPI api);
 
 			static void recreate();
@@ -31,31 +32,29 @@ namespace ProjectA {
 			virtual void onEvent(Event& event) = 0;
 
 		protected:
-			ref<Device> getDevice() const;
+			static ref<Device> getDevice();
 
-			void getWindowExtent(sint32& extentWidth, sint32& extentHeight) const;
+			static void getWindowExtent(sint32& extentWidth, sint32& extentHeight);
 
-			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const;
+			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
 
-			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const;
+			static ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor);
 
-			ref<Fence> createFence() const;
+			static ref<Fence> createFence();
 
-			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const;
+			static ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor);
 
-			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const;
+			static ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor);
 
-			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const;
+			static ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor);
 
-			ref<Sampler> createSampler(const SamplerDescriptor& descriptor) const;
+			static ref<Sampler> createSampler(const SamplerDescriptor& descriptor);
 
-			ref<Semaphore> createSemaphore() const;
+			static ref<Semaphore> createSemaphore();
 
-			ref<ShaderModule> createShaderModule(ShaderStage stage, const chain<uint8>& code) const;
+			static ref<ShaderModule> createShaderModule(ShaderStage stage, const chain<uint8>& code);
 
-			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const;
-
-			ref<Texture> createTexture(const TextureDescriptor& descriptor) const;
+			static ref<Texture> createTexture(const TextureDescriptor& descriptor);
 
 		private:
 			static GraphicsAPI graphicsApi;

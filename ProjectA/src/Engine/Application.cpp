@@ -9,7 +9,11 @@
 namespace ProjectA {
 	Application* Application::instance = nullptr;
 
-	Application::Application(const std::string& name) : lastFrameTime(0.0f) {
+	Application& Application::get() {
+		return *instance;
+	}
+
+	Application::Application(const std::string& name) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		ENGINE_ASSERT(!instance, "An application instance already exists.");
@@ -18,13 +22,27 @@ namespace ProjectA {
 
 		Renderer::setGraphicsApi(GraphicsAPI::VULKAN);
 
+		constexpr uint32 extentWidth = 1280;
+		constexpr uint32 extentHeight = 720;
+
 		// Initialize GLFW and create window.
-		window = Window::create(WindowData(name, 1280, 720));
+		window = Window::create(WindowData(name, extentWidth, extentHeight));
 		window->setEventCallback(BIND(Application::onEvent));
 
 		// Initialize graphics API.
 		Renderer::registerWindow(static_cast<GLFWwindow*>(window->getNativeWindow()));
 		Renderer::recreate();
+
+		const RenderPassDescriptor renderPassDescriptor;
+
+		renderPass = Renderer::getBackend()->createRenderPass(renderPassDescriptor);
+
+		SwapchainDescriptor swapchainDescriptor;
+		swapchainDescriptor.renderPass = renderPass;
+		swapchainDescriptor.extentWidth = extentWidth;
+		swapchainDescriptor.extentHeight = extentHeight;
+
+		swapchain = Renderer::getBackend()->createSwapchain(swapchainDescriptor);
 
 		imGuiLayer = new ImGuiLayer();
 
@@ -37,6 +55,14 @@ namespace ProjectA {
 
 	Window& Application::getWindow() {
 		return *window;
+	}
+
+	const ref<RenderPass>& Application::getRenderPass() const {
+		return renderPass;
+	}
+
+	const ref<Swapchain>& Application::getSwapchain() const {
+		return swapchain;
 	}
 
 	void Application::run() {

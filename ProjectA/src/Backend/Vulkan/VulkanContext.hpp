@@ -14,7 +14,7 @@ namespace ProjectA {
 
 		private:
 			#ifdef PLATFORM_WINDOWS
-				static void checkVulkanAvailabilityWindows();
+				static void checkWindowsVulkanAvailability();
 			#endif
 
 		private:
