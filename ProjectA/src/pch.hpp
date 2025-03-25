@@ -7,8 +7,6 @@
 #include <functional>
 #include <sstream>
 
-#include "Engine/base.hpp"
-
 #ifdef BUILD_MODE_DEBUG
 	#include <chrono>
 	#include <iomanip>
@@ -19,6 +17,8 @@
 	#include <algorithm>
 	#include <thread>
 #endif
+
+#include "Engine/base.hpp"
 
 #ifdef PLATFORM_WINDOWS
 	#include <Windows.h>
@@ -36,13 +36,13 @@
 
 #include "Engine/types.hpp"
 
-// Lyah polyfill: SIMD to scalar vector
+// Lyah polyfill: SIMD to scalar vector.
 #include "Engine/vec_sts.hpp"
 
 #ifdef BUILD_MODE_DEBUG
 	#include "Engine/Logger/Logger.hpp"
 
-	// TODO: Include ToString methods in Logger.cpp
+	// TODO: Include this inside Logger.
 	#include "Engine/to_string.hpp"
 #endif
 

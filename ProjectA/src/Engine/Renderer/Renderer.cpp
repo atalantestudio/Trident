@@ -56,12 +56,12 @@ namespace ProjectA {
 		ENGINE_ASSERT(rendererApi != nullptr, "Failed to create a corresponding renderer API.");
 	}
 
-	ref<Device> Renderer::getDevice() {
-		return rendererApi->getDevice();
-	}
-
 	void Renderer::getWindowExtent(sint32& extentWidth, sint32& extentHeight) {
 		glfwGetWindowSize(window, &extentWidth, &extentHeight);
+	}
+
+	ref<Device> Renderer::getDevice() {
+		return rendererApi->getDevice();
 	}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {

@@ -16,7 +16,7 @@ void SandboxLayer::unbind() {
 	PROFILE_SCOPE(FUNC_SIG);
 }
 
-void SandboxLayer::update(ProjectA::float32 deltaTime) {
+void SandboxLayer::update(ProjectA::float32 deltaTime, const ProjectA::ref<ProjectA::CommandEncoder>& commandEncoder, ProjectA::uint32 nextImageIndex) {
 	PROFILE_SCOPE(FUNC_SIG);
 
 	cameraController.update(deltaTime);

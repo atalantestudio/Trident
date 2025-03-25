@@ -18,7 +18,7 @@ class SandboxLayer : public ProjectA::Layer {
 		void bind() override;
 		void unbind() override;
 
-		void update(ProjectA::float32 deltaTime) override;
+		void update(ProjectA::float32 deltaTime, const ProjectA::ref<ProjectA::CommandEncoder>& commandEncoder, ProjectA::uint32 nextImageIndex) override;
 
 		virtual void renderImGui() override;
 

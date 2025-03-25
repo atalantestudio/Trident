@@ -5,11 +5,7 @@
 #include "Engine/Filesystem/FileLoader.hpp"
 
 namespace ProjectA {
-	TriangleDemoRenderer::TriangleDemoRenderer() :
-		availableImageSemaphores(MAX_FRAMES_IN_FLIGHT),
-		finishedRenderSemaphores(MAX_FRAMES_IN_FLIGHT),
-		flightFences(MAX_FRAMES_IN_FLIGHT)
-	{
+	TriangleDemoRenderer::TriangleDemoRenderer() {
 		const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
@@ -141,41 +137,9 @@ namespace ProjectA {
 			device->submit(commandBuffer, nullptr, nullptr, nullptr);
 			device->waitIdle();
 		}
-
-		// Create command encoder.
-		{
-			CommandBufferDescriptor commandBufferDescriptor{};
-			commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
-
-			commandEncoder = createCommandEncoder(commandBufferDescriptor);
-		}
-
-		for (std::size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i += 1) {
-			availableImageSemaphores[i] = createSemaphore();
-			finishedRenderSemaphores[i] = createSemaphore();
-			flightFences[i] = createFence();
-		}
 	}
 
-	void TriangleDemoRenderer::render() {
-		const ref<Device>& device = getDevice();
-
-		device->waitForFence(flightFences[frameIndex]);
-
-		uint32 nextImageIndex;
-
-		const Status acquireNextImageStatus = device->acquireNextImage(Application::get().getSwapchain(), availableImageSemaphores[frameIndex], nextImageIndex);
-
-		if (acquireNextImageStatus == Status::ERROR_OUT_OF_DATE) {
-			throw std::runtime_error("TODO: Recreate swapchain.");
-		}
-
-		if (acquireNextImageStatus != Status::SUCCESS && acquireNextImageStatus != Status::SUBOPTIMAL) {
-			throw std::runtime_error("Failed to acquire next image.");
-		}
-
-		device->resetFence(flightFences[frameIndex]);
-
+	void TriangleDemoRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
 		beginRenderPassDescriptor.swapchain = Application::get().getSwapchain();
@@ -185,8 +149,6 @@ namespace ProjectA {
 		const float32 width = static_cast<float32>(Application::get().getSwapchain()->getExtentWidth());
 		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
 
-		commandEncoder->reset();
-		commandEncoder->begin();
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
@@ -195,36 +157,5 @@ namespace ProjectA {
 		commandEncoder->setScissor(0, 0, Application::get().getSwapchain()->getExtentWidth(), Application::get().getSwapchain()->getExtentHeight());
 		commandEncoder->drawIndexed(3, 1, 0);
 		commandEncoder->endRenderPass();
-
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-		device->submit(commandBuffer, availableImageSemaphores[frameIndex], finishedRenderSemaphores[frameIndex], flightFences[frameIndex]);
-
-		const Status presentStatus = device->present(Application::get().getSwapchain(), finishedRenderSemaphores[frameIndex], nextImageIndex);
-
-		if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE) {
-			ENGINE_DEBUG("TODO: Resize.");
-
-			return;
-		}
-
-		if (presentStatus == Status::ERROR_UNHANDLED) {
-			throw std::runtime_error("Unhandled present status.");
-		}
-
-		device->waitIdle();
-
-		frameIndex += 1;
-		frameIndex %= MAX_FRAMES_IN_FLIGHT;
-	}
-
-	void TriangleDemoRenderer::onEvent(Event& event) {
-		EventDispatcher eventDispatcher(event);
-
-		eventDispatcher.dispatch<WindowResizeEvent>(BIND(TriangleDemoRenderer::onWindowResize));
-	}
-
-	bool TriangleDemoRenderer::onWindowResize(const WindowResizeEvent& event) {
-		return true;
 	}
 }

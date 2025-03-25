@@ -12,11 +12,7 @@ namespace ProjectA {
 			void bind() override;
 			void unbind() override;
 
-			void update(float32 deltaTime) override;
-
-			void onEvent(Event& event) override;
-
-			bool onWindowResize(WindowResizeEvent& event);
+			void update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
 	};
 
 	class DemoScriptEntity : public ScriptEntity {

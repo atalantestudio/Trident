@@ -21,7 +21,7 @@
 		{
 			PROFILER("Log/ProfileRun.json");
 
-			application->run();
+			application->loop();
 		}
 
 		{

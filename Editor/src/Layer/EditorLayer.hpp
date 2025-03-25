@@ -24,7 +24,7 @@ namespace ProjectA {
 			void bind() override;
 			void unbind() override;
 
-			void update(float32 deltaTime) override;
+			void update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
 
 			void renderImGui() override;
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Engine/Renderer/CommandEncoder.hpp"
-
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
+
+#include "Engine/API/CommandEncoder.hpp"
 
 namespace ProjectA {
 	class OpenGLCommandEncoder : public CommandEncoder {

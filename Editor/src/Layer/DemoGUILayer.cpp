@@ -60,17 +60,7 @@ namespace ProjectA {
 
 	void DemoGUILayer::unbind() {}
 
-	void DemoGUILayer::update(float32 deltaTime) {
-		renderer.render();
-	}
-
-	void DemoGUILayer::onEvent(Event& event) {
-		EventDispatcher eventDispatcher(event);
-
-		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
-	}
-
-	bool DemoGUILayer::onWindowResize(WindowResizeEvent& event) {
-		return renderer.onResizeEvent(event);
+	void DemoGUILayer::update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
+		renderer.render(commandEncoder, nextImageIndex);
 	}
 }

@@ -9,9 +9,7 @@ namespace ProjectA {
 
 	void DemoLayer::unbind() {}
 
-	void DemoLayer::update(float32 deltaTime) {
-		renderer.render();
+	void DemoLayer::update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
+		renderer.render(commandEncoder, nextImageIndex);
 	}
-
-	void DemoLayer::onEvent(Event& event) {}
 }

@@ -1,10 +1,13 @@
 #pragma once
 
+#include "Engine/API/CommandEncoder.hpp"
 #include "Engine/base.hpp"
 #include "Engine/Event/WindowEvent.hpp"
 #include "Engine/ImGui/ImGuiLayer.hpp"
 #include "Engine/Layer/LayerStack.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
+#include "Engine/Synchronization/Fence.hpp"
+#include "Engine/Synchronization/Semaphore.hpp"
 #include "Engine/Window.hpp"
 
 int main(int argc, char** argv);
@@ -34,7 +37,11 @@ namespace ProjectA {
 			void close();
 
 		private:
-			void run();
+			void loop();
+
+			void render(float32 deltaTime);
+
+			void resize();
 
 			bool onWindowClose(WindowCloseEvent& event);
 			bool onWindowResize(WindowResizeEvent& event);
@@ -48,6 +55,8 @@ namespace ProjectA {
 		private:
 			static Application* instance;
 
+			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
+
 		private:
 			scope<Window> window;
 			LayerStack layerStack;
@@ -55,10 +64,18 @@ namespace ProjectA {
 			// TODO: Use scope here?
 			ref<RenderPass> renderPass;
 			ref<Swapchain> swapchain;
+			ref<CommandEncoder> commandEncoder;
+			std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> availableImageSemaphores;
+			std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> finishedRenderSemaphores;
+			std::array<ref<Fence>, MAX_FRAMES_IN_FLIGHT> flightFences;
 
-			bool running = true;
+			bool looping = true;
+			bool needsResize = false;
 			bool minimized = false;
 			float32 lastFrameTime = 0.0f;
+
+			// Multiple of MAX_FRAMES_IN_FLIGHT.
+			uint32 frameInFlightIndex = 0;
 	};
 
 	Application* createApplication();

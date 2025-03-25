@@ -24,7 +24,7 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 	}
 
-	void EditorLayer::update(float32 deltaTime) {
+	void EditorLayer::update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		if (viewportWindowSize[0] > 0.0f && viewportWindowSize[1] > 0.0f && viewportWindowSize != framebuffer->descriptor.size) {

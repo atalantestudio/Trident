@@ -7,9 +7,7 @@ namespace ProjectA {
 		public:
 			TextureDemoRenderer();
 
-			void render() override;
-
-			void onEvent(Event& event) override;
+			void render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
 
 		private:
 			struct Vertex {
@@ -29,10 +27,5 @@ namespace ProjectA {
 			ref<Texture> texture;
 			ref<TextureView> textureView;
 			ref<Sampler> sampler;
-			ref<CommandEncoder> commandEncoder;
-			chain<ref<Semaphore>> availableImageSemaphores;
-			chain<ref<Semaphore>> finishedRenderSemaphores;
-			chain<ref<Fence>> flightFences;
-			uint32 frameIndex = 0;
 	};
 }

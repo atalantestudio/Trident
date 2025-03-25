@@ -15,7 +15,7 @@ namespace ProjectA {
 			uint32 getExtentHeight() const override;
 
 		private:
-			const uint32 extentWidth;
-			const uint32 extentHeight;
+			uint32 extentWidth;
+			uint32 extentHeight;
 	};
 }

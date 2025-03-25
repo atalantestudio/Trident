@@ -11,10 +11,7 @@
 namespace ProjectA {
 	GUIRenderer::GUIRenderer() :
 		cameraUniformBuffers(MAX_FRAMES_IN_FLIGHT),
-		cameraUniformBufferMappedRanges(MAX_FRAMES_IN_FLIGHT),
-		availableImageSemaphores(MAX_FRAMES_IN_FLIGHT),
-		finishedRenderSemaphores(MAX_FRAMES_IN_FLIGHT),
-		flightFences(MAX_FRAMES_IN_FLIGHT)
+		cameraUniformBufferMappedRanges(MAX_FRAMES_IN_FLIGHT)
 	{
 		BufferDescriptor cameraUniformBufferDescriptor{};
 		cameraUniformBufferDescriptor.size = sizeof(UniformBufferObject);
@@ -23,9 +20,6 @@ namespace ProjectA {
 		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i += 1) {
 			cameraUniformBuffers[i] = createBuffer(cameraUniformBufferDescriptor);
 			cameraUniformBufferMappedRanges[i] = cameraUniformBuffers[i]->map(0, cameraUniformBufferDescriptor.size);
-			availableImageSemaphores[i] = createSemaphore();
-			finishedRenderSemaphores[i] = createSemaphore();
-			flightFences[i] = createFence();
 		}
 
 		// Create color storage buffer.
@@ -186,23 +180,9 @@ namespace ProjectA {
 		colorStorageBuffer->unmap();
 	}
 
-	void GUIRenderer::render() {
+	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
 		updateScriptComponents();
 		updateCamera();
-
-		const ref<Device>& device = getDevice();
-
-		device->waitForFence(flightFences[frameIndex]);
-
-		uint32 nextImageIndex;
-
-		const Status acquireNextImageStatus = device->acquireNextImage(Application::get().getSwapchain(), availableImageSemaphores[frameIndex], nextImageIndex);
-
-		if (acquireNextImageStatus != Status::SUBOPTIMAL && acquireNextImageStatus != Status::SUCCESS) {
-			throw std::runtime_error("Failed to acquire next image.");
-		}
-
-		device->resetFence(flightFences[frameIndex]);
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
@@ -213,8 +193,6 @@ namespace ProjectA {
 		const float32 width = static_cast<float32>(Application::get().getSwapchain()->getExtentWidth());
 		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
 
-		commandEncoder->reset();
-		commandEncoder->begin();
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindDescriptorSets(0);
@@ -226,46 +204,8 @@ namespace ProjectA {
 		commandEncoder->drawIndexed(6, instanceCount, 0);
 		commandEncoder->endRenderPass();
 
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-		device->submit(commandBuffer, availableImageSemaphores[frameIndex], finishedRenderSemaphores[frameIndex], flightFences[frameIndex]);
-
-		const Status presentStatus = device->present(Application::get().getSwapchain(), finishedRenderSemaphores[frameIndex], nextImageIndex);
-
-		if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE || needsResize) {
-			resize();
-
-			return;
-		}
-
-		if (presentStatus != Status::SUCCESS) {
-			throw std::runtime_error("Unhandled present status.");
-		}
-
-		device->waitIdle();
-
 		frameIndex += 1;
 		frameIndex %= MAX_FRAMES_IN_FLIGHT;
-	}
-
-	void GUIRenderer::resize() {
-		sint32 extentWidth;
-		sint32 extentHeight;
-
-		getWindowExtent(extentWidth, extentHeight);
-
-		const ref<Device>& device = getDevice();
-
-		device->waitIdle();
-
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.renderPass = Application::get().getRenderPass();
-		swapchainDescriptor.extentWidth = static_cast<uint32>(extentWidth);
-		swapchainDescriptor.extentHeight = static_cast<uint32>(extentHeight);
-
-		Application::get().getSwapchain()->recreate(swapchainDescriptor);
-
-		needsResize = false;
 	}
 
 	void GUIRenderer::updateScriptComponents() const {
@@ -313,10 +253,4 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::onEvent(Event& event) {}
-
-	bool GUIRenderer::onResizeEvent(WindowResizeEvent& event) {
-		needsResize = true;
-
-		return true;
-	}
 }

@@ -8,6 +8,6 @@ namespace ProjectA {
 	{}
 
 	void GUILayer::append(const GUIObject& object) {
-		//
+		// TODO
 	}
 }

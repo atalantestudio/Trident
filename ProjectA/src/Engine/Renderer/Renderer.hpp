@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Engine/API/CommandEncoder.hpp"
 #include "Engine/Event/Event.hpp"
 #include "Engine/Renderer/Buffer/Buffer.hpp"
-#include "Engine/Renderer/CommandEncoder.hpp"
 #include "Engine/Renderer/Device.hpp"
 #include "Engine/Renderer/GraphicsAPI.hpp"
 #include "Engine/Renderer/PipelineLayout.hpp"
@@ -26,15 +26,15 @@ namespace ProjectA {
 
 			static void recreate();
 
-		public:
-			virtual void render() = 0;
+			static void getWindowExtent(sint32& extentWidth, sint32& extentHeight);
 
-			virtual void onEvent(Event& event) = 0;
+		public:
+			virtual void render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) = 0;
+
+			virtual void onEvent(Event& event) {}
 
 		protected:
 			static ref<Device> getDevice();
-
-			static void getWindowExtent(sint32& extentWidth, sint32& extentHeight);
 
 			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
 

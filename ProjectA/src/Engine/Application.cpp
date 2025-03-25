@@ -16,11 +16,11 @@ namespace ProjectA {
 	Application::Application(const std::string& name) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_ASSERT(!instance, "An application instance already exists.");
+		ENGINE_ASSERT(instance == nullptr, "An application instance already exists.");
 
 		instance = this;
 
-		Renderer::setGraphicsApi(GraphicsAPI::VULKAN);
+		Renderer::setGraphicsApi(GraphicsAPI::OPENGL);
 
 		constexpr uint32 extentWidth = 1280;
 		constexpr uint32 extentHeight = 720;
@@ -44,6 +44,17 @@ namespace ProjectA {
 
 		swapchain = Renderer::getBackend()->createSwapchain(swapchainDescriptor);
 
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+
+		commandEncoder = Renderer::getBackend()->createCommandEncoder(commandBufferDescriptor);
+
+		for (uint32 frameIndex = 0; frameIndex < MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
+			availableImageSemaphores[frameIndex] = Renderer::getBackend()->createSemaphore();
+			finishedRenderSemaphores[frameIndex] = Renderer::getBackend()->createSemaphore();
+			flightFences[frameIndex] = Renderer::getBackend()->createFence();
+		}
+
 		imGuiLayer = new ImGuiLayer();
 
 		pushOverlay(imGuiLayer);
@@ -65,12 +76,11 @@ namespace ProjectA {
 		return swapchain;
 	}
 
-	void Application::run() {
+	void Application::loop() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		// TODO: Use finite loop?
-		while (running) {
-			PROFILE_SCOPE("Run loop");
+		while (looping) {
+			PROFILE_SCOPE("Game loop");
 
 			const float32 time = static_cast<float32>(glfwGetTime());
 			const float32 deltaTime = time - lastFrameTime;
@@ -78,11 +88,7 @@ namespace ProjectA {
 			lastFrameTime = time;
 
 			if (!minimized) {
-				PROFILE_SCOPE("Update layers");
-
-				for (Layer* layer : layerStack) {
-					layer->update(deltaTime);
-				}
+				render(deltaTime);
 			}
 
 			imGuiLayer->begin();
@@ -98,6 +104,67 @@ namespace ProjectA {
 			imGuiLayer->end();
 			window->update();
 		}
+	}
+
+	void Application::render(float32 deltaTime) {
+		PROFILE_SCOPE("Update layers");
+
+		const ref<Device>& device = Renderer::getBackend()->getDevice();
+
+		device->waitForFence(flightFences[frameInFlightIndex]);
+
+		uint32 nextImageIndex;
+
+		const Status acquireNextImageStatus = device->acquireNextImage(Application::get().getSwapchain(), availableImageSemaphores[frameInFlightIndex], nextImageIndex);
+
+		ENGINE_ASSERT(acquireNextImageStatus == Status::SUBOPTIMAL || acquireNextImageStatus == Status::SUCCESS, "Failed to acquire next image.");
+
+		device->resetFence(flightFences[frameInFlightIndex]);
+
+		commandEncoder->reset();
+		commandEncoder->begin();
+
+		for (Layer* layer : layerStack) {
+			layer->update(deltaTime, commandEncoder, nextImageIndex);
+		}
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		device->submit(commandBuffer, availableImageSemaphores[frameInFlightIndex], finishedRenderSemaphores[frameInFlightIndex], flightFences[frameInFlightIndex]);
+
+		const Status presentStatus = device->present(Application::get().getSwapchain(), finishedRenderSemaphores[frameInFlightIndex], nextImageIndex);
+
+		if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE || needsResize) {
+			resize();
+
+			return;
+		}
+
+		ENGINE_ASSERT(presentStatus == Status::SUCCESS, "Unhandled present status.");
+
+		device->waitIdle();
+
+		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+	}
+
+	void Application::resize() {
+		sint32 extentWidth;
+		sint32 extentHeight;
+
+		Renderer::getWindowExtent(extentWidth, extentHeight);
+
+		const ref<Device>& device = Renderer::getBackend()->getDevice();
+
+		device->waitIdle();
+
+		SwapchainDescriptor swapchainDescriptor;
+		swapchainDescriptor.renderPass = Application::get().getRenderPass();
+		swapchainDescriptor.extentWidth = static_cast<uint32>(extentWidth);
+		swapchainDescriptor.extentHeight = static_cast<uint32>(extentHeight);
+
+		Application::get().getSwapchain()->recreate(swapchainDescriptor);
+
+		needsResize = false;
 	}
 
 	void Application::pushLayer(Layer* layer) {
@@ -117,7 +184,7 @@ namespace ProjectA {
 	}
 
 	void Application::close() {
-		running = false;
+		looping = false;
 	}
 
 	void Application::onEvent(Event& event) {
@@ -128,7 +195,7 @@ namespace ProjectA {
 		eventDispatcher.dispatch<WindowCloseEvent>(BIND(Application::onWindowClose));
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(Application::onWindowResize));
 
-		for (chain<Layer*>::reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); i += 1) {
+		for (chain<Layer*>::const_reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); i += 1) {
 			if (event.handled) {
 				break;
 			}
@@ -138,7 +205,7 @@ namespace ProjectA {
 	}
 
 	bool Application::onWindowClose(WindowCloseEvent& event) {
-		running = false;
+		close();
 
 		return true;
 	}
@@ -153,8 +220,7 @@ namespace ProjectA {
 		}
 
 		minimized = false;
-
-		//Renderer::onWindowResize(event.getWidth(), event.getHeight());
+		needsResize = true;
 
 		return false;
 	}

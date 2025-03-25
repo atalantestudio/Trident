@@ -2,10 +2,10 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Engine/Renderer/CommandEncoder.hpp"
-
 #include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"
+
+#include "Engine/API/CommandEncoder.hpp"
 
 namespace ProjectA {
 	class VulkanCommandEncoder : public CommandEncoder {
