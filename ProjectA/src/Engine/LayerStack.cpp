@@ -22,7 +22,7 @@ namespace ProjectA {
 	}
 
 	void LayerStack::removeLayer(Layer* layer) {
-		auto iterator = std::find(layers.begin(), layers.begin() + layerInsertionIndex, layer);
+		const chain<Layer*>::const_iterator iterator = std::find(layers.begin(), layers.begin() + layerInsertionIndex, layer);
 
 		if (iterator == layers.begin() + layerInsertionIndex) {
 			return;
@@ -36,7 +36,7 @@ namespace ProjectA {
 	}
 
 	void LayerStack::removeOverlay(Layer* overlay) {
-		auto iterator = std::find(layers.begin() + layerInsertionIndex, layers.end(), overlay);
+		const chain<Layer*>::const_iterator iterator = std::find(layers.begin() + layerInsertionIndex, layers.end(), overlay);
 
 		if (iterator == layers.end()) {
 			return;

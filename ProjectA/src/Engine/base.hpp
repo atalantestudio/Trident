@@ -106,6 +106,7 @@
 
 #define BIT(index) 1 << index
 
+// TODO: Remove usage of auto?
 #define BIND(function) \
 	[this](auto&&... arguments) -> decltype(auto) { \
 		return this->function(std::forward<decltype(arguments)>(arguments)...); \
