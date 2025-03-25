@@ -16,7 +16,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLFramebuffer::reset() {
-		if (id != 0) {
+		if (id > 0) {
 			glDeleteFramebuffers(1, &id);
 			glDeleteTextures(1, &colorAttachmentId);
 			glDeleteTextures(1, &depthAttachmentId);

@@ -2,7 +2,7 @@
 
 #include "Engine/Renderer/Framebuffer.hpp"
 
-// TODO: Old API
+// TODO: Revisit old API.
 namespace ProjectA {
 	class OpenGLFramebuffer : public Framebuffer {
 		private:
