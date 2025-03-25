@@ -18,6 +18,11 @@ namespace ProjectA {
 				return name;
 			}
 
+			// TODO: Deprecate. The Layer should be created by the application
+			// and not before startup.
+			// 
+			// template<typename T, typename... U>
+			// void LayerStack::registerLayer<T>(U&&... arguments);
 			virtual void bind() {}
 			virtual void unbind() {}
 

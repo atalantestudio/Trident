@@ -8,7 +8,7 @@
 // Application
 #include "Engine/Application.hpp"
 #include "Engine/Input.hpp"
-#include "Engine/Layer.hpp"
+#include "Engine/Layer/Layer.hpp"
 
 // 3D camera controller
 #include "Engine/Camera/Controller/OrthographicCamera3DController.hpp"
@@ -27,7 +27,8 @@
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 
 // GUI
-#include "Engine/Renderer/GUI/GUIRenderer.hpp"
+#include "Engine/GUI/GUILayer.hpp"
+#include "Engine/GUI/GUIRenderer.hpp"
 
 // ImGui
 #include "Engine/ImGui/ImGuiLayer.hpp"

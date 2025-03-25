@@ -1,11 +1,12 @@
-#include "GUILayer.hpp"
+#include "DemoGUILayer.hpp"
 
 namespace ProjectA {
-	GUILayer::GUILayer() :
-		Layer("GUILayer")
-	{}
+	DemoGUILayer::DemoGUILayer() {
+		// TODO: Design GUI API.
+		//append(GUIObject());
+	}
 
-	void GUILayer::bind() {
+	void DemoGUILayer::bind() {
 		// Register colors.
 		{
 			const chain<vec4<float32>> colors = {
@@ -57,21 +58,19 @@ namespace ProjectA {
 		}
 	}
 
-	void GUILayer::unbind() {}
+	void DemoGUILayer::unbind() {}
 
-	void GUILayer::update(float32 deltaTime) {
+	void DemoGUILayer::update(float32 deltaTime) {
 		renderer.render();
 	}
 
-	void GUILayer::renderImGui() {}
-
-	void GUILayer::onEvent(Event& event) {
+	void DemoGUILayer::onEvent(Event& event) {
 		EventDispatcher eventDispatcher(event);
 
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 	}
 
-	bool GUILayer::onWindowResize(WindowResizeEvent& event) {
+	bool DemoGUILayer::onWindowResize(WindowResizeEvent& event) {
 		return renderer.onResizeEvent(event);
 	}
 }

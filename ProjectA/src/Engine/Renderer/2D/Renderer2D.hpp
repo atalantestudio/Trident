@@ -3,6 +3,7 @@
 #include "Engine/Camera/OrthographicCamera3D.hpp"
 #include "Engine/Renderer/Subtexture.hpp"
 
+// TODO: Deprecate in favor of GUI API.
 namespace ProjectA {
 	class Renderer2D {
 		public:

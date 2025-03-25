@@ -13,7 +13,5 @@ namespace ProjectA {
 		renderer.render();
 	}
 
-	void DemoLayer::renderImGui() {}
-
 	void DemoLayer::onEvent(Event& event) {}
 }

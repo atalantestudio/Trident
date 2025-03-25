@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/ECS/ECS.hpp"
+#include "Engine/Event/WindowEvent.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {

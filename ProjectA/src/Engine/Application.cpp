@@ -42,6 +42,7 @@ namespace ProjectA {
 	void Application::run() {
 		PROFILE_SCOPE(FUNC_SIG);
 
+		// TODO: Use finite loop?
 		while (running) {
 			PROFILE_SCOPE("Run loop");
 

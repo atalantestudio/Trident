@@ -4,8 +4,8 @@
 #include "Engine/ECS/Component/ScriptComponent.hpp"
 #include "Engine/Event/WindowEvent.hpp"
 #include "Engine/Filesystem/FileLoader.hpp"
+#include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/Renderer/Buffer/BufferUsage.hpp"
-#include "Engine/Renderer/GUI/GUIRenderer.hpp"
 
 namespace ProjectA {
 	GUIRenderer::GUIRenderer() :
@@ -78,13 +78,13 @@ namespace ProjectA {
 			case GraphicsAPI::NONE:
 				throw std::runtime_error("TriangleDemo must use either OpenGL or Vulkan.");
 			case GraphicsAPI::OPENGL:
-				vertexShaderModulePath = "../ProjectA/src/Engine/Shader/GUI.vert";
-				fragmentShaderModulePath = "../ProjectA/src/Engine/Shader/GUI.frag";
+				vertexShaderModulePath = "../ProjectA/src/Engine/Shader/GUI/Subcomponent.vert";
+				fragmentShaderModulePath = "../ProjectA/src/Engine/Shader/GUI/Subcomponent.frag";
 
 				break;
 			case GraphicsAPI::VULKAN:
-				vertexShaderModulePath = "../ProjectA/src/Engine/Shader/GUI.vert.spv";
-				fragmentShaderModulePath = "../ProjectA/src/Engine/Shader/GUI.frag.spv";
+				vertexShaderModulePath = "../ProjectA/src/Engine/Shader/GUI/Subcomponent.vert.spv";
+				fragmentShaderModulePath = "../ProjectA/src/Engine/Shader/GUI/Subcomponent.frag.spv";
 
 				break;
 		}
