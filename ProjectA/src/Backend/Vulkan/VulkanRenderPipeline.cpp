@@ -9,6 +9,8 @@
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 
+#include "Engine/Application.hpp"
+
 namespace ProjectA {
 	VulkanRenderPipeline::VulkanRenderPipeline(VkDevice device, const RenderPipelineDescriptor& descriptor) :
 		device(device),
@@ -77,7 +79,7 @@ namespace ProjectA {
 		inputAssemblyStateCreateInfo.topology = topologies[static_cast<uint32>(descriptor.primitiveTopology)];
 		inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
-		const VulkanSwapchain* swapchain = static_cast<const VulkanSwapchain*>(descriptor.swapchain.get());
+		const VulkanSwapchain* swapchain = static_cast<const VulkanSwapchain*>(Application::get().getSwapchain().get());
 
 		VkViewport viewport{};
 		viewport.x = 0.0f;
@@ -163,7 +165,7 @@ namespace ProjectA {
 		dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32>(dynamicStates.size());
 		dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
 
-		const chain<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
+		const std::array<VkPipelineShaderStageCreateInfo, 2> shaderStageCreateInfos = {
 			static_cast<const VulkanShaderModule*>(descriptor.vertexShaderModule.get())->object,
 			static_cast<const VulkanShaderModule*>(descriptor.fragmentShaderModule.get())->object,
 		};

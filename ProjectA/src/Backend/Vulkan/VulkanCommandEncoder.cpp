@@ -10,6 +10,8 @@
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
 #include "Backend/Vulkan/VulkanTexture.hpp"
 
+#include "Engine/Application.hpp"
+
 namespace ProjectA {
 	VulkanCommandEncoder::VulkanCommandEncoder(const VulkanDevice& device, VkCommandPool commandPool, const CommandBufferDescriptor& descriptor) :
 		device(device),
@@ -17,8 +19,6 @@ namespace ProjectA {
 		commandBufferUsageFlag(getVkCommandBufferUsageFlag(descriptor.usage))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[VulkanCommandEncoder]");
 
 		VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
 		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -34,8 +34,6 @@ namespace ProjectA {
 
 	VulkanCommandEncoder::~VulkanCommandEncoder() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~VulkanCommandEncoder]");
 
 		vkFreeCommandBuffers(device.object, commandPool, 1, &commandBuffer);
 	}
@@ -57,7 +55,7 @@ namespace ProjectA {
 	void VulkanCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const VulkanSwapchain* swapchain = static_cast<const VulkanSwapchain*>(descriptor.swapchain.get());
+		const VulkanSwapchain* swapchain = static_cast<const VulkanSwapchain*>(Application::get().getSwapchain().get());
 
 		VkClearValue clearValue{};
 

@@ -124,7 +124,6 @@ namespace ProjectA {
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TextureDemo/Shader/TextureDemo.frag.spv", fragmentShaderModuleDescriptor);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
-		renderPipelineDescriptor.swapchain = Application::get().getSwapchain();
 		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
@@ -240,7 +239,6 @@ namespace ProjectA {
 	void TextureDemoRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
-		beginRenderPassDescriptor.swapchain = Application::get().getSwapchain();
 		beginRenderPassDescriptor.clearColor = vec4<float32>(186.0f, 113.0f, 55.0f, 255.0f) / 255.0f;
 		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 

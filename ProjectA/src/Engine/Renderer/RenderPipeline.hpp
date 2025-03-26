@@ -12,7 +12,6 @@
 namespace ProjectA {
 	struct RenderPipelineDescriptor {
 		ref<RenderPass> renderPass;
-		ref<Swapchain> swapchain;
 		ref<PipelineLayout> pipelineLayout;
 		BufferLayout vertexBufferLayout;
 		ref<ShaderModule> vertexShaderModule;

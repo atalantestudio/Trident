@@ -16,9 +16,8 @@ namespace ProjectA {
 
 	struct BeginRenderPassDescriptor {
 		ref<RenderPass> renderPass;
-		ref<Swapchain> swapchain;
 		vec4<float32> clearColor;
-		uint32 nextImageIndex;
+		uint32 nextImageIndex = 0;
 	};
 
 	class CommandEncoder {

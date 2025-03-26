@@ -5,36 +5,51 @@
 
 namespace ProjectA {
 	TriangleDemoRenderer::TriangleDemoRenderer() {
-		const PipelineLayoutDescriptor pipelineLayoutDescriptor;
+		// Create pipeline layout.
+		{
+			const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
-		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+			pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+		}
 
-		ShaderModuleDescriptor vertexShaderModuleDescriptor;
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
+		ref<ShaderModule> vertexShaderModule;
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TriangleDemo/Shader/TriangleDemo.vert.spv", vertexShaderModuleDescriptor);
+		// Create vertex shader module.
+		{
+			ShaderModuleDescriptor vertexShaderModuleDescriptor;
+			vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+			vertexShaderModuleDescriptor.entryPoint = "main";
 
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor;
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
+			vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TriangleDemo/Shader/TriangleDemo.vert.spv", vertexShaderModuleDescriptor);
+		}
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TriangleDemo/Shader/TriangleDemo.frag.spv", fragmentShaderModuleDescriptor);
+		ref<ShaderModule> fragmentShaderModule;
 
-		RenderPipelineDescriptor renderPipelineDescriptor;
-		renderPipelineDescriptor.swapchain = Application::get().getSwapchain();
-		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
-		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
-		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
-		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
-		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		renderPipelineDescriptor.cullMode = CullMode::BACK;
+		// Create fragment shader module.
+		{
+			ShaderModuleDescriptor fragmentShaderModuleDescriptor;
+			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+			fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
+			fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TriangleDemo/Shader/TriangleDemo.frag.spv", fragmentShaderModuleDescriptor);
+		}
+
+		// Create render pipeline.
+		{
+			RenderPipelineDescriptor renderPipelineDescriptor;
+			renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
+			renderPipelineDescriptor.pipelineLayout = pipelineLayout;
+			renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
+			renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
+			renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
+			renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+			renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+			renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+			renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+			renderPipelineDescriptor.cullMode = CullMode::BACK;
+
+			renderPipeline = createRenderPipeline(renderPipelineDescriptor);
+		}
 
 		// Create vertex buffer.
 		{
@@ -129,19 +144,20 @@ namespace ProjectA {
 	void TriangleDemoRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
-		beginRenderPassDescriptor.swapchain = Application::get().getSwapchain();
 		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
-		const float32 width = static_cast<float32>(Application::get().getSwapchain()->getExtentWidth());
-		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
+		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
+
+		const uint32 width = swapchain->getExtentWidth();
+		const uint32 height = swapchain->getExtentHeight();
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));
-		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, Application::get().getSwapchain()->getExtentWidth(), Application::get().getSwapchain()->getExtentHeight());
+		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, width, height);
 		commandEncoder->drawIndexed(3, 1, 0);
 		commandEncoder->endRenderPass();
 	}

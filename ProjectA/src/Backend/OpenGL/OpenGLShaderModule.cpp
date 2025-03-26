@@ -14,7 +14,7 @@ namespace ProjectA {
 		glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code.data(), length);
 
 		// TODO: Expose specialization constants.
-		glSpecializeShader(object, descriptor.entryPoint.c_str(), 0, nullptr, nullptr);
+		glSpecializeShader(object, descriptor.entryPoint, 0, nullptr, nullptr);
 
 		GLint compileStatus;
 

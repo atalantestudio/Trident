@@ -27,7 +27,7 @@ namespace ProjectA {
 		object.flags = 0;
 		object.stage = getVkShaderStageFlagBits(descriptor.stage);
 		object.module = shaderModule;
-		object.pName = descriptor.entryPoint.c_str();
+		object.pName = descriptor.entryPoint;
 		object.pSpecializationInfo = nullptr;
 	}
 
