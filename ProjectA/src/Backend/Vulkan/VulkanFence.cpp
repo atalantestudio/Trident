@@ -8,22 +8,18 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[VulkanFence]");
-
 		VkFenceCreateInfo fenceCreateInfo{};
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceCreateInfo.pNext = nullptr;
 		fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		if (vkCreateFence(device, &fenceCreateInfo, nullptr, &object) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create Vulkan fence.");
-		}
+		const VkResult result = vkCreateFence(device, &fenceCreateInfo, nullptr, &object);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan fence (code: []).", result);
 	}
 
 	VulkanFence::~VulkanFence() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~VulkanFence]");
 
 		vkDestroyFence(device, object, nullptr);
 	}

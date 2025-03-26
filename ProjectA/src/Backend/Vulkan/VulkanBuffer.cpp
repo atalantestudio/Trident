@@ -11,7 +11,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[VulkanBuffer]");
+		VkResult result;
 
 		VkBufferCreateInfo bufferCreateInfo{};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -23,9 +23,9 @@ namespace ProjectA {
 		bufferCreateInfo.queueFamilyIndexCount = 0;
 		bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-		if (vkCreateBuffer(device.object, &bufferCreateInfo, nullptr, &object) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create buffer.");
-		}
+		result = vkCreateBuffer(device.object, &bufferCreateInfo, nullptr, &object);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan buffer (code: []).", result);
 
 		VkMemoryRequirements memoryRequirements;
 
@@ -40,17 +40,17 @@ namespace ProjectA {
 		memoryAllocateInfo.allocationSize = memoryRequirements.size;
 		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
 
-		if (vkAllocateMemory(device.object, &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to allocate memory.");
-		}
+		result = vkAllocateMemory(device.object, &memoryAllocateInfo, nullptr, &memory);
 
-		vkBindBufferMemory(device.object, object, memory, 0);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan memory (code: []).", result);
+
+		result = vkBindBufferMemory(device.object, object, memory, 0);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to bind Vulkan buffer memory (code: []).", result);
 	}
 
 	VulkanBuffer::~VulkanBuffer() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~VulkanBuffer]");
 
 		vkDestroyBuffer(device.object, object, nullptr);
 		vkFreeMemory(device.object, memory, nullptr);
@@ -59,9 +59,9 @@ namespace ProjectA {
 	BufferMappedRange VulkanBuffer::map(uint64 offset, uint64 size) const {
 		BufferMappedRange mappedRange;
 
-		if (vkMapMemory(device.object, memory, offset, size, 0, &mappedRange) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to map buffer memory.");
-		}
+		const VkResult result = vkMapMemory(device.object, memory, offset, size, 0, &mappedRange);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to map Vulkan buffer memory (code: []).", result);
 
 		return mappedRange;
 	}

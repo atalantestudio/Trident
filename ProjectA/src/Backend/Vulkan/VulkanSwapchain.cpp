@@ -11,21 +11,17 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[VulkanSwapchain]");
-
 		construct(descriptor);
 	}
 
 	VulkanSwapchain::~VulkanSwapchain() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[~VulkanSwapchain]");
-
-		destruct();
+		destroy();
 	}
 
 	void VulkanSwapchain::recreate(const SwapchainDescriptor& descriptor) {
-		destruct();
+		destroy();
 		construct(descriptor);
 	}
 
@@ -124,6 +120,7 @@ namespace ProjectA {
 				throw std::runtime_error("Failed to create swapchain image view.");
 			}
 
+			// TODO: Replace with Framebuffer API.
 			VkFramebufferCreateInfo framebufferCreateInfo{};
 			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferCreateInfo.pNext = nullptr;
@@ -143,7 +140,7 @@ namespace ProjectA {
 		}
 	}
 
-	void VulkanSwapchain::destruct() {
+	void VulkanSwapchain::destroy() {
 		for (uint32 i = 0; i < images.size(); i += 1) {
 			vkDestroyFramebuffer(device, framebuffers[i], nullptr);
 			vkDestroyImageView(device, imageViews[i], nullptr);

@@ -17,22 +17,7 @@ namespace ProjectA {
 		surface(instance.object, physicalDevice, window),
 		device(createRef<VulkanDevice>(physicalDevice, surface)),
 		commandPool(physicalDevice, device->object)
-	{
-		// 1. Create instance.
-		// 2. Select physical device.
-		// 3. Create surface.
-		// 4. Check if the physical device supports the surface.
-		// 5. Get capabilities, extent, format and present mode of the surface with the physical device.
-		// 6. Create device.
-		// 7. Create command pool.
-
-		// 1. Create swapchain.
-		// 2. Create render pass.
-		// 3. Create pipeline layout.
-		// 4. Create graphics pipeline.
-		// 5. Create buffer.
-		// 6. Allocate memory for the buffer.
-	}
+	{}
 
 	ref<Device> VulkanRendererAPI::getDevice() const {
 		return device;

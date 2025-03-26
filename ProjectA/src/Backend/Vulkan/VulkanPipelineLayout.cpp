@@ -13,9 +13,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[VulkanPipelineLayout]");
-
 		chain<VkDescriptorPoolSize> descriptorPoolSizes;
+		VkResult result;
 
 		for (const DescriptorSetLayout& layout : descriptor.layouts) {
 			chain<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
@@ -57,9 +56,9 @@ namespace ProjectA {
 
 			VkDescriptorSetLayout descriptorSetLayout;
 
-			if (vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
-				throw std::runtime_error("Failed to create descriptor set layout.");
-			}
+			result = vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout);
+
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan descriptor set layout (code: []).", result);
 
 			descriptorSetLayouts.emplace_back(descriptorSetLayout);
 		}
@@ -73,9 +72,9 @@ namespace ProjectA {
 			descriptorPoolCreateInfo.poolSizeCount = static_cast<uint32>(descriptorPoolSizes.size());
 			descriptorPoolCreateInfo.pPoolSizes = descriptorPoolSizes.data();
 
-			if (vkCreateDescriptorPool(device, &descriptorPoolCreateInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
-				throw std::runtime_error("Failed to create descriptor pool.");
-			}
+			result = vkCreateDescriptorPool(device, &descriptorPoolCreateInfo, nullptr, &descriptorPool);
+
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan descriptor pool (code: []).", result);
 
 			VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
 			descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -86,9 +85,9 @@ namespace ProjectA {
 
 			descriptorSets.resize(descriptorSetLayouts.size());
 
-			if (vkAllocateDescriptorSets(device, &descriptorSetAllocateInfo, descriptorSets.data()) != VK_SUCCESS) {
-				throw std::runtime_error("Failed to allocate descriptor sets.");
-			}
+			result = vkAllocateDescriptorSets(device, &descriptorSetAllocateInfo, descriptorSets.data());
+
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan descriptor sets (code: []).", result);
 
 			chain<VkDescriptorBufferInfo> descriptorBufferInfos;
 			chain<VkDescriptorImageInfo> descriptorImageInfos;
@@ -183,19 +182,19 @@ namespace ProjectA {
 		pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 		pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 
-		if (vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &object) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create pipeline layout.");
-		}
+		result = vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &object);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan pipeline layout (code: []).", result);
 	}
 
 	VulkanPipelineLayout::~VulkanPipelineLayout() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[~VulkanPipelineLayout]");
-
 		if (descriptorSetLayouts.size() > 0) {
-			// TODO: Only OK if the pool has been created with the VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT flag.
-			//vkFreeDescriptorSets(device, descriptorPool, static_cast<uint32>(descriptorSets.size()), descriptorSets.data());
+			// NOTE: Only if the pool has been created with the VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT flag.
+			/*const VkResult result = vkFreeDescriptorSets(device, descriptorPool, static_cast<uint32>(descriptorSets.size()), descriptorSets.data());
+
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to free Vulkan descriptor sets (code: []).", result);*/
 
 			vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 

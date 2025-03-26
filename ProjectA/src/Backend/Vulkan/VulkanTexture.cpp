@@ -16,8 +16,6 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[VulkanTexture]");
-
 		ENGINE_ASSERT(descriptor.sampleCount >= 1 && descriptor.sampleCount <= 64, "Invalid sample count ([]).", descriptor.sampleCount);
 
 		VkImageCreateInfo imageCreateInfo{};
@@ -41,15 +39,15 @@ namespace ProjectA {
 		// initialLayout must be VK_IMAGE_LAYOUT_UNDEFINED or VK_IMAGE_LAYOUT_PREINITIALIZED.
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if (vkCreateImage(device.object, &imageCreateInfo, nullptr, &object) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create texture.");
-		}
+		VkResult result = vkCreateImage(device.object, &imageCreateInfo, nullptr, &object);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image (code: []).", result);
 
 		VkMemoryRequirements memoryRequirements;
 
 		vkGetImageMemoryRequirements(device.object, object, &memoryRequirements);
 
-		// HOST_COHERENT avoid caching.
+		// VK_MEMORY_PROPERTY_HOST_COHERENT_BIT avoid caching.
 		const uint32 memoryTypeIndex = device.findMemoryType(memoryRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 		VkMemoryAllocateInfo memoryAllocateInfo{};
@@ -58,17 +56,17 @@ namespace ProjectA {
 		memoryAllocateInfo.allocationSize = memoryRequirements.size;
 		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
 
-		if (vkAllocateMemory(device.object, &memoryAllocateInfo, nullptr, &memory) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to allocate memory.");
-		}
+		result = vkAllocateMemory(device.object, &memoryAllocateInfo, nullptr, &memory);
 
-		vkBindImageMemory(device.object, object, memory, 0);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan memory (code: []).", result);
+
+		result = vkBindImageMemory(device.object, object, memory, 0);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to bind Vulkan image memory (code: []).", result);
 	}
 
 	VulkanTexture::~VulkanTexture() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~VulkanTexture]");
 
 		vkDestroyImage(device.object, object, nullptr);
 		vkFreeMemory(device.object, memory, nullptr);

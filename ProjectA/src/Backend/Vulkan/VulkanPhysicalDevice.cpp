@@ -7,33 +7,32 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		uint32 physicalDeviceCount;
+		VkResult result;
 
-		vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
+		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
 
-		if (physicalDeviceCount == 0) {
-			throw std::runtime_error("Could not find physical device(s).");
-		}
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan physical devices (code: []).", result);
+		ENGINE_ASSERT(physicalDeviceCount > 0, "Could not find any physical device.");
 
 		chain<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
 
-		vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data());
+		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data());
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan physical devices (code: []).", result);
 
 		uint32 bestPhysicalDeviceIndex = 0;
 		uint32 bestPhysicalDeviceScore = 0;
 
-		for (uint32 index = 0; index < physicalDevices.size(); index += 1) {
-			const uint32 score = calculateScore(physicalDevices[index]);
+		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.size(); physicalDeviceIndex += 1) {
+			const uint32 score = calculateScore(physicalDevices[physicalDeviceIndex]);
 
 			if (score >= bestPhysicalDeviceScore) {
-				bestPhysicalDeviceIndex = index;
+				bestPhysicalDeviceIndex = physicalDeviceIndex;
 				bestPhysicalDeviceScore = score;
 			}
 		}
 
-		// Check the score of the best candidate.
-		if (bestPhysicalDeviceScore == 0) {
-			throw std::runtime_error("Could not select a suitable physical device.");
-		}
+		ENGINE_ASSERT(bestPhysicalDeviceScore > 0, "Could not select a suitable physical device.");
 
 		object = physicalDevices[bestPhysicalDeviceIndex];
 
@@ -58,20 +57,22 @@ namespace ProjectA {
 			}
 		}
 
-		uint32 enabledExtensionCount = 0;
+		uint32 extensionPropertyCount = 0;
 
-		vkEnumerateDeviceExtensionProperties(object, nullptr, &enabledExtensionCount, nullptr);
+		result = vkEnumerateDeviceExtensionProperties(object, nullptr, &extensionPropertyCount, nullptr);
 
-		chain<VkExtensionProperties> extensionProperties(enabledExtensionCount);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan device extension properties (code: []).", result);
 
-		vkEnumerateDeviceExtensionProperties(object, nullptr, &enabledExtensionCount, extensionProperties.data());
+		chain<VkExtensionProperties> extensionProperties(extensionPropertyCount);
 
-		enabledExtensionNames.resize(enabledExtensionCount);
+		result = vkEnumerateDeviceExtensionProperties(object, nullptr, &extensionPropertyCount, extensionProperties.data());
 
-		//ENGINE_TRACE("Device extensions:");
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan device extension properties (code: []).", result);
+
+		enabledExtensionNames.resize(extensionPropertyCount);
 
 		for (uint32 i = 0; i < extensionProperties.size(); i += 1) {
-			//ENGINE_TRACE("- [] (spec version: [])", extensionProperties[i].extensionName, extensionProperties[i].specVersion);
+			//ENGINE_INFO("- [] (spec version: [])", extensionProperties[i].extensionName, extensionProperties[i].specVersion);
 
 			enabledExtensionNames[i] = extensionProperties[i].extensionName;
 		}

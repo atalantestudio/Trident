@@ -11,8 +11,6 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[VulkanTextureView]");
-
 		VkImageViewCreateInfo imageViewCreateInfo{};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.pNext = nullptr;
@@ -30,15 +28,13 @@ namespace ProjectA {
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 		imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-		if (vkCreateImageView(device, &imageViewCreateInfo, nullptr, &object) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create image view.");
-		}
+		const VkResult result = vkCreateImageView(device, &imageViewCreateInfo, nullptr, &object);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view (code: []).", result);
 	}
 
 	VulkanTextureView::~VulkanTextureView() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~VulkanTextureView]");
 
 		vkDestroyImageView(device, object, nullptr);
 	}

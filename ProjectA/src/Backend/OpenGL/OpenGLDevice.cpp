@@ -19,6 +19,7 @@ namespace ProjectA {
 		glFence->create();
 
 		// TODO: Use glClientWaitSync or glWaitSync?
+		// UINT64_MAX disables the timeout.
 		const GLenum status = glClientWaitSync(glFence->object, GL_SYNC_FLUSH_COMMANDS_BIT, UINT64_MAX);
 
 		ENGINE_ASSERT(status == GL_CONDITION_SATISFIED, "Failed waiting for OpenGL fence (code: []).", status);

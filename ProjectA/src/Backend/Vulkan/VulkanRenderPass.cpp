@@ -8,8 +8,6 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[VulkanRenderPass]");
-
 		VkAttachmentDescription attachment{};
 		attachment.flags = 0;
 		attachment.format = surface.format.format;
@@ -57,15 +55,13 @@ namespace ProjectA {
 		renderPassCreateInfo.dependencyCount = 1;
 		renderPassCreateInfo.pDependencies = &dependency;
 
-		if (vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &object) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create render pass.");
-		}
+		const VkResult result = vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &object);
+		
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan render pass (code: []).", result);
 	}
 
 	VulkanRenderPass::~VulkanRenderPass() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~VulkanRenderPass]");
 
 		vkDestroyRenderPass(device, object, nullptr);
 	}

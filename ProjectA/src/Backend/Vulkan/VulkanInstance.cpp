@@ -15,8 +15,6 @@ namespace ProjectA {
 	VulkanInstance::VulkanInstance() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[VulkanInstance]");
-
 		#ifdef DEBUG_ENABLE_MESSENGER
 			VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo{};
 			debugUtilsMessengerCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -48,8 +46,7 @@ namespace ProjectA {
 		// TODO: Automatically determine application version.
 		applicationInfo.applicationVersion = VK_API_VERSION_1_0;
 
-		// TODO: Automatically determine engine name.
-		applicationInfo.pEngineName = "EngineName";
+		applicationInfo.pEngineName = ENGINE_NAME;
 
 		// TODO: Automatically determine engine version.
 		applicationInfo.engineVersion = VK_API_VERSION_1_0;
@@ -89,20 +86,20 @@ namespace ProjectA {
 		instanceCreateInfo.enabledExtensionCount = static_cast<uint32>(enabledExtensionNames.size());
 		instanceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
 
-		if (vkCreateInstance(&instanceCreateInfo, nullptr, &object) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create Vulkan instance.");
-		}
+		VkResult result;
+
+		result = vkCreateInstance(&instanceCreateInfo, nullptr, &object);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan instance (code: []).", result);
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			const PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(object, "vkCreateDebugUtilsMessengerEXT"));
 
-			if (vkCreateDebugUtilsMessengerEXT == nullptr) {
-				throw std::runtime_error("Vulkan debug messenger extension not present.");
-			}
+			ENGINE_ASSERT(vkCreateDebugUtilsMessengerEXT != nullptr, "Failed to get the address of PFN_vkCreateDebugUtilsMessengerEXT.");
 
-			if (vkCreateDebugUtilsMessengerEXT(object, &debugUtilsMessengerCreateInfo, nullptr, &debugUtilsMessenger) != VK_SUCCESS) {
-				throw std::runtime_error("Failed to create Vulkan debug messenger.");
-			}
+			result = vkCreateDebugUtilsMessengerEXT(object, &debugUtilsMessengerCreateInfo, nullptr, &debugUtilsMessenger);
+
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan debug messenger.");
 		#endif
 
 		#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
@@ -114,14 +111,10 @@ namespace ProjectA {
 	VulkanInstance::~VulkanInstance() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[~VulkanInstance]");
-
 		#ifdef DEBUG_ENABLE_MESSENGER
 			const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(object, "vkDestroyDebugUtilsMessengerEXT"));
 
-			if (vkDestroyDebugUtilsMessengerEXT == nullptr) {
-				return;
-			}
+			ENGINE_ASSERT(vkDestroyDebugUtilsMessengerEXT != nullptr, "Failed to get the address of PFN_vkDestroyDebugUtilsMessengerEXT.");
 
 			vkDestroyDebugUtilsMessengerEXT(object, debugUtilsMessenger, nullptr);
 		#endif
@@ -132,17 +125,20 @@ namespace ProjectA {
 	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
 		void VulkanInstance::checkInstanceLayers() {
 			uint32 layerPropertyCount;
+			VkResult result;
 
-			vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
+			result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
+
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan instance layer properties (code: []).", result);
 
 			chain<VkLayerProperties> layerProperties(layerPropertyCount);
 
-			vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
+			result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
 
-			/*ENGINE_TRACE("Instance layers:");
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan instance layer properties (code: []).", result);
 
-			for (uint32 i = 0; i < layerPropertyCount; i += 1) {
-				ENGINE_TRACE("- []", layerProperties[i].layerName);
+			/*for (uint32 i = 0; i < layerPropertyCount; i += 1) {
+				ENGINE_INFO("- []", layerProperties[i].layerName);
 			}*/
 		}
 	#endif

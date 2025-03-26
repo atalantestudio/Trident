@@ -20,7 +20,7 @@ namespace ProjectA {
 			uint32 getExtentHeight() const override;
 
 			void construct(const SwapchainDescriptor& descriptor);
-			void destruct();
+			void destroy();
 
 		public:
 			VkExtent2D imageExtent;

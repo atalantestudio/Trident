@@ -9,12 +9,10 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[VulkanSurface]");
-
 		#ifdef PLATFORM_WINDOWS
 			const PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = static_cast<PFN_vkCreateWin32SurfaceKHR>(static_cast<void*>(vkGetInstanceProcAddr(instance, "vkCreateWin32SurfaceKHR")));
 
-			ENGINE_ASSERT(vkCreateWin32SurfaceKHR != nullptr, "Failed to get address of PFN_vkCreateWin32SurfaceKHR.");
+			ENGINE_ASSERT(vkCreateWin32SurfaceKHR != nullptr, "Failed to get the address of PFN_vkCreateWin32SurfaceKHR.");
 
 			const HWND hwnd = GetActiveWindow(); 
 
@@ -48,8 +46,6 @@ namespace ProjectA {
 
 	VulkanSurface::~VulkanSurface() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~VulkanSurface]");
 
 		vkDestroySurfaceKHR(instance, object, nullptr);
 	}

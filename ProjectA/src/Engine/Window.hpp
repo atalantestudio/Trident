@@ -14,17 +14,19 @@ namespace ProjectA {
 		WindowData(const std::string& title, uint32 width, uint32 height) :
 			title(title),
 			width(width),
-			height(height) {}
+			height(height)
+		{}
 	};
 
 	// TODO: OpenGLWindow and VulkanWindow.
 	class Window {
 		public:
+			using EventCallback = std::function<void(Event&)>;
+
+		public:
 			static scope<Window> create(const WindowData& data);
 
 		public:
-			using EventCallback = std::function<void(Event&)>;
-
 			virtual ~Window() = default;
 
 			virtual void* getNativeWindow() const = 0;

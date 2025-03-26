@@ -27,9 +27,9 @@ namespace ProjectA {
 		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		commandBufferAllocateInfo.commandBufferCount = 1;
 
-		if (vkAllocateCommandBuffers(device.object, &commandBufferAllocateInfo, &commandBuffer) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create Vulkan command buffer.");
-		}
+		const VkResult result = vkAllocateCommandBuffers(device.object, &commandBufferAllocateInfo, &commandBuffer);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan command buffer (code: []).", result);
 	}
 
 	VulkanCommandEncoder::~VulkanCommandEncoder() {
@@ -47,9 +47,9 @@ namespace ProjectA {
 		commandBufferBeginInfo.flags = commandBufferUsageFlag;
 		commandBufferBeginInfo.pInheritanceInfo = nullptr;
 
-		if (vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to begin Vulkan command buffer.");
-		}
+		const VkResult result = vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to begin Vulkan command buffer (code: []).", result);
 	}
 
 	void VulkanCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
@@ -251,9 +251,9 @@ namespace ProjectA {
 	ref<CommandBuffer> VulkanCommandEncoder::end() const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to end Vulkan command buffer.");
-		}
+		const VkResult result = vkEndCommandBuffer(commandBuffer);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to end Vulkan command buffer (code: []).", result);
 
 		VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
@@ -269,8 +269,8 @@ namespace ProjectA {
 
 		pipelineLayout = nullptr;
 
-		if (vkResetCommandBuffer(commandBuffer, 0) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to reset Vulkan command buffer.");
-		}
+		const VkResult result = vkResetCommandBuffer(commandBuffer, 0);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan command buffer (code: []).", result);
 	}
 }

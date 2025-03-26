@@ -19,8 +19,6 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[VulkanDevice]");
-
 		chain<VkDeviceQueueCreateInfo> queueCreateInfos;
 
 		if (physicalDevice.graphicsQueueFamilyIndex == surface.presentQueueFamilyIndex) {
@@ -85,8 +83,6 @@ namespace ProjectA {
 	VulkanDevice::~VulkanDevice() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[~VulkanDevice]");
-
 		vkDestroyDevice(object, nullptr);
 	}
 
@@ -104,7 +100,9 @@ namespace ProjectA {
 			}
 		}
 
-		throw std::runtime_error("Failed to find a suitable memory type.");
+		ENGINE_ASSERT(false, "Failed to find a suitable Vulkan memory type.");
+
+		return 0;
 	}
 
 	void VulkanDevice::waitForFence(const ref<Fence>& fence) const {
@@ -177,9 +175,7 @@ namespace ProjectA {
 
 		const VkResult result = vkQueueSubmit(graphicsQueue, 1, &submitInfo, vkFence);
 
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("Failed to submit queue.");
-		}
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to submit Vulkan queue (code: []).", result);
 	}
 
 	Status VulkanDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {
@@ -201,6 +197,8 @@ namespace ProjectA {
 	}
 
 	void VulkanDevice::waitIdle() const {
-		vkDeviceWaitIdle(object);
+		const VkResult result = vkDeviceWaitIdle(object);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to idle wait (code: []).", result);
 	}
 }

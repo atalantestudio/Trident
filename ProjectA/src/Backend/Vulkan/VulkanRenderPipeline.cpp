@@ -3,6 +3,7 @@
 #include "Backend/Vulkan/CullMode.hpp"
 #include "Backend/Vulkan/FrontFace.hpp"
 #include "Backend/Vulkan/InputRate.hpp"
+#include "Backend/Vulkan/PrimitiveTopology.hpp"
 #include "Backend/Vulkan/VertexInputAttributeType.hpp"
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
@@ -17,8 +18,6 @@ namespace ProjectA {
 		pipelineLayout(static_cast<const VulkanPipelineLayout*>(descriptor.pipelineLayout.get()))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[VulkanRenderPipeline]");
 
 		chain<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 
@@ -52,31 +51,11 @@ namespace ProjectA {
 		vertexInputStateCreateInfo.vertexAttributeDescriptionCount = static_cast<uint32>(vertexInputAttributeDescriptions.size());
 		vertexInputStateCreateInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
 
-		static constexpr VkPrimitiveTopology topologies[] = {
-			VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
-			VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
-			VK_PRIMITIVE_TOPOLOGY_LINE_STRIP,
-			VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-			VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,
-
-			// Only if the VK_KHR_portability_subset extension is NOT enabled.
-			// VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN,
-
-			// Only if the geometryShader feature is enabled.
-			// VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY,
-			// VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY,
-			// VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY,
-			// VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY,
-
-			// Only if the tessellationShader feature is enabled.
-			// VK_PRIMITIVE_TOPOLOGY_PATCH_LIST,
-		};
-
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo{};
 		inputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		inputAssemblyStateCreateInfo.pNext = nullptr;
 		inputAssemblyStateCreateInfo.flags = 0;
-		inputAssemblyStateCreateInfo.topology = topologies[static_cast<uint32>(descriptor.primitiveTopology)];
+		inputAssemblyStateCreateInfo.topology = getVkPrimitiveTopology(descriptor.primitiveTopology);
 		inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
 		const VulkanSwapchain* swapchain = static_cast<const VulkanSwapchain*>(Application::get().getSwapchain().get());
@@ -153,7 +132,7 @@ namespace ProjectA {
 		colorBlendStateCreateInfo.blendConstants[2] = 0.0f;
 		colorBlendStateCreateInfo.blendConstants[3] = 0.0f;
 
-		const chain<VkDynamicState> dynamicStates = {
+		const std::array<VkDynamicState, 2> dynamicStates = {
 			VK_DYNAMIC_STATE_VIEWPORT,
 			VK_DYNAMIC_STATE_SCISSOR,
 		};
@@ -191,17 +170,13 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		graphicsPipelineCreateInfo.basePipelineIndex = -1;
 
-		if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &object) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create Vulkan render pipeline.");
-		}
+		const VkResult result = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &object);
 
-		// TODO: Shader modules can be destroyed here.
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan graphics pipeline (code: []).", result);
 	}
 
 	VulkanRenderPipeline::~VulkanRenderPipeline() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~VulkanRenderPipeline]");
 
 		vkDestroyPipeline(device, object, nullptr);
 	}

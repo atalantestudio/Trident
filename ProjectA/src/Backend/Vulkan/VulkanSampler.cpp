@@ -9,8 +9,6 @@ namespace ProjectA {
 	{
         PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[VulkanSampler]");
-
 		VkSamplerCreateInfo samplerCreateInfo{};
 		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         samplerCreateInfo.pNext = nullptr;
@@ -31,15 +29,13 @@ namespace ProjectA {
         samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
         samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
 
-        if (vkCreateSampler(device, &samplerCreateInfo, nullptr, &object) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create sampler.");
-        }
+        const VkResult result = vkCreateSampler(device, &samplerCreateInfo, nullptr, &object);
+
+        ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan sampler (code: []).", result);
 	}
 
 	VulkanSampler::~VulkanSampler() {
         PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~VulkanSampler]");
 
 		vkDestroySampler(device, object, nullptr);
 	}

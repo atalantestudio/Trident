@@ -3,7 +3,7 @@
 #include "pch.hpp"
 
 namespace ProjectA {
-	enum class PrimitiveTopology : uint32 {
+	enum class PrimitiveTopology : uint8 {
 		POINT_LIST = 0,
 		LINE_LIST = 1,
 		LINE_STRIP = 2,

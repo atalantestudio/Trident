@@ -1,5 +1,7 @@
 #pragma once
 
+#define ENGINE_NAME "ProjectA"
+
 #ifdef _WIN32
 	#ifdef _WIN64
 		#define PLATFORM_WINDOWS

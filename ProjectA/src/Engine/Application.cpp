@@ -20,7 +20,7 @@ namespace ProjectA {
 
 		instance = this;
 
-		Renderer::setGraphicsApi(GraphicsAPI::OPENGL);
+		Renderer::setGraphicsApi(GraphicsAPI::VULKAN);
 
 		constexpr uint32 extentWidth = 1280;
 		constexpr uint32 extentHeight = 720;
