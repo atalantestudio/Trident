@@ -3,5 +3,11 @@
 #include "Engine/Layer/Layer.hpp"
 
 namespace ProjectA {
-	Layer::Layer(const std::string& name) : name(name) {}
+	Layer::Layer() {}
+
+	void Layer::update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {}
+
+	void Layer::renderImGui() {}
+
+	void Layer::onEvent(Event& event) {}
 }

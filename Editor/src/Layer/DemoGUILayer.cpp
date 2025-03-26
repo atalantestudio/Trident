@@ -4,9 +4,7 @@ namespace ProjectA {
 	DemoGUILayer::DemoGUILayer() {
 		// TODO: Design GUI API.
 		//append(GUIObject());
-	}
 
-	void DemoGUILayer::bind() {
 		// Register colors.
 		{
 			const chain<vec4<float32>> colors = {
@@ -57,8 +55,6 @@ namespace ProjectA {
 			renderer.registerEntities();
 		}
 	}
-
-	void DemoGUILayer::unbind() {}
 
 	void DemoGUILayer::update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
 		renderer.render(commandEncoder, nextImageIndex);

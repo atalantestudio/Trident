@@ -7,7 +7,7 @@
 class SandboxApplication : public ProjectA::Application {
 	public:
 		SandboxApplication() {
-			pushLayer(new SandboxLayer());
+			registerLayer<SandboxLayer>();
 
 			Random::initialize();
 		}

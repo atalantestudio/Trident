@@ -3,9 +3,7 @@
 #include "Engine/GUI/GUILayer.hpp"
 
 namespace ProjectA {
-	GUILayer::GUILayer()
-		: Layer("GUILayer")
-	{}
+	GUILayer::GUILayer() {}
 
 	void GUILayer::append(const GUIObject& object) {
 		// TODO

@@ -4,9 +4,8 @@
 
 namespace ProjectA {
 	LayerStack::~LayerStack() {
+		// TODO: Make implicit?
 		for (Layer* layer : layers) {
-			layer->unbind();
-
 			delete layer;
 		}
 	}
@@ -31,8 +30,6 @@ namespace ProjectA {
 		layers.erase(iterator);
 
 		layerInsertionIndex--;
-
-		layer->unbind();
 	}
 
 	void LayerStack::removeOverlay(Layer* overlay) {
@@ -43,8 +40,6 @@ namespace ProjectA {
 		}
 
 		layers.erase(iterator);
-
-		overlay->unbind();
 	}
 
 	chain<Layer*>::iterator LayerStack::begin() {

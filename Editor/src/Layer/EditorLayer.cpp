@@ -5,9 +5,7 @@
 #include "EditorLayer.hpp"
 
 namespace ProjectA {
-	EditorLayer::EditorLayer() : Layer("Sandbox"), cameraController(1280.0f / 720.0f) {}
-
-	void EditorLayer::bind() {
+	EditorLayer::EditorLayer() : cameraController(1280.0f / 720.0f) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		//checkerboardTexture = Texture2D::create("assets/textures/checkerboard.png");
@@ -18,10 +16,6 @@ namespace ProjectA {
 		framebufferDescriptor.size = {1280.0f, 720.0f};
 
 		framebuffer = Framebuffer::create(framebufferDescriptor);
-	}
-
-	void EditorLayer::unbind() {
-		PROFILE_SCOPE(FUNC_SIG);
 	}
 
 	void EditorLayer::update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
@@ -158,7 +152,7 @@ namespace ProjectA {
 		viewportWindowFocused = ImGui::IsWindowFocused();
 		viewportWindowHovered = ImGui::IsWindowHovered();
 
-		Application::get().imGuiLayer->blockEvents = !viewportWindowFocused || !viewportWindowHovered;
+		//Application::get().imGuiLayer->blockEvents = !viewportWindowFocused || !viewportWindowHovered;
 
 		const ImVec2 imGuiViewportWindowSize = ImGui::GetContentRegionAvail();
 

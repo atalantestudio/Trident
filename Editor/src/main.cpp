@@ -8,7 +8,7 @@ namespace ProjectA {
 	class EditorApplication : public Application {
 		public:
 			EditorApplication() : Application("ProjectA Editor") {
-				pushLayer(new DemoLayer());
+				registerLayer<DemoLayer>();
 			}
 
 			~EditorApplication() {}

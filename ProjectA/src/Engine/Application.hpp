@@ -5,7 +5,6 @@
 #include "Engine/API/Synchronization/Semaphore.hpp"
 #include "Engine/base.hpp"
 #include "Engine/Event/WindowEvent.hpp"
-#include "Engine/ImGui/ImGuiLayer.hpp"
 #include "Engine/Layer/LayerStack.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
 #include "Engine/Window.hpp"
@@ -30,9 +29,23 @@ namespace ProjectA {
 
 			void onEvent(Event& event);
 
-			void pushLayer(Layer* layer);
+			template<typename T, typename... U>
+			void registerLayer(U&&... arguments) {
+				PROFILE_SCOPE(FUNC_SIG);
 
-			void pushOverlay(Layer* overlay);
+				Layer* layer = new T(std::forward<U&&>(arguments)...);
+
+				layerStack.pushLayer(layer);
+			}
+
+			template<typename T, typename... U>
+			void registerOverlay(U&&... arguments) {
+				PROFILE_SCOPE(FUNC_SIG);
+
+				Layer* overlay = new T(std::forward<U&&>(arguments)...);
+
+				layerStack.pushOverlay(overlay);
+			}
 
 			void close();
 
@@ -48,9 +61,6 @@ namespace ProjectA {
 
 		private:
 			friend int ::main(int argc, char** argv);
-
-		public:
-			ImGuiLayer* imGuiLayer;
 
 		private:
 			static Application* instance;

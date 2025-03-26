@@ -12,10 +12,8 @@ namespace ProjectA {
 
 		public:
 			ImGuiLayer();
-			~ImGuiLayer() = default;
 
-			virtual void bind() override;
-			virtual void unbind() override;
+			~ImGuiLayer();
 
 			void begin();
 			void end();

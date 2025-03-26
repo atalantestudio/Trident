@@ -4,16 +4,8 @@
 
 #include "SandboxLayer.hpp"
 
-SandboxLayer::SandboxLayer() : Layer("Sandbox"), cameraController(1280.0f / 720.0f) {}
-
-void SandboxLayer::bind() {
-	PROFILE_SCOPE(FUNC_SIG);
-
+SandboxLayer::SandboxLayer() : cameraController(1280.0f / 720.0f) {
 	//checkerboardTexture = ProjectA::Texture2D::create("assets/textures/checkerboard.png");
-}
-
-void SandboxLayer::unbind() {
-	PROFILE_SCOPE(FUNC_SIG);
 }
 
 void SandboxLayer::update(ProjectA::float32 deltaTime, const ProjectA::ref<ProjectA::CommandEncoder>& commandEncoder, ProjectA::uint32 nextImageIndex) {

@@ -12,9 +12,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {}
-
-	void ImGuiLayer::bind() {
+	ImGuiLayer::ImGuiLayer() {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		IMGUI_CHECKVERSION();
@@ -48,7 +46,7 @@ namespace ProjectA {
 		ImGui_ImplOpenGL3_Init("#version 410");
 	}
 
-	void ImGuiLayer::unbind() {
+	ImGuiLayer::~ImGuiLayer() {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		if (Renderer::getGraphicsApi() != GraphicsAPI::OPENGL) {

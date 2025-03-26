@@ -20,7 +20,7 @@ namespace ProjectA {
 
 		instance = this;
 
-		Renderer::setGraphicsApi(GraphicsAPI::VULKAN);
+		Renderer::setGraphicsApi(GraphicsAPI::OPENGL);
 
 		constexpr uint32 extentWidth = 1280;
 		constexpr uint32 extentHeight = 720;
@@ -54,10 +54,6 @@ namespace ProjectA {
 			finishedRenderSemaphores[frameIndex] = Renderer::getBackend()->createSemaphore();
 			flightFences[frameIndex] = Renderer::getBackend()->createFence();
 		}
-
-		imGuiLayer = new ImGuiLayer();
-
-		pushOverlay(imGuiLayer);
 	}
 
 	Application::~Application() {
@@ -91,17 +87,6 @@ namespace ProjectA {
 				render(deltaTime);
 			}
 
-			imGuiLayer->begin();
-
-			{
-				PROFILE_SCOPE("Render layer ImGui");
-
-				for (Layer* layer : layerStack) {
-					layer->renderImGui();
-				}
-			}
-
-			imGuiLayer->end();
 			window->update();
 		}
 	}
@@ -165,22 +150,6 @@ namespace ProjectA {
 		Application::get().getSwapchain()->recreate(swapchainDescriptor);
 
 		needsResize = false;
-	}
-
-	void Application::pushLayer(Layer* layer) {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		layerStack.pushLayer(layer);
-
-		layer->bind();
-	}
-
-	void Application::pushOverlay(Layer* overlay) {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		layerStack.pushOverlay(overlay);
-
-		overlay->bind();
 	}
 
 	void Application::close() {
