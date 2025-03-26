@@ -70,13 +70,8 @@ namespace ProjectA {
 		return createRef<VulkanSemaphore>(device->object);
 	}
 
-	ref<ShaderModule> VulkanRendererAPI::createShaderModule(ShaderStage stage, const chain<uint8>& code) const {
-		static constexpr VkShaderStageFlagBits shaderStages[] = {
-			VK_SHADER_STAGE_VERTEX_BIT,
-			VK_SHADER_STAGE_FRAGMENT_BIT,
-		};
-
-		return createRef<VulkanShaderModule>(device->object, shaderStages[static_cast<uint32>(stage)], code);
+	ref<ShaderModule> VulkanRendererAPI::createShaderModule(const ShaderModuleDescriptor& descriptor, const chain<uint8>& code) const {
+		return createRef<VulkanShaderModule>(device->object, descriptor, code);
 	}
 
 	ref<Swapchain> VulkanRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) {

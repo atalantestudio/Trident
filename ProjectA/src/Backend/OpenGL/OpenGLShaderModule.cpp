@@ -1,26 +1,26 @@
 #include "pch.hpp"
 
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
+#include "Backend/OpenGL/ShaderStage.hpp"
 
 namespace ProjectA {
-	OpenGLShaderModule::OpenGLShaderModule(GLenum stage, const chain<uint8>& code) :
-		ObjectWrapper(glCreateShader(stage))
+	OpenGLShaderModule::OpenGLShaderModule(const ShaderModuleDescriptor& descriptor, const chain<uint8>& code) :
+		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[OpenGLShaderModule]");
+		const GLsizei length = static_cast<GLsizei>(code.size());
 
-		const GLchar* const string = reinterpret_cast<const GLchar* const>(code.data());
-		const GLint length = static_cast<GLint>(code.size());
+		glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code.data(), length);
 
-		glShaderSource(object, 1, &string, &length);
-		glCompileShader(object);
+		// TODO: Expose specialization constants.
+		glSpecializeShader(object, descriptor.entryPoint.c_str(), 0, nullptr, nullptr);
 
 		GLint compileStatus;
 
 		glGetShaderiv(object, GL_COMPILE_STATUS, &compileStatus);
 
-		if (compileStatus == 0) {
+		if (compileStatus == GL_FALSE) {
 			GLint infoLogLength;
 
 			glGetShaderiv(object, GL_INFO_LOG_LENGTH, &infoLogLength);
@@ -29,7 +29,9 @@ namespace ProjectA {
 
 			glGetShaderInfoLog(object, infoLogLength, nullptr, infoLog.data());
 
-			ENGINE_ERROR("Shader module compilation failed.\n[]", infoLog.data());
+			glDeleteShader(object);
+
+			ENGINE_ERROR("Shader module compilation failed:\n[]", infoLog.data());
 
 			throw std::runtime_error("Failed to create OpenGL shader module.");
 		}
@@ -37,8 +39,6 @@ namespace ProjectA {
 
 	OpenGLShaderModule::~OpenGLShaderModule() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~OpenGLShaderModule]");
 
 		glDeleteShader(object);
 	}

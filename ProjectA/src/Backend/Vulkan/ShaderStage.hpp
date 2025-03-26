@@ -11,6 +11,6 @@ namespace ProjectA {
 			VK_SHADER_STAGE_FRAGMENT_BIT,
 		};
 
-		return vkShaderStageFlagBits[static_cast<uint32>(shaderStage)];
+		return vkShaderStageFlagBits[static_cast<uint8>(shaderStage)];
 	}
 }

@@ -1,9 +1,9 @@
 #include "pch.hpp"
 
 #include "Backend/OpenGL/OpenGLRendererAPI.hpp"
-
 #include "Backend/Vulkan/VulkanRendererAPI.hpp"
 
+#include "Engine/Filesystem/FileLoader.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
@@ -96,11 +96,13 @@ namespace ProjectA {
 		return rendererApi->createSemaphore();
 	}
 
-	ref<ShaderModule> Renderer::createShaderModule(ShaderStage stage, const chain<uint8>& code) {
-		return rendererApi->createShaderModule(stage, code);
-	}
-
 	ref<Texture> Renderer::createTexture(const TextureDescriptor& descriptor) {
 		return rendererApi->createTexture(descriptor);
+	}
+
+	ref<ShaderModule> Renderer::loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor) {
+		const chain<uint8> code = FileLoader::loadByteBuffer(path);
+
+		return rendererApi->createShaderModule(descriptor, code);
 	}
 }

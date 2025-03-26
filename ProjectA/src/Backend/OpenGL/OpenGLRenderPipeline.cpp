@@ -34,7 +34,7 @@ namespace ProjectA {
 
 		glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
 
-		if (linkStatus == 0) {
+		if (linkStatus == GL_FALSE) {
 			GLint infoLogLength;
 
 			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);

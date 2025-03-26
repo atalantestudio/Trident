@@ -3,10 +3,7 @@
 #include "Engine/Application.hpp"
 #include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/ECS/Component/ScriptComponent.hpp"
-#include "Engine/Event/WindowEvent.hpp"
-#include "Engine/Filesystem/FileLoader.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
-#include "Engine/Renderer/Buffer/BufferUsage.hpp"
 
 namespace ProjectA {
 	GUIRenderer::GUIRenderer() :
@@ -50,29 +47,17 @@ namespace ProjectA {
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
-		std::string vertexShaderModulePath;
-		std::string fragmentShaderModulePath;
+		ShaderModuleDescriptor vertexShaderModuleDescriptor;
+		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		switch (getGraphicsApi()) {
-			case GraphicsAPI::NONE:
-				throw std::runtime_error("TriangleDemo must use either OpenGL or Vulkan.");
-			case GraphicsAPI::OPENGL:
-				vertexShaderModulePath = "../ProjectA/src/Engine/Shader/GUI/Subcomponent.vert";
-				fragmentShaderModulePath = "../ProjectA/src/Engine/Shader/GUI/Subcomponent.frag";
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Shader/GUI/Subcomponent.vert.spv", vertexShaderModuleDescriptor);
 
-				break;
-			case GraphicsAPI::VULKAN:
-				vertexShaderModulePath = "../ProjectA/src/Engine/Shader/GUI/Subcomponent.vert.spv";
-				fragmentShaderModulePath = "../ProjectA/src/Engine/Shader/GUI/Subcomponent.frag.spv";
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor;
+		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				break;
-		}
-
-		const chain<uint8> vertexShaderModuleCode = FileLoader::loadByteBuffer(vertexShaderModulePath);
-		const chain<uint8> fragmentShaderModuleCode = FileLoader::loadByteBuffer(fragmentShaderModulePath);
-
-		const ref<ShaderModule> vertexShaderModule = createShaderModule(ShaderStage::VERTEX, vertexShaderModuleCode);
-		const ref<ShaderModule> fragmentShaderModule = createShaderModule(ShaderStage::FRAGMENT, fragmentShaderModuleCode);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Shader/GUI/Subcomponent.frag.spv", fragmentShaderModuleDescriptor);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.swapchain = Application::get().getSwapchain();

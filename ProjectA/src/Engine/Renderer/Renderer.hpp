@@ -52,9 +52,10 @@ namespace ProjectA {
 
 			static ref<Semaphore> createSemaphore();
 
-			static ref<ShaderModule> createShaderModule(ShaderStage stage, const chain<uint8>& code);
-
 			static ref<Texture> createTexture(const TextureDescriptor& descriptor);
+
+			// Loads and returns a SPIR-V shader module.
+			static ref<ShaderModule> loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor);
 
 		private:
 			static GraphicsAPI graphicsApi;

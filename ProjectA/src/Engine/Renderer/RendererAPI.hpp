@@ -7,7 +7,7 @@
 #include "Engine/Renderer/Device.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 #include "Engine/Renderer/Sampler.hpp"
-#include "Engine/Renderer/ShaderStage.hpp"
+#include "Engine/Renderer/ShaderModule.hpp"
 #include "Engine/Renderer/Texture.hpp"
 
 namespace ProjectA {
@@ -33,7 +33,7 @@ namespace ProjectA {
 
 			virtual ref<Semaphore> createSemaphore() const = 0;
 
-			virtual ref<ShaderModule> createShaderModule(ShaderStage stage, const chain<uint8>& code) const = 0;
+			virtual ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, const chain<uint8>& code) const = 0;
 
 			virtual ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) = 0;
 
