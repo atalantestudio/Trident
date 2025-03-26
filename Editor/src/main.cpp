@@ -7,7 +7,9 @@
 namespace ProjectA {
 	class EditorApplication : public Application {
 		public:
-			EditorApplication() : Application("ProjectA Editor") {
+			EditorApplication(const ConfigurationFile& configurationFile) :
+				Application("ProjectA Editor", configurationFile)
+			{
 				registerLayer<DemoLayer>();
 			}
 
@@ -15,6 +17,8 @@ namespace ProjectA {
 	};
 
 	Application* createApplication() {
-		return new EditorApplication();
+		const ConfigurationFile configurationFile = Filesystem::load<ConfigurationFile>("Editor.tco");
+
+		return new EditorApplication(configurationFile);
 	}
 }

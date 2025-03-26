@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/OpenGLRendererAPI.hpp"
 #include "Backend/Vulkan/VulkanRendererAPI.hpp"
 
-#include "Engine/Filesystem/FileLoader.hpp"
+#include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
@@ -101,7 +101,7 @@ namespace ProjectA {
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor) {
-		const chain<uint8> code = FileLoader::loadByteBuffer(path);
+		const chain<uint8> code = Filesystem::loadByteBuffer(path);
 
 		return rendererApi->createShaderModule(descriptor, code);
 	}

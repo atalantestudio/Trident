@@ -10,7 +10,7 @@
 #include "Engine/Input.hpp"
 #include "Engine/Layer/Layer.hpp"
 
-// 3D camera controller
+// Camera controller
 #include "Engine/Camera/Controller/OrthographicCamera3DController.hpp"
 
 // ECS
@@ -22,8 +22,8 @@
 #include "Engine/ECS/ECS.hpp"
 
 // Filesystem
-#include "Engine/Filesystem/FileLoader.hpp"
-#include "Engine/Filesystem/PNG/PNGFileLoader.hpp"
+#include "Engine/Filesystem/File/ConfigurationFile.hpp"
+#include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 
 // GUI

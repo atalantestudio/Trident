@@ -2,14 +2,14 @@
 
 #include "Engine/Application.hpp"
 #include "Engine/Debug/TextureDemo/TextureDemoRenderer.hpp"
-#include "Engine/Filesystem/FileLoader.hpp"
-#include "Engine/Filesystem/PNG/PNGFileLoader.hpp"
+#include "Engine/Filesystem/File/PNGFile.hpp"
+#include "Engine/Filesystem/Filesystem.hpp"
 
 namespace ProjectA {
 	TextureDemoRenderer::TextureDemoRenderer() {
 		// Load texture.
 		{
-			const PNGFile file = PNGFileLoader::load("../ProjectA/src/Engine/Debug/TextureDemo/Asset/Zelda.png");
+			const PNGFile file = Filesystem::load<PNGFile>("../ProjectA/src/Engine/Debug/TextureDemo/Asset/Zelda.png");
 			const uint64 size = sizeof(uint8) * file.data.size();
 
 			BufferDescriptor stagingBufferDescriptor{};

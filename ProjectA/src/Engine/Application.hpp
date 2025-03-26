@@ -5,6 +5,7 @@
 #include "Engine/API/Synchronization/Semaphore.hpp"
 #include "Engine/base.hpp"
 #include "Engine/Event/WindowEvent.hpp"
+#include "Engine/Filesystem/File/ConfigurationFile.hpp"
 #include "Engine/Layer/LayerStack.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
 #include "Engine/Window.hpp"
@@ -17,7 +18,7 @@ namespace ProjectA {
 			static Application& get();
 
 		public:
-			Application(const std::string& name = "Application");
+			Application(const std::string& name, const ConfigurationFile& configurationFile);
 
 			virtual ~Application();
 

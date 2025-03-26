@@ -6,7 +6,9 @@
 
 class SandboxApplication : public ProjectA::Application {
 	public:
-		SandboxApplication() {
+		SandboxApplication(const ProjectA::ConfigurationFile& configurationFile) :
+			ProjectA::Application("Sandbox", configurationFile)
+		{
 			registerLayer<SandboxLayer>();
 
 			Random::initialize();
@@ -16,5 +18,7 @@ class SandboxApplication : public ProjectA::Application {
 };
 
 ProjectA::Application* ProjectA::createApplication() {
-	return new SandboxApplication();
+	const ProjectA::ConfigurationFile configurationFile = ProjectA::Filesystem::load<ProjectA::ConfigurationFile>("Sandbox.tco");
+
+	return new SandboxApplication(configurationFile);
 }

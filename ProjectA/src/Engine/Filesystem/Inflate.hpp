@@ -3,6 +3,7 @@
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 
 namespace ProjectA {
+	// TODO: Make inflate() part of BitStream.
 	/**
 	 * Decompresses data using the DEFLATE compression algorithm.
 	 * References:

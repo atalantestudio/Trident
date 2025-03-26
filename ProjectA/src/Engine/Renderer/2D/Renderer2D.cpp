@@ -1,6 +1,5 @@
 #include "pch.hpp"
 
-#include "Engine/Filesystem/FileLoader.hpp"
 #include "Engine/Renderer/2D/Renderer2D.hpp"
 #include "Engine/Renderer/Buffer/Buffer.hpp"
 #include "Engine/Renderer/Buffer/BufferUsage.hpp"
@@ -80,20 +79,20 @@ namespace ProjectA {
 
 		renderPipelineDescriptor.pipelineLayout = storage.pipelineLayout;
 
-		if (Renderer::getGraphicsApi() == GraphicsAPI::OPENGL) {
-			const chain<uint8> colorTextureVertexShaderCode = FileLoader::loadByteBuffer("assets/shaders/ColorTexture.vert");
-			const chain<uint8> colorTextureFragmentShaderCode = FileLoader::loadByteBuffer("assets/shaders/ColorTexture.frag");
+		//if (Renderer::getGraphicsApi() == GraphicsAPI::OPENGL) {
+		//	const chain<uint8> colorTextureVertexShaderCode = Filesystem::loadByteBuffer("assets/shaders/ColorTexture.vert");
+		//	const chain<uint8> colorTextureFragmentShaderCode = FileLoader::loadByteBuffer("assets/shaders/ColorTexture.frag");
 
-			//renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
-			//renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
-		}
-		else if (Renderer::getGraphicsApi() == GraphicsAPI::VULKAN) {
-			const chain<uint8> colorTextureVertexShaderCode = FileLoader::loadByteBuffer("assets/shaders/ColorTexture.vert.spv");
-			const chain<uint8> colorTextureFragmentShaderCode = FileLoader::loadByteBuffer("assets/shaders/ColorTexture.frag.spv");
+		//	//renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
+		//	//renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
+		//}
+		//else if (Renderer::getGraphicsApi() == GraphicsAPI::VULKAN) {
+		//	const chain<uint8> colorTextureVertexShaderCode = FileLoader::loadByteBuffer("assets/shaders/ColorTexture.vert.spv");
+		//	const chain<uint8> colorTextureFragmentShaderCode = FileLoader::loadByteBuffer("assets/shaders/ColorTexture.frag.spv");
 
-			//renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
-			//renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
-		}
+		//	//renderPipelineDescriptor.vertexShaderModule = Renderer::createShaderModule(ShaderStage::VERTEX, colorTextureVertexShaderCode);
+		//	//renderPipelineDescriptor.fragmentShaderModule = Renderer::createShaderModule(ShaderStage::FRAGMENT, colorTextureFragmentShaderCode);
+		//}
 
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 

@@ -13,17 +13,27 @@ namespace ProjectA {
 		return *instance;
 	}
 
-	Application::Application(const std::string& name) {
+	Application::Application(const std::string& name, const ConfigurationFile& configurationFile) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		ENGINE_ASSERT(instance == nullptr, "An application instance already exists.");
 
 		instance = this;
 
-		Renderer::setGraphicsApi(GraphicsAPI::OPENGL);
+		const std::string graphicsApi = configurationFile.get<std::string>("GraphicsAPI");
 
-		constexpr uint32 extentWidth = 1280;
-		constexpr uint32 extentHeight = 720;
+		if (graphicsApi == "OpenGL") {
+			Renderer::setGraphicsApi(GraphicsAPI::OPENGL);
+		}
+		else if (graphicsApi == "Vulkan") {
+			Renderer::setGraphicsApi(GraphicsAPI::VULKAN);
+		}
+		else {
+			ENGINE_ASSERT(false, "Unhandled graphics API \"[]\".", graphicsApi);
+		}
+
+		const uint32 extentWidth = configurationFile.get<uint32>("ExtentWidth");
+		const uint32 extentHeight = configurationFile.get<uint32>("ExtentHeight");
 
 		// Initialize GLFW and create window.
 		window = Window::create(WindowData(name, extentWidth, extentHeight));
