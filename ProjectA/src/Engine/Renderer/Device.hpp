@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Engine/API/Synchronization/Fence.hpp"
+#include "Engine/API/Synchronization/Semaphore.hpp"
 #include "Engine/Renderer/CommandBuffer.hpp"
 #include "Engine/Renderer/Status.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
-#include "Engine/Synchronization/Fence.hpp"
-#include "Engine/Synchronization/Semaphore.hpp"
 
 namespace ProjectA {
 	class Device {

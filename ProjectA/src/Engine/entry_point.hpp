@@ -6,6 +6,8 @@
 	extern ProjectA::Application* createApplication();
 
 	int main(int argc, char** argv) {
+		ProjectA::FileLoader::initialize();
+
 		#ifdef BUILD_MODE_DEBUG
 			ProjectA::Logger::initialize();
 		#endif

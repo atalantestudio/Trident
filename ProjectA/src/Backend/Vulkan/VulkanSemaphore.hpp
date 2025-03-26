@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Synchronization/Semaphore.hpp"
+#include "Engine/API/Synchronization/Semaphore.hpp"
 
 namespace ProjectA {
 	class VulkanSemaphore : public Semaphore, public ObjectWrapper<VkSemaphore> {

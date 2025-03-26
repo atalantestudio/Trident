@@ -17,8 +17,8 @@ namespace ProjectA {
 			static std::size_t namePadding;
 
 		public:
-			static ref<Logger> engineLogger;
-			static ref<Logger> clientLogger;
+			static scope<Logger> engineLogger;
+			static scope<Logger> clientLogger;
 
 		private:
 			std::ostringstream stream;

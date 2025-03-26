@@ -3,6 +3,14 @@
 #include "Engine/Filesystem/FileLoader.hpp"
 
 namespace ProjectA {
+	void FileLoader::initialize() {
+		const std::filesystem::path currentDirectoryName = std::filesystem::current_path().filename();
+
+		if (currentDirectoryName != "Editor") {
+			std::filesystem::current_path("../../../Editor");
+		}
+	}
+
 	File FileLoader::loadFile(const std::string& path) {
 		std::ifstream stream(path, std::ios::binary);
 

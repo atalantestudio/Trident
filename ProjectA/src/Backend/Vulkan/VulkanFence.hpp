@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Synchronization/Fence.hpp"
+#include "Engine/API/Synchronization/Fence.hpp"
 
 namespace ProjectA {
 	class VulkanFence : public Fence, public ObjectWrapper<VkFence> {

@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Engine/API/CommandEncoder.hpp"
+#include "Engine/API/Synchronization/Fence.hpp"
+#include "Engine/API/Synchronization/Semaphore.hpp"
 #include "Engine/Renderer/Buffer/Buffer.hpp"
 #include "Engine/Renderer/Device.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 #include "Engine/Renderer/Sampler.hpp"
 #include "Engine/Renderer/ShaderStage.hpp"
 #include "Engine/Renderer/Texture.hpp"
-#include "Engine/Synchronization/Fence.hpp"
-#include "Engine/Synchronization/Semaphore.hpp"
 
 namespace ProjectA {
 	class RendererAPI {

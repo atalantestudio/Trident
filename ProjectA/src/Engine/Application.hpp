@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Engine/API/CommandEncoder.hpp"
+#include "Engine/API/Synchronization/Fence.hpp"
+#include "Engine/API/Synchronization/Semaphore.hpp"
 #include "Engine/base.hpp"
 #include "Engine/Event/WindowEvent.hpp"
 #include "Engine/ImGui/ImGuiLayer.hpp"
 #include "Engine/Layer/LayerStack.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
-#include "Engine/Synchronization/Fence.hpp"
-#include "Engine/Synchronization/Semaphore.hpp"
 #include "Engine/Window.hpp"
 
 int main(int argc, char** argv);

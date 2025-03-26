@@ -7,12 +7,12 @@ namespace ProjectA {
 
 	std::size_t Logger::namePadding = 0;
 
-	ref<Logger> Logger::engineLogger;
-	ref<Logger> Logger::clientLogger;
+	scope<Logger> Logger::engineLogger;
+	scope<Logger> Logger::clientLogger;
 
 	void Logger::initialize() {
-		engineLogger = createRef<Logger>("ENGINE", LogLevel::ALL);
-		clientLogger = createRef<Logger>("CLIENT", LogLevel::ALL);
+		engineLogger = createScope<Logger>("ENGINE", LogLevel::ALL);
+		clientLogger = createScope<Logger>("CLIENT", LogLevel::ALL);
 	}
 
 	void Logger::clear() {

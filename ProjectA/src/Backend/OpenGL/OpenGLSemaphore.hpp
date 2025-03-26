@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Synchronization/Semaphore.hpp"
+#include "Engine/API/Synchronization/Semaphore.hpp"
 
 namespace ProjectA {
 	class OpenGLSemaphore : public Semaphore {

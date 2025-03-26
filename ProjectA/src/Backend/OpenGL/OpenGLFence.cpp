@@ -3,9 +3,15 @@
 #include "Backend/OpenGL/OpenGLFence.hpp"
 
 namespace ProjectA {
-	OpenGLFence::OpenGLFence() {
+	void OpenGLFence::create() {
 		PROFILE_SCOPE(FUNCSIG);
 
-		ENGINE_TRACE("[OpenGLFence]");
+		object = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+	}
+
+	void OpenGLFence::reset() {
+		PROFILE_SCOPE(FUNCSIG);
+
+		glDeleteSync(object);
 	}
 }

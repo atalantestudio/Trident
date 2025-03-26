@@ -1,7 +1,10 @@
 #include "pch.hpp"
 
+#include <glad/glad.h>
+
 #include "Backend/OpenGL/OpenGLCommandBuffer.hpp"
 #include "Backend/OpenGL/OpenGLDevice.hpp"
+#include "Backend/OpenGL/OpenGLFence.hpp"
 
 namespace ProjectA {
 	OpenGLDevice::OpenGLDevice() {
@@ -10,9 +13,22 @@ namespace ProjectA {
 		ENGINE_TRACE("[OpenGLDevice]");
 	}
 
-	void OpenGLDevice::waitForFence(const ref<Fence>& fence) const {}
+	void OpenGLDevice::waitForFence(const ref<Fence>& fence) const {
+		OpenGLFence* glFence = static_cast<OpenGLFence*>(fence.get());
 
-	void OpenGLDevice::resetFence(const ref<Fence>& fence) const {}
+		glFence->create();
+
+		// TODO: Use glClientWaitSync or glWaitSync?
+		const GLenum status = glClientWaitSync(glFence->object, GL_SYNC_FLUSH_COMMANDS_BIT, UINT64_MAX);
+
+		ENGINE_ASSERT(status == GL_CONDITION_SATISFIED, "Failed waiting for OpenGL fence (code: []).", status);
+	}
+
+	void OpenGLDevice::resetFence(const ref<Fence>& fence) const {
+		OpenGLFence* glFence = static_cast<OpenGLFence*>(fence.get());
+
+		glFence->reset();
+	}
 
 	Status OpenGLDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const {
 		nextImageIndex = 0;

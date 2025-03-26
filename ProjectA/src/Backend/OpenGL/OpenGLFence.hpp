@@ -1,10 +1,15 @@
 #pragma once
 
-#include "Engine/Synchronization/Fence.hpp"
+#include <glad/glad.h>
+
+#include "Engine/API/ObjectWrapper.hpp"
+#include "Engine/API/Synchronization/Fence.hpp"
 
 namespace ProjectA {
-	class OpenGLFence : public Fence {
+	class OpenGLFence : public Fence, public ObjectWrapper<GLsync> {
 		public:
-			OpenGLFence();
+			void create();
+
+			void reset();
 	};
 }

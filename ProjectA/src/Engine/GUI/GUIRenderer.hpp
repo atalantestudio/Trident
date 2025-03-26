@@ -37,6 +37,9 @@ namespace ProjectA {
 			static constexpr uint32 MAX_TEXTURES = 32;
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
 
+		public:
+			ECS ecs;
+
 		private:
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
@@ -49,8 +52,5 @@ namespace ProjectA {
 			ref<CommandEncoder> commandEncoder;
 			uint32 instanceCount = 0;
 			uint32 frameIndex = 0;
-
-		public:
-			ECS ecs;
 	};
 }

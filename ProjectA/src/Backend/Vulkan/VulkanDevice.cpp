@@ -74,9 +74,9 @@ namespace ProjectA {
 		deviceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
 		deviceCreateInfo.pEnabledFeatures = &physicalDevice.features;
 
-		if (vkCreateDevice(physicalDevice.object, &deviceCreateInfo, nullptr, &object) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create device.");
-		}
+		const VkResult result = vkCreateDevice(physicalDevice.object, &deviceCreateInfo, nullptr, &object);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan device (code: []).", result);
 
 		vkGetDeviceQueue(object, physicalDevice.graphicsQueueFamilyIndex, 0, &graphicsQueue);
 		vkGetDeviceQueue(object, surface.presentQueueFamilyIndex, 0, &presentQueue);
@@ -111,13 +111,17 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		// UINT64_MAX disables the timeout.
-		vkWaitForFences(object, 1, &static_cast<const VulkanFence*>(fence.get())->object, VK_TRUE, UINT64_MAX);
+		const VkResult result = vkWaitForFences(object, 1, &static_cast<const VulkanFence*>(fence.get())->object, VK_TRUE, UINT64_MAX);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to wait for Vulkan fences (code: []).", result);
 	}
 
 	void VulkanDevice::resetFence(const ref<Fence>& fence) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		vkResetFences(object, 1, &static_cast<const VulkanFence*>(fence.get())->object);
+		const VkResult result = vkResetFences(object, 1, &static_cast<const VulkanFence*>(fence.get())->object);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan fences (code: []).", result);
 	}
 
 	Status VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const {
