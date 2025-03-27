@@ -3,29 +3,28 @@
 #include "Engine/GUI/GUISubcomponent.hpp"
 
 namespace ProjectA {
-	struct GUIObjectDescriptor {
-		vec2<float32> position;
-		vec2<float32> size;
-		uint32 colorIndex = 0;
-		uint32 textureIndex = 0;
-	};
-
 	class GUIObject {
 		public:
-			GUIObject(const GUIObjectDescriptor& descriptor);
+			GUIObject();
 
 			const vec2<float32>& getPosition() const;
 
+			void setPosition(const vec2<float32>& position);
+
 			uint32 getColorIndex() const;
 
+			void setColorIndex(uint32 colorIndex);
+
 			uint32 getTextureIndex() const;
+
+			void setTextureIndex(uint32 textureIndex);
 
 			const chain<GUISubcomponent>& getSubcomponents() const;
 
 		protected:
-			vec2<float32> position;
-			uint32 colorIndex;
-			uint32 textureIndex;
+			vec2<float32> position = {0.0f, 0.0f};
+			uint32 colorIndex = 0;
+			uint32 textureIndex = 0;
 			chain<GUISubcomponent> subcomponents;
 	};
 }

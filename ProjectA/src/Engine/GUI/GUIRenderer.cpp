@@ -1,6 +1,8 @@
 #include "pch.hpp"
 
 #include "Engine/Application.hpp"
+#include "Engine/Filesystem/File/PNGFile.hpp"
+#include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
 
 namespace ProjectA {
@@ -131,6 +133,78 @@ namespace ProjectA {
 		}
 	}
 
+	ref<Texture> GUIRenderer::loadTexture(const std::string& path) {
+		const PNGFile file = Filesystem::load<PNGFile>(path);
+		const uint64 size = sizeof(uint8) * file.data.size();
+
+		BufferDescriptor stagingBufferDescriptor{};
+		stagingBufferDescriptor.size = size;
+		stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+
+		const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
+
+		const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
+
+		std::copy(file.data.begin(), file.data.end(), static_cast<uint8*>(mappedRange));
+
+		stagingBuffer->unmap();
+
+		return loadTexture(stagingBuffer, file.width, file.height);
+	}
+
+	ref<Texture> GUIRenderer::loadTexture(const ref<Buffer>& buffer, uint32 width, uint32 height) {
+		TextureDescriptor textureDescriptor{};
+		textureDescriptor.type = TextureType::TEXTURE_2D;
+		textureDescriptor.format = TextureFormat::R8G8B8A8_SRGB;
+		textureDescriptor.usage = TextureUsage::TRANSFER_DST | TextureUsage::SAMPLED;
+		textureDescriptor.width = width;
+		textureDescriptor.height = height;
+		textureDescriptor.depth = 1;
+		textureDescriptor.mipLevelCount = 1;
+		textureDescriptor.arrayLayerCount = 1;
+		textureDescriptor.sampleCount = 1;
+
+		const ref<Texture> texture = createTexture(textureDescriptor);
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+
+		commandEncoder->begin();
+		commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL);
+		commandEncoder->copyBufferToTexture(buffer, texture, width, height, 0);
+		commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL);
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		const ref<Device>& device = getDevice();
+
+		device->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->waitIdle();
+
+		return texture;
+	}
+
+	ref<Texture> GUIRenderer::loadDefaultTexture() {
+		const std::array<uint8, 4> data = {1, 1, 1, 1};
+		const uint64 size = sizeof(uint8) * data.size();
+
+		BufferDescriptor stagingBufferDescriptor{};
+		stagingBufferDescriptor.size = size;
+		stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+
+		const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
+
+		const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
+
+		std::copy(data.begin(), data.end(), static_cast<uint8*>(mappedRange));
+
+		stagingBuffer->unmap();
+
+		return loadTexture(stagingBuffer, 1, 1);
+	}
+
 	void GUIRenderer::registerEntityPool(const ComponentPool<GUIComponent>& componentPool) {
 		instanceCount = componentPool.componentCount;
 
@@ -171,8 +245,7 @@ namespace ProjectA {
 		commandEncoder->drawIndexed(6, instanceCount, 0);
 		commandEncoder->endRenderPass();
 
-		frameIndex += 1;
-		frameIndex %= MAX_FRAMES_IN_FLIGHT;
+		frameIndex = (frameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void GUIRenderer::updateCamera() const {

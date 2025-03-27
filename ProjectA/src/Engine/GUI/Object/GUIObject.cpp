@@ -3,29 +3,30 @@
 #include "Engine/GUI/Object/GUIObject.hpp"
 
 namespace ProjectA {
-	GUIObject::GUIObject(const GUIObjectDescriptor& descriptor) :
-		position(descriptor.position),
-		colorIndex(descriptor.colorIndex),
-		textureIndex(descriptor.textureIndex)
-	{
-		GUISubcomponent subcomponent;
-		subcomponent.offset = {0.0f, 0.0f};
-		subcomponent.size = descriptor.size;
-		subcomponent.uv = {0.0f, 0.0f};
-
-		subcomponents.emplace_back(subcomponent);
-	}
+	GUIObject::GUIObject() {}
 
 	const vec2<float32>& GUIObject::getPosition() const {
 		return position;
+	}
+
+	void GUIObject::setPosition(const vec2<float32>& position) {
+		this->position = position;
 	}
 
 	uint32 GUIObject::getColorIndex() const {
 		return colorIndex;
 	}
 
+	void GUIObject::setColorIndex(uint32 colorIndex) {
+		this->colorIndex = colorIndex;
+	}
+
 	uint32 GUIObject::getTextureIndex() const {
 		return textureIndex;
+	}
+
+	void GUIObject::setTextureIndex(uint32 textureIndex) {
+		this->textureIndex = textureIndex;
 	}
 
 	const chain<GUISubcomponent>& GUIObject::getSubcomponents() const {

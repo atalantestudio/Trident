@@ -29,6 +29,7 @@
 // GUI
 #include "Engine/GUI/GUILayer.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
+#include "Engine/GUI/Object/GUITextObject.hpp"
 
 // ImGui
 #include "Engine/ImGui/ImGuiLayer.hpp"

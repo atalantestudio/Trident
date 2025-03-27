@@ -10,9 +10,30 @@ namespace ProjectA {
 
 	class ColoredQuad : public GUIObject {
 		public:
-			ColoredQuad(const vec2<float32>& position, const vec2<float32>& size, uint32 colorIndex) :
-				GUIObject({position, size, colorIndex, 0})
-			{}
+			ColoredQuad(const vec2<float32>& position, const vec2<float32>& size, uint32 colorIndex) {
+				setColorIndex(colorIndex);
+
+				GUISubcomponent subcomponent;
+				subcomponent.offset = position;
+				subcomponent.size = size;
+				subcomponent.uv = {0.0f, 0.0f};
+
+				subcomponents.emplace_back(subcomponent);
+			}
+	};
+
+	class TexturedQuad : public GUIObject {
+		public:
+			TexturedQuad(const vec2<float32>& position, const vec2<float32>& size, uint32 textureIndex) {
+				setTextureIndex(textureIndex);
+
+				GUISubcomponent subcomponent;
+				subcomponent.offset = position;
+				subcomponent.size = size;
+				subcomponent.uv = {0.0f, 0.0f};
+
+				subcomponents.emplace_back(subcomponent);
+			}
 	};
 
 	class DemoScriptEntity : public ScriptEntity {

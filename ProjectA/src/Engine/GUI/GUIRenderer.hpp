@@ -10,6 +10,12 @@ namespace ProjectA {
 		public:
 			GUIRenderer();
 
+			ref<Texture> loadTexture(const std::string& path);
+
+			ref<Texture> loadTexture(const ref<Buffer>& buffer, uint32 width, uint32 height);
+
+			ref<Texture> loadDefaultTexture();
+
 			void registerEntityPool(const ComponentPool<GUIComponent>& componentPool);
 
 			void registerColors(const chain<vec4<float32>>& colors) const;

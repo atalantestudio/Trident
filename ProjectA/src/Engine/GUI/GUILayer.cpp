@@ -2,12 +2,16 @@
 
 #include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/ECS/Component/ScriptComponent.hpp"
+#include "Engine/GUI/Font/BitmapFont.hpp"
+#include "Engine/GUI/Font/GlyphMap.hpp"
 #include "Engine/GUI/GUILayer.hpp"
 
 namespace ProjectA {
 	GUILayer::GUILayer() {
 		ecs.registerComponent<GUIComponent>();
 		ecs.registerComponent<ScriptComponent>();
+
+		loadDefaultTexture();
 	}
 
 	GUILayer::~GUILayer() {
@@ -21,6 +25,26 @@ namespace ProjectA {
 			component->entity->onDestroy();
 			component->destroyScript(component);
 		}
+	}
+
+	void GUILayer::loadDefaultFont() {
+		const ref<BitmapFont> defaultFont = createRef<BitmapFont>();
+		defaultFont->textureIndex = static_cast<uint32>(textures.size());
+		defaultFont->glyphMap.map = QUIVER_GLYPH_MAP;
+        defaultFont->glyphMap.base = 32;
+        defaultFont->glyphMap.count = 220;
+        defaultFont->tileHeight = 12;
+        defaultFont->tileSpacing = 1;
+
+		fonts.emplace_back(defaultFont);
+
+		loadTexture("../ProjectA/src/Asset/Texture/Quiver.png");
+	}
+
+	void GUILayer::loadTexture(const std::string& path) {
+		const ref<Texture> texture = renderer.loadTexture(path);
+
+		textures.emplace_back(texture);
 	}
 
 	void GUILayer::append(const GUIObject& object) {
@@ -75,5 +99,11 @@ namespace ProjectA {
 
 			component->entity->onUpdate();
 		}
+	}
+
+	void GUILayer::loadDefaultTexture() {
+		const ref<Texture> texture = renderer.loadDefaultTexture();
+
+		textures.emplace_back(texture);
 	}
 }

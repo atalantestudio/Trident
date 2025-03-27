@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/GUI/Font/Font.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/GUI/Object/GUIObject.hpp"
 #include "Engine/Layer/Layer.hpp"
@@ -11,6 +12,10 @@ namespace ProjectA {
 
 			~GUILayer();
 
+			void loadDefaultFont();
+
+			void loadTexture(const std::string& path);
+
 			void append(const GUIObject& object);
 
 			void registerColors(const chain<vec4<float32>>& colors) const;
@@ -21,11 +26,18 @@ namespace ProjectA {
 
 			void updateScriptComponents() const;
 
+		public:
+			chain<ref<Font>> fonts;
+
+		private:
+			void loadDefaultTexture();
+
 		private:
 			static constexpr uint8 MAX_GUI_COMPONENTS = 100;
 
 		private:
 			ECS ecs;
 			GUIRenderer renderer;
+			chain<ref<Texture>> textures;
 	};
 }
