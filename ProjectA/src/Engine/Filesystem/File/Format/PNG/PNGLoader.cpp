@@ -1,10 +1,9 @@
 #include "pch.hpp"
 
-#include "Engine/Filesystem/Compression/HuffmanCodeDictionary.hpp"
+#include "Engine/Compression/HuffmanCodeDictionary.hpp"
 #include "Engine/Filesystem/File/Format/PNG/FilterType.hpp"
 #include "Engine/Filesystem/File/PNGFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
-#include "Engine/Filesystem/Inflate.hpp"
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
@@ -186,7 +185,7 @@ namespace ProjectA {
 
 		const uint32 finalSize = pngFile.width * pngFile.height * 4 + (pngFile.height * 1);
 
-		const chain<uint8> unfilteredData = inflate(bitStream, finalSize);
+		const chain<uint8> unfilteredData = bitStream.inflate(finalSize);
 
 		pngFile.data.resize(pngFile.width * pngFile.height * 4);
 

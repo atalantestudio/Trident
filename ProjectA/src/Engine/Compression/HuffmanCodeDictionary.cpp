@@ -1,27 +1,14 @@
 #include "pch.hpp"
 
-#include "Engine/Filesystem/Compression/HuffmanCodeDictionary.hpp"
+#include "Engine/Compression/HuffmanCodeDictionary.hpp"
 
 namespace ProjectA {
-	uint32 HuffmanCodeDictionary::reverseBits(uint32 value, uint32 bitCount) {
-		uint32 result = 0;
-
-		for (uint32 bitIndex = 0; bitIndex <= (bitCount / 2); bitIndex += 1) {
-			uint32 inverse = (bitCount - (bitIndex + 1));
-
-			result |= ((value >> bitIndex) & 0x1) << inverse;
-			result |= ((value >> inverse) & 0x1) << bitIndex;
-		}
-
-		return result;
-	}
-
 	HuffmanCodeDictionary::HuffmanCodeDictionary(uint8 maxCodeLength) :
 		maxCodeLength(maxCodeLength)
 	{
 		ENGINE_ASSERT(maxCodeLength < MAX_CODE_LENGTH, "The maximum code length is overflowing.");
 
-		codes.resize(static_cast<std::size_t>(1) << maxCodeLength);
+		dictionary.resize(static_cast<std::size_t>(1) << maxCodeLength);
 	}
 
 	void HuffmanCodeDictionary::compute(const uint8* codeLengths, uint16 symbolCount) {
@@ -71,10 +58,10 @@ namespace ProjectA {
 				const uint32 baseIndex = (code << arbitraryBits) | entryIndex;
 				const uint32 index = reverseBits(baseIndex, maxCodeLength);
 
-				HuffmanCode& entry = codes[index];
+				HuffmanCode& huffmanCode = dictionary[index];
 
-				entry.symbolIndex = symbolIndex;
-				entry.bitLength = codeLength;
+				huffmanCode.code = symbolIndex;
+				huffmanCode.bitLength = codeLength;
 			}
 		}
 	}
@@ -83,14 +70,27 @@ namespace ProjectA {
 		// Read as many bits as possible to get a code entry index.
 		const uint16 codeIndex = stream.peek<uint16>(maxCodeLength);
 
-		ENGINE_ASSERT(codeIndex < codes.size(), "The code index is overflowing.");
+		ENGINE_ASSERT(codeIndex < dictionary.size(), "The code index is overflowing.");
 
-		const HuffmanCode& code = codes[codeIndex];
+		const HuffmanCode& huffmanCode = dictionary[codeIndex];
 
-		ENGINE_ASSERT(code.bitLength > 0, "Bit length for code is 0.");
+		ENGINE_ASSERT(huffmanCode.bitLength > 0, "The bit length is 0.");
 
-		stream.jump(code.bitLength);
+		stream.jump(huffmanCode.bitLength);
 
-		return code.symbolIndex;
+		return huffmanCode.code;
+	}
+
+	uint32 HuffmanCodeDictionary::reverseBits(uint32 value, uint8 bitCount) {
+		uint32 result = 0;
+
+		for (uint8 bitIndex = 0; bitIndex <= (bitCount / 2); bitIndex += 1) {
+			const uint8 inverse = (bitCount - (bitIndex + 1));
+
+			result |= ((value >> bitIndex) & 0x1) << inverse;
+			result |= ((value >> inverse) & 0x1) << bitIndex;
+		}
+
+		return result;
 	}
 }

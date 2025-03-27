@@ -1,13 +1,10 @@
 #pragma once
 
-#include "Engine/Filesystem/Compression/HuffmanCode.hpp"
+#include "Engine/Compression/HuffmanCode.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 
 namespace ProjectA {
 	class HuffmanCodeDictionary {
-		public:
-			static uint32 reverseBits(uint32 value, uint32 bitCount);
-
 		public:
 			HuffmanCodeDictionary(uint8 maxCodeLength);
 
@@ -18,10 +15,13 @@ namespace ProjectA {
 			uint16 decode(BitStream& stream) const;
 
 		private:
+			static uint32 reverseBits(uint32 value, uint8 bitCount);
+
+		private:
 			static constexpr uint8 MAX_CODE_LENGTH = 16;
 
 		private:
-			uint8 maxCodeLength;
-			chain<HuffmanCode> codes;
+			const uint8 maxCodeLength;
+			chain<HuffmanCode> dictionary;
 	};
 }

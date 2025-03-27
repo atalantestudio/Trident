@@ -64,6 +64,15 @@ namespace ProjectA {
 				return value;
 			}
 
+			/**
+			 * Decompresses data using the DEFLATE compression algorithm.
+			 * References:
+			 * 
+			 *    DEFLATE Compressed Data Format Specification (https://datatracker.ietf.org/doc/html/rfc1950)
+			 *    ZLIB Compressed Data Format Specification (https://datatracker.ietf.org/doc/html/rfc1951)
+			 */
+			chain<uint8> inflate(uint64 uncompressedSize);
+
 		private:
 			static constexpr uint8 MAX_READ_OR_PEEK_BIT_COUNT = sizeof(StreamSize) * 8;
 
