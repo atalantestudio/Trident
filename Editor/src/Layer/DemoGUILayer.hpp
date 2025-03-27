@@ -6,10 +6,13 @@ namespace ProjectA {
 	class DemoGUILayer : public GUILayer {
 		public:
 			DemoGUILayer();
+	};
 
-			virtual ~DemoGUILayer() = default;
-
-			void update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
+	class ColoredQuad : public GUIObject {
+		public:
+			ColoredQuad(const vec2<float32>& position, const vec2<float32>& size, uint32 colorIndex) :
+				GUIObject({position, size, colorIndex, 0})
+			{}
 	};
 
 	class DemoScriptEntity : public ScriptEntity {

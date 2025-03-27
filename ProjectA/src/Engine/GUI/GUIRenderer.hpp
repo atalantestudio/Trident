@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/ECS/ECS.hpp"
 #include "Engine/Event/WindowEvent.hpp"
 #include "Engine/Renderer/Renderer.hpp"
@@ -9,9 +10,7 @@ namespace ProjectA {
 		public:
 			GUIRenderer();
 
-			~GUIRenderer();
-
-			void registerEntities();
+			void registerEntityPool(const ComponentPool<GUIComponent>& componentPool);
 
 			void registerColors(const chain<vec4<float32>>& colors) const;
 
@@ -20,10 +19,6 @@ namespace ProjectA {
 			void onEvent(Event& event) override;
 
 		private:
-			void updateScriptComponents() const;
-
-			void destroyScriptComponents() const;
-
 			void updateCamera() const;
 
 		private:
@@ -36,9 +31,6 @@ namespace ProjectA {
 			static constexpr uint32 MAX_COLORS = 32;
 			static constexpr uint32 MAX_TEXTURES = 32;
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
-
-		public:
-			ECS ecs;
 
 		private:
 			ref<PipelineLayout> pipelineLayout;

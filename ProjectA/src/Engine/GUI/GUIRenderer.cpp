@@ -1,8 +1,6 @@
 #include "pch.hpp"
 
 #include "Engine/Application.hpp"
-#include "Engine/ECS/Component/GUIComponent.hpp"
-#include "Engine/ECS/Component/ScriptComponent.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
 
 namespace ProjectA {
@@ -131,22 +129,9 @@ namespace ProjectA {
 
 			commandEncoder = createCommandEncoder(commandBufferDescriptor);
 		}
-
-		ecs.defineComponent<GUIComponent>();
-		ecs.defineComponent<ScriptComponent>();
 	}
 
-	GUIRenderer::~GUIRenderer() {
-		destroyScriptComponents();
-	}
-
-	void GUIRenderer::registerEntities() {
-		const ComponentPool<GUIComponent>& componentPool = ecs.getComponentPool<GUIComponent>();
-
-		if (componentPool.componentCount >= MAX_QUADS) {
-			throw std::runtime_error("Too many alive components.");
-		}
-
+	void GUIRenderer::registerEntityPool(const ComponentPool<GUIComponent>& componentPool) {
 		instanceCount = componentPool.componentCount;
 
 		BufferMappedRange mappedRange = transformVertexBuffer->map(0, sizeof(GUIComponent) * instanceCount);
@@ -165,7 +150,6 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
-		updateScriptComponents();
 		updateCamera();
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
@@ -189,36 +173,6 @@ namespace ProjectA {
 
 		frameIndex += 1;
 		frameIndex %= MAX_FRAMES_IN_FLIGHT;
-	}
-
-	void GUIRenderer::updateScriptComponents() const {
-		ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
-
-		ScriptComponent* begin = componentPool.components.data();
-
-		for (uint32 componentIndex = 0; componentIndex < componentPool.componentCount; componentIndex += 1) {
-			ScriptComponent* component = begin + componentIndex;
-
-			if (component->entity == nullptr) {
-				component->entity = component->constructScript();
-				component->entity->onConstruct();
-			}
-
-			component->entity->onUpdate();
-		}
-	}
-
-	void GUIRenderer::destroyScriptComponents() const {
-		ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
-
-		ScriptComponent* begin = componentPool.components.data();
-
-		for (uint32 componentIndex = 0; componentIndex < componentPool.componentCount; componentIndex += 1) {
-			ScriptComponent* component = begin + componentIndex;
-
-			component->entity->onDestroy();
-			component->destroyScript(component);
-		}
 	}
 
 	void GUIRenderer::updateCamera() const {

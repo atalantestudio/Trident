@@ -1,119 +1,8 @@
 #pragma once
 
-#include "pch.hpp"
+#include "Engine/ECS/Pool/ComponentPool.hpp"
 
 namespace ProjectA {
-	typedef uint32 Entity;
-	typedef uint32 ComponentType;
-
-	static constexpr Entity MAX_ENTITIES = 100000;
-
-	static constexpr ComponentType MAX_COMPONENT_POOLS = 64;
-	static constexpr ComponentType MAX_COMPONENT_PER_ENTITY = 64;
-
-	class Pool {};
-
-	template<typename T>
-	class ComponentPool : public Pool {
-		public:
-			std::array<Entity, MAX_ENTITIES> entityToComponentIndex; // Sparse array
-			chain<uint32> componentIndexToEntity; // Dense array
-			chain<T> components; // Dense array
-
-			// Number of currently alive components.
-			uint32 componentCount = 0;
-
-		public:
-			ComponentPool() {
-				ENGINE_TRACE("[ComponentPool]");
-
-				// Fill array with null index.
-				for (Entity& entity : entityToComponentIndex) {
-					entity = nullComponentIndex;
-				}
-			}
-
-			// Returns the component of type T belonging to the provided entity.
-			const T& getComponent(Entity entity) const {
-				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
-
-				const Entity componentIndex = entityToComponentIndex[entity];
-
-				ENGINE_ASSERT(componentIndex != nullComponentIndex, "Entity [] has no components.", entity);
-
-				return entityComponents[componentIndex].component;
-			}
-
-			// Returns the component of type T belonging to the provided entity.
-			T& getComponent(Entity entity) {
-				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
-
-				const Entity componentIndex = entityToComponentIndex[entity];
-
-				ENGINE_ASSERT(componentIndex != nullComponentIndex, "Entity [] has no components.", entity);
-
-				return entityComponents[componentIndex].component;
-			}
-
-			// TODO: hasComponent.
-
-			// Sets or replaces the component of type T belonging to the provided entity.
-			void setComponent(Entity entity, const T& component) {
-				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
-
-				const uint32 componentIndex = entityToComponentIndex[entity];
-
-				if (componentIndex != nullComponentIndex) {
-					// Replace (overwrite) component.
-					components[componentIndex] = component;
-
-					return;
-				}
-
-				// Set (add) component.
-				entityToComponentIndex[entity] = componentCount;
-
-				components.emplace_back(component);
-				componentIndexToEntity.emplace_back(entity);
-
-				componentCount += 1;
-			}
-
-			// Erases the component of type T belonging to the provided entity.
-			void resetComponent(Entity entity) {
-				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
-
-				const Entity componentIndex = entityToComponentIndex[entity];
-
-				if (componentIndex == nullComponentIndex) {
-					ENGINE_ERROR("The component for the entity [] is already reset.", entity);
-
-					return;
-				}
-
-				// Don't touch the deleted data; instead wait for another component to overwrite it.
-				componentCount--;
-
-				T& component = components[componentIndex];
-				T& lastComponent = components[componentCount];
-
-				// Move the component to be deleted to the end of the list.
-				std::swap(component, lastComponent);
-
-				const Entity lastComponentEntity = componentIndexToEntity[componentCount];
-
-				// Since the components have been swapped, the entity pointing to lastComponent
-				// now points to the component at componentIndex.
-				entityToComponentIndex[lastComponentEntity] = componentIndex;
-
-				// Reset the index of the component to be deleted.
-				entityToComponentIndex[entity] = nullComponentIndex;
-			}
-
-		private:
-			static constexpr uint32 nullComponentIndex = std::numeric_limits<Entity>::max();
-	};
-
 	class ECS {
 		public:
 			chain<Entity> availableEntities;
@@ -121,30 +10,11 @@ namespace ProjectA {
 			chain<scope<Pool>> componentPools;
 
 		public:
-			Entity createEntity() {
-				Entity entity = 0;
-
-				if (!availableEntities.empty()) {
-					// Take the next entity from the available list.
-					entity = availableEntities.back();
-
-					availableEntities.pop_back();
-				}
-				else {
-					// Take the next entity from the iterator.
-					ENGINE_ASSERT(nextEntity < MAX_ENTITIES, "Entity limit reached.");
-
-					entity = nextEntity;
-
-					nextEntity += 1;
-				}
-
-				return entity;
-			}
+			Entity createEntity();
 
 			// Allocates space for a pool of component type T.
 			template<typename T>
-			void defineComponent() {
+			void registerComponent() {
 				ENGINE_ASSERT(componentPools.size() < MAX_COMPONENT_POOLS, "Component pool limit reached.");
 
 				const uint32 componentPoolIndex = getComponentPoolIndex<T>();
@@ -200,15 +70,7 @@ namespace ProjectA {
 			}
 
 		private:
-			static uint32 getNextComponentPoolIndex() {
-				static uint32 componentPoolIndex = 0;
-
-				const uint32 index = componentPoolIndex;
-
-				componentPoolIndex += 1;
-
-				return index;
-			}
+			static uint32 getNextComponentPoolIndex();
 
 			// Returns a unique index for each distinct type T.
 			template<typename T>
@@ -217,5 +79,8 @@ namespace ProjectA {
 
 				return componentPoolIndex;
 			}
+
+		private:
+			static constexpr uint8 MAX_COMPONENT_POOLS = 64;
 	};
 }
