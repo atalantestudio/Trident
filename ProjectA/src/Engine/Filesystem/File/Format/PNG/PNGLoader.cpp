@@ -85,8 +85,8 @@ namespace ProjectA {
 		compressedData.resize(compressedData.size() + chunkByteLength);
 
 		std::copy(
-			stream.getStream() + stream.getByteOffset(),
-			stream.getStream() + stream.getByteOffset() + chunkByteLength,
+			stream.getBytePosition(),
+			stream.getBytePosition() + chunkByteLength,
 			compressedData.end() - chunkByteLength
 		);
 

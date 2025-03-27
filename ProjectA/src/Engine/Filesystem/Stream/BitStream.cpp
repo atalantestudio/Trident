@@ -8,56 +8,41 @@ namespace ProjectA {
 		byteSize(byteSize),
 		bitOffset(0)
 	{
-		bitBuffer = *(acc_t*)(stream + byteOffset);
-	}
-
-	uint64 BitStream::getByteOffset() const {
-		return byteOffset;
+		bitBuffer = *(StreamSize*)(stream + byteOffset);
 	}
 
 	uint64 BitStream::getBitOffset() const {
 		return byteOffset * 8 + bitOffset;
 	}
 
-	uint64 BitStream::getRelativeBitOffset() const {
-		return bitOffset;
-	}
-
 	const uint8* BitStream::getBytePosition() const {
-		return stream + byteOffset + bitOffset / 8;
+		return stream + byteOffset;
 	}
 
 	uint64 BitStream::getRemainingBitSize() const {
 		return (byteSize - byteOffset) * 8 - bitOffset;
 	}
 
-	uint64 BitStream::getRemainingByteSize() const {
-		return byteSize - byteOffset;
-	}
-
 	void BitStream::jump(uint64 bitCount) {
-		ENGINE_ASSERT(bitCount <= getRemainingBitSize(), "BitStream: Attempted to jump [] bits, but only [] were left.", bitCount, getRemainingBitSize());
+		const uint64 remainingBitSize = getRemainingBitSize();
+
+		ENGINE_ASSERT(bitCount <= remainingBitSize, "Attempted to jump [] bits, but only [] were remaining.", bitCount, remainingBitSize);
 
 		uint8 jumpBitCount = 0;
 
-		if (bitCount > static_cast<uint8>((sizeof(acc_t) * 8 - 1) - bitOffset)) {
+		if (bitCount > static_cast<uint8>((sizeof(StreamSize) * 8 - 1) - bitOffset)) {
 			jumpBitCount = bitOffset;
 
-			const uint64 jumpByteCount = (bitOffset + bitCount) / (sizeof(acc_t) * 8);
+			const uint64 jumpByteCount = (bitOffset + bitCount) / (sizeof(bitBuffer) * 8);
 
 			bitOffset = 0;
-			byteOffset += sizeof(acc_t) * jumpByteCount;
-			bitBuffer = *(acc_t*)(stream + byteOffset);
+			byteOffset += sizeof(bitBuffer) * jumpByteCount;
+			bitBuffer = *(StreamSize*)(stream + byteOffset);
 		}
 
-		jumpBitCount = (jumpBitCount + bitCount) % (sizeof(acc_t) * 8);
+		jumpBitCount = (jumpBitCount + bitCount) % (sizeof(bitBuffer) * 8);
 
 		bitOffset += jumpBitCount;
 		bitBuffer >>= jumpBitCount;
-	}
-
-	void BitStream::close() {
-		byteOffset = byteSize;
-		bitOffset = 0;
 	}
 }
