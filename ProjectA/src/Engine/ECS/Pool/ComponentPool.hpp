@@ -81,7 +81,7 @@ namespace ProjectA {
 				}
 
 				// Don't touch the deleted data; instead wait for another component to overwrite it.
-				componentCount--;
+				componentCount -= 1;
 
 				T& component = components[componentIndex];
 				T& lastComponent = components[componentCount];

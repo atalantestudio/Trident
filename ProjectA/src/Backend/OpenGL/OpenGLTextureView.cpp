@@ -9,8 +9,6 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[OpenGLTextureView]");
-
 		// glGenTextures must be used here because the view must not be assigned a target.
 		glGenTextures(1, &object);
 
@@ -19,8 +17,6 @@ namespace ProjectA {
 
 	OpenGLTextureView::~OpenGLTextureView() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~OpenGLTextureView]");
 
 		glDeleteTextures(1, &object);
 	}

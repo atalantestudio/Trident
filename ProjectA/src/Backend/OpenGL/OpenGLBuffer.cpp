@@ -10,8 +10,6 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[OpenGLBuffer]");
-
 		glCreateBuffers(1, &object);
 
 		glBindBuffer(target, object);
@@ -24,8 +22,6 @@ namespace ProjectA {
 
 	OpenGLBuffer::~OpenGLBuffer() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~OpenGLBuffer]");
 
 		glDeleteBuffers(1, &object);
 	}

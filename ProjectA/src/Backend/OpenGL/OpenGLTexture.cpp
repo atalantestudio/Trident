@@ -12,8 +12,6 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_TRACE("[OpenGLTexture]");
-
 		glCreateTextures(target, 1, &object);
 
 		glTextureStorage2D(object, descriptor.mipLevelCount, GL_RGBA8, descriptor.width, descriptor.height);
@@ -21,8 +19,6 @@ namespace ProjectA {
 
 	OpenGLTexture::~OpenGLTexture() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		ENGINE_TRACE("[~OpenGLTexture]");
 
 		glDeleteTextures(1, &object);
 	}

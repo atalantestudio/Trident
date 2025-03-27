@@ -1,12 +1,7 @@
 #include "pch.hpp"
 
-#include "Backend/OpenGL/DescriptorType.hpp"
-#include "Backend/OpenGL/OpenGLBuffer.hpp"
-#include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
-#include "Backend/OpenGL/OpenGLSampler.hpp"
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
-#include "Backend/OpenGL/OpenGLTextureView.hpp"
 #include "Backend/OpenGL/VertexInputAttributeType.hpp"
 
 namespace ProjectA {
@@ -17,8 +12,6 @@ namespace ProjectA {
 		cullMode(cullModes[static_cast<uint32>(descriptor.cullMode)])
 	{
 		PROFILE_SCOPE(FUNCSIG);
-
-		ENGINE_TRACE("[OpenGLRenderPipeline]");
 
 		glCreateVertexArrays(1, &vertexArray);
 		glBindVertexArray(vertexArray);
@@ -87,51 +80,10 @@ namespace ProjectA {
 				glVertexBindingDivisor(vertexInputAttribute.location, 1);
 			}
 		}
-
-		const OpenGLPipelineLayout* pipelineLayout = static_cast<const OpenGLPipelineLayout*>(descriptor.pipelineLayout.get());
-
-		// GLSL shaders are required to specify the block index and the binding,
-		// saving the calls to glGetUniformBlockIndex and glUniformBlockBinding.
-		for (uint32 setIndex = 0; setIndex < pipelineLayout->descriptorSetLayouts.size(); setIndex += 1) {
-			const DescriptorSetLayout& descriptorSetLayout = pipelineLayout->descriptorSetLayouts[setIndex];
-
-			for (uint32 bindingIndex = 0; bindingIndex < descriptorSetLayout.bindings.size(); bindingIndex += 1) {
-				const DescriptorSetLayoutBinding& binding = descriptorSetLayout.bindings[bindingIndex];
-
-				for (const ref<Buffer>& buffer : binding.buffers) {
-					const OpenGLBuffer* glBuffer = static_cast<const OpenGLBuffer*>(buffer.get());
-
-					/*switch (glBuffer->target) {
-						case GL_UNIFORM_BUFFER:
-							glUniformBlockBinding(program, setIndex, bindingIndex);
-
-							break;
-						case GL_SHADER_STORAGE_BUFFER:
-							glShaderStorageBlockBinding(program, setIndex, bindingIndex);
-
-							break;
-						default:
-							throw std::runtime_error("Buffer target not supported.");
-					}*/
-
-					glBindBufferRange(getGlDescriptorType(binding.descriptorType), bindingIndex, glBuffer->object, 0, glBuffer->size);
-				}
-
-				for (uint32 textureViewIndex = 0; textureViewIndex < binding.textureViews.size(); textureViewIndex += 1) {
-					const OpenGLTextureView* textureView = static_cast<const OpenGLTextureView*>(binding.textureViews[textureViewIndex].get());
-					const OpenGLSampler* sampler = static_cast<const OpenGLSampler*>(binding.samplers[textureViewIndex].get());
-
-					glBindTextureUnit(bindingIndex, textureView->object);
-					glBindSampler(bindingIndex, sampler->object);
-				}
-			}
-		}
 	}
 
 	OpenGLRenderPipeline::~OpenGLRenderPipeline() {
 		PROFILE_SCOPE(FUNCSIG);
-
-		ENGINE_TRACE("[~OpenGLRenderPipeline]");
 
 		glDeleteProgram(program);
 		glDeleteVertexArrays(1, &vertexArray);

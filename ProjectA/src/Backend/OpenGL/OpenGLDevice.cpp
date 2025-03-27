@@ -9,8 +9,6 @@
 namespace ProjectA {
 	OpenGLDevice::OpenGLDevice() {
 		PROFILE_SCOPE(FUNCSIG);
-
-		ENGINE_TRACE("[OpenGLDevice]");
 	}
 
 	void OpenGLDevice::waitForFence(const ref<Fence>& fence) const {

@@ -19,8 +19,6 @@
 namespace ProjectA {
 	OpenGLCommandEncoder::OpenGLCommandEncoder(const CommandBufferDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCSIG);
-
-		ENGINE_TRACE("[OpenGLCommandEncoder]");
 	}
 
 	void OpenGLCommandEncoder::begin() const {}

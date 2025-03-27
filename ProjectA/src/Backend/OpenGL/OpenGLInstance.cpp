@@ -8,8 +8,6 @@ namespace ProjectA {
 	OpenGLInstance::OpenGLInstance() {
 		PROFILE_SCOPE(FUNCSIG);
 
-		ENGINE_TRACE("[OpenGLInstance]");
-
 		#ifdef DEBUG_ENABLE_MESSENGER
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

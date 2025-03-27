@@ -66,6 +66,6 @@ void ParticleSystem::emitParticle(const ParticleProperties& properties) {
 	particle.startSize = properties.startSize + properties.sizeBias * (Random::get<ProjectA::float32>() - 0.5f);
 	particle.endSize = properties.endSize;
 
-	poolIndex--;
+	poolIndex -= 1;
 	poolIndex %= particlePool.size();
 }

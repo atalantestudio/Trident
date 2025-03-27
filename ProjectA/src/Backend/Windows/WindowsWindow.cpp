@@ -191,10 +191,10 @@ namespace ProjectA {
 
 		glfwDestroyWindow(window);
 
-		glfwWindowCount--;
+		glfwWindowCount -= 1;
 
 		if (glfwWindowCount == 0) {
-			ENGINE_TRACE("Terminating GLFW...");
+			ENGINE_TRACE("Terminating GLFW.");
 
 			glfwTerminate();
 		}

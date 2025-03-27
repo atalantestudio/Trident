@@ -7,7 +7,5 @@
 namespace ProjectA {
 	OpenGLRenderPass::OpenGLRenderPass(const RenderPassDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCSIG);
-
-		ENGINE_TRACE("[OpenGLRenderPass]");
 	}
 }

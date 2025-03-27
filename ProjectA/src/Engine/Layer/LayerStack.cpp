@@ -29,7 +29,7 @@ namespace ProjectA {
 
 		layers.erase(iterator);
 
-		layerInsertionIndex--;
+		layerInsertionIndex -= 1;
 	}
 
 	void LayerStack::removeOverlay(Layer* overlay) {

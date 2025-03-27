@@ -7,8 +7,6 @@ namespace ProjectA {
 	OpenGLSampler::OpenGLSampler(const SamplerDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCSIG);
 
-		ENGINE_TRACE("[OpenGLSampler]");
-
 		glCreateSamplers(1, &object);
 
 		glSamplerParameteri(object, GL_TEXTURE_MAG_FILTER, getGlFilter(descriptor.magFilter));
@@ -17,8 +15,6 @@ namespace ProjectA {
 
 	OpenGLSampler::~OpenGLSampler() {
 		PROFILE_SCOPE(FUNCSIG);
-
-		ENGINE_TRACE("[~OpenGLSampler]");
 
 		glDeleteSamplers(1, &object);
 	}

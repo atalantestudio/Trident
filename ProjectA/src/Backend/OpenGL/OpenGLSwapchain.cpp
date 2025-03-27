@@ -6,8 +6,6 @@ namespace ProjectA {
 	OpenGLSwapchain::OpenGLSwapchain(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCSIG);
 
-		ENGINE_TRACE("[OpenGLSwapchain]");
-
 		recreate(descriptor);
 	}
 
