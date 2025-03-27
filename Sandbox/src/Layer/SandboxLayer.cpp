@@ -1,28 +1,28 @@
 #include <imgui/imgui.h>
 
-#include "Engine/Renderer/2D/Renderer2D.hpp"
-
 #include "SandboxLayer.hpp"
 
-SandboxLayer::SandboxLayer() : cameraController(1280.0f / 720.0f) {
+SandboxLayer::SandboxLayer() :
+	cameraController(1280.0f / 720.0f)
+{
 	//checkerboardTexture = ProjectA::Texture2D::create("assets/textures/checkerboard.png");
 }
 
 void SandboxLayer::update(ProjectA::float32 deltaTime, const ProjectA::ref<ProjectA::CommandEncoder>& commandEncoder, ProjectA::uint32 nextImageIndex) {
 	PROFILE_SCOPE(FUNC_SIG);
 
-	cameraController.update(deltaTime);
+	//cameraController.update(deltaTime);
 
-	ProjectA::Renderer2D::resetStatistics();
+	//ProjectA::Renderer2D::resetStatistics();
 
-	{
+	/*{
 		PROFILE_SCOPE("Pre-draw");
 
 		//ProjectA::Renderer::getRendererApi()->setClearColor({0.1f, 0.1f, 0.1f, 1.0f});
 		//ProjectA::Renderer::getRendererApi()->clear();
-	}
+	}*/
 
-	ProjectA::Renderer2D::camera = &cameraController.getCamera();
+	/*ProjectA::Renderer2D::camera = &cameraController.getCamera();
 
 	ProjectA::Renderer2D::beginScene();
 
@@ -53,13 +53,13 @@ void SandboxLayer::update(ProjectA::float32 deltaTime, const ProjectA::ref<Proje
 		}
 	}
 
-	ProjectA::Renderer2D::endScene();
+	ProjectA::Renderer2D::endScene();*/
 }
 
 void SandboxLayer::renderImGui() {
 	PROFILE_SCOPE(FUNC_SIG);
 
-	ProjectA::Renderer2D::Statistics statistics = ProjectA::Renderer2D::getStatistics();
+	/*ProjectA::Renderer2D::Statistics statistics = ProjectA::Renderer2D::getStatistics();
 
 	ImGui::Begin("Settings");
 
@@ -70,7 +70,7 @@ void SandboxLayer::renderImGui() {
 	ImGui::Text("Total index count: %d", statistics.getTotalIndexCount());
 	ImGui::ColorEdit4("Color", color.m.m128_f32);
 
-	ImGui::End();
+	ImGui::End();*/
 }
 
 void SandboxLayer::onEvent(ProjectA::Event& event) {

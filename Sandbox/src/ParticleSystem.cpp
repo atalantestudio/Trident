@@ -24,7 +24,7 @@ void ParticleSystem::update(ProjectA::float32 deltaTime) {
 }
 
 void ParticleSystem::render(const ProjectA::OrthographicCamera3D& camera) {
-	ProjectA::Renderer2D::beginScene();
+	//ProjectA::Renderer2D::beginScene();
 
 	for (const Particle& particle : particlePool) {
 		if (!particle.active) {
@@ -39,10 +39,10 @@ void ParticleSystem::render(const ProjectA::OrthographicCamera3D& camera) {
 
 		const ProjectA::vec3<ProjectA::float32> position = {particle.position[0], particle.position[1], -0.2f};
 
-		ProjectA::Renderer2D::drawRotatedQuad(position, {size, size}, particle.rotation, color);
+		//ProjectA::Renderer2D::drawRotatedQuad(position, {size, size}, particle.rotation, color);
 	}
 
-	ProjectA::Renderer2D::endScene();
+	//ProjectA::Renderer2D::endScene();
 }
 
 void ParticleSystem::emitParticle(const ParticleProperties& properties) {

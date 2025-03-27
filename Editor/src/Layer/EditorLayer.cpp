@@ -1,27 +1,27 @@
 #include <imgui/imgui.h>
 
-#include "Engine/Renderer/2D/Renderer2D.hpp"
-
 #include "EditorLayer.hpp"
 
 namespace ProjectA {
-	EditorLayer::EditorLayer() : cameraController(1280.0f / 720.0f) {
+	EditorLayer::EditorLayer() :
+		cameraController(1280.0f / 720.0f)
+	{
 		PROFILE_SCOPE(FUNC_SIG);
 
 		//checkerboardTexture = Texture2D::create("assets/textures/checkerboard.png");
 
-		FramebufferDescriptor framebufferDescriptor;
+		/*FramebufferDescriptor framebufferDescriptor;
 		framebufferDescriptor.renderToSwapchain = false;
 		framebufferDescriptor.sampleCount = 1;
 		framebufferDescriptor.size = {1280.0f, 720.0f};
 
-		framebuffer = Framebuffer::create(framebufferDescriptor);
+		framebuffer = Framebuffer::create(framebufferDescriptor);*/
 	}
 
 	void EditorLayer::update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		if (viewportWindowSize[0] > 0.0f && viewportWindowSize[1] > 0.0f && viewportWindowSize != framebuffer->descriptor.size) {
+		/*if (viewportWindowSize[0] > 0.0f && viewportWindowSize[1] > 0.0f && viewportWindowSize != framebuffer->descriptor.size) {
 			framebuffer->resize(viewportWindowSize);
 			cameraController.resize(viewportWindowSize);
 		}
@@ -32,14 +32,14 @@ namespace ProjectA {
 
 		Renderer2D::resetStatistics();
 
-		framebuffer->bind();
+		framebuffer->bind();*/
 
 		//Renderer::getRendererApi()->setClearColor({0.1f, 0.1f, 0.1f, 1.0f});
 		//Renderer::getRendererApi()->clear();
 
-		Renderer2D::camera = &cameraController.getCamera();
+		//Renderer2D::camera = &cameraController.getCamera();
 
-		#if 1
+		/*#if 1
 			static float32 angle = 0.0f;
 
 			angle += deltaTime;
@@ -69,15 +69,15 @@ namespace ProjectA {
 			}
 
 			Renderer2D::endScene();
-		#endif
+		#endif*/
 
-		framebuffer->unbind();
+		//framebuffer->unbind();
 	}
 
 	void EditorLayer::renderImGui() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		Renderer2D::Statistics statistics = Renderer2D::getStatistics();
+		/*Renderer2D::Statistics statistics = Renderer2D::getStatistics();
 
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
@@ -166,7 +166,7 @@ namespace ProjectA {
 		ImGui::End();
 		ImGui::PopStyleVar();
 
-		ImGui::End();
+		ImGui::End();*/
 	}
 
 	void EditorLayer::onEvent(Event& event) {

@@ -36,9 +36,6 @@
 
 #include "Engine/types.hpp"
 
-// Lyah polyfill: SIMD to scalar vector.
-#include "Engine/vec_sts.hpp"
-
 #ifdef BUILD_MODE_DEBUG
 	#include "Engine/Logger/Logger.hpp"
 
