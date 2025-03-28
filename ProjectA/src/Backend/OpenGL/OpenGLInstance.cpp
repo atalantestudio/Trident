@@ -11,7 +11,10 @@ namespace ProjectA {
 		#ifdef DEBUG_ENABLE_MESSENGER
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
 			glDebugMessageCallback(debugMessageCallback, nullptr);
+
+			glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 0, GL_DEBUG_SEVERITY_NOTIFICATION, 36, "Using OpenGL debug message callback");
 		#endif
 	}
 

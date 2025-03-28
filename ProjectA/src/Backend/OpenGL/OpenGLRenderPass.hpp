@@ -6,5 +6,8 @@ namespace ProjectA {
 	class OpenGLRenderPass : public RenderPass {
 		public:
 			OpenGLRenderPass(const RenderPassDescriptor& descriptor);
+
+		public:
+			LoadOperation loadOperation;
 	};
 }

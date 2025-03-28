@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 
 #include "Backend/OpenGL/Command/OpenGLBeginRenderPassCommand.hpp"
+#include "Backend/OpenGL/OpenGLRenderPass.hpp"
 
 namespace ProjectA {
 	OpenGLBeginRenderPassCommand::OpenGLBeginRenderPassCommand(const BeginRenderPassDescriptor& descriptor) :
@@ -10,7 +11,12 @@ namespace ProjectA {
 	{}
 
 	void OpenGLBeginRenderPassCommand::execute() const {
+		const OpenGLRenderPass& renderPass = *static_cast<OpenGLRenderPass*>(descriptor.renderPass.get());
+
 		glClearColor(descriptor.clearColor[0], descriptor.clearColor[1], descriptor.clearColor[2], descriptor.clearColor[3]);
-		glClear(GL_COLOR_BUFFER_BIT);
+
+		if (renderPass.loadOperation == LoadOperation::CLEAR || renderPass.loadOperation == LoadOperation::UNDEFINED) {
+			glClear(GL_COLOR_BUFFER_BIT);
+		}
 	}
 }
