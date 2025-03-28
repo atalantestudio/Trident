@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class DemoLayer : public Layer {
 		private:
-			TextureDemoRenderer renderer;
+			TriangleDemoRenderer renderer;
 
 		public:
 			DemoLayer();

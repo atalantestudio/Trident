@@ -11,10 +11,10 @@ namespace ProjectA {
 		public:
 			Window() {
 				// A window of 300px * (max height).
-				setDefaultWidth(300.0f);
-				setFillMode(FillMode::FILL_VERTICAL);
-				setLayoutDistribution(LayoutDistribution::TO_BOTTOM);
-				setMargin({6.0f, 6.0f, 6.0f, 6.0f});
+				size = {300.0f, 0.0f};
+				fillMode = FillMode::EXPAND_VERTICAL;
+				layoutDistribution = LayoutDistribution::VERTICAL;
+				margin = {6.0f, 6.0f, 6.0f, 6.0f};
 
 				append<GUIText>("Lorem ipsum dolor sit amet.");
 			}
@@ -23,11 +23,11 @@ namespace ProjectA {
 	class PersonListItem : public GUIObject {
 		public:
 			PersonListItem(const Person& person) {
-				setMargin({6.0f, 6.0f, 6.0f, 6.0f});
-				setFillMode(FillMode::FILL_VERTICAL);
-				setSpacing({6.0f, 6.0f});
-				setBackground(Color::GREY);
-				setLayoutDirection(RIGHT);
+				margin = {6.0f, 6.0f, 6.0f, 6.0f};
+				fillMode = FillMode::EXPAND_HORIZONTAL;
+				spacing = {6.0f, 6.0f};
+				color = Color::GREY;
+				layoutDirection = LayoutDirection::RIGHT;
 
 				append<GUIImage>(person.iconUrl);
 			}

@@ -3,6 +3,7 @@
 #include "Engine/entry_point.hpp"
 
 #include "Layer/DemoGUILayer.hpp"
+#include "Layer/DemoLayer.hpp"
 
 namespace ProjectA {
 	class EditorApplication : public Application {
@@ -10,6 +11,7 @@ namespace ProjectA {
 			EditorApplication(const ConfigurationFile& configurationFile) :
 				Application("ProjectA Editor", configurationFile)
 			{
+				registerLayer<DemoLayer>();
 				registerLayer<DemoGUILayer>();
 			}
 

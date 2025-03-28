@@ -1,6 +1,7 @@
 #include "pch.hpp"
 
 #include "Engine/ECS/Component/GUIComponent.hpp"
+#include "Engine/GUI/Font/Font.hpp"
 #include "Engine/GUI/Object/GUIObject.hpp"
 
 namespace ProjectA {
@@ -50,7 +51,7 @@ namespace ProjectA {
 		return subcomponents;
 	}
 
-	void GUIObject::compute(ECS& ecs, const vec2<float32>& parentSize, const vec2<float32>& parentMargin, chain<vec4<float32>>& colors) {
+	void GUIObject::compute(ECS& ecs, const vec2<float32>& parentSize, const vec2<float32>& parentMargin, chain<vec4<float32>>& colors, const ref<Font>& font) {
 		float32 width;
 
 		if (fillMode & FillMode::EXPAND_HORIZONTAL) {
@@ -93,7 +94,7 @@ namespace ProjectA {
 		colors.emplace_back(color);
 
 		for (const ref<GUIObject>& object : objects) {
-			object->compute(ecs, defaultSize, margin, colors);
+			object->compute(ecs, defaultSize, parentMargin + margin, colors, font);
 		}
 	}
 }

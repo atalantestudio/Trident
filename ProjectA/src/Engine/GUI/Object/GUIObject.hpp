@@ -53,7 +53,7 @@ namespace ProjectA {
 				objects.emplace_back(object);
 			}
 
-			void compute(ECS& ecs, const vec2<float32>& parentSize, const vec2<float32>& parentMargin, chain<vec4<float32>>& colors);
+			virtual void compute(ECS& ecs, const vec2<float32>& parentSize, const vec2<float32>& parentMargin, chain<vec4<float32>>& colors, const ref<Font>& font);
 
 		public:
 			LayoutDistribution layoutDistribution = LayoutDistribution::HORIZONTAL;

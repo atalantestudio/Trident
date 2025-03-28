@@ -11,7 +11,9 @@ namespace ProjectA {
 
 		const GLsizei length = static_cast<GLsizei>(code.size());
 
-		glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code.data(), length);
+		const chain<uint8> code2(code.begin() + 1, code.end());
+
+		glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code2.data(), length);
 
 		// TODO: Expose specialization constants.
 		glSpecializeShader(object, descriptor.entryPoint, 0, nullptr, nullptr);

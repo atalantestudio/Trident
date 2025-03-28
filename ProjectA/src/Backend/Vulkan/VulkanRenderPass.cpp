@@ -12,11 +12,17 @@ namespace ProjectA {
 		attachment.flags = 0;
 		attachment.format = surface.format.format;
 		attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+
+		// TODO: Temporary enabled for stacking multiple layer images
+		attachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+
 		attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+		// TODO: Fix undefined layout warning.
 		attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
 		attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 		VkAttachmentReference colorAttachment{};

@@ -27,6 +27,8 @@ namespace ProjectA {
 
 				//append<ColoredQuad>(1);
 				//210, 210, 210
+
+				append<GUITextObject>("text");
 			}
 	};
 

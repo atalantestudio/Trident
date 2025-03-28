@@ -58,7 +58,7 @@ namespace ProjectA {
 		chain<vec4<float32>> colors;
 
 		for (const ref<GUIObject>& rootObject : rootObjects) {
-			rootObject->compute(ecs, parentSize, parentMargin, colors);
+			rootObject->compute(ecs, parentSize, parentMargin, colors, fonts[0]);
 		}
 
 		renderer.registerColors(colors);
