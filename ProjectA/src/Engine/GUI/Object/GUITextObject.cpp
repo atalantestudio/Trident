@@ -5,8 +5,6 @@
 
 namespace ProjectA {
 	GUITextObject::GUITextObject(const std::string& text, const GUITextObjectDescriptor& descriptor) {
-		setColorIndex(0);
-
 		const BitmapFont& bitmapFont = *static_cast<const BitmapFont*>(descriptor.font.get());
 
 		float32 xOffset = 0.0f;

@@ -8,31 +8,43 @@ namespace ProjectA {
 			DemoGUILayer();
 	};
 
-	class ColoredQuad : public GUIObject {
+	struct Person {
+		uint32 id = 0;
+		std::string name;
+		std::string iconUrl;
+	};
+
+	class PersonListItem : public GUIObject {
 		public:
-			ColoredQuad(const vec2<float32>& position, const vec2<float32>& size, uint32 colorIndex) {
-				setColorIndex(colorIndex);
+			PersonListItem(const Person& person) {
+				setDefaultSize({0.0f, 50.0f});
+				//setMargin({6.0f, 6.0f});
+				setFillMode(FillMode::EXPAND_HORIZONTAL);
+				//setSpacing({6.0f, 6.0f});
+				//setBackground(Color::GREY);
+				//setLayoutDistribution(LayoutDistribution::HORIZONTAL);
+				setColor(vec4<float32>(50.0f, 52.0f, 50.0f, 255.0f) / 255.0f);
 
-				GUISubcomponent subcomponent;
-				subcomponent.offset = position;
-				subcomponent.size = size;
-				subcomponent.uv = {0.0f, 0.0f};
-
-				subcomponents.emplace_back(subcomponent);
+				//append<ColoredQuad>(1);
+				//210, 210, 210
 			}
 	};
 
-	class TexturedQuad : public GUIObject {
+	class PersonListWindow : public GUIObject {
 		public:
-			TexturedQuad(const vec2<float32>& position, const vec2<float32>& size, uint32 textureIndex) {
-				setTextureIndex(textureIndex);
+			PersonListWindow() {
+				// A window of 300px * (max height).
+				setDefaultSize({300.0f, 0.0f});
+				setFillMode(FillMode::EXPAND_VERTICAL);
+				//setLayoutDistribution(LayoutDistribution::VERTICAL);
+				setMargin({10.0f, 10.0f});
+				setColor(vec4<float32>(31.0f, 31.0f, 31.0f, 255.0f) / 255.0f);
 
-				GUISubcomponent subcomponent;
-				subcomponent.offset = position;
-				subcomponent.size = size;
-				subcomponent.uv = {0.0f, 0.0f};
+				Person person;
+				person.id = 1;
+				person.name = "John Doe";
 
-				subcomponents.emplace_back(subcomponent);
+				append<PersonListItem>(person);
 			}
 	};
 

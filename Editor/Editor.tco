@@ -1,3 +1,3 @@
-GraphicsAPI: OpenGL
+GraphicsAPI: Vulkan
 ExtentWidth: 1280
 ExtentHeight: 720

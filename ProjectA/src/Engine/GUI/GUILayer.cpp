@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Engine/Application.hpp"
 #include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/ECS/Component/ScriptComponent.hpp"
 #include "Engine/GUI/Font/BitmapFont.hpp"
@@ -47,20 +48,19 @@ namespace ProjectA {
 		textures.emplace_back(texture);
 	}
 
-	void GUILayer::append(const GUIObject& object) {
-		for (const GUISubcomponent& subcomponent : object.getSubcomponents()) {
-			const Entity entity = ecs.createEntity();
+	void GUILayer::compute() {
+		const vec2<float32> parentSize = {
+			static_cast<float32>(Application::get().getSwapchain()->getExtentWidth()),
+			static_cast<float32>(Application::get().getSwapchain()->getExtentHeight()),
+		};
 
-			GUIComponent component;
-			component.transform = mat3x3<float32>::scaling(subcomponent.size) * mat3x3<float32>::translation(object.getPosition() + subcomponent.offset);
-			component.colorIndex = object.getColorIndex();
-			component.textureIndex = object.getTextureIndex();
+		const vec2<float32> parentMargin = {0.0f, 0.0f};
+		chain<vec4<float32>> colors;
 
-			ecs.setComponent<GUIComponent>(entity, component);
+		for (const ref<GUIObject>& rootObject : rootObjects) {
+			rootObject->compute(ecs, parentSize, parentMargin, colors);
 		}
-	}
 
-	void GUILayer::registerColors(const chain<vec4<float32>>& colors) const {
 		renderer.registerColors(colors);
 	}
 

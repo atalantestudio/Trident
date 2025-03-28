@@ -34,7 +34,7 @@ namespace ProjectA {
 			void registerLayer(U&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
 
-				Layer* layer = new T(std::forward<U&&>(arguments)...);
+				Layer* layer = new T(std::forward<U>(arguments)...);
 
 				layerStack.pushLayer(layer);
 			}
@@ -43,7 +43,7 @@ namespace ProjectA {
 			void registerOverlay(U&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
 
-				Layer* overlay = new T(std::forward<U&&>(arguments)...);
+				Layer* overlay = new T(std::forward<U>(arguments)...);
 
 				layerStack.pushOverlay(overlay);
 			}

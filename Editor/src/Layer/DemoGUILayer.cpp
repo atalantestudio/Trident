@@ -2,27 +2,22 @@
 
 namespace ProjectA {
 	DemoGUILayer::DemoGUILayer() {
-		const chain<vec4<float32>> colors = {
-			{1.0f, 1.0f, 1.0f, 1.0f},
-			{1.0f, 0.2f, 0.0f, 1.0f},
-			{0.1f, 0.1f, 0.2f, 1.0f},
-		};
-
-		registerColors(colors);
-
 		loadDefaultFont();
 
-		//append(ColoredQuad({0.0f, 0.0f}, {64.0f, 64.0f}, 0));
-		//append(ColoredQuad({16.0f, 80.0f}, {128.0f, 48.0f}, 1));
-		//append(ColoredQuad({80.0f, 128.0f}, {256.0f, 512.0f}, 2));
+		//appendRoot(ColoredQuad({0.0f, 0.0f}, {64.0f, 64.0f}, 0));
+		//appendRoot(ColoredQuad({16.0f, 80.0f}, {128.0f, 48.0f}, 1));
+		//appendRoot(ColoredQuad({80.0f, 128.0f}, {256.0f, 512.0f}, 2));
 
-		append(TexturedQuad({80.0f, 128.0f}, {256.0f, 512.0f}, 0));
+		//appendRoot(TexturedQuad({80.0f, 128.0f}, {256.0f, 512.0f}, 0));
 
 		//GUITextObjectDescriptor textDescriptor;
 		//textDescriptor.font = fonts[0];
 
-		//append(GUITextObject("text", textDescriptor));
+		//appendRoot(GUITextObject("text", textDescriptor));
 
+		appendRoot<PersonListWindow>();
+
+		compute();
 		registerEntityPool();
 	}
 }

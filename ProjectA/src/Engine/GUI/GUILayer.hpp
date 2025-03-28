@@ -16,9 +16,14 @@ namespace ProjectA {
 
 			void loadTexture(const std::string& path);
 
-			void append(const GUIObject& object);
+			template<typename T, typename... U>
+			void appendRoot(U&&... arguments) {
+				const ref<T> object = createRef<T>(std::forward<U>(arguments)...);
 
-			void registerColors(const chain<vec4<float32>>& colors) const;
+				rootObjects.emplace_back(object);
+			}
+
+			void compute();
 
 			void registerEntityPool();
 
@@ -39,5 +44,6 @@ namespace ProjectA {
 			ECS ecs;
 			GUIRenderer renderer;
 			chain<ref<Texture>> textures;
+			chain<ref<GUIObject>> rootObjects;
 	};
 }
