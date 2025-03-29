@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Filesystem/File/ConfigurationFile.hpp"
-
 namespace ProjectA {
 	class Filesystem {
 		public:

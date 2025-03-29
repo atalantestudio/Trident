@@ -23,6 +23,8 @@
 
 // Filesystem
 #include "Engine/Filesystem/File/ConfigurationFile.hpp"
+#include "Engine/Filesystem/File/PNGFile.hpp"
+#include "Engine/Filesystem/File/TTFFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 
