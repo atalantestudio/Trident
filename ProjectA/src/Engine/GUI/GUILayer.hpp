@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Engine/GUI/Font/Font.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/GUI/Object/GUIObject.hpp"
 #include "Engine/Layer/Layer.hpp"
+#include "Engine/Renderer/Font/Font.hpp"
 
 namespace ProjectA {
 	class GUILayer : public Layer {

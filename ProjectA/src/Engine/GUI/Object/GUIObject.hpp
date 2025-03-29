@@ -2,6 +2,7 @@
 
 #include "Engine/ECS/ECS.hpp"
 #include "Engine/GUI/GUISubcomponent.hpp"
+#include "Engine/Renderer/Font/Font.hpp"
 
 namespace ProjectA {
 	enum class LayoutDistribution : uint8 {

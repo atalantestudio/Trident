@@ -1,8 +1,8 @@
 #include "pch.hpp"
 
 #include "Engine/ECS/Component/GUIComponent.hpp"
-#include "Engine/GUI/Font/BitmapFont.hpp"
 #include "Engine/GUI/Object/GUITextObject.hpp"
+#include "Engine/Renderer/Font/BitmapFont.hpp"
 
 namespace ProjectA {
 	GUITextObject::GUITextObject(const std::string& text) :
@@ -20,7 +20,7 @@ namespace ProjectA {
 			GUISubcomponent subcomponent;
 			subcomponent.offset = {xOffset, parentMargin[1]};
 			subcomponent.size = {glyph.width, bitmapFont.tileHeight};
-			subcomponent.uv = glyph.textureCoordinates;
+			subcomponent.textureCoordinates = glyph.textureCoordinates;
 
 			subcomponents.emplace_back(subcomponent);
 

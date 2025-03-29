@@ -59,6 +59,10 @@ namespace ProjectA {
 	BufferMappedRange VulkanBuffer::map(uint64 offset, uint64 size) const {
 		BufferMappedRange mappedRange;
 
+		if (size == 0) {
+			DEBUGBREAK();
+		}
+
 		const VkResult result = vkMapMemory(device.object, memory, offset, size, 0, &mappedRange);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to map Vulkan buffer memory (code: []).", result);

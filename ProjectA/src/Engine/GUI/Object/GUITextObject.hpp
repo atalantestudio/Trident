@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Engine/GUI/Font/Font.hpp"
 #include "Engine/GUI/Object/GUIObject.hpp"
+#include "Engine/Renderer/Font/Font.hpp"
 
 namespace ProjectA {
 	class GUITextObject : public GUIObject {

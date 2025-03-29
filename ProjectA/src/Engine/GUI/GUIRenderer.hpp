@@ -28,6 +28,11 @@ namespace ProjectA {
 			void updateCamera() const;
 
 		private:
+			struct Vertex {
+				vec3<float32> position;
+				vec2<float32> textureCoordinates;
+			};
+
 			struct UniformBufferObject {
 				mat3x3<float32> projection;
 			};
@@ -42,13 +47,20 @@ namespace ProjectA {
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
 			ref<Buffer> positionVertexBuffer;
+			ref<Buffer> textureCoordinateVertexBuffer;
 			ref<Buffer> transformVertexBuffer;
 			ref<Buffer> indexBuffer;
+			ref<Sampler> sampler;
 			chain<ref<Buffer>> cameraUniformBuffers;
 			ref<Buffer> colorStorageBuffer;
 			chain<BufferMappedRange> cameraUniformBufferMappedRanges;
 			ref<CommandEncoder> commandEncoder;
 			uint32 instanceCount = 0;
 			uint32 frameIndex = 0;
+
+			ref<Texture> defaultTexture;
+			ref<TextureView> defaultTextureView;
+			ref<Texture> fontTexture;
+			ref<TextureView> fontTextureView;
 	};
 }

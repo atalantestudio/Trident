@@ -19,28 +19,46 @@ namespace ProjectA {
 			cameraUniformBufferMappedRanges[i] = cameraUniformBuffers[i]->map(0, cameraUniformBufferDescriptor.size);
 		}
 
-		// Create color storage buffer.
-		{
-			BufferDescriptor colorStorageBufferDescriptor{};
-			colorStorageBufferDescriptor.size = sizeof(vec4<float32>) * MAX_COLORS;
-			colorStorageBufferDescriptor.usage = BufferUsage::STORAGE;
+		//BufferDescriptor colorStorageBufferDescriptor{};
+		//colorStorageBufferDescriptor.size = sizeof(vec4<float32>) * MAX_COLORS;
+		//colorStorageBufferDescriptor.usage = BufferUsage::STORAGE;
 
-			colorStorageBuffer = createBuffer(colorStorageBufferDescriptor);
-		}
+		//colorStorageBuffer = createBuffer(colorStorageBufferDescriptor);
+
+		const TextureViewDescriptor textureViewDescriptor;
+
+		defaultTexture = loadDefaultTexture();
+		defaultTextureView = defaultTexture->createView(textureViewDescriptor);
+
+		fontTexture = loadTexture("../ProjectA/src/Asset/Texture/Quiver.png");
+		fontTextureView = fontTexture->createView(textureViewDescriptor);
+
+		SamplerDescriptor samplerDescriptor{};
+		samplerDescriptor.magFilter = SamplerFilter::NEAREST;
+		samplerDescriptor.minFilter = SamplerFilter::NEAREST;
+
+		sampler = createSampler(samplerDescriptor);
 
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
 		cameraDescriptorSetLayoutBinding.buffers = cameraUniformBuffers;
 
-		DescriptorSetLayoutBinding colorDescriptorSetLayoutBinding{};
-		colorDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		colorDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		colorDescriptorSetLayoutBinding.buffers = {colorStorageBuffer};
+		DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding{};
+		textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		textureDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		textureDescriptorSetLayoutBinding.textureViews = {fontTextureView};
+		textureDescriptorSetLayoutBinding.samplers = {sampler};
+
+		//DescriptorSetLayoutBinding colorDescriptorSetLayoutBinding{};
+		//colorDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		//colorDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		//colorDescriptorSetLayoutBinding.buffers = {colorStorageBuffer};
 
 		DescriptorSetLayout cameraAndColorDescriptorSetLayout;
-		cameraAndColorDescriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding); // Camera at set 0, binding 0.
-		cameraAndColorDescriptorSetLayout.bindings.emplace_back(colorDescriptorSetLayoutBinding); // Color buffer at set 0, binding 1.
+		cameraAndColorDescriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding);
+		cameraAndColorDescriptorSetLayout.bindings.emplace_back(textureDescriptorSetLayoutBinding);
+		//cameraAndColorDescriptorSetLayout.bindings.emplace_back(colorDescriptorSetLayoutBinding);
 
 		PipelineLayoutDescriptor pipelineLayoutDescriptor;
 		pipelineLayoutDescriptor.layouts.emplace_back(cameraAndColorDescriptorSetLayout);
@@ -64,10 +82,11 @@ namespace ProjectA {
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
 		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
+		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
 		renderPipelineDescriptor.vertexBufferLayout.defineBinding(1, InputRate::INSTANCE);
 		renderPipelineDescriptor.vertexBufferLayout.add<mat3x3<float32>>(1, false);
 		renderPipelineDescriptor.vertexBufferLayout.add<uint32>(1, false);
-		renderPipelineDescriptor.vertexBufferLayout.add<uint32>(1, false);
+		renderPipelineDescriptor.vertexBufferLayout.add<float32>(1, false);
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
@@ -78,25 +97,32 @@ namespace ProjectA {
 
 		// Create position vertex buffer.
 		{
-			const chain<vec3<float32>> vertexPositions = {
-				{0.0f, 0.0f, 1.0f},
-				{1.0f, 0.0f, 1.0f},
-				{1.0f, 1.0f, 1.0f},
-				{0.0f, 1.0f, 1.0f},
+			// Texture coordinates are reversed manually.
+ 			const chain<Vertex> vertices = {
+				{{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+				{{1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+				{{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
+				{{0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
 			};
 
 			BufferDescriptor bufferDescriptor{};
-			bufferDescriptor.size = sizeof(vec3<float32>) * vertexPositions.size();
+			bufferDescriptor.size = sizeof(Vertex) * vertices.size();
 			bufferDescriptor.usage = BufferUsage::VERTEX;
 
 			positionVertexBuffer = createBuffer(bufferDescriptor);
 
 			BufferMappedRange mappedRange = positionVertexBuffer->map(0, bufferDescriptor.size);
 
-			std::copy(vertexPositions.begin(), vertexPositions.end(), static_cast<vec3<float32>*>(mappedRange));
+			std::copy(vertices.begin(), vertices.end(), static_cast<Vertex*>(mappedRange));
 
 			positionVertexBuffer->unmap();
 		}
+
+		BufferDescriptor textureCoordinateVertexBufferDescriptor{};
+		textureCoordinateVertexBufferDescriptor.size = sizeof(vec2<float32>) * MAX_QUADS * 4;
+		textureCoordinateVertexBufferDescriptor.usage = BufferUsage::VERTEX;
+
+		textureCoordinateVertexBuffer = createBuffer(textureCoordinateVertexBufferDescriptor);
 
 		BufferDescriptor transformVertexBufferDescriptor{};
 		transformVertexBufferDescriptor.size = sizeof(GUIComponent) * MAX_QUADS;
@@ -207,6 +233,12 @@ namespace ProjectA {
 
 	void GUIRenderer::registerEntityPool(const ComponentPool<GUIComponent>& componentPool) {
 		instanceCount = componentPool.componentCount;
+
+		/*BufferMappedRange mappedRange = textureCoordinateVertexBuffer->map(0, sizeof(vec2<float32>) * instanceCount * 4);
+
+		std::copy(componentPool.components.begin(), componentPool.components.begin() + instanceCount, static_cast<GUIComponent*>(mappedRange));
+
+		textureCoordinateVertexBuffer->unmap();*/
 
 		BufferMappedRange mappedRange = transformVertexBuffer->map(0, sizeof(GUIComponent) * instanceCount);
 

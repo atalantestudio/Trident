@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Engine/GUI/Font/Font.hpp"
-#include "Engine/GUI/Font/GlyphMap.hpp"
+#include "Engine/Renderer/Font/Font.hpp"
+#include "Engine/Renderer/Font/GlyphMap.hpp"
 
 namespace ProjectA {
 	struct BitmapFont : public Font {

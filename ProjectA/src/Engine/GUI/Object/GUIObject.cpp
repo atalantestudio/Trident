@@ -1,7 +1,6 @@
 #include "pch.hpp"
 
 #include "Engine/ECS/Component/GUIComponent.hpp"
-#include "Engine/GUI/Font/Font.hpp"
 #include "Engine/GUI/Object/GUIObject.hpp"
 
 namespace ProjectA {
@@ -76,7 +75,7 @@ namespace ProjectA {
 		GUISubcomponent subcomponent;
 		subcomponent.offset = parentMargin;
 		subcomponent.size = {width, height};
-		subcomponent.uv = {0.0f, 0.0f};
+		subcomponent.textureCoordinates = {0.0f, 0.0f};
 
 		subcomponents.emplace_back(subcomponent);
 

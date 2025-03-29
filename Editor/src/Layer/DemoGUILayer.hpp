@@ -5,7 +5,16 @@
 namespace ProjectA {
 	class DemoGUILayer : public GUILayer {
 		public:
-			DemoGUILayer();
+			DemoGUILayer() {
+				loadDefaultFont();
+
+				appendRoot<GUITextObject>("text");
+
+				//appendRoot<PersonListWindow>();
+
+				compute();
+				registerEntityPool();
+			}
 	};
 
 	struct Person {
@@ -21,14 +30,13 @@ namespace ProjectA {
 				//setMargin({6.0f, 6.0f});
 				setFillMode(FillMode::EXPAND_HORIZONTAL);
 				//setSpacing({6.0f, 6.0f});
-				//setBackground(Color::GREY);
 				//setLayoutDistribution(LayoutDistribution::HORIZONTAL);
 				setColor(vec4<float32>(50.0f, 52.0f, 50.0f, 255.0f) / 255.0f);
-
-				//append<ColoredQuad>(1);
 				//210, 210, 210
 
-				append<GUITextObject>("text");
+				//append<ColoredQuad>(1);
+
+				append<GUITextObject>(person.name);
 			}
 	};
 

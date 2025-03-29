@@ -3,16 +3,16 @@
 #include "Engine/Application.hpp"
 #include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/ECS/Component/ScriptComponent.hpp"
-#include "Engine/GUI/Font/BitmapFont.hpp"
-#include "Engine/GUI/Font/GlyphMap.hpp"
 #include "Engine/GUI/GUILayer.hpp"
+#include "Engine/Renderer/Font/BitmapFont.hpp"
+#include "Engine/Renderer/Font/GlyphMap.hpp"
 
 namespace ProjectA {
 	GUILayer::GUILayer() {
 		ecs.registerComponent<GUIComponent>();
 		ecs.registerComponent<ScriptComponent>();
 
-		loadDefaultTexture();
+		//loadDefaultTexture();
 	}
 
 	GUILayer::~GUILayer() {
@@ -39,13 +39,13 @@ namespace ProjectA {
 
 		fonts.emplace_back(defaultFont);
 
-		loadTexture("../ProjectA/src/Asset/Texture/Quiver.png");
+		//loadTexture("../ProjectA/src/Asset/Texture/Quiver.png");
 	}
 
 	void GUILayer::loadTexture(const std::string& path) {
-		const ref<Texture> texture = renderer.loadTexture(path);
+		//const ref<Texture> texture = renderer.loadTexture(path);
 
-		textures.emplace_back(texture);
+		//textures.emplace_back(texture);
 	}
 
 	void GUILayer::compute() {
@@ -61,7 +61,9 @@ namespace ProjectA {
 			rootObject->compute(ecs, parentSize, parentMargin, colors, fonts[0]);
 		}
 
-		renderer.registerColors(colors);
+		if (!colors.empty()) {
+			renderer.registerColors(colors);
+		}
 	}
 
 	void GUILayer::registerEntityPool() {
@@ -102,8 +104,8 @@ namespace ProjectA {
 	}
 
 	void GUILayer::loadDefaultTexture() {
-		const ref<Texture> texture = renderer.loadDefaultTexture();
+		//const ref<Texture> texture = renderer.loadDefaultTexture();
 
-		textures.emplace_back(texture);
+		//textures.emplace_back(texture);
 	}
 }

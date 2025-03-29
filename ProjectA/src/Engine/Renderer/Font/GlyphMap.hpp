@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/GUI/Font/Glyph.hpp"
+#include "Engine/Renderer/Font/Glyph.hpp"
 
 namespace ProjectA {
 	class GlyphMap {
