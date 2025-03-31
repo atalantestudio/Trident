@@ -159,6 +159,35 @@ namespace ProjectA {
 		return maxp;
 	}
 
+	struct GlyphTransform {
+		float32 a = 1.0f;
+		float32 b = 0.0f;
+		float32 c = 0.0f;
+		float32 d = 1.0f;
+		float32 e = 0.0f;
+		float32 f = 0.0f;
+		float32 m = 0.0f;
+		float32 n = 0.0f;
+	};
+
+	static void transformPoint(FWord& x, FWord& y, const GlyphTransform& T) {
+		const FWord xCopy = x;
+
+		x = static_cast<FWord>(T.m * (x * (T.a / T.m) + y * (T.c / T.m) + T.e));
+		y = static_cast<FWord>(T.n * (xCopy * (T.b / T.n) + y * (T.d / T.n) + T.f));
+	}
+
+	static void transformGlyph(Glyph& glyph, const GlyphTransform& T) {
+		for (Edge& edge : glyph.edges) {
+			transformPoint(edge.start.x, edge.start.y, T);
+			transformPoint(edge.end.x, edge.end.y, T);
+			transformPoint(edge.control.x, edge.control.y, T);
+		}
+
+		transformPoint(glyph.max.x, glyph.max.y, T);
+		transformPoint(glyph.min.x, glyph.min.y, T);
+	}
+
 	// fwd
 	static Glyph parseCompoundGlyph(ByteStream& stream, uint32 tableOffset, const fchain<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth);
 
@@ -396,58 +425,54 @@ namespace ProjectA {
 			// Glyph index of component.
 			const uint16 glyphIndex = stream.read<uint16>(true);
 
-			float32 e = 0.0f;
-			float32 f = 0.0f;
+			GlyphTransform T;
 
 			if (flags & BIT(0)) {
 				// If set, arguments are 16-bit, otherwise, they are bytes (uint8 or int8).
-				e = stream.read<sint16>(true);
-				f = stream.read<sint16>(true);
+				T.e = stream.read<sint16>(true);
+				T.f = stream.read<sint16>(true);
 			}
 			else {
-				e = stream.read<sint8>();
-				f = stream.read<sint8>();
+				T.e = stream.read<sint8>();
+				T.f = stream.read<sint8>();
 			}
-
-			float32 a = 1.0f;
-			float32 b = 0.0f;
-			float32 c = 0.0f;
-			float32 d = 1.0f;
 
 			if (flags & BIT(3)) {
 				// WE_HAVE_A_SCALE
-				a = stream.read<sint16>(true);
+				T.a = stream.read<sint16>(true);
 			}
 			else if (flags & BIT(6)) {
 				// WE_HAVE_AN_X_AND_Y_SCALE
-				a = stream.read<sint16>(true);
-				d = stream.read<sint16>(true);
+				T.a = stream.read<sint16>(true);
+				T.d = stream.read<sint16>(true);
 			}
 			else if (flags & BIT(7)) {
 				// WE_HAVE_A_TWO_BY_TWO
-				a = stream.read<sint16>(true);
-				b = stream.read<sint16>(true);
-				c = stream.read<sint16>(true);
-				d = stream.read<sint16>(true);
+				T.a = stream.read<sint16>(true);
+				T.b = stream.read<sint16>(true);
+				T.c = stream.read<sint16>(true);
+				T.d = stream.read<sint16>(true);
 			}
 
 			// TODO: lyah::max(float32, float32)
 			// TODO: ProjectA::abs(float32, float32)
-			float32 m = std::max(lyah::abs(a), lyah::abs(b));
+			T.m = std::max(lyah::abs(T.a), lyah::abs(T.b));
 
-			if (lyah::abs(lyah::abs(a) - lyah::abs(c)) <= 33.0f / 65536.0f) {
-				m *= 2.0f;
+			if (lyah::abs(lyah::abs(T.a) - lyah::abs(T.c)) <= 33.0f / 65536.0f) {
+				T.m *= 2.0f;
 			}
 
-			float32 n = std::max(lyah::abs(c), lyah::abs(d));
+			T.n = std::max(lyah::abs(T.c), lyah::abs(T.d));
 
-			if (lyah::abs(lyah::abs(b) - lyah::abs(d)) <= 33.0f / 65536.0f) {
-				n *= 2.0f;
+			if (lyah::abs(lyah::abs(T.b) - lyah::abs(T.d)) <= 33.0f / 65536.0f) {
+				T.n *= 2.0f;
 			}
 
 			const uint64 byteOffset = stream.getByteOffset();
 
-			const Glyph componentGlyph = parseSimpleGlyph(stream, tableOffset, glyphOffsets, glyphIndex, maxComponentDepth);
+			Glyph componentGlyph = parseSimpleGlyph(stream, tableOffset, glyphOffsets, glyphIndex, maxComponentDepth);
+
+			transformGlyph(componentGlyph, T);
 
 			for (const Edge& edge : componentGlyph.edges) {
 				glyph.edges.emplace_back(edge);
