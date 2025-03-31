@@ -32,7 +32,7 @@
 	#undef near
 #endif
 
-#include "lyah/lyah.hpp"
+#include "Engine/lyah.hpp"
 
 #include "Engine/types.hpp"
 #include "Engine/fchain.hpp"

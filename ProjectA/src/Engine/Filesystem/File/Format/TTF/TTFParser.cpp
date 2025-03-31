@@ -5,26 +5,6 @@
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
-	// TODO: 16-bit signed fraction.
-
-	// 16.16-bit signed fixed-point number.
-	struct Fixed {
-		uint16 integer;
-		uint16 fraction;
-	};
-
-	// 16-bit signed integer that describes a quantity in FUnits, the smallest measurable distance in em space.
-	typedef sint16 FWord;
-
-	// 16-bit unsigned integer that describes a quantity in FUnits, the smallest measurable distance in em space.
-	typedef uint16 uFWord;
-
-	// TODO: 16-bit signed fixed number with the low 14 bits representing fraction.
-
-	// The long internal format of a date in seconds since 12:00 midnight, January 1, 1904.
-	// It is represented as a signed 64-bit integer.
-	typedef sint64 longDateTime;
-
 	struct OffsetSubtable {
 		// A tag to indicate the OFA scaler to be used to rasterize this font.
 		uint32 scalerType;
@@ -103,30 +83,6 @@ namespace ProjectA {
 		uint16 maxComponentDepth;
 	};
 
-	struct Point {
-		FWord x;
-		FWord y;
-	};
-
-	struct EdgePoint {
-		FWord x;
-		FWord y;
-		bool onCurve;
-	};
-
-	struct Edge {
-		EdgePoint start;
-		EdgePoint end;
-		EdgePoint control;
-		bool isQuadraticCurve;
-	};
-
-	struct Glyph {
-		Point min;
-		Point max;
-		chain<Edge> edges;
-	};
-
 	static uint32 calculateTableChecksum(uint32* table, uint32 byteCount) {
 		uint32 checksum = 0;
 		uint32 longCount = (byteCount + 3) / 4;
@@ -201,6 +157,312 @@ namespace ProjectA {
 		maxp.maxComponentDepth = stream.read<uint16>(true);
 
 		return maxp;
+	}
+
+	// fwd
+	static Glyph parseCompoundGlyph(ByteStream& stream, uint32 tableOffset, const fchain<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth);
+
+	static Glyph parseSimpleGlyph(ByteStream& stream, uint32 tableOffset, const fchain<uint16>& glyphOffsets, uint16 glyphIndex, uint16 maxComponentDepth) {
+		stream.reset();
+		stream.jump(static_cast<uint64>(tableOffset + glyphOffsets[glyphIndex]));
+
+		// If the number of contours is positive or zero, it is a single glyph;
+		// If the number of contours less than zero, the glyph is compound.
+		const sint16 numberOfContours = stream.read<sint16>(true);
+
+		if (numberOfContours < 0) {
+			return parseCompoundGlyph(stream, tableOffset, glyphOffsets, glyphIndex, maxComponentDepth);
+		}
+
+		Glyph glyph;
+
+		// Minimum x for coordinate data.
+		glyph.min.x = stream.read<FWord>(true);
+
+		// Minimum y for coordinate data.
+		glyph.min.y = stream.read<FWord>(true);
+
+		// Maximum x for coordinate data.
+		glyph.max.x = stream.read<FWord>(true);
+
+		// Maximum y for coordinate data.
+		glyph.max.y = stream.read<FWord>(true);
+
+		// Array of last points of each contour; n is the number of contours; array entries are point indices.
+		fchain<uint16> endPtsOfContours(numberOfContours);
+
+		for (uint16& endPtOfContour : endPtsOfContours) {
+			endPtOfContour = stream.read<uint16>(true);
+		}
+
+		// Total number of bytes needed for instructions.
+		const uint16 instructionLength = stream.read<uint16>(true);
+
+		stream.jump(instructionLength);
+
+		const uint16 maxFlags = endPtsOfContours[numberOfContours - 1] + 1;
+
+		// Array of flags.
+		fchain<uint8> flags(maxFlags);
+
+		uint16 flagIndex = 0;
+
+		for (; flagIndex < maxFlags;) {
+			const uint8 flag = stream.read<uint8>();
+
+			flags[flagIndex] = flag;
+			flagIndex += 1;
+
+			if (flag & BIT(3)) {
+				// If set, the next byte specifies the number of additional times this set of flags is to be
+				// repeated. In this way, the number of flags listed can be smaller than the number of
+				// points in a character.
+				const uint8 repeatCount = stream.read<uint8>();
+
+				ENGINE_ASSERT(repeatCount > 0, "Repeat count is 0.");
+
+				// TODO: Use std::copy.
+				//std::copy(&flags[flagIndex], &flags[flagIndex + repeatCount], flag);
+				std::memcpy(&flags[flagIndex], &flag, repeatCount);
+
+				flagIndex += repeatCount;
+			}
+		}
+
+		ENGINE_ASSERT(flagIndex == maxFlags, "Flag index/max flags mismatch.");
+
+		// Array of x-coordinates; the first is relative to (0,0), others are relative to previous point.
+		fchain<sint16> xCoordinates(maxFlags);
+
+		sint16 prevCoordinate = 0;
+
+		for (sint16 xCoordinateIndex = 0; xCoordinateIndex < maxFlags; xCoordinateIndex += 1) {
+			const uint8 flag = flags[xCoordinateIndex];
+			sint16 xCoordinate = 0;
+
+			if (flag & BIT(1)) {
+				const sint8 sign = (flag >> 4 & BIT(0)) * 2 - 1;
+
+				xCoordinate = static_cast<sint16>(stream.read<uint8>()) * sign;
+				xCoordinate += prevCoordinate;
+			}
+			else {
+				if (flag & BIT(4)) {
+					xCoordinate = prevCoordinate;
+				}
+				else {
+					xCoordinate = stream.read<sint16>(true);
+					xCoordinate += prevCoordinate;
+				}
+			}
+
+			xCoordinates[xCoordinateIndex] = xCoordinate;
+			prevCoordinate = xCoordinate;
+		}
+
+		// Array of y-coordinates; the first is relative to (0,0), others are relative to previous point.
+		fchain<sint16> yCoordinates(maxFlags);
+
+		prevCoordinate = 0;
+
+		for (sint16 yCoordinateIndex = 0; yCoordinateIndex < maxFlags; yCoordinateIndex += 1) {
+			const uint8 flag = flags[yCoordinateIndex];
+			sint16 yCoordinate = 0;
+
+			if (flag & BIT(2)) {
+				const sint8 sign = (flag >> 5 & BIT(0)) * 2 - 1;
+
+				yCoordinate = static_cast<sint16>(stream.read<uint8>()) * sign;
+				yCoordinate += prevCoordinate;
+			}
+			else {
+				if (flag & BIT(5)) {
+					yCoordinate = prevCoordinate;
+				}
+				else {
+					yCoordinate = stream.read<sint16>(true);
+					yCoordinate += prevCoordinate;
+				}
+			}
+
+			yCoordinates[yCoordinateIndex] = yCoordinate;
+			prevCoordinate = yCoordinate;
+		}
+
+		fchain<chain<EdgePoint>> contours(numberOfContours);
+
+		for (uint16 contourIndex = 0; contourIndex < numberOfContours; contourIndex += 1) {
+			const uint16 startIndex = contourIndex == 0 ? 0 : (endPtsOfContours[contourIndex - 1] + 1);
+			const uint16 endIndex = endPtsOfContours[contourIndex];
+
+			chain<EdgePoint>& contour = contours[contourIndex];
+
+			bool previousOnCurve = flags[startIndex] & BIT(0);
+
+			if (previousOnCurve) {
+				EdgePoint point{};
+				point.x = xCoordinates[startIndex];
+				point.y = yCoordinates[startIndex];
+				point.onCurve = true;
+
+				contour.emplace_back(point);
+			}
+
+			for (uint16 index = startIndex + 1; index <= endIndex; index += 1) {
+				EdgePoint point{};
+				point.x = xCoordinates[index];
+				point.y = yCoordinates[index];
+				point.onCurve = flags[index] & BIT(0);
+
+				if (!previousOnCurve && !point.onCurve) {
+					// Insert an on-curve point between two off-curve points.
+
+					EdgePoint halfwayPoint{};
+					halfwayPoint.x = (xCoordinates[index - 1] + point.x) / 2;
+					halfwayPoint.y = (yCoordinates[index - 1] + point.y) / 2;
+					halfwayPoint.onCurve = true;
+
+					contour.emplace_back(halfwayPoint);
+				}
+
+				contour.emplace_back(point);
+
+				previousOnCurve = point.onCurve;
+			}
+
+			// Copy first point to close contour.
+			//contour.emplace_back(contour[0]);
+
+			contours[contourIndex] = contour;
+		}
+
+		for (const chain<EdgePoint>& contour : contours) {
+			for (uint16 edgePointIndex = 1; edgePointIndex < contour.size(); edgePointIndex += 1) {
+				const EdgePoint& edgePoint = contour[edgePointIndex];
+
+				if (!edgePoint.onCurve) {
+					continue;
+				}
+
+				Edge edge{};
+				edge.end.x = edgePoint.x;
+				edge.end.y = edgePoint.y;
+				edge.isQuadraticCurve = !contour[edgePointIndex - 1].onCurve;
+
+				if (edge.isQuadraticCurve) {
+					edge.start.x = contour[edgePointIndex - 2].x;
+					edge.start.y = contour[edgePointIndex - 2].y;
+					edge.control.x = contour[edgePointIndex - 1].x;
+					edge.control.y = contour[edgePointIndex - 1].y;
+				}
+				else {
+					// The start point is the previous edge point.
+					edge.start.x = contour[edgePointIndex - 1].x;
+					edge.start.y = contour[edgePointIndex - 1].y;
+				}
+
+				glyph.edges.emplace_back(edge);
+			}
+		}
+
+		return glyph;
+	}
+
+	static Glyph parseCompoundGlyph(ByteStream& stream, uint32 tableOffset, const fchain<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth) {
+		stream.reset();
+		stream.jump(static_cast<uint64>(tableOffset + glyphOffsets[compoundGlyphIndex]));
+
+		// Skip number of contours.
+		stream.jump(sizeof(sint16));
+
+		Glyph glyph;
+
+		// Minimum x for coordinate data.
+		glyph.min.x = stream.read<FWord>(true);
+
+		// Minimum y for coordinate data.
+		glyph.min.y = stream.read<FWord>(true);
+
+		// Maximum x for coordinate data.
+		glyph.max.x = stream.read<FWord>(true);
+
+		// Maximum y for coordinate data.
+		glyph.max.y = stream.read<FWord>(true);
+
+		for (uint16 depth = 0; depth < maxComponentDepth; depth += 1) {
+			// Component flag.
+			const uint16 flags = stream.read<uint16>(true);
+
+			// Glyph index of component.
+			const uint16 glyphIndex = stream.read<uint16>(true);
+
+			float32 e = 0.0f;
+			float32 f = 0.0f;
+
+			if (flags & BIT(0)) {
+				// If set, arguments are 16-bit, otherwise, they are bytes (uint8 or int8).
+				e = stream.read<sint16>(true);
+				f = stream.read<sint16>(true);
+			}
+			else {
+				e = stream.read<sint8>();
+				f = stream.read<sint8>();
+			}
+
+			float32 a = 1.0f;
+			float32 b = 0.0f;
+			float32 c = 0.0f;
+			float32 d = 1.0f;
+
+			if (flags & BIT(3)) {
+				// WE_HAVE_A_SCALE
+				a = stream.read<sint16>(true);
+			}
+			else if (flags & BIT(6)) {
+				// WE_HAVE_AN_X_AND_Y_SCALE
+				a = stream.read<sint16>(true);
+				d = stream.read<sint16>(true);
+			}
+			else if (flags & BIT(7)) {
+				// WE_HAVE_A_TWO_BY_TWO
+				a = stream.read<sint16>(true);
+				b = stream.read<sint16>(true);
+				c = stream.read<sint16>(true);
+				d = stream.read<sint16>(true);
+			}
+
+			// TODO: lyah::max(float32, float32)
+			// TODO: ProjectA::abs(float32, float32)
+			float32 m = std::max(lyah::abs(a), lyah::abs(b));
+
+			if (lyah::abs(lyah::abs(a) - lyah::abs(c)) <= 33.0f / 65536.0f) {
+				m *= 2.0f;
+			}
+
+			float32 n = std::max(lyah::abs(c), lyah::abs(d));
+
+			if (lyah::abs(lyah::abs(b) - lyah::abs(d)) <= 33.0f / 65536.0f) {
+				n *= 2.0f;
+			}
+
+			const uint64 byteOffset = stream.getByteOffset();
+
+			const Glyph componentGlyph = parseSimpleGlyph(stream, tableOffset, glyphOffsets, glyphIndex, maxComponentDepth);
+
+			for (const Edge& edge : componentGlyph.edges) {
+				glyph.edges.emplace_back(edge);
+			}
+
+			// Reset stream after parsing component glyph.
+			stream.reset();
+			stream.jump(byteOffset);
+
+			if (!(flags & BIT(5))) {
+				break;
+			}
+		}
+
+		return glyph;
 	}
 
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
@@ -299,7 +561,7 @@ namespace ProjectA {
 			glyphOffset = stream.read<uint16>(true) * 2;
 		}
 
-		/*const uint16 regCount = static_cast<uint16>(glyphLengths.count / 8);
+		const uint16 regCount = static_cast<uint16>(glyphLengths.count / 8);
 
 		for (uint16 regIndex = 0; regIndex < regCount; regIndex += 1) {
 			const __m128i next = _mm_load_si128(static_cast<__m128i*>(static_cast<void*>(&glyphOffsets[regIndex * 8 + 1])));
@@ -312,9 +574,9 @@ namespace ProjectA {
 		// Leave last glyph length as 0.
 		for (uint16 glyphIndex = regCount * 8; glyphIndex < maxp.numGlyphs; glyphIndex += 1) {
 			glyphLengths[glyphIndex] = glyphOffsets[glyphIndex + 1] - glyphOffsets[glyphIndex];
-		}*/
+		}
 
-		fchain<Glyph> glyphs(maxp.numGlyphs);
+		ttfFile.glyphs.allocate(maxp.numGlyphs);
 
 		// Parse 'glyf' table.
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
@@ -322,233 +584,27 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'glyf' table.");
 
-		// 'A'
-		const uint16 testGlyphIndex = 4;
-
-		for (uint16 glyphIndex = testGlyphIndex; glyphIndex < glyphs.count; glyphIndex += 1) {
+		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.count; glyphIndex += 1) {
+			// Need to reset + jump to peek the number of contours.
 			stream.reset();
-			stream.jump(static_cast<uint64>(tableOffset->second));
-
-			const uint16 glyphOffset = glyphOffsets[glyphIndex];
-
-			stream.jump(glyphOffset);
+			stream.jump(static_cast<uint64>(tableOffset->second + glyphOffsets[glyphIndex]));
 
 			// If the number of contours is positive or zero, it is a single glyph;
 			// If the number of contours less than zero, the glyph is compound.
-			const sint16 numberOfContours = stream.read<sint16>(true);
+			const sint16 numberOfContours = stream.peek<sint16>(true);
 
-			Glyph glyph;
+			if (glyphLengths[glyphIndex] == 0) {
+				ENGINE_WARN("Number of contours for glyph [] is 0.", glyphIndex);
 
-			if (numberOfContours == 0) {
-				glyph.max = {0, 0};
-				glyph.max = {0, 0};
+				continue;
 			}
-			else if (numberOfContours > 0) {
-				// Minimum x for coordinate data.
-				const FWord xMin = stream.read<FWord>(true);
 
-				// Minimum y for coordinate data.
-				const FWord yMin = stream.read<FWord>(true);
-
-				// Maximum x for coordinate data.
-				const FWord xMax = stream.read<FWord>(true);
-
-				// Maximum y for coordinate data.
-				const FWord yMax = stream.read<FWord>(true);
-
-				glyph.max = {xMax, yMax};
-				glyph.min = {xMin, yMin};
-
-				// Array of last points of each contour; n is the number of contours; array entries are point indices.
-				fchain<uint16> endPtsOfContours(numberOfContours);
-
-				for (uint16& endPtOfContour : endPtsOfContours) {
-					endPtOfContour = stream.read<uint16>(true);
-				}
-
-				// Total number of bytes needed for instructions.
-				const uint16 instructionLength = stream.read<uint16>(true);
-
-				stream.jump(instructionLength);
-
-				const uint16 maxFlags = endPtsOfContours[numberOfContours - 1] + 1;
-
-				// Array of flags.
-				fchain<uint8> flags(maxFlags);
-
-				uint16 flagIndex = 0;
-				const uint16 maxIterations = maxFlags;
-
-				for (uint16 iteration = 0; iteration < maxIterations; iteration += 1) {
-					const uint8 flag = stream.read<uint8>();
-					uint8 repeatCount = 0;
-
-					if (flag & BIT(3)) {
-						// If set, the next byte specifies the number of additional times this set of flags is to be
-						// repeated. In this way, the number of flags listed can be smaller than the number of
-						// points in a character.
-						repeatCount = stream.read<uint8>();
-
-						ENGINE_ASSERT(repeatCount > 0, "Repeat count is 0.");
-					}
-
-					/*if (flag & 0b11000000) {
-						ENGINE_ASSERT(false, "[] is a reserved flag. See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html.", static_cast<sint32>(flag));
-					}*/
-
-					flags[flagIndex] = flag;
-					flagIndex += 1;
-
-					while (repeatCount > 0) {
-						flags[flagIndex] = flag;
-						flagIndex += 1;
-						repeatCount -= 1;
-					}
-				}
-
-				// Array of x-coordinates; the first is relative to (0,0), others are relative to previous point.
-				fchain<sint16> xCoordinates(maxFlags);
-
-				sint16 prevCoordinate = 0;
-
-				for (sint16 xCoordinateIndex = 0; xCoordinateIndex < maxFlags; xCoordinateIndex += 1) {
-					const uint8 flag = flags[xCoordinateIndex];
-					sint16 xCoordinate = 0;
-
-					if (flag & BIT(1)) {
-						const sint8 sign = (flag >> 4 & BIT(0)) * 2 - 1;
-
-						xCoordinate = static_cast<sint16>(stream.read<uint8>()) * sign;
-						xCoordinate += prevCoordinate;
-					}
-					else {
-						if (flag & BIT(4)) {
-							xCoordinate = prevCoordinate;
-						}
-						else {
-							xCoordinate = stream.read<sint16>(true);
-							xCoordinate += prevCoordinate;
-						}
-					}
-
-					xCoordinates[xCoordinateIndex] = xCoordinate;
-					prevCoordinate = xCoordinate;
-				}
-
-				// Array of y-coordinates; the first is relative to (0,0), others are relative to previous point.
-				fchain<sint16> yCoordinates(maxFlags);
-
-				prevCoordinate = 0;
-
-				for (sint16 yCoordinateIndex = 0; yCoordinateIndex < maxFlags; yCoordinateIndex += 1) {
-					const uint8 flag = flags[yCoordinateIndex];
-					sint16 yCoordinate = 0;
-
-					if (flag & BIT(2)) {
-						const sint8 sign = (flag >> 5 & BIT(0)) * 2 - 1;
-
-						yCoordinate = static_cast<sint16>(stream.read<uint8>()) * sign;
-						yCoordinate += prevCoordinate;
-					}
-					else {
-						if (flag & BIT(5)) {
-							yCoordinate = prevCoordinate;
-						}
-						else {
-							yCoordinate = stream.read<sint16>(true);
-							yCoordinate += prevCoordinate;
-						}
-					}
-
-					yCoordinates[yCoordinateIndex] = yCoordinate;
-					prevCoordinate = yCoordinate;
-				}
-
-				fchain<chain<EdgePoint>> contours(numberOfContours);
-
-				for (uint16 contourIndex = 0; contourIndex < numberOfContours; contourIndex += 1) {
-					const uint16 startIndex = contourIndex == 0 ? 0 : (endPtsOfContours[contourIndex - 1] + 1);
-					const uint16 endIndex = endPtsOfContours[contourIndex];
-
-					chain<EdgePoint>& contour = contours[contourIndex];
-
-					bool previousOnCurve = flags[startIndex] & BIT(0);
-
-					if (previousOnCurve) {
-						EdgePoint point{};
-						point.x = xCoordinates[startIndex];
-						point.y = yCoordinates[startIndex];
-						point.onCurve = true;
-
-						contour.emplace_back(point);
-					}
-
-					for (uint16 index = startIndex + 1; index <= endIndex; index += 1) {
-						EdgePoint point{};
-						point.x = xCoordinates[index];
-						point.y = yCoordinates[index];
-						point.onCurve = flags[index] & BIT(0);
-
-						if (!previousOnCurve && !point.onCurve) {
-							// Insert an on-curve point between two off-curve points.
-
-							EdgePoint halfwayPoint{};
-							halfwayPoint.x = (xCoordinates[index - 1] + point.x) / 2;
-							halfwayPoint.y = (yCoordinates[index - 1] + point.y) / 2;
-							halfwayPoint.onCurve = true;
-
-							contour.emplace_back(halfwayPoint);
-						}
-
-						contour.emplace_back(point);
-
-						previousOnCurve = point.onCurve;
-					}
-
-					// Copy first point to close contour.
-					//contour.emplace_back(contour[0]);
-
-					contours[contourIndex] = contour;
-				}
-
-				for (const chain<EdgePoint>& contour : contours) {
-					for (uint16 edgePointIndex = 1; edgePointIndex < contour.size(); edgePointIndex += 1) {
-						const EdgePoint& edgePoint = contour[edgePointIndex];
-
-						if (!edgePoint.onCurve) {
-							continue;
-						}
-
-						Edge edge{};
-						edge.end.x = edgePoint.x;
-						edge.end.y = edgePoint.y;
-						edge.isQuadraticCurve = !contour[edgePointIndex - 1].onCurve;
-
-						if (edge.isQuadraticCurve) {
-							edge.start.x = contour[edgePointIndex - 2].x;
-							edge.start.y = contour[edgePointIndex - 2].y;
-							edge.control.x = contour[edgePointIndex - 1].x;
-							edge.control.y = contour[edgePointIndex - 1].y;
-						}
-						else {
-							// The start point is the previous edge point.
-							edge.start.x = contour[edgePointIndex - 1].x;
-							edge.start.y = contour[edgePointIndex - 1].y;
-						}
-
-						glyph.edges.emplace_back(edge);
-					}
-				}
-
-				BREAKPOINT();
+			if (numberOfContours >= 0) {
+				ttfFile.glyphs[glyphIndex] = parseSimpleGlyph(stream, tableOffset->second, glyphOffsets, glyphIndex, maxp.maxComponentDepth);
 			}
 			else {
-				ENGINE_WARN("Compound glyphs are not supported yet.");
+				ttfFile.glyphs[glyphIndex] = parseCompoundGlyph(stream, tableOffset->second, glyphOffsets, glyphIndex, maxp.maxComponentDepth);
 			}
-
-			glyphs[glyphIndex] = glyph;
-
-			BREAKPOINT();
 		}
 
 		return ttfFile;
