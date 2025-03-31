@@ -35,6 +35,7 @@
 #include "lyah/lyah.hpp"
 
 #include "Engine/types.hpp"
+#include "Engine/fchain.hpp"
 
 #ifdef BUILD_MODE_DEBUG
 	#include "Engine/Logger/Logger.hpp"

@@ -9,13 +9,28 @@ namespace ProjectA {
 			}
 
 			template<>
+			static sint16 byteswap(sint16 value) {
+				return _byteswap_ushort(value);
+			}
+
+			template<>
 			static uint16 byteswap(uint16 value) {
 				return _byteswap_ushort(value);
 			}
 
 			template<>
+			static sint32 byteswap(sint32 value) {
+				return _byteswap_ulong(value);
+			}
+
+			template<>
 			static uint32 byteswap(uint32 value) {
 				return _byteswap_ulong(value);
+			}
+
+			template<>
+			static sint64 byteswap(sint64 value) {
+				return _byteswap_uint64(value);
 			}
 
 			template<>
@@ -69,6 +84,8 @@ namespace ProjectA {
 
 				return value;
 			}
+
+			void reset();
 
 		private:
 			const uint8* stream;

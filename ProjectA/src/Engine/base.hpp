@@ -11,6 +11,8 @@
 #elif defined(__linux__)
 	#define PLATFORM_LINUX
 
+	#include <signal.h>
+
 	#error "Unhandled platform."
 #else
 	#error "Unhandled platform."
@@ -50,11 +52,11 @@
 #endif
 
 #if defined(PLATFORM_WINDOWS)
-	#define DEBUGBREAK() __debugbreak()
+	#define BREAKPOINT() __debugbreak()
+#elif defined(__clang__)
+	#define BREAKPOINT()  __builtin_debugtrap()
 #elif defined(PLATFORM_LINUX)
-	#include <signal.h>
-
-	#define DEBUGBREAK() raise(SIGTRAP)
+	#define BREAKPOINT() raise(SIGTRAP)
 #else
 	#error "Unhandled platform."
 #endif
@@ -62,14 +64,14 @@
 #define ENGINE_ASSERT(condition, ...) { \
 	if (!(condition)) { \
 		ENGINE_ERROR(__VA_ARGS__); \
-		DEBUGBREAK(); \
+		BREAKPOINT(); \
 	} \
 }
 
 #define CLIENT_ASSERT(condition, ...) { \
 	if (!(condition)) { \
 		CLIENT_ERROR(__VA_ARGS__); \
-		DEBUGBREAK(); \
+		BREAKPOINT(); \
 	} \
 }
 
@@ -102,6 +104,20 @@
 #endif
 
 #define BIT(index) 1 << index
+
+#define STRING_TO_BIG_ENDIAN_UINT32(type) ( \
+	(static_cast<uint32>(type[0]) << 24) | \
+	(static_cast<uint32>(type[1]) << 16) | \
+	(static_cast<uint32>(type[2]) << 8) | \
+	(static_cast<uint32>(type[3]) << 0) \
+)
+
+#define STRING_TO_LITTLE_ENDIAN_UINT32(type) ( \
+	(static_cast<uint32>(type[0]) << 0) | \
+	(static_cast<uint32>(type[1]) << 8) | \
+	(static_cast<uint32>(type[2]) << 16) | \
+	(static_cast<uint32>(type[3]) << 24) \
+)
 
 // TODO: Remove usage of auto?
 #define BIND(function) \

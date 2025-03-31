@@ -7,13 +7,6 @@
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
-	#define PNG_CHUNK_TYPE_STRING_TO_UINT32(type) ( \
-		(static_cast<uint32>(type[0]) << 0) | \
-		(static_cast<uint32>(type[1]) << 8) | \
-		(static_cast<uint32>(type[2]) << 16) | \
-		(static_cast<uint32>(type[3]) << 24) \
-	)
-
 	struct Chunk {
 		uint32 ByteLength = 0;
 		uint32 Type = 0;
@@ -99,15 +92,15 @@ namespace ProjectA {
 		Chunk.Type = stream.read<uint32>();
 
 		switch (Chunk.Type) {
-			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IHDR"):
+			case STRING_TO_LITTLE_ENDIAN_UINT32("IHDR"):
 				readIHDRChunk(stream, file);
 
 				break;
-			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IDAT"):
+			case STRING_TO_LITTLE_ENDIAN_UINT32("IDAT"):
 				readIDATChunk(stream, Chunk.ByteLength, compressedData);
 
 				break;
-			case PNG_CHUNK_TYPE_STRING_TO_UINT32("IEND"):
+			case STRING_TO_LITTLE_ENDIAN_UINT32("IEND"):
 				break;
 			default:
 				const char* TypeString = static_cast<char*>(static_cast<void*>(&Chunk.Type));

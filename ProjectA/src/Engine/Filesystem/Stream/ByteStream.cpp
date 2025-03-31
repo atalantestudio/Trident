@@ -27,4 +27,8 @@ namespace ProjectA {
 
 		byteOffset += byteCount;
 	}
+
+	void ByteStream::reset() {
+		byteOffset = 0;
+	}
 }
