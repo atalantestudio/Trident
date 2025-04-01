@@ -4,7 +4,10 @@
 
 namespace ProjectA {
 	enum class ShaderStage : uint8 {
-		VERTEX = 0,
-		FRAGMENT = 1,
+		VERTEX = BIT(0),
+		FRAGMENT = BIT(1),
+		COMPUTE = BIT(2),
 	};
+
+	AS_FLAG(ShaderStage);
 }

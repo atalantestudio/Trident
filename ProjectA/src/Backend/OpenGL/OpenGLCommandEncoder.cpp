@@ -27,8 +27,10 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLBeginRenderPassCommand>(descriptor));
 	}
 
-	void OpenGLCommandEncoder::bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) {
-		this->renderPipeline = static_cast<const OpenGLRenderPipeline*>(renderPipeline.get());
+	void OpenGLCommandEncoder::bindPipeline(const ref<Pipeline>& pipeline) {
+		ENGINE_ASSERT(false, "TODO: Bind OpenGL render/compute pipeline.");
+
+		this->renderPipeline = static_cast<const OpenGLRenderPipeline*>(pipeline.get());
 
 		commandBuffer.emplace_back(createRef<OpenGLBindRenderPipelineCommand>(this->renderPipeline));
 	}
@@ -71,7 +73,11 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout) const {}
+	void OpenGLCommandEncoder::dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) const {
+		ENGINE_ASSERT(false, "TODO: Dispatch groups");
+	}
+
+	void OpenGLCommandEncoder::setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const {}
 
 	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(

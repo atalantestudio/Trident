@@ -2,14 +2,8 @@
 
 #include "Engine/API/CommandEncoder.hpp"
 #include "Engine/Event/Event.hpp"
-#include "Engine/Renderer/Buffer/Buffer.hpp"
-#include "Engine/Renderer/Device.hpp"
 #include "Engine/Renderer/GraphicsAPI.hpp"
-#include "Engine/Renderer/PipelineLayout.hpp"
 #include "Engine/Renderer/RendererAPI.hpp"
-#include "Engine/Renderer/RenderPass.hpp"
-#include "Engine/Renderer/ShaderModule.hpp"
-#include "Engine/Renderer/Texture.hpp"
 
 typedef struct GLFWwindow GLFWwindow;
 
@@ -38,7 +32,7 @@ namespace ProjectA {
 
 			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
 
-			static ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor);
+			static ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor);
 
 			static ref<Fence> createFence();
 

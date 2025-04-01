@@ -16,7 +16,7 @@ namespace ProjectA {
 
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const override;
 
-			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const override;
+			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const override;
 
 			ref<Fence> createFence() const override;
 

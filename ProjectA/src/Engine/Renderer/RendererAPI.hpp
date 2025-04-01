@@ -1,14 +1,8 @@
 #pragma once
 
-#include "Engine/API/CommandEncoder.hpp"
-#include "Engine/API/Synchronization/Fence.hpp"
-#include "Engine/API/Synchronization/Semaphore.hpp"
-#include "Engine/Renderer/Buffer/Buffer.hpp"
+#include "Engine/Renderer/ComputePipeline.hpp"
 #include "Engine/Renderer/Device.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
-#include "Engine/Renderer/Sampler.hpp"
-#include "Engine/Renderer/ShaderModule.hpp"
-#include "Engine/Renderer/Texture.hpp"
 
 namespace ProjectA {
 	class RendererAPI {
@@ -19,7 +13,7 @@ namespace ProjectA {
 
 			virtual ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const = 0;
 
-			virtual ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const = 0;
+			virtual ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const = 0;
 
 			virtual ref<Fence> createFence() const = 0;
 

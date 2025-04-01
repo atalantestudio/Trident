@@ -68,8 +68,8 @@ namespace ProjectA {
 		return rendererApi->createBuffer(descriptor);
 	}
 
-	ref<CommandEncoder> Renderer::createCommandEncoder(const CommandBufferDescriptor& descriptor) {
-		return rendererApi->createCommandEncoder(descriptor);
+	ref<ComputePipeline> Renderer::createComputePipeline(const ComputePipelineDescriptor& descriptor) {
+		return rendererApi->createComputePipeline(descriptor);
 	}
 
 	ref<Fence> Renderer::createFence() {

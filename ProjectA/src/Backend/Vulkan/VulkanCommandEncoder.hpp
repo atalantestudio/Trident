@@ -2,15 +2,14 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Backend/Vulkan/VulkanDevice.hpp"
-#include "Backend/Vulkan/VulkanPipelineLayout.hpp"
+#include "Backend/Vulkan/VulkanPipeline.hpp"
 
 #include "Engine/API/CommandEncoder.hpp"
 
 namespace ProjectA {
 	class VulkanCommandEncoder : public CommandEncoder {
 		public:
-			VulkanCommandEncoder(const VulkanDevice& device, VkCommandPool commandPool, const CommandBufferDescriptor& descriptor);
+			VulkanCommandEncoder(VkDevice device, VkCommandPool commandPool, const CommandBufferDescriptor& descriptor);
 
 			~VulkanCommandEncoder();
 
@@ -18,7 +17,7 @@ namespace ProjectA {
 
 			void beginRenderPass(const BeginRenderPassDescriptor& descriptor) override;
 
-			void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) override;
+			void bindPipeline(const ref<Pipeline>& pipeline) override;
 
 			void bindDescriptorSets(uint32 descriptorSetIndex) const override;
 
@@ -30,7 +29,9 @@ namespace ProjectA {
 
 			void copyBufferToTexture(const ref<Buffer>& sourceBuffer, const ref<Texture>& destinationTexture, uint32 width, uint32 height, uint32 depth) override;
 
-			void setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout) const override;
+			void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) const override;
+
+			void setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const override;
 
 			void setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) override;
 
@@ -47,10 +48,10 @@ namespace ProjectA {
 			void reset() override;
 
 		private:
-			const VulkanDevice& device;
+			const VkDevice device;
 			const VkCommandPool commandPool;
 			const VkCommandBufferUsageFlags commandBufferUsageFlag;
 			VkCommandBuffer commandBuffer;
-			const VulkanPipelineLayout* pipelineLayout = nullptr;
+			ref<VulkanPipeline> pipeline;
 	};
 }

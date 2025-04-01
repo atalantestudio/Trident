@@ -4,10 +4,9 @@
 #include "Backend/Vulkan/VulkanBuffer.hpp"
 
 namespace ProjectA {
-	VulkanBuffer::VulkanBuffer(VkPhysicalDevice physicalDevice, VkCommandPool commandPool, const VulkanDevice& device, const BufferDescriptor& descriptor) :
+	VulkanBuffer::VulkanBuffer(VkPhysicalDevice physicalDevice, const VulkanDevice& device, const BufferDescriptor& descriptor) :
 		device(device),
-		size(descriptor.size),
-		commandPool(commandPool)
+		size(descriptor.size)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 

@@ -7,6 +7,8 @@
 
 namespace ProjectA {
 	TextureDemoRenderer::TextureDemoRenderer() {
+		const ref<Device>& device = getDevice();
+
 		// Load texture.
 		{
 			const PNGFile file = Filesystem::load<PNGFile>("../ProjectA/src/Engine/Debug/TextureDemo/Asset/Zelda.png");
@@ -40,18 +42,18 @@ namespace ProjectA {
 			CommandBufferDescriptor commandBufferDescriptor{};
 			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
-			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL);
+			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 			commandEncoder->copyBufferToTexture(stagingBuffer, texture, file.width, file.height, 0);
-			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL);
+			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 			const ref<Device>& device = getDevice();
 
-			device->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
 			device->waitIdle();
 		}
 
@@ -176,7 +178,7 @@ namespace ProjectA {
 			CommandBufferDescriptor commandBufferDescriptor{};
 			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
 			commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, 0, 0, size);
@@ -185,7 +187,7 @@ namespace ProjectA {
 
 			const ref<Device>& device = getDevice();
 
-			device->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
 			device->waitIdle();
 		}
 
@@ -222,7 +224,7 @@ namespace ProjectA {
 			CommandBufferDescriptor commandBufferDescriptor{};
 			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
 			commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, 0, 0, size);
@@ -231,7 +233,7 @@ namespace ProjectA {
 
 			const ref<Device>& device = getDevice();
 
-			device->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
 			device->waitIdle();
 		}
 	}
@@ -246,7 +248,7 @@ namespace ProjectA {
 		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-		commandEncoder->bindRenderPipeline(renderPipeline);
+		commandEncoder->bindPipeline(renderPipeline);
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));

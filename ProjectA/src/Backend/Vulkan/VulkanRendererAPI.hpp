@@ -3,7 +3,6 @@
 #include <glfw/glfw3.h>
 #include <vulkan/vulkan.h>
 
-#include "Backend/Vulkan/VulkanCommandPool.hpp"
 #include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanInstance.hpp"
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"
@@ -21,7 +20,7 @@ namespace ProjectA {
 
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const override;
 
-			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const override;
+			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const override;
 
 			ref<Fence> createFence() const override;
 
@@ -46,6 +45,5 @@ namespace ProjectA {
 			const VulkanPhysicalDevice physicalDevice;
 			VulkanSurface surface;
 			const ref<VulkanDevice> device;
-			const VulkanCommandPool commandPool;
 	};
 }

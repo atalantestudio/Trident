@@ -2,10 +2,12 @@
 
 #include "Backend/Vulkan/CommandBufferUsage.hpp"
 #include "Backend/Vulkan/IndexType.hpp"
+#include "Backend/Vulkan/PipelineStage.hpp"
 #include "Backend/Vulkan/TextureLayout.hpp"
 #include "Backend/Vulkan/VulkanBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
+#include "Backend/Vulkan/VulkanComputePipeline.hpp"
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
 #include "Backend/Vulkan/VulkanTexture.hpp"
@@ -13,7 +15,7 @@
 #include "Engine/Application.hpp"
 
 namespace ProjectA {
-	VulkanCommandEncoder::VulkanCommandEncoder(const VulkanDevice& device, VkCommandPool commandPool, const CommandBufferDescriptor& descriptor) :
+	VulkanCommandEncoder::VulkanCommandEncoder(VkDevice device, VkCommandPool commandPool, const CommandBufferDescriptor& descriptor) :
 		device(device),
 		commandPool(commandPool),
 		commandBufferUsageFlag(getVkCommandBufferUsageFlag(descriptor.usage))
@@ -27,7 +29,7 @@ namespace ProjectA {
 		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		commandBufferAllocateInfo.commandBufferCount = 1;
 
-		const VkResult result = vkAllocateCommandBuffers(device.object, &commandBufferAllocateInfo, &commandBuffer);
+		const VkResult result = vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &commandBuffer);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan command buffer (code: []).", result);
 	}
@@ -35,7 +37,7 @@ namespace ProjectA {
 	VulkanCommandEncoder::~VulkanCommandEncoder() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		vkFreeCommandBuffers(device.object, commandPool, 1, &commandBuffer);
+		vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 	}
 
 	void VulkanCommandEncoder::begin() const {
@@ -74,25 +76,25 @@ namespace ProjectA {
 		vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}
 
-	void VulkanCommandEncoder::bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) {
+	void VulkanCommandEncoder::bindPipeline(const ref<Pipeline>& pipeline) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, static_cast<const VulkanRenderPipeline*>(renderPipeline.get())->object);
+		this->pipeline = std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
 
-		pipelineLayout = static_cast<const VulkanRenderPipeline*>(renderPipeline.get())->pipelineLayout;
+		vkCmdBindPipeline(commandBuffer, this->pipeline->bindPoint, this->pipeline->object);
 	}
 
 	void VulkanCommandEncoder::bindDescriptorSets(uint32 descriptorSetIndex) const {
 		vkCmdBindDescriptorSets(
 			commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			pipelineLayout->object,
+			pipeline->bindPoint,
+			pipeline->layout->object,
 
 			// TODO: Allow custom descriptor set range to be bound.
 			0,
-			static_cast<uint32>(pipelineLayout->descriptorSets.size()),
+			static_cast<uint32>(pipeline->layout->descriptorSets.size()),
 
-			pipelineLayout->descriptorSets.data(),
+			pipeline->layout->descriptorSets.data(),
 			0,
 			nullptr
 		);
@@ -153,15 +155,58 @@ namespace ProjectA {
 		);
 	}
 
-	void VulkanCommandEncoder::setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout) const {
-		VkPipelineStageFlags sourceStage;
-		VkPipelineStageFlags destinationStage;
+	void VulkanCommandEncoder::dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) const {
+		vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
+	}
 
+	void VulkanCommandEncoder::setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const {
 		VkImageMemoryBarrier imageMemoryBarrier{};
 		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 		imageMemoryBarrier.pNext = nullptr;
 
-		if (oldLayout == TextureLayout::UNDEFINED && newLayout == TextureLayout::TRANSFER_DST_OPTIMAL) {
+		switch (oldLayout) {
+			case TextureLayout::UNDEFINED:
+				imageMemoryBarrier.srcAccessMask = VK_ACCESS_NONE;
+
+				break;
+			case TextureLayout::TRANSFER_SRC_OPTIMAL:
+				imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+				break;
+			case TextureLayout::TRANSFER_DST_OPTIMAL:
+				imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+				break;
+			case TextureLayout::SHADER_READ_ONLY_OPTIMAL:
+				imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+				break;
+			default:
+				ENGINE_WARN("Ignored unhandled Vulkan image layout (as old image layout).");
+
+				break;
+		}
+
+		switch (newLayout) {
+			case TextureLayout::TRANSFER_SRC_OPTIMAL:
+				imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+				break;
+			case TextureLayout::TRANSFER_DST_OPTIMAL:
+				imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+				break;
+			case TextureLayout::SHADER_READ_ONLY_OPTIMAL:
+				imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+				break;
+			default:
+				ENGINE_WARN("Ignored unhandled Vulkan image layout (as new image layout).");
+
+				break;
+		}
+
+		/*if (oldLayout == TextureLayout::UNDEFINED && newLayout == TextureLayout::TRANSFER_DST_OPTIMAL) {
 			imageMemoryBarrier.srcAccessMask = 0;
 			imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
@@ -175,9 +220,13 @@ namespace ProjectA {
 			sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		}
-		else {
-			throw std::runtime_error("Unhandled texture layout transition.");
-		}
+		else if (oldLayout == TextureLayout::UNDEFINED && newLayout == TextureLayout::GENERAL) {
+			imageMemoryBarrier.srcAccessMask = 0;
+			imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+			sourceStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}*/
 
 		imageMemoryBarrier.oldLayout = getVkImageLayout(oldLayout);
 		imageMemoryBarrier.newLayout = getVkImageLayout(newLayout);
@@ -192,8 +241,8 @@ namespace ProjectA {
 
 		vkCmdPipelineBarrier(
 			commandBuffer,
-			sourceStage,
-			destinationStage,
+			getVkPipelineStageFlagBits(sourceStage),
+			getVkPipelineStageFlagBits(destinationStage),
 			0,
 			0,
 			nullptr,
@@ -267,7 +316,7 @@ namespace ProjectA {
 	void VulkanCommandEncoder::reset() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		pipelineLayout = nullptr;
+		pipeline = nullptr;
 
 		const VkResult result = vkResetCommandBuffer(commandBuffer, 0);
 

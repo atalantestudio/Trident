@@ -48,14 +48,18 @@ namespace ProjectA {
 
 		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyPropertyCount, queueFamilyProperties.data());
 
-		// Find a queue family that handles graphics.
-		for (uint32 index = 0; index < queueFamilyProperties.size(); index += 1) {
-			if (queueFamilyProperties[index].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-				this->graphicsQueueFamilyIndex = index;
+		for (uint32 queueFamilyPropertyIndex = 0; queueFamilyPropertyIndex < queueFamilyPropertyCount; queueFamilyPropertyIndex += 1) {
+			if (queueFamilyProperties[queueFamilyPropertyIndex].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+				graphicsQueueFamilyIndex = queueFamilyPropertyIndex;
+			}
 
-				break;
+			if (queueFamilyProperties[queueFamilyPropertyIndex].queueFlags & VK_QUEUE_COMPUTE_BIT) {
+				computeQueueFamilyIndex = queueFamilyPropertyIndex;
 			}
 		}
+
+		ENGINE_ASSERT(graphicsQueueFamilyIndex != std::numeric_limits<uint32>::max(), "Failed to find Vulkan graphics queue index.");
+		ENGINE_ASSERT(computeQueueFamilyIndex != std::numeric_limits<uint32>::max(), "Failed to find Vulkan compute queue index.");
 
 		uint32 extensionPropertyCount = 0;
 

@@ -2,6 +2,7 @@
 
 #include "Backend/Vulkan/VulkanBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
+#include "Backend/Vulkan/VulkanComputePipeline.hpp"
 #include "Backend/Vulkan/VulkanFence.hpp"
 #include "Backend/Vulkan/VulkanRendererAPI.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
@@ -15,8 +16,7 @@ namespace ProjectA {
 		instance(),
 		physicalDevice(instance.object),
 		surface(instance.object, physicalDevice, window),
-		device(createRef<VulkanDevice>(physicalDevice, surface)),
-		commandPool(physicalDevice, device->object)
+		device(createRef<VulkanDevice>(physicalDevice, surface))
 	{}
 
 	ref<Device> VulkanRendererAPI::getDevice() const {
@@ -24,11 +24,11 @@ namespace ProjectA {
 	}
 
 	ref<Buffer> VulkanRendererAPI::createBuffer(const BufferDescriptor& descriptor) const {
-		return createRef<VulkanBuffer>(physicalDevice.object, commandPool.object, *device, descriptor);
+		return createRef<VulkanBuffer>(physicalDevice.object, *device, descriptor);
 	}
 
-	ref<CommandEncoder> VulkanRendererAPI::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
-		return createRef<VulkanCommandEncoder>(*device, commandPool.object, descriptor);
+	ref<ComputePipeline> VulkanRendererAPI::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
+		return createRef<VulkanComputePipeline>(device->object, descriptor);
 	}
 
 	ref<Fence> VulkanRendererAPI::createFence() const {

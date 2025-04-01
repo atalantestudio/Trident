@@ -3,6 +3,7 @@
 #include "Engine/Renderer/Buffer/BufferLayout.hpp"
 #include "Engine/Renderer/CullMode.hpp"
 #include "Engine/Renderer/FrontFace.hpp"
+#include "Engine/Renderer/Pipeline.hpp"
 #include "Engine/Renderer/PipelineLayout.hpp"
 #include "Engine/Renderer/PrimitiveTopology.hpp"
 #include "Engine/Renderer/RenderPass.hpp"
@@ -21,7 +22,7 @@ namespace ProjectA {
 		FrontFace frontFace;
 	};
 
-	class RenderPipeline {
+	class RenderPipeline : public Pipeline {
 		public:
 			virtual ~RenderPipeline() = default;
 	};

@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanCommandPool.hpp"
 
 namespace ProjectA {
-	VulkanCommandPool::VulkanCommandPool(const VulkanPhysicalDevice& physicalDevice, VkDevice device) :
+	VulkanCommandPool::VulkanCommandPool(VkDevice device, uint32 queueFamilyIndex) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -12,7 +12,7 @@ namespace ProjectA {
 		commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		commandPoolCreateInfo.pNext = nullptr;
 		commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		commandPoolCreateInfo.queueFamilyIndex = physicalDevice.graphicsQueueFamilyIndex;
+		commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndex;
 
 		const VkResult result = vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &object);
 

@@ -10,13 +10,12 @@ namespace ProjectA {
 			GL_SHADER_STORAGE_BUFFER,
 			GL_UNIFORM_BUFFER,
 			0,
+			0,
 		};
 
-		const GLenum glDescriptorType = glDescriptorTypes[static_cast<uint32>(descriptorType)];
+		const GLenum glDescriptorType = glDescriptorTypes[static_cast<uint8>(descriptorType)];
 
-		if (glDescriptorType == 0) {
-			throw std::runtime_error("OpenGL descriptor type not supported.");
-		}
+		ENGINE_ASSERT(glDescriptorType != 0, "OpenGL descriptor type not supported.");
 
 		return glDescriptorType;
 	}

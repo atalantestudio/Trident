@@ -7,8 +7,16 @@
 #include "Backend/OpenGL/OpenGLFence.hpp"
 
 namespace ProjectA {
-	OpenGLDevice::OpenGLDevice() {
-		PROFILE_SCOPE(FUNCSIG);
+	OpenGLDevice::OpenGLDevice() :
+		queue()
+	{}
+
+	const ref<Queue> OpenGLDevice::getComputeQueue() const {
+		return queue;
+	}
+
+	const ref<Queue> OpenGLDevice::getGraphicsQueue() const {
+		return queue;
 	}
 
 	void OpenGLDevice::waitForFence(const ref<Fence>& fence) const {
@@ -31,17 +39,10 @@ namespace ProjectA {
 	}
 
 	Status OpenGLDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const {
+		// TODO: Return correct image index - suitable for multi-buffering.
 		nextImageIndex = 0;
 
 		return Status::SUCCESS;
-	}
-
-	void OpenGLDevice::submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
-		const OpenGLCommandBuffer& buffer = *static_cast<const OpenGLCommandBuffer*>(commandBuffer.get());
-
-		for (const ref<OpenGLCommand>& command : buffer) {
-			command->execute();
-		}
 	}
 
 	Status OpenGLDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {

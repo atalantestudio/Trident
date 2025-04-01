@@ -19,55 +19,38 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		chain<VkDeviceQueueCreateInfo> queueCreateInfos;
+		chain<uint32> queueFamilyIndices = {
+			physicalDevice.graphicsQueueFamilyIndex,
+			physicalDevice.computeQueueFamilyIndex,
+			surface.presentQueueFamilyIndex,
+		};
 
-		if (physicalDevice.graphicsQueueFamilyIndex == surface.presentQueueFamilyIndex) {
-			// Create one queue.
-			const float32 queuePriority = 1.0f;
+		std::sort(queueFamilyIndices.begin(), queueFamilyIndices.end());
 
-			VkDeviceQueueCreateInfo queueCreateInfo{};
-			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			queueCreateInfo.pNext = nullptr;
-			queueCreateInfo.flags = 0;
-			queueCreateInfo.queueFamilyIndex = physicalDevice.graphicsQueueFamilyIndex;
-			queueCreateInfo.queueCount = 1;
-			queueCreateInfo.pQueuePriorities = &queuePriority;
+		queueFamilyIndices.erase(std::unique(queueFamilyIndices.begin(), queueFamilyIndices.end()), queueFamilyIndices.end());
 
-			queueCreateInfos.emplace_back(queueCreateInfo);
-		}
-		else {
-			// Create a graphics queue and a present queue.
-			const float32 graphicsQueuePriority = 1.0f;
+		fchain<VkDeviceQueueCreateInfo> deviceQueueCreateInfos(queueFamilyIndices.size());
 
-			VkDeviceQueueCreateInfo graphicsQueueCreateInfo{};
-			graphicsQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			graphicsQueueCreateInfo.pNext = nullptr;
-			graphicsQueueCreateInfo.flags = 0;
-			graphicsQueueCreateInfo.queueFamilyIndex = physicalDevice.graphicsQueueFamilyIndex;
-			graphicsQueueCreateInfo.queueCount = 1;
-			graphicsQueueCreateInfo.pQueuePriorities = &graphicsQueuePriority;
+		constexpr float32 DEFAULT_QUEUE_PRIORITY = 1.0f;
 
-			queueCreateInfos.emplace_back(graphicsQueueCreateInfo);
+		for (uint32 queueFamilyIndexIndex = 0; queueFamilyIndexIndex < queueFamilyIndices.size(); queueFamilyIndexIndex += 1) {
+			VkDeviceQueueCreateInfo deviceQueueCreateInfo{};
+			deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			deviceQueueCreateInfo.pNext = nullptr;
+			deviceQueueCreateInfo.flags = 0;
+			deviceQueueCreateInfo.queueFamilyIndex = queueFamilyIndices[queueFamilyIndexIndex];
+			deviceQueueCreateInfo.queueCount = 1;
+			deviceQueueCreateInfo.pQueuePriorities = &DEFAULT_QUEUE_PRIORITY;
 
-			const float32 presentQueuePriority = 1.0f;
-
-			VkDeviceQueueCreateInfo presentQueueCreateInfo{};
-			presentQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			presentQueueCreateInfo.pNext = nullptr;
-			presentQueueCreateInfo.flags = 0;
-			presentQueueCreateInfo.queueFamilyIndex = surface.presentQueueFamilyIndex;
-			presentQueueCreateInfo.queueCount = 1;
-			presentQueueCreateInfo.pQueuePriorities = &presentQueuePriority;
-
-			queueCreateInfos.emplace_back(presentQueueCreateInfo);
+			deviceQueueCreateInfos[queueFamilyIndexIndex] = deviceQueueCreateInfo;
 		}
 
 		VkDeviceCreateInfo deviceCreateInfo{};
 		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		deviceCreateInfo.pNext = nullptr;
 		deviceCreateInfo.flags = 0;
-		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32>(queueCreateInfos.size());
-		deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
+		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32>(deviceQueueCreateInfos.count);
+		deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfos[0];
 		deviceCreateInfo.enabledExtensionCount = static_cast<uint32>(enabledExtensionNames.size());
 		deviceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
 		deviceCreateInfo.pEnabledFeatures = &physicalDevice.features;
@@ -76,12 +59,17 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan device (code: []).", result);
 
-		vkGetDeviceQueue(object, physicalDevice.graphicsQueueFamilyIndex, 0, &graphicsQueue);
-		vkGetDeviceQueue(object, surface.presentQueueFamilyIndex, 0, &presentQueue);
+		computeQueue = createRef<VulkanQueue>(object, physicalDevice.computeQueueFamilyIndex);
+		graphicsQueue = createRef<VulkanQueue>(object, physicalDevice.graphicsQueueFamilyIndex);
+		presentQueue = createRef<VulkanQueue>(object, surface.presentQueueFamilyIndex);
 	}
 
 	VulkanDevice::~VulkanDevice() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		computeQueue.~shared_ptr();
+		graphicsQueue.~shared_ptr();
+		presentQueue.~shared_ptr();
 
 		vkDestroyDevice(object, nullptr);
 	}
@@ -103,6 +91,14 @@ namespace ProjectA {
 		ENGINE_ASSERT(false, "Failed to find a suitable Vulkan memory type.");
 
 		return 0;
+	}
+
+	const ref<Queue> VulkanDevice::getComputeQueue() const {
+		return computeQueue;
+	}
+
+	const ref<Queue> VulkanDevice::getGraphicsQueue() const {
+		return graphicsQueue;
 	}
 
 	void VulkanDevice::waitForFence(const ref<Fence>& fence) const {
@@ -138,46 +134,6 @@ namespace ProjectA {
 		return getStatus(result);
 	}
 
-	void VulkanDevice::submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.pNext = nullptr;
-
-		if (waitSemaphore == nullptr) {
-			submitInfo.waitSemaphoreCount = 0;
-			submitInfo.pWaitSemaphores = nullptr;
-		}
-		else {
-			submitInfo.waitSemaphoreCount = 1;
-			submitInfo.pWaitSemaphores = &static_cast<const VulkanSemaphore*>(waitSemaphore.get())->object;
-		}
-
-		submitInfo.pWaitDstStageMask = &static_cast<const VulkanCommandBuffer*>(commandBuffer.get())->pipelineStageFlags;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &static_cast<const VulkanCommandBuffer*>(commandBuffer.get())->object;
-
-		if (signalSemaphore == nullptr) {
-			submitInfo.signalSemaphoreCount = 0;
-			submitInfo.pSignalSemaphores = nullptr;
-		}
-		else {
-			submitInfo.signalSemaphoreCount = 1;
-			submitInfo.pSignalSemaphores = &static_cast<const VulkanSemaphore*>(signalSemaphore.get())->object;
-		}
-
-		VkFence vkFence = VK_NULL_HANDLE;
-
-		if (fence != nullptr) {
-			vkFence = static_cast<const VulkanFence*>(fence.get())->object;
-		}
-
-		const VkResult result = vkQueueSubmit(graphicsQueue, 1, &submitInfo, vkFence);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to submit Vulkan queue (code: []).", result);
-	}
-
 	Status VulkanDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -191,7 +147,7 @@ namespace ProjectA {
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr;
 
-		const VkResult result = vkQueuePresentKHR(presentQueue, &presentInfo);
+		const VkResult result = vkQueuePresentKHR(presentQueue->object, &presentInfo);
 
 		return getStatus(result);
 	}

@@ -8,7 +8,7 @@
 
 namespace ProjectA {
 	VulkanTexture::VulkanTexture(const VulkanDevice& device, const TextureDescriptor& descriptor) :
-		device(device),
+		device(device.object),
 		type(descriptor.type),
 		format(descriptor.format),
 		width(descriptor.width),
@@ -68,8 +68,8 @@ namespace ProjectA {
 	VulkanTexture::~VulkanTexture() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		vkDestroyImage(device.object, object, nullptr);
-		vkFreeMemory(device.object, memory, nullptr);
+		vkDestroyImage(device, object, nullptr);
+		vkFreeMemory(device, memory, nullptr);
 	}
 
 	uint32 VulkanTexture::getWidth() const {
@@ -81,6 +81,6 @@ namespace ProjectA {
 	}
 
 	ref<TextureView> VulkanTexture::createView(const TextureViewDescriptor& descriptor) const {
-		return createRef<VulkanTextureView>(device.object, *this, descriptor);
+		return createRef<VulkanTextureView>(device, *this, descriptor);
 	}
 }

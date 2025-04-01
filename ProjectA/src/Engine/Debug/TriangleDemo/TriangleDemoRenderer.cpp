@@ -5,6 +5,8 @@
 
 namespace ProjectA {
 	TriangleDemoRenderer::TriangleDemoRenderer() {
+		const ref<Device>& device = getDevice();
+
 		// Create pipeline layout.
 		{
 			const PipelineLayoutDescriptor pipelineLayoutDescriptor;
@@ -84,7 +86,7 @@ namespace ProjectA {
 			CommandBufferDescriptor commandBufferDescriptor{};
 			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
 			commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, 0, 0, size);
@@ -93,7 +95,7 @@ namespace ProjectA {
 
 			const ref<Device>& device = getDevice();
 
-			device->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
 			device->waitIdle();
 		}
 
@@ -127,7 +129,7 @@ namespace ProjectA {
 			CommandBufferDescriptor commandBufferDescriptor{};
 			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-			const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
 			commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, 0, 0, size);
@@ -136,7 +138,7 @@ namespace ProjectA {
 
 			const ref<Device>& device = getDevice();
 
-			device->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
 			device->waitIdle();
 		}
 	}
@@ -153,7 +155,7 @@ namespace ProjectA {
 		const uint32 height = swapchain->getExtentHeight();
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-		commandEncoder->bindRenderPipeline(renderPipeline);
+		commandEncoder->bindPipeline(renderPipeline);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));
 		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);

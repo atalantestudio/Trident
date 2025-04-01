@@ -6,6 +6,7 @@
 #include "Engine/Renderer/Device.hpp"
 
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
+#include "Backend/Vulkan/VulkanQueue.hpp"
 #include "Backend/Vulkan/VulkanSurface.hpp"
 
 namespace ProjectA {
@@ -18,13 +19,15 @@ namespace ProjectA {
 			// Returns a suitable device memory type index.
 			uint32 findMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) const;
 
+			const ref<Queue> getComputeQueue() const override;
+
+			const ref<Queue> getGraphicsQueue() const override;
+
 			void waitForFence(const ref<Fence>& fence) const override;
 
 			void resetFence(const ref<Fence>& fence) const override;
 
 			Status acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const override;
-
-			void submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const override;
 
 			Status present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const override;
 
@@ -35,9 +38,10 @@ namespace ProjectA {
 
 		private:
 			const VkPhysicalDevice physicalDevice;
-			VkQueue presentQueue;
+			ref<VulkanQueue> presentQueue;
 
 		public:
-			VkQueue graphicsQueue;
+			ref<VulkanQueue> graphicsQueue;
+			ref<VulkanQueue> computeQueue;
 	};
 }

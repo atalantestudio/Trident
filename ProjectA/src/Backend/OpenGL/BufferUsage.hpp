@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	static GLenum getGlBufferTarget(BufferUsage bufferUsage) {
-		// TODO: Find a better way of converting an enum to another.
+		// TODO: Find a better way of converting an enum to another enum.
 		if (bufferUsage & BufferUsage::UNIFORM) {
 			return GL_UNIFORM_BUFFER;
 		}

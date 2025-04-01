@@ -39,6 +39,7 @@
 // Renderer
 #include "Engine/Renderer/Buffer/Buffer.hpp"
 #include "Engine/Renderer/Buffer/BufferUsage.hpp"
+#include "Engine/Renderer/ComputePipeline.hpp"
 #include "Engine/Renderer/Framebuffer.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"

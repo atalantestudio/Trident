@@ -9,7 +9,7 @@
 namespace ProjectA {
 	class VulkanBuffer : public Buffer, public ObjectWrapper<VkBuffer> {
 		public:
-			VulkanBuffer(VkPhysicalDevice physicalDevice, VkCommandPool commandPool, const VulkanDevice& device, const BufferDescriptor& descriptor);
+			VulkanBuffer(VkPhysicalDevice physicalDevice, const VulkanDevice& device, const BufferDescriptor& descriptor);
 
 			~VulkanBuffer();
 
@@ -23,6 +23,5 @@ namespace ProjectA {
 		private:
 			const VulkanDevice& device;
 			VkDeviceMemory memory;
-			VkCommandPool commandPool;
 	};
 }

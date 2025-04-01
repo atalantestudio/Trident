@@ -3,9 +3,10 @@
 #include "pch.hpp"
 
 namespace ProjectA {
-	enum class DescriptorType : uint32 {
+	enum class DescriptorType : uint8 {
 		STORAGE_BUFFER = 0,
 		UNIFORM_BUFFER = 1,
 		COMBINED_IMAGE_SAMPLER = 2,
+		STORAGE_TEXTURE = 3,
 	};
 }

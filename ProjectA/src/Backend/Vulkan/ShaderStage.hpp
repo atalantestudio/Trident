@@ -6,11 +6,20 @@
 
 namespace ProjectA {
 	static VkShaderStageFlagBits getVkShaderStageFlagBits(ShaderStage shaderStage) {
-		static constexpr VkShaderStageFlagBits vkShaderStageFlagBits[] = {
-			VK_SHADER_STAGE_VERTEX_BIT,
-			VK_SHADER_STAGE_FRAGMENT_BIT,
-		};
+		VkShaderStageFlags vkShaderStage = 0;
 
-		return vkShaderStageFlagBits[static_cast<uint8>(shaderStage)];
+		if (shaderStage & ShaderStage::VERTEX) {
+			vkShaderStage |= VK_SHADER_STAGE_VERTEX_BIT;
+		}
+
+		if (shaderStage & ShaderStage::FRAGMENT) {
+			vkShaderStage |= VK_SHADER_STAGE_FRAGMENT_BIT;
+		}
+
+		if (shaderStage & ShaderStage::COMPUTE) {
+			vkShaderStage |= VK_SHADER_STAGE_COMPUTE_BIT;
+		}
+
+		return static_cast<VkShaderStageFlagBits>(vkShaderStage);
 	}
 }

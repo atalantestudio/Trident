@@ -10,6 +10,8 @@ namespace ProjectA {
 		cameraUniformBuffers(MAX_FRAMES_IN_FLIGHT),
 		cameraUniformBufferMappedRanges(MAX_FRAMES_IN_FLIGHT)
 	{
+		const ref<Device>& device = getDevice();
+
 		BufferDescriptor cameraUniformBufferDescriptor{};
 		cameraUniformBufferDescriptor.size = sizeof(UniformBufferObject);
 		cameraUniformBufferDescriptor.usage = BufferUsage::UNIFORM;
@@ -155,7 +157,7 @@ namespace ProjectA {
 			CommandBufferDescriptor commandBufferDescriptor{};
 			commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
-			commandEncoder = createCommandEncoder(commandBufferDescriptor);
+			commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 		}
 	}
 
@@ -179,6 +181,8 @@ namespace ProjectA {
 	}
 
 	ref<Texture> GUIRenderer::loadTexture(const ref<Buffer>& buffer, uint32 width, uint32 height) {
+		const ref<Device>& device = getDevice();
+
 		TextureDescriptor textureDescriptor{};
 		textureDescriptor.type = TextureType::TEXTURE_2D;
 		textureDescriptor.format = TextureFormat::R8G8B8A8_SRGB;
@@ -195,18 +199,16 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		const ref<CommandEncoder> commandEncoder = createCommandEncoder(commandBufferDescriptor);
+		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 		commandEncoder->begin();
-		commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL);
+		commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 		commandEncoder->copyBufferToTexture(buffer, texture, width, height, 0);
-		commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL);
+		commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		const ref<Device>& device = getDevice();
-
-		device->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
 		device->waitIdle();
 
 		return texture;
@@ -267,7 +269,7 @@ namespace ProjectA {
 		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-		commandEncoder->bindRenderPipeline(renderPipeline);
+		commandEncoder->bindPipeline(renderPipeline);
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, positionVertexBuffer, sizeof(vec3<float32>));

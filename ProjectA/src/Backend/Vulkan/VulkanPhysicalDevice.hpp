@@ -7,7 +7,10 @@
 namespace ProjectA {
 	class VulkanPhysicalDevice : public ObjectWrapper<VkPhysicalDevice> {
 		public:
-			uint32 graphicsQueueFamilyIndex = 0;
+			// TODO: lyah::max<uint32>()
+			// TODO: lyah::min<uint32>()
+			uint32 graphicsQueueFamilyIndex = std::numeric_limits<uint32>::max();
+			uint32 computeQueueFamilyIndex = std::numeric_limits<uint32>::max();
 			chain<const char*> enabledExtensionNames;
 			VkPhysicalDeviceFeatures features;
 

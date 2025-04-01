@@ -58,7 +58,7 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
-		commandEncoder = Renderer::getBackend()->createCommandEncoder(commandBufferDescriptor);
+		commandEncoder = Renderer::getBackend()->getDevice()->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 		for (uint32 frameIndex = 0; frameIndex < MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
 			availableImageSemaphores[frameIndex] = Renderer::getBackend()->createSemaphore();
@@ -126,7 +126,7 @@ namespace ProjectA {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->submit(commandBuffer, availableImageSemaphores[frameInFlightIndex], finishedRenderSemaphores[frameInFlightIndex], flightFences[frameInFlightIndex]);
+		device->getGraphicsQueue()->submit(commandBuffer, availableImageSemaphores[frameInFlightIndex], finishedRenderSemaphores[frameInFlightIndex], flightFences[frameInFlightIndex]);
 
 		const Status presentStatus = device->present(Application::get().getSwapchain(), finishedRenderSemaphores[frameInFlightIndex], nextImageIndex);
 

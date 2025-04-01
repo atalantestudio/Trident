@@ -1,7 +1,6 @@
 #include "pch.hpp"
 
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
-#include "Backend/OpenGL/OpenGLCommandEncoder.hpp"
 #include "Backend/OpenGL/OpenGLFence.hpp"
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 #include "Backend/OpenGL/OpenGLRendererAPI.hpp"
@@ -32,8 +31,11 @@ namespace ProjectA {
 		return createRef<OpenGLFence>();
 	}
 
-	ref<CommandEncoder> OpenGLRendererAPI::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
-		return createRef<OpenGLCommandEncoder>(descriptor);
+	ref<ComputePipeline> OpenGLRendererAPI::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
+		ENGINE_ASSERT(false, "TODO: OpenGLComputePipeline");
+
+		return nullptr;
+		//return createRef<>(descriptor);
 	}
 
 	ref<PipelineLayout> OpenGLRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {

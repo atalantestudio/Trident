@@ -35,7 +35,10 @@ namespace ProjectA {
 				VkDescriptorPoolSize descriptorPoolSize{};
 				descriptorPoolSize.type = descriptorType;
 
-				if (binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER) {
+				if (
+					binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER ||
+					binding.descriptorType == DescriptorType::STORAGE_TEXTURE
+				) {
 					ENGINE_ASSERT(binding.textureViews.size() == binding.samplers.size(), "Mismatch between texture view count and sampler count.");
 
 					descriptorPoolSize.descriptorCount = static_cast<uint32>(binding.textureViews.size());
@@ -112,7 +115,15 @@ namespace ProjectA {
 						VkDescriptorImageInfo descriptorImageInfo{};
 						descriptorImageInfo.sampler = sampler->object;
 						descriptorImageInfo.imageView = textureView->object;
-						descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+						// TODO: Specify layout of current image.
+						if (binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER) {
+							descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+						}
+						else if (binding.descriptorType == DescriptorType::STORAGE_TEXTURE) {
+							// Can also be VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR.
+							descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+						}
 
 						descriptorImageInfos.emplace_back(descriptorImageInfo);
 					}
@@ -123,6 +134,7 @@ namespace ProjectA {
 
 			uint32 bufferWriteDescriptorSetIndex = 0;
 			uint32 imageWriteDescriptorSetIndex = 0;
+			uint32 storageImageWriteDescriptorSetIndex = 0;
 
 			for (uint32 layoutIndex = 0; layoutIndex < descriptor.layouts.size(); layoutIndex += 1) {
 				const DescriptorSetLayout& layout = descriptor.layouts[layoutIndex];

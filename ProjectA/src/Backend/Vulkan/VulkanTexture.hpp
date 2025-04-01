@@ -25,7 +25,7 @@ namespace ProjectA {
 			const TextureFormat format;
 
 		private:
-			const VulkanDevice& device;
+			VkDevice device;
 			VkDeviceMemory memory;
 			const uint32 width;
 			const uint32 height;

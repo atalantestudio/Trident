@@ -7,35 +7,17 @@ namespace ProjectA {
 	ComputeShaderDemoRenderer::ComputeShaderDemoRenderer() {
 		const ref<Device>& device = getDevice();
 
-		const std::array<uint8, 4> textureData = {255, 0, 51, 255};
-
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-		ref<CommandEncoder> commandEncoder;
-		ref<CommandBuffer> commandBuffer;
 
 		const uint32 textureWidth = 1;
 		const uint32 textureHeight = 1;
 		const uint32 textureDepth = 1;
-		const uint64 textureBufferSize = sizeof(uint8) * textureData.size();
-
-		BufferDescriptor textureStagingBufferDescriptor{};
-		textureStagingBufferDescriptor.size = textureBufferSize;
-		textureStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
-
-		const ref<Buffer> textureStagingBuffer = createBuffer(textureStagingBufferDescriptor);
-
-		const BufferMappedRange textureMappedRange = textureStagingBuffer->map(0, textureBufferSize);
-
-		std::copy(textureData.begin(), textureData.end(), static_cast<uint8*>(textureMappedRange));
-
-		textureStagingBuffer->unmap();
 
 		TextureDescriptor textureDescriptor{};
 		textureDescriptor.type = TextureType::TEXTURE_2D;
-		textureDescriptor.format = TextureFormat::R8G8B8A8_SRGB;
-		textureDescriptor.usage = TextureUsage::TRANSFER_DST | TextureUsage::SAMPLED;
+		textureDescriptor.format = TextureFormat::R8G8B8A8_UNORM;
+		textureDescriptor.usage = TextureUsage::SAMPLED | TextureUsage::STORAGE;
 		textureDescriptor.width = textureWidth;
 		textureDescriptor.height = textureHeight;
 		textureDescriptor.depth = textureDepth;
@@ -45,17 +27,17 @@ namespace ProjectA {
 
 		texture = createTexture(textureDescriptor);
 
-		commandEncoder = createCommandEncoder(commandBufferDescriptor);
+		{
+			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
-		commandEncoder->begin();
-		commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL);
-		commandEncoder->copyBufferToTexture(textureStagingBuffer, texture, textureWidth, textureHeight, 0);
-		commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL);
+			commandEncoder->begin();
+			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-		commandBuffer = commandEncoder->end();
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->submit(commandBuffer, nullptr, nullptr, nullptr);
-		device->waitIdle();
+			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->waitIdle();
+		}
 
 		SamplerDescriptor samplerDescriptor{};
 		samplerDescriptor.magFilter = SamplerFilter::NEAREST;
@@ -66,6 +48,61 @@ namespace ProjectA {
 		const TextureViewDescriptor textureViewDescriptor;
 
 		textureView = texture->createView(textureViewDescriptor);
+
+		DescriptorSetLayoutBinding computeDescriptorSetLayoutBinding;
+		computeDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_TEXTURE;
+		computeDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
+		computeDescriptorSetLayoutBinding.samplers = {sampler};
+		computeDescriptorSetLayoutBinding.textureViews = {textureView};
+
+		DescriptorSetLayout computeDescriptorSetLayout;
+		computeDescriptorSetLayout.bindings.emplace_back(computeDescriptorSetLayoutBinding);
+
+		PipelineLayoutDescriptor computePipelineLayoutDescriptor;
+		computePipelineLayoutDescriptor.layouts.emplace_back(computeDescriptorSetLayout);
+
+		const ref<PipelineLayout> computePipelineLayout = createPipelineLayout(computePipelineLayoutDescriptor);
+
+		ShaderModuleDescriptor computeShaderModuleDescriptor{};
+		computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
+		computeShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> computeShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/ComputeShaderDemo/Shader/ComputeShaderDemo.comp.spv", computeShaderModuleDescriptor);
+
+		ComputePipelineDescriptor computePipelineDescriptor;
+		computePipelineDescriptor.pipelineLayout = computePipelineLayout;
+		computePipelineDescriptor.computeShaderModule = computeShaderModule;
+
+		const ref<ComputePipeline> computePipeline = createComputePipeline(computePipelineDescriptor);
+
+		CommandBufferDescriptor computeCommandBufferDescriptor{};
+		computeCommandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+
+		{
+			const ref<CommandEncoder> commandEncoder = device->getComputeQueue()->createCommandEncoder(computeCommandBufferDescriptor);
+
+			commandEncoder->begin();
+			commandEncoder->bindPipeline(computePipeline);
+			commandEncoder->bindDescriptorSets(0);
+			commandEncoder->dispatchGroups(1, 1, 1);
+
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+			device->getComputeQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->waitIdle();
+		}
+
+		{
+			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+			commandEncoder->begin();
+			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::GENERAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->waitIdle();
+		}
 
 		DescriptorSetLayoutBinding descriptorSetLayoutBinding;
 		descriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
@@ -133,15 +170,17 @@ namespace ProjectA {
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 
-		commandEncoder = createCommandEncoder(commandBufferDescriptor);
+		{
+			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
-		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, 0, 0, vertexBufferSize);
+			commandEncoder->begin();
+			commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, 0, 0, vertexBufferSize);
 
-		commandBuffer = commandEncoder->end();
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->submit(commandBuffer, nullptr, nullptr, nullptr);
-		device->waitIdle();
+			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->waitIdle();
+		}
 
 		const std::array<uint16, 6> indices = {
 			0, 1, 2,
@@ -168,15 +207,17 @@ namespace ProjectA {
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
 
-		commandEncoder = createCommandEncoder(commandBufferDescriptor);
+		{
+			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
-		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(indexStagingBuffer, indexBuffer, 0, 0, indexBufferSize);
+			commandEncoder->begin();
+			commandEncoder->copyBufferToBuffer(indexStagingBuffer, indexBuffer, 0, 0, indexBufferSize);
 
-		commandBuffer = commandEncoder->end();
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->submit(commandBuffer, nullptr, nullptr, nullptr);
-		device->waitIdle();
+			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->waitIdle();
+		}
 	}
 
 	void ComputeShaderDemoRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
@@ -191,7 +232,7 @@ namespace ProjectA {
 		const uint32 height = swapchain->getExtentHeight();
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-		commandEncoder->bindRenderPipeline(renderPipeline);
+		commandEncoder->bindPipeline(renderPipeline);
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(vec2<float32>));

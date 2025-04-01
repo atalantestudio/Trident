@@ -53,7 +53,6 @@ namespace ProjectA {
 	void VulkanSurface::update() {
 		VkResult result;
 
-		// Get capabilities.
 		result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, object, &capabilities);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface capabilities (code: []).", result);
@@ -64,30 +63,25 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface format count (code: []).", result);
 
-		// Select format.
-		if (formatCount > 0) {
-			chain<VkSurfaceFormatKHR> formats(formatCount);
+		fchain<VkSurfaceFormatKHR> formats(formatCount);
 
-			result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, object, &formatCount, formats.data());
+		result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, object, &formatCount, &formats[0]);
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface formats (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface formats (code: []).", result);
 
-			bool selected = false;
+		bool selected = false;
 
-			for (const VkSurfaceFormatKHR& format : formats) {
-				//if (format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR && format.format == VK_FORMAT_B8G8R8A8_SRGB) {
-					this->format = format;
+		for (const VkSurfaceFormatKHR& format : formats) {
+			if (format.format == VK_FORMAT_B8G8R8A8_SRGB) {
+				this->format = format;
 
-					selected = true;
+				selected = true;
 
-					break;
-				//}
-			}
-
-			if (!selected) {
-				format = formats[0];
+				break;
 			}
 		}
+
+		ENGINE_ASSERT(selected, "Unable to find a SRGB surface format.");
 
 		uint32 presentModeCount = 0;
 
@@ -95,29 +89,20 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface present mode count (code: []).", result);
 
-		// Select present mode.
-		if (presentModeCount > 0) {
-			chain<VkPresentModeKHR> presentModes(presentModeCount);
+		fchain<VkPresentModeKHR> presentModes(presentModeCount);
 
-			result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, object, &presentModeCount, presentModes.data());
+		result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, object, &presentModeCount, &presentModes[0]);
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface present modes (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface present modes (code: []).", result);
 
-			bool selected = false;
+		// VK_PRESENT_MODE_FIFO_KHR is guaranteed to be always available.
+		presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
-			for (const VkPresentModeKHR& presentMode : presentModes) {
-				if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-					this->presentMode = presentMode;
+		for (const VkPresentModeKHR& presentMode : presentModes) {
+			if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+				this->presentMode = presentMode;
 
-					selected = true;
-
-					break;
-				}
-			}
-
-			if (!selected) {
-				// VK_PRESENT_MODE_FIFO_KHR is guaranteed to be always available.
-				presentMode = VK_PRESENT_MODE_FIFO_KHR;
+				break;
 			}
 		}
 	}

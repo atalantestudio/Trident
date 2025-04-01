@@ -10,7 +10,7 @@
 namespace ProjectA {
 	class VulkanCommandPool : public CommandPool, public ObjectWrapper<VkCommandPool> {
 		public:
-			VulkanCommandPool(const VulkanPhysicalDevice& physicalDevice, VkDevice device);
+			VulkanCommandPool(VkDevice device, uint32 queueFamilyIndex);
 
 			~VulkanCommandPool();
 

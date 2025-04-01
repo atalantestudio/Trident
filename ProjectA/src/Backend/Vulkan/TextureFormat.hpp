@@ -8,6 +8,7 @@ namespace ProjectA {
 	static VkFormat getVkFormat(TextureFormat textureFormat) {
 		static constexpr VkFormat vkFormats[] = {
 			VK_FORMAT_R8G8B8A8_SRGB,
+			VK_FORMAT_R8G8B8A8_UNORM,
 		};
 
 		return vkFormats[static_cast<sint32>(textureFormat)];

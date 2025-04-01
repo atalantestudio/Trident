@@ -14,8 +14,8 @@
 
 namespace ProjectA {
 	VulkanRenderPipeline::VulkanRenderPipeline(VkDevice device, const RenderPipelineDescriptor& descriptor) :
-		device(device),
-		pipelineLayout(static_cast<const VulkanPipelineLayout*>(descriptor.pipelineLayout.get()))
+		VulkanPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, static_cast<const VulkanPipelineLayout*>(descriptor.pipelineLayout.get())),
+		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -164,7 +164,7 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.pDepthStencilState = nullptr;
 		graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
-		graphicsPipelineCreateInfo.layout = static_cast<const VulkanPipelineLayout*>(descriptor.pipelineLayout.get())->object;
+		graphicsPipelineCreateInfo.layout = layout->object;
 		graphicsPipelineCreateInfo.renderPass = static_cast<const VulkanRenderPass*>(descriptor.renderPass.get())->object;
 		graphicsPipelineCreateInfo.subpass = 0;
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
