@@ -10,8 +10,8 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		const uint32 textureWidth = 1;
-		const uint32 textureHeight = 1;
+		const uint32 textureWidth = 64;
+		const uint32 textureHeight = 64;
 		const uint32 textureDepth = 1;
 
 		TextureDescriptor textureDescriptor{};
@@ -84,7 +84,7 @@ namespace ProjectA {
 			commandEncoder->begin();
 			commandEncoder->bindPipeline(computePipeline);
 			commandEncoder->bindDescriptorSets(0);
-			commandEncoder->dispatchGroups(1, 1, 1);
+			commandEncoder->dispatchGroups(64, 64, 1);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
