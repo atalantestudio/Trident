@@ -58,7 +58,9 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
-		commandEncoder = Renderer::getBackend()->getDevice()->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+		auto d = Renderer::getBackend()->getDevice();
+		auto queue = d->getGraphicsQueue();
+		commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);
 
 		for (uint32 frameIndex = 0; frameIndex < MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
 			availableImageSemaphores[frameIndex] = Renderer::getBackend()->createSemaphore();

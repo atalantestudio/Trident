@@ -20,7 +20,7 @@ namespace ProjectA {
 
 		glGetShaderiv(object, GL_COMPILE_STATUS, &compileStatus);
 
-		if (compileStatus == GL_FALSE) {
+		if (compileStatus != GL_TRUE) {
 			GLint infoLogLength;
 
 			glGetShaderiv(object, GL_INFO_LOG_LENGTH, &infoLogLength);

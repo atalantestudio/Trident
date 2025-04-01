@@ -6,13 +6,22 @@
 
 namespace ProjectA {
 	static GLenum getGlShaderStage(ShaderStage shaderStage) {
-		// TODO: Combine multiple shader stages.
-		static constexpr GLenum glShaderStages[] = {
-			GL_VERTEX_SHADER,
-			GL_FRAGMENT_SHADER,
-			GL_COMPUTE_SHADER,
-		};
+		GLenum glShaderStage = 0;
 
-		return glShaderStages[static_cast<uint8>(shaderStage)];
+		if (shaderStage & ShaderStage::VERTEX) {
+			glShaderStage = GL_VERTEX_SHADER;
+		}
+
+		if (shaderStage & ShaderStage::FRAGMENT) {
+			glShaderStage = GL_FRAGMENT_SHADER;
+		}
+
+		if (shaderStage & ShaderStage::COMPUTE) {
+			glShaderStage = GL_COMPUTE_SHADER;
+		}
+
+		ENGINE_ASSERT(glShaderStage != 0, "Invalid OpenGL shader stage.");
+
+		return glShaderStage;
 	}
 }

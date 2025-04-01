@@ -76,10 +76,14 @@ namespace ProjectA {
 		vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}
 
-	void VulkanCommandEncoder::bindPipeline(const ref<Pipeline>& pipeline) {
-		PROFILE_SCOPE(FUNC_SIG);
+	void VulkanCommandEncoder::bindComputePipeline(const ref<ComputePipeline>& computePipeline) {
+		this->pipeline = std::dynamic_pointer_cast<VulkanPipeline>(computePipeline);
 
-		this->pipeline = std::dynamic_pointer_cast<VulkanPipeline>(pipeline);
+		vkCmdBindPipeline(commandBuffer, this->pipeline->bindPoint, this->pipeline->object);
+	}
+
+	void VulkanCommandEncoder::bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) {
+		this->pipeline = std::dynamic_pointer_cast<VulkanPipeline>(renderPipeline);
 
 		vkCmdBindPipeline(commandBuffer, this->pipeline->bindPoint, this->pipeline->object);
 	}
@@ -155,7 +159,7 @@ namespace ProjectA {
 		);
 	}
 
-	void VulkanCommandEncoder::dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) const {
+	void VulkanCommandEncoder::dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
 		vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
 	}
 

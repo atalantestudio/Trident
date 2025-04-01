@@ -3,11 +3,13 @@
 #include <glad/glad.h>
 
 #include "Backend/OpenGL/Command/OpenGLBeginRenderPassCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLBindComputePipelineCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindIndexBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindRenderPipelineCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindVertexBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLCopyBufferToBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLCopyBufferToTextureCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLDispatchGroupsCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetViewportCommand.hpp"
@@ -17,9 +19,7 @@
 #include "Backend/OpenGL/OpenGLTexture.hpp"
 
 namespace ProjectA {
-	OpenGLCommandEncoder::OpenGLCommandEncoder(const CommandBufferDescriptor& descriptor) {
-		PROFILE_SCOPE(FUNCSIG);
-	}
+	OpenGLCommandEncoder::OpenGLCommandEncoder(const CommandBufferDescriptor& descriptor) {}
 
 	void OpenGLCommandEncoder::begin() const {}
 
@@ -27,10 +27,14 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLBeginRenderPassCommand>(descriptor));
 	}
 
-	void OpenGLCommandEncoder::bindPipeline(const ref<Pipeline>& pipeline) {
-		ENGINE_ASSERT(false, "TODO: Bind OpenGL render/compute pipeline.");
+	void OpenGLCommandEncoder::bindComputePipeline(const ref<ComputePipeline>& computePipeline) {
+		this->computePipeline = std::static_pointer_cast<OpenGLComputePipeline>(computePipeline);
 
-		this->renderPipeline = static_cast<const OpenGLRenderPipeline*>(pipeline.get());
+		commandBuffer.emplace_back(createRef<OpenGLBindComputePipelineCommand>(this->computePipeline));
+	}
+
+	void OpenGLCommandEncoder::bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) {
+		this->renderPipeline = std::static_pointer_cast<OpenGLRenderPipeline>(renderPipeline);
 
 		commandBuffer.emplace_back(createRef<OpenGLBindRenderPipelineCommand>(this->renderPipeline));
 	}
@@ -73,8 +77,8 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) const {
-		ENGINE_ASSERT(false, "TODO: Dispatch groups");
+	void OpenGLCommandEncoder::dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
+		commandBuffer.emplace_back(createRef<OpenGLDispatchGroupsCommand>(groupCountX, groupCountY, groupCountZ));
 	}
 
 	void OpenGLCommandEncoder::setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const {}
@@ -109,6 +113,7 @@ namespace ProjectA {
 
 	void OpenGLCommandEncoder::reset() {
 		commandBuffer.clear();
+		computePipeline = nullptr;
 		renderPipeline = nullptr;
 		indexOffset = 0;
 		indexType = 0;

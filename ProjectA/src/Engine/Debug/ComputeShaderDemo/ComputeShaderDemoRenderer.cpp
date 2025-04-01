@@ -82,7 +82,7 @@ namespace ProjectA {
 			const ref<CommandEncoder> commandEncoder = device->getComputeQueue()->createCommandEncoder(computeCommandBufferDescriptor);
 
 			commandEncoder->begin();
-			commandEncoder->bindPipeline(computePipeline);
+			commandEncoder->bindComputePipeline(computePipeline);
 			commandEncoder->bindDescriptorSets(0);
 			commandEncoder->dispatchGroups(64, 64, 1);
 
@@ -90,6 +90,9 @@ namespace ProjectA {
 
 			device->getComputeQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
 			device->waitIdle();
+
+			// TODO(OpenGL): Make sure the image has finished being written to.
+			// glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		}
 
 		{
@@ -232,7 +235,7 @@ namespace ProjectA {
 		const uint32 height = swapchain->getExtentHeight();
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-		commandEncoder->bindPipeline(renderPipeline);
+		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(vec2<float32>));

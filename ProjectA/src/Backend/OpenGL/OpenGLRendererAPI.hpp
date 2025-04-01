@@ -39,6 +39,6 @@ namespace ProjectA {
 		private:
 			GLFWwindow* window;
 			const OpenGLInstance instance;
-			ref<OpenGLDevice> device;
+			const ref<OpenGLDevice> device;
 	};
 }

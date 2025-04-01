@@ -17,29 +17,5 @@ namespace ProjectA {
 			const GLenum primitiveTopology;
 			const GLenum frontFace;
 			const GLenum cullMode;
-
-		private:
-			// TODO: Create file.
-			static constexpr GLenum primitiveTopologies[] = {
-				GL_POINTS,
-				GL_LINES,
-				GL_LINE_STRIP,
-				GL_TRIANGLES,
-				GL_TRIANGLE_STRIP,
-			};
-
-			// TODO: Create file.
-			static constexpr GLenum frontFaces[] = {
-				GL_CW,
-				GL_CCW,
-			};
-
-			// TODO: Create file.
-			static constexpr GLenum cullModes[] = {
-				0,
-				GL_FRONT,
-				GL_BACK,
-				GL_FRONT_AND_BACK,
-			};
 	};
 }

@@ -6,11 +6,11 @@
 namespace ProjectA {
 	class OpenGLBindRenderPipelineCommand : public OpenGLCommand {
 		public:
-			OpenGLBindRenderPipelineCommand(const OpenGLRenderPipeline* renderPipeline);
+			OpenGLBindRenderPipelineCommand(const ref<OpenGLRenderPipeline>& renderPipeline);
 
 			void execute() const override;
 
 		private:
-			const OpenGLRenderPipeline* renderPipeline;
+			const ref<OpenGLRenderPipeline> renderPipeline;
 	};
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
+#include "Backend/OpenGL/OpenGLComputePipeline.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
 
 #include "Engine/API/CommandEncoder.hpp"
@@ -14,7 +15,9 @@ namespace ProjectA {
 
 			void beginRenderPass(const BeginRenderPassDescriptor& descriptor) override;
 
-			void bindPipeline(const ref<Pipeline>& pipeline) override;
+			void bindComputePipeline(const ref<ComputePipeline>& computePipeline) override;
+
+			void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) override;
 
 			void bindDescriptorSets(uint32 descriptorSetIndex) const override;
 
@@ -26,7 +29,7 @@ namespace ProjectA {
 
 			void copyBufferToTexture(const ref<Buffer>& sourceBuffer, const ref<Texture>& destinationTexture, uint32 width, uint32 height, uint32 depth) override;
 
-			void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) const override;
+			void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) override;
 
 			void setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const override;
 
@@ -46,7 +49,8 @@ namespace ProjectA {
 
 		private:
 			chain<ref<OpenGLCommand>> commandBuffer;
-			const OpenGLRenderPipeline* renderPipeline = nullptr;
+			ref<OpenGLComputePipeline> computePipeline = nullptr;
+			ref<OpenGLRenderPipeline> renderPipeline = nullptr;
 			GLuint indexOffset = 0;
 			GLenum indexType = 0;
 			GLsizei indexTypeSize = 0;

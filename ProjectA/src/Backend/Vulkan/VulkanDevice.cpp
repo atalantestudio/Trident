@@ -93,11 +93,11 @@ namespace ProjectA {
 		return 0;
 	}
 
-	const ref<Queue> VulkanDevice::getComputeQueue() const {
+	ref<Queue> VulkanDevice::getComputeQueue() const {
 		return computeQueue;
 	}
 
-	const ref<Queue> VulkanDevice::getGraphicsQueue() const {
+	ref<Queue> VulkanDevice::getGraphicsQueue() const {
 		return graphicsQueue;
 	}
 

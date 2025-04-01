@@ -17,7 +17,9 @@ namespace ProjectA {
 
 			void beginRenderPass(const BeginRenderPassDescriptor& descriptor) override;
 
-			void bindPipeline(const ref<Pipeline>& pipeline) override;
+			void bindComputePipeline(const ref<ComputePipeline>& computePipeline) override;
+
+			void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) override;
 
 			void bindDescriptorSets(uint32 descriptorSetIndex) const override;
 
@@ -29,7 +31,7 @@ namespace ProjectA {
 
 			void copyBufferToTexture(const ref<Buffer>& sourceBuffer, const ref<Texture>& destinationTexture, uint32 width, uint32 height, uint32 depth) override;
 
-			void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) const override;
+			void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) override;
 
 			void setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const override;
 

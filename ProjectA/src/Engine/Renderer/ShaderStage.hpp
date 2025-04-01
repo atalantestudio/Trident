@@ -9,5 +9,6 @@ namespace ProjectA {
 		COMPUTE = BIT(2),
 	};
 
+	// TODO: Keep as flag since we now have PipelineStage?
 	AS_FLAG(ShaderStage);
 }

@@ -9,10 +9,9 @@ namespace ProjectA {
 		public:
 			virtual ~Device() = default;
 
-			// TODO: Return by const& instead?
-			virtual const ref<Queue> getComputeQueue() const = 0;
+			virtual ref<Queue> getComputeQueue() const = 0;
 
-			virtual const ref<Queue> getGraphicsQueue() const = 0;
+			virtual ref<Queue> getGraphicsQueue() const = 0;
 
 			virtual void waitForFence(const ref<Fence>& fence) const = 0;
 

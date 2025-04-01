@@ -19,9 +19,9 @@ namespace ProjectA {
 			// Returns a suitable device memory type index.
 			uint32 findMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) const;
 
-			const ref<Queue> getComputeQueue() const override;
+			ref<Queue> getComputeQueue() const override;
 
-			const ref<Queue> getGraphicsQueue() const override;
+			ref<Queue> getGraphicsQueue() const override;
 
 			void waitForFence(const ref<Fence>& fence) const override;
 

@@ -1,0 +1,43 @@
+#include "pch.hpp"
+
+#include "Backend/OpenGL/OpenGLComputePipeline.hpp"
+#include "Backend/OpenGL/OpenGLShaderModule.hpp"
+
+namespace ProjectA {
+	OpenGLComputePipeline::OpenGLComputePipeline(const ComputePipelineDescriptor& descriptor) :
+		program(glCreateProgram())
+	{
+		PROFILE_SCOPE(FUNCSIG);
+
+		const ref<OpenGLShaderModule> computeShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.computeShaderModule);
+
+		glAttachShader(program, computeShaderModule->object);
+		glLinkProgram(program);
+
+		GLint linkStatus;
+
+		glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+
+		if (linkStatus != GL_TRUE) {
+			GLint infoLogLength;
+
+			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+			chain<GLchar> infoLog(infoLogLength);
+
+			glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog.data());
+
+			ENGINE_FATAL("Program linking failed.\n[]", infoLog.data());
+
+			BREAKPOINT();
+		}
+
+		glDetachShader(program, computeShaderModule->object);
+	}
+
+	OpenGLComputePipeline::~OpenGLComputePipeline() {
+		PROFILE_SCOPE(FUNCSIG);
+
+		glDeleteProgram(program);
+	}
+}

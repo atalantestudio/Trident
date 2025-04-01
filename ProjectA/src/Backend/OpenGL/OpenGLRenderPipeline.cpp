@@ -1,33 +1,36 @@
 #include "pch.hpp"
 
+#include "Backend/OpenGL/CullMode.hpp"
+#include "Backend/OpenGL/FrontFace.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
+#include "Backend/OpenGL/PrimitiveTopology.hpp"
 #include "Backend/OpenGL/VertexInputAttributeType.hpp"
 
 namespace ProjectA {
 	OpenGLRenderPipeline::OpenGLRenderPipeline(const RenderPipelineDescriptor& descriptor) :
 		program(glCreateProgram()),
-		primitiveTopology(primitiveTopologies[static_cast<uint32>(descriptor.primitiveTopology)]),
-		frontFace(frontFaces[static_cast<uint32>(descriptor.frontFace)]),
-		cullMode(cullModes[static_cast<uint32>(descriptor.cullMode)])
+		primitiveTopology(getGlPrimitiveTopology(descriptor.primitiveTopology)),
+		frontFace(getGlFrontFace(descriptor.frontFace)),
+		cullMode(getGlCullMode(descriptor.cullMode))
 	{
 		PROFILE_SCOPE(FUNCSIG);
 
 		glCreateVertexArrays(1, &vertexArray);
 		glBindVertexArray(vertexArray);
 
-		const GLuint vertexShaderModule = static_cast<const OpenGLShaderModule*>(descriptor.vertexShaderModule.get())->object;
-		const GLuint fragmentShaderModule = static_cast<const OpenGLShaderModule*>(descriptor.fragmentShaderModule.get())->object;
+		const ref<OpenGLShaderModule> vertexShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.vertexShaderModule);
+		const ref<OpenGLShaderModule> fragmentShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.fragmentShaderModule);
 
-		glAttachShader(program, vertexShaderModule);
-		glAttachShader(program, fragmentShaderModule);
+		glAttachShader(program, vertexShaderModule->object);
+		glAttachShader(program, fragmentShaderModule->object);
 		glLinkProgram(program);
 
 		GLint linkStatus;
 
 		glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
 
-		if (linkStatus == GL_FALSE) {
+		if (linkStatus != GL_TRUE) {
 			GLint infoLogLength;
 
 			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
@@ -38,11 +41,11 @@ namespace ProjectA {
 
 			ENGINE_FATAL("Program linking failed.\n[]", infoLog.data());
 
-			throw std::runtime_error("Failed to link OpenGL program.");
+			BREAKPOINT();
 		}
 
-		glDetachShader(program, vertexShaderModule);
-		glDetachShader(program, fragmentShaderModule);
+		glDetachShader(program, vertexShaderModule->object);
+		glDetachShader(program, fragmentShaderModule->object);
 
 		for (const VertexAttribute& vertexInputAttribute : descriptor.vertexBufferLayout.vertexAttributes) {
 			const GLenum type = getGlType(vertexInputAttribute.type);
@@ -68,7 +71,7 @@ namespace ProjectA {
 
 					break;
 				default:
-					throw std::runtime_error("Vertex attribute type is not supported.");
+					ENGINE_ASSERT(false, "Vertex attribute type is not supported.");
 			}
 
 			glVertexAttribBinding(vertexInputAttribute.location, vertexInputAttribute.binding);

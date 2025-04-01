@@ -15,7 +15,7 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNCSIG);
 
 		// GLSL shaders are required to specify the block index and the binding,
-		// saving the calls to glGetUniformBlockIndex and glUniformBlockBinding.
+		// saving us the calls to glGetUniformBlockIndex and glUniformBlockBinding.
 		for (uint32 layoutIndex = 0; layoutIndex < descriptor.layouts.size(); layoutIndex += 1) {
 			const DescriptorSetLayout& descriptorSetLayout = descriptor.layouts[layoutIndex];
 
@@ -34,8 +34,6 @@ namespace ProjectA {
 							glShaderStorageBlockBinding(program, layoutIndex, bindingIndex);
 
 							break;
-						default:
-							throw std::runtime_error("Buffer target not supported.");
 					}*/
 
 					glBindBufferRange(getGlDescriptorType(binding.descriptorType), bindingIndex, glBuffer->object, 0, glBuffer->size);
@@ -47,6 +45,9 @@ namespace ProjectA {
 
 					glBindTextureUnit(bindingIndex, textureView->object);
 					glBindSampler(bindingIndex, sampler->object);
+
+					// TODO: Use correct access and format.
+					glBindImageTexture(bindingIndex, textureView->object, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
 				}
 			}
 		}

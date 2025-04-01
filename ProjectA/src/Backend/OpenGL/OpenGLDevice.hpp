@@ -9,9 +9,9 @@ namespace ProjectA {
 		public:
 			OpenGLDevice();
 
-			const ref<Queue> getComputeQueue() const override;
+			ref<Queue> getComputeQueue() const override;
 
-			const ref<Queue> getGraphicsQueue() const override;
+			ref<Queue> getGraphicsQueue() const override;
 
 			void waitForFence(const ref<Fence>& fence) const override;
 

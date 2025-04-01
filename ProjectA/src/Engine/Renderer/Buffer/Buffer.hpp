@@ -1,7 +1,5 @@
 #pragma once
 
-#include "pch.hpp"
-
 #include "Engine/Renderer/Buffer/BufferUsage.hpp"
 
 namespace ProjectA {

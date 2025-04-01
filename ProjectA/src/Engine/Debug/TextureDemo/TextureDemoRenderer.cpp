@@ -248,7 +248,7 @@ namespace ProjectA {
 		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-		commandEncoder->bindPipeline(renderPipeline);
+		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));

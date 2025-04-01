@@ -65,8 +65,8 @@ namespace ProjectA {
 			PROFILE_SCOPE("Create GLFW window");
 
 			if (Renderer::getGraphicsApi() == GraphicsAPI::OPENGL) {
-				// Request OpenGL >= 3.3.
-				glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+				// Request OpenGL >= 4.3 (compute shader support).
+				glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 				glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);				
 
 				#ifdef BUILD_MODE_DEBUG

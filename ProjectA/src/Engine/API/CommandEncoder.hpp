@@ -3,10 +3,12 @@
 #include "Engine/Renderer/Buffer/Buffer.hpp"
 #include "Engine/Renderer/CommandBuffer.hpp"
 #include "Engine/Renderer/CommandBufferUsage.hpp"
+#include "Engine/Renderer/ComputePipeline.hpp"
 #include "Engine/Renderer/IndexType.hpp"
 #include "Engine/Renderer/Pipeline.hpp"
 #include "Engine/Renderer/PipelineStage.hpp"
 #include "Engine/Renderer/RenderPass.hpp"
+#include "Engine/Renderer/RenderPipeline.hpp"
 #include "Engine/Renderer/Texture.hpp"
 #include "Engine/Renderer/TextureLayout.hpp"
 
@@ -29,7 +31,9 @@ namespace ProjectA {
 
 			virtual void beginRenderPass(const BeginRenderPassDescriptor& descriptor) = 0;
 
-			virtual void bindPipeline(const ref<Pipeline>& pipeline) = 0;
+			virtual void bindComputePipeline(const ref<ComputePipeline>& computePipeline) = 0;
+
+			virtual void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) = 0;
 
 			virtual void bindDescriptorSets(uint32 descriptorSetIndex) const = 0;
 
@@ -41,7 +45,7 @@ namespace ProjectA {
 
 			virtual void copyBufferToTexture(const ref<Buffer>& sourceBuffer, const ref<Texture>& destinationTexture, uint32 width, uint32 height, uint32 depth) = 0;
 
-			virtual void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) const = 0;
+			virtual void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) = 0;
 
 			virtual void setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const = 0;
 

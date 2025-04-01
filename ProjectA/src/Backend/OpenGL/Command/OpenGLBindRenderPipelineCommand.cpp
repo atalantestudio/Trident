@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/Command/OpenGLBindRenderPipelineCommand.hpp"
 
 namespace ProjectA {
-	OpenGLBindRenderPipelineCommand::OpenGLBindRenderPipelineCommand(const OpenGLRenderPipeline* renderPipeline) :
+	OpenGLBindRenderPipelineCommand::OpenGLBindRenderPipelineCommand(const ref<OpenGLRenderPipeline>& renderPipeline) :
 		renderPipeline(renderPipeline)
 	{}
 
