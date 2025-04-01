@@ -16,7 +16,7 @@ namespace ProjectA {
 
 		// Create vertex shader module.
 		{
-			ShaderModuleDescriptor vertexShaderModuleDescriptor;
+			ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 			vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 			vertexShaderModuleDescriptor.entryPoint = "main";
 
@@ -27,7 +27,7 @@ namespace ProjectA {
 
 		// Create fragment shader module.
 		{
-			ShaderModuleDescriptor fragmentShaderModuleDescriptor;
+			ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 			fragmentShaderModuleDescriptor.entryPoint = "main";
 

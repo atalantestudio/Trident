@@ -19,8 +19,6 @@ namespace ProjectA {
 	Application* createApplication() {
 		const ConfigurationFile configurationFile = Filesystem::load<ConfigurationFile>("Editor.tco");
 
-		const TTFFile ttfFile = Filesystem::load<TTFFile>("assets/fonts/test.ttf");
-
 		return new EditorApplication(configurationFile);
 	}
 }

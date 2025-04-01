@@ -46,5 +46,6 @@
 #include "Engine/Renderer/Swapchain.hpp"
 
 // TODO: Include debug demos in a custom engine-side file, in debug mode only.
+#include "Engine/Debug/ComputeShaderDemo/ComputeShaderDemoRenderer.hpp"
 #include "Engine/Debug/TextureDemo/TextureDemoRenderer.hpp"
 #include "Engine/Debug/TriangleDemo/TriangleDemoRenderer.hpp"
