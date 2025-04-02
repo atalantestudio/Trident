@@ -16,7 +16,7 @@ namespace ProjectA {
 	}
 
 	void Logger::clear() {
-		stream.str("");
+		stream.str(std::string());
 	}
 
 	void Logger::writeTime() {
