@@ -78,7 +78,6 @@ project "ProjectA"
 		runtime "Release"
 		optimize "on"
 
-		excludes "%{prj.name}/src/Engine/Debug/**"
 		excludes "%{prj.name}/src/Engine/Logger/**"
 
 	filter "configurations:Release"
@@ -86,7 +85,6 @@ project "ProjectA"
 		runtime "Release"
 		optimize "on"
 
-		excludes "%{prj.name}/src/Engine/Debug/**"
 		excludes "%{prj.name}/src/Engine/Logger/**"
 		excludes "%{prj.name}/src/Engine/Profile/**"
 

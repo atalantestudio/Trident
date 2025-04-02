@@ -4,7 +4,7 @@
 
 namespace ProjectA {
 	OpenGLSwapchain::OpenGLSwapchain(const SwapchainDescriptor& descriptor) {
-		PROFILE_SCOPE(FUNCSIG);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		recreate(descriptor);
 	}

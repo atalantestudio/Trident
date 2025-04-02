@@ -7,7 +7,7 @@ namespace ProjectA {
 	OpenGLComputePipeline::OpenGLComputePipeline(const ComputePipelineDescriptor& descriptor) :
 		program(glCreateProgram())
 	{
-		PROFILE_SCOPE(FUNCSIG);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		const ref<OpenGLShaderModule> computeShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.computeShaderModule);
 
@@ -36,7 +36,7 @@ namespace ProjectA {
 	}
 
 	OpenGLComputePipeline::~OpenGLComputePipeline() {
-		PROFILE_SCOPE(FUNCSIG);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glDeleteProgram(program);
 	}

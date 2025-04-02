@@ -12,7 +12,7 @@ namespace ProjectA {
 	OpenGLPipelineLayout::OpenGLPipelineLayout(const PipelineLayoutDescriptor& descriptor) :
 		descriptorSetLayouts(descriptor.layouts)
 	{
-		PROFILE_SCOPE(FUNCSIG);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		// GLSL shaders are required to specify the block index and the binding,
 		// saving us the calls to glGetUniformBlockIndex and glUniformBlockBinding.

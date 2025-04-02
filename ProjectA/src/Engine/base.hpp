@@ -5,6 +5,16 @@
 #ifdef _WIN32
 	#ifdef _WIN64
 		#define PLATFORM_WINDOWS
+
+		#include <Windows.h>
+
+		#undef assert
+		#undef DELETE
+		#undef ERROR
+		#undef far
+		#undef max
+		#undef min
+		#undef near
 	#else
 		#error "Unhandled platform."
 	#endif
@@ -80,7 +90,7 @@
 		#define FUNC_SIG __PRETTY_FUNCTION__
 	#elif defined(__DMC__) && (__DMC__ >= 0x810)
 		#define FUNC_SIG __PRETTY_FUNCTION__
-	#elif defined(FUNC_SIG)
+	#elif defined(__FUNCSIG__) || (_MSC_VER)
 		#define FUNC_SIG __FUNCSIG__
 	#elif (defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 600)) || (defined(__IBMCPP__) && (__IBMCPP__ >= 500))
 		#define FUNC_SIG __FUNCTION__
@@ -93,10 +103,6 @@
 	#else
 		#define FUNC_SIG
 	#endif
-
-	#define PROFILER(path) ::ProjectA::Profiler profiler(path)
-
-	#define PROFILE_SCOPE(name) ::ProjectA::Timer timer(name)
 #else
 	#define FUNC_SIG
 	#define PROFILER(path)

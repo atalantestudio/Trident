@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	OpenGLInstance::OpenGLInstance() {
-		PROFILE_SCOPE(FUNCSIG);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			glEnable(GL_DEBUG_OUTPUT);

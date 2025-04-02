@@ -14,7 +14,7 @@ namespace ProjectA {
 		frontFace(getGlFrontFace(descriptor.frontFace)),
 		cullMode(getGlCullMode(descriptor.cullMode))
 	{
-		PROFILE_SCOPE(FUNCSIG);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glCreateVertexArrays(1, &vertexArray);
 		glBindVertexArray(vertexArray);
@@ -86,7 +86,7 @@ namespace ProjectA {
 	}
 
 	OpenGLRenderPipeline::~OpenGLRenderPipeline() {
-		PROFILE_SCOPE(FUNCSIG);
+		PROFILE_SCOPE(FUNC_SIG);
 
 		glDeleteProgram(program);
 		glDeleteVertexArrays(1, &vertexArray);
