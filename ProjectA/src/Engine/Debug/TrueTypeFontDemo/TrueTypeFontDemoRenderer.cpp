@@ -74,8 +74,8 @@ namespace ProjectA {
 		imageDescriptor.type = ImageType::TEXTURE_2D;
 		imageDescriptor.format = ImageFormat::R8_UNORM;
 		imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::STORAGE;
-		imageDescriptor.width = 64;
-		imageDescriptor.height = 64;
+		imageDescriptor.width = 4096;
+		imageDescriptor.height = 4096;
 		imageDescriptor.depth = 1;
 		imageDescriptor.mipLevelCount = 1;
 		imageDescriptor.arrayLayerCount = 1;
@@ -146,7 +146,7 @@ namespace ProjectA {
 			commandEncoder->begin();
 			commandEncoder->bindComputePipeline(computePipeline);
 			commandEncoder->bindDescriptorSets(0);
-			commandEncoder->dispatchGroups(2, 2, 1);
+			commandEncoder->dispatchGroups(128, 128, 1);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 

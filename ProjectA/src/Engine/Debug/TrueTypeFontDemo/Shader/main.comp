@@ -17,8 +17,10 @@ layout(std140, set = 0, binding = 0) buffer readonly Glyph {
 layout(set = 0, binding = 1, r8) uniform writeonly image2D image;
 
 void main() {
-	vec2 imageCoordinate = gl_GlobalInvocationID.xy;
-	vec2 glyphCoordinate = (imageCoordinate + 1.0) / vec2(imageSize(image)) * vec2(maxCoordinate - minCoordinate);
+	vec2 imageCoordinate = vec2(gl_GlobalInvocationID.xy);
+	ivec2 glyphSize = ivec2(max(maxCoordinate.x - minCoordinate.x, maxCoordinate.y - minCoordinate.y));
+	vec2 glyphCoordinate = (imageCoordinate + 1.0) / vec2(imageSize(image)) * vec2(glyphSize);
+	glyphCoordinate.y = glyphSize.y - glyphCoordinate.y;
 
 	vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
 	int windingOrder = 0;
