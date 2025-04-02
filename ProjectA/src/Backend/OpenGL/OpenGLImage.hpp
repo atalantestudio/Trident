@@ -20,6 +20,7 @@ namespace ProjectA {
 
 		public:
 			const GLenum target;
+			const GLenum internalFormat;
 			const GLenum format;
 
 		private:

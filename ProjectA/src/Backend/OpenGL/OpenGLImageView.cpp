@@ -9,10 +9,10 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		// glGenTextures must be used here (instead of glCreateTextures) because the view must not be assigned a target.
+		// glGenTextures must be used here (instead of glCreateTextures)
+		// because the view must not be assigned a target.
 		glGenTextures(1, &object);
-
-		glTextureView(object, image.target, image.object, format, 0, 1, 0, 1);
+		glTextureView(object, image.target, image.object, image.internalFormat, 0, 1, 0, 1);
 	}
 
 	OpenGLImageView::~OpenGLImageView() {
