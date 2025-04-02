@@ -15,10 +15,11 @@
 #include "Engine/Application.hpp"
 
 namespace ProjectA {
-	VulkanCommandEncoder::VulkanCommandEncoder(VkDevice device, VkCommandPool commandPool, const CommandBufferDescriptor& descriptor) :
-		device(device),
+	VulkanCommandEncoder::VulkanCommandEncoder(const VulkanDevice& device, VkCommandPool commandPool, const CommandBufferDescriptor& descriptor) :
+		device(device.object),
 		commandPool(commandPool),
-		commandBufferUsageFlag(getVkCommandBufferUsageFlag(descriptor.usage))
+		commandBufferUsageFlag(getVkCommandBufferUsageFlag(descriptor.usage)),
+		limits(std::dynamic_pointer_cast<VulkanPhysicalDevice>(device.getPhysicalDevice())->getLimits())
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -29,7 +30,7 @@ namespace ProjectA {
 		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		commandBufferAllocateInfo.commandBufferCount = 1;
 
-		const VkResult result = vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &commandBuffer);
+		const VkResult result = vkAllocateCommandBuffers(device.object, &commandBufferAllocateInfo, &commandBuffer);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan command buffer (code: []).", result);
 	}
@@ -160,6 +161,10 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
+		ENGINE_ASSERT(groupCountX <= limits.maxComputeWorkgroupCount[0], "Group count in the X axis must not exceed [].", limits.maxComputeWorkgroupCount[0]);
+		ENGINE_ASSERT(groupCountY <= limits.maxComputeWorkgroupCount[1], "Group count in the Y axis must not exceed [].", limits.maxComputeWorkgroupCount[1]);
+		ENGINE_ASSERT(groupCountZ <= limits.maxComputeWorkgroupCount[2], "Group count in the Z axis must not exceed [].", limits.maxComputeWorkgroupCount[2]);
+
 		vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
 	}
 

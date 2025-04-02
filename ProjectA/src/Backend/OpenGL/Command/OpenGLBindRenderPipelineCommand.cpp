@@ -8,6 +8,8 @@ namespace ProjectA {
 	{}
 
 	void OpenGLBindRenderPipelineCommand::execute() const {
+		// TODO: Move into OpenGLPipeline::bind.
+
 		glBindVertexArray(renderPipeline->vertexArray);
 
 		glUseProgram(renderPipeline->program);
@@ -21,6 +23,8 @@ namespace ProjectA {
 			glEnable(GL_CULL_FACE);
 			glCullFace(renderPipeline->cullMode);
 		}
+
+		glEnable(GL_FRAMEBUFFER_SRGB);
 
 		// TODO: Expose.
 		//glEnable(GL_BLEND);

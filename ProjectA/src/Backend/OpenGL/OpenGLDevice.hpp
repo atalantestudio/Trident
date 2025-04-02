@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Backend/OpenGL/OpenGLPhysicalDevice.hpp"
 #include "Backend/OpenGL/OpenGLQueue.hpp"
 
 #include "Engine/Renderer/Device.hpp"
@@ -8,6 +9,8 @@ namespace ProjectA {
 	class OpenGLDevice : public Device {
 		public:
 			OpenGLDevice();
+
+			ref<PhysicalDevice> getPhysicalDevice() const override;
 
 			ref<Queue> getComputeQueue() const override;
 
@@ -24,6 +27,7 @@ namespace ProjectA {
 			void waitIdle() const override;
 
 		private:
+			const ref<OpenGLPhysicalDevice> physicalDevice;
 			const ref<OpenGLQueue> queue;
 	};
 }

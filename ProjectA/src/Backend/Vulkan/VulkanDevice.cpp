@@ -15,7 +15,7 @@ namespace ProjectA {
 	};
 
 	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface) :
-		physicalDevice(physicalDevice.object)
+		physicalDevice(createRef<VulkanPhysicalDevice>(physicalDevice))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -59,9 +59,9 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan device (code: []).", result);
 
-		computeQueue = createRef<VulkanQueue>(object, physicalDevice.computeQueueFamilyIndex);
-		graphicsQueue = createRef<VulkanQueue>(object, physicalDevice.graphicsQueueFamilyIndex);
-		presentQueue = createRef<VulkanQueue>(object, surface.presentQueueFamilyIndex);
+		computeQueue = createRef<VulkanQueue>(*this, physicalDevice.computeQueueFamilyIndex);
+		graphicsQueue = createRef<VulkanQueue>(*this, physicalDevice.graphicsQueueFamilyIndex);
+		presentQueue = createRef<VulkanQueue>(*this, surface.presentQueueFamilyIndex);
 	}
 
 	VulkanDevice::~VulkanDevice() {
@@ -79,7 +79,7 @@ namespace ProjectA {
 
 		VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties{};
 
-		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &physicalDeviceMemoryProperties);
+		vkGetPhysicalDeviceMemoryProperties(physicalDevice->object, &physicalDeviceMemoryProperties);
 
 		// Find suitable memory type.
 		for (uint32 memoryTypeIndex = 0; memoryTypeIndex < physicalDeviceMemoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
@@ -91,6 +91,10 @@ namespace ProjectA {
 		ENGINE_ASSERT(false, "Failed to find a suitable Vulkan memory type.");
 
 		return 0;
+	}
+
+	ref<PhysicalDevice> VulkanDevice::getPhysicalDevice() const {
+		return physicalDevice;
 	}
 
 	ref<Queue> VulkanDevice::getComputeQueue() const {

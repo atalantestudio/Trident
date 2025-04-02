@@ -20,6 +20,7 @@ namespace ProjectA {
 
 		public:
 			const GLenum target;
+			const GLenum format;
 
 		private:
 			const GLsizei width;

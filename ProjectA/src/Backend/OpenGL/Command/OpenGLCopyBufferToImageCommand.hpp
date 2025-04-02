@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class OpenGLCopyBufferToImageCommand : public OpenGLCommand {
 		public:
-			OpenGLCopyBufferToImageCommand(GLuint sourceBuffer, GLuint destinationImage, GLuint width, GLuint height, GLuint depth);
+			OpenGLCopyBufferToImageCommand(GLuint sourceBuffer, GLuint destinationImage, GLuint width, GLuint height, GLuint depth, GLenum format);
 
 			void execute() const override;
 
@@ -16,5 +16,6 @@ namespace ProjectA {
 			const GLuint width;
 			const GLuint height;
 			const GLuint depth;
+			const GLenum format;
 	};
 }

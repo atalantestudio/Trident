@@ -50,3 +50,4 @@
 #include "Engine/Debug/ComputeShaderDemo/ComputeShaderDemoRenderer.hpp"
 #include "Engine/Debug/TextureDemo/TextureDemoRenderer.hpp"
 #include "Engine/Debug/TriangleDemo/TriangleDemoRenderer.hpp"
+#include "Engine/Debug/TrueTypeFontDemo/TrueTypeFontDemoRenderer.hpp"

@@ -5,10 +5,10 @@
 namespace ProjectA {
 	class DemoLayer : public Layer {
 		private:
-			ComputeShaderDemoRenderer renderer;
+			TrueTypeFontDemoRenderer renderer;
 
 		public:
-			DemoLayer();
+			DemoLayer(const TTFFile& ttfFile);
 
 			virtual ~DemoLayer() = default;
 

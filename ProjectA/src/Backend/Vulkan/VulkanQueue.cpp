@@ -2,16 +2,17 @@
 
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
+#include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanFence.hpp"
 #include "Backend/Vulkan/VulkanQueue.hpp"
 #include "Backend/Vulkan/VulkanSemaphore.hpp"
 
 namespace ProjectA {
-	VulkanQueue::VulkanQueue(VkDevice device, uint32 queueFamilyIndex) :
+	VulkanQueue::VulkanQueue(const VulkanDevice& device, uint32 queueFamilyIndex) :
 		device(device),
-		commandPool(device, queueFamilyIndex)
+		commandPool(device.object, queueFamilyIndex)
 	{
-		vkGetDeviceQueue(device, queueFamilyIndex, 0, &object);
+		vkGetDeviceQueue(device.object, queueFamilyIndex, 0, &object);
 	}
 
 	ref<CommandEncoder> VulkanQueue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {

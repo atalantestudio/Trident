@@ -63,7 +63,7 @@ namespace ProjectA {
 		computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		computeShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> computeShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/ComputeShaderDemo/Shader/ComputeShaderDemo.comp.spv", computeShaderModuleDescriptor);
+		const ref<ShaderModule> computeShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/ComputeShaderDemo/Shader/main.comp.spv", computeShaderModuleDescriptor);
 
 		ComputePipelineDescriptor computePipelineDescriptor;
 		computePipelineDescriptor.pipelineLayout = computePipelineLayout;
@@ -80,15 +80,12 @@ namespace ProjectA {
 			commandEncoder->begin();
 			commandEncoder->bindComputePipeline(computePipeline);
 			commandEncoder->bindDescriptorSets(0);
-			commandEncoder->dispatchGroups(64, 64, 1);
+			commandEncoder->dispatchGroups(2, 2, 1);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 			device->getComputeQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
 			device->waitIdle();
-
-			// TODO(OpenGL): Make sure the image has finished being written to.
-			// glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		}
 
 		{
@@ -121,13 +118,13 @@ namespace ProjectA {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/ComputeShaderDemo/Shader/ComputeShaderDemo.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/ComputeShaderDemo/Shader/main.vert.spv", vertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/ComputeShaderDemo/Shader/ComputeShaderDemo.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/ComputeShaderDemo/Shader/main.frag.spv", fragmentShaderModuleDescriptor);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();

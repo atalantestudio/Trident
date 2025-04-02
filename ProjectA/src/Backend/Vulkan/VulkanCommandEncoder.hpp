@@ -2,6 +2,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanPipeline.hpp"
 
 #include "Engine/API/CommandEncoder.hpp"
@@ -9,7 +10,7 @@
 namespace ProjectA {
 	class VulkanCommandEncoder : public CommandEncoder {
 		public:
-			VulkanCommandEncoder(VkDevice device, VkCommandPool commandPool, const CommandBufferDescriptor& descriptor);
+			VulkanCommandEncoder(const VulkanDevice& device, VkCommandPool commandPool, const CommandBufferDescriptor& descriptor);
 
 			~VulkanCommandEncoder();
 
@@ -55,5 +56,7 @@ namespace ProjectA {
 			const VkCommandBufferUsageFlags commandBufferUsageFlag;
 			VkCommandBuffer commandBuffer;
 			ref<VulkanPipeline> pipeline;
+
+			const PhysicalDeviceLimits& limits;
 	};
 }

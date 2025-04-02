@@ -44,6 +44,6 @@ namespace ProjectA {
 	};
 
 	struct TTFFile : public File {
-		fchain<Glyph> glyphs;
+		chain<Glyph> glyphs;
 	};
 }

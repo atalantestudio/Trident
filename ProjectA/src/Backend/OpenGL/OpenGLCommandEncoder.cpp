@@ -19,7 +19,9 @@
 #include "Backend/OpenGL/OpenGLImage.hpp"
 
 namespace ProjectA {
-	OpenGLCommandEncoder::OpenGLCommandEncoder(const CommandBufferDescriptor& descriptor) {}
+	OpenGLCommandEncoder::OpenGLCommandEncoder(const OpenGLDevice& device, const CommandBufferDescriptor& descriptor) :
+		limits(device.getPhysicalDevice()->getLimits())
+	{}
 
 	void OpenGLCommandEncoder::begin() const {}
 
@@ -68,21 +70,29 @@ namespace ProjectA {
 	}
 
 	void OpenGLCommandEncoder::copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, uint32 width, uint32 height, uint32 depth) {
+		const ref<OpenGLImage> glImage = std::static_pointer_cast<OpenGLImage>(destinationImage);
+
 		commandBuffer.emplace_back(createRef<OpenGLCopyBufferToImageCommand>(
 			std::static_pointer_cast<OpenGLBuffer>(sourceBuffer)->object,
-			std::static_pointer_cast<OpenGLImage>(destinationImage)->object,
+			glImage->object,
 			width,
 			height,
-			depth
+			depth,
+			glImage->format
 		));
 	}
 
 	void OpenGLCommandEncoder::dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
+		ENGINE_ASSERT(groupCountX <= limits.maxComputeWorkgroupCount[0], "Group count in the X axis must not exceed [].", limits.maxComputeWorkgroupCount[0]);
+		ENGINE_ASSERT(groupCountY <= limits.maxComputeWorkgroupCount[1], "Group count in the Y axis must not exceed [].", limits.maxComputeWorkgroupCount[1]);
+		ENGINE_ASSERT(groupCountZ <= limits.maxComputeWorkgroupCount[2], "Group count in the Z axis must not exceed [].", limits.maxComputeWorkgroupCount[2]);
+
 		commandBuffer.emplace_back(createRef<OpenGLDispatchGroupsCommand>(groupCountX, groupCountY, groupCountZ));
 	}
 
 	void OpenGLCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const {
 		// TODO: Implement.
+		// glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	}
 
 	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {

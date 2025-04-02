@@ -4,13 +4,15 @@
 #include "Backend/OpenGL/OpenGLImageView.hpp"
 
 namespace ProjectA {
-	OpenGLImageView::OpenGLImageView(const OpenGLImage& image, const ImageViewDescriptor& descriptor) {
+	OpenGLImageView::OpenGLImageView(const OpenGLImage& image, const ImageViewDescriptor& descriptor) :
+		format(image.format)
+	{
 		PROFILE_SCOPE(FUNC_SIG);
 
 		// glGenTextures must be used here (instead of glCreateTextures) because the view must not be assigned a target.
 		glGenTextures(1, &object);
 
-		glTextureView(object, image.target, image.object, GL_RGBA8, 0, 1, 0, 1);
+		glTextureView(object, image.target, image.object, format, 0, 1, 0, 1);
 	}
 
 	OpenGLImageView::~OpenGLImageView() {

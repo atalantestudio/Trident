@@ -22,7 +22,7 @@ namespace ProjectA {
 			vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 			vertexShaderModuleDescriptor.entryPoint = "main";
 
-			vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TriangleDemo/Shader/TriangleDemo.vert.spv", vertexShaderModuleDescriptor);
+			vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TriangleDemo/Shader/Triangle.vert.spv", vertexShaderModuleDescriptor);
 		}
 
 		ref<ShaderModule> fragmentShaderModule;
@@ -33,7 +33,7 @@ namespace ProjectA {
 			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 			fragmentShaderModuleDescriptor.entryPoint = "main";
 
-			fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TriangleDemo/Shader/TriangleDemo.frag.spv", fragmentShaderModuleDescriptor);
+			fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TriangleDemo/Shader/Triangle.frag.spv", fragmentShaderModuleDescriptor);
 		}
 
 		// Create render pipeline.

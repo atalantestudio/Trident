@@ -360,7 +360,7 @@ namespace ProjectA {
 			}
 
 			// Copy first point to close contour.
-			//contour.emplace_back(contour[0]);
+			contour.emplace_back(contour[0]);
 
 			contours[contourIndex] = contour;
 		}
@@ -601,7 +601,7 @@ namespace ProjectA {
 			glyphLengths[glyphIndex] = glyphOffsets[glyphIndex + 1] - glyphOffsets[glyphIndex];
 		}
 
-		ttfFile.glyphs.allocate(maxp.numGlyphs);
+		ttfFile.glyphs.resize(maxp.numGlyphs);
 
 		// Parse 'glyf' table.
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
@@ -609,7 +609,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'glyf' table.");
 
-		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.count; glyphIndex += 1) {
+		for (uint16 glyphIndex = 0; glyphIndex < maxp.numGlyphs; glyphIndex += 1) {
 			// Need to reset + jump to peek the number of contours.
 			stream.reset();
 			stream.jump(static_cast<uint64>(tableOffset->second + glyphOffsets[glyphIndex]));

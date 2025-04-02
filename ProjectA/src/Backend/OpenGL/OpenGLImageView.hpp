@@ -13,5 +13,8 @@ namespace ProjectA {
 			OpenGLImageView(const OpenGLImage& image, const ImageViewDescriptor& descriptor);
 
 			~OpenGLImageView();
+
+		public:
+			const GLenum format;
 	};
 }

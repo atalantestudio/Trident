@@ -46,8 +46,8 @@ namespace ProjectA {
 					glBindTextureUnit(bindingIndex, imageView->object);
 					glBindSampler(bindingIndex, sampler->object);
 
-					// TODO: Use correct access and format.
-					glBindImageTexture(bindingIndex, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
+					// TODO: Use correct access.
+					glBindImageTexture(bindingIndex, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, imageView->format);
 				}
 			}
 		}

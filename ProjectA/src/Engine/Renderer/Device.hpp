@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/Renderer/PhysicalDevice.hpp"
 #include "Engine/Renderer/Queue.hpp"
 #include "Engine/Renderer/Status.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
@@ -8,6 +9,8 @@ namespace ProjectA {
 	class Device {
 		public:
 			virtual ~Device() = default;
+
+			virtual ref<PhysicalDevice> getPhysicalDevice() const = 0;
 
 			virtual ref<Queue> getComputeQueue() const = 0;
 

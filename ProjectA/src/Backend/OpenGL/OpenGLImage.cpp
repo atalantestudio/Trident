@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Backend/OpenGL/ImageFormat.hpp"
 #include "Backend/OpenGL/ImageType.hpp"
 #include "Backend/OpenGL/OpenGLImage.hpp"
 #include "Backend/OpenGL/OpenGLImageView.hpp"
@@ -7,6 +8,7 @@
 namespace ProjectA {
 	OpenGLImage::OpenGLImage(const ImageDescriptor& descriptor) :
 		target(getGlImageType(descriptor.type)),
+		format(getGlImageFormat(descriptor.format)),
 		width(descriptor.width),
 		height(descriptor.height)
 	{
@@ -14,7 +16,7 @@ namespace ProjectA {
 
 		glCreateTextures(target, 1, &object);
 
-		glTextureStorage2D(object, descriptor.mipLevelCount, GL_RGBA8, descriptor.width, descriptor.height);
+		glTextureStorage2D(object, descriptor.mipLevelCount, format, descriptor.width, descriptor.height);
 	}
 
 	OpenGLImage::~OpenGLImage() {

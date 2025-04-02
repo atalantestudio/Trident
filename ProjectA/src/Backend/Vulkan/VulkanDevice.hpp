@@ -2,12 +2,12 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/Device.hpp"
-
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 #include "Backend/Vulkan/VulkanQueue.hpp"
 #include "Backend/Vulkan/VulkanSurface.hpp"
+
+#include "Engine/API/ObjectWrapper.hpp"
+#include "Engine/Renderer/Device.hpp"
 
 namespace ProjectA {
 	class VulkanDevice : public Device, public ObjectWrapper<VkDevice> {
@@ -18,6 +18,8 @@ namespace ProjectA {
 
 			// Returns a suitable device memory type index.
 			uint32 findMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) const;
+
+			ref<PhysicalDevice> getPhysicalDevice() const override;
 
 			ref<Queue> getComputeQueue() const override;
 
@@ -33,15 +35,15 @@ namespace ProjectA {
 
 			void waitIdle() const override;
 
+		public:
+			ref<VulkanQueue> graphicsQueue;
+			ref<VulkanQueue> computeQueue;
+
 		private:
 			static const chain<const char*> enabledExtensionNames;
 
 		private:
-			const VkPhysicalDevice physicalDevice;
+			const ref<VulkanPhysicalDevice> physicalDevice;
 			ref<VulkanQueue> presentQueue;
-
-		public:
-			ref<VulkanQueue> graphicsQueue;
-			ref<VulkanQueue> computeQueue;
 	};
 }

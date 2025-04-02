@@ -8,8 +8,13 @@
 
 namespace ProjectA {
 	OpenGLDevice::OpenGLDevice() :
-		queue(createRef<OpenGLQueue>())
+		physicalDevice(createRef<OpenGLPhysicalDevice>()),
+		queue(createRef<OpenGLQueue>(*this))
 	{}
+
+	ref<PhysicalDevice> OpenGLDevice::getPhysicalDevice() const {
+		return physicalDevice;
+	}
 
 	ref<Queue> OpenGLDevice::getComputeQueue() const {
 		return queue;

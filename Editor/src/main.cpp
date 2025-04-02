@@ -10,7 +10,9 @@ namespace ProjectA {
 			EditorApplication(const ConfigurationFile& configurationFile) :
 				Application("ProjectA Editor", configurationFile)
 			{
-				registerLayer<DemoLayer>();
+				const TTFFile ttfFile = Filesystem::load<TTFFile>("assets/fonts/test.ttf");
+
+				registerLayer<DemoLayer>(ttfFile);
 			}
 
 			~EditorApplication() {}

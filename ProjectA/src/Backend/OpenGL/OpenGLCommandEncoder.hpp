@@ -2,6 +2,7 @@
 
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 #include "Backend/OpenGL/OpenGLComputePipeline.hpp"
+#include "Backend/OpenGL/OpenGLDevice.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
 
 #include "Engine/API/CommandEncoder.hpp"
@@ -9,7 +10,7 @@
 namespace ProjectA {
 	class OpenGLCommandEncoder : public CommandEncoder {
 		public:
-			OpenGLCommandEncoder(const CommandBufferDescriptor& descriptor);
+			OpenGLCommandEncoder(const OpenGLDevice& device, const CommandBufferDescriptor& descriptor);
 
 			void begin() const override;
 
@@ -54,5 +55,7 @@ namespace ProjectA {
 			GLuint indexOffset = 0;
 			GLenum indexType = 0;
 			GLsizei indexTypeSize = 0;
+
+			const PhysicalDeviceLimits& limits;
 	};
 }
