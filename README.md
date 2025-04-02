@@ -11,7 +11,7 @@ Cross-platform C++ game engine (3D, physics and audio) with integrated math and 
 
 ## Install
 
-Use the `--recurse-submodules` option to recursively clone the dependencies.
+Use the `--recurse-submodules` option to recursively clone the dependencies. Make sure that the Vulkan SDK is installed (the engine will search for the `VULKAN_SDK` environment variable).
 
 ## Resources
 
