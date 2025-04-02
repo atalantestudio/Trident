@@ -33,9 +33,6 @@
 #include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/GUI/Object/GUITextObject.hpp"
 
-// ImGui
-#include "Engine/ImGui/ImGuiLayer.hpp"
-
 // Renderer
 #include "Engine/Renderer/Buffer/Buffer.hpp"
 #include "Engine/Renderer/Buffer/BufferUsage.hpp"

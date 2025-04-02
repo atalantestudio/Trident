@@ -1,5 +1,3 @@
-#include <imgui/imgui.h>
-
 #include "EditorLayer.hpp"
 
 namespace ProjectA {
@@ -74,10 +72,10 @@ namespace ProjectA {
 		//framebuffer->unbind();
 	}
 
-	void EditorLayer::renderImGui() {
+	/*void EditorLayer::renderImGui() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		/*Renderer2D::Statistics statistics = Renderer2D::getStatistics();
+		Renderer2D::Statistics statistics = Renderer2D::getStatistics();
 
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen_persistant = true;
@@ -166,8 +164,8 @@ namespace ProjectA {
 		ImGui::End();
 		ImGui::PopStyleVar();
 
-		ImGui::End();*/
-	}
+		ImGui::End();
+	}*/
 
 	void EditorLayer::onEvent(Event& event) {
 		cameraController.onEvent(event);

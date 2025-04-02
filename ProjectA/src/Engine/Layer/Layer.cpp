@@ -7,7 +7,5 @@ namespace ProjectA {
 
 	void Layer::update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {}
 
-	void Layer::renderImGui() {}
-
 	void Layer::onEvent(Event& event) {}
 }

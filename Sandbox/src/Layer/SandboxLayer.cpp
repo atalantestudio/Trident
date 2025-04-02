@@ -1,5 +1,3 @@
-#include <imgui/imgui.h>
-
 #include "SandboxLayer.hpp"
 
 SandboxLayer::SandboxLayer() :
@@ -56,10 +54,10 @@ void SandboxLayer::update(ProjectA::float32 deltaTime, const ProjectA::ref<Proje
 	ProjectA::Renderer2D::endScene();*/
 }
 
-void SandboxLayer::renderImGui() {
+/*void SandboxLayer::renderImGui() {
 	PROFILE_SCOPE(FUNC_SIG);
 
-	/*ProjectA::Renderer2D::Statistics statistics = ProjectA::Renderer2D::getStatistics();
+	ProjectA::Renderer2D::Statistics statistics = ProjectA::Renderer2D::getStatistics();
 
 	ImGui::Begin("Settings");
 
@@ -70,8 +68,8 @@ void SandboxLayer::renderImGui() {
 	ImGui::Text("Total index count: %d", statistics.getTotalIndexCount());
 	ImGui::ColorEdit4("Color", color.m.m128_f32);
 
-	ImGui::End();*/
-}
+	ImGui::End();
+}*/
 
 void SandboxLayer::onEvent(ProjectA::Event& event) {
 	cameraController.onEvent(event);

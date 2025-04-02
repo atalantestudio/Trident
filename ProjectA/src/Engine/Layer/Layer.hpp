@@ -13,9 +13,6 @@ namespace ProjectA {
 
 			virtual void update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex);
 
-			// NOTE: Deprecated.
-			virtual void renderImGui();
-
 			virtual void onEvent(Event& event);
 	};
 }

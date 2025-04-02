@@ -23,8 +23,6 @@ namespace ProjectA {
 
 			void update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
 
-			void renderImGui() override;
-
 			void onEvent(Event& event) override;
 	};
 }
