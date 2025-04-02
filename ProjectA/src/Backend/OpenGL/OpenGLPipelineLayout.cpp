@@ -46,8 +46,15 @@ namespace ProjectA {
 					glBindTextureUnit(bindingIndex, imageView->object);
 					glBindSampler(bindingIndex, sampler->object);
 
+					GLenum internalFormat = imageView->image.internalFormat;
+
+					// TODO: SRGB format is not in the list of available formats for glBindImageTexture.
+					if (internalFormat == GL_SRGB8) {
+						internalFormat = GL_RGBA8;
+					}
+
 					// TODO: Use correct access.
-					glBindImageTexture(bindingIndex, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, imageView->format);
+					glBindImageTexture(bindingIndex, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, internalFormat);
 				}
 			}
 		}

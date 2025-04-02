@@ -252,7 +252,7 @@ namespace ProjectA {
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));
-		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+ 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, Application::get().getSwapchain()->getExtentWidth(), Application::get().getSwapchain()->getExtentHeight());
 		commandEncoder->drawIndexed(6, 1, 0);
 		commandEncoder->endRenderPass();

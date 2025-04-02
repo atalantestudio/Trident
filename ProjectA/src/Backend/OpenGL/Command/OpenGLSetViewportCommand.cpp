@@ -12,5 +12,6 @@ namespace ProjectA {
 
 	void OpenGLSetViewportCommand::execute() const {
 		glViewport(x, y, width, height);
+		glClear(GL_COLOR_BUFFER_BIT);
 	}
 }

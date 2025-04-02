@@ -5,7 +5,7 @@
 
 namespace ProjectA {
 	OpenGLImageView::OpenGLImageView(const OpenGLImage& image, const ImageViewDescriptor& descriptor) :
-		format(image.format)
+		image(image)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 

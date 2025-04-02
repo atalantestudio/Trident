@@ -43,7 +43,7 @@ namespace ProjectA {
 		Renderer::recreate();
 
 		RenderPassDescriptor renderPassDescriptor;
-		renderPassDescriptor.loadOperation = LoadOperation::LOAD;
+		renderPassDescriptor.loadOperation = LoadOperation::CLEAR;
 		renderPassDescriptor.storeOperation = StoreOperation::STORE;
 
 		renderPass = Renderer::getBackend()->createRenderPass(renderPassDescriptor);

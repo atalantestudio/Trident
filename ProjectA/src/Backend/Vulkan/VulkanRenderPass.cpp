@@ -8,19 +8,24 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		VkAttachmentDescription attachment{};
-		attachment.flags = 0;
-		attachment.format = surface.format.format;
-		attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		attachment.loadOp = static_cast<VkAttachmentLoadOp>(descriptor.loadOperation);
-		attachment.storeOp = static_cast<VkAttachmentStoreOp>(descriptor.storeOperation);
-		attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		VkAttachmentDescription attachmentDescription{};
+		attachmentDescription.flags = 0;
+		attachmentDescription.format = surface.format.format;
+		attachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+		attachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(descriptor.loadOperation);
+		attachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(descriptor.storeOperation);
+		attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-		// TODO: Fix undefined layout warning with a loadOp of VK_ATTACHMENT_LOAD_OP_LOAD.
-		attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		if (descriptor.loadOperation == LoadOperation::LOAD) {
+			// TODO: Fix undefined layout warning with a loadOp of VK_ATTACHMENT_LOAD_OP_LOAD.
+			attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		}
+		else {
+			attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		}
 
-		attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		attachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 		VkAttachmentReference colorAttachment{};
 		colorAttachment.attachment = 0;
@@ -52,7 +57,7 @@ namespace ProjectA {
 		renderPassCreateInfo.pNext = nullptr;
 		renderPassCreateInfo.flags = 0;
 		renderPassCreateInfo.attachmentCount = 1;
-		renderPassCreateInfo.pAttachments = &attachment;
+		renderPassCreateInfo.pAttachments = &attachmentDescription;
 		renderPassCreateInfo.subpassCount = 1;
 		renderPassCreateInfo.pSubpasses = &subpass;
 		renderPassCreateInfo.dependencyCount = 1;
