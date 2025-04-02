@@ -13,7 +13,7 @@ workspace "ProjectA"
 	}
 
 outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
-vulkansdk = "C:/VulkanSDK/1.3.296.0" -- TODO: Temporary path
+vulkansdk = os.getenv("VULKAN_SDK")
 
 group "Dependencies"
 	include "ProjectA/vendor"
