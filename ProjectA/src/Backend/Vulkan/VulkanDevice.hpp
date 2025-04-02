@@ -42,6 +42,8 @@ namespace ProjectA {
 		private:
 			static const chain<const char*> enabledExtensionNames;
 
+			VkPhysicalDeviceMemoryProperties memoryProperties;
+
 		private:
 			const ref<VulkanPhysicalDevice> physicalDevice;
 			ref<VulkanQueue> presentQueue;

@@ -13,6 +13,8 @@ namespace ProjectA {
 
 		glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code.data(), length);
 
+		auto a = glSpecializeShader;
+
 		// TODO: Expose specialization constants.
 		glSpecializeShader(object, descriptor.entryPoint, 0, nullptr, nullptr);
 

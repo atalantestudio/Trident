@@ -65,9 +65,10 @@ namespace ProjectA {
 			PROFILE_SCOPE("Create GLFW window");
 
 			if (Renderer::getGraphicsApi() == GraphicsAPI::OPENGL) {
+				// Request OpenGL >= 4.6 (SPIR-V support).
 				// Request OpenGL >= 4.3 (compute shader support).
 				glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-				glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);				
+				glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);				
 
 				#ifdef BUILD_MODE_DEBUG
 					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);

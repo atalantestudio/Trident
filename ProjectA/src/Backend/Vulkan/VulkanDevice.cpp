@@ -11,6 +11,7 @@
 namespace ProjectA {
 	// TODO: Client-side extension request.
 	const chain<const char*> VulkanDevice::enabledExtensionNames = {
+		VK_KHR_MAINTENANCE_1_EXTENSION_NAME,
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 	};
 
@@ -62,6 +63,8 @@ namespace ProjectA {
 		computeQueue = createRef<VulkanQueue>(*this, physicalDevice.computeQueueFamilyIndex);
 		graphicsQueue = createRef<VulkanQueue>(*this, physicalDevice.graphicsQueueFamilyIndex);
 		presentQueue = createRef<VulkanQueue>(*this, surface.presentQueueFamilyIndex);
+
+		vkGetPhysicalDeviceMemoryProperties(physicalDevice.object, &memoryProperties);
 	}
 
 	VulkanDevice::~VulkanDevice() {
@@ -77,13 +80,11 @@ namespace ProjectA {
 	uint32 VulkanDevice::findMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties{};
+		for (uint32 memoryTypeIndex = 0; memoryTypeIndex < memoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
+			const VkMemoryType memoryType = memoryProperties.memoryTypes[memoryTypeIndex];
+			const bool required = memoryRequirements.memoryTypeBits & BIT(memoryTypeIndex);
 
-		vkGetPhysicalDeviceMemoryProperties(physicalDevice->object, &physicalDeviceMemoryProperties);
-
-		// Find suitable memory type.
-		for (uint32 memoryTypeIndex = 0; memoryTypeIndex < physicalDeviceMemoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
-			if ((memoryRequirements.memoryTypeBits & (1 << memoryTypeIndex)) && (physicalDeviceMemoryProperties.memoryTypes[memoryTypeIndex].propertyFlags & memoryPropertyFlags) == memoryPropertyFlags) {
+			if (required && (memoryType.propertyFlags & memoryPropertyFlags) == memoryPropertyFlags) {
 				return memoryTypeIndex;
 			}
 		}

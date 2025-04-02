@@ -47,7 +47,9 @@ namespace ProjectA {
 
 		vkGetImageMemoryRequirements(device.object, object, &memoryRequirements);
 
-		// VK_MEMORY_PROPERTY_HOST_COHERENT_BIT avoid caching.
+		// TODO: Fix memory type not being found on HP Victus (laptop).
+		// The only way to get a memory type index is by specifying a memory property flag of 0.
+		// VK_MEMORY_PROPERTY_HOST_COHERENT_BIT avoids caching.
 		const uint32 memoryTypeIndex = device.findMemoryType(memoryRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 		VkMemoryAllocateInfo memoryAllocateInfo{};
