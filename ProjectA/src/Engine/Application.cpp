@@ -67,6 +67,85 @@ namespace ProjectA {
 			finishedRenderSemaphores[frameIndex] = Renderer::getBackend()->createSemaphore();
 			flightFences[frameIndex] = Renderer::getBackend()->createFence();
 		}
+
+		/* Constants */
+
+		// DEFAULT_PROPERTY_FILE_PATH = Property file path used by default
+		// API_QUEUE = Graphics API listed by priority.
+		//             First APIs are more recent but more performant,
+		//             last APIs are older but have better support
+
+		/* Startup */
+
+		// Define char* path;
+
+		// If argc > 1
+			// Set path = argv[0]
+		// Else
+			// Set path = DEFAULT_PROPERTY_FILE_PATH
+
+		// Open config file with path
+			// If no file
+				// Emit fatal
+				// Return
+
+		// Define int selectedApiIndex
+
+		// Get "graphics_api" int setting from file
+			// If no setting
+				// Set selectedApiIndex = 0
+			// Else if the setting is not in API_QUEUE
+				// Emit warn "Unknown graphics API"
+				// Set selectedApiIndex = 0
+				// Overwrite file setting with selectedApiIndex
+			// Else
+				// Set selectedApiIndex = setting
+
+		// Define queue apiTestQueue = API_QUEUE
+			// Move the API at selectedApiIndex to the top
+
+		// Define selectedApi
+		// Define supportedApiIndices
+
+		// For each API testedApi in API_QUEUE
+			// Define available = testIfAvailable(testedApi)
+			// If available
+				// Push index of testedApi to supportedApiIndices
+
+		// Define finalApiIndex = -1
+
+		// For each API supportedApi in supportedApiIndices
+			// If selectedApiIndex = index of supportedApi
+				// Set finalApiIndex = index of supportedApi
+				// Break
+
+		// If finalApiIndex = -1
+			// Emit warn "Selected API is unsupported"
+			// Set finalApiIndex = 0
+
+		// Emit info "Using backend"
+		// Define selectedApi = API_QUEUE[supportedApiIndices[finalApiIndex]]
+
+		// Initialize selectedApi
+
+		/*int apiIndex = 0;
+		int apiTestQueue[5] = {
+			77, // Vulkan
+			63, // DirectX
+			48, // Metal
+			22, // WebGPU
+			19, // OpenGL
+		};
+
+		{
+			const auto api = apiTestQueue[apiIndex];
+
+			for (int i = apiIndex - 1; i >= 0; i--) {
+				apiTestQueue[i + 1] = apiTestQueue[i];
+			}
+
+			apiTestQueue[0] = api;
+		}*/
 	}
 
 	Application::~Application() {
