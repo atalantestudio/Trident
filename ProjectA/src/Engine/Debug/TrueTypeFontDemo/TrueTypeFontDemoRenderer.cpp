@@ -10,8 +10,8 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		// 'A'
-		const Glyph& glyph = ttfFile.glyphs[4];
+		// 'H'
+		const Glyph& glyph = ttfFile.glyphs[41];
 
 		ENGINE_ASSERT(!glyph.edges.empty(), "Glyph has no edges.");
 
