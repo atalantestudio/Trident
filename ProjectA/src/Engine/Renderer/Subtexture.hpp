@@ -2,6 +2,7 @@
 
 #include "Engine/Renderer/Texture.hpp"
 
+// TODO: Deprecated API.
 namespace ProjectA {
 	class Subtexture {
 		public:

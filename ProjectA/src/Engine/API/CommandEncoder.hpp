@@ -4,13 +4,13 @@
 #include "Engine/Renderer/CommandBuffer.hpp"
 #include "Engine/Renderer/CommandBufferUsage.hpp"
 #include "Engine/Renderer/ComputePipeline.hpp"
+#include "Engine/Renderer/Image.hpp"
+#include "Engine/Renderer/ImageLayout.hpp"
 #include "Engine/Renderer/IndexType.hpp"
 #include "Engine/Renderer/Pipeline.hpp"
 #include "Engine/Renderer/PipelineStage.hpp"
 #include "Engine/Renderer/RenderPass.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
-#include "Engine/Renderer/Texture.hpp"
-#include "Engine/Renderer/TextureLayout.hpp"
 
 namespace ProjectA {
 	struct CommandBufferDescriptor {
@@ -43,11 +43,11 @@ namespace ProjectA {
 
 			virtual void copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) = 0;
 
-			virtual void copyBufferToTexture(const ref<Buffer>& sourceBuffer, const ref<Texture>& destinationTexture, uint32 width, uint32 height, uint32 depth) = 0;
+			virtual void copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, uint32 width, uint32 height, uint32 depth) = 0;
 
 			virtual void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) = 0;
 
-			virtual void setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const = 0;
+			virtual void setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const = 0;
 
 			virtual void setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) = 0;
 

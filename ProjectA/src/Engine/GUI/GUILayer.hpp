@@ -35,15 +35,12 @@ namespace ProjectA {
 			chain<ref<Font>> fonts;
 
 		private:
-			void loadDefaultTexture();
-
-		private:
 			static constexpr uint8 MAX_GUI_COMPONENTS = 100;
 
 		private:
 			ECS ecs;
 			GUIRenderer renderer;
-			chain<ref<Texture>> textures;
+			chain<ref<Image>> images;
 			chain<ref<GUIObject>> rootObjects;
 	};
 }

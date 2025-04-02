@@ -3,20 +3,20 @@
 #include <glad/glad.h>
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/Texture.hpp"
+#include "Engine/Renderer/Image.hpp"
 
 namespace ProjectA {
-	class OpenGLTexture : public Texture, public ObjectWrapper<GLuint> {
+	class OpenGLImage : public Image, public ObjectWrapper<GLuint> {
 		public:
-			OpenGLTexture(const TextureDescriptor& descriptor);
+			OpenGLImage(const ImageDescriptor& descriptor);
 
-			~OpenGLTexture();
+			~OpenGLImage();
 
 			uint32 getWidth() const override;
 
 			uint32 getHeight() const override;
 
-			ref<TextureView> createView(const TextureViewDescriptor& descriptor) const override;
+			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const override;
 
 		public:
 			const GLenum target;

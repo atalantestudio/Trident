@@ -24,8 +24,8 @@ namespace ProjectA {
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
 			ref<Buffer> cameraUniformBuffer;
-			ref<Texture> texture;
-			ref<TextureView> textureView;
+			ref<Image> image;
+			ref<ImageView> imageView;
 			ref<Sampler> sampler;
 	};
 }

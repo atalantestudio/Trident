@@ -4,9 +4,9 @@
 
 #include "Backend/OpenGL/DescriptorType.hpp"
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
+#include "Backend/OpenGL/OpenGLImageView.hpp"
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 #include "Backend/OpenGL/OpenGLSampler.hpp"
-#include "Backend/OpenGL/OpenGLTextureView.hpp"
 
 namespace ProjectA {
 	OpenGLPipelineLayout::OpenGLPipelineLayout(const PipelineLayoutDescriptor& descriptor) :
@@ -23,7 +23,7 @@ namespace ProjectA {
 				const DescriptorSetLayoutBinding& binding = descriptorSetLayout.bindings[bindingIndex];
 
 				for (const ref<Buffer>& buffer : binding.buffers) {
-					const OpenGLBuffer* glBuffer = static_cast<const OpenGLBuffer*>(buffer.get());
+					const ref<OpenGLBuffer> glBuffer = std::static_pointer_cast<OpenGLBuffer>(buffer);
 
 					/*switch (glBuffer->target) {
 						case GL_UNIFORM_BUFFER:
@@ -39,15 +39,15 @@ namespace ProjectA {
 					glBindBufferRange(getGlDescriptorType(binding.descriptorType), bindingIndex, glBuffer->object, 0, glBuffer->size);
 				}
 
-				for (uint32 textureViewIndex = 0; textureViewIndex < binding.textureViews.size(); textureViewIndex += 1) {
-					const OpenGLTextureView* textureView = static_cast<const OpenGLTextureView*>(binding.textureViews[textureViewIndex].get());
-					const OpenGLSampler* sampler = static_cast<const OpenGLSampler*>(binding.samplers[textureViewIndex].get());
+				for (uint32 imageViewIndex = 0; imageViewIndex < binding.imageViews.size(); imageViewIndex += 1) {
+					const ref<OpenGLImageView> imageView = std::static_pointer_cast<OpenGLImageView>(binding.imageViews[imageViewIndex]);
+					const ref<OpenGLSampler> sampler = std::static_pointer_cast<OpenGLSampler>(binding.samplers[imageViewIndex]);
 
-					glBindTextureUnit(bindingIndex, textureView->object);
+					glBindTextureUnit(bindingIndex, imageView->object);
 					glBindSampler(bindingIndex, sampler->object);
 
 					// TODO: Use correct access and format.
-					glBindImageTexture(bindingIndex, textureView->object, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
+					glBindImageTexture(bindingIndex, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
 				}
 			}
 		}

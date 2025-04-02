@@ -3,9 +3,9 @@
 #include "Backend/Vulkan/DescriptorType.hpp"
 #include "Backend/Vulkan/ShaderStage.hpp"
 #include "Backend/Vulkan/VulkanBuffer.hpp"
+#include "Backend/Vulkan/VulkanImageView.hpp"
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"
 #include "Backend/Vulkan/VulkanSampler.hpp"
-#include "Backend/Vulkan/VulkanTextureView.hpp"
 
 namespace ProjectA {
 	VulkanPipelineLayout::VulkanPipelineLayout(VkDevice device, const PipelineLayoutDescriptor& descriptor) :
@@ -37,11 +37,11 @@ namespace ProjectA {
 
 				if (
 					binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER ||
-					binding.descriptorType == DescriptorType::STORAGE_TEXTURE
+					binding.descriptorType == DescriptorType::STORAGE_IMAGE
 				) {
-					ENGINE_ASSERT(binding.textureViews.size() == binding.samplers.size(), "Mismatch between texture view count and sampler count.");
+					ENGINE_ASSERT(binding.imageViews.size() == binding.samplers.size(), "Mismatch between image view count and sampler count.");
 
-					descriptorPoolSize.descriptorCount = static_cast<uint32>(binding.textureViews.size());
+					descriptorPoolSize.descriptorCount = static_cast<uint32>(binding.imageViews.size());
 				}
 				else {
 					descriptorPoolSize.descriptorCount = static_cast<uint32>(binding.buffers.size());
@@ -108,19 +108,19 @@ namespace ProjectA {
 						descriptorBufferInfos.emplace_back(descriptorBufferInfo);
 					}
 
-					for (uint32 textureViewIndex = 0; textureViewIndex < binding.textureViews.size(); textureViewIndex += 1) {
-						const VulkanSampler* sampler = static_cast<const VulkanSampler*>(binding.samplers[textureViewIndex].get());
-						const VulkanTextureView* textureView = static_cast<const VulkanTextureView*>(binding.textureViews[textureViewIndex].get());
+					for (uint32 imageViewIndex = 0; imageViewIndex < binding.imageViews.size(); imageViewIndex += 1) {
+						const ref<VulkanSampler> sampler = std::static_pointer_cast<VulkanSampler>(binding.samplers[imageViewIndex]);
+						const ref<VulkanImageView> imageView = std::static_pointer_cast<VulkanImageView>(binding.imageViews[imageViewIndex]);
 
 						VkDescriptorImageInfo descriptorImageInfo{};
 						descriptorImageInfo.sampler = sampler->object;
-						descriptorImageInfo.imageView = textureView->object;
+						descriptorImageInfo.imageView = imageView->object;
 
 						// TODO: Specify layout of current image.
 						if (binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER) {
 							descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 						}
-						else if (binding.descriptorType == DescriptorType::STORAGE_TEXTURE) {
+						else if (binding.descriptorType == DescriptorType::STORAGE_IMAGE) {
 							// Can also be VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR.
 							descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 						}
@@ -162,8 +162,8 @@ namespace ProjectA {
 						bufferWriteDescriptorSetIndex += 1;
 					}
 
-					if (binding.textureViews.size() > 0) {
-						// Treat as a texture array.
+					if (binding.imageViews.size() > 0) {
+						// Treat as an image array.
 						VkWriteDescriptorSet writeDescriptorSet{};
 						writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 						writeDescriptorSet.pNext = nullptr;

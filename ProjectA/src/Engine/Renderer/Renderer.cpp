@@ -76,6 +76,10 @@ namespace ProjectA {
 		return rendererApi->createFence();
 	}
 
+	ref<Image> Renderer::createImage(const ImageDescriptor& descriptor) {
+		return rendererApi->createImage(descriptor);
+	}
+
 	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) {
 		return rendererApi->createPipelineLayout(descriptor);
 	}
@@ -94,10 +98,6 @@ namespace ProjectA {
 
 	ref<Semaphore> Renderer::createSemaphore() {
 		return rendererApi->createSemaphore();
-	}
-
-	ref<Texture> Renderer::createTexture(const TextureDescriptor& descriptor) {
-		return rendererApi->createTexture(descriptor);
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor) {

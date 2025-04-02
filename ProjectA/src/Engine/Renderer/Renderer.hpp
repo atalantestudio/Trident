@@ -36,6 +36,8 @@ namespace ProjectA {
 
 			static ref<Fence> createFence();
 
+			static ref<Image> createImage(const ImageDescriptor& descriptor);
+
 			static ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor);
 
 			static ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor);
@@ -45,8 +47,6 @@ namespace ProjectA {
 			static ref<Sampler> createSampler(const SamplerDescriptor& descriptor);
 
 			static ref<Semaphore> createSemaphore();
-
-			static ref<Texture> createTexture(const TextureDescriptor& descriptor);
 
 			// Loads and returns a SPIR-V shader module.
 			static ref<ShaderModule> loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor);

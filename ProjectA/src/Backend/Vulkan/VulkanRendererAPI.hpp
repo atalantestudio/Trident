@@ -24,6 +24,8 @@ namespace ProjectA {
 
 			ref<Fence> createFence() const override;
 
+			ref<Image> createImage(const ImageDescriptor& descriptor) const override;
+
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const override;
 
 			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const override;
@@ -37,8 +39,6 @@ namespace ProjectA {
 			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descritptor, const chain<uint8>& code) const override;
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) override;
-
-			ref<Texture> createTexture(const TextureDescriptor& descriptor) const override;
 
 		private:
 			const VulkanInstance instance;

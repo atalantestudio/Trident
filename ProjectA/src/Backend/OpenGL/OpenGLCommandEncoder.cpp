@@ -8,7 +8,7 @@
 #include "Backend/OpenGL/Command/OpenGLBindRenderPipelineCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindVertexBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLCopyBufferToBufferCommand.hpp"
-#include "Backend/OpenGL/Command/OpenGLCopyBufferToTextureCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLCopyBufferToImageCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDispatchGroupsCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
@@ -16,7 +16,7 @@
 #include "Backend/OpenGL/IndexType.hpp"
 #include "Backend/OpenGL/OpenGLCommandBuffer.hpp"
 #include "Backend/OpenGL/OpenGLCommandEncoder.hpp"
-#include "Backend/OpenGL/OpenGLTexture.hpp"
+#include "Backend/OpenGL/OpenGLImage.hpp"
 
 namespace ProjectA {
 	OpenGLCommandEncoder::OpenGLCommandEncoder(const CommandBufferDescriptor& descriptor) {}
@@ -67,10 +67,10 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::copyBufferToTexture(const ref<Buffer>& sourceBuffer, const ref<Texture>& destinationTexture, uint32 width, uint32 height, uint32 depth) {
-		commandBuffer.emplace_back(createRef<OpenGLCopyBufferToTextureCommand>(
-			static_cast<const OpenGLBuffer*>(sourceBuffer.get())->object,
-			static_cast<const OpenGLTexture*>(destinationTexture.get())->object,
+	void OpenGLCommandEncoder::copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, uint32 width, uint32 height, uint32 depth) {
+		commandBuffer.emplace_back(createRef<OpenGLCopyBufferToImageCommand>(
+			std::static_pointer_cast<OpenGLBuffer>(sourceBuffer)->object,
+			std::static_pointer_cast<OpenGLImage>(destinationImage)->object,
 			width,
 			height,
 			depth
@@ -81,7 +81,9 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLDispatchGroupsCommand>(groupCountX, groupCountY, groupCountZ));
 	}
 
-	void OpenGLCommandEncoder::setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const {}
+	void OpenGLCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const {
+		// TODO: Implement.
+	}
 
 	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(

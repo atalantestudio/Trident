@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	enum class TextureType : uint8 {
+	enum class ImageType : uint8 {
 		TEXTURE_2D = 0,
 	};
 }

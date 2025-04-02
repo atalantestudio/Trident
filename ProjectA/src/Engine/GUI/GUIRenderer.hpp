@@ -10,11 +10,11 @@ namespace ProjectA {
 		public:
 			GUIRenderer();
 
-			ref<Texture> loadTexture(const std::string& path);
+			ref<Image> loadImage(const std::string& path);
 
-			ref<Texture> loadTexture(const ref<Buffer>& buffer, uint32 width, uint32 height);
+			ref<Image> loadImage(const ref<Buffer>& buffer, uint32 width, uint32 height);
 
-			ref<Texture> loadDefaultTexture();
+			ref<Image> loadDefaultImage();
 
 			void registerEntityPool(const ComponentPool<GUIComponent>& componentPool);
 
@@ -58,9 +58,9 @@ namespace ProjectA {
 			uint32 instanceCount = 0;
 			uint32 frameIndex = 0;
 
-			ref<Texture> defaultTexture;
-			ref<TextureView> defaultTextureView;
-			ref<Texture> fontTexture;
-			ref<TextureView> fontTextureView;
+			ref<Image> defaultImage;
+			ref<ImageView> defaultImageView;
+			ref<Image> fontImage;
+			ref<ImageView> fontImageView;
 	};
 }

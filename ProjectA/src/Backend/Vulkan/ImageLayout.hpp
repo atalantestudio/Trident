@@ -2,10 +2,10 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Engine/Renderer/TextureLayout.hpp"
+#include "Engine/Renderer/ImageLayout.hpp"
 
 namespace ProjectA {
-	static VkImageLayout getVkImageLayout(TextureLayout textureLayout) {
+	static VkImageLayout getVkImageLayout(ImageLayout imageLayout) {
 		static constexpr VkImageLayout vkImageLayouts[] = {
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
@@ -14,6 +14,6 @@ namespace ProjectA {
 			VK_IMAGE_LAYOUT_GENERAL,
 		};
 
-		return vkImageLayouts[static_cast<uint8>(textureLayout)];
+		return vkImageLayouts[static_cast<uint8>(imageLayout)];
 	}
 }

@@ -3,6 +3,7 @@
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 #include "Backend/OpenGL/OpenGLComputePipeline.hpp"
 #include "Backend/OpenGL/OpenGLFence.hpp"
+#include "Backend/OpenGL/OpenGLImage.hpp"
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 #include "Backend/OpenGL/OpenGLRendererAPI.hpp"
 #include "Backend/OpenGL/OpenGLRenderPass.hpp"
@@ -11,7 +12,6 @@
 #include "Backend/OpenGL/OpenGLSemaphore.hpp"
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
-#include "Backend/OpenGL/OpenGLTexture.hpp"
 
 namespace ProjectA {
 	OpenGLRendererAPI::OpenGLRendererAPI(GLFWwindow* window) :
@@ -30,6 +30,10 @@ namespace ProjectA {
 
 	ref<Fence> OpenGLRendererAPI::createFence() const {
 		return createRef<OpenGLFence>();
+	}
+
+	ref<Image> OpenGLRendererAPI::createImage(const ImageDescriptor& descriptor) const {
+		return createRef<OpenGLImage>(descriptor);
 	}
 
 	ref<ComputePipeline> OpenGLRendererAPI::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
@@ -62,9 +66,5 @@ namespace ProjectA {
 
 	ref<Swapchain> OpenGLRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) {
 		return createRef<OpenGLSwapchain>(descriptor);
-	}
-
-	ref<Texture> OpenGLRendererAPI::createTexture(const TextureDescriptor& descriptor) const {
-		return createRef<OpenGLTexture>(descriptor);
 	}
 }

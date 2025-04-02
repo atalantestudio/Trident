@@ -10,7 +10,7 @@ namespace ProjectA {
 			ref<Framebuffer> framebuffer;
 
 			vec4<float32> color = {0.2f, 0.3f, 0.8f, 1.0f};
-			ref<Texture> checkerboardTexture;
+			ref<Image> checkerboardImage;
 
 			vec2<float32> viewportWindowSize;
 			bool viewportWindowFocused = false;

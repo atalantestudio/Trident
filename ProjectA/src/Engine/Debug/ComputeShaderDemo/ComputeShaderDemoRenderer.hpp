@@ -17,9 +17,9 @@ namespace ProjectA {
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
 
-			// This texture is written to by the compute shader.
-			ref<Texture> texture;
-			ref<TextureView> textureView;
+			// This image is written to by the compute shader.
+			ref<Image> image;
+			ref<ImageView> imageView;
 			ref<Sampler> sampler;
 	};
 }

@@ -9,7 +9,7 @@ namespace ProjectA {
 	TextureDemoRenderer::TextureDemoRenderer() {
 		const ref<Device>& device = getDevice();
 
-		// Load texture.
+		// Load image.
 		{
 			const PNGFile file = Filesystem::load<PNGFile>("../ProjectA/src/Engine/Debug/TextureDemo/Asset/Zelda.png");
 			const uint64 size = sizeof(uint8) * file.data.size();
@@ -26,18 +26,18 @@ namespace ProjectA {
 
 			stagingBuffer->unmap();
 
-			TextureDescriptor textureDescriptor{};
-			textureDescriptor.type = TextureType::TEXTURE_2D;
-			textureDescriptor.format = TextureFormat::R8G8B8A8_SRGB;
-			textureDescriptor.usage = TextureUsage::TRANSFER_DST | TextureUsage::SAMPLED;
-			textureDescriptor.width = file.width;
-			textureDescriptor.height = file.height;
-			textureDescriptor.depth = 1;
-			textureDescriptor.mipLevelCount = 1;
-			textureDescriptor.arrayLayerCount = 1;
-			textureDescriptor.sampleCount = 1;
+			ImageDescriptor imageDescriptor{};
+			imageDescriptor.type = ImageType::TEXTURE_2D;
+			imageDescriptor.format = ImageFormat::R8G8B8A8_SRGB;
+			imageDescriptor.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED;
+			imageDescriptor.width = file.width;
+			imageDescriptor.height = file.height;
+			imageDescriptor.depth = 1;
+			imageDescriptor.mipLevelCount = 1;
+			imageDescriptor.arrayLayerCount = 1;
+			imageDescriptor.sampleCount = 1;
 
-			texture = createTexture(textureDescriptor);
+			image = createImage(imageDescriptor);
 
 			CommandBufferDescriptor commandBufferDescriptor{};
 			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -45,9 +45,9 @@ namespace ProjectA {
 			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
-			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-			commandEncoder->copyBufferToTexture(stagingBuffer, texture, file.width, file.height, 0);
-			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+			commandEncoder->setImageMemoryBarrier(image, ImageLayout::UNDEFINED, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+			commandEncoder->copyBufferToImage(stagingBuffer, image, file.width, file.height, 0);
+			commandEncoder->setImageMemoryBarrier(image, ImageLayout::TRANSFER_DST_OPTIMAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -57,11 +57,11 @@ namespace ProjectA {
 			device->waitIdle();
 		}
 
-		// Create texture view.
+		// Create image view.
 		{
-			const TextureViewDescriptor textureViewDescriptor;
+			const ImageViewDescriptor imageViewDescriptor;
 
-			textureView = texture->createView(textureViewDescriptor);
+			imageView = image->createView(imageViewDescriptor);
 		}
 
 		// Create sampler.
@@ -98,15 +98,15 @@ namespace ProjectA {
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
 
-		DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding{};
-		textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		textureDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		textureDescriptorSetLayoutBinding.samplers = {sampler};
-		textureDescriptorSetLayoutBinding.textureViews = {textureView};
+		DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding{};
+		imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		imageDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		imageDescriptorSetLayoutBinding.samplers = {sampler};
+		imageDescriptorSetLayoutBinding.imageViews = {imageView};
 
 		DescriptorSetLayout descriptorSetLayout{};
 		descriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding);
-		descriptorSetLayout.bindings.emplace_back(textureDescriptorSetLayoutBinding);
+		descriptorSetLayout.bindings.emplace_back(imageDescriptorSetLayoutBinding);
 
 		PipelineLayoutDescriptor pipelineLayoutDescriptor;
 		pipelineLayoutDescriptor.layouts.emplace_back(descriptorSetLayout);
@@ -141,10 +141,10 @@ namespace ProjectA {
 
 		// Create vertex buffer.
 		{
-			const float32 w = static_cast<float32>(texture->getWidth()) / 1000.0f;
-			const float32 h = static_cast<float32>(texture->getHeight()) / 1000.0f;
+			const float32 w = static_cast<float32>(image->getWidth()) / 1000.0f;
+			const float32 h = static_cast<float32>(image->getHeight()) / 1000.0f;
 
-			// Texture coordinates are reversed manually.
+			// Image coordinates are reversed manually here.
 			chain<Vertex> vertices(4);
 			vertices[0].position = vec2<float32>(-w, -h) / 2.0f;
 			vertices[0].uv = {0.0f, 1.0f};

@@ -17,6 +17,8 @@ namespace ProjectA {
 
 			virtual ref<Fence> createFence() const = 0;
 
+			virtual ref<Image> createImage(const ImageDescriptor& descriptor) const = 0;
+
 			virtual ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const = 0;
 
 			virtual ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const = 0;
@@ -30,7 +32,5 @@ namespace ProjectA {
 			virtual ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, const chain<uint8>& code) const = 0;
 
 			virtual ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) = 0;
-
-			virtual ref<Texture> createTexture(const TextureDescriptor& descriptor) const = 0;
 	};
 }

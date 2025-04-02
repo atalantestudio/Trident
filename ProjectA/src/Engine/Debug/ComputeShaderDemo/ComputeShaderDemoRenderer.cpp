@@ -10,28 +10,24 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		const uint32 textureWidth = 64;
-		const uint32 textureHeight = 64;
-		const uint32 textureDepth = 1;
+		ImageDescriptor imageDescriptor{};
+		imageDescriptor.type = ImageType::TEXTURE_2D;
+		imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
+		imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::STORAGE;
+		imageDescriptor.width = 64;
+		imageDescriptor.height = 64;
+		imageDescriptor.depth = 1;
+		imageDescriptor.mipLevelCount = 1;
+		imageDescriptor.arrayLayerCount = 1;
+		imageDescriptor.sampleCount = 1;
 
-		TextureDescriptor textureDescriptor{};
-		textureDescriptor.type = TextureType::TEXTURE_2D;
-		textureDescriptor.format = TextureFormat::R8G8B8A8_UNORM;
-		textureDescriptor.usage = TextureUsage::SAMPLED | TextureUsage::STORAGE;
-		textureDescriptor.width = textureWidth;
-		textureDescriptor.height = textureHeight;
-		textureDescriptor.depth = textureDepth;
-		textureDescriptor.mipLevelCount = 1;
-		textureDescriptor.arrayLayerCount = 1;
-		textureDescriptor.sampleCount = 1;
-
-		texture = createTexture(textureDescriptor);
+		image = createImage(imageDescriptor);
 
 		{
 			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
-			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+			commandEncoder->setImageMemoryBarrier(image, ImageLayout::UNDEFINED, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -45,15 +41,15 @@ namespace ProjectA {
 
 		sampler = createSampler(samplerDescriptor);
 
-		const TextureViewDescriptor textureViewDescriptor;
+		const ImageViewDescriptor imageViewDescriptor;
 
-		textureView = texture->createView(textureViewDescriptor);
+		imageView = image->createView(imageViewDescriptor);
 
 		DescriptorSetLayoutBinding computeDescriptorSetLayoutBinding;
-		computeDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_TEXTURE;
+		computeDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
 		computeDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
 		computeDescriptorSetLayoutBinding.samplers = {sampler};
-		computeDescriptorSetLayoutBinding.textureViews = {textureView};
+		computeDescriptorSetLayoutBinding.imageViews = {imageView};
 
 		DescriptorSetLayout computeDescriptorSetLayout;
 		computeDescriptorSetLayout.bindings.emplace_back(computeDescriptorSetLayoutBinding);
@@ -99,7 +95,7 @@ namespace ProjectA {
 			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
-			commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::GENERAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+			commandEncoder->setImageMemoryBarrier(image, ImageLayout::GENERAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -111,7 +107,7 @@ namespace ProjectA {
 		descriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 		descriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
 		descriptorSetLayoutBinding.samplers = {sampler};
-		descriptorSetLayoutBinding.textureViews = {textureView};
+		descriptorSetLayoutBinding.imageViews = {imageView};
 
 		DescriptorSetLayout descriptorSetLayout;
 		descriptorSetLayout.bindings.emplace_back(descriptorSetLayoutBinding);

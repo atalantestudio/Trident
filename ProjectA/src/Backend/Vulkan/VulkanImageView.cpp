@@ -1,12 +1,12 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/TextureFormat.hpp"
-#include "Backend/Vulkan/TextureType.hpp"
-#include "Backend/Vulkan/VulkanTexture.hpp"
-#include "Backend/Vulkan/VulkanTextureView.hpp"
+#include "Backend/Vulkan/ImageFormat.hpp"
+#include "Backend/Vulkan/ImageType.hpp"
+#include "Backend/Vulkan/VulkanImage.hpp"
+#include "Backend/Vulkan/VulkanImageView.hpp"
 
 namespace ProjectA {
-	VulkanTextureView::VulkanTextureView(VkDevice device, const VulkanTexture& texture, const TextureViewDescriptor& descriptor) :
+	VulkanImageView::VulkanImageView(VkDevice device, const VulkanImage& image, const ImageViewDescriptor& descriptor) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -15,9 +15,9 @@ namespace ProjectA {
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.pNext = nullptr;
 		imageViewCreateInfo.flags = 0;
-		imageViewCreateInfo.image = texture.object;
-		imageViewCreateInfo.viewType = getVkImageViewType(texture.type);
-		imageViewCreateInfo.format = getVkFormat(texture.format);
+		imageViewCreateInfo.image = image.object;
+		imageViewCreateInfo.viewType = getVkImageViewType(image.type);
+		imageViewCreateInfo.format = getVkFormat(image.format);
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -33,7 +33,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view (code: []).", result);
 	}
 
-	VulkanTextureView::~VulkanTextureView() {
+	VulkanImageView::~VulkanImageView() {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		vkDestroyImageView(device, object, nullptr);

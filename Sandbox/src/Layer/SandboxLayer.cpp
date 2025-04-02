@@ -5,7 +5,7 @@
 SandboxLayer::SandboxLayer() :
 	cameraController(1280.0f / 720.0f)
 {
-	//checkerboardTexture = ProjectA::Texture2D::create("assets/textures/checkerboard.png");
+	//checkerboardImage = ProjectA::Texture2D::create("assets/textures/checkerboard.png");
 }
 
 void SandboxLayer::update(ProjectA::float32 deltaTime, const ProjectA::ref<ProjectA::CommandEncoder>& commandEncoder, ProjectA::uint32 nextImageIndex) {
@@ -37,8 +37,8 @@ void SandboxLayer::update(ProjectA::float32 deltaTime, const ProjectA::ref<Proje
 	ProjectA::Renderer2D::drawRotatedQuad({1.0f, 0.0f}, {0.8f, 0.8f}, lyah::radians(45.0f), {0.8f, 0.2f, 0.3f, 1.0f});
 	ProjectA::Renderer2D::drawQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, {0.8f, 0.2f, 0.3f, 1.0f});
 	ProjectA::Renderer2D::drawQuad({0.5f, -0.5f}, {0.5f, 0.75f}, {0.2f, 0.3f, 0.8f, 1.0f});
-	ProjectA::Renderer2D::drawQuad({0.0f, 0.0f, 0.1f}, {20.0f, 20.0f}, checkerboardTexture, 10.0f);
-	ProjectA::Renderer2D::drawRotatedQuad({-2.0f, 0.0f, 0.0f}, {1.0f, 1.0f}, angle, checkerboardTexture, 20.0f);
+	ProjectA::Renderer2D::drawQuad({0.0f, 0.0f, 0.1f}, {20.0f, 20.0f}, checkerboardImage, 10.0f);
+	ProjectA::Renderer2D::drawRotatedQuad({-2.0f, 0.0f, 0.0f}, {1.0f, 1.0f}, angle, checkerboardImage, 20.0f);
 	ProjectA::Renderer2D::endScene();
 
 	ProjectA::Renderer2D::beginScene();

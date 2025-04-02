@@ -96,7 +96,7 @@ namespace ProjectA {
 		}
 
 		for (uint32 i = 0; i < imageCount; i += 1) {
-			// TODO: Replace with Texture and TextureView APIs.
+			// TODO: Replace with Image and ImageView APIs.
 			VkImageViewCreateInfo imageViewCreateInfo{};
 			imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			imageViewCreateInfo.pNext = nullptr;

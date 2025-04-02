@@ -8,7 +8,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		//checkerboardTexture = Texture2D::create("assets/textures/checkerboard.png");
+		//checkerboardImage = Texture2D::create("assets/textures/checkerboard.png");
 
 		/*FramebufferDescriptor framebufferDescriptor;
 		framebufferDescriptor.renderToSwapchain = false;
@@ -52,8 +52,8 @@ namespace ProjectA {
 			Renderer2D::drawRotatedQuad({1.0f, 0.0f}, {0.8f, 0.8f}, lyah::radians(45.0f), {0.8f, 0.2f, 0.3f, 1.0f});
 			Renderer2D::drawQuad({-1.0f, 0.0f}, {0.8f, 0.8f}, {0.8f, 0.2f, 0.3f, 1.0f});
 			Renderer2D::drawQuad({0.5f, -0.5f}, {0.5f, 0.75f}, color);
-			Renderer2D::drawQuad({0.0f, 0.0f, 0.1f}, {20.0f, 20.0f}, checkerboardTexture, 10.0f);
-			Renderer2D::drawRotatedQuad({-2.0f, 0.0f, 0.0f}, {1.0f, 1.0f}, angle, checkerboardTexture, 20.0f);
+			Renderer2D::drawQuad({0.0f, 0.0f, 0.1f}, {20.0f, 20.0f}, checkerboardImage, 10.0f);
+			Renderer2D::drawRotatedQuad({-2.0f, 0.0f, 0.0f}, {1.0f, 1.0f}, angle, checkerboardImage, 20.0f);
 			Renderer2D::endScene();
 
 			Renderer2D::beginScene();
@@ -158,10 +158,10 @@ namespace ProjectA {
 
 		viewportWindowSize = {imGuiViewportWindowSize.x, imGuiViewportWindowSize.y};
 
-		const uint32 textureId = framebuffer->getColorAttachmentId();
+		const uint32 colorAttachmentId = framebuffer->getColorAttachmentId();
 		const vec2<float32> size = framebuffer->descriptor.size;
 
-		ImGui::Image((void*) (std::uintptr_t) textureId, {size[0], size[1]}, {0.0f, 1.0f}, {1.0f, 0.0f});
+		ImGui::Image((void*) (std::uintptr_t) colorAttachmentId, {size[0], size[1]}, {0.0f, 1.0f}, {1.0f, 0.0f});
 
 		ImGui::End();
 		ImGui::PopStyleVar();

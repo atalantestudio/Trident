@@ -1,16 +1,16 @@
 #include "pch.hpp"
 
 #include "Backend/Vulkan/CommandBufferUsage.hpp"
+#include "Backend/Vulkan/ImageLayout.hpp"
 #include "Backend/Vulkan/IndexType.hpp"
 #include "Backend/Vulkan/PipelineStage.hpp"
-#include "Backend/Vulkan/TextureLayout.hpp"
 #include "Backend/Vulkan/VulkanBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
 #include "Backend/Vulkan/VulkanComputePipeline.hpp"
+#include "Backend/Vulkan/VulkanImage.hpp"
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
-#include "Backend/Vulkan/VulkanTexture.hpp"
 
 #include "Engine/Application.hpp"
 
@@ -133,7 +133,7 @@ namespace ProjectA {
 		);
 	}
 
-	void VulkanCommandEncoder::copyBufferToTexture(const ref<Buffer>& sourceBuffer, const ref<Texture>& destinationTexture, uint32 width, uint32 height, uint32 depth) {
+	void VulkanCommandEncoder::copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, uint32 width, uint32 height, uint32 depth) {
 		VkBufferImageCopy bufferImageCopy{};
 		bufferImageCopy.bufferOffset = 0;
 		bufferImageCopy.bufferRowLength = 0;
@@ -151,8 +151,8 @@ namespace ProjectA {
 
 		vkCmdCopyBufferToImage(
 			commandBuffer,
-			static_cast<const VulkanBuffer*>(sourceBuffer.get())->object,
-			static_cast<const VulkanTexture*>(destinationTexture.get())->object,
+			std::static_pointer_cast<VulkanBuffer>(sourceBuffer)->object,
+			std::static_pointer_cast<VulkanImage>(destinationImage)->object,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1,
 			&bufferImageCopy
@@ -163,25 +163,25 @@ namespace ProjectA {
 		vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
 	}
 
-	void VulkanCommandEncoder::setTextureMemoryBarrier(const ref<Texture>& texture, TextureLayout oldLayout, TextureLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const {
+	void VulkanCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const {
 		VkImageMemoryBarrier imageMemoryBarrier{};
 		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 		imageMemoryBarrier.pNext = nullptr;
 
 		switch (oldLayout) {
-			case TextureLayout::UNDEFINED:
+			case ImageLayout::UNDEFINED:
 				imageMemoryBarrier.srcAccessMask = VK_ACCESS_NONE;
 
 				break;
-			case TextureLayout::TRANSFER_SRC_OPTIMAL:
+			case ImageLayout::TRANSFER_SRC_OPTIMAL:
 				imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
 				break;
-			case TextureLayout::TRANSFER_DST_OPTIMAL:
+			case ImageLayout::TRANSFER_DST_OPTIMAL:
 				imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
 				break;
-			case TextureLayout::SHADER_READ_ONLY_OPTIMAL:
+			case ImageLayout::SHADER_READ_ONLY_OPTIMAL:
 				imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
 				break;
@@ -192,15 +192,15 @@ namespace ProjectA {
 		}
 
 		switch (newLayout) {
-			case TextureLayout::TRANSFER_SRC_OPTIMAL:
+			case ImageLayout::TRANSFER_SRC_OPTIMAL:
 				imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
 				break;
-			case TextureLayout::TRANSFER_DST_OPTIMAL:
+			case ImageLayout::TRANSFER_DST_OPTIMAL:
 				imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
 				break;
-			case TextureLayout::SHADER_READ_ONLY_OPTIMAL:
+			case ImageLayout::SHADER_READ_ONLY_OPTIMAL:
 				imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
 				break;
@@ -210,33 +210,11 @@ namespace ProjectA {
 				break;
 		}
 
-		/*if (oldLayout == TextureLayout::UNDEFINED && newLayout == TextureLayout::TRANSFER_DST_OPTIMAL) {
-			imageMemoryBarrier.srcAccessMask = 0;
-			imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-			sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-			destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-		}
-		else if (oldLayout == TextureLayout::TRANSFER_DST_OPTIMAL && newLayout == TextureLayout::SHADER_READ_ONLY_OPTIMAL) {
-			imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-			imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-			sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-		}
-		else if (oldLayout == TextureLayout::UNDEFINED && newLayout == TextureLayout::GENERAL) {
-			imageMemoryBarrier.srcAccessMask = 0;
-			imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-			sourceStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-		}*/
-
 		imageMemoryBarrier.oldLayout = getVkImageLayout(oldLayout);
 		imageMemoryBarrier.newLayout = getVkImageLayout(newLayout);
 		imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarrier.image = static_cast<const VulkanTexture*>(texture.get())->object;
+		imageMemoryBarrier.image = std::static_pointer_cast<VulkanImage>(image)->object;
 		imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
 		imageMemoryBarrier.subresourceRange.levelCount = 1;

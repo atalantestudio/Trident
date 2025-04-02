@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	enum class TextureUsage : uint8 {
+	enum class ImageUsage : uint8 {
 		TRANSFER_SRC = BIT(0),
 		TRANSFER_DST = BIT(1),
 		SAMPLED = BIT(2),
@@ -10,5 +10,5 @@ namespace ProjectA {
 		DEPTH_STENCIL_ATTACHMENT = BIT(5),
 	};
 
-	AS_FLAG(TextureUsage);
+	AS_FLAG(ImageUsage);
 }

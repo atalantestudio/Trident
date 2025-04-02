@@ -27,13 +27,13 @@ namespace ProjectA {
 
 		//colorStorageBuffer = createBuffer(colorStorageBufferDescriptor);
 
-		const TextureViewDescriptor textureViewDescriptor;
+		const ImageViewDescriptor imageViewDescriptor;
 
-		defaultTexture = loadDefaultTexture();
-		defaultTextureView = defaultTexture->createView(textureViewDescriptor);
+		defaultImage = loadDefaultImage();
+		defaultImageView = defaultImage->createView(imageViewDescriptor);
 
-		fontTexture = loadTexture("../ProjectA/src/Asset/Texture/Quiver.png");
-		fontTextureView = fontTexture->createView(textureViewDescriptor);
+		fontImage = loadImage("../ProjectA/src/Asset/Texture/Quiver.png");
+		fontImageView = fontImage->createView(imageViewDescriptor);
 
 		SamplerDescriptor samplerDescriptor{};
 		samplerDescriptor.magFilter = SamplerFilter::NEAREST;
@@ -46,11 +46,11 @@ namespace ProjectA {
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
 		cameraDescriptorSetLayoutBinding.buffers = cameraUniformBuffers;
 
-		DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding{};
-		textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		textureDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		textureDescriptorSetLayoutBinding.textureViews = {fontTextureView};
-		textureDescriptorSetLayoutBinding.samplers = {sampler};
+		DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding{};
+		imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		imageDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		imageDescriptorSetLayoutBinding.imageViews = {fontImageView};
+		imageDescriptorSetLayoutBinding.samplers = {sampler};
 
 		//DescriptorSetLayoutBinding colorDescriptorSetLayoutBinding{};
 		//colorDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
@@ -59,7 +59,7 @@ namespace ProjectA {
 
 		DescriptorSetLayout cameraAndColorDescriptorSetLayout;
 		cameraAndColorDescriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding);
-		cameraAndColorDescriptorSetLayout.bindings.emplace_back(textureDescriptorSetLayoutBinding);
+		cameraAndColorDescriptorSetLayout.bindings.emplace_back(imageDescriptorSetLayoutBinding);
 		//cameraAndColorDescriptorSetLayout.bindings.emplace_back(colorDescriptorSetLayoutBinding);
 
 		PipelineLayoutDescriptor pipelineLayoutDescriptor;
@@ -99,7 +99,7 @@ namespace ProjectA {
 
 		// Create position vertex buffer.
 		{
-			// Texture coordinates are reversed manually.
+			// Image coordinates are reversed manually here.
  			const chain<Vertex> vertices = {
 				{{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
 				{{1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
@@ -120,11 +120,11 @@ namespace ProjectA {
 			positionVertexBuffer->unmap();
 		}
 
-		BufferDescriptor textureCoordinateVertexBufferDescriptor{};
-		textureCoordinateVertexBufferDescriptor.size = sizeof(vec2<float32>) * MAX_QUADS * 4;
-		textureCoordinateVertexBufferDescriptor.usage = BufferUsage::VERTEX;
+		BufferDescriptor imageCoordinateVertexBufferDescriptor{};
+		imageCoordinateVertexBufferDescriptor.size = sizeof(vec2<float32>) * MAX_QUADS * 4;
+		imageCoordinateVertexBufferDescriptor.usage = BufferUsage::VERTEX;
 
-		textureCoordinateVertexBuffer = createBuffer(textureCoordinateVertexBufferDescriptor);
+		textureCoordinateVertexBuffer = createBuffer(imageCoordinateVertexBufferDescriptor);
 
 		BufferDescriptor transformVertexBufferDescriptor{};
 		transformVertexBufferDescriptor.size = sizeof(GUIComponent) * MAX_QUADS;
@@ -161,7 +161,7 @@ namespace ProjectA {
 		}
 	}
 
-	ref<Texture> GUIRenderer::loadTexture(const std::string& path) {
+	ref<Image> GUIRenderer::loadImage(const std::string& path) {
 		const PNGFile file = Filesystem::load<PNGFile>(path);
 		const uint64 size = sizeof(uint8) * file.data.size();
 
@@ -177,24 +177,24 @@ namespace ProjectA {
 
 		stagingBuffer->unmap();
 
-		return loadTexture(stagingBuffer, file.width, file.height);
+		return loadImage(stagingBuffer, file.width, file.height);
 	}
 
-	ref<Texture> GUIRenderer::loadTexture(const ref<Buffer>& buffer, uint32 width, uint32 height) {
+	ref<Image> GUIRenderer::loadImage(const ref<Buffer>& buffer, uint32 width, uint32 height) {
 		const ref<Device>& device = getDevice();
 
-		TextureDescriptor textureDescriptor{};
-		textureDescriptor.type = TextureType::TEXTURE_2D;
-		textureDescriptor.format = TextureFormat::R8G8B8A8_SRGB;
-		textureDescriptor.usage = TextureUsage::TRANSFER_DST | TextureUsage::SAMPLED;
-		textureDescriptor.width = width;
-		textureDescriptor.height = height;
-		textureDescriptor.depth = 1;
-		textureDescriptor.mipLevelCount = 1;
-		textureDescriptor.arrayLayerCount = 1;
-		textureDescriptor.sampleCount = 1;
+		ImageDescriptor imageDescriptor{};
+		imageDescriptor.type = ImageType::TEXTURE_2D;
+		imageDescriptor.format = ImageFormat::R8G8B8A8_SRGB;
+		imageDescriptor.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED;
+		imageDescriptor.width = width;
+		imageDescriptor.height = height;
+		imageDescriptor.depth = 1;
+		imageDescriptor.mipLevelCount = 1;
+		imageDescriptor.arrayLayerCount = 1;
+		imageDescriptor.sampleCount = 1;
 
-		const ref<Texture> texture = createTexture(textureDescriptor);
+		const ref<Image> image = createImage(imageDescriptor);
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -202,19 +202,19 @@ namespace ProjectA {
 		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 		commandEncoder->begin();
-		commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::UNDEFINED, TextureLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-		commandEncoder->copyBufferToTexture(buffer, texture, width, height, 0);
-		commandEncoder->setTextureMemoryBarrier(texture, TextureLayout::TRANSFER_DST_OPTIMAL, TextureLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+		commandEncoder->setImageMemoryBarrier(image, ImageLayout::UNDEFINED, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+		commandEncoder->copyBufferToImage(buffer, image, width, height, 0);
+		commandEncoder->setImageMemoryBarrier(image, ImageLayout::TRANSFER_DST_OPTIMAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
 		device->waitIdle();
 
-		return texture;
+		return image;
 	}
 
-	ref<Texture> GUIRenderer::loadDefaultTexture() {
+	ref<Image> GUIRenderer::loadDefaultImage() {
 		const std::array<uint8, 4> data = {1, 1, 1, 1};
 		const uint64 size = sizeof(uint8) * data.size();
 
@@ -230,7 +230,7 @@ namespace ProjectA {
 
 		stagingBuffer->unmap();
 
-		return loadTexture(stagingBuffer, 1, 1);
+		return loadImage(stagingBuffer, 1, 1);
 	}
 
 	void GUIRenderer::registerEntityPool(const ComponentPool<GUIComponent>& componentPool) {

@@ -7,6 +7,6 @@ namespace ProjectA {
 		STORAGE_BUFFER = 0,
 		UNIFORM_BUFFER = 1,
 		COMBINED_IMAGE_SAMPLER = 2,
-		STORAGE_TEXTURE = 3,
+		STORAGE_IMAGE = 3,
 	};
 }

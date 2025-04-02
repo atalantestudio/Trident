@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	enum class TextureLayout : uint8 {
+	enum class ImageLayout : uint8 {
 		UNDEFINED = 0,
 		TRANSFER_SRC_OPTIMAL = 1,
 		TRANSFER_DST_OPTIMAL = 2,

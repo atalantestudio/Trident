@@ -4,12 +4,12 @@
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
 #include "Backend/Vulkan/VulkanComputePipeline.hpp"
 #include "Backend/Vulkan/VulkanFence.hpp"
+#include "Backend/Vulkan/VulkanImage.hpp"
 #include "Backend/Vulkan/VulkanRendererAPI.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
 #include "Backend/Vulkan/VulkanSampler.hpp"
 #include "Backend/Vulkan/VulkanSemaphore.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
-#include "Backend/Vulkan/VulkanTexture.hpp"
 
 namespace ProjectA {
 	VulkanRendererAPI::VulkanRendererAPI(GLFWwindow* window) :
@@ -33,6 +33,10 @@ namespace ProjectA {
 
 	ref<Fence> VulkanRendererAPI::createFence() const {
 		return createRef<VulkanFence>(device->object);
+	}
+
+	ref<Image> VulkanRendererAPI::createImage(const ImageDescriptor& descriptor) const {
+		return createRef<VulkanImage>(*device, descriptor);
 	}
 
 	ref<PipelineLayout> VulkanRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
@@ -61,9 +65,5 @@ namespace ProjectA {
 
 	ref<Swapchain> VulkanRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) {
 		return createRef<VulkanSwapchain>(physicalDevice, surface, device->object, descriptor);
-	}
-
-	ref<Texture> VulkanRendererAPI::createTexture(const TextureDescriptor& descriptor) const {
-		return createRef<VulkanTexture>(*device, descriptor);
 	}
 }

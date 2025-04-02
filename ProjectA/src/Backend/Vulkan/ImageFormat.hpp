@@ -2,15 +2,15 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Engine/Renderer/TextureFormat.hpp"
+#include "Engine/Renderer/ImageFormat.hpp"
 
 namespace ProjectA {
-	static VkFormat getVkFormat(TextureFormat textureFormat) {
+	static VkFormat getVkFormat(ImageFormat imageFormat) {
 		static constexpr VkFormat vkFormats[] = {
 			VK_FORMAT_R8G8B8A8_SRGB,
 			VK_FORMAT_R8G8B8A8_UNORM,
 		};
 
-		return vkFormats[static_cast<sint32>(textureFormat)];
+		return vkFormats[static_cast<sint32>(imageFormat)];
 	}
 }

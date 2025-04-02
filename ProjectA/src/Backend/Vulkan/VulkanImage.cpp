@@ -1,13 +1,13 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/TextureFormat.hpp"
-#include "Backend/Vulkan/TextureType.hpp"
-#include "Backend/Vulkan/TextureUsage.hpp"
-#include "Backend/Vulkan/VulkanTexture.hpp"
-#include "Backend/Vulkan/VulkanTextureView.hpp"
+#include "Backend/Vulkan/ImageFormat.hpp"
+#include "Backend/Vulkan/ImageType.hpp"
+#include "Backend/Vulkan/ImageUsage.hpp"
+#include "Backend/Vulkan/VulkanImage.hpp"
+#include "Backend/Vulkan/VulkanImageView.hpp"
 
 namespace ProjectA {
-	VulkanTexture::VulkanTexture(const VulkanDevice& device, const TextureDescriptor& descriptor) :
+	VulkanImage::VulkanImage(const VulkanDevice& device, const ImageDescriptor& descriptor) :
 		device(device.object),
 		type(descriptor.type),
 		format(descriptor.format),
@@ -65,22 +65,22 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to bind Vulkan image memory (code: []).", result);
 	}
 
-	VulkanTexture::~VulkanTexture() {
+	VulkanImage::~VulkanImage() {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		vkDestroyImage(device, object, nullptr);
 		vkFreeMemory(device, memory, nullptr);
 	}
 
-	uint32 VulkanTexture::getWidth() const {
+	uint32 VulkanImage::getWidth() const {
 		return width;
 	}
 
-	uint32 VulkanTexture::getHeight() const {
+	uint32 VulkanImage::getHeight() const {
 		return height;
 	}
 
-	ref<TextureView> VulkanTexture::createView(const TextureViewDescriptor& descriptor) const {
-		return createRef<VulkanTextureView>(device, *this, descriptor);
+	ref<ImageView> VulkanImage::createView(const ImageViewDescriptor& descriptor) const {
+		return createRef<VulkanImageView>(device, *this, descriptor);
 	}
 }

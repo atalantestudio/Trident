@@ -8,7 +8,7 @@ class SandboxLayer : public ProjectA::Layer {
 	private:
 		ProjectA::OrthographicCamera3DController cameraController;
 		ProjectA::vec4<ProjectA::float32> color = {0.2f, 0.3f, 0.8f, 1.0f};
-		ProjectA::ref<ProjectA::Texture> checkerboardTexture;
+		ProjectA::ref<ProjectA::Image> checkerboardImage;
 
 	public:
 		SandboxLayer();

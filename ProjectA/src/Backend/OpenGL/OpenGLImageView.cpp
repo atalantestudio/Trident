@@ -1,0 +1,21 @@
+#include "pch.hpp"
+
+#include "Backend/OpenGL/ImageType.hpp"
+#include "Backend/OpenGL/OpenGLImageView.hpp"
+
+namespace ProjectA {
+	OpenGLImageView::OpenGLImageView(const OpenGLImage& image, const ImageViewDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		// glGenTextures must be used here (instead of glCreateTextures) because the view must not be assigned a target.
+		glGenTextures(1, &object);
+
+		glTextureView(object, image.target, image.object, GL_RGBA8, 0, 1, 0, 1);
+	}
+
+	OpenGLImageView::~OpenGLImageView() {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		glDeleteTextures(1, &object);
+	}
+}
