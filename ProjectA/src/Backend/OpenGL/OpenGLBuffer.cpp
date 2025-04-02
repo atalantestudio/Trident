@@ -26,20 +26,22 @@ namespace ProjectA {
 		glDeleteBuffers(1, &object);
 	}
 
-	BufferMappedRange OpenGLBuffer::map(uint64 offset, uint64 size) const {
-		glBindBuffer(target, object);
-
-		// TODO: Set correct access flag.
-		// GL_MAP_INVALIDATE_RANGE_BIT must be used with persistently mapped buffers,
-		// such as a camera uniform buffer.
-		return glMapBufferRange(target, offset, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
-	}
-
 	void OpenGLBuffer::unmap() const {
 		glBindBuffer(target, object);
 
 		if (!glUnmapBuffer(target)) {
 			throw std::runtime_error("Failed to unmap buffer.");
 		}
+	}
+
+	void* OpenGLBuffer::getMappedRange(uint64 offset, uint64 size) const {
+		glBindBuffer(target, object);
+
+		// TODO: Use glMapNamedBufferRange().
+
+		// TODO: Set correct access flag.
+		// GL_MAP_INVALIDATE_RANGE_BIT must be used with persistently mapped buffers,
+		// such as a camera uniform buffer.
+		return glMapBufferRange(target, offset, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
 	}
 }

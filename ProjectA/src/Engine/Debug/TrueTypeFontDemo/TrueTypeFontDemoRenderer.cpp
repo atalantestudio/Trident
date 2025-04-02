@@ -23,7 +23,7 @@ namespace ProjectA {
 
 		const ref<Buffer> glyphEdgeStagingBuffer = createBuffer(glyphEdgeStagingBufferDescriptor);
 
-		BufferMappedRange glyphEdgeMappedRange = glyphEdgeStagingBuffer->map(0, size);
+		sint32* glyphEdgeMappedRange = glyphEdgeStagingBuffer->map<sint32>(0, size);
 
 		GlyphBuffer glyphBuffer{};
 		glyphBuffer.minCoordinate[0] = glyph.min.x;
@@ -44,11 +44,11 @@ namespace ProjectA {
 			glyphBuffer.edges[edgeIndex].isQuadraticCurve = edge.isQuadraticCurve;
 		}
 
-		std::copy(&glyphBuffer.minCoordinate[0], &glyphBuffer.maxCoordinate[1] + 1, static_cast<sint32*>(glyphEdgeMappedRange));
+		std::copy(&glyphBuffer.minCoordinate[0], &glyphBuffer.maxCoordinate[1] + 1, glyphEdgeMappedRange);
 
-		glyphEdgeMappedRange = (sint32*) glyphEdgeMappedRange + 4;
+		glyphEdgeMappedRange += 4;
 
-		std::copy(&glyphBuffer.edges.front(), &glyphBuffer.edges.back(), static_cast<GlyphEdge*>(glyphEdgeMappedRange));
+		std::copy(&glyphBuffer.edges.front(), &glyphBuffer.edges.back(), (GlyphEdge*) glyphEdgeMappedRange);
 
 		glyphEdgeStagingBuffer->unmap();
 
@@ -220,9 +220,9 @@ namespace ProjectA {
 
 		const ref<Buffer> vertexStagingBuffer = createBuffer(vertexStagingBufferDescriptor);
 
-		const BufferMappedRange vertexMappedRange = vertexStagingBuffer->map(0, vertexBufferSize);
+		vec2<float32>* vertexMappedRange = vertexStagingBuffer->map<vec2<float32>>(0, vertexBufferSize);
 
-		std::copy(vertices.begin(), vertices.end(), static_cast<vec2<float32>*>(vertexMappedRange));
+		std::copy(vertices.begin(), vertices.end(), vertexMappedRange);
 
 		vertexStagingBuffer->unmap();
 
@@ -257,9 +257,9 @@ namespace ProjectA {
 
 		const ref<Buffer> indexStagingBuffer = createBuffer(indexStagingBufferDescriptor);
 
-		const BufferMappedRange indexMappedRange = indexStagingBuffer->map(0, indexBufferSize);
+		uint16* indexMappedRange = indexStagingBuffer->map<uint16>(0, indexBufferSize);
 
-		std::copy(indices.begin(), indices.end(), static_cast<uint16*>(indexMappedRange));
+		std::copy(indices.begin(), indices.end(), indexMappedRange);
 
 		indexStagingBuffer->unmap();
 

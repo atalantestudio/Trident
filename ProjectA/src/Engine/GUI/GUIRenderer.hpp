@@ -53,7 +53,7 @@ namespace ProjectA {
 			ref<Sampler> sampler;
 			chain<ref<Buffer>> cameraUniformBuffers;
 			ref<Buffer> colorStorageBuffer;
-			chain<BufferMappedRange> cameraUniformBufferMappedRanges;
+			chain<UniformBufferObject*> cameraUniformBufferMappedRanges;
 			ref<CommandEncoder> commandEncoder;
 			uint32 instanceCount = 0;
 			uint32 frameIndex = 0;

@@ -13,9 +13,9 @@ namespace ProjectA {
 
 			~VulkanBuffer();
 
-			BufferMappedRange map(uint64 offset, uint64 size) const override;
-
 			void unmap() const override;
+
+			void* getMappedRange(uint64 offset, uint64 size) const override;
 
 		public:
 			const uint64 size;

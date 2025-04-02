@@ -18,7 +18,7 @@ namespace ProjectA {
 
 		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i += 1) {
 			cameraUniformBuffers[i] = createBuffer(cameraUniformBufferDescriptor);
-			cameraUniformBufferMappedRanges[i] = cameraUniformBuffers[i]->map(0, cameraUniformBufferDescriptor.size);
+			cameraUniformBufferMappedRanges[i] = cameraUniformBuffers[i]->map<UniformBufferObject>(0, cameraUniformBufferDescriptor.size);
 		}
 
 		//BufferDescriptor colorStorageBufferDescriptor{};
@@ -113,9 +113,9 @@ namespace ProjectA {
 
 			positionVertexBuffer = createBuffer(bufferDescriptor);
 
-			BufferMappedRange mappedRange = positionVertexBuffer->map(0, bufferDescriptor.size);
+			Vertex* mappedRange = positionVertexBuffer->map<Vertex>(0, bufferDescriptor.size);
 
-			std::copy(vertices.begin(), vertices.end(), static_cast<Vertex*>(mappedRange));
+			std::copy(vertices.begin(), vertices.end(), mappedRange);
 
 			positionVertexBuffer->unmap();
 		}
@@ -145,9 +145,9 @@ namespace ProjectA {
 
 			indexBuffer = createBuffer(bufferDescriptor);
 
-			BufferMappedRange mappedRange = indexBuffer->map(0, bufferDescriptor.size);
+			uint16* mappedRange = indexBuffer->map<uint16>(0, bufferDescriptor.size);
 
-			std::copy(indices.begin(), indices.end(), static_cast<uint16*>(mappedRange));
+			std::copy(indices.begin(), indices.end(), mappedRange);
 
 			indexBuffer->unmap();
 		}
@@ -171,9 +171,9 @@ namespace ProjectA {
 
 		const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
 
-		const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
+		uint8* mappedRange = stagingBuffer->map<uint8>(0, size);
 
-		std::copy(file.data.begin(), file.data.end(), static_cast<uint8*>(mappedRange));
+		std::copy(file.data.begin(), file.data.end(), mappedRange);
 
 		stagingBuffer->unmap();
 
@@ -224,9 +224,9 @@ namespace ProjectA {
 
 		const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
 
-		const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
+		uint8* mappedRange = stagingBuffer->map<uint8>(0, size);
 
-		std::copy(data.begin(), data.end(), static_cast<uint8*>(mappedRange));
+		std::copy(data.begin(), data.end(), mappedRange);
 
 		stagingBuffer->unmap();
 
@@ -236,23 +236,23 @@ namespace ProjectA {
 	void GUIRenderer::registerEntityPool(const ComponentPool<GUIComponent>& componentPool) {
 		instanceCount = componentPool.componentCount;
 
-		/*BufferMappedRange mappedRange = textureCoordinateVertexBuffer->map(0, sizeof(vec2<float32>) * instanceCount * 4);
+		/*GUIComponent* mappedRange = textureCoordinateVertexBuffer->map<GUIComponent>(0, sizeof(vec2<float32>) * instanceCount * 4);
 
-		std::copy(componentPool.components.begin(), componentPool.components.begin() + instanceCount, static_cast<GUIComponent*>(mappedRange));
+		std::copy(componentPool.components.begin(), componentPool.components.begin() + instanceCount, mappedRange);
 
 		textureCoordinateVertexBuffer->unmap();*/
 
-		BufferMappedRange mappedRange = transformVertexBuffer->map(0, sizeof(GUIComponent) * instanceCount);
+		GUIComponent* mappedRange = transformVertexBuffer->map<GUIComponent>(0, sizeof(GUIComponent) * instanceCount);
 
-		std::copy(componentPool.components.begin(), componentPool.components.begin() + instanceCount, static_cast<GUIComponent*>(mappedRange));
+		std::copy(componentPool.components.begin(), componentPool.components.begin() + instanceCount, mappedRange);
 
 		transformVertexBuffer->unmap();
 	}
 
 	void GUIRenderer::registerColors(const chain<vec4<float32>>& colors) const {
-		BufferMappedRange mappedRange = colorStorageBuffer->map(0, sizeof(vec4<float32>) * colors.size());
+		vec4<float32>* mappedRange = colorStorageBuffer->map<vec4<float32>>(0, sizeof(vec4<float32>) * colors.size());
 
-		std::copy(colors.begin(), colors.end(), static_cast<vec4<float32>*>(mappedRange));
+		std::copy(colors.begin(), colors.end(), mappedRange);
 
 		colorStorageBuffer->unmap();
 	}
@@ -293,7 +293,7 @@ namespace ProjectA {
 			-1.0f, 1.0f, 1.0f,
 		};
 
-		std::copy(&cameraUniformBufferObject, &cameraUniformBufferObject + 1, static_cast<UniformBufferObject*>(cameraUniformBufferMappedRanges[frameIndex]));
+		std::copy(&cameraUniformBufferObject, &cameraUniformBufferObject + 1, cameraUniformBufferMappedRanges[frameIndex]);
 	}
 
 	void GUIRenderer::onEvent(Event& event) {}

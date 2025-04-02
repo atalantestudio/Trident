@@ -12,9 +12,9 @@ namespace ProjectA {
 
 			~OpenGLBuffer();
 
-			BufferMappedRange map(uint64 offset, uint64 size) const override;
-
 			void unmap() const override;
+
+			void* getMappedRange(uint64 offset, uint64 size) const override;
 
 		public:
 			const GLenum target;

@@ -55,8 +55,12 @@ namespace ProjectA {
 		vkFreeMemory(device.object, memory, nullptr);
 	}
 
-	BufferMappedRange VulkanBuffer::map(uint64 offset, uint64 size) const {
-		BufferMappedRange mappedRange;
+	void VulkanBuffer::unmap() const {
+		vkUnmapMemory(device.object, memory);
+	}
+
+	void* VulkanBuffer::getMappedRange(uint64 offset, uint64 size) const {
+		void* mappedRange;
 
 		ENGINE_ASSERT(size > 0, "The Buffer mapping size must not be 0.");
 
@@ -65,9 +69,5 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to map Vulkan buffer memory (code: []).", result);
 
 		return mappedRange;
-	}
-
-	void VulkanBuffer::unmap() const {
-		vkUnmapMemory(device.object, memory);
 	}
 }

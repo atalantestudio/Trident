@@ -20,9 +20,9 @@ namespace ProjectA {
 
 			const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
 
-			const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
+			uint8* mappedRange = stagingBuffer->map<uint8>(0, size);
 
-			std::copy(file.data.begin(), file.data.end(), static_cast<uint8*>(mappedRange));
+			std::copy(file.data.begin(), file.data.end(), mappedRange);
 
 			stagingBuffer->unmap();
 
@@ -86,9 +86,9 @@ namespace ProjectA {
 
 			cameraUniformBuffer = createBuffer(bufferDescriptor);
 
-			const BufferMappedRange mappedRange = cameraUniformBuffer->map(0, size);
+			mat4x4<float32>* mappedRange = cameraUniformBuffer->map<mat4x4<float32>>(0, size);
 
-			std::copy(&projection, &projection + 1, static_cast<mat4x4<float32>*>(mappedRange));
+			std::copy(&projection, &projection + 1, mappedRange);
 
 			cameraUniformBuffer->unmap();
 		}
@@ -163,9 +163,9 @@ namespace ProjectA {
 
 			const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
 
-			const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
+			Vertex* mappedRange = stagingBuffer->map<Vertex>(0, size);
 
-			std::copy(vertices.begin(), vertices.end(), static_cast<Vertex*>(mappedRange));
+			std::copy(vertices.begin(), vertices.end(), mappedRange);
 
 			stagingBuffer->unmap();
 
@@ -209,9 +209,9 @@ namespace ProjectA {
 
 			const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
 
-			const BufferMappedRange mappedRange = stagingBuffer->map(0, size);
+			uint16* mappedRange = stagingBuffer->map<uint16>(0, size);
 
-			std::copy(indices.begin(), indices.end(), static_cast<uint16*>(mappedRange));
+			std::copy(indices.begin(), indices.end(), mappedRange);
 
 			stagingBuffer->unmap();
 

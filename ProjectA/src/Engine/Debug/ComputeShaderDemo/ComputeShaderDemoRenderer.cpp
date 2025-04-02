@@ -154,9 +154,9 @@ namespace ProjectA {
 
 		const ref<Buffer> vertexStagingBuffer = createBuffer(vertexStagingBufferDescriptor);
 
-		const BufferMappedRange vertexMappedRange = vertexStagingBuffer->map(0, vertexBufferSize);
+		vec2<float32>* vertexMappedRange = vertexStagingBuffer->map<vec2<float32>>(0, vertexBufferSize);
 
-		std::copy(vertices.begin(), vertices.end(), static_cast<vec2<float32>*>(vertexMappedRange));
+		std::copy(vertices.begin(), vertices.end(), vertexMappedRange);
 
 		vertexStagingBuffer->unmap();
 
@@ -191,9 +191,9 @@ namespace ProjectA {
 
 		const ref<Buffer> indexStagingBuffer = createBuffer(indexStagingBufferDescriptor);
 
-		const BufferMappedRange indexMappedRange = indexStagingBuffer->map(0, indexBufferSize);
+		uint16* indexMappedRange = indexStagingBuffer->map<uint16>(0, indexBufferSize);
 
-		std::copy(indices.begin(), indices.end(), static_cast<uint16*>(indexMappedRange));
+		std::copy(indices.begin(), indices.end(), indexMappedRange);
 
 		indexStagingBuffer->unmap();
 
