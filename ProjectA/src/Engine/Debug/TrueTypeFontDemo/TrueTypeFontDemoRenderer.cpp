@@ -10,7 +10,6 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		// 'H'
 		const Glyph& glyph = ttfFile.glyphs[41];
 
 		ENGINE_ASSERT(!glyph.edges.empty(), "Glyph has no edges.");
@@ -26,29 +25,29 @@ namespace ProjectA {
 		sint32* glyphEdgeMappedRange = glyphEdgeStagingBuffer->map<sint32>(0, size);
 
 		GlyphBuffer glyphBuffer{};
-		glyphBuffer.minCoordinate[0] = glyph.min.x;
-		glyphBuffer.minCoordinate[1] = glyph.min.y;
-		glyphBuffer.maxCoordinate[0] = glyph.max.x;
-		glyphBuffer.maxCoordinate[1] = glyph.max.y;
+		glyphBuffer.minCoordinateX = glyph.min.x;
+		glyphBuffer.minCoordinateY = glyph.min.y;
+		glyphBuffer.maxCoordinateX = glyph.max.x;
+		glyphBuffer.maxCoordinateY = glyph.max.y;
 		glyphBuffer.edges.resize(glyph.edges.size());
 
 		for (uint16 edgeIndex = 0; edgeIndex < glyph.edges.size(); edgeIndex += 1) {
 			const Edge& edge = glyph.edges[edgeIndex];
 
-			glyphBuffer.edges[edgeIndex].start[0] = edge.start.x;
-			glyphBuffer.edges[edgeIndex].start[1] = edge.start.y;
-			glyphBuffer.edges[edgeIndex].end[0] = edge.end.x;
-			glyphBuffer.edges[edgeIndex].end[1] = edge.end.y;
-			glyphBuffer.edges[edgeIndex].control[0] = edge.control.x;
-			glyphBuffer.edges[edgeIndex].control[1] = edge.control.y;
-			glyphBuffer.edges[edgeIndex].isQuadraticCurve = edge.isQuadraticCurve;
+			glyphBuffer.edges[edgeIndex].startX = edge.start.x;
+			glyphBuffer.edges[edgeIndex].startY = edge.start.y;
+			glyphBuffer.edges[edgeIndex].endX = edge.end.x;
+			glyphBuffer.edges[edgeIndex].endY = edge.end.y;
+			glyphBuffer.edges[edgeIndex].controlX = edge.control.x;
+			glyphBuffer.edges[edgeIndex].controlY = edge.control.y;
+			glyphBuffer.edges[edgeIndex].quadraticCurve = edge.isQuadraticCurve;
 		}
 
-		std::copy(&glyphBuffer.minCoordinate[0], &glyphBuffer.maxCoordinate[1] + 1, glyphEdgeMappedRange);
+		std::copy(&glyphBuffer.minCoordinateX, &glyphBuffer.maxCoordinateY + 1, glyphEdgeMappedRange);
 
 		glyphEdgeMappedRange += 4;
 
-		std::copy(&glyphBuffer.edges.front(), &glyphBuffer.edges.back(), (GlyphEdge*) glyphEdgeMappedRange);
+		std::copy(glyphBuffer.edges.begin(), glyphBuffer.edges.end(), (GlyphEdge*) glyphEdgeMappedRange);
 
 		glyphEdgeStagingBuffer->unmap();
 
@@ -74,8 +73,8 @@ namespace ProjectA {
 		imageDescriptor.type = ImageType::TEXTURE_2D;
 		imageDescriptor.format = ImageFormat::R8_UNORM;
 		imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::STORAGE;
-		imageDescriptor.width = 4096;
-		imageDescriptor.height = 4096;
+		imageDescriptor.width = 2048;
+		imageDescriptor.height = 2048;
 		imageDescriptor.depth = 1;
 		imageDescriptor.mipLevelCount = 1;
 		imageDescriptor.arrayLayerCount = 1;

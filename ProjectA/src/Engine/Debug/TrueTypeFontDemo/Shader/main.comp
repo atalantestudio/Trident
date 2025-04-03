@@ -4,68 +4,56 @@ struct Edge {
 	ivec2 start;
 	ivec2 end;
 	ivec2 control;
-	bool isQuadraticCurve;
+	bool quadraticCurve;
 };
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
-layout(std140, set = 0, binding = 0) buffer readonly Glyph {
+layout(set = 0, binding = 0) buffer readonly Glyph {
 	ivec2 minCoordinate;
 	ivec2 maxCoordinate;
 	Edge edges[];
-};
+} glyph;
+
 layout(set = 0, binding = 1, r8) uniform writeonly image2D image;
 
 void main() {
-	vec2 imageCoordinate = vec2(gl_GlobalInvocationID.xy);
-	ivec2 glyphSize = ivec2(max(maxCoordinate.x - minCoordinate.x, maxCoordinate.y - minCoordinate.y));
-	vec2 glyphCoordinate = (imageCoordinate + 1.0) / vec2(imageSize(image)) * vec2(glyphSize) + vec2(minCoordinate);
-	glyphCoordinate.y = glyphSize.y - glyphCoordinate.y;
+	vec2 _imageSize = imageSize(image);
+	vec2 imageCoordinate = gl_GlobalInvocationID.xy;
+	ivec2 glyphSquareSize = ivec2(max(glyph.maxCoordinate.x - glyph.minCoordinate.x, glyph.maxCoordinate.y - glyph.minCoordinate.y));
 
-	vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
-	int windingOrder = 0;
+	vec2 p = (imageCoordinate + 1.0) / _imageSize * glyphSquareSize + abs(glyph.minCoordinate);
 
-	for (int edgeIndex = 0; edgeIndex < edges.length(); edgeIndex += 1) {
-		Edge edge = edges[edgeIndex];
-		vec2 start = vec2(edge.start);
-		vec2 end = vec2(edge.end);
+	// Flip glyph Y.
+	p.y = glyphSquareSize.y - p.y;
 
-		// The crossed edge goes from top to bottom.
-		if (start.y > glyphCoordinate.y && glyphCoordinate.y > end.y) {
-			float direction =
-				(start.x - glyphCoordinate.x)
-				*
-				(end.y - glyphCoordinate.y)
-				-
-				(end.x - glyphCoordinate.x)
-				*
-				(start.y - glyphCoordinate.y);
+	int windingNumber = 0;
+	vec4 texel = vec4(0.0, 0.0, 0.0, 1.0);
+
+	for (int edgeIndex = 0; edgeIndex < glyph.edges.length(); edgeIndex += 1) {
+		vec2 a = vec2(glyph.edges[edgeIndex].start);
+		vec2 b = vec2(glyph.edges[edgeIndex].end);
+
+		// Test if the current scanline crosses the edge.
+		if (a.y > p.y && p.y > b.y) {
+			// Top-to-bottom edge.
+			float direction = (a.x - p.x) * (b.y - p.y) - (b.x - p.x) * (a.y - p.y);
 
 			if (direction < 0.0) {
-				// On left.
-				windingOrder += 1;
+				windingNumber += 1;
 			}
 		}
-
-		// The crossed edge goes from bottom to top.
-		else if (end.y > glyphCoordinate.y && glyphCoordinate.y > start.y) {
-			float direction =
-				(start.x - glyphCoordinate.x)
-				*
-				(end.y - glyphCoordinate.y)
-				-
-				(end.x - glyphCoordinate.x)
-				*
-				(start.y - glyphCoordinate.y);
+		else if (b.y > p.y && p.y > a.y) {
+			// Bottom-to-top edge.
+			float direction = (a.x - p.x) * (b.y - p.y) - (b.x - p.x) * (a.y - p.y);
 
 			if (direction > 0.0) {
-				// On right.
-				windingOrder -= 1;
+				windingNumber -= 1;
 			}
 		}
 	}
 
-	color.r = float(windingOrder > 0);
+	texel.r = float(windingNumber > 0);
 
-	imageStore(image, ivec2(imageCoordinate), color);
+	imageStore(image, ivec2(imageCoordinate), texel);
 }

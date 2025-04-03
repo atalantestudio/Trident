@@ -14,23 +14,28 @@ namespace ProjectA {
 		private:
 			struct alignas(8) GlyphEdge {
 				// TODO: Use vec2<sint32>.
-				sint32 start[2];
+				sint32 startX;
+				sint32 startY;
 
 				// TODO: Use vec2<sint32>.
-				sint32 end[2];
+				sint32 endX;
+				sint32 endY;
 
 				// TODO: Use vec2<sint32>.
-				sint32 control[2];
+				sint32 controlX;
+				sint32 controlY;
 
-				bool isQuadraticCurve;
+				bool quadraticCurve;
 			};
 
 			struct GlyphBuffer {
 				// TODO: Use vec2<sint32>.
-				sint32 minCoordinate[2];
+				sint32 minCoordinateX;
+				sint32 minCoordinateY;
 
 				// TODO: Use vec2<sint32>.
-				sint32 maxCoordinate[2];
+				sint32 maxCoordinateX;
+				sint32 maxCoordinateY;
 
 				chain<GlyphEdge> edges;
 			};
