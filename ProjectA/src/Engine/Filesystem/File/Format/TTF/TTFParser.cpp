@@ -318,18 +318,18 @@ namespace ProjectA {
 			prevCoordinate = yCoordinate;
 		}
 
-		fchain<chain<EdgePoint>> contours(numberOfContours);
+		fchain<chain<ContourPoint>> contours(numberOfContours);
 
 		for (uint16 contourIndex = 0; contourIndex < numberOfContours; contourIndex += 1) {
 			const uint16 startIndex = contourIndex == 0 ? 0 : (endPtsOfContours[contourIndex - 1] + 1);
 			const uint16 endIndex = endPtsOfContours[contourIndex];
 
-			chain<EdgePoint>& contour = contours[contourIndex];
+			chain<ContourPoint>& contour = contours[contourIndex];
 
-			bool previousOnCurve = flags[startIndex] & BIT(0);
+			bool firstOnCurve = flags[startIndex] & BIT(0);
 
-			if (previousOnCurve) {
-				EdgePoint point{};
+			if (firstOnCurve) {
+				ContourPoint point{};
 				point.x = xCoordinates[startIndex];
 				point.y = yCoordinates[startIndex];
 				point.onCurve = true;
@@ -338,15 +338,16 @@ namespace ProjectA {
 			}
 
 			for (uint16 index = startIndex + 1; index <= endIndex; index += 1) {
-				EdgePoint point{};
+				ContourPoint point{};
 				point.x = xCoordinates[index];
 				point.y = yCoordinates[index];
 				point.onCurve = flags[index] & BIT(0);
 
+				bool previousOnCurve = flags[index - 1] & BIT(0);
+
 				if (!previousOnCurve && !point.onCurve) {
 					// Insert an on-curve point between two off-curve points.
-
-					EdgePoint halfwayPoint{};
+					ContourPoint halfwayPoint{};
 					halfwayPoint.x = (xCoordinates[index - 1] + point.x) / 2;
 					halfwayPoint.y = (yCoordinates[index - 1] + point.y) / 2;
 					halfwayPoint.onCurve = true;
@@ -355,27 +356,23 @@ namespace ProjectA {
 				}
 
 				contour.emplace_back(point);
-
-				previousOnCurve = point.onCurve;
 			}
 
 			// Copy first point to close contour.
 			contour.emplace_back(contour[0]);
-
-			contours[contourIndex] = contour;
 		}
 
-		for (const chain<EdgePoint>& contour : contours) {
+		for (const chain<ContourPoint>& contour : contours) {
 			for (uint16 edgePointIndex = 1; edgePointIndex < contour.size(); edgePointIndex += 1) {
-				const EdgePoint& edgePoint = contour[edgePointIndex];
+				const ContourPoint& contourPoint = contour[edgePointIndex];
 
-				if (!edgePoint.onCurve) {
+				if (!contourPoint.onCurve) {
 					continue;
 				}
 
 				Edge edge{};
-				edge.end.x = edgePoint.x;
-				edge.end.y = edgePoint.y;
+				edge.end.x = contourPoint.x;
+				edge.end.y = contourPoint.y;
 				edge.isQuadraticCurve = !contour[edgePointIndex - 1].onCurve;
 
 				if (edge.isQuadraticCurve) {
@@ -385,7 +382,6 @@ namespace ProjectA {
 					edge.control.y = contour[edgePointIndex - 1].y;
 				}
 				else {
-					// The start point is the previous edge point.
 					edge.start.x = contour[edgePointIndex - 1].x;
 					edge.start.y = contour[edgePointIndex - 1].y;
 				}

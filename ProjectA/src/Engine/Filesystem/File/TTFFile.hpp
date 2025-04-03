@@ -24,16 +24,16 @@ namespace ProjectA {
 		FWord y;
 	};
 
-	struct EdgePoint {
+	struct ContourPoint {
 		FWord x;
 		FWord y;
 		bool onCurve;
 	};
 
 	struct Edge {
-		EdgePoint start;
-		EdgePoint end;
-		EdgePoint control;
+		Point start;
+		Point end;
+		Point control;
 		bool isQuadraticCurve;
 	};
 

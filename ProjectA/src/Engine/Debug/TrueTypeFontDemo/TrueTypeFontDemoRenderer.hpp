@@ -13,30 +13,15 @@ namespace ProjectA {
 
 		private:
 			struct alignas(8) GlyphEdge {
-				// TODO: Use vec2<sint32>.
-				sint32 startX;
-				sint32 startY;
-
-				// TODO: Use vec2<sint32>.
-				sint32 endX;
-				sint32 endY;
-
-				// TODO: Use vec2<sint32>.
-				sint32 controlX;
-				sint32 controlY;
-
-				bool quadraticCurve;
+				sint32 start;
+				sint32 end;
+				sint32 control;
+				bool curved;
 			};
 
 			struct GlyphBuffer {
-				// TODO: Use vec2<sint32>.
-				sint32 minCoordinateX;
-				sint32 minCoordinateY;
-
-				// TODO: Use vec2<sint32>.
-				sint32 maxCoordinateX;
-				sint32 maxCoordinateY;
-
+				sint32 minCoordinate;
+				sint32 maxCoordinate;
 				chain<GlyphEdge> edges;
 			};
 
@@ -50,8 +35,14 @@ namespace ProjectA {
 			ref<Buffer> glyphEdgeStorageBuffer;
 
 			// This image is written to by the compute shader.
-			ref<Image> image;
-			ref<ImageView> imageView;
+
+			// High-resolution glyph.
+			ref<Image> glyphImage;
+			ref<ImageView> glyphImageView;
+
 			ref<Sampler> sampler;
+
+			// Glyph signed distance field image.
+			ref<Image> glyphSdfImage;
 	};
 }

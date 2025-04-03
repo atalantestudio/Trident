@@ -10,11 +10,11 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		const Glyph& glyph = ttfFile.glyphs[41];
+		const Glyph& glyph = ttfFile.glyphs[16];
 
 		ENGINE_ASSERT(!glyph.edges.empty(), "Glyph has no edges.");
 
-		const uint64 size = sizeof(sint32) * 4 + sizeof(GlyphEdge) * glyph.edges.size();
+		const uint64 size = sizeof(sint32) * 2 + sizeof(GlyphEdge) * glyph.edges.size();
 
 		BufferDescriptor glyphEdgeStagingBufferDescriptor{};
 		glyphEdgeStagingBufferDescriptor.size = size;
@@ -25,27 +25,22 @@ namespace ProjectA {
 		sint32* glyphEdgeMappedRange = glyphEdgeStagingBuffer->map<sint32>(0, size);
 
 		GlyphBuffer glyphBuffer{};
-		glyphBuffer.minCoordinateX = glyph.min.x;
-		glyphBuffer.minCoordinateY = glyph.min.y;
-		glyphBuffer.maxCoordinateX = glyph.max.x;
-		glyphBuffer.maxCoordinateY = glyph.max.y;
+		glyphBuffer.minCoordinate = static_cast<sint32>(glyph.min.x << 16) | glyph.min.y;
+		glyphBuffer.maxCoordinate = static_cast<sint32>(glyph.max.x << 16) | glyph.max.y;
 		glyphBuffer.edges.resize(glyph.edges.size());
 
 		for (uint16 edgeIndex = 0; edgeIndex < glyph.edges.size(); edgeIndex += 1) {
 			const Edge& edge = glyph.edges[edgeIndex];
 
-			glyphBuffer.edges[edgeIndex].startX = edge.start.x;
-			glyphBuffer.edges[edgeIndex].startY = edge.start.y;
-			glyphBuffer.edges[edgeIndex].endX = edge.end.x;
-			glyphBuffer.edges[edgeIndex].endY = edge.end.y;
-			glyphBuffer.edges[edgeIndex].controlX = edge.control.x;
-			glyphBuffer.edges[edgeIndex].controlY = edge.control.y;
-			glyphBuffer.edges[edgeIndex].quadraticCurve = edge.isQuadraticCurve;
+			glyphBuffer.edges[edgeIndex].start = (edge.start.x << 16) | edge.start.y;
+			glyphBuffer.edges[edgeIndex].end = (edge.end.x << 16) | edge.end.y;
+			glyphBuffer.edges[edgeIndex].control = (edge.control.x << 16) | edge.control.y;
+			glyphBuffer.edges[edgeIndex].curved = edge.isQuadraticCurve;
 		}
 
-		std::copy(&glyphBuffer.minCoordinateX, &glyphBuffer.maxCoordinateY + 1, glyphEdgeMappedRange);
+		std::copy(&glyphBuffer.minCoordinate, &glyphBuffer.maxCoordinate + 1, glyphEdgeMappedRange);
 
-		glyphEdgeMappedRange += 4;
+		glyphEdgeMappedRange += 2;
 
 		std::copy(glyphBuffer.edges.begin(), glyphBuffer.edges.end(), (GlyphEdge*) glyphEdgeMappedRange);
 
@@ -69,24 +64,24 @@ namespace ProjectA {
 			device->waitIdle();
 		}
 
-		ImageDescriptor imageDescriptor{};
-		imageDescriptor.type = ImageType::TEXTURE_2D;
-		imageDescriptor.format = ImageFormat::R8_UNORM;
-		imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::STORAGE;
-		imageDescriptor.width = 2048;
-		imageDescriptor.height = 2048;
-		imageDescriptor.depth = 1;
-		imageDescriptor.mipLevelCount = 1;
-		imageDescriptor.arrayLayerCount = 1;
-		imageDescriptor.sampleCount = 1;
+		ImageDescriptor glyphImageDescriptor{};
+		glyphImageDescriptor.type = ImageType::TEXTURE_2D;
+		glyphImageDescriptor.format = ImageFormat::R8_UNORM;
+		glyphImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::STORAGE;
+		glyphImageDescriptor.width = 2048;
+		glyphImageDescriptor.height = 2048;
+		glyphImageDescriptor.depth = 1;
+		glyphImageDescriptor.mipLevelCount = 1;
+		glyphImageDescriptor.arrayLayerCount = 1;
+		glyphImageDescriptor.sampleCount = 1;
 
-		image = createImage(imageDescriptor);
+		glyphImage = createImage(glyphImageDescriptor);
 
 		{
 			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
-			commandEncoder->setImageMemoryBarrier(image, ImageLayout::UNDEFINED, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+			commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::UNDEFINED, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -102,7 +97,7 @@ namespace ProjectA {
 
 		const ImageViewDescriptor imageViewDescriptor;
 
-		imageView = image->createView(imageViewDescriptor);
+		glyphImageView = glyphImage->createView(imageViewDescriptor);
 
 		DescriptorSetLayoutBinding glyphEdgeDescriptorSetLayoutBinding;
 		glyphEdgeDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
@@ -113,7 +108,7 @@ namespace ProjectA {
 		imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
 		imageDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
 		imageDescriptorSetLayoutBinding.samplers = {sampler};
-		imageDescriptorSetLayoutBinding.imageViews = {imageView};
+		imageDescriptorSetLayoutBinding.imageViews = {glyphImageView};
 
 		DescriptorSetLayout computeDescriptorSetLayout;
 		computeDescriptorSetLayout.bindings.emplace_back(glyphEdgeDescriptorSetLayoutBinding);
@@ -157,7 +152,7 @@ namespace ProjectA {
 			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
-			commandEncoder->setImageMemoryBarrier(image, ImageLayout::GENERAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+			commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::GENERAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -169,7 +164,7 @@ namespace ProjectA {
 		descriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 		descriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
 		descriptorSetLayoutBinding.samplers = {sampler};
-		descriptorSetLayoutBinding.imageViews = {imageView};
+		descriptorSetLayoutBinding.imageViews = {glyphImageView};
 
 		DescriptorSetLayout descriptorSetLayout;
 		descriptorSetLayout.bindings.emplace_back(descriptorSetLayoutBinding);
