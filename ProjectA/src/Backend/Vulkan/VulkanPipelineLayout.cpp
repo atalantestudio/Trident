@@ -137,52 +137,47 @@ namespace ProjectA {
 
 			uint32 bufferWriteDescriptorSetIndex = 0;
 			uint32 imageWriteDescriptorSetIndex = 0;
-			uint32 storageImageWriteDescriptorSetIndex = 0;
 
 			for (uint32 layoutIndex = 0; layoutIndex < descriptor.layouts.size(); layoutIndex += 1) {
 				const DescriptorSetLayout& layout = descriptor.layouts[layoutIndex];
+				const VkDescriptorSet descriptorSet = descriptorSets[layoutIndex];
 
 				for (uint32 bindingIndex = 0; bindingIndex < layout.bindings.size(); bindingIndex += 1) {
 					const DescriptorSetLayoutBinding& binding = layout.bindings[bindingIndex];
 
-					// 1 write descriptor set per binding.
+					// Create 1 write descriptor set per binding.
+					VkWriteDescriptorSet writeDescriptorSet{};
+					writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+					writeDescriptorSet.pNext = nullptr;
+					writeDescriptorSet.dstSet = descriptorSet;
+					writeDescriptorSet.dstBinding = bindingIndex;
+					writeDescriptorSet.dstArrayElement = 0;
 
-					for (uint32 bufferIndex = 0; bufferIndex < binding.buffers.size(); bufferIndex += 1) {
-						VkWriteDescriptorSet writeDescriptorSet{};
-						writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-						writeDescriptorSet.pNext = nullptr;
-						writeDescriptorSet.dstSet = descriptorSets[layoutIndex];
-						writeDescriptorSet.dstBinding = bindingIndex;
-						writeDescriptorSet.dstArrayElement = 0;
-						writeDescriptorSet.descriptorCount = 1;
-						writeDescriptorSet.descriptorType = getVkDescriptorType(binding.descriptorType);
+					if (!binding.buffers.empty()) {
+						writeDescriptorSet.descriptorCount = static_cast<uint32>(binding.buffers.size());
+					}
+					else if (!binding.imageViews.empty()) {
+						writeDescriptorSet.descriptorCount = static_cast<uint32>(binding.imageViews.size());
+					}
+
+					writeDescriptorSet.descriptorType = getVkDescriptorType(binding.descriptorType);
+
+					if (!binding.buffers.empty()) {
 						writeDescriptorSet.pImageInfo = nullptr;
 						writeDescriptorSet.pBufferInfo = &descriptorBufferInfos[bufferWriteDescriptorSetIndex];
-						writeDescriptorSet.pTexelBufferView = nullptr;
-
-						writeDescriptorSets.emplace_back(writeDescriptorSet);
 
 						bufferWriteDescriptorSetIndex += 1;
 					}
-
-					if (binding.imageViews.size() > 0) {
-						// Treat as an image array.
-						VkWriteDescriptorSet writeDescriptorSet{};
-						writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-						writeDescriptorSet.pNext = nullptr;
-						writeDescriptorSet.dstSet = descriptorSets[layoutIndex];
-						writeDescriptorSet.dstBinding = bindingIndex;
-						writeDescriptorSet.dstArrayElement = 0;
-						writeDescriptorSet.descriptorCount = 1;
-						writeDescriptorSet.descriptorType = getVkDescriptorType(binding.descriptorType);
+					else if (!binding.imageViews.empty()) {
 						writeDescriptorSet.pImageInfo = &descriptorImageInfos[imageWriteDescriptorSetIndex];
 						writeDescriptorSet.pBufferInfo = nullptr;
-						writeDescriptorSet.pTexelBufferView = nullptr;
-
-						writeDescriptorSets.emplace_back(writeDescriptorSet);
 
 						imageWriteDescriptorSetIndex += 1;
 					}
+
+					writeDescriptorSet.pTexelBufferView = nullptr;
+
+					writeDescriptorSets.emplace_back(writeDescriptorSet);
 				}
 			}
 

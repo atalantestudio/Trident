@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class DemoLayer : public Layer {
 		private:
-			TrueTypeFontDemoRenderer renderer;
+			ComputeShaderDemoRenderer renderer;
 
 		public:
 			DemoLayer(const TTFFile& ttfFile);
