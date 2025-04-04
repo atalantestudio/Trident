@@ -12,6 +12,26 @@ namespace ProjectA {
 			void render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
 
 		private:
+			void createGlyphBuffers();
+			void createGlyphImage();
+			void createGlyphImageComputePipeline();
+			void createGlyphMapSdfImage();
+			void createGlyphMapSdfSampler();
+			void createGlyphSdfImageComputePipeline();
+			void createVertexBuffer();
+			void createIndexBuffer();
+			void createGlyphMapSdfImageRenderPipeline();
+
+			void transitionGlyphImageCompute() const;
+			void transitionGlyphImageRender() const;
+			void transitionGlyphMapSdfImageCompute() const;
+			void transitionGlyphMapSdfImageRender() const;
+
+			void buildGlyphMapSdfImage() const;
+
+			uint64 computeMaxGlyphSize() const;
+
+		private:
 			struct alignas(8) GlyphEdge {
 				sint32 startX;
 				sint32 startY;
@@ -31,23 +51,31 @@ namespace ProjectA {
 			};
 
 		private:
-			ref<PipelineLayout> pipelineLayout;
-			ref<RenderPipeline> renderPipeline;
+			const TTFFile& ttfFile;
 
-			ref<Buffer> vertexBuffer;
-			ref<Buffer> indexBuffer;
-
-			ref<Buffer> glyphEdgeStorageBuffer;
-
-			// This image is written to by the compute shader.
+			ref<Buffer> glyphStagingBuffer;
+			ref<Buffer> glyphStorageBuffer;
 
 			// High-resolution glyph.
 			ref<Image> glyphImage;
 			ref<ImageView> glyphImageView;
 
-			ref<Sampler> sampler;
+			ref<PipelineLayout> glyphImageComputePipelineLayout;
+			ref<ComputePipeline> glyphImageComputePipeline;
 
-			// Glyph signed distance field image.
-			ref<Image> glyphSdfImage;
+			// Glyph map signed distance field.
+			// One glyph is 64x64 on this image.
+			ref<Image> glyphMapSdfImage;
+			ref<ImageView> glyphMapSdfImageView;
+			ref<Sampler> glyphMapSdfSampler;
+
+			ref<PipelineLayout> glyphSdfImageComputePipelineLayout;
+			ref<ComputePipeline> glyphSdfImageComputePipeline;
+
+			ref<PipelineLayout> renderPipelineLayout;
+			ref<RenderPipeline> renderPipeline;
+
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> indexBuffer;
 	};
 }

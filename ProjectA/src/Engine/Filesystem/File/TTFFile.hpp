@@ -34,7 +34,7 @@ namespace ProjectA {
 		Point start;
 		Point end;
 		Point control;
-		bool isQuadraticCurve;
+		bool curved;
 	};
 
 	struct Glyph {

@@ -4,71 +4,48 @@
 #include "Engine/Debug/TrueTypeFontDemo/TrueTypeFontDemoRenderer.hpp"
 
 namespace ProjectA {
-	TrueTypeFontDemoRenderer::TrueTypeFontDemoRenderer(const TTFFile& ttfFile) {
-		const ref<Device>& device = getDevice();
+	TrueTypeFontDemoRenderer::TrueTypeFontDemoRenderer(const TTFFile& ttfFile) :
+		ttfFile(ttfFile)
+	{
+		ENGINE_ASSERT(ttfFile.glyphs.size() < 4096, "Too much glyphs to compute.");
 
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+		createGlyphBuffers();
+		createGlyphImage();
+		createGlyphImageComputePipeline();
+		createGlyphMapSdfImage();
+		createGlyphMapSdfSampler();
+		createGlyphSdfImageComputePipeline();
 
-		const Glyph& glyph = ttfFile.glyphs[37];
+		transitionGlyphImageCompute();
+		transitionGlyphMapSdfImageCompute();
 
-		ENGINE_ASSERT(!glyph.edges.empty(), "Glyph has no edges.");
+		buildGlyphMapSdfImage();
 
-		const uint64 size = sizeof(sint32) * 4 + sizeof(GlyphEdge) * glyph.edges.size();
+		transitionGlyphImageRender();
+		transitionGlyphMapSdfImageRender();
 
-		BufferDescriptor glyphEdgeStagingBufferDescriptor{};
-		glyphEdgeStagingBufferDescriptor.size = size;
-		glyphEdgeStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+		createVertexBuffer();
+		createIndexBuffer();
+		createGlyphMapSdfImageRenderPipeline();
+	}
 
-		const ref<Buffer> glyphEdgeStagingBuffer = createBuffer(glyphEdgeStagingBufferDescriptor);
+	void TrueTypeFontDemoRenderer::createGlyphBuffers() {
+		const uint64 maxGlyphSize = computeMaxGlyphSize();
 
-		sint32* glyphEdgeMappedRange = glyphEdgeStagingBuffer->map<sint32>(0, size);
+		BufferDescriptor glyphStagingBufferDescriptor{};
+		glyphStagingBufferDescriptor.size = maxGlyphSize;
+		glyphStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
 
-		GlyphBuffer glyphBuffer{};
-		glyphBuffer.minCoordinateX = glyph.min.x;
-		glyphBuffer.minCoordinateY = glyph.min.y;
-		glyphBuffer.maxCoordinateX = glyph.max.x;
-		glyphBuffer.maxCoordinateY = glyph.max.y;
-		glyphBuffer.edges.resize(glyph.edges.size());
+		glyphStagingBuffer = createBuffer(glyphStagingBufferDescriptor);
 
-		for (uint16 edgeIndex = 0; edgeIndex < glyph.edges.size(); edgeIndex += 1) {
-			const Edge& edge = glyph.edges[edgeIndex];
+		BufferDescriptor glyphStorageBufferDescriptor{};
+		glyphStorageBufferDescriptor.size = maxGlyphSize;
+		glyphStorageBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::STORAGE;
 
-			glyphBuffer.edges[edgeIndex].startX = edge.start.x;
-			glyphBuffer.edges[edgeIndex].startY = edge.start.y;
-			glyphBuffer.edges[edgeIndex].endX = edge.end.x;
-			glyphBuffer.edges[edgeIndex].endY = edge.end.y;
-			glyphBuffer.edges[edgeIndex].controlX = edge.control.x;
-			glyphBuffer.edges[edgeIndex].controlY = edge.control.y;
-			glyphBuffer.edges[edgeIndex].curved = edge.isQuadraticCurve;
-		}
+		glyphStorageBuffer = createBuffer(glyphStorageBufferDescriptor);
+	}
 
-		std::copy(&glyphBuffer.minCoordinateX, &glyphBuffer.maxCoordinateY + 1, glyphEdgeMappedRange);
-
-		glyphEdgeMappedRange += 4;
-
-		std::copy(glyphBuffer.edges.begin(), glyphBuffer.edges.end(), (GlyphEdge*) glyphEdgeMappedRange);
-
-		glyphEdgeStagingBuffer->unmap();
-
-		BufferDescriptor glyphEdgeStorageBufferDescriptor{};
-		glyphEdgeStorageBufferDescriptor.size = size;
-		glyphEdgeStorageBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::STORAGE;
-
-		glyphEdgeStorageBuffer = createBuffer(glyphEdgeStorageBufferDescriptor);
-
-		{
-			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
-
-			commandEncoder->begin();
-			commandEncoder->copyBufferToBuffer(glyphEdgeStagingBuffer, glyphEdgeStorageBuffer, 0, 0, size);
-
-			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
-			device->waitIdle();
-		}
-
+	void TrueTypeFontDemoRenderer::createGlyphImage() {
 		ImageDescriptor glyphImageDescriptor{};
 		glyphImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphImageDescriptor.format = ImageFormat::R8_UNORM;
@@ -82,102 +59,202 @@ namespace ProjectA {
 
 		glyphImage = createImage(glyphImageDescriptor);
 
-		{
-			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+		const ImageViewDescriptor glyphImageViewDescriptor;
 
-			commandEncoder->begin();
-			commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::UNDEFINED, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+		glyphImageView = glyphImage->createView(glyphImageViewDescriptor);
+	}
 
-			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+	void TrueTypeFontDemoRenderer::createGlyphImageComputePipeline() {
+		DescriptorSetLayoutBinding glyphBufferDescriptorSetLayoutBinding;
+		glyphBufferDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		glyphBufferDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
+		glyphBufferDescriptorSetLayoutBinding.buffers = {glyphStorageBuffer};
 
-			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
-			device->waitIdle();
-		}
-
-		SamplerDescriptor samplerDescriptor{};
-		samplerDescriptor.magFilter = SamplerFilter::NEAREST;
-		samplerDescriptor.minFilter = SamplerFilter::NEAREST;
-
-		sampler = createSampler(samplerDescriptor);
-
-		const ImageViewDescriptor imageViewDescriptor;
-
-		glyphImageView = glyphImage->createView(imageViewDescriptor);
-
-		DescriptorSetLayoutBinding glyphEdgeDescriptorSetLayoutBinding;
-		glyphEdgeDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		glyphEdgeDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
-		glyphEdgeDescriptorSetLayoutBinding.buffers = {glyphEdgeStorageBuffer};
-
-		DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding;
-		imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
-		imageDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
-		imageDescriptorSetLayoutBinding.samplers = {sampler};
-		imageDescriptorSetLayoutBinding.imageViews = {glyphImageView};
-
-		DescriptorSetLayout computeDescriptorSetLayout;
-		computeDescriptorSetLayout.bindings.emplace_back(glyphEdgeDescriptorSetLayoutBinding);
-		computeDescriptorSetLayout.bindings.emplace_back(imageDescriptorSetLayoutBinding);
-
-		PipelineLayoutDescriptor computePipelineLayoutDescriptor;
-		computePipelineLayoutDescriptor.layouts.emplace_back(computeDescriptorSetLayout);
-
-		const ref<PipelineLayout> computePipelineLayout = createPipelineLayout(computePipelineLayoutDescriptor);
-
-		ShaderModuleDescriptor computeShaderModuleDescriptor{};
-		computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
-		computeShaderModuleDescriptor.entryPoint = "main";
-
-		const ref<ShaderModule> computeShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TrueTypeFontDemo/Shader/main.comp.spv", computeShaderModuleDescriptor);
-
-		ComputePipelineDescriptor computePipelineDescriptor;
-		computePipelineDescriptor.pipelineLayout = computePipelineLayout;
-		computePipelineDescriptor.computeShaderModule = computeShaderModule;
-
-		const ref<ComputePipeline> computePipeline = createComputePipeline(computePipelineDescriptor);
-
-		CommandBufferDescriptor computeCommandBufferDescriptor{};
-		computeCommandBufferDescriptor.usage = CommandBufferUsage::AUTO;
-
-		{
-			const ref<CommandEncoder> commandEncoder = device->getComputeQueue()->createCommandEncoder(computeCommandBufferDescriptor);
-
-			commandEncoder->begin();
-			commandEncoder->bindComputePipeline(computePipeline);
-			commandEncoder->bindDescriptorSets(0);
-			commandEncoder->dispatchGroups(128, 128, 1);
-
-			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-			device->getComputeQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
-			device->waitIdle();
-		}
-
-		{
-			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
-
-			commandEncoder->begin();
-			commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::GENERAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-
-			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
-			device->waitIdle();
-		}
-
-		DescriptorSetLayoutBinding descriptorSetLayoutBinding;
-		descriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		descriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		descriptorSetLayoutBinding.samplers = {sampler};
-		descriptorSetLayoutBinding.imageViews = {glyphImageView};
+		DescriptorSetLayoutBinding glyphImageDescriptorSetLayoutBinding;
+		glyphImageDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
+		glyphImageDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
+		glyphImageDescriptorSetLayoutBinding.imageViews = {glyphImageView};
 
 		DescriptorSetLayout descriptorSetLayout;
-		descriptorSetLayout.bindings.emplace_back(descriptorSetLayoutBinding);
+		descriptorSetLayout.bindings = {glyphBufferDescriptorSetLayoutBinding, glyphImageDescriptorSetLayoutBinding};
 
 		PipelineLayoutDescriptor pipelineLayoutDescriptor;
-		pipelineLayoutDescriptor.layouts.emplace_back(descriptorSetLayout);
+		pipelineLayoutDescriptor.layouts = {descriptorSetLayout};
 
-		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+		glyphImageComputePipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+
+		ShaderModuleDescriptor shaderModuleDescriptor{};
+		shaderModuleDescriptor.stage = ShaderStage::COMPUTE;
+		shaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> shaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TrueTypeFontDemo/Shader/GlyphImage.comp.spv", shaderModuleDescriptor);
+
+		ComputePipelineDescriptor computePipelineDescriptor;
+		computePipelineDescriptor.pipelineLayout = glyphImageComputePipelineLayout;
+		computePipelineDescriptor.computeShaderModule = shaderModule;
+
+		glyphImageComputePipeline = createComputePipeline(computePipelineDescriptor);
+	}
+
+	void TrueTypeFontDemoRenderer::createGlyphMapSdfImage() {
+		ImageDescriptor glyphMapSdfImageDescriptor{};
+		glyphMapSdfImageDescriptor.type = ImageType::TEXTURE_2D;
+		glyphMapSdfImageDescriptor.format = ImageFormat::R8_UNORM;
+		glyphMapSdfImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::STORAGE;
+		glyphMapSdfImageDescriptor.width = 64; // 4096
+		glyphMapSdfImageDescriptor.height = 64; // 4096
+		glyphMapSdfImageDescriptor.depth = 1;
+		glyphMapSdfImageDescriptor.mipLevelCount = 1;
+		glyphMapSdfImageDescriptor.arrayLayerCount = 1;
+		glyphMapSdfImageDescriptor.sampleCount = 1;
+
+		glyphMapSdfImage = createImage(glyphMapSdfImageDescriptor);
+
+		const ImageViewDescriptor glyphMapSdfImageViewDescriptor;
+
+		glyphMapSdfImageView = glyphMapSdfImage->createView(glyphMapSdfImageViewDescriptor);
+	}
+
+	void TrueTypeFontDemoRenderer::createGlyphMapSdfSampler() {
+		SamplerDescriptor glyphSdfSamplerDescriptor{};
+		glyphSdfSamplerDescriptor.magFilter = SamplerFilter::NEAREST;
+		glyphSdfSamplerDescriptor.minFilter = SamplerFilter::NEAREST;
+
+		glyphMapSdfSampler = createSampler(glyphSdfSamplerDescriptor);
+	}
+
+	void TrueTypeFontDemoRenderer::createGlyphSdfImageComputePipeline() {
+		DescriptorSetLayoutBinding glyphImageDescriptorSetLayoutBinding;
+		glyphImageDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
+		glyphImageDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
+		glyphImageDescriptorSetLayoutBinding.imageViews = {glyphImageView};
+
+		DescriptorSetLayoutBinding glyphMapSdfImageDescriptorSetLayoutBinding;
+		glyphMapSdfImageDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
+		glyphMapSdfImageDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
+		glyphMapSdfImageDescriptorSetLayoutBinding.imageViews = {glyphMapSdfImageView};
+
+		DescriptorSetLayout descriptorSetLayout;
+		descriptorSetLayout.bindings = {glyphImageDescriptorSetLayoutBinding, glyphMapSdfImageDescriptorSetLayoutBinding};
+
+		PipelineLayoutDescriptor pipelineLayoutDescriptor;
+		pipelineLayoutDescriptor.layouts = {descriptorSetLayout};
+
+		glyphSdfImageComputePipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+
+		ShaderModuleDescriptor shaderModuleDescriptor{};
+		shaderModuleDescriptor.stage = ShaderStage::COMPUTE;
+		shaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> shaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TrueTypeFontDemo/Shader/GlyphDistanceField.comp.spv", shaderModuleDescriptor);
+
+		ComputePipelineDescriptor computePipelineDescriptor;
+		computePipelineDescriptor.pipelineLayout = glyphSdfImageComputePipelineLayout;
+		computePipelineDescriptor.computeShaderModule = shaderModule;
+
+		glyphSdfImageComputePipeline = createComputePipeline(computePipelineDescriptor);
+	}
+
+	void TrueTypeFontDemoRenderer::createVertexBuffer() {
+		const vec2<float32> vertices[4] = {
+			{-1.0f,  1.0f},
+			{ 1.0f,  1.0f},
+			{ 1.0f, -1.0f},
+			{-1.0f, -1.0f},
+		};
+
+		const uint64 vertexBufferSize = sizeof(vec2<float32>) * 4;
+
+		BufferDescriptor vertexStagingBufferDescriptor{};
+		vertexStagingBufferDescriptor.size = vertexBufferSize;
+		vertexStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+
+		const ref<Buffer> vertexStagingBuffer = createBuffer(vertexStagingBufferDescriptor);
+
+		vec2<float32>* vertexMappedRange = vertexStagingBuffer->map<vec2<float32>>(0, vertexBufferSize);
+
+		std::copy_n(&vertices[0], 4, vertexMappedRange);
+
+		vertexStagingBuffer->unmap();
+
+		BufferDescriptor vertexBufferDescriptor{};
+		vertexBufferDescriptor.size = vertexBufferSize;
+		vertexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX;
+
+		vertexBuffer = createBuffer(vertexBufferDescriptor);
+
+		const ref<Device> device = getDevice();
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+		commandEncoder->begin();
+		commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, 0, 0, vertexBufferSize);
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->waitIdle();
+	}
+
+	void TrueTypeFontDemoRenderer::createIndexBuffer() {
+		const uint16 indices[6] = {
+			0, 1, 2,
+			0, 2, 3,
+		};
+
+		const uint64 indexBufferSize = sizeof(uint16) * 6;
+
+		BufferDescriptor indexStagingBufferDescriptor{};
+		indexStagingBufferDescriptor.size = indexBufferSize;
+		indexStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+
+		const ref<Buffer> indexStagingBuffer = createBuffer(indexStagingBufferDescriptor);
+
+		uint16* indexMappedRange = indexStagingBuffer->map<uint16>(0, indexBufferSize);
+
+		std::copy_n(&indices[0], 6, indexMappedRange);
+
+		indexStagingBuffer->unmap();
+
+		BufferDescriptor indexBufferDescriptor{};
+		indexBufferDescriptor.size = indexBufferSize;
+		indexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX;
+
+		indexBuffer = createBuffer(indexBufferDescriptor);
+
+		const ref<Device> device = getDevice();
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+		commandEncoder->begin();
+		commandEncoder->copyBufferToBuffer(indexStagingBuffer, indexBuffer, 0, 0, indexBufferSize);
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->waitIdle();
+	}
+
+	void TrueTypeFontDemoRenderer::createGlyphMapSdfImageRenderPipeline() {
+		DescriptorSetLayoutBinding glyphImageDescriptorSetLayoutBinding;
+		glyphImageDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		glyphImageDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		glyphImageDescriptorSetLayoutBinding.samplers = {glyphMapSdfSampler};
+		glyphImageDescriptorSetLayoutBinding.imageViews = {glyphMapSdfImageView};
+
+		DescriptorSetLayout descriptorSetLayout;
+		descriptorSetLayout.bindings = {glyphImageDescriptorSetLayoutBinding};
+
+		PipelineLayoutDescriptor pipelineLayoutDescriptor;
+		pipelineLayoutDescriptor.layouts = {descriptorSetLayout};
+
+		renderPipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -193,7 +270,7 @@ namespace ProjectA {
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
-		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
+		renderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
 		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
 		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
@@ -203,82 +280,188 @@ namespace ProjectA {
 		renderPipelineDescriptor.cullMode = CullMode::BACK;
 
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
+	}
 
-		const chain<vec2<float32>> vertices = {
-			{-1.0f,  1.0f},
-			{ 1.0f,  1.0f},
-			{ 1.0f, -1.0f},
-			{-1.0f, -1.0f},
-		};
+	void TrueTypeFontDemoRenderer::transitionGlyphImageCompute() const {
+		const ref<Device> device = getDevice();
 
-		const uint64 vertexBufferSize = sizeof(vec2<float32>) * vertices.size();
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		BufferDescriptor vertexStagingBufferDescriptor{};
-		vertexStagingBufferDescriptor.size = vertexBufferSize;
-		vertexStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
-		const ref<Buffer> vertexStagingBuffer = createBuffer(vertexStagingBufferDescriptor);
+		commandEncoder->begin();
+		commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::UNDEFINED, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-		vec2<float32>* vertexMappedRange = vertexStagingBuffer->map<vec2<float32>>(0, vertexBufferSize);
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		std::copy(vertices.begin(), vertices.end(), vertexMappedRange);
+		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->waitIdle();
+	}
 
-		vertexStagingBuffer->unmap();
+	void TrueTypeFontDemoRenderer::transitionGlyphImageRender() const {
+		const ref<Device> device = getDevice();
 
-		BufferDescriptor vertexBufferDescriptor{};
-		vertexBufferDescriptor.size = vertexBufferSize;
-		vertexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX;
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		vertexBuffer = createBuffer(vertexBufferDescriptor);
+		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
-		{
-			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+		commandEncoder->begin();
+		commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::GENERAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-			commandEncoder->begin();
-			commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, 0, 0, vertexBufferSize);
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->waitIdle();
+	}
 
-			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
-			device->waitIdle();
+	void TrueTypeFontDemoRenderer::transitionGlyphMapSdfImageCompute() const {
+		const ref<Device> device = getDevice();
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+		commandEncoder->begin();
+		commandEncoder->setImageMemoryBarrier(glyphMapSdfImage, ImageLayout::UNDEFINED, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->waitIdle();
+	}
+
+	void TrueTypeFontDemoRenderer::transitionGlyphMapSdfImageRender() const {
+		const ref<Device> device = getDevice();
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+		commandEncoder->begin();
+		commandEncoder->setImageMemoryBarrier(glyphMapSdfImage, ImageLayout::GENERAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->waitIdle();
+	}
+
+	void TrueTypeFontDemoRenderer::buildGlyphMapSdfImage() const {
+		const ref<Device> device = getDevice();
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+
+		uint16 xOffset = 0;
+		uint16 yOffset = 0;
+
+		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.size(); glyphIndex += 1) {
+			const Glyph& glyph = ttfFile.glyphs[glyphIndex];
+
+			if (glyph.edges.empty()) {
+				continue;
+			}
+
+			const uint64 glyphSize = sizeof(sint32) * 4 + sizeof(GlyphEdge) * glyph.edges.size();
+
+			sint32* glyphMappedRange = glyphStagingBuffer->map<sint32>(0, glyphSize);
+
+			GlyphBuffer glyphBuffer{};
+			glyphBuffer.minCoordinateX = glyph.min.x;
+			glyphBuffer.minCoordinateY = glyph.min.y;
+			glyphBuffer.maxCoordinateX = glyph.max.x;
+			glyphBuffer.maxCoordinateY = glyph.max.y;
+			glyphBuffer.edges.resize(glyph.edges.size());
+
+			for (uint16 edgeIndex = 0; edgeIndex < glyph.edges.size(); edgeIndex += 1) {
+				const Edge& edge = glyph.edges[edgeIndex];
+				GlyphEdge& glyphBufferEdge = glyphBuffer.edges[edgeIndex];
+
+				glyphBufferEdge.startX = edge.start.x;
+				glyphBufferEdge.startY = edge.start.y;
+				glyphBufferEdge.endX = edge.end.x;
+				glyphBufferEdge.endY = edge.end.y;
+				glyphBufferEdge.controlX = edge.control.x;
+				glyphBufferEdge.controlY = edge.control.y;
+				glyphBufferEdge.curved = edge.curved;
+			}
+
+			std::copy_n(&glyphBuffer.minCoordinateX, 4, glyphMappedRange);
+
+			glyphMappedRange += 4;
+
+			std::copy(glyphBuffer.edges.begin(), glyphBuffer.edges.end(), (GlyphEdge*) glyphMappedRange);
+
+			glyphStagingBuffer->unmap();
+
+			CommandBufferDescriptor commandBufferDescriptor{};
+			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+			{
+				const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+				commandEncoder->begin();
+				commandEncoder->copyBufferToBuffer(glyphStagingBuffer, glyphStorageBuffer, 0, 0, glyphSize);
+
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+				device->waitIdle();
+			}
+
+			{
+				const ref<CommandEncoder> commandEncoder = device->getComputeQueue()->createCommandEncoder(commandBufferDescriptor);
+
+				commandEncoder->begin();
+				commandEncoder->bindComputePipeline(glyphImageComputePipeline);
+				commandEncoder->bindDescriptorSets(0);
+				commandEncoder->dispatchGroups(128, 128, 1);
+
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				device->getComputeQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+				device->waitIdle();
+			}
+
+			xOffset += 64;
+			yOffset += 64;
+
+			// TODO: Generate glyph distance field.
+
+			{
+				const ref<CommandEncoder> commandEncoder = device->getComputeQueue()->createCommandEncoder(commandBufferDescriptor);
+
+				commandEncoder->begin();
+				commandEncoder->bindComputePipeline(glyphSdfImageComputePipeline);
+				commandEncoder->bindDescriptorSets(0);
+				commandEncoder->dispatchGroups(8, 8, 1);
+
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				device->getComputeQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+				device->waitIdle();
+			}
+
+			break;
+		}
+	}
+
+	uint64 TrueTypeFontDemoRenderer::computeMaxGlyphSize() const {
+		uint64 maxglyphCount = 0;
+
+		for (const Glyph& glyph : ttfFile.glyphs) {
+			const uint64 glyphCount = glyph.edges.size();
+
+			if (glyphCount > maxglyphCount) {
+				maxglyphCount = glyphCount;
+			}
 		}
 
-		const std::array<uint16, 6> indices = {
-			0, 1, 2,
-			0, 2, 3,
-		};
-
-		const uint64 indexBufferSize = sizeof(uint16) * indices.size();
-
-		BufferDescriptor indexStagingBufferDescriptor{};
-		indexStagingBufferDescriptor.size = indexBufferSize;
-		indexStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
-
-		const ref<Buffer> indexStagingBuffer = createBuffer(indexStagingBufferDescriptor);
-
-		uint16* indexMappedRange = indexStagingBuffer->map<uint16>(0, indexBufferSize);
-
-		std::copy(indices.begin(), indices.end(), indexMappedRange);
-
-		indexStagingBuffer->unmap();
-
-		BufferDescriptor indexBufferDescriptor{};
-		indexBufferDescriptor.size = indexBufferSize;
-		indexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX;
-
-		indexBuffer = createBuffer(indexBufferDescriptor);
-
-		{
-			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
-
-			commandEncoder->begin();
-			commandEncoder->copyBufferToBuffer(indexStagingBuffer, indexBuffer, 0, 0, indexBufferSize);
-
-			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
-			device->waitIdle();
-		}
+		return sizeof(sint32) * 4 + sizeof(GlyphEdge) * maxglyphCount;
 	}
 
 	void TrueTypeFontDemoRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {

@@ -39,8 +39,6 @@ namespace ProjectA {
 					binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER ||
 					binding.descriptorType == DescriptorType::STORAGE_IMAGE
 				) {
-					ENGINE_ASSERT(binding.imageViews.size() == binding.samplers.size(), "Mismatch between image view count and sampler count.");
-
 					descriptorPoolSize.descriptorCount = static_cast<uint32>(binding.imageViews.size());
 				}
 				else {
@@ -109,11 +107,16 @@ namespace ProjectA {
 					}
 
 					for (uint32 imageViewIndex = 0; imageViewIndex < binding.imageViews.size(); imageViewIndex += 1) {
-						const ref<VulkanSampler> sampler = std::static_pointer_cast<VulkanSampler>(binding.samplers[imageViewIndex]);
 						const ref<VulkanImageView> imageView = std::static_pointer_cast<VulkanImageView>(binding.imageViews[imageViewIndex]);
 
+						VkSampler sampler = VK_NULL_HANDLE;
+
+						if (imageViewIndex < binding.samplers.size()) {
+							sampler = std::static_pointer_cast<VulkanSampler>(binding.samplers[imageViewIndex])->object;
+						}
+
 						VkDescriptorImageInfo descriptorImageInfo{};
-						descriptorImageInfo.sampler = sampler->object;
+						descriptorImageInfo.sampler = sampler;
 						descriptorImageInfo.imageView = imageView->object;
 
 						// TODO: Specify layout of current image.

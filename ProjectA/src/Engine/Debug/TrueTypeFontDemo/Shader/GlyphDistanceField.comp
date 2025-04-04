@@ -1,0 +1,13 @@
+#version 450
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, r8) uniform readonly image2D glyphImage;
+layout(set = 0, binding = 1, r8) uniform writeonly image2D glyphMapSdfImage;
+
+void main() {
+	vec2 imageCoordinate = gl_GlobalInvocationID.xy;
+	vec4 color = vec4(1.0, 0.2, 0.0, 1.0);
+
+	imageStore(glyphMapSdfImage, ivec2(imageCoordinate), color);
+}

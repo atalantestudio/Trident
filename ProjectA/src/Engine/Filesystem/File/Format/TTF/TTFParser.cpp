@@ -384,9 +384,9 @@ namespace ProjectA {
 				Edge edge{};
 				edge.end.x = contourPoint.x;
 				edge.end.y = contourPoint.y;
-				edge.isQuadraticCurve = !contour[edgePointIndex - 1].onCurve;
+				edge.curved = !contour[edgePointIndex - 1].onCurve;
 
-				if (edge.isQuadraticCurve) {
+				if (edge.curved) {
 					edge.start.x = contour[edgePointIndex - 2].x;
 					edge.start.y = contour[edgePointIndex - 2].y;
 					edge.control.x = contour[edgePointIndex - 1].x;
@@ -626,8 +626,6 @@ namespace ProjectA {
 			const sint16 numberOfContours = stream.peek<sint16>(true);
 
 			if (glyphLengths[glyphIndex] == 0) {
-				ENGINE_WARN("Number of contours for glyph [] is 0.", glyphIndex);
-
 				continue;
 			}
 
