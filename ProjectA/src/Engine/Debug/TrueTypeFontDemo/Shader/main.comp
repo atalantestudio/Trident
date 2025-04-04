@@ -1,17 +1,17 @@
 #version 450
 
 struct Edge {
-	int start;
-	int end;
-	int control;
+	ivec2 start;
+	ivec2 end;
+	ivec2 control;
 	bool curved;
 };
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
 layout(set = 0, binding = 0) buffer readonly Glyph {
-	int minCoordinate;
-	int maxCoordinate;
+	ivec2 minCoordinate;
+	ivec2 maxCoordinate;
 	Edge edges[];
 } glyph;
 
@@ -25,11 +25,9 @@ void main() {
 		return;
 	}
 
-	ivec2 glyphMinCoordinate = ivec2(glyph.minCoordinate >> 16, glyph.minCoordinate & 0xffff);
-	ivec2 glyphMaxCoordinate = ivec2(glyph.maxCoordinate >> 16, glyph.maxCoordinate & 0xffff);
-	ivec2 glyphSquareSize = ivec2(max(glyphMaxCoordinate.x - glyphMinCoordinate.x, glyphMaxCoordinate.y - glyphMinCoordinate.y));
+	ivec2 glyphSquareSize = ivec2(max(glyph.maxCoordinate.x - glyph.minCoordinate.x, glyph.maxCoordinate.y - glyph.minCoordinate.y));
 
-	vec2 p = (imageCoordinate + 1.0) / _imageSize * glyphSquareSize + abs(glyphMinCoordinate);
+	vec2 p = (imageCoordinate + 1.0) / vec2(_imageSize) * vec2(glyphSquareSize) + vec2(abs(glyph.minCoordinate));
 
 	// Flip glyph Y.
 	p.y = glyphSquareSize.y - p.y;
@@ -39,8 +37,8 @@ void main() {
 
 	for (uint edgeIndex = 0; edgeIndex < glyph.edges.length(); edgeIndex += 1) {
 		Edge edge = glyph.edges[edgeIndex];
-		vec2 a = vec2(edge.start >> 16, edge.start & 0xffff);
-		vec2 b = vec2(edge.end >> 16, edge.end & 0xffff);
+		vec2 a = edge.start;
+		vec2 b = edge.end;
 
 		// Test if the current scanline crosses the edge.
 		if (a.y > p.y && p.y > b.y) {
@@ -61,7 +59,7 @@ void main() {
 		}
 
 		if (edge.curved) {
-			vec2 c = vec2(edge.control >> 16, edge.control & 0xffff);
+			vec2 c = edge.control;
 
 			float u = ((a.y - b.y) * (p.x - b.x) + (b.x - a.x) * (p.y - b.y)) / ((a.y - b.y) * (c.x - b.x) + (b.x - a.x) * (c.y - b.y));
 			float v = ((b.y - c.y) * (p.x - b.x) + (c.x - b.x) * (p.y - b.y)) / ((a.y - b.y) * (c.x - b.x) + (b.x - a.x) * (c.y - b.y));

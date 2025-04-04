@@ -13,15 +13,20 @@ namespace ProjectA {
 
 		private:
 			struct alignas(8) GlyphEdge {
-				sint32 start;
-				sint32 end;
-				sint32 control;
+				sint32 startX;
+				sint32 startY;
+				sint32 endX;
+				sint32 endY;
+				sint32 controlX;
+				sint32 controlY;
 				bool curved;
 			};
 
 			struct GlyphBuffer {
-				sint32 minCoordinate;
-				sint32 maxCoordinate;
+				sint32 minCoordinateX;
+				sint32 minCoordinateY;
+				sint32 maxCoordinateX;
+				sint32 maxCoordinateY;
 				chain<GlyphEdge> edges;
 			};
 

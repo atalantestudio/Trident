@@ -188,6 +188,43 @@ namespace ProjectA {
 		transformPoint(glyph.min.x, glyph.min.y, T);
 	}
 
+	// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html.
+	static void parseCoordinates(ByteStream& stream, sint16* coordinates, uint8* flags, uint16 coordinateCount, uint8 shortVectorBitIndex, uint8 sameOrPositiveVectorBitIndex, FWord minBounds, FWord maxBounds) {
+		uint16 coordinateIndex = 0;
+		sint16 previousCoordinate = 0;
+
+		while (coordinateIndex < coordinateCount) {
+			const uint8 flag = flags[coordinateIndex];
+			sint16 delta = 0;
+
+			if (flag & BIT(shortVectorBitIndex)) {
+				// If set, the corresponding coordinate is 1 byte long.
+
+				// If the Short Vector bit is set, this bit describes the sign of the value,
+				// with a value of 1 equalling positive and a zero value negative.
+				const sint8 sign = (flag >> sameOrPositiveVectorBitIndex & BIT(0)) * 2 - 1;
+
+				delta = stream.read<uint8>() * sign;
+			}
+			else {
+				// Otherwise, the corresponding coordinate is 2 bytes long.
+
+				if (~flag & BIT(sameOrPositiveVectorBitIndex)) {
+					// If the Short Vector bit is not set, and this bit is not set,
+					// the current coordinate is a signed 16-bit delta vector.
+					delta = stream.read<sint16>(true);
+				}
+			}
+
+			const sint16 coordinate = previousCoordinate + delta;
+
+			coordinates[coordinateIndex] = coordinate;
+			previousCoordinate = coordinate;
+
+			coordinateIndex += 1;
+		}
+	}
+
 	// fwd
 	static Glyph parseCompoundGlyph(ByteStream& stream, uint32 tableOffset, const fchain<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth);
 
@@ -229,137 +266,111 @@ namespace ProjectA {
 
 		stream.jump(instructionLength);
 
-		const uint16 maxFlags = endPtsOfContours[numberOfContours - 1] + 1;
+		const uint16 numPoints = endPtsOfContours[numberOfContours - 1] + 1;
 
 		// Array of flags.
-		fchain<uint8> flags(maxFlags);
+		chain<uint8> flags(numPoints);
 
-		uint16 flagIndex = 0;
+		{
+			uint16 flagIndex = 0;
 
-		for (; flagIndex < maxFlags;) {
-			const uint8 flag = stream.read<uint8>();
+			while (flagIndex < numPoints) {
+				const uint8 flag = stream.read<uint8>();
 
-			flags[flagIndex] = flag;
-			flagIndex += 1;
+				uint8 repeatCount = 1;
 
-			if (flag & BIT(3)) {
-				// If set, the next byte specifies the number of additional times this set of flags is to be
-				// repeated. In this way, the number of flags listed can be smaller than the number of
-				// points in a character.
-				const uint8 repeatCount = stream.read<uint8>();
+				if (flag & BIT(3)) {
+					// If set, the next byte specifies the number of additional times this set of flags is to be repeated.
+					// In this way, the number of flags listed can be smaller than the number of points in a character.
+					repeatCount += stream.read<uint8>();
 
-				ENGINE_ASSERT(repeatCount > 0, "Repeat count is 0.");
+					ENGINE_ASSERT(repeatCount > 1, "The additional repeat count for flag index [] is 0.", flagIndex);
+				}
 
-				// TODO: Use std::copy.
-				//std::copy(&flags[flagIndex], &flags[flagIndex + repeatCount], flag);
-				std::memcpy(&flags[flagIndex], &flag, repeatCount);
+				std::fill_n(&flags[flagIndex], repeatCount, flag);
 
 				flagIndex += repeatCount;
 			}
-		}
 
-		ENGINE_ASSERT(flagIndex == maxFlags, "Flag index/max flags mismatch.");
+			ENGINE_ASSERT(flagIndex == numPoints, "The flag count is overflowing.");
+		}
 
 		// Array of x-coordinates; the first is relative to (0,0), others are relative to previous point.
-		fchain<sint16> xCoordinates(maxFlags);
+		fchain<sint16> xCoordinates(numPoints);
 
-		sint16 prevCoordinate = 0;
-
-		for (sint16 xCoordinateIndex = 0; xCoordinateIndex < maxFlags; xCoordinateIndex += 1) {
-			const uint8 flag = flags[xCoordinateIndex];
-			sint16 xCoordinate = 0;
-
-			if (flag & BIT(1)) {
-				const sint8 sign = (flag >> 4 & BIT(0)) * 2 - 1;
-
-				xCoordinate = static_cast<sint16>(stream.read<uint8>()) * sign;
-				xCoordinate += prevCoordinate;
-			}
-			else {
-				if (flag & BIT(4)) {
-					xCoordinate = prevCoordinate;
-				}
-				else {
-					xCoordinate = stream.read<sint16>(true);
-					xCoordinate += prevCoordinate;
-				}
-			}
-
-			xCoordinates[xCoordinateIndex] = xCoordinate;
-			prevCoordinate = xCoordinate;
-		}
+		parseCoordinates(stream, &xCoordinates[0], &flags[0], numPoints, 1, 4, glyph.min.x, glyph.max.x);
 
 		// Array of y-coordinates; the first is relative to (0,0), others are relative to previous point.
-		fchain<sint16> yCoordinates(maxFlags);
+		fchain<sint16> yCoordinates(numPoints);
 
-		prevCoordinate = 0;
-
-		for (sint16 yCoordinateIndex = 0; yCoordinateIndex < maxFlags; yCoordinateIndex += 1) {
-			const uint8 flag = flags[yCoordinateIndex];
-			sint16 yCoordinate = 0;
-
-			if (flag & BIT(2)) {
-				const sint8 sign = (flag >> 5 & BIT(0)) * 2 - 1;
-
-				yCoordinate = static_cast<sint16>(stream.read<uint8>()) * sign;
-				yCoordinate += prevCoordinate;
-			}
-			else {
-				if (flag & BIT(5)) {
-					yCoordinate = prevCoordinate;
-				}
-				else {
-					yCoordinate = stream.read<sint16>(true);
-					yCoordinate += prevCoordinate;
-				}
-			}
-
-			yCoordinates[yCoordinateIndex] = yCoordinate;
-			prevCoordinate = yCoordinate;
-		}
+		parseCoordinates(stream, &yCoordinates[0], &flags[0], numPoints, 2, 5, glyph.min.y, glyph.max.y);
 
 		fchain<chain<ContourPoint>> contours(numberOfContours);
 
-		for (uint16 contourIndex = 0; contourIndex < numberOfContours; contourIndex += 1) {
-			const uint16 startIndex = contourIndex == 0 ? 0 : (endPtsOfContours[contourIndex - 1] + 1);
-			const uint16 endIndex = endPtsOfContours[contourIndex];
+		{
+			uint16 contourIndex = 0;
+			uint16 startIndex = 0;
 
-			chain<ContourPoint>& contour = contours[contourIndex];
+			while (contourIndex < numberOfContours) {
+				chain<ContourPoint>& contour = contours[contourIndex];
 
-			bool firstOnCurve = flags[startIndex] & BIT(0);
+				const uint16 endIndex = endPtsOfContours[contourIndex] + 1;
+				const bool startOnCurve = flags[startIndex] & BIT(0);
 
-			if (firstOnCurve) {
-				ContourPoint point{};
-				point.x = xCoordinates[startIndex];
-				point.y = yCoordinates[startIndex];
-				point.onCurve = true;
+				if (startOnCurve) {
+					// Add the start (on-curve) point.
+					ContourPoint startPoint{};
+					startPoint.x = xCoordinates[startIndex];
+					startPoint.y = yCoordinates[startIndex];
+					startPoint.onCurve = true;
 
-				contour.emplace_back(point);
-			}
-
-			for (uint16 index = startIndex + 1; index <= endIndex; index += 1) {
-				ContourPoint point{};
-				point.x = xCoordinates[index];
-				point.y = yCoordinates[index];
-				point.onCurve = flags[index] & BIT(0);
-
-				bool previousOnCurve = flags[index - 1] & BIT(0);
-
-				if (!previousOnCurve && !point.onCurve) {
-					// Insert an on-curve point between two off-curve points.
-					ContourPoint halfwayPoint{};
-					halfwayPoint.x = (xCoordinates[index - 1] + point.x) / 2;
-					halfwayPoint.y = (yCoordinates[index - 1] + point.y) / 2;
-					halfwayPoint.onCurve = true;
-
-					contour.emplace_back(halfwayPoint);
+					contour.emplace_back(startPoint);
 				}
 
-				contour.emplace_back(point);
-			}
+				{
+					uint16 index = startIndex + 1;
+					bool previousOnCurve = startOnCurve;
 
-			// Copy first point to close contour.
-			contour.emplace_back(contour[0]);
+					while (index < endIndex) {
+						ContourPoint point{};
+						point.x = xCoordinates[index];
+						point.y = yCoordinates[index];
+						point.onCurve = flags[index] & BIT(0);
+
+						if (!point.onCurve && !previousOnCurve) {
+							// If both this point and the previous one are off-curve,
+							// insert an on-curve point between them.
+							ContourPoint halfwayPoint{};
+							halfwayPoint.x = (point.x + xCoordinates[index - 1]) / 2;
+							halfwayPoint.y = (point.y + yCoordinates[index - 1]) / 2;
+							halfwayPoint.onCurve = true;
+
+							contour.emplace_back(halfwayPoint);
+						}
+
+						contour.emplace_back(point);
+
+						index += 1;
+						previousOnCurve = point.onCurve;
+					}
+				}
+
+				if (!startOnCurve) {
+					// Add the start (off-curve) point.
+					ContourPoint endPoint{};
+					endPoint.x = xCoordinates[startIndex];
+					endPoint.y = yCoordinates[startIndex];
+					endPoint.onCurve = false;
+
+					contour.emplace_back(endPoint);
+				}
+
+				// Close contour.
+				contour.emplace_back(contour.front());
+
+				contourIndex += 1;
+				startIndex = endIndex;
+			}
 		}
 
 		for (const chain<ContourPoint>& contour : contours) {

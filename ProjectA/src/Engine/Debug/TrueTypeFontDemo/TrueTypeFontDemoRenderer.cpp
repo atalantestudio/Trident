@@ -10,11 +10,11 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-		const Glyph& glyph = ttfFile.glyphs[16];
+		const Glyph& glyph = ttfFile.glyphs[37];
 
 		ENGINE_ASSERT(!glyph.edges.empty(), "Glyph has no edges.");
 
-		const uint64 size = sizeof(sint32) * 2 + sizeof(GlyphEdge) * glyph.edges.size();
+		const uint64 size = sizeof(sint32) * 4 + sizeof(GlyphEdge) * glyph.edges.size();
 
 		BufferDescriptor glyphEdgeStagingBufferDescriptor{};
 		glyphEdgeStagingBufferDescriptor.size = size;
@@ -25,22 +25,27 @@ namespace ProjectA {
 		sint32* glyphEdgeMappedRange = glyphEdgeStagingBuffer->map<sint32>(0, size);
 
 		GlyphBuffer glyphBuffer{};
-		glyphBuffer.minCoordinate = static_cast<sint32>(glyph.min.x << 16) | glyph.min.y;
-		glyphBuffer.maxCoordinate = static_cast<sint32>(glyph.max.x << 16) | glyph.max.y;
+		glyphBuffer.minCoordinateX = glyph.min.x;
+		glyphBuffer.minCoordinateY = glyph.min.y;
+		glyphBuffer.maxCoordinateX = glyph.max.x;
+		glyphBuffer.maxCoordinateY = glyph.max.y;
 		glyphBuffer.edges.resize(glyph.edges.size());
 
 		for (uint16 edgeIndex = 0; edgeIndex < glyph.edges.size(); edgeIndex += 1) {
 			const Edge& edge = glyph.edges[edgeIndex];
 
-			glyphBuffer.edges[edgeIndex].start = (edge.start.x << 16) | edge.start.y;
-			glyphBuffer.edges[edgeIndex].end = (edge.end.x << 16) | edge.end.y;
-			glyphBuffer.edges[edgeIndex].control = (edge.control.x << 16) | edge.control.y;
+			glyphBuffer.edges[edgeIndex].startX = edge.start.x;
+			glyphBuffer.edges[edgeIndex].startY = edge.start.y;
+			glyphBuffer.edges[edgeIndex].endX = edge.end.x;
+			glyphBuffer.edges[edgeIndex].endY = edge.end.y;
+			glyphBuffer.edges[edgeIndex].controlX = edge.control.x;
+			glyphBuffer.edges[edgeIndex].controlY = edge.control.y;
 			glyphBuffer.edges[edgeIndex].curved = edge.isQuadraticCurve;
 		}
 
-		std::copy(&glyphBuffer.minCoordinate, &glyphBuffer.maxCoordinate + 1, glyphEdgeMappedRange);
+		std::copy(&glyphBuffer.minCoordinateX, &glyphBuffer.maxCoordinateY + 1, glyphEdgeMappedRange);
 
-		glyphEdgeMappedRange += 2;
+		glyphEdgeMappedRange += 4;
 
 		std::copy(glyphBuffer.edges.begin(), glyphBuffer.edges.end(), (GlyphEdge*) glyphEdgeMappedRange);
 
