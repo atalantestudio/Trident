@@ -381,7 +381,7 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
-		for (uint16 glyphIndex = 0, glyphOffset = 0; glyphIndex < 64; glyphIndex += 1) {
+		for (uint16 glyphIndex = 0, glyphOffset = 0; glyphIndex < 20; glyphIndex += 1) {
 			ENGINE_TRACE("Computing SDF for glyph [].", glyphIndex);
 
 			const Glyph& glyph = ttfFile.glyphs[glyphIndex];

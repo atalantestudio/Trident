@@ -12,6 +12,6 @@ void main() {
 	vec2 uv = vec2(textureCoordinate.x, 1.0 - textureCoordinate.y);
 	vec4 texel = texture(textureSampler, uv);
 
-	//color.rgb = vec3(texel.r >= ALPHA_THRESHOLD);
-	color.rgb = vec3(texel.r);
+	color.rgb = vec3(texel.r >= ALPHA_THRESHOLD);
+	//color.rgb = vec3(texel.r);
 }
