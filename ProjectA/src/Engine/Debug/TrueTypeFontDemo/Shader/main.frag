@@ -6,9 +6,12 @@ layout(set = 0, binding = 0) uniform sampler2D textureSampler;
 
 layout(location = 0) out vec4 color;
 
+const float ALPHA_THRESHOLD = 0.5;
+
 void main() {
 	vec2 uv = vec2(textureCoordinate.x, 1.0 - textureCoordinate.y);
-	float textureSample = texture(textureSampler, uv).r;
+	vec4 texel = texture(textureSampler, uv);
 
-	color = vec4(vec3(textureSample), 1.0);
+	//color.rgb = vec3(texel.r >= ALPHA_THRESHOLD);
+	color.rgb = vec3(texel.r);
 }

@@ -5,84 +5,6 @@
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
-	struct OffsetSubtable {
-		// A tag to indicate the OFA scaler to be used to rasterize this font.
-		uint32 scalerType;
-
-		// Number of tables.
-		uint16 numTables;
-
-		// (maximum power of 2 <= numTables) * 16.
-		uint16 searchRange;
-
-		// log2(maximum power of 2 <= numTables).
-		uint16 entrySelector;
-
-		// numTables * 16 - searchRange.
-		uint16 rangeShift;
-	};
-
-	struct TableDirectory {
-		// 4-byte identifier.
-		uint32 tag;
-
-		// Checksum for this table.
-		uint32 checksum;
-
-		// Offset from beginning of sfnt.
-		uint32 offset;
-
-		// Length of this table in byte (actual length not padded length).
-		uint32 length;
-	};
-
-	struct maxp {
-		// 0x00010000 (1.0)
-		Fixed version;
-
-		// The number of glyphs in the font.
-		uint16 numGlyphs;
-
-		// Points in non-compound glyph.
-		uint16 maxPoints;
-
-		// Contours in non-compound glyph.
-		uint16 maxContours;
-
-		// Points in compound glyph.
-		uint16 maxComponentPoints;
-
-		// Contours in compound glyph.
-		uint16 maxComponentContours;
-
-		// Set to 2.
-		uint16 maxZones;
-
-		//points used in Twilight Zone (Z0)
-		uint16 maxTwilightPoints;
-
-		// Number of Storage Area locations.
-		uint16 maxStorage;
-
-		// Number of FDEFs.
-		uint16 maxFunctionDefs;
-
-		// Number of IDEFs.
-		uint16 maxInstructionDefs;
-
-		// Maximum stack depth.
-		uint16 maxStackElements;
-
-		// Byte count for glyph instructions.
-		uint16 maxSizeOfInstructions;
-
-		// Number of glyphs referenced at top level.
-		uint16 maxComponentElements;
-
-		// Levels of recursion, set to 0 if font has only simple glyphs.
-		uint16 maxComponentDepth;
-	};
-
 	static uint32 calculateTableChecksum(uint32* table, uint32 byteCount) {
 		uint32 checksum = 0;
 		uint32 longCount = (byteCount + 3) / 4;
@@ -159,16 +81,29 @@ namespace ProjectA {
 		return maxp;
 	}
 
-	struct GlyphTransform {
-		float32 a = 1.0f;
-		float32 b = 0.0f;
-		float32 c = 0.0f;
-		float32 d = 1.0f;
-		float32 e = 0.0f;
-		float32 f = 0.0f;
-		float32 m = 0.0f;
-		float32 n = 0.0f;
-	};
+	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6hhea.html
+	static hhea parseHheaTable(ByteStream& stream) {
+		hhea hhea{};
+		hhea.version.integer = stream.read<uint16>(true);
+		hhea.version.fraction = stream.read<uint16>(true);
+		hhea.ascent = stream.read<FWord>(true);
+		hhea.descent = stream.read<FWord>(true);
+		hhea.lineGap = stream.read<FWord>(true);
+		hhea.advanceWidthMax = stream.read<uFWord>(true);
+		hhea.minLeftSideBearing = stream.read<FWord>(true);
+		hhea.minRightSideBearing = stream.read<FWord>(true);
+		hhea.xMaxExtent = stream.read<FWord>(true);
+		hhea.caretSlopeRise = stream.read<sint16>(true);
+		hhea.caretSlopeRun = stream.read<sint16>(true);
+		hhea.caretOffset = stream.read<FWord>(true);
+
+		stream.jump(sizeof(sint16) * 4);
+
+		hhea.metricDataFormat = stream.read<sint16>(true);
+		hhea.numOfLongHorMetrics = stream.read<uint16>(true);
+
+		return hhea;
+	}
 
 	static void transformPoint(FWord& x, FWord& y, const GlyphTransform& T) {
 		const FWord xCopy = x;
@@ -635,6 +570,37 @@ namespace ProjectA {
 			else {
 				ttfFile.glyphs[glyphIndex] = parseCompoundGlyph(stream, tableOffset->second, glyphOffsets, glyphIndex, maxp.maxComponentDepth);
 			}
+		}
+
+		// Parse 'hhea' table.
+		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("hhea"));
+
+		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'hhea' table.");
+
+		stream.reset();
+		stream.jump(static_cast<uint64>(tableOffset->second));
+
+		const hhea hhea = parseHheaTable(stream);
+
+		ttfFile.hmetrics.resize(hhea.numOfLongHorMetrics);
+		ttfFile.leftSideBearings.resize(maxp.numGlyphs - hhea.numOfLongHorMetrics);
+
+		// Parse 'hmtx' table.
+		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6hmtx.html
+		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("hmtx"));
+
+		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'hmtx' table.");
+
+		stream.reset();
+		stream.jump(static_cast<uint64>(tableOffset->second));
+
+		for (longHorMetric& hMetric : ttfFile.hmetrics) {
+			hMetric.advanceWidth = stream.read<uint16>(true);
+			hMetric.leftSideBearing = stream.read<sint16>(true);
+		}
+
+		for (FWord& leftSideBearing : ttfFile.leftSideBearings) {
+			leftSideBearing = stream.read<FWord>(true);
 		}
 
 		return ttfFile;

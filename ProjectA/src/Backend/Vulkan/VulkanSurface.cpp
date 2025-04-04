@@ -69,19 +69,20 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface formats (code: []).", result);
 
-		bool selected = false;
+		bool formatSelected = false;
 
 		for (const VkSurfaceFormatKHR& format : formats) {
-			if (format.format == VK_FORMAT_B8G8R8A8_SRGB) {
+			//if (format.format == VK_FORMAT_B8G8R8A8_SRGB) {
+			if (format.format == VK_FORMAT_B8G8R8A8_UNORM) {
 				this->format = format;
 
-				selected = true;
+				formatSelected = true;
 
 				break;
 			}
 		}
 
-		ENGINE_ASSERT(selected, "Unable to find a SRGB surface format.");
+		ENGINE_ASSERT(formatSelected, "Unable to select a Vulkan surface format.");
 
 		uint32 presentModeCount = 0;
 

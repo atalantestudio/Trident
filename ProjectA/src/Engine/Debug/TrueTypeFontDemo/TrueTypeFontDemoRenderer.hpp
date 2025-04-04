@@ -47,6 +47,8 @@ namespace ProjectA {
 				sint32 minCoordinateY;
 				sint32 maxCoordinateX;
 				sint32 maxCoordinateY;
+				uint32 advanceWidth;
+				sint32 leftBearing;
 				chain<GlyphEdge> edges;
 			};
 
@@ -55,6 +57,13 @@ namespace ProjectA {
 
 			ref<Buffer> glyphStagingBuffer;
 			ref<Buffer> glyphStorageBuffer;
+			ref<Buffer> glyphIndexStagingBuffer;
+			ref<Buffer> glyphIndexStorageBuffer;
+
+			uint64 maxGlyphSize;
+
+			sint32* glyphMappedRange;
+			uint32* glyphIndexMappedRange;
 
 			// High-resolution glyph.
 			ref<Image> glyphImage;

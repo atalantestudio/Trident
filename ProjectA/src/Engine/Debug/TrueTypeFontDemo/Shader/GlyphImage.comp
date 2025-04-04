@@ -12,25 +12,32 @@ layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 layout(set = 0, binding = 0) buffer readonly Glyph {
 	ivec2 minCoordinate;
 	ivec2 maxCoordinate;
+	uint advanceWidth;
+	int leftBearing;
 	Edge edges[];
 } glyph;
 
-layout(set = 0, binding = 1, r8) uniform writeonly image2D image;
+layout(set = 0, binding = 1, r8) uniform writeonly image2D glyphImage;
+
+const uint MAX_GLYPH_SQUARE_SIZE = 1949;
 
 void main() {
-	vec2 _imageSize = imageSize(image);
 	vec2 imageCoordinate = gl_GlobalInvocationID.xy;
+	vec2 glyphImageSize = imageSize(glyphImage);
 
-	if (imageCoordinate.x >= _imageSize.x || imageCoordinate.y >= _imageSize.y) {
+	if (imageCoordinate.x >= glyphImageSize.x || imageCoordinate.y >= glyphImageSize.y) {
 		return;
 	}
 
-	ivec2 glyphSquareSize = ivec2(max(glyph.maxCoordinate.x - glyph.minCoordinate.x, glyph.maxCoordinate.y - glyph.minCoordinate.y));
+	// Size of the smallest square encapsulating the glyph.
+	int glyphWidth = glyph.maxCoordinate.x - glyph.minCoordinate.x;
+	int glyphHeight = glyph.maxCoordinate.y - glyph.minCoordinate.y;
+	ivec2 glyphSquareSize = ivec2(max(glyphWidth, glyphHeight));
 
-	vec2 p = (imageCoordinate + 1.0) / vec2(_imageSize) * vec2(glyphSquareSize) + vec2(abs(glyph.minCoordinate));
+	vec2 p = imageCoordinate / vec2(glyphImageSize) * MAX_GLYPH_SQUARE_SIZE;
 
-	// Flip glyph Y.
-	p.y = glyphSquareSize.y - p.y;
+	p.x -= (MAX_GLYPH_SQUARE_SIZE - glyph.advanceWidth) / 2;
+	p.y = MAX_GLYPH_SQUARE_SIZE - 400 - p.y;
 
 	int windingNumber = 0;
 	vec4 texel = vec4(0.0, 0.0, 0.0, 1.0);
@@ -91,5 +98,5 @@ void main() {
 
 	texel.r = float(windingNumber > 0);
 
-	imageStore(image, ivec2(imageCoordinate), texel);
+	imageStore(glyphImage, ivec2(imageCoordinate), texel);
 }

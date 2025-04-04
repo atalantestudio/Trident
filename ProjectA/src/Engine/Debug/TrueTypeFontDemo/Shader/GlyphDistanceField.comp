@@ -1,13 +1,77 @@
 #version 450
 
-layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
 layout(set = 0, binding = 0, r8) uniform readonly image2D glyphImage;
+
 layout(set = 0, binding = 1, r8) uniform writeonly image2D glyphMapSdfImage;
 
-void main() {
-	vec2 imageCoordinate = gl_GlobalInvocationID.xy;
-	vec4 color = vec4(1.0, 0.2, 0.0, 1.0);
+layout(set = 0, binding = 2) buffer Glyph {
+	uint index;
+} glyph;
 
-	imageStore(glyphMapSdfImage, ivec2(imageCoordinate), color);
+// Spread factor (in a single direction).
+// The dimensions of the sample square will be calculated as SPREAD_FACTOR + 1 + SPREAD_FACTOR.
+const int SPREAD_FACTOR = 512;
+
+const ivec2 OUTPUT_IMAGE_SIZE = ivec2(64, 64);
+
+void main() {
+	ivec2 glyphMapSdfImageCoordinate = ivec2(gl_GlobalInvocationID.xy);
+	ivec2 glyphMapSdfImageSize = imageSize(glyphMapSdfImage);
+
+	if (glyphMapSdfImageCoordinate.x >= OUTPUT_IMAGE_SIZE.x || glyphMapSdfImageCoordinate.y >= OUTPUT_IMAGE_SIZE.y) {
+		return;
+	}
+
+	ivec2 glyphImageSize = imageSize(glyphImage);
+	ivec2 glyphImageCoordinate = ivec2(vec2(glyphMapSdfImageCoordinate) / vec2(OUTPUT_IMAGE_SIZE) * glyphImageSize);
+
+	uint glyphsPerLine = glyphMapSdfImageSize.x / OUTPUT_IMAGE_SIZE.x;
+	uvec2 glyphMapOffset = uvec2(glyph.index % glyphsPerLine, glyph.index / glyphsPerLine) * OUTPUT_IMAGE_SIZE;
+
+	vec4 inputTexel = imageLoad(glyphImage, glyphImageCoordinate) * 255.0;
+	vec4 outputTexel = vec4(0.0, 0.0, 0.0, 1.0);
+
+	ivec2 sampleStart;
+	sampleStart.x = max(0, glyphImageCoordinate.x - SPREAD_FACTOR);
+	sampleStart.y = max(0, glyphImageCoordinate.y - SPREAD_FACTOR);
+
+	ivec2 sampleEnd;
+	sampleEnd.x = min(glyphImageSize.x - 1, glyphImageCoordinate.x + SPREAD_FACTOR);
+	sampleEnd.y = min(glyphImageSize.y - 1, glyphImageCoordinate.y + SPREAD_FACTOR);
+
+	float closestSquareDistance = SPREAD_FACTOR * SPREAD_FACTOR;
+
+	for (uint y = sampleStart.y; y <= sampleEnd.y; y += 1) {
+		for (uint x = sampleStart.x; x <= sampleEnd.x; x += 1) {
+			ivec2 sampleCoordinate = ivec2(x, y);
+
+			float r = imageLoad(glyphImage, sampleCoordinate).r * 255.0;
+
+			if (r == inputTexel.r) {
+				continue;
+			}
+
+			float squareDistance =
+				pow(glyphImageCoordinate.x - sampleCoordinate.x, 2) +
+				pow(glyphImageCoordinate.y - sampleCoordinate.y, 2);
+
+			closestSquareDistance = min(closestSquareDistance, squareDistance);
+		}
+	}
+
+	float closestDistance = sqrt(closestSquareDistance);
+	closestDistance = min(closestDistance, SPREAD_FACTOR);
+
+	if (inputTexel.r != 255.0) {
+		closestDistance *= -1.0;
+	}
+
+	float alpha = 0.5 + 0.5 * (closestDistance / SPREAD_FACTOR);
+	alpha = floor(clamp(alpha, 0.0, 1.0) * 255.0);
+
+	outputTexel.r = alpha / 255.0;
+
+	imageStore(glyphMapSdfImage, ivec2(glyphMapSdfImageCoordinate + glyphMapOffset), outputTexel);
 }
