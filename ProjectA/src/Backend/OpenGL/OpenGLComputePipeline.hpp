@@ -12,6 +12,8 @@ namespace ProjectA {
 			~OpenGLComputePipeline();
 
 		public:
+			chain<DescriptorSetLayout> descriptorSetLayouts;
+
 			const GLuint program;
 	};
 }

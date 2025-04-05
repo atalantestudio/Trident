@@ -2,6 +2,8 @@
 
 #include <glad/glad.h>
 
+#include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
+
 #include "Engine/Renderer/RenderPipeline.hpp"
 
 namespace ProjectA {
@@ -12,6 +14,8 @@ namespace ProjectA {
 			~OpenGLRenderPipeline();
 
 		public:
+			const chain<DescriptorSetLayout> descriptorSetLayouts;
+
 			GLuint vertexArray;
 			const GLuint program;
 			const GLenum primitiveTopology;

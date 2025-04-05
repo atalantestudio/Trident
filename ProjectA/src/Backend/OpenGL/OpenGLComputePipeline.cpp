@@ -1,10 +1,12 @@
 #include "pch.hpp"
 
 #include "Backend/OpenGL/OpenGLComputePipeline.hpp"
+#include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 
 namespace ProjectA {
 	OpenGLComputePipeline::OpenGLComputePipeline(const ComputePipelineDescriptor& descriptor) :
+		descriptorSetLayouts(std::static_pointer_cast<OpenGLPipelineLayout>(descriptor.pipelineLayout)->descriptorSetLayouts),
 		program(glCreateProgram())
 	{
 		PROFILE_SCOPE(FUNC_SIG);

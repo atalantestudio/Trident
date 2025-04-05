@@ -15,7 +15,7 @@ const uvec2 OUTPUT_IMAGE_SIZE = uvec2(64, 64);
 
 // Spread factor (in a single direction).
 // The dimensions of the sample square will be calculated as SPREAD_FACTOR + 1 + SPREAD_FACTOR.
-const uint SPREAD_FACTOR = 512;
+const uint SPREAD_FACTOR = 128;
 
 void main() {
 	uvec2 glyphMapSdfImageCoordinate = gl_GlobalInvocationID.xy;
@@ -63,9 +63,9 @@ void main() {
 		}
 	}
 
-	float closestDistance = -sqrt(closestSquareDistance);
+	float closestDistance = sqrt(closestSquareDistance);
 
-	if (inputTexel.r == 1.0) {
+	if (inputTexel.r != 1.0) {
 		closestDistance *= -1.0;
 	}
 

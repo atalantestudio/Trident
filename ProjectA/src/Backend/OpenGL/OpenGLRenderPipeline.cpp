@@ -9,6 +9,7 @@
 
 namespace ProjectA {
 	OpenGLRenderPipeline::OpenGLRenderPipeline(const RenderPipelineDescriptor& descriptor) :
+		descriptorSetLayouts(std::static_pointer_cast<OpenGLPipelineLayout>(descriptor.pipelineLayout)->descriptorSetLayouts),
 		program(glCreateProgram()),
 		primitiveTopology(getGlPrimitiveTopology(descriptor.primitiveTopology)),
 		frontFace(getGlFrontFace(descriptor.frontFace)),

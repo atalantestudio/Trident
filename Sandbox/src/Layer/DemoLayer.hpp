@@ -2,12 +2,12 @@
 
 #include "ProjectA.hpp"
 
-#include "../Renderer/ComputeShaderDemoRenderer.hpp"
+#include "../Renderer/TextureDemoRenderer.hpp"
 
 namespace ProjectA {
 	class DemoLayer : public Layer {
 		private:
-			ComputeShaderDemoRenderer renderer;
+			TextureDemoRenderer renderer;
 
 		public:
 			DemoLayer(const TTFFile& ttfFile);

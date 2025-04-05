@@ -12,12 +12,6 @@ namespace ProjectA {
 	{}
 
 	void OpenGLCopyBufferToBufferCommand::execute() const {
-		glBindBuffer(GL_COPY_READ_BUFFER, sourceBuffer);
-		glBindBuffer(GL_COPY_WRITE_BUFFER, destinationBuffer);
-
-		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, sourceOffset, destinationOffset, size);
-
-		glBindBuffer(GL_COPY_READ_BUFFER, 0);
-		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+		glCopyNamedBufferSubData(sourceBuffer, destinationBuffer, sourceOffset, destinationOffset, size);
 	}
 }

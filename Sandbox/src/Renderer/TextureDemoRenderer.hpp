@@ -7,7 +7,14 @@ namespace ProjectA {
 		public:
 			TextureDemoRenderer();
 
+			void build(const ref<Image>& image);
+
 			void render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
+
+			void createImageSampler();
+			void createVertexBuffer();
+			void createIndexBuffer();
+			void createPipeline();
 
 		private:
 			struct Vertex {
