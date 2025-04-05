@@ -43,6 +43,10 @@ namespace ProjectA {
 		return ascent - descent + lineGap;
 	}
 
+	const chain<TrueTypeGlyph>& TrueTypeFont::getGlyphs() const {
+		return glyphs;
+	}
+
 	const TrueTypeGlyph& TrueTypeFont::operator [](uint16 codePoint) {
 		const uint32 glyphIndex = unicodeMap[codePoint];
 

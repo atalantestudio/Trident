@@ -7,12 +7,12 @@
 namespace ProjectA {
 	class SDFGlyphMapBuildProcess {
 		public:
-			static ref<Image> build(const TTFFile& file);
+			static ref<Image> build(const TTFFile& ttfFile);
 
 		private:
 			static void transitionImage(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout);
 
-			static uint64 computeMaxGlyphSize(const TTFFile& file);
+			static uint64 computeMaxGlyphByteSize(const TTFFile& ttfFile);
 
 		private:
 			struct alignas(8) GlyphEdge {

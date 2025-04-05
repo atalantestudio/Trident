@@ -6,11 +6,57 @@
 
 namespace ProjectA {
 	static constexpr uint64 MAX_GLYPH_COUNT = 2048;
+	static constexpr uint64 SPREAD_FACTOR = 7;
 
 	ref<Image> SDFGlyphMapBuildProcess::build(const TTFFile& ttfFile) {
 		ENGINE_ASSERT(ttfFile.glyphs.size() < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
-		const uint64 maxGlyphSize = computeMaxGlyphSize(ttfFile);
+		const ref<Device> device = Renderer::getBackend()->getDevice();
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+
+		const uint64 maxGlyphSize = computeMaxGlyphByteSize(ttfFile);
+
+		BufferDescriptor fontStagingBufferDescriptor{};
+		fontStagingBufferDescriptor.size = sizeof(sint32) * 3;
+		fontStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+
+		const ref<Buffer> fontStagingBuffer = Renderer::getBackend()->createBuffer(fontStagingBufferDescriptor);
+
+		sint32* fontMappedRange = fontStagingBuffer->map<sint32>(0, fontStagingBufferDescriptor.size);
+
+		const uint32 lineHeight = ttfFile.hhea.ascent - ttfFile.hhea.descent;
+
+		*fontMappedRange = SPREAD_FACTOR;
+
+		fontMappedRange += 1;
+
+		*fontMappedRange = ttfFile.hhea.ascent;
+
+		fontMappedRange += 1;
+
+		*fontMappedRange = ttfFile.hhea.descent;
+
+		fontStagingBuffer->unmap();
+
+		BufferDescriptor fontStorageBufferDescriptor{};
+		fontStorageBufferDescriptor.size = fontStagingBufferDescriptor.size;
+		fontStorageBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::STORAGE;
+
+		const ref<Buffer> fontStorageBuffer = Renderer::getBackend()->createBuffer(fontStorageBufferDescriptor);
+
+		{
+			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+			commandEncoder->begin();
+			commandEncoder->copyBufferToBuffer(fontStagingBuffer, fontStorageBuffer, 0, 0, fontStagingBufferDescriptor.size);
+
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->waitIdle();
+		}
 
 		BufferDescriptor glyphStagingBufferDescriptor{};
 		glyphStagingBufferDescriptor.size = maxGlyphSize;
@@ -24,18 +70,19 @@ namespace ProjectA {
 
 		const ref<Buffer> glyphStorageBuffer = Renderer::getBackend()->createBuffer(glyphStorageBufferDescriptor);
 
-		BufferDescriptor glyphIndexStagingBufferDescriptor{};
-		glyphIndexStagingBufferDescriptor.size = sizeof(uint32);
-		glyphIndexStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+		BufferDescriptor glyphOffsetStagingBufferDescriptor{};
+		glyphOffsetStagingBufferDescriptor.size = sizeof(uint32) * 3;
+		glyphOffsetStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
 
-		const ref<Buffer> glyphIndexStagingBuffer = Renderer::getBackend()->createBuffer(glyphIndexStagingBufferDescriptor);
+		const ref<Buffer> glyphOffsetStagingBuffer = Renderer::getBackend()->createBuffer(glyphOffsetStagingBufferDescriptor);
 
-		BufferDescriptor glyphIndexStorageBufferDescriptor{};
-		glyphIndexStorageBufferDescriptor.size = sizeof(uint32);
-		glyphIndexStorageBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::STORAGE;
+		BufferDescriptor glyphOffsetStorageBufferDescriptor{};
+		glyphOffsetStorageBufferDescriptor.size = glyphOffsetStagingBufferDescriptor.size;
+		glyphOffsetStorageBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::STORAGE;
 
-		const ref<Buffer> glyphIndexStorageBuffer = Renderer::getBackend()->createBuffer(glyphIndexStorageBufferDescriptor);
+		const ref<Buffer> glyphOffsetStorageBuffer = Renderer::getBackend()->createBuffer(glyphOffsetStorageBufferDescriptor);
 
+		// Used for generating the distance field for each glyph.
 		ImageDescriptor glyphImageDescriptor{};
 		glyphImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphImageDescriptor.format = ImageFormat::R8_UNORM;
@@ -53,6 +100,11 @@ namespace ProjectA {
 
 		const ref<ImageView> glyphImageView = glyphImage->createView(glyphImageViewDescriptor);
 
+		DescriptorSetLayoutBinding fontBufferDescriptorSetLayoutBinding;
+		fontBufferDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		fontBufferDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
+		fontBufferDescriptorSetLayoutBinding.buffers = {fontStorageBuffer};
+
 		DescriptorSetLayoutBinding glyphBufferDescriptorSetLayoutBinding;
 		glyphBufferDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
 		glyphBufferDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
@@ -64,7 +116,11 @@ namespace ProjectA {
 		glyphImageDescriptorSetLayoutBinding.imageViews = {glyphImageView};
 
 		DescriptorSetLayout glyphImageDescriptorSetLayout;
-		glyphImageDescriptorSetLayout.bindings = {glyphBufferDescriptorSetLayoutBinding, glyphImageDescriptorSetLayoutBinding};
+		glyphImageDescriptorSetLayout.bindings = {
+			fontBufferDescriptorSetLayoutBinding,
+			glyphBufferDescriptorSetLayoutBinding,
+			glyphImageDescriptorSetLayoutBinding,
+		};
 
 		PipelineLayoutDescriptor glyphImagePipelineLayoutDescriptor;
 		glyphImagePipelineLayoutDescriptor.layouts = {glyphImageDescriptorSetLayout};
@@ -85,12 +141,13 @@ namespace ProjectA {
 
 		const ref<ComputePipeline> glyphImagePipeline = Renderer::getBackend()->createComputePipeline(glyphImagePipelineDescriptor);
 
+		// Contains every glyph distance fields.
 		ImageDescriptor glyphMapSdfImageDescriptor{};
 		glyphMapSdfImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphMapSdfImageDescriptor.format = ImageFormat::R8_UNORM;
 		glyphMapSdfImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::STORAGE;
 		glyphMapSdfImageDescriptor.width = 2048;
-		glyphMapSdfImageDescriptor.height = 2048;
+		glyphMapSdfImageDescriptor.height = 2048; // Can be set to 1024.
 		glyphMapSdfImageDescriptor.depth = 1;
 		glyphMapSdfImageDescriptor.mipLevelCount = 1;
 		glyphMapSdfImageDescriptor.arrayLayerCount = 1;
@@ -110,7 +167,7 @@ namespace ProjectA {
 		DescriptorSetLayoutBinding glyphIndexDescriptorSetLayoutBinding;
 		glyphIndexDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
 		glyphIndexDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
-		glyphIndexDescriptorSetLayoutBinding.buffers = {glyphIndexStorageBuffer};
+		glyphIndexDescriptorSetLayoutBinding.buffers = {glyphOffsetStorageBuffer};
 
 		DescriptorSetLayout glyphSdfDescriptorSetLayout;
 		glyphSdfDescriptorSetLayout.bindings = {
@@ -141,14 +198,12 @@ namespace ProjectA {
 		transitionImage(glyphImage, ImageLayout::UNDEFINED, ImageLayout::GENERAL);
 		transitionImage(glyphMapSdfImage, ImageLayout::UNDEFINED, ImageLayout::GENERAL);
 
+		uint32 xOffset = 0;
+		uint32 yOffset = 0;
+
 		// Build process
 		{
-			const ref<Device> device = Renderer::getBackend()->getDevice();
-
-			CommandBufferDescriptor commandBufferDescriptor{};
-			commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
-
-			for (uint16 glyphIndex = 0, glyphOffset = 0; glyphIndex < 737; glyphIndex += 1) {
+			for (uint16 glyphIndex = 0; glyphIndex < ttfFile.maxp.numGlyphs; glyphIndex += 1) {
 				const Glyph& glyph = ttfFile.glyphs[glyphIndex];
 				const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
 
@@ -226,18 +281,40 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
+				float32 glyphWidth = glyph.max.x - glyph.min.x;
+				glyphWidth /= lineHeight + 64 * SPREAD_FACTOR;
+				glyphWidth *= 64;
+
+				// TODO: lyah::ceil(float32)
+				glyphWidth = std::round(glyphWidth);
+
+				glyphWidth += SPREAD_FACTOR * 2;
+
+				if (xOffset + glyphWidth >= glyphMapSdfImage->getWidth()) {
+					xOffset = 0;
+					yOffset += 64;
+				}
+
 				// TODO: Use persistent mapping for this buffer.
-				uint32* glyphIndexMappedRange = glyphIndexStagingBuffer->map<uint32>(0, sizeof(uint32));
+				uint32* glyphOffsetMappedRange = glyphOffsetStagingBuffer->map<uint32>(0, glyphOffsetStagingBufferDescriptor.size);
 
-				*glyphIndexMappedRange = glyphOffset;
+				*glyphOffsetMappedRange = xOffset;
 
-				glyphIndexStagingBuffer->unmap();
+				glyphOffsetMappedRange += 1;
+
+				*glyphOffsetMappedRange = yOffset;
+
+				glyphOffsetMappedRange += 1;
+
+				*glyphOffsetMappedRange = SPREAD_FACTOR;
+
+				glyphOffsetStagingBuffer->unmap();
 
 				{
 					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
-					commandEncoder->copyBufferToBuffer(glyphIndexStagingBuffer, glyphIndexStorageBuffer, 0, 0, sizeof(uint32));
+					commandEncoder->copyBufferToBuffer(glyphOffsetStagingBuffer, glyphOffsetStorageBuffer, 0, 0, glyphOffsetStagingBufferDescriptor.size);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -259,7 +336,7 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				glyphOffset += 1;
+				xOffset += glyphWidth;
 			}
 		}
 
@@ -285,7 +362,7 @@ namespace ProjectA {
 		device->waitIdle();
 	}
 
-	uint64 SDFGlyphMapBuildProcess::computeMaxGlyphSize(const TTFFile& ttfFile) {
+	uint64 SDFGlyphMapBuildProcess::computeMaxGlyphByteSize(const TTFFile& ttfFile) {
 		uint64 maxGlyphEdgeCount = 0;
 
 		for (const Glyph& glyph : ttfFile.glyphs) {

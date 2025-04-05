@@ -16,6 +16,8 @@ namespace ProjectA {
 
 			sint32 getLineHeight() const;
 
+			const chain<TrueTypeGlyph>& getGlyphs() const;
+
 			const TrueTypeGlyph& operator [](uint16 codePoint);
 
 		private:

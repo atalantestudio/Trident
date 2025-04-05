@@ -10,9 +10,7 @@ namespace ProjectA {
 			SandboxApplication(const ConfigurationFile& configurationFile) :
 				Application("Sandbox", configurationFile)
 			{
-				const TTFFile ttfFile = Filesystem::load<TTFFile>("assets/fonts/test.ttf");
-
-				registerLayer<DemoLayer>(ttfFile);
+				registerLayer<DemoLayer>();
 			}
 
 			~SandboxApplication() {}

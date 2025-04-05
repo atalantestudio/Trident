@@ -7,71 +7,58 @@ layout(set = 0, binding = 0, r8) uniform readonly image2D glyphImage;
 layout(set = 0, binding = 1, r8) uniform writeonly image2D glyphMapSdfImage;
 
 layout(set = 0, binding = 2) buffer Glyph {
-	uint index;
+	uvec2 offset;
+	uint spreadFactor;
 } glyph;
 
 // Size of the a glyph part in the map.
 const uvec2 OUTPUT_IMAGE_SIZE = uvec2(64, 64);
 
-// Spread factor (in a single direction) on the final image.
-// The dimensions of the sample square will be calculated as SPREAD_FACTOR + 1 + SPREAD_FACTOR.
-const uint SPREAD_FACTOR = 7;
-
-uint computeSpreadFactor() {
-	if (SPREAD_FACTOR == 0) {
-		return 1;
-	}
-
-	return OUTPUT_IMAGE_SIZE.x * SPREAD_FACTOR;
-}
-
 void main() {
-	uvec2 glyphMapSdfImageCoordinate = gl_GlobalInvocationID.xy; // Default: between (0, 0) and (63, 63)
+	uvec2 glyphMapSdfImageCoordinate = gl_GlobalInvocationID.xy;
 
-	// Verify that the coordinate is inside the glyph sub-image.
+	// Make sure that the coordinate is inside the glyph sub-image.
 	if (glyphMapSdfImageCoordinate.x >= OUTPUT_IMAGE_SIZE.x || glyphMapSdfImageCoordinate.y >= OUTPUT_IMAGE_SIZE.y) {
 		return;
 	}
 
-	uvec2 glyphMapSdfImageSize = imageSize(glyphMapSdfImage);
+	uvec2 glyphImageSize = imageSize(glyphImage);
 
-	uvec2 glyphImageSize = imageSize(glyphImage); // Default: (4096, 4096)
-	uvec2 glyphImageCoordinate = uvec2(vec2(glyphMapSdfImageCoordinate) / vec2(OUTPUT_IMAGE_SIZE) * glyphImageSize);
+	uvec2 inputTexelCoordinate = uvec2(glyphMapSdfImageCoordinate * OUTPUT_IMAGE_SIZE + OUTPUT_IMAGE_SIZE / 2);
 
-	uint glyphsPerLine = glyphMapSdfImageSize.x / OUTPUT_IMAGE_SIZE.x;
-	uvec2 glyphMapOffset = uvec2(glyph.index % glyphsPerLine, glyph.index / glyphsPerLine) * OUTPUT_IMAGE_SIZE;
-
-	vec4 inputTexel = imageLoad(glyphImage, ivec2(glyphImageCoordinate));
+	vec4 inputTexel = imageLoad(glyphImage, ivec2(inputTexelCoordinate));
 	vec4 outputTexel = vec4(0.0, 0.0, 0.0, 1.0);
 
-	const uint spreadFactor = computeSpreadFactor();
+	const uint spread = OUTPUT_IMAGE_SIZE.x * glyph.spreadFactor;
 
 	uvec2 sampleStart = uvec2(
-		max(0, glyphImageCoordinate.x - spreadFactor),
-		max(0, glyphImageCoordinate.y - spreadFactor)
+		max(0, int(inputTexelCoordinate.x) - int(spread)),
+		max(0, int(inputTexelCoordinate.y) - int(spread))
 	);
 
 	uvec2 sampleEnd = uvec2(
-		min(glyphImageSize.x - 1, glyphImageCoordinate.x + spreadFactor),
-		min(glyphImageSize.y - 1, glyphImageCoordinate.y + spreadFactor)
+		min(glyphImageSize.x - 1, inputTexelCoordinate.x + spread),
+		min(glyphImageSize.y - 1, inputTexelCoordinate.y + spread)
 	);
 
-	uint closestSquareDistance = spreadFactor * spreadFactor;
+	uint closestSquareDistance = max(1, spread * spread);
 
-	for (uint y = sampleStart.y; y <= sampleEnd.y; y += SPREAD_FACTOR) {
-		for (uint x = sampleStart.x; x <= sampleEnd.x; x += SPREAD_FACTOR) {
-			uvec2 sampleCoordinate = uvec2(x, y);
+	if (glyph.spreadFactor > 0) {
+		for (uint y = sampleStart.y; y < sampleEnd.y; y += glyph.spreadFactor) {
+			for (uint x = sampleStart.x; x < sampleEnd.x; x += glyph.spreadFactor) {
+				uvec2 sampleCoordinate = uvec2(x, y);
 
-			float r = imageLoad(glyphImage, ivec2(sampleCoordinate)).r;
+				float r = imageLoad(glyphImage, ivec2(sampleCoordinate)).r;
 
-			if (r == inputTexel.r) {
-				continue;
+				if (r == inputTexel.r) {
+					continue;
+				}
+
+				uvec2 power = ivec2(pow(ivec2(inputTexelCoordinate - sampleCoordinate), uvec2(2, 2)));
+				uint squareDistance = power.x + power.y;
+
+				closestSquareDistance = min(closestSquareDistance, squareDistance);
 			}
-
-			uvec2 power = uvec2(pow(ivec2(glyphImageCoordinate - sampleCoordinate), uvec2(2, 2)));
-			uint squareDistance = power.x + power.y;
-
-			closestSquareDistance = min(closestSquareDistance, squareDistance);
 		}
 	}
 
@@ -81,7 +68,7 @@ void main() {
 		closestDistance *= -1.0;
 	}
 
-	outputTexel.r = (closestDistance / spreadFactor) * 0.5 + 0.5;
+	outputTexel.r = (closestDistance / spread) * 0.5 + 0.5;
 
-	imageStore(glyphMapSdfImage, ivec2(glyphMapSdfImageCoordinate + glyphMapOffset), outputTexel);
+	imageStore(glyphMapSdfImage, ivec2(glyphMapSdfImageCoordinate + glyph.offset), outputTexel);
 }

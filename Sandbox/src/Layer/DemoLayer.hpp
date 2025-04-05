@@ -10,7 +10,7 @@ namespace ProjectA {
 			TextureDemoRenderer renderer;
 
 		public:
-			DemoLayer(const TTFFile& ttfFile);
+			DemoLayer();
 
 			virtual ~DemoLayer() = default;
 
