@@ -1,7 +1,8 @@
 #include "pch.hpp"
 
 #include "Engine/Application.hpp"
-#include "Engine/Debug/ComputeShaderDemo/ComputeShaderDemoRenderer.hpp"
+
+#include "ComputeShaderDemoRenderer.hpp"
 
 namespace ProjectA {
 	ComputeShaderDemoRenderer::ComputeShaderDemoRenderer() {
@@ -63,7 +64,7 @@ namespace ProjectA {
 		computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		computeShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> computeShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/ComputeShaderDemo/Shader/main.comp.spv", computeShaderModuleDescriptor);
+		const ref<ShaderModule> computeShaderModule = loadShaderModule("assets/shaders/Compute.comp.spv", computeShaderModuleDescriptor);
 
 		ComputePipelineDescriptor computePipelineDescriptor;
 		computePipelineDescriptor.pipelineLayout = computePipelineLayout;
@@ -118,13 +119,13 @@ namespace ProjectA {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/ComputeShaderDemo/Shader/main.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("assets/shaders/Compute.vert.spv", vertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/ComputeShaderDemo/Shader/main.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("assets/shaders/Compute.frag.spv", fragmentShaderModuleDescriptor);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();

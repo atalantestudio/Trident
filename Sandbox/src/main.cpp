@@ -1,24 +1,26 @@
 #include "ProjectA.hpp"
+
 #include "Engine/entry_point.hpp"
 
-#include "Layer/SandboxLayer.hpp"
-#include "Random.hpp"
+#include "Layer/DemoLayer.hpp"
 
-class SandboxApplication : public ProjectA::Application {
-	public:
-		SandboxApplication(const ProjectA::ConfigurationFile& configurationFile) :
-			ProjectA::Application("Sandbox", configurationFile)
-		{
-			registerLayer<SandboxLayer>();
+namespace ProjectA {
+	class SandboxApplication : public Application {
+		public:
+			SandboxApplication(const ConfigurationFile& configurationFile) :
+				Application("Sandbox", configurationFile)
+			{
+				const TTFFile ttfFile = Filesystem::load<TTFFile>("assets/fonts/test.ttf");
 
-			Random::initialize();
-		}
+				registerLayer<DemoLayer>(ttfFile);
+			}
 
-		~SandboxApplication() {}
-};
+			~SandboxApplication() {}
+	};
 
-ProjectA::Application* ProjectA::createApplication() {
-	const ProjectA::ConfigurationFile configurationFile = ProjectA::Filesystem::load<ProjectA::ConfigurationFile>("Sandbox.tco");
+	Application* ProjectA::createApplication() {
+		const ConfigurationFile configurationFile = Filesystem::load<ConfigurationFile>("Sandbox.tco");
 
-	return new SandboxApplication(configurationFile);
+		return new SandboxApplication(configurationFile);
+	}
 }

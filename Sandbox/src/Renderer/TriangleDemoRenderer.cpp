@@ -1,7 +1,8 @@
 #include "pch.hpp"
 
 #include "Engine/Application.hpp"
-#include "Engine/Debug/TriangleDemo/TriangleDemoRenderer.hpp"
+
+#include "TriangleDemoRenderer.hpp"
 
 namespace ProjectA {
 	TriangleDemoRenderer::TriangleDemoRenderer() {
@@ -22,7 +23,7 @@ namespace ProjectA {
 			vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 			vertexShaderModuleDescriptor.entryPoint = "main";
 
-			vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TriangleDemo/Shader/Triangle.vert.spv", vertexShaderModuleDescriptor);
+			vertexShaderModule = loadShaderModule("assets/shaders/Triangle.vert.spv", vertexShaderModuleDescriptor);
 		}
 
 		ref<ShaderModule> fragmentShaderModule;
@@ -33,7 +34,7 @@ namespace ProjectA {
 			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 			fragmentShaderModuleDescriptor.entryPoint = "main";
 
-			fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TriangleDemo/Shader/Triangle.frag.spv", fragmentShaderModuleDescriptor);
+			fragmentShaderModule = loadShaderModule("assets/shaders/Triangle.frag.spv", fragmentShaderModuleDescriptor);
 		}
 
 		// Create render pipeline.

@@ -1,9 +1,10 @@
 #include "pch.hpp"
 
 #include "Engine/Application.hpp"
-#include "Engine/Debug/TextureDemo/TextureDemoRenderer.hpp"
 #include "Engine/Filesystem/File/PNGFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
+
+#include "TextureDemoRenderer.hpp"
 
 namespace ProjectA {
 	TextureDemoRenderer::TextureDemoRenderer() {
@@ -11,7 +12,7 @@ namespace ProjectA {
 
 		// Load image.
 		{
-			const PNGFile file = Filesystem::load<PNGFile>("../ProjectA/src/Engine/Debug/TextureDemo/Asset/Zelda.png");
+			const PNGFile file = Filesystem::load<PNGFile>("assets/textures/Zelda.png");
 			const uint64 size = sizeof(uint8) * file.data.size();
 
 			BufferDescriptor stagingBufferDescriptor{};
@@ -117,13 +118,13 @@ namespace ProjectA {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TextureDemo/Shader/Texture.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("assets/shaders/Texture.vert.spv", vertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor;
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TextureDemo/Shader/Texture.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("assets/shaders/Texture.frag.spv", fragmentShaderModuleDescriptor);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();

@@ -7,7 +7,9 @@
 namespace ProjectA {
 	class TrueTypeFontDemoRenderer : public Renderer {
 		public:
-			TrueTypeFontDemoRenderer(const TTFFile& ttfFile);
+			TrueTypeFontDemoRenderer();
+
+			void build(const TTFFile& file);
 
 			void render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
 
@@ -53,7 +55,7 @@ namespace ProjectA {
 			};
 
 		private:
-			const TTFFile& ttfFile;
+			TTFFile ttfFile;
 
 			ref<Buffer> glyphStagingBuffer;
 			ref<Buffer> glyphStorageBuffer;

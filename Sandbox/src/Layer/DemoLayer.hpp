@@ -2,6 +2,8 @@
 
 #include "ProjectA.hpp"
 
+#include "../Renderer/ComputeShaderDemoRenderer.hpp"
+
 namespace ProjectA {
 	class DemoLayer : public Layer {
 		private:

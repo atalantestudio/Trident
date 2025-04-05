@@ -1,6 +1,6 @@
 workspace "ProjectA"
 	architecture "x86_64"
-	startproject "Editor"
+	startproject "Sandbox"
 
 	configurations {
 		"Debug",

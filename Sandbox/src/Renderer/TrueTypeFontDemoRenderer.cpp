@@ -1,13 +1,16 @@
 #include "pch.hpp"
 
 #include "Engine/Application.hpp"
-#include "Engine/Debug/TrueTypeFontDemo/TrueTypeFontDemoRenderer.hpp"
+
+#include "TrueTypeFontDemoRenderer.hpp"
 
 namespace ProjectA {
-	TrueTypeFontDemoRenderer::TrueTypeFontDemoRenderer(const TTFFile& ttfFile) :
-		ttfFile(ttfFile)
-	{
+	TrueTypeFontDemoRenderer::TrueTypeFontDemoRenderer() {}
+
+	void TrueTypeFontDemoRenderer::build(const TTFFile& ttfFile) {
 		ENGINE_ASSERT(ttfFile.glyphs.size() < 4096, "Too much glyphs to compute.");
+
+		this->ttfFile = ttfFile;
 
 		createGlyphBuffers();
 		createGlyphImage();
@@ -103,7 +106,7 @@ namespace ProjectA {
 		shaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		shaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> shaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TrueTypeFontDemo/Shader/GlyphImage.comp.spv", shaderModuleDescriptor);
+		const ref<ShaderModule> shaderModule = loadShaderModule("assets/shaders/GlyphImage.comp.spv", shaderModuleDescriptor);
 
 		ComputePipelineDescriptor computePipelineDescriptor;
 		computePipelineDescriptor.pipelineLayout = glyphImageComputePipelineLayout;
@@ -171,7 +174,7 @@ namespace ProjectA {
 		shaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		shaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> shaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TrueTypeFontDemo/Shader/GlyphDistanceField.comp.spv", shaderModuleDescriptor);
+		const ref<ShaderModule> shaderModule = loadShaderModule("assets/shaders/GlyphDistanceField.comp.spv", shaderModuleDescriptor);
 
 		ComputePipelineDescriptor computePipelineDescriptor;
 		computePipelineDescriptor.pipelineLayout = glyphSdfImageComputePipelineLayout;
@@ -285,13 +288,13 @@ namespace ProjectA {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TrueTypeFontDemo/Shader/main.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("assets/shaders/Glyph.vert.spv", vertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Debug/TrueTypeFontDemo/Shader/main.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("assets/shaders/Glyph.frag.spv", fragmentShaderModuleDescriptor);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();

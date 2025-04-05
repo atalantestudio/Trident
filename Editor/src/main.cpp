@@ -2,7 +2,7 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Layer/DemoLayer.hpp"
+#include "Layer/DemoGUILayer.hpp"
 
 namespace ProjectA {
 	class EditorApplication : public Application {
@@ -10,9 +10,7 @@ namespace ProjectA {
 			EditorApplication(const ConfigurationFile& configurationFile) :
 				Application("ProjectA Editor", configurationFile)
 			{
-				const TTFFile ttfFile = Filesystem::load<TTFFile>("assets/fonts/test.ttf");
-
-				registerLayer<DemoLayer>(ttfFile);
+				registerLayer<DemoGUILayer>();
 			}
 
 			~EditorApplication() {}
