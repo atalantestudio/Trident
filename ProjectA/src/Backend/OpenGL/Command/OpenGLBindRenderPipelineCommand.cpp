@@ -28,7 +28,7 @@ namespace ProjectA {
 			glCullFace(renderPipeline->cullMode);
 		}
 
-		glEnable(GL_FRAMEBUFFER_SRGB);
+		//glEnable(GL_FRAMEBUFFER_SRGB);
 
 		// TODO: Expose.
 		//glEnable(GL_BLEND);

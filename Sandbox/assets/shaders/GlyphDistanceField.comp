@@ -1,6 +1,6 @@
 #version 450
 
-layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 layout(set = 0, binding = 0, r8) uniform readonly image2D glyphImage;
 
@@ -13,19 +13,29 @@ layout(set = 0, binding = 2) buffer Glyph {
 // Size of the a glyph part in the map.
 const uvec2 OUTPUT_IMAGE_SIZE = uvec2(64, 64);
 
-// Spread factor (in a single direction).
+// Spread factor (in a single direction) on the final image.
 // The dimensions of the sample square will be calculated as SPREAD_FACTOR + 1 + SPREAD_FACTOR.
-const uint SPREAD_FACTOR = 128;
+const uint SPREAD_FACTOR = 7;
+
+uint computeSpreadFactor() {
+	if (SPREAD_FACTOR == 0) {
+		return 1;
+	}
+
+	return OUTPUT_IMAGE_SIZE.x * SPREAD_FACTOR;
+}
 
 void main() {
-	uvec2 glyphMapSdfImageCoordinate = gl_GlobalInvocationID.xy;
-	uvec2 glyphMapSdfImageSize = imageSize(glyphMapSdfImage);
+	uvec2 glyphMapSdfImageCoordinate = gl_GlobalInvocationID.xy; // Default: between (0, 0) and (63, 63)
 
+	// Verify that the coordinate is inside the glyph sub-image.
 	if (glyphMapSdfImageCoordinate.x >= OUTPUT_IMAGE_SIZE.x || glyphMapSdfImageCoordinate.y >= OUTPUT_IMAGE_SIZE.y) {
 		return;
 	}
 
-	uvec2 glyphImageSize = imageSize(glyphImage);
+	uvec2 glyphMapSdfImageSize = imageSize(glyphMapSdfImage);
+
+	uvec2 glyphImageSize = imageSize(glyphImage); // Default: (4096, 4096)
 	uvec2 glyphImageCoordinate = uvec2(vec2(glyphMapSdfImageCoordinate) / vec2(OUTPUT_IMAGE_SIZE) * glyphImageSize);
 
 	uint glyphsPerLine = glyphMapSdfImageSize.x / OUTPUT_IMAGE_SIZE.x;
@@ -34,20 +44,22 @@ void main() {
 	vec4 inputTexel = imageLoad(glyphImage, ivec2(glyphImageCoordinate));
 	vec4 outputTexel = vec4(0.0, 0.0, 0.0, 1.0);
 
+	const uint spreadFactor = computeSpreadFactor();
+
 	uvec2 sampleStart = uvec2(
-		max(0, glyphImageCoordinate.x - SPREAD_FACTOR),
-		max(0, glyphImageCoordinate.y - SPREAD_FACTOR)
+		max(0, glyphImageCoordinate.x - spreadFactor),
+		max(0, glyphImageCoordinate.y - spreadFactor)
 	);
 
 	uvec2 sampleEnd = uvec2(
-		min(glyphImageSize.x - 1, glyphImageCoordinate.x + SPREAD_FACTOR),
-		min(glyphImageSize.y - 1, glyphImageCoordinate.y + SPREAD_FACTOR)
+		min(glyphImageSize.x - 1, glyphImageCoordinate.x + spreadFactor),
+		min(glyphImageSize.y - 1, glyphImageCoordinate.y + spreadFactor)
 	);
 
-	uint closestSquareDistance = SPREAD_FACTOR * SPREAD_FACTOR;
+	uint closestSquareDistance = spreadFactor * spreadFactor;
 
-	for (uint y = sampleStart.y; y <= sampleEnd.y; y += 1) {
-		for (uint x = sampleStart.x; x <= sampleEnd.x; x += 1) {
+	for (uint y = sampleStart.y; y <= sampleEnd.y; y += SPREAD_FACTOR) {
+		for (uint x = sampleStart.x; x <= sampleEnd.x; x += SPREAD_FACTOR) {
 			uvec2 sampleCoordinate = uvec2(x, y);
 
 			float r = imageLoad(glyphImage, ivec2(sampleCoordinate)).r;
@@ -69,7 +81,7 @@ void main() {
 		closestDistance *= -1.0;
 	}
 
-	outputTexel.r = (closestDistance / SPREAD_FACTOR) * 0.5 + 0.5;
+	outputTexel.r = (closestDistance / spreadFactor) * 0.5 + 0.5;
 
 	imageStore(glyphMapSdfImage, ivec2(glyphMapSdfImageCoordinate + glyphMapOffset), outputTexel);
 }

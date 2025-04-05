@@ -5,8 +5,10 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
+	static constexpr uint64 MAX_GLYPH_COUNT = 2048;
+
 	ref<Image> SDFGlyphMapBuildProcess::build(const TTFFile& ttfFile) {
-		ENGINE_ASSERT(ttfFile.glyphs.size() < 4096, "The input font must have less than 4096 glyphs.");
+		ENGINE_ASSERT(ttfFile.glyphs.size() < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
 		const uint64 maxGlyphSize = computeMaxGlyphSize(ttfFile);
 
@@ -87,8 +89,8 @@ namespace ProjectA {
 		glyphMapSdfImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphMapSdfImageDescriptor.format = ImageFormat::R8_UNORM;
 		glyphMapSdfImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::STORAGE;
-		glyphMapSdfImageDescriptor.width = 512;
-		glyphMapSdfImageDescriptor.height = 512;
+		glyphMapSdfImageDescriptor.width = 2048;
+		glyphMapSdfImageDescriptor.height = 2048;
 		glyphMapSdfImageDescriptor.depth = 1;
 		glyphMapSdfImageDescriptor.mipLevelCount = 1;
 		glyphMapSdfImageDescriptor.arrayLayerCount = 1;
@@ -146,9 +148,7 @@ namespace ProjectA {
 			CommandBufferDescriptor commandBufferDescriptor{};
 			commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
-			for (uint16 glyphIndex = 0, glyphOffset = 0; glyphIndex < 1; glyphIndex += 1) {
-				ENGINE_TRACE("Computing SDF for glyph [].", glyphIndex);
-
+			for (uint16 glyphIndex = 0, glyphOffset = 0; glyphIndex < 737; glyphIndex += 1) {
 				const Glyph& glyph = ttfFile.glyphs[glyphIndex];
 				const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
 
