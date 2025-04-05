@@ -43,6 +43,7 @@ namespace ProjectA {
 	};
 
 	struct Glyph {
+		uint16 codePoint;
 		Point min = {0, 0};
 		Point max = {0, 0};
 		chain<Edge> edges;
@@ -179,8 +180,11 @@ namespace ProjectA {
 	};
 
 	struct TTFFile : public File {
+		std::unordered_map<uint16, uint32> unicodeMap;
 		chain<Glyph> glyphs;
-		chain<longHorMetric> hmetrics;
+		chain<longHorMetric> hMetrics;
 		chain<FWord> leftSideBearings;
+		maxp maxp;
+		hhea hhea;
 	};
 }

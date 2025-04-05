@@ -388,7 +388,7 @@ namespace ProjectA {
 			ENGINE_TRACE("Computing SDF for glyph [].", glyphIndex);
 
 			const Glyph& glyph = ttfFile.glyphs[glyphIndex];
-			const longHorMetric& hMetric = ttfFile.hmetrics[glyphIndex];
+			const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
 
 			if (glyph.edges.empty()) {
 				continue;

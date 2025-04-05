@@ -4,8 +4,8 @@
 #include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/ECS/Component/ScriptComponent.hpp"
 #include "Engine/GUI/GUILayer.hpp"
-#include "Engine/Renderer/Font/BitmapFont.hpp"
-#include "Engine/Renderer/Font/GlyphMap.hpp"
+#include "Engine/Renderer/Font/Bitmap/BitmapFont.hpp"
+#include "Engine/Renderer/Font/Bitmap/BitmapGlyphMap.hpp"
 
 namespace ProjectA {
 	GUILayer::GUILayer() {
@@ -29,7 +29,7 @@ namespace ProjectA {
 	void GUILayer::loadDefaultFont() {
 		const ref<BitmapFont> defaultFont = createRef<BitmapFont>();
 		defaultFont->textureIndex = static_cast<uint32>(images.size());
-		defaultFont->glyphMap.map = QUIVER_GLYPH_MAP;
+		defaultFont->glyphMap.map = QUIVER_BITMAP_GLYPH_MAP;
         defaultFont->glyphMap.base = 32;
         defaultFont->glyphMap.count = 220;
         defaultFont->tileHeight = 12;

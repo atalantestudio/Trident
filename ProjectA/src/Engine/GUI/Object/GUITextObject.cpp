@@ -2,7 +2,7 @@
 
 #include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/GUI/Object/GUITextObject.hpp"
-#include "Engine/Renderer/Font/BitmapFont.hpp"
+#include "Engine/Renderer/Font/Bitmap/BitmapFont.hpp"
 
 namespace ProjectA {
 	GUITextObject::GUITextObject(const std::string& text) :
@@ -15,7 +15,7 @@ namespace ProjectA {
 		float32 xOffset = parentMargin[0];
 
 		for (const char character : text) {
-			const Glyph& glyph = bitmapFont.glyphMap.map[character - bitmapFont.glyphMap.base];
+			const BitmapGlyph& glyph = bitmapFont.glyphMap.map[character - bitmapFont.glyphMap.base];
 
 			GUISubcomponent subcomponent;
 			subcomponent.offset = {xOffset, parentMargin[1]};

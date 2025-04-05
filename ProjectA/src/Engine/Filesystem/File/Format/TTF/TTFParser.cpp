@@ -507,13 +507,13 @@ namespace ProjectA {
 		stream.reset();
 		stream.jump(static_cast<uint64>(tableOffset->second));
 
-		const maxp maxp = parseMaxpTable(stream);
+		ttfFile.maxp = parseMaxpTable(stream);
 
 		// The actual local offset divided by 2 is stored. The value of n is the number of glyphs in the font + 1.
 		// The number of glyphs in the font is found in the maximum profile table.
-		fchain<uint16> glyphOffsets(maxp.numGlyphs + 1);
+		fchain<uint16> glyphOffsets(ttfFile.maxp.numGlyphs + 1);
 
-		fchain<uint16> glyphLengths(maxp.numGlyphs + 1);
+		fchain<uint16> glyphLengths(ttfFile.maxp.numGlyphs + 1);
 
 		// Parse 'loca' table.
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6loca.html
@@ -539,11 +539,11 @@ namespace ProjectA {
 		}
 
 		// Leave last glyph length as 0.
-		for (uint16 glyphIndex = regCount * 8; glyphIndex < maxp.numGlyphs; glyphIndex += 1) {
+		for (uint16 glyphIndex = regCount * 8; glyphIndex < ttfFile.maxp.numGlyphs; glyphIndex += 1) {
 			glyphLengths[glyphIndex] = glyphOffsets[glyphIndex + 1] - glyphOffsets[glyphIndex];
 		}
 
-		ttfFile.glyphs.resize(maxp.numGlyphs);
+		ttfFile.glyphs.resize(ttfFile.maxp.numGlyphs);
 
 		// Parse 'glyf' table.
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
@@ -551,7 +551,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'glyf' table.");
 
-		for (uint16 glyphIndex = 0; glyphIndex < maxp.numGlyphs; glyphIndex += 1) {
+		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.maxp.numGlyphs; glyphIndex += 1) {
 			// Need to reset + jump to peek the number of contours.
 			stream.reset();
 			stream.jump(static_cast<uint64>(tableOffset->second + glyphOffsets[glyphIndex]));
@@ -565,10 +565,10 @@ namespace ProjectA {
 			}
 
 			if (numberOfContours >= 0) {
-				ttfFile.glyphs[glyphIndex] = parseSimpleGlyph(stream, tableOffset->second, glyphOffsets, glyphIndex, maxp.maxComponentDepth);
+				ttfFile.glyphs[glyphIndex] = parseSimpleGlyph(stream, tableOffset->second, glyphOffsets, glyphIndex, ttfFile.maxp.maxComponentDepth);
 			}
 			else {
-				ttfFile.glyphs[glyphIndex] = parseCompoundGlyph(stream, tableOffset->second, glyphOffsets, glyphIndex, maxp.maxComponentDepth);
+				ttfFile.glyphs[glyphIndex] = parseCompoundGlyph(stream, tableOffset->second, glyphOffsets, glyphIndex, ttfFile.maxp.maxComponentDepth);
 			}
 		}
 
@@ -580,10 +580,10 @@ namespace ProjectA {
 		stream.reset();
 		stream.jump(static_cast<uint64>(tableOffset->second));
 
-		const hhea hhea = parseHheaTable(stream);
+		ttfFile.hhea = parseHheaTable(stream);
 
-		ttfFile.hmetrics.resize(hhea.numOfLongHorMetrics);
-		ttfFile.leftSideBearings.resize(maxp.numGlyphs - hhea.numOfLongHorMetrics);
+		ttfFile.hMetrics.resize(ttfFile.hhea.numOfLongHorMetrics);
+		ttfFile.leftSideBearings.resize(ttfFile.maxp.numGlyphs - ttfFile.hhea.numOfLongHorMetrics);
 
 		// Parse 'hmtx' table.
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6hmtx.html
@@ -594,13 +594,153 @@ namespace ProjectA {
 		stream.reset();
 		stream.jump(static_cast<uint64>(tableOffset->second));
 
-		for (longHorMetric& hMetric : ttfFile.hmetrics) {
+		for (longHorMetric& hMetric : ttfFile.hMetrics) {
 			hMetric.advanceWidth = stream.read<uint16>(true);
 			hMetric.leftSideBearing = stream.read<sint16>(true);
 		}
 
 		for (FWord& leftSideBearing : ttfFile.leftSideBearings) {
 			leftSideBearing = stream.read<FWord>(true);
+		}
+
+		// Parse 'cmap' table.
+		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6cmap.html
+		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("cmap"));
+
+		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'cmap' table.");
+
+		stream.reset();
+		stream.jump(static_cast<uint64>(tableOffset->second));
+
+		// Skip version.
+		stream.jump(sizeof(uint16));
+
+		// Number of encoding subtables.
+		const uint16 numberSubtables = stream.read<uint16>(true);
+
+		uint64 subtableOffset = stream.getByteOffset();
+		uint64 unicodeTableOffset = 0;
+
+		// Find Unicode table.
+		for (uint16 subtableIndex = 0; subtableIndex < numberSubtables; subtableIndex += 1) {
+			stream.reset();
+			stream.jump(subtableOffset);
+
+			// Platform identifier.
+			const uint16 platformID = stream.read<uint16>(true);
+
+			// Skip platformSpecificID.
+			stream.jump(sizeof(uint16));
+
+			const uint32 offset = stream.read<uint32>(true);
+
+			if (platformID == 0) {
+				subtableOffset = stream.getByteOffset();
+
+				stream.reset();
+				stream.jump(static_cast<uint64>(tableOffset->second + offset));
+
+				const uint16 format = stream.read<uint16>(true);
+
+				if (format == 4) {
+					unicodeTableOffset = stream.getByteOffset();
+
+					break;
+				}
+			}
+
+			ENGINE_WARN("The Unicode table was not found on the first iteration.");
+		}
+
+		ENGINE_ASSERT(unicodeTableOffset != 0, "Failed to find Unicode table.");
+
+		// Parse Unicode table.
+		{
+			stream.reset();
+			stream.jump(unicodeTableOffset);
+
+			const uint16 length = stream.read<uint16>(true);
+			const uint16 language = stream.read<uint16>(true);
+			const uint16 segCountX2 = stream.read<uint16>(true);
+			const uint16 segCount = segCountX2 / 2;
+			const uint16 searchRange = stream.read<uint16>(true);
+			const uint16 entrySelector = stream.read<uint16>(true);
+			const uint16 rangeShift = stream.read<uint16>(true);
+
+			fchain<uint16> endCodes(segCount);
+
+			for (uint16& endCode : endCodes) {
+				endCode = stream.read<uint16>(true);
+			}
+
+			stream.jump(sizeof(uint16));
+
+			fchain<uint16> startCodes(segCount);
+
+			for (uint16& startCode : startCodes) {
+				startCode = stream.read<uint16>(true);
+			}
+
+			fchain<uint16> idDeltas(segCount);
+
+			for (uint16& idDelta : idDeltas) {
+				idDelta = stream.read<uint16>(true);
+			}
+
+			chain<uint16> idRangeOffsets(segCount);
+
+			for (uint16& idRangeOffset : idRangeOffsets) {
+				idRangeOffset = stream.read<uint16>(true);
+			}
+
+			const uint64 glyphIndexArrayCount = (length - (stream.getByteOffset() - unicodeTableOffset)) / 2;
+
+			idRangeOffsets.resize(segCount + glyphIndexArrayCount);
+
+			for (uint32 glyphIndexIndex = 0; glyphIndexIndex < glyphIndexArrayCount; glyphIndexIndex += 1) {
+				idRangeOffsets[segCount + glyphIndexIndex] = stream.read<uint16>(true);
+			}
+
+			for (uint16 segmentIndex = 0; segmentIndex < segCount; segmentIndex += 1) {
+				const uint16 startCode = startCodes[segmentIndex];
+				const uint16 endCode = endCodes[segmentIndex];
+				const uint16 idRangeOffset = idRangeOffsets[segmentIndex];
+
+				if (idRangeOffset == 0) {
+					for (uint16 code = startCode; code <= endCode; code += 1) {
+						const uint32 glyphIndex = static_cast<uint32>(idDeltas[segmentIndex] + code) % 65536;
+
+						ttfFile.unicodeMap.insert(std::make_pair(code, glyphIndex));
+
+						// TODO: Debug-only.
+						if (glyphIndex != 0) {
+							ttfFile.glyphs[glyphIndex].codePoint = code;
+						}
+
+						if (startCode == endCode) {
+							break;
+						}
+					}
+				}
+				else {
+					// If the idRangeOffset value for the segment is not 0,
+					// the mapping of the character codes relies on the glyphIndexArray.
+					for (uint16 code = startCode; code <= endCode; code += 1) {
+						const uint32 glyphIndex = *(&idRangeOffsets[segmentIndex] + (idRangeOffsets[segmentIndex] / 2) + (code - startCode));
+
+						ttfFile.unicodeMap.insert(std::make_pair(code, glyphIndex));
+
+						// TODO: Debug-only.
+						if (glyphIndex != 0) {
+							ttfFile.glyphs[glyphIndex].codePoint = code;
+						}
+
+						if (startCode == endCode) {
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		return ttfFile;

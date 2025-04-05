@@ -1,19 +1,19 @@
 #pragma once
 
-#include "Engine/Renderer/Font/Glyph.hpp"
+#include "Engine/Renderer/Font/Bitmap/BitmapGlyph.hpp"
 
 namespace ProjectA {
-	class GlyphMap {
+	class BitmapGlyphMap {
         public:
             // TODO: Access glyphs with [] operator.
 
         public:
-		    const Glyph* map;
+		    const BitmapGlyph* map;
 		    uint8 count;
 		    uint8 base;
 	};
 
-	static const Glyph QUIVER_GLYPH_MAP[220] = {
+	static const BitmapGlyph QUIVER_BITMAP_GLYPH_MAP[220] = {
         {4.0f, {29.0f, 72.0f}},
         {1.0f, {17.0f, 36.0f}},
         {3.0f, {6.0f, 36.0f}},
