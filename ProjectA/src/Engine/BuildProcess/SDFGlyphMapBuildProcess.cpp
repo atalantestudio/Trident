@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	ref<Image> SDFGlyphMapBuildProcess::build(const TTFFile& ttfFile) {
-		ENGINE_ASSERT(ttfFile.glyphs.size() < 4096, "Too much glyphs to compute.");
+		ENGINE_ASSERT(ttfFile.glyphs.size() < 4096, "The input font must have less than 4096 glyphs.");
 
 		const uint64 maxGlyphSize = computeMaxGlyphSize(ttfFile);
 

@@ -191,8 +191,6 @@ namespace ProjectA {
 
 				break;
 			default:
-				ENGINE_WARN("Ignored unhandled Vulkan image layout (as old image layout).");
-
 				break;
 		}
 
@@ -210,8 +208,6 @@ namespace ProjectA {
 
 				break;
 			default:
-				ENGINE_WARN("Ignored unhandled Vulkan image layout (as new image layout).");
-
 				break;
 		}
 

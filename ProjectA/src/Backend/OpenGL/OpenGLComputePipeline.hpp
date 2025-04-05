@@ -2,6 +2,8 @@
 
 #include <glad/glad.h>
 
+#include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
+
 #include "Engine/Renderer/ComputePipeline.hpp"
 
 namespace ProjectA {
@@ -12,7 +14,7 @@ namespace ProjectA {
 			~OpenGLComputePipeline();
 
 		public:
-			chain<DescriptorSetLayout> descriptorSetLayouts;
+			const OpenGLPipelineLayout& layout;
 
 			const GLuint program;
 	};

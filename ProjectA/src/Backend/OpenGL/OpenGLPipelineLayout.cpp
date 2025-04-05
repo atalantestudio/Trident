@@ -2,33 +2,37 @@
 
 #include <glad/glad.h>
 
+#include "Backend/OpenGL/DescriptorType.hpp"
+#include "Backend/OpenGL/OpenGLBuffer.hpp"
+#include "Backend/OpenGL/OpenGLImageView.hpp"
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
+#include "Backend/OpenGL/OpenGLSampler.hpp"
 
 namespace ProjectA {
 	OpenGLPipelineLayout::OpenGLPipelineLayout(const PipelineLayoutDescriptor& descriptor) :
 		descriptorSetLayouts(descriptor.layouts)
-	{
-		/*for (uint32 layoutIndex = 0; layoutIndex < descriptor.layouts.size(); layoutIndex += 1) {
-			const DescriptorSetLayout& descriptorSetLayout = descriptor.layouts[layoutIndex];
+	{}
 
-			for (uint32 bindingIndex = 0; bindingIndex < descriptorSetLayout.bindings.size(); bindingIndex += 1) {
-				const DescriptorSetLayoutBinding& binding = descriptorSetLayout.bindings[bindingIndex];
+	void OpenGLPipelineLayout::bind() const {
+		for (const DescriptorSetLayout& descriptorSetLayout : descriptorSetLayouts) {
+			for (uint32 binding = 0; binding < descriptorSetLayout.bindings.size(); binding += 1) {
+				const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout.bindings[binding];
 
-				for (const ref<Buffer>& buffer : binding.buffers) {
+				for (const ref<Buffer>& buffer : descriptorSetLayoutBinding.buffers) {
 					const ref<OpenGLBuffer> glBuffer = std::static_pointer_cast<OpenGLBuffer>(buffer);
 
-					glBindBufferRange(getGlDescriptorType(binding.descriptorType), bindingIndex, glBuffer->object, 0, glBuffer->size);
+					glBindBufferRange(getGlDescriptorType(descriptorSetLayoutBinding.descriptorType), binding, glBuffer->object, 0, glBuffer->size);
 				}
 
-				for (uint32 imageViewIndex = 0; imageViewIndex < binding.imageViews.size(); imageViewIndex += 1) {
-					const ref<OpenGLImageView> imageView = std::static_pointer_cast<OpenGLImageView>(binding.imageViews[imageViewIndex]);
+				for (uint32 imageViewIndex = 0; imageViewIndex < descriptorSetLayoutBinding.imageViews.size(); imageViewIndex += 1) {
+					const ref<OpenGLImageView> imageView = std::static_pointer_cast<OpenGLImageView>(descriptorSetLayoutBinding.imageViews[imageViewIndex]);
 
-					glBindTextureUnit(bindingIndex, imageView->object);
+					glBindTextureUnit(binding, imageView->object);
 
-					if (imageViewIndex < binding.samplers.size()) {
-						const ref<OpenGLSampler> sampler = std::static_pointer_cast<OpenGLSampler>(binding.samplers[imageViewIndex]);
+					if (imageViewIndex < descriptorSetLayoutBinding.samplers.size()) {
+						const ref<OpenGLSampler> sampler = std::static_pointer_cast<OpenGLSampler>(descriptorSetLayoutBinding.samplers[imageViewIndex]);
 
-						glBindSampler(bindingIndex, sampler->object);
+						glBindSampler(binding, sampler->object);
 					}
 
 					GLenum internalFormat = imageView->image.internalFormat;
@@ -39,9 +43,9 @@ namespace ProjectA {
 					}
 
 					// TODO: Use correct access.
-					glBindImageTexture(bindingIndex, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, internalFormat);
+					glBindImageTexture(binding, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, internalFormat);
 				}
 			}
-		}*/
+		}
 	}
 }

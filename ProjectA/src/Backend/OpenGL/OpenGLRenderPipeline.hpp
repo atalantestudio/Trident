@@ -14,7 +14,7 @@ namespace ProjectA {
 			~OpenGLRenderPipeline();
 
 		public:
-			const chain<DescriptorSetLayout> descriptorSetLayouts;
+			const OpenGLPipelineLayout& layout;
 
 			GLuint vertexArray;
 			const GLuint program;
