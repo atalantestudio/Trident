@@ -34,7 +34,7 @@ namespace ProjectA {
 
 			void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) override;
 
-			void setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const override;
+			void setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) override;
 
 			void setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) override;
 

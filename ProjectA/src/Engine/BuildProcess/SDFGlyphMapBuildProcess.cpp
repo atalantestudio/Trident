@@ -203,7 +203,7 @@ namespace ProjectA {
 
 		// Build process
 		{
-			for (uint16 glyphIndex = 0; glyphIndex < ttfFile.maxp.numGlyphs; glyphIndex += 1) {
+			for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.size(); glyphIndex += 1) {
 				const Glyph& glyph = ttfFile.glyphs[glyphIndex];
 				const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
 
@@ -281,7 +281,7 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				float32 glyphWidth = glyph.max.x - glyph.min.x;
+				float32 glyphWidth = static_cast<float32>(glyph.max.x - glyph.min.x);
 				glyphWidth /= lineHeight + 64 * SPREAD_FACTOR;
 				glyphWidth *= 64;
 
@@ -336,7 +336,7 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				xOffset += glyphWidth;
+				xOffset += static_cast<uint32>(glyphWidth);
 			}
 		}
 

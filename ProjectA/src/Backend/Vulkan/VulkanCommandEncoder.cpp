@@ -168,7 +168,7 @@ namespace ProjectA {
 		vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
 	}
 
-	void VulkanCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const {
+	void VulkanCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
 		VkImageMemoryBarrier imageMemoryBarrier{};
 		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 		imageMemoryBarrier.pNext = nullptr;

@@ -12,6 +12,7 @@
 #include "Backend/OpenGL/Command/OpenGLDispatchGroupsCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLSetImageMemoryBarrierCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetViewportCommand.hpp"
 #include "Backend/OpenGL/IndexType.hpp"
 #include "Backend/OpenGL/OpenGLCommandBuffer.hpp"
@@ -90,9 +91,21 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLDispatchGroupsCommand>(groupCountX, groupCountY, groupCountZ));
 	}
 
-	void OpenGLCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) const {
-		// TODO: Implement.
-		// glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	void OpenGLCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
+		GLbitfield barrier = 0;
+
+		switch (newLayout) {
+			case ImageLayout::SHADER_READ_ONLY_OPTIMAL:
+				barrier = GL_SHADER_IMAGE_ACCESS_BARRIER_BIT;
+
+				break;
+		}
+
+		if (barrier == 0) {
+			return;
+		}
+
+		commandBuffer.emplace_back(createRef<OpenGLSetImageMemoryBarrierCommand>(barrier));
 	}
 
 	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
