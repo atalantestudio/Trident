@@ -19,6 +19,6 @@ out VertexOutput {
 void main() {
 	gl_Position = vec4(camera.projection * world * vertexPosition, 1.0);
 
-	vertexOutput.textureCoordinates = vec3(vertexTextureCoordinates, textureIndex);
+	vertexOutput.textureCoordinates = vertexTextureCoordinates;
 	//vertexOutput.colorIndex = colorIndex;
 }

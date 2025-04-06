@@ -1,17 +1,20 @@
 #version 450
 
-layout(location = 0) in vec2 textureCoordinate;
+in VertexOutput {
+	layout(location = 0) vec2 textureCoordinate;
+} vertexOutput;
 
-layout(set = 0, binding = 0) uniform sampler2D textureSampler;
+layout(set = 0, binding = 1) uniform sampler2D textureSampler;
 
 layout(location = 0) out vec4 color;
 
 const float ALPHA_THRESHOLD = 0.5;
 
 void main() {
-	vec2 uv = vec2(textureCoordinate.x, 1.0 - textureCoordinate.y);
-	vec4 texel = texture(textureSampler, uv);
+	vec2 textureCoordinate = vertexOutput.textureCoordinate;
 
-	//color.rgb = vec3(texel.r >= ALPHA_THRESHOLD);
-	color.rgb = vec3(texel.r);
+	vec4 texel = texture(textureSampler, textureCoordinate);
+
+	color.rgb = vec3(texel.r >= ALPHA_THRESHOLD);
+	//color.rgb += vec3(1.0, 0.2, 0.0);
 }

@@ -120,14 +120,29 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {}
+	void OpenGLCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {
+		// TODO: Implement setScissor command.
+	}
 
 	void OpenGLCommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) {
-		commandBuffer.emplace_back(createRef<OpenGLDrawCommand>(renderPipeline->primitiveTopology, vertexOffset, vertexCount, instanceCount));
+		commandBuffer.emplace_back(createRef<OpenGLDrawCommand>(
+			renderPipeline->primitiveTopology,
+			vertexOffset,
+			vertexCount,
+			instanceCount
+		));
 	}
 
 	void OpenGLCommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) {
-		commandBuffer.emplace_back(createRef<OpenGLDrawIndexedCommand>(renderPipeline->primitiveTopology, indexCount, indexType, reinterpret_cast<const GLvoid*>(static_cast<std::uintptr_t>(this->indexOffset + indexOffset * indexTypeSize)), instanceCount));
+		const uint32 indices = this->indexOffset + indexOffset * indexTypeSize;
+
+		commandBuffer.emplace_back(createRef<OpenGLDrawIndexedCommand>(
+			renderPipeline->primitiveTopology,
+			indexCount,
+			indexType,
+			static_cast<const GLvoid*>(&indices),
+			instanceCount
+		));
 	}
 
 	void OpenGLCommandEncoder::endRenderPass() const {}

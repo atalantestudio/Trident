@@ -3,20 +3,6 @@
 #include "ProjectA.hpp"
 
 namespace ProjectA {
-	class DemoGUILayer : public GUILayer {
-		public:
-			DemoGUILayer() {
-				loadDefaultFont();
-
-				appendRoot<GUITextObject>("text");
-
-				//appendRoot<PersonListWindow>();
-
-				compute();
-				registerEntityPool();
-			}
-	};
-
 	struct Person {
 		uint32 id = 0;
 		std::string name;
@@ -64,6 +50,20 @@ namespace ProjectA {
 				// TODO: Allow retrieving other components from this scriptable entity, e.g.:
 				//const GUIComponent& component = getComponent<GUIComponent>();
 				//ENGINE_DEBUG("Color index = []", component.colorIndex);
+			}
+	};
+
+	class DemoGUILayer : public GUILayer {
+		public:
+			DemoGUILayer() {
+				loadDefaultFont();
+
+				//appendRoot<GUITextObject>("text");
+
+				appendRoot<PersonListWindow>();
+
+				compute();
+				registerEntityPool();
 			}
 	};
 }

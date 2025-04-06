@@ -1,11 +1,20 @@
 #version 450
 
 layout(location = 0) in vec2 vertexPosition;
+layout(location = 1) in vec2 vertexTextureCoordinate;
 
-layout(location = 0) out vec2 textureCoordinate;
+layout(set = 0, binding = 0) uniform Camera {
+	mat3x3 projection;
+} camera;
+
+out VertexOutput {
+	layout(location = 0) vec2 textureCoordinate;
+} vertexOutput;
 
 void main() {
-	gl_Position = vec4(vertexPosition, 0.0, 1.0);
+	vec3 position = camera.projection * vec3(vertexPosition, 1.0);
 
-	textureCoordinate = vertexPosition * 0.5 + 0.5;
+	gl_Position = vec4(position, 1.0);
+
+	vertexOutput.textureCoordinate = vertexTextureCoordinate;
 }

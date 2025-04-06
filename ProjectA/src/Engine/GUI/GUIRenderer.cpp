@@ -8,17 +8,17 @@
 namespace ProjectA {
 	GUIRenderer::GUIRenderer() :
 		cameraUniformBuffers(MAX_FRAMES_IN_FLIGHT),
-		cameraUniformBufferMappedRanges(MAX_FRAMES_IN_FLIGHT)
+		cameraMappedRanges(MAX_FRAMES_IN_FLIGHT)
 	{
 		const ref<Device>& device = getDevice();
 
 		BufferDescriptor cameraUniformBufferDescriptor{};
-		cameraUniformBufferDescriptor.size = sizeof(UniformBufferObject);
+		cameraUniformBufferDescriptor.size = sizeof(mat3x3<float32>);
 		cameraUniformBufferDescriptor.usage = BufferUsage::UNIFORM;
 
 		for (uint32 i = 0; i < MAX_FRAMES_IN_FLIGHT; i += 1) {
 			cameraUniformBuffers[i] = createBuffer(cameraUniformBufferDescriptor);
-			cameraUniformBufferMappedRanges[i] = cameraUniformBuffers[i]->map<UniformBufferObject>(0, cameraUniformBufferDescriptor.size);
+			cameraMappedRanges[i] = cameraUniformBuffers[i]->map<mat3x3<float32>>(0, cameraUniformBufferDescriptor.size);
 		}
 
 		//BufferDescriptor colorStorageBufferDescriptor{};
@@ -58,22 +58,24 @@ namespace ProjectA {
 		//colorDescriptorSetLayoutBinding.buffers = {colorStorageBuffer};
 
 		DescriptorSetLayout cameraAndColorDescriptorSetLayout;
-		cameraAndColorDescriptorSetLayout.bindings.emplace_back(cameraDescriptorSetLayoutBinding);
-		cameraAndColorDescriptorSetLayout.bindings.emplace_back(imageDescriptorSetLayoutBinding);
-		//cameraAndColorDescriptorSetLayout.bindings.emplace_back(colorDescriptorSetLayoutBinding);
+		cameraAndColorDescriptorSetLayout.bindings = {
+			cameraDescriptorSetLayoutBinding,
+			imageDescriptorSetLayoutBinding,
+			//colorDescriptorSetLayoutBinding,
+		};
 
 		PipelineLayoutDescriptor pipelineLayoutDescriptor;
 		pipelineLayoutDescriptor.layouts.emplace_back(cameraAndColorDescriptorSetLayout);
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
-		ShaderModuleDescriptor vertexShaderModuleDescriptor;
+		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Shader/GUI/Subcomponent.vert.spv", vertexShaderModuleDescriptor);
 
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor;
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
@@ -250,11 +252,11 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::registerColors(const chain<vec4<float32>>& colors) const {
-		vec4<float32>* mappedRange = colorStorageBuffer->map<vec4<float32>>(0, sizeof(vec4<float32>) * colors.size());
+		/*vec4<float32>* mappedRange = colorStorageBuffer->map<vec4<float32>>(0, sizeof(vec4<float32>) * colors.size());
 
 		std::copy(colors.begin(), colors.end(), mappedRange);
 
-		colorStorageBuffer->unmap();
+		colorStorageBuffer->unmap();*/
 	}
 
 	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
@@ -286,14 +288,13 @@ namespace ProjectA {
 		const float32 width = static_cast<float32>(Application::get().getSwapchain()->getExtentWidth());
 		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
 
-		UniformBufferObject cameraUniformBufferObject;
-		cameraUniformBufferObject.projection = {
+		const mat3x3<float32> cameraProjection = {
 			2.0f / width, 0.0f, 0.0f,
 			0.0f, -2.0f / height, 0.0f,
 			-1.0f, 1.0f, 1.0f,
 		};
 
-		std::copy(&cameraUniformBufferObject, &cameraUniformBufferObject + 1, cameraUniformBufferMappedRanges[frameIndex]);
+		*cameraMappedRanges[frameIndex] = cameraProjection;
 	}
 
 	void GUIRenderer::onEvent(Event& event) {}

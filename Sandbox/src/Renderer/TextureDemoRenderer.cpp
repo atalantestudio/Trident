@@ -135,13 +135,13 @@ namespace ProjectA {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("assets/shaders/Glyph.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("assets/shaders/Texture.vert.spv", vertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("assets/shaders/Glyph.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("assets/shaders/Texture.frag.spv", fragmentShaderModuleDescriptor);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();

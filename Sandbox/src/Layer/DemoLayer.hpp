@@ -2,15 +2,15 @@
 
 #include "ProjectA.hpp"
 
-#include "../Renderer/TextureDemoRenderer.hpp"
+#include "../Renderer/TextRenderer.hpp"
 
 namespace ProjectA {
 	class DemoLayer : public Layer {
 		private:
-			TextureDemoRenderer renderer;
+			TextRenderer renderer;
 
 		public:
-			DemoLayer();
+			DemoLayer(const TrueTypeFont& font);
 
 			virtual ~DemoLayer() = default;
 

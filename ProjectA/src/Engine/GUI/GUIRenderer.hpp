@@ -33,10 +33,6 @@ namespace ProjectA {
 				vec2<float32> textureCoordinates;
 			};
 
-			struct UniformBufferObject {
-				mat3x3<float32> projection;
-			};
-
 		private:
 			static constexpr uint32 MAX_QUADS = 64;
 			static constexpr uint32 MAX_COLORS = 32;
@@ -51,9 +47,12 @@ namespace ProjectA {
 			ref<Buffer> transformVertexBuffer;
 			ref<Buffer> indexBuffer;
 			ref<Sampler> sampler;
+
 			chain<ref<Buffer>> cameraUniformBuffers;
-			ref<Buffer> colorStorageBuffer;
-			chain<UniformBufferObject*> cameraUniformBufferMappedRanges;
+			chain<mat3x3<float32>*> cameraMappedRanges;
+
+			//ref<Buffer> colorStorageBuffer;
+
 			ref<CommandEncoder> commandEncoder;
 			uint32 instanceCount = 0;
 			uint32 frameIndex = 0;

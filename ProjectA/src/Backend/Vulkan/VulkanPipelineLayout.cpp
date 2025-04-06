@@ -26,7 +26,15 @@ namespace ProjectA {
 				VkDescriptorSetLayoutBinding descriptorSetLayoutBinding{};
 				descriptorSetLayoutBinding.binding = bindingIndex;
 				descriptorSetLayoutBinding.descriptorType = descriptorType;
-				descriptorSetLayoutBinding.descriptorCount = 1;
+
+				// TODO: Determine the total count of descriptor sets generated below with the write descriptors.
+				if (binding.buffers.size() > 1) {
+					descriptorSetLayoutBinding.descriptorCount = static_cast<uint32>(binding.buffers.size());
+				}
+				else {
+					descriptorSetLayoutBinding.descriptorCount = 1;
+				}
+
 				descriptorSetLayoutBinding.stageFlags = getVkShaderStageFlagBits(binding.stageFlags);
 				descriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 
