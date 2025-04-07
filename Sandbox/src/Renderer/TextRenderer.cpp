@@ -35,7 +35,7 @@ namespace ProjectA {
 	}
 
 	void TextRenderer::createVertexBuffer() {
-		constexpr uint64 vertexBufferSize = sizeof(Vertex) * 4 * MAX_CHARACTERS;
+		constexpr uint64 vertexBufferSize = sizeof(Vertex) * 4 * MAX_QUAD_COUNT;
 
 		BufferDescriptor vertexBufferDescriptor{};
 		vertexBufferDescriptor.size = vertexBufferSize;
@@ -47,29 +47,19 @@ namespace ProjectA {
 	}
 
 	void TextRenderer::createIndexBuffer() {
-		constexpr uint64 indexCount = 6;
-		constexpr uint16 indices[indexCount] = {
-			0, 1, 2,
-			0, 2, 3,
-		};
+		const uint64 indexBufferSize = sizeof(uint16) * 6 * MAX_QUAD_COUNT;
 
-		const uint64 indexBufferSize = sizeof(uint16) * indexCount * MAX_CHARACTERS;
-
-		BufferDescriptor indexStagingBufferDescriptor{};
-		indexStagingBufferDescriptor.size = indexBufferSize;
-		indexStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
-
-		const ref<Buffer> indexStagingBuffer = createBuffer(indexStagingBufferDescriptor);
+		const ref<Buffer> indexStagingBuffer = createStagingBuffer(indexBufferSize);
 
 		uint16* indexMappedRange = indexStagingBuffer->map<uint16>(0, indexBufferSize);
 
-		for (uint32 characterIndex = 0; characterIndex < MAX_CHARACTERS; characterIndex += 1) {
-			*indexMappedRange++ = characterIndex * 4 + 0;
-			*indexMappedRange++ = characterIndex * 4 + 1;
-			*indexMappedRange++ = characterIndex * 4 + 2;
-			*indexMappedRange++ = characterIndex * 4 + 0;
-			*indexMappedRange++ = characterIndex * 4 + 2;
-			*indexMappedRange++ = characterIndex * 4 + 3;
+		for (uint32 quadIndex = 0; quadIndex < MAX_QUAD_COUNT; quadIndex += 1) {
+			*indexMappedRange++ = quadIndex * 4 + 0;
+			*indexMappedRange++ = quadIndex * 4 + 1;
+			*indexMappedRange++ = quadIndex * 4 + 2;
+			*indexMappedRange++ = quadIndex * 4 + 0;
+			*indexMappedRange++ = quadIndex * 4 + 2;
+			*indexMappedRange++ = quadIndex * 4 + 3;
 		}
 
 		indexStagingBuffer->unmap();
@@ -161,9 +151,9 @@ namespace ProjectA {
 	}
 
 	void TextRenderer::setText(const std::string& text) {
-		ENGINE_ASSERT(text.size() <= MAX_CHARACTERS, "The text must not exceed [] characters.", MAX_CHARACTERS);
+		ENGINE_ASSERT(text.size() <= MAX_QUAD_COUNT, "The text must not exceed [] characters.", MAX_QUAD_COUNT);
 
-		characterCount = static_cast<uint32>(text.size());
+		quadCount = static_cast<uint32>(text.size());
 
 		const char* string = text.c_str();
 		const uint8* codePoint = static_cast<const uint8*>(static_cast<const void*>(string));
@@ -215,7 +205,7 @@ namespace ProjectA {
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));
 		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, width, height);
-		commandEncoder->drawIndexed(6 * characterCount, 1, 0);
+		commandEncoder->drawIndexed(6 * quadCount, 1, 0);
 		commandEncoder->endRenderPass();
 	}
 

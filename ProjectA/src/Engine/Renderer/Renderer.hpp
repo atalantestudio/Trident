@@ -27,7 +27,8 @@ namespace ProjectA {
 
 			virtual void onEvent(Event& event) {}
 
-		protected:
+		// TODO: Make Renderer friend of GraphicsAdapter?
+		public:
 			static ref<Device> getDevice();
 
 			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);

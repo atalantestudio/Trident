@@ -31,30 +31,22 @@ namespace ProjectA {
 	}
 
 	void TextureDemoRenderer::createVertexBuffer() {
-		const vec2<float32> vertices[4] = {
-			{-1.0f,  1.0f},
-			{ 1.0f,  1.0f},
-			{ 1.0f, -1.0f},
-			{-1.0f, -1.0f},
-		};
+		constexpr uint64 vertexBufferSize = sizeof(vec2<float32>) * 4;
 
-		const uint64 vertexBufferSize = sizeof(vec2<float32>) * 4;
+		const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
 
-		BufferDescriptor vertexStagingBufferDescriptor{};
-		vertexStagingBufferDescriptor.size = vertexBufferSize;
-		vertexStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+		vec2<float32>* vertices = vertexStagingBuffer->map<vec2<float32>>(0, vertexBufferSize);
 
-		const ref<Buffer> vertexStagingBuffer = createBuffer(vertexStagingBufferDescriptor);
-
-		vec2<float32>* vertexMappedRange = vertexStagingBuffer->map<vec2<float32>>(0, vertexBufferSize);
-
-		std::copy_n(&vertices[0], 4, vertexMappedRange);
+		vertices[0] = {-1.0f,  1.0f};
+		vertices[1] = { 1.0f,  1.0f};
+		vertices[2] = { 1.0f, -1.0f};
+		vertices[3] = {-1.0f, -1.0f};
 
 		vertexStagingBuffer->unmap();
 
 		BufferDescriptor vertexBufferDescriptor{};
 		vertexBufferDescriptor.size = vertexBufferSize;
-		vertexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX;
+		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 
@@ -75,28 +67,24 @@ namespace ProjectA {
 	}
 
 	void TextureDemoRenderer::createIndexBuffer() {
-		const uint16 indices[6] = {
-			0, 1, 2,
-			0, 2, 3,
-		};
+		constexpr uint64 indexBufferSize = sizeof(uint16) * 6;
 
-		const uint64 indexBufferSize = sizeof(uint16) * 6;
+		const ref<Buffer> indexStagingBuffer = createStagingBuffer(indexBufferSize);
 
-		BufferDescriptor indexStagingBufferDescriptor{};
-		indexStagingBufferDescriptor.size = indexBufferSize;
-		indexStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+		uint16* indices = indexStagingBuffer->map<uint16>(0, indexBufferSize);
 
-		const ref<Buffer> indexStagingBuffer = createBuffer(indexStagingBufferDescriptor);
-
-		uint16* indexMappedRange = indexStagingBuffer->map<uint16>(0, indexBufferSize);
-
-		std::copy_n(&indices[0], 6, indexMappedRange);
+		indices[0] = 0;
+		indices[1] = 1;
+		indices[2] = 2;
+		indices[3] = 0;
+		indices[4] = 2;
+		indices[5] = 3;
 
 		indexStagingBuffer->unmap();
 
 		BufferDescriptor indexBufferDescriptor{};
 		indexBufferDescriptor.size = indexBufferSize;
-		indexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX;
+		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
 

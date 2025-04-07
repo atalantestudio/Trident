@@ -28,7 +28,7 @@ namespace ProjectA {
 		}
 
 		// TRANSFER_SRC and TRANSFER_DST are secondary usages;
-		// only return these in last resort.
+		// only return these at the end.
 
 		if (bufferUsage & BufferUsage::TRANSFER_SRC) {
 			return GL_COPY_READ_BUFFER;

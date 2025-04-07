@@ -33,12 +33,9 @@ namespace ProjectA {
 			};
 
 		private:
-			static constexpr uint32 MAX_CHARACTERS = 64;
+			static constexpr uint32 MAX_QUAD_COUNT = 64;
 
 		private:
-			const TrueTypeFont& font;
-			uint32 characterCount;
-
 			ref<Buffer> vertexBuffer;
 			Vertex* vertices = nullptr;
 
@@ -53,5 +50,9 @@ namespace ProjectA {
 			ref<Image> glyphMapImage;
 			ref<ImageView> glyphMapImageView;
 			ref<Sampler> glyphMapImageSampler;
+
+			const TrueTypeFont& font;
+
+			uint32 quadCount = 0;
 	};
 }

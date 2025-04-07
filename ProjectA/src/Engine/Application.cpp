@@ -46,7 +46,7 @@ namespace ProjectA {
 		renderPassDescriptor.loadOperation = LoadOperation::CLEAR;
 		renderPassDescriptor.storeOperation = StoreOperation::STORE;
 
-		renderPass = Renderer::getBackend()->createRenderPass(renderPassDescriptor);
+		renderPass = Renderer::createRenderPass(renderPassDescriptor);
 
 		SwapchainDescriptor swapchainDescriptor;
 		swapchainDescriptor.renderPass = renderPass;
@@ -58,14 +58,12 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
-		auto d = Renderer::getBackend()->getDevice();
-		auto queue = d->getGraphicsQueue();
-		commandEncoder = queue->createCommandEncoder(commandBufferDescriptor);
+		commandEncoder = Renderer::getDevice()->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 		for (uint32 frameIndex = 0; frameIndex < MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
-			availableImageSemaphores[frameIndex] = Renderer::getBackend()->createSemaphore();
-			finishedRenderSemaphores[frameIndex] = Renderer::getBackend()->createSemaphore();
-			flightFences[frameIndex] = Renderer::getBackend()->createFence();
+			availableImageSemaphores[frameIndex] = Renderer::createSemaphore();
+			finishedRenderSemaphores[frameIndex] = Renderer::createSemaphore();
+			flightFences[frameIndex] = Renderer::createFence();
 		}
 
 		/* Constants */
@@ -186,7 +184,7 @@ namespace ProjectA {
 	void Application::render(float32 deltaTime) {
 		PROFILE_SCOPE("Update layers");
 
-		const ref<Device>& device = Renderer::getBackend()->getDevice();
+		const ref<Device> device = Renderer::getDevice();
 
 		device->waitForFence(flightFences[frameInFlightIndex]);
 
@@ -230,7 +228,7 @@ namespace ProjectA {
 
 		Renderer::getWindowExtent(extentWidth, extentHeight);
 
-		const ref<Device>& device = Renderer::getBackend()->getDevice();
+		const ref<Device> device = Renderer::getDevice();
 
 		device->waitIdle();
 

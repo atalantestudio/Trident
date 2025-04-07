@@ -10,7 +10,7 @@ namespace ProjectA {
 		cameraUniformBuffers(MAX_FRAMES_IN_FLIGHT),
 		cameraMappedRanges(MAX_FRAMES_IN_FLIGHT)
 	{
-		const ref<Device>& device = getDevice();
+		const ref<Device> device = getDevice();
 
 		BufferDescriptor cameraUniformBufferDescriptor{};
 		cameraUniformBufferDescriptor.size = sizeof(mat3x3<float32>);
@@ -170,11 +170,7 @@ namespace ProjectA {
 		const PNGFile file = Filesystem::load<PNGFile>(path);
 		const uint64 size = sizeof(uint8) * file.data.size();
 
-		BufferDescriptor stagingBufferDescriptor{};
-		stagingBufferDescriptor.size = size;
-		stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
-
-		const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
+		const ref<Buffer> stagingBuffer = createStagingBuffer(size);
 
 		uint8* mappedRange = stagingBuffer->map<uint8>(0, size);
 
@@ -186,7 +182,7 @@ namespace ProjectA {
 	}
 
 	ref<Image> GUIRenderer::loadImage(const ref<Buffer>& buffer, uint32 width, uint32 height) {
-		const ref<Device>& device = getDevice();
+		const ref<Device> device = getDevice();
 
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.type = ImageType::TEXTURE_2D;
@@ -223,11 +219,7 @@ namespace ProjectA {
 		const std::array<uint8, 4> data = {1, 1, 1, 1};
 		const uint64 size = sizeof(uint8) * data.size();
 
-		BufferDescriptor stagingBufferDescriptor{};
-		stagingBufferDescriptor.size = size;
-		stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
-
-		const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
+		const ref<Buffer> stagingBuffer = createStagingBuffer(size);
 
 		uint8* mappedRange = stagingBuffer->map<uint8>(0, size);
 

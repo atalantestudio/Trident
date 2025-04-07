@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	ComputeShaderDemoRenderer::ComputeShaderDemoRenderer() {
-		const ref<Device>& device = getDevice();
+		const ref<Device> device = getDevice();
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -181,22 +181,18 @@ namespace ProjectA {
 			device->waitIdle();
 		}
 
-		const std::array<uint16, 6> indices = {
-			0, 1, 2,
-			0, 2, 3,
-		};
+		constexpr uint64 indexBufferSize = sizeof(uint16) * 6;
 
-		const uint64 indexBufferSize = sizeof(uint16) * indices.size();
+		const ref<Buffer> indexStagingBuffer = createStagingBuffer(indexBufferSize);
 
-		BufferDescriptor indexStagingBufferDescriptor{};
-		indexStagingBufferDescriptor.size = indexBufferSize;
-		indexStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+		uint16* indices = indexStagingBuffer->map<uint16>(0, indexBufferSize);
 
-		const ref<Buffer> indexStagingBuffer = createBuffer(indexStagingBufferDescriptor);
-
-		uint16* indexMappedRange = indexStagingBuffer->map<uint16>(0, indexBufferSize);
-
-		std::copy(indices.begin(), indices.end(), indexMappedRange);
+		indices[0] = 0;
+		indices[1] = 1;
+		indices[2] = 2;
+		indices[3] = 0;
+		indices[4] = 2;
+		indices[5] = 3;
 
 		indexStagingBuffer->unmap();
 
