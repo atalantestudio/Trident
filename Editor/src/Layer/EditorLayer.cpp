@@ -32,8 +32,8 @@ namespace ProjectA {
 
 		framebuffer->bind();*/
 
-		//Renderer::getRendererApi()->setClearColor({0.1f, 0.1f, 0.1f, 1.0f});
-		//Renderer::getRendererApi()->clear();
+		//Renderer::getBackend()->setClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+		//Renderer::getBackend()->clear();
 
 		//Renderer2D::camera = &cameraController.getCamera();
 

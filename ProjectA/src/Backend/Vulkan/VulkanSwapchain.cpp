@@ -4,7 +4,7 @@
 #include "Backend/Vulkan/VulkanSwapchain.hpp"
 
 namespace ProjectA {
-	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, VulkanSurface& surface, VkDevice device, const SwapchainDescriptor& descriptor) :
+	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, VkDevice device, const SwapchainDescriptor& descriptor) :
 		physicalDevice(physicalDevice),
 		device(device),
 		surface(surface)
@@ -36,9 +36,9 @@ namespace ProjectA {
 	void VulkanSwapchain::construct(const SwapchainDescriptor& descriptor) {
 		imageExtent = {descriptor.extentWidth, descriptor.extentHeight};
 
-		surface.update();
+		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities();
 
-		const uint32 minImageCount = surface.capabilities.minImageCount + 1;
+		const uint32 minImageCount = surfaceCapabilities.minImageCount + 1;
 
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
 		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -65,7 +65,7 @@ namespace ProjectA {
 			swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
 		}
 
-		swapchainCreateInfo.preTransform = surface.capabilities.currentTransform;
+		swapchainCreateInfo.preTransform = surfaceCapabilities.currentTransform;
 		swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 		swapchainCreateInfo.presentMode = surface.presentMode;
 		swapchainCreateInfo.clipped = VK_TRUE;

@@ -4,66 +4,66 @@
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
 #include "Backend/Vulkan/VulkanComputePipeline.hpp"
 #include "Backend/Vulkan/VulkanFence.hpp"
+#include "Backend/Vulkan/VulkanGraphicsAdapter.hpp"
 #include "Backend/Vulkan/VulkanImage.hpp"
-#include "Backend/Vulkan/VulkanRendererAPI.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
 #include "Backend/Vulkan/VulkanSampler.hpp"
 #include "Backend/Vulkan/VulkanSemaphore.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 
 namespace ProjectA {
-	VulkanRendererAPI::VulkanRendererAPI(GLFWwindow* window) :
+	VulkanGraphicsAdapter::VulkanGraphicsAdapter(GLFWwindow* window) :
 		instance(),
 		physicalDevice(instance.object),
 		surface(instance.object, physicalDevice, window),
 		device(createRef<VulkanDevice>(physicalDevice, surface))
 	{}
 
-	ref<Device> VulkanRendererAPI::getDevice() const {
+	ref<Device> VulkanGraphicsAdapter::getDevice() const {
 		return device;
 	}
 
-	ref<Buffer> VulkanRendererAPI::createBuffer(const BufferDescriptor& descriptor) const {
+	ref<Buffer> VulkanGraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
 		return createRef<VulkanBuffer>(physicalDevice.object, *device, descriptor);
 	}
 
-	ref<ComputePipeline> VulkanRendererAPI::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
+	ref<ComputePipeline> VulkanGraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
 		return createRef<VulkanComputePipeline>(device->object, descriptor);
 	}
 
-	ref<Fence> VulkanRendererAPI::createFence() const {
+	ref<Fence> VulkanGraphicsAdapter::createFence() const {
 		return createRef<VulkanFence>(device->object);
 	}
 
-	ref<Image> VulkanRendererAPI::createImage(const ImageDescriptor& descriptor) const {
+	ref<Image> VulkanGraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
 		return createRef<VulkanImage>(*device, descriptor);
 	}
 
-	ref<PipelineLayout> VulkanRendererAPI::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
+	ref<PipelineLayout> VulkanGraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
 		return createRef<VulkanPipelineLayout>(device->object, descriptor);
 	}
 
-	ref<RenderPass> VulkanRendererAPI::createRenderPass(const RenderPassDescriptor& descriptor) const {
+	ref<RenderPass> VulkanGraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
 		return createRef<VulkanRenderPass>(surface, device->object, descriptor);
 	}
 
-	ref<RenderPipeline> VulkanRendererAPI::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
+	ref<RenderPipeline> VulkanGraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
 		return createRef<VulkanRenderPipeline>(device->object, descriptor);
 	}
 
-	ref<Sampler> VulkanRendererAPI::createSampler(const SamplerDescriptor& descriptor) const {
+	ref<Sampler> VulkanGraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
 		return createRef<VulkanSampler>(device->object, descriptor);
 	}
 
-	ref<Semaphore> VulkanRendererAPI::createSemaphore() const {
+	ref<Semaphore> VulkanGraphicsAdapter::createSemaphore() const {
 		return createRef<VulkanSemaphore>(device->object);
 	}
 
-	ref<ShaderModule> VulkanRendererAPI::createShaderModule(const ShaderModuleDescriptor& descriptor, const chain<uint8>& code) const {
+	ref<ShaderModule> VulkanGraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, const chain<uint8>& code) const {
 		return createRef<VulkanShaderModule>(device->object, descriptor, code);
 	}
 
-	ref<Swapchain> VulkanRendererAPI::createSwapchain(const SwapchainDescriptor& descriptor) {
+	ref<Swapchain> VulkanGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
 		return createRef<VulkanSwapchain>(physicalDevice, surface, device->object, descriptor);
 	}
 }

@@ -26,16 +26,20 @@ namespace ProjectA {
 
 			~VulkanSurface();
 
-			void update();
+			void selectFormat();
+
+			void selectPresentMode();
+
+			VkSurfaceCapabilitiesKHR getCapabilities() const;
 
 		public:
 			uint32 presentQueueFamilyIndex;
-			VkSurfaceCapabilitiesKHR capabilities;
 			VkSurfaceFormatKHR format;
 			VkPresentModeKHR presentMode;
 
 		private:
 			const VkInstance instance;
 			const VkPhysicalDevice physicalDevice;
+			VkSurfaceCapabilitiesKHR capabilities;
 	};
 }

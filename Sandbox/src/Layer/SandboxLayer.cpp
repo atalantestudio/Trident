@@ -16,8 +16,8 @@ void SandboxLayer::update(ProjectA::float32 deltaTime, const ProjectA::ref<Proje
 	/*{
 		PROFILE_SCOPE("Pre-draw");
 
-		//ProjectA::Renderer::getRendererApi()->setClearColor({0.1f, 0.1f, 0.1f, 1.0f});
-		//ProjectA::Renderer::getRendererApi()->clear();
+		//ProjectA::Renderer::getBackend()->setClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+		//ProjectA::Renderer::getBackend()->clear();
 	}*/
 
 	/*ProjectA::Renderer2D::camera = &cameraController.getCamera();

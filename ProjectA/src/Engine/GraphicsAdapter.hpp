@@ -5,10 +5,8 @@
 #include "Engine/Renderer/RenderPipeline.hpp"
 
 namespace ProjectA {
-	class RendererAPI {
+	class GraphicsAdapter {
 		public:
-			virtual ~RendererAPI() = default;
-
 			virtual ref<Device> getDevice() const = 0;
 
 			virtual ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const = 0;
@@ -31,6 +29,6 @@ namespace ProjectA {
 
 			virtual ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, const chain<uint8>& code) const = 0;
 
-			virtual ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) = 0;
+			virtual ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const = 0;
 	};
 }

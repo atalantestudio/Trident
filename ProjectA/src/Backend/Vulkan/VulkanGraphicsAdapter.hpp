@@ -9,12 +9,12 @@
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 #include "Backend/Vulkan/VulkanSurface.hpp"
 
-#include "Engine/Renderer/RendererAPI.hpp"
+#include "Engine/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	class VulkanRendererAPI : public RendererAPI {
+	class VulkanGraphicsAdapter : public GraphicsAdapter {
 		public:
-			VulkanRendererAPI(GLFWwindow* window);
+			VulkanGraphicsAdapter(GLFWwindow* window);
 
 			ref<Device> getDevice() const override;
 
@@ -38,7 +38,7 @@ namespace ProjectA {
 
 			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descritptor, const chain<uint8>& code) const override;
 
-			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) override;
+			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const override;
 
 		private:
 			const VulkanInstance instance;

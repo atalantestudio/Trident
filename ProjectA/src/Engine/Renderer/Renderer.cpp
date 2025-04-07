@@ -1,7 +1,7 @@
 #include "pch.hpp"
 
-#include "Backend/OpenGL/OpenGLRendererAPI.hpp"
-#include "Backend/Vulkan/VulkanRendererAPI.hpp"
+#include "Backend/OpenGL/OpenGLGraphicsAdapter.hpp"
+#include "Backend/Vulkan/VulkanGraphicsAdapter.hpp"
 
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
@@ -11,7 +11,7 @@ namespace ProjectA {
 
 	GLFWwindow* Renderer::window = nullptr;
 
-	scope<RendererAPI> Renderer::rendererApi = nullptr;
+	scope<GraphicsAdapter> Renderer::adapter = nullptr;
 
 	void Renderer::registerWindow(GLFWwindow* window) {
 		ENGINE_ASSERT(Renderer::window == nullptr, "The window has already been registered.");
@@ -23,8 +23,8 @@ namespace ProjectA {
 		return graphicsApi;
 	}
 
-	const scope<RendererAPI>& Renderer::getBackend() {
-		return rendererApi;
+	const scope<GraphicsAdapter>& Renderer::getBackend() {
+		return adapter;
 	}
 
 	void Renderer::setGraphicsApi(GraphicsAPI api) {
@@ -42,18 +42,18 @@ namespace ProjectA {
 			case GraphicsAPI::OPENGL:
 				ENGINE_INFO("Using OpenGL backend.");
 
-				rendererApi = createScope<OpenGLRendererAPI>(window);
+				adapter = createScope<OpenGLGraphicsAdapter>(window);
 
 				break;
 			case GraphicsAPI::VULKAN:
 				ENGINE_INFO("Using Vulkan backend.");
 
-				rendererApi = createScope<VulkanRendererAPI>(window);
+				adapter = createScope<VulkanGraphicsAdapter>(window);
 
 				break;
 		}
 
-		ENGINE_ASSERT(rendererApi != nullptr, "Failed to create a corresponding renderer API.");
+		ENGINE_ASSERT(adapter != nullptr, "Failed to initialize the graphics adapter.");
 	}
 
 	void Renderer::getWindowExtent(sint32& extentWidth, sint32& extentHeight) {
@@ -61,48 +61,48 @@ namespace ProjectA {
 	}
 
 	ref<Device> Renderer::getDevice() {
-		return rendererApi->getDevice();
+		return adapter->getDevice();
 	}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
-		return rendererApi->createBuffer(descriptor);
+		return adapter->createBuffer(descriptor);
 	}
 
 	ref<ComputePipeline> Renderer::createComputePipeline(const ComputePipelineDescriptor& descriptor) {
-		return rendererApi->createComputePipeline(descriptor);
+		return adapter->createComputePipeline(descriptor);
 	}
 
 	ref<Fence> Renderer::createFence() {
-		return rendererApi->createFence();
+		return adapter->createFence();
 	}
 
 	ref<Image> Renderer::createImage(const ImageDescriptor& descriptor) {
-		return rendererApi->createImage(descriptor);
+		return adapter->createImage(descriptor);
 	}
 
 	ref<PipelineLayout> Renderer::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) {
-		return rendererApi->createPipelineLayout(descriptor);
+		return adapter->createPipelineLayout(descriptor);
 	}
 
 	ref<RenderPass> Renderer::createRenderPass(const RenderPassDescriptor& descriptor) {
-		return rendererApi->createRenderPass(descriptor);
+		return adapter->createRenderPass(descriptor);
 	}
 
 	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) {
-		return rendererApi->createRenderPipeline(descriptor);
+		return adapter->createRenderPipeline(descriptor);
 	}
 
 	ref<Sampler> Renderer::createSampler(const SamplerDescriptor& descriptor) {
-		return rendererApi->createSampler(descriptor);
+		return adapter->createSampler(descriptor);
 	}
 
 	ref<Semaphore> Renderer::createSemaphore() {
-		return rendererApi->createSemaphore();
+		return adapter->createSemaphore();
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor) {
 		const chain<uint8> code = Filesystem::loadByteBuffer(path);
 
-		return rendererApi->createShaderModule(descriptor, code);
+		return adapter->createShaderModule(descriptor, code);
 	}
 }

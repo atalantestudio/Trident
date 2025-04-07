@@ -41,7 +41,10 @@ namespace ProjectA {
 			presentQueueFamilyIndex = physicalDevice.graphicsQueueFamilyIndex;
 		}
 
-		update();
+		selectFormat();
+		selectPresentMode();
+
+		capabilities = getCapabilities();
 	}
 
 	VulkanSurface::~VulkanSurface() {
@@ -50,14 +53,9 @@ namespace ProjectA {
 		vkDestroySurfaceKHR(instance, object, nullptr);
 	}
 
-	void VulkanSurface::update() {
-		VkResult result;
-
-		result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, object, &capabilities);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface capabilities (code: []).", result);
-
+	void VulkanSurface::selectFormat() {
 		uint32 formatCount = 0;
+		VkResult result;
 
 		result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, object, &formatCount, nullptr);
 
@@ -83,8 +81,11 @@ namespace ProjectA {
 		}
 
 		ENGINE_ASSERT(formatSelected, "Unable to select a Vulkan surface format.");
+	}
 
+	void VulkanSurface::selectPresentMode() {
 		uint32 presentModeCount = 0;
+		VkResult result;
 
 		result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, object, &presentModeCount, nullptr);
 
@@ -106,5 +107,15 @@ namespace ProjectA {
 				break;
 			}
 		}
+	}
+
+	VkSurfaceCapabilitiesKHR VulkanSurface::getCapabilities() const {
+		VkSurfaceCapabilitiesKHR surfaceCapabilities;
+
+		const VkResult result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, object, &surfaceCapabilities);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface capabilities (code: []).", result);
+
+		return surfaceCapabilities;
 	}
 }

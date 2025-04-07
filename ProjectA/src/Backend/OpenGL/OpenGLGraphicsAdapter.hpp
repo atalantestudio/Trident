@@ -2,15 +2,15 @@
 
 #include <glfw/glfw3.h>
 
-#include "Engine/Renderer/RendererAPI.hpp"
-
 #include "Backend/OpenGL/OpenGLDevice.hpp"
 #include "Backend/OpenGL/OpenGLInstance.hpp"
 
+#include "Engine/GraphicsAdapter.hpp"
+
 namespace ProjectA {
-	class OpenGLRendererAPI : public RendererAPI {
+	class OpenGLGraphicsAdapter : public GraphicsAdapter {
 		public:
-			OpenGLRendererAPI(GLFWwindow* window);
+			OpenGLGraphicsAdapter(GLFWwindow* window);
 
 			ref<Device> getDevice() const override;
 
@@ -34,7 +34,7 @@ namespace ProjectA {
 
 			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, const chain<uint8>& code) const override;
 
-			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) override;
+			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const override;
 
 		private:
 			GLFWwindow* window;
