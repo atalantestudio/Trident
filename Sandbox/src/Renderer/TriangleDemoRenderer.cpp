@@ -102,12 +102,7 @@ namespace ProjectA {
 
 		// Create index buffer.
 		{
-			chain<uint16> indices(3);
-			indices[0] = 0;
-			indices[1] = 1;
-			indices[2] = 2;
-
-			const uint64 size = sizeof(uint16) * indices.size();
+			constexpr uint64 size = sizeof(uint16) * 3;
 
 			BufferDescriptor stagingBufferDescriptor{};
 			stagingBufferDescriptor.size = size;
@@ -117,7 +112,9 @@ namespace ProjectA {
 
 			uint16* mappedRange = stagingBuffer->map<uint16>(0, size);
 
-			std::copy(indices.begin(), indices.end(), mappedRange);
+			mappedRange[0] = 0;
+			mappedRange[1] = 1;
+			mappedRange[2] = 2;
 
 			stagingBuffer->unmap();
 

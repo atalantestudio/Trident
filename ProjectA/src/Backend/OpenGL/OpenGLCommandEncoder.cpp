@@ -140,7 +140,7 @@ namespace ProjectA {
 			renderPipeline->primitiveTopology,
 			indexCount,
 			indexType,
-			static_cast<const GLvoid*>(&indices),
+			(const GLvoid*) (const std::uintptr_t) indices,
 			instanceCount
 		));
 	}

@@ -29,7 +29,7 @@ namespace ProjectA {
 		imageCreateInfo.extent.depth = descriptor.depth;
 		imageCreateInfo.mipLevels = descriptor.mipLevelCount;
 		imageCreateInfo.arrayLayers = descriptor.arrayLayerCount;
-		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(1 << (descriptor.sampleCount - 1));
+		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(BIT((descriptor.sampleCount - 1)));
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.usage = getVkImageUsageFlagBits(descriptor.usage);
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;

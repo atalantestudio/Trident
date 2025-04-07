@@ -172,7 +172,7 @@ namespace ProjectA {
 		const char* string = text.c_str();
 		const uint8* codePoint = static_cast<const uint8*>(static_cast<const void*>(string));
 
-		const uint32 fontSize = 60;
+		constexpr uint32 fontSize = 64;
 
 		float32 positionX = 0;
 		float32 positionY = 0;

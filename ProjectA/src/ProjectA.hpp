@@ -42,3 +42,6 @@
 #include "Engine/Renderer/RenderPipeline.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
+
+// Font
+#include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"

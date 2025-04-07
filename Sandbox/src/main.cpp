@@ -10,9 +10,10 @@ namespace ProjectA {
 			SandboxApplication(const ConfigurationFile& configurationFile) :
 				Application("Sandbox", configurationFile)
 			{
-				const TrueTypeFont font("assets/fonts/test.ttf");
+				registerLayer<DemoLayer>();
 
-				registerLayer<DemoLayer>(font);
+				//const TrueTypeFont font("assets/fonts/test.ttf");
+				//registerLayer<TextLayer>(font);
 			}
 
 			~SandboxApplication() {}

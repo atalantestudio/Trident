@@ -18,6 +18,9 @@ namespace ProjectA {
 
 		glCreateTextures(target, 1, &object);
 		glTextureStorage2D(object, descriptor.mipLevelCount, internalFormat, descriptor.width, descriptor.height);
+
+		// TODO: Use for sample count.
+		//glTextureStorage2DMultisample(object, descriptor.sampleCount, internalFormat, descriptor.width, descriptor.height, GL_TRUE);
 	}
 
 	OpenGLImage::~OpenGLImage() {
