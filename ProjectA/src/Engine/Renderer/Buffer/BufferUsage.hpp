@@ -1,7 +1,5 @@
 #pragma once
 
-#include "pch.hpp"
-
 namespace ProjectA {
 	enum class BufferUsage : uint16 {
 		TRANSFER_SRC = BIT(0),

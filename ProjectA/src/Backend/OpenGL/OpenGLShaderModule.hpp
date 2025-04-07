@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class OpenGLShaderModule : public ShaderModule, public ObjectWrapper<GLuint> {
 		public:
-			OpenGLShaderModule(const ShaderModuleDescriptor& descriptor, const chain<uint8>& code);
+			OpenGLShaderModule(const chain<uint8>& code, const ShaderModuleDescriptor& descriptor);
 
 			~OpenGLShaderModule() override;
 	};

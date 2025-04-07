@@ -20,26 +20,31 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		chain<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
-
-		for (const VertexBinding& binding : descriptor.vertexBufferLayout.vertexBindings) {
-			VkVertexInputBindingDescription vertexInputBindingDescription{};
-			vertexInputBindingDescription.binding = binding.index;
-			vertexInputBindingDescription.stride = binding.stride;
-			vertexInputBindingDescription.inputRate = getVkVertexInputRate(binding.inputRate);
-
-			vertexInputBindingDescriptions.emplace_back(vertexInputBindingDescription);
-		}
-
 		chain<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
 
-		for (const VertexAttribute& attribute : descriptor.vertexBufferLayout.vertexAttributes) {
-			VkVertexInputAttributeDescription vertexInputAttributeDescription{};
-			vertexInputAttributeDescription.location = attribute.location;
-			vertexInputAttributeDescription.binding = attribute.binding;
-			vertexInputAttributeDescription.format = getVkFormat(attribute.type);
-			vertexInputAttributeDescription.offset = attribute.offset;
+		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.size(); vertexInputBindingIndex += 1) {
+			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 
-			vertexInputAttributeDescriptions.emplace_back(vertexInputAttributeDescription);
+			VkVertexInputBindingDescription vertexInputBindingDescription{};
+			vertexInputBindingDescription.binding = vertexInputBindingIndex;
+			vertexInputBindingDescription.stride = vertexInputBinding.getStride();
+			vertexInputBindingDescription.inputRate = getVkVertexInputRate(vertexInputBinding.getInputRate());
+
+			const chain<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
+
+			for (uint32 attributeIndex = 0; attributeIndex < attributes.size(); attributeIndex += 1) {
+				const VertexInputAttribute& attribute = attributes[attributeIndex];
+
+				VkVertexInputAttributeDescription vertexInputAttributeDescription{};
+				vertexInputAttributeDescription.location = attributeIndex;
+				vertexInputAttributeDescription.binding = vertexInputBindingIndex;
+				vertexInputAttributeDescription.format = getVkFormat(attribute.type);
+				vertexInputAttributeDescription.offset = attribute.offset;
+
+				vertexInputAttributeDescriptions.emplace_back(vertexInputAttributeDescription);
+			}
+
+			vertexInputBindingDescriptions.emplace_back(vertexInputBindingDescription);
 		}
 
 		VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo{};

@@ -1,20 +1,18 @@
 #pragma once
 
-#include "Engine/Renderer/Buffer/BufferLayout.hpp"
 #include "Engine/Renderer/CullMode.hpp"
 #include "Engine/Renderer/FrontFace.hpp"
 #include "Engine/Renderer/Pipeline.hpp"
-#include "Engine/Renderer/PipelineLayout.hpp"
 #include "Engine/Renderer/PrimitiveTopology.hpp"
 #include "Engine/Renderer/RenderPass.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
-#include "Engine/Renderer/Swapchain.hpp"
+#include "Engine/Renderer/VertexInputBinding.hpp"
 
 namespace ProjectA {
 	struct RenderPipelineDescriptor {
 		ref<RenderPass> renderPass;
 		ref<PipelineLayout> pipelineLayout;
-		BufferLayout vertexBufferLayout;
+		chain<VertexInputBinding> vertexInputBindings;
 		ref<ShaderModule> vertexShaderModule;
 		ref<ShaderModule> fragmentShaderModule;
 		PrimitiveTopology primitiveTopology;

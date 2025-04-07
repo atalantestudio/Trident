@@ -3,11 +3,8 @@
 #include "Engine/Renderer/Buffer/VertexInputAttributeType.hpp"
 
 namespace ProjectA {
-	struct VertexAttribute {
-		// Vertex buffer binding number.
-		uint32 binding;
-
-		// Shader input location number.
+	struct VertexInputAttribute {
+		// Shader input location.
 		uint32 location;
 
 		// Type of the attribute.

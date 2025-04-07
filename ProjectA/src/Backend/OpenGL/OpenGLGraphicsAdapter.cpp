@@ -60,8 +60,8 @@ namespace ProjectA {
 		return createRef<OpenGLSemaphore>();
 	}
 
-	ref<ShaderModule> OpenGLGraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, const chain<uint8>& code) const {
-		return createRef<OpenGLShaderModule>(descriptor, code);
+	ref<ShaderModule> OpenGLGraphicsAdapter::createShaderModule(const chain<uint8>& code, const ShaderModuleDescriptor& descriptor) const {
+		return createRef<OpenGLShaderModule>(code, descriptor);
 	}
 
 	ref<Swapchain> OpenGLGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {

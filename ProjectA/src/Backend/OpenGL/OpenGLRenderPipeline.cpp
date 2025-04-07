@@ -48,40 +48,45 @@ namespace ProjectA {
 		glDetachShader(program, vertexShaderModule->object);
 		glDetachShader(program, fragmentShaderModule->object);
 
-		for (const VertexAttribute& vertexInputAttribute : descriptor.vertexBufferLayout.vertexAttributes) {
-			const GLenum type = getGlType(vertexInputAttribute.type);
-			const GLint size = getGlSize(vertexInputAttribute.type);
-			const GLvoid* offset = (const GLvoid*) (const std::uintptr_t) vertexInputAttribute.offset;
+		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.size(); vertexInputBindingIndex += 1) {
+			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
+			const chain<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
 
-			switch (type) {
-				case GL_FLOAT:
-					glVertexAttribFormat(vertexInputAttribute.location, size, type, vertexInputAttribute.normalized, vertexInputAttribute.offset);
+			for (uint32 attributeIndex = 0; attributeIndex < attributes.size(); attributeIndex += 1) {
+				const VertexInputAttribute& attribute = attributes[attributeIndex];
 
-					break;
-				case GL_BYTE:
-				case GL_UNSIGNED_BYTE:
-				case GL_SHORT:
-				case GL_UNSIGNED_SHORT:
-				case GL_INT:
-				case GL_UNSIGNED_INT:
-					glVertexAttribIFormat(vertexInputAttribute.location, size, type, vertexInputAttribute.offset);
+				const GLenum type = getGlType(attribute.type);
+				const GLint size = getGlSize(attribute.type);
+				const GLvoid* offset = (const GLvoid*) (const std::uintptr_t) attribute.offset;
 
-					break;
-				case GL_DOUBLE:
-					glVertexAttribLFormat(vertexInputAttribute.location, size, type, vertexInputAttribute.offset);
+				switch (type) {
+					case GL_FLOAT:
+						glVertexAttribFormat(attribute.location, size, type, attribute.normalized, attribute.offset);
 
-					break;
-				default:
-					ENGINE_ASSERT(false, "Vertex attribute type is not supported.");
-			}
+						break;
+					case GL_BYTE:
+					case GL_UNSIGNED_BYTE:
+					case GL_SHORT:
+					case GL_UNSIGNED_SHORT:
+					case GL_INT:
+					case GL_UNSIGNED_INT:
+						glVertexAttribIFormat(attribute.location, size, type, attribute.offset);
 
-			glVertexAttribBinding(vertexInputAttribute.location, vertexInputAttribute.binding);
-			glEnableVertexAttribArray(vertexInputAttribute.location);
+						break;
+					case GL_DOUBLE:
+						glVertexAttribLFormat(attribute.location, size, type, attribute.offset);
 
-			const VertexBinding& vertexBinding = descriptor.vertexBufferLayout.vertexBindings[vertexInputAttribute.binding];
+						break;
+					default:
+						ENGINE_ASSERT(false, "Unsupported vertex input attribute type.");
+				}
 
-			if (vertexBinding.inputRate == InputRate::INSTANCE) {
-				glVertexBindingDivisor(vertexInputAttribute.location, 1);
+				glVertexAttribBinding(attribute.location, vertexInputBindingIndex);
+				glEnableVertexAttribArray(attribute.location);
+
+				if (vertexInputBinding.getInputRate() == InputRate::INSTANCE) {
+					glVertexBindingDivisor(attribute.location, 1);
+				}
 			}
 		}
 	}

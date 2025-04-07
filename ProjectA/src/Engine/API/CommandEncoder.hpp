@@ -23,6 +23,7 @@ namespace ProjectA {
 		uint32 nextImageIndex = 0;
 	};
 
+	// TODO: Merge bindComputePipeline and bindRenderPipeline?
 	class CommandEncoder {
 		public:
 			virtual ~CommandEncoder() = default;

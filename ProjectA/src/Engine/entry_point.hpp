@@ -34,4 +34,6 @@
 
 		return 0;
 	}
+#else
+	#error "Unhandled platform."
 #endif

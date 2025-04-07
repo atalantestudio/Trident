@@ -81,16 +81,19 @@ namespace ProjectA {
 
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Shader/GUI/Subcomponent.frag.spv", fragmentShaderModuleDescriptor);
 
+		VertexInputBinding vertexRateBinding(InputRate::VERTEX);
+		vertexRateBinding.registerAttribute<vec3<float32>>(false);
+		vertexRateBinding.registerAttribute<vec2<float32>>(false);
+
+		VertexInputBinding instanceRateBinding(InputRate::INSTANCE);
+		vertexRateBinding.registerAttribute<mat3x3<float32>>(false);
+		vertexRateBinding.registerAttribute<uint32>(false);
+		vertexRateBinding.registerAttribute<float32>(false);
+
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
-		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
-		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
-		renderPipelineDescriptor.vertexBufferLayout.defineBinding(1, InputRate::INSTANCE);
-		renderPipelineDescriptor.vertexBufferLayout.add<mat3x3<float32>>(1, false);
-		renderPipelineDescriptor.vertexBufferLayout.add<uint32>(1, false);
-		renderPipelineDescriptor.vertexBufferLayout.add<float32>(1, false);
+		renderPipelineDescriptor.vertexInputBindings = {vertexRateBinding, instanceRateBinding};
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;

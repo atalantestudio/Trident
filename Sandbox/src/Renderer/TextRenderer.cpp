@@ -16,7 +16,7 @@ namespace ProjectA {
 		createGlyphMapImageSampler();
 		createVertexBuffer();
 		createIndexBuffer();
-		createCameraUniformBuffer();
+		createCameraBuffer();
 		createPipeline();
 	}
 
@@ -35,13 +35,15 @@ namespace ProjectA {
 	}
 
 	void TextRenderer::createVertexBuffer() {
-		const uint64 vertexBufferSize = sizeof(Vertex) * 3 * MAX_CHARACTERS;
+		constexpr uint64 vertexBufferSize = sizeof(Vertex) * 4 * MAX_CHARACTERS;
 
 		BufferDescriptor vertexBufferDescriptor{};
 		vertexBufferDescriptor.size = vertexBufferSize;
-		vertexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX;
+		vertexBufferDescriptor.usage = BufferUsage::VERTEX;
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
+
+		vertices = vertexBuffer->map<Vertex>(0, vertexBufferSize);
 	}
 
 	void TextRenderer::createIndexBuffer() {
@@ -94,21 +96,23 @@ namespace ProjectA {
 		device->waitIdle();
 	}
 
-	void TextRenderer::createCameraUniformBuffer() {
+	void TextRenderer::createCameraBuffer() {
+		constexpr uint64 cameraBufferSize = sizeof(Camera);
+
 		BufferDescriptor cameraUniformBufferDescriptor{};
-		cameraUniformBufferDescriptor.size = sizeof(mat3x3<float32>);
-		cameraUniformBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::UNIFORM;
+		cameraUniformBufferDescriptor.size = cameraBufferSize;
+		cameraUniformBufferDescriptor.usage = BufferUsage::UNIFORM;
 
-		cameraUniformBuffer = createBuffer(cameraUniformBufferDescriptor);
+		cameraBuffer = createBuffer(cameraUniformBufferDescriptor);
 
-		cameraMappedRange = cameraUniformBuffer->map<mat3x3<float32>>(0, cameraUniformBufferDescriptor.size);
+		camera = cameraBuffer->map<Camera>(0, cameraBufferSize);
 	}
 
 	void TextRenderer::createPipeline() {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
-		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
+		cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
 
 		DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding;
 		imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
@@ -139,12 +143,14 @@ namespace ProjectA {
 
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("assets/shaders/Glyph.frag.spv", fragmentShaderModuleDescriptor);
 
+		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+		vertexInputBinding.registerAttribute<vec2<float32>>(false);
+		vertexInputBinding.registerAttribute<vec2<float32>>(false);
+
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
-		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
-		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
+		renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
@@ -159,43 +165,27 @@ namespace ProjectA {
 
 		characterCount = static_cast<uint32>(text.size());
 
-		const uint64 vertexBufferSize = sizeof(Vertex) * 4 * characterCount;
-
-		BufferDescriptor vertexStagingBufferDescriptor{};
-		vertexStagingBufferDescriptor.size = vertexBufferSize;
-		vertexStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
-
-		const ref<Buffer> vertexStagingBuffer = createBuffer(vertexStagingBufferDescriptor);
-
-		Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
-
 		const char* string = text.c_str();
 		const uint8* codePoint = static_cast<const uint8*>(static_cast<const void*>(string));
 
 		constexpr uint32 fontSize = 64;
 
+		uint32 vertexIndex = 0;
 		float32 positionX = 0;
 		float32 positionY = 0;
-
-		uint32 vertexIndex = 0;
 
 		while (*codePoint != '\0') {
 			const TrueTypeGlyph& glyph = font[*codePoint];
 
 			if (!glyph.invisible) {
-				const float32 width = glyph.width;
-
-				vertexMappedRange[vertexIndex + 0].position = {glyph.leftSideBearing + positionX, positionY};
-				vertexMappedRange[vertexIndex + 0].uv = {glyph.minCoordinateX, glyph.minCoordinateY};
-
-				vertexMappedRange[vertexIndex + 1].position = {glyph.leftSideBearing + positionX + width, positionY};
-				vertexMappedRange[vertexIndex + 1].uv = {glyph.maxCoordinateX, glyph.minCoordinateY};
-
-				vertexMappedRange[vertexIndex + 2].position = {glyph.leftSideBearing + positionX + width, positionY + fontSize};
-				vertexMappedRange[vertexIndex + 2].uv = {glyph.maxCoordinateX, glyph.maxCoordinateY};
-
-				vertexMappedRange[vertexIndex + 3].position = {glyph.leftSideBearing + positionX, positionY + fontSize};
-				vertexMappedRange[vertexIndex + 3].uv = {glyph.minCoordinateX, glyph.maxCoordinateY};
+				vertices[vertexIndex + 0].position = {glyph.leftSideBearing + positionX, positionY};
+				vertices[vertexIndex + 0].uv = {glyph.minCoordinateX, glyph.minCoordinateY};
+				vertices[vertexIndex + 1].position = {glyph.leftSideBearing + positionX + glyph.width, positionY};
+				vertices[vertexIndex + 1].uv = {glyph.maxCoordinateX, glyph.minCoordinateY};
+				vertices[vertexIndex + 2].position = {glyph.leftSideBearing + positionX + glyph.width, positionY + fontSize};
+				vertices[vertexIndex + 2].uv = {glyph.maxCoordinateX, glyph.maxCoordinateY};
+				vertices[vertexIndex + 3].position = {glyph.leftSideBearing + positionX, positionY + fontSize};
+				vertices[vertexIndex + 3].uv = {glyph.minCoordinateX, glyph.maxCoordinateY};
 
 				vertexIndex += 4;
 			}
@@ -203,23 +193,6 @@ namespace ProjectA {
 			positionX += glyph.advanceWidth;
 			codePoint += 1;
 		}
-
-		vertexStagingBuffer->unmap();
-
-		const ref<Device> device = getDevice();
-
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
-
-		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, 0, 0, vertexBufferSize);
-
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
-		device->waitIdle();
 	}
 
 	void TextRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
@@ -239,7 +212,7 @@ namespace ProjectA {
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
-		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(vec2<float32>));
+		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));
 		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, width, height);
 		commandEncoder->drawIndexed(6 * characterCount, 1, 0);
@@ -250,12 +223,10 @@ namespace ProjectA {
 		const float32 width = static_cast<float32>(Application::get().getSwapchain()->getExtentWidth());
 		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
 
-		const mat3x3<float32> cameraProjection = {
+		camera->projection = {
 			2.0f / width, 0.0f, 0.0f,
 			0.0f, -2.0f / height, 0.0f,
 			-1.0f, 1.0f, 1.0f,
 		};
-
-		*cameraMappedRange = cameraProjection;
 	}
 }

@@ -16,7 +16,7 @@ namespace ProjectA {
 			void createGlyphMapImageSampler();
 			void createVertexBuffer();
 			void createIndexBuffer();
-			void createCameraUniformBuffer();
+			void createCameraBuffer();
 			void createPipeline();
 
 		private:
@@ -28,6 +28,10 @@ namespace ProjectA {
 				vec2<float32> uv;
 			};
 
+			struct Camera {
+				mat3x3<float32> projection;
+			};
+
 		private:
 			static constexpr uint32 MAX_CHARACTERS = 64;
 
@@ -36,10 +40,12 @@ namespace ProjectA {
 			uint32 characterCount;
 
 			ref<Buffer> vertexBuffer;
+			Vertex* vertices = nullptr;
+
 			ref<Buffer> indexBuffer;
 
-			ref<Buffer> cameraUniformBuffer;
-			mat3x3<float32>* cameraMappedRange;
+			ref<Buffer> cameraBuffer;
+			Camera* camera;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;

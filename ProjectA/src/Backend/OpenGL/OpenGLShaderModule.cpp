@@ -4,7 +4,7 @@
 #include "Backend/OpenGL/ShaderStage.hpp"
 
 namespace ProjectA {
-	OpenGLShaderModule::OpenGLShaderModule(const ShaderModuleDescriptor& descriptor, const chain<uint8>& code) :
+	OpenGLShaderModule::OpenGLShaderModule(const chain<uint8>& code, const ShaderModuleDescriptor& descriptor) :
 		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
 	{
 		PROFILE_SCOPE(FUNC_SIG);

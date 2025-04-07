@@ -9,12 +9,12 @@
 
 namespace ProjectA {
 	GUILayer::GUILayer() {
-		ecs.registerComponent<GUIComponent>();
-		ecs.registerComponent<ScriptComponent>();
+		//ecs.registerComponent<GUIComponent>();
+		//ecs.registerComponent<ScriptComponent>();
 	}
 
 	GUILayer::~GUILayer() {
-		ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
+		/*ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
 
 		ScriptComponent* begin = componentPool.components.data();
 
@@ -23,7 +23,7 @@ namespace ProjectA {
 
 			component->entity->onDestroy();
 			component->destroyScript(component);
-		}
+		}*/
 	}
 
 	void GUILayer::loadDefaultFont() {

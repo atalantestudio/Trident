@@ -65,12 +65,14 @@ namespace ProjectA {
 
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("assets/shaders/Triangle.frag.spv", fragmentShaderModuleDescriptor);
 
+		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+		vertexInputBinding.registerAttribute<vec2<float32>>(false);
+		vertexInputBinding.registerAttribute<vec3<float32>>(false);
+
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
 		renderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
-		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
-		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
-		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
+		renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;

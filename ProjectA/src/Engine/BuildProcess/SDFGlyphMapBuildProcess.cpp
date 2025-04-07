@@ -137,7 +137,7 @@ namespace ProjectA {
 
 		const chain<uint8> glyphImageShaderModuleCode = Filesystem::loadByteBuffer("assets/shaders/GlyphImage.comp.spv");
 
-		const ref<ShaderModule> glyphImageShaderModule = Renderer::getBackend()->createShaderModule(glyphImageShaderModuleDescriptor, glyphImageShaderModuleCode);
+		const ref<ShaderModule> glyphImageShaderModule = Renderer::getBackend()->createShaderModule(glyphImageShaderModuleCode, glyphImageShaderModuleDescriptor);
 
 		ComputePipelineDescriptor glyphImagePipelineDescriptor;
 		glyphImagePipelineDescriptor.pipelineLayout = glyphImagePipelineLayout;
@@ -191,7 +191,7 @@ namespace ProjectA {
 
 		const chain<uint8> glyphSdfShaderModuleCode = Filesystem::loadByteBuffer("assets/shaders/GlyphDistanceField.comp.spv");
 
-		const ref<ShaderModule> glyphSdfShaderModule = Renderer::getBackend()->createShaderModule(glyphSdfShaderModuleDescriptor, glyphSdfShaderModuleCode);
+		const ref<ShaderModule> glyphSdfShaderModule = Renderer::getBackend()->createShaderModule(glyphSdfShaderModuleCode, glyphSdfShaderModuleDescriptor);
 
 		ComputePipelineDescriptor glyphSdfPipelineDescriptor;
 		glyphSdfPipelineDescriptor.pipelineLayout = glyphSdfPipelineLayout;
@@ -209,7 +209,7 @@ namespace ProjectA {
 
 		// Build process
 		{
-			for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.size(); glyphIndex += 1) {
+			for (uint16 glyphIndex = 0; glyphIndex < 64; glyphIndex += 1) {
 				const Glyph& glyph = ttfFile.glyphs[glyphIndex];
 				const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
 

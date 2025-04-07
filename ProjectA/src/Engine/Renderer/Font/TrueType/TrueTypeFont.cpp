@@ -59,8 +59,8 @@ namespace ProjectA {
 	}
 
 	const TrueTypeGlyph& TrueTypeFont::operator [](uint16 codePoint) const {
-		const uint32 glyphIndex = unicodeMap.at(codePoint);
+		const auto glyphIndex = unicodeMap.find(codePoint);
 
-		return glyphs[glyphIndex];
+		return glyphs[glyphIndex->second];
 	}
 }

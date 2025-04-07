@@ -13,6 +13,6 @@ namespace ProjectA {
 			VK_CULL_MODE_FRONT_AND_BACK,
 		};
 
-		return vkCullModes[static_cast<uint32>(cullMode)];
+		return vkCullModes[static_cast<uint8>(cullMode)];
 	}
 }
