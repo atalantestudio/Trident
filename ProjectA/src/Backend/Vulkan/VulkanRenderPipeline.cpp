@@ -14,7 +14,7 @@
 
 namespace ProjectA {
 	VulkanRenderPipeline::VulkanRenderPipeline(VkDevice device, const RenderPipelineDescriptor& descriptor) :
-		VulkanPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, static_cast<const VulkanPipelineLayout*>(descriptor.pipelineLayout.get())),
+		VulkanPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, std::static_pointer_cast<VulkanPipelineLayout>(descriptor.pipelineLayout).get()),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -58,7 +58,7 @@ namespace ProjectA {
 		inputAssemblyStateCreateInfo.topology = getVkPrimitiveTopology(descriptor.primitiveTopology);
 		inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
-		const VulkanSwapchain* swapchain = static_cast<const VulkanSwapchain*>(Application::get().getSwapchain().get());
+		const VulkanSwapchain* swapchain = std::static_pointer_cast<VulkanSwapchain>(Application::get().getSwapchain()).get();
 
 		VkViewport viewport{};
 		viewport.x = 0.0f;
@@ -145,8 +145,8 @@ namespace ProjectA {
 		dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
 
 		const std::array<VkPipelineShaderStageCreateInfo, 2> shaderStageCreateInfos = {
-			static_cast<const VulkanShaderModule*>(descriptor.vertexShaderModule.get())->object,
-			static_cast<const VulkanShaderModule*>(descriptor.fragmentShaderModule.get())->object,
+			std::static_pointer_cast<VulkanShaderModule>(descriptor.vertexShaderModule)->object,
+			std::static_pointer_cast<VulkanShaderModule>(descriptor.fragmentShaderModule)->object,
 		};
 
 		VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo{};
@@ -165,7 +165,7 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 		graphicsPipelineCreateInfo.layout = layout->object;
-		graphicsPipelineCreateInfo.renderPass = static_cast<const VulkanRenderPass*>(descriptor.renderPass.get())->object;
+		graphicsPipelineCreateInfo.renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->object;
 		graphicsPipelineCreateInfo.subpass = 0;
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		graphicsPipelineCreateInfo.basePipelineIndex = -1;

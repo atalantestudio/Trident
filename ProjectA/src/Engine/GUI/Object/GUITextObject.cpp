@@ -10,7 +10,7 @@ namespace ProjectA {
 	{}
 
 	void GUITextObject::compute(ECS& ecs, const vec2<float32>& parentSize, const vec2<float32>& parentMargin, chain<vec4<float32>>& colors, const ref<Font>& font) {
-		const BitmapFont& bitmapFont = *static_cast<const BitmapFont*>(font.get());
+		const BitmapFont& bitmapFont = *std::static_pointer_cast<BitmapFont>(font);
 
 		float32 xOffset = parentMargin[0];
 

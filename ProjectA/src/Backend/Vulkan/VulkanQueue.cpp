@@ -34,7 +34,7 @@ namespace ProjectA {
 		}
 		else {
 			submitInfo.waitSemaphoreCount = 1;
-			submitInfo.pWaitSemaphores = &static_cast<const VulkanSemaphore*>(waitSemaphore.get())->object;
+			submitInfo.pWaitSemaphores = &std::static_pointer_cast<VulkanSemaphore>(waitSemaphore)->object;
 		}
 
 		submitInfo.pWaitDstStageMask = &vkCommandBuffer->pipelineStageFlags;
@@ -47,13 +47,13 @@ namespace ProjectA {
 		}
 		else {
 			submitInfo.signalSemaphoreCount = 1;
-			submitInfo.pSignalSemaphores = &static_cast<const VulkanSemaphore*>(signalSemaphore.get())->object;
+			submitInfo.pSignalSemaphores = &std::static_pointer_cast<VulkanSemaphore>(signalSemaphore)->object;
 		}
 
 		VkFence vkFence = VK_NULL_HANDLE;
 
 		if (fence != nullptr) {
-			vkFence = static_cast<const VulkanFence*>(fence.get())->object;
+			vkFence = std::static_pointer_cast<VulkanFence>(fence)->object;
 		}
 
 		const VkResult result = vkQueueSubmit(object, 1, &submitInfo, vkFence);

@@ -51,7 +51,7 @@ namespace ProjectA {
 		for (const VertexAttribute& vertexInputAttribute : descriptor.vertexBufferLayout.vertexAttributes) {
 			const GLenum type = getGlType(vertexInputAttribute.type);
 			const GLint size = getGlSize(vertexInputAttribute.type);
-			const GLvoid* offset = reinterpret_cast<const GLvoid*>(static_cast<std::uintptr_t>(vertexInputAttribute.offset));
+			const GLvoid* offset = (const GLvoid*) (const std::uintptr_t) vertexInputAttribute.offset;
 
 			switch (type) {
 				case GL_FLOAT:

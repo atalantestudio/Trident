@@ -5,7 +5,7 @@
 
 namespace ProjectA {
 	VulkanComputePipeline::VulkanComputePipeline(VkDevice device, const ComputePipelineDescriptor& descriptor) :
-		VulkanPipeline(VK_PIPELINE_BIND_POINT_COMPUTE, static_cast<const VulkanPipelineLayout*>(descriptor.pipelineLayout.get())),
+		VulkanPipeline(VK_PIPELINE_BIND_POINT_COMPUTE, std::static_pointer_cast<VulkanPipelineLayout>(descriptor.pipelineLayout).get()),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -14,7 +14,7 @@ namespace ProjectA {
 		computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 		computePipelineCreateInfo.pNext = nullptr;
 		computePipelineCreateInfo.flags = 0;
-		computePipelineCreateInfo.stage = static_cast<const VulkanShaderModule*>(descriptor.computeShaderModule.get())->object;
+		computePipelineCreateInfo.stage = std::static_pointer_cast<VulkanShaderModule>(descriptor.computeShaderModule)->object;
 		computePipelineCreateInfo.layout = layout->object;
 		computePipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		computePipelineCreateInfo.basePipelineIndex = 0;

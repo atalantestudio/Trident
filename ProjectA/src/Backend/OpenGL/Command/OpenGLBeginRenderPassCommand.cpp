@@ -11,7 +11,7 @@ namespace ProjectA {
 	{}
 
 	void OpenGLBeginRenderPassCommand::execute() const {
-		const OpenGLRenderPass& renderPass = *static_cast<OpenGLRenderPass*>(descriptor.renderPass.get());
+		const OpenGLRenderPass& renderPass = *std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass);
 
 		glClearColor(descriptor.clearColor[0], descriptor.clearColor[1], descriptor.clearColor[2], descriptor.clearColor[3]);
 

@@ -49,21 +49,23 @@ namespace ProjectA {
 		this->indexType = getGlIndexType(indexType);
 		indexTypeSize = getGlIndexTypeSize(indexType);
 
-		commandBuffer.emplace_back(createRef<OpenGLBindIndexBufferCommand>(static_cast<const OpenGLBuffer*>(indexBuffer.get())->object));
+		commandBuffer.emplace_back(createRef<OpenGLBindIndexBufferCommand>(
+			std::static_pointer_cast<OpenGLBuffer>(indexBuffer)->object
+		));
 	}
 
 	void OpenGLCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint32 stride) {
 		commandBuffer.emplace_back(createRef<OpenGLBindVertexBufferCommand>(
 			bindingIndex,
-			static_cast<const OpenGLBuffer*>(vertexBuffer.get())->object,
+			std::static_pointer_cast<OpenGLBuffer>(vertexBuffer)->object,
 			stride
 		));
 	}
 
 	void OpenGLCommandEncoder::copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) {
 		commandBuffer.emplace_back(createRef<OpenGLCopyBufferToBufferCommand>(
-			static_cast<const OpenGLBuffer*>(sourceBuffer.get())->object,
-			static_cast<const OpenGLBuffer*>(destinationBuffer.get())->object,
+			std::static_pointer_cast<OpenGLBuffer>(sourceBuffer)->object,
+			std::static_pointer_cast<OpenGLBuffer>(destinationBuffer)->object,
 			sourceOffset,
 			destinationOffset,
 			size

@@ -57,7 +57,9 @@ namespace ProjectA {
 					ENGINE_ASSERT(false, "Component type does not exist and can't be retrieved.");
 				}
 
-				return *static_cast<ComponentPool<T>*>(componentPools[componentPoolIndex].get());
+				Pool* componentPool = componentPools[componentPoolIndex].get();
+
+				return *static_cast<ComponentPool<T>*>(componentPool);
 			}
 
 			template<typename T>

@@ -58,7 +58,7 @@ namespace ProjectA {
 	void VulkanCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const VulkanSwapchain* swapchain = static_cast<const VulkanSwapchain*>(Application::get().getSwapchain().get());
+		const VulkanSwapchain& swapchain = *std::static_pointer_cast<VulkanSwapchain>(Application::get().getSwapchain());
 
 		VkClearValue clearValue{};
 
@@ -67,10 +67,10 @@ namespace ProjectA {
 		VkRenderPassBeginInfo renderPassBeginInfo{};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassBeginInfo.pNext = nullptr;
-		renderPassBeginInfo.renderPass = static_cast<const VulkanRenderPass*>(descriptor.renderPass.get())->object;
-		renderPassBeginInfo.framebuffer = swapchain->framebuffers[descriptor.nextImageIndex];
+		renderPassBeginInfo.renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->object;
+		renderPassBeginInfo.framebuffer = swapchain.framebuffers[descriptor.nextImageIndex];
 		renderPassBeginInfo.renderArea.offset = {0, 0};
-		renderPassBeginInfo.renderArea.extent = swapchain->imageExtent;
+		renderPassBeginInfo.renderArea.extent = swapchain.imageExtent;
 		renderPassBeginInfo.clearValueCount = 1;
 		renderPassBeginInfo.pClearValues = &clearValue;
 
@@ -108,7 +108,12 @@ namespace ProjectA {
 	void VulkanCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, IndexType indexType) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		vkCmdBindIndexBuffer(commandBuffer, static_cast<const VulkanBuffer*>(indexBuffer.get())->object, offset, getVkIndexType(indexType));
+		vkCmdBindIndexBuffer(
+			commandBuffer,
+			std::static_pointer_cast<VulkanBuffer>(indexBuffer)->object,
+			offset,
+			getVkIndexType(indexType)
+		);
 	}
 
 	void VulkanCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint32 stride) {
@@ -116,7 +121,13 @@ namespace ProjectA {
 
 		const VkDeviceSize offset = 0;
 
-		vkCmdBindVertexBuffers(commandBuffer, bindingIndex, 1, &static_cast<const VulkanBuffer*>(vertexBuffer.get())->object, &offset);
+		vkCmdBindVertexBuffers(
+			commandBuffer,
+			bindingIndex,
+			1,
+			&std::static_pointer_cast<VulkanBuffer>(vertexBuffer)->object,
+			&offset
+		);
 	}
 
 	void VulkanCommandEncoder::copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) {
@@ -127,8 +138,8 @@ namespace ProjectA {
 
 		vkCmdCopyBuffer(
 			commandBuffer,
-			static_cast<const VulkanBuffer*>(sourceBuffer.get())->object,
-			static_cast<const VulkanBuffer*>(destinationBuffer.get())->object,
+			std::static_pointer_cast<VulkanBuffer>(sourceBuffer)->object,
+			std::static_pointer_cast<VulkanBuffer>(destinationBuffer)->object,
 			1,
 			&bufferCopy
 		);

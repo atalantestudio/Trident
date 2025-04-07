@@ -11,6 +11,6 @@ namespace ProjectA {
 			VK_INDEX_TYPE_UINT32,
 		};
 
-		return vkIndexTypes[static_cast<uint32>(indexType)];
+		return vkIndexTypes[static_cast<uint8>(indexType)];
 	}
 }

@@ -25,22 +25,22 @@ namespace ProjectA {
 	}
 
 	void OpenGLDevice::waitForFence(const ref<Fence>& fence) const {
-		OpenGLFence* glFence = static_cast<OpenGLFence*>(fence.get());
+		OpenGLFence& glFence = *std::static_pointer_cast<OpenGLFence>(fence);
 
-		glFence->create();
+		glFence.create();
 
 		// TODO: Use glClientWaitSync or glWaitSync?
 		// UINT64_MAX disables the timeout.
-		const GLenum status = glClientWaitSync(glFence->object, GL_SYNC_FLUSH_COMMANDS_BIT, UINT64_MAX);
+		const GLenum status = glClientWaitSync(glFence.object, GL_SYNC_FLUSH_COMMANDS_BIT, UINT64_MAX);
 
 		// TODO: Fix crash here.
 		ENGINE_ASSERT(status == GL_CONDITION_SATISFIED, "Failed waiting for OpenGL fence (code: []).", status);
 	}
 
 	void OpenGLDevice::resetFence(const ref<Fence>& fence) const {
-		OpenGLFence* glFence = static_cast<OpenGLFence*>(fence.get());
+		OpenGLFence& glFence = *std::static_pointer_cast<OpenGLFence>(fence);
 
-		glFence->reset();
+		glFence.reset();
 	}
 
 	Status OpenGLDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const {

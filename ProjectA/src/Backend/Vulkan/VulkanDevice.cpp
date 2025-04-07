@@ -110,7 +110,13 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		// UINT64_MAX disables the timeout.
-		const VkResult result = vkWaitForFences(object, 1, &static_cast<const VulkanFence*>(fence.get())->object, VK_TRUE, UINT64_MAX);
+		const VkResult result = vkWaitForFences(
+			object,
+			1,
+			&std::static_pointer_cast<VulkanFence>(fence)->object,
+			VK_TRUE,
+			UINT64_MAX
+		);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to wait for Vulkan fences (code: []).", result);
 	}
@@ -118,7 +124,11 @@ namespace ProjectA {
 	void VulkanDevice::resetFence(const ref<Fence>& fence) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const VkResult result = vkResetFences(object, 1, &static_cast<const VulkanFence*>(fence.get())->object);
+		const VkResult result = vkResetFences(
+			object,
+			1,
+			&std::static_pointer_cast<VulkanFence>(fence)->object
+		);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan fences (code: []).", result);
 	}
@@ -129,9 +139,9 @@ namespace ProjectA {
 		// UINT64_MAX disables the timeout.
 		const VkResult result = vkAcquireNextImageKHR(
 			object,
-			static_cast<const VulkanSwapchain*>(swapchain.get())->object,
+			std::static_pointer_cast<VulkanSwapchain>(swapchain)->object,
 			UINT64_MAX,
-			static_cast<const VulkanSemaphore*>(semaphore.get())->object,
+			std::static_pointer_cast<VulkanSemaphore>(semaphore)->object,
 			VK_NULL_HANDLE,
 			&nextImageIndex
 		);
@@ -146,9 +156,9 @@ namespace ProjectA {
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		presentInfo.pNext = nullptr;
 		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = &static_cast<const VulkanSemaphore*>(waitSemaphore.get())->object;
+		presentInfo.pWaitSemaphores = &std::static_pointer_cast<VulkanSemaphore>(waitSemaphore)->object;
 		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = &static_cast<const VulkanSwapchain*>(swapchain.get())->object;
+		presentInfo.pSwapchains = &std::static_pointer_cast<VulkanSwapchain>(swapchain)->object;
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr;
 

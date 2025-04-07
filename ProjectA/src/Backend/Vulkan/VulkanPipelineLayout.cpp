@@ -104,12 +104,12 @@ namespace ProjectA {
 			for (const DescriptorSetLayout& layout : descriptor.layouts) {
 				for (const DescriptorSetLayoutBinding& binding : layout.bindings) {
 					for (const ref<Buffer>& buffer : binding.buffers) {
-						const VulkanBuffer* vkBuffer = static_cast<const VulkanBuffer*>(buffer.get());
+						const VulkanBuffer& vkBuffer = *std::static_pointer_cast<VulkanBuffer>(buffer);
 
 						VkDescriptorBufferInfo descriptorBufferInfo{};
-						descriptorBufferInfo.buffer = vkBuffer->object;
+						descriptorBufferInfo.buffer = vkBuffer.object;
 						descriptorBufferInfo.offset = 0;
-						descriptorBufferInfo.range = vkBuffer->size;
+						descriptorBufferInfo.range = vkBuffer.size;
 
 						descriptorBufferInfos.emplace_back(descriptorBufferInfo);
 					}

@@ -11,7 +11,7 @@ namespace ProjectA {
 			GL_UNSIGNED_INT,
 		};
 
-		return glIndexTypes[static_cast<uint32>(indexType)];
+		return glIndexTypes[static_cast<uint8>(indexType)];
 	}
 
 	static GLsizei getGlIndexTypeSize(IndexType indexType) {
@@ -20,6 +20,6 @@ namespace ProjectA {
 			sizeof(uint32),
 		};
 
-		return glIndexTypeSizes[static_cast<uint32>(indexType)];
+		return glIndexTypeSizes[static_cast<uint8>(indexType)];
 	}
 }
