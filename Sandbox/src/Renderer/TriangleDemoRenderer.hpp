@@ -11,15 +11,18 @@ namespace ProjectA {
 			void render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
 
 		private:
+			void setupVertexBuffer();
+			void setupRenderPipeline();
+
+		private:
 			struct Vertex {
 				vec2<float32> position;
 				vec3<float32> color;
 			};
 
 		private:
-			ref<PipelineLayout> pipelineLayout;
-			ref<RenderPipeline> renderPipeline;
 			ref<Buffer> vertexBuffer;
-			ref<Buffer> indexBuffer;
+			ref<PipelineLayout> renderPipelineLayout;
+			ref<RenderPipeline> renderPipeline;
 	};
 }

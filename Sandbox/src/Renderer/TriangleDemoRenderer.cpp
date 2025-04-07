@@ -6,139 +6,78 @@
 
 namespace ProjectA {
 	TriangleDemoRenderer::TriangleDemoRenderer() {
-		const ref<Device>& device = getDevice();
+		setupVertexBuffer();
+		setupRenderPipeline();
+	}
 
-		// Create pipeline layout.
-		{
-			const PipelineLayoutDescriptor pipelineLayoutDescriptor;
+	void TriangleDemoRenderer::setupVertexBuffer() {
+		constexpr uint64 vertexBufferSize = sizeof(Vertex) * 3;
 
-			pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
-		}
+		const ref<Device> device = getDevice();
 
-		ref<ShaderModule> vertexShaderModule;
+		const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
 
-		// Create vertex shader module.
-		{
-			ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-			vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-			vertexShaderModuleDescriptor.entryPoint = "main";
+		Vertex* vertices = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
 
-			vertexShaderModule = loadShaderModule("assets/shaders/Triangle.vert.spv", vertexShaderModuleDescriptor);
-		}
+		vertices[0].position = {-0.5f, -0.5f};
+		vertices[0].color = {1.0f, 0.0f, 0.0f};
+		vertices[1].position = {0.0f,  0.5f};
+		vertices[1].color = {0.0f, 1.0f, 0.0f};
+		vertices[2].position = {0.5f, -0.5f};
+		vertices[2].color = {0.0f, 0.0f, 1.0f};
 
-		ref<ShaderModule> fragmentShaderModule;
+		vertexStagingBuffer->unmap();
 
-		// Create fragment shader module.
-		{
-			ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-			fragmentShaderModuleDescriptor.entryPoint = "main";
+		BufferDescriptor vertexBufferDescriptor{};
+		vertexBufferDescriptor.size = vertexBufferSize;
+		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 
-			fragmentShaderModule = loadShaderModule("assets/shaders/Triangle.frag.spv", fragmentShaderModuleDescriptor);
-		}
+		vertexBuffer = createBuffer(vertexBufferDescriptor);
 
-		// Create render pipeline.
-		{
-			RenderPipelineDescriptor renderPipelineDescriptor;
-			renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
-			renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-			renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
-			renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
-			renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
-			renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-			renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-			renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-			renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-			renderPipelineDescriptor.cullMode = CullMode::BACK;
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-			renderPipeline = createRenderPipeline(renderPipelineDescriptor);
-		}
+		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
-		// Create vertex buffer.
-		{
-			chain<Vertex> vertices(3);
-			vertices[0].position = {-0.5f, -0.5f};
-			vertices[0].color = {1.0f, 0.0f, 0.0f};
-			vertices[1].position = {0.0f,  0.5f};
-			vertices[1].color = {0.0f, 1.0f, 0.0f};
-			vertices[2].position = {0.5f, -0.5f};
-			vertices[2].color = {0.0f, 0.0f, 1.0f};
+		commandEncoder->begin();
+		commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, 0, 0, vertexBufferSize);
 
-			const uint64 size = sizeof(Vertex) * vertices.size();
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-			BufferDescriptor stagingBufferDescriptor{};
-			stagingBufferDescriptor.size = size;
-			stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->waitIdle();
+	}
 
-			const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
+	void TriangleDemoRenderer::setupRenderPipeline() {
+		const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
-			Vertex* mappedRange = stagingBuffer->map<Vertex>(0, size);
+		renderPipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
-			std::copy(vertices.begin(), vertices.end(), mappedRange);
+		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexShaderModuleDescriptor.entryPoint = "main";
 
-			stagingBuffer->unmap();
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("assets/shaders/Triangle.vert.spv", vertexShaderModuleDescriptor);
 
-			BufferDescriptor vertexBufferDescriptor{};
-			vertexBufferDescriptor.size = size;
-			vertexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX;
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-			vertexBuffer = createBuffer(vertexBufferDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("assets/shaders/Triangle.frag.spv", fragmentShaderModuleDescriptor);
 
-			CommandBufferDescriptor commandBufferDescriptor{};
-			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+		RenderPipelineDescriptor renderPipelineDescriptor;
+		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
+		renderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
+		renderPipelineDescriptor.vertexBufferLayout.defineBinding(0, InputRate::VERTEX);
+		renderPipelineDescriptor.vertexBufferLayout.add<vec2<float32>>(0, false);
+		renderPipelineDescriptor.vertexBufferLayout.add<vec3<float32>>(0, false);
+		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		renderPipelineDescriptor.cullMode = CullMode::BACK;
 
-			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
-
-			commandEncoder->begin();
-			commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, 0, 0, size);
-
-			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-			const ref<Device>& device = getDevice();
-
-			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
-			device->waitIdle();
-		}
-
-		// Create index buffer.
-		{
-			constexpr uint64 size = sizeof(uint16) * 3;
-
-			BufferDescriptor stagingBufferDescriptor{};
-			stagingBufferDescriptor.size = size;
-			stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
-
-			const ref<Buffer> stagingBuffer = createBuffer(stagingBufferDescriptor);
-
-			uint16* mappedRange = stagingBuffer->map<uint16>(0, size);
-
-			mappedRange[0] = 0;
-			mappedRange[1] = 1;
-			mappedRange[2] = 2;
-
-			stagingBuffer->unmap();
-
-			BufferDescriptor indexBufferDescriptor{};
-			indexBufferDescriptor.size = size;
-			indexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX;
-
-			indexBuffer = createBuffer(indexBufferDescriptor);
-
-			CommandBufferDescriptor commandBufferDescriptor{};
-			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
-
-			commandEncoder->begin();
-			commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, 0, 0, size);
-
-			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-			const ref<Device>& device = getDevice();
-
-			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
-			device->waitIdle();
-		}
+		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 	}
 
 	void TriangleDemoRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
@@ -154,11 +93,10 @@ namespace ProjectA {
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
-		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));
 		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, width, height);
-		commandEncoder->drawIndexed(3, 1, 0);
+		commandEncoder->draw(3, 1, 0);
 		commandEncoder->endRenderPass();
 	}
 }

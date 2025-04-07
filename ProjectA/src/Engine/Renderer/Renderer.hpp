@@ -32,6 +32,8 @@ namespace ProjectA {
 
 			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
 
+			static ref<Buffer> createStagingBuffer(uint64 size);
+
 			static ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor);
 
 			static ref<Fence> createFence();

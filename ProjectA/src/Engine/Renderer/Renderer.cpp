@@ -68,6 +68,14 @@ namespace ProjectA {
 		return adapter->createBuffer(descriptor);
 	}
 
+	ref<Buffer> Renderer::createStagingBuffer(uint64 size) {
+		BufferDescriptor stagingBufferDescriptor{};
+		stagingBufferDescriptor.size = size;
+		stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+
+		return adapter->createBuffer(stagingBufferDescriptor);
+	}
+
 	ref<ComputePipeline> Renderer::createComputePipeline(const ComputePipelineDescriptor& descriptor) {
 		return adapter->createComputePipeline(descriptor);
 	}
