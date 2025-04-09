@@ -2,7 +2,8 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Layer/TextLayer.hpp"
+#include "Layer/DemoLayer.hpp"
+//#include "Layer/TextLayer.hpp"
 
 namespace ProjectA {
 	class SandboxApplication : public Application {
@@ -10,10 +11,10 @@ namespace ProjectA {
 			SandboxApplication(const ConfigurationFile& configurationFile) :
 				Application("Sandbox", configurationFile)
 			{
-				//registerLayer<DemoLayer>();
-
 				const TrueTypeFont font("assets/fonts/test.ttf");
-				registerLayer<TextLayer>(font);
+
+				registerLayer<DemoLayer>(font);
+				//registerLayer<TextLayer>(font);
 			}
 
 			~SandboxApplication() {}

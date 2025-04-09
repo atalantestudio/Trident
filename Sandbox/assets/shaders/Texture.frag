@@ -4,10 +4,17 @@ in VertexOutput {
 	layout(location = 0) vec2 textureCoordinate;
 } vertexOutput;
 
-layout(set = 0, binding = 1) uniform sampler2D textureSampler;
+layout(set = 0, binding = 0) uniform sampler2D textureSampler;
 
-layout(location = 0) out vec4 color;
+layout(location = 0) out vec4 outputTexel;
 
 void main() {
-	color = texture(textureSampler, vertexOutput.textureCoordinate);
+	vec2 textureCoordinate = vec2(
+		vertexOutput.textureCoordinate.x,
+		1.0 - vertexOutput.textureCoordinate.y
+	);
+
+	float color = texture(textureSampler, textureCoordinate).r;
+
+	outputTexel.rgb = vec3(color);
 }

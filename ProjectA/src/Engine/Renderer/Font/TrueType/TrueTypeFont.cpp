@@ -23,14 +23,14 @@ namespace ProjectA {
 			const SDFGlyph& sdfGlyph = sdfGlyphMap.glyphs[glyphIndex];
 
 			TrueTypeGlyph& trueTypeGlyph = glyphs[glyphIndex];
-			trueTypeGlyph.width = static_cast<float32>(sdfGlyph.width - sdfGlyphMap.spreadFactor * 2);// / sdfGlyphMap.glyphMap->getWidth();
-			trueTypeGlyph.minCoordinateX = static_cast<float32>(sdfGlyph.xOffset + sdfGlyphMap.spreadFactor) / sdfGlyphMap.glyphMap->getWidth();
-			trueTypeGlyph.minCoordinateY = static_cast<float32>(sdfGlyph.lineIndex * sdfGlyphMap.lineHeight) / sdfGlyphMap.glyphMap->getHeight();
-			trueTypeGlyph.maxCoordinateX = static_cast<float32>(sdfGlyph.xOffset + sdfGlyph.width - sdfGlyphMap.spreadFactor) / sdfGlyphMap.glyphMap->getWidth();
-			trueTypeGlyph.maxCoordinateY = static_cast<float32>((sdfGlyph.lineIndex + 1) * sdfGlyphMap.lineHeight) / sdfGlyphMap.glyphMap->getHeight();
-			trueTypeGlyph.advanceWidth = sdfGlyph.advanceWidth;
-			trueTypeGlyph.leftSideBearing = sdfGlyph.leftSideBearing;
 			trueTypeGlyph.invisible = sdfGlyph.invisible;
+			trueTypeGlyph.minCoordinateX = sdfGlyph.minCoordinateX;
+			trueTypeGlyph.maxCoordinateX = sdfGlyph.maxCoordinateX;
+			trueTypeGlyph.minCoordinateY = sdfGlyph.minCoordinateY;
+			trueTypeGlyph.maxCoordinateY = sdfGlyph.maxCoordinateY;
+			trueTypeGlyph.width = glyph.max.x - glyph.min.x;
+			trueTypeGlyph.advanceWidth = hMetric.advanceWidth;
+			trueTypeGlyph.leftSideBearing = hMetric.leftSideBearing;
 		}
 	}
 

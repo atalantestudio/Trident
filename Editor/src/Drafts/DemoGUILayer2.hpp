@@ -10,7 +10,9 @@ namespace ProjectA {
 	class TestGUILayer : public GUILayer {
 		public:
 			TestGUILayer() {
-				GUIWindow();
+				GUIWindow({
+					//
+				});
 
 				if (GUIButton()) {
 					GUIText("Button pressed.");

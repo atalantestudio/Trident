@@ -7,11 +7,11 @@ layout(set = 0, binding = 0, r8) uniform readonly image2D glyphImage;
 layout(set = 0, binding = 1, r8) uniform writeonly image2D glyphMapSdfImage;
 
 layout(set = 0, binding = 2) buffer Glyph {
-	uvec2 offset;
+	vec2 offset;
 	uint spreadFactor;
 } glyph;
 
-// Size of the a glyph part in the map.
+// Size of a glyph part in the map.
 const uvec2 OUTPUT_IMAGE_SIZE = uvec2(64, 64);
 
 void main() {

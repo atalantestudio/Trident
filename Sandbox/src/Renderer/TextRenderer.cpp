@@ -28,7 +28,7 @@ namespace ProjectA {
 
 	void TextRenderer::createGlyphMapImageSampler() {
 		SamplerDescriptor samplerDescriptor{};
-		samplerDescriptor.magFilter = SamplerFilter::LINEAR;
+		samplerDescriptor.magFilter = SamplerFilter::NEAREST;
 		samplerDescriptor.minFilter = SamplerFilter::NEAREST;
 
 		glyphMapImageSampler = createSampler(samplerDescriptor);
@@ -66,7 +66,7 @@ namespace ProjectA {
 
 		BufferDescriptor indexBufferDescriptor{};
 		indexBufferDescriptor.size = indexBufferSize;
-		indexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX;
+		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
 
@@ -150,7 +150,7 @@ namespace ProjectA {
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 	}
 
-	void TextRenderer::setText(const std::string& text) {
+	void TextRenderer::setText(const std::string& text, float32 fontSize) {
 		ENGINE_ASSERT(text.size() <= MAX_QUAD_COUNT, "The text must not exceed [] characters.", MAX_QUAD_COUNT);
 
 		quadCount = static_cast<uint32>(text.size());
@@ -158,7 +158,7 @@ namespace ProjectA {
 		const char* string = text.c_str();
 		const uint8* codePoint = static_cast<const uint8*>(static_cast<const void*>(string));
 
-		constexpr uint32 fontSize = 64;
+		const float32 lineHeight = static_cast<float32>(font.getLineHeight());
 
 		uint32 vertexIndex = 0;
 		float32 positionX = 0;
@@ -167,20 +167,41 @@ namespace ProjectA {
 		while (*codePoint != '\0') {
 			const TrueTypeGlyph& glyph = font[*codePoint];
 
+			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * static_cast<float32>(fontSize));
+
 			if (!glyph.invisible) {
-				vertices[vertexIndex + 0].position = {glyph.leftSideBearing + positionX, positionY};
+				// For a line height (ascent - descent) of 1210 FUnits, the 'A' glyph's width (not including bearing or advance)
+				// is 631 FUnits.
+
+				// The width should be 62.13px.
+				// TODO: float32 lyah::ceil(float32)
+				const float32 width = glyph.width / lineHeight * fontSize;
+
+				const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * fontSize;
+
+				const float32 x = positionX + leftSideBearing;
+				const float32 y = positionY;
+
+				// Top-left
+				vertices[vertexIndex + 0].position = {x, y};
 				vertices[vertexIndex + 0].uv = {glyph.minCoordinateX, glyph.minCoordinateY};
-				vertices[vertexIndex + 1].position = {glyph.leftSideBearing + positionX + glyph.width, positionY};
+
+				// Top-right
+				vertices[vertexIndex + 1].position = {x + width, y};
 				vertices[vertexIndex + 1].uv = {glyph.maxCoordinateX, glyph.minCoordinateY};
-				vertices[vertexIndex + 2].position = {glyph.leftSideBearing + positionX + glyph.width, positionY + fontSize};
+
+				// Bottom-right
+				vertices[vertexIndex + 2].position = {x + width, y + fontSize};
 				vertices[vertexIndex + 2].uv = {glyph.maxCoordinateX, glyph.maxCoordinateY};
-				vertices[vertexIndex + 3].position = {glyph.leftSideBearing + positionX, positionY + fontSize};
+
+				// Bottom-left
+				vertices[vertexIndex + 3].position = {x, y + fontSize};
 				vertices[vertexIndex + 3].uv = {glyph.minCoordinateX, glyph.maxCoordinateY};
 
 				vertexIndex += 4;
 			}
 
-			positionX += glyph.advanceWidth;
+			positionX += advanceWidth;
 			codePoint += 1;
 		}
 	}

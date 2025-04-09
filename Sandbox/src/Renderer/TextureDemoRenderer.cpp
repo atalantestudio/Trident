@@ -105,14 +105,14 @@ namespace ProjectA {
 	}
 
 	void TextureDemoRenderer::createPipeline() {
-		DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding;
-		imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		imageDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		imageDescriptorSetLayoutBinding.samplers = {sampler};
-		imageDescriptorSetLayoutBinding.imageViews = {imageView};
+		DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding;
+		textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		textureDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		textureDescriptorSetLayoutBinding.samplers = {sampler};
+		textureDescriptorSetLayoutBinding.imageViews = {imageView};
 
 		DescriptorSetLayout descriptorSetLayout;
-		descriptorSetLayout.bindings = {imageDescriptorSetLayoutBinding};
+		descriptorSetLayout.bindings = {textureDescriptorSetLayoutBinding};
 
 		PipelineLayoutDescriptor pipelineLayoutDescriptor;
 		pipelineLayoutDescriptor.layouts = {descriptorSetLayout};

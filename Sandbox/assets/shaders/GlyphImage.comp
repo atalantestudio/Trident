@@ -16,10 +16,6 @@ layout(set = 0, binding = 0) buffer readonly Font {
 } font;
 
 layout(set = 0, binding = 1) buffer readonly Glyph {
-	ivec2 minCoordinate;
-	ivec2 maxCoordinate;
-	uint advanceWidth;
-	int leftBearing;
 	Edge edges[];
 } glyph;
 
@@ -49,9 +45,6 @@ void main() {
 
 	glyphCoordinate /= glyphImageSize;
 	glyphCoordinate *= lineHeight + OUTPUT_IMAGE_SIZE * font.spreadFactor;
-
-	// Remove left padding.
-	glyphCoordinate.x += glyph.minCoordinate.x;
 
 	// Add font descent.
 	glyphCoordinate.y += font.descent;

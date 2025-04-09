@@ -19,7 +19,8 @@ void main() {
 		ALPHA_THRESHOLD + SMOOTHNESS,
 		texture(textureSampler, textureCoordinate).r
 	);
+	//float value = texture(textureSampler, textureCoordinate).r;
 
 	color.rgb = vec3(value);
-	color.rgb += vec3(1.0, 0.2, 0.0);
+	color.rgb += vec3(78.0, 115.0, 150.0) / 255.0;
 }

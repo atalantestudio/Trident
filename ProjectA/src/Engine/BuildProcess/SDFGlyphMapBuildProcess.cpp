@@ -7,13 +7,12 @@
 namespace ProjectA {
 	static constexpr uint64 MAX_GLYPH_COUNT = 2048;
 	static constexpr uint64 GLYPH_SUBIMAGE_DIMENSION = 64;
-	static constexpr uint64 SPREAD_FACTOR = 7;
+	static constexpr uint32 SPREAD_FACTOR = 0;
 
 	SDFGlyphMap SDFGlyphMapBuildProcess::build(const TTFFile& ttfFile) {
 		ENGINE_ASSERT(ttfFile.glyphs.size() < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
 		SDFGlyphMap sdfGlyphMap;
-		sdfGlyphMap.lineHeight = GLYPH_SUBIMAGE_DIMENSION;
 		sdfGlyphMap.spreadFactor = SPREAD_FACTOR;
 		sdfGlyphMap.glyphs.resize(ttfFile.glyphs.size());
 
@@ -68,7 +67,7 @@ namespace ProjectA {
 
 		const ref<Buffer> glyphBuffer = Renderer::createBuffer(glyphBufferDescriptor);
 
-		constexpr uint64 glyphOffsetBufferSize = sizeof(uint32) * 3;
+		constexpr uint64 glyphOffsetBufferSize = sizeof(float32) * 3;
 
 		const ref<Buffer> glyphOffsetStagingBuffer = Renderer::createStagingBuffer(glyphOffsetBufferSize);
 
@@ -140,8 +139,8 @@ namespace ProjectA {
 		glyphMapSdfImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphMapSdfImageDescriptor.format = ImageFormat::R8_UNORM;
 		glyphMapSdfImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::STORAGE;
-		glyphMapSdfImageDescriptor.width = 2048;
-		glyphMapSdfImageDescriptor.height = 2048; // Can be set to 1024.
+		glyphMapSdfImageDescriptor.width = 128;
+		glyphMapSdfImageDescriptor.height = 128; // Can be set to 1024.
 		glyphMapSdfImageDescriptor.depth = 1;
 		glyphMapSdfImageDescriptor.mipLevelCount = 1;
 		glyphMapSdfImageDescriptor.arrayLayerCount = 1;
@@ -179,7 +178,7 @@ namespace ProjectA {
 		glyphSdfShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		glyphSdfShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> glyphSdfShaderModule = Renderer::loadShaderModule("assets/shaders/GlyphDistanceField.comp.spv", glyphSdfShaderModuleDescriptor);
+		const ref<ShaderModule> glyphSdfShaderModule = Renderer::loadShaderModule("assets/shaders/GlyphNoDistanceField.comp.spv", glyphSdfShaderModuleDescriptor);
 
 		ComputePipelineDescriptor glyphSdfPipelineDescriptor;
 		glyphSdfPipelineDescriptor.pipelineLayout = glyphSdfPipelineLayout;
@@ -190,23 +189,20 @@ namespace ProjectA {
 		transitionImage(glyphImage, ImageLayout::UNDEFINED, ImageLayout::GENERAL);
 		transitionImage(sdfGlyphMap.glyphMap, ImageLayout::UNDEFINED, ImageLayout::GENERAL);
 
-		const uint32 lineHeight = ttfFile.hhea.ascent - ttfFile.hhea.descent;
+		float32 xOffset = 0;
+		float32 yOffset = 0;
 
-		uint32 xOffset = 0;
-		uint32 lineIndex = 0;
+		const float32 glyphMapWidth = static_cast<float32>(sdfGlyphMap.glyphMap->getWidth());
+		const float32 glyphMapHeight = static_cast<float32>(sdfGlyphMap.glyphMap->getHeight());
 
 		// Build process
 		{
-			for (uint16 glyphIndex = 0; glyphIndex < 64; glyphIndex += 1) {
+			//for (uint16 glyphIndex = 3; glyphIndex < 234; glyphIndex += 1) {
+			for (uint16 glyphIndex = 178; glyphIndex < 181; glyphIndex += 1) {
 				const Glyph& glyph = ttfFile.glyphs[glyphIndex];
 				const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
 
 				SDFGlyph& sdfGlyph = sdfGlyphMap.glyphs[glyphIndex];
-
-				sdfGlyph.advanceWidth = static_cast<float32>(hMetric.advanceWidth);
-				sdfGlyph.advanceWidth /= lineHeight + GLYPH_SUBIMAGE_DIMENSION * SPREAD_FACTOR;
-				sdfGlyph.advanceWidth *= GLYPH_SUBIMAGE_DIMENSION;
-				sdfGlyph.advanceWidth = std::round(sdfGlyph.advanceWidth);
 
 				if (glyph.edges.empty()) {
 					sdfGlyph.invisible = true;
@@ -214,26 +210,24 @@ namespace ProjectA {
 					continue;
 				}
 
+				sdfGlyph.invisible = false;
+
 				const uint64 glyphSize = sizeof(sint32) * 6 + sizeof(GlyphEdge) * glyph.edges.size();
 
 				GlyphBuffer glyphBufferData{};
-				glyphBufferData.minCoordinateX = glyph.min.x;
-				glyphBufferData.minCoordinateY = glyph.min.y;
-				glyphBufferData.maxCoordinateX = glyph.max.x;
-				glyphBufferData.maxCoordinateY = glyph.max.y;
-				glyphBufferData.advanceWidth = hMetric.advanceWidth;
-				glyphBufferData.leftBearing = hMetric.leftSideBearing;
 				glyphBufferData.edges.resize(glyph.edges.size());
+
+				const sint16 leftSideBearing = hMetric.leftSideBearing;
 
 				for (uint16 edgeIndex = 0; edgeIndex < glyph.edges.size(); edgeIndex += 1) {
 					const Edge& edge = glyph.edges[edgeIndex];
 					GlyphEdge& glyphBufferEdge = glyphBufferData.edges[edgeIndex];
 
-					glyphBufferEdge.startX = edge.start.x;
+					glyphBufferEdge.startX = edge.start.x - leftSideBearing;
 					glyphBufferEdge.startY = edge.start.y;
-					glyphBufferEdge.endX = edge.end.x;
+					glyphBufferEdge.endX = edge.end.x - leftSideBearing;
 					glyphBufferEdge.endY = edge.end.y;
-					glyphBufferEdge.controlX = edge.control.x;
+					glyphBufferEdge.controlX = edge.control.x - leftSideBearing;
 					glyphBufferEdge.controlY = edge.control.y;
 					glyphBufferEdge.curved = edge.curved;
 				}
@@ -241,17 +235,11 @@ namespace ProjectA {
 				// TODO: Use persistent mapping for this buffer.
 				sint32* glyphMappedRange = glyphStagingBuffer->map<sint32>(0, glyphBufferSize);
 
-				sint32* glyphMappedRangeCopy = glyphMappedRange;
+				std::copy(glyphBufferData.edges.begin(), glyphBufferData.edges.end(), (GlyphEdge*) glyphMappedRange);
 
-				std::copy_n(&glyphBufferData.minCoordinateX, 6, glyphMappedRangeCopy);
+				glyphMappedRange += 8 * glyphBufferData.edges.size();
 
-				glyphMappedRangeCopy += 6;
-
-				std::copy(glyphBufferData.edges.begin(), glyphBufferData.edges.end(), (GlyphEdge*) glyphMappedRangeCopy);
-
-				glyphMappedRangeCopy += 8 * glyphBufferData.edges.size();
-
-				std::fill_n(glyphMappedRangeCopy, glyphBufferSize - (glyphMappedRangeCopy - glyphMappedRange), 0);
+				std::fill_n(glyphMappedRange, glyphBufferSize - (glyphMappedRange - glyphMappedRange), 0);
 
 				glyphStagingBuffer->unmap();
 
@@ -284,38 +272,32 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				// Width of the glyph sub-image, with left and right spreads included.
-				float32 glyphWidth = static_cast<float32>(glyph.max.x - glyph.min.x);
-				glyphWidth /= lineHeight + GLYPH_SUBIMAGE_DIMENSION * SPREAD_FACTOR;
-				glyphWidth *= GLYPH_SUBIMAGE_DIMENSION;
+				const uint32 lineHeight = ttfFile.hhea.ascent - ttfFile.hhea.descent;
 
-				// TODO: lyah::ceil(float32)
-				glyphWidth = std::round(glyphWidth);
+				sdfGlyph.width = static_cast<float32>(glyph.max.x - glyph.min.x);
+				sdfGlyph.width /= lineHeight;
+				sdfGlyph.width *= GLYPH_SUBIMAGE_DIMENSION;
+				sdfGlyph.width = std::ceil(sdfGlyph.width);
 
-				glyphWidth += SPREAD_FACTOR * 2;
+				sdfGlyph.minCoordinateX = xOffset + SPREAD_FACTOR;
+				sdfGlyph.maxCoordinateX = xOffset + SPREAD_FACTOR + sdfGlyph.width;
 
-				sdfGlyph.width = static_cast<uint32>(glyphWidth);
-				sdfGlyph.xOffset = xOffset;
-				sdfGlyph.lineIndex = lineIndex;
+				sdfGlyph.minCoordinateY = yOffset + SPREAD_FACTOR;
+				sdfGlyph.maxCoordinateY = yOffset + GLYPH_SUBIMAGE_DIMENSION - SPREAD_FACTOR;
 
-				sdfGlyph.leftSideBearing = static_cast<float32>(hMetric.leftSideBearing);
-				sdfGlyph.leftSideBearing /= lineHeight + GLYPH_SUBIMAGE_DIMENSION * SPREAD_FACTOR;
-				sdfGlyph.leftSideBearing *= GLYPH_SUBIMAGE_DIMENSION;
-				sdfGlyph.leftSideBearing = std::round(sdfGlyph.leftSideBearing);
+				ENGINE_DEBUG("Width for glyph [] = []px at X = []", glyphIndex, sdfGlyph.width, sdfGlyph.minCoordinateX);
 
-				sdfGlyph.invisible = false;
-
-				if (xOffset + sdfGlyph.width >= sdfGlyphMap.glyphMap->getWidth()) {
+ 				if (xOffset + sdfGlyph.width >= sdfGlyphMap.glyphMap->getWidth()) {
 					xOffset = 0;
-					lineIndex += 1;
+					yOffset += GLYPH_SUBIMAGE_DIMENSION;
 				}
 
 				// TODO: Use persistent mapping for this buffer.
-				uint32* glyphOffsetMappedRange = glyphOffsetStagingBuffer->map<uint32>(0, glyphOffsetBufferSize);
+				float32* glyphOffsetMappedRange = glyphOffsetStagingBuffer->map<float32>(0, glyphOffsetBufferSize);
 
-				glyphOffsetMappedRange[0] = xOffset;
-				glyphOffsetMappedRange[1] = lineIndex * GLYPH_SUBIMAGE_DIMENSION;
-				glyphOffsetMappedRange[2] = SPREAD_FACTOR;
+				glyphOffsetMappedRange[0] = sdfGlyph.minCoordinateX;
+				glyphOffsetMappedRange[1] = sdfGlyph.minCoordinateY;
+				((uint32*) glyphOffsetMappedRange)[2] = SPREAD_FACTOR;
 
 				glyphOffsetStagingBuffer->unmap();
 
@@ -345,9 +327,18 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				xOffset += sdfGlyph.width;
+				sdfGlyph.minCoordinateX /= glyphMapWidth;
+				sdfGlyph.maxCoordinateX /= glyphMapWidth;
+				sdfGlyph.minCoordinateY /= glyphMapHeight;
+				sdfGlyph.maxCoordinateY /= glyphMapHeight;
+
+				// Advance horizontally.
+				xOffset += sdfGlyph.width + SPREAD_FACTOR;
 			}
 		}
+
+		// Debug
+		//sdfGlyphMap.glyphMap = glyphImage;
 
 		transitionImage(sdfGlyphMap.glyphMap, ImageLayout::GENERAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL);
 

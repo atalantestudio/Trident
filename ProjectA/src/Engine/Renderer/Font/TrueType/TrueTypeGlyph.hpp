@@ -10,12 +10,14 @@ namespace ProjectA {
 		float32 maxCoordinateX;
 		float32 maxCoordinateY;
 
-		// Width in pixels.
-		float32 width;
+		// In FUnits.
+		uint16 width;
 
-		// In pixels.
-		float32 advanceWidth;
-		float32 leftSideBearing;
+		// In FUnits.
+		uint16 advanceWidth;
+
+		// In FUnits.
+		sint16 leftSideBearing;
 
 		bool invisible;
 	};

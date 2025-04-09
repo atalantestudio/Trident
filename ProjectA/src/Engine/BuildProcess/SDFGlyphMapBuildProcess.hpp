@@ -6,18 +6,16 @@
 
 namespace ProjectA {
 	struct SDFGlyph {
-		// Horizontal offset of the glyph on the map, in px.
-		uint32 xOffset;
+		// Top-left coordinate.
+		float32 minCoordinateX;
+		float32 minCoordinateY;
+
+		// Bottom-right coordinate.
+		float32 maxCoordinateX;
+		float32 maxCoordinateY;
 
 		// Width of the glyph on the map, in px.
-		uint32 width;
-
-		float32 leftSideBearing;
-		float32 advanceWidth;
-
-		// Index of the line the glyph is on.
-		// Can be multiplied by the map's line height to get the Y offset.
-		uint32 lineIndex;
+		float32 width;
 
 		// True for spaces, tabs, etc.
 		bool invisible;
@@ -26,11 +24,8 @@ namespace ProjectA {
 	struct SDFGlyphMap {
 		ref<Image> glyphMap;
 
-		// Height of a line on the map, in px.
-		uint32 lineHeight;
-
 		// Width of the pixels used by the SDF gradient.
-		uint32 spreadFactor;
+		float32 spreadFactor;
 
 		chain<SDFGlyph> glyphs;
 	};
@@ -60,8 +55,6 @@ namespace ProjectA {
 				sint32 minCoordinateY;
 				sint32 maxCoordinateX;
 				sint32 maxCoordinateY;
-				uint32 advanceWidth;
-				sint32 leftBearing;
 				chain<GlyphEdge> edges;
 			};
 	};

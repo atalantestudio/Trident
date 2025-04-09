@@ -8,7 +8,7 @@ namespace ProjectA {
 		public:
 			TextRenderer(const TrueTypeFont& font);
 
-			void setText(const std::string& text);
+			void setText(const std::string& text, float32 fontSize);
 
 			void render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
 
