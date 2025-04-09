@@ -16,6 +16,9 @@ layout(set = 0, binding = 0) buffer readonly Font {
 } font;
 
 layout(set = 0, binding = 1) buffer readonly Glyph {
+	ivec2 minCoordinate;
+	uint dimension;
+	uint edgeCount;
 	Edge edges[];
 } glyph;
 
@@ -46,6 +49,9 @@ void main() {
 	glyphCoordinate /= glyphImageSize;
 	glyphCoordinate *= lineHeight + OUTPUT_IMAGE_SIZE * font.spreadFactor;
 
+	// Remove left padding.
+	glyphCoordinate.x += glyph.minCoordinate.x;
+
 	// Add font descent.
 	glyphCoordinate.y += font.descent;
 
@@ -53,7 +59,7 @@ void main() {
 	vec2 p = glyphCoordinate;
 	int windingNumber = 0;
 
-	for (uint edgeIndex = 0; edgeIndex < glyph.edges.length(); edgeIndex += 1) {
+	for (uint edgeIndex = 0; edgeIndex < glyph.edgeCount; edgeIndex += 1) {
 		Edge edge = glyph.edges[edgeIndex];
 		vec2 a = edge.start;
 		vec2 b = edge.end;
@@ -108,6 +114,8 @@ void main() {
 	}
 
 	texel.r = float(windingNumber > 0);
+
+	//texel.r = glyphCoordinate.x / 4096.0;
 
 	imageStore(glyphImage, ivec2(imageCoordinate), texel);
 }

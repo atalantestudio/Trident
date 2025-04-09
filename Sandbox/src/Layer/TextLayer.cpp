@@ -6,8 +6,7 @@ namespace ProjectA {
 	TextLayer::TextLayer(const TrueTypeFont& font) :
 		renderer(font)
 	{
-		//renderer.setText("PP Radio Grotesk", 128);
-		renderer.setText("hihi", 128);
+		renderer.setText("PP Radio Grotesk", 64);
 	}
 
 	void TextLayer::update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {

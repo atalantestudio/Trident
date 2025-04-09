@@ -53,9 +53,8 @@ namespace ProjectA {
 			struct GlyphBuffer {
 				sint32 minCoordinateX;
 				sint32 minCoordinateY;
-				sint32 maxCoordinateX;
-				sint32 maxCoordinateY;
-				chain<GlyphEdge> edges;
+				uint32 dimension;
+				uint32 edgeCount;
 			};
 	};
 }

@@ -14,13 +14,12 @@ const float SMOOTHNESS = 0.05;
 void main() {
 	vec2 textureCoordinate = vertexOutput.textureCoordinate;
 
-	float value = smoothstep(
+	/*float value = smoothstep(
 		ALPHA_THRESHOLD - SMOOTHNESS,
 		ALPHA_THRESHOLD + SMOOTHNESS,
 		texture(textureSampler, textureCoordinate).r
-	);
-	//float value = texture(textureSampler, textureCoordinate).r;
+	);*/
+	float value = texture(textureSampler, textureCoordinate).r;
 
 	color.rgb = vec3(value);
-	color.rgb += vec3(78.0, 115.0, 150.0) / 255.0;
 }
