@@ -10,12 +10,16 @@ namespace ProjectA {
 	}
 
 	void TextLayer::update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
-		/*GUIButton button;
-		button.text = "ABC";
-		button.padding = {0.0f, 0.0f, 0.0f, 0.0f};
+		/*GUIWindow window;
 
-		if (button.clicked) {
-			//
+		{
+			GUIButton button;
+			button.text = "ABC";
+			button.padding = {0.0f, 0.0f, 0.0f, 0.0f};
+
+			if (button.clicked()) {
+				//
+			}
 		}*/
 
 		renderer.render(commandEncoder, nextImageIndex);

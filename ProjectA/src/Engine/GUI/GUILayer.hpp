@@ -6,6 +6,13 @@
 #include "Engine/Renderer/Font/Font.hpp"
 
 namespace ProjectA {
+	class GUIContainer {
+		public:
+			GUIContainer() {
+				//
+			}
+	};
+
 	class GUILayer : public Layer {
 		public:
 			GUILayer();
@@ -25,8 +32,6 @@ namespace ProjectA {
 
 			void compute();
 
-			void registerEntityPool();
-
 			void update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
 
 			void updateScriptComponents() const;
@@ -38,7 +43,6 @@ namespace ProjectA {
 			static constexpr uint8 MAX_GUI_COMPONENTS = 100;
 
 		private:
-			ECS ecs;
 			GUIRenderer renderer;
 			chain<ref<Image>> images;
 			chain<ref<GUIObject>> rootObjects;

@@ -42,7 +42,7 @@ namespace ProjectA {
 		Renderer::registerWindow(static_cast<GLFWwindow*>(window->getNativeWindow()));
 		Renderer::recreate();
 
-		RenderPassDescriptor renderPassDescriptor;
+		RenderPassDescriptor renderPassDescriptor{};
 		renderPassDescriptor.loadOperation = LoadOperation::CLEAR;
 		renderPassDescriptor.storeOperation = StoreOperation::STORE;
 
