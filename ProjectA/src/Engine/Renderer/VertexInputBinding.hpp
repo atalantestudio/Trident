@@ -19,14 +19,16 @@ namespace ProjectA {
 			template<typename T>
 			void registerAttribute(bool normalized) {
 				VertexInputAttribute vertexInputAttribute{};
-				vertexInputAttribute.location = static_cast<uint32>(attributes.size());
 				vertexInputAttribute.type = getVertexInputAttributeType<T>();
 				vertexInputAttribute.normalized = normalized;
 				vertexInputAttribute.offset = stride;
 
 				attributes.emplace_back(vertexInputAttribute);
 
-				stride += getAttributeSize<T>();
+				// TODO: uint32 lyah::max(uint32, uint32)
+				alignment = std::max(alignment, getAttributeSize<T>());
+
+				stride += alignment;
 			}
 
 			template<>
@@ -62,6 +64,7 @@ namespace ProjectA {
 		private:
 			InputRate inputRate;
 			chain<VertexInputAttribute> attributes;
+			uint32 alignment = 0;
 			uint32 stride = 0;
 	};
 }

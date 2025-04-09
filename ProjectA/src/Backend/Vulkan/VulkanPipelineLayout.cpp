@@ -24,7 +24,7 @@ namespace ProjectA {
 				const VkDescriptorType descriptorType = getVkDescriptorType(binding.descriptorType);
 
 				// TODO: uint32 lyah::max(uint32, uint32)
-				const uint32 descriptorCount = std::max(binding.buffers.size(), binding.imageViews.size());
+				const uint32 descriptorCount = static_cast<uint32>(std::max(binding.buffers.size(), binding.imageViews.size()));
 
 				VkDescriptorSetLayoutBinding descriptorSetLayoutBinding{};
 				descriptorSetLayoutBinding.binding = bindingIndex;

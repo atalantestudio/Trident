@@ -108,9 +108,6 @@ namespace ProjectA {
 		instanceInputBinding.registerAttribute<vec2<float32>>(false);
 		instanceInputBinding.registerAttribute<uint32>(false);
 
-		// TODO: Fix alignment issue occurring when the line below isn't there.
-		instanceInputBinding.registerAttribute<float32>(false);
-
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";

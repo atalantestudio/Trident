@@ -4,9 +4,6 @@
 
 namespace ProjectA {
 	struct VertexInputAttribute {
-		// Shader input location.
-		uint32 location;
-
 		// Type of the attribute.
 		VertexInputAttributeType type;
 
