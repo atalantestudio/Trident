@@ -22,6 +22,8 @@ namespace ProjectA {
 		chain<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 		chain<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
 
+		uint32 location = 0;
+
 		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.size(); vertexInputBindingIndex += 1) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 
@@ -32,16 +34,16 @@ namespace ProjectA {
 
 			const chain<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
 
-			for (uint32 attributeIndex = 0; attributeIndex < attributes.size(); attributeIndex += 1) {
-				const VertexInputAttribute& attribute = attributes[attributeIndex];
-
+			for (const VertexInputAttribute& attribute : attributes) {
 				VkVertexInputAttributeDescription vertexInputAttributeDescription{};
-				vertexInputAttributeDescription.location = attributeIndex;
+				vertexInputAttributeDescription.location = location;
 				vertexInputAttributeDescription.binding = vertexInputBindingIndex;
 				vertexInputAttributeDescription.format = getVkFormat(attribute.type);
 				vertexInputAttributeDescription.offset = attribute.offset;
 
 				vertexInputAttributeDescriptions.emplace_back(vertexInputAttributeDescription);
+
+				location += 1;
 			}
 
 			vertexInputBindingDescriptions.emplace_back(vertexInputBindingDescription);

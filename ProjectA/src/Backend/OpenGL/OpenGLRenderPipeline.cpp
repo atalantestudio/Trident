@@ -48,20 +48,20 @@ namespace ProjectA {
 		glDetachShader(program, vertexShaderModule->object);
 		glDetachShader(program, fragmentShaderModule->object);
 
+		GLuint attribindex = 0;
+
 		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.size(); vertexInputBindingIndex += 1) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 			const chain<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
 
-			for (uint32 attributeIndex = 0; attributeIndex < attributes.size(); attributeIndex += 1) {
-				const VertexInputAttribute& attribute = attributes[attributeIndex];
-
+			for (const VertexInputAttribute& attribute : attributes) {
 				const GLenum type = getGlType(attribute.type);
 				const GLint size = getGlSize(attribute.type);
 				const GLvoid* offset = (const GLvoid*) (const std::uintptr_t) attribute.offset;
 
 				switch (type) {
 					case GL_FLOAT:
-						glVertexAttribFormat(attribute.location, size, type, attribute.normalized, attribute.offset);
+						glVertexAttribFormat(attribindex, size, type, attribute.normalized, attribute.offset);
 
 						break;
 					case GL_BYTE:
@@ -70,23 +70,25 @@ namespace ProjectA {
 					case GL_UNSIGNED_SHORT:
 					case GL_INT:
 					case GL_UNSIGNED_INT:
-						glVertexAttribIFormat(attribute.location, size, type, attribute.offset);
+						glVertexAttribIFormat(attribindex, size, type, attribute.offset);
 
 						break;
 					case GL_DOUBLE:
-						glVertexAttribLFormat(attribute.location, size, type, attribute.offset);
+						glVertexAttribLFormat(attribindex, size, type, attribute.offset);
 
 						break;
 					default:
 						ENGINE_ASSERT(false, "Unsupported vertex input attribute type.");
 				}
 
-				glVertexAttribBinding(attribute.location, vertexInputBindingIndex);
-				glEnableVertexAttribArray(attribute.location);
+				glVertexAttribBinding(attribindex, vertexInputBindingIndex);
+				glEnableVertexAttribArray(attribindex);
 
 				if (vertexInputBinding.getInputRate() == InputRate::INSTANCE) {
-					glVertexBindingDivisor(attribute.location, 1);
+					glVertexBindingDivisor(vertexInputBindingIndex, 1);
 				}
+
+				attribindex += 1;
 			}
 		}
 	}

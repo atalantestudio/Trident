@@ -23,18 +23,13 @@ namespace ProjectA {
 				const DescriptorSetLayoutBinding& binding = layout.bindings[bindingIndex];
 				const VkDescriptorType descriptorType = getVkDescriptorType(binding.descriptorType);
 
+				// TODO: uint32 lyah::max(uint32, uint32)
+				const uint32 descriptorCount = std::max(binding.buffers.size(), binding.imageViews.size());
+
 				VkDescriptorSetLayoutBinding descriptorSetLayoutBinding{};
 				descriptorSetLayoutBinding.binding = bindingIndex;
 				descriptorSetLayoutBinding.descriptorType = descriptorType;
-
-				// TODO: Determine the total count of descriptor sets generated below with the write descriptors.
-				if (binding.buffers.size() > 1) {
-					descriptorSetLayoutBinding.descriptorCount = static_cast<uint32>(binding.buffers.size());
-				}
-				else {
-					descriptorSetLayoutBinding.descriptorCount = 1;
-				}
-
+				descriptorSetLayoutBinding.descriptorCount = descriptorCount;
 				descriptorSetLayoutBinding.stageFlags = getVkShaderStageFlagBits(binding.stageFlags);
 				descriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 

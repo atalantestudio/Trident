@@ -57,16 +57,16 @@ namespace ProjectA {
 		const vec2<float32> parentMargin = {0.0f, 0.0f};
 		chain<vec4<float32>> colors;
 
-		for (const ref<GUIObject>& rootObject : rootObjects) {
+		/*for (const ref<GUIObject>& rootObject : rootObjects) {
 			rootObject->compute(ecs, parentSize, parentMargin, colors, fonts[0]);
-		}
+		}*/
 
 		if (!colors.empty()) {
 			renderer.registerColors(colors);
 		}
 	}
 
-	void GUILayer::registerEntityPool() {
+	/*void GUILayer::registerEntityPool() {
 		const ComponentPool<GUIComponent>& componentPool = ecs.getComponentPool<GUIComponent>();
 
 		ENGINE_ASSERT(componentPool.componentCount < MAX_GUI_COMPONENTS, "Too many GUI components.");
@@ -78,7 +78,7 @@ namespace ProjectA {
 		}
 
 		renderer.registerEntityPool(componentPool);
-	}
+	}*/
 
 	void GUILayer::update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
 		updateScriptComponents();
@@ -87,7 +87,7 @@ namespace ProjectA {
 	}
 
 	void GUILayer::updateScriptComponents() const {
-		ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
+		/*ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
 
 		ScriptComponent* begin = componentPool.components.data();
 
@@ -100,6 +100,6 @@ namespace ProjectA {
 			}
 
 			component->entity->onUpdate();
-		}
+		}*/
 	}
 }

@@ -24,15 +24,15 @@ namespace ProjectA {
 					glBindBufferRange(getGlDescriptorType(descriptorSetLayoutBinding.descriptorType), binding, glBuffer->object, 0, glBuffer->size);
 				}
 
-				for (uint32 imageViewIndex = 0; imageViewIndex < descriptorSetLayoutBinding.imageViews.size(); imageViewIndex += 1) {
-					const ref<OpenGLImageView> imageView = std::static_pointer_cast<OpenGLImageView>(descriptorSetLayoutBinding.imageViews[imageViewIndex]);
+				for (GLuint unit = 0; unit < descriptorSetLayoutBinding.imageViews.size(); unit += 1) {
+					const ref<OpenGLImageView> imageView = std::static_pointer_cast<OpenGLImageView>(descriptorSetLayoutBinding.imageViews[unit]);
 
-					glBindTextureUnit(binding, imageView->object);
+					glBindTextureUnit(unit, imageView->object);
 
-					if (imageViewIndex < descriptorSetLayoutBinding.samplers.size()) {
-						const ref<OpenGLSampler> sampler = std::static_pointer_cast<OpenGLSampler>(descriptorSetLayoutBinding.samplers[imageViewIndex]);
+					if (unit < descriptorSetLayoutBinding.samplers.size()) {
+						const ref<OpenGLSampler> sampler = std::static_pointer_cast<OpenGLSampler>(descriptorSetLayoutBinding.samplers[unit]);
 
-						glBindSampler(binding, sampler->object);
+						glBindSampler(unit, sampler->object);
 					}
 
 					GLenum internalFormat = imageView->image.internalFormat;
