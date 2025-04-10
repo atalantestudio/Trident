@@ -9,7 +9,5 @@ namespace ProjectA {
 
 		public:
 			virtual ~Context() = default;
-
-			virtual void swapBuffers() const = 0;
 	};
 }

@@ -11,11 +11,11 @@
 #include "Engine/Window.hpp"
 
 namespace ProjectA {
-	class WindowsWindow : public Window {
+	class Win32Window : public Window {
 		public:
-			WindowsWindow(const WindowData& data);
+			Win32Window(const WindowDescriptor& descriptor);
 
-			virtual ~WindowsWindow();
+			virtual ~Win32Window();
 
 			virtual void* getNativeWindow() const {
 				return window;
@@ -29,23 +29,20 @@ namespace ProjectA {
 				return data.height;
 			}
 
-			bool isVSyncEnabled() const override;
-
 			void setEventCallback(const EventCallback& callback) override {
 				data.callback = callback;
 			}
-
-			void setVSyncState(bool state) override;
 
 			void update() override;
 
 		private:
 			struct GLFWData {
 				std::string title;
-				// TODO: Use vec2<sint32>
+
+				// TODO: Use vec2<sint32>.
 				sint32 width = 0;
 				sint32 height = 0;
-				bool vSync = false;
+
 				EventCallback callback;
 			};
 
@@ -53,10 +50,5 @@ namespace ProjectA {
 			GLFWwindow* window;
 			scope<Context> context;
 			GLFWData data;
-
-		private:
-			virtual void initialize(const WindowData& data);
-
-			virtual void terminate();
 	};
 }

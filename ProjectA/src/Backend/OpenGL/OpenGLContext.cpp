@@ -32,10 +32,4 @@ namespace ProjectA {
 		ENGINE_INFO("GPU: [] []", gpuVendor, gpuRenderer);
 		ENGINE_INFO("GPU version: []", gpuVersion);*/
 	}
-
-	void OpenGLContext::swapBuffers() const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		glfwSwapBuffers(window);
-	}
 }

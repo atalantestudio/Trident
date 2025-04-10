@@ -34,8 +34,13 @@ namespace ProjectA {
 		const uint32 extentWidth = configurationFile.get<uint32>("ExtentWidth");
 		const uint32 extentHeight = configurationFile.get<uint32>("ExtentHeight");
 
+		WindowDescriptor windowDescriptor;
+		windowDescriptor.name = name;
+		windowDescriptor.width = extentWidth;
+		windowDescriptor.height = extentHeight;
+
 		// Initialize GLFW and create window.
-		window = Window::create(WindowData(name, extentWidth, extentHeight));
+		window = Window::create(windowDescriptor);
 		window->setEventCallback(BIND(Application::onEvent));
 
 		// Initialize graphics API.

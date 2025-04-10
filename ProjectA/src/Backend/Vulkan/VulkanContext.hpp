@@ -10,8 +10,6 @@ namespace ProjectA {
 		public:
 			VulkanContext(GLFWwindow* window);
 
-			void swapBuffers() const override;
-
 		private:
 			#ifdef PLATFORM_WINDOWS
 				static void checkWindowsVulkanAvailability();

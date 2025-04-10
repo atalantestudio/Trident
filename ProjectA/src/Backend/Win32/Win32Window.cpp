@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Backend/Windows/WindowsWindow.hpp"
+#include "Backend/Win32/Win32Window.hpp"
 
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -13,39 +13,14 @@ namespace ProjectA {
 		ENGINE_ERROR("GLFW error ([]): []", error, description);
 	}
 
-	WindowsWindow::WindowsWindow(const WindowData& data) {
-		initialize(data);
-	}
-
-	WindowsWindow::~WindowsWindow() {
-		terminate();
-	}
-
-	bool WindowsWindow::isVSyncEnabled() const {
-		return data.vSync;
-	}
-
-	void WindowsWindow::setVSyncState(bool state) {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		if (Renderer::getGraphicsApi() == GraphicsAPI::OPENGL) {
-			glfwSwapInterval(static_cast<sint32>(state));
-		}
-		else if (Renderer::getGraphicsApi() == GraphicsAPI::VULKAN) {
-			ENGINE_WARN("No support for swap interval with a Vulkan context.");
-		}
-
-		data.vSync = state;
-	}
-
-	void WindowsWindow::initialize(const WindowData& data) {
+	Win32Window::Win32Window(const WindowDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		GLFWData& glfwData = this->data;
 
-		glfwData.title = data.title;
-		glfwData.width = data.width;
-		glfwData.height = data.height;
+		glfwData.title = descriptor.name;
+		glfwData.width = descriptor.width;
+		glfwData.height = descriptor.height;
 
 		if (glfwWindowCount == 0) {
 			sint32 success;
@@ -88,8 +63,6 @@ namespace ProjectA {
 		context = Context::create(window);
 
 		glfwSetWindowUserPointer(window, &glfwData);
-
-		setVSyncState(true);
 
 		glfwSetWindowSizeCallback(window, [](GLFWwindow* window, sint32 width, sint32 height) {
 			GLFWData& data = *static_cast<GLFWData*>(glfwGetWindowUserPointer(window));
@@ -187,7 +160,7 @@ namespace ProjectA {
 		});
 	}
 
-	void WindowsWindow::terminate() {
+	Win32Window::~Win32Window() {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glfwDestroyWindow(window);
@@ -201,11 +174,9 @@ namespace ProjectA {
 		}
 	}
 
-	void WindowsWindow::update() {
+	void Win32Window::update() {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glfwPollEvents();
-
-		context->swapBuffers();
 	}
 }

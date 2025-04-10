@@ -11,8 +11,6 @@ namespace ProjectA {
 		#endif
 	}
 
-	void VulkanContext::swapBuffers() const {}
-
 	#ifdef PLATFORM_WINDOWS
 		void VulkanContext::checkWindowsVulkanAvailability() {
 			PROFILE_SCOPE(FUNC_SIG);
