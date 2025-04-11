@@ -19,9 +19,11 @@ namespace ProjectA {
 			static Application& get();
 
 		public:
-			Application(const WindowDescriptor& windowDescriptor, const ConfigurationFile& configurationFile);
+			Application(const WindowDescriptor& windowDescriptor/*, const ConfigurationFile& configurationFile*/);
 
 			virtual ~Application();
+
+			const Window& getWindow() const;
 
 			WindowOld& getWindowOld();
 
@@ -35,9 +37,9 @@ namespace ProjectA {
 			void registerLayer(U&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
 
-				//Layer* layer = new T(std::forward<U>(arguments)...);
+				Layer* layer = new T(std::forward<U>(arguments)...);
 
-				//layerStack.pushLayer(layer);
+				layerStack.pushLayer(layer);
 			}
 
 			template<typename T, typename... U>

@@ -22,6 +22,9 @@ namespace ProjectA {
 
 			~Window();
 
+			// Returns the position of the mouse, relative to the top-left corner of the client area.
+			const sint32* getMousePosition() const;
+
 			// Peeks, translates and dispatchs incoming non-queued messages.
 			void dispatchMessages() const;
 

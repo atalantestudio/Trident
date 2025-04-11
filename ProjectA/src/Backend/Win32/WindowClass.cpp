@@ -109,6 +109,9 @@ namespace ProjectA {
 
 				break;
 			}
+			case WM_MOUSEACTIVATE:
+				// Ignore message.
+				break;
 			case WM_GETMINMAXINFO: {
 				// TODO: Update MINMAXINFO struct.
 				//const MINMAXINFO* mmi = (const MINMAXINFO*) lParam;
@@ -146,6 +149,11 @@ namespace ProjectA {
 				break;
 			case WM_NCLBUTTONDOWN:
 				// Ignore message.
+				break;
+			case WM_SYSKEYDOWN:
+				// TODO: Handle WM_SYSKEYDOWN message.
+				BREAKPOINT();
+
 				break;
 			case WM_SYSCOMMAND:
 				// TODO: Handle WM_SYSCOMMAND message.
@@ -206,7 +214,7 @@ namespace ProjectA {
 		wndClass.cbWndExtra = 0;
 		wndClass.hInstance = hInstance;
 		wndClass.hIcon = nullptr;
-		//wndClass.hIcon = LoadIcon(hInstance, IDI_APPLICATION);
+		//wndClass.hIcon = LoadIconW(hInstance, IDI_APPLICATION);
 		wndClass.hCursor = nullptr;
 		wndClass.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
 		wndClass.lpszMenuName = nullptr;

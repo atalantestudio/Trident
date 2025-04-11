@@ -15,13 +15,15 @@ namespace ProjectA {
 		return *instance;
 	}
 
-	Application::Application(const WindowDescriptor& windowDescriptor, const ConfigurationFile& configurationFile) :
+	Application::Application(const WindowDescriptor& windowDescriptor/*, const ConfigurationFile& configurationFile*/) :
 		// TODO: If the instance index is > 1, append it to the window name.
 		window(WINDOW_CLASS, windowDescriptor)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
 		ENGINE_DEBUG("Running new application instance.");
+
+		instance = this;
 
 		/*const std::string graphicsApi = configurationFile.get<std::string>("GraphicsAPI");
 
@@ -159,6 +161,10 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 	}
 
+	const Window& Application::getWindow() const {
+		return window;
+	}
+
 	WindowOld& Application::getWindowOld() {
 		return *windowOld;
 	}
@@ -178,6 +184,10 @@ namespace ProjectA {
 			PROFILE_SCOPE("Game loop");
 
 			window.dispatchMessages();
+
+			for (Layer* layer : layerStack) {
+				layer->update();
+			}
 
 			/*const float32 time = static_cast<float32>(glfwGetTime());
 			const float32 deltaTime = time - lastFrameTime;

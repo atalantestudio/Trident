@@ -42,8 +42,15 @@ namespace ProjectA {
 
 		data = windowData;
 
-		SetPropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, (void*) windowClass.data);
-		SetPropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData);
+		BOOL result;
+
+		result = SetPropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, (void*) windowClass.data);
+
+		ENGINE_ASSERT(result, "Failed to set window property.");
+
+		result = SetPropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData);
+
+		ENGINE_ASSERT(result, "Failed to set window data property.");
 
 		Show(*this);
 	}
@@ -60,6 +67,12 @@ namespace ProjectA {
 		const BOOL result = DestroyWindow(windowData->hWnd);
 
 		ENGINE_ASSERT(result, "Failed to destroy Win32 window.");
+	}
+
+	const sint32* Window::getMousePosition() const {
+		const Win32WindowData* windowData = static_cast<const Win32WindowData*>(data);
+
+		return &windowData->cursorX;
 	}
 
 	void Window::dispatchMessages() const {
