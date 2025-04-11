@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Engine/Camera/OrthographicCamera3D.hpp"
-#include "Engine/Event/Event.hpp"
-#include "Engine/Event/MouseEvent.hpp"
-#include "Engine/Event/WindowEvent.hpp"
+#include "Engine/API/Event/Event.hpp"
+#include "Engine/API/Event/MouseEvent.hpp"
+#include "Engine/API/Event/WindowEvent.hpp"
 
 namespace ProjectA {
 	class OrthographicCamera3DController {

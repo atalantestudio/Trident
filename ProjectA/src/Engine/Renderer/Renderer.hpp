@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/CommandEncoder.hpp"
-#include "Engine/Event/Event.hpp"
+#include "Engine/API/Event/Event.hpp"
 #include "Engine/GraphicsAdapter.hpp"
 #include "Engine/Renderer/GraphicsAPI.hpp"
 

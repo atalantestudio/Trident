@@ -7,7 +7,7 @@
 
 namespace ProjectA {
 	bool Input::isKeyPressed(KeyCode keyCode) {
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindowOld().getNativeWindow());
 
 		const sint32 keyState = glfwGetKey(window, static_cast<sint32>(keyCode));
 
@@ -15,7 +15,7 @@ namespace ProjectA {
 	}
 
 	bool Input::isMouseButtonPressed(MouseButton button) {
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindowOld().getNativeWindow());
 
 		const sint32 buttonState = glfwGetMouseButton(window, static_cast<sint32>(button));
 
@@ -23,7 +23,7 @@ namespace ProjectA {
 	}
 
 	vec2<float64> Input::getMousePosition() {
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::get().getWindowOld().getNativeWindow());
 
 		float64 x;
 		float64 y;

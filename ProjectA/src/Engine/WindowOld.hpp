@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Engine/base.hpp"
-#include "Engine/Event/Event.hpp"
+#include "Engine/API/Event/Event.hpp"
 
 namespace ProjectA {
-	struct WindowDescriptor {
+	struct WindowOldDescriptor {
 		// TODO: Replace with const char*?
 		std::string name;
 
@@ -14,15 +14,15 @@ namespace ProjectA {
 		uint32 height;
 	};
 
-	class Window {
+	class WindowOld {
 		public:
 			using EventCallback = std::function<void(Event&)>;
 
 		public:
-			static scope<Window> create(const WindowDescriptor& descriptor);
+			static scope<WindowOld> create(const WindowOldDescriptor& descriptor);
 
 		public:
-			virtual ~Window() = default;
+			virtual ~WindowOld() = default;
 
 			virtual void* getNativeWindow() const = 0;
 

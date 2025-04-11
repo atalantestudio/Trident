@@ -7,6 +7,7 @@
 		#define PLATFORM_WINDOWS
 
 		#include <Windows.h>
+		#include <windowsx.h>
 
 		#undef assert
 		#undef DELETE

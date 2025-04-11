@@ -1,14 +1,15 @@
 #pragma once
 
 #include "Engine/API/CommandEncoder.hpp"
+#include "Engine/API/Event/WindowEvent.hpp"
 #include "Engine/API/Synchronization/Fence.hpp"
 #include "Engine/API/Synchronization/Semaphore.hpp"
+#include "Engine/API/Window/Window.hpp"
 #include "Engine/base.hpp"
-#include "Engine/Event/WindowEvent.hpp"
 #include "Engine/Filesystem/File/ConfigurationFile.hpp"
 #include "Engine/Layer/LayerStack.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
-#include "Engine/Window.hpp"
+#include "Engine/WindowOld.hpp"
 
 int main(int argc, char** argv);
 
@@ -18,11 +19,11 @@ namespace ProjectA {
 			static Application& get();
 
 		public:
-			Application(const std::string& name, const ConfigurationFile& configurationFile);
+			Application(const WindowDescriptor& windowDescriptor, const ConfigurationFile& configurationFile);
 
 			virtual ~Application();
 
-			Window& getWindow();
+			WindowOld& getWindowOld();
 
 			const ref<RenderPass>& getRenderPass() const;
 
@@ -34,18 +35,18 @@ namespace ProjectA {
 			void registerLayer(U&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
 
-				Layer* layer = new T(std::forward<U>(arguments)...);
+				//Layer* layer = new T(std::forward<U>(arguments)...);
 
-				layerStack.pushLayer(layer);
+				//layerStack.pushLayer(layer);
 			}
 
 			template<typename T, typename... U>
 			void registerOverlay(U&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
 
-				Layer* overlay = new T(std::forward<U>(arguments)...);
+				//Layer* overlay = new T(std::forward<U>(arguments)...);
 
-				layerStack.pushOverlay(overlay);
+				//layerStack.pushOverlay(overlay);
 			}
 
 			void close();
@@ -69,7 +70,9 @@ namespace ProjectA {
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
 
 		private:
-			scope<Window> window;
+			Window window;
+			scope<WindowOld> windowOld;
+
 			LayerStack layerStack;
 
 			// TODO: Use scope here?

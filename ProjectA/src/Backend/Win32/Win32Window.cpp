@@ -4,6 +4,7 @@
 
 #include "Backend/Win32/Win32Window.hpp"
 
+#include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
@@ -13,7 +14,7 @@ namespace ProjectA {
 		ENGINE_ERROR("GLFW error ([]): []", error, description);
 	}
 
-	Win32Window::Win32Window(const WindowDescriptor& descriptor) {
+	Win32Window::Win32Window(const WindowOldDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		GLFWData& glfwData = this->data;
@@ -146,7 +147,7 @@ namespace ProjectA {
 		glfwSetCursorPosCallback(window, [](GLFWwindow* window, float64 xpos, float64 ypos) {
 			const GLFWData& data = *static_cast<GLFWData*>(glfwGetWindowUserPointer(window));
 
-			MouseMoveEvent event(static_cast<float32>(xpos), static_cast<float32>(ypos));
+			MouseMoveEvent event(static_cast<sint32>(xpos), static_cast<sint32>(ypos));
 
 			data.callback(event);
 		});

@@ -6,20 +6,24 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
+	static constexpr WindowClassDescriptor WINDOW_CLASS_DESCRIPTOR = {"EngineWindowClass"};
+	static const WindowClass WINDOW_CLASS(WINDOW_CLASS_DESCRIPTOR);
+
 	Application* Application::instance = nullptr;
 
 	Application& Application::get() {
 		return *instance;
 	}
 
-	Application::Application(const std::string& name, const ConfigurationFile& configurationFile) {
+	Application::Application(const WindowDescriptor& windowDescriptor, const ConfigurationFile& configurationFile) :
+		// TODO: If the instance index is > 1, append it to the window name.
+		window(WINDOW_CLASS, windowDescriptor)
+	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_ASSERT(instance == nullptr, "An application instance already exists.");
+		ENGINE_DEBUG("Running new application instance.");
 
-		instance = this;
-
-		const std::string graphicsApi = configurationFile.get<std::string>("GraphicsAPI");
+		/*const std::string graphicsApi = configurationFile.get<std::string>("GraphicsAPI");
 
 		if (graphicsApi == "OpenGL") {
 			Renderer::setGraphicsApi(GraphicsAPI::OPENGL);
@@ -40,11 +44,11 @@ namespace ProjectA {
 		windowDescriptor.height = extentHeight;
 
 		// Initialize GLFW and create window.
-		window = Window::create(windowDescriptor);
-		window->setEventCallback(BIND(Application::onEvent));
+		windowOld = Window::create(windowDescriptor);
+		windowOld->setEventCallback(BIND(Application::onEvent));
 
 		// Initialize graphics API.
-		Renderer::registerWindow(static_cast<GLFWwindow*>(window->getNativeWindow()));
+		Renderer::registerWindow(static_cast<GLFWwindow*>(windowOld->getNativeWindow()));
 		Renderer::recreate();
 
 		RenderPassDescriptor renderPassDescriptor{};
@@ -69,7 +73,7 @@ namespace ProjectA {
 			availableImageSemaphores[frameIndex] = Renderer::createSemaphore();
 			finishedRenderSemaphores[frameIndex] = Renderer::createSemaphore();
 			flightFences[frameIndex] = Renderer::createFence();
-		}
+		}*/
 
 		/* Constants */
 
@@ -155,8 +159,8 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 	}
 
-	Window& Application::getWindow() {
-		return *window;
+	WindowOld& Application::getWindowOld() {
+		return *windowOld;
 	}
 
 	const ref<RenderPass>& Application::getRenderPass() const {
@@ -173,7 +177,9 @@ namespace ProjectA {
 		while (looping) {
 			PROFILE_SCOPE("Game loop");
 
-			const float32 time = static_cast<float32>(glfwGetTime());
+			window.dispatchMessages();
+
+			/*const float32 time = static_cast<float32>(glfwGetTime());
 			const float32 deltaTime = time - lastFrameTime;
 
 			lastFrameTime = time;
@@ -182,12 +188,12 @@ namespace ProjectA {
 				render(deltaTime);
 			}
 
-			window->update();
+			windowOld->update();*/
 		}
 	}
 
 	void Application::render(float32 deltaTime) {
-		PROFILE_SCOPE("Update layers");
+		/*PROFILE_SCOPE("Update layers");
 
 		const ref<Device> device = Renderer::getDevice();
 
@@ -224,11 +230,11 @@ namespace ProjectA {
 
 		device->waitIdle();
 
-		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;*/
 	}
 
 	void Application::resize() {
-		sint32 extentWidth;
+		/*sint32 extentWidth;
 		sint32 extentHeight;
 
 		Renderer::getWindowExtent(extentWidth, extentHeight);
@@ -244,7 +250,7 @@ namespace ProjectA {
 
 		Application::get().getSwapchain()->recreate(swapchainDescriptor);
 
-		needsResize = false;
+		needsResize = false;*/
 	}
 
 	void Application::close() {
@@ -252,7 +258,7 @@ namespace ProjectA {
 	}
 
 	void Application::onEvent(Event& event) {
-		PROFILE_SCOPE(FUNC_SIG);
+		/*PROFILE_SCOPE(FUNC_SIG);
 
 		EventDispatcher eventDispatcher(event);
 
@@ -265,7 +271,7 @@ namespace ProjectA {
 			}
 
 			(*i)->onEvent(event);
-		}
+		}*/
 	}
 
 	bool Application::onWindowClose(WindowCloseEvent& event) {
@@ -275,7 +281,7 @@ namespace ProjectA {
 	}
 
 	bool Application::onWindowResize(WindowResizeEvent& event) {
-		PROFILE_SCOPE(FUNC_SIG);
+		/*PROFILE_SCOPE(FUNC_SIG);
 
 		if (event.getWidth() == 0 || event.getHeight() == 0) {
 			minimized = true;
@@ -284,7 +290,7 @@ namespace ProjectA {
 		}
 
 		minimized = false;
-		needsResize = true;
+		needsResize = true;*/
 
 		return false;
 	}

@@ -4,16 +4,16 @@
 
 #include "Backend/OpenGL/OpenGLContext.hpp"
 
-#include "Engine/Event/KeyEvent.hpp"
-#include "Engine/Event/MouseEvent.hpp"
-#include "Engine/Event/WindowEvent.hpp"
+#include "Engine/API/Event/KeyEvent.hpp"
+#include "Engine/API/Event/MouseEvent.hpp"
+#include "Engine/API/Event/WindowEvent.hpp"
 #include "Engine/Renderer/Context.hpp"
-#include "Engine/Window.hpp"
+#include "Engine/WindowOld.hpp"
 
 namespace ProjectA {
-	class Win32Window : public Window {
+	class Win32Window : public WindowOld {
 		public:
-			Win32Window(const WindowDescriptor& descriptor);
+			Win32Window(const WindowOldDescriptor& descriptor);
 
 			virtual ~Win32Window();
 

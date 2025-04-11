@@ -4,10 +4,10 @@
 	#include "Backend/Win32/Win32Window.hpp"
 #endif
 
-#include "Engine/Window.hpp"
+#include "Engine/WindowOld.hpp"
 
 namespace ProjectA {
-	scope<Window> Window::create(const WindowDescriptor& descriptor) {
+	scope<WindowOld> WindowOld::create(const WindowOldDescriptor& descriptor) {
 		#ifdef PLATFORM_WINDOWS
 			return createScope<Win32Window>(descriptor);
 		#else

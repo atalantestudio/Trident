@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Event/Event.hpp"
+#include "Engine/API/Event/Event.hpp"
 #include "Engine/Input.hpp"
 
 namespace ProjectA {
@@ -43,29 +43,6 @@ namespace ProjectA {
 				std::stringstream stream;
 
 				stream << getName() << ": " << button;
-
-				return stream.str();
-			}
-	};
-
-	class MouseMoveEvent : public Event {
-		private:
-			vec2<float32> position;
-
-		public:
-			MouseMoveEvent(float32 x, float32 y) : position(x, y) {}
-
-			const vec2<float32>& getPosition() const {
-				return position;
-			}
-
-			EVENT_TYPE(EventType::MOUSE_MOVE)
-			EVENT_CATEGORY(EventCategory::INPUT | EventCategory::MOUSE)
-
-			std::string toString() const override {
-				std::stringstream stream;
-
-				stream << getName() << ": " << position[0] << ", " << position[1];
 
 				return stream.str();
 			}

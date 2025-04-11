@@ -8,8 +8,8 @@
 namespace ProjectA {
 	class SandboxApplication : public Application {
 		public:
-			SandboxApplication(const ConfigurationFile& configurationFile) :
-				Application("Sandbox", configurationFile)
+			SandboxApplication(const WindowDescriptor& windowDescriptor, const ConfigurationFile& configurationFile) :
+				Application(windowDescriptor, configurationFile)
 			{
 				//const TrueTypeFont font("assets/fonts/test.ttf");
 
@@ -23,6 +23,11 @@ namespace ProjectA {
 	Application* ProjectA::createApplication() {
 		const ConfigurationFile configurationFile = Filesystem::load<ConfigurationFile>("Sandbox.tco");
 
-		return new SandboxApplication(configurationFile);
+		WindowDescriptor windowDescriptor{};
+		windowDescriptor.name = "Sandbox";
+		windowDescriptor.width = configurationFile.get<uint32>("ExtentWidth");
+		windowDescriptor.height = configurationFile.get<uint32>("ExtentHeight");
+
+		return new SandboxApplication(windowDescriptor, configurationFile);
 	}
 }
