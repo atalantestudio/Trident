@@ -15,22 +15,6 @@ namespace ProjectA {
 		VkResult result;
 
 		#ifdef PLATFORM_WINDOWS
-			/*const PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = static_cast<PFN_vkCreateWin32SurfaceKHR>(static_cast<void*>(vkGetInstanceProcAddr(instance, "vkCreateWin32SurfaceKHR")));
-
-			ENGINE_ASSERT(vkCreateWin32SurfaceKHR != nullptr, "Failed to get the address of PFN_vkCreateWin32SurfaceKHR.");
-
-			VkWin32SurfaceCreateInfoKHR surfaceCreateInfo{};
-			surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-			surfaceCreateInfo.pNext = nullptr;
-			surfaceCreateInfo.flags = 0;
-			surfaceCreateInfo.hinstance = GetModuleHandle(nullptr);
-			surfaceCreateInfo.hwnd = glfwGetWin32Window(window);
-
-			// TODO: If no debug messenger, this fails with "Vulkan instance missing VK_KHR_win32_surface extension".
-			result = vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &object);
-
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan surface (code: []).", result);*/
-
 			result = createVulkanWin32Surface(window, instance, nullptr, &object);
 		#else
 			#error "Unhandled platform."

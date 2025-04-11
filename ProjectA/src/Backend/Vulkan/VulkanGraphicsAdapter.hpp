@@ -1,8 +1,5 @@
 #pragma once
 
-#include <glfw/glfw3.h>
-#include <vulkan/vulkan.h>
-
 #include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanInstance.hpp"
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"

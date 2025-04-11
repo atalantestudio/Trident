@@ -1,7 +1,5 @@
 #include "pch.hpp"
 
-#include <glfw/glfw3.h>
-
 #include "Engine/Application.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 

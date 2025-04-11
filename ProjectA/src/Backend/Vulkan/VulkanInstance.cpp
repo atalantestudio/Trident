@@ -1,7 +1,5 @@
 #include "pch.hpp"
 
-#include <glfw/glfw3.h>
-
 #include "Backend/Vulkan/VulkanInstance.hpp"
 
 namespace ProjectA {

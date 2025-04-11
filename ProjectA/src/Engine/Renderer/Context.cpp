@@ -1,7 +1,6 @@
 #include "pch.hpp"
 
 #include "Backend/OpenGL/OpenGLContext.hpp"
-#include "Backend/Vulkan/VulkanContext.hpp"
 
 #include "Engine/Renderer/Context.hpp"
 #include "Engine/Renderer/Renderer.hpp"
@@ -16,7 +15,7 @@ namespace ProjectA {
 			case GraphicsAPI::OPENGL:
 				return createScope<OpenGLContext>(static_cast<GLFWwindow*>(window));
 			case GraphicsAPI::VULKAN:
-				return createScope<VulkanContext>(static_cast<GLFWwindow*>(window));
+				return nullptr;
 		}
 
 		return nullptr;
