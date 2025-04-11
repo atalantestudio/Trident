@@ -2,10 +2,8 @@
 
 #include <glfw/glfw3.h>
 
-#include "Engine/Renderer/Context.hpp"
-
 namespace ProjectA {
-	class OpenGLContext : public Context {
+	class OpenGLContext {
 		public:
 			OpenGLContext(GLFWwindow* window);
 

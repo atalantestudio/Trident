@@ -61,8 +61,6 @@ namespace ProjectA {
 			glfwWindowCount += 1;
 		}
 
-		context = Context::create(window);
-
 		glfwSetWindowUserPointer(window, &glfwData);
 
 		glfwSetWindowSizeCallback(window, [](GLFWwindow* window, sint32 width, sint32 height) {

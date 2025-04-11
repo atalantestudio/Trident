@@ -2,12 +2,9 @@
 
 #include <glfw/glfw3.h>
 
-#include "Backend/OpenGL/OpenGLContext.hpp"
-
 #include "Engine/API/Event/KeyEvent.hpp"
 #include "Engine/API/Event/MouseEvent.hpp"
 #include "Engine/API/Event/WindowEvent.hpp"
-#include "Engine/Renderer/Context.hpp"
 #include "Engine/WindowOld.hpp"
 
 namespace ProjectA {
@@ -48,7 +45,6 @@ namespace ProjectA {
 
 		private:
 			GLFWwindow* window;
-			scope<Context> context;
 			GLFWData data;
 	};
 }
