@@ -9,8 +9,6 @@ namespace ProjectA {
 	static LRESULT CALLBACK Wndproc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 		if (Msg > 49000) {
 			// TODO: Handle client messages.
-			BREAKPOINT();
-
 			return DefWindowProcW(hWnd, Msg, wParam, lParam);
 		}
 
@@ -32,13 +30,19 @@ namespace ProjectA {
 
 				return 0;
 			case WM_MOVE:
-				// TODO: Handle WM_MOVE message.
-				BREAKPOINT();
+				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-move.
+
+				windowData->positionX = GET_X_LPARAM(lParam);
+				windowData->positionY = GET_Y_LPARAM(lParam);
 
 				return 0;
 			case WM_SIZE:
-				// TODO: Handle WM_SIZE message.
-				BREAKPOINT();
+				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-size.
+
+				windowData->sizeX = GET_X_LPARAM(lParam);
+				windowData->sizeY = GET_Y_LPARAM(lParam);
+				windowData->minimized = wParam == SIZE_MINIMIZED;
+				windowData->maximized = wParam == SIZE_MAXIMIZED;
 
 				return 0;
 			case WM_ACTIVATE:
@@ -150,14 +154,21 @@ namespace ProjectA {
 			case WM_NCLBUTTONDOWN:
 				// Ignore message.
 				break;
+			case WM_NCLBUTTONDBLCLK:
+				// Ignore message.
+				break;
+			case WM_KEYDOWN:
+				// TODO: Handle WM_KEYDOWN message.
+				BREAKPOINT();
+
+				break;
 			case WM_SYSKEYDOWN:
 				// TODO: Handle WM_SYSKEYDOWN message.
 				BREAKPOINT();
 
 				break;
 			case WM_SYSCOMMAND:
-				// TODO: Handle WM_SYSCOMMAND message.
-				BREAKPOINT();
+				// See https://learn.microsoft.com/en-us/windows/win32/menurc/wm-syscommand.
 
 				break;
 			case WM_MOUSEMOVE:
@@ -173,8 +184,28 @@ namespace ProjectA {
 			case WM_LBUTTONUP:
 				// TODO: Handle WM_LBUTTONUP message.
 				break;
+			case WM_ENTERMENULOOP:
+				// TODO: Handle WM_ENTERMENULOOP message.
+				break;
+			case WM_EXITMENULOOP:
+				// TODO: Handle WM_EXITMENULOOP message.
+				break;
+			case WM_SIZING:
+				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-sizing.
+				// TODO: Update aspect ratio.
+
+				break;
 			case WM_CAPTURECHANGED:
 				// TODO: Handle WM_CAPTURECHANGED message.
+				break;
+			case WM_MOVING:
+				// Ignore message.
+				break;
+			case WM_ENTERSIZEMOVE:
+				// TODO: Handle WM_ENTERSIZEMOVE message.
+				break;
+			case WM_EXITSIZEMOVE:
+				// TODO: Handle WM_EXITSIZEMOVE message.
 				break;
 			case WM_IME_SETCONTEXT:
 				// Ignore message.

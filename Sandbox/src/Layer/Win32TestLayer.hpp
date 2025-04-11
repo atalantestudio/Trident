@@ -7,9 +7,9 @@ namespace ProjectA {
 		public:
 			void update() override {
 				const Window& window = getWindow();
-				const sint32* mousePosition = window.getMousePosition();
+				const sint32* size = window.getSize();
 
-				ENGINE_DEBUG("Mouse: X = [] Y = []", mousePosition[0], mousePosition[1]);
+				ENGINE_DEBUG("Size: X = [] Y = []", size[0], size[1]);
 			}
 	};
 }

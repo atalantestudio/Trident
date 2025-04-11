@@ -22,6 +22,12 @@ namespace ProjectA {
 
 			~Window();
 
+			// Returns the position of the upper-left corner of the client area.
+			const sint32* getPosition() const;
+
+			// Returns the size of the client area.
+			const sint32* getSize() const;
+
 			// Returns the position of the mouse, relative to the top-left corner of the client area.
 			const sint32* getMousePosition() const;
 

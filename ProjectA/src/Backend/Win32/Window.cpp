@@ -69,6 +69,18 @@ namespace ProjectA {
 		ENGINE_ASSERT(result, "Failed to destroy Win32 window.");
 	}
 
+	const sint32* Window::getPosition() const {
+		const Win32WindowData* windowData = static_cast<const Win32WindowData*>(data);
+
+		return &windowData->positionX;
+	}
+
+	const sint32* Window::getSize() const {
+		const Win32WindowData* windowData = static_cast<const Win32WindowData*>(data);
+
+		return &windowData->sizeX;
+	}
+
 	const sint32* Window::getMousePosition() const {
 		const Win32WindowData* windowData = static_cast<const Win32WindowData*>(data);
 
