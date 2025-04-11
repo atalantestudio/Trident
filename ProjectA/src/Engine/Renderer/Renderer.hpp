@@ -2,15 +2,14 @@
 
 #include "Engine/API/CommandEncoder.hpp"
 #include "Engine/API/Event/Event.hpp"
+#include "Engine/API/Window/Window.hpp"
 #include "Engine/GraphicsAdapter.hpp"
 #include "Engine/Renderer/GraphicsAPI.hpp"
-
-typedef struct GLFWwindow GLFWwindow;
 
 namespace ProjectA {
 	class Renderer {
 		public:
-			static void registerWindow(GLFWwindow* window);
+			static void registerWindow(const Window& window);
 
 			static GraphicsAPI getGraphicsApi();
 
@@ -56,7 +55,7 @@ namespace ProjectA {
 
 		private:
 			static GraphicsAPI graphicsApi;
-			static GLFWwindow* window;
+			static const Window* window;
 			static scope<GraphicsAdapter> adapter;
 	};
 }

@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanContext.hpp"
 
 namespace ProjectA {
-	VulkanContext::VulkanContext(GLFWwindow* window) : window(window) {
+	VulkanContext::VulkanContext(GLFWwindow* window) {
 		ENGINE_ASSERT(window, "Window handle is null.");
 
 		#ifdef PLATFORM_WINDOWS

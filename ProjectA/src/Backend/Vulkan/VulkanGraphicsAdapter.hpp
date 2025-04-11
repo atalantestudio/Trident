@@ -14,7 +14,7 @@
 namespace ProjectA {
 	class VulkanGraphicsAdapter : public GraphicsAdapter {
 		public:
-			VulkanGraphicsAdapter(GLFWwindow* window);
+			VulkanGraphicsAdapter(const Window& window);
 
 			ref<Device> getDevice() const override;
 
@@ -43,7 +43,7 @@ namespace ProjectA {
 		private:
 			const VulkanInstance instance;
 			const VulkanPhysicalDevice physicalDevice;
-			VulkanSurface surface;
+			const VulkanSurface surface;
 			const ref<VulkanDevice> device;
 	};
 }

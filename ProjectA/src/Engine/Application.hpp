@@ -56,7 +56,7 @@ namespace ProjectA {
 		private:
 			void loop();
 
-			void render(float32 deltaTime);
+			void render();
 
 			void resize();
 

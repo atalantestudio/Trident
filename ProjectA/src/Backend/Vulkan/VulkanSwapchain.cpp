@@ -26,19 +26,17 @@ namespace ProjectA {
 	}
 
 	uint32 VulkanSwapchain::getExtentWidth() const {
-		return imageExtent.width;
+		return surface.window.getSize()[0];
 	}
 
 	uint32 VulkanSwapchain::getExtentHeight() const {
-		return imageExtent.height;
+		return surface.window.getSize()[1];
 	}
 
 	void VulkanSwapchain::construct(const SwapchainDescriptor& descriptor) {
-		imageExtent = {descriptor.extentWidth, descriptor.extentHeight};
-
 		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities();
-
 		const uint32 minImageCount = surfaceCapabilities.minImageCount + 1;
+		const sint32* windowSize = surface.window.getSize();
 
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
 		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -48,7 +46,8 @@ namespace ProjectA {
 		swapchainCreateInfo.minImageCount = minImageCount;
 		swapchainCreateInfo.imageFormat = surface.format.format;
 		swapchainCreateInfo.imageColorSpace = surface.format.colorSpace;
-		swapchainCreateInfo.imageExtent = imageExtent;
+		swapchainCreateInfo.imageExtent.width = windowSize[0];
+		swapchainCreateInfo.imageExtent.height = windowSize[1];
 		swapchainCreateInfo.imageArrayLayers = 1;
 		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
@@ -128,8 +127,8 @@ namespace ProjectA {
 			framebufferCreateInfo.renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->object;
 			framebufferCreateInfo.attachmentCount = 1;
 			framebufferCreateInfo.pAttachments = &imageViews[i];
-			framebufferCreateInfo.width = imageExtent.width;
-			framebufferCreateInfo.height = imageExtent.height;
+			framebufferCreateInfo.width = windowSize[0];
+			framebufferCreateInfo.height = windowSize[1];
 			framebufferCreateInfo.layers = 1;
 
 			result = vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &framebuffers[i]);

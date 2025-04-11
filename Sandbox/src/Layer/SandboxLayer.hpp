@@ -15,7 +15,7 @@ class SandboxLayer : public ProjectA::Layer {
 
 		virtual ~SandboxLayer() = default;
 
-		void update(ProjectA::float32 deltaTime, const ProjectA::ref<ProjectA::CommandEncoder>& commandEncoder, ProjectA::uint32 nextImageIndex) override;
+		void update(const ProjectA::ref<ProjectA::CommandEncoder>& commandEncoder, ProjectA::uint32 nextImageIndex) override;
 
 		void onEvent(ProjectA::Event& event) override;
 };

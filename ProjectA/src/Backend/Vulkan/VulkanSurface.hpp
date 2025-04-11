@@ -1,28 +1,15 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
-
-#ifdef PLATFORM_WINDOWS
-	#include <vulkan/vulkan_win32.h>
-
-	#define GLFW_EXPOSE_NATIVE_WIN32
-#endif
-
-#include <glfw/glfw3.h>
-
-#ifdef PLATFORM_WINDOWS
-	#include <glfw/glfw3native.h>
-#endif
-
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Surface.hpp"
+#include "Engine/API/Window/Window.hpp"
 
 namespace ProjectA {
 	class VulkanSurface : public Surface, public ObjectWrapper<VkSurfaceKHR> {
 		public:
-			VulkanSurface(VkInstance instance, const VulkanPhysicalDevice& physicalDevice, GLFWwindow* window);
+			VulkanSurface(VkInstance instance, const VulkanPhysicalDevice& physicalDevice, const Window& window);
 
 			~VulkanSurface();
 
@@ -36,6 +23,7 @@ namespace ProjectA {
 			uint32 presentQueueFamilyIndex;
 			VkSurfaceFormatKHR format;
 			VkPresentModeKHR presentMode;
+			const Window& window;
 
 		private:
 			const VkInstance instance;

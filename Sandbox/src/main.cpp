@@ -14,9 +14,9 @@ namespace ProjectA {
 			{
 				//const TrueTypeFont font("assets/fonts/test.ttf");
 
-				//registerLayer<DemoLayer>(/*font*/);
+				registerLayer<DemoLayer>(/*font*/);
 				//registerLayer<TextLayer>(font);
-				registerLayer<Win32TestLayer>();
+				//registerLayer<Win32TestLayer>();
 			}
 
 			~SandboxApplication() {}

@@ -14,6 +14,6 @@ namespace ProjectA {
 
 			virtual ~TextLayer() = default;
 
-			void update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
+			void update(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
 	};
 }

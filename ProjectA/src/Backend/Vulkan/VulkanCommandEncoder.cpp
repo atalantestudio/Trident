@@ -70,7 +70,8 @@ namespace ProjectA {
 		renderPassBeginInfo.renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->object;
 		renderPassBeginInfo.framebuffer = swapchain.framebuffers[descriptor.nextImageIndex];
 		renderPassBeginInfo.renderArea.offset = {0, 0};
-		renderPassBeginInfo.renderArea.extent = swapchain.imageExtent;
+		renderPassBeginInfo.renderArea.extent.width = swapchain.getExtentWidth();
+		renderPassBeginInfo.renderArea.extent.height = swapchain.getExtentHeight();
 		renderPassBeginInfo.clearValueCount = 1;
 		renderPassBeginInfo.pClearValues = &clearValue;
 

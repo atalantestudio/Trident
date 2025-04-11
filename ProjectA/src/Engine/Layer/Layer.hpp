@@ -16,7 +16,7 @@ namespace ProjectA {
 
 			virtual void update();
 
-			virtual void update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex);
+			virtual void update(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex);
 
 			virtual void onEvent(Event& event);
 	};

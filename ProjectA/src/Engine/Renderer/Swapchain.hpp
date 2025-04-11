@@ -5,10 +5,6 @@
 namespace ProjectA {
 	struct SwapchainDescriptor {
 		ref<RenderPass> renderPass;
-
-		// TODO: Use vec2<sint32>.
-		uint32 extentWidth = 0;
-		uint32 extentHeight = 0;
 	};
 
 	class Swapchain {

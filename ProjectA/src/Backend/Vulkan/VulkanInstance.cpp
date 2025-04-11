@@ -73,11 +73,10 @@ namespace ProjectA {
 			instanceCreateInfo.ppEnabledLayerNames = nullptr;
 		#endif
 
-		uint32 glfwRequiredExtensionCount;
-
-		const char** glfwRequiredExtensionNames = glfwGetRequiredInstanceExtensions(&glfwRequiredExtensionCount);
-
-		enabledExtensionNames.assign(glfwRequiredExtensionNames, glfwRequiredExtensionNames + glfwRequiredExtensionCount);
+		#ifdef PLATFORM_WINDOWS
+			enabledExtensionNames.emplace_back(VK_KHR_SURFACE_EXTENSION_NAME);
+			enabledExtensionNames.emplace_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+		#endif
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			enabledExtensionNames.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);

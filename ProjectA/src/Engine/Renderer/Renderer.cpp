@@ -9,14 +9,14 @@
 namespace ProjectA {
 	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::NONE;
 
-	GLFWwindow* Renderer::window = nullptr;
+	const Window* Renderer::window = nullptr;
 
 	scope<GraphicsAdapter> Renderer::adapter = nullptr;
 
-	void Renderer::registerWindow(GLFWwindow* window) {
+	void Renderer::registerWindow(const Window& window) {
 		ENGINE_ASSERT(Renderer::window == nullptr, "The window has already been registered.");
 
-		Renderer::window = window;
+		Renderer::window = &window;
 	}
 
 	GraphicsAPI Renderer::getGraphicsApi() {
@@ -42,13 +42,15 @@ namespace ProjectA {
 			case GraphicsAPI::OPENGL:
 				ENGINE_INFO("Using OpenGL backend.");
 
-				adapter = createScope<OpenGLGraphicsAdapter>(window);
+				ENGINE_ASSERT(false, "TODO");
+
+				adapter = createScope<OpenGLGraphicsAdapter>(nullptr);
 
 				break;
 			case GraphicsAPI::VULKAN:
 				ENGINE_INFO("Using Vulkan backend.");
 
-				adapter = createScope<VulkanGraphicsAdapter>(window);
+				adapter = createScope<VulkanGraphicsAdapter>(*window);
 
 				break;
 		}
@@ -57,7 +59,10 @@ namespace ProjectA {
 	}
 
 	void Renderer::getWindowExtent(sint32& extentWidth, sint32& extentHeight) {
-		glfwGetWindowSize(window, &extentWidth, &extentHeight);
+		const sint32* size = window->getSize();
+
+		extentWidth = size[0];
+		extentHeight = size[1];
 	}
 
 	ref<Device> Renderer::getDevice() {

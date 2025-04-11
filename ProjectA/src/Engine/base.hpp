@@ -5,6 +5,7 @@
 #ifdef _WIN32
 	#ifdef _WIN64
 		#define PLATFORM_WINDOWS
+		#define VK_USE_PLATFORM_WIN32_KHR
 
 		#include <Windows.h>
 		#include <windowsx.h>

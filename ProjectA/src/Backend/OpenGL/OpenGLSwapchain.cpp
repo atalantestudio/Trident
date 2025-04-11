@@ -10,8 +10,9 @@ namespace ProjectA {
 	}
 
 	void OpenGLSwapchain::recreate(const SwapchainDescriptor& descriptor) {
-		extentWidth = descriptor.extentWidth;
-		extentHeight = descriptor.extentHeight;
+		// TODO
+		//extentWidth = descriptor.extentWidth;
+		//extentHeight = descriptor.extentHeight;
 	}
 
 	uint32 OpenGLSwapchain::getExtentWidth() const {

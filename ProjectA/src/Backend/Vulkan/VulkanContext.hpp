@@ -14,8 +14,5 @@ namespace ProjectA {
 			#ifdef PLATFORM_WINDOWS
 				static void checkWindowsVulkanAvailability();
 			#endif
-
-		private:
-			GLFWwindow* window;
 	};
 }

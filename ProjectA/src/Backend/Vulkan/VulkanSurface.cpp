@@ -2,19 +2,22 @@
 
 #include "Backend/Vulkan/VulkanSurface.hpp"
 
+#include "Backend/Win32/Surface.hpp"
+
 namespace ProjectA {
-	VulkanSurface::VulkanSurface(VkInstance instance, const VulkanPhysicalDevice& physicalDevice, GLFWwindow* window) :
+	VulkanSurface::VulkanSurface(VkInstance instance, const VulkanPhysicalDevice& physicalDevice, const Window& window) :
 		instance(instance),
-		physicalDevice(physicalDevice.object)
+		physicalDevice(physicalDevice.object),
+		window(window)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		VkResult result;
+
 		#ifdef PLATFORM_WINDOWS
-			const PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = static_cast<PFN_vkCreateWin32SurfaceKHR>(static_cast<void*>(vkGetInstanceProcAddr(instance, "vkCreateWin32SurfaceKHR")));
+			/*const PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = static_cast<PFN_vkCreateWin32SurfaceKHR>(static_cast<void*>(vkGetInstanceProcAddr(instance, "vkCreateWin32SurfaceKHR")));
 
 			ENGINE_ASSERT(vkCreateWin32SurfaceKHR != nullptr, "Failed to get the address of PFN_vkCreateWin32SurfaceKHR.");
-
-			const HWND hwnd = GetActiveWindow(); 
 
 			VkWin32SurfaceCreateInfoKHR surfaceCreateInfo{};
 			surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
@@ -24,12 +27,16 @@ namespace ProjectA {
 			surfaceCreateInfo.hwnd = glfwGetWin32Window(window);
 
 			// TODO: If no debug messenger, this fails with "Vulkan instance missing VK_KHR_win32_surface extension".
-			VkResult result = vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &object);
+			result = vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &object);
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan surface (code: []).", result);
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan surface (code: []).", result);*/
+
+			result = createVulkanWin32Surface(window, instance, nullptr, &object);
 		#else
 			#error "Unhandled platform."
 		#endif
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan surface (code: []).", result);
 
 		VkBool32 supported;
 

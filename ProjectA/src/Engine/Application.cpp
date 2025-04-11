@@ -25,7 +25,8 @@ namespace ProjectA {
 
 		instance = this;
 
-		/*const std::string graphicsApi = configurationFile.get<std::string>("GraphicsAPI");
+		//const std::string graphicsApi = configurationFile.get<std::string>("GraphicsAPI");
+		const std::string graphicsApi = "Vulkan";
 
 		if (graphicsApi == "OpenGL") {
 			Renderer::setGraphicsApi(GraphicsAPI::OPENGL);
@@ -37,7 +38,7 @@ namespace ProjectA {
 			ENGINE_ASSERT(false, "Unhandled graphics API \"[]\".", graphicsApi);
 		}
 
-		const uint32 extentWidth = configurationFile.get<uint32>("ExtentWidth");
+		/*const uint32 extentWidth = configurationFile.get<uint32>("ExtentWidth");
 		const uint32 extentHeight = configurationFile.get<uint32>("ExtentHeight");
 
 		WindowDescriptor windowDescriptor;
@@ -47,10 +48,10 @@ namespace ProjectA {
 
 		// Initialize GLFW and create window.
 		windowOld = Window::create(windowDescriptor);
-		windowOld->setEventCallback(BIND(Application::onEvent));
+		windowOld->setEventCallback(BIND(Application::onEvent));*/
 
 		// Initialize graphics API.
-		Renderer::registerWindow(static_cast<GLFWwindow*>(windowOld->getNativeWindow()));
+		Renderer::registerWindow(window);
 		Renderer::recreate();
 
 		RenderPassDescriptor renderPassDescriptor{};
@@ -61,8 +62,6 @@ namespace ProjectA {
 
 		SwapchainDescriptor swapchainDescriptor;
 		swapchainDescriptor.renderPass = renderPass;
-		swapchainDescriptor.extentWidth = extentWidth;
-		swapchainDescriptor.extentHeight = extentHeight;
 
 		swapchain = Renderer::getBackend()->createSwapchain(swapchainDescriptor);
 
@@ -75,7 +74,7 @@ namespace ProjectA {
 			availableImageSemaphores[frameIndex] = Renderer::createSemaphore();
 			finishedRenderSemaphores[frameIndex] = Renderer::createSemaphore();
 			flightFences[frameIndex] = Renderer::createFence();
-		}*/
+		}
 
 		/* Constants */
 
@@ -194,16 +193,16 @@ namespace ProjectA {
 
 			lastFrameTime = time;
 
-			if (!minimized) {
-				render(deltaTime);
-			}
+			if (!minimized) {*/
+				render();
+			/*}
 
 			windowOld->update();*/
 		}
 	}
 
-	void Application::render(float32 deltaTime) {
-		/*PROFILE_SCOPE("Update layers");
+	void Application::render() {
+		PROFILE_SCOPE("Update layers");
 
 		const ref<Device> device = Renderer::getDevice();
 
@@ -221,7 +220,7 @@ namespace ProjectA {
 		commandEncoder->begin();
 
 		for (Layer* layer : layerStack) {
-			layer->update(deltaTime, commandEncoder, nextImageIndex);
+			layer->update(commandEncoder, nextImageIndex);
 		}
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
@@ -231,6 +230,8 @@ namespace ProjectA {
 		const Status presentStatus = device->present(Application::get().getSwapchain(), finishedRenderSemaphores[frameInFlightIndex], nextImageIndex);
 
 		if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE || needsResize) {
+			ENGINE_ASSERT(false, "TODO");
+
 			resize();
 
 			return;
@@ -240,7 +241,7 @@ namespace ProjectA {
 
 		device->waitIdle();
 
-		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;*/
+		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void Application::resize() {

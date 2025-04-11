@@ -23,7 +23,6 @@ namespace ProjectA {
 			void destroy();
 
 		public:
-			VkExtent2D imageExtent;
 			chain<VkImage> images;
 			chain<VkImageView> imageViews;
 			chain<VkFramebuffer> framebuffers;

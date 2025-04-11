@@ -24,27 +24,28 @@ namespace ProjectA {
 			case WM_CREATE:
 				// Ignore message (already handled through WM_NCCREATE).
 				break;
-			case WM_DESTROY:
+			case WM_DESTROY: {
 				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-destroy.
 				PostQuitMessage(0);
 
 				return 0;
-			case WM_MOVE:
+			}
+			case WM_MOVE: {
 				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-move.
-
 				windowData->positionX = GET_X_LPARAM(lParam);
 				windowData->positionY = GET_Y_LPARAM(lParam);
 
 				return 0;
-			case WM_SIZE:
+			}
+			case WM_SIZE: {
 				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-size.
-
 				windowData->sizeX = GET_X_LPARAM(lParam);
 				windowData->sizeY = GET_Y_LPARAM(lParam);
 				windowData->minimized = wParam == SIZE_MINIMIZED;
 				windowData->maximized = wParam == SIZE_MAXIMIZED;
 
 				return 0;
+			}
 			case WM_ACTIVATE:
 				// Ignore message.
 				break;

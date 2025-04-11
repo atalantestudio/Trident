@@ -8,7 +8,7 @@ namespace ProjectA {
 	class EditorApplication : public Application {
 		public:
 			EditorApplication(const WindowDescriptor& windowDescriptor, const ConfigurationFile& configurationFile) :
-				Application(windowDescriptor, configurationFile)
+				Application(windowDescriptor/*, configurationFile*/)
 			{
 				registerLayer<EditorLayer>();
 			}

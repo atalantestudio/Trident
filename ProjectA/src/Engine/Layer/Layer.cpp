@@ -12,7 +12,7 @@ namespace ProjectA {
 
 	void Layer::update() {}
 
-	void Layer::update(float32 deltaTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {}
+	void Layer::update(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {}
 
 	void Layer::onEvent(Event& event) {}
 }

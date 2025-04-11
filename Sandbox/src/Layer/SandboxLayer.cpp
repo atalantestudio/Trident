@@ -6,7 +6,7 @@ SandboxLayer::SandboxLayer() :
 	//checkerboardImage = ProjectA::Texture2D::create("assets/textures/checkerboard.png");
 }
 
-void SandboxLayer::update(ProjectA::float32 deltaTime, const ProjectA::ref<ProjectA::CommandEncoder>& commandEncoder, ProjectA::uint32 nextImageIndex) {
+void SandboxLayer::update(const ProjectA::ref<ProjectA::CommandEncoder>& commandEncoder, ProjectA::uint32 nextImageIndex) {
 	PROFILE_SCOPE(FUNC_SIG);
 
 	//cameraController.update(deltaTime);

@@ -12,7 +12,7 @@
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 
 namespace ProjectA {
-	VulkanGraphicsAdapter::VulkanGraphicsAdapter(GLFWwindow* window) :
+	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const Window& window) :
 		instance(),
 		physicalDevice(instance.object),
 		surface(instance.object, physicalDevice, window),
