@@ -8,10 +8,6 @@
 	int main(int argc, char** argv) {
 		ProjectA::Filesystem::initialize();
 
-		#ifdef BUILD_MODE_DEBUG
-			ProjectA::Logger::initialize();
-		#endif
-
 		ProjectA::Application* application;
 
 		{

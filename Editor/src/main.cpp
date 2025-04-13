@@ -7,8 +7,8 @@
 namespace ProjectA {
 	class EditorApplication : public Application {
 		public:
-			EditorApplication(const WindowDescriptor& windowDescriptor, const ConfigurationFile& configurationFile) :
-				Application(windowDescriptor/*, configurationFile*/)
+			EditorApplication(const WindowDescriptor& windowDescriptor) :
+				Application(windowDescriptor)
 			{
 				registerLayer<EditorLayer>();
 			}
@@ -17,13 +17,11 @@ namespace ProjectA {
 	};
 
 	Application* createApplication() {
-		const ConfigurationFile configurationFile = Filesystem::load<ConfigurationFile>("Editor.tco");
-
 		WindowDescriptor windowDescriptor{};
 		windowDescriptor.name = "ProjectA Editor";
-		windowDescriptor.width = configurationFile.get<uint32>("ExtentWidth");
-		windowDescriptor.height = configurationFile.get<uint32>("ExtentHeight");
+		windowDescriptor.width = 800;
+		windowDescriptor.height = 800;
 
-		return new EditorApplication(windowDescriptor, configurationFile);
+		return new EditorApplication(windowDescriptor);
 	}
 }

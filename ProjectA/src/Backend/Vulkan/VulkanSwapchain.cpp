@@ -115,9 +115,7 @@ namespace ProjectA {
 
 			result = vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageViews[i]);
 
-			if (result != VK_SUCCESS) {
-				throw std::runtime_error("Failed to create swapchain image view.");
-			}
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan swapchain image view (code: []).", result);
 
 			// TODO: Replace with Framebuffer API.
 			VkFramebufferCreateInfo framebufferCreateInfo{};
@@ -133,9 +131,7 @@ namespace ProjectA {
 
 			result = vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &framebuffers[i]);
 
-			if (result != VK_SUCCESS) {
-				throw std::runtime_error("Failed to create swapchain framebuffer.");
-			}
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan swapchain framebuffer (code: []).", result);
 		}
 	}
 

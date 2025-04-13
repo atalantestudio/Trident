@@ -3,25 +3,18 @@
 #include "Engine/Layer/LayerStack.hpp"
 
 namespace ProjectA {
-	LayerStack::~LayerStack() {
-		// TODO: Make implicit?
-		for (Layer* layer : layers) {
-			delete layer;
-		}
-	}
-
-	void LayerStack::pushLayer(Layer* layer) {
+	void LayerStack::pushLayer(const ref<Layer>& layer) {
 		layers.emplace(layers.begin() + layerInsertionIndex, layer);
 
 		layerInsertionIndex += 1;
 	}
 
-	void LayerStack::pushOverlay(Layer* overlay) {
+	void LayerStack::pushOverlay(const ref<Layer>& overlay) {
 		layers.emplace_back(overlay);
 	}
 
-	void LayerStack::removeLayer(Layer* layer) {
-		const chain<Layer*>::const_iterator iterator = std::find(layers.begin(), layers.begin() + layerInsertionIndex, layer);
+	void LayerStack::removeLayer(const ref<Layer>& layer) {
+		const chain<ref<Layer>>::const_iterator iterator = std::find(layers.begin(), layers.begin() + layerInsertionIndex, layer);
 
 		if (iterator == layers.begin() + layerInsertionIndex) {
 			return;
@@ -32,8 +25,8 @@ namespace ProjectA {
 		layerInsertionIndex -= 1;
 	}
 
-	void LayerStack::removeOverlay(Layer* overlay) {
-		const chain<Layer*>::const_iterator iterator = std::find(layers.begin() + layerInsertionIndex, layers.end(), overlay);
+	void LayerStack::removeOverlay(const ref<Layer>& overlay) {
+		const chain<ref<Layer>>::const_iterator iterator = std::find(layers.begin() + layerInsertionIndex, layers.end(), overlay);
 
 		if (iterator == layers.end()) {
 			return;
@@ -42,19 +35,19 @@ namespace ProjectA {
 		layers.erase(iterator);
 	}
 
-	chain<Layer*>::iterator LayerStack::begin() {
+	chain<ref<Layer>>::iterator LayerStack::begin() {
 		return layers.begin();
 	}
 
-	chain<Layer*>::iterator LayerStack::end() {
+	chain<ref<Layer>>::iterator LayerStack::end() {
 		return layers.end();
 	}
 
-	chain<Layer*>::reverse_iterator LayerStack::rbegin() {
+	chain<ref<Layer>>::reverse_iterator LayerStack::rbegin() {
 		return layers.rbegin();
 	}
 
-	chain<Layer*>::reverse_iterator LayerStack::rend() {
+	chain<ref<Layer>>::reverse_iterator LayerStack::rend() {
 		return layers.rend();
 	}
 }

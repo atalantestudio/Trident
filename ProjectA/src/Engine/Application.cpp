@@ -1,21 +1,44 @@
 #include "pch.hpp"
 
 #include "Engine/Application.hpp"
+#include "Engine/Filesystem/Filesystem.hpp"
+#include "Engine/Platform.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	static constexpr WindowClassDescriptor WINDOW_CLASS_DESCRIPTOR = {"EngineWindowClass"};
-	static const WindowClass WINDOW_CLASS(WINDOW_CLASS_DESCRIPTOR);
 
 	Application* Application::instance = nullptr;
+
+	scope<WindowClass> Application::windowClass;
 
 	Application& Application::get() {
 		return *instance;
 	}
 
-	Application::Application(const WindowDescriptor& windowDescriptor/*, const ConfigurationFile& configurationFile*/) :
+	ConfigurationFile Application::loadConfigurationFile(const Window& window) {
+		const std::filesystem::path currentPath = Filesystem::getCurrentPath();
+		const std::string currentDirectoryName = Filesystem::getCurrentDirectory().string();
+
+		std::filesystem::path configurationFilePath = currentPath;
+		configurationFilePath /= currentDirectoryName;
+		configurationFilePath += ".tpr";
+
+		ConfigurationFile configurationFile;
+
+		try {
+			configurationFile = Filesystem::load<ConfigurationFile>(configurationFilePath.string());
+		}
+		catch (std::runtime_error) {
+			ENGINE_FATAL(window, "Could not open property file [].", configurationFilePath);
+		}
+
+		return configurationFile;
+	}
+
+	Application::Application(const WindowDescriptor& windowDescriptor) :
 		// TODO: If the instance index is > 1, append it to the window name.
-		window(WINDOW_CLASS, windowDescriptor)
+		window(windowDescriptor)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -23,8 +46,10 @@ namespace ProjectA {
 
 		instance = this;
 
+		loadConfigurationFile(window);
+
 		//const std::string graphicsApi = configurationFile.get<std::string>("GraphicsAPI");
-		const std::string graphicsApi = "Vulkan";
+		/*const std::string graphicsApi = "Vulkan";
 
 		if (graphicsApi == "OpenGL") {
 			Renderer::setGraphicsApi(GraphicsAPI::OPENGL);
@@ -34,7 +59,7 @@ namespace ProjectA {
 		}
 		else {
 			ENGINE_ASSERT(false, "Unhandled graphics API \"[]\".", graphicsApi);
-		}
+		}*/
 
 		/*const uint32 extentWidth = configurationFile.get<uint32>("ExtentWidth");
 		const uint32 extentHeight = configurationFile.get<uint32>("ExtentHeight");
@@ -48,7 +73,7 @@ namespace ProjectA {
 		windowOld = Window::create(windowDescriptor);
 		windowOld->setEventCallback(BIND(Application::onEvent));*/
 
-		// Initialize graphics API.
+		/*// Initialize graphics API.
 		Renderer::registerWindow(window);
 		Renderer::recreate();
 
@@ -72,7 +97,7 @@ namespace ProjectA {
 			availableImageSemaphores[frameIndex] = Renderer::createSemaphore();
 			finishedRenderSemaphores[frameIndex] = Renderer::createSemaphore();
 			flightFences[frameIndex] = Renderer::createFence();
-		}
+		}*/
 
 		/* Constants */
 
@@ -83,14 +108,7 @@ namespace ProjectA {
 
 		/* Startup */
 
-		// Define char* path;
-
-		// If argc > 1
-			// Set path = argv[0]
-		// Else
-			// Set path = DEFAULT_PROPERTY_FILE_PATH
-
-		// Open config file with path
+		// Open property file at DEFAULT_PROPERTY_FILE_PATH
 			// If no file
 				// Emit fatal
 				// Return
@@ -101,7 +119,7 @@ namespace ProjectA {
 			// If no setting
 				// Set selectedApiIndex = 0
 			// Else if the setting is not in API_QUEUE
-				// Emit warn "Unknown graphics API"
+				// Emit warn "Unknown graphics API. Using API 0. Updated the property in the file to avoid future warnings."
 				// Set selectedApiIndex = 0
 				// Overwrite file setting with selectedApiIndex
 			// Else
@@ -175,32 +193,53 @@ namespace ProjectA {
 	}
 
 	void Application::loop() {
-		PROFILE_SCOPE(FUNC_SIG);
+		previousTickTime = Platform::getTime();
 
 		while (looping) {
-			PROFILE_SCOPE("Game loop");
-
-			window.dispatchMessages();
-
-			for (Layer* layer : layerStack) {
-				layer->update();
-			}
-
-			/*const float32 time = static_cast<float32>(glfwGetTime());
-			const float32 deltaTime = time - lastFrameTime;
-
-			lastFrameTime = time;
-
-			if (!minimized) {*/
-				render();
-			/*}
-
-			windowOld->update();*/
+			tick();
 		}
 	}
 
-	void Application::render() {
-		PROFILE_SCOPE("Update layers");
+	void Application::tick() {
+		PROFILE_SCOPE("Application tick");
+
+		window.processMessages();
+
+		const float64 time = Platform::getTime();
+		float64 currentTickTime = time - previousTickTime;
+
+		//ENGINE_DEBUG("Tick time = []s", currentTickTime);
+
+		previousTickTime = time;
+		timeAccumulator += currentTickTime;
+
+		while (timeAccumulator >= fixedDeltaTime) {
+			// Integrate with a fixed time step.
+			integrate(fixedDeltaTime);
+
+			// Extract 1 * base delta time from the accumulator.
+			// What's left is passed on to the next frame.
+			timeAccumulator -= fixedDeltaTime;
+		}
+
+		// TODO: Interpolate between current time and timeAccumulator.
+		if (!window.isMinimized()) {
+			//render(timeAccumulator);
+
+			frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+		}
+	}
+
+	void Application::integrate(float64 fixedDeltaTime) {
+		PROFILE_SCOPE("Application integrate (update)");
+
+		for (const ref<Layer>& layer : layerStack) {
+			layer->update(fixedDeltaTime);
+		}
+	}
+
+	void Application::render(float64 remainingFrameTime) {
+		PROFILE_SCOPE("Application render");
 
 		const ref<Device> device = Renderer::getDevice();
 
@@ -217,8 +256,8 @@ namespace ProjectA {
 		commandEncoder->reset();
 		commandEncoder->begin();
 
-		for (Layer* layer : layerStack) {
-			layer->update(commandEncoder, nextImageIndex);
+		for (const ref<Layer>& layer : layerStack) {
+			layer->render(remainingFrameTime, commandEncoder, nextImageIndex);
 		}
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
@@ -238,8 +277,6 @@ namespace ProjectA {
 		ENGINE_ASSERT(presentStatus == Status::SUCCESS, "Unhandled present status.");
 
 		device->waitIdle();
-
-		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void Application::resize() {
@@ -272,7 +309,6 @@ namespace ProjectA {
 		EventDispatcher eventDispatcher(event);
 
 		eventDispatcher.dispatch<WindowCloseEvent>(BIND(Application::onWindowClose));
-		eventDispatcher.dispatch<WindowResizeEvent>(BIND(Application::onWindowResize));
 
 		for (chain<Layer*>::const_reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); i += 1) {
 			if (event.handled) {
@@ -287,20 +323,5 @@ namespace ProjectA {
 		close();
 
 		return true;
-	}
-
-	bool Application::onWindowResize(WindowResizeEvent& event) {
-		/*PROFILE_SCOPE(FUNC_SIG);
-
-		if (event.getWidth() == 0 || event.getHeight() == 0) {
-			minimized = true;
-
-			return false;
-		}
-
-		minimized = false;
-		needsResize = true;*/
-
-		return false;
 	}
 }

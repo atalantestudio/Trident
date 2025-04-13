@@ -27,8 +27,8 @@ project "ProjectA"
 	cppdialect "C++17"
 	staticruntime "on"
 
-	targetdir ("bin/%{prj.name}/" .. outputdir)
-	objdir ("obj/%{prj.name}/" .. outputdir)
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
 	pchheader "pch.hpp"
 	pchsource "%{prj.name}/src/pch.cpp"
@@ -67,25 +67,31 @@ project "ProjectA"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "BUILD_MODE_DEBUG"
+		defines {
+			"BUILD_MODE_DEBUG",
+		}
+
 		runtime "Debug"
 		symbols "on"
 
 		excludes "%{prj.name}/src/Engine/Profile/**"
 
 	filter "configurations:Profile"
-		defines "BUILD_MODE_PROFILE"
+		defines {
+			"BUILD_MODE_PROFILE",
+		}
+
 		runtime "Release"
 		optimize "on"
-
-		excludes "%{prj.name}/src/Engine/Logger/**"
 
 	filter "configurations:Release"
-		defines "BUILD_MODE_RELEASE"
+		defines {
+			"BUILD_MODE_RELEASE",
+		}
+
 		runtime "Release"
 		optimize "on"
 
-		excludes "%{prj.name}/src/Engine/Logger/**"
 		excludes "%{prj.name}/src/Engine/Profile/**"
 
 project "Sandbox"
@@ -95,8 +101,8 @@ project "Sandbox"
 	cppdialect "C++17"
 	staticruntime "on"
 
-	targetdir ("bin/%{prj.name}/" .. outputdir)
-	objdir ("obj/%{prj.name}/" .. outputdir)
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
 	files {
 		"%{prj.name}/src/**.cpp",
@@ -113,21 +119,34 @@ project "Sandbox"
 		"ProjectA",
 	}
 
+	defines {
+		"PROJECT_NAME=\"%{prj.name}\"",
+	}
+
 	filter "system:windows"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "BUILD_MODE_DEBUG"
+		defines {
+			"BUILD_MODE_DEBUG",
+		}
+
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Profile"
-		defines "BUILD_MODE_PROFILE"
+		defines {
+			"BUILD_MODE_PROFILE",
+		}
+
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Release"
-		defines "BUILD_MODE_RELEASE"
+		defines {
+			"BUILD_MODE_RELEASE",
+		}
+
 		runtime "Release"
 		optimize "on"
 
@@ -138,8 +157,8 @@ project "Editor"
 	cppdialect "C++17"
 	staticruntime "on"
 
-	targetdir ("bin/%{prj.name}/" .. outputdir)
-	objdir ("obj/%{prj.name}/" .. outputdir)
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
 	files {
 		"%{prj.name}/src/**.cpp",
@@ -165,20 +184,33 @@ project "Editor"
 		"vulkan-1.lib", -- TODO: Temporary
 	}
 
+	defines {
+		"PROJECT_NAME=\"%{prj.name}\"",
+	}
+
 	filter "system:windows"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "BUILD_MODE_DEBUG"
+		defines {
+			"BUILD_MODE_DEBUG",
+		}
+
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Profile"
-		defines "BUILD_MODE_PROFILE"
+		defines {
+			"BUILD_MODE_PROFILE",
+		}
+
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Release"
-		defines "BUILD_MODE_RELEASE"
+		defines {
+			"BUILD_MODE_RELEASE",
+		}
+
 		runtime "Release"
 		optimize "on"

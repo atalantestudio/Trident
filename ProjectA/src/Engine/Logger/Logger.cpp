@@ -7,13 +7,8 @@ namespace ProjectA {
 
 	std::size_t Logger::namePadding = 0;
 
-	scope<Logger> Logger::engineLogger;
-	scope<Logger> Logger::clientLogger;
-
-	void Logger::initialize() {
-		engineLogger = createScope<Logger>("ENGINE", LogLevel::ALL);
-		clientLogger = createScope<Logger>("CLIENT", LogLevel::ALL);
-	}
+	Logger Logger::engineLogger("ENGINE", LogLevel::ALL);
+	Logger Logger::clientLogger("CLIENT", LogLevel::ALL);
 
 	void Logger::clear() {
 		stream.str(std::string());

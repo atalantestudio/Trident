@@ -6,23 +6,22 @@
 namespace ProjectA {
 	class LayerStack {
 		public:
-			LayerStack() = default;
-
-			~LayerStack();
-
-			void pushLayer(Layer* layer);
-			void pushOverlay(Layer* overlay);
-			void removeLayer(Layer* layer);
-			void removeOverlay(Layer* overlay);
+			void pushLayer(const ref<Layer>& layer);
+			void pushOverlay(const ref<Layer>& overlay);
+			void removeLayer(const ref<Layer>& layer);
+			void removeOverlay(const ref<Layer>& overlay);
 
 			// TODO: Write helper macro for iterators.
-			chain<Layer*>::iterator begin();
-			chain<Layer*>::iterator end();
-			chain<Layer*>::reverse_iterator rbegin();
-			chain<Layer*>::reverse_iterator rend();
+			chain<ref<Layer>>::iterator begin();
+
+			chain<ref<Layer>>::iterator end();
+
+			chain<ref<Layer>>::reverse_iterator rbegin();
+
+			chain<ref<Layer>>::reverse_iterator rend();
 
 		private:
-			chain<Layer*> layers;
+			chain<ref<Layer>> layers;
 			uint32 layerInsertionIndex = 0;
 	};
 }

@@ -5,12 +5,12 @@
 #include <filesystem>
 #include <fstream>
 #include <functional>
+#include <iostream> // Release build can need std::cout
 #include <sstream>
 
 #ifdef BUILD_MODE_DEBUG
 	#include <chrono>
 	#include <iomanip>
-	#include <iostream>
 #endif
 
 #ifdef BUILD_MODE_PROFILE

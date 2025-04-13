@@ -5,6 +5,6 @@
 namespace ProjectA {
 	class EditorLayer : public GUILayer {
 		public:
-			void update(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
+			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
 	};
 }

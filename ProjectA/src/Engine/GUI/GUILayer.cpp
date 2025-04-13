@@ -80,7 +80,7 @@ namespace ProjectA {
 		renderer.registerEntityPool(componentPool);
 	}*/
 
-	void GUILayer::update(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
+	void GUILayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
 		updateScriptComponents();
 
 		renderer.render(commandEncoder, nextImageIndex);

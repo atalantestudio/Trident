@@ -16,9 +16,11 @@ namespace ProjectA {
 		uint32 height;
 	};
 
+	//typedef *(void)() EventListener;
+
 	class Window {
 		public:
-			Window(const WindowClass& windowClass, const WindowDescriptor& windowDescriptor);
+			Window(const WindowDescriptor& windowDescriptor);
 
 			~Window();
 
@@ -28,13 +30,24 @@ namespace ProjectA {
 			// Returns the size of the client area.
 			const sint32* getSize() const;
 
+			// Returns whether the window is maximized.
+			bool isMaximized() const;
+
+			// Returns whether the window is minimized.
+			bool isMinimized() const;
+
 			// Returns the position of the mouse, relative to the top-left corner of the client area.
 			const sint32* getMousePosition() const;
 
 			// Peeks, translates and dispatchs incoming non-queued messages.
-			void dispatchMessages() const;
+			void processMessages() const;
+
+			//template<typename T>
+			//void setEventListener();
+
+			void showFatalErrorMessage(const std::string& message) const;
 
 		public:
-			const void* data;
+			void* data;
 	};
 }

@@ -9,7 +9,7 @@ namespace ProjectA {
 		renderer.setText("PP Radio Grotesk", 64);
 	}
 
-	void TextLayer::update(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
+	void TextLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
 		/*GUIWindow window;
 
 		{

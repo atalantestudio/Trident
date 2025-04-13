@@ -8,6 +8,9 @@ namespace ProjectA {
 		// Device context handle.
 		HDC hDC;
 
+		// Indirect message box params used for displaying fatal errors.
+		MSGBOXPARAMSW fatalMbp;
+
 		// TODO: Use vec2<sint32>.
 		sint32 positionX;
 		sint32 positionY;
@@ -35,10 +38,37 @@ namespace ProjectA {
 	static constexpr LPCWSTR WINDOW_CLASS_DATA_PROPERTY_STRING = L"WindowClassDataProperty";
 	static constexpr LPCWSTR WINDOW_DATA_PROPERTY_STRING = L"WindowDataProperty";
 
+	static void PrintLastError() {
+		LPWSTR lpBuffer{};
+
+		const DWORD dwMessageId = GetLastError();
+		const DWORD dwLanguageId = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
+
+		if (FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, dwMessageId, dwLanguageId, lpBuffer, 0, nullptr) == 0) {
+			ENGINE_ERROR("Failed to format Win32 error message.");
+
+			ExitProcess(GetLastError());
+
+			return;
+		}
+
+		ENGINE_ERROR(lpBuffer);
+
+		LocalFree(lpBuffer);
+		ExitProcess(dwMessageId);
+	}
+
+	#define WIN32_ASSERT(condition) { \
+		if (!(condition)) { \
+			PrintLastError(); \
+			BREAKPOINT(); \
+		} \
+	}
+
 	static HINSTANCE GetInstance() {
 		const HINSTANCE hInstance = GetModuleHandleW(nullptr);
 
-		ENGINE_ASSERT(hInstance != nullptr, "Failed to get the instance of the window procedure.");
+		WIN32_ASSERT(hInstance != nullptr);
 
 		return hInstance;
 	}
@@ -48,14 +78,14 @@ namespace ProjectA {
 	static LPCWSTR ConvertUTF8ToUTF16(LPCCH string) {
 		const sint32 characterCount = MultiByteToWideChar(CP_UTF8, 0, string, -1, nullptr, 0);
 
-		ENGINE_ASSERT(characterCount > 0, "Failed to get character count of UTF-8 string.");
+		WIN32_ASSERT(characterCount > 0);
 
 		LPWSTR convertedString = static_cast<LPWSTR>(calloc(characterCount, sizeof(WCHAR)));
 
 		if (MultiByteToWideChar(CP_UTF8, 0, string, -1, convertedString, characterCount) == 0) {
 			free(convertedString);
 
-			ENGINE_ASSERT(false, "Failed to convert UTF-8 string to UTF-16.");
+			WIN32_ASSERT(false);
 
 			return nullptr;
 		}

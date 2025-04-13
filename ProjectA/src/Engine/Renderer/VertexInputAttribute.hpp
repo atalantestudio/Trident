@@ -8,9 +8,10 @@ namespace ProjectA {
 		VertexInputAttributeType type;
 
 		// Whether the attribute is normalized.
+		// Only used with the OpenGL abstraction.
 		bool normalized;
 
-		// Byte offset relative to the start of an element in the vertex input binding.
+		// Offset relative to the start of an element in the vertex input binding, in bytes.
 		uint32 offset;
 	};
 }

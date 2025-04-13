@@ -18,8 +18,10 @@ namespace ProjectA {
 		public:
 			static Application& get();
 
+			static ConfigurationFile loadConfigurationFile(const Window& window);
+
 		public:
-			Application(const WindowDescriptor& windowDescriptor/*, const ConfigurationFile& configurationFile*/);
+			Application(const WindowDescriptor& windowDescriptor);
 
 			virtual ~Application();
 
@@ -37,7 +39,7 @@ namespace ProjectA {
 			void registerLayer(U&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
 
-				Layer* layer = new T(std::forward<U>(arguments)...);
+				const ref<Layer> layer = createRef<T>(std::forward<U>(arguments)...);
 
 				layerStack.pushLayer(layer);
 			}
@@ -46,9 +48,9 @@ namespace ProjectA {
 			void registerOverlay(U&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
 
-				//Layer* overlay = new T(std::forward<U>(arguments)...);
+				const ref<Layer> overlay = createRef<T>(std::forward<U>(arguments)...);
 
-				//layerStack.pushOverlay(overlay);
+				layerStack.pushOverlay(overlay);
 			}
 
 			void close();
@@ -56,12 +58,18 @@ namespace ProjectA {
 		private:
 			void loop();
 
-			void render();
+			void tick();
+
+			void integrate(float64 deltaTime);
+
+			void render(float64 remainingFrameTime);
 
 			void resize();
 
+			// TODO: Implement.
+			//float computeDeltaTime() const;
+
 			bool onWindowClose(WindowCloseEvent& event);
-			bool onWindowResize(WindowResizeEvent& event);
 
 		private:
 			friend int ::main(int argc, char** argv);
@@ -70,6 +78,9 @@ namespace ProjectA {
 			static Application* instance;
 
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
+
+		private:
+			static scope<WindowClass> windowClass;
 
 		private:
 			Window window;
@@ -88,7 +99,12 @@ namespace ProjectA {
 			bool looping = true;
 			bool needsResize = false;
 			bool minimized = false;
+
 			float32 lastFrameTime = 0.0f;
+			float64 framesPerSecond = 1.0;
+			float64 fixedDeltaTime = 1.0 / framesPerSecond;
+			float64 previousTickTime = 0.0;
+			float64 timeAccumulator = 0.0;
 
 			// Multiple of MAX_FRAMES_IN_FLIGHT.
 			uint32 frameInFlightIndex = 0;

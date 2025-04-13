@@ -4,7 +4,7 @@
 
 namespace ProjectA {
 	void Filesystem::initialize() {
-		const std::filesystem::path currentDirectoryName = std::filesystem::current_path().filename();
+		/*const std::filesystem::path currentDirectoryName = std::filesystem::current_path().filename();
 
 		if (currentDirectoryName != "Sandbox" && currentDirectoryName != "Editor") {
 			if (currentDirectoryName != "Sandbox") {
@@ -13,7 +13,15 @@ namespace ProjectA {
 			else if (currentDirectoryName != "Editor") {
 				std::filesystem::current_path("../../../Editor");
 			}
-		}
+		}*/
+	}
+
+	std::filesystem::path Filesystem::getCurrentPath() {
+		return std::filesystem::current_path();
+	}
+
+	std::filesystem::path Filesystem::getCurrentDirectory() {
+		return getCurrentPath().filename();
 	}
 
 	chain<uint8> Filesystem::loadByteBuffer(const std::string& path) {

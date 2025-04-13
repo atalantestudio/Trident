@@ -12,8 +12,6 @@ namespace ProjectA {
 		ShaderStage stageFlags;
 		chain<ref<Buffer>> buffers;
 		chain<ref<ImageView>> imageViews;
-
-		// One sampler per image view.
 		chain<ref<Sampler>> samplers;
 	};
 }

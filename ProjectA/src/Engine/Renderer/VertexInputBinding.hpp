@@ -25,7 +25,7 @@ namespace ProjectA {
 
 				attributes.emplace_back(vertexInputAttribute);
 
-				// TODO: uint32 lyah::max(uint32, uint32)
+				// TODO: uint32 lyah::max(uint32, uint32).
 				alignment = std::max(alignment, getAttributeSize<T>());
 
 				stride += alignment;

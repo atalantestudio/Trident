@@ -10,9 +10,9 @@ namespace ProjectA {
 		return Application::get().getWindow();
 	}
 
-	void Layer::update() {}
+	void Layer::update(float64 fixedDeltaTime) {}
 
-	void Layer::update(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {}
+	void Layer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {}
 
 	void Layer::onEvent(Event& event) {}
 }

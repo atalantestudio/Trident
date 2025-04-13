@@ -32,7 +32,7 @@ namespace ProjectA {
 
 			void compute();
 
-			void update(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
+			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
 
 			void updateScriptComponents() const;
 

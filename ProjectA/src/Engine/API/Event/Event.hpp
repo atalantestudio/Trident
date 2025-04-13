@@ -2,8 +2,6 @@
 
 #include "pch.hpp"
 
-#include "Engine/base.hpp"
-
 namespace ProjectA {
 	enum class EventType : uint32 {
 		NONE = 0,
@@ -21,17 +19,17 @@ namespace ProjectA {
 		WINDOW_RESIZE,
 	};
 
-	enum class EventCategory : uint32 {
+	enum class EventCategory : uint8 {
 		NONE = 0,
-		APPLICATION = 1 << 0,
-		INPUT = 1 << 1,
-		KEYBOARD = 1 << 2,
-		MOUSE = 1 << 3,
-		MOUSE_BUTTON= 1 << 4,
-		WINDOW = 1 << 5,
+		APPLICATION = BIT(0),
+		INPUT = BIT(1),
+		KEYBOARD = BIT(2),
+		MOUSE = BIT(3),
+		MOUSE_BUTTON = BIT(4),
+		WINDOW = BIT(5),
 	};
 
-	AS_FLAG(EventCategory)
+	AS_FLAG(EventCategory);
 
 	class Event {
 		friend class EventDispatcher;
@@ -62,7 +60,9 @@ namespace ProjectA {
 
 	class EventDispatcher {
 		public:
-			EventDispatcher(Event& event) : event(event) {}
+			EventDispatcher(Event& event) :
+				event(event)
+			{}
 
 			template<typename T, typename F>
 			bool dispatch(const F& function) {

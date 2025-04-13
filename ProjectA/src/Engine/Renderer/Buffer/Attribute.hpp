@@ -1,39 +1,37 @@
 #pragma once
 
-#include "pch.hpp"
-
 namespace ProjectA {
 	template<typename T>
 	static uint32 getAttributeSize();
 
 	template<>
-	static inline uint32 getAttributeSize<sint8>() {
+	static uint32 getAttributeSize<sint8>() {
 		return sizeof(sint8);
 	}
 
 	template<>
-	static inline uint32 getAttributeSize<uint8>() {
+	static uint32 getAttributeSize<uint8>() {
 		return sizeof(uint8);
 	}
 
 	template<>
-	static inline uint32 getAttributeSize<sint16>() {
+	static uint32 getAttributeSize<sint16>() {
 		return sizeof(sint16);
 	}
 
 	template<>
-	static inline uint32 getAttributeSize<uint16>() {
+	static uint32 getAttributeSize<uint16>() {
 		return sizeof(uint16);
 	}
 
 	template<>
-	static inline uint32 getAttributeSize<sint32>() {
+	static uint32 getAttributeSize<sint32>() {
 		return sizeof(sint32);
 	}
 
 	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
-	static inline uint32 getAttributeSize<uint32>() {
+	static uint32 getAttributeSize<uint32>() {
 		//return sizeof(uint32);
 		return sizeof(uint32) * 2;
 		//return sizeof(uint32) * 4;
@@ -41,7 +39,7 @@ namespace ProjectA {
 
 	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
-	static inline uint32 getAttributeSize<float32>() {
+	static uint32 getAttributeSize<float32>() {
 		//return sizeof(float32);
 		return sizeof(float32) * 2;
 		//return sizeof(float32) * 4;
@@ -49,55 +47,55 @@ namespace ProjectA {
 
 	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
-	static inline uint32 getAttributeSize<vec2<float32>>() {
+	static uint32 getAttributeSize<vec2<float32>>() {
 		//return sizeof(float32) * 2;
 		return sizeof(float32) * 4;
 	}
 
 	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
-	static inline uint32 getAttributeSize<vec3<float32>>() {
+	static uint32 getAttributeSize<vec3<float32>>() {
 		//return sizeof(float32) * 3;
 		return sizeof(float32) * 4;
 	}
 
 	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
-	static inline uint32 getAttributeSize<vec4<float32>>() {
+	static uint32 getAttributeSize<vec4<float32>>() {
 		return sizeof(float32) * 4;
 	}
 
 	template<>
-	static inline uint32 getAttributeSize<sint64>() {
+	static uint32 getAttributeSize<sint64>() {
 		return sizeof(sint64);
 	}
 
 	template<>
-	static inline uint32 getAttributeSize<uint64>() {
+	static uint32 getAttributeSize<uint64>() {
 		return sizeof(uint64);
 	}
 
 	template<>
-	static inline uint32 getAttributeSize<float64>() {
+	static uint32 getAttributeSize<float64>() {
 		return sizeof(float64);
 	}
 
 	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
-	static inline uint32 getAttributeSize<vec2<float64>>() {
+	static uint32 getAttributeSize<vec2<float64>>() {
 		//return sizeof(float64) * 2;
 		return sizeof(float64) * 4;
 	}
 
 	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
-	static inline uint32 getAttributeSize<vec3<float64>>() {
+	static uint32 getAttributeSize<vec3<float64>>() {
 		//return sizeof(float64) * 3;
 		return sizeof(float64) * 4;
 	}
 
 	template<>
-	static inline uint32 getAttributeSize<vec4<float64>>() {
+	static uint32 getAttributeSize<vec4<float64>>() {
 		return sizeof(float64) * 4;
 	}
 }

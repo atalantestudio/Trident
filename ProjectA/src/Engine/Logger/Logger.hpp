@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/base.hpp"
+#include "Engine/API/Window/Window.hpp"
 #include "Engine/Logger/LogLevel.hpp"
 #include "Engine/Logger/LogStructure.hpp"
 
@@ -17,8 +17,8 @@ namespace ProjectA {
 			static std::size_t namePadding;
 
 		public:
-			static scope<Logger> engineLogger;
-			static scope<Logger> clientLogger;
+			static Logger engineLogger;
+			static Logger clientLogger;
 
 		private:
 			std::ostringstream stream;
@@ -28,33 +28,10 @@ namespace ProjectA {
 			LogLevel minimumLogLevel;
 			LogStructure logStructure = LogStructure::TIME | LogStructure::LOGGER_NAME | LogStructure::LOG_LEVEL_NAME;
 			std::size_t spacing = 3;
-			std::string argumentInjectionPattern = "[]";
-
-		public:
-			static void initialize();
+			std::string_view argumentInjectionPattern = "[]";
 
 		private:
 			void clear();
-
-			template<typename T>
-			void format(T&& argument) {
-				stream << argument;
-			}
-
-			template<typename T, typename... U>
-			void format(std::string_view pattern, T&& argument, U&&... arguments) {
-				const std::size_t offset = pattern.find(argumentInjectionPattern);
-
-				stream << pattern.substr(0, offset);
-
-				if (offset == std::string::npos) {
-					return;
-				}
-
-				stream << argument;
-
-				format(pattern.substr(offset + argumentInjectionPattern.size()), arguments...);
-			}
 
 			void writeTime();
 
@@ -64,12 +41,7 @@ namespace ProjectA {
 					return;
 				}
 
-				format(pattern, arguments...);
-
-				std::string log = stream.str();
-
-				clear();
-
+				std::string log = format(pattern, std::forward<T>(arguments)...);
 				const sint32 logLevelIndex = static_cast<sint32>(logLevel) - 1;
 				const std::string ansiSet = "\033[" + std::to_string(LOG_LEVEL_BACKGROUND_COLORS[logLevelIndex]) + ';' + std::to_string(LOG_LEVEL_FOREGROUND_COLORS[logLevelIndex]) + 'm';
 				std::size_t padding = 0;
@@ -112,8 +84,9 @@ namespace ProjectA {
 				stream << std::setw(padding + log.size());
 				stream << log;
 				stream << "\033[m";
+				stream << std::endl;
 
-				*LOG_LEVEL_OUTPUT_STREAMS[logLevelIndex] << stream.str() << std::endl;
+				*LOG_LEVEL_OUTPUT_STREAMS[logLevelIndex] << stream.str();
 
 				clear();
 			}
@@ -121,66 +94,102 @@ namespace ProjectA {
 		public:
 			Logger(std::string_view name, LogLevel minimumLogLevel = LogLevel::ALL);
 
-			~Logger() = default;
+			template<typename T>
+			std::string format(T&& argument) {
+				stream << argument;
+
+				const std::string log = stream.str();
+
+				clear();
+
+				return log;
+			}
+
+			template<typename T, typename... U>
+			std::string format(std::string_view pattern, T&& argument, U&&... arguments) {
+				const std::size_t offset = pattern.find(argumentInjectionPattern);
+
+				stream << pattern.substr(0, offset);
+
+				if (offset == std::string::npos) {
+					const std::string log = stream.str();
+
+					clear();
+
+					return log;
+				}
+
+				stream << argument;
+
+				return format(pattern.substr(offset + argumentInjectionPattern.size()), std::forward<U>(arguments)...);
+			}
 
 			template<typename T>
 			void trace(T&& argument) {
-				log(LogLevel::TRACE, argumentInjectionPattern, argument);
+				log(LogLevel::TRACE, argumentInjectionPattern, std::forward<T>(argument));
 			}
 
 			template<typename... T>
 			void trace(std::string_view pattern, T&&... arguments) {
-				log(LogLevel::TRACE, pattern, arguments...);
+				log(LogLevel::TRACE, pattern, std::forward<T>(arguments)...);
 			}
 
 			template<typename T>
 			void debug(T&& argument) {
-				log(LogLevel::DEBUG, argumentInjectionPattern, argument);
+				log(LogLevel::DEBUG, argumentInjectionPattern, std::forward<T>(argument));
 			}
 
 			template<typename... T>
 			void debug(std::string_view pattern, T&&... arguments) {
-				log(LogLevel::DEBUG, pattern, arguments...);
+				log(LogLevel::DEBUG, pattern, std::forward<T>(arguments)...);
 			}
 
 			template<typename T>
 			void info(T&& argument) {
-				log(LogLevel::INFO, argumentInjectionPattern, argument);
+				log(LogLevel::INFO, argumentInjectionPattern, std::forward<T>(argument));
 			}
 
 			template<typename... T>
 			void info(std::string_view pattern, T&&... arguments) {
-				log(LogLevel::INFO, pattern, arguments...);
+				log(LogLevel::INFO, pattern, std::forward<T>(arguments)...);
 			}
 
 			template<typename T>
 			void warn(T&& argument) {
-				log(LogLevel::WARN, argumentInjectionPattern, argument);
+				log(LogLevel::WARN, argumentInjectionPattern, std::forward<T>(argument));
 			}
 
 			template<typename... T>
 			void warn(std::string_view pattern, T&&... arguments) {
-				log(LogLevel::WARN, pattern, arguments...);
+				log(LogLevel::WARN, pattern, std::forward<T>(arguments)...);
 			}
 
 			template<typename T>
 			void error(T&& argument) {
-				log(LogLevel::ERROR, argumentInjectionPattern, argument);
+				log(LogLevel::ERROR, argumentInjectionPattern, std::forward<T>(argument));
 			}
 
 			template<typename... T>
 			void error(std::string_view pattern, T&&... arguments) {
-				log(LogLevel::ERROR, pattern, arguments...);
+				log(LogLevel::ERROR, pattern, std::forward<T>(arguments)...);
 			}
 
 			template<typename T>
-			void fatal(T&& argument) {
-				log(LogLevel::FATAL, argumentInjectionPattern, argument);
+			void fatal(const Window& window, T&& argument) {
+				const std::string log = format(std::forward<T>(argument));
+
+				this->log(LogLevel::FATAL, log);
+
+				window.showFatalErrorMessage(log);
 			}
 
 			template<typename... T>
-			void fatal(std::string_view pattern, T&&... arguments) {
-				log(LogLevel::FATAL, pattern, arguments...);
+			void fatal(const Window& window, std::string_view pattern, T&&... arguments) {
+				const std::string log = format(pattern, std::forward<T>(arguments)...);
+
+				this->log(LogLevel::FATAL, log);
+
+				window.showFatalErrorMessage(log);
 			}
 	};
 }

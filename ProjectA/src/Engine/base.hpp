@@ -1,6 +1,7 @@
 #pragma once
 
 #define ENGINE_NAME "ProjectA"
+#define ENGINE_NAME_L L"ProjectA"
 
 #ifdef _WIN32
 	#ifdef _WIN64
@@ -10,12 +11,23 @@
 		#include <Windows.h>
 		#include <windowsx.h>
 
+		// https://learn.microsoft.com/en-us/answers/questions/1184393/when-including-comctl32-lib-causes-the-ordinal-345
+		#if defined _M_IX86
+			#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
+		#elif defined _M_IA64
+			#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='ia64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+		#elif defined _M_X64
+			#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+		#else
+			#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+		#endif
+
 		#undef assert
 		#undef DELETE
-		#undef ERROR
+		#undef ERROR // LogLevel::ERROR
 		#undef far
-		#undef max
-		#undef min
+		#undef max // lyah::max
+		#undef min // lyah::min
 		#undef near
 	#else
 		#error "Unhandled platform."
@@ -23,27 +35,25 @@
 #elif defined(__linux__)
 	#define PLATFORM_LINUX
 
-	#include <signal.h>
-
 	#error "Unhandled platform."
 #else
 	#error "Unhandled platform."
 #endif
 
 #ifdef BUILD_MODE_DEBUG
-	#define ENGINE_TRACE(...) ProjectA::Logger::engineLogger->trace(__VA_ARGS__)
-	#define ENGINE_DEBUG(...) ProjectA::Logger::engineLogger->debug(__VA_ARGS__)
-	#define ENGINE_INFO(...) ProjectA::Logger::engineLogger->info(__VA_ARGS__)
-	#define ENGINE_WARN(...) ProjectA::Logger::engineLogger->warn(__VA_ARGS__)
-	#define ENGINE_ERROR(...) ProjectA::Logger::engineLogger->error(__VA_ARGS__)
-	#define ENGINE_FATAL(...) ProjectA::Logger::engineLogger->fatal(__VA_ARGS__)
+	#define ENGINE_TRACE(...) ProjectA::Logger::engineLogger.trace(__VA_ARGS__)
+	#define ENGINE_DEBUG(...) ProjectA::Logger::engineLogger.debug(__VA_ARGS__)
+	#define ENGINE_INFO(...) ProjectA::Logger::engineLogger.info(__VA_ARGS__)
+	#define ENGINE_WARN(...) ProjectA::Logger::engineLogger.warn(__VA_ARGS__)
+	#define ENGINE_ERROR(...) ProjectA::Logger::engineLogger.error(__VA_ARGS__)
+	#define ENGINE_FATAL(...) ProjectA::Logger::engineLogger.fatal(__VA_ARGS__)
 
-	#define CLIENT_TRACE(...) ProjectA::Logger::clientLogger->trace(__VA_ARGS__)
-	#define CLIENT_DEBUG(...) ProjectA::Logger::clientLogger->debug(__VA_ARGS__)
-	#define CLIENT_INFO(...) ProjectA::Logger::clientLogger->info(__VA_ARGS__)
-	#define CLIENT_WARN(...) ProjectA::Logger::clientLogger->warn(__VA_ARGS__)
-	#define CLIENT_ERROR(...) ProjectA::Logger::clientLogger->error(__VA_ARGS__)
-	#define CLIENT_FATAL(...) ProjectA::Logger::clientLogger->fatal(__VA_ARGS__)
+	#define CLIENT_TRACE(...) ProjectA::Logger::clientLogger.trace(__VA_ARGS__)
+	#define CLIENT_DEBUG(...) ProjectA::Logger::clientLogger.debug(__VA_ARGS__)
+	#define CLIENT_INFO(...) ProjectA::Logger::clientLogger.info(__VA_ARGS__)
+	#define CLIENT_WARN(...) ProjectA::Logger::clientLogger.warn(__VA_ARGS__)
+	#define CLIENT_ERROR(...) ProjectA::Logger::clientLogger.error(__VA_ARGS__)
+	#define CLIENT_FATAL(...) ProjectA::Logger::clientLogger.fatal(__VA_ARGS__)
 
 	#define DEBUG_ENABLE_MESSENGER
 	#define DEBUG_ENABLE_VALIDATION_LAYERS

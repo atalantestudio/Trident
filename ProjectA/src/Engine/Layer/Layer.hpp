@@ -14,9 +14,9 @@ namespace ProjectA {
 
 			const Window& getWindow() const;
 
-			virtual void update();
+			virtual void update(float64 fixedDeltaTime);
 
-			virtual void update(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex);
+			virtual void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex);
 
 			virtual void onEvent(Event& event);
 	};

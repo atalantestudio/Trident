@@ -5,6 +5,10 @@ namespace ProjectA {
 		public:
 			static void initialize();
 
+			static std::filesystem::path getCurrentPath();
+
+			static std::filesystem::path getCurrentDirectory();
+
 			// The provided path is relative to the working directory.
 			static chain<uint8> loadByteBuffer(const std::string& path);
 

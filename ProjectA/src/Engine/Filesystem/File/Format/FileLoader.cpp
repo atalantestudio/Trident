@@ -8,7 +8,11 @@ namespace ProjectA {
 	File Filesystem::load(const std::string& path) {
 		std::ifstream stream(path, std::ios::binary);
 
-		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
+		if (!stream.is_open()) {
+			std::string message = "Failed to open file \"" + path + "\".";
+
+			throw std::runtime_error(message);
+		}
 
 		const std::filesystem::path absolutePath = std::filesystem::absolute(path);
 

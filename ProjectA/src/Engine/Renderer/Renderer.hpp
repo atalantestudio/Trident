@@ -26,7 +26,6 @@ namespace ProjectA {
 
 			virtual void onEvent(Event& event) {}
 
-		// TODO: Make Renderer friend of GraphicsAdapter?
 		public:
 			static ref<Device> getDevice();
 
