@@ -16,58 +16,56 @@ namespace ProjectA {
 		return string.substr(firstNotSpace, (lastNotSpace - firstNotSpace + 1));
 	}
 
-	#ifdef BUILD_MODE_DEBUG
-		inline std::ostringstream& operator <<(std::ostringstream& stream, __m128 m) {
-			const std::float_t* buffer = m.m128_f32;
+	inline std::ostringstream& operator <<(std::ostringstream& stream, __m128 m) {
+		const std::float_t* buffer = m.m128_f32;
 
-			stream << buffer[0] << "  " << buffer[1] << "  " << buffer[2] << "  " << buffer[3];
+		stream << buffer[0] << "  " << buffer[1] << "  " << buffer[2] << "  " << buffer[3];
 
-			return stream;
+		return stream;
+	}
+
+	inline std::ostringstream& operator <<(std::ostringstream& stream, __m128d m) {
+		const std::double_t* buffer = m.m128d_f64;
+
+		stream << buffer[0] << "  " << buffer[1];
+
+		return stream;
+	}
+
+	inline std::ostringstream& operator <<(std::ostringstream& stream, __m256d m) {
+		const std::double_t* buffer = m.m256d_f64;
+
+		stream << buffer[0] << "  " << buffer[1] << "  " << buffer[2] << "  " << buffer[3];
+
+		return stream;
+	}
+
+	template<std::size_t C, typename T>
+	inline std::ostringstream& operator <<(std::ostringstream& stream, const vec<C, T>& a) {
+		for (std::size_t index = 0; index < C - 1; index += 1) {
+			stream << a[index] << "  ";
 		}
 
-		inline std::ostringstream& operator <<(std::ostringstream& stream, __m128d m) {
-			const std::double_t* buffer = m.m128d_f64;
+		stream << a[C - 1];
 
-			stream << buffer[0] << "  " << buffer[1];
+		return stream;
+	}
 
-			return stream;
+	template<std::size_t R, std::size_t C, typename T>
+	inline std::ostringstream& operator <<(std::ostringstream& stream, const mat<R, C, T>& a) {
+		for (std::size_t index = 0; index < R - 1; index += 1) {
+			stream << a[index] << std::endl;
 		}
 
-		inline std::ostringstream& operator <<(std::ostringstream& stream, __m256d m) {
-			const std::double_t* buffer = m.m256d_f64;
+		stream << a[R - 1];
 
-			stream << buffer[0] << "  " << buffer[1] << "  " << buffer[2] << "  " << buffer[3];
+		return stream;
+	}
 
-			return stream;
-		}
+	template<typename T>
+	inline std::ostringstream& operator <<(std::ostringstream& stream, const quat<T>& a) {
+		stream << a[0] << "  " << a[1] << "  " << a[2] << "  " << a[3];
 
-		template<std::size_t C, typename T>
-		inline std::ostringstream& operator <<(std::ostringstream& stream, const vec<C, T>& a) {
-			for (std::size_t index = 0; index < C - 1; index += 1) {
-				stream << a[index] << "  ";
-			}
-
-			stream << a[C - 1];
-
-			return stream;
-		}
-
-		template<std::size_t R, std::size_t C, typename T>
-		inline std::ostringstream& operator <<(std::ostringstream& stream, const mat<R, C, T>& a) {
-			for (std::size_t index = 0; index < R - 1; index += 1) {
-				stream << a[index] << std::endl;
-			}
-
-			stream << a[R - 1];
-
-			return stream;
-		}
-
-		template<typename T>
-		inline std::ostringstream& operator <<(std::ostringstream& stream, const quat<T>& a) {
-			stream << a[0] << "  " << a[1] << "  " << a[2] << "  " << a[3];
-
-			return stream;
-		}
-	#endif
+		return stream;
+	}
 }
