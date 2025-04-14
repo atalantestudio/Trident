@@ -18,7 +18,7 @@ namespace ProjectA {
 
 	Application* createApplication() {
 		WindowDescriptor windowDescriptor{};
-		windowDescriptor.name = "ProjectA Editor";
+		windowDescriptor.name = (std::string(ENGINE_NAME) + " " + PROJECT_NAME).data();
 		windowDescriptor.width = 800;
 		windowDescriptor.height = 800;
 

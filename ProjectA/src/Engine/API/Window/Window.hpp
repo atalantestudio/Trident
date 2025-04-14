@@ -39,13 +39,15 @@ namespace ProjectA {
 			// Returns the position of the mouse, relative to the top-left corner of the client area.
 			const sint32* getMousePosition() const;
 
-			// Peeks, translates and dispatchs incoming non-queued messages.
+			// Peeks, translates and dispatches incoming non-queued messages.
 			void processMessages() const;
 
 			//template<typename T>
 			//void setEventListener();
 
-			void showFatalErrorMessage(const std::string& message) const;
+			// Shows an error message box, then exits.
+			// Differs from Platform::fatalExit in that the message box is owned by this window.
+			void fatalExit(uint32 code, const std::string& message) const;
 
 		public:
 			void* data;

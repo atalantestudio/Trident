@@ -3,8 +3,6 @@
 namespace ProjectA {
 	class Filesystem {
 		public:
-			static void initialize();
-
 			static std::filesystem::path getCurrentPath();
 
 			static std::filesystem::path getCurrentDirectory();

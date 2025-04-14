@@ -16,37 +16,29 @@ namespace ProjectA {
 		return *instance;
 	}
 
-	ConfigurationFile Application::loadConfigurationFile(const Window& window) {
+	PropertyFile Application::loadPropertyFile() {
 		const std::filesystem::path currentPath = Filesystem::getCurrentPath();
 		const std::string currentDirectoryName = Filesystem::getCurrentDirectory().string();
 
-		std::filesystem::path configurationFilePath = currentPath;
-		configurationFilePath /= currentDirectoryName;
-		configurationFilePath += ".tpr";
+		std::filesystem::path propertyFilePath = currentPath / currentDirectoryName;
+		propertyFilePath += ".tpr";
 
-		ConfigurationFile configurationFile;
-
-		try {
-			configurationFile = Filesystem::load<ConfigurationFile>(configurationFilePath.string());
-		}
-		catch (std::runtime_error) {
-			ENGINE_FATAL(window, "Could not open property file [].", configurationFilePath);
-		}
-
-		return configurationFile;
+		return Filesystem::load<PropertyFile>(propertyFilePath.string());
 	}
 
-	Application::Application(const WindowDescriptor& windowDescriptor) :
-		// TODO: If the instance index is > 1, append it to the window name.
-		window(windowDescriptor)
-	{
+	Application::Application(const WindowDescriptor& windowDescriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		ENGINE_DEBUG("Running new application instance.");
 
 		instance = this;
 
-		loadConfigurationFile(window);
+		Platform::setProjectName(windowDescriptor.name);
+
+		propertyFile = loadPropertyFile();
+
+		// TODO: If the instance index is > 1, append it to the window name.
+		window = createScope<Window>(windowDescriptor);
 
 		//const std::string graphicsApi = configurationFile.get<std::string>("GraphicsAPI");
 		/*const std::string graphicsApi = "Vulkan";
@@ -177,7 +169,7 @@ namespace ProjectA {
 	}
 
 	const Window& Application::getWindow() const {
-		return window;
+		return *window;
 	}
 
 	WindowOld& Application::getWindowOld() {
@@ -203,7 +195,7 @@ namespace ProjectA {
 	void Application::tick() {
 		PROFILE_SCOPE("Application tick");
 
-		window.processMessages();
+		window->processMessages();
 
 		const float64 time = Platform::getTime();
 		float64 currentTickTime = time - previousTickTime;
@@ -223,7 +215,7 @@ namespace ProjectA {
 		}
 
 		// TODO: Interpolate between current time and timeAccumulator.
-		if (!window.isMinimized()) {
+		if (!window->isMinimized()) {
 			//render(timeAccumulator);
 
 			frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;

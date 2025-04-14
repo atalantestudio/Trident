@@ -11,6 +11,9 @@ namespace ProjectA {
 		// File size, in bytes.
 		uint64 size = 0;
 
+		// TODO: Remove this member. No need to keep this data when we have also the decompressed data.
+		// This member should be file-specific.
+		// Compressed file data.
 		chain<uint8> rawData;
 	};
 }

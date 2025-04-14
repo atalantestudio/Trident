@@ -24,7 +24,7 @@ namespace ProjectA {
 
 	Application* ProjectA::createApplication() {
 		WindowDescriptor windowDescriptor{};
-		windowDescriptor.name = "Sandbox";
+		windowDescriptor.name = PROJECT_NAME;
 		windowDescriptor.width = 800;
 		windowDescriptor.height = 800;
 

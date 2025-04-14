@@ -38,7 +38,7 @@ namespace ProjectA {
 
 		const LPCWSTR lpWindowName = ConvertUTF8ToUTF16(descriptor.name);
 
-		windowData->hWnd = CreateWindowExW(
+		windowData->hWnd = CreateWindowEx(
 			0,
 			windowClassData->className,
 			lpWindowName,
@@ -61,8 +61,8 @@ namespace ProjectA {
 
 		WIN32_ASSERT(windowData->hDC != nullptr);
 
-		WIN32_ASSERT(SetPropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, (void*) windowClassData));
-		WIN32_ASSERT(SetPropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData));
+		WIN32_ASSERT(SetProp(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, (void*) windowClassData));
+		WIN32_ASSERT(SetProp(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData));
 
 		data = windowData;
 
@@ -85,8 +85,8 @@ namespace ProjectA {
 
 		WIN32_ASSERT(ReleaseDC(windowData->hWnd, windowData->hDC) != 0);
 
-		RemovePropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING);
-		RemovePropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING);
+		RemoveProp(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING);
+		RemoveProp(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING);
 
 		WIN32_ASSERT(DestroyWindow(windowData->hWnd));
 
@@ -128,7 +128,7 @@ namespace ProjectA {
 	void Window::processMessages() const {
 		MSG msg;
 
-		while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
+		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			if (msg.message == WM_QUIT) {
 				// TODO: Handle WM_QUIT message.
 
@@ -136,7 +136,7 @@ namespace ProjectA {
 			}
 
 			TranslateMessage(&msg);
-			DispatchMessageW(&msg);
+			DispatchMessage(&msg);
 		}
 	}
 
@@ -147,15 +147,15 @@ namespace ProjectA {
 		WIN32_ASSERT(SwapBuffers(windowData.hDC));
 	}*/
 
-	void Window::showFatalErrorMessage(const std::string& message) const {
+	void Window::fatalExit(uint32 code, const std::string& message) const {
 		Win32WindowData& windowData = *((Win32WindowData*) data);
 
 		windowData.fatalMbp.lpszText = ConvertUTF8ToUTF16(message.data());
 
-		MessageBoxIndirect(&windowData.fatalMbp);
+		WIN32_ASSERT(MessageBoxIndirect(&windowData.fatalMbp) != 0);
 
 		free((void*) windowData.fatalMbp.lpszText);
 
-		ExitProcess(2);
+		ExitProcess(code);
 	}
 }

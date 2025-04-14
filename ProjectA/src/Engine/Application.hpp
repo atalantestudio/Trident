@@ -6,7 +6,7 @@
 #include "Engine/API/Synchronization/Semaphore.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/base.hpp"
-#include "Engine/Filesystem/File/ConfigurationFile.hpp"
+#include "Engine/Filesystem/File/PropertyFile.hpp"
 #include "Engine/Layer/LayerStack.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
 #include "Engine/WindowOld.hpp"
@@ -18,7 +18,7 @@ namespace ProjectA {
 		public:
 			static Application& get();
 
-			static ConfigurationFile loadConfigurationFile(const Window& window);
+			static PropertyFile loadPropertyFile();
 
 		public:
 			Application(const WindowDescriptor& windowDescriptor);
@@ -83,7 +83,11 @@ namespace ProjectA {
 			static scope<WindowClass> windowClass;
 
 		private:
-			Window window;
+			PropertyFile propertyFile;
+
+			// Need a scope because the window is created only if the property file is found.
+			scope<Window> window;
+
 			scope<WindowOld> windowOld;
 
 			LayerStack layerStack;

@@ -7,8 +7,14 @@ namespace ProjectA {
 
 	std::size_t Logger::namePadding = 0;
 
+	std::ostringstream Logger::formatStream;
+
 	Logger Logger::engineLogger("ENGINE", LogLevel::ALL);
 	Logger Logger::clientLogger("CLIENT", LogLevel::ALL);
+
+	void Logger::clearFormatStream() {
+		formatStream.str(std::string());
+	}
 
 	void Logger::clear() {
 		stream.str(std::string());

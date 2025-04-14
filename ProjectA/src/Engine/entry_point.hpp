@@ -6,8 +6,6 @@
 	extern ProjectA::Application* createApplication();
 
 	int main(int argc, char** argv) {
-		ProjectA::Filesystem::initialize();
-
 		ProjectA::Application* application;
 
 		{
