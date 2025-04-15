@@ -33,6 +33,7 @@ namespace ProjectA {
 		return surface.window.getSize()[1];
 	}
 
+	// This constructor seems to allocate ~59Mb of memory in Release mode.
 	void VulkanSwapchain::construct(const SwapchainDescriptor& descriptor) {
 		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities();
 		const uint32 minImageCount = surfaceCapabilities.minImageCount + 1;

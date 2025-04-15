@@ -12,9 +12,6 @@ namespace ProjectA {
 
 			~VulkanInstance() override;
 
-		public:
-			chain<const char*> enabledExtensionNames;
-
 		private:
 			#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
 				static void checkInstanceLayers();
@@ -25,10 +22,14 @@ namespace ProjectA {
 			#endif
 
 		private:
+			chain<const char*> enabledExtensionNames;
+
 			#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
 				static const chain<const char*> enabledLayerNames;
 			#endif
 
-			VkDebugUtilsMessengerEXT debugUtilsMessenger;
+			#ifdef DEBUG_ENABLE_MESSENGER
+				VkDebugUtilsMessengerEXT debugUtilsMessenger;
+			#endif
 	};
 }

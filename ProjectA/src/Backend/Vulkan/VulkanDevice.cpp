@@ -15,6 +15,7 @@ namespace ProjectA {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 	};
 
+	// This constructor seems to allocate ~3Mb of memory in Release mode.
 	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface) :
 		physicalDevice(createRef<VulkanPhysicalDevice>(physicalDevice))
 	{

@@ -10,6 +10,7 @@ namespace ProjectA {
 		};
 	#endif
 
+	// This constructor seems to allocate ~25Mb of memory in Release mode.
 	VulkanInstance::VulkanInstance() {
 		PROFILE_SCOPE(FUNC_SIG);
 
