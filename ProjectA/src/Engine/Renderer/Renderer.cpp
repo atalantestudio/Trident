@@ -3,21 +3,14 @@
 #include "Backend/OpenGL/OpenGLGraphicsAdapter.hpp"
 #include "Backend/Vulkan/VulkanGraphicsAdapter.hpp"
 
+#include "Engine/Application.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::NONE;
 
-	const Window* Renderer::window = nullptr;
-
 	scope<GraphicsAdapter> Renderer::adapter = nullptr;
-
-	void Renderer::registerWindow(const Window& window) {
-		ENGINE_ASSERT(Renderer::window == nullptr, "The window has already been registered.");
-
-		Renderer::window = &window;
-	}
 
 	GraphicsAPI Renderer::getGraphicsApi() {
 		return graphicsApi;
@@ -27,30 +20,25 @@ namespace ProjectA {
 		return adapter;
 	}
 
-	void Renderer::setGraphicsApi(GraphicsAPI api) {
-		graphicsApi = api;
-	}
+	void Renderer::recreate(const Window& window, GraphicsAPI graphicsApi) {
+		Renderer::graphicsApi = graphicsApi;
 
-	void Renderer::recreate() {
-		ENGINE_ASSERT(window != nullptr, "The window hasn't been registered.");
-
-		switch (graphicsApi) {
+		switch (Renderer::graphicsApi) {
 			case GraphicsAPI::NONE:
-				ENGINE_WARN("No GPU backend selected.");
+				ENGINE_WARN("Headless graphics are not supported.");
 
 				break;
 			case GraphicsAPI::OPENGL:
 				ENGINE_INFO("Using OpenGL backend.");
 
-				ENGINE_ASSERT(false, "TODO");
-
-				adapter = createScope<OpenGLGraphicsAdapter>(nullptr);
+				// TODO: Make compatible with new Window API
+				//adapter = createScope<OpenGLGraphicsAdapter>(nullptr);
 
 				break;
 			case GraphicsAPI::VULKAN:
 				ENGINE_INFO("Using Vulkan backend.");
 
-				adapter = createScope<VulkanGraphicsAdapter>(*window);
+				adapter = createScope<VulkanGraphicsAdapter>(window);
 
 				break;
 		}
@@ -59,7 +47,7 @@ namespace ProjectA {
 	}
 
 	void Renderer::getWindowExtent(sint32& extentWidth, sint32& extentHeight) {
-		const sint32* size = window->getSize();
+		const sint32* size = Application::get().getWindow().getSize();
 
 		extentWidth = size[0];
 		extentHeight = size[1];

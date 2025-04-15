@@ -16,7 +16,9 @@ namespace ProjectA {
 		return *instance;
 	}
 
-	PropertyFile Application::loadPropertyFile() {
+	PropertyFile Application::loadPropertyFile(const WindowDescriptor& windowDescriptor) {
+		Platform::setProjectName(windowDescriptor.name);
+
 		const std::filesystem::path currentPath = Filesystem::getCurrentPath();
 		const std::string currentDirectoryName = Filesystem::getCurrentDirectory().string();
 
@@ -26,48 +28,24 @@ namespace ProjectA {
 		return Filesystem::load<PropertyFile>(propertyFilePath.string());
 	}
 
-	Application::Application(const WindowDescriptor& windowDescriptor) {
+	Application::Application(const WindowDescriptor& windowDescriptor) :
+		propertyFile(loadPropertyFile(windowDescriptor))
+	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_DEBUG("Running new application instance.");
+		const uint32 pid = Platform::getProcessId();
+
+		ENGINE_DEBUG("Running new application instance (PID = []).", pid);
 
 		instance = this;
 
-		Platform::setProjectName(windowDescriptor.name);
-
-		propertyFile = loadPropertyFile();
-
 		// TODO: If the instance index is > 1, append it to the window name.
 		window = createScope<Window>(windowDescriptor);
+		//windowOld->setEventCallback(BIND(Application::onEvent));
 
-		//const std::string graphicsApi = configurationFile.get<std::string>("GraphicsAPI");
-		/*const std::string graphicsApi = "Vulkan";
+		const GraphicsAPI graphicsApi = propertyFile.getProperty<GraphicsAPI>("GraphicsAPI");
 
-		if (graphicsApi == "OpenGL") {
-			Renderer::setGraphicsApi(GraphicsAPI::OPENGL);
-		}
-		else if (graphicsApi == "Vulkan") {
-			Renderer::setGraphicsApi(GraphicsAPI::VULKAN);
-		}
-		else {
-			ENGINE_ASSERT(false, "Unhandled graphics API \"[]\".", graphicsApi);
-		}*/
-
-		/*const uint32 extentWidth = configurationFile.get<uint32>("ExtentWidth");
-		const uint32 extentHeight = configurationFile.get<uint32>("ExtentHeight");
-
-		WindowDescriptor windowDescriptor;
-		windowDescriptor.name = name;
-		windowDescriptor.width = extentWidth;
-		windowDescriptor.height = extentHeight;
-
-		// Initialize GLFW and create window.
-		windowOld = Window::create(windowDescriptor);
-		windowOld->setEventCallback(BIND(Application::onEvent));*/
-
-		/*// Initialize graphics API.
-		Renderer::registerWindow(window);
-		Renderer::recreate();
+		Renderer::recreate(*window, graphicsApi);
 
 		RenderPassDescriptor renderPassDescriptor{};
 		renderPassDescriptor.loadOperation = LoadOperation::CLEAR;
@@ -89,7 +67,7 @@ namespace ProjectA {
 			availableImageSemaphores[frameIndex] = Renderer::createSemaphore();
 			finishedRenderSemaphores[frameIndex] = Renderer::createSemaphore();
 			flightFences[frameIndex] = Renderer::createFence();
-		}*/
+		}
 
 		/* Constants */
 
@@ -107,11 +85,11 @@ namespace ProjectA {
 
 		// Define int selectedApiIndex
 
-		// Get "graphics_api" int setting from file
+		// Get "GraphicsAPI" setting (unsigned byte) from file
 			// If no setting
 				// Set selectedApiIndex = 0
 			// Else if the setting is not in API_QUEUE
-				// Emit warn "Unknown graphics API. Using API 0. Updated the property in the file to avoid future warnings."
+				// Emit warn "Unsupported graphics API. Using API 0. Updated the property in the file to avoid future warnings."
 				// Set selectedApiIndex = 0
 				// Overwrite file setting with selectedApiIndex
 			// Else
@@ -164,9 +142,7 @@ namespace ProjectA {
 		}*/
 	}
 
-	Application::~Application() {
-		PROFILE_SCOPE(FUNC_SIG);
-	}
+	Application::~Application() {}
 
 	const Window& Application::getWindow() const {
 		return *window;
@@ -216,7 +192,7 @@ namespace ProjectA {
 
 		// TODO: Interpolate between current time and timeAccumulator.
 		if (!window->isMinimized()) {
-			//render(timeAccumulator);
+			render(timeAccumulator);
 
 			frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 		}

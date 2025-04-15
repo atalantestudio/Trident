@@ -7,6 +7,8 @@ namespace ProjectA {
 			// The project name is used as the title of error windows.
 			static void setProjectName(const std::string& projectName);
 
+			static uint32 getProcessId();
+
 			// Returns the current time in seconds.
 			static float64 getTime();
 

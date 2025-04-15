@@ -11,6 +11,12 @@ namespace ProjectA {
 		Platform::projectName = projectName;
 	}
 
+	uint32 Platform::getProcessId() {
+		const DWORD pid = GetCurrentProcessId();
+
+		return pid;
+	}
+
 	float64 Platform::getTime() {
 		static LARGE_INTEGER frequency;
 		static const BOOL result = QueryPerformanceFrequency(&frequency);

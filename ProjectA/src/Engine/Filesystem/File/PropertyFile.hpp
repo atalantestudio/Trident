@@ -3,15 +3,14 @@
 #include "Engine/Filesystem/File/File.hpp"
 
 namespace ProjectA {
-	class PropertyFile : public File {
+	class PropertyFile final : public File {
 		public:
 			std::unordered_map<std::string, chain<uint8>> propertyMap;
 
-			PropertyFile() = default;
-
-			PropertyFile(const std::string& path) {
+			PropertyFile(const std::string& path) :
+				stream(path, std::ios::in | std::ios::out | std::ios::ate)
+			{
 				const std::filesystem::path absolutePath = std::filesystem::absolute(path);
-				std::fstream stream(path);
 
 				if (!stream.is_open()) {
 					ENGINE_FATAL(ENOENT, "Could not open property file [].", absolutePath);
@@ -21,60 +20,77 @@ namespace ProjectA {
 
 				name = absolutePath.filename().string();
 				this->absolutePath = absolutePath.string();
-
-				stream.seekg(0, std::ios::end);
 				size = stream.tellg();
-				stream.seekg(0, std::ios::beg);
+			}
 
-				rawData.resize(size);
-				stream.read(static_cast<char*>(static_cast<void*>(rawData.data())), size);
-
-				/*const std::string data(rawData.begin(), rawData.end());
-
-				std::size_t beginOffset = 0;
-				std::size_t endOffset;
-
-				const uint32 lineIterationCap = static_cast<uint32>(size);
-
-				for (uint32 lineIndex = 0; lineIndex < lineIterationCap; lineIndex += 1) {
-					endOffset = data.find("\r\n", beginOffset);
-
-					const std::string line = data.substr(beginOffset, endOffset - beginOffset);
-
-					const std::size_t colonOffset = line.find(':');
-
-					ENGINE_ASSERT(colonOffset != std::string::npos, "Configuration file is malformed at line [].", lineIndex);
-
-					const std::string propertyName = line.substr(0, colonOffset);
-					const std::string valueString = trim(line.substr(colonOffset + 1));
-					const chain<uint8> value(valueString.begin(), valueString.end());	
-
-					propertyMap.insert(std::make_pair(propertyName, value));
-
-					if (endOffset == std::string::npos) {
-						break;
-					}
-
-					beginOffset = endOffset + 2;
-				}*/
+			~PropertyFile() {
+				stream.close();
 			}
 
 			template<typename T>
-			T getProperty(const std::string& propertyName) const {
-				const std::string valueString = get<std::string>(propertyName);
+			T getProperty(std::string_view propertyName) {
+				stream.seekg(0, std::ios::beg);
 
-				return static_cast<T>(std::stoi(valueString));
+				std::string line;
+				std::size_t propertyNameOffset;
+
+				while (std::getline(stream, line)) {
+					propertyNameOffset = line.find(propertyName);
+
+					if (propertyNameOffset == std::string::npos) {
+						continue;
+					}
+
+					const std::size_t valueStringStartOffset = line.find(':', propertyNameOffset) + 1;
+
+					ENGINE_ASSERT(valueStringStartOffset != std::string::npos, "The property file is corrupted.");
+
+					const std::string valueString = line.substr(valueStringStartOffset, line.size());
+
+					return static_cast<T>(std::stoi(valueString));
+				}
+
+				ENGINE_ERROR("Could not find the value for \"[]\" in the property file.", propertyName);
+
+				return static_cast<T>(-1);
 			}
 
-			template<>
-			std::string getProperty(const std::string& propertyName) const {
-				const auto property = propertyMap.find(propertyName);
+			// TODO: Implement real-time property file update.
+			/*template<typename T>
+			void setProperty(std::string_view propertyName, T value) {
+				stream.seekg(0, std::ios::beg);
 
-				ENGINE_ASSERT(property != propertyMap.end(), "Failed to locate property \"[]\" in the property map.", propertyName);
+				std::string line;
+				std::size_t propertyNameOffset;
+				std::streampos lineStartOffset = 0;
 
-				const chain<uint8>& value = property->second;
+				while (std::getline(stream, line)) {
+					propertyNameOffset = line.find(propertyName);
 
-				return {value.begin(), value.end()};
-			}
+					if (propertyNameOffset == std::string::npos) {
+						lineStartOffset = stream.tellg();
+
+						continue;
+					}
+
+					const std::size_t valueStringStartOffset = line.find(':', propertyNameOffset) + 1;
+
+					ENGINE_ASSERT(valueStringStartOffset != std::string::npos, "The property file is corrupted.");
+
+					const std::string valueString = ' ' + std::to_string(value);
+
+					stream.seekg(lineStartOffset);
+					stream.ignore(valueStringStartOffset);
+					stream.write(valueString.data(), valueString.size());
+					stream.flush();
+
+					return;
+				}
+
+				ENGINE_ERROR("Could not find the value for \"[]\" in the property file.", propertyName);
+			}*/
+
+		private:
+			std::fstream stream;
 	};
 }

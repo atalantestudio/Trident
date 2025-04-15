@@ -18,7 +18,7 @@ namespace ProjectA {
 		public:
 			static Application& get();
 
-			static PropertyFile loadPropertyFile();
+			static PropertyFile loadPropertyFile(const WindowDescriptor& windowDescriptor);
 
 		public:
 			Application(const WindowDescriptor& windowDescriptor);
@@ -27,6 +27,7 @@ namespace ProjectA {
 
 			const Window& getWindow() const;
 
+			// TODO: Deprecate.
 			WindowOld& getWindowOld();
 
 			const ref<RenderPass>& getRenderPass() const;

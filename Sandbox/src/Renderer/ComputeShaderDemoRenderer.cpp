@@ -64,7 +64,7 @@ namespace ProjectA {
 		computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		computeShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> computeShaderModule = loadShaderModule("assets/shaders/Compute.comp.spv", computeShaderModuleDescriptor);
+		const ref<ShaderModule> computeShaderModule = loadShaderModule("Asset/Shader/Compute.comp.spv", computeShaderModuleDescriptor);
 
 		ComputePipelineDescriptor computePipelineDescriptor;
 		computePipelineDescriptor.pipelineLayout = computePipelineLayout;
@@ -119,13 +119,13 @@ namespace ProjectA {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("assets/shaders/Compute.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Asset/Shader/Compute.vert.spv", vertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("assets/shaders/Compute.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Asset/Shader/Compute.frag.spv", fragmentShaderModuleDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<vec2<float32>>(false);

@@ -7,10 +7,10 @@
 #include "TextureArrayRenderer.hpp"
 
 namespace ProjectA {
-	constexpr char* BABOON_IMAGE_PATH = "assets/images/Baboon.png";
-	constexpr char* CAMERAMAN_IMAGE_PATH = "assets/images/Cameraman.png";
-	constexpr char* LENNA_IMAGE_PATH = "assets/images/Lenna.png";
-	constexpr char* PEPPER_IMAGE_PATH = "assets/images/Pepper.png";
+	constexpr char* BABOON_IMAGE_PATH = "Asset/Image/Baboon.png";
+	constexpr char* CAMERAMAN_IMAGE_PATH = "Asset/Image/Cameraman.png";
+	constexpr char* LENNA_IMAGE_PATH = "Asset/Image/Lenna.png";
+	constexpr char* PEPPER_IMAGE_PATH = "Asset/Image/Pepper.png";
 
 	TextureArrayRenderer::TextureArrayRenderer() {
 		baboonImage = loadImage(BABOON_IMAGE_PATH);
@@ -112,13 +112,13 @@ namespace ProjectA {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("assets/shaders/TextureArray.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Asset/Shader/TextureArray.vert.spv", vertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("assets/shaders/TextureArray.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Asset/Shader/TextureArray.frag.spv", fragmentShaderModuleDescriptor);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();

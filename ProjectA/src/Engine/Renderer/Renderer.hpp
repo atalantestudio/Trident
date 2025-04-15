@@ -9,15 +9,11 @@
 namespace ProjectA {
 	class Renderer {
 		public:
-			static void registerWindow(const Window& window);
-
 			static GraphicsAPI getGraphicsApi();
 
 			static const scope<GraphicsAdapter>& getBackend();
 
-			static void setGraphicsApi(GraphicsAPI api);
-
-			static void recreate();
+			static void recreate(const Window& window, GraphicsAPI graphicsAPI);
 
 			static void getWindowExtent(sint32& extentWidth, sint32& extentHeight);
 
@@ -54,7 +50,6 @@ namespace ProjectA {
 
 		private:
 			static GraphicsAPI graphicsApi;
-			static const Window* window;
 			static scope<GraphicsAdapter> adapter;
 	};
 }

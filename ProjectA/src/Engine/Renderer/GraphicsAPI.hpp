@@ -1,9 +1,7 @@
 #pragma once
 
-#include "pch.hpp"
-
 namespace ProjectA {
-	enum class GraphicsAPI : uint32 {
+	enum class GraphicsAPI : uint8 {
 		// CPU backend. Not supported for now.
 		NONE = 0,
 		// OpenGL 4.5.

@@ -123,6 +123,11 @@ project "Sandbox"
 		"PROJECT_NAME=\"%{prj.name}\"",
 	}
 
+	postbuildcommands {
+		"{COPYDIR} Asset %[bin/" .. outputdir .. "/%{prj.name}/Asset]",
+		"{COPYFILE} %[%{prj.name}.tpr] %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.tpr]",
+	}
+
 	filter "system:windows"
 		systemversion "latest"
 
@@ -186,6 +191,11 @@ project "Editor"
 
 	defines {
 		"PROJECT_NAME=\"%{prj.name}\"",
+	}
+
+	postbuildcommands {
+		"{COPYDIR} Asset %[bin/" .. outputdir .. "/%{prj.name}/Asset]",
+		"{COPYFILE} %[%{prj.name}.tpr] %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.tpr]",
 	}
 
 	filter "system:windows"

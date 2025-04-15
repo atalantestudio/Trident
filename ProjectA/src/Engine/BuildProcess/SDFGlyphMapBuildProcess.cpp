@@ -126,7 +126,7 @@ namespace ProjectA {
 		glyphImageShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		glyphImageShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> glyphImageShaderModule = Renderer::loadShaderModule("assets/shaders/GlyphImage.comp.spv", glyphImageShaderModuleDescriptor);
+		const ref<ShaderModule> glyphImageShaderModule = Renderer::loadShaderModule("Asset/Shader/GlyphImage.comp.spv", glyphImageShaderModuleDescriptor);
 
 		ComputePipelineDescriptor glyphImagePipelineDescriptor;
 		glyphImagePipelineDescriptor.pipelineLayout = glyphImagePipelineLayout;
@@ -178,7 +178,7 @@ namespace ProjectA {
 		glyphSdfShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		glyphSdfShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> glyphSdfShaderModule = Renderer::loadShaderModule("assets/shaders/GlyphDistanceField.comp.spv", glyphSdfShaderModuleDescriptor);
+		const ref<ShaderModule> glyphSdfShaderModule = Renderer::loadShaderModule("Asset/Shader/GlyphDistanceField.comp.spv", glyphSdfShaderModuleDescriptor);
 
 		ComputePipelineDescriptor glyphSdfPipelineDescriptor;
 		glyphSdfPipelineDescriptor.pipelineLayout = glyphSdfPipelineLayout;
