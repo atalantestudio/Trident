@@ -121,8 +121,7 @@ namespace ProjectA {
 
 				stream << std::setw(padding + log.size());
 				stream << log;
-				stream << "\033[m";
-				stream << std::endl;
+				stream << "\033[m\n";
 
 				*LOG_LEVEL_OUTPUT_STREAMS[logLevelIndex] << stream.str();
 

@@ -11,13 +11,6 @@ namespace ProjectA {
 			EVENT_CATEGORY(EventCategory::WINDOW)
 	};
 
-	class WindowCloseEvent : public WindowEvent {
-		public:
-			WindowCloseEvent() = default;
-
-			EVENT_TYPE(EventType::WINDOW_CLOSE)
-	};
-
 	class WindowResizeEvent : public WindowEvent {
 		private:
 			// TODO: Use vec2<sint32>.
@@ -25,7 +18,10 @@ namespace ProjectA {
 			uint32 height;
 
 		public:
-			WindowResizeEvent(uint32 width, uint32 height) : width(width), height(height) {}
+			WindowResizeEvent(uint32 width, uint32 height) :
+				width(width),
+				height(height)
+			{}
 
 			uint32 getWidth() const {
 				return width;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/API/Event/Window/WindowCloseEvent.hpp"
+
 namespace ProjectA {
 	struct Win32WindowData {
 		// Window handle.
@@ -7,9 +9,6 @@ namespace ProjectA {
 
 		// Device context handle.
 		HDC hDC;
-
-		// Indirect message box params used for displaying fatal errors.
-		MSGBOXPARAMSW fatalMbp;
 
 		// TODO: Use vec2<sint32>.
 		sint32 positionX;
@@ -25,9 +24,13 @@ namespace ProjectA {
 		// TODO: Use vec2<sint32>.
 		sint32 cursorX;
 		sint32 cursorY;
+
+		EventListener<WindowCloseEvent> windowCloseEventListener;
+
+		void (*test)();
 	};
 
-	struct Win32WindowClassData {
+	struct WindowClass {
 		LPCWSTR className;
 
 		// Handle to the cursor within the client area.
@@ -45,7 +48,7 @@ namespace ProjectA {
 		const DWORD dwLanguageId = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 
 		if (FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, dwMessageId, dwLanguageId, lpBuffer, 0, nullptr) == 0) {
-			ENGINE_ERROR("Failed to format Win32 error message.");
+			ENGINE_ASSERT(false, "Failed to format Win32 error message.");
 
 			ExitProcess(GetLastError());
 

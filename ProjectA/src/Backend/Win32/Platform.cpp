@@ -5,10 +5,14 @@
 #include "Engine/Platform.hpp"
 
 namespace ProjectA {
-	std::string Platform::projectName;
+	const char* Platform::windowName = nullptr;
 
-	void Platform::setProjectName(const std::string& projectName) {
-		Platform::projectName = projectName;
+	const char* Platform::getWindowName() {
+		return windowName;
+	}
+
+	void Platform::setWindowName(const char* windowName) {
+		Platform::windowName = windowName;
 	}
 
 	uint32 Platform::getProcessId() {
@@ -29,7 +33,7 @@ namespace ProjectA {
 	}
 
 	void Platform::fatalExit(uint32 code, const std::string& message) {
-		const LPCWSTR titleString = ConvertUTF8ToUTF16(Platform::projectName.data());
+		const LPCWSTR titleString = ConvertUTF8ToUTF16(windowName);
 		const LPCWSTR messageString = ConvertUTF8ToUTF16(message.data());
 
 		WIN32_ASSERT(MessageBox(nullptr, messageString, titleString, MB_OK | MB_ICONERROR) != 0);

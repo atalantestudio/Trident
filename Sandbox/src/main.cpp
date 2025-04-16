@@ -9,8 +9,8 @@
 namespace ProjectA {
 	class SandboxApplication : public Application {
 		public:
-			SandboxApplication(const WindowDescriptor& windowDescriptor) :
-				Application(windowDescriptor)
+			SandboxApplication(const ApplicationDescriptor& applicationDescriptor) :
+				Application(applicationDescriptor)
 			{
 				//const TrueTypeFont font("Asset/Font/test.ttf");
 
@@ -23,11 +23,9 @@ namespace ProjectA {
 	};
 
 	Application* ProjectA::createApplication() {
-		WindowDescriptor windowDescriptor{};
-		windowDescriptor.name = PROJECT_NAME;
-		windowDescriptor.width = 800;
-		windowDescriptor.height = 800;
+		ApplicationDescriptor applicationDescriptor{};
+		applicationDescriptor.projectName = PROJECT_NAME;
 
-		return new SandboxApplication(windowDescriptor);
+		return new SandboxApplication(applicationDescriptor);
 	}
 }

@@ -7,8 +7,8 @@
 namespace ProjectA {
 	class EditorApplication : public Application {
 		public:
-			EditorApplication(const WindowDescriptor& windowDescriptor) :
-				Application(windowDescriptor)
+			EditorApplication(const ApplicationDescriptor& applicationDescriptor) :
+				Application(applicationDescriptor)
 			{
 				registerLayer<EditorLayer>();
 			}
@@ -17,11 +17,9 @@ namespace ProjectA {
 	};
 
 	Application* createApplication() {
-		WindowDescriptor windowDescriptor{};
-		windowDescriptor.name = (std::string(ENGINE_NAME) + " " + PROJECT_NAME).data();
-		windowDescriptor.width = 800;
-		windowDescriptor.height = 800;
+		ApplicationDescriptor applicationDescriptor{};
+		applicationDescriptor.projectName = (std::string(ENGINE_NAME) + " " + PROJECT_NAME).data();
 
-		return new EditorApplication(windowDescriptor);
+		return new EditorApplication(applicationDescriptor);
 	}
 }

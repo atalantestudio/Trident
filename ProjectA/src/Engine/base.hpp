@@ -25,10 +25,10 @@
 		#undef assert
 		#undef DELETE
 		#undef ERROR // LogLevel::ERROR
-		#undef far
+		#undef far // lyah
 		#undef max // lyah::max
 		#undef min // lyah::min
-		#undef near
+		#undef near // lyah
 	#else
 		#error "Unhandled platform."
 	#endif
@@ -41,7 +41,7 @@
 #endif
 
 #ifdef BUILD_MODE_DEBUG
-	//#define DEBUG_ENABLE_MESSENGER
+	#define DEBUG_ENABLE_MESSENGER
 	#define DEBUG_ENABLE_VALIDATION_LAYERS
 #endif
 
@@ -82,6 +82,17 @@
 		BREAKPOINT(); \
 	} \
 }
+
+#ifdef BUILD_MODE_DEBUG
+	#define DEBUG_ASSERT(condition, ...) { \
+	if (!(condition)) { \
+		ENGINE_ERROR("Debug assertion failed."); \
+		BREAKPOINT(); \
+	} \
+}
+#else
+	#define DEBUG_ASSERT
+#endif
 
 #ifdef BUILD_MODE_PROFILE
 	#if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) || (defined(__ICC) && (__ICC >= 600)) || defined(__ghs__)

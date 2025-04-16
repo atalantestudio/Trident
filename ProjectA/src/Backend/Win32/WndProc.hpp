@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	static LRESULT CALLBACK WndProc0(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
+	static LRESULT CALLBACK TestWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 		if (Msg > 49000) {
 			// TODO: Handle client messages.
 			return DefWindowProcW(hWnd, Msg, wParam, lParam);
@@ -13,7 +13,7 @@ namespace ProjectA {
 			return DefWindowProcW(hWnd, Msg, wParam, lParam);
 		}
 
-		const Win32WindowClassData* windowClassData = static_cast<const Win32WindowClassData*>(GetPropW(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
+		const WindowClass* windowClassData = static_cast<const WindowClass*>(GetPropW(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
 
 		switch (Msg) {
 			case WM_CREATE:
@@ -231,6 +231,10 @@ namespace ProjectA {
 		return DefWindowProcW(hWnd, Msg, wParam, lParam);
 	}
 
+	static LRESULT CALLBACK DummyWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
+		return DefWindowProcW(hWnd, Msg, wParam, lParam);
+	}
+
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetPropW(hWnd, WINDOW_DATA_PROPERTY_STRING));
 
@@ -238,7 +242,7 @@ namespace ProjectA {
 			return DefWindowProcW(hWnd, Msg, wParam, lParam);
 		}
 
-		const Win32WindowClassData* windowClassData = static_cast<const Win32WindowClassData*>(GetPropW(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
+		const WindowClass* windowClassData = static_cast<const WindowClass*>(GetPropW(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
 
 		switch (Msg) {
 			case WM_MOVE: {
@@ -264,6 +268,14 @@ namespace ProjectA {
 				// TODO
 
 				break;
+			}
+			case WM_CLOSE: {
+				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-close.
+				WindowCloseEvent windowCloseEvent;
+
+				windowData->windowCloseEventListener(windowCloseEvent);
+
+				return 0;
 			}
 			case WM_SETCURSOR: {
 				// See https://learn.microsoft.com/en-us/windows/win32/menurc/wm-setcursor.

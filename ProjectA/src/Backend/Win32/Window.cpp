@@ -1,52 +1,89 @@
 #include "pch.hpp"
 
 #include "Backend/Win32/base.hpp"
+#include "Backend/Win32/WndProc.hpp"
 
 #include "Engine/API/Window/Window.hpp"
 
 namespace ProjectA {
-	static scope<WindowClass> windowClass;
+	static constexpr LPCWSTR lpszWndClassExName = L"EngineWindowClass";
+	static WindowClass* windowClass = nullptr;
+	static uint32 windowCount = 0;
 
-	static void Show(const Window& window) {
-		constexpr sint32 nCmdShow = SW_NORMAL;
+	static void registerWindowClass() {
+		const HINSTANCE hInstance = GetInstance();
 
-		const Win32WindowData* windowData = static_cast<const Win32WindowData*>(window.data);
+		WNDCLASSEX wndClass{};
+		wndClass.cbSize = sizeof(WNDCLASSEX);
+		wndClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+		wndClass.lpfnWndProc = WndProc;
+		wndClass.cbClsExtra = 0;
+		wndClass.cbWndExtra = 0;
+		wndClass.hInstance = hInstance;
+		wndClass.hIcon = nullptr;
+		wndClass.hCursor = nullptr;
+		wndClass.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
+		wndClass.lpszMenuName = nullptr;
+		wndClass.lpszClassName = lpszWndClassExName;
+		wndClass.hIconSm = nullptr;
 
-		ShowWindow(windowData->hWnd, nCmdShow);
+		WIN32_ASSERT(RegisterClassExW(&wndClass) != 0);
+
+		windowClass = new WindowClass();
+		windowClass->className = wndClass.lpszClassName;
+		windowClass->hCursor = LoadCursorW(nullptr, IDC_ARROW);
+
+		ENGINE_DEBUG("Registered window class.");
+	}
+
+	static void unregisterWindowClass() {
+		const HINSTANCE hInstance = GetInstance();
+
+		WIN32_ASSERT(DestroyCursor(windowClass->hCursor));
+		WIN32_ASSERT(UnregisterClassW(windowClass->className, hInstance));
+
+		delete windowClass;
+
+		windowClass = nullptr;
+
+		ENGINE_DEBUG("Unregistered window class.");
 	}
 
 	Window::Window(const WindowDescriptor& descriptor) {
 		if (windowClass == nullptr) {
-			WindowClassDescriptor windowClassDescriptor{};
-			windowClassDescriptor.name = "EngineWindowClass";
-
-			windowClass = createScope<WindowClass>(windowClassDescriptor);
+			registerWindowClass();
 		}
 
-		const HINSTANCE hInstance = GetInstance();
-		const Win32WindowClassData* windowClassData = static_cast<const Win32WindowClassData*>(windowClass->data);
-
 		RECT rect{};
-		rect.left = descriptor.x;
-		rect.top = descriptor.y;
-		rect.right = descriptor.x + descriptor.width;
-		rect.bottom = descriptor.y + descriptor.height;
+		rect.left = 0;
+		rect.top = 0;
+		rect.right = descriptor.width;
+		rect.bottom = descriptor.height;
 
-		WIN32_ASSERT(AdjustWindowRectEx(&rect, WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU, TRUE, WS_EX_APPWINDOW | WS_EX_TOPMOST));
+		constexpr DWORD dwStyle = WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME;
+		constexpr BOOL bMenu = FALSE;
+		constexpr DWORD dwExStyle = WS_EX_APPWINDOW;
+
+		WIN32_ASSERT(AdjustWindowRectEx(&rect, dwStyle, bMenu, dwExStyle) != 0);
+
+		const LPCWSTR lpWindowName = ConvertUTF8ToUTF16(descriptor.name.data());
+		constexpr sint32 X = CW_USEDEFAULT;
+		constexpr sint32 Y = CW_USEDEFAULT;
+		const sint32 nWidth = rect.right - rect.left;
+		const sint32 nHeight = rect.bottom - rect.top;
+		const HINSTANCE hInstance = GetInstance();
 
 		Win32WindowData* windowData = new Win32WindowData();
 
-		const LPCWSTR lpWindowName = ConvertUTF8ToUTF16(descriptor.name);
-
 		windowData->hWnd = CreateWindowEx(
-			0,
-			windowClassData->className,
+			dwExStyle,
+			windowClass->className,
 			lpWindowName,
-			WS_OVERLAPPEDWINDOW,
-			CW_USEDEFAULT,
-			CW_USEDEFAULT,
-			rect.right - rect.left,
-			rect.bottom - rect.top,
+			dwStyle,
+			X,
+			Y,
+			nWidth,
+			nHeight,
 			nullptr,
 			nullptr,
 			hInstance,
@@ -61,23 +98,15 @@ namespace ProjectA {
 
 		WIN32_ASSERT(windowData->hDC != nullptr);
 
-		WIN32_ASSERT(SetProp(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, (void*) windowClassData));
+		WIN32_ASSERT(SetProp(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, windowClass));
 		WIN32_ASSERT(SetProp(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData));
 
 		data = windowData;
+		windowCount += 1;
 
-		Show(*this);
+		constexpr sint32 nCmdShow = SW_NORMAL;
 
-		windowData->fatalMbp.cbSize = sizeof(windowData->fatalMbp);
-		windowData->fatalMbp.hwndOwner = windowData->hWnd;
-		windowData->fatalMbp.hInstance = nullptr;
-		windowData->fatalMbp.lpszText = nullptr;
-		windowData->fatalMbp.lpszCaption = ENGINE_NAME_L;
-		windowData->fatalMbp.dwStyle = MB_OK | MB_ICONERROR;
-		windowData->fatalMbp.lpszIcon = nullptr;
-		windowData->fatalMbp.dwContextHelpId = 0;
-		windowData->fatalMbp.lpfnMsgBoxCallback = nullptr;
-		windowData->fatalMbp.dwLanguageId = 0;
+		ShowWindow(windowData->hWnd, nCmdShow);
 	}
 
 	Window::~Window() {
@@ -93,6 +122,11 @@ namespace ProjectA {
 		delete windowData;
 
 		data = nullptr;
+		windowCount -= 1;
+
+		if (windowCount == 0) {
+			unregisterWindowClass();
+		}
 	}
 
 	const sint32* Window::getPosition() const {
@@ -140,22 +174,17 @@ namespace ProjectA {
 		}
 	}
 
+	// TODO: Only with OpenGL device context.
 	/*void Window::swapBuffers() const {
 		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
 
-		// TODO: Use only with OpenGL device context.
 		WIN32_ASSERT(SwapBuffers(windowData.hDC));
 	}*/
 
-	void Window::fatalExit(uint32 code, const std::string& message) const {
-		Win32WindowData& windowData = *((Win32WindowData*) data);
+	template<>
+	void Window::setEventListener(EventListener<WindowCloseEvent> eventListener) const {
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
-		windowData.fatalMbp.lpszText = ConvertUTF8ToUTF16(message.data());
-
-		WIN32_ASSERT(MessageBoxIndirect(&windowData.fatalMbp) != 0);
-
-		free((void*) windowData.fatalMbp.lpszText);
-
-		ExitProcess(code);
+		windowData->windowCloseEventListener = eventListener;
 	}
 }

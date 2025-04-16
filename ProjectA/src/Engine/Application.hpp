@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Engine/API/CommandEncoder.hpp"
+#include "Engine/API/Event/Window/WindowCloseEvent.hpp"
 #include "Engine/API/Event/WindowEvent.hpp"
+#include "Engine/API/SharedMemory/SharedMemory.hpp"
 #include "Engine/API/Synchronization/Fence.hpp"
+#include "Engine/API/Synchronization/Mutex.hpp"
 #include "Engine/API/Synchronization/Semaphore.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/base.hpp"
@@ -14,14 +17,20 @@
 int main(int argc, char** argv);
 
 namespace ProjectA {
+	struct ApplicationDescriptor {
+		std::string projectName;
+	};
+
 	class Application {
 		public:
 			static Application& get();
 
-			static PropertyFile loadPropertyFile(const WindowDescriptor& windowDescriptor);
+			static PropertyFile loadPropertyFile();
+
+			static std::string getWindowName(const std::string& projectName, uint8 instanceCount);
 
 		public:
-			Application(const WindowDescriptor& windowDescriptor);
+			Application(const ApplicationDescriptor& applicationDescriptor);
 
 			virtual ~Application();
 
@@ -67,10 +76,7 @@ namespace ProjectA {
 
 			void resize();
 
-			// TODO: Implement.
-			//float computeDeltaTime() const;
-
-			bool onWindowClose(WindowCloseEvent& event);
+			void onWindowClose(WindowCloseEvent& event);
 
 		private:
 			friend int ::main(int argc, char** argv);
@@ -81,10 +87,14 @@ namespace ProjectA {
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
 
 		private:
-			static scope<WindowClass> windowClass;
+			struct TestSharedMemoryData {
+				uint8 instanceCount;
+			};
 
 		private:
-			PropertyFile propertyFile;
+			scope<Mutex> mutex;
+			scope<SharedMemory> sharedMemory;
+			TestSharedMemoryData* sharedMemoryData;
 
 			// Need a scope because the window is created only if the property file is found.
 			scope<Window> window;

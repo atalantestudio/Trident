@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Engine/base.hpp"
 #include "Engine/API/Event/Event.hpp"
+#include "Engine/base.hpp"
 
 namespace ProjectA {
 	struct WindowOldDescriptor {
@@ -16,7 +16,7 @@ namespace ProjectA {
 
 	class WindowOld {
 		public:
-			using EventCallback = std::function<void(Event&)>;
+			using EventCallback = std::function<void(Event& event)>;
 
 		public:
 			static scope<WindowOld> create(const WindowOldDescriptor& descriptor);

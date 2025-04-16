@@ -1,22 +1,17 @@
 #pragma once
 
-#include "Engine/API/Window/WindowClass.hpp"
-
 namespace ProjectA {
 	struct WindowDescriptor {
 		// The window name.
-		const char* name;
-
-		// TODO: Use vec2<sint32>.
-		uint32 x = 0;
-		uint32 y = 0;
+		std::string name;
 
 		// TODO: Use vec2<sint32>.
 		uint32 width;
 		uint32 height;
 	};
 
-	//typedef *(void)() EventListener;
+	template<typename Event>
+	using EventListener = std::function<void(Event& event)>;
 
 	class Window {
 		public:
@@ -42,12 +37,8 @@ namespace ProjectA {
 			// Peeks, translates and dispatches incoming non-queued messages.
 			void processMessages() const;
 
-			//template<typename T>
-			//void setEventListener();
-
-			// Shows an error message box, then exits.
-			// Differs from Platform::fatalExit in that the message box is owned by this window.
-			void fatalExit(uint32 code, const std::string& message) const;
+			template<typename Event>
+			void setEventListener(EventListener<Event> eventListener) const;
 
 		public:
 			void* data;

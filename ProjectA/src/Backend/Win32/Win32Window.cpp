@@ -5,6 +5,7 @@
 #include "Backend/Win32/Win32Window.hpp"
 
 #include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
+#include "Engine/API/Event/Window/WindowCloseEvent.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {

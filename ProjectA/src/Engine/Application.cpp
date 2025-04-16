@@ -6,19 +6,13 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	static constexpr WindowClassDescriptor WINDOW_CLASS_DESCRIPTOR = {"EngineWindowClass"};
-
 	Application* Application::instance = nullptr;
-
-	scope<WindowClass> Application::windowClass;
 
 	Application& Application::get() {
 		return *instance;
 	}
 
-	PropertyFile Application::loadPropertyFile(const WindowDescriptor& windowDescriptor) {
-		Platform::setProjectName(windowDescriptor.name);
-
+	PropertyFile Application::loadPropertyFile() {
 		const std::filesystem::path currentPath = Filesystem::getCurrentPath();
 		const std::string currentDirectoryName = Filesystem::getCurrentDirectory().string();
 
@@ -28,20 +22,51 @@ namespace ProjectA {
 		return Filesystem::load<PropertyFile>(propertyFilePath.string());
 	}
 
-	Application::Application(const WindowDescriptor& windowDescriptor) :
-		propertyFile(loadPropertyFile(windowDescriptor))
-	{
+	std::string Application::getWindowName(const std::string& projectName, uint8 instanceCount) {
+		if (instanceCount == 0) {
+			return projectName;
+		}
+
+		return Logger::format("[] ([])", projectName, static_cast<sint32>(instanceCount));
+	}
+
+	Application::Application(const ApplicationDescriptor& applicationDescriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const uint32 pid = Platform::getProcessId();
-
-		ENGINE_DEBUG("Running new application instance (PID = []).", pid);
+		ENGINE_ASSERT(instance == nullptr, "Current instance already set.");
 
 		instance = this;
 
-		// TODO: If the instance index is > 1, append it to the window name.
+		mutex = createScope<Mutex>("Mutex");
+		mutex->acquire();
+
+		sharedMemory = createScope<SharedMemory>("SharedMemory", sizeof(TestSharedMemoryData));
+
+		sharedMemoryData = static_cast<TestSharedMemoryData*>(sharedMemory->map(0, sizeof(TestSharedMemoryData)));
+
+		constexpr uint8 MAX_PARALLEL_INSTANCES = 5;
+
+		Platform::setWindowName(applicationDescriptor.projectName.data());
+
+		if (sharedMemoryData->instanceCount > MAX_PARALLEL_INSTANCES) {
+			ENGINE_FATAL(EOVERFLOW, "More than [] instances running in parallel.", MAX_PARALLEL_INSTANCES);
+		}
+
+		PropertyFile propertyFile = loadPropertyFile();
+
+		WindowDescriptor windowDescriptor{};
+		windowDescriptor.name = getWindowName(applicationDescriptor.projectName, sharedMemoryData->instanceCount);
+		windowDescriptor.width = propertyFile.getProperty<uint32>("ExtentWidth");
+		windowDescriptor.height = propertyFile.getProperty<uint32>("ExtentHeight");
+
+		sharedMemoryData->instanceCount += 1;
+
+		ENGINE_TRACE("Running new instance (count = []).", static_cast<sint32>(sharedMemoryData->instanceCount));
+
+		mutex->release();
+
 		window = createScope<Window>(windowDescriptor);
-		//windowOld->setEventCallback(BIND(Application::onEvent));
+		window->setEventListener<WindowCloseEvent>(BIND(Application::onWindowClose));
 
 		const GraphicsAPI graphicsApi = propertyFile.getProperty<GraphicsAPI>("GraphicsAPI");
 
@@ -142,7 +167,15 @@ namespace ProjectA {
 		}*/
 	}
 
-	Application::~Application() {}
+	Application::~Application() {
+		mutex->acquire();
+
+		sharedMemoryData->instanceCount -= 1;
+
+		ENGINE_DEBUG("Killing instance (count = []).", static_cast<sint32>(sharedMemoryData->instanceCount));
+
+		sharedMemory->unmap(sharedMemoryData);
+	}
 
 	const Window& Application::getWindow() const {
 		return *window;
@@ -175,8 +208,6 @@ namespace ProjectA {
 
 		const float64 time = Platform::getTime();
 		float64 currentTickTime = time - previousTickTime;
-
-		//ENGINE_DEBUG("Tick time = []s", currentTickTime);
 
 		previousTickTime = time;
 		timeAccumulator += currentTickTime;
@@ -235,8 +266,7 @@ namespace ProjectA {
 		const Status presentStatus = device->present(Application::get().getSwapchain(), finishedRenderSemaphores[frameInFlightIndex], nextImageIndex);
 
 		if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE || needsResize) {
-			ENGINE_ASSERT(false, "TODO");
-
+			// TODO: Fix resize.
 			resize();
 
 			return;
@@ -248,7 +278,7 @@ namespace ProjectA {
 	}
 
 	void Application::resize() {
-		/*sint32 extentWidth;
+		sint32 extentWidth;
 		sint32 extentHeight;
 
 		Renderer::getWindowExtent(extentWidth, extentHeight);
@@ -259,12 +289,10 @@ namespace ProjectA {
 
 		SwapchainDescriptor swapchainDescriptor;
 		swapchainDescriptor.renderPass = Application::get().getRenderPass();
-		swapchainDescriptor.extentWidth = static_cast<uint32>(extentWidth);
-		swapchainDescriptor.extentHeight = static_cast<uint32>(extentHeight);
 
 		Application::get().getSwapchain()->recreate(swapchainDescriptor);
 
-		needsResize = false;*/
+		needsResize = false;
 	}
 
 	void Application::close() {
@@ -287,9 +315,7 @@ namespace ProjectA {
 		}*/
 	}
 
-	bool Application::onWindowClose(WindowCloseEvent& event) {
+	void Application::onWindowClose(WindowCloseEvent& event) {
 		close();
-
-		return true;
 	}
 }
