@@ -107,6 +107,10 @@ namespace ProjectA {
 		return graphicsQueue;
 	}
 
+	ref<Queue> VulkanDevice::getPresentQueue() const {
+		return presentQueue;
+	}
+
 	void VulkanDevice::waitForFence(const ref<Fence>& fence) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -146,24 +150,6 @@ namespace ProjectA {
 			VK_NULL_HANDLE,
 			&nextImageIndex
 		);
-
-		return getStatus(result);
-	}
-
-	Status VulkanDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		VkPresentInfoKHR presentInfo{};
-		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.pNext = nullptr;
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = &std::static_pointer_cast<VulkanSemaphore>(waitSemaphore)->object;
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = &std::static_pointer_cast<VulkanSwapchain>(swapchain)->object;
-		presentInfo.pImageIndices = &imageIndex;
-		presentInfo.pResults = nullptr;
-
-		const VkResult result = vkQueuePresentKHR(presentQueue->object, &presentInfo);
 
 		return getStatus(result);
 	}

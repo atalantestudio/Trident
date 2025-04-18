@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Backend/Vulkan/Status.hpp"
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
 #include "Backend/Vulkan/VulkanDevice.hpp"
@@ -59,5 +60,23 @@ namespace ProjectA {
 		const VkResult result = vkQueueSubmit(object, 1, &submitInfo, vkFence);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to submit Vulkan queue (code: []).", result);
+	}
+
+	Status VulkanQueue::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		VkPresentInfoKHR presentInfo{};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.pNext = nullptr;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = &std::static_pointer_cast<VulkanSemaphore>(waitSemaphore)->object;
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = &std::static_pointer_cast<VulkanSwapchain>(swapchain)->object;
+		presentInfo.pImageIndices = &imageIndex;
+		presentInfo.pResults = nullptr;
+
+		const VkResult result = vkQueuePresentKHR(object, &presentInfo);
+
+		return getStatus(result);
 	}
 }

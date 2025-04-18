@@ -21,4 +21,8 @@ namespace ProjectA {
 			command->execute();
 		}
 	}
+
+	Status OpenGLQueue::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {
+		return Status::SUCCESS;
+	}
 }

@@ -16,13 +16,13 @@ namespace ProjectA {
 
 			ref<Queue> getGraphicsQueue() const override;
 
+			ref<Queue> getPresentQueue() const override;
+
 			void waitForFence(const ref<Fence>& fence) const override;
 
 			void resetFence(const ref<Fence>& fence) const override;
 
 			Status acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const override;
-
-			Status present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const override;
 
 			void waitIdle() const override;
 

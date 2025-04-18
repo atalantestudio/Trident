@@ -24,6 +24,10 @@ namespace ProjectA {
 		return queue;
 	}
 
+	ref<Queue> OpenGLDevice::getPresentQueue() const {
+		return queue;
+	}
+
 	void OpenGLDevice::waitForFence(const ref<Fence>& fence) const {
 		OpenGLFence& glFence = *std::static_pointer_cast<OpenGLFence>(fence);
 
@@ -47,10 +51,6 @@ namespace ProjectA {
 		// TODO: Return correct image index - suitable for multi-buffering.
 		nextImageIndex = 0;
 
-		return Status::SUCCESS;
-	}
-
-	Status OpenGLDevice::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {
 		return Status::SUCCESS;
 	}
 
