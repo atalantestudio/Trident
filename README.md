@@ -4,8 +4,6 @@ Cross-platform C++ game engine (3D, physics and audio) with integrated math and 
 
 ## Dependencies
 
-- [Glad](https://glad.dav1d.de)
-- [GLFW](https://github.com/glfw/glfw)
 - [Lyah](https://github.com/debaze/lyah)
 - [Premake](https://github.com/premake/premake-core)
 

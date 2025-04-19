@@ -183,10 +183,6 @@ namespace ProjectA {
 		return *window;
 	}
 
-	WindowOld& Application::getWindowOld() {
-		return *windowOld;
-	}
-
 	const ref<RenderPass>& Application::getRenderPass() const {
 		return renderPass;
 	}

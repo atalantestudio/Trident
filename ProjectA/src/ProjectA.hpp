@@ -7,7 +7,6 @@
 
 // Application
 #include "Engine/Application.hpp"
-#include "Engine/Input.hpp"
 #include "Engine/Layer/Layer.hpp"
 
 // Camera controller

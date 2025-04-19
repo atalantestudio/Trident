@@ -1,7 +1,6 @@
 #include "pch.hpp"
 
 #include "Engine/Camera/Controller/OrthographicCamera3DController.hpp"
-#include "Engine/Input.hpp"
 
 namespace ProjectA {
 	OrthographicCamera3DController::OrthographicCamera3DController(float32 aspectRatio) :
@@ -32,7 +31,8 @@ namespace ProjectA {
 		float32 x = 0.0f;
 		float32 y = 0.0f;
 
-		if (Input::isKeyPressed(KeyCode::A)) {
+		// TODO: Implement Input.
+		/*if (Input::isKeyPressed(KeyCode::A)) {
 			x -= speed * deltaTime;
 		}
 		else if (Input::isKeyPressed(KeyCode::D)) {
@@ -51,7 +51,7 @@ namespace ProjectA {
 		}
 		else if (Input::isKeyPressed(KeyCode::E)) {
 			rotation -= rotationSpeed * deltaTime;
-		}
+		}*/
 
 		position += {x, y, 0.0f};
 

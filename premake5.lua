@@ -15,11 +15,6 @@ workspace "ProjectA"
 outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
 vulkansdk = os.getenv("VULKAN_SDK")
 
-group "Dependencies"
-	include "ProjectA/vendor"
-
-group ""
-
 project "ProjectA"
 	location "%{prj.name}"
 	kind "StaticLib"

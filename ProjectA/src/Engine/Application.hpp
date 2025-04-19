@@ -12,7 +12,6 @@
 #include "Engine/Filesystem/File/PropertyFile.hpp"
 #include "Engine/Layer/LayerStack.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
-#include "Engine/WindowOld.hpp"
 
 int main(int argc, char** argv);
 
@@ -35,9 +34,6 @@ namespace ProjectA {
 			virtual ~Application();
 
 			const Window& getWindow() const;
-
-			// TODO: Deprecate.
-			WindowOld& getWindowOld();
 
 			const ref<RenderPass>& getRenderPass() const;
 
@@ -98,8 +94,6 @@ namespace ProjectA {
 
 			// Need a scope because the window is created only if the property file is found.
 			scope<Window> window;
-
-			scope<WindowOld> windowOld;
 
 			LayerStack layerStack;
 
