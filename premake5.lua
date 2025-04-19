@@ -19,14 +19,14 @@ vulkansdk = os.getenv("VULKAN_SDK")
 os.execute("git config --global --add safe.directory *")
 os.execute("git submodule update --init")
 
--- Download required files from the OpenGL Registry.
-os.mkdir("ProjectA/vendor/GL")
-os.mkdir("ProjectA/vendor/KHR")
+os.mkdir("ProjectA/vendor/API/GL")
+os.mkdir("ProjectA/vendor/API/KHR")
 
-local glcorearbresult = http.download("https://registry.khronos.org/OpenGL/api/GL/glcorearb.h", "ProjectA/vendor/GL/glcorearb.h")
-local glextresult = http.download("https://registry.khronos.org/OpenGL/api/GL/glext.h", "ProjectA/vendor/GL/glext.h")
-local wglextresult = http.download("https://registry.khronos.org/OpenGL/api/GL/wglext.h", "ProjectA/vendor/GL/wglext.h")
-local khrplatformresult = http.download("https://raw.githubusercontent.com/KhronosGroup/EGL-Registry/refs/heads/main/api/KHR/khrplatform.h", "ProjectA/vendor/KHR/khrplatform.h")
+-- Download required files from the OpenGL Registry.
+local glcorearbresult = http.download("https://registry.khronos.org/OpenGL/api/GL/glcorearb.h", "ProjectA/vendor/API/GL/glcorearb.h")
+local glextresult = http.download("https://registry.khronos.org/OpenGL/api/GL/glext.h", "ProjectA/vendor/API/GL/glext.h")
+local wglextresult = http.download("https://registry.khronos.org/OpenGL/api/GL/wglext.h", "ProjectA/vendor/API/GL/wglext.h")
+local khrplatformresult = http.download("https://raw.githubusercontent.com/KhronosGroup/EGL-Registry/refs/heads/main/api/KHR/khrplatform.h", "ProjectA/vendor/API/KHR/khrplatform.h")
 
 printf("Fetching glcorearb.h: %s", glcorearbresult)
 printf("Fetching glext.h: %s", glextresult)
@@ -53,11 +53,13 @@ project "ProjectA"
 	files {
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/src/**.hpp",
+		"%{prj.name}/vendor/API/**.h",
 		"%{prj.name}/vendor/lyah/lyah/**.hpp",
 	}
 
 	includedirs {
 		"%{prj.name}/src",
+		"%{prj.name}/vendor/API",
 		"%{prj.name}/vendor/lyah",
 		vulkansdk .. "/Include",
 	}
@@ -120,6 +122,7 @@ project "Sandbox"
 	includedirs {
 		"ProjectA/src",
 		"ProjectA/vendor",
+		"ProjectA/vendor/API",
 		"ProjectA/vendor/lyah",
 		vulkansdk .. "/Include", -- TODO: Temporary
 	}
@@ -182,14 +185,13 @@ project "Editor"
 	includedirs {
 		"ProjectA/src",
 		"ProjectA/vendor",
+		"ProjectA/vendor/API",
 		"ProjectA/vendor/lyah",
 		vulkansdk .. "/Include", -- TODO: Temporary
 	}
 
 	links {
-		-- "opengl32.lib", -- TODO: Temporary
 		"ProjectA",
-		-- "vulkan-1.lib", -- TODO: Temporary
 	}
 
 	defines {

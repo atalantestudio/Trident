@@ -124,17 +124,15 @@
 #endif
 
 #ifdef ENABLE_OPENGL
-	//#define GL_GLEXT_PROTOTYPES 1
-
 	#ifdef PLATFORM_WINDOWS
 		#include <gl/GL.h>
 	#endif
 
-	#include "Backend/KHR/glcorearb.h"
-	#include "Backend/KHR/glext.h"
+	#include <GL/glcorearb.h>
+	#include <GL/glext.h>
 
 	#ifdef PLATFORM_WINDOWS
-		#include "Backend/KHR/wglext.h"
+		#include <GL/wglext.h>
 	#endif
 
 	#include "Backend/OpenGL/procedures.hpp"
