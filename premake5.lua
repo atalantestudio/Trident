@@ -15,6 +15,24 @@ workspace "ProjectA"
 outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
 vulkansdk = os.getenv("VULKAN_SDK")
 
+-- Checkout submodules.
+os.execute("git config --global --add safe.directory *")
+os.execute("git submodule update --init")
+
+-- Download required files from the OpenGL Registry.
+os.mkdir("ProjectA/vendor/GL")
+os.mkdir("ProjectA/vendor/KHR")
+
+local glcorearbresult = http.download("https://registry.khronos.org/OpenGL/api/GL/glcorearb.h", "ProjectA/vendor/GL/glcorearb.h")
+local glextresult = http.download("https://registry.khronos.org/OpenGL/api/GL/glext.h", "ProjectA/vendor/GL/glext.h")
+local wglextresult = http.download("https://registry.khronos.org/OpenGL/api/GL/wglext.h", "ProjectA/vendor/GL/wglext.h")
+local khrplatformresult = http.download("https://raw.githubusercontent.com/KhronosGroup/EGL-Registry/refs/heads/main/api/KHR/khrplatform.h", "ProjectA/vendor/KHR/khrplatform.h")
+
+printf("Fetching glcorearb.h: %s", glcorearbresult)
+printf("Fetching glext.h: %s", glextresult)
+printf("Fetching wglext.h: %s", wglextresult)
+printf("Fetching khrplatform.h: %s", khrplatformresult)
+
 project "ProjectA"
 	location "%{prj.name}"
 	kind "StaticLib"

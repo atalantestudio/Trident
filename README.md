@@ -7,9 +7,11 @@ Cross-platform C++ game engine (3D, physics and audio) with integrated math and 
 - [Lyah](https://github.com/debaze/lyah)
 - [Premake](https://github.com/premake/premake-core)
 
-## Install
+## Install (Windows)
 
-Use the `--recurse-submodules` option to recursively clone the dependencies. Make sure that the Vulkan SDK is installed (the engine will search for the `VULKAN_SDK` environment variable).
+On Windows, run `scripts/Windows/premake5.bat`. This will clone the required submodules, copy the needed OpenGL Registry files and build the project. In addition, this also adds the repository to the list of Git safe directories.
+
+Make sure that the Vulkan SDK is installed (the engine will search for the `VULKAN_SDK` environment variable).
 
 ## Resources
 
