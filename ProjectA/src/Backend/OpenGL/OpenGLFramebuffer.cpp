@@ -1,11 +1,9 @@
 #include "pch.hpp"
 
-#include <glad/glad.h>
-
 #include "Backend/OpenGL/OpenGLFramebuffer.hpp"
 
 namespace ProjectA {
-	static const uint32 maxFramebufferSize = 8192;
+	/*static const uint32 maxFramebufferSize = 8192;
 
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferDescriptor& descriptor) {
 		reset();
@@ -79,5 +77,5 @@ namespace ProjectA {
 		descriptor.size = size;
 
 		reset();
-	}
+	}*/
 }

@@ -1,7 +1,5 @@
 #include "pch.hpp"
 
-#include <glad/glad.h>
-
 #include "Engine/Renderer/CullMode.hpp"
 
 namespace ProjectA {

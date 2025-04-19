@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
-
 #include "Engine/Renderer/Status.hpp"
 
 namespace ProjectA {

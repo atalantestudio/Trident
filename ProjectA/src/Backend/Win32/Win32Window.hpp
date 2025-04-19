@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glfw/glfw3.h>
-
 #include "Engine/API/Event/KeyEvent.hpp"
 #include "Engine/API/Event/MouseEvent.hpp"
 #include "Engine/API/Event/WindowEvent.hpp"
@@ -9,7 +7,7 @@
 
 namespace ProjectA {
 	class Win32Window : public WindowOld {
-		public:
+		/*public:
 			Win32Window(const WindowOldDescriptor& descriptor);
 
 			virtual ~Win32Window();
@@ -45,6 +43,6 @@ namespace ProjectA {
 
 		private:
 			GLFWwindow* window;
-			GLFWData data;
+			GLFWData data;*/
 	};
 }

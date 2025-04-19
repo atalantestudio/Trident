@@ -35,7 +35,6 @@ project "ProjectA"
 
 	defines {
 		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE",
 	}
 
 	files {
@@ -46,8 +45,6 @@ project "ProjectA"
 
 	includedirs {
 		"%{prj.name}/src",
-		"%{prj.name}/vendor/glad/include",
-		"%{prj.name}/vendor/glfw/glfw/include",
 		"%{prj.name}/vendor/lyah",
 		vulkansdk .. "/Include",
 	}
@@ -57,8 +54,6 @@ project "ProjectA"
 	}
 
 	links {
-		"glad",
-		"glfw",
 		"opengl32.lib",
 		"vulkan-1.lib",
 	}
@@ -113,6 +108,7 @@ project "Sandbox"
 		"ProjectA/src",
 		"ProjectA/vendor",
 		"ProjectA/vendor/lyah",
+		vulkansdk .. "/Include", -- TODO: Temporary
 	}
 
 	links {
@@ -171,22 +167,16 @@ project "Editor"
 	}
 
 	includedirs {
-		"ProjectA/vendor/glfw/glfw/include", -- TODO: Temporary
 		"ProjectA/src",
 		"ProjectA/vendor",
 		"ProjectA/vendor/lyah",
 		vulkansdk .. "/Include", -- TODO: Temporary
 	}
 
-	libdirs {
-		vulkansdk .. "/Lib", -- TODO: Temporary
-	}
-
 	links {
-		"glfw", -- TODO: Temporary
-		"opengl32.lib", -- TODO: Temporary
+		-- "opengl32.lib", -- TODO: Temporary
 		"ProjectA",
-		"vulkan-1.lib", -- TODO: Temporary
+		-- "vulkan-1.lib", -- TODO: Temporary
 	}
 
 	defines {

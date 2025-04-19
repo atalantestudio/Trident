@@ -1,11 +1,9 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include "Backend/Vulkan/VulkanSurface.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/Renderer/RenderPass.hpp"
-
-#include "Backend/Vulkan/VulkanSurface.hpp"
 
 namespace ProjectA {
 	class VulkanRenderPass : public RenderPass, public ObjectWrapper<VkRenderPass> {

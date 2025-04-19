@@ -3,10 +3,15 @@
 #define ENGINE_NAME "ProjectA"
 #define ENGINE_NAME_L L"ProjectA"
 
+// Enable/disable OpenGL graphics adapter.
+#define ENABLE_OPENGL
+
+// Enable/disable Vulkan graphics adapter.
+#define ENABLE_VULKAN
+
 #ifdef _WIN32
 	#ifdef _WIN64
 		#define PLATFORM_WINDOWS
-		#define VK_USE_PLATFORM_WIN32_KHR
 
 		#include <Windows.h>
 		#include <windowsx.h>
@@ -30,14 +35,14 @@
 		#undef min // lyah::min
 		#undef near // lyah
 	#else
-		#error "Unhandled platform."
+		#error "Unsupported Windows platform."
 	#endif
 #elif defined(__linux__)
 	#define PLATFORM_LINUX
 
-	#error "Unhandled platform."
+	#error "Unsupported Linux platform."
 #else
-	#error "Unhandled platform."
+	#error "Unsupported platform."
 #endif
 
 #ifdef BUILD_MODE_DEBUG
@@ -48,11 +53,11 @@
 #if defined(PLATFORM_WINDOWS)
 	#define BREAKPOINT() __debugbreak()
 #elif defined(__clang__)
-	#define BREAKPOINT()  __builtin_debugtrap()
+	#define BREAKPOINT() __builtin_debugtrap()
 #elif defined(PLATFORM_LINUX)
 	#define BREAKPOINT() raise(SIGTRAP)
 #else
-	#error "Unhandled platform."
+	#error "Unsupported platform."
 #endif
 
 #define ENGINE_TRACE(...) ProjectA::Logger::engineLogger.trace(__VA_ARGS__)
@@ -116,6 +121,31 @@
 	#define FUNC_SIG
 	#define PROFILER(path)
 	#define PROFILE_SCOPE(name)
+#endif
+
+#ifdef ENABLE_OPENGL
+	//#define GL_GLEXT_PROTOTYPES 1
+
+	#ifdef PLATFORM_WINDOWS
+		#include <gl/GL.h>
+	#endif
+
+	#include "Backend/KHR/glcorearb.h"
+	#include "Backend/KHR/glext.h"
+
+	#ifdef PLATFORM_WINDOWS
+		#include "Backend/KHR/wglext.h"
+	#endif
+
+	#include "Backend/OpenGL/procedures.hpp"
+#endif
+
+#ifdef ENABLE_VULKAN
+	#ifdef PLATFORM_WINDOWS
+		#define VK_USE_PLATFORM_WIN32_KHR
+	#endif
+
+	#include <vulkan/vulkan.h>
 #endif
 
 #define BIT(index) 1 << index

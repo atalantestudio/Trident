@@ -1,7 +1,5 @@
 #include "pch.hpp"
 
-#include <glad/glad.h>
-
 #include "Backend/OpenGL/Command/OpenGLBeginRenderPassCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindComputePipelineCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindIndexBufferCommand.hpp"

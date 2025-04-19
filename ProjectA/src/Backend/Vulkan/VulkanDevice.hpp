@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
-
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 #include "Backend/Vulkan/VulkanQueue.hpp"
 #include "Backend/Vulkan/VulkanSurface.hpp"

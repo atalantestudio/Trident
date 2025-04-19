@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glad/glad.h>
-
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 
 #include "Engine/Renderer/RenderPipeline.hpp"

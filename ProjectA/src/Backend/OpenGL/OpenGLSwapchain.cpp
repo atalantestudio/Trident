@@ -10,9 +10,13 @@ namespace ProjectA {
 	}
 
 	void OpenGLSwapchain::recreate(const SwapchainDescriptor& descriptor) {
-		// TODO
-		//extentWidth = descriptor.extentWidth;
-		//extentHeight = descriptor.extentHeight;
+		#ifdef BUILD_MODE_DEBUG
+			ENGINE_ASSERT(descriptor.extentWidth != 0 && descriptor.extentWidth != std::numeric_limits<uint32>::max(), "Unusual extent width value.");
+			ENGINE_ASSERT(descriptor.extentHeight != 0 && descriptor.extentHeight != std::numeric_limits<uint32>::max(), "Unusual extent height value.");
+		#endif
+
+		extentWidth = descriptor.extentWidth;
+		extentHeight = descriptor.extentHeight;
 	}
 
 	uint32 OpenGLSwapchain::getExtentWidth() const {

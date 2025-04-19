@@ -1,10 +1,8 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include "Backend/Vulkan/VulkanDevice.hpp"
 
 #include "Engine/Renderer/Buffer/Buffer.hpp"
-
-#include "Backend/Vulkan/VulkanDevice.hpp"
 
 namespace ProjectA {
 	class VulkanBuffer : public Buffer, public ObjectWrapper<VkBuffer> {

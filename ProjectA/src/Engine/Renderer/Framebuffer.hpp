@@ -12,7 +12,7 @@ namespace ProjectA {
 			FramebufferDescriptor descriptor;
 
 		public:
-			static ref<Framebuffer> create(const FramebufferDescriptor& descriptor);
+			//static ref<Framebuffer> create(const FramebufferDescriptor& descriptor);
 
 			virtual ~Framebuffer() = default;
 

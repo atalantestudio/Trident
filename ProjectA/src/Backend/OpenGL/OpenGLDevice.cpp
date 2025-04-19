@@ -1,15 +1,13 @@
 #include "pch.hpp"
 
-#include <glad/glad.h>
-
 #include "Backend/OpenGL/OpenGLCommandBuffer.hpp"
 #include "Backend/OpenGL/OpenGLDevice.hpp"
 #include "Backend/OpenGL/OpenGLFence.hpp"
 
 namespace ProjectA {
-	OpenGLDevice::OpenGLDevice() :
+	OpenGLDevice::OpenGLDevice(const DeviceContext& deviceContext) :
 		physicalDevice(createRef<OpenGLPhysicalDevice>()),
-		queue(createRef<OpenGLQueue>(*this))
+		queue(createRef<OpenGLQueue>(deviceContext, *this))
 	{}
 
 	ref<PhysicalDevice> OpenGLDevice::getPhysicalDevice() const {

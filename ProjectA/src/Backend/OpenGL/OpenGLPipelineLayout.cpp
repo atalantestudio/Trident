@@ -1,7 +1,5 @@
 #include "pch.hpp"
 
-#include <glad/glad.h>
-
 #include "Backend/OpenGL/DescriptorType.hpp"
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 #include "Backend/OpenGL/OpenGLImageView.hpp"

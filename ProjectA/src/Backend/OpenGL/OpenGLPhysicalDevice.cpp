@@ -1,7 +1,5 @@
 #include "pch.hpp"
 
-#include <glad/glad.h>
-
 #include "Backend/OpenGL/OpenGLPhysicalDevice.hpp"
 
 namespace ProjectA {

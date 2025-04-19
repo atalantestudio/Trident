@@ -1,7 +1,5 @@
 #include "pch.hpp"
 
-#include <vulkan/vulkan.h>
-
 #include "Backend/Win32/Win32Window.hpp"
 
 #include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
@@ -9,7 +7,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	static uint8 glfwWindowCount = 0;
+	/*static uint8 glfwWindowCount = 0;
 
 	static void glfwErrorCallback(sint32 error, const char* description) {
 		ENGINE_ERROR("GLFW error ([]): []", error, description);
@@ -178,5 +176,5 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glfwPollEvents();
-	}
+	}*/
 }

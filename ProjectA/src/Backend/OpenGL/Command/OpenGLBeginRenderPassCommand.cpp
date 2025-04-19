@@ -1,7 +1,5 @@
 #include "pch.hpp"
 
-#include <glad/glad.h>
-
 #include "Backend/OpenGL/Command/OpenGLBeginRenderPassCommand.hpp"
 #include "Backend/OpenGL/OpenGLRenderPass.hpp"
 

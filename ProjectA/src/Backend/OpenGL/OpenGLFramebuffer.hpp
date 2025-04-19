@@ -2,9 +2,9 @@
 
 #include "Engine/Renderer/Framebuffer.hpp"
 
-// TODO: Revisit old API.
+// TODO: Update deprecated API.
 namespace ProjectA {
-	class OpenGLFramebuffer : public Framebuffer {
+	/*class OpenGLFramebuffer : public Framebuffer {
 		public:
 			OpenGLFramebuffer(const FramebufferDescriptor& descriptor);
 
@@ -25,5 +25,5 @@ namespace ProjectA {
 			uint32 id;
 			uint32 colorAttachmentId;
 			uint32 depthAttachmentId;
-	};
+	};*/
 }

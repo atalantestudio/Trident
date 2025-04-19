@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
-
 #include "Backend/Vulkan/VulkanCommandPool.hpp"
 #include "Backend/Vulkan/VulkanSwapchain.hpp"
 

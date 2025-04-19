@@ -7,7 +7,7 @@
 #include "Engine/WindowOld.hpp"
 
 namespace ProjectA {
-	scope<WindowOld> WindowOld::create(const WindowOldDescriptor& descriptor) {
+	/*scope<WindowOld> WindowOld::create(const WindowOldDescriptor& descriptor) {
 		#ifdef PLATFORM_WINDOWS
 			return createScope<Win32Window>(descriptor);
 		#else
@@ -15,5 +15,5 @@ namespace ProjectA {
 
 			return nullptr;
 		#endif
-	}
+	}*/
 }

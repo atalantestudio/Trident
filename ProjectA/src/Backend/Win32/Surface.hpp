@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
-
 #include "Backend/Win32/base.hpp"
 
 namespace ProjectA {

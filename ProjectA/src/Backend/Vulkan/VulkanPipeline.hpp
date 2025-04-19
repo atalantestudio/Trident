@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
-
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"

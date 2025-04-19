@@ -6,7 +6,8 @@
 #include "Backend/OpenGL/OpenGLQueue.hpp"
 
 namespace ProjectA {
-	OpenGLQueue::OpenGLQueue(const OpenGLDevice& device) :
+	OpenGLQueue::OpenGLQueue(const DeviceContext& deviceContext, const OpenGLDevice& device) :
+		deviceContext(deviceContext),
 		device(device)
 	{}
 
@@ -23,6 +24,8 @@ namespace ProjectA {
 	}
 
 	Status OpenGLQueue::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {
+		deviceContext.swapBuffers();
+
 		return Status::SUCCESS;
 	}
 }

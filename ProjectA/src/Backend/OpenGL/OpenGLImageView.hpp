@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glad/glad.h>
-
 #include "Backend/OpenGL/OpenGLImage.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"

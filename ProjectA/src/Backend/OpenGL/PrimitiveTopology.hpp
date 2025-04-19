@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glad/glad.h>
-
 #include "Engine/Renderer/PrimitiveTopology.hpp"
 
 namespace ProjectA {

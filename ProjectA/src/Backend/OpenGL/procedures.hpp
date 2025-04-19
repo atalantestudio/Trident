@@ -1,0 +1,63 @@
+#pragma once
+
+namespace ProjectA {
+	extern PFNGLATTACHSHADERPROC glAttachShader;
+	extern PFNGLBINDBUFFERPROC glBindBuffer;
+	extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
+	extern PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
+	extern PFNGLBINDSAMPLERPROC glBindSampler;
+	extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
+	extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
+	extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
+	extern PFNGLCLEARPROC glClear;
+	extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
+	extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
+	extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
+	extern PFNGLCREATEPROGRAMPROC glCreateProgram;
+	extern PFNGLCREATESAMPLERSPROC glCreateSamplers;
+	extern PFNGLCREATESHADERPROC glCreateShader;
+	extern PFNGLCREATETEXTURESPROC glCreateTextures;
+	extern PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays;
+
+	#ifdef DEBUG_ENABLE_MESSENGER
+		extern PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
+		extern PFNGLDEBUGMESSAGEINSERTPROC glDebugMessageInsert;
+	#endif
+
+	extern PFNGLDELETEBUFFERSPROC glDeleteBuffers;
+	extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
+	extern PFNGLDELETESAMPLERSPROC glDeleteSamplers;
+	extern PFNGLDELETESHADERPROC glDeleteShader;
+	extern PFNGLDELETESYNCPROC glDeleteSync;
+	extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
+	extern PFNGLDETACHSHADERPROC glDetachShader;
+	extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
+	extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
+	extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced;
+	extern PFNGLENABLEPROC glEnable;
+	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
+	extern PFNGLFENCESYNCPROC glFenceSync;
+	extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
+	extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
+	extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
+	extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
+	extern PFNGLGETSHADERIVPROC glGetShaderiv;
+	extern PFNGLLINKPROGRAMPROC glLinkProgram;
+	extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
+	extern PFNGLMEMORYBARRIERPROC glMemoryBarrier;
+	extern PFNGLNAMEDBUFFERDATAPROC glNamedBufferData;
+	extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
+	extern PFNGLSHADERBINARYPROC glShaderBinary;
+	extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
+	extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D;
+	extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
+	extern PFNGLTEXTUREVIEWPROC glTextureView;
+	extern PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer;
+	extern PFNGLUSEPROGRAMPROC glUseProgram;
+	extern PFNGLVERTEXATTRIBBINDINGPROC glVertexAttribBinding;
+	extern PFNGLVERTEXATTRIBFORMATPROC glVertexAttribFormat;
+	extern PFNGLVERTEXATTRIBIFORMATPROC glVertexAttribIFormat;
+	extern PFNGLVERTEXATTRIBLFORMATPROC glVertexAttribLFormat;
+	extern PFNGLVERTEXBINDINGDIVISORPROC glVertexBindingDivisor;
+	extern PFNGLVIEWPORTPROC glViewport;
+}

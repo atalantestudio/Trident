@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glad/glad.h>
-
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Synchronization/Fence.hpp"
 

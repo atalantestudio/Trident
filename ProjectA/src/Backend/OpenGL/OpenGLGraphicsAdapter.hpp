@@ -1,16 +1,15 @@
 #pragma once
 
-#include <glfw/glfw3.h>
-
 #include "Backend/OpenGL/OpenGLDevice.hpp"
-#include "Backend/OpenGL/OpenGLInstance.hpp"
 
+#include "Engine/API/DeviceContext.hpp"
+#include "Engine/API/Window/Window.hpp"
 #include "Engine/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	class OpenGLGraphicsAdapter : public GraphicsAdapter {
 		public:
-			OpenGLGraphicsAdapter(GLFWwindow* window);
+			OpenGLGraphicsAdapter(const Window& window);
 
 			ref<Device> getDevice() const override;
 
@@ -37,8 +36,12 @@ namespace ProjectA {
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const override;
 
 		private:
-			GLFWwindow* window;
-			const OpenGLInstance instance;
-			const ref<OpenGLDevice> device;
+			#ifdef DEBUG_ENABLE_MESSENGER
+				static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+			#endif
+
+		private:
+			const DeviceContext deviceContext;
+			ref<OpenGLDevice> device;
 	};
 }

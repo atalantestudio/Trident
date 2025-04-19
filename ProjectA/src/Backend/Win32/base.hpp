@@ -27,7 +27,15 @@ namespace ProjectA {
 
 		EventListener<WindowCloseEvent> windowCloseEventListener;
 
-		void (*test)();
+		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
+	};
+
+	struct Win32DeviceContextData {
+		// Device context handle (copy of Win32WindowData.hDC).
+		HDC hDC;
+
+		// OpenGL rendering context handle.
+		HGLRC hGLRC;
 	};
 
 	struct WindowClass {
@@ -41,25 +49,7 @@ namespace ProjectA {
 	static constexpr LPCWSTR WINDOW_CLASS_DATA_PROPERTY_STRING = L"WindowClassDataProperty";
 	static constexpr LPCWSTR WINDOW_DATA_PROPERTY_STRING = L"WindowDataProperty";
 
-	static void PrintLastError() {
-		LPWSTR lpBuffer{};
-
-		const DWORD dwMessageId = GetLastError();
-		const DWORD dwLanguageId = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
-
-		if (FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, dwMessageId, dwLanguageId, lpBuffer, 0, nullptr) == 0) {
-			ENGINE_ASSERT(false, "Failed to format Win32 error message.");
-
-			ExitProcess(GetLastError());
-
-			return;
-		}
-
-		ENGINE_ERROR(lpBuffer);
-
-		LocalFree(lpBuffer);
-		ExitProcess(dwMessageId);
-	}
+	static void PrintLastError();
 
 	#define WIN32_ASSERT(condition) { \
 		if (!(condition)) { \
@@ -78,21 +68,77 @@ namespace ProjectA {
 
 	// Converts an UTF-8 string to UTF-16.
 	// The string is assumed to be null-terminated.
-	static LPCWSTR ConvertUTF8ToUTF16(LPCCH string) {
-		const sint32 characterCount = MultiByteToWideChar(CP_UTF8, 0, string, -1, nullptr, 0);
+	static LPWSTR ConvertUTF8ToUTF16(LPCCH lpMultiByteStr) {
+		const sint32 cchWideChar = MultiByteToWideChar(CP_UTF8, 0, lpMultiByteStr, -1, nullptr, 0);
 
-		WIN32_ASSERT(characterCount > 0);
+		WIN32_ASSERT(cchWideChar > 0);
 
-		LPWSTR convertedString = static_cast<LPWSTR>(calloc(characterCount, sizeof(WCHAR)));
+		LPWSTR lpWideCharStr = static_cast<LPWSTR>(calloc(cchWideChar, sizeof(WCHAR)));
 
-		if (MultiByteToWideChar(CP_UTF8, 0, string, -1, convertedString, characterCount) == 0) {
-			free(convertedString);
+		if (MultiByteToWideChar(CP_UTF8, 0, lpMultiByteStr, -1, lpWideCharStr, cchWideChar) == 0) {
+			free(lpWideCharStr);
 
 			WIN32_ASSERT(false);
 
 			return nullptr;
 		}
 
-		return convertedString;
+		return lpWideCharStr;
+	}
+
+	// Converts an UTF-16 string to UTF-8.
+	// The string is assumed to be null-terminated.
+	static LPSTR ConvertUTF16ToUTF8(LPCWCH lpWideCharStr) {
+		const sint32 cbMultiByte = WideCharToMultiByte(CP_UTF8, 0, lpWideCharStr, -1, nullptr, 0, nullptr, nullptr);
+
+		WIN32_ASSERT(cbMultiByte > 0);
+
+		LPSTR lpMultiByteStr = static_cast<LPSTR>(calloc(cbMultiByte, sizeof(CHAR)));
+
+		if (WideCharToMultiByte(CP_UTF8, 0, lpWideCharStr, -1, lpMultiByteStr, cbMultiByte, nullptr, nullptr) == 0) {
+			free(lpMultiByteStr);
+
+			WIN32_ASSERT(false);
+
+			return nullptr;
+		}
+
+		return lpMultiByteStr;
+	}
+
+	static void PrintLastError() {
+		const DWORD dwMessageId = GetLastError();
+		constexpr DWORD dwLanguageId = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
+
+		LPWSTR buffer = nullptr;
+
+		const DWORD nSize = FormatMessage(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			nullptr,
+			dwMessageId,
+			dwLanguageId,
+			(LPWSTR) &buffer,
+			0,
+			nullptr
+		);
+
+		if (nSize == 0) {
+			ENGINE_ASSERT(false, "Failed to format Win32 error message.");
+			BREAKPOINT();
+
+			LocalFree(buffer);
+			ExitProcess(dwMessageId);
+
+			return;
+		}
+
+		const LPCSTR message = ConvertUTF16ToUTF8(buffer);
+
+		ENGINE_ERROR(message);
+		BREAKPOINT();
+
+		LocalFree(buffer);
+		LocalFree((void*) &message);
+		ExitProcess(dwMessageId);
 	}
 }

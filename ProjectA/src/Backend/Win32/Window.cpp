@@ -107,6 +107,54 @@ namespace ProjectA {
 		constexpr sint32 nCmdShow = SW_NORMAL;
 
 		ShowWindow(windowData->hWnd, nCmdShow);
+
+		PIXELFORMATDESCRIPTOR pfd{};
+		pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+		pfd.nVersion = 1;
+		pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+		pfd.iPixelType = PFD_TYPE_RGBA;
+		pfd.cColorBits = 32;
+		pfd.cRedBits = 0;
+		pfd.cRedShift = 0;
+		pfd.cGreenBits = 0;
+		pfd.cGreenShift = 0;
+		pfd.cBlueBits = 0;
+		pfd.cBlueShift = 0;
+		pfd.cAlphaBits = 0;
+		pfd.cAlphaShift = 0;
+		pfd.cAccumBits = 0;
+		pfd.cAccumRedBits = 0;
+		pfd.cAccumGreenBits = 0;
+		pfd.cAccumBlueBits = 0;
+		pfd.cAccumAlphaBits = 0;
+		pfd.cDepthBits = 24;
+		pfd.cStencilBits = 8;
+		pfd.cAuxBuffers = 0;
+		pfd.iLayerType = 0;
+		pfd.bReserved = 0;
+		pfd.dwLayerMask = 0;
+		pfd.dwVisibleMask = 0;
+		pfd.dwDamageMask = 0;
+
+		const sint32 format = ChoosePixelFormat(windowData->hDC, &pfd);
+
+		WIN32_ASSERT(format != 0);
+
+		WIN32_ASSERT(SetPixelFormat(windowData->hDC, format, &pfd) == TRUE);
+
+		const HGLRC hGLRC = wglCreateContext(windowData->hDC);
+
+		WIN32_ASSERT(hGLRC != nullptr);
+
+		WIN32_ASSERT(wglMakeCurrent(windowData->hDC, hGLRC) == TRUE);
+
+		windowData->wglCreateContextAttribsARB = static_cast<const PFNWGLCREATECONTEXTATTRIBSARBPROC>(static_cast<void*>(wglGetProcAddress("wglCreateContextAttribsARB")));
+
+		WIN32_ASSERT(windowData->wglCreateContextAttribsARB != nullptr);
+
+		WIN32_ASSERT(wglMakeCurrent(windowData->hDC, nullptr) == TRUE);
+
+		WIN32_ASSERT(wglDeleteContext(hGLRC) == TRUE);
 	}
 
 	Window::~Window() {
@@ -114,8 +162,8 @@ namespace ProjectA {
 
 		WIN32_ASSERT(ReleaseDC(windowData->hWnd, windowData->hDC) != 0);
 
-		RemoveProp(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING);
-		RemoveProp(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING);
+		WIN32_ASSERT(RemoveProp(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING) != nullptr);
+		WIN32_ASSERT(RemoveProp(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING) != nullptr);
 
 		WIN32_ASSERT(DestroyWindow(windowData->hWnd));
 

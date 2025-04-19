@@ -19,7 +19,7 @@ namespace ProjectA {
 			using EventCallback = std::function<void(Event& event)>;
 
 		public:
-			static scope<WindowOld> create(const WindowOldDescriptor& descriptor);
+			//static scope<WindowOld> create(const WindowOldDescriptor& descriptor);
 
 		public:
 			virtual ~WindowOld() = default;

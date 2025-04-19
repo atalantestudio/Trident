@@ -80,6 +80,8 @@ namespace ProjectA {
 
 		SwapchainDescriptor swapchainDescriptor;
 		swapchainDescriptor.renderPass = renderPass;
+		swapchainDescriptor.extentWidth = window->getSize()[0];
+		swapchainDescriptor.extentHeight = window->getSize()[1];
 
 		swapchain = Renderer::getBackend()->createSwapchain(swapchainDescriptor);
 
@@ -289,6 +291,10 @@ namespace ProjectA {
 
 		SwapchainDescriptor swapchainDescriptor;
 		swapchainDescriptor.renderPass = Application::get().getRenderPass();
+
+		// NOTE: Beware of sint32 -> uint32 cast.
+		swapchainDescriptor.extentWidth = extentWidth;
+		swapchainDescriptor.extentHeight = extentHeight;
 
 		Application::get().getSwapchain()->recreate(swapchainDescriptor);
 

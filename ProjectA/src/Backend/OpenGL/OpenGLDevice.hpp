@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class OpenGLDevice : public Device {
 		public:
-			OpenGLDevice();
+			OpenGLDevice(const DeviceContext& deviceContext);
 
 			ref<PhysicalDevice> getPhysicalDevice() const override;
 

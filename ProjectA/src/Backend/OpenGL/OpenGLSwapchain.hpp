@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glfw/glfw3.h>
-
 #include "Engine/Renderer/Swapchain.hpp"
 
 namespace ProjectA {

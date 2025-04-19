@@ -1,12 +1,9 @@
 #include "pch.hpp"
 
-#include <glad/glad.h>
-#include <glfw/glfw3.h>
-
 #include "Backend/OpenGL/OpenGLContext.hpp"
 
 namespace ProjectA {
-	OpenGLContext::OpenGLContext(GLFWwindow* window) :
+	/*OpenGLContext::OpenGLContext(GLFWwindow* window) :
 		window(window)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -19,17 +16,17 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(gladLoadStatus, "Failed to initialize GLAD.");
 
-		/*GLint majorVersion;
+		GLint majorVersion;
 		GLint minorVersion;
 
 		glGetIntegerv(GL_MAJOR_VERSION, &majorVersion);
-		glGetIntegerv(GL_MINOR_VERSION, &minorVersion);*/
+		glGetIntegerv(GL_MINOR_VERSION, &minorVersion);
 
-		/*const GLubyte* gpuVendor = glGetString(GL_VENDOR);
+		const GLubyte* gpuVendor = glGetString(GL_VENDOR);
 		const GLubyte* gpuRenderer = glGetString(GL_RENDERER);
 		const GLubyte* gpuVersion = glGetString(GL_VERSION);
 
 		ENGINE_INFO("GPU: [] []", gpuVendor, gpuRenderer);
-		ENGINE_INFO("GPU version: []", gpuVersion);*/
-	}
+		ENGINE_INFO("GPU version: []", gpuVersion);
+	}*/
 }

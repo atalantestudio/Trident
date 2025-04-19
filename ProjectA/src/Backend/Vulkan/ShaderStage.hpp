@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
-
 #include "Engine/Renderer/ShaderStage.hpp"
 
 namespace ProjectA {

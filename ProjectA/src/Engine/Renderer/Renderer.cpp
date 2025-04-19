@@ -1,7 +1,12 @@
 #include "pch.hpp"
 
-#include "Backend/OpenGL/OpenGLGraphicsAdapter.hpp"
-#include "Backend/Vulkan/VulkanGraphicsAdapter.hpp"
+#ifdef ENABLE_OPENGL
+	#include "Backend/OpenGL/OpenGLGraphicsAdapter.hpp"
+#endif
+
+#ifdef ENABLE_VULKAN
+	#include "Backend/Vulkan/VulkanGraphicsAdapter.hpp"
+#endif
 
 #include "Engine/Application.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -28,19 +33,23 @@ namespace ProjectA {
 				ENGINE_WARN("Headless graphics are not supported.");
 
 				break;
-			case GraphicsAPI::OPENGL:
-				ENGINE_INFO("Using OpenGL backend.");
+			#ifdef ENABLE_OPENGL
+				case GraphicsAPI::OPENGL:
+					ENGINE_INFO("Using OpenGL backend.");
 
-				// TODO: Make compatible with new Window API
-				//adapter = createScope<OpenGLGraphicsAdapter>(nullptr);
+					// TODO: Make compatible with new Window API.
+					adapter = createScope<OpenGLGraphicsAdapter>(window);
 
-				break;
-			case GraphicsAPI::VULKAN:
-				ENGINE_INFO("Using Vulkan backend.");
+					break;
+			#endif
+			#ifdef ENABLE_VULKAN
+				case GraphicsAPI::VULKAN:
+					ENGINE_INFO("Using Vulkan backend.");
 
-				adapter = createScope<VulkanGraphicsAdapter>(window);
+					adapter = createScope<VulkanGraphicsAdapter>(window);
 
-				break;
+					break;
+			#endif
 		}
 
 		ENGINE_ASSERT(adapter != nullptr, "Failed to initialize the graphics adapter.");
