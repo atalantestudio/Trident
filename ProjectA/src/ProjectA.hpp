@@ -3,7 +3,7 @@
 #include "Engine/base.hpp"
 
 // Math
-#include "lyah/lyah.hpp"
+#include "Engine/lyah.hpp"
 
 // Application
 #include "Engine/Application.hpp"
