@@ -2,10 +2,9 @@
 
 precision mediump float;
 
-/*in VertexOutput {
-	layout(location = 0) vec3 textureCoordinates;
-	layout(location = 1) flat uint colorIndex;
-} vertexOutput;*/
+in VertexOutput {
+	layout(location = 0) vec4 color;
+} vertexOutput;
 
 //layout(set = 0, binding = 1) uniform sampler2D samplers;
 
@@ -16,8 +15,6 @@ precision mediump float;
 layout(location = 0) out vec4 color;
 
 void main() {
-	//color = colors[vertexOutput.colorIndex];
-	//color = texture(samplers, vertexOutput.textureCoordinates);
-	//color = texture(samplers, vertexOutput.textureCoordinates.xy) + vec4(1, 0, 0.2, 1);
-	color = vec4(1.0, 0.2, 0.0, 1.0);
+	//color = vertexOutput.color;
+	color = vec4(1.0);
 }

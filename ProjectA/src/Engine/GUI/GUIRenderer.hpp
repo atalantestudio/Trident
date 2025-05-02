@@ -18,7 +18,7 @@ namespace ProjectA {
 
 			//void registerEntityPool(const ComponentPool<GUIComponent>& componentPool);
 
-			void addQuad(const mat3x3<float32>& world);
+			void addQuad(const mat3x3<float32>& world, const vec4<float32>& color);
 
 			//void registerColors(const chain<vec4<float32>>& colors) const;
 
@@ -30,15 +30,15 @@ namespace ProjectA {
 			void setupVertexBuffer();
 			void setupIndexBuffer();
 			void setupWorldBuffer();
-			//void setupColorBuffer();
+			void setupColorBuffer();
 			//void setupTextureCoordinateBuffer();
 			void setupCameraBuffers();
 			void setupRenderPipeline();
 
 			void updateCamera() const;
 
-			void copyWorldBuffer() const;
-			void clearWorldBuffer();
+			void copyBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 instanceSize) const;
+			void resetInstanceCount();
 
 		private:
 			struct Vertex {
@@ -65,14 +65,16 @@ namespace ProjectA {
 			ref<Buffer> worldStagingBuffer;
 			mat3x3<float32>* worldMappedRange = nullptr;
 
+			ref<Buffer> colorBuffer;
+			ref<Buffer> colorStagingBuffer;
+			vec4<float32>* colorMappedRange = nullptr;
+
 			//ref<Buffer> textureCoordinateVertexBuffer;
 
 			ref<Sampler> sampler;
 
 			chain<ref<Buffer>> cameraBuffers;
 			chain<mat3x3<float32>*> cameraMappedRanges;
-
-			//ref<Buffer> colorStorageBuffer;
 
 			uint32 instanceCount = 0;
 			uint32 frameIndex = 0;

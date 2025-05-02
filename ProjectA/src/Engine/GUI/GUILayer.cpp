@@ -108,6 +108,10 @@ namespace ProjectA {
 	}*/
 
 	void GUILayer::GUIQuad(const mat3x3<float32>& world) {
-		renderer.addQuad(world);
+		renderer.addQuad(world, {1.0f, 1.0f, 1.0f, 1.0f});
+	}
+
+	void GUILayer::GUIQuad(const mat3x3<float32>& world, const vec4<float32>& color) {
+		renderer.addQuad(world, color);
 	}
 }

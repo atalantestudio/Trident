@@ -14,7 +14,7 @@ namespace ProjectA {
 
 			//void loadDefaultFont();
 
-			//void loadTexture(const std::string& path);
+			//void loadImage(const std::string& path);
 
 			/*template<typename T, typename... U>
 			void appendRoot(U&&... arguments) {
@@ -36,6 +36,9 @@ namespace ProjectA {
 			// Renders a quad.
 			void GUIQuad(const mat3x3<float32>& world);
 
+			// Renders a colored quad.
+			void GUIQuad(const mat3x3<float32>& world, const vec4<float32>& color);
+
 		public:
 			//chain<ref<Font>> fonts;
 
@@ -44,7 +47,7 @@ namespace ProjectA {
 
 		private:
 			GUIRenderer renderer;
-			//chain<ref<Image>> images;
+			chain<ref<Image>> images;
 			//chain<ref<GUIObject>> rootObjects;
 	};
 }
