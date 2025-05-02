@@ -70,10 +70,11 @@ namespace ProjectA {
 		return adapter->createBuffer(descriptor);
 	}
 
-	ref<Buffer> Renderer::createStagingBuffer(uint64 size) {
+	ref<Buffer> Renderer::createStagingBuffer(uint64 size, bool persistent) {
 		BufferDescriptor stagingBufferDescriptor{};
 		stagingBufferDescriptor.size = size;
 		stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+		stagingBufferDescriptor.persistent = persistent;
 
 		return adapter->createBuffer(stagingBufferDescriptor);
 	}

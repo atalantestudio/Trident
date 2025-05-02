@@ -5,19 +5,20 @@
 
 namespace ProjectA {
 	OpenGLBuffer::OpenGLBuffer(const BufferDescriptor& descriptor) :
-		target(getGlBufferTarget(descriptor.usage)),
-		size(descriptor.size)
+		Buffer(descriptor.size),
+		target(getGlBufferTarget(descriptor.usage))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glCreateBuffers(1, &object);
 
-		// TODO: Provide mapping info, such as persistent mapping, when creating the buffer.
+		access = GL_MAP_WRITE_BIT;
 
-		// TODO: Set correct usage flag.
-		// GL_DYNAMIC_DRAW must be used with persistently mapped buffers,
-		// such as a camera uniform buffer.
-		glNamedBufferData(object, size, nullptr, GL_DYNAMIC_DRAW);
+		if (descriptor.persistent) {
+			access |= GL_MAP_PERSISTENT_BIT;
+		}
+
+		glNamedBufferStorage(object, size, nullptr, access);
 	}
 
 	OpenGLBuffer::~OpenGLBuffer() {
@@ -31,10 +32,7 @@ namespace ProjectA {
 	}
 
 	void* OpenGLBuffer::getMappedRange(uint64 offset, uint64 size) const {
-		// TODO: Set correct access flag.
-		// GL_MAP_INVALIDATE_RANGE_BIT must be used with persistently mapped buffers,
-		// such as a camera uniform buffer.
-		void* mappedRange = glMapNamedBufferRange(object, offset, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
+		void* mappedRange = glMapNamedBufferRange(object, offset, size, access);
 
 		ENGINE_ASSERT(mappedRange != nullptr, "Failed to map OpenGL buffer range.");
 

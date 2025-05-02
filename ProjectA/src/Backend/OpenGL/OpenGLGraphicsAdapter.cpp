@@ -63,7 +63,7 @@ namespace ProjectA {
 		glLinkProgram = static_cast<PFNGLLINKPROGRAMPROC>(deviceContext.getProcedureAddress("glLinkProgram"));
 		glMapNamedBufferRange = static_cast<PFNGLMAPNAMEDBUFFERRANGEPROC>(deviceContext.getProcedureAddress("glMapNamedBufferRange"));
 		glMemoryBarrier = static_cast<PFNGLMEMORYBARRIERPROC>(deviceContext.getProcedureAddress("glMemoryBarrier"));
-		glNamedBufferData = static_cast<PFNGLNAMEDBUFFERDATAPROC>(deviceContext.getProcedureAddress("glNamedBufferData"));
+		glNamedBufferStorage = static_cast<PFNGLNAMEDBUFFERSTORAGEPROC>(deviceContext.getProcedureAddress("glNamedBufferStorage"));
 		glSamplerParameteri = static_cast<PFNGLSAMPLERPARAMETERIPROC>(deviceContext.getProcedureAddress("glSamplerParameteri"));
 		glShaderBinary = static_cast<PFNGLSHADERBINARYPROC>(deviceContext.getProcedureAddress("glShaderBinary"));
 		glSpecializeShader = static_cast<PFNGLSPECIALIZESHADERPROC>(deviceContext.getProcedureAddress("glSpecializeShader"));

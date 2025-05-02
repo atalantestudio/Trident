@@ -16,6 +16,8 @@ namespace ProjectA {
 
 		public:
 			const GLenum target;
-			const GLsizeiptr size;
+
+		private:
+			GLbitfield access;
 	};
 }

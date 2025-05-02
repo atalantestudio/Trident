@@ -1,5 +1,6 @@
 #pragma once
 
+// TODO: Remove PCH include.
 #include "pch.hpp"
 
 #include "Engine/Renderer/Buffer/BufferUsage.hpp"
@@ -10,6 +11,10 @@ namespace ProjectA {
 		uint64 size;
 
 		BufferUsage usage;
+
+		// Indicates if the buffer is going to be mapped for the application's lifetime.
+		// Only used by OpenGL.
+		bool persistent = false;
 	};
 
 	class Buffer {
@@ -25,5 +30,11 @@ namespace ProjectA {
 
 		private:
 			virtual void* getMappedRange(uint64 offset, uint64 size) const = 0;
+
+		protected:
+			Buffer(uint64 size);
+
+		public:
+			const uint64 size;
 	};
 }

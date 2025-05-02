@@ -26,7 +26,7 @@ namespace ProjectA {
 		}*/
 	}
 
-	void GUILayer::loadDefaultFont() {
+	/*void GUILayer::loadDefaultFont() {
 		const ref<BitmapFont> defaultFont = createRef<BitmapFont>();
 		defaultFont->textureIndex = static_cast<uint32>(images.size());
 		defaultFont->glyphMap.map = QUIVER_BITMAP_GLYPH_MAP;
@@ -37,18 +37,18 @@ namespace ProjectA {
 
 		fonts.emplace_back(defaultFont);
 
-		//loadImage("../ProjectA/src/Asset/Texture/Quiver.png");
-	}
+		loadImage("../ProjectA/src/Asset/Texture/Quiver.png");
+	}*/
 
-	void GUILayer::loadTexture(const std::string& path) {
+	/*void GUILayer::loadTexture(const std::string& path) {
 		ENGINE_ASSERT(false, "TODO: Load GUI texture.");
 
-		//const ref<Image> image = renderer.loadImage(path);
+		const ref<Image> image = renderer.loadImage(path);
 
-		//images.emplace_back(texture);
-	}
+		images.emplace_back(texture);
+	}*/
 
-	void GUILayer::compute() {
+	/*void GUILayer::compute() {
 		const vec2<float32> parentSize = {
 			static_cast<float32>(Application::get().getSwapchain()->getExtentWidth()),
 			static_cast<float32>(Application::get().getSwapchain()->getExtentHeight()),
@@ -57,14 +57,14 @@ namespace ProjectA {
 		const vec2<float32> parentMargin = {0.0f, 0.0f};
 		chain<vec4<float32>> colors;
 
-		/*for (const ref<GUIObject>& rootObject : rootObjects) {
+		for (const ref<GUIObject>& rootObject : rootObjects) {
 			rootObject->compute(ecs, parentSize, parentMargin, colors, fonts[0]);
-		}*/
+		}
 
 		if (!colors.empty()) {
 			renderer.registerColors(colors);
 		}
-	}
+	}*/
 
 	/*void GUILayer::registerEntityPool() {
 		const ComponentPool<GUIComponent>& componentPool = ecs.getComponentPool<GUIComponent>();
@@ -81,13 +81,17 @@ namespace ProjectA {
 	}*/
 
 	void GUILayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
-		updateScriptComponents();
+		//updateScriptComponents();
+
+		renderGUI();
 
 		renderer.render(commandEncoder, nextImageIndex);
 	}
 
-	void GUILayer::updateScriptComponents() const {
-		/*ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
+	void GUILayer::renderGUI() {}
+
+	/*void GUILayer::updateScriptComponents() const {
+		ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
 
 		ScriptComponent* begin = componentPool.components.data();
 
@@ -100,6 +104,10 @@ namespace ProjectA {
 			}
 
 			component->entity->onUpdate();
-		}*/
+		}
+	}*/
+
+	void GUILayer::GUIQuad(const mat3x3<float32>& world) {
+		renderer.addQuad(world);
 	}
 }

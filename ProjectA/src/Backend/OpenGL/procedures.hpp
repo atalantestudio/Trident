@@ -45,7 +45,7 @@ namespace ProjectA {
 	extern PFNGLLINKPROGRAMPROC glLinkProgram;
 	extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
 	extern PFNGLMEMORYBARRIERPROC glMemoryBarrier;
-	extern PFNGLNAMEDBUFFERDATAPROC glNamedBufferData;
+	extern PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage;
 	extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
 	extern PFNGLSHADERBINARYPROC glShaderBinary;
 	extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
