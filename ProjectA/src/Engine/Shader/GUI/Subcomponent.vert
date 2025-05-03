@@ -1,7 +1,7 @@
 #version 440
 
 layout(location = 0) in vec3 vertexPosition;
-layout(location = 1) in vec3 vertexTextureCoordinates;
+layout(location = 1) in vec2 vertexTextureCoordinate;
 layout(location = 2) in mat3x3 world;
 layout(location = 5) in vec4 color;
 

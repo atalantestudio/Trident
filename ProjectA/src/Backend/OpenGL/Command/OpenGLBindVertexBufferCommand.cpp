@@ -3,14 +3,14 @@
 #include "Backend/OpenGL/Command/OpenGLBindVertexBufferCommand.hpp"
 
 namespace ProjectA {
-	OpenGLBindVertexBufferCommand::OpenGLBindVertexBufferCommand(GLuint bindingindex, GLuint buffer, GLsizei stride) :
+	OpenGLBindVertexBufferCommand::OpenGLBindVertexBufferCommand(GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride) :
 		bindingindex(bindingindex),
 		buffer(buffer),
+		offset(offset),
 		stride(stride)
 	{}
 
 	void OpenGLBindVertexBufferCommand::execute() const {
-		// TODO: Use offset.
-		glBindVertexBuffer(bindingindex, buffer, 0, stride);
+		glBindVertexBuffer(bindingindex, buffer, offset, stride);
 	}
 }

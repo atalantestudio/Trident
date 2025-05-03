@@ -230,7 +230,7 @@ namespace ProjectA {
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
-		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(vec2<float32>));
+		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(vec2<float32>));
 		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, width, height);
 		commandEncoder->drawIndexed(6, 1, 0);

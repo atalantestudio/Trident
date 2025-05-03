@@ -24,7 +24,7 @@ namespace ProjectA {
 
 			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, IndexType indexType) override;
 
-			void bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint32 stride) override;
+			void bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) override;
 
 			void copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) override;
 

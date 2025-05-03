@@ -23,7 +23,6 @@ namespace ProjectA {
 		uint32 nextImageIndex = 0;
 	};
 
-	// TODO: Merge bindComputePipeline and bindRenderPipeline?
 	class CommandEncoder {
 		public:
 			virtual ~CommandEncoder() = default;
@@ -32,15 +31,18 @@ namespace ProjectA {
 
 			virtual void beginRenderPass(const BeginRenderPassDescriptor& descriptor) = 0;
 
+			// TODO: Merge bindComputePipeline and bindRenderPipeline?
 			virtual void bindComputePipeline(const ref<ComputePipeline>& computePipeline) = 0;
 
 			virtual void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) = 0;
 
 			virtual void bindDescriptorSets(uint32 descriptorSetIndex) const = 0;
 
+			// TODO: Make indexType a template argument with uint16 and uint32 being possible values?
 			virtual void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, IndexType indexType) = 0;
 
-			virtual void bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint32 stride) = 0;
+			// `stride` is only used by OpenGL when calling glBindVertexBuffer.
+			virtual void bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) = 0;
 
 			virtual void copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) = 0;
 

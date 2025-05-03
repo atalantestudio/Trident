@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Event/Window/WindowCloseEvent.hpp"
+#include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 
 namespace ProjectA {
 	struct Win32WindowData {
@@ -25,6 +26,7 @@ namespace ProjectA {
 		sint32 cursorX;
 		sint32 cursorY;
 
+		EventListener<WindowResizeEvent> windowResizeEventListener;
 		EventListener<WindowCloseEvent> windowCloseEventListener;
 
 		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;

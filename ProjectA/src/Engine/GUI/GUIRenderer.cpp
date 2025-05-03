@@ -12,16 +12,13 @@ namespace ProjectA {
 	{
 		setupVertexBuffer();
 		setupIndexBuffer();
-		setupWorldBuffer();
-		setupColorBuffer();
+		setupInstanceBuffer();
 		//setupTextureCoordinateBuffer();
 		setupCameraBuffers();
 		setupRenderPipeline();
 	}
 
 	void GUIRenderer::setupVertexBuffer() {
-		const ref<Device> device = getDevice();
-
 		// Image coordinates are reversed manually.
  		const chain<Vertex> vertices = {
 			{{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
@@ -40,11 +37,13 @@ namespace ProjectA {
 
 		vertexStagingBuffer->unmap();
 
-		BufferDescriptor bufferDescriptor{};
-		bufferDescriptor.size = size;
-		bufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		BufferDescriptor vertexBufferDescriptor{};
+		vertexBufferDescriptor.size = size;
+		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 
-		vertexBuffer = createBuffer(bufferDescriptor);
+		vertexBuffer = createBuffer(vertexBufferDescriptor);
+
+		const ref<Device> device = getDevice();
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -98,30 +97,17 @@ namespace ProjectA {
 		device->waitIdle();
 	}
 
-	void GUIRenderer::setupWorldBuffer() {
-		constexpr uint64 size = MAX_INSTANCES * sizeof(mat3x3<float32>);
+	void GUIRenderer::setupInstanceBuffer() {
+		constexpr uint64 size = MAX_INSTANCES * sizeof(Instance);
 
-		worldStagingBuffer = createStagingBuffer(size, true);
-		worldMappedRange = worldStagingBuffer->map<mat3x3<float32>>(0, size);
+		instanceStagingBuffer = createStagingBuffer(size, true);
+		instanceMappedRange = instanceStagingBuffer->map<Instance>(0, size);
 
-		BufferDescriptor worldBufferDescriptor{};
-		worldBufferDescriptor.size = size;
-		worldBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		BufferDescriptor instanceBufferDescriptor{};
+		instanceBufferDescriptor.size = size;
+		instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 
-		worldBuffer = createBuffer(worldBufferDescriptor);
-	}
-
-	void GUIRenderer::setupColorBuffer() {
-		constexpr uint64 size = MAX_INSTANCES * sizeof(vec4<float32>);
-
-		colorStagingBuffer = createStagingBuffer(size, true);
-		colorMappedRange = colorStagingBuffer->map<vec4<float32>>(0, size);
-
-		BufferDescriptor colorBufferDescriptor{};
-		colorBufferDescriptor.size = size;
-		colorBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-
-		colorBuffer = createBuffer(colorBufferDescriptor);
+		instanceBuffer = createBuffer(instanceBufferDescriptor);
 	}
 
 	/*void GUIRenderer::setupTextureCoordinateBuffer() {
@@ -153,11 +139,11 @@ namespace ProjectA {
 		//fontImage = loadImage("../ProjectA/src/Asset/Texture/Quiver.png");
 		//fontImageView = fontImage->createView(imageViewDescriptor);
 
-		SamplerDescriptor samplerDescriptor{};
+		/*SamplerDescriptor samplerDescriptor{};
 		samplerDescriptor.magFilter = SamplerFilter::NEAREST;
 		samplerDescriptor.minFilter = SamplerFilter::NEAREST;
 
-		sampler = createSampler(samplerDescriptor);
+		sampler = createSampler(samplerDescriptor);*/
 
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
@@ -303,8 +289,8 @@ namespace ProjectA {
 	void GUIRenderer::addQuad(const mat3x3<float32>& world, const vec4<float32>& color) {
 		ENGINE_ASSERT(instanceCount < MAX_INSTANCES, "Instance overflow.");
 
-		worldMappedRange[instanceCount] = world;
-		colorMappedRange[instanceCount] = color;
+		instanceMappedRange[instanceCount].world = world;
+		instanceMappedRange[instanceCount].color = color;
 
 		instanceCount += 1;
 	}
@@ -356,28 +342,20 @@ namespace ProjectA {
 	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
 		updateCamera();
 
-		copyBuffer(worldStagingBuffer, worldBuffer, sizeof(mat3x3<float32>));
-		//copyBuffer(colorStagingBuffer, colorBuffer, sizeof(vec4<float32>));
+		copyBuffer(instanceStagingBuffer, instanceBuffer, sizeof(Instance));
 
-		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
-		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
-		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
+		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
+		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
+		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
-		const float32 width = static_cast<float32>(Application::get().getSwapchain()->getExtentWidth());
-		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
-
-		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
-		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));
-		commandEncoder->bindVertexBuffer(1, worldBuffer, sizeof(mat3x3<float32>));
-		//commandEncoder->bindVertexBuffer(2, colorBuffer, sizeof(vec4<float32>));
+		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+		commandEncoder->bindVertexBuffer(1, instanceBuffer, 0, sizeof(Instance));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, Application::get().getSwapchain()->getExtentWidth(), Application::get().getSwapchain()->getExtentHeight());
+		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 		commandEncoder->drawIndexed(6, instanceCount, 0);
-		commandEncoder->endRenderPass();
 
 		frameIndex = (frameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 

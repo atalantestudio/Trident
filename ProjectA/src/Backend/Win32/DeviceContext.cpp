@@ -47,7 +47,7 @@ namespace ProjectA {
 	}
 
 	void* DeviceContext::getProcedureAddress(std::string_view name) const {
-		void* procAddress = wglGetProcAddress(name.data());
+		PROC procAddress = wglGetProcAddress(name.data());
 
 		if (procAddress == nullptr) {
 			const HMODULE hModule = LoadLibrary(L"opengl32.dll");

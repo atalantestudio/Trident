@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/CommandEncoder.hpp"
+#include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/Event/Window/WindowCloseEvent.hpp"
 #include "Engine/API/Event/WindowEvent.hpp"
 #include "Engine/API/SharedMemory/SharedMemory.hpp"
@@ -70,7 +71,7 @@ namespace ProjectA {
 
 			void render(float64 remainingFrameTime);
 
-			void resize();
+			void onWindowResize(WindowResizeEvent& event);
 
 			void onWindowClose(WindowCloseEvent& event);
 

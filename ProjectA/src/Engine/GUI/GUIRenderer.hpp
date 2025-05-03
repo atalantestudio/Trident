@@ -29,8 +29,7 @@ namespace ProjectA {
 		private:
 			void setupVertexBuffer();
 			void setupIndexBuffer();
-			void setupWorldBuffer();
-			void setupColorBuffer();
+			void setupInstanceBuffer();
 			//void setupTextureCoordinateBuffer();
 			void setupCameraBuffers();
 			void setupRenderPipeline();
@@ -46,9 +45,14 @@ namespace ProjectA {
 				vec2<float32> textureCoordinate;
 			};
 
+			struct Instance {
+				mat3x3<float32> world;
+				vec4<float32> color;
+			};
+
 		private:
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
-			static constexpr uint64 MAX_INSTANCES = 2;
+			static constexpr uint64 MAX_INSTANCES = 3;
 			//static constexpr uint32 MAX_COLORS = 32;
 			//static constexpr uint32 MAX_TEXTURES = 32;
 
@@ -59,19 +63,15 @@ namespace ProjectA {
 			ref<Buffer> vertexStagingBuffer;
 			ref<Buffer> vertexBuffer;
 
-			ref<Buffer> indexBuffer;
-
-			ref<Buffer> worldBuffer;
-			ref<Buffer> worldStagingBuffer;
-			mat3x3<float32>* worldMappedRange = nullptr;
-
-			ref<Buffer> colorBuffer;
-			ref<Buffer> colorStagingBuffer;
-			vec4<float32>* colorMappedRange = nullptr;
-
 			//ref<Buffer> textureCoordinateVertexBuffer;
 
-			ref<Sampler> sampler;
+			ref<Buffer> indexBuffer;
+
+			ref<Buffer> instanceBuffer;
+			ref<Buffer> instanceStagingBuffer;
+			Instance* instanceMappedRange = nullptr;
+
+			//ref<Sampler> sampler;
 
 			chain<ref<Buffer>> cameraBuffers;
 			chain<mat3x3<float32>*> cameraMappedRanges;
@@ -79,9 +79,9 @@ namespace ProjectA {
 			uint32 instanceCount = 0;
 			uint32 frameIndex = 0;
 
-			ref<Image> defaultImage;
-			ref<ImageView> defaultImageView;
-			ref<Image> fontImage;
-			ref<ImageView> fontImageView;
+			//ref<Image> defaultImage;
+			//ref<ImageView> defaultImageView;
+			//ref<Image> fontImage;
+			//ref<ImageView> fontImageView;
 	};
 }

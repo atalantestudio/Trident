@@ -61,11 +61,12 @@ namespace ProjectA {
 
 		sharedMemoryData->instanceCount += 1;
 
-		ENGINE_TRACE("Running new instance (count = []).", static_cast<sint32>(sharedMemoryData->instanceCount));
+		ENGINE_TRACE("Running new instance. Updated count = [].", static_cast<sint32>(sharedMemoryData->instanceCount));
 
 		mutex->release();
 
 		window = createScope<Window>(windowDescriptor);
+		window->setEventListener<WindowResizeEvent>(BIND(Application::onWindowResize));
 		window->setEventListener<WindowCloseEvent>(BIND(Application::onWindowClose));
 
 		const GraphicsAPI graphicsApi = propertyFile.getProperty<GraphicsAPI>("GraphicsAPI");
@@ -174,7 +175,7 @@ namespace ProjectA {
 
 		sharedMemoryData->instanceCount -= 1;
 
-		ENGINE_DEBUG("Killing instance (count = []).", static_cast<sint32>(sharedMemoryData->instanceCount));
+		ENGINE_DEBUG("Killing instance. Updated count = [].", static_cast<sint32>(sharedMemoryData->instanceCount));
 
 		sharedMemory->unmap(sharedMemoryData);
 	}
@@ -253,9 +254,18 @@ namespace ProjectA {
 		commandEncoder->reset();
 		commandEncoder->begin();
 
+		BeginRenderPassDescriptor beginRenderPassDescriptor;
+		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
+		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
+
+		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
+
 		for (const ref<Layer>& layer : layerStack) {
 			layer->render(remainingFrameTime, commandEncoder, nextImageIndex);
 		}
+
+		commandEncoder->endRenderPass();
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -263,38 +273,16 @@ namespace ProjectA {
 
 		const Status presentStatus = device->getPresentQueue()->present(Application::get().getSwapchain(), finishedRenderSemaphores[frameInFlightIndex], nextImageIndex);
 
-		if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE || needsResize) {
+		/*if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE || needsResize) {
 			// TODO: Fix resize.
-			resize();
+			//resize();
 
 			return;
-		}
+		}*/
 
 		ENGINE_ASSERT(presentStatus == Status::SUCCESS, "Unhandled present status.");
 
 		device->waitIdle();
-	}
-
-	void Application::resize() {
-		sint32 extentWidth;
-		sint32 extentHeight;
-
-		Renderer::getWindowExtent(extentWidth, extentHeight);
-
-		const ref<Device> device = Renderer::getDevice();
-
-		device->waitIdle();
-
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.renderPass = Application::get().getRenderPass();
-
-		// NOTE: Beware of sint32 -> uint32 cast.
-		swapchainDescriptor.extentWidth = extentWidth;
-		swapchainDescriptor.extentHeight = extentHeight;
-
-		Application::get().getSwapchain()->recreate(swapchainDescriptor);
-
-		needsResize = false;
 	}
 
 	void Application::close() {
@@ -304,10 +292,6 @@ namespace ProjectA {
 	void Application::onEvent(Event& event) {
 		/*PROFILE_SCOPE(FUNC_SIG);
 
-		EventDispatcher eventDispatcher(event);
-
-		eventDispatcher.dispatch<WindowCloseEvent>(BIND(Application::onWindowClose));
-
 		for (chain<Layer*>::const_reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); i += 1) {
 			if (event.handled) {
 				break;
@@ -315,6 +299,21 @@ namespace ProjectA {
 
 			(*i)->onEvent(event);
 		}*/
+	}
+
+	void Application::onWindowResize(WindowResizeEvent& event) {
+		const ref<Device> device = Renderer::getDevice();
+
+		device->waitIdle();
+
+		SwapchainDescriptor swapchainDescriptor;
+		swapchainDescriptor.renderPass = Application::get().getRenderPass();
+		swapchainDescriptor.extentWidth = static_cast<sint32>(event.getWidth());
+		swapchainDescriptor.extentHeight = static_cast<sint32>(event.getHeight());
+
+		Application::get().getSwapchain()->recreate(swapchainDescriptor);
+
+		needsResize = false;
 	}
 
 	void Application::onWindowClose(WindowCloseEvent& event) {

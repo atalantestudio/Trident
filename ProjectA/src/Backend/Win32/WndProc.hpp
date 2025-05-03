@@ -1,6 +1,10 @@
 #pragma once
 
 namespace ProjectA {
+	static LRESULT CALLBACK DummyWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
+		return DefWindowProcW(hWnd, Msg, wParam, lParam);
+	}
+
 	static LRESULT CALLBACK TestWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 		if (Msg > 49000) {
 			// TODO: Handle client messages.
@@ -231,10 +235,6 @@ namespace ProjectA {
 		return DefWindowProcW(hWnd, Msg, wParam, lParam);
 	}
 
-	static LRESULT CALLBACK DummyWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
-		return DefWindowProcW(hWnd, Msg, wParam, lParam);
-	}
-
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetPropW(hWnd, WINDOW_DATA_PROPERTY_STRING));
 
@@ -257,6 +257,14 @@ namespace ProjectA {
 				windowData->sizeX = GET_X_LPARAM(lParam);
 				windowData->sizeY = GET_Y_LPARAM(lParam);
 
+				if (windowData->windowResizeEventListener) {
+					WindowResizeEvent windowResizeEvent(windowData->sizeX, windowData->sizeY);
+
+					windowData->windowResizeEventListener(windowResizeEvent);
+				}
+
+				ENGINE_DEBUG("wm_size");
+
 				return 0;
 			}
 			case WM_SETFOCUS: {
@@ -271,9 +279,11 @@ namespace ProjectA {
 			}
 			case WM_CLOSE: {
 				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-close.
-				WindowCloseEvent windowCloseEvent;
+				if (windowData->windowCloseEventListener) {
+					WindowCloseEvent windowCloseEvent;
 
-				windowData->windowCloseEventListener(windowCloseEvent);
+					windowData->windowCloseEventListener(windowCloseEvent);
+				}
 
 				return 0;
 			}

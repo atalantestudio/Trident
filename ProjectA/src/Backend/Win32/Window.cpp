@@ -222,12 +222,12 @@ namespace ProjectA {
 		}
 	}
 
-	// TODO: Only with OpenGL device context.
-	/*void Window::swapBuffers() const {
-		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
+	template<>
+	void Window::setEventListener(EventListener<WindowResizeEvent> eventListener) const {
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
-		WIN32_ASSERT(SwapBuffers(windowData.hDC));
-	}*/
+		windowData->windowResizeEventListener = eventListener;
+	}
 
 	template<>
 	void Window::setEventListener(EventListener<WindowCloseEvent> eventListener) const {

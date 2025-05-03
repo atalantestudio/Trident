@@ -117,10 +117,8 @@ namespace ProjectA {
 		);
 	}
 
-	void VulkanCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint32 stride) {
+	void VulkanCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		const VkDeviceSize offset = 0;
 
 		vkCmdBindVertexBuffers(
 			commandBuffer,

@@ -95,7 +95,7 @@ namespace ProjectA {
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
-		commandEncoder->bindVertexBuffer(0, vertexBuffer, sizeof(Vertex));
+		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, width, height);
 		commandEncoder->draw(3, 1, 0);
