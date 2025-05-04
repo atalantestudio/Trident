@@ -36,7 +36,9 @@ namespace ProjectA {
 
 			virtual void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) = 0;
 
-			virtual void bindDescriptorSets(uint32 descriptorSetIndex) const = 0;
+			// Binds all descriptor sets linked to the current pipeline.
+			// TODO: Change the API to take in argument arbitrary descriptor sets .
+			virtual void bindAllDescriptorSets() const = 0;
 
 			// TODO: Make indexType a template argument with uint16 and uint32 being possible values?
 			virtual void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, IndexType indexType) = 0;

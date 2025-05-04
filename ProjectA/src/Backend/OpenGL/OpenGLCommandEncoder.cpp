@@ -40,7 +40,7 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLBindRenderPipelineCommand>(this->renderPipeline));
 	}
 
-	void OpenGLCommandEncoder::bindDescriptorSets(uint32 descriptorSetIndex) const {}
+	void OpenGLCommandEncoder::bindAllDescriptorSets() const {}
 
 	void OpenGLCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, IndexType indexType) {
 		indexOffset = static_cast<uint32>(offset);

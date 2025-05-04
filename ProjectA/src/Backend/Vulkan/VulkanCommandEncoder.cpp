@@ -90,7 +90,7 @@ namespace ProjectA {
 		vkCmdBindPipeline(commandBuffer, this->pipeline->bindPoint, this->pipeline->object);
 	}
 
-	void VulkanCommandEncoder::bindDescriptorSets(uint32 descriptorSetIndex) const {
+	void VulkanCommandEncoder::bindAllDescriptorSets() const {
 		vkCmdBindDescriptorSets(
 			commandBuffer,
 			pipeline->bindPoint,

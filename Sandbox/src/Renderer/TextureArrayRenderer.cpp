@@ -218,7 +218,7 @@ namespace ProjectA {
 		const uint32 height = swapchain->getExtentHeight();
 
 		commandEncoder->bindRenderPipeline(renderPipeline);
-		commandEncoder->bindDescriptorSets(0);
+		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 		commandEncoder->bindVertexBuffer(1, instanceVertexBuffer, 0, sizeof(Instance));
 		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);

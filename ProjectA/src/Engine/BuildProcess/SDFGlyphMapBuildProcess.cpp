@@ -274,7 +274,7 @@ namespace ProjectA {
 
 					commandEncoder->begin();
 					commandEncoder->bindComputePipeline(glyphImagePipeline);
-					commandEncoder->bindDescriptorSets(0);
+					commandEncoder->bindAllDescriptorSets();
 
 					// TODO: Dispatch less groups depending on the size of the glyph area.
 					commandEncoder->dispatchGroups(128, 128, 1);
@@ -326,7 +326,7 @@ namespace ProjectA {
 
 					commandEncoder->begin();
 					commandEncoder->bindComputePipeline(glyphSdfPipeline);
-					commandEncoder->bindDescriptorSets(0);
+					commandEncoder->bindAllDescriptorSets();
 					commandEncoder->dispatchGroups(8, 8, 1);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
