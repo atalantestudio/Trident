@@ -12,6 +12,6 @@ namespace ProjectA {
 
 			// The provided path is relative to the working directory.
 			template<typename T>
-			static T load(const std::string& path);
+			static T load(std::string_view path);
 	};
 }

@@ -15,6 +15,8 @@ namespace ProjectA {
 						}
 					}
 				}
+
+				GUIQuad({200px, 200px}, 1);
 			}
 
 		private:

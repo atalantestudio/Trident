@@ -5,6 +5,7 @@
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
+	// TODO: Use.
 	static uint32 calculateTableChecksum(uint32* table, uint32 byteCount) {
 		uint32 checksum = 0;
 		uint32 longCount = (byteCount + 3) / 4;
@@ -97,7 +98,7 @@ namespace ProjectA {
 		hhea.caretSlopeRun = stream.read<sint16>(true);
 		hhea.caretOffset = stream.read<FWord>(true);
 
-		stream.jump(sizeof(sint16) * 4);
+		stream.jump(4 * sizeof(sint16));
 
 		hhea.metricDataFormat = stream.read<sint16>(true);
 		hhea.numOfLongHorMetrics = stream.read<uint16>(true);
@@ -160,7 +161,6 @@ namespace ProjectA {
 		}
 	}
 
-	// fwd
 	static Glyph parseCompoundGlyph(ByteStream& stream, uint32 tableOffset, const fchain<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth);
 
 	static Glyph parseSimpleGlyph(ByteStream& stream, uint32 tableOffset, const fchain<uint16>& glyphOffsets, uint16 glyphIndex, uint16 maxComponentDepth) {
@@ -176,17 +176,9 @@ namespace ProjectA {
 		}
 
 		Glyph glyph;
-
-		// Minimum x for coordinate data.
 		glyph.min.x = stream.read<FWord>(true);
-
-		// Minimum y for coordinate data.
 		glyph.min.y = stream.read<FWord>(true);
-
-		// Maximum x for coordinate data.
 		glyph.max.x = stream.read<FWord>(true);
-
-		// Maximum y for coordinate data.
 		glyph.max.y = stream.read<FWord>(true);
 
 		// Array of last points of each contour; n is the number of contours; array entries are point indices.
@@ -347,17 +339,9 @@ namespace ProjectA {
 		stream.jump(sizeof(sint16));
 
 		Glyph glyph;
-
-		// Minimum x for coordinate data.
 		glyph.min.x = stream.read<FWord>(true);
-
-		// Minimum y for coordinate data.
 		glyph.min.y = stream.read<FWord>(true);
-
-		// Maximum x for coordinate data.
 		glyph.max.x = stream.read<FWord>(true);
-
-		// Maximum y for coordinate data.
 		glyph.max.y = stream.read<FWord>(true);
 
 		for (uint16 depth = 0; depth < maxComponentDepth; depth += 1) {
@@ -434,7 +418,7 @@ namespace ProjectA {
 
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
 	template<>
-	TTFFile Filesystem::load(const std::string& path) {
+	TTFFile Filesystem::load(std::string_view path) {
 		const File file = load<File>(path);
 
 		TTFFile ttfFile;

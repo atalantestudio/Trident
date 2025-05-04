@@ -9,12 +9,18 @@
 
 namespace ProjectA {
 	GUILayer::GUILayer() {
+		defaultImageIndex = renderer.registerDefaultImage();
+
+		loadDefaultFont();
+
+		renderer.build();
+
 		//ecs.registerComponent<GUIComponent>();
 		//ecs.registerComponent<ScriptComponent>();
 	}
 
-	GUILayer::~GUILayer() {
-		/*ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
+	/*GUILayer::~GUILayer() {
+		ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
 
 		ScriptComponent* begin = componentPool.components.data();
 
@@ -23,30 +29,22 @@ namespace ProjectA {
 
 			component->entity->onDestroy();
 			component->destroyScript(component);
-		}*/
-	}
+		}
+	}*/
 
-	/*void GUILayer::loadDefaultFont() {
-		const ref<BitmapFont> defaultFont = createRef<BitmapFont>();
-		defaultFont->textureIndex = static_cast<uint32>(images.size());
+	void GUILayer::loadDefaultFont() {
+		defaultFont = createRef<TrueTypeFont>("../ProjectA/src/Asset/Font/test.ttf");
+		defaultFontImageIndex = renderer.registerImage(defaultFont->getSdfImage());
+
+		/*defaultFont->textureIndex = static_cast<uint32>(images.size());
 		defaultFont->glyphMap.map = QUIVER_BITMAP_GLYPH_MAP;
         defaultFont->glyphMap.base = 32;
         defaultFont->glyphMap.count = 220;
         defaultFont->tileHeight = 12;
         defaultFont->tileSpacing = 1;
 
-		fonts.emplace_back(defaultFont);
-
-		loadImage("../ProjectA/src/Asset/Texture/Quiver.png");
-	}*/
-
-	/*void GUILayer::loadTexture(const std::string& path) {
-		ENGINE_ASSERT(false, "TODO: Load GUI texture.");
-
-		const ref<Image> image = renderer.loadImage(path);
-
-		images.emplace_back(texture);
-	}*/
+		fonts.emplace_back(defaultFont);*/
+	}
 
 	/*void GUILayer::registerEntityPool() {
 		const ComponentPool<GUIComponent>& componentPool = ecs.getComponentPool<GUIComponent>();
@@ -84,6 +82,10 @@ namespace ProjectA {
 	}
 
 	void GUILayer::renderGUI() {}
+
+	ImageID GUILayer::loadImage(std::string_view path) {
+		return renderer.registerImage(path);
+	}
 
 	/*void GUILayer::updateScriptComponents() const {
 		ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
@@ -144,29 +146,41 @@ namespace ProjectA {
 			static_cast<sint16>(-padding.height),
 		};
 
-		GUIFloatingQuad(container.origin, container.size, color);
+		GUIFloatingQuad(container.origin, container.size, defaultImageIndex, color);
 
 		return container;
 	}
 
-	void GUILayer::GUIFloatingQuad(GUISize origin, GUISize size, const vec4<float32>& color) {
+	void GUILayer::GUIFloatingQuad(GUISize origin, GUISize size, ImageID imageId, const vec4<float32>& color) {
 		const GUISize fixedSize = computeFixedSize(size);
-		const vec2<float32> fixedSizeFloat = {static_cast<float32>(fixedSize[0]), static_cast<float32>(fixedSize[1])};
+		const vec2<float32> fixedSizeFloat = {
+			static_cast<float32>(fixedSize[0]),
+			static_cast<float32>(fixedSize[1]),
+		};
 		const vec2<float32> originFloat = {
 			static_cast<float32>(origin[0]),
 			static_cast<float32>(origin[1]),
 		};
 		const mat3x3<float32> world = mat3x3<float32>::scaling(fixedSizeFloat) * mat3x3<float32>::translation(originFloat);
+		const mat3x3<float32> textureWorld = mat3x3<float32>::identity();
 
-		renderer.addQuad(world, color);
+		renderer.registerSubcomponent(world, textureWorld, imageId, color);
 	}
 
 	void GUILayer::GUIQuad(GUISize size, const vec4<float32>& color) {
-		GUIFloatingQuad({componentOrigin[0], componentOrigin[1]}, size, color);
+		return GUIQuad(size, defaultImageIndex, color);
+	}
+
+	void GUILayer::GUIQuad(GUISize size, ImageID imageId, const vec4<float32>& color) {
+		GUIFloatingQuad({componentOrigin[0], componentOrigin[1]}, size, imageId, color);
 
 		const GUISize fixedSize = computeFixedSize(size);
 
 		//componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
+	}
+
+	void GUILayer::GUIText(std::string_view text, float32 fontSize) {
+		// TODO
 	}
 
 	void GUILayer::popContainer(GUIContainer& container) {
@@ -192,10 +206,6 @@ namespace ProjectA {
 		currentContainerInnerSize = container.parentInnerSize;
 
 		layoutSpacing = 0;
-	}
-
-	LayoutDirection GUILayer::getLayoutDirection() const {
-		return layoutDirection;
 	}
 
 	GUISize GUILayer::computeFixedSize(GUISize size) const {

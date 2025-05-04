@@ -10,7 +10,5 @@ layout(binding = 0, set = 0) uniform sampler2D samplerArray[4];
 layout(location = 0) out vec4 outputTexel;
 
 void main() {
-	vec4 texel = texture(samplerArray[vertexOutput.textureIndex], vertexOutput.textureCoordinate);
-
-	outputTexel = texel;
+	outputTexel = texture(samplerArray[vertexOutput.textureIndex], vertexOutput.textureCoordinate);;
 }

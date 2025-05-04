@@ -1,12 +1,11 @@
 #pragma once
 
-#include "Engine/GUI/GUIComponentLayout.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/GUI/GUISize.hpp"
 #include "Engine/GUI/LayoutDirection.hpp"
 #include "Engine/GUI/Object/GUIObject.hpp"
 #include "Engine/Layer/Layer.hpp"
-#include "Engine/Renderer/Font/Font.hpp"
+#include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"
 
 namespace ProjectA {
 	#pragma warning(disable: 4455)
@@ -23,6 +22,11 @@ namespace ProjectA {
 
 		return b;
 	}
+
+	// Allows a GUI component to grow towards the desired direction.
+	constexpr sint16 EXPAND = -1;
+
+	typedef uint32 ImageID;
 
 	struct GUIContainer {
 		// Top-left corner of the container, excluding padding.
@@ -49,17 +53,16 @@ namespace ProjectA {
 		public:
 			GUILayer();
 
-			~GUILayer();
-
-			//void loadDefaultFont();
-
-			//void loadImage(const std::string& path);
-
-			//void registerEntityPool();
+			//~GUILayer();
 
 			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) final override;
 
 			virtual void renderGUI();
+
+		protected:
+			ImageID loadImage(std::string_view path);
+
+			//void registerEntityPool();
 
 			//void updateScriptComponents() const;
 
@@ -71,21 +74,20 @@ namespace ProjectA {
 
 			// Renders a colored quad.
 			void GUIQuad(GUISize size, const vec4<float32>& color);
+			void GUIQuad(GUISize size, ImageID imageId, const vec4<float32>& color = {1.0f, 1.0f, 1.0f, 1.0f});
+
+			void GUIText(std::string_view text, float32 fontSize);
 
 			void popContainer(GUIContainer& container);
 
-		protected:
-			LayoutDirection getLayoutDirection() const;
-
 		private:
+			void loadDefaultFont();
+
 			// Renders a colored quad without moving the origin.
 			// origin is the top-left corner of the quad.
-			void GUIFloatingQuad(GUISize origin, GUISize size, const vec4<float32>& color);
+			void GUIFloatingQuad(GUISize origin, GUISize size, ImageID imageId, const vec4<float32>& color);
 
 			GUISize computeFixedSize(GUISize size) const;
-
-		public:
-			//chain<ref<Font>> fonts;
 
 		private:
 			//static constexpr uint8 MAX_GUI_COMPONENTS = 100;
@@ -93,8 +95,6 @@ namespace ProjectA {
 		private:
 			GUIRenderer renderer;
 			chain<ref<Image>> images;
-
-		private:
 			sint16 componentOrigin[2];
 			LayoutDirection layoutDirection = VERTICAL;
 			uint16 layoutSpacing = 0;
@@ -102,10 +102,11 @@ namespace ProjectA {
 			GUISize currentContainerSize;
 			GUISize currentContainerInnerSize;
 			bool rootComponent = true;
-	};
+			ref<TrueTypeFont> defaultFont;
 
-	// Allows a GUI component to grow towards the desired direction.
-	constexpr sint16 EXPAND = -1;
+			uint32 defaultImageIndex;
+			uint32 defaultFontImageIndex;
+	};
 }
 
-#define GUIContainer(...) for (GUIContainer container = pushContainer(__VA_ARGS__); container._iteration != true; popContainer(container))
+#define GUIContainer(...) for (GUIContainer _container = pushContainer(__VA_ARGS__); !_container._iteration; popContainer(_container))

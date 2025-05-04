@@ -5,8 +5,8 @@
 
 namespace ProjectA {
 	template<>
-	File Filesystem::load(const std::string& path) {
-		std::ifstream stream(path, std::ios::binary);
+	File Filesystem::load(std::string_view path) {
+		std::ifstream stream(path.data(), std::ios::binary);
 
 		if (!stream.is_open()) {
 			throw std::runtime_error("Could not open file.");

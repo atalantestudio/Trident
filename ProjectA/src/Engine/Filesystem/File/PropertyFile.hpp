@@ -7,8 +7,8 @@ namespace ProjectA {
 		public:
 			std::unordered_map<std::string, chain<uint8>> propertyMap;
 
-			PropertyFile(const std::string& path) :
-				stream(path, std::ios::in | std::ios::out | std::ios::ate)
+			PropertyFile(std::string_view path) :
+				stream(path.data(), std::ios::in | std::ios::out | std::ios::ate)
 			{
 				const std::filesystem::path absolutePath = std::filesystem::absolute(path);
 

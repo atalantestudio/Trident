@@ -5,7 +5,7 @@
 
 namespace ProjectA {
 	template<>
-	PropertyFile Filesystem::load(const std::string& path) {
+	PropertyFile Filesystem::load(std::string_view path) {
 		return PropertyFile(path);
 	}
 }
