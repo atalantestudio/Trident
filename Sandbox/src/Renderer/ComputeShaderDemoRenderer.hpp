@@ -8,7 +8,7 @@ namespace ProjectA {
 		public:
 			ComputeShaderDemoRenderer();
 
-			void render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
+			void render(const ref<CommandEncoder>& commandEncoder) override;
 
 		private:
 			ref<PipelineLayout> pipelineLayout;

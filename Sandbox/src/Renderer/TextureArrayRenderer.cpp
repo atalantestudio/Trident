@@ -211,18 +211,12 @@ namespace ProjectA {
 		device->waitIdle();
 	}
 
-	void TextureArrayRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
-		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
-		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
-		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
-
-		const ref<Swapchain> swapchain = Application::get().getSwapchain();
+	void TextureArrayRenderer::render(const ref<CommandEncoder>& commandEncoder) {
+		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
 
 		const uint32 width = swapchain->getExtentWidth();
 		const uint32 height = swapchain->getExtentHeight();
 
-		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
@@ -230,6 +224,5 @@ namespace ProjectA {
 		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, width, height);
 		commandEncoder->draw(24, 4, 0);
-		commandEncoder->endRenderPass();
 	}
 }

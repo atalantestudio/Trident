@@ -123,6 +123,8 @@
 	#define PROFILE_SCOPE(name)
 #endif
 
+#define ENGINE_STATIC_ASSERT static_assert
+
 #ifdef ENABLE_OPENGL
 	#ifdef PLATFORM_WINDOWS
 		#include <gl/GL.h>

@@ -35,11 +35,12 @@ namespace ProjectA {
 	}
 
 	void TextRenderer::createVertexBuffer() {
-		constexpr uint64 vertexBufferSize = sizeof(Vertex) * 4 * MAX_QUAD_COUNT;
+		constexpr uint64 vertexBufferSize = MAX_QUAD_COUNT * 4 * sizeof(Vertex);
 
 		BufferDescriptor vertexBufferDescriptor{};
 		vertexBufferDescriptor.size = vertexBufferSize;
 		vertexBufferDescriptor.usage = BufferUsage::VERTEX;
+		vertexBufferDescriptor.persistent = true;
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 
@@ -170,9 +171,8 @@ namespace ProjectA {
 			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * static_cast<float32>(fontSize));
 
 			if (!glyph.invisible) {
-				// For a line height (ascent - descent) of 1210 FUnits, the 'A' glyph's width (not including bearing or advance)
-				// is 631 FUnits.
-
+				// For a line height (ascent - descent) of 1210 FUnits,
+				// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
 				// The width should be 62.13px.
 				// TODO: float32 lyah::ceil(float32)
 				const float32 width = glyph.width / lineHeight * fontSize;
@@ -206,20 +206,14 @@ namespace ProjectA {
 		}
 	}
 
-	void TextRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
+	void TextRenderer::render(const ref<CommandEncoder>& commandEncoder) {
 		updateCamera();
-
-		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
-		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
-		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
 		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
 
 		const uint32 width = swapchain->getExtentWidth();
 		const uint32 height = swapchain->getExtentHeight();
 
-		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
@@ -227,7 +221,6 @@ namespace ProjectA {
 		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, width, height);
 		commandEncoder->drawIndexed(6 * quadCount, 1, 0);
-		commandEncoder->endRenderPass();
 	}
 
 	void TextRenderer::updateCamera() const {

@@ -11,7 +11,7 @@ namespace ProjectA {
 
 			virtual ~TextLayer() = default;
 
-			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
+			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) override;
 
 		private:
 			TextRenderer renderer;

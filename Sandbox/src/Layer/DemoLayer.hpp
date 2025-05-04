@@ -2,7 +2,7 @@
 
 #include "ProjectA.hpp"
 
-#include "../Renderer/TextureArrayRenderer.hpp"
+#include "../Renderer/TriangleDemoRenderer.hpp"
 
 namespace ProjectA {
 	class DemoLayer : public Layer {
@@ -11,9 +11,9 @@ namespace ProjectA {
 
 			virtual ~DemoLayer() = default;
 
-			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
+			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) override;
 
 		private:
-			TextureArrayRenderer renderer;
+			TriangleDemoRenderer renderer;
 	};
 }

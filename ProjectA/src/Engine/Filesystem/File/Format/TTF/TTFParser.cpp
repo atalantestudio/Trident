@@ -483,7 +483,7 @@ namespace ProjectA {
 
 			const char* TypeString = static_cast<char*>(static_cast<void*>(&tableDirectory.tag));
 
-			ENGINE_INFO("Reading directory for table \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
+			//ENGINE_INFO("Reading directory for table \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
 
 			// TODO: Calculate checksum.
 			//const uint32 checksum = calculateTableChecksum((uint32*)(stream.getBytePosition() - stream.getByteOffset() + tableDirectory.offset), tableDirectory.length);

@@ -22,7 +22,7 @@ namespace ProjectA {
 
 			//void registerColors(const chain<vec4<float32>>& colors) const;
 
-			void render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) override;
+			void render(const ref<CommandEncoder>& commandEncoder) override;
 
 			void onEvent(Event& event) override;
 
@@ -52,7 +52,7 @@ namespace ProjectA {
 
 		private:
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
-			static constexpr uint64 MAX_INSTANCES = 3;
+			static constexpr uint64 MAX_INSTANCES = 32;
 			//static constexpr uint32 MAX_COLORS = 32;
 			//static constexpr uint32 MAX_TEXTURES = 32;
 

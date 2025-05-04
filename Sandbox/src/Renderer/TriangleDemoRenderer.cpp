@@ -82,23 +82,16 @@ namespace ProjectA {
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 	}
 
-	void TriangleDemoRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
-		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
-		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
-		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
-
+	void TriangleDemoRenderer::render(const ref<CommandEncoder>& commandEncoder) {
 		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
 
 		const uint32 width = swapchain->getExtentWidth();
 		const uint32 height = swapchain->getExtentHeight();
 
-		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, width, height);
 		commandEncoder->draw(3, 1, 0);
-		commandEncoder->endRenderPass();
 	}
 }

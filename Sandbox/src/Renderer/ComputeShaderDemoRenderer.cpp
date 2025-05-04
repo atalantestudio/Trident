@@ -215,18 +215,12 @@ namespace ProjectA {
 		}
 	}
 
-	void ComputeShaderDemoRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
-		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
-		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
-		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
-
+	void ComputeShaderDemoRenderer::render(const ref<CommandEncoder>& commandEncoder) {
 		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
 
 		const uint32 width = swapchain->getExtentWidth();
 		const uint32 height = swapchain->getExtentHeight();
 
-		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindDescriptorSets(0);
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
@@ -234,6 +228,5 @@ namespace ProjectA {
 		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, width, height);
 		commandEncoder->drawIndexed(6, 1, 0);
-		commandEncoder->endRenderPass();
 	}
 }

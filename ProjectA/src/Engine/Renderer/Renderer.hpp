@@ -18,8 +18,7 @@ namespace ProjectA {
 			static void getWindowExtent(sint32& extentWidth, sint32& extentHeight);
 
 		public:
-			// TODO: Remove nextImageIndex.
-			virtual void render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) = 0;
+			virtual void render(const ref<CommandEncoder>& commandEncoder) = 0;
 
 			virtual void onEvent(Event& event) {}
 

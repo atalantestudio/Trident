@@ -262,7 +262,7 @@ namespace ProjectA {
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 
 		for (const ref<Layer>& layer : layerStack) {
-			layer->render(remainingFrameTime, commandEncoder, nextImageIndex);
+			layer->render(remainingFrameTime, commandEncoder);
 		}
 
 		commandEncoder->endRenderPass();

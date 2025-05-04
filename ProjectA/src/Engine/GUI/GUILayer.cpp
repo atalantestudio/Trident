@@ -48,24 +48,6 @@ namespace ProjectA {
 		images.emplace_back(texture);
 	}*/
 
-	/*void GUILayer::compute() {
-		const vec2<float32> parentSize = {
-			static_cast<float32>(Application::get().getSwapchain()->getExtentWidth()),
-			static_cast<float32>(Application::get().getSwapchain()->getExtentHeight()),
-		};
-
-		const vec2<float32> parentMargin = {0.0f, 0.0f};
-		chain<vec4<float32>> colors;
-
-		for (const ref<GUIObject>& rootObject : rootObjects) {
-			rootObject->compute(ecs, parentSize, parentMargin, colors, fonts[0]);
-		}
-
-		if (!colors.empty()) {
-			renderer.registerColors(colors);
-		}
-	}*/
-
 	/*void GUILayer::registerEntityPool() {
 		const ComponentPool<GUIComponent>& componentPool = ecs.getComponentPool<GUIComponent>();
 
@@ -80,12 +62,25 @@ namespace ProjectA {
 		renderer.registerEntityPool(componentPool);
 	}*/
 
-	void GUILayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
+	void GUILayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) {
 		//updateScriptComponents();
+
+		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
+
+		componentOrigin[HORIZONTAL] = 0;
+		componentOrigin[VERTICAL] = 0;
+		layoutDirection = VERTICAL;
+		layoutSpacing = 0;
+		currentContainerPadding = {0, 0};
+		currentContainerSize = {
+			static_cast<sint16>(swapchain->getExtentWidth()),
+			static_cast<sint16>(swapchain->getExtentHeight()),
+		};
+		currentContainerInnerSize = currentContainerSize;
 
 		renderGUI();
 
-		renderer.render(commandEncoder, nextImageIndex);
+		renderer.render(commandEncoder);
 	}
 
 	void GUILayer::renderGUI() {}
@@ -107,11 +102,123 @@ namespace ProjectA {
 		}
 	}*/
 
-	void GUILayer::GUIQuad(const mat3x3<float32>& world) {
-		renderer.addQuad(world, {1.0f, 1.0f, 1.0f, 1.0f});
+	GUIContainer GUILayer::pushContainer(GUISize size, GUISize padding, LayoutDirection layoutDirection, uint16 layoutSpacing) {
+		// TODO: Ensure that the container isn't expanding towards the current layout direction.
+
+		GUIContainer container;
+		container.origin = {componentOrigin[0], componentOrigin[1]};
+		container.padding = padding;
+		container.size = computeFixedSize(size);
+		container.innerSize = container.size;
+		container.innerSize.width -= padding.width * 2;
+		container.innerSize.height -= padding.height * 2;
+		container.parentPadding = currentContainerPadding;
+		container.parentSize = currentContainerSize;
+		container.parentInnerSize = currentContainerInnerSize;
+		container.root = rootComponent;
+
+		// Add container padding to the origin.
+		componentOrigin[HORIZONTAL] += padding.width;
+		componentOrigin[VERTICAL] += padding.height;
+
+		currentContainerPadding = container.padding;
+		currentContainerSize = container.size;
+		currentContainerInnerSize = container.innerSize;
+
+		// Set layout direction.
+		this->layoutDirection = layoutDirection;
+
+		// Set layout spacing (dependent of the current layout direction).
+		this->layoutSpacing = layoutSpacing;
+
+		rootComponent = false;
+
+		return container;
 	}
 
-	void GUILayer::GUIQuad(const mat3x3<float32>& world, const vec4<float32>& color) {
+	GUIContainer GUILayer::pushContainer(GUISize size, GUISize padding, LayoutDirection layoutDirection, uint16 layoutSpacing, const vec4<float32>& color) {
+		const GUIContainer container = pushContainer(size, padding, layoutDirection, layoutSpacing);
+
+		const GUISize originShift = {
+			static_cast<sint16>(-padding.width),
+			static_cast<sint16>(-padding.height),
+		};
+
+		GUIFloatingQuad(container.origin, container.size, color);
+
+		return container;
+	}
+
+	void GUILayer::GUIFloatingQuad(GUISize origin, GUISize size, const vec4<float32>& color) {
+		const GUISize fixedSize = computeFixedSize(size);
+		const vec2<float32> fixedSizeFloat = {static_cast<float32>(fixedSize[0]), static_cast<float32>(fixedSize[1])};
+		const vec2<float32> originFloat = {
+			static_cast<float32>(origin[0]),
+			static_cast<float32>(origin[1]),
+		};
+		const mat3x3<float32> world = mat3x3<float32>::scaling(fixedSizeFloat) * mat3x3<float32>::translation(originFloat);
+
 		renderer.addQuad(world, color);
+	}
+
+	void GUILayer::GUIQuad(GUISize size, const vec4<float32>& color) {
+		GUIFloatingQuad({componentOrigin[0], componentOrigin[1]}, size, color);
+
+		const GUISize fixedSize = computeFixedSize(size);
+
+		//componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
+	}
+
+	void GUILayer::popContainer(GUIContainer& container) {
+		// End loop.
+		container._iteration = true;
+
+		if (container.root) {
+			rootComponent = true;
+
+			layoutDirection = VERTICAL;
+
+			componentOrigin[0] = container.padding.width;
+			componentOrigin[1] -= container.padding.height;
+		}
+
+		// Advance component origin towards the current container's layout direction.
+		componentOrigin[layoutDirection] += currentContainerSize[layoutDirection] + layoutSpacing;
+		componentOrigin[!layoutDirection] -= currentContainerPadding[!layoutDirection];
+
+		// Set the current container sizes to the parent container sizes.
+		currentContainerPadding = container.parentPadding;
+		currentContainerSize = container.parentSize;
+		currentContainerInnerSize = container.parentInnerSize;
+
+		layoutSpacing = 0;
+	}
+
+	LayoutDirection GUILayer::getLayoutDirection() const {
+		return layoutDirection;
+	}
+
+	GUISize GUILayer::computeFixedSize(GUISize size) const {
+		GUISize fixedSize{};
+
+		if (size.width == EXPAND) {
+			fixedSize.width = currentContainerInnerSize.width;
+		}
+		else {
+			fixedSize.width = size.width;
+		}
+
+		ENGINE_ASSERT(fixedSize.width > 0, "The fixed width is less than 0.");
+
+		if (size.height == EXPAND) {
+			fixedSize.height = currentContainerInnerSize.height;
+		}
+		else {
+			fixedSize.height = size.height;
+		}
+
+		ENGINE_ASSERT(fixedSize.height > 0, "The fixed height is less than 0.");
+
+		return fixedSize;
 	}
 }

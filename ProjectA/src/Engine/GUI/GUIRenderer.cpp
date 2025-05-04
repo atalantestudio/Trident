@@ -339,12 +339,13 @@ namespace ProjectA {
 		colorStorageBuffer->unmap();
 	}*/
 
-	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder, uint32 nextImageIndex) {
+	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder) {
 		updateCamera();
 
 		copyBuffer(instanceStagingBuffer, instanceBuffer, sizeof(Instance));
 
 		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
+
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 

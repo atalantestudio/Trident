@@ -256,14 +256,14 @@ namespace ProjectA {
 				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-size.
 				windowData->sizeX = GET_X_LPARAM(lParam);
 				windowData->sizeY = GET_Y_LPARAM(lParam);
+				windowData->minimized = wParam == SIZE_MINIMIZED;
+				windowData->maximized = wParam == SIZE_MAXIMIZED;
 
 				if (windowData->windowResizeEventListener) {
 					WindowResizeEvent windowResizeEvent(windowData->sizeX, windowData->sizeY);
 
 					windowData->windowResizeEventListener(windowResizeEvent);
 				}
-
-				ENGINE_DEBUG("wm_size");
 
 				return 0;
 			}
