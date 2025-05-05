@@ -1,6 +1,5 @@
 #include "pch.hpp"
 
-#include "Engine/Application.hpp"
 #include "Engine/Filesystem/File/PNGFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
@@ -121,7 +120,7 @@ namespace ProjectA {
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Asset/Shader/TextureArray.frag.spv", fragmentShaderModuleDescriptor);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
-		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
+		renderPipelineDescriptor.renderPass = getMainRenderPass();
 		renderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
 		renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
@@ -212,17 +211,17 @@ namespace ProjectA {
 	}
 
 	void TextureArrayRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
-		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
+		const ref<Swapchain>& swapchain = getSwapchain();
 
-		const uint32 width = swapchain->getExtentWidth();
-		const uint32 height = swapchain->getExtentHeight();
+		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
+		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 		commandEncoder->bindVertexBuffer(1, instanceVertexBuffer, 0, sizeof(Instance));
-		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, width, height);
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 		commandEncoder->draw(24, 4, 0);
 	}
 }

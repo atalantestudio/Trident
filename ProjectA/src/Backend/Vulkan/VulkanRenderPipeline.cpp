@@ -10,7 +10,7 @@
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 
-#include "Engine/Application.hpp"
+#include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	VulkanRenderPipeline::VulkanRenderPipeline(VkDevice device, const RenderPipelineDescriptor& descriptor) :
@@ -65,7 +65,7 @@ namespace ProjectA {
 		inputAssemblyStateCreateInfo.topology = getVkPrimitiveTopology(descriptor.primitiveTopology);
 		inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
-		const VulkanSwapchain* swapchain = std::static_pointer_cast<VulkanSwapchain>(Application::get().getSwapchain()).get();
+		const VulkanSwapchain* swapchain = std::static_pointer_cast<VulkanSwapchain>(Renderer::getSwapchain()).get();
 
 		VkViewport viewport{};
 		viewport.x = 0.0f;

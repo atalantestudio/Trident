@@ -1,6 +1,5 @@
 #include "pch.hpp"
 
-#include "Engine/Application.hpp"
 #include "Engine/Filesystem/File/PNGFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
@@ -139,7 +138,7 @@ namespace ProjectA {
 		vertexInputBinding.registerAttribute<vec2<float32>>(false);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
-		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
+		renderPipelineDescriptor.renderPass = getMainRenderPass();
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
@@ -209,23 +208,23 @@ namespace ProjectA {
 	void TextRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		updateCamera();
 
-		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
+		const ref<Swapchain>& swapchain = getSwapchain();
 
-		const uint32 width = swapchain->getExtentWidth();
-		const uint32 height = swapchain->getExtentHeight();
+		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
+		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, width, height);
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 		commandEncoder->drawIndexed(6 * quadCount, 1, 0);
 	}
 
 	void TextRenderer::updateCamera() const {
-		const float32 width = static_cast<float32>(Application::get().getSwapchain()->getExtentWidth());
-		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
+		const float32 width = static_cast<float32>(getSwapchain()->getExtentWidth());
+		const float32 height = static_cast<float32>(getSwapchain()->getExtentHeight());
 
 		camera->projection = {
 			2.0f / width, 0.0f, 0.0f,

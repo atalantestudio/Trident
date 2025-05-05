@@ -1,6 +1,5 @@
 #include "pch.hpp"
 
-#include "Engine/Application.hpp"
 #include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/ECS/Component/ScriptComponent.hpp"
 #include "Engine/GUI/GUILayer.hpp"
@@ -63,7 +62,7 @@ namespace ProjectA {
 	void GUILayer::preRender() {
 		//updateScriptComponents();
 
-		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
+		const ref<Swapchain>& swapchain = Renderer::getSwapchain();
 
 		componentOrigin[HORIZONTAL] = 0;
 		componentOrigin[VERTICAL] = 0;

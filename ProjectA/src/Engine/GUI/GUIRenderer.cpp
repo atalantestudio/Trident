@@ -1,6 +1,5 @@
 #include "pch.hpp"
 
-#include "Engine/Application.hpp"
 #include "Engine/Filesystem/File/PNGFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
@@ -185,7 +184,7 @@ namespace ProjectA {
 		subcomponentInputBinding.registerAttribute<vec4<float32>>(false);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
-		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
+		renderPipelineDescriptor.renderPass = Renderer::getMainRenderPass();
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, subcomponentInputBinding};
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
@@ -297,8 +296,8 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::updateCamera() const {
-		const float32 width = static_cast<float32>(Application::get().getSwapchain()->getExtentWidth());
-		const float32 height = static_cast<float32>(Application::get().getSwapchain()->getExtentHeight());
+		const float32 width = static_cast<float32>(getSwapchain()->getExtentWidth());
+		const float32 height = static_cast<float32>(getSwapchain()->getExtentHeight());
 
 		const mat3x3<float32> cameraProjection = {
 			2.0f / width, 0.0f, 0.0f,
@@ -330,7 +329,7 @@ namespace ProjectA {
 			device->waitIdle();
 		}
 
-		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
+		const ref<Swapchain>& swapchain = getSwapchain();
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());

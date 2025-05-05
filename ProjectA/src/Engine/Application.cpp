@@ -71,31 +71,7 @@ namespace ProjectA {
 
 		const GraphicsAPI graphicsApi = propertyFile.getProperty<GraphicsAPI>("GraphicsAPI");
 
-		Renderer::recreate(*window, graphicsApi);
-
-		RenderPassDescriptor renderPassDescriptor{};
-		renderPassDescriptor.loadOperation = LoadOperation::CLEAR;
-		renderPassDescriptor.storeOperation = StoreOperation::STORE;
-
-		renderPass = Renderer::createRenderPass(renderPassDescriptor);
-
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.renderPass = renderPass;
-		swapchainDescriptor.extentWidth = window->getSize()[0];
-		swapchainDescriptor.extentHeight = window->getSize()[1];
-
-		swapchain = Renderer::getBackend()->createSwapchain(swapchainDescriptor);
-
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
-
-		commandEncoder = Renderer::getDevice()->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
-
-		for (uint32 frameIndex = 0; frameIndex < MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
-			availableImageSemaphores[frameIndex] = Renderer::createSemaphore();
-			finishedRenderSemaphores[frameIndex] = Renderer::createSemaphore();
-			flightFences[frameIndex] = Renderer::createFence();
-		}
+		Renderer::build(*window, graphicsApi);
 
 		/* Constants */
 
@@ -184,14 +160,6 @@ namespace ProjectA {
 		return *window;
 	}
 
-	const ref<RenderPass>& Application::getRenderPass() const {
-		return renderPass;
-	}
-
-	const ref<Swapchain>& Application::getSwapchain() const {
-		return swapchain;
-	}
-
 	void Application::loop() {
 		previousTickTime = Platform::getTime();
 
@@ -255,21 +223,23 @@ namespace ProjectA {
 
 		const ref<Device> device = Renderer::getDevice();
 
-		device->waitForFence(flightFences[frameInFlightIndex]);
+		device->waitForFence(Renderer::getFlightFence(frameInFlightIndex));
 
 		uint32 nextImageIndex;
 
-		const Status acquireNextImageStatus = device->acquireNextImage(Application::get().getSwapchain(), availableImageSemaphores[frameInFlightIndex], nextImageIndex);
+		const Status acquireNextImageStatus = device->acquireNextImage(Renderer::getSwapchain(), Renderer::getAvailableImageSemaphore(frameInFlightIndex), nextImageIndex);
 
 		ENGINE_ASSERT(acquireNextImageStatus == Status::SUBOPTIMAL || acquireNextImageStatus == Status::SUCCESS, "Failed to acquire next image.");
 
-		device->resetFence(flightFences[frameInFlightIndex]);
+		device->resetFence(Renderer::getFlightFence(frameInFlightIndex));
+
+		const ref<CommandEncoder>& commandEncoder = Renderer::getCommandEncoder();
 
 		commandEncoder->reset();
 		commandEncoder->begin();
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.renderPass = Application::get().getRenderPass();
+		beginRenderPassDescriptor.renderPass = Renderer::getMainRenderPass();
 		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
@@ -283,9 +253,9 @@ namespace ProjectA {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->getGraphicsQueue()->submit(commandBuffer, availableImageSemaphores[frameInFlightIndex], finishedRenderSemaphores[frameInFlightIndex], flightFences[frameInFlightIndex]);
+		device->getGraphicsQueue()->submit(commandBuffer, Renderer::getAvailableImageSemaphore(frameInFlightIndex), Renderer::getFinishedRenderSemaphore(frameInFlightIndex), Renderer::getFlightFence(frameInFlightIndex));
 
-		const Status presentStatus = device->getPresentQueue()->present(Application::get().getSwapchain(), finishedRenderSemaphores[frameInFlightIndex], nextImageIndex);
+		const Status presentStatus = device->getPresentQueue()->present(Renderer::getSwapchain(), Renderer::getFinishedRenderSemaphore(frameInFlightIndex), nextImageIndex);
 
 		/*if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE || needsResize) {
 			// TODO: Fix resize.
@@ -329,11 +299,11 @@ namespace ProjectA {
 		device->waitIdle();
 
 		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.renderPass = Application::get().getRenderPass();
+		swapchainDescriptor.renderPass = Renderer::getMainRenderPass();
 		swapchainDescriptor.extentWidth = static_cast<sint32>(event.getWidth());
 		swapchainDescriptor.extentHeight = static_cast<sint32>(event.getHeight());
 
-		Application::get().getSwapchain()->recreate(swapchainDescriptor);
+		Renderer::getSwapchain()->recreate(swapchainDescriptor);
 
 		needsResize = false;
 	}

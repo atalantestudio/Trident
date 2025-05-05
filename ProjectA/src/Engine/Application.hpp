@@ -36,10 +36,6 @@ namespace ProjectA {
 
 			const Window& getWindow() const;
 
-			const ref<RenderPass>& getRenderPass() const;
-
-			const ref<Swapchain>& getSwapchain() const;
-
 			void onEvent(Event& event);
 
 			template<typename T, typename... U>
@@ -83,9 +79,10 @@ namespace ProjectA {
 			friend int ::main(int argc, char** argv);
 
 		private:
-			static Application* instance;
-
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
+
+		private:
+			static Application* instance;
 
 		private:
 			struct TestSharedMemoryData {
@@ -101,14 +98,6 @@ namespace ProjectA {
 			scope<Window> window;
 
 			LayerStack layerStack;
-
-			// TODO: Use scope here?
-			ref<RenderPass> renderPass;
-			ref<Swapchain> swapchain;
-			ref<CommandEncoder> commandEncoder;
-			std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> availableImageSemaphores;
-			std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> finishedRenderSemaphores;
-			std::array<ref<Fence>, MAX_FRAMES_IN_FLIGHT> flightFences;
 
 			bool looping = true;
 			bool needsResize = false;

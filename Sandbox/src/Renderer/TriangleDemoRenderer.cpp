@@ -1,7 +1,5 @@
 #include "pch.hpp"
 
-#include "Engine/Application.hpp"
-
 #include "TriangleDemoRenderer.hpp"
 
 namespace ProjectA {
@@ -70,7 +68,7 @@ namespace ProjectA {
 		vertexInputBinding.registerAttribute<vec3<float32>>(false);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
-		renderPipelineDescriptor.renderPass = Application::get().getRenderPass();
+		renderPipelineDescriptor.renderPass = getMainRenderPass();
 		renderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
 		renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
@@ -83,15 +81,15 @@ namespace ProjectA {
 	}
 
 	void TriangleDemoRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
-		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
+		const ref<Swapchain>& swapchain = getSwapchain();
 
-		const uint32 width = swapchain->getExtentWidth();
-		const uint32 height = swapchain->getExtentHeight();
+		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
+		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-		commandEncoder->setViewport({0.0f, static_cast<float32>(height)}, {static_cast<float32>(width), -static_cast<float32>(height)}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, width, height);
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 		commandEncoder->draw(3, 1, 0);
 	}
 }

@@ -12,7 +12,7 @@
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
 
-#include "Engine/Application.hpp"
+#include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	VulkanCommandEncoder::VulkanCommandEncoder(const VulkanDevice& device, VkCommandPool commandPool, const CommandBufferDescriptor& descriptor) :
@@ -58,7 +58,7 @@ namespace ProjectA {
 	void VulkanCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const VulkanSwapchain& swapchain = *std::static_pointer_cast<VulkanSwapchain>(Application::get().getSwapchain());
+		const VulkanSwapchain& swapchain = *std::static_pointer_cast<VulkanSwapchain>(Renderer::getSwapchain());
 
 		VkClearValue clearValue{};
 

@@ -13,7 +13,7 @@ namespace ProjectA {
 
 			static const scope<GraphicsAdapter>& getBackend();
 
-			static void recreate(const Window& window, GraphicsAPI graphicsAPI);
+			static void build(const Window& window, GraphicsAPI graphicsAPI);
 
 			static void getWindowExtent(sint32& extentWidth, sint32& extentHeight);
 
@@ -24,6 +24,18 @@ namespace ProjectA {
 
 		public:
 			static ref<Device> getDevice();
+
+			static const ref<Swapchain>& getSwapchain();
+
+			static const ref<RenderPass>& getMainRenderPass();
+
+			static const ref<CommandEncoder>& getCommandEncoder();
+
+			static const ref<Semaphore>& getAvailableImageSemaphore(uint32 frameInFlightIndex);
+
+			static const ref<Semaphore>& getFinishedRenderSemaphore(uint32 frameInFlightIndex);
+
+			static const ref<Fence>& getFlightFence(uint32 frameInFlightIndex);
 
 			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
 
@@ -49,7 +61,18 @@ namespace ProjectA {
 			static ref<ShaderModule> loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor);
 
 		private:
+			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
+
+		private:
 			static GraphicsAPI graphicsApi;
 			static scope<GraphicsAdapter> adapter;
+
+			// TODO: Use scope.
+			static ref<RenderPass> mainRenderPass;
+			static ref<Swapchain> swapchain;
+			static ref<CommandEncoder> commandEncoder;
+			static std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> availableImageSemaphores;
+			static std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> finishedRenderSemaphores;
+			static std::array<ref<Fence>, MAX_FRAMES_IN_FLIGHT> flightFences;
 	};
 }

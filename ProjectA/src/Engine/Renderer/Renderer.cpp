@@ -14,8 +14,13 @@
 
 namespace ProjectA {
 	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::NONE;
-
 	scope<GraphicsAdapter> Renderer::adapter = nullptr;
+	ref<RenderPass> Renderer::mainRenderPass = nullptr;
+	ref<Swapchain> Renderer::swapchain = nullptr;
+	ref<CommandEncoder> Renderer::commandEncoder = nullptr;
+	std::array<ref<Semaphore>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::availableImageSemaphores;
+	std::array<ref<Semaphore>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::finishedRenderSemaphores;
+	std::array<ref<Fence>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::flightFences;
 
 	GraphicsAPI Renderer::getGraphicsApi() {
 		return graphicsApi;
@@ -25,7 +30,7 @@ namespace ProjectA {
 		return adapter;
 	}
 
-	void Renderer::recreate(const Window& window, GraphicsAPI graphicsApi) {
+	void Renderer::build(const Window& window, GraphicsAPI graphicsApi) {
 		Renderer::graphicsApi = graphicsApi;
 
 		switch (Renderer::graphicsApi) {
@@ -53,6 +58,30 @@ namespace ProjectA {
 		}
 
 		ENGINE_ASSERT(adapter != nullptr, "Failed to initialize the graphics adapter.");
+
+		RenderPassDescriptor renderPassDescriptor{};
+		renderPassDescriptor.loadOperation = LoadOperation::CLEAR;
+		renderPassDescriptor.storeOperation = StoreOperation::STORE;
+
+		mainRenderPass = createRenderPass(renderPassDescriptor);
+
+		SwapchainDescriptor swapchainDescriptor;
+		swapchainDescriptor.renderPass = mainRenderPass;
+		swapchainDescriptor.extentWidth = window.getSize()[0];
+		swapchainDescriptor.extentHeight = window.getSize()[1];
+
+		swapchain = adapter->createSwapchain(swapchainDescriptor);
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+
+		commandEncoder = Renderer::getDevice()->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+		for (uint32 frameIndex = 0; frameIndex < MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
+			availableImageSemaphores[frameIndex] = Renderer::createSemaphore();
+			finishedRenderSemaphores[frameIndex] = Renderer::createSemaphore();
+			flightFences[frameIndex] = Renderer::createFence();
+		}
 	}
 
 	void Renderer::getWindowExtent(sint32& extentWidth, sint32& extentHeight) {
@@ -64,6 +93,30 @@ namespace ProjectA {
 
 	ref<Device> Renderer::getDevice() {
 		return adapter->getDevice();
+	}
+
+	const ref<Swapchain>& Renderer::getSwapchain() {
+		return swapchain;
+	}
+
+	const ref<RenderPass>& Renderer::getMainRenderPass() {
+		return mainRenderPass;
+	}
+
+	const ref<CommandEncoder>& Renderer::getCommandEncoder() {
+		return commandEncoder;
+	}
+
+	const ref<Semaphore>& Renderer::getAvailableImageSemaphore(uint32 frameInFlightIndex) {
+		return availableImageSemaphores[frameInFlightIndex];
+	}
+
+	const ref<Semaphore>& Renderer::getFinishedRenderSemaphore(uint32 frameInFlightIndex) {
+		return finishedRenderSemaphores[frameInFlightIndex];
+	}
+
+	const ref<Fence>& Renderer::getFlightFence(uint32 frameInFlightIndex) {
+		return flightFences[frameInFlightIndex];
 	}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
