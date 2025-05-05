@@ -21,6 +21,8 @@ namespace ProjectA {
 
 			void registerSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const vec4<float32>& color);
 
+			void copyMappedBuffer() const;
+
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
 			void resetSubcomponentCount();

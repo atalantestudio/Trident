@@ -31,7 +31,10 @@ namespace ProjectA {
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
 			ref<Buffer> cameraUniformBuffer;
+
+			// Keep a reference to the original image to avoid getting an invalid image view while rendering.
 			ref<Image> image;
+
 			ref<ImageView> imageView;
 			ref<Sampler> sampler;
 	};

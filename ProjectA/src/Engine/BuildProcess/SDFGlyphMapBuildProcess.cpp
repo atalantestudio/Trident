@@ -200,9 +200,9 @@ namespace ProjectA {
 		const float32 glyphMapHeight = static_cast<float32>(sdfGlyphMap.glyphMap->getHeight());
 		const float32 lineHeight = static_cast<float32>(ttfFile.hhea.ascent - ttfFile.hhea.descent);
 
-		const ref<Fence> bufferCopyFence = Renderer::createFence();
+		const ref<Fence> copyBufferFence = Renderer::createFence();
 
-		device->waitForFence(bufferCopyFence);
+		device->waitForFence(copyBufferFence);
 
 		for (uint16 glyphIndex = 3; glyphIndex < 234; glyphIndex += 1) {
 			const Glyph& glyph = ttfFile.glyphs[glyphIndex];
@@ -274,7 +274,7 @@ namespace ProjectA {
 			glyphOffsetMappedRange[1] = static_cast<uint32>(yOffset);
 			glyphOffsetMappedRange[2] = SPREAD_FACTOR;
 
-			device->resetFence(bufferCopyFence);
+			device->resetFence(copyBufferFence);
 
 			{
 				CommandBufferDescriptor commandBufferDescriptor{};
@@ -288,7 +288,7 @@ namespace ProjectA {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, bufferCopyFence);
+				device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, copyBufferFence);
 				device->waitIdle();
 			}
 

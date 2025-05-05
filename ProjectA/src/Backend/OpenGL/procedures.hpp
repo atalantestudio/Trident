@@ -29,6 +29,7 @@ namespace ProjectA {
 	extern PFNGLDELETESAMPLERSPROC glDeleteSamplers;
 	extern PFNGLDELETESHADERPROC glDeleteShader;
 	extern PFNGLDELETESYNCPROC glDeleteSync;
+	extern PFNGLDELETETEXTURESPROC glDeleteTextures;
 	extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
 	extern PFNGLDETACHSHADERPROC glDetachShader;
 	extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
@@ -37,6 +38,7 @@ namespace ProjectA {
 	extern PFNGLENABLEPROC glEnable;
 	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 	extern PFNGLFENCESYNCPROC glFenceSync;
+	extern PFNGLGENTEXTURESPROC glGenTextures;
 	extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
 	extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
 	extern PFNGLGETPROGRAMIVPROC glGetProgramiv;

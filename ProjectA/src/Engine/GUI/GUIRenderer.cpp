@@ -308,26 +308,25 @@ namespace ProjectA {
 		*cameraMappedRange = cameraProjection;
 	}
 
+	void GUIRenderer::copyMappedBuffer() const {
+		const ref<Device> device = getDevice();
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		const ref<CommandEncoder> copyBufferCommandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+		copyBufferCommandEncoder->begin();
+		copyBufferCommandEncoder->copyBufferToBuffer(subcomponentStagingBuffer, subcomponentBuffer, 0, 0, subcomponentCount * sizeof(Subcomponent));
+
+		const ref<CommandBuffer> commandBuffer = copyBufferCommandEncoder->end();
+
+		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->waitIdle();
+	}
+
 	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		updateCamera();
-
-		// Copy subcomponent staging buffer to subcomponent buffer.
-		{
-			const ref<Device> device = getDevice();
-
-			CommandBufferDescriptor commandBufferDescriptor{};
-			commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-			const ref<CommandEncoder> copyBufferCommandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
-
-			copyBufferCommandEncoder->begin();
-			copyBufferCommandEncoder->copyBufferToBuffer(subcomponentStagingBuffer, subcomponentBuffer, 0, 0, subcomponentCount * sizeof(Subcomponent));
-
-			const ref<CommandBuffer> commandBuffer = copyBufferCommandEncoder->end();
-
-			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
-			device->waitIdle();
-		}
 
 		const ref<Swapchain>& swapchain = getSwapchain();
 

@@ -11,6 +11,8 @@ namespace ProjectA {
 		VkFenceCreateInfo fenceCreateInfo{};
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceCreateInfo.pNext = nullptr;
+
+		// TODO: If fences are signaled by default, this behavior should be extended to the OpenGL backend.
 		fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
 		const VkResult result = vkCreateFence(device, &fenceCreateInfo, nullptr, &object);

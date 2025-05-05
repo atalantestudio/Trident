@@ -25,7 +25,7 @@ namespace ProjectA {
 				for (GLuint unit = 0; unit < descriptorSetLayoutBinding.imageViews.size(); unit += 1) {
 					const ref<OpenGLImageView> imageView = std::static_pointer_cast<OpenGLImageView>(descriptorSetLayoutBinding.imageViews[unit]);
 
-					glBindTextureUnit(unit, imageView->object);
+					glBindTextureUnit(binding + unit, imageView->object);
 
 					if (unit < descriptorSetLayoutBinding.samplers.size()) {
 						const ref<OpenGLSampler> sampler = std::static_pointer_cast<OpenGLSampler>(descriptorSetLayoutBinding.samplers[unit]);
@@ -41,6 +41,7 @@ namespace ProjectA {
 					}
 
 					// TODO: Use correct access.
+					// TODO: Only call glBindImageTexture if the pipeline is a compute pipeline.
 					glBindImageTexture(binding, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, internalFormat);
 				}
 			}

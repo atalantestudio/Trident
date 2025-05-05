@@ -9,10 +9,9 @@ namespace ProjectA {
 	TextureDemoRenderer::TextureDemoRenderer() {}
 
 	void TextureDemoRenderer::build(const ref<Image>& image) {
-		this->image = image;
-
 		const ImageViewDescriptor imageViewDescriptor;
 
+		this->image = image;
 		imageView = this->image->createView(imageViewDescriptor);
 
 		createImageSampler();
@@ -107,8 +106,8 @@ namespace ProjectA {
 		DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding;
 		textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 		textureDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		textureDescriptorSetLayoutBinding.samplers = {sampler};
 		textureDescriptorSetLayoutBinding.imageViews = {imageView};
+		textureDescriptorSetLayoutBinding.samplers = {sampler};
 
 		DescriptorSetLayout descriptorSetLayout;
 		descriptorSetLayout.bindings = {textureDescriptorSetLayoutBinding};

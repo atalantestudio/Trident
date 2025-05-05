@@ -126,11 +126,12 @@
 #define ENGINE_STATIC_ASSERT static_assert
 
 #ifdef ENABLE_OPENGL
+	#include <GL/glcorearb.h>
+
 	#ifdef PLATFORM_WINDOWS
 		#include <gl/GL.h>
 	#endif
 
-	#include <GL/glcorearb.h>
 	#include <GL/glext.h>
 
 	#ifdef PLATFORM_WINDOWS

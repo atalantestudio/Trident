@@ -47,6 +47,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteSamplers);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteShader);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteSync);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteTextures);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteVertexArrays);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDetachShader);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDispatchCompute);
@@ -55,6 +56,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glEnable);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glEnableVertexAttribArray);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glFenceSync);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glGenTextures);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetIntegeri_v);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetProgramInfoLog);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetProgramiv);

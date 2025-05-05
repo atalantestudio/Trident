@@ -9,7 +9,7 @@ namespace ProjectA {
 	TextRenderer::TextRenderer(const TrueTypeFont& font) :
 		font(font)
 	{
-		glyphMapImage = this->font.getSdfImage();
+		glyphMapImage = font.getSdfImage();
 
 		createGlyphMapImageView();
 		createGlyphMapImageSampler();
@@ -34,7 +34,7 @@ namespace ProjectA {
 	}
 
 	void TextRenderer::createVertexBuffer() {
-		constexpr uint64 vertexBufferSize = MAX_QUAD_COUNT * 4 * sizeof(Vertex);
+		constexpr uint64 vertexBufferSize = MAX_QUADS * 4 * sizeof(Vertex);
 
 		BufferDescriptor vertexBufferDescriptor{};
 		vertexBufferDescriptor.size = vertexBufferSize;
@@ -42,18 +42,17 @@ namespace ProjectA {
 		vertexBufferDescriptor.persistent = true;
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
-
 		vertices = vertexBuffer->map<Vertex>(0, vertexBufferSize);
 	}
 
 	void TextRenderer::createIndexBuffer() {
-		const uint64 indexBufferSize = sizeof(uint16) * 6 * MAX_QUAD_COUNT;
+		const uint64 indexBufferSize = MAX_QUADS * 6 * sizeof(uint16);
 
 		const ref<Buffer> indexStagingBuffer = createStagingBuffer(indexBufferSize);
 
 		uint16* indexMappedRange = indexStagingBuffer->map<uint16>(0, indexBufferSize);
 
-		for (uint32 quadIndex = 0; quadIndex < MAX_QUAD_COUNT; quadIndex += 1) {
+		for (uint32 quadIndex = 0; quadIndex < MAX_QUADS; quadIndex += 1) {
 			*indexMappedRange++ = quadIndex * 4 + 0;
 			*indexMappedRange++ = quadIndex * 4 + 1;
 			*indexMappedRange++ = quadIndex * 4 + 2;
@@ -92,10 +91,10 @@ namespace ProjectA {
 		BufferDescriptor cameraUniformBufferDescriptor{};
 		cameraUniformBufferDescriptor.size = cameraBufferSize;
 		cameraUniformBufferDescriptor.usage = BufferUsage::UNIFORM;
+		cameraUniformBufferDescriptor.persistent = true;
 
 		cameraBuffer = createBuffer(cameraUniformBufferDescriptor);
-
-		camera = cameraBuffer->map<Camera>(0, cameraBufferSize);
+		cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBufferSize);
 	}
 
 	void TextRenderer::createPipeline() {
@@ -151,13 +150,12 @@ namespace ProjectA {
 	}
 
 	void TextRenderer::setText(const std::string& text, float32 fontSize) {
-		ENGINE_ASSERT(text.size() <= MAX_QUAD_COUNT, "The text must not exceed [] characters.", MAX_QUAD_COUNT);
+		ENGINE_ASSERT(text.size() <= MAX_QUADS, "The text must not exceed [] characters.", MAX_QUADS);
 
 		quadCount = static_cast<uint32>(text.size());
 
 		const char* string = text.c_str();
 		const uint8* codePoint = static_cast<const uint8*>(static_cast<const void*>(string));
-
 		const float32 lineHeight = static_cast<float32>(font.getLineHeight());
 
 		uint32 vertexIndex = 0;
@@ -226,7 +224,7 @@ namespace ProjectA {
 		const float32 width = static_cast<float32>(getSwapchain()->getExtentWidth());
 		const float32 height = static_cast<float32>(getSwapchain()->getExtentHeight());
 
-		camera->projection = {
+		cameraMappedRange->projection = {
 			2.0f / width, 0.0f, 0.0f,
 			0.0f, -2.0f / height, 0.0f,
 			-1.0f, 1.0f, 1.0f,

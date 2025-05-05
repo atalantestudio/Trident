@@ -76,6 +76,8 @@ namespace ProjectA {
 		currentContainerInnerSize = currentContainerSize;
 
 		updateGUI();
+
+		renderer.copyMappedBuffer();
 	}
 
 	void GUILayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {

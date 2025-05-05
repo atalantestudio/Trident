@@ -8,6 +8,7 @@ namespace ProjectA {
 		public:
 			TextRenderer(const TrueTypeFont& font);
 
+			// TODO: Use std::string_view instead of const std::string&.
 			void setText(const std::string& text, float32 fontSize);
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
@@ -33,25 +34,26 @@ namespace ProjectA {
 			};
 
 		private:
-			static constexpr uint32 MAX_QUAD_COUNT = 64;
+			static constexpr uint32 MAX_QUADS = 64;
 
 		private:
+			const TrueTypeFont& font;
+
 			ref<Buffer> vertexBuffer;
 			Vertex* vertices = nullptr;
 
 			ref<Buffer> indexBuffer;
 
 			ref<Buffer> cameraBuffer;
-			Camera* camera;
+			Camera* cameraMappedRange = nullptr;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
 
 			ref<Image> glyphMapImage;
 			ref<ImageView> glyphMapImageView;
-			ref<Sampler> glyphMapImageSampler;
 
-			const TrueTypeFont& font;
+			ref<Sampler> glyphMapImageSampler;
 
 			uint32 quadCount = 0;
 	};
