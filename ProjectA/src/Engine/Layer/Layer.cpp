@@ -12,7 +12,11 @@ namespace ProjectA {
 
 	void Layer::update(float64 fixedDeltaTime) {}
 
-	void Layer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) {}
+	void Layer::preRender() {}
+
+	void Layer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {}
+
+	void Layer::postRender() {}
 
 	void Layer::onEvent(Event& event) {}
 }

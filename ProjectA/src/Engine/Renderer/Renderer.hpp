@@ -18,7 +18,7 @@ namespace ProjectA {
 			static void getWindowExtent(sint32& extentWidth, sint32& extentHeight);
 
 		public:
-			virtual void render(const ref<CommandEncoder>& commandEncoder) = 0;
+			virtual void render(const ref<CommandEncoder>& commandEncoder) const = 0;
 
 			virtual void onEvent(Event& event) {}
 

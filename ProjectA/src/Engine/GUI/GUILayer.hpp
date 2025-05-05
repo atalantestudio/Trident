@@ -55,9 +55,13 @@ namespace ProjectA {
 
 			//~GUILayer();
 
-			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) final override;
+			void preRender() final override;
 
-			virtual void renderGUI();
+			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const final override;
+
+			void postRender() final override;
+
+			virtual void updateGUI();
 
 		protected:
 			ImageID loadImage(std::string_view path);

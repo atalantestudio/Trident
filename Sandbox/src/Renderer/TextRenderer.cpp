@@ -206,7 +206,7 @@ namespace ProjectA {
 		}
 	}
 
-	void TextRenderer::render(const ref<CommandEncoder>& commandEncoder) {
+	void TextRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		updateCamera();
 
 		const ref<Swapchain>& swapchain = Application::get().getSwapchain();

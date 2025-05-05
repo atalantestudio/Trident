@@ -8,7 +8,7 @@ namespace ProjectA {
 		public:
 			TriangleDemoRenderer();
 
-			void render(const ref<CommandEncoder>& commandEncoder) override;
+			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
 		private:
 			void setupVertexBuffer();

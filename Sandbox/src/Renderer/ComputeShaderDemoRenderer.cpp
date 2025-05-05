@@ -215,7 +215,7 @@ namespace ProjectA {
 		}
 	}
 
-	void ComputeShaderDemoRenderer::render(const ref<CommandEncoder>& commandEncoder) {
+	void ComputeShaderDemoRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
 
 		const uint32 width = swapchain->getExtentWidth();

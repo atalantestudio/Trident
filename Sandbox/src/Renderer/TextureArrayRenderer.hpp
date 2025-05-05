@@ -7,7 +7,7 @@ namespace ProjectA {
 		public:
 			TextureArrayRenderer();
 
-			void render(const ref<CommandEncoder>& commandEncoder) override;
+			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
 		private:
 			ref<Image> loadImage(const std::string& imagePath);

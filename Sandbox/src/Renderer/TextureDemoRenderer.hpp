@@ -9,7 +9,7 @@ namespace ProjectA {
 
 			void build(const ref<Image>& image);
 
-			void render(const ref<CommandEncoder>& commandEncoder) override;
+			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
 			void createImageSampler();
 			void createVertexBuffer();

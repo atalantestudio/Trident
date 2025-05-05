@@ -7,7 +7,7 @@ namespace ProjectA {
 		//renderer.build(font.getSdfImage());
 	}
 
-	void DemoLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) {
+	void DemoLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
 		renderer.render(commandEncoder);
 	}
 }

@@ -60,7 +60,7 @@ namespace ProjectA {
 		renderer.registerEntityPool(componentPool);
 	}*/
 
-	void GUILayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) {
+	void GUILayer::preRender() {
 		//updateScriptComponents();
 
 		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
@@ -76,12 +76,18 @@ namespace ProjectA {
 		};
 		currentContainerInnerSize = currentContainerSize;
 
-		renderGUI();
+		updateGUI();
+	}
 
+	void GUILayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
 		renderer.render(commandEncoder);
 	}
 
-	void GUILayer::renderGUI() {}
+	void GUILayer::postRender() {
+		renderer.resetSubcomponentCount();
+	}
+
+	void GUILayer::updateGUI() {}
 
 	ImageID GUILayer::loadImage(std::string_view path) {
 		return renderer.registerImage(path);

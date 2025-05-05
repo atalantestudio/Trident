@@ -11,7 +11,7 @@ namespace ProjectA {
 
 			virtual ~DemoLayer() = default;
 
-			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) override;
+			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const final override;
 
 		private:
 			TriangleDemoRenderer renderer;

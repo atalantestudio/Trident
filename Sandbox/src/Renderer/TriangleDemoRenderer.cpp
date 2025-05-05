@@ -82,7 +82,7 @@ namespace ProjectA {
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 	}
 
-	void TriangleDemoRenderer::render(const ref<CommandEncoder>& commandEncoder) {
+	void TriangleDemoRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		const ref<Swapchain>& swapchain = Application::get().getSwapchain();
 
 		const uint32 width = swapchain->getExtentWidth();

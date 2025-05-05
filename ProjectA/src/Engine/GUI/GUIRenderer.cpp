@@ -6,16 +6,13 @@
 #include "Engine/GUI/GUIRenderer.hpp"
 
 namespace ProjectA {
-	GUIRenderer::GUIRenderer() :
-		cameraBuffers(MAX_FRAMES_IN_FLIGHT),
-		cameraMappedRanges(MAX_FRAMES_IN_FLIGHT)
-	{}
+	GUIRenderer::GUIRenderer() {}
 
 	void GUIRenderer::build() {
 		setupVertexBuffer();
 		setupIndexBuffer();
 		setupSubcomponentBuffer();
-		setupCameraBuffers();
+		setupCameraBuffer();
 		setupSampler();
 		setupRenderPipeline();
 	}
@@ -112,16 +109,14 @@ namespace ProjectA {
 		subcomponentBuffer = createBuffer(subcomponentBufferDescriptor);
 	}
 
-	void GUIRenderer::setupCameraBuffers() {
+	void GUIRenderer::setupCameraBuffer() {
 		BufferDescriptor cameraBufferDescriptor{};
 		cameraBufferDescriptor.size = sizeof(mat3x3<float32>);
 		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
 		cameraBufferDescriptor.persistent = true;
 
-		for (uint32 cameraBufferIndex = 0; cameraBufferIndex < MAX_FRAMES_IN_FLIGHT; cameraBufferIndex += 1) {
-			cameraBuffers[cameraBufferIndex] = createBuffer(cameraBufferDescriptor);
-			cameraMappedRanges[cameraBufferIndex] = cameraBuffers[cameraBufferIndex]->map<mat3x3<float32>>(0, cameraBufferDescriptor.size);
-		}
+		cameraBuffer = createBuffer(cameraBufferDescriptor);
+		cameraMappedRange = cameraBuffer->map<mat3x3<float32>>(0, cameraBufferDescriptor.size);
 	}
 
 	void GUIRenderer::setupSampler() {
@@ -136,7 +131,7 @@ namespace ProjectA {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
-		cameraDescriptorSetLayoutBinding.buffers = cameraBuffers;
+		cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
 
 		const ImageViewDescriptor imageViewDescriptor;
 
@@ -311,10 +306,10 @@ namespace ProjectA {
 			-1.0f, 1.0f, 1.0f,
 		};
 
-		*cameraMappedRanges[frameIndex] = cameraProjection;
+		*cameraMappedRange = cameraProjection;
 	}
 
-	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder) {
+	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		updateCamera();
 
 		// Copy subcomponent staging buffer to subcomponent buffer.
@@ -348,8 +343,9 @@ namespace ProjectA {
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 		commandEncoder->drawIndexed(6, subcomponentCount, 0);
+	}
 
-		frameIndex = (frameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+	void GUIRenderer::resetSubcomponentCount() {
 		subcomponentCount = 0;
 	}
 

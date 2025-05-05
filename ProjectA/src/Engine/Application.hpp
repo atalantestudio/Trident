@@ -69,7 +69,11 @@ namespace ProjectA {
 
 			void integrate(float64 deltaTime);
 
+			void preRender();
+
 			void render(float64 remainingFrameTime);
+
+			void postRender();
 
 			void onWindowResize(WindowResizeEvent& event);
 

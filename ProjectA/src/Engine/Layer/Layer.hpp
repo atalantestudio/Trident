@@ -16,7 +16,11 @@ namespace ProjectA {
 
 			virtual void update(float64 fixedDeltaTime);
 
-			virtual void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder);
+			virtual void preRender();
+
+			virtual void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const;
+
+			virtual void postRender();
 
 			virtual void onEvent(Event& event);
 	};

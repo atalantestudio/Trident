@@ -10,7 +10,7 @@ namespace ProjectA {
 
 			void setText(const std::string& text, float32 fontSize);
 
-			void render(const ref<CommandEncoder>& commandEncoder) override;
+			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
 			void createGlyphMapImageView();
 			void createGlyphMapImageSampler();

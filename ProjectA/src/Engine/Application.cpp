@@ -220,12 +220,18 @@ namespace ProjectA {
 			timeAccumulator -= fixedDeltaTime;
 		}
 
-		// TODO: Interpolate between current time and timeAccumulator.
-		if (!window->isMinimized()) {
-			render(timeAccumulator);
-
-			frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+		if (window->isMinimized()) {
+			return;
 		}
+
+		preRender();
+
+		// TODO: Interpolate between current time and timeAccumulator.
+		render(timeAccumulator);
+
+		postRender();
+
+		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void Application::integrate(float64 fixedDeltaTime) {
@@ -233,6 +239,14 @@ namespace ProjectA {
 
 		for (const ref<Layer>& layer : layerStack) {
 			layer->update(fixedDeltaTime);
+		}
+	}
+
+	void Application::preRender() {
+		PROFILE_SCOPE("Application pre-render");
+
+		for (const ref<Layer>& layer : layerStack) {
+			layer->preRender();
 		}
 	}
 
@@ -283,6 +297,14 @@ namespace ProjectA {
 		ENGINE_ASSERT(presentStatus == Status::SUCCESS, "Unhandled present status.");
 
 		device->waitIdle();
+	}
+
+	void Application::postRender() {
+		PROFILE_SCOPE("Application post-render");
+
+		for (const ref<Layer>& layer : layerStack) {
+			layer->postRender();
+		}
 	}
 
 	void Application::close() {

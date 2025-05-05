@@ -21,7 +21,9 @@ namespace ProjectA {
 
 			void registerSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const vec4<float32>& color);
 
-			void render(const ref<CommandEncoder>& commandEncoder) override;
+			void render(const ref<CommandEncoder>& commandEncoder) const final override;
+
+			void resetSubcomponentCount();
 
 			void onEvent(Event& event) override;
 
@@ -29,7 +31,7 @@ namespace ProjectA {
 			void setupVertexBuffer();
 			void setupIndexBuffer();
 			void setupSubcomponentBuffer();
-			void setupCameraBuffers();
+			void setupCameraBuffer();
 			void setupSampler();
 			void setupRenderPipeline();
 
@@ -51,7 +53,6 @@ namespace ProjectA {
 			};
 
 		private:
-			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
 			static constexpr uint32 MAX_SUBCOMPONENTS = 32;
 			static constexpr uint32 MAX_IMAGES = 4;
 
@@ -66,15 +67,14 @@ namespace ProjectA {
 			ref<Buffer> subcomponentStagingBuffer;
 			Subcomponent* subcomponentMappedRange = nullptr;
 
-			chain<ref<Buffer>> cameraBuffers;
-			chain<mat3x3<float32>*> cameraMappedRanges;
+			ref<Buffer> cameraBuffer;
+			mat3x3<float32>* cameraMappedRange = nullptr;
 
 			chain<ref<Image>> images;
 			chain<ref<ImageView>> imageViews;
 
 			ref<Sampler> sampler;
 
-			uint32 frameIndex = 0;
 			uint32 subcomponentCount = 0;
 	};
 }
