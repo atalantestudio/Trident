@@ -21,6 +21,10 @@ namespace ProjectA {
 		for (const ref<OpenGLCommand>& command : buffer) {
 			command->execute();
 		}
+
+		if (fence != nullptr) {
+			device.waitForFence(fence);
+		}
 	}
 
 	Status OpenGLQueue::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {

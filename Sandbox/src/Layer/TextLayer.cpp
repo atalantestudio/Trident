@@ -10,18 +10,6 @@ namespace ProjectA {
 	}
 
 	void TextLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
-		/*GUIWindow window;
-
-		{
-			GUIButton button;
-			button.text = "ABC";
-			button.padding = {0.0f, 0.0f, 0.0f, 0.0f};
-
-			if (button.clicked()) {
-				//
-			}
-		}*/
-
 		renderer.render(commandEncoder);
 	}
 }

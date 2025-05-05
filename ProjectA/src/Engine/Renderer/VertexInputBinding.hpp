@@ -16,17 +16,17 @@ namespace ProjectA {
 
 			uint32 getStride() const;
 
-			template<typename T>
+			template<typename AttributeType>
 			void registerAttribute(bool normalized) {
 				VertexInputAttribute vertexInputAttribute{};
-				vertexInputAttribute.type = getVertexInputAttributeType<T>();
+				vertexInputAttribute.type = getVertexInputAttributeType<AttributeType>();
 				vertexInputAttribute.normalized = normalized;
 				vertexInputAttribute.offset = stride;
 
 				attributes.emplace_back(vertexInputAttribute);
 
 				// TODO: uint32 lyah::max(uint32, uint32).
-				alignment = std::max(alignment, getAttributeSize<T>());
+				alignment = std::max(alignment, getAttributeSize<AttributeType>());
 
 				stride += alignment;
 			}

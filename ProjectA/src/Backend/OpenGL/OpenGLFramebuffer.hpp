@@ -2,7 +2,7 @@
 
 #include "Engine/Renderer/Framebuffer.hpp"
 
-// TODO: Update deprecated API.
+// TODO: Update or remove deprecated API.
 namespace ProjectA {
 	/*class OpenGLFramebuffer : public Framebuffer {
 		public:

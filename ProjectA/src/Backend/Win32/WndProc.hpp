@@ -268,12 +268,12 @@ namespace ProjectA {
 				return 0;
 			}
 			case WM_SETFOCUS: {
-				// TODO
+				// TODO: Handle WM_SETFOCUS message.
 
 				break;
 			}
 			case WM_KILLFOCUS: {
-				// TODO
+				// TODO: Handle WM_KILLFOCUS message.
 
 				break;
 			}

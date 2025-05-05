@@ -73,17 +73,13 @@ namespace ProjectA {
 
 		VkResult result = vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &object);
 
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create swapchain.");
-		}
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create swapchain (code: [].", result);
 
 		uint32 imageCount;
 
 		result = vkGetSwapchainImagesKHR(device, object, &imageCount, nullptr);
 
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("Failed to get swapchain image count.");
-		}
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain image count (code: []).", result);
 
 		images.resize(imageCount);
 		imageViews.resize(imageCount);
@@ -91,9 +87,7 @@ namespace ProjectA {
 
 		result = vkGetSwapchainImagesKHR(device, object, &imageCount, images.data());
 
-		if (result != VK_SUCCESS) {
-			throw std::runtime_error("Failed to get swapchain images.");
-		}
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images (code: []).", result);
 
 		for (uint32 i = 0; i < imageCount; i += 1) {
 			// TODO: Replace with Image and ImageView APIs.

@@ -111,11 +111,11 @@ namespace ProjectA {
 
 	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(
-			// TODO: Use provided origin.
-			// TODO: Use vec2<sint32>.
-			static_cast<GLint>(0),
-			static_cast<GLint>(0),
-			// TODO: Use vec2<sint32>.
+			static_cast<GLint>(origin[0]),
+
+			// TODO: Use Y origin.
+			0,
+
 			static_cast<GLsizei>(lyah::abs(size[0])),
 			static_cast<GLsizei>(lyah::abs(size[1]))
 		));

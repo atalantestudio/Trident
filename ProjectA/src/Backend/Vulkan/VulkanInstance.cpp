@@ -14,6 +14,11 @@ namespace ProjectA {
 	VulkanInstance::VulkanInstance() {
 		PROFILE_SCOPE(FUNC_SIG);
 
+		#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
+			// TODO: Check layers before creating instance?
+			checkInstanceLayers();
+		#endif
+
 		#ifdef DEBUG_ENABLE_MESSENGER
 			VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo{};
 			debugUtilsMessengerCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -98,11 +103,6 @@ namespace ProjectA {
 			result = vkCreateDebugUtilsMessengerEXT(object, &debugUtilsMessengerCreateInfo, nullptr, &debugUtilsMessenger);
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan debug messenger.");
-		#endif
-
-		#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-			// TODO: Check layers before creating instance?
-			checkInstanceLayers();
 		#endif
 	}
 

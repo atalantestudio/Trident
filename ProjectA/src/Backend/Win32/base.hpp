@@ -11,18 +11,18 @@ namespace ProjectA {
 		// Device context handle.
 		HDC hDC;
 
-		// TODO: Use vec2<sint32>.
+		// TODO: Use vec2<sint32> (no SIMD).
 		sint32 positionX;
 		sint32 positionY;
 
-		// TODO: Use vec2<sint32>.
+		// TODO: Use vec2<sint32> (no SIMD).
 		sint32 sizeX;
 		sint32 sizeY;
 
 		bool minimized;
 		bool maximized;
 
-		// TODO: Use vec2<sint32>.
+		// TODO: Use vec2<sint32> (no SIMD).
 		sint32 cursorX;
 		sint32 cursorY;
 

@@ -16,11 +16,19 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		glCreateTextures(target, 1, &object);
-		glTextureStorage2D(object, descriptor.mipLevelCount, internalFormat, descriptor.width, descriptor.height);
+		ENGINE_ASSERT(descriptor.sampleCount != 0, "Could not create image: The sample count must be non-zero.");
 
-		// TODO: Use for sample count.
-		//glTextureStorage2DMultisample(object, descriptor.sampleCount, internalFormat, descriptor.width, descriptor.height, GL_TRUE);
+		glCreateTextures(target, 1, &object);
+
+		if (descriptor.sampleCount == 1) {
+			glTextureStorage2D(object, descriptor.mipLevelCount, internalFormat, descriptor.width, descriptor.height);
+		}
+		else {
+			// TODO: Create multisampled image.
+			ENGINE_ASSERT(false, "TODO: Create multisampled image.");
+
+			//glTextureStorage2DMultisample(object, descriptor.sampleCount, internalFormat, descriptor.width, descriptor.height, GL_TRUE);
+		}
 	}
 
 	OpenGLImage::~OpenGLImage() {

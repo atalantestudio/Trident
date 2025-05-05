@@ -31,7 +31,6 @@ namespace ProjectA {
 
 		glFence.create();
 
-		// TODO: Use glClientWaitSync or glWaitSync?
 		// UINT64_MAX disables the timeout.
 		const GLenum status = glClientWaitSync(glFence.object, GL_SYNC_FLUSH_COMMANDS_BIT, UINT64_MAX);
 
@@ -46,7 +45,7 @@ namespace ProjectA {
 	}
 
 	Status OpenGLDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const {
-		// TODO: Return correct image index - suitable for multi-buffering.
+		// TODO: Does nextImageIndex need to be correct, since the double buffering is handled by the device context anyways?
 		nextImageIndex = 0;
 
 		return Status::SUCCESS;
