@@ -1,23 +1,16 @@
 #pragma once
 
-#include "Engine/Renderer/IndexType.hpp"
-
 namespace ProjectA {
-	static GLenum getGlIndexType(IndexType indexType) {
-		static constexpr GLenum glIndexTypes[] = {
-			GL_UNSIGNED_SHORT,
-			GL_UNSIGNED_INT,
-		};
+	static GLenum getGlIndexType(uint8 indexTypeSize) {
+		switch (indexTypeSize) {
+			case sizeof(uint16):
+				return GL_UNSIGNED_SHORT;
+			case sizeof(uint32):
+				return GL_UNSIGNED_INT;
+			default:
+				ENGINE_ASSERT(false, "Unsupported index type size.");
 
-		return glIndexTypes[static_cast<uint8>(indexType)];
-	}
-
-	static GLsizei getGlIndexTypeSize(IndexType indexType) {
-		static constexpr GLenum glIndexTypeSizes[] = {
-			sizeof(uint16),
-			sizeof(uint32),
-		};
-
-		return glIndexTypeSizes[static_cast<uint8>(indexType)];
+				return 0;
+		}
 	}
 }

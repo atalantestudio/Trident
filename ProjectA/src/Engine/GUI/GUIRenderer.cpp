@@ -336,7 +336,7 @@ namespace ProjectA {
 
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindAllDescriptorSets();
-		commandEncoder->bindIndexBuffer(indexBuffer, 0, IndexType::UINT16);
+		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 		commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(Subcomponent));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);

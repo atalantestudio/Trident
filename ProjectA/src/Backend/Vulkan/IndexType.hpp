@@ -1,14 +1,17 @@
 #pragma once
 
-#include "Engine/Renderer/IndexType.hpp"
-
 namespace ProjectA {
-	static VkIndexType getVkIndexType(IndexType indexType) {
-		static constexpr VkIndexType vkIndexTypes[] = {
-			VK_INDEX_TYPE_UINT16,
-			VK_INDEX_TYPE_UINT32,
-		};
+	// TODO: Support VK_INDEX_TYPE_NONE_KHR and VK_INDEX_TYPE_UINT8_KHR?
+	static VkIndexType getVkIndexType(uint8 indexTypeSize) {
+		switch (indexTypeSize) {
+			case sizeof(uint16):
+				return VK_INDEX_TYPE_UINT16;
+			case sizeof(uint32):
+				return VK_INDEX_TYPE_UINT32;
+			default:
+				ENGINE_ASSERT(false, "Unsupported index type size.");
 
-		return vkIndexTypes[static_cast<uint8>(indexType)];
+				return VK_INDEX_TYPE_MAX_ENUM;
+		}
 	}
 }

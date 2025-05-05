@@ -42,10 +42,10 @@ namespace ProjectA {
 
 	void OpenGLCommandEncoder::bindAllDescriptorSets() const {}
 
-	void OpenGLCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, IndexType indexType) {
+	void OpenGLCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {
 		indexOffset = static_cast<uint32>(offset);
-		this->indexType = getGlIndexType(indexType);
-		indexTypeSize = getGlIndexTypeSize(indexType);
+		indexType = getGlIndexType(indexTypeSize);
+		this->indexTypeSize = indexTypeSize;
 
 		commandBuffer.emplace_back(createRef<OpenGLBindIndexBufferCommand>(
 			std::static_pointer_cast<OpenGLBuffer>(indexBuffer)->object

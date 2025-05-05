@@ -22,7 +22,7 @@ namespace ProjectA {
 
 			void bindAllDescriptorSets() const override;
 
-			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, IndexType indexType) override;
+			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) override;
 
 			void bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) override;
 

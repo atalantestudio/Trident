@@ -6,7 +6,6 @@
 #include "Engine/Renderer/ComputePipeline.hpp"
 #include "Engine/Renderer/Image.hpp"
 #include "Engine/Renderer/ImageLayout.hpp"
-#include "Engine/Renderer/IndexType.hpp"
 #include "Engine/Renderer/Pipeline.hpp"
 #include "Engine/Renderer/PipelineStage.hpp"
 #include "Engine/Renderer/RenderPass.hpp"
@@ -40,8 +39,8 @@ namespace ProjectA {
 			// TODO: Change the API to take in argument arbitrary descriptor sets .
 			virtual void bindAllDescriptorSets() const = 0;
 
-			// TODO: Make indexType a template argument with uint16 and uint32 being possible values?
-			virtual void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, IndexType indexType) = 0;
+			template<typename IndexType>
+			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset);
 
 			// `stride` is only used by OpenGL when calling glBindVertexBuffer.
 			virtual void bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) = 0;
@@ -67,5 +66,8 @@ namespace ProjectA {
 			virtual ref<CommandBuffer> end() const = 0;
 
 			virtual void reset() = 0;
+
+		protected:
+			virtual void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) = 0;
 	};
 }

@@ -106,14 +106,14 @@ namespace ProjectA {
 		);
 	}
 
-	void VulkanCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, IndexType indexType) {
+	void VulkanCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		vkCmdBindIndexBuffer(
 			commandBuffer,
 			std::static_pointer_cast<VulkanBuffer>(indexBuffer)->object,
 			offset,
-			getVkIndexType(indexType)
+			getVkIndexType(indexTypeSize)
 		);
 	}
 
