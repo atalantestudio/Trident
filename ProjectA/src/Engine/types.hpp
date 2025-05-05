@@ -1,8 +1,6 @@
 #pragma once
 
 namespace ProjectA {
-	typedef std::byte byte;
-
 	// TODO: void* any typedef?
 
 	typedef std::int8_t sint8;

@@ -64,13 +64,10 @@ namespace ProjectA {
 				return value;
 			}
 
-			/**
-			 * Decompresses data using the DEFLATE compression algorithm.
-			 * References:
-			 * 
-			 *    DEFLATE Compressed Data Format Specification (https://datatracker.ietf.org/doc/html/rfc1950)
-			 *    ZLIB Compressed Data Format Specification (https://datatracker.ietf.org/doc/html/rfc1951)
-			 */
+			// Decompresses data using the DEFLATE compression algorithm.
+			// References:
+			// - DEFLATE Compressed Data Format Specification (https://datatracker.ietf.org/doc/html/rfc1950)
+			// - ZLIB Compressed Data Format Specification (https://datatracker.ietf.org/doc/html/rfc1951)
 			chain<uint8> inflate(uint64 uncompressedSize);
 
 		private:
