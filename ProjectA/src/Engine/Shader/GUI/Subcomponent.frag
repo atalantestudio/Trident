@@ -13,6 +13,21 @@ layout(location = 0) out vec4 color;
 
 void main() {
 	uint imageIndex = uint(vertexOutput.imageCoordinate.z);
+	vec4 imageColor;
 
-	color = texture(imageSamplers[imageIndex], vertexOutput.imageCoordinate.xy) * vertexOutput.color;
+	// See https://stackoverflow.com/a/72046722/17136841.
+	switch (imageIndex) {
+		case 0:
+			imageColor = texture(imageSamplers[0], vertexOutput.imageCoordinate.xy) * vertexOutput.color;
+
+			break;
+		case 1:
+			imageColor = texture(imageSamplers[1], vertexOutput.imageCoordinate.xy) * vertexOutput.color;
+
+			break;
+		default:
+			break;
+	}
+
+	color = imageColor;
 }

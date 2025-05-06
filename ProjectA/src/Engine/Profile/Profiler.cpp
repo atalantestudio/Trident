@@ -7,9 +7,8 @@ namespace ProjectA {
 	std::size_t Profiler::eventCount = 0;
 
 	void Profiler::writeEvent(const ProfileEvent& event) {
-		if (!stream.is_open()) {
-			throw std::runtime_error("Couldn't write to the profiler output stream.");
-		}
+		// TODO: Fix crash that happens when closing the window instead of the console.
+		ENGINE_ASSERT(stream.is_open(), "Could not write to the profiler output stream.");
 
 		if (eventCount > 0) {
 			stream << ",";
@@ -42,12 +41,10 @@ namespace ProjectA {
 		eventCount += 1;
 	}
 
-	Profiler::Profiler(const std::string& path) {
-		stream.open(path);
+	Profiler::Profiler(std::string_view path) {
+		stream.open(path.data());
 
-		if (!stream.is_open()) {
-			throw std::runtime_error("Couldn't open the profiler output stream.");
-		}
+		ENGINE_ASSERT(stream.is_open(), "Could not open the profiler output stream.");
 
 		// Write header.
 		stream << "{\"traceEvents\":[";

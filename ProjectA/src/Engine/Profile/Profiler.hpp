@@ -8,7 +8,7 @@ namespace ProjectA {
 			static void writeEvent(const ProfileEvent& profile);
 
 		public:
-			Profiler(const std::string& path);
+			Profiler(std::string_view path);
 
 			~Profiler();
 

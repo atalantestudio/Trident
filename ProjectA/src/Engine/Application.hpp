@@ -36,6 +36,10 @@ namespace ProjectA {
 
 			const Window& getWindow() const;
 
+			float64 getCurrentTickTime() const;
+
+			float64 getRendersPerSecondAverage() const;
+
 			void onEvent(Event& event);
 
 			template<typename T, typename... U>
@@ -63,7 +67,7 @@ namespace ProjectA {
 
 			void tick();
 
-			void integrate(float64 deltaTime);
+			void update(float64 deltaTime);
 
 			void preRender();
 
@@ -80,14 +84,15 @@ namespace ProjectA {
 
 		private:
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
-
-		private:
-			static Application* instance;
+			static constexpr float64 RENDERS_PER_SECOND = 165.0;
 
 		private:
 			struct TestSharedMemoryData {
 				uint8 instanceCount;
 			};
+
+		private:
+			static Application* instance;
 
 		private:
 			scope<Mutex> mutex;
@@ -103,10 +108,9 @@ namespace ProjectA {
 			bool needsResize = false;
 			bool minimized = false;
 
-			float32 lastFrameTime = 0.0f;
-			float64 framesPerSecond = 1.0;
-			float64 fixedDeltaTime = 1.0 / framesPerSecond;
+			float64 fixedDeltaTime = 1.0;
 			float64 previousTickTime = 0.0;
+			float64 currentTickTime = 0.0;
 			float64 timeAccumulator = 0.0;
 
 			// Multiple of MAX_FRAMES_IN_FLIGHT.

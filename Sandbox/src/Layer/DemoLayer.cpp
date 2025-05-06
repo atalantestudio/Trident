@@ -3,9 +3,7 @@
 #include "DemoLayer.hpp"
 
 namespace ProjectA {
-	DemoLayer::DemoLayer(/*const TrueTypeFont& font*/) {
-		//renderer.build(font.getSdfImage());
-	}
+	DemoLayer::DemoLayer() {}
 
 	void DemoLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
 		renderer.render(commandEncoder);

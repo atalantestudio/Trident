@@ -82,7 +82,7 @@ namespace ProjectA {
 
 			template<typename... T>
 			void GUIText(std::string_view pattern, T&&... arguments) {
-				constexpr float32 fontSize = 64;
+				constexpr float32 fontSize = 32;
 
 				const std::string text = Logger::engineLogger.format(pattern, std::forward<T>(arguments)...);
 				const float32 lineHeight = static_cast<float32>(defaultFont->getLineHeight());

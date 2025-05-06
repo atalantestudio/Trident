@@ -130,17 +130,19 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) {
-		VkBufferCopy bufferCopy{};
-		bufferCopy.srcOffset = sourceOffset;
-		bufferCopy.dstOffset = destinationOffset;
-		bufferCopy.size = size;
+		ENGINE_ASSERT(size > 0, "The size for a buffer copy operation must be non-zero.");
+
+		VkBufferCopy region{};
+		region.srcOffset = sourceOffset;
+		region.dstOffset = destinationOffset;
+		region.size = size;
 
 		vkCmdCopyBuffer(
 			commandBuffer,
 			std::static_pointer_cast<VulkanBuffer>(sourceBuffer)->object,
 			std::static_pointer_cast<VulkanBuffer>(destinationBuffer)->object,
 			1,
-			&bufferCopy
+			&region
 		);
 	}
 

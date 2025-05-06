@@ -2,9 +2,8 @@
 
 #include "Engine/entry_point.hpp"
 
-//#include "Layer/DemoLayer.hpp"
-#include "Layer/TextLayer.hpp"
-//#include "Layer/Win32TestLayer.hpp"
+#include "Layer/DemoLayer.hpp"
+#include "Layer/StatisticsLayer.hpp"
 
 namespace ProjectA {
 	class SandboxApplication : public Application {
@@ -12,11 +11,8 @@ namespace ProjectA {
 			SandboxApplication(const ApplicationDescriptor& applicationDescriptor) :
 				Application(applicationDescriptor)
 			{
-				const TrueTypeFont font("../ProjectA/src/Asset/Font/test.ttf");
-
-				//registerLayer<DemoLayer>(/*font*/);
-				registerLayer<TextLayer>(font);
-				//registerLayer<Win32TestLayer>();
+				registerLayer<DemoLayer>();
+				registerLayer<StatisticsLayer>();
 			}
 
 			~SandboxApplication() {}

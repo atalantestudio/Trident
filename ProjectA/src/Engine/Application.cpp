@@ -160,6 +160,14 @@ namespace ProjectA {
 		return *window;
 	}
 
+	float64 Application::getCurrentTickTime() const {
+		return currentTickTime;
+	}
+
+	float64 Application::getRendersPerSecondAverage() const {
+		return 1000.0 / currentTickTime / 1000.0;
+	}
+
 	void Application::loop() {
 		previousTickTime = Platform::getTime();
 
@@ -174,14 +182,14 @@ namespace ProjectA {
 		window->processMessages();
 
 		const float64 time = Platform::getTime();
-		float64 currentTickTime = time - previousTickTime;
 
+		currentTickTime = time - previousTickTime;
 		previousTickTime = time;
 		timeAccumulator += currentTickTime;
 
 		while (timeAccumulator >= fixedDeltaTime) {
 			// Integrate with a fixed time step.
-			integrate(fixedDeltaTime);
+			update(fixedDeltaTime);
 
 			// Extract 1 * base delta time from the accumulator.
 			// What's left is passed on to the next frame.
@@ -202,8 +210,8 @@ namespace ProjectA {
 		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void Application::integrate(float64 fixedDeltaTime) {
-		PROFILE_SCOPE("Application integrate (update)");
+	void Application::update(float64 fixedDeltaTime) {
+		PROFILE_SCOPE("Application update/integrate");
 
 		for (const ref<Layer>& layer : layerStack) {
 			layer->update(fixedDeltaTime);
@@ -294,6 +302,10 @@ namespace ProjectA {
 	}
 
 	void Application::onWindowResize(WindowResizeEvent& event) {
+		if (window->isMinimized()) {
+			return;
+		}
+
 		const ref<Device> device = Renderer::getDevice();
 
 		device->waitIdle();

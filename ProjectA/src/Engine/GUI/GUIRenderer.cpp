@@ -309,6 +309,10 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::copyMappedBuffer() const {
+		if (subcomponentCount == 0) {
+			return;
+		}
+
 		const ref<Device> device = getDevice();
 
 		CommandBufferDescriptor commandBufferDescriptor{};
@@ -326,6 +330,10 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
+		if (subcomponentCount == 0) {
+			return;
+		}
+
 		updateCamera();
 
 		const ref<Swapchain>& swapchain = getSwapchain();

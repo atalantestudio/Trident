@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class DemoLayer : public Layer {
 		public:
-			DemoLayer(/*const TrueTypeFont& font*/);
+			DemoLayer();
 
 			virtual ~DemoLayer() = default;
 

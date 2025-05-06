@@ -18,26 +18,17 @@ namespace ProjectA {
 
 		const ref<Device> device = Renderer::getDevice();
 
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
-
 		const uint64 glyphBufferSize = computeMaxGlyphByteSize(ttfFile);
 
-		constexpr uint64 fontBufferSize = sizeof(sint32) * 3;
+		constexpr uint64 fontBufferSize = 3 * sizeof(sint32);
 
 		const ref<Buffer> fontStagingBuffer = Renderer::createStagingBuffer(fontBufferSize);
 
 		sint32* fontMappedRange = fontStagingBuffer->map<sint32>(0, fontBufferSize);
 
-		*fontMappedRange = SPREAD_FACTOR;
-
-		fontMappedRange += 1;
-
-		*fontMappedRange = ttfFile.hhea.ascent;
-
-		fontMappedRange += 1;
-
-		*fontMappedRange = ttfFile.hhea.descent;
+		fontMappedRange[0] = SPREAD_FACTOR;
+		fontMappedRange[1] = ttfFile.hhea.ascent;
+		fontMappedRange[2] = ttfFile.hhea.descent;
 
 		fontStagingBuffer->unmap();
 
@@ -48,6 +39,9 @@ namespace ProjectA {
 		const ref<Buffer> fontStorageBuffer = Renderer::createBuffer(fontStorageBufferDescriptor);
 
 		{
+			CommandBufferDescriptor commandBufferDescriptor{};
+			commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+
 			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 			commandEncoder->begin();
@@ -143,8 +137,8 @@ namespace ProjectA {
 		glyphMapSdfImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphMapSdfImageDescriptor.format = ImageFormat::R8_UNORM;
 		glyphMapSdfImageDescriptor.usage = ImageUsage::STORAGE | ImageUsage::SAMPLED;
-		glyphMapSdfImageDescriptor.width = 1024;
-		glyphMapSdfImageDescriptor.height = 1024; // Can be set to 1024.
+		glyphMapSdfImageDescriptor.width = 2056;
+		glyphMapSdfImageDescriptor.height = 2056; // Can be set to 1024.
 		glyphMapSdfImageDescriptor.depth = 1;
 		glyphMapSdfImageDescriptor.mipLevelCount = 1;
 		glyphMapSdfImageDescriptor.arrayLayerCount = 1;
@@ -204,7 +198,7 @@ namespace ProjectA {
 
 		device->waitForFence(copyBufferFence);
 
-		for (uint16 glyphIndex = 3; glyphIndex < 234; glyphIndex += 1) {
+		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.size(); glyphIndex += 1) {
 			const Glyph& glyph = ttfFile.glyphs[glyphIndex];
 			const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
 
