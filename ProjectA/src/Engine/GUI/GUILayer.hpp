@@ -80,7 +80,43 @@ namespace ProjectA {
 			void GUIQuad(GUISize size, const vec4<float32>& color);
 			void GUIQuad(GUISize size, ImageID imageId, const vec4<float32>& color = {1.0f, 1.0f, 1.0f, 1.0f});
 
-			void GUIText(std::string_view text, float32 fontSize);
+			template<typename... T>
+			void GUIText(std::string_view pattern, T&&... arguments) {
+				constexpr float32 fontSize = 64;
+
+				const std::string text = Logger::engineLogger.format(pattern, std::forward<T>(arguments)...);
+				const float32 lineHeight = static_cast<float32>(defaultFont->getLineHeight());
+
+				float32 positionX = componentOrigin[0];
+				float32 positionY = componentOrigin[1];
+
+				for (const char glyph : text) {
+					const uint16 codePoint = static_cast<uint16>(glyph);
+					const TrueTypeGlyph& glyph = (*defaultFont)[codePoint];
+					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * static_cast<float32>(fontSize));
+
+					if (!glyph.invisible) {
+						// For a line height (ascent - descent) of 1210 FUnits,
+						// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
+						// The width should be 62.13px.
+						// TODO: float32 lyah::ceil(float32)
+						const float32 width = glyph.width / lineHeight * fontSize;
+						const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * fontSize;
+
+						const vec2<float32> position = {positionX + leftSideBearing, positionY};
+						const vec2<float32> size = {width, fontSize};
+						const mat3x3<float32> transform = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
+
+						const vec2<float32> uvStart = {glyph.minCoordinateX, glyph.minCoordinateY};
+						const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
+						const mat3x3<float32> imageTransform = mat3x3<float32>::scaling(uvEnd - uvStart) * mat3x3<float32>::translation(uvStart);
+
+						renderer.registerSubcomponent(transform, imageTransform, defaultFontImageIndex, {1.0f, 1.0f, 1.0f, 1.0f});
+					}
+
+					positionX += advanceWidth;
+				}
+			}
 
 			void popContainer(GUIContainer& container);
 
@@ -98,7 +134,6 @@ namespace ProjectA {
 
 		private:
 			GUIRenderer renderer;
-			chain<ref<Image>> images;
 			sint16 componentOrigin[2];
 			LayoutDirection layoutDirection = VERTICAL;
 			uint16 layoutSpacing = 0;
@@ -106,10 +141,10 @@ namespace ProjectA {
 			GUISize currentContainerSize;
 			GUISize currentContainerInnerSize;
 			bool rootComponent = true;
-			ref<TrueTypeFont> defaultFont;
+			scope<TrueTypeFont> defaultFont;
 
-			uint32 defaultImageIndex;
-			uint32 defaultFontImageIndex;
+			ImageID defaultImageIndex;
+			ImageID defaultFontImageIndex;
 	};
 }
 

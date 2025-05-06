@@ -32,7 +32,7 @@ namespace ProjectA {
 	}*/
 
 	void GUILayer::loadDefaultFont() {
-		defaultFont = createRef<TrueTypeFont>("../ProjectA/src/Asset/Font/test.ttf");
+		defaultFont = createScope<TrueTypeFont>("../ProjectA/src/Asset/Font/test.ttf");
 		defaultFontImageIndex = renderer.registerImage(defaultFont->getSdfImage());
 
 		/*defaultFont->textureIndex = static_cast<uint32>(images.size());
@@ -168,10 +168,10 @@ namespace ProjectA {
 			static_cast<float32>(origin[0]),
 			static_cast<float32>(origin[1]),
 		};
-		const mat3x3<float32> world = mat3x3<float32>::scaling(fixedSizeFloat) * mat3x3<float32>::translation(originFloat);
-		const mat3x3<float32> textureWorld = mat3x3<float32>::identity();
+		const mat3x3<float32> transform = mat3x3<float32>::scaling(fixedSizeFloat) * mat3x3<float32>::translation(originFloat);
+		const mat3x3<float32> imageTransform = mat3x3<float32>::identity();
 
-		renderer.registerSubcomponent(world, textureWorld, imageId, color);
+		renderer.registerSubcomponent(transform, imageTransform, imageId, color);
 	}
 
 	void GUILayer::GUIQuad(GUISize size, const vec4<float32>& color) {
@@ -184,10 +184,6 @@ namespace ProjectA {
 		const GUISize fixedSize = computeFixedSize(size);
 
 		//componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
-	}
-
-	void GUILayer::GUIText(std::string_view text, float32 fontSize) {
-		// TODO
 	}
 
 	void GUILayer::popContainer(GUIContainer& container) {

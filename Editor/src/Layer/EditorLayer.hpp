@@ -16,7 +16,8 @@ namespace ProjectA {
 					}
 				}
 
-				GUIQuad({512px, 512px}, 1);
+				//GUIQuad({512px, 512px}, 1);
+				GUIText("[]", "test");
 			}
 
 		private:
