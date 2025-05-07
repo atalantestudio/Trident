@@ -1,14 +1,18 @@
 #pragma once
 
 namespace ProjectA {
-	// The following methods are part of the OpenGL 1.1 API
-	// and do not need to be linked manually.
+	// The following methods are part of the OpenGL 1.1 API and do not need to be linked manually.
+	// - glBlendFunc
+	// - glClear
+	// - glClearColor
 	// - glCullFace
+	// - glDeleteTextures
 	// - glDisable
 	// - glEnable
 	// - glFrontFace
+	// - glGenTextures
+	// - glViewport
 
-	// TODO: Remove 1.1 functions from this list.
 	extern PFNGLATTACHSHADERPROC glAttachShader;
 	extern PFNGLBINDBUFFERPROC glBindBuffer;
 	extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
@@ -17,9 +21,6 @@ namespace ProjectA {
 	extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
 	extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
 	extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
-	extern PFNGLBLENDFUNCPROC glBlendFunc;
-	extern PFNGLCLEARPROC glClear;
-	extern PFNGLCLEARCOLORPROC glClearColor;
 	extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
 	extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
 	extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
@@ -39,7 +40,6 @@ namespace ProjectA {
 	extern PFNGLDELETESAMPLERSPROC glDeleteSamplers;
 	extern PFNGLDELETESHADERPROC glDeleteShader;
 	extern PFNGLDELETESYNCPROC glDeleteSync;
-	extern PFNGLDELETETEXTURESPROC glDeleteTextures;
 	extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
 	extern PFNGLDETACHSHADERPROC glDetachShader;
 	extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
@@ -47,7 +47,6 @@ namespace ProjectA {
 	extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced;
 	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 	extern PFNGLFENCESYNCPROC glFenceSync;
-	extern PFNGLGENTEXTURESPROC glGenTextures;
 	extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
 	extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
 	extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
@@ -70,5 +69,4 @@ namespace ProjectA {
 	extern PFNGLVERTEXATTRIBIFORMATPROC glVertexAttribIFormat;
 	extern PFNGLVERTEXATTRIBLFORMATPROC glVertexAttribLFormat;
 	extern PFNGLVERTEXBINDINGDIVISORPROC glVertexBindingDivisor;
-	extern PFNGLVIEWPORTPROC glViewport;
 }

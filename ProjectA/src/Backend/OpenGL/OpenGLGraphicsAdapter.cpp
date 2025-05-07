@@ -29,9 +29,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindTextureUnit);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindVertexArray);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindVertexBuffer);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glBlendFunc);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glClear);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glClearColor);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glClientWaitSync);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glCopyNamedBufferSubData);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateBuffers);
@@ -51,7 +48,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteSamplers);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteShader);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteSync);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteTextures);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteVertexArrays);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDetachShader);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDispatchCompute);
@@ -59,7 +55,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDrawElementsInstanced);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glEnableVertexAttribArray);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glFenceSync);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glGenTextures);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetIntegeri_v);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetProgramInfoLog);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetProgramiv);
@@ -82,7 +77,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glVertexAttribIFormat);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glVertexAttribLFormat);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glVertexBindingDivisor);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glViewport);
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			glEnable(GL_DEBUG_OUTPUT);
