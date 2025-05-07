@@ -1,9 +1,5 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/CommandBufferUsage.hpp"
-#include "Backend/Vulkan/ImageLayout.hpp"
-#include "Backend/Vulkan/IndexType.hpp"
-#include "Backend/Vulkan/PipelineStage.hpp"
 #include "Backend/Vulkan/VulkanBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
@@ -11,6 +7,11 @@
 #include "Backend/Vulkan/VulkanImage.hpp"
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
+
+#include "Backend/Vulkan/CommandBufferUsage.hpp"
+#include "Backend/Vulkan/ImageLayout.hpp"
+#include "Backend/Vulkan/IndexType.hpp"
+#include "Backend/Vulkan/PipelineStage.hpp"
 
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -248,6 +249,20 @@ namespace ProjectA {
 		);
 	}
 
+	void VulkanCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		DEBUG_ASSERT(std::static_pointer_cast<VulkanRenderPipeline>(pipeline)->dynamicState & DynamicState::SCISSOR);
+
+		VkRect2D scissor{};
+		scissor.offset.x = xOffset;
+		scissor.offset.y = yOffset;
+		scissor.extent.width = width;
+		scissor.extent.height = height;
+
+		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+	}
+
 	void VulkanCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -262,20 +277,6 @@ namespace ProjectA {
 		viewport.maxDepth = maxDepth;
 
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-	}
-
-	void VulkanCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		DEBUG_ASSERT(std::static_pointer_cast<VulkanRenderPipeline>(pipeline)->dynamicState & DynamicState::SCISSOR);
-
-		VkRect2D scissor{};
-		scissor.offset.x = xOffset;
-		scissor.offset.y = yOffset;
-		scissor.extent.width = width;
-		scissor.extent.height = height;
-
-		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
 	void VulkanCommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) {

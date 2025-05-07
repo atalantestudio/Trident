@@ -159,11 +159,6 @@ namespace ProjectA {
 			dynamicStates.emplace_back(VK_DYNAMIC_STATE_SCISSOR);
 		}
 
-		// TODO: Implement primitive topology dynamic state.
-		/*if (descriptor.dynamicState & DynamicState::PRIMITIVE_TOPOLOGY) {
-			dynamicStates.emplace_back(VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY);
-		}*/
-
 		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
 		dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		dynamicStateCreateInfo.pNext = nullptr;

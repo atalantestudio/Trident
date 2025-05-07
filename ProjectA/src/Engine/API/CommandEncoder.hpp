@@ -53,13 +53,13 @@ namespace ProjectA {
 
 			virtual void setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) = 0;
 
-			// Updates the viewport area.
-			// Can only be used if the render pipeline's dynamic state contains DynamicState::VIEWPORT.
-			virtual void setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) = 0;
-
 			// Updates the scissor area.
 			// Can only be used if the render pipeline's dynamic state contains DynamicState::SCISSOR.
 			virtual void setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) = 0;
+
+			// Updates the viewport area.
+			// Can only be used if the render pipeline's dynamic state contains DynamicState::VIEWPORT.
+			virtual void setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) = 0;
 
 			virtual void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) = 0;
 
