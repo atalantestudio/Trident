@@ -11,6 +11,6 @@ namespace ProjectA {
 			void execute() const override;
 
 		private:
-			const ref<OpenGLComputePipeline> computePipeline;
+			const GLuint program;
 	};
 }

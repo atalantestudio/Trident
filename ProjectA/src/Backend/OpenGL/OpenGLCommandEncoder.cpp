@@ -1,6 +1,7 @@
 #include "pch.hpp"
 
 #include "Backend/OpenGL/Command/OpenGLBeginRenderPassCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLBindAllDescriptorSetsCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindComputePipelineCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindIndexBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindRenderPipelineCommand.hpp"
@@ -41,7 +42,20 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLBindRenderPipelineCommand>(this->renderPipeline));
 	}
 
-	void OpenGLCommandEncoder::bindAllDescriptorSets() const {}
+	void OpenGLCommandEncoder::bindAllDescriptorSets() {
+		DEBUG_ASSERT(computePipeline != nullptr || renderPipeline != nullptr);
+
+		const chain<DescriptorSetLayout>* descriptorSetLayouts;
+
+		if (computePipeline != nullptr) {
+			descriptorSetLayouts = &computePipeline->layout.descriptorSetLayouts;
+		}
+		else {
+			descriptorSetLayouts = &renderPipeline->layout.descriptorSetLayouts;
+		}
+
+		commandBuffer.emplace_back(createRef<OpenGLBindAllDescriptorSetsCommand>(*descriptorSetLayouts));
+	}
 
 	void OpenGLCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {
 		indexOffset = static_cast<uint32>(offset);

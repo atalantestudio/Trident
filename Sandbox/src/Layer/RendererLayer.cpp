@@ -41,7 +41,7 @@ namespace ProjectA {
 
 		polygonObject.position = {0.45f, -0.625f};
 
-		//renderer.registerScene(scene);
+		renderer.registerScene(scene);
 	}
 
 	vec4<float32> RendererLayer::getClearColor() const {

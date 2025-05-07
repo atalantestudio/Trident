@@ -37,7 +37,7 @@ namespace ProjectA {
 
 			// Binds all descriptor sets linked to the current pipeline.
 			// TODO: Change the API to take in argument arbitrary descriptor sets .
-			virtual void bindAllDescriptorSets() const = 0;
+			virtual void bindAllDescriptorSets() = 0;
 
 			template<typename IndexType>
 			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset);

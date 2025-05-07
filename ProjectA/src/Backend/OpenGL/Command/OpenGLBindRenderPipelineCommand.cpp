@@ -1,10 +1,6 @@
 #include "pch.hpp"
 
 #include "Backend/OpenGL/Command/OpenGLBindRenderPipelineCommand.hpp"
-#include "Backend/OpenGL/DescriptorType.hpp"
-#include "Backend/OpenGL/OpenGLBuffer.hpp"
-#include "Backend/OpenGL/OpenGLImageView.hpp"
-#include "Backend/OpenGL/OpenGLSampler.hpp"
 
 namespace ProjectA {
 	OpenGLBindRenderPipelineCommand::OpenGLBindRenderPipelineCommand(const ref<OpenGLRenderPipeline>& renderPipeline) :
@@ -34,8 +30,5 @@ namespace ProjectA {
 			glEnable(GL_CULL_FACE);
 			glCullFace(renderPipeline->cullMode);
 		}
-
-		// TODO: Move this in CommandEncoder::bindAllDescriptorSets.
-		renderPipeline->layout.bind();
 	}
 }

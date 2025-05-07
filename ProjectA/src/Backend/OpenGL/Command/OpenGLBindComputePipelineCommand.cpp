@@ -8,13 +8,10 @@
 
 namespace ProjectA {
 	OpenGLBindComputePipelineCommand::OpenGLBindComputePipelineCommand(const ref<OpenGLComputePipeline>& computePipeline) :
-		computePipeline(computePipeline)
+		program(computePipeline->program)
 	{}
 
 	void OpenGLBindComputePipelineCommand::execute() const {
-		glUseProgram(computePipeline->program);
-
-		// TODO: Move this in CommandEncoder::bindAllDescriptorSets.
-		computePipeline->layout.bind();
+		glUseProgram(program);
 	}
 }
