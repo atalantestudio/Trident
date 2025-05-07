@@ -35,6 +35,12 @@ namespace ProjectA {
 		layers.erase(iterator);
 	}
 
+	const ref<Layer>& LayerStack::operator [](std::size_t index) const {
+		ENGINE_ASSERT(index < layers.size(), "Index overflow.");
+
+		return layers[index];
+	}
+
 	chain<ref<Layer>>::iterator LayerStack::begin() {
 		return layers.begin();
 	}

@@ -14,6 +14,8 @@ namespace ProjectA {
 
 			const Window& getWindow() const;
 
+			virtual vec4<float32> getClearColor() const;
+
 			virtual void update(float64 fixedDeltaTime);
 
 			virtual void preRender();

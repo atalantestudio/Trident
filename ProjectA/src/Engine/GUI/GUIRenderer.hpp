@@ -27,8 +27,6 @@ namespace ProjectA {
 
 			void resetSubcomponentCount();
 
-			void onEvent(Event& event) override;
-
 		private:
 			void setupVertexBuffer();
 			void setupIndexBuffer();

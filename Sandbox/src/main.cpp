@@ -2,7 +2,7 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Layer/DemoLayer.hpp"
+#include "Layer/RendererLayer.hpp"
 #include "Layer/StatisticsLayer.hpp"
 
 namespace ProjectA {
@@ -11,7 +11,7 @@ namespace ProjectA {
 			SandboxApplication(const ApplicationDescriptor& applicationDescriptor) :
 				Application(applicationDescriptor)
 			{
-				registerLayer<DemoLayer>();
+				registerLayer<RendererLayer>();
 				registerLayer<StatisticsLayer>();
 			}
 

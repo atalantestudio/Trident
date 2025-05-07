@@ -91,6 +91,8 @@ namespace ProjectA {
 		extentHeight = size[1];
 	}
 
+	void Renderer::onEvent(Event& event) {}
+
 	ref<Device> Renderer::getDevice() {
 		return adapter->getDevice();
 	}

@@ -4,9 +4,9 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	class TriangleDemoRenderer : public Renderer {
+	class TriangleRenderer : public Renderer {
 		public:
-			TriangleDemoRenderer();
+			TriangleRenderer();
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 

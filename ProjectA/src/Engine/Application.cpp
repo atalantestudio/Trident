@@ -165,6 +165,10 @@ namespace ProjectA {
 	}
 
 	float64 Application::getRendersPerSecondAverage() const {
+		if (currentTickTime == 0.0) {
+			return 0.0;
+		}
+
 		return 1000.0 / currentTickTime / 1000.0;
 	}
 
@@ -248,7 +252,7 @@ namespace ProjectA {
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = Renderer::getMainRenderPass();
-		beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+		beginRenderPassDescriptor.clearColor = layerStack[0]->getClearColor();
 		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);

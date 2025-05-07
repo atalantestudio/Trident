@@ -62,6 +62,18 @@ namespace ProjectA {
 		return procAddress;
 	}
 
+	void DeviceContext::setSwapInterval(sint32 interval) const {
+		const PFNWGLGETEXTENSIONSSTRINGEXTPROC wglGetExtensionsStringEXT = static_cast<PFNWGLGETEXTENSIONSSTRINGEXTPROC>(getProcedureAddress("wglGetExtensionsStringEXT"));
+
+		const std::string extensionsString = wglGetExtensionsStringEXT();
+
+		ENGINE_ASSERT(extensionsString.find("WGL_EXT_swap_control") != std::string::npos, "WGL_EXT_swap_control extension not supported.");
+
+		const PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = static_cast<PFNWGLSWAPINTERVALEXTPROC>(getProcedureAddress("wglSwapIntervalEXT"));
+
+		WIN32_ASSERT(wglSwapIntervalEXT(interval) == TRUE);
+	}
+
 	void DeviceContext::swapBuffers() const {
 		const Win32DeviceContextData* deviceContextData = static_cast<const Win32DeviceContextData*>(data);
 

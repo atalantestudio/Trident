@@ -20,7 +20,7 @@ namespace ProjectA {
 		public:
 			virtual void render(const ref<CommandEncoder>& commandEncoder) const = 0;
 
-			virtual void onEvent(Event& event) {}
+			virtual void onEvent(Event& event);
 
 		public:
 			static ref<Device> getDevice();

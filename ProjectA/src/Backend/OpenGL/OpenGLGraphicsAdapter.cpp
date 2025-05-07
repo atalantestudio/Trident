@@ -19,6 +19,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		deviceContext.setSwapInterval(1);
+
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glAttachShader);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindBuffer);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindBufferRange);
@@ -27,7 +29,9 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindTextureUnit);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindVertexArray);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindVertexBuffer);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glBlendFunc);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glClear);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glClearColor);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glClientWaitSync);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glCopyNamedBufferSubData);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateBuffers);

@@ -13,6 +13,8 @@ namespace ProjectA {
 
 			void* getProcedureAddress(std::string_view name) const;
 
+			void setSwapInterval(sint32 interval) const;
+
 			void swapBuffers() const;
 
 		private:

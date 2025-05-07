@@ -17,13 +17,15 @@ namespace ProjectA {
 					rps = Application::get().getRendersPerSecondAverage();
 				}
 
-				GUIText("FPS: []", rps);
+				GUIContainer({172px, 54px}, {12px, 12px}, HORIZONTAL, 0px, {0.0f, 0.0f, 0.0f, 1.0f}) {
+					GUIText("FPS: []", rps);
+				}
 
 				frameIndex += 1;
 			}
 
 		private:
-			static constexpr uint8 FRAME_DELAY = 16;
+			static constexpr uint8 FRAME_DELAY = 165;
 
 		private:
 			uint8 frameIndex = 0;

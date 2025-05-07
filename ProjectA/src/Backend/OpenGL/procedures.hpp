@@ -9,7 +9,9 @@ namespace ProjectA {
 	extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
 	extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
 	extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
+	extern PFNGLBLENDFUNCPROC glBlendFunc;
 	extern PFNGLCLEARPROC glClear;
+	extern PFNGLCLEARCOLORPROC glClearColor;
 	extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
 	extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
 	extern PFNGLCREATEBUFFERSPROC glCreateBuffers;

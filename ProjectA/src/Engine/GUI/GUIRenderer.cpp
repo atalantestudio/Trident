@@ -165,13 +165,13 @@ namespace ProjectA {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../ProjectA/src/Engine/Shader/GUI/Subcomponent.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert.spv", vertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Engine/Shader/GUI/Subcomponent.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.frag.spv", fragmentShaderModuleDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<vec3<float32>>(false);
@@ -354,6 +354,4 @@ namespace ProjectA {
 	void GUIRenderer::resetSubcomponentCount() {
 		subcomponentCount = 0;
 	}
-
-	void GUIRenderer::onEvent(Event& event) {}
 }

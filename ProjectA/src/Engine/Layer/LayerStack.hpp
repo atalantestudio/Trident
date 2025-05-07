@@ -11,6 +11,8 @@ namespace ProjectA {
 			void removeLayer(const ref<Layer>& layer);
 			void removeOverlay(const ref<Layer>& overlay);
 
+			const ref<Layer>& operator [](std::size_t index) const;
+
 			// TODO: Write helper macro for iterators.
 			chain<ref<Layer>>::iterator begin();
 
