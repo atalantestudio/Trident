@@ -4,6 +4,7 @@
 #include "Backend/OpenGL/FrontFace.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
+#include "Backend/OpenGL/PolygonMode.hpp"
 #include "Backend/OpenGL/PrimitiveTopology.hpp"
 #include "Backend/OpenGL/VertexInputAttributeType.hpp"
 
@@ -13,7 +14,9 @@ namespace ProjectA {
 		program(glCreateProgram()),
 		primitiveTopology(getGlPrimitiveTopology(descriptor.primitiveTopology)),
 		frontFace(getGlFrontFace(descriptor.frontFace)),
-		cullMode(getGlCullMode(descriptor.cullMode))
+		cullMode(getGlCullMode(descriptor.cullMode)),
+		polygonModeFace(getGlPolygonModeFace(descriptor.cullMode)),
+		polygonMode(getGlPolygonMode(descriptor.polygonMode))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 

@@ -1,6 +1,14 @@
 #pragma once
 
 namespace ProjectA {
+	// The following methods are part of the OpenGL 1.1 API
+	// and do not need to be linked manually.
+	// - glCullFace
+	// - glDisable
+	// - glEnable
+	// - glFrontFace
+
+	// TODO: Remove 1.1 functions from this list.
 	extern PFNGLATTACHSHADERPROC glAttachShader;
 	extern PFNGLBINDBUFFERPROC glBindBuffer;
 	extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
@@ -37,7 +45,6 @@ namespace ProjectA {
 	extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
 	extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
 	extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced;
-	extern PFNGLENABLEPROC glEnable;
 	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 	extern PFNGLFENCESYNCPROC glFenceSync;
 	extern PFNGLGENTEXTURESPROC glGenTextures;

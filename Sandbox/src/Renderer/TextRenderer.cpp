@@ -143,6 +143,7 @@ namespace ProjectA {
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		renderPipelineDescriptor.cullMode = CullMode::BACK;
 

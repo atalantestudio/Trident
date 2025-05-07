@@ -3,6 +3,7 @@
 #include "Engine/Renderer/CullMode.hpp"
 #include "Engine/Renderer/FrontFace.hpp"
 #include "Engine/Renderer/Pipeline.hpp"
+#include "Engine/Renderer/PolygonMode.hpp"
 #include "Engine/Renderer/PrimitiveTopology.hpp"
 #include "Engine/Renderer/RenderPass.hpp"
 #include "Engine/Renderer/ShaderModule.hpp"
@@ -16,6 +17,7 @@ namespace ProjectA {
 		ref<ShaderModule> vertexShaderModule;
 		ref<ShaderModule> fragmentShaderModule;
 		PrimitiveTopology primitiveTopology;
+		PolygonMode polygonMode;
 		CullMode cullMode;
 		FrontFace frontFace;
 	};

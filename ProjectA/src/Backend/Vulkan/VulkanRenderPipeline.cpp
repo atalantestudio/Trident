@@ -1,14 +1,16 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/CullMode.hpp"
-#include "Backend/Vulkan/FrontFace.hpp"
-#include "Backend/Vulkan/InputRate.hpp"
-#include "Backend/Vulkan/PrimitiveTopology.hpp"
 #include "Backend/Vulkan/VertexInputAttributeType.hpp"
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
+
+#include "Backend/Vulkan/CullMode.hpp"
+#include "Backend/Vulkan/FrontFace.hpp"
+#include "Backend/Vulkan/InputRate.hpp"
+#include "Backend/Vulkan/PolygonMode.hpp"
+#include "Backend/Vulkan/PrimitiveTopology.hpp"
 
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -95,7 +97,7 @@ namespace ProjectA {
 		rasterizationStateCreateInfo.flags = 0;
 		rasterizationStateCreateInfo.depthClampEnable = VK_FALSE;
 		rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
-		rasterizationStateCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
+		rasterizationStateCreateInfo.polygonMode = getVkPolygonMode(descriptor.polygonMode);
 		rasterizationStateCreateInfo.cullMode = getVkCullMode(descriptor.cullMode);
 		rasterizationStateCreateInfo.frontFace = getVkFrontFace(descriptor.frontFace);
 		rasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;

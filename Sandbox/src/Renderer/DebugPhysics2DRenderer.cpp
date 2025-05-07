@@ -15,6 +15,7 @@ namespace ProjectA {
 		vertices[0] = {-0.5f, -0.5f};
 		vertices[1] = { 0.0f,  0.5f};
 		vertices[2] = { 0.5f, -0.5f};
+		//vertices[3] = vertices[0];
 
 		vertexStagingBuffer->unmap();
 
@@ -63,6 +64,7 @@ namespace ProjectA {
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		renderPipelineDescriptor.polygonMode = PolygonMode::LINE;
 		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		renderPipelineDescriptor.cullMode = CullMode::BACK;
 

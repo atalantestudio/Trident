@@ -19,5 +19,7 @@ namespace ProjectA {
 			const GLenum primitiveTopology;
 			const GLenum frontFace;
 			const GLenum cullMode;
+			const GLenum polygonModeFace;
+			const GLenum polygonMode;
 	};
 }

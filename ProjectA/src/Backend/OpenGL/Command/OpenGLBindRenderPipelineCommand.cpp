@@ -11,6 +11,11 @@ namespace ProjectA {
 		renderPipeline(renderPipeline)
 	{}
 
+	// TODO: Expose these operations.
+	// - glEnable(GL_BLEND)
+	// - glEnable(GL_DEPTH_TEST)
+	// - glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+	// - glEnable(GL_FRAMEBUFFER_SRGB)
 	void OpenGLBindRenderPipelineCommand::execute() const {
 		renderPipeline->layout.bind();
 
@@ -20,6 +25,10 @@ namespace ProjectA {
 
 		glFrontFace(renderPipeline->frontFace);
 
+		if (renderPipeline->polygonModeFace != GL_NONE) {
+			glPolygonMode(renderPipeline->polygonModeFace, renderPipeline->polygonMode);
+		}
+
 		if (renderPipeline->cullMode == 0) {
 			glDisable(GL_CULL_FACE);
 		}
@@ -27,12 +36,5 @@ namespace ProjectA {
 			glEnable(GL_CULL_FACE);
 			glCullFace(renderPipeline->cullMode);
 		}
-
-		//glEnable(GL_FRAMEBUFFER_SRGB);
-
-		// TODO: Expose.
-		//glEnable(GL_BLEND);
-		//glEnable(GL_DEPTH_TEST);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 }

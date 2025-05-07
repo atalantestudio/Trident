@@ -57,7 +57,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDispatchCompute);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDrawArraysInstanced);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDrawElementsInstanced);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glEnable);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glEnableVertexAttribArray);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glFenceSync);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glGenTextures);
