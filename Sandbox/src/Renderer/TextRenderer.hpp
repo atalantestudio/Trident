@@ -21,7 +21,7 @@ namespace ProjectA {
 			void createPipeline();
 
 		private:
-			void updateCamera() const;
+			void updateCamera(float32 width, float32 height) const;
 
 		private:
 			struct Vertex {

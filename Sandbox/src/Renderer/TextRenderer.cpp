@@ -205,12 +205,12 @@ namespace ProjectA {
 	}
 
 	void TextRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
-		updateCamera();
-
 		const ref<Swapchain>& swapchain = getSwapchain();
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+
+		updateCamera(width, height);
 
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindAllDescriptorSets();
@@ -221,14 +221,11 @@ namespace ProjectA {
 		commandEncoder->drawIndexed(6 * quadCount, 1, 0);
 	}
 
-	void TextRenderer::updateCamera() const {
-		const float32 width = static_cast<float32>(getSwapchain()->getExtentWidth());
-		const float32 height = static_cast<float32>(getSwapchain()->getExtentHeight());
-
+	void TextRenderer::updateCamera(float32 width, float32 height) const {
 		cameraMappedRange->projection = {
-			2.0f / width, 0.0f, 0.0f,
-			0.0f, -2.0f / height, 0.0f,
-			-1.0f, 1.0f, 1.0f,
+			 2.0f / width,  0.0f,           0.0f,
+			 0.0f,         -2.0f / height,  0.0f,
+			-1.0f,          1.0f,           1.0f,
 		};
 	}
 }

@@ -11,6 +11,11 @@ namespace ProjectA {
 	{}
 
 	void OpenGLDrawCommand::execute() const {
-		glDrawArraysInstanced(mode, first, count, instancecount);
+		if (instancecount == 1) {
+			glDrawArrays(mode, first, count);
+		}
+		else {
+			glDrawArraysInstanced(mode, first, count, instancecount);
+		}
 	}
 }

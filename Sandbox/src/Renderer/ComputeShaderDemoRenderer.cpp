@@ -12,7 +12,7 @@ namespace ProjectA {
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.type = ImageType::TEXTURE_2D;
 		imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-		imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::STORAGE;
+		imageDescriptor.usage = ImageUsage::STORAGE | ImageUsage::SAMPLED;
 		imageDescriptor.width = 64;
 		imageDescriptor.height = 64;
 		imageDescriptor.depth = 1;
@@ -148,13 +148,9 @@ namespace ProjectA {
 			{-1.0f, -1.0f},
 		};
 
-		const uint64 vertexBufferSize = sizeof(vec2<float32>) * vertices.size();
+		const uint64 vertexBufferSize = vertices.size() * sizeof(vec2<float32>);
 
-		BufferDescriptor vertexStagingBufferDescriptor{};
-		vertexStagingBufferDescriptor.size = vertexBufferSize;
-		vertexStagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
-
-		const ref<Buffer> vertexStagingBuffer = createBuffer(vertexStagingBufferDescriptor);
+		const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
 
 		vec2<float32>* vertexMappedRange = vertexStagingBuffer->map<vec2<float32>>(0, vertexBufferSize);
 
@@ -164,7 +160,7 @@ namespace ProjectA {
 
 		BufferDescriptor vertexBufferDescriptor{};
 		vertexBufferDescriptor.size = vertexBufferSize;
-		vertexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::VERTEX;
+		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 
@@ -180,7 +176,7 @@ namespace ProjectA {
 			device->waitIdle();
 		}
 
-		constexpr uint64 indexBufferSize = sizeof(uint16) * 6;
+		constexpr uint64 indexBufferSize = 6 * sizeof(uint16);
 
 		const ref<Buffer> indexStagingBuffer = createStagingBuffer(indexBufferSize);
 
@@ -197,7 +193,7 @@ namespace ProjectA {
 
 		BufferDescriptor indexBufferDescriptor{};
 		indexBufferDescriptor.size = indexBufferSize;
-		indexBufferDescriptor.usage = BufferUsage::TRANSFER_DST | BufferUsage::INDEX;
+		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
 

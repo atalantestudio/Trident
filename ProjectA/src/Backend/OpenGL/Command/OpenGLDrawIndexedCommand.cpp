@@ -12,6 +12,11 @@ namespace ProjectA {
 	{}
 
 	void OpenGLDrawIndexedCommand::execute() const {
-		glDrawElementsInstanced(mode, count, type, indices, instancecount);
+		if (instancecount == 1) {
+			glDrawElements(mode, count, type, indices);
+		}
+		else {
+			glDrawElementsInstanced(mode, count, type, indices, instancecount);
+		}
 	}
 }

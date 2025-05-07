@@ -2,6 +2,13 @@
 
 layout(location = 0) in vec2 vertexPosition;
 
+layout(set = 0, binding = 0) uniform Camera {
+	mat3x3 projection;
+	float zoomLevel;
+} camera;
+
 void main() {
-	gl_Position = vec4(vertexPosition, 0.0, 1.0);
+	vec3 position = camera.projection * vec3(vertexPosition * camera.zoomLevel, 0.0);
+
+	gl_Position = vec4(position, 1.0);
 }

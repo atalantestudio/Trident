@@ -17,8 +17,6 @@ namespace ProjectA {
 	// - glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 	// - glEnable(GL_FRAMEBUFFER_SRGB)
 	void OpenGLBindRenderPipelineCommand::execute() const {
-		renderPipeline->layout.bind();
-
 		glBindVertexArray(renderPipeline->vertexArray);
 
 		glUseProgram(renderPipeline->program);
@@ -36,5 +34,8 @@ namespace ProjectA {
 			glEnable(GL_CULL_FACE);
 			glCullFace(renderPipeline->cullMode);
 		}
+
+		// TODO: Move this in CommandEncoder::bindAllDescriptorSets.
+		renderPipeline->layout.bind();
 	}
 }

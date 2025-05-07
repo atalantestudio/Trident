@@ -16,9 +16,9 @@ namespace ProjectA {
 	}
 
 	void OpenGLQueue::submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
-		const OpenGLCommandBuffer& buffer = *std::static_pointer_cast<OpenGLCommandBuffer>(commandBuffer).get();
+		const OpenGLCommandBuffer& glCommandBuffer = *std::static_pointer_cast<OpenGLCommandBuffer>(commandBuffer).get();
 
-		for (const ref<OpenGLCommand>& command : buffer) {
+		for (const ref<OpenGLCommand>& command : glCommandBuffer) {
 			command->execute();
 		}
 

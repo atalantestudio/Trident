@@ -17,7 +17,7 @@ namespace ProjectA {
 			uint32 getStride() const;
 
 			template<typename AttributeType>
-			void registerAttribute(bool normalized) {
+			constexpr void registerAttribute(bool normalized) {
 				VertexInputAttribute vertexInputAttribute{};
 				vertexInputAttribute.type = getVertexInputAttributeType<AttributeType>();
 				vertexInputAttribute.normalized = normalized;
@@ -32,21 +32,21 @@ namespace ProjectA {
 			}
 
 			template<>
-			void registerAttribute<mat3x3<float32>>(bool normalized) {
+			constexpr void registerAttribute<mat3x3<float32>>(bool normalized) {
 				registerAttribute<vec3<float32>>(normalized);
 				registerAttribute<vec3<float32>>(normalized);
 				registerAttribute<vec3<float32>>(normalized);
 			}
 
 			template<>
-			void registerAttribute<mat3x3<float64>>(bool normalized) {
+			constexpr void registerAttribute<mat3x3<float64>>(bool normalized) {
 				registerAttribute<vec3<float64>>(normalized);
 				registerAttribute<vec3<float64>>(normalized);
 				registerAttribute<vec3<float64>>(normalized);
 			}
 
 			template<>
-			void registerAttribute<mat4x4<float32>>(bool normalized) {
+			constexpr void registerAttribute<mat4x4<float32>>(bool normalized) {
 				registerAttribute<vec4<float32>>(normalized);
 				registerAttribute<vec4<float32>>(normalized);
 				registerAttribute<vec4<float32>>(normalized);
@@ -54,7 +54,7 @@ namespace ProjectA {
 			}
 
 			template<>
-			void registerAttribute<mat4x4<float64>>(bool normalized) {
+			constexpr void registerAttribute<mat4x4<float64>>(bool normalized) {
 				registerAttribute<vec4<float64>>(normalized);
 				registerAttribute<vec4<float64>>(normalized);
 				registerAttribute<vec4<float64>>(normalized);

@@ -19,7 +19,5 @@ namespace ProjectA {
 		private:
 			const DeviceContext& deviceContext;
 			const OpenGLDevice& device;
-
-			uint32 previousImageIndex;
 	};
 }

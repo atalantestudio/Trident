@@ -130,7 +130,7 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) {
-		ENGINE_ASSERT(size > 0, "The size for a buffer copy operation must be non-zero.");
+		ENGINE_ASSERT(size > 0, "Vulkan: The size for a buffer copy operation must be non-zero.");
 
 		VkBufferCopy region{};
 		region.srcOffset = sourceOffset;

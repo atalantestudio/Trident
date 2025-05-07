@@ -34,145 +34,151 @@ namespace ProjectA {
 	};
 
 	template<typename T>
-	static VertexInputAttributeType getVertexInputAttributeType();
+	static constexpr VertexInputAttributeType getVertexInputAttributeType();
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<sint8>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<sint8>() {
 		return VertexInputAttributeType::R8_SINT;
 	}
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<uint8>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<uint8>() {
 		return VertexInputAttributeType::R8_UINT;
 	}
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<sint16>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<sint16>() {
 		return VertexInputAttributeType::R16_SINT;
 	}
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<uint16>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<uint16>() {
 		return VertexInputAttributeType::R16_UINT;
 	}
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<sint32>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<sint32>() {
 		return VertexInputAttributeType::R32_SINT;
 	}
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<uint32>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<uint32>() {
 		return VertexInputAttributeType::R32_UINT;
 	}
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<float32>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<float32>() {
 		return VertexInputAttributeType::R32_FLOAT;
 	}
 
 	/* template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec2<sint32>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec2<sint32>>() {
 		return VertexInputAttributeType::R32G32_SINT;
 	} */
 
 	/* template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec2<uint32>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec2<uint32>>() {
 		return VertexInputAttributeType::R32G32_UINT;
 	} */
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec2<float32>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<svec2<float32>>() {
+		return VertexInputAttributeType::R32G32_FLOAT;
+	}
+
+	// Deprecated. Use getVertexInputAttributeType<svec2<float32>>() instead.
+	template<>
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec2<float32>>() {
 		return VertexInputAttributeType::R32G32_FLOAT;
 	}
 
 	/* template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec3<sint32>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec3<sint32>>() {
 		return VertexInputAttributeType::R32G32B32_SINT;
 	} */
 
 	/* template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec3<uint32>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec3<uint32>>() {
 		return VertexInputAttributeType::R32G32B32_UINT;
 	} */
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec3<float32>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec3<float32>>() {
 		return VertexInputAttributeType::R32G32B32_FLOAT;
 	}
 
 	/* template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec4<sint32>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec4<sint32>>() {
 		return VertexInputAttributeType::R32G32B32A32_SINT;
 	} */
 
 	/* template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec4<uint32>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec4<uint32>>() {
 		return VertexInputAttributeType::R32G32B32A32_UINT;
 	} */
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec4<float32>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec4<float32>>() {
 		return VertexInputAttributeType::R32G32B32A32_FLOAT;
 	}
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<sint64>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<sint64>() {
 		return VertexInputAttributeType::R64_SINT;
 	}
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<uint64>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<uint64>() {
 		return VertexInputAttributeType::R64_UINT;
 	}
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<float64>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<float64>() {
 		return VertexInputAttributeType::R64_FLOAT;
 	}
 
 	/* template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec2<sint64>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec2<sint64>>() {
 		return VertexInputAttributeType::R64G64_SINT;
 	} */
 
 	/* template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec2<uint64>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec2<uint64>>() {
 		return VertexInputAttributeType::R64G64_UINT;
 	} */
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec2<float64>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec2<float64>>() {
 		return VertexInputAttributeType::R64G64_FLOAT;
 	}
 
 	/* template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec3<sint64>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec3<sint64>>() {
 		return VertexInputAttributeType::R64G64B64_SINT;
 	} */
 
 	/* template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec3<uint64>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec3<uint64>>() {
 		return VertexInputAttributeType::R64G64B64_UINT;
 	} */
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec3<float64>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec3<float64>>() {
 		return VertexInputAttributeType::R64G64B64_FLOAT;
 	}
 
 	/* template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec4<sint64>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec4<sint64>>() {
 		return VertexInputAttributeType::R64G64B64A64_SINT;
 	} */
 
 	/* template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec4<uint64>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec4<uint64>>() {
 		return VertexInputAttributeType::R64G64B64A64_UINT;
 	} */
 
 	template<>
-	static VertexInputAttributeType getVertexInputAttributeType<vec4<float64>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec4<float64>>() {
 		return VertexInputAttributeType::R64G64B64A64_FLOAT;
 	}
 }

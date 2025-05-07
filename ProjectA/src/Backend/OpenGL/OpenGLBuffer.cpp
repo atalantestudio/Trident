@@ -1,12 +1,10 @@
 #include "pch.hpp"
 
-#include "Backend/OpenGL/BufferUsage.hpp"
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 
 namespace ProjectA {
 	OpenGLBuffer::OpenGLBuffer(const BufferDescriptor& descriptor) :
-		Buffer(descriptor.size),
-		target(getGlBufferTarget(descriptor.usage))
+		Buffer(descriptor.size)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 

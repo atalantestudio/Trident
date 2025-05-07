@@ -12,8 +12,9 @@ namespace ProjectA {
 	{}
 
 	void OpenGLBindComputePipelineCommand::execute() const {
-		computePipeline->layout.bind();
-
 		glUseProgram(computePipeline->program);
+
+		// TODO: Move this in CommandEncoder::bindAllDescriptorSets.
+		computePipeline->layout.bind();
 	}
 }

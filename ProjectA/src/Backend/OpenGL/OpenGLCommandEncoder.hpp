@@ -22,8 +22,6 @@ namespace ProjectA {
 
 			void bindAllDescriptorSets() const override;
 
-			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) override;
-
 			void bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) override;
 
 			void copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) override;
@@ -47,6 +45,9 @@ namespace ProjectA {
 			ref<CommandBuffer> end() const override;
 
 			void reset() override;
+
+		protected:
+			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) override;
 
 		private:
 			chain<ref<OpenGLCommand>> commandBuffer;

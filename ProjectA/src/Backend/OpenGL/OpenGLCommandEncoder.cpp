@@ -62,6 +62,8 @@ namespace ProjectA {
 	}
 
 	void OpenGLCommandEncoder::copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) {
+		ENGINE_ASSERT(size > 0, "OpenGL: The size for a buffer copy operation must be non-zero.");
+
 		commandBuffer.emplace_back(createRef<OpenGLCopyBufferToBufferCommand>(
 			std::static_pointer_cast<OpenGLBuffer>(sourceBuffer)->object,
 			std::static_pointer_cast<OpenGLBuffer>(destinationBuffer)->object,

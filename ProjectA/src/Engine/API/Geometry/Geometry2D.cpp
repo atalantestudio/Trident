@@ -4,7 +4,8 @@
 
 namespace ProjectA {
 	Geometry2D::Geometry2D(const Geometry2DDescriptor& descriptor) :
-		vertices(descriptor.vertices)
+		vertices(descriptor.vertices),
+		indices(descriptor.indices)
 	{
 		// Calculate center of mass.
 		for (const svec2<float32>& vertex : vertices) {
@@ -23,6 +24,10 @@ namespace ProjectA {
 
 	const chain<svec2<float32>>& Geometry2D::getVertices() const {
 		return vertices;
+	}
+
+	const chain<uint16>& Geometry2D::getIndices() const {
+		return indices;
 	}
 
 	const svec2<float32>& Geometry2D::getCenterOfMass() const {

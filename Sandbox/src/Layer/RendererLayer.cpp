@@ -16,6 +16,10 @@ namespace ProjectA {
 			{ 3.0f,  -1.0f},
 			{-2.25f, -1.5f},
 		};
+		polygonGeometryDescriptor.indices = {
+			0, 1, 2,
+			0, 2, 3,
+		};
 
 		const Geometry2D polygonGeometry(polygonGeometryDescriptor);
 		const uint32 polygonGeometryIndex = scene.registerGeometry(polygonGeometry);
