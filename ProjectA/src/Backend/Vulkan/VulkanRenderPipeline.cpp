@@ -17,6 +17,9 @@
 namespace ProjectA {
 	VulkanRenderPipeline::VulkanRenderPipeline(VkDevice device, const RenderPipelineDescriptor& descriptor) :
 		VulkanPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, std::static_pointer_cast<VulkanPipelineLayout>(descriptor.pipelineLayout).get()),
+		#ifdef BUILD_MODE_DEBUG
+			dynamicState(descriptor.dynamicState),
+		#endif
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -146,14 +149,20 @@ namespace ProjectA {
 		colorBlendStateCreateInfo.blendConstants[2] = 0.0f;
 		colorBlendStateCreateInfo.blendConstants[3] = 0.0f;
 
-		const std::array<VkDynamicState, 2> dynamicStates = {
-			VK_DYNAMIC_STATE_VIEWPORT,
-			VK_DYNAMIC_STATE_SCISSOR,
+		chain<VkDynamicState> dynamicStates;
 
-			// TODO: Expose dynamic state.
-			//VK_DYNAMIC_STATE_LINE_WIDTH,
-			//VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY,
-		};
+		if (descriptor.dynamicState & DynamicState::VIEWPORT) {
+			dynamicStates.emplace_back(VK_DYNAMIC_STATE_VIEWPORT);
+		}
+
+		if (descriptor.dynamicState & DynamicState::SCISSOR) {
+			dynamicStates.emplace_back(VK_DYNAMIC_STATE_SCISSOR);
+		}
+
+		// TODO: Implement primitive topology dynamic state.
+		/*if (descriptor.dynamicState & DynamicState::PRIMITIVE_TOPOLOGY) {
+			dynamicStates.emplace_back(VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY);
+		}*/
 
 		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
 		dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;

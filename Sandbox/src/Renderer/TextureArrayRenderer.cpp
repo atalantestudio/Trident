@@ -129,6 +129,7 @@ namespace ProjectA {
 		renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		renderPipelineDescriptor.cullMode = CullMode::BACK;
 		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT;
 
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 	}
@@ -222,7 +223,6 @@ namespace ProjectA {
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 		commandEncoder->bindVertexBuffer(1, instanceVertexBuffer, 0, sizeof(Instance));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 		commandEncoder->draw(24, 4, 0);
 	}
 }

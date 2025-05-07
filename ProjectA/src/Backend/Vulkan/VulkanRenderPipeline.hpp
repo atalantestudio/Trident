@@ -13,6 +13,11 @@ namespace ProjectA {
 
 			~VulkanRenderPipeline();
 
+		public:
+			#ifdef BUILD_MODE_DEBUG
+				const DynamicState dynamicState;
+			#endif
+
 		private:
 			const VkDevice device;
 	};

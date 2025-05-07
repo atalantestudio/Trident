@@ -2,7 +2,7 @@
 
 #include "ProjectA.hpp"
 
-#include "../Renderer/DebugPhysics2DRenderer.hpp"
+#include "../Renderer/TriangleRenderer.hpp"
 
 namespace ProjectA {
 	class RendererLayer : public Layer {
@@ -16,6 +16,7 @@ namespace ProjectA {
 			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const final override;
 
 		private:
-			DebugPhysics2DRenderer renderer;
+			//DebugPhysics2DRenderer renderer;
+			TriangleRenderer renderer;
 	};
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/Renderer/CullMode.hpp"
+#include "Engine/Renderer/DynamicState.hpp"
 #include "Engine/Renderer/FrontFace.hpp"
 #include "Engine/Renderer/Pipeline.hpp"
 #include "Engine/Renderer/PolygonMode.hpp"
@@ -20,6 +21,7 @@ namespace ProjectA {
 		PolygonMode polygonMode;
 		CullMode cullMode;
 		FrontFace frontFace;
+		DynamicState dynamicState;
 	};
 
 	class RenderPipeline : public Pipeline {

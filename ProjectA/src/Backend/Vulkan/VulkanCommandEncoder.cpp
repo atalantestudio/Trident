@@ -251,6 +251,8 @@ namespace ProjectA {
 	void VulkanCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
 		PROFILE_SCOPE(FUNC_SIG);
 
+		DEBUG_ASSERT(std::static_pointer_cast<VulkanRenderPipeline>(pipeline)->dynamicState & DynamicState::VIEWPORT);
+
 		VkViewport viewport{};
 		viewport.x = origin[0];
 		viewport.y = origin[1];
@@ -264,6 +266,8 @@ namespace ProjectA {
 
 	void VulkanCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		DEBUG_ASSERT(std::static_pointer_cast<VulkanRenderPipeline>(pipeline)->dynamicState & DynamicState::SCISSOR);
 
 		VkRect2D scissor{};
 		scissor.offset.x = xOffset;
