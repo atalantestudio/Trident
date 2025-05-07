@@ -11,6 +11,7 @@
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetImageMemoryBarrierCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLSetScissorCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetViewportCommand.hpp"
 #include "Backend/OpenGL/IndexType.hpp"
 #include "Backend/OpenGL/OpenGLCommandBuffer.hpp"
@@ -128,7 +129,12 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {
 		DEBUG_ASSERT(renderPipeline->dynamicState & DynamicState::SCISSOR);
 
-		// TODO: Implement setScissor command.
+		commandBuffer.emplace_back(createRef<OpenGLSetScissorCommand>(
+			xOffset,
+			yOffset,
+			width,
+			height
+		));
 	}
 
 	void OpenGLCommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) {

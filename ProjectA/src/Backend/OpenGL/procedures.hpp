@@ -1,18 +1,6 @@
 #pragma once
 
 namespace ProjectA {
-	// The following methods are part of the OpenGL 1.1 API and do not need to be linked manually.
-	// - glBlendFunc
-	// - glClear
-	// - glClearColor
-	// - glCullFace
-	// - glDeleteTextures
-	// - glDisable
-	// - glEnable
-	// - glFrontFace
-	// - glGenTextures
-	// - glViewport
-
 	extern PFNGLATTACHSHADERPROC glAttachShader;
 	extern PFNGLBINDBUFFERPROC glBindBuffer;
 	extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
