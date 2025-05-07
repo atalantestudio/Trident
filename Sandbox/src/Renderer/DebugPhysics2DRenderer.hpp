@@ -16,6 +16,10 @@ namespace ProjectA {
 			void updateCamera(float32 width, float32 height) const;
 
 		private:
+			struct Instance {
+				vec4<float32> fillColor;
+			};
+
 			struct CameraUniform {
 				mat3x3<float32> projection;
 				float32 zoomLevel;
@@ -24,13 +28,17 @@ namespace ProjectA {
 		private:
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
+			ref<Buffer> instanceBuffer;
 
 			ref<Buffer> cameraBuffer;
 			CameraUniform* cameraMappedRange = nullptr;
 
 			ref<PipelineLayout> renderPipelineLayout;
-			ref<RenderPipeline> renderPipeline;
+			ref<RenderPipeline> fillRenderPipeline;
+			ref<RenderPipeline> lineRenderPipeline;
 
 			uint32 indexCount = 0;
+
+			Scene2D scene;
 	};
 }

@@ -41,6 +41,36 @@ namespace ProjectA {
 
 		polygonObject.position = {0.45f, -0.625f};
 
+		Geometry2DDescriptor triangleGeometryDescriptor;
+		triangleGeometryDescriptor.vertices = {
+			{0.0f, 0.0f},
+			{0.0f, 1.0f},
+			{6.0f, 0.0f},
+		};
+		triangleGeometryDescriptor.indices = {
+			0, 1, 2,
+		};
+
+		const Geometry2D triangleGeometry(triangleGeometryDescriptor);
+		const uint32 triangleGeometryIndex = scene.registerGeometry(triangleGeometry);
+
+		ColorMaterialDescriptor triangleMaterialDescriptor;
+		triangleMaterialDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
+		triangleMaterialDescriptor.strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
+
+		const ref<ColorMaterial> triangleMaterial = createRef<ColorMaterial>(triangleMaterialDescriptor);
+		const uint32 triangleMaterialIndex = scene.registerMaterial(triangleMaterial);
+
+		Object2DDescriptor triangleObjectDescriptor{};
+		triangleObjectDescriptor.geometryIndex = triangleGeometryIndex;
+		triangleObjectDescriptor.materialIndex = triangleMaterialIndex;
+		triangleObjectDescriptor.debugName = "Triangle";
+
+		Object2D triangleObject(triangleObjectDescriptor);
+		const uint32 triangleObjectIndex = scene.registerObject(triangleObject);
+
+		triangleObject.position = {0.45f, -0.625f};
+
 		renderer.registerScene(scene);
 	}
 

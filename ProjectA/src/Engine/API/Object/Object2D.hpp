@@ -16,8 +16,8 @@ namespace ProjectA {
 			Object2D(const Object2DDescriptor& descriptor);
 
 		public:
-			const uint32 geometryIndex;
-			const uint32 materialIndex;
+			uint32 geometryIndex;
+			uint32 materialIndex;
 			mat3x3<float32> transform;
 			vec2<float32> position;
 	};

@@ -2,6 +2,8 @@
 
 #include "DebugPhysics2DRenderer.hpp"
 
+#include "Engine/API/Material/ColorMaterial.hpp"
+
 namespace ProjectA {
 	DebugPhysics2DRenderer::DebugPhysics2DRenderer() {
 		constexpr uint64 cameraBufferSize = sizeof(CameraUniform);
@@ -18,34 +20,52 @@ namespace ProjectA {
 	}
 
 	void DebugPhysics2DRenderer::registerScene(const Scene2D& scene) {
+		this->scene = scene;
+
 		uint32 vertexCount = 0;
+		uint32 instanceCount = 0;
 
 		for (const Object2D& object : scene) {
 			const Geometry2D& geometry = scene.getGeometry(object.geometryIndex);
 
-			vertexCount += static_cast<uint32>(geometry.getVertices().size());
+			vertexCount += static_cast<uint32>(geometry.getVertices().size()) + 1;
 			indexCount += static_cast<uint32>(geometry.getIndices().size());
+			instanceCount += 1;
 		}
 
 		const uint64 vertexBufferSize = vertexCount * sizeof(svec2<float32>);
 		const uint64 indexBufferSize = indexCount * sizeof(uint16);
+		const uint64 instanceBufferSize = instanceCount * sizeof(Instance);
+
+		const uint64 stagingBufferSize = vertexBufferSize + indexBufferSize + instanceBufferSize;
 
 		const ref<Device> device = getDevice();
-		const ref<Buffer> stagingBuffer = createStagingBuffer(vertexBufferSize + indexBufferSize);
+		const ref<Buffer> stagingBuffer = createStagingBuffer(stagingBufferSize);
 
-		svec2<float32>* vertexMappedRange = stagingBuffer->map<svec2<float32>>(0, vertexBufferSize + indexBufferSize);
+		void* mappedRange = stagingBuffer->map<void>(0, stagingBufferSize);
+		svec2<float32>* vertexMappedRange = static_cast<svec2<float32>*>(mappedRange);
 		uint16* indexMappedRange = static_cast<uint16*>(static_cast<void*>(vertexMappedRange + vertexCount));
+		Instance* instanceMappedRange = static_cast<Instance*>(static_cast<void*>(indexMappedRange + indexCount));
 
 		for (const Object2D& object : scene) {
 			const Geometry2D& geometry = scene.getGeometry(object.geometryIndex);
+			const ColorMaterial& material = *std::static_pointer_cast<ColorMaterial>(scene.getMaterial(object.materialIndex)).get();
 			const chain<svec2<float32>>& vertices = geometry.getVertices();
 			const chain<uint16>& indices = geometry.getIndices();
 
 			std::copy(vertices.begin(), vertices.end(), vertexMappedRange);
+
+			// Duplicate the first vertex for line rendering.
+			vertexMappedRange += vertices.size();
+			*vertexMappedRange = vertices[0];
+
 			std::copy(indices.begin(), indices.end(), indexMappedRange);
 
-			vertexMappedRange += vertices.size();
+			instanceMappedRange->fillColor = material.fillColor;
+
+			vertexMappedRange += 1;
 			indexMappedRange += indices.size();
+			instanceMappedRange += 1;
 		}
 
 		stagingBuffer->unmap();
@@ -62,6 +82,12 @@ namespace ProjectA {
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
 
+		BufferDescriptor instanceBufferDescriptor{};
+		instanceBufferDescriptor.size = instanceBufferSize;
+		instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+
+		instanceBuffer = createBuffer(instanceBufferDescriptor);
+
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
@@ -70,6 +96,7 @@ namespace ProjectA {
 		commandEncoder->begin();
 		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, 0, 0, vertexBufferSize);
 		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, vertexBufferSize, 0, indexBufferSize);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, vertexBufferSize + indexBufferSize, 0, instanceBufferSize);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -93,33 +120,49 @@ namespace ProjectA {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> fillVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2DFill.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> lineVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2DLine.vert.spv", vertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fillFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2DFill.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> lineFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2DLine.frag.spv", fragmentShaderModuleDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>(false);
 
-		//VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		//instanceInputBinding.registerAttribute<vec4<float32>>(false);
+		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
+		instanceInputBinding.registerAttribute<vec4<float32>>(false);
 
-		RenderPipelineDescriptor renderPipelineDescriptor;
-		renderPipelineDescriptor.renderPass = getMainRenderPass();
-		renderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
-		renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding/*, instanceInputBinding*/};
-		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		renderPipelineDescriptor.cullMode = CullMode::BACK;
-		renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT;
+		RenderPipelineDescriptor fillRenderPipelineDescriptor;
+		fillRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		fillRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
+		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		fillRenderPipelineDescriptor.vertexShaderModule = fillVertexShaderModule;
+		fillRenderPipelineDescriptor.fragmentShaderModule = fillFragmentShaderModule;
+		fillRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		fillRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		fillRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		fillRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		fillRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
-		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
+		fillRenderPipeline = createRenderPipeline(fillRenderPipelineDescriptor);
+
+		RenderPipelineDescriptor lineRenderPipelineDescriptor;
+		lineRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		lineRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
+		lineRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+		lineRenderPipelineDescriptor.vertexShaderModule = lineVertexShaderModule;
+		lineRenderPipelineDescriptor.fragmentShaderModule = lineFragmentShaderModule;
+		lineRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
+		lineRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
+		lineRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		lineRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		lineRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+
+		lineRenderPipeline = createRenderPipeline(lineRenderPipelineDescriptor);
 	}
 
 	void DebugPhysics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
@@ -130,12 +173,45 @@ namespace ProjectA {
 
 		updateCamera(width, height);
 
-		commandEncoder->bindRenderPipeline(renderPipeline);
+		uint32 indexOffset = 0;
+		uint32 vertexOffset = 0;
+		uint32 instanceOffset = 0;
+
+		commandEncoder->bindRenderPipeline(fillRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
-		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
-		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
+
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->drawIndexed(indexCount, 1, 0);
+		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+
+		for (const Object2D& object : scene) {
+			const Geometry2D& geometry = scene.getGeometry(object.geometryIndex);
+			const uint32 indexCount = static_cast<uint32>(geometry.getIndices().size());
+			const uint32 vertexCount = static_cast<uint32>(geometry.getVertices().size()) + 1;
+
+			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, indexOffset * sizeof(uint16));
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceOffset * sizeof(Instance), sizeof(Instance));
+			commandEncoder->drawIndexed(indexCount, 1, 0);
+
+			indexOffset += indexCount;
+			vertexOffset += vertexCount;
+			instanceOffset += 1;
+		}
+
+		vertexOffset = 0;
+
+		commandEncoder->bindRenderPipeline(lineRenderPipeline);
+		commandEncoder->bindAllDescriptorSets();
+
+		for (const Object2D& object : scene) {
+			const Geometry2D& geometry = scene.getGeometry(object.geometryIndex);
+			const uint32 vertexCount = static_cast<uint32>(geometry.getVertices().size()) + 1;
+
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
+			commandEncoder->draw(vertexCount, 1, 0);
+
+			vertexOffset += vertexCount;
+		}
 	}
 
 	void DebugPhysics2DRenderer::updateCamera(float32 width, float32 height) const {
