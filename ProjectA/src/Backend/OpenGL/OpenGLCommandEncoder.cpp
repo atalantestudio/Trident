@@ -128,8 +128,6 @@ namespace ProjectA {
 	}
 
 	void OpenGLCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {
-		DEBUG_ASSERT(renderPipeline->dynamicState & DynamicState::SCISSOR);
-
 		commandBuffer.emplace_back(createRef<OpenGLSetScissorCommand>(
 			xOffset,
 			yOffset,
@@ -139,8 +137,6 @@ namespace ProjectA {
 	}
 
 	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
-		DEBUG_ASSERT(renderPipeline->dynamicState & DynamicState::VIEWPORT);
-
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(
 			static_cast<GLint>(origin[0]),
 

@@ -14,10 +14,6 @@ namespace ProjectA {
 		public:
 			const OpenGLPipelineLayout& layout;
 
-			#ifdef BUILD_MODE_DEBUG
-				const DynamicState dynamicState;
-			#endif
-
 			GLuint vertexArray;
 			const GLuint program;
 			const GLenum primitiveTopology;

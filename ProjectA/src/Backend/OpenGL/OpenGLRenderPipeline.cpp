@@ -11,9 +11,6 @@
 namespace ProjectA {
 	OpenGLRenderPipeline::OpenGLRenderPipeline(const RenderPipelineDescriptor& descriptor) :
 		layout(*std::static_pointer_cast<OpenGLPipelineLayout>(descriptor.pipelineLayout)),
-		#ifdef BUILD_MODE_DEBUG
-			dynamicState(descriptor.dynamicState),
-		#endif
 		program(glCreateProgram()),
 		primitiveTopology(getGlPrimitiveTopology(descriptor.primitiveTopology)),
 		frontFace(getGlFrontFace(descriptor.frontFace)),

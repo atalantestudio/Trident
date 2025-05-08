@@ -17,9 +17,6 @@
 namespace ProjectA {
 	VulkanRenderPipeline::VulkanRenderPipeline(VkDevice device, const RenderPipelineDescriptor& descriptor) :
 		VulkanPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, std::static_pointer_cast<VulkanPipelineLayout>(descriptor.pipelineLayout).get()),
-		#ifdef BUILD_MODE_DEBUG
-			dynamicState(descriptor.dynamicState),
-		#endif
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);

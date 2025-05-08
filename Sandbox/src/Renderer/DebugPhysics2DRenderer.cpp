@@ -16,7 +16,134 @@ namespace ProjectA {
 		cameraBuffer = createBuffer(cameraBufferDescriptor);
 		cameraMappedRange = cameraBuffer->map<CameraUniform>(0, cameraBufferSize);
 
-		cameraMappedRange->zoomLevel = 90.0f;
+		cameraMappedRange->zoomLevel = 50.0f;
+
+		initializeLineVertexBuffer();
+		initializeLineColorUniformBuffer();
+		initializeLineRenderPipeline();
+	}
+
+	void DebugPhysics2DRenderer::initializeLineVertexBuffer() {
+		const ref<Swapchain> swapchain = getSwapchain();
+
+		constexpr uint32 gap = 48;
+		const uint32 columnCount = swapchain->getExtentWidth() / gap;
+		const uint32 rowCount = swapchain->getExtentHeight() / gap;
+		gridVertexCount = (columnCount + rowCount) * 2;
+		const uint64 lineVertexBufferSize = static_cast<uint64>(4 + gridVertexCount) * sizeof(svec2<float32>);
+
+		const ref<Buffer> lineVertexStagingBuffer = createStagingBuffer(lineVertexBufferSize);
+
+		svec2<float32>* lineVertexMappedRange = lineVertexStagingBuffer->map<svec2<float32>>(0, lineVertexBufferSize);
+
+		lineVertexMappedRange[0] = {-1.0f,  0.0f};
+		lineVertexMappedRange[1] = { 1.0f,  0.0f};
+		lineVertexMappedRange[2] = { 0.0f,  1.0f};
+		lineVertexMappedRange[3] = { 0.0f, -1.0f};
+		lineVertexMappedRange += 4;
+
+		const float32 columnGap = gap / static_cast<float32>(swapchain->getExtentHeight()) * 2.0f;
+		float32 x = columnGap;
+
+		for (uint32 columnIndex = 0; columnIndex < columnCount; columnIndex += 2) {
+			*lineVertexMappedRange++ = {-x,  1.0f};
+			*lineVertexMappedRange++ = {-x, -1.0f};
+			*lineVertexMappedRange++ = { x,  1.0f};
+			*lineVertexMappedRange++ = { x, -1.0f};
+
+			x += columnGap;
+		}
+
+		const float32 rowGap = gap / static_cast<float32>(swapchain->getExtentWidth()) * 2.0f;
+		float32 y = rowGap;
+
+		for (uint32 rowIndex = 0; rowIndex < rowCount; rowIndex += 2) {
+			*lineVertexMappedRange++ = {-1.0f,  y};
+			*lineVertexMappedRange++ = { 1.0f,  y};
+			*lineVertexMappedRange++ = {-1.0f, -y};
+			*lineVertexMappedRange++ = { 1.0f, -y};
+
+			y += rowGap;
+		}
+
+		lineVertexStagingBuffer->unmap();
+
+		BufferDescriptor lineVertexBufferDescriptor;
+		lineVertexBufferDescriptor.size = lineVertexBufferSize;
+		lineVertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+
+		lineVertexBuffer = createBuffer(lineVertexBufferDescriptor);
+
+		const ref<Device> device = getDevice();
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+		commandEncoder->begin();
+		commandEncoder->copyBufferToBuffer(lineVertexStagingBuffer, lineVertexBuffer, 0, 0, lineVertexBufferSize);
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->waitIdle();
+	}
+
+	void DebugPhysics2DRenderer::initializeLineColorUniformBuffer() {
+		constexpr uint64 lineColorBufferSize = sizeof(vec4<float32>);
+
+		BufferDescriptor lineColorUniformBufferDescriptor;
+		lineColorUniformBufferDescriptor.size = lineColorBufferSize;
+		lineColorUniformBufferDescriptor.usage = BufferUsage::UNIFORM;
+		lineColorUniformBufferDescriptor.persistent = true;
+
+		lineColorUniformBuffer = createBuffer(lineColorUniformBufferDescriptor);
+		lineColorMappedRange = lineColorUniformBuffer->map<vec4<float32>>(0, lineColorBufferSize);
+	}
+
+	void DebugPhysics2DRenderer::initializeLineRenderPipeline() {
+		DescriptorSetLayoutBinding lineColorDescriptorSetLayoutBinding;
+		lineColorDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		lineColorDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		lineColorDescriptorSetLayoutBinding.buffers = {lineColorUniformBuffer};
+
+		DescriptorSetLayout lineColorDescriptorSetLayout;
+		lineColorDescriptorSetLayout.bindings = {lineColorDescriptorSetLayoutBinding};
+
+		PipelineLayoutDescriptor linePipelineLayoutDescriptor;
+		linePipelineLayoutDescriptor.layouts = {lineColorDescriptorSetLayout};
+
+		lineRenderPipelineLayout = createPipelineLayout(linePipelineLayoutDescriptor);
+
+		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/DebugPhysics2DLine.vert.spv", vertexShaderModuleDescriptor);
+
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/DebugPhysics2DLine.frag.spv", fragmentShaderModuleDescriptor);
+
+		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+		vertexInputBinding.registerAttribute<svec2<float32>>(false);
+
+		RenderPipelineDescriptor lineRenderPipelineDescriptor;
+		lineRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		lineRenderPipelineDescriptor.pipelineLayout = lineRenderPipelineLayout;
+		lineRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+		lineRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		lineRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		lineRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
+		lineRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
+		lineRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		lineRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		lineRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+
+		lineRenderPipeline = createRenderPipeline(lineRenderPipelineDescriptor);
 	}
 
 	void DebugPhysics2DRenderer::registerScene(const Scene2D& scene) {
@@ -120,15 +247,15 @@ namespace ProjectA {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fillVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2DFill.vert.spv", vertexShaderModuleDescriptor);
-		const ref<ShaderModule> lineVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2DLine.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> fillVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/DebugPhysics2DFill.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> strokeVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/DebugPhysics2DStroke.vert.spv", vertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fillFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2DFill.frag.spv", fragmentShaderModuleDescriptor);
-		const ref<ShaderModule> lineFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2DLine.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fillFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/DebugPhysics2DFill.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> strokeFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/DebugPhysics2DStroke.frag.spv", fragmentShaderModuleDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>(false);
@@ -150,19 +277,19 @@ namespace ProjectA {
 
 		fillRenderPipeline = createRenderPipeline(fillRenderPipelineDescriptor);
 
-		RenderPipelineDescriptor lineRenderPipelineDescriptor;
-		lineRenderPipelineDescriptor.renderPass = getMainRenderPass();
-		lineRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
-		lineRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-		lineRenderPipelineDescriptor.vertexShaderModule = lineVertexShaderModule;
-		lineRenderPipelineDescriptor.fragmentShaderModule = lineFragmentShaderModule;
-		lineRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
-		lineRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
-		lineRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		lineRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		lineRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		RenderPipelineDescriptor strokeRenderPipelineDescriptor;
+		strokeRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		strokeRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
+		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+		strokeRenderPipelineDescriptor.vertexShaderModule = strokeVertexShaderModule;
+		strokeRenderPipelineDescriptor.fragmentShaderModule = strokeFragmentShaderModule;
+		strokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
+		strokeRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
+		strokeRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		strokeRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
-		lineRenderPipeline = createRenderPipeline(lineRenderPipelineDescriptor);
+		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
 	}
 
 	void DebugPhysics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
@@ -173,15 +300,34 @@ namespace ProjectA {
 
 		updateCamera(width, height);
 
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+
+		renderGrid(commandEncoder);
+		renderScene(commandEncoder);
+	}
+
+	void DebugPhysics2DRenderer::renderGrid(const ref<CommandEncoder>& commandEncoder) const {
+		commandEncoder->bindRenderPipeline(lineRenderPipeline);
+		commandEncoder->bindAllDescriptorSets();
+		commandEncoder->bindVertexBuffer(0, lineVertexBuffer, 0, sizeof(svec2<float32>));
+
+		//*lineColorMappedRange = {0.867f, 0.867f, 0.867f, 1.0f};
+
+		//commandEncoder->draw(gridVertexCount, 1, 4);
+
+		*lineColorMappedRange = {0.733f, 0.733f, 0.733f, 1.0f};
+
+		commandEncoder->draw(4, 1, 0);
+	}
+
+	void DebugPhysics2DRenderer::renderScene(const ref<CommandEncoder>& commandEncoder) const {
 		uint32 indexOffset = 0;
 		uint32 vertexOffset = 0;
 		uint32 instanceOffset = 0;
 
 		commandEncoder->bindRenderPipeline(fillRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
-
-		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 
 		for (const Object2D& object : scene) {
 			const Geometry2D& geometry = scene.getGeometry(object.geometryIndex);
@@ -200,15 +346,15 @@ namespace ProjectA {
 
 		vertexOffset = 0;
 
-		commandEncoder->bindRenderPipeline(lineRenderPipeline);
+		commandEncoder->bindRenderPipeline(strokeRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
+		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
 
 		for (const Object2D& object : scene) {
 			const Geometry2D& geometry = scene.getGeometry(object.geometryIndex);
 			const uint32 vertexCount = static_cast<uint32>(geometry.getVertices().size()) + 1;
 
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
-			commandEncoder->draw(vertexCount, 1, 0);
+			commandEncoder->draw(vertexCount, 1, vertexOffset);
 
 			vertexOffset += vertexCount;
 		}

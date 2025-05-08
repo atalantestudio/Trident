@@ -13,7 +13,7 @@ namespace ProjectA {
 		access = GL_MAP_WRITE_BIT;
 
 		if (descriptor.persistent) {
-			access |= GL_MAP_PERSISTENT_BIT;
+			access |= GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
 		}
 
 		glNamedBufferStorage(object, size, nullptr, access);

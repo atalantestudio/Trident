@@ -16,6 +16,17 @@ namespace ProjectA {
 			void updateCamera(float32 width, float32 height) const;
 
 		private:
+			void initializeLineVertexBuffer();
+
+			void initializeLineColorUniformBuffer();
+
+			void initializeLineRenderPipeline();
+
+			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
+
+			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
+
+		private:
 			struct Instance {
 				vec4<float32> fillColor;
 			};
@@ -30,14 +41,23 @@ namespace ProjectA {
 			ref<Buffer> indexBuffer;
 			ref<Buffer> instanceBuffer;
 
+			ref<Buffer> lineVertexBuffer;
+
+			ref<Buffer> lineColorUniformBuffer;
+			vec4<float32>* lineColorMappedRange = nullptr;
+
 			ref<Buffer> cameraBuffer;
 			CameraUniform* cameraMappedRange = nullptr;
 
-			ref<PipelineLayout> renderPipelineLayout;
-			ref<RenderPipeline> fillRenderPipeline;
+			ref<PipelineLayout> lineRenderPipelineLayout;
 			ref<RenderPipeline> lineRenderPipeline;
 
+			ref<PipelineLayout> renderPipelineLayout;
+			ref<RenderPipeline> fillRenderPipeline;
+			ref<RenderPipeline> strokeRenderPipeline;
+
 			uint32 indexCount = 0;
+			uint32 gridVertexCount = 0;
 
 			Scene2D scene;
 	};
