@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Engine/API/Event/Event.hpp"
-#include "Engine/API/Event/MouseEvent.hpp"
+#include "Engine/API/Event/EventDispatcher.hpp"
+#include "Engine/API/Event/Mouse/MouseWheelEvent.hpp"
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
-#include "Engine/API/Event/WindowEvent.hpp"
 #include "Engine/Camera/OrthographicCamera3D.hpp"
 
 namespace ProjectA {
@@ -43,7 +42,7 @@ namespace ProjectA {
 			void onEvent(Event& event);
 
 		private:
-			bool onMouseScroll(MouseScrollEvent& event);
+			bool onMouseWheel(MouseWheelEvent& event);
 
 			bool onWindowResize(WindowResizeEvent& event);
 

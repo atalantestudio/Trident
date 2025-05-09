@@ -23,6 +23,8 @@ namespace ProjectA {
 
 		cameraUniformBuffer = createBuffer(cameraBufferDescriptor);
 		cameraMappedRange = cameraUniformBuffer->map<CameraUniform>(0, cameraBufferSize);
+
+		cameraMappedRange->zoomLevel = DEFAULT_ZOOM_LEVEL;
 	}
 
 	void DebugPhysics2DRenderer::initializeViewUniformBuffer() {
@@ -267,14 +269,30 @@ namespace ProjectA {
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
 	}
 
+	void DebugPhysics2DRenderer::zoom(float32 zoomLevelDelta) const {
+		float32 zoomLevel = cameraMappedRange->zoomLevel + zoomLevelDelta / 120.0f * ZOOM_SENSITIVITY;
+
+		// TODO: lyah::max
+		if (zoomLevel < MIN_ZOOM_LEVEL) {
+			zoomLevel = MIN_ZOOM_LEVEL;
+		}
+
+		// TODO: lyah::min
+		if (zoomLevel > MAX_ZOOM_LEVEL) {
+			zoomLevel = MAX_ZOOM_LEVEL;
+		}
+
+		cameraMappedRange->zoomLevel = zoomLevel;
+	}
+
 	void DebugPhysics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		const ref<Swapchain>& swapchain = getSwapchain();
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
-		updateCameraUniform(width, height);
-		updateViewUniform(width, height);
+		updateCameraProjection(width, height);
+		updateViewport(width, height);
 
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
@@ -329,7 +347,7 @@ namespace ProjectA {
 		}
 	}
 
-	void DebugPhysics2DRenderer::updateCameraUniform(float32 width, float32 height) const {
+	void DebugPhysics2DRenderer::updateCameraProjection(float32 width, float32 height) const {
 		const float32 left = -width / 2.0f;
 		const float32 right = width / 2.0f;
 		const float32 top = height / 2.0f;
@@ -340,12 +358,10 @@ namespace ProjectA {
 			0.0f,                   2.0f / (top - bottom), -(top + bottom) / (top - bottom),
 			0.0f,                   0.0f,                   1.0f,
 		};
-
-		// TODO: Animate.
-		cameraMappedRange->zoomLevel = 64.0f;
 	}
 
-	void DebugPhysics2DRenderer::updateViewUniform(float32 width, float32 height) const {
+	void DebugPhysics2DRenderer::updateViewport(float32 width, float32 height) const {
+		// TODO: Only update viewport after a window resize event.
 		viewMappedRange->viewport.x = width;
 		viewMappedRange->viewport.y = height;
 	}

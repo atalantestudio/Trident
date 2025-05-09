@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/API/Event/Mouse/MouseWheelEvent.hpp"
 #include "Engine/API/Event/Window/WindowCloseEvent.hpp"
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 
@@ -26,6 +27,7 @@ namespace ProjectA {
 		sint32 cursorX;
 		sint32 cursorY;
 
+		EventListener<MouseWheelEvent> mouseWheelEventListener;
 		EventListener<WindowResizeEvent> windowResizeEventListener;
 		EventListener<WindowCloseEvent> windowCloseEventListener;
 

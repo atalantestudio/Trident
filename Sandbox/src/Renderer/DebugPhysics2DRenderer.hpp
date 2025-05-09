@@ -11,6 +11,8 @@ namespace ProjectA {
 			// After registering the scene, the vertex buffer cannot be resized.
 			void registerScene(const Scene2D& scene);
 
+			void zoom(float32 zoomLevelDelta) const;
+
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
 		private:
@@ -26,9 +28,9 @@ namespace ProjectA {
 
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
 
-			void updateCameraUniform(float32 width, float32 height) const;
+			void updateCameraProjection(float32 width, float32 height) const;
 
-			void updateViewUniform(float32 width, float32 height) const;
+			void updateViewport(float32 width, float32 height) const;
 
 		private:
 			struct Instance {
@@ -43,6 +45,12 @@ namespace ProjectA {
 			struct ViewUniform {
 				svec2<float32> viewport;
 			};
+
+		private:
+			static constexpr float32 DEFAULT_ZOOM_LEVEL = 64.0f;
+			static constexpr float32 MIN_ZOOM_LEVEL = 16.0f;
+			static constexpr float32 MAX_ZOOM_LEVEL = 128.0f;
+			static constexpr float32 ZOOM_SENSITIVITY = 4.0f;
 
 		private:
 			ref<Buffer> vertexBuffer;

@@ -13,6 +13,11 @@ namespace ProjectA {
 
 			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const final override;
 
+			void onEvent(Event& event) final override;
+
+		private:
+			bool onMouseWheel(MouseWheelEvent& event) const;
+
 		private:
 			DebugPhysics2DRenderer renderer;
 	};

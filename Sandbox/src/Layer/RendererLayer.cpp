@@ -77,4 +77,16 @@ namespace ProjectA {
 	void RendererLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
 		renderer.render(commandEncoder);
 	}
+
+	void RendererLayer::onEvent(Event& event) {
+		EventDispatcher eventDispatcher(event);
+
+		eventDispatcher.dispatch<MouseWheelEvent>(BIND(onMouseWheel));
+	}
+
+	bool RendererLayer::onMouseWheel(MouseWheelEvent& event) const {
+		renderer.zoom(static_cast<float32>(event.getDelta()));
+
+		return true;
+	}
 }

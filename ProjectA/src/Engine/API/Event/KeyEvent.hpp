@@ -30,14 +30,6 @@ namespace ProjectA {
 			sint32 getPressCount() const {
 				return pressCount;
 			}
-
-			std::string toString() const override {
-				std::stringstream stream;
-
-				stream << getName() << ": " << getKeyCode() << " (" << getPressCount() << " repeats)";
-
-				return stream.str();
-			}
 	};
 
 	class KeyReleaseEvent : public KeyEvent {
@@ -45,14 +37,6 @@ namespace ProjectA {
 			KeyReleaseEvent(KeyCode keyCode) : KeyEvent(keyCode) {}
 
 			EVENT_TYPE(EventType::KEY_RELEASE)
-
-			std::string toString() const override {
-				std::stringstream stream;
-
-				stream << getName() << ": " << getKeyCode();
-
-				return stream.str();
-			}
 	};
 
 	class KeyTypeEvent : public KeyEvent {
@@ -60,13 +44,5 @@ namespace ProjectA {
 			KeyTypeEvent(KeyCode keyCode) : KeyEvent(keyCode) {}
 
 			EVENT_TYPE(EventType::KEY_TYPE)
-
-			std::string toString() const override {
-				std::stringstream stream;
-
-				stream << getName() << ": " << getKeyCode();
-
-				return stream.str();
-			}
 	};
 }

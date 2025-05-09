@@ -2,8 +2,7 @@
 
 namespace ProjectA {
 	struct WindowDescriptor {
-		// The window name.
-		std::string name;
+		std::string_view name;
 
 		// TODO: Use vec2<sint32>.
 		uint32 width;

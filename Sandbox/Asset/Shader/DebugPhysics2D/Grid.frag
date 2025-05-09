@@ -23,15 +23,16 @@ layout(location = 0) out vec4 color;
 
 void main() {
 	// Get the current fragment coordinate in the range [-viewport / 2, viewport].
-	ivec2 coordinate = ivec2(floor(vertexOutput.textureCoordinate * view.viewport + 0.5));
+	vec2 coordinate = floor(vertexOutput.textureCoordinate * view.viewport + 0.5);
+	coordinate.x += 1.0;
 
-	int spacing = int(floor(SPACING * camera.zoomLevel));
+	float spacing = floor(SPACING * camera.zoomLevel);
 
 	vec2 line = mod(coordinate, spacing);
-	bool isLine = min(line.x, line.y) == 0.0;
+	bool isLine = int(min(line.x, line.y)) == 0;
 
-	ivec2 axis = abs(coordinate);
-	bool isAxis = min(axis.x, axis.y) == 0;
+	vec2 axis = abs(coordinate);
+	bool isAxis = int(min(axis.x, axis.y)) == 0;
 
 	color.rgb = float(isLine && !isAxis) * LINE_COLOR;
 	color.rgb += float(isAxis) * AXIS_COLOR;

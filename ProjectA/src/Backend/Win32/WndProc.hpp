@@ -297,6 +297,18 @@ namespace ProjectA {
 
 				break;
 			}
+			case WM_MOUSEWHEEL: {
+				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousewheel.
+				const sint16 wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+
+				if (windowData->mouseWheelEventListener) {
+					MouseWheelEvent mouseWheelEvent(wheelDelta);
+
+					windowData->mouseWheelEventListener(mouseWheelEvent);
+				}
+
+				return 0;
+			}
 			default:
 				break;
 		}

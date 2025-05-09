@@ -63,14 +63,14 @@ namespace ProjectA {
 
 		EventDispatcher eventDispatcher(event);
 
-		eventDispatcher.dispatch<MouseScrollEvent>(BIND(OrthographicCamera3DController::onMouseScroll));
+		eventDispatcher.dispatch<MouseWheelEvent>(BIND(OrthographicCamera3DController::onMouseWheel));
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(OrthographicCamera3DController::onWindowResize));
 	}
 
-	bool OrthographicCamera3DController::onMouseScroll(MouseScrollEvent& event) {
+	bool OrthographicCamera3DController::onMouseWheel(MouseWheelEvent& event) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		zoomLevel -= event.getOffset()[1] / 2;
+		zoomLevel -= static_cast<float32>(event.getDelta()) * 0.5f;
 		zoomLevel = std::max(zoomLevel, 0.25f);
 		speed = zoomLevel;
 
@@ -90,6 +90,6 @@ namespace ProjectA {
 	void OrthographicCamera3DController::updateProjection() {
 		bounds = {-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel};
 
-		camera.updateProjection(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1, 1);
+		camera.updateProjection(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel, -1.0f, 1.0f);
 	}
 }

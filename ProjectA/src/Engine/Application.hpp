@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Engine/API/CommandEncoder.hpp"
-#include "Engine/API/Event/Window/WindowResizeEvent.hpp"
+#include "Engine/API/Event/Mouse/MouseWheelEvent.hpp"
 #include "Engine/API/Event/Window/WindowCloseEvent.hpp"
+#include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/Event/WindowEvent.hpp"
 #include "Engine/API/SharedMemory/SharedMemory.hpp"
 #include "Engine/API/Synchronization/Fence.hpp"
@@ -40,8 +41,6 @@ namespace ProjectA {
 
 			float64 getRendersPerSecondAverage() const;
 
-			void onEvent(Event& event);
-
 			template<typename T, typename... U>
 			void registerLayer(U&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
@@ -74,6 +73,8 @@ namespace ProjectA {
 			void render(float64 remainingFrameTime);
 
 			void postRender();
+
+			void onEvent(Event& event);
 
 			void onWindowResize(WindowResizeEvent& event);
 

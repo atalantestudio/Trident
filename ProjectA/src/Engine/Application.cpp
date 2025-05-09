@@ -66,6 +66,7 @@ namespace ProjectA {
 		mutex->release();
 
 		window = createScope<Window>(windowDescriptor);
+		window->setEventListener<MouseWheelEvent>(BIND(Application::onEvent));
 		window->setEventListener<WindowResizeEvent>(BIND(Application::onWindowResize));
 		window->setEventListener<WindowCloseEvent>(BIND(Application::onWindowClose));
 
@@ -294,18 +295,20 @@ namespace ProjectA {
 	}
 
 	void Application::onEvent(Event& event) {
-		/*PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNC_SIG);
 
-		for (chain<Layer*>::const_reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); i += 1) {
+		for (chain<ref<Layer>>::const_reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); i += 1) {
 			if (event.handled) {
 				break;
 			}
 
 			(*i)->onEvent(event);
-		}*/
+		}
 	}
 
 	void Application::onWindowResize(WindowResizeEvent& event) {
+		PROFILE_SCOPE(FUNC_SIG);
+
 		if (window->isMinimized()) {
 			return;
 		}
