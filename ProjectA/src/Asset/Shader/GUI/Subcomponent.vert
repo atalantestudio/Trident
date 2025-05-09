@@ -1,6 +1,8 @@
 #version 440
 
-layout(location = 0) in vec3 vertexPosition;
+// TODO: Remove padding.
+layout(location = 0) in vec4 vertexPosition;
+
 layout(location = 1) in vec2 vertexImageCoordinate;
 layout(location = 2) in mat3x3 world;
 layout(location = 5) in mat3x3 imageWorld;
@@ -17,7 +19,7 @@ out VertexOutput {
 } vertexOutput;
 
 void main() {
-	gl_Position = vec4(camera.projection * world * vertexPosition, 1.0);
+	gl_Position = vec4(camera.projection * world * vertexPosition.xyz, 1.0);
 
 	vertexOutput.imageCoordinate = imageWorld * vec3(vertexImageCoordinate, 1.0);
 	vertexOutput.imageCoordinate.z = float(imageIndex);

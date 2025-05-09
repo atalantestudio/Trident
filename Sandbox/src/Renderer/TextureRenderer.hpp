@@ -3,9 +3,9 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	class TextureDemoRenderer : public Renderer {
+	class TextureRenderer : public Renderer {
 		public:
-			TextureDemoRenderer();
+			TextureRenderer();
 
 			void build(const ref<Image>& image);
 
@@ -18,8 +18,8 @@ namespace ProjectA {
 
 		private:
 			struct Vertex {
-				vec2<float32> position;
-				vec2<float32> uv;
+				svec2<float32> position;
+				svec2<float32> uv;
 			};
 
 		private:

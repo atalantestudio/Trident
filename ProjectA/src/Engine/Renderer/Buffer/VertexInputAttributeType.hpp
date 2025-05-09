@@ -1,8 +1,8 @@
 #pragma once
 
 namespace ProjectA {
-	// TODO: Implement remaining types with the next version of Lyah.
-	enum class VertexInputAttributeType : uint32 {
+	// TODO: Implement remaining types using scalar vectors.
+	enum class VertexInputAttributeType : uint8 {
 		R8_SINT,
 		R8_UINT,
 		R16_SINT,
@@ -86,12 +86,6 @@ namespace ProjectA {
 		return VertexInputAttributeType::R32G32_FLOAT;
 	}
 
-	// Deprecated. Use getVertexInputAttributeType<svec2<float32>>() instead.
-	template<>
-	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec2<float32>>() {
-		return VertexInputAttributeType::R32G32_FLOAT;
-	}
-
 	/* template<>
 	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec3<sint32>>() {
 		return VertexInputAttributeType::R32G32B32_SINT;
@@ -104,12 +98,6 @@ namespace ProjectA {
 
 	template<>
 	static constexpr VertexInputAttributeType getVertexInputAttributeType<svec3<float32>>() {
-		return VertexInputAttributeType::R32G32B32_FLOAT;
-	}
-
-	// Deprecated. Use getVertexInputAttributeType<svec3<float32>>() instead.
-	template<>
-	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec3<float32>>() {
 		return VertexInputAttributeType::R32G32B32_FLOAT;
 	}
 

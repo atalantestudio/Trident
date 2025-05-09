@@ -25,8 +25,8 @@ namespace ProjectA {
 
 		private:
 			struct Vertex {
-				vec2<float32> position;
-				vec2<float32> uv;
+				svec2<float32> position;
+				svec2<float32> uv;
 			};
 
 			struct Camera {

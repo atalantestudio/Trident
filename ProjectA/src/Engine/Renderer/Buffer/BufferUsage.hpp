@@ -1,5 +1,8 @@
 #pragma once
 
+// TODO: Remove PCH header.
+#include "pch.hpp"
+
 namespace ProjectA {
 	enum class BufferUsage : uint16 {
 		TRANSFER_SRC = BIT(0),

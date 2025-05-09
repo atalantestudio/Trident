@@ -2,6 +2,7 @@
 
 #include "Engine/Renderer/PhysicalDevice.hpp"
 #include "Engine/Renderer/Queue.hpp"
+#include "Engine/Renderer/Status.hpp"
 
 namespace ProjectA {
 	class Device {

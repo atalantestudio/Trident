@@ -10,13 +10,9 @@ namespace ProjectA {
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
 		private:
-			void setupVertexBuffer();
-			void setupRenderPipeline();
-
-		private:
 			struct Vertex {
-				vec2<float32> position;
-				vec3<float32> color;
+				svec2<float32> position;
+				svec3<float32> color;
 			};
 
 		private:

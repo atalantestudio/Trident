@@ -24,10 +24,10 @@ namespace ProjectA {
 		lennaImageView = lennaImage->createView(imageViewDescriptor);
 		pepperImageView = pepperImage->createView(imageViewDescriptor);
 
-		setupSampler();
-		setupRenderPipeline();
-		setupVertexBuffer();
-		setupInstanceVertexBuffer();
+		initializeSampler();
+		initializeRenderPipeline();
+		initializeVertexBuffer();
+		initializeInstanceVertexBuffer();
 	}
 
 	ref<Image> TextureArrayRenderer::loadImage(const std::string& imagePath) {
@@ -75,7 +75,7 @@ namespace ProjectA {
 		return image;
 	}
 
-	void TextureArrayRenderer::setupSampler() {
+	void TextureArrayRenderer::initializeSampler() {
 		SamplerDescriptor samplerDescriptor{};
 		samplerDescriptor.magFilter = SamplerFilter::LINEAR;
 		samplerDescriptor.minFilter = SamplerFilter::NEAREST;
@@ -83,7 +83,7 @@ namespace ProjectA {
 		sampler = createSampler(samplerDescriptor);
 	}
 
-	void TextureArrayRenderer::setupRenderPipeline() {
+	void TextureArrayRenderer::initializeRenderPipeline() {
 		DescriptorSetLayoutBinding textureArrayDescriptorSetLayoutBinding;
 		textureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 		textureArrayDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
@@ -101,10 +101,13 @@ namespace ProjectA {
 		renderPipelineLayout = createPipelineLayout(renderPipelineLayoutDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<vec2<float32>>(false);
+		vertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<vec2<float32>>(false);
+
+		// TODO: Remove padding.
+		instanceInputBinding.registerAttribute<vec4<float32>>(false);
+
 		instanceInputBinding.registerAttribute<uint32>(false);
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
@@ -134,19 +137,19 @@ namespace ProjectA {
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 	}
 
-	void TextureArrayRenderer::setupVertexBuffer() {
-		constexpr uint64 vertexBufferSize = sizeof(Vertex) * 6;
+	void TextureArrayRenderer::initializeVertexBuffer() {
+		constexpr uint64 vertexBufferSize = 6 * sizeof(svec2<float32>);
 
 		const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
 
-		Vertex* vertices = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
+		svec2<float32>* vertices = vertexStagingBuffer->map<svec2<float32>>(0, vertexBufferSize);
 
-		vertices[0].position = {-0.5f,  0.5f};
-		vertices[1].position = { 0.5f,  0.5f};
-		vertices[2].position = { 0.5f, -0.5f};
-		vertices[3].position = {-0.5f,  0.5f};
-		vertices[4].position = { 0.5f, -0.5f};
-		vertices[5].position = {-0.5f, -0.5f};
+		vertices[0] = {-0.5f,  0.5f};
+		vertices[1] = { 0.5f,  0.5f};
+		vertices[2] = { 0.5f, -0.5f};
+		vertices[3] = {-0.5f,  0.5f};
+		vertices[4] = { 0.5f, -0.5f};
+		vertices[5] = {-0.5f, -0.5f};
 
 		vertexStagingBuffer->unmap();
 
@@ -172,20 +175,20 @@ namespace ProjectA {
 		device->waitIdle();
 	}
 
-	void TextureArrayRenderer::setupInstanceVertexBuffer() {
+	void TextureArrayRenderer::initializeInstanceVertexBuffer() {
 		constexpr uint64 instanceVertexBufferSize = sizeof(Instance) * 4;
 
 		const ref<Buffer> instanceVertexStagingBuffer = createStagingBuffer(instanceVertexBufferSize);
 
 		Instance* instances = instanceVertexStagingBuffer->map<Instance>(0, instanceVertexBufferSize);
 
-		instances[0].offset = {-0.5f,  0.5f};
+		instances[0].offset = {-0.5f,  0.5f,  0.0f,  0.0f};
 		instances[0].textureIndex = 0;
-		instances[1].offset = { 0.5f,  0.5f};
+		instances[1].offset = { 0.5f,  0.5f,  0.0f,  0.0f};
 		instances[1].textureIndex = 1;
-		instances[2].offset = {-0.5f, -0.5f};
+		instances[2].offset = {-0.5f, -0.5f,  0.0f,  0.0f};
 		instances[2].textureIndex = 2;
-		instances[3].offset = { 0.5f, -0.5f};
+		instances[3].offset = { 0.5f, -0.5f,  0.0f,  0.0f};
 		instances[3].textureIndex = 3;
 
 		instanceVertexStagingBuffer->unmap();
@@ -220,7 +223,7 @@ namespace ProjectA {
 
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindAllDescriptorSets();
-		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
 		commandEncoder->bindVertexBuffer(1, instanceVertexBuffer, 0, sizeof(Instance));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());

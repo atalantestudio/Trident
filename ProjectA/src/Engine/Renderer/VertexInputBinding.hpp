@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/Buffer/Attribute.hpp"
 #include "Engine/Renderer/Buffer/VertexInputAttributeType.hpp"
 #include "Engine/Renderer/InputRate.hpp"
 #include "Engine/Renderer/VertexInputAttribute.hpp"
@@ -25,24 +24,29 @@ namespace ProjectA {
 
 				attributes.emplace_back(vertexInputAttribute);
 
-				// TODO: uint32 lyah::max(uint32, uint32).
-				alignment = std::max(alignment, getAttributeSize<AttributeType>());
+				const uint32 attributeSize = static_cast<uint32>(sizeof(AttributeType));
 
+				// TODO: uint32 lyah::max(uint32, uint32).
+				alignment = std::max(alignment, attributeSize);
+
+				// TODO: Calculate correct required alignment.
 				stride += alignment;
 			}
 
 			template<>
 			constexpr void registerAttribute<mat3x3<float32>>(bool normalized) {
-				registerAttribute<vec3<float32>>(normalized);
-				registerAttribute<vec3<float32>>(normalized);
-				registerAttribute<vec3<float32>>(normalized);
+				// Pad 3x3 matrices.
+				registerAttribute<vec4<float32>>(normalized);
+				registerAttribute<vec4<float32>>(normalized);
+				registerAttribute<vec4<float32>>(normalized);
 			}
 
 			template<>
 			constexpr void registerAttribute<mat3x3<float64>>(bool normalized) {
-				registerAttribute<vec3<float64>>(normalized);
-				registerAttribute<vec3<float64>>(normalized);
-				registerAttribute<vec3<float64>>(normalized);
+				// Pad 3x3 matrices.
+				registerAttribute<vec4<float64>>(normalized);
+				registerAttribute<vec4<float64>>(normalized);
+				registerAttribute<vec4<float64>>(normalized);
 			}
 
 			template<>

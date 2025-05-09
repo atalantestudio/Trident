@@ -8,30 +8,30 @@ namespace ProjectA {
 	GUIRenderer::GUIRenderer() {}
 
 	void GUIRenderer::build() {
-		setupVertexBuffer();
-		setupIndexBuffer();
-		setupSubcomponentBuffer();
-		setupCameraBuffer();
-		setupSampler();
-		setupRenderPipeline();
+		initializeVertexBuffer();
+		initializeIndexBuffer();
+		initializeSubcomponentBuffer();
+		initializeCameraBuffer();
+		initializeSampler();
+		initializeRenderPipeline();
 	}
 
-	void GUIRenderer::setupVertexBuffer() {
-		// Image coordinates are reversed manually.
- 		const chain<Vertex> vertices = {
-			{{0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-			{{1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
-			{{1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-			{{0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-		};
-
-		const uint64 size = vertices.size() * sizeof(Vertex);
+	void GUIRenderer::initializeVertexBuffer() {
+		constexpr uint64 size = 6 * sizeof(Vertex);
 
 		const ref<Buffer> vertexStagingBuffer = createStagingBuffer(size);
 
 		Vertex* mappedRange = vertexStagingBuffer->map<Vertex>(0, size);
 
-		std::copy(vertices.begin(), vertices.end(), mappedRange);
+		// Image coordinates are reversed manually.
+		mappedRange[0].position = {0.0f, 0.0f, 1.0f, 0.0f};
+		mappedRange[0].imageCoordinate = {0.0f, 0.0f};
+		mappedRange[1].position = {1.0f, 0.0f, 1.0f, 0.0f};
+		mappedRange[1].imageCoordinate = {1.0f, 0.0f};
+		mappedRange[2].position = {1.0f, 1.0f, 1.0f, 0.0f};
+		mappedRange[2].imageCoordinate = {1.0f, 1.0f};
+		mappedRange[3].position = {0.0f, 1.0f, 1.0f, 0.0f};
+		mappedRange[3].imageCoordinate = {0.0f, 1.0f};
 
 		vertexStagingBuffer->unmap();
 
@@ -57,7 +57,7 @@ namespace ProjectA {
 		device->waitIdle();
 	}
 
-	void GUIRenderer::setupIndexBuffer() {
+	void GUIRenderer::initializeIndexBuffer() {
 		const ref<Device> device = getDevice();
 
 		const chain<uint16> indices = {
@@ -95,7 +95,7 @@ namespace ProjectA {
 		device->waitIdle();
 	}
 
-	void GUIRenderer::setupSubcomponentBuffer() {
+	void GUIRenderer::initializeSubcomponentBuffer() {
 		constexpr uint64 size = MAX_SUBCOMPONENTS * sizeof(Subcomponent);
 
 		subcomponentStagingBuffer = createStagingBuffer(size, true);
@@ -108,7 +108,7 @@ namespace ProjectA {
 		subcomponentBuffer = createBuffer(subcomponentBufferDescriptor);
 	}
 
-	void GUIRenderer::setupCameraBuffer() {
+	void GUIRenderer::initializeCameraBuffer() {
 		BufferDescriptor cameraBufferDescriptor{};
 		cameraBufferDescriptor.size = sizeof(mat3x3<float32>);
 		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
@@ -118,7 +118,7 @@ namespace ProjectA {
 		cameraMappedRange = cameraBuffer->map<mat3x3<float32>>(0, cameraBufferDescriptor.size);
 	}
 
-	void GUIRenderer::setupSampler() {
+	void GUIRenderer::initializeSampler() {
 		SamplerDescriptor samplerDescriptor{};
 		samplerDescriptor.magFilter = SamplerFilter::NEAREST;
 		samplerDescriptor.minFilter = SamplerFilter::NEAREST;
@@ -126,7 +126,7 @@ namespace ProjectA {
 		sampler = createSampler(samplerDescriptor);
 	}
 
-	void GUIRenderer::setupRenderPipeline() {
+	void GUIRenderer::initializeRenderPipeline() {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
@@ -174,8 +174,11 @@ namespace ProjectA {
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.frag.spv", fragmentShaderModuleDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<vec3<float32>>(false);
-		vertexInputBinding.registerAttribute<vec2<float32>>(false);
+
+		// TODO: Remove padding.
+		vertexInputBinding.registerAttribute<vec4<float32>>(false);
+
+		vertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		VertexInputBinding subcomponentInputBinding(InputRate::INSTANCE);
 		subcomponentInputBinding.registerAttribute<mat3x3<float32>>(false);

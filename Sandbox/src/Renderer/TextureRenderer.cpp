@@ -3,12 +3,12 @@
 #include "Engine/Filesystem/File/PNGFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
-#include "TextureDemoRenderer.hpp"
+#include "TextureRenderer.hpp"
 
 namespace ProjectA {
-	TextureDemoRenderer::TextureDemoRenderer() {}
+	TextureRenderer::TextureRenderer() {}
 
-	void TextureDemoRenderer::build(const ref<Image>& image) {
+	void TextureRenderer::build(const ref<Image>& image) {
 		const ImageViewDescriptor imageViewDescriptor;
 
 		this->image = image;
@@ -20,7 +20,7 @@ namespace ProjectA {
 		createPipeline();
 	}
 
-	void TextureDemoRenderer::createImageSampler() {
+	void TextureRenderer::createImageSampler() {
 		SamplerDescriptor samplerDescriptor{};
 		samplerDescriptor.magFilter = SamplerFilter::NEAREST;
 		samplerDescriptor.minFilter = SamplerFilter::NEAREST;
@@ -28,12 +28,12 @@ namespace ProjectA {
 		sampler = createSampler(samplerDescriptor);
 	}
 
-	void TextureDemoRenderer::createVertexBuffer() {
-		constexpr uint64 vertexBufferSize = sizeof(vec2<float32>) * 4;
+	void TextureRenderer::createVertexBuffer() {
+		constexpr uint64 vertexBufferSize = sizeof(svec2<float32>) * 4;
 
 		const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
 
-		vec2<float32>* vertices = vertexStagingBuffer->map<vec2<float32>>(0, vertexBufferSize);
+		svec2<float32>* vertices = vertexStagingBuffer->map<svec2<float32>>(0, vertexBufferSize);
 
 		vertices[0] = {-1.0f,  1.0f};
 		vertices[1] = { 1.0f,  1.0f};
@@ -64,7 +64,7 @@ namespace ProjectA {
 		device->waitIdle();
 	}
 
-	void TextureDemoRenderer::createIndexBuffer() {
+	void TextureRenderer::createIndexBuffer() {
 		constexpr uint64 indexBufferSize = sizeof(uint16) * 6;
 
 		const ref<Buffer> indexStagingBuffer = createStagingBuffer(indexBufferSize);
@@ -102,7 +102,7 @@ namespace ProjectA {
 		device->waitIdle();
 	}
 
-	void TextureDemoRenderer::createPipeline() {
+	void TextureRenderer::createPipeline() {
 		DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding;
 		textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 		textureDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
@@ -130,7 +130,7 @@ namespace ProjectA {
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Asset/Shader/Texture.frag.spv", fragmentShaderModuleDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<vec2<float32>>(false);
+		vertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = getMainRenderPass();
@@ -147,7 +147,7 @@ namespace ProjectA {
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 	}
 
-	void TextureDemoRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
+	void TextureRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		const ref<Swapchain>& swapchain = getSwapchain();
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
@@ -156,7 +156,7 @@ namespace ProjectA {
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
-		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(vec2<float32>));
+		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 		commandEncoder->drawIndexed(6, 1, 0);

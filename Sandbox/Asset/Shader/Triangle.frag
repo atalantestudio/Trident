@@ -1,9 +1,11 @@
 #version 450
 
-layout(location = 0) in vec3 v_color;
+in VertexOutput {
+	layout(location = 0) vec3 color;
+} vertexOutput;
 
 layout(location = 0) out vec4 color;
 
 void main() {
-	color = vec4(v_color, 1.0);
+	color = vec4(vertexOutput.color, 1.0);
 }

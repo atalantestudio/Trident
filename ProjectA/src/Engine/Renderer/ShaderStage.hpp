@@ -1,5 +1,8 @@
 #pragma once
 
+// TODO: Remove PCH include.
+#include "pch.hpp"
+
 namespace ProjectA {
 	enum class ShaderStage : uint8 {
 		VERTEX = BIT(0),
@@ -7,6 +10,6 @@ namespace ProjectA {
 		COMPUTE = BIT(2),
 	};
 
-	// TODO: Keep as flag since we now have PipelineStage?
+	// TODO: Does this need to be AS_FLAG since we now have PipelineStage?
 	AS_FLAG(ShaderStage);
 }

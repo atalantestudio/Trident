@@ -30,7 +30,6 @@
 // GUI
 #include "Engine/GUI/GUILayer.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
-#include "Engine/GUI/Object/GUITextObject.hpp"
 
 // Renderer
 #include "Engine/Renderer/Buffer/Buffer.hpp"

@@ -28,12 +28,12 @@ namespace ProjectA {
 			void resetSubcomponentCount();
 
 		private:
-			void setupVertexBuffer();
-			void setupIndexBuffer();
-			void setupSubcomponentBuffer();
-			void setupCameraBuffer();
-			void setupSampler();
-			void setupRenderPipeline();
+			void initializeVertexBuffer();
+			void initializeIndexBuffer();
+			void initializeSubcomponentBuffer();
+			void initializeCameraBuffer();
+			void initializeSampler();
+			void initializeRenderPipeline();
 
 			void updateCamera() const;
 
@@ -41,8 +41,10 @@ namespace ProjectA {
 
 		private:
 			struct Vertex {
-				vec3<float32> position;
-				vec2<float32> imageCoordinate;
+				// TODO: Remove padding.
+				vec4<float32> position;
+
+				svec2<float32> imageCoordinate;
 			};
 
 			struct Subcomponent {

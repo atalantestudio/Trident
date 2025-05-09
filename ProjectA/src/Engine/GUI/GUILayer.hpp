@@ -3,7 +3,6 @@
 #include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/GUI/GUISize.hpp"
 #include "Engine/GUI/LayoutDirection.hpp"
-#include "Engine/GUI/Object/GUIObject.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"
 

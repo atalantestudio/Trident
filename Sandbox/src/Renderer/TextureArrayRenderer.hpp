@@ -12,21 +12,16 @@ namespace ProjectA {
 		private:
 			ref<Image> loadImage(const std::string& imagePath);
 
-			void setupSampler();
-
-			void setupRenderPipeline();
-
-			void setupVertexBuffer();
-
-			void setupInstanceVertexBuffer();
+			void initializeSampler();
+			void initializeRenderPipeline();
+			void initializeVertexBuffer();
+			void initializeInstanceVertexBuffer();
 
 		private:
-			struct Vertex {
-				vec2<float32> position;
-			};
-
 			struct Instance {
-				vec2<float32> offset;
+				// TODO: Remove padding.
+				vec4<float32> offset;
+
 				uint32 textureIndex;
 			};
 

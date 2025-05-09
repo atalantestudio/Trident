@@ -1,8 +1,5 @@
 #pragma once
 
-// TODO: Remove PCH include.
-#include "pch.hpp"
-
 #include "Engine/Renderer/Buffer/BufferUsage.hpp"
 
 namespace ProjectA {

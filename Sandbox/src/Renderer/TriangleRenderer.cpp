@@ -4,14 +4,8 @@
 
 namespace ProjectA {
 	TriangleRenderer::TriangleRenderer() {
-		setupVertexBuffer();
-		setupRenderPipeline();
-	}
-
-	void TriangleRenderer::setupVertexBuffer() {
 		constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
 
-		const ref<Device> device = getDevice();
 		const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
 
 		Vertex* vertices = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
@@ -31,6 +25,8 @@ namespace ProjectA {
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 
+		const ref<Device> device = getDevice();
+
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
@@ -43,9 +39,7 @@ namespace ProjectA {
 
 		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
 		device->waitIdle();
-	}
 
-	void TriangleRenderer::setupRenderPipeline() {
 		const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
 		renderPipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
@@ -63,8 +57,8 @@ namespace ProjectA {
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Asset/Shader/Triangle.frag.spv", fragmentShaderModuleDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<vec2<float32>>(false);
-		vertexInputBinding.registerAttribute<vec3<float32>>(false);
+		vertexInputBinding.registerAttribute<svec2<float32>>(false);
+		vertexInputBinding.registerAttribute<svec3<float32>>(false);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = getMainRenderPass();

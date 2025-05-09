@@ -126,7 +126,7 @@ namespace ProjectA {
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Asset/Shader/Compute.frag.spv", fragmentShaderModuleDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<vec2<float32>>(false);
+		vertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = getMainRenderPass();
@@ -142,20 +142,16 @@ namespace ProjectA {
 
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 
-		const chain<vec2<float32>> vertices = {
-			{-1.0f,  1.0f},
-			{ 1.0f,  1.0f},
-			{ 1.0f, -1.0f},
-			{-1.0f, -1.0f},
-		};
-
-		const uint64 vertexBufferSize = vertices.size() * sizeof(vec2<float32>);
+		constexpr uint64 vertexBufferSize = 4 * sizeof(svec2<float32>);
 
 		const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
 
-		vec2<float32>* vertexMappedRange = vertexStagingBuffer->map<vec2<float32>>(0, vertexBufferSize);
+		svec2<float32>* vertexMappedRange = vertexStagingBuffer->map<svec2<float32>>(0, vertexBufferSize);
 
-		std::copy(vertices.begin(), vertices.end(), vertexMappedRange);
+		vertexMappedRange[0] = {-1.0f,  1.0f};
+		vertexMappedRange[1] = { 1.0f,  1.0f};
+		vertexMappedRange[2] = { 1.0f, -1.0f};
+		vertexMappedRange[3] = {-1.0f, -1.0f};
 
 		vertexStagingBuffer->unmap();
 
@@ -220,7 +216,7 @@ namespace ProjectA {
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
-		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(vec2<float32>));
+		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 		commandEncoder->drawIndexed(6, 1, 0);
