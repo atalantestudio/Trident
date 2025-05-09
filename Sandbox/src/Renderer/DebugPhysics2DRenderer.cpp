@@ -6,6 +6,14 @@
 
 namespace ProjectA {
 	DebugPhysics2DRenderer::DebugPhysics2DRenderer() {
+		initializeCameraUniformBuffer();
+		initializeViewUniformBuffer();
+
+		initializeGridVertexBuffer();
+		initializeGridRenderPipeline();
+	}
+
+	void DebugPhysics2DRenderer::initializeCameraUniformBuffer() {
 		constexpr uint64 cameraBufferSize = sizeof(CameraUniform);
 
 		BufferDescriptor cameraBufferDescriptor;
@@ -13,66 +21,40 @@ namespace ProjectA {
 		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
 		cameraBufferDescriptor.persistent = true;
 
-		cameraBuffer = createBuffer(cameraBufferDescriptor);
-		cameraMappedRange = cameraBuffer->map<CameraUniform>(0, cameraBufferSize);
-
-		cameraMappedRange->zoomLevel = 50.0f;
-
-		initializeLineVertexBuffer();
-		initializeLineColorUniformBuffer();
-		initializeLineRenderPipeline();
+		cameraUniformBuffer = createBuffer(cameraBufferDescriptor);
+		cameraMappedRange = cameraUniformBuffer->map<CameraUniform>(0, cameraBufferSize);
 	}
 
-	void DebugPhysics2DRenderer::initializeLineVertexBuffer() {
-		const ref<Swapchain> swapchain = getSwapchain();
+	void DebugPhysics2DRenderer::initializeViewUniformBuffer() {
+		constexpr uint64 viewportUniformBufferSize = sizeof(ViewUniform);
 
-		constexpr uint32 gap = 48;
-		const uint32 columnCount = swapchain->getExtentWidth() / gap;
-		const uint32 rowCount = swapchain->getExtentHeight() / gap;
-		gridVertexCount = (columnCount + rowCount) * 2;
-		const uint64 lineVertexBufferSize = static_cast<uint64>(4 + gridVertexCount) * sizeof(svec2<float32>);
+		BufferDescriptor viewportUniformBufferDescriptor;
+		viewportUniformBufferDescriptor.size = viewportUniformBufferSize;
+		viewportUniformBufferDescriptor.usage = BufferUsage::UNIFORM;
+		viewportUniformBufferDescriptor.persistent = true;
 
-		const ref<Buffer> lineVertexStagingBuffer = createStagingBuffer(lineVertexBufferSize);
+		viewUniformBuffer = createBuffer(viewportUniformBufferDescriptor);
+		viewMappedRange = viewUniformBuffer->map<ViewUniform>(0, viewportUniformBufferSize);
+	}
 
-		svec2<float32>* lineVertexMappedRange = lineVertexStagingBuffer->map<svec2<float32>>(0, lineVertexBufferSize);
+	void DebugPhysics2DRenderer::initializeGridVertexBuffer() {
+		constexpr uint64 gridVertexBufferSize = 3 * sizeof(svec2<float32>);
 
-		lineVertexMappedRange[0] = {-1.0f,  0.0f};
-		lineVertexMappedRange[1] = { 1.0f,  0.0f};
-		lineVertexMappedRange[2] = { 0.0f,  1.0f};
-		lineVertexMappedRange[3] = { 0.0f, -1.0f};
-		lineVertexMappedRange += 4;
+		const ref<Buffer> gridVertexStagingBuffer = createStagingBuffer(gridVertexBufferSize);
 
-		const float32 columnGap = gap / static_cast<float32>(swapchain->getExtentHeight()) * 2.0f;
-		float32 x = columnGap;
+		svec2<float32>* gridVertexMappedRange = gridVertexStagingBuffer->map<svec2<float32>>(0, gridVertexBufferSize);
 
-		for (uint32 columnIndex = 0; columnIndex < columnCount; columnIndex += 2) {
-			*lineVertexMappedRange++ = {-x,  1.0f};
-			*lineVertexMappedRange++ = {-x, -1.0f};
-			*lineVertexMappedRange++ = { x,  1.0f};
-			*lineVertexMappedRange++ = { x, -1.0f};
+		gridVertexMappedRange[0] = {-1.0f,  1.0f};
+		gridVertexMappedRange[1] = { 3.0f,  1.0f};
+		gridVertexMappedRange[2] = {-1.0f, -3.0f};
 
-			x += columnGap;
-		}
+		gridVertexStagingBuffer->unmap();
 
-		const float32 rowGap = gap / static_cast<float32>(swapchain->getExtentWidth()) * 2.0f;
-		float32 y = rowGap;
+		BufferDescriptor gridVertexBufferDescriptor{};
+		gridVertexBufferDescriptor.size = gridVertexBufferSize;
+		gridVertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 
-		for (uint32 rowIndex = 0; rowIndex < rowCount; rowIndex += 2) {
-			*lineVertexMappedRange++ = {-1.0f,  y};
-			*lineVertexMappedRange++ = { 1.0f,  y};
-			*lineVertexMappedRange++ = {-1.0f, -y};
-			*lineVertexMappedRange++ = { 1.0f, -y};
-
-			y += rowGap;
-		}
-
-		lineVertexStagingBuffer->unmap();
-
-		BufferDescriptor lineVertexBufferDescriptor;
-		lineVertexBufferDescriptor.size = lineVertexBufferSize;
-		lineVertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-
-		lineVertexBuffer = createBuffer(lineVertexBufferDescriptor);
+		gridVertexBuffer = createBuffer(gridVertexBufferDescriptor);
 
 		const ref<Device> device = getDevice();
 
@@ -82,7 +64,7 @@ namespace ProjectA {
 		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(lineVertexStagingBuffer, lineVertexBuffer, 0, 0, lineVertexBufferSize);
+		commandEncoder->copyBufferToBuffer(gridVertexStagingBuffer, gridVertexBuffer, 0, 0, gridVertexBufferSize);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -90,60 +72,53 @@ namespace ProjectA {
 		device->waitIdle();
 	}
 
-	void DebugPhysics2DRenderer::initializeLineColorUniformBuffer() {
-		constexpr uint64 lineColorBufferSize = sizeof(vec4<float32>);
+	void DebugPhysics2DRenderer::initializeGridRenderPipeline() {
+		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
+		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
 
-		BufferDescriptor lineColorUniformBufferDescriptor;
-		lineColorUniformBufferDescriptor.size = lineColorBufferSize;
-		lineColorUniformBufferDescriptor.usage = BufferUsage::UNIFORM;
-		lineColorUniformBufferDescriptor.persistent = true;
+		DescriptorSetLayoutBinding viewDescriptorSetLayoutBinding;
+		viewDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		viewDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		viewDescriptorSetLayoutBinding.buffers = {viewUniformBuffer};
 
-		lineColorUniformBuffer = createBuffer(lineColorUniformBufferDescriptor);
-		lineColorMappedRange = lineColorUniformBuffer->map<vec4<float32>>(0, lineColorBufferSize);
-	}
+		DescriptorSetLayout gridPipelineDescriptorSetLayout;
+		gridPipelineDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, viewDescriptorSetLayoutBinding};
 
-	void DebugPhysics2DRenderer::initializeLineRenderPipeline() {
-		DescriptorSetLayoutBinding lineColorDescriptorSetLayoutBinding;
-		lineColorDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		lineColorDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		lineColorDescriptorSetLayoutBinding.buffers = {lineColorUniformBuffer};
+		PipelineLayoutDescriptor gridPipelineLayoutDescriptor;
+		gridPipelineLayoutDescriptor.layouts = {gridPipelineDescriptorSetLayout};
 
-		DescriptorSetLayout lineColorDescriptorSetLayout;
-		lineColorDescriptorSetLayout.bindings = {lineColorDescriptorSetLayoutBinding};
+		gridRenderPipelineLayout = createPipelineLayout(gridPipelineLayoutDescriptor);
 
-		PipelineLayoutDescriptor linePipelineLayoutDescriptor;
-		linePipelineLayoutDescriptor.layouts = {lineColorDescriptorSetLayout};
+		ShaderModuleDescriptor gridVertexShaderModuleDescriptor{};
+		gridVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		gridVertexShaderModuleDescriptor.entryPoint = "main";
 
-		lineRenderPipelineLayout = createPipelineLayout(linePipelineLayoutDescriptor);
+		const ref<ShaderModule> gridVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Grid.vert.spv", gridVertexShaderModuleDescriptor);
 
-		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
+		ShaderModuleDescriptor gridFragmentShaderModuleDescriptor{};
+		gridFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		gridFragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/DebugPhysics2DLine.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> gridFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Grid.frag.spv", gridFragmentShaderModuleDescriptor);
 
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
+		VertexInputBinding gridVertexInputBinding(InputRate::VERTEX);
+		gridVertexInputBinding.registerAttribute<svec2<float32>>(false);
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/DebugPhysics2DLine.frag.spv", fragmentShaderModuleDescriptor);
+		RenderPipelineDescriptor gridRenderPipelineDescriptor;
+		gridRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		gridRenderPipelineDescriptor.pipelineLayout = gridRenderPipelineLayout;
+		gridRenderPipelineDescriptor.vertexInputBindings = {gridVertexInputBinding};
+		gridRenderPipelineDescriptor.vertexShaderModule = gridVertexShaderModule;
+		gridRenderPipelineDescriptor.fragmentShaderModule = gridFragmentShaderModule;
+		gridRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		gridRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		gridRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		gridRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		gridRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>(false);
-
-		RenderPipelineDescriptor lineRenderPipelineDescriptor;
-		lineRenderPipelineDescriptor.renderPass = getMainRenderPass();
-		lineRenderPipelineDescriptor.pipelineLayout = lineRenderPipelineLayout;
-		lineRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-		lineRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		lineRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		lineRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
-		lineRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
-		lineRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		lineRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		lineRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-
-		lineRenderPipeline = createRenderPipeline(lineRenderPipelineDescriptor);
+		gridRenderPipeline = createRenderPipeline(gridRenderPipelineDescriptor);
 	}
 
 	void DebugPhysics2DRenderer::registerScene(const Scene2D& scene) {
@@ -233,7 +208,7 @@ namespace ProjectA {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
-		cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
+		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
 
 		DescriptorSetLayout descriptorSetLayout;
 		descriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding};
@@ -298,7 +273,8 @@ namespace ProjectA {
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
-		updateCamera(width, height);
+		updateCameraUniform(width, height);
+		updateViewUniform(width, height);
 
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
@@ -308,17 +284,10 @@ namespace ProjectA {
 	}
 
 	void DebugPhysics2DRenderer::renderGrid(const ref<CommandEncoder>& commandEncoder) const {
-		commandEncoder->bindRenderPipeline(lineRenderPipeline);
+		commandEncoder->bindRenderPipeline(gridRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
-		commandEncoder->bindVertexBuffer(0, lineVertexBuffer, 0, sizeof(svec2<float32>));
-
-		//*lineColorMappedRange = {0.867f, 0.867f, 0.867f, 1.0f};
-
-		//commandEncoder->draw(gridVertexCount, 1, 4);
-
-		*lineColorMappedRange = {0.733f, 0.733f, 0.733f, 1.0f};
-
-		commandEncoder->draw(4, 1, 0);
+		commandEncoder->bindVertexBuffer(0, gridVertexBuffer, 0, sizeof(svec2<float32>));
+		commandEncoder->draw(3, 1, 0);
 	}
 
 	void DebugPhysics2DRenderer::renderScene(const ref<CommandEncoder>& commandEncoder) const {
@@ -360,7 +329,7 @@ namespace ProjectA {
 		}
 	}
 
-	void DebugPhysics2DRenderer::updateCamera(float32 width, float32 height) const {
+	void DebugPhysics2DRenderer::updateCameraUniform(float32 width, float32 height) const {
 		const float32 left = -width / 2.0f;
 		const float32 right = width / 2.0f;
 		const float32 top = height / 2.0f;
@@ -371,5 +340,13 @@ namespace ProjectA {
 			0.0f,                   2.0f / (top - bottom), -(top + bottom) / (top - bottom),
 			0.0f,                   0.0f,                   1.0f,
 		};
+
+		// TODO: Animate.
+		cameraMappedRange->zoomLevel = 64.0f;
+	}
+
+	void DebugPhysics2DRenderer::updateViewUniform(float32 width, float32 height) const {
+		viewMappedRange->viewport.x = width;
+		viewMappedRange->viewport.y = height;
 	}
 }

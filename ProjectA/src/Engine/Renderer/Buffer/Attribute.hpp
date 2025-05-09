@@ -1,6 +1,7 @@
 #pragma once
 
 namespace ProjectA {
+	// TODO: Remove these functions. SIMD types must not directly be stored on the GPU.
 	template<typename T>
 	static constexpr uint32 getAttributeSize();
 
@@ -45,7 +46,6 @@ namespace ProjectA {
 		//return sizeof(float32) * 4;
 	}
 
-	// NOTE: Alignment WITHOUT relaxed block layout.
 	template<>
 	static constexpr uint32 getAttributeSize<svec2<float32>>() {
 		return sizeof(svec2<float32>);
@@ -56,6 +56,11 @@ namespace ProjectA {
 	static constexpr uint32 getAttributeSize<vec2<float32>>() {
 		//return sizeof(float32) * 2;
 		return sizeof(float32) * 4;
+	}
+
+	template<>
+	static constexpr uint32 getAttributeSize<svec3<float32>>() {
+		return sizeof(svec3<float32>);
 	}
 
 	// NOTE: Alignment WITHOUT relaxed block layout.

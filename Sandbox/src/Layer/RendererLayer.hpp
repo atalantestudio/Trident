@@ -11,12 +11,9 @@ namespace ProjectA {
 
 			virtual ~RendererLayer() = default;
 
-			vec4<float32> getClearColor() const final override;
-
 			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const final override;
 
 		private:
 			DebugPhysics2DRenderer renderer;
-			//TriangleRenderer renderer;
 	};
 }

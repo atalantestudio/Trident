@@ -74,10 +74,6 @@ namespace ProjectA {
 		renderer.registerScene(scene);
 	}
 
-	vec4<float32> RendererLayer::getClearColor() const {
-		return {1.0f, 1.0f, 1.0f, 1.0f};
-	}
-
 	void RendererLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
 		renderer.render(commandEncoder);
 	}

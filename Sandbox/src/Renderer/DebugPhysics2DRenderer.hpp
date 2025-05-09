@@ -13,18 +13,22 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
-			void updateCamera(float32 width, float32 height) const;
-
 		private:
-			void initializeLineVertexBuffer();
+			void initializeViewUniformBuffer();
 
-			void initializeLineColorUniformBuffer();
+			void initializeCameraUniformBuffer();
 
-			void initializeLineRenderPipeline();
+			void initializeGridVertexBuffer();
+
+			void initializeGridRenderPipeline();
 
 			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
 
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
+
+			void updateCameraUniform(float32 width, float32 height) const;
+
+			void updateViewUniform(float32 width, float32 height) const;
 
 		private:
 			struct Instance {
@@ -36,21 +40,25 @@ namespace ProjectA {
 				float32 zoomLevel;
 			};
 
+			struct ViewUniform {
+				svec2<float32> viewport;
+			};
+
 		private:
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
 			ref<Buffer> instanceBuffer;
 
-			ref<Buffer> lineVertexBuffer;
+			ref<Buffer> gridVertexBuffer;
 
-			ref<Buffer> lineColorUniformBuffer;
-			vec4<float32>* lineColorMappedRange = nullptr;
-
-			ref<Buffer> cameraBuffer;
+			ref<Buffer> cameraUniformBuffer;
 			CameraUniform* cameraMappedRange = nullptr;
 
-			ref<PipelineLayout> lineRenderPipelineLayout;
-			ref<RenderPipeline> lineRenderPipeline;
+			ref<Buffer> viewUniformBuffer;
+			ViewUniform* viewMappedRange = nullptr;
+
+			ref<PipelineLayout> gridRenderPipelineLayout;
+			ref<RenderPipeline> gridRenderPipeline;
 
 			ref<PipelineLayout> renderPipelineLayout;
 			ref<RenderPipeline> fillRenderPipeline;

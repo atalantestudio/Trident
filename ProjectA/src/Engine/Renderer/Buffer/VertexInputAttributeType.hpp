@@ -103,6 +103,12 @@ namespace ProjectA {
 	} */
 
 	template<>
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<svec3<float32>>() {
+		return VertexInputAttributeType::R32G32B32_FLOAT;
+	}
+
+	// Deprecated. Use getVertexInputAttributeType<svec3<float32>>() instead.
+	template<>
 	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec3<float32>>() {
 		return VertexInputAttributeType::R32G32B32_FLOAT;
 	}
