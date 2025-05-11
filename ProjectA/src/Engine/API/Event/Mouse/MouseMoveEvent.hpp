@@ -5,7 +5,6 @@
 namespace ProjectA {
 	class MouseMoveEvent : public Event {
 		public:
-			// TODO: Use vec2<sint32>.
 			MouseMoveEvent(sint32 x, sint32 y) :
 				x(x),
 				y(y)

@@ -223,23 +223,30 @@ namespace ProjectA {
 	}
 
 	template<>
-	void Window::setEventListener(EventListener<MouseWheelEvent> mouseWheelEventListener) const {
+	void Window::setEventListener(EventListener<MouseMoveEvent> eventListener) const {
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
-		windowData->mouseWheelEventListener = mouseWheelEventListener;
+		windowData->mouseMoveEventListener = eventListener;
 	}
 
 	template<>
-	void Window::setEventListener(EventListener<WindowResizeEvent> windowResizeEventListener) const {
+	void Window::setEventListener(EventListener<MouseWheelEvent> eventListener) const {
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
-		windowData->windowResizeEventListener = windowResizeEventListener;
+		windowData->mouseWheelEventListener = eventListener;
 	}
 
 	template<>
-	void Window::setEventListener(EventListener<WindowCloseEvent> windowCloseEventListener) const {
+	void Window::setEventListener(EventListener<WindowResizeEvent> eventListener) const {
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
-		windowData->windowCloseEventListener = windowCloseEventListener;
+		windowData->windowResizeEventListener = eventListener;
+	}
+
+	template<>
+	void Window::setEventListener(EventListener<WindowCloseEvent> eventListener) const {
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
+
+		windowData->windowCloseEventListener = eventListener;
 	}
 }

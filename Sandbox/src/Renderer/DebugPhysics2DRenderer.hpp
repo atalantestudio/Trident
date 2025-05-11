@@ -11,6 +11,9 @@ namespace ProjectA {
 			// After registering the scene, the vertex buffer cannot be resized.
 			void registerScene(const Scene2D& scene);
 
+			// x and y are in the range [0, viewport].
+			void setMousePosition(float32 x, float32 y);
+
 			void zoom(float32 zoomLevelDelta) const;
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
@@ -48,7 +51,7 @@ namespace ProjectA {
 			};
 
 		private:
-			static constexpr float32 DEFAULT_ZOOM_LEVEL = 64.0f;
+			static constexpr float32 DEFAULT_ZOOM_LEVEL = 1.0f;
 			static constexpr float32 MIN_ZOOM_LEVEL = 16.0f;
 			static constexpr float32 MAX_ZOOM_LEVEL = 128.0f;
 			static constexpr float32 ZOOM_SENSITIVITY = 4.0f;
@@ -77,6 +80,9 @@ namespace ProjectA {
 
 			uint32 indexCount = 0;
 			uint32 gridVertexCount = 0;
+
+			// Mouse position in zoomed NDC coordinates.
+			vec2<float32> mousePosition;
 
 			const Scene2D* scene = nullptr;
 	};

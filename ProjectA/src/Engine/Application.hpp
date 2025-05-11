@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Engine/API/CommandEncoder.hpp"
-#include "Engine/API/Event/Mouse/MouseWheelEvent.hpp"
 #include "Engine/API/Event/Window/WindowCloseEvent.hpp"
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/Event/WindowEvent.hpp"

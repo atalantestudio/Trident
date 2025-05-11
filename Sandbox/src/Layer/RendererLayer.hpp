@@ -18,6 +18,8 @@ namespace ProjectA {
 			void onEvent(Event& event) final override;
 
 		private:
+			bool onMouseMove(MouseMoveEvent& event);
+
 			bool onMouseWheel(MouseWheelEvent& event) const;
 
 			bool onWindowResize(WindowResizeEvent& event) const;

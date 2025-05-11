@@ -282,6 +282,18 @@ namespace ProjectA {
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
 	}
 
+	void DebugPhysics2DRenderer::setMousePosition(float32 x, float32 y) {
+		const ref<Swapchain>& swapchain = getSwapchain();
+
+		const float32 horizontalCellCount = swapchain->getExtentWidth() / cameraMappedRange->zoomLevel;
+		const float32 verticalCellCount = swapchain->getExtentHeight() / cameraMappedRange->zoomLevel;
+
+		x = (x / swapchain->getExtentWidth() - 0.5f) * horizontalCellCount;
+		y = -(y / swapchain->getExtentHeight() - 0.5f) * verticalCellCount;
+
+		mousePosition = {x, y};
+	}
+
 	void DebugPhysics2DRenderer::zoom(float32 zoomLevelDelta) const {
 		float32 zoomLevel = cameraMappedRange->zoomLevel + zoomLevelDelta / 120.0f * ZOOM_SENSITIVITY;
 

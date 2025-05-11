@@ -99,8 +99,18 @@ namespace ProjectA {
 	void RendererLayer::onEvent(Event& event) {
 		EventDispatcher eventDispatcher(event);
 
+		eventDispatcher.dispatch<MouseMoveEvent>(BIND(onMouseMove));
 		eventDispatcher.dispatch<MouseWheelEvent>(BIND(onMouseWheel));
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
+	}
+
+	bool RendererLayer::onMouseMove(MouseMoveEvent& event) {
+		const float32 x = static_cast<float32>(event.getX());
+		const float32 y = static_cast<float32>(event.getY());
+
+		renderer.setMousePosition(x, y);
+
+		return true;
 	}
 
 	bool RendererLayer::onMouseWheel(MouseWheelEvent& event) const {

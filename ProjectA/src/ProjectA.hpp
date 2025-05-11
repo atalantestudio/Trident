@@ -9,6 +9,10 @@
 #include "Engine/Application.hpp"
 #include "Engine/Layer/Layer.hpp"
 
+// Event
+#include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
+#include "Engine/API/Event/Mouse/MouseWheelEvent.hpp"
+
 // Camera controller
 #include "Engine/Camera/Controller/OrthographicCamera3DController.hpp"
 
