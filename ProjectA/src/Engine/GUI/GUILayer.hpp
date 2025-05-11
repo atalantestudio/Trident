@@ -39,9 +39,13 @@ namespace ProjectA {
 		// Container content size, excluding padding.
 		GUISize innerSize;
 
-		GUISize parentPadding;
 		GUISize parentSize;
 		GUISize parentInnerSize;
+
+		// The parent layout direction for root containers is VERTICAL.
+		LayoutDirection parentLayoutDirection;
+
+		uint16 parentLayoutSpacing;
 
 		bool root;
 
@@ -136,7 +140,6 @@ namespace ProjectA {
 			sint16 componentOrigin[2];
 			LayoutDirection layoutDirection = VERTICAL;
 			uint16 layoutSpacing = 0;
-			GUISize currentContainerPadding;
 			GUISize currentContainerSize;
 			GUISize currentContainerInnerSize;
 			bool rootComponent = true;

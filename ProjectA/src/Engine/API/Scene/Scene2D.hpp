@@ -29,6 +29,8 @@ namespace ProjectA {
 
 			const Object2D& operator [](std::size_t index) const;
 
+			Object2D& operator [](std::size_t index);
+
 		private:
 			chain<Geometry2D> geometries;
 			chain<ref<Material>> materials;

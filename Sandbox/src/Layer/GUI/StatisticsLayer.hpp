@@ -17,8 +17,15 @@ namespace ProjectA {
 					framesPerSecond = Application::get().getFramesPerSecond();
 				}
 
-				GUIContainer({172px, 54px}, {12px, 12px}, HORIZONTAL, 0px, {0.0f, 0.0f, 0.0f, 1.0f}) {
-					GUIText("FPS: []", framesPerSecond);
+				GUIContainer({212px, EXPAND}, {8px, 8px}, VERTICAL, 8px) {
+					GUIContainer({196px, 96px}, {12px, 12px}, VERTICAL, 0px, GRAY) {
+						GUIText("FPS: []", framesPerSecond);
+					}
+
+					GUIContainer({196px, 148px}, {12px, 12px}, VERTICAL, 8px, GRAY) {
+						GUIQuad({EXPAND, 24px}, LIGHT_GRAY);
+						GUIQuad({EXPAND, 24px}, LIGHT_GRAY);
+					}
 				}
 
 				frameIndex += 1;
@@ -26,6 +33,9 @@ namespace ProjectA {
 
 		private:
 			static constexpr uint8 FRAME_DELAY = 165;
+
+			static inline const vec4<float32> GRAY = {0.122f, 0.122f, 0.122f, 1.0f};
+			static inline const vec4<float32> LIGHT_GRAY = {0.196f, 0.204f, 0.196f, 1.0f};
 
 		private:
 			uint8 frameIndex = 0;

@@ -68,7 +68,6 @@ namespace ProjectA {
 		componentOrigin[VERTICAL] = 0;
 		layoutDirection = VERTICAL;
 		layoutSpacing = 0;
-		currentContainerPadding = {0, 0};
 		currentContainerSize = {
 			static_cast<sint16>(swapchain->getExtentWidth()),
 			static_cast<sint16>(swapchain->getExtentHeight()),
@@ -121,16 +120,16 @@ namespace ProjectA {
 		container.innerSize = container.size;
 		container.innerSize.width -= padding.width * 2;
 		container.innerSize.height -= padding.height * 2;
-		container.parentPadding = currentContainerPadding;
 		container.parentSize = currentContainerSize;
 		container.parentInnerSize = currentContainerInnerSize;
 		container.root = rootComponent;
+		container.parentLayoutDirection = this->layoutDirection;
+		container.parentLayoutSpacing = this->layoutSpacing;
 
 		// Add container padding to the origin.
 		componentOrigin[HORIZONTAL] += padding.width;
 		componentOrigin[VERTICAL] += padding.height;
 
-		currentContainerPadding = container.padding;
 		currentContainerSize = container.size;
 		currentContainerInnerSize = container.innerSize;
 
@@ -183,32 +182,29 @@ namespace ProjectA {
 
 		const GUISize fixedSize = computeFixedSize(size);
 
-		//componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
+		componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
 	}
 
 	void GUILayer::popContainer(GUIContainer& container) {
-		// End loop.
 		container._iteration = true;
+
+		layoutDirection = container.parentLayoutDirection;
+		layoutSpacing = container.parentLayoutSpacing;
 
 		if (container.root) {
 			rootComponent = true;
-
-			layoutDirection = VERTICAL;
 
 			componentOrigin[0] = container.padding.width;
 			componentOrigin[1] -= container.padding.height;
 		}
 
-		// Advance component origin towards the current container's layout direction.
-		componentOrigin[layoutDirection] += currentContainerSize[layoutDirection] + layoutSpacing;
-		componentOrigin[!layoutDirection] -= currentContainerPadding[!layoutDirection];
+		// Set the component origin to the end of the popped container.
+		componentOrigin[layoutDirection] = container.origin[layoutDirection] + container.size[layoutDirection] + layoutSpacing;
+		componentOrigin[!layoutDirection] = container.origin[!layoutDirection];
 
 		// Set the current container sizes to the parent container sizes.
-		currentContainerPadding = container.parentPadding;
 		currentContainerSize = container.parentSize;
 		currentContainerInnerSize = container.parentInnerSize;
-
-		layoutSpacing = 0;
 	}
 
 	GUISize GUILayer::computeFixedSize(GUISize size) const {
@@ -221,7 +217,7 @@ namespace ProjectA {
 			fixedSize.width = size.width;
 		}
 
-		ENGINE_ASSERT(fixedSize.width > 0, "The fixed width is less than 0.");
+		ENGINE_ASSERT(fixedSize.width > 0, "The fixed width must be positive.");
 
 		if (size.height == EXPAND) {
 			fixedSize.height = currentContainerInnerSize.height;
@@ -230,7 +226,7 @@ namespace ProjectA {
 			fixedSize.height = size.height;
 		}
 
-		ENGINE_ASSERT(fixedSize.height > 0, "The fixed height is less than 0.");
+		ENGINE_ASSERT(fixedSize.height > 0, "The fixed height must be positive.");
 
 		return fixedSize;
 	}

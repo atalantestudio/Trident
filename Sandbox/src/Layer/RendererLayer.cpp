@@ -77,7 +77,9 @@ namespace ProjectA {
 	void RendererLayer::update(float64 fixedDeltaTime) {
 		const float32 t = static_cast<float32>(fixedDeltaTime);
 
-		for (Object2D& A : scene) {
+		for (uint32 objectIndex = 0; objectIndex < scene.getObjectCount(); objectIndex += 1) {
+			Object2D& A = scene[objectIndex];
+
 			A.position += A.linearVelocity * t;
 			A.rotation += A.angularVelocity * t;
 
@@ -85,6 +87,8 @@ namespace ProjectA {
 			A.angularVelocity += A.angularAcceleration * t;
 
 			scene.updateTransform(A);
+
+			renderer.writeInstanceTransform(objectIndex, A.transform);
 		}
 	}
 
@@ -96,10 +100,20 @@ namespace ProjectA {
 		EventDispatcher eventDispatcher(event);
 
 		eventDispatcher.dispatch<MouseWheelEvent>(BIND(onMouseWheel));
+		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 	}
 
 	bool RendererLayer::onMouseWheel(MouseWheelEvent& event) const {
 		renderer.zoom(static_cast<float32>(event.getDelta()));
+
+		return true;
+	}
+
+	bool RendererLayer::onWindowResize(WindowResizeEvent& event) const {
+		const float32 width = static_cast<float32>(event.getWidth());
+		const float32 height = static_cast<float32>(event.getHeight());
+
+		renderer.resize(width, height);
 
 		return true;
 	}

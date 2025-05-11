@@ -311,22 +311,23 @@ namespace ProjectA {
 	void Application::onWindowResize(WindowResizeEvent& event) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		if (window->isMinimized()) {
-			return;
+		if (!window->isMinimized()) {
+			const ref<Device> device = Renderer::getDevice();
+
+			device->waitIdle();
+
+			SwapchainDescriptor swapchainDescriptor;
+			swapchainDescriptor.renderPass = Renderer::getMainRenderPass();
+			swapchainDescriptor.extentWidth = static_cast<sint32>(event.getWidth());
+			swapchainDescriptor.extentHeight = static_cast<sint32>(event.getHeight());
+
+			Renderer::getSwapchain()->recreate(swapchainDescriptor);
+
+			needsResize = false;
 		}
 
-		const ref<Device> device = Renderer::getDevice();
-
-		device->waitIdle();
-
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.renderPass = Renderer::getMainRenderPass();
-		swapchainDescriptor.extentWidth = static_cast<sint32>(event.getWidth());
-		swapchainDescriptor.extentHeight = static_cast<sint32>(event.getHeight());
-
-		Renderer::getSwapchain()->recreate(swapchainDescriptor);
-
-		needsResize = false;
+		// Propagate the event to the layer stack.
+		onEvent(event);
 	}
 
 	void Application::onWindowClose(WindowCloseEvent& event) {

@@ -73,4 +73,10 @@ namespace ProjectA {
 
 		return objects[index];
 	}
+
+	Object2D& Scene2D::operator [](std::size_t index) {
+		DEBUG_ASSERT(index < objects.size());
+
+		return objects[index];
+	}
 }

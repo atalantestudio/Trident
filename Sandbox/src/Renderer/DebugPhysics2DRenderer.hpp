@@ -15,6 +15,10 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
+			void resize(float32 width, float32 height) const;
+
+			void writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
+
 		private:
 			void initializeViewUniformBuffer();
 
@@ -27,12 +31,6 @@ namespace ProjectA {
 			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
 
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
-
-			void updateCameraProjection(float32 width, float32 height) const;
-
-			void updateViewport(float32 width, float32 height) const;
-
-			void updateObjectWorlds() const;
 
 		private:
 			struct Instance {

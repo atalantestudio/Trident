@@ -20,6 +20,8 @@ namespace ProjectA {
 		private:
 			bool onMouseWheel(MouseWheelEvent& event) const;
 
+			bool onWindowResize(WindowResizeEvent& event) const;
+
 		private:
 			DebugPhysics2DRenderer renderer;
 			Scene2D scene;
