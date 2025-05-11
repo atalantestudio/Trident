@@ -5,6 +5,7 @@
 namespace ProjectA {
 	Object2D::Object2D(const Object2DDescriptor& descriptor) :
 		geometryIndex(descriptor.geometryIndex),
-		materialIndex(descriptor.materialIndex)
+		materialIndex(descriptor.materialIndex),
+		debugName(descriptor.debugName)
 	{}
 }

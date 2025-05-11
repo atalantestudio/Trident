@@ -15,21 +15,10 @@ namespace ProjectA {
 		Platform::windowName = windowName;
 	}
 
-	uint32 Platform::getProcessId() {
+	uint32 Platform::getCurrentProcessId() {
 		const DWORD pid = GetCurrentProcessId();
 
 		return pid;
-	}
-
-	float64 Platform::getTime() {
-		static LARGE_INTEGER frequency;
-		static const BOOL result = QueryPerformanceFrequency(&frequency);
-
-		LARGE_INTEGER performanceCount;
-
-		WIN32_ASSERT(QueryPerformanceCounter(&performanceCount));
-
-		return performanceCount.QuadPart / static_cast<float64>(frequency.QuadPart);
 	}
 
 	void Platform::fatalExit(uint32 code, const std::string& message) {
@@ -42,5 +31,9 @@ namespace ProjectA {
 		free((void*) messageString);
 
 		ExitProcess(code);
+	}
+
+	void Platform::waitForInput() {
+		std::cin.get();
 	}
 }

@@ -9,6 +9,7 @@
 #include "Engine/API/Synchronization/Fence.hpp"
 #include "Engine/API/Synchronization/Mutex.hpp"
 #include "Engine/API/Synchronization/Semaphore.hpp"
+#include "Engine/API/Timer/HighResolutionTimer.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/base.hpp"
 #include "Engine/Filesystem/File/PropertyFile.hpp"
@@ -37,9 +38,11 @@ namespace ProjectA {
 
 			const Window& getWindow() const;
 
-			float64 getCurrentTickTime() const;
+			// Returns the current frame time, in seconds.
+			float64 getCurrentFrameTime() const;
 
-			float64 getRendersPerSecondAverage() const;
+			// Returns the average frames per second count.
+			float64 getFramesPerSecond() const;
 
 			template<typename T, typename... U>
 			void registerLayer(U&&... arguments) {
@@ -64,7 +67,8 @@ namespace ProjectA {
 		private:
 			void loop();
 
-			void tick();
+			// Runs updates at a fixed time step, then renders a new frame.
+			void processFrame();
 
 			void update(float64 deltaTime);
 
@@ -87,6 +91,8 @@ namespace ProjectA {
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
 			static constexpr float64 RENDERS_PER_SECOND = 165.0;
 
+			static constexpr float64 fixedDeltaTime = lyah::rcp(165.0);
+
 		private:
 			struct TestSharedMemoryData {
 				uint8 instanceCount;
@@ -99,6 +105,7 @@ namespace ProjectA {
 			scope<Mutex> mutex;
 			scope<SharedMemory> sharedMemory;
 			TestSharedMemoryData* sharedMemoryData;
+			HighResolutionTimer timer;
 
 			// Need a scope because the window is created only if the property file is found.
 			scope<Window> window;
@@ -109,10 +116,9 @@ namespace ProjectA {
 			bool needsResize = false;
 			bool minimized = false;
 
-			float64 fixedDeltaTime = 1.0;
-			float64 previousTickTime = 0.0;
-			float64 currentTickTime = 0.0;
-			float64 timeAccumulator = 0.0;
+			float64 previousTime = 0.0;
+			float64 frameTime = 0.0;
+			float64 frameTimeAccumulator = 0.0;
 
 			// Multiple of MAX_FRAMES_IN_FLIGHT.
 			uint32 frameInFlightIndex = 0;

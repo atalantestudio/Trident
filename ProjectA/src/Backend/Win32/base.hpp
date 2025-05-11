@@ -55,12 +55,16 @@ namespace ProjectA {
 
 	static void PrintLastError();
 
-	#define WIN32_ASSERT(condition) { \
-		if (!(condition)) { \
-			PrintLastError(); \
-			BREAKPOINT(); \
-		} \
-	}
+	#ifdef BUILD_MODE_DEBUG
+		#define WIN32_ASSERT(condition) { \
+			if (!(condition)) { \
+				PrintLastError(); \
+				BREAKPOINT(); \
+			} \
+		}
+	#else
+		#define WIN32_ASSERT
+	#endif
 
 	static HINSTANCE GetInstance() {
 		const HINSTANCE hInstance = GetModuleHandleW(nullptr);

@@ -7,8 +7,6 @@
 
 namespace ProjectA {
 	RendererLayer::RendererLayer() {
-		Scene2D scene;
-
 		Geometry2DDescriptor polygonGeometryDescriptor;
 		polygonGeometryDescriptor.vertices = {
 			{-3.0f,   0.0f},
@@ -36,8 +34,7 @@ namespace ProjectA {
 		polygonObjectDescriptor.materialIndex = polygonMaterialIndex;
 		polygonObjectDescriptor.debugName = "Polygon";
 
-		Object2D polygonObject(polygonObjectDescriptor);
-		const uint32 polygonObjectIndex = scene.registerObject(polygonObject);
+		Object2D& polygonObject = scene.registerObject(polygonObjectDescriptor);
 
 		polygonObject.position = {0.45f, -0.625f};
 
@@ -66,12 +63,29 @@ namespace ProjectA {
 		triangleObjectDescriptor.materialIndex = triangleMaterialIndex;
 		triangleObjectDescriptor.debugName = "Triangle";
 
-		Object2D triangleObject(triangleObjectDescriptor);
-		const uint32 triangleObjectIndex = scene.registerObject(triangleObject);
+		Object2D& triangleObject = scene.registerObject(triangleObjectDescriptor);
 
-		triangleObject.position = {0.45f, -0.625f};
+		triangleObject.position = {0.0f, 1.957f};
+		triangleObject.rotation = lyah::radians(-30.0f);
+		//triangleObject.angularVelocity = lyah::radians(0.4617f);
+		triangleObject.angularVelocity = lyah::radians(32.26f);
+		//triangleObject.angularVelocity = lyah::radians(70.0f);
 
 		renderer.registerScene(scene);
+	}
+
+	void RendererLayer::update(float64 fixedDeltaTime) {
+		const float32 t = static_cast<float32>(fixedDeltaTime);
+
+		for (Object2D& A : scene) {
+			A.position += A.linearVelocity * t;
+			A.rotation += A.angularVelocity * t;
+
+			A.linearVelocity += A.linearAcceleration * t;
+			A.angularVelocity += A.angularAcceleration * t;
+
+			scene.updateTransform(A);
+		}
 	}
 
 	void RendererLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {

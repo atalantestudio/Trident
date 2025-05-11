@@ -124,7 +124,7 @@ namespace ProjectA {
 	}
 
 	void DebugPhysics2DRenderer::registerScene(const Scene2D& scene) {
-		this->scene = scene;
+		this->scene = &scene;
 
 		uint32 vertexCount = 0;
 		uint32 instanceCount = 0;
@@ -189,8 +189,10 @@ namespace ProjectA {
 		BufferDescriptor instanceBufferDescriptor{};
 		instanceBufferDescriptor.size = instanceBufferSize;
 		instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		instanceBufferDescriptor.persistent = true;
 
 		instanceBuffer = createBuffer(instanceBufferDescriptor);
+		this->instanceMappedRange = instanceBuffer->map<Instance>(0, instanceBufferSize);
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -237,13 +239,17 @@ namespace ProjectA {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>(false);
 
-		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<vec4<float32>>(false);
+		VertexInputBinding fillInstanceInputBinding(InputRate::INSTANCE);
+		fillInstanceInputBinding.registerAttribute<mat3x3<float32>>(false);
+		fillInstanceInputBinding.registerAttribute<vec4<float32>>(false);
+
+		//VertexInputBinding strokeInstanceInputBinding(InputRate::INSTANCE);
+		//strokeInstanceInputBinding.registerAttribute<mat3x3<float32>>(false);
 
 		RenderPipelineDescriptor fillRenderPipelineDescriptor;
 		fillRenderPipelineDescriptor.renderPass = getMainRenderPass();
 		fillRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
-		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, fillInstanceInputBinding};
 		fillRenderPipelineDescriptor.vertexShaderModule = fillVertexShaderModule;
 		fillRenderPipelineDescriptor.fragmentShaderModule = fillFragmentShaderModule;
 		fillRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
@@ -257,7 +263,7 @@ namespace ProjectA {
 		RenderPipelineDescriptor strokeRenderPipelineDescriptor;
 		strokeRenderPipelineDescriptor.renderPass = getMainRenderPass();
 		strokeRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
-		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, fillInstanceInputBinding};
 		strokeRenderPipelineDescriptor.vertexShaderModule = strokeVertexShaderModule;
 		strokeRenderPipelineDescriptor.fragmentShaderModule = strokeFragmentShaderModule;
 		strokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
@@ -293,6 +299,7 @@ namespace ProjectA {
 
 		updateCameraProjection(width, height);
 		updateViewport(width, height);
+		updateObjectWorlds();
 
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
@@ -311,38 +318,27 @@ namespace ProjectA {
 	void DebugPhysics2DRenderer::renderScene(const ref<CommandEncoder>& commandEncoder) const {
 		uint32 indexOffset = 0;
 		uint32 vertexOffset = 0;
-		uint32 instanceOffset = 0;
 
-		commandEncoder->bindRenderPipeline(fillRenderPipeline);
-		commandEncoder->bindAllDescriptorSets();
-
-		for (const Object2D& object : scene) {
-			const Geometry2D& geometry = scene.getGeometry(object.geometryIndex);
+		for (uint32 instanceIndex = 0; instanceIndex < scene->getObjectCount(); instanceIndex += 1) {
+			const Object2D& object = (*scene)[instanceIndex];
+			const Geometry2D& geometry = scene->getGeometry(object.geometryIndex);
 			const uint32 indexCount = static_cast<uint32>(geometry.getIndices().size());
 			const uint32 vertexCount = static_cast<uint32>(geometry.getVertices().size()) + 1;
 
+			commandEncoder->bindRenderPipeline(fillRenderPipeline);
+			commandEncoder->bindAllDescriptorSets();
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, indexOffset * sizeof(uint16));
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
-			commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceOffset * sizeof(Instance), sizeof(Instance));
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceIndex * sizeof(Instance), sizeof(Instance));
 			commandEncoder->drawIndexed(indexCount, 1, 0);
 
-			indexOffset += indexCount;
-			vertexOffset += vertexCount;
-			instanceOffset += 1;
-		}
-
-		vertexOffset = 0;
-
-		commandEncoder->bindRenderPipeline(strokeRenderPipeline);
-		commandEncoder->bindAllDescriptorSets();
-		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
-
-		for (const Object2D& object : scene) {
-			const Geometry2D& geometry = scene.getGeometry(object.geometryIndex);
-			const uint32 vertexCount = static_cast<uint32>(geometry.getVertices().size()) + 1;
-
+			commandEncoder->bindRenderPipeline(strokeRenderPipeline);
+			commandEncoder->bindAllDescriptorSets();
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceIndex * sizeof(Instance), sizeof(Instance));
 			commandEncoder->draw(vertexCount, 1, vertexOffset);
 
+			indexOffset += indexCount;
 			vertexOffset += vertexCount;
 		}
 	}
@@ -364,5 +360,13 @@ namespace ProjectA {
 		// TODO: Only update viewport after a window resize event.
 		viewMappedRange->viewport.x = width;
 		viewMappedRange->viewport.y = height;
+	}
+
+	void DebugPhysics2DRenderer::updateObjectWorlds() const {
+		for (uint32 instanceIndex = 0; instanceIndex < scene->getObjectCount(); instanceIndex += 1) {
+			const Object2D& object = (*scene)[instanceIndex];
+
+			instanceMappedRange[instanceIndex].world = object.transform;
+		}
 	}
 }

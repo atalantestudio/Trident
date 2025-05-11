@@ -32,8 +32,11 @@ namespace ProjectA {
 
 			void updateViewport(float32 width, float32 height) const;
 
+			void updateObjectWorlds() const;
+
 		private:
 			struct Instance {
+				mat3x3<float32> world;
 				vec4<float32> fillColor;
 			};
 
@@ -55,7 +58,9 @@ namespace ProjectA {
 		private:
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
+
 			ref<Buffer> instanceBuffer;
+			Instance* instanceMappedRange = nullptr;
 
 			ref<Buffer> gridVertexBuffer;
 
@@ -75,6 +80,6 @@ namespace ProjectA {
 			uint32 indexCount = 0;
 			uint32 gridVertexCount = 0;
 
-			Scene2D scene;
+			const Scene2D* scene = nullptr;
 	};
 }

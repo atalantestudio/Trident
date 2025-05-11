@@ -161,44 +161,45 @@ namespace ProjectA {
 		return *window;
 	}
 
-	float64 Application::getCurrentTickTime() const {
-		return currentTickTime;
+	float64 Application::getCurrentFrameTime() const {
+		return frameTime;
 	}
 
-	float64 Application::getRendersPerSecondAverage() const {
-		if (currentTickTime == 0.0) {
+	float64 Application::getFramesPerSecond() const {
+		if (frameTime == 0.0) {
 			return 0.0;
 		}
 
-		return 1000.0 / currentTickTime / 1000.0;
+		const float64 rendersPerSecond = 1000.0 / frameTime;
+
+		return rendersPerSecond / 1000.0;
 	}
 
 	void Application::loop() {
-		previousTickTime = Platform::getTime();
+		previousTime = timer.getCurrentTime();
 
 		while (looping) {
-			tick();
+			processFrame();
 		}
 	}
 
-	void Application::tick() {
-		PROFILE_SCOPE("Application tick");
+	void Application::processFrame() {
+		PROFILE_SCOPE(FUNC_SIG);
 
 		window->processMessages();
 
-		const float64 time = Platform::getTime();
+		const float64 currentTime = timer.getCurrentTime();
 
-		currentTickTime = time - previousTickTime;
-		previousTickTime = time;
-		timeAccumulator += currentTickTime;
+		frameTime = currentTime - previousTime;
+		previousTime = currentTime;
+		frameTimeAccumulator += frameTime;
 
-		while (timeAccumulator >= fixedDeltaTime) {
-			// Integrate with a fixed time step.
+		while (frameTimeAccumulator >= fixedDeltaTime) {
 			update(fixedDeltaTime);
 
-			// Extract 1 * base delta time from the accumulator.
+			// Extract the fixed delta time from the accumulator.
 			// What's left is passed on to the next frame.
-			timeAccumulator -= fixedDeltaTime;
+			frameTimeAccumulator -= fixedDeltaTime;
 		}
 
 		if (window->isMinimized()) {
@@ -207,8 +208,9 @@ namespace ProjectA {
 
 		preRender();
 
-		// TODO: Interpolate between current time and timeAccumulator.
-		render(timeAccumulator);
+		// TODO: Interpolate between current time and frameTimeAccumulator.
+		// See https://gafferongames.com/post/fix_your_timestep.
+		render(frameTimeAccumulator);
 
 		postRender();
 

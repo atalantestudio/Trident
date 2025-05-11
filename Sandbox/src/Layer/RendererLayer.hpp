@@ -11,6 +11,8 @@ namespace ProjectA {
 
 			virtual ~RendererLayer() = default;
 
+			void update(float64 fixedDeltaTime) final override;
+
 			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const final override;
 
 			void onEvent(Event& event) final override;
@@ -20,5 +22,6 @@ namespace ProjectA {
 
 		private:
 			DebugPhysics2DRenderer renderer;
+			Scene2D scene;
 	};
 }

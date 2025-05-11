@@ -17,7 +17,7 @@ namespace ProjectA {
 				}
 
 				//GUIQuad({512px, 512px}, 1);
-				GUIText("FPS: []", Application::get().getRendersPerSecondAverage());
+				GUIText("FPS: []", Application::get().getFramesPerSecond());
 			}
 
 		private:

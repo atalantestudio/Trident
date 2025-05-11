@@ -6,6 +6,8 @@
 namespace ProjectA {
 	class Scene2D {
 		public:
+			uint32 getObjectCount() const;
+
 			const Geometry2D& getGeometry(uint32 index) const;
 
 			const ref<Material>& getMaterial(uint32 index) const;
@@ -14,11 +16,18 @@ namespace ProjectA {
 
 			uint32 registerMaterial(const ref<Material>& material);
 
-			uint32 registerObject(const Object2D& object);
+			// Creates and registers an object into the scene.
+			Object2D& registerObject(const Object2DDescriptor& descriptor);
 
+			void updateTransform(Object2D& object) const;
+
+			std::vector<Object2D>::iterator begin();
 			std::vector<Object2D>::const_iterator begin() const;
 
+			std::vector<Object2D>::iterator end();
 			std::vector<Object2D>::const_iterator end() const;
+
+			const Object2D& operator [](std::size_t index) const;
 
 		private:
 			chain<Geometry2D> geometries;

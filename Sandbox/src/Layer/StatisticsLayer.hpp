@@ -6,7 +6,7 @@ namespace ProjectA {
 	class StatisticsLayer : public GUILayer {
 		public:
 			StatisticsLayer() :
-				rps(Application::get().getRendersPerSecondAverage())
+				framesPerSecond(Application::get().getFramesPerSecond())
 			{}
 
 			void updateGUI() override {
@@ -14,11 +14,11 @@ namespace ProjectA {
 
 				if (frameIndex == FRAME_DELAY) {
 					frameIndex = 0;
-					rps = Application::get().getRendersPerSecondAverage();
+					framesPerSecond = Application::get().getFramesPerSecond();
 				}
 
 				GUIContainer({172px, 54px}, {12px, 12px}, HORIZONTAL, 0px, {0.0f, 0.0f, 0.0f, 1.0f}) {
-					GUIText("FPS: []", rps);
+					GUIText("FPS: []", framesPerSecond);
 				}
 
 				frameIndex += 1;
@@ -29,6 +29,6 @@ namespace ProjectA {
 
 		private:
 			uint8 frameIndex = 0;
-			float64 rps;
+			float64 framesPerSecond;
 	};
 }
