@@ -139,8 +139,8 @@ namespace ProjectA {
 		for (const Object2D& object : scene) {
 			const Geometry2D& geometry = scene.getGeometry(object.geometryIndex);
 
-			vertexCount += static_cast<uint32>(geometry.getVertices().size()) + 1;
-			indexCount += static_cast<uint32>(geometry.getIndices().size());
+			vertexCount += static_cast<uint32>(geometry.vertices.size()) + 1;
+			indexCount += static_cast<uint32>(geometry.indices.size());
 			instanceCount += 1;
 		}
 
@@ -161,21 +161,23 @@ namespace ProjectA {
 		for (const Object2D& object : scene) {
 			const Geometry2D& geometry = scene.getGeometry(object.geometryIndex);
 			const ColorMaterial& material = *std::static_pointer_cast<ColorMaterial>(scene.getMaterial(object.materialIndex)).get();
-			const chain<svec2<float32>>& vertices = geometry.getVertices();
-			const chain<uint16>& indices = geometry.getIndices();
 
-			std::copy(vertices.begin(), vertices.end(), vertexMappedRange);
+			for (uint32 vertexIndex = 0; vertexIndex < geometry.vertices.size(); vertexIndex += 1) {
+				const vec2<float32>& vertex = geometry.vertices[vertexIndex];
+
+				vertexMappedRange[vertexIndex] = {vertex[0], vertex[1]};
+			}
 
 			// Duplicate the first vertex for line rendering.
-			vertexMappedRange += vertices.size();
-			*vertexMappedRange = vertices[0];
+			vertexMappedRange += geometry.vertices.size();
+			*vertexMappedRange = {geometry.vertices[0][0], geometry.vertices[0][1]};
 
-			std::copy(indices.begin(), indices.end(), indexMappedRange);
+			std::copy(geometry.indices.begin(), geometry.indices.end(), indexMappedRange);
 
 			instanceMappedRange->fillColor = material.fillColor;
 
 			vertexMappedRange += 1;
-			indexMappedRange += indices.size();
+			indexMappedRange += geometry.indices.size();
 			instanceMappedRange += 1;
 		}
 
@@ -337,8 +339,8 @@ namespace ProjectA {
 		for (uint32 instanceIndex = 0; instanceIndex < scene->getObjectCount(); instanceIndex += 1) {
 			const Object2D& object = (*scene)[instanceIndex];
 			const Geometry2D& geometry = scene->getGeometry(object.geometryIndex);
-			const uint32 indexCount = static_cast<uint32>(geometry.getIndices().size());
-			const uint32 vertexCount = static_cast<uint32>(geometry.getVertices().size()) + 1;
+			const uint32 indexCount = static_cast<uint32>(geometry.indices.size());
+			const uint32 vertexCount = static_cast<uint32>(geometry.vertices.size()) + 1;
 
 			commandEncoder->bindRenderPipeline(fillRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();

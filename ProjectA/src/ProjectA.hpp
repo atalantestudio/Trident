@@ -47,3 +47,6 @@
 
 // Font
 #include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"
+
+// Physics
+#include "Engine/API/Physics/GJK.hpp"

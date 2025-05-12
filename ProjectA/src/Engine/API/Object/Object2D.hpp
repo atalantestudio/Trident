@@ -1,19 +1,23 @@
 #pragma once
 
 #include "Engine/API/Geometry/Geometry2D.hpp"
+#include "Engine/API/Material/Material.hpp"
 
 namespace ProjectA {
+	class Scene2D;
+
 	struct Object2DDescriptor {
 		uint32 geometryIndex;
 		uint32 materialIndex;
-
-		// TODO: Only in debug mode.
-		const char* debugName;
 	};
 
 	class Object2D {
 		public:
-			explicit Object2D(const Object2DDescriptor& descriptor);
+			explicit Object2D(const Object2DDescriptor& descriptor, const Scene2D* scene);
+
+			const Geometry2D& getGeometry() const;
+
+			const ref<Material>& getMaterial() const;
 
 		public:
 			uint32 geometryIndex;
@@ -31,6 +35,7 @@ namespace ProjectA {
 
 			mat3x3<float32> transform = mat3x3<float32>::identity();
 
-			const char* debugName;
+		private:
+			const Scene2D* scene;
 	};
 }

@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Engine/API/Material/ColorMaterial.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace ProjectA {
@@ -19,34 +20,25 @@ namespace ProjectA {
 		return materials[index];
 	}
 
-	uint32 Scene2D::registerGeometry(const Geometry2D& geometry) {
+	uint32 Scene2D::registerGeometry(const Geometry2DDescriptor& descriptor) {
 		const uint32 geometryIndex = static_cast<uint32>(geometries.size());
 
-		geometries.emplace_back(geometry);
+		geometries.emplace_back(Geometry2D(descriptor));
 
 		return geometryIndex;
 	}
 
-	uint32 Scene2D::registerMaterial(const ref<Material>& material) {
-		const uint32 materialIndex = static_cast<uint32>(materials.size());
-
-		materials.emplace_back(material);
-
-		return materialIndex;
-	}
-
 	Object2D& Scene2D::registerObject(const Object2DDescriptor& descriptor) {
-		objects.emplace_back(Object2D(descriptor));
+		objects.emplace_back(Object2D(descriptor, this));
 
 		return objects.back();
 	}
 
 	void Scene2D::updateTransform(Object2D& object) const {
 		const Geometry2D& geometry = geometries[object.geometryIndex];
-		const vec2<float32> centerOfMass = {geometry.getCenterOfMass().x, geometry.getCenterOfMass().y};
 
 		object.transform =
-			mat3x3<float32>::translation(-centerOfMass) *
+			mat3x3<float32>::translation(-geometry.centerOfMass) *
 			mat3x3<float32>::scaling(object.scale) *
 			mat3x3<float32>::rotation(object.rotation) *
 			mat3x3<float32>::translation(object.position);

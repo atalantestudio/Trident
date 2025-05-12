@@ -7,6 +7,8 @@
 
 namespace ProjectA {
 	RendererLayer::RendererLayer() {
+		/// Geometries ///
+
 		Geometry2DDescriptor polygonGeometryDescriptor;
 		polygonGeometryDescriptor.vertices = {
 			{-3.0f,   0.0f},
@@ -19,25 +21,6 @@ namespace ProjectA {
 			0, 2, 3,
 		};
 
-		const Geometry2D polygonGeometry(polygonGeometryDescriptor);
-		const uint32 polygonGeometryIndex = scene.registerGeometry(polygonGeometry);
-
-		ColorMaterialDescriptor polygonMaterialDescriptor;
-		polygonMaterialDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
-		polygonMaterialDescriptor.strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
-
-		const ref<ColorMaterial> polygonMaterial = createRef<ColorMaterial>(polygonMaterialDescriptor);
-		const uint32 polygonMaterialIndex = scene.registerMaterial(polygonMaterial);
-
-		Object2DDescriptor polygonObjectDescriptor{};
-		polygonObjectDescriptor.geometryIndex = polygonGeometryIndex;
-		polygonObjectDescriptor.materialIndex = polygonMaterialIndex;
-		polygonObjectDescriptor.debugName = "Polygon";
-
-		Object2D& polygonObject = scene.registerObject(polygonObjectDescriptor);
-
-		polygonObject.position = {0.45f, -0.625f};
-
 		Geometry2DDescriptor triangleGeometryDescriptor;
 		triangleGeometryDescriptor.vertices = {
 			{0.0f, 0.0f},
@@ -48,28 +31,47 @@ namespace ProjectA {
 			0, 1, 2,
 		};
 
-		const Geometry2D triangleGeometry(triangleGeometryDescriptor);
-		const uint32 triangleGeometryIndex = scene.registerGeometry(triangleGeometry);
+		Geometry2DDescriptor squareGeometryDescriptor;
+		squareGeometryDescriptor.vertices = {
+			{-1.0f, -1.0f},
+			{-1.0f,  1.0f},
+			{ 1.0f,  1.0f},
+			{ 1.0f, -1.0f},
+		};
+		squareGeometryDescriptor.indices = {
+			0, 1, 2,
+			0, 2, 3,
+		};
 
-		ColorMaterialDescriptor triangleMaterialDescriptor;
-		triangleMaterialDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
-		triangleMaterialDescriptor.strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
+		/// Materials ///
 
-		const ref<ColorMaterial> triangleMaterial = createRef<ColorMaterial>(triangleMaterialDescriptor);
-		const uint32 triangleMaterialIndex = scene.registerMaterial(triangleMaterial);
+		ColorMaterialDescriptor material1Descriptor;
+		material1Descriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+		material1Descriptor.strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
-		Object2DDescriptor triangleObjectDescriptor{};
-		triangleObjectDescriptor.geometryIndex = triangleGeometryIndex;
-		triangleObjectDescriptor.materialIndex = triangleMaterialIndex;
-		triangleObjectDescriptor.debugName = "Triangle";
+		ColorMaterialDescriptor material2Descriptor;
+		material2Descriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
+		material2Descriptor.strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
-		Object2D& triangleObject = scene.registerObject(triangleObjectDescriptor);
+		/// Objects ///
 
-		triangleObject.position = {0.0f, 1.957f};
-		triangleObject.rotation = lyah::radians(-30.0f);
-		//triangleObject.angularVelocity = lyah::radians(0.4617f);
-		triangleObject.angularVelocity = lyah::radians(32.26f);
-		//triangleObject.angularVelocity = lyah::radians(70.0f);
+		Object2DDescriptor objectADescriptor{};
+		objectADescriptor.geometryIndex = scene.registerGeometry(polygonGeometryDescriptor);
+		objectADescriptor.materialIndex = scene.registerMaterial<ColorMaterial>(material1Descriptor);
+
+		Object2D& objectA = scene.registerObject(objectADescriptor);
+
+		objectA.position = {0.45f, -0.625f};
+
+		Object2DDescriptor objectBDescriptor{};
+		objectBDescriptor.geometryIndex = scene.registerGeometry(triangleGeometryDescriptor);
+		objectBDescriptor.materialIndex = scene.registerMaterial<ColorMaterial>(material2Descriptor);
+
+		Object2D& objectB = scene.registerObject(objectBDescriptor);
+
+		objectB.position = {1.0f, 1.957f};
+		objectB.rotation = lyah::radians(-30.0f);
+		objectB.angularVelocity = lyah::radians(32.26f);
 
 		renderer.registerScene(scene);
 	}
@@ -90,6 +92,17 @@ namespace ProjectA {
 
 			renderer.writeInstanceTransform(objectIndex, A.transform);
 		}
+
+		/*for (uint32 i = 0; i < scene.getObjectCount() - 1; i += 1) {
+			for (uint32 j = i + 1; j < scene.getObjectCount(); j += 1) {
+				const Object2D& A = scene[i];
+				const Object2D& B = scene[j];
+
+				const bool intersecting = GJK2DConditional(A, B);
+
+				ENGINE_DEBUG("Intersecting: []", intersecting);
+			}
+		}*/
 	}
 
 	void RendererLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {

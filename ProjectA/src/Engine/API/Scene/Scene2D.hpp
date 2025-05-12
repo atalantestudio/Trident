@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/API/Material/Material.hpp"
 #include "Engine/API/Object/Object2D.hpp"
 
 namespace ProjectA {
@@ -12,9 +11,16 @@ namespace ProjectA {
 
 			const ref<Material>& getMaterial(uint32 index) const;
 
-			uint32 registerGeometry(const Geometry2D& geometry);
+			uint32 registerGeometry(const Geometry2DDescriptor& descriptor);
 
-			uint32 registerMaterial(const ref<Material>& material);
+			template<typename MaterialType, typename... Argument>
+			uint32 registerMaterial(Argument&&... arguments) {
+				const uint32 materialIndex = static_cast<uint32>(materials.size());
+
+				materials.emplace_back(createRef<MaterialType>(std::forward<Argument>(arguments)...));
+
+				return materialIndex;
+			}
 
 			// Creates and registers an object into the scene.
 			Object2D& registerObject(const Object2DDescriptor& descriptor);

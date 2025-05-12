@@ -116,4 +116,49 @@ namespace ProjectA {
 
 	template<typename T>
 	using svec3 = svec<3, T>;
+
+	// TODO: Squared length in Lyah.
+	template<std::size_t C, typename T>
+	T lengthSq(const lyah::vec<C, T>& a) {
+		return lyah::dot(a, a);
+	}
+
+	// TODO: Squared distance in Lyah.
+	template<std::size_t C, typename T>
+	T distanceSq(const lyah::vec<C, T>& a, const lyah::vec<C, T>& b) {
+		return lengthSq(b - a);
+	}
+
+	// K-th dimensional simplex.
+	template<std::size_t K, typename T>
+	struct sim;
+
+	template<typename T>
+	struct sim<2, T> {
+		lyah::vec<2, T> m[3];
+		std::uint8_t count : 2;
+
+		sim<2, T>::sim() : count(0) {}
+
+		sim<2, T>::sim(const lyah::vec<2, T>& a) : m{a}, count(1) {}
+
+		sim<2, T>::sim(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b) : m{a, b}, count(2) {}
+
+		const lyah::vec<2, T>& operator [](std::uint8_t index) const {
+			DEBUG_ASSERT(index < count);
+
+			return m[index];
+		}
+	};
+
+	template<std::size_t C, typename T>
+	void operator +=(sim<C, T>& s, const lyah::vec<C, T>& a) {
+		ENGINE_ASSERT(s.count <= C + 1, "Simplex dimension overflow.");
+
+		s.m[s.count] = a;
+		s.count += 1;
+	}
+
+	template<typename T>
+	using sim2 = sim<2, T>;
 }

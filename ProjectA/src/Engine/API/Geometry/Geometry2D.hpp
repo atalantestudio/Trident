@@ -2,7 +2,7 @@
 
 namespace ProjectA {
 	struct Geometry2DDescriptor {
-		chain<svec2<float32>> vertices;
+		chain<vec2<float32>> vertices;
 		chain<uint16> indices;
 	};
 
@@ -10,18 +10,13 @@ namespace ProjectA {
 		public:
 			explicit Geometry2D(const Geometry2DDescriptor& descriptor);
 
-			const chain<svec2<float32>>& getVertices() const;
+			// Returns the farthest point of the geometry in the direction d.
+			const vec2<float32>& support(const vec2<float32>& d) const;
 
-			const chain<uint16>& getIndices() const;
-
-			const svec2<float32>& getCenterOfMass() const;
-
-			float32 getRadius() const;
-
-		private:
-			chain<svec2<float32>> vertices;
+		public:
+			chain<vec2<float32>> vertices;
 			chain<uint16> indices;
-			svec2<float32> centerOfMass;
+			vec2<float32> centerOfMass;
 
 			// Distance between the center of mass and the farthest vertex.
 			float32 radius = 0.0f;
