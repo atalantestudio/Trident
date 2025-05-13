@@ -63,6 +63,8 @@ namespace ProjectA {
 
 		objectA.position = {0.45f, -0.625f};
 
+		scene.updateTransform(objectA);
+
 		Object2DDescriptor objectBDescriptor{};
 		objectBDescriptor.geometryIndex = scene.registerGeometry(triangleGeometryDescriptor);
 		objectBDescriptor.materialIndex = scene.registerMaterial<ColorMaterial>(material2Descriptor);
@@ -73,36 +75,30 @@ namespace ProjectA {
 		objectB.rotation = lyah::radians(-30.0f);
 		objectB.angularVelocity = lyah::radians(32.26f);
 
+		scene.updateTransform(objectB);
+
 		renderer.registerScene(scene);
 	}
 
 	void RendererLayer::update(float64 fixedDeltaTime) {
 		const float32 t = static_cast<float32>(fixedDeltaTime);
 
-		for (uint32 objectIndex = 0; objectIndex < scene.getObjectCount(); objectIndex += 1) {
-			Object2D& A = scene[objectIndex];
-
-			A.position += A.linearVelocity * t;
-			A.rotation += A.angularVelocity * t;
-
-			A.linearVelocity += A.linearAcceleration * t;
-			A.angularVelocity += A.angularAcceleration * t;
-
-			scene.updateTransform(A);
-
-			renderer.writeInstanceTransform(objectIndex, A.transform);
-		}
-
-		/*for (uint32 i = 0; i < scene.getObjectCount() - 1; i += 1) {
+		for (uint32 i = 0; i < scene.getObjectCount() - 1; i += 1) {
 			for (uint32 j = i + 1; j < scene.getObjectCount(); j += 1) {
-				const Object2D& A = scene[i];
-				const Object2D& B = scene[j];
+				Object2D& A = scene[i];
+				Object2D& B = scene[j];
 
-				const bool intersecting = GJK2DConditional(A, B);
+				//const bool intersecting = GJK2DConditional(A, B);
 
-				ENGINE_DEBUG("Intersecting: []", intersecting);
+				//ENGINE_DEBUG(intersecting);
+
+				advanceSimulation(A, t);
+				advanceSimulation(B, t);
+
+				renderer.writeInstanceTransform(i, A.transform);
+				renderer.writeInstanceTransform(j, B.transform);
 			}
-		}*/
+		}
 	}
 
 	void RendererLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
@@ -117,11 +113,21 @@ namespace ProjectA {
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 	}
 
+	void RendererLayer::advanceSimulation(Object2D& A, float32 t) const {
+		A.position += A.linearVelocity * t;
+		A.rotation += A.angularVelocity * t;
+
+		A.linearVelocity += A.linearAcceleration * t;
+		A.angularVelocity += A.angularAcceleration * t;
+
+		scene.updateTransform(A);
+	}
+
 	bool RendererLayer::onMouseMove(MouseMoveEvent& event) {
 		const float32 x = static_cast<float32>(event.getX());
 		const float32 y = static_cast<float32>(event.getY());
 
-		renderer.setMousePosition(x, y);
+		renderer.setNdcMousePosition(x, y);
 
 		return true;
 	}

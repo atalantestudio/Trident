@@ -104,7 +104,7 @@ namespace ProjectA {
 		rasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f;
 		rasterizationStateCreateInfo.depthBiasClamp = 0.0f;
 		rasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
-		rasterizationStateCreateInfo.lineWidth = 1.0f;
+		rasterizationStateCreateInfo.lineWidth = descriptor.lineWidth;
 
 		const VkSampleMask sampleMask = 1;
 

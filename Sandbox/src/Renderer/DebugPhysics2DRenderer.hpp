@@ -12,7 +12,10 @@ namespace ProjectA {
 			void registerScene(const Scene2D& scene);
 
 			// x and y are in the range [0, viewport].
-			void setMousePosition(float32 x, float32 y);
+			const vec2<float32>& getNdcMousePosition() const;
+
+			// x and y are in the range [0, viewport].
+			void setNdcMousePosition(float32 x, float32 y);
 
 			void zoom(float32 zoomLevelDelta) const;
 
@@ -77,6 +80,8 @@ namespace ProjectA {
 			ref<PipelineLayout> renderPipelineLayout;
 			ref<RenderPipeline> fillRenderPipeline;
 			ref<RenderPipeline> strokeRenderPipeline;
+			//ref<RenderPipeline> vertexClosestFeatureRenderPipeline;
+			//ref<RenderPipeline> edgeClosestFeatureRenderPipeline;
 
 			uint32 indexCount = 0;
 			uint32 gridVertexCount = 0;

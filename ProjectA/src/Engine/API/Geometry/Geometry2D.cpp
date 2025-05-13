@@ -22,7 +22,7 @@ namespace ProjectA {
 		radius = lyah::sqrt(radius);
 	}
 
-	const vec2<float32>& Geometry2D::support(const vec2<float32>& d) const {
+	const uint32 Geometry2D::support(const vec2<float32>& d) const {
 		float32 maxValue = dot(vertices[0], d);
 		uint32 maxValueIndex = 0;
 
@@ -35,6 +35,6 @@ namespace ProjectA {
 			}
 		}
 
-		return vertices[maxValueIndex];
+		return maxValueIndex;
 	}
 }

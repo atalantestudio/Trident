@@ -10,8 +10,8 @@ namespace ProjectA {
 		public:
 			explicit Geometry2D(const Geometry2DDescriptor& descriptor);
 
-			// Returns the farthest point of the geometry in the direction d.
-			const vec2<float32>& support(const vec2<float32>& d) const;
+			// Returns the index of the farthest point of the geometry in the direction d.
+			const uint32 support(const vec2<float32>& d) const;
 
 		public:
 			chain<vec2<float32>> vertices;

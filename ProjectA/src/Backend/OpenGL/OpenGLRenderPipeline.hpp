@@ -21,5 +21,6 @@ namespace ProjectA {
 			const GLenum cullMode;
 			const GLenum polygonModeFace;
 			const GLenum polygonMode;
+			const GLfloat lineWidth;
 	};
 }

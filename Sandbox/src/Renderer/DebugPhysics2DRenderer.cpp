@@ -278,13 +278,18 @@ namespace ProjectA {
 		strokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
 		strokeRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
 		strokeRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		//strokeRenderPipelineDescriptor.lineWidth = 2.0f;
 		strokeRenderPipelineDescriptor.cullMode = CullMode::BACK;
 		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
 	}
 
-	void DebugPhysics2DRenderer::setMousePosition(float32 x, float32 y) {
+	const vec2<float32>& DebugPhysics2DRenderer::getNdcMousePosition() const {
+		return mousePosition;
+	}
+
+	void DebugPhysics2DRenderer::setNdcMousePosition(float32 x, float32 y) {
 		const ref<Swapchain>& swapchain = getSwapchain();
 
 		const float32 horizontalCellCount = swapchain->getExtentWidth() / cameraMappedRange->zoomLevel;
