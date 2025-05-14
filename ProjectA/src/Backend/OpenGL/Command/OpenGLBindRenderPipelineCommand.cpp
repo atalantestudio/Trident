@@ -14,10 +14,15 @@ namespace ProjectA {
 	// - glEnable(GL_FRAMEBUFFER_SRGB)
 	void OpenGLBindRenderPipelineCommand::execute() const {
 		glBindVertexArray(renderPipeline->vertexArray);
-
 		glUseProgram(renderPipeline->program);
-
 		glFrontFace(renderPipeline->frontFace);
+
+		if (renderPipeline->polygonMode == GL_POINT) {
+			glEnable(GL_PROGRAM_POINT_SIZE);
+		}
+		else {
+			glDisable(GL_PROGRAM_POINT_SIZE);
+		}
 
 		if (renderPipeline->polygonModeFace != GL_NONE) {
 			glPolygonMode(renderPipeline->polygonModeFace, renderPipeline->polygonMode);
