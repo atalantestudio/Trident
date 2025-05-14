@@ -19,8 +19,8 @@ namespace ProjectA {
 		ref<ShaderModule> fragmentShaderModule;
 		PrimitiveTopology primitiveTopology;
 		PolygonMode polygonMode;
-		CullMode cullMode;
-		FrontFace frontFace;
+		CullMode cullMode = CullMode::BACK;
+		FrontFace frontFace = FrontFace::CLOCKWISE;
 
 		// Line width, used by render pipelines having the LINE polygon mode.
 		float32 lineWidth = 1.0f;

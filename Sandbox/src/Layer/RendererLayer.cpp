@@ -71,7 +71,7 @@ namespace ProjectA {
 
 		Object2D& objectB = scene.registerObject(objectBDescriptor);
 
-		objectB.position = {1.0f, 1.957f};
+		objectB.position = {0.0f, 1.957f};
 		objectB.rotation = lyah::radians(-30.0f);
 		objectB.angularVelocity = lyah::radians(32.26f);
 
@@ -89,14 +89,16 @@ namespace ProjectA {
 				Object2D& B = scene[j];
 
 				//const bool intersecting = GJK2DConditional(A, B);
-
-				//ENGINE_DEBUG(intersecting);
+				const GJK2DResult gjkResult = GJK2D(A, B);
 
 				advanceSimulation(A, t);
 				advanceSimulation(B, t);
 
 				renderer.writeInstanceTransform(i, A.transform);
 				renderer.writeInstanceTransform(j, B.transform);
+
+				renderer.setVertexFeature(0, gjkResult.closestA);
+				renderer.setVertexFeature(1, gjkResult.closestB);
 			}
 		}
 	}

@@ -140,8 +140,8 @@ namespace ProjectA {
 		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		renderPipelineDescriptor.cullMode = CullMode::BACK;
+		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);

@@ -12,6 +12,9 @@ namespace ProjectA {
 		initializeGridVertexBuffer();
 		initializeGridRenderPipeline();
 
+		initializeVertexFeatureBuffer();
+		initializeVertexFeatureRenderPipeline();
+
 		const ref<Swapchain>& swapchain = getSwapchain();
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
@@ -123,11 +126,63 @@ namespace ProjectA {
 		gridRenderPipelineDescriptor.fragmentShaderModule = gridFragmentShaderModule;
 		gridRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		gridRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		gridRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		gridRenderPipelineDescriptor.cullMode = CullMode::BACK;
 		gridRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		gridRenderPipeline = createRenderPipeline(gridRenderPipelineDescriptor);
+	}
+
+	void DebugPhysics2DRenderer::initializeVertexFeatureBuffer() {
+		constexpr uint64 vertexFeatureBufferSize = 2 * sizeof(svec2<float32>);
+
+		BufferDescriptor vertexFeatureBufferDescriptor{};
+		vertexFeatureBufferDescriptor.size = vertexFeatureBufferSize;
+		vertexFeatureBufferDescriptor.usage = BufferUsage::VERTEX;
+		vertexFeatureBufferDescriptor.persistent = true;
+
+		vertexFeatureBuffer = createBuffer(vertexFeatureBufferDescriptor);
+		vertexFeatureMappedRange = vertexFeatureBuffer->map<svec2<float32>>(0, vertexFeatureBufferSize);
+	}
+
+	void DebugPhysics2DRenderer::initializeVertexFeatureRenderPipeline() {
+		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
+		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
+		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
+
+		DescriptorSetLayout vertexFeatureDescriptorSetLayout;
+		vertexFeatureDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding};
+
+		PipelineLayoutDescriptor vertexFeaturePipelineLayoutDescriptor;
+		vertexFeaturePipelineLayoutDescriptor.layouts = {vertexFeatureDescriptorSetLayout};
+
+		featureRenderPipelineLayout = createPipelineLayout(vertexFeaturePipelineLayoutDescriptor);
+
+		ShaderModuleDescriptor vertexFeatureVertexShaderModuleDescriptor{};
+		vertexFeatureVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexFeatureVertexShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> vertexFeatureVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/VertexFeature.vert.spv", vertexFeatureVertexShaderModuleDescriptor);
+
+		ShaderModuleDescriptor vertexFeatureFragmentShaderModuleDescriptor{};
+		vertexFeatureFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		vertexFeatureFragmentShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> vertexFeatureFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/VertexFeature.frag.spv", vertexFeatureFragmentShaderModuleDescriptor);
+
+		VertexInputBinding vertexFeatureVertexInputBinding(InputRate::VERTEX);
+		vertexFeatureVertexInputBinding.registerAttribute<svec2<float32>>(false);
+
+		RenderPipelineDescriptor vertexFeatureRenderPipelineDescriptor;
+		vertexFeatureRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		vertexFeatureRenderPipelineDescriptor.pipelineLayout = featureRenderPipelineLayout;
+		vertexFeatureRenderPipelineDescriptor.vertexInputBindings = {vertexFeatureVertexInputBinding};
+		vertexFeatureRenderPipelineDescriptor.vertexShaderModule = vertexFeatureVertexShaderModule;
+		vertexFeatureRenderPipelineDescriptor.fragmentShaderModule = vertexFeatureFragmentShaderModule;
+		vertexFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
+		vertexFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
+		vertexFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+
+		vertexFeatureRenderPipeline = createRenderPipeline(vertexFeatureRenderPipelineDescriptor);
 	}
 
 	void DebugPhysics2DRenderer::registerScene(const Scene2D& scene) {
@@ -263,8 +318,6 @@ namespace ProjectA {
 		fillRenderPipelineDescriptor.fragmentShaderModule = fillFragmentShaderModule;
 		fillRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		fillRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		fillRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		fillRenderPipelineDescriptor.cullMode = CullMode::BACK;
 		fillRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		fillRenderPipeline = createRenderPipeline(fillRenderPipelineDescriptor);
@@ -277,9 +330,7 @@ namespace ProjectA {
 		strokeRenderPipelineDescriptor.fragmentShaderModule = strokeFragmentShaderModule;
 		strokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
 		strokeRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
-		strokeRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		//strokeRenderPipelineDescriptor.lineWidth = 2.0f;
-		strokeRenderPipelineDescriptor.cullMode = CullMode::BACK;
 		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
@@ -328,6 +379,10 @@ namespace ProjectA {
 
 		renderGrid(commandEncoder);
 		renderScene(commandEncoder);
+
+		if (vertexFeatureCount > 0) {
+			renderClosestFeatures(commandEncoder);
+		}
 	}
 
 	void DebugPhysics2DRenderer::renderGrid(const ref<CommandEncoder>& commandEncoder) const {
@@ -365,6 +420,12 @@ namespace ProjectA {
 		}
 	}
 
+	void DebugPhysics2DRenderer::renderClosestFeatures(const ref<CommandEncoder>& commandEncoder) const {
+		commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
+		commandEncoder->bindVertexBuffer(0, vertexFeatureBuffer, 0, sizeof(svec2<float32>));
+		commandEncoder->draw(vertexFeatureCount, 1, 0);
+	}
+
 	void DebugPhysics2DRenderer::resize(float32 width, float32 height) const {
 		const float32 left = -width / 2.0f;
 		const float32 right = width / 2.0f;
@@ -383,5 +444,12 @@ namespace ProjectA {
 
 	void DebugPhysics2DRenderer::writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const {
 		instanceMappedRange[instanceIndex].world = transform;
+	}
+
+	void DebugPhysics2DRenderer::setVertexFeature(uint32 vertexFeatureIndex, const vec2<float32>& vertexFeature) {
+		DEBUG_ASSERT(vertexFeatureIndex < 2);
+
+		vertexFeatureMappedRange[vertexFeatureIndex] = {vertexFeature[0], vertexFeature[1]};
+		vertexFeatureCount = vertexFeatureIndex + 1;
 	}
 }

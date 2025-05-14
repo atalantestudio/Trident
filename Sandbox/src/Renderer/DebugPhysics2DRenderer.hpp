@@ -25,18 +25,19 @@ namespace ProjectA {
 
 			void writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
 
+			void setVertexFeature(uint32 vertexFeatureIndex, const vec2<float32>& vertexFeature);
+
 		private:
 			void initializeViewUniformBuffer();
-
 			void initializeCameraUniformBuffer();
-
 			void initializeGridVertexBuffer();
-
 			void initializeGridRenderPipeline();
+			void initializeVertexFeatureBuffer();
+			void initializeVertexFeatureRenderPipeline();
 
 			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
-
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
+			void renderClosestFeatures(const ref<CommandEncoder>& commandEncoder) const;
 
 		private:
 			struct Instance {
@@ -63,6 +64,10 @@ namespace ProjectA {
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
 
+			ref<Buffer> vertexFeatureBuffer;
+			svec2<float32>* vertexFeatureMappedRange = nullptr;
+			uint32 vertexFeatureCount = 0;
+
 			ref<Buffer> instanceBuffer;
 			Instance* instanceMappedRange = nullptr;
 
@@ -80,8 +85,10 @@ namespace ProjectA {
 			ref<PipelineLayout> renderPipelineLayout;
 			ref<RenderPipeline> fillRenderPipeline;
 			ref<RenderPipeline> strokeRenderPipeline;
-			//ref<RenderPipeline> vertexClosestFeatureRenderPipeline;
-			//ref<RenderPipeline> edgeClosestFeatureRenderPipeline;
+
+			ref<PipelineLayout> featureRenderPipelineLayout;
+			ref<RenderPipeline> vertexFeatureRenderPipeline;
+			//ref<RenderPipeline> edgeFeatureRenderPipeline;
 
 			uint32 indexCount = 0;
 			uint32 gridVertexCount = 0;

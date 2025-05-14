@@ -160,21 +160,21 @@ namespace ProjectA {
 		vec2<float32> v;
 
 		// Vertex index on A.
-		uint32 iA;
+		uint32 iA = 0;
 
 		// Vertex index on B.
-		uint32 iB;
+		uint32 iB = 0;
 
 		// Barycentric coordinate of the closest point.
-		float32 u;
+		float32 u = 0.0f;
 	};
 
 	struct Simplex {
 		SimplexVertex vertices[3];
-		float32 divisor;
+		float32 divisor = 1.0f;
 		uint8 count : 2;
 
-		Simplex() : count(0), divisor(1.0f) {}
+		Simplex() : count(0) {}
 
 		const SimplexVertex& operator [](std::size_t index) const {
 			DEBUG_ASSERT(index < 3);
@@ -207,8 +207,8 @@ namespace ProjectA {
 
 	// Calculates the closest point to the origin on a line formed by s.
 	static void ClosestPointLineOrigin(Simplex& s) {
-		const vec2<float32> a = s[0].v;
-		const vec2<float32> b = s[1].v;
+		const vec2<float32>& a = s[0].v;
+		const vec2<float32>& b = s[1].v;
 		const vec2<float32> ab = b - a;
 
 		const float32 uAB = dot(-a, ab);
@@ -235,27 +235,21 @@ namespace ProjectA {
 		}
 
 		// In region AB.
-		s[0].u = uAB;
-		s[1].u = vAB;
+		s[0].u = vAB;
+		s[1].u = uAB;
 		s.divisor = lengthSq(ab);
 		s.count = 2;
 	}
 
 	// Calculates the closest point to the origin on a triangle formed by s.
 	static void ClosestPointTriangleOrigin(Simplex& s) {
-		const vec2<float32> a = s[0].v;
-		const vec2<float32> b = s[1].v;
-		const vec2<float32> c = s[2].v;
+		const vec2<float32>& a = s[0].v;
+		const vec2<float32>& b = s[1].v;
+		const vec2<float32>& c = s[2].v;
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ac = c - a;
-		const vec2<float32> bc = c - b;
-		const vec2<float32> ca = a - c;
 
 		const float32 uAB = dot(-a, ab);
-		const float32 vAB = dot(-b, a - b);
-		const float32 uBC = dot(-b, bc);
-		const float32 vBC = dot(-c, b - c);
-		const float32 uCA = dot(-c, ca);
 		const float32 vCA = dot(-a, ac);
 
 		if (vCA <= 0.0f && uAB <= 0.0f) {
@@ -267,6 +261,11 @@ namespace ProjectA {
 			return;
 		}
 
+		const vec2<float32> bc = c - b;
+
+		const float32 vAB = dot(-b, a - b);
+		const float32 uBC = dot(-b, bc);
+
 		if (vAB <= 0.0f && uBC <= 0.0f) {
 			// In region B.
 			s[0] = s[1];
@@ -276,6 +275,11 @@ namespace ProjectA {
 
 			return;
 		}
+
+		const vec2<float32> ca = a - c;
+
+		const float32 vBC = dot(-c, b - c);
+		const float32 uCA = dot(-c, ca);
 
 		if (vBC <= 0.0f && uCA <= 0.0f) {
 			// In region C.
@@ -291,9 +295,9 @@ namespace ProjectA {
 		const float32 S = area(ab, ac);
 
 		// Compute triangle barycentric coordinates (pre-division).
-		const float32 uABC = area(-b, -c);
-		const float32 vABC = area(-c, -a);
-		const float32 wABC = area(-a, -b);
+		const float32 uABC = area(b, c);
+		const float32 vABC = area(c, a);
+		const float32 wABC = area(a, b);
 
 		if (uAB > 0.0f && vAB > 0.0f && wABC * S <= 0.0f) {
 			// In region AB.
@@ -329,9 +333,11 @@ namespace ProjectA {
 			return;
 		}
 
-		// In region ABC.
-		DEBUG_ASSERT(uABC > 0.0f && vABC > 0.0f && wABC > 0.0f);
+		// Without CCD, this throws when the shapes separate after an intersection.
+		// With CCD, this is never reached since no intersection should ever occur.
+		// DEBUG_ASSERT(uABC > 0.0f && vABC > 0.0f && wABC > 0.0f);
 
+		// In region ABC.
 		s[0].u = uABC;
 		s[1].u = vABC;
 		s[2].u = wABC;
@@ -340,48 +346,64 @@ namespace ProjectA {
 	}
 
 	inline GJK2DResult GJK2D(const Object2D& A, const Object2D& B) {
+		DEBUG_ASSERT(A.getGeometry().vertices.size() < std::numeric_limits<uint8>::max());
+		DEBUG_ASSERT(B.getGeometry().vertices.size() < std::numeric_limits<uint8>::max());
+
 		GJK2DResult result{};
 		result.A = &A;
 		result.B = &B;
 
 		Simplex& s = result.simplex;
 
-		SimplexVertex& sv = s[0];
-		sv.iA = 0;
-		sv.iB = 0;
-		sv.vA = transformSupport(A, sv.iA);
-		sv.vB = transformSupport(B, sv.iB);
-		sv.v = sv.vB - sv.vA;
-		sv.u = 1.0f;
+		SimplexVertex& vertex = s[0];
+		vertex.iA = 0;
+		vertex.iB = 0;
+		vertex.vA = transformSupport(A, vertex.iA);
+		vertex.vB = transformSupport(B, vertex.iB);
+		vertex.v = vertex.vB - vertex.vA;
+		vertex.u = 1.0f;
 
-		s.count = 1;
+ 		s.count = 1;
 
 		//vec2<float32> d = B.position - A.position;
 		vec2<float32> d;
 
 		for (uint8 i = 0; i < GJK_ITERATION_LIMIT; i += 1) {
-			const uint8 saveCount = s.count;
-			fchain<uint32> saveA(saveCount);
-			fchain<uint32> saveB(saveCount);
+			// debug
+			for (uint8 k = 0; k < s.count; k += 1) {
+				if (lengthSq(s[k].v) == 0.0f) {
+					BREAKPOINT();
+				}
+			}
 
-			for (uint32 j = 0; j < saveCount; j += 1) {
+			const uint8 previousCount = s.count;
+			fchain<uint32> saveA(previousCount);
+			fchain<uint32> saveB(previousCount);
+
+			for (uint8 j = 0; j < previousCount; j += 1) {
 				saveA[j] = s[j].iA;
 				saveB[j] = s[j].iB;
 			}
 
-			switch (s.count) {
-				case 1:
+			switch (previousCount) {
+				case 1: {
 					break;
-				case 2:
+				}
+				case 2: {
 					ClosestPointLineOrigin(s);
 
 					break;
-				case 3:
+				}
+				case 3: {
 					ClosestPointTriangleOrigin(s);
 
 					break;
-				default:
-					ENGINE_ASSERT(false, "Invalid simplex dimension.");
+				}
+				default: {
+					DEBUG_ASSERT(false, "Invalid simplex dimension.");
+
+					break;
+				}
 			}
 
 			if (s.count == 3) {
@@ -404,11 +426,14 @@ namespace ProjectA {
 					else {
 						d = {ab[1], -ab[0]};
 					}
+
+					break;
 				}
-				default:
+				default: {
 					DEBUG_ASSERT(false);
 
 					break;
+				}
 			}
 
 			if (lengthSq(d) < lyah::epsilon<float32>() * lyah::epsilon<float32>()) {
@@ -417,13 +442,14 @@ namespace ProjectA {
 				break;
 			}
 
-			const uint32 iA = supportIndex(A, d);
-			const uint32 iB = supportIndex(B, d);
+			SimplexVertex& vertex = s[s.count];
+			vertex.iA = supportIndex(A, -d);
+			vertex.iB = supportIndex(B, d);
 
 			bool duplicate = false;
 
-			for (uint8 j = 0; j < saveCount; j += 1) {
-				if (iA == saveA[j] && iB == saveB[j]) {
+			for (uint8 j = 0; j < previousCount; j += 1) {
+				if (vertex.iA == saveA[j] && vertex.iB == saveB[j]) {
 					duplicate = true;
 
 					break;
@@ -434,33 +460,30 @@ namespace ProjectA {
 				break;
 			}
 
-			sv = s[s.count];
-			sv.iA = iA;
-			sv.iB = iB;
-			sv.vA = transformSupport(A, iA);
-			sv.vB = transformSupport(B, iB);
-			sv.v = sv.vB - sv.vA;
-			sv.u = 0.0f;
+			vertex.vA = transformSupport(A, vertex.iA);
+			vertex.vB = transformSupport(B, vertex.iB);
+			vertex.v = vertex.vB - vertex.vA;
 
 			s.count += 1;
 
 			#ifdef BUILD_MODE_DEBUG
 				if (i == GJK_ITERATION_LIMIT - 1) {
-					ENGINE_WARN("GJK 2D: Iteration limit reached.");
+					//ENGINE_WARN("GJK 2D: Iteration limit reached.");
 				}
 			#endif
 		}
 
-		const float32 div = 1.0f / s.divisor;
+		const float32 div = lyah::rcp(s.divisor);
 
 		// Find the closest points on both objects.
 		switch (s.count) {
-			case 1:
+			case 1: {
 				result.closestA = s[0].vA;
 				result.closestB = s[0].vB;
 
 				break;
-			case 2:
+			}
+			case 2: {
 				result.closestA =
 					s[0].vA * s[0].u * div + 
 					s[1].vA * s[1].u * div;
@@ -469,7 +492,8 @@ namespace ProjectA {
 					s[1].vB * s[1].u * div;
 
 				break;
-			case 3:
+			}
+			case 3: {
 				result.closestA =
 					s[0].vA * s[0].u * div +
 					s[1].vA * s[1].u * div +
@@ -477,6 +501,7 @@ namespace ProjectA {
 				result.closestB = result.closestA;
 
 				break;
+			}
 		}
 
 		result.distance = distance(result.closestA, result.closestB);
