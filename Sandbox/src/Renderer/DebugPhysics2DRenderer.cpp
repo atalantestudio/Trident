@@ -267,7 +267,7 @@ namespace ProjectA {
 		edgeFeatureRenderPipelineDescriptor.fragmentShaderModule = edgeFeatureFragmentShaderModule;
 		edgeFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
 		edgeFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
-		edgeFeatureRenderPipelineDescriptor.lineWidth = 2.0f;
+		edgeFeatureRenderPipelineDescriptor.lineWidth = 3.0f;
 		edgeFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		edgeFeatureRenderPipeline = createRenderPipeline(edgeFeatureRenderPipelineDescriptor);
@@ -418,7 +418,6 @@ namespace ProjectA {
 		strokeRenderPipelineDescriptor.fragmentShaderModule = strokeFragmentShaderModule;
 		strokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
 		strokeRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
-		//strokeRenderPipelineDescriptor.lineWidth = 2.0f;
 		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
