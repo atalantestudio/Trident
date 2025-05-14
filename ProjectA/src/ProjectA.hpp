@@ -50,3 +50,5 @@
 
 // Physics
 #include "Engine/API/Physics/GJK2D.hpp"
+#include "Engine/API/Physics/GJK2DConditional.hpp"
+#include "Engine/API/Physics/GJK2DPointConditional.hpp"

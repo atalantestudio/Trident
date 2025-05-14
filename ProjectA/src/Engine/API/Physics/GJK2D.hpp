@@ -1,154 +1,12 @@
 #pragma once
 
 #include "Engine/API/Object/Object2D.hpp"
+#include "Engine/API/Physics/ClosestFeature.hpp"
 #include "Engine/API/Physics/Simplex.hpp"
 #include "Engine/API/Physics/support.hpp"
 
 namespace ProjectA {
-	static constexpr uint8 GJK_2D_CONDITIONAL_ITERATION_LIMIT = 8;
 	static constexpr uint8 GJK_2D_ITERATION_LIMIT = 8;
-
-	// TODO: Refactor using sign flip for 2D perpendicular vectors.
-	static vec2<float32> cross2d(const vec2<float32>& a, const vec2<float32>& b) {
-		const vec3<float32> a_3d = {a[0], a[1], 0.0f};
-		const vec3<float32> b_3d = {b[0], b[1], 0.0f};
-		const vec3<float32> r_3d = cross(a_3d, b_3d);
-
-		return {r_3d[0], r_3d[1]};
-	}
-
-	// TODO: Refactor using sign flip for 2D perpendicular vectors.
-	static vec2<float32> tripleCross2d(const vec2<float32>& a, const vec2<float32>& b, const vec2<float32>& c) {
-		const vec2<float32> b_c = {b[0] * c[1], b[1] * c[0]};
-
-		return {
-			a[1] * (b_c[0] - b_c[1]),
-			a[0] * (b_c[1] - b_c[0]),
-		};
-	}
-
-	// TODO: GJK 2D Point Conditional
-
-	static void handle1Simplex(sim2<float32>& s, vec2<float32>& d) {
-		const vec2<float32>& a = s[1];
-		const vec2<float32>& b = s[0];
-		const vec2<float32> ab = b - a;
-		const vec2<float32> ao = -a;
-
-		if (dot(ab, ao) > 0.0f) {
-			d = tripleCross2d(ab, ao, ab);
-
-			return;
-		}
-
-		s = {a};
-		d = ao;
-	}
-
-	static bool handle2Simplex(sim2<float32>& s, vec2<float32>& d) {
-		const vec2<float32>& a = s[2];
-		const vec2<float32>& b = s[1];
-		const vec2<float32>& c = s[0];
-		const vec2<float32> ab = b - a;
-		const vec2<float32> ac = c - a;
-		const vec2<float32> ao = -a;
-		const vec2<float32> abc = cross2d(ab, ac);
-
-		if (dot(cross2d(abc, ac), ao) > 0.0f) {
-			if (dot(ac, ao) > 0.0f) {
-				s = {a, c};
-				d = tripleCross2d(ac, ao, ac);
-
-				return false;
-			}
-
-			s = {a, b};
-
-			handle1Simplex(s, d);
-
-			return false;
-		}
-
-		if (dot(cross2d(ab, abc), ao) > 0.0f) {
-			s = {a, b};
-
-			handle1Simplex(s, d);
-
-			return false;
-		}
-
-		return true;
-	}
-
-	// Gilbert-Johnson-Keerthi algorithm (distance-less) implementation in 2D.
-	// Returns true if the Minkowski difference of A and B contains the origin, and false otherwise.
-	// 
-	// References:
-	// 
-	// - Reducible - A Strange But Elegant Approach to a Surprisingly Hard Problem (GJK Algorithm)
-	//   https://youtu.be/ajv46BSqcK4
-	// - Casey Muratori - Implementing GJK (2006)
-	//   https://caseymuratori.com/blog_0003
-	// - Erin Catto - Computing Distance using GJK - GDC 2010
-	//   https://box2d.org/files/ErinCatto_GJK_GDC2010.pdf
-	//   https://box2d.org/files/ErinCatto_GJK_Source.zip
-	// - William Bittle - GJK, Distance, Closest Points
-	//   https://dyn4j.org/2010/04/gjk-distance-closest-points
-	// - Iain Winter - GJK: Collision detection algorithm in 2D/3D
-	//   https://winter.dev/articles/gjk-algorithm
-	// - Christer Ericson - Real-Time Collision Detection
-	//   https://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf
-	// 
-	// In this implementation, a is the name of the most recent vertex added to the simplex.
-	inline bool GJK2DConditional(const Object2D& A, const Object2D& B) {
-		// TODO: Normalize or not?
-		vec2<float32> d = B.position - A.position;
-
-		// TODO: Does this case always end up in an intersection?
-		if (lengthSq(d) == 0.0f) {
-			return true;
-		}
-
-		// Find a support point on the Minkowski difference of A and B.
-		vec2<float32> a = support(B, d) - support(A, -d);
-
-		// Check if a passes the origin.
-		if (dot(a, d) < 0.0f) {
-			return false;
-		}
-
-		sim2<float32> s = {a};
-
-		d = -a;
-
-		for (uint8 iteration = 0; iteration < GJK_2D_CONDITIONAL_ITERATION_LIMIT; iteration += 1) {
-			// Find a support point on the Minkowski difference of A and B.
-			a = support(B, d) - support(A, -d);
-
-			// Check if a passes the origin.
-			if (dot(a, d) < 0.0f) {
-				return false;
-			}
-
-			s += a;
-
-			DEBUG_ASSERT(s.count == 2 || s.count == 3);
-
-			if (s.count == 2) {
-				handle1Simplex(s, d);
-
-				continue;
-			}
-
-			if (handle2Simplex(s, d)) {
-				return true;
-			}
-		}
-
-		ENGINE_WARN("Max iteration limit reached.");
-
-		return false;
-	}
 
 	// The result of a 2D GJK computation.
 	struct GJK2DResult {
@@ -162,6 +20,12 @@ namespace ProjectA {
 		// Calculated as the length of the difference between closestA and closestB.
 		// A and B are intersecting if the distance is <= 0.
 		float32 distance;
+
+		// Closest feature on A. Can either be a vertex or an edge.
+		ClosestFeature closestFeatureA;
+
+		// Closest feature on B. Can either be a vertex or an edge.
+		ClosestFeature closestFeatureB;
 	};
 
 	// Calculates the closest point to the origin on a line formed by the simplex s.
@@ -304,14 +168,28 @@ namespace ProjectA {
 		s.count = 3;
 	}
 
+	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
+	// References:
+	// 
+	// - Casey Muratori - Implementing GJK (2006)
+	//   https://caseymuratori.com/blog_0003
+	// - Erin Catto - Computing Distance using GJK - GDC 2010
+	//   https://box2d.org/files/ErinCatto_GJK_GDC2010.pdf
+	//   https://box2d.org/files/ErinCatto_GJK_Source.zip
+	// - William Bittle - GJK, Distance, Closest Points
+	//   https://dyn4j.org/2010/04/gjk-distance-closest-points
+	// - Christer Ericson - Real-Time Collision Detection
+	//   https://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf
+	// 
 	inline GJK2DResult GJK2D(const Object2D& A, const Object2D& B) {
 		DEBUG_ASSERT(A.getGeometry().vertices.size() < std::numeric_limits<uint8>::max());
 		DEBUG_ASSERT(B.getGeometry().vertices.size() < std::numeric_limits<uint8>::max());
 
-		vec2<float32> d = B.position - A.position;
+		// TODO: Use d to find the first simplex vertex.
+		//vec2<float32> d = B.position - A.position;
+		vec2<float32> d;
 
 		Simplex2Vertex vertex;
-		// TODO: Find support points with d here.
 		vertex.iA = 0;
 		vertex.iB = 0;
 		vertex.vA = transformSupport(A, vertex.iA);
@@ -323,7 +201,6 @@ namespace ProjectA {
 		uint8 i = 0;
 
 		while (i < GJK_2D_ITERATION_LIMIT) {
-			// This is either 1 or 2.
 			const uint8 previousCount = s.count;
 
 			fchain<uint32> saveA(s.count);
@@ -382,7 +259,7 @@ namespace ProjectA {
 			}
 
 			if (lengthSq(d) < lyah::epsilon<float32>() * lyah::epsilon<float32>()) {
-				ENGINE_WARN("GJK: Search direction is 0 (vertex overlap).");
+				ENGINE_WARN("GJK 2D: Vertex, edge or face overlap.");
 
 				break;
 			}
@@ -420,8 +297,6 @@ namespace ProjectA {
 			i += 1;
 		}
 
-		ENGINE_DEBUG("finished in [] iters", (int) i + 1);
-
 		GJK2DResult result;
 
 		const float32 div = lyah::rcp(s.divisor);
@@ -446,6 +321,24 @@ namespace ProjectA {
 				DEBUG_ASSERT(false);
 
 				break;
+		}
+
+		result.closestFeatureA.vertices[0] = s[0].vA;
+		result.closestFeatureA.count = 1;
+
+		result.closestFeatureB.vertices[0] = s[0].vB;
+		result.closestFeatureB.count = 1;
+
+		if (s.count == 2) {
+			if (s[0].iA != s[1].iA) {
+				result.closestFeatureA.vertices[1] = s[1].vA;
+				result.closestFeatureA.count = 2;
+			}
+
+			if (s[0].iB != s[1].iB) {
+				result.closestFeatureB.vertices[1] = s[1].vB;
+				result.closestFeatureB.count = 2;
+			}
 		}
 
 		result.distance = distance(result.closestA, result.closestB);

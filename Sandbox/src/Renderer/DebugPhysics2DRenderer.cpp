@@ -13,7 +13,10 @@ namespace ProjectA {
 		initializeGridRenderPipeline();
 
 		initializeVertexFeatureBuffer();
+		initializeEdgeVertexFeatureBuffer();
+		initializeFeaturePipelineLayout();
 		initializeVertexFeatureRenderPipeline();
+		initializeEdgeFeatureRenderPipeline();
 
 		const ref<Swapchain>& swapchain = getSwapchain();
 
@@ -143,20 +146,34 @@ namespace ProjectA {
 		vertexFeatureMappedRange = vertexFeatureBuffer->map<svec2<float32>>(0, vertexFeatureBufferSize);
 	}
 
-	void DebugPhysics2DRenderer::initializeVertexFeatureRenderPipeline() {
+	void DebugPhysics2DRenderer::initializeEdgeVertexFeatureBuffer() {
+		constexpr uint64 edgeVertexFeatureBufferSize = 4 * sizeof(svec2<float32>);
+
+		BufferDescriptor edgeVertexFeatureBufferDescriptor{};
+		edgeVertexFeatureBufferDescriptor.size = edgeVertexFeatureBufferSize;
+		edgeVertexFeatureBufferDescriptor.usage = BufferUsage::VERTEX;
+		edgeVertexFeatureBufferDescriptor.persistent = true;
+
+		edgeVertexFeatureBuffer = createBuffer(edgeVertexFeatureBufferDescriptor);
+		edgeVertexFeatureMappedRange = edgeVertexFeatureBuffer->map<svec2<float32>>(0, edgeVertexFeatureBufferSize);
+	}
+
+	void DebugPhysics2DRenderer::initializeFeaturePipelineLayout() {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
 
-		DescriptorSetLayout vertexFeatureDescriptorSetLayout;
-		vertexFeatureDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding};
+		DescriptorSetLayout featureDescriptorSetLayout;
+		featureDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding};
 
-		PipelineLayoutDescriptor vertexFeaturePipelineLayoutDescriptor;
-		vertexFeaturePipelineLayoutDescriptor.layouts = {vertexFeatureDescriptorSetLayout};
+		PipelineLayoutDescriptor featurePipelineLayoutDescriptor;
+		featurePipelineLayoutDescriptor.layouts = {featureDescriptorSetLayout};
 
-		featureRenderPipelineLayout = createPipelineLayout(vertexFeaturePipelineLayoutDescriptor);
+		featurePipelineLayout = createPipelineLayout(featurePipelineLayoutDescriptor);
+	}
 
+	void DebugPhysics2DRenderer::initializeVertexFeatureRenderPipeline() {
 		ShaderModuleDescriptor vertexFeatureVertexShaderModuleDescriptor{};
 		vertexFeatureVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexFeatureVertexShaderModuleDescriptor.entryPoint = "main";
@@ -174,7 +191,7 @@ namespace ProjectA {
 
 		RenderPipelineDescriptor vertexFeatureRenderPipelineDescriptor;
 		vertexFeatureRenderPipelineDescriptor.renderPass = getMainRenderPass();
-		vertexFeatureRenderPipelineDescriptor.pipelineLayout = featureRenderPipelineLayout;
+		vertexFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		vertexFeatureRenderPipelineDescriptor.vertexInputBindings = {vertexFeatureVertexInputBinding};
 		vertexFeatureRenderPipelineDescriptor.vertexShaderModule = vertexFeatureVertexShaderModule;
 		vertexFeatureRenderPipelineDescriptor.fragmentShaderModule = vertexFeatureFragmentShaderModule;
@@ -183,6 +200,36 @@ namespace ProjectA {
 		vertexFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		vertexFeatureRenderPipeline = createRenderPipeline(vertexFeatureRenderPipelineDescriptor);
+	}
+
+	void DebugPhysics2DRenderer::initializeEdgeFeatureRenderPipeline() {
+		ShaderModuleDescriptor edgeFeatureVertexShaderModuleDescriptor{};
+		edgeFeatureVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		edgeFeatureVertexShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> edgeFeatureVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/EdgeFeature.vert.spv", edgeFeatureVertexShaderModuleDescriptor);
+
+		ShaderModuleDescriptor edgeFeatureFragmentShaderModuleDescriptor{};
+		edgeFeatureFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		edgeFeatureFragmentShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> edgeFeatureFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/EdgeFeature.frag.spv", edgeFeatureFragmentShaderModuleDescriptor);
+
+		VertexInputBinding edgeFeatureVertexInputBinding(InputRate::VERTEX);
+		edgeFeatureVertexInputBinding.registerAttribute<svec2<float32>>(false);
+
+		RenderPipelineDescriptor edgeFeatureRenderPipelineDescriptor;
+		edgeFeatureRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		edgeFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
+		edgeFeatureRenderPipelineDescriptor.vertexInputBindings = {edgeFeatureVertexInputBinding};
+		edgeFeatureRenderPipelineDescriptor.vertexShaderModule = edgeFeatureVertexShaderModule;
+		edgeFeatureRenderPipelineDescriptor.fragmentShaderModule = edgeFeatureFragmentShaderModule;
+		edgeFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
+		edgeFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
+		edgeFeatureRenderPipelineDescriptor.lineWidth = 2.0f;
+		edgeFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+
+		edgeFeatureRenderPipeline = createRenderPipeline(edgeFeatureRenderPipelineDescriptor);
 	}
 
 	void DebugPhysics2DRenderer::registerScene(const Scene2D& scene) {
@@ -379,10 +426,7 @@ namespace ProjectA {
 
 		renderGrid(commandEncoder);
 		renderScene(commandEncoder);
-
-		if (vertexFeatureCount > 0) {
-			renderClosestFeatures(commandEncoder);
-		}
+		renderClosestFeatures(commandEncoder);
 	}
 
 	void DebugPhysics2DRenderer::renderGrid(const ref<CommandEncoder>& commandEncoder) const {
@@ -421,9 +465,17 @@ namespace ProjectA {
 	}
 
 	void DebugPhysics2DRenderer::renderClosestFeatures(const ref<CommandEncoder>& commandEncoder) const {
-		commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
-		commandEncoder->bindVertexBuffer(0, vertexFeatureBuffer, 0, sizeof(svec2<float32>));
-		commandEncoder->draw(vertexFeatureCount, 1, 0);
+		if (nextVertexFeatureIndex > 0) {
+			commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
+			commandEncoder->bindVertexBuffer(0, vertexFeatureBuffer, 0, sizeof(svec2<float32>));
+			commandEncoder->draw(nextVertexFeatureIndex, 1, 0);
+		}
+
+		if (nextEdgeVertexFeatureIndex > 0) {
+			commandEncoder->bindRenderPipeline(edgeFeatureRenderPipeline);
+			commandEncoder->bindVertexBuffer(0, edgeVertexFeatureBuffer, 0, sizeof(svec2<float32>));
+			commandEncoder->draw(nextEdgeVertexFeatureIndex, 1, 0);
+		}
 	}
 
 	void DebugPhysics2DRenderer::resize(float32 width, float32 height) const {
@@ -446,10 +498,28 @@ namespace ProjectA {
 		instanceMappedRange[instanceIndex].world = transform;
 	}
 
-	void DebugPhysics2DRenderer::setVertexFeature(uint32 vertexFeatureIndex, const vec2<float32>& vertexFeature) {
-		DEBUG_ASSERT(vertexFeatureIndex < 2);
+	void DebugPhysics2DRenderer::registerClosestFeature(const ClosestFeature& closestFeature) {
+		switch (closestFeature.count) {
+			case 1:
+				vertexFeatureMappedRange[nextVertexFeatureIndex] = {closestFeature.vertices[0][0], closestFeature.vertices[0][1]};
+				nextVertexFeatureIndex += 1;
 
-		vertexFeatureMappedRange[vertexFeatureIndex] = {vertexFeature[0], vertexFeature[1]};
-		vertexFeatureCount = vertexFeatureIndex + 1;
+				break;
+			case 2:
+				edgeVertexFeatureMappedRange[nextEdgeVertexFeatureIndex + 0] = {closestFeature.vertices[0][0], closestFeature.vertices[0][1]};
+				edgeVertexFeatureMappedRange[nextEdgeVertexFeatureIndex + 1] = {closestFeature.vertices[1][0], closestFeature.vertices[1][1]};
+				nextEdgeVertexFeatureIndex += 2;
+
+				break;
+			default:
+				DEBUG_ASSERT(false);
+
+				break;
+		}
+	}
+
+	void DebugPhysics2DRenderer::clearClosestFeatures() {
+		nextVertexFeatureIndex = 0;
+		nextEdgeVertexFeatureIndex = 0;
 	}
 }

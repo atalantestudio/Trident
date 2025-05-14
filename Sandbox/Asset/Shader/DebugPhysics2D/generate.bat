@@ -7,8 +7,8 @@
 :: "%VULKAN_SDK%\Bin\glslc.exe" DebugPhysics2DStroke.vert -o DebugPhysics2DStroke.vert.spv
 :: "%VULKAN_SDK%\Bin\glslc.exe" DebugPhysics2DStroke.frag -o DebugPhysics2DStroke.frag.spv
 
-"%VULKAN_SDK%\Bin\glslc.exe" VertexFeature.vert -o VertexFeature.vert.spv
-"%VULKAN_SDK%\Bin\glslc.exe" VertexFeature.frag -o VertexFeature.frag.spv
+:: "%VULKAN_SDK%\Bin\glslc.exe" VertexFeature.vert -o VertexFeature.vert.spv
+:: "%VULKAN_SDK%\Bin\glslc.exe" VertexFeature.frag -o VertexFeature.frag.spv
 
-:: "%VULKAN_SDK%\Bin\glslc.exe" EdgeFeature.vert -o EdgeFeature.vert.spv
-:: "%VULKAN_SDK%\Bin\glslc.exe" EdgeFeature.frag -o EdgeFeature.frag.spv
+"%VULKAN_SDK%\Bin\glslc.exe" EdgeFeature.vert -o EdgeFeature.vert.spv
+"%VULKAN_SDK%\Bin\glslc.exe" EdgeFeature.frag -o EdgeFeature.frag.spv

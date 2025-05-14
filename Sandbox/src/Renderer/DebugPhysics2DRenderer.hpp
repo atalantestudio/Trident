@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/API/Physics/ClosestFeature.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -25,7 +26,9 @@ namespace ProjectA {
 
 			void writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
 
-			void setVertexFeature(uint32 vertexFeatureIndex, const vec2<float32>& vertexFeature);
+			void registerClosestFeature(const ClosestFeature& closestFeature);
+
+			void clearClosestFeatures();
 
 		private:
 			void initializeViewUniformBuffer();
@@ -33,7 +36,10 @@ namespace ProjectA {
 			void initializeGridVertexBuffer();
 			void initializeGridRenderPipeline();
 			void initializeVertexFeatureBuffer();
+			void initializeEdgeVertexFeatureBuffer();
+			void initializeFeaturePipelineLayout();
 			void initializeVertexFeatureRenderPipeline();
+			void initializeEdgeFeatureRenderPipeline();
 
 			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
@@ -66,7 +72,11 @@ namespace ProjectA {
 
 			ref<Buffer> vertexFeatureBuffer;
 			svec2<float32>* vertexFeatureMappedRange = nullptr;
-			uint32 vertexFeatureCount = 0;
+			uint32 nextVertexFeatureIndex = 0;
+
+			ref<Buffer> edgeVertexFeatureBuffer;
+			svec2<float32>* edgeVertexFeatureMappedRange = nullptr;
+			uint32 nextEdgeVertexFeatureIndex = 0;
 
 			ref<Buffer> instanceBuffer;
 			Instance* instanceMappedRange = nullptr;
@@ -86,9 +96,10 @@ namespace ProjectA {
 			ref<RenderPipeline> fillRenderPipeline;
 			ref<RenderPipeline> strokeRenderPipeline;
 
-			ref<PipelineLayout> featureRenderPipelineLayout;
+			ref<PipelineLayout> featurePipelineLayout;
+
 			ref<RenderPipeline> vertexFeatureRenderPipeline;
-			//ref<RenderPipeline> edgeFeatureRenderPipeline;
+			ref<RenderPipeline> edgeFeatureRenderPipeline;
 
 			uint32 indexCount = 0;
 			uint32 gridVertexCount = 0;

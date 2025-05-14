@@ -81,14 +81,22 @@ namespace ProjectA {
 	}
 
 	void RendererLayer::update(float64 fixedDeltaTime) {
+		renderer.clearClosestFeatures();
+
 		const float32 t = static_cast<float32>(fixedDeltaTime);
+
+		/*const vec2<float32>& p = renderer.getNdcMousePosition();
+		const bool intersecting = GJK2DPointConditional(scene[0], p);
+
+		if (intersecting) {
+			ENGINE_DEBUG("Intersecting A at []", p);
+		}*/
 
 		for (uint32 i = 0; i < scene.getObjectCount() - 1; i += 1) {
 			for (uint32 j = i + 1; j < scene.getObjectCount(); j += 1) {
 				Object2D& A = scene[i];
 				Object2D& B = scene[j];
 
-				//const bool intersecting = GJK2DConditional(A, B);
 				const GJK2DResult gjkResult = GJK2D(A, B);
 
 				advanceSimulation(A, t);
@@ -97,8 +105,8 @@ namespace ProjectA {
 				renderer.writeInstanceTransform(i, A.transform);
 				renderer.writeInstanceTransform(j, B.transform);
 
-				renderer.setVertexFeature(0, gjkResult.closestA);
-				renderer.setVertexFeature(1, gjkResult.closestB);
+				renderer.registerClosestFeature(gjkResult.closestFeatureA);
+				renderer.registerClosestFeature(gjkResult.closestFeatureB);
 			}
 		}
 	}
