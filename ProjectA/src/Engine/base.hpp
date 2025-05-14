@@ -89,12 +89,12 @@
 }
 
 #ifdef BUILD_MODE_DEBUG
-	#define DEBUG_ASSERT(condition, ...) { \
-	if (!(condition)) { \
-		ENGINE_ERROR("Debug assertion failed."); \
-		BREAKPOINT(); \
-	} \
-}
+	#define DEBUG_ASSERT(condition) { \
+		if (!(condition)) { \
+			ENGINE_ERROR("Debug assertion failed."); \
+			BREAKPOINT(); \
+		} \
+	}
 #else
 	#define DEBUG_ASSERT
 #endif

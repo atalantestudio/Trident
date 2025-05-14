@@ -9,10 +9,10 @@ namespace ProjectA {
 		return {dot(R0, d), dot(R1, d)};
 	}
 
+	// Restore the rotation of A onto the support point.
 	static vec2<float32> transformSupport(const Object2D& A, uint32 supportIndex) {
 		const vec2<float32>& a = A.getGeometry().vertices[supportIndex];
 
-		// Restore the rotation of A on the support point.
 		return {
 			A.transform[0][0] * a[0] + A.transform[1][0] * a[1] + A.transform[2][0],
 			A.transform[0][1] * a[0] + A.transform[1][1] * a[1] + A.transform[2][1],
