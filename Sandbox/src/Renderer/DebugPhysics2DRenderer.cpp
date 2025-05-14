@@ -134,6 +134,47 @@ namespace ProjectA {
 		gridRenderPipeline = createRenderPipeline(gridRenderPipelineDescriptor);
 	}
 
+	void DebugPhysics2DRenderer::initializeCenterOfMassBuffer() {
+		const uint64 centerOfMassBufferSize = scene->getObjectCount() * sizeof(svec2<float32>);
+
+		BufferDescriptor centerOfMassBufferDescriptor{};
+		centerOfMassBufferDescriptor.size = centerOfMassBufferSize;
+		centerOfMassBufferDescriptor.usage = BufferUsage::VERTEX;
+		centerOfMassBufferDescriptor.persistent = true;
+
+		centerOfMassBuffer = createBuffer(centerOfMassBufferDescriptor);
+		centerOfMassMappedRange = centerOfMassBuffer->map<svec2<float32>>(0, centerOfMassBufferSize);
+	}
+
+	void DebugPhysics2DRenderer::initializeCenterOfMassRenderPipeline() {
+		ShaderModuleDescriptor centerOfMassVertexShaderModuleDescriptor{};
+		centerOfMassVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		centerOfMassVertexShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> centerOfMassVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/CenterOfMass.vert.spv", centerOfMassVertexShaderModuleDescriptor);
+
+		ShaderModuleDescriptor centerOfMassFragmentShaderModuleDescriptor{};
+		centerOfMassFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		centerOfMassFragmentShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> centerOfMassFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/CenterOfMass.frag.spv", centerOfMassFragmentShaderModuleDescriptor);
+
+		VertexInputBinding centerOfMassVertexInputBinding(InputRate::VERTEX);
+		centerOfMassVertexInputBinding.registerAttribute<svec2<float32>>(false);
+
+		RenderPipelineDescriptor centerOfMassRenderPipelineDescriptor;
+		centerOfMassRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		centerOfMassRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
+		centerOfMassRenderPipelineDescriptor.vertexInputBindings = {centerOfMassVertexInputBinding};
+		centerOfMassRenderPipelineDescriptor.vertexShaderModule = centerOfMassVertexShaderModule;
+		centerOfMassRenderPipelineDescriptor.fragmentShaderModule = centerOfMassFragmentShaderModule;
+		centerOfMassRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
+		centerOfMassRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
+		centerOfMassRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+
+		centerOfMassRenderPipeline = createRenderPipeline(centerOfMassRenderPipelineDescriptor);
+	}
+
 	void DebugPhysics2DRenderer::initializeVertexFeatureBuffer() {
 		constexpr uint64 vertexFeatureBufferSize = 2 * sizeof(svec2<float32>);
 
@@ -381,6 +422,9 @@ namespace ProjectA {
 		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
+
+		initializeCenterOfMassBuffer();
+		initializeCenterOfMassRenderPipeline();
 	}
 
 	const vec2<float32>& DebugPhysics2DRenderer::getNdcMousePosition() const {
@@ -415,7 +459,17 @@ namespace ProjectA {
 		cameraMappedRange->zoomLevel = zoomLevel;
 	}
 
+	void DebugPhysics2DRenderer::updateCentersOfMass() const {
+		for (uint32 instanceIndex = 0; instanceIndex < scene->getObjectCount(); instanceIndex += 1) {
+			const Object2D& object = (*scene)[instanceIndex];
+
+			centerOfMassMappedRange[instanceIndex] = {object.position[0], object.position[1]};
+		}
+	}
+
 	void DebugPhysics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
+		updateCentersOfMass();
+
 		const ref<Swapchain>& swapchain = getSwapchain();
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
@@ -455,9 +509,13 @@ namespace ProjectA {
 
 			commandEncoder->bindRenderPipeline(strokeRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
 			commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceIndex * sizeof(Instance), sizeof(Instance));
-			commandEncoder->draw(vertexCount, 1, vertexOffset);
+			commandEncoder->draw(vertexCount, 1, 0);
+
+			commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
+			commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, instanceIndex * sizeof(svec2<float32>), sizeof(svec2<float32>));
+			commandEncoder->draw(1, 1, 0);
 
 			indexOffset += indexCount;
 			vertexOffset += vertexCount;

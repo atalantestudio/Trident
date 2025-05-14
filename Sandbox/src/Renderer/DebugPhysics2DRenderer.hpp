@@ -35,11 +35,15 @@ namespace ProjectA {
 			void initializeCameraUniformBuffer();
 			void initializeGridVertexBuffer();
 			void initializeGridRenderPipeline();
+			void initializeCenterOfMassBuffer();
+			void initializeCenterOfMassRenderPipeline();
 			void initializeVertexFeatureBuffer();
 			void initializeEdgeVertexFeatureBuffer();
 			void initializeFeaturePipelineLayout();
 			void initializeVertexFeatureRenderPipeline();
 			void initializeEdgeFeatureRenderPipeline();
+
+			void updateCentersOfMass() const;
 
 			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
@@ -70,6 +74,9 @@ namespace ProjectA {
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
 
+			ref<Buffer> centerOfMassBuffer;
+			svec2<float32>* centerOfMassMappedRange = nullptr;
+
 			ref<Buffer> vertexFeatureBuffer;
 			svec2<float32>* vertexFeatureMappedRange = nullptr;
 			uint32 nextVertexFeatureIndex = 0;
@@ -96,8 +103,10 @@ namespace ProjectA {
 			ref<RenderPipeline> fillRenderPipeline;
 			ref<RenderPipeline> strokeRenderPipeline;
 
-			ref<PipelineLayout> featurePipelineLayout;
+			// The center of mass pipeline uses the same layout as the closest feature pipelines.
+			ref<RenderPipeline> centerOfMassRenderPipeline;
 
+			ref<PipelineLayout> featurePipelineLayout;
 			ref<RenderPipeline> vertexFeatureRenderPipeline;
 			ref<RenderPipeline> edgeFeatureRenderPipeline;
 
