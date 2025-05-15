@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/ShaderStage.hpp"
-
 namespace ProjectA {
 	static GLenum getGlShaderStage(ShaderStage shaderStage) {
 		GLenum glShaderStage = 0;

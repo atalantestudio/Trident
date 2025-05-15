@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/CullMode.hpp"
-
 namespace ProjectA {
 	static VkCullModeFlagBits getVkCullMode(CullMode cullMode) {
 		static constexpr VkCullModeFlagBits vkCullModes[] = {

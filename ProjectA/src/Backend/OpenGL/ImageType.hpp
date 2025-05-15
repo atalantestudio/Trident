@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/ImageType.hpp"
-
 namespace ProjectA {
 	static GLenum getGlImageType(ImageType imageType) {
 		static constexpr GLenum glImageTypes[] = {

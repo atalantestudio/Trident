@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/InputRate.hpp"
-
 namespace ProjectA {
 	static VkVertexInputRate getVkVertexInputRate(InputRate inputRate) {
 		static constexpr VkVertexInputRate vkVertexInputRates[] = {

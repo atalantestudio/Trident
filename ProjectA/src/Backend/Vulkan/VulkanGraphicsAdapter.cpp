@@ -44,7 +44,7 @@ namespace ProjectA {
 	}
 
 	ref<RenderPass> VulkanGraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		return createRef<VulkanRenderPass>(surface, device->object, descriptor);
+		return createRef<VulkanRenderPass>(surface, *device, descriptor);
 	}
 
 	ref<RenderPipeline> VulkanGraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {

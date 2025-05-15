@@ -60,6 +60,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(adapter != nullptr, "Failed to initialize the graphics adapter.");
 
 		RenderPassDescriptor renderPassDescriptor{};
+		renderPassDescriptor.sampleCount = 4;
 		renderPassDescriptor.loadOperation = LoadOperation::CLEAR;
 		renderPassDescriptor.storeOperation = StoreOperation::STORE;
 

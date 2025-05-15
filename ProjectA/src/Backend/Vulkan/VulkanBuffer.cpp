@@ -1,7 +1,8 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/BufferUsage.hpp"
 #include "Backend/Vulkan/VulkanBuffer.hpp"
+
+#include "Backend/Vulkan/BufferUsage.hpp"
 
 namespace ProjectA {
 	VulkanBuffer::VulkanBuffer(VkPhysicalDevice physicalDevice, const VulkanDevice& device, const BufferDescriptor& descriptor) :
@@ -32,6 +33,8 @@ namespace ProjectA {
 
 		// HOST_COHERENT avoid caching.
 		const uint32 memoryTypeIndex = device.findMemoryType(memoryRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+		DEBUG_ASSERT(memoryTypeIndex != std::numeric_limits<uint32>::max());
 
 		VkMemoryAllocateInfo memoryAllocateInfo{};
 		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;

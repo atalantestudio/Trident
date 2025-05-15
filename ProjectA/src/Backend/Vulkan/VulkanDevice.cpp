@@ -1,12 +1,13 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/Status.hpp"
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
 #include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanFence.hpp"
 #include "Backend/Vulkan/VulkanSemaphore.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 #include "Backend/Vulkan/VulkanSwapchain.hpp"
+
+#include "Backend/Vulkan/Status.hpp"
 
 namespace ProjectA {
 	// TODO: Client-side extension request.
@@ -82,17 +83,20 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		for (uint32 memoryTypeIndex = 0; memoryTypeIndex < memoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
-			const VkMemoryType memoryType = memoryProperties.memoryTypes[memoryTypeIndex];
-			const bool required = memoryRequirements.memoryTypeBits & BIT(memoryTypeIndex);
+			if (!(memoryRequirements.memoryTypeBits & BIT(memoryTypeIndex))) {
+				continue;
+			}
 
-			if (required && (memoryType.propertyFlags & memoryPropertyFlags) == memoryPropertyFlags) {
+			const VkMemoryType memoryType = memoryProperties.memoryTypes[memoryTypeIndex];
+
+			if ((memoryType.propertyFlags & memoryPropertyFlags) == memoryPropertyFlags) {
 				return memoryTypeIndex;
 			}
 		}
 
-		ENGINE_ASSERT(false, "Failed to find a suitable Vulkan memory type.");
+		ENGINE_WARN("Failed to find a suitable Vulkan memory type (bits: [], property flags).", memoryRequirements.memoryTypeBits, memoryPropertyFlags);
 
-		return 0;
+		return std::numeric_limits<uint32>::max();
 	}
 
 	ref<PhysicalDevice> VulkanDevice::getPhysicalDevice() const {

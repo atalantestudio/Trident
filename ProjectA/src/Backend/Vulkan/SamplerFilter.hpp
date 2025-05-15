@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/SamplerFilter.hpp"
-
 namespace ProjectA {
 	static VkFilter getVkFilter(SamplerFilter samplerFilter) {
 		static constexpr VkFilter vkFilters[] = {

@@ -1,7 +1,8 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/SamplerFilter.hpp"
 #include "Backend/Vulkan/VulkanSampler.hpp"
+
+#include "Backend/Vulkan/SamplerFilter.hpp"
 
 namespace ProjectA {
 	VulkanSampler::VulkanSampler(VkDevice device, const SamplerDescriptor& descriptor) :

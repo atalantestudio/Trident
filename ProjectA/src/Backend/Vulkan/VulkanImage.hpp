@@ -10,6 +10,8 @@ namespace ProjectA {
 		public:
 			VulkanImage(const VulkanDevice& device, const ImageDescriptor& descriptor);
 
+			VulkanImage(const VulkanDevice& device, const VkImageCreateInfo& createInfo);
+
 			~VulkanImage();
 
 			uint32 getWidth() const override;
@@ -18,14 +20,18 @@ namespace ProjectA {
 
 			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const override;
 
+		private:
+			void construct(const VulkanDevice& device, const VkImageCreateInfo& createInfo);
+
 		public:
-			const ImageType type;
-			const ImageFormat format;
+			VkImageType type;
+			VkFormat format;
+			uint32 mipLevels;
 
 		private:
 			VkDevice device;
 			VkDeviceMemory memory;
-			const uint32 width;
-			const uint32 height;
+			uint32 width;
+			uint32 height;
 	};
 }

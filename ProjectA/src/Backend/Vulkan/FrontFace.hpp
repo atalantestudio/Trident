@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/FrontFace.hpp"
-
 namespace ProjectA {
 	static VkFrontFace getVkFrontFace(FrontFace frontFace) {
 		static constexpr VkFrontFace vkFrontFaces[] = {
@@ -9,6 +7,6 @@ namespace ProjectA {
 			VK_FRONT_FACE_COUNTER_CLOCKWISE,
 		};
 
-		return vkFrontFaces[static_cast<uint32>(frontFace)];
+		return vkFrontFaces[static_cast<uint8>(frontFace)];
 	}
 }

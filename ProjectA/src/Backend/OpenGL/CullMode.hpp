@@ -1,7 +1,5 @@
 #include "pch.hpp"
 
-#include "Engine/Renderer/CullMode.hpp"
-
 namespace ProjectA {
 	static GLenum getGlCullMode(CullMode cullMode) {
 		static constexpr GLenum glCullModes[] = {

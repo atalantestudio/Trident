@@ -1,6 +1,7 @@
 #include "pch.hpp"
 
 #include "Backend/OpenGL/OpenGLSampler.hpp"
+
 #include "Backend/OpenGL/SamplerFilter.hpp"
 
 namespace ProjectA {

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/PrimitiveTopology.hpp"
-
 namespace ProjectA {
 	static GLenum getGlPrimitiveTopology(PrimitiveTopology primitiveTopology) {
 		static constexpr GLenum glPrimitiveTopologies[] = {

@@ -1,7 +1,8 @@
 #include "pch.hpp"
 
-#include "Backend/OpenGL/ImageType.hpp"
 #include "Backend/OpenGL/OpenGLImageView.hpp"
+
+#include "Backend/OpenGL/ImageType.hpp"
 
 namespace ProjectA {
 	OpenGLImageView::OpenGLImageView(const OpenGLImage& image, const ImageViewDescriptor& descriptor) :

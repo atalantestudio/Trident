@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/ImageFormat.hpp"
-
 namespace ProjectA {
 	static VkFormat getVkFormat(ImageFormat imageFormat) {
 		static constexpr VkFormat vkFormats[] = {
@@ -10,6 +8,6 @@ namespace ProjectA {
 			VK_FORMAT_R8G8B8A8_UNORM,
 		};
 
-		return vkFormats[static_cast<sint32>(imageFormat)];
+		return vkFormats[static_cast<uint8>(imageFormat)];
 	}
 }

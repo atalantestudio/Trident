@@ -1,7 +1,8 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/ShaderStage.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
+
+#include "Backend/Vulkan/ShaderStage.hpp"
 
 namespace ProjectA {
 	VulkanShaderModule::VulkanShaderModule(VkDevice device, const chain<uint8>& code, const ShaderModuleDescriptor& descriptor) :

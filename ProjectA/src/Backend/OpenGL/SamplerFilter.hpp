@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/SamplerFilter.hpp"
-
 namespace ProjectA {
 	static GLenum getGlFilter(SamplerFilter samplerFilter) {
 		static constexpr GLenum glFilters[] = {

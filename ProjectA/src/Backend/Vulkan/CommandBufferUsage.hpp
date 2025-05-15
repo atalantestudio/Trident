@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/CommandBufferUsage.hpp"
-
 namespace ProjectA {
 	static VkCommandBufferUsageFlags getVkCommandBufferUsageFlag(CommandBufferUsage commandBufferUsage) {
 		static constexpr VkCommandBufferUsageFlags vkCommandBufferUsageFlags[] = {

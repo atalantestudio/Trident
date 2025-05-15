@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/ImageLayout.hpp"
-
 namespace ProjectA {
 	static VkImageLayout getVkImageLayout(ImageLayout imageLayout) {
 		static constexpr VkImageLayout vkImageLayouts[] = {

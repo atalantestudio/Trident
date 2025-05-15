@@ -1,6 +1,5 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/VertexInputAttributeType.hpp"
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
@@ -11,6 +10,7 @@
 #include "Backend/Vulkan/InputRate.hpp"
 #include "Backend/Vulkan/PolygonMode.hpp"
 #include "Backend/Vulkan/PrimitiveTopology.hpp"
+#include "Backend/Vulkan/VertexInputAttributeType.hpp"
 
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -106,15 +106,23 @@ namespace ProjectA {
 		rasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
 		rasterizationStateCreateInfo.lineWidth = descriptor.lineWidth;
 
-		const VkSampleMask sampleMask = 1;
+		constexpr VkSampleMask sampleMask = ~0;
 
 		VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo{};
 		multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		multisampleStateCreateInfo.pNext = nullptr;
 		multisampleStateCreateInfo.flags = 0;
-		multisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-		multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;
-		multisampleStateCreateInfo.minSampleShading = 0.0f;
+		multisampleStateCreateInfo.rasterizationSamples = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->samples;
+
+		if (descriptor.minSampleShading == 0.0f) {
+			multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;
+			multisampleStateCreateInfo.minSampleShading = 0.0f;
+		}
+		else {
+			multisampleStateCreateInfo.sampleShadingEnable = VK_TRUE;
+			multisampleStateCreateInfo.minSampleShading = descriptor.minSampleShading;
+		}
+
 		multisampleStateCreateInfo.pSampleMask = &sampleMask;
 		multisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
 		multisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;

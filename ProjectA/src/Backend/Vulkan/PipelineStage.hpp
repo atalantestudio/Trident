@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/PipelineStage.hpp"
-
 namespace ProjectA {
 	static VkPipelineStageFlagBits getVkPipelineStageFlagBits(PipelineStage pipelineStage) {
 		static constexpr VkPipelineStageFlagBits vkPipelineStages[] = {

@@ -1,45 +1,49 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/ImageFormat.hpp"
-#include "Backend/Vulkan/ImageType.hpp"
-#include "Backend/Vulkan/ImageUsage.hpp"
 #include "Backend/Vulkan/VulkanImage.hpp"
 #include "Backend/Vulkan/VulkanImageView.hpp"
 
-namespace ProjectA {
-	VulkanImage::VulkanImage(const VulkanDevice& device, const ImageDescriptor& descriptor) :
-		device(device.object),
-		type(descriptor.type),
-		format(descriptor.format),
-		width(descriptor.width),
-		height(descriptor.height)
-	{
-		PROFILE_SCOPE(FUNC_SIG);
+#include "Backend/Vulkan/ImageFormat.hpp"
+#include "Backend/Vulkan/ImageType.hpp"
+#include "Backend/Vulkan/ImageUsage.hpp"
+#include "Backend/Vulkan/SampleCount.hpp"
 
+namespace ProjectA {
+	VulkanImage::VulkanImage(const VulkanDevice& device, const VkImageCreateInfo& createInfo) {
+		construct(device, createInfo);
+	}
+
+	VulkanImage::VulkanImage(const VulkanDevice& device, const ImageDescriptor& descriptor) {
 		ENGINE_ASSERT(descriptor.sampleCount >= 1 && descriptor.sampleCount <= 64, "Invalid sample count ([]).", descriptor.sampleCount);
 
 		VkImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.pNext = nullptr;
 		imageCreateInfo.flags = 0;
-		imageCreateInfo.imageType = getVkImageType(type);
-		imageCreateInfo.format = getVkFormat(format);
-		imageCreateInfo.extent.width = width;
-		imageCreateInfo.extent.height = height;
+		imageCreateInfo.imageType = getVkImageType(descriptor.type);
+		imageCreateInfo.format = getVkFormat(descriptor.format);
+		imageCreateInfo.extent.width = descriptor.width;
+		imageCreateInfo.extent.height = descriptor.height;
 		imageCreateInfo.extent.depth = descriptor.depth;
 		imageCreateInfo.mipLevels = descriptor.mipLevelCount;
 		imageCreateInfo.arrayLayers = descriptor.arrayLayerCount;
-		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(BIT((descriptor.sampleCount - 1)));
+		imageCreateInfo.samples = getVkSampleCountFlagBits(descriptor.sampleCount);
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.usage = getVkImageUsageFlagBits(descriptor.usage);
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageCreateInfo.queueFamilyIndexCount = 0;
 		imageCreateInfo.pQueueFamilyIndices = nullptr;
 
-		// initialLayout must be VK_IMAGE_LAYOUT_UNDEFINED or VK_IMAGE_LAYOUT_PREINITIALIZED.
+		// initialLayout must either be VK_IMAGE_LAYOUT_UNDEFINED or VK_IMAGE_LAYOUT_PREINITIALIZED.
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		VkResult result = vkCreateImage(device.object, &imageCreateInfo, nullptr, &object);
+		construct(device, imageCreateInfo);
+	}
+
+	void VulkanImage::construct(const VulkanDevice& device, const VkImageCreateInfo& createInfo) {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		VkResult result = vkCreateImage(device.object, &createInfo, nullptr, &object);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image (code: []).", result);
 
@@ -50,7 +54,14 @@ namespace ProjectA {
 		// VK_MEMORY_PROPERTY_HOST_COHERENT_BIT avoids caching.
 		// [HP Victus laptop] TODO: Fix memory type not being found on HP Victus (laptop).
 		//                    The only way to get a memory type index is by specifying a memory property flag of 0.
-		const uint32 memoryTypeIndex = device.findMemoryType(memoryRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		uint32 memoryTypeIndex = device.findMemoryType(memoryRequirements, VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT);
+
+		if (memoryTypeIndex == std::numeric_limits<uint32>::max()) {
+			// Fall back to device local memory.
+			memoryTypeIndex = device.findMemoryType(memoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		}
+
+		DEBUG_ASSERT(memoryTypeIndex != std::numeric_limits<uint32>::max());
 
 		VkMemoryAllocateInfo memoryAllocateInfo{};
 		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -65,6 +76,13 @@ namespace ProjectA {
 		result = vkBindImageMemory(device.object, object, memory, 0);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to bind Vulkan image memory (code: []).", result);
+
+		this->device = device.object;
+		type = createInfo.imageType;
+		format = createInfo.format;
+		width = createInfo.extent.width;
+		height = createInfo.extent.height;
+		mipLevels = createInfo.mipLevels;
 	}
 
 	VulkanImage::~VulkanImage() {

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/ImageFormat.hpp"
-
 namespace ProjectA {
 	static GLenum getGlInternalFormat(ImageFormat imageFormat) {
 		static constexpr GLenum glInternalFormats[] = {

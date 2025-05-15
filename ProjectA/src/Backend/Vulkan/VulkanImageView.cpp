@@ -1,9 +1,9 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/ImageFormat.hpp"
-#include "Backend/Vulkan/ImageType.hpp"
 #include "Backend/Vulkan/VulkanImage.hpp"
 #include "Backend/Vulkan/VulkanImageView.hpp"
+
+#include "Backend/Vulkan/ImageType.hpp"
 
 namespace ProjectA {
 	VulkanImageView::VulkanImageView(VkDevice device, const VulkanImage& image, const ImageViewDescriptor& descriptor) :
@@ -17,14 +17,14 @@ namespace ProjectA {
 		imageViewCreateInfo.flags = 0;
 		imageViewCreateInfo.image = image.object;
 		imageViewCreateInfo.viewType = getVkImageViewType(image.type);
-		imageViewCreateInfo.format = getVkFormat(image.format);
+		imageViewCreateInfo.format = image.format;
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-		imageViewCreateInfo.subresourceRange.levelCount = 1;
+		imageViewCreateInfo.subresourceRange.levelCount = image.mipLevels;
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 		imageViewCreateInfo.subresourceRange.layerCount = 1;
 

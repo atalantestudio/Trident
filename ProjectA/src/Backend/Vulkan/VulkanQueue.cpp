@@ -1,12 +1,13 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/Status.hpp"
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
 #include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanFence.hpp"
 #include "Backend/Vulkan/VulkanQueue.hpp"
 #include "Backend/Vulkan/VulkanSemaphore.hpp"
+
+#include "Backend/Vulkan/Status.hpp"
 
 namespace ProjectA {
 	VulkanQueue::VulkanQueue(const VulkanDevice& device, uint32 queueFamilyIndex) :

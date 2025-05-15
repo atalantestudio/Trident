@@ -5,6 +5,7 @@
 
 namespace ProjectA {
 	struct RenderPassDescriptor {
+		uint8 sampleCount = 1;
 		LoadOperation loadOperation;
 		StoreOperation storeOperation;
 	};

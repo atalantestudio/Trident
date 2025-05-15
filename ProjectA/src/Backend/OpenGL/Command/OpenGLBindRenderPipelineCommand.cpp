@@ -36,8 +36,8 @@ namespace ProjectA {
 			glCullFace(renderPipeline->cullMode);
 		}
 
-		if (renderPipeline->lineWidth != 1.0f) {
-			glLineWidth(renderPipeline->lineWidth);
-		}
+		glLineWidth(renderPipeline->lineWidth);
+
+		//glEnable(GL_MULTISAMPLE);
 	}
 }

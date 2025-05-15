@@ -5,6 +5,6 @@
 namespace ProjectA {
 	class OpenGLSemaphore : public Semaphore {
 		public:
-			OpenGLSemaphore();
+			OpenGLSemaphore() = default;
 	};
 }

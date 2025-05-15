@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/ImageUsage.hpp"
-
 namespace ProjectA {
 	static VkImageUsageFlagBits getVkImageUsageFlagBits(ImageUsage imageUsage) {
 		VkImageUsageFlags vkImageUsageFlags = 0;

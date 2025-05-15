@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/PrimitiveTopology.hpp"
-
 namespace ProjectA {
 	static VkPrimitiveTopology getVkPrimitiveTopology(PrimitiveTopology primitiveTopology) {
 		static constexpr VkPrimitiveTopology vkPrimitiveTopologies[] = {

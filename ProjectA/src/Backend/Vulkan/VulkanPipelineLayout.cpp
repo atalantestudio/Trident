@@ -1,11 +1,12 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/DescriptorType.hpp"
-#include "Backend/Vulkan/ShaderStage.hpp"
 #include "Backend/Vulkan/VulkanBuffer.hpp"
 #include "Backend/Vulkan/VulkanImageView.hpp"
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"
 #include "Backend/Vulkan/VulkanSampler.hpp"
+
+#include "Backend/Vulkan/DescriptorType.hpp"
+#include "Backend/Vulkan/ShaderStage.hpp"
 
 namespace ProjectA {
 	VulkanPipelineLayout::VulkanPipelineLayout(VkDevice device, const PipelineLayoutDescriptor& descriptor) :

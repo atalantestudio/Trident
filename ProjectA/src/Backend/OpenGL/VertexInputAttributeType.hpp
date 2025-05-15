@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/Buffer/VertexInputAttributeType.hpp"
-
 namespace ProjectA {
 	// Returns the number of component per generic vertex attribute.
 	static GLint getGlSize(VertexInputAttributeType type) {

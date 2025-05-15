@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/DescriptorType.hpp"
-
 namespace ProjectA {
 	static VkDescriptorType getVkDescriptorType(DescriptorType descriptorType) {
 		static constexpr VkDescriptorType vkDescriptorTypes[] = {

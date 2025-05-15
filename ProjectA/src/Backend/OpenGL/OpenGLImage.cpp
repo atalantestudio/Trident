@@ -1,10 +1,11 @@
 #include "pch.hpp"
 
+#include "Backend/OpenGL/OpenGLImage.hpp"
+#include "Backend/OpenGL/OpenGLImageView.hpp"
+
 #include "Backend/OpenGL/Format.hpp"
 #include "Backend/OpenGL/ImageType.hpp"
 #include "Backend/OpenGL/InternalFormat.hpp"
-#include "Backend/OpenGL/OpenGLImage.hpp"
-#include "Backend/OpenGL/OpenGLImageView.hpp"
 
 namespace ProjectA {
 	OpenGLImage::OpenGLImage(const ImageDescriptor& descriptor) :

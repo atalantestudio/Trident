@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/ShaderStage.hpp"
-
 namespace ProjectA {
 	static VkShaderStageFlagBits getVkShaderStageFlagBits(ShaderStage shaderStage) {
 		VkShaderStageFlags vkShaderStage = 0;

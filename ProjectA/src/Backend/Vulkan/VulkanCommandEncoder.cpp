@@ -65,6 +65,8 @@ namespace ProjectA {
 
 		_mm_store_ps(clearValue.color.float32, descriptor.clearColor.m);
 
+		const chain<VkClearValue> clearValues(std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->attachmentCount, clearValue);
+
 		VkRenderPassBeginInfo renderPassBeginInfo{};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassBeginInfo.pNext = nullptr;
@@ -73,8 +75,8 @@ namespace ProjectA {
 		renderPassBeginInfo.renderArea.offset = {0, 0};
 		renderPassBeginInfo.renderArea.extent.width = swapchain.getExtentWidth();
 		renderPassBeginInfo.renderArea.extent.height = swapchain.getExtentHeight();
-		renderPassBeginInfo.clearValueCount = 1;
-		renderPassBeginInfo.pClearValues = &clearValue;
+		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.size());
+		renderPassBeginInfo.pClearValues = clearValues.data();
 
 		vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}

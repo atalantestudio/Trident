@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/Buffer/VertexInputAttributeType.hpp"
-
 namespace ProjectA {
 	static VkFormat getVkFormat(VertexInputAttributeType vertexInputAttributeType) {
 		static constexpr VkFormat vkFormats[] = {

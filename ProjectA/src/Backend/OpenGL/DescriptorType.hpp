@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/DescriptorType.hpp"
-
 namespace ProjectA {
 	static GLenum getGlDescriptorType(DescriptorType descriptorType) {
 		static constexpr GLenum glDescriptorTypes[] = {

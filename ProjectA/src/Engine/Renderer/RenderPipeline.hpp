@@ -25,6 +25,8 @@ namespace ProjectA {
 		// Line width, used by render pipelines having the LINE polygon mode.
 		float32 lineWidth = 1.0f;
 
+		float32 minSampleShading = 0.0f;
+
 		DynamicState dynamicState;
 	};
 

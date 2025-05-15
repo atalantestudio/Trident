@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Renderer/Status.hpp"
-
 namespace ProjectA {
 	static Status getStatus(VkResult result) {
 		if (result == VK_SUCCESS) {

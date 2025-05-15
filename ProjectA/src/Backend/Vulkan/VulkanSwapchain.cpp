@@ -89,6 +89,11 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images (code: []).", result);
 
+		if (std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->attachmentCount) {
+			// Assume MSAA color attachment.
+			std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->recreateMultisampleImage(surface);
+		}
+
 		for (uint32 i = 0; i < imageCount; i += 1) {
 			// TODO: Replace with Image and ImageView APIs.
 			VkImageViewCreateInfo imageViewCreateInfo{};
@@ -118,8 +123,21 @@ namespace ProjectA {
 			framebufferCreateInfo.pNext = nullptr;
 			framebufferCreateInfo.flags = 0;
 			framebufferCreateInfo.renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->object;
-			framebufferCreateInfo.attachmentCount = 1;
-			framebufferCreateInfo.pAttachments = &imageViews[i];
+			framebufferCreateInfo.attachmentCount = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->attachmentCount;
+
+			if (framebufferCreateInfo.attachmentCount == 2) {
+				// Assume MSAA color attachment.
+				const VkImageView attachments[2] = {
+					std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->getMultisampleImageView(),
+					imageViews[i],
+				};
+
+				framebufferCreateInfo.pAttachments = attachments;
+			}
+			else {
+				framebufferCreateInfo.pAttachments = &imageViews[i];
+			}
+
 			framebufferCreateInfo.width = windowSize[0];
 			framebufferCreateInfo.height = windowSize[1];
 			framebufferCreateInfo.layers = 1;
