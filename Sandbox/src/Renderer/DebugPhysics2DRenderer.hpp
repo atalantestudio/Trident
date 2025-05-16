@@ -65,10 +65,9 @@ namespace ProjectA {
 			};
 
 		private:
-			static constexpr float32 DEFAULT_ZOOM_LEVEL = 64.0f;
-			static constexpr float32 MIN_ZOOM_LEVEL = 16.0f;
-			static constexpr float32 MAX_ZOOM_LEVEL = 128.0f;
-			static constexpr float32 ZOOM_SENSITIVITY = 4.0f;
+			static constexpr float32 MIN_ZOOM_LEVEL = 1.0f;
+			static constexpr float32 MAX_ZOOM_LEVEL = 64.0f;
+			static constexpr float32 DEFAULT_ZOOM_LEVEL = MAX_ZOOM_LEVEL;
 
 		private:
 			ref<Buffer> vertexBuffer;

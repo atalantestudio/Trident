@@ -21,12 +21,8 @@ namespace ProjectA {
 		PolygonMode polygonMode;
 		CullMode cullMode = CullMode::BACK;
 		FrontFace frontFace = FrontFace::CLOCKWISE;
-
-		// Line width, used by render pipelines having the LINE polygon mode.
 		float32 lineWidth = 1.0f;
-
 		float32 minSampleShading = 0.0f;
-
 		DynamicState dynamicState;
 	};
 

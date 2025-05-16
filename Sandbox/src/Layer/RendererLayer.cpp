@@ -61,7 +61,7 @@ namespace ProjectA {
 
 		Object2D& objectA = scene.registerObject(objectADescriptor);
 
-		objectA.position = {0.45f, -3.625f};
+		objectA.position = {0.45f, -0.625f};
 
 		scene.updateTransform(objectA);
 

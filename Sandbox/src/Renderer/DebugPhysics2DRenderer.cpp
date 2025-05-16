@@ -171,7 +171,7 @@ namespace ProjectA {
 		centerOfMassRenderPipelineDescriptor.fragmentShaderModule = centerOfMassFragmentShaderModule;
 		centerOfMassRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
 		centerOfMassRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
-		centerOfMassRenderPipelineDescriptor.minSampleShading = 0.5;
+		centerOfMassRenderPipelineDescriptor.minSampleShading = 1.0;
 		centerOfMassRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		centerOfMassRenderPipeline = createRenderPipeline(centerOfMassRenderPipelineDescriptor);
@@ -380,15 +380,15 @@ namespace ProjectA {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fillVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/DebugPhysics2DFill.vert.spv", vertexShaderModuleDescriptor);
-		const ref<ShaderModule> strokeVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/DebugPhysics2DStroke.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> fillVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Fill.vert.spv", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> strokeVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Stroke.vert.spv", vertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> fillFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/DebugPhysics2DFill.frag.spv", fragmentShaderModuleDescriptor);
-		const ref<ShaderModule> strokeFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/DebugPhysics2DStroke.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fillFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Fill.frag.spv", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> strokeFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Stroke.frag.spv", fragmentShaderModuleDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>(false);
@@ -445,7 +445,13 @@ namespace ProjectA {
 	}
 
 	void DebugPhysics2DRenderer::zoom(float32 zoomLevelDelta) const {
-		float32 zoomLevel = cameraMappedRange->zoomLevel + zoomLevelDelta / 120.0f * ZOOM_SENSITIVITY;
+		float32 direction = zoomLevelDelta;
+
+		if (direction != 0.0f) {
+			direction /= lyah::abs(zoomLevelDelta);
+		}
+
+		float32 zoomLevel = cameraMappedRange->zoomLevel + direction;
 
 		// TODO: lyah::max
 		if (zoomLevel < MIN_ZOOM_LEVEL) {
@@ -462,9 +468,9 @@ namespace ProjectA {
 
 	void DebugPhysics2DRenderer::updateCentersOfMass() const {
 		for (uint32 instanceIndex = 0; instanceIndex < scene->getObjectCount(); instanceIndex += 1) {
-			const Object2D& object = (*scene)[instanceIndex];
+			const Object2D& A = (*scene)[instanceIndex];
 
-			centerOfMassMappedRange[instanceIndex] = {object.position[0], object.position[1]};
+			centerOfMassMappedRange[instanceIndex] = {A.position[0], A.position[1]};
 		}
 	}
 
