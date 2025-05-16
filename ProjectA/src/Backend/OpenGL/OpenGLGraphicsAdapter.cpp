@@ -63,6 +63,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glLinkProgram);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glMapNamedBufferRange);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glMemoryBarrier);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glMinSampleShading);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glNamedBufferStorage);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glSamplerParameteri);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glShaderBinary);

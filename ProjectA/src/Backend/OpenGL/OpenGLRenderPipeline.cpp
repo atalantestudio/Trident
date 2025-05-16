@@ -18,7 +18,8 @@ namespace ProjectA {
 		cullMode(getGlCullMode(descriptor.cullMode)),
 		polygonModeFace(getGlPolygonModeFace(descriptor.cullMode)),
 		polygonMode(getGlPolygonMode(descriptor.polygonMode)),
-		lineWidth(descriptor.lineWidth)
+		lineWidth(descriptor.lineWidth),
+		minSampleShading(descriptor.minSampleShading)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 

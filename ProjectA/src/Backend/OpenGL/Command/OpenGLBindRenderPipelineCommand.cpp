@@ -38,6 +38,13 @@ namespace ProjectA {
 
 		glLineWidth(renderPipeline->lineWidth);
 
-		//glEnable(GL_MULTISAMPLE);
+		// TODO: Sample shading requires MSAA to work.
+		if (renderPipeline->minSampleShading == 0.0f) {
+			glDisable(GL_SAMPLE_SHADING);
+		}
+		else {
+			glEnable(GL_SAMPLE_SHADING);
+			glMinSampleShading(renderPipeline->minSampleShading);
+		}
 	}
 }

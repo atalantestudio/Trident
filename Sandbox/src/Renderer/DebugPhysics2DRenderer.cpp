@@ -171,6 +171,7 @@ namespace ProjectA {
 		centerOfMassRenderPipelineDescriptor.fragmentShaderModule = centerOfMassFragmentShaderModule;
 		centerOfMassRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
 		centerOfMassRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
+		centerOfMassRenderPipelineDescriptor.minSampleShading = 0.5;
 		centerOfMassRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		centerOfMassRenderPipeline = createRenderPipeline(centerOfMassRenderPipelineDescriptor);

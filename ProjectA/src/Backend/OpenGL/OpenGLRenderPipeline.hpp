@@ -22,5 +22,6 @@ namespace ProjectA {
 			const GLenum polygonModeFace;
 			const GLenum polygonMode;
 			const GLfloat lineWidth;
+			const GLfloat minSampleShading;
 	};
 }
