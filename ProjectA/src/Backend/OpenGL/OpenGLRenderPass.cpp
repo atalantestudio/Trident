@@ -5,5 +5,7 @@
 namespace ProjectA {
 	OpenGLRenderPass::OpenGLRenderPass(const RenderPassDescriptor& descriptor) :
 		loadOperation(descriptor.loadOperation)
-	{}
+	{
+		// TODO: MSAA color attachment.
+	}
 }

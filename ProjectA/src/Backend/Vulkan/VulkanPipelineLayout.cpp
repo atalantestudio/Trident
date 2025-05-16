@@ -104,8 +104,8 @@ namespace ProjectA {
 
 						VkDescriptorBufferInfo descriptorBufferInfo{};
 						descriptorBufferInfo.buffer = vkBuffer.object;
-						descriptorBufferInfo.offset = 0;
-						descriptorBufferInfo.range = vkBuffer.size;
+						descriptorBufferInfo.offset = binding.bufferOffset;
+						descriptorBufferInfo.range = vkBuffer.size - binding.bufferOffset;
 
 						descriptorBufferInfos.emplace_back(descriptorBufferInfo);
 					}

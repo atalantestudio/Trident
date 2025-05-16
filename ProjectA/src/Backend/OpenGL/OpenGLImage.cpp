@@ -25,10 +25,7 @@ namespace ProjectA {
 			glTextureStorage2D(object, descriptor.mipLevelCount, internalFormat, descriptor.width, descriptor.height);
 		}
 		else {
-			// TODO: Create multisampled image.
-			ENGINE_ASSERT(false, "TODO: Create multisampled image.");
-
-			//glTextureStorage2DMultisample(object, descriptor.sampleCount, internalFormat, descriptor.width, descriptor.height, GL_TRUE);
+			glTextureStorage2DMultisample(object, descriptor.sampleCount, internalFormat, descriptor.width, descriptor.height, GL_TRUE);
 		}
 	}
 

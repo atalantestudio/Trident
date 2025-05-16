@@ -58,6 +58,8 @@ namespace ProjectA {
 
 		if (memoryTypeIndex == std::numeric_limits<uint32>::max()) {
 			// Fall back to device local memory.
+			ENGINE_WARN("Failed to find lazily allocated memory for Vulkan image. Falling back to device local memory.");
+
 			memoryTypeIndex = device.findMemoryType(memoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 		}
 

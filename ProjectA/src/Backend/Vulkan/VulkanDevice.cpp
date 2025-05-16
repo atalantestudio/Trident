@@ -94,8 +94,6 @@ namespace ProjectA {
 			}
 		}
 
-		ENGINE_WARN("Failed to find a suitable Vulkan memory type (bits: [], property flags).", memoryRequirements.memoryTypeBits, memoryPropertyFlags);
-
 		return std::numeric_limits<uint32>::max();
 	}
 

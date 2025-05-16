@@ -11,6 +11,10 @@ namespace ProjectA {
 		DescriptorType descriptorType;
 		ShaderStage stageFlags;
 		chain<ref<Buffer>> buffers;
+
+		// Applies to every buffer of the descriptor.
+		uint64 bufferOffset = 0;
+
 		chain<ref<ImageView>> imageViews;
 		chain<ref<Sampler>> samplers;
 	};

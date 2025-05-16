@@ -5,7 +5,6 @@
 #include "Engine/API/DeviceContext.hpp"
 
 namespace ProjectA {
-	// TODO: OpenGL MSAA
 	DeviceContext::DeviceContext(const Window& window) {
 		const Win32WindowData* windowData = static_cast<const Win32WindowData*>(window.data);
 		Win32DeviceContextData* deviceContextData = new Win32DeviceContextData();

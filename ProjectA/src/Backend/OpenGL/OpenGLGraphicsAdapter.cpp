@@ -68,6 +68,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glShaderBinary);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glSpecializeShader);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glTextureStorage2D);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glTextureStorage2DMultisample);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glTextureSubImage2D);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glTextureView);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glUnmapNamedBuffer);

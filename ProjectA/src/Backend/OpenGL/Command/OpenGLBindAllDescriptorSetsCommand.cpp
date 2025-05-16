@@ -19,8 +19,10 @@ namespace ProjectA {
 
 				for (const ref<Buffer>& buffer : descriptorSetLayoutBinding.buffers) {
 					const ref<OpenGLBuffer> glBuffer = std::static_pointer_cast<OpenGLBuffer>(buffer);
+					const GLintptr offset = descriptorSetLayoutBinding.bufferOffset;
+					const GLsizeiptr size = glBuffer->size - offset;
 
-					glBindBufferRange(getGlDescriptorType(descriptorSetLayoutBinding.descriptorType), binding, glBuffer->object, 0, glBuffer->size);
+					glBindBufferRange(getGlDescriptorType(descriptorSetLayoutBinding.descriptorType), binding, glBuffer->object, offset, size);
 				}
 
 				for (GLuint unit = 0; unit < descriptorSetLayoutBinding.imageViews.size(); unit += 1) {

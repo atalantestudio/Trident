@@ -92,6 +92,7 @@ namespace ProjectA {
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
+		cameraDescriptorSetLayoutBinding.bufferOffset = sizeof(mat3x3<float32>);
 
 		DescriptorSetLayoutBinding viewDescriptorSetLayoutBinding;
 		viewDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;

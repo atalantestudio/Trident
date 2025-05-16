@@ -1,5 +1,5 @@
-:: "%VULKAN_SDK%\Bin\glslc.exe" Grid.vert -o Grid.vert.spv
-:: "%VULKAN_SDK%\Bin\glslc.exe" Grid.frag -o Grid.frag.spv
+"%VULKAN_SDK%\Bin\glslc.exe" Grid.vert -o Grid.vert.spv
+"%VULKAN_SDK%\Bin\glslc.exe" Grid.frag -o Grid.frag.spv
 
 :: "%VULKAN_SDK%\Bin\glslc.exe" DebugPhysics2DFill.vert -o DebugPhysics2DFill.vert.spv
 :: "%VULKAN_SDK%\Bin\glslc.exe" DebugPhysics2DFill.frag -o DebugPhysics2DFill.frag.spv
@@ -13,5 +13,5 @@
 :: "%VULKAN_SDK%\Bin\glslc.exe" EdgeFeature.vert -o EdgeFeature.vert.spv
 :: "%VULKAN_SDK%\Bin\glslc.exe" EdgeFeature.frag -o EdgeFeature.frag.spv
 
-"%VULKAN_SDK%\Bin\glslc.exe" CenterOfMass.vert -o CenterOfMass.vert.spv
-"%VULKAN_SDK%\Bin\glslc.exe" CenterOfMass.frag -o CenterOfMass.frag.spv
+:: "%VULKAN_SDK%\Bin\glslc.exe" CenterOfMass.vert -o CenterOfMass.vert.spv
+:: "%VULKAN_SDK%\Bin\glslc.exe" CenterOfMass.frag -o CenterOfMass.frag.spv
