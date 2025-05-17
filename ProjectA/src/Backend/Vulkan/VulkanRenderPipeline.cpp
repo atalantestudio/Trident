@@ -6,6 +6,7 @@
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 
 #include "Backend/Vulkan/CullMode.hpp"
+#include "Backend/Vulkan/DynamicState.hpp"
 #include "Backend/Vulkan/FrontFace.hpp"
 #include "Backend/Vulkan/InputRate.hpp"
 #include "Backend/Vulkan/PolygonMode.hpp"
@@ -154,15 +155,7 @@ namespace ProjectA {
 		colorBlendStateCreateInfo.blendConstants[2] = 0.0f;
 		colorBlendStateCreateInfo.blendConstants[3] = 0.0f;
 
-		chain<VkDynamicState> dynamicStates;
-
-		if (descriptor.dynamicState & DynamicState::VIEWPORT) {
-			dynamicStates.emplace_back(VK_DYNAMIC_STATE_VIEWPORT);
-		}
-
-		if (descriptor.dynamicState & DynamicState::SCISSOR) {
-			dynamicStates.emplace_back(VK_DYNAMIC_STATE_SCISSOR);
-		}
+		const chain<VkDynamicState> dynamicStates = getVkDynamicStates(descriptor.dynamicState);
 
 		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
 		dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;

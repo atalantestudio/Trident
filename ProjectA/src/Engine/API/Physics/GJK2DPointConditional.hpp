@@ -6,6 +6,7 @@
 namespace ProjectA {
 	static constexpr uint8 GJK_2D_POINT_CONDITIONAL_ITERATION_LIMIT = 8;
 
+	// TODO: Fix.
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
 	// Returns true if A contains p, and false otherwise.
 	// References:

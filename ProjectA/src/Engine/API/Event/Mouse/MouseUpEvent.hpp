@@ -1,0 +1,23 @@
+#pragma once
+
+#include "Engine/API/Event/Event.hpp"
+#include "Engine/MouseButton.hpp"
+
+namespace ProjectA {
+	class MouseUpEvent : public Event {
+		public:
+			MouseUpEvent(MouseButton button) :
+				button(button)
+			{}
+
+			MouseButton getButton() const {
+				return button;
+			}
+
+			EVENT_TYPE(EventType::MOUSE_UP)
+			EVENT_CATEGORY(EventCategory::INPUT | EventCategory::MOUSE)
+
+		private:
+			MouseButton button;
+	};
+}

@@ -1,6 +1,8 @@
 #include "pch.hpp"
 
+#include "Engine/API/Event/Mouse/MouseDownEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
+#include "Engine/API/Event/Mouse/MouseUpEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseWheelEvent.hpp"
 #include "Engine/Application.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -68,7 +70,9 @@ namespace ProjectA {
 		mutex->release();
 
 		window = createScope<Window>(windowDescriptor);
+		window->setEventListener<MouseDownEvent>(BIND(Application::onEvent));
 		window->setEventListener<MouseMoveEvent>(BIND(Application::onEvent));
+		window->setEventListener<MouseUpEvent>(BIND(Application::onEvent));
 		window->setEventListener<MouseWheelEvent>(BIND(Application::onEvent));
 		window->setEventListener<WindowResizeEvent>(BIND(Application::onWindowResize));
 		window->setEventListener<WindowCloseEvent>(BIND(Application::onWindowClose));

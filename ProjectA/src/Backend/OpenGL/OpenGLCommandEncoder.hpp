@@ -32,6 +32,8 @@ namespace ProjectA {
 
 			void setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) override;
 
+			void setLineWidth(float32 lineWidth) override;
+
 			void setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) override;
 
 			void setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) override;

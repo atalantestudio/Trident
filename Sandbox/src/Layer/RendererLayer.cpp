@@ -91,30 +91,44 @@ namespace ProjectA {
 				Object2D& A = scene[i];
 				Object2D& B = scene[j];
 
-				const GJK2DResult gjkResult = GJK2D(A, B);
+				gjkResult = GJK2D(A, B);
 
 				advanceSimulation(A, t);
 				advanceSimulation(B, t);
-
-				// TODO: Only the last call before render() is registered.
-				//       Call these methods once per frame, eg. in preRender().
-				renderer.writeInstanceTransform(i, A.transform);
-				renderer.writeInstanceTransform(j, B.transform);
-				renderer.setClosestPoints(gjkResult.closestA, gjkResult.closestB);
-				renderer.registerClosestFeature(gjkResult.closestFeatureA);
-				renderer.registerClosestFeature(gjkResult.closestFeatureB);
 			}
 		}
 
+		checkHover();
+	}
+
+	void RendererLayer::preRender() {
+		for (uint32 objectIndex = 0; objectIndex < scene.getObjectCount(); objectIndex += 1) {
+			const Object2D& object = scene[objectIndex];
+
+			renderer.writeInstanceTransform(objectIndex, object.transform);
+		}
+
+		renderer.setSelectedObjectIndex(selectedObjectIndex);
+
+		renderer.setClosestPoints(gjkResult.closestA, gjkResult.closestB);
+		renderer.registerClosestFeature(gjkResult.closestFeatureA);
+		renderer.registerClosestFeature(gjkResult.closestFeatureB);
+	}
+
+	void RendererLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
+		renderer.render(commandEncoder);
+	}
+
+	void RendererLayer::checkHover() {
 		hoveredObjectIndex = std::numeric_limits<uint32>::max();
 
 		const vec2<float32>& p = renderer.getNdcMousePosition();
 
 		// Check if the mouse hovers over an object.
-		for (sint32 objectIndex = static_cast<sint32>(scene.getObjectCount()) - 1; objectIndex >= 0; objectIndex -= 1) {
+		for (sint32 objectIndex = static_cast<sint32>(scene.getObjectCount() - 1); objectIndex >= 0; objectIndex -= 1) {
 			const Object2D& A = scene[objectIndex];
 
-			if (GJK2DPointConditional(A, p)) {
+			if (GJK2DPoint(A, p).distance <= 0.0f) {
 				hoveredObjectIndex = objectIndex;
 
 				break;
@@ -122,18 +136,12 @@ namespace ProjectA {
 		}
 	}
 
-	void RendererLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
-		renderer.render(commandEncoder);
-
-		if (hoveredObjectIndex != std::numeric_limits<uint32>::max()) {
-			renderer.renderHoveredObject(commandEncoder, hoveredObjectIndex);
-		}
-	}
-
 	void RendererLayer::onEvent(Event& event) {
 		EventDispatcher eventDispatcher(event);
 
+		eventDispatcher.dispatch<MouseDownEvent>(BIND(onMouseDown));
 		eventDispatcher.dispatch<MouseMoveEvent>(BIND(onMouseMove));
+		eventDispatcher.dispatch<MouseUpEvent>(BIND(onMouseUp));
 		eventDispatcher.dispatch<MouseWheelEvent>(BIND(onMouseWheel));
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 	}
@@ -148,11 +156,27 @@ namespace ProjectA {
 		scene.updateTransform(A);
 	}
 
+	bool RendererLayer::onMouseDown(MouseDownEvent& event) {
+		if (event.getButton() == MouseButton::LEFT) {
+			selectedObjectIndex = hoveredObjectIndex;
+		}
+
+		return true;
+	}
+
 	bool RendererLayer::onMouseMove(MouseMoveEvent& event) {
 		const float32 x = static_cast<float32>(event.getX());
 		const float32 y = static_cast<float32>(event.getY());
 
 		renderer.setMousePosition(x, y);
+
+		return true;
+	}
+
+	bool RendererLayer::onMouseUp(MouseUpEvent& event) {
+		if (event.getButton() == MouseButton::LEFT) {
+			selectedObjectIndex = std::numeric_limits<uint32>::max();
+		}
 
 		return true;
 	}

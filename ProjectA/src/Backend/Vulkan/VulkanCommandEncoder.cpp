@@ -37,8 +37,6 @@ namespace ProjectA {
 	}
 
 	VulkanCommandEncoder::~VulkanCommandEncoder() {
-		PROFILE_SCOPE(FUNC_SIG);
-
 		vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 	}
 
@@ -57,8 +55,6 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
-		PROFILE_SCOPE(FUNC_SIG);
-
 		const VulkanSwapchain& swapchain = *std::static_pointer_cast<VulkanSwapchain>(Renderer::getSwapchain());
 
 		VkClearValue clearValue{};
@@ -110,8 +106,6 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {
-		PROFILE_SCOPE(FUNC_SIG);
-
 		vkCmdBindIndexBuffer(
 			commandBuffer,
 			std::static_pointer_cast<VulkanBuffer>(indexBuffer)->object,
@@ -121,8 +115,6 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) {
-		PROFILE_SCOPE(FUNC_SIG);
-
 		vkCmdBindVertexBuffers(
 			commandBuffer,
 			bindingIndex,
@@ -251,9 +243,11 @@ namespace ProjectA {
 		);
 	}
 
-	void VulkanCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {
-		PROFILE_SCOPE(FUNC_SIG);
+	void VulkanCommandEncoder::setLineWidth(float32 lineWidth) {
+		vkCmdSetLineWidth(commandBuffer, lineWidth);
+	}
 
+	void VulkanCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {
 		VkRect2D scissor{};
 		scissor.offset.x = xOffset;
 		scissor.offset.y = yOffset;
@@ -264,8 +258,6 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
-		PROFILE_SCOPE(FUNC_SIG);
-
 		VkViewport viewport{};
 		viewport.x = origin[0];
 		viewport.y = origin[1];
@@ -278,20 +270,14 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) {
-		PROFILE_SCOPE(FUNC_SIG);
-
 		vkCmdDraw(commandBuffer, vertexCount, instanceCount, vertexOffset, 0);
 	}
 
 	void VulkanCommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) {
-		PROFILE_SCOPE(FUNC_SIG);
-
 		vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, indexOffset, 0, 0);
 	}
 
 	void VulkanCommandEncoder::endRenderPass() const {
-		PROFILE_SCOPE(FUNC_SIG);
-
 		vkCmdEndRenderPass(commandBuffer);
 	}
 

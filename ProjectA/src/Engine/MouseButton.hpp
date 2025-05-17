@@ -12,10 +12,10 @@ namespace ProjectA {
 		BUTTON_7 = 7,
 
 		// Aliases.
-		BUTTON_LAST = BUTTON_7,
-		BUTTON_LEFT = BUTTON_0,
-		BUTTON_RIGHT = BUTTON_1,
-		BUTTON_MIDDLE = BUTTON_2,
+		LAST = BUTTON_7,
+		LEFT = BUTTON_0,
+		RIGHT = BUTTON_1,
+		MIDDLE = BUTTON_2,
 	};
 
 	AS_PRINTABLE(MouseButton);

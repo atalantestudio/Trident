@@ -12,6 +12,7 @@
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetImageMemoryBarrierCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLSetLineWidthCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetScissorCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetViewportCommand.hpp"
 #include "Backend/OpenGL/OpenGLCommandBuffer.hpp"
@@ -125,6 +126,10 @@ namespace ProjectA {
 		}
 
 		commandBuffer.emplace_back(createRef<OpenGLSetImageMemoryBarrierCommand>(barrier));
+	}
+
+	void OpenGLCommandEncoder::setLineWidth(float32 lineWidth) {
+		commandBuffer.emplace_back(createRef<OpenGLSetLineWidthCommand>(lineWidth));
 	}
 
 	void OpenGLCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {

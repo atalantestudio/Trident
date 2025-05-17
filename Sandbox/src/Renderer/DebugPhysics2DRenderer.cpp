@@ -459,9 +459,6 @@ namespace ProjectA {
 		fillInstanceInputBinding.registerAttribute<mat3x3<float32>>(false);
 		fillInstanceInputBinding.registerAttribute<vec4<float32>>(false);
 
-		//VertexInputBinding strokeInstanceInputBinding(InputRate::INSTANCE);
-		//strokeInstanceInputBinding.registerAttribute<mat3x3<float32>>(false);
-
 		RenderPipelineDescriptor fillRenderPipelineDescriptor;
 		fillRenderPipelineDescriptor.renderPass = getMainRenderPass();
 		fillRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
@@ -474,15 +471,20 @@ namespace ProjectA {
 
 		fillRenderPipeline = createRenderPipeline(fillRenderPipelineDescriptor);
 
+		VertexInputBinding strokeInstanceInputBinding(InputRate::INSTANCE);
+		strokeInstanceInputBinding.registerAttribute<mat3x3<float32>>(false);
+		strokeInstanceInputBinding.registerAttribute<vec4<float32>>(false);
+		strokeInstanceInputBinding.registerAttribute<uint32>(false);
+
 		RenderPipelineDescriptor strokeRenderPipelineDescriptor;
 		strokeRenderPipelineDescriptor.renderPass = getMainRenderPass();
 		strokeRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
-		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, fillInstanceInputBinding};
+		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, strokeInstanceInputBinding};
 		strokeRenderPipelineDescriptor.vertexShaderModule = strokeVertexShaderModule;
 		strokeRenderPipelineDescriptor.fragmentShaderModule = strokeFragmentShaderModule;
 		strokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
 		strokeRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
-		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR | DynamicState::LINE_WIDTH;
 
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
 
@@ -562,36 +564,16 @@ namespace ProjectA {
 		renderClosestFeatures(commandEncoder);
 	}
 
-	void DebugPhysics2DRenderer::renderHoveredObject(const ref<CommandEncoder>& commandEncoder, uint32 objectIndex) const {
-		uint32 indexOffset = 0;
-		uint32 vertexOffset = 0;
-
-		for (uint32 instanceIndex = 0; instanceIndex < objectIndex; instanceIndex += 1) {
-			const Object2D& object = (*scene)[instanceIndex];
-			const Geometry2D& geometry = scene->getGeometry(object.geometryIndex);
-
-			indexOffset += static_cast<uint32>(geometry.indices.size());
-			vertexOffset += static_cast<uint32>(geometry.vertices.size()) + 1;
+	void DebugPhysics2DRenderer::setSelectedObjectIndex(uint32 objectIndex) {
+		if (selectedObjectIndex != std::numeric_limits<uint32>::max()) {
+			instanceMappedRange[selectedObjectIndex].selected = 0;
 		}
 
-		const Object2D& object = (*scene)[objectIndex];
-		const uint32 indexCount = static_cast<uint32>(object.getGeometry().indices.size());
-		const uint32 vertexCount = static_cast<uint32>(object.getGeometry().vertices.size()) + 1;
+		selectedObjectIndex = objectIndex;
 
-		commandEncoder->bindRenderPipeline(fillRenderPipeline);
-		commandEncoder->bindAllDescriptorSets();
-		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, indexOffset * sizeof(uint16));
-		commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
-		commandEncoder->bindVertexBuffer(1, instanceBuffer, objectIndex * sizeof(Instance), sizeof(Instance));
-		commandEncoder->drawIndexed(indexCount, 1, 0);
-
-		//commandEncoder->bindRenderPipeline(strokeRenderPipeline);
-		//commandEncoder->bindAllDescriptorSets();
-		//commandEncoder->draw(vertexCount, 1, 0);
-
-		//commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
-		//commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, objectIndex * sizeof(svec2<float32>), sizeof(svec2<float32>));
-		//commandEncoder->draw(1, 1, 0);
+		if (selectedObjectIndex != std::numeric_limits<uint32>::max()) {
+			instanceMappedRange[selectedObjectIndex].selected = 1;
+		}
 	}
 
 	void DebugPhysics2DRenderer::renderGrid(const ref<CommandEncoder>& commandEncoder) const {
@@ -605,8 +587,8 @@ namespace ProjectA {
 		uint32 indexOffset = 0;
 		uint32 vertexOffset = 0;
 
-		for (uint32 instanceIndex = 0; instanceIndex < scene->getObjectCount(); instanceIndex += 1) {
-			const Object2D& object = (*scene)[instanceIndex];
+		for (uint32 objectIndex = 0; objectIndex < scene->getObjectCount(); objectIndex += 1) {
+			const Object2D& object = (*scene)[objectIndex];
 			const Geometry2D& geometry = scene->getGeometry(object.geometryIndex);
 			const uint32 indexCount = static_cast<uint32>(geometry.indices.size());
 			const uint32 vertexCount = static_cast<uint32>(geometry.vertices.size()) + 1;
@@ -615,15 +597,22 @@ namespace ProjectA {
 			commandEncoder->bindAllDescriptorSets();
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, indexOffset * sizeof(uint16));
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
-			commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceIndex * sizeof(Instance), sizeof(Instance));
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, objectIndex * sizeof(Instance), sizeof(Instance));
 			commandEncoder->drawIndexed(indexCount, 1, 0);
 
 			commandEncoder->bindRenderPipeline(strokeRenderPipeline);
-			commandEncoder->bindAllDescriptorSets();
+
+			if (objectIndex == selectedObjectIndex) {
+				commandEncoder->setLineWidth(2.0f);
+			}
+			else {
+				commandEncoder->setLineWidth(1.0f);
+			}
+
 			commandEncoder->draw(vertexCount, 1, 0);
 
 			commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
-			commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, instanceIndex * sizeof(svec2<float32>), sizeof(svec2<float32>));
+			commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, objectIndex * sizeof(svec2<float32>), sizeof(svec2<float32>));
 			commandEncoder->draw(1, 1, 0);
 
 			indexOffset += indexCount;

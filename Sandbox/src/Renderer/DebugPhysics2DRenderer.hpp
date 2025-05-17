@@ -24,7 +24,7 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
-			void renderHoveredObject(const ref<CommandEncoder>& commandEncoder, uint32 objectIndex) const;
+			void setSelectedObjectIndex(uint32 objectIndex);
 
 			void resize(float32 width, float32 height) const;
 
@@ -60,6 +60,7 @@ namespace ProjectA {
 			struct Instance {
 				mat3x3<float32> world;
 				vec4<float32> fillColor;
+				uint32 selected = 0;
 			};
 
 			struct CameraUniform {
@@ -127,6 +128,8 @@ namespace ProjectA {
 
 			vec2<float32> mousePosition;
 			vec2<float32> ndcMousePosition;
+
+			uint32 selectedObjectIndex = std::numeric_limits<uint32>::max();
 
 			const Scene2D* scene = nullptr;
 	};

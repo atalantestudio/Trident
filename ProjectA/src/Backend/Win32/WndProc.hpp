@@ -310,6 +310,26 @@ namespace ProjectA {
 
 				return 0;
 			}
+			case WM_LBUTTONDOWN: {
+				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttondown.
+				if (windowData->mouseDownEventListener) {
+					MouseDownEvent mouseDownEvent(MouseButton::LEFT);
+
+					windowData->mouseDownEventListener(mouseDownEvent);
+				}
+
+				return 0;
+			}
+			case WM_LBUTTONUP: {
+				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttonup.
+				if (windowData->mouseUpEventListener) {
+					MouseUpEvent mouseUpEvent(MouseButton::LEFT);
+
+					windowData->mouseUpEventListener(mouseUpEvent);
+				}
+
+				return 0;
+			}
 			case WM_MOUSEWHEEL: {
 				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousewheel.
 				const sint16 wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);

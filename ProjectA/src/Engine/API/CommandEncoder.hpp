@@ -53,6 +53,8 @@ namespace ProjectA {
 
 			virtual void setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) = 0;
 
+			virtual void setLineWidth(float32 lineWidth) = 0;
+
 			// Updates the scissor area.
 			// Should only be used if the render pipeline's dynamic state contains DynamicState::SCISSOR.
 			virtual void setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) = 0;
