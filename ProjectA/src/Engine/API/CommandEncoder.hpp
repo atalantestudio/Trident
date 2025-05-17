@@ -67,7 +67,7 @@ namespace ProjectA {
 
 			virtual void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) = 0;
 
-			virtual void endRenderPass() const = 0;
+			virtual void endRenderPass() = 0;
 
 			virtual ref<CommandBuffer> end() const = 0;
 

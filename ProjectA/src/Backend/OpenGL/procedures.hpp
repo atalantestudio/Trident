@@ -4,14 +4,23 @@ namespace ProjectA {
 	extern PFNGLATTACHSHADERPROC glAttachShader;
 	extern PFNGLBINDBUFFERPROC glBindBuffer;
 	extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
+	extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
 	extern PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
 	extern PFNGLBINDSAMPLERPROC glBindSampler;
 	extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
 	extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
 	extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
+	extern PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
+
+	#ifdef BUILD_MODE_DEBUG
+		extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
+	#endif
+
 	extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
+	extern PFNGLCOMPILESHADERPROC glCompileShader;
 	extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
 	extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
+	extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
 	extern PFNGLCREATEPROGRAMPROC glCreateProgram;
 	extern PFNGLCREATESAMPLERSPROC glCreateSamplers;
 	extern PFNGLCREATESHADERPROC glCreateShader;
@@ -24,6 +33,7 @@ namespace ProjectA {
 	#endif
 
 	extern PFNGLDELETEBUFFERSPROC glDeleteBuffers;
+	extern PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
 	extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
 	extern PFNGLDELETESAMPLERSPROC glDeleteSamplers;
 	extern PFNGLDELETESHADERPROC glDeleteShader;
@@ -35,6 +45,7 @@ namespace ProjectA {
 	extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced;
 	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 	extern PFNGLFENCESYNCPROC glFenceSync;
+	extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
 	extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
 	extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
 	extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
@@ -48,6 +59,7 @@ namespace ProjectA {
 	extern PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
 	extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
 	extern PFNGLSHADERBINARYPROC glShaderBinary;
+	extern PFNGLSHADERSOURCEPROC glShaderSource;
 	extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
 	extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D;
 	extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;

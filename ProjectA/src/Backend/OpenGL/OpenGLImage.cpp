@@ -9,7 +9,7 @@
 
 namespace ProjectA {
 	OpenGLImage::OpenGLImage(const ImageDescriptor& descriptor) :
-		target(getGlImageType(descriptor.type)),
+		target(getGlImageType(descriptor.type, descriptor.sampleCount)),
 		internalFormat(getGlInternalFormat(descriptor.format)),
 		format(getGlFormat(descriptor.format)),
 		width(descriptor.width),
@@ -17,7 +17,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_ASSERT(descriptor.sampleCount != 0, "Could not create image: The sample count must be non-zero.");
+		ENGINE_ASSERT(descriptor.sampleCount > 0, "Could not create image: The sample count must be non-zero.");
 
 		glCreateTextures(target, 1, &object);
 

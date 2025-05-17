@@ -7,7 +7,7 @@ namespace ProjectA {
 		renderPipeline(renderPipeline)
 	{}
 
-	// TODO: Expose these operations.
+	// TODO: Expose:
 	// - glEnable(GL_BLEND)
 	// - glEnable(GL_DEPTH_TEST)
 	// - glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -17,6 +17,14 @@ namespace ProjectA {
 		glUseProgram(renderPipeline->program);
 		glFrontFace(renderPipeline->frontFace);
 
+		if (renderPipeline->polygonModeFace != GL_NONE) {
+			glPolygonMode(renderPipeline->polygonModeFace, renderPipeline->polygonMode);
+		}
+
+		if (!renderPipeline->dynamicLineWidth) {
+			glLineWidth(renderPipeline->lineWidth);
+		}
+
 		if (renderPipeline->polygonMode == GL_POINT) {
 			glEnable(GL_PROGRAM_POINT_SIZE);
 		}
@@ -24,27 +32,20 @@ namespace ProjectA {
 			glDisable(GL_PROGRAM_POINT_SIZE);
 		}
 
-		if (renderPipeline->polygonModeFace != GL_NONE) {
-			glPolygonMode(renderPipeline->polygonModeFace, renderPipeline->polygonMode);
-		}
-
-		if (renderPipeline->cullMode == 0) {
-			glDisable(GL_CULL_FACE);
-		}
-		else {
+		if (renderPipeline->cullMode != 0) {
 			glEnable(GL_CULL_FACE);
 			glCullFace(renderPipeline->cullMode);
 		}
-
-		glLineWidth(renderPipeline->lineWidth);
-
-		// TODO: Sample shading requires MSAA to work.
-		if (renderPipeline->minSampleShading == 0.0f) {
-			glDisable(GL_SAMPLE_SHADING);
-		}
 		else {
+			glDisable(GL_CULL_FACE);
+		}
+
+		if (renderPipeline->minSampleShading != 0.0f) {
 			glEnable(GL_SAMPLE_SHADING);
 			glMinSampleShading(renderPipeline->minSampleShading);
+		}
+		else {
+			glDisable(GL_SAMPLE_SHADING);
 		}
 	}
 }

@@ -602,6 +602,11 @@ namespace ProjectA {
 
 			commandEncoder->bindRenderPipeline(strokeRenderPipeline);
 
+			// TODO: In OpenGL the vertex buffers seems to get unbound when binding another pipeline.
+			//       Vulkan keeps the vertex buffers bound.
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, objectIndex * sizeof(Instance), sizeof(Instance));
+
 			if (objectIndex == selectedObjectIndex) {
 				commandEncoder->setLineWidth(2.0f);
 			}

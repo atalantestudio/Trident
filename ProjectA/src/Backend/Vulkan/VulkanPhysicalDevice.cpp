@@ -40,9 +40,7 @@ namespace ProjectA {
 
 		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyPropertyCount, nullptr);
 
-		if (queueFamilyPropertyCount == 0) {
-			throw std::runtime_error("Could not find queues for this physical device.");
-		}
+		ENGINE_ASSERT(queueFamilyPropertyCount > 0, "Could not find queues for this physical device.");
 
 		chain<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertyCount);
 

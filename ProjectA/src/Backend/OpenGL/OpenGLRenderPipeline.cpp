@@ -19,7 +19,8 @@ namespace ProjectA {
 		polygonModeFace(getGlPolygonModeFace(descriptor.cullMode)),
 		polygonMode(getGlPolygonMode(descriptor.polygonMode)),
 		lineWidth(descriptor.lineWidth),
-		minSampleShading(descriptor.minSampleShading)
+		minSampleShading(descriptor.minSampleShading),
+		dynamicLineWidth(descriptor.dynamicState & DynamicState::LINE_WIDTH)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -51,7 +52,6 @@ namespace ProjectA {
 			glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog.data());
 
 			ENGINE_ERROR("Program linking failed.\n[]", infoLog.data());
-
 			BREAKPOINT();
 		}
 

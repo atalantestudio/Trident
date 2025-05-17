@@ -15,6 +15,7 @@
 
 namespace ProjectA {
 	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const Window& window) :
+		window(window),
 		deviceContext(window)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -24,14 +25,23 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glAttachShader);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindBuffer);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindBufferRange);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindFramebuffer);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindImageTexture);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindSampler);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindTextureUnit);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindVertexArray);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindVertexBuffer);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glBlitFramebuffer);
+
+		#ifdef BUILD_MODE_DEBUG
+			LOAD_PROCEDURE_ADDRESS(deviceContext, glCheckFramebufferStatus);
+		#endif
+
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glClientWaitSync);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glCompileShader);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glCopyNamedBufferSubData);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateBuffers);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateFramebuffers);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateProgram);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateSamplers);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateShader);
@@ -44,6 +54,7 @@ namespace ProjectA {
 		#endif
 
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteBuffers);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteFramebuffers);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteProgram);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteSamplers);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteShader);
@@ -55,6 +66,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDrawElementsInstanced);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glEnableVertexAttribArray);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glFenceSync);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glFramebufferTexture2D);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetIntegeri_v);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetProgramInfoLog);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetProgramiv);
@@ -68,6 +80,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glProvokingVertex);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glSamplerParameteri);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glShaderBinary);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glShaderSource);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glSpecializeShader);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glTextureStorage2D);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glTextureStorage2DMultisample);
@@ -120,7 +133,7 @@ namespace ProjectA {
 	}
 
 	ref<RenderPass> OpenGLGraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		return createRef<OpenGLRenderPass>(descriptor);
+		return createRef<OpenGLRenderPass>(descriptor, window);
 	}
 
 	ref<RenderPipeline> OpenGLGraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {

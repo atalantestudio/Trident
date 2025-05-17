@@ -5,6 +5,20 @@
 #include "Backend/OpenGL/ShaderStage.hpp"
 
 namespace ProjectA {
+	OpenGLShaderModule::OpenGLShaderModule(const chain<uint8>& code, ShaderStage stage) :
+		ObjectWrapper(glCreateShader(getGlShaderStage(stage)))
+	{
+		PROFILE_SCOPE(FUNC_SIG);
+
+		const GLchar* const string = reinterpret_cast<const GLchar* const>(code.data());
+		const GLint length = static_cast<GLint>(code.size());
+
+		glShaderSource(object, 1, &string, &length);
+		glCompileShader(object);
+
+		checkCompileStatus();
+	}
+
 	OpenGLShaderModule::OpenGLShaderModule(const chain<uint8>& code, const ShaderModuleDescriptor& descriptor) :
 		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
 	{
@@ -14,35 +28,38 @@ namespace ProjectA {
 
 		glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code.data(), length);
 
-		auto a = glSpecializeShader;
-
 		// TODO: Expose specialization constants.
 		glSpecializeShader(object, descriptor.entryPoint, 0, nullptr, nullptr);
 
-		GLint compileStatus;
-
-		glGetShaderiv(object, GL_COMPILE_STATUS, &compileStatus);
-
-		if (compileStatus != GL_TRUE) {
-			GLint infoLogLength;
-
-			glGetShaderiv(object, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-			chain<GLchar> infoLog(infoLogLength);
-
-			glGetShaderInfoLog(object, infoLogLength, nullptr, infoLog.data());
-
-			glDeleteShader(object);
-
-			ENGINE_ERROR("Shader module compilation failed:\n[]", infoLog.data());
-
-			throw std::runtime_error("Failed to create OpenGL shader module.");
-		}
+		checkCompileStatus();
 	}
 
 	OpenGLShaderModule::~OpenGLShaderModule() {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glDeleteShader(object);
+	}
+
+	void OpenGLShaderModule::checkCompileStatus() const {
+		GLint compileStatus;
+
+		glGetShaderiv(object, GL_COMPILE_STATUS, &compileStatus);
+
+		if (compileStatus == GL_TRUE) {
+			return;
+		}
+
+		GLint infoLogLength;
+
+		glGetShaderiv(object, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+		chain<GLchar> infoLog(infoLogLength);
+
+		glGetShaderInfoLog(object, infoLogLength, nullptr, infoLog.data());
+		glDeleteShader(object);
+
+		ENGINE_ERROR("Shader module compilation failed:\n[]", infoLog.data());
+
+		BREAKPOINT();
 	}
 }

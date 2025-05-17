@@ -41,6 +41,7 @@ namespace ProjectA {
 			#endif
 
 		private:
+			const Window& window;
 			const DeviceContext deviceContext;
 			ref<OpenGLDevice> device;
 	};

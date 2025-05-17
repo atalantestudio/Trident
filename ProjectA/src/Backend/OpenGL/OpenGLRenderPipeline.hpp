@@ -23,5 +23,6 @@ namespace ProjectA {
 			const GLenum polygonMode;
 			const GLfloat lineWidth;
 			const GLfloat minSampleShading;
+			const bool dynamicLineWidth;
 	};
 }

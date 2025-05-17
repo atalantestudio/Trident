@@ -1,11 +1,17 @@
 #pragma once
 
 namespace ProjectA {
-	static GLenum getGlImageType(ImageType imageType) {
-		static constexpr GLenum glImageTypes[] = {
-			GL_TEXTURE_2D,
-		};
+	static GLenum getGlImageType(ImageType imageType, uint8 sampleCount) {
+		if (imageType == ImageType::TEXTURE_2D) {
+			if (sampleCount > 1) {
+				return GL_TEXTURE_2D_MULTISAMPLE;
+			}
 
-		return glImageTypes[static_cast<uint8>(imageType)];
+			return GL_TEXTURE_2D;
+		}
+
+		DEBUG_ASSERT(false);
+
+		return 0;
 	}
 }

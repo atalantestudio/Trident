@@ -11,6 +11,7 @@
 #include "Backend/OpenGL/Command/OpenGLDispatchGroupsCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLEndRenderPassCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetImageMemoryBarrierCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetLineWidthCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetScissorCommand.hpp"
@@ -29,6 +30,8 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::begin() const {}
 
 	void OpenGLCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
+		renderPass = std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass).get();
+
 		commandBuffer.emplace_back(createRef<OpenGLBeginRenderPassCommand>(descriptor));
 	}
 
@@ -142,6 +145,9 @@ namespace ProjectA {
 	}
 
 	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
+		viewportOrigin = origin;
+		viewportSize = size;
+
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(
 			static_cast<GLint>(origin[0]),
 
@@ -174,7 +180,9 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::endRenderPass() const {}
+	void OpenGLCommandEncoder::endRenderPass() {
+		commandBuffer.emplace_back(createRef<OpenGLEndRenderPassCommand>(*renderPass, viewportOrigin, viewportSize));
+	}
 
 	ref<CommandBuffer> OpenGLCommandEncoder::end() const {
 		return createRef<OpenGLCommandBuffer>(commandBuffer);
@@ -182,6 +190,11 @@ namespace ProjectA {
 
 	void OpenGLCommandEncoder::reset() {
 		commandBuffer.clear();
+
+		renderPass = nullptr;
+		viewportOrigin = {0.0f, 0.0f};
+		viewportSize = {0.0f, 0.0f};
+
 		computePipeline = nullptr;
 		renderPipeline = nullptr;
 		indexOffset = 0;

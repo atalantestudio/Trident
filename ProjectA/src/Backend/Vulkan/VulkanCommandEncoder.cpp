@@ -277,7 +277,7 @@ namespace ProjectA {
 		vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, indexOffset, 0, 0);
 	}
 
-	void VulkanCommandEncoder::endRenderPass() const {
+	void VulkanCommandEncoder::endRenderPass() {
 		vkCmdEndRenderPass(commandBuffer);
 	}
 
