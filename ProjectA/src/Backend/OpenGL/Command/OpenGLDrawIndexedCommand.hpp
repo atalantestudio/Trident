@@ -5,9 +5,22 @@
 namespace ProjectA {
 	class OpenGLDrawIndexedCommand : public OpenGLCommand {
 		public:
-			OpenGLDrawIndexedCommand(GLenum mode, GLsizei count, GLsizei type, const GLvoid* indices, GLsizei instancecount);
+			OpenGLDrawIndexedCommand(GLenum mode, GLsizei count, GLsizei type, const GLvoid* indices, GLsizei instancecount) :
+				mode(mode),
+				count(count),
+				type(type),
+				indices(indices),
+				instancecount(instancecount)
+			{}
 
-			void execute() const override;
+			void execute() const override {
+				if (instancecount == 1) {
+					glDrawElements(mode, count, type, indices);
+				}
+				else {
+					glDrawElementsInstanced(mode, count, type, indices, instancecount);
+				}
+			}
 
 		private:
 			const GLenum mode;

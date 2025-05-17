@@ -6,9 +6,13 @@
 namespace ProjectA {
 	class OpenGLBindIndexBufferCommand : public OpenGLCommand {
 		public:
-			OpenGLBindIndexBufferCommand(GLuint indexBuffer);
+			OpenGLBindIndexBufferCommand(GLuint indexBuffer) :
+				indexBuffer(indexBuffer)
+			{}
 
-			void execute() const override;
+			void execute() const override {
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+			}
 
 		private:
 			const GLuint indexBuffer;

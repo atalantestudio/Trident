@@ -57,7 +57,7 @@ namespace ProjectA {
 			#endif
 		}
 
-		ENGINE_ASSERT(adapter != nullptr, "Failed to initialize the graphics adapter.");
+		DEBUG_ASSERT(adapter != nullptr);
 
 		RenderPassDescriptor renderPassDescriptor{};
 		renderPassDescriptor.sampleCount = 4;

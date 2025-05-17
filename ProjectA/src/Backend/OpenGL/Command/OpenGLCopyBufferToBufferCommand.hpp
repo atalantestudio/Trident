@@ -6,9 +6,17 @@
 namespace ProjectA {
 	class OpenGLCopyBufferToBufferCommand : public OpenGLCommand {
 		public:
-			OpenGLCopyBufferToBufferCommand(GLuint sourceBuffer, GLuint destinationBuffer, GLintptr sourceOffset, GLintptr destinationOffset, GLsizeiptr size);
+			OpenGLCopyBufferToBufferCommand(GLuint sourceBuffer, GLuint destinationBuffer, GLintptr sourceOffset, GLintptr destinationOffset, GLsizeiptr size) :
+				sourceBuffer(sourceBuffer),
+				destinationBuffer(destinationBuffer),
+				sourceOffset(sourceOffset),
+				destinationOffset(destinationOffset),
+				size(size)
+			{}
 
-			void execute() const override;
+			void execute() const override {
+				glCopyNamedBufferSubData(sourceBuffer, destinationBuffer, sourceOffset, destinationOffset, size);
+			}
 
 		private:
 			const GLuint sourceBuffer;

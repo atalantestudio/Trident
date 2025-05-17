@@ -6,9 +6,13 @@
 namespace ProjectA {
 	class OpenGLBindComputePipelineCommand : public OpenGLCommand {
 		public:
-			OpenGLBindComputePipelineCommand(const ref<OpenGLComputePipeline>& computePipeline);
+			OpenGLBindComputePipelineCommand(const ref<OpenGLComputePipeline>& computePipeline) :
+				program(computePipeline->program)
+			{}
 
-			void execute() const override;
+			void execute() const override {
+				glUseProgram(program);
+			}
 
 		private:
 			const GLuint program;

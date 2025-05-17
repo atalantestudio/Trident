@@ -5,11 +5,15 @@
 namespace ProjectA {
 	class OpenGLSetImageMemoryBarrierCommand : public OpenGLCommand {
 		public:
-			OpenGLSetImageMemoryBarrierCommand(GLbitfield barrier);
+			OpenGLSetImageMemoryBarrierCommand(GLbitfield barrier) :
+				barrier(barrier)
+			{}
 
-			void execute() const override;
+			void execute() const override {
+				glMemoryBarrier(barrier);
+			}
 
 		private:
-			GLbitfield barrier;
+			const GLbitfield barrier;
 	};
 }
