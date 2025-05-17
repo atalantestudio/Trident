@@ -86,13 +86,6 @@ namespace ProjectA {
 
 		const float32 t = static_cast<float32>(fixedDeltaTime);
 
-		/*const vec2<float32>& p = renderer.getNdcMousePosition();
-		const bool intersecting = GJK2DPointConditional(scene[0], p);
-
-		if (intersecting) {
-			ENGINE_DEBUG("Intersecting A at []", p);
-		}*/
-
 		for (uint32 i = 0; i < scene.getObjectCount() - 1; i += 1) {
 			for (uint32 j = i + 1; j < scene.getObjectCount(); j += 1) {
 				Object2D& A = scene[i];
@@ -112,10 +105,29 @@ namespace ProjectA {
 				renderer.registerClosestFeature(gjkResult.closestFeatureB);
 			}
 		}
+
+		hoveredObjectIndex = std::numeric_limits<uint32>::max();
+
+		const vec2<float32>& p = renderer.getNdcMousePosition();
+
+		// Check if the mouse hovers over an object.
+		for (sint32 objectIndex = static_cast<sint32>(scene.getObjectCount()) - 1; objectIndex >= 0; objectIndex -= 1) {
+			const Object2D& A = scene[objectIndex];
+
+			if (GJK2DPointConditional(A, p)) {
+				hoveredObjectIndex = objectIndex;
+
+				break;
+			}
+		}
 	}
 
 	void RendererLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
 		renderer.render(commandEncoder);
+
+		if (hoveredObjectIndex != std::numeric_limits<uint32>::max()) {
+			renderer.renderHoveredObject(commandEncoder, hoveredObjectIndex);
+		}
 	}
 
 	void RendererLayer::onEvent(Event& event) {
@@ -140,12 +152,12 @@ namespace ProjectA {
 		const float32 x = static_cast<float32>(event.getX());
 		const float32 y = static_cast<float32>(event.getY());
 
-		renderer.setNdcMousePosition(x, y);
+		renderer.setMousePosition(x, y);
 
 		return true;
 	}
 
-	bool RendererLayer::onMouseWheel(MouseWheelEvent& event) const {
+	bool RendererLayer::onMouseWheel(MouseWheelEvent& event) {
 		renderer.zoom(static_cast<float32>(event.getDelta()));
 
 		return true;

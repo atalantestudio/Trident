@@ -491,10 +491,12 @@ namespace ProjectA {
 	}
 
 	const vec2<float32>& DebugPhysics2DRenderer::getNdcMousePosition() const {
-		return mousePosition;
+		return ndcMousePosition;
 	}
 
-	void DebugPhysics2DRenderer::setNdcMousePosition(float32 x, float32 y) {
+	void DebugPhysics2DRenderer::setMousePosition(float32 x, float32 y) {
+		mousePosition = {x, y};
+
 		const ref<Swapchain>& swapchain = getSwapchain();
 
 		const float32 horizontalCellCount = swapchain->getExtentWidth() / cameraMappedRange->zoomLevel;
@@ -503,10 +505,10 @@ namespace ProjectA {
 		x = (x / swapchain->getExtentWidth() - 0.5f) * horizontalCellCount;
 		y = -(y / swapchain->getExtentHeight() - 0.5f) * verticalCellCount;
 
-		mousePosition = {x, y};
+		ndcMousePosition = {x, y};
 	}
 
-	void DebugPhysics2DRenderer::zoom(float32 zoomLevelDelta) const {
+	void DebugPhysics2DRenderer::zoom(float32 zoomLevelDelta) {
 		float32 direction = zoomLevelDelta;
 
 		if (direction != 0.0f) {
@@ -526,6 +528,8 @@ namespace ProjectA {
 		}
 
 		cameraMappedRange->zoomLevel = zoomLevel;
+
+		setMousePosition(mousePosition[0], mousePosition[1]);
 	}
 
 	void DebugPhysics2DRenderer::setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const {
@@ -558,6 +562,38 @@ namespace ProjectA {
 		renderClosestFeatures(commandEncoder);
 	}
 
+	void DebugPhysics2DRenderer::renderHoveredObject(const ref<CommandEncoder>& commandEncoder, uint32 objectIndex) const {
+		uint32 indexOffset = 0;
+		uint32 vertexOffset = 0;
+
+		for (uint32 instanceIndex = 0; instanceIndex < objectIndex; instanceIndex += 1) {
+			const Object2D& object = (*scene)[instanceIndex];
+			const Geometry2D& geometry = scene->getGeometry(object.geometryIndex);
+
+			indexOffset += static_cast<uint32>(geometry.indices.size());
+			vertexOffset += static_cast<uint32>(geometry.vertices.size()) + 1;
+		}
+
+		const Object2D& object = (*scene)[objectIndex];
+		const uint32 indexCount = static_cast<uint32>(object.getGeometry().indices.size());
+		const uint32 vertexCount = static_cast<uint32>(object.getGeometry().vertices.size()) + 1;
+
+		commandEncoder->bindRenderPipeline(fillRenderPipeline);
+		commandEncoder->bindAllDescriptorSets();
+		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, indexOffset * sizeof(uint16));
+		commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
+		commandEncoder->bindVertexBuffer(1, instanceBuffer, objectIndex * sizeof(Instance), sizeof(Instance));
+		commandEncoder->drawIndexed(indexCount, 1, 0);
+
+		//commandEncoder->bindRenderPipeline(strokeRenderPipeline);
+		//commandEncoder->bindAllDescriptorSets();
+		//commandEncoder->draw(vertexCount, 1, 0);
+
+		//commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
+		//commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, objectIndex * sizeof(svec2<float32>), sizeof(svec2<float32>));
+		//commandEncoder->draw(1, 1, 0);
+	}
+
 	void DebugPhysics2DRenderer::renderGrid(const ref<CommandEncoder>& commandEncoder) const {
 		commandEncoder->bindRenderPipeline(gridRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
@@ -584,8 +620,6 @@ namespace ProjectA {
 
 			commandEncoder->bindRenderPipeline(strokeRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
-			commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceIndex * sizeof(Instance), sizeof(Instance));
 			commandEncoder->draw(vertexCount, 1, 0);
 
 			commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);

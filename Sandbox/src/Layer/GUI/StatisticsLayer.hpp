@@ -19,7 +19,7 @@ namespace ProjectA {
 
 				GUIContainer({212px, EXPAND}, {8px, 8px}, VERTICAL, 8px) {
 					GUIContainer({196px, 96px}, {12px, 12px}, VERTICAL, 0px, GRAY) {
-						GUIText("FPS: []", framesPerSecond);
+						GUIText(32px, "FPS: []", framesPerSecond);
 					}
 
 					GUIContainer({196px, 148px}, {12px, 12px}, VERTICAL, 8px, GRAY) {

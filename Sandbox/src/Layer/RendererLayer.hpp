@@ -22,12 +22,14 @@ namespace ProjectA {
 
 			bool onMouseMove(MouseMoveEvent& event);
 
-			bool onMouseWheel(MouseWheelEvent& event) const;
+			bool onMouseWheel(MouseWheelEvent& event);
 
 			bool onWindowResize(WindowResizeEvent& event) const;
 
 		private:
 			DebugPhysics2DRenderer renderer;
 			Scene2D scene;
+
+			uint32 hoveredObjectIndex = std::numeric_limits<uint32>::max();
 	};
 }

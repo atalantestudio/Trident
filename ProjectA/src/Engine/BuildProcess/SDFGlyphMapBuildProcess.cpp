@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	static constexpr uint64 MAX_GLYPH_COUNT = 2048;
-	static constexpr uint64 GLYPH_SUBIMAGE_DIMENSION = 64;
+	static constexpr uint32 GLYPH_SUBIMAGE_DIMENSION = 64;
 	static constexpr uint32 SPREAD_FACTOR = 0;
 
 	SDFGlyphMap SDFGlyphMapBuildProcess::build(const TTFFile& ttfFile) {
@@ -20,15 +20,16 @@ namespace ProjectA {
 
 		const uint64 glyphBufferSize = computeMaxGlyphByteSize(ttfFile);
 
-		constexpr uint64 fontBufferSize = 3 * sizeof(sint32);
+		constexpr uint64 fontBufferSize = sizeof(FontStorage);
 
 		const ref<Buffer> fontStagingBuffer = Renderer::createStagingBuffer(fontBufferSize);
 
-		sint32* fontMappedRange = fontStagingBuffer->map<sint32>(0, fontBufferSize);
+		FontStorage* fontMappedRange = fontStagingBuffer->map<FontStorage>(0, fontBufferSize);
 
-		fontMappedRange[0] = SPREAD_FACTOR;
-		fontMappedRange[1] = ttfFile.hhea.ascent;
-		fontMappedRange[2] = ttfFile.hhea.descent;
+		fontMappedRange->outputGlyphSize = GLYPH_SUBIMAGE_DIMENSION;
+		fontMappedRange->spreadFactor = SPREAD_FACTOR;
+		fontMappedRange->ascent = ttfFile.hhea.ascent;
+		fontMappedRange->descent = ttfFile.hhea.descent;
 
 		fontStagingBuffer->unmap();
 
@@ -164,6 +165,7 @@ namespace ProjectA {
 		glyphSdfDescriptorSetLayout.bindings = {
 			glyphImageDescriptorSetLayoutBinding,
 			glyphMapSdfImageDescriptorSetLayoutBinding,
+			fontBufferDescriptorSetLayoutBinding,
 			glyphIndexDescriptorSetLayoutBinding,
 		};
 
@@ -301,6 +303,8 @@ namespace ProjectA {
 
 				commandEncoder->bindComputePipeline(glyphSdfPipeline);
 				commandEncoder->bindAllDescriptorSets();
+
+				// TODO: Support custom glyph subimage dimension (multiply down).
 				commandEncoder->dispatchGroups(8, 8, 1);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();

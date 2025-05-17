@@ -16,13 +16,15 @@ namespace ProjectA {
 			const vec2<float32>& getNdcMousePosition() const;
 
 			// x and y are in the range [0, viewport].
-			void setNdcMousePosition(float32 x, float32 y);
+			void setMousePosition(float32 x, float32 y);
 
-			void zoom(float32 zoomLevelDelta) const;
+			void zoom(float32 zoomLevelDelta);
 
 			void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const;
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
+
+			void renderHoveredObject(const ref<CommandEncoder>& commandEncoder, uint32 objectIndex) const;
 
 			void resize(float32 width, float32 height) const;
 
@@ -123,8 +125,8 @@ namespace ProjectA {
 			uint32 indexCount = 0;
 			uint32 gridVertexCount = 0;
 
-			// Mouse position in zoomed NDC coordinates.
 			vec2<float32> mousePosition;
+			vec2<float32> ndcMousePosition;
 
 			const Scene2D* scene = nullptr;
 	};

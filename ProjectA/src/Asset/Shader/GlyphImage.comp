@@ -10,6 +10,7 @@ struct Edge {
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
 layout(set = 0, binding = 0) buffer readonly Font {
+	uint outputGlyphSize;
 	uint spreadFactor;
 	int ascent;
 	int descent;
@@ -24,10 +25,10 @@ layout(set = 0, binding = 1) buffer readonly Glyph {
 
 layout(set = 0, binding = 2, r8) uniform writeonly image2D glyphImage;
 
-// Size of the a glyph part in the map.
-const uvec2 OUTPUT_IMAGE_SIZE = uvec2(64, 64);
-
 void main() {
+	// Size of the a glyph part in the map.
+	uvec2 outputImageSize = uvec2(font.outputGlyphSize, font.outputGlyphSize);
+
 	uvec2 imageCoordinate = gl_GlobalInvocationID.xy;
 	uvec2 glyphImageSize = imageSize(glyphImage);
 
@@ -37,9 +38,11 @@ void main() {
 
 	vec2 glyphCoordinate = imageCoordinate;
 
+	uvec2 scaledSpreadFactor = outputImageSize * font.spreadFactor;
+
 	// Add spread offset.
-	glyphCoordinate.x -= OUTPUT_IMAGE_SIZE.x * font.spreadFactor;
-	glyphCoordinate.y += OUTPUT_IMAGE_SIZE.y * font.spreadFactor;
+	glyphCoordinate.x -= scaledSpreadFactor.x;
+	glyphCoordinate.y += scaledSpreadFactor.y;
 
 	// Flip glyph Y coordinate.
 	glyphCoordinate.y = glyphImageSize.y - glyphCoordinate.y;
@@ -47,7 +50,7 @@ void main() {
 	uint lineHeight = font.ascent - font.descent;
 
 	glyphCoordinate /= glyphImageSize;
-	glyphCoordinate *= lineHeight + OUTPUT_IMAGE_SIZE * font.spreadFactor;
+	glyphCoordinate *= lineHeight + scaledSpreadFactor;
 
 	// Remove left padding.
 	glyphCoordinate.x += glyph.minCoordinate.x;
@@ -85,6 +88,7 @@ void main() {
 		if (edge.curved) {
 			vec2 c = edge.control;
 
+			// Calculate barycentric coordinates.
 			float u = ((a.y - b.y) * (p.x - b.x) + (b.x - a.x) * (p.y - b.y)) / ((a.y - b.y) * (c.x - b.x) + (b.x - a.x) * (c.y - b.y));
 			float v = ((b.y - c.y) * (p.x - b.x) + (c.x - b.x) * (p.y - b.y)) / ((a.y - b.y) * (c.x - b.x) + (b.x - a.x) * (c.y - b.y));
 			float w = 1.0 - u - v;
@@ -114,8 +118,6 @@ void main() {
 	}
 
 	texel.r = float(windingNumber > 0);
-
-	//texel.r = glyphCoordinate.x / 4096.0;
 
 	imageStore(glyphImage, ivec2(imageCoordinate), texel);
 }

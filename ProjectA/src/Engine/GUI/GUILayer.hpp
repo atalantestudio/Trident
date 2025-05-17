@@ -83,11 +83,9 @@ namespace ProjectA {
 			void GUIQuad(GUISize size, const vec4<float32>& color);
 			void GUIQuad(GUISize size, ImageID imageId, const vec4<float32>& color = {1.0f, 1.0f, 1.0f, 1.0f});
 
-			template<typename... T>
-			void GUIText(std::string_view pattern, T&&... arguments) {
-				constexpr float32 fontSize = 32;
-
-				const std::string text = Logger::engineLogger.format(pattern, std::forward<T>(arguments)...);
+			template<typename... Argument>
+			void GUIText(float32 fontSize, std::string_view pattern, Argument&&... arguments) {
+				const std::string text = Logger::engineLogger.format(pattern, std::forward<Argument>(arguments)...);
 				const float32 lineHeight = static_cast<float32>(defaultFont->getLineHeight());
 
 				float32 positionX = componentOrigin[0];

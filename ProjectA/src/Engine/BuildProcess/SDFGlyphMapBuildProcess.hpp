@@ -30,6 +30,13 @@ namespace ProjectA {
 		chain<SDFGlyph> glyphs;
 	};
 
+	struct FontStorage {
+		uint32 outputGlyphSize;
+		uint32 spreadFactor;
+		sint32 ascent;
+		sint32 descent;
+	};
+
 	class SDFGlyphMapBuildProcess {
 		public:
 			static SDFGlyphMap build(const TTFFile& ttfFile);
