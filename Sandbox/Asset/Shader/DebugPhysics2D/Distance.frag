@@ -1,3 +1,5 @@
+// See https://stackoverflow.com/a/54543267.
+
 #version 450
 
 const float LINE_DASH_SIZE = 6.0;
