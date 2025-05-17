@@ -29,46 +29,47 @@ namespace ProjectA {
 	static void readIHDRChunk(ByteStream& stream, PNGFile& file) {
 		file.width = stream.read<uint32>(true);
 
-		if (file.width == 0) {
-			throw std::runtime_error("Width must be > 0.");
-		}
+		ENGINE_ASSERT(file.width > 0, "The width must be > 0.");
 
 		file.height = stream.read<uint32>(true);
 
-		if (file.height == 0) {
-			throw std::runtime_error("Height must be > 0.");
-		}
+		ENGINE_ASSERT(file.height > 0, "The height must be > 0.");
 
 		file.bitDepth = stream.read<uint8>();
 
-		if (file.bitDepth != 1 && file.bitDepth != 2 && file.bitDepth != 4 && file.bitDepth != 8 && file.bitDepth != 16) {
-			throw std::runtime_error("Invalid bit depth value.");
-		}
+		ENGINE_ASSERT(
+			file.bitDepth == 1 ||
+			file.bitDepth == 2 ||
+			file.bitDepth == 4 ||
+			file.bitDepth == 8 ||
+			file.bitDepth == 16,
+			"Invalid bit depth."
+		);
 
 		file.colorType = stream.read<uint8>();
 
-		if (file.colorType != 0 && file.colorType != 2 && file.colorType != 3 && file.colorType != 4 && file.colorType != 6) {
-			throw std::runtime_error("Invalid color type value.");
-		}
+		ENGINE_ASSERT(
+			file.colorType == 0 ||
+			file.colorType == 2 ||
+			file.colorType == 3 ||
+			file.colorType == 4 ||
+			file.colorType == 6,
+			"Invalid color type."
+		);
 
 		file.compressionMethod = stream.read<uint8>();
 
-		if (file.compressionMethod != 0) {
-			throw std::runtime_error("Invalid compression method value (must be 0).");
-		}
+		ENGINE_ASSERT(file.compressionMethod == 0, "Undefined compression method.");
 
 		file.filterMethod = stream.read<uint8>();
 
-		if (file.filterMethod != 0) {
-			throw std::runtime_error("Invalid filter method value (must be 0).");
-		}
+		ENGINE_ASSERT(file.filterMethod == 0, "Undefined filter method.");
 
 		file.interlaceMethod = stream.read<uint8>();
 
-		if (file.interlaceMethod != 0 && file.interlaceMethod != 1) {
-			throw std::runtime_error("Invalid interlace method value (must be 0 or 1).");
-		}
+		ENGINE_ASSERT(file.interlaceMethod == 0 || file.interlaceMethod == 1, "Undefined interlace method.");
 
+		// Assertions for currently unhandled values.
 		ENGINE_ASSERT(file.bitDepth == 8, "Bit depth = [] is unhandled.", file.bitDepth);
 		ENGINE_ASSERT(file.colorType == 6, "Color type = [] is unhandled.", file.colorType);
 	}
