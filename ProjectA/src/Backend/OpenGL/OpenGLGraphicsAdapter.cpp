@@ -65,6 +65,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glMemoryBarrier);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glMinSampleShading);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glNamedBufferStorage);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glProvokingVertex);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glSamplerParameteri);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glShaderBinary);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glSpecializeShader);
@@ -88,6 +89,8 @@ namespace ProjectA {
 
 			glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 0, GL_DEBUG_SEVERITY_NOTIFICATION, 36, "Using OpenGL debug message callback");
 		#endif
+
+		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
 
 		device = createRef<OpenGLDevice>(deviceContext);
 	}
