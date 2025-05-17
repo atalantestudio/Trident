@@ -61,7 +61,8 @@ namespace ProjectA {
 
 		Object2D& objectA = scene.registerObject(objectADescriptor);
 
-		objectA.position = {0.45f, -0.625f};
+		//objectA.position = {0.45f, -0.625f};
+		objectA.position = {-4.45f, -3.625f};
 
 		scene.updateTransform(objectA);
 
@@ -102,9 +103,11 @@ namespace ProjectA {
 				advanceSimulation(A, t);
 				advanceSimulation(B, t);
 
+				// TODO: Only the last call before render() is registered.
+				//       Call these methods once per frame, eg. in preRender().
 				renderer.writeInstanceTransform(i, A.transform);
 				renderer.writeInstanceTransform(j, B.transform);
-
+				renderer.setClosestPoints(gjkResult.closestA, gjkResult.closestB);
 				renderer.registerClosestFeature(gjkResult.closestFeatureA);
 				renderer.registerClosestFeature(gjkResult.closestFeatureB);
 			}

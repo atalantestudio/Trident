@@ -12,6 +12,9 @@ namespace ProjectA {
 		initializeGridVertexBuffer();
 		initializeGridRenderPipeline();
 
+		initializeClosestPointBuffer();
+		initializeDistanceRenderPipeline();
+
 		initializeVertexFeatureBuffer();
 		initializeEdgeVertexFeatureBuffer();
 		initializeFeaturePipelineLayout();
@@ -175,6 +178,65 @@ namespace ProjectA {
 		centerOfMassRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		centerOfMassRenderPipeline = createRenderPipeline(centerOfMassRenderPipelineDescriptor);
+	}
+
+	void DebugPhysics2DRenderer::initializeClosestPointBuffer() {
+		constexpr uint64 closestPointBufferSize = 2 * sizeof(svec2<float32>);
+
+		BufferDescriptor closestPointBufferDescriptor{};
+		closestPointBufferDescriptor.size = closestPointBufferSize;
+		closestPointBufferDescriptor.usage = BufferUsage::VERTEX;
+		closestPointBufferDescriptor.persistent = true;
+
+		closestPointBuffer = createBuffer(closestPointBufferDescriptor);
+		closestPointMappedRange = closestPointBuffer->map<svec2<float32>>(0, closestPointBufferSize);
+	}
+
+	void DebugPhysics2DRenderer::initializeDistanceRenderPipeline() {
+		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
+		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
+		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
+
+		DescriptorSetLayoutBinding viewDescriptorSetLayoutBinding;
+		viewDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		viewDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		viewDescriptorSetLayoutBinding.buffers = {viewUniformBuffer};
+
+		DescriptorSetLayout distanceDescriptorSetLayout;
+		distanceDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, viewDescriptorSetLayoutBinding};
+
+		PipelineLayoutDescriptor distancePipelineLayoutDescriptor;
+		distancePipelineLayoutDescriptor.layouts = {distanceDescriptorSetLayout};
+
+		distancePipelineLayout = createPipelineLayout(distancePipelineLayoutDescriptor);
+
+		ShaderModuleDescriptor distanceVertexShaderModuleDescriptor{};
+		distanceVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		distanceVertexShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> distanceVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Distance.vert.spv", distanceVertexShaderModuleDescriptor);
+
+		ShaderModuleDescriptor distanceFragmentShaderModuleDescriptor{};
+		distanceFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		distanceFragmentShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> distanceFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Distance.frag.spv", distanceFragmentShaderModuleDescriptor);
+
+		VertexInputBinding distanceVertexInputBinding(InputRate::VERTEX);
+		distanceVertexInputBinding.registerAttribute<svec2<float32>>(false);
+
+		RenderPipelineDescriptor distanceRenderPipelineDescriptor;
+		distanceRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		distanceRenderPipelineDescriptor.pipelineLayout = distancePipelineLayout;
+		distanceRenderPipelineDescriptor.vertexInputBindings = {distanceVertexInputBinding};
+		distanceRenderPipelineDescriptor.vertexShaderModule = distanceVertexShaderModule;
+		distanceRenderPipelineDescriptor.fragmentShaderModule = distanceFragmentShaderModule;
+		distanceRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
+		distanceRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
+		distanceRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+
+		distanceRenderPipeline = createRenderPipeline(distanceRenderPipelineDescriptor);
 	}
 
 	void DebugPhysics2DRenderer::initializeVertexFeatureBuffer() {
@@ -466,6 +528,11 @@ namespace ProjectA {
 		cameraMappedRange->zoomLevel = zoomLevel;
 	}
 
+	void DebugPhysics2DRenderer::setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const {
+		closestPointMappedRange[0] = {closestPointA[0], closestPointA[1]};
+		closestPointMappedRange[1] = {closestPointB[0], closestPointB[1]};
+	}
+
 	void DebugPhysics2DRenderer::updateCentersOfMass() const {
 		for (uint32 instanceIndex = 0; instanceIndex < scene->getObjectCount(); instanceIndex += 1) {
 			const Object2D& A = (*scene)[instanceIndex];
@@ -487,6 +554,7 @@ namespace ProjectA {
 
 		renderGrid(commandEncoder);
 		renderScene(commandEncoder);
+		renderDistance(commandEncoder);
 		renderClosestFeatures(commandEncoder);
 	}
 
@@ -529,15 +597,24 @@ namespace ProjectA {
 		}
 	}
 
+	void DebugPhysics2DRenderer::renderDistance(const ref<CommandEncoder>& commandEncoder) const {
+		commandEncoder->bindRenderPipeline(distanceRenderPipeline);
+		commandEncoder->bindAllDescriptorSets();
+		commandEncoder->bindVertexBuffer(0, closestPointBuffer, 0, sizeof(svec2<float32>));
+		commandEncoder->draw(2, 1, 0);
+	}
+
 	void DebugPhysics2DRenderer::renderClosestFeatures(const ref<CommandEncoder>& commandEncoder) const {
 		if (nextVertexFeatureIndex > 0) {
 			commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
+			commandEncoder->bindAllDescriptorSets();
 			commandEncoder->bindVertexBuffer(0, vertexFeatureBuffer, 0, sizeof(svec2<float32>));
 			commandEncoder->draw(nextVertexFeatureIndex, 1, 0);
 		}
 
 		if (nextEdgeVertexFeatureIndex > 0) {
 			commandEncoder->bindRenderPipeline(edgeFeatureRenderPipeline);
+			commandEncoder->bindAllDescriptorSets();
 			commandEncoder->bindVertexBuffer(0, edgeVertexFeatureBuffer, 0, sizeof(svec2<float32>));
 			commandEncoder->draw(nextEdgeVertexFeatureIndex, 1, 0);
 		}

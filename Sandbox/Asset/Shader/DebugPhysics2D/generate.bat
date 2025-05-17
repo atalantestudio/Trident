@@ -7,8 +7,11 @@
 :: "%VULKAN_SDK%\Bin\glslc.exe" Stroke.vert -o Stroke.vert.spv
 :: "%VULKAN_SDK%\Bin\glslc.exe" Stroke.frag -o Stroke.frag.spv
 
-"%VULKAN_SDK%\Bin\glslc.exe" CenterOfMass.vert -o CenterOfMass.vert.spv
-"%VULKAN_SDK%\Bin\glslc.exe" CenterOfMass.frag -o CenterOfMass.frag.spv
+:: "%VULKAN_SDK%\Bin\glslc.exe" CenterOfMass.vert -o CenterOfMass.vert.spv
+:: "%VULKAN_SDK%\Bin\glslc.exe" CenterOfMass.frag -o CenterOfMass.frag.spv
+
+"%VULKAN_SDK%\Bin\glslc.exe" Distance.vert -o Distance.vert.spv
+"%VULKAN_SDK%\Bin\glslc.exe" Distance.frag -o Distance.frag.spv
 
 :: "%VULKAN_SDK%\Bin\glslc.exe" VertexFeature.vert -o VertexFeature.vert.spv
 :: "%VULKAN_SDK%\Bin\glslc.exe" VertexFeature.frag -o VertexFeature.frag.spv

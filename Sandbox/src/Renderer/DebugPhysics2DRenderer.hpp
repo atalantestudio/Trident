@@ -20,6 +20,8 @@ namespace ProjectA {
 
 			void zoom(float32 zoomLevelDelta) const;
 
+			void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const;
+
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
 			void resize(float32 width, float32 height) const;
@@ -37,6 +39,8 @@ namespace ProjectA {
 			void initializeGridRenderPipeline();
 			void initializeCenterOfMassBuffer();
 			void initializeCenterOfMassRenderPipeline();
+			void initializeClosestPointBuffer();
+			void initializeDistanceRenderPipeline();
 			void initializeVertexFeatureBuffer();
 			void initializeEdgeVertexFeatureBuffer();
 			void initializeFeaturePipelineLayout();
@@ -47,6 +51,7 @@ namespace ProjectA {
 
 			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
+			void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
 			void renderClosestFeatures(const ref<CommandEncoder>& commandEncoder) const;
 
 		private:
@@ -70,6 +75,8 @@ namespace ProjectA {
 			static constexpr float32 DEFAULT_ZOOM_LEVEL = MAX_ZOOM_LEVEL;
 
 		private:
+			ref<Buffer> gridVertexBuffer;
+
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
 
@@ -87,7 +94,8 @@ namespace ProjectA {
 			ref<Buffer> instanceBuffer;
 			Instance* instanceMappedRange = nullptr;
 
-			ref<Buffer> gridVertexBuffer;
+			ref<Buffer> closestPointBuffer;
+			svec2<float32>* closestPointMappedRange = nullptr;
 
 			ref<Buffer> cameraUniformBuffer;
 			CameraUniform* cameraMappedRange = nullptr;
@@ -104,6 +112,9 @@ namespace ProjectA {
 
 			// The center of mass pipeline uses the same layout as the closest feature pipelines.
 			ref<RenderPipeline> centerOfMassRenderPipeline;
+
+			ref<PipelineLayout> distancePipelineLayout;
+			ref<RenderPipeline> distanceRenderPipeline;
 
 			ref<PipelineLayout> featurePipelineLayout;
 			ref<RenderPipeline> vertexFeatureRenderPipeline;
