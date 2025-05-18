@@ -29,8 +29,8 @@
 #include "Engine/ECS/ECS.hpp"
 
 // Filesystem
-#include "Engine/Filesystem/File/PropertyFile.hpp"
 #include "Engine/Filesystem/File/PNGFile.hpp"
+#include "Engine/Filesystem/File/PropertyFile.hpp"
 #include "Engine/Filesystem/File/TTFFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
@@ -55,4 +55,4 @@
 // Physics
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/GJK2DConditional.hpp"
-#include "Engine/API/Physics/GJK2DPointConditional.hpp"
+#include "Engine/API/Physics/GJK2DPoint.hpp"
