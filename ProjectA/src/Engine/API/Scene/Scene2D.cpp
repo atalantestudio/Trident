@@ -8,7 +8,7 @@ namespace ProjectA {
 		return static_cast<uint32>(objects.size());
 	}
 
-	const Geometry2D& Scene2D::getGeometry(uint32 index) const {
+	const ref<Geometry2D>& Scene2D::getGeometry(uint32 index) const {
 		DEBUG_ASSERT(index < geometries.size());
 
 		return geometries[index];
@@ -20,14 +20,6 @@ namespace ProjectA {
 		return materials[index];
 	}
 
-	uint32 Scene2D::registerGeometry(const Geometry2DDescriptor& descriptor) {
-		const uint32 geometryIndex = static_cast<uint32>(geometries.size());
-
-		geometries.emplace_back(Geometry2D(descriptor));
-
-		return geometryIndex;
-	}
-
 	Object2D& Scene2D::registerObject(const Object2DDescriptor& descriptor) {
 		objects.emplace_back(Object2D(descriptor, this));
 
@@ -35,10 +27,10 @@ namespace ProjectA {
 	}
 
 	void Scene2D::updateTransform(Object2D& object) const {
-		const Geometry2D& geometry = geometries[object.geometryIndex];
+		const ref<Geometry2D>& geometry = geometries[object.geometryIndex];
 
 		object.transform =
-			mat3x3<float32>::translation(-geometry.centerOfMass) *
+			mat3x3<float32>::translation(-geometry->centerOfMass) *
 			mat3x3<float32>::scaling(object.scale) *
 			mat3x3<float32>::rotation(object.rotation) *
 			mat3x3<float32>::translation(object.position);

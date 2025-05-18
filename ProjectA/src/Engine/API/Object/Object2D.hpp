@@ -15,7 +15,7 @@ namespace ProjectA {
 		public:
 			explicit Object2D(const Object2DDescriptor& descriptor, const Scene2D* scene);
 
-			const Geometry2D& getGeometry() const;
+			const ref<Geometry2D>& getGeometry() const;
 
 			const ref<Material>& getMaterial() const;
 

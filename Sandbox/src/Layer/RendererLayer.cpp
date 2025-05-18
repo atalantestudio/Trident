@@ -2,6 +2,7 @@
 
 #include "RendererLayer.hpp"
 
+#include "Engine/API/Geometry/PolytopeGeometry2D.hpp"
 #include "Engine/API/Material/ColorMaterial.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
@@ -56,7 +57,7 @@ namespace ProjectA {
 		/// Objects ///
 
 		Object2DDescriptor objectADescriptor{};
-		objectADescriptor.geometryIndex = scene.registerGeometry(polygonGeometryDescriptor);
+		objectADescriptor.geometryIndex = scene.registerGeometry<PolytopeGeometry2D>(polygonGeometryDescriptor);
 		objectADescriptor.materialIndex = scene.registerMaterial<ColorMaterial>(material1Descriptor);
 
 		Object2D& objectA = scene.registerObject(objectADescriptor);
@@ -67,7 +68,7 @@ namespace ProjectA {
 		scene.updateTransform(objectA);
 
 		Object2DDescriptor objectBDescriptor{};
-		objectBDescriptor.geometryIndex = scene.registerGeometry(triangleGeometryDescriptor);
+		objectBDescriptor.geometryIndex = scene.registerGeometry<PolytopeGeometry2D>(triangleGeometryDescriptor);
 		objectBDescriptor.materialIndex = scene.registerMaterial<ColorMaterial>(material2Descriptor);
 
 		Object2D& objectB = scene.registerObject(objectBDescriptor);

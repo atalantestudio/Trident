@@ -10,7 +10,7 @@ namespace ProjectA {
 		scene(scene)
 	{}
 
-	const Geometry2D& Object2D::getGeometry() const {
+	const ref<Geometry2D>& Object2D::getGeometry() const {
 		return scene->getGeometry(geometryIndex);
 	}
 

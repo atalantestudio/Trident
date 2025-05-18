@@ -182,8 +182,8 @@ namespace ProjectA {
 	//   https://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf
 	// 
 	inline GJK2DResult GJK2D(const Object2D& A, const Object2D& B) {
-		DEBUG_ASSERT(A.getGeometry().vertices.size() < std::numeric_limits<uint8>::max());
-		DEBUG_ASSERT(B.getGeometry().vertices.size() < std::numeric_limits<uint8>::max());
+		DEBUG_ASSERT(A.getGeometry()->vertices.size() < std::numeric_limits<uint8>::max());
+		DEBUG_ASSERT(B.getGeometry()->vertices.size() < std::numeric_limits<uint8>::max());
 
 		// TODO: Use d to find the first simplex vertex.
 		//vec2<float32> d = B.position - A.position;
@@ -360,7 +360,7 @@ namespace ProjectA {
 	//   https://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf
 	// 
 	inline GJK2DResult GJK2DPoint(const Object2D& A, const vec2<float32>& p) {
-		DEBUG_ASSERT(A.getGeometry().vertices.size() < std::numeric_limits<uint8>::max());
+		DEBUG_ASSERT(A.getGeometry()->getVertexCount() < std::numeric_limits<uint8>::max());
 
 		vec2<float32> d;
 

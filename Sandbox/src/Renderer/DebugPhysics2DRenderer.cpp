@@ -344,10 +344,10 @@ namespace ProjectA {
 		uint32 instanceCount = 0;
 
 		for (const Object2D& object : scene) {
-			const Geometry2D& geometry = scene.getGeometry(object.geometryIndex);
+			const ref<Geometry2D>& geometry = scene.getGeometry(object.geometryIndex);
 
-			vertexCount += static_cast<uint32>(geometry.vertices.size()) + 1;
-			indexCount += static_cast<uint32>(geometry.indices.size());
+			vertexCount += geometry->getVertexCount() + 1;
+			indexCount += geometry->getIndexCount();
 			instanceCount += 1;
 		}
 
@@ -366,25 +366,25 @@ namespace ProjectA {
 		Instance* instanceMappedRange = static_cast<Instance*>(static_cast<void*>(indexMappedRange + indexCount));
 
 		for (const Object2D& object : scene) {
-			const Geometry2D& geometry = scene.getGeometry(object.geometryIndex);
-			const ColorMaterial& material = *std::static_pointer_cast<ColorMaterial>(scene.getMaterial(object.materialIndex)).get();
+			const ref<Geometry2D>& geometry = scene.getGeometry(object.geometryIndex);
+			const ref<Material>& material = scene.getMaterial(object.materialIndex);
 
-			for (uint32 vertexIndex = 0; vertexIndex < geometry.vertices.size(); vertexIndex += 1) {
-				const vec2<float32>& vertex = geometry.vertices[vertexIndex];
+			for (uint32 vertexIndex = 0; vertexIndex < geometry->vertices.size(); vertexIndex += 1) {
+				const vec2<float32>& vertex = geometry->vertices[vertexIndex];
 
 				vertexMappedRange[vertexIndex] = {vertex[0], vertex[1]};
 			}
 
 			// Duplicate the first vertex for line rendering.
-			vertexMappedRange += geometry.vertices.size();
-			*vertexMappedRange = {geometry.vertices[0][0], geometry.vertices[0][1]};
+			vertexMappedRange += geometry->getVertexCount();
+			*vertexMappedRange = {geometry->vertices[0][0], geometry->vertices[0][1]};
 
-			std::copy(geometry.indices.begin(), geometry.indices.end(), indexMappedRange);
+			std::copy(geometry->indices.begin(), geometry->indices.end(), indexMappedRange);
 
-			instanceMappedRange->fillColor = material.fillColor;
+			instanceMappedRange->fillColor = std::static_pointer_cast<ColorMaterial>(material)->fillColor;
 
 			vertexMappedRange += 1;
-			indexMappedRange += geometry.indices.size();
+			indexMappedRange += geometry->getIndexCount();
 			instanceMappedRange += 1;
 		}
 
@@ -589,9 +589,9 @@ namespace ProjectA {
 
 		for (uint32 objectIndex = 0; objectIndex < scene->getObjectCount(); objectIndex += 1) {
 			const Object2D& object = (*scene)[objectIndex];
-			const Geometry2D& geometry = scene->getGeometry(object.geometryIndex);
-			const uint32 indexCount = static_cast<uint32>(geometry.indices.size());
-			const uint32 vertexCount = static_cast<uint32>(geometry.vertices.size()) + 1;
+			const ref<Geometry2D>& geometry = scene->getGeometry(object.geometryIndex);
+			const uint32 indexCount = geometry->getIndexCount();
+			const uint32 vertexCount = geometry->getVertexCount() + 1;
 
 			commandEncoder->bindRenderPipeline(fillRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();

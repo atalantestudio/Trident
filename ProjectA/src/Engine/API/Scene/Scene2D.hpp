@@ -7,11 +7,18 @@ namespace ProjectA {
 		public:
 			uint32 getObjectCount() const;
 
-			const Geometry2D& getGeometry(uint32 index) const;
+			const ref<Geometry2D>& getGeometry(uint32 index) const;
 
 			const ref<Material>& getMaterial(uint32 index) const;
 
-			uint32 registerGeometry(const Geometry2DDescriptor& descriptor);
+			template<typename Geometry2DType, typename... Argument>
+			uint32 registerGeometry(Argument&&... arguments) {
+				const uint32 geometryIndex = static_cast<uint32>(geometries.size());
+
+				geometries.emplace_back(createRef<Geometry2DType>(std::forward<Argument>(arguments)...));
+
+				return geometryIndex;
+			}
 
 			template<typename MaterialType, typename... Argument>
 			uint32 registerMaterial(Argument&&... arguments) {
@@ -38,7 +45,7 @@ namespace ProjectA {
 			Object2D& operator [](std::size_t index);
 
 		private:
-			chain<Geometry2D> geometries;
+			chain<ref<Geometry2D>> geometries;
 			chain<ref<Material>> materials;
 			chain<Object2D> objects;
 	};

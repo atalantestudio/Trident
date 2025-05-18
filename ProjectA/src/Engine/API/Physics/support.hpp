@@ -11,7 +11,7 @@ namespace ProjectA {
 
 	// Restore the rotation of A onto the support point.
 	static vec2<float32> transformSupport(const Object2D& A, uint32 supportIndex) {
-		const vec2<float32>& a = A.getGeometry().vertices[supportIndex];
+		const vec2<float32>& a = A.getGeometry()->vertices[supportIndex];
 
 		return {
 			A.transform[0][0] * a[0] + A.transform[1][0] * a[1] + A.transform[2][0],
@@ -23,7 +23,7 @@ namespace ProjectA {
 	inline uint32 supportIndex(const Object2D& A, const vec2<float32>& d) {
 		const vec2<float32> dR = cancelRotation(A, d);
 
-		return A.getGeometry().support(dR);
+		return A.getGeometry()->support(dR);
 	}
 
 	// Returns the farthest point of A in the direction d.

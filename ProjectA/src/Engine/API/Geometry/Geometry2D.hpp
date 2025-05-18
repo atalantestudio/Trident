@@ -2,23 +2,34 @@
 
 namespace ProjectA {
 	struct Geometry2DDescriptor {
-		chain<vec2<float32>> vertices;
 		chain<uint16> indices;
+		chain<vec2<float32>> vertices;
 	};
 
 	class Geometry2D {
 		public:
 			explicit Geometry2D(const Geometry2DDescriptor& descriptor);
 
-			// Returns the index of the farthest point of the geometry in the direction d.
-			const uint32 support(const vec2<float32>& d) const;
+			uint32 getIndexCount() const;
+
+			uint32 getVertexCount() const;
+
+			virtual vec2<float32> computeCenterOfMass() const = 0;
+
+			virtual float32 computeRadius() const = 0;
+
+			// Returns the index of the farthest point of the geometry along d.
+			// d does not need to be normalized.
+			virtual uint32 support(const vec2<float32>& d) const = 0;
 
 		public:
-			chain<vec2<float32>> vertices;
 			chain<uint16> indices;
+			chain<vec2<float32>> vertices;
+
+			// Average of all vertices.
 			vec2<float32> centerOfMass;
 
-			// Distance between the center of mass and the farthest vertex.
-			float32 radius = 0.0f;
+			// Distance between the center of mass and the farthest vertex of the geometry.
+			float32 radius;
 	};
 }
