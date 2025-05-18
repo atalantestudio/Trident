@@ -15,7 +15,6 @@
 
 namespace ProjectA {
 	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const Window& window) :
-		window(window),
 		deviceContext(window)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -133,7 +132,7 @@ namespace ProjectA {
 	}
 
 	ref<RenderPass> OpenGLGraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		return createRef<OpenGLRenderPass>(descriptor, window);
+		return createRef<OpenGLRenderPass>(descriptor);
 	}
 
 	ref<RenderPipeline> OpenGLGraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {

@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Backend/OpenGL/OpenGLRenderPass.hpp"
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
 namespace ProjectA {
@@ -17,6 +18,8 @@ namespace ProjectA {
 
 		extentWidth = descriptor.extentWidth;
 		extentHeight = descriptor.extentHeight;
+
+		std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass)->recreateMultisampleImages(extentWidth, extentHeight);
 	}
 
 	uint32 OpenGLSwapchain::getExtentWidth() const {
