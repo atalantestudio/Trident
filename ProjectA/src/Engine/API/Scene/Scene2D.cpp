@@ -26,16 +26,6 @@ namespace ProjectA {
 		return objects.back();
 	}
 
-	void Scene2D::updateTransform(Object2D& object) const {
-		const ref<Geometry2D>& geometry = geometries[object.geometryIndex];
-
-		object.transform =
-			mat3x3<float32>::translation(-geometry->centerOfMass) *
-			mat3x3<float32>::scaling(object.scale) *
-			mat3x3<float32>::rotation(object.rotation) *
-			mat3x3<float32>::translation(object.position);
-	}
-
 	std::vector<Object2D>::iterator Scene2D::begin() {
 		return objects.begin();
 	}

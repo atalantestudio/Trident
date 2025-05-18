@@ -20,8 +20,6 @@ namespace ProjectA {
 			void onEvent(Event& event) final override;
 
 		private:
-			void advanceSimulation(Object2D& A, float32 t) const;
-
 			void checkHover();
 
 			bool onMouseDown(MouseDownEvent& event);

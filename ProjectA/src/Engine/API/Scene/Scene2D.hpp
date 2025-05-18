@@ -32,8 +32,6 @@ namespace ProjectA {
 			// Creates and registers an object into the scene.
 			Object2D& registerObject(const Object2DDescriptor& descriptor);
 
-			void updateTransform(Object2D& object) const;
-
 			std::vector<Object2D>::iterator begin();
 			std::vector<Object2D>::const_iterator begin() const;
 

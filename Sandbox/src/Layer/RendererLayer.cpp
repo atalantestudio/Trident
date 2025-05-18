@@ -4,6 +4,7 @@
 
 #include "Engine/API/Geometry/PolytopeGeometry2D.hpp"
 #include "Engine/API/Material/ColorMaterial.hpp"
+#include "Engine/API/Physics/Integrator.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace ProjectA {
@@ -65,7 +66,7 @@ namespace ProjectA {
 		//objectA.position = {0.45f, -0.625f};
 		objectA.position = {-4.45f, -3.625f};
 
-		scene.updateTransform(objectA);
+		objectA.updateTransform();
 
 		Object2DDescriptor objectBDescriptor{};
 		objectBDescriptor.geometryIndex = scene.registerGeometry<PolytopeGeometry2D>(triangleGeometryDescriptor);
@@ -77,7 +78,7 @@ namespace ProjectA {
 		objectB.rotation = lyah::radians(-30.0f);
 		objectB.angularVelocity = lyah::radians(32.26f);
 
-		scene.updateTransform(objectB);
+		objectB.updateTransform();
 
 		renderer.registerScene(scene);
 	}
@@ -85,19 +86,16 @@ namespace ProjectA {
 	void RendererLayer::update(float64 fixedDeltaTime) {
 		renderer.clearClosestFeatures();
 
-		const float32 t = static_cast<float32>(fixedDeltaTime);
-
 		for (uint32 i = 0; i < scene.getObjectCount() - 1; i += 1) {
 			for (uint32 j = i + 1; j < scene.getObjectCount(); j += 1) {
 				Object2D& A = scene[i];
 				Object2D& B = scene[j];
 
 				gjkResult = GJK2D(A, B);
-
-				advanceSimulation(A, t);
-				advanceSimulation(B, t);
 			}
 		}
+
+		Integrator::integrate(scene, static_cast<float32>(fixedDeltaTime));
 
 		checkHover();
 	}
@@ -145,16 +143,6 @@ namespace ProjectA {
 		eventDispatcher.dispatch<MouseUpEvent>(BIND(onMouseUp));
 		eventDispatcher.dispatch<MouseWheelEvent>(BIND(onMouseWheel));
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
-	}
-
-	void RendererLayer::advanceSimulation(Object2D& A, float32 t) const {
-		A.position += A.linearVelocity * t;
-		A.rotation += A.angularVelocity * t;
-
-		A.linearVelocity += A.linearAcceleration * t;
-		A.angularVelocity += A.angularAcceleration * t;
-
-		scene.updateTransform(A);
 	}
 
 	bool RendererLayer::onMouseDown(MouseDownEvent& event) {

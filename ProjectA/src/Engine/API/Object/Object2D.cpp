@@ -17,4 +17,14 @@ namespace ProjectA {
 	const ref<Material>& Object2D::getMaterial() const {
 		return scene->getMaterial(materialIndex);
 	}
+
+	void Object2D::updateTransform() {
+		const ref<Geometry2D>& geometry = getGeometry();
+
+		transform =
+			mat3x3<float32>::translation(-geometry->centerOfMass) *
+			mat3x3<float32>::scaling(scale) *
+			mat3x3<float32>::rotation(rotation) *
+			mat3x3<float32>::translation(position);
+	}
 }

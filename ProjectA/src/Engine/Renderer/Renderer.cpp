@@ -59,6 +59,8 @@ namespace ProjectA {
 
 		DEBUG_ASSERT(adapter != nullptr);
 
+		// TODO: Allow users to control the render passes by creating them in layer groups.
+		//       Layer groups could have their own render pass.
 		RenderPassDescriptor renderPassDescriptor{};
 		renderPassDescriptor.sampleCount = 4;
 		renderPassDescriptor.loadOperation = LoadOperation::CLEAR;

@@ -19,6 +19,8 @@ namespace ProjectA {
 
 			const ref<Material>& getMaterial() const;
 
+			void updateTransform();
+
 		public:
 			uint32 geometryIndex;
 			uint32 materialIndex;
