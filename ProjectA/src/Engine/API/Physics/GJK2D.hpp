@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/Object/Object2D.hpp"
-#include "Engine/API/Physics/ClosestFeature.hpp"
+#include "Engine/API/Physics/ClosestFeature2D.hpp"
 #include "Engine/API/Physics/Simplex.hpp"
 #include "Engine/API/Physics/support.hpp"
 
@@ -22,10 +22,10 @@ namespace ProjectA {
 		float32 distance;
 
 		// Closest feature on A. Can either be a vertex or an edge.
-		ClosestFeature closestFeatureA;
+		ClosestFeature2D closestFeatureA;
 
 		// Closest feature on B. Can either be a vertex or an edge.
-		ClosestFeature closestFeatureB;
+		ClosestFeature2D closestFeatureB;
 	};
 
 	// Calculates the closest point to the origin on a line formed by the simplex s.
@@ -175,7 +175,6 @@ namespace ProjectA {
 	//   https://caseymuratori.com/blog_0003
 	// - Erin Catto - Computing Distance using GJK - GDC 2010
 	//   https://box2d.org/files/ErinCatto_GJK_GDC2010.pdf
-	//   https://box2d.org/files/ErinCatto_GJK_Source.zip
 	// - William Bittle - GJK, Distance, Closest Points
 	//   https://dyn4j.org/2010/04/gjk-distance-closest-points
 	// - Christer Ericson - Real-Time Collision Detection
@@ -323,20 +322,24 @@ namespace ProjectA {
 				break;
 		}
 
-		result.closestFeatureA.vertices[0] = s[0].vA;
+		result.closestFeatureA.vertex = s[0].vA;
+		result.closestFeatureA.vertexIndex = s[0].iA;
 		result.closestFeatureA.count = 1;
 
-		result.closestFeatureB.vertices[0] = s[0].vB;
+		result.closestFeatureB.vertex = s[0].vB;
+		result.closestFeatureB.vertexIndex = s[0].iB;
 		result.closestFeatureB.count = 1;
 
 		if (s.count == 2) {
 			if (s[0].iA != s[1].iA) {
-				result.closestFeatureA.vertices[1] = s[1].vA;
+				result.closestFeatureA.edge[1] = s[1].vA;
+				result.closestFeatureA.edgeIndices[1] = s[1].iA;
 				result.closestFeatureA.count = 2;
 			}
 
 			if (s[0].iB != s[1].iB) {
-				result.closestFeatureB.vertices[1] = s[1].vB;
+				result.closestFeatureB.edge[1] = s[1].vB;
+				result.closestFeatureB.edgeIndices[1] = s[1].iB;
 				result.closestFeatureB.count = 2;
 			}
 		}

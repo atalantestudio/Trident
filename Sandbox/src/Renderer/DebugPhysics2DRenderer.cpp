@@ -668,16 +668,16 @@ namespace ProjectA {
 		instanceMappedRange[instanceIndex].world = transform;
 	}
 
-	void DebugPhysics2DRenderer::registerClosestFeature(const ClosestFeature& closestFeature) {
+	void DebugPhysics2DRenderer::registerClosestFeature(const ClosestFeature2D& closestFeature) {
 		switch (closestFeature.count) {
 			case 1:
-				vertexFeatureMappedRange[nextVertexFeatureIndex] = {closestFeature.vertices[0][0], closestFeature.vertices[0][1]};
+				vertexFeatureMappedRange[nextVertexFeatureIndex] = {closestFeature.vertex[0], closestFeature.vertex[1]};
 				nextVertexFeatureIndex += 1;
 
 				break;
 			case 2:
-				edgeVertexFeatureMappedRange[nextEdgeVertexFeatureIndex + 0] = {closestFeature.vertices[0][0], closestFeature.vertices[0][1]};
-				edgeVertexFeatureMappedRange[nextEdgeVertexFeatureIndex + 1] = {closestFeature.vertices[1][0], closestFeature.vertices[1][1]};
+				edgeVertexFeatureMappedRange[nextEdgeVertexFeatureIndex + 0] = {closestFeature.edge[0][0], closestFeature.edge[0][1]};
+				edgeVertexFeatureMappedRange[nextEdgeVertexFeatureIndex + 1] = {closestFeature.edge[1][0], closestFeature.edge[1][1]};
 				nextEdgeVertexFeatureIndex += 2;
 
 				break;

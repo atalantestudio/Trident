@@ -166,4 +166,9 @@ namespace ProjectA {
 	T area(const lyah::vec<C, T>& a, const lyah::vec<C, T>& b) {
 		return a[0] * b[1] - a[1] * b[0];
 	}
+
+	template<typename T>
+	lyah::vec<2, T> perpendicular(const lyah::vec<2, T>& a, T b) {
+		return {b * a[1], static_cast<T>(-1) * b * a[0]};
+	}
 }

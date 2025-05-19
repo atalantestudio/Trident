@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/API/Physics/ClosestFeature.hpp"
+#include "Engine/API/Physics/ClosestFeature2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -30,7 +30,7 @@ namespace ProjectA {
 
 			void writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
 
-			void registerClosestFeature(const ClosestFeature& closestFeature);
+			void registerClosestFeature(const ClosestFeature2D& closestFeature);
 
 			void clearClosestFeatures();
 

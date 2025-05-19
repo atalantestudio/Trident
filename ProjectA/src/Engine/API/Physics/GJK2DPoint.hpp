@@ -12,7 +12,6 @@ namespace ProjectA {
 	//   https://caseymuratori.com/blog_0003
 	// - Erin Catto - Computing Distance using GJK - GDC 2010
 	//   https://box2d.org/files/ErinCatto_GJK_GDC2010.pdf
-	//   https://box2d.org/files/ErinCatto_GJK_Source.zip
 	// - William Bittle - GJK, Distance, Closest Points
 	//   https://dyn4j.org/2010/04/gjk-distance-closest-points
 	// - Christer Ericson - Real-Time Collision Detection

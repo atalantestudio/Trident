@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/API/Physics/transform.hpp"
+
 namespace ProjectA {
 	static vec2<float32> cancelRotation(const Object2D& A, const vec2<float32>& d) {
 		const mat3x3<float32> R = mat3x3<float32>::rotation(-A.rotation);
@@ -13,10 +15,7 @@ namespace ProjectA {
 	static vec2<float32> transformSupport(const Object2D& A, uint32 supportIndex) {
 		const vec2<float32>& a = A.getGeometry()->vertices[supportIndex];
 
-		return {
-			A.transform[0][0] * a[0] + A.transform[1][0] * a[1] + A.transform[2][0],
-			A.transform[0][1] * a[0] + A.transform[1][1] * a[1] + A.transform[2][1],
-		};
+		return multiplyTransform(a, A.transform);
 	}
 
 	// Returns the index of the farthest point of A in the direction d.

@@ -95,8 +95,11 @@
 			BREAKPOINT(); \
 		} \
 	}
+
+	#define DEBUG_STATIC_ASSERT static_assert
 #else
 	#define DEBUG_ASSERT
+	#define DEBUG_STATIC_ASSERT
 #endif
 
 #ifdef BUILD_MODE_PROFILE
@@ -172,15 +175,15 @@
 	}
 
 #define AS_FLAG(T) \
-	inline bool operator &(T a, T b) { \
+	inline constexpr bool operator &(T a, T b) { \
 		return static_cast<bool>(static_cast<sint32>(a) & static_cast<sint32>(b)); \
 	} \
 	\
-	inline T operator |(T a, T b) { \
+	inline constexpr T operator |(T a, T b) { \
 		return static_cast<T>(static_cast<sint32>(a) | static_cast<sint32>(b)); \
 	} \
 	\
-	inline bool operator &(std::underlying_type<T>::type a, T b) { \
+	inline constexpr bool operator &(std::underlying_type<T>::type a, T b) { \
 		return a & static_cast<std::underlying_type<T>::type>(b); \
 	}
 

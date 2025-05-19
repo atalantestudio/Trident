@@ -63,8 +63,7 @@ namespace ProjectA {
 
 		Object2D& objectA = scene.registerObject(objectADescriptor);
 
-		//objectA.position = {0.45f, -0.625f};
-		objectA.position = {-4.45f, -3.625f};
+		objectA.position = {0.45f, -0.625f};
 
 		objectA.updateTransform();
 
@@ -76,7 +75,7 @@ namespace ProjectA {
 
 		objectB.position = {0.0f, 1.957f};
 		objectB.rotation = lyah::radians(-30.0f);
-		objectB.angularVelocity = lyah::radians(32.26f);
+		objectB.angularVelocity = lyah::radians(0.4617f);
 
 		objectB.updateTransform();
 
@@ -86,16 +85,7 @@ namespace ProjectA {
 	void RendererLayer::update(float64 fixedDeltaTime) {
 		renderer.clearClosestFeatures();
 
-		for (uint32 i = 0; i < scene.getObjectCount() - 1; i += 1) {
-			for (uint32 j = i + 1; j < scene.getObjectCount(); j += 1) {
-				Object2D& A = scene[i];
-				Object2D& B = scene[j];
-
-				gjkResult = GJK2D(A, B);
-			}
-		}
-
-		Integrator::integrate(scene, static_cast<float32>(fixedDeltaTime));
+		Integrator::integrate(scene, static_cast<float32>(fixedDeltaTime), &gjkResult);
 
 		checkHover();
 	}

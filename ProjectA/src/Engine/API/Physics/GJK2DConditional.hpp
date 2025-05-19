@@ -84,7 +84,6 @@ namespace ProjectA {
 	//   https://youtu.be/ajv46BSqcK4
 	// - Iain Winter - GJK: Collision detection algorithm in 2D/3D
 	//   https://winter.dev/articles/gjk-algorithm
-	//   https://youtu.be/MDusDn8oTSE
 	// 
 	inline bool GJK2DConditional(const Object2D& A, const Object2D& B) {
 		vec2<float32> d = B.position - A.position;
