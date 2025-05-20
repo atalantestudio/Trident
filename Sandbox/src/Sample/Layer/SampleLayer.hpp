@@ -2,7 +2,7 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "../Renderer/TriangleRenderer.hpp"
+#include "../Renderer/DepthTestRenderer.hpp"
 
 namespace ProjectA {
 	class SampleLayer : public Layer {
@@ -12,6 +12,6 @@ namespace ProjectA {
 			}
 
 		private:
-			TriangleRenderer renderer;
+			DepthTestRenderer renderer;
 	};
 }

@@ -63,8 +63,18 @@ namespace ProjectA {
 			// Should only be used if the render pipeline's dynamic state contains DynamicState::VIEWPORT.
 			virtual void setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) = 0;
 
+			// Draws primitives.
+			// 
+			// vertexCount is the number of total vertices to draw.
+			// If all instances uses the same set of vertices, then this value is per instance.
+			// If some instances have their own sets of vertices, then this value is the sum of all sets.
+			// 
+			// instanceCount is the number of instances to draw.
+			// 
+			// vertexOffset is the offset in bytes in vertex rate attributes at which to start drawing.
 			virtual void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) = 0;
 
+			// Draws primitives with indexed vertices.
 			virtual void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) = 0;
 
 			virtual void endRenderPass() = 0;

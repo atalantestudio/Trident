@@ -21,6 +21,7 @@ namespace ProjectA {
 			virtual ~Buffer() = default;
 
 			// Maps a buffer range to CPU memory.
+			// `size` must be given in bytes and is not multiplied by the size of the template argument.
 			template<typename T>
 			T* map(uint64 offset, uint64 size) const {
 				return static_cast<T*>(getMappedRange(offset, size));

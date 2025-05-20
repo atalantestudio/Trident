@@ -28,7 +28,7 @@ namespace ProjectA {
 
 			glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog.data());
 
-			ENGINE_ERROR("Program linking failed.\n[]", infoLog.data());
+			ENGINE_ERROR("Program linking failed:\n[]", infoLog.data());
 
 			BREAKPOINT();
 		}

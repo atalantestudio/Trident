@@ -29,7 +29,7 @@ namespace ProjectA {
 		glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code.data(), length);
 
 		// TODO: Expose specialization constants.
-		glSpecializeShader(object, descriptor.entryPoint, 0, nullptr, nullptr);
+		glSpecializeShader(object, descriptor.entryPoint.data(), 0, nullptr, nullptr);
 
 		checkCompileStatus();
 	}
@@ -59,7 +59,6 @@ namespace ProjectA {
 		glDeleteShader(object);
 
 		ENGINE_ERROR("Shader module compilation failed:\n[]", infoLog.data());
-
 		BREAKPOINT();
 	}
 }

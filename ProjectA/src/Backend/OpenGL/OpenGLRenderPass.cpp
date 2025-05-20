@@ -36,7 +36,7 @@ namespace ProjectA {
 
 				glGetProgramInfoLog(multisampleProgram, infoLogLength, nullptr, infoLog.data());
 
-				ENGINE_ERROR("Multisample program linking failed.\n[]", infoLog.data());
+				ENGINE_ERROR("Multisample program linking failed:\n[]", infoLog.data());
 				BREAKPOINT();
 			}
 
