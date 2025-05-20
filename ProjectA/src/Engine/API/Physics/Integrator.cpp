@@ -378,6 +378,16 @@ namespace ProjectA {
 	}
 
 	void Integrator::advanceSimulation(Object2D& A, float32 t) {
+		// TODO: Replace by Verlet integration.
+		/*const vec2<float32> linearVelocity = A.previousPosition - A.position;
+		const float32 angularVelocity = A.previousRotation - A.rotation;
+
+		A.previousPosition = A.position;
+		A.previousRotation = A.rotation;
+
+		A.position += linearVelocity + A.linearAcceleration * t * t;
+		A.rotation += angularVelocity + A.angularAcceleration * t * t;*/
+
 		A.position += A.linearVelocity * t;
 		A.rotation += A.angularVelocity * t;
 

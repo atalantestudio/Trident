@@ -27,4 +27,12 @@ namespace ProjectA {
 			mat3x3<float32>::rotation(rotation) *
 			mat3x3<float32>::translation(position);
 	}
+
+	void Object2D::applyLinearForce(const vec2<float32>& linearForce) {
+		linearAcceleration += linearForce;
+	}
+
+	void Object2D::applyAngularForce(float32 angularForce) {
+		angularAcceleration += angularForce;
+	}
 }
