@@ -22,6 +22,11 @@ namespace ProjectA {
 		std::string_view projectName;
 	};
 
+	struct PresentData {
+		chain<ref<Swapchain>> swapchains;
+		chain<uint32> imageIndices;
+	};
+
 	class Application {
 		public:
 			static Application& get();
@@ -43,6 +48,8 @@ namespace ProjectA {
 			// Returns the average frames per second count.
 			float64 getFramesPerSecond() const;
 
+			uint32 getFrameInFlightIndex() const;
+
 			template<typename T, typename... U>
 			void registerLayer(U&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
@@ -62,6 +69,10 @@ namespace ProjectA {
 			}
 
 			void close();
+
+			void registerPresentSubdata(const ref<Swapchain>& swapchain, uint32 imageIndex);
+
+			void resetPresentData();
 
 		private:
 			void loop();
@@ -121,6 +132,8 @@ namespace ProjectA {
 
 			// Multiple of MAX_FRAMES_IN_FLIGHT.
 			uint32 frameInFlightIndex = 0;
+
+			PresentData presentData;
 	};
 
 	Application* createApplication();

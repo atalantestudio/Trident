@@ -13,11 +13,11 @@ namespace ProjectA {
 		public:
 			VulkanQueue(const VulkanDevice& device, uint32 queueFamilyIndex);
 
-			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const override;
+			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
 
-			void submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const override;
+			void submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const final override;
 
-			Status present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const override;
+			Status present(const chain<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const chain<uint32>& imageIndices) const final override;
 
 		private:
 			const VulkanDevice& device;

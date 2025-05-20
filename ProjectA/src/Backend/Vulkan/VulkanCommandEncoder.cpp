@@ -55,7 +55,7 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
-		const VulkanSwapchain& swapchain = *std::static_pointer_cast<VulkanSwapchain>(Renderer::getSwapchain());
+		const VulkanSwapchain& swapchain = *std::static_pointer_cast<VulkanSwapchain>(descriptor.swapchain);
 
 		VkClearValue clearValue{};
 
@@ -67,7 +67,7 @@ namespace ProjectA {
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassBeginInfo.pNext = nullptr;
 		renderPassBeginInfo.renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->object;
-		renderPassBeginInfo.framebuffer = swapchain.framebuffers[descriptor.nextImageIndex];
+		renderPassBeginInfo.framebuffer = swapchain.framebuffers[descriptor.imageIndex];
 		renderPassBeginInfo.renderArea.offset = {0, 0};
 		renderPassBeginInfo.renderArea.extent.width = swapchain.getExtentWidth();
 		renderPassBeginInfo.renderArea.extent.height = swapchain.getExtentHeight();

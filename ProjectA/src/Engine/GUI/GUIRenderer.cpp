@@ -187,7 +187,7 @@ namespace ProjectA {
 		subcomponentInputBinding.registerAttribute<vec4<float32>>(false);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
-		renderPipelineDescriptor.renderPass = Renderer::getMainRenderPass();
+		renderPipelineDescriptor.renderPass = renderPass;
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, subcomponentInputBinding};
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
@@ -302,8 +302,8 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::updateCamera() const {
-		const float32 width = static_cast<float32>(getSwapchain()->getExtentWidth());
-		const float32 height = static_cast<float32>(getSwapchain()->getExtentHeight());
+		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
+		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
 		const mat3x3<float32> cameraProjection = {
 			2.0f / width, 0.0f, 0.0f,
@@ -341,8 +341,6 @@ namespace ProjectA {
 		}
 
 		updateCamera();
-
-		const ref<Swapchain>& swapchain = getSwapchain();
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());

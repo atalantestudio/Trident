@@ -8,7 +8,7 @@
 #include "Engine/Renderer/ImageLayout.hpp"
 #include "Engine/Renderer/Pipeline.hpp"
 #include "Engine/Renderer/PipelineStage.hpp"
-#include "Engine/Renderer/RenderPass.hpp"
+#include "Engine/Renderer/Swapchain.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 
 namespace ProjectA {
@@ -18,8 +18,15 @@ namespace ProjectA {
 
 	struct BeginRenderPassDescriptor {
 		ref<RenderPass> renderPass;
+
+		// TODO: Has this swapchain always been created with the render pass above?
+		//       If so, it could be directly accessed from it.
+		ref<Swapchain> swapchain;
+
 		vec4<float32> clearColor;
-		uint32 nextImageIndex = 0;
+
+		// Index of the swapchain image to render to.
+		uint32 imageIndex = 0;
 	};
 
 	class CommandEncoder {
@@ -66,15 +73,15 @@ namespace ProjectA {
 			// Draws primitives.
 			// 
 			// vertexCount is the number of total vertices to draw.
-			// If all instances uses the same set of vertices, then this value is per instance.
-			// If some instances have their own sets of vertices, then this value is the sum of all sets.
-			// 
 			// instanceCount is the number of instances to draw.
-			// 
 			// vertexOffset is the offset in bytes in vertex rate attributes at which to start drawing.
 			virtual void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) = 0;
 
 			// Draws primitives with indexed vertices.
+			// 
+			// indexCount is the number of total indices to draw.
+			// instanceCount is the number of instances to draw.
+			// indexOffset is the offset of the first vertex in the index buffer to draw.
 			virtual void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) = 0;
 
 			virtual void endRenderPass() = 0;

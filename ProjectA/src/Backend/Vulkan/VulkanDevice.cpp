@@ -140,7 +140,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan fences (code: []).", result);
 	}
 
-	Status VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const {
+	Status VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		// UINT64_MAX disables the timeout.
@@ -150,7 +150,7 @@ namespace ProjectA {
 			UINT64_MAX,
 			std::static_pointer_cast<VulkanSemaphore>(semaphore)->object,
 			VK_NULL_HANDLE,
-			&nextImageIndex
+			&imageIndex
 		);
 
 		return getStatus(result);

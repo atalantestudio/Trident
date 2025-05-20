@@ -44,9 +44,10 @@ namespace ProjectA {
 		glFence.reset();
 	}
 
-	Status OpenGLDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const {
-		// TODO: Does nextImageIndex need to be correct, since the double buffering is handled by the device context anyways?
-		nextImageIndex = 0;
+	Status OpenGLDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
+		// TODO: Does imageIndex need to be correct
+		// since the double buffering is handled by the device context anyways?
+		imageIndex = 0;
 
 		return Status::SUCCESS;
 	}

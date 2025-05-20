@@ -12,26 +12,26 @@ namespace ProjectA {
 		public:
 			VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface);
 
-			~VulkanDevice() override;
+			~VulkanDevice() final override;
 
 			// Returns a suitable device memory type index.
 			uint32 findMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) const;
 
-			ref<PhysicalDevice> getPhysicalDevice() const override;
+			ref<PhysicalDevice> getPhysicalDevice() const final override;
 
-			ref<Queue> getComputeQueue() const override;
+			ref<Queue> getComputeQueue() const final override;
 
-			ref<Queue> getGraphicsQueue() const override;
+			ref<Queue> getGraphicsQueue() const final override;
 
-			ref<Queue> getPresentQueue() const override;
+			ref<Queue> getPresentQueue() const final override;
 
-			void waitForFence(const ref<Fence>& fence) const override;
+			void waitForFence(const ref<Fence>& fence) const final override;
 
-			void resetFence(const ref<Fence>& fence) const override;
+			void resetFence(const ref<Fence>& fence) const final override;
 
-			Status acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const override;
+			Status acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const final override;
 
-			void waitIdle() const override;
+			void waitIdle() const final override;
 
 		private:
 			static const chain<const char*> enabledExtensionNames;

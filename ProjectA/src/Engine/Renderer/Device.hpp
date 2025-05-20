@@ -21,8 +21,9 @@ namespace ProjectA {
 
 			virtual void resetFence(const ref<Fence>& fence) const = 0;
 
-			// Writes the index of the next available swapchain image.
-			virtual Status acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& nextImageIndex) const = 0;
+			// Acquires the next available swapchain image,
+			// and writes its index to imageIndex.
+			virtual Status acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const = 0;
 
 			virtual void waitIdle() const = 0;
 	};

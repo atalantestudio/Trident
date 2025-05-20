@@ -59,6 +59,9 @@ namespace ProjectA {
 			static constexpr uint32 MAX_IMAGES = 4;
 
 		private:
+			ref<RenderPass> renderPass;
+			ref<Swapchain> swapchain;
+
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
 

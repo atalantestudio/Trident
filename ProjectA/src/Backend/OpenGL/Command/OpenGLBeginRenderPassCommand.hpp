@@ -8,13 +8,12 @@
 namespace ProjectA {
 	class OpenGLBeginRenderPassCommand : public OpenGLCommand {
 		public:
-			OpenGLBeginRenderPassCommand(const BeginRenderPassDescriptor& descriptor) :
-				descriptor(descriptor)
+			OpenGLBeginRenderPassCommand(const BeginRenderPassDescriptor& descriptor, const OpenGLRenderPass& renderPass) :
+				descriptor(descriptor),
+				renderPass(renderPass)
 			{}
 
 			void execute() const override {
-				const OpenGLRenderPass& renderPass = *std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass);
-
 				glClearColor(descriptor.clearColor[0], descriptor.clearColor[1], descriptor.clearColor[2], descriptor.clearColor[3]);
 
 				if (renderPass.loadOperation == LoadOperation::CLEAR || renderPass.loadOperation == LoadOperation::UNDEFINED) {
@@ -29,5 +28,6 @@ namespace ProjectA {
 
 		private:
 			const BeginRenderPassDescriptor& descriptor;
+			const OpenGLRenderPass& renderPass;
 	};
 }

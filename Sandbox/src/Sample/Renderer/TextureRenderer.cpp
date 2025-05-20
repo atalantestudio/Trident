@@ -133,7 +133,7 @@ namespace ProjectA {
 		vertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
-		renderPipelineDescriptor.renderPass = getMainRenderPass();
+		//renderPipelineDescriptor.renderPass = renderPass;
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
@@ -148,8 +148,6 @@ namespace ProjectA {
 	}
 
 	void TextureRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
-		const ref<Swapchain>& swapchain = getSwapchain();
-
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 

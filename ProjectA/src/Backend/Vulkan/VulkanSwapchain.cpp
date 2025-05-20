@@ -33,11 +33,10 @@ namespace ProjectA {
 		return surface.window.getSize()[1];
 	}
 
-	// This constructor seems to allocate ~59Mb of memory in Release mode.
+	// Seems to allocate ~59Mb of memory in Release mode.
 	void VulkanSwapchain::construct(const SwapchainDescriptor& descriptor) {
 		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities();
 		const uint32 minImageCount = surfaceCapabilities.minImageCount + 1;
-		const sint32* windowSize = surface.window.getSize();
 
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
 		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -47,8 +46,8 @@ namespace ProjectA {
 		swapchainCreateInfo.minImageCount = minImageCount;
 		swapchainCreateInfo.imageFormat = surface.format.format;
 		swapchainCreateInfo.imageColorSpace = surface.format.colorSpace;
-		swapchainCreateInfo.imageExtent.width = windowSize[0];
-		swapchainCreateInfo.imageExtent.height = windowSize[1];
+		swapchainCreateInfo.imageExtent.width = descriptor.extentWidth;
+		swapchainCreateInfo.imageExtent.height = descriptor.extentHeight;
 		swapchainCreateInfo.imageArrayLayers = 1;
 		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
@@ -138,8 +137,8 @@ namespace ProjectA {
 				framebufferCreateInfo.pAttachments = &imageViews[i];
 			}
 
-			framebufferCreateInfo.width = windowSize[0];
-			framebufferCreateInfo.height = windowSize[1];
+			framebufferCreateInfo.width = descriptor.extentWidth;
+			framebufferCreateInfo.height = descriptor.extentHeight;
 			framebufferCreateInfo.layers = 1;
 
 			result = vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &framebuffers[i]);

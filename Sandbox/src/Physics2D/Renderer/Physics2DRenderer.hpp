@@ -78,6 +78,9 @@ namespace ProjectA {
 			static constexpr float32 DEFAULT_ZOOM_LEVEL = MAX_ZOOM_LEVEL;
 
 		private:
+			ref<RenderPass> renderPass;
+			ref<Swapchain> swapchain;
+
 			ref<Buffer> gridVertexBuffer;
 
 			ref<Buffer> vertexBuffer;

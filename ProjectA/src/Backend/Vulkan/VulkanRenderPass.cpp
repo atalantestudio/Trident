@@ -8,7 +8,8 @@
 namespace ProjectA {
 	VulkanRenderPass::VulkanRenderPass(const VulkanSurface& surface, const VulkanDevice& device, const RenderPassDescriptor& descriptor) :
 		samples(getVkSampleCountFlagBits(descriptor.sampleCount)),
-		device(device)
+		device(device),
+		surface(&surface)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 

@@ -63,17 +63,24 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to submit Vulkan queue (code: []).", result);
 	}
 
-	Status VulkanQueue::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {
+	Status VulkanQueue::present(const chain<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const chain<uint32>& imageIndices) const {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		// TODO: Find a static way of casting swapchains.
+		fchain<const VkSwapchainKHR*> vkSwapchains(swapchains.size());
+
+		for (uint64 swapchainIndex = 0; swapchainIndex < vkSwapchains.count; swapchainIndex += 1) {
+			vkSwapchains[swapchainIndex] = &std::static_pointer_cast<VulkanSwapchain>(swapchains[swapchainIndex])->object;
+		}
 
 		VkPresentInfoKHR presentInfo{};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		presentInfo.pNext = nullptr;
 		presentInfo.waitSemaphoreCount = 1;
 		presentInfo.pWaitSemaphores = &std::static_pointer_cast<VulkanSemaphore>(waitSemaphore)->object;
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = &std::static_pointer_cast<VulkanSwapchain>(swapchain)->object;
-		presentInfo.pImageIndices = &imageIndex;
+		presentInfo.swapchainCount = static_cast<uint32>(vkSwapchains.count);
+		presentInfo.pSwapchains = vkSwapchains[0];
+		presentInfo.pImageIndices = imageIndices.data();
 		presentInfo.pResults = nullptr;
 
 		const VkResult result = vkQueuePresentKHR(object, &presentInfo);

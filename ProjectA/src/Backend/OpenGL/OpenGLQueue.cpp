@@ -27,7 +27,7 @@ namespace ProjectA {
 		}
 	}
 
-	Status OpenGLQueue::present(const ref<Swapchain>& swapchain, const ref<Semaphore>& waitSemaphore, uint32 imageIndex) const {
+	Status OpenGLQueue::present(const chain<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const chain<uint32>& imageIndices) const {
 		deviceContext.swapBuffers();
 
 		return Status::SUCCESS;

@@ -11,6 +11,8 @@ namespace ProjectA {
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
 		private:
+			ref<Swapchain> swapchain;
+
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
 

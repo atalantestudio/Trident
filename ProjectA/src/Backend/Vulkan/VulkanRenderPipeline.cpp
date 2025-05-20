@@ -22,6 +22,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		const ref<VulkanRenderPass>& renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
+
 		chain<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 		chain<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
 
@@ -68,20 +70,18 @@ namespace ProjectA {
 		inputAssemblyStateCreateInfo.topology = getVkPrimitiveTopology(descriptor.primitiveTopology);
 		inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
-		const VulkanSwapchain* swapchain = std::static_pointer_cast<VulkanSwapchain>(Renderer::getSwapchain()).get();
-
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float32>(swapchain->getExtentWidth());
-		viewport.height = static_cast<float32>(swapchain->getExtentHeight());
+		viewport.width = static_cast<float32>(renderPass->surface->window.getSize()[0]);
+		viewport.height = static_cast<float32>(renderPass->surface->window.getSize()[1]);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
 		VkRect2D scissor{};
 		scissor.offset = {0, 0};
-		scissor.extent.width = swapchain->getExtentWidth();
-		scissor.extent.height = swapchain->getExtentHeight();
+		scissor.extent.width = renderPass->surface->window.getSize()[0];
+		scissor.extent.height = renderPass->surface->window.getSize()[1];
 
 		VkPipelineViewportStateCreateInfo viewportStateCreateInfo{};
 		viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -185,7 +185,7 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 		graphicsPipelineCreateInfo.layout = layout->object;
-		graphicsPipelineCreateInfo.renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->object;
+		graphicsPipelineCreateInfo.renderPass = renderPass->object;
 		graphicsPipelineCreateInfo.subpass = 0;
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		graphicsPipelineCreateInfo.basePipelineIndex = -1;

@@ -39,6 +39,8 @@ namespace ProjectA {
 		private:
 			const TrueTypeFont& font;
 
+			ref<Swapchain> swapchain;
+
 			ref<Buffer> vertexBuffer;
 			Vertex* vertices = nullptr;
 

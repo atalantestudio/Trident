@@ -182,6 +182,10 @@ namespace ProjectA {
 		return rendersPerSecond / 1000.0;
 	}
 
+	uint32 Application::getFrameInFlightIndex() const {
+		return frameInFlightIndex;
+	}
+
 	void Application::loop() {
 		previousTime = timer.getCurrentTime();
 
@@ -244,40 +248,20 @@ namespace ProjectA {
 		PROFILE_SCOPE("Application render");
 
 		const ref<Device> device = Renderer::getDevice();
-
-		device->waitForFence(Renderer::getFlightFence(frameInFlightIndex));
-
-		uint32 nextImageIndex;
-
-		const Status acquireNextImageStatus = device->acquireNextImage(Renderer::getSwapchain(), Renderer::getAvailableImageSemaphore(frameInFlightIndex), nextImageIndex);
-
-		ENGINE_ASSERT(acquireNextImageStatus == Status::SUBOPTIMAL || acquireNextImageStatus == Status::SUCCESS, "Failed to acquire next image.");
-
-		device->resetFence(Renderer::getFlightFence(frameInFlightIndex));
-
 		const ref<CommandEncoder>& commandEncoder = Renderer::getCommandEncoder();
 
 		commandEncoder->reset();
 		commandEncoder->begin();
 
-		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.renderPass = Renderer::getMainRenderPass();
-		beginRenderPassDescriptor.clearColor = layerStack[0]->getClearColor();
-		beginRenderPassDescriptor.nextImageIndex = nextImageIndex;
-
-		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-
 		for (const ref<Layer>& layer : layerStack) {
 			layer->render(remainingFrameTime, commandEncoder);
 		}
-
-		commandEncoder->endRenderPass();
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 		device->getGraphicsQueue()->submit(commandBuffer, Renderer::getAvailableImageSemaphore(frameInFlightIndex), Renderer::getFinishedRenderSemaphore(frameInFlightIndex), Renderer::getFlightFence(frameInFlightIndex));
 
-		const Status presentStatus = device->getPresentQueue()->present(Renderer::getSwapchain(), Renderer::getFinishedRenderSemaphore(frameInFlightIndex), nextImageIndex);
+		const Status presentStatus = device->getPresentQueue()->present(presentData.swapchains, Renderer::getFinishedRenderSemaphore(frameInFlightIndex), presentData.imageIndices);
 
 		/*if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE || needsResize) {
 			// TODO: Fix resize.
@@ -287,6 +271,8 @@ namespace ProjectA {
 		}*/
 
 		ENGINE_ASSERT(presentStatus == Status::SUCCESS, "Unhandled present status.");
+
+		resetPresentData();
 
 		device->waitIdle();
 	}
@@ -301,6 +287,16 @@ namespace ProjectA {
 
 	void Application::close() {
 		looping = false;
+	}
+
+	void Application::registerPresentSubdata(const ref<Swapchain>& swapchain, uint32 imageIndex) {
+		presentData.swapchains.emplace_back(swapchain);
+		presentData.imageIndices.emplace_back(imageIndex);
+	}
+
+	void Application::resetPresentData() {
+		presentData.swapchains.clear();
+		presentData.imageIndices.clear();
 	}
 
 	void Application::onEvent(Event& event) {
@@ -318,19 +314,8 @@ namespace ProjectA {
 	void Application::onWindowResize(WindowResizeEvent& event) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		if (!window->isMinimized()) {
-			const ref<Device> device = Renderer::getDevice();
-
-			device->waitIdle();
-
-			SwapchainDescriptor swapchainDescriptor;
-			swapchainDescriptor.renderPass = Renderer::getMainRenderPass();
-			swapchainDescriptor.extentWidth = static_cast<sint32>(event.getWidth());
-			swapchainDescriptor.extentHeight = static_cast<sint32>(event.getHeight());
-
-			Renderer::getSwapchain()->recreate(swapchainDescriptor);
-
-			needsResize = false;
+		if (window->isMinimized()) {
+			return;
 		}
 
 		// Propagate the event to the layer stack.

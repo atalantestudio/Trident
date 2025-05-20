@@ -62,7 +62,9 @@ namespace ProjectA {
 	void GUILayer::preRender() {
 		//updateScriptComponents();
 
-		const ref<Swapchain>& swapchain = Renderer::getSwapchain();
+		// TODO: Create swapchain inside the renderer.
+		//const ref<Swapchain>& swapchain = Renderer::getSwapchain();
+		ref<Swapchain> swapchain;
 
 		componentOrigin[HORIZONTAL] = 0;
 		componentOrigin[VERTICAL] = 0;

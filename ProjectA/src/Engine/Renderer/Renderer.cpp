@@ -15,8 +15,6 @@
 namespace ProjectA {
 	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::NONE;
 	scope<GraphicsAdapter> Renderer::adapter = nullptr;
-	ref<RenderPass> Renderer::mainRenderPass = nullptr;
-	ref<Swapchain> Renderer::swapchain = nullptr;
 	ref<CommandEncoder> Renderer::commandEncoder = nullptr;
 	std::array<ref<Semaphore>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::availableImageSemaphores;
 	std::array<ref<Semaphore>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::finishedRenderSemaphores;
@@ -59,22 +57,6 @@ namespace ProjectA {
 
 		DEBUG_ASSERT(adapter != nullptr);
 
-		// TODO: Allow users to control the render passes by creating them in layer groups.
-		//       Layer groups could have their own render pass.
-		RenderPassDescriptor renderPassDescriptor{};
-		renderPassDescriptor.sampleCount = 4;
-		renderPassDescriptor.loadOperation = LoadOperation::CLEAR;
-		renderPassDescriptor.storeOperation = StoreOperation::STORE;
-
-		mainRenderPass = createRenderPass(renderPassDescriptor);
-
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.renderPass = mainRenderPass;
-		swapchainDescriptor.extentWidth = window.getSize()[0];
-		swapchainDescriptor.extentHeight = window.getSize()[1];
-
-		swapchain = adapter->createSwapchain(swapchainDescriptor);
-
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
@@ -100,14 +82,6 @@ namespace ProjectA {
 		return adapter->getDevice();
 	}
 
-	const ref<Swapchain>& Renderer::getSwapchain() {
-		return swapchain;
-	}
-
-	const ref<RenderPass>& Renderer::getMainRenderPass() {
-		return mainRenderPass;
-	}
-
 	const ref<CommandEncoder>& Renderer::getCommandEncoder() {
 		return commandEncoder;
 	}
@@ -122,6 +96,25 @@ namespace ProjectA {
 
 	const ref<Fence>& Renderer::getFlightFence(uint32 frameInFlightIndex) {
 		return flightFences[frameInFlightIndex];
+	}
+
+	uint32 Renderer::acquireNextImage(const ref<Swapchain>& swapchain) {
+		const ref<Device> device = Renderer::getDevice();
+		const uint32 frameInFlightIndex = Application::get().getFrameInFlightIndex();
+
+		device->waitForFence(Renderer::getFlightFence(frameInFlightIndex));
+
+		uint32 imageIndex;
+
+		const Status acquireNextImageStatus = device->acquireNextImage(swapchain, Renderer::getAvailableImageSemaphore(frameInFlightIndex), imageIndex);
+
+		ENGINE_ASSERT(acquireNextImageStatus == Status::SUBOPTIMAL || acquireNextImageStatus == Status::SUCCESS, "Failed to acquire next image.");
+
+		device->resetFence(Renderer::getFlightFence(frameInFlightIndex));
+
+		Application::get().registerPresentSubdata(swapchain, imageIndex);
+
+		return imageIndex;
 	}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
@@ -167,6 +160,10 @@ namespace ProjectA {
 
 	ref<Semaphore> Renderer::createSemaphore() {
 		return adapter->createSemaphore();
+	}
+
+	ref<Swapchain> Renderer::createSwapchain(const SwapchainDescriptor& descriptor) {
+		return adapter->createSwapchain(descriptor);
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor) {

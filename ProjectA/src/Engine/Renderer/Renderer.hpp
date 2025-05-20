@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/CommandEncoder.hpp"
-#include "Engine/API/Event/Event.hpp"
+#include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/GraphicsAdapter.hpp"
 #include "Engine/Renderer/GraphicsAPI.hpp"
@@ -20,14 +20,12 @@ namespace ProjectA {
 		public:
 			virtual void render(const ref<CommandEncoder>& commandEncoder) const = 0;
 
+			virtual void resize(WindowResizeEvent& event) const {}
+
 			virtual void onEvent(Event& event);
 
 		public:
 			static ref<Device> getDevice();
-
-			static const ref<Swapchain>& getSwapchain();
-
-			static const ref<RenderPass>& getMainRenderPass();
 
 			static const ref<CommandEncoder>& getCommandEncoder();
 
@@ -36,6 +34,9 @@ namespace ProjectA {
 			static const ref<Semaphore>& getFinishedRenderSemaphore(uint32 frameInFlightIndex);
 
 			static const ref<Fence>& getFlightFence(uint32 frameInFlightIndex);
+
+			// Acquires the next available swapchain image and returns its index.
+			static uint32 acquireNextImage(const ref<Swapchain>& swapchain);
 
 			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
 
@@ -60,6 +61,8 @@ namespace ProjectA {
 
 			static ref<Semaphore> createSemaphore();
 
+			static ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor);
+
 			// Loads and returns a SPIR-V shader module.
 			static ref<ShaderModule> loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor);
 
@@ -71,8 +74,6 @@ namespace ProjectA {
 			static scope<GraphicsAdapter> adapter;
 
 			// TODO: Use scope.
-			static ref<RenderPass> mainRenderPass;
-			static ref<Swapchain> swapchain;
 			static ref<CommandEncoder> commandEncoder;
 			static std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> availableImageSemaphores;
 			static std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> finishedRenderSemaphores;

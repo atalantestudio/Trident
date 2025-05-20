@@ -123,7 +123,7 @@ namespace ProjectA {
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Asset/Shader/TextureArray.frag.spv", fragmentShaderModuleDescriptor);
 
 		RenderPipelineDescriptor renderPipelineDescriptor;
-		renderPipelineDescriptor.renderPass = getMainRenderPass();
+		//renderPipelineDescriptor.renderPass = renderPass;
 		renderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
 		renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
 		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
@@ -216,8 +216,6 @@ namespace ProjectA {
 	}
 
 	void TextureArrayRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
-		const ref<Swapchain>& swapchain = getSwapchain();
-
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 

@@ -75,7 +75,7 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
 				RenderPipelineDescriptor renderPipelineDescriptor;
-				renderPipelineDescriptor.renderPass = getMainRenderPass();
+				//renderPipelineDescriptor.renderPass = renderPass;
 				renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 				renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
 				renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Vertex.vert.spv", vertexShaderModuleDescriptor);
@@ -88,8 +88,6 @@ namespace ProjectA {
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override {
-				const ref<Swapchain>& swapchain = getSwapchain();
-
 				const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 				const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 

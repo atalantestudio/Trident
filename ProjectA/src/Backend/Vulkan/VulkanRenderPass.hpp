@@ -20,6 +20,7 @@ namespace ProjectA {
 		public:
 			const VkSampleCountFlagBits samples;
 			uint32 attachmentCount = 1;
+			const VulkanSurface* surface;
 
 		private:
 			const VulkanDevice& device;

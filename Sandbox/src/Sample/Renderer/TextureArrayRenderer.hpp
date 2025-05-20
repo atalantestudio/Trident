@@ -26,6 +26,8 @@ namespace ProjectA {
 			};
 
 		private:
+			ref<Swapchain> swapchain;
+
 			ref<PipelineLayout> renderPipelineLayout;
 			ref<RenderPipeline> renderPipeline;
 

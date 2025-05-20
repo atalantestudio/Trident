@@ -21,8 +21,6 @@ namespace ProjectA {
 		initializeVertexFeatureRenderPipeline();
 		initializeEdgeFeatureRenderPipeline();
 
-		const ref<Swapchain>& swapchain = getSwapchain();
-
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
@@ -126,7 +124,7 @@ namespace ProjectA {
 		gridVertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor gridRenderPipelineDescriptor;
-		gridRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		//gridRenderPipelineDescriptor.renderPass = renderPass;
 		gridRenderPipelineDescriptor.pipelineLayout = gridRenderPipelineLayout;
 		gridRenderPipelineDescriptor.vertexInputBindings = {gridVertexInputBinding};
 		gridRenderPipelineDescriptor.vertexShaderModule = gridVertexShaderModule;
@@ -167,7 +165,7 @@ namespace ProjectA {
 		centerOfMassVertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor centerOfMassRenderPipelineDescriptor;
-		centerOfMassRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		//centerOfMassRenderPipelineDescriptor.renderPass = renderPass;
 		centerOfMassRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		centerOfMassRenderPipelineDescriptor.vertexInputBindings = {centerOfMassVertexInputBinding};
 		centerOfMassRenderPipelineDescriptor.vertexShaderModule = centerOfMassVertexShaderModule;
@@ -227,7 +225,7 @@ namespace ProjectA {
 		distanceVertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor distanceRenderPipelineDescriptor;
-		distanceRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		//distanceRenderPipelineDescriptor.renderPass = renderPass;
 		distanceRenderPipelineDescriptor.pipelineLayout = distancePipelineLayout;
 		distanceRenderPipelineDescriptor.vertexInputBindings = {distanceVertexInputBinding};
 		distanceRenderPipelineDescriptor.vertexShaderModule = distanceVertexShaderModule;
@@ -295,7 +293,7 @@ namespace ProjectA {
 		vertexFeatureVertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor vertexFeatureRenderPipelineDescriptor;
-		vertexFeatureRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		//vertexFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		vertexFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		vertexFeatureRenderPipelineDescriptor.vertexInputBindings = {vertexFeatureVertexInputBinding};
 		vertexFeatureRenderPipelineDescriptor.vertexShaderModule = vertexFeatureVertexShaderModule;
@@ -324,7 +322,7 @@ namespace ProjectA {
 		edgeFeatureVertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor edgeFeatureRenderPipelineDescriptor;
-		edgeFeatureRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		//edgeFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		edgeFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		edgeFeatureRenderPipelineDescriptor.vertexInputBindings = {edgeFeatureVertexInputBinding};
 		edgeFeatureRenderPipelineDescriptor.vertexShaderModule = edgeFeatureVertexShaderModule;
@@ -460,7 +458,7 @@ namespace ProjectA {
 		fillInstanceInputBinding.registerAttribute<vec4<float32>>(false);
 
 		RenderPipelineDescriptor fillRenderPipelineDescriptor;
-		fillRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		//fillRenderPipelineDescriptor.renderPass = renderPass;
 		fillRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
 		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, fillInstanceInputBinding};
 		fillRenderPipelineDescriptor.vertexShaderModule = fillVertexShaderModule;
@@ -477,7 +475,7 @@ namespace ProjectA {
 		strokeInstanceInputBinding.registerAttribute<uint32>(false);
 
 		RenderPipelineDescriptor strokeRenderPipelineDescriptor;
-		strokeRenderPipelineDescriptor.renderPass = getMainRenderPass();
+		//strokeRenderPipelineDescriptor.renderPass = renderPass;
 		strokeRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
 		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, strokeInstanceInputBinding};
 		strokeRenderPipelineDescriptor.vertexShaderModule = strokeVertexShaderModule;
@@ -498,8 +496,6 @@ namespace ProjectA {
 
 	void Physics2DRenderer::setMousePosition(float32 x, float32 y) {
 		mousePosition = {x, y};
-
-		const ref<Swapchain>& swapchain = getSwapchain();
 
 		const float32 horizontalCellCount = swapchain->getExtentWidth() / cameraMappedRange->zoomLevel;
 		const float32 verticalCellCount = swapchain->getExtentHeight() / cameraMappedRange->zoomLevel;
@@ -549,8 +545,6 @@ namespace ProjectA {
 
 	void Physics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		updateCentersOfMass();
-
-		const ref<Swapchain>& swapchain = getSwapchain();
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
