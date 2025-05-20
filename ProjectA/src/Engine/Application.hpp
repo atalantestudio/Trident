@@ -19,7 +19,7 @@ int main(int argc, char** argv);
 
 namespace ProjectA {
 	struct ApplicationDescriptor {
-		std::string projectName;
+		std::string_view projectName;
 	};
 
 	class Application {
@@ -28,7 +28,7 @@ namespace ProjectA {
 
 			static PropertyFile loadPropertyFile();
 
-			static std::string getWindowName(const std::string& projectName, uint8 instanceCount);
+			static std::string getWindowName(std::string_view projectName, uint8 instanceCount);
 
 		public:
 			Application(const ApplicationDescriptor& applicationDescriptor);

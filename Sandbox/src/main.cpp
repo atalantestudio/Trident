@@ -1,27 +1,13 @@
-#include "ProjectA.hpp"
+#define RUNTIME_APPLICATION_PHYSICS_2D
+//#define RUNTIME_APPLICATION_SAMPLE
 
-#include "Engine/entry_point.hpp"
+// Select the application to run.
+#define RUNTIME_APPLICATION RUNTIME_APPLICATION_PHYSICS_2D
 
-#include "Layer/GUI/StatisticsLayer.hpp"
-#include "Layer/RendererLayer.hpp"
+#ifdef RUNTIME_APPLICATION_PHYSICS_2D
+	#include "Physics2D/Physics2DApplication.hpp"
+#endif
 
-namespace ProjectA {
-	class SandboxApplication : public Application {
-		public:
-			SandboxApplication(const ApplicationDescriptor& applicationDescriptor) :
-				Application(applicationDescriptor)
-			{
-				registerLayer<RendererLayer>();
-				registerLayer<StatisticsLayer>();
-			}
-
-			~SandboxApplication() {}
-	};
-
-	Application* ProjectA::createApplication() {
-		ApplicationDescriptor applicationDescriptor{};
-		applicationDescriptor.projectName = PROJECT_NAME;
-
-		return new SandboxApplication(applicationDescriptor);
-	}
-}
+#ifdef RUNTIME_APPLICATION_SAMPLE
+	#include "Sample/SampleApplication.hpp"
+#endif

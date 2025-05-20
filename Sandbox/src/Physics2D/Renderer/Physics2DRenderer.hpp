@@ -5,9 +5,9 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	class DebugPhysics2DRenderer : public Renderer {
+	class Physics2DRenderer : public Renderer {
 		public:
-			DebugPhysics2DRenderer();
+			Physics2DRenderer();
 
 			// After registering the scene, the vertex buffer cannot be resized.
 			void registerScene(const Scene2D& scene);

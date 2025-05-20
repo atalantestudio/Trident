@@ -26,9 +26,9 @@ namespace ProjectA {
 		return Filesystem::load<PropertyFile>(propertyFilePath.string());
 	}
 
-	std::string Application::getWindowName(const std::string& projectName, uint8 instanceCount) {
+	std::string Application::getWindowName(std::string_view projectName, uint8 instanceCount) {
 		if (instanceCount == 0) {
-			return projectName;
+			return std::string(projectName);
 		}
 
 		return Logger::format("[] ([])", projectName, static_cast<sint32>(instanceCount));

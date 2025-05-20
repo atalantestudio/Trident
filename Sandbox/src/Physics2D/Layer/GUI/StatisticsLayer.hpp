@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ProjectA.hpp"
-
 namespace ProjectA {
 	class StatisticsLayer : public GUILayer {
 		public:

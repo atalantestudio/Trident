@@ -1,11 +1,11 @@
 #include "pch.hpp"
 
-#include "DebugPhysics2DRenderer.hpp"
+#include "Physics2DRenderer.hpp"
 
 #include "Engine/API/Material/ColorMaterial.hpp"
 
 namespace ProjectA {
-	DebugPhysics2DRenderer::DebugPhysics2DRenderer() {
+	Physics2DRenderer::Physics2DRenderer() {
 		initializeCameraUniformBuffer();
 		initializeViewUniformBuffer();
 
@@ -29,7 +29,7 @@ namespace ProjectA {
 		resize(width, height);
 	}
 
-	void DebugPhysics2DRenderer::initializeCameraUniformBuffer() {
+	void Physics2DRenderer::initializeCameraUniformBuffer() {
 		constexpr uint64 cameraBufferSize = sizeof(CameraUniform);
 
 		BufferDescriptor cameraBufferDescriptor;
@@ -43,7 +43,7 @@ namespace ProjectA {
 		cameraMappedRange->zoomLevel = DEFAULT_ZOOM_LEVEL;
 	}
 
-	void DebugPhysics2DRenderer::initializeViewUniformBuffer() {
+	void Physics2DRenderer::initializeViewUniformBuffer() {
 		constexpr uint64 viewportUniformBufferSize = sizeof(ViewUniform);
 
 		BufferDescriptor viewportUniformBufferDescriptor;
@@ -55,7 +55,7 @@ namespace ProjectA {
 		viewMappedRange = viewUniformBuffer->map<ViewUniform>(0, viewportUniformBufferSize);
 	}
 
-	void DebugPhysics2DRenderer::initializeGridVertexBuffer() {
+	void Physics2DRenderer::initializeGridVertexBuffer() {
 		constexpr uint64 gridVertexBufferSize = 3 * sizeof(svec2<float32>);
 
 		const ref<Buffer> gridVertexStagingBuffer = createStagingBuffer(gridVertexBufferSize);
@@ -90,7 +90,7 @@ namespace ProjectA {
 		device->waitIdle();
 	}
 
-	void DebugPhysics2DRenderer::initializeGridRenderPipeline() {
+	void Physics2DRenderer::initializeGridRenderPipeline() {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
@@ -138,7 +138,7 @@ namespace ProjectA {
 		gridRenderPipeline = createRenderPipeline(gridRenderPipelineDescriptor);
 	}
 
-	void DebugPhysics2DRenderer::initializeCenterOfMassBuffer() {
+	void Physics2DRenderer::initializeCenterOfMassBuffer() {
 		const uint64 centerOfMassBufferSize = scene->getObjectCount() * sizeof(svec2<float32>);
 
 		BufferDescriptor centerOfMassBufferDescriptor{};
@@ -150,7 +150,7 @@ namespace ProjectA {
 		centerOfMassMappedRange = centerOfMassBuffer->map<svec2<float32>>(0, centerOfMassBufferSize);
 	}
 
-	void DebugPhysics2DRenderer::initializeCenterOfMassRenderPipeline() {
+	void Physics2DRenderer::initializeCenterOfMassRenderPipeline() {
 		ShaderModuleDescriptor centerOfMassVertexShaderModuleDescriptor{};
 		centerOfMassVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		centerOfMassVertexShaderModuleDescriptor.entryPoint = "main";
@@ -180,7 +180,7 @@ namespace ProjectA {
 		centerOfMassRenderPipeline = createRenderPipeline(centerOfMassRenderPipelineDescriptor);
 	}
 
-	void DebugPhysics2DRenderer::initializeClosestPointBuffer() {
+	void Physics2DRenderer::initializeClosestPointBuffer() {
 		constexpr uint64 closestPointBufferSize = 2 * sizeof(svec2<float32>);
 
 		BufferDescriptor closestPointBufferDescriptor{};
@@ -192,7 +192,7 @@ namespace ProjectA {
 		closestPointMappedRange = closestPointBuffer->map<svec2<float32>>(0, closestPointBufferSize);
 	}
 
-	void DebugPhysics2DRenderer::initializeDistanceRenderPipeline() {
+	void Physics2DRenderer::initializeDistanceRenderPipeline() {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
@@ -239,7 +239,7 @@ namespace ProjectA {
 		distanceRenderPipeline = createRenderPipeline(distanceRenderPipelineDescriptor);
 	}
 
-	void DebugPhysics2DRenderer::initializeVertexFeatureBuffer() {
+	void Physics2DRenderer::initializeVertexFeatureBuffer() {
 		constexpr uint64 vertexFeatureBufferSize = 2 * sizeof(svec2<float32>);
 
 		BufferDescriptor vertexFeatureBufferDescriptor{};
@@ -251,7 +251,7 @@ namespace ProjectA {
 		vertexFeatureMappedRange = vertexFeatureBuffer->map<svec2<float32>>(0, vertexFeatureBufferSize);
 	}
 
-	void DebugPhysics2DRenderer::initializeEdgeVertexFeatureBuffer() {
+	void Physics2DRenderer::initializeEdgeVertexFeatureBuffer() {
 		constexpr uint64 edgeVertexFeatureBufferSize = 4 * sizeof(svec2<float32>);
 
 		BufferDescriptor edgeVertexFeatureBufferDescriptor{};
@@ -263,7 +263,7 @@ namespace ProjectA {
 		edgeVertexFeatureMappedRange = edgeVertexFeatureBuffer->map<svec2<float32>>(0, edgeVertexFeatureBufferSize);
 	}
 
-	void DebugPhysics2DRenderer::initializeFeaturePipelineLayout() {
+	void Physics2DRenderer::initializeFeaturePipelineLayout() {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
@@ -278,7 +278,7 @@ namespace ProjectA {
 		featurePipelineLayout = createPipelineLayout(featurePipelineLayoutDescriptor);
 	}
 
-	void DebugPhysics2DRenderer::initializeVertexFeatureRenderPipeline() {
+	void Physics2DRenderer::initializeVertexFeatureRenderPipeline() {
 		ShaderModuleDescriptor vertexFeatureVertexShaderModuleDescriptor{};
 		vertexFeatureVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexFeatureVertexShaderModuleDescriptor.entryPoint = "main";
@@ -307,7 +307,7 @@ namespace ProjectA {
 		vertexFeatureRenderPipeline = createRenderPipeline(vertexFeatureRenderPipelineDescriptor);
 	}
 
-	void DebugPhysics2DRenderer::initializeEdgeFeatureRenderPipeline() {
+	void Physics2DRenderer::initializeEdgeFeatureRenderPipeline() {
 		ShaderModuleDescriptor edgeFeatureVertexShaderModuleDescriptor{};
 		edgeFeatureVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		edgeFeatureVertexShaderModuleDescriptor.entryPoint = "main";
@@ -337,7 +337,7 @@ namespace ProjectA {
 		edgeFeatureRenderPipeline = createRenderPipeline(edgeFeatureRenderPipelineDescriptor);
 	}
 
-	void DebugPhysics2DRenderer::registerScene(const Scene2D& scene) {
+	void Physics2DRenderer::registerScene(const Scene2D& scene) {
 		this->scene = &scene;
 
 		uint32 vertexCount = 0;
@@ -492,11 +492,11 @@ namespace ProjectA {
 		initializeCenterOfMassRenderPipeline();
 	}
 
-	const vec2<float32>& DebugPhysics2DRenderer::getNdcMousePosition() const {
+	const vec2<float32>& Physics2DRenderer::getNdcMousePosition() const {
 		return ndcMousePosition;
 	}
 
-	void DebugPhysics2DRenderer::setMousePosition(float32 x, float32 y) {
+	void Physics2DRenderer::setMousePosition(float32 x, float32 y) {
 		mousePosition = {x, y};
 
 		const ref<Swapchain>& swapchain = getSwapchain();
@@ -510,7 +510,7 @@ namespace ProjectA {
 		ndcMousePosition = {x, y};
 	}
 
-	void DebugPhysics2DRenderer::zoom(float32 zoomLevelDelta) {
+	void Physics2DRenderer::zoom(float32 zoomLevelDelta) {
 		float32 direction = zoomLevelDelta;
 
 		if (direction != 0.0f) {
@@ -534,12 +534,12 @@ namespace ProjectA {
 		setMousePosition(mousePosition[0], mousePosition[1]);
 	}
 
-	void DebugPhysics2DRenderer::setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const {
+	void Physics2DRenderer::setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const {
 		closestPointMappedRange[0] = {closestPointA[0], closestPointA[1]};
 		closestPointMappedRange[1] = {closestPointB[0], closestPointB[1]};
 	}
 
-	void DebugPhysics2DRenderer::updateCentersOfMass() const {
+	void Physics2DRenderer::updateCentersOfMass() const {
 		for (uint32 instanceIndex = 0; instanceIndex < scene->getObjectCount(); instanceIndex += 1) {
 			const Object2D& A = (*scene)[instanceIndex];
 
@@ -547,7 +547,7 @@ namespace ProjectA {
 		}
 	}
 
-	void DebugPhysics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
+	void Physics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		updateCentersOfMass();
 
 		const ref<Swapchain>& swapchain = getSwapchain();
@@ -564,7 +564,7 @@ namespace ProjectA {
 		renderClosestFeatures(commandEncoder);
 	}
 
-	void DebugPhysics2DRenderer::setSelectedObjectIndex(uint32 objectIndex) {
+	void Physics2DRenderer::setSelectedObjectIndex(uint32 objectIndex) {
 		if (selectedObjectIndex != std::numeric_limits<uint32>::max()) {
 			instanceMappedRange[selectedObjectIndex].selected = 0;
 		}
@@ -576,14 +576,14 @@ namespace ProjectA {
 		}
 	}
 
-	void DebugPhysics2DRenderer::renderGrid(const ref<CommandEncoder>& commandEncoder) const {
+	void Physics2DRenderer::renderGrid(const ref<CommandEncoder>& commandEncoder) const {
 		commandEncoder->bindRenderPipeline(gridRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindVertexBuffer(0, gridVertexBuffer, 0, sizeof(svec2<float32>));
 		commandEncoder->draw(3, 1, 0);
 	}
 
-	void DebugPhysics2DRenderer::renderScene(const ref<CommandEncoder>& commandEncoder) const {
+	void Physics2DRenderer::renderScene(const ref<CommandEncoder>& commandEncoder) const {
 		uint32 indexOffset = 0;
 		uint32 vertexOffset = 0;
 
@@ -625,14 +625,14 @@ namespace ProjectA {
 		}
 	}
 
-	void DebugPhysics2DRenderer::renderDistance(const ref<CommandEncoder>& commandEncoder) const {
+	void Physics2DRenderer::renderDistance(const ref<CommandEncoder>& commandEncoder) const {
 		commandEncoder->bindRenderPipeline(distanceRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindVertexBuffer(0, closestPointBuffer, 0, sizeof(svec2<float32>));
 		commandEncoder->draw(2, 1, 0);
 	}
 
-	void DebugPhysics2DRenderer::renderClosestFeatures(const ref<CommandEncoder>& commandEncoder) const {
+	void Physics2DRenderer::renderClosestFeatures(const ref<CommandEncoder>& commandEncoder) const {
 		if (nextVertexFeatureIndex > 0) {
 			commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();
@@ -648,7 +648,7 @@ namespace ProjectA {
 		}
 	}
 
-	void DebugPhysics2DRenderer::resize(float32 width, float32 height) const {
+	void Physics2DRenderer::resize(float32 width, float32 height) const {
 		const float32 left = -width / 2.0f;
 		const float32 right = width / 2.0f;
 		const float32 top = height / 2.0f;
@@ -664,11 +664,11 @@ namespace ProjectA {
 		viewMappedRange->viewport.y = height;
 	}
 
-	void DebugPhysics2DRenderer::writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const {
+	void Physics2DRenderer::writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const {
 		instanceMappedRange[instanceIndex].world = transform;
 	}
 
-	void DebugPhysics2DRenderer::registerClosestFeature(const ClosestFeature2D& closestFeature) {
+	void Physics2DRenderer::registerClosestFeature(const ClosestFeature2D& closestFeature) {
 		switch (closestFeature.count) {
 			case 1:
 				vertexFeatureMappedRange[nextVertexFeatureIndex] = {closestFeature.vertex[0], closestFeature.vertex[1]};
@@ -688,7 +688,7 @@ namespace ProjectA {
 		}
 	}
 
-	void DebugPhysics2DRenderer::clearClosestFeatures() {
+	void Physics2DRenderer::clearClosestFeatures() {
 		nextVertexFeatureIndex = 0;
 		nextEdgeVertexFeatureIndex = 0;
 	}

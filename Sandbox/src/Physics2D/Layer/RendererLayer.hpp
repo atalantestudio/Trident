@@ -2,7 +2,7 @@
 
 #include "ProjectA.hpp"
 
-#include "../Renderer/DebugPhysics2DRenderer.hpp"
+#include "../Renderer/Physics2DRenderer.hpp"
 
 namespace ProjectA {
 	class RendererLayer : public Layer {
@@ -29,7 +29,7 @@ namespace ProjectA {
 			bool onWindowResize(WindowResizeEvent& event) const;
 
 		private:
-			DebugPhysics2DRenderer renderer;
+			Physics2DRenderer renderer;
 			Scene2D scene;
 
 			GJK2DResult gjkResult;
