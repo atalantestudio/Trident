@@ -1,6 +1,6 @@
 # ProjectA
 
-Cross-platform C++ game engine (3D, physics and audio) with integrated math and GUI APIs.
+C++ 3D game engine (rendering, physics and audio) with integrated math and GUI APIs.
 
 ## Dependencies
 
