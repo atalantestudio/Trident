@@ -147,7 +147,16 @@ namespace ProjectA {
 		const float32 x = static_cast<float32>(event.getX());
 		const float32 y = static_cast<float32>(event.getY());
 
+		const vec2<float32> previousPosition = renderer.getNdcMousePosition();
+
 		renderer.setMousePosition(x, y);
+
+		if (selectedObjectIndex != std::numeric_limits<uint32>::max()) {
+			const vec2<float32>& position = renderer.getNdcMousePosition();
+			const vec2<float32> positionDelta = position - previousPosition;
+
+			scene[selectedObjectIndex].position += positionDelta;
+		}
 
 		return true;
 	}

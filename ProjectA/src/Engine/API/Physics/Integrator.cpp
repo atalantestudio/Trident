@@ -35,10 +35,6 @@ namespace ProjectA {
 					ENGINE_ERROR("Integrator: CCD state is undetermined.");
 
 					break;
-				case CCDOutputState::OVERLAPPED:
-					ENGINE_ERROR("Integrator: Initial overlap found while evaluating CCD.");
-
-					break;
 				case CCDOutputState::UNRESOLVED_ROOT:
 					ENGINE_ERROR("Integrator: Root finder ran out of iterations.");
 
