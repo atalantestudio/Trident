@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {

@@ -5,9 +5,11 @@
 #define RENDERER_COMPUTE_SHADER 0
 #define RENDERER_DEPTH_TEST 1
 #define RENDERER_TEXT 2
-#define RENDERER_TRIANGLE 3
+#define RENDERER_TEXTURE 3
+#define RENDERER_TEXTURE_ARRAY 4
+#define RENDERER_TRIANGLE 5
 
-#define RENDERER RENDERER_TEXT
+#define RENDERER RENDERER_TEXTURE
 
 #if RENDERER == RENDERER_COMPUTE_SHADER
 	#include "../Renderer/ComputeShaderRenderer.hpp"
@@ -25,6 +27,18 @@
 	#include "../Renderer/TextRenderer.hpp"
 
 	#define RENDERER_CLASS TextRenderer
+#endif
+
+#if RENDERER == RENDERER_TEXTURE
+	#include "../Renderer/TextureRenderer.hpp"
+
+	#define RENDERER_CLASS TextureRenderer
+#endif
+
+#if RENDERER == RENDERER_TEXTURE_ARRAY
+	#include "../Renderer/TextureArrayRenderer.hpp"
+
+	#define RENDERER_CLASS TextureArrayRenderer
 #endif
 
 #if RENDERER == RENDERER_TRIANGLE

@@ -6,7 +6,7 @@ namespace ProjectA {
 	class TriangleRenderer : public Renderer {
 		public:
 			TriangleRenderer() {
-				// Create render pass.
+				// 1. Create render pass.
 				{
 					Attachment colorAttachment{};
 					colorAttachment.sampleCount = 1;
@@ -19,7 +19,7 @@ namespace ProjectA {
 					renderPass = createRenderPass(renderPassDescriptor);
 				}
 
-				// Create swapchain.
+				// 2. Create swapchain.
 				{
 					SwapchainDescriptor swapchainDescriptor;
 					swapchainDescriptor.renderPass = renderPass;
@@ -29,14 +29,14 @@ namespace ProjectA {
 					swapchain = createSwapchain(swapchainDescriptor);
 				}
 
-				// Create pipeline layout.
+				// 3. Create pipeline layout.
 				{
 					const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// Create render pipeline.
+				// 4. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>(false);
@@ -63,7 +63,7 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// Create vertex buffer.
+				// 5. Create vertex buffer.
 				{
 					constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
 
