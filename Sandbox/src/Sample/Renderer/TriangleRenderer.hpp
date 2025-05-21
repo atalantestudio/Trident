@@ -13,7 +13,7 @@ namespace ProjectA {
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
 
-					RenderPassDescriptor renderPassDescriptor{};
+					RenderPassDescriptor renderPassDescriptor;
 					renderPassDescriptor.colorAttachments = {colorAttachment};
 
 					renderPass = createRenderPass(renderPassDescriptor);

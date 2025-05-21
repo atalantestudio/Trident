@@ -2,15 +2,22 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#define RENDERER_DEPTH_TEST 0
-#define RENDERER_TRIANGLE 1
+#define RENDERER_COMPUTE_SHADER 0
+#define RENDERER_DEPTH_TEST 1
+#define RENDERER_TRIANGLE 2
 
-#define RENDERER RENDERER_TRIANGLE
+#define RENDERER RENDERER_COMPUTE_SHADER
+
+#if RENDERER == RENDERER_COMPUTE_SHADER
+	#include "../Renderer/ComputeShaderRenderer.hpp"
+
+	#define RENDERER_CLASS ComputeShaderRenderer
+#endif
 
 #if RENDERER == RENDERER_DEPTH_TEST
-#include "../Renderer/DepthTestRenderer.hpp"
+	#include "../Renderer/DepthTestRenderer.hpp"
 
-#define RENDERER_CLASS DepthTestRenderer
+	#define RENDERER_CLASS DepthTestRenderer
 #endif
 
 #if RENDERER == RENDERER_TRIANGLE
