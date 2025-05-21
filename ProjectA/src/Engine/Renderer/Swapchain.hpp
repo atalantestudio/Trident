@@ -1,17 +1,8 @@
 #pragma once
 
-#include "Engine/Renderer/RenderPass.hpp"
+#include "Engine/API/Rendering/Descriptor/SwapchainDescriptor.hpp"
 
 namespace ProjectA {
-	struct SwapchainDescriptor {
-		ref<RenderPass> renderPass;
-
-		// These properties are only used in OpenGL.
-		// In Vulkan we can get them by updating the surface.
-		uint32 extentWidth = 0;
-		uint32 extentHeight = 0;
-	};
-
 	class Swapchain {
 		public:
 			virtual ~Swapchain() = default;

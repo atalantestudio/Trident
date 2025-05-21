@@ -5,8 +5,9 @@
 #include "Backend/OpenGL/OpenGLDevice.hpp"
 #include "Backend/OpenGL/OpenGLRenderPass.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
+#include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
-#include "Engine/API/CommandEncoder.hpp"
+#include "Engine/API/Rendering/CommandEncoder.hpp"
 
 namespace ProjectA {
 	class OpenGLCommandEncoder final : public CommandEncoder {
@@ -54,8 +55,7 @@ namespace ProjectA {
 
 		private:
 			OpenGLRenderPass* renderPass = nullptr;
-			vec2<float32> viewportOrigin;
-			vec2<float32> viewportSize;
+			OpenGLSwapchain* swapchain = nullptr;
 
 			chain<ref<OpenGLCommand>> commandBuffer;
 			ref<OpenGLComputePipeline> computePipeline = nullptr;

@@ -10,14 +10,15 @@ namespace ProjectA {
 		public:
 			VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, VkDevice device, const SwapchainDescriptor& descriptor);
 
-			~VulkanSwapchain() override;
+			~VulkanSwapchain() final override;
 
-			void recreate(const SwapchainDescriptor& descriptor) override;
+			void recreate(const SwapchainDescriptor& descriptor) final override;
 
-			uint32 getExtentWidth() const override;
-			uint32 getExtentHeight() const override;
+			uint32 getExtentWidth() const final override;
+			uint32 getExtentHeight() const final override;
 
 			void construct(const SwapchainDescriptor& descriptor);
+
 			void destroy();
 
 		public:

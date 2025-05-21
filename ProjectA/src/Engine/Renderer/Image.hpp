@@ -15,6 +15,8 @@ namespace ProjectA {
 		uint32 depth;
 		uint32 mipLevelCount;
 		uint32 arrayLayerCount;
+
+		// Must be a power of 2.
 		uint8 sampleCount;
 	};
 

@@ -10,7 +10,10 @@ namespace ProjectA {
 
 	class ColorMaterial : public Material {
 		public:
-			ColorMaterial(const ColorMaterialDescriptor& descriptor);
+			ColorMaterial(const ColorMaterialDescriptor& descriptor) :
+				fillColor(descriptor.fillColor),
+				strokeColor(descriptor.strokeColor)
+			{}
 
 		public:
 			const vec4<float32> fillColor;

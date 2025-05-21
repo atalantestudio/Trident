@@ -2,27 +2,22 @@
 
 #include "Backend/OpenGL/OpenGLImage.hpp"
 
-#include "Engine/Renderer/RenderPass.hpp"
+#include "Engine/API/Rendering/RenderPass.hpp"
 
 namespace ProjectA {
 	class OpenGLRenderPass : public RenderPass {
 		public:
 			OpenGLRenderPass(const RenderPassDescriptor& descriptor);
 
-			~OpenGLRenderPass();
-
-			void recreateMultisampleImages(uint32 extentWidth, uint32 extentHeight);
+		private:
+			static GLuint createScreenProgram();
 
 		public:
-			LoadOperation loadOperation;
+			uint32 colorAttachmentCount;
 
-			GLuint multisampleFramebuffer = 0;
-			GLuint multisampleIntermediateFramebuffer = 0;
-			GLuint multisampleProgram = 0;
-			scope<OpenGLImage> multisampleImage;
-			scope<OpenGLImage> screenImage;
+			// This includes color/resolve attachments and the depth stencil attachment.
+			chain<Attachment> attachments;
 
-		private:
-			uint8 sampleCount;
+			GLuint screenProgram = 0;
 	};
 }

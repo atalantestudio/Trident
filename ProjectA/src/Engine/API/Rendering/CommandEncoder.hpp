@@ -1,34 +1,16 @@
 #pragma once
 
+#include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
+#include "Engine/API/Rendering/Descriptor/CommandBufferDescriptor.hpp"
 #include "Engine/Renderer/Buffer/Buffer.hpp"
 #include "Engine/Renderer/CommandBuffer.hpp"
-#include "Engine/Renderer/CommandBufferUsage.hpp"
 #include "Engine/Renderer/ComputePipeline.hpp"
 #include "Engine/Renderer/Image.hpp"
 #include "Engine/Renderer/ImageLayout.hpp"
-#include "Engine/Renderer/Pipeline.hpp"
 #include "Engine/Renderer/PipelineStage.hpp"
-#include "Engine/Renderer/Swapchain.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 
 namespace ProjectA {
-	struct CommandBufferDescriptor {
-		CommandBufferUsage usage;
-	};
-
-	struct BeginRenderPassDescriptor {
-		ref<RenderPass> renderPass;
-
-		// TODO: Has this swapchain always been created with the render pass above?
-		//       If so, it could be directly accessed from it.
-		ref<Swapchain> swapchain;
-
-		vec4<float32> clearColor;
-
-		// Index of the swapchain image to render to.
-		uint32 imageIndex = 0;
-	};
-
 	class CommandEncoder {
 		public:
 			virtual ~CommandEncoder() = default;
@@ -47,7 +29,9 @@ namespace ProjectA {
 			virtual void bindAllDescriptorSets() = 0;
 
 			template<typename IndexType>
-			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset);
+			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset) {
+				bindIndexBuffer(indexBuffer, offset, sizeof(IndexType));
+			}
 
 			// `stride` is only used by OpenGL when calling glBindVertexBuffer.
 			virtual void bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) = 0;
@@ -93,4 +77,7 @@ namespace ProjectA {
 		protected:
 			virtual void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) = 0;
 	};
+
+	template void CommandEncoder::bindIndexBuffer<uint16>(const ref<Buffer>& indexBuffer, uint64 offset);
+	template void CommandEncoder::bindIndexBuffer<uint32>(const ref<Buffer>& indexBuffer, uint64 offset);
 }

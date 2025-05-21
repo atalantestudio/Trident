@@ -7,13 +7,21 @@
 namespace ProjectA {
 	class VertexInputBinding {
 		public:
-			VertexInputBinding(InputRate inputRate);
+			VertexInputBinding(InputRate inputRate) :
+				inputRate(inputRate)
+			{}
 
-			InputRate getInputRate() const;
+			InputRate getInputRate() const {
+				return inputRate;
+			}
 
-			const chain<VertexInputAttribute>& getAttributes() const;
+			const chain<VertexInputAttribute>& getAttributes() const {
+				return attributes;
+			}
 
-			uint32 getStride() const;
+			uint32 getStride() const {
+				return stride;
+			}
 
 			template<typename AttributeType>
 			constexpr void registerAttribute(bool normalized) {

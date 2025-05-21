@@ -3,76 +3,154 @@
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 
 #include "Backend/Vulkan/ImageFormat.hpp"
-#include "Backend/Vulkan/SampleCount.hpp"
 
 namespace ProjectA {
+	void VulkanRenderPass::countAttachments(const RenderPassDescriptor& descriptor, uint32& colorAttachmentCount, uint32& resolveAttachmentCount, uint32& depthStencilAttachmentCount) {
+		colorAttachmentCount = 0;
+		resolveAttachmentCount = 0;
+
+		for (const Attachment& colorAttachment : descriptor.colorAttachments) {
+			colorAttachmentCount += 1;
+
+			if (colorAttachment.sampleCount > 1) {
+				resolveAttachmentCount += 1;
+			}
+		}
+
+		depthStencilAttachmentCount = 0;
+
+		if (descriptor.depthStencilAttachment != nullptr) {
+			depthStencilAttachmentCount = 1;
+		}
+	}
+
 	VulkanRenderPass::VulkanRenderPass(const VulkanSurface& surface, const VulkanDevice& device, const RenderPassDescriptor& descriptor) :
-		samples(getVkSampleCountFlagBits(descriptor.sampleCount)),
+		colorAttachments(descriptor.colorAttachments),
+		hasDepthStencilAttachment(descriptor.depthStencilAttachment != nullptr),
 		device(device),
-		surface(&surface)
+		surfaceExtentWidth(surface.window.getSize()[0]),
+		surfaceExtentHeight(surface.window.getSize()[1])
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		if (samples > VK_SAMPLE_COUNT_1_BIT) {
-			attachmentCount += 1;
+		uint32 colorAttachmentCount;
+		uint32 resolveAttachmentCount;
+		uint32 depthStencilAttachmentCount;
+
+		countAttachments(descriptor, colorAttachmentCount, resolveAttachmentCount, depthStencilAttachmentCount);
+
+		attachmentCount = colorAttachmentCount + resolveAttachmentCount + depthStencilAttachmentCount;
+
+		fchain<VkAttachmentDescription> attachmentDescriptions(attachmentCount);
+		fchain<VkAttachmentReference> colorAttachmentReferences(colorAttachmentCount);
+
+		resolveAttachmentReferences.allocate(resolveAttachmentCount);
+		resolveImages.resize(resolveAttachmentCount);
+		resolveImageViews.resize(resolveAttachmentCount);
+
+		uint32 attachmentIndex = 0;
+		uint32 colorAttachmentReferenceIndex = 0;
+		uint32 resolveAttachmentReferenceIndex = 0;
+
+		for (const Attachment& colorAttachment : descriptor.colorAttachments) {
+			VkAttachmentDescription colorAttachmentDescription{};
+			colorAttachmentDescription.flags = 0;
+			colorAttachmentDescription.format = surface.format.format;
+			colorAttachmentDescription.samples = static_cast<VkSampleCountFlagBits>(colorAttachment.sampleCount);
+			colorAttachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(colorAttachment.loadOperation);
+			colorAttachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(colorAttachment.storeOperation);
+			colorAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			colorAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+			// TODO: Fix undefined layout warning with a loadOp of VK_ATTACHMENT_LOAD_OP_LOAD.
+			colorAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+			if (colorAttachment.sampleCount > 1) {
+				// Attachments that are not presented to the screen should use VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL.
+				colorAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			}
+			else {
+				// Other attachments presented to the screen must use VK_IMAGE_LAYOUT_PRESENT_SRC_KHR.
+				colorAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+			}
+
+			attachmentDescriptions[attachmentIndex] = colorAttachmentDescription;
+
+			VkAttachmentReference colorAttachmentReference{};
+			colorAttachmentReference.attachment = attachmentIndex;
+			colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+			colorAttachmentReferences[colorAttachmentReferenceIndex] = colorAttachmentReference;
+
+			attachmentIndex += 1;
+			colorAttachmentReferenceIndex += 1;
+
+			if (colorAttachment.sampleCount > 1) {
+				VkAttachmentDescription multisampleColorAttachmentDescription{};
+				multisampleColorAttachmentDescription.flags = 0;
+				multisampleColorAttachmentDescription.format = surface.format.format;
+				multisampleColorAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+				multisampleColorAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				multisampleColorAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+				multisampleColorAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				multisampleColorAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+				multisampleColorAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				multisampleColorAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+				attachmentDescriptions[attachmentIndex] = multisampleColorAttachmentDescription;
+
+				VkAttachmentReference multisampleColorAttachmentReference{};
+				multisampleColorAttachmentReference.attachment = attachmentIndex;
+				multisampleColorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+				resolveAttachmentReferences[resolveAttachmentReferenceIndex] = multisampleColorAttachmentReference;
+
+				attachmentIndex += 1;
+				resolveAttachmentReferenceIndex += 1;
+			}
 		}
-
-		chain<VkAttachmentDescription> attachments(attachmentCount);
-
-		VkAttachmentDescription& colorAttachmentDescription = attachments[0];
-		colorAttachmentDescription.flags = 0;
-		colorAttachmentDescription.format = surface.format.format;
-		colorAttachmentDescription.samples = samples;
-		colorAttachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(descriptor.loadOperation);
-		colorAttachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(descriptor.storeOperation);
-		colorAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-		// TODO: Fix undefined layout warning with a loadOp of VK_ATTACHMENT_LOAD_OP_LOAD.
-		colorAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-
-		if (samples > VK_SAMPLE_COUNT_1_BIT) {
-			colorAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-			VkAttachmentDescription& resolveAttachmentDescription = attachments[1];
-			resolveAttachmentDescription.flags = 0;
-			resolveAttachmentDescription.format = surface.format.format;
-			resolveAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
-			resolveAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			resolveAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-			resolveAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-			resolveAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			resolveAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			resolveAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		}
-		else {
-			colorAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		}
-
-		VkAttachmentReference colorAttachment{};
-		colorAttachment.attachment = 0;
-		colorAttachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 		VkSubpassDescription subpass{};
 		subpass.flags = 0;
 		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 		subpass.inputAttachmentCount = 0;
 		subpass.pInputAttachments = nullptr;
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &colorAttachment;
+		subpass.colorAttachmentCount = colorAttachmentCount;
+		subpass.pColorAttachments = &colorAttachmentReferences[0];
 
-		if (samples > VK_SAMPLE_COUNT_1_BIT) {
-			VkAttachmentReference resolveAttachment{};
-			resolveAttachment.attachment = 1;
-			resolveAttachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-			subpass.pResolveAttachments = &resolveAttachment;
+		if (resolveAttachmentCount > 0) {
+			subpass.pResolveAttachments = &resolveAttachmentReferences[0];
 		}
 		else {
 			subpass.pResolveAttachments = nullptr;
 		}
 
-		subpass.pDepthStencilAttachment = nullptr;
+		if (depthStencilAttachmentCount > 0) {
+			DEBUG_ASSERT(depthStencilAttachmentCount == 1);
+
+			VkAttachmentDescription depthStencilAttachmentDescription{};
+			depthStencilAttachmentDescription.flags = 0;
+			depthStencilAttachmentDescription.format = surface.format.format;
+			depthStencilAttachmentDescription.samples = static_cast<VkSampleCountFlagBits>(descriptor.depthStencilAttachment->sampleCount);
+			depthStencilAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+			depthStencilAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			depthStencilAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			depthStencilAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			depthStencilAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			depthStencilAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+			attachmentDescriptions[attachmentIndex] = depthStencilAttachmentDescription;
+
+			VkAttachmentReference depthStencilAttachmentReference{};
+			depthStencilAttachmentReference.attachment = attachmentIndex;
+			depthStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+			subpass.pDepthStencilAttachment = &depthStencilAttachmentReference;
+		}
+		else {
+			subpass.pDepthStencilAttachment = nullptr;
+		}
+
 		subpass.preserveAttachmentCount = 0;
 		subpass.pPreserveAttachments = nullptr;
 
@@ -81,7 +159,7 @@ namespace ProjectA {
 		dependency.dstSubpass = 0;
 		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.srcAccessMask = 0;
+		dependency.srcAccessMask = VK_ACCESS_NONE;
 		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 		dependency.dependencyFlags = 0;
 
@@ -89,15 +167,15 @@ namespace ProjectA {
 		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		renderPassCreateInfo.pNext = nullptr;
 		renderPassCreateInfo.flags = 0;
-		renderPassCreateInfo.attachmentCount = attachmentCount;
-		renderPassCreateInfo.pAttachments = attachments.data();
+		renderPassCreateInfo.attachmentCount = colorAttachmentCount + resolveAttachmentCount + depthStencilAttachmentCount;
+		renderPassCreateInfo.pAttachments = &attachmentDescriptions[0];
 		renderPassCreateInfo.subpassCount = 1;
 		renderPassCreateInfo.pSubpasses = &subpass;
 		renderPassCreateInfo.dependencyCount = 1;
 		renderPassCreateInfo.pDependencies = &dependency;
 
 		const VkResult result = vkCreateRenderPass(device.object, &renderPassCreateInfo, nullptr, &object);
-		
+
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan render pass (code: []).", result);
 	}
 
@@ -107,33 +185,56 @@ namespace ProjectA {
 		vkDestroyRenderPass(device.object, object, nullptr);
 	}
 
-	void VulkanRenderPass::recreateMultisampleImage(const VulkanSurface& surface) {
-		VkImageCreateInfo multisampleImageCreateInfo{};
-		multisampleImageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		multisampleImageCreateInfo.pNext = nullptr;
-		multisampleImageCreateInfo.flags = 0;
-		multisampleImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-		multisampleImageCreateInfo.format = surface.format.format;
-		multisampleImageCreateInfo.extent.width = surface.window.getSize()[0];
-		multisampleImageCreateInfo.extent.height = surface.window.getSize()[1];
-		multisampleImageCreateInfo.extent.depth = 1;
-		multisampleImageCreateInfo.mipLevels = 1;
-		multisampleImageCreateInfo.arrayLayers = 1;
-		multisampleImageCreateInfo.samples = samples;
-		multisampleImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		multisampleImageCreateInfo.usage = VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-		multisampleImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		multisampleImageCreateInfo.queueFamilyIndexCount = 0;
-		multisampleImageCreateInfo.pQueueFamilyIndices = nullptr;
+	VkImageView VulkanRenderPass::getAttachmentImageView(uint32 attachmentIndex) const {
+		DEBUG_ASSERT(attachmentIndex < attachmentCount);
 
-		multisampleImage = createScope<VulkanImage>(device, multisampleImageCreateInfo);
+		if (attachmentIndex < resolveImageViews.size()) {
+			return resolveImageViews[attachmentIndex]->object;
+		}
 
-		const ImageViewDescriptor multisampleImageViewDescriptor;
+		if (hasDepthStencilAttachment) {
+			return depthStencilImageView->object;
+		}
 
-		multisampleImageView = createScope<VulkanImageView>(device.object, *multisampleImage, multisampleImageViewDescriptor);
+		DEBUG_ASSERT(false);
+
+		return 0;
 	}
 
-	VkImageView VulkanRenderPass::getMultisampleImageView() const {
-		return multisampleImageView->object;
+	void VulkanRenderPass::recreateResolveAttachmentImageViews(const VulkanSurface& surface) {
+		for (uint64 resolveAttachmentIndex = 0; resolveAttachmentIndex < resolveAttachmentReferences.count; resolveAttachmentIndex += 1) {
+			const VkAttachmentReference& resolveAttachmentReference = resolveAttachmentReferences[resolveAttachmentIndex];
+
+			VkImageCreateInfo resolveImageCreateInfo{};
+			resolveImageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+			resolveImageCreateInfo.pNext = nullptr;
+			resolveImageCreateInfo.flags = 0;
+			resolveImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+			resolveImageCreateInfo.format = surface.format.format;
+			resolveImageCreateInfo.extent.width = surface.window.getSize()[0];
+			resolveImageCreateInfo.extent.height = surface.window.getSize()[1];
+			resolveImageCreateInfo.extent.depth = 1;
+			resolveImageCreateInfo.mipLevels = 1;
+			resolveImageCreateInfo.arrayLayers = 1;
+
+			// TODO: Write correct sample count.
+			resolveImageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(colorAttachments[resolveAttachmentIndex].sampleCount);
+
+			resolveImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+			resolveImageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
+			resolveImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			resolveImageCreateInfo.queueFamilyIndexCount = 0;
+			resolveImageCreateInfo.pQueueFamilyIndices = nullptr;
+
+			resolveImages[resolveAttachmentIndex] = createScope<VulkanImage>(device, resolveImageCreateInfo);
+
+			const ImageViewDescriptor resolveImageViewDescriptor;
+
+			resolveImageViews[resolveAttachmentIndex] = createScope<VulkanImageView>(device.object, *resolveImages[resolveAttachmentIndex], resolveImageViewDescriptor);
+		}
+	}
+
+	void VulkanRenderPass::recreateDepthStencilAttachmentImageView(const VulkanSurface& surface) {
+		// TODO
 	}
 }

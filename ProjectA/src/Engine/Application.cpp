@@ -44,9 +44,9 @@ namespace ProjectA {
 		mutex = createScope<Mutex>("Mutex");
 		mutex->acquire();
 
-		sharedMemory = createScope<SharedMemory>("SharedMemory", sizeof(TestSharedMemoryData));
+		sharedMemory = createScope<SharedMemory>("SharedMemory", sizeof(SharedMemoryData));
 
-		sharedMemoryData = static_cast<TestSharedMemoryData*>(sharedMemory->map(0, sizeof(TestSharedMemoryData)));
+		sharedMemoryData = static_cast<SharedMemoryData*>(sharedMemory->map(0, sizeof(SharedMemoryData)));
 
 		constexpr uint8 MAX_PARALLEL_INSTANCES = 5;
 
@@ -263,16 +263,18 @@ namespace ProjectA {
 
 		const Status presentStatus = device->getPresentQueue()->present(presentData.swapchains, Renderer::getFinishedRenderSemaphore(frameInFlightIndex), presentData.imageIndices);
 
-		/*if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE || needsResize) {
+		resetPresentData();
+
+		if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE) {
+			ENGINE_ERROR("The present status is either suboptimal or out of date.");
+
 			// TODO: Fix resize.
 			//resize();
 
 			return;
-		}*/
+		}
 
 		ENGINE_ASSERT(presentStatus == Status::SUCCESS, "Unhandled present status.");
-
-		resetPresentData();
 
 		device->waitIdle();
 	}

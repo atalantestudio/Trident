@@ -8,10 +8,13 @@ namespace ProjectA {
 			TriangleRenderer() {
 				// Create render pass.
 				{
+					Attachment colorAttachment{};
+					colorAttachment.sampleCount = 4;
+					colorAttachment.loadOperation = LoadOperation::CLEAR;
+					colorAttachment.storeOperation = StoreOperation::STORE;
+
 					RenderPassDescriptor renderPassDescriptor{};
-					renderPassDescriptor.sampleCount = 4;
-					renderPassDescriptor.loadOperation = LoadOperation::CLEAR;
-					renderPassDescriptor.storeOperation = StoreOperation::STORE;
+					renderPassDescriptor.colorAttachments = {colorAttachment};
 
 					renderPass = createRenderPass(renderPassDescriptor);
 				}
@@ -107,7 +110,7 @@ namespace ProjectA {
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.renderPass = renderPass;
 				beginRenderPassDescriptor.swapchain = swapchain;
-				beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 				beginRenderPassDescriptor.imageIndex = acquireNextImage(swapchain);
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
@@ -119,7 +122,7 @@ namespace ProjectA {
 				commandEncoder->endRenderPass();
 			}
 
-			void resize(WindowResizeEvent& event) const final override {
+			void resize(WindowResizeEvent& event) final override {
 				const ref<Device> device = getDevice();
 
 				device->waitIdle();

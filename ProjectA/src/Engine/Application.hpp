@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Engine/API/CommandEncoder.hpp"
 #include "Engine/API/Event/Window/WindowCloseEvent.hpp"
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/Event/WindowEvent.hpp"
+#include "Engine/API/Rendering/CommandEncoder.hpp"
 #include "Engine/API/SharedMemory/SharedMemory.hpp"
 #include "Engine/API/Synchronization/Fence.hpp"
 #include "Engine/API/Synchronization/Mutex.hpp"
@@ -104,7 +104,7 @@ namespace ProjectA {
 			static constexpr float64 fixedDeltaTime = lyah::rcp(165.0);
 
 		private:
-			struct TestSharedMemoryData {
+			struct SharedMemoryData {
 				uint8 instanceCount;
 			};
 
@@ -114,17 +114,13 @@ namespace ProjectA {
 		private:
 			scope<Mutex> mutex;
 			scope<SharedMemory> sharedMemory;
-			TestSharedMemoryData* sharedMemoryData;
+			SharedMemoryData* sharedMemoryData;
 			HighResolutionTimer timer;
-
-			// Need a scope because the window is created only if the property file is found.
 			scope<Window> window;
 
 			LayerStack layerStack;
 
 			bool looping = true;
-			bool needsResize = false;
-			bool minimized = false;
 
 			float64 previousTime = 0.0;
 			float64 frameTime = 0.0;

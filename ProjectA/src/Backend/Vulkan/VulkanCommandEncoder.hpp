@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanPipeline.hpp"
 
-#include "Engine/API/CommandEncoder.hpp"
+#include "Engine/API/Rendering/CommandEncoder.hpp"
 
 namespace ProjectA {
 	class VulkanCommandEncoder final : public CommandEncoder {

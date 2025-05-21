@@ -57,7 +57,7 @@ namespace ProjectA {
 			swapchainCreateInfo.pQueueFamilyIndices = nullptr;
 		}
 		else {
-			const uint32 queueFamilyIndices[] = {physicalDevice.graphicsQueueFamilyIndex, surface.presentQueueFamilyIndex};
+			const uint32 queueFamilyIndices[2] = {physicalDevice.graphicsQueueFamilyIndex, surface.presentQueueFamilyIndex};
 
 			swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 			swapchainCreateInfo.queueFamilyIndexCount = 2;
@@ -72,7 +72,7 @@ namespace ProjectA {
 
 		VkResult result = vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create swapchain (code: [].", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create swapchain (code: []).", result);
 
 		uint32 imageCount;
 
@@ -88,10 +88,10 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images (code: []).", result);
 
-		if (std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->attachmentCount) {
-			// Assume MSAA color attachment.
-			std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->recreateMultisampleImage(surface);
-		}
+		VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
+
+		renderPass.recreateResolveAttachmentImageViews(surface);
+		renderPass.recreateDepthStencilAttachmentImageView(surface);
 
 		for (uint32 i = 0; i < imageCount; i += 1) {
 			// TODO: Replace with Image and ImageView APIs.
@@ -116,27 +116,24 @@ namespace ProjectA {
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan swapchain image view (code: []).", result);
 
+			fchain<VkImageView> attachments(renderPass.attachmentCount);
+
+			uint32 attachmentIndex = 0;
+
+			for (; attachmentIndex < attachments.count - 1; attachmentIndex += 1) {
+				attachments[attachmentIndex] = renderPass.getAttachmentImageView(attachmentIndex);
+			}
+
+			attachments[attachmentIndex] = imageViews[i];
+
 			// TODO: Replace with Framebuffer API.
 			VkFramebufferCreateInfo framebufferCreateInfo{};
 			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferCreateInfo.pNext = nullptr;
 			framebufferCreateInfo.flags = 0;
-			framebufferCreateInfo.renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->object;
-			framebufferCreateInfo.attachmentCount = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->attachmentCount;
-
-			if (framebufferCreateInfo.attachmentCount == 2) {
-				// Assume MSAA color attachment.
-				const VkImageView attachments[2] = {
-					std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->getMultisampleImageView(),
-					imageViews[i],
-				};
-
-				framebufferCreateInfo.pAttachments = attachments;
-			}
-			else {
-				framebufferCreateInfo.pAttachments = &imageViews[i];
-			}
-
+			framebufferCreateInfo.renderPass = renderPass.object;
+			framebufferCreateInfo.attachmentCount = renderPass.attachmentCount;
+			framebufferCreateInfo.pAttachments = &attachments[0];
 			framebufferCreateInfo.width = descriptor.extentWidth;
 			framebufferCreateInfo.height = descriptor.extentHeight;
 			framebufferCreateInfo.layers = 1;
@@ -148,13 +145,12 @@ namespace ProjectA {
 	}
 
 	void VulkanSwapchain::destroy() {
-		for (uint32 i = 0; i < images.size(); i += 1) {
-			vkDestroyFramebuffer(device, framebuffers[i], nullptr);
-			vkDestroyImageView(device, imageViews[i], nullptr);
-
-			// Images are implicitly destroyed by vkDestroySwapchainKHR.
+		for (uint32 imageIndex = 0; imageIndex < images.size(); imageIndex += 1) {
+			vkDestroyFramebuffer(device, framebuffers[imageIndex], nullptr);
+			vkDestroyImageView(device, imageViews[imageIndex], nullptr);
 		}
 
+		// The swapchain images are automatically destroyed with the swapchain.
 		vkDestroySwapchainKHR(device, object, nullptr);
 	}
 }

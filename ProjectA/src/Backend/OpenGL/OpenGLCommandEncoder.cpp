@@ -30,9 +30,10 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::begin() const {}
 
 	void OpenGLCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
-		commandBuffer.emplace_back(createRef<OpenGLBeginRenderPassCommand>(descriptor));
-
 		renderPass = std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass).get();
+		swapchain = std::static_pointer_cast<OpenGLSwapchain>(descriptor.swapchain).get();
+
+		commandBuffer.emplace_back(createRef<OpenGLBeginRenderPassCommand>(descriptor));
 	}
 
 	void OpenGLCommandEncoder::bindComputePipeline(const ref<ComputePipeline>& computePipeline) {
@@ -117,6 +118,7 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
 		GLbitfield barrier = 0;
 
+		// TODO: Add more access barriers.
 		switch (newLayout) {
 			case ImageLayout::SHADER_READ_ONLY_OPTIMAL:
 				barrier = GL_SHADER_IMAGE_ACCESS_BARRIER_BIT;
@@ -145,9 +147,6 @@ namespace ProjectA {
 	}
 
 	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
-		viewportOrigin = origin;
-		viewportSize = size;
-
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(
 			static_cast<GLint>(origin[0]),
 
@@ -181,7 +180,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLCommandEncoder::endRenderPass() {
-		commandBuffer.emplace_back(createRef<OpenGLEndRenderPassCommand>(*renderPass, viewportOrigin, viewportSize));
+		commandBuffer.emplace_back(createRef<OpenGLEndRenderPassCommand>(*renderPass, *swapchain));
 	}
 
 	ref<CommandBuffer> OpenGLCommandEncoder::end() const {
@@ -192,9 +191,7 @@ namespace ProjectA {
 		commandBuffer.clear();
 
 		renderPass = nullptr;
-		viewportOrigin = {0.0f, 0.0f};
-		viewportSize = {0.0f, 0.0f};
-
+		swapchain = nullptr;
 		computePipeline = nullptr;
 		renderPipeline = nullptr;
 		indexOffset = 0;

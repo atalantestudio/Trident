@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/API/CommandEncoder.hpp"
+#include "Engine/API/Rendering/CommandEncoder.hpp"
 #include "Engine/API/Synchronization/Fence.hpp"
 #include "Engine/API/Synchronization/Semaphore.hpp"
 #include "Engine/Renderer/Status.hpp"

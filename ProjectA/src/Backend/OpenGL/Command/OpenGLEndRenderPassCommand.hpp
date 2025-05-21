@@ -1,48 +1,51 @@
 #pragma once
 
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
-#include "Backend/OpenGL/OpenGLRenderPass.hpp"
+#include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
 namespace ProjectA {
 	class OpenGLEndRenderPassCommand : public OpenGLCommand {
 		public:
-			OpenGLEndRenderPassCommand(const OpenGLRenderPass& renderPass, const vec2<float32>& viewportOrigin, const vec2<float32>& viewportSize) :
+			OpenGLEndRenderPassCommand(const OpenGLRenderPass& renderPass, const OpenGLSwapchain& swapchain) :
 				renderPass(renderPass),
-				viewportOrigin(viewportOrigin),
-				viewportSize(viewportSize)
+				swapchain(swapchain)
 			{}
 
 			void execute() const override {
-				if (renderPass.multisampleFramebuffer != 0) {
-					glBindFramebuffer(GL_READ_FRAMEBUFFER, renderPass.multisampleFramebuffer);
-					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, renderPass.multisampleIntermediateFramebuffer);
+				DEBUG_ASSERT(swapchain.framebuffers.size() == 1);
+
+				if (swapchain.requiresResolvePass()) {
+					glBindFramebuffer(GL_READ_FRAMEBUFFER, swapchain.framebuffers[0]);
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+					glReadBuffer(GL_COLOR_ATTACHMENT0);
+					glDrawBuffer(GL_FRONT);
 
 					glBlitFramebuffer(
-						static_cast<GLint>(viewportOrigin[0]),
 						0,
-						static_cast<GLint>(viewportSize[0]),
-						lyah::abs(static_cast<GLint>(viewportSize[1])),
-						static_cast<GLint>(viewportOrigin[0]),
 						0,
-						static_cast<GLint>(viewportSize[0]),
-						lyah::abs(static_cast<GLint>(viewportSize[1])),
+						swapchain.getExtentWidth(),
+						swapchain.getExtentHeight(),
+						0,
+						0,
+						swapchain.getExtentWidth(),
+						swapchain.getExtentHeight(),
 						GL_COLOR_BUFFER_BIT,
 						GL_NEAREST
 					);
 
-					glBindFramebuffer(GL_FRAMEBUFFER, 0);
+					//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 					// The default framebuffer has already been cleared in the render pass begin command.
 
-					glUseProgram(renderPass.multisampleProgram);
-					glBindTextureUnit(0, renderPass.screenImage->object);
-					glDrawArrays(GL_TRIANGLES, 0, 3);
+					//glUseProgram(renderPass.screenProgram);
+					//glBindTextureUnit(0, swapchain.images[0]->object);
+					//glDrawArrays(GL_TRIANGLES, 0, 3);
 				}
 			}
 
 		private:
 			const OpenGLRenderPass& renderPass;
-			const vec2<float32>& viewportOrigin;
-			const vec2<float32>& viewportSize;
+			const OpenGLSwapchain& swapchain;
 	};
 }

@@ -22,7 +22,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const ref<VulkanRenderPass>& renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
+		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
 
 		chain<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 		chain<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
@@ -73,15 +73,15 @@ namespace ProjectA {
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float32>(renderPass->surface->window.getSize()[0]);
-		viewport.height = static_cast<float32>(renderPass->surface->window.getSize()[1]);
+		viewport.width = static_cast<float32>(renderPass.surfaceExtentWidth);
+		viewport.height = static_cast<float32>(renderPass.surfaceExtentHeight);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
 		VkRect2D scissor{};
 		scissor.offset = {0, 0};
-		scissor.extent.width = renderPass->surface->window.getSize()[0];
-		scissor.extent.height = renderPass->surface->window.getSize()[1];
+		scissor.extent.width = renderPass.surfaceExtentWidth;
+		scissor.extent.height = renderPass.surfaceExtentHeight;
 
 		VkPipelineViewportStateCreateInfo viewportStateCreateInfo{};
 		viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -113,7 +113,7 @@ namespace ProjectA {
 		multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		multisampleStateCreateInfo.pNext = nullptr;
 		multisampleStateCreateInfo.flags = 0;
-		multisampleStateCreateInfo.rasterizationSamples = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->samples;
+		multisampleStateCreateInfo.rasterizationSamples = static_cast<VkSampleCountFlagBits>(renderPass.colorAttachments[0].sampleCount);
 
 		if (descriptor.minSampleShading == 0.0f) {
 			multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;
@@ -185,7 +185,7 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 		graphicsPipelineCreateInfo.layout = layout->object;
-		graphicsPipelineCreateInfo.renderPass = renderPass->object;
+		graphicsPipelineCreateInfo.renderPass = renderPass.object;
 		graphicsPipelineCreateInfo.subpass = 0;
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		graphicsPipelineCreateInfo.basePipelineIndex = -1;

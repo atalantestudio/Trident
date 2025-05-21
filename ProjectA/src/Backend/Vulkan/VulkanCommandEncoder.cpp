@@ -57,11 +57,11 @@ namespace ProjectA {
 	void VulkanCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
 		const VulkanSwapchain& swapchain = *std::static_pointer_cast<VulkanSwapchain>(descriptor.swapchain);
 
-		VkClearValue clearValue{};
+		fchain<VkClearValue> clearValues(descriptor.clearValues.size());
 
-		_mm_store_ps(clearValue.color.float32, descriptor.clearColor.m);
-
-		const chain<VkClearValue> clearValues(std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->attachmentCount, clearValue);
+		for (uint64 clearValueIndex = 0; clearValueIndex < clearValues.count; clearValueIndex += 1) {
+			_mm_store_ps(clearValues[clearValueIndex].color.float32, descriptor.clearValues[clearValueIndex].m);
+		}
 
 		VkRenderPassBeginInfo renderPassBeginInfo{};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -71,8 +71,8 @@ namespace ProjectA {
 		renderPassBeginInfo.renderArea.offset = {0, 0};
 		renderPassBeginInfo.renderArea.extent.width = swapchain.getExtentWidth();
 		renderPassBeginInfo.renderArea.extent.height = swapchain.getExtentHeight();
-		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.size());
-		renderPassBeginInfo.pClearValues = clearValues.data();
+		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.count);
+		renderPassBeginInfo.pClearValues = &clearValues[0];
 
 		vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}

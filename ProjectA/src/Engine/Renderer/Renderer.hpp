@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Engine/API/CommandEncoder.hpp"
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
+#include "Engine/API/Rendering/CommandEncoder.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/GraphicsAdapter.hpp"
 #include "Engine/Renderer/GraphicsAPI.hpp"
@@ -20,7 +20,7 @@ namespace ProjectA {
 		public:
 			virtual void render(const ref<CommandEncoder>& commandEncoder) const = 0;
 
-			virtual void resize(WindowResizeEvent& event) const {}
+			virtual void resize(WindowResizeEvent& event) {}
 
 			virtual void onEvent(Event& event);
 

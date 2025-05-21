@@ -6,7 +6,6 @@
 #include "Backend/Vulkan/ImageFormat.hpp"
 #include "Backend/Vulkan/ImageType.hpp"
 #include "Backend/Vulkan/ImageUsage.hpp"
-#include "Backend/Vulkan/SampleCount.hpp"
 
 namespace ProjectA {
 	VulkanImage::VulkanImage(const VulkanDevice& device, const VkImageCreateInfo& createInfo) {
@@ -27,7 +26,7 @@ namespace ProjectA {
 		imageCreateInfo.extent.depth = descriptor.depth;
 		imageCreateInfo.mipLevels = descriptor.mipLevelCount;
 		imageCreateInfo.arrayLayers = descriptor.arrayLayerCount;
-		imageCreateInfo.samples = getVkSampleCountFlagBits(descriptor.sampleCount);
+		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(descriptor.sampleCount);
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.usage = getVkImageUsageFlagBits(descriptor.usage);
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
