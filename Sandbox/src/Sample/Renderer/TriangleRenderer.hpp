@@ -9,7 +9,7 @@ namespace ProjectA {
 				// Create render pass.
 				{
 					Attachment colorAttachment{};
-					colorAttachment.sampleCount = 4;
+					colorAttachment.sampleCount = 1;
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
 

@@ -30,6 +30,10 @@ namespace ProjectA {
 						glClear(GL_COLOR_BUFFER_BIT);
 					}
 				}
+
+				if (!swapchain.requiresResolvePass()) {
+					glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				}
 			}
 
 		private:
