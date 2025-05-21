@@ -8,6 +8,7 @@ namespace ProjectA {
 		STORAGE = BIT(3),
 		COLOR_ATTACHMENT = BIT(4),
 		DEPTH_STENCIL_ATTACHMENT = BIT(5),
+		TRANSIENT_ATTACHMENT = BIT(6),
 	};
 
 	AS_FLAG(ImageUsage);

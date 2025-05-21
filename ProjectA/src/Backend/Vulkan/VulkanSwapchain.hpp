@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Backend/Vulkan/VulkanSurface.hpp"
+#include "Backend/Vulkan/VulkanImageView.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
@@ -8,7 +9,7 @@
 namespace ProjectA {
 	class VulkanSwapchain : public Swapchain, public ObjectWrapper<VkSwapchainKHR> {
 		public:
-			VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, VkDevice device, const SwapchainDescriptor& descriptor);
+			VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const SwapchainDescriptor& descriptor);
 
 			~VulkanSwapchain() final override;
 
@@ -21,6 +22,11 @@ namespace ProjectA {
 
 			void destroy();
 
+		private:
+			void createColorImageAndImageView(Attachment colorAttachment, uint32 attachmentIndex);
+
+			void createDepthStencilImageAndImageView(Attachment depthStencilAttachment);
+
 		public:
 			chain<VkImage> images;
 			chain<VkImageView> imageViews;
@@ -28,7 +34,13 @@ namespace ProjectA {
 
 		private:
 			const VulkanPhysicalDevice& physicalDevice;
-			const VkDevice device;
+			const VulkanDevice& device;
 			const VulkanSurface& surface;
+
+			chain<scope<VulkanImage>> colorImages;
+			chain<scope<VulkanImageView>> colorImageViews;
+
+			scope<VulkanImage> depthStencilImage;
+			scope<VulkanImageView> depthStencilImageView;
 	};
 }

@@ -44,7 +44,8 @@ namespace ProjectA {
 
 		glCreateFramebuffers(static_cast<uint32>(framebuffers.size()), framebuffers.data());
 
-		constexpr ImageViewDescriptor imageViewDescriptor;
+		ImageViewDescriptor imageViewDescriptor{};
+		imageViewDescriptor.imageAspect = ImageAspect::COLOR;
 
 		for (uint32 imageIndex = 0; imageIndex < imageCount; imageIndex += 1) {
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[imageIndex]);

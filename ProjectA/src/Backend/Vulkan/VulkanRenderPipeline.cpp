@@ -181,7 +181,40 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
 		graphicsPipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
 		graphicsPipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
-		graphicsPipelineCreateInfo.pDepthStencilState = nullptr;
+
+		if (renderPass.depthStencil) {
+			VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo{};
+			depthStencilStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+			depthStencilStateCreateInfo.pNext = nullptr;
+			depthStencilStateCreateInfo.flags = 0;
+			depthStencilStateCreateInfo.depthTestEnable = VK_TRUE;
+			depthStencilStateCreateInfo.depthWriteEnable = VK_TRUE;
+			depthStencilStateCreateInfo.depthCompareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
+			depthStencilStateCreateInfo.depthBoundsTestEnable = VK_FALSE;
+			depthStencilStateCreateInfo.stencilTestEnable = VK_FALSE;
+			depthStencilStateCreateInfo.front.failOp = VK_STENCIL_OP_KEEP;
+			depthStencilStateCreateInfo.front.passOp = VK_STENCIL_OP_KEEP;
+			depthStencilStateCreateInfo.front.depthFailOp = VK_STENCIL_OP_KEEP;
+			depthStencilStateCreateInfo.front.compareOp = VK_COMPARE_OP_NEVER;
+			depthStencilStateCreateInfo.front.compareMask = 0;
+			depthStencilStateCreateInfo.front.writeMask = 0;
+			depthStencilStateCreateInfo.front.reference = 0;
+			depthStencilStateCreateInfo.back.failOp = VK_STENCIL_OP_KEEP;
+			depthStencilStateCreateInfo.back.passOp = VK_STENCIL_OP_KEEP;
+			depthStencilStateCreateInfo.back.depthFailOp = VK_STENCIL_OP_KEEP;
+			depthStencilStateCreateInfo.back.compareOp = VK_COMPARE_OP_NEVER;
+			depthStencilStateCreateInfo.back.compareMask = 0;
+			depthStencilStateCreateInfo.back.writeMask = 0;
+			depthStencilStateCreateInfo.back.reference = 0;
+			depthStencilStateCreateInfo.minDepthBounds = 0.0f;
+			depthStencilStateCreateInfo.maxDepthBounds = 1.0f;
+
+			graphicsPipelineCreateInfo.pDepthStencilState = &depthStencilStateCreateInfo;
+		}
+		else {
+			graphicsPipelineCreateInfo.pDepthStencilState = nullptr;
+		}
+
 		graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 		graphicsPipelineCreateInfo.layout = layout->object;

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Backend/Vulkan/VulkanDevice.hpp"
-
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/Renderer/Image.hpp"
 
 namespace ProjectA {
+	class VulkanDevice;
+
 	class VulkanImage : public Image, public ObjectWrapper<VkImage> {
 		public:
 			VulkanImage(const VulkanDevice& device, const ImageDescriptor& descriptor);

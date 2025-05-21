@@ -6,7 +6,9 @@
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace ProjectA {
-	OpenGLRenderPass::OpenGLRenderPass(const RenderPassDescriptor& descriptor) {
+	OpenGLRenderPass::OpenGLRenderPass(const RenderPassDescriptor& descriptor) :
+		RenderPass(descriptor.enableDepthStencil)
+	{
 		for (const Attachment& colorAttachment : descriptor.colorAttachments) {
 			attachments.emplace_back(colorAttachment);
 
@@ -20,8 +22,8 @@ namespace ProjectA {
 
 		colorAttachmentCount = static_cast<uint32>(attachments.size());
 
-		if (descriptor.depthStencilAttachment != nullptr) {
-			attachments.emplace_back(*descriptor.depthStencilAttachment);
+		if (depthStencil) {
+			attachments.emplace_back(descriptor.depthStencilAttachment);
 
 			screenProgram = createScreenProgram();
 		}

@@ -15,7 +15,8 @@ namespace ProjectA {
 
 				// 1. Create image views.
 				{
-					constexpr ImageViewDescriptor imageViewDescriptor;
+					ImageViewDescriptor imageViewDescriptor{};
+					imageViewDescriptor.imageAspect = ImageAspect::COLOR;
 
 					baboonImageView = baboonImage->createView(imageViewDescriptor);
 					cameramanImageView = cameramanImage->createView(imageViewDescriptor);

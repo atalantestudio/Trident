@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/OpenGLImage.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/ImageView.hpp"
+#include "Engine/API/Rendering/ImageView.hpp"
 
 namespace ProjectA {
 	class OpenGLImageView : public ImageView, public ObjectWrapper<GLuint> {

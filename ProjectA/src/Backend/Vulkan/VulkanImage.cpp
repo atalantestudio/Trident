@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanImage.hpp"
 #include "Backend/Vulkan/VulkanImageView.hpp"
 

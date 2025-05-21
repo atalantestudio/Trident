@@ -19,14 +19,16 @@ namespace ProjectA {
 
 		depthStencilAttachmentCount = 0;
 
-		if (descriptor.depthStencilAttachment != nullptr) {
+		if (descriptor.enableDepthStencil) {
 			depthStencilAttachmentCount = 1;
 		}
 	}
 
-	VulkanRenderPass::VulkanRenderPass(const VulkanSurface& surface, const VulkanDevice& device, const RenderPassDescriptor& descriptor) :
+	VulkanRenderPass::VulkanRenderPass(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const RenderPassDescriptor& descriptor) :
+		RenderPass(descriptor.enableDepthStencil),
+		physicalDevice(physicalDevice),
 		colorAttachments(descriptor.colorAttachments),
-		hasDepthStencilAttachment(descriptor.depthStencilAttachment != nullptr),
+		depthStencilAttachment(descriptor.depthStencilAttachment),
 		device(device),
 		surfaceExtentWidth(surface.window.getSize()[0]),
 		surfaceExtentHeight(surface.window.getSize()[1])
@@ -43,10 +45,7 @@ namespace ProjectA {
 
 		fchain<VkAttachmentDescription> attachmentDescriptions(attachmentCount);
 		fchain<VkAttachmentReference> colorAttachmentReferences(colorAttachmentCount);
-
-		resolveAttachmentReferences.allocate(resolveAttachmentCount);
-		resolveImages.resize(resolveAttachmentCount);
-		resolveImageViews.resize(resolveAttachmentCount);
+		fchain<VkAttachmentReference> resolveAttachmentReferences(resolveAttachmentCount);
 
 		uint32 attachmentIndex = 0;
 		uint32 colorAttachmentReferenceIndex = 0;
@@ -110,19 +109,19 @@ namespace ProjectA {
 			}
 		}
 
-		VkSubpassDescription subpass{};
-		subpass.flags = 0;
-		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass.inputAttachmentCount = 0;
-		subpass.pInputAttachments = nullptr;
-		subpass.colorAttachmentCount = colorAttachmentCount;
-		subpass.pColorAttachments = &colorAttachmentReferences[0];
+		VkSubpassDescription subpassDescription{};
+		subpassDescription.flags = 0;
+		subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		subpassDescription.inputAttachmentCount = 0;
+		subpassDescription.pInputAttachments = nullptr;
+		subpassDescription.colorAttachmentCount = colorAttachmentCount;
+		subpassDescription.pColorAttachments = &colorAttachmentReferences[0];
 
 		if (resolveAttachmentCount > 0) {
-			subpass.pResolveAttachments = &resolveAttachmentReferences[0];
+			subpassDescription.pResolveAttachments = &resolveAttachmentReferences[0];
 		}
 		else {
-			subpass.pResolveAttachments = nullptr;
+			subpassDescription.pResolveAttachments = nullptr;
 		}
 
 		if (depthStencilAttachmentCount > 0) {
@@ -130,8 +129,8 @@ namespace ProjectA {
 
 			VkAttachmentDescription depthStencilAttachmentDescription{};
 			depthStencilAttachmentDescription.flags = 0;
-			depthStencilAttachmentDescription.format = surface.format.format;
-			depthStencilAttachmentDescription.samples = static_cast<VkSampleCountFlagBits>(descriptor.depthStencilAttachment->sampleCount);
+			depthStencilAttachmentDescription.format = physicalDevice.findSuitableDepthStencilFormat();
+			depthStencilAttachmentDescription.samples = static_cast<VkSampleCountFlagBits>(descriptor.depthStencilAttachment.sampleCount);
 			depthStencilAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 			depthStencilAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 			depthStencilAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -145,34 +144,40 @@ namespace ProjectA {
 			depthStencilAttachmentReference.attachment = attachmentIndex;
 			depthStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-			subpass.pDepthStencilAttachment = &depthStencilAttachmentReference;
+			subpassDescription.pDepthStencilAttachment = &depthStencilAttachmentReference;
 		}
 		else {
-			subpass.pDepthStencilAttachment = nullptr;
+			subpassDescription.pDepthStencilAttachment = nullptr;
 		}
 
-		subpass.preserveAttachmentCount = 0;
-		subpass.pPreserveAttachments = nullptr;
+		subpassDescription.preserveAttachmentCount = 0;
+		subpassDescription.pPreserveAttachments = nullptr;
 
-		VkSubpassDependency dependency{};
-		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.srcAccessMask = VK_ACCESS_NONE;
-		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		dependency.dependencyFlags = 0;
+		VkSubpassDependency subpassDependency{};
+		subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+		subpassDependency.dstSubpass = 0;
+		subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		subpassDependency.srcAccessMask = VK_ACCESS_NONE;
+		subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		subpassDependency.dependencyFlags = 0;
+
+		if (depthStencil) {
+			subpassDependency.srcStageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+			subpassDependency.dstStageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+			subpassDependency.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		}
 
 		VkRenderPassCreateInfo renderPassCreateInfo{};
 		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		renderPassCreateInfo.pNext = nullptr;
 		renderPassCreateInfo.flags = 0;
-		renderPassCreateInfo.attachmentCount = colorAttachmentCount + resolveAttachmentCount + depthStencilAttachmentCount;
+		renderPassCreateInfo.attachmentCount = attachmentCount;
 		renderPassCreateInfo.pAttachments = &attachmentDescriptions[0];
 		renderPassCreateInfo.subpassCount = 1;
-		renderPassCreateInfo.pSubpasses = &subpass;
+		renderPassCreateInfo.pSubpasses = &subpassDescription;
 		renderPassCreateInfo.dependencyCount = 1;
-		renderPassCreateInfo.pDependencies = &dependency;
+		renderPassCreateInfo.pDependencies = &subpassDependency;
 
 		const VkResult result = vkCreateRenderPass(device.object, &renderPassCreateInfo, nullptr, &object);
 
@@ -183,58 +188,5 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		vkDestroyRenderPass(device.object, object, nullptr);
-	}
-
-	VkImageView VulkanRenderPass::getAttachmentImageView(uint32 attachmentIndex) const {
-		DEBUG_ASSERT(attachmentIndex < attachmentCount);
-
-		if (attachmentIndex < resolveImageViews.size()) {
-			return resolveImageViews[attachmentIndex]->object;
-		}
-
-		if (hasDepthStencilAttachment) {
-			return depthStencilImageView->object;
-		}
-
-		DEBUG_ASSERT(false);
-
-		return 0;
-	}
-
-	void VulkanRenderPass::recreateResolveAttachmentImageViews(const VulkanSurface& surface) {
-		for (uint64 resolveAttachmentIndex = 0; resolveAttachmentIndex < resolveAttachmentReferences.count; resolveAttachmentIndex += 1) {
-			const VkAttachmentReference& resolveAttachmentReference = resolveAttachmentReferences[resolveAttachmentIndex];
-
-			VkImageCreateInfo resolveImageCreateInfo{};
-			resolveImageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-			resolveImageCreateInfo.pNext = nullptr;
-			resolveImageCreateInfo.flags = 0;
-			resolveImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-			resolveImageCreateInfo.format = surface.format.format;
-			resolveImageCreateInfo.extent.width = surface.window.getSize()[0];
-			resolveImageCreateInfo.extent.height = surface.window.getSize()[1];
-			resolveImageCreateInfo.extent.depth = 1;
-			resolveImageCreateInfo.mipLevels = 1;
-			resolveImageCreateInfo.arrayLayers = 1;
-
-			// TODO: Write correct sample count.
-			resolveImageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(colorAttachments[resolveAttachmentIndex].sampleCount);
-
-			resolveImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-			resolveImageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
-			resolveImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			resolveImageCreateInfo.queueFamilyIndexCount = 0;
-			resolveImageCreateInfo.pQueueFamilyIndices = nullptr;
-
-			resolveImages[resolveAttachmentIndex] = createScope<VulkanImage>(device, resolveImageCreateInfo);
-
-			constexpr ImageViewDescriptor resolveImageViewDescriptor;
-
-			resolveImageViews[resolveAttachmentIndex] = createScope<VulkanImageView>(device.object, *resolveImages[resolveAttachmentIndex], resolveImageViewDescriptor);
-		}
-	}
-
-	void VulkanRenderPass::recreateDepthStencilAttachmentImageView(const VulkanSurface& surface) {
-		// TODO
 	}
 }

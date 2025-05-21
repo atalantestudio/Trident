@@ -132,7 +132,8 @@ namespace ProjectA {
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
 
-		constexpr ImageViewDescriptor imageViewDescriptor;
+		ImageViewDescriptor imageViewDescriptor{};
+		imageViewDescriptor.imageAspect = ImageAspect::COLOR;
 
 		imageViews.resize(images.size());
 

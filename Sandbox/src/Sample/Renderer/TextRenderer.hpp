@@ -13,7 +13,8 @@ namespace ProjectA {
 
 				// 1. Create glyph map image view.
 				{
-					constexpr ImageViewDescriptor imageViewDescriptor;
+					ImageViewDescriptor imageViewDescriptor{};
+					imageViewDescriptor.imageAspect = ImageAspect::COLOR;
 
 					glyphMapImageView = glyphMapImage->createView(imageViewDescriptor);
 				}

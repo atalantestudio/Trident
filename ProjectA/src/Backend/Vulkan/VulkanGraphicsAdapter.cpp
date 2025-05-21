@@ -44,7 +44,7 @@ namespace ProjectA {
 	}
 
 	ref<RenderPass> VulkanGraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		return createRef<VulkanRenderPass>(surface, *device, descriptor);
+		return createRef<VulkanRenderPass>(physicalDevice, surface, *device, descriptor);
 	}
 
 	ref<RenderPipeline> VulkanGraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
@@ -64,6 +64,6 @@ namespace ProjectA {
 	}
 
 	ref<Swapchain> VulkanGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return createRef<VulkanSwapchain>(physicalDevice, surface, device->object, descriptor);
+		return createRef<VulkanSwapchain>(physicalDevice, surface, *device, descriptor);
 	}
 }

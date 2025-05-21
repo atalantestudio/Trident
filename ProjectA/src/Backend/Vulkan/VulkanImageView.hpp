@@ -3,7 +3,8 @@
 #include "Backend/Vulkan/VulkanImage.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/ImageView.hpp"
+#include "Engine/API/Rendering/Descriptor/ImageViewDescriptor.hpp"
+#include "Engine/API/Rendering/ImageView.hpp"
 
 namespace ProjectA {
 	class VulkanImageView : public ImageView, public ObjectWrapper<VkImageView> {
