@@ -107,10 +107,7 @@ namespace ProjectA {
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.renderPass = renderPass;
 				beginRenderPassDescriptor.swapchain = swapchain;
-
-				// TODO: Clear color flickers in OpenGL.
-				beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.3f, 1.0f};
-
+				beginRenderPassDescriptor.clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 				beginRenderPassDescriptor.imageIndex = acquireNextImage(swapchain);
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);

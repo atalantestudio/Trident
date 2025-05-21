@@ -30,9 +30,9 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::begin() const {}
 
 	void OpenGLCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
-		renderPass = std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass).get();
+		commandBuffer.emplace_back(createRef<OpenGLBeginRenderPassCommand>(descriptor));
 
-		commandBuffer.emplace_back(createRef<OpenGLBeginRenderPassCommand>(descriptor, *renderPass));
+		renderPass = std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass).get();
 	}
 
 	void OpenGLCommandEncoder::bindComputePipeline(const ref<ComputePipeline>& computePipeline) {
