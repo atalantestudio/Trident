@@ -17,7 +17,7 @@ namespace ProjectA {
 		lennaImage = loadImage(LENNA_IMAGE_PATH);
 		pepperImage = loadImage(PEPPER_IMAGE_PATH);
 
-		const ImageViewDescriptor imageViewDescriptor;
+		constexpr ImageViewDescriptor imageViewDescriptor;
 
 		baboonImageView = baboonImage->createView(imageViewDescriptor);
 		cameramanImageView = cameramanImage->createView(imageViewDescriptor);

@@ -228,7 +228,7 @@ namespace ProjectA {
 
 			resolveImages[resolveAttachmentIndex] = createScope<VulkanImage>(device, resolveImageCreateInfo);
 
-			const ImageViewDescriptor resolveImageViewDescriptor;
+			constexpr ImageViewDescriptor resolveImageViewDescriptor;
 
 			resolveImageViews[resolveAttachmentIndex] = createScope<VulkanImageView>(device.object, *resolveImages[resolveAttachmentIndex], resolveImageViewDescriptor);
 		}

@@ -90,7 +90,7 @@ namespace ProjectA {
 
 		const ref<Image> glyphImage = Renderer::createImage(glyphImageDescriptor);
 
-		const ImageViewDescriptor glyphImageViewDescriptor;
+		constexpr ImageViewDescriptor glyphImageViewDescriptor;
 
 		const ref<ImageView> glyphImageView = glyphImage->createView(glyphImageViewDescriptor);
 
@@ -147,7 +147,7 @@ namespace ProjectA {
 
 		sdfGlyphMap.glyphMap = Renderer::createImage(glyphMapSdfImageDescriptor);
 
-		const ImageViewDescriptor glyphMapSdfImageViewDescriptor;
+		constexpr ImageViewDescriptor glyphMapSdfImageViewDescriptor;
 
 		const ref<ImageView> glyphMapSdfImageView = sdfGlyphMap.glyphMap->createView(glyphMapSdfImageViewDescriptor);
 

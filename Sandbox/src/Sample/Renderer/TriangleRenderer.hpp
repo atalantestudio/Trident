@@ -144,8 +144,10 @@ namespace ProjectA {
 		private:
 			ref<RenderPass> renderPass;
 			ref<Swapchain> swapchain;
+
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
+
 			ref<Buffer> vertexBuffer;
 	};
 }

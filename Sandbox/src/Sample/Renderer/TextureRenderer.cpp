@@ -9,7 +9,7 @@ namespace ProjectA {
 	TextureRenderer::TextureRenderer() {}
 
 	void TextureRenderer::build(const ref<Image>& image) {
-		const ImageViewDescriptor imageViewDescriptor;
+		constexpr ImageViewDescriptor imageViewDescriptor;
 
 		this->image = image;
 		imageView = this->image->createView(imageViewDescriptor);

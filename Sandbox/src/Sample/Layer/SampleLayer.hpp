@@ -4,9 +4,10 @@
 
 #define RENDERER_COMPUTE_SHADER 0
 #define RENDERER_DEPTH_TEST 1
-#define RENDERER_TRIANGLE 2
+#define RENDERER_TEXT 2
+#define RENDERER_TRIANGLE 3
 
-#define RENDERER RENDERER_COMPUTE_SHADER
+#define RENDERER RENDERER_TEXT
 
 #if RENDERER == RENDERER_COMPUTE_SHADER
 	#include "../Renderer/ComputeShaderRenderer.hpp"
@@ -18,6 +19,12 @@
 	#include "../Renderer/DepthTestRenderer.hpp"
 
 	#define RENDERER_CLASS DepthTestRenderer
+#endif
+
+#if RENDERER == RENDERER_TEXT
+	#include "../Renderer/TextRenderer.hpp"
+
+	#define RENDERER_CLASS TextRenderer
 #endif
 
 #if RENDERER == RENDERER_TRIANGLE

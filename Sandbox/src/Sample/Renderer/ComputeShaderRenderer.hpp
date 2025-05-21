@@ -66,11 +66,11 @@ namespace ProjectA {
 					imageDescriptorSetLayoutBinding.samplers = {sampler};
 					imageDescriptorSetLayoutBinding.imageViews = {imageView};
 
-					DescriptorSetLayout imageDescriptorSetLayout;
-					imageDescriptorSetLayout.bindings = {imageDescriptorSetLayoutBinding};
+					DescriptorSetLayout descriptorSetLayout;
+					descriptorSetLayout.bindings = {imageDescriptorSetLayoutBinding};
 
 					PipelineLayoutDescriptor pipelineLayoutDescriptor;
-					pipelineLayoutDescriptor.layouts = {imageDescriptorSetLayout};
+					pipelineLayoutDescriptor.layouts = {descriptorSetLayout};
 
 					computePipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
@@ -155,11 +155,11 @@ namespace ProjectA {
 					imageDescriptorSetLayoutBinding.samplers = {sampler};
 					imageDescriptorSetLayoutBinding.imageViews = {imageView};
 
-					DescriptorSetLayout imageDescriptorSetLayout;
-					imageDescriptorSetLayout.bindings = {imageDescriptorSetLayoutBinding};
+					DescriptorSetLayout descriptorSetLayout;
+					descriptorSetLayout.bindings = {imageDescriptorSetLayoutBinding};
 
 					PipelineLayoutDescriptor pipelineLayoutDescriptor;
-					pipelineLayoutDescriptor.layouts = {imageDescriptorSetLayout};
+					pipelineLayoutDescriptor.layouts = {descriptorSetLayout};
 
 					renderPipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
