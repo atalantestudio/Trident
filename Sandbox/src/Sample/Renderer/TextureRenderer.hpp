@@ -52,14 +52,14 @@ namespace ProjectA {
 
 				// 5. Create pipeline layout.
 				{
-					DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding;
-					imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-					imageDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-					imageDescriptorSetLayoutBinding.imageViews = {imageView};
-					imageDescriptorSetLayoutBinding.samplers = {sampler};
+					DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding;
+					textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+					textureDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+					textureDescriptorSetLayoutBinding.imageViews = {imageView};
+					textureDescriptorSetLayoutBinding.samplers = {sampler};
 
 					DescriptorSetLayout descriptorSetLayout;
-					descriptorSetLayout.bindings = {imageDescriptorSetLayoutBinding};
+					descriptorSetLayout.bindings = {textureDescriptorSetLayoutBinding};
 
 					PipelineLayoutDescriptor pipelineLayoutDescriptor;
 					pipelineLayoutDescriptor.layouts = {descriptorSetLayout};
@@ -107,7 +107,7 @@ namespace ProjectA {
 
 					vertexStagingBuffer->unmap();
 
-					BufferDescriptor vertexBufferDescriptor{};
+					BufferDescriptor vertexBufferDescriptor;
 					vertexBufferDescriptor.size = vertexBufferSize;
 					vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 

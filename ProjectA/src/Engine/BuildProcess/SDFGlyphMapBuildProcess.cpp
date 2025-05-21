@@ -33,7 +33,7 @@ namespace ProjectA {
 
 		fontStagingBuffer->unmap();
 
-		BufferDescriptor fontStorageBufferDescriptor{};
+		BufferDescriptor fontStorageBufferDescriptor;
 		fontStorageBufferDescriptor.size = fontBufferSize;
 		fontStorageBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 
@@ -58,7 +58,7 @@ namespace ProjectA {
 
 		GlyphBuffer* glyphMappedRange = glyphStagingBuffer->map<GlyphBuffer>(0, glyphBufferSize);
 
-		BufferDescriptor glyphBufferDescriptor{};
+		BufferDescriptor glyphBufferDescriptor;
 		glyphBufferDescriptor.size = glyphBufferSize;
 		glyphBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 
@@ -70,7 +70,7 @@ namespace ProjectA {
 
 		uint32* glyphOffsetMappedRange = glyphOffsetStagingBuffer->map<uint32>(0, glyphOffsetBufferSize);
 
-		BufferDescriptor glyphOffsetBufferDescriptor{};
+		BufferDescriptor glyphOffsetBufferDescriptor;
 		glyphOffsetBufferDescriptor.size = glyphOffsetBufferSize;
 		glyphOffsetBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 

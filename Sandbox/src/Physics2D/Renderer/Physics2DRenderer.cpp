@@ -66,7 +66,7 @@ namespace ProjectA {
 
 		gridVertexStagingBuffer->unmap();
 
-		BufferDescriptor gridVertexBufferDescriptor{};
+		BufferDescriptor gridVertexBufferDescriptor;
 		gridVertexBufferDescriptor.size = gridVertexBufferSize;
 		gridVertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 
@@ -139,7 +139,7 @@ namespace ProjectA {
 	void Physics2DRenderer::initializeCenterOfMassBuffer() {
 		const uint64 centerOfMassBufferSize = scene->getObjectCount() * sizeof(svec2<float32>);
 
-		BufferDescriptor centerOfMassBufferDescriptor{};
+		BufferDescriptor centerOfMassBufferDescriptor;
 		centerOfMassBufferDescriptor.size = centerOfMassBufferSize;
 		centerOfMassBufferDescriptor.usage = BufferUsage::VERTEX;
 		centerOfMassBufferDescriptor.persistent = true;
@@ -181,7 +181,7 @@ namespace ProjectA {
 	void Physics2DRenderer::initializeClosestPointBuffer() {
 		constexpr uint64 closestPointBufferSize = 2 * sizeof(svec2<float32>);
 
-		BufferDescriptor closestPointBufferDescriptor{};
+		BufferDescriptor closestPointBufferDescriptor;
 		closestPointBufferDescriptor.size = closestPointBufferSize;
 		closestPointBufferDescriptor.usage = BufferUsage::VERTEX;
 		closestPointBufferDescriptor.persistent = true;
@@ -240,7 +240,7 @@ namespace ProjectA {
 	void Physics2DRenderer::initializeVertexFeatureBuffer() {
 		constexpr uint64 vertexFeatureBufferSize = 2 * sizeof(svec2<float32>);
 
-		BufferDescriptor vertexFeatureBufferDescriptor{};
+		BufferDescriptor vertexFeatureBufferDescriptor;
 		vertexFeatureBufferDescriptor.size = vertexFeatureBufferSize;
 		vertexFeatureBufferDescriptor.usage = BufferUsage::VERTEX;
 		vertexFeatureBufferDescriptor.persistent = true;
@@ -252,7 +252,7 @@ namespace ProjectA {
 	void Physics2DRenderer::initializeEdgeVertexFeatureBuffer() {
 		constexpr uint64 edgeVertexFeatureBufferSize = 4 * sizeof(svec2<float32>);
 
-		BufferDescriptor edgeVertexFeatureBufferDescriptor{};
+		BufferDescriptor edgeVertexFeatureBufferDescriptor;
 		edgeVertexFeatureBufferDescriptor.size = edgeVertexFeatureBufferSize;
 		edgeVertexFeatureBufferDescriptor.usage = BufferUsage::VERTEX;
 		edgeVertexFeatureBufferDescriptor.persistent = true;
@@ -388,19 +388,19 @@ namespace ProjectA {
 
 		stagingBuffer->unmap();
 
-		BufferDescriptor vertexBufferDescriptor{};
+		BufferDescriptor vertexBufferDescriptor;
 		vertexBufferDescriptor.size = vertexBufferSize;
 		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 
-		BufferDescriptor indexBufferDescriptor{};
+		BufferDescriptor indexBufferDescriptor;
 		indexBufferDescriptor.size = indexBufferSize;
 		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
 
-		BufferDescriptor instanceBufferDescriptor{};
+		BufferDescriptor instanceBufferDescriptor;
 		instanceBufferDescriptor.size = instanceBufferSize;
 		instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 		instanceBufferDescriptor.persistent = true;

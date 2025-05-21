@@ -31,7 +31,7 @@ namespace ProjectA {
 				{
 					constexpr uint64 cameraBufferSize = sizeof(Camera);
 
-					BufferDescriptor cameraUniformBufferDescriptor{};
+					BufferDescriptor cameraUniformBufferDescriptor;
 					cameraUniformBufferDescriptor.size = cameraBufferSize;
 					cameraUniformBufferDescriptor.usage = BufferUsage::UNIFORM;
 					cameraUniformBufferDescriptor.persistent = true;
@@ -157,7 +157,7 @@ namespace ProjectA {
 				{
 					constexpr uint64 vertexBufferSize = 4 * MAX_CHARACTER_COUNT * sizeof(Vertex);
 
-					BufferDescriptor vertexBufferDescriptor{};
+					BufferDescriptor vertexBufferDescriptor;
 					vertexBufferDescriptor.size = vertexBufferSize;
 					vertexBufferDescriptor.usage = BufferUsage::VERTEX;
 					vertexBufferDescriptor.persistent = true;

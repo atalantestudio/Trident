@@ -1,15 +1,12 @@
 #version 450
 
 layout(location = 0) in vec2 vertexPosition;
-
-// TODO: Remove padding.
 layout(location = 1) in vec4 offset;
-
 layout(location = 2) in uint textureIndex;
 
 out VertexOutput {
 	layout(location = 0) vec2 textureCoordinate;
-	layout(location = 1) uint textureIndex;
+	layout(location = 1) flat uint textureIndex;
 } vertexOutput;
 
 void main() {

@@ -204,7 +204,7 @@ namespace ProjectA {
 
 					vertexStagingBuffer->unmap();
 
-					BufferDescriptor vertexBufferDescriptor{};
+					BufferDescriptor vertexBufferDescriptor;
 					vertexBufferDescriptor.size = vertexBufferSize;
 					vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 

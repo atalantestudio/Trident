@@ -122,7 +122,7 @@ namespace ProjectA {
 	}
 
 	ref<Buffer> Renderer::createStagingBuffer(uint64 size, bool persistent) {
-		BufferDescriptor stagingBufferDescriptor{};
+		BufferDescriptor stagingBufferDescriptor;
 		stagingBufferDescriptor.size = size;
 		stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
 		stagingBufferDescriptor.persistent = persistent;

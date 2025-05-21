@@ -35,7 +35,7 @@ namespace ProjectA {
 
 		vertexStagingBuffer->unmap();
 
-		BufferDescriptor vertexBufferDescriptor{};
+		BufferDescriptor vertexBufferDescriptor;
 		vertexBufferDescriptor.size = size;
 		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 
@@ -75,7 +75,7 @@ namespace ProjectA {
 
 		indexStagingBuffer->unmap();
 
-		BufferDescriptor bufferDescriptor{};
+		BufferDescriptor bufferDescriptor;
 		bufferDescriptor.size = size;
 		bufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
 
@@ -101,7 +101,7 @@ namespace ProjectA {
 		subcomponentStagingBuffer = createStagingBuffer(size, true);
 		subcomponentMappedRange = subcomponentStagingBuffer->map<Subcomponent>(0, size);
 
-		BufferDescriptor subcomponentBufferDescriptor{};
+		BufferDescriptor subcomponentBufferDescriptor;
 		subcomponentBufferDescriptor.size = size;
 		subcomponentBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 
@@ -109,7 +109,7 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::initializeCameraBuffer() {
-		BufferDescriptor cameraBufferDescriptor{};
+		BufferDescriptor cameraBufferDescriptor;
 		cameraBufferDescriptor.size = sizeof(mat3x3<float32>);
 		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
 		cameraBufferDescriptor.persistent = true;
