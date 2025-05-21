@@ -5,7 +5,7 @@
 #include "Backend/Vulkan/ImageFormat.hpp"
 
 namespace ProjectA {
-	void VulkanRenderPass::countAttachments(const RenderPassDescriptor& descriptor, uint32& colorAttachmentCount, uint32& resolveAttachmentCount, uint32& depthStencilAttachmentCount) {
+	void VulkanRenderPass::countAttachments(const RenderPassDescriptor& descriptor, uint32& colorAttachmentCount, uint32& resolveAttachmentCount) {
 		colorAttachmentCount = 0;
 		resolveAttachmentCount = 0;
 
@@ -15,12 +15,6 @@ namespace ProjectA {
 			if (colorAttachment.sampleCount > 1) {
 				resolveAttachmentCount += 1;
 			}
-		}
-
-		depthStencilAttachmentCount = 0;
-
-		if (descriptor.enableDepthStencil) {
-			depthStencilAttachmentCount = 1;
 		}
 	}
 
@@ -37,11 +31,14 @@ namespace ProjectA {
 
 		uint32 colorAttachmentCount;
 		uint32 resolveAttachmentCount;
-		uint32 depthStencilAttachmentCount;
 
-		countAttachments(descriptor, colorAttachmentCount, resolveAttachmentCount, depthStencilAttachmentCount);
+		countAttachments(descriptor, colorAttachmentCount, resolveAttachmentCount);
 
-		attachmentCount = colorAttachmentCount + resolveAttachmentCount + depthStencilAttachmentCount;
+		attachmentCount = colorAttachmentCount + resolveAttachmentCount;
+
+		if (depthStencil) {
+			attachmentCount += 1;
+		}
 
 		fchain<VkAttachmentDescription> attachmentDescriptions(attachmentCount);
 		fchain<VkAttachmentReference> colorAttachmentReferences(colorAttachmentCount);
@@ -124,15 +121,13 @@ namespace ProjectA {
 			subpassDescription.pResolveAttachments = nullptr;
 		}
 
-		if (depthStencilAttachmentCount > 0) {
-			DEBUG_ASSERT(depthStencilAttachmentCount == 1);
-
+		if (depthStencil) {
 			VkAttachmentDescription depthStencilAttachmentDescription{};
 			depthStencilAttachmentDescription.flags = 0;
 			depthStencilAttachmentDescription.format = physicalDevice.findSuitableDepthStencilFormat();
 			depthStencilAttachmentDescription.samples = static_cast<VkSampleCountFlagBits>(descriptor.depthStencilAttachment.sampleCount);
-			depthStencilAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-			depthStencilAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			depthStencilAttachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(descriptor.depthStencilAttachment.loadOperation);
+			depthStencilAttachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(descriptor.depthStencilAttachment.storeOperation);
 			depthStencilAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			depthStencilAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 			depthStencilAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;

@@ -16,7 +16,7 @@ namespace ProjectA {
 					Attachment depthStencilAttachment{};
 					depthStencilAttachment.sampleCount = 1;
 					depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
-					depthStencilAttachment.storeOperation = StoreOperation::STORE;
+					depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
 
 					RenderPassDescriptor renderPassDescriptor{};
 					renderPassDescriptor.colorAttachments = {colorAttachment};
