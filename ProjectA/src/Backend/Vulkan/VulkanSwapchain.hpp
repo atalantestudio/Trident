@@ -7,6 +7,8 @@
 #include "Engine/Renderer/Swapchain.hpp"
 
 namespace ProjectA {
+	class VulkanDevice;
+
 	class VulkanSwapchain : public Swapchain, public ObjectWrapper<VkSwapchainKHR> {
 		public:
 			VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const SwapchainDescriptor& descriptor);
@@ -22,11 +24,6 @@ namespace ProjectA {
 
 			void destroy();
 
-		private:
-			void createColorImageAndImageView(Attachment colorAttachment, uint32 attachmentIndex);
-
-			void createDepthStencilImageAndImageView(Attachment depthStencilAttachment);
-
 		public:
 			chain<VkImage> images;
 			chain<VkImageView> imageViews;
@@ -36,11 +33,5 @@ namespace ProjectA {
 			const VulkanPhysicalDevice& physicalDevice;
 			const VulkanDevice& device;
 			const VulkanSurface& surface;
-
-			chain<scope<VulkanImage>> colorImages;
-			chain<scope<VulkanImageView>> colorImageViews;
-
-			scope<VulkanImage> depthStencilImage;
-			scope<VulkanImageView> depthStencilImageView;
 	};
 }

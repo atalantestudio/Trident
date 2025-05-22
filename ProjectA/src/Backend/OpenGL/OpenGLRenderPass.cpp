@@ -7,7 +7,7 @@
 
 namespace ProjectA {
 	OpenGLRenderPass::OpenGLRenderPass(const RenderPassDescriptor& descriptor) :
-		RenderPass(descriptor.enableDepthStencil)
+		RenderPass(descriptor.depthStencilAttachment.enabled)
 	{
 		for (const Attachment& colorAttachment : descriptor.colorAttachments) {
 			attachments.emplace_back(colorAttachment);
@@ -23,10 +23,15 @@ namespace ProjectA {
 		colorAttachmentCount = static_cast<uint32>(attachments.size());
 
 		if (depthStencil) {
-			attachments.emplace_back(descriptor.depthStencilAttachment);
+			// TODO
+			//attachments.emplace_back(descriptor.depthStencilAttachment);
 
 			screenProgram = createScreenProgram();
 		}
+	}
+
+	void OpenGLRenderPass::setAttachmentImageView(uint32 attachmentIndex, const ref<ImageView>& imageView) {
+		// TODO
 	}
 
 	GLuint OpenGLRenderPass::createScreenProgram() {

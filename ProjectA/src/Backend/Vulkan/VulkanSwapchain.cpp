@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 #include "Backend/Vulkan/VulkanSwapchain.hpp"
 
@@ -83,28 +84,14 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain image count (code: []).", result);
 
 		images.resize(imageCount);
+		imageViews.resize(imageCount);
+		framebuffers.resize(imageCount);
 
 		result = vkGetSwapchainImagesKHR(device.object, object, &imageCount, images.data());
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images (code: []).", result);
 
-		imageViews.resize(imageCount);
-		framebuffers.resize(imageCount);
-
-		VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
-
-		colorImages.resize(renderPass.colorAttachments.size());
-		colorImageViews.resize(renderPass.colorAttachments.size());
-
-		for (uint32 attachmentIndex = 0; attachmentIndex < renderPass.colorAttachments.size(); attachmentIndex += 1) {
-			const Attachment& colorAttachment = renderPass.colorAttachments[attachmentIndex];
-
-			createColorImageAndImageView(colorAttachment, attachmentIndex);
-		}
-
-		if (renderPass.depthStencil) {
-			createDepthStencilImageAndImageView(renderPass.depthStencilAttachment);
-		}
+		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
 
 		// TODO: Replace with ImageView API.
 		VkImageViewCreateInfo imageViewCreateInfo{};
@@ -134,16 +121,25 @@ namespace ProjectA {
 		framebufferCreateInfo.height = descriptor.extentHeight;
 		framebufferCreateInfo.layers = 1;
 
+		const chain<ref<ImageView>>& attachmentImageViews = renderPass.getAttachmentImageViews();
+
 		chain<VkImageView> baseAttachments(renderPass.attachmentCount);
-		uint32 attachmentIndex = 1;
 
-		for (; attachmentIndex < renderPass.colorAttachments.size(); attachmentIndex += 1) {
-			baseAttachments[attachmentIndex] = colorImageViews[attachmentIndex]->object;
+		uint32 presentAttachmentIndex = 0;
+		uint32 presentAttachmentCount = 0;
+
+		for (uint32 attachmentIndex = 0; attachmentIndex < renderPass.attachmentCount; attachmentIndex += 1) {
+			if (attachmentImageViews[attachmentIndex] == nullptr) {
+				presentAttachmentIndex = attachmentIndex;
+				presentAttachmentCount += 1;
+
+				continue;
+			}
+
+			baseAttachments[attachmentIndex] = std::static_pointer_cast<VulkanImageView>(attachmentImageViews[attachmentIndex])->object;
 		}
 
-		if (renderPass.depthStencil) {
-			baseAttachments[attachmentIndex] = depthStencilImageView->object;
-		}
+		DEBUG_ASSERT(presentAttachmentCount == 0 || presentAttachmentCount == 1);
 
 		for (uint32 imageIndex = 0; imageIndex < imageCount; imageIndex += 1) {
 			imageViewCreateInfo.image = images[imageIndex];
@@ -154,8 +150,8 @@ namespace ProjectA {
 
 			chain<VkImageView> attachments(baseAttachments);
 
-			// Override the first attachment with the view of the current swapchain image.
-			attachments[0] = imageViews[imageIndex];
+			// Bind the current swapchain image view to the attachment that is presented onto the screen.
+			attachments[presentAttachmentIndex] = imageViews[imageIndex];
 
 			framebufferCreateInfo.pAttachments = &attachments[0];
 
@@ -175,45 +171,5 @@ namespace ProjectA {
 
 		// The swapchain images are automatically destroyed with the swapchain.
 		vkDestroySwapchainKHR(device.object, object, nullptr);
-	}
-
-	void VulkanSwapchain::createColorImageAndImageView(Attachment colorAttachment, uint32 attachmentIndex) {
-		ImageDescriptor colorImageDescriptor{};
-		colorImageDescriptor.type = ImageType::TEXTURE_2D;
-		colorImageDescriptor.format = getImageFormat(surface.format.format);
-		colorImageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT;
-		colorImageDescriptor.width = surface.window.getSize()[0];
-		colorImageDescriptor.height = surface.window.getSize()[1];
-		colorImageDescriptor.depth = 1;
-		colorImageDescriptor.mipLevelCount = 1;
-		colorImageDescriptor.arrayLayerCount = 1;
-		colorImageDescriptor.sampleCount = static_cast<VkSampleCountFlagBits>(colorAttachment.sampleCount);
-
-		colorImages[attachmentIndex] = createScope<VulkanImage>(device, colorImageDescriptor);
-
-		ImageViewDescriptor colorImageViewDescriptor{};
-		colorImageViewDescriptor.imageAspect = ImageAspect::COLOR;
-
-		colorImageViews[attachmentIndex] = createScope<VulkanImageView>(device.object, *colorImages[attachmentIndex], colorImageViewDescriptor);
-	}
-
-	void VulkanSwapchain::createDepthStencilImageAndImageView(Attachment depthStencilAttachment) {
-		ImageDescriptor depthStencilImageDescriptor{};
-		depthStencilImageDescriptor.type = ImageType::TEXTURE_2D;
-		depthStencilImageDescriptor.format = getImageFormat(physicalDevice.findSuitableDepthStencilFormat());
-		depthStencilImageDescriptor.usage = ImageUsage::DEPTH_STENCIL_ATTACHMENT;
-		depthStencilImageDescriptor.width = surface.window.getSize()[0];
-		depthStencilImageDescriptor.height = surface.window.getSize()[1];
-		depthStencilImageDescriptor.depth = 1;
-		depthStencilImageDescriptor.mipLevelCount = 1;
-		depthStencilImageDescriptor.arrayLayerCount = 1;
-		depthStencilImageDescriptor.sampleCount = static_cast<VkSampleCountFlagBits>(depthStencilAttachment.sampleCount);
-
-		depthStencilImage = createScope<VulkanImage>(device, depthStencilImageDescriptor);
-
-		ImageViewDescriptor depthStencilImageViewDescriptor{};
-		depthStencilImageViewDescriptor.imageAspect = ImageAspect::DEPTH;
-
-		depthStencilImageView = createScope<VulkanImageView>(device.object, *depthStencilImage, depthStencilImageViewDescriptor);
 	}
 }

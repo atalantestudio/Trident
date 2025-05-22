@@ -6,16 +6,9 @@
 namespace ProjectA {
 	class VulkanPhysicalDevice : public PhysicalDevice, public ObjectWrapper<VkPhysicalDevice> {
 		public:
-			static bool hasStencilComponent(VkFormat format);
-
-		public:
 			VulkanPhysicalDevice(VkInstance instance);
 
 			const PhysicalDeviceLimits& getLimits() const override;
-
-			VkFormat findSuitableFormat(const chain<VkFormat>& formats, VkImageTiling imageTiling, VkFormatFeatureFlags formatFeatureFlags) const;
-
-			VkFormat findSuitableDepthStencilFormat() const;
 
 		private:
 			static uint32 calculateScore(VkPhysicalDevice physicalDevice);

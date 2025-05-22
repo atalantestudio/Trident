@@ -90,8 +90,7 @@ namespace ProjectA {
 
 		const ref<Image> glyphImage = Renderer::createImage(glyphImageDescriptor);
 
-		ImageViewDescriptor glyphImageViewDescriptor{};
-		glyphImageViewDescriptor.imageAspect = ImageAspect::COLOR;
+		constexpr ImageViewDescriptor glyphImageViewDescriptor;
 
 		const ref<ImageView> glyphImageView = glyphImage->createView(glyphImageViewDescriptor);
 
@@ -148,8 +147,7 @@ namespace ProjectA {
 
 		sdfGlyphMap.glyphMap = Renderer::createImage(glyphMapSdfImageDescriptor);
 
-		ImageViewDescriptor glyphMapSdfImageViewDescriptor{};
-		glyphMapSdfImageViewDescriptor.imageAspect = ImageAspect::COLOR;
+		constexpr ImageViewDescriptor glyphMapSdfImageViewDescriptor;
 
 		const ref<ImageView> glyphMapSdfImageView = sdfGlyphMap.glyphMap->createView(glyphMapSdfImageViewDescriptor);
 

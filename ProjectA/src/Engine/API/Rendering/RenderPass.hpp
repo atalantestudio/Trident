@@ -5,10 +5,7 @@
 namespace ProjectA {
 	struct RenderPassDescriptor {
 		chain<Attachment> colorAttachments;
-		Attachment depthStencilAttachment;
-
-		// If a depth stencil attachment is provided, then `enableDepthStencil` must be true.
-		bool enableDepthStencil = false;
+		DepthStencilAttachment depthStencilAttachment;
 	};
 
 	class RenderPass {
@@ -18,6 +15,8 @@ namespace ProjectA {
 			{}
 
 			virtual ~RenderPass() = default;
+
+			virtual void setAttachmentImageView(uint32 attachmentIndex, const ref<ImageView>& imageView) = 0;
 
 		public:
 			// Indicates if the render pass has a depth stencil attachment.

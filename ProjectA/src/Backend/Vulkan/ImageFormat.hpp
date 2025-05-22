@@ -15,37 +15,20 @@ namespace ProjectA {
 		return vkFormats[static_cast<uint8>(imageFormat)];
 	}
 
-	static ImageFormat getImageFormat(VkFormat vkFormat) {
-		if (vkFormat == VK_FORMAT_R8_UNORM) {
-			return ImageFormat::R8_UNORM;
-		}
+	static bool isDepthFormat(VkFormat format) {
+		return (
+			format == VK_FORMAT_D32_SFLOAT ||
+			format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
+			format == VK_FORMAT_D24_UNORM_S8_UINT
+		);
+	}
 
-		if (vkFormat == VK_FORMAT_B8G8R8A8_UNORM) {
-			return ImageFormat::B8G8R8A8_UNORM;
-		}
-
-		if (vkFormat == VK_FORMAT_R8G8B8A8_SRGB) {
-			return ImageFormat::R8G8B8A8_SRGB;
-		}
-
-		if (vkFormat == VK_FORMAT_R8G8B8A8_UNORM) {
-			return ImageFormat::R8G8B8A8_UNORM;
-		}
-
-		if (vkFormat == VK_FORMAT_D32_SFLOAT) {
-			return ImageFormat::D32_SFLOAT;
-		}
-
-		if (vkFormat == VK_FORMAT_D32_SFLOAT_S8_UINT) {
-			return ImageFormat::D32_SFLOAT_S8_UINT;
-		}
-
-		if (vkFormat == VK_FORMAT_D24_UNORM_S8_UINT) {
-			return ImageFormat::D24_UNORM_S8_UINT;
-		}
-
-		DEBUG_ASSERT(false);
-
-		return ImageFormat::R8_UNORM;
+	static bool isStencilFormat(VkFormat format) {
+		return (
+			format == VK_FORMAT_S8_UINT ||
+			format == VK_FORMAT_D16_UNORM_S8_UINT ||
+			format == VK_FORMAT_D24_UNORM_S8_UINT ||
+			format == VK_FORMAT_D32_SFLOAT_S8_UINT
+		);
 	}
 }

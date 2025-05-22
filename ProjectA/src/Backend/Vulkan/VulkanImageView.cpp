@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanImage.hpp"
 #include "Backend/Vulkan/VulkanImageView.hpp"
 
-#include "Backend/Vulkan/ImageAspect.hpp"
+#include "Backend/Vulkan/ImageFormat.hpp"
 #include "Backend/Vulkan/ImageType.hpp"
 
 namespace ProjectA {
@@ -23,7 +23,14 @@ namespace ProjectA {
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.subresourceRange.aspectMask = getVkImageAspectFlags(descriptor.imageAspect);
+
+		if (isDepthFormat(image.format)) {
+			imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+		}
+		else {
+			imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		}
+
 		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
 		imageViewCreateInfo.subresourceRange.levelCount = image.mipLevels;
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;

@@ -3,15 +3,6 @@
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 
 namespace ProjectA {
-	bool VulkanPhysicalDevice::hasStencilComponent(VkFormat format) {
-		return (
-			format == VK_FORMAT_S8_UINT ||
-			format == VK_FORMAT_D16_UNORM_S8_UINT ||
-			format == VK_FORMAT_D24_UNORM_S8_UINT ||
-			format == VK_FORMAT_D32_SFLOAT_S8_UINT
-		);
-	}
-
 	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance) {
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -106,33 +97,5 @@ namespace ProjectA {
 	uint32 VulkanPhysicalDevice::calculateScore(VkPhysicalDevice physicalDevice) {
 		// TODO: Implement score system.
 		return 1;
-	}
-
-	VkFormat VulkanPhysicalDevice::findSuitableFormat(const chain<VkFormat>& formats, VkImageTiling imageTiling, VkFormatFeatureFlags formatFeatureFlags) const {
-		for (const VkFormat format : formats) {
-			VkFormatProperties formatProperties;
-
-			vkGetPhysicalDeviceFormatProperties(object, format, &formatProperties);
-
-			if (imageTiling == VK_IMAGE_TILING_LINEAR && (formatProperties.linearTilingFeatures & formatFeatureFlags)) {
-				return format;
-			}
-
-			if (imageTiling == VK_IMAGE_TILING_OPTIMAL && (formatProperties.optimalTilingFeatures & formatFeatureFlags)) {
-				return format;
-			}
-		}
-
-		ENGINE_ASSERT(false, "Could not find a suitable format.");
-
-		return VK_FORMAT_UNDEFINED;
-	}
-
-	VkFormat VulkanPhysicalDevice::findSuitableDepthStencilFormat() const {
-		return findSuitableFormat(
-			{VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-		);
 	}
 }

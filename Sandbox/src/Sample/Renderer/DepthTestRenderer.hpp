@@ -6,22 +6,21 @@ namespace ProjectA {
 	class DepthTestRenderer : public Renderer {
 		public:
 			DepthTestRenderer() {
-				// Create render pass.
+				// 1. Create render pass.
 				{
 					Attachment colorAttachment{};
 					colorAttachment.sampleCount = 1;
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
 
-					Attachment depthStencilAttachment{};
+					DepthStencilAttachment depthStencilAttachment{};
+					depthStencilAttachment.enabled = true;
 					depthStencilAttachment.sampleCount = 1;
 					depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
-					depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
 
 					RenderPassDescriptor renderPassDescriptor{};
 					renderPassDescriptor.colorAttachments = {colorAttachment};
 					renderPassDescriptor.depthStencilAttachment = depthStencilAttachment;
-					renderPassDescriptor.enableDepthStencil = true;
 
 					renderPass = createRenderPass(renderPassDescriptor);
 
@@ -57,7 +56,9 @@ namespace ProjectA {
 					*/
 				}
 
-				// Create swapchain.
+				createAttachments();
+
+				// 2. Create swapchain.
 				{
 					SwapchainDescriptor swapchainDescriptor;
 					swapchainDescriptor.renderPass = renderPass;
@@ -67,7 +68,43 @@ namespace ProjectA {
 					swapchain = createSwapchain(swapchainDescriptor);
 				}
 
-				// Create vertex buffers.
+				// 3. Create pipeline layout.
+				{
+					const PipelineLayoutDescriptor pipelineLayoutDescriptor;
+
+					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+				}
+
+				// 4. Create render pipeline.
+				{
+					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+					vertexInputBinding.registerAttribute<svec3<float32>>(false);
+
+					VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
+					instanceInputBinding.registerAttribute<vec4<float32>>(false);
+
+					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+					vertexShaderModuleDescriptor.entryPoint = "main";
+
+					ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+					fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+					fragmentShaderModuleDescriptor.entryPoint = "main";
+
+					RenderPipelineDescriptor renderPipelineDescriptor;
+					renderPipelineDescriptor.renderPass = renderPass;
+					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
+					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Vertex.vert.spv", vertexShaderModuleDescriptor);
+					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Color.frag.spv", fragmentShaderModuleDescriptor);
+					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+
+					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
+				}
+
+				// 5. Create vertex buffers.
 				{
 					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE);
 
@@ -119,42 +156,6 @@ namespace ProjectA {
 					device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
 					device->waitIdle();
 				}
-
-				// Create pipeline layout.
-				{
-					const PipelineLayoutDescriptor pipelineLayoutDescriptor;
-
-					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
-				}
-
-				// Create render pipeline.
-				{
-					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-					vertexInputBinding.registerAttribute<svec3<float32>>(false);
-
-					VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-					instanceInputBinding.registerAttribute<vec4<float32>>(false);
-
-					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-					vertexShaderModuleDescriptor.entryPoint = "main";
-
-					ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-					fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-					fragmentShaderModuleDescriptor.entryPoint = "main";
-
-					RenderPipelineDescriptor renderPipelineDescriptor;
-					renderPipelineDescriptor.renderPass = renderPass;
-					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Vertex.vert.spv", vertexShaderModuleDescriptor);
-					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Color.frag.spv", fragmentShaderModuleDescriptor);
-					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-
-					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
-				}
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override {
@@ -188,12 +189,36 @@ namespace ProjectA {
 
 				device->waitIdle();
 
+				createAttachments();
+
 				SwapchainDescriptor swapchainDescriptor;
 				swapchainDescriptor.renderPass = renderPass;
 				swapchainDescriptor.extentWidth = event.getWidth();
 				swapchainDescriptor.extentHeight = event.getHeight();
 
 				swapchain->recreate(swapchainDescriptor);
+			}
+
+		private:
+			void createAttachments() {
+				ImageDescriptor depthStencilImageDescriptor{};
+				depthStencilImageDescriptor.type = ImageType::TEXTURE_2D;
+				depthStencilImageDescriptor.format = ImageFormat::D32_SFLOAT;
+				depthStencilImageDescriptor.usage = ImageUsage::DEPTH_STENCIL_ATTACHMENT;
+				depthStencilImageDescriptor.width = Application::get().getWindow().getSize()[0];
+				depthStencilImageDescriptor.height = Application::get().getWindow().getSize()[1];
+				depthStencilImageDescriptor.depth = 1;
+				depthStencilImageDescriptor.mipLevelCount = 1;
+				depthStencilImageDescriptor.arrayLayerCount = 1;
+				depthStencilImageDescriptor.sampleCount = 1;
+
+				depthStencilImage = createImage(depthStencilImageDescriptor);
+
+				constexpr ImageViewDescriptor depthStencilImageViewDescriptor;
+
+				const ref<ImageView> depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
+
+				renderPass->setAttachmentImageView(1, depthStencilImageView);
 			}
 
 		private:
@@ -211,10 +236,14 @@ namespace ProjectA {
 			static constexpr uint64 INSTANCE_BUFFER_SIZE = INSTANCE_COUNT * sizeof(Instance);
 
 		private:
+			ref<Image> depthStencilImage;
+
 			ref<RenderPass> renderPass;
 			ref<Swapchain> swapchain;
+
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
+
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> instanceBuffer;
 	};

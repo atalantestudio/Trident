@@ -9,6 +9,8 @@ namespace ProjectA {
 		public:
 			OpenGLRenderPass(const RenderPassDescriptor& descriptor);
 
+			void setAttachmentImageView(uint32 attachmentIndex, const ref<ImageView>& imageView) final override;
+
 		private:
 			static GLuint createScreenProgram();
 
