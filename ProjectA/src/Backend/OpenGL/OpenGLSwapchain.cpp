@@ -53,37 +53,88 @@ namespace ProjectA {
 
 		constexpr ImageViewDescriptor imageViewDescriptor;
 
+		const uint32 attachmentCount = renderPass.getAttachmentCount();
+		const uint32 colorAttachmentCount = renderPass.getColorAttachmentCount();
+		const uint32 resolveAttachmentCount = renderPass.getResolveAttachmentCount();
+		const uint32 presentAttachmentIndex = renderPass.getPresentAttachmentIndex();
+
+		const chain<ref<ImageView>>& colorAttachmentImageViews = renderPass.getColorAttachmentImageViews();
+
+		chain<ref<OpenGLImageView>> baseAttachmentsImageViews(attachmentCount);
+
+		// Write color attachment image views (except for the presented attachment).
+		for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < colorAttachmentCount; colorAttachmentIndex += 1) {
+			if (resolveAttachmentCount == 0 && colorAttachmentIndex == presentAttachmentIndex) {
+				continue;
+			}
+
+			const ref<ImageView>& colorAttachmentImageView = colorAttachmentImageViews[colorAttachmentIndex];
+
+			baseAttachmentsImageViews[colorAttachmentIndex] = std::static_pointer_cast<OpenGLImageView>(colorAttachmentImageView);
+		}
+
+		// Write depth stencil attachment image view.
+		if (renderPass.depthStencil) {
+			const ref<ImageView>& depthStencilAttachmentImageView = renderPass.getDepthStencilAttachmentImageView();
+
+			baseAttachmentsImageViews[colorAttachmentCount + resolveAttachmentCount] = std::static_pointer_cast<OpenGLImageView>(depthStencilAttachmentImageView);
+		}
+
 		for (uint32 imageIndex = 0; imageIndex < imageCount; imageIndex += 1) {
 			images[imageIndex] = createScope<OpenGLImage>(imageDescriptor);
 			imageViews[imageIndex] = createScope<OpenGLImageView>(*images.back(), imageViewDescriptor);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[imageIndex]);
 
-			for (uint32 attachmentIndex = 0; attachmentIndex < renderPass.colorAttachments.size(); attachmentIndex += 1) {
-				const OpenGLImageView* imageView;
+			chain<ref<OpenGLImageView>> attachmentImageViews(baseAttachmentsImageViews);
 
-				//if (attachmentImageViews[attachmentIndex] == nullptr) {
-					imageView = imageViews[imageIndex].get();
-				/*}
-				else {
-					imageView = std::static_pointer_cast<OpenGLImageView>(attachmentImageViews[attachmentIndex]).get();
-				}*/
+			// Override eligible attachments (all resolve and present) with a swapchain image view.
+			if (resolveAttachmentCount > 0) {
+				// Every resolve attachment renders to a swapchain image view.
+				for (uint32 resolveAttachmentIndex = 0; resolveAttachmentIndex < resolveAttachmentCount; resolveAttachmentIndex += 1) {
+					attachmentImageViews[colorAttachmentCount + resolveAttachmentIndex] = imageViews[imageIndex];
+				}
+			}
+			else {
+				// If there is no resolve attachments, then 1 color attachment must render to a swapchain image view.
+				DEBUG_ASSERT(presentAttachmentIndex != std::numeric_limits<uint32>::max());
 
-				glBindTexture(imageView->image.target, imageView->image.object);
+				attachmentImageViews[presentAttachmentIndex] = imageViews[imageIndex];
+			}
+
+			uint32 attachmentIndex = 0;
+
+			for (uint32 i = 0; i < colorAttachmentCount + resolveAttachmentCount; i += 1) {
+				if (i == presentAttachmentIndex) {
+					continue;
+				}
+
+				const ref<OpenGLImageView>& imageView = attachmentImageViews[attachmentIndex];
 
 				glFramebufferTexture2D(
 					GL_FRAMEBUFFER,
-					GL_COLOR_ATTACHMENT0,
+					GL_COLOR_ATTACHMENT0 + attachmentIndex,
 					imageView->image.target,
-					imageView->image.object,
+					imageView->object,
 					0
 				);
+
+				attachmentIndex += 1;
 			}
 
+			// TODO: Include depth stencil attachment.
 			/*if (renderPass.depthStencil) {
-				const OpenGLImageView& imageView = *std::static_pointer_cast<OpenGLImageView>(attachmentImageViews.back());
+				const ref<OpenGLImageView>& imageView = attachmentImageViews.back();
 
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, imageView.image.target, imageView.image.object, 0);
+				glBindTexture(imageView->image.target, imageView->object);
+
+				glFramebufferTexture2D(
+					GL_FRAMEBUFFER,
+					GL_DEPTH_ATTACHMENT,
+					imageView->image.target,
+					imageView->object,
+					0
+				);
 			}*/
 
 			const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);

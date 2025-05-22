@@ -8,8 +8,7 @@
 namespace ProjectA {
 	OpenGLRenderPass::OpenGLRenderPass(const RenderPassDescriptor& descriptor) :
 		RenderPass(descriptor),
-		colorAttachments(descriptor.colorAttachments),
-		depthStencilAttachment(descriptor.depthStencilAttachment)
+		clearValueCount(colorAttachmentCount)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -17,17 +16,59 @@ namespace ProjectA {
 
 		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachments);
 
-		DEBUG_ASSERT(colorAttachmentCount > 0 && colorAttachmentCount < static_cast<uint32>(maxColorAttachments));
+		DEBUG_ASSERT(colorAttachmentCount < static_cast<uint32>(maxColorAttachments));
+
+		if (depthStencil && depthStencilAttachment.loadOperation == LoadOperation::CLEAR) {
+			clearValueCount += 1;
+		}
+		else {
+			for (sint32 colorAttachmentIndex = static_cast<sint32>(colorAttachmentCount - 1); colorAttachmentIndex >= 0; colorAttachmentIndex -= 1) {
+				const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
+
+				if (colorAttachment.loadOperation != LoadOperation::CLEAR) {
+					clearValueCount = colorAttachmentIndex;
+
+					break;
+				}
+			}
+		}
 	}
 
 	ref<Image> OpenGLRenderPass::createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const {
-		// TODO
-		return nullptr;
+		DEBUG_ASSERT(colorAttachmentIndex < colorAttachmentCount);
+		DEBUG_ASSERT((resolveAttachmentCount == 0 && colorAttachmentIndex != presentAttachmentIndex) || resolveAttachmentCount > 0);
+
+		const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
+
+		ImageDescriptor colorImageDescriptor{};
+		colorImageDescriptor.type = descriptor.type;
+		colorImageDescriptor.format = colorAttachment.format;
+		colorImageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT;
+		colorImageDescriptor.width = descriptor.width;
+		colorImageDescriptor.height = descriptor.height;
+		colorImageDescriptor.depth = descriptor.depth;
+		colorImageDescriptor.mipLevelCount = descriptor.mipLevelCount;
+		colorImageDescriptor.arrayLayerCount = descriptor.arrayLayerCount;
+		colorImageDescriptor.sampleCount = colorAttachment.sampleCount;
+
+		return createRef<OpenGLImage>(colorImageDescriptor);
 	}
 
 	ref<Image> OpenGLRenderPass::createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const {
-		// TODO
-		return nullptr;
+		DEBUG_ASSERT(depthStencil);
+
+		ImageDescriptor depthStencilImageDescriptor{};
+		depthStencilImageDescriptor.type = descriptor.type;
+		depthStencilImageDescriptor.format = depthStencilAttachment.format;
+		depthStencilImageDescriptor.usage = ImageUsage::DEPTH_STENCIL_ATTACHMENT;
+		depthStencilImageDescriptor.width = descriptor.width;
+		depthStencilImageDescriptor.height = descriptor.height;
+		depthStencilImageDescriptor.depth = descriptor.depth;
+		depthStencilImageDescriptor.mipLevelCount = descriptor.mipLevelCount;
+		depthStencilImageDescriptor.arrayLayerCount = descriptor.arrayLayerCount;
+		depthStencilImageDescriptor.sampleCount = depthStencilAttachment.sampleCount;
+
+		return createRef<OpenGLImage>(depthStencilImageDescriptor);
 	}
 
 	GLuint OpenGLRenderPass::createScreenProgram() {

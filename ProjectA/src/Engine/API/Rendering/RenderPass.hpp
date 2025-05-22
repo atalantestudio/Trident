@@ -16,6 +16,8 @@ namespace ProjectA {
 				colorAttachments(descriptor.colorAttachments),
 				depthStencilAttachment(descriptor.depthStencilAttachment)
 			{
+				DEBUG_ASSERT(colorAttachmentCount > 0);
+
 				colorAttachmentImageViews.resize(colorAttachmentCount);
 
 				attachmentCount = colorAttachmentCount + resolveAttachmentCount;

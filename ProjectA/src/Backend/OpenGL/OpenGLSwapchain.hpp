@@ -19,8 +19,8 @@ namespace ProjectA {
 			void destroy();
 
 		public:
-			chain<scope<OpenGLImage>> images;
-			chain<scope<OpenGLImageView>> imageViews;
+			chain<ref<OpenGLImage>> images;
+			chain<ref<OpenGLImageView>> imageViews;
 			chain<GLuint> framebuffers;
 
 		private:

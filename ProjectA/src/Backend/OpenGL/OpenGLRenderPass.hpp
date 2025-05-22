@@ -17,9 +17,6 @@ namespace ProjectA {
 			static GLuint createScreenProgram();
 
 		public:
-			chain<ColorAttachment> colorAttachments;
-			DepthStencilAttachment depthStencilAttachment;
-
-			GLuint screenProgram = 0;
+			uint32 clearValueCount;
 	};
 }

@@ -17,6 +17,9 @@ namespace ProjectA {
 				const OpenGLRenderPass& renderPass = *std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass).get();
 				const OpenGLSwapchain& swapchain = *std::static_pointer_cast<OpenGLSwapchain>(descriptor.swapchain).get();
 
+				// TODO: Clear attachments.
+				DEBUG_ASSERT(descriptor.clearValues.size() == renderPass.clearValueCount);
+
 				/*for (uint32 imageIndex = 0; imageIndex < swapchain.framebuffers.size(); imageIndex += 1) {
 					const Attachment& colorAttachment = renderPass.colorResolveAttachments[imageIndex];
 

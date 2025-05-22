@@ -5,6 +5,7 @@
 
 #include "Backend/OpenGL/Format.hpp"
 #include "Backend/OpenGL/ImageType.hpp"
+#include "Backend/OpenGL/ImageUsage.hpp"
 #include "Backend/OpenGL/InternalFormat.hpp"
 
 #ifdef BUILD_MODE_DEBUG
@@ -14,6 +15,7 @@
 namespace ProjectA {
 	OpenGLImage::OpenGLImage(const ImageDescriptor& descriptor) :
 		target(getGlImageType(descriptor.type, descriptor.sampleCount)),
+		usage(descriptor.usage),
 		internalFormat(getGlInternalFormat(descriptor.format)),
 		format(getGlFormat(descriptor.format)),
 		width(descriptor.width),

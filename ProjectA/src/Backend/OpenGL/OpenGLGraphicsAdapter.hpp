@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Backend/OpenGL/OpenGLDevice.hpp"
+#include "Backend/OpenGL/OpenGLSurface.hpp"
 
 #include "Engine/API/DeviceContext.hpp"
 #include "Engine/API/Window/Window.hpp"
@@ -45,5 +46,6 @@ namespace ProjectA {
 		private:
 			const DeviceContext deviceContext;
 			ref<OpenGLDevice> device;
+			ref<OpenGLSurface> surface;
 	};
 }

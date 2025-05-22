@@ -15,7 +15,8 @@
 
 namespace ProjectA {
 	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const Window& window) :
-		deviceContext(window)
+		deviceContext(window),
+		surface(createRef<OpenGLSurface>())
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -164,6 +165,7 @@ namespace ProjectA {
 			};
 
 			const char* sourceString = sourceStrings[source - GL_DEBUG_SOURCE_API];
+
 			std::string_view typeString;
 
 			switch (type) {
@@ -228,9 +230,6 @@ namespace ProjectA {
 	}
 
 	ref<Surface> OpenGLGraphicsAdapter::getSurface() const {
-		// TODO
-		DEBUG_ASSERT(false);
-
-		return nullptr;
+		return surface;
 	}
 }

@@ -19,6 +19,7 @@ namespace ProjectA {
 
 		public:
 			const GLenum target;
+			const ImageUsage usage;
 			const GLenum internalFormat;
 			const GLenum format;
 

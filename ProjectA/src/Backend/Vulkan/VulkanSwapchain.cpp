@@ -148,8 +148,6 @@ namespace ProjectA {
 			baseAttachmentsImageViews[colorAttachmentCount + resolveAttachmentCount] = std::static_pointer_cast<VulkanImageView>(depthStencilAttachmentImageView)->object;
 		}
 
-		// TODO: Depth stencil image view in base attachments.
-
 		for (uint32 imageIndex = 0; imageIndex < imageCount; imageIndex += 1) {
 			imageViewCreateInfo.image = images[imageIndex];
 
