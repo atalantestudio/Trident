@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/API/Rendering/ClearValue.hpp"
 #include "Engine/Renderer/Swapchain.hpp"
 
 namespace ProjectA {
@@ -10,8 +11,9 @@ namespace ProjectA {
 		//       If so, it could be directly accessed from it.
 		ref<Swapchain> swapchain;
 
-		// A clear value color each color attachment.
-		chain<vec4<float32>> clearValues;
+		// 1 clear value per attachment.
+		// Clear values are ignored for attachments without a LoadOperation::CLEAR.
+		chain<ClearValue> clearValues;
 
 		// Index of the swapchain image to render to.
 		uint32 imageIndex = 0;

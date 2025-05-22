@@ -60,7 +60,12 @@ namespace ProjectA {
 		fchain<VkClearValue> clearValues(descriptor.clearValues.size());
 
 		for (uint64 clearValueIndex = 0; clearValueIndex < clearValues.count; clearValueIndex += 1) {
-			_mm_store_ps(clearValues[clearValueIndex].color.float32, descriptor.clearValues[clearValueIndex].m);
+			clearValues[clearValueIndex].color.float32[0] = descriptor.clearValues[clearValueIndex].color[0];
+			clearValues[clearValueIndex].color.float32[1] = descriptor.clearValues[clearValueIndex].color[1];
+			clearValues[clearValueIndex].color.float32[2] = descriptor.clearValues[clearValueIndex].color[2];
+			clearValues[clearValueIndex].color.float32[3] = descriptor.clearValues[clearValueIndex].color[3];
+			clearValues[clearValueIndex].depthStencil.depth = descriptor.clearValues[clearValueIndex].depth;
+			clearValues[clearValueIndex].depthStencil.stencil = descriptor.clearValues[clearValueIndex].stencil;
 		}
 
 		VkRenderPassBeginInfo renderPassBeginInfo{};
@@ -68,7 +73,8 @@ namespace ProjectA {
 		renderPassBeginInfo.pNext = nullptr;
 		renderPassBeginInfo.renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->object;
 		renderPassBeginInfo.framebuffer = swapchain.framebuffers[descriptor.imageIndex];
-		renderPassBeginInfo.renderArea.offset = {0, 0};
+		renderPassBeginInfo.renderArea.offset.x = 0;
+		renderPassBeginInfo.renderArea.offset.y = 0;
 		renderPassBeginInfo.renderArea.extent.width = swapchain.getExtentWidth();
 		renderPassBeginInfo.renderArea.extent.height = swapchain.getExtentHeight();
 		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.count);
