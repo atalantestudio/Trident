@@ -23,37 +23,6 @@ namespace ProjectA {
 					renderPassDescriptor.depthStencilAttachment = depthStencilAttachment;
 
 					renderPass = createRenderPass(renderPassDescriptor);
-
-					/* Example G-Buffer render pass:
-
-					Attachment positionColorAttachment{};
-					positionColorAttachment.sampleCount = 1;
-					positionColorAttachment.loadOperation = LoadOperation::CLEAR;
-					positionColorAttachment.storeOperation = StoreOperation::STORE;
-
-					Attachment normalColorAttachment{};
-					normalColorAttachment.sampleCount = 1;
-					normalColorAttachment.loadOperation = LoadOperation::CLEAR;
-					normalColorAttachment.storeOperation = StoreOperation::STORE;
-
-					Attachment textureCoordinateColorAttachment{};
-					textureCoordinateColorAttachment.sampleCount = 1;
-					textureCoordinateColorAttachment.loadOperation = LoadOperation::CLEAR;
-					textureCoordinateColorAttachment.storeOperation = StoreOperation::STORE;
-
-					Attachment depthStencilAttachment{};
-					depthStencilAttachment.sampleCount = 1;
-					depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
-					depthStencilAttachment.storeOperation = StoreOperation::STORE;
-
-					RenderPassDescriptor renderPassDescriptor{};
-					renderPassDescriptor.colorAttachments = {positionColorAttachment, normalColorAttachment, textureCoordinateColorAttachment};
-					renderPassDescriptor.depthStencilAttachment = depthStencilAttachment;
-					renderPassDescriptor.enableDepthStencil = true;
-
-					renderPass = createRenderPass(renderPassDescriptor);
-
-					*/
 				}
 
 				createAttachments();
