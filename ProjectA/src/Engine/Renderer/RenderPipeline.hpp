@@ -23,6 +23,7 @@ namespace ProjectA {
 		FrontFace frontFace = FrontFace::CLOCKWISE;
 		float32 lineWidth = 1.0f;
 		float32 minSampleShading = 0.0f;
+		uint8 sampleCount = 1;
 		DynamicState dynamicState;
 	};
 

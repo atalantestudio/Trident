@@ -9,16 +9,12 @@ namespace ProjectA {
 		public:
 			OpenGLRenderPass(const RenderPassDescriptor& descriptor);
 
-			void setAttachmentImageView(uint32 attachmentIndex, const ref<ImageView>& imageView) final override;
-
 		private:
 			static GLuint createScreenProgram();
 
 		public:
-			uint32 colorAttachmentCount;
-
-			// This includes color/resolve attachments and the depth stencil attachment.
-			chain<Attachment> attachments;
+			chain<ColorAttachment> colorAttachments;
+			DepthStencilAttachment depthStencilAttachment;
 
 			GLuint screenProgram = 0;
 	};

@@ -9,9 +9,15 @@ namespace ProjectA {
 				// 1. Create render pass.
 				{
 					Attachment colorAttachment{};
-					colorAttachment.sampleCount = 1;
+					colorAttachment.present = true;
+					colorAttachment.sampleCount = 4;
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
+
+					Attachment resolveAttachment{};
+					resolveAttachment.colorAttachmentIndex = 0;
+					resolveAttachment.loadOperation = LoadOperation::CLEAR;
+					resolveAttachment.storeOperation = StoreOperation::STORE;
 
 					DepthStencilAttachment depthStencilAttachment{};
 					depthStencilAttachment.enabled = true;
@@ -20,6 +26,7 @@ namespace ProjectA {
 
 					RenderPassDescriptor renderPassDescriptor{};
 					renderPassDescriptor.colorAttachments = {colorAttachment};
+					renderPassDescriptor.resolveAttachments = {resolveAttachment};
 					renderPassDescriptor.depthStencilAttachment = depthStencilAttachment;
 
 					renderPass = createRenderPass(renderPassDescriptor);
@@ -165,7 +172,7 @@ namespace ProjectA {
 				swapchainDescriptor.extentWidth = event.getWidth();
 				swapchainDescriptor.extentHeight = event.getHeight();
 
-				swapchain->recreate(swapchainDescriptor);
+				swapchain->update(swapchainDescriptor);
 			}
 
 		private:

@@ -9,7 +9,7 @@ namespace ProjectA {
 		public:
 			OpenGLSwapchain(const SwapchainDescriptor& descriptor);
 
-			void recreate(const SwapchainDescriptor& descriptor) final override;
+			void update(const SwapchainDescriptor& descriptor) final override;
 
 			uint32 getExtentWidth() const final override;
 			uint32 getExtentHeight() const final override;
@@ -18,12 +18,10 @@ namespace ProjectA {
 
 			void destroy();
 
-			bool requiresResolvePass() const;
-
 		public:
-			chain<GLuint> framebuffers;
 			chain<scope<OpenGLImage>> images;
 			chain<scope<OpenGLImageView>> imageViews;
+			chain<GLuint> framebuffers;
 
 		private:
 			uint32 extentWidth;

@@ -13,21 +13,14 @@ namespace ProjectA {
 
 			~VulkanRenderPass();
 
-			void setAttachmentImageView(uint32 attachmentIndex, const ref<ImageView>& imageView) final override;
-
-			const chain<ref<ImageView>>& getAttachmentImageViews() const;
-
 		public:
-			uint32 attachmentCount;
-			const chain<Attachment> colorAttachments;
-			DepthStencilAttachment depthStencilAttachment;
 			uint32 surfaceExtentWidth;
 			uint32 surfaceExtentHeight;
+
+			chain<ColorAttachment> colorAttachments;
 
 		private:
 			const VulkanPhysicalDevice& physicalDevice;
 			const VulkanDevice& device;
-
-			chain<ref<ImageView>> attachmentImageViews;
 	};
 }

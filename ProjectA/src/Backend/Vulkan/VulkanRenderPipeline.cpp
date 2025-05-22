@@ -113,7 +113,7 @@ namespace ProjectA {
 		multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		multisampleStateCreateInfo.pNext = nullptr;
 		multisampleStateCreateInfo.flags = 0;
-		multisampleStateCreateInfo.rasterizationSamples = static_cast<VkSampleCountFlagBits>(renderPass.colorAttachments[0].sampleCount);
+		multisampleStateCreateInfo.rasterizationSamples = static_cast<VkSampleCountFlagBits>(descriptor.sampleCount);
 
 		if (descriptor.minSampleShading == 0.0f) {
 			multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;

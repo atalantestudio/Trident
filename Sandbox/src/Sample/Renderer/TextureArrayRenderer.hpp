@@ -15,8 +15,7 @@ namespace ProjectA {
 
 				// 1. Create image views.
 				{
-					ImageViewDescriptor imageViewDescriptor{};
-					imageViewDescriptor.imageAspect = ImageAspect::COLOR;
+					constexpr ImageViewDescriptor imageViewDescriptor;
 
 					baboonImageView = baboonImage->createView(imageViewDescriptor);
 					cameramanImageView = cameramanImage->createView(imageViewDescriptor);
@@ -215,7 +214,7 @@ namespace ProjectA {
 				swapchainDescriptor.extentWidth = event.getWidth();
 				swapchainDescriptor.extentHeight = event.getHeight();
 
-				swapchain->recreate(swapchainDescriptor);
+				swapchain->update(swapchainDescriptor);
 			}
 
 		private:

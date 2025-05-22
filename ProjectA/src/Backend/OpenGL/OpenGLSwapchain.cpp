@@ -8,7 +8,7 @@ namespace ProjectA {
 		construct(descriptor);
 	}
 
-	void OpenGLSwapchain::recreate(const SwapchainDescriptor& descriptor) {
+	void OpenGLSwapchain::update(const SwapchainDescriptor& descriptor) {
 		destroy();
 		construct(descriptor);
 	}
@@ -32,45 +32,63 @@ namespace ProjectA {
 
 		const OpenGLRenderPass& renderPass = *std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass);
 
-		GLint maxColorAttachments;
-
-		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachments);
-
-		DEBUG_ASSERT(renderPass.colorAttachmentCount <= static_cast<uint32>(maxColorAttachments));
-
 		constexpr uint32 imageCount = 1;
 
+		images.resize(imageCount);
+		imageViews.resize(imageCount);
 		framebuffers.resize(imageCount);
 
-		glCreateFramebuffers(static_cast<uint32>(framebuffers.size()), framebuffers.data());
+		glCreateFramebuffers(imageCount, framebuffers.data());
+
+		ImageDescriptor imageDescriptor{};
+		imageDescriptor.type = ImageType::TEXTURE_2D;
+		imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
+		imageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT;
+		imageDescriptor.width = extentWidth;
+		imageDescriptor.height = extentHeight;
+		imageDescriptor.depth = 1;
+		imageDescriptor.mipLevelCount = 1;
+		imageDescriptor.arrayLayerCount = 1;
+		imageDescriptor.sampleCount = 1;
 
 		constexpr ImageViewDescriptor imageViewDescriptor;
 
 		for (uint32 imageIndex = 0; imageIndex < imageCount; imageIndex += 1) {
+			images[imageIndex] = createScope<OpenGLImage>(imageDescriptor);
+			imageViews[imageIndex] = createScope<OpenGLImageView>(*images.back(), imageViewDescriptor);
+
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[imageIndex]);
 
-			for (uint32 attachmentIndex = 0; attachmentIndex < renderPass.attachments.size(); attachmentIndex += 1) {
-				const Attachment& attachment = renderPass.attachments[attachmentIndex];
+			for (uint32 attachmentIndex = 0; attachmentIndex < renderPass.colorAttachments.size(); attachmentIndex += 1) {
+				const OpenGLImageView* imageView;
 
-				ImageDescriptor imageDescriptor{};
-				imageDescriptor.type = ImageType::TEXTURE_2D;
-				imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-				imageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT;
-				imageDescriptor.width = extentWidth;
-				imageDescriptor.height = extentHeight;
-				imageDescriptor.depth = 1;
-				imageDescriptor.mipLevelCount = 1;
-				imageDescriptor.arrayLayerCount = 1;
-				imageDescriptor.sampleCount = attachment.sampleCount;
+				//if (attachmentImageViews[attachmentIndex] == nullptr) {
+					imageView = imageViews[imageIndex].get();
+				/*}
+				else {
+					imageView = std::static_pointer_cast<OpenGLImageView>(attachmentImageViews[attachmentIndex]).get();
+				}*/
 
-				images.emplace_back(createScope<OpenGLImage>(imageDescriptor));
+				glBindTexture(imageView->image.target, imageView->image.object);
 
-				imageViews.emplace_back(createScope<OpenGLImageView>(*images.back(), imageViewDescriptor));
-
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentIndex, images.back()->target, images.back()->object, 0);
+				glFramebufferTexture2D(
+					GL_FRAMEBUFFER,
+					GL_COLOR_ATTACHMENT0,
+					imageView->image.target,
+					imageView->image.object,
+					0
+				);
 			}
 
-			DEBUG_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+			/*if (renderPass.depthStencil) {
+				const OpenGLImageView& imageView = *std::static_pointer_cast<OpenGLImageView>(attachmentImageViews.back());
+
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, imageView.image.target, imageView.image.object, 0);
+			}*/
+
+			const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+			DEBUG_ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -79,32 +97,8 @@ namespace ProjectA {
 	void OpenGLSwapchain::destroy() {
 		glDeleteFramebuffers(static_cast<uint32>(framebuffers.size()), framebuffers.data());
 
-		fchain<GLuint> glImages(imageViews.size() + images.size());
-
-		uint64 imageIndex = 0;
-
-		for (; imageIndex < imageViews.size(); imageIndex += 1) {
-			glImages[imageIndex] = imageViews[imageIndex]->object;
-		}
-
-		for (; imageIndex < images.size(); imageIndex += 1) {
-			glImages[imageIndex] = images[imageIndex]->object;
-		}
-
-		glDeleteTextures(static_cast<uint32>(glImages.count), &glImages[0]);
-
-		framebuffers.clear();
-		images.clear();
 		imageViews.clear();
-	}
-
-	bool OpenGLSwapchain::requiresResolvePass() const {
-		for (const scope<OpenGLImageView>& imageView : imageViews) {
-			if (imageView->image.target == GL_TEXTURE_2D_MULTISAMPLE) {
-				return true;
-			}
-		}
-
-		return false;
+		images.clear();
+		framebuffers.clear();
 	}
 }

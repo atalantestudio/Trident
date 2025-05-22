@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/ObjectWrapper.hpp"
+#include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
 #include "Engine/Renderer/Image.hpp"
 
 namespace ProjectA {

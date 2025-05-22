@@ -17,7 +17,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_ASSERT(descriptor.sampleCount > 0, "Could not create image: The sample count must be non-zero.");
+		DEBUG_ASSERT(descriptor.sampleCount > 0);
 
 		glCreateTextures(target, 1, &object);
 
@@ -27,6 +27,9 @@ namespace ProjectA {
 		else {
 			glTextureStorage2DMultisample(object, descriptor.sampleCount, internalFormat, descriptor.width, descriptor.height, GL_TRUE);
 		}
+
+		// TODO: Check GL_TEXTURE_IMMUTABLE_FORMAT after creation.
+		// glGetTextureParameteriv/GL_TEXTURE_IMMUTABLE_FORMAT
 	}
 
 	OpenGLImage::~OpenGLImage() {

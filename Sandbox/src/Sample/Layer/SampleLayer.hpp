@@ -4,12 +4,13 @@
 
 #define RENDERER_COMPUTE_SHADER 0
 #define RENDERER_DEPTH_TEST 1
-#define RENDERER_TEXT 2
-#define RENDERER_TEXTURE 3
-#define RENDERER_TEXTURE_ARRAY 4
-#define RENDERER_TRIANGLE 5
+#define RENDERER_MULTISAMPLE 2
+#define RENDERER_TEXT 3
+#define RENDERER_TEXTURE 4
+#define RENDERER_TEXTURE_ARRAY 5
+#define RENDERER_TRIANGLE 6
 
-#define RENDERER RENDERER_DEPTH_TEST
+#define RENDERER RENDERER_MULTISAMPLE
 
 #if RENDERER == RENDERER_COMPUTE_SHADER
 	#include "../Renderer/ComputeShaderRenderer.hpp"
@@ -21,6 +22,12 @@
 	#include "../Renderer/DepthTestRenderer.hpp"
 
 	#define RENDERER_CLASS DepthTestRenderer
+#endif
+
+#if RENDERER == RENDERER_MULTISAMPLE
+	#include "../Renderer/MultisampleRenderer.hpp"
+
+	#define RENDERER_CLASS MultisampleRenderer
 #endif
 
 #if RENDERER == RENDERER_TEXT

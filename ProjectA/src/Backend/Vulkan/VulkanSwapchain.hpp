@@ -15,7 +15,7 @@ namespace ProjectA {
 
 			~VulkanSwapchain() final override;
 
-			void recreate(const SwapchainDescriptor& descriptor) final override;
+			void update(const SwapchainDescriptor& descriptor) final override;
 
 			uint32 getExtentWidth() const final override;
 			uint32 getExtentHeight() const final override;
@@ -23,6 +23,8 @@ namespace ProjectA {
 			void construct(const SwapchainDescriptor& descriptor);
 
 			void destroy();
+
+			void createImageAndImageView(const ColorAttachment& colorAttachment, uint32 attachmentIndex);
 
 		public:
 			chain<VkImage> images;
@@ -33,5 +35,8 @@ namespace ProjectA {
 			const VulkanPhysicalDevice& physicalDevice;
 			const VulkanDevice& device;
 			const VulkanSurface& surface;
+
+			chain<scope<VulkanImage>> colorImages;
+			chain<scope<VulkanImageView>> colorImageViews;
 	};
 }

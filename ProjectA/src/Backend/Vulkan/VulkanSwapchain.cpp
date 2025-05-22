@@ -21,7 +21,7 @@ namespace ProjectA {
 		destroy();
 	}
 
-	void VulkanSwapchain::recreate(const SwapchainDescriptor& descriptor) {
+	void VulkanSwapchain::update(const SwapchainDescriptor& descriptor) {
 		destroy();
 		construct(descriptor);
 	}
@@ -91,8 +91,6 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images (code: []).", result);
 
-		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
-
 		// TODO: Replace with ImageView API.
 		VkImageViewCreateInfo imageViewCreateInfo{};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -110,36 +108,38 @@ namespace ProjectA {
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 		imageViewCreateInfo.subresourceRange.layerCount = 1;
 
+		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
+
+		const uint32 attachmentCount = renderPass.getAttachmentCount();
+		const uint32 colorAttachmentCount = renderPass.getColorAttachmentCount();
+		const uint32 resolveAttachmentCount = renderPass.getResolveAttachmentCount();
+		const uint32 presentAttachmentIndex = renderPass.getPresentAttachmentIndex();
+
 		// TODO: Replace with Framebuffer API.
 		VkFramebufferCreateInfo framebufferCreateInfo{};
 		framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		framebufferCreateInfo.pNext = nullptr;
 		framebufferCreateInfo.flags = 0;
 		framebufferCreateInfo.renderPass = renderPass.object;
-		framebufferCreateInfo.attachmentCount = renderPass.attachmentCount;
+		framebufferCreateInfo.attachmentCount = attachmentCount;
 		framebufferCreateInfo.width = descriptor.extentWidth;
 		framebufferCreateInfo.height = descriptor.extentHeight;
 		framebufferCreateInfo.layers = 1;
 
-		const chain<ref<ImageView>>& attachmentImageViews = renderPass.getAttachmentImageViews();
+		colorImages.resize(attachmentCount);
+		colorImageViews.resize(attachmentCount);
 
-		chain<VkImageView> baseAttachments(renderPass.attachmentCount);
+		chain<VkImageView> baseAttachments(attachmentCount);
 
-		uint32 presentAttachmentIndex = 0;
-		uint32 presentAttachmentCount = 0;
+		for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < colorAttachmentCount; colorAttachmentIndex += 1) {
+			const ColorAttachment& colorAttachment = renderPass.colorAttachments[colorAttachmentIndex];
 
-		for (uint32 attachmentIndex = 0; attachmentIndex < renderPass.attachmentCount; attachmentIndex += 1) {
-			if (attachmentImageViews[attachmentIndex] == nullptr) {
-				presentAttachmentIndex = attachmentIndex;
-				presentAttachmentCount += 1;
+			createImageAndImageView(colorAttachment, colorAttachmentIndex);
 
-				continue;
-			}
-
-			baseAttachments[attachmentIndex] = std::static_pointer_cast<VulkanImageView>(attachmentImageViews[attachmentIndex])->object;
+			baseAttachments[colorAttachmentIndex] = colorImageViews[colorAttachmentIndex]->object;
 		}
 
-		DEBUG_ASSERT(presentAttachmentCount == 0 || presentAttachmentCount == 1);
+		// TODO: Depth stencil image view in base attachments.
 
 		for (uint32 imageIndex = 0; imageIndex < imageCount; imageIndex += 1) {
 			imageViewCreateInfo.image = images[imageIndex];
@@ -150,8 +150,18 @@ namespace ProjectA {
 
 			chain<VkImageView> attachments(baseAttachments);
 
-			// Bind the current swapchain image view to the attachment that is presented onto the screen.
-			attachments[presentAttachmentIndex] = imageViews[imageIndex];
+			if (resolveAttachmentCount > 0) {
+				// Every resolve attachment renders to a swapchain image view.
+				for (uint32 resolveAttachmentIndex = 0; resolveAttachmentIndex < resolveAttachmentCount; resolveAttachmentIndex += 1) {
+					attachments[colorAttachmentCount + resolveAttachmentIndex] = imageViews[imageIndex];
+				}
+			}
+			else {
+				// If there is no resolve attachments, then 1 color attachment must render to a swapchain image view.
+				DEBUG_ASSERT(presentAttachmentIndex != std::numeric_limits<uint32>::max());
+
+				attachments[presentAttachmentIndex] = imageViews[imageIndex];
+			}
 
 			framebufferCreateInfo.pAttachments = &attachments[0];
 
@@ -171,5 +181,13 @@ namespace ProjectA {
 
 		// The swapchain images are automatically destroyed with the swapchain.
 		vkDestroySwapchainKHR(device.object, object, nullptr);
+	}
+
+	void VulkanSwapchain::createImageAndImageView(const ColorAttachment& colorAttachment, uint32 attachmentIndex) {
+		colorImages[attachmentIndex] = createScope<VulkanImage>(device, colorAttachment.imageDescriptor);
+
+		constexpr ImageViewDescriptor imageViewDescriptor;
+
+		colorImageViews[attachmentIndex] = createScope<VulkanImageView>(device.object, *colorImages[attachmentIndex], imageViewDescriptor);
 	}
 }

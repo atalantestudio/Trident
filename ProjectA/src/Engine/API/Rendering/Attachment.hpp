@@ -1,13 +1,12 @@
 #pragma once
 
-#include "Engine/API/Rendering/ImageView.hpp"
+#include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Rendering/LoadOperation.hpp"
 #include "Engine/API/Rendering/StoreOperation.hpp"
 
 namespace ProjectA {
-	struct Attachment {
-		// The number of samples of the attachment. It must be a power of 2.
-		uint8 sampleCount;
+	struct ColorAttachment {
+		ImageDescriptor imageDescriptor;
 
 		// Specifies how the attachment's contents are treated at the beginning of the subpass.
 		LoadOperation loadOperation;
@@ -17,7 +16,7 @@ namespace ProjectA {
 	};
 
 	struct DepthStencilAttachment {
-		bool enabled;
+		bool enabled = false;
 
 		// The number of samples of the attachment. It must be a power of 2.
 		uint8 sampleCount;

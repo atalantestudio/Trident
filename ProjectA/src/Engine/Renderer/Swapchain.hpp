@@ -7,7 +7,7 @@ namespace ProjectA {
 		public:
 			virtual ~Swapchain() = default;
 
-			virtual void recreate(const SwapchainDescriptor& descriptor) = 0;
+			virtual void update(const SwapchainDescriptor& descriptor) = 0;
 
 			// TODO: Use vec2<sint32>.
 			virtual uint32 getExtentWidth() const = 0;

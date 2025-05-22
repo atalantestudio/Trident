@@ -132,7 +132,7 @@ namespace ProjectA {
 				swapchainDescriptor.extentWidth = event.getWidth();
 				swapchainDescriptor.extentHeight = event.getHeight();
 
-				swapchain->recreate(swapchainDescriptor);
+				swapchain->update(swapchainDescriptor);
 			}
 
 		private:

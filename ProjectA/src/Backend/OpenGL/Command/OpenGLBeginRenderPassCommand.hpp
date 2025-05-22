@@ -17,23 +17,21 @@ namespace ProjectA {
 				const OpenGLRenderPass& renderPass = *std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass).get();
 				const OpenGLSwapchain& swapchain = *std::static_pointer_cast<OpenGLSwapchain>(descriptor.swapchain).get();
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < swapchain.framebuffers.size(); framebufferIndex += 1) {
-					const Attachment& colorAttachment = renderPass.attachments[framebufferIndex];
+				/*for (uint32 imageIndex = 0; imageIndex < swapchain.framebuffers.size(); imageIndex += 1) {
+					const Attachment& colorAttachment = renderPass.colorResolveAttachments[imageIndex];
 
-					glBindFramebuffer(GL_FRAMEBUFFER, swapchain.framebuffers[framebufferIndex]);
+					glBindFramebuffer(GL_FRAMEBUFFER, swapchain.framebuffers[imageIndex]);
 					glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-					if (colorAttachment.loadOperation == LoadOperation::CLEAR || colorAttachment.loadOperation == LoadOperation::UNDEFINED) {
-						const vec4<float32>& color = descriptor.clearValues[framebufferIndex];
+					if (colorAttachment.loadOperation == LoadOperation::CLEAR) {
+						const vec4<float32>& color = descriptor.clearValues[imageIndex];
 
 						glClearColor(color[0], color[1], color[2], color[3]);
 						glClear(GL_COLOR_BUFFER_BIT);
 					}
 				}
 
-				if (!swapchain.requiresResolvePass()) {
-					glBindFramebuffer(GL_FRAMEBUFFER, 0);
-				}
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
 			}
 
 		private:

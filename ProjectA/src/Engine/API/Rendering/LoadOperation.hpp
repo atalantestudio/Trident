@@ -8,7 +8,7 @@ namespace ProjectA {
 		// Clears the previous contents within the render area.
 		CLEAR = 1,
 
-		// Doesn't preserve the previous contents within the render area and marks them as undefined.
+		// Marks the previous contents within the render area as undefined.
 		UNDEFINED = 2,
 	};
 }
