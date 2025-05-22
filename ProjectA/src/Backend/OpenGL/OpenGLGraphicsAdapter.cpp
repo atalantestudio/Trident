@@ -107,10 +107,6 @@ namespace ProjectA {
 		device = createRef<OpenGLDevice>(deviceContext);
 	}
 
-	ref<Device> OpenGLGraphicsAdapter::getDevice() const {
-		return device;
-	}
-
 	ref<Buffer> OpenGLGraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
 		return createRef<OpenGLBuffer>(descriptor);
 	}
@@ -226,4 +222,15 @@ namespace ProjectA {
 			}
 		}
 	#endif
+
+	ref<Device> OpenGLGraphicsAdapter::getDevice() const {
+		return device;
+	}
+
+	ref<Surface> OpenGLGraphicsAdapter::getSurface() const {
+		// TODO
+		DEBUG_ASSERT(false);
+
+		return nullptr;
+	}
 }

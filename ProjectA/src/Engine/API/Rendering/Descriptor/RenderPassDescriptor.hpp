@@ -5,8 +5,12 @@
 namespace ProjectA {
 	struct RenderPassDescriptor {
 		chain<ColorAttachment> colorAttachments;
-		bool enableResolve;
-		uint32 presentAttachmentIndex = std::numeric_limits<uint32>::max();
 		DepthStencilAttachment depthStencilAttachment;
+
+		bool enableResolve;
+		bool enableDepthStencil;
+
+		// Sets the index of the attachment that will render to a swapchain image.
+		uint32 presentAttachmentIndex = std::numeric_limits<uint32>::max();
 	};
 }

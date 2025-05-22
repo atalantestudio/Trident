@@ -1,16 +1,23 @@
 #pragma once
 
+#include "Engine/API/Rendering/Descriptor/AttachmentImageDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/RenderPassDescriptor.hpp"
+#include "Engine/API/Rendering/Image.hpp"
 
 namespace ProjectA {
 	class RenderPass {
 		public:
 			RenderPass(const RenderPassDescriptor& descriptor) :
-				depthStencil(descriptor.depthStencilAttachment.enabled),
+				depthStencil(descriptor.enableDepthStencil),
+				resolve(descriptor.enableResolve),
 				colorAttachmentCount(static_cast<uint32>(descriptor.colorAttachments.size())),
 				resolveAttachmentCount(descriptor.enableResolve ? colorAttachmentCount : 0),
-				presentAttachmentIndex(descriptor.presentAttachmentIndex)
+				presentAttachmentIndex(descriptor.presentAttachmentIndex),
+				colorAttachments(descriptor.colorAttachments),
+				depthStencilAttachment(descriptor.depthStencilAttachment)
 			{
+				colorAttachmentImageViews.resize(colorAttachmentCount);
+
 				attachmentCount = colorAttachmentCount + resolveAttachmentCount;
 
 				if (depthStencil) {
@@ -36,13 +43,45 @@ namespace ProjectA {
 				return presentAttachmentIndex;
 			}
 
+			virtual ref<Image> createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const = 0;
+
+			virtual ref<Image> createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const = 0;
+
+			const chain<ref<ImageView>>& getColorAttachmentImageViews() const {
+				return colorAttachmentImageViews;
+			}
+
+			void setColorAttachmentImageView(const ref<ImageView>& imageView, uint32 colorAttachmentIndex) {
+				DEBUG_ASSERT(colorAttachmentIndex < colorAttachmentCount);
+				DEBUG_ASSERT((resolveAttachmentCount == 0 && colorAttachmentIndex != presentAttachmentIndex) || resolveAttachmentCount > 0);
+
+				colorAttachmentImageViews[colorAttachmentIndex] = imageView;
+			}
+
+			const ref<ImageView>& getDepthStencilAttachmentImageView() const {
+				return depthStencilAttachmentImageView;
+			}
+
+			void setDepthStencilAttachmentImageView(const ref<ImageView>& imageView) {
+				DEBUG_ASSERT(depthStencil);
+
+				depthStencilAttachmentImageView = imageView;
+			}
+
 		public:
 			const bool depthStencil;
+			const bool resolve;
 
 		protected:
 			uint32 attachmentCount;
 			uint32 colorAttachmentCount;
 			uint32 resolveAttachmentCount;
 			uint32 presentAttachmentIndex;
+
+			chain<ColorAttachment> colorAttachments;
+			DepthStencilAttachment depthStencilAttachment;
+
+			chain<ref<ImageView>> colorAttachmentImageViews;
+			ref<ImageView> depthStencilAttachmentImageView;
 	};
 }

@@ -24,8 +24,6 @@ namespace ProjectA {
 
 			void destroy();
 
-			void createImageAndImageView(const ColorAttachment& colorAttachment, uint32 attachmentIndex);
-
 		public:
 			chain<VkImage> images;
 			chain<VkImageView> imageViews;
@@ -35,8 +33,5 @@ namespace ProjectA {
 			const VulkanPhysicalDevice& physicalDevice;
 			const VulkanDevice& device;
 			const VulkanSurface& surface;
-
-			chain<scope<VulkanImage>> colorImages;
-			chain<scope<VulkanImageView>> colorImageViews;
 	};
 }

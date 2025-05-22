@@ -105,4 +105,9 @@ namespace ProjectA {
 
 		return surfaceCapabilities;
 	}
+
+	ImageFormat VulkanSurface::getFormat() const {
+		// TODO
+		return ImageFormat::B8G8R8A8_UNORM;
+	}
 }

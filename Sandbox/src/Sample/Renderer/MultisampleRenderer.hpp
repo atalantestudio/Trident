@@ -8,31 +8,25 @@ namespace ProjectA {
 			MultisampleRenderer() {
 				// 1. Create render pass.
 				{
-					ImageDescriptor multisampleImageDescriptor{};
-					multisampleImageDescriptor.type = ImageType::TEXTURE_2D;
-					multisampleImageDescriptor.format = ImageFormat::B8G8R8A8_UNORM;
-					multisampleImageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT;
-					multisampleImageDescriptor.width = Application::get().getWindow().getSize()[0];
-					multisampleImageDescriptor.height = Application::get().getWindow().getSize()[1];
-					multisampleImageDescriptor.depth = 1;
-					multisampleImageDescriptor.mipLevelCount = 1;
-					multisampleImageDescriptor.arrayLayerCount = 1;
-					multisampleImageDescriptor.sampleCount = 4;
-
-					ColorAttachment colorAttachment{};
-					colorAttachment.imageDescriptor = multisampleImageDescriptor;
-					colorAttachment.loadOperation = LoadOperation::CLEAR;
-					colorAttachment.storeOperation = StoreOperation::STORE;
+					ColorAttachment multisampleColorAttachment{};
+					multisampleColorAttachment.format = getSurface()->getFormat();
+					multisampleColorAttachment.sampleCount = 4;
+					multisampleColorAttachment.loadOperation = LoadOperation::CLEAR;
+					multisampleColorAttachment.storeOperation = StoreOperation::STORE;
 
 					RenderPassDescriptor renderPassDescriptor;
-					renderPassDescriptor.colorAttachments = {colorAttachment};
+					renderPassDescriptor.colorAttachments = {multisampleColorAttachment};
 					renderPassDescriptor.enableResolve = true;
+					renderPassDescriptor.enableDepthStencil = false;
 					renderPassDescriptor.presentAttachmentIndex = 0;
 
 					renderPass = createRenderPass(renderPassDescriptor);
 				}
 
-				// 2. Create swapchain.
+				// 2. Create multisample image attachment.
+				updateMultisampleAttachment();
+
+				// 3. Create swapchain.
 				{
 					SwapchainDescriptor swapchainDescriptor;
 					swapchainDescriptor.renderPass = renderPass;
@@ -42,14 +36,14 @@ namespace ProjectA {
 					swapchain = createSwapchain(swapchainDescriptor);
 				}
 
-				// 3. Create pipeline layout.
+				// 4. Create pipeline layout.
 				{
 					const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 4. Create render pipeline.
+				// 5. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>(false);
@@ -71,13 +65,12 @@ namespace ProjectA {
 					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Triangle.frag.spv", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-					renderPipelineDescriptor.sampleCount = 4;
 					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 5. Create vertex buffer.
+				// 6. Create vertex buffer.
 				{
 					constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
 
@@ -141,6 +134,8 @@ namespace ProjectA {
 
 				device->waitIdle();
 
+				updateMultisampleAttachment();
+
 				SwapchainDescriptor swapchainDescriptor;
 				swapchainDescriptor.renderPass = renderPass;
 				swapchainDescriptor.extentWidth = event.getWidth();
@@ -150,12 +145,34 @@ namespace ProjectA {
 			}
 
 		private:
+			void updateMultisampleAttachment() {
+				AttachmentImageDescriptor multisampleAttachmentImageDescriptor{};
+				multisampleAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
+				multisampleAttachmentImageDescriptor.width = Application::get().getWindow().getSize()[0];
+				multisampleAttachmentImageDescriptor.height = Application::get().getWindow().getSize()[1];
+				multisampleAttachmentImageDescriptor.depth = 1;
+				multisampleAttachmentImageDescriptor.mipLevelCount = 1;
+				multisampleAttachmentImageDescriptor.arrayLayerCount = 1;
+
+				multisampleImage = renderPass->createColorAttachmentImage(multisampleAttachmentImageDescriptor, 0);
+
+				constexpr ImageViewDescriptor multisampleImageViewDescriptor;
+
+				multisampleImageView = multisampleImage->createView(multisampleImageViewDescriptor);
+
+				renderPass->setColorAttachmentImageView(multisampleImageView, 0);
+			}
+
+		private:
 			struct Vertex {
 				svec2<float32> position;
 				svec3<float32> color;
 			};
 
 		private:
+			ref<Image> multisampleImage;
+			ref<ImageView> multisampleImageView;
+
 			ref<RenderPass> renderPass;
 			ref<Swapchain> swapchain;
 

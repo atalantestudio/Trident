@@ -13,6 +13,10 @@
 #include "Backend/Vulkan/PrimitiveTopology.hpp"
 #include "Backend/Vulkan/VertexInputAttributeType.hpp"
 
+#ifdef BUILD_MODE_DEBUG
+	#include "Engine/API/Rendering/SampleCount.hpp"
+#endif
+
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
@@ -113,7 +117,7 @@ namespace ProjectA {
 		multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		multisampleStateCreateInfo.pNext = nullptr;
 		multisampleStateCreateInfo.flags = 0;
-		multisampleStateCreateInfo.rasterizationSamples = static_cast<VkSampleCountFlagBits>(descriptor.sampleCount);
+		multisampleStateCreateInfo.rasterizationSamples = renderPass.sampleCountFlagBits;
 
 		if (descriptor.minSampleShading == 0.0f) {
 			multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;

@@ -2,7 +2,7 @@
 
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
-#include "Engine/Renderer/Image.hpp"
+#include "Engine/API/Rendering/Image.hpp"
 
 namespace ProjectA {
 	class VulkanDevice;

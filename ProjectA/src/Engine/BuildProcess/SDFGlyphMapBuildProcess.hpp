@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Engine/API/Rendering/Image.hpp"
 #include "Engine/Filesystem/File/TTFFile.hpp"
-#include "Engine/Renderer/Image.hpp"
 #include "Engine/Renderer/ImageLayout.hpp"
 
 namespace ProjectA {

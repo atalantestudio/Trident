@@ -11,29 +11,22 @@ namespace ProjectA {
 		physicalDevice(physicalDevice),
 		device(device),
 		surfaceExtentWidth(surface.window.getSize()[0]),
-		surfaceExtentHeight(surface.window.getSize()[1]),
-		colorAttachments(descriptor.colorAttachments)
+		surfaceExtentHeight(surface.window.getSize()[1])
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
 		fchain<VkAttachmentDescription> attachmentDescriptions(attachmentCount);
 		fchain<VkAttachmentReference> attachmentReferences(attachmentCount);
 
+		VkSampleCountFlags sampleCountFlags = 0;
+
 		for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < descriptor.colorAttachments.size(); colorAttachmentIndex += 1) {
 			const ColorAttachment& colorAttachment = descriptor.colorAttachments[colorAttachmentIndex];
 
 			VkAttachmentDescription colorAttachmentDescription{};
 			colorAttachmentDescription.flags = 0;
-
-			if (resolveAttachmentCount == 0 && colorAttachmentIndex == presentAttachmentIndex) {
-				colorAttachmentDescription.format = surface.format.format;
-				colorAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
-			}
-			else {
-				colorAttachmentDescription.format = getVkFormat(colorAttachment.imageDescriptor.format);
-				colorAttachmentDescription.samples = static_cast<VkSampleCountFlagBits>(colorAttachment.imageDescriptor.sampleCount);
-			}
-
+			colorAttachmentDescription.format = getVkFormat(colorAttachment.format);
+			colorAttachmentDescription.samples = static_cast<VkSampleCountFlagBits>(colorAttachment.sampleCount);
 			colorAttachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(colorAttachment.loadOperation);
 			colorAttachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(colorAttachment.storeOperation);
 			colorAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -54,6 +47,8 @@ namespace ProjectA {
 			colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 			attachmentReferences[colorAttachmentIndex] = colorAttachmentReference;
+
+			sampleCountFlags |= colorAttachmentDescription.samples;
 		}
 
 		for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < resolveAttachmentCount; colorAttachmentIndex += 1) {
@@ -99,7 +94,11 @@ namespace ProjectA {
 			depthStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 			attachmentReferences[colorAttachmentCount + resolveAttachmentCount] = depthStencilAttachmentReference;
+
+			sampleCountFlags |= depthStencilAttachmentDescription.samples;
 		}
+
+		sampleCountFlagBits = static_cast<VkSampleCountFlagBits>(sampleCountFlags);
 
 		VkSubpassDescription subpassDescription{};
 		subpassDescription.flags = 0;
@@ -161,5 +160,42 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		vkDestroyRenderPass(device.object, object, nullptr);
+	}
+
+	ref<Image> VulkanRenderPass::createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const {
+		DEBUG_ASSERT(colorAttachmentIndex < colorAttachmentCount);
+		DEBUG_ASSERT((resolveAttachmentCount == 0 && colorAttachmentIndex != presentAttachmentIndex) || resolveAttachmentCount > 0);
+
+		const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
+
+		ImageDescriptor colorImageDescriptor{};
+		colorImageDescriptor.type = descriptor.type;
+		colorImageDescriptor.format = colorAttachment.format;
+		colorImageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT;
+		colorImageDescriptor.width = descriptor.width;
+		colorImageDescriptor.height = descriptor.height;
+		colorImageDescriptor.depth = descriptor.depth;
+		colorImageDescriptor.mipLevelCount = descriptor.mipLevelCount;
+		colorImageDescriptor.arrayLayerCount = descriptor.arrayLayerCount;
+		colorImageDescriptor.sampleCount = colorAttachment.sampleCount;
+
+		return createRef<VulkanImage>(device, colorImageDescriptor);
+	}
+
+	ref<Image> VulkanRenderPass::createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const {
+		DEBUG_ASSERT(depthStencil);
+
+		ImageDescriptor depthStencilImageDescriptor{};
+		depthStencilImageDescriptor.type = descriptor.type;
+		depthStencilImageDescriptor.format = depthStencilAttachment.format;
+		depthStencilImageDescriptor.usage = ImageUsage::DEPTH_STENCIL_ATTACHMENT;
+		depthStencilImageDescriptor.width = descriptor.width;
+		depthStencilImageDescriptor.height = descriptor.height;
+		depthStencilImageDescriptor.depth = descriptor.depth;
+		depthStencilImageDescriptor.mipLevelCount = descriptor.mipLevelCount;
+		depthStencilImageDescriptor.arrayLayerCount = descriptor.arrayLayerCount;
+		depthStencilImageDescriptor.sampleCount = depthStencilAttachment.sampleCount;
+
+		return createRef<VulkanImage>(device, depthStencilImageDescriptor);
 	}
 }

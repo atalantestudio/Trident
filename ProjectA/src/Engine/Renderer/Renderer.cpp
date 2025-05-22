@@ -78,26 +78,6 @@ namespace ProjectA {
 
 	void Renderer::onEvent(Event& event) {}
 
-	ref<Device> Renderer::getDevice() {
-		return adapter->getDevice();
-	}
-
-	const ref<CommandEncoder>& Renderer::getCommandEncoder() {
-		return commandEncoder;
-	}
-
-	const ref<Semaphore>& Renderer::getAvailableImageSemaphore(uint32 frameInFlightIndex) {
-		return availableImageSemaphores[frameInFlightIndex];
-	}
-
-	const ref<Semaphore>& Renderer::getFinishedRenderSemaphore(uint32 frameInFlightIndex) {
-		return finishedRenderSemaphores[frameInFlightIndex];
-	}
-
-	const ref<Fence>& Renderer::getFlightFence(uint32 frameInFlightIndex) {
-		return flightFences[frameInFlightIndex];
-	}
-
 	uint32 Renderer::acquireNextImage(const ref<Swapchain>& swapchain) {
 		const ref<Device> device = Renderer::getDevice();
 		const uint32 frameInFlightIndex = Application::get().getFrameInFlightIndex();
@@ -164,6 +144,30 @@ namespace ProjectA {
 
 	ref<Swapchain> Renderer::createSwapchain(const SwapchainDescriptor& descriptor) {
 		return adapter->createSwapchain(descriptor);
+	}
+
+	const ref<Semaphore>& Renderer::getAvailableImageSemaphore(uint32 frameInFlightIndex) {
+		return availableImageSemaphores[frameInFlightIndex];
+	}
+
+	const ref<CommandEncoder>& Renderer::getCommandEncoder() {
+		return commandEncoder;
+	}
+
+	ref<Device> Renderer::getDevice() {
+		return adapter->getDevice();
+	}
+
+	const ref<Semaphore>& Renderer::getFinishedRenderSemaphore(uint32 frameInFlightIndex) {
+		return finishedRenderSemaphores[frameInFlightIndex];
+	}
+
+	const ref<Fence>& Renderer::getFlightFence(uint32 frameInFlightIndex) {
+		return flightFences[frameInFlightIndex];
+	}
+
+	ref<Surface> Renderer::getSurface() {
+		return adapter->getSurface();
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor) {

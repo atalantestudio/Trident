@@ -20,6 +20,16 @@ namespace ProjectA {
 		DEBUG_ASSERT(colorAttachmentCount > 0 && colorAttachmentCount < static_cast<uint32>(maxColorAttachments));
 	}
 
+	ref<Image> OpenGLRenderPass::createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const {
+		// TODO
+		return nullptr;
+	}
+
+	ref<Image> OpenGLRenderPass::createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const {
+		// TODO
+		return nullptr;
+	}
+
 	GLuint OpenGLRenderPass::createScreenProgram() {
 		const chain<uint8> screenVertexShaderModuleCode = Filesystem::loadByteBuffer("../ProjectA/src/Asset/Shader/Screen.vert");
 		const OpenGLShaderModule screenVertexShaderModule(screenVertexShaderModuleCode, ShaderStage::VERTEX);

@@ -7,6 +7,10 @@
 #include "Backend/OpenGL/ImageType.hpp"
 #include "Backend/OpenGL/InternalFormat.hpp"
 
+#ifdef BUILD_MODE_DEBUG
+	#include "Engine/API/Rendering/SampleCount.hpp"
+#endif
+
 namespace ProjectA {
 	OpenGLImage::OpenGLImage(const ImageDescriptor& descriptor) :
 		target(getGlImageType(descriptor.type, descriptor.sampleCount)),
@@ -17,7 +21,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		DEBUG_ASSERT(descriptor.sampleCount > 0);
+		DEBUG_ASSERT(checkSampleCountValidity(descriptor.sampleCount));
 
 		glCreateTextures(target, 1, &object);
 

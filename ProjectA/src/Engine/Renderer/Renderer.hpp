@@ -25,16 +25,6 @@ namespace ProjectA {
 			virtual void onEvent(Event& event);
 
 		public:
-			static ref<Device> getDevice();
-
-			static const ref<CommandEncoder>& getCommandEncoder();
-
-			static const ref<Semaphore>& getAvailableImageSemaphore(uint32 frameInFlightIndex);
-
-			static const ref<Semaphore>& getFinishedRenderSemaphore(uint32 frameInFlightIndex);
-
-			static const ref<Fence>& getFlightFence(uint32 frameInFlightIndex);
-
 			// Acquires the next available swapchain image and returns its index.
 			static uint32 acquireNextImage(const ref<Swapchain>& swapchain);
 
@@ -62,6 +52,18 @@ namespace ProjectA {
 			static ref<Semaphore> createSemaphore();
 
 			static ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor);
+
+			static const ref<Semaphore>& getAvailableImageSemaphore(uint32 frameInFlightIndex);
+
+			static const ref<CommandEncoder>& getCommandEncoder();
+
+			static ref<Device> getDevice();
+
+			static const ref<Semaphore>& getFinishedRenderSemaphore(uint32 frameInFlightIndex);
+
+			static const ref<Fence>& getFlightFence(uint32 frameInFlightIndex);
+
+			static ref<Surface> getSurface();
 
 			// Loads and returns a SPIR-V shader module.
 			static ref<ShaderModule> loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor);

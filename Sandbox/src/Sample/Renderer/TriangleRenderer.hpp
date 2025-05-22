@@ -8,13 +8,17 @@ namespace ProjectA {
 			TriangleRenderer() {
 				// 1. Create render pass.
 				{
-					Attachment colorAttachment{};
+					ColorAttachment colorAttachment{};
+					colorAttachment.format = getSurface()->getFormat();
 					colorAttachment.sampleCount = 1;
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
 
 					RenderPassDescriptor renderPassDescriptor;
 					renderPassDescriptor.colorAttachments = {colorAttachment};
+					renderPassDescriptor.enableResolve = false;
+					renderPassDescriptor.enableDepthStencil = false;
+					renderPassDescriptor.presentAttachmentIndex = 0;
 
 					renderPass = createRenderPass(renderPassDescriptor);
 				}

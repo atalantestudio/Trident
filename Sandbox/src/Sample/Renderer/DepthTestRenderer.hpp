@@ -8,33 +8,31 @@ namespace ProjectA {
 			DepthTestRenderer() {
 				// 1. Create render pass.
 				{
-					Attachment colorAttachment{};
-					colorAttachment.present = true;
-					colorAttachment.sampleCount = 4;
+					ColorAttachment colorAttachment{};
+					colorAttachment.format = getSurface()->getFormat();
+					colorAttachment.sampleCount = 1;
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
 
-					Attachment resolveAttachment{};
-					resolveAttachment.colorAttachmentIndex = 0;
-					resolveAttachment.loadOperation = LoadOperation::CLEAR;
-					resolveAttachment.storeOperation = StoreOperation::STORE;
-
 					DepthStencilAttachment depthStencilAttachment{};
-					depthStencilAttachment.enabled = true;
+					depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
 					depthStencilAttachment.sampleCount = 1;
 					depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
 
 					RenderPassDescriptor renderPassDescriptor{};
 					renderPassDescriptor.colorAttachments = {colorAttachment};
-					renderPassDescriptor.resolveAttachments = {resolveAttachment};
 					renderPassDescriptor.depthStencilAttachment = depthStencilAttachment;
+					renderPassDescriptor.enableResolve = false;
+					renderPassDescriptor.enableDepthStencil = true;
+					renderPassDescriptor.presentAttachmentIndex = 0;
 
 					renderPass = createRenderPass(renderPassDescriptor);
 				}
 
-				createAttachments();
+				// 2. Create depth stencil attachment.
+				updateDepthStencilAttachment();
 
-				// 2. Create swapchain.
+				// 3. Create swapchain.
 				{
 					SwapchainDescriptor swapchainDescriptor;
 					swapchainDescriptor.renderPass = renderPass;
@@ -44,14 +42,14 @@ namespace ProjectA {
 					swapchain = createSwapchain(swapchainDescriptor);
 				}
 
-				// 3. Create pipeline layout.
+				// 4. Create pipeline layout.
 				{
 					const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 4. Create render pipeline.
+				// 5. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec3<float32>>(false);
@@ -80,7 +78,7 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 5. Create vertex buffers.
+				// 6. Create vertex buffers.
 				{
 					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE);
 
@@ -141,7 +139,7 @@ namespace ProjectA {
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.renderPass = renderPass;
 				beginRenderPassDescriptor.swapchain = swapchain;
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
+				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f} };
 				beginRenderPassDescriptor.imageIndex = acquireNextImage(swapchain);
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
@@ -165,7 +163,7 @@ namespace ProjectA {
 
 				device->waitIdle();
 
-				createAttachments();
+				updateDepthStencilAttachment();
 
 				SwapchainDescriptor swapchainDescriptor;
 				swapchainDescriptor.renderPass = renderPass;
@@ -176,25 +174,22 @@ namespace ProjectA {
 			}
 
 		private:
-			void createAttachments() {
-				ImageDescriptor depthStencilImageDescriptor{};
-				depthStencilImageDescriptor.type = ImageType::TEXTURE_2D;
-				depthStencilImageDescriptor.format = ImageFormat::D32_SFLOAT;
-				depthStencilImageDescriptor.usage = ImageUsage::DEPTH_STENCIL_ATTACHMENT;
-				depthStencilImageDescriptor.width = Application::get().getWindow().getSize()[0];
-				depthStencilImageDescriptor.height = Application::get().getWindow().getSize()[1];
-				depthStencilImageDescriptor.depth = 1;
-				depthStencilImageDescriptor.mipLevelCount = 1;
-				depthStencilImageDescriptor.arrayLayerCount = 1;
-				depthStencilImageDescriptor.sampleCount = 1;
+			void updateDepthStencilAttachment() {
+				AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
+				depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
+				depthStencilAttachmentImageDescriptor.width = Application::get().getWindow().getSize()[0];
+				depthStencilAttachmentImageDescriptor.height = Application::get().getWindow().getSize()[1];
+				depthStencilAttachmentImageDescriptor.depth = 1;
+				depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
+				depthStencilAttachmentImageDescriptor.arrayLayerCount = 1;
 
-				depthStencilImage = createImage(depthStencilImageDescriptor);
+				depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor);
 
 				constexpr ImageViewDescriptor depthStencilImageViewDescriptor;
 
-				const ref<ImageView> depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
+				depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
 
-				renderPass->setAttachmentImageView(1, depthStencilImageView);
+				renderPass->setDepthStencilAttachmentImageView(depthStencilImageView);
 			}
 
 		private:
@@ -213,6 +208,7 @@ namespace ProjectA {
 
 		private:
 			ref<Image> depthStencilImage;
+			ref<ImageView> depthStencilImageView;
 
 			ref<RenderPass> renderPass;
 			ref<Swapchain> swapchain;

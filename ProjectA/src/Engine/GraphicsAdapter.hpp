@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/API/Rendering/Surface.hpp"
 #include "Engine/Renderer/ComputePipeline.hpp"
 #include "Engine/Renderer/Device.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
@@ -7,8 +8,6 @@
 namespace ProjectA {
 	class GraphicsAdapter {
 		public:
-			virtual ref<Device> getDevice() const = 0;
-
 			virtual ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const = 0;
 
 			virtual ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const = 0;
@@ -30,5 +29,9 @@ namespace ProjectA {
 			virtual ref<ShaderModule> createShaderModule(const chain<uint8>& code, const ShaderModuleDescriptor& descriptor) const = 0;
 
 			virtual ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const = 0;
+
+			virtual ref<Surface> getSurface() const = 0;
+
+			virtual ref<Device> getDevice() const = 0;
 	};
 }

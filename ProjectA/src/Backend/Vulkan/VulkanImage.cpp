@@ -8,13 +8,17 @@
 #include "Backend/Vulkan/ImageType.hpp"
 #include "Backend/Vulkan/ImageUsage.hpp"
 
+#ifdef BUILD_MODE_DEBUG
+	#include "Engine/API/Rendering/SampleCount.hpp"
+#endif
+
 namespace ProjectA {
 	VulkanImage::VulkanImage(const VulkanDevice& device, const VkImageCreateInfo& createInfo) {
 		construct(device, createInfo);
 	}
 
 	VulkanImage::VulkanImage(const VulkanDevice& device, const ImageDescriptor& descriptor) {
-		ENGINE_ASSERT(descriptor.sampleCount >= 1 && descriptor.sampleCount <= 64, "Invalid sample count ([]).", descriptor.sampleCount);
+		DEBUG_ASSERT(checkSampleCountValidity(descriptor.sampleCount));
 
 		VkImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;

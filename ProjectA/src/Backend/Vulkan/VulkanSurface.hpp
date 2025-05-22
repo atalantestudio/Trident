@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/API/Surface.hpp"
+#include "Engine/API/Rendering/Surface.hpp"
 #include "Engine/API/Window/Window.hpp"
 
 namespace ProjectA {
@@ -18,6 +18,8 @@ namespace ProjectA {
 			void selectPresentMode();
 
 			VkSurfaceCapabilitiesKHR getCapabilities() const;
+
+			virtual ImageFormat getFormat() const final override;
 
 		public:
 			uint32 presentQueueFamilyIndex;

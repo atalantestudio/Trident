@@ -15,13 +15,9 @@ namespace ProjectA {
 	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const Window& window) :
 		instance(),
 		physicalDevice(instance.object),
-		surface(instance.object, physicalDevice, window),
-		device(createRef<VulkanDevice>(physicalDevice, surface))
+		surface(createRef<VulkanSurface>(instance.object, physicalDevice, window)),
+		device(createRef<VulkanDevice>(physicalDevice, *surface))
 	{}
-
-	ref<Device> VulkanGraphicsAdapter::getDevice() const {
-		return device;
-	}
 
 	ref<Buffer> VulkanGraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
 		return createRef<VulkanBuffer>(physicalDevice.object, *device, descriptor);
@@ -44,7 +40,7 @@ namespace ProjectA {
 	}
 
 	ref<RenderPass> VulkanGraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		return createRef<VulkanRenderPass>(physicalDevice, surface, *device, descriptor);
+		return createRef<VulkanRenderPass>(physicalDevice, *surface, *device, descriptor);
 	}
 
 	ref<RenderPipeline> VulkanGraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
@@ -64,6 +60,14 @@ namespace ProjectA {
 	}
 
 	ref<Swapchain> VulkanGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return createRef<VulkanSwapchain>(physicalDevice, surface, *device, descriptor);
+		return createRef<VulkanSwapchain>(physicalDevice, *surface, *device, descriptor);
+	}
+
+	ref<Device> VulkanGraphicsAdapter::getDevice() const {
+		return device;
+	}
+
+	ref<Surface> VulkanGraphicsAdapter::getSurface() const {
+		return surface;
 	}
 }

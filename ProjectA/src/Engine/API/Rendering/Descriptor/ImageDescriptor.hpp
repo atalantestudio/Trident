@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Engine/Renderer/ImageFormat.hpp"
-#include "Engine/Renderer/ImageType.hpp"
+#include "Engine/API/Rendering/ImageFormat.hpp"
+#include "Engine/API/Rendering/ImageType.hpp"
 #include "Engine/Renderer/ImageUsage.hpp"
 
 namespace ProjectA {
