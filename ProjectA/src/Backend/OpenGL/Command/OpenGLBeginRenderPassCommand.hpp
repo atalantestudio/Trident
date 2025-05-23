@@ -35,9 +35,12 @@ namespace ProjectA {
 						const ClearValue& clearValue = descriptor.clearValues[clearValueIndex];
 
 						glClearBufferfv(GL_COLOR, clearValueIndex, clearValue.color);
+					}
 
-						// TODO: Move out of the loop.
-						glClearBufferfi(GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
+					if (renderPass.depthStencil) {
+						const ClearValue& depthStencilClearValue = descriptor.clearValues.back();
+
+						glClearBufferfi(GL_DEPTH_STENCIL, 0, depthStencilClearValue.depth, depthStencilClearValue.stencil);
 					}
 
 					fchain<GLenum> drawBuffers(renderPass.getColorAttachmentCount());

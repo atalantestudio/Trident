@@ -40,10 +40,6 @@ namespace ProjectA {
 
 		GLint linkStatus;
 
-		// TODO: Blend.
-		//glEnable(GL_BLEND);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 		glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
 
 		if (linkStatus != GL_TRUE) {

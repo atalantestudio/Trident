@@ -20,7 +20,7 @@ namespace ProjectA {
 						const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout.bindings[binding];
 
 						for (const ref<Buffer>& buffer : descriptorSetLayoutBinding.buffers) {
-							const ref<OpenGLBuffer> glBuffer = std::static_pointer_cast<OpenGLBuffer>(buffer);
+							const ref<OpenGLBuffer>& glBuffer = std::static_pointer_cast<OpenGLBuffer>(buffer);
 							const GLintptr offset = descriptorSetLayoutBinding.bufferOffset;
 							const GLsizeiptr size = glBuffer->size - offset;
 
@@ -28,12 +28,12 @@ namespace ProjectA {
 						}
 
 						for (GLuint unit = 0; unit < descriptorSetLayoutBinding.imageViews.size(); unit += 1) {
-							const ref<OpenGLImageView> imageView = std::static_pointer_cast<OpenGLImageView>(descriptorSetLayoutBinding.imageViews[unit]);
+							const ref<OpenGLImageView>& imageView = std::static_pointer_cast<OpenGLImageView>(descriptorSetLayoutBinding.imageViews[unit]);
 
 							glBindTextureUnit(binding + unit, imageView->object);
 
 							if (unit < descriptorSetLayoutBinding.samplers.size()) {
-								const ref<OpenGLSampler> sampler = std::static_pointer_cast<OpenGLSampler>(descriptorSetLayoutBinding.samplers[unit]);
+								const ref<OpenGLSampler>& sampler = std::static_pointer_cast<OpenGLSampler>(descriptorSetLayoutBinding.samplers[unit]);
 
 								glBindSampler(unit, sampler->object);
 							}
