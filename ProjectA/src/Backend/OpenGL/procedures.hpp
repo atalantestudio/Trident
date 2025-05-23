@@ -16,6 +16,8 @@ namespace ProjectA {
 		extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
 	#endif
 
+	extern PFNGLCLEARBUFFERFIPROC glClearBufferfi;
+	extern PFNGLCLEARBUFFERFVPROC glClearBufferfv;
 	extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
 	extern PFNGLCOMPILESHADERPROC glCompileShader;
 	extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
@@ -42,6 +44,7 @@ namespace ProjectA {
 	extern PFNGLDETACHSHADERPROC glDetachShader;
 	extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
 	extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
+	extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
 	extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced;
 	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 	extern PFNGLFENCESYNCPROC glFenceSync;

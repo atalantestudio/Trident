@@ -21,6 +21,7 @@ namespace ProjectA {
 		return extentHeight;
 	}
 
+	// TODO: Fix memory leak when resizing on the multisample demo.
 	void OpenGLSwapchain::construct(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -32,7 +33,9 @@ namespace ProjectA {
 
 		const OpenGLRenderPass& renderPass = *std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass);
 
-		constexpr uint32 imageCount = 1;
+		if (renderPass.present && renderPass.getColorAttachmentCount() == 1 && !renderPass.resolve && !renderPass.depthStencil) {
+			return;
+		}
 
 		images.resize(imageCount);
 		imageViews.resize(imageCount);
@@ -43,7 +46,7 @@ namespace ProjectA {
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.type = ImageType::TEXTURE_2D;
 		imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-		imageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT;
+		imageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT;
 		imageDescriptor.width = extentWidth;
 		imageDescriptor.height = extentHeight;
 		imageDescriptor.depth = 1;
@@ -102,32 +105,30 @@ namespace ProjectA {
 				attachmentImageViews[presentAttachmentIndex] = imageViews[imageIndex];
 			}
 
-			uint32 attachmentIndex = 0;
+			uint32 boundAttachmentIndex = 0;
 
-			for (uint32 i = 0; i < colorAttachmentCount + resolveAttachmentCount; i += 1) {
-				if (i == presentAttachmentIndex) {
+			for (uint32 attachmentIndex = resolveAttachmentCount; attachmentIndex < colorAttachmentCount + resolveAttachmentCount; attachmentIndex += 1) {
+				if (resolveAttachmentCount > 0 && attachmentIndex == presentAttachmentIndex) {
 					continue;
 				}
 
-				const ref<OpenGLImageView>& imageView = attachmentImageViews[attachmentIndex];
+				const ref<OpenGLImageView>& imageView = attachmentImageViews[boundAttachmentIndex];
 
 				glFramebufferTexture2D(
 					GL_FRAMEBUFFER,
-					GL_COLOR_ATTACHMENT0 + attachmentIndex,
+					GL_COLOR_ATTACHMENT0 + boundAttachmentIndex,
 					imageView->image.target,
 					imageView->object,
 					0
 				);
 
-				attachmentIndex += 1;
+				boundAttachmentIndex += 1;
 			}
 
-			// TODO: Include depth stencil attachment.
-			/*if (renderPass.depthStencil) {
+			if (renderPass.depthStencil) {
 				const ref<OpenGLImageView>& imageView = attachmentImageViews.back();
 
-				glBindTexture(imageView->image.target, imageView->object);
-
+				// TODO: Use GL_DEPTH_STENCIL_ATTACHMENT instead of GL_DEPTH_ATTACHMENT.
 				glFramebufferTexture2D(
 					GL_FRAMEBUFFER,
 					GL_DEPTH_ATTACHMENT,
@@ -135,7 +136,7 @@ namespace ProjectA {
 					imageView->object,
 					0
 				);
-			}*/
+			}
 
 			const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 

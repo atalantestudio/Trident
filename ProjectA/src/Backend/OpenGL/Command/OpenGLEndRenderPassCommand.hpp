@@ -12,26 +12,32 @@ namespace ProjectA {
 			{}
 
 			void execute() const override {
-				DEBUG_ASSERT(swapchain.framebuffers.size() == 1);
+				if (renderPass.present) {
+					if (renderPass.getColorAttachmentCount() == 1 && !renderPass.resolve && !renderPass.depthStencil) {
+						return;
+					}
 
-				/*glBindFramebuffer(GL_READ_FRAMEBUFFER, swapchain.framebuffers[0]);
-				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+					glBindFramebuffer(GL_READ_FRAMEBUFFER, swapchain.framebuffers[0]);
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-				glReadBuffer(GL_COLOR_ATTACHMENT0);
-				glDrawBuffer(GL_FRONT);
+					// TODO: Why resolveAttachmentCount isn't needed as offset here?
+					glReadBuffer(GL_COLOR_ATTACHMENT0 + renderPass.getPresentAttachmentIndex());
 
-				glBlitFramebuffer(
-					0,
-					0,
-					swapchain.getExtentWidth(),
-					swapchain.getExtentHeight(),
-					0,
-					0,
-					swapchain.getExtentWidth(),
-					swapchain.getExtentHeight(),
-					GL_COLOR_BUFFER_BIT,
-					GL_NEAREST
-				);*/
+					glDrawBuffer(GL_FRONT);
+
+					glBlitFramebuffer(
+						0,
+						0,
+						swapchain.getExtentWidth(),
+						swapchain.getExtentHeight(),
+						0,
+						0,
+						swapchain.getExtentWidth(),
+						swapchain.getExtentHeight(),
+						GL_COLOR_BUFFER_BIT,
+						GL_NEAREST
+					);
+				}
 			}
 
 		private:

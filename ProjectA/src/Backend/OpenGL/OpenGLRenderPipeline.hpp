@@ -2,6 +2,7 @@
 
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 
+#include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
 
 namespace ProjectA {

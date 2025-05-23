@@ -17,24 +17,37 @@ namespace ProjectA {
 				const OpenGLRenderPass& renderPass = *std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass).get();
 				const OpenGLSwapchain& swapchain = *std::static_pointer_cast<OpenGLSwapchain>(descriptor.swapchain).get();
 
-				// TODO: Clear attachments.
 				DEBUG_ASSERT(descriptor.clearValues.size() == renderPass.clearValueCount);
 
-				/*for (uint32 imageIndex = 0; imageIndex < swapchain.framebuffers.size(); imageIndex += 1) {
-					const Attachment& colorAttachment = renderPass.colorResolveAttachments[imageIndex];
+				if (renderPass.present && renderPass.getColorAttachmentCount() == 1 && !renderPass.resolve && !renderPass.depthStencil) {
+					const ClearValue& clearValue = descriptor.clearValues[0];
 
-					glBindFramebuffer(GL_FRAMEBUFFER, swapchain.framebuffers[imageIndex]);
-					glDrawBuffer(GL_COLOR_ATTACHMENT0);
+					glClearBufferfv(GL_COLOR, 0, clearValue.color);
+					glClearBufferfi(GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
 
-					if (colorAttachment.loadOperation == LoadOperation::CLEAR) {
-						const vec4<float32>& color = descriptor.clearValues[imageIndex];
-
-						glClearColor(color[0], color[1], color[2], color[3]);
-						glClear(GL_COLOR_BUFFER_BIT);
-					}
+					return;
 				}
 
-				glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
+				for (uint32 imageIndex = 0; imageIndex < swapchain.imageCount; imageIndex += 1) {
+					glBindFramebuffer(GL_FRAMEBUFFER, swapchain.framebuffers[imageIndex]);
+
+					for (uint32 clearValueIndex = 0; clearValueIndex < descriptor.clearValues.size(); clearValueIndex += 1) {
+						const ClearValue& clearValue = descriptor.clearValues[clearValueIndex];
+
+						glClearBufferfv(GL_COLOR, clearValueIndex, clearValue.color);
+
+						// TODO: Move out of the loop.
+						glClearBufferfi(GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
+					}
+
+					fchain<GLenum> drawBuffers(renderPass.getColorAttachmentCount());
+
+					for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < drawBuffers.count; colorAttachmentIndex += 1) {
+						drawBuffers[colorAttachmentIndex] = GL_COLOR_ATTACHMENT0 + colorAttachmentIndex;
+					}
+
+					glDrawBuffers(renderPass.getColorAttachmentCount(), &drawBuffers[0]);
+				}
 			}
 
 		private:

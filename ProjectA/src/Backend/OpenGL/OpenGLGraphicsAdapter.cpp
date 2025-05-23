@@ -37,6 +37,8 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(deviceContext, glCheckFramebufferStatus);
 		#endif
 
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glClearBufferfi);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glClearBufferfv);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glClientWaitSync);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glCompileShader);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glCopyNamedBufferSubData);
@@ -63,6 +65,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDetachShader);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDispatchCompute);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDrawArraysInstanced);
+		LOAD_PROCEDURE_ADDRESS(deviceContext, glDrawBuffers);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glDrawElementsInstanced);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glEnableVertexAttribArray);
 		LOAD_PROCEDURE_ADDRESS(deviceContext, glFenceSync);

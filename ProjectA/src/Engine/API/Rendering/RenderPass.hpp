@@ -10,6 +10,7 @@ namespace ProjectA {
 			RenderPass(const RenderPassDescriptor& descriptor) :
 				depthStencil(descriptor.enableDepthStencil),
 				resolve(descriptor.enableResolve),
+				present(descriptor.presentAttachmentIndex != std::numeric_limits<uint32>::max()),
 				colorAttachmentCount(static_cast<uint32>(descriptor.colorAttachments.size())),
 				resolveAttachmentCount(descriptor.enableResolve ? colorAttachmentCount : 0),
 				presentAttachmentIndex(descriptor.presentAttachmentIndex),
@@ -73,6 +74,7 @@ namespace ProjectA {
 		public:
 			const bool depthStencil;
 			const bool resolve;
+			const bool present;
 
 		protected:
 			uint32 attachmentCount;

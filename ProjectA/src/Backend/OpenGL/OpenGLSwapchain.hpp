@@ -19,6 +19,7 @@ namespace ProjectA {
 			void destroy();
 
 		public:
+			const uint32 imageCount = 1;
 			chain<ref<OpenGLImage>> images;
 			chain<ref<OpenGLImageView>> imageViews;
 			chain<GLuint> framebuffers;
