@@ -62,6 +62,12 @@ namespace ProjectA {
 		windowDescriptor.name = getWindowName(applicationDescriptor.projectName, sharedMemoryData->instanceCount);
 		windowDescriptor.width = propertyFile.getProperty<uint32>("ExtentWidth");
 		windowDescriptor.height = propertyFile.getProperty<uint32>("ExtentHeight");
+		windowDescriptor.mouseDownEventListener = BIND(Application::onEvent);
+		windowDescriptor.mouseMoveEventListener = BIND(Application::onEvent);
+		windowDescriptor.mouseUpEventListener = BIND(Application::onEvent);
+		windowDescriptor.mouseWheelEventListener = BIND(Application::onEvent);
+		windowDescriptor.windowCloseEventListener = BIND(Application::onWindowClose);
+		windowDescriptor.windowResizeEventListener = BIND(Application::onWindowResize);
 
 		sharedMemoryData->instanceCount += 1;
 
@@ -69,13 +75,8 @@ namespace ProjectA {
 
 		mutex->release();
 
-		window = createScope<Window>(windowDescriptor);
-		window->setEventListener<MouseDownEvent>(BIND(Application::onEvent));
-		window->setEventListener<MouseMoveEvent>(BIND(Application::onEvent));
-		window->setEventListener<MouseUpEvent>(BIND(Application::onEvent));
-		window->setEventListener<MouseWheelEvent>(BIND(Application::onEvent));
-		window->setEventListener<WindowResizeEvent>(BIND(Application::onWindowResize));
-		window->setEventListener<WindowCloseEvent>(BIND(Application::onWindowClose));
+		window = new Window(windowDescriptor);
+		window->show();
 
 		const GraphicsAPI graphicsApi = propertyFile.getProperty<GraphicsAPI>("GraphicsAPI");
 
@@ -162,6 +163,8 @@ namespace ProjectA {
 		ENGINE_DEBUG("Killing instance. Updated count = [].", static_cast<sint32>(sharedMemoryData->instanceCount));
 
 		sharedMemory->unmap(sharedMemoryData);
+
+		delete window;
 	}
 
 	const Window& Application::getWindow() const {

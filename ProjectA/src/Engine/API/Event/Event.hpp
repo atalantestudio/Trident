@@ -1,8 +1,5 @@
 #pragma once
 
-// TODO: Remove PCH include.
-#include "pch.hpp"
-
 #include "Engine/API/Event/EventCategory.hpp"
 #include "Engine/API/Event/EventType.hpp"
 

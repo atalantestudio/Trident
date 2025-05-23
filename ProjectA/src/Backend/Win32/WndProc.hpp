@@ -2,22 +2,22 @@
 
 namespace ProjectA {
 	static LRESULT CALLBACK DummyWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
-		return DefWindowProcW(hWnd, Msg, wParam, lParam);
+		return DefWindowProc(hWnd, Msg, wParam, lParam);
 	}
 
 	static LRESULT CALLBACK TestWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 		if (Msg > 49000) {
 			// TODO: Handle client messages.
-			return DefWindowProcW(hWnd, Msg, wParam, lParam);
+			return DefWindowProc(hWnd, Msg, wParam, lParam);
 		}
 
-		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetPropW(hWnd, WINDOW_DATA_PROPERTY_STRING));
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetProp(hWnd, WINDOW_DATA_PROPERTY_STRING));
 
 		if (windowData == nullptr) {
-			return DefWindowProcW(hWnd, Msg, wParam, lParam);
+			return DefWindowProc(hWnd, Msg, wParam, lParam);
 		}
 
-		const WindowClass* windowClassData = static_cast<const WindowClass*>(GetPropW(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
+		const WindowClass* windowClassData = static_cast<const WindowClass*>(GetProp(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
 
 		switch (Msg) {
 			case WM_CREATE:
@@ -232,17 +232,17 @@ namespace ProjectA {
 				break;
 		}
 
-		return DefWindowProcW(hWnd, Msg, wParam, lParam);
+		return DefWindowProc(hWnd, Msg, wParam, lParam);
 	}
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
-		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetPropW(hWnd, WINDOW_DATA_PROPERTY_STRING));
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetProp(hWnd, WINDOW_DATA_PROPERTY_STRING));
 
 		if (windowData == nullptr) {
-			return DefWindowProcW(hWnd, Msg, wParam, lParam);
+			return DefWindowProc(hWnd, Msg, wParam, lParam);
 		}
 
-		const WindowClass* windowClassData = static_cast<const WindowClass*>(GetPropW(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
+		const WindowClass* windowClassData = static_cast<const WindowClass*>(GetProp(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
 
 		switch (Msg) {
 			case WM_MOVE: {
@@ -259,11 +259,9 @@ namespace ProjectA {
 				windowData->minimized = wParam == SIZE_MINIMIZED;
 				windowData->maximized = wParam == SIZE_MAXIMIZED;
 
-				if (windowData->windowResizeEventListener) {
-					WindowResizeEvent windowResizeEvent(windowData->sizeX, windowData->sizeY);
+				WindowResizeEvent windowResizeEvent(windowData->sizeX, windowData->sizeY);
 
-					windowData->windowResizeEventListener(windowResizeEvent);
-				}
+				windowData->windowResizeEventListener(windowResizeEvent);
 
 				return 0;
 			}
@@ -279,11 +277,9 @@ namespace ProjectA {
 			}
 			case WM_CLOSE: {
 				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-close.
-				if (windowData->windowCloseEventListener) {
-					WindowCloseEvent windowCloseEvent;
+				WindowCloseEvent windowCloseEvent;
 
-					windowData->windowCloseEventListener(windowCloseEvent);
-				}
+				windowData->windowCloseEventListener(windowCloseEvent);
 
 				return 0;
 			}
@@ -302,31 +298,25 @@ namespace ProjectA {
 				windowData->cursorX = GET_X_LPARAM(lParam);
 				windowData->cursorY = GET_Y_LPARAM(lParam);
 
-				if (windowData->mouseMoveEventListener) {
-					MouseMoveEvent mouseMoveEvent(windowData->cursorX, windowData->cursorY);
+				MouseMoveEvent mouseMoveEvent(windowData->cursorX, windowData->cursorY);
 
-					windowData->mouseMoveEventListener(mouseMoveEvent);
-				}
+				windowData->mouseMoveEventListener(mouseMoveEvent);
 
 				return 0;
 			}
 			case WM_LBUTTONDOWN: {
 				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttondown.
-				if (windowData->mouseDownEventListener) {
-					MouseDownEvent mouseDownEvent(MouseButton::LEFT);
+				MouseDownEvent mouseDownEvent(MouseButton::LEFT);
 
-					windowData->mouseDownEventListener(mouseDownEvent);
-				}
+				windowData->mouseDownEventListener(mouseDownEvent);
 
 				return 0;
 			}
 			case WM_LBUTTONUP: {
 				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttonup.
-				if (windowData->mouseUpEventListener) {
-					MouseUpEvent mouseUpEvent(MouseButton::LEFT);
+				MouseUpEvent mouseUpEvent(MouseButton::LEFT);
 
-					windowData->mouseUpEventListener(mouseUpEvent);
-				}
+				windowData->mouseUpEventListener(mouseUpEvent);
 
 				return 0;
 			}
@@ -334,11 +324,9 @@ namespace ProjectA {
 				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousewheel.
 				const sint16 wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 
-				if (windowData->mouseWheelEventListener) {
-					MouseWheelEvent mouseWheelEvent(wheelDelta);
+				MouseWheelEvent mouseWheelEvent(wheelDelta);
 
-					windowData->mouseWheelEventListener(mouseWheelEvent);
-				}
+				windowData->mouseWheelEventListener(mouseWheelEvent);
 
 				return 0;
 			}
@@ -346,6 +334,6 @@ namespace ProjectA {
 				break;
 		}
 
-		return DefWindowProcW(hWnd, Msg, wParam, lParam);
+		return DefWindowProc(hWnd, Msg, wParam, lParam);
 	}
 }

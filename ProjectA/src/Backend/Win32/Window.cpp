@@ -73,8 +73,11 @@ namespace ProjectA {
 		const sint32 nHeight = rect.bottom - rect.top;
 		const HINSTANCE hInstance = GetInstance();
 
-		Win32WindowData* windowData = new Win32WindowData();
+		data = new Win32WindowData();
 
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
+
+		// The event loop starts automatically after creating the window.
 		windowData->hWnd = CreateWindowEx(
 			dwExStyle,
 			windowClass->className,
@@ -98,63 +101,17 @@ namespace ProjectA {
 
 		WIN32_ASSERT(windowData->hDC != nullptr);
 
+		windowData->mouseDownEventListener = descriptor.mouseDownEventListener;
+		windowData->mouseMoveEventListener = descriptor.mouseMoveEventListener;
+		windowData->mouseUpEventListener = descriptor.mouseUpEventListener;
+		windowData->mouseWheelEventListener = descriptor.mouseWheelEventListener;
+		windowData->windowCloseEventListener = descriptor.windowCloseEventListener;
+		windowData->windowResizeEventListener = descriptor.windowResizeEventListener;
+
 		WIN32_ASSERT(SetProp(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, windowClass));
 		WIN32_ASSERT(SetProp(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData));
 
-		data = windowData;
 		windowCount += 1;
-
-		constexpr sint32 nCmdShow = SW_NORMAL;
-
-		ShowWindow(windowData->hWnd, nCmdShow);
-
-		PIXELFORMATDESCRIPTOR pfd{};
-		pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-		pfd.nVersion = 1;
-		pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-		pfd.iPixelType = PFD_TYPE_RGBA;
-		pfd.cColorBits = 32;
-		pfd.cRedBits = 0;
-		pfd.cRedShift = 0;
-		pfd.cGreenBits = 0;
-		pfd.cGreenShift = 0;
-		pfd.cBlueBits = 0;
-		pfd.cBlueShift = 0;
-		pfd.cAlphaBits = 0;
-		pfd.cAlphaShift = 0;
-		pfd.cAccumBits = 0;
-		pfd.cAccumRedBits = 0;
-		pfd.cAccumGreenBits = 0;
-		pfd.cAccumBlueBits = 0;
-		pfd.cAccumAlphaBits = 0;
-		pfd.cDepthBits = 24;
-		pfd.cStencilBits = 8;
-		pfd.cAuxBuffers = 0;
-		pfd.iLayerType = 0;
-		pfd.bReserved = 0;
-		pfd.dwLayerMask = 0;
-		pfd.dwVisibleMask = 0;
-		pfd.dwDamageMask = 0;
-
-		const sint32 format = ChoosePixelFormat(windowData->hDC, &pfd);
-
-		WIN32_ASSERT(format != 0);
-
-		WIN32_ASSERT(SetPixelFormat(windowData->hDC, format, &pfd) == TRUE);
-
-		const HGLRC hGLRC = wglCreateContext(windowData->hDC);
-
-		WIN32_ASSERT(hGLRC != nullptr);
-
-		WIN32_ASSERT(wglMakeCurrent(windowData->hDC, hGLRC) == TRUE);
-
-		windowData->wglCreateContextAttribsARB = static_cast<const PFNWGLCREATECONTEXTATTRIBSARBPROC>(static_cast<void*>(wglGetProcAddress("wglCreateContextAttribsARB")));
-
-		WIN32_ASSERT(windowData->wglCreateContextAttribsARB != nullptr);
-
-		WIN32_ASSERT(wglMakeCurrent(windowData->hDC, nullptr) == TRUE);
-
-		WIN32_ASSERT(wglDeleteContext(hGLRC) == TRUE);
 	}
 
 	Window::~Window() {
@@ -207,6 +164,61 @@ namespace ProjectA {
 		return &windowData.cursorX;
 	}
 
+	void Window::show() const {
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
+
+		// The event loop starts after showing the window.
+		ShowWindow(windowData->hWnd, SW_NORMAL);
+
+		PIXELFORMATDESCRIPTOR pfd{};
+		pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+		pfd.nVersion = 1;
+		pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+		pfd.iPixelType = PFD_TYPE_RGBA;
+		pfd.cColorBits = 32;
+		pfd.cRedBits = 0;
+		pfd.cRedShift = 0;
+		pfd.cGreenBits = 0;
+		pfd.cGreenShift = 0;
+		pfd.cBlueBits = 0;
+		pfd.cBlueShift = 0;
+		pfd.cAlphaBits = 0;
+		pfd.cAlphaShift = 0;
+		pfd.cAccumBits = 0;
+		pfd.cAccumRedBits = 0;
+		pfd.cAccumGreenBits = 0;
+		pfd.cAccumBlueBits = 0;
+		pfd.cAccumAlphaBits = 0;
+		pfd.cDepthBits = 24;
+		pfd.cStencilBits = 8;
+		pfd.cAuxBuffers = 0;
+		pfd.iLayerType = 0;
+		pfd.bReserved = 0;
+		pfd.dwLayerMask = 0;
+		pfd.dwVisibleMask = 0;
+		pfd.dwDamageMask = 0;
+
+		const sint32 format = ChoosePixelFormat(windowData->hDC, &pfd);
+
+		WIN32_ASSERT(format != 0);
+
+		WIN32_ASSERT(SetPixelFormat(windowData->hDC, format, &pfd) == TRUE);
+
+		const HGLRC hGLRC = wglCreateContext(windowData->hDC);
+
+		WIN32_ASSERT(hGLRC != nullptr);
+
+		WIN32_ASSERT(wglMakeCurrent(windowData->hDC, hGLRC) == TRUE);
+
+		windowData->wglCreateContextAttribsARB = static_cast<const PFNWGLCREATECONTEXTATTRIBSARBPROC>(static_cast<void*>(wglGetProcAddress("wglCreateContextAttribsARB")));
+
+		WIN32_ASSERT(windowData->wglCreateContextAttribsARB != nullptr);
+
+		WIN32_ASSERT(wglMakeCurrent(windowData->hDC, nullptr) == TRUE);
+
+		WIN32_ASSERT(wglDeleteContext(hGLRC) == TRUE);
+	}
+
 	void Window::processMessages() const {
 		MSG msg;
 
@@ -220,47 +232,5 @@ namespace ProjectA {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-	}
-
-	template<>
-	void Window::setEventListener(EventListener<MouseDownEvent> eventListener) const {
-		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
-
-		windowData->mouseDownEventListener = eventListener;
-	}
-
-	template<>
-	void Window::setEventListener(EventListener<MouseMoveEvent> eventListener) const {
-		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
-
-		windowData->mouseMoveEventListener = eventListener;
-	}
-
-	template<>
-	void Window::setEventListener(EventListener<MouseUpEvent> eventListener) const {
-		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
-
-		windowData->mouseUpEventListener = eventListener;
-	}
-
-	template<>
-	void Window::setEventListener(EventListener<MouseWheelEvent> eventListener) const {
-		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
-
-		windowData->mouseWheelEventListener = eventListener;
-	}
-
-	template<>
-	void Window::setEventListener(EventListener<WindowResizeEvent> eventListener) const {
-		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
-
-		windowData->windowResizeEventListener = eventListener;
-	}
-
-	template<>
-	void Window::setEventListener(EventListener<WindowCloseEvent> eventListener) const {
-		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
-
-		windowData->windowCloseEventListener = eventListener;
 	}
 }

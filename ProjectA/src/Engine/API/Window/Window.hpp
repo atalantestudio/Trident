@@ -1,20 +1,11 @@
 #pragma once
 
+#include "Engine/API/Window/Descriptor/WindowDescriptor.hpp"
+
 namespace ProjectA {
-	struct WindowDescriptor {
-		std::string name;
-
-		// TODO: Use vec2<sint32>.
-		uint32 width;
-		uint32 height;
-	};
-
-	template<typename Event>
-	using EventListener = std::function<void(Event& event)>;
-
 	class Window {
 		public:
-			Window(const WindowDescriptor& windowDescriptor);
+			explicit Window(const WindowDescriptor& windowDescriptor);
 
 			~Window();
 
@@ -33,11 +24,10 @@ namespace ProjectA {
 			// Returns the position of the mouse, relative to the top-left corner of the client area.
 			const sint32* getMousePosition() const;
 
+			void show() const;
+
 			// Peeks, translates and dispatches incoming non-queued messages.
 			void processMessages() const;
-
-			template<typename Event>
-			void setEventListener(EventListener<Event> eventListener) const;
 
 		public:
 			void* data;

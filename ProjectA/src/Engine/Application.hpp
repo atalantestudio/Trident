@@ -116,7 +116,7 @@ namespace ProjectA {
 			scope<SharedMemory> sharedMemory;
 			SharedMemoryData* sharedMemoryData;
 			HighResolutionTimer timer;
-			scope<Window> window;
+			Window* window;
 
 			LayerStack layerStack;
 

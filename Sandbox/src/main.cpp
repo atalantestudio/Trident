@@ -1,3 +1,5 @@
+#include "pch.hpp"
+
 #define RUNTIME_APPLICATION_PHYSICS_2D 0
 #define RUNTIME_APPLICATION_SAMPLE 1
 
