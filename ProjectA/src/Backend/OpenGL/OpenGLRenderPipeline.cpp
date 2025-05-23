@@ -3,6 +3,7 @@
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 
+#include "Backend/OpenGL/CompareOperation.hpp"
 #include "Backend/OpenGL/CullMode.hpp"
 #include "Backend/OpenGL/FrontFace.hpp"
 #include "Backend/OpenGL/PolygonMode.hpp"
@@ -20,6 +21,9 @@ namespace ProjectA {
 		polygonMode(getGlPolygonMode(descriptor.polygonMode)),
 		lineWidth(descriptor.lineWidth),
 		minSampleShading(descriptor.minSampleShading),
+		depthTest(descriptor.depthStencilState.depthTest),
+		depthWrite(descriptor.depthStencilState.depthWrite),
+		depthFunc(getGlDepthFunc(descriptor.depthStencilState.compareOperation)),
 		dynamicLineWidth(descriptor.dynamicState & DynamicState::LINE_WIDTH)
 	{
 		PROFILE_SCOPE(FUNC_SIG);

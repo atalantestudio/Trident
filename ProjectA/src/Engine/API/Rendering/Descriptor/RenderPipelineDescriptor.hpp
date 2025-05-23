@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/API/Rendering/CompareOperation.hpp"
 #include "Engine/API/Rendering/RenderPass.hpp"
 #include "Engine/Renderer/CullMode.hpp"
 #include "Engine/Renderer/DynamicState.hpp"
@@ -11,6 +12,12 @@
 #include "Engine/Renderer/VertexInputBinding.hpp"
 
 namespace ProjectA {
+	struct DepthStencilState {
+		bool depthTest;
+		bool depthWrite;
+		CompareOperation compareOperation;
+	};
+
 	struct RenderPipelineDescriptor {
 		ref<RenderPass> renderPass;
 		ref<PipelineLayout> pipelineLayout;
@@ -23,6 +30,7 @@ namespace ProjectA {
 		FrontFace frontFace = FrontFace::CLOCKWISE;
 		float32 lineWidth = 1.0f;
 		float32 minSampleShading = 0.0f;
+		DepthStencilState depthStencilState;
 		DynamicState dynamicState;
 	};
 }

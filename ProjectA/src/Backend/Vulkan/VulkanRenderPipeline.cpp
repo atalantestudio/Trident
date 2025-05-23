@@ -191,9 +191,9 @@ namespace ProjectA {
 			depthStencilStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 			depthStencilStateCreateInfo.pNext = nullptr;
 			depthStencilStateCreateInfo.flags = 0;
-			depthStencilStateCreateInfo.depthTestEnable = VK_TRUE;
-			depthStencilStateCreateInfo.depthWriteEnable = VK_TRUE;
-			depthStencilStateCreateInfo.depthCompareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
+			depthStencilStateCreateInfo.depthTestEnable = descriptor.depthStencilState.depthTest;
+			depthStencilStateCreateInfo.depthWriteEnable = descriptor.depthStencilState.depthWrite;
+			depthStencilStateCreateInfo.depthCompareOp = static_cast<VkCompareOp>(descriptor.depthStencilState.compareOperation);
 			depthStencilStateCreateInfo.depthBoundsTestEnable = VK_FALSE;
 			depthStencilStateCreateInfo.stencilTestEnable = VK_FALSE;
 			depthStencilStateCreateInfo.front.failOp = VK_STENCIL_OP_KEEP;

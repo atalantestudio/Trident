@@ -10,11 +10,9 @@ namespace ProjectA {
 				renderPipeline(renderPipeline)
 			{}
 
-			// TODO: Expose:
-			// - glEnable(GL_BLEND)
-			// - glEnable(GL_DEPTH_TEST)
-			// - glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-			// - glEnable(GL_FRAMEBUFFER_SRGB)
+			// TODO: glEnable(GL_BLEND)
+			// TODO: glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+			// TODO: glEnable(GL_FRAMEBUFFER_SRGB)
 			void execute() const override {
 				glBindVertexArray(renderPipeline->vertexArray);
 				glUseProgram(renderPipeline->program);
@@ -49,6 +47,15 @@ namespace ProjectA {
 				}
 				else {
 					glDisable(GL_SAMPLE_SHADING);
+				}
+
+				if (renderPipeline->depthTest) {
+					glEnable(GL_DEPTH_TEST);
+					glDepthMask(renderPipeline->depthWrite);
+					glDepthFunc(renderPipeline->depthFunc);
+				}
+				else {
+					glDisable(GL_DEPTH_TEST);
 				}
 			}
 

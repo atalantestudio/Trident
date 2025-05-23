@@ -107,6 +107,7 @@ namespace ProjectA {
 					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Glyph.frag.spv", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+					renderPipelineDescriptor.depthStencilState.depthTest = false;
 					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);

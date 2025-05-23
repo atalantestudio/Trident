@@ -24,6 +24,9 @@ namespace ProjectA {
 			const GLenum polygonMode;
 			const GLfloat lineWidth;
 			const GLfloat minSampleShading;
+			const GLboolean depthTest;
+			const GLboolean depthWrite;
+			const GLenum depthFunc;
 			const bool dynamicLineWidth;
 	};
 }

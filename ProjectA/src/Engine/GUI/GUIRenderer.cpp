@@ -197,6 +197,7 @@ namespace ProjectA {
 		renderPipelineDescriptor.cullMode = CullMode::BACK;
 		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		renderPipelineDescriptor.minSampleShading = 0.5;
+		renderPipelineDescriptor.depthStencilState.depthTest = false;
 		renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		renderPipeline = createRenderPipeline(renderPipelineDescriptor);
