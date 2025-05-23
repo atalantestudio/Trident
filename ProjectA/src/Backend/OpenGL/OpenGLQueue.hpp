@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Engine/API/DeviceContext.hpp"
+#include "Backend/OpenGL/OpenGLRenderingContext.hpp"
+
 #include "Engine/Renderer/Queue.hpp"
 
 namespace ProjectA {
@@ -8,7 +9,7 @@ namespace ProjectA {
 
 	class OpenGLQueue : public Queue {
 		public:
-			OpenGLQueue(const DeviceContext& deviceContext, const OpenGLDevice& device);
+			OpenGLQueue(const OpenGLRenderingContext& renderingContext, const OpenGLDevice& device);
 
 			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
 
@@ -17,7 +18,7 @@ namespace ProjectA {
 			Status present(const std::vector<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const std::vector<uint32>& imageIndices) const final override;
 
 		private:
-			const DeviceContext& deviceContext;
+			const OpenGLRenderingContext& renderingContext;
 			const OpenGLDevice& device;
 	};
 }

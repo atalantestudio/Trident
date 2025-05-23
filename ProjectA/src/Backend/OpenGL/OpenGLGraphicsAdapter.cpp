@@ -15,87 +15,88 @@
 
 namespace ProjectA {
 	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const Window& window) :
-		deviceContext(window),
+		renderingContext(window),
 		surface(createRef<OpenGLSurface>())
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		deviceContext.setSwapInterval(1);
+		renderingContext.makeCurrent();
+		renderingContext.setSwapInterval(1);
 
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glAttachShader);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindBuffer);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindBufferRange);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindFramebuffer);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindImageTexture);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindSampler);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindTextureUnit);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindVertexArray);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glBindVertexBuffer);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glBlitFramebuffer);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glAttachShader);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBuffer);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBufferRange);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindFramebuffer);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindImageTexture);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindSampler);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindTextureUnit);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexArray);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexBuffer);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glBlitFramebuffer);
 
 		#ifdef BUILD_MODE_DEBUG
-			LOAD_PROCEDURE_ADDRESS(deviceContext, glCheckFramebufferStatus);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glCheckFramebufferStatus);
 		#endif
 
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glClearBufferfi);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glClearBufferfv);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glClientWaitSync);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glCompileShader);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glCopyNamedBufferSubData);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateBuffers);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateFramebuffers);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateProgram);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateSamplers);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateShader);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateTextures);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glCreateVertexArrays);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glClearBufferfi);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glClearBufferfv);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glClientWaitSync);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glCompileShader);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyNamedBufferSubData);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateBuffers);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateFramebuffers);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateProgram);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateSamplers);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateShader);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateTextures);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateVertexArrays);
 
 		#ifdef DEBUG_ENABLE_MESSENGER
-			LOAD_PROCEDURE_ADDRESS(deviceContext, glDebugMessageCallback);
-			LOAD_PROCEDURE_ADDRESS(deviceContext, glDebugMessageInsert);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDebugMessageCallback);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDebugMessageInsert);
 		#endif
 
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteBuffers);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteFramebuffers);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteProgram);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteSamplers);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteShader);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteSync);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDeleteVertexArrays);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDetachShader);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDispatchCompute);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDrawArraysInstanced);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDrawBuffers);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glDrawElementsInstanced);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glEnableVertexAttribArray);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glFenceSync);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glFramebufferTexture2D);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetIntegeri_v);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetProgramInfoLog);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetProgramiv);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetShaderInfoLog);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glGetShaderiv);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glLinkProgram);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glMapNamedBufferRange);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glMemoryBarrier);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glMinSampleShading);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glNamedBufferStorage);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glProvokingVertex);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glSamplerParameteri);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glShaderBinary);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glShaderSource);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glSpecializeShader);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glTextureStorage2D);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glTextureStorage2DMultisample);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glTextureSubImage2D);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glTextureView);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glUnmapNamedBuffer);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glUseProgram);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glVertexAttribBinding);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glVertexAttribFormat);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glVertexAttribIFormat);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glVertexAttribLFormat);
-		LOAD_PROCEDURE_ADDRESS(deviceContext, glVertexBindingDivisor);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteBuffers);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteFramebuffers);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteProgram);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteSamplers);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteShader);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteSync);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteVertexArrays);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDetachShader);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDispatchCompute);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawArraysInstanced);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawBuffers);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawElementsInstanced);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glEnableVertexAttribArray);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glFenceSync);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glFramebufferTexture2D);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetIntegeri_v);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetProgramInfoLog);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetProgramiv);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetShaderInfoLog);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetShaderiv);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glLinkProgram);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glMapNamedBufferRange);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glMemoryBarrier);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glMinSampleShading);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedBufferStorage);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glProvokingVertex);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glSamplerParameteri);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderBinary);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderSource);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glSpecializeShader);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2D);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2DMultisample);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage2D);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureView);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glUnmapNamedBuffer);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glUseProgram);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribBinding);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribFormat);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribIFormat);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribLFormat);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexBindingDivisor);
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			glEnable(GL_DEBUG_OUTPUT);
@@ -108,7 +109,7 @@ namespace ProjectA {
 
 		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
 
-		device = createRef<OpenGLDevice>(deviceContext);
+		device = createRef<OpenGLDevice>(renderingContext);
 	}
 
 	ref<Buffer> OpenGLGraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {

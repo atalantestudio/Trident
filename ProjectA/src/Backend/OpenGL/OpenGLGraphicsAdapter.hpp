@@ -3,7 +3,6 @@
 #include "Backend/OpenGL/OpenGLDevice.hpp"
 #include "Backend/OpenGL/OpenGLSurface.hpp"
 
-#include "Engine/API/DeviceContext.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/GraphicsAdapter.hpp"
 
@@ -44,7 +43,7 @@ namespace ProjectA {
 			#endif
 
 		private:
-			const DeviceContext deviceContext;
+			const OpenGLRenderingContext renderingContext;
 			ref<OpenGLDevice> device;
 			ref<OpenGLSurface> surface;
 	};

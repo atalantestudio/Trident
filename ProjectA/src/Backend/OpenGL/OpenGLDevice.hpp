@@ -2,13 +2,14 @@
 
 #include "Backend/OpenGL/OpenGLPhysicalDevice.hpp"
 #include "Backend/OpenGL/OpenGLQueue.hpp"
+#include "Backend/OpenGL/OpenGLRenderingContext.hpp"
 
 #include "Engine/Renderer/Device.hpp"
 
 namespace ProjectA {
 	class OpenGLDevice : public Device {
 		public:
-			OpenGLDevice(const DeviceContext& deviceContext);
+			OpenGLDevice(const OpenGLRenderingContext& renderingContext);
 
 			ref<PhysicalDevice> getPhysicalDevice() const final override;
 

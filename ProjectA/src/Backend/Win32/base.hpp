@@ -36,8 +36,6 @@ namespace ProjectA {
 		EventListener<MouseWheelEvent> mouseWheelEventListener;
 		EventListener<WindowResizeEvent> windowResizeEventListener;
 		EventListener<WindowCloseEvent> windowCloseEventListener;
-
-		PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
 	};
 
 	struct Win32DeviceContextData {
