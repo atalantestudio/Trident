@@ -22,8 +22,8 @@ namespace ProjectA {
 					RenderPassDescriptor renderPassDescriptor{};
 					renderPassDescriptor.colorAttachments = {colorAttachment};
 					renderPassDescriptor.depthStencilAttachment = depthStencilAttachment;
-					renderPassDescriptor.enableResolve = false;
-					renderPassDescriptor.enableDepthStencil = true;
+					renderPassDescriptor.resolve = false;
+					renderPassDescriptor.depthStencil = true;
 					renderPassDescriptor.presentAttachmentIndex = 0;
 
 					renderPass = createRenderPass(renderPassDescriptor);

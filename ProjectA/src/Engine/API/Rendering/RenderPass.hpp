@@ -8,11 +8,11 @@ namespace ProjectA {
 	class RenderPass {
 		public:
 			RenderPass(const RenderPassDescriptor& descriptor) :
-				depthStencil(descriptor.enableDepthStencil),
-				resolve(descriptor.enableResolve),
+				depthStencil(descriptor.depthStencil),
+				resolve(descriptor.resolve),
 				present(descriptor.presentAttachmentIndex != std::numeric_limits<uint32>::max()),
 				colorAttachmentCount(static_cast<uint32>(descriptor.colorAttachments.size())),
-				resolveAttachmentCount(descriptor.enableResolve ? colorAttachmentCount : 0),
+				resolveAttachmentCount(descriptor.resolve ? colorAttachmentCount : 0),
 				presentAttachmentIndex(descriptor.presentAttachmentIndex),
 				colorAttachments(descriptor.colorAttachments),
 				depthStencilAttachment(descriptor.depthStencilAttachment)

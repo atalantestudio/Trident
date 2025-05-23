@@ -7,8 +7,8 @@ namespace ProjectA {
 		std::vector<ColorAttachment> colorAttachments;
 		DepthStencilAttachment depthStencilAttachment;
 
-		bool enableResolve;
-		bool enableDepthStencil;
+		bool resolve;
+		bool depthStencil;
 
 		// Sets the index of the attachment that will render to a swapchain image.
 		uint32 presentAttachmentIndex = std::numeric_limits<uint32>::max();

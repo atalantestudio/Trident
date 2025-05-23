@@ -16,8 +16,8 @@ namespace ProjectA {
 
 					RenderPassDescriptor renderPassDescriptor;
 					renderPassDescriptor.colorAttachments = {multisampleColorAttachment};
-					renderPassDescriptor.enableResolve = true;
-					renderPassDescriptor.enableDepthStencil = false;
+					renderPassDescriptor.resolve = true;
+					renderPassDescriptor.depthStencil = false;
 					renderPassDescriptor.presentAttachmentIndex = 0;
 
 					renderPass = createRenderPass(renderPassDescriptor);
