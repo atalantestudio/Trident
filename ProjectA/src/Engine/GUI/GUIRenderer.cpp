@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Engine/Application.hpp"
 #include "Engine/Filesystem/File/PNGFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
@@ -8,6 +9,29 @@ namespace ProjectA {
 	GUIRenderer::GUIRenderer() {}
 
 	void GUIRenderer::build() {
+		const ref<Surface> surface = getSurface();
+
+		ColorAttachment colorAttachment{};
+		colorAttachment.format = surface->getFormat();
+		colorAttachment.sampleCount = 1;
+		colorAttachment.loadOperation = LoadOperation::CLEAR;
+		colorAttachment.storeOperation = StoreOperation::STORE;
+
+		RenderPassDescriptor renderPassDescriptor;
+		renderPassDescriptor.colorAttachments = {colorAttachment};
+		renderPassDescriptor.resolve = false;
+		renderPassDescriptor.depthStencil = false;
+		renderPassDescriptor.presentAttachmentIndex = 0;
+
+		renderPass = createRenderPass(renderPassDescriptor);
+
+		SwapchainDescriptor swapchainDescriptor;
+		swapchainDescriptor.renderPass = renderPass;
+		swapchainDescriptor.extentWidth = Application::get().getWindow().getSize()[0];
+		swapchainDescriptor.extentHeight = Application::get().getWindow().getSize()[1];
+
+		swapchain = createSwapchain(swapchainDescriptor);
+
 		initializeVertexBuffer();
 		initializeIndexBuffer();
 		initializeSubcomponentBuffer();
@@ -151,10 +175,7 @@ namespace ProjectA {
 		imageDescriptorSetLayoutBinding.samplers = samplers;
 
 		DescriptorSetLayout descriptorSetLayout;
-		descriptorSetLayout.bindings = {
-			cameraDescriptorSetLayoutBinding,
-			imageDescriptorSetLayoutBinding,
-		};
+		descriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, imageDescriptorSetLayoutBinding};
 
 		PipelineLayoutDescriptor pipelineLayoutDescriptor;
 		pipelineLayoutDescriptor.layouts = {descriptorSetLayout};
@@ -346,6 +367,13 @@ namespace ProjectA {
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
+		BeginRenderPassDescriptor beginRenderPassDescriptor;
+		beginRenderPassDescriptor.renderPass = renderPass;
+		beginRenderPassDescriptor.swapchain = swapchain;
+		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
+		beginRenderPassDescriptor.imageIndex = acquireNextImage(swapchain);
+
+		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
@@ -354,6 +382,20 @@ namespace ProjectA {
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 		commandEncoder->drawIndexed(6, subcomponentCount, 0);
+		commandEncoder->endRenderPass();
+	}
+
+	void GUIRenderer::resize(WindowResizeEvent& event) {
+		const ref<Device> device = getDevice();
+
+		device->waitIdle();
+
+		SwapchainDescriptor swapchainDescriptor;
+		swapchainDescriptor.renderPass = renderPass;
+		swapchainDescriptor.extentWidth = event.getWidth();
+		swapchainDescriptor.extentHeight = event.getHeight();
+
+		swapchain->update(swapchainDescriptor);
 	}
 
 	void GUIRenderer::resetSubcomponentCount() {

@@ -66,6 +66,10 @@ namespace ProjectA {
 
 			virtual void updateGUI();
 
+			virtual void onEvent(Event& event) final override;
+
+			bool onWindowResize(WindowResizeEvent& event);
+
 		protected:
 			ImageID loadImage(std::string_view path);
 

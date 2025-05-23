@@ -19,7 +19,7 @@ namespace ProjectA {
 					depthStencilAttachment.sampleCount = 1;
 					depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
 
-					RenderPassDescriptor renderPassDescriptor{};
+					RenderPassDescriptor renderPassDescriptor;
 					renderPassDescriptor.colorAttachments = {colorAttachment};
 					renderPassDescriptor.depthStencilAttachment = depthStencilAttachment;
 					renderPassDescriptor.resolve = false;

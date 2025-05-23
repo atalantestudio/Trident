@@ -25,6 +25,8 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
+			void resize(WindowResizeEvent& event) final override;
+
 			void resetSubcomponentCount();
 
 		private:
@@ -70,10 +72,10 @@ namespace ProjectA {
 
 			ref<Buffer> subcomponentBuffer;
 			ref<Buffer> subcomponentStagingBuffer;
-			Subcomponent* subcomponentMappedRange = nullptr;
+			Subcomponent* subcomponentMappedRange;
 
 			ref<Buffer> cameraBuffer;
-			mat3x3<float32>* cameraMappedRange = nullptr;
+			mat3x3<float32>* cameraMappedRange;
 
 			std::vector<ref<Image>> images;
 			std::vector<ref<ImageView>> imageViews;

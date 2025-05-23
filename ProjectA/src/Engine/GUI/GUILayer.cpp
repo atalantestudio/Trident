@@ -1,5 +1,7 @@
 #include "pch.hpp"
 
+#include "Engine/API/Event/EventDispatcher.hpp"
+#include "Engine/Application.hpp"
 #include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/ECS/Component/ScriptComponent.hpp"
 #include "Engine/GUI/GUILayer.hpp"
@@ -62,17 +64,13 @@ namespace ProjectA {
 	void GUILayer::preRender() {
 		//updateScriptComponents();
 
-		// TODO: Create swapchain inside the renderer.
-		//const ref<Swapchain>& swapchain = Renderer::getSwapchain();
-		ref<Swapchain> swapchain;
-
 		componentOrigin[HORIZONTAL] = 0;
 		componentOrigin[VERTICAL] = 0;
 		layoutDirection = VERTICAL;
 		layoutSpacing = 0;
 		currentContainerSize = {
-			static_cast<sint16>(swapchain->getExtentWidth()),
-			static_cast<sint16>(swapchain->getExtentHeight()),
+			static_cast<sint16>(Application::get().getWindow().getSize()[0]),
+			static_cast<sint16>(Application::get().getWindow().getSize()[0]),
 		};
 		currentContainerInnerSize = currentContainerSize;
 
@@ -90,6 +88,18 @@ namespace ProjectA {
 	}
 
 	void GUILayer::updateGUI() {}
+
+	void GUILayer::onEvent(Event& event) {
+		EventDispatcher eventDispatcher(event);
+
+		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
+	}
+
+	bool GUILayer::onWindowResize(WindowResizeEvent& event) {
+		renderer.resize(event);
+
+		return true;
+	}
 
 	ImageID GUILayer::loadImage(std::string_view path) {
 		return renderer.registerImage(path);
