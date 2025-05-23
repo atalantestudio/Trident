@@ -63,7 +63,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to submit Vulkan queue (code: []).", result);
 	}
 
-	Status VulkanQueue::present(const chain<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const chain<uint32>& imageIndices) const {
+	Status VulkanQueue::present(const std::vector<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const std::vector<uint32>& imageIndices) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		// TODO: Find a static way of casting swapchains.

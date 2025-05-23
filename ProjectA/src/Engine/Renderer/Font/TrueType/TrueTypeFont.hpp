@@ -19,7 +19,7 @@ namespace ProjectA {
 
 			const ref<Image>& getSdfImage() const;
 
-			const chain<TrueTypeGlyph>& getGlyphs() const;
+			const std::vector<TrueTypeGlyph>& getGlyphs() const;
 
 			const TrueTypeGlyph& operator [](uint16 codePoint) const;
 
@@ -28,7 +28,7 @@ namespace ProjectA {
 			sint16 descent;
 			sint16 lineGap;
 			std::unordered_map<uint16, uint32> unicodeMap;
-			chain<TrueTypeGlyph> glyphs;
+			std::vector<TrueTypeGlyph> glyphs;
 			std::unordered_map<uint16, uint16> map;
 			SDFGlyphMap sdfGlyphMap;
 	};

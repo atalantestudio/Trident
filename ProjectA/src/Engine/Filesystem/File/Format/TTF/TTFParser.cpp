@@ -196,7 +196,7 @@ namespace ProjectA {
 		const uint16 numPoints = endPtsOfContours[numberOfContours - 1] + 1;
 
 		// Array of flags.
-		chain<uint8> flags(numPoints);
+		std::vector<uint8> flags(numPoints);
 
 		{
 			uint16 flagIndex = 0;
@@ -232,14 +232,14 @@ namespace ProjectA {
 
 		parseCoordinates(stream, &yCoordinates[0], &flags[0], numPoints, 2, 5, glyph.min.y, glyph.max.y);
 
-		fchain<chain<ContourPoint>> contours(numberOfContours);
+		fchain<std::vector<ContourPoint>> contours(numberOfContours);
 
 		{
 			uint16 contourIndex = 0;
 			uint16 startIndex = 0;
 
 			while (contourIndex < numberOfContours) {
-				chain<ContourPoint>& contour = contours[contourIndex];
+				std::vector<ContourPoint>& contour = contours[contourIndex];
 
 				const uint16 endIndex = endPtsOfContours[contourIndex] + 1;
 				const bool startOnCurve = flags[startIndex] & BIT(0);
@@ -300,7 +300,7 @@ namespace ProjectA {
 			}
 		}
 
-		for (const chain<ContourPoint>& contour : contours) {
+		for (const std::vector<ContourPoint>& contour : contours) {
 			for (uint16 edgePointIndex = 1; edgePointIndex < contour.size(); edgePointIndex += 1) {
 				const ContourPoint& contourPoint = contour[edgePointIndex];
 
@@ -671,7 +671,7 @@ namespace ProjectA {
 				idDelta = stream.read<uint16>(true);
 			}
 
-			chain<uint16> idRangeOffsets(segCount);
+			std::vector<uint16> idRangeOffsets(segCount);
 
 			for (uint16& idRangeOffset : idRangeOffsets) {
 				idRangeOffset = stream.read<uint16>(true);

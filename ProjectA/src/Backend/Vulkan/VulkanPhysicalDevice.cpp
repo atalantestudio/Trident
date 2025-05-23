@@ -14,7 +14,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan physical devices (code: []).", result);
 		ENGINE_ASSERT(physicalDeviceCount > 0, "Could not find any physical device.");
 
-		chain<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+		std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
 
 		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data());
 
@@ -42,7 +42,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(queueFamilyPropertyCount > 0, "Could not find queues for this physical device.");
 
-		chain<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertyCount);
+		std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertyCount);
 
 		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyPropertyCount, queueFamilyProperties.data());
 
@@ -65,7 +65,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan device extension properties (code: []).", result);
 
-		chain<VkExtensionProperties> extensionProperties(extensionPropertyCount);
+		std::vector<VkExtensionProperties> extensionProperties(extensionPropertyCount);
 
 		result = vkEnumerateDeviceExtensionProperties(object, nullptr, &extensionPropertyCount, extensionProperties.data());
 

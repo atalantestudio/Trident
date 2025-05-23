@@ -72,10 +72,10 @@ namespace ProjectA {
 	}
 
 	GLuint OpenGLRenderPass::createScreenProgram() {
-		const chain<uint8> screenVertexShaderModuleCode = Filesystem::loadByteBuffer("../ProjectA/src/Asset/Shader/Screen.vert");
+		const std::vector<uint8> screenVertexShaderModuleCode = Filesystem::loadByteBuffer("../ProjectA/src/Asset/Shader/Screen.vert");
 		const OpenGLShaderModule screenVertexShaderModule(screenVertexShaderModuleCode, ShaderStage::VERTEX);
 
-		const chain<uint8> screenFragmentShaderModuleCode = Filesystem::loadByteBuffer("../ProjectA/src/Asset/Shader/Screen.frag");
+		const std::vector<uint8> screenFragmentShaderModuleCode = Filesystem::loadByteBuffer("../ProjectA/src/Asset/Shader/Screen.frag");
 		const OpenGLShaderModule screenFragmentShaderModule(screenFragmentShaderModuleCode, ShaderStage::FRAGMENT);
 
 		const GLuint screenProgram = glCreateProgram();
@@ -93,7 +93,7 @@ namespace ProjectA {
 
 			glGetProgramiv(screenProgram, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-			chain<GLchar> infoLog(infoLogLength);
+			std::vector<GLchar> infoLog(infoLogLength);
 
 			glGetProgramInfoLog(screenProgram, infoLogLength, nullptr, infoLog.data());
 

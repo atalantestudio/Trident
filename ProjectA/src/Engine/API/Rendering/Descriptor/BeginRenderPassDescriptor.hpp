@@ -13,7 +13,7 @@ namespace ProjectA {
 
 		// 1 clear value per attachment.
 		// Clear values are ignored for attachments without a LoadOperation::CLEAR.
-		chain<ClearValue> clearValues;
+		std::vector<ClearValue> clearValues;
 
 		// Index of the swapchain image to render to.
 		uint32 imageIndex = 0;

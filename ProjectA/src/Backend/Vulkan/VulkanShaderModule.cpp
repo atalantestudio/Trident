@@ -5,7 +5,7 @@
 #include "Backend/Vulkan/ShaderStage.hpp"
 
 namespace ProjectA {
-	VulkanShaderModule::VulkanShaderModule(VkDevice device, const chain<uint8>& code, const ShaderModuleDescriptor& descriptor) :
+	VulkanShaderModule::VulkanShaderModule(VkDevice device, const std::vector<uint8>& code, const ShaderModuleDescriptor& descriptor) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);

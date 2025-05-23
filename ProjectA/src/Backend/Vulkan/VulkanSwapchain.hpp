@@ -25,9 +25,9 @@ namespace ProjectA {
 			void destroy();
 
 		public:
-			chain<VkImage> images;
-			chain<VkImageView> imageViews;
-			chain<VkFramebuffer> framebuffers;
+			std::vector<VkImage> images;
+			std::vector<VkImageView> imageViews;
+			std::vector<VkFramebuffer> framebuffers;
 
 		private:
 			const VulkanPhysicalDevice& physicalDevice;

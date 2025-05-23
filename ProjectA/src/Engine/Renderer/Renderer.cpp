@@ -171,7 +171,7 @@ namespace ProjectA {
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor) {
-		const chain<uint8> code = Filesystem::loadByteBuffer(path);
+		const std::vector<uint8> code = Filesystem::loadByteBuffer(path);
 
 		return adapter->createShaderModule(code, descriptor);
 	}

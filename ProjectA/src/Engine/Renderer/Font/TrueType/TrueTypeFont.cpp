@@ -54,7 +54,7 @@ namespace ProjectA {
 		return sdfGlyphMap.glyphMap;
 	}
 
-	const chain<TrueTypeGlyph>& TrueTypeFont::getGlyphs() const {
+	const std::vector<TrueTypeGlyph>& TrueTypeFont::getGlyphs() const {
 		return glyphs;
 	}
 

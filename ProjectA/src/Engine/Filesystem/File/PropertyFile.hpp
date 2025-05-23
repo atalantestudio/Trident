@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class PropertyFile final : public File {
 		public:
-			std::unordered_map<std::string, chain<uint8>> propertyMap;
+			std::unordered_map<std::string, std::vector<uint8>> propertyMap;
 
 			PropertyFile(std::string_view path) :
 				stream(path.data(), std::ios::in | std::ios::out | std::ios::ate)

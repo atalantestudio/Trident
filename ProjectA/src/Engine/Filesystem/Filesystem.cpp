@@ -11,7 +11,7 @@ namespace ProjectA {
 		return getCurrentPath().filename();
 	}
 
-	chain<uint8> Filesystem::loadByteBuffer(const std::string& path) {
+	std::vector<uint8> Filesystem::loadByteBuffer(const std::string& path) {
 		std::ifstream stream(path, std::ios::binary);
 
 		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
@@ -22,11 +22,11 @@ namespace ProjectA {
 
 		stream.seekg(0, std::ios::beg);
 
-		chain<uint8> chain(size);
+		std::vector<uint8> buffer(size);
 
-		stream.read(static_cast<char*>(static_cast<void*>(chain.data())), size);
+		stream.read(static_cast<char*>(static_cast<void*>(buffer.data())), size);
 		stream.close();
 
-		return chain;
+		return buffer;
 	}
 }

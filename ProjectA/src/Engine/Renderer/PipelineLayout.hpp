@@ -4,7 +4,7 @@
 
 namespace ProjectA {
 	struct PipelineLayoutDescriptor {
-		chain<DescriptorSetLayout> layouts;
+		std::vector<DescriptorSetLayout> layouts;
 	};
 
 	class PipelineLayout {

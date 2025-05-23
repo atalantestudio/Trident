@@ -28,8 +28,8 @@ namespace ProjectA {
 
 		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
 
-		chain<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
-		chain<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
+		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
+		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
 
 		uint32 location = 0;
 
@@ -41,7 +41,7 @@ namespace ProjectA {
 			vertexInputBindingDescription.stride = vertexInputBinding.getStride();
 			vertexInputBindingDescription.inputRate = getVkVertexInputRate(vertexInputBinding.getInputRate());
 
-			const chain<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
+			const std::vector<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
 
 			for (const VertexInputAttribute& attribute : attributes) {
 				VkVertexInputAttributeDescription vertexInputAttributeDescription{};
@@ -159,7 +159,7 @@ namespace ProjectA {
 		colorBlendStateCreateInfo.blendConstants[2] = 0.0f;
 		colorBlendStateCreateInfo.blendConstants[3] = 0.0f;
 
-		const chain<VkDynamicState> dynamicStates = getVkDynamicStates(descriptor.dynamicState);
+		const std::vector<VkDynamicState> dynamicStates = getVkDynamicStates(descriptor.dynamicState);
 
 		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
 		dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;

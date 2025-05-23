@@ -5,7 +5,7 @@
 namespace ProjectA {
 	// TODO: Client-side validation layer request.
 	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-		const chain<const char*> VulkanInstance::enabledLayerNames = {
+		const std::vector<const char*> VulkanInstance::enabledLayerNames = {
 			"VK_LAYER_KHRONOS_validation",
 		};
 	#endif
@@ -129,7 +129,7 @@ namespace ProjectA {
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan instance layer properties (code: []).", result);
 
-			chain<VkLayerProperties> layerProperties(layerPropertyCount);
+			std::vector<VkLayerProperties> layerProperties(layerPropertyCount);
 
 			result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
 

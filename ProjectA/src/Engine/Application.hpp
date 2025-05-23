@@ -23,8 +23,8 @@ namespace ProjectA {
 	};
 
 	struct PresentData {
-		chain<ref<Swapchain>> swapchains;
-		chain<uint32> imageIndices;
+		std::vector<ref<Swapchain>> swapchains;
+		std::vector<uint32> imageIndices;
 	};
 
 	class Application {

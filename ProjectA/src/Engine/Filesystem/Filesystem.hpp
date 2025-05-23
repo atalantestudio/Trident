@@ -8,7 +8,7 @@ namespace ProjectA {
 			static std::filesystem::path getCurrentDirectory();
 
 			// The provided path is relative to the working directory.
-			static chain<uint8> loadByteBuffer(const std::string& path);
+			static std::vector<uint8> loadByteBuffer(const std::string& path);
 
 			// The provided path is relative to the working directory.
 			template<typename T>

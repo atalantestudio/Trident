@@ -126,9 +126,9 @@ namespace ProjectA {
 		framebufferCreateInfo.height = descriptor.extentHeight;
 		framebufferCreateInfo.layers = 1;
 
-		const chain<ref<ImageView>>& colorAttachmentImageViews = renderPass.getColorAttachmentImageViews();
+		const std::vector<ref<ImageView>>& colorAttachmentImageViews = renderPass.getColorAttachmentImageViews();
 
-		chain<VkImageView> baseAttachmentsImageViews(attachmentCount);
+		std::vector<VkImageView> baseAttachmentsImageViews(attachmentCount);
 
 		// Write color attachment image views (except for the presented attachment).
 		for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < colorAttachmentCount; colorAttachmentIndex += 1) {
@@ -155,7 +155,7 @@ namespace ProjectA {
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan swapchain image view (code: []).", result);
 
-			chain<VkImageView> attachmentImageViews(baseAttachmentsImageViews);
+			std::vector<VkImageView> attachmentImageViews(baseAttachmentsImageViews);
 
 			// Override eligible attachments (all resolve and present) with a swapchain image view.
 			if (resolveAttachmentCount > 0) {

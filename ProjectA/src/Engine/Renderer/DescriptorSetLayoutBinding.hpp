@@ -10,12 +10,12 @@ namespace ProjectA {
 	struct DescriptorSetLayoutBinding {
 		DescriptorType descriptorType;
 		ShaderStage stageFlags;
-		chain<ref<Buffer>> buffers;
+		std::vector<ref<Buffer>> buffers;
 
 		// Applies to every buffer of the descriptor.
 		uint64 bufferOffset = 0;
 
-		chain<ref<ImageView>> imageViews;
-		chain<ref<Sampler>> samplers;
+		std::vector<ref<ImageView>> imageViews;
+		std::vector<ref<Sampler>> samplers;
 	};
 }

@@ -4,7 +4,7 @@
 
 namespace ProjectA {
 	struct RenderPassDescriptor {
-		chain<ColorAttachment> colorAttachments;
+		std::vector<ColorAttachment> colorAttachments;
 		DepthStencilAttachment depthStencilAttachment;
 
 		bool enableResolve;

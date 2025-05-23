@@ -47,7 +47,7 @@ namespace ProjectA {
 
 			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-			chain<GLchar> infoLog(infoLogLength);
+			std::vector<GLchar> infoLog(infoLogLength);
 
 			glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog.data());
 
@@ -62,7 +62,7 @@ namespace ProjectA {
 
 		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.size(); vertexInputBindingIndex += 1) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
-			const chain<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
+			const std::vector<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
 
 			for (const VertexInputAttribute& attribute : attributes) {
 				const GLenum type = getGlType(attribute.type);

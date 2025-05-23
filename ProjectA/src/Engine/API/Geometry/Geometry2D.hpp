@@ -2,8 +2,8 @@
 
 namespace ProjectA {
 	struct Geometry2DDescriptor {
-		chain<uint16> indices;
-		chain<vec2<float32>> vertices;
+		std::vector<uint16> indices;
+		std::vector<vec2<float32>> vertices;
 	};
 
 	class Geometry2D {
@@ -23,8 +23,8 @@ namespace ProjectA {
 			virtual uint32 support(const vec2<float32>& d) const = 0;
 
 		public:
-			chain<uint16> indices;
-			chain<vec2<float32>> vertices;
+			std::vector<uint16> indices;
+			std::vector<vec2<float32>> vertices;
 
 			// Average of all vertices.
 			vec2<float32> centerOfMass;

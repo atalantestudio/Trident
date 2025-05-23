@@ -304,7 +304,7 @@ namespace ProjectA {
 	void Application::onEvent(Event& event) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		for (chain<ref<Layer>>::const_reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); i += 1) {
+		for (std::vector<ref<Layer>>::const_reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); i += 1) {
 			if (event.handled) {
 				break;
 			}

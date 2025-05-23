@@ -11,7 +11,7 @@
 
 namespace ProjectA {
 	// TODO: Client-side extension request.
-	const chain<const char*> VulkanDevice::enabledExtensionNames = {
+	const std::vector<const char*> VulkanDevice::enabledExtensionNames = {
 		VK_KHR_MAINTENANCE_1_EXTENSION_NAME,
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 	};
@@ -22,7 +22,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		chain<uint32> queueFamilyIndices = {
+		std::vector<uint32> queueFamilyIndices = {
 			physicalDevice.graphicsQueueFamilyIndex,
 			physicalDevice.computeQueueFamilyIndex,
 			surface.presentQueueFamilyIndex,

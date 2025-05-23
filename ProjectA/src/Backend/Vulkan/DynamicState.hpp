@@ -1,8 +1,8 @@
 #pragma once
 
 namespace ProjectA {
-	chain<VkDynamicState> getVkDynamicStates(DynamicState dynamicState) {
-		chain<VkDynamicState> dynamicStates;
+	std::vector<VkDynamicState> getVkDynamicStates(DynamicState dynamicState) {
+		std::vector<VkDynamicState> dynamicStates;
 
 		if (dynamicState & DynamicState::VIEWPORT) {
 			dynamicStates.emplace_back(VK_DYNAMIC_STATE_VIEWPORT);

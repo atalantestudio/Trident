@@ -75,8 +75,8 @@ namespace ProjectA {
 			ref<Buffer> cameraBuffer;
 			mat3x3<float32>* cameraMappedRange = nullptr;
 
-			chain<ref<Image>> images;
-			chain<ref<ImageView>> imageViews;
+			std::vector<ref<Image>> images;
+			std::vector<ref<ImageView>> imageViews;
 
 			ref<Sampler> sampler;
 

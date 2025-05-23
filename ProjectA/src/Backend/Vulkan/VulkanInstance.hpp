@@ -20,10 +20,10 @@ namespace ProjectA {
 			#endif
 
 		private:
-			chain<const char*> enabledExtensionNames;
+			std::vector<const char*> enabledExtensionNames;
 
 			#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-				static const chain<const char*> enabledLayerNames;
+				static const std::vector<const char*> enabledLayerNames;
 			#endif
 
 			#ifdef DEBUG_ENABLE_MESSENGER

@@ -27,7 +27,7 @@ namespace ProjectA {
 		// Width of the pixels used by the SDF gradient.
 		float32 spreadFactor;
 
-		chain<SDFGlyph> glyphs;
+		std::vector<SDFGlyph> glyphs;
 	};
 
 	struct FontStorage {

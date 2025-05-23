@@ -20,9 +20,9 @@ namespace ProjectA {
 
 		public:
 			const uint32 imageCount = 1;
-			chain<ref<OpenGLImage>> images;
-			chain<ref<OpenGLImageView>> imageViews;
-			chain<GLuint> framebuffers;
+			std::vector<ref<OpenGLImage>> images;
+			std::vector<ref<OpenGLImageView>> imageViews;
+			std::vector<GLuint> framebuffers;
 
 		private:
 			uint32 extentWidth;

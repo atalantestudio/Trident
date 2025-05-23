@@ -14,7 +14,7 @@ namespace ProjectA {
 	}
 
 	void LayerStack::removeLayer(const ref<Layer>& layer) {
-		const chain<ref<Layer>>::const_iterator iterator = std::find(layers.begin(), layers.begin() + layerInsertionIndex, layer);
+		const std::vector<ref<Layer>>::const_iterator iterator = std::find(layers.begin(), layers.begin() + layerInsertionIndex, layer);
 
 		if (iterator == layers.begin() + layerInsertionIndex) {
 			return;
@@ -26,7 +26,7 @@ namespace ProjectA {
 	}
 
 	void LayerStack::removeOverlay(const ref<Layer>& overlay) {
-		const chain<ref<Layer>>::const_iterator iterator = std::find(layers.begin() + layerInsertionIndex, layers.end(), overlay);
+		const std::vector<ref<Layer>>::const_iterator iterator = std::find(layers.begin() + layerInsertionIndex, layers.end(), overlay);
 
 		if (iterator == layers.end()) {
 			return;
@@ -41,19 +41,19 @@ namespace ProjectA {
 		return layers[index];
 	}
 
-	chain<ref<Layer>>::iterator LayerStack::begin() {
+	std::vector<ref<Layer>>::iterator LayerStack::begin() {
 		return layers.begin();
 	}
 
-	chain<ref<Layer>>::iterator LayerStack::end() {
+	std::vector<ref<Layer>>::iterator LayerStack::end() {
 		return layers.end();
 	}
 
-	chain<ref<Layer>>::reverse_iterator LayerStack::rbegin() {
+	std::vector<ref<Layer>>::reverse_iterator LayerStack::rbegin() {
 		return layers.rbegin();
 	}
 
-	chain<ref<Layer>>::reverse_iterator LayerStack::rend() {
+	std::vector<ref<Layer>>::reverse_iterator LayerStack::rend() {
 		return layers.rend();
 	}
 }

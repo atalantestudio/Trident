@@ -18,7 +18,7 @@ namespace ProjectA {
 			// TODO: lyah::min<uint32>()
 			uint32 graphicsQueueFamilyIndex = std::numeric_limits<uint32>::max();
 			uint32 computeQueueFamilyIndex = std::numeric_limits<uint32>::max();
-			chain<const char*> enabledExtensionNames;
+			std::vector<const char*> enabledExtensionNames;
 			VkPhysicalDeviceFeatures features;
 	};
 }

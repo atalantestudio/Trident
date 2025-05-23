@@ -10,7 +10,7 @@
 namespace ProjectA {
 	class OpenGLBindAllDescriptorSetsCommand : public OpenGLCommand {
 		public:
-			OpenGLBindAllDescriptorSetsCommand(const chain<DescriptorSetLayout>& descriptorSetLayouts) :
+			OpenGLBindAllDescriptorSetsCommand(const std::vector<DescriptorSetLayout>& descriptorSetLayouts) :
 				descriptorSetLayouts(descriptorSetLayouts)
 			{}
 
@@ -54,6 +54,6 @@ namespace ProjectA {
 			}
 
 		private:
-			const chain<DescriptorSetLayout>& descriptorSetLayouts;
+			const std::vector<DescriptorSetLayout>& descriptorSetLayouts;
 	};
 }

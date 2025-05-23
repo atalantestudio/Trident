@@ -14,11 +14,11 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		chain<VkDescriptorPoolSize> descriptorPoolSizes;
+		std::vector<VkDescriptorPoolSize> descriptorPoolSizes;
 		VkResult result;
 
 		for (const DescriptorSetLayout& layout : descriptor.layouts) {
-			chain<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+			std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
 
 			for (uint32 bindingIndex = 0; bindingIndex < layout.bindings.size(); bindingIndex += 1) {
 				const DescriptorSetLayoutBinding& binding = layout.bindings[bindingIndex];
@@ -94,8 +94,8 @@ namespace ProjectA {
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan descriptor sets (code: []).", result);
 
-			chain<VkDescriptorBufferInfo> descriptorBufferInfos;
-			chain<VkDescriptorImageInfo> descriptorImageInfos;
+			std::vector<VkDescriptorBufferInfo> descriptorBufferInfos;
+			std::vector<VkDescriptorImageInfo> descriptorImageInfos;
 
 			for (const DescriptorSetLayout& layout : descriptor.layouts) {
 				for (const DescriptorSetLayoutBinding& binding : layout.bindings) {
@@ -137,7 +137,7 @@ namespace ProjectA {
 				}
 			}
 
-			chain<VkWriteDescriptorSet> writeDescriptorSets;
+			std::vector<VkWriteDescriptorSet> writeDescriptorSets;
 
 			uint32 bufferWriteDescriptorSetIndex = 0;
 			uint32 imageWriteDescriptorSetIndex = 0;

@@ -15,7 +15,7 @@ namespace ProjectA {
 				return inputRate;
 			}
 
-			const chain<VertexInputAttribute>& getAttributes() const {
+			const std::vector<VertexInputAttribute>& getAttributes() const {
 				return attributes;
 			}
 
@@ -75,7 +75,7 @@ namespace ProjectA {
 
 		private:
 			InputRate inputRate;
-			chain<VertexInputAttribute> attributes;
+			std::vector<VertexInputAttribute> attributes;
 			uint32 alignment = 0;
 			uint32 stride = 0;
 	};

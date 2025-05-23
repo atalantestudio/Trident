@@ -33,6 +33,6 @@ namespace ProjectA {
 		uint8 interlaceMethod;
 
 		// Decompressed data with PNG filters applied.
-		chain<uint8> data;
+		std::vector<uint8> data;
 	};
 }

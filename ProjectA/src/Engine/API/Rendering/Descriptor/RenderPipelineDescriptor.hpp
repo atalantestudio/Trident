@@ -21,7 +21,7 @@ namespace ProjectA {
 	struct RenderPipelineDescriptor {
 		ref<RenderPass> renderPass;
 		ref<PipelineLayout> pipelineLayout;
-		chain<VertexInputBinding> vertexInputBindings;
+		std::vector<VertexInputBinding> vertexInputBindings;
 		ref<ShaderModule> vertexShaderModule;
 		ref<ShaderModule> fragmentShaderModule;
 		PrimitiveTopology primitiveTopology;

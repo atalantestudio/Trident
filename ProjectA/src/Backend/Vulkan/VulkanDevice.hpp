@@ -34,7 +34,7 @@ namespace ProjectA {
 			void waitIdle() const final override;
 
 		private:
-			static const chain<const char*> enabledExtensionNames;
+			static const std::vector<const char*> enabledExtensionNames;
 
 			VkPhysicalDeviceMemoryProperties memoryProperties;
 

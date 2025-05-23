@@ -22,6 +22,6 @@ namespace ProjectA {
 
 		private:
 			const uint8 maxCodeLength;
-			chain<HuffmanCode> dictionary;
+			std::vector<HuffmanCode> dictionary;
 	};
 }

@@ -8,8 +8,8 @@ namespace ProjectA {
 	class ComponentPool : public Pool {
 		public:
 			std::array<Entity, MAX_ENTITIES> entityToComponentIndex; // Sparse array
-			chain<uint32> componentIndexToEntity; // Dense array
-			chain<T> components; // Dense array
+			std::vector<uint32> componentIndexToEntity; // Dense array
+			std::vector<T> components; // Dense array
 
 			// Number of currently alive components.
 			uint32 componentCount = 0;

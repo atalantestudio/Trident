@@ -10,7 +10,7 @@ namespace ProjectA {
 	struct Chunk {
 		uint32 ByteLength = 0;
 		uint32 Type = 0;
-		chain<uint8> Data;
+		std::vector<uint8> Data;
 		uint32 CRC = 0;
 	};
 
@@ -74,7 +74,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(file.colorType == 6, "Color type = [] is unhandled.", file.colorType);
 	}
 
-	static void readIDATChunk(ByteStream& stream, uint32 chunkByteLength, chain<uint8>& compressedData) {
+	static void readIDATChunk(ByteStream& stream, uint32 chunkByteLength, std::vector<uint8>& compressedData) {
 		compressedData.resize(compressedData.size() + chunkByteLength);
 
 		std::copy(
@@ -87,7 +87,7 @@ namespace ProjectA {
 		stream.jump(chunkByteLength);
 	}
 
-	static void readChunk(ByteStream& stream, PNGFile& file, chain<uint8>& compressedData) {
+	static void readChunk(ByteStream& stream, PNGFile& file, std::vector<uint8>& compressedData) {
 		Chunk Chunk;
 		Chunk.ByteLength = stream.read<uint32>(true);
 		Chunk.Type = stream.read<uint32>();
@@ -169,7 +169,7 @@ namespace ProjectA {
 		pngFile.size = file.size;
 		pngFile.rawData = file.rawData;
 
-		chain<uint8> compressedData;
+		std::vector<uint8> compressedData;
 
 		while (stream.getRemainingByteSize() > 0) {
 			readChunk(stream, pngFile, compressedData);
@@ -179,7 +179,7 @@ namespace ProjectA {
 
 		const uint32 finalSize = pngFile.width * pngFile.height * 4 + (pngFile.height * 1);
 
-		const chain<uint8> unfilteredData = bitStream.inflate(finalSize);
+		const std::vector<uint8> unfilteredData = bitStream.inflate(finalSize);
 
 		pngFile.data.resize(pngFile.width * pngFile.height * 4);
 

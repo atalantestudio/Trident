@@ -61,9 +61,9 @@ namespace ProjectA {
 		const uint32 resolveAttachmentCount = renderPass.getResolveAttachmentCount();
 		const uint32 presentAttachmentIndex = renderPass.getPresentAttachmentIndex();
 
-		const chain<ref<ImageView>>& colorAttachmentImageViews = renderPass.getColorAttachmentImageViews();
+		const std::vector<ref<ImageView>>& colorAttachmentImageViews = renderPass.getColorAttachmentImageViews();
 
-		chain<ref<OpenGLImageView>> baseAttachmentsImageViews(attachmentCount);
+		std::vector<ref<OpenGLImageView>> baseAttachmentsImageViews(attachmentCount);
 
 		// Write color attachment image views (except for the presented attachment).
 		for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < colorAttachmentCount; colorAttachmentIndex += 1) {
@@ -89,7 +89,7 @@ namespace ProjectA {
 
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[imageIndex]);
 
-			chain<ref<OpenGLImageView>> attachmentImageViews(baseAttachmentsImageViews);
+			std::vector<ref<OpenGLImageView>> attachmentImageViews(baseAttachmentsImageViews);
 
 			// Override eligible attachments (all resolve and present) with a swapchain image view.
 			if (resolveAttachmentCount > 0) {

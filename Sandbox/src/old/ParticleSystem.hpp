@@ -27,7 +27,7 @@ class ParticleSystem {
 			bool active = false;
 		};
 
-		ProjectA::chain<Particle> particlePool;
+		std::vector<Particle> particlePool;
 
 		ProjectA::uint32 poolIndex;
 };

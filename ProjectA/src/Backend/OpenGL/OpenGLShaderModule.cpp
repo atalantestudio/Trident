@@ -5,7 +5,7 @@
 #include "Backend/OpenGL/ShaderStage.hpp"
 
 namespace ProjectA {
-	OpenGLShaderModule::OpenGLShaderModule(const chain<uint8>& code, ShaderStage stage) :
+	OpenGLShaderModule::OpenGLShaderModule(const std::vector<uint8>& code, ShaderStage stage) :
 		ObjectWrapper(glCreateShader(getGlShaderStage(stage)))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -19,7 +19,7 @@ namespace ProjectA {
 		checkCompileStatus();
 	}
 
-	OpenGLShaderModule::OpenGLShaderModule(const chain<uint8>& code, const ShaderModuleDescriptor& descriptor) :
+	OpenGLShaderModule::OpenGLShaderModule(const std::vector<uint8>& code, const ShaderModuleDescriptor& descriptor) :
 		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -53,7 +53,7 @@ namespace ProjectA {
 
 		glGetShaderiv(object, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-		chain<GLchar> infoLog(infoLogLength);
+		std::vector<GLchar> infoLog(infoLogLength);
 
 		glGetShaderInfoLog(object, infoLogLength, nullptr, infoLog.data());
 		glDeleteShader(object);

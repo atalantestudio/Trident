@@ -79,7 +79,7 @@ namespace ProjectA {
 		{24577, 13},
 	};
 
-	static void parseUncompressedZlibBlock(BitStream& stream, chain<uint8>& data) {
+	static void parseUncompressedZlibBlock(BitStream& stream, std::vector<uint8>& data) {
 		stream.jump(5);
 
 		/**
@@ -99,7 +99,7 @@ namespace ProjectA {
 		std::copy(source, source + LEN, std::back_inserter(data));
 	}
 
-	static void parseCompressedZlibBlock(BitStream& stream, uint8 BTYPE, chain<uint8>& data) {
+	static void parseCompressedZlibBlock(BitStream& stream, uint8 BTYPE, std::vector<uint8>& data) {
 		static constexpr uint16 MAX_LITERAL_LENGTH_CODE_LENGTH_COUNT = 320;
 
 		uint8 literalLengthCodeLengths[MAX_LITERAL_LENGTH_CODE_LENGTH_COUNT] = {};
@@ -226,7 +226,7 @@ namespace ProjectA {
 			const uint16 distance = distanceCode.baseDistance + stream.read<uint16>(distanceCode.extraBitCount);
 
 			// TODO: Use iterator instead of raw pointer.
-			//const chain<uint8>::const_iterator source = data.end() - distance;
+			//const std::vector<uint8>::const_iterator source = data.end() - distance;
 			const uint8* source = data.data() + data.size() - distance;
 
 			//ENGINE_ASSERT(source >= data.begin(), "The source iterator is underflowing.");
@@ -286,7 +286,7 @@ namespace ProjectA {
 		bitBuffer >>= jumpBitCount;
 	}
 
-	chain<uint8> BitStream::inflate(uint64 uncompressedSize) {
+	std::vector<uint8> BitStream::inflate(uint64 uncompressedSize) {
 		// CMF (Compression Method and flags)
 		// 
 		// This byte is divided into a 4-bit compression method and a 4-
@@ -369,7 +369,7 @@ namespace ProjectA {
 		// is there to indicate if recompression might be worthwhile.
 		const uint8 FLEVEL = FLG >> 6;
 
-		chain<uint8> data;
+		std::vector<uint8> data;
 
 		data.reserve(uncompressedSize);
 

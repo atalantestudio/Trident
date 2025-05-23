@@ -14,16 +14,16 @@ namespace ProjectA {
 			const ref<Layer>& operator [](std::size_t index) const;
 
 			// TODO: Write helper macro for iterators.
-			chain<ref<Layer>>::iterator begin();
+			std::vector<ref<Layer>>::iterator begin();
 
-			chain<ref<Layer>>::iterator end();
+			std::vector<ref<Layer>>::iterator end();
 
-			chain<ref<Layer>>::reverse_iterator rbegin();
+			std::vector<ref<Layer>>::reverse_iterator rbegin();
 
-			chain<ref<Layer>>::reverse_iterator rend();
+			std::vector<ref<Layer>>::reverse_iterator rend();
 
 		private:
-			chain<ref<Layer>> layers;
+			std::vector<ref<Layer>> layers;
 			uint32 layerInsertionIndex = 0;
 	};
 }

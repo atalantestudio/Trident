@@ -57,7 +57,7 @@ namespace ProjectA {
 			OpenGLRenderPass* renderPass = nullptr;
 			OpenGLSwapchain* swapchain = nullptr;
 
-			chain<ref<OpenGLCommand>> commandBuffer;
+			std::vector<ref<OpenGLCommand>> commandBuffer;
 			ref<OpenGLComputePipeline> computePipeline = nullptr;
 			ref<OpenGLRenderPipeline> renderPipeline = nullptr;
 			GLuint indexOffset = 0;

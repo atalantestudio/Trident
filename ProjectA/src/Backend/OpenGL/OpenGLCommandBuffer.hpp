@@ -6,12 +6,12 @@
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 
 namespace ProjectA {
-	class OpenGLCommandBuffer : public CommandBuffer, public ObjectWrapper<const chain<ref<OpenGLCommand>>> {
+	class OpenGLCommandBuffer : public CommandBuffer, public ObjectWrapper<const std::vector<ref<OpenGLCommand>>> {
 		public:
-			OpenGLCommandBuffer(const chain<ref<OpenGLCommand>>& commandBuffer);
+			OpenGLCommandBuffer(const std::vector<ref<OpenGLCommand>>& commandBuffer);
 
-			chain<ref<OpenGLCommand>>::const_iterator begin() const;
+			std::vector<ref<OpenGLCommand>>::const_iterator begin() const;
 
-			chain<ref<OpenGLCommand>>::const_iterator end() const;
+			std::vector<ref<OpenGLCommand>>::const_iterator end() const;
 	};
 }

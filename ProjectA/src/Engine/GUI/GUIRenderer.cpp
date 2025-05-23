@@ -60,7 +60,7 @@ namespace ProjectA {
 	void GUIRenderer::initializeIndexBuffer() {
 		const ref<Device> device = getDevice();
 
-		const chain<uint16> indices = {
+		const std::vector<uint16> indices = {
 			0, 1, 2,
 			0, 2, 3,
 		};
@@ -142,7 +142,7 @@ namespace ProjectA {
 			imageViews[imageIndex] = image->createView(imageViewDescriptor);
 		}
 
-		chain<ref<Sampler>> samplers(images.size(), sampler);
+		std::vector<ref<Sampler>> samplers(images.size(), sampler);
 
 		DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding{};
 		imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;

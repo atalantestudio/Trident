@@ -46,7 +46,7 @@ namespace ProjectA {
 		uint16 codePoint;
 		Point min = {0, 0};
 		Point max = {0, 0};
-		chain<Edge> edges;
+		std::vector<Edge> edges;
 	};
 
 	struct GlyphTransform {
@@ -181,9 +181,9 @@ namespace ProjectA {
 
 	struct TTFFile : public File {
 		std::unordered_map<uint16, uint32> unicodeMap;
-		chain<Glyph> glyphs;
-		chain<longHorMetric> hMetrics;
-		chain<FWord> leftSideBearings;
+		std::vector<Glyph> glyphs;
+		std::vector<longHorMetric> hMetrics;
+		std::vector<FWord> leftSideBearings;
 		maxp maxp;
 		hhea hhea;
 	};

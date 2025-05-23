@@ -43,8 +43,8 @@ namespace ProjectA {
 			Object2D& operator [](std::size_t index);
 
 		private:
-			chain<ref<Geometry2D>> geometries;
-			chain<ref<Material>> materials;
-			chain<Object2D> objects;
+			std::vector<ref<Geometry2D>> geometries;
+			std::vector<ref<Material>> materials;
+			std::vector<Object2D> objects;
 	};
 }

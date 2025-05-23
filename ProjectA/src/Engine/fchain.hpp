@@ -3,6 +3,11 @@
 #include "Engine/types.hpp"
 
 namespace ProjectA {
+	// TODO: Rename to chain<T>
+	// TODO: If count == 0, don't throw on access?
+	// TODO: Copy constructor
+	// TODO: Move constructor
+	// TODO: Remove allocate?
 	template<typename T>
 	class fchain {
 		public:

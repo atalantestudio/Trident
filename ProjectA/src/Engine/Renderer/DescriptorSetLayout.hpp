@@ -4,6 +4,6 @@
 
 namespace ProjectA {
 	struct DescriptorSetLayout {
-		chain<DescriptorSetLayoutBinding> bindings;
+		std::vector<DescriptorSetLayoutBinding> bindings;
 	};
 }

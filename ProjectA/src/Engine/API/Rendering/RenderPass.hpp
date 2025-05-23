@@ -50,7 +50,7 @@ namespace ProjectA {
 
 			virtual ref<Image> createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const = 0;
 
-			const chain<ref<ImageView>>& getColorAttachmentImageViews() const {
+			const std::vector<ref<ImageView>>& getColorAttachmentImageViews() const {
 				return colorAttachmentImageViews;
 			}
 
@@ -82,10 +82,10 @@ namespace ProjectA {
 			uint32 resolveAttachmentCount;
 			uint32 presentAttachmentIndex;
 
-			chain<ColorAttachment> colorAttachments;
+			std::vector<ColorAttachment> colorAttachments;
 			DepthStencilAttachment depthStencilAttachment;
 
-			chain<ref<ImageView>> colorAttachmentImageViews;
+			std::vector<ref<ImageView>> colorAttachmentImageViews;
 			ref<ImageView> depthStencilAttachmentImageView;
 	};
 }

@@ -5,9 +5,9 @@
 namespace ProjectA {
 	class ECS {
 		public:
-			chain<Entity> availableEntities;
+			std::vector<Entity> availableEntities;
 			Entity nextEntity = 0;
-			chain<scope<Pool>> componentPools;
+			std::vector<scope<Pool>> componentPools;
 
 		public:
 			Entity createEntity();

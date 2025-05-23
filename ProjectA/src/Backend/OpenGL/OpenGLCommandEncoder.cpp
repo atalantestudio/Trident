@@ -51,7 +51,7 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::bindAllDescriptorSets() {
 		DEBUG_ASSERT(computePipeline != nullptr || renderPipeline != nullptr);
 
-		const chain<DescriptorSetLayout>* descriptorSetLayouts;
+		const std::vector<DescriptorSetLayout>* descriptorSetLayouts;
 
 		if (computePipeline != nullptr) {
 			descriptorSetLayouts = &computePipeline->layout.descriptorSetLayouts;
