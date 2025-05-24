@@ -28,9 +28,6 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		glCreateVertexArrays(1, &vertexArray);
-		glBindVertexArray(vertexArray);
-
 		const ref<OpenGLShaderModule> vertexShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.vertexShaderModule);
 		const ref<OpenGLShaderModule> fragmentShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.fragmentShaderModule);
 
@@ -107,6 +104,5 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glDeleteProgram(program);
-		glDeleteVertexArrays(1, &vertexArray);
 	}
 }

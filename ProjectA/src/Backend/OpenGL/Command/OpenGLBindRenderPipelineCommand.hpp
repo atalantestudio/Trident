@@ -14,7 +14,6 @@ namespace ProjectA {
 			// TODO: glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 			// TODO: glEnable(GL_FRAMEBUFFER_SRGB)
 			void execute() const override {
-				glBindVertexArray(renderPipeline->vertexArray);
 				glUseProgram(renderPipeline->program);
 				glFrontFace(renderPipeline->frontFace);
 

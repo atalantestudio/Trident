@@ -30,11 +30,14 @@ namespace ProjectA {
 
 			void writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
 
-			void registerClosestFeature(const ClosestFeature2D& closestFeature);
-
 			void clearClosestFeatures();
 
+			void registerClosestFeature(const ClosestFeature2D& closestFeature);
+
 		private:
+			void updateColorAttachment();
+			void updateDepthStencilAttachment();
+
 			void initializeViewUniformBuffer();
 			void initializeCameraUniformBuffer();
 			void initializeGridVertexBuffer();
@@ -60,6 +63,10 @@ namespace ProjectA {
 			struct Instance {
 				mat3x3<float32> world;
 				vec4<float32> fillColor;
+
+				// TODO: Remove padding.
+				vec4<float32> z;
+
 				uint32 selected = 0;
 			};
 
@@ -73,13 +80,21 @@ namespace ProjectA {
 			};
 
 		private:
+			static constexpr uint8 SAMPLE_COUNT = 4;
 			static constexpr float32 MIN_ZOOM_LEVEL = 1.0f;
 			static constexpr float32 MAX_ZOOM_LEVEL = 64.0f;
 			static constexpr float32 DEFAULT_ZOOM_LEVEL = MAX_ZOOM_LEVEL;
 
 		private:
-			ref<RenderPass> renderPass;
 			ref<Swapchain> swapchain;
+
+			ref<RenderPass> renderPass;
+
+			ref<Image> colorImage;
+			ref<ImageView> colorImageView;
+
+			ref<Image> depthStencilImage;
+			ref<ImageView> depthStencilImageView;
 
 			ref<Buffer> gridVertexBuffer;
 
@@ -87,7 +102,7 @@ namespace ProjectA {
 			ref<Buffer> indexBuffer;
 
 			ref<Buffer> centerOfMassBuffer;
-			svec2<float32>* centerOfMassMappedRange = nullptr;
+			svec3<float32>* centerOfMassMappedRange = nullptr;
 
 			ref<Buffer> vertexFeatureBuffer;
 			svec2<float32>* vertexFeatureMappedRange = nullptr;

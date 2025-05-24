@@ -175,8 +175,9 @@ namespace ProjectA {
 			ref<Image> multisampleImage;
 			ref<ImageView> multisampleImageView;
 
-			ref<RenderPass> renderPass;
 			ref<Swapchain> swapchain;
+
+			ref<RenderPass> renderPass;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;

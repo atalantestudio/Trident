@@ -2,11 +2,13 @@
 
 #include "Physics2DRenderer.hpp"
 
-#include "Engine/Application.hpp"
 #include "Engine/API/Material/ColorMaterial.hpp"
+#include "Engine/Application.hpp"
 
 namespace ProjectA {
 	Physics2DRenderer::Physics2DRenderer() {
+		DEBUG_STATIC_ASSERT(SAMPLE_COUNT > 1);
+
 		SwapchainDescriptor swapchainDescriptor;
 		swapchainDescriptor.extentWidth = Application::get().getWindow().getSize()[0];
 		swapchainDescriptor.extentHeight = Application::get().getWindow().getSize()[1];
@@ -17,20 +19,23 @@ namespace ProjectA {
 
 		ColorAttachment colorAttachment{};
 		colorAttachment.format = surface->getFormat();
-		colorAttachment.sampleCount = 1;
+		colorAttachment.sampleCount = SAMPLE_COUNT;
 		colorAttachment.loadOperation = LoadOperation::CLEAR;
 		colorAttachment.storeOperation = StoreOperation::STORE;
 
 		RenderPassDescriptor renderPassDescriptor;
 		renderPassDescriptor.colorAttachments = {colorAttachment};
-		renderPassDescriptor.resolve = false;
-
-		// TODO
-		renderPassDescriptor.depthStencil = false;
-
+		renderPassDescriptor.depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
+		renderPassDescriptor.depthStencilAttachment.sampleCount = SAMPLE_COUNT;
+		renderPassDescriptor.depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
+		renderPassDescriptor.resolve = true;
+		renderPassDescriptor.depthStencil = true;
 		renderPassDescriptor.presentAttachmentIndex = 0;
 
 		renderPass = createRenderPass(renderPassDescriptor);
+
+		updateColorAttachment();
+		updateDepthStencilAttachment();
 
 		swapchain->getImages(renderPass);
 
@@ -64,6 +69,42 @@ namespace ProjectA {
 
 		viewMappedRange->viewport.x = width;
 		viewMappedRange->viewport.y = height;
+	}
+
+	void Physics2DRenderer::updateColorAttachment() {
+		AttachmentImageDescriptor colorAttachmentImageDescriptor{};
+		colorAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
+		colorAttachmentImageDescriptor.width = Application::get().getWindow().getSize()[0];
+		colorAttachmentImageDescriptor.height = Application::get().getWindow().getSize()[1];
+		colorAttachmentImageDescriptor.depth = 1;
+		colorAttachmentImageDescriptor.mipLevelCount = 1;
+		colorAttachmentImageDescriptor.arrayLayerCount = 1;
+
+		colorImage = renderPass->createColorAttachmentImage(colorAttachmentImageDescriptor, 0);
+
+		constexpr ImageViewDescriptor colorImageViewDescriptor;
+
+		colorImageView = colorImage->createView(colorImageViewDescriptor);
+
+		renderPass->setColorAttachmentImageView(colorImageView, 0);
+	}
+
+	void Physics2DRenderer::updateDepthStencilAttachment() {
+		AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
+		depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
+		depthStencilAttachmentImageDescriptor.width = Application::get().getWindow().getSize()[0];
+		depthStencilAttachmentImageDescriptor.height = Application::get().getWindow().getSize()[1];
+		depthStencilAttachmentImageDescriptor.depth = 1;
+		depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
+		depthStencilAttachmentImageDescriptor.arrayLayerCount = 1;
+
+		depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor);
+
+		constexpr ImageViewDescriptor depthStencilImageViewDescriptor;
+
+		depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
+
+		renderPass->setDepthStencilAttachmentImageView(depthStencilImageView);
 	}
 
 	void Physics2DRenderer::initializeCameraUniformBuffer() {
@@ -147,38 +188,35 @@ namespace ProjectA {
 
 		gridRenderPipelineLayout = createPipelineLayout(gridPipelineLayoutDescriptor);
 
+		VertexInputBinding gridVertexInputBinding(InputRate::VERTEX);
+		gridVertexInputBinding.registerAttribute<svec2<float32>>(false);
+
 		ShaderModuleDescriptor gridVertexShaderModuleDescriptor{};
 		gridVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		gridVertexShaderModuleDescriptor.entryPoint = "main";
-
-		const ref<ShaderModule> gridVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Grid.vert.spv", gridVertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor gridFragmentShaderModuleDescriptor{};
 		gridFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		gridFragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> gridFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Grid.frag.spv", gridFragmentShaderModuleDescriptor);
-
-		VertexInputBinding gridVertexInputBinding(InputRate::VERTEX);
-		gridVertexInputBinding.registerAttribute<svec2<float32>>(false);
-
 		RenderPipelineDescriptor gridRenderPipelineDescriptor;
 		gridRenderPipelineDescriptor.renderPass = renderPass;
 		gridRenderPipelineDescriptor.pipelineLayout = gridRenderPipelineLayout;
 		gridRenderPipelineDescriptor.vertexInputBindings = {gridVertexInputBinding};
-		gridRenderPipelineDescriptor.vertexShaderModule = gridVertexShaderModule;
-		gridRenderPipelineDescriptor.fragmentShaderModule = gridFragmentShaderModule;
+		gridRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Grid.vert.spv", gridVertexShaderModuleDescriptor);
+		gridRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Grid.frag.spv", gridFragmentShaderModuleDescriptor);
 		gridRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		gridRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		gridRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		gridRenderPipelineDescriptor.depthStencilState.depthWrite = false;
+		gridRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
 		gridRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		gridRenderPipeline = createRenderPipeline(gridRenderPipelineDescriptor);
 	}
 
 	void Physics2DRenderer::initializeCenterOfMassBuffer() {
-		const uint64 centerOfMassBufferSize = scene->getObjectCount() * sizeof(svec2<float32>);
+		const uint64 centerOfMassBufferSize = scene->getObjectCount() * sizeof(svec3<float32>);
 
 		BufferDescriptor centerOfMassBufferDescriptor;
 		centerOfMassBufferDescriptor.size = centerOfMassBufferSize;
@@ -186,36 +224,33 @@ namespace ProjectA {
 		centerOfMassBufferDescriptor.persistent = true;
 
 		centerOfMassBuffer = createBuffer(centerOfMassBufferDescriptor);
-		centerOfMassMappedRange = centerOfMassBuffer->map<svec2<float32>>(0, centerOfMassBufferSize);
+		centerOfMassMappedRange = centerOfMassBuffer->map<svec3<float32>>(0, centerOfMassBufferSize);
 	}
 
 	void Physics2DRenderer::initializeCenterOfMassRenderPipeline() {
+		VertexInputBinding centerOfMassVertexInputBinding(InputRate::VERTEX);
+		centerOfMassVertexInputBinding.registerAttribute<svec3<float32>>(false);
+
 		ShaderModuleDescriptor centerOfMassVertexShaderModuleDescriptor{};
 		centerOfMassVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		centerOfMassVertexShaderModuleDescriptor.entryPoint = "main";
-
-		const ref<ShaderModule> centerOfMassVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/CenterOfMass.vert.spv", centerOfMassVertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor centerOfMassFragmentShaderModuleDescriptor{};
 		centerOfMassFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		centerOfMassFragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> centerOfMassFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/CenterOfMass.frag.spv", centerOfMassFragmentShaderModuleDescriptor);
-
-		VertexInputBinding centerOfMassVertexInputBinding(InputRate::VERTEX);
-		centerOfMassVertexInputBinding.registerAttribute<svec2<float32>>(false);
-
 		RenderPipelineDescriptor centerOfMassRenderPipelineDescriptor;
 		centerOfMassRenderPipelineDescriptor.renderPass = renderPass;
 		centerOfMassRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		centerOfMassRenderPipelineDescriptor.vertexInputBindings = {centerOfMassVertexInputBinding};
-		centerOfMassRenderPipelineDescriptor.vertexShaderModule = centerOfMassVertexShaderModule;
-		centerOfMassRenderPipelineDescriptor.fragmentShaderModule = centerOfMassFragmentShaderModule;
+		centerOfMassRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/CenterOfMass.vert.spv", centerOfMassVertexShaderModuleDescriptor);
+		centerOfMassRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/CenterOfMass.frag.spv", centerOfMassFragmentShaderModuleDescriptor);
 		centerOfMassRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
 		centerOfMassRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
 		centerOfMassRenderPipelineDescriptor.minSampleShading = 1.0;
-		centerOfMassRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		centerOfMassRenderPipelineDescriptor.depthStencilState.depthWrite = false;
+		centerOfMassRenderPipelineDescriptor.depthStencilState.depthTest = true;
+		centerOfMassRenderPipelineDescriptor.depthStencilState.depthWrite = true;
+		centerOfMassRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
 		centerOfMassRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		centerOfMassRenderPipeline = createRenderPipeline(centerOfMassRenderPipelineDescriptor);
@@ -252,31 +287,28 @@ namespace ProjectA {
 
 		distancePipelineLayout = createPipelineLayout(distancePipelineLayoutDescriptor);
 
+		VertexInputBinding distanceVertexInputBinding(InputRate::VERTEX);
+		distanceVertexInputBinding.registerAttribute<svec2<float32>>(false);
+
 		ShaderModuleDescriptor distanceVertexShaderModuleDescriptor{};
 		distanceVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		distanceVertexShaderModuleDescriptor.entryPoint = "main";
-
-		const ref<ShaderModule> distanceVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Distance.vert.spv", distanceVertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor distanceFragmentShaderModuleDescriptor{};
 		distanceFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		distanceFragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> distanceFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Distance.frag.spv", distanceFragmentShaderModuleDescriptor);
-
-		VertexInputBinding distanceVertexInputBinding(InputRate::VERTEX);
-		distanceVertexInputBinding.registerAttribute<svec2<float32>>(false);
-
 		RenderPipelineDescriptor distanceRenderPipelineDescriptor;
 		distanceRenderPipelineDescriptor.renderPass = renderPass;
 		distanceRenderPipelineDescriptor.pipelineLayout = distancePipelineLayout;
 		distanceRenderPipelineDescriptor.vertexInputBindings = {distanceVertexInputBinding};
-		distanceRenderPipelineDescriptor.vertexShaderModule = distanceVertexShaderModule;
-		distanceRenderPipelineDescriptor.fragmentShaderModule = distanceFragmentShaderModule;
+		distanceRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Distance.vert.spv", distanceVertexShaderModuleDescriptor);
+		distanceRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Distance.frag.spv", distanceFragmentShaderModuleDescriptor);
 		distanceRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
 		distanceRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
 		distanceRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		distanceRenderPipelineDescriptor.depthStencilState.depthWrite = false;
+		distanceRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
 		distanceRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		distanceRenderPipeline = createRenderPipeline(distanceRenderPipelineDescriptor);
@@ -322,63 +354,57 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::initializeVertexFeatureRenderPipeline() {
+		VertexInputBinding vertexFeatureVertexInputBinding(InputRate::VERTEX);
+		vertexFeatureVertexInputBinding.registerAttribute<svec2<float32>>(false);
+
 		ShaderModuleDescriptor vertexFeatureVertexShaderModuleDescriptor{};
 		vertexFeatureVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexFeatureVertexShaderModuleDescriptor.entryPoint = "main";
-
-		const ref<ShaderModule> vertexFeatureVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/VertexFeature.vert.spv", vertexFeatureVertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor vertexFeatureFragmentShaderModuleDescriptor{};
 		vertexFeatureFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		vertexFeatureFragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexFeatureFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/VertexFeature.frag.spv", vertexFeatureFragmentShaderModuleDescriptor);
-
-		VertexInputBinding vertexFeatureVertexInputBinding(InputRate::VERTEX);
-		vertexFeatureVertexInputBinding.registerAttribute<svec2<float32>>(false);
-
 		RenderPipelineDescriptor vertexFeatureRenderPipelineDescriptor;
 		vertexFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		vertexFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		vertexFeatureRenderPipelineDescriptor.vertexInputBindings = {vertexFeatureVertexInputBinding};
-		vertexFeatureRenderPipelineDescriptor.vertexShaderModule = vertexFeatureVertexShaderModule;
-		vertexFeatureRenderPipelineDescriptor.fragmentShaderModule = vertexFeatureFragmentShaderModule;
+		vertexFeatureRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/VertexFeature.vert.spv", vertexFeatureVertexShaderModuleDescriptor);
+		vertexFeatureRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/VertexFeature.frag.spv", vertexFeatureFragmentShaderModuleDescriptor);
 		vertexFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
 		vertexFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
 		vertexFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		vertexFeatureRenderPipelineDescriptor.depthStencilState.depthWrite = false;
+		vertexFeatureRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
 		vertexFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		vertexFeatureRenderPipeline = createRenderPipeline(vertexFeatureRenderPipelineDescriptor);
 	}
 
 	void Physics2DRenderer::initializeEdgeFeatureRenderPipeline() {
+		VertexInputBinding edgeFeatureVertexInputBinding(InputRate::VERTEX);
+		edgeFeatureVertexInputBinding.registerAttribute<svec2<float32>>(false);
+
 		ShaderModuleDescriptor edgeFeatureVertexShaderModuleDescriptor{};
 		edgeFeatureVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		edgeFeatureVertexShaderModuleDescriptor.entryPoint = "main";
-
-		const ref<ShaderModule> edgeFeatureVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/EdgeFeature.vert.spv", edgeFeatureVertexShaderModuleDescriptor);
 
 		ShaderModuleDescriptor edgeFeatureFragmentShaderModuleDescriptor{};
 		edgeFeatureFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		edgeFeatureFragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> edgeFeatureFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/EdgeFeature.frag.spv", edgeFeatureFragmentShaderModuleDescriptor);
-
-		VertexInputBinding edgeFeatureVertexInputBinding(InputRate::VERTEX);
-		edgeFeatureVertexInputBinding.registerAttribute<svec2<float32>>(false);
-
 		RenderPipelineDescriptor edgeFeatureRenderPipelineDescriptor;
 		edgeFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		edgeFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		edgeFeatureRenderPipelineDescriptor.vertexInputBindings = {edgeFeatureVertexInputBinding};
-		edgeFeatureRenderPipelineDescriptor.vertexShaderModule = edgeFeatureVertexShaderModule;
-		edgeFeatureRenderPipelineDescriptor.fragmentShaderModule = edgeFeatureFragmentShaderModule;
+		edgeFeatureRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/EdgeFeature.vert.spv", edgeFeatureVertexShaderModuleDescriptor);
+		edgeFeatureRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/EdgeFeature.frag.spv", edgeFeatureFragmentShaderModuleDescriptor);
 		edgeFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
 		edgeFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
 		edgeFeatureRenderPipelineDescriptor.lineWidth = 3.0f;
 		edgeFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		edgeFeatureRenderPipelineDescriptor.depthStencilState.depthWrite = false;
+		edgeFeatureRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
 		edgeFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		edgeFeatureRenderPipeline = createRenderPipeline(edgeFeatureRenderPipelineDescriptor);
@@ -412,7 +438,8 @@ namespace ProjectA {
 		uint16* indexMappedRange = static_cast<uint16*>(static_cast<void*>(vertexMappedRange + vertexCount));
 		Instance* instanceMappedRange = static_cast<Instance*>(static_cast<void*>(indexMappedRange + indexCount));
 
-		for (const Object2D& object : scene) {
+		for (uint32 objectIndex = 0; objectIndex < scene.getObjectCount(); objectIndex += 1) {
+			const Object2D& object = scene[objectIndex];
 			const ref<Geometry2D>& geometry = scene.getGeometry(object.geometryIndex);
 			const ref<Material>& material = scene.getMaterial(object.materialIndex);
 
@@ -428,7 +455,10 @@ namespace ProjectA {
 
 			std::copy(geometry->indices.begin(), geometry->indices.end(), indexMappedRange);
 
+			const float32 z = static_cast<float32>(objectIndex) / instanceCount;
+
 			instanceMappedRange->fillColor = std::static_pointer_cast<ColorMaterial>(material)->fillColor;
+			instanceMappedRange->z = {z, z, z, z};
 
 			vertexMappedRange += 1;
 			indexMappedRange += geometry->getIndexCount();
@@ -485,40 +515,33 @@ namespace ProjectA {
 
 		renderPipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
-		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
-
-		const ref<ShaderModule> fillVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Fill.vert.spv", vertexShaderModuleDescriptor);
-		const ref<ShaderModule> strokeVertexShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Stroke.vert.spv", vertexShaderModuleDescriptor);
-
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
-
-		const ref<ShaderModule> fillFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Fill.frag.spv", fragmentShaderModuleDescriptor);
-		const ref<ShaderModule> strokeFragmentShaderModule = loadShaderModule("Asset/Shader/DebugPhysics2D/Stroke.frag.spv", fragmentShaderModuleDescriptor);
-
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		VertexInputBinding fillInstanceInputBinding(InputRate::INSTANCE);
 		fillInstanceInputBinding.registerAttribute<mat3x3<float32>>(false);
 		fillInstanceInputBinding.registerAttribute<vec4<float32>>(false);
+		fillInstanceInputBinding.registerAttribute<vec4<float32>>(false);
+
+		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexShaderModuleDescriptor.entryPoint = "main";
+
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		fragmentShaderModuleDescriptor.entryPoint = "main";
 
 		RenderPipelineDescriptor fillRenderPipelineDescriptor;
 		fillRenderPipelineDescriptor.renderPass = renderPass;
 		fillRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
 		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, fillInstanceInputBinding};
-		fillRenderPipelineDescriptor.vertexShaderModule = fillVertexShaderModule;
-		fillRenderPipelineDescriptor.fragmentShaderModule = fillFragmentShaderModule;
+		fillRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Fill.vert.spv", vertexShaderModuleDescriptor);
+		fillRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Fill.frag.spv", fragmentShaderModuleDescriptor);
 		fillRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		fillRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-
-		// TODO: Enable depth.
-		fillRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		fillRenderPipelineDescriptor.depthStencilState.depthWrite = false;
-
+		fillRenderPipelineDescriptor.depthStencilState.depthTest = true;
+		fillRenderPipelineDescriptor.depthStencilState.depthWrite = true;
+		fillRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
 		fillRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		fillRenderPipeline = createRenderPipeline(fillRenderPipelineDescriptor);
@@ -526,21 +549,20 @@ namespace ProjectA {
 		VertexInputBinding strokeInstanceInputBinding(InputRate::INSTANCE);
 		strokeInstanceInputBinding.registerAttribute<mat3x3<float32>>(false);
 		strokeInstanceInputBinding.registerAttribute<vec4<float32>>(false);
+		strokeInstanceInputBinding.registerAttribute<vec4<float32>>(false);
 		strokeInstanceInputBinding.registerAttribute<uint32>(false);
 
 		RenderPipelineDescriptor strokeRenderPipelineDescriptor;
 		strokeRenderPipelineDescriptor.renderPass = renderPass;
 		strokeRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
 		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, strokeInstanceInputBinding};
-		strokeRenderPipelineDescriptor.vertexShaderModule = strokeVertexShaderModule;
-		strokeRenderPipelineDescriptor.fragmentShaderModule = strokeFragmentShaderModule;
+		strokeRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Stroke.vert.spv", vertexShaderModuleDescriptor);
+		strokeRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Stroke.frag.spv", fragmentShaderModuleDescriptor);
 		strokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
 		strokeRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
-
-		// TODO: Enable depth.
-		strokeRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		strokeRenderPipelineDescriptor.depthStencilState.depthWrite = false;
-
+		strokeRenderPipelineDescriptor.depthStencilState.depthTest = true;
+		strokeRenderPipelineDescriptor.depthStencilState.depthWrite = true;
+		strokeRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
 		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR | DynamicState::LINE_WIDTH;
 
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
@@ -597,33 +619,10 @@ namespace ProjectA {
 	void Physics2DRenderer::updateCentersOfMass() const {
 		for (uint32 instanceIndex = 0; instanceIndex < scene->getObjectCount(); instanceIndex += 1) {
 			const Object2D& A = (*scene)[instanceIndex];
+			const float32 z = static_cast<float32>(instanceIndex) / scene->getObjectCount();
 
-			centerOfMassMappedRange[instanceIndex] = {A.position[0], A.position[1]};
+			centerOfMassMappedRange[instanceIndex] = {A.position[0], A.position[1], z};
 		}
-	}
-
-	void Physics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
-		updateCentersOfMass();
-
-		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
-
-		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.renderPass = renderPass;
-		beginRenderPassDescriptor.swapchain = swapchain;
-		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
-		beginRenderPassDescriptor.imageIndex = acquireNextImage(swapchain);
-
-		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
-
-		renderGrid(commandEncoder);
-		renderScene(commandEncoder);
-		renderDistance(commandEncoder);
-		renderClosestFeatures(commandEncoder);
-
-		commandEncoder->endRenderPass();
 	}
 
 	void Physics2DRenderer::setSelectedObjectIndex(uint32 objectIndex) {
@@ -638,6 +637,38 @@ namespace ProjectA {
 		}
 	}
 
+	void Physics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
+		updateCentersOfMass();
+
+		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
+		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+
+		const ClearValue colorAttachmentClearValue = {1.0f, 1.0f, 1.0f, 1.0f};
+
+		const ClearValue resolveAttachmentClearValue = {1.0f, 1.0f, 1.0f, 1.0f};
+
+		ClearValue depthStencilAttachmentClearValue{};
+		depthStencilAttachmentClearValue.depth = 0.0f;
+		depthStencilAttachmentClearValue.stencil = 0;
+
+		BeginRenderPassDescriptor beginRenderPassDescriptor;
+		beginRenderPassDescriptor.renderPass = renderPass;
+		beginRenderPassDescriptor.swapchain = swapchain;
+		beginRenderPassDescriptor.clearValues = {colorAttachmentClearValue, resolveAttachmentClearValue, depthStencilAttachmentClearValue};
+		beginRenderPassDescriptor.imageIndex = acquireNextImage(swapchain);
+
+		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+
+		renderGrid(commandEncoder);
+		renderScene(commandEncoder);
+		renderDistance(commandEncoder);
+		renderClosestFeatures(commandEncoder);
+
+		commandEncoder->endRenderPass();
+	}
+
 	void Physics2DRenderer::renderGrid(const ref<CommandEncoder>& commandEncoder) const {
 		commandEncoder->bindRenderPipeline(gridRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
@@ -646,26 +677,34 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::renderScene(const ref<CommandEncoder>& commandEncoder) const {
-		uint32 indexOffset = 0;
-		uint32 vertexOffset = 0;
+		const uint32 objectCount = scene->getObjectCount();
 
-		for (uint32 objectIndex = 0; objectIndex < scene->getObjectCount(); objectIndex += 1) {
+		commandEncoder->bindRenderPipeline(fillRenderPipeline);
+		commandEncoder->bindAllDescriptorSets();
+		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
+
+		for (uint32 objectIndex = 0, indexOffset = 0, vertexOffset = 0; objectIndex < objectCount; objectIndex += 1) {
 			const Object2D& object = (*scene)[objectIndex];
-			const ref<Geometry2D>& geometry = scene->getGeometry(object.geometryIndex);
+			const ref<Geometry2D>& geometry = object.getGeometry();
 			const uint32 indexCount = geometry->getIndexCount();
 			const uint32 vertexCount = geometry->getVertexCount() + 1;
 
-			commandEncoder->bindRenderPipeline(fillRenderPipeline);
-			commandEncoder->bindAllDescriptorSets();
-			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, indexOffset * sizeof(uint16));
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
 			commandEncoder->bindVertexBuffer(1, instanceBuffer, objectIndex * sizeof(Instance), sizeof(Instance));
-			commandEncoder->drawIndexed(indexCount, 1, 0);
+			commandEncoder->drawIndexed(indexCount, 1, indexOffset);
 
-			commandEncoder->bindRenderPipeline(strokeRenderPipeline);
+			indexOffset += indexCount;
+			vertexOffset += vertexCount;
+		}
 
-			// TODO: In OpenGL the vertex buffers seems to get unbound when binding another pipeline.
-			//       Vulkan keeps the vertex buffers bound.
+		commandEncoder->bindRenderPipeline(strokeRenderPipeline);
+		commandEncoder->bindAllDescriptorSets();
+
+		for (uint32 objectIndex = 0, vertexOffset = 0; objectIndex < objectCount; objectIndex += 1) {
+			const Object2D& object = (*scene)[objectIndex];
+			const ref<Geometry2D>& geometry = object.getGeometry();
+			const uint32 vertexCount = geometry->getVertexCount() + 1;
+
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
 			commandEncoder->bindVertexBuffer(1, instanceBuffer, objectIndex * sizeof(Instance), sizeof(Instance));
 
@@ -678,13 +717,13 @@ namespace ProjectA {
 
 			commandEncoder->draw(vertexCount, 1, 0);
 
-			commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
-			commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, objectIndex * sizeof(svec2<float32>), sizeof(svec2<float32>));
-			commandEncoder->draw(1, 1, 0);
-
-			indexOffset += indexCount;
 			vertexOffset += vertexCount;
 		}
+
+		commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
+		commandEncoder->bindAllDescriptorSets();
+		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0, sizeof(svec3<float32>));
+		commandEncoder->draw(objectCount, 1, 0);
 	}
 
 	void Physics2DRenderer::renderDistance(const ref<CommandEncoder>& commandEncoder) const {
@@ -736,11 +775,20 @@ namespace ProjectA {
 		swapchainDescriptor.extentHeight = event.getHeight();
 
 		swapchain->update(swapchainDescriptor);
+
+		updateColorAttachment();
+		updateDepthStencilAttachment();
+
 		swapchain->getImages(renderPass);
 	}
 
 	void Physics2DRenderer::writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const {
 		instanceMappedRange[instanceIndex].world = transform;
+	}
+
+	void Physics2DRenderer::clearClosestFeatures() {
+		nextVertexFeatureIndex = 0;
+		nextEdgeVertexFeatureIndex = 0;
 	}
 
 	void Physics2DRenderer::registerClosestFeature(const ClosestFeature2D& closestFeature) {
@@ -761,10 +809,5 @@ namespace ProjectA {
 
 				break;
 		}
-	}
-
-	void Physics2DRenderer::clearClosestFeatures() {
-		nextVertexFeatureIndex = 0;
-		nextEdgeVertexFeatureIndex = 0;
 	}
 }

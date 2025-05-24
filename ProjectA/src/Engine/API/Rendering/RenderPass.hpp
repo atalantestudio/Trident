@@ -13,6 +13,7 @@ namespace ProjectA {
 				present(descriptor.presentAttachmentIndex != std::numeric_limits<uint32>::max()),
 				colorAttachmentCount(static_cast<uint32>(descriptor.colorAttachments.size())),
 				resolveAttachmentCount(descriptor.resolve ? colorAttachmentCount : 0),
+				clearValueCount(colorAttachmentCount + resolveAttachmentCount),
 				presentAttachmentIndex(descriptor.presentAttachmentIndex),
 				colorAttachments(descriptor.colorAttachments),
 				depthStencilAttachment(descriptor.depthStencilAttachment)
@@ -25,6 +26,21 @@ namespace ProjectA {
 
 				if (depthStencil) {
 					attachmentCount += 1;
+				}
+
+				if (depthStencil && depthStencilAttachment.loadOperation == LoadOperation::CLEAR) {
+					clearValueCount += 1;
+				}
+				else {
+					for (sint32 colorAttachmentIndex = static_cast<sint32>(colorAttachmentCount - 1); colorAttachmentIndex >= 0; colorAttachmentIndex -= 1) {
+						const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
+
+						if (colorAttachment.loadOperation != LoadOperation::CLEAR) {
+							clearValueCount = colorAttachmentIndex;
+
+							break;
+						}
+					}
 				}
 			}
 
@@ -40,6 +56,10 @@ namespace ProjectA {
 
 			uint32 getResolveAttachmentCount() const {
 				return resolveAttachmentCount;
+			}
+
+			uint32 getClearValueCount() const {
+				return clearValueCount;
 			}
 
 			uint32 getPresentAttachmentIndex() const {
@@ -80,6 +100,7 @@ namespace ProjectA {
 			uint32 attachmentCount;
 			uint32 colorAttachmentCount;
 			uint32 resolveAttachmentCount;
+			uint32 clearValueCount;
 			uint32 presentAttachmentIndex;
 
 			std::vector<ColorAttachment> colorAttachments;

@@ -303,8 +303,9 @@ namespace ProjectA {
 			ref<Buffer> cameraBuffer;
 			Camera* cameraMappedRange;
 
-			ref<RenderPass> renderPass;
 			ref<Swapchain> swapchain;
+
+			ref<RenderPass> renderPass;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;

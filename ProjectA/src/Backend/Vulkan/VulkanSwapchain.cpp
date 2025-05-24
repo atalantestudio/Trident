@@ -25,6 +25,10 @@ namespace ProjectA {
 		vkDestroySwapchainKHR(device.object, object, nullptr);
 	}
 
+	uint32 VulkanSwapchain::getImageCount() const {
+		return imageCount;
+	}
+
 	uint32 VulkanSwapchain::getExtentWidth() const {
 		return surface.window.getSize()[0];
 	}
@@ -41,7 +45,6 @@ namespace ProjectA {
 	void VulkanSwapchain::getImages(const ref<RenderPass>& renderPass) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		uint32 imageCount;
 		VkResult result;
 
 		result = vkGetSwapchainImagesKHR(device.object, object, &imageCount, nullptr);

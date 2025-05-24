@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Engine/API/Rendering/CommandEncoder.hpp"
+#include "Engine/API/Rendering/Swapchain.hpp"
 #include "Engine/API/Synchronization/Fence.hpp"
 #include "Engine/API/Synchronization/Semaphore.hpp"
 #include "Engine/Renderer/Status.hpp"
-#include "Engine/Renderer/Swapchain.hpp"
 
 namespace ProjectA {
 	class Queue {

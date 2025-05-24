@@ -2,6 +2,7 @@
 
 namespace ProjectA {
 	union ClearValue {
+		// TODO: Replace by vec4<float32>.
 		// The color image clear values to use when clearing a color image or attachment.
 		float32 color[4];
 

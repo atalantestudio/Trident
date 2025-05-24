@@ -20,8 +20,8 @@ namespace ProjectA {
 					checkOutputState(output.state);
 				#endif
 
-				advanceSimulation(A, output.fraction);
-				advanceSimulation(B, output.fraction);
+				advanceSimulation(A, /*output.fraction*/1.0f);
+				advanceSimulation(B, /*output.fraction*/1.0f);
 
 				// TODO: Resolve possible collisions.
 			}
@@ -138,6 +138,8 @@ namespace ProjectA {
 					output.state = CCDOutputState::UNRESOLVED_ROOT;
 					output.fraction = t0;
 
+					BREAKPOINT();
+
 					return output;
 				}
 
@@ -205,6 +207,8 @@ namespace ProjectA {
 
 		output.state = CCDOutputState::UNRESOLVED_ROOT;
 		output.fraction = t0;
+
+		BREAKPOINT();
 
 		return output;
 	}

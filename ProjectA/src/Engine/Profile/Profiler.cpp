@@ -4,17 +4,18 @@
 
 namespace ProjectA {
 	std::ofstream Profiler::stream;
-	std::size_t Profiler::eventCount = 0;
+	bool Profiler::firstEvent = true;
 
 	void Profiler::writeEvent(const ProfileEvent& event) {
 		// TODO: Fix crash that happens when closing the window instead of the console.
 		ENGINE_ASSERT(stream.is_open(), "Could not write to the profiler output stream.");
 
-		if (eventCount > 0) {
+		if (!firstEvent) {
 			stream << ",";
 		}
 
-		std::string name = event.name;
+		const std::string name(event.name);
+
 		std::replace(name.begin(), name.end(), '"', '\'');
 
 		// Write event name.
@@ -38,7 +39,7 @@ namespace ProjectA {
 		// Write thread ID.
 		stream << "\"tid\":" << event.threadId << '}';
 
-		eventCount += 1;
+		firstEvent = false;
 	}
 
 	Profiler::Profiler(std::string_view path) {
@@ -55,7 +56,5 @@ namespace ProjectA {
 		stream << "]}";
 
 		stream.close();
-
-		eventCount = 0;
 	}
 }

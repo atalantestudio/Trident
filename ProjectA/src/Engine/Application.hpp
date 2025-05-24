@@ -4,6 +4,7 @@
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/Event/WindowEvent.hpp"
 #include "Engine/API/Rendering/CommandEncoder.hpp"
+#include "Engine/API/Rendering/Swapchain.hpp"
 #include "Engine/API/SharedMemory/SharedMemory.hpp"
 #include "Engine/API/Synchronization/Fence.hpp"
 #include "Engine/API/Synchronization/Mutex.hpp"
@@ -13,7 +14,6 @@
 #include "Engine/base.hpp"
 #include "Engine/Filesystem/File/PropertyFile.hpp"
 #include "Engine/Layer/LayerStack.hpp"
-#include "Engine/Renderer/Swapchain.hpp"
 
 int main(int argc, char** argv);
 

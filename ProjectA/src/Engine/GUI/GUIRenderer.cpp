@@ -183,18 +183,6 @@ namespace ProjectA {
 
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
-		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
-
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert.spv", vertexShaderModuleDescriptor);
-
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
-
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.frag.spv", fragmentShaderModuleDescriptor);
-
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 
 		// TODO: Remove padding.
@@ -208,12 +196,20 @@ namespace ProjectA {
 		subcomponentInputBinding.registerAttribute<uint32>(false);
 		subcomponentInputBinding.registerAttribute<vec4<float32>>(false);
 
+		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexShaderModuleDescriptor.entryPoint = "main";
+
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		fragmentShaderModuleDescriptor.entryPoint = "main";
+
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = renderPass;
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, subcomponentInputBinding};
-		renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		renderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert.spv", vertexShaderModuleDescriptor);
+		renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.frag.spv", fragmentShaderModuleDescriptor);
 		renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		renderPipelineDescriptor.cullMode = CullMode::BACK;

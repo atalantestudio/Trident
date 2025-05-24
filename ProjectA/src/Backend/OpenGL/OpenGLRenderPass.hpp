@@ -15,8 +15,5 @@ namespace ProjectA {
 
 		private:
 			static GLuint createScreenProgram();
-
-		public:
-			uint32 clearValueCount;
 	};
 }

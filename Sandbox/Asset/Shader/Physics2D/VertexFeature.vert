@@ -8,8 +8,8 @@ layout(set = 0, binding = 0) uniform Camera {
 } camera;
 
 void main() {
-	vec3 position = camera.projection * vec3(vertex, 1.0) * camera.zoomLevel;
+	vec3 position = camera.projection * vec3(vertex.xy, 1.0) * camera.zoomLevel;
 
 	gl_Position = vec4(position.xy, 0.0, 1.0);
-	gl_PointSize = 0.325 * camera.zoomLevel;
+	gl_PointSize = 0.125 * camera.zoomLevel;
 }

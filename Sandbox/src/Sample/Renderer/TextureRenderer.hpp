@@ -180,8 +180,9 @@ namespace ProjectA {
 
 			ref<Sampler> sampler;
 
-			ref<RenderPass> renderPass;
 			ref<Swapchain> swapchain;
+
+			ref<RenderPass> renderPass;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;

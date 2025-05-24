@@ -8,6 +8,10 @@ namespace ProjectA {
 		construct(descriptor);
 	}
 
+	uint32 OpenGLSwapchain::getImageCount() const {
+		return 1;
+	}
+
 	uint32 OpenGLSwapchain::getExtentWidth() const {
 		return extentWidth;
 	}
@@ -23,6 +27,8 @@ namespace ProjectA {
 		if (renderPass->present && renderPass->getColorAttachmentCount() == 1 && !renderPass->resolve && !renderPass->depthStencil) {
 			return;
 		}
+
+		const uint32 imageCount = getImageCount();
 
 		images.resize(imageCount);
 		imageViews.resize(imageCount);

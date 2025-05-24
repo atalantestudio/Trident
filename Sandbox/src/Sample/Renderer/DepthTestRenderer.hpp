@@ -214,8 +214,9 @@ namespace ProjectA {
 			ref<Image> depthStencilImage;
 			ref<ImageView> depthStencilImageView;
 
-			ref<RenderPass> renderPass;
 			ref<Swapchain> swapchain;
+
+			ref<RenderPass> renderPass;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;

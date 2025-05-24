@@ -55,6 +55,8 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		const VulkanSwapchain& swapchain = *std::static_pointer_cast<VulkanSwapchain>(descriptor.swapchain);
 
 		fchain<VkClearValue> clearValues(descriptor.clearValues.size());

@@ -7,8 +7,7 @@
 
 namespace ProjectA {
 	OpenGLRenderPass::OpenGLRenderPass(const RenderPassDescriptor& descriptor) :
-		RenderPass(descriptor),
-		clearValueCount(colorAttachmentCount)
+		RenderPass(descriptor)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -17,21 +16,6 @@ namespace ProjectA {
 		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachments);
 
 		DEBUG_ASSERT(colorAttachmentCount < static_cast<uint32>(maxColorAttachments));
-
-		if (depthStencil && depthStencilAttachment.loadOperation == LoadOperation::CLEAR) {
-			clearValueCount += 1;
-		}
-		else {
-			for (sint32 colorAttachmentIndex = static_cast<sint32>(colorAttachmentCount - 1); colorAttachmentIndex >= 0; colorAttachmentIndex -= 1) {
-				const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
-
-				if (colorAttachment.loadOperation != LoadOperation::CLEAR) {
-					clearValueCount = colorAttachmentIndex;
-
-					break;
-				}
-			}
-		}
 	}
 
 	ref<Image> OpenGLRenderPass::createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const {

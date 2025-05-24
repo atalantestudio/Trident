@@ -8,7 +8,15 @@ namespace ProjectA {
 	OpenGLDevice::OpenGLDevice(const OpenGLRenderingContext& renderingContext) :
 		physicalDevice(createRef<OpenGLPhysicalDevice>()),
 		queue(createRef<OpenGLQueue>(renderingContext, *this))
-	{}
+	{
+		glCreateVertexArrays(1, &vertexArray);
+		glBindVertexArray(vertexArray);
+	}
+
+	OpenGLDevice::~OpenGLDevice() {
+		glBindVertexArray(0);
+		glDeleteVertexArrays(1, &vertexArray);
+	}
 
 	ref<PhysicalDevice> OpenGLDevice::getPhysicalDevice() const {
 		return physicalDevice;

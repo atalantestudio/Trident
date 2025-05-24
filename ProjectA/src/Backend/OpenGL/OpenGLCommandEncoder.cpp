@@ -30,6 +30,8 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::begin() const {}
 
 	void OpenGLCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		renderPass = std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass).get();
 		swapchain = std::static_pointer_cast<OpenGLSwapchain>(descriptor.swapchain).get();
 

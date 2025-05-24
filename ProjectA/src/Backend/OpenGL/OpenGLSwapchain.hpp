@@ -2,12 +2,14 @@
 
 #include "Backend/OpenGL/OpenGLImageView.hpp"
 
-#include "Engine/Renderer/Swapchain.hpp"
+#include "Engine/API/Rendering/Swapchain.hpp"
 
 namespace ProjectA {
 	class OpenGLSwapchain : public Swapchain {
 		public:
 			OpenGLSwapchain(const SwapchainDescriptor& descriptor);
+
+			uint32 getImageCount() const final override;
 
 			uint32 getExtentWidth() const final override;
 
@@ -22,7 +24,6 @@ namespace ProjectA {
 			void destroy();
 
 		public:
-			const uint32 imageCount = 1;
 			std::vector<ref<OpenGLImage>> images;
 			std::vector<ref<OpenGLImageView>> imageViews;
 			std::vector<GLuint> framebuffers;

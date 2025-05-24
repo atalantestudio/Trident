@@ -14,6 +14,6 @@ namespace ProjectA {
 
 		private:
 			static std::ofstream stream;
-			static std::size_t eventCount;
+			static bool firstEvent;
 	};
 }

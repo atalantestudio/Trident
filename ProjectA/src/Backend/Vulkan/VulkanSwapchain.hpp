@@ -4,7 +4,7 @@
 #include "Backend/Vulkan/VulkanImageView.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/Swapchain.hpp"
+#include "Engine/API/Rendering/Swapchain.hpp"
 
 namespace ProjectA {
 	class VulkanDevice;
@@ -14,6 +14,8 @@ namespace ProjectA {
 			VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const SwapchainDescriptor& descriptor);
 
 			~VulkanSwapchain() final override;
+
+			uint32 getImageCount() const final override;
 
 			uint32 getExtentWidth() const final override;
 
@@ -36,5 +38,6 @@ namespace ProjectA {
 			const VulkanPhysicalDevice& physicalDevice;
 			const VulkanDevice& device;
 			const VulkanSurface& surface;
+			uint32 imageCount = 0;
 	};
 }
