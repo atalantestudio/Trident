@@ -9,6 +9,12 @@ namespace ProjectA {
 	GUIRenderer::GUIRenderer() {}
 
 	void GUIRenderer::build() {
+		SwapchainDescriptor swapchainDescriptor;
+		swapchainDescriptor.extentWidth = Application::get().getWindow().getSize()[0];
+		swapchainDescriptor.extentHeight = Application::get().getWindow().getSize()[1];
+
+		swapchain = createSwapchain(swapchainDescriptor);
+
 		const ref<Surface> surface = getSurface();
 
 		ColorAttachment colorAttachment{};
@@ -25,12 +31,7 @@ namespace ProjectA {
 
 		renderPass = createRenderPass(renderPassDescriptor);
 
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.renderPass = renderPass;
-		swapchainDescriptor.extentWidth = Application::get().getWindow().getSize()[0];
-		swapchainDescriptor.extentHeight = Application::get().getWindow().getSize()[1];
-
-		swapchain = createSwapchain(swapchainDescriptor);
+		swapchain->getImages(renderPass);
 
 		initializeVertexBuffer();
 		initializeIndexBuffer();
@@ -391,11 +392,11 @@ namespace ProjectA {
 		device->waitIdle();
 
 		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.renderPass = renderPass;
 		swapchainDescriptor.extentWidth = event.getWidth();
 		swapchainDescriptor.extentHeight = event.getHeight();
 
 		swapchain->update(swapchainDescriptor);
+		swapchain->getImages(renderPass);
 	}
 
 	void GUIRenderer::resetSubcomponentCount() {

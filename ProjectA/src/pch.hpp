@@ -37,3 +37,7 @@
 #endif
 
 #include "Engine/to_string.hpp"
+
+#ifdef BUILD_MODE_DEBUG
+	#include "Engine/Validation/Descriptor.hpp"
+#endif

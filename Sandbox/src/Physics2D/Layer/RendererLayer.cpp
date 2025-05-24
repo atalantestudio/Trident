@@ -175,11 +175,8 @@ namespace ProjectA {
 		return true;
 	}
 
-	bool RendererLayer::onWindowResize(WindowResizeEvent& event) const {
-		const float32 width = static_cast<float32>(event.getWidth());
-		const float32 height = static_cast<float32>(event.getHeight());
-
-		renderer.resize(width, height);
+	bool RendererLayer::onWindowResize(WindowResizeEvent& event) {
+		renderer.resize(event);
 
 		return true;
 	}

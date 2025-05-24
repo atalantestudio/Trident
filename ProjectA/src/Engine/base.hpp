@@ -97,9 +97,12 @@
 	}
 
 	#define DEBUG_STATIC_ASSERT static_assert
+
+	#define DEBUG_VALIDATE_DESCRIPTOR(descriptor) validateDescriptor(descriptor)
 #else
 	#define DEBUG_ASSERT
 	#define DEBUG_STATIC_ASSERT
+	#define DEBUG_VALIDATE_DESCRIPTOR
 #endif
 
 #ifdef BUILD_MODE_PROFILE
@@ -174,7 +177,12 @@
 		return this->function(std::forward<decltype(arguments)>(arguments)...); \
 	}
 
+// TODO: Fix ~ operator.
 #define AS_FLAG(T) \
+	inline constexpr T operator ~(T a) { \
+		return static_cast<T>(~static_cast<std::underlying_type<T>::type>(a)); \
+	} \
+	\
 	inline constexpr bool operator &(T a, T b) { \
 		return static_cast<bool>(static_cast<sint32>(a) & static_cast<sint32>(b)); \
 	} \

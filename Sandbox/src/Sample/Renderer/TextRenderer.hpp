@@ -40,7 +40,16 @@ namespace ProjectA {
 					cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBufferSize);
 				}
 
-				// 4. Create render pass.
+				// 4. Create swapchain.
+				{
+					SwapchainDescriptor swapchainDescriptor;
+					swapchainDescriptor.extentWidth = Application::get().getWindow().getSize()[0];
+					swapchainDescriptor.extentHeight = Application::get().getWindow().getSize()[1];
+
+					swapchain = createSwapchain(swapchainDescriptor);
+				}
+
+				// 5. Create render pass.
 				{
 					ColorAttachment colorAttachment{};
 					colorAttachment.format = getSurface()->getFormat();
@@ -57,15 +66,7 @@ namespace ProjectA {
 					renderPass = createRenderPass(renderPassDescriptor);
 				}
 
-				// 5. Create swapchain.
-				{
-					SwapchainDescriptor swapchainDescriptor;
-					swapchainDescriptor.renderPass = renderPass;
-					swapchainDescriptor.extentWidth = Application::get().getWindow().getSize()[0];
-					swapchainDescriptor.extentHeight = Application::get().getWindow().getSize()[1];
-
-					swapchain = createSwapchain(swapchainDescriptor);
-				}
+				swapchain->getImages(renderPass);
 
 				// 6. Create pipeline layout.
 				{
@@ -176,7 +177,7 @@ namespace ProjectA {
 				setText("TextRenderer", 64.0f);
 			}
 
-			void render(const ref<CommandEncoder>& commandEncoder) const final override {
+			void render(const ref<CommandEncoder>& commandEncoder) const override {
 				const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 				const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
@@ -197,17 +198,17 @@ namespace ProjectA {
 				commandEncoder->endRenderPass();
 			}
 
-			void resize(WindowResizeEvent& event) final override {
+			void resize(WindowResizeEvent& event) override {
 				const ref<Device> device = getDevice();
 
 				device->waitIdle();
 
 				SwapchainDescriptor swapchainDescriptor;
-				swapchainDescriptor.renderPass = renderPass;
 				swapchainDescriptor.extentWidth = event.getWidth();
 				swapchainDescriptor.extentHeight = event.getHeight();
 
 				swapchain->update(swapchainDescriptor);
+				swapchain->getImages(renderPass);
 
 				updateCamera();
 			}

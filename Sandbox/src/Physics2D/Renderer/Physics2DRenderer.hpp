@@ -22,11 +22,11 @@ namespace ProjectA {
 
 			void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const;
 
-			void render(const ref<CommandEncoder>& commandEncoder) const final override;
+			void render(const ref<CommandEncoder>& commandEncoder) const override;
 
 			void setSelectedObjectIndex(uint32 objectIndex);
 
-			void resize(float32 width, float32 height) const;
+			void resize(WindowResizeEvent& event) override;
 
 			void writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
 

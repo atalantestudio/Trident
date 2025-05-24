@@ -77,15 +77,15 @@ namespace ProjectA {
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float32>(renderPass.surfaceExtentWidth);
-		viewport.height = static_cast<float32>(renderPass.surfaceExtentHeight);
+		viewport.width = static_cast<float32>(renderPass.surface->window.getSize()[0]);
+		viewport.height = static_cast<float32>(renderPass.surface->window.getSize()[1]);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
 		VkRect2D scissor{};
 		scissor.offset = {0, 0};
-		scissor.extent.width = renderPass.surfaceExtentWidth;
-		scissor.extent.height = renderPass.surfaceExtentHeight;
+		scissor.extent.width = renderPass.surface->window.getSize()[0];
+		scissor.extent.height = renderPass.surface->window.getSize()[1];
 
 		VkPipelineViewportStateCreateInfo viewportStateCreateInfo{};
 		viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

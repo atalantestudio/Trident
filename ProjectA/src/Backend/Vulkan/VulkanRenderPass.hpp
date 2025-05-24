@@ -18,8 +18,7 @@ namespace ProjectA {
 			ref<Image> createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const final override;
 
 		public:
-			uint32 surfaceExtentWidth;
-			uint32 surfaceExtentHeight;
+			const VulkanSurface* surface;
 
 			VkSampleCountFlagBits sampleCountFlagBits;
 

@@ -58,16 +58,17 @@
 namespace ProjectA {
 	class SampleLayer : public Layer {
 		public:
-			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const final override {
+			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const override {
 				renderer.render(commandEncoder);
 			}
 
-			void onEvent(Event& event) {
+			void onEvent(Event& event) override {
 				EventDispatcher eventDispatcher(event);
 
 				eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 			}
 
+		private:
 			bool onWindowResize(WindowResizeEvent& event) {
 				renderer.resize(event);
 

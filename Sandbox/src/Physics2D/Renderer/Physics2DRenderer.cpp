@@ -2,10 +2,38 @@
 
 #include "Physics2DRenderer.hpp"
 
+#include "Engine/Application.hpp"
 #include "Engine/API/Material/ColorMaterial.hpp"
 
 namespace ProjectA {
 	Physics2DRenderer::Physics2DRenderer() {
+		SwapchainDescriptor swapchainDescriptor;
+		swapchainDescriptor.extentWidth = Application::get().getWindow().getSize()[0];
+		swapchainDescriptor.extentHeight = Application::get().getWindow().getSize()[1];
+
+		swapchain = createSwapchain(swapchainDescriptor);
+
+		const ref<Surface> surface = getSurface();
+
+		ColorAttachment colorAttachment{};
+		colorAttachment.format = surface->getFormat();
+		colorAttachment.sampleCount = 1;
+		colorAttachment.loadOperation = LoadOperation::CLEAR;
+		colorAttachment.storeOperation = StoreOperation::STORE;
+
+		RenderPassDescriptor renderPassDescriptor;
+		renderPassDescriptor.colorAttachments = {colorAttachment};
+		renderPassDescriptor.resolve = false;
+
+		// TODO
+		renderPassDescriptor.depthStencil = false;
+
+		renderPassDescriptor.presentAttachmentIndex = 0;
+
+		renderPass = createRenderPass(renderPassDescriptor);
+
+		swapchain->getImages(renderPass);
+
 		initializeCameraUniformBuffer();
 		initializeViewUniformBuffer();
 
@@ -23,8 +51,19 @@ namespace ProjectA {
 
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+		const float32 left = -width / 2.0f;
+		const float32 right = width / 2.0f;
+		const float32 top = height / 2.0f;
+		const float32 bottom = -height / 2.0f;
 
-		resize(width, height);
+		cameraMappedRange->projection = {
+			2.0f / (right - left),  0.0f,                  -(right + left) / (right - left),
+			0.0f,                   2.0f / (top - bottom), -(top + bottom) / (top - bottom),
+			0.0f,                   0.0f,                   1.0f,
+		};
+
+		viewMappedRange->viewport.x = width;
+		viewMappedRange->viewport.y = height;
 	}
 
 	void Physics2DRenderer::initializeCameraUniformBuffer() {
@@ -124,13 +163,15 @@ namespace ProjectA {
 		gridVertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor gridRenderPipelineDescriptor;
-		//gridRenderPipelineDescriptor.renderPass = renderPass;
+		gridRenderPipelineDescriptor.renderPass = renderPass;
 		gridRenderPipelineDescriptor.pipelineLayout = gridRenderPipelineLayout;
 		gridRenderPipelineDescriptor.vertexInputBindings = {gridVertexInputBinding};
 		gridRenderPipelineDescriptor.vertexShaderModule = gridVertexShaderModule;
 		gridRenderPipelineDescriptor.fragmentShaderModule = gridFragmentShaderModule;
 		gridRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		gridRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		gridRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		gridRenderPipelineDescriptor.depthStencilState.depthWrite = false;
 		gridRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		gridRenderPipeline = createRenderPipeline(gridRenderPipelineDescriptor);
@@ -165,7 +206,7 @@ namespace ProjectA {
 		centerOfMassVertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor centerOfMassRenderPipelineDescriptor;
-		//centerOfMassRenderPipelineDescriptor.renderPass = renderPass;
+		centerOfMassRenderPipelineDescriptor.renderPass = renderPass;
 		centerOfMassRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		centerOfMassRenderPipelineDescriptor.vertexInputBindings = {centerOfMassVertexInputBinding};
 		centerOfMassRenderPipelineDescriptor.vertexShaderModule = centerOfMassVertexShaderModule;
@@ -173,6 +214,8 @@ namespace ProjectA {
 		centerOfMassRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
 		centerOfMassRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
 		centerOfMassRenderPipelineDescriptor.minSampleShading = 1.0;
+		centerOfMassRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		centerOfMassRenderPipelineDescriptor.depthStencilState.depthWrite = false;
 		centerOfMassRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		centerOfMassRenderPipeline = createRenderPipeline(centerOfMassRenderPipelineDescriptor);
@@ -225,13 +268,15 @@ namespace ProjectA {
 		distanceVertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor distanceRenderPipelineDescriptor;
-		//distanceRenderPipelineDescriptor.renderPass = renderPass;
+		distanceRenderPipelineDescriptor.renderPass = renderPass;
 		distanceRenderPipelineDescriptor.pipelineLayout = distancePipelineLayout;
 		distanceRenderPipelineDescriptor.vertexInputBindings = {distanceVertexInputBinding};
 		distanceRenderPipelineDescriptor.vertexShaderModule = distanceVertexShaderModule;
 		distanceRenderPipelineDescriptor.fragmentShaderModule = distanceFragmentShaderModule;
 		distanceRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
 		distanceRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
+		distanceRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		distanceRenderPipelineDescriptor.depthStencilState.depthWrite = false;
 		distanceRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		distanceRenderPipeline = createRenderPipeline(distanceRenderPipelineDescriptor);
@@ -293,13 +338,15 @@ namespace ProjectA {
 		vertexFeatureVertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor vertexFeatureRenderPipelineDescriptor;
-		//vertexFeatureRenderPipelineDescriptor.renderPass = renderPass;
+		vertexFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		vertexFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		vertexFeatureRenderPipelineDescriptor.vertexInputBindings = {vertexFeatureVertexInputBinding};
 		vertexFeatureRenderPipelineDescriptor.vertexShaderModule = vertexFeatureVertexShaderModule;
 		vertexFeatureRenderPipelineDescriptor.fragmentShaderModule = vertexFeatureFragmentShaderModule;
 		vertexFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
 		vertexFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
+		vertexFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		vertexFeatureRenderPipelineDescriptor.depthStencilState.depthWrite = false;
 		vertexFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		vertexFeatureRenderPipeline = createRenderPipeline(vertexFeatureRenderPipelineDescriptor);
@@ -322,7 +369,7 @@ namespace ProjectA {
 		edgeFeatureVertexInputBinding.registerAttribute<svec2<float32>>(false);
 
 		RenderPipelineDescriptor edgeFeatureRenderPipelineDescriptor;
-		//edgeFeatureRenderPipelineDescriptor.renderPass = renderPass;
+		edgeFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		edgeFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		edgeFeatureRenderPipelineDescriptor.vertexInputBindings = {edgeFeatureVertexInputBinding};
 		edgeFeatureRenderPipelineDescriptor.vertexShaderModule = edgeFeatureVertexShaderModule;
@@ -330,6 +377,8 @@ namespace ProjectA {
 		edgeFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
 		edgeFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
 		edgeFeatureRenderPipelineDescriptor.lineWidth = 3.0f;
+		edgeFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		edgeFeatureRenderPipelineDescriptor.depthStencilState.depthWrite = false;
 		edgeFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		edgeFeatureRenderPipeline = createRenderPipeline(edgeFeatureRenderPipelineDescriptor);
@@ -458,13 +507,18 @@ namespace ProjectA {
 		fillInstanceInputBinding.registerAttribute<vec4<float32>>(false);
 
 		RenderPipelineDescriptor fillRenderPipelineDescriptor;
-		//fillRenderPipelineDescriptor.renderPass = renderPass;
+		fillRenderPipelineDescriptor.renderPass = renderPass;
 		fillRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
 		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, fillInstanceInputBinding};
 		fillRenderPipelineDescriptor.vertexShaderModule = fillVertexShaderModule;
 		fillRenderPipelineDescriptor.fragmentShaderModule = fillFragmentShaderModule;
 		fillRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		fillRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+
+		// TODO: Enable depth.
+		fillRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		fillRenderPipelineDescriptor.depthStencilState.depthWrite = false;
+
 		fillRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		fillRenderPipeline = createRenderPipeline(fillRenderPipelineDescriptor);
@@ -475,13 +529,18 @@ namespace ProjectA {
 		strokeInstanceInputBinding.registerAttribute<uint32>(false);
 
 		RenderPipelineDescriptor strokeRenderPipelineDescriptor;
-		//strokeRenderPipelineDescriptor.renderPass = renderPass;
+		strokeRenderPipelineDescriptor.renderPass = renderPass;
 		strokeRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
 		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, strokeInstanceInputBinding};
 		strokeRenderPipelineDescriptor.vertexShaderModule = strokeVertexShaderModule;
 		strokeRenderPipelineDescriptor.fragmentShaderModule = strokeFragmentShaderModule;
 		strokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
 		strokeRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
+
+		// TODO: Enable depth.
+		strokeRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		strokeRenderPipelineDescriptor.depthStencilState.depthWrite = false;
+
 		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR | DynamicState::LINE_WIDTH;
 
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
@@ -549,6 +608,13 @@ namespace ProjectA {
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
+		BeginRenderPassDescriptor beginRenderPassDescriptor;
+		beginRenderPassDescriptor.renderPass = renderPass;
+		beginRenderPassDescriptor.swapchain = swapchain;
+		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
+		beginRenderPassDescriptor.imageIndex = acquireNextImage(swapchain);
+
+		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 
@@ -556,6 +622,8 @@ namespace ProjectA {
 		renderScene(commandEncoder);
 		renderDistance(commandEncoder);
 		renderClosestFeatures(commandEncoder);
+
+		commandEncoder->endRenderPass();
 	}
 
 	void Physics2DRenderer::setSelectedObjectIndex(uint32 objectIndex) {
@@ -642,7 +710,9 @@ namespace ProjectA {
 		}
 	}
 
-	void Physics2DRenderer::resize(float32 width, float32 height) const {
+	void Physics2DRenderer::resize(WindowResizeEvent& event) {
+		const float32 width = static_cast<float32>(event.getWidth());
+		const float32 height = static_cast<float32>(event.getHeight());
 		const float32 left = -width / 2.0f;
 		const float32 right = width / 2.0f;
 		const float32 top = height / 2.0f;
@@ -656,6 +726,17 @@ namespace ProjectA {
 
 		viewMappedRange->viewport.x = width;
 		viewMappedRange->viewport.y = height;
+
+		const ref<Device> device = getDevice();
+
+		device->waitIdle();
+
+		SwapchainDescriptor swapchainDescriptor;
+		swapchainDescriptor.extentWidth = event.getWidth();
+		swapchainDescriptor.extentHeight = event.getHeight();
+
+		swapchain->update(swapchainDescriptor);
+		swapchain->getImages(renderPass);
 	}
 
 	void Physics2DRenderer::writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const {

@@ -8,11 +8,6 @@ namespace ProjectA {
 		construct(descriptor);
 	}
 
-	void OpenGLSwapchain::update(const SwapchainDescriptor& descriptor) {
-		destroy();
-		construct(descriptor);
-	}
-
 	uint32 OpenGLSwapchain::getExtentWidth() const {
 		return extentWidth;
 	}
@@ -22,18 +17,10 @@ namespace ProjectA {
 	}
 
 	// TODO: Fix memory leak when resizing on the multisample demo.
-	void OpenGLSwapchain::construct(const SwapchainDescriptor& descriptor) {
-		PROFILE_SCOPE(FUNC_SIG);
+	void OpenGLSwapchain::getImages(const ref<RenderPass>& renderPass) {
+		const ref<OpenGLRenderPass>& glRenderPass = std::static_pointer_cast<OpenGLRenderPass>(renderPass);
 
-		DEBUG_ASSERT(descriptor.extentWidth > 0 && descriptor.extentWidth < std::numeric_limits<uint32>::max());
-		DEBUG_ASSERT(descriptor.extentHeight > 0 && descriptor.extentHeight < std::numeric_limits<uint32>::max());
-
-		extentWidth = descriptor.extentWidth;
-		extentHeight = descriptor.extentHeight;
-
-		const OpenGLRenderPass& renderPass = *std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass);
-
-		if (renderPass.present && renderPass.getColorAttachmentCount() == 1 && !renderPass.resolve && !renderPass.depthStencil) {
+		if (renderPass->present && renderPass->getColorAttachmentCount() == 1 && !renderPass->resolve && !renderPass->depthStencil) {
 			return;
 		}
 
@@ -56,12 +43,12 @@ namespace ProjectA {
 
 		constexpr ImageViewDescriptor imageViewDescriptor;
 
-		const uint32 attachmentCount = renderPass.getAttachmentCount();
-		const uint32 colorAttachmentCount = renderPass.getColorAttachmentCount();
-		const uint32 resolveAttachmentCount = renderPass.getResolveAttachmentCount();
-		const uint32 presentAttachmentIndex = renderPass.getPresentAttachmentIndex();
+		const uint32 attachmentCount = renderPass->getAttachmentCount();
+		const uint32 colorAttachmentCount = renderPass->getColorAttachmentCount();
+		const uint32 resolveAttachmentCount = renderPass->getResolveAttachmentCount();
+		const uint32 presentAttachmentIndex = renderPass->getPresentAttachmentIndex();
 
-		const std::vector<ref<ImageView>>& colorAttachmentImageViews = renderPass.getColorAttachmentImageViews();
+		const std::vector<ref<ImageView>>& colorAttachmentImageViews = renderPass->getColorAttachmentImageViews();
 
 		std::vector<ref<OpenGLImageView>> baseAttachmentsImageViews(attachmentCount);
 
@@ -77,8 +64,8 @@ namespace ProjectA {
 		}
 
 		// Write depth stencil attachment image view.
-		if (renderPass.depthStencil) {
-			const ref<ImageView>& depthStencilAttachmentImageView = renderPass.getDepthStencilAttachmentImageView();
+		if (renderPass->depthStencil) {
+			const ref<ImageView>& depthStencilAttachmentImageView = renderPass->getDepthStencilAttachmentImageView();
 
 			baseAttachmentsImageViews[colorAttachmentCount + resolveAttachmentCount] = std::static_pointer_cast<OpenGLImageView>(depthStencilAttachmentImageView);
 		}
@@ -125,7 +112,7 @@ namespace ProjectA {
 				boundAttachmentIndex += 1;
 			}
 
-			if (renderPass.depthStencil) {
+			if (renderPass->depthStencil) {
 				const ref<OpenGLImageView>& imageView = attachmentImageViews.back();
 
 				// TODO: Use GL_DEPTH_STENCIL_ATTACHMENT instead of GL_DEPTH_ATTACHMENT.
@@ -144,6 +131,21 @@ namespace ProjectA {
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void OpenGLSwapchain::update(const SwapchainDescriptor& descriptor) {
+		destroy();
+		construct(descriptor);
+	}
+
+	void OpenGLSwapchain::construct(const SwapchainDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		DEBUG_ASSERT(descriptor.extentWidth > 0 && descriptor.extentWidth < std::numeric_limits<uint32>::max());
+		DEBUG_ASSERT(descriptor.extentHeight > 0 && descriptor.extentHeight < std::numeric_limits<uint32>::max());
+
+		extentWidth = descriptor.extentWidth;
+		extentHeight = descriptor.extentHeight;
 	}
 
 	void OpenGLSwapchain::destroy() {

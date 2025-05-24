@@ -10,8 +10,7 @@ namespace ProjectA {
 		RenderPass(descriptor),
 		physicalDevice(physicalDevice),
 		device(device),
-		surfaceExtentWidth(surface.window.getSize()[0]),
-		surfaceExtentHeight(surface.window.getSize()[1])
+		surface(&surface)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 

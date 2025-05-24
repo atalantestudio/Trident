@@ -68,8 +68,6 @@ namespace ProjectA {
 
 			virtual void onEvent(Event& event) final override;
 
-			bool onWindowResize(WindowResizeEvent& event);
-
 		protected:
 			ImageID loadImage(std::string_view path);
 
@@ -133,6 +131,8 @@ namespace ProjectA {
 			void GUIFloatingQuad(GUISize origin, GUISize size, ImageID imageId, const vec4<float32>& color);
 
 			GUISize computeFixedSize(GUISize size) const;
+
+			bool onWindowResize(WindowResizeEvent& event);
 
 		private:
 			//static constexpr uint8 MAX_GUI_COMPONENTS = 100;

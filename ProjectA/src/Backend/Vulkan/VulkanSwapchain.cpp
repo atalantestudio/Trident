@@ -8,6 +8,7 @@
 
 namespace ProjectA {
 	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const SwapchainDescriptor& descriptor) :
+		ObjectWrapper(VK_NULL_HANDLE),
 		physicalDevice(physicalDevice),
 		device(device),
 		surface(surface)
@@ -19,11 +20,9 @@ namespace ProjectA {
 
 	VulkanSwapchain::~VulkanSwapchain() {
 		destroy();
-	}
 
-	void VulkanSwapchain::update(const SwapchainDescriptor& descriptor) {
-		destroy();
-		construct(descriptor);
+		// The swapchain images are automatically destroyed with the swapchain.
+		vkDestroySwapchainKHR(device.object, object, nullptr);
 	}
 
 	uint32 VulkanSwapchain::getExtentWidth() const {
@@ -34,50 +33,16 @@ namespace ProjectA {
 		return surface.window.getSize()[1];
 	}
 
-	// Seems to allocate ~59Mb of memory in Release mode.
-	void VulkanSwapchain::construct(const SwapchainDescriptor& descriptor) {
+	void VulkanSwapchain::update(const SwapchainDescriptor& descriptor) {
+		destroy();
+		construct(descriptor);
+	}
+
+	void VulkanSwapchain::getImages(const ref<RenderPass>& renderPass) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities();
-		const uint32 minImageCount = surfaceCapabilities.minImageCount + 1;
-
-		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
-		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-		swapchainCreateInfo.pNext = nullptr;
-		swapchainCreateInfo.flags = 0;
-		swapchainCreateInfo.surface = surface.object;
-		swapchainCreateInfo.minImageCount = minImageCount;
-		swapchainCreateInfo.imageFormat = surface.format.format;
-		swapchainCreateInfo.imageColorSpace = surface.format.colorSpace;
-		swapchainCreateInfo.imageExtent.width = descriptor.extentWidth;
-		swapchainCreateInfo.imageExtent.height = descriptor.extentHeight;
-		swapchainCreateInfo.imageArrayLayers = 1;
-		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-		if (physicalDevice.graphicsQueueFamilyIndex == surface.presentQueueFamilyIndex) {
-			swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			swapchainCreateInfo.queueFamilyIndexCount = 0;
-			swapchainCreateInfo.pQueueFamilyIndices = nullptr;
-		}
-		else {
-			const uint32 queueFamilyIndices[2] = {physicalDevice.graphicsQueueFamilyIndex, surface.presentQueueFamilyIndex};
-
-			swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-			swapchainCreateInfo.queueFamilyIndexCount = 2;
-			swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
-		}
-
-		swapchainCreateInfo.preTransform = surfaceCapabilities.currentTransform;
-		swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-		swapchainCreateInfo.presentMode = surface.presentMode;
-		swapchainCreateInfo.clipped = VK_TRUE;
-		swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
-
-		VkResult result = vkCreateSwapchainKHR(device.object, &swapchainCreateInfo, nullptr, &object);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create swapchain (code: []).", result);
-
 		uint32 imageCount;
+		VkResult result;
 
 		result = vkGetSwapchainImagesKHR(device.object, object, &imageCount, nullptr);
 
@@ -108,25 +73,25 @@ namespace ProjectA {
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 		imageViewCreateInfo.subresourceRange.layerCount = 1;
 
-		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
+		const ref<VulkanRenderPass>& vkRenderPass = std::static_pointer_cast<VulkanRenderPass>(renderPass);
 
-		const uint32 attachmentCount = renderPass.getAttachmentCount();
-		const uint32 colorAttachmentCount = renderPass.getColorAttachmentCount();
-		const uint32 resolveAttachmentCount = renderPass.getResolveAttachmentCount();
-		const uint32 presentAttachmentIndex = renderPass.getPresentAttachmentIndex();
+		const uint32 attachmentCount = renderPass->getAttachmentCount();
+		const uint32 colorAttachmentCount = renderPass->getColorAttachmentCount();
+		const uint32 resolveAttachmentCount = renderPass->getResolveAttachmentCount();
+		const uint32 presentAttachmentIndex = renderPass->getPresentAttachmentIndex();
 
 		// TODO: Replace with Framebuffer API.
 		VkFramebufferCreateInfo framebufferCreateInfo{};
 		framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		framebufferCreateInfo.pNext = nullptr;
 		framebufferCreateInfo.flags = 0;
-		framebufferCreateInfo.renderPass = renderPass.object;
+		framebufferCreateInfo.renderPass = vkRenderPass->object;
 		framebufferCreateInfo.attachmentCount = attachmentCount;
-		framebufferCreateInfo.width = descriptor.extentWidth;
-		framebufferCreateInfo.height = descriptor.extentHeight;
+		framebufferCreateInfo.width = surface.window.getSize()[0];
+		framebufferCreateInfo.height = surface.window.getSize()[1];
 		framebufferCreateInfo.layers = 1;
 
-		const std::vector<ref<ImageView>>& colorAttachmentImageViews = renderPass.getColorAttachmentImageViews();
+		const std::vector<ref<ImageView>>& colorAttachmentImageViews = renderPass->getColorAttachmentImageViews();
 
 		std::vector<VkImageView> baseAttachmentsImageViews(attachmentCount);
 
@@ -142,8 +107,8 @@ namespace ProjectA {
 		}
 
 		// Write depth stencil attachment image view.
-		if (renderPass.depthStencil) {
-			const ref<ImageView>& depthStencilAttachmentImageView = renderPass.getDepthStencilAttachmentImageView();
+		if (renderPass->depthStencil) {
+			const ref<ImageView>& depthStencilAttachmentImageView = renderPass->getDepthStencilAttachmentImageView();
 
 			baseAttachmentsImageViews[colorAttachmentCount + resolveAttachmentCount] = std::static_pointer_cast<VulkanImageView>(depthStencilAttachmentImageView)->object;
 		}
@@ -179,6 +144,54 @@ namespace ProjectA {
 		}
 	}
 
+	// Seems to allocate ~59Mb of memory in Release mode.
+	void VulkanSwapchain::construct(const SwapchainDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNC_SIG);
+
+		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities();
+		const uint32 minImageCount = surfaceCapabilities.minImageCount + 1;
+		const VkSwapchainKHR oldSwapchain = object;
+
+		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
+		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+		swapchainCreateInfo.pNext = nullptr;
+		swapchainCreateInfo.flags = 0;
+		swapchainCreateInfo.surface = surface.object;
+		swapchainCreateInfo.minImageCount = minImageCount;
+		swapchainCreateInfo.imageFormat = surface.format.format;
+		swapchainCreateInfo.imageColorSpace = surface.format.colorSpace;
+		swapchainCreateInfo.imageExtent.width = descriptor.extentWidth;
+		swapchainCreateInfo.imageExtent.height = descriptor.extentHeight;
+		swapchainCreateInfo.imageArrayLayers = 1;
+		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+		if (physicalDevice.graphicsQueueFamilyIndex == surface.presentQueueFamilyIndex) {
+			swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			swapchainCreateInfo.queueFamilyIndexCount = 0;
+			swapchainCreateInfo.pQueueFamilyIndices = nullptr;
+		}
+		else {
+			const uint32 queueFamilyIndices[2] = {physicalDevice.graphicsQueueFamilyIndex, surface.presentQueueFamilyIndex};
+
+			swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+			swapchainCreateInfo.queueFamilyIndexCount = 2;
+			swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
+		}
+
+		swapchainCreateInfo.preTransform = surfaceCapabilities.currentTransform;
+		swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+		swapchainCreateInfo.presentMode = surface.presentMode;
+		swapchainCreateInfo.clipped = VK_TRUE;
+		swapchainCreateInfo.oldSwapchain = oldSwapchain;
+
+		const VkResult result = vkCreateSwapchainKHR(device.object, &swapchainCreateInfo, nullptr, &object);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create swapchain (code: []).", result);
+
+		// The swapchain images are automatically destroyed with the swapchain.
+		vkDestroySwapchainKHR(device.object, oldSwapchain, nullptr);
+	}
+
 	void VulkanSwapchain::destroy() {
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -186,8 +199,5 @@ namespace ProjectA {
 			vkDestroyFramebuffer(device.object, framebuffers[imageIndex], nullptr);
 			vkDestroyImageView(device.object, imageViews[imageIndex], nullptr);
 		}
-
-		// The swapchain images are automatically destroyed with the swapchain.
-		vkDestroySwapchainKHR(device.object, object, nullptr);
 	}
 }

@@ -11,13 +11,13 @@ namespace ProjectA {
 
 			virtual ~RendererLayer() = default;
 
-			void update(float64 fixedDeltaTime) final override;
+			void update(float64 fixedDeltaTime) override;
 
-			void preRender() final override;
+			void preRender() override;
 
-			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const final override;
+			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const override;
 
-			void onEvent(Event& event) final override;
+			void onEvent(Event& event) override;
 
 		private:
 			void checkHover();
@@ -26,7 +26,7 @@ namespace ProjectA {
 			bool onMouseMove(MouseMoveEvent& event);
 			bool onMouseUp(MouseUpEvent& event);
 			bool onMouseWheel(MouseWheelEvent& event);
-			bool onWindowResize(WindowResizeEvent& event) const;
+			bool onWindowResize(WindowResizeEvent& event);
 
 		private:
 			Physics2DRenderer renderer;

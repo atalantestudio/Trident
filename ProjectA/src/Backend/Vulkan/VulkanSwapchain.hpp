@@ -15,10 +15,13 @@ namespace ProjectA {
 
 			~VulkanSwapchain() final override;
 
+			uint32 getExtentWidth() const final override;
+
+			uint32 getExtentHeight() const final override;
+
 			void update(const SwapchainDescriptor& descriptor) final override;
 
-			uint32 getExtentWidth() const final override;
-			uint32 getExtentHeight() const final override;
+			void getImages(const ref<RenderPass>& renderPass) final override;
 
 			void construct(const SwapchainDescriptor& descriptor);
 

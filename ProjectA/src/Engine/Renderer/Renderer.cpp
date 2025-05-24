@@ -131,6 +131,8 @@ namespace ProjectA {
 	}
 
 	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) {
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		return adapter->createRenderPipeline(descriptor);
 	}
 
