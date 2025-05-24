@@ -192,8 +192,16 @@ namespace ProjectA {
 			depthStencilStateCreateInfo.pNext = nullptr;
 			depthStencilStateCreateInfo.flags = 0;
 			depthStencilStateCreateInfo.depthTestEnable = descriptor.depthStencilState.depthTest;
-			depthStencilStateCreateInfo.depthWriteEnable = descriptor.depthStencilState.depthWrite;
-			depthStencilStateCreateInfo.depthCompareOp = static_cast<VkCompareOp>(descriptor.depthStencilState.compareOperation);
+
+			if (descriptor.depthStencilState.depthTest) {
+				depthStencilStateCreateInfo.depthWriteEnable = descriptor.depthStencilState.depthWrite;
+				depthStencilStateCreateInfo.depthCompareOp = static_cast<VkCompareOp>(descriptor.depthStencilState.compareOperation);
+			}
+			else {
+				depthStencilStateCreateInfo.depthWriteEnable = VK_FALSE;
+				depthStencilStateCreateInfo.depthCompareOp = VK_COMPARE_OP_NEVER;
+			}
+
 			depthStencilStateCreateInfo.depthBoundsTestEnable = VK_FALSE;
 			depthStencilStateCreateInfo.stencilTestEnable = VK_FALSE;
 			depthStencilStateCreateInfo.front.failOp = VK_STENCIL_OP_KEEP;

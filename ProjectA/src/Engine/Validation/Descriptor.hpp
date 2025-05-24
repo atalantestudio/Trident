@@ -51,16 +51,18 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.depthStencilState.depthTest must be either true or false.");
 		}
 
-		if (descriptor.depthStencilState.depthWrite != true && descriptor.depthStencilState.depthWrite != false) {
-			errorCount += 1;
+		if (descriptor.depthStencilState.depthTest) {
+			if (descriptor.depthStencilState.depthWrite != true && descriptor.depthStencilState.depthWrite != false) {
+				errorCount += 1;
 
-			ENGINE_ERROR("descriptor.depthStencilState.depthWrite must be either true or false.");
-		}
+				ENGINE_ERROR("descriptor.depthStencilState.depthWrite must be either true or false.");
+			}
 
-		if (descriptor.depthStencilState.compareOperation > CompareOperation::ALWAYS) {
-			errorCount += 1;
+			if (descriptor.depthStencilState.compareOperation > CompareOperation::ALWAYS) {
+				errorCount += 1;
 
-			ENGINE_ERROR("descriptor.depthStencilState.compareOperation must be a valid CompareOperation value.");
+				ENGINE_ERROR("descriptor.depthStencilState.compareOperation must be a valid CompareOperation value.");
+			}
 		}
 
 		if (!(descriptor.dynamicState & DynamicState::SCISSOR)) {

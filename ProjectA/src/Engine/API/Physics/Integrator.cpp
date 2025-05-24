@@ -20,8 +20,8 @@ namespace ProjectA {
 					checkOutputState(output.state);
 				#endif
 
-				advanceSimulation(A, /*output.fraction*/1.0f);
-				advanceSimulation(B, /*output.fraction*/1.0f);
+				advanceSimulation(A, output.fraction);
+				advanceSimulation(B, output.fraction);
 
 				// TODO: Resolve possible collisions.
 			}

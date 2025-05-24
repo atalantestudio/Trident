@@ -307,8 +307,6 @@ namespace ProjectA {
 		distanceRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
 		distanceRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
 		distanceRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		distanceRenderPipelineDescriptor.depthStencilState.depthWrite = false;
-		distanceRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
 		distanceRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		distanceRenderPipeline = createRenderPipeline(distanceRenderPipelineDescriptor);
@@ -374,8 +372,6 @@ namespace ProjectA {
 		vertexFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
 		vertexFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
 		vertexFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		vertexFeatureRenderPipelineDescriptor.depthStencilState.depthWrite = false;
-		vertexFeatureRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
 		vertexFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		vertexFeatureRenderPipeline = createRenderPipeline(vertexFeatureRenderPipelineDescriptor);
@@ -403,8 +399,6 @@ namespace ProjectA {
 		edgeFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
 		edgeFeatureRenderPipelineDescriptor.lineWidth = 3.0f;
 		edgeFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		edgeFeatureRenderPipelineDescriptor.depthStencilState.depthWrite = false;
-		edgeFeatureRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
 		edgeFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		edgeFeatureRenderPipeline = createRenderPipeline(edgeFeatureRenderPipelineDescriptor);
