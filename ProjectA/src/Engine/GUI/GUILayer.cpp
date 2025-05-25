@@ -74,7 +74,7 @@ namespace ProjectA {
 		};
 		currentContainerInnerSize = currentContainerSize;
 
-		updateGUI();
+		GUI();
 
 		renderer.copyMappedBuffer();
 	}
@@ -87,7 +87,7 @@ namespace ProjectA {
 		renderer.resetSubcomponentCount();
 	}
 
-	void GUILayer::updateGUI() {}
+	void GUILayer::GUI() {}
 
 	void GUILayer::onEvent(Event& event) {
 		EventDispatcher eventDispatcher(event);

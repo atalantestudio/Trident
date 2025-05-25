@@ -13,8 +13,8 @@ namespace ProjectA {
 			Physics2DApplication(const ApplicationDescriptor& applicationDescriptor) :
 				Application(applicationDescriptor)
 			{
-				registerLayer<RendererLayer>();
-				//registerLayer<StatisticsLayer>();
+				//registerLayer<RendererLayer>();
+				registerLayer<StatisticsLayer>();
 			}
 
 			~Physics2DApplication() {}

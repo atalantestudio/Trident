@@ -7,7 +7,7 @@ namespace ProjectA {
 				framesPerSecond(Application::get().getFramesPerSecond())
 			{}
 
-			void updateGUI() override {
+			void GUI() override {
 				PROFILE_SCOPE(FUNC_SIG);
 
 				if (frameIndex == FRAME_DELAY) {
