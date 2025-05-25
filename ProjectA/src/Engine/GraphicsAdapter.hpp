@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
+#include "Engine/API/Rendering/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Rendering/Surface.hpp"
 #include "Engine/Renderer/ComputePipeline.hpp"
 #include "Engine/Renderer/Device.hpp"

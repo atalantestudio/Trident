@@ -43,12 +43,12 @@
 
 // Renderer
 #include "Engine/API/Rendering/Swapchain.hpp"
+#include "Engine/API/Rendering/ShaderModule.hpp"
 #include "Engine/Renderer/Buffer/Buffer.hpp"
 #include "Engine/Renderer/Buffer/BufferUsage.hpp"
 #include "Engine/Renderer/ComputePipeline.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Renderer/RenderPipeline.hpp"
-#include "Engine/Renderer/ShaderModule.hpp"
 
 // Font
 #include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"

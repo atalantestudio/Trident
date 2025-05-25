@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/ShaderModule.hpp"
+#include "Engine/API/Rendering/Descriptor/ShaderModuleDescriptor.hpp"
 
 namespace ProjectA {
 	class VulkanShaderModule : public ShaderModule, public ObjectWrapper<VkPipelineShaderStageCreateInfo> {
