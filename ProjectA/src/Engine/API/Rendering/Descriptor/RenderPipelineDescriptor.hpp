@@ -26,10 +26,10 @@ namespace ProjectA {
 		ref<ShaderModule> fragmentShaderModule;
 		PrimitiveTopology primitiveTopology;
 		PolygonMode polygonMode;
-		CullMode cullMode = CullMode::BACK;
-		FrontFace frontFace = FrontFace::CLOCKWISE;
-		float32 lineWidth = 1.0f;
-		float32 minSampleShading = 0.0f;
+		CullMode cullMode;
+		FrontFace frontFace;
+		float32 lineWidth;
+		float32 minSampleShading;
 		DepthStencilState depthStencilState;
 		DynamicState dynamicState;
 	};

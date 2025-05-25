@@ -74,6 +74,10 @@ namespace ProjectA {
 					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Color.frag.spv", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+					renderPipelineDescriptor.cullMode = CullMode::BACK;
+					renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+					renderPipelineDescriptor.lineWidth = 1.0f;
+					renderPipelineDescriptor.minSampleShading = 0.0f;
 					renderPipelineDescriptor.depthStencilState.depthTest = true;
 					renderPipelineDescriptor.depthStencilState.depthWrite = true;
 					renderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;

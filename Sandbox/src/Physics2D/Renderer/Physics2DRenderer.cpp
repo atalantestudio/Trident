@@ -207,6 +207,10 @@ namespace ProjectA {
 		gridRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Grid.frag.spv", gridFragmentShaderModuleDescriptor);
 		gridRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		gridRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		gridRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		gridRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		gridRenderPipelineDescriptor.lineWidth = 1.0f;
+		gridRenderPipelineDescriptor.minSampleShading = 0.0f;
 		gridRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		gridRenderPipelineDescriptor.depthStencilState.depthWrite = false;
 		gridRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
@@ -247,7 +251,10 @@ namespace ProjectA {
 		centerOfMassRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/CenterOfMass.frag.spv", centerOfMassFragmentShaderModuleDescriptor);
 		centerOfMassRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
 		centerOfMassRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
-		centerOfMassRenderPipelineDescriptor.minSampleShading = 1.0;
+		centerOfMassRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		centerOfMassRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		centerOfMassRenderPipelineDescriptor.lineWidth = 1.0f;
+		centerOfMassRenderPipelineDescriptor.minSampleShading = 1.0f;
 		centerOfMassRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		centerOfMassRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		centerOfMassRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
@@ -306,6 +313,10 @@ namespace ProjectA {
 		distanceRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Distance.frag.spv", distanceFragmentShaderModuleDescriptor);
 		distanceRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
 		distanceRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
+		distanceRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		distanceRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		distanceRenderPipelineDescriptor.lineWidth = 1.0f;
+		distanceRenderPipelineDescriptor.minSampleShading = 0.0f;
 		distanceRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		distanceRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
@@ -371,6 +382,10 @@ namespace ProjectA {
 		vertexFeatureRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/VertexFeature.frag.spv", vertexFeatureFragmentShaderModuleDescriptor);
 		vertexFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
 		vertexFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
+		vertexFeatureRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		vertexFeatureRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		vertexFeatureRenderPipelineDescriptor.lineWidth = 1.0f;
+		vertexFeatureRenderPipelineDescriptor.minSampleShading = 0.0f;
 		vertexFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		vertexFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
@@ -397,7 +412,10 @@ namespace ProjectA {
 		edgeFeatureRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/EdgeFeature.frag.spv", edgeFeatureFragmentShaderModuleDescriptor);
 		edgeFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
 		edgeFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
+		edgeFeatureRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		edgeFeatureRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		edgeFeatureRenderPipelineDescriptor.lineWidth = 3.0f;
+		edgeFeatureRenderPipelineDescriptor.minSampleShading = 0.0f;
 		edgeFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		edgeFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
@@ -533,6 +551,10 @@ namespace ProjectA {
 		fillRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Fill.frag.spv", fragmentShaderModuleDescriptor);
 		fillRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		fillRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		fillRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		fillRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		fillRenderPipelineDescriptor.lineWidth = 1.0f;
+		fillRenderPipelineDescriptor.minSampleShading = 0.0f;
 		fillRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		fillRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		fillRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
@@ -554,6 +576,10 @@ namespace ProjectA {
 		strokeRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Stroke.frag.spv", fragmentShaderModuleDescriptor);
 		strokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
 		strokeRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
+		strokeRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		strokeRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		strokeRenderPipelineDescriptor.lineWidth = 1.0f;
+		strokeRenderPipelineDescriptor.minSampleShading = 0.0f;
 		strokeRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		strokeRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		strokeRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;

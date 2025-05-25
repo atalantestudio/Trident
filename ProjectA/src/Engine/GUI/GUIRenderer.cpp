@@ -214,6 +214,7 @@ namespace ProjectA {
 		renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		renderPipelineDescriptor.cullMode = CullMode::BACK;
 		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		renderPipelineDescriptor.lineWidth = 1.0f;
 		renderPipelineDescriptor.minSampleShading = 0.5;
 		renderPipelineDescriptor.depthStencilState.depthTest = false;
 		renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;

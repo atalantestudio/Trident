@@ -33,10 +33,34 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.fragmentShaderModule must be a reference to a valid fragment shader module.");
 		}
 
+		if (descriptor.primitiveTopology > PrimitiveTopology::TRIANGLE_STRIP) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.primitiveTopology must be a valid PrimitiveTopology member.");
+		}
+
+		if (descriptor.polygonMode > PolygonMode::FILL) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.polygonMode must be a valid PolygonMode member.");
+		}
+
+		if (descriptor.cullMode > CullMode::FRONT_AND_BACK) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.cullMode must be a valid CullMode member.");
+		}
+
+		if (descriptor.frontFace > FrontFace::COUNTER_CLOCKWISE) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.frontFace must be a valid FrontFace member.");
+		}
+
 		if (descriptor.lineWidth <= 0.0f) {
 			warningCount += 1;
 
-			ENGINE_WARN("descriptor.lineWidth should be > 0.");
+			ENGINE_WARN("descriptor.lineWidth should be greater than 0.");
 		}
 
 		if (descriptor.minSampleShading < 0.0f || descriptor.minSampleShading > 1.0f) {
@@ -61,7 +85,7 @@ namespace ProjectA {
 			if (descriptor.depthStencilState.compareOperation > CompareOperation::ALWAYS) {
 				errorCount += 1;
 
-				ENGINE_ERROR("descriptor.depthStencilState.compareOperation must be a valid CompareOperation value.");
+				ENGINE_ERROR("descriptor.depthStencilState.compareOperation must be a valid CompareOperation member.");
 			}
 		}
 
