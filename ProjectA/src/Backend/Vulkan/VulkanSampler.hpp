@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/Sampler.hpp"
+#include "Engine/API/Rendering/Descriptor/SamplerDescriptor.hpp"
 
 namespace ProjectA {
 	class VulkanSampler : public Sampler, public ObjectWrapper<VkSampler> {
