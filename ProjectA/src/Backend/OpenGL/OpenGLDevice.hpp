@@ -25,7 +25,7 @@ namespace ProjectA {
 
 			void resetFence(const ref<Fence>& fence) const final override;
 
-			Status acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const final override;
+			AcquireNextImageStatus acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const final override;
 
 			void waitIdle() const final override;
 

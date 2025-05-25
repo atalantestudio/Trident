@@ -23,7 +23,7 @@ namespace ProjectA {
 
 			// Acquires the next available swapchain image,
 			// and writes its index to imageIndex.
-			virtual Status acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const = 0;
+			virtual AcquireNextImageStatus acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const = 0;
 
 			virtual void waitIdle() const = 0;
 	};

@@ -86,9 +86,9 @@ namespace ProjectA {
 
 		uint32 imageIndex;
 
-		const Status acquireNextImageStatus = device->acquireNextImage(swapchain, Renderer::getAvailableImageSemaphore(frameInFlightIndex), imageIndex);
+		const AcquireNextImageStatus status = device->acquireNextImage(swapchain, Renderer::getAvailableImageSemaphore(frameInFlightIndex), imageIndex);
 
-		ENGINE_ASSERT(acquireNextImageStatus == Status::SUBOPTIMAL || acquireNextImageStatus == Status::SUCCESS, "Failed to acquire next image.");
+		ENGINE_ASSERT(status == AcquireNextImageStatus::SUBOPTIMAL || status == AcquireNextImageStatus::SUCCESS, "Failed to acquire next image.");
 
 		device->resetFence(Renderer::getFlightFence(frameInFlightIndex));
 

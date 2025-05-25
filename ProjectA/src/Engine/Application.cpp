@@ -264,11 +264,11 @@ namespace ProjectA {
 
 		device->getGraphicsQueue()->submit(commandBuffer, Renderer::getAvailableImageSemaphore(frameInFlightIndex), Renderer::getFinishedRenderSemaphore(frameInFlightIndex), Renderer::getFlightFence(frameInFlightIndex));
 
-		const Status presentStatus = device->getPresentQueue()->present(presentData.swapchains, Renderer::getFinishedRenderSemaphore(frameInFlightIndex), presentData.imageIndices);
+		const PresentStatus presentStatus = device->getPresentQueue()->present(presentData.swapchains, Renderer::getFinishedRenderSemaphore(frameInFlightIndex), presentData.imageIndices);
 
 		resetPresentData();
 
-		if (presentStatus == Status::SUBOPTIMAL || presentStatus == Status::ERROR_OUT_OF_DATE) {
+		if (presentStatus == PresentStatus::SUBOPTIMAL || presentStatus == PresentStatus::ERROR_OUT_OF_DATE) {
 			ENGINE_ERROR("The present status is either suboptimal or out of date.");
 
 			// TODO: Fix resize.
@@ -277,7 +277,7 @@ namespace ProjectA {
 			return;
 		}
 
-		ENGINE_ASSERT(presentStatus == Status::SUCCESS, "Unhandled present status.");
+		ENGINE_ASSERT(presentStatus == PresentStatus::SUCCESS, "Unhandled present status.");
 
 		device->waitIdle();
 	}

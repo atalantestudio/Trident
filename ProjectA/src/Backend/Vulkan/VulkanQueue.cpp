@@ -7,8 +7,6 @@
 #include "Backend/Vulkan/VulkanQueue.hpp"
 #include "Backend/Vulkan/VulkanSemaphore.hpp"
 
-#include "Backend/Vulkan/Status.hpp"
-
 namespace ProjectA {
 	VulkanQueue::VulkanQueue(const VulkanDevice& device, uint32 queueFamilyIndex) :
 		device(device),
@@ -63,7 +61,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to submit Vulkan queue (code: []).", result);
 	}
 
-	Status VulkanQueue::present(const std::vector<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const std::vector<uint32>& imageIndices) const {
+	PresentStatus VulkanQueue::present(const std::vector<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const std::vector<uint32>& imageIndices) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		// TODO: Find a static way of casting swapchains.
@@ -85,6 +83,18 @@ namespace ProjectA {
 
 		const VkResult result = vkQueuePresentKHR(object, &presentInfo);
 
-		return getStatus(result);
+		if (result == VK_SUCCESS) {
+			return PresentStatus::SUCCESS;
+		}
+
+		if (result == VK_SUBOPTIMAL_KHR) {
+			return PresentStatus::SUBOPTIMAL;
+		}
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+			return PresentStatus::SUBOPTIMAL;
+		}
+
+		return PresentStatus::ERROR_UNHANDLED;
 	}
 }

@@ -7,8 +7,6 @@
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 #include "Backend/Vulkan/VulkanSwapchain.hpp"
 
-#include "Backend/Vulkan/Status.hpp"
-
 namespace ProjectA {
 	// TODO: Client-side extension request.
 	const std::vector<const char*> VulkanDevice::enabledExtensionNames = {
@@ -140,7 +138,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan fences (code: []).", result);
 	}
 
-	Status VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
+	AcquireNextImageStatus VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		// UINT64_MAX disables the timeout.
@@ -153,7 +151,19 @@ namespace ProjectA {
 			&imageIndex
 		);
 
-		return getStatus(result);
+		if (result == VK_SUCCESS) {
+			return AcquireNextImageStatus::SUCCESS;
+		}
+
+		if (result == VK_SUBOPTIMAL_KHR) {
+			return AcquireNextImageStatus::SUBOPTIMAL;
+		}
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+			return AcquireNextImageStatus::SUBOPTIMAL;
+		}
+
+		return AcquireNextImageStatus::ERROR_UNHANDLED;
 	}
 
 	void VulkanDevice::waitIdle() const {
