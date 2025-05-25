@@ -171,6 +171,9 @@ namespace ProjectA {
 
 				// 12. Create render pipeline.
 				{
+					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+					vertexInputBinding.registerAttribute<svec2<float32>>(false);
+
 					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 					vertexShaderModuleDescriptor.entryPoint = "main";
@@ -179,8 +182,8 @@ namespace ProjectA {
 					fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 					fragmentShaderModuleDescriptor.entryPoint = "main";
 
-					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-					vertexInputBinding.registerAttribute<svec2<float32>>(false);
+					ColorBlendAttachment colorBlendAttachment{};
+					colorBlendAttachment.blend = false;
 
 					RenderPipelineDescriptor renderPipelineDescriptor;
 					renderPipelineDescriptor.renderPass = renderPass;
@@ -194,6 +197,7 @@ namespace ProjectA {
 					renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 					renderPipelineDescriptor.lineWidth = 1.0f;
 					renderPipelineDescriptor.minSampleShading = 0.0f;
+					renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 					renderPipelineDescriptor.depthStencilState.depthTest = false;
 					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 

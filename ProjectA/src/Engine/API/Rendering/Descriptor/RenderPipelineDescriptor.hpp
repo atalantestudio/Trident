@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/API/Rendering/ColorBlendAttachment.hpp"
 #include "Engine/API/Rendering/CompareOperation.hpp"
 #include "Engine/API/Rendering/RenderPass.hpp"
 #include "Engine/API/Rendering/ShaderModule.hpp"
@@ -12,6 +13,10 @@
 #include "Engine/Renderer/VertexInputBinding.hpp"
 
 namespace ProjectA {
+	struct ColorBlendState {
+		std::vector<ColorBlendAttachment> attachments;
+	};
+
 	struct DepthStencilState {
 		bool depthTest;
 		bool depthWrite;
@@ -30,6 +35,7 @@ namespace ProjectA {
 		FrontFace frontFace;
 		float32 lineWidth;
 		float32 minSampleShading;
+		ColorBlendState colorBlendState;
 		DepthStencilState depthStencilState;
 		DynamicState dynamicState;
 	};

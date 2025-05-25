@@ -36,25 +36,25 @@ namespace ProjectA {
 		if (descriptor.primitiveTopology > PrimitiveTopology::TRIANGLE_STRIP) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.primitiveTopology must be a valid PrimitiveTopology member.");
+			ENGINE_ERROR("descriptor.primitiveTopology must be a valid PrimitiveTopology value.");
 		}
 
 		if (descriptor.polygonMode > PolygonMode::FILL) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.polygonMode must be a valid PolygonMode member.");
+			ENGINE_ERROR("descriptor.polygonMode must be a valid PolygonMode value.");
 		}
 
 		if (descriptor.cullMode > CullMode::FRONT_AND_BACK) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.cullMode must be a valid CullMode member.");
+			ENGINE_ERROR("descriptor.cullMode must be a valid CullMode value.");
 		}
 
 		if (descriptor.frontFace > FrontFace::COUNTER_CLOCKWISE) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.frontFace must be a valid FrontFace member.");
+			ENGINE_ERROR("descriptor.frontFace must be a valid FrontFace value.");
 		}
 
 		if (descriptor.lineWidth <= 0.0f) {
@@ -69,6 +69,38 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.minSampleShading must be in the range [0, 1].");
 		}
 
+		if (descriptor.colorBlendState.attachments.size() != descriptor.renderPass->getColorAttachmentCount()) {
+			errorCount += 1;
+
+			ENGINE_ERROR("The number of color blend attachments in descriptor.colorBlendState.attachments must be equal to the color attachment count of descriptor.renderPass.");
+		}
+
+		uint32 colorBlendAttachmentIndex = 0;
+
+		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.size(); colorBlendAttachmentIndex += 1) {
+			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
+
+			if (colorBlendAttachment.blend != true && colorBlendAttachment.blend != false) {
+				errorCount += 1;
+
+				ENGINE_ERROR("descriptor.colorBlendState.attachments[[]].blend must be either true or false.", colorBlendAttachmentIndex);
+			}
+
+			if (colorBlendAttachment.blend) {
+				if (colorBlendAttachment.srcColorBlendFactor > BlendFactor::ONE_MINUS_SRC1_ALPHA) {
+					errorCount += 1;
+
+					ENGINE_ERROR("If descriptor.colorBlendState.attachments[[]].blend is true, descriptor.colorBlendState.attachments[[]].srcColorBlendFactor must be a valid BlendFactor value.", colorBlendAttachmentIndex, colorBlendAttachmentIndex);
+				}
+
+				if (colorBlendAttachment.dstColorBlendFactor > BlendFactor::ONE_MINUS_SRC1_ALPHA) {
+					errorCount += 1;
+
+					ENGINE_ERROR("If descriptor.colorBlendState.attachments[[]].blend is true, descriptor.colorBlendState.attachments[[]].dstColorBlendFactor must be a valid BlendFactor value.", colorBlendAttachmentIndex, colorBlendAttachmentIndex);
+				}
+			}
+		}
+
 		if (descriptor.depthStencilState.depthTest != true && descriptor.depthStencilState.depthTest != false) {
 			errorCount += 1;
 
@@ -79,13 +111,13 @@ namespace ProjectA {
 			if (descriptor.depthStencilState.depthWrite != true && descriptor.depthStencilState.depthWrite != false) {
 				errorCount += 1;
 
-				ENGINE_ERROR("descriptor.depthStencilState.depthWrite must be either true or false.");
+				ENGINE_ERROR("If descriptor.depthStencilState.depthStencil is true, descriptor.depthStencilState.depthWrite must be either true or false.");
 			}
 
 			if (descriptor.depthStencilState.compareOperation > CompareOperation::ALWAYS) {
 				errorCount += 1;
 
-				ENGINE_ERROR("descriptor.depthStencilState.compareOperation must be a valid CompareOperation member.");
+				ENGINE_ERROR("If descriptor.depthStencilState.depthStencil is true, descriptor.depthStencilState.compareOperation must be a valid CompareOperation value.");
 			}
 		}
 

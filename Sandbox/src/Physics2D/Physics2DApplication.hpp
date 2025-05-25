@@ -4,7 +4,7 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Layer/GUI/StatisticsLayer.hpp"
+//#include "Layer/GUI/StatisticsLayer.hpp"
 #include "Layer/RendererLayer.hpp"
 
 namespace ProjectA {
@@ -13,8 +13,8 @@ namespace ProjectA {
 			Physics2DApplication(const ApplicationDescriptor& applicationDescriptor) :
 				Application(applicationDescriptor)
 			{
-				//registerLayer<RendererLayer>();
-				registerLayer<StatisticsLayer>();
+				registerLayer<RendererLayer>();
+				//registerLayer<StatisticsLayer>();
 			}
 
 			~Physics2DApplication() {}

@@ -5,6 +5,7 @@
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 
+#include "Backend/Vulkan/BlendFactor.hpp"
 #include "Backend/Vulkan/CullMode.hpp"
 #include "Backend/Vulkan/DynamicState.hpp"
 #include "Backend/Vulkan/FrontFace.hpp"
@@ -83,7 +84,7 @@ namespace ProjectA {
 		viewport.maxDepth = 1.0f;
 
 		VkRect2D scissor{};
-		scissor.offset = {0, 0};
+		scissor.offset = { 0, 0 };
 		scissor.extent.width = renderPass.surface->window.getSize()[0];
 		scissor.extent.height = renderPass.surface->window.getSize()[1];
 
@@ -132,19 +133,22 @@ namespace ProjectA {
 		multisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
 		multisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
 
-		VkPipelineColorBlendAttachmentState colorBlendAttachmentState{};
-		colorBlendAttachmentState.blendEnable = VK_FALSE;
-		//colorBlendAttachmentState.blendEnable = VK_TRUE;
-		colorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-		//colorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-		colorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-		//colorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-		colorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
-		colorBlendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-		//colorBlendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-		colorBlendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-		colorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
-		colorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		// TODO: Replace with fchain once it supports allocation sizes of 0.
+		std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachmentStates(descriptor.colorBlendState.attachments.size());
+
+		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.size(); colorBlendAttachmentIndex += 1) {
+			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
+
+			VkPipelineColorBlendAttachmentState& colorBlendAttachmentState = colorBlendAttachmentStates[colorBlendAttachmentIndex];
+			colorBlendAttachmentState.blendEnable = colorBlendAttachment.blend;
+			colorBlendAttachmentState.srcColorBlendFactor = getVkBlendFactor(colorBlendAttachment.srcColorBlendFactor);
+			colorBlendAttachmentState.dstColorBlendFactor = getVkBlendFactor(colorBlendAttachment.dstColorBlendFactor);
+			colorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
+			colorBlendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
+			colorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		}
 
 		VkPipelineColorBlendStateCreateInfo colorBlendStateCreateInfo{};
 		colorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -152,8 +156,8 @@ namespace ProjectA {
 		colorBlendStateCreateInfo.flags = 0;
 		colorBlendStateCreateInfo.logicOpEnable = VK_FALSE;
 		colorBlendStateCreateInfo.logicOp = VK_LOGIC_OP_CLEAR;
-		colorBlendStateCreateInfo.attachmentCount = 1;
-		colorBlendStateCreateInfo.pAttachments = &colorBlendAttachmentState;
+		colorBlendStateCreateInfo.attachmentCount = static_cast<uint32>(colorBlendAttachmentStates.size());
+		colorBlendStateCreateInfo.pAttachments = colorBlendAttachmentStates.data();
 		colorBlendStateCreateInfo.blendConstants[0] = 0.0f;
 		colorBlendStateCreateInfo.blendConstants[1] = 0.0f;
 		colorBlendStateCreateInfo.blendConstants[2] = 0.0f;

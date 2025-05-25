@@ -3,6 +3,7 @@
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 
+#include "Backend/OpenGL/BlendFactor.hpp"
 #include "Backend/OpenGL/CompareOperation.hpp"
 #include "Backend/OpenGL/CullMode.hpp"
 #include "Backend/OpenGL/FrontFace.hpp"
@@ -21,7 +22,8 @@ namespace ProjectA {
 		polygonMode(getGlPolygonMode(descriptor.polygonMode)),
 		lineWidth(descriptor.lineWidth),
 		minSampleShading(descriptor.minSampleShading),
-		depthTest(descriptor.depthStencilState.depthTest),
+		drawBuffers(descriptor.colorBlendState.attachments.size()),
+		depthTest(descriptor.depthStencilState.depthTest && descriptor.renderPass->depthStencil),
 		depthWrite(descriptor.depthStencilState.depthWrite),
 		depthFunc(getGlDepthFunc(descriptor.depthStencilState.compareOperation)),
 		dynamicLineWidth(descriptor.dynamicState & DynamicState::LINE_WIDTH)
@@ -97,6 +99,16 @@ namespace ProjectA {
 
 				attribindex += 1;
 			}
+		}
+
+		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.size(); colorBlendAttachmentIndex += 1) {
+			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
+
+			OpenGLDrawBuffer& drawBuffer = drawBuffers[colorBlendAttachmentIndex];
+
+			drawBuffer.blend = colorBlendAttachment.blend;
+			drawBuffer.srcColorBlendFactor = getGlBlendFactor(colorBlendAttachment.srcColorBlendFactor);
+			drawBuffer.dstColorBlendFactor = getGlBlendFactor(colorBlendAttachment.dstColorBlendFactor);
 		}
 	}
 

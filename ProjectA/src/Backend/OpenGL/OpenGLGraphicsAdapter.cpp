@@ -32,6 +32,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindTextureUnit);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexArray);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexBuffer);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glBlendFunci);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBlitFramebuffer);
 
 		#ifdef BUILD_MODE_DEBUG
@@ -64,10 +65,12 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteSync);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteVertexArrays);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDetachShader);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glDisablei);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDispatchCompute);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawArraysInstanced);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawBuffers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawElementsInstanced);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glEnablei);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glEnableVertexAttribArray);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glFenceSync);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glFramebufferTexture2D);

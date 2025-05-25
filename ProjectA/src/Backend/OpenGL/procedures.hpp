@@ -10,6 +10,7 @@ namespace ProjectA {
 	extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
 	extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
 	extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
+	extern PFNGLBLENDFUNCIPROC glBlendFunci;
 	extern PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
 
 	#ifdef BUILD_MODE_DEBUG
@@ -42,10 +43,12 @@ namespace ProjectA {
 	extern PFNGLDELETESYNCPROC glDeleteSync;
 	extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
 	extern PFNGLDETACHSHADERPROC glDetachShader;
+	extern PFNGLENABLEIPROC glDisablei;
 	extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
 	extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
 	extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
 	extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced;
+	extern PFNGLENABLEIPROC glEnablei;
 	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 	extern PFNGLFENCESYNCPROC glFenceSync;
 	extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;

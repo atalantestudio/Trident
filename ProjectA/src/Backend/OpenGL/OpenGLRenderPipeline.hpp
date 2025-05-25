@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Backend/OpenGL/OpenGLDrawBuffer.hpp"
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 
 #include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
@@ -23,9 +24,13 @@ namespace ProjectA {
 			const GLenum polygonMode;
 			const GLfloat lineWidth;
 			const GLfloat minSampleShading;
+
+			std::vector<OpenGLDrawBuffer> drawBuffers;
+
 			const GLboolean depthTest;
 			const GLboolean depthWrite;
 			const GLenum depthFunc;
+
 			const bool dynamicLineWidth;
 	};
 }

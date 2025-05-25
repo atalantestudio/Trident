@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class EditorLayer : public GUILayer {
 		public:
-			void updateGUI() override {
+			void GUI() override {
 				PROFILE_SCOPE(FUNC_SIG);
 
 				GUIContainer({EXPAND, 100px}, {20px, 20px}, HORIZONTAL, 10px, GRAY) {

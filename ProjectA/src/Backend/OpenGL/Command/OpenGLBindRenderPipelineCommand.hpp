@@ -10,8 +10,6 @@ namespace ProjectA {
 				renderPipeline(renderPipeline)
 			{}
 
-			// TODO: glEnable(GL_BLEND)
-			// TODO: glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 			// TODO: glEnable(GL_FRAMEBUFFER_SRGB)
 			void execute() const override {
 				glUseProgram(renderPipeline->program);
@@ -19,10 +17,6 @@ namespace ProjectA {
 
 				if (renderPipeline->polygonModeFace != GL_NONE) {
 					glPolygonMode(renderPipeline->polygonModeFace, renderPipeline->polygonMode);
-				}
-
-				if (!renderPipeline->dynamicLineWidth) {
-					glLineWidth(renderPipeline->lineWidth);
 				}
 
 				if (renderPipeline->polygonMode == GL_POINT) {
@@ -40,12 +34,28 @@ namespace ProjectA {
 					glDisable(GL_CULL_FACE);
 				}
 
+				if (!renderPipeline->dynamicLineWidth) {
+					glLineWidth(renderPipeline->lineWidth);
+				}
+
 				if (renderPipeline->minSampleShading != 0.0f) {
 					glEnable(GL_SAMPLE_SHADING);
 					glMinSampleShading(renderPipeline->minSampleShading);
 				}
 				else {
 					glDisable(GL_SAMPLE_SHADING);
+				}
+
+				for (uint32 drawBufferIndex = 0; drawBufferIndex < renderPipeline->drawBuffers.size(); drawBufferIndex += 1) {
+					const OpenGLDrawBuffer& drawBuffer = renderPipeline->drawBuffers[drawBufferIndex];
+
+					if (drawBuffer.blend) {
+						glEnablei(GL_BLEND, drawBufferIndex);
+						glBlendFunci(drawBufferIndex, drawBuffer.srcColorBlendFactor, drawBuffer.dstColorBlendFactor);
+					}
+					else {
+						glDisablei(GL_BLEND, drawBufferIndex);
+					}
 				}
 
 				if (renderPipeline->depthTest) {

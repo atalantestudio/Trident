@@ -204,6 +204,9 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = false;
+
 		RenderPipelineDescriptor renderPipelineDescriptor;
 		renderPipelineDescriptor.renderPass = renderPass;
 		renderPipelineDescriptor.pipelineLayout = pipelineLayout;
@@ -215,7 +218,8 @@ namespace ProjectA {
 		renderPipelineDescriptor.cullMode = CullMode::BACK;
 		renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		renderPipelineDescriptor.lineWidth = 1.0f;
-		renderPipelineDescriptor.minSampleShading = 0.5;
+		renderPipelineDescriptor.minSampleShading = 0.5f;
+		renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		renderPipelineDescriptor.depthStencilState.depthTest = false;
 		renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 

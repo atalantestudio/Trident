@@ -66,6 +66,9 @@ namespace ProjectA {
 					fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 					fragmentShaderModuleDescriptor.entryPoint = "main";
 
+					ColorBlendAttachment colorBlendAttachment{};
+					colorBlendAttachment.blend = false;
+
 					RenderPipelineDescriptor renderPipelineDescriptor;
 					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
@@ -78,6 +81,7 @@ namespace ProjectA {
 					renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 					renderPipelineDescriptor.lineWidth = 1.0f;
 					renderPipelineDescriptor.minSampleShading = 0.0f;
+					renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 					renderPipelineDescriptor.depthStencilState.depthTest = true;
 					renderPipelineDescriptor.depthStencilState.depthWrite = true;
 					renderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;

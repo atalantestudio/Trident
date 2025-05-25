@@ -199,6 +199,9 @@ namespace ProjectA {
 		gridFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		gridFragmentShaderModuleDescriptor.entryPoint = "main";
 
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = false;
+
 		RenderPipelineDescriptor gridRenderPipelineDescriptor;
 		gridRenderPipelineDescriptor.renderPass = renderPass;
 		gridRenderPipelineDescriptor.pipelineLayout = gridRenderPipelineLayout;
@@ -211,6 +214,7 @@ namespace ProjectA {
 		gridRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		gridRenderPipelineDescriptor.lineWidth = 1.0f;
 		gridRenderPipelineDescriptor.minSampleShading = 0.0f;
+		gridRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		gridRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		gridRenderPipelineDescriptor.depthStencilState.depthWrite = false;
 		gridRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
@@ -243,6 +247,9 @@ namespace ProjectA {
 		centerOfMassFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		centerOfMassFragmentShaderModuleDescriptor.entryPoint = "main";
 
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = false;
+
 		RenderPipelineDescriptor centerOfMassRenderPipelineDescriptor;
 		centerOfMassRenderPipelineDescriptor.renderPass = renderPass;
 		centerOfMassRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
@@ -255,6 +262,7 @@ namespace ProjectA {
 		centerOfMassRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		centerOfMassRenderPipelineDescriptor.lineWidth = 1.0f;
 		centerOfMassRenderPipelineDescriptor.minSampleShading = 1.0f;
+		centerOfMassRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		centerOfMassRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		centerOfMassRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		centerOfMassRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
@@ -305,6 +313,9 @@ namespace ProjectA {
 		distanceFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		distanceFragmentShaderModuleDescriptor.entryPoint = "main";
 
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = false;
+
 		RenderPipelineDescriptor distanceRenderPipelineDescriptor;
 		distanceRenderPipelineDescriptor.renderPass = renderPass;
 		distanceRenderPipelineDescriptor.pipelineLayout = distancePipelineLayout;
@@ -317,6 +328,7 @@ namespace ProjectA {
 		distanceRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		distanceRenderPipelineDescriptor.lineWidth = 1.0f;
 		distanceRenderPipelineDescriptor.minSampleShading = 0.0f;
+		distanceRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		distanceRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		distanceRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
@@ -374,6 +386,9 @@ namespace ProjectA {
 		vertexFeatureFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		vertexFeatureFragmentShaderModuleDescriptor.entryPoint = "main";
 
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = false;
+
 		RenderPipelineDescriptor vertexFeatureRenderPipelineDescriptor;
 		vertexFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		vertexFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
@@ -386,6 +401,7 @@ namespace ProjectA {
 		vertexFeatureRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		vertexFeatureRenderPipelineDescriptor.lineWidth = 1.0f;
 		vertexFeatureRenderPipelineDescriptor.minSampleShading = 0.0f;
+		vertexFeatureRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		vertexFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		vertexFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
@@ -404,6 +420,9 @@ namespace ProjectA {
 		edgeFeatureFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		edgeFeatureFragmentShaderModuleDescriptor.entryPoint = "main";
 
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = false;
+
 		RenderPipelineDescriptor edgeFeatureRenderPipelineDescriptor;
 		edgeFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		edgeFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
@@ -416,6 +435,7 @@ namespace ProjectA {
 		edgeFeatureRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		edgeFeatureRenderPipelineDescriptor.lineWidth = 3.0f;
 		edgeFeatureRenderPipelineDescriptor.minSampleShading = 0.0f;
+		edgeFeatureRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		edgeFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		edgeFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
@@ -543,6 +563,9 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = false;
+
 		RenderPipelineDescriptor fillRenderPipelineDescriptor;
 		fillRenderPipelineDescriptor.renderPass = renderPass;
 		fillRenderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
@@ -555,6 +578,7 @@ namespace ProjectA {
 		fillRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		fillRenderPipelineDescriptor.lineWidth = 1.0f;
 		fillRenderPipelineDescriptor.minSampleShading = 0.0f;
+		fillRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		fillRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		fillRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		fillRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
@@ -580,6 +604,7 @@ namespace ProjectA {
 		strokeRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		strokeRenderPipelineDescriptor.lineWidth = 1.0f;
 		strokeRenderPipelineDescriptor.minSampleShading = 0.0f;
+		strokeRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		strokeRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		strokeRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		strokeRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
