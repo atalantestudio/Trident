@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class TrueTypeFont : public Font {
 		public:
-			explicit TrueTypeFont(const std::string& ttfFilePath);
+			explicit TrueTypeFont(std::string_view ttfFilePath);
 
 			sint16 getAscent() const;
 

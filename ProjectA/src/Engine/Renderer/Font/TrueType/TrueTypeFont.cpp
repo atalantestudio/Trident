@@ -5,7 +5,7 @@
 #include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"
 
 namespace ProjectA {
-	TrueTypeFont::TrueTypeFont(const std::string& ttfFilePath) {
+	TrueTypeFont::TrueTypeFont(std::string_view ttfFilePath) {
 		const TTFFile ttfFile = Filesystem::load<TTFFile>(ttfFilePath);
 
 		sdfGlyphMap = SDFGlyphMapBuildProcess::build(ttfFile);
