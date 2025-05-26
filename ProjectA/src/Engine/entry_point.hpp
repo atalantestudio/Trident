@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/base.hpp"
+#include "Engine/config.hpp"
 
 #ifdef PLATFORM_WINDOWS
 	extern ProjectA::Application* createApplication();

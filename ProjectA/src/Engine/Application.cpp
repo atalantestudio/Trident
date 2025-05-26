@@ -16,16 +16,6 @@ namespace ProjectA {
 		return *instance;
 	}
 
-	PropertyFile Application::loadPropertyFile() {
-		const std::filesystem::path currentPath = Filesystem::getCurrentPath();
-		const std::string currentDirectoryName = Filesystem::getCurrentDirectory().string();
-
-		std::filesystem::path propertyFilePath = currentPath / currentDirectoryName;
-		propertyFilePath += ".tpr";
-
-		return Filesystem::load<PropertyFile>(propertyFilePath.string());
-	}
-
 	std::string Application::getWindowName(std::string_view projectName, uint8 instanceCount) {
 		if (instanceCount == 0) {
 			return std::string(projectName);
@@ -34,34 +24,57 @@ namespace ProjectA {
 		return Logger::format("[] ([])", projectName, static_cast<sint32>(instanceCount));
 	}
 
-	Application::Application(const ApplicationDescriptor& applicationDescriptor) {
+	Application::Application(const ApplicationManifest& applicationManifest) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		ENGINE_ASSERT(instance == nullptr, "Current instance already set.");
+		// TODO: Remove singleton pattern.
+		DEBUG_ASSERT(instance == nullptr);
 
 		instance = this;
+
+		ENGINE_TRACE("Launching.");
 
 		mutex = createScope<Mutex>("Mutex");
 		mutex->acquire();
 
 		sharedMemory = createScope<SharedMemory>("SharedMemory", sizeof(SharedMemoryData));
-
 		sharedMemoryData = static_cast<SharedMemoryData*>(sharedMemory->map(0, sizeof(SharedMemoryData)));
 
 		constexpr uint8 MAX_PARALLEL_INSTANCES = 5;
 
-		Platform::setWindowName(applicationDescriptor.projectName.data());
+		Platform::setWindowName(applicationManifest.projectName.data());
 
 		if (sharedMemoryData->instanceCount > MAX_PARALLEL_INSTANCES) {
 			ENGINE_FATAL(EOVERFLOW, "More than [] instances running in parallel.", MAX_PARALLEL_INSTANCES);
 		}
 
-		PropertyFile propertyFile = loadPropertyFile();
+		// Open/create the project property file.
+		// A project shouldn't be forced to use a window, so the property file is loaded first.
+		// When a setting is changed in the game menu, the property file is replaced with an updated version.
+		const std::filesystem::path currentPath = Filesystem::getCurrentPath();
+		const std::string currentDirectoryName = Filesystem::getCurrentDirectory().string();
+
+		std::filesystem::path propertyFilePath = currentPath / currentDirectoryName;
+		propertyFilePath += ".tpr";
+
+		ENGINE_TRACE("Opening property file.");
+
+		propertyFile = Filesystem::load<PropertyFile*>(propertyFilePath.string());
+
+		if (propertyFile == nullptr) {
+			ENGINE_WARN("Could not find property file.");
+			ENGINE_INFO("Creating new property file.");
+
+			// TODO: Recreate property file.
+			DEBUG_ASSERT(false);
+
+			return;
+		}
 
 		WindowDescriptor windowDescriptor{};
-		windowDescriptor.name = getWindowName(applicationDescriptor.projectName, sharedMemoryData->instanceCount);
-		windowDescriptor.width = propertyFile.getProperty<uint32>("ExtentWidth");
-		windowDescriptor.height = propertyFile.getProperty<uint32>("ExtentHeight");
+		windowDescriptor.name = getWindowName(applicationManifest.projectName, sharedMemoryData->instanceCount);
+		windowDescriptor.width = propertyFile->getProperty<uint32>("ExtentWidth");
+		windowDescriptor.height = propertyFile->getProperty<uint32>("ExtentHeight");
 		windowDescriptor.mouseDownEventListener = BIND(Application::onEvent);
 		windowDescriptor.mouseMoveEventListener = BIND(Application::onEvent);
 		windowDescriptor.mouseUpEventListener = BIND(Application::onEvent);
@@ -78,23 +91,21 @@ namespace ProjectA {
 		window = new Window(windowDescriptor);
 		window->show();
 
-		const GraphicsAPI graphicsApi = propertyFile.getProperty<GraphicsAPI>("GraphicsAPI");
+		const GraphicsAPI graphicsApi = propertyFile->getProperty<GraphicsAPI>("GraphicsAPI");
 
 		Renderer::build(*window, graphicsApi);
 
 		/* Constants */
 
-		// DEFAULT_PROPERTY_FILE_PATH = Property file path used by default
 		// API_QUEUE = Graphics API listed by priority.
 		//             First APIs are more recent but more performant,
 		//             last APIs are older but have better support
 
 		/* Startup */
 
-		// Open property file at DEFAULT_PROPERTY_FILE_PATH
+		// Open property file at "[PROJECT_ROOT_DIRECTORY]/[PROJECT_NAME].tpr"
 			// If no file
-				// Emit fatal
-				// Return
+				// Create a new property file with default values
 
 		// Define int selectedApiIndex
 
@@ -127,16 +138,16 @@ namespace ProjectA {
 				// Break
 
 		// If finalApiIndex = -1
-			// Emit warn "Selected API is unsupported"
+			// Emit warn "The selected API is not supported."
 			// Set finalApiIndex = 0
 
-		// Emit info "Using backend"
+		// Emit info "Using graphics adapter for []."
 		// Define selectedApi = API_QUEUE[supportedApiIndices[finalApiIndex]]
 
 		// Initialize selectedApi
 
-		/*int apiIndex = 0;
-		int apiTestQueue[5] = {
+		/*sint32 apiIndex = 0;
+		sint32 apiTestQueue[5] = {
 			77, // Vulkan
 			63, // DirectX
 			48, // Metal
@@ -147,7 +158,7 @@ namespace ProjectA {
 		{
 			const auto api = apiTestQueue[apiIndex];
 
-			for (int i = apiIndex - 1; i >= 0; i--) {
+			for (sint32 i = apiIndex - 1; i >= 0; i--) {
 				apiTestQueue[i + 1] = apiTestQueue[i];
 			}
 
@@ -165,6 +176,7 @@ namespace ProjectA {
 		sharedMemory->unmap(sharedMemoryData);
 
 		delete window;
+		delete propertyFile;
 	}
 
 	const Window& Application::getWindow() const {
@@ -271,8 +283,8 @@ namespace ProjectA {
 		if (presentStatus == PresentStatus::SUBOPTIMAL || presentStatus == PresentStatus::ERROR_OUT_OF_DATE) {
 			ENGINE_ERROR("The present status is either suboptimal or out of date.");
 
-			// TODO: Fix resize.
-			//resize();
+			// TODO: Call window resize here?
+			DEBUG_ASSERT(false);
 
 			return;
 		}

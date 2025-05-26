@@ -18,10 +18,14 @@
 int main(int argc, char** argv);
 
 namespace ProjectA {
-	struct ApplicationDescriptor {
+	// TODO: Rename to ProjectManifest?
+	struct ApplicationManifest {
 		std::string_view projectName;
+
+		// TODO: Window icon
 	};
 
+	// TODO: 1 swapchain per application. Don't create it in renderers.
 	struct PresentData {
 		std::vector<ref<Swapchain>> swapchains;
 		std::vector<uint32> imageIndices;
@@ -31,12 +35,10 @@ namespace ProjectA {
 		public:
 			static Application& get();
 
-			static PropertyFile loadPropertyFile();
-
 			static std::string getWindowName(std::string_view projectName, uint8 instanceCount);
 
 		public:
-			Application(const ApplicationDescriptor& applicationDescriptor);
+			Application(const ApplicationManifest& applicationManifest);
 
 			virtual ~Application();
 
@@ -117,6 +119,8 @@ namespace ProjectA {
 			SharedMemoryData* sharedMemoryData;
 			HighResolutionTimer timer;
 			Window* window;
+
+			PropertyFile* propertyFile;
 
 			LayerStack layerStack;
 

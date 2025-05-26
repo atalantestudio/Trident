@@ -9,17 +9,17 @@
 namespace ProjectA {
 	class SampleApplication : public Application {
 		public:
-			SampleApplication(const ApplicationDescriptor& applicationDescriptor) :
-				Application(applicationDescriptor)
+			SampleApplication(const ApplicationManifest& applicationManifest) :
+				Application(applicationManifest)
 			{
 				registerLayer<SampleLayer>();
 			}
 	};
 
 	Application* ProjectA::createApplication() {
-		ApplicationDescriptor applicationDescriptor{};
-		applicationDescriptor.projectName = "Sample";
+		ApplicationManifest applicationManifest{};
+		applicationManifest.projectName = "Sample";
 
-		return new SampleApplication(applicationDescriptor);
+		return new SampleApplication(applicationManifest);
 	}
 }

@@ -4,7 +4,7 @@ namespace ProjectA {
 	// Temporary memory shared by all instances of the application.
 	class SharedMemory {
 		public:
-			SharedMemory(const std::string& name, uint64 size);
+			SharedMemory(std::string_view name, uint64 size);
 
 			~SharedMemory();
 

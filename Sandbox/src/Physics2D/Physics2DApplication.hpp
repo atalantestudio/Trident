@@ -10,8 +10,8 @@
 namespace ProjectA {
 	class Physics2DApplication : public Application {
 		public:
-			Physics2DApplication(const ApplicationDescriptor& applicationDescriptor) :
-				Application(applicationDescriptor)
+			Physics2DApplication(const ApplicationManifest& applicationManifest) :
+				Application(applicationManifest)
 			{
 				registerLayer<RendererLayer>();
 				//registerLayer<StatisticsLayer>();
@@ -21,9 +21,9 @@ namespace ProjectA {
 	};
 
 	Application* ProjectA::createApplication() {
-		ApplicationDescriptor applicationDescriptor{};
-		applicationDescriptor.projectName = "2D physics";
+		ApplicationManifest applicationManifest{};
+		applicationManifest.projectName = "2D physics";
 
-		return new Physics2DApplication(applicationDescriptor);
+		return new Physics2DApplication(applicationManifest);
 	}
 }
