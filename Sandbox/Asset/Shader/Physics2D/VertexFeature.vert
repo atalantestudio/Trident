@@ -11,5 +11,5 @@ void main() {
 	vec3 position = camera.projection * vec3(vertex.xy, 1.0) * camera.zoomLevel;
 
 	gl_Position = vec4(position.xy, 0.0, 1.0);
-	gl_PointSize = 0.125 * camera.zoomLevel;
+	gl_PointSize = 0.15 * camera.zoomLevel;
 }

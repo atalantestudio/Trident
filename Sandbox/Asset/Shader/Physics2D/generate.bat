@@ -13,8 +13,15 @@
 :: "%VULKAN_SDK%\Bin\glslc.exe" Distance.vert -o Distance.vert.spv
 :: "%VULKAN_SDK%\Bin\glslc.exe" Distance.frag -o Distance.frag.spv
 
-"%VULKAN_SDK%\Bin\glslc.exe" VertexFeature.vert -o VertexFeature.vert.spv
-"%VULKAN_SDK%\Bin\glslc.exe" VertexFeature.frag -o VertexFeature.frag.spv
+:: "%VULKAN_SDK%\Bin\glslc.exe" VertexFeature.vert -o VertexFeature.vert.spv
+:: "%VULKAN_SDK%\Bin\glslc.exe" VertexFeature.frag -o VertexFeature.frag.spv
 
 :: "%VULKAN_SDK%\Bin\glslc.exe" EdgeFeature.vert -o EdgeFeature.vert.spv
 :: "%VULKAN_SDK%\Bin\glslc.exe" EdgeFeature.frag -o EdgeFeature.frag.spv
+
+:: "%VULKAN_SDK%\Bin\glslc.exe" PlaceholderFill.vert -o PlaceholderFill.vert.spv
+
+:: "%VULKAN_SDK%\Bin\glslc.exe" PlaceholderStroke.vert -o PlaceholderStroke.vert.spv
+:: "%VULKAN_SDK%\Bin\glslc.exe" PlaceholderStroke.frag -o PlaceholderStroke.frag.spv
+
+:: "%VULKAN_SDK%\Bin\glslc.exe" PlaceholderCenterOfMass.vert -o PlaceholderCenterOfMass.vert.spv

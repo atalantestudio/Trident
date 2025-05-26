@@ -36,5 +36,7 @@ namespace ProjectA {
 
 			uint32 hoveredObjectIndex = std::numeric_limits<uint32>::max();
 			uint32 selectedObjectIndex = std::numeric_limits<uint32>::max();
+
+			vec2<float32> placeholderOffset;
 	};
 }

@@ -24,7 +24,9 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override;
 
-			void setSelectedObjectIndex(uint32 objectIndex);
+			void selectObject(uint32 objectIndex);
+
+			void setPlaceholderOffset(const vec2<float32>& offset) const;
 
 			void resize(WindowResizeEvent& event) override;
 
@@ -58,6 +60,7 @@ namespace ProjectA {
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
 			void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
 			void renderClosestFeatures(const ref<CommandEncoder>& commandEncoder) const;
+			void renderSelectedObjectPlaceholder(const ref<CommandEncoder>& commandEncoder) const;
 
 		private:
 			struct Instance {
@@ -77,6 +80,10 @@ namespace ProjectA {
 
 			struct ViewUniform {
 				svec2<float32> viewport;
+			};
+
+			struct PlaceholderUniform {
+				svec2<float32> offset;
 			};
 
 		private:
@@ -124,15 +131,26 @@ namespace ProjectA {
 			ref<Buffer> viewUniformBuffer;
 			ViewUniform* viewMappedRange = nullptr;
 
-			ref<PipelineLayout> gridRenderPipelineLayout;
+			ref<PipelineLayout> gridPipelineLayout;
 			ref<RenderPipeline> gridRenderPipeline;
 
-			ref<PipelineLayout> renderPipelineLayout;
+			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> fillRenderPipeline;
 			ref<RenderPipeline> strokeRenderPipeline;
 
+			ref<Buffer> placeholderUniformBuffer;
+			PlaceholderUniform* placeholderMappedRange = nullptr;
+
+			ref<PipelineLayout> placeholderFillPipelineLayout;
+			ref<RenderPipeline> placeholderFillRenderPipeline;
+
+			ref<PipelineLayout> placeholderStrokePipelineLayout;
+			ref<RenderPipeline> placeholderStrokeRenderPipeline;
+
 			// The center of mass pipeline uses the same layout as the closest feature pipelines.
 			ref<RenderPipeline> centerOfMassRenderPipeline;
+
+			ref<RenderPipeline> placeholderCenterOfMassRenderPipeline;
 
 			ref<PipelineLayout> distancePipelineLayout;
 			ref<RenderPipeline> distanceRenderPipeline;

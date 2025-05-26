@@ -97,7 +97,11 @@ namespace ProjectA {
 			renderer.writeInstanceTransform(objectIndex, object.transform);
 		}
 
-		renderer.setSelectedObjectIndex(selectedObjectIndex);
+		renderer.selectObject(selectedObjectIndex);
+
+		if (selectedObjectIndex != std::numeric_limits<uint32>::max()) {
+			renderer.setPlaceholderOffset(placeholderOffset);
+		}
 
 		renderer.setClosestPoints(gjkResult.closestA, gjkResult.closestB);
 		renderer.registerClosestFeature(gjkResult.closestFeatureA);
@@ -136,8 +140,9 @@ namespace ProjectA {
 	}
 
 	bool RendererLayer::onMouseDown(MouseDownEvent& event) {
-		if (event.getButton() == MouseButton::LEFT) {
+		if (event.getButton() == MouseButton::LEFT && hoveredObjectIndex != std::numeric_limits<uint32>::max()) {
 			selectedObjectIndex = hoveredObjectIndex;
+			placeholderOffset = {0.0f, 0.0f};
 		}
 
 		return true;
@@ -155,14 +160,16 @@ namespace ProjectA {
 			const vec2<float32>& position = renderer.getNdcMousePosition();
 			const vec2<float32> positionDelta = position - previousPosition;
 
-			scene[selectedObjectIndex].position += positionDelta;
+			placeholderOffset += positionDelta;
 		}
 
 		return true;
 	}
 
 	bool RendererLayer::onMouseUp(MouseUpEvent& event) {
-		if (event.getButton() == MouseButton::LEFT) {
+		if (event.getButton() == MouseButton::LEFT && selectedObjectIndex != std::numeric_limits<uint32>::max()) {
+			scene[selectedObjectIndex].position += placeholderOffset;
+
 			selectedObjectIndex = std::numeric_limits<uint32>::max();
 		}
 
