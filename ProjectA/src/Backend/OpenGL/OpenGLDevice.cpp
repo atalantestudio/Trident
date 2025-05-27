@@ -35,26 +35,23 @@ namespace ProjectA {
 	}
 
 	void OpenGLDevice::waitForFence(const ref<Fence>& fence) const {
-		OpenGLFence& glFence = *std::static_pointer_cast<OpenGLFence>(fence);
+		const ref<OpenGLFence>& glFence = std::static_pointer_cast<OpenGLFence>(fence);
 
-		glFence.create();
+		glFence->create();
 
-		// UINT64_MAX disables the timeout.
-		const GLenum status = glClientWaitSync(glFence.object, GL_SYNC_FLUSH_COMMANDS_BIT, UINT64_MAX);
+		const GLenum status = glClientWaitSync(glFence->object, GL_SYNC_FLUSH_COMMANDS_BIT, UINT64_MAX);
 
-		// TODO: Fix crash here.
-		ENGINE_ASSERT(status == GL_CONDITION_SATISFIED, "Failed waiting for OpenGL fence (code: []).", status);
+		DEBUG_ASSERT(status == GL_CONDITION_SATISFIED || status == GL_ALREADY_SIGNALED);
 	}
 
 	void OpenGLDevice::resetFence(const ref<Fence>& fence) const {
-		OpenGLFence& glFence = *std::static_pointer_cast<OpenGLFence>(fence);
+		const ref<OpenGLFence>& glFence = std::static_pointer_cast<OpenGLFence>(fence);
 
-		glFence.reset();
+		glFence->reset();
 	}
 
 	AcquireNextImageStatus OpenGLDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
-		// TODO: Does imageIndex need to be correct
-		// since the double buffering is handled by the device context anyways?
+		// TODO: Does imageIndex need to be correct since the double buffering is handled by the device context anyways?
 		imageIndex = 0;
 
 		return AcquireNextImageStatus::SUCCESS;
