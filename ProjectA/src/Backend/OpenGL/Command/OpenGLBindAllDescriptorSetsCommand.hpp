@@ -35,7 +35,7 @@ namespace ProjectA {
 							if (unit < descriptorSetLayoutBinding.samplers.size()) {
 								const ref<OpenGLSampler>& sampler = std::static_pointer_cast<OpenGLSampler>(descriptorSetLayoutBinding.samplers[unit]);
 
-								glBindSampler(unit, sampler->object);
+								glBindSampler(binding + unit, sampler->object);
 							}
 
 							GLenum internalFormat = imageView->image.internalFormat;
