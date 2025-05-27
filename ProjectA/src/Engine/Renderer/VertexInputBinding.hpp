@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class VertexInputBinding {
 		public:
-			VertexInputBinding(InputRate inputRate) :
+			explicit VertexInputBinding(InputRate inputRate) :
 				inputRate(inputRate)
 			{}
 

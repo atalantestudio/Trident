@@ -3,7 +3,6 @@
 #include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/GUI/GUISize.hpp"
 #include "Engine/GUI/LayoutDirection.hpp"
-#include "Engine/GUI/TextStyle.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"
 
@@ -126,7 +125,7 @@ namespace ProjectA {
 						const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
 						const mat3x3<float32> imageTransform = mat3x3<float32>::scaling(uvEnd - uvStart) * mat3x3<float32>::translation(uvStart);
 
-						renderer.registerGlyphSubcomponent(transform, imageTransform, defaultFontImageIndex, textStyle.color);
+						renderer.registerGlyphSubcomponent(transform, imageTransform, defaultFontImageIndex, textStyle);
 					}
 
 					positionX += advanceWidth;

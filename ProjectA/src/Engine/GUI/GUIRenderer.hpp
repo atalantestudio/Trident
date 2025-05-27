@@ -3,13 +3,12 @@
 #include "Engine/API/Event/WindowEvent.hpp"
 #include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/ECS/ECS.hpp"
+#include "Engine/GUI/TextStyle.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	class GUIRenderer : public Renderer {
 		public:
-			GUIRenderer();
-
 			void build();
 
 			// Creates a 1x1 white image.
@@ -21,7 +20,7 @@ namespace ProjectA {
 
 			void registerSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const vec4<float32>& color);
 
-			void registerGlyphSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const vec4<float32>& color);
+			void registerGlyphSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const TextStyle& textStyle);
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
@@ -30,6 +29,8 @@ namespace ProjectA {
 			void resetCounters();
 
 		private:
+			void updateColorAttachment();
+
 			void initializeVertexBuffer();
 			void initializeIndexBuffer();
 			void initializeSubcomponentBuffer();
@@ -55,13 +56,24 @@ namespace ProjectA {
 				vec4<float32> color;
 			};
 
+			struct GlyphSubcomponent {
+				mat3x3<float32> world;
+				mat3x3<float32> textureWorld;
+				vec4<float32> fontIndexAndOutlineWidth;
+				vec4<float32> color;
+				vec4<float32> outlineColor;
+			};
+
 		private:
 			static constexpr uint32 MAX_SUBCOMPONENTS = 64;
 			static constexpr uint32 MAX_GLYPH_SUBCOMPONENTS = 64;
-			static constexpr uint32 MAX_IMAGES = 4;
+			static constexpr uint32 MAX_IMAGES = 16;
 
 		private:
 			ref<RenderPass> renderPass;
+
+			ref<Image> colorImage;
+			ref<ImageView> colorImageView;
 
 			ref<PipelineLayout> subcomponentPipelineLayout;
 			ref<RenderPipeline> subcomponentRenderPipeline;
@@ -76,7 +88,7 @@ namespace ProjectA {
 			Subcomponent* subcomponentMappedRange;
 
 			ref<Buffer> glyphSubcomponentBuffer;
-			Subcomponent* glyphSubcomponentMappedRange;
+			GlyphSubcomponent* glyphSubcomponentMappedRange;
 
 			ref<Buffer> cameraBuffer;
 			mat3x3<float32>* cameraMappedRange;

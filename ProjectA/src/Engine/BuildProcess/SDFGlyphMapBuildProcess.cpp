@@ -7,7 +7,7 @@
 namespace ProjectA {
 	static constexpr uint64 MAX_GLYPH_COUNT = 2048;
 	static constexpr uint32 GLYPH_SUBIMAGE_DIMENSION = 64;
-	static constexpr uint32 SPREAD_FACTOR = 0;
+	static constexpr uint32 SPREAD_FACTOR = 3;
 
 	SDFGlyphMap SDFGlyphMapBuildProcess::build(const TTFFile& ttfFile) {
 		ENGINE_ASSERT(ttfFile.glyphs.size() < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);

@@ -6,24 +6,24 @@
 #include "Engine/GUI/GUIRenderer.hpp"
 
 namespace ProjectA {
-	GUIRenderer::GUIRenderer() {}
-
 	void GUIRenderer::build() {
 		const ref<Surface> surface = getSurface();
 
 		ColorAttachment colorAttachment{};
 		colorAttachment.format = surface->getFormat();
-		colorAttachment.sampleCount = 1;
+		colorAttachment.sampleCount = 4;
 		colorAttachment.loadOperation = LoadOperation::CLEAR;
 		colorAttachment.storeOperation = StoreOperation::STORE;
 
 		RenderPassDescriptor renderPassDescriptor;
 		renderPassDescriptor.colorAttachments = {colorAttachment};
-		renderPassDescriptor.resolve = false;
+		renderPassDescriptor.resolve = true;
 		renderPassDescriptor.depthStencil = false;
 		renderPassDescriptor.presentAttachmentIndex = 0;
 
 		renderPass = createRenderPass(renderPassDescriptor);
+
+		updateColorAttachment();
 
 		const ref<Swapchain>& swapchain = getSwapchain();
 
@@ -49,6 +49,24 @@ namespace ProjectA {
 		initializeRenderPipeline();
 
 		updateCamera();
+	}
+
+	void GUIRenderer::updateColorAttachment() {
+		AttachmentImageDescriptor colorAttachmentImageDescriptor{};
+		colorAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
+		colorAttachmentImageDescriptor.width = Application::get().getWindow().getSize()[0];
+		colorAttachmentImageDescriptor.height = Application::get().getWindow().getSize()[1];
+		colorAttachmentImageDescriptor.depth = 1;
+		colorAttachmentImageDescriptor.mipLevelCount = 1;
+		colorAttachmentImageDescriptor.arrayLayerCount = 1;
+
+		colorImage = renderPass->createColorAttachmentImage(colorAttachmentImageDescriptor, 0);
+
+		constexpr ImageViewDescriptor colorImageViewDescriptor;
+
+		colorImageView = colorImage->createView(colorImageViewDescriptor);
+
+		renderPass->setColorAttachmentImageView(colorImageView, 0);
 	}
 
 	void GUIRenderer::initializeVertexBuffer() {
@@ -141,7 +159,7 @@ namespace ProjectA {
 		subcomponentBuffer = createBuffer(subcomponentBufferDescriptor);
 		subcomponentMappedRange = subcomponentBuffer->map<Subcomponent>(0, subcomponentBufferSize);
 
-		constexpr uint64 glyphSubcomponentBufferSize = MAX_GLYPH_SUBCOMPONENTS * sizeof(Subcomponent);
+		constexpr uint64 glyphSubcomponentBufferSize = MAX_GLYPH_SUBCOMPONENTS * sizeof(GlyphSubcomponent);
 
 		BufferDescriptor glyphSubcomponentBufferDescriptor;
 		glyphSubcomponentBufferDescriptor.size = glyphSubcomponentBufferSize;
@@ -149,7 +167,7 @@ namespace ProjectA {
 		glyphSubcomponentBufferDescriptor.persistent = true;
 
 		glyphSubcomponentBuffer = createBuffer(glyphSubcomponentBufferDescriptor);
-		glyphSubcomponentMappedRange = glyphSubcomponentBuffer->map<Subcomponent>(0, glyphSubcomponentBufferSize);
+		glyphSubcomponentMappedRange = glyphSubcomponentBuffer->map<GlyphSubcomponent>(0, glyphSubcomponentBufferSize);
 	}
 
 	void GUIRenderer::initializeCameraBuffer() {
@@ -252,6 +270,15 @@ namespace ProjectA {
 
 		glyphSubcomponentPipelineLayout = createPipelineLayout(glyphSubcomponentPipelineLayoutDescriptor);
 
+		VertexInputBinding glyphSubcomponentVertexInputBinding(InputRate::INSTANCE);
+		glyphSubcomponentVertexInputBinding.registerAttribute<mat3x3<float32>>(false);
+		glyphSubcomponentVertexInputBinding.registerAttribute<mat3x3<float32>>(false);
+		// glyphSubcomponentVertexInputBinding.registerAttribute<uint32>(false);
+		// glyphSubcomponentVertexInputBinding.registerAttribute<float32>(false);
+		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>(false);
+		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>(false);
+		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>(false);
+
 		ColorBlendAttachment transparentColorBlendAttachment{};
 		transparentColorBlendAttachment.blend = true;
 		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::ONE;
@@ -260,15 +287,15 @@ namespace ProjectA {
 		RenderPipelineDescriptor glyphSubcomponentRenderPipelineDescriptor;
 		glyphSubcomponentRenderPipelineDescriptor.renderPass = renderPass;
 		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = glyphSubcomponentPipelineLayout;
-		glyphSubcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, subcomponentInputBinding};
-		glyphSubcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert.spv", vertexShaderModuleDescriptor);
+		glyphSubcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, glyphSubcomponentVertexInputBinding};
+		glyphSubcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.vert.spv", vertexShaderModuleDescriptor);
 		glyphSubcomponentRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.frag.spv", fragmentShaderModuleDescriptor);
 		glyphSubcomponentRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		glyphSubcomponentRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		glyphSubcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;
 		glyphSubcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		glyphSubcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
-		glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 0.0f;
+		glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 1.0f;
 		glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
 		glyphSubcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		glyphSubcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
@@ -375,13 +402,14 @@ namespace ProjectA {
 		subcomponentCount += 1;
 	}
 
-	void GUIRenderer::registerGlyphSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const vec4<float32>& color) {
+	void GUIRenderer::registerGlyphSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const TextStyle& textStyle) {
 		DEBUG_ASSERT(glyphSubcomponentCount < MAX_GLYPH_SUBCOMPONENTS);
 
 		glyphSubcomponentMappedRange[glyphSubcomponentCount].world = world;
-		glyphSubcomponentMappedRange[glyphSubcomponentCount].imageWorld = imageWorld;
-		glyphSubcomponentMappedRange[glyphSubcomponentCount].imageIndex = imageIndex;
-		glyphSubcomponentMappedRange[glyphSubcomponentCount].color = color;
+		glyphSubcomponentMappedRange[glyphSubcomponentCount].textureWorld = imageWorld;
+		glyphSubcomponentMappedRange[glyphSubcomponentCount].fontIndexAndOutlineWidth = {static_cast<float32>(imageIndex), textStyle.outlineWidth, 0.0f, 0.0f};
+		glyphSubcomponentMappedRange[glyphSubcomponentCount].color = textStyle.color;
+		glyphSubcomponentMappedRange[glyphSubcomponentCount].outlineColor = textStyle.outlineColor;
 
 		glyphSubcomponentCount += 1;
 	}
@@ -412,7 +440,7 @@ namespace ProjectA {
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = renderPass;
 		beginRenderPassDescriptor.swapchain = swapchain;
-		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
+		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
 		beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
@@ -433,7 +461,7 @@ namespace ProjectA {
 		if (glyphSubcomponentCount > 0) {
 			commandEncoder->bindRenderPipeline(glyphSubcomponentRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();
-			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(Subcomponent));
+			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GlyphSubcomponent));
 			commandEncoder->drawIndexed(6, glyphSubcomponentCount, 0);
 		}
 
@@ -442,6 +470,7 @@ namespace ProjectA {
 
 	void GUIRenderer::resize(WindowResizeEvent& event) {
 		updateCamera();
+		updateColorAttachment();
 
 		const ref<Swapchain>& swapchain = getSwapchain();
 
