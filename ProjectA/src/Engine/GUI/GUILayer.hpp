@@ -3,6 +3,7 @@
 #include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/GUI/GUISize.hpp"
 #include "Engine/GUI/LayoutDirection.hpp"
+#include "Engine/GUI/TextStyle.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"
 
@@ -50,6 +51,17 @@ namespace ProjectA {
 		bool _iteration = false;
 	};
 
+	template<typename... Argument>
+	struct GUIString {
+		public:
+			GUIString(std::string_view pattern, Argument&&... arguments) :
+				string(Logger::format(pattern, std::forward<Argument>(arguments)...))
+			{}
+
+		public:
+			std::string string;
+	};
+
 	class GUILayer : public Layer {
 		public:
 			GUILayer();
@@ -84,39 +96,46 @@ namespace ProjectA {
 			void GUIQuad(GUISize size, ImageID imageId, const vec4<float32>& color = {1.0f, 1.0f, 1.0f, 1.0f});
 
 			template<typename... Argument>
-			void GUIText(float32 fontSize, std::string_view pattern, Argument&&... arguments) {
-				const std::string text = Logger::engineLogger.format(pattern, std::forward<Argument>(arguments)...);
+			void GUIText(const GUIString<Argument...>& string, const TextStyle& textStyle) {
 				const float32 lineHeight = static_cast<float32>(defaultFont->getLineHeight());
 
 				float32 positionX = componentOrigin[0];
 				float32 positionY = componentOrigin[1];
 
-				for (const char glyph : text) {
+				float32 width = 0;
+				const float32 height = textStyle.fontSize;
+
+				for (const char glyph : string.string) {
 					const uint16 codePoint = static_cast<uint16>(glyph);
 					const TrueTypeGlyph& glyph = (*defaultFont)[codePoint];
-					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * static_cast<float32>(fontSize));
+					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
 
 					if (!glyph.invisible) {
 						// For a line height (ascent - descent) of 1210 FUnits,
 						// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
 						// The width should be 62.13px.
 						// TODO: float32 lyah::ceil(float32)
-						const float32 width = glyph.width / lineHeight * fontSize;
-						const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * fontSize;
+						const float32 width = glyph.width / lineHeight * textStyle.fontSize;
+						const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * textStyle.fontSize;
 
 						const vec2<float32> position = {positionX + leftSideBearing, positionY};
-						const vec2<float32> size = {width, fontSize};
+						const vec2<float32> size = {width, textStyle.fontSize};
 						const mat3x3<float32> transform = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
 
 						const vec2<float32> uvStart = {glyph.minCoordinateX, glyph.minCoordinateY};
 						const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
 						const mat3x3<float32> imageTransform = mat3x3<float32>::scaling(uvEnd - uvStart) * mat3x3<float32>::translation(uvStart);
 
-						renderer.registerSubcomponent(transform, imageTransform, defaultFontImageIndex, {1.0f, 1.0f, 1.0f, 1.0f});
+						renderer.registerGlyphSubcomponent(transform, imageTransform, defaultFontImageIndex, textStyle.color);
 					}
 
 					positionX += advanceWidth;
+					width += advanceWidth;
 				}
+
+				const GUISize fixedSize = {static_cast<sint16>(width), static_cast<sint16>(height)};
+
+				componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
 			}
 
 			void popContainer(GUIContainer& container);
@@ -131,9 +150,6 @@ namespace ProjectA {
 			GUISize computeFixedSize(GUISize size) const;
 
 			bool onWindowResize(WindowResizeEvent& event);
-
-		private:
-			//static constexpr uint8 MAX_GUI_COMPONENTS = 100;
 
 		private:
 			GUIRenderer renderer;

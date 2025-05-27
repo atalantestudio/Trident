@@ -21,20 +21,19 @@ namespace ProjectA {
 
 			void registerSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const vec4<float32>& color);
 
-			void copyMappedBuffer() const;
+			void registerGlyphSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const vec4<float32>& color);
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
 			void resize(WindowResizeEvent& event) final override;
 
-			void resetSubcomponentCount();
+			void resetCounters();
 
 		private:
 			void initializeVertexBuffer();
 			void initializeIndexBuffer();
 			void initializeSubcomponentBuffer();
 			void initializeCameraBuffer();
-			void initializeSampler();
 			void initializeRenderPipeline();
 
 			void updateCamera() const;
@@ -57,21 +56,27 @@ namespace ProjectA {
 			};
 
 		private:
-			static constexpr uint32 MAX_SUBCOMPONENTS = 32;
+			static constexpr uint32 MAX_SUBCOMPONENTS = 64;
+			static constexpr uint32 MAX_GLYPH_SUBCOMPONENTS = 64;
 			static constexpr uint32 MAX_IMAGES = 4;
 
 		private:
 			ref<RenderPass> renderPass;
 
-			ref<PipelineLayout> pipelineLayout;
-			ref<RenderPipeline> renderPipeline;
+			ref<PipelineLayout> subcomponentPipelineLayout;
+			ref<RenderPipeline> subcomponentRenderPipeline;
+
+			ref<PipelineLayout> glyphSubcomponentPipelineLayout;
+			ref<RenderPipeline> glyphSubcomponentRenderPipeline;
 
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
 
 			ref<Buffer> subcomponentBuffer;
-			ref<Buffer> subcomponentStagingBuffer;
 			Subcomponent* subcomponentMappedRange;
+
+			ref<Buffer> glyphSubcomponentBuffer;
+			Subcomponent* glyphSubcomponentMappedRange;
 
 			ref<Buffer> cameraBuffer;
 			mat3x3<float32>* cameraMappedRange;
@@ -80,7 +85,9 @@ namespace ProjectA {
 			std::vector<ref<ImageView>> imageViews;
 
 			ref<Sampler> sampler;
+			ref<Sampler> bilinearSampler;
 
 			uint32 subcomponentCount = 0;
+			uint32 glyphSubcomponentCount = 0;
 	};
 }
