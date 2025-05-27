@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Engine/config.hpp"
 #include "Engine/Filesystem/File/TTFFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
@@ -105,6 +106,23 @@ namespace ProjectA {
 
 		return hhea;
 	}
+
+	#ifdef TTF_FIX_INVERTED_CONTOURS
+		static float32 signedAreaDouble(std::vector<ContourPoint>& contour) {
+			const uint32 count = static_cast<uint32>(contour.size());
+
+			float32 area = 0.0f;
+
+			for (uint32 i = 0; i < count; i += 1) {
+				const uint32 j = (i + 1) % count;
+
+				// TODO: lyah::area
+				area += contour[i].x * contour[j].y - contour[j].x * contour[i].y;
+			}
+
+			return area;
+		}
+	#endif
 
 	static void transformPoint(FWord& x, FWord& y, const GlyphTransform& T) {
 		const FWord xCopy = x;
@@ -300,9 +318,23 @@ namespace ProjectA {
 			}
 		}
 
+		#ifdef TTF_FIX_INVERTED_CONTOURS
+			if (numberOfContours == 1) {
+				std::vector<ContourPoint>& contour = contours[0];
+
+				const float32 signedArea = signedAreaDouble(contour);
+
+				if (signedArea > 0.0f) {
+					ENGINE_WARN("Glyph [] has a single clockwise contour. Inverting the contour's winding order.", glyphIndex);
+
+					std::reverse(contour.begin(), contour.end());
+				}
+			}
+		#endif
+
 		for (const std::vector<ContourPoint>& contour : contours) {
 			for (uint16 edgePointIndex = 1; edgePointIndex < contour.size(); edgePointIndex += 1) {
-				const ContourPoint& contourPoint = contour[edgePointIndex];
+				ContourPoint contourPoint = contour[edgePointIndex];
 
 				if (!contourPoint.onCurve) {
 					continue;

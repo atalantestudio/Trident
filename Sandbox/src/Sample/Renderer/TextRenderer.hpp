@@ -175,7 +175,7 @@ namespace ProjectA {
 
 				updateCamera();
 
-				setText("TextRenderer", 64.0f);
+				setText("Text/\\Renderer", 64.0f);
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
