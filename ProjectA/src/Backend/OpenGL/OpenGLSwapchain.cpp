@@ -75,8 +75,8 @@ namespace ProjectA {
 		}
 
 		for (uint32 imageIndex = 0; imageIndex < imageCount; imageIndex += 1) {
-			images[imageIndex] = createScope<OpenGLImage>(imageDescriptor);
-			imageViews[imageIndex] = createScope<OpenGLImageView>(*images[imageIndex], imageViewDescriptor);
+			images[imageIndex] = createRef<OpenGLImage>(imageDescriptor);
+			imageViews[imageIndex] = createRef<OpenGLImageView>(*images[imageIndex], imageViewDescriptor);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[imageIndex]);
 
