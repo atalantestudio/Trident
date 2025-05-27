@@ -6,16 +6,7 @@ namespace ProjectA {
 	class DepthTestRenderer : public Renderer {
 		public:
 			DepthTestRenderer() {
-				// 1. Create swapchain.
-				{
-					SwapchainDescriptor swapchainDescriptor;
-					swapchainDescriptor.extentWidth = Application::get().getWindow().getSize()[0];
-					swapchainDescriptor.extentHeight = Application::get().getWindow().getSize()[1];
-
-					swapchain = createSwapchain(swapchainDescriptor);
-				}
-
-				// 2. Create render pass.
+				// 1. Create render pass.
 				{
 					ColorAttachment colorAttachment{};
 					colorAttachment.format = getSurface()->getFormat();
@@ -41,16 +32,18 @@ namespace ProjectA {
 				// 2. Create depth stencil attachment.
 				updateDepthStencilAttachment();
 
+				const ref<Swapchain>& swapchain = getSwapchain();
+
 				swapchain->getImages(renderPass);
 
-				// 4. Create pipeline layout.
+				// 3. Create pipeline layout.
 				{
 					const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 5. Create render pipeline.
+				// 4. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec3<float32>>(false);
@@ -90,7 +83,7 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 6. Create vertex buffers.
+				// 5. Create vertex buffers.
 				{
 					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE);
 
@@ -145,6 +138,7 @@ namespace ProjectA {
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
+				const ref<Swapchain>& swapchain = getSwapchain();
 				const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 				const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
@@ -152,7 +146,7 @@ namespace ProjectA {
 				beginRenderPassDescriptor.renderPass = renderPass;
 				beginRenderPassDescriptor.swapchain = swapchain;
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
-				beginRenderPassDescriptor.imageIndex = acquireNextImage(swapchain);
+				beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
@@ -171,17 +165,10 @@ namespace ProjectA {
 			}
 
 			void resize(WindowResizeEvent& event) override {
-				const ref<Device> device = getDevice();
-
-				device->waitIdle();
-
 				updateDepthStencilAttachment();
 
-				SwapchainDescriptor swapchainDescriptor;
-				swapchainDescriptor.extentWidth = event.getWidth();
-				swapchainDescriptor.extentHeight = event.getHeight();
+				const ref<Swapchain>& swapchain = getSwapchain();
 
-				swapchain->update(swapchainDescriptor);
 				swapchain->getImages(renderPass);
 			}
 
@@ -219,12 +206,10 @@ namespace ProjectA {
 			static constexpr uint64 INSTANCE_BUFFER_SIZE = INSTANCE_COUNT * sizeof(Instance);
 
 		private:
+			ref<RenderPass> renderPass;
+
 			ref<Image> depthStencilImage;
 			ref<ImageView> depthStencilImageView;
-
-			ref<Swapchain> swapchain;
-
-			ref<RenderPass> renderPass;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;

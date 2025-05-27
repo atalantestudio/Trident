@@ -9,12 +9,6 @@ namespace ProjectA {
 	Physics2DRenderer::Physics2DRenderer() {
 		DEBUG_STATIC_ASSERT(SAMPLE_COUNT > 1);
 
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.extentWidth = Application::get().getWindow().getSize()[0];
-		swapchainDescriptor.extentHeight = Application::get().getWindow().getSize()[1];
-
-		swapchain = createSwapchain(swapchainDescriptor);
-
 		const ref<Surface> surface = getSurface();
 
 		ColorAttachment colorAttachment{};
@@ -36,6 +30,8 @@ namespace ProjectA {
 
 		updateColorAttachment();
 		updateDepthStencilAttachment();
+
+		const ref<Swapchain>& swapchain = getSwapchain();
 
 		swapchain->getImages(renderPass);
 
@@ -707,6 +703,7 @@ namespace ProjectA {
 	void Physics2DRenderer::setMousePosition(float32 x, float32 y) {
 		mousePosition = {x, y};
 
+		const ref<Swapchain>& swapchain = getSwapchain();
 		const float32 horizontalCellCount = swapchain->getExtentWidth() / cameraMappedRange->zoomLevel;
 		const float32 verticalCellCount = swapchain->getExtentHeight() / cameraMappedRange->zoomLevel;
 
@@ -773,6 +770,7 @@ namespace ProjectA {
 	void Physics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		updateCentersOfMass();
 
+		const ref<Swapchain>& swapchain = getSwapchain();
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
@@ -788,7 +786,7 @@ namespace ProjectA {
 		beginRenderPassDescriptor.renderPass = renderPass;
 		beginRenderPassDescriptor.swapchain = swapchain;
 		beginRenderPassDescriptor.clearValues = {colorAttachmentClearValue, resolveAttachmentClearValue, depthStencilAttachmentClearValue};
-		beginRenderPassDescriptor.imageIndex = acquireNextImage(swapchain);
+		beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
@@ -939,18 +937,10 @@ namespace ProjectA {
 		viewMappedRange->viewport.x = width;
 		viewMappedRange->viewport.y = height;
 
-		const ref<Device> device = getDevice();
-
-		device->waitIdle();
-
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.extentWidth = event.getWidth();
-		swapchainDescriptor.extentHeight = event.getHeight();
-
-		swapchain->update(swapchainDescriptor);
-
 		updateColorAttachment();
 		updateDepthStencilAttachment();
+
+		const ref<Swapchain>& swapchain = getSwapchain();
 
 		swapchain->getImages(renderPass);
 	}

@@ -89,11 +89,12 @@ namespace ProjectA {
 		mutex->release();
 
 		window = new Window(windowDescriptor);
-		window->show();
 
 		const GraphicsAPI graphicsApi = propertyFile->getProperty<GraphicsAPI>("GraphicsAPI");
 
 		Renderer::build(*window, graphicsApi);
+
+		window->show();
 
 		/* Constants */
 
@@ -265,6 +266,8 @@ namespace ProjectA {
 		const ref<Device> device = Renderer::getDevice();
 		const ref<CommandEncoder>& commandEncoder = Renderer::getCommandEncoder();
 
+		Renderer::acquireNextImage(Renderer::getSwapchain());
+
 		commandEncoder->reset();
 		commandEncoder->begin();
 
@@ -274,11 +277,18 @@ namespace ProjectA {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->getGraphicsQueue()->submit(commandBuffer, Renderer::getAvailableImageSemaphore(frameInFlightIndex), Renderer::getFinishedRenderSemaphore(frameInFlightIndex), Renderer::getFlightFence(frameInFlightIndex));
+		device->getGraphicsQueue()->submit(
+			commandBuffer,
+			Renderer::getAvailableImageSemaphore(frameInFlightIndex),
+			Renderer::getFinishedRenderSemaphore(frameInFlightIndex),
+			Renderer::getFlightFence(frameInFlightIndex)
+		);
 
-		const PresentStatus presentStatus = device->getPresentQueue()->present(presentData.swapchains, Renderer::getFinishedRenderSemaphore(frameInFlightIndex), presentData.imageIndices);
-
-		resetPresentData();
+		const PresentStatus presentStatus = device->getPresentQueue()->present(
+			{Renderer::getSwapchain()},
+			Renderer::getFinishedRenderSemaphore(frameInFlightIndex),
+			{Renderer::getImageIndex()}
+		);
 
 		if (presentStatus == PresentStatus::SUBOPTIMAL || presentStatus == PresentStatus::ERROR_OUT_OF_DATE) {
 			ENGINE_ERROR("The present status is either suboptimal or out of date.");
@@ -306,16 +316,6 @@ namespace ProjectA {
 		looping = false;
 	}
 
-	void Application::registerPresentSubdata(const ref<Swapchain>& swapchain, uint32 imageIndex) {
-		presentData.swapchains.emplace_back(swapchain);
-		presentData.imageIndices.emplace_back(imageIndex);
-	}
-
-	void Application::resetPresentData() {
-		presentData.swapchains.clear();
-		presentData.imageIndices.clear();
-	}
-
 	void Application::onEvent(Event& event) {
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -334,6 +334,12 @@ namespace ProjectA {
 		if (window->isMinimized()) {
 			return;
 		}
+
+		SwapchainDescriptor swapchainDescriptor;
+		swapchainDescriptor.extentWidth = event.getWidth();
+		swapchainDescriptor.extentHeight = event.getHeight();
+
+		Renderer::getSwapchain()->update(swapchainDescriptor);
 
 		// Propagate the event to the layer stack.
 		onEvent(event);

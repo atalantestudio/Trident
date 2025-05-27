@@ -25,12 +25,6 @@ namespace ProjectA {
 		// TODO: Window icon
 	};
 
-	// TODO: 1 swapchain per application. Don't create it in renderers.
-	struct PresentData {
-		std::vector<ref<Swapchain>> swapchains;
-		std::vector<uint32> imageIndices;
-	};
-
 	class Application {
 		public:
 			static Application& get();
@@ -71,10 +65,6 @@ namespace ProjectA {
 			}
 
 			void close();
-
-			void registerPresentSubdata(const ref<Swapchain>& swapchain, uint32 imageIndex);
-
-			void resetPresentData();
 
 		private:
 			void loop();
@@ -132,8 +122,6 @@ namespace ProjectA {
 
 			// Multiple of MAX_FRAMES_IN_FLIGHT.
 			uint32 frameInFlightIndex = 0;
-
-			PresentData presentData;
 	};
 
 	Application* createApplication();

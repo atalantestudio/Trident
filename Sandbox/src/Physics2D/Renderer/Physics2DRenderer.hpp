@@ -93,8 +93,6 @@ namespace ProjectA {
 			static constexpr float32 DEFAULT_ZOOM_LEVEL = MAX_ZOOM_LEVEL;
 
 		private:
-			ref<Swapchain> swapchain;
-
 			ref<RenderPass> renderPass;
 
 			ref<Image> colorImage;

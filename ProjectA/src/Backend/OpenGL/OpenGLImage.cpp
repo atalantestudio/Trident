@@ -35,7 +35,7 @@ namespace ProjectA {
 		}
 
 		// TODO: Check GL_TEXTURE_IMMUTABLE_FORMAT after creation.
-		// glGetTextureParameteriv/GL_TEXTURE_IMMUTABLE_FORMAT
+		// glGetTextureParameteriv + GL_TEXTURE_IMMUTABLE_FORMAT
 	}
 
 	OpenGLImage::~OpenGLImage() {

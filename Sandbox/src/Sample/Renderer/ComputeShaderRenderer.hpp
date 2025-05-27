@@ -124,16 +124,7 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				// 9. Create swapchain.
-				{
-					SwapchainDescriptor swapchainDescriptor;
-					swapchainDescriptor.extentWidth = Application::get().getWindow().getSize()[0];
-					swapchainDescriptor.extentHeight = Application::get().getWindow().getSize()[1];
-
-					swapchain = createSwapchain(swapchainDescriptor);
-				}
-
-				// 8. Create render pass.
+				// 9. Create render pass.
 				{
 					ColorAttachment colorAttachment{};
 					colorAttachment.format = getSurface()->getFormat();
@@ -150,9 +141,11 @@ namespace ProjectA {
 					renderPass = createRenderPass(renderPassDescriptor);
 				}
 
+				const ref<Swapchain>& swapchain = getSwapchain();
+
 				swapchain->getImages(renderPass);
 
-				// 11. Create render pipeline layout.
+				// 10. Create render pipeline layout.
 				{
 					DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding;
 					imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
@@ -169,7 +162,7 @@ namespace ProjectA {
 					renderPipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 12. Create render pipeline.
+				// 11. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>(false);
@@ -240,6 +233,7 @@ namespace ProjectA {
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
+				const ref<Swapchain>& swapchain = getSwapchain();
 				const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 				const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
@@ -247,7 +241,7 @@ namespace ProjectA {
 				beginRenderPassDescriptor.renderPass = renderPass;
 				beginRenderPassDescriptor.swapchain = swapchain;
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
-				beginRenderPassDescriptor.imageIndex = acquireNextImage(swapchain);
+				beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
@@ -260,15 +254,8 @@ namespace ProjectA {
 			}
 
 			void resize(WindowResizeEvent& event) override {
-				const ref<Device> device = getDevice();
+				const ref<Swapchain>& swapchain = getSwapchain();
 
-				device->waitIdle();
-
-				SwapchainDescriptor swapchainDescriptor;
-				swapchainDescriptor.extentWidth = event.getWidth();
-				swapchainDescriptor.extentHeight = event.getHeight();
-
-				swapchain->update(swapchainDescriptor);
 				swapchain->getImages(renderPass);
 			}
 
@@ -283,8 +270,6 @@ namespace ProjectA {
 			ref<ImageView> imageView;
 
 			ref<Sampler> sampler;
-
-			ref<Swapchain> swapchain;
 
 			ref<RenderPass> renderPass;
 

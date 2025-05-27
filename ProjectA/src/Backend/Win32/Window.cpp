@@ -101,6 +101,9 @@ namespace ProjectA {
 
 		WIN32_ASSERT(windowData->hDC != nullptr);
 
+		windowData->sizeX = descriptor.width;
+		windowData->sizeY = descriptor.height;
+
 		windowData->mouseDownEventListener = descriptor.mouseDownEventListener;
 		windowData->mouseMoveEventListener = descriptor.mouseMoveEventListener;
 		windowData->mouseUpEventListener = descriptor.mouseUpEventListener;

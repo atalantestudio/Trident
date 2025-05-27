@@ -25,8 +25,8 @@ namespace ProjectA {
 			virtual void onEvent(Event& event);
 
 		public:
-			// Acquires the next available swapchain image and returns its index.
-			static uint32 acquireNextImage(const ref<Swapchain>& swapchain);
+			// Acquires the next available swapchain image.
+			static void acquireNextImage(const ref<Swapchain>& swapchain);
 
 			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
 
@@ -51,8 +51,6 @@ namespace ProjectA {
 
 			static ref<Semaphore> createSemaphore();
 
-			static ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor);
-
 			static const ref<Semaphore>& getAvailableImageSemaphore(uint32 frameInFlightIndex);
 
 			static const ref<CommandEncoder>& getCommandEncoder();
@@ -63,7 +61,11 @@ namespace ProjectA {
 
 			static const ref<Fence>& getFlightFence(uint32 frameInFlightIndex);
 
+			static uint32 getImageIndex();
+
 			static ref<Surface> getSurface();
+
+			static const ref<Swapchain>& getSwapchain();
 
 			// Loads and returns a SPIR-V shader module.
 			static ref<ShaderModule> loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor);
@@ -75,10 +77,21 @@ namespace ProjectA {
 			static GraphicsAPI graphicsApi;
 			static scope<GraphicsAdapter> adapter;
 
+			static uint32 imageIndex;
+
+			// TODO: Use scope.
+			static ref<Swapchain> swapchain;
+
 			// TODO: Use scope.
 			static ref<CommandEncoder> commandEncoder;
+
+			// TODO: Use scope.
 			static std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> availableImageSemaphores;
+
+			// TODO: Use scope.
 			static std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> finishedRenderSemaphores;
+
+			// TODO: Use scope.
 			static std::array<ref<Fence>, MAX_FRAMES_IN_FLIGHT> flightFences;
 	};
 }

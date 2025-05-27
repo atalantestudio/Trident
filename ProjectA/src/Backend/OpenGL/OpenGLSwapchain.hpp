@@ -23,6 +23,9 @@ namespace ProjectA {
 
 			void destroy();
 
+		private:
+			static constexpr uint32 imageCount = 1;
+
 		public:
 			std::vector<ref<OpenGLImage>> images;
 			std::vector<ref<OpenGLImageView>> imageViews;

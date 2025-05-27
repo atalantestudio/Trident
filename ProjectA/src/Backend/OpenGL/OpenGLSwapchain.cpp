@@ -9,7 +9,7 @@ namespace ProjectA {
 	}
 
 	uint32 OpenGLSwapchain::getImageCount() const {
-		return 1;
+		return imageCount;
 	}
 
 	uint32 OpenGLSwapchain::getExtentWidth() const {
@@ -20,15 +20,13 @@ namespace ProjectA {
 		return extentHeight;
 	}
 
-	// TODO: Fix memory leak when resizing on the multisample demo.
+	// TODO: Fix memory leak when resizing on the depth test and multisample demos.
 	void OpenGLSwapchain::getImages(const ref<RenderPass>& renderPass) {
 		const ref<OpenGLRenderPass>& glRenderPass = std::static_pointer_cast<OpenGLRenderPass>(renderPass);
 
 		if (renderPass->present && renderPass->getColorAttachmentCount() == 1 && !renderPass->resolve && !renderPass->depthStencil) {
 			return;
 		}
-
-		const uint32 imageCount = getImageCount();
 
 		images.resize(imageCount);
 		imageViews.resize(imageCount);
@@ -78,24 +76,29 @@ namespace ProjectA {
 
 		for (uint32 imageIndex = 0; imageIndex < imageCount; imageIndex += 1) {
 			images[imageIndex] = createScope<OpenGLImage>(imageDescriptor);
-			imageViews[imageIndex] = createScope<OpenGLImageView>(*images.back(), imageViewDescriptor);
+			imageViews[imageIndex] = createScope<OpenGLImageView>(*images[imageIndex], imageViewDescriptor);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[imageIndex]);
 
-			std::vector<ref<OpenGLImageView>> attachmentImageViews(baseAttachmentsImageViews);
+			std::vector<OpenGLImageView*> attachmentImageViews(baseAttachmentsImageViews.size());
+
+			// Populate attachmentImageViews.
+			for (uint32 attachmentImageViewIndex = 0; attachmentImageViewIndex < attachmentImageViews.size(); attachmentImageViewIndex += 1) {
+				attachmentImageViews[attachmentImageViewIndex] = baseAttachmentsImageViews[attachmentImageViewIndex].get();
+			}
 
 			// Override eligible attachments (all resolve and present) with a swapchain image view.
 			if (resolveAttachmentCount > 0) {
 				// Every resolve attachment renders to a swapchain image view.
 				for (uint32 resolveAttachmentIndex = 0; resolveAttachmentIndex < resolveAttachmentCount; resolveAttachmentIndex += 1) {
-					attachmentImageViews[colorAttachmentCount + resolveAttachmentIndex] = imageViews[imageIndex];
+					attachmentImageViews[colorAttachmentCount + resolveAttachmentIndex] = imageViews[imageIndex].get();
 				}
 			}
 			else {
 				// If there is no resolve attachments, then 1 color attachment must render to a swapchain image view.
 				DEBUG_ASSERT(presentAttachmentIndex != std::numeric_limits<uint32>::max());
 
-				attachmentImageViews[presentAttachmentIndex] = imageViews[imageIndex];
+				attachmentImageViews[presentAttachmentIndex] = imageViews[imageIndex].get();
 			}
 
 			uint32 boundAttachmentIndex = 0;
@@ -105,7 +108,7 @@ namespace ProjectA {
 					continue;
 				}
 
-				const ref<OpenGLImageView>& imageView = attachmentImageViews[boundAttachmentIndex];
+				const OpenGLImageView* imageView = attachmentImageViews[boundAttachmentIndex];
 
 				glFramebufferTexture2D(
 					GL_FRAMEBUFFER,
@@ -119,7 +122,7 @@ namespace ProjectA {
 			}
 
 			if (renderPass->depthStencil) {
-				const ref<OpenGLImageView>& imageView = attachmentImageViews.back();
+				const OpenGLImageView* imageView = attachmentImageViews.back();
 
 				// TODO: Use GL_DEPTH_STENCIL_ATTACHMENT instead of GL_DEPTH_ATTACHMENT.
 				glFramebufferTexture2D(

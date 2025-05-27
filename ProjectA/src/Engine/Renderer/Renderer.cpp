@@ -15,6 +15,8 @@
 namespace ProjectA {
 	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::NONE;
 	scope<GraphicsAdapter> Renderer::adapter = nullptr;
+	uint32 Renderer::imageIndex = 0;
+	ref<Swapchain> Renderer::swapchain = nullptr;
 	ref<CommandEncoder> Renderer::commandEncoder = nullptr;
 	std::array<ref<Semaphore>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::availableImageSemaphores;
 	std::array<ref<Semaphore>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::finishedRenderSemaphores;
@@ -40,7 +42,6 @@ namespace ProjectA {
 				case GraphicsAPI::OPENGL:
 					ENGINE_INFO("Using OpenGL backend.");
 
-					// TODO: Make compatible with new Window API.
 					adapter = createScope<OpenGLGraphicsAdapter>(window);
 
 					break;
@@ -57,15 +58,21 @@ namespace ProjectA {
 
 		DEBUG_ASSERT(adapter != nullptr);
 
+		SwapchainDescriptor swapchainDescriptor;
+		swapchainDescriptor.extentWidth = window.getSize()[0];
+		swapchainDescriptor.extentHeight = window.getSize()[1];
+
+		swapchain = adapter->createSwapchain(swapchainDescriptor);
+
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
-		commandEncoder = Renderer::getDevice()->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+		commandEncoder = adapter->getDevice()->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 		for (uint32 frameIndex = 0; frameIndex < MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
-			availableImageSemaphores[frameIndex] = Renderer::createSemaphore();
-			finishedRenderSemaphores[frameIndex] = Renderer::createSemaphore();
-			flightFences[frameIndex] = Renderer::createFence();
+			availableImageSemaphores[frameIndex] = adapter->createSemaphore();
+			finishedRenderSemaphores[frameIndex] = adapter->createSemaphore();
+			flightFences[frameIndex] = adapter->createFence();
 		}
 	}
 
@@ -78,23 +85,17 @@ namespace ProjectA {
 
 	void Renderer::onEvent(Event& event) {}
 
-	uint32 Renderer::acquireNextImage(const ref<Swapchain>& swapchain) {
+	void Renderer::acquireNextImage(const ref<Swapchain>& swapchain) {
 		const ref<Device> device = Renderer::getDevice();
 		const uint32 frameInFlightIndex = Application::get().getFrameInFlightIndex();
 
 		device->waitForFence(Renderer::getFlightFence(frameInFlightIndex));
-
-		uint32 imageIndex;
 
 		const AcquireNextImageStatus status = device->acquireNextImage(swapchain, Renderer::getAvailableImageSemaphore(frameInFlightIndex), imageIndex);
 
 		ENGINE_ASSERT(status == AcquireNextImageStatus::SUBOPTIMAL || status == AcquireNextImageStatus::SUCCESS, "Failed to acquire next image.");
 
 		device->resetFence(Renderer::getFlightFence(frameInFlightIndex));
-
-		Application::get().registerPresentSubdata(swapchain, imageIndex);
-
-		return imageIndex;
 	}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
@@ -144,10 +145,6 @@ namespace ProjectA {
 		return adapter->createSemaphore();
 	}
 
-	ref<Swapchain> Renderer::createSwapchain(const SwapchainDescriptor& descriptor) {
-		return adapter->createSwapchain(descriptor);
-	}
-
 	const ref<Semaphore>& Renderer::getAvailableImageSemaphore(uint32 frameInFlightIndex) {
 		return availableImageSemaphores[frameInFlightIndex];
 	}
@@ -168,8 +165,16 @@ namespace ProjectA {
 		return flightFences[frameInFlightIndex];
 	}
 
+	uint32 Renderer::getImageIndex() {
+		return imageIndex;
+	}
+
 	ref<Surface> Renderer::getSurface() {
 		return adapter->getSurface();
+	}
+
+	const ref<Swapchain>& Renderer::getSwapchain() {
+		return swapchain;
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor) {

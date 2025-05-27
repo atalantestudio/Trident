@@ -9,12 +9,6 @@ namespace ProjectA {
 	GUIRenderer::GUIRenderer() {}
 
 	void GUIRenderer::build() {
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.extentWidth = Application::get().getWindow().getSize()[0];
-		swapchainDescriptor.extentHeight = Application::get().getWindow().getSize()[1];
-
-		swapchain = createSwapchain(swapchainDescriptor);
-
 		const ref<Surface> surface = getSurface();
 
 		ColorAttachment colorAttachment{};
@@ -30,6 +24,8 @@ namespace ProjectA {
 		renderPassDescriptor.presentAttachmentIndex = 0;
 
 		renderPass = createRenderPass(renderPassDescriptor);
+
+		const ref<Swapchain>& swapchain = getSwapchain();
 
 		swapchain->getImages(renderPass);
 
@@ -326,6 +322,7 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::updateCamera() const {
+		const ref<Swapchain>& swapchain = getSwapchain();
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
@@ -366,6 +363,7 @@ namespace ProjectA {
 
 		updateCamera();
 
+		const ref<Swapchain>& swapchain = getSwapchain();
 		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
 		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
 
@@ -373,7 +371,7 @@ namespace ProjectA {
 		beginRenderPassDescriptor.renderPass = renderPass;
 		beginRenderPassDescriptor.swapchain = swapchain;
 		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
-		beginRenderPassDescriptor.imageIndex = acquireNextImage(swapchain);
+		beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->bindRenderPipeline(renderPipeline);
@@ -388,15 +386,8 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::resize(WindowResizeEvent& event) {
-		const ref<Device> device = getDevice();
+		const ref<Swapchain>& swapchain = getSwapchain();
 
-		device->waitIdle();
-
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.extentWidth = event.getWidth();
-		swapchainDescriptor.extentHeight = event.getHeight();
-
-		swapchain->update(swapchainDescriptor);
 		swapchain->getImages(renderPass);
 	}
 
