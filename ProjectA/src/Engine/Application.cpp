@@ -335,6 +335,10 @@ namespace ProjectA {
 			return;
 		}
 
+		const ref<Device> device = Renderer::getDevice();
+
+		device->waitIdle();
+
 		SwapchainDescriptor swapchainDescriptor;
 		swapchainDescriptor.extentWidth = event.getWidth();
 		swapchainDescriptor.extentHeight = event.getHeight();
