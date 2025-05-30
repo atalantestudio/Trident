@@ -172,6 +172,11 @@
 	(static_cast<uint32>(type[3]) << 24) \
 )
 
+template<typename O, typename I>
+O pointer_cast(I pointer) {
+	return static_cast<O>(static_cast<void*>(pointer));
+}
+
 // TODO: Remove usage of auto?
 #define BIND(function) \
 	[this](auto&&... arguments) -> decltype(auto) { \

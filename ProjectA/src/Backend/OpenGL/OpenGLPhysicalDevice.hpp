@@ -7,6 +7,6 @@ namespace ProjectA {
 		public:
 			OpenGLPhysicalDevice();
 
-			const PhysicalDeviceLimits& getLimits() const override;
+			void setLimits();
 	};
 }

@@ -28,6 +28,10 @@ namespace ProjectA {
 
 			static void destroy();
 
+			#ifdef BUILD_MODE_DEBUG
+				static void enumerateMemoryTypes();
+			#endif
+
 			// Finds a suitable memory type for the requirements, and returns its index.
 			static uint32 findMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags);
 
@@ -43,21 +47,25 @@ namespace ProjectA {
 
 		private:
 			// Allocates a new memory block.
-			static void createAllocation(VkDevice device, uint32 memoryTypeIndex);
+			static void createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryBlockIndices);
 
 			// Creates and returns a suballocation in a memory block.
-			static MemorySuballocation suballocate(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size);
+			// If isBuffer is false, the suballocation is done on image memory.
+			static MemorySuballocation suballocate(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryBlockIndices);
 
 		private:
-			static constexpr VkDeviceSize MAX_MEMORY_BLOCK_SIZE = 2200;
+			static constexpr VkDeviceSize DEFAULT_MEMORY_BLOCK_SIZE = 16000000;
 
 		private:
 			static const VulkanPhysicalDevice* physicalDevice;
 
-			// Index of the currently allocated memory block for every memory type.
-			static std::vector<uint32> currentMemoryBlockIndices;
-
-			// Allocated memories from all memory types.
+			// Allocated buffer and image memory blocks.
 			static std::vector<MemoryBlock> memoryBlocks;
+
+			// Index of the currently active buffer memory block per memory type.
+			static std::vector<uint32> currentBufferMemoryBlockIndices;
+
+			// Index of the currently active image memory block per memory type.
+			static std::vector<uint32> currentImageMemoryBlockIndices;
 	};
 }

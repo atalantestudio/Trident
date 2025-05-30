@@ -177,6 +177,7 @@ namespace ProjectA {
 		colorImageDescriptor.mipLevelCount = descriptor.mipLevelCount;
 		colorImageDescriptor.arrayLayerCount = descriptor.arrayLayerCount;
 		colorImageDescriptor.sampleCount = colorAttachment.sampleCount;
+		colorImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 		return createRef<VulkanImage>(device.object, colorImageDescriptor);
 	}
@@ -194,6 +195,7 @@ namespace ProjectA {
 		depthStencilImageDescriptor.mipLevelCount = descriptor.mipLevelCount;
 		depthStencilImageDescriptor.arrayLayerCount = descriptor.arrayLayerCount;
 		depthStencilImageDescriptor.sampleCount = depthStencilAttachment.sampleCount;
+		depthStencilImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 		return createRef<VulkanImage>(device.object, depthStencilImageDescriptor);
 	}

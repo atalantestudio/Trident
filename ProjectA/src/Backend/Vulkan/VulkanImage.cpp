@@ -12,9 +12,9 @@
 #endif
 
 namespace ProjectA {
-	VulkanImage::VulkanImage(VkDevice device, const VkImageCreateInfo& createInfo, VkMemoryPropertyFlags memoryPropertyFlags) {
+	/*VulkanImage::VulkanImage(VkDevice device, const VkImageCreateInfo& createInfo, VkMemoryPropertyFlags memoryPropertyFlags) {
 		construct(device, createInfo, memoryPropertyFlags);
-	}
+	}*/
 
 	VulkanImage::VulkanImage(VkDevice device, const ImageDescriptor& descriptor) {
 		DEBUG_ASSERT(checkSampleCountValidity(descriptor.sampleCount));
@@ -56,14 +56,27 @@ namespace ProjectA {
 
 		uint32 memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
 
-		if ((memoryPropertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
-			ENGINE_WARN("Failed to find lazily allocated memory for Vulkan image. Falling back to device local memory.");
+		if (memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
+			ENGINE_WARN("Failed to find DEVICE_LOCAL | LAZILY_ALLOCATED memory for Vulkan image. Falling back to DEVICE_LOCAL | HOST_VISIBLE memory.");
 
-			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-
+			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
 			memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
 
-			DEBUG_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX);
+			if (memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
+				ENGINE_WARN("Failed to find DEVICE_LOCAL | HOST_VISIBLE memory for Vulkan image. Falling back to HOST_VISIBLE | HOST_COHERENT memory.");
+
+				memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+				memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
+
+				if (memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
+					ENGINE_WARN("Failed to find DEVICE_LOCAL | HOST_VISIBLE memory for Vulkan image. Falling back to DEVICE_LOCAL memory.");
+
+					memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+					memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
+
+					DEBUG_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX);
+				}
+			}
 		}
 
 		memorySuballocation = MemoryAllocator::suballocateImage(device, object, memoryTypeIndex, memoryRequirements.size);

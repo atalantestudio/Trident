@@ -4,12 +4,34 @@
 
 namespace ProjectA {
 	OpenGLPhysicalDevice::OpenGLPhysicalDevice() {
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, static_cast<GLint*>(static_cast<void*>(&limits.maxComputeWorkgroupCount[0])));
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, static_cast<GLint*>(static_cast<void*>(&limits.maxComputeWorkgroupCount[1])));
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, static_cast<GLint*>(static_cast<void*>(&limits.maxComputeWorkgroupCount[2])));
+		setLimits();
 	}
 
-	const PhysicalDeviceLimits& OpenGLPhysicalDevice::getLimits() const {
-		return limits;
+	void OpenGLPhysicalDevice::setLimits() {
+		limits.bufferImageGranularity = 0;
+
+		glGetFloatv(GL_SMOOTH_LINE_WIDTH_GRANULARITY, &limits.lineWidthGranularity);
+		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, pointer_cast<GLint*>(&limits.maxColorAttachmentCount));
+
+		limits.maxBoundDescriptorSetCount = ~0;
+
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, pointer_cast<GLint*>(&limits.maxComputeWorkgroupCount[0]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, pointer_cast<GLint*>(&limits.maxComputeWorkgroupCount[1]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, pointer_cast<GLint*>(&limits.maxComputeWorkgroupCount[2]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, pointer_cast<GLint*>(&limits.maxComputeWorkgroupSize[0]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, pointer_cast<GLint*>(&limits.maxComputeWorkgroupSize[1]));
+		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, pointer_cast<GLint*>(&limits.maxComputeWorkgroupSize[2]));
+		glGetIntegerv(GL_MAX_FRAMEBUFFER_WIDTH, pointer_cast<GLint*>(&limits.maxFramebufferSize[0]));
+		glGetIntegerv(GL_MAX_FRAMEBUFFER_HEIGHT, pointer_cast<GLint*>(&limits.maxFramebufferSize[1]));
+		glGetIntegerv(GL_MAX_FRAMEBUFFER_LAYERS, pointer_cast<GLint*>(&limits.maxFramebufferLayerCount));
+		glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, pointer_cast<GLint*>(&limits.maxImageArrayLayerCount));
+
+		limits.maxMemoryAllocationCount = ~0;
+
+		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, pointer_cast<GLint*>(&limits.maxVertexInputAttributeCount));
+		glGetIntegerv(GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET, pointer_cast<GLint*>(&limits.maxVertexInputAttributeOffset));
+		glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, pointer_cast<GLint*>(&limits.maxVertexInputBindingCount));
+		glGetIntegerv(GL_MAX_VERTEX_ATTRIB_STRIDE, pointer_cast<GLint*>(&limits.maxVertexInputBindingStride));
+		glGetFloatv(GL_SMOOTH_POINT_SIZE_GRANULARITY, &limits.pointSizeGranularity);
 	}
 }

@@ -6,6 +6,28 @@
 #include <lyah/lyah.hpp>
 
 namespace lyah {
+	// TODO: Use static arrays instead of class as polyfills.
+
+	// vec<2, sint32> polyfill.
+	template<>
+	struct lyah::vec<2, std::int32_t> {
+		public:
+			std::int32_t operator [](std::size_t index) const noexcept {
+				assert(index < 2);
+
+				return m[index];
+			}
+
+			std::int32_t& operator [](std::size_t index) noexcept {
+				assert(index < 2);
+
+				return m[index];
+			}
+
+		private:
+			std::int32_t m[2];
+	};
+
 	// vec<3, sint32> polyfill.
 	template<>
 	struct lyah::vec<3, std::int32_t> {
@@ -16,8 +38,74 @@ namespace lyah {
 				return m[index];
 			}
 
+			std::int32_t& operator [](std::size_t index) noexcept {
+				assert(index < 3);
+
+				return m[index];
+			}
+
 		private:
 			std::int32_t m[3];
+	};
+
+	// vec<2, uint32> polyfill.
+	template<>
+	struct lyah::vec<2, std::uint32_t> {
+		public:
+			std::uint32_t operator [](std::size_t index) const noexcept {
+				assert(index < 2);
+
+				return m[index];
+			}
+
+			std::uint32_t& operator [](std::size_t index) noexcept {
+				assert(index < 2);
+
+				return m[index];
+			}
+
+		private:
+			std::uint32_t m[2];
+	};
+
+	// vec<3, uint32> polyfill.
+	template<>
+	struct lyah::vec<3, std::uint32_t> {
+		public:
+			std::uint32_t operator [](std::size_t index) const noexcept {
+				assert(index < 3);
+
+				return m[index];
+			}
+
+			std::uint32_t& operator [](std::size_t index) noexcept {
+				assert(index < 3);
+
+				return m[index];
+			}
+
+		private:
+			std::uint32_t m[3];
+	};
+
+	// vec<4, uint32> polyfill.
+	template<>
+	struct lyah::vec<4, std::uint32_t> {
+		public:
+			std::uint32_t operator [](std::size_t index) const noexcept {
+				assert(index < 4);
+
+				return m[index];
+			}
+
+			std::uint32_t& operator [](std::size_t index) noexcept {
+				assert(index < 4);
+
+				return m[index];
+			}
+
+		private:
+			std::uint32_t m[4];
 	};
 }
 

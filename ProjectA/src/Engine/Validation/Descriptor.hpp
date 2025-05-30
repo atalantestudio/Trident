@@ -18,18 +18,6 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.size must not be 0.");
 		}
 
-		if (descriptor.usage > BufferUsage::INDIRECT) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.usage must be a valid BufferUsage value.");
-		}
-
-		if (descriptor.memoryProperties > MemoryProperty::LAZILY_ALLOCATED) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.memoryProperties must be a valid MemoryProperty value.");
-		}
-
 		if (descriptor.persistent != true && descriptor.persistent != false) {
 			errorCount += 1;
 
@@ -53,12 +41,6 @@ namespace ProjectA {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.format must be a valid ImageFormat value.");
-		}
-
-		if (descriptor.usage > ImageUsage::TRANSIENT_ATTACHMENT) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.usage must be a valid ImageUsage value.");
 		}
 
 		// TODO: Check max width.
@@ -108,12 +90,6 @@ namespace ProjectA {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.sampleCount must either be 1 or a power of 2.");
-		}
-
-		if (descriptor.memoryProperties > MemoryProperty::LAZILY_ALLOCATED) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.memoryProperties must be a valid MemoryProperty value.");
 		}
 
 		ENGINE_ASSERT(errorCount == 0, "Image descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);

@@ -83,17 +83,34 @@ namespace ProjectA {
 		vkGetPhysicalDeviceMemoryProperties(object, &memoryProperties);
 		vkGetPhysicalDeviceProperties(object, &properties);
 
-		limits.maxComputeWorkgroupCount[0] = properties.limits.maxComputeWorkGroupCount[0];
-		limits.maxComputeWorkgroupCount[1] = properties.limits.maxComputeWorkGroupCount[1];
-		limits.maxComputeWorkgroupCount[2] = properties.limits.maxComputeWorkGroupCount[2];
-	}
-
-	const PhysicalDeviceLimits& VulkanPhysicalDevice::getLimits() const {
-		return limits;
+		setLimits();
 	}
 
 	uint32 VulkanPhysicalDevice::calculateScore(VkPhysicalDevice physicalDevice) {
 		// TODO: Implement score system.
 		return 1;
+	}
+
+	void VulkanPhysicalDevice::setLimits() {
+		limits.bufferImageGranularity = properties.limits.bufferImageGranularity;
+		limits.lineWidthGranularity = properties.limits.lineWidthGranularity;
+		limits.maxBoundDescriptorSetCount = properties.limits.maxBoundDescriptorSets;
+		limits.maxColorAttachmentCount = properties.limits.maxColorAttachments;
+		limits.maxComputeWorkgroupCount[0] = properties.limits.maxComputeWorkGroupCount[0];
+		limits.maxComputeWorkgroupCount[1] = properties.limits.maxComputeWorkGroupCount[1];
+		limits.maxComputeWorkgroupCount[2] = properties.limits.maxComputeWorkGroupCount[2];
+		limits.maxComputeWorkgroupSize[0] = properties.limits.maxComputeWorkGroupSize[0];
+		limits.maxComputeWorkgroupSize[1] = properties.limits.maxComputeWorkGroupSize[1];
+		limits.maxComputeWorkgroupSize[2] = properties.limits.maxComputeWorkGroupSize[2];
+		limits.maxFramebufferSize[0] = properties.limits.maxFramebufferWidth;
+		limits.maxFramebufferSize[1] = properties.limits.maxFramebufferHeight;
+		limits.maxFramebufferLayerCount = properties.limits.maxFramebufferLayers;
+		limits.maxImageArrayLayerCount = properties.limits.maxImageArrayLayers;
+		limits.maxMemoryAllocationCount = properties.limits.maxMemoryAllocationCount;
+		limits.maxVertexInputAttributeCount = properties.limits.maxVertexInputAttributes;
+		limits.maxVertexInputAttributeOffset = properties.limits.maxVertexInputAttributeOffset;
+		limits.maxVertexInputBindingCount = properties.limits.maxVertexInputBindings;
+		limits.maxVertexInputBindingStride = properties.limits.maxVertexInputBindingStride;
+		limits.pointSizeGranularity = properties.limits.pointSizeGranularity;
 	}
 }

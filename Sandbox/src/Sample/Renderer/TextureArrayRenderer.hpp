@@ -131,6 +131,7 @@ namespace ProjectA {
 					BufferDescriptor vertexBufferDescriptor;
 					vertexBufferDescriptor.size = vertexBufferSize;
 					vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+					vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 					vertexBuffer = createBuffer(vertexBufferDescriptor);
 
@@ -170,6 +171,7 @@ namespace ProjectA {
 					BufferDescriptor instanceVertexBufferDescriptor;
 					instanceVertexBufferDescriptor.size = instanceVertexBufferSize;
 					instanceVertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+					instanceVertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 					instanceVertexBuffer = createBuffer(instanceVertexBufferDescriptor);
 
@@ -243,6 +245,7 @@ namespace ProjectA {
 				imageDescriptor.mipLevelCount = 1;
 				imageDescriptor.arrayLayerCount = 1;
 				imageDescriptor.sampleCount = 1;
+				imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 				const ref<Image> image = createImage(imageDescriptor);
 

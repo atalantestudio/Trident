@@ -8,10 +8,10 @@ namespace ProjectA {
 		public:
 			VulkanPhysicalDevice(VkInstance instance);
 
-			const PhysicalDeviceLimits& getLimits() const override;
-
 		private:
 			static uint32 calculateScore(VkPhysicalDevice physicalDevice);
+
+			void setLimits();
 
 		public:
 			// TODO: lyah::max<uint32>()

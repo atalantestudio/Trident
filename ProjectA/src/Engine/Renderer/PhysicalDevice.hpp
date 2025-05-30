@@ -1,13 +1,15 @@
 #pragma once
 
-#include "Engine/Renderer/PhysicalDeviceLimits.hpp"
+#include "Engine/API/Rendering/PhysicalDeviceLimits.hpp"
 
 namespace ProjectA {
 	class PhysicalDevice {
 		public:
-			~PhysicalDevice() = default;
+			virtual ~PhysicalDevice() = default;
 
-			virtual const PhysicalDeviceLimits& getLimits() const = 0;
+			const PhysicalDeviceLimits& getLimits() const {
+				return limits;
+			}
 
 		protected:
 			PhysicalDeviceLimits limits;
