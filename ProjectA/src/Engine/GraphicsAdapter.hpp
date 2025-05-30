@@ -11,6 +11,8 @@
 namespace ProjectA {
 	class GraphicsAdapter {
 		public:
+			virtual ~GraphicsAdapter() {}
+
 			virtual ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const = 0;
 
 			virtual ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const = 0;

@@ -5,6 +5,22 @@
 
 #include <lyah/lyah.hpp>
 
+namespace lyah {
+	// vec<3, sint32> polyfill.
+	template<>
+	struct lyah::vec<3, std::int32_t> {
+		public:
+			std::int32_t operator [](std::size_t index) const noexcept {
+				assert(index < 3);
+
+				return m[index];
+			}
+
+		private:
+			std::int32_t m[3];
+	};
+}
+
 namespace ProjectA {
 	// TODO: Expose Lyah methods.
 

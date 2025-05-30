@@ -80,14 +80,12 @@ namespace ProjectA {
 		}
 
 		vkGetPhysicalDeviceFeatures(object, &features);
+		vkGetPhysicalDeviceMemoryProperties(object, &memoryProperties);
+		vkGetPhysicalDeviceProperties(object, &properties);
 
-		VkPhysicalDeviceProperties physicalDeviceProperties;
-
-		vkGetPhysicalDeviceProperties(object, &physicalDeviceProperties);
-
-		limits.maxComputeWorkgroupCount[0] = physicalDeviceProperties.limits.maxComputeWorkGroupCount[0];
-		limits.maxComputeWorkgroupCount[1] = physicalDeviceProperties.limits.maxComputeWorkGroupCount[1];
-		limits.maxComputeWorkgroupCount[2] = physicalDeviceProperties.limits.maxComputeWorkGroupCount[2];
+		limits.maxComputeWorkgroupCount[0] = properties.limits.maxComputeWorkGroupCount[0];
+		limits.maxComputeWorkgroupCount[1] = properties.limits.maxComputeWorkGroupCount[1];
+		limits.maxComputeWorkgroupCount[2] = properties.limits.maxComputeWorkGroupCount[2];
 	}
 
 	const PhysicalDeviceLimits& VulkanPhysicalDevice::getLimits() const {

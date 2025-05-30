@@ -115,6 +115,8 @@ namespace ProjectA {
 		device = createRef<OpenGLDevice>(renderingContext);
 	}
 
+	OpenGLGraphicsAdapter::~OpenGLGraphicsAdapter() {}
+
 	ref<Buffer> OpenGLGraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
 		return createRef<OpenGLBuffer>(descriptor);
 	}

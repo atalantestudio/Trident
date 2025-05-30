@@ -16,7 +16,8 @@ namespace ProjectA {
 				glFrontFace(renderPipeline->frontFace);
 
 				if (renderPipeline->polygonModeFace != GL_NONE) {
-					glPolygonMode(renderPipeline->polygonModeFace, renderPipeline->polygonMode);
+					// TODO: GL_FRONT and GL_BACK seem to be invalid in code profile.
+					glPolygonMode(GL_FRONT_AND_BACK, renderPipeline->polygonMode);
 				}
 
 				if (renderPipeline->polygonMode == GL_POINT) {

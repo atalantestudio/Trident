@@ -1,17 +1,17 @@
 #pragma once
 
+#include "Backend/Vulkan/MemoryAllocator.hpp"
+
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Rendering/Image.hpp"
 
 namespace ProjectA {
-	class VulkanDevice;
-
 	class VulkanImage : public Image, public ObjectWrapper<VkImage> {
 		public:
-			VulkanImage(const VulkanDevice& device, const ImageDescriptor& descriptor);
+			VulkanImage(VkDevice device, const ImageDescriptor& descriptor);
 
-			VulkanImage(const VulkanDevice& device, const VkImageCreateInfo& createInfo);
+			VulkanImage(VkDevice device, const VkImageCreateInfo& createInfo, VkMemoryPropertyFlags memoryPropertyFlags);
 
 			~VulkanImage();
 
@@ -22,7 +22,7 @@ namespace ProjectA {
 			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const override;
 
 		private:
-			void construct(const VulkanDevice& device, const VkImageCreateInfo& createInfo);
+			void construct(VkDevice device, const VkImageCreateInfo& createInfo, VkMemoryPropertyFlags memoryPropertyFlags);
 
 		public:
 			VkImageType type;
@@ -31,7 +31,7 @@ namespace ProjectA {
 
 		private:
 			VkDevice device;
-			VkDeviceMemory memory;
+			MemorySuballocation memorySuballocation;
 			uint32 width;
 			uint32 height;
 	};

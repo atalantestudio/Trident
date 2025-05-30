@@ -1,6 +1,5 @@
 #include "pch.hpp"
 
-#include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanImage.hpp"
 #include "Backend/Vulkan/VulkanImageView.hpp"
 
@@ -13,11 +12,11 @@
 #endif
 
 namespace ProjectA {
-	VulkanImage::VulkanImage(const VulkanDevice& device, const VkImageCreateInfo& createInfo) {
-		construct(device, createInfo);
+	VulkanImage::VulkanImage(VkDevice device, const VkImageCreateInfo& createInfo, VkMemoryPropertyFlags memoryPropertyFlags) {
+		construct(device, createInfo, memoryPropertyFlags);
 	}
 
-	VulkanImage::VulkanImage(const VulkanDevice& device, const ImageDescriptor& descriptor) {
+	VulkanImage::VulkanImage(VkDevice device, const ImageDescriptor& descriptor) {
 		DEBUG_ASSERT(checkSampleCountValidity(descriptor.sampleCount));
 
 		VkImageCreateInfo imageCreateInfo{};
@@ -41,49 +40,35 @@ namespace ProjectA {
 		// initialLayout must either be VK_IMAGE_LAYOUT_UNDEFINED or VK_IMAGE_LAYOUT_PREINITIALIZED.
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		construct(device, imageCreateInfo);
+		construct(device, imageCreateInfo, static_cast<VkMemoryPropertyFlags>(descriptor.memoryProperties));
 	}
 
-	void VulkanImage::construct(const VulkanDevice& device, const VkImageCreateInfo& createInfo) {
+	void VulkanImage::construct(VkDevice device, const VkImageCreateInfo& createInfo, VkMemoryPropertyFlags memoryPropertyFlags) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		VkResult result = vkCreateImage(device.object, &createInfo, nullptr, &object);
+		VkResult result = vkCreateImage(device, &createInfo, nullptr, &object);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image (code: []).", result);
 
 		VkMemoryRequirements memoryRequirements;
 
-		vkGetImageMemoryRequirements(device.object, object, &memoryRequirements);
+		vkGetImageMemoryRequirements(device, object, &memoryRequirements);
 
-		// VK_MEMORY_PROPERTY_HOST_COHERENT_BIT avoids caching.
-		// [HP Victus laptop] TODO: Fix memory type not being found on HP Victus (laptop).
-		//                    The only way to get a memory type index is by specifying a memory property flag of 0.
-		uint32 memoryTypeIndex = device.findMemoryType(memoryRequirements, VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT);
+		uint32 memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
 
-		if (memoryTypeIndex == std::numeric_limits<uint32>::max()) {
-			// Fall back to device local memory.
+		if ((memoryPropertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
 			ENGINE_WARN("Failed to find lazily allocated memory for Vulkan image. Falling back to device local memory.");
 
-			memoryTypeIndex = device.findMemoryType(memoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+
+			memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
+
+			DEBUG_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX);
 		}
 
-		DEBUG_ASSERT(memoryTypeIndex != std::numeric_limits<uint32>::max());
+		memorySuballocation = MemoryAllocator::suballocateImage(device, object, memoryTypeIndex, memoryRequirements.size);
 
-		VkMemoryAllocateInfo memoryAllocateInfo{};
-		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		memoryAllocateInfo.pNext = nullptr;
-		memoryAllocateInfo.allocationSize = memoryRequirements.size;
-		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
-
-		result = vkAllocateMemory(device.object, &memoryAllocateInfo, nullptr, &memory);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan memory (code: []).", result);
-
-		result = vkBindImageMemory(device.object, object, memory, 0);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to bind Vulkan image memory (code: []).", result);
-
-		this->device = device.object;
+		this->device = device;
 		type = createInfo.imageType;
 		format = createInfo.format;
 		width = createInfo.extent.width;
@@ -95,7 +80,8 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		vkDestroyImage(device, object, nullptr);
-		vkFreeMemory(device, memory, nullptr);
+
+		MemoryAllocator::freeSuballocation(device, memorySuballocation.blockIndex);
 	}
 
 	uint32 VulkanImage::getWidth() const {

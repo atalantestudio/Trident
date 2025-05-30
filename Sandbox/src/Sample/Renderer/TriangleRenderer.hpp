@@ -92,6 +92,7 @@ namespace ProjectA {
 					BufferDescriptor vertexBufferDescriptor;
 					vertexBufferDescriptor.size = vertexBufferSize;
 					vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+					vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 					vertexBuffer = createBuffer(vertexBufferDescriptor);
 

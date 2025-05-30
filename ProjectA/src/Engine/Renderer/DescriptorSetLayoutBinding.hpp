@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Engine/API/Rendering/Buffer.hpp"
 #include "Engine/API/Rendering/ImageView.hpp"
 #include "Engine/API/Rendering/Sampler.hpp"
 #include "Engine/API/Rendering/ShaderStage.hpp"
-#include "Engine/Renderer/Buffer/Buffer.hpp"
 #include "Engine/Renderer/DescriptorType.hpp"
 
 namespace ProjectA {

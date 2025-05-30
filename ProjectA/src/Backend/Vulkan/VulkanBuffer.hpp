@@ -2,12 +2,14 @@
 
 #include "Backend/Vulkan/VulkanDevice.hpp"
 
-#include "Engine/Renderer/Buffer/Buffer.hpp"
+#include "Backend/Vulkan/MemoryAllocator.hpp"
+
+#include "Engine/API/Rendering/Buffer.hpp"
 
 namespace ProjectA {
 	class VulkanBuffer : public Buffer, public ObjectWrapper<VkBuffer> {
 		public:
-			VulkanBuffer(VkPhysicalDevice physicalDevice, const VulkanDevice& device, const BufferDescriptor& descriptor);
+			VulkanBuffer(VkDevice device, const BufferDescriptor& descriptor);
 
 			~VulkanBuffer();
 
@@ -16,7 +18,7 @@ namespace ProjectA {
 			void* getMappedRange(uint64 offset, uint64 size) const override;
 
 		private:
-			const VulkanDevice& device;
-			VkDeviceMemory memory;
+			VkDevice device;
+			MemorySuballocation memorySuballocation;
 	};
 }

@@ -99,6 +99,8 @@ namespace ProjectA {
 	}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		return adapter->createBuffer(descriptor);
 	}
 
@@ -106,9 +108,10 @@ namespace ProjectA {
 		BufferDescriptor stagingBufferDescriptor;
 		stagingBufferDescriptor.size = size;
 		stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
+		stagingBufferDescriptor.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT;
 		stagingBufferDescriptor.persistent = persistent;
 
-		return adapter->createBuffer(stagingBufferDescriptor);
+		return createBuffer(stagingBufferDescriptor);
 	}
 
 	ref<ComputePipeline> Renderer::createComputePipeline(const ComputePipelineDescriptor& descriptor) {
@@ -120,6 +123,8 @@ namespace ProjectA {
 	}
 
 	ref<Image> Renderer::createImage(const ImageDescriptor& descriptor) {
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		return adapter->createImage(descriptor);
 	}
 

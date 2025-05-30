@@ -19,6 +19,9 @@ namespace ProjectA {
 			uint32 graphicsQueueFamilyIndex = std::numeric_limits<uint32>::max();
 			uint32 computeQueueFamilyIndex = std::numeric_limits<uint32>::max();
 			std::vector<const char*> enabledExtensionNames;
+
 			VkPhysicalDeviceFeatures features;
+			VkPhysicalDeviceMemoryProperties memoryProperties;
+			VkPhysicalDeviceProperties properties;
 	};
 }

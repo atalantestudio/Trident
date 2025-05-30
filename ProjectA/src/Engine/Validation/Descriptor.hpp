@@ -1,10 +1,124 @@
 #pragma once
 
 #include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
+#include "Engine/API/Rendering/Descriptor/BufferDescriptor.hpp"
+#include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
 
 // API descriptor validators for debug mode.
 namespace ProjectA {
+	static void validateDescriptor(const BufferDescriptor& descriptor) {
+		uint32 warningCount = 0;
+		uint32 errorCount = 0;
+
+		// TODO: Also check size upper bound.
+		if (descriptor.size == 0) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.size must not be 0.");
+		}
+
+		if (descriptor.usage > BufferUsage::INDIRECT) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.usage must be a valid BufferUsage value.");
+		}
+
+		if (descriptor.memoryProperties > MemoryProperty::LAZILY_ALLOCATED) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.memoryProperties must be a valid MemoryProperty value.");
+		}
+
+		if (descriptor.persistent != true && descriptor.persistent != false) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.persistent must be either true or false.");
+		}
+
+		ENGINE_ASSERT(errorCount == 0, "Buffer descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
+	}
+
+	static void validateDescriptor(const ImageDescriptor& descriptor) {
+		uint32 warningCount = 0;
+		uint32 errorCount = 0;
+
+		if (descriptor.type > ImageType::TEXTURE_2D) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.type must be a valid ImageType value.");
+		}
+
+		if (descriptor.format > ImageFormat::D24_UNORM_S8_UINT) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.format must be a valid ImageFormat value.");
+		}
+
+		if (descriptor.usage > ImageUsage::TRANSIENT_ATTACHMENT) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.usage must be a valid ImageUsage value.");
+		}
+
+		// TODO: Check max width.
+		if (descriptor.width == 0) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.width must not be 0.");
+		}
+
+		// TODO: Check max height.
+		if (descriptor.height == 0) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.height must not be 0.");
+		}
+
+		// TODO: Check max depth.
+		if (descriptor.depth == 0) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.depth must not be 0.");
+		}
+
+		// TODO: Check max mip level count.
+		if (descriptor.mipLevelCount == 0) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.mipLevelCount must not be 0.");
+		}
+
+		// TODO: Check max array layer count.
+		if (descriptor.arrayLayerCount == 0) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.arrayLayerCount must not be 0.");
+		}
+
+		if (
+			descriptor.sampleCount != 1 &&
+			descriptor.sampleCount != 2 &&
+			descriptor.sampleCount != 4 &&
+			descriptor.sampleCount != 8 &&
+			descriptor.sampleCount != 16 &&
+			descriptor.sampleCount != 32 &&
+			descriptor.sampleCount != 64
+		) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.sampleCount must either be 1 or a power of 2.");
+		}
+
+		if (descriptor.memoryProperties > MemoryProperty::LAZILY_ALLOCATED) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.memoryProperties must be a valid MemoryProperty value.");
+		}
+
+		ENGINE_ASSERT(errorCount == 0, "Image descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
+	}
+
 	static void validateDescriptor(const RenderPipelineDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;

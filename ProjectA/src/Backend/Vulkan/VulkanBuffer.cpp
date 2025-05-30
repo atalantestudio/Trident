@@ -5,7 +5,7 @@
 #include "Backend/Vulkan/BufferUsage.hpp"
 
 namespace ProjectA {
-	VulkanBuffer::VulkanBuffer(VkPhysicalDevice physicalDevice, const VulkanDevice& device, const BufferDescriptor& descriptor) :
+	VulkanBuffer::VulkanBuffer(VkDevice device, const BufferDescriptor& descriptor) :
 		Buffer(descriptor.size),
 		device(device)
 	{
@@ -23,54 +23,32 @@ namespace ProjectA {
 		bufferCreateInfo.queueFamilyIndexCount = 0;
 		bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-		result = vkCreateBuffer(device.object, &bufferCreateInfo, nullptr, &object);
+		result = vkCreateBuffer(device, &bufferCreateInfo, nullptr, &object);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan buffer (code: []).", result);
 
 		VkMemoryRequirements memoryRequirements;
 
-		vkGetBufferMemoryRequirements(device.object, object, &memoryRequirements);
+		vkGetBufferMemoryRequirements(device, object, &memoryRequirements);
 
-		// HOST_COHERENT avoid caching.
-		const uint32 memoryTypeIndex = device.findMemoryType(memoryRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		const uint32 memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, static_cast<VkMemoryPropertyFlags>(descriptor.memoryProperties));
 
-		DEBUG_ASSERT(memoryTypeIndex != std::numeric_limits<uint32>::max());
-
-		VkMemoryAllocateInfo memoryAllocateInfo{};
-		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		memoryAllocateInfo.pNext = nullptr;
-		memoryAllocateInfo.allocationSize = memoryRequirements.size;
-		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
-
-		result = vkAllocateMemory(device.object, &memoryAllocateInfo, nullptr, &memory);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan memory (code: []).", result);
-
-		result = vkBindBufferMemory(device.object, object, memory, 0);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to bind Vulkan buffer memory (code: []).", result);
+		memorySuballocation = MemoryAllocator::suballocateBuffer(device, object, memoryTypeIndex, memoryRequirements.size);
 	}
 
 	VulkanBuffer::~VulkanBuffer() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		vkDestroyBuffer(device.object, object, nullptr);
-		vkFreeMemory(device.object, memory, nullptr);
+		vkDestroyBuffer(device, object, nullptr);
+
+		MemoryAllocator::freeSuballocation(device, memorySuballocation.blockIndex);
 	}
 
 	void VulkanBuffer::unmap() const {
-		vkUnmapMemory(device.object, memory);
+		MemoryAllocator::unmapSuballocation(device, memorySuballocation.blockIndex);
 	}
 
 	void* VulkanBuffer::getMappedRange(uint64 offset, uint64 size) const {
-		void* mappedRange;
-
-		ENGINE_ASSERT(size > 0, "The Buffer mapping size must not be 0.");
-
-		const VkResult result = vkMapMemory(device.object, memory, offset, size, 0, &mappedRange);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to map Vulkan buffer memory (code: []).", result);
-
-		return mappedRange;
+		return MemoryAllocator::mapSuballocation(device, memorySuballocation, size, offset);
 	}
 }

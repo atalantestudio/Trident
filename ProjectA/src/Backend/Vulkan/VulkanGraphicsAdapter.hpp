@@ -13,6 +13,8 @@ namespace ProjectA {
 		public:
 			VulkanGraphicsAdapter(const Window& window);
 
+			~VulkanGraphicsAdapter() final override;
+
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const final override;
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const final override;

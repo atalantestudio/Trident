@@ -178,7 +178,7 @@ namespace ProjectA {
 		colorImageDescriptor.arrayLayerCount = descriptor.arrayLayerCount;
 		colorImageDescriptor.sampleCount = colorAttachment.sampleCount;
 
-		return createRef<VulkanImage>(device, colorImageDescriptor);
+		return createRef<VulkanImage>(device.object, colorImageDescriptor);
 	}
 
 	ref<Image> VulkanRenderPass::createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const {
@@ -195,6 +195,6 @@ namespace ProjectA {
 		depthStencilImageDescriptor.arrayLayerCount = descriptor.arrayLayerCount;
 		depthStencilImageDescriptor.sampleCount = depthStencilAttachment.sampleCount;
 
-		return createRef<VulkanImage>(device, depthStencilImageDescriptor);
+		return createRef<VulkanImage>(device.object, depthStencilImageDescriptor);
 	}
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/Buffer/Buffer.hpp"
+#include "Engine/API/Rendering/Buffer.hpp"
 
 namespace ProjectA {
 	class OpenGLBuffer : public Buffer, public ObjectWrapper<GLuint> {

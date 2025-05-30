@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanImageView.hpp"
 #include "Backend/Vulkan/VulkanSurface.hpp"
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Engine/Renderer/Buffer/VertexInputAttributeType.hpp"
 #include "Engine/Renderer/InputRate.hpp"
 #include "Engine/Renderer/VertexInputAttribute.hpp"
+#include "Engine/Renderer/VertexInputAttributeType.hpp"
 
 namespace ProjectA {
 	class VertexInputBinding {

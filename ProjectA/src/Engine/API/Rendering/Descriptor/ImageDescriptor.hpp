@@ -2,6 +2,7 @@
 
 #include "Engine/API/Rendering/ImageFormat.hpp"
 #include "Engine/API/Rendering/ImageType.hpp"
+#include "Engine/API/Rendering/MemoryProperty.hpp"
 #include "Engine/Renderer/ImageUsage.hpp"
 
 namespace ProjectA {
@@ -17,5 +18,7 @@ namespace ProjectA {
 
 		// The number of samples for the image. Must be a power of 2.
 		uint8 sampleCount;
+
+		MemoryProperty memoryProperties;
 	};
 }

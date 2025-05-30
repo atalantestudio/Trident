@@ -14,9 +14,6 @@ namespace ProjectA {
 
 			~VulkanDevice() final override;
 
-			// Returns a suitable device memory type index.
-			uint32 findMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) const;
-
 			ref<PhysicalDevice> getPhysicalDevice() const final override;
 
 			ref<Queue> getComputeQueue() const final override;

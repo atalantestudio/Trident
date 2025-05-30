@@ -11,6 +11,8 @@ namespace ProjectA {
 		public:
 			OpenGLGraphicsAdapter(const Window& window);
 
+			~OpenGLGraphicsAdapter() final override;
+
 			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const final override;
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const final override;

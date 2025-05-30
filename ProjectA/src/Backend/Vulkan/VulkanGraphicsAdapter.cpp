@@ -11,16 +11,24 @@
 #include "Backend/Vulkan/VulkanSemaphore.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 
+#include "Backend/Vulkan/MemoryAllocator.hpp"
+
 namespace ProjectA {
 	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const Window& window) :
 		instance(),
 		physicalDevice(instance.object),
 		surface(createRef<VulkanSurface>(instance.object, physicalDevice, window)),
 		device(createRef<VulkanDevice>(physicalDevice, *surface))
-	{}
+	{
+		MemoryAllocator::initialize(physicalDevice);
+	}
+
+	VulkanGraphicsAdapter::~VulkanGraphicsAdapter() {
+		MemoryAllocator::destroy();
+	}
 
 	ref<Buffer> VulkanGraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
-		return createRef<VulkanBuffer>(physicalDevice.object, *device, descriptor);
+		return createRef<VulkanBuffer>(device->object, descriptor);
 	}
 
 	ref<ComputePipeline> VulkanGraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
@@ -32,7 +40,7 @@ namespace ProjectA {
 	}
 
 	ref<Image> VulkanGraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
-		return createRef<VulkanImage>(*device, descriptor);
+		return createRef<VulkanImage>(device->object, descriptor);
 	}
 
 	ref<PipelineLayout> VulkanGraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {

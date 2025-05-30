@@ -77,24 +77,6 @@ namespace ProjectA {
 		vkDestroyDevice(object, nullptr);
 	}
 
-	uint32 VulkanDevice::findMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) const {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		for (uint32 memoryTypeIndex = 0; memoryTypeIndex < memoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
-			if (!(memoryRequirements.memoryTypeBits & BIT(memoryTypeIndex))) {
-				continue;
-			}
-
-			const VkMemoryType memoryType = memoryProperties.memoryTypes[memoryTypeIndex];
-
-			if ((memoryType.propertyFlags & memoryPropertyFlags) == memoryPropertyFlags) {
-				return memoryTypeIndex;
-			}
-		}
-
-		return std::numeric_limits<uint32>::max();
-	}
-
 	ref<PhysicalDevice> VulkanDevice::getPhysicalDevice() const {
 		return physicalDevice;
 	}
