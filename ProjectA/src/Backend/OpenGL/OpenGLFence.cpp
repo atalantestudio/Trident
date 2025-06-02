@@ -3,6 +3,10 @@
 #include "Backend/OpenGL/OpenGLFence.hpp"
 
 namespace ProjectA {
+	OpenGLFence::OpenGLFence() :
+		ObjectWrapper(nullptr)
+	{}
+
 	void OpenGLFence::create() {
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -16,5 +20,19 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glDeleteSync(object);
+
+		object = nullptr;
+	}
+
+	bool OpenGLFence::isSignaled() const {
+		if (object == nullptr) {
+			return false;
+		}
+
+		GLint value;
+
+		glGetSynciv(object, GL_SYNC_STATUS, 1, nullptr, &value);
+
+		return static_cast<bool>(value - GL_UNSIGNALED);
 	}
 }

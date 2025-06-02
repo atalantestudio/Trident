@@ -62,8 +62,7 @@ namespace ProjectA {
 		propertyFile = Filesystem::load<PropertyFile*>(propertyFilePath.string());
 
 		if (propertyFile == nullptr) {
-			ENGINE_WARN("Could not find property file.");
-			ENGINE_INFO("Creating new property file.");
+			ENGINE_INFO("Could not find property file. Creating a new one.");
 
 			// TODO: Recreate property file.
 			DEBUG_ASSERT(false);

@@ -83,18 +83,24 @@ namespace ProjectA {
 		renderPassBeginInfo.pClearValues = &clearValues[0];
 
 		vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::bindComputePipeline(const ref<ComputePipeline>& computePipeline) {
 		this->pipeline = std::dynamic_pointer_cast<VulkanPipeline>(computePipeline);
 
 		vkCmdBindPipeline(commandBuffer, this->pipeline->bindPoint, this->pipeline->object);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) {
 		this->pipeline = std::dynamic_pointer_cast<VulkanPipeline>(renderPipeline);
 
 		vkCmdBindPipeline(commandBuffer, this->pipeline->bindPoint, this->pipeline->object);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::bindAllDescriptorSets() {
@@ -111,6 +117,8 @@ namespace ProjectA {
 			0,
 			nullptr
 		);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {
@@ -120,6 +128,8 @@ namespace ProjectA {
 			offset,
 			getVkIndexType(indexTypeSize)
 		);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) {
@@ -130,6 +140,8 @@ namespace ProjectA {
 			&std::static_pointer_cast<VulkanBuffer>(vertexBuffer)->object,
 			&offset
 		);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) {
@@ -147,6 +159,8 @@ namespace ProjectA {
 			1,
 			&region
 		);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, uint32 width, uint32 height, uint32 depth) {
@@ -173,6 +187,8 @@ namespace ProjectA {
 			1,
 			&bufferImageCopy
 		);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
@@ -181,6 +197,8 @@ namespace ProjectA {
 		ENGINE_ASSERT(groupCountZ <= limits.maxComputeWorkgroupCount[2], "Group count in the Z axis must not exceed [].", limits.maxComputeWorkgroupCount[2]);
 
 		vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
@@ -249,10 +267,14 @@ namespace ProjectA {
 			1,
 			&imageMemoryBarrier
 		);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::setLineWidth(float32 lineWidth) {
 		vkCmdSetLineWidth(commandBuffer, lineWidth);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {
@@ -263,6 +285,8 @@ namespace ProjectA {
 		scissor.extent.height = height;
 
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
@@ -275,18 +299,26 @@ namespace ProjectA {
 		viewport.maxDepth = maxDepth;
 
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) {
 		vkCmdDraw(commandBuffer, vertexCount, instanceCount, vertexOffset, 0);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) {
 		vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, indexOffset, 0, 0);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::endRenderPass() {
 		vkCmdEndRenderPass(commandBuffer);
+
+		commandCount += 1;
 	}
 
 	ref<CommandBuffer> VulkanCommandEncoder::end() const {
@@ -302,12 +334,13 @@ namespace ProjectA {
 			pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		}
 
-		return createRef<VulkanCommandBuffer>(commandBuffer, pipelineStageFlags);
+		return createRef<VulkanCommandBuffer>(commandBuffer, pipelineStageFlags, commandCount);
 	}
 
 	void VulkanCommandEncoder::reset() {
 		PROFILE_SCOPE(FUNC_SIG);
 
+		commandCount = 0;
 		pipeline = nullptr;
 
 		const VkResult result = vkResetCommandBuffer(commandBuffer, 0);

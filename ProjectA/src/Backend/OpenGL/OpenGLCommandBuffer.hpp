@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Backend/OpenGL/Command/OpenGLCommand.hpp"
+
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/Renderer/CommandBuffer.hpp"
-
-#include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 
 namespace ProjectA {
 	class OpenGLCommandBuffer : public CommandBuffer, public ObjectWrapper<const std::vector<ref<OpenGLCommand>>> {

@@ -10,6 +10,8 @@ namespace ProjectA {
 
 			~VulkanFence();
 
+			bool isSignaled() const final override;
+
 		private:
 			const VkDevice device;
 	};

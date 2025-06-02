@@ -58,7 +58,7 @@ namespace ProjectA {
 
 		const VkResult result = vkCreateDevice(physicalDevice.object, &deviceCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan device (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan device ([]).", string_VkResult(result));
 
 		computeQueue = createRef<VulkanQueue>(*this, physicalDevice.computeQueueFamilyIndex);
 		graphicsQueue = createRef<VulkanQueue>(*this, physicalDevice.graphicsQueueFamilyIndex);
@@ -105,7 +105,7 @@ namespace ProjectA {
 			UINT64_MAX
 		);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to wait for Vulkan fences (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to wait for Vulkan fence ([]).", string_VkResult(result));
 	}
 
 	void VulkanDevice::resetFence(const ref<Fence>& fence) const {
@@ -117,13 +117,12 @@ namespace ProjectA {
 			&std::static_pointer_cast<VulkanFence>(fence)->object
 		);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan fences (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan fence ([]).", string_VkResult(result));
 	}
 
 	AcquireNextImageStatus VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		// UINT64_MAX disables the timeout.
 		const VkResult result = vkAcquireNextImageKHR(
 			object,
 			std::static_pointer_cast<VulkanSwapchain>(swapchain)->object,
@@ -153,6 +152,6 @@ namespace ProjectA {
 	void VulkanDevice::waitIdle() const {
 		const VkResult result = vkDeviceWaitIdle(object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to idle wait (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to idle wait ([]).", string_VkResult(result));
 	}
 }

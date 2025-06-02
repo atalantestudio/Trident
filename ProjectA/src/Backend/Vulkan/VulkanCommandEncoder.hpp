@@ -56,6 +56,7 @@ namespace ProjectA {
 			const VkCommandPool commandPool;
 			const VkCommandBufferUsageFlags commandBufferUsageFlag;
 			VkCommandBuffer commandBuffer;
+			uint32 commandCount = 0;
 			ref<VulkanPipeline> pipeline;
 
 			const PhysicalDeviceLimits& limits;

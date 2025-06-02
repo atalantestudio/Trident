@@ -4,6 +4,7 @@
 
 namespace ProjectA {
 	OpenGLCommandBuffer::OpenGLCommandBuffer(const std::vector<ref<OpenGLCommand>>& commandBuffer) :
+		CommandBuffer(static_cast<uint32>(commandBuffer.size())),
 		ObjectWrapper(commandBuffer)
 	{}
 

@@ -166,7 +166,7 @@ namespace ProjectA {
 		MemoryBlock& memoryBlock = memoryBlocks[memoryBlockIndex];
 
 		if (memoryBlock.suballocationCount <= 1) {
-			ENGINE_TRACE("Freeing memory block [] (no more suballocations).", memoryBlockIndex);
+			ENGINE_TRACE("Freeing memory block [].", memoryBlockIndex);
 
 			vkFreeMemory(device, memoryBlock.memory, nullptr);
 
