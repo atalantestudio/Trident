@@ -46,6 +46,8 @@ namespace ProjectA {
 
 			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
 
+			DEBUG_ASSERT(infoLogLength > 0);
+
 			std::vector<GLchar> infoLog(infoLogLength);
 
 			glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog.data());

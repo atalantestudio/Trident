@@ -4,6 +4,12 @@
 
 namespace ProjectA {
 	OpenGLPhysicalDevice::OpenGLPhysicalDevice() {
+		const GLubyte* vendor = glGetString(GL_VENDOR);
+		const GLubyte* renderer = glGetString(GL_RENDERER);
+		const GLubyte* version = glGetString(GL_VERSION);
+
+		ENGINE_INFO("Using [] [] [].", vendor, renderer, version);
+
 		setLimits();
 	}
 

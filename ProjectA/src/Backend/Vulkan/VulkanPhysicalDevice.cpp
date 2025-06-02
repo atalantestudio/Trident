@@ -83,6 +83,29 @@ namespace ProjectA {
 		vkGetPhysicalDeviceMemoryProperties(object, &memoryProperties);
 		vkGetPhysicalDeviceProperties(object, &properties);
 
+		std::string deviceType;
+
+		switch (properties.deviceType) {
+			case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+				deviceType = " (integrated GPU)";
+
+				break;
+			case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+				deviceType = " (discrete GPU)";
+
+				break;
+			case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+				deviceType = " (virtual GPU)";
+
+				break;
+			case VK_PHYSICAL_DEVICE_TYPE_CPU:
+				deviceType = " (CPU)";
+
+				break;
+		}
+
+		ENGINE_INFO("Using [][].", properties.deviceName, deviceType);
+
 		setLimits();
 	}
 

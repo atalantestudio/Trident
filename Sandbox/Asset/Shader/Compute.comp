@@ -10,5 +10,9 @@ void main() {
 	// TODO: Fix imageSize returning ivec2(0, 0) on test laptop (HP Victus).
 	vec4 color = vec4(imageCoordinate / vec2(imageSize(image)), 0.0, 1.0);
 
+	/*if (imageSize(image).y == 0.0) {
+	color = vec4(1.0, 0.2, 0.0, 1.0);
+	}*/
+
 	imageStore(image, ivec2(imageCoordinate), color);
 }

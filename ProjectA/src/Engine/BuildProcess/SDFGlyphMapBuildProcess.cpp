@@ -7,7 +7,7 @@
 namespace ProjectA {
 	static constexpr uint64 MAX_GLYPH_COUNT = 2048;
 	static constexpr uint32 GLYPH_SUBIMAGE_DIMENSION = 64;
-	static constexpr uint32 SPREAD_FACTOR = 3;
+	static constexpr uint32 SPREAD_FACTOR = 0;
 
 	SDFGlyphMap SDFGlyphMapBuildProcess::build(const TTFFile& ttfFile) {
 		ENGINE_ASSERT(ttfFile.glyphs.size() < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
@@ -36,6 +36,7 @@ namespace ProjectA {
 		BufferDescriptor fontStorageBufferDescriptor;
 		fontStorageBufferDescriptor.size = fontBufferSize;
 		fontStorageBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		fontStorageBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		const ref<Buffer> fontStorageBuffer = Renderer::createBuffer(fontStorageBufferDescriptor);
 
@@ -61,6 +62,7 @@ namespace ProjectA {
 		BufferDescriptor glyphBufferDescriptor;
 		glyphBufferDescriptor.size = glyphBufferSize;
 		glyphBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		glyphBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		const ref<Buffer> glyphBuffer = Renderer::createBuffer(glyphBufferDescriptor);
 
@@ -73,6 +75,7 @@ namespace ProjectA {
 		BufferDescriptor glyphOffsetBufferDescriptor;
 		glyphOffsetBufferDescriptor.size = glyphOffsetBufferSize;
 		glyphOffsetBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		glyphOffsetBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		const ref<Buffer> glyphOffsetBuffer = Renderer::createBuffer(glyphOffsetBufferDescriptor);
 
@@ -87,6 +90,7 @@ namespace ProjectA {
 		glyphImageDescriptor.mipLevelCount = 1;
 		glyphImageDescriptor.arrayLayerCount = 1;
 		glyphImageDescriptor.sampleCount = 1;
+		glyphImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 		const ref<Image> glyphImage = Renderer::createImage(glyphImageDescriptor);
 
@@ -125,11 +129,9 @@ namespace ProjectA {
 		glyphImageShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		glyphImageShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> glyphImageShaderModule = Renderer::loadShaderModule("../ProjectA/src/Asset/Shader/GlyphImage.comp.spv", glyphImageShaderModuleDescriptor);
-
 		ComputePipelineDescriptor glyphImagePipelineDescriptor;
 		glyphImagePipelineDescriptor.pipelineLayout = glyphImagePipelineLayout;
-		glyphImagePipelineDescriptor.computeShaderModule = glyphImageShaderModule;
+		glyphImagePipelineDescriptor.computeShaderModule = Renderer::loadShaderModule("../ProjectA/src/Asset/Shader/GlyphImage.comp.spv", glyphImageShaderModuleDescriptor);;
 
 		const ref<ComputePipeline> glyphImagePipeline = Renderer::createComputePipeline(glyphImagePipelineDescriptor);
 
@@ -144,6 +146,7 @@ namespace ProjectA {
 		glyphMapSdfImageDescriptor.mipLevelCount = 1;
 		glyphMapSdfImageDescriptor.arrayLayerCount = 1;
 		glyphMapSdfImageDescriptor.sampleCount = 1;
+		glyphMapSdfImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 		sdfGlyphMap.glyphMap = Renderer::createImage(glyphMapSdfImageDescriptor);
 
@@ -178,11 +181,9 @@ namespace ProjectA {
 		glyphSdfShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		glyphSdfShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> glyphSdfShaderModule = Renderer::loadShaderModule("../ProjectA/src/Asset/Shader/GlyphDistanceField.comp.spv", glyphSdfShaderModuleDescriptor);
-
 		ComputePipelineDescriptor glyphSdfPipelineDescriptor;
 		glyphSdfPipelineDescriptor.pipelineLayout = glyphSdfPipelineLayout;
-		glyphSdfPipelineDescriptor.computeShaderModule = glyphSdfShaderModule;
+		glyphSdfPipelineDescriptor.computeShaderModule = Renderer::loadShaderModule("../ProjectA/src/Asset/Shader/GlyphDistanceField.comp.spv", glyphSdfShaderModuleDescriptor);;
 
 		const ref<ComputePipeline> glyphSdfPipeline = Renderer::createComputePipeline(glyphSdfPipelineDescriptor);
 

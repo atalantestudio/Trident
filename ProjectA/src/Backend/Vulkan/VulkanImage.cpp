@@ -12,11 +12,9 @@
 #endif
 
 namespace ProjectA {
-	/*VulkanImage::VulkanImage(VkDevice device, const VkImageCreateInfo& createInfo, VkMemoryPropertyFlags memoryPropertyFlags) {
-		construct(device, createInfo, memoryPropertyFlags);
-	}*/
-
-	VulkanImage::VulkanImage(VkDevice device, const ImageDescriptor& descriptor) {
+	VulkanImage::VulkanImage(VkDevice device, const ImageDescriptor& descriptor) :
+		device(device)
+	{
 		DEBUG_ASSERT(checkSampleCountValidity(descriptor.sampleCount));
 
 		VkImageCreateInfo imageCreateInfo{};
@@ -40,13 +38,7 @@ namespace ProjectA {
 		// initialLayout must either be VK_IMAGE_LAYOUT_UNDEFINED or VK_IMAGE_LAYOUT_PREINITIALIZED.
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		construct(device, imageCreateInfo, static_cast<VkMemoryPropertyFlags>(descriptor.memoryProperties));
-	}
-
-	void VulkanImage::construct(VkDevice device, const VkImageCreateInfo& createInfo, VkMemoryPropertyFlags memoryPropertyFlags) {
-		PROFILE_SCOPE(FUNC_SIG);
-
-		VkResult result = vkCreateImage(device, &createInfo, nullptr, &object);
+		const VkResult result = vkCreateImage(device, &imageCreateInfo, nullptr, &object);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image (code: []).", result);
 
@@ -54,39 +46,39 @@ namespace ProjectA {
 
 		vkGetImageMemoryRequirements(device, object, &memoryRequirements);
 
+		VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(descriptor.memoryProperties);
 		uint32 memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
 
-		if (memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
+		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
 			ENGINE_WARN("Failed to find DEVICE_LOCAL | LAZILY_ALLOCATED memory for Vulkan image. Falling back to DEVICE_LOCAL | HOST_VISIBLE memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
 			memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
-
-			if (memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
-				ENGINE_WARN("Failed to find DEVICE_LOCAL | HOST_VISIBLE memory for Vulkan image. Falling back to HOST_VISIBLE | HOST_COHERENT memory.");
-
-				memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-				memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
-
-				if (memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
-					ENGINE_WARN("Failed to find DEVICE_LOCAL | HOST_VISIBLE memory for Vulkan image. Falling back to DEVICE_LOCAL memory.");
-
-					memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-					memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
-
-					DEBUG_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX);
-				}
-			}
 		}
+
+		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
+			ENGINE_WARN("Failed to find DEVICE_LOCAL | HOST_VISIBLE memory for Vulkan image. Falling back to HOST_VISIBLE | HOST_COHERENT memory.");
+
+			memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+			memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
+		}
+
+		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
+			ENGINE_WARN("Failed to find DEVICE_LOCAL | HOST_VISIBLE memory for Vulkan image. Falling back to DEVICE_LOCAL memory.");
+
+			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+			memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
+		}
+
+		DEBUG_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX);
 
 		memorySuballocation = MemoryAllocator::suballocateImage(device, object, memoryTypeIndex, memoryRequirements.size);
 
-		this->device = device;
-		type = createInfo.imageType;
-		format = createInfo.format;
-		width = createInfo.extent.width;
-		height = createInfo.extent.height;
-		mipLevels = createInfo.mipLevels;
+		type = imageCreateInfo.imageType;
+		format = imageCreateInfo.format;
+		width = imageCreateInfo.extent.width;
+		height = imageCreateInfo.extent.height;
+		mipLevels = imageCreateInfo.mipLevels;
 	}
 
 	VulkanImage::~VulkanImage() {

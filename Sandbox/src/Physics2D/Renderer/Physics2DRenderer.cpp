@@ -109,6 +109,7 @@ namespace ProjectA {
 		BufferDescriptor cameraBufferDescriptor;
 		cameraBufferDescriptor.size = cameraBufferSize;
 		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
+		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		cameraBufferDescriptor.persistent = true;
 
 		cameraUniformBuffer = createBuffer(cameraBufferDescriptor);
@@ -123,6 +124,7 @@ namespace ProjectA {
 		BufferDescriptor viewportUniformBufferDescriptor;
 		viewportUniformBufferDescriptor.size = viewportUniformBufferSize;
 		viewportUniformBufferDescriptor.usage = BufferUsage::UNIFORM;
+		viewportUniformBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		viewportUniformBufferDescriptor.persistent = true;
 
 		viewUniformBuffer = createBuffer(viewportUniformBufferDescriptor);
@@ -145,6 +147,7 @@ namespace ProjectA {
 		BufferDescriptor gridVertexBufferDescriptor;
 		gridVertexBufferDescriptor.size = gridVertexBufferSize;
 		gridVertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		gridVertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		gridVertexBuffer = createBuffer(gridVertexBufferDescriptor);
 
@@ -169,7 +172,10 @@ namespace ProjectA {
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
-		cameraDescriptorSetLayoutBinding.bufferOffset = sizeof(mat3x3<float32>);
+
+		// TODO: The offset must be a multiple of the minUniformBufferAlignment physical device limit.
+		cameraDescriptorSetLayoutBinding.bufferOffset = 0;
+		//cameraDescriptorSetLayoutBinding.bufferOffset = sizeof(mat3x3<float32>);
 
 		DescriptorSetLayoutBinding viewDescriptorSetLayoutBinding;
 		viewDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
@@ -225,6 +231,7 @@ namespace ProjectA {
 		BufferDescriptor centerOfMassBufferDescriptor;
 		centerOfMassBufferDescriptor.size = centerOfMassBufferSize;
 		centerOfMassBufferDescriptor.usage = BufferUsage::VERTEX;
+		centerOfMassBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		centerOfMassBufferDescriptor.persistent = true;
 
 		centerOfMassBuffer = createBuffer(centerOfMassBufferDescriptor);
@@ -273,6 +280,7 @@ namespace ProjectA {
 		BufferDescriptor closestPointBufferDescriptor;
 		closestPointBufferDescriptor.size = closestPointBufferSize;
 		closestPointBufferDescriptor.usage = BufferUsage::VERTEX;
+		closestPointBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		closestPointBufferDescriptor.persistent = true;
 
 		closestPointBuffer = createBuffer(closestPointBufferDescriptor);
@@ -337,6 +345,7 @@ namespace ProjectA {
 		BufferDescriptor vertexFeatureBufferDescriptor;
 		vertexFeatureBufferDescriptor.size = vertexFeatureBufferSize;
 		vertexFeatureBufferDescriptor.usage = BufferUsage::VERTEX;
+		vertexFeatureBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		vertexFeatureBufferDescriptor.persistent = true;
 
 		vertexFeatureBuffer = createBuffer(vertexFeatureBufferDescriptor);
@@ -349,6 +358,7 @@ namespace ProjectA {
 		BufferDescriptor edgeVertexFeatureBufferDescriptor;
 		edgeVertexFeatureBufferDescriptor.size = edgeVertexFeatureBufferSize;
 		edgeVertexFeatureBufferDescriptor.usage = BufferUsage::VERTEX;
+		edgeVertexFeatureBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		edgeVertexFeatureBufferDescriptor.persistent = true;
 
 		edgeVertexFeatureBuffer = createBuffer(edgeVertexFeatureBufferDescriptor);
@@ -497,18 +507,21 @@ namespace ProjectA {
 		BufferDescriptor vertexBufferDescriptor;
 		vertexBufferDescriptor.size = vertexBufferSize;
 		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 
 		BufferDescriptor indexBufferDescriptor;
 		indexBufferDescriptor.size = indexBufferSize;
 		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
+		indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
 
 		BufferDescriptor instanceBufferDescriptor;
 		instanceBufferDescriptor.size = instanceBufferSize;
 		instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		instanceBufferDescriptor.persistent = true;
 
 		instanceBuffer = createBuffer(instanceBufferDescriptor);
@@ -617,6 +630,7 @@ namespace ProjectA {
 		BufferDescriptor placeholderBufferDescriptor;
 		placeholderBufferDescriptor.size = placeholderBufferSize;
 		placeholderBufferDescriptor.usage = BufferUsage::UNIFORM;
+		placeholderBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		placeholderBufferDescriptor.persistent = true;
 
 		placeholderUniformBuffer = createBuffer(placeholderBufferDescriptor);

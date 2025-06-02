@@ -34,6 +34,7 @@ namespace ProjectA {
 					BufferDescriptor cameraUniformBufferDescriptor;
 					cameraUniformBufferDescriptor.size = cameraBufferSize;
 					cameraUniformBufferDescriptor.usage = BufferUsage::UNIFORM;
+					cameraUniformBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 					cameraUniformBufferDescriptor.persistent = true;
 
 					cameraBuffer = createBuffer(cameraUniformBufferDescriptor);
@@ -143,6 +144,7 @@ namespace ProjectA {
 					BufferDescriptor indexBufferDescriptor;
 					indexBufferDescriptor.size = indexBufferSize;
 					indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
+					indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 					indexBuffer = createBuffer(indexBufferDescriptor);
 
@@ -167,6 +169,7 @@ namespace ProjectA {
 					BufferDescriptor vertexBufferDescriptor;
 					vertexBufferDescriptor.size = vertexBufferSize;
 					vertexBufferDescriptor.usage = BufferUsage::VERTEX;
+					vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 					vertexBufferDescriptor.persistent = true;
 
 					vertexBuffer = createBuffer(vertexBufferDescriptor);

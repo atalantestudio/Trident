@@ -107,7 +107,7 @@ namespace ProjectA {
 
 			glDebugMessageCallback(debugMessageCallback, nullptr);
 
-			glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 0, GL_DEBUG_SEVERITY_NOTIFICATION, 36, "Using OpenGL debug message callback");
+			glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 0, GL_DEBUG_SEVERITY_NOTIFICATION, 36, "Enabled OpenGL debug message callback.");
 		#endif
 
 		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
@@ -163,7 +163,7 @@ namespace ProjectA {
 
 	#ifdef DEBUG_ENABLE_MESSENGER
 		void OpenGLGraphicsAdapter::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-			static constexpr std::string_view log = "[] []: [].";
+			static constexpr std::string_view log = "[[] []] []";
 			static constexpr char* sourceStrings[] = {
 				"OpenGL API",
 				"Window-system API",

@@ -1,3 +1,7 @@
+"%VULKAN_SDK%\Bin\glslc.exe" Compute.vert -o Compute.vert.spv
+"%VULKAN_SDK%\Bin\glslc.exe" Compute.frag -o Compute.frag.spv
+"%VULKAN_SDK%\Bin\glslc.exe" Compute.comp -o Compute.comp.spv
+
 :: "%VULKAN_SDK%\Bin\glslc.exe" Triangle.vert -o Triangle.vert.spv
 :: "%VULKAN_SDK%\Bin\glslc.exe" Triangle.frag -o Triangle.frag.spv
 
@@ -10,5 +14,5 @@
 :: "%VULKAN_SDK%\Bin\glslc.exe" Glyph.vert -o Glyph.vert.spv
 :: "%VULKAN_SDK%\Bin\glslc.exe" Glyph.frag -o Glyph.frag.spv
 
-"%VULKAN_SDK%\Bin\glslc.exe" Vertex.vert -o Vertex.vert.spv
-"%VULKAN_SDK%\Bin\glslc.exe" Color.frag -o Color.frag.spv
+:: "%VULKAN_SDK%\Bin\glslc.exe" Vertex.vert -o Vertex.vert.spv
+:: "%VULKAN_SDK%\Bin\glslc.exe" Color.frag -o Color.frag.spv

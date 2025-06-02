@@ -15,6 +15,7 @@ namespace ProjectA {
 			void* getMappedRange(uint64 offset, uint64 size) const override;
 
 		private:
-			GLbitfield access;
+			GLbitfield storageAccessFlags = 0;
+			GLbitfield mapAccessFlags = 0;
 	};
 }

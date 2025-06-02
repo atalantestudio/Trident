@@ -20,6 +20,9 @@ in VertexOutput {
 } vertexOutput;
 
 layout(set = 0, binding = 0) uniform Camera {
+	// Unused.
+	mat3x3 projection;
+
 	// Spacing multiplier, in px.
 	float zoomLevel;
 } camera;

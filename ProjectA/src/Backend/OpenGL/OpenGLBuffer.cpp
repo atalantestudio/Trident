@@ -10,13 +10,31 @@ namespace ProjectA {
 
 		glCreateBuffers(1, &object);
 
-		access = GL_MAP_WRITE_BIT;
+		if (
+			(descriptor.memoryProperties & MemoryProperty::HOST_VISIBLE) ||
+			(descriptor.memoryProperties & MemoryProperty::HOST_COHERENT) ||
+			(descriptor.memoryProperties & MemoryProperty::HOST_CACHED)
+		) {
+			mapAccessFlags |= GL_MAP_WRITE_BIT;
 
-		if (descriptor.persistent) {
-			access |= GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+			if (!descriptor.persistent) {
+				storageAccessFlags |= GL_CLIENT_STORAGE_BIT;
+			}
 		}
 
-		glNamedBufferStorage(object, size, nullptr, access);
+		if (descriptor.persistent) {
+			DEBUG_ASSERT(mapAccessFlags & GL_MAP_WRITE_BIT);
+
+			mapAccessFlags |= GL_MAP_PERSISTENT_BIT;
+
+			if (descriptor.memoryProperties & MemoryProperty::HOST_COHERENT) {
+				mapAccessFlags |= GL_MAP_COHERENT_BIT;
+			}
+		}
+
+		storageAccessFlags |= mapAccessFlags;
+
+		glNamedBufferStorage(object, size, nullptr, storageAccessFlags);
 	}
 
 	OpenGLBuffer::~OpenGLBuffer() {
@@ -30,7 +48,7 @@ namespace ProjectA {
 	}
 
 	void* OpenGLBuffer::getMappedRange(uint64 offset, uint64 size) const {
-		void* mappedRange = glMapNamedBufferRange(object, offset, size, access);
+		void* mappedRange = glMapNamedBufferRange(object, offset, size, mapAccessFlags);
 
 		ENGINE_ASSERT(mappedRange != nullptr, "Failed to map OpenGL buffer range.");
 

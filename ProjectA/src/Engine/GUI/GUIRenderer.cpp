@@ -91,6 +91,7 @@ namespace ProjectA {
 		BufferDescriptor vertexBufferDescriptor;
 		vertexBufferDescriptor.size = size;
 		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 
@@ -128,11 +129,12 @@ namespace ProjectA {
 
 		indexStagingBuffer->unmap();
 
-		BufferDescriptor bufferDescriptor;
-		bufferDescriptor.size = size;
-		bufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
+		BufferDescriptor indexBufferDescriptor;
+		indexBufferDescriptor.size = size;
+		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
+		indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
-		indexBuffer = createBuffer(bufferDescriptor);
+		indexBuffer = createBuffer(indexBufferDescriptor);
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -154,6 +156,7 @@ namespace ProjectA {
 		BufferDescriptor subcomponentBufferDescriptor;
 		subcomponentBufferDescriptor.size = subcomponentBufferSize;
 		subcomponentBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		subcomponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		subcomponentBufferDescriptor.persistent = true;
 
 		subcomponentBuffer = createBuffer(subcomponentBufferDescriptor);
@@ -164,6 +167,7 @@ namespace ProjectA {
 		BufferDescriptor glyphSubcomponentBufferDescriptor;
 		glyphSubcomponentBufferDescriptor.size = glyphSubcomponentBufferSize;
 		glyphSubcomponentBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		glyphSubcomponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		glyphSubcomponentBufferDescriptor.persistent = true;
 
 		glyphSubcomponentBuffer = createBuffer(glyphSubcomponentBufferDescriptor);
@@ -174,6 +178,7 @@ namespace ProjectA {
 		BufferDescriptor cameraBufferDescriptor;
 		cameraBufferDescriptor.size = sizeof(mat3x3<float32>);
 		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
+		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		cameraBufferDescriptor.persistent = true;
 
 		cameraBuffer = createBuffer(cameraBufferDescriptor);
