@@ -68,10 +68,13 @@ namespace ProjectA {
 		componentOrigin[VERTICAL] = 0;
 		layoutDirection = VERTICAL;
 		layoutSpacing = 0;
+
+		// TODO: Use swapchain extent instead of window extent?
 		currentContainerSize = {
 			static_cast<sint16>(Application::get().getWindow().getSize()[0]),
 			static_cast<sint16>(Application::get().getWindow().getSize()[0]),
 		};
+
 		currentContainerInnerSize = currentContainerSize;
 
 		GUI();

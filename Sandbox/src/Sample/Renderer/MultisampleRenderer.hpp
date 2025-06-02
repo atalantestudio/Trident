@@ -135,6 +135,8 @@ namespace ProjectA {
 			}
 
 			void resize(WindowResizeEvent& event) override {
+				updateMultisampleAttachment();
+
 				const ref<Swapchain>& swapchain = getSwapchain();
 
 				swapchain->getImages(renderPass);
@@ -142,10 +144,12 @@ namespace ProjectA {
 
 		private:
 			void updateMultisampleAttachment() {
+				const ref<Swapchain>& swapchain = getSwapchain();
+
 				AttachmentImageDescriptor multisampleAttachmentImageDescriptor{};
 				multisampleAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-				multisampleAttachmentImageDescriptor.width = Application::get().getWindow().getSize()[0];
-				multisampleAttachmentImageDescriptor.height = Application::get().getWindow().getSize()[1];
+				multisampleAttachmentImageDescriptor.width = swapchain->getExtentWidth();
+				multisampleAttachmentImageDescriptor.height = swapchain->getExtentHeight();
 				multisampleAttachmentImageDescriptor.depth = 1;
 				multisampleAttachmentImageDescriptor.mipLevelCount = 1;
 				multisampleAttachmentImageDescriptor.arrayLayerCount = 1;

@@ -176,10 +176,12 @@ namespace ProjectA {
 
 		private:
 			void updateDepthStencilAttachment() {
+				const ref<Swapchain>& swapchain = getSwapchain();
+
 				AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
 				depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-				depthStencilAttachmentImageDescriptor.width = Application::get().getWindow().getSize()[0];
-				depthStencilAttachmentImageDescriptor.height = Application::get().getWindow().getSize()[1];
+				depthStencilAttachmentImageDescriptor.width = swapchain->getExtentWidth();
+				depthStencilAttachmentImageDescriptor.height = swapchain->getExtentHeight();
 				depthStencilAttachmentImageDescriptor.depth = 1;
 				depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
 				depthStencilAttachmentImageDescriptor.arrayLayerCount = 1;

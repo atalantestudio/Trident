@@ -12,7 +12,7 @@
 #define RENDERER_TRIANGLE 7
 
 // Select the renderer to view.
-#define RENDERER RENDERER_COMPUTE_SHADER
+#define RENDERER RENDERER_MULTISAMPLE
 
 #if RENDERER == RENDERER_COLOR_BLEND
 	#include "../Renderer/ColorBlendRenderer.hpp"

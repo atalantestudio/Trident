@@ -12,14 +12,6 @@ namespace ProjectA {
 		return imageCount;
 	}
 
-	uint32 OpenGLSwapchain::getExtentWidth() const {
-		return extentWidth;
-	}
-
-	uint32 OpenGLSwapchain::getExtentHeight() const {
-		return extentHeight;
-	}
-
 	// TODO: Fix memory leak when resizing on the depth test and multisample demos.
 	void OpenGLSwapchain::getImages(const ref<RenderPass>& renderPass) {
 		const ref<OpenGLRenderPass>& glRenderPass = std::static_pointer_cast<OpenGLRenderPass>(renderPass);
@@ -150,8 +142,8 @@ namespace ProjectA {
 	void OpenGLSwapchain::construct(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		DEBUG_ASSERT(descriptor.extentWidth > 0 && descriptor.extentWidth < std::numeric_limits<uint32>::max());
-		DEBUG_ASSERT(descriptor.extentHeight > 0 && descriptor.extentHeight < std::numeric_limits<uint32>::max());
+		DEBUG_ASSERT(descriptor.extentWidth > 0);
+		DEBUG_ASSERT(descriptor.extentHeight > 0);
 
 		extentWidth = descriptor.extentWidth;
 		extentHeight = descriptor.extentHeight;

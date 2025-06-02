@@ -3,7 +3,6 @@
 #include "Physics2DRenderer.hpp"
 
 #include "Engine/API/Material/ColorMaterial.hpp"
-#include "Engine/Application.hpp"
 
 namespace ProjectA {
 	Physics2DRenderer::Physics2DRenderer() {
@@ -68,10 +67,12 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::updateColorAttachment() {
+		const ref<Swapchain>& swapchain = getSwapchain();
+
 		AttachmentImageDescriptor colorAttachmentImageDescriptor{};
 		colorAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		colorAttachmentImageDescriptor.width = Application::get().getWindow().getSize()[0];
-		colorAttachmentImageDescriptor.height = Application::get().getWindow().getSize()[1];
+		colorAttachmentImageDescriptor.width = swapchain->getExtentWidth();
+		colorAttachmentImageDescriptor.height = swapchain->getExtentHeight();
 		colorAttachmentImageDescriptor.depth = 1;
 		colorAttachmentImageDescriptor.mipLevelCount = 1;
 		colorAttachmentImageDescriptor.arrayLayerCount = 1;
@@ -86,10 +87,12 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::updateDepthStencilAttachment() {
+		const ref<Swapchain>& swapchain = getSwapchain();
+
 		AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
 		depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		depthStencilAttachmentImageDescriptor.width = Application::get().getWindow().getSize()[0];
-		depthStencilAttachmentImageDescriptor.height = Application::get().getWindow().getSize()[1];
+		depthStencilAttachmentImageDescriptor.width = swapchain->getExtentWidth();
+		depthStencilAttachmentImageDescriptor.height = swapchain->getExtentHeight();
 		depthStencilAttachmentImageDescriptor.depth = 1;
 		depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
 		depthStencilAttachmentImageDescriptor.arrayLayerCount = 1;

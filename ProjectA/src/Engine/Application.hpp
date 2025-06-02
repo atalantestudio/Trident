@@ -22,7 +22,7 @@ namespace ProjectA {
 	struct ApplicationManifest {
 		std::string_view projectName;
 
-		// TODO: Window icon
+		// TODO: Handle custom window icon.
 	};
 
 	class Application {
@@ -80,6 +80,8 @@ namespace ProjectA {
 
 			void postRender();
 
+			void resize();
+
 			void onEvent(Event& event);
 
 			void onWindowResize(WindowResizeEvent& event);
@@ -106,15 +108,16 @@ namespace ProjectA {
 		private:
 			scope<Mutex> mutex;
 			scope<SharedMemory> sharedMemory;
-			SharedMemoryData* sharedMemoryData;
+			SharedMemoryData* sharedMemoryData = nullptr;
 			HighResolutionTimer timer;
-			Window* window;
+			Window* window = nullptr;
 
-			PropertyFile* propertyFile;
+			PropertyFile* propertyFile = nullptr;
 
 			LayerStack layerStack;
 
 			bool looping = true;
+			bool windowResized = false;
 
 			float64 previousTime = 0.0;
 			float64 frameTime = 0.0;

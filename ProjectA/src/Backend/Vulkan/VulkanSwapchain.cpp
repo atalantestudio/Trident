@@ -29,14 +29,6 @@ namespace ProjectA {
 		return imageCount;
 	}
 
-	uint32 VulkanSwapchain::getExtentWidth() const {
-		return surface.window.getSize()[0];
-	}
-
-	uint32 VulkanSwapchain::getExtentHeight() const {
-		return surface.window.getSize()[1];
-	}
-
 	void VulkanSwapchain::update(const SwapchainDescriptor& descriptor) {
 		destroy();
 		construct(descriptor);
@@ -90,8 +82,8 @@ namespace ProjectA {
 		framebufferCreateInfo.flags = 0;
 		framebufferCreateInfo.renderPass = vkRenderPass->object;
 		framebufferCreateInfo.attachmentCount = attachmentCount;
-		framebufferCreateInfo.width = surface.window.getSize()[0];
-		framebufferCreateInfo.height = surface.window.getSize()[1];
+		framebufferCreateInfo.width = extentWidth;
+		framebufferCreateInfo.height = extentHeight;
 		framebufferCreateInfo.layers = 1;
 
 		const std::vector<ref<ImageView>>& colorAttachmentImageViews = renderPass->getColorAttachmentImageViews();
@@ -151,6 +143,12 @@ namespace ProjectA {
 	void VulkanSwapchain::construct(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
+		DEBUG_ASSERT(descriptor.extentWidth > 0);
+		DEBUG_ASSERT(descriptor.extentHeight > 0);
+
+		extentWidth = descriptor.extentWidth;
+		extentHeight = descriptor.extentHeight;
+
 		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities();
 		const uint32 minImageCount = surfaceCapabilities.minImageCount + 1;
 		const VkSwapchainKHR oldSwapchain = object;
@@ -163,8 +161,8 @@ namespace ProjectA {
 		swapchainCreateInfo.minImageCount = minImageCount;
 		swapchainCreateInfo.imageFormat = surface.format.format;
 		swapchainCreateInfo.imageColorSpace = surface.format.colorSpace;
-		swapchainCreateInfo.imageExtent.width = descriptor.extentWidth;
-		swapchainCreateInfo.imageExtent.height = descriptor.extentHeight;
+		swapchainCreateInfo.imageExtent.width = extentWidth;
+		swapchainCreateInfo.imageExtent.height = extentHeight;
 		swapchainCreateInfo.imageArrayLayers = 1;
 		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 

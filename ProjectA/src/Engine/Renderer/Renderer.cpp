@@ -17,7 +17,7 @@ namespace ProjectA {
 	scope<GraphicsAdapter> Renderer::adapter = nullptr;
 	uint32 Renderer::imageIndex = 0;
 	ref<Swapchain> Renderer::swapchain = nullptr;
-	ref<CommandEncoder> Renderer::commandEncoder = nullptr;
+	std::array<ref<CommandEncoder>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::commandEncoders;
 	std::array<ref<Semaphore>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::availableImageSemaphores;
 	std::array<ref<Semaphore>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::finishedRenderSemaphores;
 	std::array<ref<Fence>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::flightFences;
@@ -67,9 +67,8 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
-		commandEncoder = adapter->getDevice()->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
-
 		for (uint32 frameIndex = 0; frameIndex < MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
+			commandEncoders[frameIndex] = adapter->getDevice()->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 			availableImageSemaphores[frameIndex] = adapter->createSemaphore();
 			finishedRenderSemaphores[frameIndex] = adapter->createSemaphore();
 			flightFences[frameIndex] = adapter->createFence();
@@ -154,8 +153,8 @@ namespace ProjectA {
 		return availableImageSemaphores[frameInFlightIndex];
 	}
 
-	const ref<CommandEncoder>& Renderer::getCommandEncoder() {
-		return commandEncoder;
+	const ref<CommandEncoder>& Renderer::getCommandEncoder(uint32 frameInFlightIndex) {
+		return commandEncoders[frameInFlightIndex];
 	}
 
 	ref<Device> Renderer::getDevice() {
@@ -186,5 +185,9 @@ namespace ProjectA {
 		const std::vector<uint8> code = Filesystem::loadByteBuffer(path);
 
 		return adapter->createShaderModule(code, descriptor);
+	}
+
+	void Renderer::setImageIndex(uint32 imageIndex) {
+		Renderer::imageIndex = imageIndex;
 	}
 }

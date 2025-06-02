@@ -53,7 +53,7 @@ namespace ProjectA {
 
 			static const ref<Semaphore>& getAvailableImageSemaphore(uint32 frameInFlightIndex);
 
-			static const ref<CommandEncoder>& getCommandEncoder();
+			static const ref<CommandEncoder>& getCommandEncoder(uint32 frameInFlightIndex);
 
 			static ref<Device> getDevice();
 
@@ -70,6 +70,8 @@ namespace ProjectA {
 			// Loads and returns a SPIR-V shader module.
 			static ref<ShaderModule> loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor);
 
+			static void setImageIndex(uint32 imageIndex);
+
 		private:
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -83,7 +85,7 @@ namespace ProjectA {
 			static ref<Swapchain> swapchain;
 
 			// TODO: Use scope.
-			static ref<CommandEncoder> commandEncoder;
+			static std::array<ref<CommandEncoder>, MAX_FRAMES_IN_FLIGHT> commandEncoders;
 
 			// TODO: Use scope.
 			static std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> availableImageSemaphores;

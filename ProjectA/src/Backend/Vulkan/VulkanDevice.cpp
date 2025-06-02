@@ -142,8 +142,10 @@ namespace ProjectA {
 		}
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-			return AcquireNextImageStatus::SUBOPTIMAL;
+			return AcquireNextImageStatus::ERROR_OUT_OF_DATE;
 		}
+
+		DEBUG_ASSERT(false);
 
 		return AcquireNextImageStatus::ERROR_UNHANDLED;
 	}

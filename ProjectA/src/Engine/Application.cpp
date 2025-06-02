@@ -206,14 +206,18 @@ namespace ProjectA {
 		previousTime = timer.getCurrentTime();
 
 		while (looping) {
+			window->processMessages();
+
 			processFrame();
 		}
+
+		const ref<Device> device = Renderer::getDevice();
+
+		device->waitIdle();
 	}
 
 	void Application::processFrame() {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		window->processMessages();
 
 		const float64 currentTime = timer.getCurrentTime();
 
@@ -264,9 +268,31 @@ namespace ProjectA {
 		PROFILE_SCOPE("Application render");
 
 		const ref<Device> device = Renderer::getDevice();
-		const ref<CommandEncoder>& commandEncoder = Renderer::getCommandEncoder();
 
-		Renderer::acquireNextImage(Renderer::getSwapchain());
+		device->waitForFence(Renderer::getFlightFence(frameInFlightIndex));
+
+		uint32 imageIndex;
+
+		const AcquireNextImageStatus status = device->acquireNextImage(Renderer::getSwapchain(), Renderer::getAvailableImageSemaphore(frameInFlightIndex), imageIndex);
+
+		if (status == AcquireNextImageStatus::ERROR_OUT_OF_DATE) {
+			ENGINE_DEBUG("Recreating out-of-date swapchain.");
+
+			// TODO: Test this path.
+			DEBUG_ASSERT(false);
+
+			resize();
+
+			return;
+		}
+
+		ENGINE_ASSERT(status == AcquireNextImageStatus::SUBOPTIMAL || status == AcquireNextImageStatus::SUCCESS, "Failed to acquire the next swapchain image.");
+
+		device->resetFence(Renderer::getFlightFence(frameInFlightIndex));
+
+		Renderer::setImageIndex(imageIndex);
+
+		const ref<CommandEncoder>& commandEncoder = Renderer::getCommandEncoder(frameInFlightIndex);
 
 		commandEncoder->reset();
 		commandEncoder->begin();
@@ -290,18 +316,17 @@ namespace ProjectA {
 			{Renderer::getImageIndex()}
 		);
 
-		if (presentStatus == PresentStatus::SUBOPTIMAL || presentStatus == PresentStatus::ERROR_OUT_OF_DATE) {
-			ENGINE_ERROR("The present status is either suboptimal or out of date.");
+		if (presentStatus == PresentStatus::ERROR_OUT_OF_DATE || presentStatus == PresentStatus::SUBOPTIMAL || windowResized) {
+			ENGINE_INFO("Recreating the swapchain.");
 
-			// TODO: Call window resize here?
-			DEBUG_ASSERT(false);
+			windowResized = false;
+
+			resize();
 
 			return;
 		}
 
 		ENGINE_ASSERT(presentStatus == PresentStatus::SUCCESS, "Unhandled present status.");
-
-		device->waitIdle();
 	}
 
 	void Application::postRender() {
@@ -310,6 +335,23 @@ namespace ProjectA {
 		for (const ref<Layer>& layer : layerStack) {
 			layer->postRender();
 		}
+	}
+
+	void Application::resize() {
+		const ref<Device> device = Renderer::getDevice();
+
+		device->waitIdle();
+
+		WindowResizeEvent event(window->getSize()[0], window->getSize()[1]);
+
+		SwapchainDescriptor swapchainDescriptor;
+		swapchainDescriptor.extentWidth = event.getWidth();
+		swapchainDescriptor.extentHeight = event.getHeight();
+
+		Renderer::getSwapchain()->update(swapchainDescriptor);
+
+		// Propagate the event to the layer stack.
+		onEvent(event);
 	}
 
 	void Application::close() {
@@ -335,18 +377,7 @@ namespace ProjectA {
 			return;
 		}
 
-		const ref<Device> device = Renderer::getDevice();
-
-		device->waitIdle();
-
-		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.extentWidth = event.getWidth();
-		swapchainDescriptor.extentHeight = event.getHeight();
-
-		Renderer::getSwapchain()->update(swapchainDescriptor);
-
-		// Propagate the event to the layer stack.
-		onEvent(event);
+		windowResized = true;
 	}
 
 	void Application::onWindowClose(WindowCloseEvent& event) {

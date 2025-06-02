@@ -92,8 +92,10 @@ namespace ProjectA {
 		}
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-			return PresentStatus::SUBOPTIMAL;
+			return PresentStatus::ERROR_OUT_OF_DATE;
 		}
+
+		DEBUG_ASSERT(false);
 
 		return PresentStatus::ERROR_UNHANDLED;
 	}

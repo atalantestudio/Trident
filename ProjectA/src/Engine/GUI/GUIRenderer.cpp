@@ -1,6 +1,5 @@
 #include "pch.hpp"
 
-#include "Engine/Application.hpp"
 #include "Engine/Filesystem/File/PNGFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
@@ -52,10 +51,12 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::updateColorAttachment() {
+		const ref<Swapchain>& swapchain = getSwapchain();
+
 		AttachmentImageDescriptor colorAttachmentImageDescriptor{};
 		colorAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		colorAttachmentImageDescriptor.width = Application::get().getWindow().getSize()[0];
-		colorAttachmentImageDescriptor.height = Application::get().getWindow().getSize()[1];
+		colorAttachmentImageDescriptor.width = swapchain->getExtentWidth();
+		colorAttachmentImageDescriptor.height = swapchain->getExtentHeight();
 		colorAttachmentImageDescriptor.depth = 1;
 		colorAttachmentImageDescriptor.mipLevelCount = 1;
 		colorAttachmentImageDescriptor.arrayLayerCount = 1;

@@ -162,6 +162,7 @@ namespace ProjectA {
 					break;
 			}
 
+			// TODO: Check https://vulkan.lunarg.com/doc/sdk/1.4.309.0/windows/error_messages.html to improve logging.
 			return VK_FALSE;
 		}
 	#endif

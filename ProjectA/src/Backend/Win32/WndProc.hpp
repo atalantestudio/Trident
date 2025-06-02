@@ -247,6 +247,7 @@ namespace ProjectA {
 		switch (Msg) {
 			case WM_MOVE: {
 				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-move.
+
 				windowData->positionX = GET_X_LPARAM(lParam);
 				windowData->positionY = GET_Y_LPARAM(lParam);
 
@@ -254,14 +255,20 @@ namespace ProjectA {
 			}
 			case WM_SIZE: {
 				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-size.
-				windowData->sizeX = GET_X_LPARAM(lParam);
-				windowData->sizeY = GET_Y_LPARAM(lParam);
+
+				const sint32 width = GET_X_LPARAM(lParam);
+				const sint32 height = GET_Y_LPARAM(lParam);
+
+				if (windowData->sizeX != width || windowData->sizeY != height) {
+					WindowResizeEvent windowResizeEvent(width, height);
+
+					windowData->windowResizeEventListener(windowResizeEvent);
+				}
+
+				windowData->sizeX = width;
+				windowData->sizeY = height;
 				windowData->minimized = wParam == SIZE_MINIMIZED;
 				windowData->maximized = wParam == SIZE_MAXIMIZED;
-
-				WindowResizeEvent windowResizeEvent(windowData->sizeX, windowData->sizeY);
-
-				windowData->windowResizeEventListener(windowResizeEvent);
 
 				return 0;
 			}
@@ -277,6 +284,7 @@ namespace ProjectA {
 			}
 			case WM_CLOSE: {
 				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-close.
+
 				WindowCloseEvent windowCloseEvent;
 
 				windowData->windowCloseEventListener(windowCloseEvent);
@@ -285,6 +293,7 @@ namespace ProjectA {
 			}
 			case WM_SETCURSOR: {
 				// See https://learn.microsoft.com/en-us/windows/win32/menurc/wm-setcursor.
+
 				if (LOWORD(lParam) == HTCLIENT) {
 					SetCursor(windowClassData->hCursor);
 
@@ -295,6 +304,7 @@ namespace ProjectA {
 			}
 			case WM_MOUSEMOVE: {
 				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove.
+
 				windowData->cursorX = GET_X_LPARAM(lParam);
 				windowData->cursorY = GET_Y_LPARAM(lParam);
 
@@ -306,6 +316,7 @@ namespace ProjectA {
 			}
 			case WM_LBUTTONDOWN: {
 				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttondown.
+
 				MouseDownEvent mouseDownEvent(MouseButton::LEFT);
 
 				windowData->mouseDownEventListener(mouseDownEvent);
@@ -314,6 +325,7 @@ namespace ProjectA {
 			}
 			case WM_LBUTTONUP: {
 				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-lbuttonup.
+
 				MouseUpEvent mouseUpEvent(MouseButton::LEFT);
 
 				windowData->mouseUpEventListener(mouseUpEvent);
@@ -322,6 +334,7 @@ namespace ProjectA {
 			}
 			case WM_MOUSEWHEEL: {
 				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousewheel.
+
 				const sint16 wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 
 				MouseWheelEvent mouseWheelEvent(wheelDelta);
