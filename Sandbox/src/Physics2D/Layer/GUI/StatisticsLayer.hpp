@@ -4,7 +4,7 @@ namespace ProjectA {
 	class StatisticsLayer : public GUILayer {
 		public:
 			StatisticsLayer() :
-				framesPerSecond(Application::get().getFramesPerSecond())
+				framesPerSecond(Application::getFramesPerSecond())
 			{}
 
 			void GUI() override {
@@ -12,7 +12,7 @@ namespace ProjectA {
 
 				if (frameIndex == FRAME_DELAY) {
 					frameIndex = 0;
-					framesPerSecond = Application::get().getFramesPerSecond();
+					framesPerSecond = Application::getFramesPerSecond();
 				}
 
 				GUIContainer({212px, EXPAND}, {8px, 8px}, VERTICAL, 8px) {

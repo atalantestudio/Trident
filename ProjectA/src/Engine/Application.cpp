@@ -11,12 +11,15 @@
 
 namespace ProjectA {
 	Application* Application::instance = nullptr;
+	bool Application::looping = true;
+	bool Application::windowResized = false;
+	float64 Application::previousTime = 0.0;
+	float64 Application::frameTime = 0.0;
+	float64 Application::frameTimeAccumulator = 0.0;
+	uint32 Application::frameIndex = 0;
+	uint32 Application::frameInFlightIndex = 0;
 
-	Application& Application::get() {
-		return *instance;
-	}
-
-	std::string Application::getWindowName(std::string_view projectName, uint8 instanceCount) {
+	std::string Application::formatWindowName(std::string_view projectName, uint8 instanceCount) {
 		if (instanceCount == 0) {
 			return std::string(projectName);
 		}
@@ -71,7 +74,7 @@ namespace ProjectA {
 		}
 
 		WindowDescriptor windowDescriptor{};
-		windowDescriptor.name = getWindowName(applicationManifest.projectName, sharedMemoryData->instanceCount);
+		windowDescriptor.name = formatWindowName(applicationManifest.projectName, sharedMemoryData->instanceCount);
 		windowDescriptor.width = propertyFile->getProperty<uint32>("ExtentWidth");
 		windowDescriptor.height = propertyFile->getProperty<uint32>("ExtentHeight");
 		windowDescriptor.mouseDownEventListener = BIND(Application::onEvent);
@@ -177,15 +180,11 @@ namespace ProjectA {
 		delete propertyFile;
 	}
 
-	const Window& Application::getWindow() const {
-		return *window;
-	}
-
-	float64 Application::getCurrentFrameTime() const {
+	float64 Application::getCurrentFrameTime() {
 		return frameTime;
 	}
 
-	float64 Application::getFramesPerSecond() const {
+	float64 Application::getFramesPerSecond() {
 		if (frameTime == 0.0) {
 			return 0.0;
 		}
@@ -193,10 +192,6 @@ namespace ProjectA {
 		const float64 rendersPerSecond = 1000.0 / frameTime;
 
 		return rendersPerSecond / 1000.0;
-	}
-
-	uint32 Application::getFrameInFlightIndex() const {
-		return frameInFlightIndex;
 	}
 
 	void Application::loop() {

@@ -1,17 +1,8 @@
 #pragma once
 
-#include "Engine/API/Event/Window/WindowCloseEvent.hpp"
-#include "Engine/API/Event/Window/WindowResizeEvent.hpp"
-#include "Engine/API/Event/WindowEvent.hpp"
-#include "Engine/API/Rendering/CommandEncoder.hpp"
-#include "Engine/API/Rendering/Swapchain.hpp"
 #include "Engine/API/SharedMemory/SharedMemory.hpp"
-#include "Engine/API/Synchronization/Fence.hpp"
 #include "Engine/API/Synchronization/Mutex.hpp"
-#include "Engine/API/Synchronization/Semaphore.hpp"
 #include "Engine/API/Timer/HighResolutionTimer.hpp"
-#include "Engine/API/Window/Window.hpp"
-#include "Engine/base.hpp"
 #include "Engine/Filesystem/File/PropertyFile.hpp"
 #include "Engine/Layer/LayerStack.hpp"
 
@@ -27,24 +18,18 @@ namespace ProjectA {
 
 	class Application {
 		public:
-			static Application& get();
-
-			static std::string getWindowName(std::string_view projectName, uint8 instanceCount);
+			static std::string formatWindowName(std::string_view projectName, uint8 instanceCount);
 
 		public:
 			Application(const ApplicationManifest& applicationManifest);
 
 			virtual ~Application();
 
-			const Window& getWindow() const;
-
 			// Returns the current frame time, in seconds.
-			float64 getCurrentFrameTime() const;
+			static float64 getCurrentFrameTime();
 
 			// Returns the average frames per second count.
-			float64 getFramesPerSecond() const;
-
-			uint32 getFrameInFlightIndex() const;
+			static float64 getFramesPerSecond();
 
 			template<typename T, typename... U>
 			void registerLayer(U&&... arguments) {
@@ -94,7 +79,7 @@ namespace ProjectA {
 		private:
 			static constexpr float64 RENDERS_PER_SECOND = 165.0;
 
-			static constexpr float64 fixedDeltaTime = lyah::rcp(165.0);
+			static constexpr float64 fixedDeltaTime = 1.0 / 165.0;
 
 		public:
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
@@ -107,28 +92,26 @@ namespace ProjectA {
 		private:
 			static Application* instance;
 
+			static bool looping;
+			static bool windowResized;
+
+			static float64 previousTime;
+			static float64 frameTime;
+			static float64 frameTimeAccumulator;
+
+			static uint32 frameIndex;
+
+			// In the range [0, MAX_FRAMES_IN_FLIGHT].
+			static uint32 frameInFlightIndex;
+
 		private:
 			scope<Mutex> mutex;
 			scope<SharedMemory> sharedMemory;
 			SharedMemoryData* sharedMemoryData = nullptr;
 			HighResolutionTimer timer;
 			Window* window = nullptr;
-
 			PropertyFile* propertyFile = nullptr;
-
 			LayerStack layerStack;
-
-			bool looping = true;
-			bool windowResized = false;
-
-			float64 previousTime = 0.0;
-			float64 frameTime = 0.0;
-			float64 frameTimeAccumulator = 0.0;
-
-			uint32 frameIndex = 0;
-
-			// In the range [0, MAX_FRAMES_IN_FLIGHT].
-			uint32 frameInFlightIndex = 0;
 	};
 
 	Application* createApplication();

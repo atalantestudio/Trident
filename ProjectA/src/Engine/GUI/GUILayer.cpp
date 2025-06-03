@@ -64,17 +64,16 @@ namespace ProjectA {
 	void GUILayer::preRender() {
 		//updateScriptComponents();
 
+		const ref<Swapchain>& swapchain = Renderer::getSwapchain();
+
 		componentOrigin[HORIZONTAL] = 0;
 		componentOrigin[VERTICAL] = 0;
 		layoutDirection = VERTICAL;
 		layoutSpacing = 0;
-
-		// TODO: Use swapchain extent instead of window extent?
 		currentContainerSize = {
-			static_cast<sint16>(Application::get().getWindow().getSize()[0]),
-			static_cast<sint16>(Application::get().getWindow().getSize()[0]),
+			static_cast<sint16>(swapchain->getExtentWidth()),
+			static_cast<sint16>(swapchain->getExtentHeight()),
 		};
-
 		currentContainerInnerSize = currentContainerSize;
 
 		GUI();

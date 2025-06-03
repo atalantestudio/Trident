@@ -74,13 +74,6 @@ namespace ProjectA {
 		}
 	}
 
-	void Renderer::getWindowExtent(sint32& extentWidth, sint32& extentHeight) {
-		const sint32* size = Application::get().getWindow().getSize();
-
-		extentWidth = size[0];
-		extentHeight = size[1];
-	}
-
 	void Renderer::onEvent(Event& event) {}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {

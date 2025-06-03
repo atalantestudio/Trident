@@ -16,8 +16,6 @@ namespace ProjectA {
 
 			static void build(const Window& window, GraphicsAPI graphicsAPI);
 
-			static void getWindowExtent(sint32& extentWidth, sint32& extentHeight);
-
 		public:
 			virtual void render(const ref<CommandEncoder>& commandEncoder) const = 0;
 
