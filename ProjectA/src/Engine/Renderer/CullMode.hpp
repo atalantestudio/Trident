@@ -1,7 +1,5 @@
 #pragma once
 
-#include "pch.hpp"
-
 namespace ProjectA {
 	enum class CullMode : uint8 {
 		NONE = 0,

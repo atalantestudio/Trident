@@ -1,7 +1,5 @@
 #pragma once
 
-#include "pch.hpp"
-
 namespace ProjectA {
 	enum class PrimitiveTopology : uint8 {
 		// Specifies a series of separate point primitives.

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "pch.hpp"
-
 namespace ProjectA {
 	// Trims whitespace - white lines not included.
 	inline std::string trim(const std::string& string) {

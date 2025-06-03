@@ -1,7 +1,5 @@
 #pragma once
 
-#include "pch.hpp"
-
 namespace ProjectA {
 	enum class FrontFace : uint32 {
 		CLOCKWISE = 0,

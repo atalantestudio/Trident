@@ -25,7 +25,7 @@ namespace ProjectA {
 			virtual void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) = 0;
 
 			// Binds all descriptor sets linked to the current pipeline.
-			// TODO: Change the API to take in argument arbitrary descriptor sets .
+			// TODO: Change the API to take in argument arbitrary descriptor sets.
 			virtual void bindAllDescriptorSets() = 0;
 
 			template<typename IndexType>
