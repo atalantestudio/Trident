@@ -34,7 +34,7 @@ extern "C" {
 			delete application;
 		}
 
-		return 0;
+		return EXIT_SUCCESS;
 	}
 #else
 	#error "Unhandled platform."

@@ -96,6 +96,8 @@ namespace ProjectA {
 
 		Renderer::build(*window, graphicsApi);
 
+		window->show();
+
 		/* Constants */
 
 		// API_QUEUE = Graphics API listed by priority.
@@ -195,8 +197,6 @@ namespace ProjectA {
 	}
 
 	void Application::loop() {
-		window->show();
-
 		previousTime = timer.getCurrentTime();
 
 		while (looping) {
@@ -213,11 +213,11 @@ namespace ProjectA {
 	void Application::processFrame() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const float64 currentTime = timer.getCurrentTime();
+		/*const float64 currentTime = timer.getCurrentTime();
 
 		frameTime = currentTime - previousTime;
 		previousTime = currentTime;
-		frameTimeAccumulator += frameTime;
+		frameTimeAccumulator += frameTime;*/
 
 		/*while (frameTimeAccumulator >= fixedDeltaTime) {
 			update(fixedDeltaTime);
@@ -225,21 +225,21 @@ namespace ProjectA {
 			// Extract the fixed delta time from the accumulator.
 			// What's left is passed on to the next frame.
 			frameTimeAccumulator -= fixedDeltaTime;
-		}*/
+		}
 
-		if (window->isMinimized()) {
+		/*if (window->isMinimized()) {
 			return;
 		}
 
-		preRender();
+		preRender();*/
 
 		// TODO: Interpolate between current time and frameTimeAccumulator.
 		// See https://gafferongames.com/post/fix_your_timestep.
 		render(frameTimeAccumulator);
 
-		postRender();
+		//postRender();
 
-		ENGINE_DEBUG("FrameIndex = []", frameIndex);
+		ENGINE_DEBUG("FrameIndex = [] / FrameInFlightIndex = []", frameIndex, frameInFlightIndex);
 
 		frameIndex += 1;
 		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -266,17 +266,19 @@ namespace ProjectA {
 
 		const ref<Device> device = Renderer::getDevice();
 
+		ENGINE_DEBUG("Fence signal: []", Renderer::getFlightFence(frameInFlightIndex)->isSignaled());
+
 		device->waitForFence(Renderer::getFlightFence(frameInFlightIndex));
 
 		uint32 imageIndex;
 
-		const AcquireNextImageStatus status = device->acquireNextImage(
+		const AcquireNextImageStatus acquireNextImageStatus = device->acquireNextImage(
 			Renderer::getSwapchain(),
 			Renderer::getAcquireNextImageSemaphore(frameInFlightIndex),
 			imageIndex
 		);
 
-		if (status == AcquireNextImageStatus::ERROR_OUT_OF_DATE) {
+		if (acquireNextImageStatus == AcquireNextImageStatus::ERROR_OUT_OF_DATE) {
 			ENGINE_DEBUG("Recreating out-of-date swapchain.");
 
 			// TODO: Test this path.
@@ -287,7 +289,7 @@ namespace ProjectA {
 			return;
 		}
 
-		ENGINE_ASSERT(status == AcquireNextImageStatus::SUBOPTIMAL || status == AcquireNextImageStatus::SUCCESS, "Failed to acquire the next swapchain image.");
+		ENGINE_ASSERT(acquireNextImageStatus == AcquireNextImageStatus::SUBOPTIMAL || acquireNextImageStatus == AcquireNextImageStatus::SUCCESS, "Failed to acquire the next swapchain image.");
 
 		device->resetFence(Renderer::getFlightFence(frameInFlightIndex));
 
@@ -306,14 +308,14 @@ namespace ProjectA {
 
 		device->getGraphicsQueue()->submit(
 			commandBuffer,
-			Renderer::getAcquireNextImageSemaphore(frameInFlightIndex),
-			Renderer::getFinishedRenderSemaphore(frameInFlightIndex),
-			Renderer::getFlightFence(frameInFlightIndex)
+			Renderer::getAcquireNextImageSemaphore(frameInFlightIndex), // Must be waited on before submitting.
+			Renderer::getFinishedRenderSemaphore(frameInFlightIndex), // Will be signaled once the command buffer has finished executing.
+			Renderer::getFlightFence(frameInFlightIndex) // Will be signaled once the command buffer has finished executing.
 		);
 
 		const PresentStatus presentStatus = device->getPresentQueue()->present(
 			{Renderer::getSwapchain()},
-			Renderer::getFinishedRenderSemaphore(frameInFlightIndex),
+			Renderer::getFinishedRenderSemaphore(frameInFlightIndex), // Must be waited on before presenting.
 			{Renderer::getImageIndex()}
 		);
 

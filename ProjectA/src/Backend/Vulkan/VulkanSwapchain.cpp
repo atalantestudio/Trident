@@ -144,7 +144,12 @@ namespace ProjectA {
 		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat(physicalDevice.object);
 		const VkPresentModeKHR presentMode = surface.selectPresentMode(physicalDevice.object);
 		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities(physicalDevice.object);
-		const uint32 minImageCount = surfaceCapabilities.minImageCount + 1;
+
+		uint32 minImageCount = surfaceCapabilities.minImageCount + 1;
+
+		if (surfaceCapabilities.maxImageCount > 0) {
+			minImageCount = std::min(minImageCount, surfaceCapabilities.maxImageCount);
+		}
 
 		VkExtent2D imageExtent{};
 

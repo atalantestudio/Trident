@@ -17,9 +17,9 @@ namespace ProjectA {
 	uint32 Renderer::imageIndex = 0;
 	ref<Swapchain> Renderer::swapchain = nullptr;
 	std::array<ref<CommandEncoder>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::commandEncoders;
+	std::array<ref<Fence>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::flightFences;
 	std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::acquireNextImageSemaphores;
 	std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::finishedRenderSemaphores;
-	std::array<ref<Fence>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::flightFences;
 
 	GraphicsAPI Renderer::getGraphicsApi() {
 		return graphicsApi;
@@ -68,9 +68,9 @@ namespace ProjectA {
 
 		for (uint32 frameIndex = 0; frameIndex < Application::MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
 			commandEncoders[frameIndex] = adapter->getDevice()->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+			flightFences[frameIndex] = adapter->createFence();
 			acquireNextImageSemaphores[frameIndex] = adapter->createSemaphore();
 			finishedRenderSemaphores[frameIndex] = adapter->createSemaphore();
-			flightFences[frameIndex] = adapter->createFence();
 		}
 	}
 

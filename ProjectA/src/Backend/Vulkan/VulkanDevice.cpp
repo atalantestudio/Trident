@@ -96,13 +96,12 @@ namespace ProjectA {
 	void VulkanDevice::waitForFence(const ref<Fence>& fence) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		// UINT64_MAX disables the timeout.
 		const VkResult result = vkWaitForFences(
 			object,
 			1,
 			&std::static_pointer_cast<VulkanFence>(fence)->object,
 			VK_TRUE,
-			UINT64_MAX
+			std::numeric_limits<uint64>::max()
 		);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to wait for Vulkan fence ([]).", string_VkResult(result));
@@ -123,14 +122,21 @@ namespace ProjectA {
 	AcquireNextImageStatus VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const VkResult result = vkAcquireNextImageKHR(
-			object,
-			std::static_pointer_cast<VulkanSwapchain>(swapchain)->object,
-			UINT64_MAX,
-			std::static_pointer_cast<VulkanSemaphore>(semaphore)->object,
-			VK_NULL_HANDLE,
-			&imageIndex
-		);
+		VkResult result;
+
+		// This tooks 0-1ms for the first ~400 frames, then 4-5ms (screen V-Sync).
+		{
+			// ScopeTimer scopeTimer;
+
+			result = vkAcquireNextImageKHR(
+				object,
+				std::static_pointer_cast<VulkanSwapchain>(swapchain)->object,
+				std::numeric_limits<uint64>::max(),
+				std::static_pointer_cast<VulkanSemaphore>(semaphore)->object,
+				VK_NULL_HANDLE,
+				&imageIndex
+			);
+		}
 
 		if (result == VK_SUCCESS) {
 			return AcquireNextImageStatus::SUCCESS;

@@ -200,7 +200,7 @@ namespace ProjectA {
 		}
 	}
 
-	void Window::waitMessage() {
+	void Window::waitMessage() const {
 		WIN32_ASSERT(WaitMessage() != 0);
 	}
 }

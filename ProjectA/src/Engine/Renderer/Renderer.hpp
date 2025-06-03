@@ -81,12 +81,12 @@ namespace ProjectA {
 			static std::array<ref<CommandEncoder>, Application::MAX_FRAMES_IN_FLIGHT> commandEncoders;
 
 			// TODO: Use scope.
+			static std::array<ref<Fence>, Application::MAX_FRAMES_IN_FLIGHT> flightFences;
+
+			// TODO: Use scope.
 			static std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> acquireNextImageSemaphores;
 
 			// TODO: Use scope.
 			static std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> finishedRenderSemaphores;
-
-			// TODO: Use scope.
-			static std::array<ref<Fence>, Application::MAX_FRAMES_IN_FLIGHT> flightFences;
 	};
 }

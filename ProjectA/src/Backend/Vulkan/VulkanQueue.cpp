@@ -31,13 +31,14 @@ namespace ProjectA {
 		if (waitSemaphore == nullptr) {
 			submitInfo.waitSemaphoreCount = 0;
 			submitInfo.pWaitSemaphores = nullptr;
+			submitInfo.pWaitDstStageMask = nullptr;
 		}
 		else {
 			submitInfo.waitSemaphoreCount = 1;
 			submitInfo.pWaitSemaphores = &std::static_pointer_cast<VulkanSemaphore>(waitSemaphore)->object;
+			submitInfo.pWaitDstStageMask = &vkCommandBuffer->pipelineStageFlags;
 		}
 
-		submitInfo.pWaitDstStageMask = &vkCommandBuffer->pipelineStageFlags;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &vkCommandBuffer->object;
 
