@@ -124,7 +124,7 @@ namespace ProjectA {
 
 		LPWSTR buffer = nullptr;
 
-		const DWORD nSize = FormatMessage(
+		const DWORD nSize = FormatMessageW(
 			FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			nullptr,
 			dwMessageId,

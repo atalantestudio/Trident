@@ -5,9 +5,8 @@
 #include "Backend/Win32/Surface.hpp"
 
 namespace ProjectA {
-	VulkanSurface::VulkanSurface(VkInstance instance, const VulkanPhysicalDevice& physicalDevice, const Window& window) :
+	VulkanSurface::VulkanSurface(VkInstance instance, const Window& window) :
 		instance(instance),
-		physicalDevice(physicalDevice.object),
 		window(window)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -20,22 +19,7 @@ namespace ProjectA {
 			#error "Unhandled platform."
 		#endif
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan surface (code: []).", result);
-
-		VkBool32 supported;
-
-		result = vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice.object, physicalDevice.graphicsQueueFamilyIndex, object, &supported);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan physical device surface support (code: []).", result);
-
-		if (supported) {
-			presentQueueFamilyIndex = physicalDevice.graphicsQueueFamilyIndex;
-		}
-
-		selectFormat();
-		selectPresentMode();
-
-		capabilities = getCapabilities();
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan surface ([]).", string_VkResult(result));
 	}
 
 	VulkanSurface::~VulkanSurface() {
@@ -44,64 +28,89 @@ namespace ProjectA {
 		vkDestroySurfaceKHR(instance, object, nullptr);
 	}
 
-	void VulkanSurface::selectFormat() {
+	void VulkanSurface::initPresentQueueFamilyIndex(VkPhysicalDevice physicalDevice, uint32 graphicsQueueFamilyIndex) {
+		VkBool32 supported;
+		VkResult result;
+
+		result = vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, graphicsQueueFamilyIndex, object, &supported);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan physical device surface support ([]).", string_VkResult(result));
+
+		if (supported) {
+			presentQueueFamilyIndex = graphicsQueueFamilyIndex;
+		}
+	}
+
+	VkSurfaceFormatKHR VulkanSurface::selectFormat(VkPhysicalDevice physicalDevice) const {
 		uint32 formatCount = 0;
 		VkResult result;
 
 		result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, object, &formatCount, nullptr);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface format count (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface format count ([]).", string_VkResult(result));
 
 		fchain<VkSurfaceFormatKHR> formats(formatCount);
 
 		result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, object, &formatCount, &formats[0]);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface formats (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface formats ([]).", string_VkResult(result));
 
-		for (const VkSurfaceFormatKHR& format : formats) {
+		VkSurfaceFormatKHR selectedFormat{};
+		selectedFormat.format = VK_FORMAT_UNDEFINED;
+		selectedFormat.colorSpace = VK_COLOR_SPACE_MAX_ENUM_KHR;
+
+		for (const VkSurfaceFormatKHR format : formats) {
 			//if (format.format == VK_FORMAT_B8G8R8A8_SRGB) {
 			if (format.format == VK_FORMAT_B8G8R8A8_UNORM) {
-				this->format = format;
+				selectedFormat = format;
 
-				return;
+				break;
 			}
 		}
 
-		ENGINE_ASSERT(false, "Could not select a Vulkan surface format.");
+		ENGINE_ASSERT(selectedFormat.format != VK_FORMAT_UNDEFINED, "Could not select a Vulkan surface frormat.");
+
+		ENGINE_INFO("Surface format is []/[].", string_VkFormat(selectedFormat.format), string_VkColorSpaceKHR(selectedFormat.colorSpace));
+
+		return selectedFormat;
 	}
 
-	void VulkanSurface::selectPresentMode() {
+	VkPresentModeKHR VulkanSurface::selectPresentMode(VkPhysicalDevice physicalDevice) const {
 		uint32 presentModeCount = 0;
 		VkResult result;
 
 		result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, object, &presentModeCount, nullptr);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface present mode count (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface present mode count ([]).", string_VkResult(result));
 
 		fchain<VkPresentModeKHR> presentModes(presentModeCount);
 
 		result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, object, &presentModeCount, &presentModes[0]);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface present modes (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface present modes ([]).", string_VkResult(result));
 
 		// VK_PRESENT_MODE_FIFO_KHR is guaranteed to be always available.
-		presentMode = VK_PRESENT_MODE_FIFO_KHR;
+		VkPresentModeKHR selectedPresentMode = VK_PRESENT_MODE_FIFO_KHR;
 
-		for (const VkPresentModeKHR& presentMode : presentModes) {
+		for (const VkPresentModeKHR presentMode : presentModes) {
 			if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-				this->presentMode = presentMode;
+				selectedPresentMode = presentMode;
 
 				break;
 			}
 		}
+
+		ENGINE_INFO("Surface present mode is [].", string_VkPresentModeKHR(selectedPresentMode));
+
+		return selectedPresentMode;
 	}
 
-	VkSurfaceCapabilitiesKHR VulkanSurface::getCapabilities() const {
+	VkSurfaceCapabilitiesKHR VulkanSurface::getCapabilities(VkPhysicalDevice physicalDevice) const {
 		VkSurfaceCapabilitiesKHR surfaceCapabilities;
 
 		const VkResult result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, object, &surfaceCapabilities);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface capabilities (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface capabilities ([]).", string_VkResult(result));
 
 		return surfaceCapabilities;
 	}

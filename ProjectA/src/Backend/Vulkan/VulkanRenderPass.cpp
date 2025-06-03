@@ -50,10 +50,12 @@ namespace ProjectA {
 			sampleCountFlags |= colorAttachmentDescription.samples;
 		}
 
+		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat(physicalDevice.object);
+
 		for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < resolveAttachmentCount; colorAttachmentIndex += 1) {
 			VkAttachmentDescription resolveAttachmentDescription{};
 			resolveAttachmentDescription.flags = 0;
-			resolveAttachmentDescription.format = surface.format.format;
+			resolveAttachmentDescription.format = surfaceFormat.format;
 			resolveAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
 			resolveAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			resolveAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

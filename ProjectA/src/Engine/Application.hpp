@@ -92,10 +92,12 @@ namespace ProjectA {
 			friend int ::main(int argc, char** argv);
 
 		private:
-			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
 			static constexpr float64 RENDERS_PER_SECOND = 165.0;
 
 			static constexpr float64 fixedDeltaTime = lyah::rcp(165.0);
+
+		public:
+			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
 
 		private:
 			struct SharedMemoryData {
@@ -123,7 +125,9 @@ namespace ProjectA {
 			float64 frameTime = 0.0;
 			float64 frameTimeAccumulator = 0.0;
 
-			// Multiple of MAX_FRAMES_IN_FLIGHT.
+			uint32 frameIndex = 0;
+
+			// In the range [0, MAX_FRAMES_IN_FLIGHT].
 			uint32 frameInFlightIndex = 0;
 	};
 

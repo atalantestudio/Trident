@@ -18,7 +18,7 @@ namespace ProjectA {
 
 		Win32MutexData* mutexData = new Win32MutexData();
 
-		mutexData->hMutex = CreateMutex(lpMutexAttributes, bInitialOwner, lpName);
+		mutexData->hMutex = CreateMutexW(lpMutexAttributes, bInitialOwner, lpName);
 
 		free((void*) lpName);
 

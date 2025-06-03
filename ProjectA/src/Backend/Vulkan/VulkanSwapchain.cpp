@@ -8,7 +8,6 @@
 
 namespace ProjectA {
 	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const SwapchainDescriptor& descriptor) :
-		ObjectWrapper(VK_NULL_HANDLE),
 		physicalDevice(physicalDevice),
 		device(device),
 		surface(surface)
@@ -20,9 +19,6 @@ namespace ProjectA {
 
 	VulkanSwapchain::~VulkanSwapchain() {
 		destroy();
-
-		// The swapchain images are automatically destroyed with the swapchain.
-		vkDestroySwapchainKHR(device.object, object, nullptr);
 	}
 
 	uint32 VulkanSwapchain::getImageCount() const {
@@ -41,7 +37,7 @@ namespace ProjectA {
 
 		result = vkGetSwapchainImagesKHR(device.object, object, &imageCount, nullptr);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain image count (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain image count ([]).", string_VkResult(result));
 
 		images.resize(imageCount);
 		imageViews.resize(imageCount);
@@ -49,7 +45,9 @@ namespace ProjectA {
 
 		result = vkGetSwapchainImagesKHR(device.object, object, &imageCount, images.data());
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images ([]).", string_VkResult(result));
+
+		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat(physicalDevice.object);
 
 		// TODO: Replace with ImageView API.
 		VkImageViewCreateInfo imageViewCreateInfo{};
@@ -57,7 +55,7 @@ namespace ProjectA {
 		imageViewCreateInfo.pNext = nullptr;
 		imageViewCreateInfo.flags = 0;
 		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		imageViewCreateInfo.format = surface.format.format;
+		imageViewCreateInfo.format = surfaceFormat.format;
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -113,7 +111,7 @@ namespace ProjectA {
 
 			result = vkCreateImageView(device.object, &imageViewCreateInfo, nullptr, &imageViews[imageIndex]);
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan swapchain image view (code: []).", result);
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan swapchain image view ([]).", string_VkResult(result));
 
 			std::vector<VkImageView> attachmentImageViews(baseAttachmentsImageViews);
 
@@ -135,7 +133,7 @@ namespace ProjectA {
 
 			result = vkCreateFramebuffer(device.object, &framebufferCreateInfo, nullptr, &framebuffers[imageIndex]);
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan swapchain framebuffer (code: []).", result);
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan swapchain framebuffer ([]).", string_VkResult(result));
 		}
 	}
 
@@ -149,9 +147,10 @@ namespace ProjectA {
 		extentWidth = descriptor.extentWidth;
 		extentHeight = descriptor.extentHeight;
 
-		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities();
+		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat(physicalDevice.object);
+		const VkPresentModeKHR presentMode = surface.selectPresentMode(physicalDevice.object);
+		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities(physicalDevice.object);
 		const uint32 minImageCount = surfaceCapabilities.minImageCount + 1;
-		const VkSwapchainKHR oldSwapchain = object;
 
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
 		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -159,8 +158,8 @@ namespace ProjectA {
 		swapchainCreateInfo.flags = 0;
 		swapchainCreateInfo.surface = surface.object;
 		swapchainCreateInfo.minImageCount = minImageCount;
-		swapchainCreateInfo.imageFormat = surface.format.format;
-		swapchainCreateInfo.imageColorSpace = surface.format.colorSpace;
+		swapchainCreateInfo.imageFormat = surfaceFormat.format;
+		swapchainCreateInfo.imageColorSpace = surfaceFormat.colorSpace;
 		swapchainCreateInfo.imageExtent.width = extentWidth;
 		swapchainCreateInfo.imageExtent.height = extentHeight;
 		swapchainCreateInfo.imageArrayLayers = 1;
@@ -181,16 +180,13 @@ namespace ProjectA {
 
 		swapchainCreateInfo.preTransform = surfaceCapabilities.currentTransform;
 		swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-		swapchainCreateInfo.presentMode = surface.presentMode;
+		swapchainCreateInfo.presentMode = presentMode;
 		swapchainCreateInfo.clipped = VK_TRUE;
-		swapchainCreateInfo.oldSwapchain = oldSwapchain;
+		swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
 
 		const VkResult result = vkCreateSwapchainKHR(device.object, &swapchainCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create swapchain (code: []).", result);
-
-		// The swapchain images are automatically destroyed with the swapchain.
-		vkDestroySwapchainKHR(device.object, oldSwapchain, nullptr);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create swapchain ([]).", string_VkResult(result));
 	}
 
 	void VulkanSwapchain::destroy() {
@@ -200,5 +196,8 @@ namespace ProjectA {
 			vkDestroyFramebuffer(device.object, framebuffers[imageIndex], nullptr);
 			vkDestroyImageView(device.object, imageViews[imageIndex], nullptr);
 		}
+
+		// The swapchain images are automatically destroyed with the swapchain.
+		vkDestroySwapchainKHR(device.object, object, nullptr);
 	}
 }

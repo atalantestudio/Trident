@@ -2,22 +2,22 @@
 
 namespace ProjectA {
 	static LRESULT CALLBACK DummyWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
-		return DefWindowProc(hWnd, Msg, wParam, lParam);
+		return DefWindowProcW(hWnd, Msg, wParam, lParam);
 	}
 
 	static LRESULT CALLBACK TestWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 		if (Msg > 49000) {
 			// TODO: Handle client messages.
-			return DefWindowProc(hWnd, Msg, wParam, lParam);
+			return DefWindowProcW(hWnd, Msg, wParam, lParam);
 		}
 
-		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetProp(hWnd, WINDOW_DATA_PROPERTY_STRING));
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetPropW(hWnd, WINDOW_DATA_PROPERTY_STRING));
 
 		if (windowData == nullptr) {
-			return DefWindowProc(hWnd, Msg, wParam, lParam);
+			return DefWindowProcW(hWnd, Msg, wParam, lParam);
 		}
 
-		const WindowClass* windowClassData = static_cast<const WindowClass*>(GetProp(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
+		const WindowClass* windowClassData = static_cast<const WindowClass*>(GetPropW(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
 
 		switch (Msg) {
 			case WM_CREATE:
@@ -232,17 +232,19 @@ namespace ProjectA {
 				break;
 		}
 
-		return DefWindowProc(hWnd, Msg, wParam, lParam);
+		return DefWindowProcW(hWnd, Msg, wParam, lParam);
 	}
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
-		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetProp(hWnd, WINDOW_DATA_PROPERTY_STRING));
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetPropW(hWnd, WINDOW_DATA_PROPERTY_STRING));
 
 		if (windowData == nullptr) {
-			return DefWindowProc(hWnd, Msg, wParam, lParam);
+			ENGINE_TRACE("Window data is null.");
+
+			return DefWindowProcW(hWnd, Msg, wParam, lParam);
 		}
 
-		const WindowClass* windowClassData = static_cast<const WindowClass*>(GetProp(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
+		const WindowClass* windowClassData = static_cast<const WindowClass*>(GetPropW(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
 
 		switch (Msg) {
 			case WM_MOVE: {
@@ -271,16 +273,6 @@ namespace ProjectA {
 				windowData->maximized = wParam == SIZE_MAXIMIZED;
 
 				return 0;
-			}
-			case WM_SETFOCUS: {
-				// TODO: Handle WM_SETFOCUS message.
-
-				break;
-			}
-			case WM_KILLFOCUS: {
-				// TODO: Handle WM_KILLFOCUS message.
-
-				break;
 			}
 			case WM_CLOSE: {
 				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-close.
@@ -343,10 +335,8 @@ namespace ProjectA {
 
 				return 0;
 			}
-			default:
-				break;
 		}
 
-		return DefWindowProc(hWnd, Msg, wParam, lParam);
+		return DefWindowProcW(hWnd, Msg, wParam, lParam);
 	}
 }

@@ -9,27 +9,25 @@
 namespace ProjectA {
 	class VulkanSurface : public Surface, public ObjectWrapper<VkSurfaceKHR> {
 		public:
-			VulkanSurface(VkInstance instance, const VulkanPhysicalDevice& physicalDevice, const Window& window);
+			VulkanSurface(VkInstance instance, const Window& window);
 
 			~VulkanSurface();
 
-			void selectFormat();
+			void initPresentQueueFamilyIndex(VkPhysicalDevice physicalDevice, uint32 graphicsQueueFamilyIndex);
 
-			void selectPresentMode();
+			VkSurfaceFormatKHR selectFormat(VkPhysicalDevice physicalDevice) const;
 
-			VkSurfaceCapabilitiesKHR getCapabilities() const;
+			VkPresentModeKHR selectPresentMode(VkPhysicalDevice physicalDevice) const;
+
+			VkSurfaceCapabilitiesKHR getCapabilities(VkPhysicalDevice physicalDevice) const;
 
 			virtual ImageFormat getFormat() const final override;
 
 		public:
-			uint32 presentQueueFamilyIndex;
-			VkSurfaceFormatKHR format;
-			VkPresentModeKHR presentMode;
+			uint32 presentQueueFamilyIndex = 0;
 			const Window& window;
 
 		private:
 			const VkInstance instance;
-			const VkPhysicalDevice physicalDevice;
-			VkSurfaceCapabilitiesKHR capabilities;
 	};
 }

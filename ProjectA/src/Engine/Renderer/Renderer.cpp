@@ -8,7 +8,6 @@
 	#include "Backend/Vulkan/VulkanGraphicsAdapter.hpp"
 #endif
 
-#include "Engine/Application.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -17,10 +16,10 @@ namespace ProjectA {
 	scope<GraphicsAdapter> Renderer::adapter = nullptr;
 	uint32 Renderer::imageIndex = 0;
 	ref<Swapchain> Renderer::swapchain = nullptr;
-	std::array<ref<CommandEncoder>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::commandEncoders;
-	std::array<ref<Semaphore>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::availableImageSemaphores;
-	std::array<ref<Semaphore>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::finishedRenderSemaphores;
-	std::array<ref<Fence>, Renderer::MAX_FRAMES_IN_FLIGHT> Renderer::flightFences;
+	std::array<ref<CommandEncoder>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::commandEncoders;
+	std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::acquireNextImageSemaphores;
+	std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::finishedRenderSemaphores;
+	std::array<ref<Fence>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::flightFences;
 
 	GraphicsAPI Renderer::getGraphicsApi() {
 		return graphicsApi;
@@ -67,9 +66,9 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
-		for (uint32 frameIndex = 0; frameIndex < MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
+		for (uint32 frameIndex = 0; frameIndex < Application::MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
 			commandEncoders[frameIndex] = adapter->getDevice()->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
-			availableImageSemaphores[frameIndex] = adapter->createSemaphore();
+			acquireNextImageSemaphores[frameIndex] = adapter->createSemaphore();
 			finishedRenderSemaphores[frameIndex] = adapter->createSemaphore();
 			flightFences[frameIndex] = adapter->createFence();
 		}
@@ -83,19 +82,6 @@ namespace ProjectA {
 	}
 
 	void Renderer::onEvent(Event& event) {}
-
-	void Renderer::acquireNextImage(const ref<Swapchain>& swapchain) {
-		const ref<Device> device = Renderer::getDevice();
-		const uint32 frameInFlightIndex = Application::get().getFrameInFlightIndex();
-
-		device->waitForFence(Renderer::getFlightFence(frameInFlightIndex));
-
-		const AcquireNextImageStatus status = device->acquireNextImage(swapchain, Renderer::getAvailableImageSemaphore(frameInFlightIndex), imageIndex);
-
-		ENGINE_ASSERT(status == AcquireNextImageStatus::SUBOPTIMAL || status == AcquireNextImageStatus::SUCCESS, "Failed to acquire next image.");
-
-		device->resetFence(Renderer::getFlightFence(frameInFlightIndex));
-	}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
 		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
@@ -149,8 +135,8 @@ namespace ProjectA {
 		return adapter->createSemaphore();
 	}
 
-	const ref<Semaphore>& Renderer::getAvailableImageSemaphore(uint32 frameInFlightIndex) {
-		return availableImageSemaphores[frameInFlightIndex];
+	const ref<Semaphore>& Renderer::getAcquireNextImageSemaphore(uint32 frameInFlightIndex) {
+		return acquireNextImageSemaphores[frameInFlightIndex];
 	}
 
 	const ref<CommandEncoder>& Renderer::getCommandEncoder(uint32 frameInFlightIndex) {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/Application.hpp"
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/Rendering/CommandEncoder.hpp"
 #include "Engine/API/Window/Window.hpp"
@@ -25,9 +26,6 @@ namespace ProjectA {
 			virtual void onEvent(Event& event);
 
 		public:
-			// Acquires the next available swapchain image.
-			static void acquireNextImage(const ref<Swapchain>& swapchain);
-
 			static ref<Buffer> createBuffer(const BufferDescriptor& descriptor);
 
 			// Creates and returns a staging buffer.
@@ -51,7 +49,7 @@ namespace ProjectA {
 
 			static ref<Semaphore> createSemaphore();
 
-			static const ref<Semaphore>& getAvailableImageSemaphore(uint32 frameInFlightIndex);
+			static const ref<Semaphore>& getAcquireNextImageSemaphore(uint32 frameInFlightIndex);
 
 			static const ref<CommandEncoder>& getCommandEncoder(uint32 frameInFlightIndex);
 
@@ -73,9 +71,6 @@ namespace ProjectA {
 			static void setImageIndex(uint32 imageIndex);
 
 		private:
-			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
-
-		private:
 			static GraphicsAPI graphicsApi;
 			static scope<GraphicsAdapter> adapter;
 
@@ -85,15 +80,15 @@ namespace ProjectA {
 			static ref<Swapchain> swapchain;
 
 			// TODO: Use scope.
-			static std::array<ref<CommandEncoder>, MAX_FRAMES_IN_FLIGHT> commandEncoders;
+			static std::array<ref<CommandEncoder>, Application::MAX_FRAMES_IN_FLIGHT> commandEncoders;
 
 			// TODO: Use scope.
-			static std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> availableImageSemaphores;
+			static std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> acquireNextImageSemaphores;
 
 			// TODO: Use scope.
-			static std::array<ref<Semaphore>, MAX_FRAMES_IN_FLIGHT> finishedRenderSemaphores;
+			static std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> finishedRenderSemaphores;
 
 			// TODO: Use scope.
-			static std::array<ref<Fence>, MAX_FRAMES_IN_FLIGHT> flightFences;
+			static std::array<ref<Fence>, Application::MAX_FRAMES_IN_FLIGHT> flightFences;
 	};
 }

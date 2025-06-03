@@ -43,8 +43,8 @@ namespace ProjectA {
 
 		private:
 			const VulkanInstance instance;
-			const VulkanPhysicalDevice physicalDevice;
 			const ref<VulkanSurface> surface;
+			const VulkanPhysicalDevice physicalDevice;
 			const ref<VulkanDevice> device;
 	};
 }

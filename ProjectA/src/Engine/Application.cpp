@@ -93,8 +93,6 @@ namespace ProjectA {
 
 		Renderer::build(*window, graphicsApi);
 
-		window->show();
-
 		/* Constants */
 
 		// API_QUEUE = Graphics API listed by priority.
@@ -202,6 +200,8 @@ namespace ProjectA {
 	}
 
 	void Application::loop() {
+		window->show();
+
 		previousTime = timer.getCurrentTime();
 
 		while (looping) {
@@ -224,13 +224,13 @@ namespace ProjectA {
 		previousTime = currentTime;
 		frameTimeAccumulator += frameTime;
 
-		while (frameTimeAccumulator >= fixedDeltaTime) {
+		/*while (frameTimeAccumulator >= fixedDeltaTime) {
 			update(fixedDeltaTime);
 
 			// Extract the fixed delta time from the accumulator.
 			// What's left is passed on to the next frame.
 			frameTimeAccumulator -= fixedDeltaTime;
-		}
+		}*/
 
 		if (window->isMinimized()) {
 			return;
@@ -244,6 +244,9 @@ namespace ProjectA {
 
 		postRender();
 
+		ENGINE_DEBUG("FrameIndex = []", frameIndex);
+
+		frameIndex += 1;
 		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
@@ -272,7 +275,11 @@ namespace ProjectA {
 
 		uint32 imageIndex;
 
-		const AcquireNextImageStatus status = device->acquireNextImage(Renderer::getSwapchain(), Renderer::getAvailableImageSemaphore(frameInFlightIndex), imageIndex);
+		const AcquireNextImageStatus status = device->acquireNextImage(
+			Renderer::getSwapchain(),
+			Renderer::getAcquireNextImageSemaphore(frameInFlightIndex),
+			imageIndex
+		);
 
 		if (status == AcquireNextImageStatus::ERROR_OUT_OF_DATE) {
 			ENGINE_DEBUG("Recreating out-of-date swapchain.");
@@ -304,7 +311,7 @@ namespace ProjectA {
 
 		device->getGraphicsQueue()->submit(
 			commandBuffer,
-			Renderer::getAvailableImageSemaphore(frameInFlightIndex),
+			Renderer::getAcquireNextImageSemaphore(frameInFlightIndex),
 			Renderer::getFinishedRenderSemaphore(frameInFlightIndex),
 			Renderer::getFlightFence(frameInFlightIndex)
 		);
@@ -337,6 +344,8 @@ namespace ProjectA {
 	}
 
 	void Application::resize() {
+		window->waitMessage();
+
 		const ref<Device> device = Renderer::getDevice();
 
 		device->waitIdle();

@@ -16,10 +16,12 @@
 namespace ProjectA {
 	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const Window& window) :
 		instance(),
+		surface(createRef<VulkanSurface>(instance.object, window)),
 		physicalDevice(instance.object),
-		surface(createRef<VulkanSurface>(instance.object, physicalDevice, window)),
 		device(createRef<VulkanDevice>(physicalDevice, *surface))
 	{
+		surface->initPresentQueueFamilyIndex(physicalDevice.object, physicalDevice.graphicsQueueFamilyIndex);
+
 		MemoryAllocator::initialize(physicalDevice);
 	}
 

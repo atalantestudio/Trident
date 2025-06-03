@@ -12,6 +12,7 @@
 #ifdef _WIN32
 	#ifdef _WIN64
 		#define PLATFORM_WINDOWS
+		#define VK_USE_PLATFORM_WIN32_KHR
 
 		#include <Windows.h>
 		#include <windowsx.h>
@@ -148,12 +149,11 @@
 #endif
 
 #ifdef ENABLE_VULKAN
-	#ifdef PLATFORM_WINDOWS
-		#define VK_USE_PLATFORM_WIN32_KHR
-	#endif
-
 	#include <vulkan/vulkan.h>
-	#include <vulkan/vk_enum_string_helper.h>
+
+	#ifdef BUILD_MODE_DEBUG
+		#include <vulkan/vk_enum_string_helper.h>
+	#endif
 #endif
 
 #define BIT(index) 1 << index

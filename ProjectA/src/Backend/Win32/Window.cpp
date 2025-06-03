@@ -78,7 +78,7 @@ namespace ProjectA {
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
 		// The event loop starts automatically after creating the window.
-		windowData->hWnd = CreateWindowEx(
+		windowData->hWnd = CreateWindowExW(
 			dwExStyle,
 			windowClass->className,
 			lpWindowName,
@@ -111,8 +111,8 @@ namespace ProjectA {
 		windowData->windowCloseEventListener = descriptor.windowCloseEventListener;
 		windowData->windowResizeEventListener = descriptor.windowResizeEventListener;
 
-		WIN32_ASSERT(SetProp(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, windowClass));
-		WIN32_ASSERT(SetProp(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData));
+		WIN32_ASSERT(SetPropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, windowClass));
+		WIN32_ASSERT(SetPropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData));
 
 		windowCount += 1;
 	}
@@ -122,19 +122,23 @@ namespace ProjectA {
 
 		WIN32_ASSERT(ReleaseDC(windowData->hWnd, windowData->hDC) != 0);
 
-		WIN32_ASSERT(RemoveProp(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING) != nullptr);
-		WIN32_ASSERT(RemoveProp(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING) != nullptr);
+		WIN32_ASSERT(RemovePropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING) != nullptr);
+		WIN32_ASSERT(RemovePropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING) != nullptr);
 
 		WIN32_ASSERT(DestroyWindow(windowData->hWnd));
+
+		if (windowCount == 1) {
+			unregisterWindowClass();
+
+			windowCount = 0;
+		}
+		else {
+			windowCount -= 1;
+		}
 
 		delete windowData;
 
 		data = nullptr;
-		windowCount -= 1;
-
-		if (windowCount == 0) {
-			unregisterWindowClass();
-		}
 	}
 
 	const sint32* Window::getPosition() const {
@@ -177,15 +181,26 @@ namespace ProjectA {
 	void Window::processMessages() const {
 		MSG msg;
 
-		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+		while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			if (msg.message == WM_QUIT) {
-				// TODO: Handle WM_QUIT message.
+				// TODO: Test this path.
+				DEBUG_ASSERT(false);
+
+				const Win32WindowData* windowData = static_cast<const Win32WindowData*>(data);
+
+				WindowCloseEvent windowCloseEvent;
+
+				windowData->windowCloseEventListener(windowCloseEvent);
 
 				continue;
 			}
 
 			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			DispatchMessageW(&msg);
 		}
+	}
+
+	void Window::waitMessage() {
+		WIN32_ASSERT(WaitMessage() != 0);
 	}
 }

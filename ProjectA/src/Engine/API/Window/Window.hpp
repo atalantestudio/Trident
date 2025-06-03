@@ -29,6 +29,8 @@ namespace ProjectA {
 			// Peeks, translates and dispatches incoming non-queued messages.
 			void processMessages() const;
 
+			void waitMessage();
+
 		public:
 			void* data;
 	};

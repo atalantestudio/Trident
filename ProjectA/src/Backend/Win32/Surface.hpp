@@ -16,7 +16,6 @@ namespace ProjectA {
 		win32SurfaceCreateInfo.hinstance = GetInstance();
 		win32SurfaceCreateInfo.hwnd = static_cast<const Win32WindowData*>(window.data)->hWnd;
 
-		// TODO: If no debug messenger, this fails with "Vulkan instance missing VK_KHR_win32_surface extension".
 		return vkCreateWin32SurfaceKHR(instance, &win32SurfaceCreateInfo, pAllocator, pSurface);
 	}
 }

@@ -15,7 +15,7 @@ namespace ProjectA {
 		Win32SharedMemoryData* sharedMemoryData = new Win32SharedMemoryData();
 
 		// Try to open file mapping.
-		sharedMemoryData->hFileMappingObject = OpenFileMapping(
+		sharedMemoryData->hFileMappingObject = OpenFileMappingW(
 			FILE_MAP_WRITE,
 			FALSE,
 			lpName
@@ -23,7 +23,7 @@ namespace ProjectA {
 
 		if (sharedMemoryData->hFileMappingObject == nullptr) {
 			// File mapping doesn't exist; create it.
-			sharedMemoryData->hFileMappingObject = CreateFileMapping(
+			sharedMemoryData->hFileMappingObject = CreateFileMappingW(
 				INVALID_HANDLE_VALUE,
 				nullptr,
 				PAGE_READWRITE,
