@@ -23,7 +23,7 @@ namespace ProjectA {
 
 		const VkResult result = vkCreateBuffer(device, &bufferCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan buffer (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan buffer ([]).", string_VkResult(result));
 
 		VkMemoryRequirements memoryRequirements;
 

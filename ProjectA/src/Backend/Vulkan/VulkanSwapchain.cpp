@@ -141,16 +141,23 @@ namespace ProjectA {
 	void VulkanSwapchain::construct(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		DEBUG_ASSERT(descriptor.extentWidth > 0);
-		DEBUG_ASSERT(descriptor.extentHeight > 0);
-
-		extentWidth = descriptor.extentWidth;
-		extentHeight = descriptor.extentHeight;
-
 		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat(physicalDevice.object);
 		const VkPresentModeKHR presentMode = surface.selectPresentMode(physicalDevice.object);
 		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities(physicalDevice.object);
 		const uint32 minImageCount = surfaceCapabilities.minImageCount + 1;
+
+		VkExtent2D imageExtent{};
+
+		if (surfaceCapabilities.currentExtent.width == std::numeric_limits<uint32>::max() && surfaceCapabilities.currentExtent.height == std::numeric_limits<uint32>::max()) {
+			imageExtent = surfaceCapabilities.currentExtent;
+		}
+		else {
+			imageExtent.width = std::clamp(descriptor.extentWidth, surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
+			imageExtent.height = std::clamp(descriptor.extentHeight, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
+		}
+
+		extentWidth = imageExtent.width;
+		extentHeight = imageExtent.height;
 
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
 		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -160,8 +167,7 @@ namespace ProjectA {
 		swapchainCreateInfo.minImageCount = minImageCount;
 		swapchainCreateInfo.imageFormat = surfaceFormat.format;
 		swapchainCreateInfo.imageColorSpace = surfaceFormat.colorSpace;
-		swapchainCreateInfo.imageExtent.width = extentWidth;
-		swapchainCreateInfo.imageExtent.height = extentHeight;
+		swapchainCreateInfo.imageExtent = imageExtent;
 		swapchainCreateInfo.imageArrayLayers = 1;
 		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 

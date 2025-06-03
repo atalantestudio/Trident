@@ -93,7 +93,7 @@ namespace ProjectA {
 
 		result = vkCreateInstance(&instanceCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan instance (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan instance ([]).", string_VkResult(result));
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			const PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(object, "vkCreateDebugUtilsMessengerEXT"));
@@ -103,6 +103,10 @@ namespace ProjectA {
 			result = vkCreateDebugUtilsMessengerEXT(object, &debugUtilsMessengerCreateInfo, nullptr, &debugUtilsMessenger);
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan debug messenger.");
+		#endif
+
+		#ifdef BUILD_MODE_DEBUG
+			enumeratePhysicalDevices();
 		#endif
 	}
 
@@ -127,17 +131,48 @@ namespace ProjectA {
 
 			result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan instance layer properties (code: []).", result);
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan instance layer properties ([]).", string_VkResult(result));
 
 			std::vector<VkLayerProperties> layerProperties(layerPropertyCount);
 
 			result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan instance layer properties (code: []).", result);
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan instance layer properties ([]).", string_VkResult(result));
 
 			/*for (uint32 i = 0; i < layerPropertyCount; i += 1) {
 				ENGINE_INFO("- []", layerProperties[i].layerName);
 			}*/
+		}
+	#endif
+
+	#ifdef BUILD_MODE_DEBUG
+		void VulkanInstance::enumeratePhysicalDevices() {
+			uint32 physicalDeviceCount;
+			VkResult result;
+
+			result = vkEnumeratePhysicalDevices(object, &physicalDeviceCount, nullptr);
+
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan physical devices ([]).", string_VkResult(result));
+
+			DEBUG_ASSERT(physicalDeviceCount > 0);
+
+			fchain<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+
+			result = vkEnumeratePhysicalDevices(object, &physicalDeviceCount, &physicalDevices[0]);
+
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan physical devices ([]).", string_VkResult(result));
+
+			VkPhysicalDeviceProperties physicalDeviceProperties;
+
+			ENGINE_TRACE("Available physical devices:");
+
+			for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count; physicalDeviceIndex += 1) {
+				const VkPhysicalDevice physicalDevice = physicalDevices[physicalDeviceIndex];
+
+				vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+
+				ENGINE_DEBUG("[]. []", physicalDeviceIndex, physicalDeviceProperties.deviceName);
+			}
 		}
 	#endif
 

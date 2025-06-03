@@ -15,7 +15,7 @@ namespace ProjectA {
 
 		const VkResult result = vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan semaphore (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan semaphore ([]).", string_VkResult(result));
 	}
 
 	VulkanSemaphore::~VulkanSemaphore() {

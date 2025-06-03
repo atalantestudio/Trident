@@ -82,7 +82,7 @@ namespace ProjectA {
 
 		const VkResult result = vkBindBufferMemory(device, buffer, memoryBlock.memory, memoryBlock.offset);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Could not bind memory for Vulkan buffer (code: []).", string_VkResult(result));
+		ENGINE_ASSERT(result == VK_SUCCESS, "Could not bind memory for Vulkan buffer ([]).", string_VkResult(result));
 
 		// Only advance the block offset once we are sure that the memory has been correctly bound to the buffer.
 		memoryBlock.offset += size;
@@ -100,7 +100,7 @@ namespace ProjectA {
 
 		const VkResult result = vkBindImageMemory(device, image, memoryBlock.memory, memoryBlock.offset);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Could not bind memory for Vulkan image (code: []).", string_VkResult(result));
+		ENGINE_ASSERT(result == VK_SUCCESS, "Could not bind memory for Vulkan image ([]).", string_VkResult(result));
 
 		// Only advance the block offset once we are sure that the memory has been correctly bound to the image.
 		memoryBlock.offset += size;
@@ -120,7 +120,7 @@ namespace ProjectA {
 			// Map the whole block.
 			const VkResult result = vkMapMemory(device, memoryBlock.memory, 0, memoryBlock.size, 0, &memoryBlock.mappedRange);
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Could not map Vulkan memory. (code: [])", string_VkResult(result));
+			ENGINE_ASSERT(result == VK_SUCCESS, "Could not map Vulkan memory. ([])", string_VkResult(result));
 		}
 
 		memoryBlock.mappedSuballocationCount += 1;
@@ -148,7 +148,7 @@ namespace ProjectA {
 				// Manually flush the mapped range.
 				const VkResult result = vkFlushMappedMemoryRanges(device, 1, &mappedMemoryRange);
 
-				ENGINE_ASSERT(result == VK_SUCCESS, "Could not flush mapped memory range (code: []).", string_VkResult(result));*/
+				ENGINE_ASSERT(result == VK_SUCCESS, "Could not flush mapped memory range ([]).", string_VkResult(result));*/
 			}
 
 			vkUnmapMemory(device, memoryBlock.memory);
@@ -215,7 +215,7 @@ namespace ProjectA {
 
 		const VkResult result = vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &memoryBlock.memory);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan memory (code: []).", string_VkResult(result));
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan memory ([]).", string_VkResult(result));
 
 		memoryBlock.offset = 0;
 		memoryBlock.size = blockSize;

@@ -63,7 +63,7 @@ namespace ProjectA {
 
 			result = vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout);
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan descriptor set layout (code: []).", result);
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan descriptor set layout ([]).", string_VkResult(result));
 
 			descriptorSetLayouts.emplace_back(descriptorSetLayout);
 		}
@@ -79,7 +79,7 @@ namespace ProjectA {
 
 			result = vkCreateDescriptorPool(device, &descriptorPoolCreateInfo, nullptr, &descriptorPool);
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan descriptor pool (code: []).", result);
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan descriptor pool ([]).", string_VkResult(result));
 
 			VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
 			descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -92,7 +92,7 @@ namespace ProjectA {
 
 			result = vkAllocateDescriptorSets(device, &descriptorSetAllocateInfo, descriptorSets.data());
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan descriptor sets (code: []).", result);
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan descriptor sets ([]).", string_VkResult(result));
 
 			std::vector<VkDescriptorBufferInfo> descriptorBufferInfos;
 			std::vector<VkDescriptorImageInfo> descriptorImageInfos;
@@ -199,7 +199,7 @@ namespace ProjectA {
 
 		result = vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan pipeline layout (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan pipeline layout ([]).", string_VkResult(result));
 	}
 
 	VulkanPipelineLayout::~VulkanPipelineLayout() {
@@ -209,7 +209,7 @@ namespace ProjectA {
 			// NOTE: Only if the pool has been created with the VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT flag.
 			/*const VkResult result = vkFreeDescriptorSets(device, descriptorPool, static_cast<uint32>(descriptorSets.size()), descriptorSets.data());
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to free Vulkan descriptor sets (code: []).", result);*/
+			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to free Vulkan descriptor sets ([]).", string_VkResult(result));*/
 
 			vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 

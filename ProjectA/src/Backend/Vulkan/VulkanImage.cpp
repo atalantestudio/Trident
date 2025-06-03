@@ -40,7 +40,7 @@ namespace ProjectA {
 
 		const VkResult result = vkCreateImage(device, &imageCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image ([]).", string_VkResult(result));
 
 		VkMemoryRequirements memoryRequirements;
 

@@ -16,7 +16,7 @@ namespace ProjectA {
 
 		const VkResult result = vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan command pool (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan command pool ([]).", string_VkResult(result));
 	}
 
 	VulkanCommandPool::~VulkanCommandPool() {

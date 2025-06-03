@@ -33,7 +33,7 @@ namespace ProjectA {
 
 		const VkResult result = vkAllocateCommandBuffers(device.object, &commandBufferAllocateInfo, &commandBuffer);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan command buffer (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan command buffer ([]).", string_VkResult(result));
 	}
 
 	VulkanCommandEncoder::~VulkanCommandEncoder() {
@@ -51,7 +51,7 @@ namespace ProjectA {
 
 		const VkResult result = vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to begin Vulkan command buffer (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to begin Vulkan command buffer ([]).", string_VkResult(result));
 	}
 
 	void VulkanCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
@@ -326,7 +326,7 @@ namespace ProjectA {
 
 		const VkResult result = vkEndCommandBuffer(commandBuffer);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to end Vulkan command buffer (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to end Vulkan command buffer ([]).", string_VkResult(result));
 
 		VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
@@ -345,6 +345,6 @@ namespace ProjectA {
 
 		const VkResult result = vkResetCommandBuffer(commandBuffer, 0);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan command buffer (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan command buffer ([]).", string_VkResult(result));
 	}
 }

@@ -21,7 +21,7 @@ namespace ProjectA {
 
 		const VkResult result = vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan compute pipeline (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan compute pipeline ([]).", string_VkResult(result));
 	}
 
 	VulkanComputePipeline::~VulkanComputePipeline() {

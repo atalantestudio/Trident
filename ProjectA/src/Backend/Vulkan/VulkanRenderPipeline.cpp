@@ -241,7 +241,7 @@ namespace ProjectA {
 
 		const VkResult result = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan graphics pipeline (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan graphics pipeline ([]).", string_VkResult(result));
 	}
 
 	VulkanRenderPipeline::~VulkanRenderPipeline() {

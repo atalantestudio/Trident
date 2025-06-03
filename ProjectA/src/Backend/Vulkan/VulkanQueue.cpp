@@ -58,7 +58,7 @@ namespace ProjectA {
 
 		const VkResult result = vkQueueSubmit(object, 1, &submitInfo, vkFence);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to submit Vulkan queue (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to submit Vulkan queue ([]).", string_VkResult(result));
 	}
 
 	PresentStatus VulkanQueue::present(const std::vector<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const std::vector<uint32>& imageIndices) const {

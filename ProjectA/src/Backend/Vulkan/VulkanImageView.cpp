@@ -38,7 +38,7 @@ namespace ProjectA {
 
 		const VkResult result = vkCreateImageView(device, &imageViewCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view ([]).", string_VkResult(result));
 	}
 
 	VulkanImageView::~VulkanImageView() {

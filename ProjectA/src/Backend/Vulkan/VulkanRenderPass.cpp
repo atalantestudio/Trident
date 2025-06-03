@@ -154,7 +154,7 @@ namespace ProjectA {
 
 		const VkResult result = vkCreateRenderPass(device.object, &renderPassCreateInfo, nullptr, &object);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan render pass (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan render pass ([]).", string_VkResult(result));
 	}
 
 	VulkanRenderPass::~VulkanRenderPass() {

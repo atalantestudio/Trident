@@ -15,6 +15,10 @@ namespace ProjectA {
 				static void checkInstanceLayers();
 			#endif
 
+			#ifdef BUILD_MODE_DEBUG
+				void enumeratePhysicalDevices();
+			#endif
+
 			#ifdef DEBUG_ENABLE_MESSENGER
 				static VkBool32 debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
 			#endif

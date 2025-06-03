@@ -21,7 +21,7 @@ namespace ProjectA {
 
 		const VkResult result = vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, &shaderModule);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan shader module (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan shader module ([]).", string_VkResult(result));
 
 		object.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		object.pNext = nullptr;

@@ -11,19 +11,20 @@ namespace ProjectA {
 
 		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan physical devices (code: []).", result);
-		ENGINE_ASSERT(physicalDeviceCount > 0, "Could not find any physical device.");
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan physical devices ([]).", string_VkResult(result));
 
-		std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+		DEBUG_ASSERT(physicalDeviceCount > 0);
 
-		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data());
+		fchain<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan physical devices (code: []).", result);
+		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, &physicalDevices[0]);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan physical devices ([]).", string_VkResult(result));
 
 		uint32 bestPhysicalDeviceIndex = 0;
 		uint32 bestPhysicalDeviceScore = 0;
 
-		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.size(); physicalDeviceIndex += 1) {
+		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count; physicalDeviceIndex += 1) {
 			const uint32 score = calculateScore(physicalDevices[physicalDeviceIndex]);
 
 			if (score >= bestPhysicalDeviceScore) {
@@ -42,9 +43,9 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(queueFamilyPropertyCount > 0, "Could not find queues for this physical device.");
 
-		std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertyCount);
+		fchain<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertyCount);
 
-		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyPropertyCount, queueFamilyProperties.data());
+		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyPropertyCount, &queueFamilyProperties[0]);
 
 		for (uint32 queueFamilyPropertyIndex = 0; queueFamilyPropertyIndex < queueFamilyPropertyCount; queueFamilyPropertyIndex += 1) {
 			if (queueFamilyProperties[queueFamilyPropertyIndex].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
@@ -63,20 +64,22 @@ namespace ProjectA {
 
 		result = vkEnumerateDeviceExtensionProperties(object, nullptr, &extensionPropertyCount, nullptr);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan device extension properties (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan device extension properties ([]).", string_VkResult(result));
 
-		std::vector<VkExtensionProperties> extensionProperties(extensionPropertyCount);
+		fchain<VkExtensionProperties> extensionProperties(extensionPropertyCount);
 
-		result = vkEnumerateDeviceExtensionProperties(object, nullptr, &extensionPropertyCount, extensionProperties.data());
+		result = vkEnumerateDeviceExtensionProperties(object, nullptr, &extensionPropertyCount, &extensionProperties[0]);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan device extension properties (code: []).", result);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan device extension properties ([]).", string_VkResult(result));
 
 		enabledExtensionNames.resize(extensionPropertyCount);
 
-		for (uint32 i = 0; i < extensionProperties.size(); i += 1) {
-			//ENGINE_INFO("- [] (spec version: [])", extensionProperties[i].extensionName, extensionProperties[i].specVersion);
+		ENGINE_TRACE("Enabled device extensions:");
 
-			enabledExtensionNames[i] = extensionProperties[i].extensionName;
+		for (uint32 extensionPropertiesIndex = 0; extensionPropertiesIndex < extensionProperties.count; extensionPropertiesIndex += 1) {
+			ENGINE_TRACE("- [] (spec version: [])", extensionProperties[extensionPropertiesIndex].extensionName, extensionProperties[extensionPropertiesIndex].specVersion);
+
+			enabledExtensionNames[extensionPropertiesIndex] = extensionProperties[extensionPropertiesIndex].extensionName;
 		}
 
 		vkGetPhysicalDeviceFeatures(object, &features);
