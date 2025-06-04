@@ -50,17 +50,6 @@ namespace ProjectA {
 		bool _iteration = false;
 	};
 
-	template<typename... Argument>
-	struct GUIString {
-		public:
-			GUIString(std::string_view pattern, Argument&&... arguments) :
-				string(Logger::format(pattern, std::forward<Argument>(arguments)...))
-			{}
-
-		public:
-			std::string string;
-	};
-
 	class GUILayer : public Layer {
 		public:
 			GUILayer();
@@ -95,7 +84,7 @@ namespace ProjectA {
 			void GUIQuad(GUISize size, ImageID imageId, const vec4<float32>& color = {1.0f, 1.0f, 1.0f, 1.0f});
 
 			template<typename... Argument>
-			void GUIText(const GUIString<Argument...>& string, const TextStyle& textStyle) {
+			void GUIText(const std::string& string, const TextStyle& textStyle) {
 				const float32 lineHeight = static_cast<float32>(defaultFont->getLineHeight());
 
 				float32 positionX = componentOrigin[0];
@@ -104,7 +93,7 @@ namespace ProjectA {
 				float32 width = 0;
 				const float32 height = textStyle.fontSize;
 
-				for (const char glyph : string.string) {
+				for (const char glyph : string) {
 					const uint16 codePoint = static_cast<uint16>(glyph);
 					const TrueTypeGlyph& glyph = (*defaultFont)[codePoint];
 					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
