@@ -57,7 +57,6 @@ namespace ProjectA {
 	extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
 	extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
 	extern PFNGLGETSHADERIVPROC glGetShaderiv;
-	extern PFNGLGETSYNCIVPROC glGetSynciv;
 	extern PFNGLLINKPROGRAMPROC glLinkProgram;
 	extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
 	extern PFNGLMEMORYBARRIERPROC glMemoryBarrier;

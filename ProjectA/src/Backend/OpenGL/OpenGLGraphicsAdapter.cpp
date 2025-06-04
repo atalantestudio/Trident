@@ -79,7 +79,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetProgramiv);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetShaderInfoLog);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetShaderiv);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetSynciv);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glLinkProgram);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glMapNamedBufferRange);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glMemoryBarrier);
