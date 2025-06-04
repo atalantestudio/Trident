@@ -1,6 +1,6 @@
 workspace "ProjectA"
 	architecture "x86_64"
-	startproject "Sandbox"
+	startproject "Samples"
 
 	configurations {
 		"Debug",
@@ -104,7 +104,7 @@ project "ProjectA"
 
 		excludes "%{prj.name}/src/Engine/Profile/**"
 
-project "Sandbox"
+project "Samples"
 	location "%{prj.name}"
 	kind "ConsoleApp"
 	language "C++"
