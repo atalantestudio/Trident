@@ -122,21 +122,14 @@ namespace ProjectA {
 	AcquireNextImageStatus VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		VkResult result;
-
-		// This tooks 0-1ms for the first ~400 frames, then 4-5ms (screen V-Sync).
-		{
-			// ScopeTimer scopeTimer;
-
-			result = vkAcquireNextImageKHR(
-				object,
-				std::static_pointer_cast<VulkanSwapchain>(swapchain)->object,
-				std::numeric_limits<uint64>::max(),
-				std::static_pointer_cast<VulkanSemaphore>(semaphore)->object,
-				VK_NULL_HANDLE,
-				&imageIndex
-			);
-		}
+		const VkResult result = vkAcquireNextImageKHR(
+			object,
+			std::static_pointer_cast<VulkanSwapchain>(swapchain)->object,
+			std::numeric_limits<uint64>::max(),
+			std::static_pointer_cast<VulkanSemaphore>(semaphore)->object,
+			VK_NULL_HANDLE,
+			&imageIndex
+		);
 
 		if (result == VK_SUCCESS) {
 			return AcquireNextImageStatus::SUCCESS;
