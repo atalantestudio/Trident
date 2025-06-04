@@ -9,7 +9,8 @@ C++ 3D game engine (rendering, physics and audio) with integrated math and GUI A
 
 ## Install (Windows)
 
-Run `scripts/Windows/premake5.bat`. This will clone the submodules, copy some OpenGL Registry files and build the project. In addition, it also adds the repository to the list of Git safe directories.
+Clone the repository, then run `scripts/Windows/premake5.bat`. This will clone the submodules, copy the necessary files from the OpenGL Registry and build the project.
+It also adds the repository to the list of Git safe directories.
 
 Make sure that the Vulkan SDK is installed (the engine will search for the `VULKAN_SDK` environment variable).
 
