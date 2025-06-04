@@ -239,12 +239,8 @@ namespace ProjectA {
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(GetPropW(hWnd, WINDOW_DATA_PROPERTY_STRING));
 
 		if (windowData == nullptr) {
-			ENGINE_TRACE("Window data is null.");
-
 			return DefWindowProcW(hWnd, Msg, wParam, lParam);
 		}
-
-		const WindowClass* windowClassData = static_cast<const WindowClass*>(GetPropW(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
 
 		switch (Msg) {
 			case WM_MOVE: {
@@ -287,6 +283,8 @@ namespace ProjectA {
 				// See https://learn.microsoft.com/en-us/windows/win32/menurc/wm-setcursor.
 
 				if (LOWORD(lParam) == HTCLIENT) {
+					const WindowClass* windowClassData = static_cast<const WindowClass*>(GetPropW(hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING));
+
 					SetCursor(windowClassData->hCursor);
 
 					return TRUE;

@@ -84,7 +84,7 @@ namespace ProjectA {
 		viewport.maxDepth = 1.0f;
 
 		VkRect2D scissor{};
-		scissor.offset = { 0, 0 };
+		scissor.offset = {0, 0};
 		scissor.extent.width = renderPass.surface->window.getSize()[0];
 		scissor.extent.height = renderPass.surface->window.getSize()[1];
 

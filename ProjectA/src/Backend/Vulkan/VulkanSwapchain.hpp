@@ -23,7 +23,9 @@ namespace ProjectA {
 
 			void construct(const SwapchainDescriptor& descriptor);
 
-			void destroy();
+			void destroyImageViewsAndFramebuffers() const;
+
+			void destroySwapchain(VkSwapchainKHR swapchain) const;
 
 		public:
 			std::vector<VkImage> images;

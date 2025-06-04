@@ -59,9 +59,11 @@ namespace ProjectA {
 		selectedFormat.format = VK_FORMAT_UNDEFINED;
 		selectedFormat.colorSpace = VK_COLOR_SPACE_MAX_ENUM_KHR;
 
+		//const VkFormat desiredFormat = VK_FORMAT_B8G8R8A8_SRGB;
+		const VkFormat desiredFormat = VK_FORMAT_B8G8R8A8_UNORM;
+
 		for (const VkSurfaceFormatKHR format : formats) {
-			//if (format.format == VK_FORMAT_B8G8R8A8_SRGB) {
-			if (format.format == VK_FORMAT_B8G8R8A8_UNORM) {
+			if (format.format == desiredFormat) {
 				selectedFormat = format;
 
 				break;
@@ -69,8 +71,6 @@ namespace ProjectA {
 		}
 
 		ENGINE_ASSERT(selectedFormat.format != VK_FORMAT_UNDEFINED, "Could not select a Vulkan surface frormat.");
-
-		ENGINE_INFO("Surface format is []/[].", string_VkFormat(selectedFormat.format), string_VkColorSpaceKHR(selectedFormat.colorSpace));
 
 		return selectedFormat;
 	}
@@ -99,8 +99,6 @@ namespace ProjectA {
 				break;
 			}
 		}
-
-		ENGINE_INFO("Surface present mode is [].", string_VkPresentModeKHR(selectedPresentMode));
 
 		return selectedPresentMode;
 	}

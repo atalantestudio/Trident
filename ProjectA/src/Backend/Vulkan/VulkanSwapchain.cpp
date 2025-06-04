@@ -18,7 +18,8 @@ namespace ProjectA {
 	}
 
 	VulkanSwapchain::~VulkanSwapchain() {
-		destroy();
+		destroyImageViewsAndFramebuffers();
+		destroySwapchain(object);
 	}
 
 	uint32 VulkanSwapchain::getImageCount() const {
@@ -26,7 +27,8 @@ namespace ProjectA {
 	}
 
 	void VulkanSwapchain::update(const SwapchainDescriptor& descriptor) {
-		destroy();
+		destroyImageViewsAndFramebuffers();
+
 		construct(descriptor);
 	}
 
@@ -142,14 +144,22 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat(physicalDevice.object);
+
+		ENGINE_INFO("Swapchain format is []/[].", string_VkFormat(surfaceFormat.format), string_VkColorSpaceKHR(surfaceFormat.colorSpace));
+
 		const VkPresentModeKHR presentMode = surface.selectPresentMode(physicalDevice.object);
+
+		ENGINE_INFO("Swapchain present mode is [].", string_VkPresentModeKHR(presentMode));
+
 		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities(physicalDevice.object);
 
-		uint32 minImageCount = surfaceCapabilities.minImageCount + 1;
+		uint32 imageCount = surfaceCapabilities.minImageCount + 1;
 
 		if (surfaceCapabilities.maxImageCount > 0) {
-			minImageCount = std::min(minImageCount, surfaceCapabilities.maxImageCount);
+			imageCount = std::min(imageCount, surfaceCapabilities.maxImageCount);
 		}
+
+		ENGINE_INFO("Swapchain image count is [].", imageCount);
 
 		VkExtent2D imageExtent{};
 
@@ -164,12 +174,16 @@ namespace ProjectA {
 		extentWidth = imageExtent.width;
 		extentHeight = imageExtent.height;
 
+		ENGINE_INFO("Swapchain image extent is ([], []).", extentWidth, extentHeight);
+
+		const VkSwapchainKHR oldSwapchain = object;
+
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
 		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		swapchainCreateInfo.pNext = nullptr;
 		swapchainCreateInfo.flags = 0;
 		swapchainCreateInfo.surface = surface.object;
-		swapchainCreateInfo.minImageCount = minImageCount;
+		swapchainCreateInfo.minImageCount = imageCount;
 		swapchainCreateInfo.imageFormat = surfaceFormat.format;
 		swapchainCreateInfo.imageColorSpace = surfaceFormat.colorSpace;
 		swapchainCreateInfo.imageExtent = imageExtent;
@@ -193,22 +207,24 @@ namespace ProjectA {
 		swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 		swapchainCreateInfo.presentMode = presentMode;
 		swapchainCreateInfo.clipped = VK_TRUE;
-		swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
+		swapchainCreateInfo.oldSwapchain = oldSwapchain;
 
 		const VkResult result = vkCreateSwapchainKHR(device.object, &swapchainCreateInfo, nullptr, &object);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create swapchain ([]).", string_VkResult(result));
+
+		destroySwapchain(oldSwapchain);
 	}
 
-	void VulkanSwapchain::destroy() {
-		PROFILE_SCOPE(FUNC_SIG);
-
+	void VulkanSwapchain::destroyImageViewsAndFramebuffers() const {
 		for (uint32 imageIndex = 0; imageIndex < images.size(); imageIndex += 1) {
 			vkDestroyFramebuffer(device.object, framebuffers[imageIndex], nullptr);
 			vkDestroyImageView(device.object, imageViews[imageIndex], nullptr);
 		}
+	}
 
+	void VulkanSwapchain::destroySwapchain(VkSwapchainKHR swapchain) const {
 		// The swapchain images are automatically destroyed with the swapchain.
-		vkDestroySwapchainKHR(device.object, object, nullptr);
+		vkDestroySwapchainKHR(device.object, swapchain, nullptr);
 	}
 }
