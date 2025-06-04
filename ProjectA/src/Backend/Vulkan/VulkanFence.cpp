@@ -23,12 +23,4 @@ namespace ProjectA {
 
 		vkDestroyFence(device, object, nullptr);
 	}
-
-	bool VulkanFence::isSignaled() const {
-		const VkResult result = vkGetFenceStatus(device, object);
-
-		DEBUG_ASSERT(result != VK_ERROR_DEVICE_LOST);
-
-		return !static_cast<bool>(result);
-	}
 }

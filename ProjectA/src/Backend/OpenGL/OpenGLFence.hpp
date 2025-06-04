@@ -11,7 +11,5 @@ namespace ProjectA {
 			void create();
 
 			void reset();
-
-			bool isSignaled() const final override;
 	};
 }

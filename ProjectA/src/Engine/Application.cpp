@@ -96,8 +96,6 @@ namespace ProjectA {
 
 		Renderer::build(*window, graphicsApi);
 
-		window->show();
-
 		/* Constants */
 
 		// API_QUEUE = Graphics API listed by priority.
@@ -197,6 +195,8 @@ namespace ProjectA {
 	}
 
 	void Application::loop() {
+		window->show();
+
 		previousTime = timer.getCurrentTime();
 
 		while (looping) {
@@ -213,13 +213,13 @@ namespace ProjectA {
 	void Application::processFrame() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		/*const float64 currentTime = timer.getCurrentTime();
+		const float64 currentTime = timer.getCurrentTime();
 
 		frameTime = currentTime - previousTime;
 		previousTime = currentTime;
-		frameTimeAccumulator += frameTime;*/
+		frameTimeAccumulator += frameTime;
 
-		/*while (frameTimeAccumulator >= fixedDeltaTime) {
+		while (frameTimeAccumulator >= fixedDeltaTime) {
 			update(fixedDeltaTime);
 
 			// Extract the fixed delta time from the accumulator.
@@ -227,19 +227,17 @@ namespace ProjectA {
 			frameTimeAccumulator -= fixedDeltaTime;
 		}
 
-		/*if (window->isMinimized()) {
+		if (window->isMinimized()) {
 			return;
 		}
 
-		preRender();*/
+		preRender();
 
 		// TODO: Interpolate between current time and frameTimeAccumulator.
 		// See https://gafferongames.com/post/fix_your_timestep.
 		render(frameTimeAccumulator);
 
-		//postRender();
-
-		ENGINE_DEBUG("FrameIndex = [] / FrameInFlightIndex = []", frameIndex, frameInFlightIndex);
+		postRender();
 
 		frameIndex += 1;
 		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -265,8 +263,6 @@ namespace ProjectA {
 		PROFILE_SCOPE("Application render");
 
 		const ref<Device> device = Renderer::getDevice();
-
-		ENGINE_DEBUG("Fence signal: []", Renderer::getFlightFence(frameInFlightIndex)->isSignaled());
 
 		device->waitForFence(Renderer::getFlightFence(frameInFlightIndex));
 

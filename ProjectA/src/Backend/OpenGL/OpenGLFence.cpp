@@ -23,16 +23,4 @@ namespace ProjectA {
 
 		object = nullptr;
 	}
-
-	bool OpenGLFence::isSignaled() const {
-		if (object == nullptr) {
-			return false;
-		}
-
-		GLint value;
-
-		glGetSynciv(object, GL_SYNC_STATUS, 1, nullptr, &value);
-
-		return static_cast<bool>(value - GL_UNSIGNALED);
-	}
 }
