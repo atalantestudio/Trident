@@ -14,7 +14,7 @@ namespace ProjectA {
 
 			static const scope<GraphicsAdapter>& getBackend();
 
-			static void build(const Window& window, GraphicsAPI graphicsAPI);
+			static void build(const Window& window, GraphicsAPI graphicsAPI, bool vSync);
 
 		public:
 			virtual void render(const ref<CommandEncoder>& commandEncoder) const = 0;

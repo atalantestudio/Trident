@@ -92,6 +92,7 @@ namespace ProjectA {
 		private:
 			static Application* instance;
 
+			static bool vSync;
 			static bool looping;
 			static bool windowResized;
 

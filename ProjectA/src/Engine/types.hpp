@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	// TODO: void* any typedef?
+	typedef std::uint8_t flag;
 
 	typedef std::int8_t sint8;
 	typedef std::int16_t sint16;

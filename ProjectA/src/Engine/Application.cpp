@@ -11,6 +11,7 @@
 
 namespace ProjectA {
 	Application* Application::instance = nullptr;
+	bool Application::vSync = false;
 	bool Application::looping = true;
 	bool Application::windowResized = false;
 	float64 Application::previousTime = 0.0;
@@ -49,6 +50,8 @@ namespace ProjectA {
 
 		if (sharedMemoryData->instanceCount > MAX_PARALLEL_INSTANCES) {
 			ENGINE_FATAL(EOVERFLOW, "More than [] instances running in parallel.", MAX_PARALLEL_INSTANCES);
+
+			return;
 		}
 
 		// Open/create the project property file.
@@ -94,7 +97,9 @@ namespace ProjectA {
 
 		const GraphicsAPI graphicsApi = propertyFile->getProperty<GraphicsAPI>("GraphicsAPI");
 
-		Renderer::build(*window, graphicsApi);
+		vSync = propertyFile->getProperty<bool>("V-Sync");
+
+		Renderer::build(*window, graphicsApi, vSync);
 
 		/* Constants */
 
@@ -348,6 +353,7 @@ namespace ProjectA {
 		SwapchainDescriptor swapchainDescriptor;
 		swapchainDescriptor.extentWidth = event.getWidth();
 		swapchainDescriptor.extentHeight = event.getHeight();
+		swapchainDescriptor.vSync = vSync;
 
 		Renderer::getSwapchain()->update(swapchainDescriptor);
 

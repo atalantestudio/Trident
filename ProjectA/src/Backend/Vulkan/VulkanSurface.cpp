@@ -75,7 +75,7 @@ namespace ProjectA {
 		return selectedFormat;
 	}
 
-	VkPresentModeKHR VulkanSurface::selectPresentMode(VkPhysicalDevice physicalDevice) const {
+	VkPresentModeKHR VulkanSurface::selectPresentMode(VkPhysicalDevice physicalDevice, bool vSync) const {
 		uint32 presentModeCount = 0;
 		VkResult result;
 
@@ -89,18 +89,27 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface present modes ([]).", string_VkResult(result));
 
-		// VK_PRESENT_MODE_FIFO_KHR is guaranteed to be always available.
-		VkPresentModeKHR selectedPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+		if (!vSync) {
+			// Try to find IMMEDIATE.
+			for (const VkPresentModeKHR presentMode : presentModes) {
+				if (presentMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
+					return presentMode;
+				}
+			}
 
+			ENGINE_WARN("V-Sync is disabled but no matching present mode was found. Reverting to FIFO present mode.");
+
+			return VK_PRESENT_MODE_FIFO_KHR;
+		}
+
+		// Try to find MAILBOX, else revert to FIFO.
 		for (const VkPresentModeKHR presentMode : presentModes) {
 			if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-				selectedPresentMode = presentMode;
-
-				break;
+				return presentMode;
 			}
 		}
 
-		return selectedPresentMode;
+		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
 	VkSurfaceCapabilitiesKHR VulkanSurface::getCapabilities(VkPhysicalDevice physicalDevice) const {

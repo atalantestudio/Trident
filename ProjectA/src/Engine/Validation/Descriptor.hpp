@@ -4,9 +4,41 @@
 #include "Engine/API/Rendering/Descriptor/BufferDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
+#include "Engine/API/Rendering/Descriptor/SwapchainDescriptor.hpp"
 
 // API descriptor validators for debug mode.
 namespace ProjectA {
+	static void validateDescriptor(const BeginRenderPassDescriptor& descriptor) {
+		uint32 warningCount = 0;
+		uint32 errorCount = 0;
+
+		if (descriptor.renderPass == nullptr) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.renderPass must be a reference to a valid render pass.");
+		}
+
+		if (descriptor.swapchain == nullptr) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.swapchain must be a reference to a valid swapchain.");
+		}
+
+		if (descriptor.clearValues.size() < descriptor.renderPass->getClearValueCount()) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.clearValues must have a number of clear values greater than or equal to the last attachment index in descriptor.renderPass having a load operation of LoadOperation::CLEAR.");
+		}
+
+		if (descriptor.imageIndex >= descriptor.swapchain->getImageCount()) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.imageIndex must be less than the number of swapchain images.");
+		}
+
+		ENGINE_ASSERT(errorCount == 0, "Render pass begin descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
+	}
+
 	static void validateDescriptor(const BufferDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
@@ -226,34 +258,16 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Render pipeline descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	static void validateDescriptor(const BeginRenderPassDescriptor& descriptor) {
+	static void validateDescriptor(const SwapchainDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
-		if (descriptor.renderPass == nullptr) {
+		if (descriptor.vSync != true && descriptor.vSync != false) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.renderPass must be a reference to a valid render pass.");
+			ENGINE_ERROR("descriptor.vSync must be either true or false.");
 		}
 
-		if (descriptor.swapchain == nullptr) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.swapchain must be a reference to a valid swapchain.");
-		}
-
-		if (descriptor.clearValues.size() < descriptor.renderPass->getClearValueCount()) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.clearValues must have a number of clear values greater than or equal to the last attachment index in descriptor.renderPass having a load operation of LoadOperation::CLEAR.");
-		}
-
-		if (descriptor.imageIndex >= descriptor.swapchain->getImageCount()) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.imageIndex must be less than the number of swapchain images.");
-		}
-
-		ENGINE_ASSERT(errorCount == 0, "Render pass begin descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
+		ENGINE_ASSERT(errorCount == 0, "Swapchain descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 }

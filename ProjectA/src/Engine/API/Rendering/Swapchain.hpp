@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Rendering/Descriptor/SwapchainDescriptor.hpp"
+#include "Engine/API/Rendering/RenderPass.hpp"
 
 namespace ProjectA {
 	class Swapchain {

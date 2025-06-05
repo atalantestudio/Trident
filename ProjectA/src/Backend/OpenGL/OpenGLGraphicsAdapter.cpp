@@ -21,7 +21,6 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		renderingContext.makeCurrent();
-		renderingContext.setSwapInterval(1);
 
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glAttachShader);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBuffer);
@@ -158,7 +157,9 @@ namespace ProjectA {
 	}
 
 	ref<Swapchain> OpenGLGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return createRef<OpenGLSwapchain>(descriptor);
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
+		return createRef<OpenGLSwapchain>(descriptor, renderingContext);
 	}
 
 	#ifdef DEBUG_ENABLE_MESSENGER

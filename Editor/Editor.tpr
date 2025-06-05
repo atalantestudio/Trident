@@ -1,3 +1,4 @@
 GraphicsAPI: 2
 ExtentWidth: 800
 ExtentHeight: 800
+V-Sync: true

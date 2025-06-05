@@ -4,9 +4,28 @@
 
 namespace ProjectA {
 	class PropertyFile final : public File {
-		public:
-			std::unordered_map<std::string, std::vector<uint8>> propertyMap;
+		private:
+			template<typename T>
+			static T parseValueString(const std::string& valueString, std::string_view propertyName) {
+				return static_cast<T>(std::stoi(valueString));
+			}
 
+			template<>
+			static bool parseValueString(const std::string& valueString, std::string_view propertyName) {
+				if (valueString == "true") {
+					return true;
+				}
+
+				if (valueString == "false") {
+					return false;
+				}
+
+				ENGINE_ERROR("Invalid value \"[]\" for property \"[]\".", valueString, propertyName);
+
+				return false;
+			}
+
+		public:
 			PropertyFile(std::string_view path) :
 				stream(path.data(), std::ios::in | std::ios::out | std::ios::ate)
 			{
@@ -45,9 +64,9 @@ namespace ProjectA {
 
 					ENGINE_ASSERT(valueStringStartOffset != std::string::npos, "The property file is corrupted.");
 
-					const std::string valueString = line.substr(valueStringStartOffset, line.size());
+					const std::string valueString = trim(line.substr(valueStringStartOffset, line.size()));
 
-					return static_cast<T>(std::stoi(valueString));
+					return parseValueString<T>(valueString, propertyName);
 				}
 
 				ENGINE_ERROR("Could not find the value for \"[]\" in the property file.", propertyName);
@@ -55,40 +74,8 @@ namespace ProjectA {
 				return static_cast<T>(-1);
 			}
 
-			// TODO: Implement real-time property file update.
-			/*template<typename T>
-			void setProperty(std::string_view propertyName, T value) {
-				stream.seekg(0, std::ios::beg);
-
-				std::string line;
-				std::size_t propertyNameOffset;
-				std::streampos lineStartOffset = 0;
-
-				while (std::getline(stream, line)) {
-					propertyNameOffset = line.find(propertyName);
-
-					if (propertyNameOffset == std::string::npos) {
-						lineStartOffset = stream.tellg();
-
-						continue;
-					}
-
-					const std::size_t valueStringStartOffset = line.find(':', propertyNameOffset) + 1;
-
-					ENGINE_ASSERT(valueStringStartOffset != std::string::npos, "The property file is corrupted.");
-
-					const std::string valueString = ' ' + std::to_string(value);
-
-					stream.seekg(lineStartOffset);
-					stream.ignore(valueStringStartOffset);
-					stream.write(valueString.data(), valueString.size());
-					stream.flush();
-
-					return;
-				}
-
-				ENGINE_ERROR("Could not find the value for \"[]\" in the property file.", propertyName);
-			}*/
+		public:
+			std::unordered_map<std::string, std::vector<uint8>> propertyMap;
 
 		private:
 			std::fstream stream;

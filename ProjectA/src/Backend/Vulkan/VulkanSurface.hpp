@@ -17,7 +17,7 @@ namespace ProjectA {
 
 			VkSurfaceFormatKHR selectFormat(VkPhysicalDevice physicalDevice) const;
 
-			VkPresentModeKHR selectPresentMode(VkPhysicalDevice physicalDevice) const;
+			VkPresentModeKHR selectPresentMode(VkPhysicalDevice physicalDevice, bool vSync) const;
 
 			VkSurfaceCapabilitiesKHR getCapabilities(VkPhysicalDevice physicalDevice) const;
 

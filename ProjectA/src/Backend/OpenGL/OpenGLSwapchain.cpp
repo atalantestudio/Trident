@@ -4,7 +4,9 @@
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
 namespace ProjectA {
-	OpenGLSwapchain::OpenGLSwapchain(const SwapchainDescriptor& descriptor) {
+	OpenGLSwapchain::OpenGLSwapchain(const SwapchainDescriptor& descriptor, const OpenGLRenderingContext& renderingContext) :
+		renderingContext(&renderingContext)
+	{
 		construct(descriptor);
 	}
 
@@ -12,7 +14,6 @@ namespace ProjectA {
 		return imageCount;
 	}
 
-	// TODO: Fix memory leak when resizing on the depth test and multisample demos.
 	void OpenGLSwapchain::getImages(const ref<RenderPass>& renderPass) {
 		const ref<OpenGLRenderPass>& glRenderPass = std::static_pointer_cast<OpenGLRenderPass>(renderPass);
 
@@ -147,6 +148,8 @@ namespace ProjectA {
 
 		extentWidth = descriptor.extentWidth;
 		extentHeight = descriptor.extentHeight;
+
+		renderingContext->setSwapInterval(static_cast<sint32>(descriptor.vSync));
 	}
 
 	void OpenGLSwapchain::destroy() {

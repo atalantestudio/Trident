@@ -147,7 +147,7 @@ namespace ProjectA {
 
 		ENGINE_INFO("Swapchain format is []/[].", string_VkFormat(surfaceFormat.format), string_VkColorSpaceKHR(surfaceFormat.colorSpace));
 
-		const VkPresentModeKHR presentMode = surface.selectPresentMode(physicalDevice.object);
+		const VkPresentModeKHR presentMode = surface.selectPresentMode(physicalDevice.object, descriptor.vSync);
 
 		ENGINE_INFO("Swapchain present mode is [].", string_VkPresentModeKHR(presentMode));
 

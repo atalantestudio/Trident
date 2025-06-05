@@ -29,7 +29,7 @@ namespace ProjectA {
 		return adapter;
 	}
 
-	void Renderer::build(const Window& window, GraphicsAPI graphicsApi) {
+	void Renderer::build(const Window& window, GraphicsAPI graphicsApi, bool vSync) {
 		Renderer::graphicsApi = graphicsApi;
 
 		switch (Renderer::graphicsApi) {
@@ -57,9 +57,10 @@ namespace ProjectA {
 
 		DEBUG_ASSERT(adapter != nullptr);
 
-		SwapchainDescriptor swapchainDescriptor;
+		SwapchainDescriptor swapchainDescriptor{};
 		swapchainDescriptor.extentWidth = window.getSize()[0];
 		swapchainDescriptor.extentHeight = window.getSize()[1];
+		swapchainDescriptor.vSync = vSync;
 
 		swapchain = adapter->createSwapchain(swapchainDescriptor);
 
