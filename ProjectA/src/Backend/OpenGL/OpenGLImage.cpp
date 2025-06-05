@@ -53,6 +53,8 @@ namespace ProjectA {
 	}
 
 	ref<ImageView> OpenGLImage::createView(const ImageViewDescriptor& descriptor) const {
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		return createRef<OpenGLImageView>(*this, descriptor);
 	}
 }

@@ -112,6 +112,8 @@ namespace ProjectA {
 	}
 
 	ref<RenderPass> Renderer::createRenderPass(const RenderPassDescriptor& descriptor) {
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		return adapter->createRenderPass(descriptor);
 	}
 
@@ -122,6 +124,8 @@ namespace ProjectA {
 	}
 
 	ref<Sampler> Renderer::createSampler(const SamplerDescriptor& descriptor) {
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		return adapter->createSampler(descriptor);
 	}
 
@@ -162,6 +166,8 @@ namespace ProjectA {
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor) {
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		const std::vector<uint8> code = Filesystem::loadByteBuffer(path);
 
 		return adapter->createShaderModule(code, descriptor);

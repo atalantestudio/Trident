@@ -2,6 +2,7 @@
 
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/Rendering/CommandEncoder.hpp"
+#include "Engine/API/Rendering/Descriptor/PipelineLayoutDescriptor.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/Application.hpp"
 #include "Engine/GraphicsAdapter.hpp"

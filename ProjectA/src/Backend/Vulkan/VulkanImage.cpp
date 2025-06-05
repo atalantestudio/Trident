@@ -98,6 +98,8 @@ namespace ProjectA {
 	}
 
 	ref<ImageView> VulkanImage::createView(const ImageViewDescriptor& descriptor) const {
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		return createRef<VulkanImageView>(device, *this, descriptor);
 	}
 }

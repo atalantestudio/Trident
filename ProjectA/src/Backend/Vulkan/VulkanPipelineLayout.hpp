@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/ObjectWrapper.hpp"
+#include "Engine/API/Rendering/Descriptor/PipelineLayoutDescriptor.hpp"
 #include "Engine/API/Rendering/PipelineLayout.hpp"
 
 namespace ProjectA {

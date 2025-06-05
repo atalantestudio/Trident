@@ -5,6 +5,8 @@
 #include "Backend/OpenGL/OpenGLImageView.hpp"
 #include "Backend/OpenGL/OpenGLSampler.hpp"
 
+#include "Engine/API/Rendering/DescriptorSetLayout.hpp"
+
 #include "Backend/OpenGL/DescriptorType.hpp"
 
 namespace ProjectA {

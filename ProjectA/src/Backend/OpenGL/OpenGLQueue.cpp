@@ -12,6 +12,8 @@ namespace ProjectA {
 	{}
 
 	ref<CommandEncoder> OpenGLQueue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		return createRef<OpenGLCommandEncoder>(device, descriptor);
 	}
 

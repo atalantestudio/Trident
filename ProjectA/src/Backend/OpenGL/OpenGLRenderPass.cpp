@@ -22,6 +22,8 @@ namespace ProjectA {
 		DEBUG_ASSERT(colorAttachmentIndex < colorAttachmentCount);
 		DEBUG_ASSERT((resolveAttachmentCount == 0 && colorAttachmentIndex != presentAttachmentIndex) || resolveAttachmentCount > 0);
 
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
 
 		ImageDescriptor colorImageDescriptor{};
@@ -40,6 +42,8 @@ namespace ProjectA {
 
 	ref<Image> OpenGLRenderPass::createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const {
 		DEBUG_ASSERT(depthStencil);
+
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
 
 		ImageDescriptor depthStencilImageDescriptor{};
 		depthStencilImageDescriptor.type = descriptor.type;

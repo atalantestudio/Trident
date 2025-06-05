@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Engine/API/Rendering/ComputePipeline.hpp"
+#include "Engine/API/Rendering/Descriptor/ComputePipelineDescriptor.hpp"
+#include "Engine/API/Rendering/Descriptor/PipelineLayoutDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/SamplerDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/ShaderModuleDescriptor.hpp"
