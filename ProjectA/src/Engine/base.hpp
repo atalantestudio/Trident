@@ -61,7 +61,8 @@
 	#error "Unsupported platform."
 #endif
 
-#define ENGINE_TRACE(...) ProjectA::Logger::engineLogger.trace(__VA_ARGS__)
+#define ENGINE_TRACE(argumentOrPattern, ...) ProjectA::Logger::engineLogger.trace(argumentOrPattern "\n    at []\n    ([]:[])", ##__VA_ARGS__, __FUNCSIG__, __FILE__, __LINE__)
+#define ENGINE_TRACE_PREFORMATTED(...) ProjectA::Logger::engineLogger.trace(__VA_ARGS__)
 #define ENGINE_DEBUG(...) ProjectA::Logger::engineLogger.debug(__VA_ARGS__)
 #define ENGINE_INFO(...) ProjectA::Logger::engineLogger.info(__VA_ARGS__)
 #define ENGINE_WARN(...) ProjectA::Logger::engineLogger.warn(__VA_ARGS__)

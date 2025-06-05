@@ -164,14 +164,39 @@ namespace ProjectA {
 
 			VkPhysicalDeviceProperties physicalDeviceProperties;
 
-			ENGINE_TRACE("Available physical devices:");
+			ENGINE_INFO("Physical devices:");
 
 			for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count; physicalDeviceIndex += 1) {
 				const VkPhysicalDevice physicalDevice = physicalDevices[physicalDeviceIndex];
 
 				vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
 
-				ENGINE_DEBUG("[]. []", physicalDeviceIndex, physicalDeviceProperties.deviceName);
+				std::string physicalDeviceType;
+
+				switch (physicalDeviceProperties.deviceType) {
+					case VK_PHYSICAL_DEVICE_TYPE_OTHER:
+						physicalDeviceType = "unknown type";
+
+						break;
+					case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+						physicalDeviceType = "integrated GPU";
+
+						break;
+					case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+						physicalDeviceType = "discrete GPU";
+
+						break;
+					case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+						physicalDeviceType = "virtual GPU";
+
+						break;
+					case VK_PHYSICAL_DEVICE_TYPE_CPU:
+						physicalDeviceType = "CPU";
+
+						break;
+				}
+
+				ENGINE_INFO("- [] ([])", physicalDeviceProperties.deviceName, physicalDeviceType);
 			}
 		}
 	#endif
@@ -180,7 +205,7 @@ namespace ProjectA {
 		VkBool32 VulkanInstance::debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
 			switch (messageSeverity) {
 				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-					ENGINE_TRACE(pCallbackData->pMessage);
+					ENGINE_TRACE_PREFORMATTED(pCallbackData->pMessage);
 
 					break;
 				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
@@ -197,7 +222,6 @@ namespace ProjectA {
 					break;
 			}
 
-			// TODO: Check https://vulkan.lunarg.com/doc/sdk/1.4.309.0/windows/error_messages.html to improve logging.
 			return VK_FALSE;
 		}
 	#endif
