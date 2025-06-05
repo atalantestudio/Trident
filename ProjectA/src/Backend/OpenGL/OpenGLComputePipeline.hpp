@@ -2,7 +2,7 @@
 
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 
-#include "Engine/Renderer/ComputePipeline.hpp"
+#include "Engine/API/Rendering/ComputePipeline.hpp"
 
 namespace ProjectA {
 	class OpenGLComputePipeline : public ComputePipeline {

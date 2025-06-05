@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Engine/API/Rendering/Buffer.hpp"
+#include "Engine/API/Rendering/CommandBuffer.hpp"
+#include "Engine/API/Rendering/ComputePipeline.hpp"
 #include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/CommandBufferDescriptor.hpp"
 #include "Engine/API/Rendering/Image.hpp"
-#include "Engine/Renderer/CommandBuffer.hpp"
-#include "Engine/Renderer/ComputePipeline.hpp"
-#include "Engine/Renderer/ImageLayout.hpp"
-#include "Engine/Renderer/PipelineStage.hpp"
-#include "Engine/Renderer/RenderPipeline.hpp"
+#include "Engine/API/Rendering/ImageLayout.hpp"
+#include "Engine/API/Rendering/PipelineStage.hpp"
+#include "Engine/API/Rendering/RenderPipeline.hpp"
 
 namespace ProjectA {
 	class CommandEncoder {

@@ -5,7 +5,7 @@
 #include "Backend/Vulkan/VulkanSurface.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/Device.hpp"
+#include "Engine/API/Rendering/Device.hpp"
 
 namespace ProjectA {
 	class VulkanDevice : public Device, public ObjectWrapper<VkDevice> {

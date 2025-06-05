@@ -4,7 +4,7 @@
 #include "Backend/Vulkan/VulkanSwapchain.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/Queue.hpp"
+#include "Engine/API/Rendering/Queue.hpp"
 
 namespace ProjectA {
 	class VulkanDevice;

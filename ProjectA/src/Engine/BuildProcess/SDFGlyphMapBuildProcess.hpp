@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Engine/API/Rendering/Image.hpp"
+#include "Engine/API/Rendering/ImageLayout.hpp"
 #include "Engine/Filesystem/File/TTFFile.hpp"
-#include "Engine/Renderer/ImageLayout.hpp"
 
 namespace ProjectA {
 	struct SDFGlyph {

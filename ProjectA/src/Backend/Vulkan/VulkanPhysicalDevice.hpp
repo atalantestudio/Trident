@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/PhysicalDevice.hpp"
+#include "Engine/API/Rendering/PhysicalDevice.hpp"
 
 namespace ProjectA {
 	class VulkanPhysicalDevice : public PhysicalDevice, public ObjectWrapper<VkPhysicalDevice> {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Renderer/CommandBufferUsage.hpp"
+#include "Engine/API/Rendering/CommandBufferUsage.hpp"
 
 namespace ProjectA {
 	struct CommandBufferDescriptor {

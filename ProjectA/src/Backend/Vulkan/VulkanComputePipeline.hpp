@@ -2,7 +2,7 @@
 
 #include "Backend/Vulkan/VulkanPipeline.hpp"
 
-#include "Engine/Renderer/ComputePipeline.hpp"
+#include "Engine/API/Rendering/ComputePipeline.hpp"
 
 namespace ProjectA {
 	class VulkanComputePipeline : public ComputePipeline, public VulkanPipeline {

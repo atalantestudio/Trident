@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Renderer/PhysicalDevice.hpp"
+#include "Engine/API/Rendering/PhysicalDevice.hpp"
 
 namespace ProjectA {
 	class OpenGLPhysicalDevice : public PhysicalDevice {

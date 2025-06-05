@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanPipelineLayout.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/Pipeline.hpp"
+#include "Engine/API/Rendering/Pipeline.hpp"
 
 namespace ProjectA {
 	class VulkanPipeline : public Pipeline, public ObjectWrapper<VkPipeline> {

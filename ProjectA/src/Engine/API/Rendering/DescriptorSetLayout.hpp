@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Renderer/DescriptorSetLayoutBinding.hpp"
+#include "Engine/API/Rendering/DescriptorSetLayoutBinding.hpp"
 
 namespace ProjectA {
 	struct DescriptorSetLayout {

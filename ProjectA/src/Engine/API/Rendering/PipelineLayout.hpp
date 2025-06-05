@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Renderer/DescriptorSetLayout.hpp"
+#include "Engine/API/Rendering/DescriptorSetLayout.hpp"
 
 namespace ProjectA {
 	struct PipelineLayoutDescriptor {

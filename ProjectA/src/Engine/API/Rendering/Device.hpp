@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Engine/Renderer/PhysicalDevice.hpp"
-#include "Engine/Renderer/Queue.hpp"
-#include "Engine/Renderer/Status.hpp"
+#include "Engine/API/Rendering/PhysicalDevice.hpp"
+#include "Engine/API/Rendering/Queue.hpp"
+#include "Engine/API/Rendering/Status.hpp"
 
 namespace ProjectA {
 	class Device {

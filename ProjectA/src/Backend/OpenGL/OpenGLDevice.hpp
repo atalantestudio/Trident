@@ -4,7 +4,7 @@
 #include "Backend/OpenGL/OpenGLQueue.hpp"
 #include "Backend/OpenGL/OpenGLRenderingContext.hpp"
 
-#include "Engine/Renderer/Device.hpp"
+#include "Engine/API/Rendering/Device.hpp"
 
 namespace ProjectA {
 	class OpenGLDevice : public Device {

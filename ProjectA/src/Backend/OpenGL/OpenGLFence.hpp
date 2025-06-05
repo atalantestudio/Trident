@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/API/Synchronization/Fence.hpp"
+#include "Engine/API/Rendering/Fence.hpp"
 
 namespace ProjectA {
 	class OpenGLFence : public Fence, public ObjectWrapper<GLsync> {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Renderer/VertexInputAttributeType.hpp"
+#include "Engine/API/Rendering/VertexInputAttributeType.hpp"
 
 namespace ProjectA {
 	struct VertexInputAttribute {

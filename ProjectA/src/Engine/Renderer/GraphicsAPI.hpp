@@ -6,12 +6,12 @@ namespace ProjectA {
 		NONE = 0,
 
 		#ifdef ENABLE_OPENGL
-			// OpenGL 4.6.
+			// OpenGL graphics API. Fast, very good support.
 			OPENGL = 1,
 		#endif
 
 		#ifdef ENABLE_VULKAN
-			// Vulkan 1.
+			// Vulkan graphics API. Very fast, not very good support.
 			VULKAN = 2,
 		#endif
 	};

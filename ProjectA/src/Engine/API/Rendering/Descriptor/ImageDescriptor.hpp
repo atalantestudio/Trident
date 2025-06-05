@@ -2,8 +2,8 @@
 
 #include "Engine/API/Rendering/ImageFormat.hpp"
 #include "Engine/API/Rendering/ImageType.hpp"
+#include "Engine/API/Rendering/ImageUsage.hpp"
 #include "Engine/API/Rendering/MemoryProperty.hpp"
-#include "Engine/Renderer/ImageUsage.hpp"
 
 namespace ProjectA {
 	struct ImageDescriptor {

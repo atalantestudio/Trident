@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/Instance.hpp"
+#include "Engine/API/Rendering/Instance.hpp"
 
 namespace ProjectA {
 	class VulkanInstance : public Instance, public ObjectWrapper<VkInstance> {

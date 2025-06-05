@@ -2,7 +2,7 @@
 
 #include "Backend/OpenGL/OpenGLRenderingContext.hpp"
 
-#include "Engine/Renderer/Queue.hpp"
+#include "Engine/API/Rendering/Queue.hpp"
 
 namespace ProjectA {
 	class OpenGLDevice;

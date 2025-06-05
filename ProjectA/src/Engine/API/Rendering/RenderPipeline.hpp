@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Renderer/Pipeline.hpp"
+#include "Engine/API/Rendering/Pipeline.hpp"
 
 namespace ProjectA {
 	class RenderPipeline : public Pipeline {

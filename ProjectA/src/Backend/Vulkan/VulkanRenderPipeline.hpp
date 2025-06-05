@@ -5,7 +5,7 @@
 #include "Backend/Vulkan/VulkanSwapchain.hpp"
 
 #include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
-#include "Engine/Renderer/RenderPipeline.hpp"
+#include "Engine/API/Rendering/RenderPipeline.hpp"
 
 namespace ProjectA {
 	class VulkanRenderPipeline : public RenderPipeline, public VulkanPipeline {

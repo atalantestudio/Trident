@@ -4,7 +4,7 @@
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 
 #include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
-#include "Engine/Renderer/RenderPipeline.hpp"
+#include "Engine/API/Rendering/RenderPipeline.hpp"
 
 namespace ProjectA {
 	class OpenGLRenderPipeline : public RenderPipeline {

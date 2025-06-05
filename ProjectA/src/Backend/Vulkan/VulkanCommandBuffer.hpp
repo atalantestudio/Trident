@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/CommandBuffer.hpp"
+#include "Engine/API/Rendering/CommandBuffer.hpp"
 
 namespace ProjectA {
 	class VulkanCommandBuffer : public CommandBuffer, public ObjectWrapper<const VkCommandBuffer> {

@@ -3,7 +3,7 @@
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/Renderer/CommandPool.hpp"
+#include "Engine/API/Rendering/CommandPool.hpp"
 
 namespace ProjectA {
 	class VulkanCommandPool : public CommandPool, public ObjectWrapper<VkCommandPool> {
