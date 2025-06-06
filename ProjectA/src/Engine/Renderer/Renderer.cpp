@@ -94,6 +94,8 @@ namespace ProjectA {
 	}
 
 	ref<ComputePipeline> Renderer::createComputePipeline(const ComputePipelineDescriptor& descriptor) {
+		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 		return adapter->createComputePipeline(descriptor);
 	}
 

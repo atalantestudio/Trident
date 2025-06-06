@@ -13,8 +13,7 @@ namespace ProjectA {
 			void GUI() override {
 				PROFILE_SCOPE(FUNC_SIG);
 
-				if (frameIndex == FRAME_DELAY) {
-					frameIndex = 0;
+				if (Application::getFrameIndex() % FRAME_DELAY == 0) {
 					framesPerSecond = Application::getFramesPerSecond();
 				}
 
@@ -31,18 +30,15 @@ namespace ProjectA {
 						}
 					}
 				}
-
-				frameIndex += 1;
 			}
 
 		private:
-			static constexpr uint8 FRAME_DELAY = 165;
+			static constexpr uint32 FRAME_DELAY = 165;
 
 			static inline const vec4<float32> GRAY = {0.122f, 0.122f, 0.122f, 1.0f};
 			static inline const vec4<float32> LIGHT_GRAY = {0.196f, 0.204f, 0.196f, 1.0f};
 
 		private:
-			uint8 frameIndex = 0;
 			float64 framesPerSecond;
 			TextStyle textStyle;
 	};

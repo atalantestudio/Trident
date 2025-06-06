@@ -10,7 +10,7 @@ namespace ProjectA {
 	struct DescriptorSetLayoutBinding {
 		DescriptorType descriptorType;
 
-		// TODO: Replace by flag enum?
+		// TODO: Use as flag.
 		ShaderStage stageFlags;
 
 		std::vector<ref<Buffer>> buffers;

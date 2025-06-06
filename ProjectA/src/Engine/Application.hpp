@@ -31,6 +31,8 @@ namespace ProjectA {
 			// Returns the average frames per second count.
 			static float64 getFramesPerSecond();
 
+			static uint32 getFrameIndex();
+
 			template<typename T, typename... U>
 			void registerLayer(U&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);

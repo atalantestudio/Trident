@@ -4,8 +4,10 @@
 #include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/BufferDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/CommandBufferDescriptor.hpp"
+#include "Engine/API/Rendering/Descriptor/ComputePipelineDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/ImageViewDescriptor.hpp"
+#include "Engine/API/Rendering/Descriptor/PipelineLayoutDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/RenderPassDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/SamplerDescriptor.hpp"
@@ -64,13 +66,13 @@ namespace ProjectA {
 		if (descriptor.renderPass == nullptr) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.renderPass must be a reference to a valid render pass.");
+			ENGINE_ERROR("descriptor.renderPass must be a valid RenderPass.");
 		}
 
 		if (descriptor.swapchain == nullptr) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.swapchain must be a reference to a valid swapchain.");
+			ENGINE_ERROR("descriptor.swapchain must be a valid Swapchain.");
 		}
 
 		if (descriptor.clearValues.size() < descriptor.renderPass->getClearValueCount()) {
@@ -119,6 +121,25 @@ namespace ProjectA {
 		}
 
 		ENGINE_ASSERT(errorCount == 0, "Command buffer descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
+	}
+
+	static void validateDescriptor(const ComputePipelineDescriptor& descriptor) {
+		uint32 warningCount = 0;
+		uint32 errorCount = 0;
+
+		if (descriptor.pipelineLayout == nullptr) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.pipelineLayout must be a valid PipelineLayout.");
+		}
+
+		if (descriptor.computeShaderModule == nullptr) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.computeShaderModule must be a valid compute ShaderModule.");
+		}
+
+		ENGINE_ASSERT(errorCount == 0, "Compute pipeline descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
 	static void validateDescriptor(const ImageDescriptor& descriptor) {
@@ -188,6 +209,75 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Image view descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
+	static void validateDescriptor(const PipelineLayoutDescriptor& descriptor) {
+		uint32 warningCount = 0;
+		uint32 errorCount = 0;
+
+		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptor.layouts.size(); descriptorSetLayoutIndex += 1) {
+			const DescriptorSetLayout& descriptorSetLayout = descriptor.layouts[descriptorSetLayoutIndex];
+
+			for (uint32 descriptorSetLayoutBindingIndex = 0; descriptorSetLayoutBindingIndex < descriptorSetLayout.bindings.size(); descriptorSetLayoutBindingIndex += 1) {
+				const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout.bindings[descriptorSetLayoutBindingIndex];
+
+				if (descriptorSetLayoutBinding.descriptorType > DescriptorType::STORAGE_IMAGE) {
+					errorCount += 1;
+
+					ENGINE_ERROR("descriptor.layouts[[]].bindings[[]].descriptorType must be a valid DescriptorType value.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
+				}
+
+				if (descriptorSetLayoutBinding.stageFlags > ShaderStage::COMPUTE) {
+					errorCount += 1;
+
+					ENGINE_ERROR("descriptor.layouts[[]].bindings[[]].stageFlags must be a valid ShaderStage value.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
+				}
+
+				for (uint32 bufferIndex = 0; bufferIndex < descriptorSetLayoutBinding.buffers.size(); bufferIndex += 1) {
+					const ref<Buffer>& buffer = descriptorSetLayoutBinding.buffers[bufferIndex];
+
+					if (buffer == nullptr) {
+						errorCount += 1;
+
+						ENGINE_ERROR("descriptor.layouts[[]].bindings[[]].buffers[[]] must be a valid Buffer.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex, bufferIndex);
+					}
+				}
+
+				if (!descriptorSetLayoutBinding.buffers.empty() && descriptorSetLayoutBinding.bufferOffset > 0) {
+					errorCount += 1;
+
+					ENGINE_ERROR("descriptor.layouts[[]].bindings[[]].bufferOffset must be 0 if the binding doesn't have any buffers.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
+				}
+
+				for (uint32 imageViewIndex = 0; imageViewIndex < descriptorSetLayoutBinding.imageViews.size(); imageViewIndex += 1) {
+					const ref<ImageView>& imageView = descriptorSetLayoutBinding.imageViews[imageViewIndex];
+
+					if (imageView == nullptr) {
+						errorCount += 1;
+
+						ENGINE_ERROR("descriptor.layouts[[]].bindings[[]].imageViews[[]] must be a valid ImageView.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex, imageViewIndex);
+					}
+				}
+
+				for (uint32 samplerIndex = 0; samplerIndex < descriptorSetLayoutBinding.samplers.size(); samplerIndex += 1) {
+					const ref<Sampler>& sampler = descriptorSetLayoutBinding.samplers[samplerIndex];
+
+					if (sampler == nullptr) {
+						errorCount += 1;
+
+						ENGINE_ERROR("descriptor.layouts[[]].bindings[[]].samplers[[]] must be a valid Sampler.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex, samplerIndex);
+					}
+				}
+
+				if (descriptorSetLayoutBinding.imageViews.size() != descriptorSetLayoutBinding.samplers.size()) {
+					errorCount += 1;
+
+					ENGINE_ERROR("The number of image views in descriptor.layouts[[]].bindings[[]].imageViews must be the same as the number of samplers in descriptor.layouts[[]].bindings[[]].samplers.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex, descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
+				}
+			}
+		}
+
+		ENGINE_ASSERT(errorCount == 0, "Pipeline layout descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
+	}
+
 	static void validateDescriptor(const RenderPassDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
@@ -251,7 +341,7 @@ namespace ProjectA {
 		}
 
 		if (descriptor.depthStencil) {
-			if (descriptor.depthStencilAttachment.format <= ImageFormat::D32_SFLOAT || descriptor.depthStencilAttachment.format > ImageFormat::D24_UNORM_S8_UINT) {
+			if (descriptor.depthStencilAttachment.format < ImageFormat::D32_SFLOAT || descriptor.depthStencilAttachment.format > ImageFormat::D24_UNORM_S8_UINT) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.depthStencilAttachment.format must be a valid depth stencil ImageFormat value.");
@@ -286,13 +376,13 @@ namespace ProjectA {
 		if (descriptor.renderPass == nullptr) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.renderPass must be a reference to a valid render pass.");
+			ENGINE_ERROR("descriptor.renderPass must be a valid RenderPass.");
 		}
 
 		if (descriptor.pipelineLayout == nullptr) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.pipelineLayout must be a reference to a valid pipeline layout.");
+			ENGINE_ERROR("descriptor.pipelineLayout must be a valid PipelineLayout.");
 		}
 
 		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.size(); vertexInputBindingIndex += 1) {
@@ -304,19 +394,35 @@ namespace ProjectA {
 				ENGINE_ERROR("descriptor.vertexInputBindings[[]].inputRate must be valid InputRate value.", vertexInputBindingIndex);
 			}
 
-			// TODO: Finish validation.
+			const std::vector<VertexInputAttribute>& vertexInputAttributes = vertexInputBinding.getAttributes();
+
+			for (uint32 vertexInputAttributeIndex = 0; vertexInputAttributeIndex < vertexInputAttributes.size(); vertexInputAttributeIndex += 1) {
+				const VertexInputAttribute& vertexInputAttribute = vertexInputAttributes[vertexInputAttributeIndex];
+
+				if (vertexInputAttribute.type > VertexInputAttributeType::R64G64B64A64_FLOAT) {
+					errorCount += 1;
+
+					ENGINE_ERROR("descriptor.vertexInputBindings[[]].attributes[[]].type must be valid VertexInputAttributeType value.", vertexInputBindingIndex, vertexInputAttributeIndex);
+				}
+
+				if (vertexInputAttribute.normalized != true && vertexInputAttribute.normalized != false) {
+					errorCount += 1;
+
+					ENGINE_ERROR("descriptor.vertexInputBindings[[]].attributes[[]].normalized must be either true or false.", vertexInputBindingIndex, vertexInputAttributeIndex);
+				}
+			}
 		}
 
 		if (descriptor.vertexShaderModule == nullptr) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.vertexShaderModule must be a reference to a valid vertex shader module.");
+			ENGINE_ERROR("descriptor.vertexShaderModule must be a valid vertex ShaderModule.");
 		}
 
 		if (descriptor.fragmentShaderModule == nullptr) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.fragmentShaderModule must be a reference to a valid fragment shader module.");
+			ENGINE_ERROR("descriptor.fragmentShaderModule must be a valid fragment ShaderModule.");
 		}
 
 		if (descriptor.primitiveTopology > PrimitiveTopology::TRIANGLE_STRIP) {

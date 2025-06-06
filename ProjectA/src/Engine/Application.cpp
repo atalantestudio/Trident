@@ -199,6 +199,10 @@ namespace ProjectA {
 		return rendersPerSecond / 1000.0;
 	}
 
+	uint32 Application::getFrameIndex() {
+		return frameIndex;
+	}
+
 	void Application::loop() {
 		window->show();
 
