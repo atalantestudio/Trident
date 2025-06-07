@@ -81,9 +81,6 @@ namespace ProjectA {
 		// 4-byte identifier.
 		uint32 tag;
 
-		// Checksum for this table.
-		uint32 checksum;
-
 		// Offset from beginning of sfnt.
 		uint32 offset;
 

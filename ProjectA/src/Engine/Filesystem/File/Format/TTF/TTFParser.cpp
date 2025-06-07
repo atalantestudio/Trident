@@ -6,20 +6,17 @@
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
-	// TODO: Use.
-	static uint32 calculateTableChecksum(uint32* table, uint32 byteCount) {
-		uint32 checksum = 0;
-		uint32 longCount = (byteCount + 3) / 4;
+	/*#ifdef TTF_PARSER_VERIFY_CHECKSUM
+		static uint32 calculateTableChecksum(const uint32* table, uint32 byteCount) {
+			uint32 checksum = 0;
+			uint32 longCount = (byteCount + 3) / 4;
 
-		while (longCount > 0) {
-			checksum += *table;
+			// TODO: Refactor.
+			while (longCount-- > 0) checksum += *table++;
 
-			table += 1;
-			longCount -= 1;
+			return checksum;
 		}
-
-		return checksum;
-	}
+	#endif*/
 
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6head.html
 	static sint16 parseHeadTable(ByteStream& stream) {
@@ -494,17 +491,31 @@ namespace ProjectA {
 		for (uint32 tableIndex = 0; tableIndex < offsetSubtable.numTables; tableIndex += 1) {
 			TableDirectory tableDirectory{};
 			tableDirectory.tag = stream.read<uint32>();
-			tableDirectory.checksum = stream.read<uint32>(true);
+
+			stream.jump(sizeof(uint32));
+			/*#ifdef TTF_PARSER_VERIFY_CHECKSUM
+				//const uint32 readChecksum = stream.read<uint32>(true);
+			#else
+				stream.jump(sizeof(uint32));
+			#endif*/
+
 			tableDirectory.offset = stream.read<uint32>(true);
 			tableDirectory.length = stream.read<uint32>(true);
 
 			tableOffsetMap.insert(std::make_pair(tableDirectory.tag, tableDirectory.offset));
 
-			//const char* TypeString = static_cast<char*>(static_cast<void*>(&tableDirectory.tag));
-			//ENGINE_INFO("Reading directory for table \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
+			// TODO: Handle table checksum.
+			/*#ifdef TTF_PARSER_VERIFY_CHECKSUM
+				const uint32* start = static_cast<const uint32*>(static_cast<const void*>(stream.getBytePosition() - stream.getByteOffset()));
+				const uint32* position = start + tableDirectory.offset;
+				const uint32 calculatedChecksum = calculateTableChecksum(position, tableDirectory.length);
 
-			// TODO: Calculate checksum.
-			//const uint32 checksum = calculateTableChecksum((uint32*)(stream.getBytePosition() - stream.getByteOffset() + tableDirectory.offset), tableDirectory.length);
+				if (calculatedChecksum != readChecksum) {
+					const char* tag = static_cast<char*>(static_cast<void*>(&tableDirectory.tag));
+
+					ENGINE_ASSERT(false, "Invalid checksum for TTF table \"[][][][]\".", tag[0], tag[1], tag[2], tag[3]);
+				}
+			#endif*/
 		}
 
 		// Parse 'head' table.
