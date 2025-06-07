@@ -26,8 +26,6 @@ namespace ProjectA {
 			}
 		}
 
-		glFlush();
-
 		if (fence != nullptr) {
 			device.waitForFence(fence);
 		}
