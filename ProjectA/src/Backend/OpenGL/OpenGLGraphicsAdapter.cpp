@@ -106,7 +106,7 @@ namespace ProjectA {
 
 			glDebugMessageCallback(debugMessageCallback, nullptr);
 
-			glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 0, GL_DEBUG_SEVERITY_NOTIFICATION, 36, "Enabled OpenGL debug message callback.");
+			glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 0, GL_DEBUG_SEVERITY_NOTIFICATION, 0, "Enabled OpenGL debug message callback.");
 		#endif
 
 		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
