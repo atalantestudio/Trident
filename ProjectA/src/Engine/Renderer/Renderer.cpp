@@ -39,7 +39,7 @@ namespace ProjectA {
 				break;
 			#ifdef ENABLE_OPENGL
 				case GraphicsAPI::OPENGL:
-					ENGINE_INFO("Using OpenGL backend.");
+					ENGINE_INFO("Using OpenGL graphics adapter.");
 
 					adapter = createScope<OpenGLGraphicsAdapter>(window);
 
@@ -47,7 +47,7 @@ namespace ProjectA {
 			#endif
 			#ifdef ENABLE_VULKAN
 				case GraphicsAPI::VULKAN:
-					ENGINE_INFO("Using Vulkan backend.");
+					ENGINE_INFO("Using Vulkan graphics adapter.");
 
 					adapter = createScope<VulkanGraphicsAdapter>(window);
 

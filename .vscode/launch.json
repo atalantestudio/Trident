@@ -1,0 +1,23 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Run Project (Editor)",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/Editor.exe",
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/Editor",
+			"console": "integratedTerminal"
+		},
+		{
+			"name": "Run Project (Samples)",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/Samples/Samples.exe",
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/Samples",
+			"console": "integratedTerminal"
+		}
+	]
+}

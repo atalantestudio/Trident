@@ -79,10 +79,10 @@ namespace ProjectA {
 
 		enabledExtensionNames.resize(extensionPropertyCount);
 
-		ENGINE_TRACE("Enabled device extensions:");
+		ENGINE_INFO("Enabled device extensions:");
 
 		for (uint32 extensionPropertiesIndex = 0; extensionPropertiesIndex < extensionProperties.count; extensionPropertiesIndex += 1) {
-			ENGINE_TRACE("- [] (spec version: [])", extensionProperties[extensionPropertiesIndex].extensionName, extensionProperties[extensionPropertiesIndex].specVersion);
+			ENGINE_INFO("- [] (spec version: [])", extensionProperties[extensionPropertiesIndex].extensionName, extensionProperties[extensionPropertiesIndex].specVersion);
 
 			enabledExtensionNames[extensionPropertiesIndex] = extensionProperties[extensionPropertiesIndex].extensionName;
 		}
