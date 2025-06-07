@@ -4,11 +4,9 @@ namespace ProjectA {
 	// Platform-agnostic helper functions.
 	class Platform {
 		public:
-			static const char* getWindowName();
-
-			// Sets the window name.
+			// Initializes the platform.
 			// This name is used as the title of application windows and error pop-ups.
-			static void setWindowName(const char* windowName);
+			static void initialize(const char* windowName);
 
 			// Returns the identifier of the current process.
 			static uint32 getCurrentProcessId();

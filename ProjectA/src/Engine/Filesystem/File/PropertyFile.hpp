@@ -31,15 +31,17 @@ namespace ProjectA {
 			{
 				const std::filesystem::path absolutePath = std::filesystem::absolute(path);
 
-				if (!stream.is_open()) {
-					ENGINE_FATAL(ENOENT, "Could not open property file [].", absolutePath);
-
-					return;
-				}
-
 				name = absolutePath.filename().string();
 				this->absolutePath = absolutePath.string();
 				size = stream.tellg();
+			}
+
+			explicit PropertyFile(std::string_view path, std::string_view data) {
+				std::ofstream stream(path.data(), std::ios::out);
+
+				DEBUG_ASSERT(stream.is_open());
+
+				stream << data;
 			}
 
 			~PropertyFile() {

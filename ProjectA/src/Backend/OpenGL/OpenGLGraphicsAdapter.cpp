@@ -152,7 +152,7 @@ namespace ProjectA {
 		return createRef<OpenGLSemaphore>();
 	}
 
-	ref<ShaderModule> OpenGLGraphicsAdapter::createShaderModule(const std::vector<uint8>& code, const ShaderModuleDescriptor& descriptor) const {
+	ref<ShaderModule> OpenGLGraphicsAdapter::createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const {
 		return createRef<OpenGLShaderModule>(code, descriptor);
 	}
 

@@ -5,7 +5,7 @@
 #include "Backend/Vulkan/ShaderStage.hpp"
 
 namespace ProjectA {
-	VulkanShaderModule::VulkanShaderModule(VkDevice device, const std::vector<uint8>& code, const ShaderModuleDescriptor& descriptor) :
+	VulkanShaderModule::VulkanShaderModule(VkDevice device, const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
@@ -14,12 +14,10 @@ namespace ProjectA {
 		shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		shaderModuleCreateInfo.pNext = nullptr;
 		shaderModuleCreateInfo.flags = 0;
-		shaderModuleCreateInfo.codeSize = code.size();
-		shaderModuleCreateInfo.pCode = static_cast<const uint32*>(static_cast<const void*>(code.data()));
+		shaderModuleCreateInfo.codeSize = code.count;
+		shaderModuleCreateInfo.pCode = static_cast<const uint32*>(static_cast<const void*>(code));
 
-		VkShaderModule shaderModule;
-
-		const VkResult result = vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, &shaderModule);
+		const VkResult result = vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, &object.module);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan shader module ([]).", string_VkResult(result));
 
@@ -27,7 +25,6 @@ namespace ProjectA {
 		object.pNext = nullptr;
 		object.flags = 0;
 		object.stage = getVkShaderStageFlagBits(descriptor.stage);
-		object.module = shaderModule;
 		object.pName = descriptor.entryPoint.data();
 		object.pSpecializationInfo = nullptr;
 	}

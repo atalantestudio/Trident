@@ -5,13 +5,13 @@
 #include "Backend/OpenGL/ShaderStage.hpp"
 
 namespace ProjectA {
-	OpenGLShaderModule::OpenGLShaderModule(const std::vector<uint8>& code, ShaderStage stage) :
+	OpenGLShaderModule::OpenGLShaderModule(const sequence<uint8>& code, ShaderStage stage) :
 		ObjectWrapper(glCreateShader(getGlShaderStage(stage)))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const GLchar* const string = reinterpret_cast<const GLchar* const>(code.data());
-		const GLint length = static_cast<GLint>(code.size());
+		const GLchar* const string = static_cast<const GLchar* const>(static_cast<const void* const>(code));
+		const GLint length = static_cast<GLint>(code.count);
 
 		glShaderSource(object, 1, &string, &length);
 		glCompileShader(object);
@@ -19,14 +19,14 @@ namespace ProjectA {
 		checkCompileStatus();
 	}
 
-	OpenGLShaderModule::OpenGLShaderModule(const std::vector<uint8>& code, const ShaderModuleDescriptor& descriptor) :
+	OpenGLShaderModule::OpenGLShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) :
 		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const GLsizei length = static_cast<GLsizei>(code.size());
+		const GLsizei length = static_cast<GLsizei>(code.count);
 
-		glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code.data(), length);
+		glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code, length);
 
 		// TODO: Expose specialization constants.
 		glSpecializeShader(object, descriptor.entryPoint.data(), 0, nullptr, nullptr);

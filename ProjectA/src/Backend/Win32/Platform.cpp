@@ -7,11 +7,7 @@
 namespace ProjectA {
 	const char* Platform::windowName = nullptr;
 
-	const char* Platform::getWindowName() {
-		return windowName;
-	}
-
-	void Platform::setWindowName(const char* windowName) {
+	void Platform::initialize(const char* windowName) {
 		Platform::windowName = windowName;
 	}
 

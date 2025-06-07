@@ -156,8 +156,8 @@ namespace ProjectA {
 	}
 
 	template<>
-	PNGFile Filesystem::load(std::string_view path) {
-		const File file = load<File>(path);
+	PNGFile Filesystem::openTemporary(std::string_view path) {
+		const File file = openTemporary<File>(path);
 
 		ByteStream stream(file.rawData.data(), file.size);
 

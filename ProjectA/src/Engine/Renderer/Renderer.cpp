@@ -169,10 +169,10 @@ namespace ProjectA {
 		return swapchain;
 	}
 
-	ref<ShaderModule> Renderer::loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor) {
+	ref<ShaderModule> Renderer::loadShaderModule(std::string_view path, const ShaderModuleDescriptor& descriptor) {
 		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
 
-		const std::vector<uint8> code = Filesystem::loadByteBuffer(path);
+		const sequence<uint8> code = Filesystem::loadByteBuffer(path);
 
 		return adapter->createShaderModule(code, descriptor);
 	}

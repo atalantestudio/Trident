@@ -5,7 +5,7 @@
 
 namespace ProjectA {
 	template<>
-	File Filesystem::load(std::string_view path) {
+	File Filesystem::openTemporary(std::string_view path) {
 		std::ifstream stream(path.data(), std::ios::binary);
 
 		ENGINE_ASSERT(stream.is_open(), "Could not open file \"[]\".", path);

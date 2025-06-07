@@ -40,15 +40,13 @@ namespace ProjectA {
 
 		ENGINE_DEBUG("Launching.");
 
+		Platform::initialize(applicationManifest.projectName.data());
+
 		mutex = createScope<Mutex>("Mutex");
 		mutex->acquire();
 
 		sharedMemory = createScope<SharedMemory>("SharedMemory", sizeof(SharedMemoryData));
 		sharedMemoryData = static_cast<SharedMemoryData*>(sharedMemory->map(0, sizeof(SharedMemoryData)));
-
-		constexpr uint8 MAX_PARALLEL_INSTANCES = 5;
-
-		Platform::setWindowName(applicationManifest.projectName.data());
 
 		if (sharedMemoryData->instanceCount > MAX_PARALLEL_INSTANCES) {
 			ENGINE_FATAL(EOVERFLOW, "More than [] instances running in parallel.", MAX_PARALLEL_INSTANCES);
@@ -56,32 +54,33 @@ namespace ProjectA {
 			return;
 		}
 
-		// Open/create the project property file.
+		// Open/create the project's property file.
 		// A project shouldn't be forced to use a window, so the property file is loaded first.
-		// When a setting is changed in the game menu, the property file is replaced with an updated version.
-		const std::filesystem::path currentPath = Filesystem::getCurrentPath();
-		const std::string currentDirectoryName = Filesystem::getCurrentDirectory().string();
+		// - When a setting is changed in the game menu, the property file is replaced with an updated version.
+		// - When the user edits the property file themselves, the application verifies that the new values are valid before using them.
+		//   If a property is invalid, the application emits a warning and continues to use the current value.
+		const std::filesystem::path projectRootDirectory = Filesystem::getProjectRootDirectory();
 
-		std::filesystem::path propertyFilePath = currentPath / currentDirectoryName;
-		propertyFilePath += ".tpr";
+		const std::string propertyFilePath = Logger::format("[]/[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
 
-		ENGINE_DEBUG("Opening property file.");
-
-		propertyFile = Filesystem::load<PropertyFile*>(propertyFilePath.string());
+		// Try to open the property file located at "[PROJECT_ROOT_DIRECTORY]/[PROJECT_NAME].tpr".
+		propertyFile = Filesystem::open<PropertyFile/*, OpenMode::AT_END*/>(propertyFilePath);
 
 		if (propertyFile == nullptr) {
-			ENGINE_INFO("Could not find property file. Creating a new one.");
+			ENGINE_WARN("Could not find property file \"[]\".", propertyFilePath);
 
-			// TODO: Recreate property file.
-			DEBUG_ASSERT(false);
+			// TODO: If no file, create a new property file with default values.
+			// #include "Engine/Filesystem/PropertyFile/PropertyList.hpp"
 
-			return;
+			DEBUG_ASSERT(propertyFile != nullptr);
+
+			ENGINE_INFO("Created new property file with default values.");
 		}
 
 		WindowDescriptor windowDescriptor{};
 		windowDescriptor.name = formatWindowName(applicationManifest.projectName, sharedMemoryData->instanceCount);
-		windowDescriptor.width = propertyFile->getProperty<uint32>("ExtentWidth");
-		windowDescriptor.height = propertyFile->getProperty<uint32>("ExtentHeight");
+		windowDescriptor.width = propertyFile->getProperty<uint32>("WindowWidth");
+		windowDescriptor.height = propertyFile->getProperty<uint32>("WindowHeight");
 		windowDescriptor.mouseDownEventListener = BIND(Application::onEvent);
 		windowDescriptor.mouseMoveEventListener = BIND(Application::onEvent);
 		windowDescriptor.mouseUpEventListener = BIND(Application::onEvent);
@@ -99,21 +98,13 @@ namespace ProjectA {
 
 		const GraphicsAPI graphicsApi = propertyFile->getProperty<GraphicsAPI>("GraphicsAPI");
 
-		vSync = propertyFile->getProperty<bool>("V-Sync");
+		vSync = propertyFile->getProperty<bool>("VSync");
 
 		Renderer::build(*window, graphicsApi, vSync);
-
-		/* Constants */
 
 		// API_QUEUE = Graphics API listed by priority.
 		//             First APIs are more recent but more performant,
 		//             last APIs are older but have better support
-
-		/* Startup */
-
-		// Open property file at "[PROJECT_ROOT_DIRECTORY]/[PROJECT_NAME].tpr"
-			// If no file
-				// Create a new property file with default values
 
 		// Define int selectedApiIndex
 
@@ -230,12 +221,12 @@ namespace ProjectA {
 		previousTime = currentTime;
 		frameTimeAccumulator += frameTime;
 
-		while (frameTimeAccumulator >= fixedDeltaTime) {
-			update(fixedDeltaTime);
+		while (frameTimeAccumulator >= FIXED_DELTA_TIME) {
+			update(FIXED_DELTA_TIME);
 
 			// Extract the fixed delta time from the accumulator.
 			// What's left is passed on to the next frame.
-			frameTimeAccumulator -= fixedDeltaTime;
+			frameTimeAccumulator -= FIXED_DELTA_TIME;
 		}
 
 		if (window->isMinimized()) {

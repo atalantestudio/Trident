@@ -65,7 +65,7 @@ namespace ProjectA {
 			static const ref<Swapchain>& getSwapchain();
 
 			// Loads and returns a SPIR-V shader module.
-			static ref<ShaderModule> loadShaderModule(const std::string& path, const ShaderModuleDescriptor& descriptor);
+			static ref<ShaderModule> loadShaderModule(std::string_view path, const ShaderModuleDescriptor& descriptor);
 
 			static void setImageIndex(uint32 imageIndex);
 

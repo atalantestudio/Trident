@@ -346,7 +346,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(imageIndex < MAX_IMAGES, "Image registration overflow.");
 
-		const PNGFile file = Filesystem::load<PNGFile>(path);
+		const PNGFile file = Filesystem::openTemporary<PNGFile>(path);
 		const uint64 size = file.data.size() * sizeof(uint8);
 
 		const ref<Buffer> stagingBuffer = createStagingBuffer(size);

@@ -3,28 +3,28 @@
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace ProjectA {
-	std::filesystem::path Filesystem::getCurrentPath() {
+	std::filesystem::path Filesystem::getProjectRootDirectory() {
 		return std::filesystem::current_path();
 	}
 
 	std::filesystem::path Filesystem::getCurrentDirectory() {
-		return getCurrentPath().filename();
+		return getProjectRootDirectory().filename();
 	}
 
-	std::vector<uint8> Filesystem::loadByteBuffer(const std::string& path) {
-		std::ifstream stream(path, std::ios::binary);
+	sequence<uint8> Filesystem::loadByteBuffer(std::string_view path) {
+		std::ifstream stream(path.data(), std::ios::binary);
 
 		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
 
 		stream.seekg(0, std::ios::end);
 
-		const std::streampos size = stream.tellg();
+		const std::streampos count = stream.tellg();
 
 		stream.seekg(0, std::ios::beg);
 
-		std::vector<uint8> buffer(size);
+		sequence<uint8> buffer(count);
 
-		stream.read(static_cast<char*>(static_cast<void*>(buffer.data())), size);
+		stream.read(static_cast<char*>(static_cast<void*>(buffer)), count);
 		stream.close();
 
 		return buffer;

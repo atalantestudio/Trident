@@ -450,8 +450,8 @@ namespace ProjectA {
 
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
 	template<>
-	TTFFile Filesystem::load(std::string_view path) {
-		const File baseFile = load<File>(path);
+	TTFFile Filesystem::openTemporary(std::string_view path) {
+		const File baseFile = openTemporary<File>(path);
 
 		TTFFile file;
 		file.name = baseFile.name;

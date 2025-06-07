@@ -79,11 +79,12 @@ namespace ProjectA {
 			friend int ::main(int argc, char** argv);
 
 		private:
-			static constexpr float64 RENDERS_PER_SECOND = 165.0;
-
-			static constexpr float64 fixedDeltaTime = 1.0 / 165.0;
+			static constexpr uint8 MAX_PARALLEL_INSTANCES = 5;
+			static constexpr float64 FIXED_DELTA_TIME = 1.0 / 165.0;
 
 		public:
+			// Used by the default Renderer class to initialize in flight objects
+			// (command encoders, fences, semaphores).
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
 
 		private:

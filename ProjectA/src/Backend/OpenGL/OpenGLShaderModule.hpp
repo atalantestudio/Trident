@@ -8,11 +8,11 @@ namespace ProjectA {
 		public:
 			// Creates an OpenGL shader from source code.
 			// The entry point must be named "main".
-			OpenGLShaderModule(const std::vector<uint8>& code, ShaderStage stage);
+			OpenGLShaderModule(const sequence<uint8>& code, ShaderStage stage);
 
 			// Creates an OpenGL shader from SPIR-V binary.
 			// Requires OpenGL >= 4.6.
-			OpenGLShaderModule(const std::vector<uint8>& code, const ShaderModuleDescriptor& descriptor);
+			OpenGLShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor);
 
 			~OpenGLShaderModule() override;
 

@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	TrueTypeFont::TrueTypeFont(std::string_view ttfFilePath) {
-		const TTFFile ttfFile = Filesystem::load<TTFFile>(ttfFilePath);
+		const TTFFile ttfFile = Filesystem::openTemporary<TTFFile>(ttfFilePath);
 
 		sdfGlyphMap = SDFGlyphMapBuildProcess::build(ttfFile);
 
