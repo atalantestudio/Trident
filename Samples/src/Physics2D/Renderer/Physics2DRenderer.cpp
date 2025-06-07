@@ -886,18 +886,18 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::renderClosestFeatures(const ref<CommandEncoder>& commandEncoder) const {
-		if (nextVertexFeatureIndex > 0) {
+		if (vertexFeatureCount > 0) {
 			commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();
 			commandEncoder->bindVertexBuffer(0, vertexFeatureBuffer, 0, sizeof(svec2<float32>));
-			commandEncoder->draw(nextVertexFeatureIndex, 1, 0);
+			commandEncoder->draw(vertexFeatureCount, 1, 0);
 		}
 
-		if (nextEdgeVertexFeatureIndex > 0) {
+		if (edgeVertexFeatureCount > 0) {
 			commandEncoder->bindRenderPipeline(edgeFeatureRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();
 			commandEncoder->bindVertexBuffer(0, edgeVertexFeatureBuffer, 0, sizeof(svec2<float32>));
-			commandEncoder->draw(nextEdgeVertexFeatureIndex, 1, 0);
+			commandEncoder->draw(edgeVertexFeatureCount, 1, 0);
 		}
 	}
 
@@ -966,22 +966,22 @@ namespace ProjectA {
 		instanceMappedRange[instanceIndex].world = transform;
 	}
 
-	void Physics2DRenderer::clearClosestFeatures() {
-		nextVertexFeatureIndex = 0;
-		nextEdgeVertexFeatureIndex = 0;
+	void Physics2DRenderer::clearClosestFeatureCounters() {
+		vertexFeatureCount = 0;
+		edgeVertexFeatureCount = 0;
 	}
 
 	void Physics2DRenderer::registerClosestFeature(const ClosestFeature2D& closestFeature) {
 		switch (closestFeature.count) {
 			case 1:
-				vertexFeatureMappedRange[nextVertexFeatureIndex] = {closestFeature.vertex[0], closestFeature.vertex[1]};
-				nextVertexFeatureIndex += 1;
+				vertexFeatureMappedRange[vertexFeatureCount] = {closestFeature.vertex[0], closestFeature.vertex[1]};
+				vertexFeatureCount += 1;
 
 				break;
 			case 2:
-				edgeVertexFeatureMappedRange[nextEdgeVertexFeatureIndex + 0] = {closestFeature.edge[0][0], closestFeature.edge[0][1]};
-				edgeVertexFeatureMappedRange[nextEdgeVertexFeatureIndex + 1] = {closestFeature.edge[1][0], closestFeature.edge[1][1]};
-				nextEdgeVertexFeatureIndex += 2;
+				edgeVertexFeatureMappedRange[edgeVertexFeatureCount + 0] = {closestFeature.edge[0][0], closestFeature.edge[0][1]};
+				edgeVertexFeatureMappedRange[edgeVertexFeatureCount + 1] = {closestFeature.edge[1][0], closestFeature.edge[1][1]};
+				edgeVertexFeatureCount += 2;
 
 				break;
 			default:

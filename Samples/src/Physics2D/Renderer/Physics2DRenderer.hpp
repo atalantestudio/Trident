@@ -32,7 +32,7 @@ namespace ProjectA {
 
 			void writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
 
-			void clearClosestFeatures();
+			void clearClosestFeatureCounters();
 
 			void registerClosestFeature(const ClosestFeature2D& closestFeature);
 
@@ -111,11 +111,11 @@ namespace ProjectA {
 
 			ref<Buffer> vertexFeatureBuffer;
 			svec2<float32>* vertexFeatureMappedRange = nullptr;
-			uint32 nextVertexFeatureIndex = 0;
+			uint32 vertexFeatureCount = 0;
 
 			ref<Buffer> edgeVertexFeatureBuffer;
 			svec2<float32>* edgeVertexFeatureMappedRange = nullptr;
-			uint32 nextEdgeVertexFeatureIndex = 0;
+			uint32 edgeVertexFeatureCount = 0;
 
 			ref<Buffer> instanceBuffer;
 			Instance* instanceMappedRange = nullptr;

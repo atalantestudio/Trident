@@ -83,8 +83,6 @@ namespace ProjectA {
 	}
 
 	void RendererLayer::update(float64 fixedDeltaTime) {
-		renderer.clearClosestFeatures();
-
 		Integrator::integrate(scene, static_cast<float32>(fixedDeltaTime), &gjkResult);
 
 		checkHover();
@@ -104,6 +102,8 @@ namespace ProjectA {
 		}
 
 		renderer.setClosestPoints(gjkResult.closestA, gjkResult.closestB);
+
+		renderer.clearClosestFeatureCounters();
 		renderer.registerClosestFeature(gjkResult.closestFeatureA);
 		renderer.registerClosestFeature(gjkResult.closestFeatureB);
 	}
