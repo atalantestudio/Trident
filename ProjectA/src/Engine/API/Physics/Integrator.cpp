@@ -171,7 +171,7 @@ namespace ProjectA {
 
 					const float32 s = evaluateSeparation(separationFunction, A, B, minSeparationOutput, t);
 
-					if (lyah::abs(s - TARGET) < TOLERANCE) {
+					if (abs(s - TARGET) < TOLERANCE) {
 						// Move t1 back.
 						t1 = t;
 

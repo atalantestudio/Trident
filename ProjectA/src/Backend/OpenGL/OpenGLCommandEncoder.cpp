@@ -155,8 +155,8 @@ namespace ProjectA {
 			// TODO: Use Y origin.
 			0,
 
-			static_cast<GLsizei>(lyah::abs(size[0])),
-			static_cast<GLsizei>(lyah::abs(size[1]))
+			static_cast<GLsizei>(abs(size[0])),
+			static_cast<GLsizei>(abs(size[1]))
 		));
 	}
 

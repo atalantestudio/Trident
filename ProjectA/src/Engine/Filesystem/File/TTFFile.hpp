@@ -182,8 +182,8 @@ namespace ProjectA {
 	struct TTFFile : public File {
 		std::unordered_map<uint16, uint32> unicodeMap;
 		std::vector<Glyph> glyphs;
-		std::vector<longHorMetric> hMetrics;
-		std::vector<FWord> leftSideBearings;
+		sequence<longHorMetric> hMetrics;
+		sequence<FWord> leftSideBearings;
 		maxp maxp;
 		hhea hhea;
 	};

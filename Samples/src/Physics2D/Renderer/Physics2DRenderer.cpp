@@ -734,7 +734,7 @@ namespace ProjectA {
 		float32 direction = zoomLevelDelta;
 
 		if (direction != 0.0f) {
-			direction /= lyah::abs(zoomLevelDelta);
+			direction /= abs(zoomLevelDelta);
 		}
 
 		float32 zoomLevel = cameraMappedRange->zoomLevel + direction;

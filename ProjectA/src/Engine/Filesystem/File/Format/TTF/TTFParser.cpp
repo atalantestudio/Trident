@@ -23,11 +23,11 @@ namespace ProjectA {
 
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6head.html
 	static sint16 parseHeadTable(ByteStream& stream) {
-		Fixed version;
+		Fixed version{};
 		version.integer = stream.read<uint16>(true);
 		version.fraction = stream.read<uint16>(true);
 
-		Fixed fontRevision;
+		Fixed fontRevision{};
 		fontRevision.integer = stream.read<uint16>(true);
 		fontRevision.fraction = stream.read<uint16>(true);
 
@@ -107,39 +107,22 @@ namespace ProjectA {
 		return hhea;
 	}
 
-	#ifdef TTF_FIX_INVERTED_CONTOURS
-		static float32 signedAreaDouble(std::vector<ContourPoint>& contour) {
-			const uint32 count = static_cast<uint32>(contour.size());
-
-			float32 area = 0.0f;
-
-			for (uint32 i = 0; i < count; i += 1) {
-				const uint32 j = (i + 1) % count;
-
-				// TODO: lyah::area
-				area += contour[i].x * contour[j].y - contour[j].x * contour[i].y;
-			}
-
-			return area;
-		}
-	#endif
-
 	static void transformPoint(FWord& x, FWord& y, const GlyphTransform& T) {
-		const FWord xCopy = x;
+		const FWord previousX = x;
 
 		x = static_cast<FWord>(T.m * (x * (T.a / T.m) + y * (T.c / T.m) + T.e));
-		y = static_cast<FWord>(T.n * (xCopy * (T.b / T.n) + y * (T.d / T.n) + T.f));
+		y = static_cast<FWord>(T.n * (previousX * (T.b / T.n) + y * (T.d / T.n) + T.f));
 	}
 
 	static void transformGlyph(Glyph& glyph, const GlyphTransform& T) {
+		transformPoint(glyph.max.x, glyph.max.y, T);
+		transformPoint(glyph.min.x, glyph.min.y, T);
+
 		for (Edge& edge : glyph.edges) {
 			transformPoint(edge.start.x, edge.start.y, T);
 			transformPoint(edge.end.x, edge.end.y, T);
 			transformPoint(edge.control.x, edge.control.y, T);
 		}
-
-		transformPoint(glyph.max.x, glyph.max.y, T);
-		transformPoint(glyph.min.x, glyph.min.y, T);
 	}
 
 	// See https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html.
@@ -151,18 +134,17 @@ namespace ProjectA {
 			const uint8 flag = flags[coordinateIndex];
 			sint16 delta = 0;
 
+			// If set, the corresponding coordinate is 1 byte long.
 			if (flag & BIT(shortVectorBitIndex)) {
-				// If set, the corresponding coordinate is 1 byte long.
-
 				// If the Short Vector bit is set, this bit describes the sign of the value,
 				// with a value of 1 equalling positive and a zero value negative.
 				const sint8 sign = (flag >> sameOrPositiveVectorBitIndex & BIT(0)) * 2 - 1;
 
 				delta = stream.read<uint8>() * sign;
 			}
-			else {
-				// Otherwise, the corresponding coordinate is 2 bytes long.
 
+			// Otherwise, the corresponding coordinate is 2 bytes long.
+			else {
 				if (~flag & BIT(sameOrPositiveVectorBitIndex)) {
 					// If the Short Vector bit is not set, and this bit is not set,
 					// the current coordinate is a signed 16-bit delta vector.
@@ -179,9 +161,9 @@ namespace ProjectA {
 		}
 	}
 
-	static Glyph parseCompoundGlyph(ByteStream& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth);
+	static Glyph parseCompoundGlyph(ByteStream& stream, std::vector<Glyph>& glyphs, uint32 tableOffset, const sequence<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth);
 
-	static Glyph parseSimpleGlyph(ByteStream& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, uint16 glyphIndex, uint16 maxComponentDepth) {
+	static Glyph parseSimpleGlyph(ByteStream& stream, std::vector<Glyph>& glyphs, uint32 tableOffset, const sequence<uint16>& glyphOffsets, uint16 glyphIndex, uint16 maxComponentDepth) {
 		stream.reset();
 		stream.jump(static_cast<uint64>(tableOffset + glyphOffsets[glyphIndex]));
 
@@ -190,7 +172,7 @@ namespace ProjectA {
 		const sint16 numberOfContours = stream.read<sint16>(true);
 
 		if (numberOfContours < 0) {
-			return parseCompoundGlyph(stream, tableOffset, glyphOffsets, glyphIndex, maxComponentDepth);
+			return parseCompoundGlyph(stream, glyphs, tableOffset, glyphOffsets, glyphIndex, maxComponentDepth);
 		}
 
 		Glyph glyph;
@@ -322,10 +304,19 @@ namespace ProjectA {
 			if (numberOfContours == 1) {
 				std::vector<ContourPoint>& contour = contours[0];
 
-				const float32 signedArea = signedAreaDouble(contour);
+				const uint32 count = static_cast<uint32>(contour.size());
 
-				if (signedArea > 0.0f) {
-					ENGINE_WARN("Glyph [] has a single clockwise contour. Inverting the contour's winding order.", glyphIndex);
+				float32 signedAreaDouble = 0.0f;
+
+				for (uint32 i = 0; i < count; i += 1) {
+					const uint32 j = (i + 1) % count;
+
+					// TODO: lyah::area(a, b).
+					signedAreaDouble += contour[i].x * contour[j].y - contour[j].x * contour[i].y;
+				}
+
+				if (signedAreaDouble > 0.0f) {
+					ENGINE_WARN("Glyph [] has a single counter-clockwise contour. Inverting the winding order.", glyphIndex);
 
 					std::reverse(contour.begin(), contour.end());
 				}
@@ -363,7 +354,7 @@ namespace ProjectA {
 		return glyph;
 	}
 
-	static Glyph parseCompoundGlyph(ByteStream& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth) {
+	static Glyph parseCompoundGlyph(ByteStream& stream, std::vector<Glyph>& glyphs, uint32 tableOffset, const sequence<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth) {
 		stream.reset();
 		stream.jump(static_cast<uint64>(tableOffset + glyphOffsets[compoundGlyphIndex]));
 
@@ -381,7 +372,7 @@ namespace ProjectA {
 			const uint16 flags = stream.read<uint16>(true);
 
 			// Glyph index of component.
-			const uint16 glyphIndex = stream.read<uint16>(true);
+			const uint16 componentGlyphIndex = stream.read<uint16>(true);
 
 			GlyphTransform T;
 
@@ -413,32 +404,44 @@ namespace ProjectA {
 			}
 
 			// TODO: lyah::max(float32, float32)
-			// TODO: ProjectA::abs(float32, float32)
-			T.m = std::max(lyah::abs(T.a), lyah::abs(T.b));
+			T.m = std::max(abs(T.a), abs(T.b));
 
-			if (lyah::abs(lyah::abs(T.a) - lyah::abs(T.c)) <= 33.0f / 65536.0f) {
+			constexpr float32 value = 33.0f / 65536.0f;
+
+			if (abs(abs(T.a) - abs(T.c)) <= value) {
 				T.m *= 2.0f;
 			}
 
-			T.n = std::max(lyah::abs(T.c), lyah::abs(T.d));
+			T.n = std::max(abs(T.c), abs(T.d));
 
-			if (lyah::abs(lyah::abs(T.b) - lyah::abs(T.d)) <= 33.0f / 65536.0f) {
+			if (abs(abs(T.b) - abs(T.d)) <= value) {
 				T.n *= 2.0f;
 			}
 
 			const uint64 byteOffset = stream.getByteOffset();
 
-			Glyph componentGlyph = parseSimpleGlyph(stream, tableOffset, glyphOffsets, glyphIndex, maxComponentDepth);
+			if (glyphs[componentGlyphIndex].edges.empty()) {
+				Glyph componentGlyph = parseSimpleGlyph(stream, glyphs, tableOffset, glyphOffsets, componentGlyphIndex, maxComponentDepth);
 
-			transformGlyph(componentGlyph, T);
+				glyphs[componentGlyphIndex] = componentGlyph;
 
-			for (const Edge& edge : componentGlyph.edges) {
-				glyph.edges.emplace_back(edge);
+				transformGlyph(componentGlyph, T);
+
+				for (const Edge& edge : componentGlyph.edges) {
+					glyph.edges.emplace_back(edge);
+				}
+
+				// Reset stream after parsing component glyph.
+				stream.reset();
+				stream.jump(byteOffset);
 			}
+			else {
+				const Glyph& componentGlyph = glyphs[componentGlyphIndex];
 
-			// Reset stream after parsing component glyph.
-			stream.reset();
-			stream.jump(byteOffset);
+				for (const Edge& edge : componentGlyph.edges) {
+					glyph.edges.emplace_back(edge);
+				}
+			}
 
 			if (!(flags & BIT(5))) {
 				break;
@@ -451,15 +454,15 @@ namespace ProjectA {
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
 	template<>
 	TTFFile Filesystem::load(std::string_view path) {
-		const File file = load<File>(path);
+		const File baseFile = load<File>(path);
 
-		TTFFile ttfFile;
-		ttfFile.name = file.name;
-		ttfFile.absolutePath = file.absolutePath;
-		ttfFile.size = file.size;
-		ttfFile.rawData = file.rawData;
+		TTFFile file;
+		file.name = baseFile.name;
+		file.absolutePath = baseFile.absolutePath;
+		file.size = baseFile.size;
+		file.rawData = baseFile.rawData;
 
-		ByteStream stream(file.rawData.data(), file.rawData.size());
+		ByteStream stream(baseFile.rawData.data(), baseFile.rawData.size());
 
 		// Read offset subtable.
 		OffsetSubtable offsetSubtable{};
@@ -497,8 +500,7 @@ namespace ProjectA {
 
 			tableOffsetMap.insert(std::make_pair(tableDirectory.tag, tableDirectory.offset));
 
-			const char* TypeString = static_cast<char*>(static_cast<void*>(&tableDirectory.tag));
-
+			//const char* TypeString = static_cast<char*>(static_cast<void*>(&tableDirectory.tag));
 			//ENGINE_INFO("Reading directory for table \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
 
 			// TODO: Calculate checksum.
@@ -523,13 +525,13 @@ namespace ProjectA {
 		stream.reset();
 		stream.jump(static_cast<uint64>(tableOffset->second));
 
-		ttfFile.maxp = parseMaxpTable(stream);
+		file.maxp = parseMaxpTable(stream);
 
 		// The actual local offset divided by 2 is stored. The value of n is the number of glyphs in the font + 1.
 		// The number of glyphs in the font is found in the maximum profile table.
-		sequence<uint16> glyphOffsets(ttfFile.maxp.numGlyphs + 1);
+		sequence<uint16> glyphOffsets(file.maxp.numGlyphs + 1);
 
-		sequence<uint16> glyphLengths(ttfFile.maxp.numGlyphs + 1);
+		sequence<uint16> glyphLengths(file.maxp.numGlyphs + 1);
 
 		// Parse 'loca' table.
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6loca.html
@@ -555,11 +557,11 @@ namespace ProjectA {
 		}
 
 		// Leave last glyph length as 0.
-		for (uint16 glyphIndex = regCount * 8; glyphIndex < ttfFile.maxp.numGlyphs; glyphIndex += 1) {
+		for (uint16 glyphIndex = regCount * 8; glyphIndex < file.maxp.numGlyphs; glyphIndex += 1) {
 			glyphLengths[glyphIndex] = glyphOffsets[glyphIndex + 1] - glyphOffsets[glyphIndex];
 		}
 
-		ttfFile.glyphs.resize(ttfFile.maxp.numGlyphs);
+		file.glyphs.resize(file.maxp.numGlyphs);
 
 		// Parse 'glyf' table.
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
@@ -567,7 +569,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'glyf' table.");
 
-		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.maxp.numGlyphs; glyphIndex += 1) {
+		for (uint16 glyphIndex = 0; glyphIndex < file.maxp.numGlyphs; glyphIndex += 1) {
 			// Need to reset + jump to peek the number of contours.
 			stream.reset();
 			stream.jump(static_cast<uint64>(tableOffset->second + glyphOffsets[glyphIndex]));
@@ -580,11 +582,16 @@ namespace ProjectA {
 				continue;
 			}
 
+			if (!file.glyphs[glyphIndex].edges.empty()) {
+				// This glyph has already been parsed.
+				continue;
+			}
+
 			if (numberOfContours >= 0) {
-				ttfFile.glyphs[glyphIndex] = parseSimpleGlyph(stream, tableOffset->second, glyphOffsets, glyphIndex, ttfFile.maxp.maxComponentDepth);
+				file.glyphs[glyphIndex] = parseSimpleGlyph(stream, file.glyphs, tableOffset->second, glyphOffsets, glyphIndex, file.maxp.maxComponentDepth);
 			}
 			else {
-				ttfFile.glyphs[glyphIndex] = parseCompoundGlyph(stream, tableOffset->second, glyphOffsets, glyphIndex, ttfFile.maxp.maxComponentDepth);
+				file.glyphs[glyphIndex] = parseCompoundGlyph(stream, file.glyphs, tableOffset->second, glyphOffsets, glyphIndex, file.maxp.maxComponentDepth);
 			}
 		}
 
@@ -596,10 +603,7 @@ namespace ProjectA {
 		stream.reset();
 		stream.jump(static_cast<uint64>(tableOffset->second));
 
-		ttfFile.hhea = parseHheaTable(stream);
-
-		ttfFile.hMetrics.resize(ttfFile.hhea.numOfLongHorMetrics);
-		ttfFile.leftSideBearings.resize(ttfFile.maxp.numGlyphs - ttfFile.hhea.numOfLongHorMetrics);
+		file.hhea = parseHheaTable(stream);
 
 		// Parse 'hmtx' table.
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6hmtx.html
@@ -610,12 +614,16 @@ namespace ProjectA {
 		stream.reset();
 		stream.jump(static_cast<uint64>(tableOffset->second));
 
-		for (longHorMetric& hMetric : ttfFile.hMetrics) {
+		file.hMetrics = sequence<longHorMetric>(file.hhea.numOfLongHorMetrics);
+
+		for (longHorMetric& hMetric : file.hMetrics) {
 			hMetric.advanceWidth = stream.read<uint16>(true);
 			hMetric.leftSideBearing = stream.read<sint16>(true);
 		}
 
-		for (FWord& leftSideBearing : ttfFile.leftSideBearings) {
+		file.leftSideBearings = sequence<FWord>(file.maxp.numGlyphs - file.hhea.numOfLongHorMetrics);
+
+		for (FWord& leftSideBearing : file.leftSideBearings) {
 			leftSideBearing = stream.read<FWord>(true);
 		}
 
@@ -726,11 +734,11 @@ namespace ProjectA {
 					for (uint16 code = startCode; code <= endCode; code += 1) {
 						const uint32 glyphIndex = static_cast<uint32>(idDeltas[segmentIndex] + code) % 65536;
 
-						ttfFile.unicodeMap.insert(std::make_pair(code, glyphIndex));
+						file.unicodeMap.insert(std::make_pair(code, glyphIndex));
 
 						// TODO: Debug-only.
 						if (glyphIndex != 0) {
-							ttfFile.glyphs[glyphIndex].codePoint = code;
+							file.glyphs[glyphIndex].codePoint = code;
 						}
 
 						if (startCode == endCode) {
@@ -744,11 +752,11 @@ namespace ProjectA {
 					for (uint16 code = startCode; code <= endCode; code += 1) {
 						const uint32 glyphIndex = *(&idRangeOffsets[segmentIndex] + (idRangeOffsets[segmentIndex] / 2) + (code - startCode));
 
-						ttfFile.unicodeMap.insert(std::make_pair(code, glyphIndex));
+						file.unicodeMap.insert(std::make_pair(code, glyphIndex));
 
 						// TODO: Debug-only.
 						if (glyphIndex != 0) {
-							ttfFile.glyphs[glyphIndex].codePoint = code;
+							file.glyphs[glyphIndex].codePoint = code;
 						}
 
 						if (startCode == endCode) {
@@ -759,6 +767,6 @@ namespace ProjectA {
 			}
 		}
 
-		return ttfFile;
+		return file;
 	}
 }

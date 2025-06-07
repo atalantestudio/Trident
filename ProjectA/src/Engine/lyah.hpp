@@ -275,4 +275,6 @@ namespace ProjectA {
 	lyah::vec<2, T> perpendicular(const lyah::vec<2, T>& a, T b) {
 		return {b * a[1], static_cast<T>(-1) * b * a[0]};
 	}
+
+	using lyah::abs;
 }
