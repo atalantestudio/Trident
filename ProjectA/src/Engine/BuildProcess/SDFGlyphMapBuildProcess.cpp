@@ -51,33 +51,31 @@ namespace ProjectA {
 
 			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-			device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+			device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 			device->waitIdle();
 		}
-
-		const ref<Buffer> glyphStagingBuffer = Renderer::createStagingBuffer(glyphBufferSize, true);
-
-		GlyphBuffer* glyphMappedRange = glyphStagingBuffer->map<GlyphBuffer>(0, glyphBufferSize);
 
 		BufferDescriptor glyphBufferDescriptor;
 		glyphBufferDescriptor.size = glyphBufferSize;
 		glyphBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
-		glyphBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+		glyphBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		glyphBufferDescriptor.persistent = true;
 
 		const ref<Buffer> glyphBuffer = Renderer::createBuffer(glyphBufferDescriptor);
 
+		GlyphBuffer* glyphMappedRange = glyphBuffer->map<GlyphBuffer>(0, glyphBufferSize);
+
 		constexpr uint64 glyphOffsetBufferSize = 3 * sizeof(float32);
-
-		const ref<Buffer> glyphOffsetStagingBuffer = Renderer::createStagingBuffer(glyphOffsetBufferSize, true);
-
-		uint32* glyphOffsetMappedRange = glyphOffsetStagingBuffer->map<uint32>(0, glyphOffsetBufferSize);
 
 		BufferDescriptor glyphOffsetBufferDescriptor;
 		glyphOffsetBufferDescriptor.size = glyphOffsetBufferSize;
 		glyphOffsetBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
-		glyphOffsetBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+		glyphOffsetBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		glyphOffsetBufferDescriptor.persistent = true;
 
 		const ref<Buffer> glyphOffsetBuffer = Renderer::createBuffer(glyphOffsetBufferDescriptor);
+
+		uint32* glyphOffsetMappedRange = glyphOffsetBuffer->map<uint32>(0, glyphOffsetBufferSize);
 
 		// Used for generating the distance field for each glyph.
 		ImageDescriptor glyphImageDescriptor{};
@@ -197,9 +195,12 @@ namespace ProjectA {
 		const float32 glyphMapHeight = static_cast<float32>(sdfGlyphMap.glyphMap->getHeight());
 		const float32 lineHeight = static_cast<float32>(ttfFile.hhea.ascent - ttfFile.hhea.descent);
 
-		const ref<Fence> copyBufferFence = Renderer::createFence();
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
-		device->waitForFence(copyBufferFence);
+		const ref<CommandEncoder> commandEncoder = device->getComputeQueue()->createCommandEncoder(commandBufferDescriptor);
+
+		const ref<Fence> writeBufferFence = Renderer::createFence();
 
 		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.size(); glyphIndex += 1) {
 			const Glyph& glyph = ttfFile.glyphs[glyphIndex];
@@ -271,48 +272,26 @@ namespace ProjectA {
 			glyphOffsetMappedRange[1] = static_cast<uint32>(yOffset);
 			glyphOffsetMappedRange[2] = SPREAD_FACTOR;
 
-			device->resetFence(copyBufferFence);
+			device->resetFence(writeBufferFence);
 
-			{
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+			commandEncoder->reset();
+			commandEncoder->begin();
+			commandEncoder->bindComputePipeline(glyphImagePipeline);
+			commandEncoder->bindAllDescriptorSets();
 
-				const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+			// TODO: Dispatch less groups depending on the size of the glyph area.
+			commandEncoder->dispatchGroups(128, 128, 1);
 
-				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(glyphStagingBuffer, glyphBuffer, 0, 0, glyphMapSize);
-				commandEncoder->copyBufferToBuffer(glyphOffsetStagingBuffer, glyphOffsetBuffer, 0, 0, glyphOffsetBufferSize);
+			commandEncoder->bindComputePipeline(glyphSdfPipeline);
+			commandEncoder->bindAllDescriptorSets();
 
-				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+			// TODO: Support custom glyph subimage dimension (multiply down).
+			commandEncoder->dispatchGroups(8, 8, 1);
 
-				device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, copyBufferFence);
-				device->waitIdle();
-			}
+			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-			{
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
-
-				const ref<CommandEncoder> commandEncoder = device->getComputeQueue()->createCommandEncoder(commandBufferDescriptor);
-
-				commandEncoder->begin();
-				commandEncoder->bindComputePipeline(glyphImagePipeline);
-				commandEncoder->bindAllDescriptorSets();
-
-				// TODO: Dispatch less groups depending on the size of the glyph area.
-				commandEncoder->dispatchGroups(128, 128, 1);
-
-				commandEncoder->bindComputePipeline(glyphSdfPipeline);
-				commandEncoder->bindAllDescriptorSets();
-
-				// TODO: Support custom glyph subimage dimension (multiply down).
-				commandEncoder->dispatchGroups(8, 8, 1);
-
-				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-				device->getComputeQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
-				device->waitIdle();
-			}
+			device->getComputeQueue()->submit({commandBuffer}, nullptr, nullptr, writeBufferFence);
+			device->waitIdle();
 
 			xOffset += std::ceil(sdfGlyph.width) + SPREAD_FACTOR * 2;
 		}
@@ -335,7 +314,7 @@ namespace ProjectA {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->getComputeQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->getComputeQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 		device->waitIdle();
 	}
 

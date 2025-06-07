@@ -8,18 +8,8 @@ layout(set = 0, binding = 1) uniform sampler2D textureSampler;
 
 layout(location = 0) out vec4 color;
 
-const float ALPHA_THRESHOLD = 0.5;
-const float SMOOTHNESS = 0.05;
-
 void main() {
-	vec2 textureCoordinate = vertexOutput.textureCoordinate;
+	float value = texture(textureSampler, vertexOutput.textureCoordinate).r;
 
-	/*float value = smoothstep(
-		ALPHA_THRESHOLD - SMOOTHNESS,
-		ALPHA_THRESHOLD + SMOOTHNESS,
-		texture(textureSampler, textureCoordinate).r
-	);*/
-	float value = texture(textureSampler, textureCoordinate).r;
-
-	color.rgb = vec3(value);
+	color = vec4(vec3(value), 1.0);
 }

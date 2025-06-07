@@ -59,7 +59,7 @@ namespace ProjectA {
 
 		const VulkanSwapchain& swapchain = *std::static_pointer_cast<VulkanSwapchain>(descriptor.swapchain);
 
-		fchain<VkClearValue> clearValues(descriptor.clearValues.size());
+		sequence<VkClearValue> clearValues(descriptor.clearValues.size());
 
 		for (uint64 clearValueIndex = 0; clearValueIndex < clearValues.count; clearValueIndex += 1) {
 			clearValues[clearValueIndex].color.float32[0] = descriptor.clearValues[clearValueIndex].color[0];

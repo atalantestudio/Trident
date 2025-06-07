@@ -202,8 +202,8 @@ namespace ProjectA {
 		while (i < GJK_2D_ITERATION_LIMIT) {
 			const uint8 previousCount = s.count;
 
-			fchain<uint32> saveA(s.count);
-			fchain<uint32> saveB(s.count);
+			sequence<uint32> saveA(s.count);
+			sequence<uint32> saveB(s.count);
 
 			for (uint8 j = 0; j < s.count; j += 1) {
 				saveA[j] = s[j].iA;

@@ -9,6 +9,8 @@
 #include "Engine/Platform.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
+#include "Engine/Debug/ScopeTimer.hpp"
+
 namespace ProjectA {
 	Application* Application::instance = nullptr;
 	bool Application::vSync = false;
@@ -36,7 +38,7 @@ namespace ProjectA {
 
 		instance = this;
 
-		ENGINE_TRACE("Launching.");
+		ENGINE_DEBUG("Launching.");
 
 		mutex = createScope<Mutex>("Mutex");
 		mutex->acquire();
@@ -63,7 +65,7 @@ namespace ProjectA {
 		std::filesystem::path propertyFilePath = currentPath / currentDirectoryName;
 		propertyFilePath += ".tpr";
 
-		ENGINE_TRACE("Opening property file.");
+		ENGINE_DEBUG("Opening property file.");
 
 		propertyFile = Filesystem::load<PropertyFile*>(propertyFilePath.string());
 
@@ -89,7 +91,7 @@ namespace ProjectA {
 
 		sharedMemoryData->instanceCount += 1;
 
-		ENGINE_TRACE("Running new instance. Updated count = [].", static_cast<sint32>(sharedMemoryData->instanceCount));
+		ENGINE_DEBUG("Running new instance. Updated count = [].", static_cast<sint32>(sharedMemoryData->instanceCount));
 
 		mutex->release();
 
@@ -312,7 +314,7 @@ namespace ProjectA {
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 		device->getGraphicsQueue()->submit(
-			commandBuffer,
+			{commandBuffer},
 			Renderer::getAcquireNextImageSemaphore(frameInFlightIndex), // Must be waited on before submitting.
 			Renderer::getFinishedRenderSemaphore(frameInFlightIndex), // Will be signaled once the command buffer has finished executing.
 			Renderer::getFlightFence(frameInFlightIndex) // Will be signaled once the command buffer has finished executing.

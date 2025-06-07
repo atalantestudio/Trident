@@ -116,7 +116,7 @@ namespace ProjectA {
 	struct svec;
 
 	template<typename T>
-	struct svec<2, T> {
+	struct alignas(2 * sizeof(T)) svec<2, T> {
 		T x;
 		T y;
 
@@ -130,7 +130,7 @@ namespace ProjectA {
 	};
 
 	template<typename T>
-	struct svec<3, T> {
+	struct alignas(4 * sizeof(T)) svec<3, T> {
 		T x;
 		T y;
 		T z;

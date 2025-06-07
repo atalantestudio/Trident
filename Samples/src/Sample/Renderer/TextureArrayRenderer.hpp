@@ -58,9 +58,9 @@ namespace ProjectA {
 					DescriptorSetLayoutBinding textureArrayDescriptorSetLayoutBinding;
 					textureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 					textureArrayDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+					textureArrayDescriptorSetLayoutBinding.imageViews = {baboonImageView, cameramanImageView, lennaImageView, pepperImageView};
 
 					// TODO: Don't provide a copy of the sampler for each image.
-					textureArrayDescriptorSetLayoutBinding.imageViews = {baboonImageView, cameramanImageView, lennaImageView, pepperImageView};
 					textureArrayDescriptorSetLayoutBinding.samplers = {sampler, sampler, sampler, sampler};
 
 					DescriptorSetLayout descriptorSetLayout;
@@ -75,11 +75,11 @@ namespace ProjectA {
 				// 5. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-					vertexInputBinding.registerAttribute<svec2<float32>>(false);
+					vertexInputBinding.registerAttribute<svec2<float32>>();
 
 					VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-					instanceInputBinding.registerAttribute<vec4<float32>>(false);
-					instanceInputBinding.registerAttribute<uint32>(false);
+					instanceInputBinding.registerAttribute<svec2<float32>>();
+					instanceInputBinding.registerAttribute<uint32>();
 
 					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -92,7 +92,7 @@ namespace ProjectA {
 					ColorBlendAttachment colorBlendAttachment{};
 					colorBlendAttachment.blend = false;
 
-					RenderPipelineDescriptor renderPipelineDescriptor;
+					RenderPipelineDescriptor renderPipelineDescriptor{};
 					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
@@ -119,12 +119,12 @@ namespace ProjectA {
 
 					Vertex* vertices = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
 
-					vertices[0].position = {-0.5f,  0.5f};
-					vertices[1].position = { 0.5f,  0.5f};
-					vertices[2].position = { 0.5f, -0.5f};
-					vertices[3].position = {-0.5f,  0.5f};
-					vertices[4].position = { 0.5f, -0.5f};
-					vertices[5].position = {-0.5f, -0.5f};
+					vertices[0].vertex = {-0.5f,  0.5f};
+					vertices[1].vertex = { 0.5f,  0.5f};
+					vertices[2].vertex = { 0.5f, -0.5f};
+					vertices[3].vertex = {-0.5f,  0.5f};
+					vertices[4].vertex = { 0.5f, -0.5f};
+					vertices[5].vertex = {-0.5f, -0.5f};
 
 					vertexStagingBuffer->unmap();
 
@@ -145,7 +145,7 @@ namespace ProjectA {
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 					device->waitIdle();
 				}
 
@@ -157,13 +157,13 @@ namespace ProjectA {
 
 					Instance* instances = instanceVertexStagingBuffer->map<Instance>(0, instanceVertexBufferSize);
 
-					instances[0].offset = {-0.5f, 0.5f, 0.0f, 0.0f };
+					instances[0].vertexOffset = {-0.5f, 0.5f};
 					instances[0].textureIndex = 0;
-					instances[1].offset = {0.5f, 0.5f, 0.0f, 0.0f };
+					instances[1].vertexOffset = {0.5f, 0.5f};
 					instances[1].textureIndex = 1;
-					instances[2].offset = {-0.5f, -0.5f, 0.0f, 0.0f };
+					instances[2].vertexOffset = {-0.5f, -0.5f};
 					instances[2].textureIndex = 2;
-					instances[3].offset = {0.5f, -0.5f, 0.0f, 0.0f};
+					instances[3].vertexOffset = {0.5f, -0.5f};
 					instances[3].textureIndex = 3;
 
 					instanceVertexStagingBuffer->unmap();
@@ -187,7 +187,7 @@ namespace ProjectA {
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 					device->waitIdle();
 				}
 			}
@@ -261,7 +261,7 @@ namespace ProjectA {
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-				device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+				device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 				device->waitIdle();
 
 				return image;
@@ -269,13 +269,11 @@ namespace ProjectA {
 
 		private:
 			struct Vertex {
-				svec2<float32> position;
+				svec2<float32> vertex;
 			};
 
 			struct Instance {
-				// TODO: Remove padding.
-				vec4<float32> offset;
-
+				svec2<float32> vertexOffset;
 				uint32 textureIndex;
 			};
 

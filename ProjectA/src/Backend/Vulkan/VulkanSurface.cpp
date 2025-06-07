@@ -49,7 +49,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface format count ([]).", string_VkResult(result));
 
-		fchain<VkSurfaceFormatKHR> formats(formatCount);
+		sequence<VkSurfaceFormatKHR> formats(formatCount);
 
 		result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, object, &formatCount, &formats[0]);
 
@@ -83,7 +83,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface present mode count ([]).", string_VkResult(result));
 
-		fchain<VkPresentModeKHR> presentModes(presentModeCount);
+		sequence<VkPresentModeKHR> presentModes(presentModeCount);
 
 		result = vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, object, &presentModeCount, &presentModes[0]);
 

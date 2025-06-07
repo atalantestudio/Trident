@@ -75,17 +75,17 @@ namespace ProjectA {
 
 		const ref<Buffer> vertexStagingBuffer = createStagingBuffer(size);
 
-		Vertex* mappedRange = vertexStagingBuffer->map<Vertex>(0, size);
+		Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, size);
 
 		// Image coordinates are reversed manually.
-		mappedRange[0].position = {0.0f, 0.0f, 1.0f, 0.0f};
-		mappedRange[0].imageCoordinate = {0.0f, 0.0f};
-		mappedRange[1].position = {1.0f, 0.0f, 1.0f, 0.0f};
-		mappedRange[1].imageCoordinate = {1.0f, 0.0f};
-		mappedRange[2].position = {1.0f, 1.0f, 1.0f, 0.0f};
-		mappedRange[2].imageCoordinate = {1.0f, 1.0f};
-		mappedRange[3].position = {0.0f, 1.0f, 1.0f, 0.0f};
-		mappedRange[3].imageCoordinate = {0.0f, 1.0f};
+		vertexMappedRange[0].vertex = {0.0f, 0.0f, 1.0f, 0.0f};
+		vertexMappedRange[0].imageCoordinate = {0.0f, 0.0f};
+		vertexMappedRange[1].vertex = {1.0f, 0.0f, 1.0f, 0.0f};
+		vertexMappedRange[1].imageCoordinate = {1.0f, 0.0f};
+		vertexMappedRange[2].vertex = {1.0f, 1.0f, 1.0f, 0.0f};
+		vertexMappedRange[2].imageCoordinate = {1.0f, 1.0f};
+		vertexMappedRange[3].vertex = {0.0f, 1.0f, 1.0f, 0.0f};
+		vertexMappedRange[3].imageCoordinate = {0.0f, 1.0f};
 
 		vertexStagingBuffer->unmap();
 
@@ -108,7 +108,7 @@ namespace ProjectA {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 		device->waitIdle();
 	}
 
@@ -147,7 +147,7 @@ namespace ProjectA {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 		device->waitIdle();
 	}
 
@@ -227,15 +227,15 @@ namespace ProjectA {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 
 		// TODO: Remove padding.
-		vertexInputBinding.registerAttribute<vec4<float32>>(false);
+		vertexInputBinding.registerAttribute<vec4<float32>>();
 
-		vertexInputBinding.registerAttribute<svec2<float32>>(false);
+		vertexInputBinding.registerAttribute<svec2<float32>>();
 
 		VertexInputBinding subcomponentInputBinding(InputRate::INSTANCE);
-		subcomponentInputBinding.registerAttribute<mat3x3<float32>>(false);
-		subcomponentInputBinding.registerAttribute<mat3x3<float32>>(false);
-		subcomponentInputBinding.registerAttribute<uint32>(false);
-		subcomponentInputBinding.registerAttribute<vec4<float32>>(false);
+		subcomponentInputBinding.registerAttribute<mat3x3<float32>>();
+		subcomponentInputBinding.registerAttribute<mat3x3<float32>>();
+		subcomponentInputBinding.registerAttribute<uint32>();
+		subcomponentInputBinding.registerAttribute<vec4<float32>>();
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -277,13 +277,12 @@ namespace ProjectA {
 		glyphSubcomponentPipelineLayout = createPipelineLayout(glyphSubcomponentPipelineLayoutDescriptor);
 
 		VertexInputBinding glyphSubcomponentVertexInputBinding(InputRate::INSTANCE);
-		glyphSubcomponentVertexInputBinding.registerAttribute<mat3x3<float32>>(false);
-		glyphSubcomponentVertexInputBinding.registerAttribute<mat3x3<float32>>(false);
-		// glyphSubcomponentVertexInputBinding.registerAttribute<uint32>(false);
-		// glyphSubcomponentVertexInputBinding.registerAttribute<float32>(false);
-		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>(false);
-		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>(false);
-		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>(false);
+		glyphSubcomponentVertexInputBinding.registerAttribute<mat3x3<float32>>();
+		glyphSubcomponentVertexInputBinding.registerAttribute<mat3x3<float32>>();
+		glyphSubcomponentVertexInputBinding.registerAttribute<uint32>();
+		glyphSubcomponentVertexInputBinding.registerAttribute<float32>();
+		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>();
+		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>();
 
 		ColorBlendAttachment transparentColorBlendAttachment{};
 		transparentColorBlendAttachment.blend = true;
@@ -391,7 +390,7 @@ namespace ProjectA {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 		device->waitIdle();
 
 		images.emplace_back(image);
@@ -413,7 +412,8 @@ namespace ProjectA {
 
 		glyphSubcomponentMappedRange[glyphSubcomponentCount].world = world;
 		glyphSubcomponentMappedRange[glyphSubcomponentCount].textureWorld = imageWorld;
-		glyphSubcomponentMappedRange[glyphSubcomponentCount].fontIndexAndOutlineWidth = {static_cast<float32>(imageIndex), textStyle.outlineWidth, 0.0f, 0.0f};
+		glyphSubcomponentMappedRange[glyphSubcomponentCount].fontIndex = imageIndex;
+		glyphSubcomponentMappedRange[glyphSubcomponentCount].outlineWidth = textStyle.outlineWidth;
 		glyphSubcomponentMappedRange[glyphSubcomponentCount].color = textStyle.color;
 		glyphSubcomponentMappedRange[glyphSubcomponentCount].outlineColor = textStyle.outlineColor;
 

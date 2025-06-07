@@ -179,9 +179,9 @@ namespace ProjectA {
 		}
 	}
 
-	static Glyph parseCompoundGlyph(ByteStream& stream, uint32 tableOffset, const fchain<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth);
+	static Glyph parseCompoundGlyph(ByteStream& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth);
 
-	static Glyph parseSimpleGlyph(ByteStream& stream, uint32 tableOffset, const fchain<uint16>& glyphOffsets, uint16 glyphIndex, uint16 maxComponentDepth) {
+	static Glyph parseSimpleGlyph(ByteStream& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, uint16 glyphIndex, uint16 maxComponentDepth) {
 		stream.reset();
 		stream.jump(static_cast<uint64>(tableOffset + glyphOffsets[glyphIndex]));
 
@@ -200,7 +200,7 @@ namespace ProjectA {
 		glyph.max.y = stream.read<FWord>(true);
 
 		// Array of last points of each contour; n is the number of contours; array entries are point indices.
-		fchain<uint16> endPtsOfContours(numberOfContours);
+		sequence<uint16> endPtsOfContours(numberOfContours);
 
 		for (uint16& endPtOfContour : endPtsOfContours) {
 			endPtOfContour = stream.read<uint16>(true);
@@ -241,16 +241,16 @@ namespace ProjectA {
 		}
 
 		// Array of x-coordinates; the first is relative to (0,0), others are relative to previous point.
-		fchain<sint16> xCoordinates(numPoints);
+		sequence<sint16> xCoordinates(numPoints);
 
 		parseCoordinates(stream, &xCoordinates[0], &flags[0], numPoints, 1, 4, glyph.min.x, glyph.max.x);
 
 		// Array of y-coordinates; the first is relative to (0,0), others are relative to previous point.
-		fchain<sint16> yCoordinates(numPoints);
+		sequence<sint16> yCoordinates(numPoints);
 
 		parseCoordinates(stream, &yCoordinates[0], &flags[0], numPoints, 2, 5, glyph.min.y, glyph.max.y);
 
-		fchain<std::vector<ContourPoint>> contours(numberOfContours);
+		sequence<std::vector<ContourPoint>> contours(numberOfContours);
 
 		{
 			uint16 contourIndex = 0;
@@ -363,7 +363,7 @@ namespace ProjectA {
 		return glyph;
 	}
 
-	static Glyph parseCompoundGlyph(ByteStream& stream, uint32 tableOffset, const fchain<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth) {
+	static Glyph parseCompoundGlyph(ByteStream& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, uint16 compoundGlyphIndex, uint16 maxComponentDepth) {
 		stream.reset();
 		stream.jump(static_cast<uint64>(tableOffset + glyphOffsets[compoundGlyphIndex]));
 
@@ -527,9 +527,9 @@ namespace ProjectA {
 
 		// The actual local offset divided by 2 is stored. The value of n is the number of glyphs in the font + 1.
 		// The number of glyphs in the font is found in the maximum profile table.
-		fchain<uint16> glyphOffsets(ttfFile.maxp.numGlyphs + 1);
+		sequence<uint16> glyphOffsets(ttfFile.maxp.numGlyphs + 1);
 
-		fchain<uint16> glyphLengths(ttfFile.maxp.numGlyphs + 1);
+		sequence<uint16> glyphLengths(ttfFile.maxp.numGlyphs + 1);
 
 		// Parse 'loca' table.
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6loca.html
@@ -683,7 +683,7 @@ namespace ProjectA {
 			const uint16 entrySelector = stream.read<uint16>(true);
 			const uint16 rangeShift = stream.read<uint16>(true);
 
-			fchain<uint16> endCodes(segCount);
+			sequence<uint16> endCodes(segCount);
 
 			for (uint16& endCode : endCodes) {
 				endCode = stream.read<uint16>(true);
@@ -691,13 +691,13 @@ namespace ProjectA {
 
 			stream.jump(sizeof(uint16));
 
-			fchain<uint16> startCodes(segCount);
+			sequence<uint16> startCodes(segCount);
 
 			for (uint16& startCode : startCodes) {
 				startCode = stream.read<uint16>(true);
 			}
 
-			fchain<uint16> idDeltas(segCount);
+			sequence<uint16> idDeltas(segCount);
 
 			for (uint16& idDelta : idDeltas) {
 				idDelta = stream.read<uint16>(true);

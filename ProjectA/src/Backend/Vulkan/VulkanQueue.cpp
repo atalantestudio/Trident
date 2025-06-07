@@ -21,10 +21,17 @@ namespace ProjectA {
 		return createRef<VulkanCommandEncoder>(device, commandPool.object, descriptor);
 	}
 
-	void VulkanQueue::submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
+	void VulkanQueue::submit(const std::vector<ref<CommandBuffer>>& commandBuffers, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const ref<VulkanCommandBuffer>& vkCommandBuffer = std::static_pointer_cast<VulkanCommandBuffer>(commandBuffer);
+		// TODO: One wait dst stage mask per wait semaphore, but the pipeline stage flags is stored into the command buffer.
+		const VkPipelineStageFlags waitDstStageMask = std::static_pointer_cast<VulkanCommandBuffer>(commandBuffers[0])->pipelineStageFlags;
+
+		sequence<VkCommandBuffer> vkCommandBuffers(commandBuffers.size());
+
+		for (uint32 commandBufferIndex = 0; commandBufferIndex < commandBuffers.size(); commandBufferIndex += 1) {
+			vkCommandBuffers[commandBufferIndex] = std::static_pointer_cast<VulkanCommandBuffer>(commandBuffers[commandBufferIndex])->object;
+		}
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -38,11 +45,11 @@ namespace ProjectA {
 		else {
 			submitInfo.waitSemaphoreCount = 1;
 			submitInfo.pWaitSemaphores = &std::static_pointer_cast<VulkanSemaphore>(waitSemaphore)->object;
-			submitInfo.pWaitDstStageMask = &vkCommandBuffer->pipelineStageFlags;
+			submitInfo.pWaitDstStageMask = &waitDstStageMask;
 		}
 
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &vkCommandBuffer->object;
+		submitInfo.commandBufferCount = static_cast<uint32>(vkCommandBuffers.count);
+		submitInfo.pCommandBuffers = vkCommandBuffers;
 
 		if (signalSemaphore == nullptr) {
 			submitInfo.signalSemaphoreCount = 0;
@@ -68,7 +75,7 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		// TODO: Find a static way of casting swapchains.
-		fchain<const VkSwapchainKHR*> vkSwapchains(swapchains.size());
+		sequence<const VkSwapchainKHR*> vkSwapchains(swapchains.size());
 
 		for (uint64 swapchainIndex = 0; swapchainIndex < vkSwapchains.count; swapchainIndex += 1) {
 			vkSwapchains[swapchainIndex] = &std::static_pointer_cast<VulkanSwapchain>(swapchains[swapchainIndex])->object;

@@ -6,9 +6,10 @@ layout(location = 0) in vec4 vertexPosition;
 layout(location = 1) in vec2 vertexImageCoordinate;
 layout(location = 2) in mat3x3 world;
 layout(location = 5) in mat3x3 imageWorld;
-layout(location = 8) in vec4 fontIndexAndOutlineWidth;
-layout(location = 9) in vec4 color;
-layout(location = 10) in vec4 outlineColor;
+layout(location = 8) in uint fontIndex;
+layout(location = 9) in float outlineWidth;
+layout(location = 10) in vec4 color;
+layout(location = 11) in vec4 outlineColor;
 
 layout(set = 0, binding = 0) uniform Camera {
 	mat3x3 projection;
@@ -25,8 +26,8 @@ void main() {
 	gl_Position = vec4(camera.projection * world * vertexPosition.xyz, 1.0);
 
 	vertexOutput.imageCoordinate = imageWorld * vec3(vertexImageCoordinate, 1.0);
-	vertexOutput.imageCoordinate.z = fontIndexAndOutlineWidth[0];
-	vertexOutput.outlineWidth = fontIndexAndOutlineWidth[1];
+	vertexOutput.imageCoordinate.z = float(fontIndex);
+	vertexOutput.outlineWidth = outlineWidth;
 	vertexOutput.color = color;
 	vertexOutput.outlineColor = outlineColor;
 }

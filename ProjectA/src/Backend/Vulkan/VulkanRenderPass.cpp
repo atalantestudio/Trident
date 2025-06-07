@@ -14,8 +14,8 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		fchain<VkAttachmentDescription> attachmentDescriptions(attachmentCount);
-		fchain<VkAttachmentReference> attachmentReferences(attachmentCount);
+		sequence<VkAttachmentDescription> attachmentDescriptions(attachmentCount);
+		sequence<VkAttachmentReference> attachmentReferences(attachmentCount);
 
 		VkSampleCountFlags sampleCountFlags = 0;
 

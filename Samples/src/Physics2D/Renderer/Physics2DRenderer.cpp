@@ -166,7 +166,7 @@ namespace ProjectA {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 		device->waitIdle();
 	}
 
@@ -194,7 +194,7 @@ namespace ProjectA {
 		gridPipelineLayout = createPipelineLayout(gridPipelineLayoutDescriptor);
 
 		VertexInputBinding gridVertexInputBinding(InputRate::VERTEX);
-		gridVertexInputBinding.registerAttribute<svec2<float32>>(false);
+		gridVertexInputBinding.registerAttribute<svec2<float32>>();
 
 		ShaderModuleDescriptor gridVertexShaderModuleDescriptor{};
 		gridVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -243,7 +243,7 @@ namespace ProjectA {
 
 	void Physics2DRenderer::initializeCenterOfMassRenderPipeline() {
 		VertexInputBinding centerOfMassVertexInputBinding(InputRate::VERTEX);
-		centerOfMassVertexInputBinding.registerAttribute<svec3<float32>>(false);
+		centerOfMassVertexInputBinding.registerAttribute<svec3<float32>>();
 
 		ShaderModuleDescriptor centerOfMassVertexShaderModuleDescriptor{};
 		centerOfMassVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -310,7 +310,7 @@ namespace ProjectA {
 		distancePipelineLayout = createPipelineLayout(distancePipelineLayoutDescriptor);
 
 		VertexInputBinding distanceVertexInputBinding(InputRate::VERTEX);
-		distanceVertexInputBinding.registerAttribute<svec2<float32>>(false);
+		distanceVertexInputBinding.registerAttribute<svec2<float32>>();
 
 		ShaderModuleDescriptor distanceVertexShaderModuleDescriptor{};
 		distanceVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -385,7 +385,7 @@ namespace ProjectA {
 
 	void Physics2DRenderer::initializeVertexFeatureRenderPipeline() {
 		VertexInputBinding vertexFeatureVertexInputBinding(InputRate::VERTEX);
-		vertexFeatureVertexInputBinding.registerAttribute<svec2<float32>>(false);
+		vertexFeatureVertexInputBinding.registerAttribute<svec2<float32>>();
 
 		ShaderModuleDescriptor vertexFeatureVertexShaderModuleDescriptor{};
 		vertexFeatureVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -419,7 +419,7 @@ namespace ProjectA {
 
 	void Physics2DRenderer::initializeEdgeFeatureRenderPipeline() {
 		VertexInputBinding edgeFeatureVertexInputBinding(InputRate::VERTEX);
-		edgeFeatureVertexInputBinding.registerAttribute<svec2<float32>>(false);
+		edgeFeatureVertexInputBinding.registerAttribute<svec2<float32>>();
 
 		ShaderModuleDescriptor edgeFeatureVertexShaderModuleDescriptor{};
 		edgeFeatureVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -542,7 +542,7 @@ namespace ProjectA {
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-		device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+		device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 		device->waitIdle();
 
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
@@ -564,12 +564,12 @@ namespace ProjectA {
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>(false);
+		vertexInputBinding.registerAttribute<svec2<float32>>();
 
 		VertexInputBinding fillInstanceInputBinding(InputRate::INSTANCE);
-		fillInstanceInputBinding.registerAttribute<mat3x3<float32>>(false);
-		fillInstanceInputBinding.registerAttribute<vec4<float32>>(false);
-		fillInstanceInputBinding.registerAttribute<vec4<float32>>(false);
+		fillInstanceInputBinding.registerAttribute<mat3x3<float32>>();
+		fillInstanceInputBinding.registerAttribute<vec4<float32>>();
+		fillInstanceInputBinding.registerAttribute<vec4<float32>>();
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -603,10 +603,10 @@ namespace ProjectA {
 		fillRenderPipeline = createRenderPipeline(fillRenderPipelineDescriptor);
 
 		VertexInputBinding strokeInstanceInputBinding(InputRate::INSTANCE);
-		strokeInstanceInputBinding.registerAttribute<mat3x3<float32>>(false);
-		strokeInstanceInputBinding.registerAttribute<vec4<float32>>(false);
-		strokeInstanceInputBinding.registerAttribute<vec4<float32>>(false);
-		strokeInstanceInputBinding.registerAttribute<uint32>(false);
+		strokeInstanceInputBinding.registerAttribute<mat3x3<float32>>();
+		strokeInstanceInputBinding.registerAttribute<vec4<float32>>();
+		strokeInstanceInputBinding.registerAttribute<vec4<float32>>();
+		strokeInstanceInputBinding.registerAttribute<uint32>();
 
 		RenderPipelineDescriptor strokeRenderPipelineDescriptor;
 		strokeRenderPipelineDescriptor.renderPass = renderPass;
@@ -654,11 +654,11 @@ namespace ProjectA {
 		placeholderFillPipelineLayout = createPipelineLayout(placeholderFillPipelineLayoutDescriptor);
 
 		VertexInputBinding placeholderFillInstanceInputBinding(InputRate::INSTANCE);
-		placeholderFillInstanceInputBinding.registerAttribute<mat3x3<float32>>(false);
-		placeholderFillInstanceInputBinding.registerAttribute<vec4<float32>>(false);
+		placeholderFillInstanceInputBinding.registerAttribute<mat3x3<float32>>();
+		placeholderFillInstanceInputBinding.registerAttribute<vec4<float32>>();
 
 		VertexInputBinding placeholderStrokeInstanceInputBinding(InputRate::INSTANCE);
-		placeholderStrokeInstanceInputBinding.registerAttribute<mat3x3<float32>>(false);
+		placeholderStrokeInstanceInputBinding.registerAttribute<mat3x3<float32>>();
 
 		ColorBlendAttachment transparentColorBlendAttachment{};
 		transparentColorBlendAttachment.blend = true;

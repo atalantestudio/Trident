@@ -20,7 +20,7 @@ namespace ProjectA {
 		public:
 			virtual void render(const ref<CommandEncoder>& commandEncoder) const = 0;
 
-			virtual void resize(WindowResizeEvent& event) {}
+			virtual void resize(WindowResizeEvent& event);
 
 			virtual void onEvent(Event& event);
 

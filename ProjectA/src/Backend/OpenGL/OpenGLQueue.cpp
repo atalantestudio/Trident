@@ -17,11 +17,13 @@ namespace ProjectA {
 		return createRef<OpenGLCommandEncoder>(device, descriptor);
 	}
 
-	void OpenGLQueue::submit(const ref<CommandBuffer>& commandBuffer, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
-		const OpenGLCommandBuffer& glCommandBuffer = *std::static_pointer_cast<OpenGLCommandBuffer>(commandBuffer).get();
+	void OpenGLQueue::submit(const std::vector<ref<CommandBuffer>>& commandBuffers, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
+		for (const ref<CommandBuffer>& commandBuffer : commandBuffers) {
+			const OpenGLCommandBuffer& glCommandBuffer = *std::static_pointer_cast<OpenGLCommandBuffer>(commandBuffer);
 
-		for (const ref<OpenGLCommand>& command : glCommandBuffer) {
-			command->execute();
+			for (const ref<OpenGLCommand>& command : glCommandBuffer) {
+				command->execute();
+			}
 		}
 
 		glFlush();

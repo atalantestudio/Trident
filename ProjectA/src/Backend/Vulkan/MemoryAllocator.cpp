@@ -76,7 +76,7 @@ namespace ProjectA {
 	MemorySuballocation MemoryAllocator::suballocateBuffer(VkDevice device, VkBuffer buffer, uint32 memoryTypeIndex, VkDeviceSize size) {
 		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, size, currentBufferMemoryBlockIndices);
 
-		ENGINE_TRACE("Suballocating buffer resource inside memory block (offset = [], size = []).", memorySuballocation.offset, memorySuballocation.size);
+		ENGINE_DEBUG("Suballocating buffer resource inside memory block (offset = [], size = []).", memorySuballocation.offset, memorySuballocation.size);
 
 		MemoryBlock& memoryBlock = memoryBlocks[memorySuballocation.blockIndex];
 
@@ -94,7 +94,7 @@ namespace ProjectA {
 	MemorySuballocation MemoryAllocator::suballocateImage(VkDevice device, VkImage image, uint32 memoryTypeIndex, VkDeviceSize size) {
 		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, size, currentImageMemoryBlockIndices);
 
-		ENGINE_TRACE("Suballocating image resource inside memory block (offset = [], size = []).", memorySuballocation.offset, memorySuballocation.size);
+		ENGINE_DEBUG("Suballocating image resource inside memory block (offset = [], size = []).", memorySuballocation.offset, memorySuballocation.size);
 
 		MemoryBlock& memoryBlock = memoryBlocks[memorySuballocation.blockIndex];
 
@@ -166,7 +166,7 @@ namespace ProjectA {
 		MemoryBlock& memoryBlock = memoryBlocks[memoryBlockIndex];
 
 		if (memoryBlock.suballocationCount <= 1) {
-			ENGINE_TRACE("Freeing memory block [].", memoryBlockIndex);
+			ENGINE_DEBUG("Freeing memory block [].", memoryBlockIndex);
 
 			vkFreeMemory(device, memoryBlock.memory, nullptr);
 
@@ -190,7 +190,7 @@ namespace ProjectA {
 
 		memoryBlock.suballocationCount -= 1;
 
-		ENGINE_TRACE("Freeing suballocation from memory block []. Suballocation count is now [].", memoryBlockIndex, memoryBlock.suballocationCount);
+		ENGINE_DEBUG("Freeing suballocation from memory block []. Suballocation count is now [].", memoryBlockIndex, memoryBlock.suballocationCount);
 	}
 
 	void MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryBlockIndices) {
@@ -198,7 +198,7 @@ namespace ProjectA {
 
 		const uint32 memoryBlockIndex = static_cast<uint32>(memoryBlocks.size());
 
-		ENGINE_TRACE(
+		ENGINE_DEBUG(
 			"Creating new memory allocation [] of type [] and size []Mb.",
 			memoryBlockIndex,
 			string_VkMemoryPropertyFlags(physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex].propertyFlags),
@@ -240,7 +240,7 @@ namespace ProjectA {
 
 		// If the current memory block cannot fully hold this suballocation, close it and open a new block.
 		if (currentMemoryBlock->size - currentMemoryBlock->offset < size) {
-			ENGINE_TRACE("Remaining block size is insufficient.");
+			ENGINE_DEBUG("Remaining block size is insufficient.");
 
 			createAllocation(device, memoryTypeIndex, size, currentMemoryBlockIndices);
 

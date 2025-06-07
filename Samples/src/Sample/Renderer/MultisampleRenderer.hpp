@@ -40,10 +40,10 @@ namespace ProjectA {
 				// 4. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-					vertexInputBinding.registerAttribute<svec2<float32>>(false);
-					vertexInputBinding.registerAttribute<svec3<float32>>(false);
+					vertexInputBinding.registerAttribute<svec2<float32>>();
+					vertexInputBinding.registerAttribute<svec3<float32>>();
 
-					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+ 					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 					vertexShaderModuleDescriptor.entryPoint = "main";
 
@@ -54,12 +54,12 @@ namespace ProjectA {
 					ColorBlendAttachment colorBlendAttachment{};
 					colorBlendAttachment.blend = false;
 
-					RenderPipelineDescriptor renderPipelineDescriptor;
+					RenderPipelineDescriptor renderPipelineDescriptor{};
 					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Triangle.vert.spv", vertexShaderModuleDescriptor);
-					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Triangle.frag.spv", fragmentShaderModuleDescriptor);
+					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Vertex2DRGB.vert.spv", vertexShaderModuleDescriptor);
+					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/ColorRGB.frag.spv", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 					renderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -79,14 +79,14 @@ namespace ProjectA {
 
 					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
 
-					Vertex* vertices = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
+					Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
 
-					vertices[0].position = {-0.5f, -0.5f};
-					vertices[0].color = {1.0f, 0.0f, 0.0f};
-					vertices[1].position = {0.0f, 0.5f};
-					vertices[1].color = {0.0f, 1.0f, 0.0f};
-					vertices[2].position = {0.5f, -0.5f};
-					vertices[2].color = {0.0f, 0.0f, 1.0f};
+					vertexMappedRange[0].vertex = {-0.5f, -0.5f};
+					vertexMappedRange[0].color = {1.0f, 0.0f, 0.0f};
+					vertexMappedRange[1].vertex = {0.0f, 0.5f};
+					vertexMappedRange[1].color = {0.0f, 1.0f, 0.0f};
+					vertexMappedRange[2].vertex = {0.5f, -0.5f};
+					vertexMappedRange[2].color = {0.0f, 0.0f, 1.0f};
 
 					vertexStagingBuffer->unmap();
 
@@ -109,7 +109,7 @@ namespace ProjectA {
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 					device->waitIdle();
 				}
 			}
@@ -165,7 +165,7 @@ namespace ProjectA {
 
 		private:
 			struct Vertex {
-				svec2<float32> position;
+				svec2<float32> vertex;
 				svec3<float32> color;
 			};
 

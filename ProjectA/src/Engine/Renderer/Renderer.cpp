@@ -75,6 +75,8 @@ namespace ProjectA {
 		}
 	}
 
+	void Renderer::resize(WindowResizeEvent& event) {}
+
 	void Renderer::onEvent(Event& event) {}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {

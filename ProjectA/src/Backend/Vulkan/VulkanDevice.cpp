@@ -30,7 +30,7 @@ namespace ProjectA {
 
 		queueFamilyIndices.erase(std::unique(queueFamilyIndices.begin(), queueFamilyIndices.end()), queueFamilyIndices.end());
 
-		fchain<VkDeviceQueueCreateInfo> deviceQueueCreateInfos(queueFamilyIndices.size());
+		sequence<VkDeviceQueueCreateInfo> deviceQueueCreateInfos(queueFamilyIndices.size());
 
 		constexpr float32 DEFAULT_QUEUE_PRIORITY = 1.0f;
 

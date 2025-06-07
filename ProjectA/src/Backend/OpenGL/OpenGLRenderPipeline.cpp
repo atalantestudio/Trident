@@ -61,18 +61,18 @@ namespace ProjectA {
 
 		GLuint attribindex = 0;
 
-		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.size(); vertexInputBindingIndex += 1) {
+		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.count; vertexInputBindingIndex += 1) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 			const std::vector<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
 
 			for (const VertexInputAttribute& attribute : attributes) {
 				const GLenum type = getGlType(attribute.type);
 				const GLint size = getGlSize(attribute.type);
-				const GLvoid* offset = (const GLvoid*) (const std::uintptr_t) attribute.offset;
+				const GLvoid* offset = (const GLvoid*) static_cast<uint64>(attribute.offset);
 
 				switch (type) {
 					case GL_FLOAT:
-						glVertexAttribFormat(attribindex, size, type, attribute.normalized, attribute.offset);
+						glVertexAttribFormat(attribindex, size, type, GL_FALSE, attribute.offset);
 
 						break;
 					case GL_BYTE:

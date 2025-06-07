@@ -1,0 +1,94 @@
+#pragma once
+
+#include "Engine/types.hpp"
+
+namespace ProjectA {
+	// A non-resizeable array of elements.
+	template<typename T>
+	class sequence {
+		public:
+			sequence() = default;
+
+			explicit sequence(uint64 count) :
+				array(new T[count]()),
+				count(count)
+			{}
+
+			sequence(const std::initializer_list<T>& list) :
+				sequence(list.size())
+			{
+				std::copy(list.begin(), list.end(), array);
+			}
+
+			sequence(sequence&& sequence) :
+				array(sequence.array),
+				count(sequence.count)
+			{
+				sequence.array = nullptr;
+				sequence.count = 0;
+			}
+
+			~sequence() {
+				delete[] array;
+			}
+
+			operator T*() const {
+				return array;
+			}
+
+			sequence& operator =(sequence&& sequence) {
+				array = sequence.array;
+				count = sequence.count;
+
+				sequence.array = nullptr;
+				sequence.count = 0;
+
+				return *this;
+			}
+
+			// TODO: If count == 0, don't throw on access?
+			template<typename _T = T>
+			std::enable_if_t<(sizeof(T) <= 8), _T> operator [](uint64 index) const {
+				ENGINE_ASSERT(index < count, "Index overflow.");
+
+				return array[index];
+			}
+
+			// TODO: If count == 0, don't throw on access?
+			template<typename _T = T>
+			std::enable_if_t<(sizeof(T) > 8), const _T&> operator [](uint64 index) const {
+				ENGINE_ASSERT(index < count, "Index overflow.");
+
+				return array[index];
+			}
+
+			// TODO: If count == 0, don't throw on access?
+			T& operator [](uint64 index) {
+				ENGINE_ASSERT(index < count, "Index overflow.");
+
+				return array[index];
+			}
+
+			const T* begin() const {
+				return &array[0];
+			}
+
+			T* begin() {
+				return &array[0];
+			}
+
+			const T* end() const {
+				return &array[count];
+			}
+
+			T* end() {
+				return &array[count];
+			}
+
+		private:
+			T* array = nullptr;
+
+		public:
+			uint64 count = 0;
+	};
+}

@@ -41,7 +41,7 @@ namespace ProjectA {
 						glClearBufferfi(GL_DEPTH_STENCIL, 0, depthStencilClearValue.depth, depthStencilClearValue.stencil);
 					}
 
-					fchain<GLenum> drawBuffers(renderPass->getColorAttachmentCount());
+					sequence<GLenum> drawBuffers(renderPass->getColorAttachmentCount());
 
 					for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < drawBuffers.count; colorAttachmentIndex += 1) {
 						drawBuffers[colorAttachmentIndex] = GL_COLOR_ATTACHMENT0 + colorAttachmentIndex;

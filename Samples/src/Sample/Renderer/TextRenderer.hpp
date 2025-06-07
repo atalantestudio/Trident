@@ -87,8 +87,8 @@ namespace ProjectA {
 				// 6. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-					vertexInputBinding.registerAttribute<svec2<float32>>(false);
-					vertexInputBinding.registerAttribute<svec2<float32>>(false);
+					vertexInputBinding.registerAttribute<svec2<float32>>();
+					vertexInputBinding.registerAttribute<svec2<float32>>();
 
 					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -101,7 +101,7 @@ namespace ProjectA {
 					ColorBlendAttachment colorBlendAttachment{};
 					colorBlendAttachment.blend = false;
 
-					RenderPipelineDescriptor renderPipelineDescriptor;
+					RenderPipelineDescriptor renderPipelineDescriptor{};
 					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
@@ -158,7 +158,7 @@ namespace ProjectA {
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 					device->waitIdle();
 				}
 
@@ -242,20 +242,20 @@ namespace ProjectA {
 						const float32 y = positionY;
 
 						// Top-left
-						vertexMappedRange[vertexIndex + 0].position = {x, y};
-						vertexMappedRange[vertexIndex + 0].uv = {glyph.minCoordinateX, glyph.minCoordinateY};
+						vertexMappedRange[vertexIndex + 0].vertex = {x, y};
+						vertexMappedRange[vertexIndex + 0].imageCoordinate = {glyph.minCoordinateX, glyph.minCoordinateY};
 
 						// Top-right
-						vertexMappedRange[vertexIndex + 1].position = {x + width, y};
-						vertexMappedRange[vertexIndex + 1].uv = {glyph.maxCoordinateX, glyph.minCoordinateY};
+						vertexMappedRange[vertexIndex + 1].vertex = {x + width, y};
+						vertexMappedRange[vertexIndex + 1].imageCoordinate = {glyph.maxCoordinateX, glyph.minCoordinateY};
 
 						// Bottom-right
-						vertexMappedRange[vertexIndex + 2].position = {x + width, y + fontSize};
-						vertexMappedRange[vertexIndex + 2].uv = {glyph.maxCoordinateX, glyph.maxCoordinateY};
+						vertexMappedRange[vertexIndex + 2].vertex = {x + width, y + fontSize};
+						vertexMappedRange[vertexIndex + 2].imageCoordinate = {glyph.maxCoordinateX, glyph.maxCoordinateY};
 
 						// Bottom-left
-						vertexMappedRange[vertexIndex + 3].position = {x, y + fontSize};
-						vertexMappedRange[vertexIndex + 3].uv = {glyph.minCoordinateX, glyph.maxCoordinateY};
+						vertexMappedRange[vertexIndex + 3].vertex = {x, y + fontSize};
+						vertexMappedRange[vertexIndex + 3].imageCoordinate = {glyph.minCoordinateX, glyph.maxCoordinateY};
 
 						vertexIndex += 4;
 					}
@@ -280,8 +280,8 @@ namespace ProjectA {
 
 		private:
 			struct Vertex {
-				svec2<float32> position;
-				svec2<float32> uv;
+				svec2<float32> vertex;
+				svec2<float32> imageCoordinate;
 			};
 
 			struct Camera {

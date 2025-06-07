@@ -37,7 +37,7 @@ namespace ProjectA {
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 					device->waitIdle();
 				}
 
@@ -86,7 +86,7 @@ namespace ProjectA {
 
 					ComputePipelineDescriptor computePipelineDescriptor;
 					computePipelineDescriptor.pipelineLayout = computePipelineLayout;
-					computePipelineDescriptor.computeShaderModule = loadShaderModule("Asset/Shader/Compute.comp.spv", computeShaderModuleDescriptor);
+					computePipelineDescriptor.computeShaderModule = loadShaderModule("Asset/Shader/ImageUVGradient.comp.spv", computeShaderModuleDescriptor);
 
 					computePipeline = createComputePipeline(computePipelineDescriptor);
 				}
@@ -105,7 +105,7 @@ namespace ProjectA {
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					device->getComputeQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+					device->getComputeQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 					device->waitIdle();
 				}
 
@@ -121,7 +121,7 @@ namespace ProjectA {
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 					device->waitIdle();
 				}
 
@@ -166,7 +166,7 @@ namespace ProjectA {
 				// 11. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-					vertexInputBinding.registerAttribute<svec2<float32>>(false);
+					vertexInputBinding.registerAttribute<svec2<float32>>();
 
 					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -179,12 +179,12 @@ namespace ProjectA {
 					ColorBlendAttachment colorBlendAttachment{};
 					colorBlendAttachment.blend = false;
 
-					RenderPipelineDescriptor renderPipelineDescriptor;
+					RenderPipelineDescriptor renderPipelineDescriptor{};
 					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Compute.vert.spv", vertexShaderModuleDescriptor);
-					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Compute.frag.spv", fragmentShaderModuleDescriptor);
+					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Vertex2DUV.vert.spv", vertexShaderModuleDescriptor);
+					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/TextureRGBA.frag.spv", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 					renderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -206,9 +206,9 @@ namespace ProjectA {
 
 					Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
 
-					vertexMappedRange[0].position = {-1.0f,  1.0f};
-					vertexMappedRange[1].position = { 3.0f,  1.0f};
-					vertexMappedRange[2].position = {-1.0f, -3.0f};
+					vertexMappedRange[0].vertex = {-1.0f,  1.0f};
+					vertexMappedRange[1].vertex = { 3.0f,  1.0f};
+					vertexMappedRange[2].vertex = {-1.0f, -3.0f};
 
 					vertexStagingBuffer->unmap();
 
@@ -229,7 +229,7 @@ namespace ProjectA {
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					device->getGraphicsQueue()->submit(commandBuffer, nullptr, nullptr, nullptr);
+					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 					device->waitIdle();
 				}
 			}
@@ -263,7 +263,7 @@ namespace ProjectA {
 
 		private:
 			struct Vertex {
-				svec2<float32> position;
+				svec2<float32> vertex;
 			};
 
 		private:

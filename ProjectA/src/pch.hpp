@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <functional>
+//#include <initializer_list>
 #include <iostream> // Release build can need std::cout
 #include <sstream>
 
@@ -23,7 +24,7 @@
 #include "Engine/lyah.hpp"
 
 #include "Engine/types.hpp"
-#include "Engine/fchain.hpp"
+#include "Engine/sequence.hpp"
 
 #include "Engine/Logger/Logger.hpp"
 

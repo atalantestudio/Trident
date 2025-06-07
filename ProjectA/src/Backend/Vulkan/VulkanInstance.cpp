@@ -156,7 +156,7 @@ namespace ProjectA {
 
 			DEBUG_ASSERT(physicalDeviceCount > 0);
 
-			fchain<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+			sequence<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
 
 			result = vkEnumeratePhysicalDevices(object, &physicalDeviceCount, &physicalDevices[0]);
 

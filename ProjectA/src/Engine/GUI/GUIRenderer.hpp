@@ -44,7 +44,7 @@ namespace ProjectA {
 		private:
 			struct Vertex {
 				// TODO: Remove padding.
-				vec4<float32> position;
+				vec4<float32> vertex;
 
 				svec2<float32> imageCoordinate;
 			};
@@ -59,7 +59,8 @@ namespace ProjectA {
 			struct GlyphSubcomponent {
 				mat3x3<float32> world;
 				mat3x3<float32> textureWorld;
-				vec4<float32> fontIndexAndOutlineWidth;
+				uint32 fontIndex;
+				float32 outlineWidth;
 				vec4<float32> color;
 				vec4<float32> outlineColor;
 			};

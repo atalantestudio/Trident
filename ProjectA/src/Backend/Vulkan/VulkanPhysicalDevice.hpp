@@ -9,7 +9,7 @@ namespace ProjectA {
 			VulkanPhysicalDevice(VkInstance instance);
 
 		private:
-			static uint32 calculateScore(VkPhysicalDevice physicalDevice);
+			uint32 calculateScore() const;
 
 			void setLimits();
 

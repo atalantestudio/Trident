@@ -22,6 +22,7 @@ namespace ProjectA {
 	template<typename T>
 	using vec2 = lyah::vec2<T>;
 
+	// TODO: Specify alignment.
 	template<typename T>
 	using vec3 = lyah::vec3<T>;
 
@@ -34,6 +35,7 @@ namespace ProjectA {
 	template<typename T>
 	using mat2x2 = lyah::mat2x2<T>;
 
+	// TODO: Specify alignment.
 	template<typename T>
 	using mat3x3 = lyah::mat3x3<T>;
 

@@ -114,12 +114,6 @@ namespace ProjectA {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
-		if (descriptor.usage > CommandBufferUsage::ONE_TIME_SUBMIT) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.usage must be a valid CommandBufferUsage value.");
-		}
-
 		ENGINE_ASSERT(errorCount == 0, "Command buffer descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
@@ -385,13 +379,13 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.pipelineLayout must be a valid PipelineLayout.");
 		}
 
-		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.size(); vertexInputBindingIndex += 1) {
+		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.count; vertexInputBindingIndex += 1) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 
 			if (vertexInputBinding.getInputRate() > InputRate::INSTANCE) {
 				errorCount += 1;
 
-				ENGINE_ERROR("descriptor.vertexInputBindings[[]].inputRate must be valid InputRate value.", vertexInputBindingIndex);
+				ENGINE_ERROR("descriptor.vertexInputBindings[[]].inputRate must be a valid InputRate value.", vertexInputBindingIndex);
 			}
 
 			const std::vector<VertexInputAttribute>& vertexInputAttributes = vertexInputBinding.getAttributes();
@@ -402,13 +396,7 @@ namespace ProjectA {
 				if (vertexInputAttribute.type > VertexInputAttributeType::R64G64B64A64_FLOAT) {
 					errorCount += 1;
 
-					ENGINE_ERROR("descriptor.vertexInputBindings[[]].attributes[[]].type must be valid VertexInputAttributeType value.", vertexInputBindingIndex, vertexInputAttributeIndex);
-				}
-
-				if (vertexInputAttribute.normalized != true && vertexInputAttribute.normalized != false) {
-					errorCount += 1;
-
-					ENGINE_ERROR("descriptor.vertexInputBindings[[]].attributes[[]].normalized must be either true or false.", vertexInputBindingIndex, vertexInputAttributeIndex);
+					ENGINE_ERROR("descriptor.vertexInputBindings[[]].attributes[[]].type must be a valid VertexInputAttributeType value.", vertexInputBindingIndex, vertexInputAttributeIndex);
 				}
 			}
 		}

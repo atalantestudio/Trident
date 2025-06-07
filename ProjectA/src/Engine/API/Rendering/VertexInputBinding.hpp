@@ -7,6 +7,10 @@
 namespace ProjectA {
 	class VertexInputBinding {
 		public:
+			VertexInputBinding() :
+				inputRate(InputRate::VERTEX)
+			{}
+
 			explicit VertexInputBinding(InputRate inputRate) :
 				inputRate(inputRate)
 			{}
@@ -23,60 +27,79 @@ namespace ProjectA {
 				return stride;
 			}
 
+			uint32 getMaxAlignment() const {
+				return maxAlignment;
+			}
+
 			template<typename AttributeType>
-			constexpr void registerAttribute(bool normalized) {
+			constexpr void registerAttribute() {
+				constexpr uint32 alignment = getAlignment<AttributeType>();
+
+				uint32 remainder = offset % alignment;
+
+				if (remainder != 0) {
+					// Pad so that the offset is a multiple of the alignment.
+					offset += alignment - remainder;
+				}
+
 				VertexInputAttribute vertexInputAttribute{};
 				vertexInputAttribute.type = getVertexInputAttributeType<AttributeType>();
-				vertexInputAttribute.normalized = normalized;
-				vertexInputAttribute.offset = stride;
+				vertexInputAttribute.offset = offset;
 
 				attributes.emplace_back(vertexInputAttribute);
 
-				const uint32 attributeSize = static_cast<uint32>(sizeof(AttributeType));
+				const uint32 size = static_cast<uint32>(sizeof(AttributeType));
 
-				// TODO: uint32 lyah::max(uint32, uint32).
-				alignment = std::max(alignment, attributeSize);
+				offset += size;
 
-				// TODO: Calculate correct required alignment.
-				stride += alignment;
+				stride = offset;
+
+				// TODO: lyah::max(uint32, uint32).
+				maxAlignment = std::max(maxAlignment, alignment);
+
+				remainder = stride % maxAlignment;
+
+				if (remainder != 0) {
+					// Pad so that the stride is a multiple of the alignment.
+					stride += maxAlignment - remainder;
+				}
 			}
 
 			template<>
-			constexpr void registerAttribute<mat3x3<float32>>(bool normalized) {
-				// Pad 3x3 matrices.
-				registerAttribute<vec4<float32>>(normalized);
-				registerAttribute<vec4<float32>>(normalized);
-				registerAttribute<vec4<float32>>(normalized);
+			constexpr void registerAttribute<mat3x3<float32>>() {
+				registerAttribute<svec3<float32>>();
+				registerAttribute<svec3<float32>>();
+				registerAttribute<svec3<float32>>();
 			}
 
 			template<>
-			constexpr void registerAttribute<mat3x3<float64>>(bool normalized) {
-				// Pad 3x3 matrices.
-				registerAttribute<vec4<float64>>(normalized);
-				registerAttribute<vec4<float64>>(normalized);
-				registerAttribute<vec4<float64>>(normalized);
+			constexpr void registerAttribute<mat3x3<float64>>() {
+				registerAttribute<svec3<float64>>();
+				registerAttribute<svec3<float64>>();
+				registerAttribute<svec3<float64>>();
 			}
 
 			template<>
-			constexpr void registerAttribute<mat4x4<float32>>(bool normalized) {
-				registerAttribute<vec4<float32>>(normalized);
-				registerAttribute<vec4<float32>>(normalized);
-				registerAttribute<vec4<float32>>(normalized);
-				registerAttribute<vec4<float32>>(normalized);
+			constexpr void registerAttribute<mat4x4<float32>>() {
+				registerAttribute<vec4<float32>>();
+				registerAttribute<vec4<float32>>();
+				registerAttribute<vec4<float32>>();
+				registerAttribute<vec4<float32>>();
 			}
 
 			template<>
-			constexpr void registerAttribute<mat4x4<float64>>(bool normalized) {
-				registerAttribute<vec4<float64>>(normalized);
-				registerAttribute<vec4<float64>>(normalized);
-				registerAttribute<vec4<float64>>(normalized);
-				registerAttribute<vec4<float64>>(normalized);
+			constexpr void registerAttribute<mat4x4<float64>>() {
+				registerAttribute<vec4<float64>>();
+				registerAttribute<vec4<float64>>();
+				registerAttribute<vec4<float64>>();
+				registerAttribute<vec4<float64>>();
 			}
 
 		private:
 			InputRate inputRate;
 			std::vector<VertexInputAttribute> attributes;
-			uint32 alignment = 0;
+			uint32 offset = 0;
 			uint32 stride = 0;
+			uint32 maxAlignment = 0;
 	};
 }

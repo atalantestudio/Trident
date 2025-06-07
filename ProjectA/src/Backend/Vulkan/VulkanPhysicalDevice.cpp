@@ -9,13 +9,14 @@ namespace ProjectA {
 		uint32 physicalDeviceCount;
 		VkResult result;
 
+		// TODO: Call vkEnumeratePhysicalDevices once.
 		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan physical devices ([]).", string_VkResult(result));
 
 		DEBUG_ASSERT(physicalDeviceCount > 0);
 
-		fchain<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+		sequence<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
 
 		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, &physicalDevices[0]);
 
@@ -25,7 +26,11 @@ namespace ProjectA {
 		uint32 bestPhysicalDeviceScore = 0;
 
 		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count; physicalDeviceIndex += 1) {
-			const uint32 score = calculateScore(physicalDevices[physicalDeviceIndex]);
+			const VkPhysicalDevice physicalDevice = physicalDevices[physicalDeviceIndex];
+
+			vkGetPhysicalDeviceProperties(physicalDevice, &properties);
+
+			const uint32 score = calculateScore();
 
 			if (score >= bestPhysicalDeviceScore) {
 				bestPhysicalDeviceIndex = physicalDeviceIndex;
@@ -43,7 +48,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(queueFamilyPropertyCount > 0, "Could not find queues for this physical device.");
 
-		fchain<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertyCount);
+		sequence<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertyCount);
 
 		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyPropertyCount, &queueFamilyProperties[0]);
 
@@ -66,7 +71,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan device extension properties ([]).", string_VkResult(result));
 
-		fchain<VkExtensionProperties> extensionProperties(extensionPropertyCount);
+		sequence<VkExtensionProperties> extensionProperties(extensionPropertyCount);
 
 		result = vkEnumerateDeviceExtensionProperties(object, nullptr, &extensionPropertyCount, &extensionProperties[0]);
 
@@ -112,9 +117,15 @@ namespace ProjectA {
 		setLimits();
 	}
 
-	uint32 VulkanPhysicalDevice::calculateScore(VkPhysicalDevice physicalDevice) {
-		// TODO: Implement score system.
-		return 1;
+	uint32 VulkanPhysicalDevice::calculateScore() const {
+		uint32 score = 1;
+
+		// Prefer discrete GPUs over integrated GPUs.
+		if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+			score += 1;
+		}
+
+		return score;
 	}
 
 	void VulkanPhysicalDevice::setLimits() {
