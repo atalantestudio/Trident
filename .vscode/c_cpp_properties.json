@@ -11,8 +11,6 @@
 			"defines": [
 				"BUILD_MODE_DEBUG"
 			],
-			"windowsSdkVersion": "10.0.22621.0",
-			"compilerPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.39.33519/bin/Hostx64/x64/cl.exe",
 			"cppStandard": "c++17",
 			"intelliSenseMode": "windows-msvc-x64"
 		},
@@ -27,7 +25,6 @@
 			"defines": [
 				"BUILD_MODE_PROFILE"
 			],
-			"compilerPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.39.33519/bin/Hostx64/x64/cl.exe",
 			"cppStandard": "c++17",
 			"intelliSenseMode": "windows-msvc-x64"
 		},
@@ -42,7 +39,6 @@
 			"defines": [
 				"BUILD_MODE_RELEASE"
 			],
-			"compilerPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.39.33519/bin/Hostx64/x64/cl.exe",
 			"cppStandard": "c++17",
 			"intelliSenseMode": "windows-msvc-x64"
 		}

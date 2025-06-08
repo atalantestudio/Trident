@@ -27,7 +27,7 @@ Open the solution file, then build.
 
 The [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) extension must be installed.
 
-Make sure that `MSBuild.exe` is included in your `PATH`.
+Make sure that `MSBuild.exe` is included in your `PATH` or that you have launched VS Code with the Developer Command Prompt.
 
 To build the project, run the Build Task. This can be done by either typing Ctrl + Shift + B or opening the command menu (Ctrl + Shift + P), then selecting "Tasks: Run Build Task".  
 Select the task corresponding to your configuration.

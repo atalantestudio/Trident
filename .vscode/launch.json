@@ -2,22 +2,76 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Run Project (Editor)",
+			"name": "Run Editor (Debug)",
 			"type": "cppvsdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/Editor.exe",
+			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/Editor/Editor.exe",
+			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/Editor",
-			"console": "integratedTerminal"
+			"environment": [],
+			"console": "integratedTerminal",
+			"preLaunchTask": "Build (Debug)"
 		},
 		{
-			"name": "Run Project (Samples)",
+			"name": "Run Editor (Profile)",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/windows_x86_64_Profile/Editor/Editor.exe",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/Editor",
+			"environment": [],
+			"console": "integratedTerminal",
+			"preLaunchTask": "Build (Profile)"
+		},
+		{
+			"name": "Run Editor (Release)",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/windows_x86_64_Release/Editor/Editor.exe",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/Editor",
+			"environment": [],
+			"console": "integratedTerminal",
+			"preLaunchTask": "Build (Release)"
+		},
+		{
+			"name": "Run Samples (Debug)",
 			"type": "cppvsdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/Samples/Samples.exe",
+			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/Samples",
-			"console": "integratedTerminal"
+			"environment": [],
+			"console": "integratedTerminal",
+			"preLaunchTask": "Build (Debug)"
+		},
+		{
+			"name": "Run Samples (Profile)",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/windows_x86_64_Profile/Samples/Samples.exe",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/Samples",
+			"environment": [],
+			"console": "integratedTerminal",
+			"preLaunchTask": "Build (Profile)"
+		},
+		{
+			"name": "Run Samples (Release)",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/windows_x86_64_Release/Samples/Samples.exe",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/Samples",
+			"environment": [],
+			"console": "integratedTerminal",
+			"preLaunchTask": "Build (Release)"
 		}
 	]
 }

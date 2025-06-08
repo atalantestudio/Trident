@@ -4,7 +4,7 @@
 		{
 			"label": "Build (Debug)",
 			"type": "process",
-			"command": "msbuild",
+			"command": "MSBuild.exe",
 			"args": [
 				"ProjectA.sln",
 				"/property:Configuration=Debug"
@@ -14,12 +14,13 @@
 			},
 			"presentation": {
 				"clear": true
-			}
+			},
+			"problemMatcher": "$msCompile"
 		},
 		{
 			"label": "Build (Profile)",
 			"type": "process",
-			"command": "msbuild",
+			"command": "MSBuild.exe",
 			"args": [
 				"ProjectA.sln",
 				"/property:Configuration=Profile"
@@ -29,12 +30,13 @@
 			},
 			"presentation": {
 				"clear": true
-			}
+			},
+			"problemMatcher": "$msCompile"
 		},
 		{
 			"label": "Build (Release)",
 			"type": "process",
-			"command": "msbuild",
+			"command": "MSBuild.exe",
 			"args": [
 				"ProjectA.sln",
 				"/property:Configuration=Release"
@@ -44,7 +46,8 @@
 			},
 			"presentation": {
 				"clear": true
-			}
+			},
+			"problemMatcher": "$msCompile"
 		},
 		{
 			"label": "Clean",
