@@ -1,10 +1,10 @@
 #version 450
 
 layout(location = 0) in vec3 vertex;
-layout(location = 1) in vec4 color;
+layout(location = 1) in vec3 color;
 
 out VertexOutput {
-	layout(location = 0) vec4 color;
+	layout(location = 0) vec3 color;
 } vertexOutput;
 
 void main() {

@@ -13,7 +13,7 @@
 #define RENDERER_TRIANGLE 8
 
 // Select the renderer to view.
-#define RENDERER RENDERER_TRIANGLE
+#define RENDERER RENDERER_DEPTH_TEST
 
 #if RENDERER == RENDERER_COLOR_BLEND
 	#include "../Renderer/ColorBlendRenderer.hpp"
