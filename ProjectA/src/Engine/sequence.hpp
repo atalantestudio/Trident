@@ -46,25 +46,22 @@ namespace ProjectA {
 				return *this;
 			}
 
-			// TODO: If count == 0, don't throw on access?
 			template<typename _T = T>
 			std::enable_if_t<(sizeof(T) <= 8), _T> operator [](uint64 index) const {
-				ENGINE_ASSERT(index < count, "Index overflow.");
+				DEBUG_ASSERT(index < count);
 
 				return array[index];
 			}
 
-			// TODO: If count == 0, don't throw on access?
 			template<typename _T = T>
 			std::enable_if_t<(sizeof(T) > 8), const _T&> operator [](uint64 index) const {
-				ENGINE_ASSERT(index < count, "Index overflow.");
+				DEBUG_ASSERT(index < count);
 
 				return array[index];
 			}
 
-			// TODO: If count == 0, don't throw on access?
 			T& operator [](uint64 index) {
-				ENGINE_ASSERT(index < count, "Index overflow.");
+				DEBUG_ASSERT(index < count);
 
 				return array[index];
 			}
