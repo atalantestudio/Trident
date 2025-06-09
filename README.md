@@ -21,15 +21,15 @@ At the time of writing, some resources are not present in the repository:
 
 ### Visual Studio
 
-Open the solution file, then build.
+Open the solution file, then type `Ctrl + Shift + B` to build.
 
 ### Visual Studio Code
 
-The [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) extension must be installed.
+Install the [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) extension.
 
 Make sure that `MSBuild.exe` is included in your `PATH` or that you have launched VS Code with the Developer Command Prompt.
 
-To build the project, run the Build Task. This can be done by either typing Ctrl + Shift + B or opening the command menu (Ctrl + Shift + P), then selecting "Tasks: Run Build Task".  
+To build the project, run the Build Task. This can be done by either typing `Ctrl + Shift + B` or opening the command menu (`Ctrl + Shift + P`), then selecting "Tasks: Run Build Task".  
 Select the task corresponding to your configuration.
 
 ## Property file
