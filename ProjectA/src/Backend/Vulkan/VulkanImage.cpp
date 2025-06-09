@@ -86,7 +86,7 @@ namespace ProjectA {
 
 		vkDestroyImage(device, object, nullptr);
 
-		MemoryAllocator::freeSuballocation(device, memorySuballocation.blockIndex);
+		MemoryAllocator::freeSuballocation(device, memorySuballocation.allocationIndex);
 	}
 
 	uint32 VulkanImage::getWidth() const {

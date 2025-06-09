@@ -56,11 +56,11 @@ namespace ProjectA {
 
 		vkDestroyBuffer(device, object, nullptr);
 
-		MemoryAllocator::freeSuballocation(device, memorySuballocation.blockIndex);
+		MemoryAllocator::freeSuballocation(device, memorySuballocation.allocationIndex);
 	}
 
 	void VulkanBuffer::unmap() const {
-		MemoryAllocator::unmapSuballocation(device, memorySuballocation.blockIndex);
+		MemoryAllocator::unmapSuballocation(device, memorySuballocation.allocationIndex);
 	}
 
 	void* VulkanBuffer::getMappedRange(uint64 offset, uint64 size) const {

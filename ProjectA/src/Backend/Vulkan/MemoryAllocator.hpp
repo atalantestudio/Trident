@@ -4,9 +4,9 @@
 
 namespace ProjectA {
 	#define UNDEFINED_MEMORY_TYPE_INDEX std::numeric_limits<uint32>::max()
-	#define UNDEFINED_MEMORY_BLOCK_INDEX std::numeric_limits<uint32>::max()
+	#define UNDEFINED_MEMORY_ALLOCATION_INDEX std::numeric_limits<uint32>::max()
 
-	struct MemoryBlock {
+	struct MemoryAllocation {
 		VkDeviceMemory memory;
 		VkDeviceSize offset;
 		VkDeviceSize size;
@@ -17,7 +17,7 @@ namespace ProjectA {
 	};
 
 	struct MemorySuballocation {
-		uint32 blockIndex;
+		uint32 allocationIndex;
 		VkDeviceSize offset;
 		VkDeviceSize size;
 	};
@@ -41,31 +41,33 @@ namespace ProjectA {
 
 			static void* mapSuballocation(VkDevice device, const MemorySuballocation& memorySuballocation, VkDeviceSize size, VkDeviceSize offset);
 
-			static void unmapSuballocation(VkDevice device, uint32 memoryBlockIndex);
+			static void unmapSuballocation(VkDevice device, uint32 memoryAllocationIndex);
 
-			static void freeSuballocation(VkDevice device, uint32 memoryBlockIndex);
+			static void freeSuballocation(VkDevice device, uint32 memoryAllocationIndex);
 
 		private:
-			// Allocates a new memory block.
-			static void createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryBlockIndices);
+			// Creates a new memory allocation.
+			static void createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices);
 
-			// Creates and returns a suballocation in a memory block.
+			// Creates and returns a suballocation from a memory allocation.
 			// If isBuffer is false, the suballocation is done on image memory.
-			static MemorySuballocation suballocate(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryBlockIndices);
+			static MemorySuballocation suballocate(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices);
 
 		private:
-			static constexpr VkDeviceSize DEFAULT_MEMORY_BLOCK_SIZE = 16000000;
+			// Memory allocations have a default size of 16Mb.
+			static constexpr VkDeviceSize DEFAULT_MEMORY_ALLOCATION_SIZE = 16000000;
 
 		private:
 			static const VulkanPhysicalDevice* physicalDevice;
 
-			// Allocated buffer and image memory blocks.
-			static std::vector<MemoryBlock> memoryBlocks;
+			// Allocated buffer and image memory allocations.
+			static std::vector<MemoryAllocation> memoryAllocations;
 
-			// Index of the currently active buffer memory block per memory type.
-			static std::vector<uint32> currentBufferMemoryBlockIndices;
+			// TODO: Merge with currentImageMemoryAllocationIndices.
+			// Index of the currently active buffer memory allocation per memory type.
+			static std::vector<uint32> currentBufferMemoryAllocationIndices;
 
-			// Index of the currently active image memory block per memory type.
-			static std::vector<uint32> currentImageMemoryBlockIndices;
+			// Index of the currently active image memory allocation per memory type.
+			static std::vector<uint32> currentImageMemoryAllocationIndices;
 	};
 }

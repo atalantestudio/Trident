@@ -4,9 +4,9 @@
 
 namespace ProjectA {
 	const VulkanPhysicalDevice* MemoryAllocator::physicalDevice;
-	std::vector<MemoryBlock> MemoryAllocator::memoryBlocks;
-	std::vector<uint32> MemoryAllocator::currentBufferMemoryBlockIndices;
-	std::vector<uint32> MemoryAllocator::currentImageMemoryBlockIndices;
+	std::vector<MemoryAllocation> MemoryAllocator::memoryAllocations;
+	std::vector<uint32> MemoryAllocator::currentBufferMemoryAllocationIndices;
+	std::vector<uint32> MemoryAllocator::currentImageMemoryAllocationIndices;
 
 	void MemoryAllocator::initialize(const VulkanPhysicalDevice& physicalDevice) {
 		MemoryAllocator::physicalDevice = &physicalDevice;
@@ -14,11 +14,11 @@ namespace ProjectA {
 		//ENGINE_TRACE("Buffer image granularity: []", physicalDevice.properties.limits.bufferImageGranularity);
 		//ENGINE_TRACE("Max. memory allocation count: []", physicalDevice.properties.limits.maxMemoryAllocationCount);
 
-		currentBufferMemoryBlockIndices.resize(physicalDevice.memoryProperties.memoryTypeCount);
-		std::fill(currentBufferMemoryBlockIndices.begin(), currentBufferMemoryBlockIndices.end(), UNDEFINED_MEMORY_BLOCK_INDEX);
+		currentBufferMemoryAllocationIndices.resize(physicalDevice.memoryProperties.memoryTypeCount);
+		std::fill(currentBufferMemoryAllocationIndices.begin(), currentBufferMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
 
-		currentImageMemoryBlockIndices.resize(physicalDevice.memoryProperties.memoryTypeCount);
-		std::fill(currentImageMemoryBlockIndices.begin(), currentImageMemoryBlockIndices.end(), UNDEFINED_MEMORY_BLOCK_INDEX);
+		currentImageMemoryAllocationIndices.resize(physicalDevice.memoryProperties.memoryTypeCount);
+		std::fill(currentImageMemoryAllocationIndices.begin(), currentImageMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
 
 		#ifdef BUILD_MODE_DEBUG
 			enumerateMemoryTypes();
@@ -74,65 +74,65 @@ namespace ProjectA {
 	}
 
 	MemorySuballocation MemoryAllocator::suballocateBuffer(VkDevice device, VkBuffer buffer, uint32 memoryTypeIndex, VkDeviceSize size) {
-		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, size, currentBufferMemoryBlockIndices);
+		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, size, currentBufferMemoryAllocationIndices);
 
-		ENGINE_DEBUG("Suballocating buffer resource inside memory block (offset = [], size = []).", memorySuballocation.offset, memorySuballocation.size);
+		ENGINE_DEBUG("Suballocating buffer resource inside memory allocation (offset = [], size = []).", memorySuballocation.offset, memorySuballocation.size);
 
-		MemoryBlock& memoryBlock = memoryBlocks[memorySuballocation.blockIndex];
+		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		const VkResult result = vkBindBufferMemory(device, buffer, memoryBlock.memory, memoryBlock.offset);
+		const VkResult result = vkBindBufferMemory(device, buffer, memoryAllocation.memory, memoryAllocation.offset);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Could not bind memory for Vulkan buffer ([]).", string_VkResult(result));
 
-		// Only advance the block offset once we are sure that the memory has been correctly bound to the buffer.
-		memoryBlock.offset += size;
-		memoryBlock.suballocationCount += 1;
+		// Only advance the allocation offset once we are sure that the memory has been correctly bound to the buffer.
+		memoryAllocation.offset += size;
+		memoryAllocation.suballocationCount += 1;
 
 		return memorySuballocation;
 	}
 
 	MemorySuballocation MemoryAllocator::suballocateImage(VkDevice device, VkImage image, uint32 memoryTypeIndex, VkDeviceSize size) {
-		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, size, currentImageMemoryBlockIndices);
+		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, size, currentImageMemoryAllocationIndices);
 
-		ENGINE_DEBUG("Suballocating image resource inside memory block (offset = [], size = []).", memorySuballocation.offset, memorySuballocation.size);
+		ENGINE_DEBUG("Suballocating image resource inside memory allocation (offset = [], size = []).", memorySuballocation.offset, memorySuballocation.size);
 
-		MemoryBlock& memoryBlock = memoryBlocks[memorySuballocation.blockIndex];
+		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		const VkResult result = vkBindImageMemory(device, image, memoryBlock.memory, memoryBlock.offset);
+		const VkResult result = vkBindImageMemory(device, image, memoryAllocation.memory, memoryAllocation.offset);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Could not bind memory for Vulkan image ([]).", string_VkResult(result));
 
-		// Only advance the block offset once we are sure that the memory has been correctly bound to the image.
-		memoryBlock.offset += size;
-		memoryBlock.suballocationCount += 1;
+		// Only advance the allocation offset once we are sure that the memory has been correctly bound to the image.
+		memoryAllocation.offset += size;
+		memoryAllocation.suballocationCount += 1;
 
 		return memorySuballocation;
 	}
 
 	void* MemoryAllocator::mapSuballocation(VkDevice device, const MemorySuballocation& memorySuballocation, VkDeviceSize size, VkDeviceSize offset) {
-		MemoryBlock& memoryBlock = memoryBlocks[memorySuballocation.blockIndex];
+		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		ENGINE_ASSERT(offset <= memoryBlock.offset, "The mapping offset is outside of the used range for the memory block.");
+		ENGINE_ASSERT(offset <= memoryAllocation.offset, "The mapping offset is outside of the used range for the memory allocation.");
 		ENGINE_ASSERT(size > 0, "The mapping size must not be 0.");
-		ENGINE_ASSERT(offset + size <= memoryBlock.offset, "The offsetted mapping size is larger than the size of the allocated memory block.");
+		ENGINE_ASSERT(offset + size <= memoryAllocation.offset, "The offsetted mapping size is larger than the size of the allocated memory allocation.");
 
-		if (memoryBlock.mappedSuballocationCount == 0) {
-			// Map the whole block.
-			const VkResult result = vkMapMemory(device, memoryBlock.memory, 0, memoryBlock.size, 0, &memoryBlock.mappedRange);
+		if (memoryAllocation.mappedSuballocationCount == 0) {
+			// Map the whole allocation.
+			const VkResult result = vkMapMemory(device, memoryAllocation.memory, 0, memoryAllocation.size, 0, &memoryAllocation.mappedRange);
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Could not map Vulkan memory. ([])", string_VkResult(result));
 		}
 
-		memoryBlock.mappedSuballocationCount += 1;
+		memoryAllocation.mappedSuballocationCount += 1;
 
-		return static_cast<void*>(static_cast<uint8*>(memoryBlock.mappedRange) + memorySuballocation.offset + offset);
+		return static_cast<void*>(static_cast<uint8*>(memoryAllocation.mappedRange) + memorySuballocation.offset + offset);
 	}
 
-	void MemoryAllocator::unmapSuballocation(VkDevice device, uint32 memoryBlockIndex) {
-		MemoryBlock& memoryBlock = memoryBlocks[memoryBlockIndex];
+	void MemoryAllocator::unmapSuballocation(VkDevice device, uint32 memoryAllocationIndex) {
+		MemoryAllocation& memoryAllocation = memoryAllocations[memoryAllocationIndex];
 
-		if (memoryBlock.mappedSuballocationCount <= 1) {
-			const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryBlock.memoryTypeIndex];
+		if (memoryAllocation.mappedSuballocationCount <= 1) {
+			const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryAllocation.memoryTypeIndex];
 
 			if (!(memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
 				// TODO: Expose vkFlushMappedMemoryRanges.
@@ -141,9 +141,9 @@ namespace ProjectA {
 				/*VkMappedMemoryRange mappedMemoryRange{};
 				mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
 				mappedMemoryRange.pNext = nullptr;
-				mappedMemoryRange.memory = memoryBlock.memory;
+				mappedMemoryRange.memory = memoryAllocation.memory;
 				mappedMemoryRange.offset = 0;
-				mappedMemoryRange.size = memoryBlock.offset;
+				mappedMemoryRange.size = memoryAllocation.offset;
 
 				// Manually flush the mapped range.
 				const VkResult result = vkFlushMappedMemoryRanges(device, 1, &mappedMemoryRange);
@@ -151,106 +151,106 @@ namespace ProjectA {
 				ENGINE_ASSERT(result == VK_SUCCESS, "Could not flush mapped memory range ([]).", string_VkResult(result));*/
 			}
 
-			vkUnmapMemory(device, memoryBlock.memory);
+			vkUnmapMemory(device, memoryAllocation.memory);
 
-			memoryBlock.mappedRange = nullptr;
-			memoryBlock.mappedSuballocationCount = 0;
+			memoryAllocation.mappedRange = nullptr;
+			memoryAllocation.mappedSuballocationCount = 0;
 
 			return;
 		}
 
-		memoryBlock.mappedSuballocationCount -= 1;
+		memoryAllocation.mappedSuballocationCount -= 1;
 	}
 
-	void MemoryAllocator::freeSuballocation(VkDevice device, uint32 memoryBlockIndex) {
-		MemoryBlock& memoryBlock = memoryBlocks[memoryBlockIndex];
+	void MemoryAllocator::freeSuballocation(VkDevice device, uint32 memoryAllocationIndex) {
+		MemoryAllocation& memoryAllocation = memoryAllocations[memoryAllocationIndex];
 
-		if (memoryBlock.suballocationCount <= 1) {
-			ENGINE_DEBUG("Freeing memory block [].", memoryBlockIndex);
+		if (memoryAllocation.suballocationCount <= 1) {
+			ENGINE_DEBUG("Freeing memory allocation [].", memoryAllocationIndex);
 
-			vkFreeMemory(device, memoryBlock.memory, nullptr);
+			vkFreeMemory(device, memoryAllocation.memory, nullptr);
 
-			memoryBlock.suballocationCount = 0;
+			memoryAllocation.suballocationCount = 0;
 
-			// Reset corresponding memory block index.
+			// Reset corresponding memory allocation index.
 			for (uint32 i = 0; i < physicalDevice->memoryProperties.memoryTypeCount; i += 1) {
-				if (currentBufferMemoryBlockIndices[i] == memoryBlockIndex) {
-					currentBufferMemoryBlockIndices[i] = UNDEFINED_MEMORY_BLOCK_INDEX;
+				if (currentBufferMemoryAllocationIndices[i] == memoryAllocationIndex) {
+					currentBufferMemoryAllocationIndices[i] = UNDEFINED_MEMORY_ALLOCATION_INDEX;
 				}
 
-				if (currentImageMemoryBlockIndices[i] == memoryBlockIndex) {
-					currentImageMemoryBlockIndices[i] = UNDEFINED_MEMORY_BLOCK_INDEX;
+				if (currentImageMemoryAllocationIndices[i] == memoryAllocationIndex) {
+					currentImageMemoryAllocationIndices[i] = UNDEFINED_MEMORY_ALLOCATION_INDEX;
 				}
 			}
 
-			// TODO: Remove memory block from the list?
+			// TODO: Remove memory allocation from the list?
 
 			return;
 		}
 
-		memoryBlock.suballocationCount -= 1;
+		memoryAllocation.suballocationCount -= 1;
 
-		ENGINE_DEBUG("Freeing suballocation from memory block []. Suballocation count is now [].", memoryBlockIndex, memoryBlock.suballocationCount);
+		ENGINE_DEBUG("Freeing suballocation from memory allocation []. Suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
 	}
 
-	void MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryBlockIndices) {
-		const VkDeviceSize blockSize = std::max(size, DEFAULT_MEMORY_BLOCK_SIZE);
+	void MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices) {
+		const VkDeviceSize allocationSize = std::max(size, DEFAULT_MEMORY_ALLOCATION_SIZE);
 
-		const uint32 memoryBlockIndex = static_cast<uint32>(memoryBlocks.size());
+		const uint32 memoryAllocationIndex = static_cast<uint32>(memoryAllocations.size());
 
 		ENGINE_DEBUG(
 			"Creating new memory allocation [] of type [] and size []Mb.",
-			memoryBlockIndex,
+			memoryAllocationIndex,
 			string_VkMemoryPropertyFlags(physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex].propertyFlags),
-			static_cast<float32>(blockSize) / 1000000.0f
+			static_cast<float32>(allocationSize) / 1000000.0f
 		);
 
 		VkMemoryAllocateInfo memoryAllocateInfo{};
 		memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		memoryAllocateInfo.pNext = nullptr;
-		memoryAllocateInfo.allocationSize =	blockSize;
+		memoryAllocateInfo.allocationSize =	allocationSize;
 		memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
 
-		MemoryBlock memoryBlock{};
+		MemoryAllocation memoryAllocation{};
 
-		const VkResult result = vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &memoryBlock.memory);
+		const VkResult result = vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &memoryAllocation.memory);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan memory ([]).", string_VkResult(result));
 
-		memoryBlock.offset = 0;
-		memoryBlock.size = blockSize;
-		memoryBlock.memoryTypeIndex = memoryTypeIndex;
-		memoryBlock.suballocationCount = 0;
-		memoryBlock.mappedSuballocationCount = 0;
+		memoryAllocation.offset = 0;
+		memoryAllocation.size = allocationSize;
+		memoryAllocation.memoryTypeIndex = memoryTypeIndex;
+		memoryAllocation.suballocationCount = 0;
+		memoryAllocation.mappedSuballocationCount = 0;
 
-		memoryBlocks.emplace_back(memoryBlock);
+		memoryAllocations.emplace_back(memoryAllocation);
 
-		currentMemoryBlockIndices[memoryTypeIndex] = memoryBlockIndex;
+		currentMemoryAllocationIndices[memoryTypeIndex] = memoryAllocationIndex;
 	}
 
-	MemorySuballocation MemoryAllocator::suballocate(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryBlockIndices) {
-		uint32 currentMemoryBlockIndex = currentMemoryBlockIndices[memoryTypeIndex];
+	MemorySuballocation MemoryAllocator::suballocate(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices) {
+		uint32 currentMemoryAllocationIndex = currentMemoryAllocationIndices[memoryTypeIndex];
 
-		if (currentMemoryBlockIndex == UNDEFINED_MEMORY_BLOCK_INDEX) {
-			createAllocation(device, memoryTypeIndex, size, currentMemoryBlockIndices);
+		if (currentMemoryAllocationIndex == UNDEFINED_MEMORY_ALLOCATION_INDEX) {
+			createAllocation(device, memoryTypeIndex, size, currentMemoryAllocationIndices);
 		}
 
-		currentMemoryBlockIndex = currentMemoryBlockIndices[memoryTypeIndex];
-		MemoryBlock* currentMemoryBlock = &memoryBlocks[currentMemoryBlockIndex];
+		currentMemoryAllocationIndex = currentMemoryAllocationIndices[memoryTypeIndex];
+		MemoryAllocation* currentMemoryAllocation = &memoryAllocations[currentMemoryAllocationIndex];
 
-		// If the current memory block cannot fully hold this suballocation, close it and open a new block.
-		if (currentMemoryBlock->size - currentMemoryBlock->offset < size) {
-			ENGINE_DEBUG("Remaining block size is insufficient.");
+		// If the current memory allocation cannot fully hold this suballocation, close it and open a new one.
+		if (currentMemoryAllocation->size - currentMemoryAllocation->offset < size) {
+			ENGINE_DEBUG("Remaining allocation size is insufficient.");
 
-			createAllocation(device, memoryTypeIndex, size, currentMemoryBlockIndices);
+			createAllocation(device, memoryTypeIndex, size, currentMemoryAllocationIndices);
 
-			currentMemoryBlockIndex = currentMemoryBlockIndices[memoryTypeIndex];
-			currentMemoryBlock = &memoryBlocks[currentMemoryBlockIndex];
+			currentMemoryAllocationIndex = currentMemoryAllocationIndices[memoryTypeIndex];
+			currentMemoryAllocation = &memoryAllocations[currentMemoryAllocationIndex];
 		}
 
 		MemorySuballocation memorySuballocation{};
-		memorySuballocation.blockIndex = currentMemoryBlockIndex;
-		memorySuballocation.offset = currentMemoryBlock->offset;
+		memorySuballocation.allocationIndex = currentMemoryAllocationIndex;
+		memorySuballocation.offset = currentMemoryAllocation->offset;
 		memorySuballocation.size = size;
 
 		return memorySuballocation;
