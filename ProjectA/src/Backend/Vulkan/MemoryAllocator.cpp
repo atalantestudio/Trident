@@ -21,7 +21,7 @@ namespace ProjectA {
 		std::fill(currentImageMemoryAllocationIndices.begin(), currentImageMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
 
 		#ifdef BUILD_MODE_DEBUG
-			enumerateMemoryTypes();
+			// enumerateMemoryTypes();
 		#endif
 	}
 
@@ -47,8 +47,8 @@ namespace ProjectA {
 		}
 	#endif
 
-	uint32 MemoryAllocator::findMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) {
-		ENGINE_DEBUG("Desired memory type: []", string_VkMemoryPropertyFlags(memoryPropertyFlags));
+	uint32 MemoryAllocator::findSuitableMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) {
+		// ENGINE_DEBUG("Desired memory type: []", string_VkMemoryPropertyFlags(memoryPropertyFlags));
 
 		uint32 suitableMemoryTypeIndex = UNDEFINED_MEMORY_TYPE_INDEX;
 
@@ -63,8 +63,6 @@ namespace ProjectA {
 			if ((memoryType.propertyFlags & memoryPropertyFlags) == memoryPropertyFlags) {
 				suitableMemoryTypeIndex = memoryTypeIndex;
 
-				ENGINE_INFO("This memory type is suitable.");
-
 				// TODO: Continue searching for better types?
 				break;
 			}
@@ -73,54 +71,77 @@ namespace ProjectA {
 		return suitableMemoryTypeIndex;
 	}
 
-	MemorySuballocation MemoryAllocator::suballocateBuffer(VkDevice device, VkBuffer buffer, uint32 memoryTypeIndex, VkDeviceSize size) {
-		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, size, currentBufferMemoryAllocationIndices);
+	MemorySuballocation MemoryAllocator::suballocateBuffer(VkDevice device, VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
+		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentBufferMemoryAllocationIndices);
 
-		ENGINE_DEBUG("Suballocating buffer resource inside memory allocation (offset = [], size = []).", memorySuballocation.offset, memorySuballocation.size);
+		ENGINE_INFO(
+			"Creating new memory suballocation for buffer resource inside memory allocation [].\n"
+			"	Offset = []\n"
+			"	Size = []\n"
+			"	Alignment = []",
+			memorySuballocation.allocationIndex,
+			memorySuballocation.offset,
+			memorySuballocation.size,
+			memoryRequirements.alignment
+		);
 
 		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		const VkResult result = vkBindBufferMemory(device, buffer, memoryAllocation.memory, memoryAllocation.offset);
+		const VkResult result = vkBindBufferMemory(device, buffer, memoryAllocation.memory, memorySuballocation.offset);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Could not bind memory for Vulkan buffer ([]).", string_VkResult(result));
 
-		// Only advance the allocation offset once we are sure that the memory has been correctly bound to the buffer.
-		memoryAllocation.offset += size;
+		memoryAllocation.offset = memorySuballocation.offset + memorySuballocation.size;
 		memoryAllocation.suballocationCount += 1;
 
 		return memorySuballocation;
 	}
 
-	MemorySuballocation MemoryAllocator::suballocateImage(VkDevice device, VkImage image, uint32 memoryTypeIndex, VkDeviceSize size) {
-		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, size, currentImageMemoryAllocationIndices);
+	MemorySuballocation MemoryAllocator::suballocateImage(VkDevice device, VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
+		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentImageMemoryAllocationIndices);
 
-		ENGINE_DEBUG("Suballocating image resource inside memory allocation (offset = [], size = []).", memorySuballocation.offset, memorySuballocation.size);
+		ENGINE_INFO(
+			"Creating new memory suballocation for image resource inside memory allocation [].\n"
+			"	Offset = []\n"
+			"	Size = []\n"
+			"	Alignment = []",
+			memorySuballocation.allocationIndex,
+			memorySuballocation.offset,
+			memorySuballocation.size,
+			memoryRequirements.alignment
+		);
 
 		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		const VkResult result = vkBindImageMemory(device, image, memoryAllocation.memory, memoryAllocation.offset);
+		const VkResult result = vkBindImageMemory(device, image, memoryAllocation.memory, memorySuballocation.offset);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Could not bind memory for Vulkan image ([]).", string_VkResult(result));
 
-		// Only advance the allocation offset once we are sure that the memory has been correctly bound to the image.
-		memoryAllocation.offset += size;
+		memoryAllocation.offset = memorySuballocation.offset + memorySuballocation.size;
 		memoryAllocation.suballocationCount += 1;
 
 		return memorySuballocation;
 	}
 
-	void* MemoryAllocator::mapSuballocation(VkDevice device, const MemorySuballocation& memorySuballocation, VkDeviceSize size, VkDeviceSize offset) {
+	void* MemoryAllocator::mapSuballocation(VkDevice device, const MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size) {
 		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		ENGINE_ASSERT(offset <= memoryAllocation.offset, "The mapping offset is outside of the used range for the memory allocation.");
 		ENGINE_ASSERT(size > 0, "The mapping size must not be 0.");
-		ENGINE_ASSERT(offset + size <= memoryAllocation.offset, "The offsetted mapping size is larger than the size of the allocated memory allocation.");
+		ENGINE_ASSERT(offset <= memoryAllocation.offset, "The mapping offset is outside of the used range for the memory allocation.");
+		ENGINE_ASSERT(offset + size <= memoryAllocation.offset, "The offsetted mapping size is larger than the size of the memory allocation active range.");
 
 		if (memoryAllocation.mappedSuballocationCount == 0) {
-			// Map the whole allocation.
+			// TODO: For static allocations, only map the active suballocation range and not the whole memory block.
 			const VkResult result = vkMapMemory(device, memoryAllocation.memory, 0, memoryAllocation.size, 0, &memoryAllocation.mappedRange);
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Could not map Vulkan memory. ([])", string_VkResult(result));
+
+			ENGINE_INFO(
+				"Mapped range ([], []) of memory allocation [].",
+				0,
+				memoryAllocation.size,
+				memorySuballocation.allocationIndex
+			);
 		}
 
 		memoryAllocation.mappedSuballocationCount += 1;
@@ -153,6 +174,8 @@ namespace ProjectA {
 
 			vkUnmapMemory(device, memoryAllocation.memory);
 
+			ENGINE_INFO("Unmapped memory allocation [].", memoryAllocationIndex);
+
 			memoryAllocation.mappedRange = nullptr;
 			memoryAllocation.mappedSuballocationCount = 0;
 
@@ -166,8 +189,6 @@ namespace ProjectA {
 		MemoryAllocation& memoryAllocation = memoryAllocations[memoryAllocationIndex];
 
 		if (memoryAllocation.suballocationCount <= 1) {
-			ENGINE_DEBUG("Freeing memory allocation [].", memoryAllocationIndex);
-
 			vkFreeMemory(device, memoryAllocation.memory, nullptr);
 
 			memoryAllocation.suballocationCount = 0;
@@ -185,23 +206,28 @@ namespace ProjectA {
 
 			// TODO: Remove memory allocation from the list?
 
+			ENGINE_INFO("Freed memory allocation [].", memoryAllocationIndex);
+
 			return;
 		}
 
 		memoryAllocation.suballocationCount -= 1;
 
-		ENGINE_DEBUG("Freeing suballocation from memory allocation []. Suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
+		ENGINE_DEBUG("Freed suballocation from memory allocation []. The activ suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
 	}
 
-	void MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices) {
+	uint32 MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices) {
 		const VkDeviceSize allocationSize = std::max(size, DEFAULT_MEMORY_ALLOCATION_SIZE);
 
 		const uint32 memoryAllocationIndex = static_cast<uint32>(memoryAllocations.size());
 
-		ENGINE_DEBUG(
-			"Creating new memory allocation [] of type [] and size []Mb.",
+		ENGINE_INFO(
+			"Creating new memory allocation ([]).\n"
+			"	Property flags = []\n"
+			"	Size = [] ([]Mb)",
 			memoryAllocationIndex,
 			string_VkMemoryPropertyFlags(physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex].propertyFlags),
+			allocationSize,
 			static_cast<float32>(allocationSize) / 1000000.0f
 		);
 
@@ -221,36 +247,57 @@ namespace ProjectA {
 		memoryAllocation.size = allocationSize;
 		memoryAllocation.memoryTypeIndex = memoryTypeIndex;
 		memoryAllocation.suballocationCount = 0;
+		memoryAllocation.lastSuballocationAlignment = 0;
 		memoryAllocation.mappedSuballocationCount = 0;
 
 		memoryAllocations.emplace_back(memoryAllocation);
 
 		currentMemoryAllocationIndices[memoryTypeIndex] = memoryAllocationIndex;
+
+		return memoryAllocationIndex;
 	}
 
-	MemorySuballocation MemoryAllocator::suballocate(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices) {
+	MemorySuballocation MemoryAllocator::suballocate(VkDevice device, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, std::vector<uint32>& currentMemoryAllocationIndices) {
 		uint32 currentMemoryAllocationIndex = currentMemoryAllocationIndices[memoryTypeIndex];
 
+		const VkDeviceSize size = std::max(memoryRequirements.size, memoryRequirements.alignment);
+
 		if (currentMemoryAllocationIndex == UNDEFINED_MEMORY_ALLOCATION_INDEX) {
-			createAllocation(device, memoryTypeIndex, size, currentMemoryAllocationIndices);
+			currentMemoryAllocationIndex = createAllocation(device, memoryTypeIndex, size, currentMemoryAllocationIndices);
 		}
 
-		currentMemoryAllocationIndex = currentMemoryAllocationIndices[memoryTypeIndex];
 		MemoryAllocation* currentMemoryAllocation = &memoryAllocations[currentMemoryAllocationIndex];
 
+		VkDeviceSize offset = currentMemoryAllocation->offset;
+
+		const VkDeviceSize remainder = offset % memoryRequirements.alignment;
+
+		if (remainder != 0) {
+			// Ensure that the offset meets the suballocation's alignment criteria.
+			offset += remainder;
+		}
+
 		// If the current memory allocation cannot fully hold this suballocation, close it and open a new one.
-		if (currentMemoryAllocation->size - currentMemoryAllocation->offset < size) {
-			ENGINE_DEBUG("Remaining allocation size is insufficient.");
+		// In some cases the aligned offset can be larger than size of the allocation.
+		if (offset > currentMemoryAllocation->size || currentMemoryAllocation->size - offset < size) {
+			ENGINE_WARN(
+				"Remaining size in memory allocation [] ([]) is insufficient for suballocation with size [] and alignment [] (base size = []).",
+				currentMemoryAllocationIndex,
+				currentMemoryAllocation->size - offset,
+				size,
+				memoryRequirements.alignment,
+				memoryRequirements.size
+			);
 
-			createAllocation(device, memoryTypeIndex, size, currentMemoryAllocationIndices);
-
-			currentMemoryAllocationIndex = currentMemoryAllocationIndices[memoryTypeIndex];
+			currentMemoryAllocationIndex = createAllocation(device, memoryTypeIndex, size, currentMemoryAllocationIndices);
 			currentMemoryAllocation = &memoryAllocations[currentMemoryAllocationIndex];
+
+			offset = 0;
 		}
 
 		MemorySuballocation memorySuballocation{};
 		memorySuballocation.allocationIndex = currentMemoryAllocationIndex;
-		memorySuballocation.offset = currentMemoryAllocation->offset;
+		memorySuballocation.offset = offset;
 		memorySuballocation.size = size;
 
 		return memorySuballocation;

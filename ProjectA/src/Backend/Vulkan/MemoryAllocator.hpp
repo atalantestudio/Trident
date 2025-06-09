@@ -10,9 +10,20 @@ namespace ProjectA {
 		VkDeviceMemory memory;
 		VkDeviceSize offset;
 		VkDeviceSize size;
+
+		// Index of the memory type. Used with memory mapping.
 		uint32 memoryTypeIndex;
+
+		// Number of active suballocations.
 		uint32 suballocationCount;
+
+		// Alignment of the most recent suballocation in this allocation.
+		VkDeviceSize lastSuballocationAlignment;
+
+		// Number of suballocations in the mapped state.
 		uint32 mappedSuballocationCount;
+
+		// Cached mapped range for multiple mapped suballocations in the same allocation.
 		void* mappedRange;
 	};
 
@@ -33,25 +44,25 @@ namespace ProjectA {
 			#endif
 
 			// Finds a suitable memory type for the requirements, and returns its index.
-			static uint32 findMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags);
+			static uint32 findSuitableMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags);
 
-			static MemorySuballocation suballocateBuffer(VkDevice device, VkBuffer buffer, uint32 memoryTypeIndex, VkDeviceSize size);
+			static MemorySuballocation suballocateBuffer(VkDevice device, VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
 
-			static MemorySuballocation suballocateImage(VkDevice device, VkImage image, uint32 memoryTypeIndex, VkDeviceSize size);
+			static MemorySuballocation suballocateImage(VkDevice device, VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
 
-			static void* mapSuballocation(VkDevice device, const MemorySuballocation& memorySuballocation, VkDeviceSize size, VkDeviceSize offset);
+			static void* mapSuballocation(VkDevice device, const MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size);
 
 			static void unmapSuballocation(VkDevice device, uint32 memoryAllocationIndex);
 
 			static void freeSuballocation(VkDevice device, uint32 memoryAllocationIndex);
 
 		private:
-			// Creates a new memory allocation.
-			static void createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices);
+			// Creates a new memory allocation and returns its index.
+			static uint32 createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices);
 
 			// Creates and returns a suballocation from a memory allocation.
 			// If isBuffer is false, the suballocation is done on image memory.
-			static MemorySuballocation suballocate(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices);
+			static MemorySuballocation suballocate(VkDevice device, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, std::vector<uint32>& currentMemoryAllocationIndices);
 
 		private:
 			// Memory allocations have a default size of 16Mb.

@@ -30,25 +30,25 @@ namespace ProjectA {
 		vkGetBufferMemoryRequirements(device, object, &memoryRequirements);
 
 		VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(descriptor.memoryProperties);
-		uint32 memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
+		uint32 memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 
 		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
 			ENGINE_WARN("Failed to find DEVICE_LOCAL | HOST_VISIBLE memory for Vulkan image. Falling back to HOST_VISIBLE | HOST_COHERENT memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-			memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
+			memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 		}
 
 		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
 			ENGINE_WARN("Failed to find HOST_VISIBLE | HOST_COHERENT memory for Vulkan image. Falling back to DEVICE_LOCAL memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-			memoryTypeIndex = MemoryAllocator::findMemoryType(memoryRequirements, memoryPropertyFlags);
+			memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 		}
 
 		DEBUG_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX);
 
-		memorySuballocation = MemoryAllocator::suballocateBuffer(device, object, memoryTypeIndex, memoryRequirements.size);
+		memorySuballocation = MemoryAllocator::suballocateBuffer(device, object, memoryTypeIndex, memoryRequirements);
 	}
 
 	VulkanBuffer::~VulkanBuffer() {
@@ -64,6 +64,6 @@ namespace ProjectA {
 	}
 
 	void* VulkanBuffer::getMappedRange(uint64 offset, uint64 size) const {
-		return MemoryAllocator::mapSuballocation(device, memorySuballocation, size, offset);
+		return MemoryAllocator::mapSuballocation(device, memorySuballocation, offset, size);
 	}
 }
