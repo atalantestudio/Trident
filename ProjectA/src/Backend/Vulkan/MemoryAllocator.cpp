@@ -21,7 +21,8 @@ namespace ProjectA {
 		std::fill(currentImageMemoryAllocationIndices.begin(), currentImageMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
 
 		#ifdef BUILD_MODE_DEBUG
-			// enumerateMemoryTypes();
+			enumerateMemoryHeaps();
+			enumerateMemoryTypes();
 		#endif
 	}
 
@@ -30,26 +31,60 @@ namespace ProjectA {
 	}
 
 	#ifdef BUILD_MODE_DEBUG
+		void MemoryAllocator::enumerateMemoryHeaps() {
+			for (uint32 memoryHeapIndex = 0; memoryHeapIndex < physicalDevice->memoryProperties.memoryHeapCount; memoryHeapIndex += 1) {
+				const VkMemoryHeap& memoryHeap = physicalDevice->memoryProperties.memoryHeaps[memoryHeapIndex];
+
+				ENGINE_DEBUG(
+					"Memory heap []:\n"
+					"- Size: [] ([])\n"
+					"- Flags: []",
+					memoryHeapIndex,
+					memoryHeap.size,
+					formatSize(memoryHeap.size),
+					string_VkMemoryHeapFlags(memoryHeap.flags)
+				);
+			}
+		}
+
 		void MemoryAllocator::enumerateMemoryTypes() {
 			for (uint32 memoryTypeIndex = 0; memoryTypeIndex < physicalDevice->memoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
 				const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
-				const VkMemoryHeap& memoryHeap = physicalDevice->memoryProperties.memoryHeaps[memoryType.heapIndex];
 
 				ENGINE_DEBUG(
-					"Memory type []\n  Property flags: []\n  Heap index: []\n  Heap flags: []\n  Heap size: []",
+					"Memory type []:\n"
+					"- Property flags: []\n"
+					"- Heap: []",
 					memoryTypeIndex,
 					string_VkMemoryPropertyFlags(memoryType.propertyFlags),
-					memoryType.heapIndex,
-					string_VkMemoryHeapFlags(memoryHeap.flags),
-					memoryHeap.size
+					memoryType.heapIndex
 				);
 			}
+		}
+
+		std::string MemoryAllocator::formatSize(uint64 size) {
+			float64 decimalSize = static_cast<float64>(size);
+
+			if (size >= 1000000000000) {
+				// Tb.
+				return Logger::format("[]Tb", decimalSize / 1000000000000.0);
+			}
+
+			if (size >= 1000000000) {
+				// Gb.
+				return Logger::format("[]Gb", decimalSize / 1000000000.0);
+			}
+
+			if (size >= 1000000) {
+				// Mb.
+				return Logger::format("[]Mb", decimalSize / 1000000.0);
+			}
+
+			return std::to_string(decimalSize);
 		}
 	#endif
 
 	uint32 MemoryAllocator::findSuitableMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) {
-		// ENGINE_DEBUG("Desired memory type: []", string_VkMemoryPropertyFlags(memoryPropertyFlags));
-
 		uint32 suitableMemoryTypeIndex = UNDEFINED_MEMORY_TYPE_INDEX;
 
 		for (uint32 memoryTypeIndex = 0; memoryTypeIndex < physicalDevice->memoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
@@ -73,19 +108,22 @@ namespace ProjectA {
 
 	MemorySuballocation MemoryAllocator::suballocateBuffer(VkDevice device, VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
 		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentBufferMemoryAllocationIndices);
+		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
 		ENGINE_INFO(
-			"Creating new memory suballocation for buffer resource inside memory allocation [].\n"
+			"Creating new memory suballocation ([]) for buffer resource inside memory allocation [].\n"
 			"	Offset = []\n"
-			"	Size = []\n"
+			"	Required size = []\n"
+			"	Size = [] ([])\n"
 			"	Alignment = []",
+			memoryAllocation.suballocationCount,
 			memorySuballocation.allocationIndex,
 			memorySuballocation.offset,
+			memoryRequirements.size,
 			memorySuballocation.size,
+			formatSize(memorySuballocation.size),
 			memoryRequirements.alignment
 		);
-
-		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
 		const VkResult result = vkBindBufferMemory(device, buffer, memoryAllocation.memory, memorySuballocation.offset);
 
@@ -99,19 +137,22 @@ namespace ProjectA {
 
 	MemorySuballocation MemoryAllocator::suballocateImage(VkDevice device, VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
 		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentImageMemoryAllocationIndices);
+		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
 		ENGINE_INFO(
-			"Creating new memory suballocation for image resource inside memory allocation [].\n"
+			"Creating new memory suballocation ([]) for image resource inside memory allocation [].\n"
 			"	Offset = []\n"
-			"	Size = []\n"
+			"	Required size = []\n"
+			"	Size = [] ([])\n"
 			"	Alignment = []",
+			memoryAllocation.suballocationCount,
 			memorySuballocation.allocationIndex,
 			memorySuballocation.offset,
+			memoryRequirements.size,
 			memorySuballocation.size,
+			formatSize(memorySuballocation.size),
 			memoryRequirements.alignment
 		);
-
-		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
 		const VkResult result = vkBindImageMemory(device, image, memoryAllocation.memory, memorySuballocation.offset);
 
@@ -213,7 +254,7 @@ namespace ProjectA {
 
 		memoryAllocation.suballocationCount -= 1;
 
-		ENGINE_DEBUG("Freed suballocation from memory allocation []. The activ suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
+		ENGINE_INFO("Freed suballocation from memory allocation []. The active suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
 	}
 
 	uint32 MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices) {
@@ -224,11 +265,11 @@ namespace ProjectA {
 		ENGINE_INFO(
 			"Creating new memory allocation ([]).\n"
 			"	Property flags = []\n"
-			"	Size = [] ([]Mb)",
+			"	Size = [] ([])",
 			memoryAllocationIndex,
 			string_VkMemoryPropertyFlags(physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex].propertyFlags),
 			allocationSize,
-			static_cast<float32>(allocationSize) / 1000000.0f
+			formatSize(allocationSize)
 		);
 
 		VkMemoryAllocateInfo memoryAllocateInfo{};
@@ -274,7 +315,7 @@ namespace ProjectA {
 
 		if (remainder != 0) {
 			// Ensure that the offset meets the suballocation's alignment criteria.
-			offset += remainder;
+			offset += memoryRequirements.alignment - remainder;
 		}
 
 		// If the current memory allocation cannot fully hold this suballocation, close it and open a new one.

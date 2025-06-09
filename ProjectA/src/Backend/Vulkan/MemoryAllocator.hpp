@@ -40,7 +40,11 @@ namespace ProjectA {
 			static void destroy();
 
 			#ifdef BUILD_MODE_DEBUG
+				static void enumerateMemoryHeaps();
+
 				static void enumerateMemoryTypes();
+
+				static std::string formatSize(uint64 size);
 			#endif
 
 			// Finds a suitable memory type for the requirements, and returns its index.
