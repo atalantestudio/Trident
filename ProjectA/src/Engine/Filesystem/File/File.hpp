@@ -9,11 +9,9 @@ namespace ProjectA {
 		std::string absolutePath;
 
 		// File size, in bytes.
-		uint64 size = 0;
+		uint64 size;
 
-		// TODO: Remove this member. No need to keep this data when we have also the decompressed data.
-		// This member should be file-specific.
 		// Compressed file data.
-		std::vector<uint8> rawData;
+		sequence<uint8> rawData;
 	};
 }

@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Engine/Filesystem/File/File.hpp"
-
 namespace ProjectA {
-	struct PNGFile : public File {
+	struct PNGFile {
 		// Width of the image in pixels.
 		// Zero is an invalid value.
 		uint32 width;
@@ -32,7 +30,7 @@ namespace ProjectA {
 		// Two values are defined: 0 (no interlace) or 1 (Adam7 interlace).
 		uint8 interlaceMethod;
 
-		// Decompressed data with PNG filters applied.
-		std::vector<uint8> data;
+		// Decompressed and filtered data.
+		sequence<uint8> data;
 	};
 }

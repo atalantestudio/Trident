@@ -3,7 +3,7 @@
 #include "Engine/Filesystem/File/File.hpp"
 
 namespace ProjectA {
-	class PropertyFile final : public File {
+	class PropertyFile final {
 		private:
 			template<typename T>
 			static T parseValueString(const std::string& valueString, std::string_view propertyName) {
@@ -28,17 +28,11 @@ namespace ProjectA {
 		public:
 			PropertyFile(std::string_view path) :
 				stream(path.data(), std::ios::in | std::ios::out | std::ios::ate)
+			{}
+
+			explicit PropertyFile(std::string_view path, std::string_view data) :
+				stream(path.data(), std::ios::out)
 			{
-				const std::filesystem::path absolutePath = std::filesystem::absolute(path);
-
-				name = absolutePath.filename().string();
-				this->absolutePath = absolutePath.string();
-				size = stream.tellg();
-			}
-
-			explicit PropertyFile(std::string_view path, std::string_view data) {
-				std::ofstream stream(path.data(), std::ios::out);
-
 				DEBUG_ASSERT(stream.is_open());
 
 				stream << data;

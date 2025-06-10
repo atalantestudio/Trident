@@ -176,12 +176,17 @@ namespace ProjectA {
 		uint16 numOfLongHorMetrics;
 	};
 
-	struct TTFFile : public File {
+	struct TTFFile {
 		std::unordered_map<uint16, uint32> unicodeMap;
+
 		std::vector<Glyph> glyphs;
+
 		sequence<longHorMetric> hMetrics;
+
 		sequence<FWord> leftSideBearings;
+
 		maxp maxp;
+
 		hhea hhea;
 	};
 }

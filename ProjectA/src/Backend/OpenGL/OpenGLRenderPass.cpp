@@ -60,10 +60,10 @@ namespace ProjectA {
 	}
 
 	GLuint OpenGLRenderPass::createScreenProgram() {
-		const sequence<uint8> screenVertexShaderModuleCode = Filesystem::loadByteBuffer("../ProjectA/src/Asset/Shader/Screen.vert");
+		const sequence<uint8> screenVertexShaderModuleCode = Filesystem::openBuffer("../ProjectA/src/Asset/Shader/Screen.vert");
 		const OpenGLShaderModule screenVertexShaderModule(screenVertexShaderModuleCode, ShaderStage::VERTEX);
 
-		const sequence<uint8> screenFragmentShaderModuleCode = Filesystem::loadByteBuffer("../ProjectA/src/Asset/Shader/Screen.frag");
+		const sequence<uint8> screenFragmentShaderModuleCode = Filesystem::openBuffer("../ProjectA/src/Asset/Shader/Screen.frag");
 		const OpenGLShaderModule screenFragmentShaderModule(screenFragmentShaderModuleCode, ShaderStage::FRAGMENT);
 
 		const GLuint screenProgram = glCreateProgram();

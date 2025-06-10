@@ -11,12 +11,10 @@ namespace ProjectA {
 		return getProjectRootDirectory().filename();
 	}
 
-	sequence<uint8> Filesystem::loadByteBuffer(std::string_view path) {
-		std::ifstream stream(path.data(), std::ios::binary);
+	sequence<uint8> Filesystem::openBuffer(std::string_view path) {
+		std::ifstream stream(path.data(), std::ios::ate | std::ios::binary);
 
 		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
-
-		stream.seekg(0, std::ios::end);
 
 		const std::streampos count = stream.tellg();
 

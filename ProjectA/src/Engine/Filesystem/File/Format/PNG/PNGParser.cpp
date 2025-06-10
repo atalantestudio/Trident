@@ -1,6 +1,7 @@
 #include "pch.hpp"
 
 #include "Engine/Compression/HuffmanCodeDictionary.hpp"
+#include "Engine/Filesystem/File/File.hpp"
 #include "Engine/Filesystem/File/Format/PNG/FilterType.hpp"
 #include "Engine/Filesystem/File/PNGFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -159,15 +160,11 @@ namespace ProjectA {
 	PNGFile Filesystem::openTemporary(std::string_view path) {
 		const File file = openTemporary<File>(path);
 
-		ByteStream stream(file.rawData.data(), file.size);
+		ByteStream stream(file.rawData, file.size);
 
 		readSignature(stream);
 
 		PNGFile pngFile;
-		pngFile.name = file.name;
-		pngFile.absolutePath = file.absolutePath;
-		pngFile.size = file.size;
-		pngFile.rawData = file.rawData;
 
 		std::vector<uint8> compressedData;
 
@@ -181,7 +178,7 @@ namespace ProjectA {
 
 		const std::vector<uint8> unfilteredData = bitStream.inflate(finalSize);
 
-		pngFile.data.resize(pngFile.width * pngFile.height * 4);
+		pngFile.data = sequence<uint8>(pngFile.width * pngFile.height * 4);
 
 		const uint8* source = &unfilteredData[0];
 		uint8* destination = &pngFile.data[0];

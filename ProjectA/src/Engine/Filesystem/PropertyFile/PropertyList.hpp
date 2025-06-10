@@ -3,14 +3,21 @@
 #include "Engine/Renderer/GraphicsAPI.hpp"
 
 namespace ProjectA {
+	// The properties from this list can be edited in the project's property file (.tpr).
+	// Values are used when initializating the application.
+	// The property file won't be automatically updated when a setting corresponding to a property is changed.
+	// 
+	// NOTE: Property values are not guaranteed to be used.
+	// If a value is either invalid or not supported at runtime,
+	// the engine will fall-back to an internal default without modifying the property file.
 	struct PropertyList {
-		// The graphics API to create an adapter for.
+		// Graphics API to use.
 		GraphicsAPI GraphicsAPI;
 
-		// The width of the window's client area.
+		// Width of the window's client area, in pixels.
 		uint32 WindowWidth;
 
-		// The height of the window's client area.
+		// Height of the window's client area, in pixels.
 		uint32 WindowHeight;
 
 		// Whether to enable V-Sync (vertical synchronization).

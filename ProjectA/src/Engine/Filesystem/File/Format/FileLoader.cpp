@@ -22,9 +22,9 @@ namespace ProjectA {
 
 		stream.seekg(0, std::ios::beg);
 
-		file.rawData.resize(file.size);
+		file.rawData = sequence<uint8>(file.size);
 
-		stream.read(static_cast<char*>(static_cast<void*>(file.rawData.data())), file.size);
+		stream.read(static_cast<char*>(static_cast<void*>(file.rawData)), file.size);
 		stream.close();
 
 		return file;

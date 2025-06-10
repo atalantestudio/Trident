@@ -11,7 +11,7 @@ namespace ProjectA {
 
 			// Returns the data of the file at the provided path as a byte sequence.
 			// `path` is relative to the working directory.
-			static sequence<uint8> loadByteBuffer(std::string_view path);
+			static sequence<uint8> openBuffer(std::string_view path);
 
 			// Opens a file for temporary reading or writing.
 			// `path` is relative to the working directory.

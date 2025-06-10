@@ -454,12 +454,8 @@ namespace ProjectA {
 		const File baseFile = openTemporary<File>(path);
 
 		TTFFile file;
-		file.name = baseFile.name;
-		file.absolutePath = baseFile.absolutePath;
-		file.size = baseFile.size;
-		file.rawData = baseFile.rawData;
 
-		ByteStream stream(baseFile.rawData.data(), baseFile.rawData.size());
+		ByteStream stream(baseFile.rawData, baseFile.rawData.count);
 
 		// Read offset subtable.
 		OffsetSubtable offsetSubtable{};

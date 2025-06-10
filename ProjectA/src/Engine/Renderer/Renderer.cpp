@@ -172,7 +172,7 @@ namespace ProjectA {
 	ref<ShaderModule> Renderer::loadShaderModule(std::string_view path, const ShaderModuleDescriptor& descriptor) {
 		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
 
-		const sequence<uint8> code = Filesystem::loadByteBuffer(path);
+		const sequence<uint8> code = Filesystem::openBuffer(path);
 
 		return adapter->createShaderModule(code, descriptor);
 	}

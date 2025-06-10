@@ -1,6 +1,7 @@
 #pragma once
 
 namespace ProjectA {
+	// TODO: Use.
 	enum class OpenMode : uint8 {
 		READ = BIT(0),
 		WRITE = BIT(1),
