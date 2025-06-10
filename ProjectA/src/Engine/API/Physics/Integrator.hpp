@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class Integrator {
 		public:
-			static void integrate(Scene2D& scene, float32 fixedDeltaTime, GJK2DResult* gjkResult = nullptr);
+			static void integrate(Scene2D& scene, GJK2DResult* gjkResult = nullptr);
 
 		private:
 			#ifdef BUILD_MODE_DEBUG
