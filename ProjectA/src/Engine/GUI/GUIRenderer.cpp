@@ -10,19 +10,21 @@ namespace ProjectA {
 
 		ColorAttachment colorAttachment{};
 		colorAttachment.format = surface->getFormat();
-		colorAttachment.sampleCount = 4;
+		colorAttachment.sampleCount = 1;
+		// colorAttachment.sampleCount = 4;
 		colorAttachment.loadOperation = LoadOperation::CLEAR;
 		colorAttachment.storeOperation = StoreOperation::STORE;
 
 		RenderPassDescriptor renderPassDescriptor;
 		renderPassDescriptor.colorAttachments = {colorAttachment};
-		renderPassDescriptor.resolve = true;
+		renderPassDescriptor.resolve = false;
+		// renderPassDescriptor.resolve = true;
 		renderPassDescriptor.depthStencil = false;
 		renderPassDescriptor.presentAttachmentIndex = 0;
 
 		renderPass = createRenderPass(renderPassDescriptor);
 
-		updateColorAttachment();
+		// updateColorAttachment();
 
 		const ref<Swapchain>& swapchain = getSwapchain();
 
@@ -213,7 +215,8 @@ namespace ProjectA {
 		glyphMapDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 		glyphMapDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
 		glyphMapDescriptorSetLayoutBinding.imageViews = {imageViews[1]};
-		glyphMapDescriptorSetLayoutBinding.samplers = {bilinearSampler};
+		glyphMapDescriptorSetLayoutBinding.samplers = {sampler};
+		// glyphMapDescriptorSetLayoutBinding.samplers = {bilinearSampler};
 
 		DescriptorSetLayout descriptorSetLayout;
 		descriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, imageDescriptorSetLayoutBinding};
@@ -473,7 +476,7 @@ namespace ProjectA {
 
 	void GUIRenderer::resize(WindowResizeEvent& event) {
 		updateCamera();
-		updateColorAttachment();
+		// updateColorAttachment();
 
 		const ref<Swapchain>& swapchain = getSwapchain();
 

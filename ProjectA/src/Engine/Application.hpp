@@ -25,6 +25,8 @@ namespace ProjectA {
 
 			virtual ~Application();
 
+			static const Window& getWindow();
+
 			// Returns the current frame time, in seconds.
 			static float64 getCurrentFrameTime();
 

@@ -164,12 +164,12 @@ namespace ProjectA {
 			static_cast<sint16>(-padding.height),
 		};
 
-		GUIFloatingQuad(container.origin, container.size, defaultImageIndex, color);
+		registerQuadComponent(container.origin, container.size, defaultImageIndex, color);
 
 		return container;
 	}
 
-	void GUILayer::GUIFloatingQuad(GUISize origin, GUISize size, ImageID imageId, const vec4<float32>& color) {
+	void GUILayer::registerQuadComponent(GUISize origin, GUISize size, ImageID imageId, const vec4<float32>& color) {
 		const GUISize fixedSize = computeFixedSize(size);
 		const vec2<float32> fixedSizeFloat = {
 			static_cast<float32>(fixedSize[0]),
@@ -190,11 +190,122 @@ namespace ProjectA {
 	}
 
 	void GUILayer::GUIQuad(GUISize size, ImageID imageId, const vec4<float32>& color) {
-		GUIFloatingQuad({componentOrigin[0], componentOrigin[1]}, size, imageId, color);
+		registerQuadComponent({componentOrigin[0], componentOrigin[1]}, size, imageId, color);
 
 		const GUISize fixedSize = computeFixedSize(size);
 
 		componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
+	}
+
+	void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
+		const float32 lineHeight = static_cast<float32>(defaultFont->getLineHeight());
+
+		float32 positionX = componentOrigin[0];
+		float32 positionY = componentOrigin[1];
+
+		float32 width = 0;
+		const float32 height = textStyle.fontSize;
+
+		for (const char glyph : string) {
+			const uint16 codePoint = static_cast<uint16>(glyph);
+			const TrueTypeGlyph& glyph = (*defaultFont)[codePoint];
+			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
+
+			if (!glyph.invisible) {
+				// For a line height (ascent - descent) of 1210 FUnits,
+				// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
+				// The width should be 62.13px.
+				// TODO: float32 lyah::ceil(float32)
+				const float32 width = glyph.width / lineHeight * textStyle.fontSize;
+				const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * textStyle.fontSize;
+
+				const vec2<float32> position = {positionX + leftSideBearing, positionY};
+				const vec2<float32> size = {width, textStyle.fontSize};
+				const mat3x3<float32> transform = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
+
+				const vec2<float32> uvStart = {glyph.minCoordinateX, glyph.minCoordinateY};
+				const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
+				const mat3x3<float32> imageTransform = mat3x3<float32>::scaling(uvEnd - uvStart) * mat3x3<float32>::translation(uvStart);
+
+				renderer.registerGlyphSubcomponent(transform, imageTransform, defaultFontImageIndex, textStyle);
+			}
+
+			positionX += advanceWidth;
+			width += advanceWidth;
+		}
+
+		const GUISize fixedSize = {static_cast<sint16>(width), static_cast<sint16>(height)};
+
+		componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
+	}
+
+	bool GUILayer::GUIButton(const std::string& string, const ButtonStyle& buttonStyle) {
+		// 1. Calculate the minimum size that fully encloses the text.
+		GUISize size;
+
+		size.width = 0;
+		size.height = static_cast<sint16>(buttonStyle.textStyle->fontSize);
+
+		for (const char glyph : string) {
+			const uint16 codePoint = static_cast<uint16>(glyph);
+			const TrueTypeGlyph& glyph = (*defaultFont)[codePoint];
+			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * buttonStyle.textStyle->fontSize);
+
+			size.width += static_cast<sint16>(advanceWidth);
+		}
+
+		// 2. Register a quad having the same size.
+		registerQuadComponent({componentOrigin[0], componentOrigin[1]}, size, defaultImageIndex, {0.5f, 0.5f, 0.5f, 1.0f});
+
+		// 3. Register the text on top of it.
+		{
+			const float32 lineHeight = static_cast<float32>(defaultFont->getLineHeight());
+
+			float32 positionX = componentOrigin[0];
+			float32 positionY = componentOrigin[1];
+
+			for (const char glyph : string) {
+				const uint16 codePoint = static_cast<uint16>(glyph);
+				const TrueTypeGlyph& glyph = (*defaultFont)[codePoint];
+				const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * buttonStyle.textStyle->fontSize);
+
+				if (!glyph.invisible) {
+					// For a line height (ascent - descent) of 1210 FUnits,
+					// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
+					// The width should be 62.13px.
+					// TODO: float32 lyah::ceil(float32)
+					const float32 width = glyph.width / lineHeight * buttonStyle.textStyle->fontSize;
+					const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * buttonStyle.textStyle->fontSize;
+
+					const vec2<float32> position = {positionX + leftSideBearing, positionY};
+					const vec2<float32> size = {width, buttonStyle.textStyle->fontSize};
+					const mat3x3<float32> transform = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
+
+					const vec2<float32> uvStart = {glyph.minCoordinateX, glyph.minCoordinateY};
+					const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
+					const mat3x3<float32> imageTransform = mat3x3<float32>::scaling(uvEnd - uvStart) * mat3x3<float32>::translation(uvStart);
+
+					renderer.registerGlyphSubcomponent(transform, imageTransform, defaultFontImageIndex, *buttonStyle.textStyle);
+				}
+
+				positionX += advanceWidth;
+			}
+		}
+
+		bool hovered = false;
+
+		if (intersects(
+			{componentOrigin[0], componentOrigin[1]},
+			size,
+			{static_cast<sint16>(Application::getWindow().getMousePosition()[0]), static_cast<sint16>(Application::getWindow().getMousePosition()[1])}
+		)) {
+			hovered = true;
+		}
+
+		// 4. Advance the component origin by the size (towards the current layout direction).
+		componentOrigin[layoutDirection] += size[layoutDirection] + layoutSpacing;
+
+		return hovered;
 	}
 
 	void GUILayer::popContainer(GUIContainer& container) {
@@ -217,6 +328,15 @@ namespace ProjectA {
 		// Set the current container sizes to the parent container sizes.
 		currentContainerSize = container.parentSize;
 		currentContainerInnerSize = container.parentInnerSize;
+	}
+
+	bool GUILayer::intersects(GUISize origin, GUISize size, GUISize point) {
+		return (
+			point.width >= origin.width &&
+			point.width < origin.width + size.width &&
+			point.height >= origin.height &&
+			point.height < origin.height + size.height
+		);
 	}
 
 	GUISize GUILayer::computeFixedSize(GUISize size) const {

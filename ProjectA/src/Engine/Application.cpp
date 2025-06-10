@@ -178,6 +178,10 @@ namespace ProjectA {
 		delete propertyFile;
 	}
 
+	const Window& Application::getWindow() {
+		return *instance->window;
+	}
+
 	float64 Application::getCurrentFrameTime() {
 		return frameTime;
 	}

@@ -2,8 +2,8 @@
 
 #include "Engine/API/Event/WindowEvent.hpp"
 #include "Engine/ECS/Component/GUIComponent.hpp"
+#include "Engine/GUI/ComponentStyle/ButtonStyle.hpp"
 #include "Engine/ECS/ECS.hpp"
-#include "Engine/GUI/TextStyle.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {

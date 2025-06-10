@@ -16,11 +16,12 @@ layout(set = 0, binding = 1) uniform sampler2D glyphMapSampler;
 layout(location = 0) out vec4 color;
 
 void main() {
-	float value = smoothstep(
+	/*float value = smoothstep(
 		ALPHA_THRESHOLD - SMOOTHNESS,
 		ALPHA_THRESHOLD + SMOOTHNESS,
 		texture(glyphMapSampler, vertexOutput.imageCoordinate.xy).r
-	);
+	);*/
+	float value = texture(glyphMapSampler, vertexOutput.imageCoordinate.xy).r;
 
 	const float outlineMin0 = 0.05;
 	const float outlineMin1 = 0.1;
@@ -30,7 +31,7 @@ void main() {
 	color = vertexOutput.color * value;
 	//color.a = float(value >= 0.5);
 
-	if (value > outlineMin0 && value <= outlineMax1) {
+	/*if (value > outlineMin0 && value <= outlineMax1) {
 		float outlineFactor = 1.0;
 
 		if (value <= outlineMin1) {
@@ -51,5 +52,5 @@ void main() {
 
 	const vec4 dropShadowColor = vec4(vec3(0.4), 1.0);
 
-	color = mix(dropShadowColor * dropShadow, color, color.a);
+	color = mix(dropShadowColor * dropShadow, color, color.a);*/
 }

@@ -83,48 +83,9 @@ namespace ProjectA {
 			void GUIQuad(GUISize size, const vec4<float32>& color);
 			void GUIQuad(GUISize size, ImageID imageId, const vec4<float32>& color = {1.0f, 1.0f, 1.0f, 1.0f});
 
-			template<typename... Argument>
-			void GUIText(const std::string& string, const TextStyle& textStyle) {
-				const float32 lineHeight = static_cast<float32>(defaultFont->getLineHeight());
+			void GUIText(const std::string& string, const TextStyle& textStyle);
 
-				float32 positionX = componentOrigin[0];
-				float32 positionY = componentOrigin[1];
-
-				float32 width = 0;
-				const float32 height = textStyle.fontSize;
-
-				for (const char glyph : string) {
-					const uint16 codePoint = static_cast<uint16>(glyph);
-					const TrueTypeGlyph& glyph = (*defaultFont)[codePoint];
-					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
-
-					if (!glyph.invisible) {
-						// For a line height (ascent - descent) of 1210 FUnits,
-						// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
-						// The width should be 62.13px.
-						// TODO: float32 lyah::ceil(float32)
-						const float32 width = glyph.width / lineHeight * textStyle.fontSize;
-						const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * textStyle.fontSize;
-
-						const vec2<float32> position = {positionX + leftSideBearing, positionY};
-						const vec2<float32> size = {width, textStyle.fontSize};
-						const mat3x3<float32> transform = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
-
-						const vec2<float32> uvStart = {glyph.minCoordinateX, glyph.minCoordinateY};
-						const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
-						const mat3x3<float32> imageTransform = mat3x3<float32>::scaling(uvEnd - uvStart) * mat3x3<float32>::translation(uvStart);
-
-						renderer.registerGlyphSubcomponent(transform, imageTransform, defaultFontImageIndex, textStyle);
-					}
-
-					positionX += advanceWidth;
-					width += advanceWidth;
-				}
-
-				const GUISize fixedSize = {static_cast<sint16>(width), static_cast<sint16>(height)};
-
-				componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
-			}
+			bool GUIButton(const std::string& string, const ButtonStyle& buttonStyle);
 
 			void popContainer(GUIContainer& container);
 
@@ -133,9 +94,11 @@ namespace ProjectA {
 
 			// Renders a colored quad without moving the origin.
 			// origin is the top-left corner of the quad.
-			void GUIFloatingQuad(GUISize origin, GUISize size, ImageID imageId, const vec4<float32>& color);
+			void registerQuadComponent(GUISize origin, GUISize size, ImageID imageId, const vec4<float32>& color);
 
 			GUISize computeFixedSize(GUISize size) const;
+
+			static bool intersects(GUISize origin, GUISize size, GUISize point);
 
 			bool onWindowResize(WindowResizeEvent& event);
 
