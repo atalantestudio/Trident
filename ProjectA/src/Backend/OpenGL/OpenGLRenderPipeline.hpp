@@ -17,6 +17,8 @@ namespace ProjectA {
 			const OpenGLPipelineLayout& layout;
 
 			const GLuint program;
+			GLuint vertexArray;
+
 			const GLenum primitiveTopology;
 			const GLenum frontFace;
 			const GLenum cullMode;

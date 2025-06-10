@@ -77,14 +77,13 @@ namespace ProjectA {
 
 		Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, size);
 
-		// Image coordinates are reversed manually.
-		vertexMappedRange[0].vertex = {0.0f, 0.0f, 1.0f, 0.0f};
+		vertexMappedRange[0].vertex = {0.0f, 0.0f};
 		vertexMappedRange[0].imageCoordinate = {0.0f, 0.0f};
-		vertexMappedRange[1].vertex = {1.0f, 0.0f, 1.0f, 0.0f};
+		vertexMappedRange[1].vertex = {1.0f, 0.0f};
 		vertexMappedRange[1].imageCoordinate = {1.0f, 0.0f};
-		vertexMappedRange[2].vertex = {1.0f, 1.0f, 1.0f, 0.0f};
+		vertexMappedRange[2].vertex = {1.0f, 1.0f};
 		vertexMappedRange[2].imageCoordinate = {1.0f, 1.0f};
-		vertexMappedRange[3].vertex = {0.0f, 1.0f, 1.0f, 0.0f};
+		vertexMappedRange[3].vertex = {0.0f, 1.0f};
 		vertexMappedRange[3].imageCoordinate = {0.0f, 1.0f};
 
 		vertexStagingBuffer->unmap();
@@ -225,10 +224,7 @@ namespace ProjectA {
 		subcomponentPipelineLayout = createPipelineLayout(subcomponentPipelineLayoutDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-
-		// TODO: Remove padding.
-		vertexInputBinding.registerAttribute<vec4<float32>>();
-
+		vertexInputBinding.registerAttribute<svec2<float32>>();
 		vertexInputBinding.registerAttribute<svec2<float32>>();
 
 		VertexInputBinding subcomponentInputBinding(InputRate::INSTANCE);
@@ -454,12 +450,11 @@ namespace ProjectA {
 		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 
-		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
-		commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-
 		if (subcomponentCount > 0) {
 			commandEncoder->bindRenderPipeline(subcomponentRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();
+			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(Subcomponent));
 			commandEncoder->drawIndexed(6, subcomponentCount, 0);
 		}
@@ -467,6 +462,8 @@ namespace ProjectA {
 		if (glyphSubcomponentCount > 0) {
 			commandEncoder->bindRenderPipeline(glyphSubcomponentRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();
+			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GlyphSubcomponent));
 			commandEncoder->drawIndexed(6, glyphSubcomponentCount, 0);
 		}

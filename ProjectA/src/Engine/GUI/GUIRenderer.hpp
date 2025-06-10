@@ -43,9 +43,7 @@ namespace ProjectA {
 
 		private:
 			struct Vertex {
-				// TODO: Remove padding.
-				vec4<float32> vertex;
-
+				svec2<float32> vertex;
 				svec2<float32> imageCoordinate;
 			};
 

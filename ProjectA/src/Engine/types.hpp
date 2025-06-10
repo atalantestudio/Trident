@@ -20,14 +20,13 @@ namespace ProjectA {
 	using vec = lyah::vec<C, T>;
 
 	template<typename T>
-	using vec2 = lyah::vec2<T>;
-
-	// TODO: Specify alignment.
-	template<typename T>
-	using vec3 = lyah::vec3<T>;
+	using vec2 alignas(2 * sizeof(T)) = lyah::vec2<T>;
 
 	template<typename T>
-	using vec4 = lyah::vec4<T>;
+	using vec3 alignas(4 * sizeof(T)) = lyah::vec3<T>;
+
+	template<typename T>
+	using vec4 alignas(4 * sizeof(T)) = lyah::vec4<T>;
 
 	template<std::size_t M, std::size_t N, typename T>
 	using mat = lyah::mat<M, N, T>;
@@ -35,7 +34,6 @@ namespace ProjectA {
 	template<typename T>
 	using mat2x2 = lyah::mat2x2<T>;
 
-	// TODO: Specify alignment.
 	template<typename T>
 	using mat3x3 = lyah::mat3x3<T>;
 
@@ -43,7 +41,7 @@ namespace ProjectA {
 	using mat4x4 = lyah::mat4x4<T>;
 
 	template<typename T>
-	using quat = lyah::quat<T>;
+	using quat alignas(4 * sizeof(T)) = lyah::quat<T>;
 
 	template<typename T>
 	using ref = std::shared_ptr<T>;

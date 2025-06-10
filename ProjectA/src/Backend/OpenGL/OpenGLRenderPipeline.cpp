@@ -59,6 +59,9 @@ namespace ProjectA {
 		glDetachShader(program, vertexShaderModule->object);
 		glDetachShader(program, fragmentShaderModule->object);
 
+		glCreateVertexArrays(1, &vertexArray);
+		glBindVertexArray(vertexArray);
+
 		GLuint attribindex = 0;
 
 		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.count; vertexInputBindingIndex += 1) {
@@ -68,11 +71,11 @@ namespace ProjectA {
 			for (const VertexInputAttribute& attribute : attributes) {
 				const GLenum type = getGlType(attribute.type);
 				const GLint size = getGlSize(attribute.type);
-				const GLvoid* offset = (const GLvoid*) static_cast<uint64>(attribute.offset);
+				const GLuint relativeoffset = attribute.offset;
 
 				switch (type) {
 					case GL_FLOAT:
-						glVertexAttribFormat(attribindex, size, type, GL_FALSE, attribute.offset);
+						glVertexAttribFormat(attribindex, size, type, GL_FALSE, relativeoffset);
 
 						break;
 					case GL_BYTE:
@@ -81,11 +84,11 @@ namespace ProjectA {
 					case GL_UNSIGNED_SHORT:
 					case GL_INT:
 					case GL_UNSIGNED_INT:
-						glVertexAttribIFormat(attribindex, size, type, attribute.offset);
+						glVertexAttribIFormat(attribindex, size, type, relativeoffset);
 
 						break;
 					case GL_DOUBLE:
-						glVertexAttribLFormat(attribindex, size, type, attribute.offset);
+						glVertexAttribLFormat(attribindex, size, type, relativeoffset);
 
 						break;
 					default:
@@ -103,6 +106,8 @@ namespace ProjectA {
 			}
 		}
 
+		glBindVertexArray(0);
+
 		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.size(); colorBlendAttachmentIndex += 1) {
 			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
 
@@ -116,6 +121,9 @@ namespace ProjectA {
 
 	OpenGLRenderPipeline::~OpenGLRenderPipeline() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		glBindVertexArray(0);
+		glDeleteVertexArrays(1, &vertexArray);
 
 		glDeleteProgram(program);
 	}

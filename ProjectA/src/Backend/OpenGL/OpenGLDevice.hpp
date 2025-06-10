@@ -11,8 +11,6 @@ namespace ProjectA {
 		public:
 			OpenGLDevice(const OpenGLRenderingContext& renderingContext);
 
-			~OpenGLDevice() final override;
-
 			ref<PhysicalDevice> getPhysicalDevice() const final override;
 
 			ref<Queue> getComputeQueue() const final override;
@@ -32,7 +30,5 @@ namespace ProjectA {
 		private:
 			const ref<OpenGLPhysicalDevice> physicalDevice;
 			const ref<OpenGLQueue> queue;
-
-			GLuint vertexArray;
 	};
 }
