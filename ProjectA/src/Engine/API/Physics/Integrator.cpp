@@ -17,7 +17,7 @@ namespace ProjectA {
 				const CCDOutput output = evaluateContinuousCollision(A, B, gjkResult);
 
 				#ifdef BUILD_MODE_DEBUG
-					checkOutputState(output.state);
+					printOutputState(output.state);
 				#endif
 
 				advanceSimulation(A, output.fraction);
@@ -29,14 +29,14 @@ namespace ProjectA {
 	}
 
 	#ifdef BUILD_MODE_DEBUG
-		void Integrator::checkOutputState(CCDOutputState outputState) {
+		void Integrator::printOutputState(CCDOutputState outputState) {
 			switch (outputState) {
 				case CCDOutputState::UNDETERMINED:
 					ENGINE_ERROR("Integrator: CCD state is undetermined.");
 
 					break;
 				case CCDOutputState::UNRESOLVED_ROOT:
-					ENGINE_ERROR("Integrator: Root finder ran out of iterations.");
+					ENGINE_WARN("Integrator: Root finder ran out of iterations.");
 
 					break;
 				default:
@@ -46,6 +46,8 @@ namespace ProjectA {
 	#endif
 
 	// Bilateral Advancement algorithm implementation.
+	// Evaluates continuous collision between A and B.
+	// If `gjkResult` is not null, the result of the last GJK call is written to it.
 	// References:
 	// 
 	// - Erin Catto - Continuous Collision - GDC 2013
@@ -55,8 +57,6 @@ namespace ProjectA {
 	// - Nilson Souto - Video Game Physics Tutorial - Part II: Collision Detection for Solid Objects
 	//   https://www.toptal.com/game/video-game-physics-part-ii-collision-detection-for-solid-objects
 	// 
-	// Evaluates continuous collision between A and B.
-	// If gjkResult is not null, the result of the last GJK call is written to it.
 	CCDOutput Integrator::evaluateContinuousCollision(const Object2D& A, const Object2D& B, GJK2DResult* gjkResult) {
 		static constexpr float32 TOLERANCE = 0.25f * 0.005f;
 		static constexpr float32 TARGET = 0.005f;
@@ -299,6 +299,7 @@ namespace ProjectA {
 			case (SeparationType::VERTEX_A | SeparationType::VERTEX_B): {
 				normal = separationFunction.separatingAxis;
 
+				// TODO: Does the object rotation need to be canceled?
 				output.iA = supportIndex(A, normal);
 				output.iB = supportIndex(B, -normal);
 
@@ -319,6 +320,7 @@ namespace ProjectA {
 
 				normal = multiplyTransform(separationFunction.separatingAxis, edgeRotation);
 
+				// TODO: Does the object rotation need to be canceled?
 				const uint32 i = supportIndex(*vertexObject, -normal);
 
 				output.iA = i;
@@ -349,7 +351,7 @@ namespace ProjectA {
 		switch (separationFunction.separationType) {
 			case (SeparationType::VERTEX_A | SeparationType::VERTEX_B): {
 				a = multiplyTransform(geometryA->vertices[minSeparationOutput.iA], tA.transform);
-				a = multiplyTransform(geometryB->vertices[minSeparationOutput.iB], tB.transform);
+				b = multiplyTransform(geometryB->vertices[minSeparationOutput.iB], tB.transform);
 				d = separationFunction.separatingAxis;
 
 				break;

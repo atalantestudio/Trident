@@ -253,15 +253,13 @@ namespace ProjectA {
 
 			return m[index];
 		}
+
+		lyah::vec<2, T>& operator [](std::uint8_t index) {
+			DEBUG_ASSERT(index < count);
+
+			return m[index];
+		}
 	};
-
-	template<std::size_t C, typename T>
-	void operator +=(sim<C, T>& s, const lyah::vec<C, T>& a) {
-		ENGINE_ASSERT(s.count <= C + 1, "Simplex dimension overflow.");
-
-		s.m[s.count] = a;
-		s.count += 1;
-	}
 
 	template<typename T>
 	using sim2 = sim<2, T>;

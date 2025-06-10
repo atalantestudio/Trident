@@ -197,17 +197,17 @@ namespace ProjectA {
 
 		Simplex2 s = {vertex};
 
+		uint32 saveA[3];
+		uint32 saveB[3];
+
 		uint8 i = 0;
 
 		while (i < GJK_2D_ITERATION_LIMIT) {
 			const uint8 previousCount = s.count;
 
-			sequence<uint32> saveA(s.count);
-			sequence<uint32> saveB(s.count);
-
-			for (uint8 j = 0; j < s.count; j += 1) {
-				saveA[j] = s[j].iA;
-				saveB[j] = s[j].iB;
+			for (uint8 index = 0; index < s.count; index += 1) {
+				saveA[index] = s[index].iA;
+				saveB[index] = s[index].iB;
 			}
 
 			const uint8 countCopy = s.count;
@@ -285,7 +285,8 @@ namespace ProjectA {
 			vertex.vB = transformSupport(B, vertex.iB);
 			vertex.v = vertex.vB - vertex.vA;
 
-			s += vertex;
+			s[s.count] = vertex;
+			s.count += 1;
 
 			#ifdef BUILD_MODE_DEBUG
 				if (i == GJK_2D_ITERATION_LIMIT - 1) {

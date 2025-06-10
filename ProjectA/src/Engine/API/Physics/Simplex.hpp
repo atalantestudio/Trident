@@ -44,13 +44,6 @@ namespace ProjectA {
 				return vertices[index];
 			}
 
-			void operator +=(const Simplex2Vertex& vertex) {
-				DEBUG_ASSERT(count <= MAX_VERTICES);
-
-				vertices[count] = vertex;
-				count += 1;
-			}
-
 		private:
 			static constexpr uint8 MAX_VERTICES = 3;
 

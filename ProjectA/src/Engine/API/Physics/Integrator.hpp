@@ -12,7 +12,7 @@ namespace ProjectA {
 
 		private:
 			#ifdef BUILD_MODE_DEBUG
-				static void checkOutputState(CCDOutputState outputState);
+				static void printOutputState(CCDOutputState outputState);
 			#endif
 
 			static CCDOutput evaluateContinuousCollision(const Object2D& A, const Object2D& B, GJK2DResult* gjkResult);

@@ -119,7 +119,8 @@ namespace ProjectA {
 			vertex.vB = p;
 			vertex.v = vertex.vB - vertex.vA;
 
-			s += vertex;
+			s[s.count] = vertex;
+			s.count += 1;
 
 			#ifdef BUILD_MODE_DEBUG
 				if (i == GJK_2D_ITERATION_LIMIT - 1) {

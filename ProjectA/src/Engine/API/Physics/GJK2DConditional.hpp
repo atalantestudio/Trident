@@ -116,7 +116,8 @@ namespace ProjectA {
 				return false;
 			}
 
-			s += a;
+			s[s.count] = a;
+			s.count += 1;
 
 			switch (s.count) {
 				case 2:
