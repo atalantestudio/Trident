@@ -163,29 +163,35 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, uint32 width, uint32 height, uint32 depth) {
-		VkBufferImageCopy bufferImageCopy{};
-		bufferImageCopy.bufferOffset = 0;
-		bufferImageCopy.bufferRowLength = 0;
-		bufferImageCopy.bufferImageHeight = 0;
-		bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		bufferImageCopy.imageSubresource.mipLevel = 0;
-		bufferImageCopy.imageSubresource.baseArrayLayer = 0;
-		bufferImageCopy.imageSubresource.layerCount = 1;
-		bufferImageCopy.imageOffset.x = 0;
-		bufferImageCopy.imageOffset.y = 0;
-		bufferImageCopy.imageOffset.z = depth;
-		bufferImageCopy.imageExtent.width = width;
-		bufferImageCopy.imageExtent.height = height;
-		bufferImageCopy.imageExtent.depth = 1;
+	void VulkanCommandEncoder::copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
+		sequence<VkBufferImageCopy> bufferImageCopies(copyRegions.count);
+
+		for (uint32 bufferImageCopyIndex = 0; bufferImageCopyIndex < bufferImageCopies.count; bufferImageCopyIndex += 1) {
+			const BufferImageCopyRegion& copyRegion = copyRegions[bufferImageCopyIndex];
+			VkBufferImageCopy& bufferImageCopy = bufferImageCopies[bufferImageCopyIndex];
+
+			bufferImageCopy.bufferOffset = copyRegion.bufferOffset;
+			bufferImageCopy.bufferRowLength = 0;
+			bufferImageCopy.bufferImageHeight = 0;
+			bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			bufferImageCopy.imageSubresource.mipLevel = copyRegion.imageMipLevel;
+			bufferImageCopy.imageSubresource.baseArrayLayer = copyRegion.imageBaseArrayLayer;
+			bufferImageCopy.imageSubresource.layerCount = copyRegion.imageLayerCount;
+			bufferImageCopy.imageOffset.x = copyRegion.imageOffsetX;
+			bufferImageCopy.imageOffset.y = copyRegion.imageOffsetY;
+			bufferImageCopy.imageOffset.z = copyRegion.imageOffsetZ;
+			bufferImageCopy.imageExtent.width = copyRegion.imageExtent.width;
+			bufferImageCopy.imageExtent.height = copyRegion.imageExtent.height;
+			bufferImageCopy.imageExtent.depth = copyRegion.imageExtent.depth;
+		}
 
 		vkCmdCopyBufferToImage(
 			commandBuffer,
 			std::static_pointer_cast<VulkanBuffer>(sourceBuffer)->object,
 			std::static_pointer_cast<VulkanImage>(destinationImage)->object,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			1,
-			&bufferImageCopy
+			static_cast<uint32>(bufferImageCopies.count),
+			bufferImageCopies
 		);
 
 		commandCount += 1;
@@ -202,6 +208,8 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
+		const ref<VulkanImage> vkImage = std::static_pointer_cast<VulkanImage>(image);
+
 		VkImageMemoryBarrier imageMemoryBarrier{};
 		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 		imageMemoryBarrier.pNext = nullptr;
@@ -248,12 +256,12 @@ namespace ProjectA {
 		imageMemoryBarrier.newLayout = getVkImageLayout(newLayout);
 		imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarrier.image = std::static_pointer_cast<VulkanImage>(image)->object;
+		imageMemoryBarrier.image = vkImage->object;
 		imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
-		imageMemoryBarrier.subresourceRange.levelCount = 1;
+		imageMemoryBarrier.subresourceRange.levelCount = vkImage->mipLevelCount;
 		imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
-		imageMemoryBarrier.subresourceRange.layerCount = 1;
+		imageMemoryBarrier.subresourceRange.layerCount = vkImage->arrayLayerCount;
 
 		vkCmdPipelineBarrier(
 			commandBuffer,

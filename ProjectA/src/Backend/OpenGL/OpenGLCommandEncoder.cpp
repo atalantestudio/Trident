@@ -96,17 +96,18 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, uint32 width, uint32 height, uint32 depth) {
+	void OpenGLCommandEncoder::copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
+		const GLuint glBuffer = std::static_pointer_cast<OpenGLBuffer>(sourceBuffer)->object;
 		const ref<OpenGLImage> glImage = std::static_pointer_cast<OpenGLImage>(destinationImage);
 
-		commandBuffer.emplace_back(createRef<OpenGLCopyBufferToImageCommand>(
-			std::static_pointer_cast<OpenGLBuffer>(sourceBuffer)->object,
-			glImage->object,
-			width,
-			height,
-			depth,
-			glImage->format
-		));
+		for (const BufferImageCopyRegion& copyRegion : copyRegions) {
+			commandBuffer.emplace_back(createRef<OpenGLCopyBufferToImageCommand>(
+				glBuffer,
+				glImage->object,
+				glImage->format,
+				copyRegion
+			));
+		}
 	}
 
 	void OpenGLCommandEncoder::dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {

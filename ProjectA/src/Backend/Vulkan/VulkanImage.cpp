@@ -78,7 +78,8 @@ namespace ProjectA {
 		format = imageCreateInfo.format;
 		width = imageCreateInfo.extent.width;
 		height = imageCreateInfo.extent.height;
-		mipLevels = imageCreateInfo.mipLevels;
+		mipLevelCount = imageCreateInfo.mipLevels;
+		arrayLayerCount = imageCreateInfo.arrayLayers;
 	}
 
 	VulkanImage::~VulkanImage() {

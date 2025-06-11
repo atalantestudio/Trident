@@ -10,10 +10,11 @@
 #define RENDERER_TEXT 5
 #define RENDERER_TEXTURE 6
 #define RENDERER_TEXTURE_ARRAY 7
-#define RENDERER_TRIANGLE 8
+#define RENDERER_TEXTURES 8
+#define RENDERER_TRIANGLE 9
 
 // Select the renderer to view.
-#define RENDERER RENDERER_DEPTH_TEST
+#define RENDERER RENDERER_TEXTURES
 
 #if RENDERER == RENDERER_COLOR_BLEND
 	#include "../Renderer/ColorBlendRenderer.hpp"
@@ -61,6 +62,12 @@
 	#include "../Renderer/TextureArrayRenderer.hpp"
 
 	#define RENDERER_CLASS TextureArrayRenderer
+#endif
+
+#if RENDERER == RENDERER_TEXTURES
+	#include "../Renderer/TexturesRenderer.hpp"
+
+	#define RENDERER_CLASS TexturesRenderer
 #endif
 
 #if RENDERER == RENDERER_TRIANGLE

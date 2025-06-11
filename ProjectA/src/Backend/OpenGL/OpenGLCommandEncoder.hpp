@@ -28,7 +28,7 @@ namespace ProjectA {
 
 			void copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) final override;
 
-			void copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, uint32 width, uint32 height, uint32 depth) final override;
+			void copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) final override;
 
 			void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) final override;
 

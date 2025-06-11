@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Rendering/Buffer.hpp"
+#include "Engine/API/Rendering/BufferImageCopyRegion.hpp"
 #include "Engine/API/Rendering/CommandBuffer.hpp"
 #include "Engine/API/Rendering/ComputePipeline.hpp"
 #include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
@@ -38,7 +39,7 @@ namespace ProjectA {
 
 			virtual void copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) = 0;
 
-			virtual void copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, uint32 width, uint32 height, uint32 depth) = 0;
+			virtual void copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
 
 			virtual void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) = 0;
 

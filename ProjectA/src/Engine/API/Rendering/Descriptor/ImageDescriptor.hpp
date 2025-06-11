@@ -19,6 +19,7 @@ namespace ProjectA {
 		// The number of samples for the image. Must be a power of 2.
 		uint8 sampleCount;
 
+		// TODO: Replace by MemoryResourceType.
 		MemoryProperty memoryProperties;
 	};
 }

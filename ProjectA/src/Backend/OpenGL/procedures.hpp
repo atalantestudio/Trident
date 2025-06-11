@@ -69,7 +69,9 @@ namespace ProjectA {
 	extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
 	extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D;
 	extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;
+	extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
 	extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
+	extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
 	extern PFNGLTEXTUREVIEWPROC glTextureView;
 	extern PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer;
 	extern PFNGLUSEPROGRAMPROC glUseProgram;

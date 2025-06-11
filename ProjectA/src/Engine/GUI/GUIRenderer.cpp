@@ -384,7 +384,22 @@ namespace ProjectA {
 
 		commandEncoder->begin();
 		commandEncoder->setImageMemoryBarrier(image, ImageLayout::UNDEFINED, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-		commandEncoder->copyBufferToImage(buffer, image, width, height, 0);
+
+		sequence<BufferImageCopyRegion> copyRegions(1);
+
+		BufferImageCopyRegion& bufferImageCopyRegion = copyRegions[0];
+		bufferImageCopyRegion.bufferOffset = 0;
+		bufferImageCopyRegion.imageExtent.width = width;
+		bufferImageCopyRegion.imageExtent.height = height;
+		bufferImageCopyRegion.imageExtent.depth = 1;
+		bufferImageCopyRegion.imageOffsetX = 0;
+		bufferImageCopyRegion.imageOffsetY = 0;
+		bufferImageCopyRegion.imageOffsetZ = 0;
+		bufferImageCopyRegion.imageMipLevel = 0;
+		bufferImageCopyRegion.imageBaseArrayLayer = 0;
+		bufferImageCopyRegion.imageLayerCount = 1;
+
+		commandEncoder->copyBufferToImage(buffer, image, copyRegions);
 		commandEncoder->setImageMemoryBarrier(image, ImageLayout::TRANSFER_DST_OPTIMAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();

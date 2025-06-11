@@ -90,7 +90,9 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glSpecializeShader);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2DMultisample);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage1D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage2D);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage3D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureView);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glUnmapNamedBuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glUseProgram);

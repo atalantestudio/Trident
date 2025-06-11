@@ -22,7 +22,8 @@ namespace ProjectA {
 		public:
 			VkImageType type;
 			VkFormat format;
-			uint32 mipLevels;
+			uint32 mipLevelCount;
+			uint32 arrayLayerCount;
 
 		private:
 			VkDevice device;
