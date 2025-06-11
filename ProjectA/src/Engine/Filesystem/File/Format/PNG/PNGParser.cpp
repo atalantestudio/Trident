@@ -16,15 +16,7 @@ namespace ProjectA {
 	};
 
 	static void readSignature(ByteStream& stream) {
-		// TODO: Replace with memcmp or C++ equivalent.
-		ENGINE_ASSERT(stream.read<uint8>() == 0x89, "Failed to verify signature.");
-		ENGINE_ASSERT(stream.read<uint8>() == 0x50, "Failed to verify signature.");
-		ENGINE_ASSERT(stream.read<uint8>() == 0x4E, "Failed to verify signature.");
-		ENGINE_ASSERT(stream.read<uint8>() == 0x47, "Failed to verify signature.");
-		ENGINE_ASSERT(stream.read<uint8>() == 0x0D, "Failed to verify signature.");
-		ENGINE_ASSERT(stream.read<uint8>() == 0x0A, "Failed to verify signature.");
-		ENGINE_ASSERT(stream.read<uint8>() == 0x1A, "Failed to verify signature.");
-		ENGINE_ASSERT(stream.read<uint8>() == 0x0A, "Failed to verify signature.");
+		ENGINE_ASSERT(stream.read<uint64>(true) == 0x89504E470D0A1A0A, "Failed to verify signature.");
 	}
 
 	static void readIHDRChunk(ByteStream& stream, PNGFile& file) {
