@@ -8,6 +8,7 @@ void main() {
 	vec2 imageCoordinate = gl_GlobalInvocationID.xy;
 
 	// TODO: Fix imageSize returning (0, 0) on Intel UHD Graphics 4.6.0 (HP Victus laptop).
+	// TODO: Try removing writeonly attribute.
 	vec4 color = vec4(imageCoordinate / vec2(imageSize(image)), 0.0, 1.0);
 
 	imageStore(image, ivec2(imageCoordinate), color);
