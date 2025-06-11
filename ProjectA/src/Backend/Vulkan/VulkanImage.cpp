@@ -27,7 +27,7 @@ namespace ProjectA {
 		imageCreateInfo.extent.height = descriptor.height;
 		imageCreateInfo.extent.depth = descriptor.depth;
 		imageCreateInfo.mipLevels = descriptor.mipLevelCount;
-		imageCreateInfo.arrayLayers = descriptor.arrayLayerCount;
+		imageCreateInfo.arrayLayers = descriptor.layerCount;
 		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(descriptor.sampleCount);
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.usage = getVkImageUsageFlagBits(descriptor.usage);
@@ -79,7 +79,7 @@ namespace ProjectA {
 		width = imageCreateInfo.extent.width;
 		height = imageCreateInfo.extent.height;
 		mipLevelCount = imageCreateInfo.mipLevels;
-		arrayLayerCount = imageCreateInfo.arrayLayers;
+		layerCount = imageCreateInfo.arrayLayers;
 	}
 
 	VulkanImage::~VulkanImage() {

@@ -61,7 +61,7 @@ namespace ProjectA {
 		colorAttachmentImageDescriptor.height = swapchain->getExtentHeight();
 		colorAttachmentImageDescriptor.depth = 1;
 		colorAttachmentImageDescriptor.mipLevelCount = 1;
-		colorAttachmentImageDescriptor.arrayLayerCount = 1;
+		colorAttachmentImageDescriptor.layerCount = 1;
 
 		colorImage = renderPass->createColorAttachmentImage(colorAttachmentImageDescriptor, 0);
 
@@ -370,7 +370,7 @@ namespace ProjectA {
 		imageDescriptor.height = height;
 		imageDescriptor.depth = 1;
 		imageDescriptor.mipLevelCount = 1;
-		imageDescriptor.arrayLayerCount = 1;
+		imageDescriptor.layerCount = 1;
 		imageDescriptor.sampleCount = 1;
 
 		const ref<Image> image = createImage(imageDescriptor);

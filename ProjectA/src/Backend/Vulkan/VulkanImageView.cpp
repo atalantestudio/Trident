@@ -17,7 +17,7 @@ namespace ProjectA {
 		imageViewCreateInfo.pNext = nullptr;
 		imageViewCreateInfo.flags = 0;
 		imageViewCreateInfo.image = image.object;
-		imageViewCreateInfo.viewType = getVkImageViewType(image.type, image.arrayLayerCount);
+		imageViewCreateInfo.viewType = getVkImageViewType(image.type, image.layerCount);
 		imageViewCreateInfo.format = image.format;
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -34,7 +34,7 @@ namespace ProjectA {
 		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
 		imageViewCreateInfo.subresourceRange.levelCount = image.mipLevelCount;
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-		imageViewCreateInfo.subresourceRange.layerCount = image.arrayLayerCount;
+		imageViewCreateInfo.subresourceRange.layerCount = image.layerCount;
 
 		const VkResult result = vkCreateImageView(device, &imageViewCreateInfo, nullptr, &object);
 

@@ -104,6 +104,7 @@ namespace ProjectA {
 			commandBuffer.emplace_back(createRef<OpenGLCopyBufferToImageCommand>(
 				glBuffer,
 				glImage->object,
+				glImage->target,
 				glImage->format,
 				copyRegion
 			));

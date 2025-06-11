@@ -35,7 +35,7 @@ namespace ProjectA {
 		imageDescriptor.height = extentHeight;
 		imageDescriptor.depth = 1;
 		imageDescriptor.mipLevelCount = 1;
-		imageDescriptor.arrayLayerCount = 1;
+		imageDescriptor.layerCount = 1;
 		imageDescriptor.sampleCount = 1;
 
 		constexpr ImageViewDescriptor imageViewDescriptor;

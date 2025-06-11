@@ -15,11 +15,10 @@ namespace ProjectA {
 				{
 					for (uint32 assetIndex = 0; assetIndex < assets.size(); assetIndex += 1) {
 						const std::string_view path = ASSET_PATHS[assetIndex];
-						PNGFile& asset = assets[assetIndex];
 
-						asset = Filesystem::openTemporary<PNGFile>(path);
+						assets[assetIndex] = Filesystem::openTemporary<PNGFile>(path);
 
-						size += asset.width * asset.height * asset.bitDepth;
+						size += assets[assetIndex].data.count;
 					}
 				}
 
@@ -29,14 +28,13 @@ namespace ProjectA {
 				{
 					textureArrayStagingBuffer = createStagingBuffer(size);
 					uint8* textureArrayMappedRange = textureArrayStagingBuffer->map<uint8>(0, size);
-					uint64 offset = 0;
 
 					for (uint32 assetIndex = 0; assetIndex < assets.size(); assetIndex += 1) {
 						const PNGFile& asset = assets[assetIndex];
 
-						std::copy(asset.data.begin(), asset.data.end(), &textureArrayMappedRange[offset]);
+						std::copy(asset.data.begin(), asset.data.end(), textureArrayMappedRange);
 
-						offset += asset.width * asset.height * asset.bitDepth;
+						textureArrayMappedRange += asset.data.count;
 					}
 
 					textureArrayStagingBuffer->unmap();
@@ -52,9 +50,10 @@ namespace ProjectA {
 					textureArrayDescriptor.height = TEXTURE_ARRAY_HEIGHT;
 					textureArrayDescriptor.depth = 1;
 					textureArrayDescriptor.mipLevelCount = 1;
-					textureArrayDescriptor.arrayLayerCount = static_cast<uint32>(ASSET_PATHS.size());
+					textureArrayDescriptor.layerCount = 4;
+					// textureArrayDescriptor.layerCount = static_cast<uint32>(ASSET_PATHS.size());
 					textureArrayDescriptor.sampleCount = 1;
-					textureArrayDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+					textureArrayDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 					textureArray = createImage(textureArrayDescriptor);
 				}
@@ -69,11 +68,11 @@ namespace ProjectA {
 					commandEncoder->begin();
 					commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::UNDEFINED, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-					sequence<BufferImageCopyRegion> copyRegions(4);
+					sequence<BufferImageCopyRegion> copyRegions(assets.size());
 
-					for (uint32 assetIndex = 0; assetIndex < 4; assetIndex += 1) {
+					for (uint32 assetIndex = 0; assetIndex < assets.size(); assetIndex += 1) {
 						const PNGFile& asset = assets[assetIndex];
-						const uint64 offset = static_cast<uint64>(asset.width * asset.height * asset.bitDepth * assetIndex);
+						const uint64 offset = static_cast<uint64>(asset.data.count * assetIndex);
 
 						BufferImageCopyRegion& bufferImageCopyRegion = copyRegions[assetIndex];
 						bufferImageCopyRegion.bufferOffset = offset;
@@ -175,7 +174,7 @@ namespace ProjectA {
 					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/TexturesOrTextureArray.vert.spv", vertexShaderModuleDescriptor);
+					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/ArrayTextureOrTextureArray.vert.spv", vertexShaderModuleDescriptor);
 					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/TextureArray.frag.spv", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
@@ -306,11 +305,11 @@ namespace ProjectA {
 			};
 
 		private:
-			static constexpr std::array<std::string_view, 4> ASSET_PATHS = {
+			static constexpr std::array<std::string_view, 1> ASSET_PATHS = {
 				"Asset/Image/Baboon.png",
-				"Asset/Image/Cameraman.png",
-				"Asset/Image/Lenna.png",
-				"Asset/Image/Pepper.png",
+				// "Asset/Image/Cameraman.png",
+				// "Asset/Image/Lenna.png",
+				// "Asset/Image/Pepper.png",
 			};
 
 			static constexpr uint32 TEXTURE_ARRAY_WIDTH = 512;

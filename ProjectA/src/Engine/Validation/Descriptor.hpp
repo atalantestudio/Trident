@@ -50,10 +50,10 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.mipLevelCount must be greater than 0.");
 		}
 
-		if (descriptor.arrayLayerCount == 0) {
+		if (descriptor.layerCount == 0) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.arrayLayerCount must be greater than 0.");
+			ENGINE_ERROR("descriptor.layerCount must be greater than 0.");
 		}
 
 		ENGINE_ASSERT(errorCount == 0, "Attachment image descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
@@ -181,10 +181,10 @@ namespace ProjectA {
 		}
 
 		// TODO: Check max array layer count.
-		if (descriptor.arrayLayerCount == 0) {
+		if (descriptor.layerCount == 0) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.arrayLayerCount must not be 0.");
+			ENGINE_ERROR("descriptor.layerCount must not be 0.");
 		}
 
 		if (!validateSampleCount(descriptor.sampleCount)) {

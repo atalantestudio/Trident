@@ -9,6 +9,6 @@ namespace ProjectA {
 		uint32 height;
 		uint32 depth;
 		uint32 mipLevelCount;
-		uint32 arrayLayerCount;
+		uint32 layerCount;
 	};
 }

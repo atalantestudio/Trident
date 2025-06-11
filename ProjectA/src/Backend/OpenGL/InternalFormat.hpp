@@ -5,7 +5,7 @@ namespace ProjectA {
 		static constexpr GLenum glInternalFormats[] = {
 			GL_R8,
 			GL_BGRA8_EXT,
-			GL_SRGB8,
+			GL_SRGB8_ALPHA8,
 			GL_RGBA8,
 			GL_DEPTH_COMPONENT32F,
 			GL_DEPTH32F_STENCIL8,

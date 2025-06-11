@@ -68,7 +68,9 @@ namespace ProjectA {
 	extern PFNGLSHADERSOURCEPROC glShaderSource;
 	extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
 	extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D;
+	extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D;
 	extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;
+	extern PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC glTextureStorage3DMultisample;
 	extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
 	extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
 	extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
@@ -80,4 +82,6 @@ namespace ProjectA {
 	extern PFNGLVERTEXATTRIBIFORMATPROC glVertexAttribIFormat;
 	extern PFNGLVERTEXATTRIBLFORMATPROC glVertexAttribLFormat;
 	extern PFNGLVERTEXBINDINGDIVISORPROC glVertexBindingDivisor;
+
+	extern PFNGLCLEARTEXSUBIMAGEPROC glClearTexSubImage;
 }

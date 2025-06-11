@@ -14,7 +14,7 @@ namespace ProjectA {
 		uint32 height;
 		uint32 depth;
 		uint32 mipLevelCount;
-		uint32 arrayLayerCount;
+		uint32 layerCount;
 
 		// The number of samples for the image. Must be a power of 2.
 		uint8 sampleCount;

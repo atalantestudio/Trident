@@ -31,7 +31,7 @@ namespace ProjectA {
 
 		// TODO: Get this OpenGL limit.
 		// Maximum number of layers for an image.
-		uint32 maxImageArrayLayerCount;
+		uint32 maxImageLayerCount;
 
 		// Maximum number of device memory allocations which can simultaneously exist.
 		// Only relevant when using the Vulkan adapter.

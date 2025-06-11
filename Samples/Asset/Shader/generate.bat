@@ -8,9 +8,10 @@
 :: "%VULKAN_SDK%\Bin\glslc.exe" Base/ColorRGBA.frag -o Base/ColorRGBA.frag.spv
 :: "%VULKAN_SDK%\Bin\glslc.exe" Base/TextureRGBA.frag -o Base/TextureRGBA.frag.spv
 
-"%VULKAN_SDK%\Bin\glslc.exe" TexturesOrTextureArray.vert -o TexturesOrTextureArray.vert.spv
+"%VULKAN_SDK%\Bin\glslc.exe" ArrayTextureOrTextureArray.vert -o ArrayTextureOrTextureArray.vert.spv
 
-"%VULKAN_SDK%\Bin\glslc.exe" Textures.frag -o Textures.frag.spv
+"%VULKAN_SDK%\Bin\glslc.exe" ArrayTexture.frag -o ArrayTexture.frag.spv
+
 "%VULKAN_SDK%\Bin\glslc.exe" TextureArray.frag -o TextureArray.frag.spv
 
 :: "%VULKAN_SDK%\Bin\glslc.exe" Glyph.vert -o Glyph.vert.spv

@@ -89,7 +89,9 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderSource);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glSpecializeShader);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2D);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage3D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2DMultisample);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage3DMultisample);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage1D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage2D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage3D);
@@ -101,6 +103,8 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribIFormat);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribLFormat);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexBindingDivisor);
+
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glClearTexSubImage);
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			glEnable(GL_DEBUG_OUTPUT);

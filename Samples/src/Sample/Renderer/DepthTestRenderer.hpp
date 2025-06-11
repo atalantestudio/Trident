@@ -184,7 +184,7 @@ namespace ProjectA {
 				depthStencilAttachmentImageDescriptor.height = swapchain->getExtentHeight();
 				depthStencilAttachmentImageDescriptor.depth = 1;
 				depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
-				depthStencilAttachmentImageDescriptor.arrayLayerCount = 1;
+				depthStencilAttachmentImageDescriptor.layerCount = 1;
 
 				depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor);
 

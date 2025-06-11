@@ -2,19 +2,25 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#define RENDERER_COLOR_BLEND 0
-#define RENDERER_COMPUTE_SHADER 1
-#define RENDERER_DEPTH_TEST 2
-#define RENDERER_DEFAULT 3
-#define RENDERER_MULTISAMPLE 4
-#define RENDERER_TEXT 5
-#define RENDERER_TEXTURE 6
-#define RENDERER_TEXTURE_ARRAY 7
-#define RENDERER_TEXTURES 8
+#define RENDERER_ARRAY_TEXTURE 0
+#define RENDERER_COLOR_BLEND 1
+#define RENDERER_COMPUTE_SHADER 2
+#define RENDERER_DEPTH_TEST 3
+#define RENDERER_DEFAULT 4
+#define RENDERER_MULTISAMPLE 5
+#define RENDERER_TEXT 6
+#define RENDERER_TEXTURE 7
+#define RENDERER_TEXTURE_ARRAY 8
 #define RENDERER_TRIANGLE 9
 
-// Select the renderer to view.
-#define RENDERER RENDERER_TEXTURES
+// Select the renderer to run.
+#define RENDERER RENDERER_TEXTURE_ARRAY
+
+#if RENDERER == RENDERER_ARRAY_TEXTURE
+	#include "../Renderer/ArrayTextureRenderer.hpp"
+
+	#define RENDERER_CLASS ArrayTextureRenderer
+#endif
 
 #if RENDERER == RENDERER_COLOR_BLEND
 	#include "../Renderer/ColorBlendRenderer.hpp"
@@ -62,12 +68,6 @@
 	#include "../Renderer/TextureArrayRenderer.hpp"
 
 	#define RENDERER_CLASS TextureArrayRenderer
-#endif
-
-#if RENDERER == RENDERER_TEXTURES
-	#include "../Renderer/TexturesRenderer.hpp"
-
-	#define RENDERER_CLASS TexturesRenderer
 #endif
 
 #if RENDERER == RENDERER_TRIANGLE

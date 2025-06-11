@@ -3,17 +3,20 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	class TexturesRenderer : public Renderer {
+	class ArrayTextureRenderer : public Renderer {
 		public:
-			TexturesRenderer() :
-				baboonImage(loadImage(BABOON_IMAGE_PATH)),
-				cameramanImage(loadImage(CAMERAMAN_IMAGE_PATH)),
-				lennaImage(loadImage(LENNA_IMAGE_PATH)),
-				pepperImage(loadImage(PEPPER_IMAGE_PATH))
-			{
+			ArrayTextureRenderer() {
 				const ref<Device> device = getDevice();
 
-				// 1. Create image views.
+				// 1. Load assets as images.
+				{
+					baboonImage = loadImage(BABOON_IMAGE_PATH);
+					cameramanImage = loadImage(CAMERAMAN_IMAGE_PATH);
+					lennaImage = loadImage(LENNA_IMAGE_PATH);
+					pepperImage = loadImage(PEPPER_IMAGE_PATH);
+				}
+
+				// 2. Create image views.
 				{
 					constexpr ImageViewDescriptor imageViewDescriptor;
 
@@ -23,7 +26,7 @@ namespace ProjectA {
 					pepperImageView = pepperImage->createView(imageViewDescriptor);
 				}
 
-				// 2. Create sampler.
+				// 3. Create sampler.
 				{
 					SamplerDescriptor samplerDescriptor{};
 					samplerDescriptor.magFilter = SamplerFilter::LINEAR;
@@ -32,7 +35,7 @@ namespace ProjectA {
 					sampler = createSampler(samplerDescriptor);
 				}
 
-				// 3. Create render pass.
+				// 4. Create render pass.
 				{
 					ColorAttachment colorAttachment{};
 					colorAttachment.format = getSurface()->getFormat();
@@ -47,13 +50,13 @@ namespace ProjectA {
 					renderPassDescriptor.presentAttachmentIndex = 0;
 
 					renderPass = createRenderPass(renderPassDescriptor);
+
+					const ref<Swapchain>& swapchain = getSwapchain();
+
+					swapchain->getImages(renderPass);
 				}
 
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				swapchain->getImages(renderPass);
-
-				// 4. Create pipeline layout.
+				// 5. Create pipeline layout.
 				{
 					DescriptorSetLayoutBinding textureArrayDescriptorSetLayoutBinding;
 					textureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
@@ -72,7 +75,7 @@ namespace ProjectA {
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 5. Create render pipeline.
+				// 6. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -96,8 +99,8 @@ namespace ProjectA {
 					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/TexturesOrTextureArray.vert.spv", vertexShaderModuleDescriptor);
-					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Textures.frag.spv", fragmentShaderModuleDescriptor);
+					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/ArrayTextureOrTextureArray.vert.spv", vertexShaderModuleDescriptor);
+					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/ArrayTexture.frag.spv", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 					renderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -111,20 +114,20 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 6. Create vertex buffer.
+				// 7. Create vertex buffer.
 				{
 					constexpr uint64 vertexBufferSize = 6 * sizeof(Vertex);
 
 					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
 
-					Vertex* vertices = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
+					Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
 
-					vertices[0].vertex = {-0.5f,  0.5f};
-					vertices[1].vertex = { 0.5f,  0.5f};
-					vertices[2].vertex = { 0.5f, -0.5f};
-					vertices[3].vertex = {-0.5f,  0.5f};
-					vertices[4].vertex = { 0.5f, -0.5f};
-					vertices[5].vertex = {-0.5f, -0.5f};
+					vertexMappedRange[0].vertex = {-0.5f,  0.5f};
+					vertexMappedRange[1].vertex = { 0.5f,  0.5f};
+					vertexMappedRange[2].vertex = { 0.5f, -0.5f};
+					vertexMappedRange[3].vertex = {-0.5f,  0.5f};
+					vertexMappedRange[4].vertex = { 0.5f, -0.5f};
+					vertexMappedRange[5].vertex = {-0.5f, -0.5f};
 
 					vertexStagingBuffer->unmap();
 
@@ -149,22 +152,22 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				// 7. Create instance buffer.
+				// 8. Create instance buffer.
 				{
 					constexpr uint64 instanceVertexBufferSize = 4 * sizeof(Instance);
 
 					const ref<Buffer> instanceVertexStagingBuffer = createStagingBuffer(instanceVertexBufferSize);
 
-					Instance* instances = instanceVertexStagingBuffer->map<Instance>(0, instanceVertexBufferSize);
+					Instance* instanceMappedRange = instanceVertexStagingBuffer->map<Instance>(0, instanceVertexBufferSize);
 
-					instances[0].vertexOffset = {-0.5f, 0.5f};
-					instances[0].textureIndex = 0;
-					instances[1].vertexOffset = {0.5f, 0.5f};
-					instances[1].textureIndex = 1;
-					instances[2].vertexOffset = {-0.5f, -0.5f};
-					instances[2].textureIndex = 2;
-					instances[3].vertexOffset = {0.5f, -0.5f};
-					instances[3].textureIndex = 3;
+					instanceMappedRange[0].vertexOffset = {-0.5f, 0.5f};
+					instanceMappedRange[0].textureIndex = 0;
+					instanceMappedRange[1].vertexOffset = {0.5f, 0.5f};
+					instanceMappedRange[1].textureIndex = 1;
+					instanceMappedRange[2].vertexOffset = {-0.5f, -0.5f};
+					instanceMappedRange[2].textureIndex = 2;
+					instanceMappedRange[3].vertexOffset = {0.5f, -0.5f};
+					instanceMappedRange[3].textureIndex = 3;
 
 					instanceVertexStagingBuffer->unmap();
 
@@ -221,10 +224,10 @@ namespace ProjectA {
 			}
 
 		private:
-			ref<Image> loadImage(std::string_view imagePath) {
+			ref<Image> loadImage(std::string_view path) {
 				const ref<Device> device = getDevice();
 
-				const PNGFile file = Filesystem::openTemporary<PNGFile>(imagePath);
+				const PNGFile file = Filesystem::openTemporary<PNGFile>(path);
 				const uint64 imageBufferSize = file.data.count * sizeof(uint8);
 
 				const ref<Buffer> imageStagingBuffer = createStagingBuffer(imageBufferSize);
@@ -243,7 +246,7 @@ namespace ProjectA {
 				imageDescriptor.height = file.height;
 				imageDescriptor.depth = 1;
 				imageDescriptor.mipLevelCount = 1;
-				imageDescriptor.arrayLayerCount = 1;
+				imageDescriptor.layerCount = 1;
 				imageDescriptor.sampleCount = 1;
 				imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 

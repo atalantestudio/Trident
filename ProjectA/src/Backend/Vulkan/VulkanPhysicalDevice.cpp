@@ -142,7 +142,7 @@ namespace ProjectA {
 		limits.maxFramebufferSize[0] = properties.limits.maxFramebufferWidth;
 		limits.maxFramebufferSize[1] = properties.limits.maxFramebufferHeight;
 		limits.maxFramebufferLayerCount = properties.limits.maxFramebufferLayers;
-		limits.maxImageArrayLayerCount = properties.limits.maxImageArrayLayers;
+		limits.maxImageLayerCount = properties.limits.maxImageArrayLayers;
 		limits.maxMemoryAllocationCount = properties.limits.maxMemoryAllocationCount;
 		limits.maxVertexInputAttributeCount = properties.limits.maxVertexInputAttributes;
 		limits.maxVertexInputAttributeOffset = properties.limits.maxVertexInputAttributeOffset;

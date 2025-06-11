@@ -86,7 +86,7 @@ namespace ProjectA {
 		glyphImageDescriptor.height = 4096;
 		glyphImageDescriptor.depth = 1;
 		glyphImageDescriptor.mipLevelCount = 1;
-		glyphImageDescriptor.arrayLayerCount = 1;
+		glyphImageDescriptor.layerCount = 1;
 		glyphImageDescriptor.sampleCount = 1;
 		glyphImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
@@ -142,7 +142,7 @@ namespace ProjectA {
 		glyphMapSdfImageDescriptor.height = 2056; // Can be set to 1024.
 		glyphMapSdfImageDescriptor.depth = 1;
 		glyphMapSdfImageDescriptor.mipLevelCount = 1;
-		glyphMapSdfImageDescriptor.arrayLayerCount = 1;
+		glyphMapSdfImageDescriptor.layerCount = 1;
 		glyphMapSdfImageDescriptor.sampleCount = 1;
 		glyphMapSdfImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 

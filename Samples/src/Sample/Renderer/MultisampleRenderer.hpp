@@ -152,7 +152,7 @@ namespace ProjectA {
 				multisampleAttachmentImageDescriptor.height = swapchain->getExtentHeight();
 				multisampleAttachmentImageDescriptor.depth = 1;
 				multisampleAttachmentImageDescriptor.mipLevelCount = 1;
-				multisampleAttachmentImageDescriptor.arrayLayerCount = 1;
+				multisampleAttachmentImageDescriptor.layerCount = 1;
 
 				multisampleImage = renderPass->createColorAttachmentImage(multisampleAttachmentImageDescriptor, 0);
 

@@ -34,7 +34,7 @@ namespace ProjectA {
 		colorImageDescriptor.height = descriptor.height;
 		colorImageDescriptor.depth = descriptor.depth;
 		colorImageDescriptor.mipLevelCount = descriptor.mipLevelCount;
-		colorImageDescriptor.arrayLayerCount = descriptor.arrayLayerCount;
+		colorImageDescriptor.layerCount = descriptor.layerCount;
 		colorImageDescriptor.sampleCount = colorAttachment.sampleCount;
 
 		return createRef<OpenGLImage>(colorImageDescriptor);
@@ -53,7 +53,7 @@ namespace ProjectA {
 		depthStencilImageDescriptor.height = descriptor.height;
 		depthStencilImageDescriptor.depth = descriptor.depth;
 		depthStencilImageDescriptor.mipLevelCount = descriptor.mipLevelCount;
-		depthStencilImageDescriptor.arrayLayerCount = descriptor.arrayLayerCount;
+		depthStencilImageDescriptor.layerCount = descriptor.layerCount;
 		depthStencilImageDescriptor.sampleCount = depthStencilAttachment.sampleCount;
 
 		return createRef<OpenGLImage>(depthStencilImageDescriptor);

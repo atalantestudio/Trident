@@ -261,7 +261,7 @@ namespace ProjectA {
 		imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
 		imageMemoryBarrier.subresourceRange.levelCount = vkImage->mipLevelCount;
 		imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
-		imageMemoryBarrier.subresourceRange.layerCount = vkImage->arrayLayerCount;
+		imageMemoryBarrier.subresourceRange.layerCount = vkImage->layerCount;
 
 		vkCmdPipelineBarrier(
 			commandBuffer,

@@ -18,7 +18,7 @@ namespace ProjectA {
 					imageDescriptor.height = 64;
 					imageDescriptor.depth = 1;
 					imageDescriptor.mipLevelCount = 1;
-					imageDescriptor.arrayLayerCount = 1;
+					imageDescriptor.layerCount = 1;
 					imageDescriptor.sampleCount = 1;
 					imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 

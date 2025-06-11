@@ -12,5 +12,5 @@ layout(location = 0) out vec4 color;
 void main() {
 	vec3 textureCoordinate = vec3(vertexOutput.textureCoordinate, float(vertexOutput.textureIndex));
 
-	color = texture(textureArraySampler, textureCoordinate);
+	color = mix(vec4(textureCoordinate.xy, textureCoordinate.z / 4.0, 1.0), texture(textureArraySampler, textureCoordinate), 0.5);
 }

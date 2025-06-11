@@ -12,6 +12,9 @@ namespace ProjectA {
 
 		glSamplerParameteri(object, GL_TEXTURE_MAG_FILTER, getGlFilter(descriptor.magFilter));
 		glSamplerParameteri(object, GL_TEXTURE_MIN_FILTER, getGlFilter(descriptor.minFilter));
+		glSamplerParameteri(object, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glSamplerParameteri(object, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glSamplerParameteri(object, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	}
 
 	OpenGLSampler::~OpenGLSampler() {

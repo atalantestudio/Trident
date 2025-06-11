@@ -75,7 +75,7 @@ namespace ProjectA {
 		colorAttachmentImageDescriptor.height = swapchain->getExtentHeight();
 		colorAttachmentImageDescriptor.depth = 1;
 		colorAttachmentImageDescriptor.mipLevelCount = 1;
-		colorAttachmentImageDescriptor.arrayLayerCount = 1;
+		colorAttachmentImageDescriptor.layerCount = 1;
 
 		colorImage = renderPass->createColorAttachmentImage(colorAttachmentImageDescriptor, 0);
 
@@ -95,7 +95,7 @@ namespace ProjectA {
 		depthStencilAttachmentImageDescriptor.height = swapchain->getExtentHeight();
 		depthStencilAttachmentImageDescriptor.depth = 1;
 		depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
-		depthStencilAttachmentImageDescriptor.arrayLayerCount = 1;
+		depthStencilAttachmentImageDescriptor.layerCount = 1;
 
 		depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor);
 
