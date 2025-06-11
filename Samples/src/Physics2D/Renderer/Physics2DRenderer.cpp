@@ -211,8 +211,8 @@ namespace ProjectA {
 		gridRenderPipelineDescriptor.renderPass = renderPass;
 		gridRenderPipelineDescriptor.pipelineLayout = gridPipelineLayout;
 		gridRenderPipelineDescriptor.vertexInputBindings = {gridVertexInputBinding};
-		gridRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Grid.vert.spv", gridVertexShaderModuleDescriptor);
-		gridRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Grid.frag.spv", gridFragmentShaderModuleDescriptor);
+		gridRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Grid.vert", gridVertexShaderModuleDescriptor);
+		gridRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Grid.frag", gridFragmentShaderModuleDescriptor);
 		gridRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		gridRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		gridRenderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -260,8 +260,8 @@ namespace ProjectA {
 		centerOfMassRenderPipelineDescriptor.renderPass = renderPass;
 		centerOfMassRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		centerOfMassRenderPipelineDescriptor.vertexInputBindings = {centerOfMassVertexInputBinding};
-		centerOfMassRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/CenterOfMass.vert.spv", centerOfMassVertexShaderModuleDescriptor);
-		centerOfMassRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/CenterOfMass.frag.spv", centerOfMassFragmentShaderModuleDescriptor);
+		centerOfMassRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/CenterOfMass.vert", centerOfMassVertexShaderModuleDescriptor);
+		centerOfMassRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/CenterOfMass.frag", centerOfMassFragmentShaderModuleDescriptor);
 		centerOfMassRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
 		centerOfMassRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
 		centerOfMassRenderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -327,8 +327,8 @@ namespace ProjectA {
 		distanceRenderPipelineDescriptor.renderPass = renderPass;
 		distanceRenderPipelineDescriptor.pipelineLayout = distancePipelineLayout;
 		distanceRenderPipelineDescriptor.vertexInputBindings = {distanceVertexInputBinding};
-		distanceRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Distance.vert.spv", distanceVertexShaderModuleDescriptor);
-		distanceRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Distance.frag.spv", distanceFragmentShaderModuleDescriptor);
+		distanceRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Distance.vert", distanceVertexShaderModuleDescriptor);
+		distanceRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Distance.frag", distanceFragmentShaderModuleDescriptor);
 		distanceRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
 		distanceRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
 		distanceRenderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -402,8 +402,8 @@ namespace ProjectA {
 		vertexFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		vertexFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		vertexFeatureRenderPipelineDescriptor.vertexInputBindings = {vertexFeatureVertexInputBinding};
-		vertexFeatureRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/VertexFeature.vert.spv", vertexFeatureVertexShaderModuleDescriptor);
-		vertexFeatureRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/VertexFeature.frag.spv", vertexFeatureFragmentShaderModuleDescriptor);
+		vertexFeatureRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/VertexFeature.vert", vertexFeatureVertexShaderModuleDescriptor);
+		vertexFeatureRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/VertexFeature.frag", vertexFeatureFragmentShaderModuleDescriptor);
 		vertexFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
 		vertexFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
 		vertexFeatureRenderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -436,8 +436,8 @@ namespace ProjectA {
 		edgeFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		edgeFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		edgeFeatureRenderPipelineDescriptor.vertexInputBindings = {edgeFeatureVertexInputBinding};
-		edgeFeatureRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/EdgeFeature.vert.spv", edgeFeatureVertexShaderModuleDescriptor);
-		edgeFeatureRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/EdgeFeature.frag.spv", edgeFeatureFragmentShaderModuleDescriptor);
+		edgeFeatureRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/EdgeFeature.vert", edgeFeatureVertexShaderModuleDescriptor);
+		edgeFeatureRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/EdgeFeature.frag", edgeFeatureFragmentShaderModuleDescriptor);
 		edgeFeatureRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
 		edgeFeatureRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
 		edgeFeatureRenderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -586,8 +586,8 @@ namespace ProjectA {
 		fillRenderPipelineDescriptor.renderPass = renderPass;
 		fillRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, fillInstanceInputBinding};
-		fillRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Fill.vert.spv", vertexShaderModuleDescriptor);
-		fillRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Fill.frag.spv", fragmentShaderModuleDescriptor);
+		fillRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Fill.vert", vertexShaderModuleDescriptor);
+		fillRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Fill.frag", fragmentShaderModuleDescriptor);
 		fillRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		fillRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		fillRenderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -612,8 +612,8 @@ namespace ProjectA {
 		strokeRenderPipelineDescriptor.renderPass = renderPass;
 		strokeRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, strokeInstanceInputBinding};
-		strokeRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Stroke.vert.spv", vertexShaderModuleDescriptor);
-		strokeRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Stroke.frag.spv", fragmentShaderModuleDescriptor);
+		strokeRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Stroke.vert", vertexShaderModuleDescriptor);
+		strokeRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/Stroke.frag", fragmentShaderModuleDescriptor);
 		strokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
 		strokeRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
 		strokeRenderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -667,7 +667,7 @@ namespace ProjectA {
 
 		fillRenderPipelineDescriptor.pipelineLayout = placeholderFillPipelineLayout;
 		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, placeholderFillInstanceInputBinding};
-		fillRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/PlaceholderFill.vert.spv", vertexShaderModuleDescriptor);
+		fillRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/PlaceholderFill.vert", vertexShaderModuleDescriptor);
 		fillRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
 		fillRenderPipelineDescriptor.depthStencilState.depthTest = false;
 
@@ -683,8 +683,8 @@ namespace ProjectA {
 
 		strokeRenderPipelineDescriptor.pipelineLayout = placeholderStrokePipelineLayout;
 		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, placeholderStrokeInstanceInputBinding};
-		strokeRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/PlaceholderStroke.vert.spv", vertexShaderModuleDescriptor);
-		strokeRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/PlaceholderStroke.frag.spv", fragmentShaderModuleDescriptor);
+		strokeRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/PlaceholderStroke.vert", vertexShaderModuleDescriptor);
+		strokeRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/PlaceholderStroke.frag", fragmentShaderModuleDescriptor);
 		strokeRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
 		strokeRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
@@ -695,8 +695,8 @@ namespace ProjectA {
 		placeholderCenterOfMassRenderPipelineDescriptor.renderPass = renderPass;
 		placeholderCenterOfMassRenderPipelineDescriptor.pipelineLayout = placeholderFillPipelineLayout;
 		placeholderCenterOfMassRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-		placeholderCenterOfMassRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/PlaceholderCenterOfMass.vert.spv", vertexShaderModuleDescriptor);
-		placeholderCenterOfMassRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/CenterOfMass.frag.spv", fragmentShaderModuleDescriptor);
+		placeholderCenterOfMassRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/PlaceholderCenterOfMass.vert", vertexShaderModuleDescriptor);
+		placeholderCenterOfMassRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Physics2D/CenterOfMass.frag", fragmentShaderModuleDescriptor);
 		placeholderCenterOfMassRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::POINT_LIST;
 		placeholderCenterOfMassRenderPipelineDescriptor.polygonMode = PolygonMode::POINT;
 		placeholderCenterOfMassRenderPipelineDescriptor.cullMode = CullMode::BACK;

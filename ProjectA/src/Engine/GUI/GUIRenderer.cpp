@@ -251,8 +251,8 @@ namespace ProjectA {
 		subcomponentRenderPipelineDescriptor.renderPass = renderPass;
 		subcomponentRenderPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
 		subcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, subcomponentInputBinding};
-		subcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert.spv", vertexShaderModuleDescriptor);
-		subcomponentRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.frag.spv", fragmentShaderModuleDescriptor);
+		subcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert", vertexShaderModuleDescriptor);
+		subcomponentRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.frag", fragmentShaderModuleDescriptor);
 		subcomponentRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		subcomponentRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		subcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -292,8 +292,8 @@ namespace ProjectA {
 		glyphSubcomponentRenderPipelineDescriptor.renderPass = renderPass;
 		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = glyphSubcomponentPipelineLayout;
 		glyphSubcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, glyphSubcomponentVertexInputBinding};
-		glyphSubcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.vert.spv", vertexShaderModuleDescriptor);
-		glyphSubcomponentRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.frag.spv", fragmentShaderModuleDescriptor);
+		glyphSubcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.vert", vertexShaderModuleDescriptor);
+		glyphSubcomponentRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.frag", fragmentShaderModuleDescriptor);
 		glyphSubcomponentRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		glyphSubcomponentRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		glyphSubcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;

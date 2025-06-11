@@ -99,8 +99,8 @@ namespace ProjectA {
 					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/ArrayTextureOrTextureArray.vert.spv", vertexShaderModuleDescriptor);
-					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/ArrayTexture.frag.spv", fragmentShaderModuleDescriptor);
+					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/ArrayTextureOrTextureArray.vert", vertexShaderModuleDescriptor);
+					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/ArrayTexture.frag", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 					renderPipelineDescriptor.cullMode = CullMode::BACK;

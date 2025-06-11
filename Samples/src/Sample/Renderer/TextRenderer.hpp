@@ -105,8 +105,8 @@ namespace ProjectA {
 					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Glyph.vert.spv", vertexShaderModuleDescriptor);
-					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Glyph.frag.spv", fragmentShaderModuleDescriptor);
+					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Glyph.vert", vertexShaderModuleDescriptor);
+					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Glyph.frag", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 					renderPipelineDescriptor.cullMode = CullMode::BACK;

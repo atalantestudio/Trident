@@ -13,6 +13,8 @@
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
+#include "Engine/config.hpp"
+
 namespace ProjectA {
 	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const Window& window) :
 		renderingContext(window),
@@ -159,7 +161,11 @@ namespace ProjectA {
 	}
 
 	ref<ShaderModule> OpenGLGraphicsAdapter::createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const {
-		return createRef<OpenGLShaderModule>(code, descriptor);
+		#ifdef OPENGL_USE_SPIRV
+			return createRef<OpenGLShaderModule>(code, descriptor);
+		#else
+			return createRef<OpenGLShaderModule>(code, descriptor.stage);
+		#endif
 	}
 
 	ref<Swapchain> OpenGLGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {

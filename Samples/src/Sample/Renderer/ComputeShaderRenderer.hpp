@@ -86,7 +86,7 @@ namespace ProjectA {
 
 					ComputePipelineDescriptor computePipelineDescriptor;
 					computePipelineDescriptor.pipelineLayout = computePipelineLayout;
-					computePipelineDescriptor.computeShaderModule = loadShaderModule("Asset/Shader/ImageUVGradient.comp.spv", computeShaderModuleDescriptor);
+					computePipelineDescriptor.computeShaderModule = loadShaderModule("Asset/Shader/ImageUVGradient.comp", computeShaderModuleDescriptor);
 
 					computePipeline = createComputePipeline(computePipelineDescriptor);
 				}
@@ -183,8 +183,8 @@ namespace ProjectA {
 					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Vertex2DUV.vert.spv", vertexShaderModuleDescriptor);
-					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/TextureRGBA.frag.spv", fragmentShaderModuleDescriptor);
+					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Vertex2DUV.vert", vertexShaderModuleDescriptor);
+					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/TextureRGBA.frag", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 					renderPipelineDescriptor.cullMode = CullMode::BACK;

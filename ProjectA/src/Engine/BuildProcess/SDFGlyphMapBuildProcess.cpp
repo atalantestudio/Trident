@@ -129,7 +129,7 @@ namespace ProjectA {
 
 		ComputePipelineDescriptor glyphImagePipelineDescriptor;
 		glyphImagePipelineDescriptor.pipelineLayout = glyphImagePipelineLayout;
-		glyphImagePipelineDescriptor.computeShaderModule = Renderer::loadShaderModule("../ProjectA/src/Asset/Shader/GlyphImage.comp.spv", glyphImageShaderModuleDescriptor);
+		glyphImagePipelineDescriptor.computeShaderModule = Renderer::loadShaderModule("../ProjectA/src/Asset/Shader/GlyphImage.comp", glyphImageShaderModuleDescriptor);
 
 		const ref<ComputePipeline> glyphImagePipeline = Renderer::createComputePipeline(glyphImagePipelineDescriptor);
 
@@ -181,7 +181,7 @@ namespace ProjectA {
 
 		ComputePipelineDescriptor glyphSdfPipelineDescriptor;
 		glyphSdfPipelineDescriptor.pipelineLayout = glyphSdfPipelineLayout;
-		glyphSdfPipelineDescriptor.computeShaderModule = Renderer::loadShaderModule("../ProjectA/src/Asset/Shader/GlyphDistanceField.comp.spv", glyphSdfShaderModuleDescriptor);
+		glyphSdfPipelineDescriptor.computeShaderModule = Renderer::loadShaderModule("../ProjectA/src/Asset/Shader/GlyphDistanceField.comp", glyphSdfShaderModuleDescriptor);
 
 		const ref<ComputePipeline> glyphSdfPipeline = Renderer::createComputePipeline(glyphSdfPipelineDescriptor);
 

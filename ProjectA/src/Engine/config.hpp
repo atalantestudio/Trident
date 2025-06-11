@@ -9,4 +9,7 @@ namespace ProjectA {
 	// For glyphs with a single contour, checks if the contour is counter-clockwise.
 	// If so, inverts it before building the glyph map.
 	#define TTF_FIX_INVERTED_CONTOURS
+
+	// Use SPIR-V to store OpenGL shader modules.
+	#define OPENGL_USE_SPIRV
 }
