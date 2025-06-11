@@ -48,7 +48,7 @@ namespace ProjectA {
 
 							// TODO: Use correct access.
 							// TODO: Only call glBindImageTexture if the pipeline is a compute pipeline.
-							glBindImageTexture(binding, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, format);
+							glBindImageTexture(binding + unit, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, format);
 						}
 					}
 				}
