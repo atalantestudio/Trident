@@ -99,7 +99,7 @@ namespace ProjectA {
 			default:
 				const char* TypeString = static_cast<char*>(static_cast<void*>(&Chunk.Type));
 
-				ENGINE_WARN("Unhandled chunk \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
+				ENGINE_WARN("Ignored unhandled PNG chunk type \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
 
 				stream.jump(Chunk.ByteLength);
 
