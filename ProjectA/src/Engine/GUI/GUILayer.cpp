@@ -2,17 +2,11 @@
 
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/Application.hpp"
-#include "Engine/ECS/Component/GUIComponent.hpp"
-#include "Engine/ECS/Component/ScriptComponent.hpp"
 #include "Engine/GUI/GUILayer.hpp"
-#include "Engine/Renderer/Font/Bitmap/BitmapFont.hpp"
-#include "Engine/Renderer/Font/Bitmap/BitmapGlyphMap.hpp"
 
 namespace ProjectA {
 	GUILayer::GUILayer() {
-		defaultImageIndex = renderer.registerDefaultImage();
-
-		loadDefaultFont();
+		renderer.registerDefaultImage();
 
 		renderer.build();
 
@@ -33,18 +27,22 @@ namespace ProjectA {
 		}
 	}*/
 
-	void GUILayer::loadDefaultFont() {
-		defaultFont = createScope<TrueTypeFont>("../ProjectA/src/Asset/Font/test.ttf");
-		defaultFontImageIndex = renderer.registerImage(defaultFont->getSdfImage());
-
+	GUILayer::FontID GUILayer::loadFont(std::string_view path) {
+		// "../ProjectA/src/Asset/Font/test.ttf"
 		/*defaultFont->textureIndex = static_cast<uint32>(images.size());
 		defaultFont->glyphMap.map = QUIVER_BITMAP_GLYPH_MAP;
         defaultFont->glyphMap.base = 32;
         defaultFont->glyphMap.count = 220;
         defaultFont->tileHeight = 12;
-        defaultFont->tileSpacing = 1;
+        defaultFont->tileSpacing = 1;*/
 
-		fonts.emplace_back(defaultFont);*/
+		const FontID fontId = fontCount;
+
+		fonts[fontCount] = createScope<TrueTypeFont>(path);
+
+		fontCount += 1;
+
+		return fontId;
 	}
 
 	/*void GUILayer::registerEntityPool() {
@@ -101,7 +99,7 @@ namespace ProjectA {
 		return true;
 	}
 
-	ImageID GUILayer::loadImage(std::string_view path) {
+	GUILayer::ImageID GUILayer::loadImage(std::string_view path) {
 		return renderer.registerImage(path);
 	}
 
@@ -164,9 +162,31 @@ namespace ProjectA {
 			static_cast<sint16>(-padding.height),
 		};
 
-		registerQuadComponent(container.origin, container.size, defaultImageIndex, color);
+		registerQuadComponent(container.origin, container.size, DEFAULT_IMAGE_ID, color);
 
 		return container;
+	}
+
+	void GUILayer::popContainer(GUIContainer& container) {
+		container.iteration = true;
+
+		layoutDirection = container.parentLayoutDirection;
+		layoutSpacing = container.parentLayoutSpacing;
+
+		if (container.root) {
+			rootComponent = true;
+
+			componentOrigin[HORIZONTAL] = container.padding.width;
+			componentOrigin[VERTICAL] -= container.padding.height;
+		}
+
+		// Set the component origin to the end of the popped container.
+		componentOrigin[layoutDirection] = container.origin[layoutDirection] + container.size[layoutDirection] + layoutSpacing;
+		componentOrigin[!layoutDirection] = container.origin[!layoutDirection];
+
+		// Set the current container sizes to the parent container sizes.
+		currentContainerSize = container.parentSize;
+		currentContainerInnerSize = container.parentInnerSize;
 	}
 
 	void GUILayer::registerQuadComponent(GUISize origin, GUISize size, ImageID imageId, const vec4<float32>& color) {
@@ -186,7 +206,7 @@ namespace ProjectA {
 	}
 
 	void GUILayer::GUIQuad(GUISize size, const vec4<float32>& color) {
-		return GUIQuad(size, defaultImageIndex, color);
+		return GUIQuad(size, DEFAULT_IMAGE_ID, color);
 	}
 
 	void GUILayer::GUIQuad(GUISize size, ImageID imageId, const vec4<float32>& color) {
@@ -198,7 +218,9 @@ namespace ProjectA {
 	}
 
 	void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
-		const float32 lineHeight = static_cast<float32>(defaultFont->getLineHeight());
+		constexpr FontID fontIndex = 0;
+
+		const float32 lineHeight = static_cast<float32>(fonts[fontIndex]->getLineHeight());
 
 		float32 positionX = componentOrigin[0];
 		float32 positionY = componentOrigin[1];
@@ -208,7 +230,7 @@ namespace ProjectA {
 
 		for (const char glyph : string) {
 			const uint16 codePoint = static_cast<uint16>(glyph);
-			const TrueTypeGlyph& glyph = (*defaultFont)[codePoint];
+			const TrueTypeGlyph& glyph = (*fonts[fontIndex])[codePoint];
 			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
 
 			if (!glyph.invisible) {
@@ -227,7 +249,7 @@ namespace ProjectA {
 				const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
 				const mat3x3<float32> imageTransform = mat3x3<float32>::scaling(uvEnd - uvStart) * mat3x3<float32>::translation(uvStart);
 
-				renderer.registerGlyphSubcomponent(transform, imageTransform, defaultFontImageIndex, textStyle);
+				renderer.registerGlyphSubcomponent(transform, imageTransform, fontIndex, textStyle);
 			}
 
 			positionX += advanceWidth;
@@ -240,6 +262,8 @@ namespace ProjectA {
 	}
 
 	bool GUILayer::GUIButton(const std::string& string, const ButtonStyle& buttonStyle) {
+		constexpr FontID fontIndex = 0;
+
 		// 1. Calculate the minimum size that fully encloses the text.
 		GUISize size;
 
@@ -248,25 +272,25 @@ namespace ProjectA {
 
 		for (const char glyph : string) {
 			const uint16 codePoint = static_cast<uint16>(glyph);
-			const TrueTypeGlyph& glyph = (*defaultFont)[codePoint];
+			const TrueTypeGlyph& glyph = (*fonts[fontIndex])[codePoint];
 			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * buttonStyle.textStyle->fontSize);
 
 			size.width += static_cast<sint16>(advanceWidth);
 		}
 
 		// 2. Register a quad having the same size.
-		registerQuadComponent({componentOrigin[0], componentOrigin[1]}, size, defaultImageIndex, {0.5f, 0.5f, 0.5f, 1.0f});
+		registerQuadComponent({componentOrigin[0], componentOrigin[1]}, size, DEFAULT_IMAGE_ID, {0.5f, 0.5f, 0.5f, 1.0f});
 
 		// 3. Register the text on top of it.
 		{
-			const float32 lineHeight = static_cast<float32>(defaultFont->getLineHeight());
+			const float32 lineHeight = static_cast<float32>(fonts[fontIndex]->getLineHeight());
 
 			float32 positionX = componentOrigin[0];
 			float32 positionY = componentOrigin[1];
 
 			for (const char glyph : string) {
 				const uint16 codePoint = static_cast<uint16>(glyph);
-				const TrueTypeGlyph& glyph = (*defaultFont)[codePoint];
+				const TrueTypeGlyph& glyph = (*fonts[fontIndex])[codePoint];
 				const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * buttonStyle.textStyle->fontSize);
 
 				if (!glyph.invisible) {
@@ -285,7 +309,7 @@ namespace ProjectA {
 					const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
 					const mat3x3<float32> imageTransform = mat3x3<float32>::scaling(uvEnd - uvStart) * mat3x3<float32>::translation(uvStart);
 
-					renderer.registerGlyphSubcomponent(transform, imageTransform, defaultFontImageIndex, *buttonStyle.textStyle);
+					renderer.registerGlyphSubcomponent(transform, imageTransform, fontIndex, *buttonStyle.textStyle);
 				}
 
 				positionX += advanceWidth;
@@ -306,28 +330,6 @@ namespace ProjectA {
 		componentOrigin[layoutDirection] += size[layoutDirection] + layoutSpacing;
 
 		return hovered;
-	}
-
-	void GUILayer::popContainer(GUIContainer& container) {
-		container._iteration = true;
-
-		layoutDirection = container.parentLayoutDirection;
-		layoutSpacing = container.parentLayoutSpacing;
-
-		if (container.root) {
-			rootComponent = true;
-
-			componentOrigin[0] = container.padding.width;
-			componentOrigin[1] -= container.padding.height;
-		}
-
-		// Set the component origin to the end of the popped container.
-		componentOrigin[layoutDirection] = container.origin[layoutDirection] + container.size[layoutDirection] + layoutSpacing;
-		componentOrigin[!layoutDirection] = container.origin[!layoutDirection];
-
-		// Set the current container sizes to the parent container sizes.
-		currentContainerSize = container.parentSize;
-		currentContainerInnerSize = container.parentInnerSize;
 	}
 
 	bool GUILayer::intersects(GUISize origin, GUISize size, GUISize point) {

@@ -1,56 +1,22 @@
 #pragma once
 
+#include "Engine/GUI/Component/Container.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
-#include "Engine/GUI/GUISize.hpp"
-#include "Engine/GUI/LayoutDirection.hpp"
+#include "Engine/GUI/px.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"
 
 namespace ProjectA {
-	#pragma warning(disable: 4455)
-
-	// User-defined literals not prefixed with an underscore are forbidden,
-	// but for now I'll leave this here to keep consistency with a future transpiled scripting language.
-	constexpr sint16 operator"" px(uint64 a) {
-		const sint16 b = static_cast<sint16>(a);
-		const uint64 c = static_cast<uint64>(b);
-
-		DEBUG_ASSERT(a == c);
-
-		return b;
-	}
-
-	// Allows a GUI component to grow towards the desired direction.
-	constexpr sint16 EXPAND = -1;
-
-	typedef uint32 ImageID;
-
-	struct GUIContainer {
-		// Top-left corner of the container, excluding padding.
-		GUISize origin;
-
-		GUISize padding;
-
-		// Container size, including padding.
-		GUISize size;
-
-		// Container content size, excluding padding.
-		GUISize innerSize;
-
-		GUISize parentSize;
-		GUISize parentInnerSize;
-
-		// The parent layout direction for root containers is VERTICAL.
-		LayoutDirection parentLayoutDirection;
-
-		uint16 parentLayoutSpacing;
-
-		bool root;
-
-		bool _iteration = false;
+	enum LayoutDirection : uint8 {
+		HORIZONTAL = 0,
+		VERTICAL = 1,
 	};
 
 	class GUILayer : public Layer {
+		protected:
+			typedef uint32 FontID;
+			typedef uint32 ImageID;
+
 		public:
 			GUILayer();
 
@@ -67,6 +33,8 @@ namespace ProjectA {
 			virtual void onEvent(Event& event) final override;
 
 		protected:
+			FontID loadFont(std::string_view path);
+
 			ImageID loadImage(std::string_view path);
 
 			//void registerEntityPool();
@@ -79,6 +47,8 @@ namespace ProjectA {
 			GUIContainer pushContainer(GUISize size, GUISize padding, LayoutDirection layoutDirection, uint16 layoutSpacing);
 			GUIContainer pushContainer(GUISize size, GUISize padding, LayoutDirection layoutDirection, uint16 layoutSpacing, const vec4<float32>& color);
 
+			void popContainer(GUIContainer& container);
+
 			// Renders a colored quad.
 			void GUIQuad(GUISize size, const vec4<float32>& color);
 			void GUIQuad(GUISize size, ImageID imageId, const vec4<float32>& color = {1.0f, 1.0f, 1.0f, 1.0f});
@@ -87,11 +57,7 @@ namespace ProjectA {
 
 			bool GUIButton(const std::string& string, const ButtonStyle& buttonStyle);
 
-			void popContainer(GUIContainer& container);
-
 		private:
-			void loadDefaultFont();
-
 			// Renders a colored quad without moving the origin.
 			// origin is the top-left corner of the quad.
 			void registerQuadComponent(GUISize origin, GUISize size, ImageID imageId, const vec4<float32>& color);
@@ -102,6 +68,19 @@ namespace ProjectA {
 
 			bool onWindowResize(WindowResizeEvent& event);
 
+		protected:
+			static constexpr ImageID DEFAULT_IMAGE_ID = 0;
+
+			// Grow towards the layout direction.
+			static constexpr sint16 EXPAND = -1;
+
+			// Retreat towards the layout direction.
+			static constexpr sint16 SHRINK = -2;
+
+		private:
+			// static constexpr uint32 MAX_IMAGE_COUNT = 4;
+			static constexpr uint32 MAX_FONT_COUNT = 2;
+
 		private:
 			GUIRenderer renderer;
 			sint16 componentOrigin[2];
@@ -110,11 +89,10 @@ namespace ProjectA {
 			GUISize currentContainerSize;
 			GUISize currentContainerInnerSize;
 			bool rootComponent = true;
-			scope<TrueTypeFont> defaultFont;
 
-			ImageID defaultImageIndex;
-			ImageID defaultFontImageIndex;
+			std::array<scope<TrueTypeFont>, MAX_FONT_COUNT> fonts;
+			uint32 fontCount = 0;
 	};
-}
 
-#define GUIContainer(...) for (GUIContainer _container = pushContainer(__VA_ARGS__); !_container._iteration; popContainer(_container))
+	#define GUIContainer(...) for (GUIContainer _container = pushContainer(__VA_ARGS__); !_container.iteration; popContainer(_container))
+}
