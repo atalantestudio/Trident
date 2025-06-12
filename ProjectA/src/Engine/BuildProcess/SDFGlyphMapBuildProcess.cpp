@@ -138,8 +138,8 @@ namespace ProjectA {
 		glyphMapSdfImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphMapSdfImageDescriptor.format = ImageFormat::R8_UNORM;
 		glyphMapSdfImageDescriptor.usage = ImageUsage::STORAGE | ImageUsage::SAMPLED;
-		glyphMapSdfImageDescriptor.width = 2056;
-		glyphMapSdfImageDescriptor.height = 2056; // Can be set to 1024.
+		glyphMapSdfImageDescriptor.width = 2048;
+		glyphMapSdfImageDescriptor.height = 2048; // Can be set to 1024.
 		glyphMapSdfImageDescriptor.depth = 1;
 		glyphMapSdfImageDescriptor.mipLevelCount = 1;
 		glyphMapSdfImageDescriptor.layerCount = 1;
