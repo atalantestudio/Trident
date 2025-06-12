@@ -2,8 +2,6 @@
 
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 
-#include "Engine/config.hpp"
-
 namespace ProjectA {
 	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance) {
 		PROFILE_SCOPE(FUNC_SIG);

@@ -13,8 +13,6 @@
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
-#include "Engine/config.hpp"
-
 namespace ProjectA {
 	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const Window& window) :
 		renderingContext(window),

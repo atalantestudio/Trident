@@ -1,12 +1,11 @@
 #include "pch.hpp"
 
-#include "Engine/config.hpp"
 #include "Engine/Filesystem/File/TTFFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
-	/*#ifdef TTF_PARSER_VERIFY_CHECKSUM
+	/* #ifdef TTF_PARSER_VERIFY_CHECKSUM
 		static uint32 calculateTableChecksum(const uint32* table, uint32 byteCount) {
 			uint32 checksum = 0;
 			uint32 longCount = (byteCount + 3) / 4;
@@ -16,7 +15,7 @@ namespace ProjectA {
 
 			return checksum;
 		}
-	#endif*/
+	#endif */
 
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6head.html
 	static sint16 parseHeadTable(ByteStream& stream) {

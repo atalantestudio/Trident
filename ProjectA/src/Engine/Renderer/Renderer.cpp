@@ -8,7 +8,6 @@
 	#include "Backend/Vulkan/VulkanGraphicsAdapter.hpp"
 #endif
 
-#include "Engine/config.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 

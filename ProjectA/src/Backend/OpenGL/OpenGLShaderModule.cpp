@@ -4,15 +4,13 @@
 
 #include "Backend/OpenGL/ShaderStage.hpp"
 
-#include "Engine/config.hpp"
-
 namespace ProjectA {
 	OpenGLShaderModule::OpenGLShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) :
 		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const GLsizei length = static_cast<GLsizei>(code.count);
+		GLsizei length = static_cast<GLsizei>(code.count);
 
 		#ifdef OPENGL_USE_SPIRV
 			glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code, length);
@@ -20,10 +18,31 @@ namespace ProjectA {
 			// TODO: Expose specialization constants.
 			glSpecializeShader(object, descriptor.entryPoint.data(), 0, nullptr, nullptr);
 		#else
-			const GLchar* const string = static_cast<const GLchar* const>(static_cast<const void* const>(code));
+			std::string codeString(code.begin(), code.end());
 
-			// TODO: Handle custom entry point name.
-			// #define TheActualEntrypoint main
+			if (descriptor.entryPoint != "main") {
+				static const std::regex postVersionDirective("#version\\s+\\d+");
+
+				std::smatch matchResults;
+
+				const bool match = std::regex_search(codeString, matchResults, postVersionDirective);
+
+				ENGINE_ASSERT(match, "Could not find #version directive in GLSL string.");
+
+				const std::size_t offset = matchResults[0].length();
+
+				std::string entryPointDefine;
+				entryPointDefine += "\n#define ";
+				entryPointDefine += descriptor.entryPoint;
+				entryPointDefine += " main";
+
+				codeString.replace(offset, 0, entryPointDefine);
+
+				length = static_cast<GLsizei>(codeString.size());
+			}
+
+			const GLchar* const string = static_cast<const GLchar* const>(codeString.data());
+
 			glShaderSource(object, 1, &string, &length);
 			glCompileShader(object);
 		#endif
@@ -50,12 +69,13 @@ namespace ProjectA {
 
 		glGetShaderiv(object, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-		std::vector<GLchar> infoLog(infoLogLength);
+		sequence<GLchar> infoLog(infoLogLength);
 
-		glGetShaderInfoLog(object, infoLogLength, nullptr, infoLog.data());
+		glGetShaderInfoLog(object, infoLogLength, nullptr, infoLog);
 		glDeleteShader(object);
 
-		ENGINE_ERROR("Shader module compilation failed:\n[]", infoLog.data());
+		ENGINE_ERROR("Shader module compilation failed:\n[]", infoLog);
+
 		BREAKPOINT();
 	}
 }

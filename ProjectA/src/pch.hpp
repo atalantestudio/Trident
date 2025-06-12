@@ -20,6 +20,11 @@
 #endif
 
 #include "Engine/base.hpp"
+#include "Engine/config.hpp"
+
+#ifndef OPENGL_USE_SPIRV
+	#include <regex>
+#endif
 
 #include "Engine/lyah.hpp"
 

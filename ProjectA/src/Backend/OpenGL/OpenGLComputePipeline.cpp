@@ -24,11 +24,11 @@ namespace ProjectA {
 
 			glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-			std::vector<GLchar> infoLog(infoLogLength);
+			sequence<GLchar> infoLog(infoLogLength);
 
-			glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog.data());
+			glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog);
 
-			ENGINE_ERROR("Program linking failed:\n[]", infoLog.data());
+			ENGINE_ERROR("Program linking failed:\n[]", infoLog);
 
 			BREAKPOINT();
 		}
