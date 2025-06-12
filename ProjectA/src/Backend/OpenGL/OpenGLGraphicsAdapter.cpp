@@ -43,7 +43,11 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glClearBufferfi);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glClearBufferfv);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glClientWaitSync);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glCompileShader);
+
+		#ifndef OPENGL_USE_SPIRV
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glCompileShader);
+		#endif
+
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyNamedBufferSubData);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateBuffers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateFramebuffers);
@@ -87,9 +91,19 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedBufferStorage);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glProvokingVertex);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glSamplerParameteri);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderBinary);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderSource);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glSpecializeShader);
+
+		#ifdef OPENGL_USE_SPIRV
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderBinary);
+		#endif
+
+		#ifndef OPENGL_USE_SPIRV
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderSource);
+		#endif
+
+		#ifdef OPENGL_USE_SPIRV
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glSpecializeShader);
+		#endif
+
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage3D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2DMultisample);
@@ -161,11 +175,7 @@ namespace ProjectA {
 	}
 
 	ref<ShaderModule> OpenGLGraphicsAdapter::createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const {
-		#ifdef OPENGL_USE_SPIRV
-			return createRef<OpenGLShaderModule>(code, descriptor);
-		#else
-			return createRef<OpenGLShaderModule>(code, descriptor.stage);
-		#endif
+		return createRef<OpenGLShaderModule>(code, descriptor);
 	}
 
 	ref<Swapchain> OpenGLGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/config.hpp"
+
 namespace ProjectA {
 	extern PFNGLATTACHSHADERPROC glAttachShader;
 	extern PFNGLBINDBUFFERPROC glBindBuffer;
@@ -20,7 +22,11 @@ namespace ProjectA {
 	extern PFNGLCLEARBUFFERFIPROC glClearBufferfi;
 	extern PFNGLCLEARBUFFERFVPROC glClearBufferfv;
 	extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
-	extern PFNGLCOMPILESHADERPROC glCompileShader;
+
+	#ifndef OPENGL_USE_SPIRV
+		extern PFNGLCOMPILESHADERPROC glCompileShader;
+	#endif
+
 	extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
 	extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
 	extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
@@ -64,9 +70,19 @@ namespace ProjectA {
 	extern PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage;
 	extern PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
 	extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
-	extern PFNGLSHADERBINARYPROC glShaderBinary;
-	extern PFNGLSHADERSOURCEPROC glShaderSource;
-	extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
+
+	#ifdef OPENGL_USE_SPIRV
+		extern PFNGLSHADERBINARYPROC glShaderBinary;
+	#endif
+
+	#ifndef OPENGL_USE_SPIRV
+		extern PFNGLSHADERSOURCEPROC glShaderSource;
+	#endif
+
+	#ifdef OPENGL_USE_SPIRV
+		extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
+	#endif
+
 	extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D;
 	extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D;
 	extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;

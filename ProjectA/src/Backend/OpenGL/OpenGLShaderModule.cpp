@@ -4,21 +4,9 @@
 
 #include "Backend/OpenGL/ShaderStage.hpp"
 
+#include "Engine/config.hpp"
+
 namespace ProjectA {
-	OpenGLShaderModule::OpenGLShaderModule(const sequence<uint8>& code, ShaderStage stage) :
-		ObjectWrapper(glCreateShader(getGlShaderStage(stage)))
-	{
-		PROFILE_SCOPE(FUNC_SIG);
-
-		const GLchar* const string = static_cast<const GLchar* const>(static_cast<const void* const>(code));
-		const GLint length = static_cast<GLint>(code.count);
-
-		glShaderSource(object, 1, &string, &length);
-		glCompileShader(object);
-
-		checkCompileStatus();
-	}
-
 	OpenGLShaderModule::OpenGLShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) :
 		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
 	{
@@ -26,10 +14,19 @@ namespace ProjectA {
 
 		const GLsizei length = static_cast<GLsizei>(code.count);
 
-		glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code, length);
+		#ifdef OPENGL_USE_SPIRV
+			glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code, length);
 
-		// TODO: Expose specialization constants.
-		glSpecializeShader(object, descriptor.entryPoint.data(), 0, nullptr, nullptr);
+			// TODO: Expose specialization constants.
+			glSpecializeShader(object, descriptor.entryPoint.data(), 0, nullptr, nullptr);
+		#else
+			const GLchar* const string = static_cast<const GLchar* const>(static_cast<const void* const>(code));
+
+			// TODO: Handle custom entry point name.
+			// #define TheActualEntrypoint main
+			glShaderSource(object, 1, &string, &length);
+			glCompileShader(object);
+		#endif
 
 		checkCompileStatus();
 	}

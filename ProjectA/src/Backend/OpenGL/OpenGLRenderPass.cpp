@@ -58,42 +58,4 @@ namespace ProjectA {
 
 		return createRef<OpenGLImage>(depthStencilImageDescriptor);
 	}
-
-	GLuint OpenGLRenderPass::createScreenProgram() {
-		const sequence<uint8> screenVertexShaderModuleCode = Filesystem::openBuffer("../ProjectA/src/Asset/Shader/Screen.vert");
-		const OpenGLShaderModule screenVertexShaderModule(screenVertexShaderModuleCode, ShaderStage::VERTEX);
-
-		const sequence<uint8> screenFragmentShaderModuleCode = Filesystem::openBuffer("../ProjectA/src/Asset/Shader/Screen.frag");
-		const OpenGLShaderModule screenFragmentShaderModule(screenFragmentShaderModuleCode, ShaderStage::FRAGMENT);
-
-		const GLuint screenProgram = glCreateProgram();
-
-		glAttachShader(screenProgram, screenVertexShaderModule.object);
-		glAttachShader(screenProgram, screenFragmentShaderModule.object);
-		glLinkProgram(screenProgram);
-
-		GLint linkStatus;
-
-		glGetProgramiv(screenProgram, GL_LINK_STATUS, &linkStatus);
-
-		if (linkStatus != GL_TRUE) {
-			GLint infoLogLength;
-
-			glGetProgramiv(screenProgram, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-			std::vector<GLchar> infoLog(infoLogLength);
-
-			glGetProgramInfoLog(screenProgram, infoLogLength, nullptr, infoLog.data());
-
-			ENGINE_ERROR("Screen program linking failed:\n[]", infoLog.data());
-			BREAKPOINT();
-
-			return 0;
-		}
-
-		glDetachShader(screenProgram, screenVertexShaderModule.object);
-		glDetachShader(screenProgram, screenFragmentShaderModule.object);
-
-		return screenProgram;
-	}
 }
