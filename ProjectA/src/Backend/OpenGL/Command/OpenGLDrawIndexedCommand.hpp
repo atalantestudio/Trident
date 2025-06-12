@@ -14,12 +14,7 @@ namespace ProjectA {
 			{}
 
 			void execute() const override {
-				if (instancecount == 1) {
-					glDrawElements(mode, count, type, indices);
-				}
-				else {
-					glDrawElementsInstanced(mode, count, type, indices, instancecount);
-				}
+				glDrawElementsInstanced(mode, count, type, indices, instancecount);
 			}
 
 		private:

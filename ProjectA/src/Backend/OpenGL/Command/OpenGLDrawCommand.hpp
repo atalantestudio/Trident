@@ -13,12 +13,7 @@ namespace ProjectA {
 			{}
 
 			void execute() const override {
-				if (instancecount == 1) {
-					glDrawArrays(mode, first, count);
-				}
-				else {
-					glDrawArraysInstanced(mode, first, count, instancecount);
-				}
+				glDrawArraysInstanced(mode, first, count, instancecount);
 			}
 
 		private:
