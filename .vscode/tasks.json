@@ -7,6 +7,7 @@
 			"command": "MSBuild.exe",
 			"args": [
 				"ProjectA.sln",
+				"/t:Build",
 				"/property:Configuration=Debug"
 			],
 			"group": {
@@ -23,6 +24,7 @@
 			"command": "MSBuild.exe",
 			"args": [
 				"ProjectA.sln",
+				"/t:Build",
 				"/property:Configuration=Profile"
 			],
 			"group": {
@@ -39,6 +41,7 @@
 			"command": "MSBuild.exe",
 			"args": [
 				"ProjectA.sln",
+				"/t:Build",
 				"/property:Configuration=Release"
 			],
 			"group": {
