@@ -2,6 +2,8 @@
 
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 
+#include "Engine/config.hpp"
+
 namespace ProjectA {
 	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance) {
 		PROFILE_SCOPE(FUNC_SIG);
@@ -41,6 +43,31 @@ namespace ProjectA {
 		ENGINE_ASSERT(bestPhysicalDeviceScore > 0, "Could not select a suitable physical device.");
 
 		object = physicalDevices[bestPhysicalDeviceIndex];
+
+		vkGetPhysicalDeviceProperties(object, &properties);
+
+		std::string deviceType;
+
+		switch (properties.deviceType) {
+			case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+				deviceType = " (integrated GPU)";
+
+				break;
+			case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+				deviceType = " (discrete GPU)";
+
+				break;
+			case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+				deviceType = " (virtual GPU)";
+
+				break;
+			case VK_PHYSICAL_DEVICE_TYPE_CPU:
+				deviceType = " (CPU)";
+
+				break;
+		}
+
+		ENGINE_INFO("Using [][].", properties.deviceName, deviceType);
 
 		uint32 queueFamilyPropertyCount;
 
@@ -89,41 +116,24 @@ namespace ProjectA {
 
 		vkGetPhysicalDeviceFeatures(object, &features);
 		vkGetPhysicalDeviceMemoryProperties(object, &memoryProperties);
-		vkGetPhysicalDeviceProperties(object, &properties);
-
-		std::string deviceType;
-
-		switch (properties.deviceType) {
-			case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-				deviceType = " (integrated GPU)";
-
-				break;
-			case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-				deviceType = " (discrete GPU)";
-
-				break;
-			case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
-				deviceType = " (virtual GPU)";
-
-				break;
-			case VK_PHYSICAL_DEVICE_TYPE_CPU:
-				deviceType = " (CPU)";
-
-				break;
-		}
-
-		ENGINE_INFO("Using [][].", properties.deviceName, deviceType);
 
 		setLimits();
 	}
 
 	uint32 VulkanPhysicalDevice::calculateScore() const {
-		uint32 score = 1;
+		uint32 score = 0;
 
-		// Prefer discrete GPUs over integrated GPUs.
-		if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-			score += 1;
-		}
+		#if PREFERRED_GPU_TYPE == GPU_TYPE_DISCRETE
+			if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+				score += 1;
+			}
+		#endif
+
+		#if PREFERRED_GPU_TYPE == GPU_TYPE_INTEGRATED
+			if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
+				score += 1;
+			}
+		#endif
 
 		return score;
 	}

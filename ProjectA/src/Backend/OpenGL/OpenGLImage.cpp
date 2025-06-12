@@ -37,10 +37,12 @@ namespace ProjectA {
 				break;
 			case GL_PROXY_TEXTURE_1D_ARRAY:
 			case GL_PROXY_TEXTURE_2D:
+			case GL_PROXY_TEXTURE_2D_MULTISAMPLE:
 			case GL_PROXY_TEXTURE_CUBE_MAP:
 			case GL_PROXY_TEXTURE_RECTANGLE:
 			case GL_TEXTURE_1D_ARRAY:
 			case GL_TEXTURE_2D:
+			case GL_TEXTURE_2D_MULTISAMPLE:
 			case GL_TEXTURE_CUBE_MAP:
 			case GL_TEXTURE_RECTANGLE:
 				if (descriptor.sampleCount > 1) {
@@ -52,9 +54,11 @@ namespace ProjectA {
 
 				break;
 			case GL_PROXY_TEXTURE_2D_ARRAY:
+			case GL_PROXY_TEXTURE_2D_MULTISAMPLE_ARRAY:
 			case GL_PROXY_TEXTURE_3D:
 			case GL_PROXY_TEXTURE_CUBE_MAP_ARRAY:
 			case GL_TEXTURE_2D_ARRAY:
+			case GL_TEXTURE_2D_MULTISAMPLE_ARRAY:
 			case GL_TEXTURE_3D:
 			case GL_TEXTURE_CUBE_MAP_ARRAY:
 				ENGINE_ASSERT(descriptor.depth == 1, "The OpenGL adapter only supports texture arrays of depth 1.");
@@ -67,10 +71,22 @@ namespace ProjectA {
 				}
 
 				break;
+			default:
+				ENGINE_ERROR("Unhandled image target ([]).", target);
+				DEBUG_ASSERT(false);
+
+				break;
 		}
 
-		// TODO: Check GL_TEXTURE_IMMUTABLE_FORMAT after creation.
-		// glGetTextureParameteriv + GL_TEXTURE_IMMUTABLE_FORMAT
+		glBindTexture(target, object);
+
+		GLint immutableFormat;
+
+		glGetTexParameteriv(target, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
+
+		ENGINE_ASSERT(immutableFormat != GL_FALSE, "Only immutable image formats are not supported.");
+
+		glBindTexture(target, 0);
 	}
 
 	OpenGLImage::~OpenGLImage() {

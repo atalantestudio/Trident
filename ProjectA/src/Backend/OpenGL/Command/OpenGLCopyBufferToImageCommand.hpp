@@ -47,9 +47,6 @@ namespace ProjectA {
 					case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
 					case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
 					case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
-						// TODO: Test this path.
-						DEBUG_ASSERT(false);
-
 						glTextureSubImage2D(
 							texture,
 							copyRegion->imageMipLevel,
@@ -78,6 +75,11 @@ namespace ProjectA {
 							GL_UNSIGNED_BYTE,
 							pixels
 						);
+
+						break;
+					default:
+						ENGINE_ERROR("Unhandled image target ([]).", target);
+						DEBUG_ASSERT(false);
 
 						break;
 				}

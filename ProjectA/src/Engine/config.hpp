@@ -1,6 +1,13 @@
 #pragma once
 
 namespace ProjectA {
+	#define GPU_TYPE_DISCRETE 0
+	#define GPU_TYPE_INTEGRATED 1
+
+	// The physical device preferred by the application.
+	// There is no guarantee that it will be selected at runtime.
+	#define PREFERRED_GPU_TYPE GPU_TYPE_DISCRETE
+
 	#define PROJECT_ROOT_DIRECTORY "/"
 
 	// Verify the validity of the checksum for each table of a TTF file.

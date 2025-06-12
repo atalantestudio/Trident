@@ -4,10 +4,12 @@
 #include "Engine/config.hpp"
 
 extern "C" {
-	// Prefer discrete GPU over integrated GPU.
-	// NOTE: AmdPowerXpressRequestHighPerformance seems to be recognized even on a laptop with no AMD card.
-	// __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-	// __declspec(dllexport) unsigned int NvOptimusEnablement = 1;
+	#if PREFERRED_GPU_TYPE == GPU_TYPE_DISCRETE
+		// NOTE: AmdPowerXpressRequestHighPerformance seems to be recognized even on a laptop with no AMD card.
+		__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+
+		__declspec(dllexport) unsigned int NvOptimusEnablement = 1;
+	#endif
 }
 
 #ifdef PLATFORM_WINDOWS
