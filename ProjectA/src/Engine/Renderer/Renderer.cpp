@@ -173,16 +173,18 @@ namespace ProjectA {
 	ref<ShaderModule> Renderer::loadShaderModule(std::string_view path, const ShaderModuleDescriptor& descriptor) {
 		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
 
-		#ifdef OPENGL_USE_SPIRV
-			// TODO: This block only targets OpenGL. Move it inside the corresponding adapter.
-			std::string pathString(path);
+		std::string pathString(path);
 
-			if (graphicsApi == GraphicsAPI::OPENGL) {
-				pathString += ".spv";
+		if (
+			graphicsApi == GraphicsAPI::VULKAN
+			#ifdef OPENGL_USE_SPIRV
+				|| graphicsApi == GraphicsAPI::OPENGL
+			#endif
+		) {
+			pathString += ".spv";
 
-				path = pathString;
-			}
-		#endif
+			path = pathString;
+		}
 
 		const sequence<uint8> code = Filesystem::openBuffer(path);
 

@@ -51,7 +51,6 @@ namespace ProjectA {
 					textureArrayDescriptor.depth = 1;
 					textureArrayDescriptor.mipLevelCount = 1;
 					textureArrayDescriptor.layerCount = 4;
-					// textureArrayDescriptor.layerCount = static_cast<uint32>(ASSET_PATHS.size());
 					textureArrayDescriptor.sampleCount = 1;
 					textureArrayDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
@@ -83,7 +82,7 @@ namespace ProjectA {
 						bufferImageCopyRegion.imageOffsetY = 0;
 						bufferImageCopyRegion.imageOffsetZ = 0;
 						bufferImageCopyRegion.imageMipLevel = 0;
-						bufferImageCopyRegion.imageBaseArrayLayer = assetIndex;
+						bufferImageCopyRegion.imageLayerOffset = assetIndex;
 						bufferImageCopyRegion.imageLayerCount = 1;
 					}
 
@@ -305,11 +304,11 @@ namespace ProjectA {
 			};
 
 		private:
-			static constexpr std::array<std::string_view, 1> ASSET_PATHS = {
+			static constexpr std::array<std::string_view, 4> ASSET_PATHS = {
 				"Asset/Image/Baboon.png",
-				// "Asset/Image/Cameraman.png",
-				// "Asset/Image/Lenna.png",
-				// "Asset/Image/Pepper.png",
+				"Asset/Image/Cameraman.png",
+				"Asset/Image/Lenna.png",
+				"Asset/Image/Pepper.png",
 			};
 
 			static constexpr uint32 TEXTURE_ARRAY_WIDTH = 512;

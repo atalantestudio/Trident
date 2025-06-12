@@ -10,7 +10,7 @@ namespace ProjectA {
 		sint32 imageOffsetY;
 		sint32 imageOffsetZ;
 		uint32 imageMipLevel;
-		uint32 imageBaseArrayLayer;
+		uint32 imageLayerOffset;
 		uint32 imageLayerCount;
 	};
 }

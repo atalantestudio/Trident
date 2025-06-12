@@ -191,8 +191,7 @@ namespace ProjectA {
 		float32 xOffset = 0;
 		float32 yOffset = 0;
 
-		const float32 glyphMapWidth = static_cast<float32>(sdfGlyphMap.glyphMap->getWidth());
-		const float32 glyphMapHeight = static_cast<float32>(sdfGlyphMap.glyphMap->getHeight());
+		const Extent3D& glyphMapExtent = sdfGlyphMap.glyphMap->getExtent();
 		const float32 lineHeight = static_cast<float32>(ttfFile.hhea.ascent - ttfFile.hhea.descent);
 
 		CommandBufferDescriptor commandBufferDescriptor{};
@@ -257,16 +256,16 @@ namespace ProjectA {
 			sdfGlyph.width /= lineHeight;
 			sdfGlyph.width *= GLYPH_SUBIMAGE_DIMENSION;
 
-			if (xOffset + sdfGlyph.width >= sdfGlyphMap.glyphMap->getWidth()) {
+			if (xOffset + sdfGlyph.width >= glyphMapExtent.width) {
 				xOffset = 0;
 				yOffset += GLYPH_SUBIMAGE_DIMENSION;
 			}
 
-			sdfGlyph.minCoordinateX = xOffset / glyphMapWidth;
-			sdfGlyph.maxCoordinateX = (xOffset + sdfGlyph.width) / glyphMapWidth;
+			sdfGlyph.minCoordinateX = xOffset / glyphMapExtent.width;
+			sdfGlyph.maxCoordinateX = (xOffset + sdfGlyph.width) / glyphMapExtent.width;
 
-			sdfGlyph.minCoordinateY = yOffset / glyphMapHeight;
-			sdfGlyph.maxCoordinateY = (yOffset + GLYPH_SUBIMAGE_DIMENSION) / glyphMapHeight;
+			sdfGlyph.minCoordinateY = yOffset / glyphMapExtent.height;
+			sdfGlyph.maxCoordinateY = (yOffset + GLYPH_SUBIMAGE_DIMENSION) / glyphMapExtent.height;
 
 			glyphOffsetMappedRange[0] = static_cast<uint32>(xOffset);
 			glyphOffsetMappedRange[1] = static_cast<uint32>(yOffset);

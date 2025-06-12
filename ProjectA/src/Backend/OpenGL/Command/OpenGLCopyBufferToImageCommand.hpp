@@ -54,9 +54,9 @@ namespace ProjectA {
 							texture,
 							copyRegion->imageMipLevel,
 							copyRegion->imageOffsetX,
-							copyRegion->imageOffsetY,
+							copyRegion->imageOffsetY + copyRegion->imageLayerOffset,
 							copyRegion->imageExtent.width,
-							copyRegion->imageExtent.height,
+							copyRegion->imageExtent.height * copyRegion->imageLayerCount,
 							format,
 							GL_UNSIGNED_BYTE,
 							pixels
@@ -65,36 +65,19 @@ namespace ProjectA {
 						break;
 					case GL_TEXTURE_2D_ARRAY:
 					case GL_TEXTURE_3D:
-						std::vector<uint8> d(512 * 512 * 4, 150);
-
-						glClearTexSubImage(texture, 0, 0, 0, 0, 512, 512, 1, GL_RGBA, GL_UNSIGNED_BYTE, d.data());
 						glTextureSubImage3D(
-							texture,
-							0,
-							0,
-							0,
-							0,
-							512,
-							512,
-							1,
-							GL_RGBA,
-							GL_UNSIGNED_BYTE,
-							(const void*) 0
-						);
-
-						/*glTextureSubImage3D(
 							texture,
 							copyRegion->imageMipLevel,
 							copyRegion->imageOffsetX,
 							copyRegion->imageOffsetY,
-							copyRegion->imageBaseArrayLayer + copyRegion->imageOffsetZ,
+							copyRegion->imageOffsetZ + copyRegion->imageLayerOffset,
 							copyRegion->imageExtent.width,
 							copyRegion->imageExtent.height,
-							copyRegion->imageExtent.depth,
+							copyRegion->imageExtent.depth * copyRegion->imageLayerCount,
 							format,
 							GL_UNSIGNED_BYTE,
 							pixels
-						);*/
+						);
 
 						break;
 				}

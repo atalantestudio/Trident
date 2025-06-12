@@ -396,7 +396,7 @@ namespace ProjectA {
 		bufferImageCopyRegion.imageOffsetY = 0;
 		bufferImageCopyRegion.imageOffsetZ = 0;
 		bufferImageCopyRegion.imageMipLevel = 0;
-		bufferImageCopyRegion.imageBaseArrayLayer = 0;
+		bufferImageCopyRegion.imageLayerOffset = 0;
 		bufferImageCopyRegion.imageLayerCount = 1;
 
 		commandEncoder->copyBufferToImage(buffer, image, copyRegions);

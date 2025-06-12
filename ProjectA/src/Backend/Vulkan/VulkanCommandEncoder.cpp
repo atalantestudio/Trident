@@ -175,7 +175,7 @@ namespace ProjectA {
 			bufferImageCopy.bufferImageHeight = 0;
 			bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			bufferImageCopy.imageSubresource.mipLevel = copyRegion.imageMipLevel;
-			bufferImageCopy.imageSubresource.baseArrayLayer = copyRegion.imageBaseArrayLayer;
+			bufferImageCopy.imageSubresource.baseArrayLayer = copyRegion.imageLayerOffset;
 			bufferImageCopy.imageSubresource.layerCount = copyRegion.imageLayerCount;
 			bufferImageCopy.imageOffset.x = copyRegion.imageOffsetX;
 			bufferImageCopy.imageOffset.y = copyRegion.imageOffsetY;

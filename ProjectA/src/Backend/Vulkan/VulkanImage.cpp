@@ -13,6 +13,7 @@
 
 namespace ProjectA {
 	VulkanImage::VulkanImage(VkDevice device, const ImageDescriptor& descriptor) :
+		Image(descriptor),
 		device(device)
 	{
 		DEBUG_ASSERT(checkSampleCountValidity(descriptor.sampleCount));
@@ -23,9 +24,9 @@ namespace ProjectA {
 		imageCreateInfo.flags = 0;
 		imageCreateInfo.imageType = getVkImageType(descriptor.type);
 		imageCreateInfo.format = getVkFormat(descriptor.format);
-		imageCreateInfo.extent.width = descriptor.width;
-		imageCreateInfo.extent.height = descriptor.height;
-		imageCreateInfo.extent.depth = descriptor.depth;
+		imageCreateInfo.extent.width = extent.width;
+		imageCreateInfo.extent.height = extent.height;
+		imageCreateInfo.extent.depth = extent.depth;
 		imageCreateInfo.mipLevels = descriptor.mipLevelCount;
 		imageCreateInfo.arrayLayers = descriptor.layerCount;
 		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(descriptor.sampleCount);
@@ -76,8 +77,6 @@ namespace ProjectA {
 
 		type = imageCreateInfo.imageType;
 		format = imageCreateInfo.format;
-		width = imageCreateInfo.extent.width;
-		height = imageCreateInfo.extent.height;
 		mipLevelCount = imageCreateInfo.mipLevels;
 		layerCount = imageCreateInfo.arrayLayers;
 	}
@@ -88,14 +87,6 @@ namespace ProjectA {
 		vkDestroyImage(device, object, nullptr);
 
 		MemoryAllocator::freeSuballocation(device, memorySuballocation.allocationIndex);
-	}
-
-	uint32 VulkanImage::getWidth() const {
-		return width;
-	}
-
-	uint32 VulkanImage::getHeight() const {
-		return height;
 	}
 
 	ref<ImageView> VulkanImage::createView(const ImageViewDescriptor& descriptor) const {

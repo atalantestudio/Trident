@@ -13,10 +13,6 @@ namespace ProjectA {
 
 			~VulkanImage();
 
-			uint32 getWidth() const override;
-
-			uint32 getHeight() const override;
-
 			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const override;
 
 		public:
@@ -28,7 +24,5 @@ namespace ProjectA {
 		private:
 			VkDevice device;
 			MemorySuballocation memorySuballocation;
-			uint32 width;
-			uint32 height;
 	};
 }

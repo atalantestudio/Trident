@@ -14,12 +14,13 @@
 
 namespace ProjectA {
 	OpenGLImage::OpenGLImage(const ImageDescriptor& descriptor) :
+		Image(descriptor),
 		target(getGlImageType(descriptor.type, descriptor.sampleCount, descriptor.layerCount)),
 		usage(descriptor.usage),
 		internalFormat(getGlInternalFormat(descriptor.format)),
 		format(getGlFormat(descriptor.format)),
-		width(descriptor.width),
-		height(descriptor.height)
+		mipLevelCount(descriptor.mipLevelCount),
+		layerCount(descriptor.layerCount)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -43,10 +44,10 @@ namespace ProjectA {
 			case GL_TEXTURE_CUBE_MAP:
 			case GL_TEXTURE_RECTANGLE:
 				if (descriptor.sampleCount > 1) {
-					glTextureStorage2DMultisample(object, descriptor.sampleCount, internalFormat, descriptor.width, descriptor.height, GL_TRUE);
+					glTextureStorage2DMultisample(object, descriptor.sampleCount, internalFormat, extent.width, extent.height, GL_TRUE);
 				}
 				else {
-					glTextureStorage2D(object, descriptor.mipLevelCount, internalFormat, descriptor.width, descriptor.height);
+					glTextureStorage2D(object, mipLevelCount, internalFormat, extent.width, extent.height);
 				}
 
 				break;
@@ -59,12 +60,10 @@ namespace ProjectA {
 				ENGINE_ASSERT(descriptor.depth == 1, "The OpenGL adapter only supports texture arrays of depth 1.");
 
 				if (descriptor.sampleCount > 1) {
-					glTextureStorage3DMultisample(object, descriptor.sampleCount, internalFormat, width, height, descriptor.layerCount, GL_TRUE);
+					glTextureStorage3DMultisample(object, descriptor.sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);
 				}
 				else {
-					// glTextureStorage3D(object, 1, GL_SRGB8_ALPHA8, 512, 512, 4);
-					// glTextureStorage3D(object, descriptor.mipLevelCount, internalFormat, descriptor.width, descriptor.height, descriptor.layerCount);
-					glTextureStorage3D(object, 4, internalFormat, descriptor.width, descriptor.height, 1);
+					glTextureStorage3D(object, mipLevelCount, internalFormat, extent.width, extent.height, extent.depth * layerCount);
 				}
 
 				break;
@@ -78,14 +77,6 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		glDeleteTextures(1, &object);
-	}
-
-	uint32 OpenGLImage::getWidth() const {
-		return width;
-	}
-
-	uint32 OpenGLImage::getHeight() const {
-		return height;
 	}
 
 	ref<ImageView> OpenGLImage::createView(const ImageViewDescriptor& descriptor) const {

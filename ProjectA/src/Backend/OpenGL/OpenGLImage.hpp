@@ -11,10 +11,6 @@ namespace ProjectA {
 
 			~OpenGLImage();
 
-			uint32 getWidth() const override;
-
-			uint32 getHeight() const override;
-
 			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const override;
 
 		public:
@@ -22,9 +18,7 @@ namespace ProjectA {
 			const ImageUsage usage;
 			const GLenum internalFormat;
 			const GLenum format;
-
-		private:
-			const GLsizei width;
-			const GLsizei height;
+			const GLuint mipLevelCount;
+			const GLuint layerCount;
 	};
 }
