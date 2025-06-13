@@ -35,6 +35,9 @@ namespace ProjectA {
 
 			static uint32 getFrameIndex();
 
+			void postConstruct();
+
+		protected:
 			template<typename T, typename... U>
 			void registerLayer(U&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
@@ -53,8 +56,6 @@ namespace ProjectA {
 				layerStack.pushOverlay(overlay);
 			}
 
-			void close();
-
 		private:
 			void loop();
 
@@ -63,13 +64,11 @@ namespace ProjectA {
 
 			void update(float64 deltaTime);
 
-			void preRender();
-
 			void render(float64 remainingFrameTime);
 
-			void postRender();
-
 			void resize();
+
+			void close();
 
 			void onEvent(Event& event);
 

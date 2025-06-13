@@ -36,6 +36,17 @@ namespace ProjectA {
 				return array;
 			}
 
+			sequence& operator =(const sequence& sequence) {
+				delete[] array;
+
+				array = new T[sequence.count]();
+				count = sequence.count;
+
+				std::copy(sequence.begin(), sequence.end(), array);
+
+				return *this;
+			}
+
 			sequence& operator =(sequence&& sequence) {
 				array = sequence.array;
 				count = sequence.count;

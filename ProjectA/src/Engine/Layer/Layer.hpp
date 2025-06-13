@@ -10,6 +10,8 @@ namespace ProjectA {
 
 			virtual ~Layer() = default;
 
+			virtual void postConstruct() {}
+
 			virtual void update(float64 fixedDeltaTime) {}
 
 			virtual void preRender() {}

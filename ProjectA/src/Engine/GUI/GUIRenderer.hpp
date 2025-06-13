@@ -3,6 +3,7 @@
 #include "Engine/API/Event/WindowEvent.hpp"
 #include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/GUI/ComponentStyle/ButtonStyle.hpp"
+#include "Engine/GUI/TextureArrayLayer.hpp"
 #include "Engine/ECS/ECS.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -11,12 +12,13 @@ namespace ProjectA {
 		public:
 			void build();
 
-			// Creates a 1x1 white image.
-			uint32 registerDefaultImage();
+			// Copies the image data to the texture array staging buffer.
+			// Returns the layer index of the image in the array.
+			uint32 registerTextureArrayLayer(const TextureArrayLayer& layer);
 
-			// Registers a view of the provided image, and returns its index in the image view array.
-			uint32 registerImage(const ref<Image>& image);
-			uint32 registerImage(std::string_view path);
+			void flushTextureArrayStagingBuffer() const;
+
+			Extent2D getTextureArrayLayerExtent(uint32 layerIndex) const;
 
 			void registerSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const vec4<float32>& color);
 
@@ -38,8 +40,6 @@ namespace ProjectA {
 			void initializeRenderPipeline();
 
 			void updateCamera() const;
-
-			void registerImage(const ref<Buffer>& buffer, uint32 width, uint32 height);
 
 		private:
 			struct Vertex {
@@ -63,10 +63,16 @@ namespace ProjectA {
 				vec4<float32> outlineColor;
 			};
 
+		public:
+			static constexpr uint32 TEXTURE_ARRAY_MAX_WIDTH = 2048;
+			static constexpr uint32 TEXTURE_ARRAY_MAX_HEIGHT = 2048;
+
 		private:
+			static constexpr uint32 TEXTURE_ARRAY_MAX_LAYER_COUNT = 4;
+			static constexpr uint64 TEXTURE_ARRAY_LAYER_BPP = sizeof(uint32);
+
 			static constexpr uint32 MAX_SUBCOMPONENTS = 64;
 			static constexpr uint32 MAX_GLYPH_SUBCOMPONENTS = 64;
-			static constexpr uint32 MAX_IMAGES = 16;
 
 		private:
 			ref<RenderPass> renderPass;
@@ -92,8 +98,12 @@ namespace ProjectA {
 			ref<Buffer> cameraBuffer;
 			mat3x3<float32>* cameraMappedRange;
 
-			std::vector<ref<Image>> images;
-			std::vector<ref<ImageView>> imageViews;
+			ref<Image> textureArray;
+			ref<ImageView> textureArrayView;
+			ref<Buffer> textureArrayStagingBuffer;
+			uint8* textureArrayStagingBufferMappedRange;
+			uint32 textureArrayLayerCount = 0;
+			std::array<Extent2D, TEXTURE_ARRAY_MAX_LAYER_COUNT> textureArrayLayerExtents;
 
 			ref<Sampler> sampler;
 			ref<Sampler> bilinearSampler;

@@ -22,6 +22,7 @@ extern "C" {
 			PROFILER("Log/ProfileStart.json");
 
 			application = ProjectA::createApplication();
+			application->postConstruct();
 		}
 
 		{

@@ -35,6 +35,29 @@ namespace ProjectA {
 		initializeSubcomponentBuffer();
 		initializeCameraBuffer();
 
+		ImageDescriptor textureArrayDescriptor;
+		textureArrayDescriptor.type = ImageType::TEXTURE_2D;
+		textureArrayDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
+		textureArrayDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
+		textureArrayDescriptor.width = TEXTURE_ARRAY_MAX_WIDTH;
+		textureArrayDescriptor.height = TEXTURE_ARRAY_MAX_HEIGHT;
+		textureArrayDescriptor.depth = 1;
+		textureArrayDescriptor.mipLevelCount = 1;
+		textureArrayDescriptor.layerCount = TEXTURE_ARRAY_MAX_LAYER_COUNT;
+		textureArrayDescriptor.sampleCount = 1;
+		textureArrayDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+
+		textureArray = createImage(textureArrayDescriptor);
+
+		constexpr ImageViewDescriptor textureArrayViewDescriptor;
+
+		textureArrayView = textureArray->createView(textureArrayViewDescriptor);
+
+		static constexpr uint64 textureArrayStagingBufferSize = TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_LAYER_BPP;
+
+		textureArrayStagingBuffer = createStagingBuffer(textureArrayStagingBufferSize);
+		textureArrayStagingBufferMappedRange = textureArrayStagingBuffer->map<uint8>(0, textureArrayStagingBufferSize);
+
 		SamplerDescriptor samplerDescriptor{};
 		samplerDescriptor.magFilter = SamplerFilter::NEAREST;
 		samplerDescriptor.minFilter = SamplerFilter::NEAREST;
@@ -190,36 +213,19 @@ namespace ProjectA {
 	void GUIRenderer::initializeRenderPipeline() {
 		constexpr ImageViewDescriptor imageViewDescriptor;
 
-		imageViews.resize(images.size());
-
-		for (uint32 imageIndex = 0; imageIndex < images.size(); imageIndex += 1) {
-			const ref<Image>& image = images[imageIndex];
-
-			imageViews[imageIndex] = image->createView(imageViewDescriptor);
-		}
-
-		std::vector<ref<Sampler>> samplers(images.size(), sampler);
-
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
 
-		DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding{};
-		imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		imageDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		imageDescriptorSetLayoutBinding.imageViews = imageViews;
-		imageDescriptorSetLayoutBinding.samplers = samplers;
-
-		DescriptorSetLayoutBinding glyphMapDescriptorSetLayoutBinding{};
-		glyphMapDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		glyphMapDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		glyphMapDescriptorSetLayoutBinding.imageViews = {imageViews[1]};
-		glyphMapDescriptorSetLayoutBinding.samplers = {sampler};
-		// glyphMapDescriptorSetLayoutBinding.samplers = {bilinearSampler};
+		DescriptorSetLayoutBinding textureArrayDescriptorSetLayoutBinding{};
+		textureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		textureArrayDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		textureArrayDescriptorSetLayoutBinding.imageViews = {textureArrayView};
+		textureArrayDescriptorSetLayoutBinding.samplers = {sampler};
 
 		DescriptorSetLayout descriptorSetLayout;
-		descriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, imageDescriptorSetLayoutBinding};
+		descriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, textureArrayDescriptorSetLayoutBinding};
 
 		PipelineLayoutDescriptor subcomponentPipelineLayoutDescriptor;
 		subcomponentPipelineLayoutDescriptor.layouts = {descriptorSetLayout};
@@ -267,11 +273,8 @@ namespace ProjectA {
 
 		///
 
-		DescriptorSetLayout glyphSubcomponentDescriptorSetLayout;
-		glyphSubcomponentDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, glyphMapDescriptorSetLayoutBinding};
-
 		PipelineLayoutDescriptor glyphSubcomponentPipelineLayoutDescriptor;
-		glyphSubcomponentPipelineLayoutDescriptor.layouts = {glyphSubcomponentDescriptorSetLayout};
+		glyphSubcomponentPipelineLayoutDescriptor.layouts = {descriptorSetLayout};
 
 		glyphSubcomponentPipelineLayout = createPipelineLayout(glyphSubcomponentPipelineLayoutDescriptor);
 
@@ -307,107 +310,78 @@ namespace ProjectA {
 		glyphSubcomponentRenderPipeline = createRenderPipeline(glyphSubcomponentRenderPipelineDescriptor);
 	}
 
-	uint32 GUIRenderer::registerDefaultImage() {
-		const uint32 imageIndex = static_cast<uint32>(images.size());
+	uint32 GUIRenderer::registerTextureArrayLayer(const TextureArrayLayer& layer) {
+		ENGINE_ASSERT(textureArrayLayerCount + 1 < TEXTURE_ARRAY_MAX_LAYER_COUNT, "Too much");
+		ENGINE_ASSERT(layer.width <= TEXTURE_ARRAY_MAX_WIDTH, "Image width ([]) is larger than the maximum width ([]).", layer.width, TEXTURE_ARRAY_MAX_WIDTH);
+		ENGINE_ASSERT(layer.height <= TEXTURE_ARRAY_MAX_HEIGHT, "Image height ([]) is larger than the maximum height ([]).", layer.height, TEXTURE_ARRAY_MAX_HEIGHT);
 
-		ENGINE_ASSERT(imageIndex < MAX_IMAGES, "Image registration overflow.");
+		const uint32 layerIndex = textureArrayLayerCount;
 
-		constexpr uint32 width = 1;
-		constexpr uint32 height = 1;
-		constexpr uint64 channelCount = 4;
-		constexpr uint64 size = channelCount * sizeof(uint8);
+		std::copy(layer.data.begin(), layer.data.end(), textureArrayStagingBufferMappedRange);
 
-		const ref<Buffer> stagingBuffer = createStagingBuffer(size);
+		const uint64 size = layer.width * layer.height * TEXTURE_ARRAY_LAYER_BPP;
 
-		uint8* mappedRange = stagingBuffer->map<uint8>(0, size);
+		textureArrayStagingBufferMappedRange += size;
 
-		std::fill_n(mappedRange, channelCount, 255);
+		textureArrayLayerExtents[textureArrayLayerCount].width = layer.width;
+		textureArrayLayerExtents[textureArrayLayerCount].height = layer.height;
 
-		stagingBuffer->unmap();
+		textureArrayLayerCount += 1;
 
-		registerImage(stagingBuffer, width, height);
-
-		return imageIndex;
+		return layerIndex;
 	}
 
-	uint32 GUIRenderer::registerImage(const ref<Image>& image) {
-		const uint32 imageIndex = static_cast<uint32>(images.size());
+	void GUIRenderer::flushTextureArrayStagingBuffer() const {
+		DEBUG_ASSERT(textureArrayLayerCount > 0);
 
-		ENGINE_ASSERT(imageIndex < MAX_IMAGES, "Image registration overflow.");
+		textureArrayStagingBuffer->unmap();
 
-		images.emplace_back(image);
+		sequence<BufferImageCopyRegion> copyRegions(textureArrayLayerCount);
+		uint64 offset = 0;
 
-		return imageIndex;
-	}
+		for (uint32 layerIndex = 0; layerIndex < textureArrayLayerCount; layerIndex += 1) {
+			const Extent2D extent = textureArrayLayerExtents[layerIndex];
 
-	uint32 GUIRenderer::registerImage(std::string_view path) {
-		const uint32 imageIndex = static_cast<uint32>(images.size());
+			BufferImageCopyRegion& copyRegion = copyRegions[layerIndex];
+			copyRegion.bufferOffset;
+			copyRegion.imageExtent.width = extent.width;
+			copyRegion.imageExtent.height = extent.height;
+			copyRegion.imageExtent.depth = 1;
+			copyRegion.imageOffsetX = 0;
+			copyRegion.imageOffsetY = 0;
+			copyRegion.imageOffsetZ = 0;
+			copyRegion.imageMipLevel = 0;
+			copyRegion.imageLayerOffset = layerIndex;
+			copyRegion.imageLayerCount = 1;
 
-		ENGINE_ASSERT(imageIndex < MAX_IMAGES, "Image registration overflow.");
-
-		const PNGFile file = Filesystem::openTemporary<PNGFile>(path);
-		const uint64 size = file.data.count * sizeof(uint8);
-
-		const ref<Buffer> stagingBuffer = createStagingBuffer(size);
-
-		uint8* mappedRange = stagingBuffer->map<uint8>(0, size);
-
-		std::copy(file.data.begin(), file.data.end(), mappedRange);
-
-		stagingBuffer->unmap();
-
-		registerImage(stagingBuffer, file.width, file.height);
-
-		return imageIndex;
-	}
-
-	void GUIRenderer::registerImage(const ref<Buffer>& buffer, uint32 width, uint32 height) {
-		ImageDescriptor imageDescriptor{};
-		imageDescriptor.type = ImageType::TEXTURE_2D;
-		imageDescriptor.format = ImageFormat::R8G8B8A8_SRGB;
-		imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
-		imageDescriptor.width = width;
-		imageDescriptor.height = height;
-		imageDescriptor.depth = 1;
-		imageDescriptor.mipLevelCount = 1;
-		imageDescriptor.layerCount = 1;
-		imageDescriptor.sampleCount = 1;
-
-		const ref<Image> image = createImage(imageDescriptor);
+			offset += extent.width * extent.height * TEXTURE_ARRAY_LAYER_BPP;
+		}
 
 		const ref<Device> device = getDevice();
 
-		CommandBufferDescriptor commandBufferDescriptor{};
+		CommandBufferDescriptor commandBufferDescriptor;
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
 		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 		commandEncoder->begin();
-		commandEncoder->setImageMemoryBarrier(image, ImageLayout::UNDEFINED, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-		sequence<BufferImageCopyRegion> copyRegions(1);
-
-		BufferImageCopyRegion& bufferImageCopyRegion = copyRegions[0];
-		bufferImageCopyRegion.bufferOffset = 0;
-		bufferImageCopyRegion.imageExtent.width = width;
-		bufferImageCopyRegion.imageExtent.height = height;
-		bufferImageCopyRegion.imageExtent.depth = 1;
-		bufferImageCopyRegion.imageOffsetX = 0;
-		bufferImageCopyRegion.imageOffsetY = 0;
-		bufferImageCopyRegion.imageOffsetZ = 0;
-		bufferImageCopyRegion.imageMipLevel = 0;
-		bufferImageCopyRegion.imageLayerOffset = 0;
-		bufferImageCopyRegion.imageLayerCount = 1;
-
-		commandEncoder->copyBufferToImage(buffer, image, copyRegions);
-		commandEncoder->setImageMemoryBarrier(image, ImageLayout::TRANSFER_DST_OPTIMAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+		commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::UNDEFINED, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+		commandEncoder->copyBufferToImage(textureArrayStagingBuffer, textureArray, copyRegions);
+		commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::TRANSFER_DST_OPTIMAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 		device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 		device->waitIdle();
 
-		images.emplace_back(image);
+		textureArrayStagingBuffer.~shared_ptr();
+	}
+
+	Extent2D GUIRenderer::getTextureArrayLayerExtent(uint32 layerIndex) const {
+		ENGINE_ASSERT(layerIndex < textureArrayLayerCount, "Layer index overflow.");
+
+		return textureArrayLayerExtents[layerIndex];
 	}
 
 	void GUIRenderer::registerSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const vec4<float32>& color) {

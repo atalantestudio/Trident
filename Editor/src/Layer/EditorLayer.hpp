@@ -16,12 +16,12 @@ namespace ProjectA {
 				GUIContainer({EXPAND, 100px}, {20px, 20px}, HORIZONTAL, 10px, GRAY) {
 					for (uint8 i = 0; i < 3; i += 1) {
 						GUIContainer({150px, EXPAND}, {10px, 10px}, HORIZONTAL, 0px, ORANGE) {
-							GUIQuad({EXPAND, EXPAND}, LIGHT_GRAY);
+							GUIComponent({EXPAND, EXPAND}, LIGHT_GRAY);
 						}
 					}
 				}
 
-				GUIQuad({512px, 512px}, 1);
+				GUIComponent({512px, 512px}, 1);
 
 				const std::string string = Logger::format("FPS: []", Application::getFramesPerSecond());
 

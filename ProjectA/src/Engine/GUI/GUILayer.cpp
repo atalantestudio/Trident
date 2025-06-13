@@ -2,66 +2,77 @@
 
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/Application.hpp"
+#include "Engine/Filesystem/File/PNGFile.hpp"
+#include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/GUI/GUILayer.hpp"
 
 namespace ProjectA {
 	GUILayer::GUILayer() {
-		renderer.registerDefaultImage();
-
 		renderer.build();
 
-		//ecs.registerComponent<GUIComponent>();
-		//ecs.registerComponent<ScriptComponent>();
+		TextureArrayLayer defaultImageLayer;
+		defaultImageLayer.width = 1;
+		defaultImageLayer.height = 1;
+		defaultImageLayer.data = {255, 255, 255, 255};
+
+		renderer.registerTextureArrayLayer(defaultImageLayer);
 	}
 
-	/*GUILayer::~GUILayer() {
-		ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
+	void GUILayer::postConstruct() {
+		renderer.flushTextureArrayStagingBuffer();
 
-		ScriptComponent* begin = componentPool.components.data();
-
-		for (uint32 componentIndex = 0; componentIndex < componentPool.componentCount; componentIndex += 1) {
-			ScriptComponent* component = begin + componentIndex;
-
-			component->entity->onDestroy();
-			component->destroyScript(component);
-		}
-	}*/
+		textureArrayFlushed = true;
+	}
 
 	GUILayer::FontID GUILayer::loadFont(std::string_view path) {
+		ENGINE_ASSERT(false, "Fonts are not currently supported.");
+
+		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
+
 		// "../ProjectA/src/Asset/Font/test.ttf"
-		/*defaultFont->textureIndex = static_cast<uint32>(images.size());
+		/* defaultFont->textureIndex = static_cast<uint32>(images.size());
 		defaultFont->glyphMap.map = QUIVER_BITMAP_GLYPH_MAP;
-        defaultFont->glyphMap.base = 32;
-        defaultFont->glyphMap.count = 220;
-        defaultFont->tileHeight = 12;
-        defaultFont->tileSpacing = 1;*/
+		defaultFont->glyphMap.base = 32;
+		defaultFont->glyphMap.count = 220;
+		defaultFont->tileHeight = 12;
+		defaultFont->tileSpacing = 1; */
 
 		const FontID fontId = fontCount;
 
-		fonts[fontCount] = createScope<TrueTypeFont>(path);
+		const ref<TrueTypeFont> font = createRef<TrueTypeFont>(path);
+
+		fonts[fontCount] = font;
 
 		fontCount += 1;
+
+		const Extent3D imageExtent = font->getSdfImage()->getExtent();
+
+		TextureArrayLayer glyphMapImageLayer;
+		glyphMapImageLayer.width = imageExtent.width;
+		glyphMapImageLayer.height = imageExtent.height;
+
+		// TODO: ?
+		// glyphMapImageLayer.data = imageExtent.data;
+
+		return renderer.registerTextureArrayLayer(glyphMapImageLayer);
 
 		return fontId;
 	}
 
-	/*void GUILayer::registerEntityPool() {
-		const ComponentPool<GUIComponent>& componentPool = ecs.getComponentPool<GUIComponent>();
+	GUILayer::ImageID GUILayer::loadImage(std::string_view path) {
+		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
-		ENGINE_ASSERT(componentPool.componentCount < MAX_GUI_COMPONENTS, "Too many GUI components.");
+		const PNGFile file = Filesystem::openTemporary<PNGFile>(path);
 
-		if (componentPool.componentCount == 0) {
-			ENGINE_WARN("No GUI component registered.");
+		TextureArrayLayer imageLayer;
+		imageLayer.width = file.width;
+		imageLayer.height = file.height;
+		imageLayer.data = file.data;
 
-			return;
-		}
-
-		renderer.registerEntityPool(componentPool);
-	}*/
+		return renderer.registerTextureArrayLayer(imageLayer);
+	}
 
 	void GUILayer::preRender() {
-		//updateScriptComponents();
-
 		const ref<Swapchain>& swapchain = Renderer::getSwapchain();
 
 		componentOrigin[HORIZONTAL] = 0;
@@ -98,27 +109,6 @@ namespace ProjectA {
 
 		return true;
 	}
-
-	GUILayer::ImageID GUILayer::loadImage(std::string_view path) {
-		return renderer.registerImage(path);
-	}
-
-	/*void GUILayer::updateScriptComponents() const {
-		ComponentPool<ScriptComponent>& componentPool = ecs.getComponentPool<ScriptComponent>();
-
-		ScriptComponent* begin = componentPool.components.data();
-
-		for (uint32 componentIndex = 0; componentIndex < componentPool.componentCount; componentIndex += 1) {
-			ScriptComponent* component = begin + componentIndex;
-
-			if (component->entity == nullptr) {
-				component->entity = component->constructScript();
-				component->entity->onConstruct();
-			}
-
-			component->entity->onUpdate();
-		}
-	}*/
 
 	GUIContainer GUILayer::pushContainer(GUISize size, GUISize padding, LayoutDirection layoutDirection, uint16 layoutSpacing) {
 		// TODO: Ensure that the container isn't expanding towards the current layout direction.
@@ -157,12 +147,14 @@ namespace ProjectA {
 	GUIContainer GUILayer::pushContainer(GUISize size, GUISize padding, LayoutDirection layoutDirection, uint16 layoutSpacing, const vec4<float32>& color) {
 		const GUIContainer container = pushContainer(size, padding, layoutDirection, layoutSpacing);
 
-		const GUISize originShift = {
+		/*const GUISize originShift = {
 			static_cast<sint16>(-padding.width),
 			static_cast<sint16>(-padding.height),
-		};
+		};*/
 
-		registerQuadComponent(container.origin, container.size, DEFAULT_IMAGE_ID, color);
+		const GUISize fixedSize = computeFixedSize(container.size);
+
+		registerComponent(fixedSize, DEFAULT_IMAGE_ID, color);
 
 		return container;
 	}
@@ -189,30 +181,36 @@ namespace ProjectA {
 		currentContainerInnerSize = container.parentInnerSize;
 	}
 
-	void GUILayer::registerQuadComponent(GUISize origin, GUISize size, ImageID imageId, const vec4<float32>& color) {
-		const GUISize fixedSize = computeFixedSize(size);
-		const vec2<float32> fixedSizeFloat = {
-			static_cast<float32>(fixedSize[0]),
-			static_cast<float32>(fixedSize[1]),
+	void GUILayer::registerComponent(GUISize size, ImageID imageId, const vec4<float32>& color) {
+		const vec2<float32> sizeFloat = {
+			static_cast<float32>(size[0]),
+			static_cast<float32>(size[1]),
 		};
 		const vec2<float32> originFloat = {
-			static_cast<float32>(origin[0]),
-			static_cast<float32>(origin[1]),
+			static_cast<float32>(componentOrigin[0]),
+			static_cast<float32>(componentOrigin[1]),
 		};
-		const mat3x3<float32> transform = mat3x3<float32>::scaling(fixedSizeFloat) * mat3x3<float32>::translation(originFloat);
-		const mat3x3<float32> imageTransform = mat3x3<float32>::identity();
+		const mat3x3<float32> transform = mat3x3<float32>::scaling(sizeFloat) * mat3x3<float32>::translation(originFloat);
+
+		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(imageId);
+
+		// TODO: Fix wrong first image column due to image transform precision error.
+		const mat3x3<float32> imageTransform = mat3x3<float32>::scaling({
+			imageExtent.width / static_cast<float32>(renderer.TEXTURE_ARRAY_MAX_WIDTH),
+			imageExtent.height / static_cast<float32>(renderer.TEXTURE_ARRAY_MAX_HEIGHT),
+		});
 
 		renderer.registerSubcomponent(transform, imageTransform, imageId, color);
 	}
 
-	void GUILayer::GUIQuad(GUISize size, const vec4<float32>& color) {
-		return GUIQuad(size, DEFAULT_IMAGE_ID, color);
+	void GUILayer::GUIComponent(GUISize size, const vec4<float32>& color) {
+		return GUIComponent(size, DEFAULT_IMAGE_ID, color);
 	}
 
-	void GUILayer::GUIQuad(GUISize size, ImageID imageId, const vec4<float32>& color) {
-		registerQuadComponent({componentOrigin[0], componentOrigin[1]}, size, imageId, color);
-
+	void GUILayer::GUIComponent(GUISize size, ImageID imageId, const vec4<float32>& color) {
 		const GUISize fixedSize = computeFixedSize(size);
+
+		registerComponent(fixedSize, imageId, color);
 
 		componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
 	}
@@ -279,7 +277,7 @@ namespace ProjectA {
 		}
 
 		// 2. Register a quad having the same size.
-		registerQuadComponent({componentOrigin[0], componentOrigin[1]}, size, DEFAULT_IMAGE_ID, {0.5f, 0.5f, 0.5f, 1.0f});
+		registerComponent(size, DEFAULT_IMAGE_ID, {0.5f, 0.5f, 0.5f, 1.0f});
 
 		// 3. Register the text on top of it.
 		{

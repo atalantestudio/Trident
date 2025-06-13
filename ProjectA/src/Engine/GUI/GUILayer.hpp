@@ -20,7 +20,7 @@ namespace ProjectA {
 		public:
 			GUILayer();
 
-			//~GUILayer();
+			void postConstruct() final override;
 
 			void preRender() final override;
 
@@ -37,10 +37,6 @@ namespace ProjectA {
 
 			ImageID loadImage(std::string_view path);
 
-			//void registerEntityPool();
-
-			//void updateScriptComponents() const;
-
 			// Renders a container cascading from top to bottom and left to right.
 			// layoutDirection is the direction the container's component must be laid towards.
 			// layoutSpacing is the spacing between the container's component, in pixels.
@@ -49,9 +45,9 @@ namespace ProjectA {
 
 			void popContainer(GUIContainer& container);
 
-			// Renders a colored quad.
-			void GUIQuad(GUISize size, const vec4<float32>& color);
-			void GUIQuad(GUISize size, ImageID imageId, const vec4<float32>& color = {1.0f, 1.0f, 1.0f, 1.0f});
+			// Renders a colored/textured quad.
+			void GUIComponent(GUISize size, const vec4<float32>& color);
+			void GUIComponent(GUISize size, ImageID imageId, const vec4<float32>& color = {1.0f, 1.0f, 1.0f, 1.0f});
 
 			void GUIText(const std::string& string, const TextStyle& textStyle);
 
@@ -60,7 +56,7 @@ namespace ProjectA {
 		private:
 			// Renders a colored quad without moving the origin.
 			// origin is the top-left corner of the quad.
-			void registerQuadComponent(GUISize origin, GUISize size, ImageID imageId, const vec4<float32>& color);
+			void registerComponent(GUISize size, ImageID imageId, const vec4<float32>& color);
 
 			GUISize computeFixedSize(GUISize size) const;
 
@@ -90,7 +86,9 @@ namespace ProjectA {
 			GUISize currentContainerInnerSize;
 			bool rootComponent = true;
 
-			std::array<scope<TrueTypeFont>, MAX_FONT_COUNT> fonts;
+			bool textureArrayFlushed = false;
+
+			std::array<ref<TrueTypeFont>, MAX_FONT_COUNT> fonts;
 			uint32 fontCount = 0;
 	};
 

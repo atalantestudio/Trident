@@ -26,7 +26,7 @@ namespace ProjectA {
 
 					GUIContainer({196px, 148px}, {12px, 12px}, VERTICAL, 8px, GRAY) {
 						for (uint8 i = 0; i < 2; i += 1) {
-							GUIQuad({EXPAND, 24px}, LIGHT_GRAY);
+							GUIComponent({EXPAND, 24px}, LIGHT_GRAY);
 						}
 					}
 				}

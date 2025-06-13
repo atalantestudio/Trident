@@ -200,6 +200,14 @@ namespace ProjectA {
 		return frameIndex;
 	}
 
+	void Application::postConstruct() {
+		PROFILE_SCOPE("Application post-construct");
+
+		for (const ref<Layer>& layer : layerStack) {
+			layer->postConstruct();
+		}
+	}
+
 	void Application::loop() {
 		window->show();
 
@@ -237,13 +245,9 @@ namespace ProjectA {
 			return;
 		}
 
-		preRender();
-
 		// TODO: Interpolate between current time and frameTimeAccumulator.
 		// See https://gafferongames.com/post/fix_your_timestep.
 		render(frameTimeAccumulator);
-
-		postRender();
 
 		frameIndex += 1;
 		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -254,14 +258,6 @@ namespace ProjectA {
 
 		for (const ref<Layer>& layer : layerStack) {
 			layer->update(fixedDeltaTime);
-		}
-	}
-
-	void Application::preRender() {
-		PROFILE_SCOPE("Application pre-render");
-
-		for (const ref<Layer>& layer : layerStack) {
-			layer->preRender();
 		}
 	}
 
@@ -303,7 +299,9 @@ namespace ProjectA {
 		commandEncoder->begin();
 
 		for (const ref<Layer>& layer : layerStack) {
+			layer->preRender();
 			layer->render(remainingFrameTime, commandEncoder);
+			layer->postRender();
 		}
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
@@ -332,14 +330,6 @@ namespace ProjectA {
 		}
 
 		ENGINE_ASSERT(presentStatus == PresentStatus::SUCCESS, "Unhandled present status.");
-	}
-
-	void Application::postRender() {
-		PROFILE_SCOPE("Application post-render");
-
-		for (const ref<Layer>& layer : layerStack) {
-			layer->postRender();
-		}
 	}
 
 	void Application::resize() {

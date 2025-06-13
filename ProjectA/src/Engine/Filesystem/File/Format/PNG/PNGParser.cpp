@@ -15,10 +15,6 @@ namespace ProjectA {
 		uint32 CRC = 0;
 	};
 
-	static void readSignature(ByteStream& stream) {
-		ENGINE_ASSERT(stream.read<uint64>(true) == 0x89504E470D0A1A0A, "Failed to verify signature.");
-	}
-
 	static void readIHDRChunk(ByteStream& stream, PNGFile& file) {
 		file.width = stream.read<uint32>(true);
 
@@ -63,8 +59,8 @@ namespace ProjectA {
 		ENGINE_ASSERT(file.interlaceMethod == 0 || file.interlaceMethod == 1, "Undefined interlace method.");
 
 		// Assertions for currently unhandled values.
-		ENGINE_ASSERT(file.bitDepth == 8, "Bit depth = [] is unhandled.", file.bitDepth);
-		ENGINE_ASSERT(file.colorType == 6, "Color type = [] is unhandled.", file.colorType);
+		ENGINE_ASSERT(file.bitDepth == 8, "Bit depth = [] is unhandled.", static_cast<sint32>(file.bitDepth));
+		ENGINE_ASSERT(file.colorType == 6, "Color type = [] is unhandled.", static_cast<sint32>(file.colorType));
 	}
 
 	static void readIDATChunk(ByteStream& stream, uint32 chunkByteLength, std::vector<uint8>& compressedData) {
@@ -154,7 +150,7 @@ namespace ProjectA {
 
 		ByteStream stream(file.rawData, file.size);
 
-		readSignature(stream);
+		ENGINE_ASSERT(stream.read<uint64>(true) == 0x89504E470D0A1A0A, "Failed to verify signature.");
 
 		PNGFile pngFile;
 

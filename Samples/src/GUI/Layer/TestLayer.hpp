@@ -4,7 +4,7 @@ namespace ProjectA {
 	class TestLayer : public GUILayer {
 		public:
 			TestLayer() {
-				pepperImageId = loadImage("Asset/Image/Pepper.png");
+				imageId = loadImage("Asset/Image/Pepper.png");
 			}
 
 			void GUI() override {
@@ -25,7 +25,7 @@ namespace ProjectA {
 				static ButtonStyle buttonStyle;
 				buttonStyle.textStyle = &buttonTextStyle;*/
 
-				GUIQuad({200px, 200px}, pepperImageId);
+				GUIComponent({512, 512}, imageId);
 
 				// GUIContainer({EXPAND, EXPAND}, {0px, 0px}, HORIZONTAL, 0px, LIGHT_GRAY) {
 					// GUIText("Pick up ", whiteTextStyle);
@@ -44,6 +44,6 @@ namespace ProjectA {
 			static inline const vec4<float32> WHITE = {1.0f, 1.0f, 1.0f, 1.0f};
 
 		private:
-			ImageID pepperImageId;
+			ImageID imageId;
 	};
 }
