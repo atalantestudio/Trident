@@ -294,7 +294,7 @@ namespace ProjectA {
 					const uint16 codePoint = static_cast<uint16>(glyph);
 					const TrueTypeGlyph& glyph = font[codePoint];
 
-					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * static_cast<float32>(fontSize));
+					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * fontSize);
 
 					if (!glyph.invisible) {
 						// For a line height (ascent - descent) of 1210 FUnits,
@@ -302,7 +302,6 @@ namespace ProjectA {
 						// The width should be 62.13px.
 						// TODO: float32 lyah::ceil(float32)
 						const float32 width = glyph.width / lineHeight * fontSize;
-
 						const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * fontSize;
 
 						const float32 x = positionX + leftSideBearing;

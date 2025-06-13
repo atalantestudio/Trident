@@ -12,22 +12,10 @@ namespace ProjectA {
 			}
 
 			void GUI() override {
-				/* static TextStyle yellowTextStyle;
-				yellowTextStyle.color = {1.0f, 1.0f, 0.0f, 1.0f};
-				yellowTextStyle.fontSize = fontSize;
-
-				TextStyle buttonTextStyle;
-				buttonTextStyle.color = {0.0f, 0.0f, 0.0f, 1.0f};
-				buttonTextStyle.fontSize = 256.0f;
-
-				static ButtonStyle buttonStyle;
-				buttonStyle.textStyle = &buttonTextStyle; */
-
-				// GUIComponent({512, 512}, imageId);
+				GUIText("PP Radio Grotesk", whiteTextStyle);
+				GUIComponent({2048, 2048}, 1);
 
 				// GUIContainer({EXPAND, EXPAND}, {0px, 0px}, HORIZONTAL, 0px, LIGHT_GRAY) {
-					GUIText("PP Radio Grotesk", whiteTextStyle);
-					GUIComponent({2048, 2048}, 1);
 					// GUIText("Alarm Clock", yellowTextStyle);
 
 					// if (GUIButton("Test Button", buttonStyle)) {

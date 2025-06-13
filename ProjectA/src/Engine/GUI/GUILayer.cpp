@@ -215,7 +215,7 @@ namespace ProjectA {
 		constexpr FontID fontId = 0;
 		const TrueTypeFont& font = *fonts[fontId].font;
 		const uint32 glyphMapImageId = fonts[fontId].glyphMapImageId;
-
+		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(glyphMapImageId);
 		const float32 lineHeight = static_cast<float32>(font.getLineHeight());
 
 		float32 positionX = componentOrigin[0];
@@ -245,8 +245,6 @@ namespace ProjectA {
 				const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
 				const vec2<float32> uvDiff = uvEnd - uvStart;
 
-				const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(glyphMapImageId);
-
 				const mat3x3<float32> imageTransform = mat3x3<float32>::scaling({
 					uvDiff[0] * imageExtent.width / renderer.TEXTURE_ARRAY_MAX_WIDTH,
 					uvDiff[1] * imageExtent.height / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
@@ -268,6 +266,7 @@ namespace ProjectA {
 		constexpr FontID fontId = 0;
 		const TrueTypeFont& font = *fonts[fontId].font;
 		const uint32 glyphMapImageId = fonts[fontId].glyphMapImageId;
+		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(glyphMapImageId);
 
 		// 1. Calculate the minimum size that fully encloses the text.
 		GUISize size;
@@ -313,8 +312,6 @@ namespace ProjectA {
 					const vec2<float32> uvStart = {glyph.minCoordinateX, glyph.minCoordinateY};
 					const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
 					const vec2<float32> uvDiff = uvEnd - uvStart;
-
-					const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(glyphMapImageId);
 
 					const mat3x3<float32> imageTransform = mat3x3<float32>::scaling({
 						uvDiff[0] * imageExtent.width / renderer.TEXTURE_ARRAY_MAX_WIDTH,

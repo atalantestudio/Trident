@@ -14,7 +14,7 @@
 #define RENDERER_TRIANGLE 9
 
 // Select the renderer to run.
-#define RENDERER RENDERER_TEXTURE
+#define RENDERER RENDERER_TEXT
 
 #if RENDERER == RENDERER_ARRAY_TEXTURE
 	#include "../Renderer/ArrayTextureRenderer.hpp"
