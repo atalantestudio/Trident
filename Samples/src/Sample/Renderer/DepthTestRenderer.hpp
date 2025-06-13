@@ -8,8 +8,10 @@ namespace ProjectA {
 			DepthTestRenderer() {
 				// 1. Create render pass.
 				{
+					const ref<Surface> surface = getSurface();
+
 					ColorAttachment colorAttachment{};
-					colorAttachment.format = getSurface()->getFormat();
+					colorAttachment.format = surface->getFormat();
 					colorAttachment.sampleCount = 1;
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
@@ -27,23 +29,22 @@ namespace ProjectA {
 					renderPassDescriptor.presentAttachmentIndex = 0;
 
 					renderPass = createRenderPass(renderPassDescriptor);
+
+					updateDepthStencilAttachment();
+
+					const ref<Swapchain>& swapchain = getSwapchain();
+
+					swapchain->getImages(renderPass);
 				}
 
-				// 2. Create depth stencil attachment.
-				updateDepthStencilAttachment();
-
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				swapchain->getImages(renderPass);
-
-				// 3. Create pipeline layout.
+				// 2. Create pipeline layout.
 				{
 					const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 4. Create render pipeline.
+				// 3. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<vec3<float32>>();
@@ -83,7 +84,7 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 5. Create vertex buffers.
+				// 4. Create vertex buffers.
 				{
 					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE);
 

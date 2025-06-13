@@ -108,8 +108,10 @@ namespace ProjectA {
 
 				// 7. Create render pass.
 				{
+					const ref<Surface> surface = getSurface();
+
 					ColorAttachment colorAttachment{};
-					colorAttachment.format = getSurface()->getFormat();
+					colorAttachment.format = surface->getFormat();
 					colorAttachment.sampleCount = 1;
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;

@@ -8,8 +8,10 @@ namespace ProjectA {
 			MultisampleRenderer() {
 				// 1. Create render pass.
 				{
+					const ref<Surface> surface = getSurface();
+
 					ColorAttachment multisampleColorAttachment{};
-					multisampleColorAttachment.format = getSurface()->getFormat();
+					multisampleColorAttachment.format = surface->getFormat();
 					multisampleColorAttachment.sampleCount = 4;
 					multisampleColorAttachment.loadOperation = LoadOperation::CLEAR;
 					multisampleColorAttachment.storeOperation = StoreOperation::STORE;
@@ -21,23 +23,22 @@ namespace ProjectA {
 					renderPassDescriptor.presentAttachmentIndex = 0;
 
 					renderPass = createRenderPass(renderPassDescriptor);
+
+					updateMultisampleAttachment();
+
+					const ref<Swapchain>& swapchain = getSwapchain();
+
+					swapchain->getImages(renderPass);
 				}
 
-				// 2. Create multisample image attachment.
-				updateMultisampleAttachment();
-
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				swapchain->getImages(renderPass);
-
-				// 3. Create pipeline layout.
+				// 2. Create pipeline layout.
 				{
 					const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 4. Create render pipeline.
+				// 3. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -73,7 +74,7 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 5. Create vertex buffer.
+				// 4. Create vertex buffer.
 				{
 					constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
 

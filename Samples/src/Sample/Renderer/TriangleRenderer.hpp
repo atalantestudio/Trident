@@ -10,8 +10,10 @@ namespace ProjectA {
 			TriangleRenderer() {
 				// 1. Create render pass.
 				{
+					const ref<Surface> surface = getSurface();
+
 					ColorAttachment colorAttachment{};
-					colorAttachment.format = getSurface()->getFormat();
+					colorAttachment.format = surface->getFormat();
 					colorAttachment.sampleCount = 1;
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
@@ -23,11 +25,11 @@ namespace ProjectA {
 					renderPassDescriptor.presentAttachmentIndex = 0;
 
 					renderPass = createRenderPass(renderPassDescriptor);
+
+					const ref<Swapchain>& swapchain = getSwapchain();
+
+					swapchain->getImages(renderPass);
 				}
-
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				swapchain->getImages(renderPass);
 
 				// 2. Create pipeline layout.
 				{
