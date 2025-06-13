@@ -81,7 +81,6 @@ namespace ProjectA {
 			case WM_CLOSE:
 				// See https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-close.
 				// TODO: Handle WM_CLOSE message.
-				//BREAKPOINT();
 
 				return 0;
 			case WM_QUERYOPEN:

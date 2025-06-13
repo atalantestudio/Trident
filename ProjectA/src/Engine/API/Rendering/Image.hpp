@@ -9,7 +9,8 @@ namespace ProjectA {
 			Image(const ImageDescriptor& descriptor) :
 				extent(descriptor.extent),
 				mipLevelCount(descriptor.mipLevelCount),
-				layerCount(descriptor.layerCount)
+				layerCount(descriptor.layerCount),
+				sampleCount(descriptor.sampleCount)
 			{}
 
 		public:
@@ -27,11 +28,16 @@ namespace ProjectA {
 				return layerCount;
 			}
 
+			uint8 getSampleCount() const {
+				return sampleCount;
+			}
+
 			virtual ref<ImageView> createView(const ImageViewDescriptor& descriptor) const = 0;
 
 		protected:
 			const Extent3D extent;
 			const uint32 mipLevelCount;
 			const uint32 layerCount;
+			const uint8 sampleCount : 7;
 	};
 }

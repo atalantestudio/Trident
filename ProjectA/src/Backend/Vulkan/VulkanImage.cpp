@@ -16,7 +16,7 @@ namespace ProjectA {
 		Image(descriptor),
 		device(device)
 	{
-		DEBUG_ASSERT(checkSampleCountValidity(descriptor.sampleCount));
+		DEBUG_ASSERT(checkSampleCountValidity(sampleCount));
 
 		VkImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -29,7 +29,7 @@ namespace ProjectA {
 		imageCreateInfo.extent.depth = extent.depth;
 		imageCreateInfo.mipLevels = mipLevelCount;
 		imageCreateInfo.arrayLayers = layerCount;
-		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(descriptor.sampleCount);
+		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(sampleCount);
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.usage = getVkImageUsageFlagBits(descriptor.usage);
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;

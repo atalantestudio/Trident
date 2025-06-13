@@ -15,14 +15,14 @@
 namespace ProjectA {
 	OpenGLImage::OpenGLImage(const ImageDescriptor& descriptor) :
 		Image(descriptor),
-		target(getGlImageType(descriptor.type, descriptor.sampleCount, layerCount)),
+		target(getGlImageType(descriptor.type, sampleCount, layerCount)),
 		usage(descriptor.usage),
 		internalFormat(getGlInternalFormat(descriptor.format)),
 		format(getGlFormat(descriptor.format))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		DEBUG_ASSERT(checkSampleCountValidity(descriptor.sampleCount));
+		DEBUG_ASSERT(checkSampleCountValidity(sampleCount));
 
 		glCreateTextures(target, 1, &object);
 
@@ -43,8 +43,8 @@ namespace ProjectA {
 			case GL_TEXTURE_2D_MULTISAMPLE:
 			case GL_TEXTURE_CUBE_MAP:
 			case GL_TEXTURE_RECTANGLE:
-				if (descriptor.sampleCount > 1) {
-					glTextureStorage2DMultisample(object, descriptor.sampleCount, internalFormat, extent.width, extent.height, GL_TRUE);
+				if (sampleCount > 1) {
+					glTextureStorage2DMultisample(object, sampleCount, internalFormat, extent.width, extent.height, GL_TRUE);
 				}
 				else {
 					glTextureStorage2D(object, mipLevelCount, internalFormat, extent.width, extent.height);
@@ -59,10 +59,8 @@ namespace ProjectA {
 			case GL_TEXTURE_2D_MULTISAMPLE_ARRAY:
 			case GL_TEXTURE_3D:
 			case GL_TEXTURE_CUBE_MAP_ARRAY:
-				ENGINE_ASSERT(extent.depth == 1, "The OpenGL adapter only supports texture arrays of depth 1.");
-
-				if (descriptor.sampleCount > 1) {
-					glTextureStorage3DMultisample(object, descriptor.sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);
+				if (sampleCount > 1) {
+					glTextureStorage3DMultisample(object, sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);
 				}
 				else {
 					glTextureStorage3D(object, mipLevelCount, internalFormat, extent.width, extent.height, extent.depth * layerCount);

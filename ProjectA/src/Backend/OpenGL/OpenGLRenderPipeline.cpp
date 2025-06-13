@@ -54,7 +54,9 @@ namespace ProjectA {
 
 			ENGINE_ERROR("Program linking failed:\n[]", infoLog);
 
-			BREAKPOINT();
+			DEBUG_ASSERT(false);
+
+			return;
 		}
 
 		glDetachShader(program, vertexShaderModule->object);

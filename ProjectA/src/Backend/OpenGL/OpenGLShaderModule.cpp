@@ -76,6 +76,6 @@ namespace ProjectA {
 
 		ENGINE_ERROR("Shader module compilation failed:\n[]", infoLog);
 
-		BREAKPOINT();
+		DEBUG_ASSERT(false);
 	}
 }
