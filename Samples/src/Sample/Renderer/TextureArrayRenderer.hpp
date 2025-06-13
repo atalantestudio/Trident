@@ -67,24 +67,19 @@ namespace ProjectA {
 					commandEncoder->begin();
 					commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::UNDEFINED, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-					sequence<BufferImageCopyRegion> copyRegions(assets.size());
+					sequence<BufferImageCopyRegion> copyRegions(1);
 
-					for (uint32 assetIndex = 0; assetIndex < assets.size(); assetIndex += 1) {
-						const PNGFile& asset = assets[assetIndex];
-						const uint64 offset = static_cast<uint64>(asset.data.count * assetIndex);
-
-						BufferImageCopyRegion& bufferImageCopyRegion = copyRegions[assetIndex];
-						bufferImageCopyRegion.bufferOffset = offset;
-						bufferImageCopyRegion.imageExtent.width = asset.width;
-						bufferImageCopyRegion.imageExtent.height = asset.height;
-						bufferImageCopyRegion.imageExtent.depth = 1;
-						bufferImageCopyRegion.imageOffsetX = 0;
-						bufferImageCopyRegion.imageOffsetY = 0;
-						bufferImageCopyRegion.imageOffsetZ = 0;
-						bufferImageCopyRegion.imageMipLevel = 0;
-						bufferImageCopyRegion.imageLayerOffset = assetIndex;
-						bufferImageCopyRegion.imageLayerCount = 1;
-					}
+					BufferImageCopyRegion& copyRegion = copyRegions[0];
+					copyRegion.bufferOffset = 0;
+					copyRegion.imageExtent.width = TEXTURE_ARRAY_WIDTH;
+					copyRegion.imageExtent.height = TEXTURE_ARRAY_HEIGHT;
+					copyRegion.imageExtent.depth = 1;
+					copyRegion.imageOffsetX = 0;
+					copyRegion.imageOffsetY = 0;
+					copyRegion.imageOffsetZ = 0;
+					copyRegion.imageMipLevel = 0;
+					copyRegion.imageLayerOffset = 0;
+					copyRegion.imageLayerCount = static_cast<uint32>(assets.size());
 
 					commandEncoder->copyBufferToImage(textureArrayStagingBuffer, textureArray, copyRegions);
 					commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::TRANSFER_DST_OPTIMAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
