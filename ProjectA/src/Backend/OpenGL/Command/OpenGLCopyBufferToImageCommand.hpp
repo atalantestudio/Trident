@@ -6,12 +6,10 @@
 namespace ProjectA {
 	class OpenGLCopyBufferToImageCommand : public OpenGLCommand {
 		public:
-			OpenGLCopyBufferToImageCommand(GLuint buffer, GLuint texture, GLuint target, GLenum format, const BufferImageCopyRegion& copyRegion) :
+			OpenGLCopyBufferToImageCommand(GLuint buffer, const OpenGLImage* image, const sequence<BufferImageCopyRegion>& copyRegions) :
 				buffer(buffer),
-				texture(texture),
-				target(target),
-				format(format),
-				copyRegion(&copyRegion)
+				image(image),
+				copyRegions(&copyRegions)
 			{}
 
 			// TODO: Use glCopyTextureSubImage* instead of glTextureSubImage*?
@@ -19,79 +17,130 @@ namespace ProjectA {
 			//       Replace a rectangular portion of a texture image with pixels from the current GL_READ_BUFFER
 			//       (rather than from main memory, as is the case for glTexSubImage2D).
 			void execute() const override {
+				#ifndef OPENGL_USE_DSA
+					glBindTexture(image->target, image->object);
+				#endif
+
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer);
 
-				const void* pixels = (const void*) copyRegion->bufferOffset;
+				for (const BufferImageCopyRegion& copyRegion : *copyRegions) {
+					const void* pixels = (const void*) copyRegion.bufferOffset;
 
-				switch (target) {
-					case GL_TEXTURE_1D:
-						// TODO: Test this path.
-						DEBUG_ASSERT(false);
+					// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even when creating the image).
+					switch (image->target) {
+						case GL_TEXTURE_1D:
+							// TODO: Test this path.
+							DEBUG_ASSERT(false);
 
-						glTextureSubImage1D(
-							texture,
-							copyRegion->imageMipLevel,
-							copyRegion->imageOffsetX,
-							copyRegion->imageExtent.width,
-							format,
-							GL_UNSIGNED_BYTE,
-							pixels
-						);
+							#ifdef OPENGL_USE_DSA
+								glTextureSubImage1D(
+									image->object,
+									copyRegion.imageMipLevel,
+									copyRegion.imageOffsetX,
+									copyRegion.imageExtent.width,
+									image->format,
+									GL_UNSIGNED_BYTE,
+									pixels
+								);
+							#else
+								glTexSubImage1D(
+									image->target,
+									copyRegion.imageMipLevel,
+									copyRegion.imageOffsetX,
+									copyRegion.imageExtent.width,
+									image->format,
+									GL_UNSIGNED_BYTE,
+									pixels
+								);
+							#endif
 
-						break;
-					case GL_TEXTURE_1D_ARRAY:
-					case GL_TEXTURE_2D:
-					case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
-					case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
-					case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
-					case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
-					case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
-					case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
-						glTextureSubImage2D(
-							texture,
-							copyRegion->imageMipLevel,
-							copyRegion->imageOffsetX,
-							copyRegion->imageOffsetY + copyRegion->imageLayerOffset,
-							copyRegion->imageExtent.width,
-							copyRegion->imageExtent.height * copyRegion->imageLayerCount,
-							format,
-							GL_UNSIGNED_BYTE,
-							pixels
-						);
+							break;
+						case GL_TEXTURE_1D_ARRAY:
+						case GL_TEXTURE_2D:
+						case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+						case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+						case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+						case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+						case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+						case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+							#ifdef OPENGL_USE_DSA
+								glTextureSubImage2D(
+									image->object,
+									copyRegion.imageMipLevel,
+									copyRegion.imageOffsetX,
+									copyRegion.imageOffsetY + copyRegion.imageLayerOffset,
+									copyRegion.imageExtent.width,
+									copyRegion.imageExtent.height * copyRegion.imageLayerCount,
+									image->format,
+									GL_UNSIGNED_BYTE,
+									pixels
+								);
+							#else
+								glTexSubImage2D(
+									image->target,
+									copyRegion.imageMipLevel,
+									copyRegion.imageOffsetX,
+									copyRegion.imageOffsetY + copyRegion.imageLayerOffset,
+									copyRegion.imageExtent.width,
+									copyRegion.imageExtent.height * copyRegion.imageLayerCount,
+									image->format,
+									GL_UNSIGNED_BYTE,
+									pixels
+								);
+							#endif
 
-						break;
-					case GL_TEXTURE_2D_ARRAY:
-					case GL_TEXTURE_3D:
-						glTextureSubImage3D(
-							texture,
-							copyRegion->imageMipLevel,
-							copyRegion->imageOffsetX,
-							copyRegion->imageOffsetY,
-							copyRegion->imageOffsetZ + copyRegion->imageLayerOffset,
-							copyRegion->imageExtent.width,
-							copyRegion->imageExtent.height,
-							copyRegion->imageExtent.depth * copyRegion->imageLayerCount,
-							format,
-							GL_UNSIGNED_BYTE,
-							pixels
-						);
+							break;
+						case GL_TEXTURE_2D_ARRAY:
+						case GL_TEXTURE_3D:
+							#ifdef OPENGL_USE_DSA
+								glTextureSubImage3D(
+									image->object,
+									copyRegion.imageMipLevel,
+									copyRegion.imageOffsetX,
+									copyRegion.imageOffsetY,
+									copyRegion.imageOffsetZ + copyRegion.imageLayerOffset,
+									copyRegion.imageExtent.width,
+									copyRegion.imageExtent.height,
+									copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
+									image->format,
+									GL_UNSIGNED_BYTE,
+									pixels
+								);
+							#else
+								glTexSubImage3D(
+									image->target,
+									copyRegion.imageMipLevel,
+									copyRegion.imageOffsetX,
+									copyRegion.imageOffsetY,
+									copyRegion.imageOffsetZ + copyRegion.imageLayerOffset,
+									copyRegion.imageExtent.width,
+									copyRegion.imageExtent.height,
+									copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
+									image->format,
+									GL_UNSIGNED_BYTE,
+									pixels
+								);
+							#endif
 
-						break;
-					default:
-						ENGINE_ERROR("Unhandled image target ([]).", target);
-						DEBUG_ASSERT(false);
+							break;
+						default:
+							ENGINE_ERROR("Unhandled image target ([]).", image->target);
+							DEBUG_ASSERT(false);
 
-						break;
+							break;
+					}
 				}
 
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+				#ifndef OPENGL_USE_DSA
+					glBindTexture(image->target, 0);
+				#endif
 			}
 
 		private:
 			const GLuint buffer;
-			const GLuint texture;
-			const GLuint target;
-			const GLenum format;
-			const BufferImageCopyRegion* copyRegion;
+			const OpenGLImage* image;
+			const sequence<BufferImageCopyRegion>* copyRegions;
 	};
 }

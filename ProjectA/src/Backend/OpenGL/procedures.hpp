@@ -27,12 +27,6 @@ namespace ProjectA {
 		extern PFNGLCOMPILESHADERPROC glCompileShader;
 	#endif
 
-	#ifdef OPENGL_USE_DSA
-		extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
-	#else
-		extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
-	#endif
-
 	extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
 	extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
 	extern PFNGLCREATEPROGRAMPROC glCreateProgram;
@@ -92,9 +86,6 @@ namespace ProjectA {
 	extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D;
 	extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;
 	extern PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC glTextureStorage3DMultisample;
-	extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
-	extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
-	extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
 	extern PFNGLTEXTUREVIEWPROC glTextureView;
 	extern PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer;
 	extern PFNGLUSEPROGRAMPROC glUseProgram;
@@ -104,5 +95,15 @@ namespace ProjectA {
 	extern PFNGLVERTEXATTRIBLFORMATPROC glVertexAttribLFormat;
 	extern PFNGLVERTEXBINDINGDIVISORPROC glVertexBindingDivisor;
 
-	extern PFNGLCLEARTEXSUBIMAGEPROC glClearTexSubImage;
+	#ifdef OPENGL_USE_DSA
+		extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
+		extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
+		extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
+		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
+	#else
+		extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
+		extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
+		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
+		extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
+	#endif
 }

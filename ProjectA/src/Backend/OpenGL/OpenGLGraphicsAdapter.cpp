@@ -46,12 +46,6 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCompileShader);
 		#endif
 
-		#ifdef OPENGL_USE_DSA
-			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyNamedBufferSubData);
-		#else
-			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyBufferSubData);
-		#endif
-
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateBuffers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateFramebuffers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateProgram);
@@ -111,9 +105,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage3D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2DMultisample);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage3DMultisample);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage1D);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage2D);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage3D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureView);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glUnmapNamedBuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glUseProgram);
@@ -123,7 +114,17 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribLFormat);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexBindingDivisor);
 
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glClearTexSubImage);
+		#ifdef OPENGL_USE_DSA
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyNamedBufferSubData);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage1D);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage2D);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage3D);
+		#else
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyBufferSubData);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage1D);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage2D);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage3D);
+		#endif
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			glEnable(GL_DEBUG_OUTPUT);
