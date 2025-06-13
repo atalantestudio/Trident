@@ -57,8 +57,8 @@ namespace ProjectA {
 		RECT rect{};
 		rect.left = 0;
 		rect.top = 0;
-		rect.right = descriptor.width;
-		rect.bottom = descriptor.height;
+		rect.right = descriptor.size.width;
+		rect.bottom = descriptor.size.height;
 
 		constexpr DWORD dwStyle = WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME;
 		constexpr BOOL bMenu = FALSE;
@@ -101,8 +101,8 @@ namespace ProjectA {
 
 		WIN32_ASSERT(windowData->hDC != nullptr);
 
-		windowData->sizeX = descriptor.width;
-		windowData->sizeY = descriptor.height;
+		windowData->sizeX = descriptor.size.width;
+		windowData->sizeY = descriptor.size.height;
 
 		windowData->mouseDownEventListener = descriptor.mouseDownEventListener;
 		windowData->mouseMoveEventListener = descriptor.mouseMoveEventListener;

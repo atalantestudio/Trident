@@ -156,8 +156,8 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
 				const ref<Swapchain>& swapchain = getSwapchain();
-				const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-				const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+				const float32 width = static_cast<float32>(swapchain->getExtent().width);
+				const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.renderPass = renderPass;
@@ -169,7 +169,7 @@ namespace ProjectA {
 				commandEncoder->bindRenderPipeline(renderPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+				commandEncoder->setScissor(0, 0, swapchain->getExtent().width, swapchain->getExtent().height);
 
 				for (uint32 instanceIndex = 0; instanceIndex < INSTANCE_COUNT; instanceIndex += 1) {
 					const uint32 vertexOffset = 3 * static_cast<uint32>(instanceIndex);
@@ -195,9 +195,9 @@ namespace ProjectA {
 
 				AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
 				depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-				depthStencilAttachmentImageDescriptor.width = swapchain->getExtentWidth();
-				depthStencilAttachmentImageDescriptor.height = swapchain->getExtentHeight();
-				depthStencilAttachmentImageDescriptor.depth = 1;
+				depthStencilAttachmentImageDescriptor.extent.width = swapchain->getExtent().width;
+				depthStencilAttachmentImageDescriptor.extent.height = swapchain->getExtent().height;
+				depthStencilAttachmentImageDescriptor.extent.depth = 1;
 				depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
 				depthStencilAttachmentImageDescriptor.layerCount = 1;
 

@@ -12,9 +12,7 @@ namespace ProjectA {
 	struct WindowDescriptor {
 		std::string name;
 
-		// TODO: Use vec2<sint32/uint32> (scalar).
-		uint32 width;
-		uint32 height;
+		Extent2D size;
 
 		EventListener<MouseDownEvent> mouseDownEventListener;
 		EventListener<MouseMoveEvent> mouseMoveEventListener;

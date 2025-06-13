@@ -82,8 +82,8 @@ namespace ProjectA {
 		framebufferCreateInfo.flags = 0;
 		framebufferCreateInfo.renderPass = vkRenderPass->object;
 		framebufferCreateInfo.attachmentCount = attachmentCount;
-		framebufferCreateInfo.width = extentWidth;
-		framebufferCreateInfo.height = extentHeight;
+		framebufferCreateInfo.width = extent.width;
+		framebufferCreateInfo.height = extent.height;
 		framebufferCreateInfo.layers = 1;
 
 		const std::vector<ref<ImageView>>& colorAttachmentImageViews = renderPass->getColorAttachmentImageViews();
@@ -161,20 +161,15 @@ namespace ProjectA {
 
 		ENGINE_INFO("Swapchain image count is [].", imageCount);
 
-		VkExtent2D imageExtent{};
-
 		if (surfaceCapabilities.currentExtent.width == std::numeric_limits<uint32>::max() && surfaceCapabilities.currentExtent.height == std::numeric_limits<uint32>::max()) {
-			imageExtent = surfaceCapabilities.currentExtent;
+			extent = *pointer_cast_const<const Extent2D*>(&surfaceCapabilities.currentExtent);
 		}
 		else {
-			imageExtent.width = std::clamp(descriptor.extentWidth, surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
-			imageExtent.height = std::clamp(descriptor.extentHeight, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
+			extent.width = std::clamp(descriptor.extent.width, surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
+			extent.height = std::clamp(descriptor.extent.height, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
 		}
 
-		extentWidth = imageExtent.width;
-		extentHeight = imageExtent.height;
-
-		ENGINE_INFO("Swapchain image extent is ([], []).", extentWidth, extentHeight);
+		ENGINE_INFO("Swapchain image extent is ([], []).", extent.width, extent.height);
 
 		const VkSwapchainKHR oldSwapchain = object;
 
@@ -186,7 +181,8 @@ namespace ProjectA {
 		swapchainCreateInfo.minImageCount = imageCount;
 		swapchainCreateInfo.imageFormat = surfaceFormat.format;
 		swapchainCreateInfo.imageColorSpace = surfaceFormat.colorSpace;
-		swapchainCreateInfo.imageExtent = imageExtent;
+		swapchainCreateInfo.imageExtent = *pointer_cast_const<const VkExtent2D*>(&extent);
+		BREAKPOINT();
 		swapchainCreateInfo.imageArrayLayers = 1;
 		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 

@@ -59,7 +59,7 @@ namespace ProjectA {
 			case GL_TEXTURE_2D_MULTISAMPLE_ARRAY:
 			case GL_TEXTURE_3D:
 			case GL_TEXTURE_CUBE_MAP_ARRAY:
-				ENGINE_ASSERT(descriptor.depth == 1, "The OpenGL adapter only supports texture arrays of depth 1.");
+				ENGINE_ASSERT(extent.depth == 1, "The OpenGL adapter only supports texture arrays of depth 1.");
 
 				if (descriptor.sampleCount > 1) {
 					glTextureStorage3DMultisample(object, descriptor.sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);

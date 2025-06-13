@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Extent.hpp"
-
 namespace ProjectA {
 	struct BufferImageCopyRegion {
 		uint64 bufferOffset;

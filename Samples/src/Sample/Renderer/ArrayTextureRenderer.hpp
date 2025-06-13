@@ -211,8 +211,8 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
 				const ref<Swapchain>& swapchain = getSwapchain();
-				const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-				const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+				const float32 width = static_cast<float32>(swapchain->getExtent().width);
+				const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.renderPass = renderPass;
@@ -226,7 +226,7 @@ namespace ProjectA {
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, instanceVertexBuffer, 0, sizeof(Instance));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+				commandEncoder->setScissor(0, 0, swapchain->getExtent().width, swapchain->getExtent().height);
 				commandEncoder->draw(24, 4, 0);
 				commandEncoder->endRenderPass();
 			}
@@ -255,13 +255,13 @@ namespace ProjectA {
 				ImageDescriptor imageDescriptor{};
 				imageDescriptor.type = ImageType::TEXTURE_2D;
 				imageDescriptor.format = ImageFormat::R8G8B8A8_SRGB;
-				imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
-				imageDescriptor.width = file.width;
-				imageDescriptor.height = file.height;
-				imageDescriptor.depth = 1;
+				imageDescriptor.extent.width = file.width;
+				imageDescriptor.extent.height = file.height;
+				imageDescriptor.extent.depth = 1;
 				imageDescriptor.mipLevelCount = 1;
 				imageDescriptor.layerCount = 1;
 				imageDescriptor.sampleCount = 1;
+				imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
 				imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 				const ref<Image> image = createImage(imageDescriptor);

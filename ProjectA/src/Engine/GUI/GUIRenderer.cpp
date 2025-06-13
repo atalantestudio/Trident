@@ -38,13 +38,13 @@ namespace ProjectA {
 		ImageDescriptor textureArrayDescriptor;
 		textureArrayDescriptor.type = ImageType::TEXTURE_2D;
 		textureArrayDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-		textureArrayDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
-		textureArrayDescriptor.width = TEXTURE_ARRAY_MAX_WIDTH;
-		textureArrayDescriptor.height = TEXTURE_ARRAY_MAX_HEIGHT;
-		textureArrayDescriptor.depth = 1;
+		textureArrayDescriptor.extent.width = TEXTURE_ARRAY_MAX_WIDTH;
+		textureArrayDescriptor.extent.height = TEXTURE_ARRAY_MAX_HEIGHT;
+		textureArrayDescriptor.extent.depth = 1;
 		textureArrayDescriptor.mipLevelCount = 1;
 		textureArrayDescriptor.layerCount = TEXTURE_ARRAY_MAX_LAYER_COUNT;
 		textureArrayDescriptor.sampleCount = 1;
+		textureArrayDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
 		textureArrayDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 		textureArray = createImage(textureArrayDescriptor);
@@ -80,9 +80,9 @@ namespace ProjectA {
 
 		AttachmentImageDescriptor colorAttachmentImageDescriptor{};
 		colorAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		colorAttachmentImageDescriptor.width = swapchain->getExtentWidth();
-		colorAttachmentImageDescriptor.height = swapchain->getExtentHeight();
-		colorAttachmentImageDescriptor.depth = 1;
+		colorAttachmentImageDescriptor.extent.width = swapchain->getExtent().width;
+		colorAttachmentImageDescriptor.extent.height = swapchain->getExtent().height;
+		colorAttachmentImageDescriptor.extent.depth = 1;
 		colorAttachmentImageDescriptor.mipLevelCount = 1;
 		colorAttachmentImageDescriptor.layerCount = 1;
 
@@ -417,8 +417,8 @@ namespace ProjectA {
 
 	void GUIRenderer::updateCamera() const {
 		const ref<Swapchain>& swapchain = getSwapchain();
-		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+		const float32 width = static_cast<float32>(swapchain->getExtent().width);
+		const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 		const mat3x3<float32> cameraProjection = {
 			2.0f / width, 0.0f, 0.0f,
@@ -435,8 +435,8 @@ namespace ProjectA {
 		}
 
 		const ref<Swapchain>& swapchain = getSwapchain();
-		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+		const float32 width = static_cast<float32>(swapchain->getExtent().width);
+		const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.renderPass = renderPass;
@@ -446,7 +446,7 @@ namespace ProjectA {
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 
-		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+		commandEncoder->setScissor(0, 0, swapchain->getExtent());
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 
 		if (subcomponentCount > 0) {

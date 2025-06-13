@@ -52,7 +52,7 @@ namespace ProjectA {
 
 			// Updates the scissor area.
 			// NOTE: This should only be used if the render pipeline's dynamic state contains SCISSOR.
-			virtual void setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) = 0;
+			virtual void setScissor(sint32 xOffset, sint32 yOffset, Extent2D extent) = 0;
 
 			// Updates the viewport area.
 			// NOTE: This should only be used if the render pipeline's dynamic state contains VIEWPORT.

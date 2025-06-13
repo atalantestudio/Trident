@@ -30,13 +30,13 @@ namespace ProjectA {
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.type = ImageType::TEXTURE_2D;
 		imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-		imageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT;
-		imageDescriptor.width = extentWidth;
-		imageDescriptor.height = extentHeight;
-		imageDescriptor.depth = 1;
+		imageDescriptor.extent.width = extent.width;
+		imageDescriptor.extent.height = extent.height;
+		imageDescriptor.extent.depth = 1;
 		imageDescriptor.mipLevelCount = 1;
 		imageDescriptor.layerCount = 1;
 		imageDescriptor.sampleCount = 1;
+		imageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT;
 
 		constexpr ImageViewDescriptor imageViewDescriptor;
 
@@ -143,11 +143,10 @@ namespace ProjectA {
 	void OpenGLSwapchain::construct(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		DEBUG_ASSERT(descriptor.extentWidth > 0);
-		DEBUG_ASSERT(descriptor.extentHeight > 0);
+		DEBUG_ASSERT(descriptor.extent.width > 0);
+		DEBUG_ASSERT(descriptor.extent.height > 0);
 
-		extentWidth = descriptor.extentWidth;
-		extentHeight = descriptor.extentHeight;
+		extent = descriptor.extent;
 
 		renderingContext->setSwapInterval(static_cast<sint32>(descriptor.vSync));
 	}

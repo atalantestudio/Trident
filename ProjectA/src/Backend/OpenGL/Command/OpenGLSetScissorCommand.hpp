@@ -5,21 +5,19 @@
 namespace ProjectA {
 	class OpenGLSetScissorCommand : public OpenGLCommand {
 		public:
-			OpenGLSetScissorCommand(GLint x, GLint y, GLsizei width, GLsizei height) :
-				x(x),
-				y(y),
-				width(width),
-				height(height)
+			OpenGLSetScissorCommand(GLint xOffset, GLint yOffset, Extent2D extent) :
+				xOffset(xOffset),
+				yOffset(yOffset),
+				extent(extent)
 			{}
 
 			void execute() const final override {
-				glScissor(x, y, width, height);
+				glScissor(xOffset, yOffset, extent.width, extent.height);
 			}
 
 		private:
-			const GLint x;
-			const GLint y;
-			const GLsizei width;
-			const GLsizei height;
+			const GLint xOffset;
+			const GLint yOffset;
+			const Extent2D extent;
 	};
 }

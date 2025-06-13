@@ -77,13 +77,13 @@ namespace ProjectA {
 		ImageDescriptor glyphImageDescriptor{};
 		glyphImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphImageDescriptor.format = ImageFormat::R8_UNORM;
-		glyphImageDescriptor.usage = ImageUsage::STORAGE;
-		glyphImageDescriptor.width = 4096;
-		glyphImageDescriptor.height = 4096;
-		glyphImageDescriptor.depth = 1;
+		glyphImageDescriptor.extent.width = 4096;
+		glyphImageDescriptor.extent.height = 4096;
+		glyphImageDescriptor.extent.depth = 1;
 		glyphImageDescriptor.mipLevelCount = 1;
 		glyphImageDescriptor.layerCount = 1;
 		glyphImageDescriptor.sampleCount = 1;
+		glyphImageDescriptor.usage = ImageUsage::STORAGE;
 		glyphImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 		const ref<Image> glyphImage = Renderer::createImage(glyphImageDescriptor);
@@ -133,13 +133,13 @@ namespace ProjectA {
 		ImageDescriptor glyphMapSdfImageDescriptor{};
 		glyphMapSdfImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphMapSdfImageDescriptor.format = ImageFormat::R8_UNORM;
-		glyphMapSdfImageDescriptor.usage = ImageUsage::STORAGE | ImageUsage::TRANSFER_SRC;
-		glyphMapSdfImageDescriptor.width = sdfGlyphMap.extent.width;
-		glyphMapSdfImageDescriptor.height = sdfGlyphMap.extent.height;
-		glyphMapSdfImageDescriptor.depth = 1;
+		glyphMapSdfImageDescriptor.extent.width = sdfGlyphMap.extent.width;
+		glyphMapSdfImageDescriptor.extent.height = sdfGlyphMap.extent.height;
+		glyphMapSdfImageDescriptor.extent.depth = 1;
 		glyphMapSdfImageDescriptor.mipLevelCount = 1;
 		glyphMapSdfImageDescriptor.layerCount = 1;
 		glyphMapSdfImageDescriptor.sampleCount = 1;
+		glyphMapSdfImageDescriptor.usage = ImageUsage::STORAGE | ImageUsage::TRANSFER_SRC;
 		glyphMapSdfImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 		ref<Image> glyphMapImage = Renderer::createImage(glyphMapSdfImageDescriptor);

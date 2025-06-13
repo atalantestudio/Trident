@@ -45,13 +45,13 @@ namespace ProjectA {
 					ImageDescriptor textureArrayDescriptor;
 					textureArrayDescriptor.type = ImageType::TEXTURE_2D;
 					textureArrayDescriptor.format = ImageFormat::R8G8B8A8_SRGB;
-					textureArrayDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
-					textureArrayDescriptor.width = TEXTURE_ARRAY_WIDTH;
-					textureArrayDescriptor.height = TEXTURE_ARRAY_HEIGHT;
-					textureArrayDescriptor.depth = 1;
+					textureArrayDescriptor.extent.width = TEXTURE_ARRAY_WIDTH;
+					textureArrayDescriptor.extent.height = TEXTURE_ARRAY_HEIGHT;
+					textureArrayDescriptor.extent.depth = 1;
 					textureArrayDescriptor.mipLevelCount = 1;
 					textureArrayDescriptor.layerCount = 4;
 					textureArrayDescriptor.sampleCount = 1;
+					textureArrayDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
 					textureArrayDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 					textureArray = createImage(textureArrayDescriptor);
@@ -280,8 +280,8 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
 				const ref<Swapchain>& swapchain = getSwapchain();
-				const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-				const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+				const float32 width = static_cast<float32>(swapchain->getExtent().width);
+				const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.renderPass = renderPass;
@@ -295,7 +295,7 @@ namespace ProjectA {
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
 				commandEncoder->bindVertexBuffer(1, instanceVertexBuffer, 0, sizeof(Instance));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+				commandEncoder->setScissor(0, 0, swapchain->getExtent().width, swapchain->getExtent().height);
 				commandEncoder->draw(24, 4, 0);
 				commandEncoder->endRenderPass();
 			}

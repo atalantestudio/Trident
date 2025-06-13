@@ -8,12 +8,8 @@ namespace ProjectA {
 		public:
 			virtual ~Swapchain() = default;
 
-			uint32 getExtentWidth() const {
-				return extentWidth;
-			}
-
-			uint32 getExtentHeight() const {
-				return extentHeight;
+			Extent2D getExtent() const {
+				return extent;
 			}
 
 			virtual uint32 getImageCount() const = 0;
@@ -23,8 +19,6 @@ namespace ProjectA {
 			virtual void update(const SwapchainDescriptor& descriptor) = 0;
 
 		protected:
-			// TODO: Use vec2<uint32>.
-			uint32 extentWidth;
-			uint32 extentHeight;
+			Extent2D extent;
 	};
 }

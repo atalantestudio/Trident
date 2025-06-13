@@ -58,8 +58,8 @@ namespace ProjectA {
 		DEBUG_ASSERT(adapter != nullptr);
 
 		SwapchainDescriptor swapchainDescriptor{};
-		swapchainDescriptor.extentWidth = window.getSize()[0];
-		swapchainDescriptor.extentHeight = window.getSize()[1];
+		swapchainDescriptor.extent.width = window.getSize()[0];
+		swapchainDescriptor.extent.height = window.getSize()[1];
 		swapchainDescriptor.vSync = vSync;
 
 		swapchain = adapter->createSwapchain(swapchainDescriptor);

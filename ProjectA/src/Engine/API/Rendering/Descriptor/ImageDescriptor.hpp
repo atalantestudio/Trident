@@ -7,17 +7,27 @@
 
 namespace ProjectA {
 	struct ImageDescriptor {
+		// The basic dimensionality of the image.
 		ImageType type;
+
+		// The format and type of the texel blocks that will be contained in the image.
 		ImageFormat format;
-		ImageUsage usage;
-		uint32 width;
-		uint32 height;
-		uint32 depth;
+
+		// The number of texels in each dimension of the base level of the image.
+		Extent3D extent;
+
+		// The number of LOD available for minified sampling of the image.
 		uint32 mipLevelCount;
+
+		// The number of layers in the image.
 		uint32 layerCount;
 
-		// The number of samples for the image. Must be a power of 2.
-		uint8 sampleCount;
+		// The number of samples per texel for the image.
+		// NOTE: It must be either 1 or a power of 2 up to 64.
+		uint8 sampleCount : 7;
+
+		// The intended usage of the image.
+		ImageUsage usage;
 
 		// TODO: Replace by MemoryResourceType.
 		MemoryProperty memoryProperties;

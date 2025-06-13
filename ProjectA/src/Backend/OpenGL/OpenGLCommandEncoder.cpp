@@ -139,12 +139,11 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLSetLineWidthCommand>(lineWidth));
 	}
 
-	void OpenGLCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {
+	void OpenGLCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, Extent2D extent) {
 		commandBuffer.emplace_back(createRef<OpenGLSetScissorCommand>(
 			xOffset,
 			yOffset,
-			width,
-			height
+			extent
 		));
 	}
 

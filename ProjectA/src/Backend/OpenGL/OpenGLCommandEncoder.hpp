@@ -38,7 +38,7 @@ namespace ProjectA {
 
 			void setLineWidth(float32 lineWidth) final override;
 
-			void setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) final override;
+			void setScissor(sint32 xOffset, sint32 yOffset, Extent2D extent) final override;
 
 			void setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) final override;
 

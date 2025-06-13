@@ -25,15 +25,17 @@ namespace ProjectA {
 
 					glDrawBuffer(GL_FRONT);
 
+					const Extent2D swapchainExtent = swapchain.getExtent();
+
 					glBlitFramebuffer(
 						0,
 						0,
-						swapchain.getExtentWidth(),
-						swapchain.getExtentHeight(),
+						swapchainExtent.width,
+						swapchainExtent.height,
 						0,
 						0,
-						swapchain.getExtentWidth(),
-						swapchain.getExtentHeight(),
+						swapchainExtent.width,
+						swapchainExtent.height,
 						GL_COLOR_BUFFER_BIT,
 						GL_NEAREST
 					);

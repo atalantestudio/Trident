@@ -49,8 +49,8 @@ namespace ProjectA {
 		initializeVertexFeatureRenderPipeline();
 		initializeEdgeFeatureRenderPipeline();
 
-		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+		const float32 width = static_cast<float32>(swapchain->getExtent().width);
+		const float32 height = static_cast<float32>(swapchain->getExtent().height);
 		const float32 left = -width / 2.0f;
 		const float32 right = width / 2.0f;
 		const float32 top = height / 2.0f;
@@ -71,9 +71,9 @@ namespace ProjectA {
 
 		AttachmentImageDescriptor colorAttachmentImageDescriptor{};
 		colorAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		colorAttachmentImageDescriptor.width = swapchain->getExtentWidth();
-		colorAttachmentImageDescriptor.height = swapchain->getExtentHeight();
-		colorAttachmentImageDescriptor.depth = 1;
+		colorAttachmentImageDescriptor.extent.width = swapchain->getExtent().width;
+		colorAttachmentImageDescriptor.extent.height = swapchain->getExtent().height;
+		colorAttachmentImageDescriptor.extent.depth = 1;
 		colorAttachmentImageDescriptor.mipLevelCount = 1;
 		colorAttachmentImageDescriptor.layerCount = 1;
 
@@ -91,9 +91,9 @@ namespace ProjectA {
 
 		AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
 		depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		depthStencilAttachmentImageDescriptor.width = swapchain->getExtentWidth();
-		depthStencilAttachmentImageDescriptor.height = swapchain->getExtentHeight();
-		depthStencilAttachmentImageDescriptor.depth = 1;
+		depthStencilAttachmentImageDescriptor.extent.width = swapchain->getExtent().width;
+		depthStencilAttachmentImageDescriptor.extent.height = swapchain->getExtent().height;
+		depthStencilAttachmentImageDescriptor.extent.depth = 1;
 		depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
 		depthStencilAttachmentImageDescriptor.layerCount = 1;
 
@@ -743,11 +743,11 @@ namespace ProjectA {
 		mousePosition = {x, y};
 
 		const ref<Swapchain>& swapchain = getSwapchain();
-		const float32 horizontalCellCount = swapchain->getExtentWidth() / cameraMappedRange->zoomLevel;
-		const float32 verticalCellCount = swapchain->getExtentHeight() / cameraMappedRange->zoomLevel;
+		const float32 horizontalCellCount = swapchain->getExtent().width / cameraMappedRange->zoomLevel;
+		const float32 verticalCellCount = swapchain->getExtent().height / cameraMappedRange->zoomLevel;
 
-		x = (x / swapchain->getExtentWidth() - 0.5f) * horizontalCellCount;
-		y = -(y / swapchain->getExtentHeight() - 0.5f) * verticalCellCount;
+		x = (x / swapchain->getExtent().width - 0.5f) * horizontalCellCount;
+		y = -(y / swapchain->getExtent().height - 0.5f) * verticalCellCount;
 
 		ndcMousePosition = {x, y};
 	}
@@ -810,8 +810,8 @@ namespace ProjectA {
 		updateCentersOfMass();
 
 		const ref<Swapchain>& swapchain = getSwapchain();
-		const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-		const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+		const float32 width = static_cast<float32>(swapchain->getExtent().width);
+		const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 		const ClearValue colorAttachmentClearValue = {1.0f, 1.0f, 1.0f, 1.0f};
 
@@ -829,7 +829,7 @@ namespace ProjectA {
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+		commandEncoder->setScissor(0, 0, swapchain->getExtent());
 
 		renderGrid(commandEncoder);
 		renderScene(commandEncoder);

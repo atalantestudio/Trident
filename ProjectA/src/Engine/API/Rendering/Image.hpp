@@ -2,13 +2,12 @@
 
 #include "Engine/API/Rendering/Descriptor/ImageViewDescriptor.hpp"
 #include "Engine/API/Rendering/ImageView.hpp"
-#include "Engine/Extent.hpp"
 
 namespace ProjectA {
 	class Image {
 		protected:
 			Image(const ImageDescriptor& descriptor) :
-				extent{descriptor.width, descriptor.height, descriptor.depth},
+				extent(descriptor.extent),
 				mipLevelCount(descriptor.mipLevelCount),
 				layerCount(descriptor.layerCount)
 			{}

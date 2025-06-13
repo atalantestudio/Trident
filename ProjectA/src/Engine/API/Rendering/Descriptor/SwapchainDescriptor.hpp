@@ -2,8 +2,7 @@
 
 namespace ProjectA {
 	struct SwapchainDescriptor {
-		uint32 extentWidth;
-		uint32 extentHeight;
+		Extent2D extent;
 		bool vSync;
 	};
 }

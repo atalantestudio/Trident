@@ -174,13 +174,11 @@ namespace ProjectA {
 		ImageDescriptor colorImageDescriptor{};
 		colorImageDescriptor.type = descriptor.type;
 		colorImageDescriptor.format = colorAttachment.format;
-		colorImageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT;
-		colorImageDescriptor.width = descriptor.width;
-		colorImageDescriptor.height = descriptor.height;
-		colorImageDescriptor.depth = descriptor.depth;
+		colorImageDescriptor.extent = descriptor.extent;
 		colorImageDescriptor.mipLevelCount = descriptor.mipLevelCount;
 		colorImageDescriptor.layerCount = descriptor.layerCount;
 		colorImageDescriptor.sampleCount = colorAttachment.sampleCount;
+		colorImageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT;
 		colorImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 		return createRef<VulkanImage>(device.object, colorImageDescriptor);
@@ -194,13 +192,11 @@ namespace ProjectA {
 		ImageDescriptor depthStencilImageDescriptor{};
 		depthStencilImageDescriptor.type = descriptor.type;
 		depthStencilImageDescriptor.format = depthStencilAttachment.format;
-		depthStencilImageDescriptor.usage = ImageUsage::DEPTH_STENCIL_ATTACHMENT;
-		depthStencilImageDescriptor.width = descriptor.width;
-		depthStencilImageDescriptor.height = descriptor.height;
-		depthStencilImageDescriptor.depth = descriptor.depth;
+		depthStencilImageDescriptor.extent = descriptor.extent;
 		depthStencilImageDescriptor.mipLevelCount = descriptor.mipLevelCount;
 		depthStencilImageDescriptor.layerCount = descriptor.layerCount;
 		depthStencilImageDescriptor.sampleCount = depthStencilAttachment.sampleCount;
+		depthStencilImageDescriptor.usage = ImageUsage::DEPTH_STENCIL_ATTACHMENT;
 		depthStencilImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 		return createRef<VulkanImage>(device.object, depthStencilImageDescriptor);

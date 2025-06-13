@@ -29,13 +29,13 @@ namespace ProjectA {
 					ImageDescriptor imageDescriptor;
 					imageDescriptor.type = ImageType::TEXTURE_2D;
 					imageDescriptor.format = ImageFormat::R8_UNORM;
-					imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
-					imageDescriptor.width = glyphMap.extent.width;
-					imageDescriptor.height = glyphMap.extent.height;
-					imageDescriptor.depth = 1;
+					imageDescriptor.extent.width = glyphMap.extent.width;
+					imageDescriptor.extent.height = glyphMap.extent.height;
+					imageDescriptor.extent.depth = 1;
 					imageDescriptor.mipLevelCount = 1;
 					imageDescriptor.layerCount = 1;
 					imageDescriptor.sampleCount = 1;
+					imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
 					imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 					image = createImage(imageDescriptor);
@@ -206,8 +206,8 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
 				const ref<Swapchain>& swapchain = getSwapchain();
-				const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-				const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+				const float32 width = static_cast<float32>(swapchain->getExtent().width);
+				const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.renderPass = renderPass;
@@ -220,7 +220,7 @@ namespace ProjectA {
 				commandEncoder->bindAllDescriptorSets();
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+				commandEncoder->setScissor(0, 0, swapchain->getExtent().width, swapchain->getExtent().height);
 				commandEncoder->draw(6, 1, 0);
 				commandEncoder->endRenderPass();
 			}

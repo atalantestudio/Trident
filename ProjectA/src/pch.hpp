@@ -30,6 +30,7 @@
 
 #include "Engine/types.hpp"
 #include "Engine/sequence.hpp"
+#include "Engine/Extent.hpp"
 
 #include "Engine/Logger/Logger.hpp"
 

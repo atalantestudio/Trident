@@ -82,8 +82,8 @@ namespace ProjectA {
 		layoutDirection = VERTICAL;
 		layoutSpacing = 0;
 		currentContainerSize = {
-			static_cast<sint16>(swapchain->getExtentWidth()),
-			static_cast<sint16>(swapchain->getExtentHeight()),
+			static_cast<sint16>(swapchain->getExtent().width),
+			static_cast<sint16>(swapchain->getExtent().height),
 		};
 		currentContainerInnerSize = currentContainerSize;
 

@@ -9,8 +9,8 @@ namespace ProjectA {
 		// Must be a color format.
 		ImageFormat format;
 
-		// The number of samples of the attachment. It must be a power of 2.
-		uint8 sampleCount;
+		// The number of samples of the attachment. It must be either 1 or a power of 2 up to 64.
+		uint8 sampleCount : 7;
 
 		// Specifies how the attachment's contents are treated at the beginning of the subpass.
 		LoadOperation loadOperation;
@@ -24,8 +24,8 @@ namespace ProjectA {
 		// Must be a depth or depth stencil format.
 		ImageFormat format;
 
-		// The number of samples of the attachment. It must be a power of 2.
-		uint8 sampleCount;
+		// The number of samples of the attachment. It must be either 1 or a power of 2 up to 64.
+		uint8 sampleCount : 7;
 
 		// Specifies how the attachment's contents are treated at the beginning of the subpass.
 		LoadOperation loadOperation;

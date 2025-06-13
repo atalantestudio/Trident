@@ -77,8 +77,7 @@ namespace ProjectA {
 		renderPassBeginInfo.framebuffer = swapchain.framebuffers[descriptor.imageIndex];
 		renderPassBeginInfo.renderArea.offset.x = 0;
 		renderPassBeginInfo.renderArea.offset.y = 0;
-		renderPassBeginInfo.renderArea.extent.width = swapchain.getExtentWidth();
-		renderPassBeginInfo.renderArea.extent.height = swapchain.getExtentHeight();
+		renderPassBeginInfo.renderArea.extent = *static_cast<const VkExtent2D*>(static_cast<const void*>(&swapchain.getExtent()));
 		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.count);
 		renderPassBeginInfo.pClearValues = &clearValues[0];
 
@@ -274,12 +273,11 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) {
+	void VulkanCommandEncoder::setScissor(sint32 xOffset, sint32 yOffset, Extent2D extent) {
 		VkRect2D scissor{};
 		scissor.offset.x = xOffset;
 		scissor.offset.y = yOffset;
-		scissor.extent.width = width;
-		scissor.extent.height = height;
+		scissor.extent = *static_cast<const VkExtent2D*>(static_cast<const void*>(&extent));
 
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 

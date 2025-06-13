@@ -29,13 +29,13 @@ namespace ProjectA {
 					ImageDescriptor glyphMapImageDescriptor;
 					glyphMapImageDescriptor.type = ImageType::TEXTURE_2D;
 					glyphMapImageDescriptor.format = ImageFormat::R8_UNORM;
-					glyphMapImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
-					glyphMapImageDescriptor.width = glyphMap.extent.width;
-					glyphMapImageDescriptor.height = glyphMap.extent.height;
-					glyphMapImageDescriptor.depth = 1;
+					glyphMapImageDescriptor.extent.width = glyphMap.extent.width;
+					glyphMapImageDescriptor.extent.height = glyphMap.extent.height;
+					glyphMapImageDescriptor.extent.depth = 1;
 					glyphMapImageDescriptor.mipLevelCount = 1;
 					glyphMapImageDescriptor.layerCount = 1;
 					glyphMapImageDescriptor.sampleCount = 1;
+					glyphMapImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
 					glyphMapImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 					glyphMapImage = createImage(glyphMapImageDescriptor);
@@ -251,8 +251,8 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
 				const ref<Swapchain>& swapchain = getSwapchain();
-				const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-				const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+				const float32 width = static_cast<float32>(swapchain->getExtent().width);
+				const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.renderPass = renderPass;
@@ -266,7 +266,7 @@ namespace ProjectA {
 				commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+				commandEncoder->setScissor(0, 0, swapchain->getExtent().width, swapchain->getExtent().height);
 				commandEncoder->drawIndexed(6 * characterCount, 1, 0);
 				commandEncoder->endRenderPass();
 			}
@@ -333,8 +333,8 @@ namespace ProjectA {
 		private:
 			void updateCamera() const {
 				const ref<Swapchain>& swapchain = getSwapchain();
-				const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-				const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+				const float32 width = static_cast<float32>(swapchain->getExtent().width);
+				const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 				cameraMappedRange->projection = {
 					 2.0f / width,  0.0f,           0.0f,

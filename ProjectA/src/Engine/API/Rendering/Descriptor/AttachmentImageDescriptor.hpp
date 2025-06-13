@@ -5,9 +5,7 @@
 namespace ProjectA {
 	struct AttachmentImageDescriptor {
 		ImageType type;
-		uint32 width;
-		uint32 height;
-		uint32 depth;
+		Extent3D extent;
 		uint32 mipLevelCount;
 		uint32 layerCount;
 	};

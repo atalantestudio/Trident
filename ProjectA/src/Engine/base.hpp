@@ -180,6 +180,11 @@ O pointer_cast(I pointer) {
 	return static_cast<O>(static_cast<void*>(pointer));
 }
 
+template<typename O, typename I>
+O pointer_cast_const(I pointer) {
+	return static_cast<O>(static_cast<const void*>(pointer));
+}
+
 // TODO: Remove usage of auto?
 #define BIND(function) \
 	[this](auto&&... arguments) -> decltype(auto) { \

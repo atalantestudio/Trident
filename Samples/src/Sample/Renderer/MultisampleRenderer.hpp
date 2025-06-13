@@ -124,8 +124,8 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
 				const ref<Swapchain>& swapchain = getSwapchain();
-				const float32 width = static_cast<float32>(swapchain->getExtentWidth());
-				const float32 height = static_cast<float32>(swapchain->getExtentHeight());
+				const float32 width = static_cast<float32>(swapchain->getExtent().width);
+				const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.renderPass = renderPass;
@@ -137,7 +137,7 @@ namespace ProjectA {
 				commandEncoder->bindRenderPipeline(renderPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
+				commandEncoder->setScissor(0, 0, swapchain->getExtent().width, swapchain->getExtent().height);
 				commandEncoder->draw(3, 1, 0);
 				commandEncoder->endRenderPass();
 			}
@@ -156,9 +156,9 @@ namespace ProjectA {
 
 				AttachmentImageDescriptor multisampleAttachmentImageDescriptor{};
 				multisampleAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-				multisampleAttachmentImageDescriptor.width = swapchain->getExtentWidth();
-				multisampleAttachmentImageDescriptor.height = swapchain->getExtentHeight();
-				multisampleAttachmentImageDescriptor.depth = 1;
+				multisampleAttachmentImageDescriptor.extent.width = swapchain->getExtent().width;
+				multisampleAttachmentImageDescriptor.extent.height = swapchain->getExtent().height;
+				multisampleAttachmentImageDescriptor.extent.depth = 1;
 				multisampleAttachmentImageDescriptor.mipLevelCount = 1;
 				multisampleAttachmentImageDescriptor.layerCount = 1;
 

@@ -38,10 +38,22 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.type must be a valid ImageType value.");
 		}
 
-		if (descriptor.depth == 0) {
+		if (descriptor.extent.width == 0) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.depth must be greater than 0.");
+			ENGINE_ERROR("descriptor.extent.width must be greater than 0.");
+		}
+
+		if (descriptor.extent.height == 0) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.extent.height must be greater than 0.");
+		}
+
+		if (descriptor.extent.depth == 0) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.extent.depth must be greater than 0.");
 		}
 
 		if (descriptor.mipLevelCount == 0) {
@@ -153,24 +165,24 @@ namespace ProjectA {
 		}
 
 		// TODO: Check max width.
-		if (descriptor.width == 0) {
+		if (descriptor.extent.width == 0) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.width must not be 0.");
+			ENGINE_ERROR("descriptor.extent.width must not be 0.");
 		}
 
 		// TODO: Check max height.
-		if (descriptor.height == 0) {
+		if (descriptor.extent.height == 0) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.height must not be 0.");
+			ENGINE_ERROR("descriptor.extent.height must not be 0.");
 		}
 
 		// TODO: Check max depth.
-		if (descriptor.depth == 0) {
+		if (descriptor.extent.depth == 0) {
 			errorCount += 1;
 
-			ENGINE_ERROR("descriptor.depth must not be 0.");
+			ENGINE_ERROR("descriptor.extent.depth must not be 0.");
 		}
 
 		// TODO: Check max mip level count.

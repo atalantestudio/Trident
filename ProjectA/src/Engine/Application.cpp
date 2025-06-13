@@ -79,8 +79,8 @@ namespace ProjectA {
 
 		WindowDescriptor windowDescriptor{};
 		windowDescriptor.name = formatWindowName(applicationManifest.projectName, sharedMemoryData->instanceCount);
-		windowDescriptor.width = propertyFile->getProperty<uint32>("WindowWidth");
-		windowDescriptor.height = propertyFile->getProperty<uint32>("WindowHeight");
+		windowDescriptor.size.width = propertyFile->getProperty<uint32>("WindowWidth");
+		windowDescriptor.size.height = propertyFile->getProperty<uint32>("WindowHeight");
 		windowDescriptor.mouseDownEventListener = BIND(Application::onEvent);
 		windowDescriptor.mouseMoveEventListener = BIND(Application::onEvent);
 		windowDescriptor.mouseUpEventListener = BIND(Application::onEvent);
@@ -342,8 +342,8 @@ namespace ProjectA {
 		WindowResizeEvent event(window->getSize()[0], window->getSize()[1]);
 
 		SwapchainDescriptor swapchainDescriptor;
-		swapchainDescriptor.extentWidth = event.getWidth();
-		swapchainDescriptor.extentHeight = event.getHeight();
+		swapchainDescriptor.extent.width = event.getWidth();
+		swapchainDescriptor.extent.height = event.getHeight();
 		swapchainDescriptor.vSync = vSync;
 
 		Renderer::getSwapchain()->update(swapchainDescriptor);
