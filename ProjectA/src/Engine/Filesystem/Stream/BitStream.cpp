@@ -232,9 +232,18 @@ namespace ProjectA {
 
 			ENGINE_ASSERT(source >= data, "The source iterator is underflowing.");
 
-			std::copy(source, source + length, data + dataOffset);
+			// TODO: std::copy produces correct results, except for Cameraman.png and a part of Pepper.png. Why?
+			#if 0
+				std::copy(source, source + length, data + dataOffset);
+				dataOffset += length;
+			#else
+				for (uint16 index = 0; index < length; index += 1) {
+					data[dataOffset] = *source;
+					dataOffset += 1;
 
-			dataOffset += length;
+					source += 1;
+				}
+			#endif
 		}
 
 		ENGINE_WARN("Reached last safe iteration.");

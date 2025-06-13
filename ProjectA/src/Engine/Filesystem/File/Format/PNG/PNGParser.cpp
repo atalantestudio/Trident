@@ -95,7 +95,8 @@ namespace ProjectA {
 		}
 
 		// TODO: Check CRC. See https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix.
-		const uint32 CRC = stream.read<uint32>(true);
+		// const uint32 CRC = stream.read<uint32>(true);
+		stream.jump(sizeof(uint32));
 	}
 
 	static uint8 applyAddFilter(const uint8* x, uint8* aOrB, uint8 channelIndex) {
