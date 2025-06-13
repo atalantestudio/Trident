@@ -51,6 +51,7 @@ namespace ProjectA {
 
 			void GUIText(const std::string& string, const TextStyle& textStyle);
 
+			// Returns true if the button is hovered.
 			bool GUIButton(const std::string& string, const ButtonStyle& buttonStyle);
 
 		private:
@@ -71,25 +72,25 @@ namespace ProjectA {
 			static constexpr sint16 EXPAND = -1;
 
 			// Retreat towards the layout direction.
-			static constexpr sint16 SHRINK = -2;
+			// static constexpr sint16 SHRINK = -2;
 
 		private:
-			// static constexpr uint32 MAX_IMAGE_COUNT = 4;
 			static constexpr uint32 MAX_FONT_COUNT = 2;
 
 		private:
 			GUIRenderer renderer;
+
+			bool textureArrayFlushed = false;
+
+			std::array<ref<TrueTypeFont>, MAX_FONT_COUNT> fonts;
+			uint32 fontCount = 0;
+
 			sint16 componentOrigin[2];
 			LayoutDirection layoutDirection = VERTICAL;
 			uint16 layoutSpacing = 0;
 			GUISize currentContainerSize;
 			GUISize currentContainerInnerSize;
 			bool rootComponent = true;
-
-			bool textureArrayFlushed = false;
-
-			std::array<ref<TrueTypeFont>, MAX_FONT_COUNT> fonts;
-			uint32 fontCount = 0;
 	};
 
 	#define GUIContainer(...) for (GUIContainer _container = pushContainer(__VA_ARGS__); !_container.iteration; popContainer(_container))
