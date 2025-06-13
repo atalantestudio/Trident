@@ -9,16 +9,75 @@ namespace ProjectA {
 				font("../ProjectA/src/Asset/Font/test.ttf")
 			{
 				const ref<Device> device = getDevice();
-				const ref<Image>& glyphMapImage = font.getSdfImage();
+				const SDFGlyphMap& glyphMap = font.getGlyphMap();
 
-				// 1. Create glyph map image view.
+				ref<Buffer> glyphMapImageStagingBuffer;
+
+				// 1. Create image staging buffer and copy the glyph map data to it.
+				{
+					glyphMapImageStagingBuffer = createStagingBuffer(glyphMap.data.count);
+
+					uint8* glyphMapImageStagingBufferMappedRange = glyphMapImageStagingBuffer->map<uint8>(0, glyphMapImageStagingBuffer->size);
+
+					std::copy(glyphMap.data.begin(), glyphMap.data.end(), glyphMapImageStagingBufferMappedRange);
+
+					glyphMapImageStagingBuffer->unmap();
+				}
+
+				// 2. Create image and copy the image staging buffer to it.
+				{
+					ImageDescriptor glyphMapImageDescriptor;
+					glyphMapImageDescriptor.type = ImageType::TEXTURE_2D;
+					glyphMapImageDescriptor.format = ImageFormat::R8_UNORM;
+					glyphMapImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
+					glyphMapImageDescriptor.width = glyphMap.extent.width;
+					glyphMapImageDescriptor.height = glyphMap.extent.height;
+					glyphMapImageDescriptor.depth = 1;
+					glyphMapImageDescriptor.mipLevelCount = 1;
+					glyphMapImageDescriptor.layerCount = 1;
+					glyphMapImageDescriptor.sampleCount = 1;
+					glyphMapImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+
+					glyphMapImage = createImage(glyphMapImageDescriptor);
+
+					sequence<BufferImageCopyRegion> bufferImageCopyRegions(1);
+
+					BufferImageCopyRegion& bufferImageCopyRegion = bufferImageCopyRegions[0];
+					bufferImageCopyRegion.bufferOffset = 0;
+					bufferImageCopyRegion.imageOffsetX = 0;
+					bufferImageCopyRegion.imageOffsetY = 0;
+					bufferImageCopyRegion.imageOffsetZ = 0;
+					bufferImageCopyRegion.imageExtent.width = glyphMap.extent.width;
+					bufferImageCopyRegion.imageExtent.height = glyphMap.extent.height;
+					bufferImageCopyRegion.imageExtent.depth = 1;
+					bufferImageCopyRegion.imageMipLevel = 0;
+					bufferImageCopyRegion.imageLayerOffset = 0;
+					bufferImageCopyRegion.imageLayerCount = 1;
+
+					CommandBufferDescriptor commandBufferDescriptor;
+					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+					commandEncoder->begin();
+					commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::UNDEFINED, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+					commandEncoder->copyBufferToImage(glyphMapImageStagingBuffer, glyphMapImage, bufferImageCopyRegions);
+					commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::TRANSFER_DST_OPTIMAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
+					device->waitIdle();
+				}
+
+				// 3. Create glyph map image view.
 				{
 					constexpr ImageViewDescriptor imageViewDescriptor;
 
 					glyphMapImageView = glyphMapImage->createView(imageViewDescriptor);
 				}
 
-				// 2. Create glyph map image sampler.
+				// 4. Create glyph map image sampler.
 				{
 					SamplerDescriptor samplerDescriptor{};
 					samplerDescriptor.magFilter = SamplerFilter::NEAREST;
@@ -27,7 +86,7 @@ namespace ProjectA {
 					glyphMapImageSampler = createSampler(samplerDescriptor);
 				}
 
-				// 3. Create camera buffer.
+				// 5. Create camera buffer.
 				{
 					constexpr uint64 cameraBufferSize = sizeof(Camera);
 
@@ -41,7 +100,7 @@ namespace ProjectA {
 					cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBufferSize);
 				}
 
-				// 4. Create render pass.
+				// 6. Create render pass.
 				{
 					const ref<Surface> surface = getSurface();
 
@@ -64,7 +123,7 @@ namespace ProjectA {
 					swapchain->getImages(renderPass);
 				}
 
-				// 5. Create pipeline layout.
+				// 7. Create pipeline layout.
 				{
 					DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 					cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
@@ -86,7 +145,7 @@ namespace ProjectA {
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 6. Create render pipeline.
+				// 8. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -122,7 +181,7 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 7. Create index buffer.
+				// 9. Create index buffer.
 				{
 					constexpr uint64 indexBufferSize = 6 * MAX_CHARACTER_COUNT * sizeof(uint16);
 
@@ -171,7 +230,7 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				// 8. Create vertex buffer.
+				// 10. Create vertex buffer.
 				{
 					constexpr uint64 vertexBufferSize = 4 * MAX_CHARACTER_COUNT * sizeof(Vertex);
 
@@ -187,7 +246,7 @@ namespace ProjectA {
 
 				updateCamera();
 
-				setText("Text/\\Renderer", 64.0f);
+				setText("PP Radio Grotesk", 64.0f);
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
@@ -225,16 +284,15 @@ namespace ProjectA {
 
 				characterCount = static_cast<uint32>(text.size());
 
-				const char* string = text.data();
-				const uint8* codePoint = static_cast<const uint8*>(static_cast<const void*>(string));
 				const float32 lineHeight = static_cast<float32>(font.getLineHeight());
 
 				uint32 vertexIndex = 0;
 				float32 positionX = 0;
 				float32 positionY = 0;
 
-				while (*codePoint != '\0') {
-					const TrueTypeGlyph& glyph = font[*codePoint];
+				for (const char glyph : text) {
+					const uint16 codePoint = static_cast<uint16>(glyph);
+					const TrueTypeGlyph& glyph = font[codePoint];
 
 					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * static_cast<float32>(fontSize));
 
@@ -270,7 +328,6 @@ namespace ProjectA {
 					}
 
 					positionX += advanceWidth;
-					codePoint += 1;
 				}
 			}
 

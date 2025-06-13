@@ -53,7 +53,7 @@ namespace ProjectA {
 
 		textureArrayView = textureArray->createView(textureArrayViewDescriptor);
 
-		static constexpr uint64 textureArrayStagingBufferSize = TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_LAYER_BPP;
+		static constexpr uint64 textureArrayStagingBufferSize = TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_MAX_LAYER_COUNT * TEXTURE_ARRAY_LAYER_BPP;
 
 		textureArrayStagingBuffer = createStagingBuffer(textureArrayStagingBufferSize);
 		textureArrayStagingBufferMappedRange = textureArrayStagingBuffer->map<uint8>(0, textureArrayStagingBufferSize);
@@ -241,10 +241,10 @@ namespace ProjectA {
 		DescriptorSetLayout descriptorSetLayout;
 		descriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, textureArrayDescriptorSetLayoutBinding};
 
-		PipelineLayoutDescriptor subcomponentPipelineLayoutDescriptor;
-		subcomponentPipelineLayoutDescriptor.layouts = {descriptorSetLayout};
+		PipelineLayoutDescriptor pipelineLayoutDescriptor;
+		pipelineLayoutDescriptor.layouts = {descriptorSetLayout};
 
-		subcomponentPipelineLayout = createPipelineLayout(subcomponentPipelineLayoutDescriptor);
+		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -269,7 +269,7 @@ namespace ProjectA {
 
 		RenderPipelineDescriptor subcomponentRenderPipelineDescriptor;
 		subcomponentRenderPipelineDescriptor.renderPass = renderPass;
-		subcomponentRenderPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
+		subcomponentRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		subcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, subcomponentInputBinding};
 		subcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert", vertexShaderModuleDescriptor);
 		subcomponentRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.frag", fragmentShaderModuleDescriptor);
@@ -284,13 +284,6 @@ namespace ProjectA {
 		subcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
 		subcomponentRenderPipeline = createRenderPipeline(subcomponentRenderPipelineDescriptor);
-
-		///
-
-		PipelineLayoutDescriptor glyphSubcomponentPipelineLayoutDescriptor;
-		glyphSubcomponentPipelineLayoutDescriptor.layouts = {descriptorSetLayout};
-
-		glyphSubcomponentPipelineLayout = createPipelineLayout(glyphSubcomponentPipelineLayoutDescriptor);
 
 		VertexInputBinding glyphSubcomponentVertexInputBinding(InputRate::INSTANCE);
 		glyphSubcomponentVertexInputBinding.registerAttribute<mat3x3<float32>>();
@@ -307,7 +300,7 @@ namespace ProjectA {
 
 		RenderPipelineDescriptor glyphSubcomponentRenderPipelineDescriptor;
 		glyphSubcomponentRenderPipelineDescriptor.renderPass = renderPass;
-		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = glyphSubcomponentPipelineLayout;
+		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		glyphSubcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, glyphSubcomponentVertexInputBinding};
 		glyphSubcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.vert", vertexShaderModuleDescriptor);
 		glyphSubcomponentRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.frag", fragmentShaderModuleDescriptor);
@@ -316,8 +309,10 @@ namespace ProjectA {
 		glyphSubcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;
 		glyphSubcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		glyphSubcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
-		glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 1.0f;
-		glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
+		// glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 1.0f;
+		glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 0.0f;
+		// glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
+		glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {opaqueColorBlendAttachment};
 		glyphSubcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		glyphSubcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
@@ -325,7 +320,7 @@ namespace ProjectA {
 	}
 
 	uint32 GUIRenderer::registerTextureArrayLayer(const TextureArrayLayer& layer) {
-		ENGINE_ASSERT(textureArrayLayerCount + 1 < TEXTURE_ARRAY_MAX_LAYER_COUNT, "Too much");
+		ENGINE_ASSERT(textureArrayLayerCount + 1 < TEXTURE_ARRAY_MAX_LAYER_COUNT, "Too many client-side images.");
 		ENGINE_ASSERT(layer.width <= TEXTURE_ARRAY_MAX_WIDTH, "Image width ([]) is larger than the maximum width ([]).", layer.width, TEXTURE_ARRAY_MAX_WIDTH);
 		ENGINE_ASSERT(layer.height <= TEXTURE_ARRAY_MAX_HEIGHT, "Image height ([]) is larger than the maximum height ([]).", layer.height, TEXTURE_ARRAY_MAX_HEIGHT);
 
@@ -333,9 +328,7 @@ namespace ProjectA {
 
 		std::copy(layer.data.begin(), layer.data.end(), textureArrayStagingBufferMappedRange);
 
-		const uint64 size = layer.width * layer.height * TEXTURE_ARRAY_LAYER_BPP;
-
-		textureArrayStagingBufferMappedRange += size;
+		textureArrayStagingBufferMappedRange += layer.data.count;
 
 		textureArrayLayerExtents[textureArrayLayerCount].width = layer.width;
 		textureArrayLayerExtents[textureArrayLayerCount].height = layer.height;

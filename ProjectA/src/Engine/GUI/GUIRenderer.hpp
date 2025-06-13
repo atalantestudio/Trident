@@ -80,10 +80,8 @@ namespace ProjectA {
 			ref<Image> colorImage;
 			ref<ImageView> colorImageView;
 
-			ref<PipelineLayout> subcomponentPipelineLayout;
+			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> subcomponentRenderPipeline;
-
-			ref<PipelineLayout> glyphSubcomponentPipelineLayout;
 			ref<RenderPipeline> glyphSubcomponentRenderPipeline;
 
 			ref<Buffer> vertexBuffer;

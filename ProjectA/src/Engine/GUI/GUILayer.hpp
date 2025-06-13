@@ -17,6 +17,12 @@ namespace ProjectA {
 			typedef uint32 FontID;
 			typedef uint32 ImageID;
 
+		private:
+			struct FontData {
+				ref<TrueTypeFont> font;
+				ImageID glyphMapImageId;
+			};
+
 		public:
 			GUILayer();
 
@@ -82,7 +88,7 @@ namespace ProjectA {
 
 			bool textureArrayFlushed = false;
 
-			std::array<ref<TrueTypeFont>, MAX_FONT_COUNT> fonts;
+			std::array<FontData, MAX_FONT_COUNT> fonts;
 			uint32 fontCount = 0;
 
 			sint16 componentOrigin[2];

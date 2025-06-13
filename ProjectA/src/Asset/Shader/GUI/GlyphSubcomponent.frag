@@ -15,22 +15,22 @@ layout(set = 0, binding = 1) uniform sampler2DArray textureArraySampler;
 layout(location = 0) out vec4 color;
 
 void main() {
-	/*float value = smoothstep(
+	/* float value = smoothstep(
 		ALPHA_THRESHOLD - SMOOTHNESS,
 		ALPHA_THRESHOLD + SMOOTHNESS,
 		texture(textureArraySampler, vertexOutput.textureCoordinate).r
-	);*/
+	); */
 	float value = texture(textureArraySampler, vertexOutput.textureCoordinate).r;
 
-	const float outlineMin0 = 0.05;
+	// color.a = float(value >= 0.5);
+	color = vertexOutput.color * value;
+
+	/* const float outlineMin0 = 0.05;
 	const float outlineMin1 = 0.1;
 	const float outlineMax0 = 0.95;
 	const float outlineMax1 = 1.0;
 
-	color = vertexOutput.color * value;
-	//color.a = float(value >= 0.5);
-
-	/*if (value > outlineMin0 && value <= outlineMax1) {
+	if (value > outlineMin0 && value <= outlineMax1) {
 		float outlineFactor = 1.0;
 
 		if (value <= outlineMin1) {
@@ -51,5 +51,5 @@ void main() {
 
 	const vec4 dropShadowColor = vec4(vec3(0.4), 1.0);
 
-	color = mix(dropShadowColor * dropShadow, color, color.a);*/
+	color = mix(dropShadowColor * dropShadow, color, color.a); */
 }

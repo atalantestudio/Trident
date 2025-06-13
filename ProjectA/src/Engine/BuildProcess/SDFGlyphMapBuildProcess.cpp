@@ -181,8 +181,7 @@ namespace ProjectA {
 
 		const ref<ComputePipeline> glyphSdfPipeline = Renderer::createComputePipeline(glyphSdfPipelineDescriptor);
 
-		// Copy the font staging buffer to the font storage buffer
-		// and transition the glyph and glyph map images from UNDEFINED to GENERAL.
+		// Copy the font staging buffer to the font storage buffer and transition the glyph and glyph map images from UNDEFINED to GENERAL.
 
 		sequence<BufferCopyRegion> fontBufferCopyRegions(1);
 
@@ -295,7 +294,7 @@ namespace ProjectA {
 			commandEncoder->bindComputePipeline(glyphSdfPipeline);
 			commandEncoder->bindAllDescriptorSets();
 
-			// TODO: Support custom glyph subimage dimension (multiply down).
+			// TODO: Support custom glyph sub-image dimension (multiply down).
 			commandEncoder->dispatchGroups(8, 8, 1);
 
 			commandBuffer = commandEncoder->end();
@@ -303,21 +302,11 @@ namespace ProjectA {
 			device->getComputeQueue()->submit({commandBuffer}, nullptr, nullptr, writeBufferFence);
 			device->waitIdle();
 
+			// TODO: lyah::ceil.
 			xOffset += std::ceil(sdfGlyph.width) + SPREAD_FACTOR * 2;
 		}
 
-		// Transition the glyph map image to TRANSFER_SRC_OPTIMAL.
-
-		commandEncoder = device->getComputeQueue()->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
-		commandEncoder->begin();
-		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::GENERAL, ImageLayout::TRANSFER_SRC_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-
-		commandBuffer = commandEncoder->end();
-
-		device->getComputeQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
-		device->waitIdle();
-
-		// TODO: Copy the data from glyphMapImage to sdfGlyphMap.data.
+		// Transition the glyph map image to TRANSFER_SRC_OPTIMAL and copy its data to the final buffer.
 
 		BufferDescriptor glyphMapStagingBufferDescriptor;
 		glyphMapStagingBufferDescriptor.size = sdfGlyphMap.extent.width * sdfGlyphMap.extent.height;
@@ -340,6 +329,7 @@ namespace ProjectA {
 
 		commandEncoder = device->getComputeQueue()->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
 		commandEncoder->begin();
+		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::GENERAL, ImageLayout::TRANSFER_SRC_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, bufferImageCopyRegions);
 
 		commandBuffer = commandEncoder->end();

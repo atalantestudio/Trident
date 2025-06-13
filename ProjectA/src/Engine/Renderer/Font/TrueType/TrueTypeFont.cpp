@@ -15,7 +15,7 @@ namespace ProjectA {
 		lineGap = ttfFile.hhea.lineGap;
 		unicodeMap = ttfFile.unicodeMap;
 
-		glyphs.resize(ttfFile.maxp.numGlyphs);
+		glyphs = sequence<TrueTypeGlyph>(ttfFile.maxp.numGlyphs);
 
 		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.maxp.numGlyphs; glyphIndex += 1) {
 			const Glyph& glyph = ttfFile.glyphs[glyphIndex];
@@ -54,12 +54,12 @@ namespace ProjectA {
 		return sdfGlyphMap;
 	}
 
-	const std::vector<TrueTypeGlyph>& TrueTypeFont::getGlyphs() const {
+	const sequence<TrueTypeGlyph>& TrueTypeFont::getGlyphs() const {
 		return glyphs;
 	}
 
 	const TrueTypeGlyph& TrueTypeFont::operator [](uint16 codePoint) const {
-		const auto glyphIndex = unicodeMap.find(codePoint);
+		const std::list<std::pair<const uint16, uint32>, std::allocator<std::pair<const uint16, uint32>>>::const_iterator glyphIndex = unicodeMap.find(codePoint);
 
 		return glyphs[glyphIndex->second];
 	}

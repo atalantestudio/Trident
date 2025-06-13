@@ -4,17 +4,15 @@ namespace ProjectA {
 	class TestLayer : public GUILayer {
 		public:
 			TestLayer() {
-				imageId = loadImage("Asset/Image/Pepper.png");
+				// imageId = loadImage("Asset/Image/Pepper.png");
+				fontId = loadFont("../ProjectA/src/Asset/Font/test.ttf");
+
+				whiteTextStyle.color = {1.0f, 1.0f, 1.0f, 1.0f};
+				whiteTextStyle.fontSize = 64.0f;
 			}
 
 			void GUI() override {
-				/*static constexpr float32 fontSize = 20.0f;
-
-				static TextStyle whiteTextStyle;
-				whiteTextStyle.color = {1.0f, 1.0f, 1.0f, 1.0f};
-				whiteTextStyle.fontSize = fontSize;
-
-				static TextStyle yellowTextStyle;
+				/* static TextStyle yellowTextStyle;
 				yellowTextStyle.color = {1.0f, 1.0f, 0.0f, 1.0f};
 				yellowTextStyle.fontSize = fontSize;
 
@@ -23,12 +21,13 @@ namespace ProjectA {
 				buttonTextStyle.fontSize = 256.0f;
 
 				static ButtonStyle buttonStyle;
-				buttonStyle.textStyle = &buttonTextStyle;*/
+				buttonStyle.textStyle = &buttonTextStyle; */
 
-				GUIComponent({512, 512}, imageId);
+				// GUIComponent({512, 512}, imageId);
 
 				// GUIContainer({EXPAND, EXPAND}, {0px, 0px}, HORIZONTAL, 0px, LIGHT_GRAY) {
-					// GUIText("Pick up ", whiteTextStyle);
+					GUIText("PP Radio Grotesk", whiteTextStyle);
+					GUIComponent({2048, 2048}, 1);
 					// GUIText("Alarm Clock", yellowTextStyle);
 
 					// if (GUIButton("Test Button", buttonStyle)) {
@@ -44,6 +43,9 @@ namespace ProjectA {
 			static inline const vec4<float32> WHITE = {1.0f, 1.0f, 1.0f, 1.0f};
 
 		private:
+			TextStyle whiteTextStyle;
+
 			ImageID imageId;
+			FontID fontId;
 	};
 }

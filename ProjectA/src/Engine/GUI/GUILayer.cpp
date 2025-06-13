@@ -25,8 +25,6 @@ namespace ProjectA {
 	}
 
 	GUILayer::FontID GUILayer::loadFont(std::string_view path) {
-		ENGINE_ASSERT(false, "Fonts are not currently supported.");
-
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
 		// "../ProjectA/src/Asset/Font/test.ttf"
@@ -37,22 +35,28 @@ namespace ProjectA {
 		defaultFont->tileHeight = 12;
 		defaultFont->tileSpacing = 1; */
 
-		const FontID fontId = fontCount;
+		fonts[fontCount].font = createRef<TrueTypeFont>(path);
 
-		const ref<TrueTypeFont> font = createRef<TrueTypeFont>(path);
-
-		fonts[fontCount] = font;
-
-		fontCount += 1;
-
-		const SDFGlyphMap& glyphMap = font->getGlyphMap();
+		const SDFGlyphMap& glyphMap = fonts[fontCount].font->getGlyphMap();
 
 		TextureArrayLayer glyphMapImageLayer;
 		glyphMapImageLayer.width = glyphMap.extent.width;
 		glyphMapImageLayer.height = glyphMap.extent.height;
-		glyphMapImageLayer.data = glyphMap.data;
+		glyphMapImageLayer.data = sequence<uint8>(glyphMap.data.count * 4);
 
-		return renderer.registerTextureArrayLayer(glyphMapImageLayer);
+		// Map R to RGBA.
+		for (uint32 texelIndex = 0; texelIndex < glyphMap.data.count; texelIndex += 1) {
+			glyphMapImageLayer.data[texelIndex * 4 + 0] = glyphMap.data[texelIndex];
+			glyphMapImageLayer.data[texelIndex * 4 + 1] = 0;
+			glyphMapImageLayer.data[texelIndex * 4 + 2] = 0;
+			glyphMapImageLayer.data[texelIndex * 4 + 3] = 255;
+		}
+
+		const FontID fontId = fontCount;
+
+		fonts[fontCount].glyphMapImageId = renderer.registerTextureArrayLayer(glyphMapImageLayer);
+
+		fontCount += 1;
 
 		return fontId;
 	}
@@ -144,12 +148,6 @@ namespace ProjectA {
 
 	GUIContainer GUILayer::pushContainer(GUISize size, GUISize padding, LayoutDirection layoutDirection, uint16 layoutSpacing, const vec4<float32>& color) {
 		const GUIContainer container = pushContainer(size, padding, layoutDirection, layoutSpacing);
-
-		/*const GUISize originShift = {
-			static_cast<sint16>(-padding.width),
-			static_cast<sint16>(-padding.height),
-		};*/
-
 		const GUISize fixedSize = computeFixedSize(container.size);
 
 		registerComponent(fixedSize, DEFAULT_IMAGE_ID, color);
@@ -214,9 +212,11 @@ namespace ProjectA {
 	}
 
 	void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
-		constexpr FontID fontIndex = 0;
+		constexpr FontID fontId = 0;
+		const TrueTypeFont& font = *fonts[fontId].font;
+		const uint32 glyphMapImageId = fonts[fontId].glyphMapImageId;
 
-		const float32 lineHeight = static_cast<float32>(fonts[fontIndex]->getLineHeight());
+		const float32 lineHeight = static_cast<float32>(font.getLineHeight());
 
 		float32 positionX = componentOrigin[0];
 		float32 positionY = componentOrigin[1];
@@ -226,7 +226,7 @@ namespace ProjectA {
 
 		for (const char glyph : string) {
 			const uint16 codePoint = static_cast<uint16>(glyph);
-			const TrueTypeGlyph& glyph = (*fonts[fontIndex])[codePoint];
+			const TrueTypeGlyph& glyph = font[codePoint];
 			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
 
 			if (!glyph.invisible) {
@@ -243,9 +243,16 @@ namespace ProjectA {
 
 				const vec2<float32> uvStart = {glyph.minCoordinateX, glyph.minCoordinateY};
 				const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
-				const mat3x3<float32> imageTransform = mat3x3<float32>::scaling(uvEnd - uvStart) * mat3x3<float32>::translation(uvStart);
+				const vec2<float32> uvDiff = uvEnd - uvStart;
 
-				renderer.registerGlyphSubcomponent(transform, imageTransform, fontIndex, textStyle);
+				const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(glyphMapImageId);
+
+				const mat3x3<float32> imageTransform = mat3x3<float32>::scaling({
+					uvDiff[0] * imageExtent.width / renderer.TEXTURE_ARRAY_MAX_WIDTH,
+					uvDiff[1] * imageExtent.height / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
+				}) * mat3x3<float32>::translation(uvStart);
+
+				renderer.registerGlyphSubcomponent(transform, imageTransform, glyphMapImageId, textStyle);
 			}
 
 			positionX += advanceWidth;
@@ -258,7 +265,9 @@ namespace ProjectA {
 	}
 
 	bool GUILayer::GUIButton(const std::string& string, const ButtonStyle& buttonStyle) {
-		constexpr FontID fontIndex = 0;
+		constexpr FontID fontId = 0;
+		const TrueTypeFont& font = *fonts[fontId].font;
+		const uint32 glyphMapImageId = fonts[fontId].glyphMapImageId;
 
 		// 1. Calculate the minimum size that fully encloses the text.
 		GUISize size;
@@ -268,7 +277,7 @@ namespace ProjectA {
 
 		for (const char glyph : string) {
 			const uint16 codePoint = static_cast<uint16>(glyph);
-			const TrueTypeGlyph& glyph = (*fonts[fontIndex])[codePoint];
+			const TrueTypeGlyph& glyph = font[codePoint];
 			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * buttonStyle.textStyle->fontSize);
 
 			size.width += static_cast<sint16>(advanceWidth);
@@ -279,14 +288,14 @@ namespace ProjectA {
 
 		// 3. Register the text on top of it.
 		{
-			const float32 lineHeight = static_cast<float32>(fonts[fontIndex]->getLineHeight());
+			const float32 lineHeight = static_cast<float32>(font.getLineHeight());
 
 			float32 positionX = componentOrigin[0];
 			float32 positionY = componentOrigin[1];
 
 			for (const char glyph : string) {
 				const uint16 codePoint = static_cast<uint16>(glyph);
-				const TrueTypeGlyph& glyph = (*fonts[fontIndex])[codePoint];
+				const TrueTypeGlyph& glyph = font[codePoint];
 				const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * buttonStyle.textStyle->fontSize);
 
 				if (!glyph.invisible) {
@@ -303,9 +312,16 @@ namespace ProjectA {
 
 					const vec2<float32> uvStart = {glyph.minCoordinateX, glyph.minCoordinateY};
 					const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
-					const mat3x3<float32> imageTransform = mat3x3<float32>::scaling(uvEnd - uvStart) * mat3x3<float32>::translation(uvStart);
+					const vec2<float32> uvDiff = uvEnd - uvStart;
 
-					renderer.registerGlyphSubcomponent(transform, imageTransform, fontIndex, *buttonStyle.textStyle);
+					const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(glyphMapImageId);
+
+					const mat3x3<float32> imageTransform = mat3x3<float32>::scaling({
+						uvDiff[0] * imageExtent.width / renderer.TEXTURE_ARRAY_MAX_WIDTH,
+						uvDiff[1] * imageExtent.height / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
+					}) * mat3x3<float32>::translation(uvStart);
+
+					renderer.registerGlyphSubcomponent(transform, imageTransform, glyphMapImageId, *buttonStyle.textStyle);
 				}
 
 				positionX += advanceWidth;
