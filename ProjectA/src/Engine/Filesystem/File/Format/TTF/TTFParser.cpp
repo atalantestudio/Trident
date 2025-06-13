@@ -432,7 +432,9 @@ namespace ProjectA {
 				stream.jump(byteOffset);
 			}
 			else {
-				const Glyph& componentGlyph = glyphs[componentGlyphIndex];
+				Glyph componentGlyph = glyphs[componentGlyphIndex];
+
+				transformGlyph(componentGlyph, T);
 
 				for (const Edge& edge : componentGlyph.edges) {
 					glyph.edges.emplace_back(edge);
@@ -741,13 +743,6 @@ namespace ProjectA {
 
 						file.unicodeMap.insert(std::make_pair(code, glyphIndex));
 
-						// TODO: Remove test branch.
-						#ifdef BUILD_MODE_DEBUG
-							if (glyphIndex != 0) {
-								file.glyphs[glyphIndex].codePoint = code;
-							}
-						#endif
-
 						if (startCode == endCode) {
 							break;
 						}
@@ -760,13 +755,6 @@ namespace ProjectA {
 						const uint32 glyphIndex = *(&idRangeOffsets[segmentIndex] + (idRangeOffsets[segmentIndex] / 2) + (code - startCode));
 
 						file.unicodeMap.insert(std::make_pair(code, glyphIndex));
-
-						// TODO: Remove test branch.
-						#ifdef BUILD_MODE_DEBUG
-							if (glyphIndex != 0) {
-								file.glyphs[glyphIndex].codePoint = code;
-							}
-						#endif
 
 						if (startCode == endCode) {
 							break;

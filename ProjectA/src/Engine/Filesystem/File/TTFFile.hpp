@@ -43,7 +43,6 @@ namespace ProjectA {
 	};
 
 	struct Glyph {
-		uint16 codePoint;
 		Point min = {0, 0};
 		Point max = {0, 0};
 		std::vector<Edge> edges;
