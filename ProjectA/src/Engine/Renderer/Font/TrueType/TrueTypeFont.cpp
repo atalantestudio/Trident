@@ -50,8 +50,8 @@ namespace ProjectA {
 		return ascent - descent + lineGap;
 	}
 
-	const ref<Image>& TrueTypeFont::getSdfImage() const {
-		return sdfGlyphMap.glyphMap;
+	const SDFGlyphMap& TrueTypeFont::getGlyphMap() const {
+		return sdfGlyphMap;
 	}
 
 	const std::vector<TrueTypeGlyph>& TrueTypeFont::getGlyphs() const {

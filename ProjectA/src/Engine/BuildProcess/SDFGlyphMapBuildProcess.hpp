@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/API/Rendering/Image.hpp"
-#include "Engine/API/Rendering/ImageLayout.hpp"
 #include "Engine/Filesystem/File/TTFFile.hpp"
 
 namespace ProjectA {
@@ -22,19 +20,17 @@ namespace ProjectA {
 	};
 
 	struct SDFGlyphMap {
-		ref<Image> glyphMap;
+		// Glyph map data in the R8_UNORM format.
+		sequence<uint8> data;
 
-		// Width of the pixels used by the SDF gradient.
+		// Dimensions of the glyph map data.
+		Extent2D extent;
+
+		// Size of the area occupied by the SDF spread.
 		float32 spreadFactor;
 
-		std::vector<SDFGlyph> glyphs;
-	};
-
-	struct FontStorage {
-		uint32 outputGlyphSize;
-		uint32 spreadFactor;
-		sint32 ascent;
-		sint32 descent;
+		// Per-glyph data.
+		sequence<SDFGlyph> glyphs;
 	};
 
 	class SDFGlyphMapBuildProcess {
@@ -42,11 +38,23 @@ namespace ProjectA {
 			static SDFGlyphMap build(const TTFFile& ttfFile);
 
 		private:
-			static void transitionImage(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout);
-
 			static uint64 computeMaxGlyphByteSize(const TTFFile& ttfFile);
 
 		private:
+			struct FontStorage {
+				uint32 outputGlyphSize;
+				uint32 spreadFactor;
+				sint32 ascent;
+				sint32 descent;
+			};
+
+			struct GlyphBuffer {
+				sint32 minCoordinateX;
+				sint32 minCoordinateY;
+				uint32 dimension;
+				uint32 edgeCount;
+			};
+
 			struct alignas(8) GlyphEdge {
 				sint32 startX;
 				sint32 startY;
@@ -55,13 +63,6 @@ namespace ProjectA {
 				sint32 controlX;
 				sint32 controlY;
 				bool curved;
-			};
-
-			struct GlyphBuffer {
-				sint32 minCoordinateX;
-				sint32 minCoordinateY;
-				uint32 dimension;
-				uint32 edgeCount;
 			};
 	};
 }

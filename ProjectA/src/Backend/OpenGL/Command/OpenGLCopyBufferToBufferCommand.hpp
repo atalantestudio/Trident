@@ -6,23 +6,35 @@
 namespace ProjectA {
 	class OpenGLCopyBufferToBufferCommand : public OpenGLCommand {
 		public:
-			OpenGLCopyBufferToBufferCommand(GLuint sourceBuffer, GLuint destinationBuffer, GLintptr sourceOffset, GLintptr destinationOffset, GLsizeiptr size) :
+			OpenGLCopyBufferToBufferCommand(GLuint sourceBuffer, GLuint destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) :
 				sourceBuffer(sourceBuffer),
 				destinationBuffer(destinationBuffer),
-				sourceOffset(sourceOffset),
-				destinationOffset(destinationOffset),
-				size(size)
+				copyRegions(&copyRegions)
 			{}
 
 			void execute() const override {
-				glCopyNamedBufferSubData(sourceBuffer, destinationBuffer, sourceOffset, destinationOffset, size);
+				#ifndef OPENGL_USE_DSA
+					glBindBuffer(GL_COPY_READ_BUFFER, sourceBuffer);
+					glBindBuffer(GL_COPY_WRITE_BUFFER, destinationBuffer);
+				#endif
+
+				for (const BufferCopyRegion& copyRegion : *copyRegions) {
+					#ifdef OPENGL_USE_DSA
+						glCopyNamedBufferSubData(sourceBuffer, destinationBuffer, copyRegion.sourceOffset, copyRegion.destinationOffset, copyRegion.size);
+					#else
+						glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, copyRegion.sourceOffset, copyRegion.destinationOffset, copyRegion.size);
+					#endif
+				}
+
+				#ifndef OPENGL_USE_DSA
+					glBindBuffer(GL_COPY_READ_BUFFER, 0);
+					glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+				#endif
 			}
 
 		private:
 			const GLuint sourceBuffer;
 			const GLuint destinationBuffer;
-			const GLintptr sourceOffset;
-			const GLintptr destinationOffset;
-			const GLsizeiptr size;
+			const sequence<BufferCopyRegion>* copyRegions;
 	};
 }

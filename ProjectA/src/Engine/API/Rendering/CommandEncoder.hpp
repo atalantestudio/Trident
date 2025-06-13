@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Rendering/Buffer.hpp"
+#include "Engine/API/Rendering/BufferCopyRegion.hpp"
 #include "Engine/API/Rendering/BufferImageCopyRegion.hpp"
 #include "Engine/API/Rendering/CommandBuffer.hpp"
 #include "Engine/API/Rendering/ComputePipeline.hpp"
@@ -37,9 +38,11 @@ namespace ProjectA {
 			// `stride` is only used by OpenGL when calling glBindVertexBuffer.
 			virtual void bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) = 0;
 
-			virtual void copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, uint64 sourceOffset, uint64 destinationOffset, uint64 size) = 0;
+			virtual void copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) = 0;
 
 			virtual void copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
+
+			// virtual void copyImageToBuffer(const ref<Image>& sourceImage, const ref<Buffer>& destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
 
 			virtual void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) = 0;
 
@@ -48,25 +51,23 @@ namespace ProjectA {
 			virtual void setLineWidth(float32 lineWidth) = 0;
 
 			// Updates the scissor area.
-			// Should only be used if the render pipeline's dynamic state contains DynamicState::SCISSOR.
+			// NOTE: This should only be used if the render pipeline's dynamic state contains SCISSOR.
 			virtual void setScissor(sint32 xOffset, sint32 yOffset, uint32 width, uint32 height) = 0;
 
 			// Updates the viewport area.
-			// Should only be used if the render pipeline's dynamic state contains DynamicState::VIEWPORT.
+			// NOTE: This should only be used if the render pipeline's dynamic state contains VIEWPORT.
 			virtual void setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) = 0;
 
 			// Draws primitives.
-			// 
-			// vertexCount is the number of total vertices to draw.
-			// instanceCount is the number of instances to draw.
-			// vertexOffset is the offset in bytes in vertex rate attributes at which to start drawing.
+			// - `vertexCount` is the number of total vertices to draw.
+			// - `instanceCount` is the number of instances to draw.
+			// - `vertexOffset` is the offset in bytes in vertex rate attributes at which to start drawing.
 			virtual void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) = 0;
 
 			// Draws primitives with indexed vertices.
-			// 
-			// indexCount is the number of total indices to draw.
-			// instanceCount is the number of instances to draw.
-			// indexOffset is the offset of the first vertex in the index buffer to draw.
+			// - `indexCount` is the number of total indices to draw.
+			// - `instanceCount` is the number of instances to draw.
+			// - `indexOffset` is the offset of the first vertex (in the index buffer) to draw.
 			virtual void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) = 0;
 
 			virtual void endRenderPass() = 0;

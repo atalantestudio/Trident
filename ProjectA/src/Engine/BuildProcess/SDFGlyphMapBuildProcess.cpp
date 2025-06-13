@@ -14,9 +14,20 @@ namespace ProjectA {
 
 		SDFGlyphMap sdfGlyphMap;
 		sdfGlyphMap.spreadFactor = SPREAD_FACTOR;
-		sdfGlyphMap.glyphs.resize(ttfFile.glyphs.size());
+		sdfGlyphMap.extent.width = 2048;
+		sdfGlyphMap.extent.height = 2048;
+		sdfGlyphMap.glyphs = sequence<SDFGlyph>(ttfFile.glyphs.size());
 
 		const ref<Device> device = Renderer::getDevice();
+
+		CommandBufferDescriptor autoCommandBufferDescriptor{};
+		autoCommandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+
+		CommandBufferDescriptor oneTimeSubmitCommandBufferDescriptor{};
+		oneTimeSubmitCommandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		ref<CommandEncoder> commandEncoder;
+		ref<CommandBuffer> commandBuffer;
 
 		const uint64 glyphBufferSize = computeMaxGlyphByteSize(ttfFile);
 
@@ -39,21 +50,6 @@ namespace ProjectA {
 		fontStorageBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		const ref<Buffer> fontStorageBuffer = Renderer::createBuffer(fontStorageBufferDescriptor);
-
-		{
-			CommandBufferDescriptor commandBufferDescriptor{};
-			commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
-
-			const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
-
-			commandEncoder->begin();
-			commandEncoder->copyBufferToBuffer(fontStagingBuffer, fontStorageBuffer, 0, 0, fontBufferSize);
-
-			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-			device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
-			device->waitIdle();
-		}
 
 		BufferDescriptor glyphBufferDescriptor;
 		glyphBufferDescriptor.size = glyphBufferSize;
@@ -81,7 +77,7 @@ namespace ProjectA {
 		ImageDescriptor glyphImageDescriptor{};
 		glyphImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphImageDescriptor.format = ImageFormat::R8_UNORM;
-		glyphImageDescriptor.usage = ImageUsage::STORAGE | ImageUsage::SAMPLED;
+		glyphImageDescriptor.usage = ImageUsage::STORAGE;
 		glyphImageDescriptor.width = 4096;
 		glyphImageDescriptor.height = 4096;
 		glyphImageDescriptor.depth = 1;
@@ -137,20 +133,20 @@ namespace ProjectA {
 		ImageDescriptor glyphMapSdfImageDescriptor{};
 		glyphMapSdfImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphMapSdfImageDescriptor.format = ImageFormat::R8_UNORM;
-		glyphMapSdfImageDescriptor.usage = ImageUsage::STORAGE | ImageUsage::SAMPLED;
-		glyphMapSdfImageDescriptor.width = 2048;
-		glyphMapSdfImageDescriptor.height = 2048; // Can be set to 1024.
+		glyphMapSdfImageDescriptor.usage = ImageUsage::STORAGE | ImageUsage::TRANSFER_SRC;
+		glyphMapSdfImageDescriptor.width = sdfGlyphMap.extent.width;
+		glyphMapSdfImageDescriptor.height = sdfGlyphMap.extent.height;
 		glyphMapSdfImageDescriptor.depth = 1;
 		glyphMapSdfImageDescriptor.mipLevelCount = 1;
 		glyphMapSdfImageDescriptor.layerCount = 1;
 		glyphMapSdfImageDescriptor.sampleCount = 1;
 		glyphMapSdfImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
-		sdfGlyphMap.glyphMap = Renderer::createImage(glyphMapSdfImageDescriptor);
+		ref<Image> glyphMapImage = Renderer::createImage(glyphMapSdfImageDescriptor);
 
 		constexpr ImageViewDescriptor glyphMapSdfImageViewDescriptor;
 
-		const ref<ImageView> glyphMapSdfImageView = sdfGlyphMap.glyphMap->createView(glyphMapSdfImageViewDescriptor);
+		const ref<ImageView> glyphMapSdfImageView = glyphMapImage->createView(glyphMapSdfImageViewDescriptor);
 
 		DescriptorSetLayoutBinding glyphMapSdfImageDescriptorSetLayoutBinding;
 		glyphMapSdfImageDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
@@ -185,19 +181,34 @@ namespace ProjectA {
 
 		const ref<ComputePipeline> glyphSdfPipeline = Renderer::createComputePipeline(glyphSdfPipelineDescriptor);
 
-		transitionImage(glyphImage, ImageLayout::UNDEFINED, ImageLayout::GENERAL);
-		transitionImage(sdfGlyphMap.glyphMap, ImageLayout::UNDEFINED, ImageLayout::GENERAL);
+		// Copy the font staging buffer to the font storage buffer
+		// and transition the glyph and glyph map images from UNDEFINED to GENERAL.
+
+		sequence<BufferCopyRegion> fontBufferCopyRegions(1);
+
+		BufferCopyRegion& fontBufferCopyRegion = fontBufferCopyRegions[0];
+		fontBufferCopyRegion.sourceOffset = 0;
+		fontBufferCopyRegion.destinationOffset = 0;
+		fontBufferCopyRegion.size = fontBufferSize;
+
+		commandEncoder = device->getComputeQueue()->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
+		commandEncoder->begin();
+		commandEncoder->copyBufferToBuffer(fontStagingBuffer, fontStorageBuffer, fontBufferCopyRegions);
+		commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::UNDEFINED, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::UNDEFINED, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+		commandBuffer = commandEncoder->end();
+
+		device->getComputeQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
+		device->waitIdle();
 
 		float32 xOffset = 0;
 		float32 yOffset = 0;
 
-		const Extent3D& glyphMapExtent = sdfGlyphMap.glyphMap->getExtent();
+		const Extent3D& glyphMapExtent = glyphMapImage->getExtent();
 		const float32 lineHeight = static_cast<float32>(ttfFile.hhea.ascent - ttfFile.hhea.descent);
 
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
-
-		const ref<CommandEncoder> commandEncoder = device->getComputeQueue()->createCommandEncoder(commandBufferDescriptor);
+		commandEncoder = device->getComputeQueue()->createCommandEncoder(autoCommandBufferDescriptor);
 
 		const ref<Fence> writeBufferFence = Renderer::createFence();
 
@@ -287,7 +298,7 @@ namespace ProjectA {
 			// TODO: Support custom glyph subimage dimension (multiply down).
 			commandEncoder->dispatchGroups(8, 8, 1);
 
-			const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+			commandBuffer = commandEncoder->end();
 
 			device->getComputeQueue()->submit({commandBuffer}, nullptr, nullptr, writeBufferFence);
 			device->waitIdle();
@@ -295,26 +306,22 @@ namespace ProjectA {
 			xOffset += std::ceil(sdfGlyph.width) + SPREAD_FACTOR * 2;
 		}
 
-		transitionImage(sdfGlyphMap.glyphMap, ImageLayout::GENERAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+		// Transition the glyph map image to TRANSFER_SRC_OPTIMAL.
 
-		return sdfGlyphMap;
-	}
-
-	void SDFGlyphMapBuildProcess::transitionImage(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout) {
-		const ref<Device> device = Renderer::getDevice();
-
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-		const ref<CommandEncoder> commandEncoder = device->getComputeQueue()->createCommandEncoder(commandBufferDescriptor);
-
+		commandEncoder = device->getComputeQueue()->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
 		commandEncoder->begin();
-		commandEncoder->setImageMemoryBarrier(image, oldLayout, newLayout, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::GENERAL, ImageLayout::TRANSFER_SRC_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+		commandBuffer = commandEncoder->end();
 
 		device->getComputeQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
 		device->waitIdle();
+
+		// TODO: Copy the data from glyphMapImage to sdfGlyphMap.data.
+
+		BREAKPOINT();
+
+		return sdfGlyphMap;
 	}
 
 	uint64 SDFGlyphMapBuildProcess::computeMaxGlyphByteSize(const TTFFile& ttfFile) {
@@ -323,13 +330,12 @@ namespace ProjectA {
 		for (const Glyph& glyph : ttfFile.glyphs) {
 			const uint64 glyphEdgeCount = glyph.edges.size();
 
-			// TODO: lyah::min(uint64, uint64).
 			// TODO: lyah::max(uint64, uint64).
 			if (glyphEdgeCount > maxGlyphEdgeCount) {
 				maxGlyphEdgeCount = glyphEdgeCount;
 			}
 		}
 
-		return sizeof(GlyphBuffer) + sizeof(GlyphEdge) * maxGlyphEdgeCount;
+		return sizeof(GlyphBuffer) + maxGlyphEdgeCount * sizeof(GlyphEdge);
 	}
 }

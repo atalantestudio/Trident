@@ -96,6 +96,8 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::initializeVertexBuffer() {
+		const ref<Device> device = getDevice();
+
 		constexpr uint64 size = 6 * sizeof(Vertex);
 
 		const ref<Buffer> vertexStagingBuffer = createStagingBuffer(size);
@@ -120,7 +122,12 @@ namespace ProjectA {
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 
-		const ref<Device> device = getDevice();
+		sequence<BufferCopyRegion> vertexBufferCopyRegions(1);
+
+		BufferCopyRegion& vertexBufferCopyRegion = vertexBufferCopyRegions[0];
+		vertexBufferCopyRegion.sourceOffset = 0;
+		vertexBufferCopyRegion.destinationOffset = 0;
+		vertexBufferCopyRegion.size = size;
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -128,7 +135,7 @@ namespace ProjectA {
 		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, 0, 0, size);
+		commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, vertexBufferCopyRegions);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -161,13 +168,20 @@ namespace ProjectA {
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
 
+		sequence<BufferCopyRegion> indexBufferCopyRegions(1);
+
+		BufferCopyRegion& indexBufferCopyRegion = indexBufferCopyRegions[0];
+		indexBufferCopyRegion.sourceOffset = 0;
+		indexBufferCopyRegion.destinationOffset = 0;
+		indexBufferCopyRegion.size = size;
+
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
 		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(indexStagingBuffer, indexBuffer, 0, 0, size);
+		commandEncoder->copyBufferToBuffer(indexStagingBuffer, indexBuffer, indexBufferCopyRegions);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 

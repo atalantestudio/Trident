@@ -46,7 +46,12 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCompileShader);
 		#endif
 
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyNamedBufferSubData);
+		#ifdef OPENGL_USE_DSA
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyNamedBufferSubData);
+		#else
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyBufferSubData);
+		#endif
+
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateBuffers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateFramebuffers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateProgram);

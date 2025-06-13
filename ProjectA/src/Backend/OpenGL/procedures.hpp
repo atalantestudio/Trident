@@ -27,7 +27,12 @@ namespace ProjectA {
 		extern PFNGLCOMPILESHADERPROC glCompileShader;
 	#endif
 
-	extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
+	#ifdef OPENGL_USE_DSA
+		extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
+	#else
+		extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
+	#endif
+
 	extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
 	extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
 	extern PFNGLCREATEPROGRAMPROC glCreateProgram;

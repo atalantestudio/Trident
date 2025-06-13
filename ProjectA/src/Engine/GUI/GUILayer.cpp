@@ -45,14 +45,12 @@ namespace ProjectA {
 
 		fontCount += 1;
 
-		const Extent3D imageExtent = font->getSdfImage()->getExtent();
+		const SDFGlyphMap& glyphMap = font->getGlyphMap();
 
 		TextureArrayLayer glyphMapImageLayer;
-		glyphMapImageLayer.width = imageExtent.width;
-		glyphMapImageLayer.height = imageExtent.height;
-
-		// TODO: ?
-		// glyphMapImageLayer.data = imageExtent.data;
+		glyphMapImageLayer.width = glyphMap.extent.width;
+		glyphMapImageLayer.height = glyphMap.extent.height;
+		glyphMapImageLayer.data = glyphMap.data;
 
 		return renderer.registerTextureArrayLayer(glyphMapImageLayer);
 

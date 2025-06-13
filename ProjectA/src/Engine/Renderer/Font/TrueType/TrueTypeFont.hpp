@@ -17,7 +17,7 @@ namespace ProjectA {
 
 			sint32 getLineHeight() const;
 
-			const ref<Image>& getSdfImage() const;
+			const SDFGlyphMap& getGlyphMap() const;
 
 			const std::vector<TrueTypeGlyph>& getGlyphs() const;
 

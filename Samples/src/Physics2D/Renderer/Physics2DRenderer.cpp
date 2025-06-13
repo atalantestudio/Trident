@@ -135,6 +135,8 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::initializeGridVertexBuffer() {
+		const ref<Device> device = getDevice();
+
 		constexpr uint64 gridVertexBufferSize = 3 * sizeof(svec2<float32>);
 
 		const ref<Buffer> gridVertexStagingBuffer = createStagingBuffer(gridVertexBufferSize);
@@ -154,7 +156,12 @@ namespace ProjectA {
 
 		gridVertexBuffer = createBuffer(gridVertexBufferDescriptor);
 
-		const ref<Device> device = getDevice();
+		sequence<BufferCopyRegion> gridVertexBufferCopyRegions(1);
+
+		BufferCopyRegion& gridVertexBufferCopyRegion = gridVertexBufferCopyRegions[0];
+		gridVertexBufferCopyRegion.sourceOffset = 0;
+		gridVertexBufferCopyRegion.destinationOffset = 0;
+		gridVertexBufferCopyRegion.size = gridVertexBufferSize;
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -162,7 +169,7 @@ namespace ProjectA {
 		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(gridVertexStagingBuffer, gridVertexBuffer, 0, 0, gridVertexBufferSize);
+		commandEncoder->copyBufferToBuffer(gridVertexStagingBuffer, gridVertexBuffer, gridVertexBufferCopyRegions);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -530,15 +537,30 @@ namespace ProjectA {
 		instanceBuffer = createBuffer(instanceBufferDescriptor);
 		this->instanceMappedRange = instanceBuffer->map<Instance>(0, instanceBufferSize);
 
+		sequence<BufferCopyRegion> bufferCopyRegions(3);
+
+		BufferCopyRegion& vertexBufferCopyRegion = bufferCopyRegions[0];
+		vertexBufferCopyRegion.sourceOffset = 0;
+		vertexBufferCopyRegion.destinationOffset = 0;
+		vertexBufferCopyRegion.size = vertexBufferSize;
+
+		BufferCopyRegion& indexBufferCopyRegion = bufferCopyRegions[1];
+		indexBufferCopyRegion.sourceOffset = vertexBufferSize;
+		indexBufferCopyRegion.destinationOffset = 0;
+		indexBufferCopyRegion.size = indexBufferSize;
+
+		BufferCopyRegion& instanceBufferCopyRegion = bufferCopyRegions[2];
+		instanceBufferCopyRegion.sourceOffset = vertexBufferSize + indexBufferSize;
+		instanceBufferCopyRegion.destinationOffset = 0;
+		instanceBufferCopyRegion.size = instanceBufferSize;
+
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
 		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, 0, 0, vertexBufferSize);
-		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, vertexBufferSize, 0, indexBufferSize);
-		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, vertexBufferSize + indexBufferSize, 0, instanceBufferSize);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegions);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
