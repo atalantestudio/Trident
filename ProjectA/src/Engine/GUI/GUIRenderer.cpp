@@ -344,13 +344,13 @@ namespace ProjectA {
 		textureArrayStagingBuffer->unmap();
 
 		sequence<BufferImageCopyRegion> copyRegions(textureArrayLayerCount);
-		uint64 offset = 0;
+		uint64 bufferOffset = 0;
 
 		for (uint32 layerIndex = 0; layerIndex < textureArrayLayerCount; layerIndex += 1) {
 			const Extent2D extent = textureArrayLayerExtents[layerIndex];
 
 			BufferImageCopyRegion& copyRegion = copyRegions[layerIndex];
-			copyRegion.bufferOffset;
+			copyRegion.bufferOffset = bufferOffset;
 			copyRegion.imageOffsetX = 0;
 			copyRegion.imageOffsetY = 0;
 			copyRegion.imageOffsetZ = 0;
@@ -361,7 +361,7 @@ namespace ProjectA {
 			copyRegion.imageLayerOffset = layerIndex;
 			copyRegion.imageLayerCount = 1;
 
-			offset += extent.width * extent.height * TEXTURE_ARRAY_LAYER_BPP;
+			bufferOffset += extent.width * extent.height * TEXTURE_ARRAY_LAYER_BPP;
 		}
 
 		const ref<Device> device = getDevice();
