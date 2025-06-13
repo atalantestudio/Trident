@@ -229,7 +229,7 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::initializeCenterOfMassBuffer() {
-		const uint64 centerOfMassBufferSize = scene->getObjectCount() * sizeof(svec3<float32>);
+		const uint64 centerOfMassBufferSize = scene->getObjectCount() * sizeof(vec3<float32>);
 
 		BufferDescriptor centerOfMassBufferDescriptor;
 		centerOfMassBufferDescriptor.size = centerOfMassBufferSize;
@@ -238,12 +238,12 @@ namespace ProjectA {
 		centerOfMassBufferDescriptor.persistent = true;
 
 		centerOfMassBuffer = createBuffer(centerOfMassBufferDescriptor);
-		centerOfMassMappedRange = centerOfMassBuffer->map<svec3<float32>>(0, centerOfMassBufferSize);
+		centerOfMassMappedRange = centerOfMassBuffer->map<vec3<float32>>(0, centerOfMassBufferSize);
 	}
 
 	void Physics2DRenderer::initializeCenterOfMassRenderPipeline() {
 		VertexInputBinding centerOfMassVertexInputBinding(InputRate::VERTEX);
-		centerOfMassVertexInputBinding.registerAttribute<svec3<float32>>();
+		centerOfMassVertexInputBinding.registerAttribute<vec3<float32>>();
 
 		ShaderModuleDescriptor centerOfMassVertexShaderModuleDescriptor{};
 		centerOfMassVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -874,7 +874,7 @@ namespace ProjectA {
 
 		commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
-		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0, sizeof(svec3<float32>));
+		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0, sizeof(vec3<float32>));
 		commandEncoder->draw(objectCount, 1, 0);
 	}
 
@@ -917,7 +917,7 @@ namespace ProjectA {
 
 		commandEncoder->bindRenderPipeline(placeholderCenterOfMassRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
-		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, selectedObjectIndex * sizeof(svec3<float32>), sizeof(svec2<float32>));
+		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, selectedObjectIndex * sizeof(vec3<float32>), sizeof(svec2<float32>));
 		commandEncoder->draw(1, 1, 0);
 
 		const uint32 indexCount = (*scene)[selectedObjectIndex].getGeometry()->getIndexCount();

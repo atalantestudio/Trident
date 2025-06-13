@@ -76,7 +76,7 @@ namespace ProjectA {
 	} */
 
 	template<>
-	static constexpr uint32 getAlignment<svec3<float32>>() {
+	static constexpr uint32 getAlignment<vec3<float32>>() {
 		return 4 * sizeof(float32);
 	}
 
@@ -136,7 +136,7 @@ namespace ProjectA {
 	} */
 
 	template<>
-	static constexpr uint32 getAlignment<svec3<float64>>() {
+	static constexpr uint32 getAlignment<vec3<float64>>() {
 		return 4 * sizeof(float64);
 	}
 

@@ -46,10 +46,10 @@ namespace ProjectA {
 				// 4. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-					vertexInputBinding.registerAttribute<svec3<float32>>();
+					vertexInputBinding.registerAttribute<vec3<float32>>();
 
 					VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-					instanceInputBinding.registerAttribute<svec3<float32>>();
+					instanceInputBinding.registerAttribute<vec3<float32>>();
 
 					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -197,11 +197,11 @@ namespace ProjectA {
 
 		private:
 			struct Vertex {
-				svec3<float32> vertex;
+				vec3<float32> vertex;
 			};
 
 			struct Instance {
-				svec3<float32> color;
+				vec3<float32> color;
 			};
 
 		private:

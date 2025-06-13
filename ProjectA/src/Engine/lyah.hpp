@@ -218,9 +218,6 @@ namespace ProjectA {
 	template<typename T>
 	using svec2 = svec<2, T>;
 
-	template<typename T>
-	using svec3 = svec<3, T>;
-
 	// TODO: Squared length in Lyah.
 	template<std::size_t C, typename T>
 	T lengthSq(const lyah::vec<C, T>& a) {

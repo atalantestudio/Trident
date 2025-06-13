@@ -41,7 +41,7 @@ namespace ProjectA {
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
-					vertexInputBinding.registerAttribute<svec3<float32>>();
+					vertexInputBinding.registerAttribute<vec3<float32>>();
 
  					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -166,7 +166,7 @@ namespace ProjectA {
 		private:
 			struct Vertex {
 				svec2<float32> vertex;
-				svec3<float32> color;
+				vec3<float32> color;
 			};
 
 		private:

@@ -67,16 +67,16 @@ namespace ProjectA {
 
 			template<>
 			constexpr void registerAttribute<mat3x3<float32>>() {
-				registerAttribute<svec3<float32>>();
-				registerAttribute<svec3<float32>>();
-				registerAttribute<svec3<float32>>();
+				registerAttribute<vec3<float32>>();
+				registerAttribute<vec3<float32>>();
+				registerAttribute<vec3<float32>>();
 			}
 
 			template<>
 			constexpr void registerAttribute<mat3x3<float64>>() {
-				registerAttribute<svec3<float64>>();
-				registerAttribute<svec3<float64>>();
-				registerAttribute<svec3<float64>>();
+				registerAttribute<vec3<float64>>();
+				registerAttribute<vec3<float64>>();
+				registerAttribute<vec3<float64>>();
 			}
 
 			template<>

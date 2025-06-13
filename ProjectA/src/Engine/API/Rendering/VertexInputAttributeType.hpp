@@ -97,7 +97,7 @@ namespace ProjectA {
 	} */
 
 	template<>
-	static constexpr VertexInputAttributeType getVertexInputAttributeType<svec3<float32>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec3<float32>>() {
 		return VertexInputAttributeType::R32G32B32_FLOAT;
 	}
 
@@ -157,7 +157,7 @@ namespace ProjectA {
 	} */
 
 	template<>
-	static constexpr VertexInputAttributeType getVertexInputAttributeType<svec3<float64>>() {
+	static constexpr VertexInputAttributeType getVertexInputAttributeType<vec3<float64>>() {
 		return VertexInputAttributeType::R64G64B64_FLOAT;
 	}
 

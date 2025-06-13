@@ -107,7 +107,7 @@ namespace ProjectA {
 			ref<Buffer> indexBuffer;
 
 			ref<Buffer> centerOfMassBuffer;
-			svec3<float32>* centerOfMassMappedRange = nullptr;
+			vec3<float32>* centerOfMassMappedRange = nullptr;
 
 			ref<Buffer> vertexFeatureBuffer;
 			svec2<float32>* vertexFeatureMappedRange = nullptr;
