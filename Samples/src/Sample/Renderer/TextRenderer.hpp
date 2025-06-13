@@ -150,13 +150,20 @@ namespace ProjectA {
 
 					indexBuffer = createBuffer(indexBufferDescriptor);
 
+					sequence<BufferCopyRegion> bufferCopyRegions(1);
+
+					BufferCopyRegion& indexBufferCopyRegion = bufferCopyRegions[0];
+					indexBufferCopyRegion.sourceOffset = 0;
+					indexBufferCopyRegion.destinationOffset = 0;
+					indexBufferCopyRegion.size = indexBufferSize;
+
 					CommandBufferDescriptor commandBufferDescriptor{};
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
 					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
-					commandEncoder->copyBufferToBuffer(indexStagingBuffer, indexBuffer, 0, 0, indexBufferSize);
+					commandEncoder->copyBufferToBuffer(indexStagingBuffer, indexBuffer, bufferCopyRegions);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 

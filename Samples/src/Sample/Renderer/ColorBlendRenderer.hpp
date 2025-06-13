@@ -78,6 +78,8 @@ namespace ProjectA {
 
 				// 4. Create vertex buffers.
 				{
+					const ref<Device> device = getDevice();
+
 					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE);
 
 					Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, VERTEX_BUFFER_SIZE);
@@ -114,7 +116,19 @@ namespace ProjectA {
 
 					instanceBuffer = createBuffer(instanceBufferDescriptor);
 
-					const ref<Device> device = getDevice();
+					sequence<BufferCopyRegion> vertexBufferCopyRegions(1);
+
+					BufferCopyRegion& vertexBufferCopyRegion = vertexBufferCopyRegions[0];
+					vertexBufferCopyRegion.sourceOffset = 0;
+					vertexBufferCopyRegion.destinationOffset = 0;
+					vertexBufferCopyRegion.size = VERTEX_BUFFER_SIZE;
+
+					sequence<BufferCopyRegion> instanceBufferCopyRegions(1);
+
+					BufferCopyRegion& instanceBufferCopyRegion = instanceBufferCopyRegions[0];
+					instanceBufferCopyRegion.sourceOffset = 0;
+					instanceBufferCopyRegion.destinationOffset = 0;
+					instanceBufferCopyRegion.size = INSTANCE_BUFFER_SIZE;
 
 					CommandBufferDescriptor commandBufferDescriptor{};
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -122,8 +136,8 @@ namespace ProjectA {
 					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
-					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, 0, 0, VERTEX_BUFFER_SIZE);
-					commandEncoder->copyBufferToBuffer(instanceStagingBuffer, instanceBuffer, 0, 0, INSTANCE_BUFFER_SIZE);
+					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, vertexBufferCopyRegions);
+					commandEncoder->copyBufferToBuffer(instanceStagingBuffer, instanceBuffer, instanceBufferCopyRegions);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 

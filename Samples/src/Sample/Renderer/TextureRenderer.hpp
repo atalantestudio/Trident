@@ -123,13 +123,20 @@ namespace ProjectA {
 
 					vertexBuffer = createBuffer(vertexBufferDescriptor);
 
+					sequence<BufferCopyRegion> bufferCopyRegions(1);
+
+					BufferCopyRegion& vertexBufferCopyRegion = bufferCopyRegions[0];
+					vertexBufferCopyRegion.sourceOffset = 0;
+					vertexBufferCopyRegion.destinationOffset = 0;
+					vertexBufferCopyRegion.size = vertexBufferSize;
+
 					CommandBufferDescriptor commandBufferDescriptor{};
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
 					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
-					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, 0, 0, vertexBufferSize);
+					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, bufferCopyRegions);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 

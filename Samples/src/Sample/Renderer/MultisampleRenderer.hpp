@@ -76,6 +76,8 @@ namespace ProjectA {
 
 				// 4. Create vertex buffer.
 				{
+					const ref<Device> device = getDevice();
+
 					constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
 
 					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
@@ -98,7 +100,12 @@ namespace ProjectA {
 
 					vertexBuffer = createBuffer(vertexBufferDescriptor);
 
-					const ref<Device> device = getDevice();
+					sequence<BufferCopyRegion> bufferCopyRegions(1);
+
+					BufferCopyRegion& vertexBufferCopyRegion = bufferCopyRegions[0];
+					vertexBufferCopyRegion.sourceOffset = 0;
+					vertexBufferCopyRegion.destinationOffset = 0;
+					vertexBufferCopyRegion.size = vertexBufferSize;
 
 					CommandBufferDescriptor commandBufferDescriptor{};
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -106,7 +113,7 @@ namespace ProjectA {
 					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
-					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, 0, 0, vertexBufferSize);
+					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, bufferCopyRegions);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
