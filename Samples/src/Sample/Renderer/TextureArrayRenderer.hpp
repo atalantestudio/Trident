@@ -71,12 +71,10 @@ namespace ProjectA {
 
 					BufferImageCopyRegion& copyRegion = copyRegions[0];
 					copyRegion.bufferOffset = 0;
-					copyRegion.imageExtent.width = TEXTURE_ARRAY_WIDTH;
-					copyRegion.imageExtent.height = TEXTURE_ARRAY_HEIGHT;
-					copyRegion.imageExtent.depth = 1;
 					copyRegion.imageOffsetX = 0;
 					copyRegion.imageOffsetY = 0;
 					copyRegion.imageOffsetZ = 0;
+					copyRegion.imageExtent = textureArray->getExtent();
 					copyRegion.imageMipLevel = 0;
 					copyRegion.imageLayerOffset = 0;
 					copyRegion.imageLayerCount = static_cast<uint32>(assets.size());

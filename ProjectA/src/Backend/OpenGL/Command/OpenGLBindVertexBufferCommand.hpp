@@ -13,7 +13,7 @@ namespace ProjectA {
 				stride(stride)
 			{}
 
-			void execute() const override {
+			void execute() const final override {
 				glBindVertexBuffer(bindingindex, buffer, offset, stride);
 			}
 

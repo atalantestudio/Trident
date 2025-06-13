@@ -5,20 +5,79 @@
 namespace ProjectA {
 	class TextureRenderer : public Renderer {
 		public:
-			TextureRenderer() :
-				font("../ProjectA/src/Asset/Font/test.ttf")
-			{
-				const ref<Device> device = getDevice();
-				const ref<Image>& image = font.getSdfImage();
+			TextureRenderer() {
+				TrueTypeFont font(FONT_PATH);
 
-				// 1. Create image view.
+				const ref<Device> device = getDevice();
+				const SDFGlyphMap& glyphMap = font.getGlyphMap();
+
+				ref<Buffer> imageStagingBuffer;
+
+				// 1. Create image staging buffer and copy the glyph map data to it.
+				{
+					imageStagingBuffer = createStagingBuffer(glyphMap.data.count);
+
+					uint8* imageStagingBufferMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->size);
+
+					std::copy(glyphMap.data.begin(), glyphMap.data.end(), imageStagingBufferMappedRange);
+
+					imageStagingBuffer->unmap();
+				}
+
+				// 1. Create image and copy the image staging buffer to it.
+				{
+					ImageDescriptor imageDescriptor;
+					imageDescriptor.type = ImageType::TEXTURE_2D;
+					imageDescriptor.format = ImageFormat::R8_UNORM;
+					imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
+					imageDescriptor.width = glyphMap.extent.width;
+					imageDescriptor.height = glyphMap.extent.height;
+					imageDescriptor.depth = 1;
+					imageDescriptor.mipLevelCount = 1;
+					imageDescriptor.layerCount = 1;
+					imageDescriptor.sampleCount = 1;
+					imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+
+					image = createImage(imageDescriptor);
+
+					sequence<BufferImageCopyRegion> bufferImageCopyRegions(1);
+
+					BufferImageCopyRegion& bufferImageCopyRegion = bufferImageCopyRegions[0];
+					bufferImageCopyRegion.bufferOffset = 0;
+					bufferImageCopyRegion.imageOffsetX = 0;
+					bufferImageCopyRegion.imageOffsetY = 0;
+					bufferImageCopyRegion.imageOffsetZ = 0;
+					bufferImageCopyRegion.imageExtent.width = glyphMap.extent.width;
+					bufferImageCopyRegion.imageExtent.height = glyphMap.extent.height;
+					bufferImageCopyRegion.imageExtent.depth = 1;
+					bufferImageCopyRegion.imageMipLevel = 0;
+					bufferImageCopyRegion.imageLayerOffset = 0;
+					bufferImageCopyRegion.imageLayerCount = 1;
+
+					CommandBufferDescriptor commandBufferDescriptor;
+					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+					commandEncoder->begin();
+					commandEncoder->setImageMemoryBarrier(image, ImageLayout::UNDEFINED, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+					commandEncoder->copyBufferToImage(imageStagingBuffer, image, bufferImageCopyRegions);
+					commandEncoder->setImageMemoryBarrier(image, ImageLayout::TRANSFER_DST_OPTIMAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
+					device->waitIdle();
+				}
+
+				// 2. Create image view.
 				{
 					constexpr ImageViewDescriptor imageViewDescriptor;
 
 					imageView = image->createView(imageViewDescriptor);
 				}
 
-				// 2. Create image sampler.
+				// 3. Create image sampler.
 				{
 					SamplerDescriptor samplerDescriptor{};
 					samplerDescriptor.magFilter = SamplerFilter::NEAREST;
@@ -27,7 +86,7 @@ namespace ProjectA {
 					sampler = createSampler(samplerDescriptor);
 				}
 
-				// 3. Create render pass.
+				// 4. Create render pass.
 				{
 					const ref<Surface> surface = getSurface();
 
@@ -50,7 +109,7 @@ namespace ProjectA {
 					swapchain->getImages(renderPass);
 				}
 
-				// 4. Create pipeline layout.
+				// 5. Create pipeline layout.
 				{
 					DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding;
 					textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
@@ -67,7 +126,7 @@ namespace ProjectA {
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 5. Create render pipeline.
+				// 6. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -102,17 +161,17 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 6. Create vertex buffer.
+				// 7. Create vertex buffer.
 				{
-					constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
+					constexpr uint64 vertexBufferSize = 3 * sizeof(svec2<float32>);
 
 					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
 
-					Vertex* vertices = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
+					svec2<float32>* vertexMappedRange = vertexStagingBuffer->map<svec2<float32>>(0, vertexBufferSize);
 
-					vertices[0].vertex = {-1.0f,  1.0f};
-					vertices[1].vertex = { 3.0f,  1.0f};
-					vertices[2].vertex = {-1.0f, -3.0f};
+					vertexMappedRange[0] = {-1.0f,  1.0f};
+					vertexMappedRange[1] = { 3.0f,  1.0f};
+					vertexMappedRange[2] = {-1.0f, -3.0f};
 
 					vertexStagingBuffer->unmap();
 
@@ -159,7 +218,7 @@ namespace ProjectA {
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
 				commandEncoder->bindAllDescriptorSets();
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchain->getExtentWidth(), swapchain->getExtentHeight());
 				commandEncoder->draw(6, 1, 0);
@@ -173,14 +232,10 @@ namespace ProjectA {
 			}
 
 		private:
-			struct Vertex {
-				svec2<float32> vertex;
-			};
+			static constexpr std::string_view FONT_PATH = "../ProjectA/src/Asset/Font/test.ttf";
 
 		private:
-			// Use the glyph map image from a TTF font as example.
-			TrueTypeFont font;
-
+			ref<Image> image;
 			ref<ImageView> imageView;
 
 			ref<Sampler> sampler;

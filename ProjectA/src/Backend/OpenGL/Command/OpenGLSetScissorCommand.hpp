@@ -12,7 +12,7 @@ namespace ProjectA {
 				height(height)
 			{}
 
-			void execute() const {
+			void execute() const final override {
 				glScissor(x, y, width, height);
 			}
 

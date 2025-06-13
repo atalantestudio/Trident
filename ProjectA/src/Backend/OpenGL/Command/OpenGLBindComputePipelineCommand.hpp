@@ -10,7 +10,7 @@ namespace ProjectA {
 				program(computePipeline->program)
 			{}
 
-			void execute() const override {
+			void execute() const final override {
 				glUseProgram(program);
 			}
 

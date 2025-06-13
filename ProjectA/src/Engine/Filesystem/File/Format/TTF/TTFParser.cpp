@@ -499,7 +499,6 @@ namespace ProjectA {
 
 			tableOffsetMap.insert(std::make_pair(tableDirectory.tag, tableDirectory.offset));
 
-			// TODO: Handle table checksum.
 			/*#ifdef TTF_PARSER_VERIFY_CHECKSUM
 				const uint32* start = static_cast<const uint32*>(static_cast<const void*>(stream.getBytePosition() - stream.getByteOffset()));
 				const uint32* position = start + tableDirectory.offset;
@@ -742,10 +741,12 @@ namespace ProjectA {
 
 						file.unicodeMap.insert(std::make_pair(code, glyphIndex));
 
-						// TODO: Debug-only.
-						if (glyphIndex != 0) {
-							file.glyphs[glyphIndex].codePoint = code;
-						}
+						// TODO: Remove test branch.
+						#ifdef BUILD_MODE_DEBUG
+							if (glyphIndex != 0) {
+								file.glyphs[glyphIndex].codePoint = code;
+							}
+						#endif
 
 						if (startCode == endCode) {
 							break;
@@ -760,10 +761,12 @@ namespace ProjectA {
 
 						file.unicodeMap.insert(std::make_pair(code, glyphIndex));
 
-						// TODO: Debug-only.
-						if (glyphIndex != 0) {
-							file.glyphs[glyphIndex].codePoint = code;
-						}
+						// TODO: Remove test branch.
+						#ifdef BUILD_MODE_DEBUG
+							if (glyphIndex != 0) {
+								file.glyphs[glyphIndex].codePoint = code;
+							}
+						#endif
 
 						if (startCode == endCode) {
 							break;

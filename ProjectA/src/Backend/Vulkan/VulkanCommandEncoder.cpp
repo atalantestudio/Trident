@@ -157,32 +157,28 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
-		sequence<VkBufferImageCopy> bufferImageCopies(copyRegions.count);
-
-		for (uint32 bufferImageCopyIndex = 0; bufferImageCopyIndex < bufferImageCopies.count; bufferImageCopyIndex += 1) {
-			const BufferImageCopyRegion& copyRegion = copyRegions[bufferImageCopyIndex];
-			VkBufferImageCopy& bufferImageCopy = bufferImageCopies[bufferImageCopyIndex];
-
-			bufferImageCopy.bufferOffset = copyRegion.bufferOffset;
-			bufferImageCopy.bufferRowLength = 0;
-			bufferImageCopy.bufferImageHeight = 0;
-			bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			bufferImageCopy.imageSubresource.mipLevel = copyRegion.imageMipLevel;
-			bufferImageCopy.imageSubresource.baseArrayLayer = copyRegion.imageLayerOffset;
-			bufferImageCopy.imageSubresource.layerCount = copyRegion.imageLayerCount;
-			bufferImageCopy.imageOffset.x = copyRegion.imageOffsetX;
-			bufferImageCopy.imageOffset.y = copyRegion.imageOffsetY;
-			bufferImageCopy.imageOffset.z = copyRegion.imageOffsetZ;
-			bufferImageCopy.imageExtent.width = copyRegion.imageExtent.width;
-			bufferImageCopy.imageExtent.height = copyRegion.imageExtent.height;
-			bufferImageCopy.imageExtent.depth = copyRegion.imageExtent.depth;
-		}
+		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions);
 
 		vkCmdCopyBufferToImage(
 			commandBuffer,
 			std::static_pointer_cast<VulkanBuffer>(sourceBuffer)->object,
 			std::static_pointer_cast<VulkanImage>(destinationImage)->object,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			static_cast<uint32>(bufferImageCopies.count),
+			bufferImageCopies
+		);
+
+		commandCount += 1;
+	}
+
+	void VulkanCommandEncoder::copyImageToBuffer(const ref<Image>& sourceImage, const ref<Buffer>& destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) {
+		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions);
+
+		vkCmdCopyImageToBuffer(
+			commandBuffer,
+			std::static_pointer_cast<VulkanImage>(sourceImage)->object,
+			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			std::static_pointer_cast<VulkanBuffer>(destinationBuffer)->object,
 			static_cast<uint32>(bufferImageCopies.count),
 			bufferImageCopies
 		);
@@ -252,9 +248,9 @@ namespace ProjectA {
 		imageMemoryBarrier.image = vkImage->object;
 		imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
-		imageMemoryBarrier.subresourceRange.levelCount = vkImage->mipLevelCount;
+		imageMemoryBarrier.subresourceRange.levelCount = vkImage->getMipLevelCount();
 		imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
-		imageMemoryBarrier.subresourceRange.layerCount = vkImage->layerCount;
+		imageMemoryBarrier.subresourceRange.layerCount = image->getLayerCount();
 
 		vkCmdPipelineBarrier(
 			commandBuffer,
@@ -347,5 +343,28 @@ namespace ProjectA {
 		const VkResult result = vkResetCommandBuffer(commandBuffer, 0);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan command buffer ([]).", string_VkResult(result));
+	}
+
+	sequence<VkBufferImageCopy> VulkanCommandEncoder::parseBufferImageCopyRegions(const sequence<BufferImageCopyRegion>& copyRegions) {
+		sequence<VkBufferImageCopy> bufferImageCopies(copyRegions.count);
+
+		for (uint32 bufferImageCopyIndex = 0; bufferImageCopyIndex < bufferImageCopies.count; bufferImageCopyIndex += 1) {
+			const BufferImageCopyRegion& copyRegion = copyRegions[bufferImageCopyIndex];
+			VkBufferImageCopy& bufferImageCopy = bufferImageCopies[bufferImageCopyIndex];
+
+			bufferImageCopy.bufferOffset = copyRegion.bufferOffset;
+			bufferImageCopy.bufferRowLength = 0;
+			bufferImageCopy.bufferImageHeight = 0;
+			bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			bufferImageCopy.imageSubresource.mipLevel = copyRegion.imageMipLevel;
+			bufferImageCopy.imageSubresource.baseArrayLayer = copyRegion.imageLayerOffset;
+			bufferImageCopy.imageSubresource.layerCount = copyRegion.imageLayerCount;
+			bufferImageCopy.imageOffset.x = copyRegion.imageOffsetX;
+			bufferImageCopy.imageOffset.y = copyRegion.imageOffsetY;
+			bufferImageCopy.imageOffset.z = copyRegion.imageOffsetZ;
+			bufferImageCopy.imageExtent = *static_cast<const VkExtent3D*>(static_cast<const void*>(&copyRegion.imageExtent));
+		}
+
+		return bufferImageCopies;
 	}
 }

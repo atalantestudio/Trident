@@ -11,7 +11,7 @@ namespace ProjectA {
 				swapchain(swapchain)
 			{}
 
-			void execute() const override {
+			void execute() const final override {
 				if (renderPass.present) {
 					if (renderPass.getColorAttachmentCount() == 1 && !renderPass.resolve && !renderPass.depthStencil) {
 						return;

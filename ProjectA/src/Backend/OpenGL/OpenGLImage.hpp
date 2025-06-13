@@ -18,7 +18,5 @@ namespace ProjectA {
 			const ImageUsage usage;
 			const GLenum internalFormat;
 			const GLenum format;
-			const GLuint mipLevelCount;
-			const GLuint layerCount;
 	};
 }

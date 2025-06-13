@@ -16,7 +16,7 @@ namespace ProjectA {
 				descriptorSetLayouts(descriptorSetLayouts)
 			{}
 
-			void execute() const {
+			void execute() const final override {
 				for (const DescriptorSetLayout& descriptorSetLayout : descriptorSetLayouts) {
 					for (uint32 binding = 0; binding < descriptorSetLayout.bindings.size(); binding += 1) {
 						const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout.bindings[binding];

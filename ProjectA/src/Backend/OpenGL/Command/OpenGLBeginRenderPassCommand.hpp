@@ -13,7 +13,7 @@ namespace ProjectA {
 				descriptor(descriptor)
 			{}
 
-			void execute() const override {
+			void execute() const final override {
 				const ref<OpenGLRenderPass>& renderPass = std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass);
 				const ref<OpenGLSwapchain>& swapchain = std::static_pointer_cast<OpenGLSwapchain>(descriptor.swapchain);
 

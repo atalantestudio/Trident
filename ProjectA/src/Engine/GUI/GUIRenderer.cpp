@@ -358,12 +358,12 @@ namespace ProjectA {
 
 			BufferImageCopyRegion& copyRegion = copyRegions[layerIndex];
 			copyRegion.bufferOffset;
-			copyRegion.imageExtent.width = extent.width;
-			copyRegion.imageExtent.height = extent.height;
-			copyRegion.imageExtent.depth = 1;
 			copyRegion.imageOffsetX = 0;
 			copyRegion.imageOffsetY = 0;
 			copyRegion.imageOffsetZ = 0;
+			copyRegion.imageExtent.width = extent.width;
+			copyRegion.imageExtent.height = extent.height;
+			copyRegion.imageExtent.depth = 1;
 			copyRegion.imageMipLevel = 0;
 			copyRegion.imageLayerOffset = layerIndex;
 			copyRegion.imageLayerCount = 1;

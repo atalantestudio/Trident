@@ -42,7 +42,7 @@ namespace ProjectA {
 
 			virtual void copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
 
-			// virtual void copyImageToBuffer(const ref<Image>& sourceImage, const ref<Buffer>& destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
+			virtual void copyImageToBuffer(const ref<Image>& sourceImage, const ref<Buffer>& destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
 
 			virtual void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) = 0;
 

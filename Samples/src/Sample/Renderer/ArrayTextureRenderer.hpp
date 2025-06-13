@@ -278,12 +278,12 @@ namespace ProjectA {
 
 				BufferImageCopyRegion& bufferImageCopyRegion = copyRegions[0];
 				bufferImageCopyRegion.bufferOffset = 0;
-				bufferImageCopyRegion.imageExtent.width = file.width;
-				bufferImageCopyRegion.imageExtent.height = file.height;
-				bufferImageCopyRegion.imageExtent.depth = 1;
 				bufferImageCopyRegion.imageOffsetX = 0;
 				bufferImageCopyRegion.imageOffsetY = 0;
 				bufferImageCopyRegion.imageOffsetZ = 0;
+				bufferImageCopyRegion.imageExtent.width = file.width;
+				bufferImageCopyRegion.imageExtent.height = file.height;
+				bufferImageCopyRegion.imageExtent.depth = 1;
 				bufferImageCopyRegion.imageMipLevel = 0;
 				bufferImageCopyRegion.imageLayerOffset = 0;
 				bufferImageCopyRegion.imageLayerCount = 1;

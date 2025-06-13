@@ -9,7 +9,7 @@ namespace ProjectA {
 				barrier(barrier)
 			{}
 
-			void execute() const override {
+			void execute() const final override {
 				glMemoryBarrier(barrier);
 			}
 

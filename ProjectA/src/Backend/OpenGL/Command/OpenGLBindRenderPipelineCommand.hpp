@@ -11,7 +11,7 @@ namespace ProjectA {
 			{}
 
 			// TODO: glEnable(GL_FRAMEBUFFER_SRGB)
-			void execute() const override {
+			void execute() const final override {
 				glBindVertexArray(renderPipeline->vertexArray);
 				glUseProgram(renderPipeline->program);
 				glFrontFace(renderPipeline->frontFace);

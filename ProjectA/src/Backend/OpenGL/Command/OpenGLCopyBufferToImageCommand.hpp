@@ -16,12 +16,12 @@ namespace ProjectA {
 			//       The description for glCopyTextureSubImage* is:
 			//       Replace a rectangular portion of a texture image with pixels from the current GL_READ_BUFFER
 			//       (rather than from main memory, as is the case for glTexSubImage2D).
-			void execute() const override {
+			void execute() const final override {
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer);
+
 				#ifndef OPENGL_USE_DSA
 					glBindTexture(image->target, image->object);
 				#endif
-
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer);
 
 				for (const BufferImageCopyRegion& copyRegion : *copyRegions) {
 					const void* pixels = (const void*) copyRegion.bufferOffset;
@@ -131,11 +131,11 @@ namespace ProjectA {
 					}
 				}
 
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
 				#ifndef OPENGL_USE_DSA
 					glBindTexture(image->target, 0);
 				#endif
+
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 			}
 
 		private:

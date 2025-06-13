@@ -12,7 +12,7 @@ namespace ProjectA {
 				instancecount(instancecount)
 			{}
 
-			void execute() const override {
+			void execute() const final override {
 				glDrawArraysInstanced(mode, first, count, instancecount);
 			}
 

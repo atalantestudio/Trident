@@ -15,12 +15,10 @@
 namespace ProjectA {
 	OpenGLImage::OpenGLImage(const ImageDescriptor& descriptor) :
 		Image(descriptor),
-		target(getGlImageType(descriptor.type, descriptor.sampleCount, descriptor.layerCount)),
+		target(getGlImageType(descriptor.type, descriptor.sampleCount, layerCount)),
 		usage(descriptor.usage),
 		internalFormat(getGlInternalFormat(descriptor.format)),
-		format(getGlFormat(descriptor.format)),
-		mipLevelCount(descriptor.mipLevelCount),
-		layerCount(descriptor.layerCount)
+		format(getGlFormat(descriptor.format))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 

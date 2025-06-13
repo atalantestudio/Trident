@@ -10,7 +10,7 @@ namespace ProjectA {
 				indexBuffer(indexBuffer)
 			{}
 
-			void execute() const override {
+			void execute() const final override {
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 			}
 

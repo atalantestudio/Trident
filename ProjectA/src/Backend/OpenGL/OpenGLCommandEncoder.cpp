@@ -8,6 +8,7 @@
 #include "Backend/OpenGL/Command/OpenGLBindVertexBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLCopyBufferToBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLCopyBufferToImageCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLCopyImageToBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDispatchGroupsCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
@@ -96,6 +97,14 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLCopyBufferToImageCommand>(
 			std::static_pointer_cast<OpenGLBuffer>(sourceBuffer)->object,
 			std::static_pointer_cast<OpenGLImage>(destinationImage).get(),
+			copyRegions
+		));
+	}
+
+	void OpenGLCommandEncoder::copyImageToBuffer(const ref<Image>& sourceImage, const ref<Buffer>& destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) {
+		commandBuffer.emplace_back(createRef<OpenGLCopyImageToBufferCommand>(
+			std::static_pointer_cast<OpenGLImage>(sourceImage).get(),
+			std::static_pointer_cast<OpenGLBuffer>(destinationBuffer).get(),
 			copyRegions
 		));
 	}

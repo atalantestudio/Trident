@@ -12,7 +12,7 @@ namespace ProjectA {
 				copyRegions(&copyRegions)
 			{}
 
-			void execute() const override {
+			void execute() const final override {
 				#ifndef OPENGL_USE_DSA
 					glBindBuffer(GL_COPY_READ_BUFFER, sourceBuffer);
 					glBindBuffer(GL_COPY_WRITE_BUFFER, destinationBuffer);

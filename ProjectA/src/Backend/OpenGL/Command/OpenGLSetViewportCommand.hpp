@@ -12,7 +12,7 @@ namespace ProjectA {
 				height(height)
 			{}
 
-			void execute() const override {
+			void execute() const final override {
 				glViewport(x, y, width, height);
 			}
 

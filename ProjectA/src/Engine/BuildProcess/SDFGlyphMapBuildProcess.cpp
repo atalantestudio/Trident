@@ -319,7 +319,41 @@ namespace ProjectA {
 
 		// TODO: Copy the data from glyphMapImage to sdfGlyphMap.data.
 
-		BREAKPOINT();
+		BufferDescriptor glyphMapStagingBufferDescriptor;
+		glyphMapStagingBufferDescriptor.size = sdfGlyphMap.extent.width * sdfGlyphMap.extent.height;
+		glyphMapStagingBufferDescriptor.usage = BufferUsage::TRANSFER_DST;
+		glyphMapStagingBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		glyphMapStagingBufferDescriptor.persistent = false;
+
+		ref<Buffer> glyphMapStagingBuffer = Renderer::createBuffer(glyphMapStagingBufferDescriptor);
+
+		sequence<BufferImageCopyRegion> bufferImageCopyRegions(1);
+		BufferImageCopyRegion& glyphMapCopyRegion = bufferImageCopyRegions[0];
+		glyphMapCopyRegion.bufferOffset = 0;
+		glyphMapCopyRegion.imageOffsetX = 0;
+		glyphMapCopyRegion.imageOffsetY = 0;
+		glyphMapCopyRegion.imageOffsetZ = 0;
+		glyphMapCopyRegion.imageExtent = glyphMapImage->getExtent();
+		glyphMapCopyRegion.imageMipLevel = 0;
+		glyphMapCopyRegion.imageLayerOffset = 0;
+		glyphMapCopyRegion.imageLayerCount = glyphMapImage->getLayerCount();
+
+		commandEncoder = device->getComputeQueue()->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
+		commandEncoder->begin();
+		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, bufferImageCopyRegions);
+
+		commandBuffer = commandEncoder->end();
+
+		device->getComputeQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
+		device->waitIdle();
+
+		sdfGlyphMap.data = sequence<uint8>(glyphMapStagingBuffer->size);
+
+		const uint8* glyphMapStagingBufferMappedRange = glyphMapStagingBuffer->map<uint8>(0, glyphMapStagingBuffer->size);
+
+		std::copy(glyphMapStagingBufferMappedRange, glyphMapStagingBufferMappedRange + glyphMapStagingBuffer->size, &sdfGlyphMap.data[0]);
+
+		glyphMapStagingBuffer->unmap();
 
 		return sdfGlyphMap;
 	}
