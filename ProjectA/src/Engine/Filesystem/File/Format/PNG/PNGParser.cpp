@@ -8,13 +8,6 @@
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
-	struct Chunk {
-		uint32 ByteLength = 0;
-		uint32 Type = 0;
-		std::vector<uint8> Data;
-		uint32 CRC = 0;
-	};
-
 	static void readIHDRChunk(ByteStream& stream, PNGFile& file) {
 		file.width = stream.read<uint32>(true);
 
@@ -72,38 +65,37 @@ namespace ProjectA {
 			compressedData.end() - chunkByteLength
 		);
 
-		// Skip chunk data for the moment.
+		// TODO: Skip chunk data for the moment.
 		stream.jump(chunkByteLength);
 	}
 
 	static void readChunk(ByteStream& stream, PNGFile& file, std::vector<uint8>& compressedData) {
-		Chunk Chunk;
-		Chunk.ByteLength = stream.read<uint32>(true);
-		Chunk.Type = stream.read<uint32>();
+		const uint32 ByteLength = stream.read<uint32>(true);
+		const uint32 Type = stream.read<uint32>();
 
-		switch (Chunk.Type) {
+		switch (Type) {
 			case STRING_TO_LITTLE_ENDIAN_UINT32("IHDR"):
 				readIHDRChunk(stream, file);
 
 				break;
 			case STRING_TO_LITTLE_ENDIAN_UINT32("IDAT"):
-				readIDATChunk(stream, Chunk.ByteLength, compressedData);
+				readIDATChunk(stream, ByteLength, compressedData);
 
 				break;
 			case STRING_TO_LITTLE_ENDIAN_UINT32("IEND"):
 				break;
 			default:
-				const char* TypeString = static_cast<char*>(static_cast<void*>(&Chunk.Type));
+				const char* TypeString = static_cast<const char*>(static_cast<const void*>(&Type));
 
 				ENGINE_WARN("Ignored unhandled PNG chunk type \"[][][][]\".", TypeString[0], TypeString[1], TypeString[2], TypeString[3]);
 
-				stream.jump(Chunk.ByteLength);
+				stream.jump(ByteLength);
 
 				break;
 		}
 
 		// TODO: Check CRC. See https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix.
-		Chunk.CRC = stream.read<uint32>(true);
+		const uint32 CRC = stream.read<uint32>(true);
 	}
 
 	static uint8 applyAddFilter(const uint8* x, uint8* aOrB, uint8 channelIndex) {
@@ -146,39 +138,39 @@ namespace ProjectA {
 
 	template<>
 	PNGFile Filesystem::openTemporary(std::string_view path) {
-		const File file = openTemporary<File>(path);
+		const File baseFile = openTemporary<File>(path);
 
-		ByteStream stream(file.rawData, file.size);
+		ByteStream stream(baseFile.rawData, baseFile.size);
 
 		ENGINE_ASSERT(stream.read<uint64>(true) == 0x89504E470D0A1A0A, "Failed to verify signature.");
 
-		PNGFile pngFile;
+		PNGFile file;
 
 		std::vector<uint8> compressedData;
 
 		while (stream.getRemainingByteSize() > 0) {
-			readChunk(stream, pngFile, compressedData);
+			readChunk(stream, file, compressedData);
 		}
 
 		BitStream bitStream(compressedData.data(), compressedData.size());
 
-		const uint32 finalSize = pngFile.width * pngFile.height * 4 + (pngFile.height * 1);
+		const uint32 finalSize = file.width * file.height * 4 + (file.height * 1);
 
-		const std::vector<uint8> unfilteredData = bitStream.inflate(finalSize);
+		const sequence<uint8> unfilteredData = bitStream.inflate(finalSize);
 
-		pngFile.data = sequence<uint8>(pngFile.width * pngFile.height * 4);
+		file.data = sequence<uint8>(file.width * file.height * 4);
 
-		const uint8* source = &unfilteredData[0];
-		uint8* destination = &pngFile.data[0];
+		const uint8* source = unfilteredData;
+		uint8* destination = &file.data[0];
 
-		const uint32 rowLength = pngFile.width * 4 + 1;
+		const uint32 rowLength = file.width * 4 + 1;
 
 		const uint8 zero = 0;
 		uint8* previousRow = (uint8*) &zero;
 		sint32 previousRowAdvance = 0;
 
-		// TODO: Refactor with SIMD (vec4<sint32>).
-		for (uint32 y = 0; y < pngFile.height; y += 1) {
+		// TODO: Refactor with SIMD.
+		for (uint32 y = 0; y < file.height; y += 1) {
 			const FilterType filterType = static_cast<FilterType>(*source);
 
 			source += 1;
@@ -187,17 +179,17 @@ namespace ProjectA {
 
 			switch (filterType) {
 				case FilterType::NONE: {
-					std::copy(source, source + pngFile.width * 4, destination);
+					std::copy(source, source + file.width * 4, destination);
 
-					source += pngFile.width * 4;
-					destination += pngFile.width * 4;
+					source += file.width * 4;
+					destination += file.width * 4;
 
 					break;
 				}
 				case FilterType::SUB: {
 					uint32 aPixel = 0;
 
-					for (uint32 x = 0; x < pngFile.width; x += 1) {
+					for (uint32 x = 0; x < file.width; x += 1) {
 						destination[0] = applyAddFilter(source, (uint8*) &aPixel, 0);
 						destination[1] = applyAddFilter(source, (uint8*) &aPixel, 1);
 						destination[2] = applyAddFilter(source, (uint8*) &aPixel, 2);
@@ -213,7 +205,7 @@ namespace ProjectA {
 				case FilterType::UP: {
 					uint8* bPixel = previousRow;
 
-					for (uint32 x = 0; x < pngFile.width; x += 1) {
+					for (uint32 x = 0; x < file.width; x += 1) {
 						destination[0] = applyAddFilter(source, bPixel, 0);
 						destination[1] = applyAddFilter(source, bPixel, 1);
 						destination[2] = applyAddFilter(source, bPixel, 2);
@@ -230,7 +222,7 @@ namespace ProjectA {
 					uint32 aPixel = 0;
 					uint8* bPixel = previousRow;
 
-					for (uint32 x = 0; x < pngFile.width; x += 1) {
+					for (uint32 x = 0; x < file.width; x += 1) {
 						destination[0] = applyAverageFilter(source, (uint8*) &aPixel, bPixel, 0);
 						destination[1] = applyAverageFilter(source, (uint8*) &aPixel, bPixel, 1);
 						destination[2] = applyAverageFilter(source, (uint8*) &aPixel, bPixel, 2);
@@ -249,7 +241,7 @@ namespace ProjectA {
 					uint8* bPixel = previousRow;
 					uint32 cPixel = 0;
 
-					for (uint32 x = 0; x < pngFile.width; x += 1) {
+					for (uint32 x = 0; x < file.width; x += 1) {
 						destination[0] = applyPaethFilter(source, (uint8*) &aPixel, bPixel, (uint8*) &cPixel, 0);
 						destination[1] = applyPaethFilter(source, (uint8*) &aPixel, bPixel, (uint8*) &cPixel, 1);
 						destination[2] = applyPaethFilter(source, (uint8*) &aPixel, bPixel, (uint8*) &cPixel, 2);
@@ -274,6 +266,6 @@ namespace ProjectA {
 			previousRow = currentRow;
 		}
 
-		return pngFile;
+		return file;
 	}
 }

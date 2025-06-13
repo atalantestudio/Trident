@@ -68,7 +68,7 @@ namespace ProjectA {
 			// References:
 			// - DEFLATE Compressed Data Format Specification (https://datatracker.ietf.org/doc/html/rfc1950)
 			// - ZLIB Compressed Data Format Specification (https://datatracker.ietf.org/doc/html/rfc1951)
-			std::vector<uint8> inflate(uint64 uncompressedSize);
+			sequence<uint8> inflate(uint64 uncompressedSize);
 
 		private:
 			static constexpr uint8 MAX_READ_OR_PEEK_BIT_COUNT = sizeof(StreamSize) * 8;

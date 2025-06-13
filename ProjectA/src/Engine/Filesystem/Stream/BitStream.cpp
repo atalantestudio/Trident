@@ -79,7 +79,7 @@ namespace ProjectA {
 		{24577, 13},
 	};
 
-	static void parseUncompressedZlibBlock(BitStream& stream, std::vector<uint8>& data) {
+	static void parseUncompressedZlibBlock(BitStream& stream, sequence<uint8>& data, uint32& dataOffset) {
 		stream.jump(5);
 
 		/**
@@ -96,10 +96,12 @@ namespace ProjectA {
 
 		const uint8* source = stream.getBytePosition();
 
-		std::copy(source, source + LEN, std::back_inserter(data));
+		std::copy(source, source + LEN, data + dataOffset);
+
+		dataOffset += LEN;
 	}
 
-	static void parseCompressedZlibBlock(BitStream& stream, uint8 BTYPE, std::vector<uint8>& data) {
+	static void parseCompressedZlibBlock(BitStream& stream, uint8 BTYPE, sequence<uint8>& data, uint32& dataOffset) {
 		static constexpr uint16 MAX_LITERAL_LENGTH_CODE_LENGTH_COUNT = 320;
 
 		uint8 literalLengthCodeLengths[MAX_LITERAL_LENGTH_CODE_LENGTH_COUNT] = {};
@@ -202,7 +204,8 @@ namespace ProjectA {
 			ENGINE_ASSERT(literalLength <= 285, "Literal/length value should not exceed 285. See https://datatracker.ietf.org/doc/html/rfc1951.");
 
 			if (literalLength <= 255) {
-				data.emplace_back(static_cast<uint8>(literalLength));
+				data[dataOffset] = static_cast<uint8>(literalLength);
+				dataOffset += 1;
 
 				continue;
 			}
@@ -225,19 +228,13 @@ namespace ProjectA {
 			const DistanceCode distanceCode = distanceCodes[distanceCodeIndex];
 			const uint16 distance = distanceCode.baseDistance + stream.read<uint16>(distanceCode.extraBitCount);
 
-			// TODO: Use iterator instead of raw pointer.
-			//const std::vector<uint8>::const_iterator source = data.end() - distance;
-			const uint8* source = data.data() + data.size() - distance;
+			const uint8* source = data + dataOffset - distance;
 
-			//ENGINE_ASSERT(source >= data.begin(), "The source iterator is underflowing.");
-			ENGINE_ASSERT(source >= data.data(), "The source iterator is underflowing.");
+			ENGINE_ASSERT(source >= data, "The source iterator is underflowing.");
 
-			//std::copy(source, source + length, std::back_inserter(data));
-			for (uint16 index = 0; index < length; index += 1) {
-				data.emplace_back(*source);
+			std::copy(source, source + length, data + dataOffset);
 
-				source += 1;
-			}
+			dataOffset += length;
 		}
 
 		ENGINE_WARN("Reached last safe iteration.");
@@ -286,7 +283,7 @@ namespace ProjectA {
 		bitBuffer >>= jumpBitCount;
 	}
 
-	std::vector<uint8> BitStream::inflate(uint64 uncompressedSize) {
+	sequence<uint8> BitStream::inflate(uint64 uncompressedSize) {
 		// CMF (Compression Method and flags)
 		// 
 		// This byte is divided into a 4-bit compression method and a 4-
@@ -369,9 +366,8 @@ namespace ProjectA {
 		// is there to indicate if recompression might be worthwhile.
 		const uint8 FLEVEL = FLG >> 6;
 
-		std::vector<uint8> data;
-
-		data.reserve(uncompressedSize);
+		sequence<uint8> data(uncompressedSize);
+		uint32 dataOffset = 0;
 
 		// TODO: Compute theoretical max. number of blocks.
 		constexpr uint32 MAX_BLOCK_COUNT = 1000;
@@ -395,10 +391,10 @@ namespace ProjectA {
 			ENGINE_ASSERT(BTYPE != 3, "BTYPE = 3 is a reserved value. See https://datatracker.ietf.org/doc/html/rfc1951.");
 
 			if (BTYPE == 0) {
-				parseUncompressedZlibBlock(*this, data);
+				parseUncompressedZlibBlock(*this, data, dataOffset);
 			}
 			else {
-				parseCompressedZlibBlock(*this, BTYPE, data);
+				parseCompressedZlibBlock(*this, BTYPE, data, dataOffset);
 			}
 
 			if (BFINAL) {
