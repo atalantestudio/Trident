@@ -23,8 +23,10 @@ namespace ProjectA {
 			}
 
 			void GUI() override {
-				GUIContainer({EXPAND, EXPAND}, {12px, 12px}, VERTICAL, 12px, white) {
+				GUIContainer({EXPAND, EXPAND}, {12px, 12px}, VERTICAL, 0px, white) {
 					GUIText("The Lorem Ipsum", titleStyle);
+
+					GUISpacing(16px);
 
 					GUIText(
 						"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n"
@@ -34,7 +36,11 @@ namespace ProjectA {
 						paragraphStyle
 					);
 
+					GUISpacing(16px);
+
 					GUIComponent({256px, 256px}, pepperImage);
+
+					GUISpacing(4px);
 
 					GUIText("This is a picture of a pepper.", legendStyle);
 				}

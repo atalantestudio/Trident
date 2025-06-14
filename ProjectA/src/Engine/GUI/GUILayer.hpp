@@ -57,6 +57,9 @@ namespace ProjectA {
 			// Returns true if the button is hovered.
 			bool GUIButton(const std::string& string, const ButtonStyle& buttonStyle);
 
+			// Advances the component origin by `spacing` towards the current layout direction.
+			void GUISpacing(uint16 spacing);
+
 		private:
 			// Renders a colored quad without moving the origin.
 			// origin is the top-left corner of the quad.

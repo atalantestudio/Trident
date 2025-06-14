@@ -368,6 +368,10 @@ namespace ProjectA {
 		return hovered;
 	}
 
+	void GUILayer::GUISpacing(uint16 spacing) {
+		componentOrigin[layoutDirection] += spacing;
+	}
+
 	bool GUILayer::intersects(GUISize origin, GUISize size, GUISize point) {
 		return (
 			point.width >= origin.width &&
