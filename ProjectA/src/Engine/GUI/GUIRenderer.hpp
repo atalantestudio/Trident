@@ -66,7 +66,7 @@ namespace ProjectA {
 			static constexpr uint32 TEXTURE_ARRAY_MAX_HEIGHT = 2048;
 
 		private:
-			static constexpr uint32 TEXTURE_ARRAY_MAX_LAYER_COUNT = 4;
+			static constexpr uint32 TEXTURE_ARRAY_MAX_LAYER_COUNT = 8;
 			static constexpr uint64 TEXTURE_ARRAY_LAYER_BPP = sizeof(uint32);
 
 			static constexpr uint32 MAX_SUBCOMPONENTS = 512;

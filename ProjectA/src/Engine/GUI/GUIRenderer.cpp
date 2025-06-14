@@ -308,7 +308,7 @@ namespace ProjectA {
 	}
 
 	uint32 GUIRenderer::registerTextureArrayLayer(const TextureArrayLayer& layer) {
-		ENGINE_ASSERT(textureArrayLayerCount + 1 < TEXTURE_ARRAY_MAX_LAYER_COUNT, "Too many client-side images.");
+		ENGINE_ASSERT(textureArrayLayerCount + 1 <= TEXTURE_ARRAY_MAX_LAYER_COUNT, "Too many client-side images.");
 		ENGINE_ASSERT(layer.width <= TEXTURE_ARRAY_MAX_WIDTH, "Image width ([]) is larger than the maximum width ([]).", layer.width, TEXTURE_ARRAY_MAX_WIDTH);
 		ENGINE_ASSERT(layer.height <= TEXTURE_ARRAY_MAX_HEIGHT, "Image height ([]) is larger than the maximum height ([]).", layer.height, TEXTURE_ARRAY_MAX_HEIGHT);
 

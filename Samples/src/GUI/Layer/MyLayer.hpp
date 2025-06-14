@@ -4,21 +4,28 @@ namespace ProjectA {
 	class MyLayer : public GUILayer {
 		public:
 			MyLayer() {
-				radioGroteskBoldFontId = loadFont("../ProjectA/src/Asset/Font/test-bold.ttf");
-				radioGroteskRegularFontId = loadFont("../ProjectA/src/Asset/Font/test-regular.ttf");
+				radioGroteskBoldFont = loadFont("../ProjectA/src/Asset/Font/test-bold.ttf");
+				radioGroteskRegularFont = loadFont("../ProjectA/src/Asset/Font/test-regular.ttf");
+				radioGroteskRegularItalicFont = loadFont("../ProjectA/src/Asset/Font/test-regular-italic.ttf");
+				pepperImage = loadImage("Asset/Image/Pepper.png");
 
 				titleStyle.color = {0.0f, 0.0f, 0.0f, 1.0f};
-				titleStyle.font = radioGroteskBoldFontId;
+				titleStyle.font = radioGroteskBoldFont;
 				titleStyle.fontSize = 24.0f;
 
 				paragraphStyle.color = {0.0f, 0.0f, 0.0f, 1.0f};
-				paragraphStyle.font = radioGroteskRegularFontId;
+				paragraphStyle.font = radioGroteskRegularFont;
 				paragraphStyle.fontSize = 16.0f;
+
+				legendStyle.color = {0.3f, 0.3f, 0.3f, 1.0f};
+				legendStyle.font = radioGroteskRegularItalicFont;
+				legendStyle.fontSize = 14.0f;
 			}
 
 			void GUI() override {
 				GUIContainer({EXPAND, EXPAND}, {12px, 12px}, VERTICAL, 12px, white) {
 					GUIText("The Lorem Ipsum", titleStyle);
+
 					GUIText(
 						"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n"
 						"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n"
@@ -26,6 +33,10 @@ namespace ProjectA {
 						"Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
 						paragraphStyle
 					);
+
+					GUIComponent({256px, 256px}, pepperImage);
+
+					GUIText("This is a picture of a pepper.", legendStyle);
 				}
 			}
 
@@ -33,10 +44,13 @@ namespace ProjectA {
 			static inline const vec4<float32> white = {1.0f, 1.0f, 1.0f, 1.0f};
 
 		private:
-			FontID radioGroteskBoldFontId;
-			FontID radioGroteskRegularFontId;
+			FontID radioGroteskBoldFont;
+			FontID radioGroteskRegularFont;
+			FontID radioGroteskRegularItalicFont;
+			ImageID pepperImage;
 
 			TextStyle titleStyle;
 			TextStyle paragraphStyle;
+			TextStyle legendStyle;
 	};
 }

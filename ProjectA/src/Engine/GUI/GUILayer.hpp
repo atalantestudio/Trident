@@ -78,7 +78,7 @@ namespace ProjectA {
 			// static constexpr sint16 SHRINK = -2;
 
 		private:
-			static constexpr uint32 MAX_FONT_COUNT = 2;
+			static constexpr uint32 MAX_FONT_COUNT = 4;
 
 		private:
 			GUIRenderer renderer;

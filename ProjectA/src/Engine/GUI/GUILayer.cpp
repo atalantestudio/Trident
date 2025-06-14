@@ -25,6 +25,7 @@ namespace ProjectA {
 	}
 
 	FontID GUILayer::loadFont(std::string_view path) {
+		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
 		/* defaultFont->textureIndex = static_cast<uint32>(images.size());
@@ -219,22 +220,30 @@ namespace ProjectA {
 		float32 positionY = componentOrigin[1];
 
 		float32 width = 0;
-		const float32 height = textStyle.fontSize;
+		float32 height = textStyle.fontSize;
 
 		for (const char character : string) {
-			if (character == '\n') {
-				positionX = componentOrigin[0];
-				positionY += height;
+			if (character < 0) {
+				// TODO: Handle UTF-16 characters.
 
 				continue;
 			}
 
-			if (positionX > currentContainerSize.width) {
+			if (character == '\n') {
 				positionX = componentOrigin[0];
-				positionY += height;
+				positionY += textStyle.fontSize;
+				height += textStyle.fontSize;
+
+				continue;
 			}
 
-			if (positionY > currentContainerSize.height) {
+			if (positionX > currentContainerInnerSize.width) {
+				positionX = componentOrigin[0];
+				positionY += textStyle.fontSize;
+				height += textStyle.fontSize;
+			}
+
+			if (positionY > currentContainerInnerSize.height) {
 				ENGINE_WARN("A text component is overflowing the current container.");
 			}
 
