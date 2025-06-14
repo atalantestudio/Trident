@@ -281,8 +281,6 @@ namespace ProjectA {
 		glyphSubcomponentVertexInputBinding.registerAttribute<mat3x3<float32>>();
 		glyphSubcomponentVertexInputBinding.registerAttribute<mat3x3<float32>>();
 		glyphSubcomponentVertexInputBinding.registerAttribute<uint32>();
-		glyphSubcomponentVertexInputBinding.registerAttribute<float32>();
-		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>();
 		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>();
 
 		ColorBlendAttachment transparentColorBlendAttachment{};
@@ -398,9 +396,7 @@ namespace ProjectA {
 		glyphSubcomponentMappedRange[glyphSubcomponentCount].world = world;
 		glyphSubcomponentMappedRange[glyphSubcomponentCount].textureWorld = imageWorld;
 		glyphSubcomponentMappedRange[glyphSubcomponentCount].fontIndex = imageIndex;
-		glyphSubcomponentMappedRange[glyphSubcomponentCount].outlineWidth = textStyle.outlineWidth;
 		glyphSubcomponentMappedRange[glyphSubcomponentCount].color = textStyle.color;
-		glyphSubcomponentMappedRange[glyphSubcomponentCount].outlineColor = textStyle.outlineColor;
 
 		glyphSubcomponentCount += 1;
 	}

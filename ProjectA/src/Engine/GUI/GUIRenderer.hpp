@@ -58,9 +58,7 @@ namespace ProjectA {
 				mat3x3<float32> world;
 				mat3x3<float32> textureWorld;
 				uint32 fontIndex;
-				float32 outlineWidth;
 				vec4<float32> color;
-				vec4<float32> outlineColor;
 			};
 
 		public:
