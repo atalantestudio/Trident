@@ -41,17 +41,17 @@ namespace ProjectA {
 			ImageID loadImage(std::string_view path);
 
 			// Renders a container cascading from top to bottom and left to right.
-			// layoutDirection is the direction the container's component must be laid towards.
-			// layoutSpacing is the spacing between the container's component, in pixels.
-			GUIContainer pushContainer(GUISize size, GUISize padding, LayoutDirection layoutDirection, uint16 layoutSpacing);
-			GUIContainer pushContainer(GUISize size, GUISize padding, LayoutDirection layoutDirection, uint16 layoutSpacing, const vec4<float32>& color);
+			// `layoutDirection` is the direction the container's component must be laid towards.
+			// `layoutSpacing` is the spacing between the container's component, in pixels.
+			GUIContainer pushContainer(Extent2D size, Extent2D padding, LayoutDirection layoutDirection, uint32 layoutSpacing);
+			GUIContainer pushContainer(Extent2D size, Extent2D padding, LayoutDirection layoutDirection, uint32 layoutSpacing, const vec4<float32>& color);
 
 			void popContainer(GUIContainer& container);
 
 			// Draw a rectangle with a custom color.
-			void GUIComponent(GUISize size, const vec4<float32>& color);
+			void GUIComponent(Extent2D size, const vec4<float32>& color);
 
-			void GUIImage(GUISize size, ImageID imageId);
+			void GUIImage(Extent2D size, ImageID imageId);
 
 			void GUIText(const std::string& string, const TextStyle& textStyle);
 
@@ -59,16 +59,16 @@ namespace ProjectA {
 			bool GUIButton(const std::string& string, const ButtonStyle& buttonStyle);
 
 			// Advances the component origin by `spacing` towards the current layout direction.
-			void GUISpacing(uint16 spacing);
+			void GUISpacing(uint32 spacing);
 
 		private:
 			// Renders a colored quad without moving the origin.
 			// origin is the top-left corner of the quad.
-			void registerComponent(GUISize size, ImageID imageId, const vec4<float32>& color);
+			void registerComponent(Extent2D size, ImageID imageId, const vec4<float32>& color);
 
-			GUISize computeFixedSize(GUISize size) const;
+			Extent2D computeFixedSize(Extent2D size) const;
 
-			static bool intersects(GUISize origin, GUISize size, GUISize point);
+			static bool intersects(Extent2D origin, Extent2D size, Extent2D point);
 
 			bool onWindowResize(WindowResizeEvent& event);
 
@@ -76,10 +76,10 @@ namespace ProjectA {
 			static constexpr ImageID DEFAULT_IMAGE_ID = 0;
 
 			// Grow towards the layout direction.
-			static constexpr sint16 EXPAND = -1;
+			static constexpr uint32 EXPAND = -1;
 
 			// Retreat towards the layout direction.
-			// static constexpr sint16 SHRINK = -2;
+			// static constexpr uint32 SHRINK = -2;
 
 		private:
 			static constexpr uint32 MAX_FONT_COUNT = 4;
@@ -92,11 +92,11 @@ namespace ProjectA {
 			std::array<FontData, MAX_FONT_COUNT> fonts;
 			uint32 fontCount = 0;
 
-			sint16 componentOrigin[2];
+			uint32 componentOrigin[2];
 			LayoutDirection layoutDirection = VERTICAL;
-			uint16 layoutSpacing = 0;
-			GUISize currentContainerSize;
-			GUISize currentContainerInnerSize;
+			uint32 layoutSpacing = 0;
+			Extent2D currentContainerSize;
+			Extent2D currentContainerInnerSize;
 			bool rootComponent = true;
 	};
 

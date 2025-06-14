@@ -81,11 +81,8 @@ namespace ProjectA {
 		componentOrigin[VERTICAL] = 0;
 		layoutDirection = VERTICAL;
 		layoutSpacing = 0;
-		currentContainerSize = {
-			static_cast<sint16>(swapchain->getExtent().width),
-			static_cast<sint16>(swapchain->getExtent().height),
-		};
-		currentContainerInnerSize = currentContainerSize;
+		currentContainerSize = swapchain->getExtent();
+		currentContainerInnerSize = swapchain->getExtent();
 
 		GUI();
 	}
@@ -112,7 +109,7 @@ namespace ProjectA {
 		return true;
 	}
 
-	GUIContainer GUILayer::pushContainer(GUISize size, GUISize padding, LayoutDirection layoutDirection, uint16 layoutSpacing) {
+	GUIContainer GUILayer::pushContainer(Extent2D size, Extent2D padding, LayoutDirection layoutDirection, uint32 layoutSpacing) {
 		// TODO: Ensure that the container isn't expanding towards the current layout direction.
 
 		GUIContainer container;
@@ -146,8 +143,8 @@ namespace ProjectA {
 		return container;
 	}
 
-	GUIContainer GUILayer::pushContainer(GUISize size, GUISize padding, LayoutDirection layoutDirection, uint16 layoutSpacing, const vec4<float32>& color) {
-		const GUISize fixedSize = computeFixedSize(size);
+	GUIContainer GUILayer::pushContainer(Extent2D size, Extent2D padding, LayoutDirection layoutDirection, uint32 layoutSpacing, const vec4<float32>& color) {
+		const Extent2D fixedSize = computeFixedSize(size);
 
 		registerComponent(fixedSize, DEFAULT_IMAGE_ID, color);
 
@@ -168,28 +165,28 @@ namespace ProjectA {
 		}
 
 		// Set the component origin to the end of the popped container.
-		componentOrigin[layoutDirection] = container.origin[layoutDirection] + container.size[layoutDirection] + layoutSpacing;
-		componentOrigin[!layoutDirection] = container.origin[!layoutDirection];
+		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&container.origin))[layoutDirection] + (pointer_cast_const<const uint32*>(&container.size))[layoutDirection] + layoutSpacing;
+		componentOrigin[!layoutDirection] += (pointer_cast_const<const uint32*>(&container.origin))[!layoutDirection];
 
 		// Set the current container sizes to the parent container sizes.
 		currentContainerSize = container.parentSize;
 		currentContainerInnerSize = container.parentInnerSize;
 	}
 
-	void GUILayer::GUIComponent(GUISize size, const vec4<float32>& color) {
-		const GUISize fixedSize = computeFixedSize(size);
+	void GUILayer::GUIComponent(Extent2D size, const vec4<float32>& color) {
+		const Extent2D fixedSize = computeFixedSize(size);
 
 		registerComponent(fixedSize, DEFAULT_IMAGE_ID, color);
 
-		componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
+		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&fixedSize))[layoutDirection] + layoutSpacing;
 	}
 
-	void GUILayer::GUIImage(GUISize size, ImageID imageId) {
-		const GUISize fixedSize = computeFixedSize(size);
+	void GUILayer::GUIImage(Extent2D size, ImageID imageId) {
+		const Extent2D fixedSize = computeFixedSize(size);
 
 		registerComponent(fixedSize, imageId, {1.0f, 1.0f, 1.0f, 1.0f});
 
-		componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
+		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&fixedSize))[layoutDirection] + layoutSpacing;
 	}
 
 	void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
@@ -198,8 +195,8 @@ namespace ProjectA {
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
 		const float32 lineHeight = static_cast<float32>(font.getLineHeight());
 
-		float32 positionX = componentOrigin[0];
-		float32 positionY = componentOrigin[1];
+		float32 positionX = static_cast<float32>(componentOrigin[0]);
+		float32 positionY = static_cast<float32>(componentOrigin[1]);
 
 		float32 width = 0;
 		float32 height = textStyle.fontSize;
@@ -212,7 +209,7 @@ namespace ProjectA {
 			}
 
 			if (character == '\n') {
-				positionX = componentOrigin[0];
+				positionX = static_cast<float32>(componentOrigin[0]);
 				positionY += textStyle.fontSize;
 				height += textStyle.fontSize;
 
@@ -220,7 +217,7 @@ namespace ProjectA {
 			}
 
 			if (positionX > currentContainerInnerSize.width) {
-				positionX = componentOrigin[0];
+				positionX = static_cast<float32>(componentOrigin[0]);
 				positionY += textStyle.fontSize;
 				height += textStyle.fontSize;
 			}
@@ -234,7 +231,7 @@ namespace ProjectA {
 			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
 
 			// Don't register spaces on the start of the text.
-			if (glyph.invisible && positionX == componentOrigin[0]) {
+			if (glyph.invisible && positionX == static_cast<float32>(componentOrigin[0])) {
 				continue;
 			}
 
@@ -266,9 +263,9 @@ namespace ProjectA {
 			width += advanceWidth;
 		}
 
-		const GUISize fixedSize = {static_cast<sint16>(width), static_cast<sint16>(height)};
+		const Extent2D computedSize = {static_cast<uint32>(width), static_cast<uint32>(height)};
 
-		componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
+		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&computedSize))[layoutDirection] + layoutSpacing;
 	}
 
 	// TODO: Refactor.
@@ -279,17 +276,17 @@ namespace ProjectA {
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(glyphMapImageId);
 
 		// 1. Calculate the minimum size that fully encloses the text.
-		GUISize size;
+		Extent2D size;
 
 		size.width = 0;
-		size.height = static_cast<sint16>(buttonStyle.textStyle->fontSize);
+		size.height = static_cast<uint32>(buttonStyle.textStyle->fontSize);
 
 		for (const char glyph : string) {
 			const uint16 codePoint = static_cast<uint16>(glyph);
 			const TrueTypeGlyph& glyph = font[codePoint];
 			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * buttonStyle.textStyle->fontSize);
 
-			size.width += static_cast<sint16>(advanceWidth);
+			size.width += static_cast<uint32>(advanceWidth);
 		}
 
 		// 2. Register a quad having the same size.
@@ -299,8 +296,8 @@ namespace ProjectA {
 		{
 			const float32 lineHeight = static_cast<float32>(font.getLineHeight());
 
-			float32 positionX = componentOrigin[0];
-			float32 positionY = componentOrigin[1];
+			float32 positionX = static_cast<float32>(componentOrigin[0]);
+			float32 positionY = static_cast<float32>(componentOrigin[1]);
 
 			for (const char glyph : string) {
 				const uint16 codePoint = static_cast<uint16>(glyph);
@@ -340,25 +337,25 @@ namespace ProjectA {
 		if (intersects(
 			{componentOrigin[0], componentOrigin[1]},
 			size,
-			{static_cast<sint16>(Application::getWindow().getMousePosition()[0]), static_cast<sint16>(Application::getWindow().getMousePosition()[1])}
+			{static_cast<uint32>(Application::getWindow().getMousePosition()[0]), static_cast<uint32>(Application::getWindow().getMousePosition()[1])}
 		)) {
 			hovered = true;
 		}
 
 		// 4. Advance the component origin by the size (towards the current layout direction).
-		componentOrigin[layoutDirection] += size[layoutDirection] + layoutSpacing;
+		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&size))[layoutDirection] + layoutSpacing;
 
 		return hovered;
 	}
 
-	void GUILayer::GUISpacing(uint16 spacing) {
+	void GUILayer::GUISpacing(uint32 spacing) {
 		componentOrigin[layoutDirection] += spacing;
 	}
 
-	void GUILayer::registerComponent(GUISize size, ImageID imageId, const vec4<float32>& color) {
+	void GUILayer::registerComponent(Extent2D size, ImageID imageId, const vec4<float32>& color) {
 		const vec2<float32> sizeFloat = {
-			static_cast<float32>(size[0]),
-			static_cast<float32>(size[1]),
+			static_cast<float32>(size.width),
+			static_cast<float32>(size.height),
 		};
 		const vec2<float32> originFloat = {
 			static_cast<float32>(componentOrigin[0]),
@@ -377,7 +374,7 @@ namespace ProjectA {
 		renderer.registerSubcomponent(transform, imageTransform, imageId, color);
 	}
 
-	bool GUILayer::intersects(GUISize origin, GUISize size, GUISize point) {
+	bool GUILayer::intersects(Extent2D origin, Extent2D size, Extent2D point) {
 		return (
 			point.width >= origin.width &&
 			point.width < origin.width + size.width &&
@@ -386,8 +383,8 @@ namespace ProjectA {
 		);
 	}
 
-	GUISize GUILayer::computeFixedSize(GUISize size) const {
-		GUISize fixedSize{};
+	Extent2D GUILayer::computeFixedSize(Extent2D size) const {
+		Extent2D fixedSize{};
 
 		if (size.width == EXPAND) {
 			fixedSize.width = currentContainerInnerSize.width;

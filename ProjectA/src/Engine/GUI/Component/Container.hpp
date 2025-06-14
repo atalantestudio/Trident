@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/GUI/GUISize.hpp"
 #include "Engine/GUI/GUILayer.hpp"
 
 namespace ProjectA {
@@ -8,23 +7,23 @@ namespace ProjectA {
 
 	struct GUIContainer {
 		// Top-left corner of the container, excluding padding.
-		GUISize origin;
+		Extent2D origin;
 
-		GUISize padding;
+		Extent2D padding;
 
 		// Container size, including padding.
-		GUISize size;
+		Extent2D size;
 
 		// Container content size, excluding padding.
-		GUISize innerSize;
+		Extent2D innerSize;
 
-		GUISize parentSize;
-		GUISize parentInnerSize;
+		Extent2D parentSize;
+		Extent2D parentInnerSize;
 
 		// The parent layout direction for root containers is VERTICAL.
 		LayoutDirection parentLayoutDirection;
 
-		uint16 parentLayoutSpacing;
+		uint32 parentLayoutSpacing;
 
 		bool root;
 
