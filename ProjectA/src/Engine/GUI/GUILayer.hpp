@@ -48,9 +48,10 @@ namespace ProjectA {
 
 			void popContainer(GUIContainer& container);
 
-			// Renders a colored/textured quad.
+			// Draw a rectangle with a custom color.
 			void GUIComponent(GUISize size, const vec4<float32>& color);
-			void GUIComponent(GUISize size, ImageID imageId, const vec4<float32>& color = {1.0f, 1.0f, 1.0f, 1.0f});
+
+			void GUIImage(GUISize size, ImageID imageId);
 
 			void GUIText(const std::string& string, const TextStyle& textStyle);
 

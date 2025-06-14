@@ -21,7 +21,7 @@ namespace ProjectA {
 					}
 				}
 
-				GUIComponent({512px, 512px}, 1);
+				GUIImage({512px, 512px}, 1);
 
 				const std::string string = Logger::format("FPS: []", Application::getFramesPerSecond());
 

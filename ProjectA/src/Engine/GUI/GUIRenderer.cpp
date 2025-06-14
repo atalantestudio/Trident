@@ -58,7 +58,7 @@ namespace ProjectA {
 
 		SamplerDescriptor samplerDescriptor{};
 		samplerDescriptor.magFilter = SamplerFilter::NEAREST;
-		samplerDescriptor.minFilter = SamplerFilter::LINEAR;
+		samplerDescriptor.minFilter = SamplerFilter::NEAREST;
 
 		sampler = createSampler(samplerDescriptor);
 

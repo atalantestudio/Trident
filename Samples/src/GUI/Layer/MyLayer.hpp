@@ -38,7 +38,7 @@ namespace ProjectA {
 
 					GUISpacing(16px);
 
-					GUIComponent({256px, 256px}, pepperImage);
+					GUIImage({256px, 256px}, pepperImage);
 
 					GUISpacing(4px);
 

@@ -176,36 +176,18 @@ namespace ProjectA {
 		currentContainerInnerSize = container.parentInnerSize;
 	}
 
-	void GUILayer::registerComponent(GUISize size, ImageID imageId, const vec4<float32>& color) {
-		const vec2<float32> sizeFloat = {
-			static_cast<float32>(size[0]),
-			static_cast<float32>(size[1]),
-		};
-		const vec2<float32> originFloat = {
-			static_cast<float32>(componentOrigin[0]),
-			static_cast<float32>(componentOrigin[1]),
-		};
-		const mat3x3<float32> transform = mat3x3<float32>::scaling(sizeFloat) * mat3x3<float32>::translation(originFloat);
-
-		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(imageId);
-
-		// TODO: Fix wrong first image column due to image transform precision error.
-		const mat3x3<float32> imageTransform = mat3x3<float32>::scaling({
-			imageExtent.width / static_cast<float32>(renderer.TEXTURE_ARRAY_MAX_WIDTH),
-			imageExtent.height / static_cast<float32>(renderer.TEXTURE_ARRAY_MAX_HEIGHT),
-		});
-
-		renderer.registerSubcomponent(transform, imageTransform, imageId, color);
-	}
-
 	void GUILayer::GUIComponent(GUISize size, const vec4<float32>& color) {
-		return GUIComponent(size, DEFAULT_IMAGE_ID, color);
-	}
-
-	void GUILayer::GUIComponent(GUISize size, ImageID imageId, const vec4<float32>& color) {
 		const GUISize fixedSize = computeFixedSize(size);
 
-		registerComponent(fixedSize, imageId, color);
+		registerComponent(fixedSize, DEFAULT_IMAGE_ID, color);
+
+		componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
+	}
+
+	void GUILayer::GUIImage(GUISize size, ImageID imageId) {
+		const GUISize fixedSize = computeFixedSize(size);
+
+		registerComponent(fixedSize, imageId, {1.0f, 1.0f, 1.0f, 1.0f});
 
 		componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
 	}
@@ -289,6 +271,7 @@ namespace ProjectA {
 		componentOrigin[layoutDirection] += fixedSize[layoutDirection] + layoutSpacing;
 	}
 
+	// TODO: Refactor.
 	bool GUILayer::GUIButton(const std::string& string, const ButtonStyle& buttonStyle) {
 		constexpr FontID fontId = 0;
 		const TrueTypeFont& font = *fonts[fontId].font;
@@ -370,6 +353,28 @@ namespace ProjectA {
 
 	void GUILayer::GUISpacing(uint16 spacing) {
 		componentOrigin[layoutDirection] += spacing;
+	}
+
+	void GUILayer::registerComponent(GUISize size, ImageID imageId, const vec4<float32>& color) {
+		const vec2<float32> sizeFloat = {
+			static_cast<float32>(size[0]),
+			static_cast<float32>(size[1]),
+		};
+		const vec2<float32> originFloat = {
+			static_cast<float32>(componentOrigin[0]),
+			static_cast<float32>(componentOrigin[1]),
+		};
+		const mat3x3<float32> transform = mat3x3<float32>::scaling(sizeFloat) * mat3x3<float32>::translation(originFloat);
+
+		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(imageId);
+
+		// TODO: Fix wrong first image column due to image transform precision error.
+		const mat3x3<float32> imageTransform = mat3x3<float32>::scaling({
+			imageExtent.width / static_cast<float32>(renderer.TEXTURE_ARRAY_MAX_WIDTH),
+			imageExtent.height / static_cast<float32>(renderer.TEXTURE_ARRAY_MAX_HEIGHT),
+		});
+
+		renderer.registerSubcomponent(transform, imageTransform, imageId, color);
 	}
 
 	bool GUILayer::intersects(GUISize origin, GUISize size, GUISize point) {
