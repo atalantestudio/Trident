@@ -97,13 +97,13 @@ namespace ProjectA {
 		Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, size);
 
 		vertexMappedRange[0].vertex = {0.0f, 0.0f};
-		vertexMappedRange[0].imageCoordinate = {0.0f, 0.0f};
+		vertexMappedRange[0].textureCoordinate = {0.0f, 0.0f};
 		vertexMappedRange[1].vertex = {1.0f, 0.0f};
-		vertexMappedRange[1].imageCoordinate = {1.0f, 0.0f};
+		vertexMappedRange[1].textureCoordinate = {1.0f, 0.0f};
 		vertexMappedRange[2].vertex = {1.0f, 1.0f};
-		vertexMappedRange[2].imageCoordinate = {1.0f, 1.0f};
+		vertexMappedRange[2].textureCoordinate = {1.0f, 1.0f};
 		vertexMappedRange[3].vertex = {0.0f, 1.0f};
-		vertexMappedRange[3].imageCoordinate = {0.0f, 1.0f};
+		vertexMappedRange[3].textureCoordinate = {0.0f, 1.0f};
 
 		vertexStagingBuffer->unmap();
 
@@ -182,7 +182,7 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::initializeSubcomponentBuffer() {
-		constexpr uint64 subcomponentBufferSize = MAX_SUBCOMPONENTS * sizeof(Subcomponent);
+		constexpr uint64 subcomponentBufferSize = MAX_SUBCOMPONENTS * sizeof(GUISubcomponent);
 
 		BufferDescriptor subcomponentBufferDescriptor;
 		subcomponentBufferDescriptor.size = subcomponentBufferSize;
@@ -191,9 +191,9 @@ namespace ProjectA {
 		subcomponentBufferDescriptor.persistent = true;
 
 		subcomponentBuffer = createBuffer(subcomponentBufferDescriptor);
-		subcomponentMappedRange = subcomponentBuffer->map<Subcomponent>(0, subcomponentBufferSize);
+		subcomponentMappedRange = subcomponentBuffer->map<GUISubcomponent>(0, subcomponentBufferSize);
 
-		constexpr uint64 glyphSubcomponentBufferSize = MAX_GLYPH_SUBCOMPONENTS * sizeof(GlyphSubcomponent);
+		constexpr uint64 glyphSubcomponentBufferSize = MAX_GLYPH_SUBCOMPONENTS * sizeof(GUIGlyphSubcomponent);
 
 		BufferDescriptor glyphSubcomponentBufferDescriptor;
 		glyphSubcomponentBufferDescriptor.size = glyphSubcomponentBufferSize;
@@ -202,7 +202,7 @@ namespace ProjectA {
 		glyphSubcomponentBufferDescriptor.persistent = true;
 
 		glyphSubcomponentBuffer = createBuffer(glyphSubcomponentBufferDescriptor);
-		glyphSubcomponentMappedRange = glyphSubcomponentBuffer->map<GlyphSubcomponent>(0, glyphSubcomponentBufferSize);
+		glyphSubcomponentMappedRange = glyphSubcomponentBuffer->map<GUIGlyphSubcomponent>(0, glyphSubcomponentBufferSize);
 	}
 
 	void GUIRenderer::initializeCameraBuffer() {
@@ -239,14 +239,15 @@ namespace ProjectA {
 		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
-		vertexInputBinding.registerAttribute<svec2<float32>>();
+		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
 
 		VertexInputBinding subcomponentInputBinding(InputRate::INSTANCE);
-		subcomponentInputBinding.registerAttribute<mat3x3<float32>>();
-		subcomponentInputBinding.registerAttribute<mat3x3<float32>>();
-		subcomponentInputBinding.registerAttribute<uint32>();
-		subcomponentInputBinding.registerAttribute<vec4<float32>>();
+		subcomponentInputBinding.registerAttribute<vec4<float32>>(); // Center and half inner size
+		subcomponentInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
+		subcomponentInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
+		subcomponentInputBinding.registerAttribute<uint32>(); // Texture array layer index
+		subcomponentInputBinding.registerAttribute<vec4<float32>>(); // Color
+		subcomponentInputBinding.registerAttribute<float32>(); // Border radius
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -379,25 +380,17 @@ namespace ProjectA {
 		return textureArrayLayerExtents[layerIndex];
 	}
 
-	void GUIRenderer::registerSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const vec4<float32>& color) {
+	void GUIRenderer::registerSubcomponent(const GUISubcomponent& subcomponent) {
 		DEBUG_ASSERT(subcomponentCount < MAX_SUBCOMPONENTS);
 
-		subcomponentMappedRange[subcomponentCount].world = world;
-		subcomponentMappedRange[subcomponentCount].imageWorld = imageWorld;
-		subcomponentMappedRange[subcomponentCount].imageIndex = imageIndex;
-		subcomponentMappedRange[subcomponentCount].color = color;
-
+		subcomponentMappedRange[subcomponentCount] = subcomponent;
 		subcomponentCount += 1;
 	}
 
-	void GUIRenderer::registerGlyphSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const TextStyle& textStyle) {
+	void GUIRenderer::registerGlyphSubcomponent(const GUIGlyphSubcomponent& glyphSubcomponent) {
 		DEBUG_ASSERT(glyphSubcomponentCount < MAX_GLYPH_SUBCOMPONENTS);
 
-		glyphSubcomponentMappedRange[glyphSubcomponentCount].world = world;
-		glyphSubcomponentMappedRange[glyphSubcomponentCount].textureWorld = imageWorld;
-		glyphSubcomponentMappedRange[glyphSubcomponentCount].fontIndex = imageIndex;
-		glyphSubcomponentMappedRange[glyphSubcomponentCount].color = textStyle.color;
-
+		glyphSubcomponentMappedRange[glyphSubcomponentCount] = glyphSubcomponent;
 		glyphSubcomponentCount += 1;
 	}
 
@@ -440,7 +433,7 @@ namespace ProjectA {
 			commandEncoder->bindAllDescriptorSets();
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(Subcomponent));
+			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(GUISubcomponent));
 			commandEncoder->drawIndexed(6, subcomponentCount, 0);
 		}
 
@@ -449,7 +442,7 @@ namespace ProjectA {
 			commandEncoder->bindAllDescriptorSets();
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GlyphSubcomponent));
+			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GUIGlyphSubcomponent));
 			commandEncoder->drawIndexed(6, glyphSubcomponentCount, 0);
 		}
 

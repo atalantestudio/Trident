@@ -146,7 +146,7 @@ namespace ProjectA {
 	GUIContainer GUILayer::pushContainer(Extent2D size, Extent2D padding, LayoutDirection layoutDirection, uint32 layoutSpacing, const vec4<float32>& color) {
 		const Extent2D fixedSize = computeFixedSize(size);
 
-		registerComponent(fixedSize, DEFAULT_IMAGE_ID, color);
+		registerSubcomponent(fixedSize, DEFAULT_IMAGE_ID, color, 0.0f);
 
 		return pushContainer(size, padding, layoutDirection, layoutSpacing);
 	}
@@ -173,18 +173,18 @@ namespace ProjectA {
 		currentContainerInnerSize = container.parentInnerSize;
 	}
 
-	void GUILayer::GUIComponent(Extent2D size, const vec4<float32>& color) {
+	void GUILayer::GUIComponent(Extent2D size, const vec4<float32>& color, float32 radius) {
 		const Extent2D fixedSize = computeFixedSize(size);
 
-		registerComponent(fixedSize, DEFAULT_IMAGE_ID, color);
+		registerSubcomponent(fixedSize, DEFAULT_IMAGE_ID, color, radius);
 
 		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&fixedSize))[layoutDirection] + layoutSpacing;
 	}
 
-	void GUILayer::GUIImage(Extent2D size, ImageID imageId) {
+	void GUILayer::GUIImage(Extent2D size, ImageID imageId, float32 radius) {
 		const Extent2D fixedSize = computeFixedSize(size);
 
-		registerComponent(fixedSize, imageId, {1.0f, 1.0f, 1.0f, 1.0f});
+		registerSubcomponent(fixedSize, imageId, {1.0f, 1.0f, 1.0f, 1.0f}, radius);
 
 		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&fixedSize))[layoutDirection] + layoutSpacing;
 	}
@@ -200,6 +200,10 @@ namespace ProjectA {
 
 		float32 width = 0;
 		float32 height = textStyle.fontSize;
+
+		GUIGlyphSubcomponent glyphSubcomponent;
+		glyphSubcomponent.layerIndex = fontData.glyphMapImageId;
+		glyphSubcomponent.color = textStyle.color;
 
 		for (const char character : string) {
 			if (character < 0) {
@@ -245,18 +249,17 @@ namespace ProjectA {
 
 				const vec2<float32> position = {positionX + leftSideBearing, positionY};
 				const vec2<float32> size = {width, textStyle.fontSize};
-				const mat3x3<float32> transform = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
-
 				const vec2<float32> uvStart = {glyph.minCoordinateX, glyph.minCoordinateY};
 				const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
 				const vec2<float32> uvDiff = uvEnd - uvStart;
 
-				const mat3x3<float32> imageTransform = mat3x3<float32>::scaling({
+				glyphSubcomponent.world = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
+				glyphSubcomponent.textureWorld = mat3x3<float32>::scaling({
 					uvDiff[0] * imageExtent.width / renderer.TEXTURE_ARRAY_MAX_WIDTH,
 					uvDiff[1] * imageExtent.height / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
 				}) * mat3x3<float32>::translation(uvStart);
 
-				renderer.registerGlyphSubcomponent(transform, imageTransform, fontData.glyphMapImageId, textStyle);
+				renderer.registerGlyphSubcomponent(glyphSubcomponent);
 			}
 
 			positionX += advanceWidth;
@@ -270,7 +273,11 @@ namespace ProjectA {
 
 	// TODO: Refactor.
 	bool GUILayer::GUIButton(const std::string& string, const ButtonStyle& buttonStyle) {
-		constexpr FontID fontId = 0;
+		DEBUG_ASSERT(false);
+
+		return false;
+
+		/*constexpr FontID fontId = 0;
 		const TrueTypeFont& font = *fonts[fontId].font;
 		const uint32 glyphMapImageId = fonts[fontId].glyphMapImageId;
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(glyphMapImageId);
@@ -290,7 +297,7 @@ namespace ProjectA {
 		}
 
 		// 2. Register a quad having the same size.
-		registerComponent(size, DEFAULT_IMAGE_ID, {0.5f, 0.5f, 0.5f, 1.0f});
+		registerSubcomponent(size, DEFAULT_IMAGE_ID, {0.5f, 0.5f, 0.5f, 1.0f});
 
 		// 3. Register the text on top of it.
 		{
@@ -345,33 +352,39 @@ namespace ProjectA {
 		// 4. Advance the component origin by the size (towards the current layout direction).
 		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&size))[layoutDirection] + layoutSpacing;
 
-		return hovered;
+		return hovered;*/
 	}
 
 	void GUILayer::GUISpacing(uint32 spacing) {
 		componentOrigin[layoutDirection] += spacing;
 	}
 
-	void GUILayer::registerComponent(Extent2D size, ImageID imageId, const vec4<float32>& color) {
-		const vec2<float32> sizeFloat = {
-			static_cast<float32>(size.width),
-			static_cast<float32>(size.height),
-		};
-		const vec2<float32> originFloat = {
+	void GUILayer::registerSubcomponent(Extent2D size, ImageID imageId, const vec4<float32>& color, float32 radius) {
+		const vec2<float32> decimalOrigin = {
 			static_cast<float32>(componentOrigin[0]),
 			static_cast<float32>(componentOrigin[1]),
 		};
-		const mat3x3<float32> transform = mat3x3<float32>::scaling(sizeFloat) * mat3x3<float32>::translation(originFloat);
-
+		const vec2<float32> decimalSize = {
+			static_cast<float32>(size.width),
+			static_cast<float32>(size.height),
+		};
+		const vec2<float32> decimalHalfInnerSize = decimalSize * 0.5f - vec2<float32>(radius, radius);
+		const vec2<float32> decimalCenter = decimalOrigin + decimalSize * 0.5f;
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(imageId);
 
-		// TODO: Fix wrong first image column due to image transform precision error.
-		const mat3x3<float32> imageTransform = mat3x3<float32>::scaling({
-			imageExtent.width / static_cast<float32>(renderer.TEXTURE_ARRAY_MAX_WIDTH),
-			imageExtent.height / static_cast<float32>(renderer.TEXTURE_ARRAY_MAX_HEIGHT),
+		GUISubcomponent subcomponent;
+		subcomponent.center = {decimalCenter[0], decimalCenter[1]};
+		subcomponent.halfInnerSize = {decimalHalfInnerSize[0], decimalHalfInnerSize[1]};
+		subcomponent.worldTransform = mat3x3<float32>::scaling(decimalSize) * mat3x3<float32>::translation(decimalOrigin);
+		subcomponent.textureTransform = mat3x3<float32>::scaling({
+			static_cast<float32>(imageExtent.width) / renderer.TEXTURE_ARRAY_MAX_WIDTH,
+			static_cast<float32>(imageExtent.height) / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
 		});
+		subcomponent.layerIndex = imageId;
+		subcomponent.color = color;
+		subcomponent.radius = radius;
 
-		renderer.registerSubcomponent(transform, imageTransform, imageId, color);
+		renderer.registerSubcomponent(subcomponent);
 	}
 
 	bool GUILayer::intersects(Extent2D origin, Extent2D size, Extent2D point) {

@@ -4,6 +4,7 @@
 #include "Engine/ECS/Component/GUIComponent.hpp"
 #include "Engine/GUI/ComponentStyle/ButtonStyle.hpp"
 #include "Engine/GUI/TextureArrayLayer.hpp"
+#include "Engine/GUI/Subcomponent.hpp"
 #include "Engine/ECS/ECS.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -20,9 +21,9 @@ namespace ProjectA {
 
 			Extent2D getTextureArrayLayerExtent(uint32 layerIndex) const;
 
-			void registerSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const vec4<float32>& color);
+			void registerSubcomponent(const GUISubcomponent& subcomponent);
 
-			void registerGlyphSubcomponent(const mat3x3<float32>& world, const mat3x3<float32>& imageWorld, uint32 imageIndex, const TextStyle& textStyle);
+			void registerGlyphSubcomponent(const GUIGlyphSubcomponent& glyphSubcomponent);
 
 			void render(const ref<CommandEncoder>& commandEncoder) const final override;
 
@@ -44,21 +45,7 @@ namespace ProjectA {
 		private:
 			struct Vertex {
 				svec2<float32> vertex;
-				svec2<float32> imageCoordinate;
-			};
-
-			struct Subcomponent {
-				mat3x3<float32> world;
-				mat3x3<float32> imageWorld;
-				uint32 imageIndex;
-				vec4<float32> color;
-			};
-
-			struct GlyphSubcomponent {
-				mat3x3<float32> world;
-				mat3x3<float32> textureWorld;
-				uint32 fontIndex;
-				vec4<float32> color;
+				svec2<float32> textureCoordinate;
 			};
 
 		public:
@@ -86,10 +73,10 @@ namespace ProjectA {
 			ref<Buffer> indexBuffer;
 
 			ref<Buffer> subcomponentBuffer;
-			Subcomponent* subcomponentMappedRange;
+			GUISubcomponent* subcomponentMappedRange;
 
 			ref<Buffer> glyphSubcomponentBuffer;
-			GlyphSubcomponent* glyphSubcomponentMappedRange;
+			GUIGlyphSubcomponent* glyphSubcomponentMappedRange;
 
 			ref<Buffer> cameraBuffer;
 			mat3x3<float32>* cameraMappedRange;

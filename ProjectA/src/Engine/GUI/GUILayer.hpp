@@ -49,9 +49,9 @@ namespace ProjectA {
 			void popContainer(GUIContainer& container);
 
 			// Draw a rectangle with a custom color.
-			void GUIComponent(Extent2D size, const vec4<float32>& color);
+			void GUIComponent(Extent2D size, const vec4<float32>& color, float32 radius = 0.0f);
 
-			void GUIImage(Extent2D size, ImageID imageId);
+			void GUIImage(Extent2D size, ImageID imageId, float32 radius = 0.0f);
 
 			void GUIText(const std::string& string, const TextStyle& textStyle);
 
@@ -64,7 +64,7 @@ namespace ProjectA {
 		private:
 			// Renders a colored quad without moving the origin.
 			// origin is the top-left corner of the quad.
-			void registerComponent(Extent2D size, ImageID imageId, const vec4<float32>& color);
+			void registerSubcomponent(Extent2D size, ImageID imageId, const vec4<float32>& color, float32 radius);
 
 			Extent2D computeFixedSize(Extent2D size) const;
 

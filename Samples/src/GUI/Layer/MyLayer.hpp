@@ -4,10 +4,10 @@ namespace ProjectA {
 	class MyLayer : public GUILayer {
 		public:
 			MyLayer() {
-				/* radioGroteskBoldFont = loadFont("../ProjectA/src/Asset/Font/test-bold.ttf");
+				radioGroteskBoldFont = loadFont("../ProjectA/src/Asset/Font/test-bold.ttf");
 				radioGroteskRegularFont = loadFont("../ProjectA/src/Asset/Font/test-regular.ttf");
 				radioGroteskRegularItalicFont = loadFont("../ProjectA/src/Asset/Font/test-regular-italic.ttf");
-				pepperImage = loadImage("Asset/Image/Pepper.png");
+				image = loadImage("Asset/Image/Horse_rgba.png");
 
 				titleStyle.color = {0.0f, 0.0f, 0.0f, 1.0f};
 				titleStyle.font = radioGroteskBoldFont;
@@ -19,12 +19,12 @@ namespace ProjectA {
 
 				legendStyle.color = {0.3f, 0.3f, 0.3f, 1.0f};
 				legendStyle.font = radioGroteskRegularItalicFont;
-				legendStyle.fontSize = 14.0f; */
+				legendStyle.fontSize = 14.0f;
 			}
 
 			void GUI() override {
 				GUIContainer({EXPAND, EXPAND}, {12px, 12px}, VERTICAL, 0px, white) {
-					/* GUIText("The Lorem Ipsum", titleStyle);
+					GUIText("The Lorem Ipsum", titleStyle);
 
 					GUISpacing(16px);
 
@@ -38,13 +38,11 @@ namespace ProjectA {
 
 					GUISpacing(16px);
 
-					GUIImage({256px, 256px}, pepperImage);
+					GUIImage({256px, 256px}, image, 8px);
 
 					GUISpacing(4px);
 
-					GUIText("This is a picture of a pepper.", legendStyle); */
-
-					GUIComponent({128px, 128px}, {1.0f, 0.2f, 0.0f, 1.0f});
+					GUIText("This is a horse.", legendStyle);
 				}
 			}
 
@@ -52,13 +50,13 @@ namespace ProjectA {
 			static inline const vec4<float32> white = {1.0f, 1.0f, 1.0f, 1.0f};
 
 		private:
-			/* FontID radioGroteskBoldFont;
+			FontID radioGroteskBoldFont;
 			FontID radioGroteskRegularFont;
 			FontID radioGroteskRegularItalicFont;
-			ImageID pepperImage;
+			ImageID image;
 
 			TextStyle titleStyle;
 			TextStyle paragraphStyle;
-			TextStyle legendStyle; */
+			TextStyle legendStyle;
 	};
 }
