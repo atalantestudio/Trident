@@ -21,6 +21,7 @@
 #include "Backend/OpenGL/OpenGLCommandEncoder.hpp"
 #include "Backend/OpenGL/OpenGLImage.hpp"
 
+#include "Backend/OpenGL/ImageLayout.hpp"
 #include "Backend/OpenGL/IndexType.hpp"
 
 namespace ProjectA {
@@ -118,21 +119,15 @@ namespace ProjectA {
 	}
 
 	void OpenGLCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
-		GLbitfield barrier = 0;
-
-		// TODO: Add more access barriers.
-		switch (newLayout) {
-			case ImageLayout::SHADER_READ_ONLY_OPTIMAL:
-				barrier = GL_SHADER_IMAGE_ACCESS_BARRIER_BIT;
-
-				break;
-		}
+		const GLbitfield barrier = getGlBarrier(image->getLayout());
 
 		if (barrier == 0) {
 			return;
 		}
 
 		commandBuffer.emplace_back(createRef<OpenGLSetImageMemoryBarrierCommand>(barrier));
+
+		std::static_pointer_cast<OpenGLImage>(image)->setLayout(newLayout);
 	}
 
 	void OpenGLCommandEncoder::setLineWidth(float32 lineWidth) {
