@@ -96,4 +96,8 @@ namespace ProjectA {
 
 		return createRef<OpenGLImageView>(*this, descriptor);
 	}
+
+	void OpenGLImage::setLayout(ImageLayout layout) {
+		this->layout = layout;
+	}
 }

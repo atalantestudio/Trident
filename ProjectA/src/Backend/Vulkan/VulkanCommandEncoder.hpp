@@ -32,7 +32,7 @@ namespace ProjectA {
 
 			void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) final override;
 
-			void setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) final override;
+			void setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) final override;
 
 			void setLineWidth(float32 lineWidth) final override;
 

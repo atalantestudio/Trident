@@ -46,7 +46,7 @@ namespace ProjectA {
 
 			virtual void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) = 0;
 
-			virtual void setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) = 0;
+			virtual void setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) = 0;
 
 			virtual void setLineWidth(float32 lineWidth) = 0;
 

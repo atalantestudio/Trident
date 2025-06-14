@@ -60,9 +60,9 @@ namespace ProjectA {
 					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
-					commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::UNDEFINED, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+					commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 					commandEncoder->copyBufferToImage(glyphMapImageStagingBuffer, glyphMapImage, bufferImageCopyRegions);
-					commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::TRANSFER_DST_OPTIMAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+					commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 

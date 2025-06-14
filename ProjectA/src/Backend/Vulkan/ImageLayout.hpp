@@ -12,4 +12,16 @@ namespace ProjectA {
 
 		return vkImageLayouts[static_cast<uint8>(imageLayout)];
 	}
+
+	static VkAccessFlags getVkAccessFlags(ImageLayout imageLayout) {
+		static constexpr VkAccessFlags vkAccessFlags[] = {
+			VK_ACCESS_NONE,
+			VK_ACCESS_TRANSFER_READ_BIT,
+			VK_ACCESS_TRANSFER_WRITE_BIT,
+			VK_ACCESS_SHADER_READ_BIT,
+			0,
+		};
+
+		return vkAccessFlags[static_cast<uint8>(imageLayout)];
+	}
 }

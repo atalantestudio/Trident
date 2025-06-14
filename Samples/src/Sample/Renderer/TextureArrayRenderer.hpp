@@ -59,14 +59,6 @@ namespace ProjectA {
 
 				// 4. Copy asset data to the texture array.
 				{
-					CommandBufferDescriptor commandBufferDescriptor;
-					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
-
-					commandEncoder->begin();
-					commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::UNDEFINED, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-
 					sequence<BufferImageCopyRegion> copyRegions(1);
 
 					BufferImageCopyRegion& copyRegion = copyRegions[0];
@@ -79,8 +71,15 @@ namespace ProjectA {
 					copyRegion.imageLayerOffset = 0;
 					copyRegion.imageLayerCount = static_cast<uint32>(assets.size());
 
+					CommandBufferDescriptor commandBufferDescriptor;
+					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+
+					commandEncoder->begin();
+					commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 					commandEncoder->copyBufferToImage(textureArrayStagingBuffer, textureArray, copyRegions);
-					commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::TRANSFER_DST_OPTIMAL, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+					commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 

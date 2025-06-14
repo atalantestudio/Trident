@@ -193,8 +193,8 @@ namespace ProjectA {
 		commandEncoder = device->getComputeQueue()->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
 		commandEncoder->begin();
 		commandEncoder->copyBufferToBuffer(fontStagingBuffer, fontStorageBuffer, fontBufferCopyRegions);
-		commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::UNDEFINED, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::UNDEFINED, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+		commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 		commandBuffer = commandEncoder->end();
 
@@ -329,7 +329,7 @@ namespace ProjectA {
 
 		commandEncoder = device->getComputeQueue()->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
 		commandEncoder->begin();
-		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::GENERAL, ImageLayout::TRANSFER_SRC_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::TRANSFER_SRC_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, bufferImageCopyRegions);
 
 		commandBuffer = commandEncoder->end();

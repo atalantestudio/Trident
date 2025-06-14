@@ -13,6 +13,8 @@ namespace ProjectA {
 
 			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const override;
 
+			void setLayout(ImageLayout layout);
+
 		public:
 			const GLenum target;
 			const ImageUsage usage;

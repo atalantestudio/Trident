@@ -15,6 +15,8 @@ namespace ProjectA {
 
 			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const override;
 
+			void setLayout(ImageLayout layout);
+
 		public:
 			VkImageType type;
 			VkFormat format;

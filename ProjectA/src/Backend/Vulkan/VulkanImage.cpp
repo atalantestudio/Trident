@@ -92,4 +92,8 @@ namespace ProjectA {
 
 		return createRef<VulkanImageView>(device, *this, descriptor);
 	}
+
+	void VulkanImage::setLayout(ImageLayout layout) {
+		this->layout = layout;
+	}
 }

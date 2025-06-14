@@ -195,59 +195,22 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout oldLayout, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
-		const ref<VulkanImage> vkImage = std::static_pointer_cast<VulkanImage>(image);
+	void VulkanCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
+		VulkanImage& vkImage = *std::static_pointer_cast<VulkanImage>(image);
 
 		VkImageMemoryBarrier imageMemoryBarrier{};
 		imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 		imageMemoryBarrier.pNext = nullptr;
-
-		switch (oldLayout) {
-			case ImageLayout::UNDEFINED:
-				imageMemoryBarrier.srcAccessMask = VK_ACCESS_NONE;
-
-				break;
-			case ImageLayout::TRANSFER_SRC_OPTIMAL:
-				imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-
-				break;
-			case ImageLayout::TRANSFER_DST_OPTIMAL:
-				imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-				break;
-			case ImageLayout::SHADER_READ_ONLY_OPTIMAL:
-				imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-				break;
-			default:
-				break;
-		}
-
-		switch (newLayout) {
-			case ImageLayout::TRANSFER_SRC_OPTIMAL:
-				imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-
-				break;
-			case ImageLayout::TRANSFER_DST_OPTIMAL:
-				imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-				break;
-			case ImageLayout::SHADER_READ_ONLY_OPTIMAL:
-				imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-				break;
-			default:
-				break;
-		}
-
-		imageMemoryBarrier.oldLayout = getVkImageLayout(oldLayout);
+		imageMemoryBarrier.srcAccessMask = getVkAccessFlags(image->getLayout());
+		imageMemoryBarrier.dstAccessMask = getVkAccessFlags(newLayout);
+		imageMemoryBarrier.oldLayout = getVkImageLayout(image->getLayout());
 		imageMemoryBarrier.newLayout = getVkImageLayout(newLayout);
 		imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		imageMemoryBarrier.image = vkImage->object;
+		imageMemoryBarrier.image = vkImage.object;
 		imageMemoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		imageMemoryBarrier.subresourceRange.baseMipLevel = 0;
-		imageMemoryBarrier.subresourceRange.levelCount = vkImage->getMipLevelCount();
+		imageMemoryBarrier.subresourceRange.levelCount = image->getMipLevelCount();
 		imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
 		imageMemoryBarrier.subresourceRange.layerCount = image->getLayerCount();
 
@@ -263,6 +226,8 @@ namespace ProjectA {
 			1,
 			&imageMemoryBarrier
 		);
+
+		vkImage.setLayout(newLayout);
 
 		commandCount += 1;
 	}

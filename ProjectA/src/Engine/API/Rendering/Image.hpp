@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Rendering/Descriptor/ImageViewDescriptor.hpp"
+#include "Engine/API/Rendering/ImageLayout.hpp"
 #include "Engine/API/Rendering/ImageView.hpp"
 
 namespace ProjectA {
@@ -32,6 +33,10 @@ namespace ProjectA {
 				return sampleCount;
 			}
 
+			ImageLayout getLayout() const {
+				return layout;
+			}
+
 			virtual ref<ImageView> createView(const ImageViewDescriptor& descriptor) const = 0;
 
 		protected:
@@ -39,5 +44,7 @@ namespace ProjectA {
 			const uint32 mipLevelCount;
 			const uint32 layerCount;
 			const uint8 sampleCount : 7;
+
+			ImageLayout layout = ImageLayout::UNDEFINED;
 	};
 }
