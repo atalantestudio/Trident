@@ -2,6 +2,7 @@
 
 #include "Engine/GUI/Component/Container.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
+#include "Engine/GUI/ID.hpp"
 #include "Engine/GUI/px.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"
@@ -13,10 +14,6 @@ namespace ProjectA {
 	};
 
 	class GUILayer : public Layer {
-		protected:
-			typedef uint32 FontID;
-			typedef uint32 ImageID;
-
 		private:
 			struct FontData {
 				ref<TrueTypeFont> font;

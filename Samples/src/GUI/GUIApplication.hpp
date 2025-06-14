@@ -4,7 +4,7 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Layer/TestLayer.hpp"
+#include "Layer/MyLayer.hpp"
 
 namespace ProjectA {
 	class GUIApplication : public Application {
@@ -12,7 +12,7 @@ namespace ProjectA {
 			GUIApplication(const ApplicationManifest& applicationManifest) :
 				Application(applicationManifest)
 			{
-				registerLayer<TestLayer>();
+				registerLayer<MyLayer>();
 			}
 
 			~GUIApplication() {}
@@ -20,7 +20,7 @@ namespace ProjectA {
 
 	Application* ProjectA::createApplication() {
 		ApplicationManifest applicationManifest{};
-		applicationManifest.projectName = "GUI";
+		applicationManifest.projectName = "Lorem Ipsum";
 
 		return new GUIApplication(applicationManifest);
 	}

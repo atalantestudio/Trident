@@ -24,10 +24,9 @@ namespace ProjectA {
 		textureArrayFlushed = true;
 	}
 
-	GUILayer::FontID GUILayer::loadFont(std::string_view path) {
+	FontID GUILayer::loadFont(std::string_view path) {
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
-		// "../ProjectA/src/Asset/Font/test.ttf"
 		/* defaultFont->textureIndex = static_cast<uint32>(images.size());
 		defaultFont->glyphMap.map = QUIVER_BITMAP_GLYPH_MAP;
 		defaultFont->glyphMap.base = 32;
@@ -61,7 +60,7 @@ namespace ProjectA {
 		return fontId;
 	}
 
-	GUILayer::ImageID GUILayer::loadImage(std::string_view path) {
+	ImageID GUILayer::loadImage(std::string_view path) {
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
 		const PNGFile file = Filesystem::openTemporary<PNGFile>(path);
@@ -147,12 +146,11 @@ namespace ProjectA {
 	}
 
 	GUIContainer GUILayer::pushContainer(GUISize size, GUISize padding, LayoutDirection layoutDirection, uint16 layoutSpacing, const vec4<float32>& color) {
-		const GUIContainer container = pushContainer(size, padding, layoutDirection, layoutSpacing);
-		const GUISize fixedSize = computeFixedSize(container.size);
+		const GUISize fixedSize = computeFixedSize(size);
 
 		registerComponent(fixedSize, DEFAULT_IMAGE_ID, color);
 
-		return container;
+		return pushContainer(size, padding, layoutDirection, layoutSpacing);
 	}
 
 	void GUILayer::popContainer(GUIContainer& container) {
@@ -212,10 +210,9 @@ namespace ProjectA {
 	}
 
 	void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
-		constexpr FontID fontId = 0;
-		const TrueTypeFont& font = *fonts[fontId].font;
-		const uint32 glyphMapImageId = fonts[fontId].glyphMapImageId;
-		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(glyphMapImageId);
+		const FontData& fontData = fonts[textStyle.font];
+		const TrueTypeFont& font = *fontData.font;
+		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
 		const float32 lineHeight = static_cast<float32>(font.getLineHeight());
 
 		float32 positionX = componentOrigin[0];
@@ -224,10 +221,31 @@ namespace ProjectA {
 		float32 width = 0;
 		const float32 height = textStyle.fontSize;
 
-		for (const char glyph : string) {
-			const uint16 codePoint = static_cast<uint16>(glyph);
+		for (const char character : string) {
+			if (character == '\n') {
+				positionX = componentOrigin[0];
+				positionY += height;
+
+				continue;
+			}
+
+			if (positionX > currentContainerSize.width) {
+				positionX = componentOrigin[0];
+				positionY += height;
+			}
+
+			if (positionY > currentContainerSize.height) {
+				ENGINE_WARN("A text component is overflowing the current container.");
+			}
+
+			const uint16 codePoint = static_cast<uint16>(character);
 			const TrueTypeGlyph& glyph = font[codePoint];
 			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
+
+			// Don't register spaces on the start of the text.
+			if (glyph.invisible && positionX == componentOrigin[0]) {
+				continue;
+			}
 
 			if (!glyph.invisible) {
 				// For a line height (ascent - descent) of 1210 FUnits,
@@ -250,7 +268,7 @@ namespace ProjectA {
 					uvDiff[1] * imageExtent.height / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
 				}) * mat3x3<float32>::translation(uvStart);
 
-				renderer.registerGlyphSubcomponent(transform, imageTransform, glyphMapImageId, textStyle);
+				renderer.registerGlyphSubcomponent(transform, imageTransform, fontData.glyphMapImageId, textStyle);
 			}
 
 			positionX += advanceWidth;

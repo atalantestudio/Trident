@@ -71,8 +71,8 @@ namespace ProjectA {
 			static constexpr uint32 TEXTURE_ARRAY_MAX_LAYER_COUNT = 4;
 			static constexpr uint64 TEXTURE_ARRAY_LAYER_BPP = sizeof(uint32);
 
-			static constexpr uint32 MAX_SUBCOMPONENTS = 64;
-			static constexpr uint32 MAX_GLYPH_SUBCOMPONENTS = 64;
+			static constexpr uint32 MAX_SUBCOMPONENTS = 512;
+			static constexpr uint32 MAX_GLYPH_SUBCOMPONENTS = 512;
 
 		private:
 			ref<RenderPass> renderPass;
@@ -104,7 +104,6 @@ namespace ProjectA {
 			std::array<Extent2D, TEXTURE_ARRAY_MAX_LAYER_COUNT> textureArrayLayerExtents;
 
 			ref<Sampler> sampler;
-			ref<Sampler> bilinearSampler;
 
 			uint32 subcomponentCount = 0;
 			uint32 glyphSubcomponentCount = 0;

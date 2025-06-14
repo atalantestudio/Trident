@@ -232,7 +232,7 @@ namespace ProjectA {
 			}
 
 		private:
-			static constexpr std::string_view FONT_PATH = "../ProjectA/src/Asset/Font/test.ttf";
+			static constexpr std::string_view FONT_PATH = "../ProjectA/src/Asset/Font/test-regular.ttf";
 
 		private:
 			ref<Image> image;

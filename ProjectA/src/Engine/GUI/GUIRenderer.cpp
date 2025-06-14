@@ -10,21 +10,19 @@ namespace ProjectA {
 
 		ColorAttachment colorAttachment{};
 		colorAttachment.format = surface->getFormat();
-		colorAttachment.sampleCount = 1;
-		// colorAttachment.sampleCount = 4;
+		colorAttachment.sampleCount = 4;
 		colorAttachment.loadOperation = LoadOperation::CLEAR;
 		colorAttachment.storeOperation = StoreOperation::STORE;
 
 		RenderPassDescriptor renderPassDescriptor;
 		renderPassDescriptor.colorAttachments = {colorAttachment};
-		renderPassDescriptor.resolve = false;
-		// renderPassDescriptor.resolve = true;
+		renderPassDescriptor.resolve = true;
 		renderPassDescriptor.depthStencil = false;
 		renderPassDescriptor.presentAttachmentIndex = 0;
 
 		renderPass = createRenderPass(renderPassDescriptor);
 
-		// updateColorAttachment();
+		updateColorAttachment();
 
 		const ref<Swapchain>& swapchain = getSwapchain();
 
@@ -60,15 +58,9 @@ namespace ProjectA {
 
 		SamplerDescriptor samplerDescriptor{};
 		samplerDescriptor.magFilter = SamplerFilter::NEAREST;
-		samplerDescriptor.minFilter = SamplerFilter::NEAREST;
+		samplerDescriptor.minFilter = SamplerFilter::LINEAR;
 
 		sampler = createSampler(samplerDescriptor);
-
-		SamplerDescriptor bilinearSamplerDescriptor{};
-		bilinearSamplerDescriptor.magFilter = SamplerFilter::LINEAR;
-		bilinearSamplerDescriptor.minFilter = SamplerFilter::LINEAR;
-
-		bilinearSampler = createSampler(bilinearSamplerDescriptor);
 
 		initializeRenderPipeline();
 
@@ -309,10 +301,8 @@ namespace ProjectA {
 		glyphSubcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;
 		glyphSubcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		glyphSubcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
-		// glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 1.0f;
-		glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 0.0f;
-		// glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
-		glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {opaqueColorBlendAttachment};
+		glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 1.0f;
+		glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
 		glyphSubcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		glyphSubcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
@@ -472,7 +462,7 @@ namespace ProjectA {
 
 	void GUIRenderer::resize(WindowResizeEvent& event) {
 		updateCamera();
-		// updateColorAttachment();
+		updateColorAttachment();
 
 		const ref<Swapchain>& swapchain = getSwapchain();
 

@@ -6,7 +6,7 @@ namespace ProjectA {
 	class TextRenderer : public Renderer {
 		public:
 			TextRenderer() :
-				font("../ProjectA/src/Asset/Font/test.ttf")
+				font("../ProjectA/src/Asset/Font/test-regular.ttf")
 			{
 				const ref<Device> device = getDevice();
 				const SDFGlyphMap& glyphMap = font.getGlyphMap();

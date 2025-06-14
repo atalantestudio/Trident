@@ -15,7 +15,7 @@ It also adds the repository to the list of Git safe directories.
 Make sure that the Vulkan SDK is installed (the engine will search for the `VULKAN_SDK` environment variable).
 
 At the time of writing, some resources are not present in the repository:
-- `ProjectA/src/Asset/Font/test.ttf`: Test font for the GUI and text renderers.
+- `ProjectA/src/Asset/Font/**`: Test fonts for the GUI and text renderers.
 - `Editor/Editor.tpr`: Configuration file for the Editor project.
 - `Editor/Samples.tpr`: Configuration file for the Samples project.
 

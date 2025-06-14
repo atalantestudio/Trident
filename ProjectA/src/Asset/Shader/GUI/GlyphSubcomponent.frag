@@ -15,14 +15,13 @@ layout(set = 0, binding = 1) uniform sampler2DArray textureArraySampler;
 layout(location = 0) out vec4 color;
 
 void main() {
-	/* float value = smoothstep(
+	float value = texture(textureArraySampler, vertexOutput.textureCoordinate).r;
+	/*float value = smoothstep(
 		ALPHA_THRESHOLD - SMOOTHNESS,
 		ALPHA_THRESHOLD + SMOOTHNESS,
 		texture(textureArraySampler, vertexOutput.textureCoordinate).r
-	); */
-	float value = texture(textureArraySampler, vertexOutput.textureCoordinate).r;
+	);*/
 
-	// color.a = float(value >= 0.5);
 	color = vertexOutput.color * value;
 
 	/* const float outlineMin0 = 0.05;
