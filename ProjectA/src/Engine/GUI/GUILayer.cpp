@@ -368,13 +368,11 @@ namespace ProjectA {
 			static_cast<float32>(size.width),
 			static_cast<float32>(size.height),
 		};
-		const vec2<float32> decimalHalfInnerSize = decimalSize * 0.5f - vec2<float32>(radius, radius);
-		const vec2<float32> decimalCenter = decimalOrigin + decimalSize * 0.5f;
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(imageId);
 
 		GUISubcomponent subcomponent;
-		subcomponent.center = {decimalCenter[0], decimalCenter[1]};
-		subcomponent.halfInnerSize = {decimalHalfInnerSize[0], decimalHalfInnerSize[1]};
+		subcomponent.minBounds = {decimalOrigin[0] + radius, decimalOrigin[1] + radius};
+		subcomponent.maxBounds = {decimalOrigin[0] + decimalSize[0] - radius, decimalOrigin[1] + decimalSize[1] - radius};
 		subcomponent.worldTransform = mat3x3<float32>::scaling(decimalSize) * mat3x3<float32>::translation(decimalOrigin);
 		subcomponent.textureTransform = mat3x3<float32>::scaling({
 			static_cast<float32>(imageExtent.width) / renderer.TEXTURE_ARRAY_MAX_WIDTH,

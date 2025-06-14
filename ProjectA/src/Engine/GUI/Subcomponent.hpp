@@ -2,8 +2,8 @@
 
 namespace ProjectA {
 	struct GUISubcomponent {
-		svec2<float32> center;
-		svec2<float32> halfInnerSize;
+		svec2<float32> minBounds;
+		svec2<float32> maxBounds;
 		mat3x3<float32> worldTransform;
 		mat3x3<float32> textureTransform;
 		uint32 layerIndex;

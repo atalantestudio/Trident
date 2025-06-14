@@ -242,7 +242,7 @@ namespace ProjectA {
 		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
 
 		VertexInputBinding subcomponentInputBinding(InputRate::INSTANCE);
-		subcomponentInputBinding.registerAttribute<vec4<float32>>(); // Center and half inner size
+		subcomponentInputBinding.registerAttribute<vec4<float32>>(); // Bounds
 		subcomponentInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
 		subcomponentInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
 		subcomponentInputBinding.registerAttribute<uint32>(); // Texture array layer index
