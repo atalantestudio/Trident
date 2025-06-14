@@ -7,7 +7,7 @@ namespace ProjectA {
 				radioGroteskBoldFont = loadFont("../ProjectA/src/Asset/Font/test-bold.ttf");
 				radioGroteskRegularFont = loadFont("../ProjectA/src/Asset/Font/test-regular.ttf");
 				radioGroteskRegularItalicFont = loadFont("../ProjectA/src/Asset/Font/test-regular-italic.ttf");
-				image = loadImage("Asset/Image/Horse_rgba.png");
+				image = loadImage("Asset/Image/Cameraman.png");
 
 				titleStyle.color = {0.0f, 0.0f, 0.0f, 1.0f};
 				titleStyle.font = radioGroteskBoldFont;
@@ -42,7 +42,7 @@ namespace ProjectA {
 
 					GUISpacing(4px);
 
-					GUIText("This is a horse.", legendStyle);
+					GUIText("The Cameraman test image.", legendStyle);
 				}
 			}
 
