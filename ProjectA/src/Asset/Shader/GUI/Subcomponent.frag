@@ -1,8 +1,20 @@
 #version 440
 
-// If enabled, a vignette effect is applied to images with a radius > 0.
-// If disabled, the image radius is treated as a border radius.
-// #define VIGNETTE_EFFECT
+#define EFFECT_TYPE_BEVEL 0
+#define EFFECT_TYPE_ROUND 1
+#define EFFECT_TYPE_VIGNETTE 2
+
+#define BORDER_EFFECT_TYPE EFFECT_TYPE_VIGNETTE
+
+#if BORDER_EFFECT_TYPE == EFFECT_TYPE_BEVEL
+	bool beveledCorner(vec2 delta, float radius) {
+		return abs(delta.x) + abs(delta.y) > radius;
+	}
+#elif BORDER_EFFECT_TYPE == ROUNDED_CORNER
+	bool roundedCorner(vec2 delta, float radius) {
+		return dot(delta, delta) > radius * radius;
+	}
+#endif
 
 layout(origin_upper_left) in vec4 gl_FragCoord;
 
@@ -32,16 +44,24 @@ void main() {
 	// Closest point of p on the inner rectangle.
 	vec2 a = clamp(p, minBounds, maxBounds);
 
-	// [0, pow(r * sqrt(2), 2)]
-	float d = lengthSquared(p - a);
+	vec2 ap = p - a;
 
-#ifndef VIGNETTE_EFFECT
-	if (d > r * r) {
+#if BORDER_EFFECT_TYPE != EFFECT_TYPE_VIGNETTE
+	bool condition;
+
+	#if BORDER_EFFECT_TYPE == EFFECT_TYPE_BEVEL
+		condition = beveledCorner(ap, r);
+	#elif BORDER_EFFECT_TYPE == EFFECT_TYPE_ROUNDED
+		condition = roundedCorner(ap, r);
+	#endif
+
+	if (condition) {
 		discard;
 	}
 
 	color = texture(textureArraySampler, vertexOutput.textureCoordinate) * vertexOutput.color;
 #else
+	float d = dot(ap, ap);
 	float m = 1.0;
 
 	if (r > 0.0) {
