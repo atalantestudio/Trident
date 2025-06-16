@@ -5,6 +5,7 @@
 #include "Engine/API/Timer/HighResolutionTimer.hpp"
 #include "Engine/Filesystem/File/PropertyFile.hpp"
 #include "Engine/Layer/LayerStack.hpp"
+#include "Engine/Process/Process.hpp"
 
 int main(int argc, char** argv);
 
@@ -37,21 +38,32 @@ namespace ProjectA {
 
 			void postConstruct();
 
+			bool hasGraphicalProcesses() const;
+
 		protected:
-			template<typename T, typename... U>
-			void registerLayer(U&&... arguments) {
+			template<typename ProcessType, typename... Argument>
+			void registerProcess(Argument&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
 
-				const ref<Layer> layer = createRef<T>(std::forward<U>(arguments)...);
+				const ref<Process> process = createRef<ProcessType>(std::forward<Argument>(arguments)...);
+
+				processes.emplace_back(process);
+			}
+
+			template<typename LayerType, typename... Argument>
+			void registerLayer(Argument&&... arguments) {
+				PROFILE_SCOPE(FUNC_SIG);
+
+				const ref<Layer> layer = createRef<LayerType>(std::forward<Argument>(arguments)...);
 
 				layerStack.pushLayer(layer);
 			}
 
-			template<typename T, typename... U>
-			void registerOverlay(U&&... arguments) {
+			template<typename OverlayType, typename... Argument>
+			void registerOverlay(Argument&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
 
-				const ref<Layer> overlay = createRef<T>(std::forward<U>(arguments)...);
+				const ref<Layer> overlay = createRef<OverlayType>(std::forward<Argument>(arguments)...);
 
 				layerStack.pushOverlay(overlay);
 			}
@@ -117,6 +129,7 @@ namespace ProjectA {
 			Window* window = nullptr;
 			PropertyFile* propertyFile = nullptr;
 			LayerStack layerStack;
+			std::vector<ref<Process>> processes;
 	};
 
 	Application* createApplication();

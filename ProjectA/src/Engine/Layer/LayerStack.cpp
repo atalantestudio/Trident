@@ -35,6 +35,10 @@ namespace ProjectA {
 		layers.erase(iterator);
 	}
 
+	bool LayerStack::hasLayers() const {
+		return layerInsertionIndex > 0;
+	}
+
 	const ref<Layer>& LayerStack::operator [](std::size_t index) const {
 		ENGINE_ASSERT(index < layers.size(), "Index overflow.");
 

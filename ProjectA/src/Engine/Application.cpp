@@ -166,6 +166,10 @@ namespace ProjectA {
 	}
 
 	Application::~Application() {
+		for (const ref<Process>& process : processes) {
+			process.~shared_ptr();
+		}
+
 		mutex->acquire();
 
 		sharedMemoryData->instanceCount -= 1;
@@ -206,6 +210,10 @@ namespace ProjectA {
 		for (const ref<Layer>& layer : layerStack) {
 			layer->postConstruct();
 		}
+	}
+
+	bool Application::hasGraphicalProcesses() const {
+		return layerStack.hasLayers();
 	}
 
 	void Application::loop() {

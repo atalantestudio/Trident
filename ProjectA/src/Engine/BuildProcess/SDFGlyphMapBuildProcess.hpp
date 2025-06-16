@@ -33,6 +33,7 @@ namespace ProjectA {
 		sequence<SDFGlyph> glyphs;
 	};
 
+	// TODO: Extend Process.
 	class SDFGlyphMapBuildProcess {
 		public:
 			static SDFGlyphMap build(const TTFFile& ttfFile);

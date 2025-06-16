@@ -25,7 +25,7 @@ extern "C" {
 			application->postConstruct();
 		}
 
-		{
+		if (application->hasGraphicalProcesses()) {
 			PROFILER("Log/ProfileRun.json");
 
 			application->loop();
