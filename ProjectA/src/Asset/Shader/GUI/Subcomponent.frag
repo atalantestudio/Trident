@@ -4,6 +4,8 @@
 // If disabled, the image radius is treated as a border radius.
 // #define VIGNETTE_EFFECT
 
+layout(origin_upper_left) in vec4 gl_FragCoord;
+
 in VertexOutput {
 	layout(location = 0) flat vec4 bounds;
 	layout(location = 1) flat vec4 color;
@@ -20,24 +22,20 @@ float lengthSquared(vec2 a) {
 }
 
 void main() {
-	// Screen space coordinate of the current fragment.
-	vec2 p = gl_FragCoord.xy;
-
-	// Bounds of the inner rectangle.
 	vec2 minBounds = vertexOutput.bounds.xy;
 	vec2 maxBounds = vertexOutput.bounds.zw;
-
-	// Border radius.
 	float r = vertexOutput.radius;
+
+	// Screen space coordinate of the current fragment.
+	vec2 p = floor(gl_FragCoord.xy) + 0.5;
 
 	// Closest point of p on the inner rectangle.
 	vec2 a = clamp(p, minBounds, maxBounds);
 
 	// [0, pow(r * sqrt(2), 2)]
-	float d = abs(lengthSquared(p - a));
+	float d = lengthSquared(p - a);
 
 #ifndef VIGNETTE_EFFECT
-	// TODO: It seems that the top-left corner has a smaller radius than the others.
 	if (d > r * r) {
 		discard;
 	}
