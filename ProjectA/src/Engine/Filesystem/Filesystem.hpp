@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/Filesystem/FileStream.hpp"
 #include "Engine/Filesystem/OpenMode.hpp"
 
 namespace ProjectA {
@@ -23,5 +24,9 @@ namespace ProjectA {
 			// The returned value is the file pointer. It must be managed by the application.
 			template<typename File/*, OpenMode OpenMode*/>
 			static File* open(std::string_view path);
+
+			// Opens a file and returns a byte stream to it.
+			template<OpenMode OpenMode>
+			static FileStream open2(std::string_view path);
 	};
 }

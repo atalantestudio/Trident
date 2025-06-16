@@ -20,4 +20,9 @@ namespace ProjectA {
 
 		return new PropertyFile(path);
 	}
+
+	template<>
+	FileStream Filesystem::open2<OpenMode::WRITE>(std::string_view path) {
+		return FileStream(path);
+	}
 }
