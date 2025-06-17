@@ -72,8 +72,10 @@ namespace ProjectA {
 
 			bool onWindowResize(WindowResizeEvent& event);
 
+			Extent2D calculateTextSize(const std::string& string, const TextStyle& textStyle);
+
 		protected:
-			static constexpr ImageID DEFAULT_IMAGE_ID = 0;
+			static constexpr ImageID DEFAULT_IMAGE_INDEX = 0;
 
 			// Grow towards the layout direction.
 			static constexpr uint32 EXPAND = -1;

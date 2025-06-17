@@ -146,7 +146,7 @@ namespace ProjectA {
 	GUIContainer GUILayer::pushContainer(Extent2D size, Extent2D padding, LayoutDirection layoutDirection, uint32 layoutSpacing, const vec4<float32>& color) {
 		const Extent2D fixedSize = computeFixedSize(size);
 
-		registerSubcomponent(fixedSize, DEFAULT_IMAGE_ID, color, 0.0f);
+		registerSubcomponent(fixedSize, DEFAULT_IMAGE_INDEX, color, 0.0f);
 
 		return pushContainer(size, padding, layoutDirection, layoutSpacing);
 	}
@@ -176,7 +176,7 @@ namespace ProjectA {
 	void GUILayer::GUIComponent(Extent2D size, const vec4<float32>& color, float32 radius) {
 		const Extent2D fixedSize = computeFixedSize(size);
 
-		registerSubcomponent(fixedSize, DEFAULT_IMAGE_ID, color, radius);
+		registerSubcomponent(fixedSize, DEFAULT_IMAGE_INDEX, color, radius);
 
 		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&fixedSize))[layoutDirection] + layoutSpacing;
 	}
@@ -232,12 +232,13 @@ namespace ProjectA {
 
 			const uint16 codePoint = static_cast<uint16>(character);
 			const TrueTypeGlyph& glyph = font[codePoint];
-			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
 
 			// Don't register spaces on the start of the text.
 			if (glyph.invisible && positionX == static_cast<float32>(componentOrigin[0])) {
 				continue;
 			}
+
+			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
 
 			if (!glyph.invisible) {
 				// For a line height (ascent - descent) of 1210 FUnits,
@@ -271,75 +272,26 @@ namespace ProjectA {
 		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&computedSize))[layoutDirection] + layoutSpacing;
 	}
 
-	// TODO: Refactor.
 	bool GUILayer::GUIButton(const std::string& string, const ButtonStyle& buttonStyle) {
-		DEBUG_ASSERT(false);
+		const Extent2D textExtent = calculateTextSize(string, *buttonStyle.textStyle);
 
-		return false;
-
-		/*constexpr FontID fontId = 0;
-		const TrueTypeFont& font = *fonts[fontId].font;
-		const uint32 glyphMapImageId = fonts[fontId].glyphMapImageId;
-		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(glyphMapImageId);
-
-		// 1. Calculate the minimum size that fully encloses the text.
 		Extent2D size;
+		size.width = textExtent.width + buttonStyle.padding.width * 2;
+		size.height = textExtent.height + buttonStyle.padding.height * 2;
 
-		size.width = 0;
-		size.height = static_cast<uint32>(buttonStyle.textStyle->fontSize);
+		registerSubcomponent(size, DEFAULT_IMAGE_INDEX, buttonStyle.backgroundColor, buttonStyle.radius);
 
-		for (const char glyph : string) {
-			const uint16 codePoint = static_cast<uint16>(glyph);
-			const TrueTypeGlyph& glyph = font[codePoint];
-			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * buttonStyle.textStyle->fontSize);
+		const uint32 componentOriginOppositeDirection = componentOrigin[!layoutDirection];
 
-			size.width += static_cast<uint32>(advanceWidth);
-		}
+		componentOrigin[0] += buttonStyle.padding.width;
+		componentOrigin[1] += buttonStyle.padding.height;
 
-		// 2. Register a quad having the same size.
-		registerSubcomponent(size, DEFAULT_IMAGE_ID, {0.5f, 0.5f, 0.5f, 1.0f});
+		GUIText(string, *buttonStyle.textStyle);
 
-		// 3. Register the text on top of it.
-		{
-			const float32 lineHeight = static_cast<float32>(font.getLineHeight());
+		componentOrigin[!layoutDirection] = componentOriginOppositeDirection;
+		componentOrigin[layoutDirection] += buttonStyle.padding.height;
 
-			float32 positionX = static_cast<float32>(componentOrigin[0]);
-			float32 positionY = static_cast<float32>(componentOrigin[1]);
-
-			for (const char glyph : string) {
-				const uint16 codePoint = static_cast<uint16>(glyph);
-				const TrueTypeGlyph& glyph = font[codePoint];
-				const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * buttonStyle.textStyle->fontSize);
-
-				if (!glyph.invisible) {
-					// For a line height (ascent - descent) of 1210 FUnits,
-					// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
-					// The width should be 62.13px.
-					// TODO: float32 lyah::ceil(float32)
-					const float32 width = glyph.width / lineHeight * buttonStyle.textStyle->fontSize;
-					const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * buttonStyle.textStyle->fontSize;
-
-					const vec2<float32> position = {positionX + leftSideBearing, positionY};
-					const vec2<float32> size = {width, buttonStyle.textStyle->fontSize};
-					const mat3x3<float32> transform = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
-
-					const vec2<float32> uvStart = {glyph.minCoordinateX, glyph.minCoordinateY};
-					const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
-					const vec2<float32> uvDiff = uvEnd - uvStart;
-
-					const mat3x3<float32> imageTransform = mat3x3<float32>::scaling({
-						uvDiff[0] * imageExtent.width / renderer.TEXTURE_ARRAY_MAX_WIDTH,
-						uvDiff[1] * imageExtent.height / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
-					}) * mat3x3<float32>::translation(uvStart);
-
-					renderer.registerGlyphSubcomponent(transform, imageTransform, glyphMapImageId, *buttonStyle.textStyle);
-				}
-
-				positionX += advanceWidth;
-			}
-		}
-
-		bool hovered = false;
+		/*bool hovered = false;
 
 		if (intersects(
 			{componentOrigin[0], componentOrigin[1]},
@@ -352,7 +304,9 @@ namespace ProjectA {
 		// 4. Advance the component origin by the size (towards the current layout direction).
 		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&size))[layoutDirection] + layoutSpacing;
 
-		return hovered;*/
+		return hovered; */
+
+		return false;
 	}
 
 	void GUILayer::GUISpacing(uint32 spacing) {
@@ -416,5 +370,53 @@ namespace ProjectA {
 		ENGINE_ASSERT(fixedSize.height > 0, "The fixed height must be positive.");
 
 		return fixedSize;
+	}
+
+	Extent2D GUILayer::calculateTextSize(const std::string& string, const TextStyle& textStyle) {
+		const TrueTypeFont& font = *fonts[textStyle.font].font;
+		const sint32 lineHeight = font.getLineHeight();
+
+		Extent2D extent;
+		extent.width = 0;
+		extent.height = 0;
+
+		if (!string.empty()) {
+			extent.height = static_cast<uint32>(textStyle.fontSize);
+		}
+
+		float32 advanceWidth;
+		bool firstLineGlyph = true;
+
+		for (const char character : string) {
+			if (character < 0) {
+				// TODO: Handle UTF-16 characters.
+
+				continue;
+			}
+
+			if (character == '\n') {
+				extent.height += static_cast<uint32>(textStyle.fontSize);
+				firstLineGlyph = true;
+
+				continue;
+			}
+
+			const uint16 codePoint = static_cast<uint16>(character);
+			const TrueTypeGlyph& glyph = font[codePoint];
+
+			if (firstLineGlyph) {
+				firstLineGlyph = false;
+
+				if (glyph.invisible) {
+					continue;
+				}
+			}
+
+			advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
+
+			extent.width += static_cast<uint32>(advanceWidth);
+		}
+
+		return extent;
 	}
 }

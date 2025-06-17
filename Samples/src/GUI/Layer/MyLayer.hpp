@@ -20,10 +20,17 @@ namespace ProjectA {
 				legendStyle.color = {0.3f, 0.3f, 0.3f, 1.0f};
 				legendStyle.font = radioGroteskRegularItalicFont;
 				legendStyle.fontSize = 14.0f;
+
+				buttonStyle.padding = {0px, 0px};
+				buttonStyle.backgroundColor = {1.0f, 0.2f, 0.0f, 1.0f};
+				buttonStyle.radius = 10.0f;
+				buttonStyle.textStyle = &titleStyle;
 			}
 
 			void GUI() override {
 				GUIContainer({EXPAND, EXPAND}, {12px, 12px}, VERTICAL, 0px, white) {
+					GUIButton("Button", buttonStyle);
+
 					GUIText("The Lorem Ipsum", titleStyle);
 
 					GUISpacing(16px);
@@ -58,5 +65,6 @@ namespace ProjectA {
 			TextStyle titleStyle;
 			TextStyle paragraphStyle;
 			TextStyle legendStyle;
+			ButtonStyle buttonStyle;
 	};
 }

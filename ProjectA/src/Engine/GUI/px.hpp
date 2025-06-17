@@ -5,11 +5,10 @@ namespace ProjectA {
 
 	// User-defined literals not prefixed with an underscore are forbidden,
 	// but for now I'll leave this here to keep consistency with a future transpiled scripting language.
-	constexpr sint16 operator"" px(uint64 a) {
-		const sint16 b = static_cast<sint16>(a);
-		const uint64 c = static_cast<uint64>(b);
+	constexpr uint32 operator"" px(uint64 a) {
+		const uint32 b = static_cast<uint32>(a);
 
-		DEBUG_ASSERT(a == c);
+		DEBUG_ASSERT(a == static_cast<uint64>(b));
 
 		return b;
 	}
