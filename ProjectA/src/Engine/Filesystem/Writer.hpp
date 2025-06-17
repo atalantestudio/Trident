@@ -1,11 +1,15 @@
 #pragma once
 
 namespace ProjectA {
-	class FileStream {
+	class Writer {
 		public:
-			FileStream(std::string_view path) :
+			Writer(std::string_view path) :
 				stream(path.data(), std::ios::binary)
 			{}
+
+			~Writer() {
+				stream.close();
+			}
 
 			void write(const sequence<uint8>& data) {
 				stream.write(static_cast<const char*>(static_cast<const void*>(data)), data.count);
@@ -13,10 +17,6 @@ namespace ProjectA {
 
 			void flush() {
 				stream.flush();
-			}
-
-			~FileStream() {
-				stream.close();
 			}
 
 		private:

@@ -27,4 +27,12 @@ namespace ProjectA {
 
 		return buffer;
 	}
+
+	Reader Filesystem::openReader(std::string_view path) {
+		return Reader(path);
+	}
+
+	Writer Filesystem::openWriter(std::string_view path) {
+		return Writer(path);
+	}
 }

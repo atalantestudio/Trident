@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Engine/Filesystem/FileStream.hpp"
 #include "Engine/Filesystem/OpenMode.hpp"
+#include "Engine/Filesystem/Reader.hpp"
+#include "Engine/Filesystem/Writer.hpp"
 
 namespace ProjectA {
 	class Filesystem {
@@ -25,8 +26,8 @@ namespace ProjectA {
 			template<typename File/*, OpenMode OpenMode*/>
 			static File* open(std::string_view path);
 
-			// Opens a file and returns a byte stream to it.
-			template<OpenMode OpenMode>
-			static FileStream open2(std::string_view path);
+			static Reader openReader(std::string_view path);
+
+			static Writer openWriter(std::string_view path);
 	};
 }
