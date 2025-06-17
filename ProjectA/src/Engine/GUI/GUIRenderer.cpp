@@ -286,7 +286,7 @@ namespace ProjectA {
 
 		ColorBlendAttachment transparentColorBlendAttachment{};
 		transparentColorBlendAttachment.blend = true;
-		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::ONE;
+		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
 		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
 		RenderPipelineDescriptor glyphSubcomponentRenderPipelineDescriptor;

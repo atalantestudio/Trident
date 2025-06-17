@@ -16,13 +16,15 @@ namespace ProjectA {
 	};
 
 	static void readIHDRChunk(ByteStream& stream, PNGFile& file) {
-		file.width = stream.read<uint32>(true);
+		file.extent.width = stream.read<uint32>(true);
 
-		ENGINE_ASSERT(file.width > 0, "The width must be > 0.");
+		ENGINE_ASSERT(file.extent.width > 0, "The width must be > 0.");
 
-		file.height = stream.read<uint32>(true);
+		file.extent.height = stream.read<uint32>(true);
 
-		ENGINE_ASSERT(file.height > 0, "The height must be > 0.");
+		ENGINE_ASSERT(file.extent.height > 0, "The height must be > 0.");
+
+		file.extent.depth = 1;
 
 		file.bitDepth = stream.read<uint8>();
 
@@ -145,7 +147,7 @@ namespace ProjectA {
 
 		ByteStream stream(baseFile.rawData, baseFile.size);
 
-		ENGINE_ASSERT(stream.read<uint64>(true) == 0x89504E470D0A1A0A, "Failed to verify signature.");
+		ENGINE_ASSERT(stream.read<uint64>(true) == 0x89504E470D0A1A0A, "Invalid PNG file signature.");
 
 		PNGFile file;
 
@@ -182,13 +184,13 @@ namespace ProjectA {
 				break;
 		}
 
-		const uint32 uncompressedSize = file.width * file.height * channelCount + (file.height * 1);
+		const uint32 uncompressedSize = file.extent.width * file.extent.height * channelCount + (file.extent.height * 1);
 
 		BitStream bitStream(compressedData.data(), compressedData.size());
 
 		const sequence<uint8> unfilteredData = bitStream.inflate(uncompressedSize);
 
-		file.data = sequence<uint8>(file.width * file.height * channelCount);
+		file.data = sequence<uint8>(file.extent.width * file.extent.height * channelCount);
 
 		const uint8* source = unfilteredData;
 		uint8* destination = &file.data[0];
@@ -199,7 +201,7 @@ namespace ProjectA {
 		sint32 previousRowAdvance = 0;
 
 		// TODO: Refactor with SIMD.
-		for (uint32 y = 0; y < file.height; y += 1) {
+		for (uint32 y = 0; y < file.extent.height; y += 1) {
 			const FilterType filterType = static_cast<FilterType>(*source);
 
 			source += 1;
@@ -208,17 +210,17 @@ namespace ProjectA {
 
 			switch (filterType) {
 				case FilterType::NONE: {
-					std::copy(source, source + file.width * channelCount, destination);
+					std::copy(source, source + file.extent.width * channelCount, destination);
 
-					source += file.width * channelCount;
-					destination += file.width * channelCount;
+					source += file.extent.width * channelCount;
+					destination += file.extent.width * channelCount;
 
 					break;
 				}
 				case FilterType::SUB: {
 					uint32 aPixel = 0;
 
-					for (uint32 x = 0; x < file.width; x += 1) {
+					for (uint32 x = 0; x < file.extent.width; x += 1) {
 						for (uint8 channelIndex = 0; channelIndex < channelCount; channelIndex += 1) {
 							destination[channelIndex] = source[channelIndex] + pointer_cast<uint8*>(&aPixel)[channelIndex];
 						}
@@ -233,7 +235,7 @@ namespace ProjectA {
 				case FilterType::UP: {
 					uint8* bPixel = previousRow;
 
-					for (uint32 x = 0; x < file.width; x += 1) {
+					for (uint32 x = 0; x < file.extent.width; x += 1) {
 						for (uint8 channelIndex = 0; channelIndex < channelCount; channelIndex += 1) {
 							destination[channelIndex] = source[channelIndex] + bPixel[channelIndex];
 						}
@@ -249,7 +251,7 @@ namespace ProjectA {
 					uint32 aPixel = 0;
 					uint8* bPixel = previousRow;
 
-					for (uint32 x = 0; x < file.width; x += 1) {
+					for (uint32 x = 0; x < file.extent.width; x += 1) {
 						for (uint8 channelIndex = 0; channelIndex < channelCount; channelIndex += 1) {
 							destination[channelIndex] = applyAverageFilter(source, pointer_cast<uint8*>(&aPixel), bPixel, channelIndex);
 						}
@@ -267,7 +269,7 @@ namespace ProjectA {
 					uint8* bPixel = previousRow;
 					uint32 cPixel = 0;
 
-					for (uint32 x = 0; x < file.width; x += 1) {
+					for (uint32 x = 0; x < file.extent.width; x += 1) {
 						for (uint8 channelIndex = 0; channelIndex < channelCount; channelIndex += 1) {
 							destination[channelIndex] = applyPaethFilter(source, pointer_cast<uint8*>(&aPixel), bPixel, pointer_cast<uint8*>(&cPixel), channelIndex);
 						}

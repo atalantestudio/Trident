@@ -2,13 +2,10 @@
 
 namespace ProjectA {
 	struct PNGFile {
-		// Width of the image in pixels.
-		// Zero is an invalid value.
-		uint32 width;
+		ImageFormat format;
 
-		// Height of the image in pixels.
-		// Zero is an invalid value.
-		uint32 height;
+		// Only a depth of 1 is supported.
+		Extent3D extent;
 
 		// Number of bytes per sample or per palette index (not per pixel).
 		// Valid values are 1, 2, 4, 8, and 16, although not all values are allowed for all color types.
@@ -32,7 +29,5 @@ namespace ProjectA {
 
 		// Decompressed and filtered data.
 		sequence<uint8> data;
-
-		ImageFormat format;
 	};
 }

@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class BitStream {
 		private:
-			typedef uint64 StreamSize;
+			typedef uint64 BitStreamSize;
 
 		public:
 			BitStream(const uint8* stream, uint64 byteSize);
@@ -35,19 +35,23 @@ namespace ProjectA {
 
 				ENGINE_ASSERT(bitCount <= remainingBitSize, "Attempted to peek [] bits, but only [] were remaining.", static_cast<sint32>(bitCount), remainingBitSize);
 
-				T value = static_cast<T>(bitBuffer);
+				T value = *pointer_cast_const<const T*>(&bitBuffer);
 
 				if (swapEndianness) {
-					value = ByteStream::byteswap<T>(value);
+					value = ByteStream::byteswap(value);
 				}
+
+				BitStreamSize valueStreamSize = *pointer_cast_const<const BitStreamSize*>(&value);
 
 				if (bitOffset > 0) {
-					const StreamSize offset = sizeof(bitBuffer) * 8 - bitOffset;
+					const BitStreamSize offset = sizeof(bitBuffer) * 8 - bitOffset;
 
-					value |= (*((StreamSize*) (stream + byteOffset + sizeof(bitBuffer)))) << offset;
+					valueStreamSize |= (*((BitStreamSize*) (stream + byteOffset + sizeof(bitBuffer)))) << offset;
 				}
 
-				return value & ((1ULL << bitCount) - 1);
+				valueStreamSize &= ((1ULL << bitCount) - 1);
+
+				return *pointer_cast_const<const T*>(&valueStreamSize);
 			}
 
 			// Returns the next bits from the stream.
@@ -71,15 +75,15 @@ namespace ProjectA {
 			sequence<uint8> inflate(uint64 uncompressedSize);
 
 		private:
-			static constexpr uint8 MAX_READ_OR_PEEK_BIT_COUNT = sizeof(StreamSize) * 8;
+			static constexpr uint8 MAX_READ_OR_PEEK_BIT_COUNT = sizeof(BitStreamSize) * 8;
 
 		private:
-			// TODO: Should stream be StreamSize* instead?
+			// TODO: Should stream be BitStreamSize* instead?
 			const uint8* stream;
 
 			// Bit accumulator.
 			// Missed opportunity to name this "bitBucket".
-			StreamSize bitBuffer;
+			BitStreamSize bitBuffer;
 
 			// Size of the stream in bytes.
 			uint64 byteSize;

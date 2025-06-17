@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/Filesystem/FileFormat.hpp"
+#include "Engine/Filesystem/ImageFile.hpp"
 #include "Engine/Filesystem/OpenMode.hpp"
 #include "Engine/Filesystem/Reader.hpp"
 #include "Engine/Filesystem/Writer.hpp"
@@ -29,5 +31,12 @@ namespace ProjectA {
 			static Reader openReader(std::string_view path);
 
 			static Writer openWriter(std::string_view path);
+
+			template<FileFormat FileFormat>
+			static ImageFile openImage(std::string_view path) {
+				const sequence<uint8> buffer = openBuffer(path);
+
+				return Decoder::decode<FileFormat>(buffer);
+			}
 	};
 }

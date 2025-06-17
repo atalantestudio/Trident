@@ -67,8 +67,8 @@ namespace ProjectA {
 		const PNGFile file = Filesystem::openTemporary<PNGFile>(path);
 
 		TextureArrayLayer imageLayer;
-		imageLayer.width = file.width;
-		imageLayer.height = file.height;
+		imageLayer.width = file.extent.width;
+		imageLayer.height = file.extent.height;
 		imageLayer.data = file.data;
 
 		return renderer.registerTextureArrayLayer(imageLayer);

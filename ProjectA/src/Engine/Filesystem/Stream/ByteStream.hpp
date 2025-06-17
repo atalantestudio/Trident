@@ -5,6 +5,8 @@ namespace ProjectA {
 		public:
 			template<typename T>
 			static constexpr T byteswap(T value) {
+				DEBUG_ASSERT(false);
+
 				return value;
 			}
 
@@ -61,7 +63,7 @@ namespace ProjectA {
 
 				ENGINE_ASSERT(sizeof(T) <= remainingByteSize, "Attempted to peek [] bytes, but only [] were remaining.", sizeof(T), remainingByteSize);
 
-				T value = *(T*)(stream + byteOffset);
+				T value = *pointer_cast_const<const T*>(stream + byteOffset);
 
 				if (swapEndianness) {
 					value = byteswap<T>(value);

@@ -2,9 +2,18 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
+// PNG test images:
 // - ../ProjectA/src/Asset/Image/icon-black.png		OK
 // - ../ProjectA/src/Asset/Image/icon-white.png		OK
 // - ../ProjectA/src/Asset/Image/Quiver.png			OK
+// - Asset/Image/qoi_test_images/dice.png			OK
+// - Asset/Image/qoi_test_images/edgecase.png		OK
+// - Asset/Image/qoi_test_images/kodim10.png		OK
+// - Asset/Image/qoi_test_images/kodim23.png		OK
+// - Asset/Image/qoi_test_images/qoi_logo.png		OK
+// - Asset/Image/qoi_test_images/testcard.png		OK
+// - Asset/Image/qoi_test_images/testcard_rgba.png	OK
+// - Asset/Image/qoi_test_images/wikipedia_008.png	OK
 // - Asset/Image/Baboon.png							OK
 // - Asset/Image/Cameraman.png						OK
 // - Asset/Image/checkerboard_cm0.png				Unhandled filter type (120)
@@ -26,11 +35,23 @@
 // - Asset/Image/test_inflate2_0.png				Unhandled filter type (24)
 // - Asset/Image/test_inflate2_9.png				Unhandled filter type (24)
 // - Asset/Image/Zelda.png							OK
+
+// QOI test images:
+// - Asset/Image/qoi_test_images/dice.qoi			-
+// - Asset/Image/qoi_test_images/edgecase.qoi		OK
+// - Asset/Image/qoi_test_images/kodim10.qoi		OK
+// - Asset/Image/qoi_test_images/kodim23.qoi		OK
+// - Asset/Image/qoi_test_images/qoi_logo.qoi		OK
+// - Asset/Image/qoi_test_images/testcard.qoi		-
+// - Asset/Image/qoi_test_images/testcard_rgba.qoi	-
+// - Asset/Image/qoi_test_images/wikipedia_008.qoi	OK
+// - Asset/Image/test1.qoi							OK
 namespace ProjectA {
 	class ImageRenderer : public Renderer {
 		public:
 			ImageRenderer() {
-				const PNGFile file = Filesystem::openTemporary<PNGFile>("Asset/Image/Cameraman.png");
+				// const PNGFile file = Filesystem::openTemporary<PNGFile>("Asset/Image/Zelda.png");
+				const ImageFile file = Filesystem::openImage<FileFormat::QOI>("Asset/Image/qoi_test_images/edgecase.qoi");
 
 				const ref<Device> device = getDevice();
 
@@ -52,9 +73,7 @@ namespace ProjectA {
 					ImageDescriptor imageDescriptor;
 					imageDescriptor.type = ImageType::TEXTURE_2D;
 					imageDescriptor.format = file.format;
-					imageDescriptor.extent.width = file.width;
-					imageDescriptor.extent.height = file.height;
-					imageDescriptor.extent.depth = 1;
+					imageDescriptor.extent = file.extent;
 					imageDescriptor.mipLevelCount = 1;
 					imageDescriptor.layerCount = 1;
 					imageDescriptor.sampleCount = 1;
@@ -161,7 +180,9 @@ namespace ProjectA {
 					fragmentShaderModuleDescriptor.entryPoint = "main";
 
 					ColorBlendAttachment colorBlendAttachment{};
-					colorBlendAttachment.blend = false;
+					colorBlendAttachment.blend = true;
+					colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
+					colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
 					RenderPipelineDescriptor renderPipelineDescriptor{};
 					renderPipelineDescriptor.renderPass = renderPass;
@@ -233,7 +254,7 @@ namespace ProjectA {
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.renderPass = renderPass;
 				beginRenderPassDescriptor.swapchain = swapchain;
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
+				beginRenderPassDescriptor.clearValues = {{1.0f, 0.2f, 0.0f, 1.0f}};
 				beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);

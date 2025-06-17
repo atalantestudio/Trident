@@ -196,7 +196,7 @@ namespace ProjectA {
 		distanceDictionary.compute(literalLengthCodeLengths + literalLengthCodeCount, distanceCodeCount);
 
 		// TODO: Compute theoretical max literal length count.
-		constexpr uint32 MAX_LITERAL_LENGTH_COUNT = 100000;
+		static constexpr uint32 MAX_LITERAL_LENGTH_COUNT = 177237;
 
 		for (uint32 literalLengthIndex = 0; literalLengthIndex < MAX_LITERAL_LENGTH_COUNT; literalLengthIndex += 1) {
 			const uint16 literalLength = literalLengthDictionary.decode(stream);
@@ -254,7 +254,7 @@ namespace ProjectA {
 		byteSize(byteSize),
 		bitOffset(0)
 	{
-		bitBuffer = *(StreamSize*)(stream + byteOffset);
+		bitBuffer = *(BitStreamSize*)(stream + byteOffset);
 	}
 
 	uint64 BitStream::getBitOffset() const {
@@ -276,14 +276,14 @@ namespace ProjectA {
 
 		uint8 jumpBitCount = 0;
 
-		if (bitCount > static_cast<uint8>((sizeof(StreamSize) * 8 - 1) - bitOffset)) {
+		if (bitCount > static_cast<uint8>((sizeof(BitStreamSize) * 8 - 1) - bitOffset)) {
 			jumpBitCount = bitOffset;
 
 			const uint64 jumpByteCount = (bitOffset + bitCount) / (sizeof(bitBuffer) * 8);
 
 			bitOffset = 0;
 			byteOffset += sizeof(bitBuffer) * jumpByteCount;
-			bitBuffer = *(StreamSize*)(stream + byteOffset);
+			bitBuffer = *(BitStreamSize*)(stream + byteOffset);
 		}
 
 		jumpBitCount = (jumpBitCount + bitCount) % (sizeof(bitBuffer) * 8);
@@ -379,7 +379,7 @@ namespace ProjectA {
 		uint32 dataOffset = 0;
 
 		// TODO: Compute theoretical max. number of blocks.
-		constexpr uint32 MAX_BLOCK_COUNT = 1000;
+		static constexpr uint32 MAX_BLOCK_COUNT = 1000;
 
 		for (uint32 blockIndex = 0; blockIndex < MAX_BLOCK_COUNT; blockIndex += 1) {
 			// BFINAL is set if and only if this is the last block of the data set.
