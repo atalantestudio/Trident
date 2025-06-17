@@ -64,7 +64,7 @@ namespace ProjectA {
 			descriptorSetLayouts = &renderPipeline->layout.descriptorSetLayouts;
 		}
 
-		commandBuffer.emplace_back(createRef<OpenGLBindAllDescriptorSetsCommand>(*descriptorSetLayouts));
+		commandBuffer.emplace_back(createRef<OpenGLBindAllDescriptorSetsCommand>(*descriptorSetLayouts, computePipeline != nullptr));
 	}
 
 	void OpenGLCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {

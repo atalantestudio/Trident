@@ -64,7 +64,7 @@ namespace ProjectA {
 				return value;
 			}
 
-			// Decompresses data using the DEFLATE compression algorithm.
+			// Decompresses data using the DEFLATE decompression algorithm.
 			// References:
 			// - DEFLATE Compressed Data Format Specification (https://datatracker.ietf.org/doc/html/rfc1950)
 			// - ZLIB Compressed Data Format Specification (https://datatracker.ietf.org/doc/html/rfc1951)

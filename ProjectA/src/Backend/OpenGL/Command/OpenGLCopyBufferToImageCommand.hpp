@@ -23,6 +23,21 @@ namespace ProjectA {
 					glBindTexture(image->target, image->object);
 				#endif
 
+				switch (image->format) {
+					case GL_RGB:
+						glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+						break;
+					case GL_RGBA:
+						glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+						break;
+					default:
+						ENGINE_WARN("Image target is not RGB or RGBA. Unpack alignment unchanged.");
+
+						break;
+				}
+
 				for (const BufferImageCopyRegion& copyRegion : *copyRegions) {
 					const void* pixels = (const void*) copyRegion.bufferOffset;
 

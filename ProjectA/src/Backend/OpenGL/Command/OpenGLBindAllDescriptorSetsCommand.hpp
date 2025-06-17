@@ -12,8 +12,9 @@
 namespace ProjectA {
 	class OpenGLBindAllDescriptorSetsCommand : public OpenGLCommand {
 		public:
-			OpenGLBindAllDescriptorSetsCommand(const std::vector<DescriptorSetLayout>& descriptorSetLayouts) :
-				descriptorSetLayouts(descriptorSetLayouts)
+			OpenGLBindAllDescriptorSetsCommand(const std::vector<DescriptorSetLayout>& descriptorSetLayouts, bool isCompute) :
+				descriptorSetLayouts(descriptorSetLayouts),
+				isCompute(isCompute)
 			{}
 
 			void execute() const final override {
@@ -40,15 +41,16 @@ namespace ProjectA {
 								glBindSampler(binding + unit, sampler->object);
 							}
 
-							GLenum format = imageView->image.internalFormat;
+							if (isCompute) {
+								GLenum format = imageView->image.internalFormat;
 
-							if (format == GL_SRGB8_ALPHA8) {
-								format = GL_RGBA8;
+								if (format == GL_SRGB8_ALPHA8) {
+									format = GL_RGBA8;
+								}
+
+								// TODO: Use correct access.
+								glBindImageTexture(binding + unit, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, format);
 							}
-
-							// TODO: Use correct access.
-							// TODO: Only call glBindImageTexture if the pipeline is a compute pipeline.
-							glBindImageTexture(binding + unit, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, format);
 						}
 					}
 				}
@@ -56,5 +58,6 @@ namespace ProjectA {
 
 		private:
 			const std::vector<DescriptorSetLayout>& descriptorSetLayouts;
+			const bool isCompute;
 	};
 }

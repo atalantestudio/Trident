@@ -2,24 +2,47 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
+// - ../ProjectA/src/Asset/Image/icon-black.png		OK
+// - ../ProjectA/src/Asset/Image/icon-white.png		OK
+// - ../ProjectA/src/Asset/Image/Quiver.png			OK
+// - Asset/Image/Baboon.png							OK
+// - Asset/Image/Cameraman.png						OK
+// - Asset/Image/checkerboard_cm0.png				Unhandled filter type (120)
+// - Asset/Image/checkerboard_cm9.png				OK
+// - Asset/Image/checkerboard1.png					OK
+// - Asset/Image/checkerboard2.png					OK
+// - Asset/Image/graffiti.png						OK
+// - Asset/Image/Horse_rgb.png						OK
+// - Asset/Image/Horse_rgba.png						OK
+// - Asset/Image/Lenna.png							OK
+// - Asset/Image/MetallicGold.png					OK
+// - Asset/Image/Pepper.png							OK
+// - Asset/Image/RPGpack_sheet_2X.png				OK
+// - Asset/Image/test_inflate_0.png					Unhandled filter type (24)
+// - Asset/Image/test_inflate_1.png					OK
+// - Asset/Image/test_inflate_1b.png				OK
+// - Asset/Image/test_inflate_2.png					OK
+// - Asset/Image/test_inflate_9.png					OK
+// - Asset/Image/test_inflate2_0.png				Unhandled filter type (24)
+// - Asset/Image/test_inflate2_9.png				Unhandled filter type (24)
+// - Asset/Image/Zelda.png							OK
 namespace ProjectA {
-	class TextureRenderer : public Renderer {
+	class ImageRenderer : public Renderer {
 		public:
-			TextureRenderer() {
-				TrueTypeFont font(FONT_PATH);
+			ImageRenderer() {
+				const PNGFile file = Filesystem::openTemporary<PNGFile>("Asset/Image/Cameraman.png");
 
 				const ref<Device> device = getDevice();
-				const SDFGlyphMap& glyphMap = font.getGlyphMap();
 
 				ref<Buffer> imageStagingBuffer;
 
 				// 1. Create image staging buffer and copy the glyph map data to it.
 				{
-					imageStagingBuffer = createStagingBuffer(glyphMap.data.count);
+					imageStagingBuffer = createStagingBuffer(file.data.count);
 
 					uint8* imageStagingBufferMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->size);
 
-					std::copy(glyphMap.data.begin(), glyphMap.data.end(), imageStagingBufferMappedRange);
+					std::copy(file.data.begin(), file.data.end(), imageStagingBufferMappedRange);
 
 					imageStagingBuffer->unmap();
 				}
@@ -28,9 +51,9 @@ namespace ProjectA {
 				{
 					ImageDescriptor imageDescriptor;
 					imageDescriptor.type = ImageType::TEXTURE_2D;
-					imageDescriptor.format = ImageFormat::R8_UNORM;
-					imageDescriptor.extent.width = glyphMap.extent.width;
-					imageDescriptor.extent.height = glyphMap.extent.height;
+					imageDescriptor.format = file.format;
+					imageDescriptor.extent.width = file.width;
+					imageDescriptor.extent.height = file.height;
 					imageDescriptor.extent.depth = 1;
 					imageDescriptor.mipLevelCount = 1;
 					imageDescriptor.layerCount = 1;
@@ -47,9 +70,7 @@ namespace ProjectA {
 					bufferImageCopyRegion.imageOffsetX = 0;
 					bufferImageCopyRegion.imageOffsetY = 0;
 					bufferImageCopyRegion.imageOffsetZ = 0;
-					bufferImageCopyRegion.imageExtent.width = glyphMap.extent.width;
-					bufferImageCopyRegion.imageExtent.height = glyphMap.extent.height;
-					bufferImageCopyRegion.imageExtent.depth = 1;
+					bufferImageCopyRegion.imageExtent = image->getExtent();
 					bufferImageCopyRegion.imageMipLevel = 0;
 					bufferImageCopyRegion.imageLayerOffset = 0;
 					bufferImageCopyRegion.imageLayerCount = 1;
@@ -220,8 +241,8 @@ namespace ProjectA {
 				commandEncoder->bindAllDescriptorSets();
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchain->getExtent().width, swapchain->getExtent().height);
-				commandEncoder->draw(6, 1, 0);
+				commandEncoder->setScissor(0, 0, swapchain->getExtent());
+				commandEncoder->draw(3, 1, 0);
 				commandEncoder->endRenderPass();
 			}
 
@@ -230,9 +251,6 @@ namespace ProjectA {
 
 				swapchain->getImages(renderPass);
 			}
-
-		private:
-			static constexpr std::string_view FONT_PATH = "../ProjectA/src/Asset/Font/test-regular.ttf";
 
 		private:
 			ref<Image> image;

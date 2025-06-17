@@ -3,10 +3,9 @@
 #include "Backend/OpenGL/OpenGLImage.hpp"
 #include "Backend/OpenGL/OpenGLImageView.hpp"
 
-#include "Backend/OpenGL/Format.hpp"
+#include "Backend/OpenGL/ImageFormat.hpp"
 #include "Backend/OpenGL/ImageType.hpp"
 #include "Backend/OpenGL/ImageUsage.hpp"
-#include "Backend/OpenGL/InternalFormat.hpp"
 
 #ifdef BUILD_MODE_DEBUG
 	#include "Engine/API/Rendering/SampleCount.hpp"

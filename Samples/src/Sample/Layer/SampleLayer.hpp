@@ -7,14 +7,14 @@
 #define RENDERER_COMPUTE_SHADER 2
 #define RENDERER_DEPTH_TEST 3
 #define RENDERER_DEFAULT 4
-#define RENDERER_MULTISAMPLE 5
-#define RENDERER_TEXT 6
-#define RENDERER_TEXTURE 7
+#define RENDERER_IMAGE 5
+#define RENDERER_MULTISAMPLE 6
+#define RENDERER_TEXT 7
 #define RENDERER_TEXTURE_ARRAY 8
 #define RENDERER_TRIANGLE 9
 
 // Select the renderer to run.
-#define RENDERER RENDERER_TEXT
+#define RENDERER RENDERER_IMAGE
 
 #if RENDERER == RENDERER_ARRAY_TEXTURE
 	#include "../Renderer/ArrayTextureRenderer.hpp"
@@ -46,6 +46,12 @@
 	#define RENDERER_CLASS DepthTestRenderer
 #endif
 
+#if RENDERER == RENDERER_IMAGE
+	#include "../Renderer/ImageRenderer.hpp"
+
+	#define RENDERER_CLASS ImageRenderer
+#endif
+
 #if RENDERER == RENDERER_MULTISAMPLE
 	#include "../Renderer/MultisampleRenderer.hpp"
 
@@ -56,12 +62,6 @@
 	#include "../Renderer/TextRenderer.hpp"
 
 	#define RENDERER_CLASS TextRenderer
-#endif
-
-#if RENDERER == RENDERER_TEXTURE
-	#include "../Renderer/TextureRenderer.hpp"
-
-	#define RENDERER_CLASS TextureRenderer
 #endif
 
 #if RENDERER == RENDERER_TEXTURE_ARRAY

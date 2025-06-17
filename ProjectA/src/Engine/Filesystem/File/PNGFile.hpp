@@ -32,5 +32,7 @@ namespace ProjectA {
 
 		// Decompressed and filtered data.
 		sequence<uint8> data;
+
+		ImageFormat format;
 	};
 }
