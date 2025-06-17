@@ -6,10 +6,9 @@
 namespace ProjectA {
 	class HuffmanCodeDictionary {
 		public:
-			HuffmanCodeDictionary(uint8 maxCodeLength);
+			explicit HuffmanCodeDictionary(uint8 maxCodeLength);
 
-			// Giving the bit lengths of the codes for each symbol of the alphabet in order
-			// is sufficient to determine the actual codes.
+			// Giving the bit lengths of the codes for each symbol of the alphabet in order is sufficient to determine the actual codes.
 			void compute(const uint8* codeLengths, uint16 symbolCount);
 
 			uint16 decode(BitStream& stream) const;
@@ -22,6 +21,6 @@ namespace ProjectA {
 
 		private:
 			const uint8 maxCodeLength;
-			std::vector<HuffmanCode> dictionary;
+			sequence<HuffmanCode> dictionary;
 	};
 }

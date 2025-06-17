@@ -2,7 +2,7 @@
 
 namespace ProjectA {
 	struct HuffmanCode {
-		uint16 code = 0;
-		uint8 bitLength = 0;
+		uint16 code;
+		uint8 bitLength;
 	};
 }

@@ -6,9 +6,10 @@ namespace ProjectA {
 	HuffmanCodeDictionary::HuffmanCodeDictionary(uint8 maxCodeLength) :
 		maxCodeLength(maxCodeLength)
 	{
+		ENGINE_ASSERT(maxCodeLength > 0, "The maximum code length is 0.");
 		ENGINE_ASSERT(maxCodeLength < MAX_CODE_LENGTH, "The maximum code length is overflowing.");
 
-		dictionary.resize(static_cast<std::size_t>(1) << maxCodeLength);
+		dictionary = sequence<HuffmanCode>(static_cast<std::size_t>(1) << maxCodeLength);
 	}
 
 	void HuffmanCodeDictionary::compute(const uint8* codeLengths, uint16 symbolCount) {
@@ -33,13 +34,12 @@ namespace ProjectA {
 			nextUnusedCode[bitIndex] = (nextUnusedCode[bitIndex - 1] + codeLengthCodeCount[bitIndex - 1]) << 1;
 		}
 
-		// 3. Assign numerical values to all codes, using consecutive values
-		// for all codes of the same length with the base values determined at step 2.
+		// 3. Assign numerical values to all codes, using consecutive values for all codes of the same length
+		// with the base values determined at step 2.
 		for (uint16 symbolIndex = 0; symbolIndex < symbolCount; symbolIndex += 1) {
 			const uint8 codeLength = codeLengths[symbolIndex];
 
-			// Codes that are never used (which have a bit length of zero)
-			// must not be assigned a value.
+			// Codes that are never used (which have a bit length of zero) must not be assigned a value.
 			if (codeLength == 0) {
 				continue;
 			}
@@ -70,7 +70,7 @@ namespace ProjectA {
 		// Read as many bits as possible to get a code entry index.
 		const uint16 codeIndex = stream.peek<uint16>(maxCodeLength);
 
-		ENGINE_ASSERT(codeIndex < dictionary.size(), "The code index is overflowing.");
+		ENGINE_ASSERT(codeIndex < dictionary.count, "The code index is overflowing.");
 
 		const HuffmanCode& huffmanCode = dictionary[codeIndex];
 
@@ -84,8 +84,8 @@ namespace ProjectA {
 	uint32 HuffmanCodeDictionary::reverseBits(uint32 value, uint8 bitCount) {
 		uint32 result = 0;
 
-		for (uint8 bitIndex = 0; bitIndex <= (bitCount / 2); bitIndex += 1) {
-			const uint8 inverse = (bitCount - (bitIndex + 1));
+		for (uint8 bitIndex = 0; bitIndex <= bitCount / 2; bitIndex += 1) {
+			const uint8 inverse = bitCount - (bitIndex + 1);
 
 			result |= ((value >> bitIndex) & 0x1) << inverse;
 			result |= ((value >> inverse) & 0x1) << bitIndex;
