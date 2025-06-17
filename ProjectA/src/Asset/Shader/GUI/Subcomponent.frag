@@ -4,13 +4,13 @@
 #define EFFECT_TYPE_ROUND 1
 #define EFFECT_TYPE_VIGNETTE 2
 
-#define BORDER_EFFECT_TYPE EFFECT_TYPE_VIGNETTE
+#define BORDER_EFFECT_TYPE EFFECT_TYPE_ROUND
 
 #if BORDER_EFFECT_TYPE == EFFECT_TYPE_BEVEL
 	bool beveledCorner(vec2 delta, float radius) {
 		return abs(delta.x) + abs(delta.y) > radius;
 	}
-#elif BORDER_EFFECT_TYPE == ROUNDED_CORNER
+#elif BORDER_EFFECT_TYPE == EFFECT_TYPE_ROUND
 	bool roundedCorner(vec2 delta, float radius) {
 		return dot(delta, delta) > radius * radius;
 	}
@@ -28,10 +28,6 @@ in VertexOutput {
 layout(set = 0, binding = 1) uniform sampler2DArray textureArraySampler;
 
 layout(location = 0) out vec4 color;
-
-float lengthSquared(vec2 a) {
-	return dot(a, a);
-}
 
 void main() {
 	vec2 minBounds = vertexOutput.bounds.xy;
@@ -51,7 +47,7 @@ void main() {
 
 	#if BORDER_EFFECT_TYPE == EFFECT_TYPE_BEVEL
 		condition = beveledCorner(ap, r);
-	#elif BORDER_EFFECT_TYPE == EFFECT_TYPE_ROUNDED
+	#elif BORDER_EFFECT_TYPE == EFFECT_TYPE_ROUND
 		condition = roundedCorner(ap, r);
 	#endif
 
