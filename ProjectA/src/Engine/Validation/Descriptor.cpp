@@ -526,10 +526,10 @@ namespace ProjectA {
 				ENGINE_ERROR("descriptor.subpassIndex must be lesser than the number of subpasses in descriptor.renderPass.");
 			}
 			else {
-				if (descriptor.depthStencilState.depthTest != descriptor.renderPass->getSubpass(descriptor.subpassIndex)->hasDepthStencilAttachment()) {
+				if (descriptor.depthStencilState.depthTest && !descriptor.renderPass->getSubpass(descriptor.subpassIndex)->hasDepthStencilAttachment()) {
 					warningCount += 1;
 
-					ENGINE_WARN("descriptor.depthStencilState.depthTest is not the same as descriptor.renderPass.subpasses[descriptor.subpassIndex].depthStencil.");
+					ENGINE_WARN("descriptor.depthStencilState.depthTest is true but the subpass does not contain a depth stencil attachment.");
 				}
 			}
 		}

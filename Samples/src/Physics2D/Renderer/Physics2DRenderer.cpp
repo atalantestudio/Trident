@@ -979,6 +979,8 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::resize(WindowResizeEvent& event) {
+		recreateFramebuffers();
+
 		const float32 width = static_cast<float32>(event.getWidth());
 		const float32 height = static_cast<float32>(event.getHeight());
 		const float32 left = -width / 2.0f;
@@ -994,8 +996,6 @@ namespace ProjectA {
 
 		viewMappedRange->viewport.x = width;
 		viewMappedRange->viewport.y = height;
-
-		recreateFramebuffers();
 	}
 
 	void Physics2DRenderer::writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const {

@@ -11,7 +11,7 @@ namespace ProjectA {
 		ColorAttachment colorAttachment{};
 		colorAttachment.format = surface->getFormat();
 		colorAttachment.sampleCount = 4;
-		colorAttachment.loadOperation = LoadOperation::CLEAR;
+		colorAttachment.loadOperation = LoadOperation::LOAD;
 		colorAttachment.storeOperation = StoreOperation::STORE;
 
 		SubpassDescriptor subpassDescriptor{};
@@ -403,7 +403,6 @@ namespace ProjectA {
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 

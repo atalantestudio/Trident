@@ -81,7 +81,13 @@ namespace ProjectA {
 		renderPassBeginInfo.renderArea.offset.y = 0;
 		renderPassBeginInfo.renderArea.extent = *pointer_cast_const<const VkExtent2D*>(&framebuffer.getExtent());
 		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.count);
-		renderPassBeginInfo.pClearValues = &clearValues[0];
+
+		if (clearValues.count == 0) {
+			renderPassBeginInfo.pClearValues = nullptr;
+		}
+		else {
+			renderPassBeginInfo.pClearValues = &clearValues[0];
+		}
 
 		vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
