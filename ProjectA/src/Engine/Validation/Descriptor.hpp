@@ -15,7 +15,7 @@ namespace ProjectA {
 	struct RenderPipelineDescriptor;
 	struct SamplerDescriptor;
 	struct ShaderModuleDescriptor;
-	struct Subpass;
+	struct SubpassDescriptor;
 	struct SwapchainDescriptor;
 
 	void validateDescriptor(const AttachmentImageDescriptor& descriptor);
@@ -31,7 +31,7 @@ namespace ProjectA {
 	void validateDescriptor(const RenderPipelineDescriptor& descriptor);
 	void validateDescriptor(const SamplerDescriptor& descriptor);
 	void validateDescriptor(const ShaderModuleDescriptor& descriptor);
-	void validateDescriptor(const Subpass& subpass);
+	void validateDescriptor(const SubpassDescriptor& descriptor);
 	void validateDescriptor(const SwapchainDescriptor& descriptor);
 
 	#ifdef BUILD_MODE_DEBUG

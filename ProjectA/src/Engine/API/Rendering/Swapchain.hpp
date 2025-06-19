@@ -22,8 +22,6 @@ namespace ProjectA {
 				return imageViews[index];
 			}
 
-			virtual void getImages(const ref<RenderPass>& renderPass) = 0;
-
 			virtual void update(const SwapchainDescriptor& descriptor) = 0;
 
 		protected:
@@ -35,7 +33,6 @@ namespace ProjectA {
 				for (uint32 imageViewIndex = 0; imageViewIndex < imageViews.count; imageViewIndex += 1) {
 					const ref<Image>& image = images[imageViewIndex];
 
-					imageViewDescriptor.image = image;
 					imageViewDescriptor.mipLevelCount = image->getMipLevelCount();
 					imageViewDescriptor.layerCount = image->getLayerCount();
 

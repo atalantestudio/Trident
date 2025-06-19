@@ -8,7 +8,7 @@ namespace ProjectA {
 	class TriangleRenderer : public Renderer {
 		public:
 			void build() override {
-				// 1. Create render pass.
+				// 1. Create render pass and subpass.
 				{
 					const ref<Surface> surface = getSurface();
 
@@ -18,11 +18,12 @@ namespace ProjectA {
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
 
-					Subpass subpass{};
-					subpass.colorAttachments = {colorAttachment};
-					subpass.resolve = false;
-					subpass.depthStencil = false;
-					subpass.presentAttachmentIndex = 0;
+					SubpassDescriptor subpassDescriptor{};
+					subpassDescriptor.colorAttachments = {colorAttachment};
+					subpassDescriptor.presentAttachmentIndex = 0;
+					subpassDescriptor.depthStencil = false;
+
+					subpass = createSubpass(subpassDescriptor);
 
 					RenderPassDescriptor renderPassDescriptor;
 					renderPassDescriptor.subpasses = {subpass};
@@ -31,32 +32,16 @@ namespace ProjectA {
 				}
 
 				// 2. Create framebuffers.
-				{
-					const ref<Swapchain>& swapchain = getSwapchain();
+				recreateFramebuffers();
 
-					framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
-
-					FramebufferDescriptor framebufferDescriptor{};
-					framebufferDescriptor.renderPass = renderPass;
-					framebufferDescriptor.imageViews = sequence<ref<ImageView>>(1);
-					framebufferDescriptor.extent = swapchain->getExtent();
-					framebufferDescriptor.layerCount = 1;
-
-					for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
-						framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-
-						framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-					}
-				}
-
-				// 2. Create pipeline layout.
+				// 3. Create pipeline layout.
 				{
 					const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 3. Create render pipeline.
+				// 4. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -93,7 +78,7 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 4. Create vertex buffer.
+				// 5. Create vertex buffer.
 				{
 					static constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
 
@@ -161,7 +146,20 @@ namespace ProjectA {
 			}
 
 			void resize(WindowResizeEvent& event) override {
+				recreateFramebuffers();
+			}
+
+		private:
+			void recreateFramebuffers() {
 				const ref<Swapchain>& swapchain = getSwapchain();
+
+				if (framebuffers.count > 0) {
+					for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+						framebuffers[framebufferIndex].~shared_ptr();
+					}
+				}
+
+				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
 				FramebufferDescriptor framebufferDescriptor{};
 				framebufferDescriptor.renderPass = renderPass;
@@ -169,7 +167,6 @@ namespace ProjectA {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				// Recreate framebuffers.
 				for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
@@ -184,6 +181,7 @@ namespace ProjectA {
 			};
 
 		private:
+			ref<Subpass> subpass;
 			ref<RenderPass> renderPass;
 
 			sequence<ref<Framebuffer>> framebuffers;

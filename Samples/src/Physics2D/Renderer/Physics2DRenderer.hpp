@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class Physics2DRenderer : public Renderer {
 		public:
-			Physics2DRenderer();
+			void build() override;
 
 			// After registering the scene, the vertex buffer cannot be resized.
 			void registerScene(const Scene2D& scene);
@@ -37,8 +37,7 @@ namespace ProjectA {
 			void registerClosestFeature(const ClosestFeature2D& closestFeature);
 
 		private:
-			void updateColorAttachment();
-			void updateDepthStencilAttachment();
+			void recreateFramebuffers();
 
 			void initializeViewUniformBuffer();
 			void initializeCameraUniformBuffer();
@@ -93,7 +92,10 @@ namespace ProjectA {
 			static constexpr float32 DEFAULT_ZOOM_LEVEL = MAX_ZOOM_LEVEL;
 
 		private:
+			ref<Subpass> subpass;
 			ref<RenderPass> renderPass;
+
+			sequence<ref<Framebuffer>> framebuffers;
 
 			ref<Image> colorImage;
 			ref<ImageView> colorImageView;

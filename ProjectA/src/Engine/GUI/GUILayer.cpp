@@ -16,6 +16,8 @@ namespace ProjectA {
 		defaultImageLayer.data = {255, 255, 255, 255};
 
 		renderer.registerTextureArrayLayer(defaultImageLayer);
+
+		registerAssets();
 	}
 
 	void GUILayer::postConstruct() {

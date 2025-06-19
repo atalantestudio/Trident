@@ -1,17 +1,16 @@
 #pragma once
 
 #include "Backend/OpenGL/OpenGLRenderingContext.hpp"
+#include "Backend/OpenGL/OpenGLSurface.hpp"
 
 #include "Engine/API/Rendering/Swapchain.hpp"
 
 namespace ProjectA {
 	class OpenGLSwapchain : public Swapchain {
 		public:
-			OpenGLSwapchain(const SwapchainDescriptor& descriptor, const OpenGLRenderingContext& renderingContext);
+			OpenGLSwapchain(const SwapchainDescriptor& descriptor, const OpenGLRenderingContext& renderingContext, const OpenGLSurface& surface);
 
 			uint32 getImageCount() const final override;
-
-			void getImages(const ref<RenderPass>& renderPass) final override;
 
 			void update(const SwapchainDescriptor& descriptor) final override;
 
@@ -19,5 +18,6 @@ namespace ProjectA {
 
 		private:
 			const OpenGLRenderingContext* renderingContext;
+			const OpenGLSurface* surface;
 	};
 }

@@ -208,15 +208,8 @@ namespace ProjectA {
 		PROFILE_SCOPE("Application post-construct");
 
 		for (const ref<Layer>& layer : layerStack) {
-			// subpassDescriptors.emplace_back(subpassDescriptor);
-
-			layer->build();
-			// layer->postConstruct();
+			layer->postConstruct();
 		}
-
-		// std::copy(subpassDescriptors.begin(), subpassDescriptors.end(), renderPassDescriptor.subpassDescriptors);
-
-		// renderPass = Renderer::getBackend()->createRenderPass(renderPassDescriptor);
 	}
 
 	bool Application::hasGraphicalProcesses() const {

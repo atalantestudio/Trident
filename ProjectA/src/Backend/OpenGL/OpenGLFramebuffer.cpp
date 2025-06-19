@@ -13,29 +13,54 @@ namespace ProjectA {
 		glCreateFramebuffers(1, &object);
 		glBindFramebuffer(GL_FRAMEBUFFER, object);
 
+		// All images attached to a framebuffer must have the same number of samples.
+		// Use this information to find if the framebuffer contains multisampled attachments or not.
+		bool resolve = false;
+
+		for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count; imageViewIndex += 1) {
+			const ref<ImageView>& imageView = descriptor.imageViews[imageViewIndex];
+
+			if (imageView->getImage()->getSampleCount() > 1) {
+				resolve = true;
+
+				break;
+			}
+		}
+
+		uint32 boundAttachmentIndex = 0;
+
 		for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count; imageViewIndex += 1) {
 			const ref<ImageView>& imageView = descriptor.imageViews[imageViewIndex];
 			const OpenGLImage* glImage = static_cast<const OpenGLImage*>(imageView->getImage());
 			const OpenGLImageView& glImageView = *std::static_pointer_cast<OpenGLImageView>(imageView);
 
+			if (resolve && imageView->getImage()->getSampleCount() == 1) {
+				continue;
+			}
+
 			GLenum attachment;
 
 			if (isDepthFormat(glImage->internalFormat)) {
+				// TODO: Use GL_DEPTH_STENCIL_ATTACHMENT instead of GL_DEPTH_ATTACHMENT.
 				attachment = GL_DEPTH_ATTACHMENT;
 			}
 			else {
-				attachment = GL_COLOR_ATTACHMENT0 + imageViewIndex;
+				attachment = GL_COLOR_ATTACHMENT0 + boundAttachmentIndex;
 			}
 
 			// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even when creating the image).
 			switch (glImage->target) {
 				case GL_TEXTURE_2D:
+
+				// TODO: Check if it's right.
+				case GL_TEXTURE_2D_MULTISAMPLE:
+
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
 				case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
 				case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
-				case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+				case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z: {
 					glFramebufferTexture2D(
 						GL_FRAMEBUFFER,
 						attachment,
@@ -45,12 +70,15 @@ namespace ProjectA {
 					);
 
 					break;
+				}
 				default:
 					ENGINE_ERROR("Unhandled image target ([]).", glImage->target);
 					DEBUG_ASSERT(false);
 
 					break;
 			}
+
+			boundAttachmentIndex += 1;
 		}
 
 		#ifdef OPENGL_USE_DSA

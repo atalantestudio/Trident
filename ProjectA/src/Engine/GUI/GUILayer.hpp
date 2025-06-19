@@ -23,6 +23,9 @@ namespace ProjectA {
 		public:
 			void build() final override;
 
+			// Build method for clients.
+			virtual void registerAssets() = 0;
+
 			void postConstruct() final override;
 
 			void preRender() final override;

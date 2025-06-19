@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class EditorLayer : public GUILayer {
 		public:
-			EditorLayer() {
+			void registerAssets() override {
 				textStyle.color = {1.0f, 1.0f, 1.0f, 1.0f};
 				textStyle.fontSize = static_cast<float32>(32px);
 			}

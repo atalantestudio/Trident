@@ -5,11 +5,10 @@
 namespace ProjectA {
 	class TextRenderer : public Renderer {
 		public:
-			TextRenderer() :
-				font("../ProjectA/src/Asset/Font/test-regular.ttf")
-			{
-				const ref<Device> device = getDevice();
+			void build() override {
+				const TrueTypeFont font("../ProjectA/src/Asset/Font/test-regular.ttf");
 				const SDFGlyphMap& glyphMap = font.getGlyphMap();
+				const ref<Device> device = getDevice();
 
 				ref<Buffer> glyphMapImageStagingBuffer;
 
@@ -72,7 +71,11 @@ namespace ProjectA {
 
 				// 3. Create glyph map image view.
 				{
-					constexpr ImageViewDescriptor imageViewDescriptor;
+					ImageViewDescriptor imageViewDescriptor{};
+					imageViewDescriptor.mipLevelOffset = 0;
+					imageViewDescriptor.mipLevelCount = glyphMapImage->getMipLevelCount();
+					imageViewDescriptor.layerOffset = 0;
+					imageViewDescriptor.layerCount = glyphMapImage->getLayerCount();
 
 					glyphMapImageView = glyphMapImage->createView(imageViewDescriptor);
 				}
@@ -100,7 +103,7 @@ namespace ProjectA {
 					cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBufferSize);
 				}
 
-				// 6. Create render pass.
+				// 6. Create render pass and subpass.
 				{
 					const ref<Surface> surface = getSurface();
 
@@ -110,20 +113,23 @@ namespace ProjectA {
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
 
-					SubpassDescriptor subpassDescriptor;
+					SubpassDescriptor subpassDescriptor{};
 					subpassDescriptor.colorAttachments = {colorAttachment};
-					subpassDescriptor.resolve = false;
-					subpassDescriptor.depthStencil = false;
 					subpassDescriptor.presentAttachmentIndex = 0;
+					subpassDescriptor.depthStencil = false;
+
+					subpass = createSubpass(subpassDescriptor);
+
+					RenderPassDescriptor renderPassDescriptor{};
+					renderPassDescriptor.subpasses = {subpass};
 
 					renderPass = createRenderPass(renderPassDescriptor);
-
-					const ref<Swapchain>& swapchain = getSwapchain();
-
-					swapchain->getImages(renderPass);
 				}
 
-				// 7. Create pipeline layout.
+				// 7. Create framebuffers.
+				recreateFramebuffers();
+
+				// 8. Create pipeline layout.
 				{
 					DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 					cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
@@ -145,7 +151,7 @@ namespace ProjectA {
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 8. Create render pipeline.
+				// 9. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -163,7 +169,6 @@ namespace ProjectA {
 					colorBlendAttachment.blend = false;
 
 					RenderPipelineDescriptor renderPipelineDescriptor{};
-					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Glyph.vert", vertexShaderModuleDescriptor);
@@ -177,11 +182,13 @@ namespace ProjectA {
 					renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 					renderPipelineDescriptor.depthStencilState.depthTest = false;
 					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+					renderPipelineDescriptor.renderPass = renderPass;
+					renderPipelineDescriptor.subpassIndex = 0;
 
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 9. Create index buffer.
+				// 10. Create index buffer.
 				{
 					constexpr uint64 indexBufferSize = 6 * MAX_CHARACTER_COUNT * sizeof(uint16);
 
@@ -230,7 +237,7 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				// 10. Create vertex buffer.
+				// 11. Create vertex buffer.
 				{
 					constexpr uint64 vertexBufferSize = 4 * MAX_CHARACTER_COUNT * sizeof(Vertex);
 
@@ -246,7 +253,7 @@ namespace ProjectA {
 
 				updateCamera();
 
-				setText("PP Radio Grotesk", 64.0f);
+				setText("PP Radio Grotesk", font, 64.0f);
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
@@ -255,10 +262,8 @@ namespace ProjectA {
 				const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
-				beginRenderPassDescriptor.renderPass = renderPass;
-				beginRenderPassDescriptor.swapchain = swapchain;
+				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
-				beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
@@ -272,14 +277,11 @@ namespace ProjectA {
 			}
 
 			void resize(WindowResizeEvent& event) override {
+				recreateFramebuffers();
 				updateCamera();
-
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				swapchain->getImages(renderPass);
 			}
 
-			void setText(std::string_view text, float32 fontSize) {
+			void setText(std::string_view text, const TrueTypeFont& font, float32 fontSize) {
 				ENGINE_ASSERT(text.size() <= MAX_CHARACTER_COUNT, "The text must not exceed [] characters.", MAX_CHARACTER_COUNT);
 
 				characterCount = static_cast<uint32>(text.size());
@@ -331,6 +333,30 @@ namespace ProjectA {
 			}
 
 		private:
+			void recreateFramebuffers() {
+				const ref<Swapchain>& swapchain = getSwapchain();
+
+				if (framebuffers.count > 0) {
+					for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+						framebuffers[framebufferIndex].~shared_ptr();
+					}
+				}
+
+				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
+
+				FramebufferDescriptor framebufferDescriptor{};
+				framebufferDescriptor.renderPass = renderPass;
+				framebufferDescriptor.imageViews = sequence<ref<ImageView>>(1);
+				framebufferDescriptor.extent = swapchain->getExtent();
+				framebufferDescriptor.layerCount = 1;
+
+				for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
+
+					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+				}
+			}
+
 			void updateCamera() const {
 				const ref<Swapchain>& swapchain = getSwapchain();
 				const float32 width = static_cast<float32>(swapchain->getExtent().width);
@@ -357,8 +383,6 @@ namespace ProjectA {
 			static constexpr uint64 MAX_CHARACTER_COUNT = 64;
 
 		private:
-			TrueTypeFont font;
-
 			ref<Image> glyphMapImage;
 			ref<ImageView> glyphMapImageView;
 
@@ -367,7 +391,10 @@ namespace ProjectA {
 			ref<Buffer> cameraBuffer;
 			Camera* cameraMappedRange;
 
+			ref<Subpass> subpass;
 			ref<RenderPass> renderPass;
+
+			sequence<ref<Framebuffer>> framebuffers;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;

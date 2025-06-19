@@ -9,7 +9,7 @@ namespace ProjectA {
 
 	class Image {
 		public:
-			Image() {};
+			Image() {}
 
 			virtual ~Image() = default;
 

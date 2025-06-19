@@ -19,8 +19,6 @@ namespace ProjectA {
 
 			void update(const SwapchainDescriptor& descriptor) final override;
 
-			void getImages(const ref<RenderPass>& renderPass) final override;
-
 			void construct(const SwapchainDescriptor& descriptor);
 
 			void destroyImageViewsAndFramebuffers() const;

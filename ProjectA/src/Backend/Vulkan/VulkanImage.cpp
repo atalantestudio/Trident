@@ -15,7 +15,9 @@ namespace ProjectA {
 	VulkanImage::VulkanImage(VkDevice device, const ImageDescriptor& descriptor) :
 		Image(descriptor),
 		device(device),
-		swapchainImage(false)
+		swapchainImage(false),
+		type(getVkImageType(descriptor.type)),
+		format(getVkFormat(descriptor.format))
 	{
 		DEBUG_ASSERT(checkSampleCountValidity(sampleCount));
 
@@ -23,8 +25,8 @@ namespace ProjectA {
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.pNext = nullptr;
 		imageCreateInfo.flags = 0;
-		imageCreateInfo.imageType = getVkImageType(descriptor.type);
-		imageCreateInfo.format = getVkFormat(descriptor.format);
+		imageCreateInfo.imageType = type;
+		imageCreateInfo.format = format;
 		imageCreateInfo.extent.width = extent.width;
 		imageCreateInfo.extent.height = extent.height;
 		imageCreateInfo.extent.depth = extent.depth;
@@ -75,9 +77,6 @@ namespace ProjectA {
 		DEBUG_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX);
 
 		memorySuballocation = MemoryAllocator::suballocateImage(device, object, memoryTypeIndex, memoryRequirements);
-
-		type = imageCreateInfo.imageType;
-		format = imageCreateInfo.format;
 	}
 
 	VulkanImage::VulkanImage(VkDevice device, VkImage image, VkFormat format, Extent2D extent) :

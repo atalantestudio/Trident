@@ -11,14 +11,14 @@ namespace ProjectA {
 			{}
 
 			void execute() const final override {
-				const Subpass& subpass = framebuffer->getRenderPass()->getSubpass(subpassIndex);
+				const ref<Subpass>& subpass = framebuffer->getRenderPass()->getSubpass(subpassIndex);
 
-				if (subpass.presentAttachmentIndex != std::numeric_limits<uint32>::max()) {
+				if (subpass->getPresentAttachmentIndex() != std::numeric_limits<uint32>::max()) {
 					glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->object);
 					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 					// TODO: Why resolveAttachmentCount isn't needed as offset here?
-					glReadBuffer(GL_COLOR_ATTACHMENT0 + subpass.presentAttachmentIndex);
+					glReadBuffer(GL_COLOR_ATTACHMENT0 + subpass->getPresentAttachmentIndex());
 
 					glDrawBuffer(GL_FRONT);
 

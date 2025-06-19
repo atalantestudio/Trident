@@ -32,7 +32,7 @@ namespace ProjectA {
 			void resetCounters();
 
 		private:
-			void updateColorAttachment();
+			void recreateFramebuffers();
 
 			void initializeVertexBuffer();
 			void initializeIndexBuffer();
@@ -60,7 +60,10 @@ namespace ProjectA {
 			static constexpr uint32 MAX_GLYPH_SUBCOMPONENTS = 512;
 
 		private:
+			ref<Subpass> subpass;
 			ref<RenderPass> renderPass;
+
+			sequence<ref<Framebuffer>> framebuffers;
 
 			ref<Image> colorImage;
 			ref<ImageView> colorImageView;

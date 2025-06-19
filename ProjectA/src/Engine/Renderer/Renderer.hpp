@@ -18,8 +18,7 @@ namespace ProjectA {
 			static void initialize(const Window& window, GraphicsAPI graphicsAPI, bool vSync);
 
 		public:
-			// virtual void build() = 0;
-			virtual void build() {};
+			virtual void build() = 0;
 
 			virtual void render(const ref<CommandEncoder>& commandEncoder) const = 0;
 
@@ -52,6 +51,8 @@ namespace ProjectA {
 			static ref<Sampler> createSampler(const SamplerDescriptor& descriptor);
 
 			static ref<Semaphore> createSemaphore();
+
+			static ref<Subpass> createSubpass(const SubpassDescriptor& descriptor);
 
 			static const ref<Semaphore>& getAcquireNextImageSemaphore(uint32 frameInFlightIndex);
 

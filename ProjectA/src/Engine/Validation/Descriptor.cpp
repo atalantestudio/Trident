@@ -13,8 +13,8 @@
 #include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/SamplerDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/ShaderModuleDescriptor.hpp"
+#include "Engine/API/Rendering/Descriptor/SubpassDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/SwapchainDescriptor.hpp"
-#include "Engine/API/Rendering/Subpass.hpp"
 #include "Engine/Validation/Descriptor.hpp"
 
 namespace ProjectA {
@@ -345,10 +345,10 @@ namespace ProjectA {
 					}
 				}
 
-				if (descriptorSetLayoutBinding.imageViews.size() != descriptorSetLayoutBinding.samplers.size()) {
+				if (!descriptorSetLayoutBinding.samplers.empty() && (descriptorSetLayoutBinding.imageViews.size() != descriptorSetLayoutBinding.samplers.size())) {
 					errorCount += 1;
 
-					ENGINE_ERROR("The number of image views in descriptor.layouts[[]].bindings[[]].imageViews must be the same as the number of samplers in descriptor.layouts[[]].bindings[[]].samplers.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex, descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
+					ENGINE_ERROR("The number of image views in descriptor.layouts[[]].bindings[[]].imageViews and the number of samplers in descriptor.layouts[[]].bindings[[]].samplers must be the same.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex, descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
 				}
 			}
 		}
@@ -526,7 +526,7 @@ namespace ProjectA {
 				ENGINE_ERROR("descriptor.subpassIndex must be lesser than the number of subpasses in descriptor.renderPass.");
 			}
 			else {
-				if (descriptor.depthStencilState.depthTest != descriptor.renderPass->getSubpass(descriptor.subpassIndex).depthStencil) {
+				if (descriptor.depthStencilState.depthTest != descriptor.renderPass->getSubpass(descriptor.subpassIndex)->hasDepthStencilAttachment()) {
 					warningCount += 1;
 
 					ENGINE_WARN("descriptor.depthStencilState.depthTest is not the same as descriptor.renderPass.subpasses[descriptor.subpassIndex].depthStencil.");
@@ -575,35 +575,17 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Shader module descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const Subpass& subpass) {
+	void validateDescriptor(const SubpassDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
-		/* if (descriptor.colorAttachments.empty()) {
+		if (descriptor.colorAttachments.count == 0) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.colorAttachments must not be empty.");
 		}
 
-		if (descriptor.resolve != true && descriptor.resolve != false) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.resolve must be either true or false.");
-		}
-
-		if (descriptor.depthStencil != true && descriptor.depthStencil != false) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.depthStencil must be either true or false.");
-		}
-
-		if (descriptor.presentAttachmentIndex >= descriptor.colorAttachments.size()) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.presentAttachmentIndex must be less than the number of color attachments.");
-		}
-
-		for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < descriptor.colorAttachments.size(); colorAttachmentIndex += 1) {
+		for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < descriptor.colorAttachments.count; colorAttachmentIndex += 1) {
 			const ColorAttachment& colorAttachment = descriptor.colorAttachments[colorAttachmentIndex];
 
 			if (colorAttachment.format > ImageFormat::R8G8B8A8_UNORM) {
@@ -616,12 +598,6 @@ namespace ProjectA {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.colorAttachments[[]].sampleCount must either be 1 or a power of 2 (up to 64).", colorAttachmentIndex);
-			}
-
-			if (colorAttachment.sampleCount != 1 && !descriptor.resolve) {
-				errorCount += 1;
-
-				ENGINE_ERROR("If descriptor.resolve is false, descriptor.colorAttachments[[]].sampleCount must be 1.", colorAttachmentIndex);
 			}
 
 			if (colorAttachment.loadOperation > LoadOperation::UNDEFINED) {
@@ -637,8 +613,14 @@ namespace ProjectA {
 			}
 		}
 
+		if (descriptor.depthStencil != true && descriptor.depthStencil != false) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.depthStencil must be either true or false.");
+		}
+
 		if (descriptor.depthStencil) {
-			if (descriptor.depthStencilAttachment.format < ImageFormat::D32_SFLOAT || descriptor.depthStencilAttachment.format > ImageFormat::D24_UNORM_S8_UINT) {
+			if (!isDepthFormat(descriptor.depthStencilAttachment.format)) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.depthStencilAttachment.format must be a valid depth stencil ImageFormat value.");
@@ -661,9 +643,15 @@ namespace ProjectA {
 
 				ENGINE_ERROR("descriptor.depthStencilAttachment.loadOperation must be a valid LoadOperation value.");
 			}
-		} */
+		}
 
-		ENGINE_ASSERT(false, "TODO");
+		if (descriptor.presentAttachmentIndex >= descriptor.colorAttachments.count) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.presentAttachmentIndex must be less than the number of color attachments.");
+		}
+
+		ENGINE_ASSERT(errorCount == 0, "Subpass descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
 	void validateDescriptor(const SwapchainDescriptor& descriptor) {

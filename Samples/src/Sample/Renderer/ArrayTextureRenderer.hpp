@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class ArrayTextureRenderer : public Renderer {
 		public:
-			ArrayTextureRenderer() {
+			void build() override {
 				const ref<Device> device = getDevice();
 
 				// 1. Load assets as images.
@@ -18,7 +18,11 @@ namespace ProjectA {
 
 				// 2. Create image views.
 				{
-					constexpr ImageViewDescriptor imageViewDescriptor;
+					ImageViewDescriptor imageViewDescriptor{};
+					imageViewDescriptor.mipLevelOffset = 0;
+					imageViewDescriptor.mipLevelCount = 1;
+					imageViewDescriptor.layerOffset = 0;
+					imageViewDescriptor.layerCount = 1;
 
 					baboonImageView = baboonImage->createView(imageViewDescriptor);
 					cameramanImageView = cameramanImage->createView(imageViewDescriptor);
@@ -35,7 +39,7 @@ namespace ProjectA {
 					sampler = createSampler(samplerDescriptor);
 				}
 
-				// 4. Create render pass.
+				// 4. Create render pass and subpass.
 				{
 					const ref<Surface> surface = getSurface();
 
@@ -45,20 +49,23 @@ namespace ProjectA {
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
 
-					SubpassDescriptor subpassDescriptor;
+					SubpassDescriptor subpassDescriptor{};
 					subpassDescriptor.colorAttachments = {colorAttachment};
-					subpassDescriptor.resolve = false;
-					subpassDescriptor.depthStencil = false;
 					subpassDescriptor.presentAttachmentIndex = 0;
+					subpassDescriptor.depthStencil = false;
+
+					subpass = createSubpass(subpassDescriptor);
+
+					RenderPassDescriptor renderPassDescriptor{};
+					renderPassDescriptor.subpasses = {subpass};
 
 					renderPass = createRenderPass(renderPassDescriptor);
-
-					const ref<Swapchain>& swapchain = getSwapchain();
-
-					swapchain->getImages(renderPass);
 				}
 
-				// 5. Create pipeline layout.
+				// 5. Create framebuffers.
+				recreateFramebuffers();
+
+				// 6. Create pipeline layout.
 				{
 					DescriptorSetLayoutBinding textureArrayDescriptorSetLayoutBinding;
 					textureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
@@ -77,7 +84,7 @@ namespace ProjectA {
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 6. Create render pipeline.
+				// 7. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -98,7 +105,6 @@ namespace ProjectA {
 					colorBlendAttachment.blend = false;
 
 					RenderPipelineDescriptor renderPipelineDescriptor{};
-					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
 					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/ArrayTextureOrTextureArray.vert", vertexShaderModuleDescriptor);
@@ -112,11 +118,13 @@ namespace ProjectA {
 					renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 					renderPipelineDescriptor.depthStencilState.depthTest = false;
 					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+					renderPipelineDescriptor.renderPass = renderPass;
+					renderPipelineDescriptor.subpassIndex = 0;
 
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 7. Create vertex buffer.
+				// 8. Create vertex buffer.
 				{
 					constexpr uint64 vertexBufferSize = 6 * sizeof(Vertex);
 
@@ -161,7 +169,7 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				// 8. Create instance buffer.
+				// 9. Create instance buffer.
 				{
 					constexpr uint64 instanceVertexBufferSize = 4 * sizeof(Instance);
 
@@ -215,10 +223,8 @@ namespace ProjectA {
 				const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
-				beginRenderPassDescriptor.renderPass = renderPass;
-				beginRenderPassDescriptor.swapchain = swapchain;
+				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
-				beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
@@ -232,9 +238,7 @@ namespace ProjectA {
 			}
 
 			void resize(WindowResizeEvent& event) override {
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				swapchain->getImages(renderPass);
+				recreateFramebuffers();
 			}
 
 		private:
@@ -254,10 +258,8 @@ namespace ProjectA {
 
 				ImageDescriptor imageDescriptor{};
 				imageDescriptor.type = ImageType::TEXTURE_2D;
-				imageDescriptor.format = ImageFormat::R8G8B8A8_SRGB;
-				imageDescriptor.extent.width = file.width;
-				imageDescriptor.extent.height = file.height;
-				imageDescriptor.extent.depth = 1;
+				imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
+				imageDescriptor.extent = file.extent;
 				imageDescriptor.mipLevelCount = 1;
 				imageDescriptor.layerCount = 1;
 				imageDescriptor.sampleCount = 1;
@@ -273,9 +275,7 @@ namespace ProjectA {
 				bufferImageCopyRegion.imageOffsetX = 0;
 				bufferImageCopyRegion.imageOffsetY = 0;
 				bufferImageCopyRegion.imageOffsetZ = 0;
-				bufferImageCopyRegion.imageExtent.width = file.width;
-				bufferImageCopyRegion.imageExtent.height = file.height;
-				bufferImageCopyRegion.imageExtent.depth = 1;
+				bufferImageCopyRegion.imageExtent = file.extent;
 				bufferImageCopyRegion.imageMipLevel = 0;
 				bufferImageCopyRegion.imageLayerOffset = 0;
 				bufferImageCopyRegion.imageLayerCount = 1;
@@ -296,6 +296,30 @@ namespace ProjectA {
 				device->waitIdle();
 
 				return image;
+			}
+
+			void recreateFramebuffers() {
+				const ref<Swapchain>& swapchain = getSwapchain();
+
+				if (framebuffers.count > 0) {
+					for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+						framebuffers[framebufferIndex].~shared_ptr();
+					}
+				}
+
+				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
+
+				FramebufferDescriptor framebufferDescriptor{};
+				framebufferDescriptor.renderPass = renderPass;
+				framebufferDescriptor.imageViews = sequence<ref<ImageView>>(1);
+				framebufferDescriptor.extent = swapchain->getExtent();
+				framebufferDescriptor.layerCount = 1;
+
+				for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
+
+					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+				}
 			}
 
 		private:
@@ -329,7 +353,10 @@ namespace ProjectA {
 
 			ref<Sampler> sampler;
 
+			ref<Subpass> subpass;
 			ref<RenderPass> renderPass;
+
+			sequence<ref<Framebuffer>> framebuffers;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;

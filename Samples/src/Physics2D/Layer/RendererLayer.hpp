@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class RendererLayer : public Layer {
 		public:
-			RendererLayer();
+			void build() override;
 
 			virtual ~RendererLayer() = default;
 

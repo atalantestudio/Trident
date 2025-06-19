@@ -29,7 +29,7 @@ namespace ProjectA {
 
 		static constexpr VkSampleMask sampleMask = ~0;
 
-		const Subpass& subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
+		const ref<Subpass>& subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
 		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
 
 		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
@@ -119,7 +119,7 @@ namespace ProjectA {
 		multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		multisampleStateCreateInfo.pNext = nullptr;
 		multisampleStateCreateInfo.flags = 0;
-		multisampleStateCreateInfo.rasterizationSamples = static_cast<VkSampleCountFlagBits>(subpass.getCombinedSampleCounts());
+		multisampleStateCreateInfo.rasterizationSamples = static_cast<VkSampleCountFlagBits>(subpass->getRasterizationSampleCount());
 
 		if (descriptor.minSampleShading == 0.0f) {
 			multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;
@@ -191,7 +191,7 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
 		graphicsPipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
 
-		if (descriptor.depthStencilState.depthTest && subpass.depthStencil) {
+		if (subpass->hasDepthStencilAttachment()) {
 			VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo{};
 			depthStencilStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 			depthStencilStateCreateInfo.pNext = nullptr;

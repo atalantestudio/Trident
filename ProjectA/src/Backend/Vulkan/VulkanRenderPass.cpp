@@ -24,17 +24,13 @@ namespace ProjectA {
 		uint32 subpassAttachmentOffset = 0;
 
 		for (uint32 subpassIndex = 0; subpassIndex < descriptor.subpasses.count; subpassIndex += 1) {
-			const Subpass& subpass = descriptor.subpasses[subpassIndex];
+			const ref<Subpass>& subpass = descriptor.subpasses[subpassIndex];
+			const sequence<ColorAttachment>& colorAttachments = subpass->getColorAttachments();
+			const uint32 colorAttachmentCount = static_cast<uint32>(colorAttachments.count);
+			const uint32 resolveAttachmentCount = subpass->getResolveAttachmentCount();
 
-			uint32 colorAttachmentCount = static_cast<uint32>(subpass.colorAttachments.count);
-			uint32 resolveAttachmentCount = 0;
-
-			if (subpass.resolve) {
-				resolveAttachmentCount = static_cast<uint32>(subpass.colorAttachments.count);
-			}
-
-			for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < subpass.colorAttachments.count; colorAttachmentIndex += 1) {
-				const ColorAttachment& colorAttachment = subpass.colorAttachments[colorAttachmentIndex];
+			for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < colorAttachmentCount; colorAttachmentIndex += 1) {
+				const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
 
 				VkAttachmentDescription& colorAttachmentDescription = attachmentDescriptions[subpassAttachmentOffset + colorAttachmentIndex];
 				colorAttachmentDescription.flags = 0;
@@ -46,7 +42,7 @@ namespace ProjectA {
 				colorAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 				colorAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-				if (resolveAttachmentCount == 0 && colorAttachmentIndex == subpass.presentAttachmentIndex) {
+				if (resolveAttachmentCount == 0 && colorAttachmentIndex == subpass->getPresentAttachmentIndex()) {
 					colorAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 				}
 				else {
@@ -81,12 +77,14 @@ namespace ProjectA {
 
 			subpassAttachmentOffset += resolveAttachmentCount;
 
-			if (subpass.depthStencil) {
+			if (subpass->hasDepthStencilAttachment()) {
+				const DepthStencilAttachment depthStencilAttachment = subpass->getDepthStencilAttachment();
+
 				VkAttachmentDescription& depthStencilAttachmentDescription = attachmentDescriptions[subpassAttachmentOffset];
 				depthStencilAttachmentDescription.flags = 0;
 				depthStencilAttachmentDescription.format = VK_FORMAT_D32_SFLOAT;
-				depthStencilAttachmentDescription.samples = static_cast<VkSampleCountFlagBits>(subpass.depthStencilAttachment.sampleCount);
-				depthStencilAttachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(subpass.depthStencilAttachment.loadOperation);
+				depthStencilAttachmentDescription.samples = static_cast<VkSampleCountFlagBits>(depthStencilAttachment.sampleCount);
+				depthStencilAttachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(depthStencilAttachment.loadOperation);
 
 				// Vulkan can make optimizations if we explicitly tell it that we don't care about the depth data post-rendering.
 				depthStencilAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -116,7 +114,7 @@ namespace ProjectA {
 				subpassDescription.pResolveAttachments = nullptr;
 			}
 
-			if (subpass.depthStencil) {
+			if (subpass->hasDepthStencilAttachment()) {
 				subpassDescription.pDepthStencilAttachment = &attachmentReferences[colorAttachmentCount + resolveAttachmentCount];
 			}
 			else {
@@ -135,7 +133,7 @@ namespace ProjectA {
 			subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 			subpassDependency.dependencyFlags = 0;
 
-			if (subpass.depthStencil) {
+			if (subpass->hasDepthStencilAttachment()) {
 				subpassDependency.srcStageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 				subpassDependency.dstStageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 				subpassDependency.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
@@ -163,43 +161,4 @@ namespace ProjectA {
 
 		vkDestroyRenderPass(device.object, object, nullptr);
 	}
-
-	/* ref<Image> VulkanRenderPass::createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const {
-		DEBUG_ASSERT(colorAttachmentIndex < colorAttachmentCount);
-		DEBUG_ASSERT((resolveAttachmentCount == 0 && colorAttachmentIndex != presentAttachmentIndex) || resolveAttachmentCount > 0);
-
-		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
-
-		const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
-
-		ImageDescriptor colorImageDescriptor{};
-		colorImageDescriptor.type = descriptor.type;
-		colorImageDescriptor.format = colorAttachment.format;
-		colorImageDescriptor.extent = descriptor.extent;
-		colorImageDescriptor.mipLevelCount = descriptor.mipLevelCount;
-		colorImageDescriptor.layerCount = descriptor.layerCount;
-		colorImageDescriptor.sampleCount = colorAttachment.sampleCount;
-		colorImageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT;
-		colorImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
-
-		return createRef<VulkanImage>(device.object, colorImageDescriptor);
-	}
-
-	ref<Image> VulkanRenderPass::createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const {
-		DEBUG_ASSERT(depthStencil);
-
-		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
-
-		ImageDescriptor depthStencilImageDescriptor{};
-		depthStencilImageDescriptor.type = descriptor.type;
-		depthStencilImageDescriptor.format = depthStencilAttachment.format;
-		depthStencilImageDescriptor.extent = descriptor.extent;
-		depthStencilImageDescriptor.mipLevelCount = descriptor.mipLevelCount;
-		depthStencilImageDescriptor.layerCount = descriptor.layerCount;
-		depthStencilImageDescriptor.sampleCount = depthStencilAttachment.sampleCount;
-		depthStencilImageDescriptor.usage = ImageUsage::DEPTH_STENCIL_ATTACHMENT;
-		depthStencilImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
-
-		return createRef<VulkanImage>(device.object, depthStencilImageDescriptor);
-	} */
 }

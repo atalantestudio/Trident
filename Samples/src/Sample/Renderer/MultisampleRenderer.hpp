@@ -5,8 +5,8 @@
 namespace ProjectA {
 	class MultisampleRenderer : public Renderer {
 		public:
-			MultisampleRenderer() {
-				// 1. Create render pass.
+			void build() override {
+				// 1. Create render pass and subpass.
 				{
 					const ref<Surface> surface = getSurface();
 
@@ -16,29 +16,30 @@ namespace ProjectA {
 					multisampleColorAttachment.loadOperation = LoadOperation::CLEAR;
 					multisampleColorAttachment.storeOperation = StoreOperation::STORE;
 
-					SubpassDescriptor subpassDescriptor;
+					SubpassDescriptor subpassDescriptor{};
 					subpassDescriptor.colorAttachments = {multisampleColorAttachment};
-					subpassDescriptor.resolve = true;
-					subpassDescriptor.depthStencil = false;
 					subpassDescriptor.presentAttachmentIndex = 0;
+					subpassDescriptor.depthStencil = false;
+
+					subpass = createSubpass(subpassDescriptor);
+
+					RenderPassDescriptor renderPassDescriptor{};
+					renderPassDescriptor.subpasses = {subpass};
 
 					renderPass = createRenderPass(renderPassDescriptor);
-
-					updateMultisampleAttachment();
-
-					const ref<Swapchain>& swapchain = getSwapchain();
-
-					swapchain->getImages(renderPass);
 				}
 
-				// 2. Create pipeline layout.
+				// 2. Create framebuffers.
+				recreateFramebuffers();
+
+				// 3. Create pipeline layout.
 				{
 					const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 3. Create render pipeline.
+				// 4. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -56,7 +57,6 @@ namespace ProjectA {
 					colorBlendAttachment.blend = false;
 
 					RenderPipelineDescriptor renderPipelineDescriptor{};
-					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Vertex2DRGB.vert", vertexShaderModuleDescriptor);
@@ -70,11 +70,13 @@ namespace ProjectA {
 					renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 					renderPipelineDescriptor.depthStencilState.depthTest = false;
 					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+					renderPipelineDescriptor.renderPass = renderPass;
+					renderPipelineDescriptor.subpassIndex = 0;
 
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 4. Create vertex buffer.
+				// 5. Create vertex buffer.
 				{
 					const ref<Device> device = getDevice();
 
@@ -128,10 +130,8 @@ namespace ProjectA {
 				const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
-				beginRenderPassDescriptor.renderPass = renderPass;
-				beginRenderPassDescriptor.swapchain = swapchain;
+				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
-				beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
@@ -143,32 +143,52 @@ namespace ProjectA {
 			}
 
 			void resize(WindowResizeEvent& event) override {
-				updateMultisampleAttachment();
-
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				swapchain->getImages(renderPass);
+				recreateFramebuffers();
 			}
 
 		private:
-			void updateMultisampleAttachment() {
+			void recreateFramebuffers() {
 				const ref<Swapchain>& swapchain = getSwapchain();
+				const Extent2D extent = swapchain->getExtent();
 
-				AttachmentImageDescriptor multisampleAttachmentImageDescriptor{};
-				multisampleAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-				multisampleAttachmentImageDescriptor.extent.width = swapchain->getExtent().width;
-				multisampleAttachmentImageDescriptor.extent.height = swapchain->getExtent().height;
-				multisampleAttachmentImageDescriptor.extent.depth = 1;
-				multisampleAttachmentImageDescriptor.mipLevelCount = 1;
-				multisampleAttachmentImageDescriptor.layerCount = 1;
+				AttachmentImageDescriptor colorImageDescriptor{};
+				colorImageDescriptor.type = ImageType::TEXTURE_2D;
+				colorImageDescriptor.extent.width = extent.width;
+				colorImageDescriptor.extent.height = extent.height;
+				colorImageDescriptor.extent.depth = 1;
+				colorImageDescriptor.mipLevelCount = 1;
+				colorImageDescriptor.layerCount = 1;
 
-				multisampleImage = renderPass->createColorAttachmentImage(multisampleAttachmentImageDescriptor, 0);
+				colorImage = renderPass->getSubpass(0)->createColorAttachmentImage(colorImageDescriptor, 0);
 
-				constexpr ImageViewDescriptor multisampleImageViewDescriptor;
+				ImageViewDescriptor colorImageViewDescriptor{};
+				colorImageViewDescriptor.mipLevelOffset = 0;
+				colorImageViewDescriptor.mipLevelCount = colorImage->getMipLevelCount();
+				colorImageViewDescriptor.layerOffset = 0;
+				colorImageViewDescriptor.layerCount = colorImage->getLayerCount();
 
-				multisampleImageView = multisampleImage->createView(multisampleImageViewDescriptor);
+				colorImageView = colorImage->createView(colorImageViewDescriptor);
 
-				renderPass->setColorAttachmentImageView(multisampleImageView, 0);
+				if (framebuffers.count > 0) {
+					for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+						framebuffers[framebufferIndex].~shared_ptr();
+					}
+				}
+
+				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
+
+				FramebufferDescriptor framebufferDescriptor{};
+				framebufferDescriptor.renderPass = renderPass;
+				framebufferDescriptor.imageViews = sequence<ref<ImageView>>(2);
+				framebufferDescriptor.imageViews[0] = colorImageView;
+				framebufferDescriptor.extent = extent;
+				framebufferDescriptor.layerCount = 1;
+
+				for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+					framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
+
+					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+				}
 			}
 
 		private:
@@ -178,10 +198,13 @@ namespace ProjectA {
 			};
 
 		private:
+			ref<Subpass> subpass;
 			ref<RenderPass> renderPass;
+		
+			sequence<ref<Framebuffer>> framebuffers;
 
-			ref<Image> multisampleImage;
-			ref<ImageView> multisampleImageView;
+			ref<Image> colorImage;
+			ref<ImageView> colorImageView;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;

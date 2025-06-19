@@ -8,7 +8,7 @@
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace ProjectA {
-	RendererLayer::RendererLayer() {
+	void RendererLayer::build() {
 		/// Geometries ///
 
 		Geometry2DDescriptor polygonGeometryDescriptor;
@@ -64,8 +64,8 @@ namespace ProjectA {
 		Object2D& objectA = scene.registerObject(objectADescriptor);
 
 		// X = -0.03 triggers CCD vertex-vertex case.
-		objectA.position = {-0.03f, -0.625f};
-		// objectA.position = {0.45f, -0.625f};
+		// objectA.position = {-0.03f, -0.625f};
+		objectA.position = {0.45f, -0.625f};
 
 		objectA.updateTransform();
 
@@ -81,6 +81,7 @@ namespace ProjectA {
 
 		objectB.updateTransform();
 
+		renderer.build();
 		renderer.registerScene(scene);
 	}
 
@@ -101,6 +102,11 @@ namespace ProjectA {
 
 		if (selectedObjectIndex != std::numeric_limits<uint32>::max()) {
 			renderer.setPlaceholderOffset(placeholderOffset);
+		}
+
+		// TODO: First frame guard.
+		if (gjkResult.closestFeatureA.count == 0) {
+			return;
 		}
 
 		renderer.setClosestPoints(gjkResult.closestA, gjkResult.closestB);

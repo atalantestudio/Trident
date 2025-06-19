@@ -9,8 +9,7 @@ namespace ProjectA {
 		public:
 			virtual ~Layer() = default;
 
-			// virtual void build() = 0;
-			virtual void build() {};
+			virtual void build() = 0;
 
 			virtual void postConstruct() {}
 

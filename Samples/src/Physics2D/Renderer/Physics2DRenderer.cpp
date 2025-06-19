@@ -5,7 +5,7 @@
 #include "Engine/API/Material/ColorMaterial.hpp"
 
 namespace ProjectA {
-	Physics2DRenderer::Physics2DRenderer() {
+	void Physics2DRenderer::build() {
 		DEBUG_STATIC_ASSERT(SAMPLE_COUNT > 1);
 
 		const ref<Surface> surface = getSurface();
@@ -16,28 +16,22 @@ namespace ProjectA {
 		colorAttachment.loadOperation = LoadOperation::CLEAR;
 		colorAttachment.storeOperation = StoreOperation::STORE;
 
-		Subpass subpass{};
-		subpass.colorAttachments = {colorAttachment};
-		subpass.depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
-		subpass.depthStencilAttachment.sampleCount = SAMPLE_COUNT;
-		subpass.depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
-		subpass.resolve = true;
-		subpass.depthStencil = true;
-		subpass.presentAttachmentIndex = 0;
+		SubpassDescriptor subpassDescriptor{};
+		subpassDescriptor.colorAttachments = {colorAttachment};
+		subpassDescriptor.presentAttachmentIndex = 0;
+		subpassDescriptor.depthStencil = true;
+		subpassDescriptor.depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
+		subpassDescriptor.depthStencilAttachment.sampleCount = SAMPLE_COUNT;
+		subpassDescriptor.depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
+
+		subpass = createSubpass(subpassDescriptor);
 
 		RenderPassDescriptor renderPassDescriptor{};
 		renderPassDescriptor.subpasses = {subpass};
 
-		DEBUG_ASSERT(false);
-
 		renderPass = createRenderPass(renderPassDescriptor);
 
-		updateColorAttachment();
-		updateDepthStencilAttachment();
-
-		const ref<Swapchain>& swapchain = getSwapchain();
-
-		swapchain->getImages(renderPass);
+		recreateFramebuffers();
 
 		initializeCameraUniformBuffer();
 		initializeViewUniformBuffer();
@@ -53,6 +47,8 @@ namespace ProjectA {
 		initializeFeaturePipelineLayout();
 		initializeVertexFeatureRenderPipeline();
 		initializeEdgeFeatureRenderPipeline();
+
+		const ref<Swapchain>& swapchain = getSwapchain();
 
 		const float32 width = static_cast<float32>(swapchain->getExtent().width);
 		const float32 height = static_cast<float32>(swapchain->getExtent().height);
@@ -71,48 +67,51 @@ namespace ProjectA {
 		viewMappedRange->viewport.y = height;
 	}
 
-	void Physics2DRenderer::updateColorAttachment() {
-		DEBUG_ASSERT(false);
+	void Physics2DRenderer::recreateFramebuffers() {
+		const ref<Swapchain>& swapchain = getSwapchain();
+		const Extent2D extent = swapchain->getExtent();
 
-		/* const ref<Swapchain>& swapchain = getSwapchain();
+		AttachmentImageDescriptor attachmentImageDescriptor{};
+		attachmentImageDescriptor.type = ImageType::TEXTURE_2D;
+		attachmentImageDescriptor.extent.width = extent.width;
+		attachmentImageDescriptor.extent.height = extent.height;
+		attachmentImageDescriptor.extent.depth = 1;
+		attachmentImageDescriptor.mipLevelCount = 1;
+		attachmentImageDescriptor.layerCount = 1;
 
-		AttachmentImageDescriptor colorAttachmentImageDescriptor{};
-		colorAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		colorAttachmentImageDescriptor.extent.width = swapchain->getExtent().width;
-		colorAttachmentImageDescriptor.extent.height = swapchain->getExtent().height;
-		colorAttachmentImageDescriptor.extent.depth = 1;
-		colorAttachmentImageDescriptor.mipLevelCount = 1;
-		colorAttachmentImageDescriptor.layerCount = 1;
+		ImageViewDescriptor attachmentImageViewDescriptor{};
+		attachmentImageViewDescriptor.mipLevelOffset = 0;
+		attachmentImageViewDescriptor.mipLevelCount = 1;
+		attachmentImageViewDescriptor.layerOffset = 0;
+		attachmentImageViewDescriptor.layerCount = 1;
 
-		colorImage = renderPass->createColorAttachmentImage(colorAttachmentImageDescriptor, 0);
+		colorImage = renderPass->getSubpass(0)->createColorAttachmentImage(attachmentImageDescriptor, 0);
+		colorImageView = colorImage->createView(attachmentImageViewDescriptor);
 
-		constexpr ImageViewDescriptor colorImageViewDescriptor;
+		depthStencilImage = renderPass->getSubpass(0)->createDepthStencilAttachmentImage(attachmentImageDescriptor);
+		depthStencilImageView = depthStencilImage->createView(attachmentImageViewDescriptor);
 
-		colorImageView = colorImage->createView(colorImageViewDescriptor);
+		if (framebuffers.count > 0) {
+			for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+				framebuffers[framebufferIndex].~shared_ptr();
+			}
+		}
 
-		renderPass->setColorAttachmentImageView(colorImageView, 0); */
-	}
+		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
-	void Physics2DRenderer::updateDepthStencilAttachment() {
-		DEBUG_ASSERT(false);
+		FramebufferDescriptor framebufferDescriptor{};
+		framebufferDescriptor.renderPass = renderPass;
+		framebufferDescriptor.imageViews = sequence<ref<ImageView>>(3);
+		framebufferDescriptor.imageViews[0] = colorImageView;
+		framebufferDescriptor.imageViews[2] = depthStencilImageView;
+		framebufferDescriptor.extent = extent;
+		framebufferDescriptor.layerCount = 1;
 
-		/* const ref<Swapchain>& swapchain = getSwapchain();
+		for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+			framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
 
-		AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
-		depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		depthStencilAttachmentImageDescriptor.extent.width = swapchain->getExtent().width;
-		depthStencilAttachmentImageDescriptor.extent.height = swapchain->getExtent().height;
-		depthStencilAttachmentImageDescriptor.extent.depth = 1;
-		depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
-		depthStencilAttachmentImageDescriptor.layerCount = 1;
-
-		depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor);
-
-		constexpr ImageViewDescriptor depthStencilImageViewDescriptor;
-
-		depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
-
-		renderPass->setDepthStencilAttachmentImageView(depthStencilImageView); */
+			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+		}
 	}
 
 	void Physics2DRenderer::initializeCameraUniformBuffer() {
@@ -224,7 +223,6 @@ namespace ProjectA {
 		colorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor gridRenderPipelineDescriptor;
-		// gridRenderPipelineDescriptor.renderPass = renderPass;
 		gridRenderPipelineDescriptor.pipelineLayout = gridPipelineLayout;
 		gridRenderPipelineDescriptor.vertexInputBindings = {gridVertexInputBinding};
 		gridRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Grid.vert", gridVertexShaderModuleDescriptor);
@@ -240,6 +238,8 @@ namespace ProjectA {
 		gridRenderPipelineDescriptor.depthStencilState.depthWrite = false;
 		gridRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::NEVER;
 		gridRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		gridRenderPipelineDescriptor.renderPass = renderPass;
+		gridRenderPipelineDescriptor.subpassIndex = 0;
 
 		gridRenderPipeline = createRenderPipeline(gridRenderPipelineDescriptor);
 	}
@@ -273,7 +273,6 @@ namespace ProjectA {
 		colorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor centerOfMassRenderPipelineDescriptor;
-		// centerOfMassRenderPipelineDescriptor.renderPass = renderPass;
 		centerOfMassRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		centerOfMassRenderPipelineDescriptor.vertexInputBindings = {centerOfMassVertexInputBinding};
 		centerOfMassRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/CenterOfMass.vert", centerOfMassVertexShaderModuleDescriptor);
@@ -289,6 +288,8 @@ namespace ProjectA {
 		centerOfMassRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		centerOfMassRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
 		centerOfMassRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		centerOfMassRenderPipelineDescriptor.renderPass = renderPass;
+		centerOfMassRenderPipelineDescriptor.subpassIndex = 0;
 
 		centerOfMassRenderPipeline = createRenderPipeline(centerOfMassRenderPipelineDescriptor);
 	}
@@ -340,7 +341,6 @@ namespace ProjectA {
 		colorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor distanceRenderPipelineDescriptor;
-		// distanceRenderPipelineDescriptor.renderPass = renderPass;
 		distanceRenderPipelineDescriptor.pipelineLayout = distancePipelineLayout;
 		distanceRenderPipelineDescriptor.vertexInputBindings = {distanceVertexInputBinding};
 		distanceRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Distance.vert", distanceVertexShaderModuleDescriptor);
@@ -354,6 +354,8 @@ namespace ProjectA {
 		distanceRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		distanceRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		distanceRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		distanceRenderPipelineDescriptor.renderPass = renderPass;
+		distanceRenderPipelineDescriptor.subpassIndex = 0;
 
 		distanceRenderPipeline = createRenderPipeline(distanceRenderPipelineDescriptor);
 	}
@@ -415,7 +417,6 @@ namespace ProjectA {
 		colorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor vertexFeatureRenderPipelineDescriptor;
-		// vertexFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		vertexFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		vertexFeatureRenderPipelineDescriptor.vertexInputBindings = {vertexFeatureVertexInputBinding};
 		vertexFeatureRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/VertexFeature.vert", vertexFeatureVertexShaderModuleDescriptor);
@@ -429,6 +430,8 @@ namespace ProjectA {
 		vertexFeatureRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		vertexFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		vertexFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		vertexFeatureRenderPipelineDescriptor.renderPass = renderPass;
+		vertexFeatureRenderPipelineDescriptor.subpassIndex = 0;
 
 		vertexFeatureRenderPipeline = createRenderPipeline(vertexFeatureRenderPipelineDescriptor);
 	}
@@ -449,7 +452,6 @@ namespace ProjectA {
 		colorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor edgeFeatureRenderPipelineDescriptor;
-		// edgeFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		edgeFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		edgeFeatureRenderPipelineDescriptor.vertexInputBindings = {edgeFeatureVertexInputBinding};
 		edgeFeatureRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/EdgeFeature.vert", edgeFeatureVertexShaderModuleDescriptor);
@@ -463,6 +465,8 @@ namespace ProjectA {
 		edgeFeatureRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		edgeFeatureRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		edgeFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		edgeFeatureRenderPipelineDescriptor.renderPass = renderPass;
+		edgeFeatureRenderPipelineDescriptor.subpassIndex = 0;
 
 		edgeFeatureRenderPipeline = createRenderPipeline(edgeFeatureRenderPipelineDescriptor);
 	}
@@ -546,19 +550,23 @@ namespace ProjectA {
 		instanceBuffer = createBuffer(instanceBufferDescriptor);
 		this->instanceMappedRange = instanceBuffer->map<Instance>(0, instanceBufferSize);
 
-		sequence<BufferCopyRegion> bufferCopyRegions(3);
+		sequence<BufferCopyRegion> vertexBufferCopyRegions(1);
 
-		BufferCopyRegion& vertexBufferCopyRegion = bufferCopyRegions[0];
+		BufferCopyRegion& vertexBufferCopyRegion = vertexBufferCopyRegions[0];
 		vertexBufferCopyRegion.sourceOffset = 0;
 		vertexBufferCopyRegion.destinationOffset = 0;
 		vertexBufferCopyRegion.size = vertexBufferSize;
 
-		BufferCopyRegion& indexBufferCopyRegion = bufferCopyRegions[1];
+		sequence<BufferCopyRegion> indexBufferCopyRegions(1);
+
+		BufferCopyRegion& indexBufferCopyRegion = indexBufferCopyRegions[0];
 		indexBufferCopyRegion.sourceOffset = vertexBufferSize;
 		indexBufferCopyRegion.destinationOffset = 0;
 		indexBufferCopyRegion.size = indexBufferSize;
 
-		BufferCopyRegion& instanceBufferCopyRegion = bufferCopyRegions[2];
+		sequence<BufferCopyRegion> instanceBufferCopyRegions(1);
+
+		BufferCopyRegion& instanceBufferCopyRegion = instanceBufferCopyRegions[0];
 		instanceBufferCopyRegion.sourceOffset = vertexBufferSize + indexBufferSize;
 		instanceBufferCopyRegion.destinationOffset = 0;
 		instanceBufferCopyRegion.size = instanceBufferSize;
@@ -569,7 +577,9 @@ namespace ProjectA {
 		const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
 
 		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, bufferCopyRegions);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, vertexBufferCopyRegions);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, indexBufferCopyRegions);
+		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, instanceBufferCopyRegions);
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -614,7 +624,6 @@ namespace ProjectA {
 		opaqueColorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor fillRenderPipelineDescriptor;
-		// fillRenderPipelineDescriptor.renderPass = renderPass;
 		fillRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, fillInstanceInputBinding};
 		fillRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Fill.vert", vertexShaderModuleDescriptor);
@@ -630,6 +639,8 @@ namespace ProjectA {
 		fillRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		fillRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
 		fillRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		fillRenderPipelineDescriptor.renderPass = renderPass;
+		fillRenderPipelineDescriptor.subpassIndex = 0;
 
 		fillRenderPipeline = createRenderPipeline(fillRenderPipelineDescriptor);
 
@@ -640,7 +651,6 @@ namespace ProjectA {
 		strokeInstanceInputBinding.registerAttribute<uint32>();
 
 		RenderPipelineDescriptor strokeRenderPipelineDescriptor;
-		// strokeRenderPipelineDescriptor.renderPass = renderPass;
 		strokeRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, strokeInstanceInputBinding};
 		strokeRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Stroke.vert", vertexShaderModuleDescriptor);
@@ -656,6 +666,8 @@ namespace ProjectA {
 		strokeRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		strokeRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
 		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR | DynamicState::LINE_WIDTH;
+		strokeRenderPipelineDescriptor.renderPass = renderPass;
+		strokeRenderPipelineDescriptor.subpassIndex = 0;
 
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
 
@@ -723,7 +735,6 @@ namespace ProjectA {
 		placeholderStrokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
 
 		RenderPipelineDescriptor placeholderCenterOfMassRenderPipelineDescriptor;
-		// placeholderCenterOfMassRenderPipelineDescriptor.renderPass = renderPass;
 		placeholderCenterOfMassRenderPipelineDescriptor.pipelineLayout = placeholderFillPipelineLayout;
 		placeholderCenterOfMassRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 		placeholderCenterOfMassRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/PlaceholderCenterOfMass.vert", vertexShaderModuleDescriptor);
@@ -737,6 +748,8 @@ namespace ProjectA {
 		placeholderCenterOfMassRenderPipelineDescriptor.colorBlendState.attachments = {opaqueColorBlendAttachment};
 		placeholderCenterOfMassRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		placeholderCenterOfMassRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		placeholderCenterOfMassRenderPipelineDescriptor.renderPass = renderPass;
+		placeholderCenterOfMassRenderPipelineDescriptor.subpassIndex = 0;
 
 		placeholderCenterOfMassRenderPipeline = createRenderPipeline(placeholderCenterOfMassRenderPipelineDescriptor);
 
@@ -823,20 +836,15 @@ namespace ProjectA {
 		const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 		const ClearValue colorAttachmentClearValue = {1.0f, 1.0f, 1.0f, 1.0f};
-
 		const ClearValue resolveAttachmentClearValue = {1.0f, 1.0f, 1.0f, 1.0f};
 
 		ClearValue depthStencilAttachmentClearValue{};
 		depthStencilAttachmentClearValue.depth = 0.0f;
 		depthStencilAttachmentClearValue.stencil = 0;
 
-		DEBUG_ASSERT(false);
-
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		// beginRenderPassDescriptor.renderPass = renderPass;
-		// beginRenderPassDescriptor.swapchain = swapchain;
+		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 		beginRenderPassDescriptor.clearValues = {colorAttachmentClearValue, resolveAttachmentClearValue, depthStencilAttachmentClearValue};
-		// beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
@@ -987,12 +995,7 @@ namespace ProjectA {
 		viewMappedRange->viewport.x = width;
 		viewMappedRange->viewport.y = height;
 
-		updateColorAttachment();
-		updateDepthStencilAttachment();
-
-		const ref<Swapchain>& swapchain = getSwapchain();
-
-		swapchain->getImages(renderPass);
+		recreateFramebuffers();
 	}
 
 	void Physics2DRenderer::writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const {

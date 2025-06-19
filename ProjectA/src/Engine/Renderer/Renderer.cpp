@@ -142,6 +142,10 @@ namespace ProjectA {
 		return adapter->createSemaphore();
 	}
 
+	ref<Subpass> Renderer::createSubpass(const SubpassDescriptor& descriptor) {
+		return createRef<Subpass>(descriptor);
+	}
+
 	const ref<Semaphore>& Renderer::getAcquireNextImageSemaphore(uint32 frameInFlightIndex) {
 		return acquireNextImageSemaphores[frameInFlightIndex];
 	}

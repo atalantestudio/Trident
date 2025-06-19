@@ -3,10 +3,11 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
+	// TODO: Color is too bright with the OpenGL adapter.
 	class ColorBlendRenderer : public Renderer {
 		public:
-			ColorBlendRenderer() {
-				// 1. Create render pass.
+			void build() override {
+				// 1. Create render pass and subpass.
 				{
 					const ref<Surface> surface = getSurface();
 
@@ -16,27 +17,30 @@ namespace ProjectA {
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
 
-					SubpassDescriptor subpassDescriptor;
+					SubpassDescriptor subpassDescriptor{};
 					subpassDescriptor.colorAttachments = {colorAttachment};
-					subpassDescriptor.resolve = false;
-					subpassDescriptor.depthStencil = false;
 					subpassDescriptor.presentAttachmentIndex = 0;
+					subpassDescriptor.depthStencil = false;
+
+					subpass = createSubpass(subpassDescriptor);
+
+					RenderPassDescriptor renderPassDescriptor{};
+					renderPassDescriptor.subpasses = {subpass};
 
 					renderPass = createRenderPass(renderPassDescriptor);
-
-					const ref<Swapchain>& swapchain = getSwapchain();
-
-					swapchain->getImages(renderPass);
 				}
 
-				// 2. Create pipeline layout.
+				// 2. Create framebuffers.
+				recreateFramebuffers();
+
+				// 3. Create pipeline layout.
 				{
 					const PipelineLayoutDescriptor pipelineLayoutDescriptor;
 
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 3. Create render pipeline.
+				// 4. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -58,7 +62,6 @@ namespace ProjectA {
 					colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
 					RenderPipelineDescriptor renderPipelineDescriptor{};
-					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
 					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Vertex2DRGBA.vert", vertexShaderModuleDescriptor);
@@ -72,11 +75,13 @@ namespace ProjectA {
 					renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 					renderPipelineDescriptor.depthStencilState.depthTest = false;
 					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+					renderPipelineDescriptor.renderPass = renderPass;
+					renderPipelineDescriptor.subpassIndex = 0;
 
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 4. Create vertex buffers.
+				// 5. Create vertex buffers.
 				{
 					const ref<Device> device = getDevice();
 
@@ -152,10 +157,8 @@ namespace ProjectA {
 				const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
-				beginRenderPassDescriptor.renderPass = renderPass;
-				beginRenderPassDescriptor.swapchain = swapchain;
+				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
-				beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
@@ -174,9 +177,32 @@ namespace ProjectA {
 			}
 
 			void resize(WindowResizeEvent& event) override {
+				recreateFramebuffers();
+			}
+
+		private:
+			void recreateFramebuffers() {
 				const ref<Swapchain>& swapchain = getSwapchain();
 
-				swapchain->getImages(renderPass);
+				if (framebuffers.count > 0) {
+					for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+						framebuffers[framebufferIndex].~shared_ptr();
+					}
+				}
+
+				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
+
+				FramebufferDescriptor framebufferDescriptor{};
+				framebufferDescriptor.renderPass = renderPass;
+				framebufferDescriptor.imageViews = sequence<ref<ImageView>>(1);
+				framebufferDescriptor.extent = swapchain->getExtent();
+				framebufferDescriptor.layerCount = 1;
+
+				for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
+
+					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+				}
 			}
 
 		private:
@@ -194,7 +220,10 @@ namespace ProjectA {
 			static constexpr uint64 INSTANCE_BUFFER_SIZE = INSTANCE_COUNT * sizeof(Instance);
 
 		private:
+			ref<Subpass> subpass;
 			ref<RenderPass> renderPass;
+
+			sequence<ref<Framebuffer>> framebuffers;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;

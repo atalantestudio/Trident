@@ -56,9 +56,12 @@ namespace ProjectA {
 
 				const ref<Layer> layer = createRef<LayerType>(std::forward<Argument>(arguments)...);
 
+				layer->build();
+
 				layerStack.pushLayer(layer);
 			}
 
+			// TODO: Remove support for overlays.
 			template<typename OverlayType, typename... Argument>
 			void registerOverlay(Argument&&... arguments) {
 				PROFILE_SCOPE(FUNC_SIG);
@@ -120,11 +123,6 @@ namespace ProjectA {
 
 			// In the range [0, MAX_FRAMES_IN_FLIGHT].
 			static uint32 frameInFlightIndex;
-
-			// std::vector<SubpassDescriptor> subpassDescriptors;
-
-			// static RenderPassDescriptor renderPassDescriptor;
-			// static ref<RenderPass> renderPass;
 
 		private:
 			scope<Mutex> mutex;

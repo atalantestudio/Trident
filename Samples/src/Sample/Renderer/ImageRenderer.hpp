@@ -49,9 +49,9 @@
 namespace ProjectA {
 	class ImageRenderer : public Renderer {
 		public:
-			ImageRenderer() {
+			void build() override {
 				// const PNGFile file = Filesystem::openTemporary<PNGFile>("Asset/Image/Zelda.png");
-				const ImageFile file = Filesystem::openImage<FileFormat::QOI>("Asset/Image/qoi_test_images/testcard.qoi");
+				const ImageFile file = Filesystem::openImage<FileFormat::QOI>("Asset/Image/qoi_test_images/kodim10.qoi");
 
 				const ref<Device> device = getDevice();
 
@@ -70,6 +70,7 @@ namespace ProjectA {
 
 				// 2. Create image and copy the image staging buffer to it.
 				{
+					// TODO: On Vulkan, the data of an RGB image must first be copied to an RGBA image which supports TRANSFER_DST usage.
 					ImageDescriptor imageDescriptor;
 					imageDescriptor.type = ImageType::TEXTURE_2D;
 					imageDescriptor.format = file.format;
@@ -112,7 +113,11 @@ namespace ProjectA {
 
 				// 3. Create image view.
 				{
-					constexpr ImageViewDescriptor imageViewDescriptor;
+					ImageViewDescriptor imageViewDescriptor{};
+					imageViewDescriptor.mipLevelOffset = 0;
+					imageViewDescriptor.mipLevelCount = image->getMipLevelCount();
+					imageViewDescriptor.layerOffset = 0;
+					imageViewDescriptor.layerCount = image->getLayerCount();
 
 					imageView = image->createView(imageViewDescriptor);
 				}
@@ -126,7 +131,7 @@ namespace ProjectA {
 					sampler = createSampler(samplerDescriptor);
 				}
 
-				// 5. Create render pass.
+				// 5. Create render pass and subpass.
 				{
 					const ref<Surface> surface = getSurface();
 
@@ -136,20 +141,23 @@ namespace ProjectA {
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
 
-					SubpassDescriptor subpassDescriptor;
+					SubpassDescriptor subpassDescriptor{};
 					subpassDescriptor.colorAttachments = {colorAttachment};
-					subpassDescriptor.resolve = false;
-					subpassDescriptor.depthStencil = false;
 					subpassDescriptor.presentAttachmentIndex = 0;
+					subpassDescriptor.depthStencil = false;
+
+					subpass = createSubpass(subpassDescriptor);
+
+					RenderPassDescriptor renderPassDescriptor{};
+					renderPassDescriptor.subpasses = {subpass};
 
 					renderPass = createRenderPass(renderPassDescriptor);
-
-					const ref<Swapchain>& swapchain = getSwapchain();
-
-					swapchain->getImages(renderPass);
 				}
 
-				// 6. Create pipeline layout.
+				// 6. Create framebuffers.
+				recreateFramebuffers();
+
+				// 7. Create pipeline layout.
 				{
 					DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding;
 					textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
@@ -166,7 +174,7 @@ namespace ProjectA {
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 7. Create render pipeline.
+				// 8. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -203,7 +211,7 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 8. Create vertex buffer.
+				// 9. Create vertex buffer.
 				{
 					constexpr uint64 vertexBufferSize = 3 * sizeof(svec2<float32>);
 
@@ -252,10 +260,8 @@ namespace ProjectA {
 				const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
-				beginRenderPassDescriptor.renderPass = renderPass;
-				beginRenderPassDescriptor.swapchain = swapchain;
+				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{1.0f, 0.2f, 0.0f, 1.0f}};
-				beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
@@ -268,9 +274,32 @@ namespace ProjectA {
 			}
 
 			void resize(WindowResizeEvent& event) override {
+				recreateFramebuffers();
+			}
+
+		private:
+			void recreateFramebuffers() {
 				const ref<Swapchain>& swapchain = getSwapchain();
 
-				swapchain->getImages(renderPass);
+				if (framebuffers.count > 0) {
+					for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+						framebuffers[framebufferIndex].~shared_ptr();
+					}
+				}
+
+				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
+
+				FramebufferDescriptor framebufferDescriptor{};
+				framebufferDescriptor.renderPass = renderPass;
+				framebufferDescriptor.imageViews = sequence<ref<ImageView>>(1);
+				framebufferDescriptor.extent = swapchain->getExtent();
+				framebufferDescriptor.layerCount = 1;
+
+				for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
+
+					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+				}
 			}
 
 		private:
@@ -279,7 +308,10 @@ namespace ProjectA {
 
 			ref<Sampler> sampler;
 
+			ref<Subpass> subpass;
 			ref<RenderPass> renderPass;
+
+			sequence<ref<Framebuffer>> framebuffers;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;

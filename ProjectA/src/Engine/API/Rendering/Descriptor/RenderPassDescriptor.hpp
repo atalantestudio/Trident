@@ -4,6 +4,6 @@
 
 namespace ProjectA {
 	struct RenderPassDescriptor {
-		sequence<Subpass> subpasses;
+		sequence<ref<Subpass>> subpasses;
 	};
 }

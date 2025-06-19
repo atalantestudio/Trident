@@ -6,9 +6,6 @@
 
 namespace ProjectA {
 	void GUIRenderer::build() {
-		updateColorAttachment();
-
-		const ref<Swapchain>& swapchain = getSwapchain();
 		const ref<Surface> surface = getSurface();
 
 		ColorAttachment colorAttachment{};
@@ -17,20 +14,19 @@ namespace ProjectA {
 		colorAttachment.loadOperation = LoadOperation::CLEAR;
 		colorAttachment.storeOperation = StoreOperation::STORE;
 
-		Subpass subpass{};
-		subpass.colorAttachments = {colorAttachment};
-		subpass.resolve = true;
-		subpass.depthStencil = false;
-		subpass.presentAttachmentIndex = 0;
+		SubpassDescriptor subpassDescriptor{};
+		subpassDescriptor.colorAttachments = {colorAttachment};
+		subpassDescriptor.presentAttachmentIndex = 0;
+		subpassDescriptor.depthStencil = false;
+
+		subpass = createSubpass(subpassDescriptor);
 
 		RenderPassDescriptor renderPassDescriptor{};
 		renderPassDescriptor.subpasses = {subpass};
 
 		renderPass = createRenderPass(renderPassDescriptor);
 
-		DEBUG_ASSERT(false);
-
-		swapchain->getImages(renderPass);
+		recreateFramebuffers();
 
 		initializeVertexBuffer();
 		initializeIndexBuffer();
@@ -73,28 +69,6 @@ namespace ProjectA {
 		initializeRenderPipeline();
 
 		updateCamera();
-	}
-
-	void GUIRenderer::updateColorAttachment() {
-		DEBUG_ASSERT(false);
-
-		/* const ref<Swapchain>& swapchain = getSwapchain();
-
-		AttachmentImageDescriptor colorAttachmentImageDescriptor{};
-		colorAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		colorAttachmentImageDescriptor.extent.width = swapchain->getExtent().width;
-		colorAttachmentImageDescriptor.extent.height = swapchain->getExtent().height;
-		colorAttachmentImageDescriptor.extent.depth = 1;
-		colorAttachmentImageDescriptor.mipLevelCount = 1;
-		colorAttachmentImageDescriptor.layerCount = 1;
-
-		colorImage = renderPass->createColorAttachmentImage(colorAttachmentImageDescriptor, 0);
-
-		constexpr ImageViewDescriptor colorImageViewDescriptor;
-
-		colorImageView = colorImage->createView(colorImageViewDescriptor);
-
-		renderPass->setColorAttachmentImageView(colorImageView, 0); */
 	}
 
 	void GUIRenderer::initializeVertexBuffer() {
@@ -282,7 +256,8 @@ namespace ProjectA {
 		subcomponentRenderPipelineDescriptor.colorBlendState.attachments = {opaqueColorBlendAttachment};
 		subcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		subcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		// subcomponentRenderPipelineDescriptor.subpass = subpass;
+		subcomponentRenderPipelineDescriptor.renderPass = renderPass;
+		subcomponentRenderPipelineDescriptor.subpassIndex = 0;
 
 		subcomponentRenderPipeline = createRenderPipeline(subcomponentRenderPipelineDescriptor);
 
@@ -311,7 +286,8 @@ namespace ProjectA {
 		glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
 		glyphSubcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		glyphSubcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		// glyphSubcomponentRenderPipelineDescriptor.subpass = subpass;
+		glyphSubcomponentRenderPipelineDescriptor.renderPass = renderPass;
+		glyphSubcomponentRenderPipelineDescriptor.subpassIndex = 0;
 
 		glyphSubcomponentRenderPipeline = createRenderPipeline(glyphSubcomponentRenderPipelineDescriptor);
 	}
@@ -425,13 +401,9 @@ namespace ProjectA {
 		const float32 width = static_cast<float32>(swapchain->getExtent().width);
 		const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
-		DEBUG_ASSERT(false);
-
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		// beginRenderPassDescriptor.renderPass = renderPass;
-		// beginRenderPassDescriptor.swapchain = swapchain;
+		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
-		// beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 
@@ -460,16 +432,56 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::resize(WindowResizeEvent& event) {
+		recreateFramebuffers();
 		updateCamera();
-		updateColorAttachment();
-
-		const ref<Swapchain>& swapchain = getSwapchain();
-
-		swapchain->getImages(renderPass);
 	}
 
 	void GUIRenderer::resetCounters() {
 		subcomponentCount = 0;
 		glyphSubcomponentCount = 0;
+	}
+
+	void GUIRenderer::recreateFramebuffers() {
+		const ref<Swapchain>& swapchain = getSwapchain();
+		const Extent2D extent = swapchain->getExtent();
+
+		AttachmentImageDescriptor colorImageDescriptor{};
+		colorImageDescriptor.type = ImageType::TEXTURE_2D;
+		colorImageDescriptor.extent.width = extent.width;
+		colorImageDescriptor.extent.height = extent.height;
+		colorImageDescriptor.extent.depth = 1;
+		colorImageDescriptor.mipLevelCount = 1;
+		colorImageDescriptor.layerCount = 1;
+
+		colorImage = renderPass->getSubpass(0)->createColorAttachmentImage(colorImageDescriptor, 0);
+
+		ImageViewDescriptor colorImageViewDescriptor{};
+		colorImageViewDescriptor.mipLevelOffset = 0;
+		colorImageViewDescriptor.mipLevelCount = colorImage->getMipLevelCount();
+		colorImageViewDescriptor.layerOffset = 0;
+		colorImageViewDescriptor.layerCount = colorImage->getLayerCount();
+
+		colorImageView = colorImage->createView(colorImageViewDescriptor);
+
+		if (framebuffers.count > 0) {
+			for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+				framebuffers[framebufferIndex].~shared_ptr();
+			}
+		}
+
+		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
+
+		FramebufferDescriptor framebufferDescriptor{};
+		framebufferDescriptor.renderPass = renderPass;
+		framebufferDescriptor.imageViews = sequence<ref<ImageView>>(2);
+		framebufferDescriptor.imageViews[0] = colorImageView;
+		framebufferDescriptor.extent = extent;
+		framebufferDescriptor.layerCount = 1;
+
+		for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+			framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
+
+			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+		}
 	}
 }

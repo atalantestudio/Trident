@@ -192,7 +192,7 @@ namespace ProjectA {
 	ref<Swapchain> OpenGLGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
 		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
 
-		return createRef<OpenGLSwapchain>(descriptor, renderingContext);
+		return createRef<OpenGLSwapchain>(descriptor, renderingContext, *surface);
 	}
 
 	#ifdef DEBUG_ENABLE_MESSENGER

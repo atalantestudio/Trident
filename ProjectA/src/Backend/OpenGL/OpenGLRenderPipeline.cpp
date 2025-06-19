@@ -23,7 +23,7 @@ namespace ProjectA {
 		lineWidth(descriptor.lineWidth),
 		minSampleShading(descriptor.minSampleShading),
 		drawBuffers(descriptor.colorBlendState.attachments.size()),
-		depthTest(descriptor.depthStencilState.depthTest && descriptor.renderPass->getSubpass(descriptor.subpassIndex).depthStencil),
+		depthTest(descriptor.renderPass->getSubpass(descriptor.subpassIndex)->hasDepthStencilAttachment()),
 		depthWrite(descriptor.depthStencilState.depthWrite),
 		depthFunc(getGlDepthFunc(descriptor.depthStencilState.compareOperation)),
 		dynamicLineWidth(descriptor.dynamicState & DynamicState::LINE_WIDTH),

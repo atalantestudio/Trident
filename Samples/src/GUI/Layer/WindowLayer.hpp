@@ -3,7 +3,7 @@
 namespace ProjectA {
 	class WindowLayer : public GUILayer {
 		public:
-			WindowLayer() {
+			void registerAssets() override {
 				radioGroteskRegularFont = loadFont("../ProjectA/src/Asset/Font/test-regular.ttf");
 
 				textStyle.color = white;

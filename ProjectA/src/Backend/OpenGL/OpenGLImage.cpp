@@ -42,6 +42,7 @@ namespace ProjectA {
 			case GL_TEXTURE_2D_MULTISAMPLE:
 			case GL_TEXTURE_CUBE_MAP:
 			case GL_TEXTURE_RECTANGLE:
+				// TODO: Decouple multisample from non-multisample images.
 				if (sampleCount > 1) {
 					glTextureStorage2DMultisample(object, sampleCount, internalFormat, extent.width, extent.height, GL_TRUE);
 				}
@@ -58,6 +59,7 @@ namespace ProjectA {
 			case GL_TEXTURE_2D_MULTISAMPLE_ARRAY:
 			case GL_TEXTURE_3D:
 			case GL_TEXTURE_CUBE_MAP_ARRAY:
+				// TODO: Decouple multisample from non-multisample images.
 				if (sampleCount > 1) {
 					glTextureStorage3DMultisample(object, sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);
 				}

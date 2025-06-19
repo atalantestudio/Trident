@@ -1,71 +1,88 @@
 #pragma once
 
-#include "Engine/API/Rendering/Attachment.hpp"
+#include "Engine/API/Rendering/Descriptor/AttachmentImageDescriptor.hpp"
+#include "Engine/API/Rendering/Descriptor/SubpassDescriptor.hpp"
+#include "Engine/API/Rendering/Image.hpp"
+#include "Engine/Validation/Descriptor.hpp"
 
 namespace ProjectA {
 	struct Subpass {
-		sequence<ColorAttachment> colorAttachments;
-		DepthStencilAttachment depthStencilAttachment;
-
-		// TODO: Determine `resolve` with the sample count of all color attachments.
-		bool resolve;
-
-		bool depthStencil;
-
-		// Sets the index of the attachment that will render to a swapchain image.
-		uint32 presentAttachmentIndex = std::numeric_limits<uint32>::max();
-
 		public:
-			Subpass() :
-				combinedSampleCounts(1)
+			Subpass() {}
+
+			explicit Subpass(const SubpassDescriptor& descriptor) :
+				colorAttachments(descriptor.colorAttachments),
+				rasterizationSampleCount(1),
+				presentAttachmentIndex(descriptor.presentAttachmentIndex),
+				depthStencil(descriptor.depthStencil),
+				depthStencilAttachment(descriptor.depthStencilAttachment)
 			{
+				DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
 				for (const ColorAttachment& colorAttachment : colorAttachments) {
-					combinedSampleCounts |= colorAttachment.sampleCount;
+					if (colorAttachment.sampleCount > 1) {
+						rasterizationSampleCount = colorAttachment.sampleCount;
+						resolveAttachmentCount = static_cast<uint32>(colorAttachments.count);
+
+						break;
+					}
 				}
 			}
 
-			uint8 getCombinedSampleCounts() const {
-				return combinedSampleCounts;
+			const sequence<ColorAttachment>& getColorAttachments() const {
+				return colorAttachments;
 			}
 
+			uint32 getColorAttachmentCount() const {
+				return static_cast<uint32>(colorAttachments.count);
+			}
+
+			uint32 getResolveAttachmentCount() const {
+				return resolveAttachmentCount;
+			}
+
+			uint8 getRasterizationSampleCount() const {
+				return rasterizationSampleCount;
+			}
+
+			uint32 getPresentAttachmentIndex() const {
+				return presentAttachmentIndex;
+			}
+
+			bool hasDepthStencilAttachment() const {
+				return depthStencil;
+			}
+
+			DepthStencilAttachment getDepthStencilAttachment() const {
+				return depthStencilAttachment;
+			}
+
+			ref<Image> createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const;
+
+			ref<Image> createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const;
+
 		private:
-			uint8 combinedSampleCounts : 7;
+			sequence<ColorAttachment> colorAttachments;
+			uint32 resolveAttachmentCount = 0;
+			uint8 rasterizationSampleCount : 7;
+			uint32 presentAttachmentIndex = 0;
+			bool depthStencil;
+			DepthStencilAttachment depthStencilAttachment;
 	};
 
 	/* class SubpassOld {
 		public:
-			Subpass(const SubpassDescriptor& subpassDescriptor, const ref<RenderPass>& renderPass, uint32 index) :
-				index(index),
-				renderPass(renderPass),
+			Subpass(const SubpassDescriptor& subpassDescriptor) :
 				depthStencilAttachment(subpassDescriptor.depthStencil)
 			{
 				// TODO
-
-				for (const ColorAttachment& colorAttachment : subpassDescriptor.colorAttachments) {
-					sampleCounts |= colorAttachment.sampleCount;
-				}
-			}
-
-			const ref<RenderPass>& getRenderPass() const {
-				return renderPass;
-			}
-
-			uint32 getIndex() const {
-				return index;
 			}
 
 			bool hasDepthStencilAttachment() const {
 				return depthStencilAttachment;
 			}
 
-			uint32 getSampleCounts() const {
-				return sampleCounts;
-			}
-
 		private:
-			const ref<RenderPass>& renderPass;
-			const uint32 index;
 			const bool depthStencilAttachment;
-			uint32 sampleCounts = 1;
 	}; */
 }
