@@ -35,8 +35,8 @@ namespace ProjectA {
 			std::size_t spacing = 3;
 
 		public:
-			template<typename T>
-			static std::string format(T&& argument) {
+			template<typename CurrentArgument>
+			static std::string format(CurrentArgument&& argument) {
 				formatStream << argument;
 
 				const std::string log = formatStream.str();
@@ -46,8 +46,8 @@ namespace ProjectA {
 				return log;
 			}
 
-			template<typename T, typename... U>
-			static std::string format(std::string_view pattern, T&& argument, U&&... arguments) {
+			template<typename CurrentArgument, typename... Argument>
+			static std::string format(std::string_view pattern, CurrentArgument&& argument, Argument&&... arguments) {
 				const std::size_t offset = pattern.find(argumentInjectionPattern);
 
 				formatStream << pattern.substr(0, offset);
@@ -62,7 +62,7 @@ namespace ProjectA {
 
 				formatStream << argument;
 
-				return format(pattern.substr(offset + argumentInjectionPattern.size()), std::forward<U>(arguments)...);
+				return format(pattern.substr(offset + argumentInjectionPattern.size()), std::forward<Argument>(arguments)...);
 			}
 
 		private:
@@ -131,59 +131,59 @@ namespace ProjectA {
 		public:
 			Logger(std::string_view name, LogLevel minimumLogLevel = LogLevel::ALL);
 
-			template<typename T>
-			void trace(T&& argument) {
-				log(LogLevel::TRACE, argumentInjectionPattern, std::forward<T>(argument));
+			template<typename Argument>
+			void trace(Argument&& argument) {
+				log(LogLevel::TRACE, argumentInjectionPattern, std::forward<Argument>(argument));
 			}
 
-			template<typename... T>
-			void trace(std::string_view pattern, T&&... arguments) {
-				log(LogLevel::TRACE, pattern, std::forward<T>(arguments)...);
+			template<typename... Argument>
+			void trace(std::string_view pattern, Argument&&... arguments) {
+				log(LogLevel::TRACE, pattern, std::forward<Argument>(arguments)...);
 			}
 
-			template<typename T>
-			void debug(T&& argument) {
-				log(LogLevel::DEBUG, argumentInjectionPattern, std::forward<T>(argument));
+			template<typename Argument>
+			void debug(Argument&& argument) {
+				log(LogLevel::DEBUG, argumentInjectionPattern, std::forward<Argument>(argument));
 			}
 
-			template<typename... T>
-			void debug(std::string_view pattern, T&&... arguments) {
-				log(LogLevel::DEBUG, pattern, std::forward<T>(arguments)...);
+			template<typename... Argument>
+			void debug(std::string_view pattern, Argument&&... arguments) {
+				log(LogLevel::DEBUG, pattern, std::forward<Argument>(arguments)...);
 			}
 
-			template<typename T>
-			void info(T&& argument) {
-				log(LogLevel::INFO, argumentInjectionPattern, std::forward<T>(argument));
+			template<typename Argument>
+			void info(Argument&& argument) {
+				log(LogLevel::INFO, argumentInjectionPattern, std::forward<Argument>(argument));
 			}
 
-			template<typename... T>
-			void info(std::string_view pattern, T&&... arguments) {
-				log(LogLevel::INFO, pattern, std::forward<T>(arguments)...);
+			template<typename... Argument>
+			void info(std::string_view pattern, Argument&&... arguments) {
+				log(LogLevel::INFO, pattern, std::forward<Argument>(arguments)...);
 			}
 
-			template<typename T>
-			void warn(T&& argument) {
-				log(LogLevel::WARN, argumentInjectionPattern, std::forward<T>(argument));
+			template<typename Argument>
+			void warn(Argument&& argument) {
+				log(LogLevel::WARN, argumentInjectionPattern, std::forward<Argument>(argument));
 			}
 
-			template<typename... T>
-			void warn(std::string_view pattern, T&&... arguments) {
-				log(LogLevel::WARN, pattern, std::forward<T>(arguments)...);
+			template<typename... Argument>
+			void warn(std::string_view pattern, Argument&&... arguments) {
+				log(LogLevel::WARN, pattern, std::forward<Argument>(arguments)...);
 			}
 
-			template<typename T>
-			void error(T&& argument) {
-				log(LogLevel::ERROR, argumentInjectionPattern, std::forward<T>(argument));
+			template<typename Argument>
+			void error(Argument&& argument) {
+				log(LogLevel::ERROR, argumentInjectionPattern, std::forward<Argument>(argument));
 			}
 
-			template<typename... T>
-			void error(std::string_view pattern, T&&... arguments) {
-				log(LogLevel::ERROR, pattern, std::forward<T>(arguments)...);
+			template<typename... Argument>
+			void error(std::string_view pattern, Argument&&... arguments) {
+				log(LogLevel::ERROR, pattern, std::forward<Argument>(arguments)...);
 			}
 
-			template<typename... T>
-			void fatal(uint32 code, std::string_view pattern, T&&... arguments) {
-				const std::string message = format(pattern, std::forward<T>(arguments)...);
+			template<typename... Argument>
+			void fatal(uint32 code, std::string_view pattern, Argument&&... arguments) {
+				const std::string message = format(pattern, std::forward<Argument>(arguments)...);
 
 				log(LogLevel::FATAL, message);
 				Platform::fatalExit(code, message);
