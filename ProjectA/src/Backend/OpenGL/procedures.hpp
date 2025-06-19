@@ -51,7 +51,6 @@ namespace ProjectA {
 	extern PFNGLENABLEIPROC glDisablei;
 	extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
 	extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
-	extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
 	extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced;
 	extern PFNGLENABLEIPROC glEnablei;
 	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
@@ -98,11 +97,13 @@ namespace ProjectA {
 
 	#ifdef OPENGL_USE_DSA
 		extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
+		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
 		extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
 		extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
 		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
 	#else
 		extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
+		extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
 		extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
 		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
 		extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;

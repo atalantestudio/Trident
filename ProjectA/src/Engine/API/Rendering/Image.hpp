@@ -13,6 +13,10 @@ namespace ProjectA {
 
 			virtual ~Image() = default;
 
+			ImageFormat getFormat() const {
+				return format;
+			}
+
 			const Extent3D& getExtent() const {
 				return extent;
 			}
@@ -39,6 +43,7 @@ namespace ProjectA {
 
 		protected:
 			explicit Image(const ImageDescriptor& descriptor) :
+				format(descriptor.format),
 				extent(descriptor.extent),
 				mipLevelCount(descriptor.mipLevelCount),
 				layerCount(descriptor.layerCount),
@@ -48,6 +53,7 @@ namespace ProjectA {
 			virtual ref<ImageView> createViewInternal(const Image* image, const ImageViewDescriptor& descriptor) const = 0;
 
 		protected:
+			ImageFormat format;
 			Extent3D extent;
 			uint32 mipLevelCount;
 			uint32 layerCount;

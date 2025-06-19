@@ -1,9 +1,6 @@
 #include "pch.hpp"
 
 #include "Backend/OpenGL/OpenGLRenderPass.hpp"
-#include "Backend/OpenGL/OpenGLShaderModule.hpp"
-
-#include "Engine/Filesystem/Filesystem.hpp"
 
 namespace ProjectA {
 	OpenGLRenderPass::OpenGLRenderPass(const RenderPassDescriptor& descriptor) :

@@ -20,6 +20,14 @@ namespace ProjectA {
 				return layerCount;
 			}
 
+			uint32 getColorAttachmentCount() const {
+				return colorAttachmentCount;
+			}
+
+			bool hasDepthStencilAttachment() const {
+				return depthStencilAttachment;
+			}
+
 		protected:
 			explicit Framebuffer(const FramebufferDescriptor& descriptor) :
 				renderPass(descriptor.renderPass),
@@ -27,11 +35,24 @@ namespace ProjectA {
 				layerCount(descriptor.layerCount)
 			{
 				DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+
+				for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count; imageViewIndex += 1) {
+					const Image* image = descriptor.imageViews[imageViewIndex]->getImage();
+
+					if (isDepthFormat(image->getFormat())) {
+						depthStencilAttachment = true;
+					}
+					else {
+						colorAttachmentCount += 1;
+					}
+				}
 			}
 
 		protected:
 			ref<RenderPass> renderPass;
 			Extent2D extent;
 			uint32 layerCount;
+			uint32 colorAttachmentCount = 0;
+			bool depthStencilAttachment = false;
 	};
 }

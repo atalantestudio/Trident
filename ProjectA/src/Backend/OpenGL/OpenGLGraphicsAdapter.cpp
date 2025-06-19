@@ -3,6 +3,7 @@
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 #include "Backend/OpenGL/OpenGLComputePipeline.hpp"
 #include "Backend/OpenGL/OpenGLFence.hpp"
+#include "Backend/OpenGL/OpenGLFramebuffer.hpp"
 #include "Backend/OpenGL/OpenGLGraphicsAdapter.hpp"
 #include "Backend/OpenGL/OpenGLImage.hpp"
 #include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
@@ -70,7 +71,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDisablei);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDispatchCompute);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawArraysInstanced);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawBuffers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawElementsInstanced);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glEnablei);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glEnableVertexAttribArray);
@@ -117,11 +117,13 @@ namespace ProjectA {
 
 		#ifdef OPENGL_USE_DSA
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyNamedBufferSubData);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedFramebufferDrawBuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage1D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage2D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage3D);
 		#else
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyBufferSubData);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawBuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage1D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage2D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage3D);
@@ -152,9 +154,7 @@ namespace ProjectA {
 	}
 
 	ref<Framebuffer> OpenGLGraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
-		DEBUG_ASSERT(false);
-
-		return nullptr;
+		return createRef<OpenGLFramebuffer>(descriptor);
 	}
 
 	ref<Image> OpenGLGraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {

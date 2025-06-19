@@ -2,6 +2,7 @@
 
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
+#include "Backend/OpenGL/OpenGLImage.hpp"
 #include "Backend/OpenGL/OpenGLImageView.hpp"
 #include "Backend/OpenGL/OpenGLSampler.hpp"
 

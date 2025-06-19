@@ -14,6 +14,7 @@
 #include "Engine/API/Rendering/Descriptor/SamplerDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/SwapchainDescriptor.hpp"
+#include "Engine/API/Rendering/Subpass.hpp"
 #include "Engine/Validation/Descriptor.hpp"
 
 namespace ProjectA {
@@ -574,7 +575,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Shader module descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const SubpassDescriptor& descriptor) {
+	void validateDescriptor(const Subpass& subpass) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 

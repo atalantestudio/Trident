@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Backend/OpenGL/OpenGLImage.hpp"
-
 #include "Engine/API/Rendering/RenderPass.hpp"
 
 namespace ProjectA {

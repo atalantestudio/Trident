@@ -34,5 +34,7 @@ namespace ProjectA {
 			const GLenum depthFunc;
 
 			const bool dynamicLineWidth;
+
+			const uint32 subpassIndex;
 	};
 }

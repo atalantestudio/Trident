@@ -30,4 +30,19 @@ namespace ProjectA {
 
 		return glInternalFormats[static_cast<uint8>(imageFormat)];
 	}
+
+	static bool isDepthFormat(GLenum internalFormat) {
+		return (
+			internalFormat == GL_DEPTH_COMPONENT32F ||
+			internalFormat == GL_DEPTH32F_STENCIL8 ||
+			internalFormat == GL_DEPTH24_STENCIL8
+		);
+	}
+
+	static bool isStencilFormat(GLenum internalFormat) {
+		return (
+			internalFormat == GL_DEPTH32F_STENCIL8 ||
+			internalFormat == GL_DEPTH24_STENCIL8
+		);
+	}
 }

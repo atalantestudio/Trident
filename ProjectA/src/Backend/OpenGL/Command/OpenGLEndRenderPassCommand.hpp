@@ -5,45 +5,42 @@
 namespace ProjectA {
 	class OpenGLEndRenderPassCommand : public OpenGLCommand {
 		public:
-			OpenGLEndRenderPassCommand(const OpenGLRenderPass& renderPass) :
-				renderPass(renderPass)
+			OpenGLEndRenderPassCommand(const OpenGLFramebuffer* framebuffer, uint32 subpassIndex) :
+				framebuffer(framebuffer),
+				subpassIndex(subpassIndex)
 			{}
 
 			void execute() const final override {
-				// TODO
-				DEBUG_ASSERT(false);
+				const Subpass& subpass = framebuffer->getRenderPass()->getSubpass(subpassIndex);
 
-				/* if (renderPass.present) {
-					if (renderPass.getColorAttachmentCount() == 1 && !renderPass.resolve && !renderPass.depthStencil) {
-						return;
-					}
-
-					glBindFramebuffer(GL_READ_FRAMEBUFFER, swapchain.framebuffers[0]);
+				if (subpass.presentAttachmentIndex != std::numeric_limits<uint32>::max()) {
+					glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->object);
 					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 					// TODO: Why resolveAttachmentCount isn't needed as offset here?
-					glReadBuffer(GL_COLOR_ATTACHMENT0 + renderPass.getPresentAttachmentIndex());
+					glReadBuffer(GL_COLOR_ATTACHMENT0 + subpass.presentAttachmentIndex);
 
 					glDrawBuffer(GL_FRONT);
 
-					const Extent2D swapchainExtent = swapchain.getExtent();
+					const Extent2D extent = framebuffer->getExtent();
 
 					glBlitFramebuffer(
 						0,
 						0,
-						swapchainExtent.width,
-						swapchainExtent.height,
+						extent.width,
+						extent.height,
 						0,
 						0,
-						swapchainExtent.width,
-						swapchainExtent.height,
+						extent.width,
+						extent.height,
 						GL_COLOR_BUFFER_BIT,
 						GL_NEAREST
 					);
-				} */
+				}
 			}
 
 		private:
-			const OpenGLRenderPass& renderPass;
+			const OpenGLFramebuffer* framebuffer;
+			uint32 subpassIndex;
 	};
 }

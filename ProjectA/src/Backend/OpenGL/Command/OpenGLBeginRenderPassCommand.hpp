@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
+#include "Backend/OpenGL/OpenGLFramebuffer.hpp"
 #include "Backend/OpenGL/OpenGLRenderPass.hpp"
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
@@ -14,44 +15,34 @@ namespace ProjectA {
 			{}
 
 			void execute() const final override {
-				// TODO
-				DEBUG_ASSERT(false);
+				const OpenGLFramebuffer& glFramebuffer = *std::static_pointer_cast<OpenGLFramebuffer>(descriptor.framebuffer);
 
-				/* const ref<OpenGLRenderPass>& renderPass = std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass);
-				const ref<OpenGLSwapchain>& swapchain = std::static_pointer_cast<OpenGLSwapchain>(descriptor.swapchain);
+				glBindFramebuffer(GL_FRAMEBUFFER, glFramebuffer.object);
 
-				if (renderPass->present && renderPass->getColorAttachmentCount() == 1 && !renderPass->resolve && !renderPass->depthStencil) {
-					const ClearValue& clearValue = descriptor.clearValues[0];
+				// TODO: Restore clear values.
+				/* for (uint32 clearValueIndex = 0; clearValueIndex < descriptor.clearValues.size(); clearValueIndex += 1) {
+					const ClearValue& clearValue = descriptor.clearValues[clearValueIndex];
 
-					glClearBufferfv(GL_COLOR, 0, clearValue.color);
-					glClearBufferfi(GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
-
-					return;
+					glClearBufferfv(GL_COLOR, clearValueIndex, clearValue.color);
 				}
 
-				for (uint32 imageIndex = 0; imageIndex < swapchain->getImageCount(); imageIndex += 1) {
-					glBindFramebuffer(GL_FRAMEBUFFER, swapchain->framebuffers[imageIndex]);
+				if (glFramebuffer.hasDepthStencilAttachment()) {
+					DEBUG_ASSERT(descriptor.clearValues.size() == glFramebuffer.getColorAttachmentCount() + 1);
 
-					for (uint32 clearValueIndex = 0; clearValueIndex < descriptor.clearValues.size(); clearValueIndex += 1) {
-						const ClearValue& clearValue = descriptor.clearValues[clearValueIndex];
+					const ClearValue& depthStencilClearValue = descriptor.clearValues.back();
 
-						glClearBufferfv(GL_COLOR, clearValueIndex, clearValue.color);
-					}
-
-					if (renderPass->depthStencil) {
-						const ClearValue& depthStencilClearValue = descriptor.clearValues.back();
-
-						glClearBufferfi(GL_DEPTH_STENCIL, 0, depthStencilClearValue.depth, depthStencilClearValue.stencil);
-					}
-
-					sequence<GLenum> drawBuffers(renderPass->getColorAttachmentCount());
-
-					for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < drawBuffers.count; colorAttachmentIndex += 1) {
-						drawBuffers[colorAttachmentIndex] = GL_COLOR_ATTACHMENT0 + colorAttachmentIndex;
-					}
-
-					glDrawBuffers(renderPass->getColorAttachmentCount(), &drawBuffers[0]);
+					glClearBufferfi(GL_DEPTH_STENCIL, 0, depthStencilClearValue.depth, depthStencilClearValue.stencil);
 				} */
+
+				#ifndef OPENGL_USE_DSA
+					sequence<GLenum> colorAttachments(glFramebuffer.getColorAttachmentCount());
+
+					for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < colorAttachments.count; colorAttachmentIndex += 1) {
+						colorAttachments[colorAttachmentIndex] = GL_COLOR_ATTACHMENT0 + colorAttachmentIndex;
+					}
+
+					glDrawBuffers(static_cast<GLsizei>(colorAttachments.count), drawBuffers);
+				#endif
 			}
 
 		private:

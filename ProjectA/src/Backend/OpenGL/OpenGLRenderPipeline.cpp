@@ -26,7 +26,8 @@ namespace ProjectA {
 		depthTest(descriptor.depthStencilState.depthTest && descriptor.renderPass->getSubpass(descriptor.subpassIndex).depthStencil),
 		depthWrite(descriptor.depthStencilState.depthWrite),
 		depthFunc(getGlDepthFunc(descriptor.depthStencilState.compareOperation)),
-		dynamicLineWidth(descriptor.dynamicState & DynamicState::LINE_WIDTH)
+		dynamicLineWidth(descriptor.dynamicState & DynamicState::LINE_WIDTH),
+		subpassIndex(descriptor.subpassIndex)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 

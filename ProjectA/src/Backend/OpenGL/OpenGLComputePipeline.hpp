@@ -14,7 +14,6 @@ namespace ProjectA {
 
 		public:
 			const OpenGLPipelineLayout& layout;
-
 			const GLuint program;
 	};
 }

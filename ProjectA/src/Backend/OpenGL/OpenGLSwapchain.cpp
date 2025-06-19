@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Backend/OpenGL/OpenGLImage.hpp"
 #include "Backend/OpenGL/OpenGLRenderPass.hpp"
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
@@ -7,14 +8,19 @@ namespace ProjectA {
 	OpenGLSwapchain::OpenGLSwapchain(const SwapchainDescriptor& descriptor, const OpenGLRenderingContext& renderingContext) :
 		renderingContext(&renderingContext)
 	{
+		images = sequence<ref<Image>>(1);
+		imageViews = sequence<ref<ImageView>>(1);
+
 		construct(descriptor);
 	}
 
 	uint32 OpenGLSwapchain::getImageCount() const {
-		return imageCount;
+		return 1;
 	}
 
 	void OpenGLSwapchain::getImages(const ref<RenderPass>& renderPass) {
+		DEBUG_ASSERT(false);
+
 		/* const ref<OpenGLRenderPass>& glRenderPass = std::static_pointer_cast<OpenGLRenderPass>(renderPass);
 
 		if (renderPass->present && renderPass->getColorAttachmentCount() == 1 && !renderPass->resolve && !renderPass->depthStencil) {
@@ -136,7 +142,6 @@ namespace ProjectA {
 	}
 
 	void OpenGLSwapchain::update(const SwapchainDescriptor& descriptor) {
-		destroy();
 		construct(descriptor);
 	}
 
@@ -149,13 +154,24 @@ namespace ProjectA {
 		extent = descriptor.extent;
 
 		renderingContext->setSwapInterval(static_cast<sint32>(descriptor.vSync));
-	}
 
-	void OpenGLSwapchain::destroy() {
-		glDeleteFramebuffers(static_cast<uint32>(framebuffers.size()), framebuffers.data());
+		ImageDescriptor imageDescriptor{};
+		imageDescriptor.type = ImageType::TEXTURE_2D;
+		imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
+		imageDescriptor.extent.width = extent.width;
+		imageDescriptor.extent.height = extent.height;
+		imageDescriptor.extent.depth = 1;
+		imageDescriptor.mipLevelCount = 1;
+		imageDescriptor.layerCount = 1;
+		imageDescriptor.sampleCount = 1;
 
-		imageViews.clear();
-		images.clear();
-		framebuffers.clear();
+		// Swapchain images are not associated with client-side usage.
+		imageDescriptor.usage = static_cast<ImageUsage>(0);
+
+		for (uint32 imageIndex = 0; imageIndex < images.count; imageIndex += 1) {
+			images[imageIndex] = createRef<OpenGLImage>(imageDescriptor);
+		}
+
+		createImageViews();
 	}
 }

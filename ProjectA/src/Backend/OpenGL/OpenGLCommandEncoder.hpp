@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 #include "Backend/OpenGL/OpenGLComputePipeline.hpp"
 #include "Backend/OpenGL/OpenGLDevice.hpp"
-#include "Backend/OpenGL/OpenGLRenderPass.hpp"
+#include "Backend/OpenGL/OpenGLFramebuffer.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
 
 #include "Engine/API/Rendering/CommandEncoder.hpp"
@@ -55,8 +55,8 @@ namespace ProjectA {
 			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) final override;
 
 		private:
-			OpenGLRenderPass* renderPass = nullptr;
-
+			OpenGLFramebuffer* framebuffer = nullptr;
+			uint32 subpassIndex = 0;
 			std::vector<ref<OpenGLCommand>> commandBuffer;
 			ref<OpenGLComputePipeline> computePipeline = nullptr;
 			ref<OpenGLRenderPipeline> renderPipeline = nullptr;

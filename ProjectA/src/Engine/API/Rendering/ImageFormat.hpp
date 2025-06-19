@@ -11,4 +11,12 @@ namespace ProjectA {
 		D32_SFLOAT_S8_UINT = 6,
 		D24_UNORM_S8_UINT = 7,
 	};
+
+	static bool isDepthFormat(ImageFormat imageFormat) {
+		return (
+			imageFormat == ImageFormat::D32_SFLOAT ||
+			imageFormat == ImageFormat::D32_SFLOAT_S8_UINT ||
+			imageFormat == ImageFormat::D24_UNORM_S8_UINT
+		);
+	}
 }
