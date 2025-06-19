@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/API/Rendering/ImageFormat.hpp"
+
 namespace ProjectA {
 	struct PNGFile {
 		ImageFormat format;

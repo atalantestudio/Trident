@@ -19,6 +19,8 @@ namespace ProjectA {
 
 			ref<Fence> createFence() const final override;
 
+			ref<Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor) const final override;
+
 			ref<Image> createImage(const ImageDescriptor& descriptor) const final override;
 
 			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const final override;

@@ -90,10 +90,10 @@ namespace ProjectA {
 		glDeleteTextures(1, &object);
 	}
 
-	ref<ImageView> OpenGLImage::createView(const ImageViewDescriptor& descriptor) const {
+	ref<ImageView> OpenGLImage::createViewInternal(const Image* image, const ImageViewDescriptor& descriptor) const {
 		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
 
-		return createRef<OpenGLImageView>(*this, descriptor);
+		return createRef<OpenGLImageView>(image, descriptor);
 	}
 
 	void OpenGLImage::setLayout(ImageLayout layout) {

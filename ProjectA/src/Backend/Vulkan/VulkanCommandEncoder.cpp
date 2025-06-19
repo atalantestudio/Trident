@@ -4,6 +4,7 @@
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
 #include "Backend/Vulkan/VulkanComputePipeline.hpp"
+#include "Backend/Vulkan/VulkanFramebuffer.hpp"
 #include "Backend/Vulkan/VulkanImage.hpp"
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
@@ -57,7 +58,8 @@ namespace ProjectA {
 	void VulkanCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
 		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
 
-		const VulkanSwapchain& swapchain = *std::static_pointer_cast<VulkanSwapchain>(descriptor.swapchain);
+		const VulkanFramebuffer& framebuffer = *std::static_pointer_cast<VulkanFramebuffer>(descriptor.framebuffer);
+		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(framebuffer.getRenderPass());
 
 		sequence<VkClearValue> clearValues(descriptor.clearValues.size());
 
@@ -73,11 +75,11 @@ namespace ProjectA {
 		VkRenderPassBeginInfo renderPassBeginInfo{};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassBeginInfo.pNext = nullptr;
-		renderPassBeginInfo.renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass)->object;
-		renderPassBeginInfo.framebuffer = swapchain.framebuffers[descriptor.imageIndex];
+		renderPassBeginInfo.renderPass = renderPass.object;
+		renderPassBeginInfo.framebuffer = framebuffer.object;
 		renderPassBeginInfo.renderArea.offset.x = 0;
 		renderPassBeginInfo.renderArea.offset.y = 0;
-		renderPassBeginInfo.renderArea.extent = *static_cast<const VkExtent2D*>(static_cast<const void*>(&swapchain.getExtent()));
+		renderPassBeginInfo.renderArea.extent = *pointer_cast_const<const VkExtent2D*>(&framebuffer.getExtent());
 		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.count);
 		renderPassBeginInfo.pClearValues = &clearValues[0];
 

@@ -1,20 +1,16 @@
 #pragma once
 
-#include "Engine/API/Rendering/Descriptor/ImageViewDescriptor.hpp"
+#include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Rendering/ImageLayout.hpp"
-#include "Engine/API/Rendering/ImageView.hpp"
 
 namespace ProjectA {
-	class Image {
-		protected:
-			Image(const ImageDescriptor& descriptor) :
-				extent(descriptor.extent),
-				mipLevelCount(descriptor.mipLevelCount),
-				layerCount(descriptor.layerCount),
-				sampleCount(descriptor.sampleCount)
-			{}
+	class ImageView;
+	struct ImageViewDescriptor;
 
+	class Image {
 		public:
+			Image() {};
+
 			virtual ~Image() = default;
 
 			const Extent3D& getExtent() const {
@@ -37,14 +33,25 @@ namespace ProjectA {
 				return layout;
 			}
 
-			virtual ref<ImageView> createView(const ImageViewDescriptor& descriptor) const = 0;
+			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const {
+				return createViewInternal(this, descriptor);
+			}
 
 		protected:
-			const Extent3D extent;
-			const uint32 mipLevelCount;
-			const uint32 layerCount;
-			const uint8 sampleCount : 7;
+			explicit Image(const ImageDescriptor& descriptor) :
+				extent(descriptor.extent),
+				mipLevelCount(descriptor.mipLevelCount),
+				layerCount(descriptor.layerCount),
+				sampleCount(descriptor.sampleCount)
+			{}
 
+			virtual ref<ImageView> createViewInternal(const Image* image, const ImageViewDescriptor& descriptor) const = 0;
+
+		protected:
+			Extent3D extent;
+			uint32 mipLevelCount;
+			uint32 layerCount;
+			uint8 sampleCount : 7;
 			ImageLayout layout = ImageLayout::UNDEFINED;
 	};
 }

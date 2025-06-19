@@ -18,9 +18,11 @@ namespace ProjectA {
 		DEBUG_ASSERT(colorAttachmentCount < static_cast<uint32>(maxColorAttachments));
 	}
 
-	ref<Image> OpenGLRenderPass::createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const {
+	/* ref<Image> OpenGLRenderPass::createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const {
 		DEBUG_ASSERT(colorAttachmentIndex < colorAttachmentCount);
-		DEBUG_ASSERT((resolveAttachmentCount == 0 && colorAttachmentIndex != presentAttachmentIndex) || resolveAttachmentCount > 0);
+
+		// TODO
+		// DEBUG_ASSERT((resolveAttachmentCount == 0 && colorAttachmentIndex != presentAttachmentIndex) || resolveAttachmentCount > 0);
 
 		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
 
@@ -53,5 +55,5 @@ namespace ProjectA {
 		depthStencilImageDescriptor.usage = ImageUsage::DEPTH_STENCIL_ATTACHMENT;
 
 		return createRef<OpenGLImage>(depthStencilImageDescriptor);
-	}
+	} */
 }

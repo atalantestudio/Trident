@@ -20,6 +20,13 @@ namespace ProjectA {
 				std::copy(list.begin(), list.end(), array);
 			}
 
+			sequence(const sequence& sequence) :
+				array(new T[sequence.count]()),
+				count(sequence.count)
+			{
+				std::copy(sequence.begin(), sequence.end(), array);
+			}
+
 			sequence(sequence&& sequence) :
 				array(sequence.array),
 				count(sequence.count)

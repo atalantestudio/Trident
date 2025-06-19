@@ -135,11 +135,11 @@ namespace ProjectA {
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
 
-					RenderPassDescriptor renderPassDescriptor;
-					renderPassDescriptor.colorAttachments = {colorAttachment};
-					renderPassDescriptor.resolve = false;
-					renderPassDescriptor.depthStencil = false;
-					renderPassDescriptor.presentAttachmentIndex = 0;
+					SubpassDescriptor subpassDescriptor;
+					subpassDescriptor.colorAttachments = {colorAttachment};
+					subpassDescriptor.resolve = false;
+					subpassDescriptor.depthStencil = false;
+					subpassDescriptor.presentAttachmentIndex = 0;
 
 					renderPass = createRenderPass(renderPassDescriptor);
 

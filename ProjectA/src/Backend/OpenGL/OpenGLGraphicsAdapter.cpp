@@ -151,6 +151,12 @@ namespace ProjectA {
 		return createRef<OpenGLFence>();
 	}
 
+	ref<Framebuffer> OpenGLGraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
+		DEBUG_ASSERT(false);
+
+		return nullptr;
+	}
+
 	ref<Image> OpenGLGraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
 		return createRef<OpenGLImage>(descriptor);
 	}

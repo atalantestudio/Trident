@@ -7,7 +7,7 @@
 #include "Engine/GUI/GUILayer.hpp"
 
 namespace ProjectA {
-	GUILayer::GUILayer() {
+	void GUILayer::build() {
 		renderer.build();
 
 		TextureArrayLayer defaultImageLayer;

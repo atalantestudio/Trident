@@ -11,7 +11,7 @@
 namespace ProjectA {
 	class GUIRenderer : public Renderer {
 		public:
-			void build();
+			void build() final override;
 
 			// Copies the image data to the texture array staging buffer.
 			// Returns the layer index of the image in the array.

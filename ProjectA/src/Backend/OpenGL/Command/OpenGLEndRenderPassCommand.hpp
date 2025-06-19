@@ -1,18 +1,19 @@
 #pragma once
 
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
-#include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
 namespace ProjectA {
 	class OpenGLEndRenderPassCommand : public OpenGLCommand {
 		public:
-			OpenGLEndRenderPassCommand(const OpenGLRenderPass& renderPass, const OpenGLSwapchain& swapchain) :
-				renderPass(renderPass),
-				swapchain(swapchain)
+			OpenGLEndRenderPassCommand(const OpenGLRenderPass& renderPass) :
+				renderPass(renderPass)
 			{}
 
 			void execute() const final override {
-				if (renderPass.present) {
+				// TODO
+				DEBUG_ASSERT(false);
+
+				/* if (renderPass.present) {
 					if (renderPass.getColorAttachmentCount() == 1 && !renderPass.resolve && !renderPass.depthStencil) {
 						return;
 					}
@@ -39,11 +40,10 @@ namespace ProjectA {
 						GL_COLOR_BUFFER_BIT,
 						GL_NEAREST
 					);
-				}
+				} */
 			}
 
 		private:
 			const OpenGLRenderPass& renderPass;
-			const OpenGLSwapchain& swapchain;
 	};
 }

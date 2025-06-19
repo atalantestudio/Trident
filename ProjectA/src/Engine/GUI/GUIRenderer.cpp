@@ -6,6 +6,9 @@
 
 namespace ProjectA {
 	void GUIRenderer::build() {
+		updateColorAttachment();
+
+		const ref<Swapchain>& swapchain = getSwapchain();
 		const ref<Surface> surface = getSurface();
 
 		ColorAttachment colorAttachment{};
@@ -14,17 +17,18 @@ namespace ProjectA {
 		colorAttachment.loadOperation = LoadOperation::CLEAR;
 		colorAttachment.storeOperation = StoreOperation::STORE;
 
-		RenderPassDescriptor renderPassDescriptor;
-		renderPassDescriptor.colorAttachments = {colorAttachment};
-		renderPassDescriptor.resolve = true;
-		renderPassDescriptor.depthStencil = false;
-		renderPassDescriptor.presentAttachmentIndex = 0;
+		Subpass subpass{};
+		subpass.colorAttachments = {colorAttachment};
+		subpass.resolve = true;
+		subpass.depthStencil = false;
+		subpass.presentAttachmentIndex = 0;
+
+		RenderPassDescriptor renderPassDescriptor{};
+		renderPassDescriptor.subpasses = {subpass};
 
 		renderPass = createRenderPass(renderPassDescriptor);
 
-		updateColorAttachment();
-
-		const ref<Swapchain>& swapchain = getSwapchain();
+		DEBUG_ASSERT(false);
 
 		swapchain->getImages(renderPass);
 
@@ -47,7 +51,11 @@ namespace ProjectA {
 
 		textureArray = createImage(textureArrayDescriptor);
 
-		constexpr ImageViewDescriptor textureArrayViewDescriptor;
+		ImageViewDescriptor textureArrayViewDescriptor{};
+		textureArrayViewDescriptor.mipLevelOffset = 0;
+		textureArrayViewDescriptor.mipLevelCount = textureArray->getMipLevelCount();
+		textureArrayViewDescriptor.layerOffset = 0;
+		textureArrayViewDescriptor.layerCount = textureArray->getLayerCount();
 
 		textureArrayView = textureArray->createView(textureArrayViewDescriptor);
 
@@ -68,7 +76,9 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::updateColorAttachment() {
-		const ref<Swapchain>& swapchain = getSwapchain();
+		DEBUG_ASSERT(false);
+
+		/* const ref<Swapchain>& swapchain = getSwapchain();
 
 		AttachmentImageDescriptor colorAttachmentImageDescriptor{};
 		colorAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
@@ -84,13 +94,13 @@ namespace ProjectA {
 
 		colorImageView = colorImage->createView(colorImageViewDescriptor);
 
-		renderPass->setColorAttachmentImageView(colorImageView, 0);
+		renderPass->setColorAttachmentImageView(colorImageView, 0); */
 	}
 
 	void GUIRenderer::initializeVertexBuffer() {
-		const ref<Device> device = getDevice();
+		static constexpr uint64 size = 6 * sizeof(Vertex);
 
-		constexpr uint64 size = 6 * sizeof(Vertex);
+		const ref<Device> device = getDevice();
 
 		const ref<Buffer> vertexStagingBuffer = createStagingBuffer(size);
 
@@ -217,8 +227,6 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::initializeRenderPipeline() {
-		constexpr ImageViewDescriptor imageViewDescriptor;
-
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
@@ -261,7 +269,6 @@ namespace ProjectA {
 		opaqueColorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor subcomponentRenderPipelineDescriptor;
-		subcomponentRenderPipelineDescriptor.renderPass = renderPass;
 		subcomponentRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		subcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, subcomponentInputBinding};
 		subcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert", vertexShaderModuleDescriptor);
@@ -275,6 +282,7 @@ namespace ProjectA {
 		subcomponentRenderPipelineDescriptor.colorBlendState.attachments = {opaqueColorBlendAttachment};
 		subcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		subcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		// subcomponentRenderPipelineDescriptor.subpass = subpass;
 
 		subcomponentRenderPipeline = createRenderPipeline(subcomponentRenderPipelineDescriptor);
 
@@ -290,7 +298,6 @@ namespace ProjectA {
 		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
 		RenderPipelineDescriptor glyphSubcomponentRenderPipelineDescriptor;
-		glyphSubcomponentRenderPipelineDescriptor.renderPass = renderPass;
 		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		glyphSubcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, glyphSubcomponentVertexInputBinding};
 		glyphSubcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.vert", vertexShaderModuleDescriptor);
@@ -304,6 +311,7 @@ namespace ProjectA {
 		glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
 		glyphSubcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		glyphSubcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		// glyphSubcomponentRenderPipelineDescriptor.subpass = subpass;
 
 		glyphSubcomponentRenderPipeline = createRenderPipeline(glyphSubcomponentRenderPipelineDescriptor);
 	}
@@ -417,11 +425,13 @@ namespace ProjectA {
 		const float32 width = static_cast<float32>(swapchain->getExtent().width);
 		const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
+		DEBUG_ASSERT(false);
+
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.renderPass = renderPass;
-		beginRenderPassDescriptor.swapchain = swapchain;
+		// beginRenderPassDescriptor.renderPass = renderPass;
+		// beginRenderPassDescriptor.swapchain = swapchain;
 		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
-		beginRenderPassDescriptor.imageIndex = getImageIndex();
+		// beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 

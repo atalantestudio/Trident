@@ -88,7 +88,11 @@ namespace ProjectA {
 
 		const ref<Image> glyphImage = Renderer::createImage(glyphImageDescriptor);
 
-		constexpr ImageViewDescriptor glyphImageViewDescriptor;
+		ImageViewDescriptor glyphImageViewDescriptor;
+		glyphImageViewDescriptor.mipLevelOffset = 0;
+		glyphImageViewDescriptor.mipLevelCount = glyphImage->getMipLevelCount();
+		glyphImageViewDescriptor.layerOffset = 0;
+		glyphImageViewDescriptor.layerCount = glyphImage->getLayerCount();
 
 		const ref<ImageView> glyphImageView = glyphImage->createView(glyphImageViewDescriptor);
 
@@ -144,7 +148,11 @@ namespace ProjectA {
 
 		ref<Image> glyphMapImage = Renderer::createImage(glyphMapSdfImageDescriptor);
 
-		constexpr ImageViewDescriptor glyphMapSdfImageViewDescriptor;
+		ImageViewDescriptor glyphMapSdfImageViewDescriptor{};
+		glyphMapSdfImageViewDescriptor.mipLevelOffset = 0;
+		glyphMapSdfImageViewDescriptor.mipLevelCount = glyphMapImage->getMipLevelCount();
+		glyphMapSdfImageViewDescriptor.layerOffset = 0;
+		glyphMapSdfImageViewDescriptor.layerCount = glyphMapImage->getLayerCount();
 
 		const ref<ImageView> glyphMapSdfImageView = glyphMapImage->createView(glyphMapSdfImageViewDescriptor);
 

@@ -16,14 +16,19 @@ namespace ProjectA {
 		colorAttachment.loadOperation = LoadOperation::CLEAR;
 		colorAttachment.storeOperation = StoreOperation::STORE;
 
-		RenderPassDescriptor renderPassDescriptor;
-		renderPassDescriptor.colorAttachments = {colorAttachment};
-		renderPassDescriptor.depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
-		renderPassDescriptor.depthStencilAttachment.sampleCount = SAMPLE_COUNT;
-		renderPassDescriptor.depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
-		renderPassDescriptor.resolve = true;
-		renderPassDescriptor.depthStencil = true;
-		renderPassDescriptor.presentAttachmentIndex = 0;
+		Subpass subpass{};
+		subpass.colorAttachments = {colorAttachment};
+		subpass.depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
+		subpass.depthStencilAttachment.sampleCount = SAMPLE_COUNT;
+		subpass.depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
+		subpass.resolve = true;
+		subpass.depthStencil = true;
+		subpass.presentAttachmentIndex = 0;
+
+		RenderPassDescriptor renderPassDescriptor{};
+		renderPassDescriptor.subpasses = {subpass};
+
+		DEBUG_ASSERT(false);
 
 		renderPass = createRenderPass(renderPassDescriptor);
 
@@ -67,7 +72,9 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::updateColorAttachment() {
-		const ref<Swapchain>& swapchain = getSwapchain();
+		DEBUG_ASSERT(false);
+
+		/* const ref<Swapchain>& swapchain = getSwapchain();
 
 		AttachmentImageDescriptor colorAttachmentImageDescriptor{};
 		colorAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
@@ -83,11 +90,13 @@ namespace ProjectA {
 
 		colorImageView = colorImage->createView(colorImageViewDescriptor);
 
-		renderPass->setColorAttachmentImageView(colorImageView, 0);
+		renderPass->setColorAttachmentImageView(colorImageView, 0); */
 	}
 
 	void Physics2DRenderer::updateDepthStencilAttachment() {
-		const ref<Swapchain>& swapchain = getSwapchain();
+		DEBUG_ASSERT(false);
+
+		/* const ref<Swapchain>& swapchain = getSwapchain();
 
 		AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
 		depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
@@ -103,7 +112,7 @@ namespace ProjectA {
 
 		depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
 
-		renderPass->setDepthStencilAttachmentImageView(depthStencilImageView);
+		renderPass->setDepthStencilAttachmentImageView(depthStencilImageView); */
 	}
 
 	void Physics2DRenderer::initializeCameraUniformBuffer() {
@@ -215,7 +224,7 @@ namespace ProjectA {
 		colorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor gridRenderPipelineDescriptor;
-		gridRenderPipelineDescriptor.renderPass = renderPass;
+		// gridRenderPipelineDescriptor.renderPass = renderPass;
 		gridRenderPipelineDescriptor.pipelineLayout = gridPipelineLayout;
 		gridRenderPipelineDescriptor.vertexInputBindings = {gridVertexInputBinding};
 		gridRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Grid.vert", gridVertexShaderModuleDescriptor);
@@ -264,7 +273,7 @@ namespace ProjectA {
 		colorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor centerOfMassRenderPipelineDescriptor;
-		centerOfMassRenderPipelineDescriptor.renderPass = renderPass;
+		// centerOfMassRenderPipelineDescriptor.renderPass = renderPass;
 		centerOfMassRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		centerOfMassRenderPipelineDescriptor.vertexInputBindings = {centerOfMassVertexInputBinding};
 		centerOfMassRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/CenterOfMass.vert", centerOfMassVertexShaderModuleDescriptor);
@@ -331,7 +340,7 @@ namespace ProjectA {
 		colorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor distanceRenderPipelineDescriptor;
-		distanceRenderPipelineDescriptor.renderPass = renderPass;
+		// distanceRenderPipelineDescriptor.renderPass = renderPass;
 		distanceRenderPipelineDescriptor.pipelineLayout = distancePipelineLayout;
 		distanceRenderPipelineDescriptor.vertexInputBindings = {distanceVertexInputBinding};
 		distanceRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Distance.vert", distanceVertexShaderModuleDescriptor);
@@ -406,7 +415,7 @@ namespace ProjectA {
 		colorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor vertexFeatureRenderPipelineDescriptor;
-		vertexFeatureRenderPipelineDescriptor.renderPass = renderPass;
+		// vertexFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		vertexFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		vertexFeatureRenderPipelineDescriptor.vertexInputBindings = {vertexFeatureVertexInputBinding};
 		vertexFeatureRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/VertexFeature.vert", vertexFeatureVertexShaderModuleDescriptor);
@@ -440,7 +449,7 @@ namespace ProjectA {
 		colorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor edgeFeatureRenderPipelineDescriptor;
-		edgeFeatureRenderPipelineDescriptor.renderPass = renderPass;
+		// edgeFeatureRenderPipelineDescriptor.renderPass = renderPass;
 		edgeFeatureRenderPipelineDescriptor.pipelineLayout = featurePipelineLayout;
 		edgeFeatureRenderPipelineDescriptor.vertexInputBindings = {edgeFeatureVertexInputBinding};
 		edgeFeatureRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/EdgeFeature.vert", edgeFeatureVertexShaderModuleDescriptor);
@@ -605,7 +614,7 @@ namespace ProjectA {
 		opaqueColorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor fillRenderPipelineDescriptor;
-		fillRenderPipelineDescriptor.renderPass = renderPass;
+		// fillRenderPipelineDescriptor.renderPass = renderPass;
 		fillRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, fillInstanceInputBinding};
 		fillRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Fill.vert", vertexShaderModuleDescriptor);
@@ -631,7 +640,7 @@ namespace ProjectA {
 		strokeInstanceInputBinding.registerAttribute<uint32>();
 
 		RenderPipelineDescriptor strokeRenderPipelineDescriptor;
-		strokeRenderPipelineDescriptor.renderPass = renderPass;
+		// strokeRenderPipelineDescriptor.renderPass = renderPass;
 		strokeRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, strokeInstanceInputBinding};
 		strokeRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/Stroke.vert", vertexShaderModuleDescriptor);
@@ -714,7 +723,7 @@ namespace ProjectA {
 		placeholderStrokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
 
 		RenderPipelineDescriptor placeholderCenterOfMassRenderPipelineDescriptor;
-		placeholderCenterOfMassRenderPipelineDescriptor.renderPass = renderPass;
+		// placeholderCenterOfMassRenderPipelineDescriptor.renderPass = renderPass;
 		placeholderCenterOfMassRenderPipelineDescriptor.pipelineLayout = placeholderFillPipelineLayout;
 		placeholderCenterOfMassRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 		placeholderCenterOfMassRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Physics2D/PlaceholderCenterOfMass.vert", vertexShaderModuleDescriptor);
@@ -821,11 +830,13 @@ namespace ProjectA {
 		depthStencilAttachmentClearValue.depth = 0.0f;
 		depthStencilAttachmentClearValue.stencil = 0;
 
+		DEBUG_ASSERT(false);
+
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.renderPass = renderPass;
-		beginRenderPassDescriptor.swapchain = swapchain;
+		// beginRenderPassDescriptor.renderPass = renderPass;
+		// beginRenderPassDescriptor.swapchain = swapchain;
 		beginRenderPassDescriptor.clearValues = {colorAttachmentClearValue, resolveAttachmentClearValue, depthStencilAttachmentClearValue};
-		beginRenderPassDescriptor.imageIndex = getImageIndex();
+		// beginRenderPassDescriptor.imageIndex = getImageIndex();
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);

@@ -37,13 +37,13 @@
 // - Asset/Image/Zelda.png							OK
 
 // QOI test images:
-// - Asset/Image/qoi_test_images/dice.qoi			-
+// - Asset/Image/qoi_test_images/dice.qoi			QOI_OP_RUN overflow
 // - Asset/Image/qoi_test_images/edgecase.qoi		OK
 // - Asset/Image/qoi_test_images/kodim10.qoi		OK
 // - Asset/Image/qoi_test_images/kodim23.qoi		OK
 // - Asset/Image/qoi_test_images/qoi_logo.qoi		OK
-// - Asset/Image/qoi_test_images/testcard.qoi		-
-// - Asset/Image/qoi_test_images/testcard_rgba.qoi	-
+// - Asset/Image/qoi_test_images/testcard.qoi		Compression artifacts
+// - Asset/Image/qoi_test_images/testcard_rgba.qoi	Compression artifacts
 // - Asset/Image/qoi_test_images/wikipedia_008.qoi	OK
 // - Asset/Image/test1.qoi							OK
 namespace ProjectA {
@@ -51,13 +51,13 @@ namespace ProjectA {
 		public:
 			ImageRenderer() {
 				// const PNGFile file = Filesystem::openTemporary<PNGFile>("Asset/Image/Zelda.png");
-				const ImageFile file = Filesystem::openImage<FileFormat::QOI>("Asset/Image/qoi_test_images/edgecase.qoi");
+				const ImageFile file = Filesystem::openImage<FileFormat::QOI>("Asset/Image/qoi_test_images/testcard.qoi");
 
 				const ref<Device> device = getDevice();
 
 				ref<Buffer> imageStagingBuffer;
 
-				// 1. Create image staging buffer and copy the glyph map data to it.
+				// 1. Create image staging buffer and copy the image data to it.
 				{
 					imageStagingBuffer = createStagingBuffer(file.data.count);
 
@@ -68,7 +68,7 @@ namespace ProjectA {
 					imageStagingBuffer->unmap();
 				}
 
-				// 1. Create image and copy the image staging buffer to it.
+				// 2. Create image and copy the image staging buffer to it.
 				{
 					ImageDescriptor imageDescriptor;
 					imageDescriptor.type = ImageType::TEXTURE_2D;
@@ -110,14 +110,14 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				// 2. Create image view.
+				// 3. Create image view.
 				{
 					constexpr ImageViewDescriptor imageViewDescriptor;
 
 					imageView = image->createView(imageViewDescriptor);
 				}
 
-				// 3. Create image sampler.
+				// 4. Create image sampler.
 				{
 					SamplerDescriptor samplerDescriptor{};
 					samplerDescriptor.magFilter = SamplerFilter::NEAREST;
@@ -126,7 +126,7 @@ namespace ProjectA {
 					sampler = createSampler(samplerDescriptor);
 				}
 
-				// 4. Create render pass.
+				// 5. Create render pass.
 				{
 					const ref<Surface> surface = getSurface();
 
@@ -136,11 +136,11 @@ namespace ProjectA {
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
 
-					RenderPassDescriptor renderPassDescriptor;
-					renderPassDescriptor.colorAttachments = {colorAttachment};
-					renderPassDescriptor.resolve = false;
-					renderPassDescriptor.depthStencil = false;
-					renderPassDescriptor.presentAttachmentIndex = 0;
+					SubpassDescriptor subpassDescriptor;
+					subpassDescriptor.colorAttachments = {colorAttachment};
+					subpassDescriptor.resolve = false;
+					subpassDescriptor.depthStencil = false;
+					subpassDescriptor.presentAttachmentIndex = 0;
 
 					renderPass = createRenderPass(renderPassDescriptor);
 
@@ -149,7 +149,7 @@ namespace ProjectA {
 					swapchain->getImages(renderPass);
 				}
 
-				// 5. Create pipeline layout.
+				// 6. Create pipeline layout.
 				{
 					DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding;
 					textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
@@ -166,7 +166,7 @@ namespace ProjectA {
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 6. Create render pipeline.
+				// 7. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -203,7 +203,7 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 7. Create vertex buffer.
+				// 8. Create vertex buffer.
 				{
 					constexpr uint64 vertexBufferSize = 3 * sizeof(svec2<float32>);
 

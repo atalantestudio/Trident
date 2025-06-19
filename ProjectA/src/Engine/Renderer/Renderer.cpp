@@ -10,6 +10,7 @@
 
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
+#include "Engine/Validation/Descriptor.hpp"
 
 namespace ProjectA {
 	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::NONE;
@@ -29,7 +30,7 @@ namespace ProjectA {
 		return adapter;
 	}
 
-	void Renderer::build(const Window& window, GraphicsAPI graphicsApi, bool vSync) {
+	void Renderer::initialize(const Window& window, GraphicsAPI graphicsApi, bool vSync) {
 		Renderer::graphicsApi = graphicsApi;
 
 		switch (Renderer::graphicsApi) {
@@ -103,6 +104,10 @@ namespace ProjectA {
 
 	ref<Fence> Renderer::createFence() {
 		return adapter->createFence();
+	}
+
+	ref<Framebuffer> Renderer::createFramebuffer(const FramebufferDescriptor& descriptor) {
+		return adapter->createFramebuffer(descriptor);
 	}
 
 	ref<Image> Renderer::createImage(const ImageDescriptor& descriptor) {

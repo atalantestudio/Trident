@@ -27,6 +27,9 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		static constexpr VkSampleMask sampleMask = ~0;
+
+		const Subpass& subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
 		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
 
 		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
@@ -112,13 +115,11 @@ namespace ProjectA {
 		rasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
 		rasterizationStateCreateInfo.lineWidth = descriptor.lineWidth;
 
-		constexpr VkSampleMask sampleMask = ~0;
-
 		VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo{};
 		multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		multisampleStateCreateInfo.pNext = nullptr;
 		multisampleStateCreateInfo.flags = 0;
-		multisampleStateCreateInfo.rasterizationSamples = renderPass.sampleCountFlagBits;
+		multisampleStateCreateInfo.rasterizationSamples = static_cast<VkSampleCountFlagBits>(subpass.getCombinedSampleCounts());
 
 		if (descriptor.minSampleShading == 0.0f) {
 			multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;
@@ -190,7 +191,7 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
 		graphicsPipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
 
-		if (renderPass.depthStencil) {
+		if (descriptor.depthStencilState.depthTest && subpass.depthStencil) {
 			VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo{};
 			depthStencilStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 			depthStencilStateCreateInfo.pNext = nullptr;
@@ -235,7 +236,7 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
 		graphicsPipelineCreateInfo.layout = layout->object;
 		graphicsPipelineCreateInfo.renderPass = renderPass.object;
-		graphicsPipelineCreateInfo.subpass = 0;
+		graphicsPipelineCreateInfo.subpass = descriptor.subpassIndex;
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		graphicsPipelineCreateInfo.basePipelineIndex = -1;
 

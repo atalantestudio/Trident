@@ -5,7 +5,6 @@
 #include "Backend/OpenGL/OpenGLDevice.hpp"
 #include "Backend/OpenGL/OpenGLRenderPass.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
-#include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
 #include "Engine/API/Rendering/CommandEncoder.hpp"
 
@@ -57,7 +56,6 @@ namespace ProjectA {
 
 		private:
 			OpenGLRenderPass* renderPass = nullptr;
-			OpenGLSwapchain* swapchain = nullptr;
 
 			std::vector<ref<OpenGLCommand>> commandBuffer;
 			ref<OpenGLComputePipeline> computePipeline = nullptr;

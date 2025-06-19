@@ -10,6 +10,7 @@
 
 namespace ProjectA {
 	VulkanPipelineLayout::VulkanPipelineLayout(VkDevice device, const PipelineLayoutDescriptor& descriptor) :
+		PipelineLayout(descriptor),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);

@@ -101,12 +101,9 @@
 	}
 
 	#define DEBUG_STATIC_ASSERT static_assert
-
-	#define DEBUG_VALIDATE_DESCRIPTOR(descriptor) validateDescriptor(descriptor)
 #else
 	#define DEBUG_ASSERT
 	#define DEBUG_STATIC_ASSERT
-	#define DEBUG_VALIDATE_DESCRIPTOR
 #endif
 
 #ifdef BUILD_MODE_PROFILE

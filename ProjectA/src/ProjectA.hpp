@@ -45,6 +45,7 @@
 // Renderer
 #include "Engine/API/Rendering/Buffer.hpp"
 #include "Engine/API/Rendering/ComputePipeline.hpp"
+#include "Engine/API/Rendering/Framebuffer.hpp"
 #include "Engine/API/Rendering/RenderPipeline.hpp"
 #include "Engine/API/Rendering/Swapchain.hpp"
 #include "Engine/API/Rendering/ShaderModule.hpp"

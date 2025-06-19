@@ -1,10 +1,8 @@
 #include "pch.hpp"
 
 #include "Backend/Vulkan/VulkanDevice.hpp"
-#include "Backend/Vulkan/VulkanRenderPass.hpp"
+#include "Backend/Vulkan/VulkanImage.hpp"
 #include "Backend/Vulkan/VulkanSwapchain.hpp"
-
-#include "Backend/Vulkan/ImageFormat.hpp"
 
 namespace ProjectA {
 	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const SwapchainDescriptor& descriptor) :
@@ -33,7 +31,9 @@ namespace ProjectA {
 	}
 
 	void VulkanSwapchain::getImages(const ref<RenderPass>& renderPass) {
-		PROFILE_SCOPE(FUNC_SIG);
+		DEBUG_ASSERT(false);
+
+		/* PROFILE_SCOPE(FUNC_SIG);
 
 		VkResult result;
 
@@ -136,12 +136,14 @@ namespace ProjectA {
 			result = vkCreateFramebuffer(device.object, &framebufferCreateInfo, nullptr, &framebuffers[imageIndex]);
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan swapchain framebuffer ([]).", string_VkResult(result));
-		}
+		} */
 	}
 
 	// Seems to allocate ~59Mb of memory in Release mode.
 	void VulkanSwapchain::construct(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		VkResult result;
 
 		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat(physicalDevice.object);
 
@@ -153,7 +155,7 @@ namespace ProjectA {
 
 		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities(physicalDevice.object);
 
-		uint32 imageCount = surfaceCapabilities.minImageCount + 1;
+		imageCount = surfaceCapabilities.minImageCount + 1;
 
 		if (surfaceCapabilities.maxImageCount > 0) {
 			imageCount = std::min(imageCount, surfaceCapabilities.maxImageCount);
@@ -204,17 +206,36 @@ namespace ProjectA {
 		swapchainCreateInfo.clipped = VK_TRUE;
 		swapchainCreateInfo.oldSwapchain = oldSwapchain;
 
-		const VkResult result = vkCreateSwapchainKHR(device.object, &swapchainCreateInfo, nullptr, &object);
+		result = vkCreateSwapchainKHR(device.object, &swapchainCreateInfo, nullptr, &object);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create swapchain ([]).", string_VkResult(result));
 
 		destroySwapchain(oldSwapchain);
+
+		result = vkGetSwapchainImagesKHR(device.object, object, &imageCount, nullptr);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain image count ([]).", string_VkResult(result));
+
+		sequence<VkImage> vkImages(imageCount);
+
+		result = vkGetSwapchainImagesKHR(device.object, object, &imageCount, vkImages);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images ([]).", string_VkResult(result));
+
+		images = sequence<ref<Image>>(imageCount);
+
+		for (uint32 imageIndex = 0; imageIndex < imageCount; imageIndex += 1) {
+			images[imageIndex] = createRef<VulkanImage>(device.object, vkImages[imageIndex], surfaceFormat.format, extent);
+		}
+
+		imageViews = sequence<ref<ImageView>>(imageCount);
+
+		createImageViews();
 	}
 
 	void VulkanSwapchain::destroyImageViewsAndFramebuffers() const {
-		for (uint32 imageIndex = 0; imageIndex < images.size(); imageIndex += 1) {
-			vkDestroyFramebuffer(device.object, framebuffers[imageIndex], nullptr);
-			vkDestroyImageView(device.object, imageViews[imageIndex], nullptr);
+		for (const ref<ImageView>& imageView : imageViews) {
+			imageView.~shared_ptr();
 		}
 	}
 

@@ -121,6 +121,11 @@ namespace ProjectA {
 			// In the range [0, MAX_FRAMES_IN_FLIGHT].
 			static uint32 frameInFlightIndex;
 
+			// std::vector<SubpassDescriptor> subpassDescriptors;
+
+			// static RenderPassDescriptor renderPassDescriptor;
+			// static ref<RenderPass> renderPass;
+
 		private:
 			scope<Mutex> mutex;
 			scope<SharedMemory> sharedMemory;

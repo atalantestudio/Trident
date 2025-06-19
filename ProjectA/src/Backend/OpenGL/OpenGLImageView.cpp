@@ -1,18 +1,21 @@
 #include "pch.hpp"
 
+#include "Backend/OpenGL/OpenGLImage.hpp"
 #include "Backend/OpenGL/OpenGLImageView.hpp"
 
 #include "Backend/OpenGL/ImageType.hpp"
 
 namespace ProjectA {
-	OpenGLImageView::OpenGLImageView(const OpenGLImage& image, const ImageViewDescriptor& descriptor) :
-		image(image)
+	OpenGLImageView::OpenGLImageView(const Image* image, const ImageViewDescriptor& descriptor) :
+		ImageView(image, descriptor)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
+		const OpenGLImage& glImage = *static_cast<const OpenGLImage*>(image);
+
 		// `glGenTextures` must be used here instead of `glCreateTextures` because the view must not be assigned a target.
 		glGenTextures(1, &object);
-		glTextureView(object, image.target, image.object, image.internalFormat, 0, image.getMipLevelCount(), 0, image.getLayerCount());
+		glTextureView(object, glImage.target, glImage.object, glImage.internalFormat, 0, image->getMipLevelCount(), 0, image->getLayerCount());
 	}
 
 	OpenGLImageView::~OpenGLImageView() {

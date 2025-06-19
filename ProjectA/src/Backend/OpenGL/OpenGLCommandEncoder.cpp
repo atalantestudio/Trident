@@ -34,8 +34,7 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
 		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
 
-		renderPass = std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass).get();
-		swapchain = std::static_pointer_cast<OpenGLSwapchain>(descriptor.swapchain).get();
+		renderPass = std::static_pointer_cast<OpenGLRenderPass>(descriptor.framebuffer->getRenderPass()).get();
 
 		commandBuffer.emplace_back(createRef<OpenGLBeginRenderPassCommand>(descriptor));
 	}
@@ -176,7 +175,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLCommandEncoder::endRenderPass() {
-		commandBuffer.emplace_back(createRef<OpenGLEndRenderPassCommand>(*renderPass, *swapchain));
+		commandBuffer.emplace_back(createRef<OpenGLEndRenderPassCommand>(*renderPass));
 	}
 
 	ref<CommandBuffer> OpenGLCommandEncoder::end() const {
@@ -187,7 +186,6 @@ namespace ProjectA {
 		commandBuffer.clear();
 
 		renderPass = nullptr;
-		swapchain = nullptr;
 		computePipeline = nullptr;
 		renderPipeline = nullptr;
 		indexOffset = 0;

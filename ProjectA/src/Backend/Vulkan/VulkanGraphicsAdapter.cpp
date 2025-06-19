@@ -4,6 +4,7 @@
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
 #include "Backend/Vulkan/VulkanComputePipeline.hpp"
 #include "Backend/Vulkan/VulkanFence.hpp"
+#include "Backend/Vulkan/VulkanFramebuffer.hpp"
 #include "Backend/Vulkan/VulkanGraphicsAdapter.hpp"
 #include "Backend/Vulkan/VulkanImage.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
@@ -39,6 +40,10 @@ namespace ProjectA {
 
 	ref<Fence> VulkanGraphicsAdapter::createFence() const {
 		return createRef<VulkanFence>(device->object);
+	}
+
+	ref<Framebuffer> VulkanGraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
+		return createRef<VulkanFramebuffer>(device->object, descriptor);
 	}
 
 	ref<Image> VulkanGraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {

@@ -14,7 +14,10 @@ namespace ProjectA {
 			{}
 
 			void execute() const final override {
-				const ref<OpenGLRenderPass>& renderPass = std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass);
+				// TODO
+				DEBUG_ASSERT(false);
+
+				/* const ref<OpenGLRenderPass>& renderPass = std::static_pointer_cast<OpenGLRenderPass>(descriptor.renderPass);
 				const ref<OpenGLSwapchain>& swapchain = std::static_pointer_cast<OpenGLSwapchain>(descriptor.swapchain);
 
 				if (renderPass->present && renderPass->getColorAttachmentCount() == 1 && !renderPass->resolve && !renderPass->depthStencil) {
@@ -48,10 +51,10 @@ namespace ProjectA {
 					}
 
 					glDrawBuffers(renderPass->getColorAttachmentCount(), &drawBuffers[0]);
-				}
+				} */
 			}
 
 		private:
-			const BeginRenderPassDescriptor descriptor;
+			BeginRenderPassDescriptor descriptor;
 	};
 }

@@ -14,14 +14,12 @@ namespace ProjectA {
 
 			~VulkanRenderPass();
 
-			ref<Image> createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const final override;
+			// ref<Image> createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const final override;
 
-			ref<Image> createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const final override;
+			// ref<Image> createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const final override;
 
 		public:
 			const VulkanSurface* surface;
-
-			VkSampleCountFlagBits sampleCountFlagBits;
 
 		private:
 			const VulkanPhysicalDevice& physicalDevice;

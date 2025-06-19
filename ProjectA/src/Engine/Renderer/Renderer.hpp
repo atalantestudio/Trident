@@ -15,9 +15,12 @@ namespace ProjectA {
 
 			static const scope<GraphicsAdapter>& getBackend();
 
-			static void build(const Window& window, GraphicsAPI graphicsAPI, bool vSync);
+			static void initialize(const Window& window, GraphicsAPI graphicsAPI, bool vSync);
 
 		public:
+			// virtual void build() = 0;
+			virtual void build() {};
+
 			virtual void render(const ref<CommandEncoder>& commandEncoder) const = 0;
 
 			virtual void resize(WindowResizeEvent& event);
@@ -35,6 +38,8 @@ namespace ProjectA {
 			static ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor);
 
 			static ref<Fence> createFence();
+
+			static ref<Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor);
 
 			static ref<Image> createImage(const ImageDescriptor& descriptor);
 

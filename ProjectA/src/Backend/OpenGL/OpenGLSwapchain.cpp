@@ -15,7 +15,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLSwapchain::getImages(const ref<RenderPass>& renderPass) {
-		const ref<OpenGLRenderPass>& glRenderPass = std::static_pointer_cast<OpenGLRenderPass>(renderPass);
+		/* const ref<OpenGLRenderPass>& glRenderPass = std::static_pointer_cast<OpenGLRenderPass>(renderPass);
 
 		if (renderPass->present && renderPass->getColorAttachmentCount() == 1 && !renderPass->resolve && !renderPass->depthStencil) {
 			return;
@@ -132,7 +132,7 @@ namespace ProjectA {
 			DEBUG_ASSERT(status == GL_FRAMEBUFFER_COMPLETE);
 		}
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0); */
 	}
 
 	void OpenGLSwapchain::update(const SwapchainDescriptor& descriptor) {

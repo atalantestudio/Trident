@@ -24,7 +24,6 @@ namespace ProjectA {
 	};
 
 	struct RenderPipelineDescriptor {
-		ref<RenderPass> renderPass;
 		ref<PipelineLayout> pipelineLayout;
 		sequence<VertexInputBinding> vertexInputBindings;
 		ref<ShaderModule> vertexShaderModule;
@@ -38,5 +37,7 @@ namespace ProjectA {
 		ColorBlendState colorBlendState;
 		DepthStencilState depthStencilState;
 		DynamicState dynamicState;
+		ref<RenderPass> renderPass;
+		uint32 subpassIndex;
 	};
 }

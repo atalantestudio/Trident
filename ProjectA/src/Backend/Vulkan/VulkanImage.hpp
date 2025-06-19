@@ -3,19 +3,24 @@
 #include "Backend/Vulkan/MemoryAllocator.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Rendering/Image.hpp"
 
 namespace ProjectA {
 	class VulkanImage : public Image, public ObjectWrapper<VkImage> {
 		public:
-			VulkanImage(VkDevice device, const ImageDescriptor& descriptor);
+			explicit VulkanImage(VkDevice device, const ImageDescriptor& descriptor);
 
-			~VulkanImage();
+			// NOTE: Use this constructor to create a wrapper around a swapchain image.
+			explicit VulkanImage(VkDevice device, VkImage image, VkFormat format, Extent2D extent);
 
-			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const override;
+			~VulkanImage() final override;
+
+			ref<ImageView> createViewInternal(const Image* image, const ImageViewDescriptor& descriptor) const final override;
 
 			void setLayout(ImageLayout layout);
+
+		private:
+			static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent);
 
 		public:
 			VkImageType type;
@@ -24,5 +29,6 @@ namespace ProjectA {
 		private:
 			VkDevice device;
 			MemorySuballocation memorySuballocation;
+			bool swapchainImage;
 	};
 }

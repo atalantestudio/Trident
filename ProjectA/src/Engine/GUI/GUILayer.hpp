@@ -21,7 +21,7 @@ namespace ProjectA {
 			};
 
 		public:
-			GUILayer();
+			void build() final override;
 
 			void postConstruct() final override;
 

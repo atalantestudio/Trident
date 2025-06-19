@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Rendering/Image.hpp"
 
 namespace ProjectA {
@@ -9,9 +8,9 @@ namespace ProjectA {
 		public:
 			OpenGLImage(const ImageDescriptor& descriptor);
 
-			~OpenGLImage();
+			~OpenGLImage() final override;
 
-			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const override;
+			ref<ImageView> createViewInternal(const Image* image, const ImageViewDescriptor& descriptor) const final override;
 
 			void setLayout(ImageLayout layout);
 

@@ -16,11 +16,11 @@ namespace ProjectA {
 					multisampleColorAttachment.loadOperation = LoadOperation::CLEAR;
 					multisampleColorAttachment.storeOperation = StoreOperation::STORE;
 
-					RenderPassDescriptor renderPassDescriptor;
-					renderPassDescriptor.colorAttachments = {multisampleColorAttachment};
-					renderPassDescriptor.resolve = true;
-					renderPassDescriptor.depthStencil = false;
-					renderPassDescriptor.presentAttachmentIndex = 0;
+					SubpassDescriptor subpassDescriptor;
+					subpassDescriptor.colorAttachments = {multisampleColorAttachment};
+					subpassDescriptor.resolve = true;
+					subpassDescriptor.depthStencil = false;
+					subpassDescriptor.presentAttachmentIndex = 0;
 
 					renderPass = createRenderPass(renderPassDescriptor);
 

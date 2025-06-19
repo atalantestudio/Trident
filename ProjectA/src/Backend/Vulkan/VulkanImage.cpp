@@ -14,7 +14,8 @@
 namespace ProjectA {
 	VulkanImage::VulkanImage(VkDevice device, const ImageDescriptor& descriptor) :
 		Image(descriptor),
-		device(device)
+		device(device),
+		swapchainImage(false)
 	{
 		DEBUG_ASSERT(checkSampleCountValidity(sampleCount));
 
@@ -79,21 +80,47 @@ namespace ProjectA {
 		format = imageCreateInfo.format;
 	}
 
+	VulkanImage::VulkanImage(VkDevice device, VkImage image, VkFormat format, Extent2D extent) :
+		Image(createSwapchainImageDescriptor(extent)),
+		ObjectWrapper(image),
+		device(device),
+		swapchainImage(true),
+		type(VK_IMAGE_TYPE_2D),
+		format(format)
+	{}
+
 	VulkanImage::~VulkanImage() {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		if (swapchainImage) {
+			return;
+		}
 
 		vkDestroyImage(device, object, nullptr);
 
 		MemoryAllocator::freeSuballocation(device, memorySuballocation.allocationIndex);
 	}
 
-	ref<ImageView> VulkanImage::createView(const ImageViewDescriptor& descriptor) const {
+	ref<ImageView> VulkanImage::createViewInternal(const Image* image, const ImageViewDescriptor& descriptor) const {
 		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
 
-		return createRef<VulkanImageView>(device, *this, descriptor);
+		return createRef<VulkanImageView>(device, image, descriptor);
 	}
 
 	void VulkanImage::setLayout(ImageLayout layout) {
+		ENGINE_ASSERT(!swapchainImage, "Only the layout of non-swapchain images can be changed through this method.");
+
 		this->layout = layout;
+	}
+
+	ImageDescriptor VulkanImage::createSwapchainImageDescriptor(Extent2D extent) {
+		ImageDescriptor imageDescriptor;
+		imageDescriptor.extent.width = extent.width;
+		imageDescriptor.extent.height = extent.height;
+		imageDescriptor.extent.depth = 1;
+		imageDescriptor.mipLevelCount = 1;
+		imageDescriptor.layerCount = 1;
+
+		return imageDescriptor;
 	}
 }

@@ -1,0 +1,37 @@
+#pragma once
+
+#include "Engine/API/Rendering/Descriptor/FramebufferDescriptor.hpp"
+#include "Engine/Validation/Descriptor.hpp"
+
+namespace ProjectA {
+	class Framebuffer {
+		public:
+			virtual ~Framebuffer() = default;
+
+			const ref<RenderPass>& getRenderPass() const {
+				return renderPass;
+			}
+
+			Extent2D getExtent() const {
+				return extent;
+			}
+
+			uint32 getLayerCount() const {
+				return layerCount;
+			}
+
+		protected:
+			explicit Framebuffer(const FramebufferDescriptor& descriptor) :
+				renderPass(descriptor.renderPass),
+				extent(descriptor.extent),
+				layerCount(descriptor.layerCount)
+			{
+				DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+			}
+
+		protected:
+			ref<RenderPass> renderPass;
+			Extent2D extent;
+			uint32 layerCount;
+	};
+}

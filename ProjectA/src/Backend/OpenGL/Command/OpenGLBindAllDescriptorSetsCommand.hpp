@@ -42,7 +42,7 @@ namespace ProjectA {
 							}
 
 							if (isCompute) {
-								GLenum format = imageView->image.internalFormat;
+								GLenum format = static_cast<const OpenGLImage*>(imageView->getImage())->internalFormat;
 
 								if (format == GL_SRGB8_ALPHA8) {
 									format = GL_RGBA8;

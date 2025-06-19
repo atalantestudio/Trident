@@ -14,7 +14,7 @@
 #define RENDERER_TRIANGLE 9
 
 // Select the renderer to run.
-#define RENDERER RENDERER_IMAGE
+#define RENDERER RENDERER_TRIANGLE
 
 #if RENDERER == RENDERER_ARRAY_TEXTURE
 	#include "../Renderer/ArrayTextureRenderer.hpp"
@@ -79,6 +79,10 @@
 namespace ProjectA {
 	class SampleLayer : public Layer {
 		public:
+			void build() override {
+				renderer.build();
+			}
+
 			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const override {
 				renderer.render(commandEncoder);
 			}

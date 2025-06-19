@@ -100,7 +100,7 @@ namespace ProjectA {
 
 		vSync = propertyFile->getProperty<bool>("VSync");
 
-		Renderer::build(*window, graphicsApi, vSync);
+		Renderer::initialize(*window, graphicsApi, vSync);
 
 		// API_QUEUE = Graphics API listed by priority.
 		//             First APIs are more recent but more performant,
@@ -208,8 +208,15 @@ namespace ProjectA {
 		PROFILE_SCOPE("Application post-construct");
 
 		for (const ref<Layer>& layer : layerStack) {
-			layer->postConstruct();
+			// subpassDescriptors.emplace_back(subpassDescriptor);
+
+			layer->build();
+			// layer->postConstruct();
 		}
+
+		// std::copy(subpassDescriptors.begin(), subpassDescriptors.end(), renderPassDescriptor.subpassDescriptors);
+
+		// renderPass = Renderer::getBackend()->createRenderPass(renderPassDescriptor);
 	}
 
 	bool Application::hasGraphicalProcesses() const {

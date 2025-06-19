@@ -27,11 +27,6 @@ namespace ProjectA {
 
 			void destroySwapchain(VkSwapchainKHR swapchain) const;
 
-		public:
-			std::vector<VkImage> images;
-			std::vector<VkImageView> imageViews;
-			std::vector<VkFramebuffer> framebuffers;
-
 		private:
 			const VulkanPhysicalDevice& physicalDevice;
 			const VulkanDevice& device;

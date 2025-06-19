@@ -4,11 +4,13 @@
 #include "Engine/API/Rendering/CommandEncoder.hpp"
 
 namespace ProjectA {
+	// TODO: Rename to Subpass.
 	class Layer {
 		public:
-			Layer() {}
-
 			virtual ~Layer() = default;
+
+			// virtual void build() = 0;
+			virtual void build() {};
 
 			virtual void postConstruct() {}
 

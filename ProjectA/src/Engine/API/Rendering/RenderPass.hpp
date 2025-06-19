@@ -1,34 +1,41 @@
 #pragma once
 
-#include "Engine/API/Rendering/Descriptor/AttachmentImageDescriptor.hpp"
+// #include "Engine/API/Rendering/Descriptor/AttachmentImageDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/RenderPassDescriptor.hpp"
-#include "Engine/API/Rendering/Image.hpp"
+// #include "Engine/API/Rendering/Image.hpp"
+#include "Engine/Validation/Descriptor.hpp"
 
 namespace ProjectA {
 	class RenderPass {
 		public:
-			RenderPass(const RenderPassDescriptor& descriptor) :
-				depthStencil(descriptor.depthStencil),
-				resolve(descriptor.resolve),
-				present(descriptor.presentAttachmentIndex != std::numeric_limits<uint32>::max()),
-				colorAttachmentCount(static_cast<uint32>(descriptor.colorAttachments.size())),
-				resolveAttachmentCount(descriptor.resolve ? colorAttachmentCount : 0),
-				clearValueCount(colorAttachmentCount + resolveAttachmentCount),
-				presentAttachmentIndex(descriptor.presentAttachmentIndex),
-				colorAttachments(descriptor.colorAttachments),
-				depthStencilAttachment(descriptor.depthStencilAttachment)
+			RenderPass::RenderPass(const RenderPassDescriptor& descriptor) :
+				subpasses(descriptor.subpasses)
 			{
-				DEBUG_ASSERT(colorAttachmentCount > 0);
+				DEBUG_VALIDATE_DESCRIPTOR(descriptor);
 
-				colorAttachmentImageViews.resize(colorAttachmentCount);
+				for (const Subpass& subpass : descriptor.subpasses) {
+					colorAttachmentCount += static_cast<uint32>(subpass.colorAttachments.count);
+					attachmentCount += static_cast<uint32>(subpass.colorAttachments.count);
 
-				attachmentCount = colorAttachmentCount + resolveAttachmentCount;
+					if (subpass.resolve) {
+						// If resolve is enabled, then every color attachment must be resolved,
+						// so this is twice the number of color attachments.
+						attachmentCount += static_cast<uint32>(subpass.colorAttachments.count);
+					}
 
-				if (depthStencil) {
-					attachmentCount += 1;
+					if (subpass.depthStencil) {
+						// TODO: +1 if depth stencil resolve attachment?
+						attachmentCount += 1;
+
+						depthStencilSubpass = true;
+					}
 				}
 
-				if (depthStencil && depthStencilAttachment.loadOperation == LoadOperation::CLEAR) {
+				DEBUG_ASSERT(attachmentCount > 0);
+
+				// colorAttachmentImageViews.resize(colorAttachmentCount);
+
+				/* if (depthStencil && depthStencilAttachment.loadOperation == LoadOperation::CLEAR) {
 					clearValueCount += 1;
 				}
 				else {
@@ -41,32 +48,38 @@ namespace ProjectA {
 							break;
 						}
 					}
-				}
+				} */
 			}
 
 			virtual ~RenderPass() = default;
-
-			uint32 getAttachmentCount() const {
-				return attachmentCount;
-			}
 
 			uint32 getColorAttachmentCount() const {
 				return colorAttachmentCount;
 			}
 
-			uint32 getResolveAttachmentCount() const {
-				return resolveAttachmentCount;
+			uint32 getAttachmentCount() const {
+				return attachmentCount;
 			}
 
 			uint32 getClearValueCount() const {
 				return clearValueCount;
 			}
 
-			uint32 getPresentAttachmentIndex() const {
-				return presentAttachmentIndex;
+			bool hasDepthStencilSubpass() const {
+				return depthStencilSubpass;
 			}
 
-			virtual ref<Image> createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const = 0;
+			const Subpass& getSubpass(uint32 index) const {
+				ENGINE_ASSERT(index < subpasses.count, "Subpass index overflow.");
+
+				return subpasses[index];
+			}
+
+			uint32 getSubpassCount() const {
+				return static_cast<uint32>(subpasses.count);
+			}
+
+			/* virtual ref<Image> createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const = 0;
 
 			virtual ref<Image> createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const = 0;
 
@@ -89,24 +102,19 @@ namespace ProjectA {
 				DEBUG_ASSERT(depthStencil);
 
 				depthStencilAttachmentImageView = imageView;
-			}
-
-		public:
-			const bool depthStencil;
-			const bool resolve;
-			const bool present;
+			} */
 
 		protected:
-			uint32 attachmentCount;
-			uint32 colorAttachmentCount;
-			uint32 resolveAttachmentCount;
-			uint32 clearValueCount;
-			uint32 presentAttachmentIndex;
+			uint32 colorAttachmentCount = 0;
+			uint32 attachmentCount = 0;
+			uint32 clearValueCount = 0;
 
-			std::vector<ColorAttachment> colorAttachments;
-			DepthStencilAttachment depthStencilAttachment;
+		private:
+			bool depthStencilSubpass = false;
 
-			std::vector<ref<ImageView>> colorAttachmentImageViews;
-			ref<ImageView> depthStencilAttachmentImageView;
+			// std::vector<ColorAttachment> colorAttachments;
+			// std::vector<ref<ImageView>> colorAttachmentImageViews;
+
+			sequence<Subpass> subpasses;
 	};
 }

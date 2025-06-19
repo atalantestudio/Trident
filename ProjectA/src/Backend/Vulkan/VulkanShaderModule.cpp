@@ -6,6 +6,7 @@
 
 namespace ProjectA {
 	VulkanShaderModule::VulkanShaderModule(VkDevice device, const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) :
+		// ShaderModule(descriptor),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);
