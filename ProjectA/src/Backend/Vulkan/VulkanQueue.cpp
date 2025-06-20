@@ -21,15 +21,15 @@ namespace ProjectA {
 		return createRef<VulkanCommandEncoder>(device, commandPool.object, descriptor);
 	}
 
-	void VulkanQueue::submit(const std::vector<ref<CommandBuffer>>& commandBuffers, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
+	void VulkanQueue::submit(const sequence<ref<CommandBuffer>>& commandBuffers, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		// TODO: One wait dst stage mask per wait semaphore, but the pipeline stage flags is stored into the command buffer.
+		// TODO: One wait destination stage mask per wait semaphore, but the pipeline stage flags is stored into the command buffer.
 		const VkPipelineStageFlags waitDstStageMask = std::static_pointer_cast<VulkanCommandBuffer>(commandBuffers[0])->pipelineStageFlags;
 
-		sequence<VkCommandBuffer> vkCommandBuffers(commandBuffers.size());
+		sequence<VkCommandBuffer> vkCommandBuffers(commandBuffers.count);
 
-		for (uint32 commandBufferIndex = 0; commandBufferIndex < commandBuffers.size(); commandBufferIndex += 1) {
+		for (uint32 commandBufferIndex = 0; commandBufferIndex < commandBuffers.count; commandBufferIndex += 1) {
 			vkCommandBuffers[commandBufferIndex] = std::static_pointer_cast<VulkanCommandBuffer>(commandBuffers[commandBufferIndex])->object;
 		}
 
@@ -71,11 +71,11 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to submit Vulkan queue ([]).", string_VkResult(result));
 	}
 
-	PresentStatus VulkanQueue::present(const std::vector<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const std::vector<uint32>& imageIndices) const {
+	PresentStatus VulkanQueue::present(const sequence<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		// TODO: Find a static way of casting swapchains.
-		sequence<const VkSwapchainKHR*> vkSwapchains(swapchains.size());
+		sequence<const VkSwapchainKHR*> vkSwapchains(swapchains.count);
 
 		for (uint64 swapchainIndex = 0; swapchainIndex < vkSwapchains.count; swapchainIndex += 1) {
 			vkSwapchains[swapchainIndex] = &std::static_pointer_cast<VulkanSwapchain>(swapchains[swapchainIndex])->object;
@@ -88,7 +88,7 @@ namespace ProjectA {
 		presentInfo.pWaitSemaphores = &std::static_pointer_cast<VulkanSemaphore>(waitSemaphore)->object;
 		presentInfo.swapchainCount = static_cast<uint32>(vkSwapchains.count);
 		presentInfo.pSwapchains = vkSwapchains[0];
-		presentInfo.pImageIndices = imageIndices.data();
+		presentInfo.pImageIndices = imageIndices;
 		presentInfo.pResults = nullptr;
 
 		const VkResult result = vkQueuePresentKHR(object, &presentInfo);

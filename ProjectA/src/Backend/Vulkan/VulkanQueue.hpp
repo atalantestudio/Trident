@@ -15,9 +15,9 @@ namespace ProjectA {
 
 			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
 
-			void submit(const std::vector<ref<CommandBuffer>>& commandBuffers, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const final override;
+			void submit(const sequence<ref<CommandBuffer>>& commandBuffers, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const final override;
 
-			PresentStatus present(const std::vector<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const std::vector<uint32>& imageIndices) const final override;
+			PresentStatus present(const sequence<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const final override;
 
 		private:
 			const VulkanDevice& device;
