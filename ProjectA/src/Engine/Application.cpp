@@ -313,15 +313,16 @@ namespace ProjectA {
 		}
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+		const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
 
-		device->getGraphicsQueue()->submit(
+		graphicsQueue->submit(
 			{commandBuffer},
 			Renderer::getAcquireNextImageSemaphore(frameInFlightIndex), // Must be waited on before submitting.
 			Renderer::getFinishedRenderSemaphore(frameInFlightIndex), // Will be signaled once the command buffer has finished executing.
 			Renderer::getFlightFence(frameInFlightIndex) // Will be signaled once the command buffer has finished executing.
 		);
 
-		const PresentStatus presentStatus = device->getPresentQueue()->present(
+		const PresentStatus presentStatus = graphicsQueue->present(
 			{Renderer::getSwapchain()},
 			Renderer::getFinishedRenderSemaphore(frameInFlightIndex), // Must be waited on before presenting.
 			{Renderer::getImageIndex()}

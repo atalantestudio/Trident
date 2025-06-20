@@ -14,15 +14,7 @@ namespace ProjectA {
 		return physicalDevice;
 	}
 
-	ref<Queue> OpenGLDevice::getComputeQueue() const {
-		return queue;
-	}
-
-	ref<Queue> OpenGLDevice::getGraphicsQueue() const {
-		return queue;
-	}
-
-	ref<Queue> OpenGLDevice::getPresentQueue() const {
+	ref<Queue> OpenGLDevice::getQueue(QueueFamilyCapability queueFamilyCapability) const {
 		return queue;
 	}
 

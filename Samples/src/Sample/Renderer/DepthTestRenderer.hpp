@@ -143,7 +143,8 @@ namespace ProjectA {
 					CommandBufferDescriptor commandBufferDescriptor{};
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+					const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
+					const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
 					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, vertexBufferCopyRegions);
@@ -151,7 +152,8 @@ namespace ProjectA {
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
+					graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
 					device->waitIdle();
 				}
 			}

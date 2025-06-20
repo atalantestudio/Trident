@@ -68,8 +68,10 @@ namespace ProjectA {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
+		const ref<Queue> graphicsQueue = adapter->getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
+
 		for (uint32 frameIndex = 0; frameIndex < Application::MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
-			commandEncoders[frameIndex] = adapter->getDevice()->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+			commandEncoders[frameIndex] = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
 			flightFences[frameIndex] = adapter->createFence();
 			acquireNextImageSemaphores[frameIndex] = adapter->createSemaphore();
 			finishedRenderSemaphores[frameIndex] = adapter->createSemaphore();

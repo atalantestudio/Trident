@@ -6,19 +6,29 @@
 namespace ProjectA {
 	class VulkanPhysicalDevice final : public PhysicalDevice, public ObjectWrapper<VkPhysicalDevice> {
 		public:
-			VulkanPhysicalDevice(VkInstance instance);
+			explicit VulkanPhysicalDevice(VkInstance instance);
 
 		private:
-			uint32 calculateScore() const;
-
 			void setLimits();
 
+			void selectQueueFamilyIndices();
+
+			static void enumerateQueueFamilyProperties(const sequence<VkQueueFamilyProperties>& queueFamilies);
+
+			static uint32 calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties);
+
+			static uint32 calculateGraphicsQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties);
+
+			static uint32 calculateComputeQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties);
+
+			static uint32 calculateTransferQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties);
+
 		public:
-			// TODO: lyah::max<uint32>()
-			// TODO: lyah::min<uint32>()
-			uint32 graphicsQueueFamilyIndex = std::numeric_limits<uint32>::max();
-			uint32 computeQueueFamilyIndex = std::numeric_limits<uint32>::max();
 			std::vector<const char*> enabledExtensionNames;
+
+			uint32 graphicsQueueFamilyIndex;
+			uint32 computeQueueFamilyIndex;
+			uint32 transferQueueFamilyIndex;
 
 			VkPhysicalDeviceFeatures features;
 			VkPhysicalDeviceMemoryProperties memoryProperties;

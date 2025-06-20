@@ -83,20 +83,9 @@ namespace ProjectA {
 		swapchainCreateInfo.imageExtent = *pointer_cast_const<const VkExtent2D*>(&extent);
 		swapchainCreateInfo.imageArrayLayers = 1;
 		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-		if (physicalDevice.graphicsQueueFamilyIndex == surface.presentQueueFamilyIndex) {
-			swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-			swapchainCreateInfo.queueFamilyIndexCount = 0;
-			swapchainCreateInfo.pQueueFamilyIndices = nullptr;
-		}
-		else {
-			const uint32 queueFamilyIndices[2] = {physicalDevice.graphicsQueueFamilyIndex, surface.presentQueueFamilyIndex};
-
-			swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-			swapchainCreateInfo.queueFamilyIndexCount = 2;
-			swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
-		}
-
+		swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		swapchainCreateInfo.queueFamilyIndexCount = 0;
+		swapchainCreateInfo.pQueueFamilyIndices = nullptr;
 		swapchainCreateInfo.preTransform = surfaceCapabilities.currentTransform;
 		swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 		swapchainCreateInfo.presentMode = presentMode;

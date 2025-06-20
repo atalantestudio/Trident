@@ -74,7 +74,8 @@ namespace ProjectA {
 					CommandBufferDescriptor commandBufferDescriptor;
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+					const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
+					const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
 					commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
@@ -83,7 +84,8 @@ namespace ProjectA {
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
+					graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
 					device->waitIdle();
 				}
 
@@ -224,14 +226,16 @@ namespace ProjectA {
 					CommandBufferDescriptor commandBufferDescriptor{};
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+					const ref<Queue> transferQueue = device->getQueue(QueueFamilyCapability::TRANSFER);
+					const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
 					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, bufferCopyRegions);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
+					transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
 					device->waitIdle();
 				}
 
@@ -273,14 +277,16 @@ namespace ProjectA {
 					CommandBufferDescriptor commandBufferDescriptor{};
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-					const ref<CommandEncoder> commandEncoder = device->getGraphicsQueue()->createCommandEncoder(commandBufferDescriptor);
+					const ref<Queue> transferQueue = device->getQueue(QueueFamilyCapability::TRANSFER);
+					const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
 					commandEncoder->copyBufferToBuffer(instanceVertexStagingBuffer, instanceVertexBuffer, bufferCopyRegions);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					device->getGraphicsQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
+					transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
 					device->waitIdle();
 				}
 			}

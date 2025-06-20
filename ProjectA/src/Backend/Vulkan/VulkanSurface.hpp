@@ -15,7 +15,7 @@ namespace ProjectA {
 
 			virtual ImageFormat getFormat() const final override;
 
-			void initPresentQueueFamilyIndex(VkPhysicalDevice physicalDevice, uint32 graphicsQueueFamilyIndex);
+			void checkPresentQueueFamilyIndex(VkPhysicalDevice physicalDevice, uint32 graphicsQueueFamilyIndex);
 
 			VkSurfaceFormatKHR selectFormat(VkPhysicalDevice physicalDevice) const;
 
@@ -24,7 +24,6 @@ namespace ProjectA {
 			VkSurfaceCapabilitiesKHR getCapabilities(VkPhysicalDevice physicalDevice) const;
 
 		public:
-			uint32 presentQueueFamilyIndex = 0;
 			const Window& window;
 
 		private:

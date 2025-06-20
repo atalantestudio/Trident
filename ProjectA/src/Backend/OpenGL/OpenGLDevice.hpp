@@ -13,11 +13,7 @@ namespace ProjectA {
 
 			ref<PhysicalDevice> getPhysicalDevice() const final override;
 
-			ref<Queue> getComputeQueue() const final override;
-
-			ref<Queue> getGraphicsQueue() const final override;
-
-			ref<Queue> getPresentQueue() const final override;
+			ref<Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const final override;
 
 			void waitForFence(const ref<Fence>& fence) const final override;
 

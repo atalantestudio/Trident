@@ -19,6 +19,7 @@ namespace ProjectA {
 		sdfGlyphMap.glyphs = sequence<SDFGlyph>(ttfFile.glyphs.size());
 
 		const ref<Device> device = Renderer::getDevice();
+		const ref<Queue> computeQueue = device->getQueue(QueueFamilyCapability::COMPUTE);
 
 		CommandBufferDescriptor autoCommandBufferDescriptor{};
 		autoCommandBufferDescriptor.usage = CommandBufferUsage::AUTO;
@@ -198,7 +199,7 @@ namespace ProjectA {
 		fontBufferCopyRegion.destinationOffset = 0;
 		fontBufferCopyRegion.size = fontBufferSize;
 
-		commandEncoder = device->getComputeQueue()->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
+		commandEncoder = computeQueue->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
 		commandEncoder->begin();
 		commandEncoder->copyBufferToBuffer(fontStagingBuffer, fontStorageBuffer, fontBufferCopyRegions);
 		commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
@@ -206,7 +207,8 @@ namespace ProjectA {
 
 		commandBuffer = commandEncoder->end();
 
-		device->getComputeQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
+		computeQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
 		device->waitIdle();
 
 		float32 xOffset = 0;
@@ -215,7 +217,7 @@ namespace ProjectA {
 		const Extent3D& glyphMapExtent = glyphMapImage->getExtent();
 		const float32 lineHeight = static_cast<float32>(ttfFile.hhea.ascent - ttfFile.hhea.descent);
 
-		commandEncoder = device->getComputeQueue()->createCommandEncoder(autoCommandBufferDescriptor);
+		commandEncoder = computeQueue->createCommandEncoder(autoCommandBufferDescriptor);
 
 		const ref<Fence> writeBufferFence = Renderer::createFence();
 
@@ -307,7 +309,8 @@ namespace ProjectA {
 
 			commandBuffer = commandEncoder->end();
 
-			device->getComputeQueue()->submit({commandBuffer}, nullptr, nullptr, writeBufferFence);
+			computeQueue->submit({commandBuffer}, nullptr, nullptr, writeBufferFence);
+
 			device->waitIdle();
 
 			// TODO: lyah::ceil.
@@ -335,14 +338,15 @@ namespace ProjectA {
 		glyphMapCopyRegion.imageLayerOffset = 0;
 		glyphMapCopyRegion.imageLayerCount = glyphMapImage->getLayerCount();
 
-		commandEncoder = device->getComputeQueue()->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
+		commandEncoder = computeQueue->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
 		commandEncoder->begin();
 		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::TRANSFER_SRC_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, bufferImageCopyRegions);
 
 		commandBuffer = commandEncoder->end();
 
-		device->getComputeQueue()->submit({commandBuffer}, nullptr, nullptr, nullptr);
+		computeQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
 		device->waitIdle();
 
 		sdfGlyphMap.data = sequence<uint8>(glyphMapStagingBuffer->size);

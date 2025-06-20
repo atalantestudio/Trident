@@ -28,21 +28,18 @@ namespace ProjectA {
 		vkDestroySurfaceKHR(instance, object, nullptr);
 	}
 
-	void VulkanSurface::initPresentQueueFamilyIndex(VkPhysicalDevice physicalDevice, uint32 graphicsQueueFamilyIndex) {
+	void VulkanSurface::checkPresentQueueFamilyIndex(VkPhysicalDevice physicalDevice, uint32 graphicsQueueFamilyIndex) {
 		VkBool32 supported;
 		VkResult result;
 
 		result = vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, graphicsQueueFamilyIndex, object, &supported);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan physical device surface support ([]).", string_VkResult(result));
-
-		if (supported) {
-			presentQueueFamilyIndex = graphicsQueueFamilyIndex;
-		}
+		ENGINE_ASSERT(supported == VK_TRUE, "The graphics queue family does not support this surface.");
 	}
 
 	ImageFormat VulkanSurface::getFormat() const {
-		// TODO: Return the correct format.
+		// TODO: Return the correct format (remap the result of VulkanSurface::selectFormat to ImageFormat enum).
 		return ImageFormat::B8G8R8A8_UNORM;
 	}
 

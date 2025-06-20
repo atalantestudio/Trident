@@ -23,7 +23,7 @@ namespace ProjectA {
 		std::vector<uint32> queueFamilyIndices = {
 			physicalDevice.graphicsQueueFamilyIndex,
 			physicalDevice.computeQueueFamilyIndex,
-			surface.presentQueueFamilyIndex,
+			physicalDevice.transferQueueFamilyIndex,
 		};
 
 		std::sort(queueFamilyIndices.begin(), queueFamilyIndices.end());
@@ -60,9 +60,9 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan device ([]).", string_VkResult(result));
 
-		computeQueue = createRef<VulkanQueue>(*this, physicalDevice.computeQueueFamilyIndex);
-		graphicsQueue = createRef<VulkanQueue>(*this, physicalDevice.graphicsQueueFamilyIndex);
-		presentQueue = createRef<VulkanQueue>(*this, surface.presentQueueFamilyIndex);
+		queues[static_cast<uint32>(QueueFamilyCapability::GRAPHICS)] = createRef<VulkanQueue>(*this, physicalDevice.graphicsQueueFamilyIndex);
+		queues[static_cast<uint32>(QueueFamilyCapability::COMPUTE)] = createRef<VulkanQueue>(*this, physicalDevice.computeQueueFamilyIndex);
+		queues[static_cast<uint32>(QueueFamilyCapability::TRANSFER)] = createRef<VulkanQueue>(*this, physicalDevice.transferQueueFamilyIndex);
 
 		vkGetPhysicalDeviceMemoryProperties(physicalDevice.object, &memoryProperties);
 	}
@@ -70,9 +70,10 @@ namespace ProjectA {
 	VulkanDevice::~VulkanDevice() {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		computeQueue.~shared_ptr();
-		graphicsQueue.~shared_ptr();
-		presentQueue.~shared_ptr();
+		for (const ref<VulkanQueue>& queue : queues) {
+			// Destroy the queue's command pool.
+			queue.~shared_ptr();
+		}
 
 		vkDestroyDevice(object, nullptr);
 	}
@@ -81,16 +82,8 @@ namespace ProjectA {
 		return physicalDevice;
 	}
 
-	ref<Queue> VulkanDevice::getComputeQueue() const {
-		return computeQueue;
-	}
-
-	ref<Queue> VulkanDevice::getGraphicsQueue() const {
-		return graphicsQueue;
-	}
-
-	ref<Queue> VulkanDevice::getPresentQueue() const {
-		return presentQueue;
+	ref<Queue> VulkanDevice::getQueue(QueueFamilyCapability queueFamilyCapability) const {
+		return queues[static_cast<uint32>(queueFamilyCapability)];
 	}
 
 	void VulkanDevice::waitForFence(const ref<Fence>& fence) const {

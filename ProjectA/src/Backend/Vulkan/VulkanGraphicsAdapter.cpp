@@ -21,7 +21,7 @@ namespace ProjectA {
 		physicalDevice(instance.object),
 		device(createRef<VulkanDevice>(physicalDevice, *surface))
 	{
-		surface->initPresentQueueFamilyIndex(physicalDevice.object, physicalDevice.graphicsQueueFamilyIndex);
+		surface->checkPresentQueueFamilyIndex(physicalDevice.object, physicalDevice.graphicsQueueFamilyIndex);
 
 		MemoryAllocator::initialize(physicalDevice);
 	}

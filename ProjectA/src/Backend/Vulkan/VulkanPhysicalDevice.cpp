@@ -3,6 +3,21 @@
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 
 namespace ProjectA {
+	static std::string formatPhysicalDeviceType(VkPhysicalDeviceType physicalDeviceType) {
+		switch (physicalDeviceType) {
+			case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+				return "(integrated GPU)";
+			case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+				return "(discrete GPU)";
+			case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+				return "(virtual GPU)";
+			case VK_PHYSICAL_DEVICE_TYPE_CPU:
+				return "(CPU)";
+			default:
+				return "(unknown type)";
+		}
+	}
+
 	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance) {
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -22,73 +37,33 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan physical devices ([]).", string_VkResult(result));
 
+		uint32 maxPhysicalDeviceScore = 0;
 		uint32 bestPhysicalDeviceIndex = 0;
-		uint32 bestPhysicalDeviceScore = 0;
 
 		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count; physicalDeviceIndex += 1) {
 			const VkPhysicalDevice physicalDevice = physicalDevices[physicalDeviceIndex];
 
 			vkGetPhysicalDeviceProperties(physicalDevice, &properties);
 
-			const uint32 score = calculateScore();
+			const uint32 physicalDeviceScore = calculatePhysicalDeviceScore(properties);
 
-			if (score >= bestPhysicalDeviceScore) {
+			if (physicalDeviceScore >= maxPhysicalDeviceScore) {
+				maxPhysicalDeviceScore = physicalDeviceScore;
 				bestPhysicalDeviceIndex = physicalDeviceIndex;
-				bestPhysicalDeviceScore = score;
 			}
 		}
 
-		ENGINE_ASSERT(bestPhysicalDeviceScore > 0, "Could not select a suitable physical device.");
+		ENGINE_ASSERT(maxPhysicalDeviceScore > 0, "Could not select a suitable physical device.");
 
 		object = physicalDevices[bestPhysicalDeviceIndex];
 
 		vkGetPhysicalDeviceProperties(object, &properties);
 
-		std::string deviceType;
+		const std::string physicalDeviceType = formatPhysicalDeviceType(properties.deviceType);
 
-		switch (properties.deviceType) {
-			case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-				deviceType = " (integrated GPU)";
+		ENGINE_INFO("Using [] [].", properties.deviceName, physicalDeviceType);
 
-				break;
-			case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-				deviceType = " (discrete GPU)";
-
-				break;
-			case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
-				deviceType = " (virtual GPU)";
-
-				break;
-			case VK_PHYSICAL_DEVICE_TYPE_CPU:
-				deviceType = " (CPU)";
-
-				break;
-		}
-
-		ENGINE_INFO("Using [][].", properties.deviceName, deviceType);
-
-		uint32 queueFamilyPropertyCount;
-
-		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyPropertyCount, nullptr);
-
-		ENGINE_ASSERT(queueFamilyPropertyCount > 0, "Could not find queues for this physical device.");
-
-		sequence<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyPropertyCount);
-
-		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyPropertyCount, &queueFamilyProperties[0]);
-
-		for (uint32 queueFamilyPropertyIndex = 0; queueFamilyPropertyIndex < queueFamilyPropertyCount; queueFamilyPropertyIndex += 1) {
-			if (queueFamilyProperties[queueFamilyPropertyIndex].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-				graphicsQueueFamilyIndex = queueFamilyPropertyIndex;
-			}
-
-			if (queueFamilyProperties[queueFamilyPropertyIndex].queueFlags & VK_QUEUE_COMPUTE_BIT) {
-				computeQueueFamilyIndex = queueFamilyPropertyIndex;
-			}
-		}
-
-		ENGINE_ASSERT(graphicsQueueFamilyIndex != std::numeric_limits<uint32>::max(), "Failed to find Vulkan graphics queue index.");
-		ENGINE_ASSERT(computeQueueFamilyIndex != std::numeric_limits<uint32>::max(), "Failed to find Vulkan compute queue index.");
+		selectQueueFamilyIndices();
 
 		uint32 extensionPropertyCount = 0;
 
@@ -118,24 +93,6 @@ namespace ProjectA {
 		setLimits();
 	}
 
-	uint32 VulkanPhysicalDevice::calculateScore() const {
-		uint32 score = 0;
-
-		#if PREFERRED_GPU_TYPE == GPU_TYPE_DISCRETE
-			if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-				score += 1;
-			}
-		#endif
-
-		#if PREFERRED_GPU_TYPE == GPU_TYPE_INTEGRATED
-			if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
-				score += 1;
-			}
-		#endif
-
-		return score;
-	}
-
 	void VulkanPhysicalDevice::setLimits() {
 		limits.bufferImageGranularity = properties.limits.bufferImageGranularity;
 		limits.lineWidthGranularity = properties.limits.lineWidthGranularity;
@@ -157,5 +114,120 @@ namespace ProjectA {
 		limits.maxVertexInputBindingCount = properties.limits.maxVertexInputBindings;
 		limits.maxVertexInputBindingStride = properties.limits.maxVertexInputBindingStride;
 		limits.pointSizeGranularity = properties.limits.pointSizeGranularity;
+	}
+
+	void VulkanPhysicalDevice::selectQueueFamilyIndices() {
+		uint32 queueFamilyCount;
+
+		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyCount, nullptr);
+
+		ENGINE_ASSERT(queueFamilyCount > 0, "Could not find queues for this physical device.");
+
+		sequence<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+
+		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyCount, &queueFamilies[0]);
+
+		#ifdef BUILD_MODE_DEBUG
+			enumerateQueueFamilyProperties(queueFamilies);
+		#endif
+
+		uint32 maxGraphicsQueueFamilyScore = 0;
+		uint32 maxComputeQueueFamilyScore = 0;
+		uint32 maxTransferQueueFamilyScore = 0;
+
+		for (uint32 queueFamilyIndex = 0; queueFamilyIndex < queueFamilyCount; queueFamilyIndex += 1) {
+			const VkQueueFamilyProperties& queueFamily = queueFamilies[queueFamilyIndex];
+
+			ENGINE_ASSERT(queueFamily.queueCount > 0, "Queue family [] has no queues.", queueFamilyIndex);
+
+			const uint32 graphicsQueueFamilyScore = calculateGraphicsQueueFamilyScore(queueFamily);
+
+			if (graphicsQueueFamilyScore > maxGraphicsQueueFamilyScore) {
+				maxGraphicsQueueFamilyScore = graphicsQueueFamilyScore;
+				graphicsQueueFamilyIndex = queueFamilyIndex;
+			}
+
+			const uint32 computeQueueFamilyScore = calculateComputeQueueFamilyScore(queueFamily);
+
+			if (computeQueueFamilyScore > maxComputeQueueFamilyScore) {
+				maxComputeQueueFamilyScore = computeQueueFamilyScore;
+				computeQueueFamilyIndex = queueFamilyIndex;
+			}
+
+			const uint32 transferQueueFamilyScore = calculateTransferQueueFamilyScore(queueFamily);
+
+			if (transferQueueFamilyScore > maxTransferQueueFamilyScore) {
+				maxTransferQueueFamilyScore = transferQueueFamilyScore;
+				transferQueueFamilyIndex = queueFamilyIndex;
+			}
+		}
+
+		ENGINE_ASSERT(maxGraphicsQueueFamilyScore > 0, "Failed to find a Vulkan graphics queue family.");
+		ENGINE_ASSERT(maxComputeQueueFamilyScore > 0, "Failed to find a Vulkan compute queue family.");
+		ENGINE_ASSERT(maxTransferQueueFamilyScore > 0, "Failed to find a Vulkan transfer queue family.");
+	}
+
+	void VulkanPhysicalDevice::enumerateQueueFamilyProperties(const sequence<VkQueueFamilyProperties>& queueFamilies) {
+		for (uint32 queueFamilyIndex = 0; queueFamilyIndex < queueFamilies.count; queueFamilyIndex += 1) {
+			const VkQueueFamilyProperties& queueFamily = queueFamilies[queueFamilyIndex];
+
+			ENGINE_INFO(
+				"Properties for queue family []:\n"
+				"- Queue count: []\n"
+				"- Queue flags: []",
+				queueFamilyIndex,
+				queueFamily.queueCount,
+				string_VkQueueFlags(queueFamily.queueFlags)
+			);
+		}
+	}
+
+	uint32 VulkanPhysicalDevice::calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties) {
+		#if PREFERRED_GPU_TYPE == GPU_TYPE_DISCRETE
+			if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+				return 1;
+			}
+		#endif
+
+		#if PREFERRED_GPU_TYPE == GPU_TYPE_INTEGRATED
+			if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
+				return 1;
+			}
+		#endif
+
+		return 0;
+	}
+
+	uint32 VulkanPhysicalDevice::calculateGraphicsQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
+		if (queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+			return 1;
+		}
+
+		return 0;
+	}
+
+	uint32 VulkanPhysicalDevice::calculateComputeQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
+		if (queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+			return 1;
+		}
+
+		return 0;
+	}
+
+	uint32 VulkanPhysicalDevice::calculateTransferQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
+		if (queueFamilyProperties.queueFlags & VK_QUEUE_TRANSFER_BIT) {
+			// Prefer queues which don't support graphics or compute, so that transfers are non-blocking regarding other operations.
+			if (!(queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT) && !(queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT)) {
+				return 3;
+			}
+
+			return 2;
+		}
+
+		if (queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT || queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+			return 1;
+		}
+
+		return 1;
 	}
 }
