@@ -32,7 +32,7 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::begin() const {}
 
 	void OpenGLCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
-		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		framebuffer = std::static_pointer_cast<OpenGLFramebuffer>(descriptor.framebuffer).get();
 

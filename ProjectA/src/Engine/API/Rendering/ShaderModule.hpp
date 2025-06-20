@@ -12,7 +12,7 @@ namespace ProjectA {
 
 		/* protected:
 			explicit ShaderModule(const ShaderModuleDescriptor& descriptor) {
-				DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+				DEBUG_DESCRIPTOR_GUARD(descriptor);
 			} */
 	};
 }

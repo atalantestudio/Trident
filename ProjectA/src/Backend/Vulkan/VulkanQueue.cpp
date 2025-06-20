@@ -16,7 +16,7 @@ namespace ProjectA {
 	}
 
 	ref<CommandEncoder> VulkanQueue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
-		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		return createRef<VulkanCommandEncoder>(device, commandPool.object, descriptor);
 	}

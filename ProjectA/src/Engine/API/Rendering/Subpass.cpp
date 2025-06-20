@@ -7,7 +7,7 @@ namespace ProjectA {
 	ref<Image> Subpass::createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const {
 		DEBUG_ASSERT(colorAttachmentIndex < colorAttachments.count);
 		DEBUG_ASSERT(resolveAttachmentCount > 0 || (resolveAttachmentCount == 0 && colorAttachmentIndex != presentAttachmentIndex));
-		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
 
@@ -26,7 +26,7 @@ namespace ProjectA {
 
 	ref<Image> Subpass::createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const {
 		DEBUG_ASSERT(depthStencil);
-		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.type = descriptor.type;

@@ -34,7 +34,7 @@ namespace ProjectA {
 				extent(descriptor.extent),
 				layerCount(descriptor.layerCount)
 			{
-				DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+				DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 				for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count; imageViewIndex += 1) {
 					const Image* image = descriptor.imageViews[imageViewIndex]->getImage();

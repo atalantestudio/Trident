@@ -9,7 +9,7 @@ namespace ProjectA {
 			RenderPass::RenderPass(const RenderPassDescriptor& descriptor) :
 				subpasses(descriptor.subpasses)
 			{
-				DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+				DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 				for (const ref<Subpass>& subpass : descriptor.subpasses) {
 					attachmentCount += subpass->getColorAttachmentCount() + subpass->getResolveAttachmentCount();

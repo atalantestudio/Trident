@@ -101,7 +101,7 @@ namespace ProjectA {
 	}
 
 	ref<ImageView> VulkanImage::createViewInternal(const Image* image, const ImageViewDescriptor& descriptor) const {
-		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		return createRef<VulkanImageView>(device, image, descriptor);
 	}

@@ -56,7 +56,7 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
-		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		const VulkanFramebuffer& framebuffer = *std::static_pointer_cast<VulkanFramebuffer>(descriptor.framebuffer);
 		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(framebuffer.getRenderPass());

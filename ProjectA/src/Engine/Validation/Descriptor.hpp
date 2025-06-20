@@ -18,25 +18,25 @@ namespace ProjectA {
 	struct SubpassDescriptor;
 	struct SwapchainDescriptor;
 
-	void validateDescriptor(const AttachmentImageDescriptor& descriptor);
-	void validateDescriptor(const BeginRenderPassDescriptor& descriptor);
-	void validateDescriptor(const BufferDescriptor& descriptor);
-	void validateDescriptor(const CommandBufferDescriptor& descriptor);
-	void validateDescriptor(const ComputePipelineDescriptor& descriptor);
-	void validateDescriptor(const FramebufferDescriptor& descriptor);
-	void validateDescriptor(const ImageDescriptor& descriptor);
-	void validateDescriptor(const ImageViewDescriptor& descriptor);
-	void validateDescriptor(const PipelineLayoutDescriptor& descriptor);
-	void validateDescriptor(const RenderPassDescriptor& descriptor);
-	void validateDescriptor(const RenderPipelineDescriptor& descriptor);
-	void validateDescriptor(const SamplerDescriptor& descriptor);
-	void validateDescriptor(const ShaderModuleDescriptor& descriptor);
-	void validateDescriptor(const SubpassDescriptor& descriptor);
-	void validateDescriptor(const SwapchainDescriptor& descriptor);
+	void DescriptorGuard(const AttachmentImageDescriptor& descriptor);
+	void DescriptorGuard(const BeginRenderPassDescriptor& descriptor);
+	void DescriptorGuard(const BufferDescriptor& descriptor);
+	void DescriptorGuard(const CommandBufferDescriptor& descriptor);
+	void DescriptorGuard(const ComputePipelineDescriptor& descriptor);
+	void DescriptorGuard(const FramebufferDescriptor& descriptor);
+	void DescriptorGuard(const ImageDescriptor& descriptor);
+	void DescriptorGuard(const ImageViewDescriptor& descriptor);
+	void DescriptorGuard(const PipelineLayoutDescriptor& descriptor);
+	void DescriptorGuard(const RenderPassDescriptor& descriptor);
+	void DescriptorGuard(const RenderPipelineDescriptor& descriptor);
+	void DescriptorGuard(const SamplerDescriptor& descriptor);
+	void DescriptorGuard(const ShaderModuleDescriptor& descriptor);
+	void DescriptorGuard(const SubpassDescriptor& descriptor);
+	void DescriptorGuard(const SwapchainDescriptor& descriptor);
 
 	#ifdef BUILD_MODE_DEBUG
-		#define DEBUG_VALIDATE_DESCRIPTOR validateDescriptor
+		#define DEBUG_DESCRIPTOR_GUARD DescriptorGuard
 	#else
-		#define DEBUG_VALIDATE_DESCRIPTOR
+		#define DEBUG_DESCRIPTOR_GUARD
 	#endif
 }

@@ -9,7 +9,7 @@ namespace ProjectA {
 
 		protected:
 			explicit PipelineLayout(const PipelineLayoutDescriptor& descriptor) {
-				DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+				DEBUG_DESCRIPTOR_GUARD(descriptor);
 			}
 	};
 }

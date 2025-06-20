@@ -17,7 +17,7 @@ namespace ProjectA {
 				depthStencil(descriptor.depthStencil),
 				depthStencilAttachment(descriptor.depthStencilAttachment)
 			{
-				DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+				DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 				for (const ColorAttachment& colorAttachment : colorAttachments) {
 					if (colorAttachment.sampleCount > 1) {

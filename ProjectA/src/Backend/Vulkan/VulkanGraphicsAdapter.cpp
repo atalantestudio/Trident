@@ -75,7 +75,7 @@ namespace ProjectA {
 	}
 
 	ref<Swapchain> VulkanGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		DEBUG_VALIDATE_DESCRIPTOR(descriptor);
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		return createRef<VulkanSwapchain>(physicalDevice, *surface, *device, descriptor);
 	}

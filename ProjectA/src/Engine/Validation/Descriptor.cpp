@@ -30,7 +30,7 @@ namespace ProjectA {
 		);
 	}
 
-	void validateDescriptor(const AttachmentImageDescriptor& descriptor) {
+	void DescriptorGuard(const AttachmentImageDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -73,7 +73,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Attachment image descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const BeginRenderPassDescriptor& descriptor) {
+	void DescriptorGuard(const BeginRenderPassDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -93,7 +93,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Render pass begin descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const BufferDescriptor& descriptor) {
+	void DescriptorGuard(const BufferDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -113,14 +113,14 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Buffer descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const CommandBufferDescriptor& descriptor) {
+	void DescriptorGuard(const CommandBufferDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
 		ENGINE_ASSERT(errorCount == 0, "Command buffer descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const ComputePipelineDescriptor& descriptor) {
+	void DescriptorGuard(const ComputePipelineDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -139,7 +139,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Compute pipeline descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const FramebufferDescriptor& descriptor) {
+	void DescriptorGuard(const FramebufferDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -205,7 +205,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Framebuffer descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const ImageDescriptor& descriptor) {
+	void DescriptorGuard(const ImageDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -265,7 +265,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Image descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const ImageViewDescriptor& descriptor) {
+	void DescriptorGuard(const ImageViewDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -287,7 +287,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Image view descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const PipelineLayoutDescriptor& descriptor) {
+	void DescriptorGuard(const PipelineLayoutDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -356,7 +356,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Pipeline layout descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const RenderPassDescriptor& descriptor) {
+	void DescriptorGuard(const RenderPassDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -369,7 +369,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Render pass descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const RenderPipelineDescriptor& descriptor) {
+	void DescriptorGuard(const RenderPipelineDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -537,7 +537,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Render pipeline descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const SamplerDescriptor& descriptor) {
+	void DescriptorGuard(const SamplerDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -556,7 +556,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Sampler descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const ShaderModuleDescriptor& descriptor) {
+	void DescriptorGuard(const ShaderModuleDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -575,7 +575,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Shader module descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const SubpassDescriptor& descriptor) {
+	void DescriptorGuard(const SubpassDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -654,7 +654,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Subpass descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void validateDescriptor(const SwapchainDescriptor& descriptor) {
+	void DescriptorGuard(const SwapchainDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
