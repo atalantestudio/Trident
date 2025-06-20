@@ -3,7 +3,7 @@
 #include "Engine/API/Rendering/RenderPass.hpp"
 
 namespace ProjectA {
-	class OpenGLRenderPass : public RenderPass {
+	class OpenGLRenderPass final : public RenderPass {
 		public:
 			OpenGLRenderPass(const RenderPassDescriptor& descriptor);
 	};

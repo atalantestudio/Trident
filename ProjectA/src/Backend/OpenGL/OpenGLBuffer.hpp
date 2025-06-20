@@ -4,15 +4,15 @@
 #include "Engine/API/Rendering/Buffer.hpp"
 
 namespace ProjectA {
-	class OpenGLBuffer : public Buffer, public ObjectWrapper<GLuint> {
+	class OpenGLBuffer final : public Buffer, public ObjectWrapper<GLuint> {
 		public:
 			OpenGLBuffer(const BufferDescriptor& descriptor);
 
-			~OpenGLBuffer();
+			~OpenGLBuffer() final override;
 
-			void unmap() const override;
+			void unmap() const final override;
 
-			void* getMappedRange(uint64 offset, uint64 size) const override;
+			void* getMappedRange(uint64 offset, uint64 size) const final override;
 
 		private:
 			GLbitfield storageAccessFlags = 0;

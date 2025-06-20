@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 
 namespace ProjectA {
-	class OpenGLDispatchGroupsCommand : public OpenGLCommand {
+	class OpenGLDispatchGroupsCommand final : public OpenGLCommand {
 		public:
 			OpenGLDispatchGroupsCommand(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z) :
 				num_groups_x(num_groups_x),

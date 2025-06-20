@@ -41,6 +41,11 @@ namespace ProjectA {
 		}
 	}
 
+	ImageFormat VulkanSurface::getFormat() const {
+		// TODO: Return the correct format.
+		return ImageFormat::B8G8R8A8_UNORM;
+	}
+
 	VkSurfaceFormatKHR VulkanSurface::selectFormat(VkPhysicalDevice physicalDevice) const {
 		uint32 formatCount = 0;
 		VkResult result;
@@ -120,10 +125,5 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get Vulkan surface capabilities ([]).", string_VkResult(result));
 
 		return surfaceCapabilities;
-	}
-
-	ImageFormat VulkanSurface::getFormat() const {
-		// TODO
-		return ImageFormat::B8G8R8A8_UNORM;
 	}
 }

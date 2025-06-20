@@ -4,7 +4,7 @@
 #include "Engine/API/Rendering/CommandBuffer.hpp"
 
 namespace ProjectA {
-	class VulkanCommandBuffer : public CommandBuffer, public ObjectWrapper<const VkCommandBuffer> {
+	class VulkanCommandBuffer final : public CommandBuffer, public ObjectWrapper<const VkCommandBuffer> {
 		public:
 			VulkanCommandBuffer(VkCommandBuffer commandBuffer, VkPipelineStageFlags pipelineStageFlags, uint32 commandCount);
 

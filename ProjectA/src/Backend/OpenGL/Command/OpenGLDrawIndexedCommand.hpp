@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 
 namespace ProjectA {
-	class OpenGLDrawIndexedCommand : public OpenGLCommand {
+	class OpenGLDrawIndexedCommand final : public OpenGLCommand {
 		public:
 			OpenGLDrawIndexedCommand(GLenum mode, GLsizei count, GLsizei type, const GLvoid* indices, GLsizei instancecount) :
 				mode(mode),

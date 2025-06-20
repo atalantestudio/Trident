@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class OpenGLDevice;
 
-	class OpenGLQueue : public Queue {
+	class OpenGLQueue final : public Queue {
 		public:
 			OpenGLQueue(const OpenGLRenderingContext& renderingContext, const OpenGLDevice& device);
 

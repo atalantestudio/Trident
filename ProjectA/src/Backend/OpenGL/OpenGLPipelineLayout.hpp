@@ -3,7 +3,7 @@
 #include "Engine/API/Rendering/PipelineLayout.hpp"
 
 namespace ProjectA {
-	class OpenGLPipelineLayout : public PipelineLayout {
+	class OpenGLPipelineLayout final : public PipelineLayout {
 		public:
 			OpenGLPipelineLayout(const PipelineLayoutDescriptor& descriptor);
 

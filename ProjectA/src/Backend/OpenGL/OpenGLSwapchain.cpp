@@ -9,10 +9,12 @@ namespace ProjectA {
 		renderingContext(&renderingContext),
 		surface(&surface)
 	{
-		images = sequence<ref<Image>>(1);
-		imageViews = sequence<ref<ImageView>>(1);
+		const uint32 imageCount = getImageCount();
 
-		construct(descriptor);
+		images = sequence<ref<Image>>(imageCount);
+		imageViews = sequence<ref<ImageView>>(imageCount);
+
+		update(descriptor);
 	}
 
 	uint32 OpenGLSwapchain::getImageCount() const {
@@ -20,10 +22,6 @@ namespace ProjectA {
 	}
 
 	void OpenGLSwapchain::update(const SwapchainDescriptor& descriptor) {
-		construct(descriptor);
-	}
-
-	void OpenGLSwapchain::construct(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		DEBUG_ASSERT(descriptor.extent.width > 0);

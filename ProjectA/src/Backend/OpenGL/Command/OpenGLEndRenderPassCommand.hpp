@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 
 namespace ProjectA {
-	class OpenGLEndRenderPassCommand : public OpenGLCommand {
+	class OpenGLEndRenderPassCommand final : public OpenGLCommand {
 		public:
 			OpenGLEndRenderPassCommand(const OpenGLFramebuffer* framebuffer, uint32 subpassIndex) :
 				framebuffer(framebuffer),

@@ -4,7 +4,7 @@
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
 
 namespace ProjectA {
-	class VulkanPhysicalDevice : public PhysicalDevice, public ObjectWrapper<VkPhysicalDevice> {
+	class VulkanPhysicalDevice final : public PhysicalDevice, public ObjectWrapper<VkPhysicalDevice> {
 		public:
 			VulkanPhysicalDevice(VkInstance instance);
 

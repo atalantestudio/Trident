@@ -32,7 +32,7 @@ namespace ProjectA {
 
 		sequence<VkDeviceQueueCreateInfo> deviceQueueCreateInfos(queueFamilyIndices.size());
 
-		constexpr float32 DEFAULT_QUEUE_PRIORITY = 1.0f;
+		static constexpr float32 DEFAULT_QUEUE_PRIORITY = 1.0f;
 
 		for (uint32 queueFamilyIndexIndex = 0; queueFamilyIndexIndex < queueFamilyIndices.size(); queueFamilyIndexIndex += 1) {
 			VkDeviceQueueCreateInfo deviceQueueCreateInfo{};

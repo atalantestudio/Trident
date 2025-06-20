@@ -4,11 +4,11 @@
 #include "Engine/API/Rendering/ShaderModule.hpp"
 
 namespace ProjectA {
-	class VulkanShaderModule : public ShaderModule, public ObjectWrapper<VkPipelineShaderStageCreateInfo> {
+	class VulkanShaderModule final : public ShaderModule, public ObjectWrapper<VkPipelineShaderStageCreateInfo> {
 		public:
 			VulkanShaderModule(VkDevice device, const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor);
 
-			~VulkanShaderModule() override;
+			~VulkanShaderModule() final override;
 
 		private:
 			const VkDevice device;

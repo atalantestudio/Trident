@@ -8,7 +8,7 @@
 #include "Engine/API/Rendering/Device.hpp"
 
 namespace ProjectA {
-	class VulkanDevice : public Device, public ObjectWrapper<VkDevice> {
+	class VulkanDevice final : public Device, public ObjectWrapper<VkDevice> {
 		public:
 			VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface);
 

@@ -7,7 +7,7 @@
 #include "Engine/API/Rendering/Device.hpp"
 
 namespace ProjectA {
-	class OpenGLDevice : public Device {
+	class OpenGLDevice final : public Device {
 		public:
 			OpenGLDevice(const OpenGLRenderingContext& renderingContext);
 

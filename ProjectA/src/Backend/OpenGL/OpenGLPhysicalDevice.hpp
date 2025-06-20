@@ -3,7 +3,7 @@
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
 
 namespace ProjectA {
-	class OpenGLPhysicalDevice : public PhysicalDevice {
+	class OpenGLPhysicalDevice final : public PhysicalDevice {
 		public:
 			OpenGLPhysicalDevice();
 

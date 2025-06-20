@@ -4,7 +4,7 @@
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 
 namespace ProjectA {
-	class OpenGLBindVertexBufferCommand : public OpenGLCommand {
+	class OpenGLBindVertexBufferCommand final : public OpenGLCommand {
 		public:
 			OpenGLBindVertexBufferCommand(GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride) :
 				bindingindex(bindingindex),

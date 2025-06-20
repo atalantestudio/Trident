@@ -16,7 +16,7 @@ namespace ProjectA {
 
 			virtual uint32 getImageCount() const = 0;
 
-			virtual const ref<ImageView>& getImageView(uint32 index) const {
+			const ref<ImageView>& getImageView(uint32 index) const {
 				ENGINE_ASSERT(index < imageViews.count, "Image view index overflow.");
 
 				return imageViews[index];

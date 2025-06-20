@@ -8,7 +8,7 @@
 #include "Engine/API/Rendering/CommandEncoder.hpp"
 
 namespace ProjectA {
-	class OpenGLBeginRenderPassCommand : public OpenGLCommand {
+	class OpenGLBeginRenderPassCommand final : public OpenGLCommand {
 		public:
 			OpenGLBeginRenderPassCommand(const BeginRenderPassDescriptor& descriptor) :
 				descriptor(descriptor)

@@ -4,7 +4,7 @@
 #include "Engine/API/Rendering/Framebuffer.hpp"
 
 namespace ProjectA {
-	class VulkanFramebuffer : public Framebuffer, public ObjectWrapper<VkFramebuffer> {
+	class VulkanFramebuffer final : public Framebuffer, public ObjectWrapper<VkFramebuffer> {
 		public:
 			explicit VulkanFramebuffer(VkDevice device, const FramebufferDescriptor& descriptor);
 

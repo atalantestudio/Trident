@@ -5,7 +5,7 @@
 #include "Engine/API/Rendering/ImageView.hpp"
 
 namespace ProjectA {
-	class VulkanImageView : public ImageView, public ObjectWrapper<VkImageView> {
+	class VulkanImageView final : public ImageView, public ObjectWrapper<VkImageView> {
 		public:
 			VulkanImageView(VkDevice device, const Image* image, const ImageViewDescriptor& descriptor);
 

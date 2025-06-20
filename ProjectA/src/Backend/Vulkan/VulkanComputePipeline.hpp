@@ -6,11 +6,11 @@
 #include "Engine/API/Rendering/Descriptor/ComputePipelineDescriptor.hpp"
 
 namespace ProjectA {
-	class VulkanComputePipeline : public ComputePipeline, public VulkanPipeline {
+	class VulkanComputePipeline final : public ComputePipeline, public VulkanPipeline {
 		public:
 			VulkanComputePipeline(VkDevice device, const ComputePipelineDescriptor& descriptor);
 
-			~VulkanComputePipeline();
+			~VulkanComputePipeline() final override;
 
 		private:
 			const VkDevice device;

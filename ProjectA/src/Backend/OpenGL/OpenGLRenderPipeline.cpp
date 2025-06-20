@@ -116,7 +116,6 @@ namespace ProjectA {
 			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
 
 			OpenGLDrawBuffer& drawBuffer = drawBuffers[colorBlendAttachmentIndex];
-
 			drawBuffer.blend = colorBlendAttachment.blend;
 			drawBuffer.srcColorBlendFactor = getGlBlendFactor(colorBlendAttachment.srcColorBlendFactor);
 			drawBuffer.dstColorBlendFactor = getGlBlendFactor(colorBlendAttachment.dstColorBlendFactor);

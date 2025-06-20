@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 
 namespace ProjectA {
-	class OpenGLSetImageMemoryBarrierCommand : public OpenGLCommand {
+	class OpenGLSetImageMemoryBarrierCommand final : public OpenGLCommand {
 		public:
 			OpenGLSetImageMemoryBarrierCommand(GLbitfield barrier) :
 				barrier(barrier)

@@ -4,11 +4,11 @@
 #include "Engine/API/Rendering/Semaphore.hpp"
 
 namespace ProjectA {
-	class VulkanSemaphore : public Semaphore, public ObjectWrapper<VkSemaphore> {
+	class VulkanSemaphore final : public Semaphore, public ObjectWrapper<VkSemaphore> {
 		public:
 			VulkanSemaphore(VkDevice device);
 
-			~VulkanSemaphore();
+			~VulkanSemaphore() final override;
 
 		private:
 			const VkDevice device;

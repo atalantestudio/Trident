@@ -6,11 +6,11 @@
 #include "Engine/API/Rendering/CommandPool.hpp"
 
 namespace ProjectA {
-	class VulkanCommandPool : public CommandPool, public ObjectWrapper<VkCommandPool> {
+	class VulkanCommandPool final : public CommandPool, public ObjectWrapper<VkCommandPool> {
 		public:
 			VulkanCommandPool(VkDevice device, uint32 queueFamilyIndex);
 
-			~VulkanCommandPool();
+			~VulkanCommandPool() final override;
 
 		private:
 			const VkDevice device;

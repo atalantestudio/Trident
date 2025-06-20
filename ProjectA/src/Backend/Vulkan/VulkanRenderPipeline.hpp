@@ -8,11 +8,11 @@
 #include "Engine/API/Rendering/RenderPipeline.hpp"
 
 namespace ProjectA {
-	class VulkanRenderPipeline : public RenderPipeline, public VulkanPipeline {
+	class VulkanRenderPipeline final : public RenderPipeline, public VulkanPipeline {
 		public:
 			VulkanRenderPipeline(VkDevice device, const RenderPipelineDescriptor& descriptor);
 
-			~VulkanRenderPipeline();
+			~VulkanRenderPipeline() final override;
 
 		private:
 			const VkDevice device;

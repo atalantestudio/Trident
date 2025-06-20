@@ -37,6 +37,10 @@ namespace ProjectA {
 				return layout;
 			}
 
+			void setLayout(ImageLayout layout) {
+				this->layout = layout;
+			}
+
 			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const {
 				return createViewInternal(this, descriptor);
 			}

@@ -9,7 +9,7 @@
 namespace ProjectA {
 	class VulkanDevice;
 
-	class VulkanSwapchain : public Swapchain, public ObjectWrapper<VkSwapchainKHR> {
+	class VulkanSwapchain final : public Swapchain, public ObjectWrapper<VkSwapchainKHR> {
 		public:
 			VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const SwapchainDescriptor& descriptor);
 
@@ -19,11 +19,8 @@ namespace ProjectA {
 
 			void update(const SwapchainDescriptor& descriptor) final override;
 
-			void construct(const SwapchainDescriptor& descriptor);
-
-			void destroyImageViewsAndFramebuffers() const;
-
-			void destroySwapchain(VkSwapchainKHR swapchain) const;
+		private:
+			void updateInternal(const SwapchainDescriptor& descriptor);
 
 		private:
 			const VulkanPhysicalDevice& physicalDevice;

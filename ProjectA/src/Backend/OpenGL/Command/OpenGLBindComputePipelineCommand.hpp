@@ -4,7 +4,7 @@
 #include "Backend/OpenGL/OpenGLComputePipeline.hpp"
 
 namespace ProjectA {
-	class OpenGLBindComputePipelineCommand : public OpenGLCommand {
+	class OpenGLBindComputePipelineCommand final : public OpenGLCommand {
 		public:
 			OpenGLBindComputePipelineCommand(const ref<OpenGLComputePipeline>& computePipeline) :
 				program(computePipeline->program)

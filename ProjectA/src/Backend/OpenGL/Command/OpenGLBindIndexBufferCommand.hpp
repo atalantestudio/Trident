@@ -4,7 +4,7 @@
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 
 namespace ProjectA {
-	class OpenGLBindIndexBufferCommand : public OpenGLCommand {
+	class OpenGLBindIndexBufferCommand final : public OpenGLCommand {
 		public:
 			OpenGLBindIndexBufferCommand(GLuint indexBuffer) :
 				indexBuffer(indexBuffer)

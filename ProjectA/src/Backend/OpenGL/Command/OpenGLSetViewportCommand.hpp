@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 
 namespace ProjectA {
-	class OpenGLSetViewportCommand : public OpenGLCommand {
+	class OpenGLSetViewportCommand final : public OpenGLCommand {
 		public:
 			OpenGLSetViewportCommand(GLint x, GLint y, GLsizei width, GLsizei height) :
 				x(x),

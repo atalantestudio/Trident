@@ -5,11 +5,11 @@
 #include "Engine/API/Rendering/Sampler.hpp"
 
 namespace ProjectA {
-	class VulkanSampler : public Sampler, public ObjectWrapper<VkSampler> {
+	class VulkanSampler final : public Sampler, public ObjectWrapper<VkSampler> {
 		public:
 			VulkanSampler(VkDevice device, const SamplerDescriptor& descriptor);
 
-			~VulkanSampler();
+			~VulkanSampler() final override;
 
 		private:
 			VkDevice device;

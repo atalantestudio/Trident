@@ -3,7 +3,7 @@
 #include "Engine/API/Rendering/Surface.hpp"
 
 namespace ProjectA {
-	class OpenGLSurface : public Surface {
+	class OpenGLSurface final : public Surface {
 		public:
 			ImageFormat getFormat() const final override;
 	};

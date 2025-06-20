@@ -9,7 +9,7 @@
 namespace ProjectA {
 	class VulkanDevice;
 
-	class VulkanQueue : public Queue, public ObjectWrapper<VkQueue> {
+	class VulkanQueue final : public Queue, public ObjectWrapper<VkQueue> {
 		public:
 			VulkanQueue(const VulkanDevice& device, uint32 queueFamilyIndex);
 

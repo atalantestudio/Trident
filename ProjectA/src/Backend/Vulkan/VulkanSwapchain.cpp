@@ -12,12 +12,16 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		construct(descriptor);
+		updateInternal(descriptor);
 	}
 
 	VulkanSwapchain::~VulkanSwapchain() {
-		destroyImageViewsAndFramebuffers();
-		destroySwapchain(object);
+		for (const ref<ImageView>& imageView : imageViews) {
+			imageView.~shared_ptr();
+		}
+
+		// The swapchain images are automatically destroyed with the swapchain.
+		vkDestroySwapchainKHR(device.object, object, nullptr);
 	}
 
 	uint32 VulkanSwapchain::getImageCount() const {
@@ -25,13 +29,15 @@ namespace ProjectA {
 	}
 
 	void VulkanSwapchain::update(const SwapchainDescriptor& descriptor) {
-		destroyImageViewsAndFramebuffers();
+		for (const ref<ImageView>& imageView : imageViews) {
+			imageView.~shared_ptr();
+		}
 
-		construct(descriptor);
+		updateInternal(descriptor);
 	}
 
 	// Seems to allocate ~59Mb of memory in Release mode.
-	void VulkanSwapchain::construct(const SwapchainDescriptor& descriptor) {
+	void VulkanSwapchain::updateInternal(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		VkResult result;
@@ -101,7 +107,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create swapchain ([]).", string_VkResult(result));
 
-		destroySwapchain(oldSwapchain);
+		vkDestroySwapchainKHR(device.object, oldSwapchain, nullptr);
 
 		result = vkGetSwapchainImagesKHR(device.object, object, &imageCount, nullptr);
 
@@ -122,16 +128,5 @@ namespace ProjectA {
 		imageViews = sequence<ref<ImageView>>(imageCount);
 
 		createImageViews();
-	}
-
-	void VulkanSwapchain::destroyImageViewsAndFramebuffers() const {
-		for (const ref<ImageView>& imageView : imageViews) {
-			imageView.~shared_ptr();
-		}
-	}
-
-	void VulkanSwapchain::destroySwapchain(VkSwapchainKHR swapchain) const {
-		// The swapchain images are automatically destroyed with the swapchain.
-		vkDestroySwapchainKHR(device.object, swapchain, nullptr);
 	}
 }

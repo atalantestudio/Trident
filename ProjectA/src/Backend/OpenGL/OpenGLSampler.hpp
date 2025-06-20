@@ -5,10 +5,10 @@
 #include "Engine/API/Rendering/Sampler.hpp"
 
 namespace ProjectA {
-	class OpenGLSampler : public Sampler, public ObjectWrapper<GLuint> {
+	class OpenGLSampler final : public Sampler, public ObjectWrapper<GLuint> {
 		public:
 			OpenGLSampler(const SamplerDescriptor& descriptor);
 
-			~OpenGLSampler();
+			~OpenGLSampler() final override;
 	};
 }

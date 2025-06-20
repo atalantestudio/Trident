@@ -4,7 +4,7 @@
 #include "Engine/API/ObjectWrapper.hpp"
 
 namespace ProjectA {
-	class OpenGLFramebuffer : public Framebuffer, public ObjectWrapper<GLuint> {
+	class OpenGLFramebuffer final : public Framebuffer, public ObjectWrapper<GLuint> {
 		public:
 			OpenGLFramebuffer(const FramebufferDescriptor& descriptor);
 

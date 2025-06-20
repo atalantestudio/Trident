@@ -3,7 +3,7 @@
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 
 namespace ProjectA {
-	class OpenGLSetLineWidthCommand : public OpenGLCommand {
+	class OpenGLSetLineWidthCommand final : public OpenGLCommand {
 		public:
 			OpenGLSetLineWidthCommand(GLfloat width) :
 				width(width)

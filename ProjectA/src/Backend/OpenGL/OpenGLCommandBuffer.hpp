@@ -6,7 +6,7 @@
 #include "Engine/API/Rendering/CommandBuffer.hpp"
 
 namespace ProjectA {
-	class OpenGLCommandBuffer : public CommandBuffer, public ObjectWrapper<const std::vector<ref<OpenGLCommand>>> {
+	class OpenGLCommandBuffer final : public CommandBuffer, public ObjectWrapper<const std::vector<ref<OpenGLCommand>>> {
 		public:
 			OpenGLCommandBuffer(const std::vector<ref<OpenGLCommand>>& commandBuffer);
 

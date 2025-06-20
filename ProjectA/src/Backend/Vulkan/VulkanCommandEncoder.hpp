@@ -10,7 +10,7 @@ namespace ProjectA {
 		public:
 			VulkanCommandEncoder(const VulkanDevice& device, VkCommandPool commandPool, const CommandBufferDescriptor& descriptor);
 
-			~VulkanCommandEncoder();
+			~VulkanCommandEncoder() final override;
 
 			void begin() const final override;
 

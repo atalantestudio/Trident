@@ -6,7 +6,7 @@
 #include "Engine/API/Rendering/Image.hpp"
 
 namespace ProjectA {
-	class VulkanImage : public Image, public ObjectWrapper<VkImage> {
+	class VulkanImage final : public Image, public ObjectWrapper<VkImage> {
 		public:
 			explicit VulkanImage(VkDevice device, const ImageDescriptor& descriptor);
 
@@ -16,8 +16,6 @@ namespace ProjectA {
 			~VulkanImage() final override;
 
 			ref<ImageView> createViewInternal(const Image* image, const ImageViewDescriptor& descriptor) const final override;
-
-			void setLayout(ImageLayout layout);
 
 		private:
 			static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent);

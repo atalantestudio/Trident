@@ -7,11 +7,11 @@
 #include "Engine/API/Rendering/RenderPipeline.hpp"
 
 namespace ProjectA {
-	class OpenGLRenderPipeline : public RenderPipeline {
+	class OpenGLRenderPipeline final : public RenderPipeline {
 		public:
 			OpenGLRenderPipeline(const RenderPipelineDescriptor& descriptor);
 
-			~OpenGLRenderPipeline();
+			~OpenGLRenderPipeline() final override;
 
 		public:
 			const OpenGLPipelineLayout& layout;

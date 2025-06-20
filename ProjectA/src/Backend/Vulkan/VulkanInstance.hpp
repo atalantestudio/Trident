@@ -4,11 +4,11 @@
 #include "Engine/API/Rendering/Instance.hpp"
 
 namespace ProjectA {
-	class VulkanInstance : public Instance, public ObjectWrapper<VkInstance> {
+	class VulkanInstance final : public Instance, public ObjectWrapper<VkInstance> {
 		public:
 			VulkanInstance();
 
-			~VulkanInstance() override;
+			~VulkanInstance() final override;
 
 		private:
 			#ifdef DEBUG_ENABLE_VALIDATION_LAYERS

@@ -7,7 +7,7 @@
 #include "Engine/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	class OpenGLGraphicsAdapter : public GraphicsAdapter {
+	class OpenGLGraphicsAdapter final : public GraphicsAdapter {
 		public:
 			OpenGLGraphicsAdapter(const Window& window);
 

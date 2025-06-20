@@ -8,11 +8,11 @@
 #include "Engine/API/Rendering/RenderPass.hpp"
 
 namespace ProjectA {
-	class VulkanRenderPass : public RenderPass, public ObjectWrapper<VkRenderPass> {
+	class VulkanRenderPass final : public RenderPass, public ObjectWrapper<VkRenderPass> {
 		public:
 			VulkanRenderPass(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const RenderPassDescriptor& descriptor);
 
-			~VulkanRenderPass();
+			~VulkanRenderPass() final override;
 
 		public:
 			const VulkanSurface* surface;

@@ -106,12 +106,6 @@ namespace ProjectA {
 		return createRef<VulkanImageView>(device, image, descriptor);
 	}
 
-	void VulkanImage::setLayout(ImageLayout layout) {
-		ENGINE_ASSERT(!swapchainImage, "Only the layout of non-swapchain images can be changed through this method.");
-
-		this->layout = layout;
-	}
-
 	ImageDescriptor VulkanImage::createSwapchainImageDescriptor(Extent2D extent) {
 		ImageDescriptor imageDescriptor;
 		imageDescriptor.extent.width = extent.width;

@@ -4,7 +4,7 @@
 #include "Engine/API/Rendering/Fence.hpp"
 
 namespace ProjectA {
-	class OpenGLFence : public Fence, public ObjectWrapper<GLsync> {
+	class OpenGLFence final : public Fence, public ObjectWrapper<GLsync> {
 		public:
 			OpenGLFence();
 

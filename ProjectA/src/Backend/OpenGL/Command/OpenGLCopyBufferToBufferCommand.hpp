@@ -4,7 +4,7 @@
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 
 namespace ProjectA {
-	class OpenGLCopyBufferToBufferCommand : public OpenGLCommand {
+	class OpenGLCopyBufferToBufferCommand final : public OpenGLCommand {
 		public:
 			OpenGLCopyBufferToBufferCommand(GLuint sourceBuffer, GLuint destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) :
 				sourceBuffer(sourceBuffer),

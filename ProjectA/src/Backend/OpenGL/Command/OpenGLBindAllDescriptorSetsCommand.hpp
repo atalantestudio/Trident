@@ -11,7 +11,7 @@
 #include "Backend/OpenGL/DescriptorType.hpp"
 
 namespace ProjectA {
-	class OpenGLBindAllDescriptorSetsCommand : public OpenGLCommand {
+	class OpenGLBindAllDescriptorSetsCommand final : public OpenGLCommand {
 		public:
 			OpenGLBindAllDescriptorSetsCommand(const std::vector<DescriptorSetLayout>& descriptorSetLayouts, bool isCompute) :
 				descriptorSetLayouts(descriptorSetLayouts),

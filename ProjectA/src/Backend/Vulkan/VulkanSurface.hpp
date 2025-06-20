@@ -7,11 +7,13 @@
 #include "Engine/API/Window/Window.hpp"
 
 namespace ProjectA {
-	class VulkanSurface : public Surface, public ObjectWrapper<VkSurfaceKHR> {
+	class VulkanSurface final : public Surface, public ObjectWrapper<VkSurfaceKHR> {
 		public:
 			VulkanSurface(VkInstance instance, const Window& window);
 
-			~VulkanSurface();
+			~VulkanSurface() final override;
+
+			virtual ImageFormat getFormat() const final override;
 
 			void initPresentQueueFamilyIndex(VkPhysicalDevice physicalDevice, uint32 graphicsQueueFamilyIndex);
 
@@ -20,8 +22,6 @@ namespace ProjectA {
 			VkPresentModeKHR selectPresentMode(VkPhysicalDevice physicalDevice, bool vSync) const;
 
 			VkSurfaceCapabilitiesKHR getCapabilities(VkPhysicalDevice physicalDevice) const;
-
-			virtual ImageFormat getFormat() const final override;
 
 		public:
 			uint32 presentQueueFamilyIndex = 0;

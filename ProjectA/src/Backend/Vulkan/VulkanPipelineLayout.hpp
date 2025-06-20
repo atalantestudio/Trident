@@ -5,11 +5,11 @@
 #include "Engine/API/Rendering/PipelineLayout.hpp"
 
 namespace ProjectA {
-	class VulkanPipelineLayout : public PipelineLayout, public ObjectWrapper<VkPipelineLayout> {
+	class VulkanPipelineLayout final : public PipelineLayout, public ObjectWrapper<VkPipelineLayout> {
 		public:
 			VulkanPipelineLayout(VkDevice device, const PipelineLayoutDescriptor& descriptor);
 
-			~VulkanPipelineLayout();
+			~VulkanPipelineLayout() final override;
 
 		public:
 			std::vector<VkDescriptorSet> descriptorSets;

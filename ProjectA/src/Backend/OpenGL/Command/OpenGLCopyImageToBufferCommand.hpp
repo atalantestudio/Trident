@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	class OpenGLCopyImageToBufferCommand : public OpenGLCommand {
+	class OpenGLCopyImageToBufferCommand final : public OpenGLCommand {
 		public:
 			OpenGLCopyImageToBufferCommand(const OpenGLImage* image, const OpenGLBuffer* buffer, const sequence<BufferImageCopyRegion>& copyRegions) :
 				image(image),

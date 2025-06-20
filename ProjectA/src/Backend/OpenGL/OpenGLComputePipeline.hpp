@@ -6,11 +6,11 @@
 #include "Engine/API/Rendering/Descriptor/ComputePipelineDescriptor.hpp"
 
 namespace ProjectA {
-	class OpenGLComputePipeline : public ComputePipeline {
+	class OpenGLComputePipeline final : public ComputePipeline {
 		public:
 			OpenGLComputePipeline(const ComputePipelineDescriptor& descriptor);
 
-			~OpenGLComputePipeline();
+			~OpenGLComputePipeline() final override;
 
 		public:
 			const OpenGLPipelineLayout& layout;

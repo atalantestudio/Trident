@@ -9,7 +9,7 @@
 #include "Engine/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	class VulkanGraphicsAdapter : public GraphicsAdapter {
+	class VulkanGraphicsAdapter final : public GraphicsAdapter {
 		public:
 			VulkanGraphicsAdapter(const Window& window);
 
