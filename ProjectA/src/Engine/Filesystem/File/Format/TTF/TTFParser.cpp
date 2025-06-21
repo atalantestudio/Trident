@@ -5,7 +5,6 @@
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
-	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
 	static void parseCoordinates(ByteStream& stream, sint16* coordinates, uint8* flags, uint16 coordinateCount, uint8 shortVectorBitIndex, uint8 sameOrPositiveVectorBitIndex, FWord minBounds, FWord maxBounds) {
 		uint16 coordinateIndex = 0;
 		sint16 previousCoordinate = 0;
