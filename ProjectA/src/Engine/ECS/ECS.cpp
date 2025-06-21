@@ -4,22 +4,19 @@
 
 namespace ProjectA {
 	Entity ECS::createEntity() {
-		Entity entity = 0;
-
-		if (!availableEntities.empty()) {
-			// Take the next entity from the available list.
-			entity = availableEntities.back();
-
-			availableEntities.pop_back();
-		}
-		else {
+		if (availableEntities.empty()) {
 			// Take the next entity from the iterator.
 			ENGINE_ASSERT(nextEntity < MAX_ENTITIES, "Entity limit reached.");
 
-			entity = nextEntity;
+			const Entity entity = nextEntity;
 
 			nextEntity += 1;
 		}
+
+		// Take the next entity from the available list.
+		const Entity entity = availableEntities.back();
+
+		availableEntities.pop_back();
 
 		return entity;
 	}
