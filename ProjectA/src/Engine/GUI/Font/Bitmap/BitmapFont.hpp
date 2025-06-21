@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Engine/Renderer/Font/Bitmap/BitmapGlyphMap.hpp"
-#include "Engine/Renderer/Font/Font.hpp"
+#include "Engine/GUI/Font/Bitmap/BitmapGlyphMap.hpp"
+#include "Engine/GUI/Font/Font.hpp"
 
 namespace ProjectA {
 	class BitmapFont : public Font {

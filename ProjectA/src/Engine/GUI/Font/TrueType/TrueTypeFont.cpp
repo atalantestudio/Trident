@@ -2,7 +2,7 @@
 
 #include "Engine/Filesystem/File/TTFFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
-#include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"
+#include "Engine/GUI/Font/TrueType/TrueTypeFont.hpp"
 
 namespace ProjectA {
 	TrueTypeFont::TrueTypeFont(std::string_view ttfFilePath) {
@@ -10,24 +10,22 @@ namespace ProjectA {
 
 		sdfGlyphMap = SDFGlyphMapBuildProcess::build(ttfFile);
 
-		ascent = ttfFile.hhea.ascent;
-		descent = ttfFile.hhea.descent;
-		lineGap = ttfFile.hhea.lineGap;
+		ascent = ttfFile.ascent;
+		descent = ttfFile.descent;
+		lineGap = ttfFile.lineGap;
 		unicodeMap = ttfFile.unicodeMap;
 
-		glyphs = sequence<TrueTypeGlyph>(ttfFile.maxp.numGlyphs);
+		glyphs = sequence<TrueTypeGlyph>(ttfFile.glyphs.count);
 
-		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.maxp.numGlyphs; glyphIndex += 1) {
+		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.count; glyphIndex += 1) {
 			const Glyph& glyph = ttfFile.glyphs[glyphIndex];
 			const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
 			const SDFGlyph& sdfGlyph = sdfGlyphMap.glyphs[glyphIndex];
 
 			TrueTypeGlyph& trueTypeGlyph = glyphs[glyphIndex];
 			trueTypeGlyph.invisible = sdfGlyph.invisible;
-			trueTypeGlyph.minCoordinateX = sdfGlyph.minCoordinateX;
-			trueTypeGlyph.maxCoordinateX = sdfGlyph.maxCoordinateX;
-			trueTypeGlyph.minCoordinateY = sdfGlyph.minCoordinateY;
-			trueTypeGlyph.maxCoordinateY = sdfGlyph.maxCoordinateY;
+			trueTypeGlyph.minCoordinate = sdfGlyph.minCoordinate;
+			trueTypeGlyph.maxCoordinate = sdfGlyph.maxCoordinate;
 			trueTypeGlyph.width = glyph.max.x - glyph.min.x;
 			trueTypeGlyph.advanceWidth = hMetric.advanceWidth;
 			trueTypeGlyph.leftSideBearing = hMetric.leftSideBearing;

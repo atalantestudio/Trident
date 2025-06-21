@@ -7,6 +7,9 @@
 namespace ProjectA {
 	class VertexInputBinding {
 		public:
+			// Needed for copying a sequence of bindings.
+			VertexInputBinding() = default;
+
 			explicit VertexInputBinding(InputRate inputRate) :
 				inputRate(inputRate)
 			{}

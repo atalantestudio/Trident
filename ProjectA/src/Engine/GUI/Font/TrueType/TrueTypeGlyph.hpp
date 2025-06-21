@@ -1,14 +1,13 @@
 #pragma once
 
 namespace ProjectA {
+	// TODO: This struct is very similar to SDFGlyph. Maybe merge them?
 	struct TrueTypeGlyph {
 		// Top-left coordinate.
-		float32 minCoordinateX;
-		float32 minCoordinateY;
+		svec2<float32> minCoordinate;
 
 		// Bottom-right coordinate.
-		float32 maxCoordinateX;
-		float32 maxCoordinateY;
+		svec2<float32> maxCoordinate;
 
 		// In FUnits.
 		uint16 width;
@@ -19,6 +18,7 @@ namespace ProjectA {
 		// In FUnits.
 		sint16 leftSideBearing;
 
+		// True for spaces, tabs, etc.
 		bool invisible;
 	};
 }

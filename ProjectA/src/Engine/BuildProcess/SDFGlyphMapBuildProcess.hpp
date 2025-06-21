@@ -5,14 +5,12 @@
 namespace ProjectA {
 	struct SDFGlyph {
 		// Top-left coordinate.
-		float32 minCoordinateX;
-		float32 minCoordinateY;
+		svec2<float32> minCoordinate;
 
 		// Bottom-right coordinate.
-		float32 maxCoordinateX;
-		float32 maxCoordinateY;
+		svec2<float32> maxCoordinate;
 
-		// Width of the glyph on the map, in px.
+		// Width of the glyph on the glyph map, in px.
 		float32 width;
 
 		// True for spaces, tabs, etc.

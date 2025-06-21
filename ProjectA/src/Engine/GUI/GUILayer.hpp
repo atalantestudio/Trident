@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Engine/GUI/Component/Container.hpp"
+#include "Engine/GUI/Font/TrueType/TrueTypeFont.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/GUI/ID.hpp"
 #include "Engine/GUI/px.hpp"
 #include "Engine/Layer/Layer.hpp"
-#include "Engine/Renderer/Font/TrueType/TrueTypeFont.hpp"
 
 namespace ProjectA {
 	enum LayoutDirection : uint8 {

@@ -20,15 +20,17 @@ namespace ProjectA {
 		return size - byteOffset;
 	}
 
-	void ByteStream::jump(uint64 byteCount) {
-		const uint64 remainingByteSize = getRemainingByteSize();
+	void ByteStream::seek(uint64 offset) {
+		ENGINE_ASSERT(offset <= size, "Cannot seek more bytes than there is in the stream.", offset, size);
 
-		ENGINE_ASSERT(byteCount <= remainingByteSize, "Attempted to jump [] bytes, but only [] were remaining.", byteCount, remainingByteSize);
-
-		byteOffset += byteCount;
+		byteOffset = offset;
 	}
 
-	void ByteStream::reset() {
-		byteOffset = 0;
+	void ByteStream::jump(uint64 count) {
+		const uint64 remainingByteSize = getRemainingByteSize();
+
+		ENGINE_ASSERT(count <= remainingByteSize, "Attempted to jump [] bytes, but only [] were remaining.", count, remainingByteSize);
+
+		byteOffset += count;
 	}
 }

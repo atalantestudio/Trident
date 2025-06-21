@@ -10,13 +10,13 @@ namespace ProjectA {
 	static constexpr uint32 SPREAD_FACTOR = 0;
 
 	SDFGlyphMap SDFGlyphMapBuildProcess::build(const TTFFile& ttfFile) {
-		ENGINE_ASSERT(ttfFile.glyphs.size() < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
+		ENGINE_ASSERT(ttfFile.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
 		SDFGlyphMap sdfGlyphMap;
 		sdfGlyphMap.spreadFactor = SPREAD_FACTOR;
 		sdfGlyphMap.extent.width = 2048;
 		sdfGlyphMap.extent.height = 2048;
-		sdfGlyphMap.glyphs = sequence<SDFGlyph>(ttfFile.glyphs.size());
+		sdfGlyphMap.glyphs = sequence<SDFGlyph>(ttfFile.glyphs.count);
 
 		const ref<Device> device = Renderer::getDevice();
 		const ref<Queue> computeQueue = device->getQueue(QueueFamilyCapability::COMPUTE);
@@ -40,8 +40,8 @@ namespace ProjectA {
 
 		fontMappedRange->outputGlyphSize = GLYPH_SUBIMAGE_DIMENSION;
 		fontMappedRange->spreadFactor = SPREAD_FACTOR;
-		fontMappedRange->ascent = ttfFile.hhea.ascent;
-		fontMappedRange->descent = ttfFile.hhea.descent;
+		fontMappedRange->ascent = ttfFile.ascent;
+		fontMappedRange->descent = ttfFile.descent;
 
 		fontStagingBuffer->unmap();
 
@@ -215,13 +215,13 @@ namespace ProjectA {
 		float32 yOffset = 0;
 
 		const Extent3D& glyphMapExtent = glyphMapImage->getExtent();
-		const float32 lineHeight = static_cast<float32>(ttfFile.hhea.ascent - ttfFile.hhea.descent);
+		const float32 lineHeight = static_cast<float32>(ttfFile.ascent - ttfFile.descent);
 
 		commandEncoder = computeQueue->createCommandEncoder(autoCommandBufferDescriptor);
 
 		const ref<Fence> writeBufferFence = Renderer::createFence();
 
-		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.size(); glyphIndex += 1) {
+		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.count; glyphIndex += 1) {
 			const Glyph& glyph = ttfFile.glyphs[glyphIndex];
 			const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
 
@@ -281,11 +281,11 @@ namespace ProjectA {
 				yOffset += GLYPH_SUBIMAGE_DIMENSION;
 			}
 
-			sdfGlyph.minCoordinateX = xOffset / glyphMapExtent.width;
-			sdfGlyph.maxCoordinateX = (xOffset + sdfGlyph.width) / glyphMapExtent.width;
+			sdfGlyph.minCoordinate.x = xOffset / glyphMapExtent.width;
+			sdfGlyph.minCoordinate.y = yOffset / glyphMapExtent.height;
 
-			sdfGlyph.minCoordinateY = yOffset / glyphMapExtent.height;
-			sdfGlyph.maxCoordinateY = (yOffset + GLYPH_SUBIMAGE_DIMENSION) / glyphMapExtent.height;
+			sdfGlyph.maxCoordinate.x = (xOffset + sdfGlyph.width) / glyphMapExtent.width;
+			sdfGlyph.maxCoordinate.y = (yOffset + GLYPH_SUBIMAGE_DIMENSION) / glyphMapExtent.height;
 
 			glyphOffsetMappedRange[0] = static_cast<uint32>(xOffset);
 			glyphOffsetMappedRange[1] = static_cast<uint32>(yOffset);

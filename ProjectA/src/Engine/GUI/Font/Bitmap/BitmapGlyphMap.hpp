@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Renderer/Font/Bitmap/BitmapGlyph.hpp"
+#include "Engine/GUI/Font/Bitmap/BitmapGlyph.hpp"
 
 namespace ProjectA {
 	class BitmapGlyphMap {

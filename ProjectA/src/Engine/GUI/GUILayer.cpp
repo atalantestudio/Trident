@@ -197,6 +197,8 @@ namespace ProjectA {
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
 		const float32 lineHeight = static_cast<float32>(font.getLineHeight());
 
+		const float32 scaledHeight = 1.0f / lineHeight * textStyle.fontSize;
+
 		float32 positionX = static_cast<float32>(componentOrigin[0]);
 		float32 positionY = static_cast<float32>(componentOrigin[1]);
 
@@ -240,20 +242,20 @@ namespace ProjectA {
 				continue;
 			}
 
-			const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
+			const float32 advanceWidth = std::ceil(glyph.advanceWidth * scaledHeight);
 
 			if (!glyph.invisible) {
 				// For a line height (ascent - descent) of 1210 FUnits,
 				// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
 				// The width should be 62.13px.
 				// TODO: float32 lyah::ceil(float32)
-				const float32 width = glyph.width / lineHeight * textStyle.fontSize;
-				const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * textStyle.fontSize;
+				const float32 width = glyph.width * scaledHeight;
+				const float32 leftSideBearing = glyph.leftSideBearing * scaledHeight;
 
 				const vec2<float32> position = {positionX + leftSideBearing, positionY};
 				const vec2<float32> size = {width, textStyle.fontSize};
-				const vec2<float32> uvStart = {glyph.minCoordinateX, glyph.minCoordinateY};
-				const vec2<float32> uvEnd = {glyph.maxCoordinateX, glyph.maxCoordinateY};
+				const vec2<float32> uvStart = {glyph.minCoordinate.x, glyph.minCoordinate.y};
+				const vec2<float32> uvEnd = {glyph.maxCoordinate.x, glyph.maxCoordinate.y};
 				const vec2<float32> uvDiff = uvEnd - uvStart;
 
 				glyphSubcomponent.world = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);

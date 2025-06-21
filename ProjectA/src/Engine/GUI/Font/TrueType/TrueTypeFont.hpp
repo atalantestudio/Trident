@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Engine/BuildProcess/SDFGlyphMapBuildProcess.hpp"
-#include "Engine/Renderer/Font/Font.hpp"
-#include "Engine/Renderer/Font/TrueType/TrueTypeGlyph.hpp"
+#include "Engine/GUI/Font/Font.hpp"
+#include "Engine/GUI/Font/TrueType/TrueTypeGlyph.hpp"
 
 namespace ProjectA {
 	class TrueTypeFont : public Font {

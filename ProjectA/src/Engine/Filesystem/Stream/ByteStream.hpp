@@ -5,9 +5,27 @@ namespace ProjectA {
 		public:
 			template<typename T>
 			static constexpr T byteswap(T value) {
-				DEBUG_ASSERT(false);
+				switch (sizeof(T)) {
+					case 2: {
+						const uint16 valueInteger = *pointer_cast_const<const uint16*>(&value);
 
-				return value;
+						return *pointer_cast_const<const T*>(&valueInteger);
+					}
+					case 4: {
+						const uint32 valueInteger = *pointer_cast_const<const uint32*>(&value);
+
+						return *pointer_cast_const<const T*>(&valueInteger);
+					}
+					case 8: {
+						const uint64 valueInteger = *pointer_cast_const<const uint64*>(&value);
+
+						return *pointer_cast_const<const T*>(&valueInteger);
+					}
+					default:
+						ENGINE_ASSERT(false, "Unable to byteswap value.");
+
+						return value;
+				}
 			}
 
 			template<>
@@ -49,10 +67,14 @@ namespace ProjectA {
 
 			uint64 getRemainingByteSize() const;
 
+			// Repositions the offset from the start of the stream.
+			// `offset`: the stream offset in bytes.
+			void seek(uint64 offset);
+
 			// Advances by the provided byte count.
 			// Usage:
-			// - The byte count must be <= the remaining bytes in the stream.
-			void jump(uint64 byteCount);
+			// `count`: The number of bytes to jump over. It must be less than or equal to the remaining bytes in the offsetted stream.
+			void jump(uint64 count);
 
 			// Returns the next bytes from the stream without updating the offsets.
 			// Usage:
@@ -86,8 +108,6 @@ namespace ProjectA {
 
 				return value;
 			}
-
-			void reset();
 
 		private:
 			const uint8* stream;
