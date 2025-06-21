@@ -226,14 +226,11 @@ namespace ProjectA {
 			const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
 
 			SDFGlyph& sdfGlyph = sdfGlyphMap.glyphs[glyphIndex];
+			sdfGlyph.invisible = glyph.emptyOrUnparsed();
 
-			if (glyph.edges.empty()) {
-				sdfGlyph.invisible = true;
-
+			if (sdfGlyph.invisible) {
 				continue;
 			}
-
-			sdfGlyph.invisible = false;
 
 			const uint64 glyphMapSize = sizeof(GlyphBuffer) + glyph.edges.size() * sizeof(GlyphEdge);
 

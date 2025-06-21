@@ -100,20 +100,6 @@ namespace ProjectA {
 		float32 n = 0.0f;
 	};
 
-	struct hhea {
-		// Distance from baseline of highest ascender.
-		FWord ascent;
-
-		// Distance from baseline of lowest descender.
-		FWord descent;
-
-		// Typographic line gap.
-		FWord lineGap;
-
-		// Number of advance widths in metrics table.
-		uint16 numOfLongHorMetrics;
-	};
-
 	struct TTFFile {
 		std::unordered_map<uint16, uint32> unicodeMap;
 		sequence<Glyph> glyphs;
