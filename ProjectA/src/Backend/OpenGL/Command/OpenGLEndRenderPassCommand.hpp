@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class OpenGLEndRenderPassCommand final : public OpenGLCommand {
 		public:
-			OpenGLEndRenderPassCommand(const OpenGLFramebuffer* framebuffer, uint32 subpassIndex) :
+			explicit OpenGLEndRenderPassCommand(const OpenGLFramebuffer* framebuffer, uint32 subpassIndex) :
 				framebuffer(framebuffer),
 				subpassIndex(subpassIndex)
 			{}

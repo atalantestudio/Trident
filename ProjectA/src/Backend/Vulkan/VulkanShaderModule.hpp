@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class VulkanShaderModule final : public ShaderModule, public ObjectWrapper<VkPipelineShaderStageCreateInfo> {
 		public:
-			VulkanShaderModule(VkDevice device, const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor);
+			explicit VulkanShaderModule(VkDevice device, const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor);
 
 			~VulkanShaderModule() final override;
 

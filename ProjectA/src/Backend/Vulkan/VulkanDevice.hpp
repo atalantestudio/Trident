@@ -10,7 +10,7 @@
 namespace ProjectA {
 	class VulkanDevice final : public Device, public ObjectWrapper<VkDevice> {
 		public:
-			VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface);
+			explicit VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface);
 
 			~VulkanDevice() final override;
 

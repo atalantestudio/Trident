@@ -9,7 +9,7 @@
 namespace ProjectA {
 	class OpenGLRenderPipeline final : public RenderPipeline {
 		public:
-			OpenGLRenderPipeline(const RenderPipelineDescriptor& descriptor);
+			explicit OpenGLRenderPipeline(const RenderPipelineDescriptor& descriptor);
 
 			~OpenGLRenderPipeline() final override;
 

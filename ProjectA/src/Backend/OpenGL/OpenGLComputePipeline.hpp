@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class OpenGLComputePipeline final : public ComputePipeline {
 		public:
-			OpenGLComputePipeline(const ComputePipelineDescriptor& descriptor);
+			explicit OpenGLComputePipeline(const ComputePipelineDescriptor& descriptor);
 
 			~OpenGLComputePipeline() final override;
 

@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	OpenGLShaderModule::OpenGLShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) :
-		// ShaderModule(descriptor),
+		ShaderModule(descriptor),
 		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
 	{
 		PROFILE_SCOPE(FUNC_SIG);

@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class OpenGLBindVertexBufferCommand final : public OpenGLCommand {
 		public:
-			OpenGLBindVertexBufferCommand(GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride) :
+			explicit OpenGLBindVertexBufferCommand(GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride) :
 				bindingindex(bindingindex),
 				buffer(buffer),
 				offset(offset),

@@ -9,7 +9,7 @@ namespace ProjectA {
 
 	class OpenGLQueue final : public Queue {
 		public:
-			OpenGLQueue(const OpenGLRenderingContext& renderingContext, const OpenGLDevice& device);
+			explicit OpenGLQueue(const OpenGLRenderingContext& renderingContext, const OpenGLDevice& device);
 
 			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
 

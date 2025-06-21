@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class VulkanImageView final : public ImageView, public ObjectWrapper<VkImageView> {
 		public:
-			VulkanImageView(VkDevice device, const Image* image, const ImageViewDescriptor& descriptor);
+			explicit VulkanImageView(VkDevice device, const Image* image, const ImageViewDescriptor& descriptor);
 
 			~VulkanImageView() final override;
 

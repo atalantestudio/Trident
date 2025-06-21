@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class RenderPass {
 		public:
-			RenderPass::RenderPass(const RenderPassDescriptor& descriptor) :
+			explicit RenderPass(const RenderPassDescriptor& descriptor) :
 				subpasses(descriptor.subpasses)
 			{
 				DEBUG_DESCRIPTOR_GUARD(descriptor);

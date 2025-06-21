@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class OpenGLDrawIndexedCommand final : public OpenGLCommand {
 		public:
-			OpenGLDrawIndexedCommand(GLenum mode, GLsizei count, GLsizei type, const GLvoid* indices, GLsizei instancecount) :
+			explicit OpenGLDrawIndexedCommand(GLenum mode, GLsizei count, GLsizei type, const GLvoid* indices, GLsizei instancecount) :
 				mode(mode),
 				count(count),
 				type(type),

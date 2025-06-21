@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class OpenGLDispatchGroupsCommand final : public OpenGLCommand {
 		public:
-			OpenGLDispatchGroupsCommand(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z) :
+			explicit OpenGLDispatchGroupsCommand(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z) :
 				num_groups_x(num_groups_x),
 				num_groups_y(num_groups_y),
 				num_groups_z(num_groups_z)

@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class OpenGLBindRenderPipelineCommand final : public OpenGLCommand {
 		public:
-			OpenGLBindRenderPipelineCommand(const ref<OpenGLRenderPipeline>& renderPipeline) :
+			explicit OpenGLBindRenderPipelineCommand(const ref<OpenGLRenderPipeline>& renderPipeline) :
 				renderPipeline(renderPipeline)
 			{}
 

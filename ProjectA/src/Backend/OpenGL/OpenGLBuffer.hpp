@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class OpenGLBuffer final : public Buffer, public ObjectWrapper<GLuint> {
 		public:
-			OpenGLBuffer(const BufferDescriptor& descriptor);
+			explicit OpenGLBuffer(const BufferDescriptor& descriptor);
 
 			~OpenGLBuffer() final override;
 

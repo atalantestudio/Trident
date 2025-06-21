@@ -9,7 +9,7 @@
 namespace ProjectA {
 	class VulkanSurface final : public Surface, public ObjectWrapper<VkSurfaceKHR> {
 		public:
-			VulkanSurface(VkInstance instance, const Window& window);
+			explicit VulkanSurface(VkInstance instance, const Window& window);
 
 			~VulkanSurface() final override;
 

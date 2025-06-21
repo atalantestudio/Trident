@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class VulkanComputePipeline final : public ComputePipeline, public VulkanPipeline {
 		public:
-			VulkanComputePipeline(VkDevice device, const ComputePipelineDescriptor& descriptor);
+			explicit VulkanComputePipeline(VkDevice device, const ComputePipelineDescriptor& descriptor);
 
 			~VulkanComputePipeline() final override;
 

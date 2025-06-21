@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class OpenGLSampler final : public Sampler, public ObjectWrapper<GLuint> {
 		public:
-			OpenGLSampler(const SamplerDescriptor& descriptor);
+			explicit OpenGLSampler(const SamplerDescriptor& descriptor);
 
 			~OpenGLSampler() final override;
 	};

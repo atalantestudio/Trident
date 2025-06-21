@@ -11,7 +11,7 @@ namespace ProjectA {
 
 	class VulkanQueue final : public Queue, public ObjectWrapper<VkQueue> {
 		public:
-			VulkanQueue(const VulkanDevice& device, uint32 queueFamilyIndex);
+			explicit VulkanQueue(const VulkanDevice& device, uint32 queueFamilyIndex);
 
 			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
 

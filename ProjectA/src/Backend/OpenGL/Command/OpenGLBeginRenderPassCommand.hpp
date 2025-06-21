@@ -10,7 +10,7 @@
 namespace ProjectA {
 	class OpenGLBeginRenderPassCommand final : public OpenGLCommand {
 		public:
-			OpenGLBeginRenderPassCommand(const BeginRenderPassDescriptor& descriptor) :
+			explicit OpenGLBeginRenderPassCommand(const BeginRenderPassDescriptor& descriptor) :
 				descriptor(descriptor)
 			{}
 

@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class OpenGLSetScissorCommand final : public OpenGLCommand {
 		public:
-			OpenGLSetScissorCommand(GLint xOffset, GLint yOffset, Extent2D extent) :
+			explicit OpenGLSetScissorCommand(GLint xOffset, GLint yOffset, Extent2D extent) :
 				xOffset(xOffset),
 				yOffset(yOffset),
 				extent(extent)

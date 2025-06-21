@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class VulkanPipeline : public Pipeline, public ObjectWrapper<VkPipeline> {
 		public:
-			VulkanPipeline(VkPipelineBindPoint bindPoint, const VulkanPipelineLayout* layout);
+			explicit VulkanPipeline(VkPipelineBindPoint bindPoint, const VulkanPipelineLayout* layout);
 
 		public:
 			VkPipelineBindPoint bindPoint;

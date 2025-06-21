@@ -6,13 +6,11 @@
 namespace ProjectA {
 	class ShaderModule {
 		public:
-			// ShaderModule() = default;
-
 			virtual ~ShaderModule() = default;
 
-		/* protected:
+		protected:
 			explicit ShaderModule(const ShaderModuleDescriptor& descriptor) {
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
-			} */
+			}
 	};
 }

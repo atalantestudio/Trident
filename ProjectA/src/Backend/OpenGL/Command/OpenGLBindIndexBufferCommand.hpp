@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class OpenGLBindIndexBufferCommand final : public OpenGLCommand {
 		public:
-			OpenGLBindIndexBufferCommand(GLuint indexBuffer) :
+			explicit OpenGLBindIndexBufferCommand(GLuint indexBuffer) :
 				indexBuffer(indexBuffer)
 			{}
 

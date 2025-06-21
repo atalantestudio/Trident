@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class OpenGLSwapchain final : public Swapchain {
 		public:
-			OpenGLSwapchain(const SwapchainDescriptor& descriptor, const OpenGLRenderingContext& renderingContext, const OpenGLSurface& surface);
+			explicit OpenGLSwapchain(const SwapchainDescriptor& descriptor, const OpenGLRenderingContext& renderingContext, const OpenGLSurface& surface);
 
 			uint32 getImageCount() const final override;
 

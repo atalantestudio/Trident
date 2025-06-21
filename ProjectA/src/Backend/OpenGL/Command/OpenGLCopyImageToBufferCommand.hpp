@@ -3,7 +3,7 @@
 namespace ProjectA {
 	class OpenGLCopyImageToBufferCommand final : public OpenGLCommand {
 		public:
-			OpenGLCopyImageToBufferCommand(const OpenGLImage* image, const OpenGLBuffer* buffer, const sequence<BufferImageCopyRegion>& copyRegions) :
+			explicit OpenGLCopyImageToBufferCommand(const OpenGLImage* image, const OpenGLBuffer* buffer, const sequence<BufferImageCopyRegion>& copyRegions) :
 				image(image),
 				buffer(buffer),
 				copyRegions(&copyRegions)

@@ -11,7 +11,7 @@ namespace ProjectA {
 
 	class VulkanSwapchain final : public Swapchain, public ObjectWrapper<VkSwapchainKHR> {
 		public:
-			VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const SwapchainDescriptor& descriptor);
+			explicit VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const SwapchainDescriptor& descriptor);
 
 			~VulkanSwapchain() final override;
 

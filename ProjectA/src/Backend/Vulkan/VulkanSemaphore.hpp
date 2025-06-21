@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class VulkanSemaphore final : public Semaphore, public ObjectWrapper<VkSemaphore> {
 		public:
-			VulkanSemaphore(VkDevice device);
+			explicit VulkanSemaphore(VkDevice device);
 
 			~VulkanSemaphore() final override;
 

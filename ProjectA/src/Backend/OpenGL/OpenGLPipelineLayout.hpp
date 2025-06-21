@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class OpenGLPipelineLayout final : public PipelineLayout {
 		public:
-			OpenGLPipelineLayout(const PipelineLayoutDescriptor& descriptor);
+			explicit OpenGLPipelineLayout(const PipelineLayoutDescriptor& descriptor);
 
 		public:
 			std::vector<DescriptorSetLayout> descriptorSetLayouts;

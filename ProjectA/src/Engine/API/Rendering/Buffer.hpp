@@ -18,7 +18,7 @@ namespace ProjectA {
 			virtual void unmap() const = 0;
 
 		protected:
-			Buffer(uint64 size) :
+			explicit Buffer(uint64 size) :
 				size(size)
 			{}
 

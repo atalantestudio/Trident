@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class OpenGLCommandBuffer final : public CommandBuffer, public ObjectWrapper<const std::vector<ref<OpenGLCommand>>> {
 		public:
-			OpenGLCommandBuffer(const std::vector<ref<OpenGLCommand>>& commandBuffer);
+			explicit OpenGLCommandBuffer(const std::vector<ref<OpenGLCommand>>& commandBuffer);
 
 			std::vector<ref<OpenGLCommand>>::const_iterator begin() const;
 

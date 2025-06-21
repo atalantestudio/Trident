@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class OpenGLImage final : public Image, public ObjectWrapper<GLuint> {
 		public:
-			OpenGLImage(const ImageDescriptor& descriptor);
+			explicit OpenGLImage(const ImageDescriptor& descriptor);
 
 			~OpenGLImage() final override;
 

@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class OpenGLDrawCommand final : public OpenGLCommand {
 		public:
-			OpenGLDrawCommand(GLenum mode, GLint first, GLsizei count, GLsizei instancecount) :
+			explicit OpenGLDrawCommand(GLenum mode, GLint first, GLsizei count, GLsizei instancecount) :
 				mode(mode),
 				first(first),
 				count(count),

@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class OpenGLShaderModule final : public ShaderModule, public ObjectWrapper<GLuint> {
 		public:
-			OpenGLShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor);
+			explicit OpenGLShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor);
 
 			~OpenGLShaderModule() final override;
 

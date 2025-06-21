@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class VulkanFence final : public Fence, public ObjectWrapper<VkFence> {
 		public:
-			VulkanFence(VkDevice device);
+			explicit VulkanFence(VkDevice device);
 
 			~VulkanFence() final override;
 

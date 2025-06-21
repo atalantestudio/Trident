@@ -7,10 +7,6 @@
 namespace ProjectA {
 	class VertexInputBinding {
 		public:
-			VertexInputBinding() :
-				inputRate(InputRate::VERTEX)
-			{}
-
 			explicit VertexInputBinding(InputRate inputRate) :
 				inputRate(inputRate)
 			{}
@@ -96,7 +92,7 @@ namespace ProjectA {
 			}
 
 		private:
-			InputRate inputRate;
+			InputRate inputRate = InputRate::VERTEX;
 			std::vector<VertexInputAttribute> attributes;
 			uint32 offset = 0;
 			uint32 stride = 0;

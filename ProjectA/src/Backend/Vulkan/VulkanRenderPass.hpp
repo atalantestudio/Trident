@@ -10,7 +10,7 @@
 namespace ProjectA {
 	class VulkanRenderPass final : public RenderPass, public ObjectWrapper<VkRenderPass> {
 		public:
-			VulkanRenderPass(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const RenderPassDescriptor& descriptor);
+			explicit VulkanRenderPass(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const RenderPassDescriptor& descriptor);
 
 			~VulkanRenderPass() final override;
 

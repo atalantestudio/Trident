@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class VulkanCommandPool final : public CommandPool, public ObjectWrapper<VkCommandPool> {
 		public:
-			VulkanCommandPool(VkDevice device, uint32 queueFamilyIndex);
+			explicit VulkanCommandPool(VkDevice device, uint32 queueFamilyIndex);
 
 			~VulkanCommandPool() final override;
 

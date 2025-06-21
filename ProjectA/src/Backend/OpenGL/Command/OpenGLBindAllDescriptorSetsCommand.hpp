@@ -13,7 +13,7 @@
 namespace ProjectA {
 	class OpenGLBindAllDescriptorSetsCommand final : public OpenGLCommand {
 		public:
-			OpenGLBindAllDescriptorSetsCommand(const std::vector<DescriptorSetLayout>& descriptorSetLayouts, bool isCompute) :
+			explicit OpenGLBindAllDescriptorSetsCommand(const std::vector<DescriptorSetLayout>& descriptorSetLayouts, bool isCompute) :
 				descriptorSetLayouts(descriptorSetLayouts),
 				isCompute(isCompute)
 			{}

@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class OpenGLSetViewportCommand final : public OpenGLCommand {
 		public:
-			OpenGLSetViewportCommand(GLint x, GLint y, GLsizei width, GLsizei height) :
+			explicit OpenGLSetViewportCommand(GLint x, GLint y, GLsizei width, GLsizei height) :
 				x(x),
 				y(y),
 				width(width),

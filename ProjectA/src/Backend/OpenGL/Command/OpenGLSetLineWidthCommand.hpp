@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class OpenGLSetLineWidthCommand final : public OpenGLCommand {
 		public:
-			OpenGLSetLineWidthCommand(GLfloat width) :
+			explicit OpenGLSetLineWidthCommand(GLfloat width) :
 				width(width)
 			{}
 

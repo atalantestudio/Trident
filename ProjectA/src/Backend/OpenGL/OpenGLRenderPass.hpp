@@ -5,6 +5,6 @@
 namespace ProjectA {
 	class OpenGLRenderPass final : public RenderPass {
 		public:
-			OpenGLRenderPass(const RenderPassDescriptor& descriptor);
+			explicit OpenGLRenderPass(const RenderPassDescriptor& descriptor);
 	};
 }

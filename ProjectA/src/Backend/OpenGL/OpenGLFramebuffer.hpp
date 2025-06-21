@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class OpenGLFramebuffer final : public Framebuffer, public ObjectWrapper<GLuint> {
 		public:
-			OpenGLFramebuffer(const FramebufferDescriptor& descriptor);
+			explicit OpenGLFramebuffer(const FramebufferDescriptor& descriptor);
 
 			~OpenGLFramebuffer() final override;
 	};

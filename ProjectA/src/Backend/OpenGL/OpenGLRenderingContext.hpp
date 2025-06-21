@@ -8,7 +8,7 @@ namespace ProjectA {
 			static void* getProcedureAddress(std::string_view name);
 
 		public:
-			OpenGLRenderingContext(const Window& window);
+			explicit OpenGLRenderingContext(const Window& window);
 
 			~OpenGLRenderingContext();
 

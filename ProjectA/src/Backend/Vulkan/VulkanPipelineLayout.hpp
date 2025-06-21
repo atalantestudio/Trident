@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class VulkanPipelineLayout final : public PipelineLayout, public ObjectWrapper<VkPipelineLayout> {
 		public:
-			VulkanPipelineLayout(VkDevice device, const PipelineLayoutDescriptor& descriptor);
+			explicit VulkanPipelineLayout(VkDevice device, const PipelineLayoutDescriptor& descriptor);
 
 			~VulkanPipelineLayout() final override;
 

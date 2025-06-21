@@ -11,7 +11,7 @@
 namespace ProjectA {
 	class OpenGLCommandEncoder final : public CommandEncoder {
 		public:
-			OpenGLCommandEncoder(const OpenGLDevice& device, const CommandBufferDescriptor& descriptor);
+			explicit OpenGLCommandEncoder(const OpenGLDevice& device, const CommandBufferDescriptor& descriptor);
 
 			void begin() const final override;
 

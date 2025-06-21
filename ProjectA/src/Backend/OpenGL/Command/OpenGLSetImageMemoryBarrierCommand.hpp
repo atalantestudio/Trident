@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class OpenGLSetImageMemoryBarrierCommand final : public OpenGLCommand {
 		public:
-			OpenGLSetImageMemoryBarrierCommand(GLbitfield barrier) :
+			explicit OpenGLSetImageMemoryBarrierCommand(GLbitfield barrier) :
 				barrier(barrier)
 			{}
 

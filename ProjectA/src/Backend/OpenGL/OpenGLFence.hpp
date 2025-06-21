@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class OpenGLFence final : public Fence, public ObjectWrapper<GLsync> {
 		public:
-			OpenGLFence();
+			explicit OpenGLFence();
 
 			void create();
 

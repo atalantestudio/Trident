@@ -8,7 +8,7 @@ namespace ProjectA {
 			}
 
 		protected:
-			CommandBuffer(uint32 commandCount) :
+			explicit CommandBuffer(uint32 commandCount) :
 				commandCount(commandCount)
 			{}
 

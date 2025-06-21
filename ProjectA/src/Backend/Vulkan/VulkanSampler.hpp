@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class VulkanSampler final : public Sampler, public ObjectWrapper<VkSampler> {
 		public:
-			VulkanSampler(VkDevice device, const SamplerDescriptor& descriptor);
+			explicit VulkanSampler(VkDevice device, const SamplerDescriptor& descriptor);
 
 			~VulkanSampler() final override;
 

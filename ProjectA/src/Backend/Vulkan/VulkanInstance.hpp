@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class VulkanInstance final : public Instance, public ObjectWrapper<VkInstance> {
 		public:
-			VulkanInstance();
+			explicit VulkanInstance();
 
 			~VulkanInstance() final override;
 

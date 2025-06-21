@@ -10,7 +10,7 @@
 namespace ProjectA {
 	class VulkanRenderPipeline final : public RenderPipeline, public VulkanPipeline {
 		public:
-			VulkanRenderPipeline(VkDevice device, const RenderPipelineDescriptor& descriptor);
+			explicit VulkanRenderPipeline(VkDevice device, const RenderPipelineDescriptor& descriptor);
 
 			~VulkanRenderPipeline() final override;
 

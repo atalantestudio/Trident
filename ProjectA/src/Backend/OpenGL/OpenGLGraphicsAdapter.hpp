@@ -9,7 +9,7 @@
 namespace ProjectA {
 	class OpenGLGraphicsAdapter final : public GraphicsAdapter {
 		public:
-			OpenGLGraphicsAdapter(const Window& window);
+			explicit OpenGLGraphicsAdapter(const Window& window);
 
 			~OpenGLGraphicsAdapter() final override;
 

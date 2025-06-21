@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class OpenGLPhysicalDevice final : public PhysicalDevice {
 		public:
-			OpenGLPhysicalDevice();
+			explicit OpenGLPhysicalDevice();
 
 			void setLimits();
 	};

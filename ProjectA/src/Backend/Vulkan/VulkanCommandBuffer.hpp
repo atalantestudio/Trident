@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class VulkanCommandBuffer final : public CommandBuffer, public ObjectWrapper<const VkCommandBuffer> {
 		public:
-			VulkanCommandBuffer(VkCommandBuffer commandBuffer, VkPipelineStageFlags pipelineStageFlags, uint32 commandCount);
+			explicit VulkanCommandBuffer(VkCommandBuffer commandBuffer, VkPipelineStageFlags pipelineStageFlags, uint32 commandCount);
 
 		public:
 			const VkPipelineStageFlags pipelineStageFlags;
