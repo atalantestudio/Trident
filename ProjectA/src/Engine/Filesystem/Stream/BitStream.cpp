@@ -79,29 +79,25 @@ namespace ProjectA {
 		{24577, 13},
 	};
 
-	static void parseUncompressedZlibBlock(BitStream& stream, sequence<uint8>& data, uint32& dataOffset) {
-		stream.jump(5);
+	void BitStream::parseUncompressedZlibBlock(uint8* data) {
+		jump(5);
 
-		/**
-		 * LEN is the number of data bytes in the block.
-		 */
-		const uint16 LEN = stream.read<uint16>(16);
+		// LEN is the number of data bytes in the block.
+		const uint16 LEN = read<uint16>(16);
 
-		/**
-		 * NLEN is the one's complement of LEN.
-		 */
-		const uint16 NLEN = stream.read<uint16>(16);
+		// NLEN is the one's complement of LEN.
+		const uint16 NLEN = read<uint16>(16);
 
 		ENGINE_ASSERT(LEN == static_cast<uint16>(~NLEN), "NLEN check failed. See https://datatracker.ietf.org/doc/html/rfc1951.");
 
-		const uint8* source = stream.getBytePosition();
+		std::copy_n(getBytePosition(), LEN, data);
 
-		std::copy(source, source + LEN, data + dataOffset);
+		jump(LEN * 8);
 
-		dataOffset += LEN;
+		data += LEN;
 	}
 
-	static void parseCompressedZlibBlock(BitStream& stream, uint8 BTYPE, sequence<uint8>& data, uint32& dataOffset) {
+	void BitStream::parseCompressedZlibBlock(uint8* data, uint64& dataOffset, uint8 BTYPE) {
 		static constexpr uint16 MAX_LITERAL_LENGTH_CODE_LENGTH_COUNT = 320;
 
 		uint8 literalLengthCodeLengths[MAX_LITERAL_LENGTH_CODE_LENGTH_COUNT] = {};
@@ -123,15 +119,15 @@ namespace ProjectA {
 		}
 		else {
 			// # of Literal/Length codes - 257 (257 - 286)
-			const uint8 HLIT = stream.read<uint8>(5);
+			const uint8 HLIT = read<uint8>(5);
 
 			ENGINE_ASSERT(HLIT <= 29, "HLIT = [] is overflowing.", HLIT);
 
 			// # of Distance codes - 1 (1 - 32)
-			const uint8 HDIST = stream.read<uint8>(5);
+			const uint8 HDIST = read<uint8>(5);
 
 			// # of Code Length codes - 4 (4 - 19)
-			const uint8 HCLEN = stream.read<uint8>(4);
+			const uint8 HCLEN = read<uint8>(4);
 
 			literalLengthCodeCount = HLIT + 257;
 			distanceCodeCount = HDIST + 1;
@@ -144,7 +140,7 @@ namespace ProjectA {
 			uint8 literalLengthCodeLengthCodeLengths[MAX_CODE_LENGTH_CODE_COUNT] = {};
 
 			for (uint8 i = 0; i < codeLengthCodeCount; i += 1) {
-				literalLengthCodeLengthCodeLengths[reorder[i]] = stream.read<uint8>(3);
+				literalLengthCodeLengthCodeLengths[reorder[i]] = read<uint8>(3);
 			}
 
 			HuffmanCodeDictionary literalLengthCodeLengthDictionary(7);
@@ -157,7 +153,7 @@ namespace ProjectA {
 			ENGINE_ASSERT(literalLengthCodeLengthCount <= MAX_LITERAL_LENGTH_CODE_LENGTH_COUNT, "The literal/length code length count is overflowing.");
 
 			for (uint16 literalLengthCodeLengthIndex = 0; literalLengthCodeLengthIndex < literalLengthCodeLengthCount;) {
-				const uint8 encodedCodeLength = static_cast<uint8>(literalLengthCodeLengthDictionary.decode(stream));
+				const uint8 encodedCodeLength = static_cast<uint8>(literalLengthCodeLengthDictionary.decode(*this));
 
 				ENGINE_ASSERT(encodedCodeLength <= 18, "Code length = [] is not allowed.", encodedCodeLength);
 
@@ -171,17 +167,17 @@ namespace ProjectA {
 					ENGINE_ASSERT(literalLengthCodeLengthIndex > 0, "The literal/length code length index cannot be 0 if the encoded code length is 16.");
 
 					codeLength = literalLengthCodeLengths[literalLengthCodeLengthIndex - 1];
-					repeatLength = stream.read<uint8>(2) + 3;
+					repeatLength = read<uint8>(2) + 3;
 
 					ENGINE_ASSERT(repeatLength <= 6, "Repeat length = [] is overflowing.", repeatLength);
 				}
 				else if (encodedCodeLength == 17) {
-					repeatLength = stream.read<uint8>(3) + 3;
+					repeatLength = read<uint8>(3) + 3;
 
 					ENGINE_ASSERT(repeatLength <= 10, "Repeat length = [] is overflowing.", repeatLength);
 				}
 				else if (encodedCodeLength == 18) {
-					repeatLength = stream.read<uint8>(7) + 11;
+					repeatLength = read<uint8>(7) + 11;
 
 					ENGINE_ASSERT(repeatLength <= 138, "Repeat length = [] is overflowing.", repeatLength);
 				}
@@ -199,7 +195,7 @@ namespace ProjectA {
 		static constexpr uint32 MAX_LITERAL_LENGTH_COUNT = 177237;
 
 		for (uint32 literalLengthIndex = 0; literalLengthIndex < MAX_LITERAL_LENGTH_COUNT; literalLengthIndex += 1) {
-			const uint16 literalLength = literalLengthDictionary.decode(stream);
+			const uint16 literalLength = literalLengthDictionary.decode(*this);
 
 			ENGINE_ASSERT(literalLength <= 285, "Literal/length value should not exceed 285. See https://datatracker.ietf.org/doc/html/rfc1951.");
 
@@ -219,29 +215,26 @@ namespace ProjectA {
 			ENGINE_ASSERT(lengthCodeIndex < 29, "The length code index is overflowing.");
 
 			const LengthCode lengthCode = lengthCodes[lengthCodeIndex];
-			const uint16 length = lengthCode.baseLength + stream.read<uint8>(lengthCode.extraBitCount);
+			const uint16 length = lengthCode.baseLength + read<uint8>(lengthCode.extraBitCount);
 
-			const uint16 distanceCodeIndex = distanceDictionary.decode(stream);
+			const uint16 distanceCodeIndex = distanceDictionary.decode(*this);
 
 			ENGINE_ASSERT(distanceCodeIndex < 30, "The distance code index is overflowing.");
 
 			const DistanceCode distanceCode = distanceCodes[distanceCodeIndex];
-			const uint16 distance = distanceCode.baseDistance + stream.read<uint16>(distanceCode.extraBitCount);
+			const uint16 distance = distanceCode.baseDistance + read<uint16>(distanceCode.extraBitCount);
 
-			const uint8* source = data + dataOffset - distance;
+			ENGINE_ASSERT(distance <= dataOffset, "The source pointer is not within the bounds of the uncompressed data.");
 
-			ENGINE_ASSERT(source >= data, "The source iterator is underflowing.");
-
-			// TODO: std::copy produces correct results, except for Cameraman.png and a part of Pepper.png. Why?
+			// TODO: std::copy doesn't produce correct results for Cameraman.png, Zelda.png and a part of Pepper.png.
 			#if 0
-				std::copy(source, source + length, data + dataOffset);
+				std::copy_n(&data[dataOffset - distance], length, &data[dataOffset]);
+
 				dataOffset += length;
 			#else
 				for (uint16 index = 0; index < length; index += 1) {
-					data[dataOffset] = *source;
+					data[dataOffset] = data[dataOffset - distance];
 					dataOffset += 1;
-
-					source += 1;
 				}
 			#endif
 		}
@@ -262,7 +255,7 @@ namespace ProjectA {
 	}
 
 	const uint8* BitStream::getBytePosition() const {
-		return stream + byteOffset;
+		return stream + byteOffset + bitOffset / 8;
 	}
 
 	uint64 BitStream::getRemainingBitSize() const {
@@ -376,7 +369,7 @@ namespace ProjectA {
 		const uint8 FLEVEL = FLG >> 6;
 
 		sequence<uint8> data(uncompressedSize);
-		uint32 dataOffset = 0;
+		uint64 dataOffset = 0;
 
 		// TODO: Compute theoretical max. number of blocks.
 		static constexpr uint32 MAX_BLOCK_COUNT = 1000;
@@ -397,17 +390,17 @@ namespace ProjectA {
 			// defined.
 			const uint8 BTYPE = read<uint8>(2);
 
-			ENGINE_ASSERT(BTYPE != 3, "BTYPE = 3 is a reserved value. See https://datatracker.ietf.org/doc/html/rfc1951.");
+			ENGINE_ASSERT(BTYPE != 0b11, "BTYPE = 0b11 is a reserved value. See https://datatracker.ietf.org/doc/html/rfc1951.");
 
 			if (BTYPE == 0) {
-				parseUncompressedZlibBlock(*this, data, dataOffset);
+				parseUncompressedZlibBlock(data);
 			}
 			else {
-				parseCompressedZlibBlock(*this, BTYPE, data, dataOffset);
+				parseCompressedZlibBlock(data, dataOffset, BTYPE);
 			}
 
 			if (BFINAL) {
-				// TODO: Check Adler32. See https://datatracker.ietf.org/doc/html/rfc1950.
+				// TODO: Check Adler32.
 				return data;
 			}
 		}

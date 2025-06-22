@@ -59,7 +59,7 @@ namespace ProjectA {
 			}
 
 		public:
-			ByteStream(const uint8* stream, uint64 size);
+			explicit ByteStream(const uint8* stream, uint64 size);
 
 			uint64 getByteOffset() const;
 

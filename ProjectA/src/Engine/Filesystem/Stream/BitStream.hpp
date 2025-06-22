@@ -8,7 +8,7 @@ namespace ProjectA {
 			typedef uint64 BitStreamSize;
 
 		public:
-			BitStream(const uint8* stream, uint64 byteSize);
+			explicit BitStream(const uint8* stream, uint64 byteSize);
 
 			uint64 getBitOffset() const;
 
@@ -75,24 +75,27 @@ namespace ProjectA {
 			sequence<uint8> inflate(uint64 uncompressedSize);
 
 		private:
-			static constexpr uint8 MAX_READ_OR_PEEK_BIT_COUNT = sizeof(BitStreamSize) * 8;
+			void parseUncompressedZlibBlock(uint8* data);
+
+			void parseCompressedZlibBlock(uint8* data, uint64& dataOffset, uint8 BTYPE);
+
+		private:
+			static constexpr uint8 MAX_READ_OR_PEEK_BIT_COUNT = 8 * sizeof(BitStreamSize);
 
 		private:
 			// TODO: Should stream be BitStreamSize* instead?
 			const uint8* stream;
 
-			// Bit accumulator.
-			// Missed opportunity to name this "bitBucket".
+			// Bit accumulator (missed opportunity to name this "bitBucket").
 			BitStreamSize bitBuffer;
 
 			// Size of the stream in bytes.
 			uint64 byteSize;
 
-			// Offset of the currently read byte.
+			// Offset of byte that is currently being read.
 			uint64 byteOffset = 0;
 
 			// Offset within the bit buffer.
-			// E [0, 64[
 			uint8 bitOffset: 6;
 	};
 }

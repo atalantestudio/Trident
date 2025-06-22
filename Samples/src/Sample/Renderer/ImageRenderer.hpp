@@ -16,7 +16,7 @@
 // - Asset/Image/qoi_test_images/wikipedia_008.png	OK
 // - Asset/Image/Baboon.png							OK
 // - Asset/Image/Cameraman.png						OK
-// - Asset/Image/checkerboard_cm0.png				Unhandled filter type (120)
+// - Asset/Image/checkerboard_cm0.png				OK
 // - Asset/Image/checkerboard_cm9.png				OK
 // - Asset/Image/checkerboard1.png					OK
 // - Asset/Image/checkerboard2.png					OK
@@ -27,13 +27,13 @@
 // - Asset/Image/MetallicGold.png					OK
 // - Asset/Image/Pepper.png							OK
 // - Asset/Image/RPGpack_sheet_2X.png				OK
-// - Asset/Image/test_inflate_0.png					Unhandled filter type (24)
+// - Asset/Image/test_inflate_0.png					OK
 // - Asset/Image/test_inflate_1.png					OK
 // - Asset/Image/test_inflate_1b.png				OK
 // - Asset/Image/test_inflate_2.png					OK
 // - Asset/Image/test_inflate_9.png					OK
-// - Asset/Image/test_inflate2_0.png				Unhandled filter type (24)
-// - Asset/Image/test_inflate2_9.png				Unhandled filter type (24)
+// - Asset/Image/test_inflate2_0.png				No errors but the colors seem wrong
+// - Asset/Image/test_inflate2_9.png				No errors but the colors seem wrong
 // - Asset/Image/Zelda.png							OK
 
 // QOI test images:
@@ -50,8 +50,8 @@ namespace ProjectA {
 	class ImageRenderer : public Renderer {
 		public:
 			void build() override {
-				// const PNGFile file = Filesystem::openTemporary<PNGFile>("Asset/Image/Zelda.png");
-				const ImageFile file = Filesystem::openImage<FileFormat::QOI>("Asset/Image/qoi_test_images/kodim10.qoi");
+				const PNGFile file = Filesystem::openTemporary<PNGFile>("Asset/Image/test_inflate_0.png");
+				// const ImageFile file = Filesystem::openImage<FileFormat::QOI>("Asset/Image/qoi_test_images/kodim10.qoi");
 
 				const ref<Device> device = getDevice();
 
