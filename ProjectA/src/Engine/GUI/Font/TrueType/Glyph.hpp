@@ -2,7 +2,7 @@
 
 namespace ProjectA {
 	// TODO: This struct is very similar to SDFGlyph. Maybe merge them?
-	struct TrueTypeGlyph {
+	struct Glyph {
 		// Top-left coordinate.
 		svec2<float32> minCoordinate;
 

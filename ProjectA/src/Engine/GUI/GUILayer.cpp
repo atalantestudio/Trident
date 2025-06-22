@@ -235,7 +235,7 @@ namespace ProjectA {
 			}
 
 			const uint16 codePoint = static_cast<uint16>(character);
-			const TrueTypeGlyph& glyph = font[codePoint];
+			const Glyph& glyph = font[codePoint];
 
 			// Don't register spaces on the start of the text.
 			if (glyph.invisible && positionX == static_cast<float32>(componentOrigin[0])) {
@@ -406,7 +406,7 @@ namespace ProjectA {
 			}
 
 			const uint16 codePoint = static_cast<uint16>(character);
-			const TrueTypeGlyph& glyph = font[codePoint];
+			const Glyph& glyph = font[codePoint];
 
 			if (firstLineGlyph) {
 				firstLineGlyph = false;

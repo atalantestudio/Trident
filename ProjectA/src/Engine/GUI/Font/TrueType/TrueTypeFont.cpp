@@ -15,20 +15,20 @@ namespace ProjectA {
 		lineGap = ttfFile.lineGap;
 		unicodeMap = ttfFile.unicodeMap;
 
-		glyphs = sequence<TrueTypeGlyph>(ttfFile.glyphs.count);
+		glyphs = sequence<Glyph>(ttfFile.glyphs.count);
 
 		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.count; glyphIndex += 1) {
-			const Glyph& glyph = ttfFile.glyphs[glyphIndex];
+			const TrueTypeGlyph& trueTypeGlyph = ttfFile.glyphs[glyphIndex];
 			const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
 			const SDFGlyph& sdfGlyph = sdfGlyphMap.glyphs[glyphIndex];
 
-			TrueTypeGlyph& trueTypeGlyph = glyphs[glyphIndex];
-			trueTypeGlyph.invisible = sdfGlyph.invisible;
-			trueTypeGlyph.minCoordinate = sdfGlyph.minCoordinate;
-			trueTypeGlyph.maxCoordinate = sdfGlyph.maxCoordinate;
-			trueTypeGlyph.width = glyph.max.x - glyph.min.x;
-			trueTypeGlyph.advanceWidth = hMetric.advanceWidth;
-			trueTypeGlyph.leftSideBearing = hMetric.leftSideBearing;
+			Glyph& glyph = glyphs[glyphIndex];
+			glyph.invisible = sdfGlyph.invisible;
+			glyph.minCoordinate = sdfGlyph.minCoordinate;
+			glyph.maxCoordinate = sdfGlyph.maxCoordinate;
+			glyph.width = trueTypeGlyph.max.x - trueTypeGlyph.min.x;
+			glyph.advanceWidth = hMetric.advanceWidth;
+			glyph.leftSideBearing = hMetric.leftSideBearing;
 		}
 	}
 
@@ -52,11 +52,11 @@ namespace ProjectA {
 		return sdfGlyphMap;
 	}
 
-	const sequence<TrueTypeGlyph>& TrueTypeFont::getGlyphs() const {
+	const sequence<Glyph>& TrueTypeFont::getGlyphs() const {
 		return glyphs;
 	}
 
-	const TrueTypeGlyph& TrueTypeFont::operator [](uint16 codePoint) const {
+	const Glyph& TrueTypeFont::operator [](uint16 codePoint) const {
 		const std::list<std::pair<const uint16, uint32>, std::allocator<std::pair<const uint16, uint32>>>::const_iterator glyphIndex = unicodeMap.find(codePoint);
 
 		return glyphs[glyphIndex->second];

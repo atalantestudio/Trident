@@ -3,7 +3,7 @@
 namespace ProjectA {
 	class MyLayer : public GUILayer {
 		public:
-			MyLayer() {
+			void registerAssets() override {
 				radioGroteskBoldFont = loadFont("../ProjectA/src/Asset/Font/test-bold.ttf");
 				radioGroteskRegularFont = loadFont("../ProjectA/src/Asset/Font/test-regular.ttf");
 				radioGroteskRegularItalicFont = loadFont("../ProjectA/src/Asset/Font/test-regular-italic.ttf");
@@ -29,8 +29,6 @@ namespace ProjectA {
 
 			void GUI() override {
 				GUIContainer({EXPAND, EXPAND}, {12px, 12px}, VERTICAL, 0px, white) {
-					GUIButton("Button", buttonStyle);
-
 					GUIText("The Lorem Ipsum", titleStyle);
 
 					GUISpacing(16px);

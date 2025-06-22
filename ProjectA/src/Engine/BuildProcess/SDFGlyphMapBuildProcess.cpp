@@ -222,23 +222,23 @@ namespace ProjectA {
 		const ref<Fence> writeBufferFence = Renderer::createFence();
 
 		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.count; glyphIndex += 1) {
-			const Glyph& glyph = ttfFile.glyphs[glyphIndex];
+			const TrueTypeGlyph& trueTypeGlyph = ttfFile.glyphs[glyphIndex];
 			const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
 
 			SDFGlyph& sdfGlyph = sdfGlyphMap.glyphs[glyphIndex];
-			sdfGlyph.invisible = glyph.emptyOrUnparsed();
+			sdfGlyph.invisible = trueTypeGlyph.emptyOrUnparsed();
 
 			if (sdfGlyph.invisible) {
 				continue;
 			}
 
-			const uint64 glyphMapSize = sizeof(GlyphBuffer) + glyph.edges.size() * sizeof(GlyphEdge);
+			const uint64 glyphMapSize = sizeof(GlyphBuffer) + trueTypeGlyph.edges.count * sizeof(GlyphEdge);
 
 			// Glyph width in FUnits.
-			const uint16 glyphWidth = glyph.max.x - glyph.min.x;
+			const uint16 glyphWidth = trueTypeGlyph.max.x - trueTypeGlyph.min.x;
 
 			// Glyph height in FUnits.
-			const uint16 glyphHeight = glyph.max.y - glyph.min.y;
+			const uint16 glyphHeight = trueTypeGlyph.max.y - trueTypeGlyph.min.y;
 
 			// Glyph dimension (the largest between width and height) in FUnits.
 			// TODO: uint16 lyah::max(uint16, uint16)
@@ -250,15 +250,15 @@ namespace ProjectA {
 			// Glyph signed distance field width in pixels.
 			//const float32 glyphSdfWidth = static_cast<float32>(glyphWidth) / glyphDimension * GLYPH_SUBIMAGE_DIMENSION;
 
-			glyphMappedRange->minCoordinateX = glyph.min.x;
-			glyphMappedRange->minCoordinateY = glyph.min.y;
+			glyphMappedRange->minCoordinateX = trueTypeGlyph.min.x;
+			glyphMappedRange->minCoordinateY = trueTypeGlyph.min.y;
 			glyphMappedRange->dimension = glyphDimension;
-			glyphMappedRange->edgeCount = static_cast<uint32>(glyph.edges.size());
+			glyphMappedRange->edgeCount = static_cast<uint32>(trueTypeGlyph.edges.count);
 
 			GlyphEdge* glyphEdgeMappedRange = static_cast<GlyphEdge*>(static_cast<void*>(glyphMappedRange + 1));
 
-			for (uint32 edgeIndex = 0; edgeIndex < glyph.edges.size(); edgeIndex += 1) {
-				const Edge& edge = glyph.edges[edgeIndex];
+			for (uint32 edgeIndex = 0; edgeIndex < trueTypeGlyph.edges.count; edgeIndex += 1) {
+				const Edge& edge = trueTypeGlyph.edges[edgeIndex];
 
 				glyphEdgeMappedRange[edgeIndex].startX = edge.start.x;
 				glyphEdgeMappedRange[edgeIndex].startY = edge.start.y;
@@ -269,7 +269,7 @@ namespace ProjectA {
 				glyphEdgeMappedRange[edgeIndex].curved = edge.curved;
 			}
 
-			sdfGlyph.width = static_cast<float32>(glyph.max.x - glyph.min.x);
+			sdfGlyph.width = static_cast<float32>(trueTypeGlyph.max.x - trueTypeGlyph.min.x);
 			sdfGlyph.width /= lineHeight;
 			sdfGlyph.width *= GLYPH_SUBIMAGE_DIMENSION;
 
@@ -360,12 +360,10 @@ namespace ProjectA {
 	uint64 SDFGlyphMapBuildProcess::computeMaxGlyphByteSize(const TTFFile& ttfFile) {
 		uint64 maxGlyphEdgeCount = 0;
 
-		for (const Glyph& glyph : ttfFile.glyphs) {
-			const uint64 glyphEdgeCount = glyph.edges.size();
-
+		for (const TrueTypeGlyph& trueTypeGlyph : ttfFile.glyphs) {
 			// TODO: lyah::max(uint64, uint64).
-			if (glyphEdgeCount > maxGlyphEdgeCount) {
-				maxGlyphEdgeCount = glyphEdgeCount;
+			if (trueTypeGlyph.edges.count > maxGlyphEdgeCount) {
+				maxGlyphEdgeCount = trueTypeGlyph.edges.count;
 			}
 		}
 

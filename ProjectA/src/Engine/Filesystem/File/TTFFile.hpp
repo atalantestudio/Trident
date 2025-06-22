@@ -79,13 +79,13 @@ namespace ProjectA {
 		sint16 leftSideBearing;
 	};
 
-	struct Glyph {
-		Point min = {0, 0};
-		Point max = {0, 0};
-		std::vector<Edge> edges;
+	struct TrueTypeGlyph {
+		Point min;
+		Point max;
+		sequence<Edge> edges;
 
 		bool emptyOrUnparsed() const {
-			return edges.empty();
+			return edges.count == 0;
 		}
 	};
 
@@ -102,7 +102,7 @@ namespace ProjectA {
 
 	struct TTFFile {
 		std::unordered_map<uint16, uint32> unicodeMap;
-		sequence<Glyph> glyphs;
+		sequence<TrueTypeGlyph> glyphs;
 		sequence<longHorMetric> hMetrics;
 		sequence<FWord> leftSideBearings;
 		FWord ascent;

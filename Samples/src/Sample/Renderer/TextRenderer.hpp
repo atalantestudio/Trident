@@ -298,7 +298,7 @@ namespace ProjectA {
 
 				for (const char glyph : text) {
 					const uint16 codePoint = static_cast<uint16>(glyph);
-					const TrueTypeGlyph& glyph = font[codePoint];
+					const Glyph& glyph = font[codePoint];
 
 					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * fontSize);
 

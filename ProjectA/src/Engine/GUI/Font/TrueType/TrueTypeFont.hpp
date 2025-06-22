@@ -2,7 +2,7 @@
 
 #include "Engine/BuildProcess/SDFGlyphMapBuildProcess.hpp"
 #include "Engine/GUI/Font/Font.hpp"
-#include "Engine/GUI/Font/TrueType/TrueTypeGlyph.hpp"
+#include "Engine/GUI/Font/TrueType/Glyph.hpp"
 
 namespace ProjectA {
 	class TrueTypeFont : public Font {
@@ -19,16 +19,16 @@ namespace ProjectA {
 
 			const SDFGlyphMap& getGlyphMap() const;
 
-			const sequence<TrueTypeGlyph>& getGlyphs() const;
+			const sequence<Glyph>& getGlyphs() const;
 
-			const TrueTypeGlyph& operator [](uint16 codePoint) const;
+			const Glyph& operator [](uint16 codePoint) const;
 
 		private:
 			sint16 ascent;
 			sint16 descent;
 			sint16 lineGap;
 			std::unordered_map<uint16, uint32> unicodeMap;
-			sequence<TrueTypeGlyph> glyphs;
+			sequence<Glyph> glyphs;
 			std::unordered_map<uint16, uint16> map;
 			SDFGlyphMap sdfGlyphMap;
 	};

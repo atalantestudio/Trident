@@ -47,8 +47,8 @@ namespace ProjectA {
 		y = static_cast<FWord>(T.n * (previousX * (T.b / T.n) + y * (T.d / T.n) + T.f));
 	}
 
-	static void parseGlyph(ByteStream& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, sequence<Glyph>& glyphs, uint16 glyphIndex, uint16 maxComponentDepth) {
-		Glyph& glyph = glyphs[glyphIndex];
+	static void parseGlyph(ByteStream& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, sequence<TrueTypeGlyph>& glyphs, uint16 glyphIndex, uint16 maxComponentDepth) {
+		TrueTypeGlyph& glyph = glyphs[glyphIndex];
 
 		if (!glyph.emptyOrUnparsed()) {
 			return;
@@ -202,12 +202,26 @@ namespace ProjectA {
 					}
 
 					if (signedAreaDouble > 0.0f) {
-						ENGINE_WARN("Glyph [] has a single counter-clockwise contour. Reversing the winding order.", glyphIndex);
+						ENGINE_WARN("Glyph [] has a single counter-clockwise contour. Reversing the contour winding order.", glyphIndex);
 
 						std::reverse(contour.begin(), contour.end());
 					}
 				}
 			#endif
+
+			uint16 edgeCount = 0;
+
+			for (const std::vector<ContourPoint>& contour : contours) {
+				for (uint16 edgePointIndex = 1; edgePointIndex < contour.size(); edgePointIndex += 1) {
+					if (contour[edgePointIndex].onCurve) {
+						edgeCount += 1;
+					}
+				}
+			}
+
+			glyph.edges = sequence<Edge>(edgeCount);
+
+			uint16 edgeIndex = 0;
 
 			for (const std::vector<ContourPoint>& contour : contours) {
 				for (uint16 edgePointIndex = 1; edgePointIndex < contour.size(); edgePointIndex += 1) {
@@ -217,7 +231,7 @@ namespace ProjectA {
 						continue;
 					}
 
-					Edge edge{};
+					Edge& edge = glyph.edges[edgeIndex];
 					edge.end.x = contourPoint.x;
 					edge.end.y = contourPoint.y;
 					edge.curved = !contour[edgePointIndex - 1].onCurve;
@@ -233,12 +247,14 @@ namespace ProjectA {
 						edge.start.y = contour[edgePointIndex - 1].y;
 					}
 
-					glyph.edges.emplace_back(edge);
+					edgeIndex += 1;
 				}
 			}
 		}
 		else {
 			// Parse compound glyph.
+			std::vector<Edge> edges;
+
 			for (uint16 componentIndex = 0; componentIndex < maxComponentDepth; componentIndex += 1) {
 				// Component flag.
 				const uint16 flags = stream.read<uint16>(true);
@@ -302,20 +318,24 @@ namespace ProjectA {
 					stream.seek(offset);
 				}
 
-				Glyph componentGlyph = glyphs[componentGlyphIndex];
+				TrueTypeGlyph componentGlyph = glyphs[componentGlyphIndex];
 
 				for (Edge& edge : componentGlyph.edges) {
 					transformPoint(edge.start.x, edge.start.y, T);
 					transformPoint(edge.end.x, edge.end.y, T);
 					transformPoint(edge.control.x, edge.control.y, T);
 
-					glyph.edges.emplace_back(edge);
+					edges.emplace_back(edge);
 				}
 
 				if (!(flags & BIT(5))) {
 					break;
 				}
 			}
+
+			glyph.edges = sequence<Edge>(edges.size());
+
+			std::copy(edges.begin(), edges.end(), &glyph.edges[0]);
 		}
 	}
 
@@ -454,7 +474,7 @@ namespace ProjectA {
 			glyphLengths[glyphIndex] = glyphOffsets[glyphIndex + 1] - glyphOffsets[glyphIndex];
 		}
 
-		file.glyphs = sequence<Glyph>(numGlyphs);
+		file.glyphs = sequence<TrueTypeGlyph>(numGlyphs);
 
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("glyf"));
