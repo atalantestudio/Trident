@@ -3,7 +3,7 @@
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace ProjectA {
-	static uint8 PaethPredictor(uint8 a, uint8 b, uint8 c) {
+	static sint32 PaethPredictor(uint8 a, uint8 b, uint8 c) {
 		/* const uint8 p = a + b - c;
 		const uint8 pa = abs(p - a);
 		const uint8 pb = abs(p - b);
@@ -31,51 +31,57 @@ namespace ProjectA {
 		if (pb < 0) pb = -pb;
 		if (pc < 0) pc = -pc;
 
-		sint32 paeth = _c;
-
 		if (pa <= pb && pa <= pc) {
-			paeth = _a;
-		}
-		else if (pb <= pc) {
-			paeth = _b;
+			return _a;
 		}
 
-		return paeth;
+		if (pb <= pc) {
+			return _b;
+		}
+
+		return _c;
 	}
 
 	typedef uint8 (*Filter)(uint8 x, uint8 a, uint8 b, uint8 c);
 
 	static uint8 None(uint8 x, uint8 a, uint8 b, uint8 c) {
-		BREAKPOINT();
-
 		return x;
 	}
 
 	static uint8 Sub(uint8 x, uint8 a, uint8 b, uint8 c) {
-		BREAKPOINT();
+		const uint16 sum = x + a;
 
-		return x + a;
+		// BREAKPOINT();
+
+		// return x + a;
+		return static_cast<uint8>(sum % 256);
 	}
 
 	static uint8 Up(uint8 x, uint8 a, uint8 b, uint8 c) {
-		BREAKPOINT();
+		const uint16 sum = x + b;
 
-		return x + b;
+		// BREAKPOINT();
+
+		// return x + b;
+		return static_cast<uint8>(sum % 256);
 	}
 
 	// https://www.w3.org/TR/2003/REC-PNG-20031110/#9Filter-type-3-Average
 	static uint8 Average(uint8 x, uint8 a, uint8 b, uint8 c) {
-		// TODO
-		BREAKPOINT();
+		// BREAKPOINT();
 
-		return x + (uint8) ((uint32) a + (uint32) b / 2);
+		const uint16 sum = a + b;
+
+		return static_cast<uint8>((x + sum / 2) % 256);
 	}
 
 	// https://www.w3.org/TR/2003/REC-PNG-20031110/#9Filter-type-4-Paeth
 	static uint8 Paeth(uint8 x, uint8 a, uint8 b, uint8 c) {
-		BREAKPOINT();
+		const uint32 sum = x + PaethPredictor(a, b, c);
 
-		return x + PaethPredictor(a, b, c);
+		// BREAKPOINT();
+
+		return static_cast<uint8>(sum % 256);
 	}
 
 	static constexpr uint32 ZERO_PIXEL = 0;
@@ -230,59 +236,67 @@ namespace ProjectA {
 
 		file.data = sequence<uint8>(filteredDataSize);
 
-		const uint8* source = unfilteredData;
 		uint8* destination = &file.data[0];
 		const uint8* previousRow = pointer_cast_const<const uint8*>(&ZERO_PIXEL);
-		sint32 previousRowAdvance = 0;
+		uint32 bAdvance = 0;
 
-		for (uint32 i = 0; i < file.extent.height; i += 1) {
+		/* for (uint32 i = 0; i < file.extent.height; i += 1) {
 			for (uint32 j = 1; j < file.extent.width; j += 4) {
 				ENGINE_DEBUG("[] [] [] []", (int) unfilteredData[i * file.extent.height + j + 0], (int) unfilteredData[i * file.extent.height + j + 1], (int) unfilteredData[i * file.extent.height + j + 2], (int) unfilteredData[i * file.extent.height + j + 3]);
 			}
-		}
+		} */
+
+		// The byte being filtered.
+		const uint8* x = unfilteredData;
+
+		// The byte corresponding to x in the pixel immediately before the pixel containing x.
+		// const uint8* a;
+
+		// The byte corresponding to x in the previous scanline.
+		// const uint8* b = pointer_cast_const<const uint8*>(&ZERO_PIXEL);
+
+		// The byte corresponding to b in the pixel immediately before the pixel containing b.
+		// const uint8* c;
 
 		// TODO: Use SIMD when the image has 4 channels.
 		for (uint32 rowIndex = 0; rowIndex < file.extent.height; rowIndex += 1) {
-			const uint8 filterType = *source;
+			const uint8 filterType = *x;
 
 			ENGINE_ASSERT(filterType < 5, "Undefined filter type ([]).", static_cast<sint32>(filterType));
 
-			source += 1;
+			x += 1;
 
-			// The byte being filtered.
-			const uint8* x = source;
+			const uint8* row = destination;
 
-			// The byte corresponding to x in the pixel immediately before the pixel containing x.
-			const uint8* a = pointer_cast_const<const uint8*>(&ZERO_PIXEL);
+			for (uint32 columnIndex = 0; columnIndex < file.extent.width; columnIndex += 1) {
+				const uint8* a = pointer_cast_const<const uint8*>(&ZERO_PIXEL);
+				const uint8* b = row;
+				const uint8* c = pointer_cast_const<const uint8*>(&ZERO_PIXEL);
+				// if (rowIndex == 22 && columnIndex == 18) BREAKPOINT();
 
-			// The byte corresponding to x in the previous scanline.
-			const uint8* b = previousRow;
-
-			// The byte corresponding to b in the pixel immediately before the pixel containing b.
-			const uint8* c = pointer_cast_const<const uint8*>(&ZERO_PIXEL);
-
-			uint8* row = destination;
-
-			for (uint32 colunmIndex = 0; colunmIndex < file.extent.width; colunmIndex += 1) {
 				for (uint8 channelIndex = 0; channelIndex < channelCount; channelIndex += 1) {
 					destination[channelIndex] = FILTERS[filterType](*x, *a, *b, *c);
 
-					c = b;
-					b += previousRowAdvance;
+					c += 1;
+					b += bAdvance;
 					a += 1;
 					x += 1;
 				}
 
-				ENGINE_INFO("[] [] [] []", (int) destination[0], (int) destination[1], (int) destination[2], (int) destination[3]);
-
+				c = b;
 				a = destination;
 
 				destination += channelCount;
-				source += channelCount;
 			}
 
 			previousRow = row;
-			previousRowAdvance = 1;
+			bAdvance = 1;
+
+			if (rowIndex == 22) {
+				// BREAKPOINT();
+
+				// break;
+			}
 		}
 
 		return file;

@@ -19,6 +19,9 @@ namespace ProjectA {
 
 				glBindFramebuffer(GL_FRAMEBUFFER, glFramebuffer.object);
 
+				glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT);
+
 				// TODO: Restore clear values.
 				/* for (uint32 clearValueIndex = 0; clearValueIndex < descriptor.clearValues.size(); clearValueIndex += 1) {
 					const ClearValue& clearValue = descriptor.clearValues[clearValueIndex];
