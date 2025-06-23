@@ -3,10 +3,10 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 // PNG test images:
-// - ../ProjectA/src/Asset/Image/icon-black.png		OK OK
-// - ../ProjectA/src/Asset/Image/icon-white.png		OK OK
-// - ../ProjectA/src/Asset/Image/Quiver.png			OK OK
-// - Asset/Image/qoi_test_images/dice.png			OK Corrupted
+// - ../ProjectA/src/Asset/Image/icon-black.png		OK
+// - ../ProjectA/src/Asset/Image/icon-white.png		OK
+// - ../ProjectA/src/Asset/Image/Quiver.png			OK
+// - Asset/Image/qoi_test_images/dice.png			OK
 // - Asset/Image/qoi_test_images/edgecase.png		OK
 // - Asset/Image/qoi_test_images/kodim10.png		OK
 // - Asset/Image/qoi_test_images/kodim23.png		OK
@@ -16,7 +16,7 @@
 // - Asset/Image/qoi_test_images/wikipedia_008.png	OK
 // - Asset/Image/Baboon.png							OK
 // - Asset/Image/Cameraman.png						OK
-// - Asset/Image/checkerboard_cm0.png				OK OK
+// - Asset/Image/checkerboard_cm0.png				OK
 // - Asset/Image/checkerboard_cm9.png				OK
 // - Asset/Image/checkerboard1.png					OK
 // - Asset/Image/checkerboard2.png					OK
@@ -32,8 +32,8 @@
 // - Asset/Image/test_inflate_1b.png				OK
 // - Asset/Image/test_inflate_2.png					OK
 // - Asset/Image/test_inflate_9.png					OK
-// - Asset/Image/test_inflate2_0.png				No errors but the colors seem wrong
-// - Asset/Image/test_inflate2_9.png				No errors but the colors seem wrong
+// - Asset/Image/test_inflate2_0.png				OK
+// - Asset/Image/test_inflate2_9.png				OK
 // - Asset/Image/Zelda.png							OK
 
 // QOI test images:
@@ -50,7 +50,7 @@ namespace ProjectA {
 	class ImageRenderer : public Renderer {
 		public:
 			void build() override {
-				const Stream stream = Filesystem::openStream("Asset/Image/qoi_test_images/edgecase.png");
+				const Stream stream = Filesystem::openStream("Asset/Image/test_inflate2_9.png");
 				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(stream);
 				// const File<FileFormat::QOI> file = Filesystem::decode<FileFormat::QOI>(stream);
 
