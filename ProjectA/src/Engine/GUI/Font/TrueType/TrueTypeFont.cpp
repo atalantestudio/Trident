@@ -1,25 +1,25 @@
 #include "pch.hpp"
 
-#include "Engine/Filesystem/File/TTFFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/GUI/Font/TrueType/TrueTypeFont.hpp"
 
 namespace ProjectA {
-	TrueTypeFont::TrueTypeFont(std::string_view ttfFilePath) {
-		const TTFFile ttfFile = Filesystem::openTemporary<TTFFile>(ttfFilePath);
+	TrueTypeFont::TrueTypeFont(std::string_view path) {
+		const Stream stream = Filesystem::openStream(path);
+		const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(stream);
 
-		sdfGlyphMap = SDFGlyphMapBuildProcess::build(ttfFile);
+		sdfGlyphMap = SDFGlyphMapBuildProcess::build(file);
 
-		ascent = ttfFile.ascent;
-		descent = ttfFile.descent;
-		lineGap = ttfFile.lineGap;
-		unicodeMap = ttfFile.unicodeMap;
+		ascent = file.ascent;
+		descent = file.descent;
+		lineGap = file.lineGap;
+		unicodeMap = file.unicodeMap;
 
-		glyphs = sequence<Glyph>(ttfFile.glyphs.count);
+		glyphs = sequence<Glyph>(file.glyphs.count);
 
-		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.count; glyphIndex += 1) {
-			const TrueTypeGlyph& trueTypeGlyph = ttfFile.glyphs[glyphIndex];
-			const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
+		for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count; glyphIndex += 1) {
+			const TrueTypeGlyph& trueTypeGlyph = file.glyphs[glyphIndex];
+			const longHorMetric& hMetric = file.hMetrics[glyphIndex];
 			const SDFGlyph& sdfGlyph = sdfGlyphMap.glyphs[glyphIndex];
 
 			Glyph& glyph = glyphs[glyphIndex];

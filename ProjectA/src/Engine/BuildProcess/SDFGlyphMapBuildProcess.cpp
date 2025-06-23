@@ -9,14 +9,14 @@ namespace ProjectA {
 	static constexpr uint32 GLYPH_SUBIMAGE_DIMENSION = 64;
 	static constexpr uint32 SPREAD_FACTOR = 0;
 
-	SDFGlyphMap SDFGlyphMapBuildProcess::build(const TTFFile& ttfFile) {
-		ENGINE_ASSERT(ttfFile.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
+	SDFGlyphMap SDFGlyphMapBuildProcess::build(const File<FileFormat::TTF>& file) {
+		ENGINE_ASSERT(file.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
 		SDFGlyphMap sdfGlyphMap;
 		sdfGlyphMap.spreadFactor = SPREAD_FACTOR;
 		sdfGlyphMap.extent.width = 2048;
 		sdfGlyphMap.extent.height = 2048;
-		sdfGlyphMap.glyphs = sequence<SDFGlyph>(ttfFile.glyphs.count);
+		sdfGlyphMap.glyphs = sequence<SDFGlyph>(file.glyphs.count);
 
 		const ref<Device> device = Renderer::getDevice();
 		const ref<Queue> computeQueue = device->getQueue(QueueFamilyCapability::COMPUTE);
@@ -30,7 +30,7 @@ namespace ProjectA {
 		ref<CommandEncoder> commandEncoder;
 		ref<CommandBuffer> commandBuffer;
 
-		const uint64 glyphBufferSize = computeMaxGlyphByteSize(ttfFile);
+		const uint64 glyphBufferSize = computeMaxGlyphByteSize(file);
 
 		constexpr uint64 fontBufferSize = sizeof(FontStorage);
 
@@ -40,8 +40,8 @@ namespace ProjectA {
 
 		fontMappedRange->outputGlyphSize = GLYPH_SUBIMAGE_DIMENSION;
 		fontMappedRange->spreadFactor = SPREAD_FACTOR;
-		fontMappedRange->ascent = ttfFile.ascent;
-		fontMappedRange->descent = ttfFile.descent;
+		fontMappedRange->ascent = file.ascent;
+		fontMappedRange->descent = file.descent;
 
 		fontStagingBuffer->unmap();
 
@@ -215,15 +215,15 @@ namespace ProjectA {
 		float32 yOffset = 0;
 
 		const Extent3D& glyphMapExtent = glyphMapImage->getExtent();
-		const float32 lineHeight = static_cast<float32>(ttfFile.ascent - ttfFile.descent);
+		const float32 lineHeight = static_cast<float32>(file.ascent - file.descent);
 
 		commandEncoder = computeQueue->createCommandEncoder(autoCommandBufferDescriptor);
 
 		const ref<Fence> writeBufferFence = Renderer::createFence();
 
-		for (uint16 glyphIndex = 0; glyphIndex < ttfFile.glyphs.count; glyphIndex += 1) {
-			const TrueTypeGlyph& trueTypeGlyph = ttfFile.glyphs[glyphIndex];
-			const longHorMetric& hMetric = ttfFile.hMetrics[glyphIndex];
+		for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count; glyphIndex += 1) {
+			const TrueTypeGlyph& trueTypeGlyph = file.glyphs[glyphIndex];
+			const longHorMetric& hMetric = file.hMetrics[glyphIndex];
 
 			SDFGlyph& sdfGlyph = sdfGlyphMap.glyphs[glyphIndex];
 			sdfGlyph.invisible = trueTypeGlyph.emptyOrUnparsed();
@@ -357,10 +357,10 @@ namespace ProjectA {
 		return sdfGlyphMap;
 	}
 
-	uint64 SDFGlyphMapBuildProcess::computeMaxGlyphByteSize(const TTFFile& ttfFile) {
+	uint64 SDFGlyphMapBuildProcess::computeMaxGlyphByteSize(const File<FileFormat::TTF>& file) {
 		uint64 maxGlyphEdgeCount = 0;
 
-		for (const TrueTypeGlyph& trueTypeGlyph : ttfFile.glyphs) {
+		for (const TrueTypeGlyph& trueTypeGlyph : file.glyphs) {
 			// TODO: lyah::max(uint64, uint64).
 			if (trueTypeGlyph.edges.count > maxGlyphEdgeCount) {
 				maxGlyphEdgeCount = trueTypeGlyph.edges.count;

@@ -175,6 +175,7 @@ O pointer_cast(I pointer) {
 	return static_cast<O>(static_cast<void*>(pointer));
 }
 
+// TODO: Merge with pointer_cast.
 template<typename O, typename I>
 O pointer_cast_const(I pointer) {
 	return static_cast<O>(static_cast<const void*>(pointer));

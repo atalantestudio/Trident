@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Filesystem/File/File.hpp"
+#include "Engine/Filesystem/File.hpp"
 
 namespace ProjectA {
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
@@ -100,7 +100,8 @@ namespace ProjectA {
 		float32 n = 0.0f;
 	};
 
-	struct TTFFile {
+	template<>
+	struct File<FileFormat::TTF> {
 		std::unordered_map<uint16, uint32> unicodeMap;
 		sequence<TrueTypeGlyph> glyphs;
 		sequence<longHorMetric> hMetrics;

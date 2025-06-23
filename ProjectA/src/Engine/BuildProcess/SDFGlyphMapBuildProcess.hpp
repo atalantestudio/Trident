@@ -34,10 +34,10 @@ namespace ProjectA {
 	// TODO: Extend Process.
 	class SDFGlyphMapBuildProcess {
 		public:
-			static SDFGlyphMap build(const TTFFile& ttfFile);
+			static SDFGlyphMap build(const File<FileFormat::TTF>& file);
 
 		private:
-			static uint64 computeMaxGlyphByteSize(const TTFFile& ttfFile);
+			static uint64 computeMaxGlyphByteSize(const File<FileFormat::TTF>& file);
 
 		private:
 			struct FontStorage {

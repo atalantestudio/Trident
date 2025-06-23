@@ -50,8 +50,9 @@ namespace ProjectA {
 	class ImageRenderer : public Renderer {
 		public:
 			void build() override {
-				const PNGFile file = Filesystem::openTemporary<PNGFile>("Asset/Image/test_inflate_0.png");
-				// const ImageFile file = Filesystem::openImage<FileFormat::QOI>("Asset/Image/qoi_test_images/kodim10.qoi");
+				const Stream stream = Filesystem::openStream("Asset/Image/test_inflate2_0.png");
+				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(stream);
+				// const File<FileFormat::QOI> file = Filesystem::decode<FileFormat::QOI>(stream);
 
 				const ref<Device> device = getDevice();
 

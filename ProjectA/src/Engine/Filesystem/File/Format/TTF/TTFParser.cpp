@@ -353,15 +353,13 @@ namespace ProjectA {
 
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
 	template<>
-	TTFFile Filesystem::openTemporary(std::string_view path) {
-		const File baseFile = openTemporary<File>(path);
+	File<FileFormat::TTF> Filesystem::decode(const Stream& stream) {
+		File<FileFormat::TTF> file;
 
-		TTFFile file;
-
-		ByteStream stream(baseFile.rawData, baseFile.rawData.count);
+		ByteStream byteStream = stream.asByteStream();
 
 		OffsetSubtable offsetSubtable{};
-		offsetSubtable.scalerType = stream.read<uint32>(true);
+		offsetSubtable.scalerType = byteStream.read<uint32>(true);
 
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html#ScalerTypeNote
 		switch (offsetSubtable.scalerType) {
@@ -382,31 +380,31 @@ namespace ProjectA {
 				return file;
 		}
 
-		offsetSubtable.numTables = stream.read<uint16>(true);
-		offsetSubtable.searchRange = stream.read<uint16>(true);
-		offsetSubtable.entrySelector = stream.read<uint16>(true);
-		offsetSubtable.rangeShift = stream.read<uint16>(true);
+		offsetSubtable.numTables = byteStream.read<uint16>(true);
+		offsetSubtable.searchRange = byteStream.read<uint16>(true);
+		offsetSubtable.entrySelector = byteStream.read<uint16>(true);
+		offsetSubtable.rangeShift = byteStream.read<uint16>(true);
 
 		std::unordered_map<uint32, uint32> tableOffsetMap;
 
 		for (uint16 tableIndex = 0; tableIndex < offsetSubtable.numTables; tableIndex += 1) {
 			TableDirectory tableDirectory{};
-			tableDirectory.tag = stream.read<uint32>();
+			tableDirectory.tag = byteStream.read<uint32>();
 
 			#ifdef TTF_PARSER_VERIFY_CHECKSUM
 				// TODO: Implement this macro.
-				// const uint32 readChecksum = stream.read<uint32>(true);
+				// const uint32 readChecksum = byteStream.read<uint32>(true);
 			#else
-				stream.jump(sizeof(uint32));
+				byteStream.jump(sizeof(uint32));
 			#endif
 
-			tableDirectory.offset = stream.read<uint32>(true);
-			tableDirectory.length = stream.read<uint32>(true);
+			tableDirectory.offset = byteStream.read<uint32>(true);
+			tableDirectory.length = byteStream.read<uint32>(true);
 
 			tableOffsetMap.insert(std::make_pair(tableDirectory.tag, tableDirectory.offset));
 
 			/* #ifdef TTF_PARSER_VERIFY_CHECKSUM
-				const uint32* start = static_cast<const uint32*>(static_cast<const void*>(stream.getBytePosition() - stream.getByteOffset()));
+				const uint32* start = static_cast<const uint32*>(static_cast<const void*>(byteStream.getBytePosition() - byteStream.getByteOffset()));
 				const uint32* position = start + tableDirectory.offset;
 				const uint32 calculatedChecksum = calculateTableChecksum(position, tableDirectory.length);
 
@@ -423,10 +421,10 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'head' table.");
 
-		stream.seek(tableOffset->second + 50);
+		byteStream.seek(tableOffset->second + 50);
 
 		// 0 for short offsets, 1 for long.
-		const sint16 indexToLocFormat = stream.read<sint16>(true);
+		const sint16 indexToLocFormat = byteStream.read<sint16>(true);
 
 		ENGINE_ASSERT(indexToLocFormat == 0, "IndexToLocFormat = [] is not supported.", indexToLocFormat);
 
@@ -435,13 +433,13 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'maxp' table.");
 
-		stream.seek(tableOffset->second + 4);
+		byteStream.seek(tableOffset->second + 4);
 
-		const uint16 numGlyphs = stream.read<uint16>(true);
+		const uint16 numGlyphs = byteStream.read<uint16>(true);
 
-		stream.jump(24);
+		byteStream.jump(24);
 
-		const uint16 maxComponentDepth = stream.read<uint16>(true);
+		const uint16 maxComponentDepth = byteStream.read<uint16>(true);
 
 		// The actual local offset divided by 2 is stored. The value of n is the number of glyphs in the font + 1.
 		// The number of glyphs in the font is found in the maximum profile table.
@@ -453,10 +451,10 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'loca' table.");
 
-		stream.seek(tableOffset->second);
+		byteStream.seek(tableOffset->second);
 
 		for (uint16& glyphOffset : glyphOffsets) {
-			glyphOffset = stream.read<uint16>(true) * 2;
+			glyphOffset = byteStream.read<uint16>(true) * 2;
 		}
 
 		const uint16 regCount = static_cast<uint16>(glyphLengths.count / 8);
@@ -493,7 +491,7 @@ namespace ProjectA {
 				continue;
 			}
 
-			parseGlyph(stream, tableOffset->second, glyphOffsets, file.glyphs, glyphIndex, maxComponentDepth);
+			parseGlyph(byteStream, tableOffset->second, glyphOffsets, file.glyphs, glyphIndex, maxComponentDepth);
 		}
 
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6hhea.html
@@ -501,34 +499,34 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'hhea' table.");
 
-		stream.seek(tableOffset->second + 4);
+		byteStream.seek(tableOffset->second + 4);
 
-		file.ascent = stream.read<FWord>(true);
-		file.descent = stream.read<FWord>(true);
-		file.lineGap = stream.read<FWord>(true);
+		file.ascent = byteStream.read<FWord>(true);
+		file.descent = byteStream.read<FWord>(true);
+		file.lineGap = byteStream.read<FWord>(true);
 
-		stream.jump(24);
+		byteStream.jump(24);
 
-		const uint16 numOfLongHorMetrics = stream.read<uint16>(true);
+		const uint16 numOfLongHorMetrics = byteStream.read<uint16>(true);
 
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6hmtx.html
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("hmtx"));
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'hmtx' table.");
 
-		stream.seek(tableOffset->second);
+		byteStream.seek(tableOffset->second);
 
 		file.hMetrics = sequence<longHorMetric>(numOfLongHorMetrics);
 
 		for (longHorMetric& hMetric : file.hMetrics) {
-			hMetric.advanceWidth = stream.read<uint16>(true);
-			hMetric.leftSideBearing = stream.read<sint16>(true);
+			hMetric.advanceWidth = byteStream.read<uint16>(true);
+			hMetric.leftSideBearing = byteStream.read<sint16>(true);
 		}
 
 		file.leftSideBearings = sequence<FWord>(numGlyphs - numOfLongHorMetrics);
 
 		for (FWord& leftSideBearing : file.leftSideBearings) {
-			leftSideBearing = stream.read<FWord>(true);
+			leftSideBearing = byteStream.read<FWord>(true);
 		}
 
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6cmap.html
@@ -536,35 +534,35 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'cmap' table.");
 
-		stream.seek(tableOffset->second + 2);
+		byteStream.seek(tableOffset->second + 2);
 
 		// Number of encoding subtables.
-		const uint16 numberSubtables = stream.read<uint16>(true);
+		const uint16 numberSubtables = byteStream.read<uint16>(true);
 
-		uint64 subtableOffset = stream.getByteOffset();
+		uint64 subtableOffset = byteStream.getByteOffset();
 		uint64 unicodeTableOffset = 0;
 
 		// Find Unicode table.
 		for (uint16 subtableIndex = 0; subtableIndex < numberSubtables; subtableIndex += 1) {
-			stream.seek(subtableOffset);
+			byteStream.seek(subtableOffset);
 
 			// Platform identifier.
-			const uint16 platformID = stream.read<uint16>(true);
+			const uint16 platformID = byteStream.read<uint16>(true);
 
 			// Skip platformSpecificID.
-			stream.jump(sizeof(uint16));
+			byteStream.jump(sizeof(uint16));
 
-			const uint32 offset = stream.read<uint32>(true);
+			const uint32 offset = byteStream.read<uint32>(true);
 
 			if (platformID == 0) {
-				subtableOffset = stream.getByteOffset();
+				subtableOffset = byteStream.getByteOffset();
 
-				stream.seek(tableOffset->second + offset);
+				byteStream.seek(tableOffset->second + offset);
 
-				const uint16 format = stream.read<uint16>(true);
+				const uint16 format = byteStream.read<uint16>(true);
 
 				if (format == 4) {
-					unicodeTableOffset = stream.getByteOffset();
+					unicodeTableOffset = byteStream.getByteOffset();
 
 					break;
 				}
@@ -577,48 +575,48 @@ namespace ProjectA {
 
 		// Parse Unicode table.
 		{
-			stream.seek(unicodeTableOffset);
+			byteStream.seek(unicodeTableOffset);
 
-			const uint16 length = stream.read<uint16>(true);
-			const uint16 language = stream.read<uint16>(true);
-			const uint16 segCountX2 = stream.read<uint16>(true);
+			const uint16 length = byteStream.read<uint16>(true);
+			const uint16 language = byteStream.read<uint16>(true);
+			const uint16 segCountX2 = byteStream.read<uint16>(true);
 			const uint16 segCount = segCountX2 / 2;
-			const uint16 searchRange = stream.read<uint16>(true);
-			const uint16 entrySelector = stream.read<uint16>(true);
-			const uint16 rangeShift = stream.read<uint16>(true);
+			const uint16 searchRange = byteStream.read<uint16>(true);
+			const uint16 entrySelector = byteStream.read<uint16>(true);
+			const uint16 rangeShift = byteStream.read<uint16>(true);
 
 			sequence<uint16> endCodes(segCount);
 
 			for (uint16& endCode : endCodes) {
-				endCode = stream.read<uint16>(true);
+				endCode = byteStream.read<uint16>(true);
 			}
 
-			stream.jump(sizeof(uint16));
+			byteStream.jump(sizeof(uint16));
 
 			sequence<uint16> startCodes(segCount);
 
 			for (uint16& startCode : startCodes) {
-				startCode = stream.read<uint16>(true);
+				startCode = byteStream.read<uint16>(true);
 			}
 
 			sequence<uint16> idDeltas(segCount);
 
 			for (uint16& idDelta : idDeltas) {
-				idDelta = stream.read<uint16>(true);
+				idDelta = byteStream.read<uint16>(true);
 			}
 
 			std::vector<uint16> idRangeOffsets(segCount);
 
 			for (uint16& idRangeOffset : idRangeOffsets) {
-				idRangeOffset = stream.read<uint16>(true);
+				idRangeOffset = byteStream.read<uint16>(true);
 			}
 
-			const uint64 glyphIndexArrayCount = (length - (stream.getByteOffset() - unicodeTableOffset)) / 2;
+			const uint64 glyphIndexArrayCount = (length - (byteStream.getByteOffset() - unicodeTableOffset)) / 2;
 
 			idRangeOffsets.resize(segCount + glyphIndexArrayCount);
 
 			for (uint32 glyphIndexIndex = 0; glyphIndexIndex < glyphIndexArrayCount; glyphIndexIndex += 1) {
-				idRangeOffsets[segCount + glyphIndexIndex] = stream.read<uint16>(true);
+				idRangeOffsets[segCount + glyphIndexIndex] = byteStream.read<uint16>(true);
 			}
 
 			for (uint16 segmentIndex = 0; segmentIndex < segCount; segmentIndex += 1) {

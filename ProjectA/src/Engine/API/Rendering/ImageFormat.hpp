@@ -19,4 +19,19 @@ namespace ProjectA {
 			imageFormat == ImageFormat::D24_UNORM_S8_UINT
 		);
 	}
+
+	static ImageFormat findUnormFormat(uint8 channelCount) {
+		switch (channelCount) {
+			case 1:
+				return ImageFormat::R8_UNORM;
+			case 3:
+				return ImageFormat::R8G8B8_UNORM;
+			case 4:
+				return ImageFormat::R8G8B8A8_UNORM;
+			default:
+				ENGINE_ASSERT(false, "Unsupported channel count for *UNORM format.");
+
+				return static_cast<ImageFormat>(0);
+		}
+	}
 }

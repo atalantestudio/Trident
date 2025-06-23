@@ -1,8 +1,6 @@
 #include "pch.hpp"
 
 #include "Engine/Compression/HuffmanCodeDictionary.hpp"
-#include "Engine/Filesystem/File/File.hpp"
-#include "Engine/Filesystem/File/PNGFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
@@ -15,7 +13,7 @@ namespace ProjectA {
 		PAETH = 4,
 	};
 
-	static void readIHDRChunk(ByteStream& stream, PNGFile& file) {
+	/* static void readIHDRChunk(ByteStream& stream, File<FileFormat::PNG>& file) {
 		file.extent.width = stream.read<uint32>(true);
 
 		ENGINE_ASSERT(file.extent.width > 0, "The width must be > 0.");
@@ -63,9 +61,9 @@ namespace ProjectA {
 		// Assertions for values currently unhandled by the engine.
 		ENGINE_ASSERT(file.bitDepth == 8, "Unhandled bit depth ([]).", static_cast<sint32>(file.bitDepth));
 		ENGINE_ASSERT(file.colorType == 0 || file.colorType == 2 || file.colorType == 6, "Unhandled color type ([]).", static_cast<sint32>(file.colorType));
-	}
+	} */
 
-	static void readIDATChunk(ByteStream& stream, uint32 chunkByteLength, std::vector<uint8>& compressedData) {
+	/* static void readIDATChunk(ByteStream& stream, uint32 chunkByteLength, std::vector<uint8>& compressedData) {
 		compressedData.resize(compressedData.size() + chunkByteLength);
 
 		std::copy(
@@ -76,9 +74,9 @@ namespace ProjectA {
 
 		// TODO: Skip chunk data for the moment.
 		stream.jump(chunkByteLength);
-	}
+	} */
 
-	static void readChunk(ByteStream& stream, PNGFile& file, std::vector<uint8>& compressedData) {
+	/* static void readChunk(ByteStream& stream, File<FileFormat::PNG>& file, std::vector<uint8>& compressedData) {
 		const uint32 ByteLength = stream.read<uint32>(true);
 		const uint32 Type = stream.read<uint32>();
 
@@ -106,7 +104,7 @@ namespace ProjectA {
 		// TODO: Check CRC. See https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix.
 		// const uint32 CRC = stream.read<uint32>(true);
 		stream.jump(sizeof(uint32));
-	}
+	} */
 
 	static uint8 applyAverageFilter(const uint8* x, uint8* a, uint8* b, uint8 channelIndex) {
 		const uint32 average = ((uint32) a[channelIndex] + (uint32) b[channelIndex]) / 2;
@@ -141,20 +139,17 @@ namespace ProjectA {
 		return x[channelIndex] + static_cast<uint8>(paeth);
 	}
 
-	template<>
-	PNGFile Filesystem::openTemporary(std::string_view path) {
-		const File baseFile = openTemporary<File>(path);
+	/* template<>
+	File<FileFormat::PNG> Filesystem::decode(const Stream& stream) {
+		File<FileFormat::PNG> file;
+		ByteStream byteStream = stream.asByteStream();
 
-		ByteStream stream(baseFile.rawData, baseFile.size);
-
-		ENGINE_ASSERT(stream.read<uint64>(true) == 0x89504E470D0A1A0A, "Invalid PNG file signature.");
-
-		PNGFile file;
+		ENGINE_ASSERT(byteStream.read<uint64>(true) == 0x89504E470D0A1A0A, "Invalid PNG file signature.");
 
 		std::vector<uint8> compressedData;
 
-		while (stream.getRemainingByteSize() > 0) {
-			readChunk(stream, file, compressedData);
+		while (byteStream.getRemainingByteSize() > 0) {
+			readChunk(byteStream, file, compressedData);
 		}
 
 		uint8 channelCount;
@@ -184,9 +179,9 @@ namespace ProjectA {
 				break;
 		}
 
-		const uint32 uncompressedSize = file.extent.width * file.extent.height * channelCount + (file.extent.height * 1);
-
 		BitStream bitStream(compressedData.data(), compressedData.size());
+
+		const uint32 uncompressedSize = file.extent.width * file.extent.height * channelCount + (file.extent.height * 1);
 
 		const sequence<uint8> unfilteredData = bitStream.inflate(uncompressedSize);
 
@@ -295,5 +290,5 @@ namespace ProjectA {
 		}
 
 		return file;
-	}
+	} */
 }

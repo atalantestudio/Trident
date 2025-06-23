@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/Filesystem/File/File.hpp"
-
 namespace ProjectA {
 	class PropertyFile final {
 		private:

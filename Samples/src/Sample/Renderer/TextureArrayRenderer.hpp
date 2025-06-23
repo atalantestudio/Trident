@@ -8,7 +8,7 @@ namespace ProjectA {
 			void build() override {
 				const ref<Device> device = getDevice();
 
-				std::array<PNGFile, ASSET_PATHS.size()> assets;
+				std::array<File<FileFormat::PNG>, ASSET_PATHS.size()> assets;
 				uint64 size = 0;
 
 				// 1. Load assets.
@@ -16,7 +16,9 @@ namespace ProjectA {
 					for (uint32 assetIndex = 0; assetIndex < assets.size(); assetIndex += 1) {
 						const std::string_view path = ASSET_PATHS[assetIndex];
 
-						assets[assetIndex] = Filesystem::openTemporary<PNGFile>(path);
+						const Stream stream = Filesystem::openStream(path);
+
+						assets[assetIndex] = Filesystem::decode<FileFormat::PNG>(stream);
 
 						size += assets[assetIndex].data.count;
 					}
@@ -30,7 +32,7 @@ namespace ProjectA {
 					uint8* textureArrayMappedRange = textureArrayStagingBuffer->map<uint8>(0, size);
 
 					for (uint32 assetIndex = 0; assetIndex < assets.size(); assetIndex += 1) {
-						const PNGFile& asset = assets[assetIndex];
+						const File<FileFormat::PNG>& asset = assets[assetIndex];
 
 						std::copy(asset.data.begin(), asset.data.end(), textureArrayMappedRange);
 

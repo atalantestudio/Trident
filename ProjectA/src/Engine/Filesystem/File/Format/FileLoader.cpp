@@ -1,18 +1,18 @@
 #include "pch.hpp"
 
-#include "Engine/Filesystem/File/File.hpp"
+#include "Engine/Filesystem/File/BaseFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace ProjectA {
 	template<>
-	File Filesystem::openTemporary(std::string_view path) {
+	BaseFile Filesystem::openTemporary(std::string_view path) {
 		std::ifstream stream(path.data(), std::ios::binary);
 
 		ENGINE_ASSERT(stream.is_open(), "Could not open file \"[]\".", path);
 
 		const std::filesystem::path absolutePath = std::filesystem::absolute(path);
 
-		File file;
+		BaseFile file;
 		file.name = absolutePath.filename().string();
 		file.absolutePath = absolutePath.string();
 

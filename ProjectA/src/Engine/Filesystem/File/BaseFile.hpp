@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	struct File {
+	struct BaseFile {
 		// File name, including extension.
 		std::string name;
 

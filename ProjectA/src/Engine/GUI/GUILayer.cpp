@@ -2,7 +2,7 @@
 
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/Application.hpp"
-#include "Engine/Filesystem/File/PNGFile.hpp"
+#include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/GUI/GUILayer.hpp"
 
@@ -66,7 +66,8 @@ namespace ProjectA {
 	ImageID GUILayer::loadImage(std::string_view path) {
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
-		const PNGFile file = Filesystem::openTemporary<PNGFile>(path);
+		const Stream stream = Filesystem::openStream(path);
+		const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(stream);
 
 		TextureArrayLayer imageLayer;
 		imageLayer.width = file.extent.width;

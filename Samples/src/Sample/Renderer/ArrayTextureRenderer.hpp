@@ -249,7 +249,8 @@ namespace ProjectA {
 			ref<Image> loadImage(std::string_view path) {
 				const ref<Device> device = getDevice();
 
-				const PNGFile file = Filesystem::openTemporary<PNGFile>(path);
+				const Stream stream = Filesystem::openStream(path);
+				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(stream);
 				const uint64 imageBufferSize = file.data.count * sizeof(uint8);
 
 				const ref<Buffer> imageStagingBuffer = createStagingBuffer(imageBufferSize);

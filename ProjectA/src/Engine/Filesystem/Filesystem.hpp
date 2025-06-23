@@ -1,42 +1,50 @@
 #pragma once
 
-#include "Engine/Filesystem/FileFormat.hpp"
+#include "Engine/Filesystem/File.hpp"
 #include "Engine/Filesystem/ImageFile.hpp"
 #include "Engine/Filesystem/OpenMode.hpp"
+#include "Engine/Filesystem/Stream/Stream.hpp"
 #include "Engine/Filesystem/Reader.hpp"
 #include "Engine/Filesystem/Writer.hpp"
 
 namespace ProjectA {
-	class Filesystem {
-		public:
-			static std::filesystem::path getProjectRootDirectory();
+	namespace Filesystem {
+		std::filesystem::path getProjectRootDirectory();
 
-			static std::filesystem::path getCurrentDirectory();
+		std::filesystem::path getCurrentDirectory();
 
-			// Returns the data of the file at the provided path as a byte sequence.
-			// `path` is relative to the working directory.
-			static sequence<uint8> openBuffer(std::string_view path);
+		// Returns the data of the file at the provided path as a byte sequence.
+		// `path` is relative to the working directory.
+		sequence<uint8> openBuffer(std::string_view path);
 
-			// Opens a file for temporary reading or writing.
-			// `path` is relative to the working directory.
-			template<typename File>
-			static File openTemporary(std::string_view path);
+		Stream openStream(std::string_view path);
 
-			// Opens a file for permanent reading or writing.
-			// `path` is relative to the working directory.
-			// The returned value is the file pointer. It must be managed by the application.
-			template<typename File/*, OpenMode OpenMode*/>
-			static File* open(std::string_view path);
+		// Opens a file for temporary reading or writing.
+		// `path` is relative to the working directory.
+		template<typename File>
+		File openTemporary(std::string_view path);
 
-			static Reader openReader(std::string_view path);
+		// Opens a file for permanent reading or writing.
+		// `path` is relative to the working directory.
+		// The returned value is the file pointer. It must be managed by the application.
+		template<typename File/*, OpenMode OpenMode*/>
+		File* open(std::string_view path);
 
-			static Writer openWriter(std::string_view path);
+		Reader openReader(std::string_view path);
 
-			template<FileFormat FileFormat>
-			static ImageFile openImage(std::string_view path) {
-				const sequence<uint8> buffer = openBuffer(path);
+		Writer openWriter(std::string_view path);
 
-				return Decoder::decode<FileFormat>(buffer);
-			}
+		template<FileFormat FileFormat>
+		ImageFile openImage(std::string_view path) {
+			const sequence<uint8> buffer = openBuffer(path);
+
+			return Decoder::decode<FileFormat>(buffer);
+		}
+
+		template<FileFormat FileFormat>
+		File<FileFormat> encode(const Stream& stream);
+
+		template<FileFormat FileFormat>
+		File<FileFormat> decode(const Stream& stream);
 	};
 }

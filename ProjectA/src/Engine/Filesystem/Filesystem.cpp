@@ -22,10 +22,16 @@ namespace ProjectA {
 
 		sequence<uint8> buffer(count);
 
-		stream.read(static_cast<char*>(static_cast<void*>(buffer)), count);
+		stream.read(pointer_cast<char*>(&buffer[0]), count);
 		stream.close();
 
 		return buffer;
+	}
+
+	Stream Filesystem::openStream(std::string_view path) {
+		const sequence<uint8> buffer = openBuffer(path);
+
+		return Stream(buffer);
 	}
 
 	Reader Filesystem::openReader(std::string_view path) {
