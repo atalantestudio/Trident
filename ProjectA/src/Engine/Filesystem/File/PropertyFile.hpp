@@ -5,7 +5,14 @@ namespace ProjectA {
 		private:
 			template<typename T>
 			static T parseValueString(const std::string& valueString, std::string_view propertyName) {
-				return static_cast<T>(std::stoi(valueString));
+				uint32 value = 0;
+
+				for (const char character : valueString) {
+					value *= 10;
+					value += character - '0';
+				}
+
+				return static_cast<T>(value);
 			}
 
 			template<>
