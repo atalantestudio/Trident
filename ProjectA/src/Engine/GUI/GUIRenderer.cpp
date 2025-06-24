@@ -10,7 +10,7 @@ namespace ProjectA {
 		ColorAttachment colorAttachment{};
 		colorAttachment.format = surface->getFormat();
 		colorAttachment.sampleCount = 4;
-		colorAttachment.loadOperation = LoadOperation::LOAD;
+		colorAttachment.loadOperation = LoadOperation::CLEAR;
 		colorAttachment.storeOperation = StoreOperation::STORE;
 
 		SubpassDescriptor subpassDescriptor{};
@@ -245,6 +245,11 @@ namespace ProjectA {
 		ColorBlendAttachment opaqueColorBlendAttachment{};
 		opaqueColorBlendAttachment.blend = false;
 
+		ColorBlendAttachment transparentColorBlendAttachment{};
+		transparentColorBlendAttachment.blend = true;
+		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
+		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+
 		RenderPipelineDescriptor subcomponentRenderPipelineDescriptor;
 		subcomponentRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		subcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, subcomponentInputBinding};
@@ -256,7 +261,8 @@ namespace ProjectA {
 		subcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		subcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
 		subcomponentRenderPipelineDescriptor.minSampleShading = 0.5f;
-		subcomponentRenderPipelineDescriptor.colorBlendState.attachments = {opaqueColorBlendAttachment};
+		// TODO: Transparency for debug purposes.
+		subcomponentRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
 		subcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		subcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 		subcomponentRenderPipelineDescriptor.renderPass = renderPass;
@@ -269,11 +275,6 @@ namespace ProjectA {
 		glyphSubcomponentVertexInputBinding.registerAttribute<mat3x3<float32>>();
 		glyphSubcomponentVertexInputBinding.registerAttribute<uint32>();
 		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>();
-
-		ColorBlendAttachment transparentColorBlendAttachment{};
-		transparentColorBlendAttachment.blend = true;
-		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
 		RenderPipelineDescriptor glyphSubcomponentRenderPipelineDescriptor;
 		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
@@ -408,6 +409,7 @@ namespace ProjectA {
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
+		beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}};
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 

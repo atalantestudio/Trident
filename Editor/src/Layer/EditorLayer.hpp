@@ -13,19 +13,19 @@ namespace ProjectA {
 			void GUI() override {
 				PROFILE_SCOPE(FUNC_SIG);
 
-				GUIContainer({EXPAND, 100px}, {20px, 20px}, HORIZONTAL, 10px, GRAY) {
+				/* GUIContainer({EXPAND, 100px}, {20px, 20px}, HORIZONTAL, 10px, GRAY) {
 					for (uint8 i = 0; i < 3; i += 1) {
 						GUIContainer({150px, EXPAND}, {10px, 10px}, HORIZONTAL, 0px, ORANGE) {
 							GUIComponent({EXPAND, EXPAND}, LIGHT_GRAY);
 						}
 					}
-				}
+				} */
 
-				GUIImage({512px, 512px}, 1);
+				// GUIImage({512px, 512px}, 1);
 
 				const std::string string = Logger::format("FPS: []", Application::getFramesPerSecond());
 
-				GUIText(string, textStyle);
+				// GUIText(string, textStyle);
 			}
 
 		private:

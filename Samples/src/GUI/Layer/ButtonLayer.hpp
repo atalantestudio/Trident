@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	class WindowLayer : public GUILayer {
+	class ButtonLayer : public GUILayer {
 		public:
 			void registerAssets() override {
 				radioGroteskRegularFont = loadFont("../ProjectA/src/Asset/Font/test-regular.ttf");

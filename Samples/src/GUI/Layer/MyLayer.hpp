@@ -43,7 +43,7 @@ namespace ProjectA {
 
 					GUISpacing(16px);
 
-					GUIImage({256px, 256px}, image, 8px);
+					GUIImage({256px, 256px}, image, 8.0f);
 
 					GUISpacing(4px);
 

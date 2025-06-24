@@ -80,12 +80,16 @@ namespace ProjectA {
 	void GUILayer::preRender() {
 		const ref<Swapchain>& swapchain = Renderer::getSwapchain();
 
-		componentOrigin[HORIZONTAL] = 0;
-		componentOrigin[VERTICAL] = 0;
-		layoutDirection = VERTICAL;
-		layoutSpacing = 0;
-		currentContainerSize = swapchain->getExtent();
-		currentContainerInnerSize = swapchain->getExtent();
+		/* ContainerStyle root;
+		root.size = swapchain->getExtent();
+		root.padding = {0px, 0px};
+		root.layoutDirection = VERTICAL;
+		root.layoutSpacing = 0px;
+		root.color = 0xffffffff; */
+
+		DEBUG_ASSERT(components.empty());
+
+		origin = {0px, 0px};
 
 		GUI();
 	}
@@ -97,8 +101,6 @@ namespace ProjectA {
 	void GUILayer::postRender() {
 		renderer.resetCounters();
 	}
-
-	void GUILayer::GUI() {}
 
 	void GUILayer::onEvent(Event& event) {
 		EventDispatcher eventDispatcher(event);
@@ -112,87 +114,88 @@ namespace ProjectA {
 		return true;
 	}
 
-	GUIContainer GUILayer::pushContainer(Extent2D size, Extent2D padding, LayoutDirection layoutDirection, uint32 layoutSpacing) {
-		// TODO: Ensure that the container isn't expanding towards the current layout direction.
-
+	void GUILayer::openContainer(const ContainerStyle& style) {
 		GUIContainer container;
-		container.origin = {componentOrigin[0], componentOrigin[1]};
-		container.padding = padding;
-		container.size = computeFixedSize(size);
-		container.innerSize = container.size;
-		container.innerSize.width -= padding.width * 2;
-		container.innerSize.height -= padding.height * 2;
-		container.parentSize = currentContainerSize;
-		container.parentInnerSize = currentContainerInnerSize;
-		container.root = rootComponent;
-		container.parentLayoutDirection = this->layoutDirection;
-		container.parentLayoutSpacing = this->layoutSpacing;
 
-		// Add container padding to the origin.
-		componentOrigin[HORIZONTAL] += padding.width;
-		componentOrigin[VERTICAL] += padding.height;
-
-		currentContainerSize = container.size;
-		currentContainerInnerSize = container.innerSize;
-
-		// Set layout direction.
-		this->layoutDirection = layoutDirection;
-
-		// Set layout spacing (dependent of the current layout direction).
-		this->layoutSpacing = layoutSpacing;
-
-		rootComponent = false;
-
-		return container;
-	}
-
-	GUIContainer GUILayer::pushContainer(Extent2D size, Extent2D padding, LayoutDirection layoutDirection, uint32 layoutSpacing, const vec4<float32>& color) {
-		const Extent2D fixedSize = computeFixedSize(size);
-
-		registerSubcomponent(fixedSize, DEFAULT_IMAGE_INDEX, color, 0.0f);
-
-		return pushContainer(size, padding, layoutDirection, layoutSpacing);
-	}
-
-	void GUILayer::popContainer(GUIContainer& container) {
-		container.iteration = true;
-
-		layoutDirection = container.parentLayoutDirection;
-		layoutSpacing = container.parentLayoutSpacing;
-
-		if (container.root) {
-			rootComponent = true;
-
-			componentOrigin[HORIZONTAL] = container.padding.width;
-			componentOrigin[VERTICAL] -= container.padding.height;
+		if (!components.empty()) {
+			container.parentIndex = static_cast<uint32>(components.size()) - 1;
+		}
+		else {
+			container.parentIndex = ~0;
 		}
 
-		// Set the component origin to the end of the popped container.
-		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&container.origin))[layoutDirection] + (pointer_cast_const<const uint32*>(&container.size))[layoutDirection] + layoutSpacing;
-		componentOrigin[!layoutDirection] += (pointer_cast_const<const uint32*>(&container.origin))[!layoutDirection];
+		container.fillMode = style.fillMode;
+		container.size = style.size;
+		container.padding = style.padding;
+		container.layoutDirection = style.layoutDirection;
+		container.layoutSpacing = style.layoutSpacing;
+		container.color = style.color;
 
-		// Set the current container sizes to the parent container sizes.
-		currentContainerSize = container.parentSize;
-		currentContainerInnerSize = container.parentInnerSize;
+		components.emplace_back(container);
 	}
 
-	void GUILayer::GUIComponent(Extent2D size, const vec4<float32>& color, float32 radius) {
+	void GUILayer::closeContainer() {
+		GUIContainer& component = components.back();
+
+		Extent2D nextOrigin = origin;
+
+		if (component.parentIndex != ~0) {
+			GUIContainer& parent = components[component.parentIndex];
+
+			// 1. Update parent fit width.
+			if (parent.fillMode == FIT) {
+				if (parent.layoutDirection == HORIZONTAL) {
+					parent.size.width += component.size.width;
+				}
+				else {
+					// TODO: lyah::max
+					parent.size.width = std::max(parent.size.width, component.size.width);
+				}
+			}
+
+			// TODO: 2. Grow & Shrink Sizing Widths
+			// TODO: 3. Wrap Text
+
+			// 4. Update parent fit height.
+			if (parent.fillMode == FIT) {
+				if (parent.layoutDirection == VERTICAL) {
+					parent.size.height += component.size.height;
+				}
+				else {
+					// TODO: lyah::max
+					parent.size.height = std::max(parent.size.height, component.size.height);
+				}
+			}
+
+			// TODO: 5. Grow & Shrink Sizing Heights
+
+			// 6. Positions
+			nextOrigin[parent.layoutDirection] += component.size[parent.layoutDirection];
+		}
+
+		// 7. Register component for rendering.
+		registerSubcomponent(origin, component.size, DEFAULT_IMAGE_INDEX, component.color, 0.0f);
+
+		components.pop_back();
+	}
+
+	/* void GUILayer::GUIComponent(Extent2D size, const vec4<float32>& color, float32 radius) {
 		const Extent2D fixedSize = computeFixedSize(size);
 
 		registerSubcomponent(fixedSize, DEFAULT_IMAGE_INDEX, color, radius);
 
 		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&fixedSize))[layoutDirection] + layoutSpacing;
-	}
+	} */
 
-	void GUILayer::GUIImage(Extent2D size, ImageID imageId, float32 radius) {
+	/* void GUILayer::GUIImage(Extent2D size, ImageID imageId, float32 radius) {
 		const Extent2D fixedSize = computeFixedSize(size);
 
-		registerSubcomponent(fixedSize, imageId, {1.0f, 1.0f, 1.0f, 1.0f}, radius);
+		registerSubcomponent(fixedSize, imageId, 0xffffffff, radius);
 
 		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&fixedSize))[layoutDirection] + layoutSpacing;
-	}
+	} */
 
-	void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
+	/* void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
 		const FontData& fontData = fonts[textStyle.font];
 		const TrueTypeFont& font = *fontData.font;
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
@@ -225,15 +228,15 @@ namespace ProjectA {
 				continue;
 			}
 
-			if (positionX > currentContainerInnerSize.width) {
-				positionX = static_cast<float32>(componentOrigin[0]);
-				positionY += textStyle.fontSize;
-				height += textStyle.fontSize;
-			}
+			// if (positionX > currentContainerInnerSize.width) {
+				// positionX = static_cast<float32>(componentOrigin[0]);
+				// positionY += textStyle.fontSize;
+				// height += textStyle.fontSize;
+			// }
 
-			if (positionY > currentContainerInnerSize.height) {
-				ENGINE_WARN("A text component is overflowing the current container.");
-			}
+			// if (positionY > currentContainerInnerSize.height) {
+				// ENGINE_WARN("A text component is overflowing the current container.");
+			// }
 
 			const uint16 codePoint = static_cast<uint16>(character);
 			const Glyph& glyph = font[codePoint];
@@ -275,9 +278,9 @@ namespace ProjectA {
 		const Extent2D computedSize = {static_cast<uint32>(width), static_cast<uint32>(height)};
 
 		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&computedSize))[layoutDirection] + layoutSpacing;
-	}
+	} */
 
-	bool GUILayer::GUIButton(const std::string& string, const ButtonStyle& buttonStyle) {
+	/* bool GUILayer::GUIButton(const std::string& string, const ButtonStyle& buttonStyle) {
 		const Extent2D textExtent = calculateTextSize(string, *buttonStyle.textStyle);
 
 		Extent2D size;
@@ -296,32 +299,31 @@ namespace ProjectA {
 		componentOrigin[!layoutDirection] = componentOriginOppositeDirection;
 		componentOrigin[layoutDirection] += buttonStyle.padding.height;
 
-		/*bool hovered = false;
+		// bool hovered = false;
 
-		if (intersects(
-			{componentOrigin[0], componentOrigin[1]},
-			size,
-			{static_cast<uint32>(Application::getWindow().getMousePosition()[0]), static_cast<uint32>(Application::getWindow().getMousePosition()[1])}
-		)) {
-			hovered = true;
-		}
+		// if (intersects(
+			// {componentOrigin[0], componentOrigin[1]},
+			// size,
+			// {static_cast<uint32>(Application::getWindow().getMousePosition()[0]), static_cast<uint32>(Application::getWindow().getMousePosition()[1])}
+		// )) {
+			// hovered = true;
+		// }
 
 		// 4. Advance the component origin by the size (towards the current layout direction).
-		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&size))[layoutDirection] + layoutSpacing;
+		// componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&size))[layoutDirection] + layoutSpacing;
 
-		return hovered; */
-
+		// return hovered;
 		return false;
-	}
+	} */
 
-	void GUILayer::GUISpacing(uint32 spacing) {
+	/* void GUILayer::GUISpacing(uint32 spacing) {
 		componentOrigin[layoutDirection] += spacing;
-	}
+	} */
 
-	void GUILayer::registerSubcomponent(Extent2D size, ImageID imageId, const vec4<float32>& color, float32 radius) {
+	void GUILayer::registerSubcomponent(Extent2D origin, Extent2D size, ImageID imageId, const Color& color, float32 radius) {
 		const vec2<float32> decimalOrigin = {
-			static_cast<float32>(componentOrigin[0]),
-			static_cast<float32>(componentOrigin[1]),
+			static_cast<float32>(origin[0]),
+			static_cast<float32>(origin[1]),
 		};
 		const vec2<float32> decimalSize = {
 			static_cast<float32>(size.width),
@@ -338,7 +340,7 @@ namespace ProjectA {
 			static_cast<float32>(imageExtent.height) / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
 		});
 		subcomponent.layerIndex = imageId;
-		subcomponent.color = color;
+		subcomponent.color = color.value;
 		subcomponent.radius = radius;
 
 		renderer.registerSubcomponent(subcomponent);
@@ -353,31 +355,7 @@ namespace ProjectA {
 		);
 	}
 
-	Extent2D GUILayer::computeFixedSize(Extent2D size) const {
-		Extent2D fixedSize{};
-
-		if (size.width == EXPAND) {
-			fixedSize.width = currentContainerInnerSize.width;
-		}
-		else {
-			fixedSize.width = size.width;
-		}
-
-		ENGINE_ASSERT(fixedSize.width > 0, "The fixed width must be positive.");
-
-		if (size.height == EXPAND) {
-			fixedSize.height = currentContainerInnerSize.height;
-		}
-		else {
-			fixedSize.height = size.height;
-		}
-
-		ENGINE_ASSERT(fixedSize.height > 0, "The fixed height must be positive.");
-
-		return fixedSize;
-	}
-
-	Extent2D GUILayer::calculateTextSize(const std::string& string, const TextStyle& textStyle) {
+	Extent2D GUILayer::calculateTextSize(const std::string& string, const TextStyle& textStyle) const {
 		const TrueTypeFont& font = *fonts[textStyle.font].font;
 		const sint32 lineHeight = font.getLineHeight();
 

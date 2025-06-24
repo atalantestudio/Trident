@@ -1,4 +1,4 @@
-GraphicsAPI: 1
-WindowWidth: 720
+GraphicsAPI: 2
+WindowWidth: 1280
 WindowHeight: 720
 VSync: true

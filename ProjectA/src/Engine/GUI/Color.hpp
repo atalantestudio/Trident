@@ -23,6 +23,14 @@ namespace ProjectA {
 				)
 			{}
 
+			bool operator ==(const Color& color) const {
+				return value == color.value;
+			}
+
+			bool operator !=(const Color& color) const {
+				return value != color.value;
+			}
+
 		public:
 			// Unsigned normalized RGBA value in the range [0, 1].
 			vec4<float32> value;
