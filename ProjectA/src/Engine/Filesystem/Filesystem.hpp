@@ -19,11 +19,6 @@ namespace ProjectA {
 
 		Stream openStream(std::string_view path);
 
-		// Opens a file for temporary reading or writing.
-		// `path` is relative to the working directory.
-		template<typename File>
-		File openTemporary(std::string_view path);
-
 		// Opens a file for permanent reading or writing.
 		// `path` is relative to the working directory.
 		// The returned value is the file pointer. It must be managed by the application.
