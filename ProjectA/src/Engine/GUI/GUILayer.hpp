@@ -83,6 +83,7 @@ namespace ProjectA {
 
 			std::vector<uint32> openedComponents;
 			std::vector<GUIContainer> components;
+			std::vector<TextComponent> textComponents;
 	};
 
 	#define GUIComponent(component) for (bool _opened = (openComponent(component), true); _opened; _opened = false, closeComponent())

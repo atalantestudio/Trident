@@ -86,8 +86,10 @@ namespace ProjectA {
 
 		// 7. Register component for rendering.
 		for (const GUIContainer& component : components) {
-			registerSubcomponent(component.origin, component.size, DEFAULT_IMAGE_INDEX, component.color, component.radius);
+			registerSubcomponent(component.origin, component.size, component.image, component.color, component.radius);
 		}
+
+		// TODO: Register individual text characters.
 	}
 
 	void GUILayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
@@ -134,6 +136,7 @@ namespace ProjectA {
 		component.layoutDirection = style.layoutDirection;
 		component.layoutSpacing = style.layoutSpacing;
 		component.color = style.color;
+		component.image = style.image;
 		component.radius = style.radius;
 
 		openedComponents.emplace_back(componentIndex);
@@ -141,39 +144,29 @@ namespace ProjectA {
 	}
 
 	void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
-		const uint32 componentIndex = static_cast<uint32>(components.size());
+		const uint32 componentIndex = static_cast<uint32>(textComponents.size());
 
-		GUIContainer component;
+		TextComponent textComponent;
 
 		if (!openedComponents.empty()) {
-			component.parentIndex = openedComponents.back();
-			component.origin = components[openedComponents.back()].origin;
+			textComponent.parentIndex = openedComponents.back();
+			textComponent.origin = components[openedComponents.back()].origin;
 
-			GUIContainer& parent = components[component.parentIndex];
+			GUIContainer& parent = components[textComponent.parentIndex];
 
 			parent.childIndices.emplace_back(componentIndex);
 		}
 		else {
-			component.parentIndex = ~0;
-			component.origin = {0.0f, 0.0f};
+			textComponent.parentIndex = ~0;
+			textComponent.origin = {0.0f, 0.0f};
 		}
 
-		component.size = {0_px, 0_px};
-		component.remainingSize = component.size;
-		component.color = textStyle.color;
+		textComponent.size = {0_px, 0_px};
+		textComponent.text = string.data();
+		textComponent.characterCount = static_cast<uint32>(string.size());
+		textComponent.color = textStyle.color;
 
-		// Default values for text components.
-		component.padding = {0_px, 0_px};
-		component.layoutDirection = HORIZONTAL;
-		component.layoutSpacing = 0_px;
-		component.radius = 0.0f;
-
-		component.text = string.data();
-		component.textSize = static_cast<uint32>(string.size());
-
-		components.emplace_back(component);
-
-		DEBUG_ASSERT("TODO");
+		textComponents.emplace_back(textComponent);
 
 		/* const FontData& fontData = fonts[textStyle.font];
 		const TrueTypeFont& font = *fontData.font;

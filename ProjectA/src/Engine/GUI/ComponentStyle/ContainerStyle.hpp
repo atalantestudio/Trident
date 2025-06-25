@@ -2,6 +2,7 @@
 
 #include "Engine/Extent.hpp"
 #include "Engine/GUI/Color.hpp"
+#include "Engine/GUI/ID.hpp"
 #include "Engine/GUI/LayoutDirection.hpp"
 #include "Engine/GUI/px.hpp"
 #include "Engine/GUI/Size.hpp"
@@ -13,6 +14,7 @@ namespace ProjectA {
 		LayoutDirection layoutDirection = HORIZONTAL;
 		float32 layoutSpacing = 0_px;
 		Color color = 0xffffffff;
+		ImageID image = 0;
 		float32 radius = 0.0f;
 	};
 }
