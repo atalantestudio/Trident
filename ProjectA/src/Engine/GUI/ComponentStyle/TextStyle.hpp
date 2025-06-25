@@ -1,11 +1,13 @@
 #pragma once
 
+#include "Engine/GUI/Color.hpp"
 #include "Engine/GUI/ID.hpp"
 
 namespace ProjectA {
 	struct TextStyle {
-		vec4<float32> color = {0.0f, 0.0f, 0.0f, 1.0f};
+		// Size2D size;
+		Color color = 0xffffffff;
 		FontID font;
-		float32 fontSize = 64.0f;
+		float32 fontSize;
 	};
 }

@@ -6,16 +6,16 @@ namespace ProjectA {
 	class EditorLayer : public GUILayer {
 		public:
 			void registerAssets() override {
-				textStyle.color = {1.0f, 1.0f, 1.0f, 1.0f};
+				textStyle.color = 0xffffffff;
 				textStyle.fontSize = static_cast<float32>(32_px);
 			}
 
 			void GUI() override {
 				PROFILE_SCOPE(FUNC_SIG);
 
-				/* GUIContainer({EXPAND, 100_px}, {20_px, 20_px}, HORIZONTAL, 10_px, GRAY) {
+				/* GUIComponent({EXPAND, 100_px}, {20_px, 20_px}, HORIZONTAL, 10_px, GRAY) {
 					for (uint8 i = 0; i < 3; i += 1) {
-						GUIContainer({150_px, EXPAND}, {10_px, 10_px}, HORIZONTAL, 0_px, ORANGE) {
+						GUIComponent({150_px, EXPAND}, {10_px, 10_px}, HORIZONTAL, 0_px, ORANGE) {
 							GUIComponent({EXPAND, EXPAND}, LIGHT_GRAY);
 						}
 					}

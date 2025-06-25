@@ -28,7 +28,7 @@ namespace ProjectA {
 			}
 
 			void GUI() override {
-				GUIContainer({EXPAND, EXPAND}, {12_px, 12_px}, VERTICAL, 0_px, white) {
+				GUIComponent({EXPAND, EXPAND}, {12_px, 12_px}, VERTICAL, 0_px, white) {
 					GUIText("The Lorem Ipsum", titleStyle);
 
 					GUISpacing(16_px);

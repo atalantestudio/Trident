@@ -110,7 +110,7 @@ namespace ProjectA {
 		return true;
 	}
 
-	void GUILayer::openContainer(const ContainerStyle& style) {
+	void GUILayer::openComponent(const ContainerStyle& style) {
 		const uint32 componentIndex = static_cast<uint32>(components.size());
 
 		GUIContainer component;
@@ -128,7 +128,6 @@ namespace ProjectA {
 			component.origin = {0.0f, 0.0f};
 		}
 
-		component.childOrigin = {0.0f, 0.0f};
 		component.size = style.size;
 		component.remainingSize = component.size;
 		component.padding = style.padding;
@@ -141,7 +140,125 @@ namespace ProjectA {
 		components.emplace_back(component);
 	}
 
-	void GUILayer::closeContainer() {
+	void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
+		const uint32 componentIndex = static_cast<uint32>(components.size());
+
+		GUIContainer component;
+
+		if (!openedComponents.empty()) {
+			component.parentIndex = openedComponents.back();
+			component.origin = components[openedComponents.back()].origin;
+
+			GUIContainer& parent = components[component.parentIndex];
+
+			parent.childIndices.emplace_back(componentIndex);
+		}
+		else {
+			component.parentIndex = ~0;
+			component.origin = {0.0f, 0.0f};
+		}
+
+		component.size = {0_px, 0_px};
+		component.remainingSize = component.size;
+		component.color = textStyle.color;
+
+		// Default values for text components.
+		component.padding = {0_px, 0_px};
+		component.layoutDirection = HORIZONTAL;
+		component.layoutSpacing = 0_px;
+		component.radius = 0.0f;
+
+		component.text = string.data();
+		component.textSize = static_cast<uint32>(string.size());
+
+		components.emplace_back(component);
+
+		DEBUG_ASSERT("TODO");
+
+		/* const FontData& fontData = fonts[textStyle.font];
+		const TrueTypeFont& font = *fontData.font;
+		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
+		const float32 lineHeight = static_cast<float32>(font.getLineHeight());
+		const float32 scaledHeight = 1.0f / lineHeight * textStyle.fontSize;
+
+		float32 positionX = static_cast<float32>(origin[0]);
+		float32 positionY = static_cast<float32>(origin[1]);
+
+		float32 width = 0;
+		float32 height = textStyle.fontSize;
+
+		GUIGlyphSubcomponent glyphSubcomponent;
+		glyphSubcomponent.layerIndex = fontData.glyphMapImageId;
+		glyphSubcomponent.color = textStyle.color.value;
+
+		for (const char character : string) {
+			if (character < 0) {
+				// TODO: Handle UTF-16 characters.
+
+				continue;
+			}
+
+			if (character == '\n') {
+				positionX = static_cast<float32>(origin[0]);
+				positionY += textStyle.fontSize;
+				height += textStyle.fontSize;
+
+				continue;
+			}
+
+			// if (positionX > currentContainerInnerSize.width) {
+				// positionX = static_cast<float32>(componentOrigin[0]);
+				// positionY += textStyle.fontSize;
+				// height += textStyle.fontSize;
+			// }
+
+			// if (positionY > currentContainerInnerSize.height) {
+				// ENGINE_WARN("A text component is overflowing the current container.");
+			// }
+
+			const uint16 codePoint = static_cast<uint16>(character);
+			const Glyph& glyph = font[codePoint];
+
+			// Don't register spaces on the start of the text.
+			if (glyph.invisible && positionX == static_cast<float32>(origin[0])) {
+				continue;
+			}
+
+			const float32 advanceWidth = std::ceil(glyph.advanceWidth * scaledHeight);
+
+			if (!glyph.invisible) {
+				// For a line height (ascent - descent) of 1210 FUnits,
+				// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
+				// The width should be 62.13_px.
+				// TODO: float32 lyah::ceil(float32)
+				const float32 width = glyph.width * scaledHeight;
+				const float32 leftSideBearing = glyph.leftSideBearing * scaledHeight;
+
+				const vec2<float32> position = {positionX + leftSideBearing, positionY};
+				const vec2<float32> size = {width, textStyle.fontSize};
+				const vec2<float32> uvStart = {glyph.minCoordinate.x, glyph.minCoordinate.y};
+				const vec2<float32> uvEnd = {glyph.maxCoordinate.x, glyph.maxCoordinate.y};
+				const vec2<float32> uvDiff = uvEnd - uvStart;
+
+				glyphSubcomponent.world = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
+				glyphSubcomponent.textureWorld = mat3x3<float32>::scaling({
+					uvDiff[0] * imageExtent.width / renderer.TEXTURE_ARRAY_MAX_WIDTH,
+					uvDiff[1] * imageExtent.height / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
+				}) * mat3x3<float32>::translation(uvStart);
+
+				renderer.registerGlyphSubcomponent(glyphSubcomponent);
+			}
+
+			positionX += advanceWidth;
+			width += advanceWidth;
+		}
+
+		const Extent2D computedSize = {static_cast<uint32>(width), static_cast<uint32>(height)};
+
+		origin[layoutDirection] += (pointer_cast_const<const uint32*>(&computedSize))[layoutDirection]; */
+	}
+
+	void GUILayer::closeComponent() {
 		DEBUG_ASSERT(!openedComponents.empty());
 
 		GUIContainer& component = components[openedComponents.back()];
@@ -177,22 +294,9 @@ namespace ProjectA {
 					parent.size.width.value = std::max(parent.size.width.value, component.size.width.value);
 				}
 			}
-
-			// TODO: 3. Wrap Text
-
-			// 4. Update parent fit height.
-			if (parent.size.height.fillMode == FillMode::FIT) {
-				if (parent.layoutDirection == VERTICAL) {
-					parent.size.height.value += component.size.height.value;
-				}
-				else {
-					// TODO: lyah::max
-					parent.size.height.value = std::max(parent.size.height.value, component.size.height.value);
-				}
-			}
 		}
 
-		// TODO: 2. Grow & Shrink Sizing Widths
+		// 2. Grow & Shrink Sizing Widths
 		{
 			std::vector<uint32> widthExpandChildIndices;
 
@@ -206,20 +310,84 @@ namespace ProjectA {
 			}
 
 			if (!widthExpandChildIndices.empty()) {
-				const float32 distributedWidth = component.remainingSize.x / static_cast<float32>(widthExpandChildIndices.size());
+				if (component.layoutDirection == HORIZONTAL) {
+					const float32 distributedWidth = component.remainingSize.x / static_cast<float32>(widthExpandChildIndices.size());
 
-				for (uint32 index = 0; index < widthExpandChildIndices.size(); index += 1) {
-					const uint32 childIndex = widthExpandChildIndices[index];
-					GUIContainer& child = components[childIndex];
+					for (uint32 index = 0; index < widthExpandChildIndices.size(); index += 1) {
+						const uint32 childIndex = widthExpandChildIndices[index];
+						GUIContainer& child = components[childIndex];
 
-					child.size.width.value = distributedWidth;
+						child.size.width.value = distributedWidth;
+					}
+				}
+				else {
+					for (uint32 index = 0; index < widthExpandChildIndices.size(); index += 1) {
+						const uint32 childIndex = widthExpandChildIndices[index];
+						GUIContainer& child = components[childIndex];
+
+						DEBUG_ASSERT(component.size.width.value >= component.padding.x * 2.0f);
+
+						child.size.width.value = component.size.width.value - component.padding.x * 2.0f;
+					}
 				}
 			}
 		}
 
-		// TODO: 5. Grow & Shrink Sizing Heights
+		// TODO: 3. Wrap Text
 
-		// 6. Positions
+		// 4. Update parent fit height.
+		if (component.parentIndex != ~0) {
+			GUIContainer& parent = components[component.parentIndex];
+
+			if (parent.size.height.fillMode == FillMode::FIT) {
+				if (parent.layoutDirection == VERTICAL) {
+					parent.size.height.value += component.size.height.value;
+				}
+				else {
+					// TODO: lyah::max
+					parent.size.height.value = std::max(parent.size.height.value, component.size.height.value);
+				}
+			}
+		}
+
+		// 5. Grow & Shrink Sizing Heights
+		{
+			std::vector<uint32> heightExpandChildIndices;
+
+			for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
+				const uint32 childIndex = component.childIndices[index];
+				const GUIContainer& child = components[childIndex];
+
+				if (child.size.height.fillMode == FillMode::EXPAND) {
+					heightExpandChildIndices.emplace_back(childIndex);
+				}
+			}
+
+			if (!heightExpandChildIndices.empty()) {
+				if (component.layoutDirection == VERTICAL) {
+					const float32 distributedHeight = component.remainingSize.y / static_cast<float32>(heightExpandChildIndices.size());
+
+					for (uint32 index = 0; index < heightExpandChildIndices.size(); index += 1) {
+						const uint32 childIndex = heightExpandChildIndices[index];
+						GUIContainer& child = components[childIndex];
+
+						child.size.height.value = distributedHeight;
+					}
+				}
+				else {
+					for (uint32 index = 0; index < heightExpandChildIndices.size(); index += 1) {
+						const uint32 childIndex = heightExpandChildIndices[index];
+						GUIContainer& child = components[childIndex];
+
+						DEBUG_ASSERT(component.size.height.value >= component.padding.y * 2.0f);
+
+						child.size.height.value = component.size.height.value - component.padding.y * 2.0f;
+					}
+				}
+			}
+		}
+
+		// 6. Positioning
 		{
 			svec2<float32> origin = component.origin;
 			origin.x += component.padding.x;
@@ -252,131 +420,6 @@ namespace ProjectA {
 		registerSubcomponent(fixedSize, imageId, 0xffffffff, radius);
 
 		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&fixedSize))[layoutDirection] + layoutSpacing;
-	} */
-
-	/* void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
-		const FontData& fontData = fonts[textStyle.font];
-		const TrueTypeFont& font = *fontData.font;
-		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
-		const float32 lineHeight = static_cast<float32>(font.getLineHeight());
-
-		const float32 scaledHeight = 1.0f / lineHeight * textStyle.fontSize;
-
-		float32 positionX = static_cast<float32>(componentOrigin[0]);
-		float32 positionY = static_cast<float32>(componentOrigin[1]);
-
-		float32 width = 0;
-		float32 height = textStyle.fontSize;
-
-		GUIGlyphSubcomponent glyphSubcomponent;
-		glyphSubcomponent.layerIndex = fontData.glyphMapImageId;
-		glyphSubcomponent.color = textStyle.color;
-
-		for (const char character : string) {
-			if (character < 0) {
-				// TODO: Handle UTF-16 characters.
-
-				continue;
-			}
-
-			if (character == '\n') {
-				positionX = static_cast<float32>(componentOrigin[0]);
-				positionY += textStyle.fontSize;
-				height += textStyle.fontSize;
-
-				continue;
-			}
-
-			// if (positionX > currentContainerInnerSize.width) {
-				// positionX = static_cast<float32>(componentOrigin[0]);
-				// positionY += textStyle.fontSize;
-				// height += textStyle.fontSize;
-			// }
-
-			// if (positionY > currentContainerInnerSize.height) {
-				// ENGINE_WARN("A text component is overflowing the current container.");
-			// }
-
-			const uint16 codePoint = static_cast<uint16>(character);
-			const Glyph& glyph = font[codePoint];
-
-			// Don't register spaces on the start of the text.
-			if (glyph.invisible && positionX == static_cast<float32>(componentOrigin[0])) {
-				continue;
-			}
-
-			const float32 advanceWidth = std::ceil(glyph.advanceWidth * scaledHeight);
-
-			if (!glyph.invisible) {
-				// For a line height (ascent - descent) of 1210 FUnits,
-				// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
-				// The width should be 62.13_px.
-				// TODO: float32 lyah::ceil(float32)
-				const float32 width = glyph.width * scaledHeight;
-				const float32 leftSideBearing = glyph.leftSideBearing * scaledHeight;
-
-				const vec2<float32> position = {positionX + leftSideBearing, positionY};
-				const vec2<float32> size = {width, textStyle.fontSize};
-				const vec2<float32> uvStart = {glyph.minCoordinate.x, glyph.minCoordinate.y};
-				const vec2<float32> uvEnd = {glyph.maxCoordinate.x, glyph.maxCoordinate.y};
-				const vec2<float32> uvDiff = uvEnd - uvStart;
-
-				glyphSubcomponent.world = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
-				glyphSubcomponent.textureWorld = mat3x3<float32>::scaling({
-					uvDiff[0] * imageExtent.width / renderer.TEXTURE_ARRAY_MAX_WIDTH,
-					uvDiff[1] * imageExtent.height / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
-				}) * mat3x3<float32>::translation(uvStart);
-
-				renderer.registerGlyphSubcomponent(glyphSubcomponent);
-			}
-
-			positionX += advanceWidth;
-			width += advanceWidth;
-		}
-
-		const Extent2D computedSize = {static_cast<uint32>(width), static_cast<uint32>(height)};
-
-		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&computedSize))[layoutDirection] + layoutSpacing;
-	} */
-
-	/* bool GUILayer::GUIButton(const std::string& string, const ButtonStyle& buttonStyle) {
-		const Extent2D textExtent = calculateTextSize(string, *buttonStyle.textStyle);
-
-		Extent2D size;
-		size.width = textExtent.width + buttonStyle.padding.width * 2;
-		size.height = textExtent.height + buttonStyle.padding.height * 2;
-
-		registerSubcomponent(size, DEFAULT_IMAGE_INDEX, buttonStyle.backgroundColor, buttonStyle.radius);
-
-		const uint32 componentOriginOppositeDirection = componentOrigin[!layoutDirection];
-
-		componentOrigin[0] += buttonStyle.padding.width;
-		componentOrigin[1] += buttonStyle.padding.height;
-
-		GUIText(string, *buttonStyle.textStyle);
-
-		componentOrigin[!layoutDirection] = componentOriginOppositeDirection;
-		componentOrigin[layoutDirection] += buttonStyle.padding.height;
-
-		// bool hovered = false;
-
-		// if (intersects(
-			// {componentOrigin[0], componentOrigin[1]},
-			// size,
-			// {static_cast<uint32>(Application::getWindow().getMousePosition()[0]), static_cast<uint32>(Application::getWindow().getMousePosition()[1])}
-		// )) {
-			// hovered = true;
-		// }
-
-		// 4. Advance the component origin by the size (towards the current layout direction).
-		// componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&size))[layoutDirection] + layoutSpacing;
-
-		// return hovered;
-		return false;
-	} */
-
-	/* void GUILayer::GUISpacing(uint32 spacing) {
-		componentOrigin[layoutDirection] += spacing;
 	} */
 
 	void GUILayer::registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 radius) {

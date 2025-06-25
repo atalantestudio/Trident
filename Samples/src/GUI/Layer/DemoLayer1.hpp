@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	class TwoPassLayer : public GUILayer {
+	class DemoLayer1 : public GUILayer {
 		public:
 			void GUI() override {
 				ContainerStyle blue;
@@ -12,26 +12,26 @@ namespace ProjectA {
 				blue.color = 0x0a6e89ff;
 				blue.radius = 16.0f;
 
-				GUIContainer(blue) {
+				GUIComponent(blue) {
 					ContainerStyle pink;
-					pink.size = {300_px, 300_px};
+					pink.size = {300_px, EXPAND};
 					pink.padding = {0_px, 0_px};
 					pink.layoutDirection = HORIZONTAL;
 					pink.layoutSpacing = 0_px;
 					pink.color = 0xfb938fff;
 					pink.radius = 16.0f;
 
-					GUIContainer(pink);
+					GUIComponent(pink);
 
 					ContainerStyle yellow;
-					yellow.size = {EXPAND, 300_px};
+					yellow.size = {EXPAND, 200_px};
 					yellow.padding = {0_px, 0_px};
 					yellow.layoutDirection = HORIZONTAL;
 					yellow.layoutSpacing = 0_px;
 					yellow.color = 0xfed84dff;
 					yellow.radius = 16.0f;
 
-					GUIContainer(yellow);
+					GUIComponent(yellow);
 
 					ContainerStyle lightBlue;
 					lightBlue.size = {300_px, 300_px};
@@ -41,7 +41,7 @@ namespace ProjectA {
 					lightBlue.color = 0x5ecbe4ff;
 					lightBlue.radius = 16.0f;
 
-					GUIContainer(lightBlue);
+					GUIComponent(lightBlue);
 				}
 			}
 	};

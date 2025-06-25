@@ -9,10 +9,6 @@ namespace ProjectA {
 		uint32 parentIndex = ~0;
 
 		svec2<float32> origin;
-
-		// Child origin.
-		svec2<float32> childOrigin;
-
 		Size2D size;
 		svec2<float32> remainingSize;
 		svec2<float32> padding;
@@ -21,5 +17,8 @@ namespace ProjectA {
 		Color color = 0xffffffff;
 		float32 radius;
 		std::vector<uint32> childIndices;
+
+		const char* text = nullptr;
+		uint32 textSize = 0;
 	};
 }

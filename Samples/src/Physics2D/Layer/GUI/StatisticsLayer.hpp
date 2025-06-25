@@ -20,14 +20,14 @@ namespace ProjectA {
 					framesPerSecond = Application::getFramesPerSecond();
 				}
 
-				GUIContainer({212_px, EXPAND}, {8_px, 8_px}, VERTICAL, 8_px) {
-					GUIContainer({196_px, 96_px}, {12_px, 12_px}, VERTICAL, 0_px, gray) {
+				GUIComponent({212_px, EXPAND}, {8_px, 8_px}, VERTICAL, 8_px) {
+					GUIComponent({196_px, 96_px}, {12_px, 12_px}, VERTICAL, 0_px, gray) {
 						const std::string string = Logger::format("FPS: []", framesPerSecond);
 
 						GUIText(string, textStyle);
 					}
 
-					GUIContainer({196_px, 148_px}, {12_px, 12_px}, VERTICAL, 8_px, gray) {
+					GUIComponent({196_px, 148_px}, {12_px, 12_px}, VERTICAL, 8_px, gray) {
 						for (uint8 i = 0; i < 2; i += 1) {
 							GUIComponent({EXPAND, 24_px}, lightGray);
 						}

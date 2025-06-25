@@ -40,22 +40,16 @@ namespace ProjectA {
 
 			ImageID loadImage(std::string_view path);
 
-			void openContainer(const ContainerStyle& style);
+			void openComponent(const ContainerStyle& style);
 
-			void closeContainer();
+			void GUIText(const std::string& string, const TextStyle& textStyle);
+
+			void closeComponent();
 
 			// Draw a rectangle with a custom color.
 			// void GUIComponent(Extent2D size, const vec4<float32>& color, float32 radius = 0.0f);
 
 			// void GUIImage(Extent2D size, ImageID imageId, float32 radius = 0.0f);
-
-			// void GUIText(const std::string& string, const TextStyle& textStyle);
-
-			// Returns true if the button is hovered.
-			// bool GUIButton(const std::string& string, const ButtonStyle& buttonStyle);
-
-			// Advances the component origin by `spacing` towards the current layout direction.
-			// void GUISpacing(uint32 spacing);
 
 		private:
 			// Renders a colored quad without moving the origin.
@@ -89,13 +83,7 @@ namespace ProjectA {
 
 			std::vector<uint32> openedComponents;
 			std::vector<GUIContainer> components;
-
-			// uint32 componentOrigin[2];
-			// LayoutDirection layoutDirection = VERTICAL;
-			// uint32 layoutSpacing = 0;
-			// Extent2D currentContainerSize;
-			// bool rootComponent = true;
 	};
 
-	#define GUIContainer(...) for (bool _opened = (openContainer(__VA_ARGS__), true); _opened; _opened = false, closeContainer())
+	#define GUIComponent(component) for (bool _opened = (openComponent(component), true); _opened; _opened = false, closeComponent())
 }

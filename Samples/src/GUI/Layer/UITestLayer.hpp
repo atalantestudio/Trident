@@ -17,7 +17,7 @@ namespace ProjectA {
 			}
 
 			void GUI() override {
-				GUIContainer({EXPAND, EXPAND}, {8_px, 8_px}, VERTICAL, 4_px, gray) {
+				GUIComponent({EXPAND, EXPAND}, {8_px, 8_px}, VERTICAL, 4_px, gray) {
 					GUIButton("Load Asset", buttonStyle);
 					GUIButton("Generate Mipmaps", buttonStyle);
 				}

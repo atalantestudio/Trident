@@ -4,7 +4,7 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Layer/TwoPassLayer.hpp"
+#include "Layer/DemoLayer1.hpp"
 
 namespace ProjectA {
 	class GUIApplication : public Application {
@@ -12,7 +12,7 @@ namespace ProjectA {
 			GUIApplication(const ApplicationManifest& applicationManifest) :
 				Application(applicationManifest)
 			{
-				registerLayer<TwoPassLayer>();
+				registerLayer<DemoLayer1>();
 			}
 
 			~GUIApplication() {}
