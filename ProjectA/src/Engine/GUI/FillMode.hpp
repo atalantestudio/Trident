@@ -1,9 +1,9 @@
 #pragma once
 
 namespace ProjectA {
-	enum FillMode : uint8 {
-		FIT = 0, // (shrink)
-		FIXED = 1,
+	enum class FillMode : uint8 {
+		FIXED = 0,
+		FIT = 1,
 		EXPAND = 2,
 	};
 }

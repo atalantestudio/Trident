@@ -87,9 +87,9 @@ namespace ProjectA {
 		root.layoutSpacing = 0px;
 		root.color = 0xffffffff; */
 
-		DEBUG_ASSERT(components.empty());
+		components.clear();
 
-		origin = {0px, 0px};
+		DEBUG_ASSERT(openedComponents.empty());
 
 		GUI();
 	}
@@ -115,41 +115,51 @@ namespace ProjectA {
 	}
 
 	void GUILayer::openContainer(const ContainerStyle& style) {
-		GUIContainer container;
+		const uint32 componentIndex = static_cast<uint32>(components.size());
 
-		if (!components.empty()) {
-			container.parentIndex = static_cast<uint32>(components.size()) - 1;
+		GUIContainer component;
+
+		if (!openedComponents.empty()) {
+			component.parentIndex = openedComponents.back();
+			component.origin = components[openedComponents.back()].origin;
+
+			GUIContainer& parent = components[component.parentIndex];
+
+			parent.childIndices.emplace_back(componentIndex);
 		}
 		else {
-			container.parentIndex = ~0;
+			component.parentIndex = ~0;
+			component.origin = style.padding;
 		}
 
-		container.fillMode = style.fillMode;
-		container.size = style.size;
-		container.padding = style.padding;
-		container.layoutDirection = style.layoutDirection;
-		container.layoutSpacing = style.layoutSpacing;
-		container.color = style.color;
+		component.size = style.size;
+		component.padding = style.padding;
+		component.layoutDirection = style.layoutDirection;
+		component.layoutSpacing = style.layoutSpacing;
+		component.color = style.color;
 
-		components.emplace_back(container);
+		openedComponents.emplace_back(componentIndex);
+		components.emplace_back(component);
 	}
 
 	void GUILayer::closeContainer() {
-		GUIContainer& component = components.back();
+		DEBUG_ASSERT(!openedComponents.empty());
 
-		Extent2D nextOrigin = origin;
+		GUIContainer& component = components[openedComponents.back()];
+
+		Extent2D origin = {0px, 0px};
 
 		if (component.parentIndex != ~0) {
 			GUIContainer& parent = components[component.parentIndex];
 
 			// 1. Update parent fit width.
-			if (parent.fillMode == FIT) {
+			if (parent.size.width.fillMode == FillMode::FIT) {
 				if (parent.layoutDirection == HORIZONTAL) {
-					parent.size.width += component.size.width;
+					parent.size.width.value += component.size.width.value;
 				}
 				else {
 					// TODO: lyah::max
-					parent.size.width = std::max(parent.size.width, component.size.width);
+					parent.size.width.value = std::max(parent.size.width.value, component.size.width.value);
 				}
 			}
 
@@ -157,26 +167,41 @@ namespace ProjectA {
 			// TODO: 3. Wrap Text
 
 			// 4. Update parent fit height.
-			if (parent.fillMode == FIT) {
+			if (parent.size.height.fillMode == FillMode::FIT) {
 				if (parent.layoutDirection == VERTICAL) {
-					parent.size.height += component.size.height;
+					parent.size.height.value += component.size.height.value;
 				}
 				else {
 					// TODO: lyah::max
-					parent.size.height = std::max(parent.size.height, component.size.height);
+					parent.size.height.value = std::max(parent.size.height.value, component.size.height.value);
 				}
 			}
+
+			// BREAKPOINT();
 
 			// TODO: 5. Grow & Shrink Sizing Heights
 
 			// 6. Positions
-			nextOrigin[parent.layoutDirection] += component.size[parent.layoutDirection];
+			origin = parent.origin;
+
+			parent.origin[parent.layoutDirection] += component.size[parent.layoutDirection];
+		}
+
+		// TODO
+		{
+			for (uint32 childIndex = 0; childIndex < component.childIndices.size(); childIndex += 1) {
+				const GUIContainer& child = components[component.childIndices[childIndex]];
+
+				// ENGINE_DEBUG("[] []", child.size.width, child.size.height);
+			}
 		}
 
 		// 7. Register component for rendering.
 		registerSubcomponent(origin, component.size, DEFAULT_IMAGE_INDEX, component.color, 0.0f);
 
-		components.pop_back();
+		openedComponents.pop_back();
+
+		// TODO: Remove parent children?
 	}
 
 	/* void GUILayer::GUIComponent(Extent2D size, const vec4<float32>& color, float32 radius) {
@@ -320,14 +345,14 @@ namespace ProjectA {
 		componentOrigin[layoutDirection] += spacing;
 	} */
 
-	void GUILayer::registerSubcomponent(Extent2D origin, Extent2D size, ImageID imageId, const Color& color, float32 radius) {
+	void GUILayer::registerSubcomponent(Extent2D origin, const Size2D& size, ImageID imageId, const Color& color, float32 radius) {
 		const vec2<float32> decimalOrigin = {
 			static_cast<float32>(origin[0]),
 			static_cast<float32>(origin[1]),
 		};
 		const vec2<float32> decimalSize = {
-			static_cast<float32>(size.width),
-			static_cast<float32>(size.height),
+			static_cast<float32>(size.width.value),
+			static_cast<float32>(size.height.value),
 		};
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(imageId);
 

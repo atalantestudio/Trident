@@ -60,7 +60,7 @@ namespace ProjectA {
 		private:
 			// Renders a colored quad without moving the origin.
 			// `origin` is the top-left corner of the quad.
-			void registerSubcomponent(Extent2D origin, Extent2D size, ImageID imageId, const Color& color, float32 radius);
+			void registerSubcomponent(Extent2D origin, const Size2D& size, ImageID imageId, const Color& color, float32 radius);
 
 			static bool intersects(Extent2D origin, Extent2D size, Extent2D point);
 
@@ -72,10 +72,10 @@ namespace ProjectA {
 			static constexpr ImageID DEFAULT_IMAGE_INDEX = 0;
 
 			// Grow towards the layout direction.
-			// static constexpr uint32 EXPAND = -1;
+			static constexpr uint32 EXPAND = -1;
 
-			// Retreat towards the layout direction.
-			// static constexpr uint32 FIT = -2;
+			// Shrink towards the layout direction.
+			static constexpr uint32 FIT = -2;
 
 		private:
 			static constexpr uint32 MAX_FONT_COUNT = 4;
@@ -88,9 +88,8 @@ namespace ProjectA {
 			std::array<FontData, MAX_FONT_COUNT> fonts;
 			uint32 fontCount = 0;
 
+			std::vector<uint32> openedComponents;
 			std::vector<GUIContainer> components;
-			uint32 currentContainerIndex = ~0;
-			Extent2D origin;
 
 			// uint32 componentOrigin[2];
 			// LayoutDirection layoutDirection = VERTICAL;
