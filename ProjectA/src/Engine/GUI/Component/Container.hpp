@@ -19,6 +19,7 @@ namespace ProjectA {
 		LayoutDirection layoutDirection;
 		float32 layoutSpacing;
 		Color color = 0xffffffff;
+		float32 radius;
 		std::vector<uint32> childIndices;
 	};
 }

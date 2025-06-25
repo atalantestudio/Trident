@@ -13,5 +13,6 @@ namespace ProjectA {
 		LayoutDirection layoutDirection = HORIZONTAL;
 		float32 layoutSpacing = 0_px;
 		Color color = 0xffffffff;
+		float32 radius = 0.0f;
 	};
 }

@@ -86,7 +86,7 @@ namespace ProjectA {
 
 		// 7. Register component for rendering.
 		for (const GUIContainer& component : components) {
-			registerSubcomponent(component.origin, component.size, DEFAULT_IMAGE_INDEX, component.color, 0.0f);
+			registerSubcomponent(component.origin, component.size, DEFAULT_IMAGE_INDEX, component.color, component.radius);
 		}
 	}
 
@@ -135,6 +135,7 @@ namespace ProjectA {
 		component.layoutDirection = style.layoutDirection;
 		component.layoutSpacing = style.layoutSpacing;
 		component.color = style.color;
+		component.radius = style.radius;
 
 		openedComponents.emplace_back(componentIndex);
 		components.emplace_back(component);
@@ -145,9 +146,15 @@ namespace ProjectA {
 
 		GUIContainer& component = components[openedComponents.back()];
 
-		// Add padding to component.
 		component.size.width.value += component.padding.x * 2.0f;
 		component.size.height.value += component.padding.y * 2.0f;
+
+		const sint32 m = static_cast<sint32>(component.childIndices.size());
+
+		// TODO: lyah::max
+		const float32 layoutSpacing = component.layoutSpacing * static_cast<float32>(std::max(0, m - 1));
+
+		component.size[component.layoutDirection].value += layoutSpacing;
 
 		if (component.parentIndex != ~0) {
 			GUIContainer& parent = components[component.parentIndex];
@@ -211,14 +218,6 @@ namespace ProjectA {
 		}
 
 		// TODO: 5. Grow & Shrink Sizing Heights
-
-		// Add layout spacing.
-		{
-			// TODO: lyah::max
-			const float32 layoutSpacing = component.layoutSpacing * std::max(0.0f, static_cast<float32>(component.childIndices.size()) - 1.0f);
-
-			component.size[component.layoutDirection].value += layoutSpacing;
-		}
 
 		// 6. Positions
 		{
