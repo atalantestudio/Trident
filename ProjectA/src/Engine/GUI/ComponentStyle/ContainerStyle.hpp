@@ -9,9 +9,9 @@
 namespace ProjectA {
 	struct ContainerStyle {
 		Size2D size;
-		Extent2D padding = {0px, 0px};
+		svec2<float32> padding = {0_px, 0_px};
 		LayoutDirection layoutDirection = HORIZONTAL;
-		uint32 layoutSpacing = 0px;
+		float32 layoutSpacing = 0_px;
 		Color color = 0xffffffff;
 	};
 }

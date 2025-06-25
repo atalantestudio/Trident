@@ -21,17 +21,17 @@ namespace ProjectA {
 				legendStyle.font = radioGroteskRegularItalicFont;
 				legendStyle.fontSize = 14.0f;
 
-				buttonStyle.padding = {0px, 0px};
+				buttonStyle.padding = {0_px, 0_px};
 				buttonStyle.backgroundColor = {1.0f, 0.2f, 0.0f, 1.0f};
 				buttonStyle.radius = 10.0f;
 				buttonStyle.textStyle = &titleStyle;
 			}
 
 			void GUI() override {
-				GUIContainer({EXPAND, EXPAND}, {12px, 12px}, VERTICAL, 0px, white) {
+				GUIContainer({EXPAND, EXPAND}, {12_px, 12_px}, VERTICAL, 0_px, white) {
 					GUIText("The Lorem Ipsum", titleStyle);
 
-					GUISpacing(16px);
+					GUISpacing(16_px);
 
 					GUIText(
 						"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n"
@@ -41,11 +41,11 @@ namespace ProjectA {
 						paragraphStyle
 					);
 
-					GUISpacing(16px);
+					GUISpacing(16_px);
 
-					GUIImage({256px, 256px}, image, 8.0f);
+					GUIImage({256_px, 256_px}, image, 8.0f);
 
-					GUISpacing(4px);
+					GUISpacing(4_px);
 
 					GUIText("The Cameraman test image.", legendStyle);
 				}

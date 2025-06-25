@@ -7,26 +7,22 @@ namespace ProjectA {
 		public:
 			Size1D() = default;
 
-			Size1D(uint32 fillModeOrPixels) :
-				value(fillModeOrPixels)
-			{
-				if (fillModeOrPixels < static_cast<uint32>(-2)) {
-					fillMode = FillMode::FIXED;
+			Size1D(float32 fillModeOrPixels) {
+				if (fillModeOrPixels >= 0.0f) {
 					value = fillModeOrPixels;
 				}
 				else {
-					fillMode = static_cast<FillMode>(fillModeOrPixels + 3);
-					value = 0;
+					fillMode = static_cast<FillMode>(static_cast<sint32>(fillModeOrPixels) + 2);
 				}
 			}
 
-			operator uint32() const {
+			operator float32() const {
 				return value;
 			}
 
 		public:
 			FillMode fillMode = FillMode::FIXED;
-			uint32 value = 0;
+			float32 value = 0.0f;
 	};
 
 	struct Size2D {
@@ -41,6 +37,10 @@ namespace ProjectA {
 		Size1D& operator [](std::size_t index) {
 			// TODO: Assert.
 			return pointer_cast<Size1D*>(this)[index];
+		}
+
+		operator svec2<float32>() const {
+			return {width.value, height.value};
 		}
 	};
 }

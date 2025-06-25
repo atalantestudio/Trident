@@ -78,20 +78,16 @@ namespace ProjectA {
 	}
 
 	void GUILayer::preRender() {
-		const ref<Swapchain>& swapchain = Renderer::getSwapchain();
-
-		/* ContainerStyle root;
-		root.size = swapchain->getExtent();
-		root.padding = {0px, 0px};
-		root.layoutDirection = VERTICAL;
-		root.layoutSpacing = 0px;
-		root.color = 0xffffffff; */
-
 		components.clear();
 
 		DEBUG_ASSERT(openedComponents.empty());
 
 		GUI();
+
+		// 7. Register component for rendering.
+		for (const GUIContainer& component : components) {
+			registerSubcomponent(component.origin, component.size, DEFAULT_IMAGE_INDEX, component.color, 0.0f);
+		}
 	}
 
 	void GUILayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
@@ -129,10 +125,12 @@ namespace ProjectA {
 		}
 		else {
 			component.parentIndex = ~0;
-			component.origin = style.padding;
+			component.origin = {0.0f, 0.0f};
 		}
 
+		component.childOrigin = {0.0f, 0.0f};
 		component.size = style.size;
+		component.remainingSize = component.size;
 		component.padding = style.padding;
 		component.layoutDirection = style.layoutDirection;
 		component.layoutSpacing = style.layoutSpacing;
@@ -147,10 +145,20 @@ namespace ProjectA {
 
 		GUIContainer& component = components[openedComponents.back()];
 
-		Extent2D origin = {0px, 0px};
+		// Add padding to component.
+		component.size.width.value += component.padding.x * 2.0f;
+		component.size.height.value += component.padding.y * 2.0f;
 
 		if (component.parentIndex != ~0) {
 			GUIContainer& parent = components[component.parentIndex];
+
+			if (component.size.width.fillMode == FillMode::FIXED) {
+				parent.remainingSize.x -= component.size.width;
+			}
+
+			if (component.size.height.fillMode == FillMode::FIXED) {
+				parent.remainingSize.y -= component.size.height;
+			}
 
 			// 1. Update parent fit width.
 			if (parent.size.width.fillMode == FillMode::FIT) {
@@ -163,7 +171,6 @@ namespace ProjectA {
 				}
 			}
 
-			// TODO: 2. Grow & Shrink Sizing Widths
 			// TODO: 3. Wrap Text
 
 			// 4. Update parent fit height.
@@ -176,32 +183,60 @@ namespace ProjectA {
 					parent.size.height.value = std::max(parent.size.height.value, component.size.height.value);
 				}
 			}
-
-			// BREAKPOINT();
-
-			// TODO: 5. Grow & Shrink Sizing Heights
-
-			// 6. Positions
-			origin = parent.origin;
-
-			parent.origin[parent.layoutDirection] += component.size[parent.layoutDirection];
 		}
 
-		// TODO
+		// TODO: 2. Grow & Shrink Sizing Widths
 		{
-			for (uint32 childIndex = 0; childIndex < component.childIndices.size(); childIndex += 1) {
-				const GUIContainer& child = components[component.childIndices[childIndex]];
+			std::vector<uint32> widthExpandChildIndices;
 
-				// ENGINE_DEBUG("[] []", child.size.width, child.size.height);
+			for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
+				const uint32 childIndex = component.childIndices[index];
+				const GUIContainer& child = components[childIndex];
+
+				if (child.size.width.fillMode == FillMode::EXPAND) {
+					widthExpandChildIndices.emplace_back(childIndex);
+				}
+			}
+
+			if (!widthExpandChildIndices.empty()) {
+				const float32 distributedWidth = component.remainingSize.x / static_cast<float32>(widthExpandChildIndices.size());
+
+				for (uint32 index = 0; index < widthExpandChildIndices.size(); index += 1) {
+					const uint32 childIndex = widthExpandChildIndices[index];
+					GUIContainer& child = components[childIndex];
+
+					child.size.width.value = distributedWidth;
+				}
 			}
 		}
 
-		// 7. Register component for rendering.
-		registerSubcomponent(origin, component.size, DEFAULT_IMAGE_INDEX, component.color, 0.0f);
+		// TODO: 5. Grow & Shrink Sizing Heights
+
+		// Add layout spacing.
+		{
+			// TODO: lyah::max
+			const float32 layoutSpacing = component.layoutSpacing * std::max(0.0f, static_cast<float32>(component.childIndices.size()) - 1.0f);
+
+			component.size[component.layoutDirection].value += layoutSpacing;
+		}
+
+		// 6. Positions
+		{
+			svec2<float32> origin = component.origin;
+			origin.x += component.padding.x;
+			origin.y += component.padding.y;
+
+			for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
+				const uint32 childIndex = component.childIndices[index];
+				GUIContainer& child = components[childIndex];
+
+				child.origin = origin;
+
+				origin[component.layoutDirection] += child.size[component.layoutDirection].value + component.layoutSpacing;
+			}
+		}
 
 		openedComponents.pop_back();
-
-		// TODO: Remove parent children?
 	}
 
 	/* void GUILayer::GUIComponent(Extent2D size, const vec4<float32>& color, float32 radius) {
@@ -276,7 +311,7 @@ namespace ProjectA {
 			if (!glyph.invisible) {
 				// For a line height (ascent - descent) of 1210 FUnits,
 				// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
-				// The width should be 62.13px.
+				// The width should be 62.13_px.
 				// TODO: float32 lyah::ceil(float32)
 				const float32 width = glyph.width * scaledHeight;
 				const float32 leftSideBearing = glyph.leftSideBearing * scaledHeight;
@@ -345,15 +380,9 @@ namespace ProjectA {
 		componentOrigin[layoutDirection] += spacing;
 	} */
 
-	void GUILayer::registerSubcomponent(Extent2D origin, const Size2D& size, ImageID imageId, const Color& color, float32 radius) {
-		const vec2<float32> decimalOrigin = {
-			static_cast<float32>(origin[0]),
-			static_cast<float32>(origin[1]),
-		};
-		const vec2<float32> decimalSize = {
-			static_cast<float32>(size.width.value),
-			static_cast<float32>(size.height.value),
-		};
+	void GUILayer::registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 radius) {
+		const vec2<float32> decimalOrigin = {origin[0], origin[1]};
+		const vec2<float32> decimalSize = {size.width.value, size.height.value};
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(imageId);
 
 		GUISubcomponent subcomponent;

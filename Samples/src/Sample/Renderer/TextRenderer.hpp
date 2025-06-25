@@ -305,7 +305,7 @@ namespace ProjectA {
 					if (!glyph.invisible) {
 						// For a line height (ascent - descent) of 1210 FUnits,
 						// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
-						// The width should be 62.13px.
+						// The width should be 62.13_px.
 						// TODO: float32 lyah::ceil(float32)
 						const float32 width = glyph.width / lineHeight * fontSize;
 						const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * fontSize;

@@ -127,6 +127,16 @@ namespace ProjectA {
 		constexpr svec(T x, T y) :
 			x(x), y(y)
 		{}
+
+		T operator [](std::size_t index) const {
+			// TODO: Assert.
+			return *pointer_const_cast<const T*>(this)[index];
+		}
+
+		T& operator [](std::size_t index) {
+			// TODO: Assert.
+			return pointer_cast<T*>(this)[index];
+		}
 	};
 
 	template<typename T>
@@ -142,6 +152,16 @@ namespace ProjectA {
 		constexpr svec(T x, T y, T z) :
 			x(x), y(y), z(z)
 		{}
+
+		T operator [](std::size_t index) const {
+			// TODO: Assert.
+			return *pointer_const_cast<const T*>(this)[index];
+		}
+
+		T& operator [](std::size_t index) {
+			// TODO: Assert.
+			return *pointer_const<T*>(this)[index];
+		}
 	};
 
 	template<std::size_t C, typename T>

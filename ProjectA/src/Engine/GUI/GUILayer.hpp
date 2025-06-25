@@ -60,7 +60,7 @@ namespace ProjectA {
 		private:
 			// Renders a colored quad without moving the origin.
 			// `origin` is the top-left corner of the quad.
-			void registerSubcomponent(Extent2D origin, const Size2D& size, ImageID imageId, const Color& color, float32 radius);
+			void registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 radius);
 
 			static bool intersects(Extent2D origin, Extent2D size, Extent2D point);
 
@@ -69,15 +69,14 @@ namespace ProjectA {
 			Extent2D calculateTextSize(const std::string& string, const TextStyle& textStyle) const;
 
 		protected:
-			static constexpr ImageID DEFAULT_IMAGE_INDEX = 0;
+			// Shrink towards the layout direction.
+			static constexpr float32 FIT = -2.0f;
 
 			// Grow towards the layout direction.
-			static constexpr uint32 EXPAND = -1;
-
-			// Shrink towards the layout direction.
-			static constexpr uint32 FIT = -2;
+			static constexpr float32 EXPAND = -1.0f;
 
 		private:
+			static constexpr ImageID DEFAULT_IMAGE_INDEX = 0;
 			static constexpr uint32 MAX_FONT_COUNT = 4;
 
 		private:

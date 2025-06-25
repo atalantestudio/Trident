@@ -10,14 +10,14 @@ namespace ProjectA {
 				textStyle.font = radioGroteskRegularFont;
 				textStyle.fontSize = 16.0f;
 
-				buttonStyle.padding = {4px, 2px};
+				buttonStyle.padding = {4_px, 2_px};
 				buttonStyle.backgroundColor = lightGray;
 				buttonStyle.radius = 3.0f;
 				buttonStyle.textStyle = &textStyle;
 			}
 
 			void GUI() override {
-				GUIContainer({EXPAND, EXPAND}, {8px, 8px}, VERTICAL, 4px, gray) {
+				GUIContainer({EXPAND, EXPAND}, {8_px, 8_px}, VERTICAL, 4_px, gray) {
 					GUIButton("Load Asset", buttonStyle);
 					GUIButton("Generate Mipmaps", buttonStyle);
 				}
