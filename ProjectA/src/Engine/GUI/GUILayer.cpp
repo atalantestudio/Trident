@@ -161,7 +161,10 @@ namespace ProjectA {
 			textComponent.origin = {0.0f, 0.0f};
 		}
 
-		textComponent.size = {0_px, 0_px};
+		// TODO: Apart from their data, text components should not be decoupled from other components.
+		const Extent2D size = calculateTextSize(string, textStyle);
+
+		textComponent.size = {static_cast<float32>(size.width), static_cast<float32>(size.height)};
 		textComponent.text = string.data();
 		textComponent.characterCount = static_cast<uint32>(string.size());
 		textComponent.color = textStyle.color;
@@ -269,16 +272,15 @@ namespace ProjectA {
 		if (component.parentIndex != ~0) {
 			GUIContainer& parent = components[component.parentIndex];
 
-			if (component.size.width.fillMode == FillMode::FIXED) {
-				parent.remainingSize.x -= component.size.width;
-			}
-
-			if (component.size.height.fillMode == FillMode::FIXED) {
-				parent.remainingSize.y -= component.size.height;
-			}
+			// Instead of calculating the size of the current "fit" component by summing the size of its children,
+			// take advantage of the macro's open-close loop and only add the size of the current component to the "fit" parent.
+			// To avoid the null parent check, we could create a root component before lending the control to the user.
+			// That way all user-defined components will have a parent.
 
 			// 1. Update parent fit width.
 			if (parent.size.width.fillMode == FillMode::FIT) {
+				DEBUG_ASSERT(component.size.width.value > 0.0f);
+
 				if (parent.layoutDirection == HORIZONTAL) {
 					parent.size.width.value += component.size.width.value;
 				}
@@ -286,6 +288,14 @@ namespace ProjectA {
 					// TODO: lyah::max
 					parent.size.width.value = std::max(parent.size.width.value, component.size.width.value);
 				}
+			}
+
+			if (component.size.width.fillMode == FillMode::FIXED) {
+				parent.remainingSize.x -= component.size.width;
+			}
+
+			if (component.size.height.fillMode == FillMode::FIXED) {
+				parent.remainingSize.y -= component.size.height;
 			}
 		}
 
@@ -380,6 +390,14 @@ namespace ProjectA {
 			}
 		}
 
+		// Validate radius.
+		{
+			// TODO: lyah::min
+			const float32 minHalfDimension = std::min(component.size.width.value, component.size.height.value) / 2.0f;
+
+			ENGINE_ASSERT(component.radius >= 0.0f && component.radius <= minHalfDimension, "Invalid radius.");
+		}
+
 		// 6. Positioning
 		{
 			svec2<float32> origin = component.origin;
@@ -398,22 +416,6 @@ namespace ProjectA {
 
 		openedComponents.pop_back();
 	}
-
-	/* void GUILayer::GUIComponent(Extent2D size, const vec4<float32>& color, float32 radius) {
-		const Extent2D fixedSize = computeFixedSize(size);
-
-		registerSubcomponent(fixedSize, DEFAULT_IMAGE_INDEX, color, radius);
-
-		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&fixedSize))[layoutDirection] + layoutSpacing;
-	} */
-
-	/* void GUILayer::GUIImage(Extent2D size, ImageID imageId, float32 radius) {
-		const Extent2D fixedSize = computeFixedSize(size);
-
-		registerSubcomponent(fixedSize, imageId, 0xffffffff, radius);
-
-		componentOrigin[layoutDirection] += (pointer_cast_const<const uint32*>(&fixedSize))[layoutDirection] + layoutSpacing;
-	} */
 
 	void GUILayer::registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 radius) {
 		const vec2<float32> decimalOrigin = {origin[0], origin[1]};
@@ -448,9 +450,7 @@ namespace ProjectA {
 		const TrueTypeFont& font = *fonts[textStyle.font].font;
 		const sint32 lineHeight = font.getLineHeight();
 
-		Extent2D extent;
-		extent.width = 0;
-		extent.height = 0;
+		Extent2D extent{};
 
 		if (!string.empty()) {
 			extent.height = static_cast<uint32>(textStyle.fontSize);

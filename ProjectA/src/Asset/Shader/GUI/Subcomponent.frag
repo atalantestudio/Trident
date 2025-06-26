@@ -1,16 +1,16 @@
 #version 440
 
-#define EFFECT_TYPE_BEVEL 0
-#define EFFECT_TYPE_ROUND 1
-#define EFFECT_TYPE_VIGNETTE 2
+#define BORDER_EFFECT_BEVEL 0
+#define BORDER_EFFECT_ROUND 1
+#define BORDER_EFFECT_VIGNETTE 2
 
-#define BORDER_EFFECT_TYPE EFFECT_TYPE_ROUND
+#define BORDER_EFFECT BORDER_EFFECT_ROUND
 
-#if BORDER_EFFECT_TYPE == EFFECT_TYPE_BEVEL
+#if BORDER_EFFECT == BORDER_EFFECT_BEVEL
 	bool beveledCorner(vec2 delta, float radius) {
 		return abs(delta.x) + abs(delta.y) > radius;
 	}
-#elif BORDER_EFFECT_TYPE == EFFECT_TYPE_ROUND
+#elif BORDER_EFFECT == BORDER_EFFECT_ROUND
 	bool roundedCorner(vec2 delta, float radius) {
 		return dot(delta, delta) > radius * radius;
 	}
@@ -18,21 +18,21 @@
 
 layout(origin_upper_left) in vec4 gl_FragCoord;
 
-in VertexOutput {
+in FragmentInput {
 	layout(location = 0) flat vec4 bounds;
 	layout(location = 1) flat vec4 color;
 	layout(location = 2) flat float radius;
 	layout(location = 3) vec3 textureCoordinate;
-} vertexOutput;
+} fragmentInput;
 
 layout(set = 0, binding = 1) uniform sampler2DArray textureArraySampler;
 
 layout(location = 0) out vec4 color;
 
 void main() {
-	vec2 minBounds = vertexOutput.bounds.xy;
-	vec2 maxBounds = vertexOutput.bounds.zw;
-	float r = vertexOutput.radius;
+	vec2 minBounds = fragmentInput.bounds.xy;
+	vec2 maxBounds = fragmentInput.bounds.zw;
+	float r = fragmentInput.radius;
 
 	// Screen space coordinate of the current fragment.
 	vec2 p = floor(gl_FragCoord.xy) + 0.5;
@@ -42,12 +42,12 @@ void main() {
 
 	vec2 ap = p - a;
 
-#if BORDER_EFFECT_TYPE != EFFECT_TYPE_VIGNETTE
+#if BORDER_EFFECT != BORDER_EFFECT_VIGNETTE
 	bool condition;
 
-	#if BORDER_EFFECT_TYPE == EFFECT_TYPE_BEVEL
+	#if BORDER_EFFECT == BORDER_EFFECT_BEVEL
 		condition = beveledCorner(ap, r);
-	#elif BORDER_EFFECT_TYPE == EFFECT_TYPE_ROUND
+	#elif BORDER_EFFECT == BORDER_EFFECT_ROUND
 		condition = roundedCorner(ap, r);
 	#endif
 
@@ -55,7 +55,7 @@ void main() {
 		discard;
 	}
 
-	color = texture(textureArraySampler, vertexOutput.textureCoordinate) * vertexOutput.color;
+	color = texture(textureArraySampler, fragmentInput.textureCoordinate) * fragmentInput.color;
 #else
 	float d = dot(ap, ap);
 	float m = 1.0;
@@ -64,6 +64,6 @@ void main() {
 		m -= d / pow(r * sqrt(2.0), 2.0);
 	}
 
-	color = texture(textureArraySampler, vertexOutput.textureCoordinate) * vertexOutput.color * m;
+	color = texture(textureArraySampler, fragmentInput.textureCoordinate) * fragmentInput.color * m;
 #endif
 }

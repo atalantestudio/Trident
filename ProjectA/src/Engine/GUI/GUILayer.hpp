@@ -46,11 +46,6 @@ namespace ProjectA {
 
 			void closeComponent();
 
-			// Draw a rectangle with a custom color.
-			// void GUIComponent(Extent2D size, const vec4<float32>& color, float32 radius = 0.0f);
-
-			// void GUIImage(Extent2D size, ImageID imageId, float32 radius = 0.0f);
-
 		private:
 			// Renders a colored quad without moving the origin.
 			// `origin` is the top-left corner of the quad.
