@@ -1,4 +1,4 @@
 [submodule "ProjectA/vendor/lyah"]
 	path = ProjectA/vendor/lyah
-	url = git@github.com:debaze/lyah
+	url = git@github.com:atalantestudio/lyah
 	branch = main
