@@ -1,8 +1,5 @@
 #pragma once
 
-// TODO: Move into Lyah.
-#include <cstdint>
-
 #include <lyah/lyah.hpp>
 
 namespace lyah {
