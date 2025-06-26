@@ -84,8 +84,16 @@ namespace ProjectA {
 
 		GUI();
 
-		// 7. Register component for rendering.
 		for (const GUIContainer& component : components) {
+			// Validate radius.
+			{
+				// TODO: lyah::min
+				const float32 minHalfDimension = std::min(component.size.width.value, component.size.height.value) / 2.0f;
+
+				ENGINE_ASSERT(component.radius >= 0.0f && component.radius <= minHalfDimension, "Invalid radius.");
+			}
+
+			// 7. Register component for rendering.
 			registerSubcomponent(component.origin, component.size, component.image, component.color, component.radius);
 		}
 
@@ -388,14 +396,6 @@ namespace ProjectA {
 					}
 				}
 			}
-		}
-
-		// Validate radius.
-		{
-			// TODO: lyah::min
-			const float32 minHalfDimension = std::min(component.size.width.value, component.size.height.value) / 2.0f;
-
-			ENGINE_ASSERT(component.radius >= 0.0f && component.radius <= minHalfDimension, "Invalid radius.");
 		}
 
 		// 6. Positioning
