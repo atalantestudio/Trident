@@ -34,7 +34,7 @@ namespace ProjectA {
 					GUIComponent(yellow);
 
 					ContainerStyle lightBlue;
-					lightBlue.size = {300_px, 300_px};
+					lightBlue.size = {EXPAND, 300_px};
 					lightBlue.padding = {0_px, 0_px};
 					lightBlue.layoutDirection = HORIZONTAL;
 					lightBlue.layoutSpacing = 0_px;

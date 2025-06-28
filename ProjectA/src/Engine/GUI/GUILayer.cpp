@@ -121,20 +121,29 @@ namespace ProjectA {
 	}
 
 	void GUILayer::openComponent(const ContainerStyle& style) {
-		const uint32 componentIndex = static_cast<uint32>(components.size());
+		GUIContainer* parent = nullptr;
 
 		GUIContainer component;
+		component.parentIndex = ~0;
 
 		if (!openedComponents.empty()) {
 			component.parentIndex = openedComponents.back();
-			component.origin = components[openedComponents.back()].origin;
 
-			GUIContainer& parent = components[component.parentIndex];
+			parent = &components[component.parentIndex];
+		}
 
-			parent.childIndices.emplace_back(componentIndex);
+		// TODO: Move these asserts after closing the component.
+		// ENGINE_ASSERT(parent == nullptr || (parent->size.width.fillMode == FillMode::FIT && style.size.width.fillMode == FillMode::EXPAND), "An expanding component cannot be a child of a fit component in the same direction.");
+		// ENGINE_ASSERT(parent == nullptr || (parent->size.height.fillMode == FillMode::FIT && style.size.height.fillMode == FillMode::EXPAND), "An expanding component cannot be a child of a fit component in the same direction.");
+
+		const uint32 componentIndex = static_cast<uint32>(components.size());
+
+		if (parent != nullptr) {
+			component.origin = components[component.parentIndex].origin;
+
+			parent->childIndices.emplace_back(componentIndex);
 		}
 		else {
-			component.parentIndex = ~0;
 			component.origin = {0.0f, 0.0f};
 		}
 
@@ -321,14 +330,61 @@ namespace ProjectA {
 			}
 
 			if (!widthExpandChildIndices.empty()) {
+				// Calculate width to be distributed among expanding children.
+				float32 remainingWidth = component.size.width.value - component.padding.x * 2.0f;
+
 				if (component.layoutDirection == HORIZONTAL) {
-					const float32 distributedWidth = component.remainingSize.x / static_cast<float32>(widthExpandChildIndices.size());
+					remainingWidth -= (component.childIndices.size() - 1) * component.layoutSpacing;
 
-					for (uint32 index = 0; index < widthExpandChildIndices.size(); index += 1) {
-						const uint32 childIndex = widthExpandChildIndices[index];
-						GUIContainer& child = components[childIndex];
+					for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
+						const uint32 childIndex = component.childIndices[index];
+						const GUIContainer& child = components[childIndex];
 
-						child.size.width.value = distributedWidth;
+						remainingWidth -= child.size.width.value;
+					}
+
+					while (remainingWidth > 0.0f) {
+						float32 smallestWidth = components[widthExpandChildIndices[0]].size.width.value;
+						float32 secondSmallestWidth = lyah::infinity<float32>();
+						float32 widthToAdd = remainingWidth;
+
+						for (uint32 index = 1; index < widthExpandChildIndices.size(); index += 1) {
+							const uint32 childIndex = widthExpandChildIndices[index];
+							const GUIContainer& child = components[childIndex];
+							const float32 width = child.size.width.value;
+
+							// If we have found a child smaller than the smallest width registered, replace it with the child's width.
+							if (width < smallestWidth) {
+								secondSmallestWidth = smallestWidth;
+								smallestWidth = width;
+							}
+
+							// Found a child with a larger width than the registered value.
+							if (width > smallestWidth) {
+								// TODO: lyah::min
+								secondSmallestWidth = std::min(secondSmallestWidth, width);
+
+								// Calculate difference between the smallest and second smallest widths.
+								widthToAdd = secondSmallestWidth - smallestWidth;
+							}
+						}
+
+						// Double-check that the width to add is smaller than the equal distribution of the width among expanding children.
+						// TODO: lyah::min
+						widthToAdd = std::min(widthToAdd, remainingWidth / widthExpandChildIndices.size());
+
+						// Add the width to each expanding child.
+						for (uint32 index = 0; index < widthExpandChildIndices.size(); index += 1) {
+							const uint32 childIndex = widthExpandChildIndices[index];
+							GUIContainer& child = components[childIndex];
+
+							if (child.size.width.value == smallestWidth) {
+								// Resize the child to reach the second smallest width, then repeat.
+								child.size.width.value += widthToAdd;
+
+								remainingWidth -= widthToAdd;
+							}
+						}
 					}
 				}
 				else {
@@ -336,9 +392,7 @@ namespace ProjectA {
 						const uint32 childIndex = widthExpandChildIndices[index];
 						GUIContainer& child = components[childIndex];
 
-						DEBUG_ASSERT(component.size.width.value >= component.padding.x * 2.0f);
-
-						child.size.width.value = component.size.width.value - component.padding.x * 2.0f;
+						child.size.width.value = remainingWidth;
 					}
 				}
 			}
@@ -375,14 +429,61 @@ namespace ProjectA {
 			}
 
 			if (!heightExpandChildIndices.empty()) {
-				if (component.layoutDirection == VERTICAL) {
-					const float32 distributedHeight = component.remainingSize.y / static_cast<float32>(heightExpandChildIndices.size());
+				// Calculate height to be distributed among expanding children.
+				float32 remainingHeight = component.size.height.value - component.padding.y * 2.0f;
 
-					for (uint32 index = 0; index < heightExpandChildIndices.size(); index += 1) {
-						const uint32 childIndex = heightExpandChildIndices[index];
-						GUIContainer& child = components[childIndex];
+				if (component.layoutDirection == VERTICAL) {					
+					remainingHeight -= (component.childIndices.size() - 1) * component.layoutSpacing;
 
-						child.size.height.value = distributedHeight;
+					for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
+						const uint32 childIndex = component.childIndices[index];
+						const GUIContainer& child = components[childIndex];
+
+						remainingHeight -= child.size.height.value;
+					}
+
+					while (remainingHeight > 0.0f) {
+						float32 smallestHeight = components[heightExpandChildIndices[0]].size.height.value;
+						float32 secondSmallestHeight = lyah::infinity<float32>();
+						float32 heightToAdd = remainingHeight;
+
+						for (uint32 index = 1; index < heightExpandChildIndices.size(); index += 1) {
+							const uint32 childIndex = heightExpandChildIndices[index];
+							const GUIContainer& child = components[childIndex];
+							const float32 height = child.size.height.value;
+
+							// If we have found a child smaller than the smallest height registered, replace it with the child's height.
+							if (height < smallestHeight) {
+								secondSmallestHeight = smallestHeight;
+								smallestHeight = height;
+							}
+
+							// Found a child with a larger height than the registered value.
+							if (height > smallestHeight) {
+								// TODO: lyah::min
+								secondSmallestHeight = std::min(secondSmallestHeight, height);
+
+								// Calculate difference between the smallest and second smallest heights.
+								heightToAdd = secondSmallestHeight - smallestHeight;
+							}
+						}
+
+						// Double-check that the height to add is smaller than the equal distribution of the height among expanding children.
+						// TODO: lyah::min
+						heightToAdd = std::min(heightToAdd, remainingHeight / heightExpandChildIndices.size());
+
+						// Add the height to each expanding child.
+						for (uint32 index = 0; index < heightExpandChildIndices.size(); index += 1) {
+							const uint32 childIndex = heightExpandChildIndices[index];
+							GUIContainer& child = components[childIndex];
+
+							if (child.size.height.value == smallestHeight) {
+								// Resize the child to reach the second smallest height, then repeat.
+								child.size.height.value += heightToAdd;
+
+								remainingHeight -= heightToAdd;
+							}
+						}
 					}
 				}
 				else {
@@ -390,9 +491,7 @@ namespace ProjectA {
 						const uint32 childIndex = heightExpandChildIndices[index];
 						GUIContainer& child = components[childIndex];
 
-						DEBUG_ASSERT(component.size.height.value >= component.padding.y * 2.0f);
-
-						child.size.height.value = component.size.height.value - component.padding.y * 2.0f;
+						child.size.height.value = remainingHeight;
 					}
 				}
 			}
