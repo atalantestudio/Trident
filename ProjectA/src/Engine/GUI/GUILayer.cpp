@@ -84,20 +84,26 @@ namespace ProjectA {
 
 		GUI();
 
+		// 7. Register components for rendering.
 		for (const GUIContainer& component : components) {
-			// Validate radius.
-			{
+			if (component.textComponent) {
+				// TODO: Register individual text characters.
+
+				Size2D size = component.size;
+				size.height.value = 100_px;
+
+				registerSubcomponent(component.origin, size, DEFAULT_IMAGE_INDEX, 0xff9800ff, 0.0f);
+			}
+			else {
+				// Validate radius.
 				// TODO: lyah::min
 				const float32 minHalfDimension = std::min(component.size.width.value, component.size.height.value) / 2.0f;
 
 				ENGINE_ASSERT(component.radius >= 0.0f && component.radius <= minHalfDimension, "Invalid radius.");
+
+				registerSubcomponent(component.origin, component.size, component.image, component.color, component.radius);
 			}
-
-			// 7. Register component for rendering.
-			registerSubcomponent(component.origin, component.size, component.image, component.color, component.radius);
 		}
-
-		// TODO: Register individual text characters.
 	}
 
 	void GUILayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
@@ -155,15 +161,16 @@ namespace ProjectA {
 		component.color = style.color;
 		component.image = style.image;
 		component.radius = style.radius;
+		component.textComponent = false;
 
 		openedComponents.emplace_back(componentIndex);
 		components.emplace_back(component);
 	}
 
 	void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
-		const uint32 componentIndex = static_cast<uint32>(textComponents.size());
+		const uint32 componentIndex = static_cast<uint32>(components.size());
 
-		TextComponent textComponent;
+		GUIContainer textComponent;
 
 		if (!openedComponents.empty()) {
 			textComponent.parentIndex = openedComponents.back();
@@ -178,15 +185,24 @@ namespace ProjectA {
 			textComponent.origin = {0.0f, 0.0f};
 		}
 
-		// TODO: Apart from their data, text components should not be decoupled from other components.
-		const Extent2D size = calculateTextSize(string, textStyle);
+		const float32 preferredWidth = static_cast<float32>(calculateTextPreferredWidth(string, textStyle));
+		const float32 minimumWidth = static_cast<float32>(calculateTextMinimumWidth(string, textStyle));
 
-		textComponent.size = {static_cast<float32>(size.width), static_cast<float32>(size.height)};
-		textComponent.text = string.data();
-		textComponent.characterCount = static_cast<uint32>(string.size());
+		textComponent.size = {preferredWidth, 0_px};
+		textComponent.padding = {0_px, 0_px};
+		textComponent.layoutDirection = HORIZONTAL;
+		textComponent.layoutSpacing = 0_px;
 		textComponent.color = textStyle.color;
+		textComponent.image = fonts[textStyle.font].glyphMapImageId;
+		textComponent.radius = 0.0f;
+		textComponent.textComponent = true;
+		textComponent.nullTerminatedText = string.c_str();
+		textComponent.preferredSize = {preferredWidth, 0_px};
+		textComponent.minimumSize = {minimumWidth, 0_px};
+		textComponent.font = textStyle.font;
+		textComponent.fontSize = textStyle.fontSize;
 
-		textComponents.emplace_back(textComponent);
+		components.emplace_back(textComponent);
 
 		/* const FontData& fontData = fonts[textStyle.font];
 		const TrueTypeFont& font = *fontData.font;
@@ -300,10 +316,12 @@ namespace ProjectA {
 
 				if (parent.layoutDirection == HORIZONTAL) {
 					parent.size.width.value += component.size.width.value;
+					parent.minimumSize.x += component.minimumSize.x;
 				}
 				else {
 					// TODO: lyah::max
 					parent.size.width.value = std::max(parent.size.width.value, component.size.width.value);
+					parent.minimumSize.x = std::max(parent.minimumSize.x, component.minimumSize.x);
 				}
 			}
 
@@ -318,31 +336,36 @@ namespace ProjectA {
 
 		// 2. Grow & Shrink Sizing Widths
 		{
+			// Calculate width to be distributed among expanding children.
+			float32 remainingWidth = component.size.width.value - component.padding.x * 2.0f;
+
+			if (component.layoutDirection == HORIZONTAL) {
+				remainingWidth -= (component.childIndices.size() - 1) * component.layoutSpacing;
+
+				for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
+					const uint32 childIndex = component.childIndices[index];
+					const GUIContainer& child = components[childIndex];
+
+					remainingWidth -= child.size.width.value;
+				}
+			}
+
 			std::vector<uint32> widthExpandChildIndices;
 
 			for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
 				const uint32 childIndex = component.childIndices[index];
 				const GUIContainer& child = components[childIndex];
 
-				if (child.size.width.fillMode == FillMode::EXPAND) {
+				if (child.size.width.fillMode == FillMode::FIT || child.size.width.fillMode == FillMode::EXPAND) {
 					widthExpandChildIndices.emplace_back(childIndex);
 				}
 			}
 
 			if (!widthExpandChildIndices.empty()) {
-				// Calculate width to be distributed among expanding children.
-				float32 remainingWidth = component.size.width.value - component.padding.x * 2.0f;
+				// BREAKPOINT();
 
 				if (component.layoutDirection == HORIZONTAL) {
-					remainingWidth -= (component.childIndices.size() - 1) * component.layoutSpacing;
-
-					for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
-						const uint32 childIndex = component.childIndices[index];
-						const GUIContainer& child = components[childIndex];
-
-						remainingWidth -= child.size.width.value;
-					}
-
+					// Expand components.
 					while (remainingWidth > 0.0f) {
 						float32 smallestWidth = components[widthExpandChildIndices[0]].size.width.value;
 						float32 secondSmallestWidth = lyah::infinity<float32>();
@@ -359,7 +382,7 @@ namespace ProjectA {
 								smallestWidth = width;
 							}
 
-							// Found a child with a larger width than the registered value.
+							// This child not the smallest.
 							if (width > smallestWidth) {
 								// TODO: lyah::min
 								secondSmallestWidth = std::min(secondSmallestWidth, width);
@@ -369,7 +392,7 @@ namespace ProjectA {
 							}
 						}
 
-						// Double-check that the width to add is smaller than the equal distribution of the width among expanding children.
+						// Double-check that the width to add is <= than the equal distribution of the width among expanding children.
 						// TODO: lyah::min
 						widthToAdd = std::min(widthToAdd, remainingWidth / widthExpandChildIndices.size());
 
@@ -386,6 +409,50 @@ namespace ProjectA {
 							}
 						}
 					}
+
+					// Shrink components.
+					while (remainingWidth < 0.0f) {
+						float32 largestWidth = components[widthExpandChildIndices[0]].size.width.value;
+						float32 secondLargestWidth = 0.0f;
+						float32 widthToRemove = remainingWidth;
+
+						for (uint32 index = 1; index < widthExpandChildIndices.size(); index += 1) {
+							const uint32 childIndex = widthExpandChildIndices[index];
+							const GUIContainer& child = components[childIndex];
+							const float32 width = child.size.width.value;
+
+							// If we have found a child larger than the largest width registered, replace it with the child's width.
+							if (width > largestWidth) {
+								secondLargestWidth = largestWidth;
+								largestWidth = width;
+							}
+
+							// This child is not the largest.
+							if (width < largestWidth) {
+								// TODO: lyah::max
+								secondLargestWidth = std::max(secondLargestWidth, width);
+
+								// Calculate difference between the largest and second largest widths.
+								widthToRemove = secondLargestWidth - largestWidth;
+							}
+						}
+
+						// Double-check that the width to remove is >= than the equal distribution of the width among expanding children.
+						// TODO: lyah::max
+						widthToRemove = std::max(widthToRemove, remainingWidth / widthExpandChildIndices.size());
+
+						// Remove the width from each expanding child.
+						for (uint32 index = 0; index < widthExpandChildIndices.size(); index += 1) {
+							const uint32 childIndex = widthExpandChildIndices[index];
+							GUIContainer& child = components[childIndex];
+
+							if (child.size.width.value == largestWidth) {
+								// Resize the child to reach the second largest width, then repeat.
+								child.size.width.value += widthToRemove;
+								remainingWidth -= widthToRemove;
+							}
+						}
+					}
 				}
 				else {
 					for (uint32 index = 0; index < widthExpandChildIndices.size(); index += 1) {
@@ -398,7 +465,8 @@ namespace ProjectA {
 			}
 		}
 
-		// TODO: 3. Wrap Text
+		// 3. Wrap Text
+		// TODO
 
 		// 4. Update parent fit height.
 		if (component.parentIndex != ~0) {
@@ -407,41 +475,46 @@ namespace ProjectA {
 			if (parent.size.height.fillMode == FillMode::FIT) {
 				if (parent.layoutDirection == VERTICAL) {
 					parent.size.height.value += component.size.height.value;
+					parent.minimumSize.y += component.minimumSize.y;
 				}
 				else {
 					// TODO: lyah::max
 					parent.size.height.value = std::max(parent.size.height.value, component.size.height.value);
+					parent.minimumSize.y = std::max(parent.minimumSize.y, component.minimumSize.y);
 				}
 			}
 		}
 
 		// 5. Grow & Shrink Sizing Heights
 		{
+			// Calculate height to be distributed among expanding children.
+			float32 remainingHeight = component.size.height.value - component.padding.y * 2.0f;
+
+			if (component.layoutDirection == VERTICAL) {					
+				remainingHeight -= (component.childIndices.size() - 1) * component.layoutSpacing;
+
+				for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
+					const uint32 childIndex = component.childIndices[index];
+					const GUIContainer& child = components[childIndex];
+
+					remainingHeight -= child.size.height.value;
+				}
+			}
+
 			std::vector<uint32> heightExpandChildIndices;
 
 			for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
 				const uint32 childIndex = component.childIndices[index];
 				const GUIContainer& child = components[childIndex];
 
-				if (child.size.height.fillMode == FillMode::EXPAND) {
+				if (child.size.height.fillMode == FillMode::FIT || child.size.height.fillMode == FillMode::EXPAND) {
 					heightExpandChildIndices.emplace_back(childIndex);
 				}
 			}
 
 			if (!heightExpandChildIndices.empty()) {
-				// Calculate height to be distributed among expanding children.
-				float32 remainingHeight = component.size.height.value - component.padding.y * 2.0f;
-
-				if (component.layoutDirection == VERTICAL) {					
-					remainingHeight -= (component.childIndices.size() - 1) * component.layoutSpacing;
-
-					for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
-						const uint32 childIndex = component.childIndices[index];
-						const GUIContainer& child = components[childIndex];
-
-						remainingHeight -= child.size.height.value;
-					}
-
+				if (component.layoutDirection == VERTICAL) {
+					// Expand components.
 					while (remainingHeight > 0.0f) {
 						float32 smallestHeight = components[heightExpandChildIndices[0]].size.height.value;
 						float32 secondSmallestHeight = lyah::infinity<float32>();
@@ -458,7 +531,7 @@ namespace ProjectA {
 								smallestHeight = height;
 							}
 
-							// Found a child with a larger height than the registered value.
+							// This child is larger.
 							if (height > smallestHeight) {
 								// TODO: lyah::min
 								secondSmallestHeight = std::min(secondSmallestHeight, height);
@@ -482,6 +555,50 @@ namespace ProjectA {
 								child.size.height.value += heightToAdd;
 
 								remainingHeight -= heightToAdd;
+							}
+						}
+					}
+
+					// Shrink components.
+					while (remainingHeight < 0.0f) {
+						float32 largestHeight = components[heightExpandChildIndices[0]].size.height.value;
+						float32 secondLargestHeight = 0.0f;
+						float32 heightToRemove = remainingHeight;
+
+						for (uint32 index = 1; index < heightExpandChildIndices.size(); index += 1) {
+							const uint32 childIndex = heightExpandChildIndices[index];
+							const GUIContainer& child = components[childIndex];
+							const float32 height = child.size.height.value;
+
+							// If we have found a child larger than the largest height registered, replace it with the child's height.
+							if (height > largestHeight) {
+								secondLargestHeight = largestHeight;
+								largestHeight = height;
+							}
+
+							// This child is not the largest.
+							if (height < largestHeight) {
+								// TODO: lyah::max
+								secondLargestHeight = std::max(secondLargestHeight, height);
+
+								// Calculate difference between the largest and second largest heights.
+								heightToRemove = secondLargestHeight - largestHeight;
+							}
+						}
+
+						// Double-check that the height to remove is >= than the equal distribution of the height among expanding children.
+						// TODO: lyah::max
+						heightToRemove = std::max(heightToRemove, remainingHeight / heightExpandChildIndices.size());
+
+						// Remove the height from each expanding child.
+						for (uint32 index = 0; index < heightExpandChildIndices.size(); index += 1) {
+							const uint32 childIndex = heightExpandChildIndices[index];
+							GUIContainer& child = components[childIndex];
+
+							if (child.size.height.value == largestHeight) {
+								// Resize the child to reach the second largest height, then repeat.
+								child.size.height.value += heightToRemove;
+								remainingHeight -= heightToRemove;
 							}
 						}
 					}
@@ -545,17 +662,12 @@ namespace ProjectA {
 		);
 	}
 
-	Extent2D GUILayer::calculateTextSize(const std::string& string, const TextStyle& textStyle) const {
+	uint32 GUILayer::calculateTextPreferredWidth(const std::string& string, const TextStyle& textStyle) const {
 		const TrueTypeFont& font = *fonts[textStyle.font].font;
-		const sint32 lineHeight = font.getLineHeight();
 
-		Extent2D extent{};
+		uint32 preferredWidth = 0;
+		uint32 lineWidth = 0;
 
-		if (!string.empty()) {
-			extent.height = static_cast<uint32>(textStyle.fontSize);
-		}
-
-		float32 advanceWidth;
 		bool firstLineGlyph = true;
 
 		for (const char character : string) {
@@ -566,7 +678,10 @@ namespace ProjectA {
 			}
 
 			if (character == '\n') {
-				extent.height += static_cast<uint32>(textStyle.fontSize);
+				// TODO: lyah::max
+				preferredWidth = std::max(preferredWidth, lineWidth);
+
+				lineWidth = 0;
 				firstLineGlyph = true;
 
 				continue;
@@ -583,11 +698,69 @@ namespace ProjectA {
 				}
 			}
 
-			advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * textStyle.fontSize);
+			const float32 advanceWidth = std::ceil(glyph.advanceWidth / static_cast<float32>(font.getLineHeight()) * textStyle.fontSize);
 
-			extent.width += static_cast<uint32>(advanceWidth);
+			lineWidth += static_cast<uint32>(advanceWidth);
 		}
 
-		return extent;
+		// TODO: lyah::max
+		preferredWidth = std::max(preferredWidth, lineWidth);
+
+		return preferredWidth;
+	}
+
+	uint32 GUILayer::calculateTextMinimumWidth(const std::string& string, const TextStyle& textStyle) const {
+		const TrueTypeFont& font = *fonts[textStyle.font].font;
+
+		uint32 minimumWidth = 0;
+		uint32 wordWidth = 0;
+
+		bool firstLineGlyph = true;
+
+		for (const char character : string) {
+			if (character < 0) {
+				// TODO: Handle UTF-16 characters.
+
+				continue;
+			}
+
+			if (character == '\n') {
+				// TODO: lyah::max
+				minimumWidth = std::max(minimumWidth, wordWidth);
+
+				wordWidth = 0;
+
+				break;
+			}
+
+			const uint16 codePoint = static_cast<uint16>(character);
+			const Glyph& glyph = font[codePoint];
+
+			if (firstLineGlyph) {
+				firstLineGlyph = false;
+
+				if (glyph.invisible) {
+					continue;
+				}
+			}
+
+			if (glyph.invisible) {
+				// TODO: lyah::max
+				minimumWidth = std::max(minimumWidth, wordWidth);
+
+				wordWidth = 0;
+
+				continue;
+			}
+
+			const float32 advanceWidth = std::ceil(glyph.advanceWidth / static_cast<float32>(font.getLineHeight()) * textStyle.fontSize);
+
+			wordWidth += static_cast<uint32>(advanceWidth);
+		}
+
+		// TODO: lyah::max
+		minimumWidth = std::max(minimumWidth, wordWidth);
+
+		return minimumWidth;
 	}
 }

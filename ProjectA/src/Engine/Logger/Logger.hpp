@@ -7,33 +7,6 @@
 
 namespace ProjectA {
 	class Logger {
-		private:
-			static constexpr std::size_t TIME_PADDING = 14;
-			static constexpr std::size_t LEVEL_NAME_PADDING = 5;
-			static constexpr uint8 LOG_LEVEL_BACKGROUND_COLORS[] = {0, 0, 0, 0, 101, 107};
-			static constexpr uint8 LOG_LEVEL_FOREGROUND_COLORS[] = {97, 37, 94, 93, 97, 30};
-			static constexpr const char* LOG_LEVEL_NAMES[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
-			static std::ostream* LOG_LEVEL_OUTPUT_STREAMS[];
-
-			static std::size_t namePadding;
-
-			static std::ostringstream formatStream;
-
-		public:
-			static Logger engineLogger;
-			static Logger clientLogger;
-
-			static constexpr std::string_view argumentInjectionPattern = "[]";
-
-		private:
-			std::ostringstream stream;
-
-		public:
-			std::string name;
-			LogLevel minimumLogLevel;
-			LogStructure logStructure = LogStructure::TIME | LogStructure::LOGGER_NAME | LogStructure::LOG_LEVEL_NAME;
-			std::size_t spacing = 3;
-
 		public:
 			template<typename CurrentArgument>
 			static std::string format(CurrentArgument&& argument) {
@@ -188,5 +161,32 @@ namespace ProjectA {
 				log(LogLevel::FATAL, message);
 				Platform::fatalExit(code, message);
 			}
+
+		private:
+			static constexpr std::size_t TIME_PADDING = 14;
+			static constexpr std::size_t LEVEL_NAME_PADDING = 5;
+			static constexpr uint8 LOG_LEVEL_BACKGROUND_COLORS[] = {0, 0, 0, 0, 101, 107};
+			static constexpr uint8 LOG_LEVEL_FOREGROUND_COLORS[] = {97, 37, 94, 93, 97, 30};
+			static constexpr const char* LOG_LEVEL_NAMES[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
+			static std::ostream* LOG_LEVEL_OUTPUT_STREAMS[];
+
+			static std::size_t namePadding;
+
+			static std::ostringstream formatStream;
+
+		public:
+			static Logger engineLogger;
+			static Logger clientLogger;
+
+			static constexpr std::string_view argumentInjectionPattern = "[]";
+
+		private:
+			std::ostringstream stream;
+
+		public:
+			std::string name;
+			LogLevel minimumLogLevel;
+			LogStructure logStructure = LogStructure::TIME | LogStructure::LOGGER_NAME | LogStructure::LOG_LEVEL_NAME;
+			std::size_t spacing = 3;
 	};
 }

@@ -55,7 +55,10 @@ namespace ProjectA {
 
 			bool onWindowResize(WindowResizeEvent& event);
 
-			Extent2D calculateTextSize(const std::string& string, const TextStyle& textStyle) const;
+			uint32 calculateTextPreferredWidth(const std::string& string, const TextStyle& textStyle) const;
+
+			// Returns the size 
+			uint32 calculateTextMinimumWidth(const std::string& string, const TextStyle& textStyle) const;
 
 		protected:
 			// Shrink towards the layout direction.
@@ -78,7 +81,6 @@ namespace ProjectA {
 
 			std::vector<uint32> openedComponents;
 			std::vector<GUIContainer> components;
-			std::vector<TextComponent> textComponents;
 	};
 
 	#define GUIComponent(component) for (bool _opened = (openComponent(component), true); _opened; _opened = false, closeComponent())
