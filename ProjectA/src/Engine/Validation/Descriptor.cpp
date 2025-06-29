@@ -83,10 +83,25 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.framebuffer must be a valid Framebuffer.");
 		}
 		else {
-			if (descriptor.clearValues.size() < descriptor.framebuffer->getRenderPass()->getClearValueCount()) {
+			const ref<RenderPass>& renderPass = descriptor.framebuffer->getRenderPass();
+
+			if (renderPass == nullptr) {
 				errorCount += 1;
 
-				ENGINE_ERROR("descriptor.clearValues must have a number of clear values greater than or equal to the last attachment index in descriptor.framebuffer.renderPass having a load operation of LoadOperation::CLEAR.");
+				ENGINE_ERROR("descriptor.framebuffer.renderPass must be a valid RenderPass.");
+			}
+			else {
+				if (descriptor.clearValues.size() <= renderPass->getLastClearAttachmentIndex()) {
+					errorCount += 1;
+
+					ENGINE_ERROR("descriptor.clearValues.count must be greater than the last attachment index in descriptor.framebuffer.renderPass specifying a load operation (or a stencil load operation) of LoadOperation::CLEAR.");
+				}
+
+				if (descriptor.clearValues.size() > renderPass->getAttachmentCount()) {
+					errorCount += 1;
+
+					ENGINE_ERROR("descriptor.clearValues.count must be smaller than the number of attachments in descriptor.framebuffer.renderPass.");
+				}
 			}
 		}
 

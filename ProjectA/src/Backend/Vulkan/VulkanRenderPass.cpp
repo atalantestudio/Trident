@@ -28,6 +28,7 @@ namespace ProjectA {
 			const sequence<ColorAttachment>& colorAttachments = subpass->getColorAttachments();
 			const uint32 colorAttachmentCount = static_cast<uint32>(colorAttachments.count);
 			const uint32 resolveAttachmentCount = subpass->getResolveAttachmentCount();
+			const uint32 depthStencilAttachmentCount = static_cast<uint32>(subpass->hasDepthStencilAttachment());
 
 			for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < colorAttachmentCount; colorAttachmentIndex += 1) {
 				const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
@@ -58,25 +59,6 @@ namespace ProjectA {
 
 			subpassAttachmentOffset += colorAttachmentCount;
 
-			for (uint32 resolveAttachmentIndex = 0; resolveAttachmentIndex < resolveAttachmentCount; resolveAttachmentIndex += 1) {
-				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[subpassAttachmentOffset + resolveAttachmentIndex];
-				resolveAttachmentDescription.flags = 0;
-				resolveAttachmentDescription.format = surfaceFormat.format;
-				resolveAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
-				resolveAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-				resolveAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-				resolveAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-				resolveAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-				resolveAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				resolveAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-				VkAttachmentReference& resolveAttachmentReference = attachmentReferences[subpassAttachmentOffset + resolveAttachmentIndex];
-				resolveAttachmentReference.attachment = subpassAttachmentOffset + resolveAttachmentIndex;
-				resolveAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			}
-
-			subpassAttachmentOffset += resolveAttachmentCount;
-
 			if (subpass->hasDepthStencilAttachment()) {
 				const DepthStencilAttachment depthStencilAttachment = subpass->getDepthStencilAttachment();
 
@@ -95,8 +77,30 @@ namespace ProjectA {
 				depthStencilAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 				VkAttachmentReference& depthStencilAttachmentReference = attachmentReferences[subpassAttachmentOffset];
-				depthStencilAttachmentReference.attachment = colorAttachmentCount + resolveAttachmentCount;
+				depthStencilAttachmentReference.attachment = subpassAttachmentOffset;
 				depthStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			}
+
+			subpassAttachmentOffset += depthStencilAttachmentCount;
+
+			for (uint32 resolveAttachmentIndex = 0; resolveAttachmentIndex < resolveAttachmentCount; resolveAttachmentIndex += 1) {
+				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[subpassAttachmentOffset + resolveAttachmentIndex];
+				resolveAttachmentDescription.flags = 0;
+				resolveAttachmentDescription.format = surfaceFormat.format;
+				resolveAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+				resolveAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				resolveAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+				// TODO: Expose stencilLoadOp and stencilStoreOp.
+				resolveAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				resolveAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+				resolveAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				resolveAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+				VkAttachmentReference& resolveAttachmentReference = attachmentReferences[subpassAttachmentOffset + resolveAttachmentIndex];
+				resolveAttachmentReference.attachment = subpassAttachmentOffset + resolveAttachmentIndex;
+				resolveAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 			}
 
 			VkSubpassDescription& subpassDescription = subpassDescriptions[subpassIndex];
@@ -108,14 +112,14 @@ namespace ProjectA {
 			subpassDescription.pColorAttachments = &attachmentReferences[0];
 
 			if (resolveAttachmentCount > 0) {
-				subpassDescription.pResolveAttachments = &attachmentReferences[colorAttachmentCount];
+				subpassDescription.pResolveAttachments = &attachmentReferences[colorAttachmentCount + depthStencilAttachmentCount];
 			}
 			else {
 				subpassDescription.pResolveAttachments = nullptr;
 			}
 
 			if (subpass->hasDepthStencilAttachment()) {
-				subpassDescription.pDepthStencilAttachment = &attachmentReferences[colorAttachmentCount + resolveAttachmentCount];
+				subpassDescription.pDepthStencilAttachment = &attachmentReferences[colorAttachmentCount];
 			}
 			else {
 				subpassDescription.pDepthStencilAttachment = nullptr;

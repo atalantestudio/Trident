@@ -11,33 +11,45 @@ namespace ProjectA {
 			{
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-				for (const ref<Subpass>& subpass : descriptor.subpasses) {
+				for (const ref<Subpass>& subpass : subpasses) {
 					attachmentCount += subpass->getColorAttachmentCount() + subpass->getResolveAttachmentCount();
 
 					if (subpass->hasDepthStencilAttachment()) {
 						// TODO: +1 if depth stencil resolve attachment?
 						attachmentCount += 1;
-						depthStencilSubpass = true;
+						anyDepthStencilSubpass = true;
 					}
 				}
 
-				DEBUG_ASSERT(attachmentCount > 0);
+				ENGINE_ASSERT(attachmentCount > 0, "A render pass must have at least 1 attachment.");
 
-				// TODO: Restore clear values.
-				/* if (depthStencil && depthStencilAttachment.loadOperation == LoadOperation::CLEAR) {
-					clearValueCount += 1;
-				}
-				else {
-					for (sint32 colorAttachmentIndex = static_cast<sint32>(colorAttachmentCount - 1); colorAttachmentIndex >= 0; colorAttachmentIndex -= 1) {
-						const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
+				uint32 lastAttachmentIndex = attachmentCount - 1;
 
-						if (colorAttachment.loadOperation != LoadOperation::CLEAR) {
-							clearValueCount = colorAttachmentIndex;
+				for (sint32 subpassIndex = static_cast<sint32>(subpasses.count) - 1; subpassIndex >= 0; subpassIndex -= 1) {
+					const ref<Subpass>& subpass = subpasses[subpassIndex];
+
+					if (subpass->hasDepthStencilAttachment()) {
+						if (subpass->getDepthStencilAttachment().loadOperation == LoadOperation::CLEAR) {
+							lastClearAttachmentIndex = lastAttachmentIndex;
+							lastClearDepthStencilAttachmentIndex = lastAttachmentIndex;
 
 							break;
 						}
+
+						lastAttachmentIndex -= 1;
 					}
-				} */
+
+					for (sint32 colorAttachmentIndex = static_cast<sint32>(subpass->getColorAttachmentCount()) - 1; colorAttachmentIndex >= 0; colorAttachmentIndex -= 1) {
+						if (subpass->getColorAttachments()[colorAttachmentIndex].loadOperation == LoadOperation::CLEAR) {
+							lastClearAttachmentIndex = lastAttachmentIndex;
+							lastClearColorAttachmentIndex = lastAttachmentIndex;
+
+							break;
+						}
+
+						lastAttachmentIndex -= (subpass->getColorAttachmentCount() + subpass->getResolveAttachmentCount()) / subpass->getColorAttachmentCount();
+					}
+				}
 			}
 
 			virtual ~RenderPass() = default;
@@ -46,12 +58,12 @@ namespace ProjectA {
 				return attachmentCount;
 			}
 
-			uint32 getClearValueCount() const {
-				return clearValueCount;
+			uint32 getLastClearAttachmentIndex() const {
+				return lastClearAttachmentIndex;
 			}
 
-			bool hasDepthStencilSubpass() const {
-				return depthStencilSubpass;
+			bool hasAnyDepthStencilSubpass() const {
+				return anyDepthStencilSubpass;
 			}
 
 			const ref<Subpass>& getSubpass(uint32 index) const {
@@ -66,10 +78,18 @@ namespace ProjectA {
 
 		protected:
 			uint32 attachmentCount = 0;
-			uint32 clearValueCount = 0;
+
+			// Largest attachment index specifying a load operation (or stencil load operation, if the attachment has a depth/stencil format) of LoadOperation::CLEAR.
+			uint32 lastClearAttachmentIndex;
+
+			// These are used by the OpenGL adapter.
+			uint32 lastClearColorAttachmentIndex = ~0;
+			uint32 lastClearDepthStencilAttachmentIndex = ~0;
 
 		private:
-			bool depthStencilSubpass = false;
+			// True if any subpass has a depth stencil attachment.
+			bool anyDepthStencilSubpass = false;
+
 			sequence<ref<Subpass>> subpasses;
 	};
 }

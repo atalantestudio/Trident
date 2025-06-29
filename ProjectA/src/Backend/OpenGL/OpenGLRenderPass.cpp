@@ -8,7 +8,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		// TODO: Check per subpass instead.
+		// TODO: Check per subpass instead?
 		/* GLint maxColorAttachments;
 
 		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachments);

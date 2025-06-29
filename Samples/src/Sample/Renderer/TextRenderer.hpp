@@ -315,19 +315,19 @@ namespace ProjectA {
 
 						// Top-left
 						vertexMappedRange[vertexIndex + 0].vertex = {x, y};
-						vertexMappedRange[vertexIndex + 0].imageCoordinate = {glyph.minCoordinateX, glyph.minCoordinateY};
+						vertexMappedRange[vertexIndex + 0].imageCoordinate = {glyph.minCoordinate.x, glyph.minCoordinate.y};
 
 						// Top-right
 						vertexMappedRange[vertexIndex + 1].vertex = {x + width, y};
-						vertexMappedRange[vertexIndex + 1].imageCoordinate = {glyph.maxCoordinateX, glyph.minCoordinateY};
+						vertexMappedRange[vertexIndex + 1].imageCoordinate = {glyph.maxCoordinate.x, glyph.minCoordinate.y};
 
 						// Bottom-right
 						vertexMappedRange[vertexIndex + 2].vertex = {x + width, y + fontSize};
-						vertexMappedRange[vertexIndex + 2].imageCoordinate = {glyph.maxCoordinateX, glyph.maxCoordinateY};
+						vertexMappedRange[vertexIndex + 2].imageCoordinate = {glyph.maxCoordinate.x, glyph.maxCoordinate.y};
 
 						// Bottom-left
 						vertexMappedRange[vertexIndex + 3].vertex = {x, y + fontSize};
-						vertexMappedRange[vertexIndex + 3].imageCoordinate = {glyph.minCoordinateX, glyph.maxCoordinateY};
+						vertexMappedRange[vertexIndex + 3].imageCoordinate = {glyph.minCoordinate.x, glyph.maxCoordinate.y};
 
 						vertexIndex += 4;
 					}

@@ -103,12 +103,12 @@ namespace ProjectA {
 		framebufferDescriptor.renderPass = renderPass;
 		framebufferDescriptor.imageViews = sequence<ref<ImageView>>(3);
 		framebufferDescriptor.imageViews[0] = colorImageView;
-		framebufferDescriptor.imageViews[2] = depthStencilImageView;
+		framebufferDescriptor.imageViews[1] = depthStencilImageView;
 		framebufferDescriptor.extent = extent;
 		framebufferDescriptor.layerCount = 1;
 
 		for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
-			framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
+			framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 		}
@@ -839,16 +839,15 @@ namespace ProjectA {
 		const float32 width = static_cast<float32>(swapchain->getExtent().width);
 		const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
-		const ClearValue colorAttachmentClearValue = {1.0f, 1.0f, 1.0f, 1.0f};
-		const ClearValue resolveAttachmentClearValue = {1.0f, 1.0f, 1.0f, 1.0f};
+		const ClearValue colorClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
-		ClearValue depthStencilAttachmentClearValue{};
-		depthStencilAttachmentClearValue.depth = 0.0f;
-		depthStencilAttachmentClearValue.stencil = 0;
+		ClearValue depthStencilClearValue{};
+		depthStencilClearValue.depth = 0.0f;
+		depthStencilClearValue.stencil = 0;
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-		beginRenderPassDescriptor.clearValues = {colorAttachmentClearValue, resolveAttachmentClearValue, depthStencilAttachmentClearValue};
+		beginRenderPassDescriptor.clearValues = {colorClearValue, depthStencilClearValue, colorClearValue};
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);

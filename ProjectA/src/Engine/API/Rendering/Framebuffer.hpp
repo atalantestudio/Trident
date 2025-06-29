@@ -24,8 +24,8 @@ namespace ProjectA {
 				return colorAttachmentCount;
 			}
 
-			bool hasDepthStencilAttachment() const {
-				return depthStencilAttachment;
+			uint32 getDepthStencilAttachmentIndex() const {
+				return depthStencilAttachmentIndex;
 			}
 
 		protected:
@@ -37,14 +37,13 @@ namespace ProjectA {
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 				for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count; imageViewIndex += 1) {
-					const Image* image = descriptor.imageViews[imageViewIndex]->getImage();
+					if (isDepthFormat(descriptor.imageViews[imageViewIndex]->getImage()->getFormat())) {
+						depthStencilAttachmentIndex = imageViewIndex;
 
-					if (isDepthFormat(image->getFormat())) {
-						depthStencilAttachment = true;
+						continue;
 					}
-					else {
-						colorAttachmentCount += 1;
-					}
+
+					colorAttachmentCount += 1;
 				}
 			}
 
@@ -53,6 +52,6 @@ namespace ProjectA {
 			Extent2D extent;
 			uint32 layerCount;
 			uint32 colorAttachmentCount = 0;
-			bool depthStencilAttachment = false;
+			uint32 depthStencilAttachmentIndex = ~0;
 	};
 }

@@ -3,7 +3,6 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	// TODO: Color is too bright with the OpenGL adapter.
 	class ColorBlendRenderer : public Renderer {
 		public:
 			void build() override {
@@ -159,7 +158,7 @@ namespace ProjectA {
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
+				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);

@@ -64,12 +64,12 @@ namespace ProjectA {
 		sequence<VkClearValue> clearValues(descriptor.clearValues.size());
 
 		for (uint64 clearValueIndex = 0; clearValueIndex < clearValues.count; clearValueIndex += 1) {
+			clearValues[clearValueIndex].depthStencil.depth = descriptor.clearValues[clearValueIndex].depth;
+			clearValues[clearValueIndex].depthStencil.stencil = descriptor.clearValues[clearValueIndex].stencil;
 			clearValues[clearValueIndex].color.float32[0] = descriptor.clearValues[clearValueIndex].color[0];
 			clearValues[clearValueIndex].color.float32[1] = descriptor.clearValues[clearValueIndex].color[1];
 			clearValues[clearValueIndex].color.float32[2] = descriptor.clearValues[clearValueIndex].color[2];
 			clearValues[clearValueIndex].color.float32[3] = descriptor.clearValues[clearValueIndex].color[3];
-			clearValues[clearValueIndex].depthStencil.depth = descriptor.clearValues[clearValueIndex].depth;
-			clearValues[clearValueIndex].depthStencil.stencil = descriptor.clearValues[clearValueIndex].stencil;
 		}
 
 		VkRenderPassBeginInfo renderPassBeginInfo{};

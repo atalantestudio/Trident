@@ -409,7 +409,7 @@ namespace ProjectA {
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-		beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}};
+		beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 

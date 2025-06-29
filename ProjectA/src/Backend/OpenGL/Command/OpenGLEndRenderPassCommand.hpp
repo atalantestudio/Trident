@@ -18,6 +18,7 @@ namespace ProjectA {
 					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 					// TODO: Why resolveAttachmentCount isn't needed as offset here?
+					// TODO: Include subpass offset.
 					glReadBuffer(GL_COLOR_ATTACHMENT0 + subpass->getPresentAttachmentIndex());
 
 					glDrawBuffer(GL_FRONT);

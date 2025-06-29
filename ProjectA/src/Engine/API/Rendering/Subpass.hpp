@@ -69,20 +69,4 @@ namespace ProjectA {
 			bool depthStencil;
 			DepthStencilAttachment depthStencilAttachment;
 	};
-
-	/* class SubpassOld {
-		public:
-			Subpass(const SubpassDescriptor& subpassDescriptor) :
-				depthStencilAttachment(subpassDescriptor.depthStencil)
-			{
-				// TODO
-			}
-
-			bool hasDepthStencilAttachment() const {
-				return depthStencilAttachment;
-			}
-
-		private:
-			const bool depthStencilAttachment;
-	}; */
 }
