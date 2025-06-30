@@ -74,6 +74,7 @@ namespace ProjectA {
 		this->indexTypeSize = indexTypeSize;
 
 		commandBuffer.emplace_back(createRef<OpenGLBindIndexBufferCommand>(
+			renderPipeline->vertexArray,
 			std::static_pointer_cast<OpenGLBuffer>(indexBuffer)->object
 		));
 	}

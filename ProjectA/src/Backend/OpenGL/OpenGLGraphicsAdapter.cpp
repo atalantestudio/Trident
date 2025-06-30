@@ -23,8 +23,8 @@ namespace ProjectA {
 
 		renderingContext.makeCurrent();
 
-		// TODO: Some procedures like glBindBuffer are automatically loaded by Windows.
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glAttachShader);
+		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBufferRange);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindFramebuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindImageTexture);
@@ -121,6 +121,7 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage2D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage3D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glUnmapNamedBuffer);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexArrayElementBuffer);
 		#else
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glBufferStorage);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyBufferSubData);

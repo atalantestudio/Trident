@@ -4,7 +4,10 @@
 
 namespace ProjectA {
 	extern PFNGLATTACHSHADERPROC glAttachShader;
+
+	// Required even with DSA to bind buffers to GL_PIXEL_UNPACK_BUFFER for buffer-image copy.
 	extern PFNGLBINDBUFFERPROC glBindBuffer;
+
 	extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
 	extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
 	extern PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
@@ -102,6 +105,7 @@ namespace ProjectA {
 		extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
 		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
 		extern PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer;
+		extern PFNGLVERTEXARRAYELEMENTBUFFERPROC glVertexArrayElementBuffer;
 	#else
 		extern PFNGLBUFFERSTORAGEPROC glBufferStorage;
 		extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
