@@ -8,6 +8,8 @@ namespace ProjectA {
 		STORAGE = BIT(5),
 		INDEX = BIT(6),
 		VERTEX = BIT(7),
+
+		// TODO: Implement indirect buffers.
 		INDIRECT = BIT(8),
 	};
 

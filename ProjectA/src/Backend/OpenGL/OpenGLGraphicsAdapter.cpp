@@ -23,8 +23,8 @@ namespace ProjectA {
 
 		renderingContext.makeCurrent();
 
+		// TODO: Some procedures like glBindBuffer are automatically loaded by Windows.
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glAttachShader);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBufferRange);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindFramebuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindImageTexture);
@@ -47,7 +47,6 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCompileShader);
 		#endif
 
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateBuffers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateFramebuffers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateProgram);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateSamplers);
@@ -83,10 +82,8 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetShaderiv);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetTextureSubImage);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glLinkProgram);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glMapNamedBufferRange);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glMemoryBarrier);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glMinSampleShading);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedBufferStorage);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glProvokingVertex);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glSamplerParameteri);
 
@@ -107,7 +104,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2DMultisample);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage3DMultisample);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureView);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glUnmapNamedBuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glUseProgram);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribBinding);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribFormat);
@@ -117,16 +113,24 @@ namespace ProjectA {
 
 		#ifdef OPENGL_USE_DSA
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyNamedBufferSubData);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateBuffers);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glMapNamedBufferRange);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedBufferStorage);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedFramebufferDrawBuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage1D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage2D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage3D);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glUnmapNamedBuffer);
 		#else
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glBufferStorage);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyBufferSubData);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawBuffers);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glGenBuffers);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glMapBufferRange);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage1D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage2D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage3D);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glUnmapBuffer);
 		#endif
 
 		#ifdef DEBUG_ENABLE_MESSENGER

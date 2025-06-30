@@ -15,6 +15,10 @@ namespace ProjectA {
 			void* getMappedRange(uint64 offset, uint64 size) const final override;
 
 		private:
+			#ifndef OPENGL_USE_DSA
+				const GLenum target;
+			#endif
+
 			GLbitfield storageAccessFlags = 0;
 			GLbitfield mapAccessFlags = 0;
 	};

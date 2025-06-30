@@ -27,7 +27,6 @@ namespace ProjectA {
 		extern PFNGLCOMPILESHADERPROC glCompileShader;
 	#endif
 
-	extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
 	extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
 	extern PFNGLCREATEPROGRAMPROC glCreateProgram;
 	extern PFNGLCREATESAMPLERSPROC glCreateSamplers;
@@ -66,7 +65,6 @@ namespace ProjectA {
 	extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
 	extern PFNGLMEMORYBARRIERPROC glMemoryBarrier;
 	extern PFNGLMINSAMPLESHADINGPROC glMinSampleShading;
-	extern PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage;
 	extern PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
 	extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
 
@@ -87,7 +85,6 @@ namespace ProjectA {
 	extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;
 	extern PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC glTextureStorage3DMultisample;
 	extern PFNGLTEXTUREVIEWPROC glTextureView;
-	extern PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer;
 	extern PFNGLUSEPROGRAMPROC glUseProgram;
 	extern PFNGLVERTEXATTRIBBINDINGPROC glVertexAttribBinding;
 	extern PFNGLVERTEXATTRIBFORMATPROC glVertexAttribFormat;
@@ -97,15 +94,23 @@ namespace ProjectA {
 
 	#ifdef OPENGL_USE_DSA
 		extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
+		extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
+		extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
+		extern PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage;
 		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
 		extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
 		extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
 		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
+		extern PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer;
 	#else
+		extern PFNGLBUFFERSTORAGEPROC glBufferStorage;
 		extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
 		extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
+		extern PFNGLGENBUFFERSPROC glGenBuffers;
+		extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
 		extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
 		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
 		extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
+		extern PFNGLUNMAPBUFFERPROC glUnmapBuffer;
 	#endif
 }

@@ -37,7 +37,7 @@ namespace ProjectA {
 						colorAttachments[colorAttachmentIndex] = GL_COLOR_ATTACHMENT0 + colorAttachmentIndex;
 					}
 
-					glDrawBuffers(static_cast<GLsizei>(colorAttachments.count), drawBuffers);
+					glDrawBuffers(static_cast<GLsizei>(colorAttachments.count), colorAttachments);
 				#endif
 			}
 
