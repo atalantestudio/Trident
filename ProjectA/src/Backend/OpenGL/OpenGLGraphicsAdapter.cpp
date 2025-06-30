@@ -29,16 +29,9 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindFramebuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindImageTexture);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindSampler);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindTextureUnit);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexArray);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexBuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBlendFunci);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glBlitFramebuffer);
-
-		#ifdef BUILD_MODE_DEBUG
-			LOAD_PROCEDURE_ADDRESS(renderingContext, glCheckFramebufferStatus);
-		#endif
-
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glClearBufferfi);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glClearBufferfv);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glClientWaitSync);
@@ -112,17 +105,26 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexBindingDivisor);
 
 		#ifdef OPENGL_USE_DSA
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glBindTextureUnit);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glBlitNamedFramebuffer);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyNamedBufferSubData);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateBuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glMapNamedBufferRange);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedBufferStorage);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedFramebufferDrawBuffers);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedFramebufferReadBuffer);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage1D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage2D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage3D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glUnmapNamedBuffer);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexArrayElementBuffer);
+
+			#ifdef BUILD_MODE_DEBUG
+				LOAD_PROCEDURE_ADDRESS(renderingContext, glCheckNamedFramebufferStatus);
+			#endif
 		#else
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glActiveTexture);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glBlitFramebuffer);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glBufferStorage);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyBufferSubData);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawBuffers);
@@ -132,6 +134,10 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage2D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage3D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glUnmapBuffer);
+
+			#ifdef BUILD_MODE_DEBUG
+				LOAD_PROCEDURE_ADDRESS(renderingContext, glCheckFramebufferStatus);
+			#endif
 		#endif
 
 		#ifdef DEBUG_ENABLE_MESSENGER
@@ -144,6 +150,10 @@ namespace ProjectA {
 		#endif
 
 		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
+
+		#ifdef OPENGL_USE_DSA
+			glNamedFramebufferDrawBuffers(0, 1, &defaultFramebufferDrawBuffer);
+		#endif
 
 		device = createRef<OpenGLDevice>(renderingContext);
 	}

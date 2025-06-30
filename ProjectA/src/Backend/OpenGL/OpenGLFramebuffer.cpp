@@ -92,12 +92,16 @@ namespace ProjectA {
 		#endif
 
 		#ifdef BUILD_MODE_DEBUG
-			const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			GLenum status;
+
+			#ifdef OPENGL_USE_DSA
+				status = glCheckNamedFramebufferStatus(object, GL_FRAMEBUFFER);
+			#else
+				status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			#endif
 
 			ENGINE_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "The bound framebuffer is incomplete.");
 		#endif
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	OpenGLFramebuffer::~OpenGLFramebuffer() {

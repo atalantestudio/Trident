@@ -11,7 +11,7 @@ namespace ProjectA {
 	#define PREFERRED_GPU_TYPE GPU_TYPE_DISCRETE
 
 	// TODO: Implement.
-	// Verify the validity of the checksum for each table of a TTF file.
+	// Verify the validity of the table checksums in a TTF file.
 	// #define TTF_PARSER_VERIFY_CHECKSUM
 
 	// If enabled, glyphs with a single contour are checked to ensure that the contour is clockwise.

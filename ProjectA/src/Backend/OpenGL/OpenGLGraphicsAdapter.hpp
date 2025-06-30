@@ -9,6 +9,9 @@
 namespace ProjectA {
 	class OpenGLGraphicsAdapter final : public GraphicsAdapter {
 		public:
+			static constexpr GLenum defaultFramebufferDrawBuffer = GL_FRONT_LEFT;
+
+		public:
 			explicit OpenGLGraphicsAdapter(const Window& window);
 
 			~OpenGLGraphicsAdapter() final override;

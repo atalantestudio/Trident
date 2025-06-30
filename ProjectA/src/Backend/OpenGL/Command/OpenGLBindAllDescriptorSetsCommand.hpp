@@ -33,8 +33,14 @@ namespace ProjectA {
 
 						for (GLuint unit = 0; unit < descriptorSetLayoutBinding.imageViews.size(); unit += 1) {
 							const ref<OpenGLImageView>& imageView = std::static_pointer_cast<OpenGLImageView>(descriptorSetLayoutBinding.imageViews[unit]);
+							const OpenGLImage& image = *static_cast<const OpenGLImage*>(imageView->getImage());
 
-							glBindTextureUnit(binding + unit, imageView->object);
+							#ifdef OPENGL_USE_DSA
+								glBindTextureUnit(binding + unit, imageView->object);
+							#else
+								glActiveTexture(GL_TEXTURE0 + binding + unit);
+								glBindTexture(image.target, imageView->object);
+							#endif
 
 							if (unit < descriptorSetLayoutBinding.samplers.size()) {
 								const ref<OpenGLSampler>& sampler = std::static_pointer_cast<OpenGLSampler>(descriptorSetLayoutBinding.samplers[unit]);
@@ -43,7 +49,7 @@ namespace ProjectA {
 							}
 
 							if (isCompute) {
-								GLenum format = static_cast<const OpenGLImage*>(imageView->getImage())->internalFormat;
+								GLenum format = image.internalFormat;
 
 								if (format == GL_SRGB8_ALPHA8) {
 									format = GL_RGBA8;

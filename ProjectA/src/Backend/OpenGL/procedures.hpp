@@ -4,24 +4,14 @@
 
 namespace ProjectA {
 	extern PFNGLATTACHSHADERPROC glAttachShader;
-
-	// Required even with DSA to bind buffers to GL_PIXEL_UNPACK_BUFFER for buffer-image copy.
 	extern PFNGLBINDBUFFERPROC glBindBuffer;
-
 	extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
 	extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
 	extern PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
 	extern PFNGLBINDSAMPLERPROC glBindSampler;
-	extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
 	extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
 	extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
 	extern PFNGLBLENDFUNCIPROC glBlendFunci;
-	extern PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
-
-	#ifdef BUILD_MODE_DEBUG
-		extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
-	#endif
-
 	extern PFNGLCLEARBUFFERFIPROC glClearBufferfi;
 	extern PFNGLCLEARBUFFERFVPROC glClearBufferfv;
 	extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
@@ -65,7 +55,6 @@ namespace ProjectA {
 	extern PFNGLGETSHADERIVPROC glGetShaderiv;
 	extern PFNGLGETTEXTURESUBIMAGEPROC glGetTextureSubImage;
 	extern PFNGLLINKPROGRAMPROC glLinkProgram;
-	extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
 	extern PFNGLMEMORYBARRIERPROC glMemoryBarrier;
 	extern PFNGLMINSAMPLESHADINGPROC glMinSampleShading;
 	extern PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
@@ -96,17 +85,26 @@ namespace ProjectA {
 	extern PFNGLVERTEXBINDINGDIVISORPROC glVertexBindingDivisor;
 
 	#ifdef OPENGL_USE_DSA
+		extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
+		extern PFNGLBLITNAMEDFRAMEBUFFERPROC glBlitNamedFramebuffer;
 		extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
 		extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
 		extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
 		extern PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage;
 		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
+		extern PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC glNamedFramebufferReadBuffer;
 		extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
 		extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
 		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
 		extern PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer;
 		extern PFNGLVERTEXARRAYELEMENTBUFFERPROC glVertexArrayElementBuffer;
+
+		#ifdef BUILD_MODE_DEBUG
+			extern PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC glCheckNamedFramebufferStatus;
+		#endif
 	#else
+		extern PFNGLACTIVETEXTUREPROC glActiveTexture;
+		extern PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
 		extern PFNGLBUFFERSTORAGEPROC glBufferStorage;
 		extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
 		extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
@@ -116,5 +114,9 @@ namespace ProjectA {
 		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
 		extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
 		extern PFNGLUNMAPBUFFERPROC glUnmapBuffer;
+
+		#ifdef BUILD_MODE_DEBUG
+			extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
+		#endif
 	#endif
 }
