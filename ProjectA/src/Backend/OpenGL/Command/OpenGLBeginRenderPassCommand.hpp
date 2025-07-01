@@ -17,16 +17,26 @@ namespace ProjectA {
 			void execute() const final override {
 				const OpenGLFramebuffer& glFramebuffer = *std::static_pointer_cast<OpenGLFramebuffer>(descriptor.framebuffer);
 
-				glBindFramebuffer(GL_FRAMEBUFFER, glFramebuffer.object);
+				#ifndef OPENGL_USE_DSA
+					glBindFramebuffer(GL_FRAMEBUFFER, glFramebuffer.object);
+				#endif
 
 				for (uint32 clearValueIndex = 0; clearValueIndex < descriptor.clearValues.size(); clearValueIndex += 1) {
 					const ClearValue& clearValue = descriptor.clearValues[clearValueIndex];
 
 					if (clearValueIndex == glFramebuffer.getDepthStencilAttachmentIndex()) {
-						glClearBufferfi(GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
+						#ifdef OPENGL_USE_DSA
+							glClearNamedFramebufferfi(glFramebuffer.object, GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
+						#else
+							glClearBufferfi(GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
+						#endif
 					}
 					else {
-						glClearBufferfv(GL_COLOR, clearValueIndex, clearValue.color);
+						#ifdef OPENGL_USE_DSA
+							glClearNamedFramebufferfv(glFramebuffer.object, GL_COLOR, clearValueIndex, clearValue.color);
+						#else
+							glClearBufferfv(GL_COLOR, clearValueIndex, clearValue.color);
+						#endif
 					}
 				}
 

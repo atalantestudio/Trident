@@ -16,22 +16,17 @@ namespace ProjectA {
 
 				if (subpass->getPresentAttachmentIndex() != std::numeric_limits<uint32>::max()) {
 					// TODO: Why resolveAttachmentCount isn't needed as offset here?
-					// TODO: Include subpass offset.
+					// TODO: Include the offset of the subpass.
 					const GLenum readBuffer = GL_COLOR_ATTACHMENT0 + subpass->getPresentAttachmentIndex();
-
-					#ifdef OPENGL_USE_DSA
-						glNamedFramebufferReadBuffer(framebuffer->object, readBuffer);
-					#else
-						glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->object);
-						glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-						glReadBuffer(readBuffer);
-						glDrawBuffer(OpenGLGraphicsAdapter::defaultFramebufferDrawBuffer);
-					#endif
 
 					const Extent2D extent = framebuffer->getExtent();
 
 					#ifdef OPENGL_USE_DSA
+						// TODO: Check why the framebuffer still needs to be bound to GL_DRAW_FRAMEBUFFER, even with DSA.
+						glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->object);
+
+						glNamedFramebufferReadBuffer(framebuffer->object, readBuffer);
+
 						glBlitNamedFramebuffer(
 							framebuffer->object,
 							0,
@@ -47,6 +42,12 @@ namespace ProjectA {
 							GL_NEAREST
 						);
 					#else
+						glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->object);
+						glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+						glReadBuffer(readBuffer);
+						glDrawBuffer(OpenGLGraphicsAdapter::defaultFramebufferDrawBuffer);
+
 						glBlitFramebuffer(
 							0,
 							0,

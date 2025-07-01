@@ -9,6 +9,9 @@
 namespace ProjectA {
 	class OpenGLGraphicsAdapter final : public GraphicsAdapter {
 		public:
+			static void loadProcedures(const OpenGLRenderingContext& renderingContext);
+
+		public:
 			static constexpr GLenum defaultFramebufferDrawBuffer = GL_FRONT_LEFT;
 
 		public:

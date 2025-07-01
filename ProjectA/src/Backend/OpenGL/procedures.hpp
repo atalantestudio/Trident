@@ -6,21 +6,22 @@ namespace ProjectA {
 	extern PFNGLATTACHSHADERPROC glAttachShader;
 	extern PFNGLBINDBUFFERPROC glBindBuffer;
 	extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
+
+	// TODO: glBindFramebuffer should only be loaded in a non-DSA context.
+	//       See OpenGLEndRenderPassCommand.
 	extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
+
 	extern PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
 	extern PFNGLBINDSAMPLERPROC glBindSampler;
 	extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
 	extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
 	extern PFNGLBLENDFUNCIPROC glBlendFunci;
-	extern PFNGLCLEARBUFFERFIPROC glClearBufferfi;
-	extern PFNGLCLEARBUFFERFVPROC glClearBufferfv;
 	extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
 
 	#ifndef OPENGL_USE_SPIRV
 		extern PFNGLCOMPILESHADERPROC glCompileShader;
 	#endif
 
-	extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
 	extern PFNGLCREATEPROGRAMPROC glCreateProgram;
 	extern PFNGLCREATESAMPLERSPROC glCreateSamplers;
 	extern PFNGLCREATESHADERPROC glCreateShader;
@@ -47,7 +48,6 @@ namespace ProjectA {
 	extern PFNGLENABLEIPROC glEnablei;
 	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 	extern PFNGLFENCESYNCPROC glFenceSync;
-	extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
 	extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
 	extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
 	extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
@@ -87,12 +87,16 @@ namespace ProjectA {
 	#ifdef OPENGL_USE_DSA
 		extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
 		extern PFNGLBLITNAMEDFRAMEBUFFERPROC glBlitNamedFramebuffer;
+		extern PFNGLCLEARNAMEDFRAMEBUFFERFIPROC glClearNamedFramebufferfi;
+		extern PFNGLCLEARNAMEDFRAMEBUFFERFVPROC glClearNamedFramebufferfv;
 		extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
 		extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
+		extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
 		extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
 		extern PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage;
 		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
 		extern PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC glNamedFramebufferReadBuffer;
+		extern PFNGLNAMEDFRAMEBUFFERTEXTUREPROC glNamedFramebufferTexture;
 		extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
 		extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
 		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
@@ -106,9 +110,13 @@ namespace ProjectA {
 		extern PFNGLACTIVETEXTUREPROC glActiveTexture;
 		extern PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
 		extern PFNGLBUFFERSTORAGEPROC glBufferStorage;
+		extern PFNGLCLEARBUFFERFIPROC glClearBufferfi;
+		extern PFNGLCLEARBUFFERFVPROC glClearBufferfv;
 		extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
 		extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
+		extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
 		extern PFNGLGENBUFFERSPROC glGenBuffers;
+		extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
 		extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
 		extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
 		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;

@@ -10,8 +10,12 @@ namespace ProjectA {
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferDescriptor& descriptor) :
 		Framebuffer(descriptor)
 	{
-		glCreateFramebuffers(1, &object);
-		glBindFramebuffer(GL_FRAMEBUFFER, object);
+		#ifdef OPENGL_USE_DSA
+			glCreateFramebuffers(1, &object);
+		#else
+			glGenFramebuffers(1, &object);
+			glBindFramebuffer(GL_FRAMEBUFFER, object);
+		#endif
 
 		// All images attached to a framebuffer must have the same number of samples.
 		// Use this information to find if the framebuffer contains multisampled attachments or not.
@@ -48,7 +52,7 @@ namespace ProjectA {
 				attachment = GL_COLOR_ATTACHMENT0 + boundAttachmentIndex;
 			}
 
-			// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even when creating the image).
+			// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even before creating the image).
 			switch (glImage->target) {
 				case GL_TEXTURE_2D:
 
@@ -60,17 +64,25 @@ namespace ProjectA {
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
 				case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
-				case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z: {
-					glFramebufferTexture2D(
-						GL_FRAMEBUFFER,
-						attachment,
-						glImage->target,
-						glImageView.object,
-						imageView->getMipLevelOffset()
-					);
+				case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+					#ifdef OPENGL_USE_DSA
+						glNamedFramebufferTexture(
+							object,
+							attachment,
+							glImageView.object,
+							imageView->getMipLevelOffset()
+						);
+					#else
+						glFramebufferTexture2D(
+							GL_FRAMEBUFFER,
+							attachment,
+							glImage->target,
+							glImageView.object,
+							imageView->getMipLevelOffset()
+						);
+					#endif
 
 					break;
-				}
 				default:
 					ENGINE_ERROR("Unhandled image target ([]).", glImage->target);
 					DEBUG_ASSERT(false);

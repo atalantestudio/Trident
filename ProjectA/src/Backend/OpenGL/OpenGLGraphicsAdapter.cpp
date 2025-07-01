@@ -15,13 +15,8 @@
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
 namespace ProjectA {
-	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const Window& window) :
-		renderingContext(window),
-		surface(createRef<OpenGLSurface>())
-	{
+	void OpenGLGraphicsAdapter::loadProcedures(const OpenGLRenderingContext& renderingContext) {
 		PROFILE_SCOPE(FUNC_SIG);
-
-		renderingContext.makeCurrent();
 
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glAttachShader);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBuffer);
@@ -32,15 +27,12 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexArray);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexBuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBlendFunci);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glClearBufferfi);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glClearBufferfv);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glClientWaitSync);
 
 		#ifndef OPENGL_USE_SPIRV
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCompileShader);
 		#endif
 
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateFramebuffers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateProgram);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateSamplers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateShader);
@@ -67,7 +59,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glEnablei);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glEnableVertexAttribArray);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glFenceSync);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glFramebufferTexture2D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetIntegeri_v);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetProgramInfoLog);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetProgramiv);
@@ -107,12 +98,16 @@ namespace ProjectA {
 		#ifdef OPENGL_USE_DSA
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glBindTextureUnit);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glBlitNamedFramebuffer);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glClearNamedFramebufferfi);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glClearNamedFramebufferfv);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyNamedBufferSubData);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateBuffers);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateFramebuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glMapNamedBufferRange);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedBufferStorage);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedFramebufferDrawBuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedFramebufferReadBuffer);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedFramebufferTexture);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage1D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage2D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage3D);
@@ -126,9 +121,13 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glActiveTexture);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glBlitFramebuffer);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glBufferStorage);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glClearBufferfi);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glClearBufferfv);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyBufferSubData);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawBuffers);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glFramebufferTexture2D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glGenBuffers);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glGenFramebuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glMapBufferRange);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage1D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage2D);
@@ -139,6 +138,17 @@ namespace ProjectA {
 				LOAD_PROCEDURE_ADDRESS(renderingContext, glCheckFramebufferStatus);
 			#endif
 		#endif
+	}
+
+	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const Window& window) :
+		renderingContext(window),
+		surface(createRef<OpenGLSurface>())
+	{
+		PROFILE_SCOPE(FUNC_SIG);
+
+		renderingContext.makeCurrent();
+
+		loadProcedures(renderingContext);
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			glEnable(GL_DEBUG_OUTPUT);
