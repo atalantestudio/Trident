@@ -8,7 +8,11 @@ namespace ProjectA {
 	OpenGLSampler::OpenGLSampler(const SamplerDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		glCreateSamplers(1, &object);
+		#ifdef OPENGL_USE_DSA
+			glCreateSamplers(1, &object);
+		#else
+			glGenSamplers(1, &object);
+		#endif
 
 		glSamplerParameteri(object, GL_TEXTURE_MAG_FILTER, getGlFilter(descriptor.magFilter));
 		glSamplerParameteri(object, GL_TEXTURE_MIN_FILTER, getGlFilter(descriptor.minFilter));

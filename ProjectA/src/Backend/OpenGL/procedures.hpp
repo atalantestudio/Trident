@@ -23,7 +23,6 @@ namespace ProjectA {
 	#endif
 
 	extern PFNGLCREATEPROGRAMPROC glCreateProgram;
-	extern PFNGLCREATESAMPLERSPROC glCreateSamplers;
 	extern PFNGLCREATESHADERPROC glCreateShader;
 	extern PFNGLCREATETEXTURESPROC glCreateTextures;
 	extern PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays;
@@ -92,6 +91,7 @@ namespace ProjectA {
 		extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
 		extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
 		extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
+		extern PFNGLCREATESAMPLERSPROC glCreateSamplers;
 		extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
 		extern PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage;
 		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
@@ -117,6 +117,7 @@ namespace ProjectA {
 		extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
 		extern PFNGLGENBUFFERSPROC glGenBuffers;
 		extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
+		extern PFNGLGENSAMPLERSPROC glGenSamplers;
 		extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
 		extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
 		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;

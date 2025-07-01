@@ -34,7 +34,6 @@ namespace ProjectA {
 		#endif
 
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateProgram);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateSamplers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateShader);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateTextures);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateVertexArrays);
@@ -103,6 +102,7 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCopyNamedBufferSubData);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateBuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateFramebuffers);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateSamplers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glMapNamedBufferRange);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedBufferStorage);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedFramebufferDrawBuffers);
@@ -128,6 +128,7 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glFramebufferTexture2D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glGenBuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glGenFramebuffers);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glGenSamplers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glMapBufferRange);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage1D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage2D);
