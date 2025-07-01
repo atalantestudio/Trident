@@ -25,6 +25,12 @@ namespace ProjectA {
 			virtual void update(const SwapchainDescriptor& descriptor) = 0;
 
 		protected:
+			explicit Swapchain(const SwapchainDescriptor& descriptor) :
+				extent(descriptor.extent)
+			{
+				DEBUG_DESCRIPTOR_GUARD(descriptor);
+			}
+
 			void createImageViews() {
 				ImageViewDescriptor imageViewDescriptor{};
 				imageViewDescriptor.mipLevelOffset = 0;

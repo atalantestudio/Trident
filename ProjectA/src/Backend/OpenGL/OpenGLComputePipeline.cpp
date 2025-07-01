@@ -5,6 +5,7 @@
 
 namespace ProjectA {
 	OpenGLComputePipeline::OpenGLComputePipeline(const ComputePipelineDescriptor& descriptor) :
+		ComputePipeline(descriptor),
 		layout(*std::static_pointer_cast<OpenGLPipelineLayout>(descriptor.pipelineLayout)),
 		program(glCreateProgram())
 	{

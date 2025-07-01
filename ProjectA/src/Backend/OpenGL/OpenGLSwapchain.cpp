@@ -6,6 +6,7 @@
 
 namespace ProjectA {
 	OpenGLSwapchain::OpenGLSwapchain(const SwapchainDescriptor& descriptor, const OpenGLRenderingContext& renderingContext, const OpenGLSurface& surface) :
+		Swapchain(descriptor),
 		renderingContext(&renderingContext),
 		surface(&surface)
 	{
@@ -24,8 +25,7 @@ namespace ProjectA {
 	void OpenGLSwapchain::update(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		DEBUG_ASSERT(descriptor.extent.width > 0);
-		DEBUG_ASSERT(descriptor.extent.height > 0);
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		extent = descriptor.extent;
 

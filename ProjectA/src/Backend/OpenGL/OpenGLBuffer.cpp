@@ -8,7 +8,7 @@
 
 namespace ProjectA {
 	OpenGLBuffer::OpenGLBuffer(const BufferDescriptor& descriptor) :
-		Buffer(descriptor.size)
+		Buffer(descriptor)
 		#ifndef OPENGL_USE_DSA
 			, target(getGlTarget(descriptor.usage))
 		#endif

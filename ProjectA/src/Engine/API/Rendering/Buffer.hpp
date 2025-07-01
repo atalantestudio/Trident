@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Rendering/Descriptor/BufferDescriptor.hpp"
+#include "Engine/Validation/Descriptor.hpp"
 
 namespace ProjectA {
 	class Buffer {
@@ -18,9 +19,11 @@ namespace ProjectA {
 			virtual void unmap() const = 0;
 
 		protected:
-			explicit Buffer(uint64 size) :
-				size(size)
-			{}
+			explicit Buffer(const BufferDescriptor& descriptor) :
+				size(descriptor.size)
+			{
+				DEBUG_DESCRIPTOR_GUARD(descriptor);
+			}
 
 		private:
 			virtual void* getMappedRange(uint64 offset, uint64 size) const = 0;

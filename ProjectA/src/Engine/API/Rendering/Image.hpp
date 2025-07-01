@@ -2,6 +2,7 @@
 
 #include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
 #include "Engine/API/Rendering/ImageLayout.hpp"
+#include "Engine/Validation/Descriptor.hpp"
 
 namespace ProjectA {
 	class ImageView;
@@ -52,7 +53,9 @@ namespace ProjectA {
 				mipLevelCount(descriptor.mipLevelCount),
 				layerCount(descriptor.layerCount),
 				sampleCount(descriptor.sampleCount)
-			{}
+			{
+				DEBUG_DESCRIPTOR_GUARD(descriptor);
+			}
 
 			virtual ref<ImageView> createViewInternal(const Image* image, const ImageViewDescriptor& descriptor) const = 0;
 

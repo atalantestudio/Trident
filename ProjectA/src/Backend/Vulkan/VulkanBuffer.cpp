@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	VulkanBuffer::VulkanBuffer(VkDevice device, const BufferDescriptor& descriptor) :
-		Buffer(descriptor.size),
+		Buffer(descriptor),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNC_SIG);

@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	static bool checkSampleCountValidity(uint8 sampleCount) {
+	static bool validateSampleCount(uint8 sampleCount) {
 		switch (sampleCount) {
 			case 1:
 			case 2:

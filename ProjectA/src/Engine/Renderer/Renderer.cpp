@@ -83,8 +83,6 @@ namespace ProjectA {
 	void Renderer::onEvent(Event& event) {}
 
 	ref<Buffer> Renderer::createBuffer(const BufferDescriptor& descriptor) {
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
 		return adapter->createBuffer(descriptor);
 	}
 
@@ -99,8 +97,6 @@ namespace ProjectA {
 	}
 
 	ref<ComputePipeline> Renderer::createComputePipeline(const ComputePipelineDescriptor& descriptor) {
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
 		return adapter->createComputePipeline(descriptor);
 	}
 
@@ -113,8 +109,6 @@ namespace ProjectA {
 	}
 
 	ref<Image> Renderer::createImage(const ImageDescriptor& descriptor) {
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
 		return adapter->createImage(descriptor);
 	}
 
@@ -123,8 +117,6 @@ namespace ProjectA {
 	}
 
 	ref<RenderPass> Renderer::createRenderPass(const RenderPassDescriptor& descriptor) {
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
 		return adapter->createRenderPass(descriptor);
 	}
 
@@ -181,8 +173,6 @@ namespace ProjectA {
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(std::string_view path, const ShaderModuleDescriptor& descriptor) {
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
 		std::string pathString(path);
 
 		if (

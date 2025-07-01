@@ -21,7 +21,11 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glAttachShader);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBufferRange);
+
+		// TODO: glBindFramebuffer should only be loaded in a non-DSA context.
+		//       See OpenGLEndRenderPassCommand.
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindFramebuffer);
+
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindImageTexture);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindSampler);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexArray);
@@ -50,17 +54,19 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetProgramiv);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetShaderInfoLog);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetShaderiv);
+
+		// TODO: There is no non-DSA variant for this function.
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetTextureSubImage);
+
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glLinkProgram);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glMemoryBarrier);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glMinSampleShading);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glProvokingVertex);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glSamplerParameteri);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2D);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage3D);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2DMultisample);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage3DMultisample);
+
+		// TODO: There is no non-DSA variant for this function.
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureView);
+
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glUseProgram);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribBinding);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribFormat);
@@ -89,6 +95,10 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedFramebufferDrawBuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedFramebufferReadBuffer);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedFramebufferTexture);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2D);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2DMultisample);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage3D);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage3DMultisample);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage1D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage2D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage3D);
@@ -112,6 +122,10 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glGenSamplers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glGenVertexArrays);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glMapBufferRange);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexStorage2D);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexStorage2DMultisample);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexStorage3D);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexStorage3DMultisample);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage1D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage2D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage3D);
@@ -206,8 +220,6 @@ namespace ProjectA {
 	}
 
 	ref<Swapchain> OpenGLGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
 		return createRef<OpenGLSwapchain>(descriptor, renderingContext, *surface);
 	}
 

@@ -7,10 +7,6 @@
 #include "Backend/OpenGL/ImageType.hpp"
 #include "Backend/OpenGL/ImageUsage.hpp"
 
-#ifdef BUILD_MODE_DEBUG
-	#include "Engine/API/Rendering/SampleCount.hpp"
-#endif
-
 namespace ProjectA {
 	OpenGLImage::OpenGLImage(const ImageDescriptor& descriptor) :
 		Image(descriptor),
@@ -20,8 +16,6 @@ namespace ProjectA {
 		format(getGlFormat(descriptor.format))
 	{
 		PROFILE_SCOPE(FUNC_SIG);
-
-		DEBUG_ASSERT(checkSampleCountValidity(sampleCount));
 
 		#ifdef OPENGL_USE_DSA
 			glCreateTextures(target, 1, &object);
@@ -33,8 +27,8 @@ namespace ProjectA {
 		switch (target) {
 			case GL_PROXY_TEXTURE_1D:
 			case GL_TEXTURE_1D:
-				// TODO: Test this path.
-				DEBUG_ASSERT(false);
+				// TODO: Implement 1D images.
+				ENGINE_ASSERT(false, "1D images are not supported.");
 
 				break;
 			case GL_PROXY_TEXTURE_1D_ARRAY:
@@ -49,10 +43,18 @@ namespace ProjectA {
 			case GL_TEXTURE_RECTANGLE:
 				// TODO: Decouple multisample from non-multisample images.
 				if (sampleCount > 1) {
-					glTextureStorage2DMultisample(object, sampleCount, internalFormat, extent.width, extent.height, GL_TRUE);
+					#ifdef OPENGL_USE_DSA
+						glTextureStorage2DMultisample(object, sampleCount, internalFormat, extent.width, extent.height, GL_TRUE);
+					#else
+						glTexStorage2DMultisample(target, sampleCount, internalFormat, extent.width, extent.height, GL_TRUE);
+					#endif
 				}
 				else {
-					glTextureStorage2D(object, mipLevelCount, internalFormat, extent.width, extent.height);
+					#ifdef OPENGL_USE_DSA
+						glTextureStorage2D(object, mipLevelCount, internalFormat, extent.width, extent.height);
+					#else
+						glTexStorage2D(target, mipLevelCount, internalFormat, extent.width, extent.height);
+					#endif
 				}
 
 				break;
@@ -66,10 +68,18 @@ namespace ProjectA {
 			case GL_TEXTURE_CUBE_MAP_ARRAY:
 				// TODO: Decouple multisample from non-multisample images.
 				if (sampleCount > 1) {
-					glTextureStorage3DMultisample(object, sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);
+					#ifdef OPENGL_USE_DSA
+						glTextureStorage3DMultisample(object, sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);
+					#else
+						glTexStorage3DMultisample(target, sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);
+					#endif
 				}
 				else {
-					glTextureStorage3D(object, mipLevelCount, internalFormat, extent.width, extent.height, extent.depth * layerCount);
+					#ifdef OPENGL_USE_DSA
+						glTextureStorage3D(object, mipLevelCount, internalFormat, extent.width, extent.height, extent.depth * layerCount);
+					#else
+						glTexStorage3D(target, mipLevelCount, internalFormat, extent.width, extent.height, extent.depth * layerCount);
+					#endif
 				}
 
 				break;

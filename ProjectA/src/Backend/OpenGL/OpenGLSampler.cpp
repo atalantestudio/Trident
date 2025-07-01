@@ -5,7 +5,9 @@
 #include "Backend/OpenGL/SamplerFilter.hpp"
 
 namespace ProjectA {
-	OpenGLSampler::OpenGLSampler(const SamplerDescriptor& descriptor) {
+	OpenGLSampler::OpenGLSampler(const SamplerDescriptor& descriptor) :
+		Sampler(descriptor)
+	{
 		PROFILE_SCOPE(FUNC_SIG);
 
 		#ifdef OPENGL_USE_DSA

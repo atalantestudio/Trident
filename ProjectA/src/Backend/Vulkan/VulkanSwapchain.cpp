@@ -6,12 +6,11 @@
 
 namespace ProjectA {
 	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const SwapchainDescriptor& descriptor) :
+		Swapchain(descriptor),
 		physicalDevice(physicalDevice),
 		device(device),
 		surface(surface)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
-
 		updateInternal(descriptor);
 	}
 
@@ -39,6 +38,8 @@ namespace ProjectA {
 	// Seems to allocate ~59Mb of memory in Release mode.
 	void VulkanSwapchain::updateInternal(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
+
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		VkResult result;
 

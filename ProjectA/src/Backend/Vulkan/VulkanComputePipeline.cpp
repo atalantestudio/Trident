@@ -5,6 +5,7 @@
 
 namespace ProjectA {
 	VulkanComputePipeline::VulkanComputePipeline(VkDevice device, const ComputePipelineDescriptor& descriptor) :
+		ComputePipeline(descriptor),
 		VulkanPipeline(VK_PIPELINE_BIND_POINT_COMPUTE, std::static_pointer_cast<VulkanPipelineLayout>(descriptor.pipelineLayout).get()),
 		device(device)
 	{

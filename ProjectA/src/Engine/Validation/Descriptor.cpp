@@ -15,21 +15,10 @@
 #include "Engine/API/Rendering/Descriptor/ShaderModuleDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/SubpassDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/SwapchainDescriptor.hpp"
+#include "Engine/API/Rendering/SampleCount.hpp"
 #include "Engine/Validation/Descriptor.hpp"
 
 namespace ProjectA {
-	static bool validateSampleCount(uint8 sampleCount) {
-		return (
-			sampleCount == 1 ||
-			sampleCount == 2 ||
-			sampleCount == 4 ||
-			sampleCount == 8 ||
-			sampleCount == 16 ||
-			sampleCount == 32 ||
-			sampleCount == 64
-		);
-	}
-
 	void DescriptorGuard(const AttachmentImageDescriptor& descriptor) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
@@ -677,6 +666,18 @@ namespace ProjectA {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.vSync must be either true or false.");
+		}
+
+		if (descriptor.extent.width == 0) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.extent.width must not be 0.");
+		}
+
+		if (descriptor.extent.height == 0) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.extent.height must not be 0.");
 		}
 
 		ENGINE_ASSERT(errorCount == 0, "Swapchain descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);

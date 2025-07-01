@@ -7,10 +7,6 @@
 #include "Backend/Vulkan/ImageType.hpp"
 #include "Backend/Vulkan/ImageUsage.hpp"
 
-#ifdef BUILD_MODE_DEBUG
-	#include "Engine/API/Rendering/SampleCount.hpp"
-#endif
-
 namespace ProjectA {
 	VulkanImage::VulkanImage(VkDevice device, const ImageDescriptor& descriptor) :
 		Image(descriptor),
@@ -19,8 +15,6 @@ namespace ProjectA {
 		type(getVkImageType(descriptor.type)),
 		format(getVkFormat(descriptor.format))
 	{
-		DEBUG_ASSERT(checkSampleCountValidity(sampleCount));
-
 		VkImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.pNext = nullptr;
@@ -107,12 +101,19 @@ namespace ProjectA {
 	}
 
 	ImageDescriptor VulkanImage::createSwapchainImageDescriptor(Extent2D extent) {
-		ImageDescriptor imageDescriptor;
+		ImageDescriptor imageDescriptor{};
 		imageDescriptor.extent.width = extent.width;
 		imageDescriptor.extent.height = extent.height;
 		imageDescriptor.extent.depth = 1;
 		imageDescriptor.mipLevelCount = 1;
 		imageDescriptor.layerCount = 1;
+
+		// These properties aren't used when creating a swapchain image.
+		imageDescriptor.type = ImageType::TEXTURE_2D;
+		imageDescriptor.format = ImageFormat::B8G8R8A8_UNORM;
+		imageDescriptor.sampleCount = 1;
+		imageDescriptor.usage = static_cast<ImageUsage>(0);
+		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		return imageDescriptor;
 	}

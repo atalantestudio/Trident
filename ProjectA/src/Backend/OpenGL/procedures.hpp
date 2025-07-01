@@ -39,17 +39,19 @@ namespace ProjectA {
 	extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
 	extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
 	extern PFNGLGETSHADERIVPROC glGetShaderiv;
+
+	// TODO: There is no non-DSA variant for this function.
 	extern PFNGLGETTEXTURESUBIMAGEPROC glGetTextureSubImage;
+
 	extern PFNGLLINKPROGRAMPROC glLinkProgram;
 	extern PFNGLMEMORYBARRIERPROC glMemoryBarrier;
 	extern PFNGLMINSAMPLESHADINGPROC glMinSampleShading;
 	extern PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
 	extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
-	extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D;
-	extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D;
-	extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;
-	extern PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC glTextureStorage3DMultisample;
+
+	// TODO: There is no non-DSA variant for this function.
 	extern PFNGLTEXTUREVIEWPROC glTextureView;
+
 	extern PFNGLUSEPROGRAMPROC glUseProgram;
 	extern PFNGLVERTEXATTRIBBINDINGPROC glVertexAttribBinding;
 	extern PFNGLVERTEXATTRIBFORMATPROC glVertexAttribFormat;
@@ -78,6 +80,10 @@ namespace ProjectA {
 		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
 		extern PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC glNamedFramebufferReadBuffer;
 		extern PFNGLNAMEDFRAMEBUFFERTEXTUREPROC glNamedFramebufferTexture;
+		extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D;
+		extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;
+		extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D;
+		extern PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC glTextureStorage3DMultisample;
 		extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
 		extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
 		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
@@ -101,6 +107,10 @@ namespace ProjectA {
 		extern PFNGLGENSAMPLERSPROC glGenSamplers;
 		extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 		extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
+		extern PFNGLTEXSTORAGE2DPROC glTexStorage2D;
+		extern PFNGLTEXSTORAGE2DMULTISAMPLEPROC glTexStorage2DMultisample;
+		extern PFNGLTEXSTORAGE3DPROC glTexStorage3D;
+		extern PFNGLTEXSTORAGE3DMULTISAMPLEPROC glTexStorage3DMultisample;
 		extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
 		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
 		extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;

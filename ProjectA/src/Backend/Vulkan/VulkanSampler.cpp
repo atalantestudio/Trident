@@ -6,6 +6,7 @@
 
 namespace ProjectA {
 	VulkanSampler::VulkanSampler(VkDevice device, const SamplerDescriptor& descriptor) :
+        Sampler(descriptor),
 		device(device)
 	{
         PROFILE_SCOPE(FUNC_SIG);
