@@ -4,7 +4,8 @@
 #include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseUpEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseWheelEvent.hpp"
-#include "Engine/Application.hpp"
+#include "Engine/Application/Application.hpp"
+#include "Engine/Filesystem/File/PropertyFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Platform.hpp"
 #include "Engine/Renderer/Renderer.hpp"
@@ -13,7 +14,6 @@
 
 namespace ProjectA {
 	Application* Application::instance = nullptr;
-	bool Application::vSync = false;
 	bool Application::looping = true;
 	bool Application::windowResized = false;
 	float64 Application::previousTime = 0.0;
@@ -21,6 +21,7 @@ namespace ProjectA {
 	float64 Application::frameTimeAccumulator = 0.0;
 	uint32 Application::frameIndex = 0;
 	uint32 Application::frameInFlightIndex = 0;
+	ApplicationProperties* Application::properties = nullptr;
 
 	std::string Application::formatWindowName(std::string_view projectName, uint8 instanceCount) {
 		if (instanceCount == 0) {
@@ -56,31 +57,40 @@ namespace ProjectA {
 
 		// Open/create the project's property file.
 		// A project shouldn't be forced to use a window, so the property file is loaded first.
-		// - When a setting is changed in the game menu, the property file is replaced with an updated version.
-		// - When the user edits the property file themselves, the application verifies that the new values are valid before using them.
-		//   If a property is invalid, the application emits a warning and continues to use the current value.
+		// TODO: When a setting is changed in the game menu, the property file is replaced with an updated version.
+		// TODO: When the user edits the property file themselves, the application verifies that the new values are valid before using them.
+		//       If a property is invalid, the application emits a warning, but continues to use the current value.
 		const std::filesystem::path projectRootDirectory = Filesystem::getProjectRootDirectory();
 
-		const std::string propertyFilePath = Logger::format("[]/[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
+		const std::string propertyFilePath = Logger::format("[]\\[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
 
 		// Try to open the property file located at "[PROJECT_ROOT_DIRECTORY]/[PROJECT_NAME].tpr".
-		propertyFile = Filesystem::open<PropertyFile/*, OpenMode::AT_END*/>(propertyFilePath);
+		Reader propertyFilePreReader = Filesystem::openReader(propertyFilePath);
 
-		if (propertyFile == nullptr) {
+		if (!propertyFilePreReader.fileExists()) {
 			ENGINE_WARN("Could not find property file \"[]\".", propertyFilePath);
 
-			// TODO: If no file, create a new property file with default values.
-			// #include "Engine/Filesystem/PropertyFile/PropertyList.hpp"
+			// If the property file cannot be found, create a new one with default values.
+			Writer propertyFileWriter = Filesystem::openWriter(propertyFilePath);
 
-			DEBUG_ASSERT(propertyFile != nullptr);
+			const std::string defaultFileData = PropertyFile::getDefaultFileData();
+
+			propertyFileWriter.write(defaultFileData.data(), defaultFileData.size());
 
 			ENGINE_INFO("Created new property file with default values.");
 		}
 
+		properties = new ApplicationProperties();
+
+		Reader propertyFilePostReader = Filesystem::openReader(propertyFilePath);
+
+		PropertyFile propertyFile(propertyFilePostReader);
+		propertyFile.readProperties(properties);
+
 		WindowDescriptor windowDescriptor{};
 		windowDescriptor.name = formatWindowName(applicationManifest.projectName, sharedMemoryData->instanceCount);
-		windowDescriptor.size.width = propertyFile->getProperty<uint32>("WindowWidth");
-		windowDescriptor.size.height = propertyFile->getProperty<uint32>("WindowHeight");
+		windowDescriptor.size.width = properties->WindowWidth;
+		windowDescriptor.size.height = properties->WindowHeight;
 		windowDescriptor.mouseDownEventListener = BIND(Application::onEvent);
 		windowDescriptor.mouseMoveEventListener = BIND(Application::onEvent);
 		windowDescriptor.mouseUpEventListener = BIND(Application::onEvent);
@@ -96,73 +106,7 @@ namespace ProjectA {
 
 		window = new Window(windowDescriptor);
 
-		const GraphicsAPI graphicsApi = propertyFile->getProperty<GraphicsAPI>("GraphicsAPI");
-
-		vSync = propertyFile->getProperty<bool>("VSync");
-
-		Renderer::initialize(*window, graphicsApi, vSync);
-
-		// API_QUEUE = Graphics API listed by priority.
-		//             First APIs are more recent but more performant,
-		//             last APIs are older but have better support
-
-		// Define int selectedApiIndex
-
-		// Get "GraphicsAPI" setting (unsigned byte) from file
-			// If no setting
-				// Set selectedApiIndex = 0
-			// Else if the setting is not in API_QUEUE
-				// Emit warn "Unsupported graphics API. Using API 0. Updated the property in the file to avoid future warnings."
-				// Set selectedApiIndex = 0
-				// Overwrite file setting with selectedApiIndex
-			// Else
-				// Set selectedApiIndex = setting
-
-		// Define queue apiTestQueue = API_QUEUE
-			// Move the API at selectedApiIndex to the top
-
-		// Define selectedApi
-		// Define supportedApiIndices
-
-		// For each API testedApi in API_QUEUE
-			// Define available = testIfAvailable(testedApi)
-			// If available
-				// Push index of testedApi to supportedApiIndices
-
-		// Define finalApiIndex = -1
-
-		// For each API supportedApi in supportedApiIndices
-			// If selectedApiIndex = index of supportedApi
-				// Set finalApiIndex = index of supportedApi
-				// Break
-
-		// If finalApiIndex = -1
-			// Emit warn "The selected API is not supported."
-			// Set finalApiIndex = 0
-
-		// Emit info "Using graphics adapter for []."
-		// Define selectedApi = API_QUEUE[supportedApiIndices[finalApiIndex]]
-
-		// Initialize selectedApi
-
-		/*sint32 apiIndex = 0;
-		sint32 apiTestQueue[5] = {
-			77, // Vulkan
-			63, // DirectX
-			48, // Metal
-			22, // WebGPU
-			19, // OpenGL
-		};
-
-		{
-			const auto api = apiTestQueue[apiIndex];
-
-			for (sint32 i = apiIndex - 1; i >= 0; i--) {
-				apiTestQueue[i + 1] = apiTestQueue[i];
-			}
-
-			apiTestQueue[0] = api;
-		}*/
+		Renderer::initialize(*window, properties->GraphicsAPI, properties->VSync);
 	}
 
 	Application::~Application() {
@@ -179,7 +123,7 @@ namespace ProjectA {
 		sharedMemory->unmap(sharedMemoryData);
 
 		delete window;
-		delete propertyFile;
+		delete properties;
 	}
 
 	const Window& Application::getWindow() {
@@ -353,7 +297,7 @@ namespace ProjectA {
 		SwapchainDescriptor swapchainDescriptor;
 		swapchainDescriptor.extent.width = event.getWidth();
 		swapchainDescriptor.extent.height = event.getHeight();
-		swapchainDescriptor.vSync = vSync;
+		swapchainDescriptor.vSync = properties->VSync;
 
 		Renderer::getSwapchain()->update(swapchainDescriptor);
 

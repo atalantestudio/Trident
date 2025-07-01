@@ -3,20 +3,22 @@
 namespace ProjectA {
 	class Writer {
 		public:
-			Writer(std::string_view path) :
-				stream(path.data(), std::ios::binary)
-			{}
+			explicit Writer(std::string_view path) :
+				stream(path.data())
+			{
+				ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
+			}
 
 			~Writer() {
 				stream.close();
 			}
 
-			void write(const sequence<uint8>& data) {
-				stream.write(static_cast<const char*>(static_cast<const void*>(data)), data.count);
+			void write(const char* string, uint64 size) {
+				stream.write(string, size);
 			}
 
-			void flush() {
-				stream.flush();
+			void write(const sequence<uint8>& data) {
+				stream.write(pointer_cast_const<const char*>(data), data.count);
 			}
 
 		private:

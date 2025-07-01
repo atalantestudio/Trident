@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Engine/Filesystem/File.hpp"
-#include "Engine/Filesystem/ImageFile.hpp"
 #include "Engine/Filesystem/OpenMode.hpp"
 #include "Engine/Filesystem/Stream/Stream.hpp"
 #include "Engine/Filesystem/Reader.hpp"
@@ -9,8 +8,10 @@
 
 namespace ProjectA {
 	namespace Filesystem {
+		// Returns the path to the project's root directory.
 		std::filesystem::path getProjectRootDirectory();
 
+		// Returns the name of the current working directory (CWD).
 		std::filesystem::path getCurrentDirectory();
 
 		// Returns the data of the file at the provided path as a byte sequence.
@@ -22,19 +23,12 @@ namespace ProjectA {
 		// Opens a file for permanent reading or writing.
 		// `path` is relative to the working directory.
 		// The returned value is the file pointer. It must be managed by the application.
-		template<typename File/*, OpenMode OpenMode*/>
-		File* open(std::string_view path);
+		// template<OpenMode OpenMode, typename StreamType>
+		// StreamType* open(std::string_view path);
 
 		Reader openReader(std::string_view path);
 
 		Writer openWriter(std::string_view path);
-
-		template<FileFormat FileFormat>
-		ImageFile openImage(std::string_view path) {
-			const sequence<uint8> buffer = openBuffer(path);
-
-			return Decoder::decode<FileFormat>(buffer);
-		}
 
 		template<FileFormat FileFormat>
 		File<FileFormat> encode(const Stream& stream);

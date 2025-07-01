@@ -3,6 +3,7 @@
 #include "Engine/API/Rendering/ImageFormat.hpp"
 
 namespace ProjectA {
+	// TODO: Use.
 	struct ImageFile {
 		ImageFormat format;
 

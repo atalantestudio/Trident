@@ -10,7 +10,7 @@ namespace ProjectA {
 	// NOTE: Property values are not guaranteed to be used.
 	// If a value is either invalid or not supported at runtime,
 	// the engine will fall-back to an internal default without modifying the property file.
-	struct PropertyList {
+	struct ApplicationProperties {
 		// Graphics API to use.
 		GraphicsAPI GraphicsAPI;
 

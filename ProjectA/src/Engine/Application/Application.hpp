@@ -3,20 +3,14 @@
 #include "Engine/API/SharedMemory/SharedMemory.hpp"
 #include "Engine/API/Synchronization/Mutex.hpp"
 #include "Engine/API/Timer/HighResolutionTimer.hpp"
-#include "Engine/Filesystem/File/PropertyFile.hpp"
+#include "Engine/Application/ApplicationManifest.hpp"
+#include "Engine/Application/ApplicationProperties.hpp"
 #include "Engine/Layer/LayerStack.hpp"
 #include "Engine/Process/Process.hpp"
 
 int main(int argc, char** argv);
 
 namespace ProjectA {
-	// TODO: Rename to ProjectManifest?
-	struct ApplicationManifest {
-		std::string_view projectName;
-
-		// TODO: Handle custom window icon.
-	};
-
 	class Application {
 		public:
 			static std::string formatWindowName(std::string_view projectName, uint8 instanceCount);
@@ -124,13 +118,14 @@ namespace ProjectA {
 			// In the range [0, MAX_FRAMES_IN_FLIGHT].
 			static uint32 frameInFlightIndex;
 
+			static ApplicationProperties* properties;
+
 		private:
 			scope<Mutex> mutex;
 			scope<SharedMemory> sharedMemory;
 			SharedMemoryData* sharedMemoryData = nullptr;
 			HighResolutionTimer timer;
 			Window* window = nullptr;
-			PropertyFile* propertyFile = nullptr;
 			LayerStack layerStack;
 			std::vector<ref<Process>> processes;
 	};

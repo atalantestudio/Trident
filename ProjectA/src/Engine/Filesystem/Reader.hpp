@@ -3,19 +3,36 @@
 namespace ProjectA {
 	class Reader {
 		public:
-			Reader(std::string_view path) :
-				stream(path.data(), std::ios::binary)
-			{
-				ENGINE_ASSERT(stream.is_open(), "File not found.");
-			}
+			explicit Reader(std::string_view path) :
+				stream(path.data())
+			{}
 
 			~Reader() {
 				stream.close();
 			}
 
-			void read(const sequence<uint8>& data) {
-				// TODO
-				// stream.read(static_cast<const char*>(static_cast<const void*>(data)), data.count);
+			std::ifstream& getStream() {
+				return stream;
+			}
+
+			bool fileExists() const {
+				return stream.good();
+			}
+
+			void seekg(std::ios_base::seekdir way) {
+				stream.seekg(0, way);
+			}
+
+			std::streampos tellg() {
+				return stream.tellg();
+			}
+
+			sequence<uint8> read(uint64 count) {
+				sequence<uint8> data(count);
+
+				stream.read(pointer_cast<char*>(data), data.count);
+
+				return data;
 			}
 
 		private:

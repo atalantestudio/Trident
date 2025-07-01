@@ -1,7 +1,19 @@
 #pragma once
 
+#include "Engine/Filesystem/Reader.hpp"
+
 namespace ProjectA {
 	class PropertyFile final {
+		public:
+			static std::string getDefaultFileData() {
+				return (
+					"GraphicsAPI: 2\n"
+					"WindowWidth: 1280\n"
+					"WindowHeight: 720\n"
+					"VSync: true"
+				);
+			}
+
 		private:
 			template<typename T>
 			static T parseValueString(const std::string& valueString, std::string_view propertyName) {
@@ -31,30 +43,34 @@ namespace ProjectA {
 			}
 
 		public:
-			PropertyFile(std::string_view path) :
-				stream(path.data(), std::ios::in | std::ios::out | std::ios::ate)
-			{}
-
-			explicit PropertyFile(std::string_view path, std::string_view data) :
-				stream(path.data(), std::ios::out)
+			explicit PropertyFile(Reader& reader) :
+				reader(&reader)
 			{
-				DEBUG_ASSERT(stream.is_open());
+				size = reader.tellg();
 
-				stream << data;
+				reader.seekg(std::ios::beg);
 			}
 
-			~PropertyFile() {
-				stream.close();
+			uint64 getSize() const {
+				return size;
 			}
 
+			void readProperties(ApplicationProperties* properties) {
+				properties->GraphicsAPI = getProperty<GraphicsAPI>("GraphicsAPI");
+				properties->WindowWidth = getProperty<uint32>("WindowWidth");
+				properties->WindowHeight = getProperty<uint32>("WindowHeight");
+				properties->VSync = getProperty<bool>("VSync");
+			}
+
+		private:
 			template<typename T>
 			T getProperty(std::string_view propertyName) {
-				stream.seekg(0, std::ios::beg);
+				reader->seekg(std::ios::beg);
 
 				std::string line;
 				std::size_t propertyNameOffset;
 
-				while (std::getline(stream, line)) {
+				while (std::getline(reader->getStream(), line)) {
 					propertyNameOffset = line.find(propertyName);
 
 					if (propertyNameOffset == std::string::npos) {
@@ -79,6 +95,7 @@ namespace ProjectA {
 			std::unordered_map<std::string, std::vector<uint8>> propertyMap;
 
 		private:
-			std::fstream stream;
+			Reader* reader;
+			std::streampos size;
 	};
 }

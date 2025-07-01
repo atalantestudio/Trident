@@ -4,7 +4,7 @@
 #include "Engine/API/Rendering/CommandEncoder.hpp"
 #include "Engine/API/Rendering/Descriptor/PipelineLayoutDescriptor.hpp"
 #include "Engine/API/Window/Window.hpp"
-#include "Engine/Application.hpp"
+#include "Engine/Application/Application.hpp"
 #include "Engine/GraphicsAdapter.hpp"
 #include "Engine/Renderer/GraphicsAPI.hpp"
 
