@@ -17,4 +17,13 @@ namespace ProjectA {
 		// Uncompressed and filtered data.
 		sequence<uint8> data;
 	};
+
+	template<>
+	struct File<FileFormat::QOI> {
+		ImageFormat format;
+		Extent3D extent;
+
+		// Uncompressed and filtered data.
+		sequence<uint8> data;
+	};
 }

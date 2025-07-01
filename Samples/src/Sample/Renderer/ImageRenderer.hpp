@@ -37,22 +37,22 @@
 // - Asset/Image/Zelda.png							OK
 
 // QOI test images:
-// - Asset/Image/qoi_test_images/dice.qoi			QOI_OP_RUN overflow
+// - Asset/Image/qoi_test_images/dice.qoi			OK
 // - Asset/Image/qoi_test_images/edgecase.qoi		OK
 // - Asset/Image/qoi_test_images/kodim10.qoi		OK
 // - Asset/Image/qoi_test_images/kodim23.qoi		OK
 // - Asset/Image/qoi_test_images/qoi_logo.qoi		OK
-// - Asset/Image/qoi_test_images/testcard.qoi		Compression artifacts
-// - Asset/Image/qoi_test_images/testcard_rgba.qoi	Compression artifacts
+// - Asset/Image/qoi_test_images/testcard.qoi		OK
+// - Asset/Image/qoi_test_images/testcard_rgba.qoi	OK
 // - Asset/Image/qoi_test_images/wikipedia_008.qoi	OK
 // - Asset/Image/test1.qoi							OK
 namespace ProjectA {
 	class ImageRenderer : public Renderer {
 		public:
 			void build() override {
-				const Stream stream = Filesystem::openStream("Asset/Image/test_inflate2_9.png");
-				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(stream);
-				// const File<FileFormat::QOI> file = Filesystem::decode<FileFormat::QOI>(stream);
+				const Stream stream = Filesystem::openStream("Asset/Image/qoi_test_images/dice.qoi");
+				// const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(stream);
+				const File<FileFormat::QOI> file = Filesystem::decode<FileFormat::QOI>(stream);
 
 				const ref<Device> device = getDevice();
 
@@ -266,7 +266,7 @@ namespace ProjectA {
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{1.0f, 0.2f, 0.0f, 1.0f}};
+				beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}};
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);

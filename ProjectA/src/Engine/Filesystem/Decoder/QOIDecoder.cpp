@@ -1,21 +1,15 @@
 #include "pch.hpp"
 
-#include "Engine/Filesystem/Decoder/Decoder.hpp"
+#include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
-#pragma pack(push, 1)
-
 namespace ProjectA {
-	union rgba {
-		struct {
-			uint8 r;
-			uint8 g;
-			uint8 b;
-			uint8 a;
-		};
-
-		uint32 value;
+	struct qoi_rgba {
+		uint8 r;
+		uint8 g;
+		uint8 b;
+		uint8 a;
 	};
 
 	struct qoi_diff {
@@ -37,7 +31,7 @@ namespace ProjectA {
 		uint8 tag : 2;
 	};
 
-	static qoi_index rgbaHash(rgba p) {
+	static qoi_index rgbaHash(qoi_rgba p) {
 		qoi_index index;
 
 		index.index = (p.r * 3 + p.g * 5 + p.b * 7 + p.a * 11) % 64;
@@ -47,10 +41,10 @@ namespace ProjectA {
 
 	// https://qoiformat.org/qoi-specification.pdf
 	template<>
-	ImageFile Decoder::decode<FileFormat::QOI>(const sequence<uint8>& data) {
-		ImageFile file;
+	File<FileFormat::QOI> Filesystem::decode<FileFormat::QOI>(const Stream& baseStream) {
+		File<FileFormat::QOI> file;
 
-		ByteStream stream(data, data.count);
+		ByteStream stream = baseStream.asByteStream();
 
 		ENGINE_ASSERT(stream.read<uint32>() == STRING_TO_LITTLE_ENDIAN_UINT32("qoif"), "Invalid QOI file signature.");
 
@@ -81,36 +75,40 @@ namespace ProjectA {
 
 		file.data = sequence<uint8>(file.extent.width * file.extent.height * channelCount);
 
-		rgba texel = {0, 0, 0, 255};
-		rgba previouslySeenTexels[64]{};
+		qoi_rgba texel = {0, 0, 0, 255};
+		qoi_rgba previouslySeenTexels[64]{};
 
 		uint64 dataOffset = 0;
-		uint64 iterationByteOffset = 14;
+		uint64 iterationIndex = 0;
 
-		while (iterationByteOffset < data.count - 8) {
-			uint8 tag = stream.peek<uint8>();
+		// We cannot parse more than the total byte size - (14-byte header + 8-byte footer).
+		// This implementation doesn't look at the footer.
+		const uint64 maxIterationCount = baseStream.getSize() - 22;
 
-			if (tag == 0b11111110 || tag == 0b11111111) {
+		while (iterationIndex < maxIterationCount) {
+			const uint8 tag = stream.peek<uint8>();
+
+			if (tag >= 0b11111110) {
 				// QOI_OP_RGB/QOI_OP_RGBA
 
 				stream.jump(1);
 
-				const rgba readTexel = stream.peek<rgba>();
-
-				stream.jump(channelCount);
+				const qoi_rgba readTexel = stream.peek<qoi_rgba>();
 
 				texel.r = readTexel.r;
 				texel.g = readTexel.g;
 				texel.b = readTexel.b;
 
-				if (channelCount == 4) {
+				stream.jump(tag - 251);
+
+				if (tag == 0b11111111) {
 					texel.a = readTexel.a;
 				}
 
 				std::copy_n(pointer_cast_const<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
 
 				dataOffset += channelCount;
-				iterationByteOffset += channelCount + 1;
+				iterationIndex += channelCount + 1;
 			}
 			else {
 				switch (tag >> 6) {
@@ -124,7 +122,7 @@ namespace ProjectA {
 						std::copy_n(pointer_cast_const<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
 
 						dataOffset += channelCount;
-						iterationByteOffset += 1;
+						iterationIndex += 1;
 
 						break;
 					}
@@ -140,7 +138,7 @@ namespace ProjectA {
 						std::copy_n(pointer_cast_const<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
 
 						dataOffset += channelCount;
-						iterationByteOffset += 1;
+						iterationIndex += 1;
 
 						break;
 					}
@@ -156,7 +154,7 @@ namespace ProjectA {
 						std::copy_n(pointer_cast_const<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
 
 						dataOffset += channelCount;
-						iterationByteOffset += 2;
+						iterationIndex += 2;
 
 						break;
 					}
@@ -173,7 +171,7 @@ namespace ProjectA {
 							dataOffset += channelCount;
 						}
 
-						iterationByteOffset += 1;
+						iterationIndex += 1;
 
 						break;
 					}
@@ -186,5 +184,3 @@ namespace ProjectA {
 		return file;
 	}
 }
-
-#pragma pack(pop)
