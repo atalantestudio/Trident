@@ -2,6 +2,18 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "Generate Windows Project Files (Visual Studio 2022)",
+			"type": "process",
+			"command": "scripts/Windows/premake5_vs2022.bat",
+			"group": {
+				"kind": "build"
+			},
+			"presentation": {
+				"clear": true
+			},
+			"problemMatcher": "$msCompile"
+		},
+		{
 			"label": "Build (Debug)",
 			"type": "process",
 			"command": "MSBuild.exe",
@@ -14,6 +26,7 @@
 				"kind": "build"
 			},
 			"presentation": {
+				"group": "Build",
 				"clear": true
 			},
 			"problemMatcher": "$msCompile"
@@ -31,6 +44,7 @@
 				"kind": "build"
 			},
 			"presentation": {
+				"group": "Build",
 				"clear": true
 			},
 			"problemMatcher": "$msCompile"
@@ -48,6 +62,7 @@
 				"kind": "build"
 			},
 			"presentation": {
+				"group": "Build",
 				"clear": true
 			},
 			"problemMatcher": "$msCompile"
