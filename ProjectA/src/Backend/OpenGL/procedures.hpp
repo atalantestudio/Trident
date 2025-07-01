@@ -17,21 +17,8 @@ namespace ProjectA {
 	extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
 	extern PFNGLBLENDFUNCIPROC glBlendFunci;
 	extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
-
-	#ifndef OPENGL_USE_SPIRV
-		extern PFNGLCOMPILESHADERPROC glCompileShader;
-	#endif
-
 	extern PFNGLCREATEPROGRAMPROC glCreateProgram;
 	extern PFNGLCREATESHADERPROC glCreateShader;
-	extern PFNGLCREATETEXTURESPROC glCreateTextures;
-	extern PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays;
-
-	#ifdef DEBUG_ENABLE_MESSENGER
-		extern PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
-		extern PFNGLDEBUGMESSAGEINSERTPROC glDebugMessageInsert;
-	#endif
-
 	extern PFNGLDELETEBUFFERSPROC glDeleteBuffers;
 	extern PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
 	extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
@@ -58,19 +45,6 @@ namespace ProjectA {
 	extern PFNGLMINSAMPLESHADINGPROC glMinSampleShading;
 	extern PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
 	extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
-
-	#ifdef OPENGL_USE_SPIRV
-		extern PFNGLSHADERBINARYPROC glShaderBinary;
-	#endif
-
-	#ifndef OPENGL_USE_SPIRV
-		extern PFNGLSHADERSOURCEPROC glShaderSource;
-	#endif
-
-	#ifdef OPENGL_USE_SPIRV
-		extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
-	#endif
-
 	extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D;
 	extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D;
 	extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;
@@ -83,6 +57,11 @@ namespace ProjectA {
 	extern PFNGLVERTEXATTRIBLFORMATPROC glVertexAttribLFormat;
 	extern PFNGLVERTEXBINDINGDIVISORPROC glVertexBindingDivisor;
 
+	#ifdef DEBUG_ENABLE_MESSENGER
+		extern PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
+		extern PFNGLDEBUGMESSAGEINSERTPROC glDebugMessageInsert;
+	#endif
+
 	#ifdef OPENGL_USE_DSA
 		extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
 		extern PFNGLBLITNAMEDFRAMEBUFFERPROC glBlitNamedFramebuffer;
@@ -92,6 +71,8 @@ namespace ProjectA {
 		extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
 		extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
 		extern PFNGLCREATESAMPLERSPROC glCreateSamplers;
+		extern PFNGLCREATETEXTURESPROC glCreateTextures;
+		extern PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays;
 		extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
 		extern PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage;
 		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
@@ -118,6 +99,7 @@ namespace ProjectA {
 		extern PFNGLGENBUFFERSPROC glGenBuffers;
 		extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
 		extern PFNGLGENSAMPLERSPROC glGenSamplers;
+		extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 		extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
 		extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
 		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
@@ -127,5 +109,13 @@ namespace ProjectA {
 		#ifdef BUILD_MODE_DEBUG
 			extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
 		#endif
+	#endif
+
+	#ifdef OPENGL_USE_SPIRV
+		extern PFNGLSHADERBINARYPROC glShaderBinary;
+		extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
+	#else
+		extern PFNGLCOMPILESHADERPROC glCompileShader;
+		extern PFNGLSHADERSOURCEPROC glShaderSource;
 	#endif
 }

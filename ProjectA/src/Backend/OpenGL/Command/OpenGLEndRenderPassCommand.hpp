@@ -22,9 +22,6 @@ namespace ProjectA {
 					const Extent2D extent = framebuffer->getExtent();
 
 					#ifdef OPENGL_USE_DSA
-						// TODO: Check why the framebuffer still needs to be bound to GL_DRAW_FRAMEBUFFER, even with DSA.
-						glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer->object);
-
 						glNamedFramebufferReadBuffer(framebuffer->object, readBuffer);
 
 						glBlitNamedFramebuffer(

@@ -28,21 +28,8 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexBuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBlendFunci);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glClientWaitSync);
-
-		#ifndef OPENGL_USE_SPIRV
-			LOAD_PROCEDURE_ADDRESS(renderingContext, glCompileShader);
-		#endif
-
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateProgram);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateShader);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateTextures);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateVertexArrays);
-
-		#ifdef DEBUG_ENABLE_MESSENGER
-			LOAD_PROCEDURE_ADDRESS(renderingContext, glDebugMessageCallback);
-			LOAD_PROCEDURE_ADDRESS(renderingContext, glDebugMessageInsert);
-		#endif
-
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteBuffers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteFramebuffers);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteProgram);
@@ -69,19 +56,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glMinSampleShading);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glProvokingVertex);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glSamplerParameteri);
-
-		#ifdef OPENGL_USE_SPIRV
-			LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderBinary);
-		#endif
-
-		#ifndef OPENGL_USE_SPIRV
-			LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderSource);
-		#endif
-
-		#ifdef OPENGL_USE_SPIRV
-			LOAD_PROCEDURE_ADDRESS(renderingContext, glSpecializeShader);
-		#endif
-
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage3D);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureStorage2DMultisample);
@@ -94,6 +68,11 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribLFormat);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexBindingDivisor);
 
+		#ifdef DEBUG_ENABLE_MESSENGER
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDebugMessageCallback);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDebugMessageInsert);
+		#endif
+
 		#ifdef OPENGL_USE_DSA
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glBindTextureUnit);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glBlitNamedFramebuffer);
@@ -103,6 +82,8 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateBuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateFramebuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateSamplers);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateTextures);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateVertexArrays);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glMapNamedBufferRange);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedBufferStorage);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glNamedFramebufferDrawBuffers);
@@ -129,6 +110,7 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glGenBuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glGenFramebuffers);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glGenSamplers);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glGenVertexArrays);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glMapBufferRange);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage1D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTexSubImage2D);
@@ -138,6 +120,14 @@ namespace ProjectA {
 			#ifdef BUILD_MODE_DEBUG
 				LOAD_PROCEDURE_ADDRESS(renderingContext, glCheckFramebufferStatus);
 			#endif
+		#endif
+
+		#ifdef OPENGL_USE_SPIRV
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderBinary);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glSpecializeShader);
+		#else
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glCompileShader);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderSource);
 		#endif
 	}
 

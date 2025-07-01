@@ -23,7 +23,12 @@ namespace ProjectA {
 
 		DEBUG_ASSERT(checkSampleCountValidity(sampleCount));
 
-		glCreateTextures(target, 1, &object);
+		#ifdef OPENGL_USE_DSA
+			glCreateTextures(target, 1, &object);
+		#else
+			glGenTextures(1, &object);
+			glBindTexture(target, object);
+		#endif
 
 		switch (target) {
 			case GL_PROXY_TEXTURE_1D:

@@ -63,7 +63,12 @@ namespace ProjectA {
 		glDetachShader(program, vertexShaderModule->object);
 		glDetachShader(program, fragmentShaderModule->object);
 
-		glCreateVertexArrays(1, &vertexArray);
+		#ifdef OPENGL_USE_DSA
+			glCreateVertexArrays(1, &vertexArray);
+		#else
+			glGenVertexArrays(1, &vertexArray);
+		#endif
+
 		glBindVertexArray(vertexArray);
 
 		GLuint attribindex = 0;

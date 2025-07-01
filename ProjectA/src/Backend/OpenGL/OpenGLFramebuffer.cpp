@@ -112,7 +112,7 @@ namespace ProjectA {
 				status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			#endif
 
-			ENGINE_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "The bound framebuffer is incomplete.");
+			ENGINE_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
 		#endif
 	}
 
