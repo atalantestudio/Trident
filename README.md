@@ -72,6 +72,13 @@ VSync: true
 | *GJK: Collision detection algorithm in 2D/3D* | Winterdev | August 29, 2020 | [Article](https://winter.dev/articles/gjk-algorithm)<br />[Video](https://youtu.be/MDusDn8oTSE) |
 | *A Strange But Elegant Approach to a Surprisingly Hard Problem (GJK Algorithm)* | Reducible | Mar 24, 2021 | [Video](https://youtu.be/ajv46BSqcK4) |
 
+### OpenGL
+
+| Title | Author(s) | Date | Links |
+| - | - | - | - |
+| *A Guide to Modern OpenGL Functions* | fendevel | Oct 3, 2016 | [Article](https://github.com/fendevel/Guide-to-Modern-OpenGL-Functions) |
+| *Best Practices for Modern OpenGL* | Jake Ryan | Jan, 2022 | [Article](https://juandiegomontoya.github.io/modern_opengl.html) |
+
 ### PNG
 
 | Title | Author(s) | Date | Links |
