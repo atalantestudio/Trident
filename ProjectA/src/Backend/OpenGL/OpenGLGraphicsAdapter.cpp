@@ -29,7 +29,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindImageTexture);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindSampler);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexArray);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexBuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBlendFunci);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glClientWaitSync);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glCreateProgram);
@@ -104,12 +103,14 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureSubImage3D);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glUnmapNamedBuffer);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexArrayElementBuffer);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexArrayVertexBuffer);
 
 			#ifdef BUILD_MODE_DEBUG
 				LOAD_PROCEDURE_ADDRESS(renderingContext, glCheckNamedFramebufferStatus);
 			#endif
 		#else
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glActiveTexture);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexBuffer);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glBlitFramebuffer);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glBufferStorage);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glClearBufferfi);

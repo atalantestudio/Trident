@@ -81,6 +81,7 @@ namespace ProjectA {
 
 	void OpenGLCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) {
 		commandBuffer.emplace_back(createRef<OpenGLBindVertexBufferCommand>(
+			renderPipeline->vertexArray,
 			bindingIndex,
 			std::static_pointer_cast<OpenGLBuffer>(vertexBuffer)->object,
 			offset,

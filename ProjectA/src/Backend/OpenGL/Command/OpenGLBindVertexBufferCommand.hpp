@@ -6,19 +6,26 @@
 namespace ProjectA {
 	class OpenGLBindVertexBufferCommand final : public OpenGLCommand {
 		public:
-			explicit OpenGLBindVertexBufferCommand(GLuint bindingindex, GLuint buffer, GLintptr offset, GLsizei stride) :
-				bindingindex(bindingindex),
+			explicit OpenGLBindVertexBufferCommand(GLuint vertexArray, GLuint bindingIndex, GLuint buffer, GLintptr offset, GLsizei stride) :
+				vertexArray(vertexArray),
+				bindingIndex(bindingIndex),
 				buffer(buffer),
 				offset(offset),
 				stride(stride)
 			{}
 
 			void execute() const final override {
-				glBindVertexBuffer(bindingindex, buffer, offset, stride);
+				#ifdef OPENGL_USE_DSA
+					glVertexArrayVertexBuffer(vertexArray, bindingIndex, buffer, offset, stride);
+				#else
+					glBindVertexArray(vertexArray);
+					glBindVertexBuffer(bindingIndex, buffer, offset, stride);
+				#endif
 			}
 
 		private:
-			const GLuint bindingindex;
+			const GLuint vertexArray;
+			const GLuint bindingIndex;
 			const GLuint buffer;
 			const GLintptr offset;
 			const GLsizei stride;

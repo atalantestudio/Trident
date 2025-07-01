@@ -14,7 +14,6 @@ namespace ProjectA {
 	extern PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
 	extern PFNGLBINDSAMPLERPROC glBindSampler;
 	extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
-	extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
 	extern PFNGLBLENDFUNCIPROC glBlendFunci;
 	extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
 	extern PFNGLCREATEPROGRAMPROC glCreateProgram;
@@ -89,12 +88,14 @@ namespace ProjectA {
 		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
 		extern PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer;
 		extern PFNGLVERTEXARRAYELEMENTBUFFERPROC glVertexArrayElementBuffer;
+		extern PFNGLVERTEXARRAYVERTEXBUFFERPROC glVertexArrayVertexBuffer;
 
 		#ifdef BUILD_MODE_DEBUG
 			extern PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC glCheckNamedFramebufferStatus;
 		#endif
 	#else
 		extern PFNGLACTIVETEXTUREPROC glActiveTexture;
+		extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
 		extern PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
 		extern PFNGLBUFFERSTORAGEPROC glBufferStorage;
 		extern PFNGLCLEARBUFFERFIPROC glClearBufferfi;

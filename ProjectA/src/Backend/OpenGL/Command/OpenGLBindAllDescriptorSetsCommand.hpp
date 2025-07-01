@@ -47,6 +47,9 @@ namespace ProjectA {
 
 								glBindSampler(binding + unit, sampler->object);
 							}
+							else {
+								ENGINE_WARN("Image has been bound without a sampler object.");
+							}
 
 							if (isCompute) {
 								GLenum format = image.internalFormat;
