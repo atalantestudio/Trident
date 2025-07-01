@@ -5,6 +5,7 @@ C++ 3D game engine (rendering, physics and audio) with integrated math and GUI A
 ## Dependencies
 
 - [Lyah](https://github.com/atalantestudio/lyah)
+- [SampleAssetPack](https://github.com/atalantestudio/SampleAssetPack)
 - [Premake](https://github.com/premake/premake-core)
 
 ## Install (Windows)
