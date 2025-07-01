@@ -2,3 +2,7 @@
 	path = ProjectA/vendor/lyah
 	url = git@github.com:atalantestudio/lyah
 	branch = main
+[submodule "Samples/Asset"]
+	path = Samples/Asset
+	url = git@github.com:atalantestudio/SampleAssetPack
+	branch = main
