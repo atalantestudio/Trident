@@ -159,6 +159,7 @@ namespace ProjectA {
 				const std::string message = format(pattern, std::forward<Argument>(arguments)...);
 
 				log(LogLevel::FATAL, message);
+
 				Platform::fatalExit(code, message);
 			}
 

@@ -20,6 +20,12 @@ namespace ProjectA {
 	// Toggle Vulkan graphics adapter.
 	#define ENABLE_VULKAN_ADAPTER
 
+	// Toggle debug messages from the graphics API.
+	#define DEBUG_ENABLE_MESSENGER
+
+	// Toggle validation layers for graphics APIs that support them.
+	#define DEBUG_ENABLE_VALIDATION_LAYERS
+
 	// If enabled, glyphs with a single contour are checked to ensure that the contour is clockwise.
 	// If not, a warning is outputted and the contour's winding order is inverted.
 	#define TTF_FIX_INVERTED_CONTOURS

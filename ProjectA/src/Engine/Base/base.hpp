@@ -5,8 +5,14 @@
 // Determine compiler, OS and architecture.
 #include "Engine/Base/context.hpp"
 
+#ifdef BUILD_MODE_DEBUG
+	#include "Engine/Base/Debug.hpp"
+#endif
+
 // Basic types.
 #include "Engine/Base/types.hpp"
+
+static constexpr char* ENGINE_NAME = "ProjectA";
 
 // Binary helpers.
 #include "Engine/Base/binary.hpp"
@@ -20,50 +26,50 @@
 // Function helpers.
 #include "Engine/Base/function.hpp"
 
-#define ENGINE_NAME "ProjectA"
-#define ENGINE_NAME_L L"ProjectA"
-
 #if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
-	#define VK_USE_PLATFORM_WIN32_KHR
+	#define NOGDICAPMASKS
+	#define NOVIRTUALKEYCODES
+	#define NOSYSMETRICS
+	#define NOMENUS
+	#define NOICONS
+	#define NOKEYSTATES
+	#define NOSYSCOMMANDS
+	#define NORASTEROPS
+	#define OEMRESOURCE
+	#define NOATOM
+	#define NOCLIPBOARD
+	#define NODRAWTEXT
+	#define NOKERNEL
+	#define NOMEMMGR
+	#define NOMETAFILE
+	#define NOMINMAX
+	#define NOOPENFILE
+	#define NOSCROLL
+	#define NOSERVICE
+	#define NOSOUND
+	#define NOTEXTMETRIC
+	#define NOWH
+	#define NOWINOFFSETS
+	#define NOCOMM
+	#define NOKANJI
+	#define NOHELP
+	#define NOPROFILER
+	#define NODEFERWINDOWPOS
+	#define NOMCX
 
 	#include <Windows.h>
+
+	// NOTE: ERROR is a LogLevel value.
+	#undef ERROR
+
 	#include <windowsx.h>
 
-	// TODO: Refactor in context.hpp.
+	// Load Windows 11 theme.
 	// https://learn.microsoft.com/en-us/answers/questions/1184393/when-including-comctl32-lib-causes-the-ordinal-345
-	#if defined _M_IX86
-		#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
-	#elif defined _M_IA64
-		#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='ia64' publicKeyToken='6595b64144ccf1df' language='*'\"")
-	#elif defined _M_X64
-		#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
-	#else
-		#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-	#endif
-
-	#undef assert
-	#undef DELETE
-	#undef ERROR // LogLevel::ERROR
-	#undef far // lyah
-	#undef max // lyah::max
-	#undef min // lyah::min
-	#undef near // lyah
-#endif
-
-#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
-	#define BREAKPOINT() __debugbreak()
-#elif defined(__clang__)
-	#define BREAKPOINT() __builtin_debugtrap()
-#elif defined(PLATFORM_LINUX)
-	#define BREAKPOINT() raise(SIGTRAP)
-#else
-	#error "Unsupported platform."
+	#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df'\"")
 #endif
 
 #ifdef BUILD_MODE_DEBUG
-	#define DEBUG_ENABLE_MESSENGER
-	#define DEBUG_ENABLE_VALIDATION_LAYERS
-
 	#define DEBUG_ASSERT(condition) { \
 		if (!(condition)) { \
 			ENGINE_ERROR("Debug assertion failed."); \
@@ -77,22 +83,23 @@
 	#define DEBUG_STATIC_ASSERT
 #endif
 
-namespace ProjectA {
-	#define ENGINE_TRACE(argumentOrPattern, ...) Logger::engineLogger.trace(argumentOrPattern "\n    at []\n    ([]:[])", ##__VA_ARGS__, __FUNCSIG__, __FILE__, __LINE__)
-	#define ENGINE_TRACE_PREFORMATTED(...) Logger::engineLogger.trace(__VA_ARGS__)
-	#define ENGINE_DEBUG(...) Logger::engineLogger.debug(__VA_ARGS__)
-	#define ENGINE_INFO(...) Logger::engineLogger.info(__VA_ARGS__)
-	#define ENGINE_WARN(...) Logger::engineLogger.warn(__VA_ARGS__)
-	#define ENGINE_ERROR(...) Logger::engineLogger.error(__VA_ARGS__)
-	#define ENGINE_FATAL(...) Logger::engineLogger.fatal(__VA_ARGS__)
+#include "Engine/Extent.hpp"
+#include "Engine/Logger/Logger.hpp"
 
-	#define CLIENT_TRACE(...) Logger::clientLogger.trace(__VA_ARGS__)
-	#define CLIENT_DEBUG(...) Logger::clientLogger.debug(__VA_ARGS__)
-	#define CLIENT_INFO(...) Logger::clientLogger.info(__VA_ARGS__)
-	#define CLIENT_WARN(...) Logger::clientLogger.warn(__VA_ARGS__)
-	#define CLIENT_ERROR(...) Logger::clientLogger.error(__VA_ARGS__)
-	#define CLIENT_FATAL(...) Logger::clientLogger.fatal(__VA_ARGS__)
-}
+#define ENGINE_TRACE(argumentOrPattern, ...) ::ProjectA::Logger::engineLogger.trace(argumentOrPattern "\n    at []\n    ([]:[])", ##__VA_ARGS__, __FUNCSIG__, __FILE__, __LINE__)
+#define ENGINE_TRACE_PREFORMATTED(...) ::ProjectA::Logger::engineLogger.trace(__VA_ARGS__)
+#define ENGINE_DEBUG(...) ::ProjectA::Logger::engineLogger.debug(__VA_ARGS__)
+#define ENGINE_INFO(...) ::ProjectA::Logger::engineLogger.info(__VA_ARGS__)
+#define ENGINE_WARN(...) ::ProjectA::Logger::engineLogger.warn(__VA_ARGS__)
+#define ENGINE_ERROR(...) ::ProjectA::Logger::engineLogger.error(__VA_ARGS__)
+#define ENGINE_FATAL(...) ::ProjectA::Logger::engineLogger.fatal(__VA_ARGS__)
+
+#define CLIENT_TRACE(...) ::ProjectA::Logger::clientLogger.trace(__VA_ARGS__)
+#define CLIENT_DEBUG(...) ::ProjectA::Logger::clientLogger.debug(__VA_ARGS__)
+#define CLIENT_INFO(...) ::ProjectA::Logger::clientLogger.info(__VA_ARGS__)
+#define CLIENT_WARN(...) ::ProjectA::Logger::clientLogger.warn(__VA_ARGS__)
+#define CLIENT_ERROR(...) ::ProjectA::Logger::clientLogger.error(__VA_ARGS__)
+#define CLIENT_FATAL(...) ::ProjectA::Logger::clientLogger.fatal(__VA_ARGS__)
 
 #define ENGINE_ASSERT(condition, ...) { \
 	if (!(condition)) { \
@@ -109,6 +116,8 @@ namespace ProjectA {
 }
 
 #define ENGINE_STATIC_ASSERT static_assert
+
+#include "Engine/Base/UDL.hpp"
 
 #ifdef ENABLE_OPENGL_ADAPTER
 	#include <GL/glcorearb.h>
@@ -132,6 +141,10 @@ namespace ProjectA {
 #endif
 
 #ifdef ENABLE_VULKAN_ADAPTER
+	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+		#define VK_USE_PLATFORM_WIN32_KHR
+	#endif
+
 	#include <vulkan/vulkan.h>
 
 	#ifdef BUILD_MODE_DEBUG
@@ -139,11 +152,7 @@ namespace ProjectA {
 	#endif
 #endif
 
-#include "Engine/Module/lyah.hpp"
-#include "Engine/Extent.hpp"
-
 #include "Engine/sequence.hpp"
-#include "Engine/Logger/Logger.hpp"
 
 #ifdef BUILD_MODE_PROFILE
 	#include "Engine/Profile/Profiler.hpp"

@@ -39,7 +39,7 @@ namespace ProjectA {
 	}
 
 	template<std::size_t C, typename T>
-	inline std::ostringstream& operator <<(std::ostringstream& stream, const vec<C, T>& a) {
+	inline std::ostringstream& operator <<(std::ostringstream& stream, const lyah::vec<C, T>& a) {
 		for (std::size_t index = 0; index < C - 1; index += 1) {
 			stream << a[index] << "  ";
 		}
@@ -50,7 +50,7 @@ namespace ProjectA {
 	}
 
 	template<std::size_t R, std::size_t C, typename T>
-	inline std::ostringstream& operator <<(std::ostringstream& stream, const mat<R, C, T>& a) {
+	inline std::ostringstream& operator <<(std::ostringstream& stream, const lyah::mat<R, C, T>& a) {
 		for (std::size_t index = 0; index < R - 1; index += 1) {
 			stream << a[index] << '\n';
 		}
@@ -61,7 +61,7 @@ namespace ProjectA {
 	}
 
 	template<typename T>
-	inline std::ostringstream& operator <<(std::ostringstream& stream, const quat<T>& a) {
+	inline std::ostringstream& operator <<(std::ostringstream& stream, const lyah::quat<T>& a) {
 		stream << a[0] << "  " << a[1] << "  " << a[2] << "  " << a[3];
 
 		return stream;

@@ -18,4 +18,10 @@
 	#include <thread>
 #endif
 
+// Register modules.
+#include "Engine/Module/Include/lyah.hpp"
+
 #include "Engine/Base/base.hpp"
+
+// Register module adapters.
+#include "Engine/Module/Adapter/lyah.hpp"

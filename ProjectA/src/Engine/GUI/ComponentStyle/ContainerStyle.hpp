@@ -4,7 +4,6 @@
 #include "Engine/Extent.hpp"
 #include "Engine/GUI/ID.hpp"
 #include "Engine/GUI/LayoutDirection.hpp"
-#include "Engine/GUI/px.hpp"
 #include "Engine/GUI/Size.hpp"
 
 namespace ProjectA {

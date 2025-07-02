@@ -5,7 +5,6 @@
 #include "Engine/GUI/Font/TrueType/TrueTypeFont.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/GUI/ID.hpp"
-#include "Engine/GUI/px.hpp"
 #include "Engine/Layer/Layer.hpp"
 
 namespace ProjectA {

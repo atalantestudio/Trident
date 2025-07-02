@@ -50,7 +50,7 @@ namespace ProjectA {
 		sharedMemoryData = static_cast<SharedMemoryData*>(sharedMemory->map(0, sizeof(SharedMemoryData)));
 
 		if (sharedMemoryData->instanceCount > MAX_PARALLEL_INSTANCES) {
-			ENGINE_FATAL(EOVERFLOW, "More than [] instances running in parallel.", MAX_PARALLEL_INSTANCES);
+			ENGINE_FATAL(EOVERFLOW, "More than [] instances running in parallel.", static_cast<sint32>(MAX_PARALLEL_INSTANCES));
 
 			return;
 		}

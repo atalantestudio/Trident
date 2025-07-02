@@ -1,7 +1,5 @@
 #pragma once
 
-#include <lyah/lyah.hpp>
-
 namespace lyah {
 	// TODO: Use static arrays instead of class as polyfills.
 
@@ -10,13 +8,13 @@ namespace lyah {
 	struct lyah::vec<2, std::int32_t> {
 		public:
 			std::int32_t operator [](std::size_t index) const noexcept {
-				assert(index < 2);
+				DEBUG_ASSERT(index < 2);
 
 				return m[index];
 			}
 
 			std::int32_t& operator [](std::size_t index) noexcept {
-				assert(index < 2);
+				DEBUG_ASSERT(index < 2);
 
 				return m[index];
 			}
@@ -30,13 +28,13 @@ namespace lyah {
 	struct lyah::vec<3, std::int32_t> {
 		public:
 			std::int32_t operator [](std::size_t index) const noexcept {
-				assert(index < 3);
+				DEBUG_ASSERT(index < 3);
 
 				return m[index];
 			}
 
 			std::int32_t& operator [](std::size_t index) noexcept {
-				assert(index < 3);
+				DEBUG_ASSERT(index < 3);
 
 				return m[index];
 			}
@@ -50,13 +48,13 @@ namespace lyah {
 	struct lyah::vec<2, std::uint32_t> {
 		public:
 			std::uint32_t operator [](std::size_t index) const noexcept {
-				assert(index < 2);
+				DEBUG_ASSERT(index < 2);
 
 				return m[index];
 			}
 
 			std::uint32_t& operator [](std::size_t index) noexcept {
-				assert(index < 2);
+				DEBUG_ASSERT(index < 2);
 
 				return m[index];
 			}
@@ -70,13 +68,13 @@ namespace lyah {
 	struct lyah::vec<3, std::uint32_t> {
 		public:
 			std::uint32_t operator [](std::size_t index) const noexcept {
-				assert(index < 3);
+				DEBUG_ASSERT(index < 3);
 
 				return m[index];
 			}
 
 			std::uint32_t& operator [](std::size_t index) noexcept {
-				assert(index < 3);
+				DEBUG_ASSERT(index < 3);
 
 				return m[index];
 			}
@@ -90,13 +88,13 @@ namespace lyah {
 	struct lyah::vec<4, std::uint32_t> {
 		public:
 			std::uint32_t operator [](std::size_t index) const noexcept {
-				assert(index < 4);
+				DEBUG_ASSERT(index < 4);
 
 				return m[index];
 			}
 
 			std::uint32_t& operator [](std::size_t index) noexcept {
-				assert(index < 4);
+				DEBUG_ASSERT(index < 4);
 
 				return m[index];
 			}
@@ -153,12 +151,14 @@ namespace ProjectA {
 		{}
 
 		T operator [](std::size_t index) const {
-			// TODO: Assert.
-			return *pointer_const_cast<const T*>(this)[index];
+			DEBUG_ASSERT(index < 2);
+
+			return pointer_const_cast<const T*>(this)[index];
 		}
 
 		T& operator [](std::size_t index) {
-			// TODO: Assert.
+			DEBUG_ASSERT(index < 2);
+
 			return pointer_cast<T*>(this)[index];
 		}
 	};
@@ -178,13 +178,15 @@ namespace ProjectA {
 		{}
 
 		T operator [](std::size_t index) const {
-			// TODO: Assert.
-			return *pointer_const_cast<const T*>(this)[index];
+			DEBUG_ASSERT(index < 3);
+
+			return pointer_const_cast<const T*>(this)[index];
 		}
 
 		T& operator [](std::size_t index) {
-			// TODO: Assert.
-			return *pointer_const<T*>(this)[index];
+			DEBUG_ASSERT(index < 3);
+
+			return pointer_const<T*>(this)[index];
 		}
 	};
 
@@ -262,13 +264,13 @@ namespace ProjectA {
 	template<typename T>
 	using svec2 = svec<2, T>;
 
-	// TODO: Squared length in Lyah.
+	// TODO: lyah::lengthSquared
 	template<std::size_t C, typename T>
 	T lengthSq(const lyah::vec<C, T>& a) {
 		return lyah::dot(a, a);
 	}
 
-	// TODO: Squared distance in Lyah.
+	// TODO: lyah::distanceSquared
 	template<std::size_t C, typename T>
 	T distanceSq(const lyah::vec<C, T>& a, const lyah::vec<C, T>& b) {
 		return lengthSq(b - a);
