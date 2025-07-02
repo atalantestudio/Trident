@@ -7,19 +7,19 @@ namespace ProjectA {
 			static constexpr T byteswap(T value) {
 				switch (sizeof(T)) {
 					case 2: {
-						const uint16 valueInteger = *pointer_cast_const<const uint16*>(&value);
+						const uint16 valueInteger = *pointer_cast<const uint16*>(&value);
 
-						return *pointer_cast_const<const T*>(&valueInteger);
+						return *pointer_cast<const T*>(&valueInteger);
 					}
 					case 4: {
-						const uint32 valueInteger = *pointer_cast_const<const uint32*>(&value);
+						const uint32 valueInteger = *pointer_cast<const uint32*>(&value);
 
-						return *pointer_cast_const<const T*>(&valueInteger);
+						return *pointer_cast<const T*>(&valueInteger);
 					}
 					case 8: {
-						const uint64 valueInteger = *pointer_cast_const<const uint64*>(&value);
+						const uint64 valueInteger = *pointer_cast<const uint64*>(&value);
 
-						return *pointer_cast_const<const T*>(&valueInteger);
+						return *pointer_cast<const T*>(&valueInteger);
 					}
 					default:
 						ENGINE_ASSERT(false, "Unable to byteswap value.");
@@ -85,7 +85,7 @@ namespace ProjectA {
 
 				ENGINE_ASSERT(sizeof(T) <= remainingByteSize, "Attempted to peek [] bytes, but only [] were remaining.", sizeof(T), remainingByteSize);
 
-				T value = *pointer_cast_const<const T*>(stream + byteOffset);
+				T value = *pointer_cast<const T*>(stream + byteOffset);
 
 				if (swapEndianness) {
 					value = byteswap<T>(value);

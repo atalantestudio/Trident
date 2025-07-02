@@ -31,7 +31,7 @@ namespace ProjectA {
 
 		Size1D operator [](std::size_t index) const {
 			// TODO: Assert.
-			return pointer_cast_const<const Size1D*>(this)[index];
+			return pointer_cast<const Size1D*>(this)[index];
 		}
 
 		Size1D& operator [](std::size_t index) {

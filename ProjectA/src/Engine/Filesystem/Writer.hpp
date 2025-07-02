@@ -18,7 +18,7 @@ namespace ProjectA {
 			}
 
 			void write(const sequence<uint8>& data) {
-				stream.write(pointer_cast_const<const char*>(data), data.count);
+				stream.write(pointer_cast<const char*>(data), data.count);
 			}
 
 		private:

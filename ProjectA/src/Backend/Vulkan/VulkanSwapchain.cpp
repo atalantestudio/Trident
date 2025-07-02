@@ -62,7 +62,7 @@ namespace ProjectA {
 		ENGINE_INFO("Swapchain image count is [].", imageCount);
 
 		if (surfaceCapabilities.currentExtent.width == std::numeric_limits<uint32>::max() && surfaceCapabilities.currentExtent.height == std::numeric_limits<uint32>::max()) {
-			extent = *pointer_cast_const<const Extent2D*>(&surfaceCapabilities.currentExtent);
+			extent = *pointer_cast<const Extent2D*>(&surfaceCapabilities.currentExtent);
 		}
 		else {
 			extent.width = std::clamp(descriptor.extent.width, surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
@@ -81,7 +81,7 @@ namespace ProjectA {
 		swapchainCreateInfo.minImageCount = imageCount;
 		swapchainCreateInfo.imageFormat = surfaceFormat.format;
 		swapchainCreateInfo.imageColorSpace = surfaceFormat.colorSpace;
-		swapchainCreateInfo.imageExtent = *pointer_cast_const<const VkExtent2D*>(&extent);
+		swapchainCreateInfo.imageExtent = *pointer_cast<const VkExtent2D*>(&extent);
 		swapchainCreateInfo.imageArrayLayers = 1;
 		swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 		swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;

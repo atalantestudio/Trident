@@ -284,7 +284,7 @@ namespace ProjectA {
 
 		const Extent2D computedSize = {static_cast<uint32>(width), static_cast<uint32>(height)};
 
-		origin[layoutDirection] += (pointer_cast_const<const uint32*>(&computedSize))[layoutDirection]; */
+		origin[layoutDirection] += (pointer_cast<const uint32*>(&computedSize))[layoutDirection]; */
 	}
 
 	void GUILayer::closeComponent() {

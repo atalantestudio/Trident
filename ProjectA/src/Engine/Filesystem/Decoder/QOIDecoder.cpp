@@ -105,7 +105,7 @@ namespace ProjectA {
 					texel.a = readTexel.a;
 				}
 
-				std::copy_n(pointer_cast_const<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
+				std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
 
 				dataOffset += channelCount;
 				iterationIndex += channelCount + 1;
@@ -119,7 +119,7 @@ namespace ProjectA {
 
 						texel = previouslySeenTexels[index.index];
 
-						std::copy_n(pointer_cast_const<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
+						std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
 
 						dataOffset += channelCount;
 						iterationIndex += 1;
@@ -135,7 +135,7 @@ namespace ProjectA {
 						texel.g += diff.dg - 2;
 						texel.b += diff.db - 2;
 
-						std::copy_n(pointer_cast_const<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
+						std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
 
 						dataOffset += channelCount;
 						iterationIndex += 1;
@@ -151,7 +151,7 @@ namespace ProjectA {
 						texel.g += luma.dg - 32;
 						texel.b += luma.dg - 32 + luma.db_dg - 8;
 
-						std::copy_n(pointer_cast_const<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
+						std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
 
 						dataOffset += channelCount;
 						iterationIndex += 2;
@@ -166,7 +166,7 @@ namespace ProjectA {
 						const uint8 runLength = (tag & 0b00111111) + 1;
 
 						for (uint8 runOffset = 0; runOffset < runLength; runOffset += 1) {
-							std::copy_n(pointer_cast_const<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
+							std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
 
 							dataOffset += channelCount;
 						}

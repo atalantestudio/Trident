@@ -171,19 +171,17 @@
 )
 
 template<typename O, typename I>
-O pointer_cast(I pointer) {
-	return static_cast<O>(static_cast<void*>(pointer));
-}
-
-// TODO: Merge with pointer_cast.
-template<typename O, typename I>
-O pointer_cast_const(I pointer) {
+typename std::enable_if<std::is_const<typename std::remove_pointer<O>::type>::value, O>::type pointer_cast(I pointer) {
 	return static_cast<O>(static_cast<const void*>(pointer));
 }
 
-// TODO: Remove usage of auto?
+template<typename O, typename I>
+typename std::enable_if<!std::is_const<typename std::remove_pointer<O>::type>::value, O>::type pointer_cast(I pointer) {
+	return static_cast<O>(static_cast<void*>(pointer));
+}
+
 #define BIND(function) \
-	[this](auto&&... arguments) -> decltype(auto) { \
+	[this](auto&&... arguments) { \
 		return this->function(std::forward<decltype(arguments)>(arguments)...); \
 	}
 

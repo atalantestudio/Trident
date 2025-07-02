@@ -153,7 +153,7 @@ namespace ProjectA {
 				case STRING_TO_LITTLE_ENDIAN_UINT32("IEND"):
 					break;
 				default: {
-					const char* typeString = pointer_cast_const<const char*>(&type);
+					const char* typeString = pointer_cast<const char*>(&type);
 
 					ENGINE_WARN("Ignoring unsupported PNG chunk of type \"[][][][]\".", typeString[0], typeString[1], typeString[2], typeString[3]);
 
@@ -206,7 +206,7 @@ namespace ProjectA {
 		const uint8* a;
 
 		// Pixel above `x`. If `x` is the upmost pixel, `b` is 0.
-		const uint8* b = pointer_cast_const<const uint8*>(&ZERO_PIXEL);
+		const uint8* b = pointer_cast<const uint8*>(&ZERO_PIXEL);
 
 		// Pixel at the left of `b`. If `b` is the leftmost pixel, `c` is 0.
 		const uint8* c;
@@ -218,8 +218,8 @@ namespace ProjectA {
 			ENGINE_ASSERT(filterType < 5, "Undefined filter type ([]).", static_cast<sint32>(filterType));
 
 			x += 1;
-			a = pointer_cast_const<const uint8*>(&ZERO_PIXEL);
-			c = pointer_cast_const<const uint8*>(&ZERO_PIXEL);
+			a = pointer_cast<const uint8*>(&ZERO_PIXEL);
+			c = pointer_cast<const uint8*>(&ZERO_PIXEL);
 
 			const uint8* row = destination;
 

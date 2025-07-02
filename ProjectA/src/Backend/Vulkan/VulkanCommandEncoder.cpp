@@ -79,7 +79,7 @@ namespace ProjectA {
 		renderPassBeginInfo.framebuffer = framebuffer.object;
 		renderPassBeginInfo.renderArea.offset.x = 0;
 		renderPassBeginInfo.renderArea.offset.y = 0;
-		renderPassBeginInfo.renderArea.extent = *pointer_cast_const<const VkExtent2D*>(&framebuffer.getExtent());
+		renderPassBeginInfo.renderArea.extent = *pointer_cast<const VkExtent2D*>(&framebuffer.getExtent());
 		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.count);
 
 		if (clearValues.count == 0) {

@@ -7,7 +7,7 @@ namespace ProjectA {
 
 		uint32 operator [](std::size_t index) const {
 			// TODO: Assert.
-			return pointer_cast_const<const uint32*>(this)[index];
+			return pointer_cast<const uint32*>(this)[index];
 		}
 
 		uint32& operator [](std::size_t index) {
@@ -23,7 +23,7 @@ namespace ProjectA {
 
 		uint32 operator [](std::size_t index) const {
 			// TODO: Assert.
-			return pointer_cast_const<const uint32*>(this)[index];
+			return pointer_cast<const uint32*>(this)[index];
 		}
 
 		uint32& operator [](std::size_t index) {

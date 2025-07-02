@@ -35,13 +35,13 @@ namespace ProjectA {
 
 				ENGINE_ASSERT(bitCount <= remainingBitSize, "Attempted to peek [] bits, but only [] were remaining.", static_cast<sint32>(bitCount), remainingBitSize);
 
-				T value = *pointer_cast_const<const T*>(&bitBuffer);
+				T value = *pointer_cast<const T*>(&bitBuffer);
 
 				if (swapEndianness) {
 					value = ByteStream::byteswap(value);
 				}
 
-				BitStreamSize valueStreamSize = *pointer_cast_const<const BitStreamSize*>(&value);
+				BitStreamSize valueStreamSize = *pointer_cast<const BitStreamSize*>(&value);
 
 				if (bitOffset > 0) {
 					const BitStreamSize offset = sizeof(bitBuffer) * 8 - bitOffset;
@@ -51,7 +51,7 @@ namespace ProjectA {
 
 				valueStreamSize &= ((1ULL << bitCount) - 1);
 
-				return *pointer_cast_const<const T*>(&valueStreamSize);
+				return *pointer_cast<const T*>(&valueStreamSize);
 			}
 
 			// Returns the next bits from the stream.

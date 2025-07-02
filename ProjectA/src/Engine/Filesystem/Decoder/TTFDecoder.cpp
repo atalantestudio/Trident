@@ -460,8 +460,8 @@ namespace ProjectA {
 		const uint16 regCount = static_cast<uint16>(glyphLengths.count / 8);
 
 		for (uint16 regIndex = 0; regIndex < regCount; regIndex += 1) {
-			const __m128i next = _mm_load_si128(pointer_cast_const<const __m128i*>(&glyphOffsets[regIndex * 8 + 1]));
-			const __m128i curr = _mm_load_si128(pointer_cast_const<const __m128i*>(&glyphOffsets[regIndex * 8]));
+			const __m128i next = _mm_load_si128(pointer_cast<const __m128i*>(&glyphOffsets[regIndex * 8 + 1]));
+			const __m128i curr = _mm_load_si128(pointer_cast<const __m128i*>(&glyphOffsets[regIndex * 8]));
 			const __m128i sub = _mm_sub_epi16(next, curr);
 
 			_mm_store_si128(pointer_cast<__m128i*>(&glyphLengths[regIndex * 8]), sub);
