@@ -3,6 +3,8 @@
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 
+#include "Engine/API/Rendering/BufferImageCopyRegion.hpp"
+
 namespace ProjectA {
 	class OpenGLCopyBufferToImageCommand final : public OpenGLCommand {
 		public:

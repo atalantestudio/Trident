@@ -1,10 +1,10 @@
 #include "pch.hpp"
 
-#ifdef ENABLE_OPENGL
+#ifdef ENABLE_OPENGL_ADAPTER
 	#include "Backend/OpenGL/OpenGLGraphicsAdapter.hpp"
 #endif
 
-#ifdef ENABLE_VULKAN
+#ifdef ENABLE_VULKAN_ADAPTER
 	#include "Backend/Vulkan/VulkanGraphicsAdapter.hpp"
 #endif
 
@@ -38,7 +38,7 @@ namespace ProjectA {
 				ENGINE_WARN("Headless graphics are not supported.");
 
 				break;
-			#ifdef ENABLE_OPENGL
+			#ifdef ENABLE_OPENGL_ADAPTER
 				case GraphicsAPI::OPENGL:
 					ENGINE_INFO("Using OpenGL graphics adapter.");
 
@@ -46,7 +46,7 @@ namespace ProjectA {
 
 					break;
 			#endif
-			#ifdef ENABLE_VULKAN
+			#ifdef ENABLE_VULKAN_ADAPTER
 				case GraphicsAPI::VULKAN:
 					ENGINE_INFO("Using Vulkan graphics adapter.");
 

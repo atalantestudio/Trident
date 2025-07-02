@@ -1,11 +1,7 @@
 #pragma once
 
+// TODO: Don't include the precompiled header here.
 #include "pch.hpp"
-
-#include "Engine/base.hpp"
-
-// Math
-#include "Engine/lyah.hpp"
 
 // Application
 #include "Engine/Application/Application.hpp"

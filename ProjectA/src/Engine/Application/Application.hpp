@@ -1,8 +1,11 @@
 #pragma once
 
+#include "Engine/API/Event/Window/WindowCloseEvent.hpp"
+#include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/SharedMemory/SharedMemory.hpp"
 #include "Engine/API/Synchronization/Mutex.hpp"
 #include "Engine/API/Timer/HighResolutionTimer.hpp"
+#include "Engine/API/Window/Window.hpp"
 #include "Engine/Application/ApplicationManifest.hpp"
 #include "Engine/Application/ApplicationProperties.hpp"
 #include "Engine/Layer/LayerStack.hpp"

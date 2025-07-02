@@ -1,8 +1,5 @@
 #pragma once
 
-// TODO: Remove this include.
-#include "pch.hpp"
-
 namespace ProjectA {
 	class Camera3D {
 		public:

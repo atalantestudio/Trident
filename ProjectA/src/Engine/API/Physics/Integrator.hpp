@@ -3,6 +3,7 @@
 #include "Engine/API/Physics/CCD/CCDOutput.hpp"
 #include "Engine/API/Physics/CCD/SeparationFunction.hpp"
 #include "Engine/API/Physics/CCD/MinSeparationOutput.hpp"
+#include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace ProjectA {

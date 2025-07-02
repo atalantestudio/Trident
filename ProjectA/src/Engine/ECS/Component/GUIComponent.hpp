@@ -1,7 +1,5 @@
 #pragma once
 
-#include "pch.hpp"
-
 namespace ProjectA {
 	// Simple quad for 2D GUIs.
 	struct GUIComponent {

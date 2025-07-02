@@ -103,5 +103,3 @@ VSync: true
 | *TrueType Reference Manual* | Apple | - | [Website](https://developer.apple.com/fonts/TrueType-Reference-Manual) |
 | *True Type Fonts* | Gabor Makes Games | - | [Article](https://gabormakesgames.com/blog_fonts.html) |
 | *FontDrop!* | Viktor Nübel<br />Clemens Nübel | - | [Website](https://fontdrop.info) |
-
-<mark><b>TODO</b></mark>

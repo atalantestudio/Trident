@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/types.hpp"
-
 namespace ProjectA {
 	// A non-resizeable array of elements.
 	template<typename T>

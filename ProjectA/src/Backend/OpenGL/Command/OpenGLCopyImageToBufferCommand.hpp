@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/API/Rendering/BufferImageCopyRegion.hpp"
+
 namespace ProjectA {
 	class OpenGLCopyImageToBufferCommand final : public OpenGLCommand {
 		public:

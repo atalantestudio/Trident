@@ -13,7 +13,7 @@ namespace ProjectA {
 
 		VkResult result;
 
-		#ifdef PLATFORM_WINDOWS
+		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 			result = createVulkanWin32Surface(window, instance, nullptr, &object);
 		#else
 			#error "Unhandled platform."

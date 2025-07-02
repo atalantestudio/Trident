@@ -18,6 +18,8 @@ namespace ProjectA {
 	void OpenGLGraphicsAdapter::loadProcedures(const OpenGLRenderingContext& renderingContext) {
 		PROFILE_SCOPE(FUNC_SIG);
 
+		#define LOAD_PROCEDURE_ADDRESS(renderingContext, procedure) procedure = static_cast<decltype(procedure)>(renderingContext.getProcedureAddress(#procedure))
+
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glAttachShader);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBufferRange);
@@ -144,6 +146,8 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCompileShader);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderSource);
 		#endif
+
+		#undef LOAD_PROCEDURE_ADDRESS
 	}
 
 	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const Window& window) :

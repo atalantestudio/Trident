@@ -77,7 +77,7 @@ namespace ProjectA {
 			instanceCreateInfo.ppEnabledLayerNames = nullptr;
 		#endif
 
-		#ifdef PLATFORM_WINDOWS
+		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 			enabledExtensionNames.emplace_back(VK_KHR_SURFACE_EXTENSION_NAME);
 			enabledExtensionNames.emplace_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 		#endif

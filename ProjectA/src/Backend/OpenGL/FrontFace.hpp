@@ -1,4 +1,4 @@
-#include "pch.hpp"
+#pragma once
 
 namespace ProjectA {
 	static GLenum getGlFrontFace(FrontFace frontFace) {

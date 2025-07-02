@@ -22,6 +22,6 @@ namespace ProjectA {
 
 		// TODO: Replace by flag.
 		// The number of vertices used.
-		uint8 count : 2;
+		flag count : 2;
 	};
 }

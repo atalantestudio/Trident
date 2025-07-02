@@ -2,10 +2,8 @@
 
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 #include "Backend/OpenGL/OpenGLFramebuffer.hpp"
-#include "Backend/OpenGL/OpenGLRenderPass.hpp"
-#include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
-#include "Engine/API/Rendering/CommandEncoder.hpp"
+#include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
 
 namespace ProjectA {
 	class OpenGLBeginRenderPassCommand final : public OpenGLCommand {

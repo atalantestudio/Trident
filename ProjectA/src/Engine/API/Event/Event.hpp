@@ -17,7 +17,9 @@ namespace ProjectA {
 			virtual const char* getName() const = 0;
 
 			inline bool hasCategory(EventCategory category) const {
-				return getCategories() & category;
+				const uint32 categories = getCategories();
+
+				return categories & category;
 			}
 
 		public:

@@ -1,8 +1,8 @@
 #pragma once
 
-namespace ProjectA {
-	#define LOAD_PROCEDURE_ADDRESS(renderingContext, procedure) procedure = static_cast<decltype(procedure)>(renderingContext.getProcedureAddress(#procedure))
+#include "Engine/API/Window/Window.hpp"
 
+namespace ProjectA {
 	class OpenGLRenderingContext {
 		public:
 			static void* getProcedureAddress(std::string_view name);

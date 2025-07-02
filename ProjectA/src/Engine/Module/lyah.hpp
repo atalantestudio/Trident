@@ -107,6 +107,33 @@ namespace lyah {
 }
 
 namespace ProjectA {
+	template<std::size_t C, typename T>
+	using vec = lyah::vec<C, T>;
+
+	template<typename T>
+	using vec2 alignas(2 * sizeof(T)) = lyah::vec2<T>;
+
+	template<typename T>
+	using vec3 alignas(4 * sizeof(T)) = lyah::vec3<T>;
+
+	template<typename T>
+	using vec4 alignas(4 * sizeof(T)) = lyah::vec4<T>;
+
+	template<std::size_t M, std::size_t N, typename T>
+	using mat = lyah::mat<M, N, T>;
+
+	template<typename T>
+	using mat2x2 = lyah::mat2x2<T>;
+
+	template<typename T>
+	using mat3x3 = lyah::mat3x3<T>;
+
+	template<typename T>
+	using mat4x4 = lyah::mat4x4<T>;
+
+	template<typename T>
+	using quat alignas(4 * sizeof(T)) = lyah::quat<T>;
+
 	// TODO: Expose Lyah methods.
 
 	template<std::size_t C, typename T>
