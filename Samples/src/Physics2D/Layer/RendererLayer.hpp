@@ -34,8 +34,8 @@ namespace ProjectA {
 
 			GJK2DResult gjkResult;
 
-			uint32 hoveredObjectIndex = std::numeric_limits<uint32>::max();
-			uint32 selectedObjectIndex = std::numeric_limits<uint32>::max();
+			uint32 hoveredObjectIndex = max<uint32>();
+			uint32 selectedObjectIndex = max<uint32>();
 
 			vec2<float32> placeholderOffset;
 	};

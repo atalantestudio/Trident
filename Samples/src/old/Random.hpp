@@ -17,6 +17,6 @@ class Random {
 
 		template<>
 		static ProjectA::float32 Random::get() {
-			return (ProjectA::float32) distribution(mt) / (ProjectA::float32) std::numeric_limits<ProjectA::uint32>::max();
+			return static_cast<ProjectA::float32>(distribution(mt)) / ProjectA::max<ProjectA::uint32>();
 		}
 };

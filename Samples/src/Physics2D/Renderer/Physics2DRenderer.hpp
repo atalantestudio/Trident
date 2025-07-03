@@ -165,7 +165,7 @@ namespace ProjectA {
 			vec2<float32> mousePosition;
 			vec2<float32> ndcMousePosition;
 
-			uint32 selectedObjectIndex = std::numeric_limits<uint32>::max();
+			uint32 selectedObjectIndex = max<uint32>();
 
 			const Scene2D* scene = nullptr;
 	};

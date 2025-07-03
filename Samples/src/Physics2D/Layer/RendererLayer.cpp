@@ -100,7 +100,7 @@ namespace ProjectA {
 
 		renderer.selectObject(selectedObjectIndex);
 
-		if (selectedObjectIndex != std::numeric_limits<uint32>::max()) {
+		if (selectedObjectIndex != max<uint32>()) {
 			renderer.setPlaceholderOffset(placeholderOffset);
 		}
 
@@ -121,7 +121,7 @@ namespace ProjectA {
 	}
 
 	void RendererLayer::checkHover() {
-		hoveredObjectIndex = std::numeric_limits<uint32>::max();
+		hoveredObjectIndex = max<uint32>();
 
 		const vec2<float32>& p = renderer.getNdcMousePosition();
 
@@ -148,7 +148,7 @@ namespace ProjectA {
 	}
 
 	bool RendererLayer::onMouseDown(MouseDownEvent& event) {
-		if (event.getButton() == MouseButton::LEFT && hoveredObjectIndex != std::numeric_limits<uint32>::max()) {
+		if (event.getButton() == MouseButton::LEFT && hoveredObjectIndex != max<uint32>()) {
 			selectedObjectIndex = hoveredObjectIndex;
 			placeholderOffset = {0.0f, 0.0f};
 		}
@@ -164,7 +164,7 @@ namespace ProjectA {
 
 		renderer.setMousePosition(x, y);
 
-		if (selectedObjectIndex != std::numeric_limits<uint32>::max()) {
+		if (selectedObjectIndex != max<uint32>()) {
 			const vec2<float32>& position = renderer.getNdcMousePosition();
 			const vec2<float32> positionDelta = position - previousPosition;
 
@@ -175,10 +175,10 @@ namespace ProjectA {
 	}
 
 	bool RendererLayer::onMouseUp(MouseUpEvent& event) {
-		if (event.getButton() == MouseButton::LEFT && selectedObjectIndex != std::numeric_limits<uint32>::max()) {
+		if (event.getButton() == MouseButton::LEFT && selectedObjectIndex != max<uint32>()) {
 			scene[selectedObjectIndex].position += placeholderOffset;
 
-			selectedObjectIndex = std::numeric_limits<uint32>::max();
+			selectedObjectIndex = max<uint32>();
 		}
 
 		return true;

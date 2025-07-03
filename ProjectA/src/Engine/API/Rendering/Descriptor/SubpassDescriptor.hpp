@@ -7,7 +7,7 @@ namespace ProjectA {
 		sequence<ColorAttachment> colorAttachments;
 
 		// Sets the index of the attachment that will render to the swapchain image.
-		uint32 presentAttachmentIndex = std::numeric_limits<uint32>::max();
+		uint32 presentAttachmentIndex = max<uint32>();
 
 		bool depthStencil;
 		DepthStencilAttachment depthStencilAttachment;

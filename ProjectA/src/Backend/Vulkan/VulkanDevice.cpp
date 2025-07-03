@@ -94,7 +94,7 @@ namespace ProjectA {
 			1,
 			&std::static_pointer_cast<VulkanFence>(fence)->object,
 			VK_TRUE,
-			std::numeric_limits<uint64>::max()
+			max<uint64>()
 		);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to wait for Vulkan fence ([]).", string_VkResult(result));
@@ -118,7 +118,7 @@ namespace ProjectA {
 		const VkResult result = vkAcquireNextImageKHR(
 			object,
 			std::static_pointer_cast<VulkanSwapchain>(swapchain)->object,
-			std::numeric_limits<uint64>::max(),
+			max<uint64>(),
 			std::static_pointer_cast<VulkanSemaphore>(semaphore)->object,
 			VK_NULL_HANDLE,
 			&imageIndex

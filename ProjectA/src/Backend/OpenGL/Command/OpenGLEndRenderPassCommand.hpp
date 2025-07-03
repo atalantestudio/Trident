@@ -14,7 +14,7 @@ namespace ProjectA {
 			void execute() const final override {
 				const ref<Subpass>& subpass = framebuffer->getRenderPass()->getSubpass(subpassIndex);
 
-				if (subpass->getPresentAttachmentIndex() != std::numeric_limits<uint32>::max()) {
+				if (subpass->getPresentAttachmentIndex() != max<uint32>()) {
 					// TODO: Why resolveAttachmentCount isn't needed as offset here?
 					// TODO: Include the offset of the subpass.
 					const GLenum readBuffer = GL_COLOR_ATTACHMENT0 + subpass->getPresentAttachmentIndex();

@@ -817,13 +817,13 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::selectObject(uint32 objectIndex) {
-		if (selectedObjectIndex != std::numeric_limits<uint32>::max()) {
+		if (selectedObjectIndex != max<uint32>()) {
 			instanceMappedRange[selectedObjectIndex].selected = 0;
 		}
 
 		selectedObjectIndex = objectIndex;
 
-		if (selectedObjectIndex != std::numeric_limits<uint32>::max()) {
+		if (selectedObjectIndex != max<uint32>()) {
 			instanceMappedRange[selectedObjectIndex].selected = 1;
 		}
 	}
@@ -858,7 +858,7 @@ namespace ProjectA {
 		renderDistance(commandEncoder);
 		renderClosestFeatures(commandEncoder);
 
-		if (selectedObjectIndex != std::numeric_limits<uint32>::max()) {
+		if (selectedObjectIndex != max<uint32>()) {
 			renderSelectedObjectPlaceholder(commandEncoder);
 		}
 

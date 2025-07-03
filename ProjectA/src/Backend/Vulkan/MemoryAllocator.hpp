@@ -3,8 +3,8 @@
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 
 namespace ProjectA {
-	#define UNDEFINED_MEMORY_TYPE_INDEX std::numeric_limits<uint32>::max()
-	#define UNDEFINED_MEMORY_ALLOCATION_INDEX std::numeric_limits<uint32>::max()
+	#define UNDEFINED_MEMORY_TYPE_INDEX max<uint32>()
+	#define UNDEFINED_MEMORY_ALLOCATION_INDEX max<uint32>()
 
 	struct MemoryAllocation {
 		VkDeviceMemory memory;

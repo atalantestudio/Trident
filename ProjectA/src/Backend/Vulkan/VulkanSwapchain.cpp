@@ -56,12 +56,13 @@ namespace ProjectA {
 		imageCount = surfaceCapabilities.minImageCount + 1;
 
 		if (surfaceCapabilities.maxImageCount > 0) {
+			// TODO: lyah::min
 			imageCount = std::min(imageCount, surfaceCapabilities.maxImageCount);
 		}
 
 		ENGINE_INFO("Swapchain image count is [].", imageCount);
 
-		if (surfaceCapabilities.currentExtent.width == std::numeric_limits<uint32>::max() && surfaceCapabilities.currentExtent.height == std::numeric_limits<uint32>::max()) {
+		if (surfaceCapabilities.currentExtent.width == max<uint32>() && surfaceCapabilities.currentExtent.height == max<uint32>()) {
 			extent = *pointer_cast<const Extent2D*>(&surfaceCapabilities.currentExtent);
 		}
 		else {

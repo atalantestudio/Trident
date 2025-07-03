@@ -100,6 +100,6 @@ namespace ProjectA {
 			}
 
 		private:
-			static constexpr uint32 NULL_COMPONENT_INDEX = std::numeric_limits<Entity>::max();
+			static constexpr uint32 NULL_COMPONENT_INDEX = max<Entity>();
 	};
 }

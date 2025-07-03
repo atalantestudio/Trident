@@ -14,6 +14,8 @@
 
 static constexpr char* ENGINE_NAME = "ProjectA";
 
+#include "Engine/Base/Limits.hpp"
+
 // Binary helpers.
 #include "Engine/Base/binary.hpp"
 

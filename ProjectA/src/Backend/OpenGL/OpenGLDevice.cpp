@@ -23,7 +23,7 @@ namespace ProjectA {
 
 		glFence->create();
 
-		const GLenum status = glClientWaitSync(glFence->object, GL_SYNC_FLUSH_COMMANDS_BIT, std::numeric_limits<uint64>::max());
+		const GLenum status = glClientWaitSync(glFence->object, GL_SYNC_FLUSH_COMMANDS_BIT, max<uint64>());
 
 		DEBUG_ASSERT(status == GL_CONDITION_SATISFIED || status == GL_ALREADY_SIGNALED);
 	}
