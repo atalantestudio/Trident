@@ -2,73 +2,22 @@
 
 #include "Engine/config.hpp"
 
-// Determine compiler, OS and architecture.
 #include "Engine/Base/context.hpp"
 
 #ifdef BUILD_MODE_DEBUG
 	#include "Engine/Base/Debug.hpp"
 #endif
 
-// Basic types.
 #include "Engine/Base/types.hpp"
 
-static constexpr char* ENGINE_NAME = "ProjectA";
-
 #include "Engine/Base/Limits.hpp"
-
-// Binary helpers.
 #include "Engine/Base/binary.hpp"
-
-// Casting helpers.
 #include "Engine/Base/cast.hpp"
-
-// Enum helpers.
 #include "Engine/Base/enum.hpp"
-
-// Function helpers.
 #include "Engine/Base/function.hpp"
 
 #if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
-	#define NOGDICAPMASKS
-	#define NOVIRTUALKEYCODES
-	#define NOSYSMETRICS
-	#define NOMENUS
-	#define NOICONS
-	#define NOKEYSTATES
-	#define NOSYSCOMMANDS
-	#define NORASTEROPS
-	#define OEMRESOURCE
-	#define NOATOM
-	#define NOCLIPBOARD
-	#define NODRAWTEXT
-	#define NOKERNEL
-	#define NOMEMMGR
-	#define NOMETAFILE
-	#define NOMINMAX
-	#define NOOPENFILE
-	#define NOSCROLL
-	#define NOSERVICE
-	#define NOSOUND
-	#define NOTEXTMETRIC
-	#define NOWH
-	#define NOWINOFFSETS
-	#define NOCOMM
-	#define NOKANJI
-	#define NOHELP
-	#define NOPROFILER
-	#define NODEFERWINDOWPOS
-	#define NOMCX
-
-	#include <Windows.h>
-
-	// NOTE: ERROR is a LogLevel value.
-	#undef ERROR
-
-	#include <windowsx.h>
-
-	// Load Windows 11 theme.
-	// https://learn.microsoft.com/en-us/answers/questions/1184393/when-including-comctl32-lib-causes-the-ordinal-345
-	#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df'\"")
+	#include "Engine/Base/Windows.hpp"
 #endif
 
 #ifdef BUILD_MODE_DEBUG
@@ -122,68 +71,15 @@ static constexpr char* ENGINE_NAME = "ProjectA";
 #include "Engine/Base/UDL.hpp"
 
 #ifdef ENABLE_OPENGL_ADAPTER
-	#include <GL/glcorearb.h>
-
-	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
-		#include <gl/GL.h>
-	#endif
-
-	#include <GL/glext.h>
-
-	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
-		#include <GL/wglext.h>
-	#endif
-
-	#ifndef OPENGL_USE_SPIRV
-		// NOTE: <regex> is used for custom entrypoints within a GLSL shader.
-		#include <regex>
-	#endif
-
-	#include "Backend/OpenGL/procedures.hpp"
+	#include "Backend/OpenGL/base.hpp"
 #endif
 
 #ifdef ENABLE_VULKAN_ADAPTER
-	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
-		#define VK_USE_PLATFORM_WIN32_KHR
-	#endif
-
-	#include <vulkan/vulkan.h>
-
-	#ifdef BUILD_MODE_DEBUG
-		#include <vulkan/vk_enum_string_helper.h>
-	#endif
+	#include "Backend/Vulkan/base.hpp"
 #endif
 
 #include "Engine/Base/sequence.hpp"
-
-#ifdef BUILD_MODE_PROFILE
-	#include "Engine/Profile/Profiler.hpp"
-	#include "Engine/Profile/Timer.hpp"
-
-	#define PROFILER(path) ::ProjectA::Profiler profiler = ::ProjectA::Profiler(path)
-	#define PROFILE_SCOPE(name) ::ProjectA::Timer timer = ::ProjectA::Timer(name)
-
-	#if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) || (defined(__ICC) && (__ICC >= 600)) || defined(__ghs__)
-		#define FUNC_SIG __PRETTY_FUNCTION__
-	#elif defined(__DMC__) && (__DMC__ >= 0x810)
-		#define FUNC_SIG __PRETTY_FUNCTION__
-	#elif defined(__FUNCSIG__) || (_MSC_VER)
-		#define FUNC_SIG __FUNCSIG__
-	#elif (defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 600)) || (defined(__IBMCPP__) && (__IBMCPP__ >= 500))
-		#define FUNC_SIG __FUNCTION__
-	#elif defined(__BORLANDC__) && (__BORLANDC__ >= 0x550)
-		#define FUNC_SIG __FUNC__
-	#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901)
-		#define FUNC_SIG __func__
-	#elif defined(__cplusplus) && (__cplusplus >= 201103)
-		#define FUNC_SIG __func__
-	#else
-		#define FUNC_SIG
-	#endif
-#else
-	#define FUNC_SIG
-	#define PROFILER(path)
-	#define PROFILE_SCOPE(name)
-#endif
-
+#include "Engine/Base/Profile.hpp"
 #include "Engine/Base/string.hpp"
+
+static constexpr char* ENGINE_NAME = "ProjectA";
