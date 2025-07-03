@@ -1,5 +1,20 @@
 #pragma once
 
+#define ABORT std::abort
+
+#ifdef BUILD_MODE_DEBUG
+	#if COMPILER == COMPILER_MSVC
+		#define BREAKPOINT __debugbreak
+	#else
+		#define BREAKPOINT
+	#endif
+
+	#define DEBUG_PRINT(value) std::cout << #value##" = " << value << std::endl
+#else
+	#define BREAKPOINT
+	#define DEBUG_PRINT(value)
+#endif
+
 #ifdef BUILD_MODE_PROFILE
 	#include "Engine/Profile/Profiler.hpp"
 	#include "Engine/Profile/Timer.hpp"
