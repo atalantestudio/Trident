@@ -296,7 +296,7 @@ namespace ProjectA {
 				float32 positionX = 0;
 				float32 positionY = 0;
 
-				for (const char glyph : text) {
+				for (const char8 glyph : text) {
 					const uint16 codePoint = static_cast<uint16>(glyph);
 					const Glyph& glyph = font[codePoint];
 

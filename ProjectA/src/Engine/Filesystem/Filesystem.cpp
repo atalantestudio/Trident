@@ -22,7 +22,7 @@ namespace ProjectA {
 
 		sequence<uint8> buffer(count);
 
-		stream.read(pointer_cast<char*>(&buffer[0]), count);
+		stream.read(pointer_cast<char8*>(&buffer[0]), count);
 		stream.close();
 
 		return buffer;

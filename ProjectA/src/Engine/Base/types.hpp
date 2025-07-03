@@ -1,7 +1,9 @@
 #pragma once
 
 namespace ProjectA {
-	// TODO: Add char8/16/32 typedefs?
+	typedef char char8;
+	typedef char16_t char16;
+	typedef char32_t char32;
 
 	typedef std::int8_t sint8;
 	typedef std::int16_t sint16;

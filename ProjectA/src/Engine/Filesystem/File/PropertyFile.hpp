@@ -19,7 +19,7 @@ namespace ProjectA {
 			static T parseValueString(const std::string& valueString, std::string_view propertyName) {
 				uint32 value = 0;
 
-				for (const char character : valueString) {
+				for (const char8 character : valueString) {
 					value *= 10;
 					value += character - '0';
 				}

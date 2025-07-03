@@ -168,7 +168,7 @@ namespace ProjectA {
 			static constexpr std::size_t LEVEL_NAME_PADDING = 5;
 			static constexpr uint8 LOG_LEVEL_BACKGROUND_COLORS[] = {0, 0, 0, 0, 101, 107};
 			static constexpr uint8 LOG_LEVEL_FOREGROUND_COLORS[] = {97, 37, 94, 93, 97, 30};
-			static constexpr const char* LOG_LEVEL_NAMES[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
+			static constexpr const char8* LOG_LEVEL_NAMES[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 			static std::ostream* LOG_LEVEL_OUTPUT_STREAMS[];
 
 			static std::size_t namePadding;

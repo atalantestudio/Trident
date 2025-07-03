@@ -5,9 +5,9 @@
 #include "Engine/Platform.hpp"
 
 namespace ProjectA {
-	const char* Platform::windowName = nullptr;
+	const char8* Platform::windowName = nullptr;
 
-	void Platform::initialize(const char* windowName) {
+	void Platform::initialize(const char8* windowName) {
 		Platform::windowName = windowName;
 	}
 

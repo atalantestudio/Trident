@@ -231,7 +231,7 @@ namespace ProjectA {
 	#ifdef DEBUG_ENABLE_MESSENGER
 		void OpenGLGraphicsAdapter::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 			static constexpr std::string_view log = "[[] []] []";
-			static constexpr char* sourceStrings[] = {
+			static constexpr char8* sourceStrings[] = {
 				"OpenGL API",
 				"Window-system API",
 				"Shader compiler",
@@ -240,7 +240,7 @@ namespace ProjectA {
 				"Unknown source",
 			};
 
-			const char* sourceString = sourceStrings[source - GL_DEBUG_SOURCE_API];
+			const char8* sourceString = sourceStrings[source - GL_DEBUG_SOURCE_API];
 
 			std::string_view typeString;
 

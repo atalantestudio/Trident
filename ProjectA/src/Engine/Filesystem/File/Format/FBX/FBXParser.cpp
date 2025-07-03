@@ -3,7 +3,7 @@
 namespace ProjectA {
 	// https://code.blender.org/2013/08/fbx-binary-file-format-specification
 	// https://banexdevblog.wordpress.com/2014/06/23/a-quick-tutorial-about-the-fbx-ascii-format
-	enum class FBXPropertyTypeCode : char {
+	enum class FBXPropertyTypeCode : char8 {
 		// 2 byte signed integer.
 		Y = 'Y',
 		// 1 bit boolean (encoded as the LSB of a 1 byte value).
@@ -58,7 +58,7 @@ namespace ProjectA {
 				- Read Contents = DecodedContents
 		- If TypeCode is S
 			- Read Length
-			- Read Data(Length) as char
+			- Read Data(Length) as char8
 			- Add null terminator
 		- If TypeCode is R
 			- Read Length

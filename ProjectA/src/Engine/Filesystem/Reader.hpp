@@ -30,7 +30,7 @@ namespace ProjectA {
 			sequence<uint8> read(uint64 count) {
 				sequence<uint8> data(count);
 
-				stream.read(pointer_cast<char*>(data), data.count);
+				stream.read(pointer_cast<char8*>(data), data.count);
 
 				return data;
 			}

@@ -23,7 +23,7 @@ namespace ProjectA {
 		// Exclusive to text components
 
 		bool textComponent;
-		const char* nullTerminatedText;
+		const char8* nullTerminatedText;
 		FontID font;
 		float32 fontSize;
 	};

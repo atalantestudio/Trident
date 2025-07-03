@@ -14,7 +14,7 @@ namespace ProjectA {
 
 			virtual uint32 getCategories() const = 0;
 
-			virtual const char* getName() const = 0;
+			virtual const char8* getName() const = 0;
 
 			inline bool hasCategory(EventCategory category) const {
 				const uint32 categories = getCategories();
@@ -40,7 +40,7 @@ namespace ProjectA {
 			return getStaticType(); \
 		} \
 		\
-		virtual const char* getName() const override { \
+		virtual const char8* getName() const override { \
 			return #type; \
 		}
 }

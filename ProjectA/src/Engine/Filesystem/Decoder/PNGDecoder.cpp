@@ -153,7 +153,7 @@ namespace ProjectA {
 				case STRING_TO_LITTLE_ENDIAN_UINT32("IEND"):
 					break;
 				default: {
-					const char* typeString = pointer_cast<const char*>(&type);
+					const char8* typeString = pointer_cast<const char8*>(&type);
 
 					ENGINE_WARN("Ignoring unsupported PNG chunk of type \"[][][][]\".", typeString[0], typeString[1], typeString[2], typeString[3]);
 

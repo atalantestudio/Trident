@@ -24,7 +24,7 @@ namespace ProjectA {
 			static uint32 calculateTransferQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties);
 
 		public:
-			std::vector<const char*> enabledExtensionNames;
+			std::vector<const char8*> enabledExtensionNames;
 
 			uint32 graphicsQueueFamilyIndex;
 			uint32 computeQueueFamilyIndex;

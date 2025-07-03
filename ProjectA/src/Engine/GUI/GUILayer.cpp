@@ -220,7 +220,7 @@ namespace ProjectA {
 		glyphSubcomponent.layerIndex = fontData.glyphMapImageId;
 		glyphSubcomponent.color = textStyle.color.value;
 
-		for (const char character : string) {
+		for (const char8 character : string) {
 			if (character < 0) {
 				// TODO: Handle UTF-16 characters.
 
@@ -670,7 +670,7 @@ namespace ProjectA {
 
 		bool firstLineGlyph = true;
 
-		for (const char character : string) {
+		for (const char8 character : string) {
 			if (character < 0) {
 				// TODO: Handle UTF-16 characters.
 
@@ -717,7 +717,7 @@ namespace ProjectA {
 
 		bool firstLineGlyph = true;
 
-		for (const char character : string) {
+		for (const char8 character : string) {
 			if (character < 0) {
 				// TODO: Handle UTF-16 characters.
 

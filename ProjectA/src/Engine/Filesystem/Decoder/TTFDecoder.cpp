@@ -409,7 +409,7 @@ namespace ProjectA {
 				const uint32 calculatedChecksum = calculateTableChecksum(position, tableDirectory.length);
 
 				if (calculatedChecksum != readChecksum) {
-					const char* tag = static_cast<char*>(static_cast<void*>(&tableDirectory.tag));
+					const char8* tag = static_cast<char8*>(static_cast<void*>(&tableDirectory.tag));
 
 					ENGINE_ASSERT(false, "Invalid checksum for TTF table \"[][][][]\".", tag[0], tag[1], tag[2], tag[3]);
 				}

@@ -6,7 +6,7 @@ namespace ProjectA {
 		public:
 			// Initializes the platform.
 			// This name is used as the title of application windows and error pop-ups.
-			static void initialize(const char* windowName);
+			static void initialize(const char8* windowName);
 
 			// Returns the identifier of the current process.
 			static uint32 getCurrentProcessId();
@@ -17,6 +17,6 @@ namespace ProjectA {
 			static void waitForInput();
 
 		private:
-			static const char* windowName;
+			static const char8* windowName;
 	};
 }
