@@ -9,12 +9,36 @@
 
 	#define ABORT BREAKPOINT
 
+	#define DEBUG_ASSERT(condition) { \
+		if (!(condition)) { \
+			ENGINE_ERROR("Debug assertion failed."); \
+			BREAKPOINT(); \
+		} \
+	}
+
 	#define DEBUG_PRINT(value) std::cout << #value##" = " << value << std::endl
 #else
 	#define ABORT std::abort
 	#define BREAKPOINT
-	#define DEBUG_PRINT(value)
+	#define DEBUG_ASSERT(...)
+	#define DEBUG_PRINT(...)
 #endif
+
+#define ENGINE_ASSERT(condition, ...) { \
+	if (!(condition)) { \
+		ENGINE_ERROR(__VA_ARGS__); \
+		BREAKPOINT(); \
+	} \
+}
+
+#define CLIENT_ASSERT(condition, ...) { \
+	if (!(condition)) { \
+		CLIENT_ERROR(__VA_ARGS__); \
+		BREAKPOINT(); \
+	} \
+}
+
+#define ENGINE_STATIC_ASSERT static_assert
 
 #ifdef BUILD_MODE_PROFILE
 	#include "Engine/Profile/Profiler.hpp"
@@ -43,6 +67,10 @@
 	#endif
 #else
 	#define FUNC_SIG
-	#define PROFILER(path)
-	#define PROFILE_SCOPE(name)
+	#define PROFILER(...)
+	#define PROFILE_SCOPE(...)
 #endif
+
+#define BIND(function) [this](auto&&... arguments) { \
+	return this->function(std::forward<decltype(arguments)>(arguments)...); \
+}

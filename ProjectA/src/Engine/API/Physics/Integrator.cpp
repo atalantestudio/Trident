@@ -70,7 +70,7 @@ namespace ProjectA {
 		static constexpr float32 TOLERANCE = 0.25f * 0.005f;
 		static constexpr float32 TARGET = 0.005f;
 
-		DEBUG_STATIC_ASSERT(TARGET > TOLERANCE);
+		ENGINE_STATIC_ASSERT(TARGET > TOLERANCE);
 
 		CCDOutput output{};
 

@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	void Physics2DRenderer::build() {
-		DEBUG_STATIC_ASSERT(SAMPLE_COUNT > 1);
+		ENGINE_STATIC_ASSERT(SAMPLE_COUNT > 1);
 
 		const ref<Surface> surface = getSurface();
 
