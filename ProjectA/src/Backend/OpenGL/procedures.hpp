@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/config.hpp"
-
 namespace ProjectA {
 	extern PFNGLATTACHSHADERPROC glAttachShader;
 	extern PFNGLBINDBUFFERPROC glBindBuffer;

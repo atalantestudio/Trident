@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/API/Color.hpp"
 #include "Engine/GUI/ID.hpp"
 #include "Engine/GUI/LayoutDirection.hpp"
 #include "Engine/GUI/Size.hpp"

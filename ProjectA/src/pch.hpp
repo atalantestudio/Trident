@@ -25,3 +25,5 @@
 
 // Register module adapters.
 #include "Engine/Module/Adapter/lyah.hpp"
+
+#include "Engine/Base/Color.hpp"

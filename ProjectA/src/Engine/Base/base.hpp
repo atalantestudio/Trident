@@ -85,7 +85,7 @@ static constexpr char* ENGINE_NAME = "ProjectA";
 	#define DEBUG_STATIC_ASSERT
 #endif
 
-#include "Engine/Extent.hpp"
+#include "Engine/Base/Extent.hpp"
 #include "Engine/Logger/Logger.hpp"
 
 #define ENGINE_TRACE(argumentOrPattern, ...) ::ProjectA::Logger::engineLogger.trace(argumentOrPattern "\n    at []\n    ([]:[])", ##__VA_ARGS__, __FUNCSIG__, __FILE__, __LINE__)
@@ -154,7 +154,7 @@ static constexpr char* ENGINE_NAME = "ProjectA";
 	#endif
 #endif
 
-#include "Engine/sequence.hpp"
+#include "Engine/Base/sequence.hpp"
 
 #ifdef BUILD_MODE_PROFILE
 	#include "Engine/Profile/Profiler.hpp"
