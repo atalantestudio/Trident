@@ -35,7 +35,7 @@ namespace ProjectA {
 		updateInternal(descriptor);
 	}
 
-	// Seems to allocate ~59Mb of memory in Release mode.
+	// NOTE: ~59Mb in Release mode.
 	void VulkanSwapchain::updateInternal(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNC_SIG);
 

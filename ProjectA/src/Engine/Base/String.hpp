@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	// Trims whitespace - white lines not included.
+	// Trims whitespace. White lines not included.
 	inline std::string trim(const std::string& string) {
 		const std::size_t firstNotSpace = string.find_first_not_of(' ');
 

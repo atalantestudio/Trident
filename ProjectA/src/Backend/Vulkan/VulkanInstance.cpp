@@ -5,12 +5,12 @@
 namespace ProjectA {
 	// TODO: Client-side validation layer request.
 	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-		const std::vector<const char*> VulkanInstance::enabledLayerNames = {
+		const std::vector<const char8*> VulkanInstance::enabledLayerNames = {
 			"VK_LAYER_KHRONOS_validation",
 		};
 	#endif
 
-	// This constructor seems to allocate ~25Mb of memory in Release mode.
+	// NOTE: ~25Mb in Release mode.
 	VulkanInstance::VulkanInstance() {
 		PROFILE_SCOPE(FUNC_SIG);
 
@@ -51,10 +51,7 @@ namespace ProjectA {
 		applicationInfo.applicationVersion = VK_API_VERSION_1_0;
 
 		applicationInfo.pEngineName = ENGINE_NAME;
-
-		// TODO: Automatically determine engine version.
-		applicationInfo.engineVersion = VK_API_VERSION_1_0;
-
+		applicationInfo.engineVersion = VK_MAKE_API_VERSION(0, ENGINE_VERSION_MAJOR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
 		applicationInfo.apiVersion = VK_API_VERSION_1_0;
 
 		VkInstanceCreateInfo instanceCreateInfo{};

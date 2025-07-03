@@ -27,3 +27,5 @@
 #include "Engine/Module/Adapter/lyah.hpp"
 
 #include "Engine/Base/Color.hpp"
+
+#include "Engine/Manifest.hpp"

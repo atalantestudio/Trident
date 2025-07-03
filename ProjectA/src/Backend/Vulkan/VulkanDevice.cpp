@@ -9,12 +9,12 @@
 
 namespace ProjectA {
 	// TODO: Client-side extension request.
-	const std::vector<const char*> VulkanDevice::enabledExtensionNames = {
+	const std::vector<const char8*> VulkanDevice::enabledExtensionNames = {
 		VK_KHR_MAINTENANCE_1_EXTENSION_NAME,
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 	};
 
-	// This constructor seems to allocate ~3Mb of memory in Release mode.
+	// NOTE: ~3Mb in Release mode.
 	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface) :
 		physicalDevice(createRef<VulkanPhysicalDevice>(physicalDevice))
 	{

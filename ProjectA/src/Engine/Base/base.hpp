@@ -80,6 +80,4 @@
 
 #include "Engine/Base/sequence.hpp"
 #include "Engine/Base/Profile.hpp"
-#include "Engine/Base/string.hpp"
-
-static constexpr char* ENGINE_NAME = "ProjectA";
+#include "Engine/Base/String.hpp"
