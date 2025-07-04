@@ -8,5 +8,7 @@ namespace ProjectA {
 		Color color = 0xffffffff;
 		FontID font;
 		float32 fontSize;
+
+		std::string_view debugName;
 	};
 }

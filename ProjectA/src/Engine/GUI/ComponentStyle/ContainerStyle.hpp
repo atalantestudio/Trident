@@ -13,5 +13,7 @@ namespace ProjectA {
 		Color color = 0xffffffff;
 		ImageID image = 0;
 		float32 radius = 0.0f;
+
+		std::string_view debugName;
 	};
 }

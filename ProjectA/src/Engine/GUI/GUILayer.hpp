@@ -46,6 +46,16 @@ namespace ProjectA {
 			void closeComponent();
 
 		private:
+			void openRootComponent();
+
+			std::vector<uint32> FindGrowableOrShrinkableChildren(const GUIContainer& parent, bool axis) const;
+
+			void FitSizingWidths(uint32 componentIndex);
+			void FitSizingHeights(uint32 componentIndex);
+			void GrowAndShrinkSizingWidths(uint32 parentIndex);
+			void GrowAndShrinkSizingHeights(uint32 parentIndex);
+			void Positions(GUIContainer& parent, svec2<float32>& origin);
+
 			// Renders a colored quad without moving the origin.
 			// `origin` is the top-left corner of the quad.
 			void registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 radius);
@@ -70,6 +80,9 @@ namespace ProjectA {
 			static constexpr ImageID DEFAULT_IMAGE_INDEX = 0;
 			static constexpr uint32 MAX_FONT_COUNT = 4;
 
+			static constexpr bool WIDTH_AXIS = 0;
+			static constexpr bool HEIGHT_AXIS = 1;
+
 		private:
 			GUIRenderer renderer;
 
@@ -78,7 +91,7 @@ namespace ProjectA {
 			std::array<FontData, MAX_FONT_COUNT> fonts;
 			uint32 fontCount = 0;
 
-			std::vector<uint32> openedComponents;
+			std::vector<uint32> openComponents;
 			std::vector<GUIContainer> components;
 	};
 

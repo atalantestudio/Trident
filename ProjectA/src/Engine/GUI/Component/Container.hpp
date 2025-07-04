@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	struct GUIContainer {
-		uint32 parentIndex = ~0;
+		uint32 parentIndex;
 		svec2<float32> origin;
 		Size2D size;
 		svec2<float32> preferredSize;
@@ -23,8 +23,10 @@ namespace ProjectA {
 		// Exclusive to text components
 
 		bool textComponent;
-		const char8* nullTerminatedText;
+		std::string text;
 		FontID font;
 		float32 fontSize;
+
+		std::string_view debugName;
 	};
 }
