@@ -63,8 +63,6 @@ namespace ProjectA {
 
 		Object2D& objectA = scene.registerObject(objectADescriptor);
 
-		// X = -0.03 triggers CCD vertex-vertex case.
-		// objectA.position = {-0.03f, -0.625f};
 		objectA.position = {0.45f, -0.625f};
 
 		objectA.updateTransform();

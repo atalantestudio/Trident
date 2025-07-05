@@ -81,7 +81,7 @@ namespace ProjectA {
 
 		uint32 distanceIteration = 0;
 
-		// TODO: Add iteration limit.
+		// TODO: Use proper condition.
 		while (true) {
 			const Object2D nextA = copyObjectAt(A, t0);
 			const Object2D nextB = copyObjectAt(B, t0);
@@ -112,17 +112,21 @@ namespace ProjectA {
 
 			const SeparationFunction separationFunction = createSeparationFunction(nextA, nextB, result);
 
+			if (separationFunction.separationType == (SeparationType::VERTEX_A | SeparationType::VERTEX_B)) {
+				ENGINE_DEBUG("Vertex/vertex case");
+			}
+
 			float32 t1 = 1.0f;
 			uint32 pushBackIteration = 0;
 
-			// TODO: Add iteration limit.
+			// TODO: Use proper condition.
 			while (true) {
 				const Object2D nextSeparationA = copyObjectAt(A, t1);
 				const Object2D nextSeparationB = copyObjectAt(B, t1);
 
 				const MinSeparationOutput minSeparationOutput = findMinSeparation(separationFunction, nextSeparationA, nextSeparationB);
 
-				float32 s1 = minSeparationOutput.value;
+				float32 s1 = minSeparationOutput.separationValue;
 
 				if (s1 > TARGET + TOLERANCE) {
 					// If the objects are separated at t1, exit.
@@ -164,6 +168,7 @@ namespace ProjectA {
 
 				uint32 rootFinderIteration = 0;
 
+				// TODO: Use proper condition.
 				while (true) {
 					float32 t;
 
@@ -241,8 +246,7 @@ namespace ProjectA {
 			const vec2<float32>& a = multiplyTransform(geometryA->vertices[gjkResult.closestFeatureA.vertexIndex], A.transform);
 			const vec2<float32>& b = multiplyTransform(geometryB->vertices[gjkResult.closestFeatureB.vertexIndex], B.transform);
 
-			// The separating axis is b - a.
-			separationFunction.separatingAxis = b - a;
+			separationFunction.separatingAxis = normalized(b - a);
 			separationFunction.localPoint = {0.0f, 0.0f};
 
 			return separationFunction;
@@ -342,7 +346,7 @@ namespace ProjectA {
 			}
 		}
 
-		output.value = dot(b - a, normal);
+		output.separationValue = dot(b - a, normal);
 
 		return output;
 	}
