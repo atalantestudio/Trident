@@ -193,6 +193,6 @@ namespace ProjectA {
 	bool RendererLayer::onWindowResize(WindowResizeEvent& event) {
 		renderer.resize(event);
 
-		return true;
+		return false;
 	}
 }

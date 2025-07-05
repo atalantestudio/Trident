@@ -144,7 +144,7 @@ namespace ProjectA {
 	bool GUILayer::onWindowResize(WindowResizeEvent& event) {
 		renderer.resize(event);
 
-		return true;
+		return false;
 	}
 
 	void GUILayer::openRootComponent() {
