@@ -306,32 +306,28 @@ namespace ProjectA {
 	// TODO: lyah::max
 	void GUILayer::FitSizingWidths(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
-		GUIContainer& parent = components[component.parentIndex];
 
 		// Add padding to the component's size.
 		component.size.width.value += component.padding.x * 2.0f;
 
-		// Update the component and its parent depending on the parent's layout direction.
-		if (parent.layoutDirection == HORIZONTAL) {
-			// AAAA BB CCC D
-
-			// Calculate layout spacing.
+		if (component.layoutDirection == HORIZONTAL) {
+			// Add layout spacing to the component's size.
 			const sint32 childCount = static_cast<sint32>(component.childIndices.size());
 			const float32 layoutSpacing = component.layoutSpacing * static_cast<float32>(std::max(0, childCount - 1));
 
 			component.size.width.value += layoutSpacing;
+		}
 
+		GUIContainer& parent = components[component.parentIndex];
+
+		// Update the component and its parent depending on the parent's layout direction.
+		if (parent.layoutDirection == HORIZONTAL) {
 			if (parent.size.width.fillMode != FillMode::FIXED) {
 				parent.size.width.value += component.size.width.value;
 				parent.minimumSize.x += component.minimumSize.x;
 			}
 		}
 		else {
-			// AAAA
-			// BB
-			// CCC
-			// D
-
 			if (parent.size.width.fillMode != FillMode::FIXED) {
 				parent.size.width.value = std::max(parent.size.width.value, component.size.width.value);
 				parent.minimumSize.x = std::max(parent.minimumSize.x, component.minimumSize.x);
@@ -343,38 +339,31 @@ namespace ProjectA {
 	void GUILayer::FitSizingHeightsRecursive(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
 
+		// Add padding to the component's size.
+		component.size.height.value += component.padding.y * 2.0f;
+
+		if (component.layoutSpacing == VERTICAL) {
+			// Add layout spacing to the component's size.
+			const sint32 childCount = static_cast<sint32>(component.childIndices.size());
+			const float32 layoutSpacing = component.layoutSpacing * static_cast<float32>(std::max(0, childCount - 1));
+
+			component.size.height.value += layoutSpacing;
+		}
+
 		if (component.parentIndex == ~0) {
 			return;
 		}
 
 		GUIContainer& parent = components[component.parentIndex];
 
-		// Add padding to the component's size.
-		component.size.height.value += component.padding.y * 2.0f;
-
 		// Update the component and its parent depending on the parent's layout direction.
 		if (parent.layoutDirection == VERTICAL) {
-			// AAAA
-			// BB
-			// CCC
-			// D
-
-			// Calculate layout spacing.
-			const sint32 childCount = static_cast<sint32>(component.childIndices.size());
-			const float32 layoutSpacing = component.layoutSpacing * static_cast<float32>(std::max(0, childCount - 1));
-
-			component.size.height.value += layoutSpacing;
-
 			if (parent.size.height.fillMode != FillMode::FIXED) {
 				parent.size.height.value += component.size.height.value;
 				parent.minimumSize.y += component.minimumSize.y;
 			}
 		}
 		else {
-			// A B C D
-			// A   C D
-			//     C
-
 			if (parent.size.height.fillMode != FillMode::FIXED) {
 				parent.size.height.value = std::max(parent.size.height.value, component.size.height.value);
 				parent.minimumSize.y = std::max(parent.minimumSize.y, component.minimumSize.y);
@@ -395,11 +384,8 @@ namespace ProjectA {
 			return;
 		}
 
-		float32 remainingWidth = parent.size.width.value - parent.padding.x * 2.0f;
-
 		if (parent.layoutDirection == HORIZONTAL) {
-			// Grow/shrink towards right
-			// a b c d
+			float32 remainingWidth = parent.size.width.value - parent.padding.x * 2.0f;
 
 			for (const uint32 childIndex : parent.childIndices) {
 				const GUIContainer& child = components[childIndex];
@@ -408,106 +394,96 @@ namespace ProjectA {
 			}
 
 			remainingWidth -= parent.layoutSpacing * (parent.childIndices.size() - 1);
+
+			// Grow children.
+			while (remainingWidth > 0.0f) {
+				float32 smallestWidth = components[growableChildIndices[0]].size.width.value;
+				float32 secondSmallestWidth = lyah::infinity<float32>();
+				float32 widthToAdd = remainingWidth;
+
+				for (const uint32 childIndex : growableChildIndices) {
+					const GUIContainer& child = components[childIndex];
+					const float32 width = child.size.width.value;
+
+					// If we have found a child smaller than the smallest width registered, replace it with the child's width.
+					if (width < smallestWidth) {
+						secondSmallestWidth = smallestWidth;
+						smallestWidth = width;
+					}
+
+					// This child not the smallest.
+					if (width > smallestWidth) {
+						secondSmallestWidth = std::min(secondSmallestWidth, width);
+						widthToAdd = secondSmallestWidth - smallestWidth;
+					}
+				}
+
+				// Double-check that the width to add is <= than the equal distribution of the width among expanding children.
+				widthToAdd = std::min(widthToAdd, remainingWidth / growableChildIndices.size());
+
+				// Add the width to each expanding child.
+				for (const uint32 childIndex : growableChildIndices) {
+					GUIContainer& child = components[childIndex];
+
+					// Resize the child in order to reach the second smallest width, then repeat.
+					if (child.size.width.value == smallestWidth) {
+						child.size.width.value += widthToAdd;
+
+						// TODO: Handle maximum width.
+
+						remainingWidth -= widthToAdd;
+					}
+				}
+			}
+
+			const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
+
+			// Shrink children.
+			while (remainingWidth < 0.0f) {
+				float32 largestWidth = components[shrinkableChildIndices[0]].size.width.value;
+				float32 secondLargestWidth = 0.0f;
+				float32 widthToRemove = remainingWidth;
+
+				for (const uint32 childIndex : shrinkableChildIndices) {
+					const GUIContainer& child = components[childIndex];
+					const float32 width = child.size.width.value;
+
+					// If we have found a child larger than the largest width registered, replace it with the child's width.
+					if (width > largestWidth) {
+						secondLargestWidth = largestWidth;
+						largestWidth = width;
+					}
+
+					// This child is not the largest.
+					if (width < largestWidth) {
+						secondLargestWidth = std::max(secondLargestWidth, width);
+						widthToRemove = secondLargestWidth - largestWidth;
+					}
+				}
+
+				// Double-check that the width to remove is >= than the equal distribution of the width among expanding children.
+				widthToRemove = std::max(widthToRemove, remainingWidth / shrinkableChildIndices.size());
+
+				// Remove the width from each expanding child.
+				for (const uint32 childIndex : shrinkableChildIndices) {
+					GUIContainer& child = components[childIndex];
+
+					// Resize the child in order to reach the second largest width, then repeat.
+					if (child.size.width.value == largestWidth) {
+						child.size.width.value += widthToRemove;
+
+						// TODO: Handle minimum width.
+
+						remainingWidth -= widthToRemove;
+					}
+				}
+			}
 		}
 		else {
-			// Grow/shrink towards right
-			// a
-			// b
-			// c
-			// d
-
-			float32 maxChildWidth = 0.0f;
-
-			for (const uint32 childIndex : parent.childIndices) {
-				const GUIContainer& child = components[childIndex];
-
-				maxChildWidth = std::max(maxChildWidth, child.size.width.value);
-			}
-
-			remainingWidth -= maxChildWidth;
-		}
-
-		// Grow children.
-		while (remainingWidth > 0.0f) {
-			float32 smallestWidth = components[growableChildIndices[0]].size.width.value;
-			float32 secondSmallestWidth = lyah::infinity<float32>();
-			float32 widthToAdd = remainingWidth;
-
-			for (const uint32 childIndex : growableChildIndices) {
-				const GUIContainer& child = components[childIndex];
-				const float32 width = child.size.width.value;
-
-				// If we have found a child smaller than the smallest width registered, replace it with the child's width.
-				if (width < smallestWidth) {
-					secondSmallestWidth = smallestWidth;
-					smallestWidth = width;
-				}
-
-				// This child not the smallest.
-				if (width > smallestWidth) {
-					secondSmallestWidth = std::min(secondSmallestWidth, width);
-					widthToAdd = secondSmallestWidth - smallestWidth;
-				}
-			}
-
-			// Double-check that the width to add is <= than the equal distribution of the width among expanding children.
-			widthToAdd = std::min(widthToAdd, remainingWidth / growableChildIndices.size());
-
-			// Add the width to each expanding child.
 			for (const uint32 childIndex : growableChildIndices) {
 				GUIContainer& child = components[childIndex];
 
-				// Resize the child in order to reach the second smallest width, then repeat.
-				if (child.size.width.value == smallestWidth) {
-					child.size.width.value += widthToAdd;
-
-					// TODO: Handle maximum width.
-
-					remainingWidth -= widthToAdd;
-				}
-			}
-		}
-
-		const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
-
-		// Shrink children.
-		while (remainingWidth < 0.0f) {
-			float32 largestWidth = components[shrinkableChildIndices[0]].size.width.value;
-			float32 secondLargestWidth = 0.0f;
-			float32 widthToRemove = remainingWidth;
-
-			for (const uint32 childIndex : shrinkableChildIndices) {
-				const GUIContainer& child = components[childIndex];
-				const float32 width = child.size.width.value;
-
-				// If we have found a child larger than the largest width registered, replace it with the child's width.
-				if (width > largestWidth) {
-					secondLargestWidth = largestWidth;
-					largestWidth = width;
-				}
-
-				// This child is not the largest.
-				if (width < largestWidth) {
-					secondLargestWidth = std::max(secondLargestWidth, width);
-					widthToRemove = secondLargestWidth - largestWidth;
-				}
-			}
-
-			// Double-check that the width to remove is >= than the equal distribution of the width among expanding children.
-			widthToRemove = std::max(widthToRemove, remainingWidth / shrinkableChildIndices.size());
-
-			// Remove the width from each expanding child.
-			for (const uint32 childIndex : shrinkableChildIndices) {
-				GUIContainer& child = components[childIndex];
-
-				// Resize the child in order to reach the second largest width, then repeat.
-				if (child.size.width.value == largestWidth) {
-					child.size.width.value += widthToRemove;
-
-					// TODO: Handle minimum width.
-
-					remainingWidth -= widthToRemove;
-				}
+				child.size.width.value = parent.size.width.value - parent.padding.x * 2.0f;
 			}
 		}
 
@@ -527,14 +503,8 @@ namespace ProjectA {
 			return;
 		}
 
-		float32 remainingHeight = parent.size.height.value - parent.padding.y * 2.0f;
-
 		if (parent.layoutDirection == VERTICAL) {
-			// Grow/shrink towards bottom
-			// a
-			// b
-			// c
-			// d
+			float32 remainingHeight = parent.size.height.value - parent.padding.y * 2.0f;
 
 			for (const uint32 childIndex : parent.childIndices) {
 				const GUIContainer& child = components[childIndex];
@@ -543,103 +513,96 @@ namespace ProjectA {
 			}
 
 			remainingHeight -= parent.layoutSpacing * (parent.childIndices.size() - 1);
+
+			// Grow children.
+			while (remainingHeight > 0.0f) {
+				float32 smallestHeight = components[growableChildIndices[0]].size.height.value;
+				float32 secondSmallestHeight = lyah::infinity<float32>();
+				float32 heightToAdd = remainingHeight;
+
+				for (const uint32 childIndex : growableChildIndices) {
+					const GUIContainer& child = components[childIndex];
+					const float32 height = child.size.height.value;
+
+					// If we have found a child smaller than the smallest height registered, replace it with the child's height.
+					if (height < smallestHeight) {
+						secondSmallestHeight = smallestHeight;
+						smallestHeight = height;
+					}
+
+					// This child not the smallest.
+					if (height > smallestHeight) {
+						secondSmallestHeight = std::min(secondSmallestHeight, height);
+						heightToAdd = secondSmallestHeight - smallestHeight;
+					}
+				}
+
+				// Double-check that the height to add is <= than the equal distribution of the height among expanding children.
+				heightToAdd = std::min(heightToAdd, remainingHeight / growableChildIndices.size());
+
+				// Add the height to each expanding child.
+				for (const uint32 childIndex : growableChildIndices) {
+					GUIContainer& child = components[childIndex];
+
+					// Resize the child in order to reach the second smallest height, then repeat.
+					if (child.size.height.value == smallestHeight) {
+						child.size.height.value += heightToAdd;
+
+						// TODO: Handle maximum height.
+
+						remainingHeight -= heightToAdd;
+					}
+				}
+			}
+
+			const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
+
+			// Shrink children.
+			while (remainingHeight < 0.0f) {
+				float32 largestHeight = components[shrinkableChildIndices[0]].size.height.value;
+				float32 secondLargestHeight = 0.0f;
+				float32 heightToRemove = remainingHeight;
+
+				for (const uint32 childIndex : shrinkableChildIndices) {
+					const GUIContainer& child = components[childIndex];
+					const float32 height = child.size.height.value;
+
+					// If we have found a child larger than the largest height registered, replace it with the child's height.
+					if (height > largestHeight) {
+						secondLargestHeight = largestHeight;
+						largestHeight = height;
+					}
+
+					// This child is not the largest.
+					if (height < largestHeight) {
+						secondLargestHeight = std::max(secondLargestHeight, height);
+						heightToRemove = secondLargestHeight - largestHeight;
+					}
+				}
+
+				// Double-check that the height to remove is >= than the equal distribution of the height among expanding children.
+				heightToRemove = std::max(heightToRemove, remainingHeight / shrinkableChildIndices.size());
+
+				// Remove the height from each expanding child.
+				for (const uint32 childIndex : shrinkableChildIndices) {
+					GUIContainer& child = components[childIndex];
+
+					// Resize the child in order to reach the second largest height, then repeat.
+					if (child.size.height.value == largestHeight) {
+						child.size.height.value += heightToRemove;
+
+						// TODO: Handle minimum height.
+
+						remainingHeight -= heightToRemove;
+					}
+				}
+			}
 		}
 		else {
-			// Grow/shrink towards bottom
-			// a b c d
-
-			float32 maxChildHeight = 0.0f;
-
-			for (const uint32 childIndex : parent.childIndices) {
-				const GUIContainer& child = components[childIndex];
-
-				maxChildHeight = std::max(maxChildHeight, child.size.height.value);
-			}
-
-			remainingHeight -= maxChildHeight;
-		}
-
-		// Grow children.
-		while (remainingHeight > 0.0f) {
-			float32 smallestHeight = components[growableChildIndices[0]].size.height.value;
-			float32 secondSmallestHeight = lyah::infinity<float32>();
-			float32 heightToAdd = remainingHeight;
-
-			for (const uint32 childIndex : growableChildIndices) {
-				const GUIContainer& child = components[childIndex];
-				const float32 height = child.size.height.value;
-
-				// If we have found a child smaller than the smallest height registered, replace it with the child's height.
-				if (height < smallestHeight) {
-					secondSmallestHeight = smallestHeight;
-					smallestHeight = height;
-				}
-
-				// This child not the smallest.
-				if (height > smallestHeight) {
-					secondSmallestHeight = std::min(secondSmallestHeight, height);
-					heightToAdd = secondSmallestHeight - smallestHeight;
-				}
-			}
-
-			// Double-check that the height to add is <= than the equal distribution of the height among expanding children.
-			heightToAdd = std::min(heightToAdd, remainingHeight / growableChildIndices.size());
-
-			// Add the height to each expanding child.
 			for (const uint32 childIndex : growableChildIndices) {
 				GUIContainer& child = components[childIndex];
 
-				// Resize the child in order to reach the second smallest height, then repeat.
-				if (child.size.height.value == smallestHeight) {
-					child.size.height.value += heightToAdd;
-
-					// TODO: Handle maximum height.
-
-					remainingHeight -= heightToAdd;
-				}
-			}
-		}
-
-		const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
-
-		// Shrink children.
-		while (remainingHeight < 0.0f) {
-			float32 largestHeight = components[shrinkableChildIndices[0]].size.height.value;
-			float32 secondLargestHeight = 0.0f;
-			float32 heightToRemove = remainingHeight;
-
-			for (const uint32 childIndex : shrinkableChildIndices) {
-				const GUIContainer& child = components[childIndex];
-				const float32 height = child.size.height.value;
-
-				// If we have found a child larger than the largest height registered, replace it with the child's height.
-				if (height > largestHeight) {
-					secondLargestHeight = largestHeight;
-					largestHeight = height;
-				}
-
-				// This child is not the largest.
-				if (height < largestHeight) {
-					secondLargestHeight = std::max(secondLargestHeight, height);
-					heightToRemove = secondLargestHeight - largestHeight;
-				}
-			}
-
-			// Double-check that the height to remove is >= than the equal distribution of the height among expanding children.
-			heightToRemove = std::max(heightToRemove, remainingHeight / shrinkableChildIndices.size());
-
-			// Remove the height from each expanding child.
-			for (const uint32 childIndex : shrinkableChildIndices) {
-				GUIContainer& child = components[childIndex];
-
-				// Resize the child in order to reach the second largest height, then repeat.
-				if (child.size.height.value == largestHeight) {
-					child.size.height.value += heightToRemove;
-
-					// TODO: Handle minimum height.
-
-					remainingHeight -= heightToRemove;
-				}
+				child.size.height.value = parent.size.height.value - parent.padding.y * 2.0f;
 			}
 		}
 
