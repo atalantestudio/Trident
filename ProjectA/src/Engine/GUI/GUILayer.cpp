@@ -79,20 +79,19 @@ namespace ProjectA {
 
 	void GUILayer::preRender() {
 		components.clear();
-		openComponents.clear();
+		openComponentIndices.clear();
+		leafComponentIndices.clear();
 
 		openRootComponent();
+
 		GUI();
-		closeRootComponent();
 
 		if (components.size() == 1) {
 			// No other components than root, return.
 			return;
 		}
 
-		svec2<float32> origin = {0_px, 0_px};
-
-		Positions(components[0], origin);
+		closeRootComponent();
 
 		// 7. Register components for rendering.
 		for (uint32 componentIndex = 1; componentIndex < components.size(); componentIndex += 1) {
@@ -148,16 +147,10 @@ namespace ProjectA {
 	}
 
 	void GUILayer::openRootComponent() {
-		const Extent2D swapchainExtent = renderer.getSwapchain()->getExtent();
-		// const Extent2D swapchainExtent = {0, 0};
-
 		GUIContainer rootComponent{};
 		rootComponent.parentIndex = ~0;
 		rootComponent.origin = {0_px, 0_px};
-		rootComponent.size.width.fillMode = FillMode::FIXED;
-		rootComponent.size.width.value = static_cast<float32>(swapchainExtent.width);
-		rootComponent.size.height.fillMode = FillMode::FIXED;
-		rootComponent.size.height.value = static_cast<float32>(swapchainExtent.height);
+		rootComponent.size = {FIT, FIT};
 		rootComponent.padding = {0_px, 0_px};
 		rootComponent.layoutDirection = HORIZONTAL;
 		rootComponent.layoutSpacing = 0_px;
@@ -165,16 +158,15 @@ namespace ProjectA {
 		rootComponent.image = 0;
 		rootComponent.radius = 0.0f;
 		rootComponent.textComponent = false;
-
 		rootComponent.debugName = "__root";
 
 		components.emplace_back(rootComponent);
-		openComponents.emplace_back(0);
+		openComponentIndices.emplace_back(0);
 	}
 
 	void GUILayer::openComponent(const ContainerStyle& style) {
 		const uint32 componentIndex = static_cast<uint32>(components.size());
-		const uint32 parentIndex = openComponents.back();
+		const uint32 parentIndex = openComponentIndices.back();
 
 		GUIContainer& parent = components[parentIndex];
 
@@ -193,17 +185,16 @@ namespace ProjectA {
 		component.image = style.image;
 		component.radius = style.radius;
 		component.textComponent = false;
-
 		component.debugName = style.debugName;
 
 		parent.childIndices.emplace_back(componentIndex);
-		openComponents.emplace_back(componentIndex);
 		components.emplace_back(component);
+		openComponentIndices.emplace_back(componentIndex);
 	}
 
 	void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
 		const uint32 componentIndex = static_cast<uint32>(components.size());
-		const uint32 parentIndex = openComponents.back();
+		const uint32 parentIndex = openComponentIndices.back();
 		const float32 preferredWidth = static_cast<float32>(calculateTextPreferredWidth(string, textStyle));
 		const float32 minimumWidth = static_cast<float32>(calculateTextMinimumWidth(string, textStyle));
 
@@ -234,38 +225,55 @@ namespace ProjectA {
 		// Pushing the component to the vector might invalidate the parent reference, so we update the parent's children indices before.
 		parent.childIndices.emplace_back(componentIndex);
 		components.emplace_back(textComponent);
+		leafComponentIndices.emplace_back(componentIndex);
 
 		FitSizingWidths(componentIndex);
 	}
 
 	void GUILayer::closeRootComponent() {
-		const uint32 componentIndex = openComponents.back();
+		static constexpr uint32 rootComponentIndex = 0;
+		const GUIContainer& rootComponent = components[rootComponentIndex];
 
-		GrowAndShrinkSizingWidths(componentIndex);
-		WrapTextChildren(componentIndex);
+		for (const uint32 childIndex : rootComponent.childIndices) {
+			GUIContainer& child = components[childIndex];
 
-		openComponents.pop_back();
+			if (!child.textComponent) {
+				GrowAndShrinkSizingWidthsRecursive(childIndex);
+			}
+		}
+
+		WrapTextChildrenRecursive(rootComponentIndex);
+
+		for (const uint32 leafComponentIndex : leafComponentIndices) {
+			FitSizingHeightsRecursive(leafComponentIndex);
+		}
+
+		GrowAndShrinkSizingHeightsRecursive(rootComponentIndex);
+
+		svec2<float32> origin = {0_px, 0_px};
+
+		Positions(components[0], origin);
+
+		openComponentIndices.pop_back();
 	}
 
 	void GUILayer::closeComponent() {
-		DEBUG_ASSERT(!openComponents.empty());
+		DEBUG_ASSERT(!openComponentIndices.empty());
 
-		const uint32 componentIndex = openComponents.back();
+		const uint32 componentIndex = openComponentIndices.back();
 
 		FitSizingWidths(componentIndex);
-		GrowAndShrinkSizingWidths(componentIndex);
 
-		WrapTextChildren(componentIndex);
+		const GUIContainer& component = components[componentIndex];
 
-		FitSizingHeights(componentIndex);
+		if (component.childIndices.empty()) {
+			leafComponentIndices.emplace_back(componentIndex);
+		}
 
-		// TODO
-		// GrowAndShrinkSizingHeights(componentIndex);
-
-		openComponents.pop_back();
+		openComponentIndices.pop_back();
 	}
 
-	std::vector<uint32> GUILayer::FindGrowableOrShrinkableChildren(const GUIContainer& parent, bool axis) const {
+	std::vector<uint32> GUILayer::FindGrowableChildIndices(const GUIContainer& parent, bool axis) const {
 		std::vector<uint32> childIndices;
 
 		for (uint32 index = 0; index < parent.childIndices.size(); index += 1) {
@@ -273,6 +281,21 @@ namespace ProjectA {
 			const GUIContainer& child = components[childIndex];
 
 			if (child.size[axis].fillMode == FillMode::FIT || child.size[axis].fillMode == FillMode::EXPAND) {
+				childIndices.emplace_back(childIndex);
+			}
+		}
+
+		return childIndices;
+	}
+
+	std::vector<uint32> GUILayer::FindShrinkableChildIndices(const GUIContainer& parent, bool axis) const {
+		std::vector<uint32> childIndices;
+
+		for (uint32 index = 0; index < parent.childIndices.size(); index += 1) {
+			const uint32 childIndex = parent.childIndices[index];
+			const GUIContainer& child = components[childIndex];
+
+			if (child.size[axis].fillMode == FillMode::FIT) {
 				childIndices.emplace_back(childIndex);
 			}
 		}
@@ -317,8 +340,13 @@ namespace ProjectA {
 	}
 
 	// TODO: lyah::max
-	void GUILayer::FitSizingHeights(uint32 componentIndex) {
+	void GUILayer::FitSizingHeightsRecursive(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
+
+		if (component.parentIndex == ~0) {
+			return;
+		}
+
 		GUIContainer& parent = components[component.parentIndex];
 
 		// Add padding to the component's size.
@@ -352,16 +380,18 @@ namespace ProjectA {
 				parent.minimumSize.y = std::max(parent.minimumSize.y, component.minimumSize.y);
 			}
 		}
+
+		FitSizingHeightsRecursive(component.parentIndex);
 	}
 
 	// TODO: lyah::max
 	// TODO: lyah::min
-	void GUILayer::GrowAndShrinkSizingWidths(uint32 parentIndex) {
+	void GUILayer::GrowAndShrinkSizingWidthsRecursive(uint32 parentIndex) {
 		GUIContainer& parent = components[parentIndex];
 
-		const std::vector<uint32> growableOrShrinkableChildren = FindGrowableOrShrinkableChildren(parent, WIDTH_AXIS);
+		const std::vector<uint32> growableChildIndices = FindGrowableChildIndices(parent, WIDTH_AXIS);
 
-		if (growableOrShrinkableChildren.empty()) {
+		if (growableChildIndices.empty()) {
 			return;
 		}
 
@@ -399,11 +429,11 @@ namespace ProjectA {
 
 		// Grow children.
 		while (remainingWidth > 0.0f) {
-			float32 smallestWidth = components[growableOrShrinkableChildren[0]].size.width.value;
+			float32 smallestWidth = components[growableChildIndices[0]].size.width.value;
 			float32 secondSmallestWidth = lyah::infinity<float32>();
 			float32 widthToAdd = remainingWidth;
 
-			for (const uint32 childIndex : growableOrShrinkableChildren) {
+			for (const uint32 childIndex : growableChildIndices) {
 				const GUIContainer& child = components[childIndex];
 				const float32 width = child.size.width.value;
 
@@ -421,10 +451,10 @@ namespace ProjectA {
 			}
 
 			// Double-check that the width to add is <= than the equal distribution of the width among expanding children.
-			widthToAdd = std::min(widthToAdd, remainingWidth / growableOrShrinkableChildren.size());
+			widthToAdd = std::min(widthToAdd, remainingWidth / growableChildIndices.size());
 
 			// Add the width to each expanding child.
-			for (const uint32 childIndex : growableOrShrinkableChildren) {
+			for (const uint32 childIndex : growableChildIndices) {
 				GUIContainer& child = components[childIndex];
 
 				// Resize the child in order to reach the second smallest width, then repeat.
@@ -438,13 +468,15 @@ namespace ProjectA {
 			}
 		}
 
+		const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
+
 		// Shrink children.
 		while (remainingWidth < 0.0f) {
-			float32 largestWidth = components[growableOrShrinkableChildren[0]].size.width.value;
+			float32 largestWidth = components[shrinkableChildIndices[0]].size.width.value;
 			float32 secondLargestWidth = 0.0f;
 			float32 widthToRemove = remainingWidth;
 
-			for (const uint32 childIndex : growableOrShrinkableChildren) {
+			for (const uint32 childIndex : shrinkableChildIndices) {
 				const GUIContainer& child = components[childIndex];
 				const float32 width = child.size.width.value;
 
@@ -462,10 +494,10 @@ namespace ProjectA {
 			}
 
 			// Double-check that the width to remove is >= than the equal distribution of the width among expanding children.
-			widthToRemove = std::max(widthToRemove, remainingWidth / growableOrShrinkableChildren.size());
+			widthToRemove = std::max(widthToRemove, remainingWidth / shrinkableChildIndices.size());
 
 			// Remove the width from each expanding child.
-			for (const uint32 childIndex : growableOrShrinkableChildren) {
+			for (const uint32 childIndex : shrinkableChildIndices) {
 				GUIContainer& child = components[childIndex];
 
 				// Resize the child in order to reach the second largest width, then repeat.
@@ -478,16 +510,20 @@ namespace ProjectA {
 				}
 			}
 		}
+
+		for (const uint32 childIndex : growableChildIndices) {
+			GrowAndShrinkSizingWidthsRecursive(childIndex);
+		}
 	}
 
 	// TODO: lyah::max
 	// TODO: lyah::min
-	void GUILayer::GrowAndShrinkSizingHeights(uint32 parentIndex) {
+	void GUILayer::GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex) {
 		GUIContainer& parent = components[parentIndex];
 
-		const std::vector<uint32> growableOrShrinkableChildren = FindGrowableOrShrinkableChildren(parent, HEIGHT_AXIS);
+		const std::vector<uint32> growableChildIndices = FindGrowableChildIndices(parent, HEIGHT_AXIS);
 
-		if (growableOrShrinkableChildren.empty()) {
+		if (growableChildIndices.empty()) {
 			return;
 		}
 
@@ -525,11 +561,11 @@ namespace ProjectA {
 
 		// Grow children.
 		while (remainingHeight > 0.0f) {
-			float32 smallestHeight = components[growableOrShrinkableChildren[0]].size.height.value;
+			float32 smallestHeight = components[growableChildIndices[0]].size.height.value;
 			float32 secondSmallestHeight = lyah::infinity<float32>();
 			float32 heightToAdd = remainingHeight;
 
-			for (const uint32 childIndex : growableOrShrinkableChildren) {
+			for (const uint32 childIndex : growableChildIndices) {
 				const GUIContainer& child = components[childIndex];
 				const float32 height = child.size.height.value;
 
@@ -547,10 +583,10 @@ namespace ProjectA {
 			}
 
 			// Double-check that the height to add is <= than the equal distribution of the height among expanding children.
-			heightToAdd = std::min(heightToAdd, remainingHeight / growableOrShrinkableChildren.size());
+			heightToAdd = std::min(heightToAdd, remainingHeight / growableChildIndices.size());
 
 			// Add the height to each expanding child.
-			for (const uint32 childIndex : growableOrShrinkableChildren) {
+			for (const uint32 childIndex : growableChildIndices) {
 				GUIContainer& child = components[childIndex];
 
 				// Resize the child in order to reach the second smallest height, then repeat.
@@ -564,13 +600,15 @@ namespace ProjectA {
 			}
 		}
 
+		const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
+
 		// Shrink children.
 		while (remainingHeight < 0.0f) {
-			float32 largestHeight = components[growableOrShrinkableChildren[0]].size.height.value;
+			float32 largestHeight = components[shrinkableChildIndices[0]].size.height.value;
 			float32 secondLargestHeight = 0.0f;
 			float32 heightToRemove = remainingHeight;
 
-			for (const uint32 childIndex : growableOrShrinkableChildren) {
+			for (const uint32 childIndex : shrinkableChildIndices) {
 				const GUIContainer& child = components[childIndex];
 				const float32 height = child.size.height.value;
 
@@ -588,10 +626,10 @@ namespace ProjectA {
 			}
 
 			// Double-check that the height to remove is >= than the equal distribution of the height among expanding children.
-			heightToRemove = std::max(heightToRemove, remainingHeight / growableOrShrinkableChildren.size());
+			heightToRemove = std::max(heightToRemove, remainingHeight / shrinkableChildIndices.size());
 
 			// Remove the height from each expanding child.
-			for (const uint32 childIndex : growableOrShrinkableChildren) {
+			for (const uint32 childIndex : shrinkableChildIndices) {
 				GUIContainer& child = components[childIndex];
 
 				// Resize the child in order to reach the second largest height, then repeat.
@@ -604,15 +642,21 @@ namespace ProjectA {
 				}
 			}
 		}
+
+		for (const uint32 childIndex : growableChildIndices) {
+			GrowAndShrinkSizingHeightsRecursive(childIndex);
+		}
 	}
 
-	void GUILayer::WrapTextChildren(uint32 parentIndex) {
+	void GUILayer::WrapTextChildrenRecursive(uint32 parentIndex) {
 		GUIContainer& parent = components[parentIndex];
 
 		for (const uint32 childIndex : parent.childIndices) {
 			GUIContainer& child = components[childIndex];
 
 			if (!child.textComponent) {
+				WrapTextChildrenRecursive(childIndex);
+
 				continue;
 			}
 
@@ -696,7 +740,7 @@ namespace ProjectA {
 
 			if (flushCurrentWord) {
 				FlushWordData flushWordData;
-				flushWordData.word = textComponent.text.substr(wordStartIndex, wordLength);
+				flushWordData.word = std::string_view(&textComponent.text[wordStartIndex], wordLength);
 				flushWordData.font = &font;
 				flushWordData.imageSize = imageSize;
 				flushWordData.fontSize = textComponent.fontSize;
@@ -720,10 +764,9 @@ namespace ProjectA {
 			wordLength += 1;
 		}
 
-		// Case A: Flush last word.
 		if (wordLength > 0 && wordStartIndex + wordLength == textComponent.text.size()) {
 			FlushWordData flushWordData;
-			flushWordData.word = textComponent.text.substr(wordStartIndex, wordLength);
+			flushWordData.word = std::string_view(&textComponent.text[wordStartIndex], wordLength);
 			flushWordData.font = &font;
 			flushWordData.imageSize = imageSize;
 			flushWordData.fontSize = textComponent.fontSize;

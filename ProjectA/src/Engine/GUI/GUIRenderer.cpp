@@ -10,7 +10,8 @@ namespace ProjectA {
 		ColorAttachment colorAttachment{};
 		colorAttachment.format = surface->getFormat();
 		colorAttachment.sampleCount = 1;
-		colorAttachment.loadOperation = LoadOperation::LOAD;
+		colorAttachment.loadOperation = LoadOperation::CLEAR;
+		// colorAttachment.loadOperation = LoadOperation::LOAD;
 		colorAttachment.storeOperation = StoreOperation::STORE;
 		colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;
 
@@ -413,8 +414,11 @@ namespace ProjectA {
 		const float32 width = static_cast<float32>(swapchain->getExtent().width);
 		const float32 height = static_cast<float32>(swapchain->getExtent().height);
 
+		const ClearValue clearValue = {1.0f, 1.0f, 1.0f, 1.0f};
+
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
+		beginRenderPassDescriptor.clearValues = {clearValue};
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->setScissor(0, 0, swapchain->getExtent());

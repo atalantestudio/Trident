@@ -16,8 +16,7 @@ namespace ProjectA {
 			};
 
 			struct FlushWordData {
-				// TODO: Use std::string_view instead.
-				std::string word;
+				std::string_view word;
 
 				const TrueTypeFont* font;
 				vec2<float32> imageSize;
@@ -61,13 +60,14 @@ namespace ProjectA {
 			void openRootComponent();
 			void closeRootComponent();
 
-			std::vector<uint32> FindGrowableOrShrinkableChildren(const GUIContainer& parent, bool axis) const;
+			std::vector<uint32> FindGrowableChildIndices(const GUIContainer& parent, bool axis) const;
+			std::vector<uint32> FindShrinkableChildIndices(const GUIContainer& parent, bool axis) const;
 
 			void FitSizingWidths(uint32 componentIndex);
-			void FitSizingHeights(uint32 componentIndex);
-			void GrowAndShrinkSizingWidths(uint32 parentIndex);
-			void GrowAndShrinkSizingHeights(uint32 parentIndex);
-			void WrapTextChildren(uint32 parentIndex);
+			void FitSizingHeightsRecursive(uint32 componentIndex);
+			void GrowAndShrinkSizingWidthsRecursive(uint32 parentIndex);
+			void GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex);
+			void WrapTextChildrenRecursive(uint32 parentIndex);
 			void WrapText(GUIContainer& textComponent);
 			bool OutsideWord(char8 character, const TrueTypeFont& font) const;
 			void FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
@@ -108,8 +108,9 @@ namespace ProjectA {
 			std::array<FontData, MAX_FONT_COUNT> fonts;
 			uint32 fontCount = 0;
 
-			std::vector<uint32> openComponents;
 			std::vector<GUIContainer> components;
+			std::vector<uint32> openComponentIndices;
+			std::vector<uint32> leafComponentIndices;
 	};
 
 	#define GUIComponent(component) for (bool _opened = (openComponent(component), true); _opened; _opened = false, closeComponent())
