@@ -82,8 +82,8 @@ namespace ProjectA {
 		openComponents.clear();
 
 		openRootComponent();
-
 		GUI();
+		closeRootComponent();
 
 		if (components.size() == 1) {
 			// No other components than root, return.
@@ -148,8 +148,8 @@ namespace ProjectA {
 	}
 
 	void GUILayer::openRootComponent() {
-		// const Extent2D swapchainExtent = renderer.getSwapchain()->getExtent();
-		const Extent2D swapchainExtent = {0, 0};
+		const Extent2D swapchainExtent = renderer.getSwapchain()->getExtent();
+		// const Extent2D swapchainExtent = {0, 0};
 
 		GUIContainer rootComponent{};
 		rootComponent.parentIndex = ~0;
@@ -238,15 +238,21 @@ namespace ProjectA {
 		components.emplace_back(textComponent);
 
 		FitSizingWidths(componentIndex);
+	}
 
-		// TODO: Wrap Text
+	void GUILayer::closeRootComponent() {
+		const uint32 componentIndex = openComponents.back();
+
+		GrowAndShrinkSizingWidths(componentIndex);
+		WrapTextChildren(componentIndex);
+
+		openComponents.pop_back();
 	}
 
 	void GUILayer::closeComponent() {
 		DEBUG_ASSERT(!openComponents.empty());
 
 		const uint32 componentIndex = openComponents.back();
-		const uint32 parentIndex = components[componentIndex].parentIndex;
 
 		FitSizingWidths(componentIndex);
 		GrowAndShrinkSizingWidths(componentIndex);

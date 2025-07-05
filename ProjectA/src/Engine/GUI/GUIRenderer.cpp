@@ -10,7 +10,7 @@ namespace ProjectA {
 		ColorAttachment colorAttachment{};
 		colorAttachment.format = surface->getFormat();
 		colorAttachment.sampleCount = 4;
-		colorAttachment.loadOperation = LoadOperation::CLEAR;
+		colorAttachment.loadOperation = LoadOperation::LOAD;
 		colorAttachment.storeOperation = StoreOperation::STORE;
 
 		SubpassDescriptor subpassDescriptor{};
@@ -400,6 +400,8 @@ namespace ProjectA {
 
 	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		if (subcomponentCount == 0 && glyphSubcomponentCount == 0) {
+			ENGINE_WARN("No GUI components to render.");
+
 			return;
 		}
 
@@ -409,10 +411,8 @@ namespace ProjectA {
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-		beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
 
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-
 		commandEncoder->setScissor(0, 0, swapchain->getExtent());
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 

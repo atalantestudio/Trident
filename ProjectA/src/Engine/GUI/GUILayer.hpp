@@ -59,6 +59,7 @@ namespace ProjectA {
 
 		private:
 			void openRootComponent();
+			void closeRootComponent();
 
 			std::vector<uint32> FindGrowableOrShrinkableChildren(const GUIContainer& parent, bool axis) const;
 

@@ -80,7 +80,7 @@ namespace ProjectA {
 				ENGINE_ERROR("descriptor.framebuffer.renderPass must be a valid RenderPass.");
 			}
 			else {
-				if (descriptor.clearValues.size() <= renderPass->getLastClearAttachmentIndex()) {
+				if (renderPass->getLastClearAttachmentIndex() < max<uint32>() && descriptor.clearValues.size() <= renderPass->getLastClearAttachmentIndex()) {
 					errorCount += 1;
 
 					ENGINE_ERROR("descriptor.clearValues.count must be greater than the last attachment index in descriptor.framebuffer.renderPass specifying a load operation (or a stencil load operation) of LoadOperation::CLEAR.");
