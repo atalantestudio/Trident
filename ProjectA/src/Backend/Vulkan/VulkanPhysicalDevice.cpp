@@ -81,11 +81,11 @@ namespace ProjectA {
 
 		ENGINE_INFO("Enabled device extensions:");
 
-		for (uint32 extensionPropertiesIndex = 0; extensionPropertiesIndex < extensionProperties.count; extensionPropertiesIndex += 1) {
+		/* for (uint32 extensionPropertiesIndex = 0; extensionPropertiesIndex < extensionProperties.count; extensionPropertiesIndex += 1) {
 			ENGINE_INFO("- [] (spec version: [])", extensionProperties[extensionPropertiesIndex].extensionName, extensionProperties[extensionPropertiesIndex].specVersion);
 
 			enabledExtensionNames[extensionPropertiesIndex] = extensionProperties[extensionPropertiesIndex].extensionName;
-		}
+		} */
 
 		vkGetPhysicalDeviceFeatures(object, &features);
 		vkGetPhysicalDeviceMemoryProperties(object, &memoryProperties);

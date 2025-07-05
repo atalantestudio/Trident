@@ -66,9 +66,6 @@ namespace ProjectA {
 
 			sequence<ref<Framebuffer>> framebuffers;
 
-			ref<Image> colorImage;
-			ref<ImageView> colorImageView;
-
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> subcomponentRenderPipeline;
 			ref<RenderPipeline> glyphSubcomponentRenderPipeline;

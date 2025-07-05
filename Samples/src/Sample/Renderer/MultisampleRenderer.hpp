@@ -10,15 +10,15 @@ namespace ProjectA {
 				{
 					const ref<Surface> surface = getSurface();
 
-					ColorAttachment multisampleColorAttachment{};
-					multisampleColorAttachment.format = surface->getFormat();
-					multisampleColorAttachment.sampleCount = 4;
-					multisampleColorAttachment.loadOperation = LoadOperation::CLEAR;
-					multisampleColorAttachment.storeOperation = StoreOperation::STORE;
+					ColorAttachment colorAttachment{};
+					colorAttachment.format = surface->getFormat();
+					colorAttachment.sampleCount = 4;
+					colorAttachment.loadOperation = LoadOperation::CLEAR;
+					colorAttachment.storeOperation = StoreOperation::STORE;
+					colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;
 
 					SubpassDescriptor subpassDescriptor{};
-					subpassDescriptor.colorAttachments = {multisampleColorAttachment};
-					subpassDescriptor.presentAttachmentIndex = 0;
+					subpassDescriptor.colorAttachments = {colorAttachment};
 					subpassDescriptor.depthStencil = false;
 
 					subpass = createSubpass(subpassDescriptor);

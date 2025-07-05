@@ -34,10 +34,6 @@ namespace ProjectA {
 						glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
 						break;
-					default:
-						ENGINE_WARN("Image target is not RGB or RGBA. Unpack alignment unchanged.");
-
-						break;
 				}
 
 				for (const BufferImageCopyRegion& copyRegion : *copyRegions) {

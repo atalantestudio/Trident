@@ -9,19 +9,24 @@ namespace ProjectA {
 
 		ColorAttachment colorAttachment{};
 		colorAttachment.format = surface->getFormat();
-		colorAttachment.sampleCount = 4;
+		colorAttachment.sampleCount = 1;
 		colorAttachment.loadOperation = LoadOperation::LOAD;
 		colorAttachment.storeOperation = StoreOperation::STORE;
+		colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;
 
 		SubpassDescriptor subpassDescriptor{};
 		subpassDescriptor.colorAttachments = {colorAttachment};
-		subpassDescriptor.presentAttachmentIndex = 0;
 		subpassDescriptor.depthStencil = false;
 
 		subpass = createSubpass(subpassDescriptor);
 
+		SubpassDependency subpassDependency{};
+		subpassDependency.sourceSubpassIndex = SubpassDependency::EXTERNAL_SUBPASS;
+		subpassDependency.destinationSubpassIndex = 0;
+
 		RenderPassDescriptor renderPassDescriptor{};
 		renderPassDescriptor.subpasses = {subpass};
+		renderPassDescriptor.subpassDependencies = {subpassDependency};
 
 		renderPass = createRenderPass(renderPassDescriptor);
 
@@ -449,25 +454,6 @@ namespace ProjectA {
 
 	void GUIRenderer::recreateFramebuffers() {
 		const ref<Swapchain>& swapchain = getSwapchain();
-		const Extent2D extent = swapchain->getExtent();
-
-		AttachmentImageDescriptor colorImageDescriptor{};
-		colorImageDescriptor.type = ImageType::TEXTURE_2D;
-		colorImageDescriptor.extent.width = extent.width;
-		colorImageDescriptor.extent.height = extent.height;
-		colorImageDescriptor.extent.depth = 1;
-		colorImageDescriptor.mipLevelCount = 1;
-		colorImageDescriptor.layerCount = 1;
-
-		colorImage = renderPass->getSubpass(0)->createColorAttachmentImage(colorImageDescriptor, 0);
-
-		ImageViewDescriptor colorImageViewDescriptor{};
-		colorImageViewDescriptor.mipLevelOffset = 0;
-		colorImageViewDescriptor.mipLevelCount = colorImage->getMipLevelCount();
-		colorImageViewDescriptor.layerOffset = 0;
-		colorImageViewDescriptor.layerCount = colorImage->getLayerCount();
-
-		colorImageView = colorImage->createView(colorImageViewDescriptor);
 
 		if (framebuffers.count > 0) {
 			for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
@@ -479,13 +465,12 @@ namespace ProjectA {
 
 		FramebufferDescriptor framebufferDescriptor{};
 		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = sequence<ref<ImageView>>(2);
-		framebufferDescriptor.imageViews[0] = colorImageView;
-		framebufferDescriptor.extent = extent;
+		framebufferDescriptor.imageViews = sequence<ref<ImageView>>(1);
+		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
 		for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
-			framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
+			framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 		}

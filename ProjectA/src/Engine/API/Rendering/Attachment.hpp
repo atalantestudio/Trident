@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
+#include "Engine/API/Rendering/ImageLayout.hpp"
 #include "Engine/API/Rendering/LoadOperation.hpp"
 #include "Engine/API/Rendering/StoreOperation.hpp"
 
@@ -17,6 +18,8 @@ namespace ProjectA {
 
 		// Specifies how the attachment's contents are treated at the end of the subpass.
 		StoreOperation storeOperation;
+
+		ImageLayout finalImageLayout;
 	};
 
 	struct DepthStencilAttachment {

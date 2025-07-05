@@ -636,23 +636,17 @@ namespace ProjectA {
 				ENGINE_ERROR("descriptor.depthStencilAttachment.sampleCount must either be 1 or a power of 2 (up to 64).");
 			}
 
-			if (descriptor.depthStencilAttachment.sampleCount != descriptor.colorAttachments[descriptor.presentAttachmentIndex].sampleCount) {
+			/* if (descriptor.depthStencilAttachment.sampleCount != descriptor.colorAttachments[descriptor.presentAttachmentIndex].sampleCount) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.depthStencilAttachment.sampleCount must be equal to the sample count of the color attachment specified as present attachment by descriptor.presentAttachmentIndex ([]).", descriptor.presentAttachmentIndex);
-			}
+			} */
 
 			if (descriptor.depthStencilAttachment.loadOperation > LoadOperation::UNDEFINED) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.depthStencilAttachment.loadOperation must be a valid LoadOperation value.");
 			}
-		}
-
-		if (descriptor.presentAttachmentIndex >= descriptor.colorAttachments.count) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.presentAttachmentIndex must be less than the number of color attachments.");
 		}
 
 		ENGINE_ASSERT(errorCount == 0, "Subpass descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);

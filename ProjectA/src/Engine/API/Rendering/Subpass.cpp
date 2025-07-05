@@ -6,10 +6,11 @@
 namespace ProjectA {
 	ref<Image> Subpass::createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const {
 		DEBUG_ASSERT(colorAttachmentIndex < colorAttachments.count);
-		DEBUG_ASSERT(resolveAttachmentCount > 0 || (resolveAttachmentCount == 0 && colorAttachmentIndex != presentAttachmentIndex));
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
+
+		DEBUG_ASSERT(resolveAttachmentCount > 0 || (resolveAttachmentCount == 0 && colorAttachment.finalImageLayout != ImageLayout::PRESENT_SRC));
 
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.type = descriptor.type;

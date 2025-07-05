@@ -15,6 +15,7 @@ namespace ProjectA {
 					colorAttachment.sampleCount = 1;
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
+					colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;
 
 					DepthStencilAttachment depthStencilAttachment{};
 					depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
@@ -23,7 +24,6 @@ namespace ProjectA {
 
 					SubpassDescriptor subpassDescriptor{};
 					subpassDescriptor.colorAttachments = {colorAttachment};
-					subpassDescriptor.presentAttachmentIndex = 0;
 					subpassDescriptor.depthStencil = true;
 					subpassDescriptor.depthStencilAttachment = depthStencilAttachment;
 

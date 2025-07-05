@@ -2,6 +2,7 @@
 
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 #include "Backend/OpenGL/OpenGLGraphicsAdapter.hpp"
+#include "Backend/OpenGL/OpenGLRenderPass.hpp"
 
 namespace ProjectA {
 	class OpenGLEndRenderPassCommand final : public OpenGLCommand {
@@ -12,13 +13,11 @@ namespace ProjectA {
 			{}
 
 			void execute() const final override {
-				const ref<Subpass>& subpass = framebuffer->getRenderPass()->getSubpass(subpassIndex);
+				const ref<OpenGLRenderPass>& renderPass = std::static_pointer_cast<OpenGLRenderPass>(framebuffer->getRenderPass());
+				const uint32 presentSourceAttachmentIndex = renderPass->getPresentSourceAttachmentIndex();
 
-				if (subpass->getPresentAttachmentIndex() != max<uint32>()) {
-					// TODO: Why resolveAttachmentCount isn't needed as offset here?
-					// TODO: Include the offset of the subpass.
-					const GLenum readBuffer = GL_COLOR_ATTACHMENT0 + subpass->getPresentAttachmentIndex();
-
+				if (presentSourceAttachmentIndex != max<uint32>()) {
+					const GLenum readBuffer = GL_COLOR_ATTACHMENT0 + presentSourceAttachmentIndex;
 					const Extent2D extent = framebuffer->getExtent();
 
 					#ifdef OPENGL_USE_DSA

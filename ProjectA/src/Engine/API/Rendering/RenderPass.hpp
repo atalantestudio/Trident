@@ -86,10 +86,11 @@ namespace ProjectA {
 			uint32 lastClearColorAttachmentIndex = max<uint32>();
 			uint32 lastClearDepthStencilAttachmentIndex = max<uint32>();
 
+			sequence<ref<Subpass>> subpasses;
+			sequence<SubpassDependency> subpassDependencies;
+
 		private:
 			// True if any subpass has a depth stencil attachment.
 			bool anyDepthStencilSubpass = false;
-
-			sequence<ref<Subpass>> subpasses;
 	};
 }

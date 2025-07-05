@@ -13,7 +13,6 @@ namespace ProjectA {
 			explicit Subpass(const SubpassDescriptor& descriptor) :
 				colorAttachments(descriptor.colorAttachments),
 				rasterizationSampleCount(1),
-				presentAttachmentIndex(descriptor.presentAttachmentIndex),
 				depthStencil(descriptor.depthStencil),
 				depthStencilAttachment(descriptor.depthStencilAttachment)
 			{
@@ -45,10 +44,6 @@ namespace ProjectA {
 				return rasterizationSampleCount;
 			}
 
-			uint32 getPresentAttachmentIndex() const {
-				return presentAttachmentIndex;
-			}
-
 			bool hasDepthStencilAttachment() const {
 				return depthStencil;
 			}
@@ -65,7 +60,6 @@ namespace ProjectA {
 			sequence<ColorAttachment> colorAttachments;
 			uint32 resolveAttachmentCount = 0;
 			uint8 rasterizationSampleCount : 7;
-			uint32 presentAttachmentIndex = 0;
 			bool depthStencil;
 			DepthStencilAttachment depthStencilAttachment;
 	};

@@ -21,8 +21,8 @@ namespace ProjectA {
 		std::fill(currentImageMemoryAllocationIndices.begin(), currentImageMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
 
 		#ifdef BUILD_MODE_DEBUG
-			enumerateMemoryHeaps();
-			enumerateMemoryTypes();
+			// enumerateMemoryHeaps();
+			// enumerateMemoryTypes();
 		#endif
 	}
 

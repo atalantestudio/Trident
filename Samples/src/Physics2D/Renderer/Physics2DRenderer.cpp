@@ -15,10 +15,10 @@ namespace ProjectA {
 		colorAttachment.sampleCount = SAMPLE_COUNT;
 		colorAttachment.loadOperation = LoadOperation::CLEAR;
 		colorAttachment.storeOperation = StoreOperation::STORE;
+		colorAttachment.finalImageLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
 		SubpassDescriptor subpassDescriptor{};
 		subpassDescriptor.colorAttachments = {colorAttachment};
-		subpassDescriptor.presentAttachmentIndex = 0;
 		subpassDescriptor.depthStencil = true;
 		subpassDescriptor.depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
 		subpassDescriptor.depthStencilAttachment.sampleCount = SAMPLE_COUNT;

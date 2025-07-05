@@ -4,7 +4,7 @@
 
 #include "Engine/entry_point.hpp"
 
-// #include "Layer/GUI/StatisticsLayer.hpp"
+#include "Layer/GUI/StatisticsLayer.hpp"
 #include "Layer/RendererLayer.hpp"
 
 namespace ProjectA {
@@ -15,7 +15,7 @@ namespace ProjectA {
 			{
 				// TODO: On Vulkan, a framebuffer becomes invalid when registering both layers and resizing the window.
 				registerLayer<RendererLayer>();
-				// registerLayer<StatisticsLayer>();
+				registerLayer<StatisticsLayer>();
 			}
 
 			~Physics2DApplication() {}
