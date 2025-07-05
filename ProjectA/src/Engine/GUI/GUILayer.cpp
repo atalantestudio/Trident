@@ -621,8 +621,8 @@ namespace ProjectA {
 	// 2. A line break character (\n) is encountered.
 	// 
 	// The current word must be flushed when:
-	// 1. It is the last word.
-	// 2. It overflows the text component's width.
+	// 1. It's the last word.
+	// 2. It overflows the text component's width. However, we need to look ahead for the next blank character to close the word.
 	// 3. A invisible character (space, \t, etc.) is encountered.
 	// 
 	// TODO: lyah::ceil
@@ -641,7 +641,6 @@ namespace ProjectA {
 		float32 postWordAdvanceWidth = 0.0f;
 
 		bool flushCurrentWord = false;
-		bool flushOnNewLine = false;
 
 		GUIGlyphSubcomponent defaultGlyphSubcomponent;
 		defaultGlyphSubcomponent.layerIndex = fontData.glyphMapImageId;
@@ -691,16 +690,6 @@ namespace ProjectA {
 				flushCurrentWord = true;
 			}
 
-			/* const char8 character = textComponent.text[characterIndex];
-			const uint16 codePoint = static_cast<uint16>(character);
-			const Glyph& glyph = font[codePoint];
-
-			if (flushOnNewLine) {
-				flushCurrentWord = true;
-
-				characterOffset.y += textComponent.fontSize;
-			} */
-
 			if (flushCurrentWord) {
 				FlushWordData flushWordData;
 				flushWordData.word = textComponent.text.substr(wordStartIndex, wordLength);
@@ -725,90 +714,6 @@ namespace ProjectA {
 			}
 
 			wordLength += 1;
-
-			/* if (codePoint == '\n' || codePoint == '\t' || (characterIndex + 1 == textComponent.text.size())) {
-				newLine = true;
-
-				characterIndex += 1;
-			}
-			else {
-				const Glyph& glyph = font[codePoint];
-
-				if (glyph.invisible) {
-					newLine = true;
-
-					// Look-ahead to skip consecutive invisible glyphs.
-					for (uint32 i = characterIndex + 1; i < textComponent.text.size(); i += 1) {
-						const uint16 nextCodePoint = static_cast<uint16>(textComponent.text[i]);
-						const Glyph& nextGlyph = font[nextCodePoint];
-
-						if (!glyph.invisible) {
-							characterIndex = i - 1;
-
-							break;
-						}
-					}
-				}
-				else if (characterPosition.x + glyph.width * lineHeight > textComponent.size.width.value) {
-					newLine = true;
-
-					// Look-ahead to close the overflowing word.
-					for (uint32 i = characterIndex + 1; i < textComponent.text.size(); i += 1) {
-						const uint16 nextCodePoint = static_cast<uint16>(textComponent.text[i]);
-						const Glyph& nextGlyph = font[nextCodePoint];
-
-						if (glyph.invisible) {
-							characterIndex = i - 1;
-							wordEndIndex = characterIndex;
-
-							break;
-						}
-					}
-				}
-			}
-
-			if (newLine) {
-				flushWord = true;
-			}
-
-			if (flushWord) {
-				// Flush the current word.
-				for (uint32 i = wordStartIndex; i < wordEndIndex; i += 1) {
-					const char8 character = textComponent.text[i];
-					const uint16 codePoint = static_cast<uint16>(character);
-					const Glyph& glyph = font[codePoint];
-
-					const float32 advanceWidth = std::ceil(glyph.advanceWidth * lineHeight);
-					const float32 width = glyph.width * lineHeight;
-					const float32 leftSideBearing = glyph.leftSideBearing * lineHeight;
-
-					const vec2<float32> position = {characterPosition.x + leftSideBearing, characterPosition.y};
-					const vec2<float32> size = {width, textComponent.fontSize};
-					const vec2<float32> uvStart = {glyph.minCoordinate.x, glyph.minCoordinate.y};
-					const vec2<float32> uvEnd = {glyph.maxCoordinate.x, glyph.maxCoordinate.y};
-					const vec2<float32> uvDiff = uvEnd - uvStart;
-
-					GUIGlyphSubcomponent glyphSubcomponent = defaultGlyphSubcomponent;
-					glyphSubcomponent.world = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
-					glyphSubcomponent.textureWorld = mat3x3<float32>::scaling({
-						uvDiff[0] * imageExtent.width / renderer.TEXTURE_ARRAY_MAX_WIDTH,
-						uvDiff[1] * imageExtent.height / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
-					}) * mat3x3<float32>::translation(uvStart);
-				}
-
-				wordStartIndex += wordEndIndex + 1;
-				wordEndIndex = wordStartIndex;
-
-				if (newLine) {
-					characterPosition.x = textComponent.origin.x;
-					characterPosition.y += textComponent.fontSize;
-					lineCount += 1;
-				}
-			}
-			else {
-				characterIndex += 1;
-				wordEndIndex += 1;
-			} */
 		}
 
 		// Case A: Flush last word.
@@ -833,11 +738,7 @@ namespace ProjectA {
 		const uint16 codePoint = static_cast<uint16>(character);
 		const Glyph& glyph = font[codePoint];
 
-		if (glyph.invisible) {
-			return true;
-		}
-
-		return false;
+		return glyph.invisible;
 	}
 
 	void GUILayer::FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) {
