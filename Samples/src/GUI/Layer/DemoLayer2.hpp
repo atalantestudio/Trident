@@ -22,7 +22,7 @@ namespace ProjectA {
 					text1.fontSize = 64.0f;
 					text1.debugName = "text1";
 
-					GUIText("One Two Three Four", text1);
+					GUIText("One Two Three Four Five", text1);
 
 					ContainerStyle yellow;
 					yellow.size = {300_px, 300_px};

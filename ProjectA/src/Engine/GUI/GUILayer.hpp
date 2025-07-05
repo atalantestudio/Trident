@@ -15,6 +15,18 @@ namespace ProjectA {
 				ImageID glyphMapImageId;
 			};
 
+			struct FlushWordData {
+				// TODO: Use std::string_view instead.
+				std::string word;
+
+				const TrueTypeFont* font;
+				vec2<float32> imageSize;
+				float32 fontSize;
+
+				// Line height scaled by the font size.
+				float32 lineHeight;
+			};
+
 		public:
 			void build() final override;
 
@@ -54,6 +66,10 @@ namespace ProjectA {
 			void FitSizingHeights(uint32 componentIndex);
 			void GrowAndShrinkSizingWidths(uint32 parentIndex);
 			void GrowAndShrinkSizingHeights(uint32 parentIndex);
+			void WrapTextChildren(uint32 parentIndex);
+			void WrapText(GUIContainer& textComponent);
+			bool OutsideWord(char8 character, const TrueTypeFont& font) const;
+			void FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
 			void Positions(GUIContainer& parent, svec2<float32>& origin);
 
 			// Renders a colored quad without moving the origin.

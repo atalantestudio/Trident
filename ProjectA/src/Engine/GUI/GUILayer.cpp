@@ -99,84 +99,20 @@ namespace ProjectA {
 			const GUIContainer& component = components[componentIndex];
 
 			if (component.textComponent) {
-				svec2<float32> textOrigin = component.origin;
+				GUIGlyphSubcomponent defaultGlyphSubcomponent;
+				defaultGlyphSubcomponent.color = component.color.value;
+				defaultGlyphSubcomponent.layerIndex = fonts[component.font].glyphMapImageId;
 
-				const FontData& fontData = fonts[component.font];
-				const TrueTypeFont& font = *fontData.font;
-				const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
-				const float32 lineHeight = static_cast<float32>(font.getLineHeight());
-				const float32 scaledHeight = 1.0f / lineHeight * component.fontSize;
+				const vec2<float32> origin = {component.origin.x, component.origin.y};
 
-				float32 positionX = static_cast<float32>(textOrigin[0]);
-				float32 positionY = static_cast<float32>(textOrigin[1]);
+				for (const TextCharacter& textCharacter : component.characters) {
+					GUIGlyphSubcomponent glyphSubcomponent = defaultGlyphSubcomponent;
+					glyphSubcomponent.world =
+						mat3x3<float32>::scaling(textCharacter.size) *
+						mat3x3<float32>::translation(origin + textCharacter.offset);
+					glyphSubcomponent.textureWorld = textCharacter.textureTransform;
 
-				float32 width = 0;
-				float32 height = component.fontSize;
-
-				GUIGlyphSubcomponent glyphSubcomponent;
-				glyphSubcomponent.layerIndex = fontData.glyphMapImageId;
-				glyphSubcomponent.color = component.color.value;
-
-				for (const char8 character : component.text) {
-					if (character < 0) {
-						// TODO: Handle UTF-16 characters.
-
-						continue;
-					}
-
-					if (character == '\n') {
-						positionX = static_cast<float32>(textOrigin[0]);
-						positionY += component.fontSize;
-						height += component.fontSize;
-
-						continue;
-					}
-
-					// if (positionX > currentContainerInnerSize.width) {
-						// positionX = static_cast<float32>(componentOrigin[0]);
-						// positionY += component.fontSize;
-						// height += component.fontSize;
-					// }
-
-					// if (positionY > currentContainerInnerSize.height) {
-						// ENGINE_WARN("A text component is overflowing the current container.");
-					// }
-
-					const uint16 codePoint = static_cast<uint16>(character);
-					const Glyph& glyph = font[codePoint];
-
-					// Don't register spaces on the start of the text.
-					if (glyph.invisible && positionX == static_cast<float32>(textOrigin[0])) {
-						continue;
-					}
-
-					const float32 advanceWidth = std::ceil(glyph.advanceWidth * scaledHeight);
-
-					if (!glyph.invisible) {
-						// For a line height (ascent - descent) of 1210 FUnits,
-						// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
-						// The width should be 62.13_px.
-						// TODO: float32 lyah::ceil(float32)
-						const float32 width = glyph.width * scaledHeight;
-						const float32 leftSideBearing = glyph.leftSideBearing * scaledHeight;
-
-						const vec2<float32> position = {positionX + leftSideBearing, positionY};
-						const vec2<float32> size = {width, component.fontSize};
-						const vec2<float32> uvStart = {glyph.minCoordinate.x, glyph.minCoordinate.y};
-						const vec2<float32> uvEnd = {glyph.maxCoordinate.x, glyph.maxCoordinate.y};
-						const vec2<float32> uvDiff = uvEnd - uvStart;
-
-						glyphSubcomponent.world = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
-						glyphSubcomponent.textureWorld = mat3x3<float32>::scaling({
-							uvDiff[0] * imageExtent.width / renderer.TEXTURE_ARRAY_MAX_WIDTH,
-							uvDiff[1] * imageExtent.height / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
-						}) * mat3x3<float32>::translation(uvStart);
-
-						renderer.registerGlyphSubcomponent(glyphSubcomponent);
-					}
-
-					positionX += advanceWidth;
-					width += advanceWidth;
+					renderer.registerGlyphSubcomponent(glyphSubcomponent);
 				}
 			}
 			else {
@@ -313,14 +249,14 @@ namespace ProjectA {
 		const uint32 parentIndex = components[componentIndex].parentIndex;
 
 		FitSizingWidths(componentIndex);
-		// GrowAndShrinkSizingWidths(componentIndex);
+		GrowAndShrinkSizingWidths(componentIndex);
 
-		// TODO: Wrap Text
+		WrapTextChildren(componentIndex);
 
 		FitSizingHeights(componentIndex);
 
 		// TODO
-		// GrowAndShrinkSizingHeights(parent);
+		// GrowAndShrinkSizingHeights(componentIndex);
 
 		openComponents.pop_back();
 	}
@@ -425,7 +361,7 @@ namespace ProjectA {
 			return;
 		}
 
-		float32 remainingWidth = parent.remainingSize.y - parent.padding.y * 2.0f;
+		float32 remainingWidth = parent.size.width.value - parent.padding.x * 2.0f;
 
 		if (parent.layoutDirection == HORIZONTAL) {
 			// Grow/shrink towards right
@@ -490,13 +426,16 @@ namespace ProjectA {
 				// Resize the child in order to reach the second smallest width, then repeat.
 				if (child.size.width.value == smallestWidth) {
 					child.size.width.value += widthToAdd;
+
+					// TODO: Handle maximum width.
+
 					remainingWidth -= widthToAdd;
 				}
 			}
 		}
 
 		// Shrink children.
-		/* while (remainingWidth < 0.0f) {
+		while (remainingWidth < 0.0f) {
 			float32 largestWidth = components[growableOrShrinkableChildren[0]].size.width.value;
 			float32 secondLargestWidth = 0.0f;
 			float32 widthToRemove = remainingWidth;
@@ -528,10 +467,13 @@ namespace ProjectA {
 				// Resize the child in order to reach the second largest width, then repeat.
 				if (child.size.width.value == largestWidth) {
 					child.size.width.value += widthToRemove;
+
+					// TODO: Handle minimum width.
+
 					remainingWidth -= widthToRemove;
 				}
 			}
-		} */
+		}
 	}
 
 	// TODO: lyah::max
@@ -545,7 +487,7 @@ namespace ProjectA {
 			return;
 		}
 
-		float32 remainingHeight = parent.remainingSize.y - parent.padding.y * 2.0f;
+		float32 remainingHeight = parent.size.height.value - parent.padding.y * 2.0f;
 
 		if (parent.layoutDirection == VERTICAL) {
 			// Grow/shrink towards bottom
@@ -610,6 +552,9 @@ namespace ProjectA {
 				// Resize the child in order to reach the second smallest height, then repeat.
 				if (child.size.height.value == smallestHeight) {
 					child.size.height.value += heightToAdd;
+
+					// TODO: Handle maximum height.
+
 					remainingHeight -= heightToAdd;
 				}
 			}
@@ -648,9 +593,271 @@ namespace ProjectA {
 				// Resize the child in order to reach the second largest height, then repeat.
 				if (child.size.height.value == largestHeight) {
 					child.size.height.value += heightToRemove;
+
+					// TODO: Handle minimum height.
+
 					remainingHeight -= heightToRemove;
 				}
 			}
+		}
+	}
+
+	void GUILayer::WrapTextChildren(uint32 parentIndex) {
+		GUIContainer& parent = components[parentIndex];
+
+		for (const uint32 childIndex : parent.childIndices) {
+			GUIContainer& child = components[childIndex];
+
+			if (!child.textComponent) {
+				continue;
+			}
+
+			WrapText(child);
+		}
+	}
+
+	// A new line must be added when:
+	// 1. The current word overflows the text component's width.
+	// 2. A line break character (\n) is encountered.
+	// 
+	// The current word must be flushed when:
+	// 1. It is the last word.
+	// 2. It overflows the text component's width.
+	// 3. A invisible character (space, \t, etc.) is encountered.
+	// 
+	// TODO: lyah::ceil
+	void GUILayer::WrapText(GUIContainer& textComponent) {
+		const FontData& fontData = fonts[textComponent.font];
+		const TrueTypeFont& font = *fontData.font;
+		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
+		const vec2<float32> imageSize = {static_cast<float32>(imageExtent.width), static_cast<float32>(imageExtent.height)};
+		const float32 lineHeight = textComponent.fontSize / font.getLineHeight();
+
+		svec2<float32> characterOffset = textComponent.origin;
+
+		uint32 characterIndex = 0;
+		uint32 wordStartIndex = 0;
+		uint32 wordLength = 0;
+		float32 postWordAdvanceWidth = 0.0f;
+
+		bool flushCurrentWord = false;
+		bool flushOnNewLine = false;
+
+		GUIGlyphSubcomponent defaultGlyphSubcomponent;
+		defaultGlyphSubcomponent.layerIndex = fontData.glyphMapImageId;
+		defaultGlyphSubcomponent.color = textComponent.color.value;
+
+		while (characterIndex < textComponent.text.size()) {
+			const char8 character = textComponent.text[characterIndex];
+
+			characterIndex += 1;
+
+			if (character >= 0) {
+				const uint16 codePoint = static_cast<uint16>(character);
+				const Glyph& glyph = font[codePoint];
+
+				if (glyph.invisible) {
+					// Flush the current word if we encounter a blank character.
+					flushCurrentWord = true;
+					postWordAdvanceWidth = glyph.advanceWidth * lineHeight;
+				}
+				else {
+					const float32 width = glyph.width * lineHeight;
+
+					if (characterOffset.x + width > textComponent.size.width.value) {
+						characterOffset.x = 0.0f;
+						characterOffset.y += textComponent.fontSize;
+
+						wordLength += 1;
+
+						for (uint32 lookAheadIndex = characterIndex; lookAheadIndex < textComponent.text.size(); lookAheadIndex += 1) {
+							const char8 character = textComponent.text[lookAheadIndex];
+
+							if (OutsideWord(character, font)) {
+								break;
+							}
+
+							wordLength += 1;
+						}
+
+						characterIndex += wordLength - 1;
+						flushCurrentWord = true;
+					}
+				}
+			}
+			else {
+				// TODO: Handle UTF-16 and UTF-32 characters.
+				//       For now, we just flush the current word.
+				flushCurrentWord = true;
+			}
+
+			/* const char8 character = textComponent.text[characterIndex];
+			const uint16 codePoint = static_cast<uint16>(character);
+			const Glyph& glyph = font[codePoint];
+
+			if (flushOnNewLine) {
+				flushCurrentWord = true;
+
+				characterOffset.y += textComponent.fontSize;
+			} */
+
+			if (flushCurrentWord) {
+				FlushWordData flushWordData;
+				flushWordData.word = textComponent.text.substr(wordStartIndex, wordLength);
+				flushWordData.font = &font;
+				flushWordData.imageSize = imageSize;
+				flushWordData.fontSize = textComponent.fontSize;
+				flushWordData.lineHeight = lineHeight;
+
+				FlushWord(flushWordData, textComponent.characters, characterOffset);
+
+				wordStartIndex = characterIndex;
+				wordLength = 0;
+				flushCurrentWord = false;
+
+				if (postWordAdvanceWidth > 0.0f) {
+					characterOffset.x += postWordAdvanceWidth;
+
+					postWordAdvanceWidth = 0.0f;
+				}
+
+				continue;
+			}
+
+			wordLength += 1;
+
+			/* if (codePoint == '\n' || codePoint == '\t' || (characterIndex + 1 == textComponent.text.size())) {
+				newLine = true;
+
+				characterIndex += 1;
+			}
+			else {
+				const Glyph& glyph = font[codePoint];
+
+				if (glyph.invisible) {
+					newLine = true;
+
+					// Look-ahead to skip consecutive invisible glyphs.
+					for (uint32 i = characterIndex + 1; i < textComponent.text.size(); i += 1) {
+						const uint16 nextCodePoint = static_cast<uint16>(textComponent.text[i]);
+						const Glyph& nextGlyph = font[nextCodePoint];
+
+						if (!glyph.invisible) {
+							characterIndex = i - 1;
+
+							break;
+						}
+					}
+				}
+				else if (characterPosition.x + glyph.width * lineHeight > textComponent.size.width.value) {
+					newLine = true;
+
+					// Look-ahead to close the overflowing word.
+					for (uint32 i = characterIndex + 1; i < textComponent.text.size(); i += 1) {
+						const uint16 nextCodePoint = static_cast<uint16>(textComponent.text[i]);
+						const Glyph& nextGlyph = font[nextCodePoint];
+
+						if (glyph.invisible) {
+							characterIndex = i - 1;
+							wordEndIndex = characterIndex;
+
+							break;
+						}
+					}
+				}
+			}
+
+			if (newLine) {
+				flushWord = true;
+			}
+
+			if (flushWord) {
+				// Flush the current word.
+				for (uint32 i = wordStartIndex; i < wordEndIndex; i += 1) {
+					const char8 character = textComponent.text[i];
+					const uint16 codePoint = static_cast<uint16>(character);
+					const Glyph& glyph = font[codePoint];
+
+					const float32 advanceWidth = std::ceil(glyph.advanceWidth * lineHeight);
+					const float32 width = glyph.width * lineHeight;
+					const float32 leftSideBearing = glyph.leftSideBearing * lineHeight;
+
+					const vec2<float32> position = {characterPosition.x + leftSideBearing, characterPosition.y};
+					const vec2<float32> size = {width, textComponent.fontSize};
+					const vec2<float32> uvStart = {glyph.minCoordinate.x, glyph.minCoordinate.y};
+					const vec2<float32> uvEnd = {glyph.maxCoordinate.x, glyph.maxCoordinate.y};
+					const vec2<float32> uvDiff = uvEnd - uvStart;
+
+					GUIGlyphSubcomponent glyphSubcomponent = defaultGlyphSubcomponent;
+					glyphSubcomponent.world = mat3x3<float32>::scaling(size) * mat3x3<float32>::translation(position);
+					glyphSubcomponent.textureWorld = mat3x3<float32>::scaling({
+						uvDiff[0] * imageExtent.width / renderer.TEXTURE_ARRAY_MAX_WIDTH,
+						uvDiff[1] * imageExtent.height / renderer.TEXTURE_ARRAY_MAX_HEIGHT,
+					}) * mat3x3<float32>::translation(uvStart);
+				}
+
+				wordStartIndex += wordEndIndex + 1;
+				wordEndIndex = wordStartIndex;
+
+				if (newLine) {
+					characterPosition.x = textComponent.origin.x;
+					characterPosition.y += textComponent.fontSize;
+					lineCount += 1;
+				}
+			}
+			else {
+				characterIndex += 1;
+				wordEndIndex += 1;
+			} */
+		}
+
+		// Case A: Flush last word.
+		if (wordLength > 0 && wordStartIndex + wordLength == textComponent.text.size()) {
+			FlushWordData flushWordData;
+			flushWordData.word = textComponent.text.substr(wordStartIndex, wordLength);
+			flushWordData.font = &font;
+			flushWordData.imageSize = imageSize;
+			flushWordData.fontSize = textComponent.fontSize;
+			flushWordData.lineHeight = lineHeight;
+
+			FlushWord(flushWordData, textComponent.characters, characterOffset);
+		}
+	}
+
+	bool GUILayer::OutsideWord(char8 character, const TrueTypeFont& font) const {
+		if (character < 0) {
+			// TODO: Handle UTF-16 and UTF-32 characters.
+			return true;
+		}
+
+		const uint16 codePoint = static_cast<uint16>(character);
+		const Glyph& glyph = font[codePoint];
+
+		if (glyph.invisible) {
+			return true;
+		}
+
+		return false;
+	}
+
+	void GUILayer::FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) {
+		for (const char8 character : data.word) {
+			const uint16 codePoint = static_cast<uint16>(character);
+			const Glyph& glyph = (*data.font)[codePoint];
+			const float32 advanceWidth = std::ceil(glyph.advanceWidth * data.lineHeight);
+			const vec2<float32> startTextureCoordinate = {glyph.minCoordinate.x, glyph.minCoordinate.y};
+			const vec2<float32> endTextureCoordinate = {glyph.maxCoordinate.x, glyph.maxCoordinate.y};
+
+			TextCharacter textCharacter;
+			textCharacter.offset = {characterOffset.x + glyph.leftSideBearing * data.lineHeight, characterOffset.y};
+			textCharacter.size = {glyph.width * data.lineHeight, data.fontSize};
+			textCharacter.textureTransform =
+				mat3x3<float32>::scaling((endTextureCoordinate - startTextureCoordinate) * data.imageSize / renderer.TEXTURE_ARRAY_MAX_SIZE) *
+				mat3x3<float32>::translation(startTextureCoordinate);
+
+			textCharacters.emplace_back(textCharacter);
+
+			characterOffset.x += advanceWidth;
 		}
 	}
 
@@ -762,13 +969,16 @@ namespace ProjectA {
 		return preferredWidth;
 	}
 
+	// TODO: lyah::max
 	uint32 GUILayer::calculateTextMinimumWidth(const std::string& string, const TextStyle& textStyle) const {
 		const TrueTypeFont& font = *fonts[textStyle.font].font;
+		const float32 lineHeight = textStyle.fontSize / font.getLineHeight();
 
-		uint32 minimumWidth = 0;
-		uint32 wordWidth = 0;
+		uint32 minimumWordWidth = 0;
+		uint32 currentWordWidth = 0;
+		const Glyph* glyph = nullptr;
 
-		bool firstLineGlyph = true;
+		bool closeWord = false;
 
 		for (const char8 character : string) {
 			if (character < 0) {
@@ -778,42 +988,30 @@ namespace ProjectA {
 			}
 
 			if (character == '\n') {
-				// TODO: lyah::max
-				minimumWidth = std::max(minimumWidth, wordWidth);
-
-				wordWidth = 0;
-
-				break;
+				closeWord = true;
 			}
+			else {
+				const uint16 codePoint = static_cast<uint16>(character);
 
-			const uint16 codePoint = static_cast<uint16>(character);
-			const Glyph& glyph = font[codePoint];
+				glyph = &font[codePoint];
 
-			if (firstLineGlyph) {
-				firstLineGlyph = false;
-
-				if (glyph.invisible) {
-					continue;
+				if (glyph->invisible) {
+					closeWord = true;
 				}
 			}
 
-			if (glyph.invisible) {
-				// TODO: lyah::max
-				minimumWidth = std::max(minimumWidth, wordWidth);
-
-				wordWidth = 0;
+			if (closeWord) {
+				minimumWordWidth = std::max(minimumWordWidth, currentWordWidth);
+				currentWordWidth = 0;
 
 				continue;
 			}
 
-			const float32 advanceWidth = std::ceil(glyph.advanceWidth / static_cast<float32>(font.getLineHeight()) * textStyle.fontSize);
+			const uint32 advanceWidth = static_cast<uint32>(glyph->advanceWidth / textStyle.fontSize);
 
-			wordWidth += static_cast<uint32>(advanceWidth);
+			currentWordWidth += advanceWidth;
 		}
 
-		// TODO: lyah::max
-		minimumWidth = std::max(minimumWidth, wordWidth);
-
-		return minimumWidth;
+		return std::max(minimumWordWidth, currentWordWidth);
 	}
 }

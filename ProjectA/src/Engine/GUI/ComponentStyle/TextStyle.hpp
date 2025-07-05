@@ -9,6 +9,7 @@ namespace ProjectA {
 		FontID font;
 		float32 fontSize;
 
+		// TODO: Debug-only.
 		std::string_view debugName;
 	};
 }
