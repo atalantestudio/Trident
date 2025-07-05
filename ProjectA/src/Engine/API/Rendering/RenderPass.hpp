@@ -30,8 +30,8 @@ namespace ProjectA {
 
 					if (subpass->hasDepthStencilAttachment()) {
 						if (subpass->getDepthStencilAttachment().loadOperation == LoadOperation::CLEAR) {
-							lastClearAttachmentIndex = lastAttachmentIndex;
 							lastClearDepthStencilAttachmentIndex = lastAttachmentIndex;
+							lastClearAttachmentIndex = lastAttachmentIndex;
 
 							break;
 						}
@@ -41,8 +41,8 @@ namespace ProjectA {
 
 					for (sint32 colorAttachmentIndex = static_cast<sint32>(subpass->getColorAttachmentCount()) - 1; colorAttachmentIndex >= 0; colorAttachmentIndex -= 1) {
 						if (subpass->getColorAttachments()[colorAttachmentIndex].loadOperation == LoadOperation::CLEAR) {
-							lastClearAttachmentIndex = lastAttachmentIndex;
 							lastClearColorAttachmentIndex = lastAttachmentIndex;
+							lastClearAttachmentIndex = lastAttachmentIndex;
 
 							break;
 						}
@@ -80,11 +80,11 @@ namespace ProjectA {
 			uint32 attachmentCount = 0;
 
 			// Largest attachment index specifying a load operation (or stencil load operation, if the attachment has a depth/stencil format) of LoadOperation::CLEAR.
-			uint32 lastClearAttachmentIndex;
+			uint32 lastClearAttachmentIndex = max<uint32>();
 
 			// These are used by the OpenGL adapter.
-			uint32 lastClearColorAttachmentIndex = ~0;
-			uint32 lastClearDepthStencilAttachmentIndex = ~0;
+			uint32 lastClearColorAttachmentIndex = max<uint32>();
+			uint32 lastClearDepthStencilAttachmentIndex = max<uint32>();
 
 		private:
 			// True if any subpass has a depth stencil attachment.
