@@ -266,8 +266,7 @@ namespace ProjectA {
 		subcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		subcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
 		subcomponentRenderPipelineDescriptor.minSampleShading = 0.5f;
-		// TODO: Transparency for debug purposes.
-		subcomponentRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
+		subcomponentRenderPipelineDescriptor.colorBlendState.attachments = {opaqueColorBlendAttachment};
 		subcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		subcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 		subcomponentRenderPipelineDescriptor.renderPass = renderPass;

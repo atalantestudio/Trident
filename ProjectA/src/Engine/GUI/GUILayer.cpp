@@ -158,7 +158,6 @@ namespace ProjectA {
 		rootComponent.size.width.value = static_cast<float32>(swapchainExtent.width);
 		rootComponent.size.height.fillMode = FillMode::FIXED;
 		rootComponent.size.height.value = static_cast<float32>(swapchainExtent.height);
-		rootComponent.remainingSize = {static_cast<float32>(swapchainExtent.width), static_cast<float32>(swapchainExtent.height)};
 		rootComponent.padding = {0_px, 0_px};
 		rootComponent.layoutDirection = HORIZONTAL;
 		rootComponent.layoutSpacing = 0_px;
@@ -187,7 +186,6 @@ namespace ProjectA {
 		component.parentIndex = parentIndex;
 		component.origin = parent.origin;
 		component.size = style.size;
-		component.remainingSize = component.size;
 		component.padding = style.padding;
 		component.layoutDirection = style.layoutDirection;
 		component.layoutSpacing = style.layoutSpacing;

@@ -20,16 +20,20 @@ namespace ProjectA {
 		Size2D size;
 		svec2<float32> preferredSize;
 		svec2<float32> minimumSize;
-		svec2<float32> remainingSize;
 		svec2<float32> padding;
+
+		// For non-text components, this is the background color blended with the image.
+		// For text component, this is the text color.
+		Color color = 0xffffffff;
+
+		// Exclusive to non-text components.
 		LayoutDirection layoutDirection;
 		float32 layoutSpacing;
-		Color color = 0xffffffff;
 		ImageID image;
 		float32 radius;
 		std::vector<uint32> childIndices;
 
-		// Exclusive to text components
+		// Exclusive to text components.
 		bool textComponent;
 		std::string text;
 		std::vector<TextCharacter> characters;
