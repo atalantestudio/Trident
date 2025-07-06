@@ -18,7 +18,7 @@ namespace ProjectA {
 		uint32 parentIndex;
 		svec2<float32> origin;
 		Size2D size;
-		svec2<float32> preferredSize;
+		svec2<float32> maximumSize;
 		svec2<float32> minimumSize;
 		svec2<float32> padding;
 
