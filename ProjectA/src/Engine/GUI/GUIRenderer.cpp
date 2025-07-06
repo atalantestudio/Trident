@@ -248,9 +248,6 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		ColorBlendAttachment opaqueColorBlendAttachment{};
-		opaqueColorBlendAttachment.blend = false;
-
 		ColorBlendAttachment transparentColorBlendAttachment{};
 		transparentColorBlendAttachment.blend = true;
 		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
@@ -267,7 +264,7 @@ namespace ProjectA {
 		subcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		subcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
 		subcomponentRenderPipelineDescriptor.minSampleShading = 0.5f;
-		subcomponentRenderPipelineDescriptor.colorBlendState.attachments = {opaqueColorBlendAttachment};
+		subcomponentRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
 		subcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		subcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 		subcomponentRenderPipelineDescriptor.renderPass = renderPass;

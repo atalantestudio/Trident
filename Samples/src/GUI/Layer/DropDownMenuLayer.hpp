@@ -10,31 +10,45 @@ namespace ProjectA {
 			void GUI() override {
 				ContainerStyle menu;
 				menu.size = {FIT, FIT};
+				menu.padding = {8_px, 8_px};
 				menu.layoutDirection = VERTICAL;
+				menu.layoutSpacing = 8_px;
 				menu.color = 0xa675a2ff;
 				menu.radius = 4_px;
 
 				GUIComponent(menu) {
 					for (const std::string& label : itemLabels) {
 						ContainerStyle item;
-						item.size = {FIT, FIT};
+						item.size = {EXPAND, 40_px};
+						// TODO: Fix minimumSize.
+						// item.minimumSize.y = 40_px;
+						item.padding = {8_px, 8_px};
+						item.anchorPoint = AnchorPoint::LEFT | AnchorPoint::VCENTER;
+						item.layoutSpacing = 8_px;
 						item.color = 0xbd95bcff;
 						item.radius = 4_px;
-						item.debugName = label;
+						item.debugName = "item";
 
 						GUIComponent(item) {
-							TextStyle itemTextStyle;
-							itemTextStyle.color = 0xffffffff;
-							itemTextStyle.font = font;
-							itemTextStyle.fontSize = 32;
+							ContainerStyle labelContainer;
+							labelContainer.size = {EXPAND, FIT};
+							labelContainer.color = 0x00000000;
+							labelContainer.debugName = "labelContainer";
 
-							GUIText(label, itemTextStyle);
+							GUIComponent(labelContainer) {
+								TextStyle itemLabel;
+								itemLabel.color = 0xffffffff;
+								itemLabel.font = font;
+								itemLabel.fontSize = 32;
 
-							/* ContainerStyle itemImage;
+								GUIText(label, itemLabel);
+							}
+
+							ContainerStyle itemImage;
 							itemImage.size = {32_px, 32_px};
 							itemImage.image = 0;
 
-							GUIComponent(itemImage); */
+							GUIComponent(itemImage);
 						}
 					}
 				}

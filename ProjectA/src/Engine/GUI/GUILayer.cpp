@@ -282,9 +282,7 @@ namespace ProjectA {
 		AddVerticalPaddingRecursive(rootComponentIndex);
 		GrowAndShrinkSizingHeightsRecursive(rootComponentIndex);
 
-		svec2<float32> origin = {0_px, 0_px};
-
-		PositionsAndAlignment(rootComponent, origin, rootComponent.layoutDirection);
+		PositionsAndAlignment(rootComponent, rootComponent.origin);
 
 		openComponentIndices.pop_back();
 	}
@@ -877,14 +875,14 @@ namespace ProjectA {
 	}
 
 	// TODO: lyah::max
-	void GUILayer::PositionsAndAlignment(GUIContainer& component, svec2<float32>& origin, LayoutDirection layoutDirection) {
+	void GUILayer::PositionsAndAlignment(GUIContainer& component, svec2<float32> origin) {
 		component.origin = origin;
 
 		if (component.childIndices.empty()) {
 			const GUIContainer& parent = components[component.parentIndex];
 
 			// Skip over the component towards the layout direction (this includes the padding).
-			origin[layoutDirection] += component.size[layoutDirection].value;
+			origin[parent.layoutDirection] += component.size[parent.layoutDirection].value;
 
 			return;
 		}
@@ -930,11 +928,9 @@ namespace ProjectA {
 
 			origin[!component.layoutDirection] = originAcross + remainingAcross * fAcross;
 
-			if (child.childIndices.size() > 1) {
-				layoutDirection = child.layoutDirection;
-			}
+			PositionsAndAlignment(child, origin);
 
-			PositionsAndAlignment(child, origin, layoutDirection);
+			origin[component.layoutDirection] += child.size[component.layoutDirection].value;
 
 			if (index + 1 == component.childIndices.size()) {
 				break;
