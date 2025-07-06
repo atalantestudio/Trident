@@ -64,6 +64,7 @@ namespace ProjectA {
 			std::vector<uint32> FindShrinkableChildIndices(const GUIContainer& parent, bool axis) const;
 
 			void FitSizingWidths(uint32 componentIndex);
+			void AddVerticalPaddingRecursive(uint32 componentIndex);
 			void FitSizingHeightsRecursive(uint32 componentIndex);
 			void GrowAndShrinkSizingWidthsRecursive(uint32 parentIndex);
 			void GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex);

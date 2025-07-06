@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/GUI/AnchorPoint.hpp"
 #include "Engine/GUI/ID.hpp"
 #include "Engine/GUI/LayoutDirection.hpp"
 #include "Engine/GUI/Size.hpp"
@@ -24,14 +25,16 @@ namespace ProjectA {
 
 		// For non-text components, this is the background color blended with the image.
 		// For text component, this is the text color.
-		Color color = 0xffffffff;
+		Color color = 0x00000000;
 
 		// Exclusive to non-text components.
+		AnchorPoint anchorPoint;
 		LayoutDirection layoutDirection;
 		float32 layoutSpacing;
 		ImageID image;
 		float32 radius;
 		std::vector<uint32> childIndices;
+		bool sizeIncludesPaddingAndSpacing = false;
 
 		// Exclusive to text components.
 		bool textComponent;

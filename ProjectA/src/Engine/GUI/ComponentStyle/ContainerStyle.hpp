@@ -10,6 +10,7 @@ namespace ProjectA {
 		svec2<float32> maximumSize = {max<float32>(), max<float32>()};
 		svec2<float32> minimumSize = {0_px, 0_px};
 		svec2<float32> padding = {0_px, 0_px};
+		AnchorPoint anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
 		LayoutDirection layoutDirection = HORIZONTAL;
 		float32 layoutSpacing = 0_px;
 		Color color = 0xffffffff;

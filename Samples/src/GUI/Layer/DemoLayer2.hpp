@@ -11,6 +11,7 @@ namespace ProjectA {
 				ContainerStyle blue;
 				blue.size = {1000_px, 500_px};
 				blue.padding = {32_px, 32_px};
+				blue.anchorPoint = AnchorPoint::LEFT | AnchorPoint::TOP;
 				blue.layoutSpacing = 32_px;
 				blue.color = 0x0a6e89ff;
 				blue.debugName = "blue";

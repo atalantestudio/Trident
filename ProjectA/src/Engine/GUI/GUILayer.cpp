@@ -151,6 +151,7 @@ namespace ProjectA {
 		rootComponent.origin = {0_px, 0_px};
 		rootComponent.size = {FIT, FIT};
 		rootComponent.padding = {0_px, 0_px};
+		rootComponent.anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
 		rootComponent.layoutDirection = HORIZONTAL;
 		rootComponent.layoutSpacing = 0_px;
 		rootComponent.color = 0xffffffff;
@@ -192,14 +193,14 @@ namespace ProjectA {
 			component.minimumSize.y = style.minimumSize.y;
 		}
 
-		if (component.size.width.fillMode == FillMode::EXPAND) {
+		if (component.size.width.fillMode != FillMode::FIXED) {
 			component.maximumSize.x = style.maximumSize.x;
 		}
 		else {
 			component.maximumSize.x = component.size.width.value;
 		}
 
-		if (component.size.height.fillMode == FillMode::EXPAND) {
+		if (component.size.height.fillMode != FillMode::FIXED) {
 			component.maximumSize.y = style.maximumSize.y;
 		}
 		else {
@@ -207,6 +208,7 @@ namespace ProjectA {
 		}
 
 		component.padding = style.padding;
+		component.anchorPoint = style.anchorPoint;
 		component.layoutDirection = style.layoutDirection;
 		component.layoutSpacing = style.layoutSpacing;
 		component.color = style.color;
@@ -276,6 +278,8 @@ namespace ProjectA {
 			FitSizingHeightsRecursive(leafComponentIndex);
 		}
 
+		AddVerticalPaddingRecursive(rootComponentIndex);
+
 		GrowAndShrinkSizingHeightsRecursive(rootComponentIndex);
 
 		svec2<float32> origin = {0_px, 0_px};
@@ -332,6 +336,7 @@ namespace ProjectA {
 	}
 
 	// TODO: lyah::max
+	// TODO: lyah::min
 	void GUILayer::FitSizingWidths(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
 
@@ -362,11 +367,12 @@ namespace ProjectA {
 			}
 		}
 
-		parent.size.width.value = std::max(parent.size.width.value, parent.maximumSize.x);
+		parent.size.width.value = std::min(parent.size.width.value, parent.maximumSize.x);
+		parent.maximumSize.x = std::max(parent.maximumSize.x, parent.minimumSize.x);
 	}
 
 	// TODO: lyah::max
-	void GUILayer::FitSizingHeightsRecursive(uint32 componentIndex) {
+	void GUILayer::AddVerticalPaddingRecursive(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
 
 		// Add padding to the component's size.
@@ -379,6 +385,16 @@ namespace ProjectA {
 
 			component.size.height.value += layoutSpacing;
 		}
+
+		for (const uint32 childIndex : component.childIndices) {
+			AddVerticalPaddingRecursive(childIndex);
+		}
+	}
+
+	// TODO: lyah::max
+	// TODO: lyah::min
+	void GUILayer::FitSizingHeightsRecursive(uint32 componentIndex) {
+		GUIContainer& component = components[componentIndex];
 
 		if (component.parentIndex == ~0) {
 			return;
@@ -400,7 +416,8 @@ namespace ProjectA {
 			}
 		}
 
-		parent.size.height.value = std::max(parent.size.height.value, parent.maximumSize.y);
+		parent.size.height.value = std::min(parent.size.height.value, parent.maximumSize.y);
+		parent.maximumSize.y = std::max(parent.maximumSize.y, parent.minimumSize.y);
 
 		FitSizingHeightsRecursive(component.parentIndex);
 	}
@@ -857,6 +874,7 @@ namespace ProjectA {
 		}
 	}
 
+	// TODO: lyah::max
 	void GUILayer::Positions(GUIContainer& parent, svec2<float32>& origin) {
 		parent.origin = origin;
 
@@ -871,15 +889,60 @@ namespace ProjectA {
 		origin.x += parent.padding.x;
 		origin.y += parent.padding.y;
 
+		svec2<float32> remainingSize = {parent.size.width.value - parent.padding.x * 2.0f, parent.size.height.value - parent.padding.y * 2.0f};
+
+		const float32 layoutSpacing = parent.layoutSpacing * (static_cast<uint32>(parent.childIndices.size()) - 1);
+
+		remainingSize[parent.layoutDirection] -= layoutSpacing;
+
+		float32 remainingAcross = 0.0f;
+
+		for (const uint32 childIndex : parent.childIndices) {
+			const GUIContainer& child = components[childIndex];
+
+			remainingSize[parent.layoutDirection] -= child.size[parent.layoutDirection].value;
+			remainingAcross = std::max(remainingAcross, child.size[!parent.layoutDirection].value);
+		}
+
+		remainingSize[!parent.layoutDirection] -= remainingAcross;
+
+		// Towards layout direction:
+		// - LEFT/TOP: add remainingWidth * 0
+		// - HCENTER/VCENTER: add remainingWidth * 0.5
+		// - RIGHT/BOTTOM: add remainingWidth * 1
+
+		// Snap to anchor point along layout direction.
+		const uint8 shiftAmountAlong = 1 + (!parent.layoutDirection) * 3;
+		const uint8 anchorRangeAlong = (static_cast<uint8>(parent.anchorPoint) & 0b111000) >> shiftAmountAlong;
+		const float32 fAlong = static_cast<float32>(anchorRangeAlong) * 0.5f;
+
+		origin[parent.layoutDirection] += remainingSize[parent.layoutDirection] * fAlong;
+
+		// Snap to anchor point across layout direction.
+		const uint8 shiftAmountAcross = 1 + parent.layoutDirection * 3;
+		const uint8 anchorRangeAcross = (static_cast<uint8>(parent.anchorPoint) & 0b000111) >> shiftAmountAcross;
+		const float32 fAcross = static_cast<float32>(anchorRangeAcross) * 0.5f;
+
+		const float32 parentAcross = parent.size[!parent.layoutDirection].value - parent.padding[!parent.layoutDirection] * 2.0f;
+
 		for (uint32 index = 0; index < parent.childIndices.size(); index += 1) {
 			GUIContainer& child = components[parent.childIndices[index]];
+			svec2<float32> originCopy = origin;
 
-			Positions(child, origin);
+			const float32 remainingAcross = parentAcross - child.size[!parent.layoutDirection].value;
 
-			// Add layout spacing if it's not the last child.
-			if (index != parent.childIndices.size()) {
-				origin[parent.layoutDirection] += parent.layoutSpacing;
+			originCopy[!parent.layoutDirection] += remainingAcross * fAcross;
+
+			Positions(child, originCopy);
+
+			if (index == parent.childIndices.size()) {
+				break;
 			}
+
+			origin[parent.layoutDirection] = originCopy[parent.layoutDirection];
+
+			// Add layout spacing (only if it's not the last child).
+			origin[parent.layoutDirection] += parent.layoutSpacing;
 		}
 
 		// Add again padding towards the layout direction.
