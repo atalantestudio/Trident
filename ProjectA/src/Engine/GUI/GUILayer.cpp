@@ -93,7 +93,6 @@ namespace ProjectA {
 
 		closeRootComponent();
 
-		// 7. Register components for rendering.
 		for (uint32 componentIndex = 1; componentIndex < components.size(); componentIndex += 1) {
 			const GUIContainer& component = components[componentIndex];
 
@@ -645,10 +644,10 @@ namespace ProjectA {
 		const float32 lineHeight = textComponent.fontSize / font.getLineHeight();
 
 		svec2<float32> characterOffset = textComponent.origin;
-
 		uint32 characterIndex = 0;
 		uint32 wordStartIndex = 0;
 		uint32 wordLength = 0;
+		float32 wordCharacterOffsetX = 0.0f;
 		float32 postWordAdvanceWidth = 0.0f;
 
 		bool flushCurrentWord = false;
@@ -672,13 +671,15 @@ namespace ProjectA {
 					postWordAdvanceWidth = glyph.advanceWidth * lineHeight;
 				}
 				else {
-					const float32 width = glyph.width * lineHeight;
+					const float32 advanceWidth = std::ceil(glyph.advanceWidth * lineHeight);
 
-					if (characterOffset.x + width > textComponent.size.width.value) {
+					wordCharacterOffsetX += advanceWidth;
+
+					if (wordCharacterOffsetX > textComponent.size.width.value) {
 						characterOffset.x = 0.0f;
 						characterOffset.y += textComponent.fontSize;
-
 						wordLength += 1;
+						flushCurrentWord = true;
 
 						for (uint32 lookAheadIndex = characterIndex; lookAheadIndex < textComponent.text.size(); lookAheadIndex += 1) {
 							const char8 character = textComponent.text[lookAheadIndex];
@@ -688,10 +689,8 @@ namespace ProjectA {
 							}
 
 							wordLength += 1;
+							characterIndex += 1;
 						}
-
-						characterIndex += wordLength - 1;
-						flushCurrentWord = true;
 					}
 				}
 			}
@@ -720,6 +719,8 @@ namespace ProjectA {
 
 					postWordAdvanceWidth = 0.0f;
 				}
+
+				wordCharacterOffsetX = characterOffset.x;
 
 				continue;
 			}
