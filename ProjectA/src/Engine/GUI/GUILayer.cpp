@@ -262,7 +262,8 @@ namespace ProjectA {
 
 	void GUILayer::closeRootComponent() {
 		static constexpr uint32 rootComponentIndex = 0;
-		const GUIContainer& rootComponent = components[rootComponentIndex];
+
+		GUIContainer& rootComponent = components[rootComponentIndex];
 
 		for (const uint32 childIndex : rootComponent.childIndices) {
 			GUIContainer& child = components[childIndex];
@@ -279,12 +280,11 @@ namespace ProjectA {
 		}
 
 		AddVerticalPaddingRecursive(rootComponentIndex);
-
 		GrowAndShrinkSizingHeightsRecursive(rootComponentIndex);
 
 		svec2<float32> origin = {0_px, 0_px};
 
-		Positions(components[0], origin);
+		PositionsAndAlignment(rootComponent, origin, rootComponent.layoutDirection);
 
 		openComponentIndices.pop_back();
 	}
@@ -312,7 +312,7 @@ namespace ProjectA {
 			const uint32 childIndex = parent.childIndices[index];
 			const GUIContainer& child = components[childIndex];
 
-			if (child.size[axis].fillMode == FillMode::FIT || child.size[axis].fillMode == FillMode::EXPAND) {
+			if (child.size[axis].fillMode == FillMode::EXPAND) {
 				childIndices.emplace_back(childIndex);
 			}
 		}
@@ -378,7 +378,7 @@ namespace ProjectA {
 		// Add padding to the component's size.
 		component.size.height.value += component.padding.y * 2.0f;
 
-		if (component.layoutSpacing == VERTICAL) {
+		if (component.layoutDirection == VERTICAL) {
 			// Add layout spacing to the component's size.
 			const sint32 childCount = static_cast<sint32>(component.childIndices.size());
 			const float32 layoutSpacing = component.layoutSpacing * static_cast<float32>(std::max(0, childCount - 1));
@@ -400,18 +400,20 @@ namespace ProjectA {
 			return;
 		}
 
+		const float32 height = component.size.height.value + component.padding.y * 2.0f;
+
 		GUIContainer& parent = components[component.parentIndex];
 
 		// Update the component and its parent depending on the parent's layout direction.
 		if (parent.layoutDirection == VERTICAL) {
 			if (parent.size.height.fillMode != FillMode::FIXED) {
-				parent.size.height.value += component.size.height.value;
+				parent.size.height.value += height;
 				parent.minimumSize.y += component.minimumSize.y;
 			}
 		}
 		else {
 			if (parent.size.height.fillMode != FillMode::FIXED) {
-				parent.size.height.value = std::max(parent.size.height.value, component.size.height.value);
+				parent.size.height.value = std::max(parent.size.height.value, height);
 				parent.minimumSize.y = std::max(parent.minimumSize.y, component.minimumSize.y);
 			}
 		}
@@ -875,81 +877,78 @@ namespace ProjectA {
 	}
 
 	// TODO: lyah::max
-	void GUILayer::Positions(GUIContainer& parent, svec2<float32>& origin) {
-		parent.origin = origin;
+	void GUILayer::PositionsAndAlignment(GUIContainer& component, svec2<float32>& origin, LayoutDirection layoutDirection) {
+		component.origin = origin;
 
-		if (parent.childIndices.empty()) {
+		if (component.childIndices.empty()) {
+			const GUIContainer& parent = components[component.parentIndex];
+
 			// Skip over the component towards the layout direction (this includes the padding).
-			origin[parent.layoutDirection] += parent.size[parent.layoutDirection].value;
+			origin[layoutDirection] += component.size[layoutDirection].value;
 
 			return;
 		}
 
 		// Add top/left padding.
-		origin.x += parent.padding.x;
-		origin.y += parent.padding.y;
+		origin.x += component.padding.x;
+		origin.y += component.padding.y;
 
-		svec2<float32> remainingSize = {parent.size.width.value - parent.padding.x * 2.0f, parent.size.height.value - parent.padding.y * 2.0f};
-
-		const float32 layoutSpacing = parent.layoutSpacing * (static_cast<uint32>(parent.childIndices.size()) - 1);
-
-		remainingSize[parent.layoutDirection] -= layoutSpacing;
-
+		svec2<float32> remainingSize = {component.size.width.value - component.padding.x * 2.0f, component.size.height.value - component.padding.y * 2.0f};
 		float32 remainingAcross = 0.0f;
 
-		for (const uint32 childIndex : parent.childIndices) {
+		for (const uint32 childIndex : component.childIndices) {
 			const GUIContainer& child = components[childIndex];
 
-			remainingSize[parent.layoutDirection] -= child.size[parent.layoutDirection].value;
-			remainingAcross = std::max(remainingAcross, child.size[!parent.layoutDirection].value);
+			remainingSize[component.layoutDirection] -= child.size[component.layoutDirection].value;
+			remainingAcross = std::max(remainingAcross, child.size[!component.layoutDirection].value);
 		}
 
-		remainingSize[!parent.layoutDirection] -= remainingAcross;
-
-		// Towards layout direction:
-		// - LEFT/TOP: add remainingWidth * 0
-		// - HCENTER/VCENTER: add remainingWidth * 0.5
-		// - RIGHT/BOTTOM: add remainingWidth * 1
+		remainingSize[component.layoutDirection] -= component.layoutSpacing * (static_cast<uint32>(component.childIndices.size()) - 1);
+		remainingSize[!component.layoutDirection] -= remainingAcross;
 
 		// Snap to anchor point along layout direction.
-		const uint8 shiftAmountAlong = 1 + (!parent.layoutDirection) * 3;
-		const uint8 anchorRangeAlong = (static_cast<uint8>(parent.anchorPoint) & 0b111000) >> shiftAmountAlong;
+		// TODO: Replace by 4 - layoutDirection * 3?
+		const uint8 shiftAmountAlong = 1 + (!component.layoutDirection) * 3;
+		const uint8 maskAlong = 0b111000 >> component.layoutDirection * 3;
+		const uint8 anchorRangeAlong = (static_cast<uint8>(component.anchorPoint) & maskAlong) >> shiftAmountAlong;
 		const float32 fAlong = static_cast<float32>(anchorRangeAlong) * 0.5f;
 
-		origin[parent.layoutDirection] += remainingSize[parent.layoutDirection] * fAlong;
+		origin[component.layoutDirection] += remainingSize[component.layoutDirection] * fAlong;
 
 		// Snap to anchor point across layout direction.
-		const uint8 shiftAmountAcross = 1 + parent.layoutDirection * 3;
-		const uint8 anchorRangeAcross = (static_cast<uint8>(parent.anchorPoint) & 0b000111) >> shiftAmountAcross;
+		const uint8 shiftAmountAcross = 1 + component.layoutDirection * 3;
+		const uint8 maskAcross = 0b111000 >> (!component.layoutDirection) * 3;
+		const uint8 anchorRangeAcross = (static_cast<uint8>(component.anchorPoint) & maskAcross) >> shiftAmountAcross;
 		const float32 fAcross = static_cast<float32>(anchorRangeAcross) * 0.5f;
+		const float32 parentAcross = component.size[!component.layoutDirection].value - component.padding[!component.layoutDirection] * 2.0f;
+		const float32 originAcross = origin[!component.layoutDirection];
 
-		const float32 parentAcross = parent.size[!parent.layoutDirection].value - parent.padding[!parent.layoutDirection] * 2.0f;
+		for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
+			GUIContainer& child = components[component.childIndices[index]];
 
-		for (uint32 index = 0; index < parent.childIndices.size(); index += 1) {
-			GUIContainer& child = components[parent.childIndices[index]];
-			svec2<float32> originCopy = origin;
+			const float32 remainingAcross = parentAcross - child.size[!component.layoutDirection].value;
 
-			const float32 remainingAcross = parentAcross - child.size[!parent.layoutDirection].value;
+			origin[!component.layoutDirection] = originAcross + remainingAcross * fAcross;
 
-			originCopy[!parent.layoutDirection] += remainingAcross * fAcross;
+			if (child.childIndices.size() > 1) {
+				layoutDirection = child.layoutDirection;
+			}
 
-			Positions(child, originCopy);
+			PositionsAndAlignment(child, origin, layoutDirection);
 
-			if (index == parent.childIndices.size()) {
+			if (index + 1 == component.childIndices.size()) {
 				break;
 			}
 
-			origin[parent.layoutDirection] = originCopy[parent.layoutDirection];
-
 			// Add layout spacing (only if it's not the last child).
-			origin[parent.layoutDirection] += parent.layoutSpacing;
+			origin[component.layoutDirection] += component.layoutSpacing;
 		}
 
-		// Add again padding towards the layout direction.
-		origin[parent.layoutDirection] += parent.padding[parent.layoutDirection];
+		// Add padding along the layout direction.
+		origin[component.layoutDirection] += component.padding[component.layoutDirection];
 
-		// Remove some padding away from the layout direction.
-		origin[parent.layoutDirection] -= parent.padding[parent.layoutDirection];
+		// Remove padding across the layout direction.
+		origin[!component.layoutDirection] -= component.padding[!component.layoutDirection];
 	}
 
 	void GUILayer::registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 radius) {

@@ -3,54 +3,37 @@
 namespace ProjectA {
 	class DemoLayer2 : public GUILayer {
 		public:
-			void registerAssets() override {
-				font = loadFont("../ProjectA/src/Asset/Font/test-regular.ttf");
-			}
-
 			void GUI() override {
 				ContainerStyle blue;
-				blue.size = {1000_px, 500_px};
-				blue.padding = {32_px, 32_px};
-				blue.anchorPoint = AnchorPoint::LEFT | AnchorPoint::TOP;
-				blue.layoutSpacing = 32_px;
+				blue.size = {FIT, FIT};
+				blue.padding = {8_px, 8_px};
+				blue.layoutDirection = VERTICAL;
+				blue.layoutSpacing = 8_px;
 				blue.color = 0x0a6e89ff;
+				blue.radius = 4.0f;
 				blue.debugName = "blue";
 
 				GUIComponent(blue) {
-					TextStyle text1;
-					text1.color = 0xf99394ff;
-					text1.font = font;
-					text1.fontSize = 64.0f;
-					text1.debugName = "text1";
+					for (uint32 i = 0; i < 3; i += 1) {
+						ContainerStyle pink;
+						pink.size = {FIT, FIT};
+						pink.padding = {8_px, 8_px};
+						pink.color = 0xfb938fff;
+						pink.layoutDirection = VERTICAL;
+						pink.radius = 4.0f;
+						pink.debugName = "pink";
 
-					GUIText("One Two Three Four Five", text1);
+						ContainerStyle yellow;
+						yellow.size = {64_px, 64_px};
+						yellow.color = 0xfed84dff;
+						yellow.radius = 4.0f;
+						yellow.debugName = "yellow";
 
-					ContainerStyle yellow;
-					yellow.size = {300_px, 300_px};
-					yellow.color = 0xfed84dff;
-					yellow.debugName = "yellow";
-
-					GUIComponent(yellow);
-
-					ContainerStyle lightBlue;
-					lightBlue.size = {FIT, FIT};
-					lightBlue.padding = {32_px, 32_px};
-					lightBlue.color = 0x5ecbe4ff;
-					lightBlue.debugName = "lightBlue";
-
-					GUIComponent(lightBlue) {
-						TextStyle text2;
-						text2.color = 0xb45bd0ff;
-						text2.font = font;
-						text2.fontSize = 64.0f;
-						text2.debugName = "text2";
-
-						GUIText("Five Six Seven Eight Nine Ten", text2);
+						GUIComponent(pink) {
+							GUIComponent(yellow);
+						}
 					}
 				}
 			}
-
-		private:
-			FontID font;
 	};
 }

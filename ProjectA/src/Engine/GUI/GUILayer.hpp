@@ -72,7 +72,7 @@ namespace ProjectA {
 			void WrapText(GUIContainer& textComponent);
 			bool OutsideWord(char8 character, const TrueTypeFont& font) const;
 			void FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
-			void Positions(GUIContainer& parent, svec2<float32>& origin);
+			void PositionsAndAlignment(GUIContainer& component, svec2<float32>& origin, LayoutDirection layoutDirection);
 
 			// Renders a colored quad without moving the origin.
 			// `origin` is the top-left corner of the quad.
