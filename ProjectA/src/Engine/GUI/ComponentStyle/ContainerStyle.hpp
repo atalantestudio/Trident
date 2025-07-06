@@ -7,6 +7,8 @@
 namespace ProjectA {
 	struct ContainerStyle {
 		Size2D size;
+		svec2<float32> maximumSize = {max<float32>(), max<float32>()};
+		svec2<float32> minimumSize = {0_px, 0_px};
 		svec2<float32> padding = {0_px, 0_px};
 		LayoutDirection layoutDirection = HORIZONTAL;
 		float32 layoutSpacing = 0_px;
