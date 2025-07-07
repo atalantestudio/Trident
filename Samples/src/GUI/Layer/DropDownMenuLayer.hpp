@@ -22,7 +22,7 @@ namespace ProjectA {
 						ContainerStyle item;
 						item.size = {EXPAND, 40_px};
 						// TODO: Fix minimumSize.
-						// item.minimumSize.y = 40_px;
+						item.minimumSize.y = 40_px;
 						item.padding = {8_px, 8_px};
 						item.anchorPoint = AnchorPoint::LEFT | AnchorPoint::VCENTER;
 						item.layoutSpacing = 8_px;
@@ -36,20 +36,20 @@ namespace ProjectA {
 							labelContainer.color = 0x00000000;
 							labelContainer.debugName = "labelContainer";
 
-							/* GUIComponent(labelContainer) {
+							GUIComponent(labelContainer) {
 								TextStyle itemLabel;
 								itemLabel.color = 0xffffffff;
 								itemLabel.font = font;
 								itemLabel.fontSize = 32;
 
-								// GUIText(label, itemLabel);
-							} */
+								GUIText(label, itemLabel);
+							}
 
 							ContainerStyle itemImage;
 							itemImage.size = {32_px, 32_px};
-							itemImage.image = 0;
+							itemImage.color = 0xff9800ff;
+							itemImage.debugName = "itemImage";
 
-							GUIComponent(itemImage);
 							GUIComponent(itemImage);
 						}
 					}

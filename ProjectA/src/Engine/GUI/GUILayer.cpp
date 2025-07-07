@@ -170,41 +170,41 @@ namespace ProjectA {
 
 		GUIContainer& parent = components[parentIndex];
 
-		// TODO: Move these asserts after closing the component.
-		// ENGINE_ASSERT(parent == nullptr || (parent->size.width.fillMode == FillMode::FIT && style.size.width.fillMode == FillMode::EXPAND), "An expanding component cannot be a child of a fit component in the same direction.");
-		// ENGINE_ASSERT(parent == nullptr || (parent->size.height.fillMode == FillMode::FIT && style.size.height.fillMode == FillMode::EXPAND), "An expanding component cannot be a child of a fit component in the same direction.");
-
 		GUIContainer component{};
 		component.parentIndex = parentIndex;
 		component.origin = parent.origin;
 		component.size = style.size;
 
-		if (style.minimumSize.x == max<float32>()) {
+		if (component.size.width.fillMode == FillMode::FIXED) {
+			component.maximumSize.x = component.size.width.value;
 			component.minimumSize.x = component.size.width.value;
 		}
 		else {
-			component.minimumSize.x = style.minimumSize.x;
+			component.maximumSize.x = style.maximumSize.x;
+
+			if (style.minimumSize.x == max<float32>()) {
+				component.minimumSize.x = component.size.width.value;
+			}
+			else {
+				component.minimumSize.x = style.minimumSize.x;
+				component.size.width.value = style.minimumSize.x;
+			}
 		}
 
-		if (style.minimumSize.y == max<float32>()) {
+		if (component.size.height.fillMode == FillMode::FIXED) {
+			component.maximumSize.y = component.size.height.value;
 			component.minimumSize.y = component.size.height.value;
 		}
 		else {
-			component.minimumSize.y = style.minimumSize.y;
-		}
-
-		if (component.size.width.fillMode != FillMode::FIXED) {
-			component.maximumSize.x = style.maximumSize.x;
-		}
-		else {
-			component.maximumSize.x = component.size.width.value;
-		}
-
-		if (component.size.height.fillMode != FillMode::FIXED) {
 			component.maximumSize.y = style.maximumSize.y;
-		}
-		else {
-			component.maximumSize.y = component.size.height.value;
+
+			if (style.minimumSize.y == max<float32>()) {
+				component.minimumSize.y = component.size.height.value;
+			}
+			else {
+				component.minimumSize.y = style.minimumSize.y;
+				component.size.height.value = style.minimumSize.y;
+			}
 		}
 
 		component.padding = style.padding;
@@ -275,13 +275,11 @@ namespace ProjectA {
 
 		WrapTextChildrenRecursive(rootComponentIndex);
 
-		for (const uint32 leafComponentIndex : leafComponentIndices) {
-			FitSizingHeightsRecursive(leafComponentIndex);
+		for (sint32 componentIndex = static_cast<sint32>(components.size()) - 1; componentIndex >= 1; componentIndex -= 1) {
+			FitSizingHeights(componentIndex);
 		}
 
-		AddVerticalPaddingRecursive(rootComponentIndex);
 		GrowAndShrinkSizingHeightsRecursive(rootComponentIndex);
-
 		PositionsAndAlignment(rootComponent, rootComponent.origin);
 
 		openComponentIndices.pop_back();
@@ -370,48 +368,30 @@ namespace ProjectA {
 	}
 
 	// TODO: lyah::max
-	void GUILayer::AddVerticalPaddingRecursive(uint32 componentIndex) {
-		GUIContainer& component = components[componentIndex];
-
-		// Add padding to the component's size.
-		component.size.height.value += component.padding.y * 2.0f;
-
-		if (component.layoutDirection == VERTICAL) {
-			// Add layout spacing to the component's size.
-			const sint32 childCount = static_cast<sint32>(component.childIndices.size());
-			const float32 layoutSpacing = component.layoutSpacing * static_cast<float32>(std::max(0, childCount - 1));
-
-			component.size.height.value += layoutSpacing;
-		}
-
-		for (const uint32 childIndex : component.childIndices) {
-			AddVerticalPaddingRecursive(childIndex);
-		}
-	}
-
-	// TODO: lyah::max
 	// TODO: lyah::min
-	void GUILayer::FitSizingHeightsRecursive(uint32 componentIndex) {
+	void GUILayer::FitSizingHeights(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
 
-		if (component.parentIndex == ~0) {
-			return;
-		}
-
-		const float32 height = component.size.height.value + component.padding.y * 2.0f;
+		DEBUG_ASSERT(component.parentIndex != ~0);
 
 		GUIContainer& parent = components[component.parentIndex];
+
+		float32 componentHeight = component.size.height.value + component.padding.y * 2.0f;
+
+		if (component.layoutDirection == VERTICAL) {
+			componentHeight += component.layoutSpacing * (std::max(0, static_cast<sint32>(component.childIndices.size()) - 1));
+		}
 
 		// Update the component and its parent depending on the parent's layout direction.
 		if (parent.layoutDirection == VERTICAL) {
 			if (parent.size.height.fillMode != FillMode::FIXED) {
-				parent.size.height.value += height;
+				parent.size.height.value += componentHeight;
 				parent.minimumSize.y += component.minimumSize.y;
 			}
 		}
 		else {
 			if (parent.size.height.fillMode != FillMode::FIXED) {
-				parent.size.height.value = std::max(parent.size.height.value, height);
+				parent.size.height.value = std::max(parent.size.height.value, componentHeight);
 				parent.minimumSize.y = std::max(parent.minimumSize.y, component.minimumSize.y);
 			}
 		}
@@ -419,7 +399,7 @@ namespace ProjectA {
 		parent.size.height.value = std::min(parent.size.height.value, parent.maximumSize.y);
 		parent.maximumSize.y = std::max(parent.maximumSize.y, parent.minimumSize.y);
 
-		FitSizingHeightsRecursive(component.parentIndex);
+		component.size.height.value = componentHeight;
 	}
 
 	// TODO: lyah::max
@@ -934,13 +914,13 @@ namespace ProjectA {
 		const uint8 maskAcross = 0b111000 >> (!component.layoutDirection) * 3;
 		const uint8 anchorRangeAcross = (static_cast<uint8>(component.anchorPoint) & maskAcross) >> shiftAmountAcross;
 		const float32 fAcross = static_cast<float32>(anchorRangeAcross) * 0.5f;
-		const float32 parentAcross = component.size[!component.layoutDirection].value - component.padding[!component.layoutDirection] * 2.0f;
+		const float32 componentAcross = component.size[!component.layoutDirection].value - component.padding[!component.layoutDirection] * 2.0f;
 		const float32 originAcross = origin[!component.layoutDirection];
 
 		for (uint32 index = 0; index < component.childIndices.size(); index += 1) {
 			GUIContainer& child = components[component.childIndices[index]];
 
-			const float32 remainingAcross = parentAcross - child.size[!component.layoutDirection].value;
+			const float32 remainingAcross = componentAcross - child.size[!component.layoutDirection].value;
 
 			origin[!component.layoutDirection] = originAcross + remainingAcross * fAcross;
 

@@ -25,6 +25,8 @@ namespace ProjectA {
 						ContainerStyle lightBlue;
 						lightBlue.size = {FIT, FIT};
 						lightBlue.padding = {8_px, 8_px};
+						lightBlue.layoutDirection = HORIZONTAL;
+						lightBlue.layoutSpacing = 8_px;
 						lightBlue.color = 0x5ecbe4ff;
 						lightBlue.radius = 4.0f;
 						lightBlue.debugName = "lightBlue";
@@ -37,6 +39,7 @@ namespace ProjectA {
 
 						GUIComponent(pink) {
 							GUIComponent(lightBlue) {
+								GUIComponent(yellow);
 								GUIComponent(yellow);
 							}
 						}
