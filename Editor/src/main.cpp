@@ -12,8 +12,6 @@ namespace ProjectA {
 			{
 				registerLayer<EditorLayer>();
 			}
-
-			~EditorApplication() {}
 	};
 
 	Application* createApplication() {

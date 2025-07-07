@@ -14,8 +14,6 @@ namespace ProjectA {
 			{
 				registerLayer<DropDownMenuLayer>();
 			}
-
-			~GUIApplication() {}
 	};
 
 	Application* ProjectA::createApplication() {

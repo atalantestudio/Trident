@@ -13,17 +13,14 @@ namespace ProjectA {
 			Physics2DApplication(const ApplicationManifest& applicationManifest) :
 				Application(applicationManifest)
 			{
-				// TODO: On Vulkan, a framebuffer becomes invalid when registering both layers and resizing the window.
 				registerLayer<RendererLayer>();
 				registerLayer<StatisticsLayer>();
 			}
-
-			~Physics2DApplication() {}
 	};
 
 	Application* ProjectA::createApplication() {
 		ApplicationManifest applicationManifest{};
-		applicationManifest.projectName = "2D physics";
+		applicationManifest.projectName = "Physics";
 
 		return new Physics2DApplication(applicationManifest);
 	}
