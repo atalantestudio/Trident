@@ -747,8 +747,10 @@ namespace ProjectA {
 		uint32 wordLength = 0;
 		float32 wordCharacterOffsetX = 0.0f;
 		float32 postWordAdvanceWidth = 0.0f;
+		float32 postWordAdvanceHeight = 0.0f;
 
 		bool flushCurrentWord = false;
+		bool flushBeforeNewLine = false;
 
 		GUIGlyphSubcomponent defaultGlyphSubcomponent;
 		defaultGlyphSubcomponent.layerIndex = fontData.glyphMapImageId;
@@ -761,34 +763,42 @@ namespace ProjectA {
 
 			if (character >= 0) {
 				const uint16 codePoint = static_cast<uint16>(character);
-				const Glyph& glyph = font[codePoint];
 
-				if (glyph.invisible) {
-					// Flush the current word if we encounter a blank character.
+				if (codePoint == '\n') {
+					lineCount += 1;
 					flushCurrentWord = true;
-					postWordAdvanceWidth = glyph.advanceWidth * lineHeight;
+					flushBeforeNewLine = true;
 				}
 				else {
-					const float32 advanceWidth = std::ceil(glyph.advanceWidth * lineHeight);
+					const Glyph& glyph = font[codePoint];
 
-					wordCharacterOffsetX += advanceWidth;
-
-					if (wordCharacterOffsetX > textComponent.size.width.value) {
-						characterOffset.x = 0.0f;
-						characterOffset.y += textComponent.fontSize;
-						lineCount += 1;
-						wordLength += 1;
+					if (glyph.invisible) {
+						// Flush the current word if we encounter a blank character.
 						flushCurrentWord = true;
+						postWordAdvanceWidth = glyph.advanceWidth * lineHeight;
+					}
+					else {
+						const float32 advanceWidth = std::ceil(glyph.advanceWidth * lineHeight);
 
-						for (uint32 lookAheadIndex = characterIndex; lookAheadIndex < textComponent.text.size(); lookAheadIndex += 1) {
-							const char8 character = textComponent.text[lookAheadIndex];
+						wordCharacterOffsetX += advanceWidth;
 
-							if (OutsideWord(character, font)) {
-								break;
-							}
-
+						if (wordCharacterOffsetX > textComponent.size.width.value) {
+							characterOffset.x = 0.0f;
+							characterOffset.y += textComponent.fontSize;
+							lineCount += 1;
 							wordLength += 1;
-							characterIndex += 1;
+							flushCurrentWord = true;
+
+							for (uint32 lookAheadIndex = characterIndex; lookAheadIndex < textComponent.text.size(); lookAheadIndex += 1) {
+								const char8 character = textComponent.text[lookAheadIndex];
+
+								if (OutsideWord(character, font)) {
+									break;
+								}
+
+								wordLength += 1;
+								characterIndex += 1;
+							}
 						}
 					}
 				}
@@ -813,10 +823,17 @@ namespace ProjectA {
 				wordLength = 0;
 				flushCurrentWord = false;
 
-				if (postWordAdvanceWidth > 0.0f) {
-					characterOffset.x += postWordAdvanceWidth;
+				characterOffset.x += postWordAdvanceWidth;
+				characterOffset.y += postWordAdvanceHeight;
 
-					postWordAdvanceWidth = 0.0f;
+				postWordAdvanceWidth = 0.0f;
+				postWordAdvanceHeight = 0.0f;
+
+				if (flushBeforeNewLine) {
+					characterOffset.x = 0.0f;
+					characterOffset.y += textComponent.fontSize;
+
+					flushBeforeNewLine = false;
 				}
 
 				wordCharacterOffsetX = characterOffset.x;
