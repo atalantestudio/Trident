@@ -429,18 +429,18 @@ namespace ProjectA {
 
 		const std::vector<uint32> growableChildIndices = FindGrowableChildIndices(parent, WIDTH_AXIS);
 
-		if (!growableChildIndices.empty()) {
-			if (parent.layoutDirection == HORIZONTAL) {
-				float32 remainingWidth = parent.size.width.value - parent.padding.x * 2.0f;
+		if (parent.layoutDirection == HORIZONTAL) {
+			float32 remainingWidth = parent.size.width.value - parent.padding.x * 2.0f;
 
-				for (const uint32 childIndex : parent.childIndices) {
-					const GUIContainer& child = components[childIndex];
+			for (const uint32 childIndex : parent.childIndices) {
+				const GUIContainer& child = components[childIndex];
 
-					remainingWidth -= child.size.width.value;
-				}
+				remainingWidth -= child.size.width.value;
+			}
 
-				remainingWidth -= parent.layoutSpacing * (parent.childIndices.size() - 1);
+			remainingWidth -= parent.layoutSpacing * (parent.childIndices.size() - 1);
 
+			if (!growableChildIndices.empty()) {
 				std::vector<uint32> growableChildIndexCopy = growableChildIndices;
 
 				// Grow children.
@@ -492,9 +492,11 @@ namespace ProjectA {
 						}
 					}
 				}
+			}
 
-				const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
+			const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
 
+			if (!shrinkableChildIndices.empty()) {
 				std::vector<uint32> shrinkableChildIndexCopy = shrinkableChildIndices;
 
 				// Shrink children.
@@ -547,18 +549,16 @@ namespace ProjectA {
 					}
 				}
 			}
-			else {
-				for (const uint32 childIndex : growableChildIndices) {
-					GUIContainer& child = components[childIndex];
+		}
+		else {
+			for (const uint32 childIndex : growableChildIndices) {
+				GUIContainer& child = components[childIndex];
 
-					if (child.size.width.fillMode == FillMode::EXPAND) {
-						child.size.width.value = parent.size.width.value - parent.padding.x * 2.0f;
-					}
-				}
+				child.size.width.value = parent.size.width.value - parent.padding.x * 2.0f;
 			}
 		}
 
-		for (const uint32 childIndex : growableChildIndices) {
+		for (const uint32 childIndex : parent.childIndices) {
 			const GUIContainer& child = components[childIndex];
 
 			if (child.textComponent) {
@@ -576,18 +576,18 @@ namespace ProjectA {
 
 		const std::vector<uint32> growableChildIndices = FindGrowableChildIndices(parent, HEIGHT_AXIS);
 
-		if (!growableChildIndices.empty()) {
-			if (parent.layoutDirection == VERTICAL) {
-				float32 remainingHeight = parent.size.height.value - parent.padding.y * 2.0f;
+		if (parent.layoutDirection == VERTICAL) {
+			float32 remainingHeight = parent.size.height.value - parent.padding.y * 2.0f;
 
-				for (const uint32 childIndex : parent.childIndices) {
-					const GUIContainer& child = components[childIndex];
+			for (const uint32 childIndex : parent.childIndices) {
+				const GUIContainer& child = components[childIndex];
 
-					remainingHeight -= child.size.height.value;
-				}
+				remainingHeight -= child.size.height.value;
+			}
 
-				remainingHeight -= parent.layoutSpacing * (parent.childIndices.size() - 1);
+			remainingHeight -= parent.layoutSpacing * (parent.childIndices.size() - 1);
 
+			if (!growableChildIndices.empty()) {
 				std::vector<uint32> growableChildIndexCopy = growableChildIndices;
 
 				// Grow children.
@@ -639,9 +639,11 @@ namespace ProjectA {
 						}
 					}
 				}
+			}
 
-				const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
+			const std::vector<uint32> shrinkableChildIndices = FindShrinkableChildIndices(parent, WIDTH_AXIS);
 
+			if (!shrinkableChildIndices.empty()) {
 				std::vector<uint32> shrinkableChildIndexCopy = shrinkableChildIndices;
 
 				// Shrink children.
@@ -694,14 +696,12 @@ namespace ProjectA {
 					}
 				}
 			}
-			else {
-				for (const uint32 childIndex : growableChildIndices) {
-					GUIContainer& child = components[childIndex];
+		}
+		else {
+			for (const uint32 childIndex : growableChildIndices) {
+				GUIContainer& child = components[childIndex];
 
-					if (child.size.height.fillMode == FillMode::EXPAND) {
-						child.size.height.value = parent.size.height.value - parent.padding.y * 2.0f;
-					}
-				}
+				child.size.height.value = parent.size.height.value - parent.padding.y * 2.0f;
 			}
 		}
 
@@ -905,8 +905,7 @@ namespace ProjectA {
 		remainingSize[!component.layoutDirection] -= remainingAcross;
 
 		// Snap to anchor point along layout direction.
-		// TODO: Replace by 4 - layoutDirection * 3?
-		const uint8 shiftAmountAlong = 1 + (!component.layoutDirection) * 3;
+		const uint8 shiftAmountAlong = 4 - component.layoutDirection * 3;
 		const uint8 maskAlong = 0b111000 >> component.layoutDirection * 3;
 		const uint8 anchorRangeAlong = (static_cast<uint8>(component.anchorPoint) & maskAlong) >> shiftAmountAlong;
 		const float32 fAlong = static_cast<float32>(anchorRangeAlong) * 0.5f;

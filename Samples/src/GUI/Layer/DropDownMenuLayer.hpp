@@ -15,6 +15,7 @@ namespace ProjectA {
 				menu.layoutSpacing = 8_px;
 				menu.color = 0xa675a2ff;
 				menu.radius = 4_px;
+				menu.debugName = "menu";
 
 				GUIComponent(menu) {
 					for (const std::string& label : itemLabels) {
@@ -35,19 +36,20 @@ namespace ProjectA {
 							labelContainer.color = 0x00000000;
 							labelContainer.debugName = "labelContainer";
 
-							GUIComponent(labelContainer) {
+							/* GUIComponent(labelContainer) {
 								TextStyle itemLabel;
 								itemLabel.color = 0xffffffff;
 								itemLabel.font = font;
 								itemLabel.fontSize = 32;
 
-								GUIText(label, itemLabel);
-							}
+								// GUIText(label, itemLabel);
+							} */
 
 							ContainerStyle itemImage;
 							itemImage.size = {32_px, 32_px};
 							itemImage.image = 0;
 
+							GUIComponent(itemImage);
 							GUIComponent(itemImage);
 						}
 					}
