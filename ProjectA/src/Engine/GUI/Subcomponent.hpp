@@ -8,7 +8,7 @@ namespace ProjectA {
 		mat3x3<float32> textureTransform;
 		uint32 layerIndex;
 		vec4<float32> color;
-		float32 radius;
+		float32 borderRadius;
 	};
 
 	struct GUIGlyphSubcomponent {

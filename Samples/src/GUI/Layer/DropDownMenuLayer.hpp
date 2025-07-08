@@ -14,7 +14,7 @@ namespace ProjectA {
 				menu.layoutDirection = VERTICAL;
 				menu.layoutSpacing = 8_px;
 				menu.color = 0xa675a2ff;
-				menu.radius = 4_px;
+				menu.borderRadius = 4_px;
 				menu.debugName = "menu";
 
 				GUIComponent(menu) {
@@ -27,7 +27,7 @@ namespace ProjectA {
 						item.anchorPoint = AnchorPoint::LEFT | AnchorPoint::VCENTER;
 						item.layoutSpacing = 8_px;
 						item.color = 0xbd95bcff;
-						item.radius = 4_px;
+						item.borderRadius = 4_px;
 						item.debugName = "item";
 
 						GUIComponent(item) {

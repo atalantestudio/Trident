@@ -10,7 +10,7 @@ namespace ProjectA {
 				blue.layoutDirection = VERTICAL;
 				blue.layoutSpacing = 8_px;
 				blue.color = 0x0a6e89ff;
-				blue.radius = 4.0f;
+				blue.borderRadius = 4.0f;
 				blue.debugName = "blue";
 
 				GUIComponent(blue) {
@@ -19,7 +19,7 @@ namespace ProjectA {
 						pink.size = {FIT, FIT};
 						pink.padding = {8_px, 8_px};
 						pink.color = 0xfb938fff;
-						pink.radius = 4.0f;
+						pink.borderRadius = 4.0f;
 						pink.debugName = "pink";
 
 						ContainerStyle lightBlue;
@@ -28,13 +28,13 @@ namespace ProjectA {
 						lightBlue.layoutDirection = HORIZONTAL;
 						lightBlue.layoutSpacing = 8_px;
 						lightBlue.color = 0x5ecbe4ff;
-						lightBlue.radius = 4.0f;
+						lightBlue.borderRadius = 4.0f;
 						lightBlue.debugName = "lightBlue";
 
 						ContainerStyle yellow;
 						yellow.size = {64_px, 64_px};
 						yellow.color = 0xfed84dff;
-						yellow.radius = 4.0f;
+						yellow.borderRadius = 4.0f;
 						yellow.debugName = "yellow";
 
 						GUIComponent(pink) {

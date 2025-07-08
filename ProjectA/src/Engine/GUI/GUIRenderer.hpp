@@ -2,7 +2,6 @@
 
 #include "Engine/API/Event/WindowEvent.hpp"
 #include "Engine/ECS/Component/GUIComponent.hpp"
-#include "Engine/GUI/ComponentStyle/ButtonStyle.hpp"
 #include "Engine/GUI/TextureArrayLayer.hpp"
 #include "Engine/GUI/Subcomponent.hpp"
 #include "Engine/ECS/ECS.hpp"

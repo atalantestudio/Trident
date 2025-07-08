@@ -6,7 +6,7 @@ layout(location = 2) in mat3x3 worldTransform;
 layout(location = 5) in mat3x3 textureTransform;
 layout(location = 8) in uint layerIndex;
 layout(location = 9) in vec4 color;
-layout(location = 10) in float radius;
+layout(location = 10) in float borderRadius;
 
 layout(set = 0, binding = 0) uniform Camera {
 	mat3x3 projection;
@@ -15,7 +15,7 @@ layout(set = 0, binding = 0) uniform Camera {
 out VertexOutput {
 	layout(location = 0) flat vec4 bounds;
 	layout(location = 1) flat vec4 color;
-	layout(location = 2) flat float radius;
+	layout(location = 2) flat float borderRadius;
 	layout(location = 3) vec3 textureCoordinate;
 } vertexOutput;
 
@@ -27,7 +27,7 @@ void main() {
 
 	vertexOutput.bounds = bounds;
 	vertexOutput.color = color;
-	vertexOutput.radius = radius;
+	vertexOutput.borderRadius = borderRadius;
 	vertexOutput.textureCoordinate = textureTransform * textureCoordinate;
 	vertexOutput.textureCoordinate.z = float(layerIndex);
 }

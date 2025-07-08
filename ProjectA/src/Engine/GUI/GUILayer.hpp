@@ -2,6 +2,7 @@
 
 #include "Engine/GUI/Component/Container.hpp"
 #include "Engine/GUI/ComponentStyle/ContainerStyle.hpp"
+#include "Engine/GUI/ComponentStyle/TextStyle.hpp"
 #include "Engine/GUI/Font/TrueType/TrueTypeFont.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/GUI/ID.hpp"
@@ -73,9 +74,7 @@ namespace ProjectA {
 			void FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin);
 
-			// Renders a colored quad without moving the origin.
-			// `origin` is the top-left corner of the quad.
-			void registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 radius);
+			void registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 borderRadius);
 
 			static bool intersects(Extent2D origin, Extent2D size, Extent2D point);
 

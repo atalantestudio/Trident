@@ -21,7 +21,7 @@ layout(origin_upper_left) in vec4 gl_FragCoord;
 in FragmentInput {
 	layout(location = 0) flat vec4 bounds;
 	layout(location = 1) flat vec4 color;
-	layout(location = 2) flat float radius;
+	layout(location = 2) flat float borderRadius;
 	layout(location = 3) vec3 textureCoordinate;
 } fragmentInput;
 
@@ -32,7 +32,7 @@ layout(location = 0) out vec4 color;
 void main() {
 	vec2 minBounds = fragmentInput.bounds.xy;
 	vec2 maxBounds = fragmentInput.bounds.zw;
-	float r = fragmentInput.radius;
+	float r = fragmentInput.borderRadius;
 
 	// Screen space coordinate of the current fragment.
 	vec2 p = floor(gl_FragCoord.xy) + 0.5;

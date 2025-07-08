@@ -32,7 +32,7 @@ namespace ProjectA {
 		LayoutDirection layoutDirection;
 		float32 layoutSpacing;
 		ImageID image;
-		float32 radius;
+		float32 borderRadius;
 		std::vector<uint32> childIndices;
 		bool sizeIncludesPaddingAndSpacing = false;
 

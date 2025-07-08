@@ -114,13 +114,13 @@ namespace ProjectA {
 				}
 			}
 			else {
-				// Validate radius.
+				// Validate border radius.
 				// TODO: lyah::min
 				const float32 minHalfDimension = std::min(component.size.width.value, component.size.height.value) / 2.0f;
 
-				// ENGINE_ASSERT(component.radius >= 0.0f && component.radius <= minHalfDimension, "Invalid radius.");
+				// ENGINE_ASSERT(component.borderRadius >= 0.0f && component.borderRadius <= minHalfDimension, "Invalid border radius.");
 
-				registerSubcomponent(component.origin, component.size, component.image, component.color, component.radius);
+				registerSubcomponent(component.origin, component.size, component.image, component.color, component.borderRadius);
 			}
 		}
 	}
@@ -156,7 +156,7 @@ namespace ProjectA {
 		rootComponent.layoutSpacing = 0_px;
 		rootComponent.color = 0xffffffff;
 		rootComponent.image = 0;
-		rootComponent.radius = 0.0f;
+		rootComponent.borderRadius = 0.0f;
 		rootComponent.textComponent = false;
 		rootComponent.debugName = "__root";
 
@@ -213,7 +213,7 @@ namespace ProjectA {
 		component.layoutSpacing = style.layoutSpacing;
 		component.color = style.color;
 		component.image = style.image;
-		component.radius = style.radius;
+		component.borderRadius = style.borderRadius;
 		component.textComponent = false;
 		component.debugName = style.debugName;
 
@@ -244,7 +244,7 @@ namespace ProjectA {
 		textComponent.layoutSpacing = 0_px;
 		textComponent.color = textStyle.color;
 		textComponent.image = fonts[textStyle.font].glyphMapImageId;
-		textComponent.radius = 0.0f;
+		textComponent.borderRadius = 0.0f;
 		textComponent.textComponent = true;
 		textComponent.text = string;
 		textComponent.font = textStyle.font;
@@ -943,14 +943,14 @@ namespace ProjectA {
 		origin[!component.layoutDirection] -= component.padding[!component.layoutDirection];
 	}
 
-	void GUILayer::registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 radius) {
+	void GUILayer::registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 borderRadius) {
 		const vec2<float32> decimalOrigin = {origin[0], origin[1]};
 		const vec2<float32> decimalSize = {size.width.value, size.height.value};
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(imageId);
 
 		GUISubcomponent subcomponent;
-		subcomponent.minBounds = {decimalOrigin[0] + radius, decimalOrigin[1] + radius};
-		subcomponent.maxBounds = {decimalOrigin[0] + decimalSize[0] - radius, decimalOrigin[1] + decimalSize[1] - radius};
+		subcomponent.minBounds = {decimalOrigin[0] + borderRadius, decimalOrigin[1] + borderRadius};
+		subcomponent.maxBounds = {decimalOrigin[0] + decimalSize[0] - borderRadius, decimalOrigin[1] + decimalSize[1] - borderRadius};
 		subcomponent.worldTransform = mat3x3<float32>::scaling(decimalSize) * mat3x3<float32>::translation(decimalOrigin);
 		subcomponent.textureTransform = mat3x3<float32>::scaling({
 			static_cast<float32>(imageExtent.width) / renderer.TEXTURE_ARRAY_MAX_WIDTH,
@@ -958,7 +958,7 @@ namespace ProjectA {
 		});
 		subcomponent.layerIndex = imageId;
 		subcomponent.color = color.value;
-		subcomponent.radius = radius;
+		subcomponent.borderRadius = borderRadius;
 
 		renderer.registerSubcomponent(subcomponent);
 	}

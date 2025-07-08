@@ -15,7 +15,7 @@ namespace ProjectA {
 				buttonStyle.size = {FIT, FIT};
 				buttonStyle.padding = {4_px, 2_px};
 				buttonStyle.color = 0x494949ff;
-				buttonStyle.radius = 3.0f;
+				buttonStyle.borderRadius = 3.0f;
 
 				textStyle.color = 0xffffffff;
 				textStyle.font = font;

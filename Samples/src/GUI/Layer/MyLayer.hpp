@@ -21,7 +21,7 @@ namespace ProjectA {
 
 				imageStyle.size = {256_px, 256_px};
 				imageStyle.image = image;
-				imageStyle.radius = 8.0f;
+				imageStyle.borderRadius = 8.0f;
 
 				titleStyle.color = 0x000000ff;
 				titleStyle.font = fontBold;
