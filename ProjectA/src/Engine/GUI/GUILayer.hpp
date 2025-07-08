@@ -73,11 +73,14 @@ namespace ProjectA {
 			bool OutsideWord(char8 character, const TrueTypeFont& font) const;
 			void FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin);
+			uint32 GetHoveredComponentIndex() const;
+			static bool IsIntersecting(const GUIContainer& component, const vec2<float32>& point);
+			void DispatchMouseEvents();
 
 			void registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 outlineSize, const Color& outlineColor, float32 borderRadius);
 
-			static bool intersects(Extent2D origin, Extent2D size, Extent2D point);
-
+			bool onMouseDown(MouseDownEvent& event);
+			bool onMouseUp(MouseUpEvent& event);
 			bool onWindowResize(WindowResizeEvent& event);
 
 			uint32 calculateTextPreferredWidth(const std::string& string, const TextStyle& textStyle) const;
@@ -110,6 +113,10 @@ namespace ProjectA {
 			std::vector<GUIContainer> components;
 			std::vector<uint32> openComponentIndices;
 			std::vector<uint32> leafComponentIndices;
+			std::vector<uint32> buttonComponentIndices;
+
+			uint32 hoveredComponentIndex = max<uint32>();
+			uint32 mouseDownComponentIndex = max<uint32>();
 	};
 
 	#define GUIComponent(component) for (bool _opened = (openComponent(component), true); _opened; _opened = false, closeComponent())

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/GUI/EventListeners.hpp"
 #include "Engine/GUI/ID.hpp"
 
 namespace ProjectA {
@@ -8,6 +9,7 @@ namespace ProjectA {
 		Color color = 0xffffffff;
 		FontID font;
 		float32 fontSize;
+		const EventListeners* eventListeners;
 
 		// TODO: Debug-only.
 		std::string_view debugName;

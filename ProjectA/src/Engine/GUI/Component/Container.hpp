@@ -2,6 +2,7 @@
 
 #include "Engine/GUI/AnchorPoint.hpp"
 #include "Engine/GUI/ID.hpp"
+#include "Engine/GUI/EventListeners.hpp"
 #include "Engine/GUI/LayoutDirection.hpp"
 #include "Engine/GUI/Size.hpp"
 #include "Engine/GUI/Subcomponent.hpp"
@@ -44,6 +45,8 @@ namespace ProjectA {
 		std::vector<TextCharacter> characters;
 		FontID font;
 		float32 fontSize;
+
+		const EventListeners* eventListeners;
 
 		// TODO: Debug-only.
 		std::string_view debugName;

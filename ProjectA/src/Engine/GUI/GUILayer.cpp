@@ -81,6 +81,7 @@ namespace ProjectA {
 		components.clear();
 		openComponentIndices.clear();
 		leafComponentIndices.clear();
+		buttonComponentIndices.clear();
 
 		openRootComponent();
 
@@ -92,6 +93,8 @@ namespace ProjectA {
 		}
 
 		closeRootComponent();
+
+		DispatchMouseEvents();
 
 		for (uint32 componentIndex = 1; componentIndex < components.size(); componentIndex += 1) {
 			const GUIContainer& component = components[componentIndex];
@@ -136,13 +139,9 @@ namespace ProjectA {
 	void GUILayer::onEvent(Event& event) {
 		EventDispatcher eventDispatcher(event);
 
+		eventDispatcher.dispatch<MouseDownEvent>(BIND(onMouseDown));
+		eventDispatcher.dispatch<MouseUpEvent>(BIND(onMouseUp));
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
-	}
-
-	bool GUILayer::onWindowResize(WindowResizeEvent& event) {
-		renderer.resize(event);
-
-		return false;
 	}
 
 	void GUILayer::openRootComponent() {
@@ -219,11 +218,16 @@ namespace ProjectA {
 		component.outlineColor = style.outlineColor;
 		component.borderRadius = style.borderRadius;
 		component.textComponent = false;
+		component.eventListeners = style.eventListeners;
 		component.debugName = style.debugName;
 
 		parent.childIndices.emplace_back(componentIndex);
 		components.emplace_back(component);
 		openComponentIndices.emplace_back(componentIndex);
+
+		if (component.eventListeners != nullptr) {
+			buttonComponentIndices.emplace_back(componentIndex);
+		}
 	}
 
 	void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
@@ -255,13 +259,17 @@ namespace ProjectA {
 		textComponent.text = string;
 		textComponent.font = textStyle.font;
 		textComponent.fontSize = textStyle.fontSize;
-
+		textComponent.eventListeners = textStyle.eventListeners;
 		textComponent.debugName = textStyle.debugName;
 
 		// Pushing the component to the vector might invalidate the parent reference, so we update the parent's children indices before.
 		parent.childIndices.emplace_back(componentIndex);
 		components.emplace_back(textComponent);
 		leafComponentIndices.emplace_back(componentIndex);
+
+		if (textComponent.eventListeners != nullptr) {
+			buttonComponentIndices.emplace_back(componentIndex);
+		}
 
 		FitSizingWidths(componentIndex);
 	}
@@ -949,6 +957,87 @@ namespace ProjectA {
 		origin[!component.layoutDirection] -= component.padding[!component.layoutDirection];
 	}
 
+	uint32 GUILayer::GetHoveredComponentIndex() const {
+		const sint32* mousePositionInteger = Application::getWindow().getMousePosition();
+		const vec2<float32> mousePosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
+
+		for (sint32 buttonComponentIndex = static_cast<sint32>(buttonComponentIndices.size()) - 1; buttonComponentIndex >= 0; buttonComponentIndex -= 1) {
+			const uint32 componentIndex = buttonComponentIndices[buttonComponentIndex];
+			const GUIContainer& component = components[componentIndex];
+
+			if (IsIntersecting(component, mousePosition)) {
+				return componentIndex;
+			}
+		}
+
+		return max<uint32>();
+	}
+
+	bool GUILayer::IsIntersecting(const GUIContainer& component, const vec2<float32>& point) {
+		return (
+			point[0] >= component.origin.x &&
+			point[0] < component.origin.x + component.size.width.value &&
+			point[1] >= component.origin.y &&
+			point[1] < component.origin.y + component.size.height.value
+		);
+	}
+
+	void GUILayer::DispatchMouseEvents() {
+		const sint32* mousePositionInteger = Application::getWindow().getMousePosition();
+		const uint32 lastHoveredComponentIndex = GetHoveredComponentIndex();
+
+		MouseMoveEvent mouseMoveEvent(mousePositionInteger[0], mousePositionInteger[1]);
+
+		if (hoveredComponentIndex != max<uint32>() && hoveredComponentIndex != lastHoveredComponentIndex) {
+			// Dispatch mouse leave event.
+			const GUIContainer& component = components[hoveredComponentIndex];
+			component.eventListeners->onMouseLeave(mouseMoveEvent);
+		}
+
+		if (lastHoveredComponentIndex != max<uint32>() && lastHoveredComponentIndex != hoveredComponentIndex) {
+			// Dispatch mouse hover (= mouse enter) event.
+			const GUIContainer& component = components[lastHoveredComponentIndex];
+			component.eventListeners->onMouseHover(mouseMoveEvent);
+		}
+
+		hoveredComponentIndex = lastHoveredComponentIndex;
+	}
+
+	bool GUILayer::onMouseDown(MouseDownEvent& event) {
+		if (hoveredComponentIndex != max<uint32>()) {
+			// Dispatch mouse down event.
+			const GUIContainer& component = components[hoveredComponentIndex];
+			component.eventListeners->onMouseDown(event);
+		}
+
+		mouseDownComponentIndex = hoveredComponentIndex;
+
+		return false;
+	}
+
+	bool GUILayer::onMouseUp(MouseUpEvent& event) {
+		if (mouseDownComponentIndex != max<uint32>()) {
+			// Dispatch a mouse down event.
+			const GUIContainer& component = components[mouseDownComponentIndex];
+			component.eventListeners->onMouseUp(event);
+
+			if (mouseDownComponentIndex == hoveredComponentIndex) {
+				// Dispatch a mouse click event (mouse down, then up on the same component).
+				component.eventListeners->onMouseClick(event);
+			}
+		}
+
+		mouseDownComponentIndex = max<uint32>();
+
+		return false;
+	}
+
+	bool GUILayer::onWindowResize(WindowResizeEvent& event) {
+		renderer.resize(event);
+
+		return false;
+	}
+
 	void GUILayer::registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 outlineSize, const Color& outlineColor, float32 borderRadius) {
 		const vec2<float32> decimalOrigin = {origin[0], origin[1]};
 		const vec2<float32> decimalSize = {size.width.value, size.height.value};
@@ -969,15 +1058,6 @@ namespace ProjectA {
 		subcomponent.borderRadius = borderRadius;
 
 		renderer.registerSubcomponent(subcomponent);
-	}
-
-	bool GUILayer::intersects(Extent2D origin, Extent2D size, Extent2D point) {
-		return (
-			point.width >= origin.width &&
-			point.width < origin.width + size.width &&
-			point.height >= origin.height &&
-			point.height < origin.height + size.height
-		);
 	}
 
 	// TODO: lyah::max
