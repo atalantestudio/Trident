@@ -1,28 +1,28 @@
 #version 440
 
-#define BORDER_EFFECT_BEVEL 0
-#define BORDER_EFFECT_ROUND 1
-#define BORDER_EFFECT_VIGNETTE 2
+float lengthSquared(vec2 a) {
+	return dot(a, a);
+}
 
-#define BORDER_EFFECT BORDER_EFFECT_ROUND
+// delta = absolute difference between the current fragment and the center of the rectangle
+// halfSize = size of the rectangle divided by 2
+// r = border radius
+float RoundedBoxSignedDistance(vec2 delta, vec2 halfSize, float r) {
+	vec2 d = delta - halfSize + r;
 
-#if BORDER_EFFECT == BORDER_EFFECT_BEVEL
-	bool beveledCorner(vec2 delta, float radius) {
-		return abs(delta.x) + abs(delta.y) > radius;
-	}
-#elif BORDER_EFFECT == BORDER_EFFECT_ROUND
-	bool roundedCorner(vec2 delta, float radius) {
-		return dot(delta, delta) > radius * radius;
-	}
-#endif
+	// return length(max(d, 0.0)) - r;
+	return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - r;
+}
 
 layout(origin_upper_left) in vec4 gl_FragCoord;
 
 in FragmentInput {
 	layout(location = 0) flat vec4 bounds;
 	layout(location = 1) flat vec4 color;
-	layout(location = 2) flat float borderRadius;
-	layout(location = 3) vec3 textureCoordinate;
+	layout(location = 2) flat float outlineSize;
+	layout(location = 3) flat vec4 outlineColor;
+	layout(location = 4) flat float borderRadius;
+	layout(location = 5) vec3 textureCoordinate;
 } fragmentInput;
 
 layout(set = 0, binding = 1) uniform sampler2DArray textureArraySampler;
@@ -33,37 +33,20 @@ void main() {
 	vec2 minBounds = fragmentInput.bounds.xy;
 	vec2 maxBounds = fragmentInput.bounds.zw;
 	float r = fragmentInput.borderRadius;
+	float outlineSize = fragmentInput.outlineSize;
 
 	// Screen space coordinate of the current fragment.
-	vec2 p = floor(gl_FragCoord.xy) + 0.5;
+	// vec2 p = floor(gl_FragCoord.xy) + 0.5;
+	vec2 p = gl_FragCoord.xy;
 
-	// Closest point of p on the inner rectangle.
-	vec2 a = clamp(p, minBounds, maxBounds);
+	vec2 size = maxBounds - minBounds;
+	vec2 center = mix(minBounds, maxBounds, 0.5);
 
-	vec2 ap = p - a;
+	float d = RoundedBoxSignedDistance(abs(p - center), size * 0.5, r);
+	float fw = fwidth(d);
+	float content = smoothstep(-fw, fw, -d - outlineSize);
 
-#if BORDER_EFFECT != BORDER_EFFECT_VIGNETTE
-	bool condition;
-
-	#if BORDER_EFFECT == BORDER_EFFECT_BEVEL
-		condition = beveledCorner(ap, r);
-	#elif BORDER_EFFECT == BORDER_EFFECT_ROUND
-		condition = roundedCorner(ap, r);
-	#endif
-
-	if (condition) {
-		discard;
-	}
-
-	color = texture(textureArraySampler, fragmentInput.textureCoordinate) * fragmentInput.color;
-#else
-	float d = dot(ap, ap);
-	float m = 1.0;
-
-	if (r > 0.0) {
-		m -= d / pow(r * sqrt(2.0), 2.0);
-	}
-
-	color = texture(textureArraySampler, fragmentInput.textureCoordinate) * fragmentInput.color * m;
-#endif
+	// TODO: Calculate the correct outline inner radius.
+	color = fragmentInput.outlineColor * content * outlineSize;
+	color += fragmentInput.color * texture(textureArraySampler, fragmentInput.textureCoordinate) * content;
 }

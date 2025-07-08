@@ -10,8 +10,11 @@ namespace ProjectA {
 		ColorAttachment colorAttachment{};
 		colorAttachment.format = surface->getFormat();
 		colorAttachment.sampleCount = 1;
+
+		// TODO: Debug-only.
 		colorAttachment.loadOperation = LoadOperation::CLEAR;
 		// colorAttachment.loadOperation = LoadOperation::LOAD;
+
 		colorAttachment.storeOperation = StoreOperation::STORE;
 		colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;
 
@@ -65,11 +68,17 @@ namespace ProjectA {
 		textureArrayStagingBuffer = createStagingBuffer(textureArrayStagingBufferSize);
 		textureArrayStagingBufferMappedRange = textureArrayStagingBuffer->map<uint8>(0, textureArrayStagingBufferSize);
 
-		SamplerDescriptor samplerDescriptor{};
-		samplerDescriptor.magFilter = SamplerFilter::NEAREST;
-		samplerDescriptor.minFilter = SamplerFilter::NEAREST;
+		SamplerDescriptor nearestSamplerDescriptor{};
+		nearestSamplerDescriptor.magFilter = SamplerFilter::NEAREST;
+		nearestSamplerDescriptor.minFilter = SamplerFilter::NEAREST;
 
-		sampler = createSampler(samplerDescriptor);
+		nearestSampler = createSampler(nearestSamplerDescriptor);
+
+		SamplerDescriptor linearSamplerDescriptor{};
+		linearSamplerDescriptor.magFilter = SamplerFilter::NEAREST;
+		linearSamplerDescriptor.minFilter = SamplerFilter::LINEAR;
+
+		linearSampler = createSampler(linearSamplerDescriptor);
 
 		initializeRenderPipeline();
 
@@ -215,19 +224,33 @@ namespace ProjectA {
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
 
-		DescriptorSetLayoutBinding textureArrayDescriptorSetLayoutBinding{};
-		textureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		textureArrayDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
-		textureArrayDescriptorSetLayoutBinding.imageViews = {textureArrayView};
-		textureArrayDescriptorSetLayoutBinding.samplers = {sampler};
+		DescriptorSetLayoutBinding nearestTextureArrayDescriptorSetLayoutBinding{};
+		nearestTextureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		nearestTextureArrayDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		nearestTextureArrayDescriptorSetLayoutBinding.imageViews = {textureArrayView};
+		nearestTextureArrayDescriptorSetLayoutBinding.samplers = {nearestSampler};
 
-		DescriptorSetLayout descriptorSetLayout;
-		descriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, textureArrayDescriptorSetLayoutBinding};
+		DescriptorSetLayoutBinding linearTextureArrayDescriptorSetLayoutBinding{};
+		linearTextureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		linearTextureArrayDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		linearTextureArrayDescriptorSetLayoutBinding.imageViews = {textureArrayView};
+		linearTextureArrayDescriptorSetLayoutBinding.samplers = {linearSampler};
 
-		PipelineLayoutDescriptor pipelineLayoutDescriptor;
-		pipelineLayoutDescriptor.layouts = {descriptorSetLayout};
+		DescriptorSetLayout nearestDescriptorSetLayout;
+		nearestDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, nearestTextureArrayDescriptorSetLayoutBinding};
 
-		pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+		DescriptorSetLayout linearDescriptorSetLayout;
+		linearDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, linearTextureArrayDescriptorSetLayoutBinding};
+
+		PipelineLayoutDescriptor nearestPipelineLayoutDescriptor;
+		nearestPipelineLayoutDescriptor.layouts = {nearestDescriptorSetLayout};
+
+		PipelineLayoutDescriptor linearPipelineLayoutDescriptor;
+		linearPipelineLayoutDescriptor.layouts = {linearDescriptorSetLayout};
+
+		subcomponentPipelineLayout = createPipelineLayout(nearestPipelineLayoutDescriptor);
+
+		glyphSubcomponentPipelineLayout = createPipelineLayout(linearPipelineLayoutDescriptor);
 
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
@@ -236,8 +259,10 @@ namespace ProjectA {
 		subcomponentInputBinding.registerAttribute<vec4<float32>>(); // Bounds
 		subcomponentInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
 		subcomponentInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
-		subcomponentInputBinding.registerAttribute<uint32>(); // Texture array layer index
 		subcomponentInputBinding.registerAttribute<vec4<float32>>(); // Color
+		subcomponentInputBinding.registerAttribute<vec4<float32>>(); // Outline color
+		subcomponentInputBinding.registerAttribute<uint32>(); // Texture array layer index
+		subcomponentInputBinding.registerAttribute<float32>(); // Outline size
 		subcomponentInputBinding.registerAttribute<float32>(); // Border radius
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
@@ -254,7 +279,7 @@ namespace ProjectA {
 		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
 		RenderPipelineDescriptor subcomponentRenderPipelineDescriptor;
-		subcomponentRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
+		subcomponentRenderPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
 		subcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, subcomponentInputBinding};
 		subcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert", vertexShaderModuleDescriptor);
 		subcomponentRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/Subcomponent.frag", fragmentShaderModuleDescriptor);
@@ -279,7 +304,7 @@ namespace ProjectA {
 		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>();
 
 		RenderPipelineDescriptor glyphSubcomponentRenderPipelineDescriptor;
-		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
+		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = glyphSubcomponentPipelineLayout;
 		glyphSubcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, glyphSubcomponentVertexInputBinding};
 		glyphSubcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.vert", vertexShaderModuleDescriptor);
 		glyphSubcomponentRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.frag", fragmentShaderModuleDescriptor);

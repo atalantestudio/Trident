@@ -65,7 +65,8 @@ namespace ProjectA {
 
 			sequence<ref<Framebuffer>> framebuffers;
 
-			ref<PipelineLayout> pipelineLayout;
+			ref<PipelineLayout> subcomponentPipelineLayout;
+			ref<PipelineLayout> glyphSubcomponentPipelineLayout;
 			ref<RenderPipeline> subcomponentRenderPipeline;
 			ref<RenderPipeline> glyphSubcomponentRenderPipeline;
 
@@ -88,7 +89,8 @@ namespace ProjectA {
 			uint32 textureArrayLayerCount = 0;
 			std::array<Extent2D, TEXTURE_ARRAY_MAX_LAYER_COUNT> textureArrayLayerExtents;
 
-			ref<Sampler> sampler;
+			ref<Sampler> nearestSampler;
+			ref<Sampler> linearSampler;
 
 			uint32 subcomponentCount = 0;
 			uint32 glyphSubcomponentCount = 0;

@@ -32,6 +32,8 @@ namespace ProjectA {
 		LayoutDirection layoutDirection;
 		float32 layoutSpacing;
 		ImageID image;
+		float32 outlineSize;
+		Color outlineColor = 0x00000000;
 		float32 borderRadius;
 		std::vector<uint32> childIndices;
 		bool sizeIncludesPaddingAndSpacing = false;

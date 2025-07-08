@@ -74,7 +74,7 @@ namespace ProjectA {
 			void FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin);
 
-			void registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 borderRadius);
+			void registerSubcomponent(svec2<float32> origin, const Size2D& size, ImageID imageId, const Color& color, float32 outlineSize, const Color& outlineColor, float32 borderRadius);
 
 			static bool intersects(Extent2D origin, Extent2D size, Extent2D point);
 

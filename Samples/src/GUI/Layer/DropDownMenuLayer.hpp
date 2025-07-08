@@ -21,7 +21,6 @@ namespace ProjectA {
 					for (const std::string& label : itemLabels) {
 						ContainerStyle item;
 						item.size = {EXPAND, 40_px};
-						// TODO: Fix minimumSize.
 						item.minimumSize.y = 40_px;
 						item.padding = {8_px, 8_px};
 						item.anchorPoint = AnchorPoint::LEFT | AnchorPoint::VCENTER;
