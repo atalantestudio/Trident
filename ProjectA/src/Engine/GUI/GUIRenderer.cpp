@@ -12,8 +12,8 @@ namespace ProjectA {
 		colorAttachment.sampleCount = 1;
 
 		// TODO: Debug-only.
-		colorAttachment.loadOperation = LoadOperation::CLEAR;
-		// colorAttachment.loadOperation = LoadOperation::LOAD;
+		// colorAttachment.loadOperation = LoadOperation::CLEAR;
+		colorAttachment.loadOperation = LoadOperation::LOAD;
 
 		colorAttachment.storeOperation = StoreOperation::STORE;
 		colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;

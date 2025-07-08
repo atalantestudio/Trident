@@ -81,8 +81,7 @@ namespace ProjectA {
 
 		uint32 distanceIteration = 0;
 
-		// TODO: Use proper condition.
-		while (true) {
+		while (distanceIteration < DISTANCE_ITERATION_LIMIT) {
 			const Object2D nextA = copyObjectAt(A, t0);
 			const Object2D nextB = copyObjectAt(B, t0);
 
@@ -112,15 +111,10 @@ namespace ProjectA {
 
 			const SeparationFunction separationFunction = createSeparationFunction(nextA, nextB, result);
 
-			if (separationFunction.separationType == (SeparationType::VERTEX_A | SeparationType::VERTEX_B)) {
-				ENGINE_DEBUG("Vertex/vertex case");
-			}
-
 			float32 t1 = 1.0f;
 			uint32 pushBackIteration = 0;
 
-			// TODO: Use proper condition.
-			while (true) {
+			while (pushBackIteration < PUSH_BACK_ITERATION_LIMIT) {
 				const Object2D nextSeparationA = copyObjectAt(A, t1);
 				const Object2D nextSeparationB = copyObjectAt(B, t1);
 
@@ -169,7 +163,7 @@ namespace ProjectA {
 				uint32 rootFinderIteration = 0;
 
 				// TODO: Use proper condition.
-				while (true) {
+				while (rootFinderIteration < ROOT_FINDER_ITERATION_LIMIT) {
 					float32 t;
 
 					if (rootFinderIteration & 1) {
@@ -200,22 +194,9 @@ namespace ProjectA {
 						a1 = t;
 						s1 = s;
 					}
-
-					if (rootFinderIteration >= ROOT_FINDER_ITERATION_LIMIT) {
-						break;
-					}
 				}
 
 				pushBackIteration += 1;
-
-				if (pushBackIteration >= PUSH_BACK_ITERATION_LIMIT) {
-					break;
-				}
-			}
-
-			if (distanceIteration >= DISTANCE_ITERATION_LIMIT) {
-				// Root finder error.
-				break;
 			}
 		}
 
