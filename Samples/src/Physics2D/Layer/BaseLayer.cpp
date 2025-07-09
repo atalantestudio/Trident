@@ -7,12 +7,20 @@
 
 namespace ProjectA {
 	void BaseLayer::update(float64 fixedDeltaTime) {
-		Integrator::integrate(scene, &gjkResult);
+		for (Entity entity = 0; entity < scene.getPhysicalObjectEntityCount(); entity += 1) {
+			ref<RigidBody2D>& body = std::static_pointer_cast<RigidBody2D>(scene.getBody(entity));
 
-		checkHover();
+			body->linearForces = {0.0f, 0.0f};
+		}
+
+		PhysicsUpdate();
+
+		Integrator::integrate(scene, &gjkResult);
 	}
 
 	void BaseLayer::preRender() {
+		checkHover();
+
 		for (Entity entity = 0; entity < scene.getPhysicalObjectEntityCount(); entity += 1) {
 			const PhysicalObject2D& physicalObject = scene.getPhysicalObject(entity);
 
@@ -25,15 +33,12 @@ namespace ProjectA {
 			renderer.setPlaceholderOffset(placeholderOffset);
 		}
 
-		// First frame guard.
-		if (gjkResult.closestFeatureA.count == 0) {
-			return;
+		if (gjkResult.closestFeatureA.count > 0) {
+			renderer.setClosestPoints(gjkResult.closestA, gjkResult.closestB);
+			renderer.clearClosestFeatureCounters();
+			renderer.registerClosestFeature(gjkResult.closestFeatureA);
+			renderer.registerClosestFeature(gjkResult.closestFeatureB);
 		}
-
-		renderer.setClosestPoints(gjkResult.closestA, gjkResult.closestB);
-		renderer.clearClosestFeatureCounters();
-		renderer.registerClosestFeature(gjkResult.closestFeatureA);
-		renderer.registerClosestFeature(gjkResult.closestFeatureB);
 	}
 
 	void BaseLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {

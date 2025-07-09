@@ -11,7 +11,7 @@ namespace ProjectA {
 	class Scene2D {
 		public:
 			explicit Scene2D() {
-				ecs.registerComponent<ref<Body>>();
+				ecs.registerComponent<ref<Body2D>>();
 				ecs.registerComponent<ref<Geometry2D>>();
 				ecs.registerComponent<ref<Material>>();
 				ecs.registerComponent<PhysicalObject2D>();
@@ -25,8 +25,12 @@ namespace ProjectA {
 				return ecs.nextEntity - 1;
 			}
 
-			const ref<Body>& getBody(Entity entity) const {
-				return ecs.getComponent<ref<Body>>(entity);
+			const ref<Body2D>& getBody(Entity entity) const {
+				return ecs.getComponent<ref<Body2D>>(entity);
+			}
+
+			ref<Body2D>& getBody(Entity entity) {
+				return ecs.getComponent<ref<Body2D>>(entity);
 			}
 
 			const ref<Geometry2D>& getGeometry(Entity entity) const {
@@ -51,8 +55,8 @@ namespace ProjectA {
 				return entity;
 			}
 
-			void setBody(Entity entity, const ref<Body>& body) {
-				ecs.setComponent<ref<Body>>(entity, body);
+			void setBody(Entity entity, const ref<Body2D>& body) {
+				ecs.setComponent<ref<Body2D>>(entity, body);
 			}
 
 			void setGeometry(Entity entity, const ref<Geometry2D>& geometry) {
@@ -67,12 +71,12 @@ namespace ProjectA {
 				const ref<Geometry2D>& geometry = ecs.getComponent<ref<Geometry2D>>(entity);
 				const ref<Material>& material = ecs.getComponent<ref<Material>>(entity);
 
-				ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(ecs.getComponent<ref<Body>>(entity));
+				ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(ecs.getComponent<ref<Body2D>>(entity));
 				rigidBody->inverseMass = 1.0f / geometry->calculateMass(material->density);
 			}
 
 			void updateTransform(Entity entity) {
-				const ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(ecs.getComponent<ref<Body>>(entity));
+				const ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(ecs.getComponent<ref<Body2D>>(entity));
 				const ref<Geometry2D>& geometry = ecs.getComponent<ref<Geometry2D>>(entity);
 				PhysicalObject2D& physicalObject = ecs.getComponent<PhysicalObject2D>(entity);
 

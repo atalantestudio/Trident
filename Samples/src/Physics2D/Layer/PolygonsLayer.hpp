@@ -45,7 +45,7 @@ namespace ProjectA {
 				materialA->fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 				materialA->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
-				scene.setBody(entityA, std::static_pointer_cast<Body>(bodyA));
+				scene.setBody(entityA, std::static_pointer_cast<Body2D>(bodyA));
 				scene.setGeometry(entityA, std::static_pointer_cast<Geometry2D>(polygonGeometry));
 				scene.setMaterial(entityA, std::static_pointer_cast<Material>(materialA));
 				scene.updateMass(entityA);
@@ -64,7 +64,7 @@ namespace ProjectA {
 				materialB->fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 				materialB->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
-				scene.setBody(entityB, std::static_pointer_cast<Body>(bodyB));
+				scene.setBody(entityB, std::static_pointer_cast<Body2D>(bodyB));
 				scene.setGeometry(entityB, std::static_pointer_cast<Geometry2D>(triangleGeometry));
 				scene.setMaterial(entityB, std::static_pointer_cast<Material>(materialB));
 				scene.updateMass(entityB);

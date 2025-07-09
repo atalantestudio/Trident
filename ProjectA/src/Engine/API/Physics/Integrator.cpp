@@ -438,8 +438,11 @@ namespace ProjectA {
 		rigidBody->position += rigidBody->linearVelocity * t + rigidBody->linearAcceleration * t * t * 0.5f;
 		rigidBody->rotation += rigidBody->angularVelocity * t + rigidBody->angularAcceleration * t * t * 0.5f;
 
-		rigidBody->linearVelocity += rigidBody->linearAcceleration * t;
-		rigidBody->angularVelocity += rigidBody->angularAcceleration * t;
+		rigidBody->linearVelocity += (rigidBody->linearAcceleration + rigidBody->linearForces) * t * 0.5f;
+		rigidBody->angularVelocity += (rigidBody->angularAcceleration + rigidBody->angularForces) * t * 0.5f;
+
+		rigidBody->linearAcceleration = rigidBody->linearForces;
+		rigidBody->angularAcceleration = rigidBody->angularForces;
 
 		scene.updateTransform(entity);
 	}

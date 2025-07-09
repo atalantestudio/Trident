@@ -9,6 +9,8 @@ namespace ProjectA {
 		public:
 			virtual ~BaseLayer() = default;
 
+			virtual void PhysicsUpdate() {};
+
 			void update(float64 fixedDeltaTime) override;
 
 			void preRender() override;
