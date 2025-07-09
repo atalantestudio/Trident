@@ -304,12 +304,9 @@ namespace ProjectA {
 			case (SeparationType::VERTEX_A | SeparationType::VERTEX_B): {
 				normal = separationFunction.separatingAxis;
 
-				// TODO: Does the object rotation need to be canceled?
-				output.iA = supportIndex(A, normal);
-				output.iB = supportIndex(B, -normal);
-
-				a = multiplyTransform(A.geometry->vertices[output.iA], A.transform);
-				b = multiplyTransform(B.geometry->vertices[output.iB], B.transform);
+				// NOTE: The support with canceled rotation doesn't seem to be necessary here.
+				a = multiplyTransform(A.geometry->vertices[0], A.transform);
+				b = multiplyTransform(B.geometry->vertices[0], B.transform);
 
 				break;
 			}
@@ -323,7 +320,6 @@ namespace ProjectA {
 
 				normal = multiplyTransform(separationFunction.separatingAxis, edgeRotation);
 
-				// TODO: Does the object rotation need to be canceled?
 				const uint32 i = supportIndex(*vertexObject, -normal);
 
 				output.iA = i;
