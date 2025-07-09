@@ -8,7 +8,7 @@ namespace ProjectA {
 		// Support point on A in world space.
 		vec2<float32> vB;
 
-		// vB - vA.
+		// Difference between `vA` and `vB`.
 		vec2<float32> v;
 
 		// Vertex index on A.

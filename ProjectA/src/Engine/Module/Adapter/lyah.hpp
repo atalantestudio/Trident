@@ -318,4 +318,50 @@ namespace ProjectA {
 	}
 
 	using lyah::abs;
+
+	// TODO: lyah::area
+	template<typename T>
+	T area(const sequence<lyah::vec<2, T>>& vertices) {
+		T area = static_cast<T>(0.0);
+
+		for (uint32 i = 0; i < vertices.count; i += 1) {
+			const uint32 j = (i + 1) % vertices.count;
+
+			area += (vertices[i][0] + vertices[j][0]) * (vertices[i][1] + vertices[j][1]);
+
+			// TODO: This way of accumulating the sum doesn't seem to work with some glyphs.
+			// signedAreaDouble += vertices[i][0] * (vertices[(i + 1) % vertexCount][1] - vertices[(i - 1) % vertexCount][1]);
+		}
+
+		return area * static_cast<T>(0.5);
+	}
+
+	// TODO: Refactor using sign flip for 2D perpendicular vectors.
+	template<typename T>
+	lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b) {
+		const lyah::vec<3, T> a_3d = {a[0], a[1], 0.0f};
+		const lyah::vec<3, T> b_3d = {b[0], b[1], 0.0f};
+		const lyah::vec<3, T> r_3d = cross(a_3d, b_3d);
+
+		return {r_3d[0], r_3d[1]};
+	}
+
+	// TODO: Refactor using sign flip for 2D perpendicular vectors.
+	template<typename T>
+	lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b, const lyah::vec<2, T>& c) {
+		const lyah::vec<2, T> b_c = {b[0] * c[1], b[1] * c[0]};
+
+		return {
+			a[1] * (b_c[0] - b_c[1]),
+			a[0] * (b_c[1] - b_c[0]),
+		};
+	}
+
+	template<typename T>
+	lyah::vec<2, T> multiplyTransform(const lyah::vec<2, T>& a, const lyah::mat<3, 3, T>& t) {
+		return {
+			t[0][0] * a[0] + t[1][0] * a[1] + t[2][0],
+			t[0][1] * a[0] + t[1][1] * a[1] + t[2][1],
+		};
+	}
 }

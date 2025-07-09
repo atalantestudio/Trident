@@ -5,11 +5,9 @@
 #include "../Renderer/Physics2DRenderer.hpp"
 
 namespace ProjectA {
-	class RendererLayer : public Layer {
+	class BaseLayer : public Layer {
 		public:
-			void build() override;
-
-			virtual ~RendererLayer() = default;
+			virtual ~BaseLayer() = default;
 
 			void update(float64 fixedDeltaTime) override;
 
@@ -28,14 +26,15 @@ namespace ProjectA {
 			bool onMouseWheel(MouseWheelEvent& event);
 			bool onWindowResize(WindowResizeEvent& event);
 
-		private:
+		protected:
 			Physics2DRenderer renderer;
 			Scene2D scene;
 
+		private:
 			GJK2DResult gjkResult;
 
-			uint32 hoveredObjectIndex = max<uint32>();
-			uint32 selectedObjectIndex = max<uint32>();
+			Entity hoveredEntity = max<uint32>();
+			Entity selectedEntity = max<uint32>();
 
 			vec2<float32> placeholderOffset;
 	};

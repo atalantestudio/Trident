@@ -4,16 +4,8 @@
 #include "Engine/ECS/Pool/Pool.hpp"
 
 namespace ProjectA {
-	template<typename T>
+	template<typename ComponentType>
 	class ComponentPool : public Pool {
-		public:
-			std::array<Entity, MAX_ENTITIES> entityToComponentIndex; // Sparse array
-			std::vector<uint32> componentIndexToEntity; // Dense array
-			std::vector<T> components; // Dense array
-
-			// Number of currently alive components.
-			uint32 componentCount = 0;
-
 		public:
 			ComponentPool() {
 				// Fill array with null index.
@@ -22,32 +14,32 @@ namespace ProjectA {
 				}
 			}
 
-			// Returns the component of type T belonging to the provided entity.
-			const T& getComponent(Entity entity) const {
+			// Returns the component belonging to the provided entity.
+			const ComponentType& getComponent(Entity entity) const {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
 
 				const Entity componentIndex = entityToComponentIndex[entity];
 
 				ENGINE_ASSERT(componentIndex != NULL_COMPONENT_INDEX, "Entity [] has no components.", entity);
 
-				return entityComponents[componentIndex].component;
+				return components[componentIndex];
 			}
 
-			// Returns the component of type T belonging to the provided entity.
-			T& getComponent(Entity entity) {
+			// Returns the component belonging to the provided entity.
+			ComponentType& getComponent(Entity entity) {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
 
 				const Entity componentIndex = entityToComponentIndex[entity];
 
 				ENGINE_ASSERT(componentIndex != NULL_COMPONENT_INDEX, "Entity [] has no components.", entity);
 
-				return entityComponents[componentIndex].component;
+				return components[componentIndex];
 			}
 
-			// TODO: hasComponent.
+			// TODO: hasComponent()
 
-			// Sets or replaces the component of type T belonging to the provided entity.
-			void setComponent(Entity entity, const T& component) {
+			// Sets or replaces the component belonging to the provided entity.
+			void setComponent(Entity entity, const ComponentType& component) {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
 
 				const uint32 componentIndex = entityToComponentIndex[entity];
@@ -68,7 +60,7 @@ namespace ProjectA {
 				componentCount += 1;
 			}
 
-			// Erases the component of type T belonging to the provided entity.
+			// Erases the component belonging to the provided entity.
 			void resetComponent(Entity entity) {
 				ENGINE_ASSERT(entity < MAX_ENTITIES, "The entity [] is overflowing.", entity);
 
@@ -101,5 +93,13 @@ namespace ProjectA {
 
 		private:
 			static constexpr uint32 NULL_COMPONENT_INDEX = max<Entity>();
+
+		public:
+			std::array<Entity, MAX_ENTITIES> entityToComponentIndex; // Sparse array
+			std::vector<uint32> componentIndexToEntity; // Dense array
+			std::vector<ComponentType> components; // Dense array
+
+			// Number of currently alive components.
+			uint32 componentCount = 0;
 	};
 }

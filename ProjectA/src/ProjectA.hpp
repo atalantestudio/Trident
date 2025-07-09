@@ -49,7 +49,15 @@
 // Font
 #include "Engine/GUI/Font/TrueType/TrueTypeFont.hpp"
 
+// Geometry
+#include "Engine/API/Geometry/PolytopeGeometry2D.hpp"
+
+// Material
+#include "Engine/API/Material/ColorMaterial.hpp"
+
 // Physics
+#include "Engine/API/Physics/Body/RigidBody.hpp"
+#include "Engine/API/Physics/CCD/CCDOutput.hpp"
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/GJK2DConditional.hpp"
 #include "Engine/API/Physics/GJK2DPoint.hpp"

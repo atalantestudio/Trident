@@ -2,8 +2,8 @@
 
 namespace ProjectA {
 	struct Geometry2DDescriptor {
-		std::vector<uint16> indices;
-		std::vector<vec2<float32>> vertices;
+		sequence<uint16> indices;
+		sequence<vec2<float32>> vertices;
 	};
 
 	class Geometry2D {
@@ -23,13 +23,13 @@ namespace ProjectA {
 			virtual uint32 support(const vec2<float32>& d) const = 0;
 
 		public:
-			std::vector<uint16> indices;
-			std::vector<vec2<float32>> vertices;
+			sequence<uint16> indices;
+			sequence<vec2<float32>> vertices;
 
 			// Average of all vertices.
 			vec2<float32> centerOfMass;
 
-			// Distance between the center of mass and the farthest vertex of the geometry.
+			// Distance between the center of mass and the farthest vertex.
 			float32 radius;
 	};
 }

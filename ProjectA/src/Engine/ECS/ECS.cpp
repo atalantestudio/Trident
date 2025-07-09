@@ -11,6 +11,8 @@ namespace ProjectA {
 			const Entity entity = nextEntity;
 
 			nextEntity += 1;
+
+			return entity;
 		}
 
 		// Take the next entity from the available list.

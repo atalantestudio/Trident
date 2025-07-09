@@ -7,14 +7,14 @@ namespace ProjectA {
 		indices(descriptor.indices),
 		vertices(descriptor.vertices)
 	{
-		DEBUG_ASSERT(indices.size() > 0 && vertices.size() > 0);
+		DEBUG_ASSERT(indices.count > 0 && vertices.count > 0);
 	}
 
 	uint32 Geometry2D::getIndexCount() const {
-		return static_cast<uint32>(indices.size());
+		return static_cast<uint32>(indices.count);
 	}
 
 	uint32 Geometry2D::getVertexCount() const {
-		return static_cast<uint32>(vertices.size());
+		return static_cast<uint32>(vertices.count);
 	}
 }

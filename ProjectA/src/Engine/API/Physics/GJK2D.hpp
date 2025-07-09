@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Engine/API/Object/Object2D.hpp"
 #include "Engine/API/Physics/ClosestFeature2D.hpp"
 #include "Engine/API/Physics/Simplex.hpp"
 #include "Engine/API/Physics/support.hpp"
+#include "Engine/API/Scene/Scene2D.hpp"
 
 namespace ProjectA {
 	static constexpr uint8 GJK_2D_ITERATION_LIMIT = 8;
@@ -180,12 +180,12 @@ namespace ProjectA {
 	// - Christer Ericson - Real-Time Collision Detection
 	//   https://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf
 	// 
-	inline GJK2DResult GJK2D(const Object2D& A, const Object2D& B) {
-		DEBUG_ASSERT(A.getGeometry()->vertices.size() < max<uint8>());
-		DEBUG_ASSERT(B.getGeometry()->vertices.size() < max<uint8>());
+	inline GJK2DResult GJK2D(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
+		DEBUG_ASSERT(A.geometry->getVertexCount() < max<uint8>());
+		DEBUG_ASSERT(B.geometry->getVertexCount() < max<uint8>());
 
 		// TODO: Use d to find the first simplex vertex.
-		//vec2<float32> d = B.position - A.position;
+		// vec2<float32> d = B.position - A.position;
 		vec2<float32> d;
 
 		Simplex2Vertex vertex;

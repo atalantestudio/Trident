@@ -12,15 +12,12 @@ namespace ProjectA {
 	#define DEBUG_ENABLE_CCD
 
 	void Integrator::integrate(Scene2D& scene, GJK2DResult* gjkResult) {
-		for (uint32 i = 0; i < scene.getObjectCount() - 1; i += 1) {
-			for (uint32 j = i + 1; j < scene.getObjectCount(); j += 1) {
-				Object2D& A = scene[i];
-				Object2D& B = scene[j];
-
+		for (Entity A = 0; A < scene.getPhysicalObjectEntityCount() - 1; A += 1) {
+			for (Entity B = A + 1; B < scene.getPhysicalObjectEntityCount(); B += 1) {
 				float32 toi = 1.0f;
 
 				#ifdef DEBUG_ENABLE_CCD
-					const CCDOutput output = evaluateContinuousCollision(A, B, gjkResult);
+					const CCDOutput output = evaluateContinuousCollision(scene, A, B, gjkResult);
 
 					#ifdef BUILD_MODE_DEBUG
 						printOutputState(output.state);
@@ -29,10 +26,41 @@ namespace ProjectA {
 					toi = output.fraction;
 				#endif
 
-				advanceSimulation(A, toi);
-				advanceSimulation(B, toi);
+				advanceSimulation(scene, A, toi);
+				advanceSimulation(scene, B, toi);
 
-				// TODO: Resolve possible collisions.
+				// https://code.tutsplus.com/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331t
+				/* if (output.state == CCDOutputState::HIT) {
+					ref<RigidBody2D>& rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene.getBody(A));
+					ref<RigidBody2D>& rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene.getBody(B));
+					const ref<Material>& materialA = scene.getMaterial(A);
+					const ref<Material>& materialB = scene.getMaterial(B);
+
+					const vec2<float32> collisionNormal = normalized(rigidBodyB->position - rigidBodyA->position);
+					const vec2<float32> relativeLinearVelocity = rigidBodyB->linearVelocity - rigidBodyA->linearVelocity;
+					const float32 velocityAlongNormal = dot(relativeLinearVelocity, collisionNormal);
+
+					if (velocityAlongNormal > 0.0f) {
+						// The objects are separating.
+						return;
+					}
+
+					// TODO: lyah::min
+					// Calculate coefficient of restitution.
+					const float32 e = std::min(materialA->coefficientOfRestitution, materialB->coefficientOfRestitution);
+
+					// Calculate linear impulse.
+					const float32 j = (-(1 + e) * velocityAlongNormal) / (rigidBodyA->inverseMass + rigidBodyB->inverseMass);
+					const vec2<float32> impulse = collisionNormal * j;
+
+					// Apply linear impulse.
+					rigidBodyA->linearVelocity -= impulse * rigidBodyA->inverseMass;
+					rigidBodyB->linearVelocity += impulse * rigidBodyB->inverseMass;
+
+					// TODO: 1 - toi does not move the objects.
+					advanceSimulation(scene, A, 1.0f - toi);
+					advanceSimulation(scene, B, 1.0f - toi);
+				} */
 			}
 		}
 	}
@@ -66,7 +94,7 @@ namespace ProjectA {
 	// - Nilson Souto - Video Game Physics Tutorial - Part II: Collision Detection for Solid Objects
 	//   https://www.toptal.com/game/video-game-physics-part-ii-collision-detection-for-solid-objects
 	// 
-	CCDOutput Integrator::evaluateContinuousCollision(const Object2D& A, const Object2D& B, GJK2DResult* gjkResult) {
+	CCDOutput Integrator::evaluateContinuousCollision(const Scene2D& scene, Entity A, Entity B, GJK2DResult* gjkResult) {
 		static constexpr float32 TOLERANCE = 0.25f * 0.005f;
 		static constexpr float32 TARGET = 0.005f;
 
@@ -79,11 +107,14 @@ namespace ProjectA {
 
 		float32 t0 = 0.0f;
 
+		const PhysicalObjectCopy2D baseA = copyPhysicalObject(scene, A);
+		const PhysicalObjectCopy2D baseB = copyPhysicalObject(scene, B);
+
 		uint32 distanceIteration = 0;
 
 		while (distanceIteration < DISTANCE_ITERATION_LIMIT) {
-			const Object2D nextA = copyObjectAt(A, t0);
-			const Object2D nextB = copyObjectAt(B, t0);
+			const PhysicalObjectCopy2D nextA = copyPhysicalObject(scene, A, t0);
+			const PhysicalObjectCopy2D nextB = copyPhysicalObject(scene, B, t0);
 
 			const GJK2DResult result = GJK2D(nextA, nextB);
 
@@ -115,9 +146,8 @@ namespace ProjectA {
 			uint32 pushBackIteration = 0;
 
 			while (pushBackIteration < PUSH_BACK_ITERATION_LIMIT) {
-				const Object2D nextSeparationA = copyObjectAt(A, t1);
-				const Object2D nextSeparationB = copyObjectAt(B, t1);
-
+				const PhysicalObjectCopy2D nextSeparationA = copyPhysicalObject(scene, A, t1);
+				const PhysicalObjectCopy2D nextSeparationB = copyPhysicalObject(scene, B, t1);
 				const MinSeparationOutput minSeparationOutput = findMinSeparation(separationFunction, nextSeparationA, nextSeparationB);
 
 				float32 s1 = minSeparationOutput.separationValue;
@@ -138,7 +168,7 @@ namespace ProjectA {
 				}
 
 				// Calculate the initial separation value of the witness points.
-				float32 s0 = evaluateSeparation(separationFunction, A, B, minSeparationOutput, t0);
+				float32 s0 = evaluateSeparation(separationFunction, scene, A, B, minSeparationOutput, t0);
 
 				if (s0 < TARGET - TOLERANCE) {
 					// If the root finder reaches the iteration limit, exit.
@@ -177,7 +207,7 @@ namespace ProjectA {
 
 					rootFinderIteration += 1;
 
-					const float32 s = evaluateSeparation(separationFunction, A, B, minSeparationOutput, t);
+					const float32 s = evaluateSeparation(separationFunction, scene, A, B, minSeparationOutput, t);
 
 					if (abs(s - TARGET) < TOLERANCE) {
 						// Move t1 back.
@@ -208,24 +238,16 @@ namespace ProjectA {
 		return output;
 	}
 
-	Object2D Integrator::copyObjectAt(Object2D A, float32 t) {
-		advanceSimulation(A, t);
-
-		return A;
-	}
-
-	SeparationFunction Integrator::createSeparationFunction(const Object2D& A, const Object2D& B, const GJK2DResult& gjkResult) {
-		const ref<Geometry2D>& geometryA = A.getGeometry();
-		const ref<Geometry2D>& geometryB = B.getGeometry();
-
+	SeparationFunction Integrator::createSeparationFunction(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, const GJK2DResult& gjkResult) {
 		SeparationFunction separationFunction;
 
 		if (gjkResult.closestFeatureA.count == 1 && gjkResult.closestFeatureB.count == 1) {
 			// Both features are vertices.
+
 			separationFunction.separationType = SeparationType::VERTEX_A | SeparationType::VERTEX_B;
 
-			const vec2<float32>& a = multiplyTransform(geometryA->vertices[gjkResult.closestFeatureA.vertexIndex], A.transform);
-			const vec2<float32>& b = multiplyTransform(geometryB->vertices[gjkResult.closestFeatureB.vertexIndex], B.transform);
+			const vec2<float32>& a = multiplyTransform(A.geometry->vertices[gjkResult.closestFeatureA.vertexIndex], A.transform);
+			const vec2<float32>& b = multiplyTransform(B.geometry->vertices[gjkResult.closestFeatureB.vertexIndex], B.transform);
 
 			separationFunction.separatingAxis = normalized(b - a);
 			separationFunction.localPoint = {0.0f, 0.0f};
@@ -234,10 +256,11 @@ namespace ProjectA {
 		}
 
 		// At least one feature is an edge. Use it as the separating axis.
-		const Object2D* vertexObjectPtr = nullptr;
-		const Object2D* edgeObjectPtr = nullptr;
-		const ClosestFeature2D* vertexFeaturePtr = nullptr;
-		const ClosestFeature2D* edgeFeaturePtr = nullptr;
+
+		const PhysicalObjectCopy2D* vertexEntity = nullptr;
+		const PhysicalObjectCopy2D* edgeEntity = nullptr;
+		const ClosestFeature2D* vertexFeature = nullptr;
+		const ClosestFeature2D* edgeFeature = nullptr;
 
 		identifyClosestFeatures(
 			separationFunction.separationType,
@@ -245,32 +268,22 @@ namespace ProjectA {
 			B,
 			gjkResult.closestFeatureA,
 			gjkResult.closestFeatureB,
-			vertexObjectPtr,
-			edgeObjectPtr,
-			vertexFeaturePtr,
-			edgeFeaturePtr
+			vertexEntity,
+			edgeEntity,
+			vertexFeature,
+			edgeFeature
 		);
 
-		DEBUG_ASSERT(vertexObjectPtr != nullptr && edgeObjectPtr != nullptr && vertexFeaturePtr != nullptr && edgeFeaturePtr != nullptr);
-
-		const Object2D& vertexObject = *vertexObjectPtr;
-		const Object2D& edgeObject = *edgeObjectPtr;
-		const ref<Geometry2D>& vertexGeometry = vertexObject.getGeometry();
-		const ref<Geometry2D>& edgeGeometry = edgeObject.getGeometry();
-		const ClosestFeature2D& vertexFeature = *vertexFeaturePtr;
-		const ClosestFeature2D& edgeFeature = *edgeFeaturePtr;
-
-		const vec2<float32>& edgeLocalPoint0 = edgeGeometry->vertices[edgeFeature.edgeIndices[0]];
-		const vec2<float32>& edgeLocalPoint1 = edgeGeometry->vertices[edgeFeature.edgeIndices[1]];
+		const vec2<float32>& edgeLocalPoint0 = edgeEntity->geometry->vertices[edgeFeature->edgeIndices[0]];
+		const vec2<float32>& edgeLocalPoint1 = edgeEntity->geometry->vertices[edgeFeature->edgeIndices[1]];
 
 		separationFunction.separatingAxis = perpendicular(edgeLocalPoint1 - edgeLocalPoint0, 1.0f);
-
 		separationFunction.localPoint = lerp(edgeLocalPoint0, edgeLocalPoint1, 0.5f);
 
-		const vec2<float32> edgePoint = multiplyTransform(separationFunction.localPoint, edgeObject.transform);
-		const vec2<float32> vertexPoint = multiplyTransform(vertexGeometry->vertices[vertexFeature.vertexIndex], vertexObject.transform);
+		const vec2<float32> edgePoint = multiplyTransform(separationFunction.localPoint, edgeEntity->transform);
+		const vec2<float32> vertexPoint = multiplyTransform(vertexEntity->geometry->vertices[vertexFeature->vertexIndex], vertexEntity->transform);
 
-		const mat3x3<float32> edgeRotation = mat3x3<float32>::rotation(edgeObject.rotation);
+		const mat3x3<float32> edgeRotation = mat3x3<float32>::rotation(edgeEntity->rotation);
 		const vec2<float32> normal = multiplyTransform(separationFunction.separatingAxis, edgeRotation);
 
 		if (dot(vertexPoint - edgePoint, normal) < 0.0f) {
@@ -282,9 +295,8 @@ namespace ProjectA {
 		return separationFunction;
 	}
 
-	MinSeparationOutput Integrator::findMinSeparation(SeparationFunction separationFunction, const Object2D& A, const Object2D& B) {
+	MinSeparationOutput Integrator::findMinSeparation(SeparationFunction separationFunction, const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
 		MinSeparationOutput output{};
-
 		vec2<float32> normal;
 		vec2<float32> a;
 		vec2<float32> b;
@@ -297,18 +309,16 @@ namespace ProjectA {
 				output.iA = supportIndex(A, normal);
 				output.iB = supportIndex(B, -normal);
 
-				a = multiplyTransform(A.getGeometry()->vertices[output.iA], A.transform);
-				b = multiplyTransform(B.getGeometry()->vertices[output.iB], B.transform);
+				a = multiplyTransform(A.geometry->vertices[output.iA], A.transform);
+				b = multiplyTransform(B.geometry->vertices[output.iB], B.transform);
 
 				break;
 			}
 			default: {
-				const Object2D* vertexObject = nullptr;
-				const Object2D* edgeObject = nullptr;
+				const PhysicalObjectCopy2D* vertexObject = nullptr;
+				const PhysicalObjectCopy2D* edgeObject = nullptr;
 
 				identifyClosestFeatures(A, B, separationFunction.separationType, vertexObject, edgeObject);
-
-				DEBUG_ASSERT(vertexObject != nullptr && edgeObject != nullptr);
 
 				const mat3x3<float32> edgeRotation = mat3x3<float32>::rotation(edgeObject->rotation);
 
@@ -321,7 +331,7 @@ namespace ProjectA {
 				output.iB = i;
 
 				a = multiplyTransform(separationFunction.localPoint, edgeObject->transform);
-				b = multiplyTransform(vertexObject->getGeometry()->vertices[i], vertexObject->transform);
+				b = multiplyTransform(vertexObject->geometry->vertices[i], vertexObject->transform);
 
 				break;
 			}
@@ -332,11 +342,11 @@ namespace ProjectA {
 		return output;
 	}
 
-	float32 Integrator::evaluateSeparation(SeparationFunction separationFunction, const Object2D& A, const Object2D& B, MinSeparationOutput minSeparationOutput, float32 t) {
-		const ref<Geometry2D>& geometryA = A.getGeometry();
-		const ref<Geometry2D>& geometryB = B.getGeometry();
-		const Object2D& tA = copyObjectAt(A, t);
-		const Object2D& tB = copyObjectAt(B, t);
+	float32 Integrator::evaluateSeparation(SeparationFunction separationFunction, const Scene2D& scene, Entity A, Entity B, MinSeparationOutput minSeparationOutput, float32 t) {
+		const ref<Geometry2D>& geometryA = scene.getGeometry(A);
+		const ref<Geometry2D>& geometryB = scene.getGeometry(B);
+		const PhysicalObjectCopy2D tA = copyPhysicalObject(scene, A, t);
+		const PhysicalObjectCopy2D tB = copyPhysicalObject(scene, B, t);
 
 		vec2<float32> a;
 		vec2<float32> b;
@@ -373,24 +383,15 @@ namespace ProjectA {
 		return dot(b - a, d);
 	}
 
-	void Integrator::advanceSimulation(Object2D& A, float32 t) {
-		A.position += A.linearVelocity * t + A.linearAcceleration * t * t * 0.5f;
-		A.rotation += A.angularVelocity * t + A.angularAcceleration * t * t * 0.5f;
-
-		A.linearVelocity += A.linearAcceleration * t;
-		A.angularVelocity += A.angularAcceleration * t;
-
-		A.updateTransform();
-	}
-
+	// TODO: Refactor.
 	void Integrator::identifyClosestFeatures(
 		SeparationType& separationType,
-		const Object2D& objectA,
-		const Object2D& objectB,
+		const PhysicalObjectCopy2D& objectA,
+		const PhysicalObjectCopy2D& objectB,
 		const ClosestFeature2D& closestFeatureA,
 		const ClosestFeature2D& closestFeatureB,
-		const Object2D*& vertexObject,
-		const Object2D*& edgeObject,
+		const PhysicalObjectCopy2D*& vertexObject,
+		const PhysicalObjectCopy2D*& edgeObject,
 		const ClosestFeature2D*& vertexFeature,
 		const ClosestFeature2D*& edgeFeature
 	) {
@@ -414,16 +415,11 @@ namespace ProjectA {
 			return;
 		}
 
-		DEBUG_ASSERT(false);
+		ENGINE_ASSERT(false, "Invalid separation type.");
 	}
 
-	void Integrator::identifyClosestFeatures(
-		const Object2D& objectA,
-		const Object2D& objectB,
-		SeparationType separationType,
-		const Object2D*& vertexObject,
-		const Object2D*& edgeObject
-	) {
+	// TODO: Refactor.
+	void Integrator::identifyClosestFeatures(const PhysicalObjectCopy2D& objectA, const PhysicalObjectCopy2D& objectB, SeparationType separationType, const PhysicalObjectCopy2D*& vertexObject, const PhysicalObjectCopy2D*& edgeObject) {
 		if (separationType & SeparationType::EDGE_A) {
 			vertexObject = &objectB;
 			edgeObject = &objectA;
@@ -438,6 +434,18 @@ namespace ProjectA {
 			return;
 		}
 
-		DEBUG_ASSERT(false);
+		ENGINE_ASSERT(false, "Invalid separation type.");
+	}
+
+	void Integrator::advanceSimulation(Scene2D& scene, Entity entity, float32 t) {
+		ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene.getBody(entity));
+
+		rigidBody->position += rigidBody->linearVelocity * t + rigidBody->linearAcceleration * t * t * 0.5f;
+		rigidBody->rotation += rigidBody->angularVelocity * t + rigidBody->angularAcceleration * t * t * 0.5f;
+
+		rigidBody->linearVelocity += rigidBody->linearAcceleration * t;
+		rigidBody->angularVelocity += rigidBody->angularAcceleration * t;
+
+		scene.updateTransform(entity);
 	}
 }

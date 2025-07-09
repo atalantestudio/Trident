@@ -16,36 +16,38 @@ namespace ProjectA {
 				static void printOutputState(CCDOutputState outputState);
 			#endif
 
-			static CCDOutput evaluateContinuousCollision(const Object2D& A, const Object2D& B, GJK2DResult* gjkResult);
+			static CCDOutput evaluateContinuousCollision(const Scene2D& scene, Entity A, Entity B, GJK2DResult* gjkResult);
 
-			static Object2D copyObjectAt(Object2D A, float32 t);
+			static SeparationFunction createSeparationFunction(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, const GJK2DResult& gjkResult);
 
-			static SeparationFunction createSeparationFunction(const Object2D& A, const Object2D& B, const GJK2DResult& gjkResult);
+			static MinSeparationOutput findMinSeparation(SeparationFunction separationFunction, const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B);
 
-			static MinSeparationOutput findMinSeparation(SeparationFunction separationFunction, const Object2D& A, const Object2D& B);
+			// Arguments:
+			// - Entity geometries
+			// - Entity transforms at time t
+			// - Entity rotations at time t
+			static float32 evaluateSeparation(SeparationFunction separationFunction, const Scene2D& scene, Entity A, Entity B, MinSeparationOutput minSeparationOutput, float32 t);
 
-			static float32 evaluateSeparation(SeparationFunction separationFunction, const Object2D& A, const Object2D& B, MinSeparationOutput minSeparationOutput, float32 t);
-
-			static void advanceSimulation(Object2D& A, float32 t);
+			static void advanceSimulation(Scene2D& scene, Entity A, float32 t);
 
 			static void identifyClosestFeatures(
 				SeparationType& separationType,
-				const Object2D& objectA,
-				const Object2D& objectB,
+				const PhysicalObjectCopy2D& A,
+				const PhysicalObjectCopy2D& B,
 				const ClosestFeature2D& closestFeatureA,
 				const ClosestFeature2D& closestFeatureB,
-				const Object2D*& vertexObject,
-				const Object2D*& edgeObject,
+				const PhysicalObjectCopy2D*& vertexObject,
+				const PhysicalObjectCopy2D*& edgeObject,
 				const ClosestFeature2D*& vertexFeature,
 				const ClosestFeature2D*& edgeFeature
 			);
 
 			static void identifyClosestFeatures(
-				const Object2D& objectA,
-				const Object2D& objectB,
+				const PhysicalObjectCopy2D& A,
+				const PhysicalObjectCopy2D& B,
 				SeparationType separationType,
-				const Object2D*& vertexObject,
-				const Object2D*& edgeObject
+				const PhysicalObjectCopy2D*& vertexObject,
+				const PhysicalObjectCopy2D*& edgeObject
 			);
 	};
 }

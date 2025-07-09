@@ -197,7 +197,7 @@ namespace ProjectA {
 					for (uint32 i = 0; i < count; i += 1) {
 						const uint32 j = (i + 1) % count;
 
-						// TODO: lyah::area(a, b).
+						// TODO: lyah::area
 						signedAreaDouble += contour[i].x * contour[j].y - contour[j].x * contour[i].y;
 					}
 

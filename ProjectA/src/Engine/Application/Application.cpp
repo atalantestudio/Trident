@@ -185,6 +185,8 @@ namespace ProjectA {
 		previousTime = currentTime;
 		frameTimeAccumulator += frameTime;
 
+		// TODO: Cap frameTimeAccumumlator to avoid the "spiral of death" (increasing number of physics updates).
+
 		while (frameTimeAccumulator >= FIXED_DELTA_TIME) {
 			update(FIXED_DELTA_TIME);
 
@@ -198,7 +200,8 @@ namespace ProjectA {
 		}
 
 		// TODO: Interpolate between current time and frameTimeAccumulator.
-		// See https://gafferongames.com/post/fix_your_timestep.
+		// Use frameTimeAccumulator / FIXED_DELTA_TIME to get a value between 0 and 1.
+		// See https://gafferongames.com/post/fix_your_timestep and https://code.tutsplus.com/how-to-create-a-custom-2d-physics-engine-the-core-engine--gamedev-7493t.
 		render(frameTimeAccumulator);
 
 		frameIndex += 1;

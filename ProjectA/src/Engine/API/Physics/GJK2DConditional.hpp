@@ -1,29 +1,9 @@
 #pragma once
 
-#include "Engine/API/Object/Object2D.hpp"
 #include "Engine/API/Physics/support.hpp"
 
 namespace ProjectA {
 	static constexpr uint8 GJK_2D_CONDITIONAL_ITERATION_LIMIT = 8;
-
-	// TODO: Refactor using sign flip for 2D perpendicular vectors.
-	static vec2<float32> cross2d(const vec2<float32>& a, const vec2<float32>& b) {
-		const vec3<float32> a_3d = {a[0], a[1], 0.0f};
-		const vec3<float32> b_3d = {b[0], b[1], 0.0f};
-		const vec3<float32> r_3d = cross(a_3d, b_3d);
-
-		return {r_3d[0], r_3d[1]};
-	}
-
-	// TODO: Refactor using sign flip for 2D perpendicular vectors.
-	static vec2<float32> cross2d(const vec2<float32>& a, const vec2<float32>& b, const vec2<float32>& c) {
-		const vec2<float32> b_c = {b[0] * c[1], b[1] * c[0]};
-
-		return {
-			a[1] * (b_c[0] - b_c[1]),
-			a[0] * (b_c[1] - b_c[0]),
-		};
-	}
 
 	static void handleSimplex1(sim2<float32>& s, vec2<float32>& d) {
 		const vec2<float32>& a = s[1];
@@ -85,8 +65,8 @@ namespace ProjectA {
 	// - Iain Winter - GJK: Collision detection algorithm in 2D/3D
 	//   https://winter.dev/articles/gjk-algorithm
 	// 
-	inline bool GJK2DConditional(const Object2D& A, const Object2D& B) {
-		vec2<float32> d = B.position - A.position;
+	inline bool GJK2DConditional(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
+		vec2<float32> d = B.position - B.position;
 
 		if (lengthSq(d) == 0.0f) {
 			return true;

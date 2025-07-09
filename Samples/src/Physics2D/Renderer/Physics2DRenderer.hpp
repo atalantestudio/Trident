@@ -24,13 +24,13 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override;
 
-			void selectObject(uint32 objectIndex);
+			void selectEntity(Entity entity);
 
 			void setPlaceholderOffset(const vec2<float32>& offset) const;
 
 			void resize(WindowResizeEvent& event) override;
 
-			void writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
+			void writeInstanceTransform(Entity entity, const mat3x3<float32>& transform) const;
 
 			void clearClosestFeatureCounters();
 
@@ -59,7 +59,7 @@ namespace ProjectA {
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
 			void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
 			void renderClosestFeatures(const ref<CommandEncoder>& commandEncoder) const;
-			void renderSelectedObjectPlaceholder(const ref<CommandEncoder>& commandEncoder) const;
+			void renderSelectedEntityPlaceholder(const ref<CommandEncoder>& commandEncoder) const;
 
 		private:
 			struct Instance {
@@ -165,7 +165,7 @@ namespace ProjectA {
 			vec2<float32> mousePosition;
 			vec2<float32> ndcMousePosition;
 
-			uint32 selectedObjectIndex = max<uint32>();
+			Entity selectedEntity = max<uint32>();
 
 			const Scene2D* scene = nullptr;
 	};
