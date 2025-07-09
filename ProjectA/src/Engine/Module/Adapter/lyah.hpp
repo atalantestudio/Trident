@@ -320,20 +320,30 @@ namespace ProjectA {
 	using lyah::abs;
 
 	// TODO: lyah::area
+	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
+	// https://stackoverflow.com/a/717367/17136841
+	// https://web.archive.org/web/20111004134549/http://softsurfer.com/Archive/algorithm_0101/algorithm_0101.htm
 	template<typename T>
-	T area(const sequence<lyah::vec<2, T>>& vertices) {
+	T area(const sequence<lyah::vec<2, T>>& unclosedVertices) {
 		T area = static_cast<T>(0.0);
 
-		for (uint32 i = 0; i < vertices.count; i += 1) {
-			const uint32 j = (i + 1) % vertices.count;
+		// Close vertex array.
+		sequence<lyah::vec<2, T>> closedVertices(unclosedVertices.count + 2);
 
-			area += (vertices[i][0] + vertices[j][0]) * (vertices[i][1] + vertices[j][1]);
+		std::copy(unclosedVertices.begin(), unclosedVertices.end(), &closedVertices[0]);
 
-			// TODO: This way of accumulating the sum doesn't seem to work with some glyphs.
-			// signedAreaDouble += vertices[i][0] * (vertices[(i + 1) % vertexCount][1] - vertices[(i - 1) % vertexCount][1]);
+		closedVertices[unclosedVertices.count + 0] = unclosedVertices[0];
+		closedVertices[unclosedVertices.count + 1] = unclosedVertices[1];
+
+		uint32 i = 1;
+
+		while (i <= unclosedVertices.count) {
+			area += closedVertices[i][0] * (closedVertices[i + 1][1] - closedVertices[i - 1][1]);
+
+			i += 1;
 		}
 
-		return area * static_cast<T>(0.5);
+		return abs(area) * static_cast<T>(0.5);
 	}
 
 	// TODO: Refactor using sign flip for 2D perpendicular vectors.
