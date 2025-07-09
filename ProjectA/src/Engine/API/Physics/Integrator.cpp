@@ -30,7 +30,7 @@ namespace ProjectA {
 				advanceSimulation(scene, B, toi);
 
 				// https://code.tutsplus.com/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331t
-				/* if (output.state == CCDOutputState::HIT) {
+				if (output.state == CCDOutputState::HIT) {
 					ref<RigidBody2D>& rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene.getBody(A));
 					ref<RigidBody2D>& rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene.getBody(B));
 					const ref<Material>& materialA = scene.getMaterial(A);
@@ -41,8 +41,8 @@ namespace ProjectA {
 					const float32 velocityAlongNormal = dot(relativeLinearVelocity, collisionNormal);
 
 					if (velocityAlongNormal > 0.0f) {
-						// The objects are separating.
-						return;
+						// These entities are separating; continue to the next entities.
+						continue;
 					}
 
 					// TODO: lyah::min
@@ -57,10 +57,10 @@ namespace ProjectA {
 					rigidBodyA->linearVelocity -= impulse * rigidBodyA->inverseMass;
 					rigidBodyB->linearVelocity += impulse * rigidBodyB->inverseMass;
 
-					// TODO: 1 - toi does not move the objects.
-					advanceSimulation(scene, A, 1.0f - toi);
-					advanceSimulation(scene, B, 1.0f - toi);
-				} */
+					// TODO: t < 0.1 does not move the entities.
+					advanceSimulation(scene, A, std::max(0.1f, 1.0f - toi));
+					advanceSimulation(scene, B, std::max(0.1f, 1.0f - toi));
+				}
 			}
 		}
 	}
@@ -192,7 +192,6 @@ namespace ProjectA {
 
 				uint32 rootFinderIteration = 0;
 
-				// TODO: Use proper condition.
 				while (rootFinderIteration < ROOT_FINDER_ITERATION_LIMIT) {
 					float32 t;
 

@@ -56,8 +56,6 @@ namespace ProjectA {
 				scene.calculateMass(entityB);
 				scene.updateTransform(entityB);
 
-				// BREAKPOINT();
-
 				renderer.build();
 				renderer.registerScene(scene);
 			}
