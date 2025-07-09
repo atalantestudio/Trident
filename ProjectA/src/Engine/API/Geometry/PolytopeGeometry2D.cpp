@@ -6,11 +6,11 @@ namespace ProjectA {
 	PolytopeGeometry2D::PolytopeGeometry2D(const Geometry2DDescriptor& descriptor) :
 		Geometry2D(descriptor)
 	{
-		centerOfMass = computeCenterOfMass();
-		radius = computeRadius();
+		centerOfMass = calculateCenterOfMass();
+		radius = calculateRadius();
 	}
 
-	vec2<float32> PolytopeGeometry2D::computeCenterOfMass() const {
+	vec2<float32> PolytopeGeometry2D::calculateCenterOfMass() const {
 		vec2<float32> centerOfMass;
 
 		for (const vec2<float32>& vertex : vertices) {
@@ -22,7 +22,11 @@ namespace ProjectA {
 		return centerOfMass;
 	}
 
-	float32 PolytopeGeometry2D::computeRadius() const {
+	float32 PolytopeGeometry2D::calculateMass(float32 density) const {
+		return density * area(vertices);
+	}
+
+	float32 PolytopeGeometry2D::calculateRadius() const {
 		float32 radius = 0.0f;
 
 		for (const vec2<float32>& vertex : vertices) {

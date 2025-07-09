@@ -63,6 +63,14 @@ namespace ProjectA {
 				ecs.setComponent<ref<Material>>(entity, material);
 			}
 
+			void updateMass(Entity entity) {
+				const ref<Geometry2D>& geometry = ecs.getComponent<ref<Geometry2D>>(entity);
+				const ref<Material>& material = ecs.getComponent<ref<Material>>(entity);
+
+				ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(ecs.getComponent<ref<Body>>(entity));
+				rigidBody->inverseMass = 1.0f / geometry->calculateMass(material->density);
+			}
+
 			void updateTransform(Entity entity) {
 				const ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(ecs.getComponent<ref<Body>>(entity));
 				const ref<Geometry2D>& geometry = ecs.getComponent<ref<Geometry2D>>(entity);
@@ -73,15 +81,6 @@ namespace ProjectA {
 					mat3x3<float32>::scaling(rigidBody->scale) *
 					mat3x3<float32>::rotation(rigidBody->rotation) *
 					mat3x3<float32>::translation(rigidBody->position);
-			}
-
-			void calculateMass(Entity entity) {
-				const ref<Geometry2D>& geometry = ecs.getComponent<ref<Geometry2D>>(entity);
-				const ref<Material>& material = ecs.getComponent<ref<Material>>(entity);
-				const float32 volume = area(geometry->vertices);
-
-				ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(ecs.getComponent<ref<Body>>(entity));
-				rigidBody->inverseMass = 1.0f / (material->density * volume);
 			}
 
 		private:

@@ -14,9 +14,11 @@ namespace ProjectA {
 
 			uint32 getVertexCount() const;
 
-			virtual vec2<float32> computeCenterOfMass() const = 0;
+			virtual vec2<float32> calculateCenterOfMass() const = 0;
 
-			virtual float32 computeRadius() const = 0;
+			virtual float32 calculateMass(float32 density) const = 0;
+
+			virtual float32 calculateRadius() const = 0;
 
 			// Returns the index of the farthest point of the geometry along d.
 			// d does not need to be normalized.

@@ -35,7 +35,7 @@ namespace ProjectA {
 				scene.setBody(entityA, std::static_pointer_cast<Body>(bodyA));
 				scene.setGeometry(entityA, std::static_pointer_cast<Geometry2D>(squareGeometry));
 				scene.setMaterial(entityA, std::static_pointer_cast<Material>(materialA));
-				scene.calculateMass(entityA);
+				scene.updateMass(entityA);
 				scene.updateTransform(entityA);
 
 				const Entity entityB = scene.createPhysicalObjectEntity();
@@ -53,7 +53,7 @@ namespace ProjectA {
 				scene.setBody(entityB, std::static_pointer_cast<Body>(bodyB));
 				scene.setGeometry(entityB, std::static_pointer_cast<Geometry2D>(squareGeometry));
 				scene.setMaterial(entityB, std::static_pointer_cast<Material>(materialB));
-				scene.calculateMass(entityB);
+				scene.updateMass(entityB);
 				scene.updateTransform(entityB);
 
 				renderer.build();
