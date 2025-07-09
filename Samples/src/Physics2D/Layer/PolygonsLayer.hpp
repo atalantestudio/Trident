@@ -34,7 +34,7 @@ namespace ProjectA {
 				const ref<PolytopeGeometry2D> polygonGeometry = createRef<PolytopeGeometry2D>(polygonGeometryDescriptor);
 				const ref<PolytopeGeometry2D> triangleGeometry = createRef<PolytopeGeometry2D>(triangleGeometryDescriptor);
 
-				const Entity entityA = scene.createPhysicalObjectEntity();
+				const Entity entityA = scene.createPhysicalObjectEntity(0);
 
 				ref<RigidBody2D> bodyA = createRef<RigidBody2D>();
 				bodyA->position = {0.45f, -0.625f};
@@ -51,7 +51,7 @@ namespace ProjectA {
 				scene.updateMass(entityA);
 				scene.updateTransform(entityA);
 
-				const Entity entityB = scene.createPhysicalObjectEntity();
+				const Entity entityB = scene.createPhysicalObjectEntity(0);
 
 				ref<RigidBody2D> bodyB = createRef<RigidBody2D>();
 				bodyB->position = {0.0f, 1.957f};

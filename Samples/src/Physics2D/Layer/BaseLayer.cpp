@@ -1,6 +1,5 @@
 #include "pch.hpp"
 
-#include "Engine/API/Physics/Integrator.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 #include "BaseLayer.hpp"
@@ -15,7 +14,7 @@ namespace ProjectA {
 
 		PhysicsUpdate();
 
-		Integrator::integrate(scene, &gjkResult);
+		physicsEngine.update(scene, &gjkResult);
 	}
 
 	void BaseLayer::preRender() {

@@ -33,6 +33,8 @@ namespace ProjectA {
 			Scene2D scene;
 
 		private:
+			PhysicsEngine physicsEngine;
+
 			GJK2DResult gjkResult;
 
 			Entity hoveredEntity = max<uint32>();

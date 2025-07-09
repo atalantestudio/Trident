@@ -1,86 +1,130 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/GJK2D.hpp"
-#include "Engine/API/Physics/Integrator.hpp"
+#include "Engine/API/Physics/PhysicsEngine.hpp"
 
 namespace ProjectA {
 	static constexpr uint32 DISTANCE_ITERATION_LIMIT = 20;
 	static constexpr uint32 PUSH_BACK_ITERATION_LIMIT = 8;
 	static constexpr uint32 ROOT_FINDER_ITERATION_LIMIT = 50;
 
-	// Enable/disable continuous collision detection.
+	// Toggle continuous collision detection.
 	#define DEBUG_ENABLE_CCD
 
-	void Integrator::integrate(Scene2D& scene, GJK2DResult* gjkResult) {
-		for (Entity A = 0; A < scene.getPhysicalObjectEntityCount() - 1; A += 1) {
-			for (Entity B = A + 1; B < scene.getPhysicalObjectEntityCount(); B += 1) {
-				float32 toi = 1.0f;
+	void PhysicsEngine::update(Scene2D& scene, GJK2DResult* gjkResult) {
+		this->scene = &scene;
 
-				#ifdef DEBUG_ENABLE_CCD
-					const CCDOutput output = evaluateContinuousCollision(scene, A, B, gjkResult);
+		broadPhase();
+		narrowPhase(gjkResult);
+		integrate();
+	}
 
-					#ifdef BUILD_MODE_DEBUG
-						printOutputState(output.state);
-					#endif
+	void PhysicsEngine::broadPhase() {
+		pairs.clear();
+		safeAdvanceTimes.resize(scene->getPhysicalObjectEntityCount());
 
-					toi = output.fraction;
-				#endif
+		std::fill(safeAdvanceTimes.begin(), safeAdvanceTimes.end(), 1.0f);
 
-				advanceSimulation(scene, A, toi);
-				advanceSimulation(scene, B, toi);
+		if (scene->getPhysicalObjectEntityCount() < 2) {
+			return;
+		}
 
-				// https://code.tutsplus.com/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331t
-				if (output.state == CCDOutputState::HIT) {
-					ref<RigidBody2D>& rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene.getBody(A));
-					ref<RigidBody2D>& rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene.getBody(B));
-					const ref<Material>& materialA = scene.getMaterial(A);
-					const ref<Material>& materialB = scene.getMaterial(B);
+		for (const std::vector<Entity>& layer : scene->getLayers()) {
+			if (layer.size() < 2) {
+				continue;
+			}
 
-					const vec2<float32> collisionNormal = normalized(rigidBodyB->position - rigidBodyA->position);
-					const vec2<float32> relativeLinearVelocity = rigidBodyB->linearVelocity - rigidBodyA->linearVelocity;
-					const float32 velocityAlongNormal = dot(relativeLinearVelocity, collisionNormal);
+			for (Entity A = 0; A < layer.size() - 1; A += 1) {
+				for (Entity B = A + 1; B < scene->getPhysicalObjectEntityCount(); B += 1) {
+					CollisionPair pair{};
+					pair.A = A;
+					pair.B = B;
 
-					if (velocityAlongNormal > 0.0f) {
-						// These entities are separating; continue to the next entities.
-						continue;
-					}
-
-					// TODO: lyah::min
-					// Calculate coefficient of restitution.
-					const float32 e = std::min(materialA->coefficientOfRestitution, materialB->coefficientOfRestitution);
-
-					// Calculate linear impulse.
-					const float32 j = (-(1 + e) * velocityAlongNormal) / (rigidBodyA->inverseMass + rigidBodyB->inverseMass);
-					const vec2<float32> impulse = collisionNormal * j;
-
-					// Apply linear impulse.
-					rigidBodyA->linearVelocity -= impulse * rigidBodyA->inverseMass;
-					rigidBodyB->linearVelocity += impulse * rigidBodyB->inverseMass;
-
-					// TODO: t < 0.1 does not move the entities.
-					advanceSimulation(scene, A, std::max(0.1f, 1.0f - toi));
-					advanceSimulation(scene, B, std::max(0.1f, 1.0f - toi));
+					pairs.emplace_back(pair);
 				}
 			}
 		}
 	}
 
-	#ifdef BUILD_MODE_DEBUG
-		void Integrator::printOutputState(CCDOutputState outputState) {
-			switch (outputState) {
-				case CCDOutputState::UNDETERMINED:
-					ENGINE_ERROR("Integrator: CCD state is undetermined.");
+	void PhysicsEngine::narrowPhase(GJK2DResult* gjkResult) {
+		// TODO
+		// BREAKPOINT();
 
-					break;
-				case CCDOutputState::UNRESOLVED_ROOT:
-					ENGINE_WARN("Integrator: Root finder ran out of iterations.");
+		for (CollisionPair& pair : pairs) {
+			float32 toi = 1.0f;
 
-					break;
-				default:
-					break;
+			#ifdef DEBUG_ENABLE_CCD
+				const CCDOutput output = evaluateContinuousCollision(pair.A, pair.B, gjkResult);
+
+				toi = output.fraction;
+			#endif
+
+			// TODO: lyah::min
+			safeAdvanceTimes[pair.A] = std::min(safeAdvanceTimes[pair.A], toi);
+			safeAdvanceTimes[pair.B] = std::min(safeAdvanceTimes[pair.B], toi);
+
+			// https://code.tutsplus.com/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331t
+			if (output.state == CCDOutputState::HIT) {
+				const PhysicalObjectCopy2D copyA = copyPhysicalObject(*scene, pair.A, safeAdvanceTimes[pair.A]);
+				const PhysicalObjectCopy2D copyB = copyPhysicalObject(*scene, pair.B, safeAdvanceTimes[pair.B]);
+
+				ref<RigidBody2D>& rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene->getBody(pair.A));
+				ref<RigidBody2D>& rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene->getBody(pair.B));
+				const ref<Material>& materialA = scene->getMaterial(pair.A);
+				const ref<Material>& materialB = scene->getMaterial(pair.B);
+
+				const vec2<float32> collisionNormal = normalized(copyB.position - copyA.position);
+				const vec2<float32> relativeLinearVelocity = copyB.linearVelocity - copyA.linearVelocity;
+				const float32 velocityAlongNormal = dot(relativeLinearVelocity, collisionNormal);
+
+				if (velocityAlongNormal > 0.0f) {
+					// These entities are separating; continue to the next entities.
+					continue;
+				}
+
+				// TODO: lyah::min
+				// Calculate coefficient of restitution.
+				const float32 e = std::min(materialA->coefficientOfRestitution, materialB->coefficientOfRestitution);
+
+				// Calculate linear impulse.
+				const float32 j = (-(1 + e) * velocityAlongNormal) / (rigidBodyA->inverseMass + rigidBodyB->inverseMass);
+				const vec2<float32> impulse = collisionNormal * j;
+
+				// TODO: Move the entities to the hit point before applying impulses.
+				// Apply linear impulse.
+				// rigidBodyA->linearVelocity -= impulse * rigidBodyA->inverseMass;
+				// rigidBodyB->linearVelocity += impulse * rigidBodyB->inverseMass;
+
+				// TODO: lyah::max
+				// TODO: t < 0.1 does not move the entities.
+				const float32 t = 1.0f - toi;
+				// const float32 t = std::max(0.1f, 1.0f - toi);
+
+				// TODO: lyah::min
+				safeAdvanceTimes[pair.A] = std::min(safeAdvanceTimes[pair.A], t);
+				safeAdvanceTimes[pair.B] = std::min(safeAdvanceTimes[pair.B], t);
 			}
 		}
-	#endif
+	}
+
+	void PhysicsEngine::integrate() {
+		for (Entity entity = 0; entity < scene->getPhysicalObjectEntityCount(); entity += 1) {
+			const float32 t = safeAdvanceTimes[entity];
+
+			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(entity));
+
+			rigidBody->position += rigidBody->linearVelocity * t + rigidBody->linearAcceleration * t * t * 0.5f;
+			rigidBody->rotation += rigidBody->angularVelocity * t + rigidBody->angularAcceleration * t * t * 0.5f;
+
+			rigidBody->linearVelocity += (rigidBody->linearAcceleration + rigidBody->linearForces) * t * 0.5f;
+			rigidBody->angularVelocity += (rigidBody->angularAcceleration + rigidBody->angularForces) * t * 0.5f;
+
+			rigidBody->linearAcceleration = rigidBody->linearForces;
+			rigidBody->angularAcceleration = rigidBody->angularForces;
+
+			scene->updateTransform(entity);
+		}
+	}
 
 	// Bilateral Advancement algorithm implementation.
 	// Evaluates continuous collision between A and B.
@@ -94,7 +138,7 @@ namespace ProjectA {
 	// - Nilson Souto - Video Game Physics Tutorial - Part II: Collision Detection for Solid Objects
 	//   https://www.toptal.com/game/video-game-physics-part-ii-collision-detection-for-solid-objects
 	// 
-	CCDOutput Integrator::evaluateContinuousCollision(const Scene2D& scene, Entity A, Entity B, GJK2DResult* gjkResult) {
+	CCDOutput PhysicsEngine::evaluateContinuousCollision(Entity A, Entity B, GJK2DResult* gjkResult) {
 		static constexpr float32 TOLERANCE = 0.25f * 0.005f;
 		static constexpr float32 TARGET = 0.005f;
 
@@ -107,14 +151,14 @@ namespace ProjectA {
 
 		float32 t0 = 0.0f;
 
-		const PhysicalObjectCopy2D baseA = copyPhysicalObject(scene, A);
-		const PhysicalObjectCopy2D baseB = copyPhysicalObject(scene, B);
+		const PhysicalObjectCopy2D baseA = copyPhysicalObject(*scene, A);
+		const PhysicalObjectCopy2D baseB = copyPhysicalObject(*scene, B);
 
 		uint32 distanceIteration = 0;
 
 		while (distanceIteration < DISTANCE_ITERATION_LIMIT) {
-			const PhysicalObjectCopy2D nextA = copyPhysicalObject(scene, A, t0);
-			const PhysicalObjectCopy2D nextB = copyPhysicalObject(scene, B, t0);
+			const PhysicalObjectCopy2D nextA = copyPhysicalObject(*scene, A, t0);
+			const PhysicalObjectCopy2D nextB = copyPhysicalObject(*scene, B, t0);
 
 			const GJK2DResult result = GJK2D(nextA, nextB);
 
@@ -146,8 +190,8 @@ namespace ProjectA {
 			uint32 pushBackIteration = 0;
 
 			while (pushBackIteration < PUSH_BACK_ITERATION_LIMIT) {
-				const PhysicalObjectCopy2D nextSeparationA = copyPhysicalObject(scene, A, t1);
-				const PhysicalObjectCopy2D nextSeparationB = copyPhysicalObject(scene, B, t1);
+				const PhysicalObjectCopy2D nextSeparationA = copyPhysicalObject(*scene, A, t1);
+				const PhysicalObjectCopy2D nextSeparationB = copyPhysicalObject(*scene, B, t1);
 				const MinSeparationOutput minSeparationOutput = findMinSeparation(separationFunction, nextSeparationA, nextSeparationB);
 
 				float32 s1 = minSeparationOutput.separationValue;
@@ -168,7 +212,7 @@ namespace ProjectA {
 				}
 
 				// Calculate the initial separation value of the witness points.
-				float32 s0 = evaluateSeparation(separationFunction, scene, A, B, minSeparationOutput, t0);
+				float32 s0 = evaluateSeparation(separationFunction, A, B, minSeparationOutput, t0);
 
 				if (s0 < TARGET - TOLERANCE) {
 					// If the root finder reaches the iteration limit, exit.
@@ -206,7 +250,7 @@ namespace ProjectA {
 
 					rootFinderIteration += 1;
 
-					const float32 s = evaluateSeparation(separationFunction, scene, A, B, minSeparationOutput, t);
+					const float32 s = evaluateSeparation(separationFunction, A, B, minSeparationOutput, t);
 
 					if (abs(s - TARGET) < TOLERANCE) {
 						// Move t1 back.
@@ -237,7 +281,7 @@ namespace ProjectA {
 		return output;
 	}
 
-	SeparationFunction Integrator::createSeparationFunction(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, const GJK2DResult& gjkResult) {
+	SeparationFunction PhysicsEngine::createSeparationFunction(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, const GJK2DResult& gjkResult) {
 		SeparationFunction separationFunction;
 
 		if (gjkResult.closestFeatureA.count == 1 && gjkResult.closestFeatureB.count == 1) {
@@ -294,7 +338,7 @@ namespace ProjectA {
 		return separationFunction;
 	}
 
-	MinSeparationOutput Integrator::findMinSeparation(SeparationFunction separationFunction, const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
+	MinSeparationOutput PhysicsEngine::findMinSeparation(SeparationFunction separationFunction, const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
 		MinSeparationOutput output{};
 		vec2<float32> normal;
 		vec2<float32> a;
@@ -337,11 +381,11 @@ namespace ProjectA {
 		return output;
 	}
 
-	float32 Integrator::evaluateSeparation(SeparationFunction separationFunction, const Scene2D& scene, Entity A, Entity B, MinSeparationOutput minSeparationOutput, float32 t) {
-		const ref<Geometry2D>& geometryA = scene.getGeometry(A);
-		const ref<Geometry2D>& geometryB = scene.getGeometry(B);
-		const PhysicalObjectCopy2D tA = copyPhysicalObject(scene, A, t);
-		const PhysicalObjectCopy2D tB = copyPhysicalObject(scene, B, t);
+	float32 PhysicsEngine::evaluateSeparation(SeparationFunction separationFunction, Entity A, Entity B, MinSeparationOutput minSeparationOutput, float32 t) {
+		const ref<Geometry2D>& geometryA = scene->getGeometry(A);
+		const ref<Geometry2D>& geometryB = scene->getGeometry(B);
+		const PhysicalObjectCopy2D tA = copyPhysicalObject(*scene, A, t);
+		const PhysicalObjectCopy2D tB = copyPhysicalObject(*scene, B, t);
 
 		vec2<float32> a;
 		vec2<float32> b;
@@ -379,7 +423,7 @@ namespace ProjectA {
 	}
 
 	// TODO: Refactor.
-	void Integrator::identifyClosestFeatures(
+	void PhysicsEngine::identifyClosestFeatures(
 		SeparationType& separationType,
 		const PhysicalObjectCopy2D& objectA,
 		const PhysicalObjectCopy2D& objectB,
@@ -414,7 +458,7 @@ namespace ProjectA {
 	}
 
 	// TODO: Refactor.
-	void Integrator::identifyClosestFeatures(const PhysicalObjectCopy2D& objectA, const PhysicalObjectCopy2D& objectB, SeparationType separationType, const PhysicalObjectCopy2D*& vertexObject, const PhysicalObjectCopy2D*& edgeObject) {
+	void PhysicsEngine::identifyClosestFeatures(const PhysicalObjectCopy2D& objectA, const PhysicalObjectCopy2D& objectB, SeparationType separationType, const PhysicalObjectCopy2D*& vertexObject, const PhysicalObjectCopy2D*& edgeObject) {
 		if (separationType & SeparationType::EDGE_A) {
 			vertexObject = &objectB;
 			edgeObject = &objectA;
@@ -432,8 +476,8 @@ namespace ProjectA {
 		ENGINE_ASSERT(false, "Invalid separation type.");
 	}
 
-	void Integrator::advanceSimulation(Scene2D& scene, Entity entity, float32 t) {
-		ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene.getBody(entity));
+	void PhysicsEngine::advanceSimulation(Entity entity, float32 t) {
+		ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(entity));
 
 		rigidBody->position += rigidBody->linearVelocity * t + rigidBody->linearAcceleration * t * t * 0.5f;
 		rigidBody->rotation += rigidBody->angularVelocity * t + rigidBody->angularAcceleration * t * t * 0.5f;
@@ -444,6 +488,6 @@ namespace ProjectA {
 		rigidBody->linearAcceleration = rigidBody->linearForces;
 		rigidBody->angularAcceleration = rigidBody->angularForces;
 
-		scene.updateTransform(entity);
+		scene->updateTransform(entity);
 	}
 }

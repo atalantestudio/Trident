@@ -20,7 +20,7 @@ namespace ProjectA {
 
 				const ref<PolytopeGeometry2D> squareGeometry = createRef<PolytopeGeometry2D>(squareGeometryDescriptor);
 
-				const Entity entityA = scene.createPhysicalObjectEntity();
+				const Entity entityA = scene.createPhysicalObjectEntity(0);
 
 				ref<RigidBody2D> bodyA = createRef<RigidBody2D>();
 				bodyA->position = {-3.0f, -3.0f};
@@ -38,7 +38,7 @@ namespace ProjectA {
 				scene.updateMass(entityA);
 				scene.updateTransform(entityA);
 
-				const Entity entityB = scene.createPhysicalObjectEntity();
+				const Entity entityB = scene.createPhysicalObjectEntity(0);
 
 				ref<RigidBody2D> bodyB = createRef<RigidBody2D>();
 				bodyB->position = {3.0f, -3.0f};

@@ -9,12 +9,19 @@
 namespace ProjectA {
 	// TODO: Create "Runtime" directory for this kind of object?
 	class Scene2D {
+		private:
+			static constexpr uint32 LAYER_COUNT = 4;
+
 		public:
 			explicit Scene2D() {
 				ecs.registerComponent<ref<Body2D>>();
 				ecs.registerComponent<ref<Geometry2D>>();
 				ecs.registerComponent<ref<Material>>();
 				ecs.registerComponent<PhysicalObject2D>();
+			}
+
+			const std::array<std::vector<Entity>, LAYER_COUNT>& getLayers() const {
+				return layers;
 			}
 
 			uint32 getPhysicalObjectEntityCount() const {
@@ -45,12 +52,16 @@ namespace ProjectA {
 				return ecs.getComponent<PhysicalObject2D>(entity);
 			}
 
-			Entity createPhysicalObjectEntity() {
+			Entity createPhysicalObjectEntity(uint32 layerIndex) {
+				ENGINE_ASSERT(layerIndex < LAYER_COUNT, "The layer index is overflowing.");
+
 				const Entity entity = ecs.createEntity();
 
 				PhysicalObject2D physicalObject;
 
 				ecs.setComponent<PhysicalObject2D>(entity, physicalObject);
+
+				layers[layerIndex].emplace_back(entity);
 
 				return entity;
 			}
@@ -89,5 +100,6 @@ namespace ProjectA {
 
 		private:
 			ECS ecs;
+			std::array<std::vector<Entity>, LAYER_COUNT> layers;
 	};
 }
