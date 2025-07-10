@@ -65,10 +65,8 @@ namespace ProjectA {
 			struct Instance {
 				mat3x3<float32> world;
 				vec4<float32> fillColor;
-
-				// TODO: Remove padding.
-				vec4<float32> z;
-
+				vec4<float32> strokeColor;
+				float32 z;
 				uint32 selected = 0;
 			};
 

@@ -6,7 +6,7 @@ namespace ProjectA {
 	class SquaresLayer : public BaseLayer {
 		public:
 			void build() override {
-				Geometry2DDescriptor squareGeometryDescriptor;
+				PolygonGeometry2DDescriptor squareGeometryDescriptor;
 				squareGeometryDescriptor.vertices = {
 					{-1.0f, -1.0f},
 					{-1.0f,  1.0f},
@@ -18,7 +18,7 @@ namespace ProjectA {
 					0, 2, 3,
 				};
 
-				const ref<PolytopeGeometry2D> squareGeometry = createRef<PolytopeGeometry2D>(squareGeometryDescriptor);
+				const ref<PolygonGeometry2D> squareGeometry = createRef<PolygonGeometry2D>(squareGeometryDescriptor);
 
 				const Entity entityA = scene.createPhysicalObjectEntity(0);
 
@@ -27,8 +27,6 @@ namespace ProjectA {
 				bodyA->linearVelocity = {0.02f, 0.02f};
 
 				ref<ColorMaterial> materialA = createRef<ColorMaterial>();
-				materialA->density = 1.0f;
-				materialA->coefficientOfRestitution = 1.0f;
 				materialA->fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 				materialA->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
@@ -45,8 +43,6 @@ namespace ProjectA {
 				bodyB->linearVelocity = {-0.02f, 0.02f};
 
 				ref<ColorMaterial> materialB = createRef<ColorMaterial>();
-				materialB->density = 1.0f;
-				materialB->coefficientOfRestitution = 1.0f;
 				materialB->fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 				materialB->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 

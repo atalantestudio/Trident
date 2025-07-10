@@ -9,7 +9,7 @@ namespace ProjectA {
 	class PolygonsLayer : public BaseLayer {
 		public:
 			void build() override {
-				Geometry2DDescriptor polygonGeometryDescriptor;
+				PolygonGeometry2DDescriptor polygonGeometryDescriptor;
 				polygonGeometryDescriptor.vertices = {
 					{-3.0f,   0.0f},
 					{ 4.0f,   0.0f},
@@ -31,8 +31,8 @@ namespace ProjectA {
 					0, 1, 2,
 				};
 
-				const ref<PolytopeGeometry2D> polygonGeometry = createRef<PolytopeGeometry2D>(polygonGeometryDescriptor);
-				const ref<PolytopeGeometry2D> triangleGeometry = createRef<PolytopeGeometry2D>(triangleGeometryDescriptor);
+				const ref<PolygonGeometry2D> polygonGeometry = createRef<PolygonGeometry2D>(polygonGeometryDescriptor);
+				const ref<PolygonGeometry2D> triangleGeometry = createRef<PolygonGeometry2D>(triangleGeometryDescriptor);
 
 				const Entity entityA = scene.createPhysicalObjectEntity(0);
 
@@ -40,8 +40,6 @@ namespace ProjectA {
 				bodyA->position = {0.45f, -0.625f};
 
 				ref<ColorMaterial> materialA = createRef<ColorMaterial>();
-				materialA->density = 1.0f;
-				materialA->coefficientOfRestitution = 1.0f;
 				materialA->fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 				materialA->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
@@ -59,8 +57,6 @@ namespace ProjectA {
 				bodyB->angularVelocity = lyah::radians(0.4617f);
 
 				ref<ColorMaterial> materialB = createRef<ColorMaterial>();
-				materialB->density = 1.0f;
-				materialB->coefficientOfRestitution = 1.0f;
 				materialB->fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 				materialB->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 

@@ -83,7 +83,11 @@ namespace ProjectA {
 				const ref<Material>& material = ecs.getComponent<ref<Material>>(entity);
 
 				ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(ecs.getComponent<ref<Body2D>>(entity));
-				rigidBody->inverseMass = 1.0f / geometry->calculateMass(material->density);
+				rigidBody->inverseMass = geometry->calculateMass(material->density);
+
+				if (rigidBody->inverseMass != 0.0f) {
+					rigidBody->inverseMass = 1.0f / rigidBody->inverseMass;
+				}
 			}
 
 			void updateTransform(Entity entity) {

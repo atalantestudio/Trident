@@ -22,8 +22,8 @@ namespace ProjectA {
 		//       ENGINE_ASSERT(coefficientOfRestitution >= 0.0f && coefficientOfRestitution <= 1.0f, "The coefficient of restitution must be between 0 and 1.");
 
 		// Mass is assumed to be uniformly distributed.
-		float32 density;
+		float32 density = 1.0f;
 
-		float32 coefficientOfRestitution;
+		float32 coefficientOfRestitution = 1.0f;
 	};
 }

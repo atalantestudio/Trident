@@ -193,9 +193,9 @@ namespace ProjectA {
 		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
 
-		// TODO: The offset must be a multiple of the minUniformBufferAlignment physical device limit.
+		// TODO: The camera's projection isn't needed here, but the offset must be a multiple of the minUniformBufferAlignment physical device limit.
 		cameraDescriptorSetLayoutBinding.bufferOffset = 0;
-		//cameraDescriptorSetLayoutBinding.bufferOffset = sizeof(mat3x3<float32>);
+		// cameraDescriptorSetLayoutBinding.bufferOffset = sizeof(CameraUniform::projection);
 
 		DescriptorSetLayoutBinding viewDescriptorSetLayoutBinding;
 		viewDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
@@ -516,10 +516,9 @@ namespace ProjectA {
 
 			std::copy(geometry->indices.begin(), geometry->indices.end(), indexMappedRange);
 
-			const float32 z = static_cast<float32>(entity) / instanceCount;
-
 			instanceMappedRange->fillColor = std::static_pointer_cast<ColorMaterial>(material)->fillColor;
-			instanceMappedRange->z = {z, z, z, z};
+			instanceMappedRange->strokeColor = std::static_pointer_cast<ColorMaterial>(material)->strokeColor;
+			instanceMappedRange->z = static_cast<float32>(entity) / instanceCount;
 
 			vertexMappedRange += geometry->getVertexCount() + 1;
 			indexMappedRange += geometry->getIndexCount();
@@ -614,6 +613,7 @@ namespace ProjectA {
 		fillInstanceInputBinding.registerAttribute<mat3x3<float32>>();
 		fillInstanceInputBinding.registerAttribute<vec4<float32>>();
 		fillInstanceInputBinding.registerAttribute<vec4<float32>>();
+		fillInstanceInputBinding.registerAttribute<float32>();
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -626,6 +626,11 @@ namespace ProjectA {
 		ColorBlendAttachment opaqueColorBlendAttachment{};
 		opaqueColorBlendAttachment.blend = false;
 
+		ColorBlendAttachment transparentColorBlendAttachment{};
+		transparentColorBlendAttachment.blend = true;
+		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
+		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+
 		RenderPipelineDescriptor fillRenderPipelineDescriptor;
 		fillRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, fillInstanceInputBinding};
@@ -637,7 +642,7 @@ namespace ProjectA {
 		fillRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		fillRenderPipelineDescriptor.lineWidth = 1.0f;
 		fillRenderPipelineDescriptor.minSampleShading = 0.0f;
-		fillRenderPipelineDescriptor.colorBlendState.attachments = {opaqueColorBlendAttachment};
+		fillRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
 		fillRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		fillRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		fillRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
@@ -651,6 +656,7 @@ namespace ProjectA {
 		strokeInstanceInputBinding.registerAttribute<mat3x3<float32>>();
 		strokeInstanceInputBinding.registerAttribute<vec4<float32>>();
 		strokeInstanceInputBinding.registerAttribute<vec4<float32>>();
+		strokeInstanceInputBinding.registerAttribute<float32>();
 		strokeInstanceInputBinding.registerAttribute<uint32>();
 
 		RenderPipelineDescriptor strokeRenderPipelineDescriptor;
@@ -664,7 +670,7 @@ namespace ProjectA {
 		strokeRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		strokeRenderPipelineDescriptor.lineWidth = 1.0f;
 		strokeRenderPipelineDescriptor.minSampleShading = 0.0f;
-		strokeRenderPipelineDescriptor.colorBlendState.attachments = {opaqueColorBlendAttachment};
+		strokeRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
 		strokeRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		strokeRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		strokeRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
@@ -705,11 +711,6 @@ namespace ProjectA {
 
 		VertexInputBinding placeholderStrokeInstanceInputBinding(InputRate::INSTANCE);
 		placeholderStrokeInstanceInputBinding.registerAttribute<mat3x3<float32>>();
-
-		ColorBlendAttachment transparentColorBlendAttachment{};
-		transparentColorBlendAttachment.blend = true;
-		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
 		fillRenderPipelineDescriptor.pipelineLayout = placeholderFillPipelineLayout;
 		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, placeholderFillInstanceInputBinding};

@@ -50,7 +50,8 @@
 #include "Engine/GUI/Font/TrueType/TrueTypeFont.hpp"
 
 // Geometry
-#include "Engine/API/Geometry/PolytopeGeometry2D.hpp"
+#include "Engine/API/Geometry/CircleGeometry2D.hpp"
+#include "Engine/API/Geometry/PolygonGeometry2D.hpp"
 
 // Material
 #include "Engine/API/Material/ColorMaterial.hpp"
