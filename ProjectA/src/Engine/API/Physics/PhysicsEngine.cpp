@@ -66,17 +66,17 @@ namespace ProjectA {
 
 			// https://code.tutsplus.com/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331t
 			if (output.state == CCDOutputState::HIT) {
-				const PhysicalObjectCopy2D copyA = copyPhysicalObject(*scene, pair.A, safeAdvanceTimes[pair.A]);
-				const PhysicalObjectCopy2D copyB = copyPhysicalObject(*scene, pair.B, safeAdvanceTimes[pair.B]);
+				const PhysicalObjectCopy2D copyA = copyPhysicalObject(*scene, pair.A, toi);
+				const PhysicalObjectCopy2D copyB = copyPhysicalObject(*scene, pair.B, toi);
 
 				ref<RigidBody2D>& rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene->getBody(pair.A));
 				ref<RigidBody2D>& rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene->getBody(pair.B));
 				const ref<Material>& materialA = scene->getMaterial(pair.A);
 				const ref<Material>& materialB = scene->getMaterial(pair.B);
 
-				const vec2<float32> collisionNormal = normalized(copyB.position - copyA.position);
-				const vec2<float32> relativeLinearVelocity = copyB.linearVelocity - copyA.linearVelocity;
-				const float32 velocityAlongNormal = dot(relativeLinearVelocity, collisionNormal);
+				const vec2<float32> n = normalized(copyB.position - copyA.position);
+				vec2<float32> relativeLinearVelocity = copyB.linearVelocity - copyA.linearVelocity;
+				const float32 velocityAlongNormal = dot(relativeLinearVelocity, n);
 
 				if (velocityAlongNormal > 0.0f) {
 					// These entities are separating; continue to the next entities.
@@ -88,19 +88,40 @@ namespace ProjectA {
 				const float32 e = std::min(materialA->coefficientOfRestitution, materialB->coefficientOfRestitution);
 
 				// Calculate linear impulse.
-				const float32 j = (-(1 + e) * velocityAlongNormal) / (rigidBodyA->inverseMass + rigidBodyB->inverseMass);
-				const vec2<float32> impulse = collisionNormal * j;
+				// Fn is the magnitude of the collision normal.
+				const float32 Fn = (-(1 + e) * velocityAlongNormal) / (rigidBodyA->inverseMass + rigidBodyB->inverseMass);
+				const vec2<float32> normalImpulse = n * Fn;
+
+				// TODO: Fix infinite tangent vector.
+				/* // Linear velocity + normal impulse.
+				const vec2<float32> vA = copyA.linearVelocity - normalImpulse * rigidBodyA->inverseMass;
+				const vec2<float32> vB = copyB.linearVelocity + normalImpulse * rigidBodyB->inverseMass;
+
+				relativeLinearVelocity = vB - vA;
+
+				// Tangent to the collision normal.
+				const vec2<float32> tangent = normalized(relativeLinearVelocity - n * dot(relativeLinearVelocity, n));
+
+				// Magnitude of the friction.
+				const float32 Ff = -dot(relativeLinearVelocity, tangent) / (rigidBodyA->inverseMass + rigidBodyB->inverseMass);
+
+				const float32 mu = (rigidBodyA->staticFriction + rigidBodyB->staticFriction) * 0.5f;
+
+				vec2<float32> frictionImpulse = tangent * Ff;
+
+				if (abs(Ff) > mu * Fn) {
+					frictionImpulse = tangent * -Fn * ((rigidBodyA->dynamicFriction + rigidBodyB->dynamicFriction) * 0.5f);
+				} */
 
 				ImpulseData impulseDataA;
 				impulseDataA.entity = pair.A;
-				impulseDataA.impulse = -impulse * rigidBodyA->inverseMass;
-
-				impulses.emplace_back(impulseDataA);
+				impulseDataA.impulse = -(normalImpulse /* + frictionImpulse */) * rigidBodyA->inverseMass;
 
 				ImpulseData impulseDataB;
 				impulseDataB.entity = pair.B;
-				impulseDataB.impulse = impulse * rigidBodyB->inverseMass;
+				impulseDataB.impulse = (normalImpulse /* + frictionImpulse */) * rigidBodyB->inverseMass;
 
+				impulses.emplace_back(impulseDataA);
 				impulses.emplace_back(impulseDataB);
 			}
 		}
