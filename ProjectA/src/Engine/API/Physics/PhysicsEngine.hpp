@@ -8,6 +8,11 @@
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace ProjectA {
+	struct ImpulseData {
+		Entity entity;
+		vec2<float32> impulse;
+	};
+
 	class PhysicsEngine {
 		public:
 			void update(Scene2D& scene, GJK2DResult* gjkResult = nullptr);
@@ -51,5 +56,6 @@ namespace ProjectA {
 			Scene2D* scene;
 			std::vector<CollisionPair> pairs;
 			std::vector<float32> safeAdvanceTimes;
+			std::vector<ImpulseData> impulses;
 	};
 }

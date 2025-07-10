@@ -22,6 +22,7 @@ namespace ProjectA {
 	void PhysicsEngine::broadPhase() {
 		pairs.clear();
 		safeAdvanceTimes.resize(scene->getPhysicalObjectEntityCount());
+		impulses.clear();
 
 		std::fill(safeAdvanceTimes.begin(), safeAdvanceTimes.end(), 1.0f);
 
@@ -90,19 +91,17 @@ namespace ProjectA {
 				const float32 j = (-(1 + e) * velocityAlongNormal) / (rigidBodyA->inverseMass + rigidBodyB->inverseMass);
 				const vec2<float32> impulse = collisionNormal * j;
 
-				// TODO: Move the entities to the hit point before applying impulses.
-				// Apply linear impulse.
-				// rigidBodyA->linearVelocity -= impulse * rigidBodyA->inverseMass;
-				// rigidBodyB->linearVelocity += impulse * rigidBodyB->inverseMass;
+				ImpulseData impulseDataA;
+				impulseDataA.entity = pair.A;
+				impulseDataA.impulse = -impulse * rigidBodyA->inverseMass;
 
-				// TODO: lyah::max
-				// TODO: t < 0.1 does not move the entities.
-				const float32 t = 1.0f - toi;
-				// const float32 t = std::max(0.1f, 1.0f - toi);
+				impulses.emplace_back(impulseDataA);
 
-				// TODO: lyah::min
-				safeAdvanceTimes[pair.A] = std::min(safeAdvanceTimes[pair.A], t);
-				safeAdvanceTimes[pair.B] = std::min(safeAdvanceTimes[pair.B], t);
+				ImpulseData impulseDataB;
+				impulseDataB.entity = pair.B;
+				impulseDataB.impulse = impulse * rigidBodyB->inverseMass;
+
+				impulses.emplace_back(impulseDataB);
 			}
 		}
 	}
@@ -123,6 +122,30 @@ namespace ProjectA {
 			rigidBody->angularAcceleration = rigidBody->angularForces;
 
 			scene->updateTransform(entity);
+		}
+
+		for (const ImpulseData& impulseData : impulses) {
+			const float32 toi = safeAdvanceTimes[impulseData.entity];
+
+			// TODO: lyah::max
+			// TODO: max(0.1, t) seems to be needed with 2 entities. Both don't work when gravity is enabled.
+			const float32 t = 1.0f - toi;
+			// const float32 t = std::max(0.1f, 1.0f - toi);
+
+			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(impulseData.entity));
+
+			rigidBody->linearVelocity += impulseData.impulse;
+
+			rigidBody->position += rigidBody->linearVelocity * t + rigidBody->linearAcceleration * t * t * 0.5f;
+			rigidBody->rotation += rigidBody->angularVelocity * t + rigidBody->angularAcceleration * t * t * 0.5f;
+
+			rigidBody->linearVelocity += (rigidBody->linearAcceleration + rigidBody->linearForces) * t * 0.5f;
+			rigidBody->angularVelocity += (rigidBody->angularAcceleration + rigidBody->angularForces) * t * 0.5f;
+
+			rigidBody->linearAcceleration = rigidBody->linearForces;
+			rigidBody->angularAcceleration = rigidBody->angularForces;
+
+			scene->updateTransform(impulseData.entity);
 		}
 	}
 
