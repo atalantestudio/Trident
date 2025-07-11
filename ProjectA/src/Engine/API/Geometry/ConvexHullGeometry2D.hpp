@@ -3,14 +3,14 @@
 #include "Engine/API/Geometry/Geometry2D.hpp"
 
 namespace ProjectA {
-	struct PolygonGeometry2DDescriptor {
+	struct ConvexHullGeometry2DDescriptor {
 		sequence<uint32> indices;
 		sequence<vec2<float32>> vertices;
 	};
 
-	class PolygonGeometry2D : public Geometry2D {
+	class ConvexHullGeometry2D : public Geometry2D {
 		public:
-			explicit PolygonGeometry2D(const PolygonGeometry2DDescriptor& descriptor) {
+			explicit ConvexHullGeometry2D(const ConvexHullGeometry2DDescriptor& descriptor) {
 				indices = descriptor.indices;
 				vertices = descriptor.vertices;
 

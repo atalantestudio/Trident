@@ -9,7 +9,7 @@ namespace ProjectA {
 	class PolygonsLayer : public BaseLayer {
 		public:
 			void build() override {
-				PolygonGeometry2DDescriptor polygonGeometryDescriptor;
+				ConvexHullGeometry2DDescriptor polygonGeometryDescriptor;
 				polygonGeometryDescriptor.vertices = {
 					{-3.0f,   0.0f},
 					{ 4.0f,   0.0f},
@@ -31,8 +31,8 @@ namespace ProjectA {
 					0, 1, 2,
 				};
 
-				const ref<PolygonGeometry2D> polygonGeometry = createRef<PolygonGeometry2D>(polygonGeometryDescriptor);
-				const ref<PolygonGeometry2D> triangleGeometry = createRef<PolygonGeometry2D>(triangleGeometryDescriptor);
+				const ref<ConvexHullGeometry2D> polygonGeometry = createRef<ConvexHullGeometry2D>(polygonGeometryDescriptor);
+				const ref<ConvexHullGeometry2D> triangleGeometry = createRef<ConvexHullGeometry2D>(triangleGeometryDescriptor);
 
 				const Entity entityA = scene.createPhysicalObjectEntity(0);
 

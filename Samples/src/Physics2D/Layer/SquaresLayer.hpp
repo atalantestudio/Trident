@@ -6,7 +6,7 @@ namespace ProjectA {
 	class SquaresLayer : public BaseLayer {
 		public:
 			void build() override {
-				PolygonGeometry2DDescriptor squareGeometryDescriptor;
+				ConvexHullGeometry2DDescriptor squareGeometryDescriptor;
 				squareGeometryDescriptor.vertices = {
 					{-1.0f, -1.0f},
 					{-1.0f,  1.0f},
@@ -18,7 +18,7 @@ namespace ProjectA {
 					0, 2, 3,
 				};
 
-				const ref<PolygonGeometry2D> squareGeometry = createRef<PolygonGeometry2D>(squareGeometryDescriptor);
+				const ref<ConvexHullGeometry2D> squareGeometry = createRef<ConvexHullGeometry2D>(squareGeometryDescriptor);
 
 				const Entity entityA = scene.createPhysicalObjectEntity(0);
 

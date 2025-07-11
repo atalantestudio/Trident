@@ -48,9 +48,6 @@ namespace ProjectA {
 	}
 
 	void PhysicsEngine::narrowPhase(GJK2DResult* gjkResult) {
-		// TODO
-		// BREAKPOINT();
-
 		for (CollisionPair& pair : pairs) {
 			float32 toi = 1.0f;
 
