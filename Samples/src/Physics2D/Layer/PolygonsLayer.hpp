@@ -31,7 +31,7 @@ namespace ProjectA {
 				const ref<ConvexHullGeometry2D> polygonGeometry = createRef<ConvexHullGeometry2D>(polygonGeometryDescriptor);
 				const ref<ConvexHullGeometry2D> triangleGeometry = createRef<ConvexHullGeometry2D>(triangleGeometryDescriptor);
 
-				const Entity entityA = scene.createPhysicalObjectEntity(0);
+				const Entity entityA = scene.createDynamicEntity(0);
 
 				ref<RigidBody2D> bodyA = createRef<RigidBody2D>();
 				bodyA->position = {0.45f, -0.625f};
@@ -46,7 +46,7 @@ namespace ProjectA {
 				scene.updateMass(entityA);
 				scene.updateTransform(entityA);
 
-				const Entity entityB = scene.createPhysicalObjectEntity(0);
+				const Entity entityB = scene.createDynamicEntity(0);
 
 				ref<RigidBody2D> bodyB = createRef<RigidBody2D>();
 				bodyB->position = {0.0f, 1.957f};

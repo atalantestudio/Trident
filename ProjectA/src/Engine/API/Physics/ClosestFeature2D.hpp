@@ -7,9 +7,8 @@ namespace ProjectA {
 		// and because of that structs that use ClosestFeature2D (like GJK2DResult) cannot be constructed.
 		ClosestFeature2D() {}
 
-		// TODO: Store the index of the vertices instead of the transformed vertices.
-		//       In CCD, the non-transformed vertex is needed to create the separation function.
 		// The vertices that compose the feature.
+		// NOTE: The mesh transform is already applied on the feature's vertices.
 		union {
 			vec2<float32> vertex;
 			vec2<float32> edge[2];

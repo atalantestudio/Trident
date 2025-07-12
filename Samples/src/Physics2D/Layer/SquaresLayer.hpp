@@ -20,7 +20,7 @@ namespace ProjectA {
 
 				const ref<ConvexHullGeometry2D> squareGeometry = createRef<ConvexHullGeometry2D>(squareGeometryDescriptor);
 
-				const Entity entityA = scene.createPhysicalObjectEntity(0);
+				const Entity entityA = scene.createDynamicEntity(0);
 
 				ref<RigidBody2D> bodyA = createRef<RigidBody2D>();
 				bodyA->position = {-3.0f, -3.0f};
@@ -36,7 +36,7 @@ namespace ProjectA {
 				scene.updateMass(entityA);
 				scene.updateTransform(entityA);
 
-				const Entity entityB = scene.createPhysicalObjectEntity(0);
+				const Entity entityB = scene.createDynamicEntity(0);
 
 				ref<RigidBody2D> bodyB = createRef<RigidBody2D>();
 				bodyB->position = {3.0f, -3.0f};

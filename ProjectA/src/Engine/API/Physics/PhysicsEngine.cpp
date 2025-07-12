@@ -240,7 +240,7 @@ namespace ProjectA {
 				return output;
 			}
 
-			const SeparationFunction separationFunction = createSeparationFunction(nextA, nextB, result);
+			const SeparationFunction separationFunction(nextA, nextB, result.closestFeatureA, result.closestFeatureB);
 
 			float32 t1 = 1.0f;
 			uint32 pushBackIteration = 0;
@@ -248,7 +248,7 @@ namespace ProjectA {
 			while (pushBackIteration < PUSH_BACK_ITERATION_LIMIT) {
 				const PhysicalObjectCopy2D nextSeparationA = copyPhysicalObject(*scene, A, t1);
 				const PhysicalObjectCopy2D nextSeparationB = copyPhysicalObject(*scene, B, t1);
-				const MinSeparationOutput minSeparationOutput = findMinSeparation(separationFunction, nextSeparationA, nextSeparationB);
+				const MinSeparationOutput minSeparationOutput = separationFunction.findMinimumValue(nextSeparationA, nextSeparationB);
 
 				float32 s1 = minSeparationOutput.separationValue;
 
@@ -267,8 +267,11 @@ namespace ProjectA {
 					break;
 				}
 
+				const PhysicalObjectCopy2D tA = copyPhysicalObject(*scene, A, t0);
+				const PhysicalObjectCopy2D tB = copyPhysicalObject(*scene, B, t0);
+
 				// Calculate the initial separation value of the witness points.
-				float32 s0 = evaluateSeparation(separationFunction, A, B, minSeparationOutput, t0);
+				float32 s0 = separationFunction.evaluate(minSeparationOutput, tA, tB);
 
 				if (s0 < TARGET - TOLERANCE) {
 					// If the root finder reaches the iteration limit, exit.
@@ -306,7 +309,10 @@ namespace ProjectA {
 
 					rootFinderIteration += 1;
 
-					const float32 s = evaluateSeparation(separationFunction, A, B, minSeparationOutput, t);
+					const PhysicalObjectCopy2D tA = copyPhysicalObject(*scene, A, t);
+					const PhysicalObjectCopy2D tB = copyPhysicalObject(*scene, B, t);
+
+					const float32 s = separationFunction.evaluate(minSeparationOutput, tA, tB);
 
 					if (abs(s - TARGET) < TOLERANCE) {
 						// Move t1 back.
@@ -335,201 +341,6 @@ namespace ProjectA {
 		BREAKPOINT();
 
 		return output;
-	}
-
-	SeparationFunction PhysicsEngine::createSeparationFunction(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, const GJK2DResult& gjkResult) {
-		SeparationFunction separationFunction;
-
-		if (gjkResult.closestFeatureA.count == 1 && gjkResult.closestFeatureB.count == 1) {
-			// Both features are vertices.
-
-			separationFunction.separationType = SeparationType::VERTEX_A | SeparationType::VERTEX_B;
-
-			const vec2<float32>& a = multiplyTransform(A.geometry->vertices[gjkResult.closestFeatureA.vertexIndex], A.transform);
-			const vec2<float32>& b = multiplyTransform(B.geometry->vertices[gjkResult.closestFeatureB.vertexIndex], B.transform);
-
-			separationFunction.separatingAxis = normalized(b - a);
-			separationFunction.localPoint = {0.0f, 0.0f};
-
-			return separationFunction;
-		}
-
-		// At least one feature is an edge. Use it as the separating axis.
-
-		const PhysicalObjectCopy2D* vertexEntity = nullptr;
-		const PhysicalObjectCopy2D* edgeEntity = nullptr;
-		const ClosestFeature2D* vertexFeature = nullptr;
-		const ClosestFeature2D* edgeFeature = nullptr;
-
-		identifyClosestFeatures(
-			separationFunction.separationType,
-			A,
-			B,
-			gjkResult.closestFeatureA,
-			gjkResult.closestFeatureB,
-			vertexEntity,
-			edgeEntity,
-			vertexFeature,
-			edgeFeature
-		);
-
-		const vec2<float32>& edgeLocalPoint0 = edgeEntity->geometry->vertices[edgeFeature->edgeIndices[0]];
-		const vec2<float32>& edgeLocalPoint1 = edgeEntity->geometry->vertices[edgeFeature->edgeIndices[1]];
-
-		separationFunction.separatingAxis = perpendicular(edgeLocalPoint1 - edgeLocalPoint0, 1.0f);
-		separationFunction.localPoint = lerp(edgeLocalPoint0, edgeLocalPoint1, 0.5f);
-
-		const vec2<float32> edgePoint = multiplyTransform(separationFunction.localPoint, edgeEntity->transform);
-		const vec2<float32> vertexPoint = multiplyTransform(vertexEntity->geometry->vertices[vertexFeature->vertexIndex], vertexEntity->transform);
-
-		const mat3x3<float32> edgeRotation = mat3x3<float32>::rotation(edgeEntity->rotation);
-		const vec2<float32> normal = multiplyTransform(separationFunction.separatingAxis, edgeRotation);
-
-		if (dot(vertexPoint - edgePoint, normal) < 0.0f) {
-			// If the direction formed by vertexPoint - edgePoint is facing away from the normal,
-			// invert the separating axis.
-			separationFunction.separatingAxis = -separationFunction.separatingAxis;
-		}
-
-		return separationFunction;
-	}
-
-	MinSeparationOutput PhysicsEngine::findMinSeparation(SeparationFunction separationFunction, const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
-		MinSeparationOutput output{};
-		vec2<float32> normal;
-		vec2<float32> a;
-		vec2<float32> b;
-
-		switch (separationFunction.separationType) {
-			case (SeparationType::VERTEX_A | SeparationType::VERTEX_B): {
-				normal = separationFunction.separatingAxis;
-
-				// NOTE: The support with canceled rotation doesn't seem to be necessary here.
-				a = multiplyTransform(A.geometry->vertices[0], A.transform);
-				b = multiplyTransform(B.geometry->vertices[0], B.transform);
-
-				break;
-			}
-			default: {
-				const PhysicalObjectCopy2D* vertexObject = nullptr;
-				const PhysicalObjectCopy2D* edgeObject = nullptr;
-
-				identifyClosestFeatures(A, B, separationFunction.separationType, vertexObject, edgeObject);
-
-				const mat3x3<float32> edgeRotation = mat3x3<float32>::rotation(edgeObject->rotation);
-
-				normal = multiplyTransform(separationFunction.separatingAxis, edgeRotation);
-
-				const uint32 i = supportIndex(*vertexObject, -normal);
-
-				output.iA = i;
-				output.iB = i;
-
-				a = multiplyTransform(separationFunction.localPoint, edgeObject->transform);
-				b = multiplyTransform(vertexObject->geometry->vertices[i], vertexObject->transform);
-
-				break;
-			}
-		}
-
-		output.separationValue = dot(b - a, normal);
-
-		return output;
-	}
-
-	float32 PhysicsEngine::evaluateSeparation(SeparationFunction separationFunction, Entity A, Entity B, MinSeparationOutput minSeparationOutput, float32 t) {
-		const ref<Geometry2D>& geometryA = scene->getGeometry(A);
-		const ref<Geometry2D>& geometryB = scene->getGeometry(B);
-		const PhysicalObjectCopy2D tA = copyPhysicalObject(*scene, A, t);
-		const PhysicalObjectCopy2D tB = copyPhysicalObject(*scene, B, t);
-
-		vec2<float32> a;
-		vec2<float32> b;
-		vec2<float32> d;
-
-		switch (separationFunction.separationType) {
-			case (SeparationType::VERTEX_A | SeparationType::VERTEX_B): {
-				a = multiplyTransform(geometryA->vertices[minSeparationOutput.iA], tA.transform);
-				b = multiplyTransform(geometryB->vertices[minSeparationOutput.iB], tB.transform);
-				d = separationFunction.separatingAxis;
-
-				break;
-			}
-			case (SeparationType::EDGE_A | SeparationType::VERTEX_B): {
-				const mat3x3<float32> rotationA = mat3x3<float32>::rotation(tA.rotation);
-
-				a = multiplyTransform(separationFunction.localPoint, tA.transform);
-				b = multiplyTransform(geometryB->vertices[minSeparationOutput.iB], tB.transform);
-				d = multiplyTransform(separationFunction.separatingAxis, rotationA);
-
-				break;
-			}
-			case (SeparationType::VERTEX_A | SeparationType::EDGE_B): {
-				const mat3x3<float32> rotationB = mat3x3<float32>::rotation(tB.rotation);
-
-				a = multiplyTransform(separationFunction.localPoint, tB.transform);
-				b = multiplyTransform(geometryA->vertices[minSeparationOutput.iA], tA.transform);
-				d = multiplyTransform(separationFunction.separatingAxis, rotationB);
-
-				break;
-			}
-		}
-
-		return dot(b - a, d);
-	}
-
-	// TODO: Refactor.
-	void PhysicsEngine::identifyClosestFeatures(
-		SeparationType& separationType,
-		const PhysicalObjectCopy2D& objectA,
-		const PhysicalObjectCopy2D& objectB,
-		const ClosestFeature2D& closestFeatureA,
-		const ClosestFeature2D& closestFeatureB,
-		const PhysicalObjectCopy2D*& vertexObject,
-		const PhysicalObjectCopy2D*& edgeObject,
-		const ClosestFeature2D*& vertexFeature,
-		const ClosestFeature2D*& edgeFeature
-	) {
-		if (closestFeatureA.count == 2) {
-			separationType = SeparationType::EDGE_A | SeparationType::VERTEX_B;
-			vertexObject = &objectB;
-			vertexFeature = &closestFeatureB;
-			edgeObject = &objectA;
-			edgeFeature = &closestFeatureA;
-
-			return;
-		}
-
-		if (closestFeatureB.count == 2) {
-			separationType = SeparationType::VERTEX_A | SeparationType::EDGE_B;
-			vertexObject = &objectA;
-			vertexFeature = &closestFeatureA;
-			edgeObject = &objectB;
-			edgeFeature = &closestFeatureB;
-
-			return;
-		}
-
-		ENGINE_ASSERT(false, "Invalid separation type.");
-	}
-
-	// TODO: Refactor.
-	void PhysicsEngine::identifyClosestFeatures(const PhysicalObjectCopy2D& objectA, const PhysicalObjectCopy2D& objectB, SeparationType separationType, const PhysicalObjectCopy2D*& vertexObject, const PhysicalObjectCopy2D*& edgeObject) {
-		if (separationType & SeparationType::EDGE_A) {
-			vertexObject = &objectB;
-			edgeObject = &objectA;
-
-			return;
-		}
-
-		if (separationType & SeparationType::EDGE_B) {
-			vertexObject = &objectA;
-			edgeObject = &objectB;
-
-			return;
-		}
-
-		ENGINE_ASSERT(false, "Invalid separation type.");
 	}
 
 	void PhysicsEngine::advanceSimulation(Entity entity, float32 t) {

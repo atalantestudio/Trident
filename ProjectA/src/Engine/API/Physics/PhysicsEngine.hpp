@@ -30,30 +30,6 @@ namespace ProjectA {
 
 			CCDOutput evaluateContinuousCollision(Entity A, Entity B, GJK2DResult* gjkResult);
 
-			SeparationFunction createSeparationFunction(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, const GJK2DResult& gjkResult);
-
-			MinSeparationOutput findMinSeparation(SeparationFunction separationFunction, const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B);
-
-			// Arguments:
-			// - Entity geometries
-			// - Entity transforms at time t
-			// - Entity rotations at time t
-			float32 evaluateSeparation(SeparationFunction separationFunction, Entity A, Entity B, MinSeparationOutput minSeparationOutput, float32 t);
-
-			void identifyClosestFeatures(
-				SeparationType& separationType,
-				const PhysicalObjectCopy2D& A,
-				const PhysicalObjectCopy2D& B,
-				const ClosestFeature2D& closestFeatureA,
-				const ClosestFeature2D& closestFeatureB,
-				const PhysicalObjectCopy2D*& vertexObject,
-				const PhysicalObjectCopy2D*& edgeObject,
-				const ClosestFeature2D*& vertexFeature,
-				const ClosestFeature2D*& edgeFeature
-			);
-
-			void identifyClosestFeatures(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, SeparationType separationType, const PhysicalObjectCopy2D*& vertexObject, const PhysicalObjectCopy2D*& edgeObject);
-
 			void advanceSimulation(Entity entity, float32 t);
 
 		private:

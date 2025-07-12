@@ -12,7 +12,7 @@ namespace ProjectA {
 
 				const ref<CircleGeometry2D> circleGeometry = createRef<CircleGeometry2D>(circleGeometryDescriptor);
 
-				const Entity entityA = scene.createPhysicalObjectEntity(0);
+				const Entity entityA = scene.createDynamicEntity(0);
 
 				ref<RigidBody2D> bodyA = createRef<RigidBody2D>();
 

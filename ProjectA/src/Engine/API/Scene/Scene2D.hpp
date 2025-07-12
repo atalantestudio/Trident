@@ -73,6 +73,7 @@ namespace ProjectA {
 				return entity;
 			}
 
+			// TODO: Difference between static/dynamic entities.
 			Entity createStaticEntity(uint32 layerIndex) {
 				ENGINE_ASSERT(layerIndex < LAYER_COUNT, "The layer index is overflowing.");
 
