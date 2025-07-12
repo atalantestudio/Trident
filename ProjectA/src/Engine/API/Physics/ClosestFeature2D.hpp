@@ -20,7 +20,6 @@ namespace ProjectA {
 			uint32 edgeIndices[2];
 		};
 
-		// TODO: Replace by flag.
 		// The number of vertices used.
 		flag count : 2;
 	};

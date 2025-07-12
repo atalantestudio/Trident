@@ -24,7 +24,11 @@ namespace ProjectA {
 				return 0.0f;
 			}
 
-			uint32 support(const vec2<float32>& d) const final override {
+			vec2<float32> support(const vec2<float32>& d) const final override {
+				return vertices[supportIndex(d)];
+			}
+
+			uint32 supportIndex(const vec2<float32>& d) const final override {
 				return 0;
 			}
 	};

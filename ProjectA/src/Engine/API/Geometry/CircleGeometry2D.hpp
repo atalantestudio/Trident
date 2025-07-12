@@ -33,8 +33,13 @@ namespace ProjectA {
 				return radius;
 			}
 
-			uint32 support(const vec2<float32>& d) const final override {
-				// TODO: Change the support function to return a vector instead of an index.
+			vec2<float32> support(const vec2<float32>& d) const final override {
+				return normalized(d) * radius;
+			}
+
+			uint32 supportIndex(const vec2<float32>& d) const final override {
+				ENGINE_ASSERT(false, "Use CircleGeometry::support to get a support point.");
+
 				return 0;
 			}
 

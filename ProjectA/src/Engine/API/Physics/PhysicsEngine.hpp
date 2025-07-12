@@ -10,7 +10,11 @@
 namespace ProjectA {
 	struct ImpulseData {
 		Entity entity;
+
 		vec2<float32> impulse;
+
+		// Vector from the COM to the contact point.
+		vec2<float32> r;
 	};
 
 	class PhysicsEngine {

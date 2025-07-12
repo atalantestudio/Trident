@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine/API/Geometry/Geometry2D.hpp"
 #include "Engine/ECS/Entity.hpp"
 
 namespace ProjectA {

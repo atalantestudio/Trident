@@ -25,7 +25,7 @@ namespace ProjectA {
 		Simplex2Vertex vertex;
 		vertex.iA = 0;
 		vertex.iB = 0;
-		vertex.vA = transformSupport(A, vertex.iA);
+		vertex.vA = multiplyTransform(A.geometry->vertices[vertex.iA], A.transform);
 		vertex.vB = p;
 		vertex.v = vertex.vB - vertex.vA;
 
@@ -115,7 +115,7 @@ namespace ProjectA {
 				break;
 			}
 
-			vertex.vA = transformSupport(A, vertex.iA);
+			vertex.vA = multiplyTransform(A.geometry->vertices[vertex.iA], A.transform);
 			vertex.vB = p;
 			vertex.v = vertex.vB - vertex.vA;
 

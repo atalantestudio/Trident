@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Engine/API/Geometry/PolytopeGeometry2D.hpp"
-#include "Engine/API/Material/ColorMaterial.hpp"
-
 #include "BaseLayer.hpp"
 
 namespace ProjectA {
@@ -21,7 +18,7 @@ namespace ProjectA {
 					0, 2, 3,
 				};
 
-				Geometry2DDescriptor triangleGeometryDescriptor;
+				ConvexHullGeometry2DDescriptor triangleGeometryDescriptor;
 				triangleGeometryDescriptor.vertices = {
 					{0.0f, 0.0f},
 					{0.0f, 1.0f},

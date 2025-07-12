@@ -46,7 +46,11 @@ namespace ProjectA {
 				return radius;
 			}
 
-			uint32 support(const vec2<float32>& d) const final override {
+			vec2<float32> support(const vec2<float32>& d) const final override {
+				return vertices[supportIndex(d)];
+			}
+
+			uint32 supportIndex(const vec2<float32>& d) const final override {
 				float32 maxValue = dot(vertices[0], d);
 				uint32 maxValueIndex = 0;
 

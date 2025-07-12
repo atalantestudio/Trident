@@ -26,7 +26,8 @@ namespace ProjectA {
 		float32 staticFriction = 0.0f;
 		float32 dynamicFriction = 0.0f;
 
-		// TODO: Inertia/inverse inertia?
+		// TODO: Use inertia SI unit.
+		float32 inverseInertia = 1.0f;
 
 		void applyLinearForce(const vec2<float32>& force) override {
 			linearForces += force;

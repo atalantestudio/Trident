@@ -31,7 +31,7 @@ namespace ProjectA {
 		}
 
 		for (const std::vector<Entity>& layer : scene->getLayers()) {
-			if (layer.size() < 2) {
+			if (layer.empty()) {
 				continue;
 			}
 
@@ -49,13 +49,16 @@ namespace ProjectA {
 
 	void PhysicsEngine::narrowPhase(GJK2DResult* gjkResult) {
 		for (CollisionPair& pair : pairs) {
-			float32 toi = 1.0f;
+			CCDOutput output;
 
 			#ifdef DEBUG_ENABLE_CCD
-				const CCDOutput output = evaluateContinuousCollision(pair.A, pair.B, gjkResult);
-
-				toi = output.fraction;
+				output = evaluateContinuousCollision(pair.A, pair.B, gjkResult);
+			#else
+				output.state = CCDOutputState::SEPARATED;
+				output.fraction = 1.0f;
 			#endif
+
+			const float32 toi = output.fraction;
 
 			// TODO: lyah::min
 			safeAdvanceTimes[pair.A] = std::min(safeAdvanceTimes[pair.A], toi);
@@ -110,13 +113,21 @@ namespace ProjectA {
 					frictionImpulse = tangent * -Fn * ((rigidBodyA->dynamicFriction + rigidBodyB->dynamicFriction) * 0.5f);
 				} */
 
+				// Vector from the center of mass to the contact point on A.
+				const vec2<float32> rA = output.closestA - copyA.geometry->centerOfMass;
+
+				// Vector from the center of mass to the contact point on B.
+				const vec2<float32> rB = output.closestB - copyB.geometry->centerOfMass;
+
 				ImpulseData impulseDataA;
 				impulseDataA.entity = pair.A;
-				impulseDataA.impulse = -(normalImpulse /* + frictionImpulse */) * rigidBodyA->inverseMass;
+				impulseDataA.impulse = -normalImpulse /* - frictionImpulse */;
+				impulseDataA.r = rA;
 
 				ImpulseData impulseDataB;
 				impulseDataB.entity = pair.B;
-				impulseDataB.impulse = (normalImpulse /* + frictionImpulse */) * rigidBodyB->inverseMass;
+				impulseDataB.impulse = +normalImpulse /* + frictionImpulse */;
+				impulseDataB.r = rB;
 
 				impulses.emplace_back(impulseDataA);
 				impulses.emplace_back(impulseDataB);
@@ -147,12 +158,13 @@ namespace ProjectA {
 
 			// TODO: lyah::max
 			// TODO: max(0.1, t) seems to be needed with 2 entities. Both don't work when gravity is enabled.
-			const float32 t = 1.0f - toi;
-			// const float32 t = std::max(0.1f, 1.0f - toi);
+			// const float32 t = 1.0f - toi;
+			const float32 t = std::max(0.1f, 1.0f - toi);
 
 			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(impulseData.entity));
 
-			rigidBody->linearVelocity += impulseData.impulse;
+			rigidBody->linearVelocity += impulseData.impulse * rigidBody->inverseMass;
+			rigidBody->angularVelocity += area(impulseData.r, impulseData.impulse) * rigidBody->inverseInertia;
 
 			rigidBody->position += rigidBody->linearVelocity * t + rigidBody->linearAcceleration * t * t * 0.5f;
 			rigidBody->rotation += rigidBody->angularVelocity * t + rigidBody->angularAcceleration * t * t * 0.5f;
@@ -168,9 +180,8 @@ namespace ProjectA {
 	}
 
 	// Bilateral Advancement algorithm implementation.
-	// Evaluates continuous collision between A and B.
-	// If `gjkResult` is not null, the result of the last GJK call is written to it.
-	// References:
+	// Evaluates continuous collisions between A and B.
+	// The result of the last GJK call is copied to `gjkResult` if it's not null.
 	// 
 	// - Erin Catto - Continuous Collision - GDC 2013
 	//   https://box2d.org/files/ErinCatto_ContinuousCollision_GDC2013.pdf (54 pages)
@@ -209,6 +220,9 @@ namespace ProjectA {
 
 			distanceIteration += 1;
 
+			output.closestA = result.closestA;
+			output.closestB = result.closestB;
+
 			// Exit if the shapes are initially overlapped.
 			if (result.distance <= 0.0f) {
 				output.state = CCDOutputState::OVERLAPPED;
@@ -221,6 +235,7 @@ namespace ProjectA {
 			if (result.distance <= TARGET + TOLERANCE) {
 				output.state = CCDOutputState::HIT;
 				output.fraction = t0;
+				output.closestB = result.closestB;
 
 				return output;
 			}

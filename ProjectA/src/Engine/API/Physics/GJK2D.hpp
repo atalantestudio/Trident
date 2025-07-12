@@ -191,8 +191,8 @@ namespace ProjectA {
 		Simplex2Vertex vertex;
 		vertex.iA = 0;
 		vertex.iB = 0;
-		vertex.vA = transformSupport(A, vertex.iA);
-		vertex.vB = transformSupport(B, vertex.iB);
+		vertex.vA = multiplyTransform(A.geometry->vertices[vertex.iA], A.transform);
+		vertex.vB = multiplyTransform(B.geometry->vertices[vertex.iB], B.transform);
 		vertex.v = vertex.vB - vertex.vA;
 
 		Simplex2 s = {vertex};
@@ -281,8 +281,8 @@ namespace ProjectA {
 				break;
 			}
 
-			vertex.vA = transformSupport(A, vertex.iA);
-			vertex.vB = transformSupport(B, vertex.iB);
+			vertex.vA = multiplyTransform(A.geometry->vertices[vertex.iA], A.transform);
+			vertex.vB = multiplyTransform(B.geometry->vertices[vertex.iB], B.transform);
 			vertex.v = vertex.vB - vertex.vA;
 
 			s[s.count] = vertex;
