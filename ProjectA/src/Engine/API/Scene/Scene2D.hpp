@@ -106,11 +106,22 @@ namespace ProjectA {
 				const ref<Material>& material = ecs.getComponent<ref<Material>>(entity);
 
 				ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(ecs.getComponent<ref<Body2D>>(entity));
-				rigidBody->inverseMass = geometry->calculateMass(material->density);
 
-				if (rigidBody->inverseMass != 0.0f) {
-					rigidBody->inverseMass = 1.0f / rigidBody->inverseMass;
+				const float32 m = geometry->calculateMass(material->density);
+
+				// TODO: INFINITY constant?
+				if (m == max<float32>()) {
+					rigidBody->inverseMass = 0.0_kg;
+					rigidBody->inverseInertia = 0.0f;
+				
+					return;
 				}
+
+				// https://github.com/erincatto/box2d-lite/blob/227b71b6974ea57ab7e96d40f6374287bd6a0e77/src/Body.cpp#L47
+				const float32 I = m * area(geometry->vertices) / 12.0f;
+
+				rigidBody->inverseMass = rcp(m);
+				rigidBody->inverseInertia = rcp(I);
 			}
 
 			void updateTransform(Entity entity) {

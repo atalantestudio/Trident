@@ -318,6 +318,7 @@ namespace ProjectA {
 	}
 
 	using lyah::abs;
+	using lyah::rcp;
 
 	// TODO: lyah::area
 	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.

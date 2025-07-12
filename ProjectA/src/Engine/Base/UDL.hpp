@@ -15,6 +15,7 @@
 
 namespace ProjectA {
 	DEFINE_UDL(kg, float32);
+	DEFINE_UDL(m, float32);
 	DEFINE_UDL(m_s, float32);
 	DEFINE_UDL(m_s2, float32);
 	DEFINE_UDL(N, float32);
