@@ -13,6 +13,8 @@ namespace ProjectA {
 	};
 
 	struct PhysicalObjectCopy2D {
+		Entity entity;
+
 		Transform3D transform;
 
 		vec2<float32> position;

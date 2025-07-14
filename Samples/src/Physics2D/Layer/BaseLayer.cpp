@@ -57,7 +57,7 @@ namespace ProjectA {
 		for (sint32 entity = scene.getLastEntity(); entity >= 0; entity -= 1) {
 			copy = copyPhysicalObject(scene, static_cast<Entity>(entity));
 
-			if (GJK2DPoint(copy, p).distance <= 0.0f) {
+			if (GJK2DPointConditional(copy, p)) {
 				hoveredEntity = entity;
 
 				break;
@@ -79,6 +79,14 @@ namespace ProjectA {
 		if (event.getButton() == MouseButton::LEFT && hoveredEntity != max<uint32>()) {
 			selectedEntity = hoveredEntity;
 			placeholderOffset = {0.0f, 0.0f};
+
+			// ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene.getBody(selectedEntity));
+
+			// selectedEntityPreviousInverseMass = rigidBody->inverseMass;
+			// selectedEntityPreviousInverseInertia = rigidBody->inverseInertia;
+
+			// rigidBody->inverseMass = 0.0f;
+			// rigidBody->inverseInertia = 0.0f;
 		}
 
 		return true;
@@ -107,6 +115,8 @@ namespace ProjectA {
 			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene.getBody(selectedEntity));
 
 			rigidBody->position += placeholderOffset;
+			// rigidBody->inverseMass = selectedEntityPreviousInverseMass;
+			// rigidBody->inverseInertia = selectedEntityPreviousInverseInertia;
 
 			selectedEntity = max<uint32>();
 		}

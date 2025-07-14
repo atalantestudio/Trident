@@ -19,10 +19,15 @@ namespace ProjectA {
 		return copy.geometry->supportIndex(dR);
 	}
 
+	// Returns the index of the farthest point of A in the direction d.
+	inline vec2<float32> supportVertex(const PhysicalObjectCopy2D& copy, const vec2<float32>& d) {
+		const vec2<float32> dR = rotate(d, -copy.rotation);
+
+		return copy.geometry->support(dR);
+	}
+
 	// Returns the farthest point of A in the direction d.
 	inline vec2<float32> support(const PhysicalObjectCopy2D& copy, const vec2<float32>& d) {
-		const uint32 index = supportIndex(copy, d);
-
-		return multiplyTransform(copy.geometry->vertices[index], copy.transform);
+		return multiplyTransform(supportVertex(copy, d), copy.transform);
 	}
 }

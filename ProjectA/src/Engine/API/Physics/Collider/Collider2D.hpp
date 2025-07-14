@@ -1,29 +1,43 @@
 #pragma once
 
 #include "Engine/API/Geometry/Geometry2DType.hpp"
-#include "Engine/API/Scene/Scene2D.hpp"
+#include "Engine/API/Object/PhysicalObject.hpp"
+#include "Engine/API/Physics/ContactManifold.hpp"
 
 namespace ProjectA {
-	typedef void (*Collider2D)(const Scene2D& scene, const ref<RigidBody>& rigidBodyA, const ref<RigidBody>& rigidBodyB);
+	typedef float32 (*ColliderPenetration2D)(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B);
+	typedef ContactManifold2D (*Collider2D)(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, float32 penetration);
 
-	static Collider2D CircleCircleCollider;
-	static Collider2D CircleConvexHullCollider;
-	static Collider2D ConvexHullConvexHullCollider;
+	static float32 CircleCircleColliderPenetration(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
+		if (abs(lengthSq(B.position) - lengthSq(A.position)) < 0.001f) {
+			// Degenerate case: The circles are coincident.
+			// Return a positive penetration to avoid generating contact points.
+			return max<float32>();
+		}
 
-	static constexpr Collider2D COLLIDER_2D_TABLE[Geometry2DType::MAX_ENUM][Geometry2DType::MAX_ENUM] = {
-		CircleCircleCollider, CircleConvexHullCollider,
-		nullptr,              ConvexHullConvexHullCollider,
+		return lengthSq(B.position - A.position) - lyah::pow(A.geometry->radius + B.geometry->radius, 2.0f);
+	}
+
+	static constexpr ColliderPenetration2D COLLIDER_PENETRATION_2D_TABLE[Geometry2DType::MAX_ENUM][Geometry2DType::MAX_ENUM] = {
+		{CircleCircleColliderPenetration},
 	};
 
-	static void CircleCircleCollider(const Scene2D& scene, const ref<RigidBody>& rigidBodyA, const ref<RigidBody>& rigidBodyB) {
-		// TODO
+	// https://media.steampowered.com/apps/valve/2015/DirkGregorius_Contacts.pdf
+	static ContactManifold2D CircleCircleCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, float32 penetration) {
+		ContactManifold2D contactManifold;
+		contactManifold.contactNormal = normalized(B.position - A.position);
+		contactManifold.penetration = penetration;
+		contactManifold.contactPointCount = 1;
+
+		const vec2<float32> sA = A.position + contactManifold.contactNormal * A.geometry->radius;
+		const vec2<float32> sB = B.position - contactManifold.contactNormal * B.geometry->radius;
+
+		contactManifold.contactPoints[0].position = (sA + sB) * 0.5f;
+
+		return contactManifold;
 	}
 
-	static void CircleConvexHullCollider(const Scene2D& scene, const ref<RigidBody>& rigidBodyA, const ref<RigidBody>& rigidBodyB) {
-		// TODO
-	}
-
-	static void ConvexHullConvexHullCollider(const Scene2D& scene, const ref<RigidBody>& rigidBodyA, const ref<RigidBody>& rigidBodyB) {
-		// TODO
-	}
+	static constexpr Collider2D COLLIDER_2D_TABLE[Geometry2DType::MAX_ENUM][Geometry2DType::MAX_ENUM] = {
+		{CircleCircleCollider},
+	};
 }

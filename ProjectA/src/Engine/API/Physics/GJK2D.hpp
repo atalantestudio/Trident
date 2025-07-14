@@ -1,15 +1,18 @@
 #pragma once
 
+#include "Engine/API/Object/PhysicalObject.hpp"
 #include "Engine/API/Physics/ClosestFeature2D.hpp"
 #include "Engine/API/Physics/Simplex.hpp"
 #include "Engine/API/Physics/support.hpp"
-#include "Engine/API/Scene/Scene2D.hpp"
 
 namespace ProjectA {
 	static constexpr uint8 GJK_2D_ITERATION_LIMIT = 8;
 
 	// The result of a 2D GJK computation.
 	struct GJK2DResult {
+		// Final simplex.
+		Simplex2 simplex;
+
 		// Closest point on A.
 		vec2<float32> closestA;
 
@@ -118,12 +121,12 @@ namespace ProjectA {
 		}
 
 		// Compute signed parallelogram area.
-		const float32 S = area(ab, ac);
+		const float32 S = parallelogramArea(ab, ac);
 
 		// Compute triangle barycentric coordinates (pre-division).
-		const float32 uABC = area(b, c);
-		const float32 vABC = area(c, a);
-		const float32 wABC = area(a, b);
+		const float32 uABC = parallelogramArea(b, c);
+		const float32 vABC = parallelogramArea(c, a);
+		const float32 wABC = parallelogramArea(a, b);
 
 		if (uAB > 0.0f && vAB > 0.0f && wABC * S <= 0.0f) {
 			// In region AB.
@@ -243,7 +246,7 @@ namespace ProjectA {
 					break;
 				case 2: {
 					const vec2<float32> ab = s[1].v - s[0].v;
-					const float32 sign = area(ab, -s[0].v);
+					const float32 sign = parallelogramArea(ab, -s[0].v);
 
 					if (sign > 0.0f) {
 						d = {-ab[1], ab[0]};

@@ -43,5 +43,8 @@ namespace ProjectA {
 			Entity selectedEntity = max<uint32>();
 
 			vec2<float32> placeholderOffset;
+
+			// float32 selectedEntityPreviousInverseMass;
+			// float32 selectedEntityPreviousInverseInertia;
 	};
 }

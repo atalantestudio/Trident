@@ -4,29 +4,23 @@
 
 namespace ProjectA {
 	class Demo1Layer : public BaseLayer {
-		private:
-			static constexpr float32 BOX2D_LITE_DEMO_SCALE_MULTIPLIER = 0.4f;
 		public:
 			void build() override {
-				ConvexHullGeometry2DDescriptor polygonGeometryDescriptor;
-				polygonGeometryDescriptor.vertices = {
-					{-1.0f, -1.0f},
-					{-1.0f,  1.0f},
-					{ 1.0f,  1.0f},
-					{ 1.0f, -1.0f},
-				};
-				polygonGeometryDescriptor.indices = {
-					0, 1, 2,
-					0, 2, 3,
-				};
+				CircleGeometry2DDescriptor circleGeometryDescriptor;
+				circleGeometryDescriptor.resolution = 32;
+				circleGeometryDescriptor.radius = 5.0f;
 
-				const ref<ConvexHullGeometry2D> polygonGeometry = createRef<ConvexHullGeometry2D>(polygonGeometryDescriptor);
+				const ref<CircleGeometry2D> circle1Geometry = createRef<CircleGeometry2D>(circleGeometryDescriptor);
+
+				circleGeometryDescriptor.radius = 2.0f;
+
+				const ref<CircleGeometry2D> circle2Geometry = createRef<CircleGeometry2D>(circleGeometryDescriptor);
 
 				const Entity entityA = scene.createDynamicEntity(0);
 
 				ref<RigidBody2D> bodyA = createRef<RigidBody2D>();
-				bodyA->position = vec2<float32>(0.0f, -0.5f * 20.0f);
-				bodyA->scale = vec2<float32>(100.0f, 20.0f) * BOX2D_LITE_DEMO_SCALE_MULTIPLIER;
+				bodyA->position = vec2<float32>(0.0f, -7.0f);
+				bodyA->scale = vec2<float32>(1.0f, 1.0f);
 				bodyA->inverseMass = 0_kg;
 				bodyA->inverseInertia = 0.0f;
 
@@ -35,7 +29,7 @@ namespace ProjectA {
 				materialA->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
 				scene.setBody(entityA, std::static_pointer_cast<Body2D>(bodyA));
-				scene.setGeometry(entityA, std::static_pointer_cast<Geometry2D>(polygonGeometry));
+				scene.setGeometry(entityA, std::static_pointer_cast<Geometry2D>(circle1Geometry));
 				scene.setMaterial(entityA, std::static_pointer_cast<Material>(materialA));
 				scene.updateTransform(entityA);
 
@@ -43,16 +37,16 @@ namespace ProjectA {
 
 				ref<RigidBody2D> bodyB = createRef<RigidBody2D>();
 				bodyB->position = vec2<float32>(0.0f, 4.0f);
-				bodyB->scale = vec2<float32>(1.0f, 1.0f) * BOX2D_LITE_DEMO_SCALE_MULTIPLIER;
-				bodyB->inverseMass = rcp(200_kg * BOX2D_LITE_DEMO_SCALE_MULTIPLIER);
-				bodyB->inverseInertia = 200_kg * BOX2D_LITE_DEMO_SCALE_MULTIPLIER / 12.0f;
+				bodyB->scale = vec2<float32>(1.0f, 1.0f);
+				bodyB->inverseMass = rcp(200_kg);
+				bodyB->inverseInertia = 200_kg / 12.0f;
 
 				ref<ColorMaterial> materialB = createRef<ColorMaterial>();
 				materialB->fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 				materialB->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
 				scene.setBody(entityB, std::static_pointer_cast<Body2D>(bodyB));
-				scene.setGeometry(entityB, std::static_pointer_cast<Geometry2D>(polygonGeometry));
+				scene.setGeometry(entityB, std::static_pointer_cast<Geometry2D>(circle2Geometry));
 				scene.setMaterial(entityB, std::static_pointer_cast<Material>(materialB));
 				scene.updateTransform(entityB);
 

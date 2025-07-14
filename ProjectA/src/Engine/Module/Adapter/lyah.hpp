@@ -298,7 +298,7 @@ namespace ProjectA {
 		}
 
 		lyah::vec<2, T>& operator [](std::uint8_t index) {
-			DEBUG_ASSERT(index < count);
+			DEBUG_ASSERT(index < 3);
 
 			return m[index];
 		}
@@ -307,8 +307,9 @@ namespace ProjectA {
 	template<typename T>
 	using sim2 = sim<2, T>;
 
+	// Returns the area of the parallelogram formed by `a` and `b`.
 	template<std::size_t C, typename T>
-	T area(const lyah::vec<C, T>& a, const lyah::vec<C, T>& b) {
+	T parallelogramArea(const lyah::vec<C, T>& a, const lyah::vec<C, T>& b) {
 		return a[0] * b[1] - a[1] * b[0];
 	}
 
@@ -324,7 +325,7 @@ namespace ProjectA {
 
 	template<typename T>
 	lyah::vec<2, T> perpendicular(const lyah::vec<2, T>& a, T b) {
-		return {b * a[1], static_cast<T>(-1) * b * a[0]};
+		return {a[1] * b, a[0] * b * static_cast<T>(-1)};
 	}
 
 	using lyah::abs;

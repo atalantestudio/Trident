@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/API/Geometry/Geometry2DType.hpp"
+
 namespace ProjectA {
 	class Geometry2D {
 		public:
@@ -26,6 +28,8 @@ namespace ProjectA {
 			virtual uint32 supportIndex(const vec2<float32>& d) const = 0;
 
 		public:
+			Geometry2DType type;
+
 			// The index sequence must be readable with both TRIANGLE_LIST and LINE_STRIP topologies.
 			sequence<uint32> indices;
 

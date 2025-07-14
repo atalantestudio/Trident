@@ -34,5 +34,10 @@ namespace ProjectA {
 		void applyForce(const vec2<float32>& force) override {
 			this->force += force;
 		}
+
+		void applyImpulse(const vec2<float32>& j, const vec2<float32>& r) override {
+			linearVelocity += j * inverseMass;
+			angularVelocity += parallelogramArea(r, j) * inverseInertia;
+		}
 	};
 }

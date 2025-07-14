@@ -15,6 +15,7 @@ namespace ProjectA {
 				ENGINE_ASSERT(descriptor.radius > 0.0f, "The radius must be positive.");
 				ENGINE_ASSERT(descriptor.resolution > 2, "The resolution must be greater than 2.");
 
+				type = Geometry2DType::CIRCLE;
 				centerOfMass = calculateCenterOfMass();
 				radius = descriptor.radius;
 

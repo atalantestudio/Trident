@@ -1,5 +1,7 @@
 #include "pch.hpp"
 
+#include "Engine/API/Physics/Collider/Collider2D.hpp"
+#include "Engine/API/Physics/EPA2D.hpp"
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/PhysicsEngine.hpp"
 
@@ -16,7 +18,7 @@ namespace ProjectA {
 		const std::vector<CollisionPair> collisionPairs = BroadPhase();
 
 		// 2. Narrow phase: Calculate the contact manifold for each pair.
-		const std::vector<Arbiter2D> arbiters = NarrowPhase(collisionPairs, gjkResult);
+		std::vector<Arbiter2D> arbiters = NarrowPhase(collisionPairs, gjkResult);
 
 		// 3. Integrate forces.
 		// TODO: Do we need to integrate forces on resting objects? E.g. they could be at rest on a moving platform due to inertia.
@@ -39,17 +41,18 @@ namespace ProjectA {
 		//    - Calculate combined values in each pair (static/dynamic friction, restitution, etc.)
 		//    - For each contact point, calculate mass normal, mass tangent and bias value
 		// TODO
-		/* for (Arbiter2D arbiter : arbiters) {
-			arbiter.precompute(inv_dt);
-		} */
+		for (Arbiter2D& arbiter : arbiters) {
+			arbiter.precompute(/* inv_dt */);
+		}
 
-		// 5. Apply impulses to overlapping pairs in a sequential manner.
+		// 5. Apply normal and friction impulses to overlapping pairs in a sequential manner.
 		// TODO
-		/* for (uint32 iteration; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
-			for (auto arbiterIterator = arbiters.begin(); arbiterIterator != arbiters.end(); arbiterIterator += 1) {
-				arbiterIterator->second.applyImpulse();
+		for (uint32 iteration = 0; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
+			// for (auto arbiterIterator = arbiters.begin(); arbiterIterator != arbiters.end(); arbiterIterator += 1) {
+			for (Arbiter2D& arbiter : arbiters) {
+				arbiter.applyImpulse();
 			}
-		} */
+		}
 
 		// 6. Integrate positions/rotations and velocities and reset forces.
 		// TODO: Do we need to integrate positions/rotations on dynamic objects with an inverse mass of 0?
@@ -94,34 +97,36 @@ namespace ProjectA {
 		return collisionPairs;
 	}
 
-	std::vector<Arbiter2D> PhysicsEngine::NarrowPhase(const std::vector<CollisionPair>& collisionPairs, GJK2DResult* gjkResult) const {
+	std::vector<Arbiter2D> PhysicsEngine::NarrowPhase(const std::vector<CollisionPair>& collisionPairs, GJK2DResult* gjkResultPointer) const {
 		std::vector<Arbiter2D> arbiters;
+		EPA2DResult epaResult;
+
 		Arbiter2D arbiter;
-		GJK2DResult result;
+		arbiter.scene = scene;
 
 		for (const CollisionPair& pair : collisionPairs) {
 			const PhysicalObjectCopy2D A = copyPhysicalObject(*scene, pair.A);
 			const PhysicalObjectCopy2D B = copyPhysicalObject(*scene, pair.B);
 
-			result = GJK2D(A, B);
+			ref<RigidBody2D>& rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene->getBody(pair.A));
+			ref<RigidBody2D>& rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene->getBody(pair.B));
 
-			if (result.distance > 0.0f) {
+			const float32 penetration = COLLIDER_PENETRATION_2D_TABLE[static_cast<uint32>(A.geometry->type)][static_cast<uint32>(B.geometry->type)](A, B);
+
+			if (penetration > 0.0f) {
+				// Entities are not intersecting (or degenerate case).
 				continue;
 			}
 
 			arbiter.A = A;
 			arbiter.B = B;
-
-			// TODO: Generate contact manifold with EPA.
+			arbiter.contactManifold = COLLIDER_2D_TABLE[static_cast<uint32>(A.geometry->type)][static_cast<uint32>(B.geometry->type)](A, B, penetration);
+			arbiter.contactManifold.combinedFriction = lyah::sqrt(rigidBodyA->friction * rigidBodyB->friction);
 
 			arbiters.emplace_back(arbiter);
 		}
 
-		if (gjkResult != nullptr) {
-			*gjkResult = result;
-		}
-
-		return arbiter;
+		return arbiters;
 	}
 
 	/* void PhysicsEngine::BroadPhase(GJK2DResult* gjkResult) {

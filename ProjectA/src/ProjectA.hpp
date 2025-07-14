@@ -52,6 +52,7 @@
 // Geometry
 #include "Engine/API/Geometry/CircleGeometry2D.hpp"
 #include "Engine/API/Geometry/ConvexHullGeometry2D.hpp"
+#include "Engine/API/Geometry/PointGeometry2D.hpp"
 
 // Material
 #include "Engine/API/Material/ColorMaterial.hpp"

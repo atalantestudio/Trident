@@ -9,6 +9,7 @@ namespace ProjectA {
 		const PhysicalObject2D& physicalObject = scene.getPhysicalObject(entity);
 
 		PhysicalObjectCopy2D copy{};
+		copy.entity = entity;
 		copy.transform = physicalObject.transform;
 		copy.position = rigidBody->position;
 		copy.linearVelocity = rigidBody->linearVelocity;

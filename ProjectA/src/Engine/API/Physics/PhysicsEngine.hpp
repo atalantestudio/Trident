@@ -62,7 +62,7 @@ namespace ProjectA {
 		private:
 			std::vector<CollisionPair> BroadPhase() const;
 
-			std::vector<Arbiter2D> NarrowPhase(const std::vector<CollisionPair>& collisionPairs, GJK2DResult* gjkResult) const;
+			std::vector<Arbiter2D> NarrowPhase(const std::vector<CollisionPair>& collisionPairs, GJK2DResult* gjkResultPointer) const;
 
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;

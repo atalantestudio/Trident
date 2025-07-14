@@ -74,7 +74,7 @@ namespace ProjectA {
 					break;
 				case 2: {
 					const vec2<float32> ab = s[1].v - s[0].v;
-					const float32 sign = area(ab, -s[0].v);
+					const float32 sign = parallelogramArea(ab, -s[0].v);
 
 					if (sign > 0.0f) {
 						d = {-ab[1], ab[0]};
@@ -98,7 +98,10 @@ namespace ProjectA {
 			}
 
 			Simplex2Vertex vertex;
+
+			// TODO: Use support instead of support index (e.g. when dealing with circle geometries).
 			vertex.iA = supportIndex(A, -d);
+
 			vertex.iB = 0;
 
 			bool duplicate = false;
