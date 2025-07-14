@@ -7,7 +7,7 @@ namespace ProjectA {
 		public:
 			void build() override {
 				CircleGeometry2DDescriptor circleGeometryDescriptor;
-				circleGeometryDescriptor.resolution = 32;
+				circleGeometryDescriptor.resolution = 128;
 				circleGeometryDescriptor.radius = 5.0f;
 
 				const ref<CircleGeometry2D> circle1Geometry = createRef<CircleGeometry2D>(circleGeometryDescriptor);

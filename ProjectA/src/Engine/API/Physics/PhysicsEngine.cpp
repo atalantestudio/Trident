@@ -11,6 +11,14 @@ namespace ProjectA {
 	}
 
 	void PhysicsEngine::tick(float32 deltaTime, GJK2DResult* gjkResult) {
+		const float32 halfDeltaTime = deltaTime * 0.5f;
+
+		float32 inverseDeltaTime = 0.0f;
+		
+		if (deltaTime > 0.0f) {
+			inverseDeltaTime = 1.0f / deltaTime;
+		}
+
 		const ComponentPool<DynamicEntityComponent>& pool = scene->getDynamicEntityPool();
 
 		// 1. Broad phase: Detect potentially overlapping pairs.
@@ -32,9 +40,10 @@ namespace ProjectA {
 				continue;
 			}
 
-			// NOTE: Gravity can also be added in 2 halves: one here and one after integrating the positions/velocities.
-			rigidBody->linearVelocity += (rigidBody->force * rigidBody->inverseMass + G) * deltaTime;
-			rigidBody->angularVelocity += rigidBody->torque * rigidBody->inverseMass * deltaTime;
+			// NOTE: https://web.archive.org/web/20161201054257/https://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html
+			//       This seems like Velocity Verlet to me?
+			rigidBody->linearVelocity += (rigidBody->force * rigidBody->inverseMass + G) * halfDeltaTime;
+			rigidBody->angularVelocity += rigidBody->torque * rigidBody->inverseInertia * halfDeltaTime;
 		}
 
 		// 4. Pre-compute step:
@@ -42,13 +51,12 @@ namespace ProjectA {
 		//    - For each contact point, calculate mass normal, mass tangent and bias value
 		// TODO
 		for (Arbiter2D& arbiter : arbiters) {
-			arbiter.precompute(/* inv_dt */);
+			arbiter.precompute(inverseDeltaTime);
 		}
 
 		// 5. Apply normal and friction impulses to overlapping pairs in a sequential manner.
 		// TODO
 		for (uint32 iteration = 0; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
-			// for (auto arbiterIterator = arbiters.begin(); arbiterIterator != arbiters.end(); arbiterIterator += 1) {
 			for (Arbiter2D& arbiter : arbiters) {
 				arbiter.applyImpulse();
 			}
@@ -64,6 +72,12 @@ namespace ProjectA {
 
 			rigidBody->position += rigidBody->linearVelocity * deltaTime;
 			rigidBody->rotation += rigidBody->angularVelocity * deltaTime;
+
+			if (rigidBody->inverseMass > 0.0f) {
+				rigidBody->linearVelocity += (rigidBody->force * rigidBody->inverseMass + G) * halfDeltaTime;
+				rigidBody->angularVelocity += rigidBody->torque * rigidBody->inverseInertia * halfDeltaTime;
+			}
+
 			rigidBody->force = {0.0f, 0.0f};
 			rigidBody->torque = 0.0f;
 
@@ -110,6 +124,9 @@ namespace ProjectA {
 
 			ref<RigidBody2D>& rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene->getBody(pair.A));
 			ref<RigidBody2D>& rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene->getBody(pair.B));
+
+			const ref<Material>& materialA = scene->getMaterial(pair.A);
+			const ref<Material>& materialB = scene->getMaterial(pair.B);
 
 			const float32 penetration = COLLIDER_PENETRATION_2D_TABLE[static_cast<uint32>(A.geometry->type)][static_cast<uint32>(B.geometry->type)](A, B);
 
@@ -220,7 +237,7 @@ namespace ProjectA {
 
 				// TODO: lyah::min
 				// Calculate coefficient of restitution.
-				const float32 e = std::min(materialA->coefficientOfRestitution, materialB->coefficientOfRestitution);
+				const float32 e = std::min(materialA->restitution, materialB->restitution);
 
 				// Calculate linear impulse.
 				// Fn is the magnitude of the collision normal.

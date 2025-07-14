@@ -19,11 +19,12 @@ namespace ProjectA {
 	struct Material {
 		// TODO: Validate data.
 		//       ENGINE_ASSERT(density > 0.0f, "The density must be positive.");
-		//       ENGINE_ASSERT(coefficientOfRestitution >= 0.0f && coefficientOfRestitution <= 1.0f, "The coefficient of restitution must be between 0 and 1.");
+		//       ENGINE_ASSERT(restitution >= 0.0f && restitution <= 1.0f, "The coefficient of restitution must be between 0 and 1.");
 
 		// Mass is assumed to be uniformly distributed.
 		float32 density = 1.0f;
 
-		float32 coefficientOfRestitution = 1.0f;
+		// Coefficient of restitution. Overridden when the gravity is the only force.
+		float32 restitution = 1.0f;
 	};
 }

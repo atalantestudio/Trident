@@ -7,11 +7,11 @@ namespace ProjectA {
 		vec2<float32> position;
 		// vec2<float32> normal;
 
-		// Distance to A's COM.
-		// vec2<float32> rA;
+		// A's position to the contact point.
+		vec2<float32> rA;
 
-		// Distance to B's COM.
-		// vec2<float32> rB;
+		// B's position to the contact point.
+		vec2<float32> rB;
 
 		float32 massNormal;
 		float32 massTangent;
@@ -35,7 +35,5 @@ namespace ProjectA {
 
 		// TODO: Differentiate static friction from dynamic friction.
 		float32 combinedFriction;
-
-		// float32 combinedRestitution;
 	};
 }

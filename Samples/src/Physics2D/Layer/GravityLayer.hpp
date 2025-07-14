@@ -51,7 +51,7 @@ namespace ProjectA {
 				boxMaterial->fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 				boxMaterial->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 				// boxMaterial->density = 0.05f;
-				boxMaterial->coefficientOfRestitution = 1.0f;
+				boxMaterial->restitution = 1.0f;
 
 				scene.setBody(box, std::static_pointer_cast<Body2D>(boxBody));
 				scene.setGeometry(box, std::static_pointer_cast<Geometry2D>(squareGeometry));

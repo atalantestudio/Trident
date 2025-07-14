@@ -58,8 +58,7 @@ namespace ProjectA {
 					indices[triangleIndex * 3 + 1] = triangleIndex + 1;
 					indices[triangleIndex * 3 + 2] = triangleIndex + 2;
 
-					vertices[triangleIndex] = {lyah::sin(angle), lyah::cos(angle)};
-					vertices[triangleIndex] *= radius;
+					vertices[triangleIndex] = vec2<float32>(lyah::sin(angle), lyah::cos(angle)) * radius;
 
 					angle += theta;
 				}
