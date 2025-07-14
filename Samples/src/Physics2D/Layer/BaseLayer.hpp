@@ -7,11 +7,13 @@
 namespace ProjectA {
 	class BaseLayer : public Layer {
 		public:
+			explicit BaseLayer();
+
 			virtual ~BaseLayer() = default;
 
-			virtual void PhysicsUpdate() {};
+			virtual void physicsUpdate() {};
 
-			void update(float64 fixedDeltaTime) override;
+			void update(float32 deltaTime) override;
 
 			void preRender() override;
 

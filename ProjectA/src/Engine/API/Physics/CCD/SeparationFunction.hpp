@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Engine/API/Physics/CCD/MinSeparationOutput.hpp"
+#include "Engine/API/Physics/ClosestFeature2D.hpp"
+#include "Engine/API/Physics/support.hpp"
+#include "Engine/API/Scene/Scene2D.hpp"
 
 namespace ProjectA {
 	class SeparationFunction;

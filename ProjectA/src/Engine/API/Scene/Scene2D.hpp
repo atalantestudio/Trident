@@ -7,12 +7,11 @@
 #include "Engine/ECS/ECS.hpp"
 
 namespace ProjectA {
+	struct DynamicEntityComponent {};
+	struct StaticEntityComponent {};
+
 	// TODO: Create "Runtime" directory for this kind of object?
 	class Scene2D {
-		private:
-			struct DynamicEntityComponent {};
-			struct StaticEntityComponent {};
-
 		private:
 			static constexpr uint32 LAYER_COUNT = 4;
 
@@ -136,13 +135,9 @@ namespace ProjectA {
 					mat3x3<float32>::translation(rigidBody->position);
 			}
 
-			/* const ComponentPool<DynamicEntityComponent>& pool = ecs.getComponentPool<DynamicEntityComponent>();
-
-			for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
-				const Entity entity = pool.componentIndexToEntity[componentIndex];
-
-				// TODO
-			} */
+			const ComponentPool<DynamicEntityComponent>& getDynamicEntityPool() const {
+				return ecs.getComponentPool<DynamicEntityComponent>();
+			}
 
 			/*
 			for (entity in dynamic entities) {

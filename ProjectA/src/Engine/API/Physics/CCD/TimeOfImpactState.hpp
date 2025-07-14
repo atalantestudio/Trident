@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	enum class CCDOutputState : uint8 {
+	enum class TimeOfImpactState : uint8 {
 		UNDETERMINED = 0,
 		SEPARATED = 1,
 		HIT = 2,
@@ -9,5 +9,5 @@ namespace ProjectA {
 		UNRESOLVED_ROOT = 4,
 	};
 
-	AS_PRINTABLE(CCDOutputState);
+	AS_PRINTABLE(TimeOfImpactState);
 }

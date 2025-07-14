@@ -313,6 +313,16 @@ namespace ProjectA {
 	}
 
 	template<typename T>
+	lyah::vec<2, T> cross(const lyah::vec<2, T>& a, float32 b) {
+		return {b * a[1], -b * a[0]};
+	}
+
+	template<typename T>
+	lyah::vec<2, T> cross(float32 a, const lyah::vec<2, T>& b) {
+		return {-a * b[1], a * b[0]};
+	}
+
+	template<typename T>
 	lyah::vec<2, T> perpendicular(const lyah::vec<2, T>& a, T b) {
 		return {b * a[1], static_cast<T>(-1) * b * a[0]};
 	}

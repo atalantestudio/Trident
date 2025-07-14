@@ -208,11 +208,11 @@ namespace ProjectA {
 		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void Application::update(float64 fixedDeltaTime) {
+	void Application::update(float64 deltaTime) {
 		PROFILE_SCOPE("Application update/integrate");
 
 		for (const ref<Layer>& layer : layerStack) {
-			layer->update(fixedDeltaTime);
+			layer->update(static_cast<float32>(deltaTime));
 		}
 	}
 

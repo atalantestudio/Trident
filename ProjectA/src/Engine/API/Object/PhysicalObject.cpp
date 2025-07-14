@@ -12,10 +12,10 @@ namespace ProjectA {
 		copy.transform = physicalObject.transform;
 		copy.position = rigidBody->position;
 		copy.linearVelocity = rigidBody->linearVelocity;
-		copy.linearAcceleration = rigidBody->linearAcceleration;
+		copy.force = rigidBody->force;
 		copy.rotation = rigidBody->rotation;
 		copy.angularVelocity = rigidBody->angularVelocity;
-		copy.angularAcceleration = rigidBody->angularAcceleration;
+		copy.torque = rigidBody->torque;
 		copy.scale = rigidBody->scale;
 		copy.geometry = geometry;
 
@@ -25,11 +25,12 @@ namespace ProjectA {
 	PhysicalObjectCopy2D copyPhysicalObject(const Scene2D& scene, Entity entity, float32 t) {
 		PhysicalObjectCopy2D copy = copyPhysicalObject(scene, entity);
 
-		copy.position += copy.linearVelocity * t + copy.linearAcceleration * t * t * 0.5f;
-		copy.rotation += copy.angularVelocity * t + copy.angularAcceleration * t * t * 0.5f;
+		// TODO
+		// copy.position += copy.linearVelocity * t + copy.force * t * t * 0.5f;
+		// copy.rotation += copy.angularVelocity * t + copy.torque * t * t * 0.5f;
 
-		copy.linearVelocity += copy.linearAcceleration * t;
-		copy.angularVelocity += copy.angularAcceleration * t;
+		// copy.linearVelocity += copy.linearAcceleration * t;
+		// copy.angularVelocity += copy.torque * t;
 
 		copy.transform =
 			mat3x3<float32>::translation(-copy.geometry->centerOfMass) *

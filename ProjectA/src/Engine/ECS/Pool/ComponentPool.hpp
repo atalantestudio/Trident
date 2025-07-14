@@ -95,9 +95,9 @@ namespace ProjectA {
 			static constexpr uint32 NULL_COMPONENT_INDEX = max<Entity>();
 
 		public:
-			std::array<Entity, MAX_ENTITIES> entityToComponentIndex; // Sparse array
-			std::vector<uint32> componentIndexToEntity; // Dense array
-			std::vector<ComponentType> components; // Dense array
+			std::array<Entity, MAX_ENTITIES> entityToComponentIndex; // (sparse array)
+			std::vector<uint32> componentIndexToEntity; // (dense array)
+			std::vector<ComponentType> components; // (dense array)
 
 			// Number of currently alive components.
 			uint32 componentCount = 0;

@@ -21,6 +21,9 @@ namespace ProjectA {
 		// A and B are intersecting if the distance is <= 0.
 		float32 distance;
 
+		// Last search direction used by GJK.
+		vec2<float32> separatingAxis;
+
 		// Closest feature on A. Can either be a vertex or an edge.
 		ClosestFeature2D closestFeatureA;
 
@@ -346,6 +349,7 @@ namespace ProjectA {
 		}
 
 		result.distance = distance(result.closestA, result.closestB);
+		result.separatingAxis = d;
 
 		return result;
 	}

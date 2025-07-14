@@ -4,59 +4,189 @@
 #include "Engine/API/Physics/PhysicsEngine.hpp"
 
 namespace ProjectA {
-	static constexpr uint32 DISTANCE_ITERATION_LIMIT = 20;
-	static constexpr uint32 PUSH_BACK_ITERATION_LIMIT = 8;
-	static constexpr uint32 ROOT_FINDER_ITERATION_LIMIT = 50;
-
-	// Toggle continuous collision detection.
-	#define DEBUG_ENABLE_CCD
-
-	void PhysicsEngine::update(Scene2D& scene, GJK2DResult* gjkResult) {
+	void PhysicsEngine::setScene(Scene2D& scene) {
 		this->scene = &scene;
-
-		broadPhase();
-		narrowPhase(gjkResult);
-		integrate();
 	}
 
-	void PhysicsEngine::broadPhase() {
-		pairs.clear();
-		safeAdvanceTimes.resize(scene->getPhysicalObjectEntityCount());
-		impulses.clear();
+	void PhysicsEngine::tick(float32 deltaTime, GJK2DResult* gjkResult) {
+		const ComponentPool<DynamicEntityComponent>& pool = scene->getDynamicEntityPool();
 
-		std::fill(safeAdvanceTimes.begin(), safeAdvanceTimes.end(), 1.0f);
+		// 1. Broad phase: Detect potentially overlapping pairs.
+		// TODO: If less than 2 objects in the same layer AND in different physical groups, no chance of overlap.
+		const std::vector<CollisionPair> collisionPairs = BroadPhase();
 
+		// 2. Narrow phase: Calculate the contact manifold for each pair.
+		const std::vector<Arbiter2D> arbiters = NarrowPhase(collisionPairs, gjkResult);
+
+		// 3. Integrate forces.
+		// TODO: Do we need to integrate forces on resting objects? E.g. they could be at rest on a moving platform due to inertia.
+		for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
+			const Entity entity = pool.componentIndexToEntity[componentIndex];
+
+			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(entity));
+
+			// TODO: Exclude dynamic objects with an inverse mass of 0 from the loop.
+			if (rigidBody->inverseMass == 0.0f) {
+				continue;
+			}
+
+			// NOTE: Gravity can also be added in 2 halves: one here and one after integrating the positions/velocities.
+			rigidBody->linearVelocity += (rigidBody->force * rigidBody->inverseMass + G) * deltaTime;
+			rigidBody->angularVelocity += rigidBody->torque * rigidBody->inverseMass * deltaTime;
+		}
+
+		// 4. Pre-compute step:
+		//    - Calculate combined values in each pair (static/dynamic friction, restitution, etc.)
+		//    - For each contact point, calculate mass normal, mass tangent and bias value
+		// TODO
+		/* for (Arbiter2D arbiter : arbiters) {
+			arbiter.precompute(inv_dt);
+		} */
+
+		// 5. Apply impulses to overlapping pairs in a sequential manner.
+		// TODO
+		/* for (uint32 iteration; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
+			for (auto arbiterIterator = arbiters.begin(); arbiterIterator != arbiters.end(); arbiterIterator += 1) {
+				arbiterIterator->second.applyImpulse();
+			}
+		} */
+
+		// 6. Integrate positions/rotations and velocities and reset forces.
+		// TODO: Do we need to integrate positions/rotations on dynamic objects with an inverse mass of 0?
+		// TODO: Do we need to integrate positions/rotations on resting objects? E.g. they could be at rest on a moving platform due to inertia.
+		for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
+			const Entity entity = pool.componentIndexToEntity[componentIndex];
+
+			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(entity));
+
+			rigidBody->position += rigidBody->linearVelocity * deltaTime;
+			rigidBody->rotation += rigidBody->angularVelocity * deltaTime;
+			rigidBody->force = {0.0f, 0.0f};
+			rigidBody->torque = 0.0f;
+
+			scene->updateTransform(entity);
+		}
+	}
+
+	std::vector<CollisionPair> PhysicsEngine::BroadPhase() const {
+		std::vector<CollisionPair> collisionPairs;
+		CollisionPair pair;
+
+		// TODO: If less than 2 objects in the same layer AND in different physical groups, no chance of overlap.
+		for (const std::vector<Entity>& layer : scene->getLayers()) {
+			if (layer.size() < 2) {
+				continue;
+			}
+
+			for (Entity A = 0; A < layer.size() - 1; A += 1) {
+				pair.A = A;
+
+				for (Entity B = A + 1; B < layer.size(); B += 1) {
+					pair.B = B;
+
+					collisionPairs.emplace_back(pair);
+				}
+
+				// TODO: Create dynamic-static pairs as well.
+			}
+		}
+
+		return collisionPairs;
+	}
+
+	std::vector<Arbiter2D> PhysicsEngine::NarrowPhase(const std::vector<CollisionPair>& collisionPairs, GJK2DResult* gjkResult) const {
+		std::vector<Arbiter2D> arbiters;
+		Arbiter2D arbiter;
+		GJK2DResult result;
+
+		for (const CollisionPair& pair : collisionPairs) {
+			const PhysicalObjectCopy2D A = copyPhysicalObject(*scene, pair.A);
+			const PhysicalObjectCopy2D B = copyPhysicalObject(*scene, pair.B);
+
+			result = GJK2D(A, B);
+
+			if (result.distance > 0.0f) {
+				continue;
+			}
+
+			arbiter.A = A;
+			arbiter.B = B;
+
+			// TODO: Generate contact manifold with EPA.
+
+			arbiters.emplace_back(arbiter);
+		}
+
+		if (gjkResult != nullptr) {
+			*gjkResult = result;
+		}
+
+		return arbiter;
+	}
+
+	/* void PhysicsEngine::BroadPhase(GJK2DResult* gjkResult) {
 		if (scene->getPhysicalObjectEntityCount() < 2) {
 			return;
 		}
 
 		for (const std::vector<Entity>& layer : scene->getLayers()) {
-			if (layer.empty()) {
+			if (layer.size() < 2) {
 				continue;
 			}
 
-			for (Entity A = 0; A < layer.size() - 1; A += 1) {
-				for (Entity B = A + 1; B < scene->getPhysicalObjectEntityCount(); B += 1) {
-					CollisionPair pair{};
-					pair.A = A;
-					pair.B = B;
+			ref<RigidBody2D> rigidBodyA;
+			ref<RigidBody2D> rigidBodyB;
+			CollisionPair collisionPair;
 
-					pairs.emplace_back(pair);
+			for (Entity A = 0; A < layer.size() - 1; A += 1) {
+				rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene->getBody(A));
+				collisionPair.A = A;
+
+				for (Entity B = A + 1; B < layer.size(); B += 1) {
+					rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene->getBody(B));
+
+					if (rigidBodyA->inverseMass == 0.0f && rigidBodyB->inverseMass == 0.0f) {
+						continue;
+					}
+
+					collisionPair.B = B;
+
+					const ContactManifold2D contactManifold = GenerateContactManifold(A, B, gjkResult);
+
+					if (contactManifold.contactPointCount == 0) {
+						arbiters.erase(collisionPair);
+
+						continue;
+					}
+
+					auto arbiterIterator = arbiters.find(collisionPair);
+
+					if (arbiterIterator == arbiters.end()) {
+						arbiterIterator->second.update(contactManifold);
+
+						continue;
+					}
+
+					Arbiter2D arbiter;
+					arbiter.scene = scene;
+					arbiter.A = A;
+					arbiter.B = B;
+					arbiter.contactManifold = contactManifold;
+					arbiter.contactManifold.combinedFriction = lyah::sqrt(rigidBodyA->friction * rigidBodyB->friction);
+
+					arbiters.insert(std::pair<CollisionPair, Arbiter2D>(collisionPair, arbiter));
 				}
 			}
 		}
-	}
+	} */
 
-	void PhysicsEngine::narrowPhase(GJK2DResult* gjkResult) {
+	/* void PhysicsEngine::narrowPhase(GJK2DResult* gjkResult) {
 		for (CollisionPair& pair : pairs) {
-			CCDOutput output;
+			TimeOfImpact output;
 
-			#ifdef DEBUG_ENABLE_CCD
-				output = evaluateContinuousCollision(pair.A, pair.B, gjkResult);
-			#else
-				output.state = CCDOutputState::SEPARATED;
-				output.fraction = 1.0f;
-			#endif
+			output = evaluateContinuousCollision(pair.A, pair.B, gjkResult);
+			// output.state = TimeOfImpactState::SEPARATED;
+			// output.fraction = 1.0f;
 
 			const float32 toi = output.fraction;
 
@@ -65,7 +195,7 @@ namespace ProjectA {
 			safeAdvanceTimes[pair.B] = std::min(safeAdvanceTimes[pair.B], toi);
 
 			// https://code.tutsplus.com/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331t
-			if (output.state == CCDOutputState::HIT) {
+			if (output.state == TimeOfImpactState::HIT) {
 				const PhysicalObjectCopy2D copyA = copyPhysicalObject(*scene, pair.A, toi);
 				const PhysicalObjectCopy2D copyB = copyPhysicalObject(*scene, pair.B, toi);
 
@@ -93,25 +223,25 @@ namespace ProjectA {
 				const vec2<float32> normalImpulse = n * Fn;
 
 				// TODO: Fix infinite tangent vector.
-				/* // Linear velocity + normal impulse.
-				const vec2<float32> vA = copyA.linearVelocity - normalImpulse * rigidBodyA->inverseMass;
-				const vec2<float32> vB = copyB.linearVelocity + normalImpulse * rigidBodyB->inverseMass;
+				// Linear velocity + normal impulse.
+				// const vec2<float32> vA = copyA.linearVelocity - normalImpulse * rigidBodyA->inverseMass;
+				// const vec2<float32> vB = copyB.linearVelocity + normalImpulse * rigidBodyB->inverseMass;
 
-				relativeLinearVelocity = vB - vA;
+				// relativeLinearVelocity = vB - vA;
 
 				// Tangent to the collision normal.
-				const vec2<float32> tangent = normalized(relativeLinearVelocity - n * dot(relativeLinearVelocity, n));
+				// const vec2<float32> tangent = normalized(relativeLinearVelocity - n * dot(relativeLinearVelocity, n));
 
 				// Magnitude of the friction.
-				const float32 Ff = -dot(relativeLinearVelocity, tangent) / (rigidBodyA->inverseMass + rigidBodyB->inverseMass);
+				// const float32 Ff = -dot(relativeLinearVelocity, tangent) / (rigidBodyA->inverseMass + rigidBodyB->inverseMass);
 
-				const float32 mu = (rigidBodyA->staticFriction + rigidBodyB->staticFriction) * 0.5f;
+				// const float32 mu = (rigidBodyA->staticFriction + rigidBodyB->staticFriction) * 0.5f;
 
-				vec2<float32> frictionImpulse = tangent * Ff;
+				// vec2<float32> frictionImpulse = tangent * Ff;
 
-				if (abs(Ff) > mu * Fn) {
-					frictionImpulse = tangent * -Fn * ((rigidBodyA->dynamicFriction + rigidBodyB->dynamicFriction) * 0.5f);
-				} */
+				// if (abs(Ff) > mu * Fn) {
+					// frictionImpulse = tangent * -Fn * ((rigidBodyA->dynamicFriction + rigidBodyB->dynamicFriction) * 0.5f);
+				// }
 
 				// Vector from the center of mass to the contact point on A.
 				const vec2<float32> rA = output.closestA - copyA.geometry->centerOfMass;
@@ -121,21 +251,21 @@ namespace ProjectA {
 
 				ImpulseData impulseDataA;
 				impulseDataA.entity = pair.A;
-				impulseDataA.impulse = -normalImpulse /* - frictionImpulse */;
+				impulseDataA.impulse = -normalImpulse; // - frictionImpulse
 				impulseDataA.r = rA;
 
 				ImpulseData impulseDataB;
 				impulseDataB.entity = pair.B;
-				impulseDataB.impulse = +normalImpulse /* + frictionImpulse */;
+				impulseDataB.impulse = +normalImpulse; // + frictionImpulse
 				impulseDataB.r = rB;
 
 				impulses.emplace_back(impulseDataA);
 				impulses.emplace_back(impulseDataB);
 			}
 		}
-	}
+	} */
 
-	void PhysicsEngine::integrate() {
+	/* void PhysicsEngine::integrate() {
 		for (Entity entity = 0; entity < scene->getPhysicalObjectEntityCount(); entity += 1) {
 			const float32 t = safeAdvanceTimes[entity];
 
@@ -145,10 +275,10 @@ namespace ProjectA {
 			rigidBody->rotation += rigidBody->angularVelocity * t + rigidBody->angularAcceleration * t * t * 0.5f;
 
 			rigidBody->linearVelocity += (rigidBody->linearAcceleration + rigidBody->linearForces) * t * 0.5f;
-			rigidBody->angularVelocity += (rigidBody->angularAcceleration + rigidBody->angularForces) * t * 0.5f;
+			rigidBody->angularVelocity += (rigidBody->angularAcceleration + rigidBody->torque) * t * 0.5f;
 
 			rigidBody->linearAcceleration = rigidBody->linearForces;
-			rigidBody->angularAcceleration = rigidBody->angularForces;
+			rigidBody->angularAcceleration = rigidBody->torque;
 
 			scene->updateTransform(entity);
 		}
@@ -170,191 +300,12 @@ namespace ProjectA {
 			rigidBody->rotation += rigidBody->angularVelocity * t + rigidBody->angularAcceleration * t * t * 0.5f;
 
 			rigidBody->linearVelocity += (rigidBody->linearAcceleration + rigidBody->linearForces) * t * 0.5f;
-			rigidBody->angularVelocity += (rigidBody->angularAcceleration + rigidBody->angularForces) * t * 0.5f;
+			rigidBody->angularVelocity += (rigidBody->angularAcceleration + rigidBody->torque) * t * 0.5f;
 
 			rigidBody->linearAcceleration = rigidBody->linearForces;
-			rigidBody->angularAcceleration = rigidBody->angularForces;
+			rigidBody->angularAcceleration = rigidBody->torque;
 
 			scene->updateTransform(impulseData.entity);
 		}
-	}
-
-	// Bilateral Advancement algorithm implementation.
-	// Evaluates continuous collisions between A and B.
-	// The result of the last GJK call is copied to `gjkResult` if it's not null.
-	// 
-	// - Erin Catto - Continuous Collision - GDC 2013
-	//   https://box2d.org/files/ErinCatto_ContinuousCollision_GDC2013.pdf (54 pages)
-	//   https://ubm-twvideo01.s3.amazonaws.com/o1/vault/gdc2013/slides/824737Catto_Erin_PhysicsForGame.pdf (67 pages)
-	//   https://www.youtube.com/watch?v=7_nKOET6zwI
-	// - Nilson Souto - Video Game Physics Tutorial - Part II: Collision Detection for Solid Objects
-	//   https://www.toptal.com/game/video-game-physics-part-ii-collision-detection-for-solid-objects
-	// 
-	CCDOutput PhysicsEngine::evaluateContinuousCollision(Entity A, Entity B, GJK2DResult* gjkResult) {
-		static constexpr float32 TOLERANCE = 0.25f * 0.005f;
-		static constexpr float32 TARGET = 0.005f;
-
-		ENGINE_STATIC_ASSERT(TARGET > TOLERANCE);
-
-		CCDOutput output{};
-
-		output.state = CCDOutputState::UNDETERMINED;
-		output.fraction = 0.0f;
-
-		float32 t0 = 0.0f;
-
-		const PhysicalObjectCopy2D baseA = copyPhysicalObject(*scene, A);
-		const PhysicalObjectCopy2D baseB = copyPhysicalObject(*scene, B);
-
-		uint32 distanceIteration = 0;
-
-		while (distanceIteration < DISTANCE_ITERATION_LIMIT) {
-			const PhysicalObjectCopy2D nextA = copyPhysicalObject(*scene, A, t0);
-			const PhysicalObjectCopy2D nextB = copyPhysicalObject(*scene, B, t0);
-
-			const GJK2DResult result = GJK2D(nextA, nextB);
-
-			if (gjkResult != nullptr) {
-				*gjkResult = result;
-			}
-
-			distanceIteration += 1;
-
-			output.closestA = result.closestA;
-			output.closestB = result.closestB;
-
-			// Exit if the shapes are initially overlapped.
-			if (result.distance <= 0.0f) {
-				output.state = CCDOutputState::OVERLAPPED;
-				output.fraction = 0.0f;
-
-				return output;
-			}
-
-			// If the minimum distance is less than the tolerance, exit.
-			if (result.distance <= TARGET + TOLERANCE) {
-				output.state = CCDOutputState::HIT;
-				output.fraction = t0;
-				output.closestB = result.closestB;
-
-				return output;
-			}
-
-			const SeparationFunction separationFunction(nextA, nextB, result.closestFeatureA, result.closestFeatureB);
-
-			float32 t1 = 1.0f;
-			uint32 pushBackIteration = 0;
-
-			while (pushBackIteration < PUSH_BACK_ITERATION_LIMIT) {
-				const PhysicalObjectCopy2D nextSeparationA = copyPhysicalObject(*scene, A, t1);
-				const PhysicalObjectCopy2D nextSeparationB = copyPhysicalObject(*scene, B, t1);
-				const MinSeparationOutput minSeparationOutput = separationFunction.findMinimumValue(nextSeparationA, nextSeparationB);
-
-				float32 s1 = minSeparationOutput.separationValue;
-
-				if (s1 > TARGET + TOLERANCE) {
-					// If the objects are separated at t1, exit.
-					output.state = CCDOutputState::SEPARATED;
-					output.fraction = t1;
-
-					return output;
-				}
-
-				if (s1 > TARGET - TOLERANCE) {
-					// Advance t0.
-					t0 = t1;
-
-					break;
-				}
-
-				const PhysicalObjectCopy2D tA = copyPhysicalObject(*scene, A, t0);
-				const PhysicalObjectCopy2D tB = copyPhysicalObject(*scene, B, t0);
-
-				// Calculate the initial separation value of the witness points.
-				float32 s0 = separationFunction.evaluate(minSeparationOutput, tA, tB);
-
-				if (s0 < TARGET - TOLERANCE) {
-					// If the root finder reaches the iteration limit, exit.
-					output.state = CCDOutputState::UNRESOLVED_ROOT;
-					output.fraction = t0;
-
-					BREAKPOINT();
-
-					return output;
-				}
-
-				if (s0 <= TARGET + TOLERANCE) {
-					// If the objects hit each other, exit.
-					output.state = CCDOutputState::HIT;
-					output.fraction = t0;
-				}
-
-				// Compute root.
-				float32 a0 = t0;
-				float32 a1 = t1;
-
-				uint32 rootFinderIteration = 0;
-
-				while (rootFinderIteration < ROOT_FINDER_ITERATION_LIMIT) {
-					float32 t;
-
-					if (rootFinderIteration & 1) {
-						// Use false position.
-						t = a0 + (TARGET - s0) * (a1 - a0) / (s1 - s0);
-					}
-					else {
-						// Use bisection.
-						t = (a0 + a1) * 0.5f;
-					}
-
-					rootFinderIteration += 1;
-
-					const PhysicalObjectCopy2D tA = copyPhysicalObject(*scene, A, t);
-					const PhysicalObjectCopy2D tB = copyPhysicalObject(*scene, B, t);
-
-					const float32 s = separationFunction.evaluate(minSeparationOutput, tA, tB);
-
-					if (abs(s - TARGET) < TOLERANCE) {
-						// Move t1 back.
-						t1 = t;
-
-						break;
-					}
-
-					if (s > TARGET) {
-						a0 = t;
-						s0 = s;
-					}
-					else {
-						a1 = t;
-						s1 = s;
-					}
-				}
-
-				pushBackIteration += 1;
-			}
-		}
-
-		output.state = CCDOutputState::UNRESOLVED_ROOT;
-		output.fraction = t0;
-
-		BREAKPOINT();
-
-		return output;
-	}
-
-	void PhysicsEngine::advanceSimulation(Entity entity, float32 t) {
-		ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(entity));
-
-		rigidBody->position += rigidBody->linearVelocity * t + rigidBody->linearAcceleration * t * t * 0.5f;
-		rigidBody->rotation += rigidBody->angularVelocity * t + rigidBody->angularAcceleration * t * t * 0.5f;
-
-		rigidBody->linearVelocity += (rigidBody->linearAcceleration + rigidBody->linearForces) * t * 0.5f;
-		rigidBody->angularVelocity += (rigidBody->angularAcceleration + rigidBody->angularForces) * t * 0.5f;
-
-		rigidBody->linearAcceleration = rigidBody->linearForces;
-		rigidBody->angularAcceleration = rigidBody->angularForces;
-
-		scene->updateTransform(entity);
-	}
+	} */
 }

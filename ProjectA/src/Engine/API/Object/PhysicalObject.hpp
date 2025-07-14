@@ -17,11 +17,11 @@ namespace ProjectA {
 
 		vec2<float32> position;
 		vec2<float32> linearVelocity;
-		vec2<float32> linearAcceleration;
+		vec2<float32> force;
 
 		float32 rotation;
 		float32 angularVelocity;
-		float32 angularAcceleration; // (torque)
+		float32 torque;
 
 		vec2<float32> scale;
 

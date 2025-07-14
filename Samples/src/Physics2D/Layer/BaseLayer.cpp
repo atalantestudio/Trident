@@ -5,16 +5,14 @@
 #include "BaseLayer.hpp"
 
 namespace ProjectA {
-	void BaseLayer::update(float64 fixedDeltaTime) {
-		for (Entity entity = 0; entity < scene.getPhysicalObjectEntityCount(); entity += 1) {
-			ref<RigidBody2D>& body = std::static_pointer_cast<RigidBody2D>(scene.getBody(entity));
+	BaseLayer::BaseLayer() {
+		physicsEngine.setScene(scene);
+	}
 
-			body->linearForces = {0.0f, 0.0f};
-		}
+	void BaseLayer::update(float32 deltaTime) {
+		physicsUpdate();
 
-		PhysicsUpdate();
-
-		physicsEngine.update(scene, &gjkResult);
+		physicsEngine.tick(deltaTime, &gjkResult);
 	}
 
 	void BaseLayer::preRender() {

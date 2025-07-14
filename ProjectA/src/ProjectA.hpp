@@ -58,7 +58,7 @@
 
 // Physics
 #include "Engine/API/Physics/Body/RigidBody.hpp"
-#include "Engine/API/Physics/CCD/CCDOutput.hpp"
+#include "Engine/API/Physics/CCD/TimeOfImpact.hpp"
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/GJK2DConditional.hpp"
 #include "Engine/API/Physics/GJK2DPoint.hpp"
