@@ -6,6 +6,20 @@ namespace ProjectA {
 	class Demo1Layer : public BaseLayer {
 		public:
 			void build() override {
+				ConvexHullGeometry2DDescriptor convexHullGeometryDescriptor;
+				convexHullGeometryDescriptor.vertices = {
+					{-1.0f, -1.0f},
+					{-1.0f,  1.0f},
+					{ 1.0f,  1.0f},
+					{ 1.0f, -1.0f},
+				};
+				convexHullGeometryDescriptor.indices = {
+					0, 1, 2,
+					0, 2, 3,
+				};
+
+				const ref<ConvexHullGeometry2D> convexHullGeometry = createRef<ConvexHullGeometry2D>(convexHullGeometryDescriptor);
+
 				CircleGeometry2DDescriptor circleGeometryDescriptor;
 				circleGeometryDescriptor.resolution = 128;
 				circleGeometryDescriptor.radius = 5.0f;
@@ -16,11 +30,11 @@ namespace ProjectA {
 
 				const ref<CircleGeometry2D> circle2Geometry = createRef<CircleGeometry2D>(circleGeometryDescriptor);
 
-				const Entity entityA = scene.createDynamicEntity(0);
+				const Entity entityA = scene.createStaticEntity(0);
 
 				ref<RigidBody2D> bodyA = createRef<RigidBody2D>();
-				bodyA->position = vec2<float32>(0.0f, -7.0f);
-				bodyA->scale = vec2<float32>(1.0f, 1.0f);
+				bodyA->position = vec2<float32>(0.0f, -3.0f);
+				// bodyA->scale = vec2<float32>(20.0f, 1.0f);
 				bodyA->inverseMass = 0_kg;
 				bodyA->inverseInertia = 0.0f;
 
@@ -29,7 +43,7 @@ namespace ProjectA {
 				materialA->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
 				scene.setBody(entityA, std::static_pointer_cast<Body2D>(bodyA));
-				scene.setGeometry(entityA, std::static_pointer_cast<Geometry2D>(circle1Geometry));
+				scene.setGeometry(entityA, std::static_pointer_cast<Geometry2D>(circle2Geometry));
 				scene.setMaterial(entityA, std::static_pointer_cast<Material>(materialA));
 				scene.updateTransform(entityA);
 
@@ -46,7 +60,7 @@ namespace ProjectA {
 				materialB->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
 				scene.setBody(entityB, std::static_pointer_cast<Body2D>(bodyB));
-				scene.setGeometry(entityB, std::static_pointer_cast<Geometry2D>(circle2Geometry));
+				scene.setGeometry(entityB, std::static_pointer_cast<Geometry2D>(convexHullGeometry));
 				scene.setMaterial(entityB, std::static_pointer_cast<Material>(materialB));
 				scene.updateTransform(entityB);
 

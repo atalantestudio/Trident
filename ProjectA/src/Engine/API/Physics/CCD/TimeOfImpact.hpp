@@ -24,7 +24,7 @@ namespace ProjectA {
 
 	// Bilateral Advancement algorithm implementation.
 	// Evaluates continuous collisions between A and B.
-	// The result of the last GJK call is copied to `gjkResult` if it's not null.
+	// The result of the last GJK call is copied to `gjkOutput` if it's not null.
 	// 
 	// - Erin Catto - Continuous Collision - GDC 2013
 	//   https://box2d.org/files/ErinCatto_ContinuousCollision_GDC2013.pdf (54 pages)
@@ -33,7 +33,7 @@ namespace ProjectA {
 	// - Nilson Souto - Video Game Physics Tutorial - Part II: Collision Detection for Solid Objects
 	//   https://www.toptal.com/game/video-game-physics-part-ii-collision-detection-for-solid-objects
 	// 
-	static TimeOfImpact calculateTimeOfImpact(Scene2D* scene, Entity A, Entity B, GJK2DResult* gjkResult) {
+	static TimeOfImpact calculateTimeOfImpact(Scene2D* scene, Entity A, Entity B, GJK2DOutput* gjkOutputPointer) {
 		static constexpr float32 TOLERANCE = 0.25f * 0.005f;
 		static constexpr float32 TARGET = 0.005f;
 
@@ -55,19 +55,19 @@ namespace ProjectA {
 			const PhysicalObjectCopy2D nextA = copyPhysicalObject(*scene, A, t0);
 			const PhysicalObjectCopy2D nextB = copyPhysicalObject(*scene, B, t0);
 
-			const GJK2DResult result = GJK2D(nextA, nextB);
+			const GJK2DOutput gjkOutput = GJK2D(nextA, nextB);
 
-			if (gjkResult != nullptr) {
-				*gjkResult = result;
+			if (gjkOutputPointer != nullptr) {
+				*gjkOutputPointer = gjkOutput;
 			}
 
 			distanceIteration += 1;
 
-			output.closestA = result.closestA;
-			output.closestB = result.closestB;
+			output.closestA = gjkOutput.closestA;
+			output.closestB = gjkOutput.closestB;
 
 			// Exit if the shapes are initially overlapped.
-			if (result.distance <= 0.0f) {
+			if (gjkOutput.distance <= 0.0f) {
 				output.state = TimeOfImpactState::OVERLAPPED;
 				output.fraction = 0.0f;
 
@@ -75,15 +75,15 @@ namespace ProjectA {
 			}
 
 			// If the minimum distance is less than the tolerance, exit.
-			if (result.distance <= TARGET + TOLERANCE) {
+			if (gjkOutput.distance <= TARGET + TOLERANCE) {
 				output.state = TimeOfImpactState::HIT;
 				output.fraction = t0;
-				output.closestB = result.closestB;
+				output.closestB = gjkOutput.closestB;
 
 				return output;
 			}
 
-			const SeparationFunction separationFunction(nextA, nextB, result.closestFeatureA, result.closestFeatureB);
+			const SeparationFunction separationFunction(nextA, nextB, gjkOutput.closestFeatureA, gjkOutput.closestFeatureB);
 
 			float32 t1 = 1.0f;
 			uint32 pushBackIteration = 0;

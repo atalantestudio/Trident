@@ -20,7 +20,7 @@ namespace ProjectA {
 		float32 torque = 0.0f;
 
 		// NOTE: The scale of an entity isn't meant to be dynamically updated.
-		vec2<float32> scale;
+		vec2<float32> scale = {1.0f, 1.0f};
 
 		float32 inverseMass = 1.0f / 1.0_kg;
 

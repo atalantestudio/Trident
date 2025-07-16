@@ -139,6 +139,10 @@ namespace ProjectA {
 				return ecs.getComponentPool<DynamicEntityComponent>();
 			}
 
+			const ComponentPool<StaticEntityComponent>& getStaticEntityPool() const {
+				return ecs.getComponentPool<StaticEntityComponent>();
+			}
+
 			/*
 			for (entity in dynamic entities) {
 				for (other entity in dynamic entities) {

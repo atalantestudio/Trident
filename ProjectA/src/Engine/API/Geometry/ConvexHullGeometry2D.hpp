@@ -14,6 +14,7 @@ namespace ProjectA {
 				indices = descriptor.indices;
 				vertices = descriptor.vertices;
 
+				type = Geometry2DType::CONVEX_HULL;
 				centerOfMass = calculateCenterOfMass();
 				radius = calculateRadius();
 			}

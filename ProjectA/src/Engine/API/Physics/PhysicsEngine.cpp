@@ -10,7 +10,7 @@ namespace ProjectA {
 		this->scene = &scene;
 	}
 
-	void PhysicsEngine::tick(float32 deltaTime, GJK2DResult* gjkResult) {
+	void PhysicsEngine::tick(float32 deltaTime, GJK2DOutput* gjkOutput) {
 		const float32 halfDeltaTime = deltaTime * 0.5f;
 
 		float32 inverseDeltaTime = 0.0f;
@@ -26,7 +26,7 @@ namespace ProjectA {
 		const std::vector<CollisionPair> collisionPairs = BroadPhase();
 
 		// 2. Narrow phase: Calculate the contact manifold for each pair.
-		std::vector<Arbiter2D> arbiters = NarrowPhase(collisionPairs, gjkResult);
+		std::vector<Arbiter2D> arbiters = NarrowPhase(collisionPairs, gjkOutput);
 
 		// 3. Integrate forces.
 		// TODO: Do we need to integrate forces on resting objects? E.g. they could be at rest on a moving platform due to inertia.
@@ -86,32 +86,37 @@ namespace ProjectA {
 	}
 
 	std::vector<CollisionPair> PhysicsEngine::BroadPhase() const {
+		const ComponentPool<DynamicEntityComponent>& dynamicPool = scene->getDynamicEntityPool();
+		const ComponentPool<StaticEntityComponent>& staticPool = scene->getStaticEntityPool();
+
 		std::vector<CollisionPair> collisionPairs;
 		CollisionPair pair;
 
 		// TODO: If less than 2 objects in the same layer AND in different physical groups, no chance of overlap.
-		for (const std::vector<Entity>& layer : scene->getLayers()) {
-			if (layer.size() < 2) {
-				continue;
+		for (uint32 iA = 0; iA < dynamicPool.componentCount; iA += 1) {
+			pair.A = dynamicPool.componentIndexToEntity[iA];
+
+			for (uint32 iB = iA + 1; iB < dynamicPool.componentCount; iB += 1) {
+				pair.B = dynamicPool.componentIndexToEntity[iB];
+
+				// ENGINE_DEBUG("Registered dynamic-dynamic pair ([], []).", pair.A, pair.B);
+
+				collisionPairs.emplace_back(pair);
 			}
 
-			for (Entity A = 0; A < layer.size() - 1; A += 1) {
-				pair.A = A;
+			for (uint32 iB = 0; iB < staticPool.componentCount; iB += 1) {
+				pair.B = staticPool.componentIndexToEntity[iB];
 
-				for (Entity B = A + 1; B < layer.size(); B += 1) {
-					pair.B = B;
+				// ENGINE_DEBUG("Registered dynamic-static pair ([], []).", pair.A, pair.B);
 
-					collisionPairs.emplace_back(pair);
-				}
-
-				// TODO: Create dynamic-static pairs as well.
+				collisionPairs.emplace_back(pair);
 			}
 		}
 
 		return collisionPairs;
 	}
 
-	std::vector<Arbiter2D> PhysicsEngine::NarrowPhase(const std::vector<CollisionPair>& collisionPairs, GJK2DResult* gjkResultPointer) const {
+	std::vector<Arbiter2D> PhysicsEngine::NarrowPhase(const std::vector<CollisionPair>& collisionPairs, GJK2DOutput* gjkOutputPointer) const {
 		std::vector<Arbiter2D> arbiters;
 		EPA2DResult epaResult;
 
@@ -128,16 +133,13 @@ namespace ProjectA {
 			const ref<Material>& materialA = scene->getMaterial(pair.A);
 			const ref<Material>& materialB = scene->getMaterial(pair.B);
 
-			const float32 penetration = COLLIDER_PENETRATION_2D_TABLE[static_cast<uint32>(A.geometry->type)][static_cast<uint32>(B.geometry->type)](A, B);
-
-			if (penetration > 0.0f) {
+			if (!COLLIDER_2D_TABLE[static_cast<uint32>(A.geometry->type)][static_cast<uint32>(B.geometry->type)](A, B, &arbiter.contactManifold)) {
 				// Entities are not intersecting (or degenerate case).
 				continue;
 			}
 
 			arbiter.A = A;
 			arbiter.B = B;
-			arbiter.contactManifold = COLLIDER_2D_TABLE[static_cast<uint32>(A.geometry->type)][static_cast<uint32>(B.geometry->type)](A, B, penetration);
 			arbiter.contactManifold.combinedFriction = lyah::sqrt(rigidBodyA->friction * rigidBodyB->friction);
 
 			arbiters.emplace_back(arbiter);
@@ -146,7 +148,7 @@ namespace ProjectA {
 		return arbiters;
 	}
 
-	/* void PhysicsEngine::BroadPhase(GJK2DResult* gjkResult) {
+	/* void PhysicsEngine::BroadPhase(GJK2DOutput* gjkOutput) {
 		if (scene->getPhysicalObjectEntityCount() < 2) {
 			return;
 		}
@@ -173,7 +175,7 @@ namespace ProjectA {
 
 					collisionPair.B = B;
 
-					const ContactManifold2D contactManifold = GenerateContactManifold(A, B, gjkResult);
+					const ContactManifold2D contactManifold = GenerateContactManifold(A, B, gjkOutput);
 
 					if (contactManifold.contactPointCount == 0) {
 						arbiters.erase(collisionPair);
@@ -202,11 +204,11 @@ namespace ProjectA {
 		}
 	} */
 
-	/* void PhysicsEngine::narrowPhase(GJK2DResult* gjkResult) {
+	/* void PhysicsEngine::narrowPhase(GJK2DOutput* gjkOutput) {
 		for (CollisionPair& pair : pairs) {
 			TimeOfImpact output;
 
-			output = evaluateContinuousCollision(pair.A, pair.B, gjkResult);
+			output = evaluateContinuousCollision(pair.A, pair.B, gjkOutput);
 			// output.state = TimeOfImpactState::SEPARATED;
 			// output.fraction = 1.0f;
 

@@ -12,7 +12,7 @@ namespace ProjectA {
 	void BaseLayer::update(float32 deltaTime) {
 		physicsUpdate();
 
-		physicsEngine.tick(deltaTime, &gjkResult);
+		physicsEngine.tick(deltaTime, &gjkOutput);
 	}
 
 	void BaseLayer::preRender() {
@@ -30,11 +30,11 @@ namespace ProjectA {
 			renderer.setPlaceholderOffset(placeholderOffset);
 		}
 
-		if (gjkResult.closestFeatureA.count > 0) {
-			renderer.setClosestPoints(gjkResult.closestA, gjkResult.closestB);
+		if (gjkOutput.closestFeatureA.count > 0) {
+			renderer.setClosestPoints(gjkOutput.closestA, gjkOutput.closestB);
 			renderer.clearClosestFeatureCounters();
-			renderer.registerClosestFeature(gjkResult.closestFeatureA);
-			renderer.registerClosestFeature(gjkResult.closestFeatureB);
+			renderer.registerClosestFeature(gjkOutput.closestFeatureA);
+			renderer.registerClosestFeature(gjkOutput.closestFeatureB);
 		}
 	}
 
@@ -49,15 +49,18 @@ namespace ProjectA {
 			return;
 		}
 
-		const vec2<float32>& p = renderer.getNdcMousePosition();
-
 		PhysicalObjectCopy2D copy;
 
-		// Check if the mouse hovers over an object.
+		PhysicalObjectCopy2D p;
+		p.position = renderer.getNdcMousePosition();
+		p.geometry = createRef<PointGeometry2D>();
+		p.transform = mat3x3<float32>::translation(p.position);
+
+		// Check if an entity is hovered.
 		for (sint32 entity = scene.getLastEntity(); entity >= 0; entity -= 1) {
 			copy = copyPhysicalObject(scene, static_cast<Entity>(entity));
 
-			if (GJK2DPointConditional(copy, p)) {
+			if (GJK2DConditional(copy, p)) {
 				hoveredEntity = entity;
 
 				break;
@@ -117,6 +120,8 @@ namespace ProjectA {
 			rigidBody->position += placeholderOffset;
 			// rigidBody->inverseMass = selectedEntityPreviousInverseMass;
 			// rigidBody->inverseInertia = selectedEntityPreviousInverseInertia;
+
+			scene.updateTransform(selectedEntity);
 
 			selectedEntity = max<uint32>();
 		}

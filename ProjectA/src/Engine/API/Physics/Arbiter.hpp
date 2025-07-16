@@ -31,8 +31,9 @@ namespace ProjectA {
 				contactPoint.rA = contactPoint.position - rigidBodyA->position;
 				contactPoint.rB = contactPoint.position - rigidBodyB->position;
 
-				// Linear relative velocity.
-				const vec2<float32> relativeVelocity = B.linearVelocity - A.linearVelocity;
+				const vec2<float32> relativeVelocity =
+					rigidBodyB->linearVelocity + cross(rigidBodyB->angularVelocity, contactPoint.rB) -
+					rigidBodyA->linearVelocity - cross(rigidBodyA->angularVelocity, contactPoint.rA);
 
 				// Precompute normal mass, tangent mass, and bias.
 				const float32 rn1 = dot(contactPoint.rA, contactManifold.contactNormal);
@@ -58,7 +59,7 @@ namespace ProjectA {
 
 				contactPoint.massTangent = 1.0f / tangentN; */
 
-				contactPoint.bias = -PENETRATION_BIAS * (inverseDeltaTime / 10.0f) * std::min(0.0f, contactManifold.penetration + ALLOWED_PENETRATION);
+				contactPoint.bias = -PENETRATION_BIAS * (inverseDeltaTime/*  / 10.0f */) * std::min(0.0f, contactManifold.penetration + ALLOWED_PENETRATION);
 				// contactPoint.accumulatedNormalImpulseBias = 0.0f;
 
 				/* // Accumulate impulses.
@@ -79,14 +80,15 @@ namespace ProjectA {
 			for (uint8 contactPointIndex = 0; contactPointIndex < contactManifold.contactPointCount; contactPointIndex += 1) {
 				ContactPoint2D& contactPoint = contactManifold.contactPoints[contactPointIndex];
 
-				// Linear relative velocity.
-				const vec2<float32> relativeVelocity = rigidBodyB->linearVelocity - rigidBodyA->linearVelocity;
+				const vec2<float32> relativeVelocity =
+					rigidBodyB->linearVelocity + cross(rigidBodyB->angularVelocity, contactPoint.rB) -
+					rigidBodyA->linearVelocity - cross(rigidBodyA->angularVelocity, contactPoint.rA);
 
 				// TODO
 				const float32 vn = dot(relativeVelocity, contactManifold.contactNormal);
 
 				// NOTE: Restitution gets applied here (0.0f).
-				float32 dPn = contactPoint.massNormal * (-(1.0f + 0.0f) * vn + contactPoint.bias);
+				float32 dPn = contactPoint.massNormal * (-vn + contactPoint.bias);
 
 				// Clamp the accumulated impulse.
 				/* {

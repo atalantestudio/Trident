@@ -37,7 +37,7 @@ namespace ProjectA {
 		private:
 			PhysicsEngine physicsEngine;
 
-			GJK2DResult gjkResult;
+			GJK2DOutput gjkOutput;
 
 			Entity hoveredEntity = max<uint32>();
 			Entity selectedEntity = max<uint32>();

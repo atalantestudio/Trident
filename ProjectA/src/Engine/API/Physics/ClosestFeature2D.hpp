@@ -3,8 +3,8 @@
 namespace ProjectA {
 	// The vertex or edge on an object that is the closest to another object.
 	struct ClosestFeature2D {
-		// The vertex/edge union deletes the default constructor,
-		// and because of that structs that use ClosestFeature2D (like GJK2DResult) cannot be constructed.
+		// NOTE: The vertex/edge union deletes the default constructor,
+		//       and because of that structs that use ClosestFeature2D cannot be constructed.
 		ClosestFeature2D() {}
 
 		// The vertices that compose the feature.

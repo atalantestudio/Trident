@@ -57,12 +57,12 @@ namespace ProjectA {
 		public:
 			void setScene(Scene2D& scene);
 
-			void tick(float32 deltaTime, GJK2DResult* gjkResult = nullptr);
+			void tick(float32 deltaTime, GJK2DOutput* gjkOutput = nullptr);
 
 		private:
 			std::vector<CollisionPair> BroadPhase() const;
 
-			std::vector<Arbiter2D> NarrowPhase(const std::vector<CollisionPair>& collisionPairs, GJK2DResult* gjkResultPointer) const;
+			std::vector<Arbiter2D> NarrowPhase(const std::vector<CollisionPair>& collisionPairs, GJK2DOutput* gjkOutputPointer) const;
 
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;

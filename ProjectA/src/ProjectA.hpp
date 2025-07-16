@@ -62,5 +62,4 @@
 #include "Engine/API/Physics/CCD/TimeOfImpact.hpp"
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/GJK2DConditional.hpp"
-#include "Engine/API/Physics/GJK2DPoint.hpp"
 #include "Engine/API/Physics/PhysicsEngine.hpp"

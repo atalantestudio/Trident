@@ -8,8 +8,8 @@
 namespace ProjectA {
 	static constexpr uint8 GJK_2D_ITERATION_LIMIT = 8;
 
-	// The result of a 2D GJK computation.
-	struct GJK2DResult {
+	// The result of GJK in 2D.
+	struct GJK2DOutput {
 		// Final simplex.
 		Simplex2 simplex;
 
@@ -186,7 +186,7 @@ namespace ProjectA {
 	// - Christer Ericson - Real-Time Collision Detection
 	//   https://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf
 	// 
-	inline GJK2DResult GJK2D(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
+	inline GJK2DOutput GJK2D(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
 		DEBUG_ASSERT(A.geometry->getVertexCount() < max<uint8>());
 		DEBUG_ASSERT(B.geometry->getVertexCount() < max<uint8>());
 
@@ -303,24 +303,24 @@ namespace ProjectA {
 			i += 1;
 		}
 
-		GJK2DResult result;
+		GJK2DOutput output;
 
 		const float32 div = lyah::rcp(s.divisor);
 
 		switch (s.count) {
 			case 1:
-				result.closestA = s[0].vA;
-				result.closestB = s[0].vB;
+				output.closestA = s[0].vA;
+				output.closestB = s[0].vB;
 
 				break;
 			case 2:
-				result.closestA = (s[0].vA * s[0].u + s[1].vA * s[1].u) * div;
-				result.closestB = (s[0].vB * s[0].u + s[1].vB * s[1].u) * div;
+				output.closestA = (s[0].vA * s[0].u + s[1].vA * s[1].u) * div;
+				output.closestB = (s[0].vB * s[0].u + s[1].vB * s[1].u) * div;
 
 				break;
 			case 3:
-				result.closestA = (s[0].vA * s[0].u + s[1].vA * s[1].u + s[2].vA * s[2].u) * div;
-				result.closestB = result.closestA;
+				output.closestA = (s[0].vA * s[0].u + s[1].vA * s[1].u + s[2].vA * s[2].u) * div;
+				output.closestB = output.closestA;
 
 				break;
 			default:
@@ -329,31 +329,31 @@ namespace ProjectA {
 				break;
 		}
 
-		result.closestFeatureA.vertex = s[0].vA;
-		result.closestFeatureA.vertexIndex = s[0].iA;
-		result.closestFeatureA.count = 1;
+		output.closestFeatureA.vertex = s[0].vA;
+		output.closestFeatureA.vertexIndex = s[0].iA;
+		output.closestFeatureA.count = 1;
 
-		result.closestFeatureB.vertex = s[0].vB;
-		result.closestFeatureB.vertexIndex = s[0].iB;
-		result.closestFeatureB.count = 1;
+		output.closestFeatureB.vertex = s[0].vB;
+		output.closestFeatureB.vertexIndex = s[0].iB;
+		output.closestFeatureB.count = 1;
 
 		if (s.count == 2) {
 			if (s[0].iA != s[1].iA) {
-				result.closestFeatureA.edge[1] = s[1].vA;
-				result.closestFeatureA.edgeIndices[1] = s[1].iA;
-				result.closestFeatureA.count = 2;
+				output.closestFeatureA.edge[1] = s[1].vA;
+				output.closestFeatureA.edgeIndices[1] = s[1].iA;
+				output.closestFeatureA.count = 2;
 			}
 
 			if (s[0].iB != s[1].iB) {
-				result.closestFeatureB.edge[1] = s[1].vB;
-				result.closestFeatureB.edgeIndices[1] = s[1].iB;
-				result.closestFeatureB.count = 2;
+				output.closestFeatureB.edge[1] = s[1].vB;
+				output.closestFeatureB.edgeIndices[1] = s[1].iB;
+				output.closestFeatureB.count = 2;
 			}
 		}
 
-		result.distance = distance(result.closestA, result.closestB);
-		result.separatingAxis = d;
+		output.distance = distance(output.closestA, output.closestB);
+		output.separatingAxis = d;
 
-		return result;
+		return output;
 	}
 }
