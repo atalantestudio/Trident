@@ -6,6 +6,7 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <random>
 #include <sstream>
 
 #ifdef BUILD_MODE_DEBUG

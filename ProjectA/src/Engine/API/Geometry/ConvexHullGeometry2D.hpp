@@ -66,5 +66,9 @@ namespace ProjectA {
 
 				return maxValueIndex;
 			}
+
+			uint32 getEdgeCount() const {
+				return (static_cast<uint32>(indices.count) / 3) * 2;
+			}
 	};
 }

@@ -48,7 +48,7 @@ namespace ProjectA {
 
 		// 4. Pre-compute step:
 		//    - Calculate combined values in each pair (static/dynamic friction, restitution, etc.)
-		//    - For each contact point, calculate mass normal, mass tangent and bias value
+		//    - For each contact, calculate mass normal, mass tangent and bias value
 		// TODO
 		for (Arbiter2D& arbiter : arbiters) {
 			arbiter.precompute(inverseDeltaTime);
@@ -177,7 +177,7 @@ namespace ProjectA {
 
 					const ContactManifold2D contactManifold = GenerateContactManifold(A, B, gjkOutput);
 
-					if (contactManifold.contactPointCount == 0) {
+					if (contactManifold.contactCount == 0) {
 						arbiters.erase(collisionPair);
 
 						continue;
@@ -267,10 +267,10 @@ namespace ProjectA {
 					// frictionImpulse = tangent * -Fn * ((rigidBodyA->dynamicFriction + rigidBodyB->dynamicFriction) * 0.5f);
 				// }
 
-				// Vector from the center of mass to the contact point on A.
+				// Vector from the center of mass to the contact on A.
 				const vec2<float32> rA = output.closestA - copyA.geometry->centerOfMass;
 
-				// Vector from the center of mass to the contact point on B.
+				// Vector from the center of mass to the contact on B.
 				const vec2<float32> rB = output.closestB - copyB.geometry->centerOfMass;
 
 				ImpulseData impulseDataA;

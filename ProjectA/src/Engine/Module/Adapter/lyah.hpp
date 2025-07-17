@@ -386,4 +386,22 @@ namespace ProjectA {
 			t[0][1] * a[0] + t[1][1] * a[1] + t[2][1],
 		};
 	}
+
+	// TODO: Implement in Lyah.
+	template<typename T>
+	lyah::mat<2, 2, T> mat2x2_rotation(T angle) {
+		const T c = lyah::cos(angle);
+		const T s = lyah::sin(angle);
+
+		return {
+			c, -s,
+			s, c,
+		};
+	}
+
+	static vec2<float32> rotate(const vec2<float32>& d, float32 r) {
+		const mat2x2<float32> R = mat2x2_rotation<float32>(r);
+
+		return d * R;
+	}
 }

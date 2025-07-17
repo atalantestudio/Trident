@@ -4,6 +4,7 @@
 #include "Engine/API/Object/PhysicalObject.hpp"
 #include "Engine/API/Physics/ContactManifold.hpp"
 #include "Engine/API/Physics/GJK2D.hpp"
+#include "Engine/API/Physics/SAT2D.hpp"
 
 namespace ProjectA {
 	typedef bool (*Collider2D)(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold);
@@ -25,8 +26,8 @@ namespace ProjectA {
 
 		contactManifold->contactNormal = normalized(B.position - A.position);
 		contactManifold->penetration = d;
-		contactManifold->contactPointCount = 1;
-		contactManifold->contactPoints[0].position = (sA + sB) * 0.5f;
+		contactManifold->contactCount = 1;
+		contactManifold->contacts[0].position = (sA + sB) * 0.5f;
 
 		return true;
 	}
@@ -45,13 +46,13 @@ namespace ProjectA {
 		if (d > -A.geometry->radius) {
 			contactManifold->contactNormal = normalized(gjkOutput.closestB - gjkOutput.closestA);
 			contactManifold->penetration = d;
-			contactManifold->contactPointCount = 1;
-			contactManifold->contactPoints[0].position = gjkOutput.closestB;
+			contactManifold->contactCount = 1;
+			contactManifold->contacts[0].position = gjkOutput.closestB;
 
 			return true;
 		}
 
-		// TODO
+		// TODO: Handle deep contact with SAT.
 		BREAKPOINT();
 
 		return true;
@@ -61,9 +62,21 @@ namespace ProjectA {
 		return CircleConvexHullCollider(B, A, contactManifold);
 	}
 
+	static bool ConvexHullConvexHullCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold) {
+		const SAT2DOutput satOutput = SAT2D(A, B);
+
+		if (satOutput.separation > 0.0f) {
+			return false;
+		}
+
+		// TODO
+
+		return true;
+	}
+
 	// https://media.steampowered.com/apps/valve/2015/DirkGregorius_Contacts.pdf
 	static constexpr Collider2D COLLIDER_2D_TABLE[static_cast<uint32>(Geometry2DType::MAX_ENUM)][static_cast<uint32>(Geometry2DType::MAX_ENUM)] = {
 		{CircleCircleCollider, CircleConvexHullCollider},
-		{ConvexHullCircleCollider, nullptr},
+		{ConvexHullCircleCollider, ConvexHullConvexHullCollider},
 	};
 }

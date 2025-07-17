@@ -3,14 +3,14 @@
 #include "Engine/API/Physics/ClosestFeature2D.hpp"
 
 namespace ProjectA {
-	struct ContactPoint2D {
+	struct Contact2D {
 		vec2<float32> position;
 		// vec2<float32> normal;
 
-		// A's position to the contact point.
+		// A's position to the contact.
 		vec2<float32> rA;
 
-		// B's position to the contact point.
+		// B's position to the contact.
 		vec2<float32> rB;
 
 		float32 massNormal;
@@ -29,9 +29,9 @@ namespace ProjectA {
 		float32 penetration;
 
 		// TODO: Use fewer bits.
-		uint8 contactPointCount;
+		uint8 contactCount;
 
-		ContactPoint2D contactPoints[2];
+		Contact2D contacts[2];
 
 		// TODO: Differentiate static friction from dynamic friction.
 		float32 combinedFriction;

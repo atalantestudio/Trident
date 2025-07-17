@@ -75,6 +75,7 @@ namespace ProjectA {
 	//   https://winter.dev/articles/gjk-algorithm
 	// 
 	// NOTE: In this implementation, `a` is the name of the most recent vertex added to the simplex.
+	// TODO: Fix rotations not being properly handled.
 	static bool GJK2DConditional(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
 		vec2<float32> d = B.position - A.position;
 

@@ -1,12 +1,26 @@
 #pragma once
 
 #include "Engine/API/Geometry/Geometry2D.hpp"
-#include "Engine/API/Material/Material.hpp"
+#include "Engine/API/Material/ColorMaterial.hpp"
 #include "Engine/API/Object/PhysicalObject.hpp"
 #include "Engine/API/Physics/Body/RigidBody.hpp"
 #include "Engine/ECS/ECS.hpp"
 
 namespace ProjectA {
+	struct EntityDescriptor {
+		vec2<float32> position = {0.0f, 0.0f};
+		float32 rotation = 0.0f;
+		vec2<float32> scale = {1.0f, 1.0f};
+		float32 mass = 0.0f;
+		float32 inertia = 0.0f;
+		float32 friction = 0.0f;
+		float32 restitution = 0.0f;
+		ref<Geometry2D> geometry;
+		vec4<float32> fillColor = {1.0f, 1.0f, 1.0f, 1.0f};
+		vec4<float32> strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
+		uint32 layerIndex = 0;
+	};
+
 	struct DynamicEntityComponent {};
 	struct StaticEntityComponent {};
 
@@ -57,35 +71,16 @@ namespace ProjectA {
 				return ecs.getComponent<PhysicalObject2D>(entity);
 			}
 
-			Entity createDynamicEntity(uint32 layerIndex) {
-				ENGINE_ASSERT(layerIndex < LAYER_COUNT, "The layer index is overflowing.");
+			void createDynamicEntity(const EntityDescriptor& descriptor) {
+				const Entity entity = createEntity(descriptor);
 
-				const Entity entity = ecs.createEntity();
-
-				PhysicalObject2D physicalObject;
-
-				ecs.setComponent<PhysicalObject2D>(entity, physicalObject);
 				ecs.setComponent<DynamicEntityComponent>(entity, {});
-
-				layers[layerIndex].emplace_back(entity);
-
-				return entity;
 			}
 
-			// TODO: Difference between static/dynamic entities.
-			Entity createStaticEntity(uint32 layerIndex) {
-				ENGINE_ASSERT(layerIndex < LAYER_COUNT, "The layer index is overflowing.");
+			void createStaticEntity(const EntityDescriptor& descriptor) {
+				const Entity entity = createEntity(descriptor);
 
-				const Entity entity = ecs.createEntity();
-
-				PhysicalObject2D physicalObject;
-
-				ecs.setComponent<PhysicalObject2D>(entity, physicalObject);
 				ecs.setComponent<StaticEntityComponent>(entity, {});
-
-				layers[layerIndex].emplace_back(entity);
-
-				return entity;
 			}
 
 			void setBody(Entity entity, const ref<Body2D>& body) {
@@ -143,34 +138,44 @@ namespace ProjectA {
 				return ecs.getComponentPool<StaticEntityComponent>();
 			}
 
-			/*
-			for (entity in dynamic entities) {
-				for (other entity in dynamic entities) {
-					//
-				}
-			}
+		private:
+			Entity createEntity(const EntityDescriptor& descriptor) {
+				// TODO: Restore physical layers.
+				// ENGINE_ASSERT(descriptor.layerIndex < LAYER_COUNT, "The layer index is overflowing.");
 
-			for (group index = 0; group index < group count - 1; group index += 1) {
-				group = groups[group index]
+				const Entity entity = ecs.createEntity();
 
-				for (entity A in group) {
-					for (other group index = group index + 1; other group index < group count; other group index += 1) {
-						other group = groups[other group index]
+				ref<RigidBody2D> rigidBody = createRef<RigidBody2D>();
+				rigidBody->position = descriptor.position;
+				rigidBody->rotation = descriptor.rotation;
+				rigidBody->scale = descriptor.scale;
+				rigidBody->rotation = 0.2f;
 
-						for (entity B in other group) {
-							toi = time of impact between A and B
-
-							if (toi < 1) {
-								entity impulse = impulse between A and B
-								group impulse = min(group impulse, entity impulse)
-							}
-						}
-					}
+				if (descriptor.mass != 0.0f) {
+					rigidBody->inverseMass = 1.0f / descriptor.mass;
 				}
 
-				apply group impulse
+				if (descriptor.inertia != 0.0f) {
+					rigidBody->inverseInertia = 1.0f / descriptor.inertia;
+				}
+
+				ref<ColorMaterial> material = createRef<ColorMaterial>();
+				material->fillColor = descriptor.fillColor;
+				material->strokeColor = descriptor.strokeColor;
+
+				ecs.setComponent<PhysicalObject2D>(entity, {});
+
+				setBody(entity, std::static_pointer_cast<Body2D>(rigidBody));
+				setGeometry(entity, descriptor.geometry);
+				setMaterial(entity, std::static_pointer_cast<Material>(material));
+				updateMass(entity);
+				updateTransform(entity);
+
+				// TODO: Restore physical layers.
+				// layers[descriptor.layerIndex].emplace_back(entity);
+
+				return entity;
 			}
-			*/
 
 		private:
 			ECS ecs;

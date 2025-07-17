@@ -15,7 +15,7 @@
 // - Collision shapes
 // - Object AABBs
 // - Overlapping pairs
-// - Contact points (manifold)
+// - Contacts (manifold)
 // 
 // Dynamics data:
 // - Motion state, transforms, velocities
@@ -49,7 +49,7 @@ namespace ProjectA {
 
 		vec2<float32> impulse;
 
-		// Vector from the COM to the contact point.
+		// Vector from the COM to the contact.
 		vec2<float32> r;
 	};
 
@@ -67,7 +67,8 @@ namespace ProjectA {
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
 
-			static inline const vec2<float32> G = {0.0f, -9.81f};
+			// static inline const vec2<float32> G = {0.0f, -9.81f};
+			static inline const vec2<float32> G = {0.0f, 0.0f};
 
 		private:
 			Scene2D* scene;

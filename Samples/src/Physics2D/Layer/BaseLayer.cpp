@@ -10,8 +10,6 @@ namespace ProjectA {
 	}
 
 	void BaseLayer::update(float32 deltaTime) {
-		physicsUpdate();
-
 		physicsEngine.tick(deltaTime, &gjkOutput);
 	}
 
