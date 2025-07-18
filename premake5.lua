@@ -19,7 +19,7 @@ vulkansdk = os.getenv("VULKAN_SDK")
 os.execute("git config --global --add safe.directory *")
 os.execute("git submodule update --init")
 
-os.mkdir("ProjectA/vendor/API/GL")
+--[[ os.mkdir("ProjectA/vendor/API/GL")
 os.mkdir("ProjectA/vendor/API/KHR")
 
 -- Download required files from the OpenGL Registry.
@@ -31,7 +31,7 @@ local khrplatformresult = http.download("https://raw.githubusercontent.com/Khron
 printf("Fetching glcorearb.h: %s", glcorearbresult)
 printf("Fetching glext.h: %s", glextresult)
 printf("Fetching wglext.h: %s", wglextresult)
-printf("Fetching khrplatform.h: %s", khrplatformresult)
+printf("Fetching khrplatform.h: %s", khrplatformresult) ]]--
 
 project "ProjectA"
 	location "%{prj.name}"
