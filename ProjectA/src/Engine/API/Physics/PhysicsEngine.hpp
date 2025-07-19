@@ -59,7 +59,8 @@ namespace ProjectA {
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
 
-			static inline const vec2<float32> G = {0.0f, -9.81f};
+			// static inline const vec2<float32> G = {0.0f, -9.81f};
+			static inline const vec2<float32> G = {0.0f, -10.0f};
 
 		private:
 			Scene2D* scene;

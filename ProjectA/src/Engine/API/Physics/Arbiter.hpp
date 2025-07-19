@@ -27,25 +27,17 @@ namespace ProjectA {
 					contact.rA = contact.position - rigidBodyA->position;
 					contact.rB = contact.position - rigidBodyB->position;
 
-					const vec2<float32> relativeVelocity =
-						rigidBodyB->linearVelocity + cross(rigidBodyB->angularVelocity, contact.rB) -
-						rigidBodyA->linearVelocity - cross(rigidBodyA->angularVelocity, contact.rA);
-
 					// Precompute normal mass, tangent mass, and bias.
-					const float32 rn1 = dot(contact.rA, contactManifold.contactNormal);
-					const float32 rn2 = dot(contact.rB, contactManifold.contactNormal);
+					const float32 rnA = dot(contact.rA, contactManifold.contactNormal);
+					const float32 rnB = dot(contact.rB, contactManifold.contactNormal);
 
-					float32 normal =
-						(dot(contact.rA, contact.rA) - rn1 * rn1) * rigidBodyA->inverseInertia +
-						(dot(contact.rB, contact.rB) - rn2 * rn2) * rigidBodyB->inverseInertia +
-						rigidBodyA->inverseMass + rigidBodyB->inverseMass;
+					const float32 massNormal =
+						(dot(contact.rA, contact.rA) - rnA * rnA) * rigidBodyA->inverseInertia +
+						(dot(contact.rB, contact.rB) - rnB * rnB) * rigidBodyB->inverseInertia +
+						rigidBodyA->inverseMass +
+						rigidBodyB->inverseMass;
 
-					/* const float32 inverseMassSum =
-						lyah::sqrt(parallelogramArea(rA, contactManifold.contactNormal)) * rigidBodyA->inverseInertia +
-						lyah::sqrt(parallelogramArea(rB, contactManifold.contactNormal)) * rigidBodyB->inverseInertia +
-						rigidBodyA->inverseMass + rigidBodyB->inverseMass; */
-
-					contact.massNormal = 1.0f / normal;
+					contact.massNormal = 1.0f / massNormal;
 
 					/* const vec2<float32> tangent = cross(contactManifold.contactNormal, 1.0f);
 
@@ -55,7 +47,7 @@ namespace ProjectA {
 
 					contact.massTangent = 1.0f / tangentN; */
 
-					contact.bias = -PENETRATION_BIAS * (inverseDeltaTime/*  / 10.0f */) * std::min(0.0f, contact.separation + ALLOWED_PENETRATION);
+					contact.bias = -PENETRATION_BIAS * inverseDeltaTime * std::min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
 					/* // Accumulate impulses.
 					{
@@ -75,12 +67,28 @@ namespace ProjectA {
 				for (uint8 contactPointIndex = 0; contactPointIndex < contactManifold.contactCount; contactPointIndex += 1) {
 					Contact2D& contact = contactManifold.contacts[contactPointIndex];
 
-					const vec2<float32> relativeVelocity =
+					// Box2D Lite:
+					// contact.position = (-0.500000000, 0.00000000)
+					// contact.separation = -0.0416660905
+					// contact.rA = (-0.500000000, 10.0000000)
+					// contact.rB = (-0.500000000, -0.458333910)
+					// contact.bias = 0.379993081
+					// contact.massNnormal = 80.0000076
+					// dv = (0.00000000, -8.49999714)
+
+					// Custom:
+					// contact.position = (0.500000000, 0.00000000)
+					// contact.separation = -0.0416660905
+					// contact.rA = (0.500000000, 10.0000000)
+					// contact.rB = (0.500000000, -0.458333910)
+					// contact.bias = 0.379993081
+					// contact.massNormal = 50.000000
+					// dv = (0.00000000, -8.49999714)
+
+					const vec2<float32> dv =
 						rigidBodyB->linearVelocity + cross(rigidBodyB->angularVelocity, contact.rB) -
 						rigidBodyA->linearVelocity - cross(rigidBodyA->angularVelocity, contact.rA);
-
-					// TODO
-					const float32 vn = dot(relativeVelocity, contactManifold.contactNormal);
+					const float32 vn = dot(dv, contactManifold.contactNormal);
 
 					// NOTE: Restitution gets applied here (0.0f).
 					float32 dPn = contact.massNormal * (-vn + contact.bias);
@@ -97,6 +105,7 @@ namespace ProjectA {
 
 					const vec2<float32> normalImpulse = contactManifold.contactNormal * dPn;
 
+					// Apply normal impulse.
 					rigidBodyA->applyImpulse(-normalImpulse, contact.rA);
 					rigidBodyB->applyImpulse(normalImpulse, contact.rB);
 

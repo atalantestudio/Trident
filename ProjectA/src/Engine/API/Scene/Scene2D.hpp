@@ -12,7 +12,6 @@ namespace ProjectA {
 		float32 rotation = 0.0f;
 		vec2<float32> scale = {1.0f, 1.0f};
 		float32 mass = 0.0f;
-		float32 inertia = 0.0f;
 		float32 friction = 0.0f;
 		float32 restitution = 0.0f;
 		ref<Geometry2D> geometry;
@@ -150,13 +149,20 @@ namespace ProjectA {
 				rigidBody->rotation = descriptor.rotation;
 				rigidBody->scale = descriptor.scale;
 
-				if (descriptor.mass != 0.0f) {
+				if (descriptor.mass == 0.0f) {
+					rigidBody->inverseMass = 0.0f;
+					rigidBody->inverseInertia = 0.0f;
+				}
+				else {
 					rigidBody->inverseMass = 1.0f / descriptor.mass;
+
+					const float32 A = area(descriptor.geometry->vertices) * 2.0f;
+
+					// https://github.com/erincatto/box2d-lite/blob/227b71b6974ea57ab7e96d40f6374287bd6a0e77/src/Body.cpp#L47
+					rigidBody->inverseInertia = 1.0f / (descriptor.mass * A / 12.0f);
 				}
 
-				if (descriptor.inertia != 0.0f) {
-					rigidBody->inverseInertia = 1.0f / descriptor.inertia;
-				}
+				rigidBody->friction = descriptor.friction;
 
 				ref<ColorMaterial> material = createRef<ColorMaterial>();
 				material->fillColor = descriptor.fillColor;
@@ -167,7 +173,7 @@ namespace ProjectA {
 				setBody(entity, std::static_pointer_cast<Body2D>(rigidBody));
 				setGeometry(entity, descriptor.geometry);
 				setMaterial(entity, std::static_pointer_cast<Material>(material));
-				updateMass(entity);
+				// updateMass(entity);
 				updateTransform(entity);
 
 				// TODO: Restore physical layers.

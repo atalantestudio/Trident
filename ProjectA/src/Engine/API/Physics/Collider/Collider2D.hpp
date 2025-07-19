@@ -93,6 +93,7 @@ namespace ProjectA {
 			return false;
 		}
 
+		contactManifold->contactNormal = satOutput.normal;
 		contactManifold->contactCount = 0;
 
 		const float32 referenceNormalOffset = dot(satOutput.normal, referenceEdge.edge[0]);
@@ -110,7 +111,7 @@ namespace ProjectA {
 			contactManifold->contactCount += 1;
 		}
 
-		return true;
+		return contactManifold->contactCount;
 	}
 
 	// https://media.steampowered.com/apps/valve/2015/DirkGregorius_Contacts.pdf

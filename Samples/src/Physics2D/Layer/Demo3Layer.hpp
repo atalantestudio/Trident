@@ -3,7 +3,7 @@
 #include "BaseLayer.hpp"
 
 namespace ProjectA {
-	class Demo1Layer : public BaseLayer {
+	class Demo3Layer : public BaseLayer {
 		public:
 			void build() override {
 				ConvexHullGeometry2DDescriptor convexHullGeometryDescriptor;
@@ -26,8 +26,7 @@ namespace ProjectA {
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = convexHullGeometry;
 
-				// TODO: Make the floor a static entity.
-				scene.createDynamicEntity(floorDescriptor);
+				scene.createStaticEntity(floorDescriptor);
 
 				for (uint32 boxIndex = 0; boxIndex < 10; boxIndex += 1) {
 					EntityDescriptor boxDescriptor{};

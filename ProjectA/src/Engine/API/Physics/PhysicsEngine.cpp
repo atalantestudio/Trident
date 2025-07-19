@@ -9,6 +9,9 @@ namespace ProjectA {
 	}
 
 	void PhysicsEngine::tick(float32 deltaTime, VisualizationData2D* visualizationData) {
+		// TODO: Debug.
+		deltaTime = 1.0f / 60.0f;
+
 		const float32 halfDeltaTime = deltaTime * 0.5f;
 
 		float32 inverseDeltaTime = 0.0f;
@@ -28,7 +31,7 @@ namespace ProjectA {
 
 		// 3. Integrate forces.
 		// TODO: Do we need to integrate forces on resting objects? E.g. they could be at rest on a moving platform due to inertia.
-		/* for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
+		for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
 			const Entity entity = pool.componentIndexToEntity[componentIndex];
 
 			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(entity));
@@ -40,28 +43,30 @@ namespace ProjectA {
 
 			// NOTE: https://web.archive.org/web/20161201054257/https://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html
 			//       This seems like Velocity Verlet to me?
-			rigidBody->linearVelocity += (rigidBody->force * rigidBody->inverseMass + G) * halfDeltaTime;
-			rigidBody->angularVelocity += rigidBody->torque * rigidBody->inverseInertia * halfDeltaTime;
-		} */
+			// rigidBody->linearVelocity += (rigidBody->force * rigidBody->inverseMass + G) * halfDeltaTime;
+			// rigidBody->angularVelocity += rigidBody->torque * rigidBody->inverseInertia * halfDeltaTime;
+			rigidBody->linearVelocity += (rigidBody->force * rigidBody->inverseMass + G) * deltaTime;
+			rigidBody->angularVelocity += rigidBody->torque * rigidBody->inverseInertia * deltaTime;
+		}
 
 		// 4. Pre-compute step:
 		//    - Calculate combined values in each pair (static/dynamic friction, restitution, etc.)
 		//    - For each contact, calculate mass normal, mass tangent and bias value
-		/* for (Arbiter2D& arbiter : arbiters) {
+		for (Arbiter2D& arbiter : arbiters) {
 			arbiter.precompute(inverseDeltaTime);
-		} */
+		}
 
 		// 5. Apply normal and friction impulses to overlapping pairs in a sequential manner.
-		/* for (uint32 iteration = 0; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
+		for (uint32 iteration = 0; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
 			for (Arbiter2D& arbiter : arbiters) {
 				arbiter.applyImpulse();
 			}
-		} */
+		}
 
 		// 6. Integrate positions/rotations and velocities and reset forces.
 		// TODO: Do we need to integrate positions/rotations on dynamic objects with an inverse mass of 0?
 		// TODO: Do we need to integrate positions/rotations on resting objects? E.g. they could be at rest on a moving platform due to inertia.
-		/* for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
+		for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
 			const Entity entity = pool.componentIndexToEntity[componentIndex];
 
 			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(entity));
@@ -69,16 +74,16 @@ namespace ProjectA {
 			rigidBody->position += rigidBody->linearVelocity * deltaTime;
 			rigidBody->rotation += rigidBody->angularVelocity * deltaTime;
 
-			if (rigidBody->inverseMass > 0.0f) {
+			/* if (rigidBody->inverseMass > 0.0f) {
 				rigidBody->linearVelocity += (rigidBody->force * rigidBody->inverseMass + G) * halfDeltaTime;
 				rigidBody->angularVelocity += rigidBody->torque * rigidBody->inverseInertia * halfDeltaTime;
-			}
+			} */
 
 			rigidBody->force = {0.0f, 0.0f};
 			rigidBody->torque = 0.0f;
 
 			scene->updateTransform(entity);
-		} */
+		}
 	}
 
 	std::vector<CollisionPair> PhysicsEngine::BroadPhase() const {
