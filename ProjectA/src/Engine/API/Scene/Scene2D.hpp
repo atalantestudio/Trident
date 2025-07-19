@@ -18,6 +18,9 @@ namespace ProjectA {
 		vec4<float32> fillColor = {1.0f, 1.0f, 1.0f, 1.0f};
 		vec4<float32> strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 		uint32 layerIndex = 0;
+
+		// TODO: Debug-only.
+		vec2<float32> linearVelocity = {0.0f, 0.0f};
 	};
 
 	struct DynamicEntityComponent {};
@@ -125,7 +128,7 @@ namespace ProjectA {
 				physicalObject.transform =
 					mat3x3<float32>::translation(-geometry->centerOfMass) *
 					mat3x3<float32>::scaling(rigidBody->scale) *
-					mat3x3<float32>::rotation(rigidBody->rotation) *
+					mat3x3<float32>::rotation(-rigidBody->rotation) *
 					mat3x3<float32>::translation(rigidBody->position);
 			}
 
@@ -146,6 +149,7 @@ namespace ProjectA {
 
 				ref<RigidBody2D> rigidBody = createRef<RigidBody2D>();
 				rigidBody->position = descriptor.position;
+				rigidBody->linearVelocity = descriptor.linearVelocity;
 				rigidBody->rotation = descriptor.rotation;
 				rigidBody->scale = descriptor.scale;
 

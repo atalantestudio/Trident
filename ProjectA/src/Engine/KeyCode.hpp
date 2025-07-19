@@ -1,6 +1,8 @@
 #pragma once
 
 namespace ProjectA {
+	#undef DELETE
+
 	enum class KeyCode : uint16 {
 		SPACE			= 32,
 		APOSTROPHE		= 39,	// '

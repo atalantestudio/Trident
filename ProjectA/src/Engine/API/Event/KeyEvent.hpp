@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Engine/API/Event/Event.hpp"
-#include "Engine/Input.hpp"
 
 namespace ProjectA {
 	class KeyEvent : public Event {

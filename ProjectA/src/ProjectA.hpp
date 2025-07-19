@@ -8,6 +8,7 @@
 #include "Engine/Layer/Layer.hpp"
 
 // Event
+#include "Engine/API/Event/KeyEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseDownEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseUpEvent.hpp"

@@ -96,6 +96,14 @@ namespace ProjectA {
 		contactManifold->contactNormal = satOutput.normal;
 		contactManifold->contactCount = 0;
 
+		vec2<float32> frontNormal = contactManifold->contactNormal;
+
+		if (satOutput.incidentObject == &A) {
+			contactManifold->contactNormal = -contactManifold->contactNormal;
+
+			frontNormal = -frontNormal;
+		}
+
 		const float32 referenceNormalOffset = dot(satOutput.normal, referenceEdge.edge[0]);
 
 		// Keep all vertices below the reference edge, then move them to the reference edge's line.
@@ -106,7 +114,7 @@ namespace ProjectA {
 				continue;
 			}
 
-			contactManifold->contacts[contactManifold->contactCount].position = clippedIncidentEdge.edge[vertexIndex] - satOutput.normal * separation;
+			contactManifold->contacts[contactManifold->contactCount].position = clippedIncidentEdge.edge[vertexIndex] - frontNormal * separation;
 			contactManifold->contacts[contactManifold->contactCount].separation = separation;
 			contactManifold->contactCount += 1;
 		}

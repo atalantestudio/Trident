@@ -110,9 +110,6 @@ namespace ProjectA {
 					rigidBodyB->applyImpulse(normalImpulse, contact.rB);
 
 					// TODO: Friction impulse.
-					// TODO: Angular normal/friction impulses.
-
-					// ENGINE_DEBUG("imp []", (int) contactPointIndex);
 				}
 			}
 
