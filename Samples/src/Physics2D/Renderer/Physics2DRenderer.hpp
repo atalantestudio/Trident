@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/API/Physics/ClosestFeature2D.hpp"
+#include "Engine/API/Physics/Feature2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
@@ -32,7 +32,7 @@ namespace ProjectA {
 
 			void writeInstanceTransform(Entity entity, const mat3x3<float32>& transform) const;
 
-			void registerClosestFeature(const ClosestFeature2D& closestFeature);
+			void registerFeature(const Feature2D& feature);
 
 			void clearRegisteredData();
 
@@ -58,7 +58,7 @@ namespace ProjectA {
 			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
 			void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
-			void renderClosestFeatures(const ref<CommandEncoder>& commandEncoder) const;
+			void renderFeatures(const ref<CommandEncoder>& commandEncoder) const;
 			void renderSelectedEntityPlaceholder(const ref<CommandEncoder>& commandEncoder) const;
 
 		private:

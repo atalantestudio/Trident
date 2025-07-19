@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/Object/PhysicalObject.hpp"
-#include "Engine/API/Physics/ClosestFeature2D.hpp"
+#include "Engine/API/Physics/Feature2D.hpp"
 #include "Engine/API/Physics/Simplex.hpp"
 #include "Engine/API/Physics/support.hpp"
 
@@ -28,10 +28,10 @@ namespace ProjectA {
 		vec2<float32> separatingAxis;
 
 		// Closest feature on A. Can either be a vertex or an edge.
-		ClosestFeature2D closestFeatureA;
+		Feature2D closestFeatureA;
 
 		// Closest feature on B. Can either be a vertex or an edge.
-		ClosestFeature2D closestFeatureB;
+		Feature2D closestFeatureB;
 	};
 
 	// Calculates the closest point to the origin on a line formed by the simplex s.

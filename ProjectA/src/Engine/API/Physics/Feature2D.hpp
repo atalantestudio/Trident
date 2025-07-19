@@ -1,11 +1,11 @@
 #pragma once
 
 namespace ProjectA {
-	// The vertex or edge on an object that is the closest to another object.
-	struct ClosestFeature2D {
+	// A part of an object's geometry, in world-space.
+	struct Feature2D {
 		// NOTE: The vertex/edge union deletes the default constructor,
-		//       and because of that structs that use ClosestFeature2D cannot be constructed.
-		ClosestFeature2D() {}
+		//       and because of that structs that use Feature2D cannot be constructed.
+		Feature2D() {}
 
 		// The vertices that compose the feature.
 		// NOTE: The mesh transform is already applied on the feature's vertices.

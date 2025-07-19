@@ -859,7 +859,7 @@ namespace ProjectA {
 		renderGrid(commandEncoder);
 		renderScene(commandEncoder);
 		renderDistance(commandEncoder);
-		renderClosestFeatures(commandEncoder);
+		renderFeatures(commandEncoder);
 
 		if (selectedEntity != max<uint32>()) {
 			renderSelectedEntityPlaceholder(commandEncoder);
@@ -934,7 +934,7 @@ namespace ProjectA {
 		commandEncoder->draw(2, 1, 0);
 	}
 
-	void Physics2DRenderer::renderClosestFeatures(const ref<CommandEncoder>& commandEncoder) const {
+	void Physics2DRenderer::renderFeatures(const ref<CommandEncoder>& commandEncoder) const {
 		if (vertexFeatureCount > 0) {
 			commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();
@@ -1005,16 +1005,16 @@ namespace ProjectA {
 		instanceMappedRange[entity].world = transform;
 	}
 
-	void Physics2DRenderer::registerClosestFeature(const ClosestFeature2D& closestFeature) {
-		switch (closestFeature.count) {
+	void Physics2DRenderer::registerFeature(const Feature2D& feature) {
+		switch (feature.count) {
 			case 1:
-				vertexFeatureMappedRange[vertexFeatureCount] = {closestFeature.vertex[0], closestFeature.vertex[1]};
+				vertexFeatureMappedRange[vertexFeatureCount] = {feature.vertex[0], feature.vertex[1]};
 				vertexFeatureCount += 1;
 
 				break;
 			case 2:
-				edgeVertexFeatureMappedRange[edgeVertexFeatureCount + 0] = {closestFeature.edge[0][0], closestFeature.edge[0][1]};
-				edgeVertexFeatureMappedRange[edgeVertexFeatureCount + 1] = {closestFeature.edge[1][0], closestFeature.edge[1][1]};
+				edgeVertexFeatureMappedRange[edgeVertexFeatureCount + 0] = {feature.edge[0][0], feature.edge[0][1]};
+				edgeVertexFeatureMappedRange[edgeVertexFeatureCount + 1] = {feature.edge[1][0], feature.edge[1][1]};
 				edgeVertexFeatureCount += 2;
 
 				break;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/API/Physics/ClosestFeature2D.hpp"
+#include "Engine/API/Physics/Feature2D.hpp"
 
 namespace ProjectA {
 	struct Contact2D {
@@ -20,7 +20,7 @@ namespace ProjectA {
 		float32 accumulatedNormalImpulse;
 		float32 accumulatedTangentImpulse;
 
-		// ClosestFeature2D closestFeature;
+		// Feature2D feature;
 	};
 
 	struct ContactManifold2D {

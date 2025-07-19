@@ -30,7 +30,7 @@ namespace ProjectA {
 		}
 
 		/* if (visualizationData.contactManifold.contactCount > 0) {
-			ClosestFeature2D contactManifold;
+			Feature2D contactManifold;
 			contactManifold.count = visualizationData.contactManifold.contactCount;
 
 			for (uint8 contactIndex = 0; contactIndex < contactManifold.count; contactIndex += 1) {
@@ -43,12 +43,12 @@ namespace ProjectA {
 		renderer.clearRegisteredData();
 
 		if (visualizationData.satOutput.separation <= 0.0f) {
-			ClosestFeature2D edgeFeature;
+			Feature2D edgeFeature;
 			edgeFeature.count = 2;
 			edgeFeature.edge[0] = visualizationData.satOutput.edgeA1;
 			edgeFeature.edge[1] = visualizationData.satOutput.edgeA2;
 
-			ClosestFeature2D vertexFeature;
+			Feature2D vertexFeature;
 			vertexFeature.count = 1;
 			vertexFeature.vertex = visualizationData.satOutput.supportB;
 
@@ -57,15 +57,15 @@ namespace ProjectA {
 			const vec2<float32> closestB = vertexFeature.vertex + visualizationData.satOutput.normal * -visualizationData.satOutput.separation;
 
 			renderer.setClosestPoints(closestA, closestB);
-			renderer.registerClosestFeature(edgeFeature);
-			renderer.registerClosestFeature(vertexFeature);
+			renderer.registerFeature(edgeFeature);
+			renderer.registerFeature(vertexFeature);
 		}
 
 		/* if (visualizationData.gjkOutput.closestFeatureA.count > 0) {
 			renderer.setClosestPoints(visualizationData.gjkOutput.closestA, visualizationData.gjkOutput.closestB);
 			renderer.clearRegisteredData();
-			renderer.registerClosestFeature(visualizationData.gjkOutput.closestFeatureA);
-			renderer.registerClosestFeature(visualizationData.gjkOutput.closestFeatureB);
+			renderer.registerFeature(visualizationData.gjkOutput.closestFeatureA);
+			renderer.registerFeature(visualizationData.gjkOutput.closestFeatureB);
 		} */
 	}
 

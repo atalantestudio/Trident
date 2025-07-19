@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/Physics/CCD/MinSeparationOutput.hpp"
-#include "Engine/API/Physics/ClosestFeature2D.hpp"
+#include "Engine/API/Physics/Feature2D.hpp"
 #include "Engine/API/Physics/support.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
@@ -18,7 +18,7 @@ namespace ProjectA {
 
 	class SeparationFunction {
 		public:
-			explicit SeparationFunction(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, const ClosestFeature2D& closestFeatureA, const ClosestFeature2D& closestFeatureB) {
+			explicit SeparationFunction(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, const Feature2D& closestFeatureA, const Feature2D& closestFeatureB) {
 				if (closestFeatureA.count == 1 && closestFeatureB.count == 1) {
 					const vec2<float32>& a = closestFeatureA.vertex;
 					const vec2<float32>& b = closestFeatureB.vertex;
@@ -34,8 +34,8 @@ namespace ProjectA {
 					return;
 				}
 
-				const ClosestFeature2D* vertexFeature = nullptr;
-				const ClosestFeature2D* edgeFeature = nullptr;
+				const Feature2D* vertexFeature = nullptr;
+				const Feature2D* edgeFeature = nullptr;
 
 				if (closestFeatureA.count == 2) {
 					_vertexObjectIndex = 1;
