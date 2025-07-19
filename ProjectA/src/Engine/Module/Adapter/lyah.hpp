@@ -329,6 +329,7 @@ namespace ProjectA {
 	}
 
 	using lyah::abs;
+	using lyah::lerp;
 	using lyah::radians;
 	using lyah::rcp;
 
@@ -422,5 +423,10 @@ namespace ProjectA {
 	template<typename T>
 	static T overlap(const Interval<T>& intervalA, const Interval<T>& intervalB) {
 		return std::max(intervalA.min - intervalB.max, intervalB.min - intervalA.max);
+	}
+
+	static vec2<float32> edgeNormalClockwise(const vec2<float32>& a, const vec2<float32>& b) {
+		// Assume clockwise order (edge left = outside).
+		return perpendicular(normalized(b - a), -1.0f);
 	}
 }

@@ -19,7 +19,7 @@ namespace ProjectA {
 	class SeparationFunction {
 		public:
 			explicit SeparationFunction(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, const Feature2D& closestFeatureA, const Feature2D& closestFeatureB) {
-				if (closestFeatureA.count == 1 && closestFeatureB.count == 1) {
+				if (closestFeatureA.getVertexCount() == 1 && closestFeatureB.getVertexCount() == 1) {
 					const vec2<float32>& a = closestFeatureA.vertex;
 					const vec2<float32>& b = closestFeatureB.vertex;
 
@@ -37,13 +37,13 @@ namespace ProjectA {
 				const Feature2D* vertexFeature = nullptr;
 				const Feature2D* edgeFeature = nullptr;
 
-				if (closestFeatureA.count == 2) {
+				if (closestFeatureA.getVertexCount() == 2) {
 					_vertexObjectIndex = 1;
 					vertexFeature = &closestFeatureB;
 					_edgeObjectIndex = 0;
 					edgeFeature = &closestFeatureA;
 				}
-				else if (closestFeatureB.count == 2) {
+				else if (closestFeatureB.getVertexCount() == 2) {
 					_vertexObjectIndex = 0;
 					vertexFeature = &closestFeatureA;
 					_edgeObjectIndex = 1;

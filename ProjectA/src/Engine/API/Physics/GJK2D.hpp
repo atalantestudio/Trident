@@ -330,23 +330,23 @@ namespace ProjectA {
 
 		output.closestFeatureA.vertex = s[0].vA;
 		output.closestFeatureA.vertexIndex = s[0].iA;
-		output.closestFeatureA.count = 1;
+		output.closestFeatureA.setVertexCount(1);
 
 		output.closestFeatureB.vertex = s[0].vB;
 		output.closestFeatureB.vertexIndex = s[0].iB;
-		output.closestFeatureB.count = 1;
+		output.closestFeatureB.setVertexCount(1);
 
 		if (s.count == 2) {
 			if (s[0].iA != s[1].iA) {
 				output.closestFeatureA.edge[1] = s[1].vA;
 				output.closestFeatureA.edgeIndices[1] = s[1].iA;
-				output.closestFeatureA.count = 2;
+				output.closestFeatureA.setVertexCount(2);
 			}
 
 			if (s[0].iB != s[1].iB) {
 				output.closestFeatureB.edge[1] = s[1].vB;
 				output.closestFeatureB.edgeIndices[1] = s[1].iB;
-				output.closestFeatureB.count = 2;
+				output.closestFeatureB.setVertexCount(2);
 			}
 		}
 

@@ -30,6 +30,7 @@ namespace ProjectA {
 				scene.createDynamicEntity(squareADescriptor);
 
 				EntityDescriptor squareBDescriptor{};
+				// squareBDescriptor.position = {-2.0f, -2.0f};
 				squareBDescriptor.position = {0.0f, 2.0f};
 				squareBDescriptor.rotation = radians(30.0f);
 				squareBDescriptor.scale = {2.0f, 2.0f};

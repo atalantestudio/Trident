@@ -135,13 +135,13 @@ namespace ProjectA {
 
 			arbiter.A = A;
 			arbiter.B = B;
-			arbiter.contactManifold.combinedFriction = lyah::sqrt(rigidBodyA->friction * rigidBodyB->friction);
+			arbiter.combinedFriction = lyah::sqrt(rigidBodyA->friction * rigidBodyB->friction);
 
 			arbiters.emplace_back(arbiter);
 
-			/* if (visualizationData != nullptr) {
+			if (visualizationData != nullptr) {
 				visualizationData->contactManifold = arbiter.contactManifold;
-			} */
+			}
 		}
 
 		return arbiters;

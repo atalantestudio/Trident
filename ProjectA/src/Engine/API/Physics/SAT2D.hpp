@@ -5,42 +5,37 @@
 
 namespace ProjectA {
 	struct SAT2DOutput {
-		// If the separation is negative, the shapes are intersecting.
+		// A separation less than or equal to 0 indicates overlap between the shapes.
 		float32 separation;
 
-		uint32 edgeIndex;
+		vec2<float32> normal;
 		vec2<float32> edgeA1;
 		vec2<float32> edgeA2;
 		vec2<float32> supportB;
-		vec2<float32> normal;
+		Feature2D closestFeatureA;
+		Feature2D closestFeatureB;
+		const PhysicalObjectCopy2D* incidentObject;
 	};
-
-	static vec2<float32> calculateEdgeNormal(const vec2<float32>& a, const vec2<float32>& b) {
-		// Assume clockwise order (edge left = outside).
-		return perpendicular(normalized(b - a), -1.0f);
-	}
 
 	static void queryEdgeDirections(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, SAT2DOutput& output) {
 		const ref<ConvexHullGeometry2D>& geometry = std::static_pointer_cast<ConvexHullGeometry2D>(A.geometry);
 
 		// TODO: Expose edges/normals from ConvexHullGeometry.
-		for (uint32 edgeIndex = 0, edgeVertexOffset = 0; edgeVertexOffset < geometry->getVertexCount(); edgeIndex += 1, edgeVertexOffset += 1) {
-			const vec2<float32>& edge1 = geometry->vertices[(edgeVertexOffset + 0) % geometry->getVertexCount()];
-			const vec2<float32>& edge2 = geometry->vertices[(edgeVertexOffset + 1) % geometry->getVertexCount()];
-			const vec2<float32> transformedEdge1 = multiplyTransform(edge1, A.transform);
-			const vec2<float32> transformedEdge2 = multiplyTransform(edge2, A.transform);
-			const vec2<float32> d = calculateEdgeNormal(transformedEdge1, transformedEdge2);
-			const vec2<float32> supportB = support(B, -d);
+		for (uint32 edgeVertexOffset = 0; edgeVertexOffset < geometry->getVertexCount(); edgeVertexOffset += 1) {
+			const vec2<float32> a = multiplyTransform(geometry->vertices[(edgeVertexOffset + 0) % geometry->getVertexCount()], A.transform);
+			const vec2<float32> b = multiplyTransform(geometry->vertices[(edgeVertexOffset + 1) % geometry->getVertexCount()], A.transform);
+			const vec2<float32> d = edgeNormalClockwise(a, b);
+			const vec2<float32> s = support(B, -d);
 
-			const float32 separation = signedDistanceLinePoint(transformedEdge1, transformedEdge2, supportB);
+			const float32 separation = signedDistanceLinePoint(a, b, s);
 
 			if (separation > output.separation) {
 				output.separation = separation;
-				output.edgeIndex = edgeIndex;
-				output.edgeA1 = transformedEdge1;
-				output.edgeA2 = transformedEdge2;
-				output.supportB = supportB;
+				output.supportB = s;
+				output.edgeA1 = a;
+				output.edgeA2 = b;
 				output.normal = d;
+				output.incidentObject = &B;
 			}
 		}
 	}
@@ -72,10 +67,29 @@ namespace ProjectA {
 			return output;
 		}
 
+		const SAT2DOutput outputA = output;
+
 		queryEdgeDirections(B, A, output);
 
 		if (output.separation > 0.0f) {
 			return output;
+		}
+
+		if (outputA.separation < 0.0f || output.separation < 0.0f) {
+			output.closestFeatureA.setVertexCount(2);
+			output.closestFeatureA.edge[0] = outputA.edgeA1;
+			output.closestFeatureA.edge[1] = outputA.edgeA2;
+
+			output.closestFeatureB.setVertexCount(2);
+			output.closestFeatureB.edge[0] = output.edgeA1;
+			output.closestFeatureB.edge[1] = output.edgeA2;
+		}
+		else {
+			output.closestFeatureA.setVertexCount(1);
+			output.closestFeatureA.vertex = output.supportB;
+
+			output.closestFeatureB.setVertexCount(1);
+			output.closestFeatureB.vertex = outputA.supportB;
 		}
 
 		return output;

@@ -29,43 +29,35 @@ namespace ProjectA {
 			renderer.setPlaceholderOffset(placeholderOffset);
 		}
 
-		/* if (visualizationData.contactManifold.contactCount > 0) {
-			Feature2D contactManifold;
-			contactManifold.count = visualizationData.contactManifold.contactCount;
+		renderer.clearRegisteredData();
 
-			for (uint8 contactIndex = 0; contactIndex < contactManifold.count; contactIndex += 1) {
+		if (visualizationData.contactManifold.contactCount > 0) {
+			Feature2D contactManifold;
+			contactManifold.setVertexCount(visualizationData.contactManifold.contactCount);
+
+			for (uint8 contactIndex = 0; contactIndex < contactManifold.getVertexCount(); contactIndex += 1) {
 				contactManifold.edge[contactIndex] = visualizationData.contactManifold.contacts[contactIndex].position;
 			}
 
-			renderer.registerClosestFeature(contactManifold);
-		} */
-
-		renderer.clearRegisteredData();
-
-		if (visualizationData.satOutput.separation <= 0.0f) {
-			Feature2D edgeFeature;
-			edgeFeature.count = 2;
-			edgeFeature.edge[0] = visualizationData.satOutput.edgeA1;
-			edgeFeature.edge[1] = visualizationData.satOutput.edgeA2;
-
-			Feature2D vertexFeature;
-			vertexFeature.count = 1;
-			vertexFeature.vertex = visualizationData.satOutput.supportB;
-
-			// NOTE: We don't actually know yet which closest point belongs to which shape.
-			const vec2<float32>& closestA = vertexFeature.vertex;
-			const vec2<float32> closestB = vertexFeature.vertex + visualizationData.satOutput.normal * -visualizationData.satOutput.separation;
-
-			renderer.setClosestPoints(closestA, closestB);
-			renderer.registerFeature(edgeFeature);
-			renderer.registerFeature(vertexFeature);
+			renderer.registerFeature(contactManifold);
 		}
+
+		visualizationData.contactManifold.contactCount = 0;
 
 		/* if (visualizationData.gjkOutput.closestFeatureA.count > 0) {
 			renderer.setClosestPoints(visualizationData.gjkOutput.closestA, visualizationData.gjkOutput.closestB);
 			renderer.clearRegisteredData();
 			renderer.registerFeature(visualizationData.gjkOutput.closestFeatureA);
 			renderer.registerFeature(visualizationData.gjkOutput.closestFeatureB);
+		} */
+
+		/* if (visualizationData.satOutput.separation <= 0.0f) {
+			const vec2<float32>& closestA = visualizationData.satOutput.supportB;
+			const vec2<float32> closestB = closestA - visualizationData.satOutput.normal * visualizationData.satOutput.separation;
+
+			renderer.setClosestPoints(closestA, closestB);
+			renderer.registerFeature(visualizationData.satOutput.closestFeatureA);
+			renderer.registerFeature(visualizationData.satOutput.closestFeatureB);
 		} */
 	}
 

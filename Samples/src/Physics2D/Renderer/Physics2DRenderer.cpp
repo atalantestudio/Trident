@@ -1006,7 +1006,7 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::registerFeature(const Feature2D& feature) {
-		switch (feature.count) {
+		switch (feature.getVertexCount()) {
 			case 1:
 				vertexFeatureMappedRange[vertexFeatureCount] = {feature.vertex[0], feature.vertex[1]};
 				vertexFeatureCount += 1;
