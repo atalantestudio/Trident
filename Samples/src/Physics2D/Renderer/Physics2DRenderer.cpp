@@ -1005,11 +1005,6 @@ namespace ProjectA {
 		instanceMappedRange[entity].world = transform;
 	}
 
-	void Physics2DRenderer::clearClosestFeatureCounters() {
-		vertexFeatureCount = 0;
-		edgeVertexFeatureCount = 0;
-	}
-
 	void Physics2DRenderer::registerClosestFeature(const ClosestFeature2D& closestFeature) {
 		switch (closestFeature.count) {
 			case 1:
@@ -1028,5 +1023,12 @@ namespace ProjectA {
 
 				break;
 		}
+	}
+
+	void Physics2DRenderer::clearRegisteredData() {
+		vertexFeatureCount = 0;
+		edgeVertexFeatureCount = 0;
+		closestPointMappedRange[0] = {0.0f, 0.0f};
+		closestPointMappedRange[1] = {0.0f, 0.0f};
 	}
 }

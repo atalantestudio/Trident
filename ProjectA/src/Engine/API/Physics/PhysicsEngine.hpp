@@ -5,7 +5,6 @@
 #include "Engine/API/Physics/CCD/SeparationFunction.hpp"
 #include "Engine/API/Physics/CCD/TimeOfImpact.hpp"
 #include "Engine/API/Physics/CollisionPair.hpp"
-#include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
 // TODO
@@ -44,37 +43,25 @@
 // 3. Repeat ~10 times for all pairs
 
 namespace ProjectA {
-	struct ImpulseData {
-		Entity entity;
-
-		vec2<float32> impulse;
-
-		// Vector from the COM to the contact.
-		vec2<float32> r;
-	};
+	struct VisualizationData2D;
 
 	class PhysicsEngine {
 		public:
 			void setScene(Scene2D& scene);
 
-			void tick(float32 deltaTime, GJK2DOutput* gjkOutput = nullptr);
+			void tick(float32 deltaTime, VisualizationData2D* visualizationData = {});
 
 		private:
 			std::vector<CollisionPair> BroadPhase() const;
 
-			std::vector<Arbiter2D> NarrowPhase(const std::vector<CollisionPair>& collisionPairs, GJK2DOutput* gjkOutputPointer) const;
+			std::vector<Arbiter2D> NarrowPhase(const std::vector<CollisionPair>& collisionPairs, VisualizationData2D* visualizationData) const;
 
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
 
-			// static inline const vec2<float32> G = {0.0f, -9.81f};
-			static inline const vec2<float32> G = {0.0f, 0.0f};
+			static inline const vec2<float32> G = {0.0f, -9.81f};
 
 		private:
 			Scene2D* scene;
-			// std::vector<CollisionPair> pairs;
-			// std::vector<float32> safeAdvanceTimes;
-			// std::vector<ImpulseData> impulses;
-			// std::unordered_map<CollisionPair, Arbiter2D> arbiters;
 	};
 }

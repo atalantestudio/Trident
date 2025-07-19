@@ -329,6 +329,7 @@ namespace ProjectA {
 	}
 
 	using lyah::abs;
+	using lyah::radians;
 	using lyah::rcp;
 
 	// TODO: lyah::area
@@ -403,5 +404,23 @@ namespace ProjectA {
 		const mat2x2<float32> R = mat2x2_rotation<float32>(r);
 
 		return d * R;
+	}
+
+	static float32 signedDistanceLinePoint(const vec2<float32>& a, const vec2<float32>& b, const vec2<float32>& p) {
+		const vec2<float32> ap = p - a;
+		const vec2<float32> ab = b - a;
+
+		return parallelogramArea(ab, ap) / length(ab);
+	}
+
+	template<typename T>
+	struct Interval {
+		T min;
+		T max;
+	};
+
+	template<typename T>
+	static T overlap(const Interval<T>& intervalA, const Interval<T>& intervalB) {
+		return std::max(intervalA.min - intervalB.max, intervalB.min - intervalA.max);
 	}
 }

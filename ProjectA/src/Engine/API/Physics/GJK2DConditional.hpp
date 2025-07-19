@@ -4,7 +4,6 @@
 
 namespace ProjectA {
 	static constexpr uint8 GJK_2D_CONDITIONAL_ITERATION_LIMIT = 8;
-	static constexpr uint8 GJK_2D_POINT_CONDITIONAL_ITERATION_LIMIT = 8;
 
 	static void handleSimplex1(sim2<float32>& s, vec2<float32>& d) {
 		// TODO: Use structured bindings here, e.g.:
@@ -65,7 +64,6 @@ namespace ProjectA {
 
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
 	// Returns true if the Minkowski difference of A and B contains the origin, and false otherwise.
-	// References:
 	// 
 	// - Casey Muratori - Implementing GJK (2006)
 	//   https://caseymuratori.com/blog_0003

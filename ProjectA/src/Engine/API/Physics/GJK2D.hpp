@@ -175,7 +175,6 @@ namespace ProjectA {
 	}
 
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	// References:
 	// 
 	// - Casey Muratori - Implementing GJK (2006)
 	//   https://caseymuratori.com/blog_0003

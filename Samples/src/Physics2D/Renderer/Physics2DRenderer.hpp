@@ -32,9 +32,9 @@ namespace ProjectA {
 
 			void writeInstanceTransform(Entity entity, const mat3x3<float32>& transform) const;
 
-			void clearClosestFeatureCounters();
-
 			void registerClosestFeature(const ClosestFeature2D& closestFeature);
+
+			void clearRegisteredData();
 
 		private:
 			void recreateFramebuffers();

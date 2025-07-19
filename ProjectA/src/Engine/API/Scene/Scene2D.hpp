@@ -149,7 +149,6 @@ namespace ProjectA {
 				rigidBody->position = descriptor.position;
 				rigidBody->rotation = descriptor.rotation;
 				rigidBody->scale = descriptor.scale;
-				rigidBody->rotation = 0.2f;
 
 				if (descriptor.mass != 0.0f) {
 					rigidBody->inverseMass = 1.0f / descriptor.mass;

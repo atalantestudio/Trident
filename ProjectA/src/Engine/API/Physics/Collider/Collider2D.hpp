@@ -3,13 +3,12 @@
 #include "Engine/API/Geometry/PointGeometry2D.hpp"
 #include "Engine/API/Object/PhysicalObject.hpp"
 #include "Engine/API/Physics/ContactManifold.hpp"
-#include "Engine/API/Physics/GJK2D.hpp"
-#include "Engine/API/Physics/SAT2D.hpp"
+#include "Engine/API/Physics/VisualizationData.hpp"
 
 namespace ProjectA {
-	typedef bool (*Collider2D)(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold);
+	typedef bool (*Collider2D)(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold, VisualizationData2D* visualizationData);
 
-	static bool CircleCircleCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold) {
+	static bool CircleCircleCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold, VisualizationData2D* visualizationData) {
 		if (abs(lengthSq(B.position) - lengthSq(A.position)) < 0.001f) {
 			// Degenerate case: The circles are coincident.
 			return false;
@@ -32,7 +31,7 @@ namespace ProjectA {
 		return true;
 	}
 
-	static bool CircleConvexHullCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold) {
+	static bool CircleConvexHullCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold, VisualizationData2D* visualizationData) {
 		PhysicalObjectCopy2D pointA = A;
 		pointA.geometry = createRef<PointGeometry2D>();
 
@@ -58,12 +57,16 @@ namespace ProjectA {
 		return true;
 	}
 
-	static bool ConvexHullCircleCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold) {
-		return CircleConvexHullCollider(B, A, contactManifold);
+	static bool ConvexHullCircleCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold, VisualizationData2D* visualizationData) {
+		return CircleConvexHullCollider(B, A, contactManifold, visualizationData);
 	}
 
-	static bool ConvexHullConvexHullCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold) {
+	static bool ConvexHullConvexHullCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold, VisualizationData2D* visualizationData) {
 		const SAT2DOutput satOutput = SAT2D(A, B);
+
+		if (visualizationData != nullptr) {
+			visualizationData->satOutput = satOutput;
+		}
 
 		if (satOutput.separation > 0.0f) {
 			return false;

@@ -1,8 +1,6 @@
 #include "pch.hpp"
 
 #include "Engine/API/Physics/Collider/Collider2D.hpp"
-#include "Engine/API/Physics/EPA2D.hpp"
-#include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/PhysicsEngine.hpp"
 
 namespace ProjectA {
@@ -10,7 +8,7 @@ namespace ProjectA {
 		this->scene = &scene;
 	}
 
-	void PhysicsEngine::tick(float32 deltaTime, GJK2DOutput* gjkOutput) {
+	void PhysicsEngine::tick(float32 deltaTime, VisualizationData2D* visualizationData) {
 		const float32 halfDeltaTime = deltaTime * 0.5f;
 
 		float32 inverseDeltaTime = 0.0f;
@@ -26,11 +24,11 @@ namespace ProjectA {
 		const std::vector<CollisionPair> collisionPairs = BroadPhase();
 
 		// 2. Narrow phase: Calculate the contact manifold for each pair.
-		std::vector<Arbiter2D> arbiters = NarrowPhase(collisionPairs, gjkOutput);
+		std::vector<Arbiter2D> arbiters = NarrowPhase(collisionPairs, visualizationData);
 
 		// 3. Integrate forces.
 		// TODO: Do we need to integrate forces on resting objects? E.g. they could be at rest on a moving platform due to inertia.
-		for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
+		/* for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
 			const Entity entity = pool.componentIndexToEntity[componentIndex];
 
 			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(entity));
@@ -44,28 +42,26 @@ namespace ProjectA {
 			//       This seems like Velocity Verlet to me?
 			rigidBody->linearVelocity += (rigidBody->force * rigidBody->inverseMass + G) * halfDeltaTime;
 			rigidBody->angularVelocity += rigidBody->torque * rigidBody->inverseInertia * halfDeltaTime;
-		}
+		} */
 
 		// 4. Pre-compute step:
 		//    - Calculate combined values in each pair (static/dynamic friction, restitution, etc.)
 		//    - For each contact, calculate mass normal, mass tangent and bias value
-		// TODO
-		for (Arbiter2D& arbiter : arbiters) {
+		/* for (Arbiter2D& arbiter : arbiters) {
 			arbiter.precompute(inverseDeltaTime);
-		}
+		} */
 
 		// 5. Apply normal and friction impulses to overlapping pairs in a sequential manner.
-		// TODO
-		for (uint32 iteration = 0; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
+		/* for (uint32 iteration = 0; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
 			for (Arbiter2D& arbiter : arbiters) {
 				arbiter.applyImpulse();
 			}
-		}
+		} */
 
 		// 6. Integrate positions/rotations and velocities and reset forces.
 		// TODO: Do we need to integrate positions/rotations on dynamic objects with an inverse mass of 0?
 		// TODO: Do we need to integrate positions/rotations on resting objects? E.g. they could be at rest on a moving platform due to inertia.
-		for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
+		/* for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
 			const Entity entity = pool.componentIndexToEntity[componentIndex];
 
 			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(entity));
@@ -82,7 +78,7 @@ namespace ProjectA {
 			rigidBody->torque = 0.0f;
 
 			scene->updateTransform(entity);
-		}
+		} */
 	}
 
 	std::vector<CollisionPair> PhysicsEngine::BroadPhase() const {
@@ -116,9 +112,8 @@ namespace ProjectA {
 		return collisionPairs;
 	}
 
-	std::vector<Arbiter2D> PhysicsEngine::NarrowPhase(const std::vector<CollisionPair>& collisionPairs, GJK2DOutput* gjkOutputPointer) const {
+	std::vector<Arbiter2D> PhysicsEngine::NarrowPhase(const std::vector<CollisionPair>& collisionPairs, VisualizationData2D* visualizationData) const {
 		std::vector<Arbiter2D> arbiters;
-		EPA2DResult epaResult;
 
 		Arbiter2D arbiter;
 		arbiter.scene = scene;
@@ -133,7 +128,7 @@ namespace ProjectA {
 			const ref<Material>& materialA = scene->getMaterial(pair.A);
 			const ref<Material>& materialB = scene->getMaterial(pair.B);
 
-			if (!COLLIDER_2D_TABLE[static_cast<uint32>(A.geometry->type)][static_cast<uint32>(B.geometry->type)](A, B, &arbiter.contactManifold)) {
+			if (!COLLIDER_2D_TABLE[static_cast<uint32>(A.geometry->type)][static_cast<uint32>(B.geometry->type)](A, B, &arbiter.contactManifold, visualizationData)) {
 				// Entities are not intersecting (or degenerate case).
 				continue;
 			}
@@ -143,6 +138,10 @@ namespace ProjectA {
 			arbiter.contactManifold.combinedFriction = lyah::sqrt(rigidBodyA->friction * rigidBodyB->friction);
 
 			arbiters.emplace_back(arbiter);
+
+			/* if (visualizationData != nullptr) {
+				visualizationData->contactManifold = arbiter.contactManifold;
+			} */
 		}
 
 		return arbiters;

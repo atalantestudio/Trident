@@ -63,3 +63,4 @@
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/GJK2DConditional.hpp"
 #include "Engine/API/Physics/PhysicsEngine.hpp"
+#include "Engine/API/Physics/VisualizationData.hpp"

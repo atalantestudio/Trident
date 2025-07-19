@@ -6,11 +6,12 @@
 
 namespace ProjectA {
 	BaseLayer::BaseLayer() {
+		visualizationData = {};
 		physicsEngine.setScene(scene);
 	}
 
 	void BaseLayer::update(float32 deltaTime) {
-		physicsEngine.tick(deltaTime, &gjkOutput);
+		physicsEngine.tick(deltaTime, &visualizationData);
 	}
 
 	void BaseLayer::preRender() {
@@ -28,12 +29,44 @@ namespace ProjectA {
 			renderer.setPlaceholderOffset(placeholderOffset);
 		}
 
-		if (gjkOutput.closestFeatureA.count > 0) {
-			renderer.setClosestPoints(gjkOutput.closestA, gjkOutput.closestB);
-			renderer.clearClosestFeatureCounters();
-			renderer.registerClosestFeature(gjkOutput.closestFeatureA);
-			renderer.registerClosestFeature(gjkOutput.closestFeatureB);
+		/* if (visualizationData.contactManifold.contactCount > 0) {
+			ClosestFeature2D contactManifold;
+			contactManifold.count = visualizationData.contactManifold.contactCount;
+
+			for (uint8 contactIndex = 0; contactIndex < contactManifold.count; contactIndex += 1) {
+				contactManifold.edge[contactIndex] = visualizationData.contactManifold.contacts[contactIndex].position;
+			}
+
+			renderer.registerClosestFeature(contactManifold);
+		} */
+
+		renderer.clearRegisteredData();
+
+		if (visualizationData.satOutput.separation <= 0.0f) {
+			ClosestFeature2D edgeFeature;
+			edgeFeature.count = 2;
+			edgeFeature.edge[0] = visualizationData.satOutput.edgeA1;
+			edgeFeature.edge[1] = visualizationData.satOutput.edgeA2;
+
+			ClosestFeature2D vertexFeature;
+			vertexFeature.count = 1;
+			vertexFeature.vertex = visualizationData.satOutput.supportB;
+
+			// NOTE: We don't actually know yet which closest point belongs to which shape.
+			const vec2<float32>& closestA = vertexFeature.vertex;
+			const vec2<float32> closestB = vertexFeature.vertex + visualizationData.satOutput.normal * -visualizationData.satOutput.separation;
+
+			renderer.setClosestPoints(closestA, closestB);
+			renderer.registerClosestFeature(edgeFeature);
+			renderer.registerClosestFeature(vertexFeature);
 		}
+
+		/* if (visualizationData.gjkOutput.closestFeatureA.count > 0) {
+			renderer.setClosestPoints(visualizationData.gjkOutput.closestA, visualizationData.gjkOutput.closestB);
+			renderer.clearRegisteredData();
+			renderer.registerClosestFeature(visualizationData.gjkOutput.closestFeatureA);
+			renderer.registerClosestFeature(visualizationData.gjkOutput.closestFeatureB);
+		} */
 	}
 
 	void BaseLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {

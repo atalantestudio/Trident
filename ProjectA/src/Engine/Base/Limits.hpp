@@ -47,12 +47,12 @@ namespace ProjectA {
 
 	template<>
 	constexpr float32 min() noexcept {
-		return 1.175494351e-38f;
+		return -3.402823466e+38f;
 	}
 
 	template<>
 	constexpr float64 min() noexcept {
-		return 2.2250738585072014e-308;
+		return -1.7976931348623158e+308;
 	}
 
 	// Returns the maximum value representable by T.
