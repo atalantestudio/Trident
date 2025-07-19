@@ -60,7 +60,6 @@ namespace ProjectA {
 				contact.massTangent = 1.0f / tangentN; */
 
 				contact.bias = -PENETRATION_BIAS * (inverseDeltaTime/*  / 10.0f */) * std::min(0.0f, contactManifold.penetration + ALLOWED_PENETRATION);
-				// contact.accumulatedNormalImpulseBias = 0.0f;
 
 				/* // Accumulate impulses.
 				{

@@ -19,7 +19,6 @@ namespace ProjectA {
 
 		float32 accumulatedNormalImpulse;
 		float32 accumulatedTangentImpulse;
-		float32 accumulatedNormalImpulseBias;
 
 		// ClosestFeature2D closestFeature;
 	};
