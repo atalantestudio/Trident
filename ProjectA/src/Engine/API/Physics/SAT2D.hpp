@@ -19,21 +19,28 @@ namespace ProjectA {
 
 	static void queryEdgeDirections(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, SAT2DOutput& output) {
 		const ref<ConvexHullGeometry2D>& geometry = std::static_pointer_cast<ConvexHullGeometry2D>(A.geometry);
+		const mat2x2<float32> R = mat2x2_rotation(B.rotation - A.rotation);
 
 		// TODO: Expose edges/normals from ConvexHullGeometry.
 		for (uint32 edgeVertexOffset = 0; edgeVertexOffset < geometry->getVertexCount(); edgeVertexOffset += 1) {
-			const vec2<float32> a = multiplyTransform(geometry->vertices[(edgeVertexOffset + 0) % geometry->getVertexCount()], A.transform);
-			const vec2<float32> b = multiplyTransform(geometry->vertices[(edgeVertexOffset + 1) % geometry->getVertexCount()], A.transform);
-			const vec2<float32> d = edgeNormalClockwise(a, b);
-			const vec2<float32> s = support(B, -d);
+			const vec2<float32>& a = geometry->vertices[(edgeVertexOffset + 0) % geometry->getVertexCount()];
+			const vec2<float32>& b = geometry->vertices[(edgeVertexOffset + 1) % geometry->getVertexCount()];
 
-			const float32 separation = signedDistanceLinePoint(a, b, s);
+			const vec2<float32> d = edgeNormalClockwise(a, b) * R;
+
+			const vec2<float32> s = B.geometry->support(-d);
+			const vec2<float32> sT = multiplyTransform(s, B.transform);
+
+			const vec2<float32> aT = multiplyTransform(a, A.transform);
+			const vec2<float32> bT = multiplyTransform(b, A.transform);
+
+			const float32 separation = signedDistanceLinePoint(aT, bT, sT);
 
 			if (separation > output.separation) {
 				output.separation = separation;
-				output.supportB = s;
-				output.edgeA1 = a;
-				output.edgeA2 = b;
+				output.supportB = sT;
+				output.edgeA1 = aT;
+				output.edgeA2 = bT;
 				output.normal = d;
 				output.incidentObject = &B;
 			}

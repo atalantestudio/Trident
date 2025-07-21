@@ -24,7 +24,8 @@ namespace ProjectA {
 	};
 
 	struct ContactManifold2D {
-		vec2<float32> contactNormal;
+		vec2<float32> normal;
+		vec2<float32> tangent;
 
 		// TODO: Use fewer bits.
 		uint8 contactCount;

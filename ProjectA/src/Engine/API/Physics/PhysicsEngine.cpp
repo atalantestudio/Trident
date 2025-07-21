@@ -140,7 +140,6 @@ namespace ProjectA {
 
 			arbiter.A = A;
 			arbiter.B = B;
-			arbiter.combinedFriction = lyah::sqrt(rigidBodyA->friction * rigidBodyB->friction);
 
 			arbiters.emplace_back(arbiter);
 

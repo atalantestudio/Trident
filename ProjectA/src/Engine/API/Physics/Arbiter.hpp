@@ -20,6 +20,9 @@ namespace ProjectA {
 				const ref<RigidBody2D>& rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene->getBody(A.entity));
 				const ref<RigidBody2D>& rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene->getBody(B.entity));
 
+				// contactManifold.tangent = perpendicular(contactManifold.normal, 1.0f);
+				// combinedFriction = lyah::sqrt(rigidBodyA->friction * rigidBodyB->friction);
+
 				for (uint8 contactPointIndex = 0; contactPointIndex < contactManifold.contactCount; contactPointIndex += 1) {
 					Contact2D& contact = contactManifold.contacts[contactPointIndex];
 
@@ -28,8 +31,8 @@ namespace ProjectA {
 					contact.rB = contact.position - rigidBodyB->position;
 
 					// Precompute normal mass, tangent mass, and bias.
-					const float32 rnA = dot(contact.rA, contactManifold.contactNormal);
-					const float32 rnB = dot(contact.rB, contactManifold.contactNormal);
+					const float32 rnA = dot(contact.rA, contactManifold.normal);
+					const float32 rnB = dot(contact.rB, contactManifold.normal);
 
 					const float32 massNormal =
 						(dot(contact.rA, contact.rA) - rnA * rnA) * rigidBodyA->inverseInertia +
@@ -39,20 +42,22 @@ namespace ProjectA {
 
 					contact.massNormal = 1.0f / massNormal;
 
-					/* const vec2<float32> tangent = cross(contactManifold.contactNormal, 1.0f);
+					/* const float32 rtA = dot(contact.rA, contactManifold.tangent);
+					const float32 rtB = dot(contact.rB, contactManifold.tangent);
+					const float32 massTangent =
+						(dot(contact.rA, contact.rA) - rtA * rtA) * rigidBodyA->inverseInertia +
+						(dot(contact.rB, contact.rB) - rtB * rtB) * rigidBodyB->inverseInertia +
+						rigidBodyA->inverseMass +
+						rigidBodyB->inverseMass;
 
-					const float32 rt1 = dot(rA, tangent);
-					const float32 rt2 = dot(rB, tangent);
-					const float32 tangentN = (rigidBodyA->inverseInertia * (dot(rA, rA) - rt1 * rt1) + rigidBodyB->inverseInertia * (dot(rB, rB) - rt2 * rt2)) + rigidBodyA->inverseMass + rigidBodyB->inverseMass;
-
-					contact.massTangent = 1.0f / tangentN; */
+					contact.massTangent = 1.0f / massTangent; */
 
 					contact.bias = -PENETRATION_BIAS * inverseDeltaTime * std::min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
 					/* // Accumulate impulses.
 					{
 						// Apply normal + friction impulse.
-						const vec2<float32> j = contact.accumulatedNormalImpulse * contactManifold.contactNormal + contact.accumulatedTangentImpulse * tangent;
+						const vec2<float32> j = contact.accumulatedNormalImpulse * contactManifold.normal + contact.accumulatedTangentImpulse * tangent;
 
 						rigidBodyA->applyImpulse(-j, rA);
 						rigidBodyB->applyImpulse(j, rB);
@@ -88,7 +93,7 @@ namespace ProjectA {
 					const vec2<float32> dv =
 						rigidBodyB->linearVelocity + cross(rigidBodyB->angularVelocity, contact.rB) -
 						rigidBodyA->linearVelocity - cross(rigidBodyA->angularVelocity, contact.rA);
-					const float32 vn = dot(dv, contactManifold.contactNormal);
+					const float32 vn = dot(dv, contactManifold.normal);
 
 					// NOTE: Restitution gets applied here (0.0f).
 					float32 dPn = contact.massNormal * (-vn + contact.bias);
@@ -103,13 +108,26 @@ namespace ProjectA {
 					} */
 					dPn = std::max(0.0f, dPn);
 
-					const vec2<float32> normalImpulse = contactManifold.contactNormal * dPn;
+					const vec2<float32> normalImpulse = contactManifold.normal * dPn;
 
 					// Apply normal impulse.
 					rigidBodyA->applyImpulse(-normalImpulse, contact.rA);
 					rigidBodyB->applyImpulse(normalImpulse, contact.rB);
 
 					// TODO: Friction impulse.
+					/* const float32 vt = dot(dv, contactManifold.tangent);
+					float32 dPt = contact.massTangent * -vt;
+
+					const float32 maxPt = combinedFriction * dPn;
+
+					// TODO: lyah::clamp
+					dPt = std::clamp(dPt, -maxPt, maxPt);
+
+					const vec2<float32> tangentImpulse = contactManifold.tangent * dPt;
+
+					// Apply tangent impulse.
+					rigidBodyA->applyImpulse(-tangentImpulse, contact.rA);
+					rigidBodyB->applyImpulse(tangentImpulse, contact.rB); */
 				}
 			}
 

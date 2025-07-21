@@ -20,10 +20,10 @@ namespace ProjectA {
 			return false;
 		}
 
-		const vec2<float32> sA = A.position + contactManifold->contactNormal * A.geometry->radius;
-		const vec2<float32> sB = B.position - contactManifold->contactNormal * B.geometry->radius;
+		const vec2<float32> sA = A.position + contactManifold->normal * A.geometry->radius;
+		const vec2<float32> sB = B.position - contactManifold->normal * B.geometry->radius;
 
-		contactManifold->contactNormal = normalized(B.position - A.position);
+		contactManifold->normal = normalized(B.position - A.position);
 		contactManifold->contactCount = 1;
 		contactManifold->contacts[0].position = (sA + sB) * 0.5f;
 		contactManifold->contacts[0].separation = d;
@@ -43,7 +43,7 @@ namespace ProjectA {
 		}
 
 		if (d > -A.geometry->radius) {
-			contactManifold->contactNormal = normalized(gjkOutput.closestB - gjkOutput.closestA);
+			contactManifold->normal = normalized(gjkOutput.closestB - gjkOutput.closestA);
 			contactManifold->contactCount = 1;
 			contactManifold->contacts[0].position = gjkOutput.closestB;
 			contactManifold->contacts[0].separation = d;
@@ -93,13 +93,13 @@ namespace ProjectA {
 			return false;
 		}
 
-		contactManifold->contactNormal = satOutput.normal;
+		contactManifold->normal = satOutput.normal;
 		contactManifold->contactCount = 0;
 
-		vec2<float32> frontNormal = contactManifold->contactNormal;
+		vec2<float32> frontNormal = contactManifold->normal;
 
 		if (satOutput.incidentObject == &A) {
-			contactManifold->contactNormal = -contactManifold->contactNormal;
+			contactManifold->normal = -contactManifold->normal;
 
 			frontNormal = -frontNormal;
 		}

@@ -315,12 +315,12 @@ namespace ProjectA {
 
 	template<typename T>
 	lyah::vec<2, T> cross(const lyah::vec<2, T>& a, float32 b) {
-		return {b * a[1], -b * a[0]};
+		return {a[1] * b, a[0] * -b};
 	}
 
 	template<typename T>
 	lyah::vec<2, T> cross(float32 a, const lyah::vec<2, T>& b) {
-		return {-a * b[1], a * b[0]};
+		return {b[1] * -a, b[0] * a};
 	}
 
 	template<typename T>
@@ -426,7 +426,6 @@ namespace ProjectA {
 	}
 
 	static vec2<float32> edgeNormalClockwise(const vec2<float32>& a, const vec2<float32>& b) {
-		// Assume clockwise order (edge left = outside).
 		return perpendicular(normalized(b - a), -1.0f);
 	}
 }

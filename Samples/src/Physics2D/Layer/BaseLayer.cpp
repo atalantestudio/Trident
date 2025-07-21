@@ -31,7 +31,7 @@ namespace ProjectA {
 
 		renderer.clearRegisteredData();
 
-		if (visualizationData.contactManifold.contactCount > 0) {
+		/* if (visualizationData.contactManifold.contactCount > 0) {
 			Feature2D contactManifold;
 			contactManifold.setVertexCount(visualizationData.contactManifold.contactCount);
 
@@ -40,9 +40,9 @@ namespace ProjectA {
 			}
 
 			renderer.registerFeature(contactManifold);
-		}
 
-		visualizationData.contactManifold.contactCount = 0;
+			visualizationData.contactManifold.contactCount = 0;
+		} */
 
 		/* if (visualizationData.gjkOutput.closestFeatureA.count > 0) {
 			renderer.setClosestPoints(visualizationData.gjkOutput.closestA, visualizationData.gjkOutput.closestB);
@@ -51,14 +51,14 @@ namespace ProjectA {
 			renderer.registerFeature(visualizationData.gjkOutput.closestFeatureB);
 		} */
 
-		/* if (visualizationData.satOutput.separation <= 0.0f) {
+		if (visualizationData.satOutput.separation <= 0.0f) {
 			const vec2<float32>& closestA = visualizationData.satOutput.supportB;
 			const vec2<float32> closestB = closestA - visualizationData.satOutput.normal * visualizationData.satOutput.separation;
 
 			renderer.setClosestPoints(closestA, closestB);
 			renderer.registerFeature(visualizationData.satOutput.closestFeatureA);
 			renderer.registerFeature(visualizationData.satOutput.closestFeatureB);
-		} */
+		}
 	}
 
 	void BaseLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
