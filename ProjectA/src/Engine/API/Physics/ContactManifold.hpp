@@ -35,32 +35,29 @@ namespace ProjectA {
 
 	// Finds and returns the incident edge feature on a convex hull.
 	static Feature2D findIncidentEdge(const PhysicalObjectCopy2D& incidentObject, const vec2<float32>& referenceEdgeNormal) {
-		const ref<Geometry2D>& geometry = incidentObject.geometry;
+		const mat2x2<float32> R = mat2x2_rotation(-incidentObject.rotation);
 
 		float32 minDotProduct = max<float32>();
-		vec2<float32> a;
-		vec2<float32> b;
+		Feature2D incidentEdge;
 
 		// TODO: Expose edges/normals from ConvexHullGeometry.
-		for (uint32 edgeIndex = 0, edgeVertexOffset = 0; edgeVertexOffset < incidentObject.geometry->getVertexCount(); edgeIndex += 1, edgeVertexOffset += 1) {
-			const vec2<float32>& edge1 = incidentObject.geometry->vertices[(edgeVertexOffset + 0) % incidentObject.geometry->getVertexCount()];
-			const vec2<float32>& edge2 = incidentObject.geometry->vertices[(edgeVertexOffset + 1) % incidentObject.geometry->getVertexCount()];
-			const vec2<float32> transformedEdge1 = multiplyTransform(edge1, incidentObject.transform);
-			const vec2<float32> transformedEdge2 = multiplyTransform(edge2, incidentObject.transform);
-			const vec2<float32> edgeNormal = edgeNormalClockwise(transformedEdge1, transformedEdge2);
+		for (uint32 edgeVertexOffset = 0; edgeVertexOffset < incidentObject.geometry->getVertexCount(); edgeVertexOffset += 1) {
+			const vec2<float32>& a = incidentObject.geometry->vertices[(edgeVertexOffset + 0) % incidentObject.geometry->getVertexCount()];
+			const vec2<float32>& b = incidentObject.geometry->vertices[(edgeVertexOffset + 1) % incidentObject.geometry->getVertexCount()];
 
-			const float32 dotProduct = dot(edgeNormal, referenceEdgeNormal);
+			const vec2<float32> edgeNormal = edgeNormalClockwise(a, b) * R;
+
+			const float32 dotProduct = dot(referenceEdgeNormal, edgeNormal);
 
 			if (dotProduct < minDotProduct) {
 				minDotProduct = dotProduct;
-				a = transformedEdge1;
-				b = transformedEdge2;
+				incidentEdge.edge[0] = a;
+				incidentEdge.edge[1] = b;
 			}
 		}
 
-		Feature2D incidentEdge;
-		incidentEdge.edge[0] = a;
-		incidentEdge.edge[1] = b;
+		incidentEdge.edge[0] = multiplyTransform(incidentEdge.edge[0], incidentObject.transform);
+		incidentEdge.edge[1] = multiplyTransform(incidentEdge.edge[1], incidentObject.transform);
 
 		return incidentEdge;
 	}
@@ -92,7 +89,8 @@ namespace ProjectA {
 
 			const float32 t = d0 / (d0 - d1);
 
-			clippedEdge.edge[clippedEdgeVertexCount] = lerp(edge.edge[0], edge.edge[1], t);
+			// clippedEdge.edge[clippedEdgeVertexCount] = lerp(edge.edge[0], edge.edge[1], t);
+			clippedEdge.edge[clippedEdgeVertexCount] = edge.edge[0] + t * (edge.edge[1] - edge.edge[0]);
 			clippedEdgeVertexCount += 1;
 		}
 

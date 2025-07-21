@@ -52,7 +52,7 @@ namespace ProjectA {
 		} */
 
 		if (visualizationData.satOutput.separation <= 0.0f) {
-			const vec2<float32>& closestA = visualizationData.satOutput.supportB;
+			const vec2<float32>& closestA = visualizationData.satOutput.support;
 			const vec2<float32> closestB = closestA - visualizationData.satOutput.normal * visualizationData.satOutput.separation;
 
 			renderer.setClosestPoints(closestA, closestB);

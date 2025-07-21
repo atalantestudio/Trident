@@ -8,12 +8,22 @@ namespace ProjectA {
 		// A separation less than or equal to 0 indicates overlap between the shapes.
 		float32 separation;
 
+		// Reference edge normal.
 		vec2<float32> normal;
-		vec2<float32> edgeA1;
-		vec2<float32> edgeA2;
-		vec2<float32> supportB;
+
+		// First vertex on the reference edge.
+		vec2<float32> edge0;
+
+		// Second vertex on the reference edge.
+		vec2<float32> edge1;
+
+		// Support point on the incident shape, in the direction opposite to the reference edge's normal.
+		vec2<float32> support;
+
 		Feature2D closestFeatureA;
 		Feature2D closestFeatureB;
+
+		const PhysicalObjectCopy2D* referenceObject;
 		const PhysicalObjectCopy2D* incidentObject;
 	};
 
@@ -38,10 +48,11 @@ namespace ProjectA {
 
 			if (separation > output.separation) {
 				output.separation = separation;
-				output.supportB = sT;
-				output.edgeA1 = aT;
-				output.edgeA2 = bT;
+				output.edge0 = aT;
+				output.edge1 = bT;
+				output.support = sT;
 				output.normal = d;
+				output.referenceObject = &A;
 				output.incidentObject = &B;
 			}
 		}
@@ -84,20 +95,23 @@ namespace ProjectA {
 
 		if (outputA.separation < 0.0f || output.separation < 0.0f) {
 			output.closestFeatureA.setVertexCount(2);
-			output.closestFeatureA.edge[0] = outputA.edgeA1;
-			output.closestFeatureA.edge[1] = outputA.edgeA2;
+			output.closestFeatureA.edge[0] = outputA.edge0;
+			output.closestFeatureA.edge[1] = outputA.edge1;
 
 			output.closestFeatureB.setVertexCount(2);
-			output.closestFeatureB.edge[0] = output.edgeA1;
-			output.closestFeatureB.edge[1] = output.edgeA2;
+			output.closestFeatureB.edge[0] = output.edge0;
+			output.closestFeatureB.edge[1] = output.edge1;
 		}
 		else {
 			output.closestFeatureA.setVertexCount(1);
-			output.closestFeatureA.vertex = output.supportB;
+			output.closestFeatureA.vertex = output.support;
 
 			output.closestFeatureB.setVertexCount(1);
-			output.closestFeatureB.vertex = outputA.supportB;
+			output.closestFeatureB.vertex = outputA.support;
 		}
+
+		// Correct normal direction.
+		output.normal = rotate(output.normal, -output.incidentObject->rotation);
 
 		return output;
 	}
