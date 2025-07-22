@@ -31,7 +31,7 @@ namespace ProjectA {
 				scene.createStaticEntity(floorDescriptor);
 
 				EntityDescriptor boxDescriptor{};
-				boxDescriptor.position = {0.0f, 0.4f};
+				boxDescriptor.position = {0.0f, 4.0f};
 				boxDescriptor.mass = 200.0f;
 				boxDescriptor.friction = 0.2f;
 				boxDescriptor.geometry = squareGeometry;

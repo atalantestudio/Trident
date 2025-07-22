@@ -34,13 +34,17 @@ namespace ProjectA {
 
 		private:
 			PhysicsEngine physicsEngine;
-			VisualizationData2D visualizationData;
+
+			#ifdef BUILD_MODE_DEBUG
+				VisualizationData2D visualizationData;
+			#endif
 
 			Entity hoveredEntity = max<uint32>();
 			Entity selectedEntity = max<uint32>();
 
 			vec2<float32> placeholderOffset;
 
+			// TODO: Implement for debugging.
 			// float32 selectedEntityPreviousInverseMass;
 			// float32 selectedEntityPreviousInverseInertia;
 	};

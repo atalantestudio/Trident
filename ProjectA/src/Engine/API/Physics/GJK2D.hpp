@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/API/Object/PhysicalObject.hpp"
 #include "Engine/API/Physics/Feature2D.hpp"
 #include "Engine/API/Physics/Simplex.hpp"
 #include "Engine/API/Physics/support.hpp"

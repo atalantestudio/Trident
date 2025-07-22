@@ -2,13 +2,33 @@
 
 #include "Engine/API/Geometry/PointGeometry2D.hpp"
 #include "Engine/API/Object/PhysicalObject.hpp"
-#include "Engine/API/Physics/ContactManifold.hpp"
-#include "Engine/API/Physics/VisualizationData.hpp"
+#include "Engine/API/Physics/Contact/ContactManifold.hpp"
+#include "Engine/API/Physics/GJK2D.hpp"
+#include "Engine/API/Physics/SAT2D.hpp"
+
+#ifdef BUILD_MODE_DEBUG
+	#include "Engine/API/Physics/VisualizationData.hpp"
+#endif
 
 namespace ProjectA {
-	typedef bool (*Collider2D)(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold, VisualizationData2D* visualizationData);
+	typedef bool (*Collider2D)(
+		const PhysicalObjectCopy2D& A,
+		const PhysicalObjectCopy2D& B,
+		ContactManifold2D* contactManifold
+		#ifdef BUILD_MODE_DEBUG
+			, VisualizationData2D* visualizationData
+		#endif
+	);
 
-	static bool CircleCircleCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold, VisualizationData2D* visualizationData) {
+	// TODO: Write to visualizationData in debug-mode.
+	static bool CircleCircleCollider(
+		const PhysicalObjectCopy2D& A,
+		const PhysicalObjectCopy2D& B,
+		ContactManifold2D* contactManifold
+		#ifdef BUILD_MODE_DEBUG
+			, VisualizationData2D* visualizationData
+		#endif
+	) {
 		if (abs(lengthSq(B.position) - lengthSq(A.position)) < 0.001f) {
 			// Degenerate case: The circles are coincident.
 			return false;
@@ -24,14 +44,22 @@ namespace ProjectA {
 		const vec2<float32> sB = B.position - contactManifold->normal * B.geometry->radius;
 
 		contactManifold->normal = normalized(B.position - A.position);
-		contactManifold->contactCount = 1;
+		contactManifold->setContactCount(1);
 		contactManifold->contacts[0].position = (sA + sB) * 0.5f;
 		contactManifold->contacts[0].separation = d;
 
 		return true;
 	}
 
-	static bool CircleConvexHullCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold, VisualizationData2D* visualizationData) {
+	// TODO: Write to visualizationData in debug-mode.
+	static bool CircleConvexHullCollider(
+		const PhysicalObjectCopy2D& A,
+		const PhysicalObjectCopy2D& B,
+		ContactManifold2D* contactManifold
+		#ifdef BUILD_MODE_DEBUG
+			, VisualizationData2D* visualizationData
+		#endif
+	) {
 		PhysicalObjectCopy2D pointA = A;
 		pointA.geometry = createRef<PointGeometry2D>();
 
@@ -44,7 +72,7 @@ namespace ProjectA {
 
 		if (d > -A.geometry->radius) {
 			contactManifold->normal = normalized(gjkOutput.closestB - gjkOutput.closestA);
-			contactManifold->contactCount = 1;
+			contactManifold->setContactCount(1);
 			contactManifold->contacts[0].position = gjkOutput.closestB;
 			contactManifold->contacts[0].separation = d;
 
@@ -57,16 +85,39 @@ namespace ProjectA {
 		return true;
 	}
 
-	static bool ConvexHullCircleCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold, VisualizationData2D* visualizationData) {
-		return CircleConvexHullCollider(B, A, contactManifold, visualizationData);
+	static bool ConvexHullCircleCollider(
+		const PhysicalObjectCopy2D& A,
+		const PhysicalObjectCopy2D& B,
+		ContactManifold2D* contactManifold
+		#ifdef BUILD_MODE_DEBUG
+			, VisualizationData2D* visualizationData
+		#endif
+	) {
+		return CircleConvexHullCollider(
+			B,
+			A,
+			contactManifold
+			#ifdef BUILD_MODE_DEBUG
+				, visualizationData
+			#endif
+		);
 	}
 
-	static bool ConvexHullConvexHullCollider(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, ContactManifold2D* contactManifold, VisualizationData2D* visualizationData) {
+	static bool ConvexHullConvexHullCollider(
+		const PhysicalObjectCopy2D& A,
+		const PhysicalObjectCopy2D& B,
+		ContactManifold2D* contactManifold
+		#ifdef BUILD_MODE_DEBUG
+			, VisualizationData2D* visualizationData
+		#endif
+	) {
 		const SAT2DOutput satOutput = SAT2D(A, B);
 
-		if (visualizationData != nullptr) {
-			visualizationData->satOutput = satOutput;
-		}
+		#ifdef BUILD_MODE_DEBUG
+			if (visualizationData != nullptr) {
+				visualizationData->satOutput = satOutput;
+			}
+		#endif
 
 		if (satOutput.separation > 0.0f) {
 			return false;
@@ -94,9 +145,8 @@ namespace ProjectA {
 			contactManifold->normal = -contactManifold->normal;
 		}
 
-		contactManifold->contactCount = 0;
-
 		const float32 referenceNormalOffset = dot(satOutput.referenceEdge.edge[0], satOutput.normal);
+		uint32 contactCount = 0;
 
 		// Keep all vertices below the reference edge, then move them to the reference edge's line.
 		for (uint32 vertexIndex = 0; vertexIndex < 2; vertexIndex += 1) {
@@ -106,12 +156,15 @@ namespace ProjectA {
 				continue;
 			}
 
-			contactManifold->contacts[contactManifold->contactCount].position = clippedIncidentEdge.edge[vertexIndex] - contactManifold->normal * separation;
-			contactManifold->contacts[contactManifold->contactCount].separation = separation;
-			contactManifold->contactCount += 1;
+			contactManifold->contacts[contactCount].position = clippedIncidentEdge.edge[vertexIndex] - contactManifold->normal * separation;
+			contactManifold->contacts[contactCount].separation = separation;
+
+			contactCount += 1;
 		}
 
-		return contactManifold->contactCount;
+		contactManifold->setContactCount(contactCount);
+
+		return contactCount;
 	}
 
 	// https://media.steampowered.com/apps/valve/2015/DirkGregorius_Contacts.pdf

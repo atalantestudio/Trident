@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/API/Physics/ContactManifold.hpp"
+#include "Engine/API/Physics/Contact/ContactManifold.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/ECS/Entity.hpp"
 
@@ -23,7 +23,7 @@ namespace ProjectA {
 				// contactManifold.tangent = perpendicular(contactManifold.normal, 1.0f);
 				// combinedFriction = lyah::sqrt(rigidBodyA->friction * rigidBodyB->friction);
 
-				for (uint8 contactPointIndex = 0; contactPointIndex < contactManifold.contactCount; contactPointIndex += 1) {
+				for (uint8 contactPointIndex = 0; contactPointIndex < contactManifold.getContactCount(); contactPointIndex += 1) {
 					Contact2D& contact = contactManifold.contacts[contactPointIndex];
 
 					// Distance from the contact to the shape's COM.
@@ -69,7 +69,7 @@ namespace ProjectA {
 				const ref<RigidBody2D>& rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene->getBody(A.entity));
 				const ref<RigidBody2D>& rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene->getBody(B.entity));
 
-				for (uint8 contactPointIndex = 0; contactPointIndex < contactManifold.contactCount; contactPointIndex += 1) {
+				for (uint8 contactPointIndex = 0; contactPointIndex < contactManifold.getContactCount(); contactPointIndex += 1) {
 					Contact2D& contact = contactManifold.contacts[contactPointIndex];
 
 					// Box2D Lite:

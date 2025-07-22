@@ -4,35 +4,37 @@
 #include "Engine/API/Physics/PhysicsEngine.hpp"
 
 namespace ProjectA {
-	void PhysicsEngine::setScene(Scene2D& scene) {
+	void PhysicsEngine::registerScene(Scene2D& scene) {
 		this->scene = &scene;
 	}
 
-	void PhysicsEngine::tick(float32 deltaTime, VisualizationData2D* visualizationData) {
-		// TODO: Debug.
-		deltaTime = 1.0f / 60.0f;
-
+	void PhysicsEngine::tick(
+		float32 deltaTime,
+		float32 inverseDeltaTime
+		#ifdef BUILD_MODE_DEBUG
+			, VisualizationData2D* visualizationData
+		#endif
+	) {
 		const float32 halfDeltaTime = deltaTime * 0.5f;
 
-		float32 inverseDeltaTime = 0.0f;
-		
-		if (deltaTime > 0.0f) {
-			inverseDeltaTime = 1.0f / deltaTime;
-		}
-
-		const ComponentPool<DynamicEntityComponent>& pool = scene->getDynamicEntityPool();
+		const ComponentPool<DynamicEntityComponent>& dynamicPool = scene->getDynamicEntityPool();
 
 		// 1. Broad phase: Detect potentially overlapping pairs.
 		// TODO: If less than 2 objects in the same layer AND in different physical groups, no chance of overlap.
-		const std::vector<CollisionPair> collisionPairs = BroadPhase();
+		const std::vector<EntityPair> entityPairs = BroadPhase();
 
 		// 2. Narrow phase: Calculate the contact manifold for each pair.
-		std::vector<Arbiter2D> arbiters = NarrowPhase(collisionPairs, visualizationData);
+		std::vector<Arbiter2D> arbiters = NarrowPhase(
+			entityPairs
+			#ifdef BUILD_MODE_DEBUG
+				, visualizationData
+			#endif
+		);
 
 		// 3. Integrate forces.
 		// TODO: Do we need to integrate forces on resting objects? E.g. they could be at rest on a moving platform due to inertia.
-		for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
-			const Entity entity = pool.componentIndexToEntity[componentIndex];
+		for (uint32 componentIndex = 0; componentIndex < dynamicPool.componentCount; componentIndex += 1) {
+			const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
 
 			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(entity));
 
@@ -66,8 +68,8 @@ namespace ProjectA {
 		// 6. Integrate positions/rotations and velocities and reset forces.
 		// TODO: Do we need to integrate positions/rotations on dynamic objects with an inverse mass of 0?
 		// TODO: Do we need to integrate positions/rotations on resting objects? E.g. they could be at rest on a moving platform due to inertia.
-		for (uint32 componentIndex = 0; componentIndex < pool.componentCount; componentIndex += 1) {
-			const Entity entity = pool.componentIndexToEntity[componentIndex];
+		for (uint32 componentIndex = 0; componentIndex < dynamicPool.componentCount; componentIndex += 1) {
+			const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
 
 			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(entity));
 
@@ -86,52 +88,59 @@ namespace ProjectA {
 		}
 	}
 
-	std::vector<CollisionPair> PhysicsEngine::BroadPhase() const {
+	std::vector<EntityPair> PhysicsEngine::BroadPhase() const {
 		const ComponentPool<DynamicEntityComponent>& dynamicPool = scene->getDynamicEntityPool();
 		const ComponentPool<StaticEntityComponent>& staticPool = scene->getStaticEntityPool();
 
-		std::vector<CollisionPair> collisionPairs;
-		CollisionPair pair;
+		std::vector<EntityPair> entityPairs;
+		EntityPair entityPair;
 
 		// TODO: If less than 2 objects in the same layer AND in different physical groups, no chance of overlap.
-		for (uint32 iA = 0; iA < dynamicPool.componentCount; iA += 1) {
-			pair.A = dynamicPool.componentIndexToEntity[iA];
+		for (uint32 indexA = 0; indexA < dynamicPool.componentCount; indexA += 1) {
+			entityPair.A = dynamicPool.componentIndexToEntity[indexA];
 
-			for (uint32 iB = iA + 1; iB < dynamicPool.componentCount; iB += 1) {
-				pair.B = dynamicPool.componentIndexToEntity[iB];
+			// Register all dynamic-dynamic pairs.
+			for (uint32 indexB = indexA + 1; indexB < dynamicPool.componentCount; indexB += 1) {
+				entityPair.B = dynamicPool.componentIndexToEntity[indexB];
 
 				// ENGINE_DEBUG("Registered dynamic-dynamic pair ([], []).", pair.A, pair.B);
 
-				collisionPairs.emplace_back(pair);
+				entityPairs.emplace_back(entityPair);
 			}
 
-			for (uint32 iB = 0; iB < staticPool.componentCount; iB += 1) {
-				pair.B = staticPool.componentIndexToEntity[iB];
+			// Register all dynamic-static pairs.
+			for (uint32 indexB = 0; indexB < staticPool.componentCount; indexB += 1) {
+				entityPair.B = staticPool.componentIndexToEntity[indexB];
 
 				// ENGINE_DEBUG("Registered dynamic-static pair ([], []).", pair.A, pair.B);
 
-				collisionPairs.emplace_back(pair);
+				entityPairs.emplace_back(entityPair);
 			}
 		}
 
-		return collisionPairs;
+		return entityPairs;
 	}
 
-	std::vector<Arbiter2D> PhysicsEngine::NarrowPhase(const std::vector<CollisionPair>& collisionPairs, VisualizationData2D* visualizationData) const {
+	std::vector<Arbiter2D> PhysicsEngine::NarrowPhase(
+		const std::vector<EntityPair>& entityPairs
+		#ifdef BUILD_MODE_DEBUG
+			, VisualizationData2D* visualizationData
+		#endif
+	) const {
 		std::vector<Arbiter2D> arbiters;
 
 		Arbiter2D arbiter;
 		arbiter.scene = scene;
 
-		for (const CollisionPair& pair : collisionPairs) {
-			const PhysicalObjectCopy2D A = copyPhysicalObject(*scene, pair.A);
-			const PhysicalObjectCopy2D B = copyPhysicalObject(*scene, pair.B);
+		for (const EntityPair& entityPair : entityPairs) {
+			const PhysicalObjectCopy2D A = copyPhysicalObject(*scene, entityPair.A);
+			const PhysicalObjectCopy2D B = copyPhysicalObject(*scene, entityPair.B);
 
-			ref<RigidBody2D>& rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene->getBody(pair.A));
-			ref<RigidBody2D>& rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene->getBody(pair.B));
+			ref<RigidBody2D>& rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene->getBody(entityPair.A));
+			ref<RigidBody2D>& rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene->getBody(entityPair.B));
 
-			const ref<Material>& materialA = scene->getMaterial(pair.A);
-			const ref<Material>& materialB = scene->getMaterial(pair.B);
+			const ref<Material>& materialA = scene->getMaterial(entityPair.A);
+			const ref<Material>& materialB = scene->getMaterial(entityPair.B);
 
 			if (!COLLIDER_2D_TABLE[static_cast<uint32>(A.geometry->type)][static_cast<uint32>(B.geometry->type)](A, B, &arbiter.contactManifold, visualizationData)) {
 				// Entities are not intersecting (or degenerate case).
@@ -143,154 +152,15 @@ namespace ProjectA {
 
 			arbiters.emplace_back(arbiter);
 
-			if (visualizationData != nullptr) {
-				visualizationData->contactManifold = arbiter.contactManifold;
-			}
+			#ifdef BUILD_MODE_DEBUG
+				if (visualizationData != nullptr) {
+					visualizationData->contactManifold = arbiter.contactManifold;
+				}
+			#endif
 		}
 
 		return arbiters;
 	}
-
-	/* void PhysicsEngine::BroadPhase(GJK2DOutput* gjkOutput) {
-		if (scene->getPhysicalObjectEntityCount() < 2) {
-			return;
-		}
-
-		for (const std::vector<Entity>& layer : scene->getLayers()) {
-			if (layer.size() < 2) {
-				continue;
-			}
-
-			ref<RigidBody2D> rigidBodyA;
-			ref<RigidBody2D> rigidBodyB;
-			CollisionPair collisionPair;
-
-			for (Entity A = 0; A < layer.size() - 1; A += 1) {
-				rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene->getBody(A));
-				collisionPair.A = A;
-
-				for (Entity B = A + 1; B < layer.size(); B += 1) {
-					rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene->getBody(B));
-
-					if (rigidBodyA->inverseMass == 0.0f && rigidBodyB->inverseMass == 0.0f) {
-						continue;
-					}
-
-					collisionPair.B = B;
-
-					const ContactManifold2D contactManifold = GenerateContactManifold(A, B, gjkOutput);
-
-					if (contactManifold.contactCount == 0) {
-						arbiters.erase(collisionPair);
-
-						continue;
-					}
-
-					auto arbiterIterator = arbiters.find(collisionPair);
-
-					if (arbiterIterator == arbiters.end()) {
-						arbiterIterator->second.update(contactManifold);
-
-						continue;
-					}
-
-					Arbiter2D arbiter;
-					arbiter.scene = scene;
-					arbiter.A = A;
-					arbiter.B = B;
-					arbiter.contactManifold = contactManifold;
-					arbiter.contactManifold.combinedFriction = lyah::sqrt(rigidBodyA->friction * rigidBodyB->friction);
-
-					arbiters.insert(std::pair<CollisionPair, Arbiter2D>(collisionPair, arbiter));
-				}
-			}
-		}
-	} */
-
-	/* void PhysicsEngine::narrowPhase(GJK2DOutput* gjkOutput) {
-		for (CollisionPair& pair : pairs) {
-			TimeOfImpact output;
-
-			output = evaluateContinuousCollision(pair.A, pair.B, gjkOutput);
-			// output.state = TimeOfImpactState::SEPARATED;
-			// output.fraction = 1.0f;
-
-			const float32 toi = output.fraction;
-
-			// TODO: lyah::min
-			safeAdvanceTimes[pair.A] = std::min(safeAdvanceTimes[pair.A], toi);
-			safeAdvanceTimes[pair.B] = std::min(safeAdvanceTimes[pair.B], toi);
-
-			// https://code.tutsplus.com/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331t
-			if (output.state == TimeOfImpactState::HIT) {
-				const PhysicalObjectCopy2D copyA = copyPhysicalObject(*scene, pair.A, toi);
-				const PhysicalObjectCopy2D copyB = copyPhysicalObject(*scene, pair.B, toi);
-
-				ref<RigidBody2D>& rigidBodyA = std::static_pointer_cast<RigidBody2D>(scene->getBody(pair.A));
-				ref<RigidBody2D>& rigidBodyB = std::static_pointer_cast<RigidBody2D>(scene->getBody(pair.B));
-				const ref<Material>& materialA = scene->getMaterial(pair.A);
-				const ref<Material>& materialB = scene->getMaterial(pair.B);
-
-				const vec2<float32> n = normalized(copyB.position - copyA.position);
-				vec2<float32> relativeLinearVelocity = copyB.linearVelocity - copyA.linearVelocity;
-				const float32 velocityAlongNormal = dot(relativeLinearVelocity, n);
-
-				if (velocityAlongNormal > 0.0f) {
-					// These entities are separating; continue to the next entities.
-					continue;
-				}
-
-				// TODO: lyah::min
-				// Calculate coefficient of restitution.
-				const float32 e = std::min(materialA->restitution, materialB->restitution);
-
-				// Calculate linear impulse.
-				// Fn is the magnitude of the collision normal.
-				const float32 Fn = (-(1 + e) * velocityAlongNormal) / (rigidBodyA->inverseMass + rigidBodyB->inverseMass);
-				const vec2<float32> normalImpulse = n * Fn;
-
-				// TODO: Fix infinite tangent vector.
-				// Linear velocity + normal impulse.
-				// const vec2<float32> vA = copyA.linearVelocity - normalImpulse * rigidBodyA->inverseMass;
-				// const vec2<float32> vB = copyB.linearVelocity + normalImpulse * rigidBodyB->inverseMass;
-
-				// relativeLinearVelocity = vB - vA;
-
-				// Tangent to the collision normal.
-				// const vec2<float32> tangent = normalized(relativeLinearVelocity - n * dot(relativeLinearVelocity, n));
-
-				// Magnitude of the friction.
-				// const float32 Ff = -dot(relativeLinearVelocity, tangent) / (rigidBodyA->inverseMass + rigidBodyB->inverseMass);
-
-				// const float32 mu = (rigidBodyA->staticFriction + rigidBodyB->staticFriction) * 0.5f;
-
-				// vec2<float32> frictionImpulse = tangent * Ff;
-
-				// if (abs(Ff) > mu * Fn) {
-					// frictionImpulse = tangent * -Fn * ((rigidBodyA->dynamicFriction + rigidBodyB->dynamicFriction) * 0.5f);
-				// }
-
-				// Vector from the center of mass to the contact on A.
-				const vec2<float32> rA = output.closestA - copyA.geometry->centerOfMass;
-
-				// Vector from the center of mass to the contact on B.
-				const vec2<float32> rB = output.closestB - copyB.geometry->centerOfMass;
-
-				ImpulseData impulseDataA;
-				impulseDataA.entity = pair.A;
-				impulseDataA.impulse = -normalImpulse; // - frictionImpulse
-				impulseDataA.r = rA;
-
-				ImpulseData impulseDataB;
-				impulseDataB.entity = pair.B;
-				impulseDataB.impulse = +normalImpulse; // + frictionImpulse
-				impulseDataB.r = rB;
-
-				impulses.emplace_back(impulseDataA);
-				impulses.emplace_back(impulseDataB);
-			}
-		}
-	} */
 
 	/* void PhysicsEngine::integrate() {
 		for (Entity entity = 0; entity < scene->getPhysicalObjectEntityCount(); entity += 1) {

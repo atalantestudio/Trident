@@ -6,12 +6,22 @@
 
 namespace ProjectA {
 	BaseLayer::BaseLayer() {
-		visualizationData = {};
-		physicsEngine.setScene(scene);
+		physicsEngine.registerScene(scene);
 	}
 
 	void BaseLayer::update(float32 deltaTime) {
-		physicsEngine.tick(deltaTime, &visualizationData);
+		// TODO: Debug-only.
+		// deltaTime = 1.0f / 60.0f;
+
+		const float32 inverseDeltaTime = 1.0f / deltaTime;
+
+		physicsEngine.tick(
+			deltaTime,
+			inverseDeltaTime
+			#ifdef BUILD_MODE_DEBUG
+				, &visualizationData
+			#endif
+		);
 	}
 
 	void BaseLayer::preRender() {

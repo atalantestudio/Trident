@@ -1,36 +1,27 @@
 #pragma once
 
+#include "Engine/API/Physics/Contact/Contact.hpp"
 #include "Engine/API/Physics/Feature2D.hpp"
 
 namespace ProjectA {
-	struct Contact2D {
-		vec2<float32> position;
+	class ContactManifold2D {
+		public:
+			void setContactCount(uint32 contactCount) {
+				this->contactCount = contactCount - 1;
+			}
 
-		// Distance to the normal of the reference edge.
-		float32 separation;
+			uint32 getContactCount() const {
+				return contactCount + 1;
+			}
 
-		// A's position to the contact.
-		vec2<float32> rA;
+		public:
+			vec2<float32> normal;
+			vec2<float32> tangent;
+			Contact2D contacts[2];
 
-		// B's position to the contact.
-		vec2<float32> rB;
-
-		float32 massNormal;
-		float32 massTangent;
-		float32 bias;
-
-		float32 accumulatedNormalImpulse;
-		float32 accumulatedTangentImpulse;
-	};
-
-	struct ContactManifold2D {
-		vec2<float32> normal;
-		vec2<float32> tangent;
-
-		// TODO: Use fewer bits.
-		uint8 contactCount;
-
-		Contact2D contacts[2];
+		private:
+			// TODO: Use fewer bits.
+			uint8 contactCount : 1;
 	};
 
 	// Finds and returns the incident edge feature on a convex hull.
