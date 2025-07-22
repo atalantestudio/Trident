@@ -16,6 +16,7 @@ namespace ProjectA {
 		| Pillow     | 0.1     | 0.2  |
 		| Static     | 0.0     | 0.4  |
 	*/
+
 	struct Material {
 		// TODO: Validate data.
 		//       ENGINE_ASSERT(density > 0.0f, "The density must be positive.");

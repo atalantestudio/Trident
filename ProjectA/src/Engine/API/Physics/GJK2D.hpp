@@ -184,7 +184,7 @@ namespace ProjectA {
 	// - Christer Ericson - Real-Time Collision Detection
 	//   https://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf
 	// 
-	inline GJK2DOutput GJK2D(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
+	inline GJK2DOutput GJK2D(const RigidBody2D& A, const RigidBody2D& B) {
 		DEBUG_ASSERT(A.geometry->getVertexCount() < max<uint8>());
 		DEBUG_ASSERT(B.geometry->getVertexCount() < max<uint8>());
 

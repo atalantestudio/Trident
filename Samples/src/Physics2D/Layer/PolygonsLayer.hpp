@@ -3,6 +3,7 @@
 #include "BaseLayer.hpp"
 
 namespace ProjectA {
+	// TODO: Rewrite with new physics API.
 	class PolygonsLayer : public BaseLayer {
 		public:
 			void build() override {
@@ -33,14 +34,14 @@ namespace ProjectA {
 
 				const Entity entityA = scene.createDynamicEntity(0);
 
-				ref<RigidBody2D> bodyA = createRef<RigidBody2D>();
-				bodyA->position = {0.45f, -0.625f};
+				RigidBody2D bodyA;
+				bodyA.position = {0.45f, -0.625f};
 
 				ref<ColorMaterial> materialA = createRef<ColorMaterial>();
 				materialA->fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 				materialA->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
-				scene.setBody(entityA, std::static_pointer_cast<Body2D>(bodyA));
+				scene.setRigidBody(entityA, std::static_pointer_cast<Body2D>(bodyA));
 				scene.setGeometry(entityA, std::static_pointer_cast<Geometry2D>(polygonGeometry));
 				scene.setMaterial(entityA, std::static_pointer_cast<Material>(materialA));
 				scene.updateMass(entityA);
@@ -48,16 +49,16 @@ namespace ProjectA {
 
 				const Entity entityB = scene.createDynamicEntity(0);
 
-				ref<RigidBody2D> bodyB = createRef<RigidBody2D>();
-				bodyB->position = {0.0f, 1.957f};
-				bodyB->rotation = lyah::radians(-30.0f);
-				bodyB->angularVelocity = lyah::radians(0.4617f);
+				RigidBody2D bodyB;
+				bodyB.position = {0.0f, 1.957f};
+				bodyB.rotation = lyah::radians(-30.0f);
+				bodyB.angularVelocity = lyah::radians(0.4617f);
 
 				ref<ColorMaterial> materialB = createRef<ColorMaterial>();
 				materialB->fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 				materialB->strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
-				scene.setBody(entityB, std::static_pointer_cast<Body2D>(bodyB));
+				scene.setRigidBody(entityB, std::static_pointer_cast<Body2D>(bodyB));
 				scene.setGeometry(entityB, std::static_pointer_cast<Geometry2D>(triangleGeometry));
 				scene.setMaterial(entityB, std::static_pointer_cast<Material>(materialB));
 				scene.updateMass(entityB);

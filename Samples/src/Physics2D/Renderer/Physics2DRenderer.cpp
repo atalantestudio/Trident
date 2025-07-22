@@ -247,7 +247,8 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::initializeCenterOfMassBuffer() {
-		const uint64 centerOfMassBufferSize = scene->getPhysicalObjectEntityCount() * sizeof(vec3<float32>);
+		const uint32 rigidBodyCount = scene->getComponentPool<RigidBody2D>().componentCount;
+		const uint64 centerOfMassBufferSize = rigidBodyCount * sizeof(vec3<float32>);
 
 		BufferDescriptor centerOfMassBufferDescriptor;
 		centerOfMassBufferDescriptor.size = centerOfMassBufferSize;
@@ -479,7 +480,10 @@ namespace ProjectA {
 		uint32 vertexCount = 0;
 		uint32 instanceCount = 0;
 
-		for (Entity entity = 0; entity < scene.getPhysicalObjectEntityCount(); entity += 1) {
+		const ComponentPool<RigidBody2D>& rigidBodyPool = scene.getComponentPool<RigidBody2D>();
+
+		for (uint32 rigidBodyIndex = 0; rigidBodyIndex < rigidBodyPool.componentCount; rigidBodyIndex += 1) {
+			const Entity entity = rigidBodyPool.componentIndexToEntity[rigidBodyIndex];
 			const ref<Geometry2D>& geometry = scene.getGeometry(entity);
 
 			vertexCount += geometry->getVertexCount() + 1;
@@ -501,7 +505,8 @@ namespace ProjectA {
 		uint16* indexMappedRange = static_cast<uint16*>(static_cast<void*>(vertexMappedRange + vertexCount));
 		Instance* instanceMappedRange = static_cast<Instance*>(static_cast<void*>(indexMappedRange + indexCount));
 
-		for (Entity entity = 0; entity < scene.getPhysicalObjectEntityCount(); entity += 1) {
+		for (uint32 rigidBodyIndex = 0; rigidBodyIndex < rigidBodyPool.componentCount; rigidBodyIndex += 1) {
+			const Entity entity = rigidBodyPool.componentIndexToEntity[rigidBodyIndex];
 			const ref<Geometry2D>& geometry = scene.getGeometry(entity);
 			const ref<Material>& material = scene.getMaterial(entity);
 
@@ -808,26 +813,29 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::updateCentersOfMass() const {
-		for (Entity entity = 0; entity < scene->getPhysicalObjectEntityCount(); entity += 1) {
-			const ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene->getBody(entity));
+		const ComponentPool<RigidBody2D>& rigidBodyPool = scene->getComponentPool<RigidBody2D>();
 
-			centerOfMassMappedRange[entity] = {
-				rigidBody->position[0],
-				rigidBody->position[1],
-				static_cast<float32>(entity) / scene->getPhysicalObjectEntityCount(),
+		for (uint32 rigidBodyIndex = 0; rigidBodyIndex < rigidBodyPool.componentCount; rigidBodyIndex += 1) {
+			const RigidBody2D& rigidBody = rigidBodyPool.components[rigidBodyIndex];
+
+			centerOfMassMappedRange[rigidBodyIndex] = {
+				rigidBody.position[0],
+				rigidBody.position[1],
+				static_cast<float32>(rigidBodyIndex) / rigidBodyPool.componentCount,
 			};
 		}
 	}
 
 	void Physics2DRenderer::selectEntity(Entity entity) {
-		if (selectedEntity != max<uint32>()) {
-			instanceMappedRange[selectedEntity].selected = 0;
+		if (selectedInstanceIndex != max<uint32>()) {
+			instanceMappedRange[selectedInstanceIndex].selected = 0;
 		}
 
-		selectedEntity = entity;
+		if (entity != max<uint32>()) {
+			const ComponentPool<RigidBody2D>& instancePool = scene->getComponentPool<RigidBody2D>();
 
-		if (selectedEntity != max<uint32>()) {
-			instanceMappedRange[selectedEntity].selected = 1;
+			selectedInstanceIndex = instancePool.entityToComponentIndex[entity];
+			instanceMappedRange[selectedInstanceIndex].selected = 1;
 		}
 	}
 
@@ -861,8 +869,8 @@ namespace ProjectA {
 		renderDistance(commandEncoder);
 		renderFeatures(commandEncoder);
 
-		if (selectedEntity != max<uint32>()) {
-			renderSelectedEntityPlaceholder(commandEncoder);
+		if (selectedInstanceIndex != max<uint32>()) {
+			renderSelectedInstancePlaceholder(commandEncoder);
 		}
 
 		commandEncoder->endRenderPass();
@@ -880,16 +888,18 @@ namespace ProjectA {
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 
-		Entity entity = 0;
+		uint32 rigidBodyIndex = 0;
 		uint32 vertexOffset = 0;
 
-		for (uint32 indexOffset = 0; entity < scene->getPhysicalObjectEntityCount(); entity += 1) {
-			const ref<Geometry2D>& geometry = scene->getGeometry(entity);
+		const ComponentPool<RigidBody2D>& rigidBodyPool = scene->getComponentPool<RigidBody2D>();
+
+		for (uint32 indexOffset = 0; rigidBodyIndex < rigidBodyPool.componentCount; rigidBodyIndex += 1) {
+			const ref<Geometry2D>& geometry = rigidBodyPool.components[rigidBodyIndex].geometry;
 			const uint32 indexCount = geometry->getIndexCount();
 			const uint32 vertexCount = geometry->getVertexCount() + 1;
 
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
-			commandEncoder->bindVertexBuffer(1, instanceBuffer, entity * sizeof(Instance), sizeof(Instance));
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, rigidBodyIndex * sizeof(Instance), sizeof(Instance));
 			commandEncoder->drawIndexed(indexCount, 1, indexOffset);
 
 			indexOffset += indexCount;
@@ -899,17 +909,17 @@ namespace ProjectA {
 		commandEncoder->bindRenderPipeline(strokeRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 
-		entity = 0;
+		rigidBodyIndex = 0;
 		vertexOffset = 0;
 
-		for (; entity < scene->getPhysicalObjectEntityCount(); entity += 1) {
-			const ref<Geometry2D>& geometry = scene->getGeometry(entity);
+		for (; rigidBodyIndex < rigidBodyPool.componentCount; rigidBodyIndex += 1) {
+			const ref<Geometry2D>& geometry = rigidBodyPool.components[rigidBodyIndex].geometry;
 			const uint32 vertexCount = geometry->getVertexCount() + 1;
 
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
-			commandEncoder->bindVertexBuffer(1, instanceBuffer, entity * sizeof(Instance), sizeof(Instance));
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, rigidBodyIndex * sizeof(Instance), sizeof(Instance));
 
-			if (entity == selectedEntity) {
+			if (rigidBodyIndex == selectedInstanceIndex) {
 				commandEncoder->setLineWidth(2.0f);
 			}
 			else {
@@ -924,7 +934,7 @@ namespace ProjectA {
 		commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0, sizeof(vec3<float32>));
-		commandEncoder->draw(scene->getPhysicalObjectEntityCount(), 1, 0);
+		commandEncoder->draw(rigidBodyPool.componentCount, 1, 0);
 	}
 
 	void Physics2DRenderer::renderDistance(const ref<CommandEncoder>& commandEncoder) const {
@@ -950,29 +960,31 @@ namespace ProjectA {
 		}
 	}
 
-	void Physics2DRenderer::renderSelectedEntityPlaceholder(const ref<CommandEncoder>& commandEncoder) const {
-		DEBUG_ASSERT(selectedEntity < scene->getPhysicalObjectEntityCount());
+	void Physics2DRenderer::renderSelectedInstancePlaceholder(const ref<CommandEncoder>& commandEncoder) const {
+		const uint32 instanceCount = scene->getComponentPool<RigidBody2D>().componentCount;
+
+		DEBUG_ASSERT(selectedInstanceIndex < instanceCount);
 
 		uint32 vertexOffset = 0;
 
-		for (Entity entity = 0; entity < selectedEntity; entity += 1) {
+		for (Entity entity = 0; entity < selectedInstanceIndex; entity += 1) {
 			const ref<Geometry2D>& geometry = scene->getGeometry(entity);
 
 			vertexOffset += geometry->getVertexCount() + 1;
 		}
 
-		const ref<Geometry2D>& geometry = scene->getGeometry(selectedEntity);
+		const ref<Geometry2D>& geometry = scene->getGeometry(selectedInstanceIndex);
 
 		commandEncoder->bindRenderPipeline(placeholderCenterOfMassRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
-		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, selectedEntity * sizeof(vec3<float32>), sizeof(svec2<float32>));
+		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, selectedInstanceIndex * sizeof(vec3<float32>), sizeof(svec2<float32>));
 		commandEncoder->draw(1, 1, 0);
 
 		commandEncoder->bindRenderPipeline(placeholderFillRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
-		commandEncoder->bindVertexBuffer(1, instanceBuffer, selectedEntity * sizeof(Instance), sizeof(Instance));
+		commandEncoder->bindVertexBuffer(1, instanceBuffer, selectedInstanceIndex * sizeof(Instance), sizeof(Instance));
 		commandEncoder->drawIndexed(geometry->getIndexCount(), 1, 0);
 
 		commandEncoder->bindRenderPipeline(placeholderStrokeRenderPipeline);
@@ -1001,8 +1013,8 @@ namespace ProjectA {
 		viewMappedRange->viewport.y = height;
 	}
 
-	void Physics2DRenderer::writeInstanceTransform(Entity entity, const mat3x3<float32>& transform) const {
-		instanceMappedRange[entity].world = transform;
+	void Physics2DRenderer::writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const {
+		instanceMappedRange[instanceIndex].world = transform;
 	}
 
 	void Physics2DRenderer::registerFeature(const Feature2D& feature) {

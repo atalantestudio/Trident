@@ -8,11 +8,11 @@ namespace ProjectA {
 			explicit PointGeometry2D() {
 				indices = {0};
 				vertices = {{0.0f, 0.0f}};
-				centerOfMass = calculateCenterOfMass();
+				centroid = calculateCentroid();
 				radius = calculateRadius();
 			}
 
-			vec2<float32> calculateCenterOfMass() const final override {
+			vec2<float32> calculateCentroid() const final override {
 				return vertices[0];
 			}
 

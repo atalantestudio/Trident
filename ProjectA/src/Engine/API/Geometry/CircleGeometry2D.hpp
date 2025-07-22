@@ -16,13 +16,13 @@ namespace ProjectA {
 				ENGINE_ASSERT(descriptor.resolution > 2, "The resolution must be greater than 2.");
 
 				type = Geometry2DType::CIRCLE;
-				centerOfMass = calculateCenterOfMass();
+				centroid = calculateCentroid();
 				radius = descriptor.radius;
 
 				generateVertices(descriptor.resolution);
 			}
 
-			vec2<float32> calculateCenterOfMass() const final override {
+			vec2<float32> calculateCentroid() const final override {
 				return {0.0f, 0.0f};
 			}
 

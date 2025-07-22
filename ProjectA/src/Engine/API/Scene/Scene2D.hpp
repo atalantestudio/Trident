@@ -2,8 +2,7 @@
 
 #include "Engine/API/Geometry/Geometry2D.hpp"
 #include "Engine/API/Material/ColorMaterial.hpp"
-#include "Engine/API/Object/PhysicalObject.hpp"
-#include "Engine/API/Physics/Body/RigidBody.hpp"
+#include "Engine/API/Physics/RigidBody.hpp"
 #include "Engine/ECS/ECS.hpp"
 
 namespace ProjectA {
@@ -20,8 +19,8 @@ namespace ProjectA {
 		uint32 layerIndex = 0;
 	};
 
-	struct DynamicEntityComponent {};
-	struct StaticEntityComponent {};
+	struct DynamicEntityTag {};
+	struct StaticEntityTag {};
 
 	// TODO: Create "Runtime" directory for this kind of object?
 	class Scene2D {
@@ -30,32 +29,42 @@ namespace ProjectA {
 
 		public:
 			explicit Scene2D() {
-				ecs.registerComponent<ref<Body2D>>();
+				// An entity of a 2D scene is composed of:
+				// - 0-1 RigidBody2D
+				// - 0-1 Geometry2D subclass
+				// - 0-1 Material (base or subclass)
+				// - 0-1 DynamicEntityTag to indicate that the entity is affected by forces.
+				// - 0-1 StaticEntityTag to indicate that the entity is a fixed decoration.
+				// 
+				// DynamicEntityTag and StaticEntityTag are used by the physics engine to optimize broad and narrow phases.
+				// They are not cumulable.
+
+				ecs.registerComponent<RigidBody2D>();
 				ecs.registerComponent<ref<Geometry2D>>();
 				ecs.registerComponent<ref<Material>>();
-				ecs.registerComponent<PhysicalObject2D>();
-				ecs.registerComponent<DynamicEntityComponent>();
-				ecs.registerComponent<StaticEntityComponent>();
+				ecs.registerComponent<DynamicEntityTag>();
+				ecs.registerComponent<StaticEntityTag>();
 			}
 
 			const std::array<std::vector<Entity>, LAYER_COUNT>& getLayers() const {
 				return layers;
 			}
 
-			uint32 getPhysicalObjectEntityCount() const {
-				return ecs.getComponentPool<PhysicalObject2D>().componentCount;
-			}
-
 			Entity getLastEntity() const {
 				return ecs.nextEntity - 1;
 			}
 
-			const ref<Body2D>& getBody(Entity entity) const {
-				return ecs.getComponent<ref<Body2D>>(entity);
+			const RigidBody2D& getRigidBody(Entity entity) const {
+				return ecs.getComponent<RigidBody2D>(entity);
 			}
 
-			ref<Body2D>& getBody(Entity entity) {
-				return ecs.getComponent<ref<Body2D>>(entity);
+			template<typename ComponentType>
+			const ComponentPool<ComponentType>& getComponentPool() const {
+				return ecs.getComponentPool<ComponentType>();
+			}
+
+			RigidBody2D& getRigidBody(Entity entity) {
+				return ecs.getComponent<RigidBody2D>(entity);
 			}
 
 			const ref<Geometry2D>& getGeometry(Entity entity) const {
@@ -66,24 +75,20 @@ namespace ProjectA {
 				return ecs.getComponent<ref<Material>>(entity);
 			}
 
-			const PhysicalObject2D& getPhysicalObject(Entity entity) const {
+			/* const PhysicalObject2D& getPhysicalObject(Entity entity) const {
 				return ecs.getComponent<PhysicalObject2D>(entity);
-			}
+			} */
 
 			void createDynamicEntity(const EntityDescriptor& descriptor) {
 				const Entity entity = createEntity(descriptor);
 
-				ecs.setComponent<DynamicEntityComponent>(entity, {});
+				ecs.setComponent<DynamicEntityTag>(entity, {});
 			}
 
 			void createStaticEntity(const EntityDescriptor& descriptor) {
 				const Entity entity = createEntity(descriptor);
 
-				ecs.setComponent<StaticEntityComponent>(entity, {});
-			}
-
-			void setBody(Entity entity, const ref<Body2D>& body) {
-				ecs.setComponent<ref<Body2D>>(entity, body);
+				ecs.setComponent<StaticEntityTag>(entity, {});
 			}
 
 			void setGeometry(Entity entity, const ref<Geometry2D>& geometry) {
@@ -94,87 +99,57 @@ namespace ProjectA {
 				ecs.setComponent<ref<Material>>(entity, material);
 			}
 
-			void updateMass(Entity entity) {
-				const ref<Geometry2D>& geometry = ecs.getComponent<ref<Geometry2D>>(entity);
-				const ref<Material>& material = ecs.getComponent<ref<Material>>(entity);
-
-				ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(ecs.getComponent<ref<Body2D>>(entity));
-
-				const float32 m = geometry->calculateMass(material->density);
-
-				// TODO: INFINITY constant?
-				if (m == max<float32>()) {
-					rigidBody->inverseMass = 0.0_kg;
-					rigidBody->inverseInertia = 0.0f;
-				
-					return;
-				}
-
-				// https://github.com/erincatto/box2d-lite/blob/227b71b6974ea57ab7e96d40f6374287bd6a0e77/src/Body.cpp#L47
-				const float32 I = m * area(geometry->vertices) / 12.0f;
-
-				rigidBody->inverseMass = rcp(m);
-				rigidBody->inverseInertia = rcp(I);
+			const ComponentPool<DynamicEntityTag>& getDynamicEntityPool() const {
+				return ecs.getComponentPool<DynamicEntityTag>();
 			}
 
-			void updateTransform(Entity entity) {
-				const ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(ecs.getComponent<ref<Body2D>>(entity));
-				const ref<Geometry2D>& geometry = ecs.getComponent<ref<Geometry2D>>(entity);
-				PhysicalObject2D& physicalObject = ecs.getComponent<PhysicalObject2D>(entity);
-
-				physicalObject.transform =
-					mat3x3<float32>::translation(-geometry->centerOfMass) *
-					mat3x3<float32>::scaling(rigidBody->scale) *
-					mat3x3<float32>::rotation(-rigidBody->rotation) *
-					mat3x3<float32>::translation(rigidBody->position);
-			}
-
-			const ComponentPool<DynamicEntityComponent>& getDynamicEntityPool() const {
-				return ecs.getComponentPool<DynamicEntityComponent>();
-			}
-
-			const ComponentPool<StaticEntityComponent>& getStaticEntityPool() const {
-				return ecs.getComponentPool<StaticEntityComponent>();
+			const ComponentPool<StaticEntityTag>& getStaticEntityPool() const {
+				return ecs.getComponentPool<StaticEntityTag>();
 			}
 
 		private:
+			void setRigidBody(Entity entity, const RigidBody2D& body) {
+				ecs.setComponent<RigidBody2D>(entity, body);
+			}
+
 			Entity createEntity(const EntityDescriptor& descriptor) {
 				// TODO: Restore physical layers.
 				// ENGINE_ASSERT(descriptor.layerIndex < LAYER_COUNT, "The layer index is overflowing.");
 
 				const Entity entity = ecs.createEntity();
 
-				ref<RigidBody2D> rigidBody = createRef<RigidBody2D>();
-				rigidBody->position = descriptor.position;
-				rigidBody->rotation = descriptor.rotation;
-				rigidBody->scale = descriptor.scale;
+				setGeometry(entity, descriptor.geometry);
+
+				RigidBody2D rigidBody{};
+				rigidBody.position = descriptor.position;
+				rigidBody.rotation = descriptor.rotation;
+				rigidBody.scale = descriptor.scale;
 
 				if (descriptor.mass == 0.0f) {
-					rigidBody->inverseMass = 0.0f;
-					rigidBody->inverseInertia = 0.0f;
+					rigidBody.inverseMass = 0.0f;
+					rigidBody.inverseInertia = 0.0f;
 				}
 				else {
-					rigidBody->inverseMass = 1.0f / descriptor.mass;
+					rigidBody.inverseMass = 1.0f / descriptor.mass;
 
 					const float32 A = area(descriptor.geometry->vertices) * 2.0f;
 
 					// https://github.com/erincatto/box2d-lite/blob/227b71b6974ea57ab7e96d40f6374287bd6a0e77/src/Body.cpp#L47
-					rigidBody->inverseInertia = 1.0f / (descriptor.mass * A / 12.0f);
+					rigidBody.inverseInertia = 1.0f / (descriptor.mass * A / 12.0f);
 				}
 
-				rigidBody->friction = descriptor.friction;
+				rigidBody.centerOfMass = descriptor.geometry->centroid;
+				rigidBody.friction = descriptor.friction;
+				rigidBody.geometry = ecs.getComponent<ref<Geometry2D>>(entity);
+				rigidBody.updateTransform();
+
+				setRigidBody(entity, rigidBody);
 
 				ref<ColorMaterial> material = createRef<ColorMaterial>();
 				material->fillColor = descriptor.fillColor;
 				material->strokeColor = descriptor.strokeColor;
 
-				ecs.setComponent<PhysicalObject2D>(entity, {});
-
-				setBody(entity, std::static_pointer_cast<Body2D>(rigidBody));
-				setGeometry(entity, descriptor.geometry);
 				setMaterial(entity, std::static_pointer_cast<Material>(material));
-				// updateMass(entity);
-				updateTransform(entity);
 
 				// TODO: Restore physical layers.
 				// layers[descriptor.layerIndex].emplace_back(entity);

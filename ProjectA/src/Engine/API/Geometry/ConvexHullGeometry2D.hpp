@@ -15,20 +15,20 @@ namespace ProjectA {
 				vertices = descriptor.vertices;
 
 				type = Geometry2DType::CONVEX_HULL;
-				centerOfMass = calculateCenterOfMass();
+				centroid = calculateCentroid();
 				radius = calculateRadius();
 			}
 
-			vec2<float32> calculateCenterOfMass() const final override {
-				vec2<float32> centerOfMass;
+			vec2<float32> calculateCentroid() const final override {
+				vec2<float32> centroid;
 
 				for (const vec2<float32>& vertex : vertices) {
-					centerOfMass += vertex;
+					centroid += vertex;
 				}
 
-				centerOfMass /= static_cast<float32>(getVertexCount());
+				centroid /= static_cast<float32>(getVertexCount());
 
-				return centerOfMass;
+				return centroid;
 			}
 
 			float32 calculateMass(float32 density) const final override {
@@ -39,7 +39,7 @@ namespace ProjectA {
 				float32 radius = 0.0f;
 
 				for (const vec2<float32>& vertex : vertices) {
-					radius = std::max(radius, distanceSq(vertex, centerOfMass));
+					radius = std::max(radius, distanceSq(vertex, centroid));
 				}
 
 				radius = lyah::sqrt(radius);

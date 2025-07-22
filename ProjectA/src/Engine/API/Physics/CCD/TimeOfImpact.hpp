@@ -6,7 +6,7 @@
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace ProjectA {
-	struct TimeOfImpact {
+	/* struct TimeOfImpact {
 		TimeOfImpactState state;
 
 		// Time in between 2 frames at which point the objects collide.
@@ -184,5 +184,5 @@ namespace ProjectA {
 		BREAKPOINT();
 
 		return output;
-	}
+	} */
 }

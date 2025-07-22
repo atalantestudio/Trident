@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/API/Physics/Arbiter.hpp"
 #include "Engine/API/Physics/EntityPair.hpp"
 #include "Engine/API/Scene/Scene2D.hpp"
 
@@ -37,7 +36,7 @@
 // - Integrate positions
 
 namespace ProjectA {
-	class PhysicsEngine {
+	class PhysicsEngine2D {
 		public:
 			void registerScene(Scene2D& scene);
 
@@ -50,14 +49,18 @@ namespace ProjectA {
 			);
 
 		private:
-			std::vector<EntityPair> BroadPhase() const;
+			void BroadPhase();
 
-			std::vector<Arbiter2D> NarrowPhase(
-				const std::vector<EntityPair>& entityPairs
+			void NarrowPhase(
 				#ifdef BUILD_MODE_DEBUG
-					, VisualizationData2D* visualizationData
+					VisualizationData2D* visualizationData
 				#endif
-			) const;
+			);
+
+			// `inverseDeltaTime` is used to calculate the position bias.
+			void precompute(EntityContactPair2D& pair, float32 inverseDeltaTime);
+
+			void applyImpulse(const EntityContactPair2D& pair);
 
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
@@ -66,5 +69,8 @@ namespace ProjectA {
 
 		private:
 			Scene2D* scene;
+
+			std::vector<EntityPair> entityPairs;
+			std::vector<EntityContactPair2D> entityContactPairs;
 	};
 }

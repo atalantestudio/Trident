@@ -33,7 +33,7 @@ namespace ProjectA {
 			Scene2D scene;
 
 		private:
-			PhysicsEngine physicsEngine;
+			PhysicsEngine2D physicsEngine;
 
 			#ifdef BUILD_MODE_DEBUG
 				VisualizationData2D visualizationData;

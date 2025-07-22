@@ -1,26 +1,25 @@
 #pragma once
 
-#include "Engine/API/Object/PhysicalObject.hpp"
+#include "Engine/API/Physics/RigidBody.hpp"
 
 namespace ProjectA {
-	// TODO: Note that some geometries (e.g. CircleGeometry2D) don't implement `supportIndex`.
-	//       Please use `supportVertex` instead.
-	// Returns the index of the farthest point on `copy` along `d`, in model-space.
-	static uint32 supportIndex(const PhysicalObjectCopy2D& copy, const vec2<float32>& d) {
-		const vec2<float32> dR = rotate(d, -copy.rotation);
+	// TODO: Some geometries (e.g. CircleGeometry2D) don't implement `supportIndex`. Prefer `supportVertex` instead.
+	// Returns the index of the farthest point on `A` along `d`, in model-space.
+	static uint32 supportIndex(const RigidBody2D& A, const vec2<float32>& d) {
+		const vec2<float32> dR = rotate(d, -A.rotation);
 
-		return copy.geometry->supportIndex(dR);
+		return A.geometry->supportIndex(dR);
 	}
 
-	// Returns the farthest point on `copy` along `d`, in model-space.
-	static vec2<float32> supportVertex(const PhysicalObjectCopy2D& copy, const vec2<float32>& d) {
-		const vec2<float32> dR = rotate(d, -copy.rotation);
+	// Returns the farthest point on `A` along `d`, in model-space.
+	static vec2<float32> supportVertex(const RigidBody2D& A, const vec2<float32>& d) {
+		const vec2<float32> dR = rotate(d, -A.rotation);
 
-		return copy.geometry->support(dR);
+		return A.geometry->support(dR);
 	}
 
-	// Returns the farthest point on `copy` along `d`, in world-space.
-	static vec2<float32> support(const PhysicalObjectCopy2D& copy, const vec2<float32>& d) {
-		return multiplyTransform(supportVertex(copy, d), copy.transform);
+	// Returns the farthest point on `A` along `d`, in world-space.
+	static vec2<float32> support(const RigidBody2D& A, const vec2<float32>& d) {
+		return multiplyTransform(supportVertex(A, d), A.transform);
 	}
 }

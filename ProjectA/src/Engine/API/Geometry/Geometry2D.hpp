@@ -13,7 +13,7 @@ namespace ProjectA {
 				return static_cast<uint32>(vertices.count);
 			}
 
-			virtual vec2<float32> calculateCenterOfMass() const = 0;
+			virtual vec2<float32> calculateCentroid() const = 0;
 
 			virtual float32 calculateMass(float32 density) const = 0;
 
@@ -36,7 +36,7 @@ namespace ProjectA {
 			sequence<vec2<float32>> vertices;
 
 			// Average of all vertices.
-			vec2<float32> centerOfMass;
+			vec2<float32> centroid;
 
 			// Distance between the center of mass and the farthest vertex.
 			float32 radius;

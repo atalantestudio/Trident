@@ -27,10 +27,14 @@ namespace ProjectA {
 	void BaseLayer::preRender() {
 		checkHover();
 
-		for (Entity entity = 0; entity < scene.getPhysicalObjectEntityCount(); entity += 1) {
-			const PhysicalObject2D& physicalObject = scene.getPhysicalObject(entity);
+		// TODO: Only write once the static component transforms.
+		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene.getComponentPool<RigidBody2D>();
 
-			renderer.writeInstanceTransform(entity, physicalObject.transform);
+		for (uint32 rigidBodyIndex = 0; rigidBodyIndex < rigidBodyComponentPool.componentCount; rigidBodyIndex += 1) {
+			const Entity entity = static_cast<Entity>(rigidBodyComponentPool.componentIndexToEntity[rigidBodyIndex]);
+			const RigidBody2D& rigidBody = scene.getRigidBody(entity);
+
+			renderer.writeInstanceTransform(rigidBodyIndex, rigidBody.transform);
 		}
 
 		renderer.selectEntity(selectedEntity);
@@ -77,22 +81,25 @@ namespace ProjectA {
 	void BaseLayer::checkHover() {
 		hoveredEntity = max<uint32>();
 
-		if (scene.getPhysicalObjectEntityCount() == 0) {
+		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene.getComponentPool<RigidBody2D>();
+
+		if (rigidBodyComponentPool.componentCount == 0) {
 			return;
 		}
 
-		PhysicalObjectCopy2D copy;
+		RigidBody2D mouseRigidBody{};
+		mouseRigidBody.position = renderer.getNdcMousePosition();
+		mouseRigidBody.geometry = createRef<PointGeometry2D>();
 
-		PhysicalObjectCopy2D p;
-		p.position = renderer.getNdcMousePosition();
-		p.geometry = createRef<PointGeometry2D>();
-		p.transform = mat3x3<float32>::translation(p.position);
+		mouseRigidBody.updateTransform();
 
 		// Check if an entity is hovered.
-		for (sint32 entity = scene.getLastEntity(); entity >= 0; entity -= 1) {
-			copy = copyPhysicalObject(scene, static_cast<Entity>(entity));
+		// for (sint32 entity = scene.getLastEntity(); entity >= 0; entity -= 1) {
+		for (sint32 rigidBodyIndex = static_cast<sint32>(rigidBodyComponentPool.componentCount - 1); rigidBodyIndex >= 0; rigidBodyIndex -= 1) {
+			const Entity entity = static_cast<Entity>(rigidBodyComponentPool.componentIndexToEntity[rigidBodyIndex]);
+			const RigidBody2D& rigidBody = scene.getRigidBody(entity);
 
-			if (GJK2DConditional(copy, p)) {
+			if (GJK2DConditional(rigidBody, mouseRigidBody)) {
 				hoveredEntity = entity;
 
 				break;
@@ -115,13 +122,13 @@ namespace ProjectA {
 			selectedEntity = hoveredEntity;
 			placeholderOffset = {0.0f, 0.0f};
 
-			// ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene.getBody(selectedEntity));
+			// RigidBody2D& rigidBody = scene.getRigidBody(selectedEntity);
 
-			// selectedEntityPreviousInverseMass = rigidBody->inverseMass;
-			// selectedEntityPreviousInverseInertia = rigidBody->inverseInertia;
+			// selectedEntityPreviousInverseMass = rigidBody.inverseMass;
+			// selectedEntityPreviousInverseInertia = rigidBody.inverseInertia;
 
-			// rigidBody->inverseMass = 0.0f;
-			// rigidBody->inverseInertia = 0.0f;
+			// rigidBody.inverseMass = 0.0f;
+			// rigidBody.inverseInertia = 0.0f;
 		}
 
 		return true;
@@ -147,13 +154,13 @@ namespace ProjectA {
 
 	bool BaseLayer::onMouseUp(MouseUpEvent& event) {
 		if (event.getButton() == MouseButton::LEFT && selectedEntity != max<uint32>()) {
-			ref<RigidBody2D>& rigidBody = std::static_pointer_cast<RigidBody2D>(scene.getBody(selectedEntity));
+			RigidBody2D& rigidBody = scene.getRigidBody(selectedEntity);
 
-			rigidBody->position += placeholderOffset;
-			// rigidBody->inverseMass = selectedEntityPreviousInverseMass;
-			// rigidBody->inverseInertia = selectedEntityPreviousInverseInertia;
+			rigidBody.position += placeholderOffset;
+			// rigidBody.inverseMass = selectedEntityPreviousInverseMass;
+			// rigidBody.inverseInertia = selectedEntityPreviousInverseInertia;
 
-			scene.updateTransform(selectedEntity);
+			rigidBody.updateTransform();
 
 			selectedEntity = max<uint32>();
 		}

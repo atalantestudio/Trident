@@ -30,7 +30,7 @@ namespace ProjectA {
 
 			void resize(WindowResizeEvent& event) override;
 
-			void writeInstanceTransform(Entity entity, const mat3x3<float32>& transform) const;
+			void writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
 
 			void registerFeature(const Feature2D& feature);
 
@@ -59,7 +59,7 @@ namespace ProjectA {
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
 			void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
 			void renderFeatures(const ref<CommandEncoder>& commandEncoder) const;
-			void renderSelectedEntityPlaceholder(const ref<CommandEncoder>& commandEncoder) const;
+			void renderSelectedInstancePlaceholder(const ref<CommandEncoder>& commandEncoder) const;
 
 		private:
 			struct Instance {
@@ -163,7 +163,7 @@ namespace ProjectA {
 			vec2<float32> mousePosition;
 			vec2<float32> ndcMousePosition;
 
-			Entity selectedEntity = max<uint32>();
+			uint32 selectedInstanceIndex = max<uint32>();
 
 			const Scene2D* scene = nullptr;
 	};

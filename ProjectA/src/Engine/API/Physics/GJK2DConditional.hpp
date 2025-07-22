@@ -74,7 +74,7 @@ namespace ProjectA {
 	// 
 	// NOTE: In this implementation, `a` is the name of the most recent vertex added to the simplex.
 	// TODO: Fix rotations not being properly handled.
-	static bool GJK2DConditional(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
+	static bool GJK2DConditional(const RigidBody2D& A, const RigidBody2D& B) {
 		vec2<float32> d = B.position - A.position;
 
 		// Degenerate case: The objects have the same position.

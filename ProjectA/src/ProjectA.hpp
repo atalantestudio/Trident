@@ -59,9 +59,9 @@
 #include "Engine/API/Material/ColorMaterial.hpp"
 
 // Physics
-#include "Engine/API/Physics/Body/RigidBody.hpp"
+#include "Engine/API/Physics/RigidBody.hpp"
 #include "Engine/API/Physics/CCD/TimeOfImpact.hpp"
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/GJK2DConditional.hpp"
-#include "Engine/API/Physics/PhysicsEngine.hpp"
+#include "Engine/API/Physics/PhysicsEngine2D.hpp"
 #include "Engine/API/Physics/VisualizationData.hpp"

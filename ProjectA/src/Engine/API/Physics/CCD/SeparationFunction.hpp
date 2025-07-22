@@ -6,6 +6,61 @@
 #include "Engine/API/Scene/Scene2D.hpp"
 
 namespace ProjectA {
+	/* struct PhysicalObjectCopy2D {
+		Entity entity;
+
+		mat3x3<float32> transform;
+
+		vec2<float32> position;
+		vec2<float32> linearVelocity;
+		vec2<float32> force;
+
+		float32 rotation;
+		float32 angularVelocity;
+		float32 torque;
+
+		vec2<float32> scale;
+
+		ref<Geometry2D> geometry;
+	};
+
+	static PhysicalObjectCopy2D copyPhysicalObject(const Scene2D& scene, Entity entity) {
+		const RigidBody2D& rigidBody = scene.getRigidBody(entity);
+		const ref<Geometry2D>& geometry = scene.getGeometry(entity);
+
+		PhysicalObjectCopy2D copy{};
+		copy.entity = entity;
+		copy.transform = rigidBody.transform;
+		copy.position = rigidBody.position;
+		copy.linearVelocity = rigidBody.linearVelocity;
+		copy.force = rigidBody.force;
+		copy.rotation = rigidBody.rotation;
+		copy.angularVelocity = rigidBody.angularVelocity;
+		copy.torque = rigidBody.torque;
+		copy.scale = rigidBody.scale;
+		copy.geometry = geometry;
+
+		return copy;
+	}
+
+	static PhysicalObjectCopy2D copyPhysicalObject(const Scene2D& scene, Entity entity, float32 t) {
+		PhysicalObjectCopy2D copy = copyPhysicalObject(scene, entity);
+
+		copy.position += copy.linearVelocity * t + copy.force * t * t * 0.5f;
+		copy.rotation += copy.angularVelocity * t + copy.torque * t * t * 0.5f;
+
+		copy.linearVelocity += copy.linearAcceleration * t;
+		copy.angularVelocity += copy.torque * t;
+
+		copy.transform =
+			mat3x3<float32>::translation(-copy.geometry->centerOfMass) *
+			mat3x3<float32>::scaling(copy.scale) *
+			mat3x3<float32>::rotation(-copy.rotation) *
+			mat3x3<float32>::translation(copy.position);
+
+		return copy;
+	}
+
 	class SeparationFunction;
 
 	typedef MinSeparationOutput (*FindMinSeparationFunction)(const SeparationFunction& separationFunction, const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, uint32 edgeObjectIndex, uint32 vertexObjectIndex);
@@ -155,5 +210,5 @@ namespace ProjectA {
 		const vec2<float32> separatingAxis = multiplyTransform(separationFunction.separatingAxis, mat3x3<float32>::rotation(edgeObject.rotation));
 
 		return dot(b - a, separatingAxis);
-	}
+	} */
 }

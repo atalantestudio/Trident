@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Engine/API/Geometry/PointGeometry2D.hpp"
-#include "Engine/API/Object/PhysicalObject.hpp"
 #include "Engine/API/Physics/Contact/ContactManifold.hpp"
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/SAT2D.hpp"
@@ -12,18 +11,88 @@
 
 namespace ProjectA {
 	typedef bool (*Collider2D)(
-		const PhysicalObjectCopy2D& A,
-		const PhysicalObjectCopy2D& B,
+		const RigidBody2D& A,
+		const RigidBody2D& B,
 		ContactManifold2D* contactManifold
 		#ifdef BUILD_MODE_DEBUG
 			, VisualizationData2D* visualizationData
 		#endif
 	);
 
+	// Finds and returns the incident edge feature on a convex hull.
+	static Feature2D findIncidentEdge(const RigidBody2D& incidentBody, const vec2<float32>& referenceEdgeNormal) {
+		const mat2x2<float32> R = mat2x2_rotation(-incidentBody.rotation);
+
+		float32 minDotProduct = max<float32>();
+		Feature2D incidentEdge;
+
+		// TODO: Expose edges/normals from ConvexHullGeometry.
+		for (uint32 edgeVertexOffset = 0; edgeVertexOffset < incidentBody.geometry->getVertexCount(); edgeVertexOffset += 1) {
+			const vec2<float32>& a = incidentBody.geometry->vertices[(edgeVertexOffset + 0) % incidentBody.geometry->getVertexCount()];
+			const vec2<float32>& b = incidentBody.geometry->vertices[(edgeVertexOffset + 1) % incidentBody.geometry->getVertexCount()];
+
+			const vec2<float32> edgeNormal = edgeNormalClockwise(a, b) * R;
+
+			const float32 dotProduct = dot(referenceEdgeNormal, edgeNormal);
+
+			if (dotProduct < minDotProduct) {
+				minDotProduct = dotProduct;
+				incidentEdge.edge[0] = a;
+				incidentEdge.edge[1] = b;
+			}
+		}
+
+		incidentEdge.edge[0] = multiplyTransform(incidentEdge.edge[0], incidentBody.transform);
+		incidentEdge.edge[1] = multiplyTransform(incidentEdge.edge[1], incidentBody.transform);
+
+		return incidentEdge;
+	}
+
+	// `normal` and `offset` form the line equation.
+	static Feature2D clipEdge(const Feature2D& edge, const vec2<float32>& normal, float32 offset) {
+		Feature2D clippedEdge;
+		uint32 clippedEdgeVertexCount = 0;
+
+		const float32 d0 = dot(edge.edge[0], normal) - offset;
+
+		if (d0 <= 0.0f) {
+			// This vertex is behind the line; don't interpolate.
+			clippedEdge.edge[clippedEdgeVertexCount] = edge.edge[0];
+			clippedEdgeVertexCount += 1;
+		}
+
+		const float32 d1 = dot(edge.edge[1], normal) - offset;
+
+		if (d1 <= 0.0f) {
+			// This vertex is behind the line; don't interpolate.
+			clippedEdge.edge[clippedEdgeVertexCount] = edge.edge[1];
+			clippedEdgeVertexCount += 1;
+		}
+
+		// If one vertex is above and the other is below, interpolate.
+		if (d0 * d1 < 0.0f) {
+			DEBUG_ASSERT(clippedEdgeVertexCount < 2);
+
+			const float32 t = d0 / (d0 - d1);
+
+			// clippedEdge.edge[clippedEdgeVertexCount] = lerp(edge.edge[0], edge.edge[1], t);
+			clippedEdge.edge[clippedEdgeVertexCount] = edge.edge[0] + t * (edge.edge[1] - edge.edge[0]);
+			clippedEdgeVertexCount += 1;
+		}
+
+		// If both vertices are above the line, clip them.
+
+		DEBUG_ASSERT(clippedEdgeVertexCount <= 2);
+
+		clippedEdge.setVertexCount(clippedEdgeVertexCount);
+
+		return clippedEdge;
+	}
+
 	// TODO: Write to visualizationData in debug-mode.
 	static bool CircleCircleCollider(
-		const PhysicalObjectCopy2D& A,
-		const PhysicalObjectCopy2D& B,
+		const RigidBody2D& A,
+		const RigidBody2D& B,
 		ContactManifold2D* contactManifold
 		#ifdef BUILD_MODE_DEBUG
 			, VisualizationData2D* visualizationData
@@ -53,14 +122,14 @@ namespace ProjectA {
 
 	// TODO: Write to visualizationData in debug-mode.
 	static bool CircleConvexHullCollider(
-		const PhysicalObjectCopy2D& A,
-		const PhysicalObjectCopy2D& B,
+		const RigidBody2D& A,
+		const RigidBody2D& B,
 		ContactManifold2D* contactManifold
 		#ifdef BUILD_MODE_DEBUG
 			, VisualizationData2D* visualizationData
 		#endif
 	) {
-		PhysicalObjectCopy2D pointA = A;
+		RigidBody2D pointA = A;
 		pointA.geometry = createRef<PointGeometry2D>();
 
 		const GJK2DOutput gjkOutput = GJK2D(pointA, B);
@@ -86,8 +155,8 @@ namespace ProjectA {
 	}
 
 	static bool ConvexHullCircleCollider(
-		const PhysicalObjectCopy2D& A,
-		const PhysicalObjectCopy2D& B,
+		const RigidBody2D& A,
+		const RigidBody2D& B,
 		ContactManifold2D* contactManifold
 		#ifdef BUILD_MODE_DEBUG
 			, VisualizationData2D* visualizationData
@@ -104,8 +173,8 @@ namespace ProjectA {
 	}
 
 	static bool ConvexHullConvexHullCollider(
-		const PhysicalObjectCopy2D& A,
-		const PhysicalObjectCopy2D& B,
+		const RigidBody2D& A,
+		const RigidBody2D& B,
 		ContactManifold2D* contactManifold
 		#ifdef BUILD_MODE_DEBUG
 			, VisualizationData2D* visualizationData
@@ -123,7 +192,7 @@ namespace ProjectA {
 			return false;
 		}
 
-		const Feature2D incidentEdge = findIncidentEdge(*satOutput.incidentObject, satOutput.normal);
+		const Feature2D incidentEdge = findIncidentEdge(*satOutput.incidentBody, satOutput.normal);
 		const vec2<float32> referenceRightEdgeNormal = normalized(satOutput.referenceEdge.edge[1] - satOutput.referenceEdge.edge[0]);
 
 		Feature2D clippedIncidentEdge = incidentEdge;
@@ -141,7 +210,7 @@ namespace ProjectA {
 
 		contactManifold->normal = satOutput.normal;
 
-		if (satOutput.referenceObject == &B) {
+		if (satOutput.referenceBody == &B) {
 			contactManifold->normal = -contactManifold->normal;
 		}
 
