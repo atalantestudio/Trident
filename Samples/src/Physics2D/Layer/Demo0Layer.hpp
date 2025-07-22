@@ -23,22 +23,19 @@ namespace ProjectA {
 
 				EntityDescriptor floorDescriptor{};
 				floorDescriptor.position = {0.0f, -10.0f};
-				floorDescriptor.rotation = radians(-30.0f);
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.mass = 0.0f;
 				floorDescriptor.geometry = squareGeometry;
 				floorDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
-				scene.createDynamicEntity(floorDescriptor);
+				scene.createStaticEntity(floorDescriptor);
 
 				EntityDescriptor boxDescriptor{};
-				boxDescriptor.position = {0.0f, 4.0f};
+				boxDescriptor.position = {0.0f, 0.4f};
 				boxDescriptor.mass = 200.0f;
 				boxDescriptor.friction = 0.2f;
 				boxDescriptor.geometry = squareGeometry;
 				boxDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
-
-				// boxDescriptor.linearVelocity = {1.0f, 0.0f};
 
 				scene.createDynamicEntity(boxDescriptor);
 

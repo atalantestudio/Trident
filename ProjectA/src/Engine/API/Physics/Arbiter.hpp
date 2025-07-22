@@ -93,22 +93,23 @@ namespace ProjectA {
 					const vec2<float32> dv =
 						rigidBodyB->linearVelocity + cross(rigidBodyB->angularVelocity, contact.rB) -
 						rigidBodyA->linearVelocity - cross(rigidBodyA->angularVelocity, contact.rA);
+
 					const float32 vn = dot(dv, contactManifold.normal);
 
 					// NOTE: Restitution gets applied here (0.0f).
-					float32 dPn = contact.massNormal * (-vn + contact.bias);
+					float32 normalImpulseLength = contact.massNormal * (-vn + contact.bias);
 
 					// Clamp the accumulated impulse.
 					/* {
 						const float32 previousANI = contact.accumulatedNormalImpulse;
 
-						contact.accumulatedNormalImpulse = std::max(0.0f, previousANI + dPn);
+						contact.accumulatedNormalImpulse = std::max(0.0f, previousANI + normalImpulseLength);
 
-						dPn = contact.accumulatedNormalImpulse - previousANI;
+						normalImpulseLength = contact.accumulatedNormalImpulse - previousANI;
 					} */
-					dPn = std::max(0.0f, dPn);
+					normalImpulseLength = std::max(0.0f, normalImpulseLength);
 
-					const vec2<float32> normalImpulse = contactManifold.normal * dPn;
+					const vec2<float32> normalImpulse = contactManifold.normal * normalImpulseLength;
 
 					// Apply normal impulse.
 					rigidBodyA->applyImpulse(-normalImpulse, contact.rA);
@@ -116,14 +117,14 @@ namespace ProjectA {
 
 					// TODO: Friction impulse.
 					/* const float32 vt = dot(dv, contactManifold.tangent);
-					float32 dPt = contact.massTangent * -vt;
+					float32 frictionImpulseLength = contact.massTangent * -vt;
 
-					const float32 maxPt = combinedFriction * dPn;
+					const float32 maxPt = combinedFriction * normalImpulseLength;
 
 					// TODO: lyah::clamp
-					dPt = std::clamp(dPt, -maxPt, maxPt);
+					frictionImpulseLength = std::clamp(frictionImpulseLength, -maxPt, maxPt);
 
-					const vec2<float32> tangentImpulse = contactManifold.tangent * dPt;
+					const vec2<float32> tangentImpulse = contactManifold.tangent * frictionImpulseLength;
 
 					// Apply tangent impulse.
 					rigidBodyA->applyImpulse(-tangentImpulse, contact.rA);

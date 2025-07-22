@@ -94,15 +94,12 @@ namespace ProjectA {
 		}
 
 		contactManifold->normal = satOutput.normal;
-		contactManifold->contactCount = 0;
 
-		vec2<float32> frontNormal = contactManifold->normal;
-
-		/* if (satOutput.incidentObject == &A) {
+		if (satOutput.referenceObject == &B) {
 			contactManifold->normal = -contactManifold->normal;
+		}
 
-			frontNormal = -frontNormal;
-		} */
+		contactManifold->contactCount = 0;
 
 		const float32 referenceNormalOffset = dot(referenceEdge.edge[0], satOutput.normal);
 
@@ -114,7 +111,7 @@ namespace ProjectA {
 				continue;
 			}
 
-			contactManifold->contacts[contactManifold->contactCount].position = clippedIncidentEdge.edge[vertexIndex] - frontNormal * separation;
+			contactManifold->contacts[contactManifold->contactCount].position = clippedIncidentEdge.edge[vertexIndex] - contactManifold->normal * separation;
 			contactManifold->contacts[contactManifold->contactCount].separation = separation;
 			contactManifold->contactCount += 1;
 		}
