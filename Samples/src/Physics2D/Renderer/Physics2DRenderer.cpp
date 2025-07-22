@@ -831,12 +831,16 @@ namespace ProjectA {
 			instanceMappedRange[selectedInstanceIndex].selected = 0;
 		}
 
-		if (entity != max<uint32>()) {
-			const ComponentPool<RigidBody2D>& instancePool = scene->getComponentPool<RigidBody2D>();
+		if (entity == max<uint32>()) {
+			selectedInstanceIndex = entity;
 
-			selectedInstanceIndex = instancePool.entityToComponentIndex[entity];
-			instanceMappedRange[selectedInstanceIndex].selected = 1;
+			return;
 		}
+
+		const ComponentPool<RigidBody2D>& instancePool = scene->getComponentPool<RigidBody2D>();
+
+		selectedInstanceIndex = instancePool.entityToComponentIndex[entity];
+		instanceMappedRange[selectedInstanceIndex].selected = 1;
 	}
 
 	void Physics2DRenderer::setPlaceholderOffset(const vec2<float32>& offset) const {
