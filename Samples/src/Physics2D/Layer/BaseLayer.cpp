@@ -52,12 +52,11 @@ namespace ProjectA {
 		} */
 
 		if (visualizationData.satOutput.separation <= 0.0f) {
-			const vec2<float32>& closestA = visualizationData.satOutput.support;
+			const vec2<float32>& closestA = visualizationData.satOutput.incidentSupportPoint;
 			const vec2<float32> closestB = closestA - visualizationData.satOutput.normal * visualizationData.satOutput.separation;
 
 			renderer.setClosestPoints(closestA, closestB);
-			renderer.registerFeature(visualizationData.satOutput.closestFeatureA);
-			renderer.registerFeature(visualizationData.satOutput.closestFeatureB);
+			renderer.registerFeature(visualizationData.satOutput.referenceEdge);
 		}
 	}
 

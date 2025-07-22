@@ -8,22 +8,20 @@ namespace ProjectA {
 		// A separation less than or equal to 0 indicates overlap between the shapes.
 		float32 separation;
 
-		// Reference edge normal.
+		// Normal of the reference edge.
 		vec2<float32> normal;
 
-		// First vertex on the reference edge.
-		vec2<float32> edge0;
+		// Closest edge on the reference object to the incident object.
+		Feature2D referenceEdge;
 
-		// Second vertex on the reference edge.
-		vec2<float32> edge1;
+		// Support point on the incident object, in the direction opposite to the reference edge's normal.
+		// This is the closest point to the reference edge.
+		vec2<float32> incidentSupportPoint;
 
-		// Support point on the incident shape, in the direction opposite to the reference edge's normal.
-		vec2<float32> support;
-
-		Feature2D closestFeatureA;
-		Feature2D closestFeatureB;
-
+		// Pointer to the reference object.
 		const PhysicalObjectCopy2D* referenceObject;
+
+		// Pointer to the incident object.
 		const PhysicalObjectCopy2D* incidentObject;
 	};
 
@@ -48,12 +46,16 @@ namespace ProjectA {
 
 			if (separation > output.separation) {
 				output.separation = separation;
-				output.edge0 = aT;
-				output.edge1 = bT;
-				output.support = sT;
 				output.normal = d;
+				output.referenceEdge.edge[0] = aT;
+				output.referenceEdge.edge[1] = bT;
+				output.incidentSupportPoint = sT;
 				output.referenceObject = &A;
 				output.incidentObject = &B;
+			}
+
+			if (separation > 0.0f) {
+				break;
 			}
 		}
 	}
@@ -78,6 +80,7 @@ namespace ProjectA {
 	static SAT2DOutput SAT2D(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B) {
 		SAT2DOutput output;
 		output.separation = min<float32>();
+		output.referenceEdge.setVertexCount(2);
 
 		queryEdgeDirections(A, B, output);
 
@@ -91,23 +94,6 @@ namespace ProjectA {
 
 		if (output.separation > 0.0f) {
 			return output;
-		}
-
-		if (outputA.separation < 0.0f || output.separation < 0.0f) {
-			output.closestFeatureA.setVertexCount(2);
-			output.closestFeatureA.edge[0] = outputA.edge0;
-			output.closestFeatureA.edge[1] = outputA.edge1;
-
-			output.closestFeatureB.setVertexCount(2);
-			output.closestFeatureB.edge[0] = output.edge0;
-			output.closestFeatureB.edge[1] = output.edge1;
-		}
-		else {
-			output.closestFeatureA.setVertexCount(1);
-			output.closestFeatureA.vertex = output.support;
-
-			output.closestFeatureB.setVertexCount(1);
-			output.closestFeatureB.vertex = outputA.support;
 		}
 
 		// Correct normal direction.

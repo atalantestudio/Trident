@@ -72,22 +72,17 @@ namespace ProjectA {
 			return false;
 		}
 
-		Feature2D referenceEdge;
-		referenceEdge.edge[0] = satOutput.edge0;
-		referenceEdge.edge[1] = satOutput.edge1;
-
 		const Feature2D incidentEdge = findIncidentEdge(*satOutput.incidentObject, satOutput.normal);
-		const vec2<float32> referenceRightEdgeNormal = normalized(referenceEdge.edge[1] - referenceEdge.edge[0]);
+		const vec2<float32> referenceRightEdgeNormal = normalized(satOutput.referenceEdge.edge[1] - satOutput.referenceEdge.edge[0]);
 
 		Feature2D clippedIncidentEdge = incidentEdge;
-
-		clippedIncidentEdge = clipEdge(clippedIncidentEdge, -referenceRightEdgeNormal, -dot(referenceRightEdgeNormal, referenceEdge.edge[0]));
+		clippedIncidentEdge = clipEdge(clippedIncidentEdge, -referenceRightEdgeNormal, -dot(referenceRightEdgeNormal, satOutput.referenceEdge.edge[0]));
 
 		if (clippedIncidentEdge.getVertexCount() < 2) {
 			return false;
 		}
 
-		clippedIncidentEdge = clipEdge(clippedIncidentEdge, referenceRightEdgeNormal, dot(referenceRightEdgeNormal, referenceEdge.edge[1]));
+		clippedIncidentEdge = clipEdge(clippedIncidentEdge, referenceRightEdgeNormal, dot(referenceRightEdgeNormal, satOutput.referenceEdge.edge[1]));
 
 		if (clippedIncidentEdge.getVertexCount() < 2) {
 			return false;
@@ -101,7 +96,7 @@ namespace ProjectA {
 
 		contactManifold->contactCount = 0;
 
-		const float32 referenceNormalOffset = dot(referenceEdge.edge[0], satOutput.normal);
+		const float32 referenceNormalOffset = dot(satOutput.referenceEdge.edge[0], satOutput.normal);
 
 		// Keep all vertices below the reference edge, then move them to the reference edge's line.
 		for (uint32 vertexIndex = 0; vertexIndex < 2; vertexIndex += 1) {
