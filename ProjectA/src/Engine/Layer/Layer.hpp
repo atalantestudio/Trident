@@ -13,7 +13,7 @@ namespace ProjectA {
 
 			virtual void postConstruct() {}
 
-			virtual void update(float32 deltaTime) {}
+			virtual void update(float32 deltaTime, float32 inverseDeltaTime) {}
 
 			virtual void preRender() {}
 

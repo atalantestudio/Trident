@@ -46,10 +46,10 @@ namespace ProjectA {
 			}
 
 			// NOTE: https://web.archive.org/web/20161201054257/https://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html
-			//       This seems like Velocity Verlet to me?
+			//       This looks like Velocity Verlet for gravity to me?
 			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * halfDeltaTime;
-			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
 			rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * deltaTime;
+			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
 			rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * deltaTime;
 		}
 
@@ -75,15 +75,18 @@ namespace ProjectA {
 
 			RigidBody2D& rigidBody = scene->getRigidBody(entity);
 
+			// TODO: Exclude dynamic objects with an inverse mass of 0 from the loop.
+			if (rigidBody.inverseMass == 0.0f) {
+				continue;
+			}
+
 			rigidBody.position += rigidBody.linearVelocity * deltaTime;
 			rigidBody.rotation += rigidBody.angularVelocity * deltaTime;
 
 			rigidBody.updateTransform();
 
-			/* if (rigidBody->inverseMass > 0.0f) {
-				rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * halfDeltaTime;
-				rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
-			} */
+			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * halfDeltaTime;
+			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
 
 			rigidBody.force = {0.0f, 0.0f};
 			rigidBody.torque = 0.0f;
@@ -101,10 +104,9 @@ namespace ProjectA {
 			entityPair.A = dynamicPool.componentIndexToEntity[indexA];
 
 			// Register all dynamic-dynamic pairs.
+			// NOTE: This step only occurs if the dynamic pool contains more than 1 component.
 			for (uint32 indexB = indexA + 1; indexB < dynamicPool.componentCount; indexB += 1) {
 				entityPair.B = dynamicPool.componentIndexToEntity[indexB];
-
-				// ENGINE_DEBUG("Registered dynamic-dynamic pair ([], []).", pair.A, pair.B);
 
 				entityPairs.emplace_back(entityPair);
 			}
@@ -112,8 +114,6 @@ namespace ProjectA {
 			// Register all dynamic-static pairs.
 			for (uint32 indexB = 0; indexB < staticPool.componentCount; indexB += 1) {
 				entityPair.B = staticPool.componentIndexToEntity[indexB];
-
-				// ENGINE_DEBUG("Registered dynamic-static pair ([], []).", pair.A, pair.B);
 
 				entityPairs.emplace_back(entityPair);
 			}
@@ -156,8 +156,8 @@ namespace ProjectA {
 		const RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
 		const RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
 
-		// pair.contactManifold.tangent = perpendicular(pair.contactManifold.normal, 1.0f);
-		// pair.combinedFriction = lyah::sqrt(rigidBodyA.friction * rigidBodyB.friction);
+		pair.contactManifold.tangent = perpendicular(pair.contactManifold.normal, 1.0f);
+		pair.combinedFriction = lyah::sqrt(rigidBodyA.friction * rigidBodyB.friction);
 
 		for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.getContactCount(); contactPointIndex += 1) {
 			Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
@@ -166,6 +166,8 @@ namespace ProjectA {
 			contact.rA = contact.position - rigidBodyA.position;
 			contact.rB = contact.position - rigidBodyB.position;
 
+			const float32 inverseMassSum = rigidBodyA.inverseMass + rigidBodyB.inverseMass;
+
 			// Precompute normal mass, tangent mass, and bias.
 			const float32 rnA = dot(contact.rA, pair.contactManifold.normal);
 			const float32 rnB = dot(contact.rB, pair.contactManifold.normal);
@@ -173,20 +175,18 @@ namespace ProjectA {
 			const float32 massNormal =
 				(dot(contact.rA, contact.rA) - rnA * rnA) * rigidBodyA.inverseInertia +
 				(dot(contact.rB, contact.rB) - rnB * rnB) * rigidBodyB.inverseInertia +
-				rigidBodyA.inverseMass +
-				rigidBodyB.inverseMass;
+				inverseMassSum;
 
 			contact.massNormal = 1.0f / massNormal;
 
-			/* const float32 rtA = dot(contact.rA, contactManifold.tangent);
-			const float32 rtB = dot(contact.rB, contactManifold.tangent);
+			const float32 rtA = dot(contact.rA, pair.contactManifold.tangent);
+			const float32 rtB = dot(contact.rB, pair.contactManifold.tangent);
 			const float32 massTangent =
 				(dot(contact.rA, contact.rA) - rtA * rtA) * rigidBodyA.inverseInertia +
 				(dot(contact.rB, contact.rB) - rtB * rtB) * rigidBodyB.inverseInertia +
-				rigidBodyA.inverseMass +
-				rigidBodyB.inverseMass;
+				inverseMassSum;
 
-			contact.massTangent = 1.0f / massTangent; */
+			contact.massTangent = 1.0f / massTangent;
 
 			contact.bias = -PENETRATION_BIAS * inverseDeltaTime * std::min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
@@ -204,18 +204,17 @@ namespace ProjectA {
 	void PhysicsEngine2D::applyImpulse(const EntityContactPair2D& pair) {
 		RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
 		RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
+		vec2<float32> relativeVelocity;
 
 		for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.getContactCount(); contactPointIndex += 1) {
 			const Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
 
-			const vec2<float32> dv =
-				rigidBodyB.linearVelocity + cross(rigidBodyB.angularVelocity, contact.rB) -
-				rigidBodyA.linearVelocity - cross(rigidBodyA.angularVelocity, contact.rA);
+			// Calculate the relative velocity at the contact point.
+			relativeVelocity = rigidBodyB.linearVelocity + cross(rigidBodyB.angularVelocity, contact.rB) - rigidBodyA.linearVelocity - cross(rigidBodyA.angularVelocity, contact.rA);
 
-			const float32 vn = dot(dv, pair.contactManifold.normal);
+			const float32 relativeVelocityTowardsNormal = dot(relativeVelocity, pair.contactManifold.normal);
 
-			// NOTE: Restitution gets applied here (0.0f).
-			float32 normalImpulseLength = contact.massNormal * (-vn + contact.bias);
+			float32 normalImpulseLength = (-relativeVelocityTowardsNormal + contact.bias) * contact.massNormal;
 
 			// Clamp the accumulated impulse.
 			/* {
@@ -225,6 +224,7 @@ namespace ProjectA {
 
 				normalImpulseLength = contact.accumulatedNormalImpulse - previousANI;
 			} */
+			// TODO: lyah::max
 			normalImpulseLength = std::max(0.0f, normalImpulseLength);
 
 			const vec2<float32> normalImpulse = pair.contactManifold.normal * normalImpulseLength;
@@ -233,20 +233,23 @@ namespace ProjectA {
 			rigidBodyA.applyImpulse(-normalImpulse, contact.rA);
 			rigidBodyB.applyImpulse(normalImpulse, contact.rB);
 
-			// TODO: Friction impulse.
-			/* const float32 vt = dot(dv, contactManifold.tangent);
-			float32 frictionImpulseLength = contact.massTangent * -vt;
+			const float32 maxFrictionImpulseLength = pair.combinedFriction * normalImpulseLength;
 
-			const float32 maxPt = combinedFriction * normalImpulseLength;
+			// Calculate the updated relative velocity at the contact point.
+			relativeVelocity = rigidBodyB.linearVelocity + cross(rigidBodyB.angularVelocity, contact.rB) - rigidBodyA.linearVelocity - cross(rigidBodyA.angularVelocity, contact.rA);
+
+			const float32 relativeVelocityTowardsTangent = dot(relativeVelocity, pair.contactManifold.tangent);
+
+			float32 frictionImpulseLength = -relativeVelocityTowardsTangent * contact.massTangent;
 
 			// TODO: lyah::clamp
-			frictionImpulseLength = std::clamp(frictionImpulseLength, -maxPt, maxPt);
+			frictionImpulseLength = std::clamp(frictionImpulseLength, -maxFrictionImpulseLength, maxFrictionImpulseLength);
 
-			const vec2<float32> tangentImpulse = contactManifold.tangent * frictionImpulseLength;
+			const vec2<float32> frictionImpulse = pair.contactManifold.tangent * frictionImpulseLength;
 
-			// Apply tangent impulse.
-			rigidBodyA.applyImpulse(-tangentImpulse, contact.rA);
-			rigidBodyB.applyImpulse(tangentImpulse, contact.rB); */
+			// Apply friction impulse.
+			rigidBodyA.applyImpulse(-frictionImpulse, contact.rA);
+			rigidBodyB.applyImpulse(frictionImpulse, contact.rB);
 		}
 	}
 

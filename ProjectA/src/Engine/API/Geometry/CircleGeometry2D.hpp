@@ -26,7 +26,8 @@ namespace ProjectA {
 				return {0.0f, 0.0f};
 			}
 
-			float32 calculateMass(float32 density) const final override {
+			float32 calculateMass(float32 density, const vec2<float32>& scale) const final override {
+				// TODO: Use `scale` argument.
 				return density * lyah::pi<float32>() * radius * radius;
 			}
 

@@ -9,11 +9,8 @@ namespace ProjectA {
 		physicsEngine.registerScene(scene);
 	}
 
-	void BaseLayer::update(float32 deltaTime) {
-		// TODO: Debug-only.
-		// deltaTime = 1.0f / 60.0f;
-
-		const float32 inverseDeltaTime = 1.0f / deltaTime;
+	void BaseLayer::update(float32 deltaTime, float32 inverseDeltaTime) {
+		static uint32 i = 0;
 
 		physicsEngine.tick(
 			deltaTime,
@@ -43,7 +40,7 @@ namespace ProjectA {
 			renderer.setPlaceholderOffset(placeholderOffset);
 		}
 
-		renderer.clearRegisteredData();
+		// renderer.clearRegisteredData();
 
 		/* if (visualizationData.contactManifold.contactCount > 0) {
 			Feature2D contactManifold;
@@ -65,13 +62,13 @@ namespace ProjectA {
 			renderer.registerFeature(visualizationData.gjkOutput.closestFeatureB);
 		} */
 
-		if (visualizationData.satOutput.separation <= 0.0f) {
+		/* if (visualizationData.satOutput.separation <= 0.0f) {
 			const vec2<float32>& closestA = visualizationData.satOutput.incidentSupportPoint;
 			const vec2<float32> closestB = closestA - visualizationData.satOutput.normal * visualizationData.satOutput.separation;
 
 			renderer.setClosestPoints(closestA, closestB);
 			renderer.registerFeature(visualizationData.satOutput.referenceEdge);
-		}
+		} */
 	}
 
 	void BaseLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {

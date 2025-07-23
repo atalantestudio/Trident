@@ -360,6 +360,29 @@ namespace ProjectA {
 		return abs(area) * static_cast<T>(0.5);
 	}
 
+	template<typename T>
+	T scaledArea(const sequence<lyah::vec<2, T>>& unclosedVertices, const vec2<float32>& scale) {
+		T area = static_cast<T>(0.0);
+
+		// Close vertex array.
+		sequence<lyah::vec<2, T>> closedVertices(unclosedVertices.count + 2);
+
+		std::copy(unclosedVertices.begin(), unclosedVertices.end(), &closedVertices[0]);
+
+		closedVertices[unclosedVertices.count + 0] = unclosedVertices[0];
+		closedVertices[unclosedVertices.count + 1] = unclosedVertices[1];
+
+		uint32 i = 1;
+
+		while (i <= unclosedVertices.count) {
+			area += closedVertices[i][0] * scale[0] * (closedVertices[i + 1][1] * scale[1] - closedVertices[i - 1][1] * scale[1]);
+
+			i += 1;
+		}
+
+		return abs(area) * static_cast<T>(0.5);
+	}
+
 	// TODO: Refactor using sign flip for 2D perpendicular vectors.
 	template<typename T>
 	lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b) {

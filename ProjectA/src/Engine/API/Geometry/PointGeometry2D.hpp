@@ -7,16 +7,16 @@ namespace ProjectA {
 		public:
 			explicit PointGeometry2D() {
 				indices = {0};
-				vertices = {{0.0f, 0.0f}};
+				vertices = {{0.0_m, 0.0_m}};
 				centroid = calculateCentroid();
 				radius = calculateRadius();
 			}
 
 			vec2<float32> calculateCentroid() const final override {
-				return vertices[0];
+				return {0.0_m, 0.0_m};
 			}
 
-			float32 calculateMass(float32 density) const final override {
+			float32 calculateMass(float32 density, const vec2<float32>& scale) const final override {
 				return 0_kg;
 			}
 

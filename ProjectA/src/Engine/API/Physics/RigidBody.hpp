@@ -27,6 +27,7 @@ namespace ProjectA {
 		public:
 			mat3x3<float32> transform = mat3x3<float32>::identity();
 
+			// Position of the center of mass, in world-space.
 			vec2<float32> position = {0.0_m, 0.0_m};
 
 			// TODO: Use correct SI unit.

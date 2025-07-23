@@ -31,8 +31,8 @@ namespace ProjectA {
 				return centroid;
 			}
 
-			float32 calculateMass(float32 density) const final override {
-				return density * area(vertices);
+			float32 calculateMass(float32 density, const vec2<float32>& scale) const final override {
+				return density * scaledArea(vertices, scale);
 			}
 
 			float32 calculateRadius() const final override {

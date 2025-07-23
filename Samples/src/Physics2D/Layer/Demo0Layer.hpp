@@ -25,6 +25,7 @@ namespace ProjectA {
 				floorDescriptor.position = {0.0f, -10.0f};
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.mass = 0.0f;
+				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
 				floorDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 

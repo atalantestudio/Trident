@@ -14,6 +14,7 @@ namespace ProjectA {
 		float32 friction = 0.0f;
 		float32 restitution = 0.0f;
 		ref<Geometry2D> geometry;
+		float32 density = 1.0f;
 		vec4<float32> fillColor = {1.0f, 1.0f, 1.0f, 1.0f};
 		vec4<float32> strokeColor = {0.0f, 0.0f, 0.0f, 1.0f};
 		uint32 layerIndex = 0;
@@ -75,18 +76,30 @@ namespace ProjectA {
 				return ecs.getComponent<ref<Material>>(entity);
 			}
 
-			/* const PhysicalObject2D& getPhysicalObject(Entity entity) const {
-				return ecs.getComponent<PhysicalObject2D>(entity);
-			} */
-
 			void createDynamicEntity(const EntityDescriptor& descriptor) {
 				const Entity entity = createEntity(descriptor);
+				const ref<Material>& material = getMaterial(entity);
+				RigidBody2D& rigidBody = getRigidBody(entity);
+
+				const float32 m = descriptor.mass;
+
+				rigidBody.inverseMass = 1.0f / m;
+
+				const float32 area = descriptor.geometry->calculateMass(material->density, rigidBody.scale) * 2.0f;
+				const float32 I = m * area / 12.0f;
+
+				// https://github.com/erincatto/box2d-lite/blob/227b71b6974ea57ab7e96d40f6374287bd6a0e77/src/Body.cpp#L47
+				rigidBody.inverseInertia = 1.0f / I;
 
 				ecs.setComponent<DynamicEntityTag>(entity, {});
 			}
 
 			void createStaticEntity(const EntityDescriptor& descriptor) {
 				const Entity entity = createEntity(descriptor);
+
+				RigidBody2D& rigidBody = getRigidBody(entity);
+				rigidBody.inverseMass = 0.0f;
+				rigidBody.inverseInertia = 0.0f;
 
 				ecs.setComponent<StaticEntityTag>(entity, {});
 			}
@@ -120,36 +133,25 @@ namespace ProjectA {
 
 				setGeometry(entity, descriptor.geometry);
 
-				RigidBody2D rigidBody{};
-				rigidBody.position = descriptor.position;
-				rigidBody.rotation = descriptor.rotation;
-				rigidBody.scale = descriptor.scale;
-
-				if (descriptor.mass == 0.0f) {
-					rigidBody.inverseMass = 0.0f;
-					rigidBody.inverseInertia = 0.0f;
-				}
-				else {
-					rigidBody.inverseMass = 1.0f / descriptor.mass;
-
-					const float32 A = area(descriptor.geometry->vertices) * 2.0f;
-
-					// https://github.com/erincatto/box2d-lite/blob/227b71b6974ea57ab7e96d40f6374287bd6a0e77/src/Body.cpp#L47
-					rigidBody.inverseInertia = 1.0f / (descriptor.mass * A / 12.0f);
-				}
-
-				rigidBody.centerOfMass = descriptor.geometry->centroid;
-				rigidBody.friction = descriptor.friction;
-				rigidBody.geometry = ecs.getComponent<ref<Geometry2D>>(entity);
-				rigidBody.updateTransform();
-
-				setRigidBody(entity, rigidBody);
-
+				// TODO: Set correct restitution.
 				ref<ColorMaterial> material = createRef<ColorMaterial>();
+				material->density = descriptor.density;
 				material->fillColor = descriptor.fillColor;
 				material->strokeColor = descriptor.strokeColor;
 
 				setMaterial(entity, std::static_pointer_cast<Material>(material));
+
+				RigidBody2D rigidBody{};
+				rigidBody.position = descriptor.position;
+				rigidBody.rotation = descriptor.rotation;
+				rigidBody.scale = descriptor.scale;
+				rigidBody.centerOfMass = descriptor.geometry->centroid;
+				rigidBody.friction = descriptor.friction;
+				rigidBody.geometry = ecs.getComponent<ref<Geometry2D>>(entity);
+
+				rigidBody.updateTransform();
+
+				setRigidBody(entity, rigidBody);
 
 				// TODO: Restore physical layers.
 				// layers[descriptor.layerIndex].emplace_back(entity);

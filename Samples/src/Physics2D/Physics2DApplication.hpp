@@ -5,7 +5,7 @@
 #include "Engine/entry_point.hpp"
 
 #include "Layer/GUI/StatisticsLayer.hpp"
-#include "Layer/Demo3Layer.hpp"
+#include "Layer/Demo4Layer.hpp"
 
 namespace ProjectA {
 	class Physics2DApplication : public Application {
@@ -13,7 +13,7 @@ namespace ProjectA {
 			Physics2DApplication(const ApplicationManifest& applicationManifest) :
 				Application(applicationManifest)
 			{
-				registerLayer<Demo3Layer>();
+				registerLayer<Demo4Layer>();
 				registerLayer<StatisticsLayer>();
 			}
 	};

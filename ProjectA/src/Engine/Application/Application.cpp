@@ -188,7 +188,7 @@ namespace ProjectA {
 		// TODO: Cap frameTimeAccumumlator to avoid the "spiral of death" (increasing number of physics updates).
 
 		while (frameTimeAccumulator >= FIXED_DELTA_TIME) {
-			update(FIXED_DELTA_TIME);
+			update(FIXED_DELTA_TIME, INVERSE_FIXED_DELTA_TIME);
 
 			// Extract the fixed delta time from the accumulator.
 			// What's left is passed on to the next frame.
@@ -208,11 +208,11 @@ namespace ProjectA {
 		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void Application::update(float64 deltaTime) {
+	void Application::update(float64 deltaTime, float64 inverseDeltaTime) {
 		PROFILE_SCOPE("Application update/integrate");
 
 		for (const ref<Layer>& layer : layerStack) {
-			layer->update(static_cast<float32>(deltaTime));
+			layer->update(static_cast<float32>(deltaTime), static_cast<float32>(inverseDeltaTime));
 		}
 	}
 
