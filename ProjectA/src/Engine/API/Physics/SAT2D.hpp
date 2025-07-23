@@ -14,6 +14,9 @@ namespace ProjectA {
 		// Closest edge on the reference body to the incident body.
 		Feature2D referenceEdge;
 
+		// Index of the reference edge in the geometry vertex array.
+		uint32 referenceEdgeIndex;
+
 		// Support point on the incident body, in the direction opposite to the reference edge's normal.
 		// This is the closest point to the reference edge.
 		vec2<float32> incidentSupportPoint;
@@ -49,6 +52,7 @@ namespace ProjectA {
 				output.normal = d;
 				output.referenceEdge.edge[0] = aT;
 				output.referenceEdge.edge[1] = bT;
+				output.referenceEdgeIndex = edgeVertexOffset / 2;
 				output.incidentSupportPoint = sT;
 				output.referenceBody = &A;
 				output.incidentBody = &B;

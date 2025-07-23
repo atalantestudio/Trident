@@ -176,11 +176,7 @@ namespace ProjectA {
 			for (uint32 previousContactIndex = 0; previousContactIndex < entityContactPair.contactManifold.getContactCount(); previousContactIndex += 1) {
 				const Contact2D& previousContact = entityContactPair.contactManifold.contacts[contactIndex];
 
-				// TODO: Find the correct condition to locate previous similar contacts.
-				if (
-					abs(previousContact.position[0] - contact.position[0]) < 0.01f &&
-					abs(previousContact.position[1] - contact.position[1]) < 0.01f
-				) {
+				if (contact == previousContact) {
 					indexInPreviousManifold = previousContactIndex;
 
 					break;
@@ -208,7 +204,6 @@ namespace ProjectA {
 		entityContactPair.contactManifold.setContactCount(contactManifold.getContactCount());
 		entityContactPair.contactManifold.normal = contactManifold.normal;
 		entityContactPair.contactManifold.tangent = contactManifold.tangent;
-		entityContactPair.contactManifold.referenceEdge = contactManifold.referenceEdge;
 	}
 
 	void PhysicsEngine2D::precompute(EntityContactPair2D& pair, float32 inverseDeltaTime) {
