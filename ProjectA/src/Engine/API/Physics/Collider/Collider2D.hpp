@@ -209,6 +209,7 @@ namespace ProjectA {
 		}
 
 		contactManifold->normal = satOutput.normal;
+		contactManifold->referenceEdge = satOutput.referenceEdge;
 
 		if (satOutput.referenceBody == &B) {
 			contactManifold->normal = -contactManifold->normal;

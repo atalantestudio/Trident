@@ -4,6 +4,10 @@
 #include "Engine/API/Physics/PhysicsEngine2D.hpp"
 
 namespace ProjectA {
+	vec2<float32> PhysicsEngine2D::calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, const Contact2D& contact) {
+		return B.linearVelocity + cross(B.angularVelocity, contact.rB) - A.linearVelocity - cross(A.angularVelocity, contact.rA);
+	}
+
 	void PhysicsEngine2D::registerScene(Scene2D& scene) {
 		this->scene = &scene;
 	}
@@ -20,7 +24,6 @@ namespace ProjectA {
 		const ComponentPool<DynamicEntityTag>& dynamicPool = scene->getDynamicEntityPool();
 
 		entityPairs.clear();
-		entityContactPairs.clear();
 
 		// 1. Broad phase: Detect potentially overlapping pairs.
 		// TODO: If less than 2 objects in the same layer AND in different physical groups, no chance of overlap.
@@ -56,14 +59,14 @@ namespace ProjectA {
 		// 4. Pre-compute step:
 		//    - Calculate combined values in each pair (static/dynamic friction, restitution, etc.)
 		//    - For each contact, calculate mass normal, mass tangent and bias value
-		for (EntityContactPair2D& entityContactPair : entityContactPairs) {
-			precompute(entityContactPair, inverseDeltaTime);
+		for (auto& entityContactPair : entityContactPairs) {
+			precompute(entityContactPair.second, inverseDeltaTime);
 		}
 
 		// 5. Apply normal and friction impulses to overlapping pairs in a sequential manner.
 		for (uint32 iteration = 0; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
-			for (EntityContactPair2D& entityContactPair : entityContactPairs) {
-				applyImpulse(entityContactPair);
+			for (auto& entityContactPair : entityContactPairs) {
+				applyImpulse(entityContactPair.second);
 			}
 		}
 
@@ -127,19 +130,31 @@ namespace ProjectA {
 	) {
 		EntityContactPair2D entityContactPair;
 
-		for (const EntityPair& entityPair : entityPairs) {
+		for (const EntityPair entityPair : entityPairs) {
+			const EntityPairKey key = entityPair.asKey();
+
 			const RigidBody2D& rigidBodyA = scene->getRigidBody(entityPair.A);
 			const RigidBody2D& rigidBodyB = scene->getRigidBody(entityPair.B);
 
 			if (!COLLIDER_2D_TABLE[static_cast<uint32>(rigidBodyA.geometry->type)][static_cast<uint32>(rigidBodyB.geometry->type)](rigidBodyA, rigidBodyB, &entityContactPair.contactManifold, visualizationData)) {
 				// Entities are not intersecting (or degenerate case).
+				entityContactPairs.erase(key);
+
 				continue;
 			}
 
-			entityContactPair.A = entityPair.A;
-			entityContactPair.B = entityPair.B;
+			std::unordered_map<EntityPairKey, EntityContactPair2D>::iterator entityContactPairIterator = entityContactPairs.find(key);
 
-			entityContactPairs.emplace_back(entityContactPair);
+			if (entityContactPairIterator == entityContactPairs.end()) {
+				entityContactPair.A = entityPair.A;
+				entityContactPair.B = entityPair.B;
+
+				entityContactPairs.insert(std::pair<EntityPairKey, EntityContactPair2D>(key, entityContactPair));
+			}
+			else {
+				// TODO: This path seems never active.
+				mergeContactManifolds(entityContactPairIterator->second, entityContactPair.contactManifold);
+			}
 
 			#ifdef BUILD_MODE_DEBUG
 				if (visualizationData != nullptr) {
@@ -147,6 +162,53 @@ namespace ProjectA {
 				}
 			#endif
 		}
+	}
+
+	void PhysicsEngine2D::mergeContactManifolds(EntityContactPair2D& entityContactPair, const ContactManifold2D& contactManifold) {
+		ContactManifold2D mergedContactManifold;
+
+		for (uint32 contactIndex = 0; contactIndex < contactManifold.getContactCount(); contactIndex += 1) {
+			const Contact2D& contact = contactManifold.contacts[contactIndex];
+
+			uint32 indexInPreviousManifold = max<uint32>();
+
+			// Check if the previous manifold contains this contact.
+			for (uint32 previousContactIndex = 0; previousContactIndex < entityContactPair.contactManifold.getContactCount(); previousContactIndex += 1) {
+				const Contact2D& previousContact = entityContactPair.contactManifold.contacts[contactIndex];
+
+				// TODO: Find the correct condition to locate previous similar contacts.
+				if (
+					abs(previousContact.position[0] - contact.position[0]) < 0.01f &&
+					abs(previousContact.position[1] - contact.position[1]) < 0.01f
+				) {
+					indexInPreviousManifold = previousContactIndex;
+
+					break;
+				}
+			}
+
+			if (indexInPreviousManifold == max<uint32>()) {
+				// Add the new contact.
+				mergedContactManifold.contacts[contactIndex] = contactManifold.contacts[contactIndex];
+
+				continue;
+			}
+
+			mergedContactManifold.contacts[contactIndex] = contact;
+
+			if constexpr (WARM_STARTING) {
+				const Contact2D& previousContact = entityContactPair.contactManifold.contacts[indexInPreviousManifold];
+
+				mergedContactManifold.contacts[contactIndex].accumulatedNormalImpulse = previousContact.accumulatedNormalImpulse;
+				mergedContactManifold.contacts[contactIndex].accumulatedTangentImpulse = previousContact.accumulatedTangentImpulse;
+			}
+		}
+
+		entityContactPair.contactManifold = mergedContactManifold;
+		entityContactPair.contactManifold.setContactCount(contactManifold.getContactCount());
+		entityContactPair.contactManifold.normal = contactManifold.normal;
+		entityContactPair.contactManifold.tangent = contactManifold.tangent;
+		entityContactPair.contactManifold.referenceEdge = contactManifold.referenceEdge;
 	}
 
 	void PhysicsEngine2D::precompute(EntityContactPair2D& pair, float32 inverseDeltaTime) {
@@ -190,42 +252,45 @@ namespace ProjectA {
 
 			contact.bias = -PENETRATION_BIAS * inverseDeltaTime * std::min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
-			/* // Accumulate impulses.
-			{
-				// Apply normal + friction impulse.
-				const vec2<float32> j = contact.accumulatedNormalImpulse * contactManifold.normal + contact.accumulatedTangentImpulse * tangent;
+			if constexpr (ACCUMULATE_IMPULSES) {
+				RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
+				RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
 
-				rigidBodyA.applyImpulse(-j, rA);
-				rigidBodyB.applyImpulse(j, rB);
-			} */
+				const vec2<float32> impulse = pair.contactManifold.normal * contact.accumulatedNormalImpulse + pair.contactManifold.tangent * contact.accumulatedTangentImpulse;
+
+				rigidBodyA.applyImpulse(-impulse, contact.rA);
+				rigidBodyB.applyImpulse(impulse, contact.rA);
+			}
 		}
 	}
 
-	void PhysicsEngine2D::applyImpulse(const EntityContactPair2D& pair) {
+	void PhysicsEngine2D::applyImpulse(EntityContactPair2D& pair) {
 		RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
 		RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
 		vec2<float32> relativeVelocity;
 
 		for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.getContactCount(); contactPointIndex += 1) {
-			const Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
+			Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
 
 			// Calculate the relative velocity at the contact point.
-			relativeVelocity = rigidBodyB.linearVelocity + cross(rigidBodyB.angularVelocity, contact.rB) - rigidBodyA.linearVelocity - cross(rigidBodyA.angularVelocity, contact.rA);
+			relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact);
 
 			const float32 relativeVelocityTowardsNormal = dot(relativeVelocity, pair.contactManifold.normal);
 
 			float32 normalImpulseLength = (-relativeVelocityTowardsNormal + contact.bias) * contact.massNormal;
 
-			// Clamp the accumulated impulse.
-			/* {
-				const float32 previousANI = contact.accumulatedNormalImpulse;
+			if constexpr (ACCUMULATE_IMPULSES) {
+				const float32 accumulatedNormalImpulse = contact.accumulatedNormalImpulse;
 
-				contact.accumulatedNormalImpulse = std::max(0.0f, previousANI + normalImpulseLength);
+				// TODO: lyah::max
+				contact.accumulatedNormalImpulse = std::max(0.0f, accumulatedNormalImpulse + normalImpulseLength);
 
-				normalImpulseLength = contact.accumulatedNormalImpulse - previousANI;
-			} */
-			// TODO: lyah::max
-			normalImpulseLength = std::max(0.0f, normalImpulseLength);
+				normalImpulseLength = contact.accumulatedNormalImpulse - accumulatedNormalImpulse;
+			}
+			else {
+				// TODO: lyah::max
+				normalImpulseLength = std::max(0.0f, normalImpulseLength);
+			}
 
 			const vec2<float32> normalImpulse = pair.contactManifold.normal * normalImpulseLength;
 
@@ -233,23 +298,34 @@ namespace ProjectA {
 			rigidBodyA.applyImpulse(-normalImpulse, contact.rA);
 			rigidBodyB.applyImpulse(normalImpulse, contact.rB);
 
-			const float32 maxFrictionImpulseLength = pair.combinedFriction * normalImpulseLength;
-
 			// Calculate the updated relative velocity at the contact point.
-			relativeVelocity = rigidBodyB.linearVelocity + cross(rigidBodyB.angularVelocity, contact.rB) - rigidBodyA.linearVelocity - cross(rigidBodyA.angularVelocity, contact.rA);
+			relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact);
 
 			const float32 relativeVelocityTowardsTangent = dot(relativeVelocity, pair.contactManifold.tangent);
 
-			float32 frictionImpulseLength = -relativeVelocityTowardsTangent * contact.massTangent;
+			float32 tangentImpulseLength = -relativeVelocityTowardsTangent * contact.massTangent;
 
-			// TODO: lyah::clamp
-			frictionImpulseLength = std::clamp(frictionImpulseLength, -maxFrictionImpulseLength, maxFrictionImpulseLength);
+			if constexpr (ACCUMULATE_IMPULSES) {
+				const float32 maxTangentImpulseLength = pair.combinedFriction * contact.accumulatedNormalImpulse;
+				const float32 accumulatedTangentImpulse = contact.accumulatedTangentImpulse;
 
-			const vec2<float32> frictionImpulse = pair.contactManifold.tangent * frictionImpulseLength;
+				// TODO: lyah::max
+				contact.accumulatedTangentImpulse = std::clamp(contact.accumulatedTangentImpulse + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
 
-			// Apply friction impulse.
-			rigidBodyA.applyImpulse(-frictionImpulse, contact.rA);
-			rigidBodyB.applyImpulse(frictionImpulse, contact.rB);
+				tangentImpulseLength = contact.accumulatedTangentImpulse - accumulatedTangentImpulse;
+			}
+			else {
+				const float32 maxTangentImpulseLength = pair.combinedFriction * normalImpulseLength;
+
+				// TODO: lyah::clamp
+				tangentImpulseLength = std::clamp(tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
+			}
+
+			const vec2<float32> tangentImpulse = pair.contactManifold.tangent * tangentImpulseLength;
+
+			// Apply tangent (friction) impulse.
+			rigidBodyA.applyImpulse(-tangentImpulse, contact.rA);
+			rigidBodyB.applyImpulse(tangentImpulse, contact.rB);
 		}
 	}
 

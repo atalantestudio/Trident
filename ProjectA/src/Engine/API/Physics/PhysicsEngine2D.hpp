@@ -9,6 +9,9 @@
 
 namespace ProjectA {
 	class PhysicsEngine2D {
+		private:
+			static vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, const Contact2D& contact);
+
 		public:
 			void registerScene(Scene2D& scene);
 
@@ -29,12 +32,16 @@ namespace ProjectA {
 				#endif
 			);
 
+			void mergeContactManifolds(EntityContactPair2D& entityContactPair, const ContactManifold2D& contactManifold);
+
 			// `inverseDeltaTime` is used to calculate the position bias.
 			void precompute(EntityContactPair2D& pair, float32 inverseDeltaTime);
 
-			void applyImpulse(const EntityContactPair2D& pair);
+			void applyImpulse(EntityContactPair2D& pair);
 
 		private:
+			static constexpr bool ACCUMULATE_IMPULSES = true;
+			static constexpr bool WARM_STARTING = true;
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
 
 			static inline const vec2<float32> G = {0.0f, -9.80665f};
@@ -42,6 +49,6 @@ namespace ProjectA {
 		private:
 			Scene2D* scene;
 			std::vector<EntityPair> entityPairs;
-			std::vector<EntityContactPair2D> entityContactPairs;
+			std::unordered_map<EntityPairKey, EntityContactPair2D> entityContactPairs;
 	};
 }

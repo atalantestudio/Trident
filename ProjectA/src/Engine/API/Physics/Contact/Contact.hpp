@@ -17,7 +17,7 @@ namespace ProjectA {
 		float32 massTangent;
 		float32 bias;
 
-		float32 accumulatedNormalImpulse;
-		float32 accumulatedTangentImpulse;
+		float32 accumulatedNormalImpulse = 0.0f;
+		float32 accumulatedTangentImpulse = 0.0f;
 	};
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Physics/Contact/Contact.hpp"
+#include "Engine/API/Physics/Feature2D.hpp"
 
 namespace ProjectA {
 	class ContactManifold2D {
@@ -21,6 +22,7 @@ namespace ProjectA {
 			vec2<float32> normal;
 			vec2<float32> tangent;
 			Contact2D contacts[2];
+			Feature2D referenceEdge;
 
 		private:
 			// TODO: Use fewer bits.

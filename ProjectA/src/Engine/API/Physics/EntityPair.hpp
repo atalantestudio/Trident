@@ -4,7 +4,18 @@
 #include "Engine/ECS/Entity.hpp"
 
 namespace ProjectA {
+	typedef uint64 EntityPairKey;
+
 	struct EntityPair {
+		EntityPairKey asKey() const {
+			return (static_cast<EntityPairKey>(A) << 32) | B;
+		}
+
+		void parseKey(EntityPairKey key) {
+			A = static_cast<Entity>(key >> 32);
+			B = static_cast<Entity>(key);
+		}
+
 		Entity A;
 		Entity B;
 	};
