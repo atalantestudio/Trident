@@ -8,113 +8,48 @@ namespace ProjectA {
 		return B.linearVelocity + cross(B.angularVelocity, contact.rB) - A.linearVelocity - cross(A.angularVelocity, contact.rA);
 	}
 
+	PhysicsEngine2D::PhysicsEngine2D(const PhysicsEngine2DDescriptor& descriptor) :
+		deltaTime(static_cast<float32>(descriptor.deltaTime)),
+		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime)),
+		halfDeltaTime(static_cast<float32>(descriptor.deltaTime * 0.5))
+		#ifdef BUILD_MODE_DEBUG
+			, visualizationData(descriptor.visualizationData)
+		#endif
+	{}
+
 	void PhysicsEngine2D::registerScene(Scene2D& scene) {
 		this->scene = &scene;
 	}
 
-	void PhysicsEngine2D::tick(
-		float32 deltaTime,
-		float32 inverseDeltaTime
-		#ifdef BUILD_MODE_DEBUG
-			, VisualizationData2D* visualizationData
-		#endif
-	) {
-		const float32 halfDeltaTime = deltaTime * 0.5f;
-
-		const ComponentPool<DynamicEntityTag>& dynamicPool = scene->getDynamicEntityPool();
-
+	void PhysicsEngine2D::tick() {
 		entityPairs.clear();
 
-		// 1. Broad phase: Detect potentially overlapping pairs.
-		// TODO: If less than 2 objects in the same layer AND in different physical groups, no chance of overlap.
 		BroadPhase();
-
-		// 2. Narrow phase: Calculate the contact manifold for each pair.
-		NarrowPhase(
-			#ifdef BUILD_MODE_DEBUG
-				visualizationData
-			#endif
-		);
-
-		// 3. Integrate forces.
-		// TODO: Do we need to integrate forces on resting objects? E.g. they could be at rest on a moving platform due to inertia.
-		for (uint32 componentIndex = 0; componentIndex < dynamicPool.componentCount; componentIndex += 1) {
-			const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
-
-			RigidBody2D& rigidBody = scene->getRigidBody(entity);
-
-			// TODO: Exclude dynamic objects with an inverse mass of 0 from the loop.
-			if (rigidBody.inverseMass == 0.0f) {
-				continue;
-			}
-
-			// NOTE: https://web.archive.org/web/20161201054257/https://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html
-			//       This looks like Velocity Verlet for gravity to me?
-			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * halfDeltaTime;
-			rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * deltaTime;
-			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
-			rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * deltaTime;
-		}
-
-		// 4. Pre-compute step:
-		//    - Calculate combined values in each pair (static/dynamic friction, restitution, etc.)
-		//    - For each contact, calculate mass normal, mass tangent and bias value
-		for (auto& entityContactPair : entityContactPairs) {
-			precompute(entityContactPair.second, inverseDeltaTime);
-		}
-
-		// 5. Apply normal and friction impulses to overlapping pairs in a sequential manner.
-		for (uint32 iteration = 0; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
-			for (auto& entityContactPair : entityContactPairs) {
-				applyImpulse(entityContactPair.second);
-			}
-		}
-
-		// 6. Integrate positions/rotations and velocities and reset forces.
-		// TODO: Do we need to integrate positions/rotations on dynamic objects with an inverse mass of 0?
-		// TODO: Do we need to integrate positions/rotations on resting objects? E.g. they could be at rest on a moving platform due to inertia.
-		for (uint32 componentIndex = 0; componentIndex < dynamicPool.componentCount; componentIndex += 1) {
-			const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
-
-			RigidBody2D& rigidBody = scene->getRigidBody(entity);
-
-			// TODO: Exclude dynamic objects with an inverse mass of 0 from the loop.
-			if (rigidBody.inverseMass == 0.0f) {
-				continue;
-			}
-
-			rigidBody.position += rigidBody.linearVelocity * deltaTime;
-			rigidBody.rotation += rigidBody.angularVelocity * deltaTime;
-
-			rigidBody.updateTransform();
-
-			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * halfDeltaTime;
-			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
-
-			rigidBody.force = {0.0f, 0.0f};
-			rigidBody.torque = 0.0f;
-		}
+		NarrowPhase();
+		ApplyForces();
+		UpdateManifolds();
+		ApplyImpulses();
+		Integrate();
 	}
 
 	void PhysicsEngine2D::BroadPhase() {
-		const ComponentPool<DynamicEntityTag>& dynamicPool = scene->getDynamicEntityPool();
-		const ComponentPool<StaticEntityTag>& staticPool = scene->getStaticEntityPool();
+		const ComponentPool<DynamicEntityTag>& dynamicPool = scene->getComponentPool<DynamicEntityTag>();
+		const ComponentPool<StaticEntityTag>& staticPool = scene->getComponentPool<StaticEntityTag>();
 
 		EntityPair entityPair;
 
-		// TODO: If less than 2 objects in the same layer AND in different physical groups, no chance of overlap.
+		// TODO: Only register potentially overlapping entities.
 		for (uint32 indexA = 0; indexA < dynamicPool.componentCount; indexA += 1) {
 			entityPair.A = dynamicPool.componentIndexToEntity[indexA];
 
-			// Register all dynamic-dynamic pairs.
-			// NOTE: This step only occurs if the dynamic pool contains more than 1 component.
+			// Register all dynamic-dynamic entity pairs.
 			for (uint32 indexB = indexA + 1; indexB < dynamicPool.componentCount; indexB += 1) {
 				entityPair.B = dynamicPool.componentIndexToEntity[indexB];
 
 				entityPairs.emplace_back(entityPair);
 			}
 
-			// Register all dynamic-static pairs.
+			// Register all dynamic-static entity pairs.
 			for (uint32 indexB = 0; indexB < staticPool.componentCount; indexB += 1) {
 				entityPair.B = staticPool.componentIndexToEntity[indexB];
 
@@ -123,11 +58,7 @@ namespace ProjectA {
 		}
 	}
 
-	void PhysicsEngine2D::NarrowPhase(
-		#ifdef BUILD_MODE_DEBUG
-			VisualizationData2D* visualizationData
-		#endif
-	) {
+	void PhysicsEngine2D::NarrowPhase() {
 		EntityContactPair2D entityContactPair;
 
 		for (const EntityPair entityPair : entityPairs) {
@@ -136,8 +67,16 @@ namespace ProjectA {
 			const RigidBody2D& rigidBodyA = scene->getRigidBody(entityPair.A);
 			const RigidBody2D& rigidBodyB = scene->getRigidBody(entityPair.B);
 
+			Geometry2DType typeA = rigidBodyA.geometry->type;
+			Geometry2DType typeB = rigidBodyB.geometry->type;
+
+			if (typeA > typeB) {
+				typeA = rigidBodyB.geometry->type;
+				typeB = rigidBodyA.geometry->type;
+			}
+
 			if (
-				!COLLIDER_2D_TABLE[static_cast<uint32>(rigidBodyA.geometry->type)][static_cast<uint32>(rigidBodyB.geometry->type)](
+				!COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)](
 					rigidBodyA,
 					rigidBodyB,
 					&entityContactPair.contactManifold
@@ -152,24 +91,201 @@ namespace ProjectA {
 				continue;
 			}
 
-			std::unordered_map<EntityPairKey, EntityContactPair2D>::iterator entityContactPairIterator = entityContactPairs.find(key);
-
-			if (entityContactPairIterator == entityContactPairs.end()) {
-				entityContactPair.A = entityPair.A;
-				entityContactPair.B = entityPair.B;
-
-				entityContactPairs.insert(std::pair<EntityPairKey, EntityContactPair2D>(key, entityContactPair));
-			}
-			else {
-				// TODO: This path seems never active.
-				mergeContactManifolds(entityContactPairIterator->second, entityContactPair.contactManifold);
-			}
-
 			#ifdef BUILD_MODE_DEBUG
 				if (visualizationData != nullptr) {
 					visualizationData->contactManifold = entityContactPair.contactManifold;
 				}
 			#endif
+
+			std::unordered_map<const EntityPairKey, EntityContactPair2D>::iterator entityContactPairIterator = entityContactPairs.find(key);
+
+			if (entityContactPairIterator == entityContactPairs.end()) {
+				entityContactPair.A = entityPair.A;
+				entityContactPair.B = entityPair.B;
+
+				entityContactPairs.insert(std::pair<const EntityPairKey, EntityContactPair2D>(key, entityContactPair));
+
+				continue;
+			}
+
+			mergeContactManifolds(entityContactPairIterator->second, entityContactPair.contactManifold);
+		}
+	}
+
+	void PhysicsEngine2D::ApplyForces() {
+		const ComponentPool<DynamicEntityTag>& dynamicPool = scene->getComponentPool<DynamicEntityTag>();
+
+		// TODO: Integrate velocities on dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
+		for (uint32 componentIndex = 0; componentIndex < dynamicPool.componentCount; componentIndex += 1) {
+			const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
+
+			RigidBody2D& rigidBody = scene->getRigidBody(entity);
+
+			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
+			if (rigidBody.inverseMass == 0.0f) {
+				continue;
+			}
+
+			// TODO: https://web.archive.org/web/20161201054257/https://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html
+			//       This looks like Velocity Verlet for gravity to me?
+			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * halfDeltaTime;
+			rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * deltaTime;
+			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
+			rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * deltaTime;
+		}
+	}
+
+	void PhysicsEngine2D::UpdateManifolds() {
+		// Calculate combined values in each pair (static/dynamic friction, restitution, etc.).
+		// For each contact, calculate mass normal, mass tangent and bias value.
+		for (std::pair<const EntityPairKey, EntityContactPair2D>& entityContactPair : entityContactPairs) {
+			EntityContactPair2D& pair = entityContactPair.second;
+
+			const RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
+			const RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
+
+			pair.contactManifold.tangent = perpendicular(pair.contactManifold.normal, 1.0f);
+			pair.combinedFriction = lyah::sqrt(rigidBodyA.friction * rigidBodyB.friction);
+
+			for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.getContactCount(); contactPointIndex += 1) {
+				Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
+
+				// Distance from the contact to the entity's COM.
+				contact.rA = contact.position - rigidBodyA.position;
+				contact.rB = contact.position - rigidBodyB.position;
+
+				const float32 inverseMassSum = rigidBodyA.inverseMass + rigidBodyB.inverseMass;
+
+				// Precompute normal mass, tangent mass, and bias.
+				const float32 rnA = dot(contact.rA, pair.contactManifold.normal);
+				const float32 rnB = dot(contact.rB, pair.contactManifold.normal);
+
+				const float32 massNormal =
+					(dot(contact.rA, contact.rA) - rnA * rnA) * rigidBodyA.inverseInertia +
+					(dot(contact.rB, contact.rB) - rnB * rnB) * rigidBodyB.inverseInertia +
+					inverseMassSum;
+
+				contact.massNormal = 1.0f / massNormal;
+
+				const float32 rtA = dot(contact.rA, pair.contactManifold.tangent);
+				const float32 rtB = dot(contact.rB, pair.contactManifold.tangent);
+				const float32 massTangent =
+					(dot(contact.rA, contact.rA) - rtA * rtA) * rigidBodyA.inverseInertia +
+					(dot(contact.rB, contact.rB) - rtB * rtB) * rigidBodyB.inverseInertia +
+					inverseMassSum;
+
+				contact.massTangent = 1.0f / massTangent;
+
+				contact.bias = -PENETRATION_BIAS * inverseDeltaTime * std::min(0.0f, contact.separation + ALLOWED_PENETRATION);
+
+				#ifdef ACCUMULATE_IMPULSES
+					RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
+					RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
+
+					const vec2<float32> impulse = pair.contactManifold.normal * contact.accumulatedNormalImpulse + pair.contactManifold.tangent * contact.accumulatedTangentImpulse;
+
+					rigidBodyA.applyImpulse(-impulse, contact.rA);
+					rigidBodyB.applyImpulse(impulse, contact.rA);
+				#endif
+			}
+		}
+	}
+
+	void PhysicsEngine2D::ApplyImpulses() {
+		for (uint32 iteration = 0; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
+			for (std::pair<const EntityPairKey, EntityContactPair2D>& entityContactPair : entityContactPairs) {
+				EntityContactPair2D& pair = entityContactPair.second;
+
+				RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
+				RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
+				vec2<float32> relativeVelocity;
+
+				for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.getContactCount(); contactPointIndex += 1) {
+					Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
+
+					// Calculate the relative velocity at the contact point.
+					relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact);
+
+					const float32 relativeVelocityTowardsNormal = dot(relativeVelocity, pair.contactManifold.normal);
+
+					float32 normalImpulseLength = (-relativeVelocityTowardsNormal + contact.bias) * contact.massNormal;
+
+					#ifdef ACCUMULATE_IMPULSES
+						const float32 oldNormalValue = contact.accumulatedNormalImpulse;
+
+						// TODO: lyah::max
+						contact.accumulatedNormalImpulse = std::max(0.0f, contact.accumulatedNormalImpulse + normalImpulseLength);
+
+						normalImpulseLength = contact.accumulatedNormalImpulse - oldNormalValue;
+					#else
+						// TODO: lyah::max
+						normalImpulseLength = std::max(0.0f, normalImpulseLength);
+					#endif
+
+					const vec2<float32> normalImpulse = pair.contactManifold.normal * normalImpulseLength;
+
+					// Apply normal impulse.
+					rigidBodyA.applyImpulse(-normalImpulse, contact.rA);
+					rigidBodyB.applyImpulse(normalImpulse, contact.rB);
+
+					// Calculate the updated relative velocity at the contact point.
+					relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact);
+
+					const float32 relativeVelocityTowardsTangent = dot(relativeVelocity, pair.contactManifold.tangent);
+
+					float32 tangentImpulseLength = -relativeVelocityTowardsTangent * contact.massTangent;
+
+					#ifdef ACCUMULATE_IMPULSES
+						const float32 maxTangentImpulseLength = pair.combinedFriction * contact.accumulatedNormalImpulse;
+						const float32 oldTangentValue = contact.accumulatedTangentImpulse;
+
+						// TODO: lyah::max
+						contact.accumulatedTangentImpulse = std::clamp(contact.accumulatedTangentImpulse + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
+
+						tangentImpulseLength = contact.accumulatedTangentImpulse - oldTangentValue;
+					#else
+						const float32 maxTangentImpulseLength = pair.combinedFriction * normalImpulseLength;
+
+						// TODO: lyah::clamp
+						tangentImpulseLength = std::clamp(tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
+					#endif
+
+					const vec2<float32> tangentImpulse = pair.contactManifold.tangent * tangentImpulseLength;
+
+					// Apply tangent (friction) impulse.
+					rigidBodyA.applyImpulse(-tangentImpulse, contact.rA);
+					rigidBodyB.applyImpulse(tangentImpulse, contact.rB);
+				}
+			}
+		}
+	}
+
+	void PhysicsEngine2D::Integrate() {
+		const ComponentPool<DynamicEntityTag>& dynamicPool = scene->getComponentPool<DynamicEntityTag>();
+
+		// TODO: Integration for static entities (e.g. a moving platform that isn't affected by other forces)?
+		// TODO: Integration for dynamic entities with infinite mass?
+		// TODO: Integration for dynamic resting entities (e.g. an object on a moving platform may move due to inertia)?
+		for (uint32 componentIndex = 0; componentIndex < dynamicPool.componentCount; componentIndex += 1) {
+			const Entity entity = dynamicPool.componentIndexToEntity[componentIndex];
+
+			RigidBody2D& rigidBody = scene->getRigidBody(entity);
+
+			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
+			if (rigidBody.inverseMass == 0.0f) {
+				continue;
+			}
+
+			rigidBody.position += rigidBody.linearVelocity * deltaTime;
+			rigidBody.rotation += rigidBody.angularVelocity * deltaTime;
+
+			rigidBody.updateTransform();
+
+			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * halfDeltaTime;
+			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
+
+			rigidBody.force = {0.0f, 0.0f};
+			rigidBody.torque = 0.0f;
 		}
 	}
 
@@ -198,119 +314,6 @@ namespace ProjectA {
 		entityContactPair.contactManifold = mergedContactManifold;
 		entityContactPair.contactManifold.setContactCount(contactManifold.getContactCount());
 		entityContactPair.contactManifold.normal = contactManifold.normal;
-	}
-
-	void PhysicsEngine2D::precompute(EntityContactPair2D& pair, float32 inverseDeltaTime) {
-		const RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
-		const RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
-
-		pair.contactManifold.tangent = perpendicular(pair.contactManifold.normal, 1.0f);
-		pair.combinedFriction = lyah::sqrt(rigidBodyA.friction * rigidBodyB.friction);
-
-		for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.getContactCount(); contactPointIndex += 1) {
-			Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
-
-			// Distance from the contact to the shape's COM.
-			contact.rA = contact.position - rigidBodyA.position;
-			contact.rB = contact.position - rigidBodyB.position;
-
-			const float32 inverseMassSum = rigidBodyA.inverseMass + rigidBodyB.inverseMass;
-
-			// Precompute normal mass, tangent mass, and bias.
-			const float32 rnA = dot(contact.rA, pair.contactManifold.normal);
-			const float32 rnB = dot(contact.rB, pair.contactManifold.normal);
-
-			const float32 massNormal =
-				(dot(contact.rA, contact.rA) - rnA * rnA) * rigidBodyA.inverseInertia +
-				(dot(contact.rB, contact.rB) - rnB * rnB) * rigidBodyB.inverseInertia +
-				inverseMassSum;
-
-			contact.massNormal = 1.0f / massNormal;
-
-			const float32 rtA = dot(contact.rA, pair.contactManifold.tangent);
-			const float32 rtB = dot(contact.rB, pair.contactManifold.tangent);
-			const float32 massTangent =
-				(dot(contact.rA, contact.rA) - rtA * rtA) * rigidBodyA.inverseInertia +
-				(dot(contact.rB, contact.rB) - rtB * rtB) * rigidBodyB.inverseInertia +
-				inverseMassSum;
-
-			contact.massTangent = 1.0f / massTangent;
-
-			contact.bias = -PENETRATION_BIAS * inverseDeltaTime * std::min(0.0f, contact.separation + ALLOWED_PENETRATION);
-
-			#ifdef ACCUMULATE_IMPULSES
-				RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
-				RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
-
-				const vec2<float32> impulse = pair.contactManifold.normal * contact.accumulatedNormalImpulse + pair.contactManifold.tangent * contact.accumulatedTangentImpulse;
-
-				rigidBodyA.applyImpulse(-impulse, contact.rA);
-				rigidBodyB.applyImpulse(impulse, contact.rA);
-			#endif
-		}
-	}
-
-	void PhysicsEngine2D::applyImpulse(EntityContactPair2D& pair) {
-		RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
-		RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
-		vec2<float32> relativeVelocity;
-
-		for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.getContactCount(); contactPointIndex += 1) {
-			Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
-
-			// Calculate the relative velocity at the contact point.
-			relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact);
-
-			const float32 relativeVelocityTowardsNormal = dot(relativeVelocity, pair.contactManifold.normal);
-
-			float32 normalImpulseLength = (-relativeVelocityTowardsNormal + contact.bias) * contact.massNormal;
-
-			#ifdef ACCUMULATE_IMPULSES
-				const float32 oldNormalValue = contact.accumulatedNormalImpulse;
-
-				// TODO: lyah::max
-				contact.accumulatedNormalImpulse = std::max(0.0f, contact.accumulatedNormalImpulse + normalImpulseLength);
-
-				normalImpulseLength = contact.accumulatedNormalImpulse - oldNormalValue;
-			#else
-				// TODO: lyah::max
-				normalImpulseLength = std::max(0.0f, normalImpulseLength);
-			#endif
-
-			const vec2<float32> normalImpulse = pair.contactManifold.normal * normalImpulseLength;
-
-			// Apply normal impulse.
-			rigidBodyA.applyImpulse(-normalImpulse, contact.rA);
-			rigidBodyB.applyImpulse(normalImpulse, contact.rB);
-
-			// Calculate the updated relative velocity at the contact point.
-			relativeVelocity = calculateRelativeVelocity(rigidBodyA, rigidBodyB, contact);
-
-			const float32 relativeVelocityTowardsTangent = dot(relativeVelocity, pair.contactManifold.tangent);
-
-			float32 tangentImpulseLength = -relativeVelocityTowardsTangent * contact.massTangent;
-
-			#ifdef ACCUMULATE_IMPULSES
-				const float32 maxTangentImpulseLength = pair.combinedFriction * contact.accumulatedNormalImpulse;
-				const float32 oldTangentValue = contact.accumulatedTangentImpulse;
-
-				// TODO: lyah::max
-				contact.accumulatedTangentImpulse = std::clamp(contact.accumulatedTangentImpulse + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
-
-				tangentImpulseLength = contact.accumulatedTangentImpulse - oldTangentValue;
-			#else
-				const float32 maxTangentImpulseLength = pair.combinedFriction * normalImpulseLength;
-
-				// TODO: lyah::clamp
-				tangentImpulseLength = std::clamp(tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
-			#endif
-
-			const vec2<float32> tangentImpulse = pair.contactManifold.tangent * tangentImpulseLength;
-
-			// Apply tangent (friction) impulse.
-			rigidBodyA.applyImpulse(-tangentImpulse, contact.rA);
-			rigidBodyB.applyImpulse(tangentImpulse, contact.rB);
-		}
 	}
 
 	/* void PhysicsEngine2D::integrate() {

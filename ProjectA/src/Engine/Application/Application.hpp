@@ -25,6 +25,8 @@ namespace ProjectA {
 
 			static const Window& getWindow();
 
+			static float64 getFixedDeltaTime();
+
 			// Returns the current frame time, in seconds.
 			static float64 getCurrentFrameTime();
 

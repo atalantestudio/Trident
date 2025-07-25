@@ -116,19 +116,7 @@ namespace ProjectA {
 				ecs.setComponent<ref<Material>>(entity, material);
 			}
 
-			const ComponentPool<DynamicEntityTag>& getDynamicEntityPool() const {
-				return ecs.getComponentPool<DynamicEntityTag>();
-			}
-
-			const ComponentPool<StaticEntityTag>& getStaticEntityPool() const {
-				return ecs.getComponentPool<StaticEntityTag>();
-			}
-
 		private:
-			void setRigidBody(Entity entity, const RigidBody2D& body) {
-				ecs.setComponent<RigidBody2D>(entity, body);
-			}
-
 			Entity createEntity(const EntityDescriptor& descriptor) {
 				// TODO: Restore physical layers.
 				// ENGINE_ASSERT(descriptor.layerIndex < LAYER_COUNT, "The layer index is overflowing.");
@@ -155,7 +143,7 @@ namespace ProjectA {
 
 				rigidBody.updateTransform();
 
-				setRigidBody(entity, rigidBody);
+				ecs.setComponent<RigidBody2D>(entity, rigidBody);
 
 				// TODO: Restore physical layers.
 				// layers[descriptor.layerIndex].emplace_back(entity);

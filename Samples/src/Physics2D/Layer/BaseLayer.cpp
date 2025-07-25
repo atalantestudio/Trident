@@ -5,20 +5,14 @@
 #include "BaseLayer.hpp"
 
 namespace ProjectA {
-	BaseLayer::BaseLayer() {
+	BaseLayer::BaseLayer() :
+		physicsEngine(getPhysicsEngineDescriptor())
+	{
 		physicsEngine.registerScene(scene);
 	}
 
 	void BaseLayer::update(float32 deltaTime, float32 inverseDeltaTime) {
-		static uint32 i = 0;
-
-		physicsEngine.tick(
-			deltaTime,
-			inverseDeltaTime
-			#ifdef BUILD_MODE_DEBUG
-				, &visualizationData
-			#endif
-		);
+		physicsEngine.tick();
 	}
 
 	void BaseLayer::preRender() {
@@ -73,6 +67,17 @@ namespace ProjectA {
 
 	void BaseLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
 		renderer.render(commandEncoder);
+	}
+
+	PhysicsEngine2DDescriptor BaseLayer::getPhysicsEngineDescriptor() {
+		PhysicsEngine2DDescriptor descriptor{};
+		descriptor.deltaTime = Application::getFixedDeltaTime();
+
+		#ifdef BUILD_MODE_DEBUG
+			descriptor.visualizationData = &visualizationData;
+		#endif
+
+		return descriptor;
 	}
 
 	void BaseLayer::checkHover() {

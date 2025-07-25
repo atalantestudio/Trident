@@ -130,6 +130,10 @@ namespace ProjectA {
 		return *instance->window;
 	}
 
+	float64 Application::getFixedDeltaTime() {
+		return FIXED_DELTA_TIME;
+	}
+
 	float64 Application::getCurrentFrameTime() {
 		return frameTime;
 	}

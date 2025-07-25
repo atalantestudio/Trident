@@ -20,6 +20,8 @@ namespace ProjectA {
 			void onEvent(Event& event) override;
 
 		private:
+			PhysicsEngine2DDescriptor getPhysicsEngineDescriptor();
+
 			void checkHover();
 
 			bool onMouseDown(MouseDownEvent& event);

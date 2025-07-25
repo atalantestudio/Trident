@@ -176,24 +176,6 @@ namespace ProjectA {
 		return true;
 	}
 
-	static bool ConvexHullCircleCollider(
-		const RigidBody2D& A,
-		const RigidBody2D& B,
-		ContactManifold2D* contactManifold
-		#ifdef BUILD_MODE_DEBUG
-			, VisualizationData2D* visualizationData
-		#endif
-	) {
-		return CircleConvexHullCollider(
-			B,
-			A,
-			contactManifold
-			#ifdef BUILD_MODE_DEBUG
-				, visualizationData
-			#endif
-		);
-	}
-
 	static bool ConvexHullConvexHullCollider(
 		const RigidBody2D& A,
 		const RigidBody2D& B,
@@ -283,6 +265,6 @@ namespace ProjectA {
 
 	static constexpr Collider2D COLLIDER_2D_TABLE[static_cast<uint32>(Geometry2DType::MAX_ENUM)][static_cast<uint32>(Geometry2DType::MAX_ENUM)] = {
 		{CircleCircleCollider, CircleConvexHullCollider},
-		{ConvexHullCircleCollider, ConvexHullConvexHullCollider},
+		{nullptr, ConvexHullConvexHullCollider},
 	};
 }
