@@ -30,7 +30,6 @@ namespace ProjectA {
 				EntityDescriptor floorDescriptor{};
 				floorDescriptor.position = {0.0f, -10.0f};
 				floorDescriptor.scale = {100.0f, 20.0f};
-				floorDescriptor.mass = 0.0f;
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
 				floorDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
@@ -49,26 +48,5 @@ namespace ProjectA {
 				renderer.build();
 				renderer.registerScene(scene);
 			}
-
-			/* void onEvent(Event& event) override {
-				EventDispatcher eventDispatcher(event);
-
-				eventDispatcher.dispatch<KeyPressEvent>(BIND(onKeyPress));
-				eventDispatcher.dispatch<KeyReleaseEvent>(BIND(onKeyRelease));
-			}
-
-			bool onKeyPress(KeyPressEvent& event) {
-				// TODO
-				ENGINE_DEBUG("KeyPress");
-
-				return true;
-			}
-
-			bool onKeyRelease(KeyReleaseEvent& event) {
-				// TODO
-				ENGINE_DEBUG("KeyRelease");
-
-				return true;
-			} */
 	};
 }

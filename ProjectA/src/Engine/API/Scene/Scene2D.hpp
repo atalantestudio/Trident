@@ -10,6 +10,8 @@ namespace ProjectA {
 		vec2<float32> position = {0.0f, 0.0f};
 		float32 rotation = 0.0f;
 		vec2<float32> scale = {1.0f, 1.0f};
+		vec2<float32> linearVelocity = {0.0f, 0.0f};
+		float32 angularVelocity = 0.0f;
 		float32 mass = 0.0f;
 		float32 friction = 0.0f;
 		float32 restitution = 0.0f;
@@ -83,6 +85,8 @@ namespace ProjectA {
 
 				const float32 m = descriptor.mass;
 
+				rigidBody.linearVelocity = descriptor.linearVelocity;
+				rigidBody.angularVelocity = descriptor.angularVelocity;
 				rigidBody.inverseMass = 1.0f / m;
 
 				const float32 area = descriptor.geometry->calculateMass(material->density, rigidBody.scale) * 2.0f;
