@@ -67,7 +67,7 @@ namespace ProjectA {
 		bool onCurve;
 	};
 
-	struct Edge {
+	struct TTFEdge {
 		Point start;
 		Point end;
 		Point control;
@@ -82,7 +82,7 @@ namespace ProjectA {
 	struct TrueTypeGlyph {
 		Point min;
 		Point max;
-		sequence<Edge> edges;
+		sequence<TTFEdge> edges;
 
 		bool emptyOrUnparsed() const {
 			return edges.count == 0;

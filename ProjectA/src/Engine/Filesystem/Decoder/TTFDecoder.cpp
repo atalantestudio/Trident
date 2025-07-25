@@ -219,7 +219,7 @@ namespace ProjectA {
 				}
 			}
 
-			glyph.edges = sequence<Edge>(edgeCount);
+			glyph.edges = sequence<TTFEdge>(edgeCount);
 
 			uint16 edgeIndex = 0;
 
@@ -231,7 +231,7 @@ namespace ProjectA {
 						continue;
 					}
 
-					Edge& edge = glyph.edges[edgeIndex];
+					TTFEdge& edge = glyph.edges[edgeIndex];
 					edge.end.x = contourPoint.x;
 					edge.end.y = contourPoint.y;
 					edge.curved = !contour[edgePointIndex - 1].onCurve;
@@ -253,7 +253,7 @@ namespace ProjectA {
 		}
 		else {
 			// Parse compound glyph.
-			std::vector<Edge> edges;
+			std::vector<TTFEdge> edges;
 
 			for (uint16 componentIndex = 0; componentIndex < maxComponentDepth; componentIndex += 1) {
 				// Component flag.
@@ -320,7 +320,7 @@ namespace ProjectA {
 
 				TrueTypeGlyph componentGlyph = glyphs[componentGlyphIndex];
 
-				for (Edge& edge : componentGlyph.edges) {
+				for (TTFEdge& edge : componentGlyph.edges) {
 					transformPoint(edge.start.x, edge.start.y, T);
 					transformPoint(edge.end.x, edge.end.y, T);
 					transformPoint(edge.control.x, edge.control.y, T);
@@ -333,7 +333,7 @@ namespace ProjectA {
 				}
 			}
 
-			glyph.edges = sequence<Edge>(edges.size());
+			glyph.edges = sequence<TTFEdge>(edges.size());
 
 			std::copy(edges.begin(), edges.end(), &glyph.edges[0]);
 		}

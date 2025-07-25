@@ -22,16 +22,21 @@ namespace ProjectA {
 	);
 
 	// Finds and returns the incident edge feature on a convex hull.
-	static ClipFeature2D findIncidentEdge(const RigidBody2D& incidentBody, const vec2<float32>& referenceEdgeNormal, uint32 referenceEdgeIndex) {
+	static ClipFeature2D findIncidentEdge(const RigidBody2D& incidentBody, const vec2<float32>& referenceEdgeNormal) {
+		const ref<ConvexHullGeometry2D> geometry = std::static_pointer_cast<ConvexHullGeometry2D>(incidentBody.geometry);
 		const mat2x2<float32> R = mat2x2_rotation(-incidentBody.rotation);
 
 		float32 minDotProduct = max<float32>();
-		ClipFeature2D incidentEdge;
+		ClipFeature2D incidentEdge{};
+		uint32 incidentEdgeIndex = 0;
 
-		// TODO: Expose edges/normals from ConvexHullGeometry.
-		for (uint32 edgeVertexOffset = 0; edgeVertexOffset < incidentBody.geometry->getVertexCount(); edgeVertexOffset += 1) {
-			const vec2<float32>& a = incidentBody.geometry->vertices[(edgeVertexOffset + 0) % incidentBody.geometry->getVertexCount()];
-			const vec2<float32>& b = incidentBody.geometry->vertices[(edgeVertexOffset + 1) % incidentBody.geometry->getVertexCount()];
+		incidentEdge.setVertexCount(2);
+
+		// TODO: Expose edge normals from ConvexHullGeometry.
+		for (uint32 edgeIndex = 0; edgeIndex < geometry->edges.count; edgeIndex += 1) {
+			const Edge& edge = geometry->edges[edgeIndex];
+			const vec2<float32>& a = incidentBody.geometry->vertices[edge.indexA];
+			const vec2<float32>& b = incidentBody.geometry->vertices[edge.indexB];
 
 			const vec2<float32> edgeNormal = edgeNormalClockwise(a, b) * R;
 
@@ -41,15 +46,17 @@ namespace ProjectA {
 				minDotProduct = dotProduct;
 				incidentEdge.edge[0].position = a;
 				incidentEdge.edge[1].position = b;
-
-				// TODO: Build correct contact ID.
-				incidentEdge.edge[1].id.edgeIndexB0 = referenceEdgeIndex;
-				incidentEdge.edge[1].id.edgeIndexB1 = edgeVertexOffset / 2;
+				incidentEdgeIndex = edgeIndex;
 			}
 		}
 
 		incidentEdge.edge[0].position = multiplyTransform(incidentEdge.edge[0].position, incidentBody.transform);
+		incidentEdge.edge[0].id.incidentEdge0Index = (incidentEdgeIndex - 1) % geometry->edges.count;
+		incidentEdge.edge[0].id.incidentEdge1Index = incidentEdgeIndex;
+
 		incidentEdge.edge[1].position = multiplyTransform(incidentEdge.edge[1].position, incidentBody.transform);
+		incidentEdge.edge[1].id.incidentEdge0Index = incidentEdgeIndex;
+		incidentEdge.edge[1].id.incidentEdge1Index = (incidentEdgeIndex + 1) % geometry->edges.count;
 
 		return incidentEdge;
 	}
@@ -62,7 +69,7 @@ namespace ProjectA {
 		const float32 d0 = dot(edge.edge[0].position, normal) - offset;
 
 		if (d0 <= 0.0f) {
-			// This vertex is behind the line; don't interpolate.
+			// This vertex is below the line; don't interpolate.
 			clippedEdge.edge[clippedEdgeVertexCount] = edge.edge[0];
 			clippedEdgeVertexCount += 1;
 		}
@@ -70,7 +77,7 @@ namespace ProjectA {
 		const float32 d1 = dot(edge.edge[1].position, normal) - offset;
 
 		if (d1 <= 0.0f) {
-			// This vertex is behind the line; don't interpolate.
+			// This vertex is below the line; don't interpolate.
 			clippedEdge.edge[clippedEdgeVertexCount] = edge.edge[1];
 			clippedEdgeVertexCount += 1;
 		}
@@ -84,12 +91,12 @@ namespace ProjectA {
 			clippedEdge.edge[clippedEdgeVertexCount].position = lerp(edge.edge[0].position, edge.edge[1].position, t);
 
 			if (d0 > 0.0f) {
-				clippedEdge.edge[clippedEdgeVertexCount].id.edgeIndexA0 = edgeIndex;
-				clippedEdge.edge[clippedEdgeVertexCount].id.edgeIndexB0 = Contact2DID::NULL_EDGE_INDEX;
+				clippedEdge.edge[clippedEdgeVertexCount].id.referenceEdge0Index = edgeIndex;
+				clippedEdge.edge[clippedEdgeVertexCount].id.incidentEdge0Index = Contact2DID::NULL_EDGE_INDEX;
 			}
 			else {
-				clippedEdge.edge[clippedEdgeVertexCount].id.edgeIndexA1 = edgeIndex;
-				clippedEdge.edge[clippedEdgeVertexCount].id.edgeIndexB1 = Contact2DID::NULL_EDGE_INDEX;
+				clippedEdge.edge[clippedEdgeVertexCount].id.referenceEdge1Index = edgeIndex;
+				clippedEdge.edge[clippedEdgeVertexCount].id.incidentEdge1Index = Contact2DID::NULL_EDGE_INDEX;
 			}
 
 			clippedEdgeVertexCount += 1;
@@ -135,7 +142,7 @@ namespace ProjectA {
 		return true;
 	}
 
-	// TODO: Write to visualizationData in debug-mode.
+	// TODO: Write to visualizationData in debug mode.
 	static bool CircleConvexHullCollider(
 		const RigidBody2D& A,
 		const RigidBody2D& B,
@@ -207,10 +214,12 @@ namespace ProjectA {
 			return false;
 		}
 
-		const ClipFeature2D incidentEdge = findIncidentEdge(*satOutput.incidentBody, satOutput.normal, satOutput.referenceEdgeIndex);
+		const ClipFeature2D incidentEdge = findIncidentEdge(*satOutput.incidentBody, satOutput.normal);
 		const vec2<float32> referenceRightEdgeNormal = normalized(satOutput.referenceEdge.edge[1] - satOutput.referenceEdge.edge[0]);
 
-		const uint32 leftEdgeIndex = (satOutput.referenceEdgeIndex - 1) % std::static_pointer_cast<ConvexHullGeometry2D>(satOutput.referenceBody->geometry)->getEdgeCount();
+		const ref<ConvexHullGeometry2D> referenceGeometry = std::static_pointer_cast<ConvexHullGeometry2D>(satOutput.referenceBody->geometry);
+
+		const uint32 leftEdgeIndex = (satOutput.referenceEdgeIndex - 1) % referenceGeometry->edges.count;
 
 		ClipFeature2D clippedIncidentEdge = incidentEdge;
 		clippedIncidentEdge = clipEdge(clippedIncidentEdge, -referenceRightEdgeNormal, -dot(referenceRightEdgeNormal, satOutput.referenceEdge.edge[0]), leftEdgeIndex);
@@ -219,7 +228,7 @@ namespace ProjectA {
 			return false;
 		}
 
-		const uint32 rightEdgeIndex = (satOutput.referenceEdgeIndex + 1) % std::static_pointer_cast<ConvexHullGeometry2D>(satOutput.referenceBody->geometry)->getEdgeCount();
+		const uint32 rightEdgeIndex = (satOutput.referenceEdgeIndex + 1) % referenceGeometry->edges.count;
 
 		clippedIncidentEdge = clipEdge(clippedIncidentEdge, referenceRightEdgeNormal, dot(referenceRightEdgeNormal, satOutput.referenceEdge.edge[1]), rightEdgeIndex);
 
@@ -230,7 +239,23 @@ namespace ProjectA {
 		contactManifold->normal = satOutput.normal;
 
 		if (satOutput.referenceBody == &B) {
+			// The normal must point towards the incident body and away from the reference body.
 			contactManifold->normal = -contactManifold->normal;
+
+			// TODO
+			/*uint32 temp;
+
+			temp = clippedIncidentEdge.edge[0].id.incidentEdge0Index;
+			clippedIncidentEdge.edge[0].id.referenceEdge0Index = temp;
+
+			temp = clippedIncidentEdge.edge[0].id.incidentEdge1Index;
+			clippedIncidentEdge.edge[0].id.referenceEdge1Index = temp;
+
+			temp = clippedIncidentEdge.edge[1].id.incidentEdge0Index;
+			clippedIncidentEdge.edge[1].id.referenceEdge0Index = temp;
+
+			temp = clippedIncidentEdge.edge[1].id.incidentEdge1Index;
+			clippedIncidentEdge.edge[1].id.referenceEdge1Index = temp;*/
 		}
 
 		const float32 referenceNormalOffset = dot(satOutput.referenceEdge.edge[0], satOutput.normal);
@@ -244,7 +269,7 @@ namespace ProjectA {
 				continue;
 			}
 
-			contactManifold->contacts[contactCount].position = clippedIncidentEdge.edge[vertexIndex].position - contactManifold->normal * separation;
+			contactManifold->contacts[contactCount].position = clippedIncidentEdge.edge[vertexIndex].position - satOutput.normal * separation;
 			contactManifold->contacts[contactCount].separation = separation;
 			contactManifold->contacts[contactCount].id = clippedIncidentEdge.edge[vertexIndex].id;
 

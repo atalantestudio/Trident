@@ -1,16 +1,22 @@
 #pragma once
 
+#include "Engine/API/Geometry/Edge.hpp"
 #include "Engine/API/Geometry/Geometry2D.hpp"
 
 namespace ProjectA {
 	struct ConvexHullGeometry2DDescriptor {
-		sequence<uint32> indices;
 		sequence<vec2<float32>> vertices;
+		sequence<uint32> indices;
+
+		// Geometry edges, represented as vertex index pairs.
+		sequence<Edge> edges;
 	};
 
 	class ConvexHullGeometry2D : public Geometry2D {
 		public:
-			explicit ConvexHullGeometry2D(const ConvexHullGeometry2DDescriptor& descriptor) {
+			explicit ConvexHullGeometry2D(const ConvexHullGeometry2DDescriptor& descriptor) :
+				edges(descriptor.edges)
+			{
 				indices = descriptor.indices;
 				vertices = descriptor.vertices;
 
@@ -67,8 +73,7 @@ namespace ProjectA {
 				return maxValueIndex;
 			}
 
-			uint32 getEdgeCount() const {
-				return (static_cast<uint32>(indices.count) / 3) * 2;
-			}
+		public:
+			const sequence<Edge> edges;
 	};
 }

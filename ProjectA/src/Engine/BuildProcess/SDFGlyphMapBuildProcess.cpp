@@ -258,7 +258,7 @@ namespace ProjectA {
 			GlyphEdge* glyphEdgeMappedRange = static_cast<GlyphEdge*>(static_cast<void*>(glyphMappedRange + 1));
 
 			for (uint32 edgeIndex = 0; edgeIndex < trueTypeGlyph.edges.count; edgeIndex += 1) {
-				const Edge& edge = trueTypeGlyph.edges[edgeIndex];
+				const TTFEdge& edge = trueTypeGlyph.edges[edgeIndex];
 
 				glyphEdgeMappedRange[edgeIndex].startX = edge.start.x;
 				glyphEdgeMappedRange[edgeIndex].startY = edge.start.y;

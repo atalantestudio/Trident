@@ -136,7 +136,16 @@ namespace ProjectA {
 			const RigidBody2D& rigidBodyA = scene->getRigidBody(entityPair.A);
 			const RigidBody2D& rigidBodyB = scene->getRigidBody(entityPair.B);
 
-			if (!COLLIDER_2D_TABLE[static_cast<uint32>(rigidBodyA.geometry->type)][static_cast<uint32>(rigidBodyB.geometry->type)](rigidBodyA, rigidBodyB, &entityContactPair.contactManifold, visualizationData)) {
+			if (
+				!COLLIDER_2D_TABLE[static_cast<uint32>(rigidBodyA.geometry->type)][static_cast<uint32>(rigidBodyB.geometry->type)](
+					rigidBodyA,
+					rigidBodyB,
+					&entityContactPair.contactManifold
+					#ifdef BUILD_MODE_DEBUG
+						, visualizationData
+					#endif
+				)
+			) {
 				// Entities are not intersecting (or degenerate case).
 				entityContactPairs.erase(key);
 
@@ -170,46 +179,28 @@ namespace ProjectA {
 		for (uint32 contactIndex = 0; contactIndex < contactManifold.getContactCount(); contactIndex += 1) {
 			const Contact2D& contact = contactManifold.contacts[contactIndex];
 
-			uint32 indexInPreviousManifold = max<uint32>();
-
-			// Check if the previous manifold contains this contact.
-			for (uint32 previousContactIndex = 0; previousContactIndex < entityContactPair.contactManifold.getContactCount(); previousContactIndex += 1) {
-				const Contact2D& previousContact = entityContactPair.contactManifold.contacts[contactIndex];
-
-				if (contact == previousContact) {
-					indexInPreviousManifold = previousContactIndex;
-
-					break;
-				}
-			}
-
-			if (indexInPreviousManifold == max<uint32>()) {
-				// Add the new contact.
-				mergedContactManifold.contacts[contactIndex] = contactManifold.contacts[contactIndex];
-
-				continue;
-			}
-
 			mergedContactManifold.contacts[contactIndex] = contact;
 
-			if constexpr (WARM_STARTING) {
-				const Contact2D& previousContact = entityContactPair.contactManifold.contacts[indexInPreviousManifold];
+			#ifdef WARM_STARTING
+				for (uint32 previousContactIndex = 0; previousContactIndex < entityContactPair.contactManifold.getContactCount(); previousContactIndex += 1) {
+					const Contact2D& previousContact = entityContactPair.contactManifold.contacts[previousContactIndex];
 
-				mergedContactManifold.contacts[contactIndex].accumulatedNormalImpulse = previousContact.accumulatedNormalImpulse;
-				mergedContactManifold.contacts[contactIndex].accumulatedTangentImpulse = previousContact.accumulatedTangentImpulse;
-			}
+					if (contact == previousContact) {
+						mergedContactManifold.contacts[contactIndex].accumulatedNormalImpulse = previousContact.accumulatedNormalImpulse;
+						mergedContactManifold.contacts[contactIndex].accumulatedTangentImpulse = previousContact.accumulatedTangentImpulse;
+
+						break;
+					}
+				}
+			#endif
 		}
 
 		entityContactPair.contactManifold = mergedContactManifold;
 		entityContactPair.contactManifold.setContactCount(contactManifold.getContactCount());
 		entityContactPair.contactManifold.normal = contactManifold.normal;
-		entityContactPair.contactManifold.tangent = contactManifold.tangent;
 	}
 
 	void PhysicsEngine2D::precompute(EntityContactPair2D& pair, float32 inverseDeltaTime) {
-		static constexpr float32 ALLOWED_PENETRATION = 0.01f;
-		static constexpr float32 PENETRATION_BIAS = true ? 0.2f : 0.0f;
-
 		const RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
 		const RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
 
@@ -247,7 +238,7 @@ namespace ProjectA {
 
 			contact.bias = -PENETRATION_BIAS * inverseDeltaTime * std::min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
-			if constexpr (ACCUMULATE_IMPULSES) {
+			#ifdef ACCUMULATE_IMPULSES
 				RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
 				RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
 
@@ -255,7 +246,7 @@ namespace ProjectA {
 
 				rigidBodyA.applyImpulse(-impulse, contact.rA);
 				rigidBodyB.applyImpulse(impulse, contact.rA);
-			}
+			#endif
 		}
 	}
 
@@ -274,18 +265,17 @@ namespace ProjectA {
 
 			float32 normalImpulseLength = (-relativeVelocityTowardsNormal + contact.bias) * contact.massNormal;
 
-			if constexpr (ACCUMULATE_IMPULSES) {
-				const float32 accumulatedNormalImpulse = contact.accumulatedNormalImpulse;
+			#ifdef ACCUMULATE_IMPULSES
+				const float32 oldNormalValue = contact.accumulatedNormalImpulse;
 
 				// TODO: lyah::max
-				contact.accumulatedNormalImpulse = std::max(0.0f, accumulatedNormalImpulse + normalImpulseLength);
+				contact.accumulatedNormalImpulse = std::max(0.0f, contact.accumulatedNormalImpulse + normalImpulseLength);
 
-				normalImpulseLength = contact.accumulatedNormalImpulse - accumulatedNormalImpulse;
-			}
-			else {
+				normalImpulseLength = contact.accumulatedNormalImpulse - oldNormalValue;
+			#else
 				// TODO: lyah::max
 				normalImpulseLength = std::max(0.0f, normalImpulseLength);
-			}
+			#endif
 
 			const vec2<float32> normalImpulse = pair.contactManifold.normal * normalImpulseLength;
 
@@ -300,21 +290,20 @@ namespace ProjectA {
 
 			float32 tangentImpulseLength = -relativeVelocityTowardsTangent * contact.massTangent;
 
-			if constexpr (ACCUMULATE_IMPULSES) {
+			#ifdef ACCUMULATE_IMPULSES
 				const float32 maxTangentImpulseLength = pair.combinedFriction * contact.accumulatedNormalImpulse;
-				const float32 accumulatedTangentImpulse = contact.accumulatedTangentImpulse;
+				const float32 oldTangentValue = contact.accumulatedTangentImpulse;
 
 				// TODO: lyah::max
 				contact.accumulatedTangentImpulse = std::clamp(contact.accumulatedTangentImpulse + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
 
-				tangentImpulseLength = contact.accumulatedTangentImpulse - accumulatedTangentImpulse;
-			}
-			else {
+				tangentImpulseLength = contact.accumulatedTangentImpulse - oldTangentValue;
+			#else
 				const float32 maxTangentImpulseLength = pair.combinedFriction * normalImpulseLength;
 
 				// TODO: lyah::clamp
 				tangentImpulseLength = std::clamp(tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
-			}
+			#endif
 
 			const vec2<float32> tangentImpulse = pair.contactManifold.tangent * tangentImpulseLength;
 

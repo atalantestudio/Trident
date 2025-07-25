@@ -93,7 +93,6 @@ namespace ProjectA {
 
 		private:
 			static constexpr uint8 MAX_PARALLEL_INSTANCES = 5;
-			// static constexpr float64 FIXED_DELTA_TIME = 1.0 / 165.0;
 			static constexpr float64 FIXED_DELTA_TIME = 1.0 / 60.0;
 			static constexpr float64 INVERSE_FIXED_DELTA_TIME = 1.0 / FIXED_DELTA_TIME;
 

@@ -15,7 +15,10 @@ namespace ProjectA {
 		colorAttachment.sampleCount = SAMPLE_COUNT;
 		colorAttachment.loadOperation = LoadOperation::CLEAR;
 		colorAttachment.storeOperation = StoreOperation::STORE;
-		colorAttachment.finalImageLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
+		// TODO: Restore layout.
+		// colorAttachment.finalImageLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+		colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;
 
 		SubpassDescriptor subpassDescriptor{};
 		subpassDescriptor.colorAttachments = {colorAttachment};

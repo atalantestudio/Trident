@@ -32,10 +32,11 @@ namespace ProjectA {
 		const ref<ConvexHullGeometry2D>& geometry = std::static_pointer_cast<ConvexHullGeometry2D>(A.geometry);
 		const mat2x2<float32> R = mat2x2_rotation(B.rotation - A.rotation);
 
-		// TODO: Expose edges/normals from ConvexHullGeometry.
-		for (uint32 edgeVertexOffset = 0; edgeVertexOffset < geometry->getVertexCount(); edgeVertexOffset += 1) {
-			const vec2<float32>& a = geometry->vertices[(edgeVertexOffset + 0) % geometry->getVertexCount()];
-			const vec2<float32>& b = geometry->vertices[(edgeVertexOffset + 1) % geometry->getVertexCount()];
+		// TODO: Expose edge normals from ConvexHullGeometry.
+		for (uint32 edgeIndex = 0; edgeIndex < geometry->edges.count; edgeIndex += 1) {
+			const Edge& edge = geometry->edges[edgeIndex];
+			const vec2<float32>& a = geometry->vertices[edge.indexA];
+			const vec2<float32>& b = geometry->vertices[edge.indexB];
 
 			const vec2<float32> d = edgeNormalClockwise(a, b) * R;
 
@@ -47,12 +48,13 @@ namespace ProjectA {
 
 			const float32 separation = signedDistanceLinePoint(aT, bT, sT);
 
-			if (separation > output.separation) {
+			// NOTE: Use >= to account restore B as the reference body if possible.
+			if (separation >= output.separation) {
 				output.separation = separation;
 				output.normal = d;
 				output.referenceEdge.edge[0] = aT;
 				output.referenceEdge.edge[1] = bT;
-				output.referenceEdgeIndex = edgeVertexOffset / 2;
+				output.referenceEdgeIndex = edgeIndex;
 				output.incidentSupportPoint = sT;
 				output.referenceBody = &A;
 				output.incidentBody = &B;

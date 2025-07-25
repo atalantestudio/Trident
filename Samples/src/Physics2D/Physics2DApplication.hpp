@@ -4,7 +4,7 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Layer/GUI/StatisticsLayer.hpp"
+// #include "Layer/GUI/StatisticsLayer.hpp"
 #include "Layer/Demo4Layer.hpp"
 
 namespace ProjectA {
@@ -14,7 +14,7 @@ namespace ProjectA {
 				Application(applicationManifest)
 			{
 				registerLayer<Demo4Layer>();
-				registerLayer<StatisticsLayer>();
+				// registerLayer<StatisticsLayer>();
 			}
 	};
 

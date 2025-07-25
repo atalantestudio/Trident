@@ -48,8 +48,10 @@ namespace ProjectA {
 	class ClipFeature2D {
 		public:
 			// NOTE: The vertex/edge union deletes the default constructor,
-			//       and because of that structs that use Feature2D cannot be constructed.
-			ClipFeature2D() {}
+			//       and because of that structs that use ClipFeature2D cannot be constructed.
+			ClipFeature2D() :
+				edge{}
+			{}
 
 			uint32 getVertexCount() const {
 				return vertexCount + 1;
@@ -60,7 +62,7 @@ namespace ProjectA {
 			}
 
 		public:
-			// The vertices that compose the feature.
+			// The vertices that coddmpose the feature.
 			// NOTE: The mesh transform is already applied on the feature's vertices.
 			union {
 				ClipVertex2D vertex;

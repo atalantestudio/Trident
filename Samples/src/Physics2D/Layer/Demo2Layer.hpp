@@ -8,14 +8,20 @@ namespace ProjectA {
 			void build() override {
 				ConvexHullGeometry2DDescriptor convexHullGeometryDescriptor;
 				convexHullGeometryDescriptor.vertices = {
-					{-0.5f, -0.5f},
 					{-0.5f,  0.5f},
 					{ 0.5f,  0.5f},
 					{ 0.5f, -0.5f},
+					{-0.5f, -0.5f},
 				};
 				convexHullGeometryDescriptor.indices = {
 					0, 1, 2,
 					0, 2, 3,
+				};
+				convexHullGeometryDescriptor.edges = {
+					{0, 1},
+					{1, 2},
+					{2, 3},
+					{3, 0},
 				};
 
 				const ref<ConvexHullGeometry2D> convexHullGeometry = createRef<ConvexHullGeometry2D>(convexHullGeometryDescriptor);
