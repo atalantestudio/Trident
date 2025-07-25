@@ -1,31 +1,31 @@
 #pragma once
 
-#include "BaseLayer.hpp"
+#include "../BaseLayer.hpp"
 
 namespace ProjectA {
-	class Demo0Layer : public BaseLayer {
+	class SampleLayer : public BaseLayer {
 		public:
 			void build() override {
-				ConvexHullGeometry2DDescriptor convexHullGeometryDescriptor;
-				convexHullGeometryDescriptor.vertices = {
+				ConvexHullGeometry2DDescriptor squareGeometryDescriptor{};
+				squareGeometryDescriptor.vertices = {
 					{-0.5f,  0.5f},
 					{ 0.5f,  0.5f},
 					{ 0.5f, -0.5f},
 					{-0.5f, -0.5f},
 				};
-				convexHullGeometryDescriptor.indices = {
+				squareGeometryDescriptor.indices = {
 					0, 1,
 					2, 0,
 					2, 3,
 				};
-				convexHullGeometryDescriptor.edges = {
+				squareGeometryDescriptor.edges = {
 					{0, 1},
 					{1, 2},
 					{2, 3},
 					{3, 0},
 				};
 
-				const ref<ConvexHullGeometry2D> squareGeometry = createRef<ConvexHullGeometry2D>(convexHullGeometryDescriptor);
+				const ref<ConvexHullGeometry2D> squareGeometry = createRef<ConvexHullGeometry2D>(squareGeometryDescriptor);
 
 				EntityDescriptor floorDescriptor{};
 				floorDescriptor.position = {0.0f, -10.0f};
@@ -44,9 +44,6 @@ namespace ProjectA {
 				boxDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 
 				scene.createDynamicEntity(boxDescriptor);
-
-				renderer.build();
-				renderer.registerScene(scene);
 			}
 	};
 }

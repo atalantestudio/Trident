@@ -87,7 +87,7 @@ namespace ProjectA {
 			static constexpr uint8 SAMPLE_COUNT = 4;
 			static constexpr float32 MIN_ZOOM_LEVEL = 1.0f;
 			static constexpr float32 MAX_ZOOM_LEVEL = 64.0f;
-			static constexpr float32 DEFAULT_ZOOM_LEVEL = 16.0f;
+			static constexpr float32 DEFAULT_ZOOM_LEVEL = 32.0f;
 
 		private:
 			ref<Subpass> subpass;

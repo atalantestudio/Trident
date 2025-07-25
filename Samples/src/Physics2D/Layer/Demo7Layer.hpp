@@ -86,9 +86,6 @@ namespace ProjectA {
 				pusherDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
 				scene.createDynamicEntity(pusherDescriptor);
-
-				renderer.build();
-				renderer.registerScene(scene);
 			}
 	};
 }

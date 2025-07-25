@@ -89,9 +89,6 @@ namespace ProjectA {
 
 					scene.createDynamicEntity(boxDescriptor);
 				}
-
-				renderer.build();
-				renderer.registerScene(scene);
 			}
 	};
 }

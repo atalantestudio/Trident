@@ -59,9 +59,6 @@ namespace ProjectA {
 				triangleDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 
 				scene.createDynamicEntity(triangleDescriptor);
-
-				renderer.build();
-				renderer.registerScene(scene);
 			}
 	};
 }

@@ -11,6 +11,8 @@ namespace ProjectA {
 
 			virtual ~BaseLayer() = default;
 
+			void postConstruct() override;
+
 			void update(float32 deltaTime, float32 inverseDeltaTime) override;
 
 			void preRender() override;

@@ -7,7 +7,12 @@
 namespace ProjectA {
 	BaseLayer::BaseLayer() :
 		physicsEngine(getPhysicsEngineDescriptor())
-	{
+	{}
+
+	void BaseLayer::postConstruct() {
+		renderer.build();
+		renderer.registerScene(scene);
+
 		physicsEngine.registerScene(scene);
 	}
 

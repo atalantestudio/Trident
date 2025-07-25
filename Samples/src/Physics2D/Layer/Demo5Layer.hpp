@@ -83,9 +83,6 @@ namespace ProjectA {
 				rightWeightDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 
 				scene.createDynamicEntity(rightWeightDescriptor);
-
-				renderer.build();
-				renderer.registerScene(scene);
 			}
 	};
 }

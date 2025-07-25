@@ -53,9 +53,6 @@ namespace ProjectA {
 
 					x += {0.5625f, 2.0f};
 				}
-
-				renderer.build();
-				renderer.registerScene(scene);
 			}
 	};
 }
