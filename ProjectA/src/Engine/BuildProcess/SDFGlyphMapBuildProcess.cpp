@@ -10,6 +10,8 @@ namespace ProjectA {
 	static constexpr uint32 SPREAD_FACTOR = 0;
 
 	SDFGlyphMap SDFGlyphMapBuildProcess::build(const File<FileFormat::TTF>& file) {
+		using namespace TrueTypeFont;
+
 		ENGINE_ASSERT(file.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
 		SDFGlyphMap sdfGlyphMap;
@@ -222,7 +224,7 @@ namespace ProjectA {
 		const ref<Fence> writeBufferFence = Renderer::createFence();
 
 		for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count; glyphIndex += 1) {
-			const TrueTypeGlyph& trueTypeGlyph = file.glyphs[glyphIndex];
+			const Glyph& trueTypeGlyph = file.glyphs[glyphIndex];
 			const longHorMetric& hMetric = file.hMetrics[glyphIndex];
 
 			SDFGlyph& sdfGlyph = sdfGlyphMap.glyphs[glyphIndex];
@@ -258,7 +260,7 @@ namespace ProjectA {
 			GlyphEdge* glyphEdgeMappedRange = static_cast<GlyphEdge*>(static_cast<void*>(glyphMappedRange + 1));
 
 			for (uint32 edgeIndex = 0; edgeIndex < trueTypeGlyph.edges.count; edgeIndex += 1) {
-				const TTFEdge& edge = trueTypeGlyph.edges[edgeIndex];
+				const Edge& edge = trueTypeGlyph.edges[edgeIndex];
 
 				glyphEdgeMappedRange[edgeIndex].startX = edge.start.x;
 				glyphEdgeMappedRange[edgeIndex].startY = edge.start.y;
@@ -360,7 +362,7 @@ namespace ProjectA {
 	uint64 SDFGlyphMapBuildProcess::computeMaxGlyphByteSize(const File<FileFormat::TTF>& file) {
 		uint64 maxGlyphEdgeCount = 0;
 
-		for (const TrueTypeGlyph& trueTypeGlyph : file.glyphs) {
+		for (const TrueTypeFont::Glyph& trueTypeGlyph : file.glyphs) {
 			// TODO: lyah::max(uint64, uint64).
 			if (trueTypeGlyph.edges.count > maxGlyphEdgeCount) {
 				maxGlyphEdgeCount = trueTypeGlyph.edges.count;

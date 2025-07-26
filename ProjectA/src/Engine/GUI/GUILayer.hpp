@@ -12,14 +12,14 @@ namespace ProjectA {
 	class GUILayer : public Layer {
 		private:
 			struct FontData {
-				ref<TrueTypeFont> font;
+				ref<TrueTypeFontClass> font;
 				ImageID glyphMapImageId;
 			};
 
 			struct FlushWordData {
 				std::string_view word;
 
-				const TrueTypeFont* font;
+				const TrueTypeFontClass* font;
 				vec2<float32> imageSize;
 				float32 fontSize;
 
@@ -70,7 +70,7 @@ namespace ProjectA {
 			void GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex);
 			void WrapTextChildrenRecursive(uint32 parentIndex);
 			void WrapText(GUIContainer& textComponent);
-			bool OutsideWord(char8 character, const TrueTypeFont& font) const;
+			bool OutsideWord(char8 character, const TrueTypeFontClass& font) const;
 			void FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin);
 			uint32 GetHoveredComponentIndex() const;

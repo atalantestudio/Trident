@@ -2,7 +2,6 @@
 
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/Application/Application.hpp"
-#include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/GUI/GUILayer.hpp"
 
@@ -37,7 +36,7 @@ namespace ProjectA {
 		defaultFont->tileHeight = 12;
 		defaultFont->tileSpacing = 1; */
 
-		fonts[fontCount].font = createRef<TrueTypeFont>(path);
+		fonts[fontCount].font = createRef<TrueTypeFontClass>(path);
 
 		const SDFGlyphMap& glyphMap = fonts[fontCount].font->getGlyphMap();
 
@@ -729,7 +728,7 @@ namespace ProjectA {
 	// TODO: lyah::ceil
 	void GUILayer::WrapText(GUIContainer& textComponent) {
 		const FontData& fontData = fonts[textComponent.font];
-		const TrueTypeFont& font = *fontData.font;
+		const TrueTypeFontClass& font = *fontData.font;
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
 		const vec2<float32> imageSize = {static_cast<float32>(imageExtent.width), static_cast<float32>(imageExtent.height)};
 		const float32 lineHeight = textComponent.fontSize / font.getLineHeight();
@@ -852,7 +851,7 @@ namespace ProjectA {
 		textComponent.size.height.value = textComponent.fontSize * lineCount;
 	}
 
-	bool GUILayer::OutsideWord(char8 character, const TrueTypeFont& font) const {
+	bool GUILayer::OutsideWord(char8 character, const TrueTypeFontClass& font) const {
 		if (character < 0) {
 			// TODO: Handle UTF-16 and UTF-32 characters.
 			return true;
@@ -1062,7 +1061,7 @@ namespace ProjectA {
 
 	// TODO: lyah::max
 	uint32 GUILayer::calculateTextPreferredWidth(const std::string& string, const TextStyle& textStyle) const {
-		const TrueTypeFont& font = *fonts[textStyle.font].font;
+		const TrueTypeFontClass& font = *fonts[textStyle.font].font;
 
 		uint32 preferredWidth = 0;
 		uint32 lineWidth = 0;
@@ -1105,7 +1104,7 @@ namespace ProjectA {
 
 	// TODO: lyah::max
 	uint32 GUILayer::calculateTextMinimumWidth(const std::string& string, const TextStyle& textStyle) const {
-		const TrueTypeFont& font = *fonts[textStyle.font].font;
+		const TrueTypeFontClass& font = *fonts[textStyle.font].font;
 		const float32 lineHeight = textStyle.fontSize / font.getLineHeight();
 
 		uint32 minimumWordWidth = 0;

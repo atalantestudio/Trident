@@ -3,14 +3,14 @@
 #include "Engine/Filesystem/Filesystem.hpp"
 
 namespace ProjectA {
-	namespace Filesystem {
-		struct ParsedImage {
+	/* namespace Filesystem {
+		struct ImageAsset {
 			// TODO
 		};
 
 		template<>
-		ParsedImage decode<FileFormat::PNG>(const sequence<uint8>& data) {
+		ImageAsset Filesystem::encode<FileFormat::PNG>(const sequence<uint8>& data) {
 			// TODO
 		}
-	}
+	} */
 }

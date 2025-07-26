@@ -5,355 +5,359 @@
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
-	static void parseCoordinates(ByteStream& stream, sint16* coordinates, uint8* flags, uint16 coordinateCount, uint8 shortVectorBitIndex, uint8 sameOrPositiveVectorBitIndex, FWord minBounds, FWord maxBounds) {
-		uint16 coordinateIndex = 0;
-		sint16 previousCoordinate = 0;
+	namespace TrueTypeFont {
+		static void parseCoordinates(ByteStream& stream, sint16* coordinates, uint8* flags, uint16 coordinateCount, uint8 shortVectorBitIndex, uint8 sameOrPositiveVectorBitIndex, FWord minBounds, FWord maxBounds) {
+			uint16 coordinateIndex = 0;
+			sint16 previousCoordinate = 0;
 
-		while (coordinateIndex < coordinateCount) {
-			const uint8 flag = flags[coordinateIndex];
-			sint16 delta = 0;
+			while (coordinateIndex < coordinateCount) {
+				const uint8 flag = flags[coordinateIndex];
+				sint16 delta = 0;
 
-			// If set, the corresponding coordinate is 1 byte long.
-			if (flag & BIT(shortVectorBitIndex)) {
-				// If the Short Vector bit is set, this bit describes the sign of the value,
-				// with a value of 1 equalling positive and a zero value negative.
-				const sint8 sign = (flag >> sameOrPositiveVectorBitIndex & BIT(0)) * 2 - 1;
+				// If set, the corresponding coordinate is 1 byte long.
+				if (flag & BIT(shortVectorBitIndex)) {
+					// If the Short Vector bit is set, this bit describes the sign of the value,
+					// with a value of 1 equalling positive and a zero value negative.
+					const sint8 sign = (flag >> sameOrPositiveVectorBitIndex & BIT(0)) * 2 - 1;
 
-				delta = stream.read<uint8>() * sign;
-			}
-
-			// Otherwise, the corresponding coordinate is 2 bytes long.
-			else {
-				if (~flag & BIT(sameOrPositiveVectorBitIndex)) {
-					// If the Short Vector bit is not set, and this bit is not set,
-					// the current coordinate is a signed 16-bit delta vector.
-					delta = stream.read<sint16>(true);
-				}
-			}
-
-			const sint16 coordinate = previousCoordinate + delta;
-
-			coordinates[coordinateIndex] = coordinate;
-			previousCoordinate = coordinate;
-
-			coordinateIndex += 1;
-		}
-	}
-
-	static void transformPoint(FWord& x, FWord& y, const GlyphTransform& T) {
-		const FWord previousX = x;
-
-		x = static_cast<FWord>(T.m * (x * (T.a / T.m) + y * (T.c / T.m) + T.e));
-		y = static_cast<FWord>(T.n * (previousX * (T.b / T.n) + y * (T.d / T.n) + T.f));
-	}
-
-	static void parseGlyph(ByteStream& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, sequence<TrueTypeGlyph>& glyphs, uint16 glyphIndex, uint16 maxComponentDepth) {
-		TrueTypeGlyph& glyph = glyphs[glyphIndex];
-
-		if (!glyph.emptyOrUnparsed()) {
-			return;
-		}
-
-		stream.seek(tableOffset + glyphOffsets[glyphIndex]);
-
-		const sint16 numberOfContours = stream.read<sint16>(true);
-
-		glyph.min.x = stream.read<FWord>(true);
-		glyph.min.y = stream.read<FWord>(true);
-		glyph.max.x = stream.read<FWord>(true);
-		glyph.max.y = stream.read<FWord>(true);
-
-		if (numberOfContours >= 0) {
-			// Parse simple glyph.
-
-			// Array of last points of each contour; n is the number of contours; array entries are point indices.
-			sequence<uint16> endPtsOfContours(numberOfContours);
-
-			for (uint16& endPtOfContour : endPtsOfContours) {
-				endPtOfContour = stream.read<uint16>(true);
-			}
-
-			// Total number of bytes needed for instructions.
-			const uint16 instructionLength = stream.read<uint16>(true);
-
-			// Ignore instructions for the moment.
-			stream.jump(instructionLength);
-
-			const uint16 numPoints = endPtsOfContours[numberOfContours - 1] + 1;
-
-			// Array of flags.
-			sequence<uint8> flags(numPoints);
-
-			{
-				uint16 flagIndex = 0;
-
-				while (flagIndex < numPoints) {
-					const uint8 flag = stream.read<uint8>();
-
-					uint8 repeatCount = 1;
-
-					if (flag & BIT(3)) {
-						// If set, the next byte specifies the number of additional times this set of flags is to be repeated.
-						// In this way, the number of flags listed can be smaller than the number of points in a character.
-						repeatCount += stream.read<uint8>();
-
-						ENGINE_ASSERT(repeatCount > 0, "The additional repeat count for flag index [] is 0.", flagIndex);
-					}
-
-					std::fill_n(&flags[flagIndex], repeatCount, flag);
-
-					flagIndex += repeatCount;
+					delta = stream.read<uint8>() * sign;
 				}
 
-				ENGINE_ASSERT(flagIndex == numPoints, "The flag count is overflowing.");
+				// Otherwise, the corresponding coordinate is 2 bytes long.
+				else {
+					if (~flag & BIT(sameOrPositiveVectorBitIndex)) {
+						// If the Short Vector bit is not set, and this bit is not set,
+						// the current coordinate is a signed 16-bit delta vector.
+						delta = stream.read<sint16>(true);
+					}
+				}
+
+				const sint16 coordinate = previousCoordinate + delta;
+
+				coordinates[coordinateIndex] = coordinate;
+				previousCoordinate = coordinate;
+
+				coordinateIndex += 1;
+			}
+		}
+
+		static void transformPoint(FWord& x, FWord& y, const GlyphTransform& T) {
+			const FWord previousX = x;
+
+			x = static_cast<FWord>(T.m * (x * (T.a / T.m) + y * (T.c / T.m) + T.e));
+			y = static_cast<FWord>(T.n * (previousX * (T.b / T.n) + y * (T.d / T.n) + T.f));
+		}
+
+		static void parseGlyph(ByteStream& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, sequence<Glyph>& glyphs, uint16 glyphIndex, uint16 maxComponentDepth) {
+			Glyph& glyph = glyphs[glyphIndex];
+
+			if (!glyph.emptyOrUnparsed()) {
+				return;
 			}
 
-			// Array of x-coordinates; the first is relative to (0,0), others are relative to previous point.
-			sequence<sint16> xCoordinates(numPoints);
+			stream.seek(tableOffset + glyphOffsets[glyphIndex]);
 
-			parseCoordinates(stream, &xCoordinates[0], &flags[0], numPoints, 1, 4, glyph.min.x, glyph.max.x);
+			const sint16 numberOfContours = stream.read<sint16>(true);
 
-			// Array of y-coordinates; the first is relative to (0,0), others are relative to previous point.
-			sequence<sint16> yCoordinates(numPoints);
+			glyph.min.x = stream.read<FWord>(true);
+			glyph.min.y = stream.read<FWord>(true);
+			glyph.max.x = stream.read<FWord>(true);
+			glyph.max.y = stream.read<FWord>(true);
 
-			parseCoordinates(stream, &yCoordinates[0], &flags[0], numPoints, 2, 5, glyph.min.y, glyph.max.y);
+			if (numberOfContours >= 0) {
+				// Parse simple glyph.
 
-			sequence<std::vector<ContourPoint>> contours(numberOfContours);
+				// Array of last points of each contour; n is the number of contours; array entries are point indices.
+				sequence<uint16> endPtsOfContours(numberOfContours);
 
-			{
-				uint16 contourIndex = 0;
-				uint16 startIndex = 0;
+				for (uint16& endPtOfContour : endPtsOfContours) {
+					endPtOfContour = stream.read<uint16>(true);
+				}
 
-				while (contourIndex < numberOfContours) {
-					std::vector<ContourPoint>& contour = contours[contourIndex];
+				// Total number of bytes needed for instructions.
+				const uint16 instructionLength = stream.read<uint16>(true);
 
-					const uint16 endIndex = endPtsOfContours[contourIndex] + 1;
-					const bool startOnCurve = flags[startIndex] & BIT(0);
+				// Ignore instructions for the moment.
+				stream.jump(instructionLength);
 
-					if (startOnCurve) {
-						// Add the start (on-curve) point.
-						ContourPoint startPoint{};
-						startPoint.x = xCoordinates[startIndex];
-						startPoint.y = yCoordinates[startIndex];
-						startPoint.onCurve = true;
+				const uint16 numPoints = endPtsOfContours[numberOfContours - 1] + 1;
 
-						contour.emplace_back(startPoint);
+				// Array of flags.
+				sequence<uint8> flags(numPoints);
+
+				{
+					uint16 flagIndex = 0;
+
+					while (flagIndex < numPoints) {
+						const uint8 flag = stream.read<uint8>();
+
+						uint8 repeatCount = 1;
+
+						if (flag & BIT(3)) {
+							// If set, the next byte specifies the number of additional times this set of flags is to be repeated.
+							// In this way, the number of flags listed can be smaller than the number of points in a character.
+							repeatCount += stream.read<uint8>();
+
+							ENGINE_ASSERT(repeatCount > 0, "The additional repeat count for flag index [] is 0.", flagIndex);
+						}
+
+						std::fill_n(&flags[flagIndex], repeatCount, flag);
+
+						flagIndex += repeatCount;
 					}
 
-					{
-						uint16 index = startIndex + 1;
-						bool previousOnCurve = startOnCurve;
+					ENGINE_ASSERT(flagIndex == numPoints, "The flag count is overflowing.");
+				}
 
-						while (index < endIndex) {
-							ContourPoint point{};
-							point.x = xCoordinates[index];
-							point.y = yCoordinates[index];
-							point.onCurve = flags[index] & BIT(0);
+				// Array of x-coordinates; the first is relative to (0,0), others are relative to previous point.
+				sequence<sint16> xCoordinates(numPoints);
 
-							if (!point.onCurve && !previousOnCurve) {
-								// If both this point and the previous one are off-curve,
-								// insert an on-curve point between them.
-								ContourPoint halfwayPoint{};
-								halfwayPoint.x = (point.x + xCoordinates[index - 1]) / 2;
-								halfwayPoint.y = (point.y + yCoordinates[index - 1]) / 2;
-								halfwayPoint.onCurve = true;
+				parseCoordinates(stream, &xCoordinates[0], &flags[0], numPoints, 1, 4, glyph.min.x, glyph.max.x);
 
-								contour.emplace_back(halfwayPoint);
+				// Array of y-coordinates; the first is relative to (0,0), others are relative to previous point.
+				sequence<sint16> yCoordinates(numPoints);
+
+				parseCoordinates(stream, &yCoordinates[0], &flags[0], numPoints, 2, 5, glyph.min.y, glyph.max.y);
+
+				sequence<std::vector<ContourPoint>> contours(numberOfContours);
+
+				{
+					uint16 contourIndex = 0;
+					uint16 startIndex = 0;
+
+					while (contourIndex < numberOfContours) {
+						std::vector<ContourPoint>& contour = contours[contourIndex];
+
+						const uint16 endIndex = endPtsOfContours[contourIndex] + 1;
+						const bool startOnCurve = flags[startIndex] & BIT(0);
+
+						if (startOnCurve) {
+							// Add the start (on-curve) point.
+							ContourPoint startPoint{};
+							startPoint.x = xCoordinates[startIndex];
+							startPoint.y = yCoordinates[startIndex];
+							startPoint.onCurve = true;
+
+							contour.emplace_back(startPoint);
+						}
+
+						{
+							uint16 index = startIndex + 1;
+							bool previousOnCurve = startOnCurve;
+
+							while (index < endIndex) {
+								ContourPoint point{};
+								point.x = xCoordinates[index];
+								point.y = yCoordinates[index];
+								point.onCurve = flags[index] & BIT(0);
+
+								if (!point.onCurve && !previousOnCurve) {
+									// If both this point and the previous one are off-curve,
+									// insert an on-curve point between them.
+									ContourPoint halfwayPoint{};
+									halfwayPoint.x = (point.x + xCoordinates[index - 1]) / 2;
+									halfwayPoint.y = (point.y + yCoordinates[index - 1]) / 2;
+									halfwayPoint.onCurve = true;
+
+									contour.emplace_back(halfwayPoint);
+								}
+
+								contour.emplace_back(point);
+
+								index += 1;
+								previousOnCurve = point.onCurve;
 							}
+						}
 
-							contour.emplace_back(point);
+						if (!startOnCurve) {
+							// Add the start (off-curve) point.
+							ContourPoint endPoint{};
+							endPoint.x = xCoordinates[startIndex];
+							endPoint.y = yCoordinates[startIndex];
+							endPoint.onCurve = false;
 
-							index += 1;
-							previousOnCurve = point.onCurve;
+							contour.emplace_back(endPoint);
+						}
+
+						// Close contour.
+						contour.emplace_back(contour.front());
+
+						contourIndex += 1;
+						startIndex = endIndex;
+					}
+				}
+
+				#ifdef TTF_FIX_INVERTED_CONTOURS
+					if (numberOfContours == 1) {
+						std::vector<ContourPoint>& contour = contours[0];
+
+						const uint32 count = static_cast<uint32>(contour.size());
+
+						float32 signedAreaDouble = 0.0f;
+
+						for (uint32 i = 0; i < count; i += 1) {
+							const uint32 j = (i + 1) % count;
+
+							// TODO: lyah::area
+							signedAreaDouble += contour[i].x * contour[j].y - contour[j].x * contour[i].y;
+						}
+
+						if (signedAreaDouble > 0.0f) {
+							ENGINE_WARN("Glyph [] has a single counter-clockwise contour. Reversing the contour winding order.", glyphIndex);
+
+							std::reverse(contour.begin(), contour.end());
 						}
 					}
+				#endif
 
-					if (!startOnCurve) {
-						// Add the start (off-curve) point.
-						ContourPoint endPoint{};
-						endPoint.x = xCoordinates[startIndex];
-						endPoint.y = yCoordinates[startIndex];
-						endPoint.onCurve = false;
+				uint16 edgeCount = 0;
 
-						contour.emplace_back(endPoint);
-					}
-
-					// Close contour.
-					contour.emplace_back(contour.front());
-
-					contourIndex += 1;
-					startIndex = endIndex;
-				}
-			}
-
-			#ifdef TTF_FIX_INVERTED_CONTOURS
-				if (numberOfContours == 1) {
-					std::vector<ContourPoint>& contour = contours[0];
-
-					const uint32 count = static_cast<uint32>(contour.size());
-
-					float32 signedAreaDouble = 0.0f;
-
-					for (uint32 i = 0; i < count; i += 1) {
-						const uint32 j = (i + 1) % count;
-
-						// TODO: lyah::area
-						signedAreaDouble += contour[i].x * contour[j].y - contour[j].x * contour[i].y;
-					}
-
-					if (signedAreaDouble > 0.0f) {
-						ENGINE_WARN("Glyph [] has a single counter-clockwise contour. Reversing the contour winding order.", glyphIndex);
-
-						std::reverse(contour.begin(), contour.end());
+				for (const std::vector<ContourPoint>& contour : contours) {
+					for (uint16 edgePointIndex = 1; edgePointIndex < contour.size(); edgePointIndex += 1) {
+						if (contour[edgePointIndex].onCurve) {
+							edgeCount += 1;
+						}
 					}
 				}
-			#endif
 
-			uint16 edgeCount = 0;
+				glyph.edges = sequence<Edge>(edgeCount);
 
-			for (const std::vector<ContourPoint>& contour : contours) {
-				for (uint16 edgePointIndex = 1; edgePointIndex < contour.size(); edgePointIndex += 1) {
-					if (contour[edgePointIndex].onCurve) {
-						edgeCount += 1;
+				uint16 edgeIndex = 0;
+
+				for (const std::vector<ContourPoint>& contour : contours) {
+					for (uint16 edgePointIndex = 1; edgePointIndex < contour.size(); edgePointIndex += 1) {
+						ContourPoint contourPoint = contour[edgePointIndex];
+
+						if (!contourPoint.onCurve) {
+							continue;
+						}
+
+						Edge& edge = glyph.edges[edgeIndex];
+						edge.end.x = contourPoint.x;
+						edge.end.y = contourPoint.y;
+						edge.curved = !contour[edgePointIndex - 1].onCurve;
+
+						if (edge.curved) {
+							edge.start.x = contour[edgePointIndex - 2].x;
+							edge.start.y = contour[edgePointIndex - 2].y;
+							edge.control.x = contour[edgePointIndex - 1].x;
+							edge.control.y = contour[edgePointIndex - 1].y;
+						}
+						else {
+							edge.start.x = contour[edgePointIndex - 1].x;
+							edge.start.y = contour[edgePointIndex - 1].y;
+						}
+
+						edgeIndex += 1;
 					}
 				}
 			}
+			else {
+				// Parse compound glyph.
+				std::vector<Edge> edges;
 
-			glyph.edges = sequence<TTFEdge>(edgeCount);
+				for (uint16 componentIndex = 0; componentIndex < maxComponentDepth; componentIndex += 1) {
+					// Component flag.
+					const uint16 flags = stream.read<uint16>(true);
 
-			uint16 edgeIndex = 0;
+					// Glyph index of component.
+					const uint16 componentGlyphIndex = stream.read<uint16>(true);
 
-			for (const std::vector<ContourPoint>& contour : contours) {
-				for (uint16 edgePointIndex = 1; edgePointIndex < contour.size(); edgePointIndex += 1) {
-					ContourPoint contourPoint = contour[edgePointIndex];
+					GlyphTransform T;
 
-					if (!contourPoint.onCurve) {
-						continue;
-					}
-
-					TTFEdge& edge = glyph.edges[edgeIndex];
-					edge.end.x = contourPoint.x;
-					edge.end.y = contourPoint.y;
-					edge.curved = !contour[edgePointIndex - 1].onCurve;
-
-					if (edge.curved) {
-						edge.start.x = contour[edgePointIndex - 2].x;
-						edge.start.y = contour[edgePointIndex - 2].y;
-						edge.control.x = contour[edgePointIndex - 1].x;
-						edge.control.y = contour[edgePointIndex - 1].y;
+					if (flags & BIT(0)) {
+						// If set, arguments are 16-bit, otherwise, they are bytes (uint8 or int8).
+						T.e = stream.read<sint16>(true);
+						T.f = stream.read<sint16>(true);
 					}
 					else {
-						edge.start.x = contour[edgePointIndex - 1].x;
-						edge.start.y = contour[edgePointIndex - 1].y;
+						T.e = stream.read<sint8>();
+						T.f = stream.read<sint8>();
 					}
 
-					edgeIndex += 1;
+					if (flags & BIT(3)) {
+						// WE_HAVE_A_SCALE
+						T.a = stream.read<sint16>(true);
+					}
+					else if (flags & BIT(6)) {
+						// WE_HAVE_AN_X_AND_Y_SCALE
+						T.a = stream.read<sint16>(true);
+						T.d = stream.read<sint16>(true);
+					}
+					else if (flags & BIT(7)) {
+						// WE_HAVE_A_TWO_BY_TWO
+						T.a = stream.read<sint16>(true);
+						T.b = stream.read<sint16>(true);
+						T.c = stream.read<sint16>(true);
+						T.d = stream.read<sint16>(true);
+					}
+
+					// TODO: Implement lyah::max.
+					T.m = std::max(abs(T.a), abs(T.b));
+
+					static constexpr float32 G = 33.0f / 65536.0f;
+
+					if (abs(abs(T.a) - abs(T.c)) <= G) {
+						T.m *= 2.0f;
+					}
+
+					// TODO: Implement lyah::max.
+					T.n = std::max(abs(T.c), abs(T.d));
+
+					if (abs(abs(T.b) - abs(T.d)) <= G) {
+						T.n *= 2.0f;
+					}
+
+					const uint64 offset = stream.getByteOffset();
+
+					if (glyphs[componentGlyphIndex].emptyOrUnparsed()) {
+						stream.seek(tableOffset + glyphOffsets[componentGlyphIndex]);
+
+						parseGlyph(stream, tableOffset, glyphOffsets, glyphs, componentGlyphIndex, maxComponentDepth);
+
+						// Reset stream offset after parsing each component glyph.
+						stream.seek(offset);
+					}
+
+					Glyph componentGlyph = glyphs[componentGlyphIndex];
+
+					for (Edge& edge : componentGlyph.edges) {
+						transformPoint(edge.start.x, edge.start.y, T);
+						transformPoint(edge.end.x, edge.end.y, T);
+						transformPoint(edge.control.x, edge.control.y, T);
+
+						edges.emplace_back(edge);
+					}
+
+					if (!(flags & BIT(5))) {
+						break;
+					}
 				}
+
+				glyph.edges = sequence<Edge>(edges.size());
+
+				std::copy(edges.begin(), edges.end(), &glyph.edges[0]);
 			}
 		}
-		else {
-			// Parse compound glyph.
-			std::vector<TTFEdge> edges;
 
-			for (uint16 componentIndex = 0; componentIndex < maxComponentDepth; componentIndex += 1) {
-				// Component flag.
-				const uint16 flags = stream.read<uint16>(true);
+		/* #ifdef TTF_PARSER_VERIFY_CHECKSUM
+			static uint32 calculateTableChecksum(const uint32* table, uint32 byteCount) {
+				uint32 checksum = 0;
+				uint32 longCount = (byteCount + 3) / 4;
 
-				// Glyph index of component.
-				const uint16 componentGlyphIndex = stream.read<uint16>(true);
+				// TODO: Refactor.
+				while (longCount-- > 0) checksum += *table++;
 
-				GlyphTransform T;
-
-				if (flags & BIT(0)) {
-					// If set, arguments are 16-bit, otherwise, they are bytes (uint8 or int8).
-					T.e = stream.read<sint16>(true);
-					T.f = stream.read<sint16>(true);
-				}
-				else {
-					T.e = stream.read<sint8>();
-					T.f = stream.read<sint8>();
-				}
-
-				if (flags & BIT(3)) {
-					// WE_HAVE_A_SCALE
-					T.a = stream.read<sint16>(true);
-				}
-				else if (flags & BIT(6)) {
-					// WE_HAVE_AN_X_AND_Y_SCALE
-					T.a = stream.read<sint16>(true);
-					T.d = stream.read<sint16>(true);
-				}
-				else if (flags & BIT(7)) {
-					// WE_HAVE_A_TWO_BY_TWO
-					T.a = stream.read<sint16>(true);
-					T.b = stream.read<sint16>(true);
-					T.c = stream.read<sint16>(true);
-					T.d = stream.read<sint16>(true);
-				}
-
-				// TODO: Implement lyah::max.
-				T.m = std::max(abs(T.a), abs(T.b));
-
-				static constexpr float32 G = 33.0f / 65536.0f;
-
-				if (abs(abs(T.a) - abs(T.c)) <= G) {
-					T.m *= 2.0f;
-				}
-
-				// TODO: Implement lyah::max.
-				T.n = std::max(abs(T.c), abs(T.d));
-
-				if (abs(abs(T.b) - abs(T.d)) <= G) {
-					T.n *= 2.0f;
-				}
-
-				const uint64 offset = stream.getByteOffset();
-
-				if (glyphs[componentGlyphIndex].emptyOrUnparsed()) {
-					stream.seek(tableOffset + glyphOffsets[componentGlyphIndex]);
-
-					parseGlyph(stream, tableOffset, glyphOffsets, glyphs, componentGlyphIndex, maxComponentDepth);
-
-					// Reset stream offset after parsing each component glyph.
-					stream.seek(offset);
-				}
-
-				TrueTypeGlyph componentGlyph = glyphs[componentGlyphIndex];
-
-				for (TTFEdge& edge : componentGlyph.edges) {
-					transformPoint(edge.start.x, edge.start.y, T);
-					transformPoint(edge.end.x, edge.end.y, T);
-					transformPoint(edge.control.x, edge.control.y, T);
-
-					edges.emplace_back(edge);
-				}
-
-				if (!(flags & BIT(5))) {
-					break;
-				}
+				return checksum;
 			}
-
-			glyph.edges = sequence<TTFEdge>(edges.size());
-
-			std::copy(edges.begin(), edges.end(), &glyph.edges[0]);
-		}
+		#endif */
 	}
-
-	/* #ifdef TTF_PARSER_VERIFY_CHECKSUM
-		static uint32 calculateTableChecksum(const uint32* table, uint32 byteCount) {
-			uint32 checksum = 0;
-			uint32 longCount = (byteCount + 3) / 4;
-
-			// TODO: Refactor.
-			while (longCount-- > 0) checksum += *table++;
-
-			return checksum;
-		}
-	#endif */
 
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
 	template<>
 	File<FileFormat::TTF> Filesystem::decode(const Stream& stream) {
+		using namespace TrueTypeFont;
+
 		File<FileFormat::TTF> file;
 
 		ByteStream byteStream = stream.asByteStream();
@@ -472,7 +476,7 @@ namespace ProjectA {
 			glyphLengths[glyphIndex] = glyphOffsets[glyphIndex + 1] - glyphOffsets[glyphIndex];
 		}
 
-		file.glyphs = sequence<TrueTypeGlyph>(numGlyphs);
+		file.glyphs = sequence<Glyph>(numGlyphs);
 
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("glyf"));

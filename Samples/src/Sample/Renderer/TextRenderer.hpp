@@ -6,7 +6,7 @@ namespace ProjectA {
 	class TextRenderer : public Renderer {
 		public:
 			void build() override {
-				const TrueTypeFont font("../ProjectA/src/Asset/Font/test-regular.ttf");
+				const TrueTypeFontClass font("../ProjectA/src/Asset/Font/test-regular.ttf");
 				const SDFGlyphMap& glyphMap = font.getGlyphMap();
 				const ref<Device> device = getDevice();
 
@@ -285,7 +285,7 @@ namespace ProjectA {
 				updateCamera();
 			}
 
-			void setText(std::string_view text, const TrueTypeFont& font, float32 fontSize) {
+			void setText(std::string_view text, const TrueTypeFontClass& font, float32 fontSize) {
 				ENGINE_ASSERT(text.size() <= MAX_CHARACTER_COUNT, "The text must not exceed [] characters.", MAX_CHARACTER_COUNT);
 
 				characterCount = static_cast<uint32>(text.size());
@@ -303,10 +303,6 @@ namespace ProjectA {
 					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * fontSize);
 
 					if (!glyph.invisible) {
-						// For a line height (ascent - descent) of 1210 FUnits,
-						// the 'A' glyph's width (not including bearing or advance) is 631 FUnits.
-						// The width should be 62.13_px.
-						// TODO: float32 lyah::ceil(float32)
 						const float32 width = glyph.width / lineHeight * fontSize;
 						const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * fontSize;
 

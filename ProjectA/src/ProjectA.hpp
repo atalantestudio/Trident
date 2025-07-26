@@ -28,7 +28,6 @@
 #include "Engine/ECS/ECS.hpp"
 
 // Filesystem
-#include "Engine/Filesystem/Decoder/Decoder.hpp"
 #include "Engine/Filesystem/File/PropertyFile.hpp"
 #include "Engine/Filesystem/File/TTFFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"

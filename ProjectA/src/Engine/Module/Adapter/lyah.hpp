@@ -153,7 +153,7 @@ namespace ProjectA {
 		T operator [](std::size_t index) const {
 			DEBUG_ASSERT(index < 2);
 
-			return pointer_const_cast<const T*>(this)[index];
+			return pointer_cast<const T*>(this)[index];
 		}
 
 		T& operator [](std::size_t index) {
@@ -180,7 +180,7 @@ namespace ProjectA {
 		T operator [](std::size_t index) const {
 			DEBUG_ASSERT(index < 3);
 
-			return pointer_const_cast<const T*>(this)[index];
+			return pointer_cast<const T*>(this)[index];
 		}
 
 		T& operator [](std::size_t index) {

@@ -5,15 +5,9 @@
 #include "Engine/GUI/Font/TrueType/Glyph.hpp"
 
 namespace ProjectA {
-	class TrueTypeFont : public Font {
+	class TrueTypeFontClass : public Font {
 		public:
-			explicit TrueTypeFont(std::string_view path);
-
-			sint16 getAscent() const;
-
-			sint16 getDescent() const;
-
-			sint16 getLineGap() const;
+			explicit TrueTypeFontClass(std::string_view path);
 
 			sint32 getLineHeight() const;
 
@@ -24,9 +18,7 @@ namespace ProjectA {
 			const Glyph& operator [](uint16 codePoint) const;
 
 		private:
-			sint16 ascent;
-			sint16 descent;
-			sint16 lineGap;
+			uint32 lineHeight;
 			std::unordered_map<uint16, uint32> unicodeMap;
 			sequence<Glyph> glyphs;
 			std::unordered_map<uint16, uint16> map;

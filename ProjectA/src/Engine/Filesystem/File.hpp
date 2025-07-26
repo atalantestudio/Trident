@@ -11,7 +11,7 @@ namespace ProjectA {
 	struct File<FileFormat::PNG> {
 		ImageFormat format;
 
-		// Only a depth of 1 is supported.
+		// Depth of 1 is supported.
 		Extent3D extent;
 
 		// Uncompressed and filtered data.
