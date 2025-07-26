@@ -46,7 +46,6 @@ namespace ProjectA {
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
 			static constexpr float32 ALLOWED_PENETRATION = 0.01f;
-			static constexpr float32 PENETRATION_BIAS = 0.2f;
 			static inline const vec2<float32> G = {0.0f, -9.80665f};
 
 		private:

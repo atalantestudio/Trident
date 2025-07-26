@@ -31,6 +31,10 @@ namespace ProjectA {
 				generateVertices(descriptor.resolution);
 			}
 
+			float32 getPenetrationBias() const final override {
+				return 0.01f;
+			}
+
 			vec2<float32> calculateCentroid() const final override {
 				return {0.0f, 0.0f};
 			}

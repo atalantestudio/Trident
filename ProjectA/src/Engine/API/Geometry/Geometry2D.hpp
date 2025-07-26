@@ -13,6 +13,8 @@ namespace ProjectA {
 				return static_cast<uint32>(vertices.count);
 			}
 
+			virtual float32 getPenetrationBias() const = 0;
+
 			virtual vec2<float32> calculateCentroid() const = 0;
 
 			virtual float32 calculateMass(float32 density, const vec2<float32>& scale) const = 0;

@@ -176,7 +176,10 @@ namespace ProjectA {
 
 				contact.massTangent = 1.0f / massTangent;
 
-				contact.bias = -PENETRATION_BIAS * inverseDeltaTime * std::min(0.0f, contact.separation + ALLOWED_PENETRATION);
+				const float32 penetrationBias = (rigidBodyA.geometry->getPenetrationBias() + rigidBodyB.geometry->getPenetrationBias()) * 0.5f;
+
+				// TODO: lyah::min
+				contact.bias = -penetrationBias * inverseDeltaTime * std::min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
 				#ifdef ACCUMULATE_IMPULSES
 					RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);

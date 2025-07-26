@@ -149,7 +149,6 @@ namespace ProjectA {
 		return true;
 	}
 
-	// TODO: Write to visualizationData in debug mode.
 	static bool CircleConvexHullCollider(
 		const RigidBody2D& A,
 		const RigidBody2D& B,
@@ -165,6 +164,13 @@ namespace ProjectA {
 		const float32 scaleA = A.scale[0];
 
 		const GJK2DOutput gjkOutput = GJK2D(pointA, B);
+
+		#ifdef BUILD_MODE_DEBUG
+			if (visualizationData != nullptr) {
+				visualizationData->gjkOutput = gjkOutput;
+			}
+		#endif
+
 		const float32 d = gjkOutput.distance - A.geometry->radius * scaleA;
 
 		if (d > 0.0f) {
@@ -181,6 +187,12 @@ namespace ProjectA {
 		}
 
 		const SAT2DOutput satOutput = SATCircleConvexHull2D(A, B);
+
+		#ifdef BUILD_MODE_DEBUG
+			if (visualizationData != nullptr) {
+				visualizationData->satOutput = satOutput;
+			}
+		#endif
 
 		contactManifold->normal = -satOutput.normal;
 		contactManifold->setContactCount(1);

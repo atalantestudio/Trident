@@ -49,6 +49,10 @@ namespace ProjectA {
 				radius = calculateRadius();
 			}
 
+			float32 getPenetrationBias() const final override {
+				return 0.2f;
+			}
+
 			vec2<float32> calculateCentroid() const final override {
 				vec2<float32> centroid;
 
