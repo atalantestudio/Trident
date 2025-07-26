@@ -111,7 +111,6 @@ namespace ProjectA {
 		return clippedEdge;
 	}
 
-	// TODO: Write to visualizationData in debug-mode.
 	static bool CircleCircleCollider(
 		const RigidBody2D& A,
 		const RigidBody2D& B,
@@ -120,21 +119,28 @@ namespace ProjectA {
 			, VisualizationData2D* visualizationData
 		#endif
 	) {
-		if (abs(lengthSq(B.position) - lengthSq(A.position)) < 0.001f) {
+		const vec2<float32> AB = B.position - A.position;
+		const float32 lengthAB = lengthSq(AB);
+
+		if (abs(lengthAB) < 0.001f) {
 			// Degenerate case: The circles are coincident.
 			return false;
 		}
 
-		const float32 d = lengthSq(B.position - A.position) - lyah::pow(A.geometry->radius + B.geometry->radius, 2.0f);
+		// NOTE: The Y component is ignored for circle scaling.
+		const float32 scaleA = A.scale[0];
+		const float32 scaleB = B.scale[0];
+
+		const float32 d = lengthAB - lyah::pow(A.geometry->radius * scaleA + B.geometry->radius * scaleB, 2.0f);
 
 		if (d > 0.0f) {
 			return false;
 		}
 
-		const vec2<float32> sA = A.position + contactManifold->normal * A.geometry->radius;
-		const vec2<float32> sB = B.position - contactManifold->normal * B.geometry->radius;
+		const vec2<float32> sA = A.position + A.geometry->support(AB) * scaleA;
+		const vec2<float32> sB = B.position + B.geometry->support(-AB) * scaleB;
 
-		contactManifold->normal = normalized(B.position - A.position);
+		contactManifold->normal = normalized(AB);
 		contactManifold->setContactCount(1);
 		contactManifold->contacts[0].position = (sA + sB) * 0.5f;
 		contactManifold->contacts[0].separation = d;
@@ -264,7 +270,7 @@ namespace ProjectA {
 	}
 
 	static constexpr Collider2D COLLIDER_2D_TABLE[static_cast<uint32>(Geometry2DType::MAX_ENUM)][static_cast<uint32>(Geometry2DType::MAX_ENUM)] = {
-		{CircleCircleCollider, CircleConvexHullCollider},
-		{nullptr, ConvexHullConvexHullCollider},
+		{CircleCircleCollider, CircleConvexHullCollider    },
+		{nullptr,              ConvexHullConvexHullCollider},
 	};
 }
