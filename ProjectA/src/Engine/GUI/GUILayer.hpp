@@ -3,7 +3,7 @@
 #include "Engine/GUI/Component/Container.hpp"
 #include "Engine/GUI/ComponentStyle/ContainerStyle.hpp"
 #include "Engine/GUI/ComponentStyle/TextStyle.hpp"
-#include "Engine/GUI/Font/TrueType/TrueTypeFont.hpp"
+#include "Engine/GUI/Font/Font.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/GUI/ID.hpp"
 #include "Engine/Layer/Layer.hpp"
@@ -12,14 +12,14 @@ namespace ProjectA {
 	class GUILayer : public Layer {
 		private:
 			struct FontData {
-				ref<TrueTypeFontClass> font;
+				scope<Font> font;
 				ImageID glyphMapImageId;
 			};
 
 			struct FlushWordData {
 				std::string_view word;
 
-				const TrueTypeFontClass* font;
+				const Font* font;
 				vec2<float32> imageSize;
 				float32 fontSize;
 
@@ -70,7 +70,7 @@ namespace ProjectA {
 			void GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex);
 			void WrapTextChildrenRecursive(uint32 parentIndex);
 			void WrapText(GUIContainer& textComponent);
-			bool OutsideWord(char8 character, const TrueTypeFontClass& font) const;
+			bool OutsideWord(char8 character, const Font& font) const;
 			void FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin);
 			uint32 GetHoveredComponentIndex() const;

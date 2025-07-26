@@ -7,6 +7,7 @@ namespace ProjectA {
 	template<FileFormat FileFormat>
 	struct File;
 
+	// TODO: Replace with ImageAsset?
 	template<>
 	struct File<FileFormat::PNG> {
 		ImageFormat format;
@@ -18,6 +19,7 @@ namespace ProjectA {
 		sequence<uint8> data;
 	};
 
+	// TODO: Replace with ImageAsset?
 	template<>
 	struct File<FileFormat::QOI> {
 		ImageFormat format;

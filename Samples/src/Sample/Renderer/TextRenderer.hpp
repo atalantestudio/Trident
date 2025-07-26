@@ -7,18 +7,18 @@ namespace ProjectA {
 		public:
 			void build() override {
 				const TrueTypeFontClass font("../ProjectA/src/Asset/Font/test-regular.ttf");
-				const SDFGlyphMap& glyphMap = font.getGlyphMap();
+				const ref<ImageAsset>& glyphMapImage = font.getGlyphMapImage();
 				const ref<Device> device = getDevice();
 
 				ref<Buffer> glyphMapImageStagingBuffer;
 
 				// 1. Create image staging buffer and copy the glyph map data to it.
 				{
-					glyphMapImageStagingBuffer = createStagingBuffer(glyphMap.data.count);
+					glyphMapImageStagingBuffer = createStagingBuffer(glyphMapImage.data.count);
 
 					uint8* glyphMapImageStagingBufferMappedRange = glyphMapImageStagingBuffer->map<uint8>(0, glyphMapImageStagingBuffer->size);
 
-					std::copy(glyphMap.data.begin(), glyphMap.data.end(), glyphMapImageStagingBufferMappedRange);
+					std::copy(glyphMapImage.data.begin(), glyphMapImage.data.end(), glyphMapImageStagingBufferMappedRange);
 
 					glyphMapImageStagingBuffer->unmap();
 				}
@@ -28,8 +28,8 @@ namespace ProjectA {
 					ImageDescriptor glyphMapImageDescriptor;
 					glyphMapImageDescriptor.type = ImageType::TEXTURE_2D;
 					glyphMapImageDescriptor.format = ImageFormat::R8_UNORM;
-					glyphMapImageDescriptor.extent.width = glyphMap.extent.width;
-					glyphMapImageDescriptor.extent.height = glyphMap.extent.height;
+					glyphMapImageDescriptor.extent.width = glyphMapImage.extent.width;
+					glyphMapImageDescriptor.extent.height = glyphMapImage.extent.height;
 					glyphMapImageDescriptor.extent.depth = 1;
 					glyphMapImageDescriptor.mipLevelCount = 1;
 					glyphMapImageDescriptor.layerCount = 1;
@@ -46,8 +46,8 @@ namespace ProjectA {
 					bufferImageCopyRegion.imageOffsetX = 0;
 					bufferImageCopyRegion.imageOffsetY = 0;
 					bufferImageCopyRegion.imageOffsetZ = 0;
-					bufferImageCopyRegion.imageExtent.width = glyphMap.extent.width;
-					bufferImageCopyRegion.imageExtent.height = glyphMap.extent.height;
+					bufferImageCopyRegion.imageExtent.width = glyphMapImage.extent.width;
+					bufferImageCopyRegion.imageExtent.height = glyphMapImage.extent.height;
 					bufferImageCopyRegion.imageExtent.depth = 1;
 					bufferImageCopyRegion.imageMipLevel = 0;
 					bufferImageCopyRegion.imageLayerOffset = 0;
@@ -302,7 +302,7 @@ namespace ProjectA {
 
 					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * fontSize);
 
-					if (!glyph.invisible) {
+					if (!glyph.whitespace) {
 						const float32 width = glyph.width / lineHeight * fontSize;
 						const float32 leftSideBearing = glyph.leftSideBearing / lineHeight * fontSize;
 

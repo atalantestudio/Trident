@@ -15,7 +15,6 @@ namespace ProjectA {
 		ENGINE_ASSERT(file.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
 		SDFGlyphMap sdfGlyphMap;
-		sdfGlyphMap.spreadFactor = SPREAD_FACTOR;
 		sdfGlyphMap.extent.width = 2048;
 		sdfGlyphMap.extent.height = 2048;
 		sdfGlyphMap.glyphs = sequence<SDFGlyph>(file.glyphs.count);
@@ -228,9 +227,9 @@ namespace ProjectA {
 			const longHorMetric& hMetric = file.hMetrics[glyphIndex];
 
 			SDFGlyph& sdfGlyph = sdfGlyphMap.glyphs[glyphIndex];
-			sdfGlyph.invisible = trueTypeGlyph.emptyOrUnparsed();
+			sdfGlyph.whitespace = trueTypeGlyph.emptyOrUnparsed();
 
-			if (sdfGlyph.invisible) {
+			if (sdfGlyph.whitespace) {
 				continue;
 			}
 

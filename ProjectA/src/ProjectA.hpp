@@ -37,6 +37,9 @@
 #include "Engine/GUI/GUILayer.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
 
+// Font
+#include "Engine/GUI/Font/Font.hpp"
+
 // Renderer
 #include "Engine/API/Rendering/Buffer.hpp"
 #include "Engine/API/Rendering/ComputePipeline.hpp"
@@ -45,9 +48,6 @@
 #include "Engine/API/Rendering/Swapchain.hpp"
 #include "Engine/API/Rendering/ShaderModule.hpp"
 #include "Engine/Renderer/Renderer.hpp"
-
-// Font
-#include "Engine/GUI/Font/TrueType/TrueTypeFont.hpp"
 
 // Geometry
 #include "Engine/API/Geometry/CircleGeometry2D.hpp"

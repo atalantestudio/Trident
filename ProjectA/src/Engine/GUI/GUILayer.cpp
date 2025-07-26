@@ -31,26 +31,31 @@ namespace ProjectA {
 
 		/* defaultFont->textureIndex = static_cast<uint32>(images.size());
 		defaultFont->glyphMap.map = QUIVER_BITMAP_GLYPH_MAP;
-		defaultFont->glyphMap.base = 32;
+		defaultFont->glyphMap.utfOffset = 32;
 		defaultFont->glyphMap.count = 220;
 		defaultFont->tileHeight = 12;
 		defaultFont->tileSpacing = 1; */
 
-		fonts[fontCount].font = createRef<TrueTypeFontClass>(path);
+		const Stream stream = Filesystem::openStream(path);
+		const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(stream);
 
-		const SDFGlyphMap& glyphMap = fonts[fontCount].font->getGlyphMap();
+		fonts[fontCount].font = createScope<Font>(file);
+
+		const scope<Font>& font = fonts[fontCount].font;
+
+		const ref<ImageAsset>& glyphMapImage = font->getGlyphMapImage();
 
 		TextureArrayLayer glyphMapImageLayer;
-		glyphMapImageLayer.width = glyphMap.extent.width;
-		glyphMapImageLayer.height = glyphMap.extent.height;
-		glyphMapImageLayer.data = sequence<uint8>(glyphMap.data.count * 4);
+		glyphMapImageLayer.width = glyphMapImage->getExtent().width;
+		glyphMapImageLayer.height = glyphMapImage->getExtent().height;
+		glyphMapImageLayer.data = sequence<uint8>(glyphMapImage->getData().count * 4);
 
-		// Map R to RGBA.
-		for (uint32 texelIndex = 0; texelIndex < glyphMap.data.count; texelIndex += 1) {
-			glyphMapImageLayer.data[texelIndex * 4 + 0] = glyphMap.data[texelIndex];
-			glyphMapImageLayer.data[texelIndex * 4 + 1] = 0;
-			glyphMapImageLayer.data[texelIndex * 4 + 2] = 0;
-			glyphMapImageLayer.data[texelIndex * 4 + 3] = 255;
+		// Convert R to RGBA.
+		for (uint32 glyphIndex = 0; glyphIndex < font->getGlyphCount(); glyphIndex += 1) {
+			glyphMapImageLayer.data[glyphIndex * 4 + 0] = glyphMapImage->getData()[glyphIndex];
+			glyphMapImageLayer.data[glyphIndex * 4 + 1] = 0;
+			glyphMapImageLayer.data[glyphIndex * 4 + 2] = 0;
+			glyphMapImageLayer.data[glyphIndex * 4 + 3] = 255;
 		}
 
 		const FontID fontId = fontCount;
@@ -728,7 +733,7 @@ namespace ProjectA {
 	// TODO: lyah::ceil
 	void GUILayer::WrapText(GUIContainer& textComponent) {
 		const FontData& fontData = fonts[textComponent.font];
-		const TrueTypeFontClass& font = *fontData.font;
+		const Font& font = *fontData.font;
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
 		const vec2<float32> imageSize = {static_cast<float32>(imageExtent.width), static_cast<float32>(imageExtent.height)};
 		const float32 lineHeight = textComponent.fontSize / font.getLineHeight();
@@ -765,7 +770,7 @@ namespace ProjectA {
 				else {
 					const Glyph& glyph = font[codePoint];
 
-					if (glyph.invisible) {
+					if (glyph.whitespace) {
 						// Flush the current word if we encounter a blank character.
 						flushCurrentWord = true;
 						postWordAdvanceWidth = glyph.advanceWidth * lineHeight;
@@ -851,7 +856,7 @@ namespace ProjectA {
 		textComponent.size.height.value = textComponent.fontSize * lineCount;
 	}
 
-	bool GUILayer::OutsideWord(char8 character, const TrueTypeFontClass& font) const {
+	bool GUILayer::OutsideWord(char8 character, const Font& font) const {
 		if (character < 0) {
 			// TODO: Handle UTF-16 and UTF-32 characters.
 			return true;
@@ -860,7 +865,7 @@ namespace ProjectA {
 		const uint16 codePoint = static_cast<uint16>(character);
 		const Glyph& glyph = font[codePoint];
 
-		return glyph.invisible;
+		return glyph.whitespace;
 	}
 
 	void GUILayer::FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) {
@@ -1061,7 +1066,7 @@ namespace ProjectA {
 
 	// TODO: lyah::max
 	uint32 GUILayer::calculateTextPreferredWidth(const std::string& string, const TextStyle& textStyle) const {
-		const TrueTypeFontClass& font = *fonts[textStyle.font].font;
+		const Font& font = *fonts[textStyle.font].font;
 
 		uint32 preferredWidth = 0;
 		uint32 lineWidth = 0;
@@ -1089,7 +1094,7 @@ namespace ProjectA {
 			if (firstLineGlyph) {
 				firstLineGlyph = false;
 
-				if (glyph.invisible) {
+				if (glyph.whitespace) {
 					continue;
 				}
 			}
@@ -1104,7 +1109,7 @@ namespace ProjectA {
 
 	// TODO: lyah::max
 	uint32 GUILayer::calculateTextMinimumWidth(const std::string& string, const TextStyle& textStyle) const {
-		const TrueTypeFontClass& font = *fonts[textStyle.font].font;
+		const Font& font = *fonts[textStyle.font].font;
 		const float32 lineHeight = textStyle.fontSize / font.getLineHeight();
 
 		uint32 minimumWordWidth = 0;
@@ -1128,7 +1133,7 @@ namespace ProjectA {
 
 				glyph = &font[codePoint];
 
-				if (glyph->invisible) {
+				if (glyph->whitespace) {
 					closeWord = true;
 				}
 			}

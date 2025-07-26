@@ -3,6 +3,7 @@
 #include "Engine/Filesystem/File/TTFFile.hpp"
 
 namespace ProjectA {
+	// TODO: This struct is very similar to Glyph. Maybe merge them?
 	struct SDFGlyph {
 		// Top-left coordinate.
 		svec2<float32> minCoordinate;
@@ -13,8 +14,8 @@ namespace ProjectA {
 		// Width of the glyph on the glyph map, in px.
 		float32 width;
 
-		// True for spaces, tabs, etc.
-		bool invisible;
+		// Spaces, tabs, etc.
+		bool whitespace;
 	};
 
 	struct SDFGlyphMap {
@@ -23,9 +24,6 @@ namespace ProjectA {
 
 		// Dimensions of the glyph map data.
 		Extent2D extent;
-
-		// Size of the area occupied by the SDF spread.
-		float32 spreadFactor;
 
 		// Per-glyph data.
 		sequence<SDFGlyph> glyphs;
@@ -42,7 +40,10 @@ namespace ProjectA {
 		private:
 			struct FontStorage {
 				uint32 outputGlyphSize;
+
+				// Size of the area occupied by the SDF spread.
 				uint32 spreadFactor;
+
 				sint32 ascent;
 				sint32 descent;
 			};
