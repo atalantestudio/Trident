@@ -14,6 +14,30 @@ namespace ProjectA {
 
 	class ConvexHullGeometry2D : public Geometry2D {
 		public:
+			static ref<ConvexHullGeometry2D> unitSquare() {
+				ConvexHullGeometry2DDescriptor squareGeometryDescriptor{};
+				squareGeometryDescriptor.vertices = {
+					{-0.5f,  0.5f},
+					{ 0.5f,  0.5f},
+					{ 0.5f, -0.5f},
+					{-0.5f, -0.5f},
+				};
+				squareGeometryDescriptor.indices = {
+					0, 1,
+					2, 0,
+					2, 3,
+				};
+				squareGeometryDescriptor.edges = {
+					{0, 1},
+					{1, 2},
+					{2, 3},
+					{3, 0},
+				};
+
+				return createRef<ConvexHullGeometry2D>(squareGeometryDescriptor);
+			}
+
+		public:
 			explicit ConvexHullGeometry2D(const ConvexHullGeometry2DDescriptor& descriptor) :
 				edges(descriptor.edges)
 			{

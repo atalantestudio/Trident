@@ -1,37 +1,18 @@
 #pragma once
 
-#include "BaseLayer.hpp"
+#include "../BaseLayer.hpp"
 
 namespace ProjectA {
-	class Demo5Layer : public BaseLayer {
+	class SampleLayer : public BaseLayer {
 		public:
 			void build() override {
-				ConvexHullGeometry2DDescriptor convexHullGeometryDescriptor;
-				convexHullGeometryDescriptor.vertices = {
-					{-0.5f,  0.5f},
-					{ 0.5f,  0.5f},
-					{ 0.5f, -0.5f},
-					{-0.5f, -0.5f},
-				};
-				convexHullGeometryDescriptor.indices = {
-					0, 1,
-					2, 0,
-					2, 3,
-				};
-				convexHullGeometryDescriptor.edges = {
-					{0, 1},
-					{1, 2},
-					{2, 3},
-					{3, 0},
-				};
-
-				const ref<ConvexHullGeometry2D> convexHullGeometry = createRef<ConvexHullGeometry2D>(convexHullGeometryDescriptor);
+				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
 				EntityDescriptor floorDescriptor{};
 				floorDescriptor.position = {0.0f, -10.0f};
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
-				floorDescriptor.geometry = convexHullGeometry;
+				floorDescriptor.geometry = squareGeometry;
 				floorDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
 				scene.createStaticEntity(floorDescriptor);
@@ -40,7 +21,7 @@ namespace ProjectA {
 				swingBaseDescriptor.position = {0.0f, 0.5f};
 				swingBaseDescriptor.scale = {0.1f, 1.0f};
 				swingBaseDescriptor.friction = 0.0f;
-				swingBaseDescriptor.geometry = convexHullGeometry;
+				swingBaseDescriptor.geometry = squareGeometry;
 				swingBaseDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
 				scene.createStaticEntity(swingBaseDescriptor);
@@ -50,7 +31,7 @@ namespace ProjectA {
 				swingDescriptor.scale = {12.0f, 0.25f};
 				swingDescriptor.mass = 100.0f;
 				swingDescriptor.friction = 0.2f;
-				swingDescriptor.geometry = convexHullGeometry;
+				swingDescriptor.geometry = squareGeometry;
 				swingDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 
 				scene.createDynamicEntity(swingDescriptor);
@@ -60,7 +41,7 @@ namespace ProjectA {
 				leftWeight0Descriptor.scale = {0.5f, 0.5f};
 				leftWeight0Descriptor.mass = 25.0f;
 				leftWeight0Descriptor.friction = 0.2f;
-				leftWeight0Descriptor.geometry = convexHullGeometry;
+				leftWeight0Descriptor.geometry = squareGeometry;
 				leftWeight0Descriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 
 				scene.createDynamicEntity(leftWeight0Descriptor);
@@ -70,7 +51,7 @@ namespace ProjectA {
 				leftWeight1Descriptor.scale = {0.5f, 0.5f};
 				leftWeight1Descriptor.mass = 25.0f;
 				leftWeight1Descriptor.friction = 0.2f;
-				leftWeight1Descriptor.geometry = convexHullGeometry;
+				leftWeight1Descriptor.geometry = squareGeometry;
 				leftWeight1Descriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 
 				scene.createDynamicEntity(leftWeight1Descriptor);
@@ -79,7 +60,7 @@ namespace ProjectA {
 				rightWeightDescriptor.position = {5.5f, 15.0f};
 				rightWeightDescriptor.mass = 100.0f;
 				rightWeightDescriptor.friction = 0.2f;
-				rightWeightDescriptor.geometry = convexHullGeometry;
+				rightWeightDescriptor.geometry = squareGeometry;
 				rightWeightDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 
 				scene.createDynamicEntity(rightWeightDescriptor);

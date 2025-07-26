@@ -5,7 +5,7 @@
 #include "Engine/entry_point.hpp"
 
 // #include "Layer/GUI/StatisticsLayer.hpp"
-#include "Layer/Sample/RollingBall.hpp"
+#include "Layer/Sample/Polygons.hpp"
 
 namespace ProjectA {
 	class Physics2DApplication : public Application {

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "BaseLayer.hpp"
+#include "../BaseLayer.hpp"
 
 namespace ProjectA {
-	class PolygonsLayer : public BaseLayer {
+	class SampleLayer : public BaseLayer {
 		public:
 			void build() override {
 				ConvexHullGeometry2DDescriptor polygonGeometryDescriptor;

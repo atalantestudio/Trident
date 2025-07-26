@@ -6,26 +6,7 @@ namespace ProjectA {
 	class SampleLayer : public BaseLayer {
 		public:
 			void build() override {
-				ConvexHullGeometry2DDescriptor squareGeometryDescriptor{};
-				squareGeometryDescriptor.vertices = {
-					{-0.5f,  0.5f},
-					{ 0.5f,  0.5f},
-					{ 0.5f, -0.5f},
-					{-0.5f, -0.5f},
-				};
-				squareGeometryDescriptor.indices = {
-					0, 1,
-					2, 0,
-					2, 3,
-				};
-				squareGeometryDescriptor.edges = {
-					{0, 1},
-					{1, 2},
-					{2, 3},
-					{3, 0},
-				};
-
-				const ref<ConvexHullGeometry2D> squareGeometry = createRef<ConvexHullGeometry2D>(squareGeometryDescriptor);
+				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
 				EntityDescriptor floorDescriptor{};
 				floorDescriptor.position = {0.0f, -10.0f};

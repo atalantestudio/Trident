@@ -11,6 +11,15 @@ namespace ProjectA {
 	// NOTE: This geometry is well-fitted for triangle fan rendering.
 	class CircleGeometry2D : public Geometry2D {
 		public:
+			static ref<CircleGeometry2D> unitCircle(uint32 resolution) {
+				CircleGeometry2DDescriptor descriptor{};
+				descriptor.radius = 0.5f;
+				descriptor.resolution = resolution;
+
+				return createRef<CircleGeometry2D>(descriptor);
+			}
+
+		public:
 			explicit CircleGeometry2D(const CircleGeometry2DDescriptor& descriptor) {
 				ENGINE_ASSERT(descriptor.radius > 0.0f, "The radius must be positive.");
 				ENGINE_ASSERT(descriptor.resolution > 2, "The resolution must be greater than 2.");

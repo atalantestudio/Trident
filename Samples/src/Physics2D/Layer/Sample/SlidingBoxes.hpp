@@ -1,36 +1,18 @@
 #pragma once
 
-#include "BaseLayer.hpp"
+#include "../BaseLayer.hpp"
 
 namespace ProjectA {
-	class Demo2Layer : public BaseLayer {
+	class SampleLayer : public BaseLayer {
 		public:
 			void build() override {
-				ConvexHullGeometry2DDescriptor convexHullGeometryDescriptor;
-				convexHullGeometryDescriptor.vertices = {
-					{-0.5f,  0.5f},
-					{ 0.5f,  0.5f},
-					{ 0.5f, -0.5f},
-					{-0.5f, -0.5f},
-				};
-				convexHullGeometryDescriptor.indices = {
-					0, 1, 2,
-					0, 2, 3,
-				};
-				convexHullGeometryDescriptor.edges = {
-					{0, 1},
-					{1, 2},
-					{2, 3},
-					{3, 0},
-				};
-
-				const ref<ConvexHullGeometry2D> convexHullGeometry = createRef<ConvexHullGeometry2D>(convexHullGeometryDescriptor);
+				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
 				EntityDescriptor floorDescriptor{};
 				floorDescriptor.position = {0.0f, -10.0f};
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
-				floorDescriptor.geometry = convexHullGeometry;
+				floorDescriptor.geometry = squareGeometry;
 
 				scene.createStaticEntity(floorDescriptor);
 
@@ -39,7 +21,7 @@ namespace ProjectA {
 				entity0Descriptor.rotation = -0.25f;
 				entity0Descriptor.scale = {13.0f, 0.25f};
 				entity0Descriptor.friction = 0.2f;
-				entity0Descriptor.geometry = convexHullGeometry;
+				entity0Descriptor.geometry = squareGeometry;
 
 				scene.createStaticEntity(entity0Descriptor);
 
@@ -47,7 +29,7 @@ namespace ProjectA {
 				entity1Descriptor.position = {5.25f, 9.5f};
 				entity1Descriptor.scale = {0.25f, 1.0f};
 				entity1Descriptor.friction = 0.2f;
-				entity1Descriptor.geometry = convexHullGeometry;
+				entity1Descriptor.geometry = squareGeometry;
 
 				scene.createStaticEntity(entity1Descriptor);
 
@@ -56,7 +38,7 @@ namespace ProjectA {
 				entity2Descriptor.rotation = 0.25f;
 				entity2Descriptor.scale = {13.0f, 0.25f};
 				entity2Descriptor.friction = 0.2f;
-				entity2Descriptor.geometry = convexHullGeometry;
+				entity2Descriptor.geometry = squareGeometry;
 
 				scene.createStaticEntity(entity2Descriptor);
 
@@ -64,7 +46,7 @@ namespace ProjectA {
 				entity3Descriptor.position = {-5.25f, 5.5f};
 				entity3Descriptor.scale = {0.25f, 1.0f};
 				entity3Descriptor.friction = 0.2f;
-				entity3Descriptor.geometry = convexHullGeometry;
+				entity3Descriptor.geometry = squareGeometry;
 
 				scene.createStaticEntity(entity3Descriptor);
 
@@ -73,19 +55,20 @@ namespace ProjectA {
 				entity4Descriptor.rotation = -0.25f;
 				entity4Descriptor.scale = {13.0f, 0.25f};
 				entity4Descriptor.friction = 0.2f;
-				entity4Descriptor.geometry = convexHullGeometry;
+				entity4Descriptor.geometry = squareGeometry;
 
 				scene.createStaticEntity(entity4Descriptor);
 
 				static constexpr float32 frictions[5] = {0.75f, 0.5f, 0.35f, 0.1f, 0.0f};
 
+				EntityDescriptor boxDescriptor{};
+				boxDescriptor.scale = {0.5f, 0.5f};
+				boxDescriptor.mass = 25.0f;
+				boxDescriptor.geometry = squareGeometry;
+
 				for (uint32 boxIndex = 0; boxIndex < 5; boxIndex += 1) {
-					EntityDescriptor boxDescriptor{};
 					boxDescriptor.position = {-7.5f + 2.0f * boxIndex, 14.0f};
-					boxDescriptor.scale = {0.5f, 0.5f};
-					boxDescriptor.mass = 25.0f;
 					boxDescriptor.friction = frictions[boxIndex];
-					boxDescriptor.geometry = convexHullGeometry;
 
 					scene.createDynamicEntity(boxDescriptor);
 				}
