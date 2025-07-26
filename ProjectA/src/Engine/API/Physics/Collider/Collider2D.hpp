@@ -4,6 +4,7 @@
 #include "Engine/API/Physics/Contact/ContactManifold.hpp"
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/SAT2D.hpp"
+#include "Engine/API/Physics/SATCircleConvexHull2D.hpp"
 
 #ifdef BUILD_MODE_DEBUG
 	#include "Engine/API/Physics/VisualizationData.hpp"
@@ -160,14 +161,17 @@ namespace ProjectA {
 		RigidBody2D pointA = A;
 		pointA.geometry = createRef<PointGeometry2D>();
 
+		// NOTE: The Y component is ignored for circle scaling.
+		const float32 scaleA = A.scale[0];
+
 		const GJK2DOutput gjkOutput = GJK2D(pointA, B);
-		const float32 d = gjkOutput.distance - A.geometry->radius;
+		const float32 d = gjkOutput.distance - A.geometry->radius * scaleA;
 
 		if (d > 0.0f) {
 			return false;
 		}
 
-		if (d > -A.geometry->radius) {
+		if (d > -A.geometry->radius * scaleA) {
 			contactManifold->normal = normalized(gjkOutput.closestB - gjkOutput.closestA);
 			contactManifold->setContactCount(1);
 			contactManifold->contacts[0].position = gjkOutput.closestB;
@@ -176,8 +180,12 @@ namespace ProjectA {
 			return true;
 		}
 
-		// TODO: Handle deep contact with SAT.
-		BREAKPOINT();
+		const SAT2DOutput satOutput = SATCircleConvexHull2D(A, B);
+
+		contactManifold->normal = -satOutput.normal;
+		contactManifold->setContactCount(1);
+		contactManifold->contacts[0].position = satOutput.incidentSupportPoint - satOutput.normal * satOutput.separation;
+		contactManifold->contacts[0].separation = satOutput.separation - A.geometry->radius * scaleA;
 
 		return true;
 	}

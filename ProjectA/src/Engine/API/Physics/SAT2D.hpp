@@ -94,8 +94,6 @@ namespace ProjectA {
 			return output;
 		}
 
-		const SAT2DOutput outputA = output;
-
 		queryEdgeDirections(B, A, output);
 
 		if (output.separation > 0.0f) {
