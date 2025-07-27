@@ -157,7 +157,7 @@ namespace ProjectA {
 			std::static_pointer_cast<VulkanBuffer>(sourceBuffer)->object,
 			std::static_pointer_cast<VulkanBuffer>(destinationBuffer)->object,
 			static_cast<uint32>(copyRegions.count),
-			pointer_cast<const VkBufferCopy*>(copyRegions)
+			pointer_cast<const VkBufferCopy*>(&copyRegions[0])
 		);
 
 		commandCount += 1;

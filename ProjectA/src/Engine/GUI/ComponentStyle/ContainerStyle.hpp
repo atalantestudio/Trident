@@ -19,7 +19,7 @@ namespace ProjectA {
 		float32 outlineSize = 0_px;
 		Color outlineColor = 0x00000000;
 		float32 borderRadius = 0.0f;
-		const EventListeners* eventListeners;
+		const EventListeners* eventListeners = {};
 
 		std::string_view debugName;
 	};

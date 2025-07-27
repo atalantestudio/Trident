@@ -7,11 +7,13 @@
 namespace ProjectA {
 	class TTFToTFOProcess : public Process {
 		public:
-			explicit TTFToTFOProcess() {
-				const Stream stream = Filesystem::openStream("../ProjectA/src/Asset/Font/test-regular.ttf");
+			explicit TTFToTFOProcess(std::string_view path, FontDescriptor& fontDescriptor) {
+				const Stream stream = Filesystem::openStream(path);
 				const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(stream);
 
-				const SDFGlyphMap sdfGlyphMap = SDFGlyphMapBuildProcess::build(file);
+				SDFGlyphMap sdfGlyphMap;
+
+				SDFGlyphMapBuildProcess sdfGlyphMapProcess(file, sdfGlyphMap);
 
 				ImageAssetDescriptor glyphMapImageDescriptor{};
 				glyphMapImageDescriptor.format = ImageFormat::R8_UNORM;
@@ -23,14 +25,12 @@ namespace ProjectA {
 
 				const ref<ImageAsset> glyphMapImage = createRef<ImageAsset>(glyphMapImageDescriptor);
 
-				FontDescriptor fontDescriptor{};
 				fontDescriptor.glyphMapImage = glyphMapImage;
 				fontDescriptor.glyphs = sdfGlyphMap.glyphs;
 				fontDescriptor.unicodeMap = file.unicodeMap;
 				fontDescriptor.lineHeight = file.ascent - file.descent + file.lineGap;
 
-				const ref<Font> font = createRef<Font>(fontDescriptor);
-
+				// TODO: Remove.
 				/* for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count; glyphIndex += 1) {
 					const TrueTypeFont::Glyph& trueTypeGlyph = file.glyphs[glyphIndex];
 					const TrueTypeFont::longHorMetric& hMetric = file.hMetrics[glyphIndex];
@@ -44,8 +44,6 @@ namespace ProjectA {
 					glyph.advanceWidth = hMetric.advanceWidth;
 					glyph.leftSideBearing = hMetric.leftSideBearing;
 				} */
-
-				BREAKPOINT();
 			}
 	};
 }

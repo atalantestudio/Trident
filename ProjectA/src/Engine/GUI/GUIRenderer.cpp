@@ -11,9 +11,9 @@ namespace ProjectA {
 		colorAttachment.format = surface->getFormat();
 		colorAttachment.sampleCount = 1;
 
-		// TODO: Debug-only.
-		// colorAttachment.loadOperation = LoadOperation::CLEAR;
-		colorAttachment.loadOperation = LoadOperation::LOAD;
+		// TODO: Use of CLEAR is debug-only.
+		colorAttachment.loadOperation = LoadOperation::CLEAR;
+		// colorAttachment.loadOperation = LoadOperation::LOAD;
 
 		colorAttachment.storeOperation = StoreOperation::STORE;
 		colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;
@@ -428,6 +428,9 @@ namespace ProjectA {
 	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		if (subcomponentCount == 0 && glyphSubcomponentCount == 0) {
 			ENGINE_WARN("No GUI components to render.");
+
+			// TODO: If the command encoder is left empty, the attachments will not be transitioned into the final layout.
+			BREAKPOINT();
 
 			return;
 		}

@@ -26,7 +26,7 @@ namespace ProjectA {
 		imageCreateInfo.extent.depth = extent.depth;
 		imageCreateInfo.mipLevels = mipLevelCount;
 		imageCreateInfo.arrayLayers = layerCount;
-		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(sampleCount);
+		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(getSampleCount());
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.usage = getVkImageUsageFlagBits(descriptor.usage);
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;

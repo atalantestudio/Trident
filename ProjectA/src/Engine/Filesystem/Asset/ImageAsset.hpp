@@ -32,7 +32,7 @@ namespace ProjectA {
 				extent(descriptor.extent),
 				mipLevelCount(descriptor.mipLevelCount),
 				layerCount(descriptor.layerCount),
-				sampleCount(descriptor.sampleCount),
+				sampleCount(descriptor.sampleCount - 1),
 				data(descriptor.data)
 			{}
 

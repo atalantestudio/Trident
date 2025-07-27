@@ -62,15 +62,8 @@ namespace ProjectA {
 				return *this;
 			}
 
-			template<typename _T = T>
-			std::enable_if_t<(sizeof(T) <= 8), _T> operator [](uint64 index) const {
-				DEBUG_ASSERT(index < count);
-
-				return array[index];
-			}
-
-			template<typename _T = T>
-			std::enable_if_t<(sizeof(T) > 8), const _T&> operator [](uint64 index) const {
+			template<typename T>
+			T operator [](uint64 index) const {
 				DEBUG_ASSERT(index < count);
 
 				return array[index];

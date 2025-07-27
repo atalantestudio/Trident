@@ -6,14 +6,14 @@
 
 namespace ProjectA {
 	static constexpr uint64 MAX_GLYPH_COUNT = 2048;
+	static constexpr Extent2D GLYPH_MAP_IMAGE_EXTENT = {2048, 2048};
 	static constexpr uint32 GLYPH_SUBIMAGE_DIMENSION = 64;
 	static constexpr uint32 SPREAD_FACTOR = 0;
 
-	SDFGlyphMap SDFGlyphMapBuildProcess::build(const File<FileFormat::TTF>& file) {
+	SDFGlyphMapBuildProcess::SDFGlyphMapBuildProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& output) {
 		ENGINE_ASSERT(file.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
-		SDFGlyphMap output{};
-		output.extent = {2048, 2048};
+		output.extent = GLYPH_MAP_IMAGE_EXTENT;
 		output.glyphs = sequence<Glyph>(file.glyphs.count);
 
 		const ref<Device> device = Renderer::getDevice();
@@ -28,7 +28,7 @@ namespace ProjectA {
 		ref<CommandEncoder> commandEncoder;
 		ref<CommandBuffer> commandBuffer;
 
-		const uint64 glyphBufferSize = computeMaxGlyphByteSize(file);
+		const uint64 glyphBufferSize = computeMaxGlyphByteSize(file.glyphs);
 
 		constexpr uint64 fontBufferSize = sizeof(FontStorage);
 
@@ -233,23 +233,18 @@ namespace ProjectA {
 				continue;
 			}
 
-			const uint64 glyphMapSize = sizeof(GlyphBuffer) + trueTypeGlyph.edges.count * sizeof(GlyphEdge);
-
-			// Glyph width in FUnits.
-			const uint16 glyphWidth = trueTypeGlyph.max.x - trueTypeGlyph.min.x;
-
 			// Glyph height in FUnits.
 			const uint16 glyphHeight = trueTypeGlyph.max.y - trueTypeGlyph.min.y;
 
 			// Glyph dimension (the largest between width and height) in FUnits.
 			// TODO: uint16 lyah::max(uint16, uint16)
-			const uint16 glyphDimension = std::max(glyphWidth, glyphHeight);
+			const uint16 glyphDimension = std::max(glyph.width, glyphHeight);
 
 			// Glyph dimension on the high resolution image.
-			//const float32 glyphHighResolutionDimension = (float32) glyphWidth / (float32) glyphImage->getWidth() * (float32) glyphDimension;
+			// const float32 glyphHighResolutionDimension = (float32) glyph.width / (float32) glyphImage->getWidth() * (float32) glyphDimension;
 
 			// Glyph signed distance field width in pixels.
-			//const float32 glyphSdfWidth = static_cast<float32>(glyphWidth) / glyphDimension * GLYPH_SUBIMAGE_DIMENSION;
+			// const float32 glyphSdfWidth = static_cast<float32>(glyph.width) / glyphDimension * GLYPH_SUBIMAGE_DIMENSION;
 
 			glyphMappedRange->minCoordinateX = trueTypeGlyph.min.x;
 			glyphMappedRange->minCoordinateY = trueTypeGlyph.min.y;
@@ -354,18 +349,14 @@ namespace ProjectA {
 		std::copy(glyphMapStagingBufferMappedRange, glyphMapStagingBufferMappedRange + glyphMapStagingBuffer->size, &output.data[0]);
 
 		glyphMapStagingBuffer->unmap();
-
-		return output;
 	}
 
-	uint64 SDFGlyphMapBuildProcess::computeMaxGlyphByteSize(const File<FileFormat::TTF>& file) {
+	uint64 SDFGlyphMapBuildProcess::computeMaxGlyphByteSize(const sequence<TrueTypeFont::Glyph>& glyphs) {
 		uint64 maxGlyphEdgeCount = 0;
 
-		for (const TrueTypeFont::Glyph& trueTypeGlyph : file.glyphs) {
-			// TODO: lyah::max(uint64, uint64).
-			if (trueTypeGlyph.edges.count > maxGlyphEdgeCount) {
-				maxGlyphEdgeCount = trueTypeGlyph.edges.count;
-			}
+		for (const TrueTypeFont::Glyph& glyph : glyphs) {
+			// TODO: lyah::max
+			maxGlyphEdgeCount = std::max(maxGlyphEdgeCount, glyph.edges.count);
 		}
 
 		return sizeof(GlyphBuffer) + maxGlyphEdgeCount * sizeof(GlyphEdge);

@@ -2,6 +2,7 @@
 
 #include "Engine/Filesystem/File/TTFFile.hpp"
 #include "Engine/GUI/Font/Glyph.hpp"
+#include "Engine/Process/Process.hpp"
 
 namespace ProjectA {
 	struct SDFGlyphMap {
@@ -10,14 +11,7 @@ namespace ProjectA {
 		sequence<Glyph> glyphs;
 	};
 
-	// TODO: Extend Process.
-	class SDFGlyphMapBuildProcess {
-		public:
-			static SDFGlyphMap build(const File<FileFormat::TTF>& file);
-
-		private:
-			static uint64 computeMaxGlyphByteSize(const File<FileFormat::TTF>& file);
-
+	class SDFGlyphMapBuildProcess : public Process {
 		private:
 			struct FontStorage {
 				uint32 outputGlyphSize;
@@ -45,5 +39,11 @@ namespace ProjectA {
 				sint32 controlY;
 				bool curved;
 			};
+
+		public:
+			explicit SDFGlyphMapBuildProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& sdfGlyphMap);
+
+		private:
+			static uint64 computeMaxGlyphByteSize(const sequence<TrueTypeFont::Glyph>& glyphs);
 	};
 }

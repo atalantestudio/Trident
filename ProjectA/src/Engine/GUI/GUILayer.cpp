@@ -2,6 +2,7 @@
 
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/Application/Application.hpp"
+#include "Engine/BuildProcess/TTFToTFOProcess.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/GUI/GUILayer.hpp"
 
@@ -25,6 +26,7 @@ namespace ProjectA {
 		textureArrayFlushed = true;
 	}
 
+	// TODO: Fonts will always be loaded as .tfo files, except in the build phase which converts TTF to .tfo.
 	FontID GUILayer::loadFont(std::string_view path) {
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
@@ -36,10 +38,11 @@ namespace ProjectA {
 		defaultFont->tileHeight = 12;
 		defaultFont->tileSpacing = 1; */
 
-		const Stream stream = Filesystem::openStream(path);
-		const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(stream);
+		FontDescriptor fontDescriptor{};
 
-		fonts[fontCount].font = createScope<Font>(file);
+		TTFToTFOProcess process(path, fontDescriptor);
+
+		fonts[fontCount].font = createScope<Font>(fontDescriptor);
 
 		const scope<Font>& font = fonts[fontCount].font;
 
