@@ -167,7 +167,7 @@ project "Samples"
 		runtime "Release"
 		optimize "on"
 
-project "Editor"
+project "AssetBuilder"
 	location "%{prj.name}"
 	kind "ConsoleApp"
 	language "C++"

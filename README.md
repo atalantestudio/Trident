@@ -17,7 +17,7 @@ Make sure that the Vulkan SDK is installed (the engine will search for the `VULK
 
 At the time of writing, some resources are not present in the repository:
 - `ProjectA/src/Asset/Font/**`: Test fonts for the GUI and text renderers.
-- `Editor/Editor.tpr`: Configuration file for the Editor project.
+- `AssetBuilder/AssetBuilder.tpr`: Configuration file for the AssetBuilder project.
 - `Samples/Samples.tpr`: Configuration file for the Samples project.
 
 ### Visual Studio
@@ -36,7 +36,7 @@ Select the task corresponding to your configuration.
 ## Property file
 
 A property file is a text file containing information for running a project.
-Property files have the name of their parent project and end with the .tpr extension.
+Property files share the name of their parent project and end with the .tpr extension.
 
 Here is the default structure for a property file:
 ```txt

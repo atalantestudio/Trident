@@ -2,42 +2,6 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Run Editor (Debug)",
-			"type": "cppvsdbg",
-			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/Editor/Editor.exe",
-			"args": [],
-			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/Editor",
-			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Debug)"
-		},
-		{
-			"name": "Run Editor (Profile)",
-			"type": "cppvsdbg",
-			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Profile/Editor/Editor.exe",
-			"args": [],
-			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/Editor",
-			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Profile)"
-		},
-		{
-			"name": "Run Editor (Release)",
-			"type": "cppvsdbg",
-			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Release/Editor/Editor.exe",
-			"args": [],
-			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/Editor",
-			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Release)"
-		},
-		{
 			"name": "Run Samples (Debug)",
 			"type": "cppvsdbg",
 			"request": "launch",
@@ -69,6 +33,42 @@
 			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/Samples",
+			"environment": [],
+			"console": "integratedTerminal",
+			"preLaunchTask": "Build (Release)"
+		},
+		{
+			"name": "Run AssetBuilder (Debug)",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/AssetBuilder/AssetBuilder.exe",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/AssetBuilder",
+			"environment": [],
+			"console": "integratedTerminal",
+			"preLaunchTask": "Build (Debug)"
+		},
+		{
+			"name": "Run AssetBuilder (Profile)",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/windows_x86_64_Profile/AssetBuilder/AssetBuilder.exe",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/AssetBuilder",
+			"environment": [],
+			"console": "integratedTerminal",
+			"preLaunchTask": "Build (Profile)"
+		},
+		{
+			"name": "Run AssetBuilder (Release)",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/windows_x86_64_Release/AssetBuilder/AssetBuilder.exe",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/AssetBuilder",
 			"environment": [],
 			"console": "integratedTerminal",
 			"preLaunchTask": "Build (Release)"
