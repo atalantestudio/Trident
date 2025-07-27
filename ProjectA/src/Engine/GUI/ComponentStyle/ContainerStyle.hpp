@@ -14,7 +14,7 @@ namespace ProjectA {
 		AnchorPoint anchorPoint = AnchorPoint::TOP | AnchorPoint::LEFT;
 		LayoutDirection layoutDirection = HORIZONTAL;
 		float32 layoutSpacing = 0_px;
-		Color color = 0x00000000;
+		Color color = 0xffffffff;
 		ImageID image = 0;
 		float32 outlineSize = 0_px;
 		Color outlineColor = 0x00000000;

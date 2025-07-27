@@ -47,18 +47,19 @@ namespace ProjectA {
 		const scope<Font>& font = fonts[fontCount].font;
 
 		const ref<ImageAsset>& glyphMapImage = font->getGlyphMapImage();
+		const uint64 texelCount = glyphMapImage->getData().count;
 
 		TextureArrayLayer glyphMapImageLayer;
 		glyphMapImageLayer.width = glyphMapImage->getExtent().width;
 		glyphMapImageLayer.height = glyphMapImage->getExtent().height;
-		glyphMapImageLayer.data = sequence<uint8>(glyphMapImage->getData().count * 4);
+		glyphMapImageLayer.data = sequence<uint8>(texelCount * 4);
 
 		// Convert R to RGBA.
-		for (uint32 glyphIndex = 0; glyphIndex < font->getGlyphCount(); glyphIndex += 1) {
-			glyphMapImageLayer.data[glyphIndex * 4 + 0] = glyphMapImage->getData()[glyphIndex];
-			glyphMapImageLayer.data[glyphIndex * 4 + 1] = 0;
-			glyphMapImageLayer.data[glyphIndex * 4 + 2] = 0;
-			glyphMapImageLayer.data[glyphIndex * 4 + 3] = 255;
+		for (uint32 texelIndex = 0, channelIndex = 0; texelIndex < texelCount; texelIndex += 1, channelIndex += 4) {
+			glyphMapImageLayer.data[channelIndex + 0] = glyphMapImage->getData()[texelIndex];
+			glyphMapImageLayer.data[channelIndex + 1] = 0;
+			glyphMapImageLayer.data[channelIndex + 2] = 0;
+			glyphMapImageLayer.data[channelIndex + 3] = 255;
 		}
 
 		const FontID fontId = fontCount;

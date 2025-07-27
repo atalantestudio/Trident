@@ -10,7 +10,6 @@ namespace ProjectA {
 				containerStyle.padding = {8_px, 8_px};
 				containerStyle.layoutDirection = VERTICAL;
 				containerStyle.layoutSpacing = 8_px;
-				// windowStyle.color = 0x313131ff;
 
 				buttonEventListeners.onMouseDown = BIND(onMouseDown);
 				buttonEventListeners.onMouseUp = BIND(onMouseUp);
@@ -20,15 +19,10 @@ namespace ProjectA {
 
 				buttonStyle.size = {FIT, FIT};
 				buttonStyle.padding = {10_px, 8_px};
-				// buttonStyle.color = 0x494949ff;
 				buttonStyle.color = 0xffffffff;
 				buttonStyle.layoutSpacing = 8_px;
 				buttonStyle.outlineColor = 0xd9d9d9ff;
 				buttonStyle.eventListeners = &buttonEventListeners;
-
-				imageStyle.size = {16_px, 16_px};
-				imageStyle.color = 0x2c3338ff;
-				imageStyle.borderRadius = 8_px;
 
 				textStyle.color = 0x000000ff;
 				textStyle.font = font;
@@ -87,7 +81,6 @@ namespace ProjectA {
 			FontID font;
 			ContainerStyle containerStyle;
 			ContainerStyle buttonStyle;
-			ContainerStyle imageStyle;
 			TextStyle textStyle;
 			EventListeners buttonEventListeners;
 
