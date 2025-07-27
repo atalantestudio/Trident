@@ -61,9 +61,7 @@ namespace ProjectA {
 			FWord y;
 		};
 
-		struct ContourPoint {
-			FWord x;
-			FWord y;
+		struct ContourPoint : public Point {
 			bool onCurve;
 		};
 

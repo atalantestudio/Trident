@@ -10,14 +10,11 @@ namespace ProjectA {
 	static constexpr uint32 SPREAD_FACTOR = 0;
 
 	SDFGlyphMap SDFGlyphMapBuildProcess::build(const File<FileFormat::TTF>& file) {
-		using namespace TrueTypeFont;
-
 		ENGINE_ASSERT(file.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
-		SDFGlyphMap sdfGlyphMap;
-		sdfGlyphMap.extent.width = 2048;
-		sdfGlyphMap.extent.height = 2048;
-		sdfGlyphMap.glyphs = sequence<SDFGlyph>(file.glyphs.count);
+		SDFGlyphMap output{};
+		output.extent = {2048, 2048};
+		output.glyphs = sequence<Glyph>(file.glyphs.count);
 
 		const ref<Device> device = Renderer::getDevice();
 		const ref<Queue> computeQueue = device->getQueue(QueueFamilyCapability::COMPUTE);
@@ -139,8 +136,8 @@ namespace ProjectA {
 		ImageDescriptor glyphMapSdfImageDescriptor{};
 		glyphMapSdfImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphMapSdfImageDescriptor.format = ImageFormat::R8_UNORM;
-		glyphMapSdfImageDescriptor.extent.width = sdfGlyphMap.extent.width;
-		glyphMapSdfImageDescriptor.extent.height = sdfGlyphMap.extent.height;
+		glyphMapSdfImageDescriptor.extent.width = output.extent.width;
+		glyphMapSdfImageDescriptor.extent.height = output.extent.height;
 		glyphMapSdfImageDescriptor.extent.depth = 1;
 		glyphMapSdfImageDescriptor.mipLevelCount = 1;
 		glyphMapSdfImageDescriptor.layerCount = 1;
@@ -223,13 +220,16 @@ namespace ProjectA {
 		const ref<Fence> writeBufferFence = Renderer::createFence();
 
 		for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count; glyphIndex += 1) {
-			const Glyph& trueTypeGlyph = file.glyphs[glyphIndex];
-			const longHorMetric& hMetric = file.hMetrics[glyphIndex];
+			const TrueTypeFont::Glyph& trueTypeGlyph = file.glyphs[glyphIndex];
+			const TrueTypeFont::longHorMetric& hMetric = file.hMetrics[glyphIndex];
 
-			SDFGlyph& sdfGlyph = sdfGlyphMap.glyphs[glyphIndex];
-			sdfGlyph.whitespace = trueTypeGlyph.emptyOrUnparsed();
+			Glyph& glyph = output.glyphs[glyphIndex];
+			glyph.width = trueTypeGlyph.max.x - trueTypeGlyph.min.x;
+			glyph.advanceWidth = hMetric.advanceWidth;
+			glyph.leftSideBearing = hMetric.leftSideBearing;
+			glyph.whitespace = trueTypeGlyph.emptyOrUnparsed();
 
-			if (sdfGlyph.whitespace) {
+			if (glyph.whitespace) {
 				continue;
 			}
 
@@ -256,10 +256,10 @@ namespace ProjectA {
 			glyphMappedRange->dimension = glyphDimension;
 			glyphMappedRange->edgeCount = static_cast<uint32>(trueTypeGlyph.edges.count);
 
-			GlyphEdge* glyphEdgeMappedRange = static_cast<GlyphEdge*>(static_cast<void*>(glyphMappedRange + 1));
+			GlyphEdge* glyphEdgeMappedRange = pointer_cast<GlyphEdge*>(glyphMappedRange + 1);
 
 			for (uint32 edgeIndex = 0; edgeIndex < trueTypeGlyph.edges.count; edgeIndex += 1) {
-				const Edge& edge = trueTypeGlyph.edges[edgeIndex];
+				const TrueTypeFont::Edge& edge = trueTypeGlyph.edges[edgeIndex];
 
 				glyphEdgeMappedRange[edgeIndex].startX = edge.start.x;
 				glyphEdgeMappedRange[edgeIndex].startY = edge.start.y;
@@ -270,20 +270,20 @@ namespace ProjectA {
 				glyphEdgeMappedRange[edgeIndex].curved = edge.curved;
 			}
 
-			sdfGlyph.width = static_cast<float32>(trueTypeGlyph.max.x - trueTypeGlyph.min.x);
-			sdfGlyph.width /= lineHeight;
-			sdfGlyph.width *= GLYPH_SUBIMAGE_DIMENSION;
+			float32 width = static_cast<float32>(trueTypeGlyph.max.x - trueTypeGlyph.min.x);
+			width /= lineHeight;
+			width *= GLYPH_SUBIMAGE_DIMENSION;
 
-			if (xOffset + sdfGlyph.width >= glyphMapExtent.width) {
+			if (xOffset + width >= glyphMapExtent.width) {
 				xOffset = 0;
 				yOffset += GLYPH_SUBIMAGE_DIMENSION;
 			}
 
-			sdfGlyph.minCoordinate.x = xOffset / glyphMapExtent.width;
-			sdfGlyph.minCoordinate.y = yOffset / glyphMapExtent.height;
+			glyph.minCoordinate.x = xOffset / glyphMapExtent.width;
+			glyph.minCoordinate.y = yOffset / glyphMapExtent.height;
 
-			sdfGlyph.maxCoordinate.x = (xOffset + sdfGlyph.width) / glyphMapExtent.width;
-			sdfGlyph.maxCoordinate.y = (yOffset + GLYPH_SUBIMAGE_DIMENSION) / glyphMapExtent.height;
+			glyph.maxCoordinate.x = (xOffset + width) / glyphMapExtent.width;
+			glyph.maxCoordinate.y = (yOffset + GLYPH_SUBIMAGE_DIMENSION) / glyphMapExtent.height;
 
 			glyphOffsetMappedRange[0] = static_cast<uint32>(xOffset);
 			glyphOffsetMappedRange[1] = static_cast<uint32>(yOffset);
@@ -312,13 +312,13 @@ namespace ProjectA {
 			device->waitIdle();
 
 			// TODO: lyah::ceil.
-			xOffset += std::ceil(sdfGlyph.width) + SPREAD_FACTOR * 2;
+			xOffset += std::ceil(width) + SPREAD_FACTOR * 2;
 		}
 
 		// Transition the glyph map image to TRANSFER_SRC_OPTIMAL and copy its data to the final buffer.
 
 		BufferDescriptor glyphMapStagingBufferDescriptor;
-		glyphMapStagingBufferDescriptor.size = sdfGlyphMap.extent.width * sdfGlyphMap.extent.height;
+		glyphMapStagingBufferDescriptor.size = output.extent.width * output.extent.height;
 		glyphMapStagingBufferDescriptor.usage = BufferUsage::TRANSFER_DST;
 		glyphMapStagingBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		glyphMapStagingBufferDescriptor.persistent = false;
@@ -347,15 +347,15 @@ namespace ProjectA {
 
 		device->waitIdle();
 
-		sdfGlyphMap.data = sequence<uint8>(glyphMapStagingBuffer->size);
+		output.data = sequence<uint8>(glyphMapStagingBuffer->size);
 
 		const uint8* glyphMapStagingBufferMappedRange = glyphMapStagingBuffer->map<uint8>(0, glyphMapStagingBuffer->size);
 
-		std::copy(glyphMapStagingBufferMappedRange, glyphMapStagingBufferMappedRange + glyphMapStagingBuffer->size, &sdfGlyphMap.data[0]);
+		std::copy(glyphMapStagingBufferMappedRange, glyphMapStagingBufferMappedRange + glyphMapStagingBuffer->size, &output.data[0]);
 
 		glyphMapStagingBuffer->unmap();
 
-		return sdfGlyphMap;
+		return output;
 	}
 
 	uint64 SDFGlyphMapBuildProcess::computeMaxGlyphByteSize(const File<FileFormat::TTF>& file) {

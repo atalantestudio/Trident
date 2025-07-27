@@ -1,32 +1,13 @@
 #pragma once
 
 #include "Engine/Filesystem/File/TTFFile.hpp"
+#include "Engine/GUI/Font/Glyph.hpp"
 
 namespace ProjectA {
-	// TODO: This struct is very similar to Glyph. Maybe merge them?
-	struct SDFGlyph {
-		// Top-left coordinate.
-		svec2<float32> minCoordinate;
-
-		// Bottom-right coordinate.
-		svec2<float32> maxCoordinate;
-
-		// Width of the glyph on the glyph map, in px.
-		float32 width;
-
-		// Spaces, tabs, etc.
-		bool whitespace;
-	};
-
 	struct SDFGlyphMap {
-		// Glyph map data in the R8_UNORM format.
 		sequence<uint8> data;
-
-		// Dimensions of the glyph map data.
 		Extent2D extent;
-
-		// Per-glyph data.
-		sequence<SDFGlyph> glyphs;
+		sequence<Glyph> glyphs;
 	};
 
 	// TODO: Extend Process.

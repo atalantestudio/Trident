@@ -4,7 +4,7 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Process/DefaultProcess.hpp"
+#include "Process/TTFToTFOProcess.hpp"
 
 namespace ProjectA {
 	class ProcessApplication : public Application {
@@ -12,7 +12,7 @@ namespace ProjectA {
 			ProcessApplication(const ApplicationManifest& applicationManifest) :
 				Application(applicationManifest)
 			{
-				registerProcess<DefaultProcess>();
+				registerProcess<TTFToTFOProcess>();
 			}
 	};
 
