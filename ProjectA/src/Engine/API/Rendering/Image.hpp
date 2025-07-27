@@ -31,7 +31,7 @@ namespace ProjectA {
 			}
 
 			uint8 getSampleCount() const {
-				return sampleCount;
+				return sampleCount + 1;
 			}
 
 			ImageLayout getLayout() const {
@@ -52,7 +52,7 @@ namespace ProjectA {
 				extent(descriptor.extent),
 				mipLevelCount(descriptor.mipLevelCount),
 				layerCount(descriptor.layerCount),
-				sampleCount(descriptor.sampleCount)
+				sampleCount(descriptor.sampleCount - 1)
 			{
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 			}
@@ -64,7 +64,7 @@ namespace ProjectA {
 			Extent3D extent;
 			uint32 mipLevelCount;
 			uint32 layerCount;
-			uint8 sampleCount : 7;
+			uint8 sampleCount : 6;
 			ImageLayout layout = ImageLayout::UNDEFINED;
 	};
 }
