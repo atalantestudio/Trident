@@ -66,7 +66,7 @@ namespace ProjectA {
 
 		WIN32_ASSERT(wglMakeCurrent(hDC, dummyHGLRC) == TRUE);
 
-		const PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = static_cast<const PFNWGLCREATECONTEXTATTRIBSARBPROC>(static_cast<void*>(wglGetProcAddress("wglCreateContextAttribsARB")));
+		const PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = pointer_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
 
 		WIN32_ASSERT(wglCreateContextAttribsARB != nullptr);
 

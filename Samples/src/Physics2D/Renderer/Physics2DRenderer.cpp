@@ -505,8 +505,8 @@ namespace ProjectA {
 
 		void* mappedRange = stagingBuffer->map<void>(0, stagingBufferSize);
 		svec2<float32>* vertexMappedRange = static_cast<svec2<float32>*>(mappedRange);
-		uint16* indexMappedRange = static_cast<uint16*>(static_cast<void*>(vertexMappedRange + vertexCount));
-		Instance* instanceMappedRange = static_cast<Instance*>(static_cast<void*>(indexMappedRange + indexCount));
+		uint16* indexMappedRange = pointer_cast<uint16*>(vertexMappedRange + vertexCount);
+		Instance* instanceMappedRange = pointer_cast<Instance*>(indexMappedRange + indexCount);
 
 		for (uint32 rigidBodyIndex = 0; rigidBodyIndex < rigidBodyPool.componentCount; rigidBodyIndex += 1) {
 			const Entity entity = rigidBodyPool.componentIndexToEntity[rigidBodyIndex];

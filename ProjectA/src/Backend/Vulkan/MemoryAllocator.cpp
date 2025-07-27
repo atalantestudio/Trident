@@ -187,7 +187,9 @@ namespace ProjectA {
 
 		memoryAllocation.mappedSuballocationCount += 1;
 
-		return static_cast<void*>(static_cast<uint8*>(memoryAllocation.mappedRange) + memorySuballocation.offset + offset);
+		uint8* mappedRange = static_cast<uint8*>(memoryAllocation.mappedRange) + memorySuballocation.offset + offset;
+
+		return static_cast<void*>(mappedRange);
 	}
 
 	void MemoryAllocator::unmapSuballocation(VkDevice device, uint32 memoryAllocationIndex) {

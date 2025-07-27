@@ -12,6 +12,7 @@ namespace ProjectA {
 					value = fillModeOrPixels;
 				}
 				else {
+					// TODO: Remove sint32 cast?
 					fillMode = static_cast<FillMode>(static_cast<sint32>(fillModeOrPixels) + 2);
 				}
 			}

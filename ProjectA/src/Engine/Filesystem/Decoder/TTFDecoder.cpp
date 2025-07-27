@@ -408,12 +408,12 @@ namespace ProjectA {
 			tableOffsetMap.insert(std::make_pair(tableDirectory.tag, tableDirectory.offset));
 
 			/* #ifdef TTF_PARSER_VERIFY_CHECKSUM
-				const uint32* start = static_cast<const uint32*>(static_cast<const void*>(byteStream.getBytePosition() - byteStream.getByteOffset()));
+				const uint32* start = pointer_cast<const uint32*>(byteStream.getBytePosition() - byteStream.getByteOffset());
 				const uint32* position = start + tableDirectory.offset;
 				const uint32 calculatedChecksum = calculateTableChecksum(position, tableDirectory.length);
 
 				if (calculatedChecksum != readChecksum) {
-					const char8* tag = static_cast<char8*>(static_cast<void*>(&tableDirectory.tag));
+					const char8* tag = pointer_cast<char8*>(&tableDirectory.tag);
 
 					ENGINE_ASSERT(false, "Invalid checksum for TTF table \"[][][][]\".", tag[0], tag[1], tag[2], tag[3]);
 				}

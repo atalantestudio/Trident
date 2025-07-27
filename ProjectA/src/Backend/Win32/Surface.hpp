@@ -5,7 +5,7 @@
 namespace ProjectA {
 	// Creates a Vulkan Win32 surface object.
 	static VkResult createVulkanWin32Surface(const Window& window, VkInstance instance, const VkAllocationCallbacks* pAllocator, VkSurfaceKHR* pSurface) {
-		const PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = static_cast<PFN_vkCreateWin32SurfaceKHR>(static_cast<void*>(vkGetInstanceProcAddr(instance, "vkCreateWin32SurfaceKHR")));
+		const PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR = pointer_cast<PFN_vkCreateWin32SurfaceKHR>(vkGetInstanceProcAddr(instance, "vkCreateWin32SurfaceKHR"));
 
 		ENGINE_ASSERT(vkCreateWin32SurfaceKHR != nullptr, "Failed to get the address of PFN_vkCreateWin32SurfaceKHR.");
 

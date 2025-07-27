@@ -157,7 +157,7 @@ namespace ProjectA {
 			std::static_pointer_cast<VulkanBuffer>(sourceBuffer)->object,
 			std::static_pointer_cast<VulkanBuffer>(destinationBuffer)->object,
 			static_cast<uint32>(copyRegions.count),
-			static_cast<const VkBufferCopy*>(static_cast<const void*>(copyRegions))
+			pointer_cast<const VkBufferCopy*>(copyRegions)
 		);
 
 		commandCount += 1;
@@ -250,7 +250,7 @@ namespace ProjectA {
 		VkRect2D scissor{};
 		scissor.offset.x = xOffset;
 		scissor.offset.y = yOffset;
-		scissor.extent = *static_cast<const VkExtent2D*>(static_cast<const void*>(&extent));
+		scissor.extent = *pointer_cast<const VkExtent2D*>(&extent);
 
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
@@ -333,7 +333,7 @@ namespace ProjectA {
 			bufferImageCopy.imageOffset.x = copyRegion.imageOffsetX;
 			bufferImageCopy.imageOffset.y = copyRegion.imageOffsetY;
 			bufferImageCopy.imageOffset.z = copyRegion.imageOffsetZ;
-			bufferImageCopy.imageExtent = *static_cast<const VkExtent3D*>(static_cast<const void*>(&copyRegion.imageExtent));
+			bufferImageCopy.imageExtent = *pointer_cast<const VkExtent3D*>(&copyRegion.imageExtent);
 		}
 
 		return bufferImageCopies;

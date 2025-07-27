@@ -12,7 +12,7 @@ namespace ProjectA {
 		template<typename T>
 		void bind() {
 			constructScript = []() {
-				return static_cast<ScriptEntity*>(static_cast<void*>(new T()));
+				return pointer_cast<ScriptEntity*>(new T());
 			};
 
 			destroyScript = [](ScriptComponent* scriptComponent) {

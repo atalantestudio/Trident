@@ -16,7 +16,7 @@ namespace ProjectA {
 		shaderModuleCreateInfo.pNext = nullptr;
 		shaderModuleCreateInfo.flags = 0;
 		shaderModuleCreateInfo.codeSize = code.count;
-		shaderModuleCreateInfo.pCode = static_cast<const uint32*>(static_cast<const void*>(code));
+		shaderModuleCreateInfo.pCode = pointer_cast<const uint32*>(code);
 
 		const VkResult result = vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, &object.module);
 
