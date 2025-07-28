@@ -149,7 +149,7 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(
 			static_cast<GLint>(origin[0]),
 
-			// TODO: Use Y origin.
+			// TODO: The origin's Y can be flipped in Vulkan but not in OpenGL.
 			0,
 
 			static_cast<GLsizei>(abs(size[0])),

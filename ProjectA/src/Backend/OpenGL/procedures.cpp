@@ -39,7 +39,8 @@ namespace ProjectA {
 	PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
 	PFNGLGETSHADERIVPROC glGetShaderiv;
 
-	// TODO: There is no non-DSA variant for this function.
+	// NOTE: There is no non-DSA variant for this function.
+	// TODO: Write a custom implementation.
 	PFNGLGETTEXTURESUBIMAGEPROC glGetTextureSubImage;
 
 	PFNGLLINKPROGRAMPROC glLinkProgram;
@@ -48,7 +49,8 @@ namespace ProjectA {
 	PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
 	PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
 
-	// TODO: There is no non-DSA variant for this function.
+	// NOTE: There is no non-DSA variant for this function.
+	// TODO: Write a custom implementation.
 	PFNGLTEXTUREVIEWPROC glTextureView;
 
 	PFNGLUSEPROGRAMPROC glUseProgram;

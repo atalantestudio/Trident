@@ -35,7 +35,9 @@ namespace ProjectA {
 	}
 
 	AcquireNextImageStatus OpenGLDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
-		// TODO: Does imageIndex need to be correct since the double buffering is handled by the device context anyways?
+		// NOTE
+		// WGL handles double buffering at a lower level.
+		// The device implementation doesn't need to emulate this behavior and thus can always return 0.
 		imageIndex = 0;
 
 		return AcquireNextImageStatus::SUCCESS;

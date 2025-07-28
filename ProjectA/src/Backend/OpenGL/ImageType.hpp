@@ -8,7 +8,7 @@ namespace ProjectA {
 
 				if (layerCount > 1) {
 					// TODO: Test this path.
-					DEBUG_ASSERT(false);
+					ENGINE_ASSERT(false, "Multisampled 2D texture arrays are not implemented.");
 
 					return GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
 				}
