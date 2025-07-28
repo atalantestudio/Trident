@@ -169,3 +169,4 @@
 | Title | Author(s) | Date | Links |
 | - | - | - | - |
 | *Immediate-Mode Graphical User Interfaces (2005)* | Casey Muratori | May 12, 2016 | [Article](https://caseymuratori.com/blog_0001)<br />[Video](https://www.youtube.com/watch?v=Z1qyvQsjK5Y) |
+| *How Clay's UI Layout Algorithm Works* | Nic Barker | March 2, 2025 | [Video](https://www.youtube.com/watch?v=by9lQvpvMIc) |
