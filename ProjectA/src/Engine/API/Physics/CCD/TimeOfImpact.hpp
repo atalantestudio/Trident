@@ -25,14 +25,6 @@ namespace ProjectA {
 	// Bilateral Advancement algorithm implementation.
 	// Evaluates continuous collisions between A and B.
 	// The result of the last GJK call is copied to `gjkOutput` if it's not null.
-	// 
-	// - Erin Catto - Continuous Collision - GDC 2013
-	//   https://box2d.org/files/ErinCatto_ContinuousCollision_GDC2013.pdf (54 pages)
-	//   https://ubm-twvideo01.s3.amazonaws.com/o1/vault/gdc2013/slides/824737Catto_Erin_PhysicsForGame.pdf (67 pages)
-	//   https://www.youtube.com/watch?v=7_nKOET6zwI
-	// - Nilson Souto - Video Game Physics Tutorial - Part II: Collision Detection for Solid Objects
-	//   https://www.toptal.com/game/video-game-physics-part-ii-collision-detection-for-solid-objects
-	// 
 	static TimeOfImpact calculateTimeOfImpact(Scene2D* scene, Entity A, Entity B, GJK2DOutput* gjkOutputPointer) {
 		static constexpr float32 TOLERANCE = 0.25f * 0.005f;
 		static constexpr float32 TARGET = 0.005f;

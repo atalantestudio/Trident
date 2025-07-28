@@ -11,8 +11,6 @@
 #endif
 
 namespace ProjectA {
-	// https://media.steampowered.com/apps/valve/2015/DirkGregorius_Contacts.pdf
-
 	typedef bool (*Collider2D)(
 		const RigidBody2D& A,
 		const RigidBody2D& B,

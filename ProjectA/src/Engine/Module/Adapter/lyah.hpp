@@ -335,8 +335,7 @@ namespace ProjectA {
 
 	// TODO: lyah::area
 	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
-	// https://stackoverflow.com/a/717367/17136841
-	// https://web.archive.org/web/20111004134549/http://softsurfer.com/Archive/algorithm_0101/algorithm_0101.htm
+	// See https://stackoverflow.com/a/717367/17136841.
 	template<typename T>
 	T area(const sequence<lyah::vec<2, T>>& unclosedVertices) {
 		T area = static_cast<T>(0.0);

@@ -1,7 +1,8 @@
 #pragma once
 
 namespace ProjectA {
-	// TODO: Add SAMPLER and SAMPLED_IMAGE.
+	// TODO: Add SAMPLER.
+	// TODO: Add SAMPLED_IMAGE.
 	// See https://stackoverflow.com/a/77070649/17136841.
 	enum class DescriptorType : uint8 {
 		STORAGE_BUFFER = 0,

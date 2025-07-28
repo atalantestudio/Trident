@@ -2,7 +2,7 @@
 
 namespace ProjectA {
 	// See https://registry.khronos.org/vulkan/specs/latest/man/html/VkIndexType.html.
-	// TODO: Support VK_INDEX_TYPE_NONE_KHR and VK_INDEX_TYPE_UINT8_KHR?
+	// TODO: Add support for VK_INDEX_TYPE_NONE_KHR and VK_INDEX_TYPE_UINT8_KHR?
 	static VkIndexType getVkIndexType(uint8 indexTypeSize) {
 		switch (indexTypeSize) {
 			case sizeof(uint16):

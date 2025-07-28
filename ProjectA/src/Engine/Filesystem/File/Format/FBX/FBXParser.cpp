@@ -1,8 +1,6 @@
 #include "pch.hpp"
 
 namespace ProjectA {
-	// https://code.blender.org/2013/08/fbx-binary-file-format-specification
-	// https://banexdevblog.wordpress.com/2014/06/23/a-quick-tutorial-about-the-fbx-ascii-format
 	enum class FBXPropertyTypeCode : char8 {
 		// 2 byte signed integer.
 		Y = 'Y',
@@ -54,7 +52,7 @@ namespace ProjectA {
 			- If Encoding == 0
 				- Read Contents(ArrayLength)
 			- If Encoding == 1
-				- [TODO] Decode Contents(CompressedLength) in DecodedContents
+				- TODO: Decode Contents(CompressedLength) in DecodedContents
 				- Read Contents = DecodedContents
 		- If TypeCode is S
 			- Read Length

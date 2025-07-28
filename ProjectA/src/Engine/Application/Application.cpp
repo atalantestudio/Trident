@@ -204,8 +204,7 @@ namespace ProjectA {
 		}
 
 		// TODO: Interpolate between current time and frameTimeAccumulator.
-		// Use frameTimeAccumulator / FIXED_DELTA_TIME to get a value between 0 and 1.
-		// See https://gafferongames.com/post/fix_your_timestep and https://code.tutsplus.com/how-to-create-a-custom-2d-physics-engine-the-core-engine--gamedev-7493t.
+		//       Use frameTimeAccumulator / FIXED_DELTA_TIME to get a value between 0 and 1.
 		render(frameTimeAccumulator);
 
 		frameIndex += 1;

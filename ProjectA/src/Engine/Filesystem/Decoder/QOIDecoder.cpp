@@ -39,7 +39,6 @@ namespace ProjectA {
 		return index;
 	}
 
-	// https://qoiformat.org/qoi-specification.pdf
 	template<>
 	File<FileFormat::QOI> Filesystem::decode<FileFormat::QOI>(const Stream& baseStream) {
 		File<FileFormat::QOI> file;

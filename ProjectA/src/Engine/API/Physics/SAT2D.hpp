@@ -67,22 +67,10 @@ namespace ProjectA {
 	}
 
 	// Separating Axis Theorem algorithm implementation in 2D.
-	// 
-	// - Dirk Gregorius - The Separating Axis Test between Convex Polyhedra
-	//   https://gdcvault.com/play/1017646/Physics-for-Game-Programmers-The
-	//   https://media.gdcvault.com/gdc2013/slides/822403Gregorius_Dirk_TheSeparatingAxisTest.pdf
-	// - Erin Catto - Fast and Simple Physics using Sequential Impulses
-	//   https://box2d.org/files/ErinCatto_SequentialImpulses_GDC2006.pdf
-	// - Tim Wheeler - 2D Collision Detection and Resolution
-	//   https://timallanwheeler.com/blog/2024/08/01/2d-collision-detection-and-resolution
-	// - William Bittle - SAT (Separating Axis Theorem)
-	//   https://dyn4j.org/2010/01/sat
-	// 
 	// TODO: Basic optimizations:
 	//       - Don't test the same separating axis multiple times
 	//       - Don't test parallel axes (https://dyn4j.org/2010/01/sat)
 	//       - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases. But what if the separation axis changes e.g. due to rotation?
-	// https://media.gdcvault.com/gdc2013/slides/822403Gregorius_Dirk_TheSeparatingAxisTest.pdf
 	static SAT2DOutput SAT2D(const RigidBody2D& A, const RigidBody2D& B) {
 		SAT2DOutput output;
 		output.separation = min<float32>();

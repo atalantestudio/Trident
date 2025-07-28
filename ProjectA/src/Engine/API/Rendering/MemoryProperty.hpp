@@ -1,7 +1,6 @@
 #pragma once
 
 namespace ProjectA {
-	// See https://zeux.io/2020/02/27/writing-an-efficient-vulkan-renderer.
 	// Memory properties. Useful combinations:
 	// - DEVICE_LOCAL: GPU memory that is fast to access from the GPU but not visible from the CPU. Suited for static resources and attachments.
 	// - DEVICE_LOCAL | HOST_VISIBLE: (AMD only) Up to 256Mb of GPU memory that can be written to by the CPU. Useful for data that changes every frame.

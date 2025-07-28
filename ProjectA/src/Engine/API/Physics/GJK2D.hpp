@@ -174,16 +174,6 @@ namespace ProjectA {
 	}
 
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
-	// 
-	// - Casey Muratori - Implementing GJK (2006)
-	//   https://caseymuratori.com/blog_0003
-	// - Erin Catto - Computing Distance using GJK - GDC 2010
-	//   https://box2d.org/files/ErinCatto_GJK_GDC2010.pdf
-	// - William Bittle - GJK, Distance, Closest Points
-	//   https://dyn4j.org/2010/04/gjk-distance-closest-points
-	// - Christer Ericson - Real-Time Collision Detection
-	//   https://www.r-5.org/files/books/computers/algo-list/realtime-3d/Christer_Ericson-Real-Time_Collision_Detection-EN.pdf
-	// 
 	inline GJK2DOutput GJK2D(const RigidBody2D& A, const RigidBody2D& B) {
 		DEBUG_ASSERT(A.geometry->getVertexCount() < max<uint8>());
 		DEBUG_ASSERT(B.geometry->getVertexCount() < max<uint8>());

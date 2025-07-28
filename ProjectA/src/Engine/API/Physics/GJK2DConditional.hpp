@@ -64,14 +64,6 @@ namespace ProjectA {
 
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
 	// Returns true if the Minkowski difference of A and B contains the origin, and false otherwise.
-	// 
-	// - Casey Muratori - Implementing GJK (2006)
-	//   https://caseymuratori.com/blog_0003
-	// - Reducible - A Strange But Elegant Approach to a Surprisingly Hard Problem (GJK Algorithm)
-	//   https://youtu.be/ajv46BSqcK4
-	// - Iain Winter - GJK: Collision detection algorithm in 2D/3D
-	//   https://winter.dev/articles/gjk-algorithm
-	// 
 	// NOTE: In this implementation, `a` is the name of the most recent vertex added to the simplex.
 	// TODO: Fix rotations not being properly handled.
 	static bool GJK2DConditional(const RigidBody2D& A, const RigidBody2D& B) {
