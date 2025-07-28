@@ -13,7 +13,7 @@ namespace ProjectA {
 
 				SDFGlyphMap sdfGlyphMap;
 
-				SDFGlyphMapBuildProcess sdfGlyphMapProcess(file, sdfGlyphMap);
+				SDFGlyphMapBuildProcess(file, sdfGlyphMap);
 
 				ImageAssetDescriptor glyphMapImageDescriptor{};
 				glyphMapImageDescriptor.format = ImageFormat::R8_UNORM;
