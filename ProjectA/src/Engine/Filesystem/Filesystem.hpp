@@ -31,6 +31,9 @@ namespace ProjectA {
 		Writer openWriter(std::string_view path);
 
 		template<FileFormat FileFormat>
+		bool validateSignature(const Stream& stream);
+
+		template<FileFormat FileFormat>
 		File<FileFormat> encode(const Stream& stream);
 
 		template<FileFormat FileFormat>

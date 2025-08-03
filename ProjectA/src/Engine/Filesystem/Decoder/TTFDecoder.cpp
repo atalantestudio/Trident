@@ -353,6 +353,26 @@ namespace ProjectA {
 		#endif */
 	}
 
+	// Returns true if the provided file has a valid TTF signature.
+	template<>
+	bool Filesystem::validateSignature<FileFormat::TTF>(const Stream& stream) {
+		if (stream.getSize() < sizeof(uint32)) {
+			return false;
+		}
+
+		const uint32 scalerType = stream.asByteStream().peek<uint32>(true);
+
+		switch (scalerType) {
+			case STRING_TO_BIG_ENDIAN_UINT32("true"):
+			case 0x00010000:
+			case STRING_TO_BIG_ENDIAN_UINT32("typ1"):
+			case STRING_TO_BIG_ENDIAN_UINT32("OTTO"):
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
 	template<>
 	File<FileFormat::TTF> Filesystem::decode(const Stream& stream) {

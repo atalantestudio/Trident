@@ -64,13 +64,13 @@ namespace ProjectA {
 
 			template<typename T>
 			T operator [](uint64 index) const {
-				DEBUG_ASSERT(index < count);
+				DEBUG_ASSERT(index == 0 || index < count);
 
 				return array[index];
 			}
 
 			T& operator [](uint64 index) {
-				DEBUG_ASSERT(index < count);
+				DEBUG_ASSERT(index == 0 || index < count);
 
 				return array[index];
 			}

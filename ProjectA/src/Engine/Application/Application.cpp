@@ -164,6 +164,18 @@ namespace ProjectA {
 		return layerStack.hasLayers();
 	}
 
+	const sequence<void*>& Application::getConsoleArguments() const {
+		return consoleArguments;
+	}
+
+	void Application::setConsoleArguments(uint32 argumentCount, char** argumentValues) {
+		consoleArguments = sequence<void*>(argumentCount);
+
+		for (uint32 consoleArgumentIndex = 0; consoleArgumentIndex < argumentCount; consoleArgumentIndex += 1) {
+			consoleArguments[consoleArgumentIndex] = static_cast<void*>(argumentValues[consoleArgumentIndex]);
+		}
+	}
+
 	void Application::loop() {
 		window->show();
 

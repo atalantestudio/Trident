@@ -7,17 +7,19 @@
 namespace ProjectA {
 	class AssetBuilderApplication : public Application {
 		public:
-			AssetBuilderApplication(const ApplicationManifest& applicationManifest) :
+			explicit AssetBuilderApplication(const ApplicationManifest& applicationManifest, uint32 argumentCount, char** argumentValues) :
 				Application(applicationManifest)
 			{
-				registerProcess<BuildProcess>();
+				setConsoleArguments(argumentCount, argumentValues);
+
+				registerProcess<BuildProcess>(getConsoleArguments());
 			}
 	};
 
-	Application* createApplication() {
+	Application* createApplication(uint32 argumentCount, char** argumentValues) {
 		ApplicationManifest applicationManifest{};
 		applicationManifest.projectName = "ProjectA Asset Builder";
 
-		return new AssetBuilderApplication(applicationManifest);
+		return new AssetBuilderApplication(applicationManifest, argumentCount, argumentValues);
 	}
 }

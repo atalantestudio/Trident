@@ -16,7 +16,7 @@ namespace ProjectA {
 			}
 	};
 
-	Application* ProjectA::createApplication() {
+	Application* ProjectA::createApplication(uint32 argumentCount, char** argumentValues) {
 		ApplicationManifest applicationManifest{};
 		applicationManifest.projectName = "Process";
 

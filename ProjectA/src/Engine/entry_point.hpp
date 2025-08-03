@@ -9,7 +9,7 @@ extern "C" {
 	#endif
 }
 
-extern ProjectA::Application* createApplication();
+extern ProjectA::Application* createApplication(ProjectA::uint32 argumentCount, char** argumentValues);
 
 int main(int argc, char** argv) {
 	ProjectA::Application* application;
@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
 	{
 		PROFILER("Log/ProfileStart.json");
 
-		application = ProjectA::createApplication();
+		application = ProjectA::createApplication(static_cast<ProjectA::uint32>(argc), argv);
 		application->postConstruct();
 	}
 

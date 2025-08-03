@@ -39,6 +39,10 @@ namespace ProjectA {
 
 			bool hasGraphicalProcesses() const;
 
+			const sequence<void*>& getConsoleArguments() const;
+
+			void setConsoleArguments(uint32 argumentCount, char** argumentValues);
+
 		protected:
 			template<typename ProcessType, typename... Argument>
 			void registerProcess(Argument&&... arguments) {
@@ -134,7 +138,9 @@ namespace ProjectA {
 			Window* window = nullptr;
 			LayerStack layerStack;
 			std::vector<ref<Process>> processes;
+
+			sequence<void*> consoleArguments;
 	};
 
-	Application* createApplication();
+	Application* createApplication(uint32 argumentCount, char** argumentValues);
 }
