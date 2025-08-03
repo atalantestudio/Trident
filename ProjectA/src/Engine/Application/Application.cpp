@@ -75,7 +75,7 @@ namespace ProjectA {
 
 			const std::string defaultFileData = PropertyFile::getDefaultFileData();
 
-			propertyFileWriter.write(defaultFileData.data(), defaultFileData.size());
+			propertyFileWriter.write(defaultFileData);
 
 			ENGINE_INFO("Created new property file with default values.");
 		}

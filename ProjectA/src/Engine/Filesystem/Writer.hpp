@@ -13,10 +13,6 @@ namespace ProjectA {
 				stream.close();
 			}
 
-			void write(const char8* string, uint64 size) {
-				stream.write(string, size);
-			}
-
 			void write(const sequence<uint8>& data) {
 				stream.write(pointer_cast<const char8*>(data), data.count);
 			}
