@@ -136,7 +136,10 @@ project "Samples"
 	}
 
 	postbuildcommands {
-		"{COPYDIR} Asset %[bin/" .. outputdir .. "/%{prj.name}/Asset]",
+		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Font]",
+		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Image]",
+		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Shader]",
+		"IF EXIST Asset/Shader {COPYDIR} Asset/Shader %[bin/" .. outputdir .. "/%{prj.name}/Asset/Shader]",
 		"IF EXIST %[%{prj.name}.tpr] {COPYFILE} %[%{prj.name}.tpr] %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.tpr]",
 	}
 
@@ -199,7 +202,6 @@ project "AssetBuilder"
 	}
 
 	postbuildcommands {
-		"{COPYDIR} Asset %[bin/" .. outputdir .. "/%{prj.name}/Asset]",
 		"IF EXIST %[%{prj.name}.tpr] {COPYFILE} %[%{prj.name}.tpr] %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.tpr]",
 	}
 

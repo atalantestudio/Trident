@@ -1,17 +1,25 @@
 #pragma once
 
 namespace ProjectA {
+	struct AssetDescriptor {
+		uint32 identifier;
+		VersionNumber version;
+	};
+
 	class Asset {
 		public:
 			explicit Asset() :
-				id(random<uint32>(min<uint32>(), max<uint32>()))
+				identifier(random<uint32>(min<uint32>(), max<uint32>())),
+				version(0, 0, 1)
 			{}
 
-			uint32 getId() const {
-				return id;
-			}
+			explicit Asset(const AssetDescriptor& descriptor) :
+				identifier(descriptor.identifier),
+				version(descriptor.version)
+			{}
 
-		private:
-			uint32 id;
+		public:
+			uint32 identifier;
+			VersionNumber version;
 	};
 }

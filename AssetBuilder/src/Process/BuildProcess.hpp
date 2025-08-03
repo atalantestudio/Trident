@@ -7,6 +7,7 @@ namespace ProjectA {
 		public:
 			explicit BuildProcess(const sequence<void*>& consoleArguments) {
 				const char* projectPath = static_cast<const char*>(consoleArguments[PROJECT_PATH_ARGUMENT_INDEX]);
+				const char* projectBuildPath = static_cast<const char*>(consoleArguments[PROJECT_BUILD_PATH_ARGUMENT_INDEX]);
 
 				std::string fontDirectoryPath = projectPath;
 				fontDirectoryPath += "/Asset/Font";
@@ -18,13 +19,15 @@ namespace ProjectA {
 						continue;
 					}
 
-					BuildTrueTypeFontSubprocess(directoryEntry.path().string());
+					// TODO: Const?
+					BuildTrueTypeFontSubprocess subprocess(directoryEntry, std::string(projectBuildPath) + "/Asset/Font/");
 				}
 
-				BREAKPOINT();
+				ENGINE_INFO("Done building assets.");
 			}
 
 		private:
 			static constexpr uint32 PROJECT_PATH_ARGUMENT_INDEX = 1;
+			static constexpr uint32 PROJECT_BUILD_PATH_ARGUMENT_INDEX = 2;
 	};
 }

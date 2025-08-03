@@ -82,7 +82,7 @@ namespace ProjectA {
 
 		// We cannot parse more than the total byte size - (14-byte header + 8-byte footer).
 		// This implementation doesn't look at the footer.
-		const uint64 maxIterationCount = baseStream.getSize() - 22;
+		const uint64 maxIterationCount = baseStream.getBuffer().count - 22;
 
 		while (iterationIndex < maxIterationCount) {
 			const uint8 tag = stream.peek<uint8>();

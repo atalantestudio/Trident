@@ -10,12 +10,8 @@ namespace ProjectA {
 				buffer(buffer)
 			{}
 
-			const uint8* getBuffer() const {
+			const sequence<uint8>& getBuffer() const {
 				return buffer;
-			}
-
-			uint64 getSize() const {
-				return buffer.count;
 			}
 
 			BitStream asBitStream() const {

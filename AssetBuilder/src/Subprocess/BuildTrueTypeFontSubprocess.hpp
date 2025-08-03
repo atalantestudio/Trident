@@ -8,16 +8,18 @@
 namespace ProjectA {
 	class BuildTrueTypeFontSubprocess {
 		public:
-			explicit BuildTrueTypeFontSubprocess(const std::string& path) {
-				const Stream stream = Filesystem::openStream(path);
+			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& fontDirectoryBuildPath) {
+				const std::string path = directoryEntry.path().string();
 
-				if (!Filesystem::validateSignature<FileFormat::TTF>(stream)) {
+				const Stream inputStream = Filesystem::openStream(path);
+
+				if (!Filesystem::validateSignature<FileFormat::TTF>(inputStream)) {
 					ENGINE_INFO("Ignored non-TTF file \"[]\".", path);
 
 					return;
 				}
 
-				const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(stream);
+				const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(inputStream);
 
 				FontDescriptor fontDescriptor{};
 				fontDescriptor.unicodeMap = file.unicodeMap;
@@ -39,7 +41,26 @@ namespace ProjectA {
 
 				fontDescriptor.glyphMapImage = createRef<ImageAsset>(glyphMapImageDescriptor);
 
-				// BREAKPOINT();
+				const Asset asset;
+
+				sequence<uint8> streamBuffer(4 * sizeof(uint32));
+
+				Stream outputStream(streamBuffer);
+				ByteStream byteStream = outputStream.asByteStream();
+
+				// byteStream.write<uint32>(getSignature<AssetType::FONT>());
+				// byteStream.write<uint32>(asset.identifier);
+				// byteStream.write<uint32>(asset.version);
+				// byteStream.write<uint32>(fontDescriptor.glyphs.count);
+
+				std::string outputPath = fontDirectoryBuildPath;
+				outputPath += directoryEntry.path().stem().string();
+				outputPath += ".tfo";
+
+				Writer writer = Filesystem::openWriter(outputPath);
+				writer.write(outputStream.getBuffer());
+
+				BREAKPOINT();
 			}
 	};
 }

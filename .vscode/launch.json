@@ -44,6 +44,7 @@
 			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/AssetBuilder/AssetBuilder.exe",
 			"args": [
 				"${workspaceFolder}/Samples",
+				"${workspaceFolder}/bin/windows_x86_64_Debug/Samples",
 			],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/AssetBuilder",
@@ -58,6 +59,7 @@
 			"program": "${workspaceFolder}/bin/windows_x86_64_Profile/AssetBuilder/AssetBuilder.exe",
 			"args": [
 				"${workspaceFolder}/Samples",
+				"${workspaceFolder}/bin/windows_x86_64_Profile/Samples",
 			],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/AssetBuilder",
@@ -72,6 +74,7 @@
 			"program": "${workspaceFolder}/bin/windows_x86_64_Release/AssetBuilder/AssetBuilder.exe",
 			"args": [
 				"${workspaceFolder}/Samples",
+				"${workspaceFolder}/bin/windows_x86_64_Release/Samples",
 			],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/AssetBuilder",
