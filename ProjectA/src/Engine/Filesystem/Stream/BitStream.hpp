@@ -17,15 +17,13 @@ namespace ProjectA {
 			uint64 getRemainingBitSize() const;
 
 			// Advances the offsets by the provided bit count.
-			// Usage:
-			// - The bit count must be <= the remaining bits in the stream.
+			// The bit count must be <= the remaining bits in the stream.
 			void jump(uint64 bitCount);
 
 			// Returns the next bits from the stream without updating the offsets.
-			// Usage:
-			// - The bit count must be <= the number of bits in T.
-			// - The bit count must be <= MAX_READ_OR_PEEK_BIT_COUNT.
-			// - The bit count must be <= the remaining bits in the stream.
+			// The bit count must be <= the number of bits in T.
+			// The bit count must be <= MAX_READ_OR_PEEK_BIT_COUNT.
+			// The bit count must be <= the remaining bits in the stream.
 			template<typename T>
 			T peek(uint8 bitCount, bool swapEndianness = false) const {
 				ENGINE_ASSERT(bitCount <= sizeof(T) * 8, "Cannot peek [] bits for a []-bit type.", static_cast<sint32>(bitCount), sizeof(T) * 8);
@@ -55,10 +53,9 @@ namespace ProjectA {
 			}
 
 			// Returns the next bits from the stream.
-			// Usage:
-			// - The bit count must be <= the number of bits in T.
-			// - The bit count must be <= MAX_READ_OR_PEEK_BIT_COUNT.
-			// - The bit count must be <= the remaining bits in the stream.
+			// The bit count must be <= the number of bits in T.
+			// The bit count must be <= MAX_READ_OR_PEEK_BIT_COUNT.
+			// The bit count must be <= the remaining bits in the stream.
 			template<typename T>
 			T read(uint8 bitCount, bool swapEndianness = false) {
 				const T value = peek<T>(bitCount, swapEndianness);

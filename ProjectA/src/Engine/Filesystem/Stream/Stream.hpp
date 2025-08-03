@@ -14,10 +14,12 @@ namespace ProjectA {
 				return buffer;
 			}
 
+			// TODO: Replace with BitStream<IN>?
 			BitStream asBitStream() const {
 				return BitStream(buffer, buffer.count);
 			}
 
+			// TODO: Replace with ByteStream<IN>?
 			ByteStream asByteStream() const {
 				return ByteStream(buffer, buffer.count);
 			}

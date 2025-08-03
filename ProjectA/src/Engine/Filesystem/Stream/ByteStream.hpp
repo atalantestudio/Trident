@@ -68,17 +68,15 @@ namespace ProjectA {
 			uint64 getRemainingByteSize() const;
 
 			// Repositions the offset from the start of the stream.
-			// `offset`: the stream offset in bytes.
+			// `offset` is the stream offset in bytes.
 			void seek(uint64 offset);
 
 			// Advances by the provided byte count.
-			// Usage:
-			// `count`: The number of bytes to jump over. It must be less than or equal to the remaining bytes in the offsetted stream.
+			// `count` is The number of bytes to jump over. It must be less than or equal to the remaining bytes in the offsetted stream.
 			void jump(uint64 count);
 
 			// Returns the next bytes from the stream without updating the offsets.
-			// Usage:
-			// - The byte size of T must be <= the remaining bytes in the stream.
+			// The byte size of T must be <= the remaining bytes in the stream.
 			template<typename T>
 			T peek(bool swapEndianness = false) const {
 				const uint64 remainingByteSize = getRemainingByteSize();
@@ -94,12 +92,11 @@ namespace ProjectA {
 				return value;
 			}
 
-			// TODO: Allow entire structs to be read using ByteStream, e.g.
-			// const MyStruct myStruct = stream.read<MyStruct>();
+			// TODO: Allow entire structs to be read using ByteStream,
+			//       e.g. const MyStruct myStruct = stream.read<MyStruct>().
 			// 
-			// Returns the next bytes from the stream.
-			// Usage:
-			// - The byte size of T must be <= the remaining bytes in the stream.
+			// Casts to T and returns the next bytes from the stream.
+			// The byte size of T must be <= the remaining bytes in the stream.
 			template<typename T>
 			T read(bool swapEndianness = false) {
 				const T value = peek<T>(swapEndianness);
