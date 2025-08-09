@@ -74,8 +74,8 @@ namespace ProjectA {
 	ImageID GUILayer::loadImage(std::string_view path) {
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
-		const Stream stream = Filesystem::openStream(path);
-		const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(stream);
+		const sequence<uint8> data = Filesystem::openBuffer(path);
+		const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(data);
 
 		TextureArrayLayer imageLayer;
 		imageLayer.width = file.extent.width;

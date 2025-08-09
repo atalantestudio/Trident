@@ -7,6 +7,12 @@ namespace ProjectA {
 				stream(path.data())
 			{}
 
+			Reader& operator =(Reader& reader) {
+				stream.swap(reader.getStream());
+
+				return *this;
+			}
+
 			~Reader() {
 				stream.close();
 			}

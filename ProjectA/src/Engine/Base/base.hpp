@@ -30,3 +30,5 @@
 #include "Engine/Base/Error.hpp"
 #include "Engine/Base/Random.hpp"
 #include "Engine/Base/VersionNumber.hpp"
+
+// TODO: Implement Endianness enum.

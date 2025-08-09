@@ -79,7 +79,7 @@ namespace ProjectA {
 		{24577, 13},
 	};
 
-	void BitStream::parseUncompressedZlibBlock(uint8* data) {
+	void BitStream<StreamOperation::READ>::parseUncompressedZlibBlock(uint8* data) {
 		jump(5);
 
 		// LEN is the number of data bytes in the block.
@@ -97,7 +97,7 @@ namespace ProjectA {
 		data += LEN;
 	}
 
-	void BitStream::parseCompressedZlibBlock(uint8* data, uint64& dataOffset, uint8 BTYPE) {
+	void BitStream<StreamOperation::READ>::parseCompressedZlibBlock(uint8* data, uint64& dataOffset, uint8 BTYPE) {
 		static constexpr uint16 MAX_LITERAL_LENGTH_CODE_LENGTH_COUNT = 320;
 
 		uint8 literalLengthCodeLengths[MAX_LITERAL_LENGTH_CODE_LENGTH_COUNT] = {};
@@ -242,50 +242,7 @@ namespace ProjectA {
 		ENGINE_WARN("Reached last safe iteration.");
 	}
 
-	BitStream::BitStream(const uint8* stream, uint64 byteSize) :
-		stream(stream),
-		byteSize(byteSize),
-		bitOffset(0)
-	{
-		bitBuffer = *(BitStreamSize*)(stream + byteOffset);
-	}
-
-	uint64 BitStream::getBitOffset() const {
-		return byteOffset * 8 + bitOffset;
-	}
-
-	const uint8* BitStream::getBytePosition() const {
-		return stream + byteOffset + bitOffset / 8;
-	}
-
-	uint64 BitStream::getRemainingBitSize() const {
-		return (byteSize - byteOffset) * 8 - bitOffset;
-	}
-
-	void BitStream::jump(uint64 bitCount) {
-		const uint64 remainingBitSize = getRemainingBitSize();
-
-		ENGINE_ASSERT(bitCount <= remainingBitSize, "Attempted to jump [] bits, but only [] were remaining.", bitCount, remainingBitSize);
-
-		uint8 jumpBitCount = 0;
-
-		if (bitCount > static_cast<uint8>((sizeof(BitStreamSize) * 8 - 1) - bitOffset)) {
-			jumpBitCount = bitOffset;
-
-			const uint64 jumpByteCount = (bitOffset + bitCount) / (sizeof(bitBuffer) * 8);
-
-			bitOffset = 0;
-			byteOffset += sizeof(bitBuffer) * jumpByteCount;
-			bitBuffer = *(BitStreamSize*)(stream + byteOffset);
-		}
-
-		jumpBitCount = (jumpBitCount + bitCount) % (sizeof(bitBuffer) * 8);
-
-		bitOffset += jumpBitCount;
-		bitBuffer >>= jumpBitCount;
-	}
-
-	sequence<uint8> BitStream::inflate(uint64 uncompressedSize) {
+	sequence<uint8> BitStream<StreamOperation::READ>::inflate(uint64 uncompressedSize) {
 		// CMF (Compression Method and flags)
 		// 
 		// This byte is divided into a 4-bit compression method and a 4-

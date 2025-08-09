@@ -1,6 +1,8 @@
 #include "pch.hpp"
 
 #include "Engine/Filesystem/Filesystem.hpp"
+#include "Engine/Filesystem/Stream/BitStream.hpp"
+#include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
 	static sint32 PaethPredictor(uint8 a, uint8 b, uint8 c) {
@@ -49,10 +51,10 @@ namespace ProjectA {
 	static constexpr Filter FILTERS[] = {None, Sub, Up, Average, Paeth};
 
 	template<>
-	File<FileFormat::PNG> Filesystem::decode(const Stream& baseStream) {
+	File<FileFormat::PNG> Filesystem::decode(const sequence<uint8>& data) {
 		File<FileFormat::PNG> file;
 
-		ByteStream stream = baseStream.asByteStream();
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count);
 
 		const uint64 signature = stream.read<uint64>(true);
 
@@ -187,12 +189,12 @@ namespace ProjectA {
 			stream.jump(byteLength + sizeof(uint32));
 		}
 
-		BitStream inflateStream(compressedData, compressedDataSize);
+		BitStream<StreamOperation::READ> inflateBitStream(compressedData, compressedDataSize);
 
 		const uint64 filteredDataSize = file.extent.width * file.extent.height * channelCount;
 		const uint64 unfilteredDataSize = filteredDataSize + file.extent.height;
 
-		const sequence<uint8> unfilteredData = inflateStream.inflate(unfilteredDataSize);
+		const sequence<uint8> unfilteredData = inflateBitStream.inflate(unfilteredDataSize);
 
 		file.data = sequence<uint8>(filteredDataSize);
 

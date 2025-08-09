@@ -65,9 +65,9 @@ namespace ProjectA {
 		const std::string propertyFilePath = Logger::format("[]\\[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
 
 		// Try to open the property file located at "[PROJECT_ROOT_DIRECTORY]/[PROJECT_NAME].tpr".
-		Reader propertyFilePreReader = Filesystem::openReader(propertyFilePath);
+		Reader propertyFileReader = Filesystem::openReader(propertyFilePath);
 
-		if (!propertyFilePreReader.fileExists()) {
+		if (!propertyFileReader.fileExists()) {
 			ENGINE_WARN("Could not find property file \"[]\".", propertyFilePath);
 
 			// If the property file cannot be found, create a new one with default values.
@@ -75,16 +75,19 @@ namespace ProjectA {
 
 			const std::string defaultFileData = PropertyFile::getDefaultFileData();
 
-			propertyFileWriter.write(defaultFileData);
+			sequence<uint8> data(defaultFileData.size());
+
+			std::copy(defaultFileData.begin(), defaultFileData.end(), &data[0]);
+
+			propertyFileWriter.write(&data[0], data.count);
 
 			ENGINE_INFO("Created new property file with default values.");
 		}
 
 		properties = new ApplicationProperties();
+		propertyFileReader = Filesystem::openReader(propertyFilePath);
 
-		Reader propertyFilePostReader = Filesystem::openReader(propertyFilePath);
-
-		PropertyFile propertyFile(propertyFilePostReader);
+		PropertyFile propertyFile(propertyFileReader);
 		propertyFile.readProperties(properties);
 
 		WindowDescriptor windowDescriptor{};

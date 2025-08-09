@@ -28,12 +28,6 @@ namespace ProjectA {
 		return buffer;
 	}
 
-	Stream Filesystem::openStream(std::string_view path) {
-		const sequence<uint8> buffer = openBuffer(path);
-
-		return Stream(buffer);
-	}
-
 	Reader Filesystem::openReader(std::string_view path) {
 		return Reader(path);
 	}

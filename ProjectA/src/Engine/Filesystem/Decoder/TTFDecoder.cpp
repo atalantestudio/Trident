@@ -2,11 +2,10 @@
 
 #include "Engine/Filesystem/File/TTFFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
-#include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
 	namespace TrueTypeFont {
-		static void parseCoordinates(ByteStream& stream, sint16* coordinates, uint8* flags, uint16 coordinateCount, uint8 shortVectorBitIndex, uint8 sameOrPositiveVectorBitIndex, FWord minBounds, FWord maxBounds) {
+		static void parseCoordinates(ByteStream<StreamOperation::READ>& stream, sint16* coordinates, uint8* flags, uint16 coordinateCount, uint8 shortVectorBitIndex, uint8 sameOrPositiveVectorBitIndex, FWord minBounds, FWord maxBounds) {
 			uint16 coordinateIndex = 0;
 			sint16 previousCoordinate = 0;
 
@@ -48,7 +47,7 @@ namespace ProjectA {
 			y = static_cast<FWord>(T.n * (previousX * (T.b / T.n) + y * (T.d / T.n) + T.f));
 		}
 
-		static void parseGlyph(ByteStream& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, sequence<Glyph>& glyphs, uint16 glyphIndex, uint16 maxComponentDepth) {
+		static void parseGlyph(ByteStream<StreamOperation::READ>& stream, uint32 tableOffset, const sequence<uint16>& glyphOffsets, sequence<Glyph>& glyphs, uint16 glyphIndex, uint16 maxComponentDepth) {
 			Glyph& glyph = glyphs[glyphIndex];
 
 			if (!glyph.emptyOrUnparsed()) {
@@ -355,12 +354,12 @@ namespace ProjectA {
 
 	// Returns true if the provided file has a valid TTF signature.
 	template<>
-	bool Filesystem::validateSignature<FileFormat::TTF>(const Stream& stream) {
-		if (stream.getBuffer().count < sizeof(uint32)) {
+	bool Filesystem::validateSignature<FileFormat::TTF>(const ByteStream<StreamOperation::READ>& stream) {
+		if (stream.getRemainingByteSize() < sizeof(uint32)) {
 			return false;
 		}
 
-		const uint32 scalerType = stream.asByteStream().peek<uint32>(true);
+		const uint32 scalerType = stream.peek<uint32>(true);
 
 		switch (scalerType) {
 			case STRING_TO_BIG_ENDIAN_UINT32("true"):
@@ -375,12 +374,12 @@ namespace ProjectA {
 
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
 	template<>
-	File<FileFormat::TTF> Filesystem::decode(const Stream& stream) {
+	File<FileFormat::TTF> Filesystem::decode(const sequence<uint8>& data) {
 		using namespace TrueTypeFont;
 
 		File<FileFormat::TTF> file;
 
-		ByteStream byteStream = stream.asByteStream();
+		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count);
 
 		OffsetSubtable offsetSubtable{};
 		offsetSubtable.scalerType = byteStream.read<uint32>(true);

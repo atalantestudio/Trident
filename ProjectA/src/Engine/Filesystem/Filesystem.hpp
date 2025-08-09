@@ -2,8 +2,8 @@
 
 #include "Engine/Filesystem/File.hpp"
 #include "Engine/Filesystem/OpenMode.hpp"
-#include "Engine/Filesystem/Stream/Stream.hpp"
 #include "Engine/Filesystem/Reader.hpp"
+#include "Engine/Filesystem/Stream/ByteStream.hpp"
 #include "Engine/Filesystem/Writer.hpp"
 
 namespace ProjectA {
@@ -18,8 +18,6 @@ namespace ProjectA {
 		// `path` is relative to the working directory.
 		sequence<uint8> openBuffer(std::string_view path);
 
-		Stream openStream(std::string_view path);
-
 		// Opens a file for permanent reading or writing.
 		// `path` is relative to the working directory.
 		// The returned value is the file pointer. It must be managed by the application.
@@ -31,12 +29,12 @@ namespace ProjectA {
 		Writer openWriter(std::string_view path);
 
 		template<FileFormat FileFormat>
-		bool validateSignature(const Stream& stream);
+		bool validateSignature(const ByteStream<StreamOperation::READ>& stream);
 
 		template<FileFormat FileFormat>
-		File<FileFormat> encode(const Stream& stream);
+		File<FileFormat> encode(const sequence<uint8>& data);
 
 		template<FileFormat FileFormat>
-		File<FileFormat> decode(const Stream& stream);
+		File<FileFormat> decode(const sequence<uint8>& data);
 	};
 }

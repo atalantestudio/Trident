@@ -66,7 +66,7 @@ namespace ProjectA {
 		}
 	}
 
-	uint16 HuffmanCodeDictionary::decode(BitStream& stream) const {
+	uint16 HuffmanCodeDictionary::decode(BitStream<StreamOperation::READ>& stream) const {
 		// Read as many bits as possible to get a code entry index.
 		const uint16 codeIndex = stream.peek<uint16>(maxCodeLength);
 

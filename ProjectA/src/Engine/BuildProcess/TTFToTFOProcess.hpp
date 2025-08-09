@@ -8,8 +8,8 @@ namespace ProjectA {
 	class TTFToTFOProcess : public Process {
 		public:
 			explicit TTFToTFOProcess(std::string_view path, FontDescriptor& fontDescriptor) {
-				const Stream stream = Filesystem::openStream(path);
-				const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(stream);
+				const sequence<uint8> data = Filesystem::openBuffer(path);
+				const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(data);
 
 				SDFGlyphMap sdfGlyphMap;
 
@@ -29,21 +29,6 @@ namespace ProjectA {
 				fontDescriptor.glyphs = sdfGlyphMap.glyphs;
 				fontDescriptor.unicodeMap = file.unicodeMap;
 				fontDescriptor.lineHeight = file.ascent - file.descent + file.lineGap;
-
-				// TODO: Remove.
-				/* for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count; glyphIndex += 1) {
-					const TrueTypeFont::Glyph& trueTypeGlyph = file.glyphs[glyphIndex];
-					const TrueTypeFont::longHorMetric& hMetric = file.hMetrics[glyphIndex];
-					const SDFGlyph& sdfGlyph = sdfGlyphMap.glyphs[glyphIndex];
-
-					Glyph& glyph = glyphMap[glyphIndex];
-					glyph.whitespace = sdfGlyph.whitespace;
-					glyph.minCoordinate = sdfGlyph.minCoordinate;
-					glyph.maxCoordinate = sdfGlyph.maxCoordinate;
-					glyph.width = trueTypeGlyph.max.x - trueTypeGlyph.min.x;
-					glyph.advanceWidth = hMetric.advanceWidth;
-					glyph.leftSideBearing = hMetric.leftSideBearing;
-				} */
 			}
 	};
 }

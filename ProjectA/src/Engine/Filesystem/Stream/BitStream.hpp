@@ -3,22 +3,58 @@
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
-	class BitStream {
+	template<StreamOperation StreamOperation>
+	class BitStream;
+
+	template<>
+	class BitStream<StreamOperation::READ> {
 		private:
 			typedef uint64 BitStreamSize;
 
 		public:
-			explicit BitStream(const uint8* stream, uint64 byteSize);
+			explicit BitStream(const uint8* data, uint64 byteSize) :
+				data(data),
+				bitBuffer(*pointer_cast<const BitStreamSize*>(&data[0])),
+				byteSize(byteSize),
+				bitOffset(0)
+			{}
 
-			uint64 getBitOffset() const;
+			uint64 getBitOffset() const {
+				return byteOffset * 8 + bitOffset;
+			}
 
-			const uint8* getBytePosition() const;
+			const uint8* getBytePosition() const {
+				return data + byteOffset + bitOffset / 8;
+			}
 
-			uint64 getRemainingBitSize() const;
+			uint64 getRemainingBitSize() const {
+				return (byteSize - byteOffset) * 8 - bitOffset;
+			}
 
 			// Advances the offsets by the provided bit count.
 			// The bit count must be <= the remaining bits in the stream.
-			void jump(uint64 bitCount);
+			void jump(uint64 bitCount) {
+				const uint64 remainingBitSize = getRemainingBitSize();
+
+				ENGINE_ASSERT(bitCount <= remainingBitSize, "Attempted to jump [] bits, but only [] were remaining.", bitCount, remainingBitSize);
+
+				uint8 jumpBitCount = 0;
+
+				if (bitCount > static_cast<uint8>((sizeof(BitStreamSize) * 8 - 1) - bitOffset)) {
+					jumpBitCount = bitOffset;
+
+					const uint64 jumpByteCount = (bitOffset + bitCount) / (sizeof(bitBuffer) * 8);
+
+					bitOffset = 0;
+					byteOffset += sizeof(bitBuffer) * jumpByteCount;
+					bitBuffer = *(BitStreamSize*)(data + byteOffset);
+				}
+
+				jumpBitCount = (jumpBitCount + bitCount) % (sizeof(bitBuffer) * 8);
+
+				bitOffset += jumpBitCount;
+				bitBuffer >>= jumpBitCount;
+			}
 
 			// Returns the next bits from the stream without updating the offsets.
 			// The bit count must be <= the number of bits in T.
@@ -36,7 +72,7 @@ namespace ProjectA {
 				T value = *pointer_cast<const T*>(&bitBuffer);
 
 				if (swapEndianness) {
-					value = ByteStream::byteswap(value);
+					value = Stream::byteswap(value);
 				}
 
 				BitStreamSize valueStreamSize = *pointer_cast<const BitStreamSize*>(&value);
@@ -44,7 +80,7 @@ namespace ProjectA {
 				if (bitOffset > 0) {
 					const BitStreamSize offset = sizeof(bitBuffer) * 8 - bitOffset;
 
-					valueStreamSize |= (*((BitStreamSize*) (stream + byteOffset + sizeof(bitBuffer)))) << offset;
+					valueStreamSize |= (*((BitStreamSize*) (data + byteOffset + sizeof(bitBuffer)))) << offset;
 				}
 
 				valueStreamSize &= ((1ULL << bitCount) - 1);
@@ -65,6 +101,9 @@ namespace ProjectA {
 				return value;
 			}
 
+			// TODO: Implement seek<T>(uint8 bitCount).
+			// TODO: Implement write<T>(uint8 bitCount).
+
 			// Uncompresses data using the DEFLATE decompression algorithm.
 			sequence<uint8> inflate(uint64 uncompressedSize);
 
@@ -78,10 +117,10 @@ namespace ProjectA {
 
 		private:
 			// TODO: Should stream be BitStreamSize* instead?
-			const uint8* stream;
+			const uint8* data;
 
 			// Bit accumulator (missed opportunity to name this "bitBucket").
-			BitStreamSize bitBuffer;
+			BitStreamSize bitBuffer = 0;
 
 			// Size of the stream in bytes.
 			uint64 byteSize;

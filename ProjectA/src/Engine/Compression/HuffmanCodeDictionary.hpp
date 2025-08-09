@@ -11,7 +11,7 @@ namespace ProjectA {
 			// Giving the bit lengths of the codes for each symbol of the alphabet in order is sufficient to determine the actual codes.
 			void compute(const uint8* codeLengths, uint16 symbolCount);
 
-			uint16 decode(BitStream& stream) const;
+			uint16 decode(BitStream<StreamOperation::READ>& stream) const;
 
 		private:
 			static uint32 reverseBits(uint32 value, uint8 bitCount);

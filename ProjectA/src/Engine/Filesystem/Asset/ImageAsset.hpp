@@ -4,7 +4,7 @@
 #include "Engine/Filesystem/Asset/Asset.hpp"
 
 namespace ProjectA {
-	struct ImageAssetDescriptor {
+	struct ImageAssetDescriptor : public AssetDescriptor {
 		// The format and type of the texel blocks that will be contained in the image.
 		ImageFormat format;
 
@@ -28,6 +28,7 @@ namespace ProjectA {
 	class ImageAsset : public Asset {
 		public:
 			explicit ImageAsset(const ImageAssetDescriptor& descriptor) :
+				Asset(descriptor),
 				format(descriptor.format),
 				extent(descriptor.extent),
 				mipLevelCount(descriptor.mipLevelCount),

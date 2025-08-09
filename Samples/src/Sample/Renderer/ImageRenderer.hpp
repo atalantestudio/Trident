@@ -50,9 +50,9 @@ namespace ProjectA {
 	class ImageRenderer : public Renderer {
 		public:
 			void build() override {
-				const Stream stream = Filesystem::openStream("Asset/Image/qoi_test_images/dice.qoi");
-				// const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(stream);
-				const File<FileFormat::QOI> file = Filesystem::decode<FileFormat::QOI>(stream);
+				const sequence<uint8> data = Filesystem::openBuffer("Asset/Image/Zelda.png");
+				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(data);
+				// const File<FileFormat::QOI> file = Filesystem::decode<FileFormat::QOI>(data);
 
 				const ref<Device> device = getDevice();
 

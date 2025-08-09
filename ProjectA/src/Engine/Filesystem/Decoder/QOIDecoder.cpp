@@ -2,7 +2,6 @@
 
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
-#include "Engine/Filesystem/Stream/ByteStream.hpp"
 
 namespace ProjectA {
 	struct qoi_rgba {
@@ -40,10 +39,10 @@ namespace ProjectA {
 	}
 
 	template<>
-	File<FileFormat::QOI> Filesystem::decode<FileFormat::QOI>(const Stream& baseStream) {
+	File<FileFormat::QOI> Filesystem::decode<FileFormat::QOI>(const sequence<uint8>& data) {
 		File<FileFormat::QOI> file;
 
-		ByteStream stream = baseStream.asByteStream();
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count);
 
 		ENGINE_ASSERT(stream.read<uint32>() == STRING_TO_LITTLE_ENDIAN_UINT32("qoif"), "Invalid QOI file signature.");
 
@@ -81,8 +80,8 @@ namespace ProjectA {
 		uint64 iterationIndex = 0;
 
 		// We cannot parse more than the total byte size - (14-byte header + 8-byte footer).
-		// This implementation doesn't look at the footer.
-		const uint64 maxIterationCount = baseStream.getBuffer().count - 22;
+		// NOTE: This implementation doesn't look at the footer.
+		const uint64 maxIterationCount = data.count - 22;
 
 		while (iterationIndex < maxIterationCount) {
 			const uint8 tag = stream.peek<uint8>();
