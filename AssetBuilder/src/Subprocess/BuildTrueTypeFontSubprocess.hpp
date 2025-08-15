@@ -1,9 +1,8 @@
 #pragma once
 
-// TODO: Remove this include.
-#include "ProjectA.hpp"
-
 #include "Engine/BuildProcess/SDFGlyphMapBuildProcess.hpp"
+
+#include "BuildGlyphMapImageSubprocess.hpp"
 
 namespace ProjectA {
 	class BuildTrueTypeFontSubprocess {
@@ -11,7 +10,7 @@ namespace ProjectA {
 			static constexpr uint32 TFO_SIGNATURE = 0x491b9ec5;
 
 		public:
-			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& fontDirectoryBuildPath) {
+			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& assetOutputPath) {
 				const std::string path = directoryEntry.path().string();
 				const sequence<uint8> inputData = Filesystem::openBuffer(path);
 				const ByteStream<StreamOperation::READ> inputByteStream(&inputData[0], inputData.count);
@@ -34,30 +33,27 @@ namespace ProjectA {
 
 				fontDescriptor.glyphs = sdfGlyphMap.glyphs;
 
-				ImageAssetDescriptor glyphMapImageDescriptor{};
-				glyphMapImageDescriptor.format = ImageFormat::R8_UNORM;
-				glyphMapImageDescriptor.extent = {sdfGlyphMap.extent.width, sdfGlyphMap.extent.height, 1};
-				glyphMapImageDescriptor.mipLevelCount = 1;
-				glyphMapImageDescriptor.layerCount = 1;
-				glyphMapImageDescriptor.sampleCount = 1;
-				glyphMapImageDescriptor.data = sdfGlyphMap.data;
+				ImageAssetDescriptor glyphMapImageAssetDescriptor{};
+				glyphMapImageAssetDescriptor.format = ImageFormat::R8_UNORM;
+				glyphMapImageAssetDescriptor.extent = {sdfGlyphMap.extent.width, sdfGlyphMap.extent.height, 1};
+				glyphMapImageAssetDescriptor.mipLevelCount = 1;
+				glyphMapImageAssetDescriptor.layerCount = 1;
+				glyphMapImageAssetDescriptor.sampleCount = 1;
+				glyphMapImageAssetDescriptor.data = sdfGlyphMap.data;
 
-				fontDescriptor.glyphMapImage = createRef<ImageAsset>(glyphMapImageDescriptor);
+				fontDescriptor.glyphMapImage = createRef<ImageAsset>(glyphMapImageAssetDescriptor);
 
 				const uint32 glyphCount = static_cast<uint32>(fontDescriptor.glyphs.count);
 
-				const uint64 outputSize =
-					5 * sizeof(uint32) +
-					3 * sizeof(sint16) +
-					glyphCount * (4 * sizeof(float32) + 3 * sizeof(uint16))
-				;
+				const uint64 outputSize = 7 * sizeof(uint32) + glyphCount * (4 * sizeof(float32) + 3 * sizeof(uint16));
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize);
 
-				const uint32 assetIdentifier = random<uint32>(min<uint32>(), max<uint32>());
+				const uint32 assetIdentifier = AssetLibrary::createAssetIdentifier();
 
-				// TODO: Find glyph map image asset.
-				const uint32 glyphMapImageAssetIdentifier = 0;
+				uint32 glyphMapImageAssetIdentifier;
+
+				const BuildGlyphMapImageSubprocess buildGlyphMapImageSubprocess(assetOutputPath, directoryEntry.path().stem().string(), fontDescriptor.glyphMapImage, glyphMapImageAssetIdentifier);
 
 				outputByteStream.write<uint32>(TFO_SIGNATURE);
 				outputByteStream.write<uint32>(assetIdentifier);
@@ -66,6 +62,7 @@ namespace ProjectA {
 				outputByteStream.write<sint16>(file.ascent);
 				outputByteStream.write<sint16>(file.descent);
 				outputByteStream.write<sint16>(file.lineGap);
+				outputByteStream.jump(sizeof(sint16));
 				outputByteStream.write<uint32>(glyphCount);
 
 				for (uint32 glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
@@ -95,9 +92,7 @@ namespace ProjectA {
 					outputByteStream.write<uint16>(glyph.leftSideBearing);
 				}
 
-				std::string outputPath = fontDirectoryBuildPath;
-				outputPath += directoryEntry.path().stem().string();
-				outputPath += ".tfo";
+				const std::string outputPath = assetOutputPath + "Font/" + directoryEntry.path().stem().string() + ".tfo";
 
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputByteStream.size);

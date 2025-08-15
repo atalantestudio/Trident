@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/Filesystem/Asset/FontAsset.hpp"
+#include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Filesystem/File.hpp"
 #include "Engine/Filesystem/OpenMode.hpp"
 #include "Engine/Filesystem/Reader.hpp"
@@ -32,9 +34,9 @@ namespace ProjectA {
 		bool validateSignature(const ByteStream<StreamOperation::READ>& stream);
 
 		template<FileFormat FileFormat>
-		File<FileFormat> encode(const sequence<uint8>& data);
-
-		template<FileFormat FileFormat>
 		File<FileFormat> decode(const sequence<uint8>& data);
+
+		void encode(const FontAsset& asset);
+		void encode(const ImageAsset& asset);
 	};
 }

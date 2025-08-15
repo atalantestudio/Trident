@@ -4,40 +4,6 @@
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 
 namespace ProjectA {
-	struct qoi_rgba {
-		uint8 r;
-		uint8 g;
-		uint8 b;
-		uint8 a;
-	};
-
-	struct qoi_diff {
-		uint8 db : 2;
-		uint8 dg : 2;
-		uint8 dr : 2;
-		uint8 tag : 2;
-	};
-
-	struct qoi_luma {
-		uint8 dg : 6;
-		uint8 tag : 2;
-		uint8 db_dg : 4;
-		uint8 dr_dg : 4;
-	};
-
-	struct qoi_index {
-		uint8 index : 6;
-		uint8 tag : 2;
-	};
-
-	static qoi_index rgbaHash(qoi_rgba p) {
-		qoi_index index;
-
-		index.index = (p.r * 3 + p.g * 5 + p.b * 7 + p.a * 11) % 64;
-
-		return index;
-	}
-
 	template<>
 	File<FileFormat::QOI> Filesystem::decode<FileFormat::QOI>(const sequence<uint8>& data) {
 		File<FileFormat::QOI> file;
