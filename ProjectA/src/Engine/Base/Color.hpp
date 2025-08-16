@@ -1,6 +1,13 @@
 #pragma once
 
 namespace ProjectA {
+	struct rgba {
+		uint8 r;
+		uint8 g;
+		uint8 b;
+		uint8 a;
+	};
+
 	class Color {
 		public:
 			// From an hexadecimal code (transparency included).

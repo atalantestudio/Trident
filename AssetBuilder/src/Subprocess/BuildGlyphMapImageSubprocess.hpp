@@ -9,14 +9,6 @@
 namespace ProjectA {
 	class BuildGlyphMapImageSubprocess {
 		private:
-			struct rgba {
-				uint8 r;
-				uint8 g;
-				uint8 b;
-				uint8 a;
-			};
-
-		private:
 			static constexpr uint64 TIM_HEADER_SIZE = 8 * sizeof(uint32);
 
 		public:
@@ -35,14 +27,14 @@ namespace ProjectA {
 
 				const uint64 texelCount = imageAsset->getData().count;
 
-				sequence<uint8> rgbaData(texelCount * 4);
+				sequence<uint8> rgbaDataPerChannel(texelCount * 4);
 
 				// Convert R to RGBA.
 				for (uint32 texelIndex = 0, channelIndex = 0; texelIndex < texelCount; texelIndex += 1, channelIndex += 4) {
-					rgbaData[channelIndex + 0] = imageAsset->getData()[texelIndex];
-					rgbaData[channelIndex + 1] = 0;
-					rgbaData[channelIndex + 2] = 0;
-					rgbaData[channelIndex + 3] = 255;
+					rgbaDataPerChannel[channelIndex + 0] = imageAsset->getData()[texelIndex];
+					rgbaDataPerChannel[channelIndex + 1] = 0;
+					rgbaDataPerChannel[channelIndex + 2] = 0;
+					rgbaDataPerChannel[channelIndex + 3] = 255;
 				}
 
 				// TODO: Automatically determine channel count.
@@ -54,10 +46,13 @@ namespace ProjectA {
 
 				uint8 runLength = 0;
 
+				const rgba* rgbaData = pointer_cast<const rgba*>(&rgbaDataPerChannel[0]);
+
 				for (uint32 z = 0; z < imageAsset->getExtent().depth; z += 1) {
 					for (uint32 y = 0; y < imageAsset->getExtent().height; y += 1) {
 						for (uint32 x = 0; x < imageAsset->getExtent().width; x += 1) {
-							const rgba baseTexel = *pointer_cast<const rgba*>(&imageAsset->getData()[x * y * z * channelCount]);
+							const uint32 baseTexelOffset = (z * imageAsset->getExtent().depth + y * imageAsset->getExtent().height + x);
+							const rgba baseTexel = rgbaData[baseTexelOffset];
 
 							qoi_rgba texel;
 							texel.r = baseTexel.r;
@@ -102,14 +97,10 @@ namespace ProjectA {
 
 				const uint64 outputSize = outputByteStream.getByteOffset();
 
-				BREAKPOINT();
-
 				const std::string outputPath = assetOutputPath + "Image/" + assetName + ".tim";
 
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputSize);
-
-				BREAKPOINT();
 			}
 	};
 }
