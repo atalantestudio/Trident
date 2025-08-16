@@ -5,9 +5,10 @@
 #include "Engine/BuildProcess/SDFGlyphMapBuildProcess.hpp"
 
 namespace ProjectA {
+	// TODO: Remove.
 	class TTFToTFOProcess : public Process {
 		public:
-			explicit TTFToTFOProcess(std::string_view path, FontDescriptor& fontDescriptor) {
+			explicit TTFToTFOProcess(std::string_view path, FontAssetDescriptor& fontAssetDescriptor) {
 				const sequence<uint8> data = Filesystem::openBuffer(path);
 				const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(data);
 
@@ -24,10 +25,10 @@ namespace ProjectA {
 
 				const ref<ImageAsset> glyphMapImage = createRef<ImageAsset>(glyphMapImageDescriptor);
 
-				fontDescriptor.glyphMapImage = glyphMapImage;
-				fontDescriptor.glyphs = sdfGlyphMap.glyphs;
-				fontDescriptor.unicodeMap = file.unicodeMap;
-				fontDescriptor.lineHeight = file.ascent - file.descent + file.lineGap;
+				fontAssetDescriptor.glyphMapImage = glyphMapImage;
+				fontAssetDescriptor.glyphs = sdfGlyphMap.glyphs;
+				fontAssetDescriptor.unicodeMap = file.unicodeMap;
+				fontAssetDescriptor.lineHeight = file.ascent - file.descent + file.lineGap;
 			}
 	};
 }

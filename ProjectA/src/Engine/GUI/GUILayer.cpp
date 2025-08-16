@@ -38,15 +38,15 @@ namespace ProjectA {
 		defaultFont->tileHeight = 12;
 		defaultFont->tileSpacing = 1; */
 
-		FontDescriptor fontDescriptor{};
+		FontAssetDescriptor fontAssetDescriptor{};
 
-		TTFToTFOProcess process(path, fontDescriptor);
+		TTFToTFOProcess process(path, fontAssetDescriptor);
 
-		fonts[fontCount].font = createScope<Font>(fontDescriptor);
+		fonts[fontCount].fontAsset = createScope<FontAsset>(fontAssetDescriptor);
 
-		const scope<Font>& font = fonts[fontCount].font;
+		const scope<FontAsset>& fontAsset = fonts[fontCount].fontAsset;
 
-		const ref<ImageAsset>& glyphMapImage = font->getGlyphMapImage();
+		const ref<ImageAsset>& glyphMapImage = fontAsset->getGlyphMapImage();
 		const uint64 texelCount = glyphMapImage->getData().count;
 
 		TextureArrayLayer glyphMapImageLayer;
@@ -737,10 +737,10 @@ namespace ProjectA {
 	// TODO: lyah::ceil
 	void GUILayer::WrapText(GUIContainer& textComponent) {
 		const FontData& fontData = fonts[textComponent.font];
-		const Font& font = *fontData.font;
+		const FontAsset& fontAsset = *fontData.fontAsset;
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
 		const vec2<float32> imageSize = {static_cast<float32>(imageExtent.width), static_cast<float32>(imageExtent.height)};
-		const float32 lineHeight = textComponent.fontSize / font.getLineHeight();
+		const float32 lineHeight = textComponent.fontSize / fontAsset.getLineHeight();
 
 		svec2<float32> characterOffset = textComponent.origin;
 		uint32 lineCount = 1;
@@ -772,7 +772,7 @@ namespace ProjectA {
 					flushBeforeNewLine = true;
 				}
 				else {
-					const Glyph& glyph = font[codePoint];
+					const Glyph& glyph = fontAsset[codePoint];
 
 					if (glyph.whitespace) {
 						// Flush the current word if we encounter a blank character.
@@ -794,7 +794,7 @@ namespace ProjectA {
 							for (uint32 lookAheadIndex = characterIndex; lookAheadIndex < textComponent.text.size(); lookAheadIndex += 1) {
 								const char8 character = textComponent.text[lookAheadIndex];
 
-								if (OutsideWord(character, font)) {
+								if (OutsideWord(character, fontAsset)) {
 									break;
 								}
 
@@ -814,7 +814,7 @@ namespace ProjectA {
 			if (flushCurrentWord) {
 				FlushWordData flushWordData;
 				flushWordData.word = std::string_view(&textComponent.text[wordStartIndex], wordLength);
-				flushWordData.font = &font;
+				flushWordData.fontAsset = &fontAsset;
 				flushWordData.imageSize = imageSize;
 				flushWordData.fontSize = textComponent.fontSize;
 				flushWordData.lineHeight = lineHeight;
@@ -849,7 +849,7 @@ namespace ProjectA {
 		if (wordLength > 0 && wordStartIndex + wordLength == textComponent.text.size()) {
 			FlushWordData flushWordData;
 			flushWordData.word = std::string_view(&textComponent.text[wordStartIndex], wordLength);
-			flushWordData.font = &font;
+			flushWordData.fontAsset = &fontAsset;
 			flushWordData.imageSize = imageSize;
 			flushWordData.fontSize = textComponent.fontSize;
 			flushWordData.lineHeight = lineHeight;
@@ -860,14 +860,14 @@ namespace ProjectA {
 		textComponent.size.height.value = textComponent.fontSize * lineCount;
 	}
 
-	bool GUILayer::OutsideWord(char8 character, const Font& font) const {
+	bool GUILayer::OutsideWord(char8 character, const FontAsset& fontAsset) const {
 		if (character < 0) {
 			// TODO: Handle UTF-16 and UTF-32 characters.
 			return true;
 		}
 
 		const uint16 codePoint = static_cast<uint16>(character);
-		const Glyph& glyph = font[codePoint];
+		const Glyph& glyph = fontAsset[codePoint];
 
 		return glyph.whitespace;
 	}
@@ -875,7 +875,7 @@ namespace ProjectA {
 	void GUILayer::FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) {
 		for (const char8 character : data.word) {
 			const uint16 codePoint = static_cast<uint16>(character);
-			const Glyph& glyph = (*data.font)[codePoint];
+			const Glyph& glyph = (*data.fontAsset)[codePoint];
 			const float32 advanceWidth = std::ceil(glyph.advanceWidth * data.lineHeight);
 			const vec2<float32> startTextureCoordinate = {glyph.minCoordinate.x, glyph.minCoordinate.y};
 			const vec2<float32> endTextureCoordinate = {glyph.maxCoordinate.x, glyph.maxCoordinate.y};
@@ -1070,7 +1070,7 @@ namespace ProjectA {
 
 	// TODO: lyah::max
 	uint32 GUILayer::calculateTextPreferredWidth(const std::string& string, const TextStyle& textStyle) const {
-		const Font& font = *fonts[textStyle.font].font;
+		const FontAsset& fontAsset = *fonts[textStyle.font].fontAsset;
 
 		uint32 preferredWidth = 0;
 		uint32 lineWidth = 0;
@@ -1093,7 +1093,7 @@ namespace ProjectA {
 			}
 
 			const uint16 codePoint = static_cast<uint16>(character);
-			const Glyph& glyph = font[codePoint];
+			const Glyph& glyph = fontAsset[codePoint];
 
 			if (firstLineGlyph) {
 				firstLineGlyph = false;
@@ -1103,7 +1103,7 @@ namespace ProjectA {
 				}
 			}
 
-			const float32 advanceWidth = std::ceil(glyph.advanceWidth / static_cast<float32>(font.getLineHeight()) * textStyle.fontSize);
+			const float32 advanceWidth = std::ceil(glyph.advanceWidth / static_cast<float32>(fontAsset.getLineHeight()) * textStyle.fontSize);
 
 			lineWidth += static_cast<uint32>(advanceWidth);
 		}
@@ -1113,8 +1113,8 @@ namespace ProjectA {
 
 	// TODO: lyah::max
 	uint32 GUILayer::calculateTextMinimumWidth(const std::string& string, const TextStyle& textStyle) const {
-		const Font& font = *fonts[textStyle.font].font;
-		const float32 lineHeight = textStyle.fontSize / font.getLineHeight();
+		const FontAsset& fontAsset = *fonts[textStyle.font].fontAsset;
+		const float32 lineHeight = textStyle.fontSize / fontAsset.getLineHeight();
 
 		uint32 minimumWordWidth = 0;
 		uint32 currentWordWidth = 0;
@@ -1135,7 +1135,7 @@ namespace ProjectA {
 			else {
 				const uint16 codePoint = static_cast<uint16>(character);
 
-				glyph = &font[codePoint];
+				glyph = &fontAsset[codePoint];
 
 				if (glyph->whitespace) {
 					closeWord = true;

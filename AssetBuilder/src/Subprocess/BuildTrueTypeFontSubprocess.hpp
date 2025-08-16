@@ -20,15 +20,15 @@ namespace ProjectA {
 
 				const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(inputData);
 
-				FontDescriptor fontDescriptor{};
-				fontDescriptor.unicodeMap = file.unicodeMap;
-				fontDescriptor.lineHeight = file.ascent - file.descent + file.lineGap;
+				FontAssetDescriptor fontAssetDescriptor{};
+				fontAssetDescriptor.unicodeMap = file.unicodeMap;
+				fontAssetDescriptor.lineHeight = file.ascent - file.descent + file.lineGap;
 
 				SDFGlyphMap sdfGlyphMap;
 
 				SDFGlyphMapBuildProcess(file, sdfGlyphMap);
 
-				fontDescriptor.glyphs = sdfGlyphMap.glyphs;
+				fontAssetDescriptor.glyphs = sdfGlyphMap.glyphs;
 
 				ImageAssetDescriptor glyphMapImageAssetDescriptor{};
 				glyphMapImageAssetDescriptor.format = ImageFormat::R8_UNORM;
@@ -37,9 +37,9 @@ namespace ProjectA {
 				glyphMapImageAssetDescriptor.layerCount = 1;
 				glyphMapImageAssetDescriptor.data = sdfGlyphMap.data;
 
-				fontDescriptor.glyphMapImage = createRef<ImageAsset>(glyphMapImageAssetDescriptor);
+				fontAssetDescriptor.glyphMapImage = createRef<ImageAsset>(glyphMapImageAssetDescriptor);
 
-				const uint32 glyphCount = static_cast<uint32>(fontDescriptor.glyphs.count);
+				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count);
 
 				const uint64 outputSize = 7 * sizeof(uint32) + glyphCount * (4 * sizeof(float32) + 3 * sizeof(uint16));
 
@@ -49,9 +49,9 @@ namespace ProjectA {
 
 				uint32 glyphMapImageAssetIdentifier;
 
-				const BuildGlyphMapImageSubprocess buildGlyphMapImageSubprocess(assetOutputPath, directoryEntry.path().stem().string(), fontDescriptor.glyphMapImage, glyphMapImageAssetIdentifier);
+				const BuildGlyphMapImageSubprocess buildGlyphMapImageSubprocess(assetOutputPath, directoryEntry.path().stem().string(), fontAssetDescriptor.glyphMapImage, glyphMapImageAssetIdentifier);
 
-				outputByteStream.write<uint32>(AssetSignature::TFO);
+				outputByteStream.write<AssetSignature>(AssetSignature::TFO);
 				outputByteStream.write<uint32>(assetIdentifier);
 				outputByteStream.write<VersionNumber>({0, 0, 0});
 				outputByteStream.write<uint32>(glyphMapImageAssetIdentifier);
@@ -62,7 +62,7 @@ namespace ProjectA {
 				outputByteStream.write<uint32>(glyphCount);
 
 				for (uint32 glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
-					const Glyph& glyph = fontDescriptor.glyphs[glyphIndex];
+					const Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
 
 					outputByteStream.write<float32>(glyph.minCoordinate.x);
 					outputByteStream.write<float32>(glyph.minCoordinate.y);
@@ -71,19 +71,19 @@ namespace ProjectA {
 				}
 
 				for (uint32 glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
-					const Glyph& glyph = fontDescriptor.glyphs[glyphIndex];
+					const Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
 
 					outputByteStream.write<uint16>(glyph.width);
 				}
 
 				for (uint32 glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
-					const Glyph& glyph = fontDescriptor.glyphs[glyphIndex];
+					const Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
 
 					outputByteStream.write<uint16>(glyph.advanceWidth);
 				}
 
 				for (uint32 glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
-					const Glyph& glyph = fontDescriptor.glyphs[glyphIndex];
+					const Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
 
 					outputByteStream.write<uint16>(glyph.leftSideBearing);
 				}
@@ -92,6 +92,8 @@ namespace ProjectA {
 
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputByteStream.size);
+
+				ENGINE_INFO("Generated font asset (ID: []).", assetIdentifier);
 			}
 	};
 }

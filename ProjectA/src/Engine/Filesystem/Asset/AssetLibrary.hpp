@@ -35,15 +35,28 @@ namespace ProjectA {
 					}
 
 					const std::string assetPath = assetEntry.path().string();
+					const std::string stem = assetEntry.path().stem().string();
 
 					const sequence<uint8> data = Filesystem::openBuffer(assetPath);
-					const ByteStream<StreamOperation::READ> stream(&data[0], data.count);
 
-					const uint32 signature = stream.peek<uint32>();
+					ByteStream<StreamOperation::READ> byteStream(&data[0], data.count);
+
+					const AssetSignature signature = byteStream.peek<AssetSignature>();
 
 					if (signature != AssetSignature::TIM) {
 						continue;
 					}
+
+					byteStream.jump(sizeof(AssetSignature));
+
+					const ref<ImageAsset> imageAsset = decode(byteStream);
+
+					const uint32 imageAssetIndex = static_cast<uint32>(assets.size());
+
+					assetIdentifierToAssetIndex.insert({imageAsset->identifier, imageAssetIndex});
+					imageAssetStemToAssetIndex.insert({stem, imageAssetIndex});
+
+					assets.emplace_back(imageAsset);
 				}
 			}
 
@@ -56,7 +69,7 @@ namespace ProjectA {
 				return assets[iterator->second];
 			}
 
-			ref<FontAsset> findFontAsset(std::string_view stem) const {
+			ref<FontAsset> findFontAsset(const std::string& stem) const {
 				const auto iterator = fontAssetStemToAssetIndex.find(stem);
 
 				ENGINE_ASSERT(iterator != fontAssetStemToAssetIndex.end(), "No asset exists with the provided identifier.");
@@ -65,7 +78,7 @@ namespace ProjectA {
 				 return std::static_pointer_cast<FontAsset>(assets[iterator->second]);
 			}
 
-			ref<ImageAsset> findImageAsset(std::string_view stem) const {
+			ref<ImageAsset> findImageAsset(const std::string& stem) const {
 				const auto iterator = imageAssetStemToAssetIndex.find(stem);
 
 				ENGINE_ASSERT(iterator != imageAssetStemToAssetIndex.end(), "No asset exists with the provided identifier.");
@@ -75,9 +88,27 @@ namespace ProjectA {
 			}
 
 		private:
+			ref<ImageAsset> decode(ByteStream<StreamOperation::READ>& byteStream) const {
+				ImageAssetDescriptor imageAssetDescriptor{};
+				imageAssetDescriptor.identifier = byteStream.read<uint32>();
+				imageAssetDescriptor.version = byteStream.read<VersionNumber>();
+				imageAssetDescriptor.format = static_cast<ImageFormat>(byteStream.read<uint32>());
+				imageAssetDescriptor.extent = byteStream.read<Extent3D>();
+				imageAssetDescriptor.mipLevelCount = byteStream.read<uint32>();
+				imageAssetDescriptor.layerCount = byteStream.read<uint32>();
+
+				// TODO: Decode image data.
+				// imageAssetDescriptor.data = nullptr;
+
+				BREAKPOINT();
+
+				return createRef<ImageAsset>(imageAssetDescriptor);
+			}
+
+		private:
 			std::vector<ref<Asset>> assets;
 			std::unordered_map<uint32, uint32> assetIdentifierToAssetIndex;
-			std::unordered_map<std::string_view, uint32> fontAssetStemToAssetIndex;
-			std::unordered_map<std::string_view, uint32> imageAssetStemToAssetIndex;
+			std::unordered_map<std::string, uint32> fontAssetStemToAssetIndex;
+			std::unordered_map<std::string, uint32> imageAssetStemToAssetIndex;
 	};
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/Font/Font.hpp"
 #include "Engine/GUI/Component/Container.hpp"
 #include "Engine/GUI/ComponentStyle/ContainerStyle.hpp"
 #include "Engine/GUI/ComponentStyle/TextStyle.hpp"
@@ -12,14 +11,14 @@ namespace ProjectA {
 	class GUILayer : public Layer {
 		private:
 			struct FontData {
-				scope<Font> font;
+				scope<FontAsset> fontAsset;
 				ImageID glyphMapImageId;
 			};
 
 			struct FlushWordData {
 				std::string_view word;
 
-				const Font* font;
+				const FontAsset* fontAsset;
 				vec2<float32> imageSize;
 				float32 fontSize;
 
@@ -70,7 +69,7 @@ namespace ProjectA {
 			void GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex);
 			void WrapTextChildrenRecursive(uint32 parentIndex);
 			void WrapText(GUIContainer& textComponent);
-			bool OutsideWord(char8 character, const Font& font) const;
+			bool OutsideWord(char8 character, const FontAsset& fontAsset) const;
 			void FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin);
 			uint32 GetHoveredComponentIndex() const;

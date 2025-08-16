@@ -495,7 +495,7 @@ namespace ProjectA {
 			glyphLengths[glyphIndex] = glyphOffsets[glyphIndex + 1] - glyphOffsets[glyphIndex];
 		}
 
-		file.glyphs = sequence<Glyph>(numGlyphs);
+		file.glyphs = sequence<TrueTypeFont::Glyph>(numGlyphs);
 
 		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
 		tableOffset = tableOffsetMap.find(STRING_TO_LITTLE_ENDIAN_UINT32("glyf"));

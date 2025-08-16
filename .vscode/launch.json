@@ -8,7 +8,7 @@
 			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/Samples/Samples.exe",
 			"args": [],
 			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/Samples",
+			"cwd": "${workspaceFolder}/bin/windows_x86_64_Debug/Samples",
 			"environment": [],
 			"console": "integratedTerminal",
 			"preLaunchTask": "Build (Debug)"
@@ -20,7 +20,7 @@
 			"program": "${workspaceFolder}/bin/windows_x86_64_Profile/Samples/Samples.exe",
 			"args": [],
 			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/Samples",
+			"cwd": "${workspaceFolder}/bin/windows_x86_64_Debug/Samples",
 			"environment": [],
 			"console": "integratedTerminal",
 			"preLaunchTask": "Build (Profile)"
@@ -32,7 +32,7 @@
 			"program": "${workspaceFolder}/bin/windows_x86_64_Release/Samples/Samples.exe",
 			"args": [],
 			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/Samples",
+			"cwd": "${workspaceFolder}/bin/windows_x86_64_Debug/Samples",
 			"environment": [],
 			"console": "integratedTerminal",
 			"preLaunchTask": "Build (Release)"

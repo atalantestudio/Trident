@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class BuildGlyphMapImageSubprocess {
 		private:
-			static constexpr uint64 TIM_HEADER_SIZE = 8 * sizeof(uint32);
+			static constexpr uint64 TIM_HEADER_SIZE = 9 * sizeof(uint32);
 
 		public:
 			explicit BuildGlyphMapImageSubprocess(const std::string& assetOutputPath, const std::string& assetName, const ref<ImageAsset>& imageAsset, uint32& assetIdentifier) {
@@ -15,7 +15,8 @@ namespace ProjectA {
 				const uint64 maxOutputSize = TIM_HEADER_SIZE + imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * sizeof(uint32);
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(maxOutputSize);
-				outputByteStream.write<uint32>(AssetSignature::TIM);
+				outputByteStream.write<AssetSignature>(AssetSignature::TIM);
+				outputByteStream.write<uint32>(assetIdentifier);
 				outputByteStream.write<VersionNumber>({0, 0, 0});
 				outputByteStream.write<uint32>(static_cast<uint32>(imageAsset->getFormat()));
 				outputByteStream.write<Extent3D>(imageAsset->getExtent());
@@ -98,6 +99,8 @@ namespace ProjectA {
 
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputSize);
+
+				ENGINE_INFO("Generated glyph map image asset (ID: []).", assetIdentifier);
 			}
 	};
 }

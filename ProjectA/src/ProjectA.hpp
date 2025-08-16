@@ -33,9 +33,6 @@
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 
-// Font
-#include "Engine/Font/Font.hpp"
-
 // GUI
 #include "Engine/GUI/GUILayer.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
