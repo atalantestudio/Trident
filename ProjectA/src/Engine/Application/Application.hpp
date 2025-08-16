@@ -26,6 +26,8 @@ namespace ProjectA {
 
 			static const Window& getWindow();
 
+			static const AssetLibrary& getAssetLibrary();
+
 			static float64 getFixedDeltaTime();
 
 			// Returns the current frame time, in seconds.
@@ -132,6 +134,8 @@ namespace ProjectA {
 			static ApplicationProperties* properties;
 
 		private:
+			ProjectType projectType;
+
 			scope<Mutex> mutex;
 			scope<SharedMemory> sharedMemory;
 			SharedMemoryData* sharedMemoryData = nullptr;
@@ -142,7 +146,7 @@ namespace ProjectA {
 
 			sequence<void*> consoleArguments;
 
-			AssetLibrary assetLibrary;
+			AssetLibrary* assetLibrary = nullptr;
 	};
 
 	Application* createApplication(uint32 argumentCount, char** argumentValues);

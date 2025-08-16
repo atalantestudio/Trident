@@ -18,6 +18,7 @@ namespace ProjectA {
 
 	Application* createApplication(uint32 argumentCount, char** argumentValues) {
 		ApplicationManifest applicationManifest{};
+		applicationManifest.projectType = ProjectType::BUILD;
 		applicationManifest.projectName = "ProjectA Asset Builder";
 
 		return new AssetBuilderApplication(applicationManifest, argumentCount, argumentValues);

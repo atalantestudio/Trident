@@ -17,10 +17,6 @@ namespace ProjectA {
 		// The number of layers in the image.
 		uint32 layerCount;
 
-		// The number of samples per texel for the image.
-		// Valid sample counts range from 1 to 64, as powers of 2.
-		uint8 sampleCount : 7;
-
 		// Uncompressed image data.
 		sequence<uint8> data;
 	};
@@ -34,7 +30,6 @@ namespace ProjectA {
 				extent(descriptor.extent),
 				mipLevelCount(descriptor.mipLevelCount),
 				layerCount(descriptor.layerCount),
-				sampleCount(descriptor.sampleCount - 1),
 				data(descriptor.data)
 			{}
 
@@ -54,10 +49,6 @@ namespace ProjectA {
 				return layerCount;
 			}
 
-			uint8 getSampleCount() const {
-				return sampleCount + 1;
-			}
-
 			const sequence<uint8>& getData() const {
 				return data;
 			}
@@ -67,7 +58,6 @@ namespace ProjectA {
 			Extent3D extent;
 			uint32 mipLevelCount;
 			uint32 layerCount;
-			uint8 sampleCount : 6;
 			sequence<uint8> data;
 	};
 }

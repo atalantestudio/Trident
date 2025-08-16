@@ -1,8 +1,5 @@
 #pragma once
 
-// TODO: Remove this include.
-#include "ProjectA.hpp"
-
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Filesystem/Decoder/QOIDecoder.cpp"
 

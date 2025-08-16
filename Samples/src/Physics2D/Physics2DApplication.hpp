@@ -20,6 +20,7 @@ namespace ProjectA {
 
 	Application* ProjectA::createApplication(uint32 argumentCount, char** argumentValues) {
 		ApplicationManifest applicationManifest{};
+		applicationManifest.projectType = ProjectType::MAIN;
 		applicationManifest.projectName = "Physics";
 
 		return new Physics2DApplication(applicationManifest);

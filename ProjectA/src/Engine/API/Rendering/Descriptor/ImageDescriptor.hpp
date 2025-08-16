@@ -23,7 +23,7 @@ namespace ProjectA {
 		uint32 layerCount;
 
 		// The number of samples per texel for the image.
-		// NOTE: It must be either 1 or a power of 2 up to 64.
+		// NOTE: Valid sample counts range from 1 to 64, as powers of 2.
 		uint8 sampleCount : 7;
 
 		// The intended usage of the image.

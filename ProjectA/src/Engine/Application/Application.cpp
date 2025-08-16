@@ -31,7 +31,9 @@ namespace ProjectA {
 		return Logger::format("[] ([])", projectName, static_cast<sint32>(instanceCount));
 	}
 
-	Application::Application(const ApplicationManifest& applicationManifest) {
+	Application::Application(const ApplicationManifest& applicationManifest) :
+		projectType(applicationManifest.projectType)
+	{
 		PROFILE_SCOPE(FUNC_SIG);
 
 		// TODO: Remove singleton pattern.
@@ -111,14 +113,20 @@ namespace ProjectA {
 
 		Renderer::initialize(*window, properties->GraphicsAPI, properties->VSync);
 
-		if (std::filesystem::current_path().stem() != "AssetBuilder") {
+		if (projectType == ProjectType::MAIN) {
 			ENGINE_INFO("Loading assets.");
 
-			assetLibrary.loadAssets();
+			assetLibrary = new AssetLibrary();
+			assetLibrary->loadAssets();
 		}
 	}
 
 	Application::~Application() {
+		if (projectType == ProjectType::MAIN) {
+			// TODO: Unload assets.
+			delete assetLibrary;
+		}
+
 		for (const ref<Process>& process : processes) {
 			process.~shared_ptr();
 		}
@@ -137,6 +145,10 @@ namespace ProjectA {
 
 	const Window& Application::getWindow() {
 		return *instance->window;
+	}
+
+	const AssetLibrary& Application::getAssetLibrary() {
+		return *instance->assetLibrary;
 	}
 
 	float64 Application::getFixedDeltaTime() {

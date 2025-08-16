@@ -35,7 +35,6 @@ namespace ProjectA {
 				glyphMapImageAssetDescriptor.extent = {sdfGlyphMap.extent.width, sdfGlyphMap.extent.height, 1};
 				glyphMapImageAssetDescriptor.mipLevelCount = 1;
 				glyphMapImageAssetDescriptor.layerCount = 1;
-				glyphMapImageAssetDescriptor.sampleCount = 1;
 				glyphMapImageAssetDescriptor.data = sdfGlyphMap.data;
 
 				fontDescriptor.glyphMapImage = createRef<ImageAsset>(glyphMapImageAssetDescriptor);

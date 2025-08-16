@@ -20,7 +20,6 @@ namespace ProjectA {
 				glyphMapImageDescriptor.extent = {sdfGlyphMap.extent.width, sdfGlyphMap.extent.height, 1};
 				glyphMapImageDescriptor.mipLevelCount = 1;
 				glyphMapImageDescriptor.layerCount = 1;
-				glyphMapImageDescriptor.sampleCount = 1;
 				glyphMapImageDescriptor.data = sdfGlyphMap.data;
 
 				const ref<ImageAsset> glyphMapImage = createRef<ImageAsset>(glyphMapImageDescriptor);

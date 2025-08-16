@@ -18,6 +18,7 @@ namespace ProjectA {
 
 	Application* ProjectA::createApplication(uint32 argumentCount, char** argumentValues) {
 		ApplicationManifest applicationManifest{};
+		applicationManifest.projectType = ProjectType::MAIN;
 		applicationManifest.projectName = "Lorem Ipsum";
 
 		return new GUIApplication(applicationManifest);
