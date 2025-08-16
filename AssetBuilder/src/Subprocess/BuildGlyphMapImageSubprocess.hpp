@@ -17,7 +17,6 @@ namespace ProjectA {
 			};
 
 		private:
-			static constexpr uint32 TIM_SIGNATURE = 0x513f8fd2;
 			static constexpr uint64 TIM_HEADER_SIZE = 8 * sizeof(uint32);
 
 		public:
@@ -27,7 +26,7 @@ namespace ProjectA {
 				const uint64 maxOutputSize = TIM_HEADER_SIZE + imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * sizeof(uint32);
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(maxOutputSize);
-				outputByteStream.write<uint32>(TIM_SIGNATURE);
+				outputByteStream.write<uint32>(AssetSignature::TIM);
 				outputByteStream.write<VersionNumber>({0, 0, 0});
 				outputByteStream.write<uint32>(static_cast<uint32>(imageAsset->getFormat()));
 				outputByteStream.write<Extent3D>(imageAsset->getExtent());

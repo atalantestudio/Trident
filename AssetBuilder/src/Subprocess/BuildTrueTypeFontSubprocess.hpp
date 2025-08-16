@@ -6,9 +6,6 @@
 
 namespace ProjectA {
 	class BuildTrueTypeFontSubprocess {
-		private:
-			static constexpr uint32 TFO_SIGNATURE = 0x491b9ec5;
-
 		public:
 			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& assetOutputPath) {
 				const std::string path = directoryEntry.path().string();
@@ -55,7 +52,7 @@ namespace ProjectA {
 
 				const BuildGlyphMapImageSubprocess buildGlyphMapImageSubprocess(assetOutputPath, directoryEntry.path().stem().string(), fontDescriptor.glyphMapImage, glyphMapImageAssetIdentifier);
 
-				outputByteStream.write<uint32>(TFO_SIGNATURE);
+				outputByteStream.write<uint32>(AssetSignature::TFO);
 				outputByteStream.write<uint32>(assetIdentifier);
 				outputByteStream.write<VersionNumber>({0, 0, 0});
 				outputByteStream.write<uint32>(glyphMapImageAssetIdentifier);

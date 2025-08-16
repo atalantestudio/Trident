@@ -110,6 +110,12 @@ namespace ProjectA {
 		window = new Window(windowDescriptor);
 
 		Renderer::initialize(*window, properties->GraphicsAPI, properties->VSync);
+
+		if (std::filesystem::current_path().stem() != "AssetBuilder") {
+			ENGINE_INFO("Loading assets.");
+
+			assetLibrary.loadAssets();
+		}
 	}
 
 	Application::~Application() {

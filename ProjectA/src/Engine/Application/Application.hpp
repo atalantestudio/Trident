@@ -8,6 +8,7 @@
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/Application/ApplicationManifest.hpp"
 #include "Engine/Application/ApplicationProperties.hpp"
+#include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Layer/LayerStack.hpp"
 #include "Engine/Process/Process.hpp"
 
@@ -140,6 +141,8 @@ namespace ProjectA {
 			std::vector<ref<Process>> processes;
 
 			sequence<void*> consoleArguments;
+
+			AssetLibrary assetLibrary;
 	};
 
 	Application* createApplication(uint32 argumentCount, char** argumentValues);

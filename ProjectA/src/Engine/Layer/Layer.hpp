@@ -4,7 +4,7 @@
 #include "Engine/API/Rendering/CommandEncoder.hpp"
 
 namespace ProjectA {
-	// TODO: Rename to Subpass.
+	// TODO: Rename to Subpass?
 	class Layer {
 		public:
 			virtual ~Layer() = default;
