@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/Filesystem/File/TTFFile.hpp"
-#include "Engine/GUI/Font/Glyph.hpp"
+#include "Engine/Font/Glyph.hpp"
 #include "Engine/Process/Process.hpp"
 
 namespace ProjectA {

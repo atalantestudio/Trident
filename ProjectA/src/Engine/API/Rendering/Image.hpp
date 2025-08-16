@@ -8,6 +8,7 @@ namespace ProjectA {
 	class ImageView;
 	struct ImageViewDescriptor;
 
+	// An image stored in GPU memory (as opposed to ImageAsset).
 	class Image {
 		public:
 			Image() {}

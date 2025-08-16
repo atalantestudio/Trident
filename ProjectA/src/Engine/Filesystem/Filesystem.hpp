@@ -36,7 +36,7 @@ namespace ProjectA {
 		template<FileFormat FileFormat>
 		File<FileFormat> decode(const sequence<uint8>& data);
 
-		void encode(const FontAsset& asset);
-		void encode(const ImageAsset& asset);
+		// TODO: Implement.
+		// Font decode(const ByteStream<StreamOperation::READ>& stream);
 	};
 }

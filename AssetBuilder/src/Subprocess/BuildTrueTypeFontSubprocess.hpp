@@ -93,8 +93,6 @@ namespace ProjectA {
 
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputByteStream.size);
-
-				BREAKPOINT();
 			}
 	};
 }

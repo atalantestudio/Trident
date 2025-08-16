@@ -25,6 +25,7 @@ namespace ProjectA {
 		sequence<uint8> data;
 	};
 
+	// An image stored in CPU memory (as opposed to Image).
 	class ImageAsset : public Asset {
 		public:
 			explicit ImageAsset(const ImageAssetDescriptor& descriptor) :

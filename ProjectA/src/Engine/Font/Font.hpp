@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
-#include "Engine/GUI/Font/Glyph.hpp"
+#include "Engine/Font/Glyph.hpp"
 
 namespace ProjectA {
 	struct FontDescriptor {

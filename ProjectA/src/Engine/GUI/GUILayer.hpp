@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Engine/Font/Font.hpp"
 #include "Engine/GUI/Component/Container.hpp"
 #include "Engine/GUI/ComponentStyle/ContainerStyle.hpp"
 #include "Engine/GUI/ComponentStyle/TextStyle.hpp"
-#include "Engine/GUI/Font/Font.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
 #include "Engine/GUI/ID.hpp"
 #include "Engine/Layer/Layer.hpp"
