@@ -21,8 +21,8 @@ namespace ProjectA {
 				const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(inputData);
 
 				FontAssetDescriptor fontAssetDescriptor{};
-				fontAssetDescriptor.unicodeMap = file.unicodeMap;
 				fontAssetDescriptor.lineHeight = file.ascent - file.descent + file.lineGap;
+				fontAssetDescriptor.unicodeMap = file.unicodeMap;
 
 				SDFGlyphMap sdfGlyphMap;
 
@@ -40,17 +40,14 @@ namespace ProjectA {
 				fontAssetDescriptor.glyphMapImage = createRef<ImageAsset>(glyphMapImageAssetDescriptor);
 
 				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count);
-
-				const uint64 outputSize = 7 * sizeof(uint32) + glyphCount * (4 * sizeof(float32) + 3 * sizeof(uint16));
-
-				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize);
-
+				const uint64 outputSize = 7 * sizeof(uint32) + (4 * sizeof(float32) + 3 * sizeof(uint16)) * glyphCount;
 				const uint32 assetIdentifier = AssetLibrary::createAssetIdentifier();
 
 				uint32 glyphMapImageAssetIdentifier;
 
 				const BuildGlyphMapImageSubprocess buildGlyphMapImageSubprocess(assetOutputPath, directoryEntry.path().stem().string(), fontAssetDescriptor.glyphMapImage, glyphMapImageAssetIdentifier);
 
+				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize);
 				outputByteStream.write<AssetSignature>(AssetSignature::TFO);
 				outputByteStream.write<uint32>(assetIdentifier);
 				outputByteStream.write<VersionNumber>({0, 0, 0});
@@ -58,7 +55,7 @@ namespace ProjectA {
 				outputByteStream.write<sint16>(file.ascent);
 				outputByteStream.write<sint16>(file.descent);
 				outputByteStream.write<sint16>(file.lineGap);
-				outputByteStream.jump(sizeof(sint16));
+				outputByteStream.jump(sizeof(uint16));
 				outputByteStream.write<uint32>(glyphCount);
 
 				for (uint32 glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
@@ -85,7 +82,7 @@ namespace ProjectA {
 				for (uint32 glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
 					const Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
 
-					outputByteStream.write<uint16>(glyph.leftSideBearing);
+					outputByteStream.write<sint16>(glyph.leftSideBearing);
 				}
 
 				const std::string outputPath = assetOutputPath + "Font/" + directoryEntry.path().stem().string() + ".tfo";

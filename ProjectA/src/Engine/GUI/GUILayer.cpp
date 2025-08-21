@@ -2,7 +2,6 @@
 
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/Application/Application.hpp"
-#include "Engine/BuildProcess/TTFToTFOProcess.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/GUI/GUILayer.hpp"
 
@@ -26,7 +25,6 @@ namespace ProjectA {
 		textureArrayFlushed = true;
 	}
 
-	// TODO: Fonts will always be loaded as .tfo files, except in the build phase which converts TTF to .tfo.
 	FontID GUILayer::loadFont(std::string_view path) {
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
@@ -40,27 +38,21 @@ namespace ProjectA {
 
 		FontAssetDescriptor fontAssetDescriptor{};
 
-		TTFToTFOProcess process(path, fontAssetDescriptor);
+		// TODO: Load font asset (.tfo).
+		BREAKPOINT();
 
 		fonts[fontCount].fontAsset = createScope<FontAsset>(fontAssetDescriptor);
 
 		const scope<FontAsset>& fontAsset = fonts[fontCount].fontAsset;
 
 		const ref<ImageAsset>& glyphMapImage = fontAsset->getGlyphMapImage();
-		const uint64 texelCount = glyphMapImage->getData().count;
 
 		TextureArrayLayer glyphMapImageLayer;
 		glyphMapImageLayer.width = glyphMapImage->getExtent().width;
 		glyphMapImageLayer.height = glyphMapImage->getExtent().height;
-		glyphMapImageLayer.data = sequence<uint8>(texelCount * 4);
+		glyphMapImageLayer.data = sequence<uint8>(glyphMapImage->getData().count * 4);
 
-		// Convert R to RGBA.
-		for (uint32 texelIndex = 0, channelIndex = 0; texelIndex < texelCount; texelIndex += 1, channelIndex += 4) {
-			glyphMapImageLayer.data[channelIndex + 0] = glyphMapImage->getData()[texelIndex];
-			glyphMapImageLayer.data[channelIndex + 1] = 0;
-			glyphMapImageLayer.data[channelIndex + 2] = 0;
-			glyphMapImageLayer.data[channelIndex + 3] = 255;
-		}
+		convertRedToRGBA(glyphMapImage->getData(), glyphMapImageLayer.data);
 
 		const FontID fontId = fontCount;
 

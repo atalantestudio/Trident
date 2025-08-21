@@ -27,6 +27,7 @@ namespace ProjectA {
 		sequence<uint8> data;
 	};
 
+	// NOTE: This chunk doesn't contain the tag.
 	struct qoi_rgba {
 		uint8 r;
 		uint8 g;

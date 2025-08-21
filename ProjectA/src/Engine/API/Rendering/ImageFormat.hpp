@@ -37,4 +37,21 @@ namespace ProjectA {
 				return static_cast<ImageFormat>(0);
 		}
 	}
+
+	static uint8 getChannelCount(ImageFormat imageFormat) {
+		switch (imageFormat) {
+			case ImageFormat::R8_UNORM:
+				return 1;
+			case ImageFormat::R8G8B8_UNORM:
+				return 3;
+			case ImageFormat::B8G8R8A8_UNORM:
+			case ImageFormat::R8G8B8A8_SRGB:
+			case ImageFormat::R8G8B8A8_UNORM:
+				return 4;
+			default:
+				ENGINE_ASSERT(false, "Unsupported image format.");
+
+				return 0;
+		}
+	}
 }

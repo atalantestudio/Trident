@@ -4,7 +4,7 @@ namespace ProjectA {
 	class Writer {
 		public:
 			explicit Writer(std::string_view path) :
-				stream(path.data())
+				stream(path.data(), std::ios::binary | std::ios::trunc)
 			{
 				ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
 			}

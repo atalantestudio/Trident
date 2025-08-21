@@ -25,17 +25,18 @@ namespace ProjectA {
 			}
 
 			void loadAssets() {
-				const std::string assetDirectory = std::filesystem::current_path().string() + "/Asset";
+				const std::filesystem::path assetDirectoryPath = std::filesystem::current_path() / "Asset";
 
-				const std::filesystem::recursive_directory_iterator assetIterator(assetDirectory);
+				// Load image assets.
+				const std::filesystem::path imageAssetDirectoryPath = assetDirectoryPath / "Image";
+				const std::filesystem::recursive_directory_iterator imageAssetIterator(imageAssetDirectoryPath);
 
-				for (const std::filesystem::directory_entry& assetEntry : assetIterator) {
+				for (const std::filesystem::directory_entry& assetEntry : imageAssetIterator) {
 					if (assetEntry.is_directory()) {
 						continue;
 					}
 
 					const std::string assetPath = assetEntry.path().string();
-					const std::string stem = assetEntry.path().stem().string();
 
 					const sequence<uint8> data = Filesystem::openBuffer(assetPath);
 
@@ -49,14 +50,51 @@ namespace ProjectA {
 
 					byteStream.jump(sizeof(AssetSignature));
 
-					const ref<ImageAsset> imageAsset = decode(byteStream);
+					const ref<ImageAsset> imageAsset = decodeImageAsset(byteStream);
 
 					const uint32 imageAssetIndex = static_cast<uint32>(assets.size());
+
+					const std::string stem = assetEntry.path().stem().string();
 
 					assetIdentifierToAssetIndex.insert({imageAsset->identifier, imageAssetIndex});
 					imageAssetStemToAssetIndex.insert({stem, imageAssetIndex});
 
 					assets.emplace_back(imageAsset);
+				}
+
+				// Load font assets.
+				const std::filesystem::path fontAssetDirectoryPath = assetDirectoryPath / "Font";
+				const std::filesystem::recursive_directory_iterator fontAssetIterator(fontAssetDirectoryPath);
+
+				for (const std::filesystem::directory_entry& assetEntry : fontAssetIterator) {
+					if (assetEntry.is_directory()) {
+						continue;
+					}
+
+					const std::string assetPath = assetEntry.path().string();
+
+					const sequence<uint8> data = Filesystem::openBuffer(assetPath);
+
+					ByteStream<StreamOperation::READ> byteStream(&data[0], data.count);
+
+					const AssetSignature signature = byteStream.peek<AssetSignature>();
+
+					if (signature != AssetSignature::TFO) {
+						continue;
+					}
+
+					byteStream.jump(sizeof(AssetSignature));
+
+					const ref<FontAsset> fontAsset = decodeFontAsset(byteStream);
+
+					const uint32 fontAssetIndex = static_cast<uint32>(assets.size());
+
+					const std::string stem = assetEntry.path().stem().string();
+
+					assetIdentifierToAssetIndex.insert({fontAsset->identifier, fontAssetIndex});
+					fontAssetStemToAssetIndex.insert({stem, fontAssetIndex});
+
+					assets.emplace_back(fontAsset);
 				}
 			}
 
@@ -88,21 +126,72 @@ namespace ProjectA {
 			}
 
 		private:
-			ref<ImageAsset> decode(ByteStream<StreamOperation::READ>& byteStream) const {
+			ref<ImageAsset> decodeImageAsset(ByteStream<StreamOperation::READ>& byteStream) const {
 				ImageAssetDescriptor imageAssetDescriptor{};
 				imageAssetDescriptor.identifier = byteStream.read<uint32>();
 				imageAssetDescriptor.version = byteStream.read<VersionNumber>();
 				imageAssetDescriptor.format = static_cast<ImageFormat>(byteStream.read<uint32>());
+
+				ENGINE_ASSERT(imageAssetDescriptor.format == ImageFormat::R8G8B8A8_UNORM, "Image formats other than R8G8B8A8_UNORM are not supported yet.");
+
 				imageAssetDescriptor.extent = byteStream.read<Extent3D>();
 				imageAssetDescriptor.mipLevelCount = byteStream.read<uint32>();
 				imageAssetDescriptor.layerCount = byteStream.read<uint32>();
 
-				// TODO: Decode image data.
-				// imageAssetDescriptor.data = nullptr;
+				static constexpr uint8 CHANNEL_COUNT = 4;
 
-				BREAKPOINT();
+				imageAssetDescriptor.data = sequence<uint8>(imageAssetDescriptor.layerCount * imageAssetDescriptor.extent.width * imageAssetDescriptor.extent.height * imageAssetDescriptor.extent.depth * CHANNEL_COUNT);
+
+				const uint64 maxIterationCount = byteStream.getRemainingByteSize();
+
+				Filesystem::QOIDecoderContentOnly(byteStream, imageAssetDescriptor.data, CHANNEL_COUNT, maxIterationCount);
 
 				return createRef<ImageAsset>(imageAssetDescriptor);
+			}
+
+			ref<FontAsset> decodeFontAsset(ByteStream<StreamOperation::READ>& byteStream) const {
+				FontAssetDescriptor fontAssetDescriptor{};
+				fontAssetDescriptor.identifier = byteStream.read<uint32>();
+				fontAssetDescriptor.version = byteStream.read<VersionNumber>();
+
+				const uint32 glyphMapImageAssetIdentifier = byteStream.read<uint32>();
+
+				fontAssetDescriptor.glyphMapImage = std::static_pointer_cast<ImageAsset>(findAsset(glyphMapImageAssetIdentifier));
+
+				const sint16 ascent = byteStream.read<sint16>();
+				const sint16 descent = byteStream.read<sint16>();
+				const sint16 lineGap = byteStream.read<sint16>();
+
+				fontAssetDescriptor.lineHeight = ascent - descent + lineGap;
+
+				byteStream.jump(sizeof(uint16));
+
+				const uint32 glyphCount = byteStream.read<uint32>();
+
+				fontAssetDescriptor.glyphs = sequence<Glyph>(glyphCount);
+
+				for (Glyph& glyph : fontAssetDescriptor.glyphs) {
+					glyph.minCoordinate.x = byteStream.read<float32>();
+					glyph.minCoordinate.y = byteStream.read<float32>();
+					glyph.maxCoordinate.x = byteStream.read<float32>();
+					glyph.maxCoordinate.y = byteStream.read<float32>();
+				}
+
+				for (Glyph& glyph : fontAssetDescriptor.glyphs) {
+					glyph.width = byteStream.read<uint16>();
+				}
+
+				for (Glyph& glyph : fontAssetDescriptor.glyphs) {
+					glyph.advanceWidth = byteStream.read<uint16>();
+				}
+
+				for (Glyph& glyph : fontAssetDescriptor.glyphs) {
+					glyph.leftSideBearing = byteStream.read<sint16>();
+				}
+
+				// TODO: Parse Unicode map.
+
+				return createRef<FontAsset>(fontAssetDescriptor);
 			}
 
 		private:

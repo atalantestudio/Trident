@@ -39,15 +39,21 @@ namespace ProjectA {
 
 		file.data = sequence<uint8>(file.extent.width * file.extent.height * channelCount);
 
+		// We cannot parse more than the total byte size - (14-byte header + 8-byte footer).
+		// NOTE: This implementation doesn't look at the footer.
+		const uint64 maxIterationCount = data.count - 22;
+
+		QOIDecoderContentOnly(stream, file.data, channelCount, maxIterationCount);
+
+		return file;
+	}
+
+	void Filesystem::QOIDecoderContentOnly(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint64 maxIterationCount) {
 		qoi_rgba texel = {0, 0, 0, 255};
 		qoi_rgba previouslySeenTexels[64]{};
 
 		uint64 dataOffset = 0;
 		uint64 iterationIndex = 0;
-
-		// We cannot parse more than the total byte size - (14-byte header + 8-byte footer).
-		// NOTE: This implementation doesn't look at the footer.
-		const uint64 maxIterationCount = data.count - 22;
 
 		while (iterationIndex < maxIterationCount) {
 			const uint8 tag = stream.peek<uint8>();
@@ -69,7 +75,7 @@ namespace ProjectA {
 					texel.a = readTexel.a;
 				}
 
-				std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
+				std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &data[dataOffset]);
 
 				dataOffset += channelCount;
 				iterationIndex += channelCount + 1;
@@ -83,7 +89,7 @@ namespace ProjectA {
 
 						texel = previouslySeenTexels[index.index];
 
-						std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
+						std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &data[dataOffset]);
 
 						dataOffset += channelCount;
 						iterationIndex += 1;
@@ -99,7 +105,7 @@ namespace ProjectA {
 						texel.g += diff.dg - 2;
 						texel.b += diff.db - 2;
 
-						std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
+						std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &data[dataOffset]);
 
 						dataOffset += channelCount;
 						iterationIndex += 1;
@@ -115,7 +121,7 @@ namespace ProjectA {
 						texel.g += luma.dg - 32;
 						texel.b += luma.dg - 32 + luma.db_dg - 8;
 
-						std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
+						std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &data[dataOffset]);
 
 						dataOffset += channelCount;
 						iterationIndex += 2;
@@ -130,7 +136,7 @@ namespace ProjectA {
 						const uint8 runLength = (tag & 0b00111111) + 1;
 
 						for (uint8 runOffset = 0; runOffset < runLength; runOffset += 1) {
-							std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &file.data[dataOffset]);
+							std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &data[dataOffset]);
 
 							dataOffset += channelCount;
 						}
@@ -144,7 +150,5 @@ namespace ProjectA {
 
 			previouslySeenTexels[rgbaHash(texel).index] = texel;
 		}
-
-		return file;
 	}
 }

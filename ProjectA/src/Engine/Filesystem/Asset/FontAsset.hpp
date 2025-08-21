@@ -6,9 +6,9 @@
 namespace ProjectA {
 	struct FontAssetDescriptor : public AssetDescriptor {
 		ref<ImageAsset> glyphMapImage;
+		sint32 lineHeight;
 		sequence<Glyph> glyphs;
 		std::unordered_map<uint16, uint32> unicodeMap;
-		sint32 lineHeight;
 	};
 
 	class FontAsset : public Asset {
@@ -16,13 +16,17 @@ namespace ProjectA {
 			explicit FontAsset(const FontAssetDescriptor& descriptor) :
 				Asset(descriptor),
 				glyphMapImage(descriptor.glyphMapImage),
+				lineHeight(descriptor.lineHeight),
 				glyphs(descriptor.glyphs),
-				unicodeMap(descriptor.unicodeMap),
-				lineHeight(descriptor.lineHeight)
+				unicodeMap(descriptor.unicodeMap)
 			{}
 
 			const ref<ImageAsset>& getGlyphMapImage() const {
 				return glyphMapImage;
+			}
+
+			sint32 getLineHeight() const {
+				return lineHeight;
 			}
 
 			const sequence<Glyph>& getGlyphs() const {
@@ -31,10 +35,6 @@ namespace ProjectA {
 
 			uint32 getGlyphCount() const {
 				return static_cast<uint32>(glyphs.count);
-			}
-
-			sint32 getLineHeight() const {
-				return lineHeight;
 			}
 
 			// Returns the glyph represented by the provided code point.
@@ -47,8 +47,8 @@ namespace ProjectA {
 
 		private:
 			ref<ImageAsset> glyphMapImage;
+			sint32 lineHeight;
 			sequence<Glyph> glyphs;
 			std::unordered_map<uint16, uint32> unicodeMap;
-			sint32 lineHeight;
 	};
 }

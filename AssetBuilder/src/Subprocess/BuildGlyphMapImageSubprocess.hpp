@@ -9,89 +9,87 @@ namespace ProjectA {
 			static constexpr uint64 TIM_HEADER_SIZE = 9 * sizeof(uint32);
 
 		public:
+			// TODO: Mip level count is not handled for the moment and must be set to 1.
 			explicit BuildGlyphMapImageSubprocess(const std::string& assetOutputPath, const std::string& assetName, const ref<ImageAsset>& imageAsset, uint32& assetIdentifier) {
 				assetIdentifier = AssetLibrary::createAssetIdentifier();
 
-				const uint64 maxOutputSize = TIM_HEADER_SIZE + imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * sizeof(uint32);
+				const uint8 channelCount = getChannelCount(imageAsset->getFormat());
+
+				// NOTE: In the worst case, all chunks are QOI_RGBA.
+				const uint64 maxOutputSize =
+					TIM_HEADER_SIZE +
+					imageAsset->getLayerCount() *
+					imageAsset->getExtent().width *
+					imageAsset->getExtent().height *
+					imageAsset->getExtent().depth *
+					(sizeof(uint8) + sizeof(qoi_rgba));
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(maxOutputSize);
 				outputByteStream.write<AssetSignature>(AssetSignature::TIM);
 				outputByteStream.write<uint32>(assetIdentifier);
 				outputByteStream.write<VersionNumber>({0, 0, 0});
-				outputByteStream.write<uint32>(static_cast<uint32>(imageAsset->getFormat()));
+				outputByteStream.write<uint32>(static_cast<uint32>(ImageFormat::R8G8B8A8_UNORM));
 				outputByteStream.write<Extent3D>(imageAsset->getExtent());
 				outputByteStream.write<uint32>(imageAsset->getMipLevelCount());
 				outputByteStream.write<uint32>(imageAsset->getLayerCount());
 
-				const uint64 texelCount = imageAsset->getData().count;
+				sequence<uint8> rgbaDataPerChannel(imageAsset->getData().count * 4);
 
-				sequence<uint8> rgbaDataPerChannel(texelCount * 4);
+				convertRedToRGBA(imageAsset->getData(), rgbaDataPerChannel);
 
-				// Convert R to RGBA.
-				for (uint32 texelIndex = 0, channelIndex = 0; texelIndex < texelCount; texelIndex += 1, channelIndex += 4) {
-					rgbaDataPerChannel[channelIndex + 0] = imageAsset->getData()[texelIndex];
-					rgbaDataPerChannel[channelIndex + 1] = 0;
-					rgbaDataPerChannel[channelIndex + 2] = 0;
-					rgbaDataPerChannel[channelIndex + 3] = 255;
-				}
+				const qoi_rgba* rgbaData = pointer_cast<const qoi_rgba*>(&rgbaDataPerChannel[0]);
 
-				// TODO: Automatically determine channel count.
-				const uint8 channelCount = 4;
-
+				qoi_rgba texelCache[64]{};
 				qoi_rgba previousTexel = {0, 0, 0, 255};
 				qoi_index previousTexelHash = rgbaHash(previousTexel);
-				qoi_rgba texelCache[64]{};
-
 				uint8 runLength = 0;
+				uint32 texelIndex = 0;
 
-				const rgba* rgbaData = pointer_cast<const rgba*>(&rgbaDataPerChannel[0]);
+				for (uint32 layerIndex = 0; layerIndex < imageAsset->getLayerCount(); layerIndex += 1) {
+					for (uint32 z = 0; z < imageAsset->getExtent().depth; z += 1) {
+						for (uint32 y = 0; y < imageAsset->getExtent().height; y += 1) {
+							for (uint32 x = 0; x < imageAsset->getExtent().width; x += 1, texelIndex += 1) {
+								texelCache[previousTexelHash.index] = previousTexel;
 
-				for (uint32 z = 0; z < imageAsset->getExtent().depth; z += 1) {
-					for (uint32 y = 0; y < imageAsset->getExtent().height; y += 1) {
-						for (uint32 x = 0; x < imageAsset->getExtent().width; x += 1) {
-							const uint32 baseTexelOffset = (z * imageAsset->getExtent().depth + y * imageAsset->getExtent().height + x);
-							const rgba baseTexel = rgbaData[baseTexelOffset];
+								const qoi_rgba texel = rgbaData[texelIndex];
+								const qoi_index texelHash = rgbaHash(texel);
 
-							qoi_rgba texel;
-							texel.r = baseTexel.r;
-							texel.g = baseTexel.g;
-							texel.b = baseTexel.b;
-							texel.a = baseTexel.a;
+								if (texelHash.index == previousTexelHash.index && runLength != 62) {
+									runLength += 1;
 
-							const qoi_index texelHash = rgbaHash(texel);
+									continue;
+								}
 
-							if (texelHash.index == previousTexelHash.index && runLength < 62) {
-								runLength += 1;
+								if (runLength > 0) {
+									qoi_run run;
+									run.tag = 0b11;
+									run.run = runLength - 1;
 
-								continue;
+									outputByteStream.write<qoi_run>(run);
+
+									runLength = 0;
+								}
+
+								if (texel == texelCache[texelHash.index]) {
+									qoi_index index;
+									index.tag = 0b00;
+									index.index = texelHash.index;
+
+									outputByteStream.write<qoi_index>(index);
+								}
+								else {
+									outputByteStream.write<uint8>(0b11111111);
+									outputByteStream.write<qoi_rgba>(texel);
+								}
+
+								previousTexel = texel;
+								previousTexelHash = texelHash;
 							}
-
-							if (runLength > 0) {
-								qoi_run run;
-								run.tag = 0b11;
-								run.run = runLength;
-
-								outputByteStream.write<qoi_run>(run);
-
-								runLength = 0;
-							}
-							else if (texel == texelCache[texelHash.index]) {
-								qoi_index index;
-								index.tag = 0b00;
-								index.index = texelHash.index;
-
-								outputByteStream.write<qoi_index>(index);
-							}
-							else {
-								outputByteStream.write<uint32>(0b11111111);
-								outputByteStream.write<qoi_rgba>(texel);
-							}
-
-							previousTexelHash = texelHash;
-							texelCache[texelHash.index] = texel;
 						}
 					}
 				}
+
+				DEBUG_ASSERT(texelIndex == imageAsset->getData().count);
 
 				const uint64 outputSize = outputByteStream.getByteOffset();
 

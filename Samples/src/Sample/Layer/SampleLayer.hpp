@@ -7,13 +7,12 @@
 #define RENDERER_COMPUTE_SHADER 2
 #define RENDERER_DEFAULT 3
 #define RENDERER_DEPTH_TEST 4
-#define RENDERER_GLYPH_MAP_IMAGE 5
-#define RENDERER_IMAGE 6
-#define RENDERER_IMAGE_ASSET 7
-#define RENDERER_MULTISAMPLE 8
-#define RENDERER_TEXT 9
-#define RENDERER_TEXTURE_ARRAY 10
-#define RENDERER_TRIANGLE 11
+#define RENDERER_IMAGE 5
+#define RENDERER_IMAGE_ASSET 6
+#define RENDERER_MULTISAMPLE 7
+#define RENDERER_TEXT 8
+#define RENDERER_TEXTURE_ARRAY 9
+#define RENDERER_TRIANGLE 10
 
 // Select the renderer to run.
 #define RENDERER RENDERER_IMAGE_ASSET
@@ -46,12 +45,6 @@
 	#include "../Renderer/DepthTestRenderer.hpp"
 
 	#define RENDERER_CLASS DepthTestRenderer
-#endif
-
-#if RENDERER == RENDERER_GLYPH_MAP_IMAGE
-	#include "../Renderer/GlyphMapImageRenderer.hpp"
-
-	#define RENDERER_CLASS GlyphMapImageRenderer
 #endif
 
 #if RENDERER == RENDERER_IMAGE

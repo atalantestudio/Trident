@@ -6,7 +6,7 @@ namespace ProjectA {
 	class ImageAssetRenderer : public Renderer {
 		public:
 			void build() override {
-				const ref<ImageAsset> imageAsset = Application::getAssetLibrary().findImageAsset("MyImage");
+				const ref<ImageAsset> imageAsset = Application::getAssetLibrary().findImageAsset("test-regular");
 
 				const ref<Device> device = getDevice();
 
@@ -28,7 +28,7 @@ namespace ProjectA {
 					// TODO: On Vulkan, the data of an RGB image must first be copied to an RGBA image which supports TRANSFER_DST usage.
 					ImageDescriptor imageDescriptor;
 					imageDescriptor.type = ImageType::TEXTURE_2D;
-					imageDescriptor.format = imageAsset->getFormat();
+					imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
 					imageDescriptor.extent = imageAsset->getExtent();
 					imageDescriptor.mipLevelCount = imageAsset->getMipLevelCount();
 					imageDescriptor.layerCount = imageAsset->getLayerCount();
