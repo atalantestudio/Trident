@@ -25,10 +25,11 @@ namespace ProjectA {
 		textureArrayFlushed = true;
 	}
 
-	FontID GUILayer::loadFont(std::string_view path) {
+	FontID GUILayer::loadFontAsset(const ref<FontAsset>& fontAsset) {
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
+		// TODO: Make bitmap fonts work seamlessly with True-Type fonts.
 		/* defaultFont->textureIndex = static_cast<uint32>(images.size());
 		defaultFont->glyphMap.map = QUIVER_BITMAP_GLYPH_MAP;
 		defaultFont->glyphMap.utfOffset = 32;
@@ -36,23 +37,12 @@ namespace ProjectA {
 		defaultFont->tileHeight = 12;
 		defaultFont->tileSpacing = 1; */
 
-		FontAssetDescriptor fontAssetDescriptor{};
-
-		// TODO: Load font asset (.tfo).
-		BREAKPOINT();
-
-		fonts[fontCount].fontAsset = createScope<FontAsset>(fontAssetDescriptor);
-
-		const scope<FontAsset>& fontAsset = fonts[fontCount].fontAsset;
-
-		const ref<ImageAsset>& glyphMapImage = fontAsset->getGlyphMapImage();
+		fonts[fontCount].fontAsset = fontAsset;
 
 		TextureArrayLayer glyphMapImageLayer;
-		glyphMapImageLayer.width = glyphMapImage->getExtent().width;
-		glyphMapImageLayer.height = glyphMapImage->getExtent().height;
-		glyphMapImageLayer.data = sequence<uint8>(glyphMapImage->getData().count * 4);
-
-		convertRedToRGBA(glyphMapImage->getData(), glyphMapImageLayer.data);
+		glyphMapImageLayer.width = fontAsset->getGlyphMapImage()->getExtent().width;
+		glyphMapImageLayer.height = fontAsset->getGlyphMapImage()->getExtent().height;
+		glyphMapImageLayer.data = fontAsset->getGlyphMapImage()->getData();
 
 		const FontID fontId = fontCount;
 

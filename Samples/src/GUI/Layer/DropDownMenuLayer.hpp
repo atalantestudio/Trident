@@ -4,7 +4,9 @@ namespace ProjectA {
 	class DropDownMenuLayer : public GUILayer {
 		public:
 			void registerAssets() override {
-				font = loadFont("../ProjectA/src/Asset/Font/test-regular.ttf");
+				const ref<FontAsset> testRegularFontAsset = Application::getAssetLibrary().findFontAsset("test-regular");
+
+				font = loadFontAsset(testRegularFontAsset);
 			}
 
 			void GUI() override {

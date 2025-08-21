@@ -189,7 +189,22 @@ namespace ProjectA {
 					glyph.leftSideBearing = byteStream.read<sint16>();
 				}
 
-				// TODO: Parse Unicode map.
+				const uint64 unicodeMapOffset = byteStream.getByteOffset();
+				const uint64 unicodeMapSize = byteStream.getRemainingByteSize() / (sizeof(uint16) + sizeof(uint32));
+
+				fontAssetDescriptor.unicodeMap.reserve(unicodeMapSize);
+
+				for (uint64 unicodeEntryIndex = 0; unicodeEntryIndex < unicodeMapSize; unicodeEntryIndex += 1) {
+					byteStream.seek(unicodeMapOffset + unicodeMapSize * sizeof(uint16) + unicodeEntryIndex * sizeof(uint32));
+
+					const uint32 glyphIndex = byteStream.peek<uint32>();
+
+					byteStream.seek(unicodeMapOffset + unicodeEntryIndex * sizeof(uint16));
+
+					const uint16 codePoint = byteStream.read<uint16>();
+
+					fontAssetDescriptor.unicodeMap.insert({codePoint, glyphIndex});
+				}
 
 				return createRef<FontAsset>(fontAssetDescriptor);
 			}

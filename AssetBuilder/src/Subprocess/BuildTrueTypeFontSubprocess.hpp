@@ -40,7 +40,9 @@ namespace ProjectA {
 				fontAssetDescriptor.glyphMapImage = createRef<ImageAsset>(glyphMapImageAssetDescriptor);
 
 				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count);
-				const uint64 outputSize = 7 * sizeof(uint32) + (4 * sizeof(float32) + 3 * sizeof(uint16)) * glyphCount;
+				const uint64 outputSize =
+					7 * sizeof(uint32) + (4 * sizeof(float32) + 3 * sizeof(uint16)) * glyphCount +
+					(sizeof(uint16) + sizeof(uint32)) * file.unicodeMap.size();
 				const uint32 assetIdentifier = AssetLibrary::createAssetIdentifier();
 
 				uint32 glyphMapImageAssetIdentifier;
@@ -83,6 +85,14 @@ namespace ProjectA {
 					const Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
 
 					outputByteStream.write<sint16>(glyph.leftSideBearing);
+				}
+
+				for (const auto& unicodeEntry : file.unicodeMap) {
+					outputByteStream.write<uint16>(unicodeEntry.first);
+				}
+
+				for (const auto& unicodeEntry : file.unicodeMap) {
+					outputByteStream.write<uint32>(unicodeEntry.second);
 				}
 
 				const std::string outputPath = assetOutputPath + "Font/" + directoryEntry.path().stem().string() + ".tfo";

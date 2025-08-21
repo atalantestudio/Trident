@@ -11,7 +11,7 @@ namespace ProjectA {
 	class GUILayer : public Layer {
 		private:
 			struct FontData {
-				scope<FontAsset> fontAsset;
+				ref<FontAsset> fontAsset;
 				ImageID glyphMapImageId;
 			};
 
@@ -46,7 +46,7 @@ namespace ProjectA {
 			virtual void onEvent(Event& event) final override;
 
 		protected:
-			FontID loadFont(std::string_view path);
+			FontID loadFontAsset(const ref<FontAsset>& fontAsset);
 
 			ImageID loadImage(std::string_view path);
 
