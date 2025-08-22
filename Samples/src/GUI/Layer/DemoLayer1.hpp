@@ -4,7 +4,7 @@ namespace ProjectA {
 	class DemoLayer1 : public GUILayer {
 		public:
 			void GUI() override {
-				ContainerStyle blue;
+				ContainerStyle blue{};
 				blue.size = {1600_px, FIT};
 				blue.padding = {32_px, 32_px};
 				blue.layoutDirection = HORIZONTAL;
@@ -14,7 +14,7 @@ namespace ProjectA {
 				blue.debugName = "blue";
 
 				GUIComponent(blue) {
-					ContainerStyle pink;
+					ContainerStyle pink{};
 					pink.size = {300_px, EXPAND};
 					pink.padding = {0_px, 0_px};
 					pink.layoutDirection = HORIZONTAL;
@@ -25,7 +25,7 @@ namespace ProjectA {
 
 					GUIComponent(pink);
 
-					ContainerStyle yellow;
+					ContainerStyle yellow{};
 					yellow.size = {EXPAND, 200_px};
 					yellow.padding = {0_px, 0_px};
 					yellow.layoutDirection = HORIZONTAL;
@@ -36,7 +36,7 @@ namespace ProjectA {
 
 					GUIComponent(yellow);
 
-					ContainerStyle lightBlue;
+					ContainerStyle lightBlue{};
 					lightBlue.size = {EXPAND, 300_px};
 					lightBlue.padding = {0_px, 0_px};
 					lightBlue.layoutDirection = HORIZONTAL;

@@ -10,7 +10,7 @@ namespace ProjectA {
 			}
 
 			void GUI() override {
-				ContainerStyle menu;
+				ContainerStyle menu{};
 				menu.size = {FIT, FIT};
 				menu.padding = {8_px, 8_px};
 				menu.layoutDirection = VERTICAL;
@@ -21,7 +21,7 @@ namespace ProjectA {
 
 				GUIComponent(menu) {
 					for (const std::string& label : itemLabels) {
-						ContainerStyle item;
+						ContainerStyle item{};
 						item.size = {EXPAND, 40_px};
 						item.minimumSize.y = 40_px;
 						item.padding = {8_px, 8_px};
@@ -32,13 +32,13 @@ namespace ProjectA {
 						item.debugName = "item";
 
 						GUIComponent(item) {
-							ContainerStyle labelContainer;
+							ContainerStyle labelContainer{};
 							labelContainer.size = {EXPAND, FIT};
 							labelContainer.color = 0x00000000;
 							labelContainer.debugName = "labelContainer";
 
 							GUIComponent(labelContainer) {
-								TextStyle itemLabel;
+								TextStyle itemLabel{};
 								itemLabel.color = 0xffffffff;
 								itemLabel.font = font;
 								itemLabel.fontSize = 32;
@@ -46,7 +46,7 @@ namespace ProjectA {
 								GUIText(label, itemLabel);
 							}
 
-							ContainerStyle itemImage;
+							ContainerStyle itemImage{};
 							itemImage.size = {32_px, 32_px};
 							itemImage.color = 0xff9800ff;
 							itemImage.debugName = "itemImage";
