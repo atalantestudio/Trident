@@ -175,6 +175,7 @@ namespace ProjectA {
 					glyph.minCoordinate.y = byteStream.read<float32>();
 					glyph.maxCoordinate.x = byteStream.read<float32>();
 					glyph.maxCoordinate.y = byteStream.read<float32>();
+					glyph.whitespace = (glyph.minCoordinate.x == glyph.maxCoordinate.x && glyph.minCoordinate.y == glyph.maxCoordinate.y);
 				}
 
 				for (Glyph& glyph : fontAssetDescriptor.glyphs) {
