@@ -47,7 +47,6 @@ namespace ProjectA {
 
 			void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) final override;
 
-			// TODO: The index buffer offset provided when calling bindIndexBuffer is ignored on calls to drawIndexedIndirect.
 			void drawIndexedIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) final override;
 
 			void endRenderPass() final override;

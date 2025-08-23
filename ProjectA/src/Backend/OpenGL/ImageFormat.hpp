@@ -31,6 +31,31 @@ namespace ProjectA {
 		return glInternalFormats[static_cast<uint8>(imageFormat)];
 	}
 
+	static ImageFormat fromGlInternalFormat(GLenum internalFormat) {
+		switch (internalFormat) {
+			case GL_R8:
+				return ImageFormat::R8_UNORM;
+			case GL_RGB8:
+				return ImageFormat::R8G8B8_UNORM;
+			case GL_BGRA8_EXT:
+				return ImageFormat::B8G8R8A8_UNORM;
+			case GL_SRGB8_ALPHA8:
+				return ImageFormat::R8G8B8A8_SRGB;
+			case GL_RGBA8:
+				return ImageFormat::R8G8B8A8_UNORM;
+			case GL_DEPTH_COMPONENT32F:
+				return ImageFormat::D32_SFLOAT;
+			case GL_DEPTH32F_STENCIL8:
+				return ImageFormat::D32_SFLOAT_S8_UINT;
+			case GL_DEPTH24_STENCIL8:
+				return ImageFormat::D24_UNORM_S8_UINT;
+			default:
+				ENGINE_ASSERT(false, "Unhandled OpenGL internal format.");
+
+				return static_cast<ImageFormat>(0);
+		}
+	}
+
 	static bool isDepthFormat(GLenum internalFormat) {
 		return (
 			internalFormat == GL_DEPTH_COMPONENT32F ||

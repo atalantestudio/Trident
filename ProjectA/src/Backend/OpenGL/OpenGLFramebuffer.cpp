@@ -44,12 +44,23 @@ namespace ProjectA {
 
 			GLenum attachment;
 
-			if (isDepthFormat(glImage->internalFormat)) {
-				// TODO: Use GL_DEPTH_STENCIL_ATTACHMENT instead of GL_DEPTH_ATTACHMENT.
-				attachment = GL_DEPTH_ATTACHMENT;
-			}
-			else {
-				attachment = GL_COLOR_ATTACHMENT0 + boundAttachmentIndex;
+			const ImageFormat internalFormat = fromGlInternalFormat(glImage->internalFormat);
+
+			// TODO: Handle stencil-only internal formats with GL_STENCIL_ATTACHMENT.
+			switch (internalFormat) {
+				case ImageFormat::D32_SFLOAT:
+					attachment = GL_DEPTH_ATTACHMENT;
+
+					break;
+				case ImageFormat::D32_SFLOAT_S8_UINT:
+				case ImageFormat::D24_UNORM_S8_UINT:
+					attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+
+					break;
+				default:
+					attachment = GL_COLOR_ATTACHMENT0 + boundAttachmentIndex;
+
+					break;
 			}
 
 			// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even before creating the image).
