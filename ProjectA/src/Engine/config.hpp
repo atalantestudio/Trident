@@ -37,4 +37,93 @@ namespace ProjectA {
 	// If enabled, OpenGL shaders will be sourced from SPIR-V binaries.
 	// If disabled, they will be sourced from GLSL strings.
 	#define OPENGL_USE_SPIRV
+
+	#define OPENGL_VERSION_1_2 120
+	#define OPENGL_VERSION_1_3 130
+	#define OPENGL_VERSION_1_4 140
+	#define OPENGL_VERSION_1_5 150
+	#define OPENGL_VERSION_2_0 200
+	#define OPENGL_VERSION_2_1 210
+	#define OPENGL_VERSION_3_0 300
+	#define OPENGL_VERSION_3_1 310
+	#define OPENGL_VERSION_3_2 320
+	#define OPENGL_VERSION_3_3 330
+	#define OPENGL_VERSION_4_0 400
+	#define OPENGL_VERSION_4_1 410
+	#define OPENGL_VERSION_4_2 420
+	#define OPENGL_VERSION_4_3 430
+	#define OPENGL_VERSION_4_4 440
+	#define OPENGL_VERSION_4_5 450
+	#define OPENGL_VERSION_4_6 460
+
+	/* #ifdef GL_VERSION_1_2
+		#define OPENGL_VERSION OPENGL_VERSION_1_2
+	#endif
+
+	#ifdef GL_VERSION_1_3
+		#define OPENGL_VERSION OPENGL_VERSION_1_3
+	#endif
+
+	#ifdef GL_VERSION_1_4
+		#define OPENGL_VERSION OPENGL_VERSION_1_4
+	#endif
+
+	#ifdef GL_VERSION_1_5
+		#define OPENGL_VERSION OPENGL_VERSION_1_5
+	#endif
+
+	#ifdef GL_VERSION_2_0
+		#define OPENGL_VERSION OPENGL_VERSION_2_0
+	#endif
+
+	#ifdef GL_VERSION_2_1
+		#define OPENGL_VERSION OPENGL_VERSION_2_1
+	#endif
+
+	#ifdef GL_VERSION_3_0
+		#define OPENGL_VERSION OPENGL_VERSION_3_0
+	#endif
+
+	#ifdef GL_VERSION_3_1
+		#define OPENGL_VERSION OPENGL_VERSION_3_1
+	#endif
+
+	#ifdef GL_VERSION_3_2
+		#define OPENGL_VERSION OPENGL_VERSION_3_2
+	#endif
+
+	#ifdef GL_VERSION_3_3
+		#define OPENGL_VERSION OPENGL_VERSION_3_3
+	#endif
+
+	#ifdef GL_VERSION_4_0
+		#define OPENGL_VERSION OPENGL_VERSION_4_0
+	#endif
+
+	#ifdef GL_VERSION_4_1
+		#define OPENGL_VERSION OPENGL_VERSION_4_1
+	#endif
+
+	#ifdef GL_VERSION_4_2
+		#define OPENGL_VERSION OPENGL_VERSION_4_2
+	#endif
+
+	#ifdef GL_VERSION_4_3
+		#define OPENGL_VERSION OPENGL_VERSION_4_3
+	#endif
+
+	#ifdef GL_VERSION_4_4
+		#define OPENGL_VERSION OPENGL_VERSION_4_4
+	#endif
+
+	#ifdef GL_VERSION_4_5
+		#define OPENGL_VERSION OPENGL_VERSION_4_5
+	#endif
+
+	#ifdef GL_VERSION_4_6
+		#define OPENGL_VERSION OPENGL_VERSION_4_6
+	#endif */
+
+	// Desired OpenGL version. Note that the current device might not be able to load this version.
+	#define OPENGL_VERSION OPENGL_VERSION_4_6
 }

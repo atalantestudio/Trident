@@ -20,7 +20,8 @@ namespace ProjectA {
 
 		protected:
 			explicit Buffer(const BufferDescriptor& descriptor) :
-				size(descriptor.size)
+				size(descriptor.size),
+				usage(descriptor.usage)
 			{
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 			}
@@ -29,7 +30,9 @@ namespace ProjectA {
 			virtual void* getMappedRange(uint64 offset, uint64 size) const = 0;
 
 		public:
-			// The size in bytes of the buffer.
 			const uint64 size;
+
+			// NOTE: This member is only used for assertions in the OpenGL adapter.
+			const BufferUsage usage;
 	};
 }

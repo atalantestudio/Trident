@@ -42,6 +42,8 @@ namespace ProjectA {
 
 			void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) final override;
 
+			void drawIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) final override;
+
 			void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) final override;
 
 			void endRenderPass() final override;

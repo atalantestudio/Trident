@@ -26,6 +26,10 @@ namespace ProjectA {
 			return GL_ARRAY_BUFFER;
 		}
 
+		if (bufferUsage & BufferUsage::INDIRECT) {
+			return GL_DRAW_INDIRECT_BUFFER;
+		}
+
 		ENGINE_ASSERT(false, "Unhandled buffer usage.");
 
 		return 0;

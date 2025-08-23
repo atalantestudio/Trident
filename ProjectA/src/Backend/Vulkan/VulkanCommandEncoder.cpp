@@ -277,6 +277,18 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
+	void VulkanCommandEncoder::drawIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) {
+		vkCmdDrawIndirect(
+			commandBuffer,
+			std::static_pointer_cast<VulkanBuffer>(buffer)->object,
+			offset,
+			drawCount,
+			stride
+		);
+
+		commandCount += 1;
+	}
+
 	void VulkanCommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) {
 		vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, indexOffset, 0, 0);
 

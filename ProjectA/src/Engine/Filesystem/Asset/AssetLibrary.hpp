@@ -9,6 +9,7 @@
 namespace ProjectA {
 	class AssetLibrary {
 		public:
+			// https://en.wikipedia.org/wiki/Ostrich_algorithm
 			static uint32 createAssetIdentifier() {
 				return random<uint32>(min<uint32>(), max<uint32>());
 			}

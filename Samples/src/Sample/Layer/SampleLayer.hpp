@@ -9,13 +9,14 @@
 #define RENDERER_DEPTH_TEST 4
 #define RENDERER_IMAGE 5
 #define RENDERER_IMAGE_ASSET 6
-#define RENDERER_MULTISAMPLE 7
-#define RENDERER_TEXT 8
-#define RENDERER_TEXTURE_ARRAY 9
-#define RENDERER_TRIANGLE 10
+#define RENDERER_INDIRECT 7
+#define RENDERER_MULTISAMPLE 8
+#define RENDERER_TEXT 9
+#define RENDERER_TEXTURE_ARRAY 10
+#define RENDERER_TRIANGLE 11
 
 // Select the renderer to run.
-#define RENDERER RENDERER_IMAGE_ASSET
+#define RENDERER RENDERER_INDIRECT
 
 #if RENDERER == RENDERER_ARRAY_TEXTURE
 	#include "../Renderer/ArrayTextureRenderer.hpp"
@@ -57,6 +58,12 @@
 	#include "../Renderer/ImageAssetRenderer.hpp"
 
 	#define RENDERER_CLASS ImageAssetRenderer
+#endif
+
+#if RENDERER == RENDERER_INDIRECT
+	#include "../Renderer/IndirectRenderer.hpp"
+
+	#define RENDERER_CLASS IndirectRenderer
 #endif
 
 #if RENDERER == RENDERER_MULTISAMPLE

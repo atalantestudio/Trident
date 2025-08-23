@@ -11,6 +11,7 @@
 #include "Backend/OpenGL/Command/OpenGLCopyImageToBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDispatchGroupsCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLDrawIndirectCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLEndRenderPassCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetImageMemoryBarrierCommand.hpp"
@@ -149,7 +150,7 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(
 			static_cast<GLint>(origin[0]),
 
-			// TODO: The origin's Y can be flipped in Vulkan but not in OpenGL.
+			// TODO: Allow the origin's Y to be flipped like in Vulkan.
 			0,
 
 			static_cast<GLsizei>(abs(size[0])),
@@ -166,14 +167,27 @@ namespace ProjectA {
 		));
 	}
 
+	void OpenGLCommandEncoder::drawIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) {
+		ENGINE_ASSERT(buffer->usage & BufferUsage::INDIRECT, "This buffer cannot be used as an indirect buffer.");
+		ENGINE_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
+
+		commandBuffer.emplace_back(createRef<OpenGLDrawIndirectCommand>(
+			renderPipeline->primitiveTopology,
+			std::static_pointer_cast<OpenGLBuffer>(buffer)->object,
+			(const GLubyte*) offset,
+			drawCount,
+			stride
+		));
+	}
+
 	void OpenGLCommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) {
-		const uint32 indices = this->indexOffset + indexOffset * indexTypeSize;
+		const uint64 indices = this->indexOffset + indexOffset * indexTypeSize;
 
 		commandBuffer.emplace_back(createRef<OpenGLDrawIndexedCommand>(
 			renderPipeline->primitiveTopology,
 			indexCount,
 			indexType,
-			(const GLvoid*) (const std::uintptr_t) indices,
+			(const GLvoid*) indices,
 			instanceCount
 		));
 	}

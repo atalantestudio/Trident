@@ -127,4 +127,10 @@ namespace ProjectA {
 		extern PFNGLCOMPILESHADERPROC glCompileShader;
 		extern PFNGLSHADERSOURCEPROC glShaderSource;
 	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_3
+		extern PFNGLMULTIDRAWARRAYSINDIRECTPROC glMultiDrawArraysIndirect;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_4_0
+		extern PFNGLDRAWARRAYSINDIRECTPROC glDrawArraysIndirect;
+	#endif
 }

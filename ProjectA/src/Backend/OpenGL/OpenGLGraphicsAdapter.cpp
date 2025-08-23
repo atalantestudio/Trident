@@ -147,6 +147,12 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderSource);
 		#endif
 
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_3
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glMultiDrawArraysIndirect);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_4_0
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawArraysIndirect);
+		#endif
+
 		#undef LOAD_PROCEDURE_ADDRESS
 	}
 
