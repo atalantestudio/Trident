@@ -15,10 +15,9 @@ namespace ProjectA {
 				{
 					for (uint32 assetIndex = 0; assetIndex < assets.size(); assetIndex += 1) {
 						const std::string_view path = ASSET_PATHS[assetIndex];
+						const sequence<uint8> data = Filesystem::openBuffer(path);
 
-						const Stream stream = Filesystem::openStream(path);
-
-						assets[assetIndex] = Filesystem::decode<FileFormat::PNG>(stream);
+						assets[assetIndex] = Filesystem::decode<FileFormat::PNG>(data);
 
 						size += assets[assetIndex].data.count;
 					}
@@ -309,7 +308,7 @@ namespace ProjectA {
 				commandEncoder->bindVertexBuffer(1, instanceVertexBuffer, 0, sizeof(Instance));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchain->getExtent());
-				commandEncoder->draw(24, 4, 0);
+				commandEncoder->draw(24, 4, 0, 0);
 				commandEncoder->endRenderPass();
 			}
 

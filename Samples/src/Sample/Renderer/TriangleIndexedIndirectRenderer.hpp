@@ -5,7 +5,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	class IndirectRenderer : public Renderer {
+	class TriangleIndexedIndirectRenderer : public Renderer {
 		public:
 			void build() override {
 				// 1. Create render pass and subpass.
@@ -106,19 +106,44 @@ namespace ProjectA {
 					vertexBuffer = createBuffer(vertexBufferDescriptor);
 				}
 
+				ref<Buffer> indexStagingBuffer;
+
+				// 6. Create index staging buffer.
+				{
+					static constexpr uint64 indexBufferSize = 3 * sizeof(uint16);
+
+					indexStagingBuffer = createStagingBuffer(indexBufferSize);
+
+					uint16* indexStagingBufferRange = indexStagingBuffer->map<uint16>(0, indexBufferSize);
+					indexStagingBufferRange[0] = 0;
+					indexStagingBufferRange[1] = 1;
+					indexStagingBufferRange[2] = 2;
+
+					indexStagingBuffer->unmap();
+
+					BufferDescriptor indexBufferDescriptor{};
+					indexBufferDescriptor.size = indexBufferSize;
+					indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
+					indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+					indexBufferDescriptor.persistent = false;
+
+					indexBuffer = createBuffer(indexBufferDescriptor);
+				}
+
 				ref<Buffer> indirectStagingBuffer;
 
-				// 6. Create indirect staging buffer.
+				// 7. Create indirect staging buffer.
 				{
-					static constexpr uint64 indirectBufferSize = sizeof(DrawIndirectCommand);
+					static constexpr uint64 indirectBufferSize = sizeof(DrawIndexedIndirectCommand);
 
 					indirectStagingBuffer = createStagingBuffer(indirectBufferSize);
 
-					DrawIndirectCommand* indirectBufferMappedRange = indirectStagingBuffer->map<DrawIndirectCommand>(0, indirectBufferSize);
-					indirectBufferMappedRange->vertexCount = 3;
-					indirectBufferMappedRange->instanceCount = 1;
-					indirectBufferMappedRange->vertexOffset = 0;
-					indirectBufferMappedRange->instanceOffset = 0;
+					DrawIndexedIndirectCommand* indirectStagingBufferRange = indirectStagingBuffer->map<DrawIndexedIndirectCommand>(0, indirectBufferSize);
+					indirectStagingBufferRange->indexCount = 3;
+					indirectStagingBufferRange->instanceCount = 1;
+					indirectStagingBufferRange->indexOffset = 0;
+					indirectStagingBufferRange->vertexBias = 0;
+					indirectStagingBufferRange->instanceOffset = 0;
 
 					indirectStagingBuffer->unmap();
 
@@ -131,7 +156,7 @@ namespace ProjectA {
 					indirectBuffer = createBuffer(indirectBufferDescriptor);
 				}
 
-				// Write to the vertex and indirect buffers.
+				// 7. Write to the vertex, index and indirect buffers.
 				{
 					const ref<Device> device = getDevice();
 
@@ -141,6 +166,13 @@ namespace ProjectA {
 					vertexBufferCopyRegion.sourceOffset = 0;
 					vertexBufferCopyRegion.destinationOffset = 0;
 					vertexBufferCopyRegion.size = vertexStagingBuffer->size;
+
+					sequence<BufferCopyRegion> indexBufferCopyRegions(1);
+
+					BufferCopyRegion& indexBufferCopyRegion = indexBufferCopyRegions[0];
+					indexBufferCopyRegion.sourceOffset = 0;
+					indexBufferCopyRegion.destinationOffset = 0;
+					indexBufferCopyRegion.size = indexStagingBuffer->size;
 
 					sequence<BufferCopyRegion> indirectBufferCopyRegions(1);
 
@@ -157,6 +189,7 @@ namespace ProjectA {
 
 					commandEncoder->begin();
 					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, vertexBufferCopyRegions);
+					commandEncoder->copyBufferToBuffer(indexStagingBuffer, indexBuffer, indexBufferCopyRegions);
 					commandEncoder->copyBufferToBuffer(indirectStagingBuffer, indirectBuffer, indirectBufferCopyRegions);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
@@ -179,9 +212,10 @@ namespace ProjectA {
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+				commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchain->getExtent());
-				commandEncoder->drawIndirect(indirectBuffer, 0, 1, 0);
+				commandEncoder->drawIndexedIndirect(indirectBuffer, 0, 1, 0);
 				commandEncoder->endRenderPass();
 			}
 
@@ -230,6 +264,7 @@ namespace ProjectA {
 			ref<RenderPipeline> renderPipeline;
 
 			ref<Buffer> vertexBuffer;
+			ref<Buffer> indexBuffer;
 			ref<Buffer> indirectBuffer;
 	};
 }

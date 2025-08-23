@@ -237,7 +237,7 @@ namespace ProjectA {
 				commandEncoder->bindVertexBuffer(1, instanceVertexBuffer, 0, sizeof(Instance));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchain->getExtent());
-				commandEncoder->draw(24, 4, 0);
+				commandEncoder->draw(24, 4, 0, 0);
 				commandEncoder->endRenderPass();
 			}
 
@@ -249,8 +249,8 @@ namespace ProjectA {
 			ref<Image> loadImage(std::string_view path) {
 				const ref<Device> device = getDevice();
 
-				const Stream stream = Filesystem::openStream(path);
-				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(stream);
+				const sequence<uint8> data = Filesystem::openBuffer(path);
+				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(data);
 				const uint64 imageBufferSize = file.data.count * sizeof(uint8);
 
 				const ref<Buffer> imageStagingBuffer = createStagingBuffer(imageBufferSize);

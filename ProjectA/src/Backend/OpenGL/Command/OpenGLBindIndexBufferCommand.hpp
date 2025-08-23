@@ -12,6 +12,8 @@ namespace ProjectA {
 			{}
 
 			void execute() const final override {
+				// TODO: Use glBindBufferRange to account for the offset.
+
 				#ifdef OPENGL_USE_DSA
 					glVertexArrayElementBuffer(vertexArray, indexBuffer);
 				#else

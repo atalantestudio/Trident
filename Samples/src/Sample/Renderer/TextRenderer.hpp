@@ -6,19 +6,19 @@ namespace ProjectA {
 	class TextRenderer : public Renderer {
 		public:
 			void build() override {
-				const TrueTypeFontClass font("../ProjectA/src/Asset/Font/test-regular.ttf");
-				const ref<ImageAsset>& glyphMapImage = font.getGlyphMapImage();
+				const ref<FontAsset>& fontAsset = Application::getAssetLibrary().findFontAsset("test-regular");
+				const ref<ImageAsset>& glyphMapImageAsset = fontAsset->getGlyphMapImage();
 				const ref<Device> device = getDevice();
 
 				ref<Buffer> glyphMapImageStagingBuffer;
 
 				// 1. Create image staging buffer and copy the glyph map data to it.
 				{
-					glyphMapImageStagingBuffer = createStagingBuffer(glyphMapImage.data.count);
+					glyphMapImageStagingBuffer = createStagingBuffer(glyphMapImageAsset->getData().count);
 
 					uint8* glyphMapImageStagingBufferMappedRange = glyphMapImageStagingBuffer->map<uint8>(0, glyphMapImageStagingBuffer->size);
 
-					std::copy(glyphMapImage.data.begin(), glyphMapImage.data.end(), glyphMapImageStagingBufferMappedRange);
+					std::copy(glyphMapImageAsset->getData().begin(), glyphMapImageAsset->getData().end(), glyphMapImageStagingBufferMappedRange);
 
 					glyphMapImageStagingBuffer->unmap();
 				}
@@ -27,9 +27,9 @@ namespace ProjectA {
 				{
 					ImageDescriptor glyphMapImageDescriptor;
 					glyphMapImageDescriptor.type = ImageType::TEXTURE_2D;
-					glyphMapImageDescriptor.format = ImageFormat::R8_UNORM;
-					glyphMapImageDescriptor.extent.width = glyphMapImage.extent.width;
-					glyphMapImageDescriptor.extent.height = glyphMapImage.extent.height;
+					glyphMapImageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
+					glyphMapImageDescriptor.extent.width = glyphMapImageAsset->getExtent().width;
+					glyphMapImageDescriptor.extent.height = glyphMapImageAsset->getExtent().height;
 					glyphMapImageDescriptor.extent.depth = 1;
 					glyphMapImageDescriptor.mipLevelCount = 1;
 					glyphMapImageDescriptor.layerCount = 1;
@@ -46,8 +46,8 @@ namespace ProjectA {
 					bufferImageCopyRegion.imageOffsetX = 0;
 					bufferImageCopyRegion.imageOffsetY = 0;
 					bufferImageCopyRegion.imageOffsetZ = 0;
-					bufferImageCopyRegion.imageExtent.width = glyphMapImage.extent.width;
-					bufferImageCopyRegion.imageExtent.height = glyphMapImage.extent.height;
+					bufferImageCopyRegion.imageExtent.width = glyphMapImageAsset->getExtent().width;
+					bufferImageCopyRegion.imageExtent.height = glyphMapImageAsset->getExtent().height;
 					bufferImageCopyRegion.imageExtent.depth = 1;
 					bufferImageCopyRegion.imageMipLevel = 0;
 					bufferImageCopyRegion.imageLayerOffset = 0;
@@ -257,7 +257,7 @@ namespace ProjectA {
 
 				updateCamera();
 
-				setText("PP Radio Grotesk", font, 64.0f);
+				setText("PP Radio Grotesk", fontAsset, 64.0f);
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
@@ -276,7 +276,7 @@ namespace ProjectA {
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchain->getExtent());
-				commandEncoder->drawIndexed(6 * characterCount, 1, 0);
+				commandEncoder->drawIndexed(6 * characterCount, 1, 0, 0, 0);
 				commandEncoder->endRenderPass();
 			}
 
@@ -285,20 +285,20 @@ namespace ProjectA {
 				updateCamera();
 			}
 
-			void setText(std::string_view text, const TrueTypeFontClass& font, float32 fontSize) {
+			void setText(std::string_view text, const ref<FontAsset>& fontAsset, float32 fontSize) {
 				ENGINE_ASSERT(text.size() <= MAX_CHARACTER_COUNT, "The text must not exceed [] characters.", MAX_CHARACTER_COUNT);
 
 				characterCount = static_cast<uint32>(text.size());
 
-				const float32 lineHeight = static_cast<float32>(font.getLineHeight());
+				const float32 lineHeight = static_cast<float32>(fontAsset->getLineHeight());
 
 				uint32 vertexIndex = 0;
 				float32 positionX = 0;
 				float32 positionY = 0;
 
-				for (const char8 glyph : text) {
-					const uint16 codePoint = static_cast<uint16>(glyph);
-					const Glyph& glyph = font[codePoint];
+				for (const char8 character : text) {
+					const uint16 codePoint = static_cast<uint16>(character);
+					const Glyph& glyph = (*fontAsset)[codePoint];
 
 					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * fontSize);
 

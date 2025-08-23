@@ -62,7 +62,8 @@ namespace ProjectA {
 			// - `vertexCount` is the number of total vertices to draw.
 			// - `instanceCount` is the number of instances to draw.
 			// - `vertexOffset` is the offset in bytes in vertex rate attributes at which to start drawing.
-			virtual void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) = 0;
+			// - `instanceOffset` is the offset of the first instance.
+			virtual void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) = 0;
 
 			// Draws primitives using arguments from an indirect buffer.
 			// - `buffer` is the buffer containing draw arguments.
@@ -74,8 +75,17 @@ namespace ProjectA {
 			// Draws primitives with indexed vertices.
 			// - `indexCount` is the number of total indices to draw.
 			// - `instanceCount` is the number of instances to draw.
-			// - `indexOffset` is the offset of the first vertex (in the index buffer) to draw.
-			virtual void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) = 0;
+			// - `indexOffset` is the offset of the first index.
+			// - `indexBias` is a value added to the index before indexing into the vertex buffer.
+			// - `instanceOffset` is the offset of the first instance.
+			virtual void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) = 0;
+
+			// Draws primitives with indexed vertices, using arguments from an indirect buffer.
+			// - `buffer` is the buffer containing draw arguments.
+			// - `offset` is the offset into `buffer` where arguments begin, in bytes.
+			// - `drawCount` is the number of draw calls to execute. Cannot be 0.
+			// - `stride` is the distance between successive sets of draw arguments, in bytes. Ignored if `drawCount` is 0 or 1.
+			virtual void drawIndexedIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) = 0;
 
 			virtual void endRenderPass() = 0;
 

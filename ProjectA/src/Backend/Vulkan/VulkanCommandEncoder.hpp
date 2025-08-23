@@ -40,11 +40,13 @@ namespace ProjectA {
 
 			void setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) final override;
 
-			void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) final override;
+			void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) final override;
 
 			void drawIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) final override;
 
-			void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) final override;
+			void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) final override;
+
+			void drawIndexedIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) final override;
 
 			void endRenderPass() final override;
 

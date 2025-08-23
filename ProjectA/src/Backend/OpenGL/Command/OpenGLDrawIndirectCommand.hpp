@@ -22,14 +22,16 @@ namespace ProjectA {
 					for (GLsizei drawindex = 0; drawindex < drawcount; drawindex += 1) {
 						glDrawArraysIndirect(mode, indirect + drawindex * stride);
 					}
+				#else
+					ENGINE_ASSERT(false, "DrawIndirect is not supported.");
 				#endif
 			}
 
 		private:
-			GLenum mode;
-			GLenum buffer;
+			const GLenum mode;
+			const GLenum buffer;
 			const GLubyte* indirect;
-			GLsizei drawcount;
-			GLsizei stride;
+			const GLsizei drawcount;
+			const GLsizei stride;
 	};
 }

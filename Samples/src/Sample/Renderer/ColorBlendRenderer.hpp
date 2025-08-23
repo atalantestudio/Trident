@@ -170,7 +170,7 @@ namespace ProjectA {
 					const uint32 vertexOffset = 3 * static_cast<uint32>(instanceIndex);
 
 					commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceIndex * sizeof(Instance), sizeof(Instance));
-					commandEncoder->draw(3, 1, vertexOffset);
+					commandEncoder->draw(3, 1, vertexOffset, 0);
 				}
 
 				commandEncoder->endRenderPass();

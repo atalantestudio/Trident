@@ -45,8 +45,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDetachShader);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDisablei);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDispatchCompute);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawArraysInstanced);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawElementsInstanced);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glEnablei);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glEnableVertexAttribArray);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glFenceSync);
@@ -147,10 +145,25 @@ namespace ProjectA {
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderSource);
 		#endif
 
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_2
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawArraysInstancedBaseInstance);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawElementsInstancedBaseVertexBaseInstance);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_3_2
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawElementsInstancedBaseVertex);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawArraysInstanced);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawElementsInstanced);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawArrays);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawElements);
+		#endif
+
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glMultiDrawArraysIndirect);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glMultiDrawElementsIndirect);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_4_0
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawArraysIndirect);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDrawElementsIndirect);
 		#endif
 
 		#undef LOAD_PROCEDURE_ADDRESS

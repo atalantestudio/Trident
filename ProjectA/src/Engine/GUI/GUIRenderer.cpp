@@ -455,7 +455,7 @@ namespace ProjectA {
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(GUISubcomponent));
-			commandEncoder->drawIndexed(6, subcomponentCount, 0);
+			commandEncoder->drawIndexed(6, subcomponentCount, 0, 0, 0);
 		}
 
 		if (glyphSubcomponentCount > 0) {
@@ -464,7 +464,7 @@ namespace ProjectA {
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GUIGlyphSubcomponent));
-			commandEncoder->drawIndexed(6, glyphSubcomponentCount, 0);
+			commandEncoder->drawIndexed(6, glyphSubcomponentCount, 0, 0, 0);
 		}
 
 		commandEncoder->endRenderPass();

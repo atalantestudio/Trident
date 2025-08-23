@@ -11,8 +11,9 @@
 #include "Backend/OpenGL/Command/OpenGLCopyImageToBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDispatchGroupsCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
-#include "Backend/OpenGL/Command/OpenGLDrawIndirectCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLDrawIndexedIndirectCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLDrawIndirectCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLEndRenderPassCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetImageMemoryBarrierCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetLineWidthCommand.hpp"
@@ -158,12 +159,13 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset) {
+	void OpenGLCommandEncoder::draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) {
 		commandBuffer.emplace_back(createRef<OpenGLDrawCommand>(
 			renderPipeline->primitiveTopology,
 			vertexOffset,
 			vertexCount,
-			instanceCount
+			instanceCount,
+			instanceOffset
 		));
 	}
 
@@ -180,7 +182,7 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset) {
+	void OpenGLCommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) {
 		const uint64 indices = this->indexOffset + indexOffset * indexTypeSize;
 
 		commandBuffer.emplace_back(createRef<OpenGLDrawIndexedCommand>(
@@ -188,7 +190,23 @@ namespace ProjectA {
 			indexCount,
 			indexType,
 			(const GLvoid*) indices,
-			instanceCount
+			instanceCount,
+			indexBias,
+			instanceOffset
+		));
+	}
+
+	void OpenGLCommandEncoder::drawIndexedIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) {
+		ENGINE_ASSERT(buffer->usage & BufferUsage::INDIRECT, "This buffer cannot be used as an indirect buffer.");
+		ENGINE_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
+
+		commandBuffer.emplace_back(createRef<OpenGLDrawIndexedIndirectCommand>(
+			renderPipeline->primitiveTopology,
+			indexType,
+			std::static_pointer_cast<OpenGLBuffer>(buffer)->object,
+			(const GLubyte*) offset,
+			drawCount,
+			stride
 		));
 	}
 

@@ -143,7 +143,7 @@ namespace ProjectA {
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchain->getExtent());
-				commandEncoder->draw(3, 1, 0);
+				commandEncoder->draw(3, 1, 0, 0);
 				commandEncoder->endRenderPass();
 			}
 

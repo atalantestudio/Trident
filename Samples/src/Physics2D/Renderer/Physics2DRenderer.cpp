@@ -887,7 +887,7 @@ namespace ProjectA {
 		commandEncoder->bindRenderPipeline(gridRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindVertexBuffer(0, gridVertexBuffer, 0, sizeof(svec2<float32>));
-		commandEncoder->draw(3, 1, 0);
+		commandEncoder->draw(3, 1, 0, 0);
 	}
 
 	void Physics2DRenderer::renderScene(const ref<CommandEncoder>& commandEncoder) const {
@@ -907,7 +907,7 @@ namespace ProjectA {
 
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
 			commandEncoder->bindVertexBuffer(1, instanceBuffer, rigidBodyIndex * sizeof(Instance), sizeof(Instance));
-			commandEncoder->drawIndexed(indexCount, 1, indexOffset);
+			commandEncoder->drawIndexed(indexCount, 1, indexOffset, 0, 0);
 
 			indexOffset += indexCount;
 			vertexOffset += vertexCount;
@@ -933,7 +933,7 @@ namespace ProjectA {
 				commandEncoder->setLineWidth(1.0f);
 			}
 
-			commandEncoder->draw(vertexCount, 1, 0);
+			commandEncoder->draw(vertexCount, 1, 0, 0);
 
 			vertexOffset += vertexCount;
 		}
@@ -941,14 +941,14 @@ namespace ProjectA {
 		commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0, sizeof(vec3<float32>));
-		commandEncoder->draw(rigidBodyPool.componentCount, 1, 0);
+		commandEncoder->draw(rigidBodyPool.componentCount, 1, 0, 0);
 	}
 
 	void Physics2DRenderer::renderDistance(const ref<CommandEncoder>& commandEncoder) const {
 		commandEncoder->bindRenderPipeline(distanceRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindVertexBuffer(0, closestPointBuffer, 0, sizeof(svec2<float32>));
-		commandEncoder->draw(2, 1, 0);
+		commandEncoder->draw(2, 1, 0, 0);
 	}
 
 	void Physics2DRenderer::renderFeatures(const ref<CommandEncoder>& commandEncoder) const {
@@ -956,14 +956,14 @@ namespace ProjectA {
 			commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();
 			commandEncoder->bindVertexBuffer(0, vertexFeatureBuffer, 0, sizeof(svec2<float32>));
-			commandEncoder->draw(vertexFeatureCount, 1, 0);
+			commandEncoder->draw(vertexFeatureCount, 1, 0, 0);
 		}
 
 		if (edgeVertexFeatureCount > 0) {
 			commandEncoder->bindRenderPipeline(edgeFeatureRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();
 			commandEncoder->bindVertexBuffer(0, edgeVertexFeatureBuffer, 0, sizeof(svec2<float32>));
-			commandEncoder->draw(edgeVertexFeatureCount, 1, 0);
+			commandEncoder->draw(edgeVertexFeatureCount, 1, 0, 0);
 		}
 	}
 
@@ -985,19 +985,19 @@ namespace ProjectA {
 		commandEncoder->bindRenderPipeline(placeholderCenterOfMassRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, selectedInstanceIndex * sizeof(vec3<float32>), sizeof(svec2<float32>));
-		commandEncoder->draw(1, 1, 0);
+		commandEncoder->draw(1, 1, 0, 0);
 
 		commandEncoder->bindRenderPipeline(placeholderFillRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
 		commandEncoder->bindVertexBuffer(1, instanceBuffer, selectedInstanceIndex * sizeof(Instance), sizeof(Instance));
-		commandEncoder->drawIndexed(geometry->getIndexCount(), 1, 0);
+		commandEncoder->drawIndexed(geometry->getIndexCount(), 1, 0, 0, 0);
 
 		commandEncoder->bindRenderPipeline(placeholderStrokeRenderPipeline);
 		commandEncoder->bindAllDescriptorSets();
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
-		commandEncoder->draw(geometry->getVertexCount() + 1, 1, 0);
+		commandEncoder->draw(geometry->getVertexCount() + 1, 1, 0, 0);
 	}
 
 	void Physics2DRenderer::resize(WindowResizeEvent& event) {
