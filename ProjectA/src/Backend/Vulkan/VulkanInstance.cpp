@@ -11,7 +11,7 @@ namespace ProjectA {
 	#endif
 
 	// NOTE: ~25Mb in Release mode.
-	VulkanInstance::VulkanInstance() {
+	VulkanInstance::VulkanInstance(const ApplicationManifest& applicationManifest) {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
@@ -42,13 +42,8 @@ namespace ProjectA {
 
 		VkApplicationInfo applicationInfo{};
 		applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-
-		// TODO(review): Is the application name the same as the window name?
-		applicationInfo.pApplicationName = "ApplicationName";
-
-		// TODO(review): Get application version.
-		applicationInfo.applicationVersion = VK_API_VERSION_1_0;
-
+		applicationInfo.pApplicationName = applicationManifest.projectName.data();
+		applicationInfo.applicationVersion = VK_MAKE_API_VERSION(0, applicationManifest.projectVersion.major, applicationManifest.projectVersion.minor, applicationManifest.projectVersion.patch);
 		applicationInfo.pEngineName = ENGINE_NAME;
 		applicationInfo.engineVersion = VK_MAKE_API_VERSION(0, ENGINE_VERSION_MAJOR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
 		applicationInfo.apiVersion = VK_API_VERSION_1_0;

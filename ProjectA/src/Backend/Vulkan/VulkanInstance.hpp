@@ -2,11 +2,12 @@
 
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/Instance.hpp"
+#include "Engine/Application/ApplicationManifest.hpp"
 
 namespace ProjectA {
 	class VulkanInstance final : public Instance, public ObjectWrapper<VkInstance> {
 		public:
-			explicit VulkanInstance();
+			explicit VulkanInstance(const ApplicationManifest& applicationManifest);
 
 			~VulkanInstance() final override;
 

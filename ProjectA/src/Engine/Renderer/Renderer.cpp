@@ -30,7 +30,7 @@ namespace ProjectA {
 		return adapter;
 	}
 
-	void Renderer::initialize(const Window& window, GraphicsAPI graphicsApi, bool vSync) {
+	void Renderer::initialize(const ApplicationManifest& applicationManifest, const Window& window, GraphicsAPI graphicsApi, bool vSync) {
 		Renderer::graphicsApi = graphicsApi;
 
 		switch (Renderer::graphicsApi) {
@@ -42,7 +42,7 @@ namespace ProjectA {
 				case GraphicsAPI::OPENGL:
 					ENGINE_INFO("Using OpenGL graphics adapter.");
 
-					adapter = createScope<OpenGLGraphicsAdapter>(window);
+					adapter = createScope<OpenGLGraphicsAdapter>(applicationManifest, window);
 
 					break;
 			#endif
@@ -50,7 +50,7 @@ namespace ProjectA {
 				case GraphicsAPI::VULKAN:
 					ENGINE_INFO("Using Vulkan graphics adapter.");
 
-					adapter = createScope<VulkanGraphicsAdapter>(window);
+					adapter = createScope<VulkanGraphicsAdapter>(applicationManifest, window);
 
 					break;
 			#endif

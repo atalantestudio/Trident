@@ -7,6 +7,7 @@ namespace ProjectA {
 	struct ApplicationManifest {
 		ProjectType projectType;
 		std::string_view projectName;
+		VersionNumber projectVersion = {1, 0, 0};
 
 		// TODO(review): Handle custom window icon.
 	};

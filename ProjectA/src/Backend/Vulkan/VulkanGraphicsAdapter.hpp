@@ -11,7 +11,7 @@
 namespace ProjectA {
 	class VulkanGraphicsAdapter final : public GraphicsAdapter {
 		public:
-			explicit VulkanGraphicsAdapter(const Window& window);
+			explicit VulkanGraphicsAdapter(const ApplicationManifest& applicationManifest, const Window& window);
 
 			~VulkanGraphicsAdapter() final override;
 

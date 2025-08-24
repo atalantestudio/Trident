@@ -166,7 +166,7 @@ namespace ProjectA {
 		#undef LOAD_PROCEDURE_ADDRESS
 	}
 
-	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const Window& window) :
+	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const ApplicationManifest& applicationManifest, const Window& window) :
 		renderingContext(window),
 		surface(createRef<OpenGLSurface>())
 	{

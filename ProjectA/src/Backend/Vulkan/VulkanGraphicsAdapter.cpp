@@ -15,8 +15,8 @@
 #include "Backend/Vulkan/MemoryAllocator.hpp"
 
 namespace ProjectA {
-	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const Window& window) :
-		instance(),
+	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const ApplicationManifest& applicationManifest, const Window& window) :
+		instance(applicationManifest),
 		surface(createRef<VulkanSurface>(instance.object, window)),
 		physicalDevice(instance.object),
 		device(createRef<VulkanDevice>(physicalDevice, *surface))

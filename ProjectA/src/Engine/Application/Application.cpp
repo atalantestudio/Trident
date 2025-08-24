@@ -111,7 +111,7 @@ namespace ProjectA {
 
 		window = new Window(windowDescriptor);
 
-		Renderer::initialize(*window, properties->GraphicsAPI, properties->VSync);
+		Renderer::initialize(applicationManifest, *window, properties->GraphicsAPI, properties->VSync);
 
 		if (projectType == ProjectType::MAIN) {
 			ENGINE_INFO("Loading assets.");
