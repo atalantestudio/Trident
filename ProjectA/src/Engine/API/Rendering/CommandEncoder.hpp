@@ -33,6 +33,8 @@ namespace ProjectA {
 			// Binds all descriptor sets linked to the current pipeline.
 			virtual void bindAllDescriptorSets() = 0;
 
+			// Binds the provided index buffer.
+			// The `offset` is in bytes and must be a multiple of IndexType.
 			template<typename IndexType>
 			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset) {
 				bindIndexBuffer(indexBuffer, offset, sizeof(IndexType));
@@ -66,8 +68,8 @@ namespace ProjectA {
 			// Draws primitives.
 			// - `vertexCount` is the number of total vertices to draw.
 			// - `instanceCount` is the number of instances to draw.
-			// - `vertexOffset` is the offset in bytes in vertex rate attributes at which to start drawing.
-			// - `instanceOffset` is the offset of the first instance.
+			// - `vertexOffset` is the offset in vertex units in vertex rate attributes at which to start drawing.
+			// - `instanceOffset` is the offset of the first instance, in instance units.
 			virtual void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) = 0;
 
 			// Draws primitives using arguments from an indirect buffer.
@@ -80,9 +82,9 @@ namespace ProjectA {
 			// Draws primitives with indexed vertices.
 			// - `indexCount` is the number of total indices to draw.
 			// - `instanceCount` is the number of instances to draw.
-			// - `indexOffset` is the offset of the first index.
+			// - `indexOffset` is the offset of the first index, in index units.
 			// - `indexBias` is a value added to the index before indexing into the vertex buffer.
-			// - `instanceOffset` is the offset of the first instance.
+			// - `instanceOffset` is the offset of the first instance, in instance units.
 			virtual void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) = 0;
 
 			// Draws primitives with indexed vertices, using arguments from an indirect buffer.

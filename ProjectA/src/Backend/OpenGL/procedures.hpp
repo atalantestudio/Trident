@@ -3,7 +3,6 @@
 namespace ProjectA {
 	extern PFNGLATTACHSHADERPROC glAttachShader;
 	extern PFNGLBINDBUFFERPROC glBindBuffer;
-	extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
 
 	// TODO(review): glBindFramebuffer should only be loaded in a non-DSA context.
 	//       See OpenGLEndRenderPassCommand.
@@ -130,6 +129,10 @@ namespace ProjectA {
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_3
 		extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
 		extern PFNGLDISPATCHCOMPUTEINDIRECTPROC glDispatchComputeIndirect;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+		extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_2
