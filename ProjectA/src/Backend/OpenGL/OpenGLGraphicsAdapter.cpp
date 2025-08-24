@@ -22,7 +22,6 @@ namespace ProjectA {
 
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glAttachShader);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBuffer);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindFramebuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindImageTexture);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindSampler);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexArray);
@@ -140,6 +139,7 @@ namespace ProjectA {
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBufferRange);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glBindFramebuffer);
 		#endif
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_2
