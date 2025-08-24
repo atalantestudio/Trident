@@ -7,6 +7,7 @@ namespace ProjectA {
 	std::vector<MemoryAllocation> MemoryAllocator::memoryAllocations;
 	std::vector<uint32> MemoryAllocator::currentBufferMemoryAllocationIndices;
 	std::vector<uint32> MemoryAllocator::currentImageMemoryAllocationIndices;
+	std::vector<uint32> MemoryAllocator::freeMemoryAllocationIndices;
 
 	void MemoryAllocator::initialize(const VulkanPhysicalDevice& physicalDevice) {
 		MemoryAllocator::physicalDevice = &physicalDevice;
@@ -249,7 +250,8 @@ namespace ProjectA {
 
 			ENGINE_INFO("Freed memory allocation [].", memoryAllocationIndex);
 
-			// TODO(review): Remove memory allocation from the list?
+			freeMemoryAllocationIndices.emplace_back(memoryAllocationIndex);
+
 			return;
 		}
 
@@ -261,7 +263,13 @@ namespace ProjectA {
 	uint32 MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices) {
 		const VkDeviceSize allocationSize = std::max(size, DEFAULT_MEMORY_ALLOCATION_SIZE);
 
-		const uint32 memoryAllocationIndex = static_cast<uint32>(memoryAllocations.size());
+		uint32 memoryAllocationIndex = static_cast<uint32>(memoryAllocations.size());
+
+		if (!freeMemoryAllocationIndices.empty()) {
+			memoryAllocationIndex = freeMemoryAllocationIndices.back();
+
+			freeMemoryAllocationIndices.pop_back();
+		}
 
 		ENGINE_INFO(
 			"Creating new memory allocation ([]).\n"
@@ -292,7 +300,12 @@ namespace ProjectA {
 		memoryAllocation.lastSuballocationAlignment = 0;
 		memoryAllocation.mappedSuballocationCount = 0;
 
-		memoryAllocations.emplace_back(memoryAllocation);
+		if (memoryAllocationIndex == memoryAllocations.size()) {
+			memoryAllocations.emplace_back(memoryAllocation);
+		}
+		else {
+			memoryAllocations[memoryAllocationIndex] = memoryAllocation;
+		}
 
 		currentMemoryAllocationIndices[memoryTypeIndex] = memoryAllocationIndex;
 

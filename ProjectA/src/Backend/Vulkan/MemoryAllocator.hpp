@@ -84,5 +84,7 @@ namespace ProjectA {
 
 			// Indices of the currently active image memory allocations per memory type.
 			static std::vector<uint32> currentImageMemoryAllocationIndices;
+
+			static std::vector<uint32> freeMemoryAllocationIndices;
 	};
 }

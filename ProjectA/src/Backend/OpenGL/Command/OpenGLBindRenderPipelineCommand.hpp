@@ -10,7 +10,6 @@ namespace ProjectA {
 				renderPipeline(renderPipeline)
 			{}
 
-			// TODO(review): Make glEnable/glDisable calls when initializing?
 			void execute() const final override {
 				DEBUG_ASSERT(renderPipeline->minSampleShading >= 0.0f && renderPipeline->minSampleShading <= 1.0f);
 
