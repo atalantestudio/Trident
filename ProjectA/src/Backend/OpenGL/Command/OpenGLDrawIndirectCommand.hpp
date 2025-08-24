@@ -23,7 +23,7 @@ namespace ProjectA {
 						glDrawArraysIndirect(mode, indirect + drawindex * stride);
 					}
 				#else
-					ENGINE_ASSERT(false, "DrawIndirect is not supported.");
+					ENGINE_ERROR_UNSUPPORTED();
 				#endif
 			}
 

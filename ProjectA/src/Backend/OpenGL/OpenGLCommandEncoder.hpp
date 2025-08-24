@@ -31,7 +31,9 @@ namespace ProjectA {
 
 			void copyImageToBuffer(const ref<Image>& sourceImage, const ref<Buffer>& destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) final override;
 
-			void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) final override;
+			void dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) final override;
+
+			void dispatchIndirect(const ref<Buffer>& buffer, uint64 offset) final override;
 
 			void setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) final override;
 

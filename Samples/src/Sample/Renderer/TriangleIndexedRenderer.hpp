@@ -80,7 +80,7 @@ namespace ProjectA {
 
 				ref<Buffer> vertexStagingBuffer;
 
-				// 5. Create vertex staging buffer.
+				// 5. Create vertex buffer.
 				{
 					static constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
 
@@ -108,7 +108,7 @@ namespace ProjectA {
 
 				ref<Buffer> indexStagingBuffer;
 
-				// 6. Create index staging buffer.
+				// 6. Create index buffer.
 				{
 					static constexpr uint64 indexBufferSize = 3 * sizeof(uint16);
 
@@ -130,7 +130,7 @@ namespace ProjectA {
 					indexBuffer = createBuffer(indexBufferDescriptor);
 				}
 
-				// 7. Write to the vertex and index buffers.
+				// 7. Write to vertex and index buffers.
 				{
 					const ref<Device> device = getDevice();
 

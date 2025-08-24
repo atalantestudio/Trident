@@ -24,7 +24,7 @@ namespace ProjectA {
 						glDrawElementsIndirect(mode, indirect + drawindex * stride);
 					}
 				#else
-					ENGINE_ASSERT(false, "DrawIndexedIndirect is not supported.");
+					ENGINE_ERROR_UNSUPPORTED();
 				#endif
 			}
 

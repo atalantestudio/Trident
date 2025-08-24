@@ -27,7 +27,7 @@ namespace ProjectA {
 						glDrawArrays(mode, first, count);
 					}
 				#else
-					ENGINE_ASSERT(false, "OpenGLDrawCommand is not supported.");
+					ENGINE_ERROR_UNSUPPORTED();
 				#endif
 			}
 

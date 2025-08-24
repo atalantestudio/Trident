@@ -33,7 +33,7 @@ namespace ProjectA {
 						glDrawElements(mode, count, type, indices);
 					}
 				#else
-					ENGINE_ASSERT(false, "OpenGLDrawIndexedCommand is not supported.");
+					ENGINE_ERROR_UNSUPPORTED();
 				#endif
 			}
 

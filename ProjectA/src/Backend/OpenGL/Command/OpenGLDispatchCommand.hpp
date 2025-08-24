@@ -3,16 +3,20 @@
 #include "Backend/OpenGL/Command/OpenGLCommand.hpp"
 
 namespace ProjectA {
-	class OpenGLDispatchGroupsCommand final : public OpenGLCommand {
+	class OpenGLDispatchCommand final : public OpenGLCommand {
 		public:
-			explicit OpenGLDispatchGroupsCommand(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z) :
+			explicit OpenGLDispatchCommand(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z) :
 				num_groups_x(num_groups_x),
 				num_groups_y(num_groups_y),
 				num_groups_z(num_groups_z)
 			{}
 
 			void execute() const final override {
-				glDispatchCompute(num_groups_x, num_groups_y, num_groups_z);
+				#if OPENGL_VERSION >= OPENGL_VERSION_4_3
+					glDispatchCompute(num_groups_x, num_groups_y, num_groups_z);
+				#else
+					ENGINE_ERROR_UNSUPPORTED();
+				#endif
 			}
 
 		private:

@@ -9,7 +9,8 @@
 #include "Backend/OpenGL/Command/OpenGLCopyBufferToBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLCopyBufferToImageCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLCopyImageToBufferCommand.hpp"
-#include "Backend/OpenGL/Command/OpenGLDispatchGroupsCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLDispatchCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLDispatchIndirectCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedIndirectCommand.hpp"
@@ -115,12 +116,16 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
+	void OpenGLCommandEncoder::dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
 		ENGINE_ASSERT(groupCountX <= limits.maxComputeWorkgroupCount[0], "Group count in the X axis must not exceed [].", limits.maxComputeWorkgroupCount[0]);
 		ENGINE_ASSERT(groupCountY <= limits.maxComputeWorkgroupCount[1], "Group count in the Y axis must not exceed [].", limits.maxComputeWorkgroupCount[1]);
 		ENGINE_ASSERT(groupCountZ <= limits.maxComputeWorkgroupCount[2], "Group count in the Z axis must not exceed [].", limits.maxComputeWorkgroupCount[2]);
 
-		commandBuffer.emplace_back(createRef<OpenGLDispatchGroupsCommand>(groupCountX, groupCountY, groupCountZ));
+		commandBuffer.emplace_back(createRef<OpenGLDispatchCommand>(groupCountX, groupCountY, groupCountZ));
+	}
+
+	void OpenGLCommandEncoder::dispatchIndirect(const ref<Buffer>& buffer, uint64 offset) {
+		commandBuffer.emplace_back(createRef<OpenGLDispatchIndirectCommand>(std::static_pointer_cast<OpenGLBuffer>(buffer)->object, offset));
 	}
 
 	void OpenGLCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {

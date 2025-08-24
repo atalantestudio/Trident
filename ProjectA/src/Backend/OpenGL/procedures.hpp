@@ -25,7 +25,6 @@ namespace ProjectA {
 	extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
 	extern PFNGLDETACHSHADERPROC glDetachShader;
 	extern PFNGLENABLEIPROC glDisablei;
-	extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
 	extern PFNGLENABLEIPROC glEnablei;
 	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 	extern PFNGLFENCESYNCPROC glFenceSync;
@@ -126,6 +125,11 @@ namespace ProjectA {
 	#else
 		extern PFNGLCOMPILESHADERPROC glCompileShader;
 		extern PFNGLSHADERSOURCEPROC glShaderSource;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_3
+		extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
+		extern PFNGLDISPATCHCOMPUTEINDIRECTPROC glDispatchComputeIndirect;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_2

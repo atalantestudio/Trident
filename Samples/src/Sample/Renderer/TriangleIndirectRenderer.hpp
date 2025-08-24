@@ -80,7 +80,7 @@ namespace ProjectA {
 
 				ref<Buffer> vertexStagingBuffer;
 
-				// 5. Create vertex staging buffer.
+				// 5. Create vertex buffer.
 				{
 					static constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
 
@@ -108,17 +108,17 @@ namespace ProjectA {
 
 				ref<Buffer> indirectStagingBuffer;
 
-				// 6. Create indirect staging buffer.
+				// 6. Create indirect buffer.
 				{
 					static constexpr uint64 indirectBufferSize = sizeof(DrawIndirectCommand);
 
 					indirectStagingBuffer = createStagingBuffer(indirectBufferSize);
 
-					DrawIndirectCommand* indirectBufferMappedRange = indirectStagingBuffer->map<DrawIndirectCommand>(0, indirectBufferSize);
-					indirectBufferMappedRange->vertexCount = 3;
-					indirectBufferMappedRange->instanceCount = 1;
-					indirectBufferMappedRange->vertexOffset = 0;
-					indirectBufferMappedRange->instanceOffset = 0;
+					DrawIndirectCommand* drawIndirectCommands = indirectStagingBuffer->map<DrawIndirectCommand>(0, indirectBufferSize);
+					drawIndirectCommands[0].vertexCount = 3;
+					drawIndirectCommands[0].instanceCount = 1;
+					drawIndirectCommands[0].vertexOffset = 0;
+					drawIndirectCommands[0].instanceOffset = 0;
 
 					indirectStagingBuffer->unmap();
 
@@ -131,7 +131,7 @@ namespace ProjectA {
 					indirectBuffer = createBuffer(indirectBufferDescriptor);
 				}
 
-				// Write to the vertex and indirect buffers.
+				// 7. Write to vertex and indirect buffers.
 				{
 					const ref<Device> device = getDevice();
 

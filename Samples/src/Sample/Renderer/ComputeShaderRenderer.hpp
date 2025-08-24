@@ -107,7 +107,7 @@ namespace ProjectA {
 					commandEncoder->begin();
 					commandEncoder->bindComputePipeline(computePipeline);
 					commandEncoder->bindAllDescriptorSets();
-					commandEncoder->dispatchGroups(2, 2, 1);
+					commandEncoder->dispatch(2, 2, 1);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 

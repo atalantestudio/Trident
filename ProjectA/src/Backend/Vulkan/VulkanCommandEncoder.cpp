@@ -190,12 +190,18 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
+	void VulkanCommandEncoder::dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
 		ENGINE_ASSERT(groupCountX <= limits.maxComputeWorkgroupCount[0], "Group count in the X axis must not exceed [].", limits.maxComputeWorkgroupCount[0]);
 		ENGINE_ASSERT(groupCountY <= limits.maxComputeWorkgroupCount[1], "Group count in the Y axis must not exceed [].", limits.maxComputeWorkgroupCount[1]);
 		ENGINE_ASSERT(groupCountZ <= limits.maxComputeWorkgroupCount[2], "Group count in the Z axis must not exceed [].", limits.maxComputeWorkgroupCount[2]);
 
 		vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
+
+		commandCount += 1;
+	}
+
+	void VulkanCommandEncoder::dispatchIndirect(const ref<Buffer>& buffer, uint64 offset) {
+		vkCmdDispatchIndirect(commandBuffer, std::static_pointer_cast<VulkanBuffer>(buffer)->object, offset);
 
 		commandCount += 1;
 	}

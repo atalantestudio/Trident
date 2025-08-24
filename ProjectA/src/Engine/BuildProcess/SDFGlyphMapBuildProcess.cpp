@@ -292,13 +292,13 @@ namespace ProjectA {
 			commandEncoder->bindAllDescriptorSets();
 
 			// TODO: Dispatch less groups depending on the size of the glyph area.
-			commandEncoder->dispatchGroups(128, 128, 1);
+			commandEncoder->dispatch(128, 128, 1);
 
 			commandEncoder->bindComputePipeline(glyphSdfPipeline);
 			commandEncoder->bindAllDescriptorSets();
 
 			// TODO(review): Support custom glyph sub-image dimension (multiply down). See GlyphDistanceField.comp.
-			commandEncoder->dispatchGroups(8, 8, 1);
+			commandEncoder->dispatch(8, 8, 1);
 
 			commandBuffer = commandEncoder->end();
 

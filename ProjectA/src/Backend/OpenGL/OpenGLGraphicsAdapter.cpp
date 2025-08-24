@@ -40,7 +40,6 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDeleteVertexArrays);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDetachShader);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glDisablei);
-		LOAD_PROCEDURE_ADDRESS(renderingContext, glDispatchCompute);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glEnablei);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glEnableVertexAttribArray);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glFenceSync);
@@ -133,6 +132,11 @@ namespace ProjectA {
 		#else
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glCompileShader);
 			LOAD_PROCEDURE_ADDRESS(renderingContext, glShaderSource);
+		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_3
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDispatchCompute);
+			LOAD_PROCEDURE_ADDRESS(renderingContext, glDispatchComputeIndirect);
 		#endif
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_2

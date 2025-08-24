@@ -47,7 +47,9 @@ namespace ProjectA {
 
 			virtual void copyImageToBuffer(const ref<Image>& sourceImage, const ref<Buffer>& destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
 
-			virtual void dispatchGroups(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) = 0;
+			virtual void dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) = 0;
+
+			virtual void dispatchIndirect(const ref<Buffer>& buffer, uint64 offset) = 0;
 
 			virtual void setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) = 0;
 
