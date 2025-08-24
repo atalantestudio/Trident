@@ -32,7 +32,6 @@ namespace ProjectA {
 
 				vec2<float32> normal = normalized(perpendicular(ij, 1.0f));
 
-				// TODO: Why is i used instead of ij or j?
 				float32 distance = dot(normal, i);
 
 				if (distance < 0.0f) {
@@ -44,7 +43,6 @@ namespace ProjectA {
 					minDistance = distance;
 					minNormal = normal;
 
-					// TODO: Why is j used instead of i?
 					minIndex = indexJ;
 				}
 			}

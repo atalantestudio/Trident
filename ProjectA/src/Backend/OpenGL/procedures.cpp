@@ -6,11 +6,7 @@ namespace ProjectA {
 	PFNGLATTACHSHADERPROC glAttachShader;
 	PFNGLBINDBUFFERPROC glBindBuffer;
 	PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
-
-	// TODO: glBindFramebuffer should only be loaded in a non-DSA context.
-	//       See OpenGLEndRenderPassCommand.
 	PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
-
 	PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
 	PFNGLBINDSAMPLERPROC glBindSampler;
 	PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
@@ -36,21 +32,13 @@ namespace ProjectA {
 	PFNGLGETPROGRAMIVPROC glGetProgramiv;
 	PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
 	PFNGLGETSHADERIVPROC glGetShaderiv;
-
-	// NOTE: There is no non-DSA variant for this function.
-	// TODO: Write a custom implementation.
 	PFNGLGETTEXTURESUBIMAGEPROC glGetTextureSubImage;
-
 	PFNGLLINKPROGRAMPROC glLinkProgram;
 	PFNGLMEMORYBARRIERPROC glMemoryBarrier;
 	PFNGLMINSAMPLESHADINGPROC glMinSampleShading;
 	PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
 	PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
-
-	// NOTE: There is no non-DSA variant for this function.
-	// TODO: Write a custom implementation.
 	PFNGLTEXTUREVIEWPROC glTextureView;
-
 	PFNGLUSEPROGRAMPROC glUseProgram;
 	PFNGLVERTEXATTRIBBINDINGPROC glVertexAttribBinding;
 	PFNGLVERTEXATTRIBFORMATPROC glVertexAttribFormat;

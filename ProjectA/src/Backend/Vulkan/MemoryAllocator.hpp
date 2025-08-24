@@ -78,11 +78,11 @@ namespace ProjectA {
 			// Allocated buffer and image memory allocations.
 			static std::vector<MemoryAllocation> memoryAllocations;
 
-			// TODO: Merge with currentImageMemoryAllocationIndices.
-			// Index of the currently active buffer memory allocation per memory type.
+			// TODO(review): Merge with currentImageMemoryAllocationIndices.
+			// Indices of the currently active buffer memory allocations per memory type.
 			static std::vector<uint32> currentBufferMemoryAllocationIndices;
 
-			// Index of the currently active image memory allocation per memory type.
+			// Indices of the currently active image memory allocations per memory type.
 			static std::vector<uint32> currentImageMemoryAllocationIndices;
 	};
 }

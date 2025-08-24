@@ -178,7 +178,7 @@ namespace ProjectA {
 
 				const float32 penetrationBias = (rigidBodyA.geometry->getPenetrationBias() + rigidBodyB.geometry->getPenetrationBias()) * 0.5f;
 
-				// TODO: lyah::min
+				// TODO(review): lyah::min
 				contact.bias = -penetrationBias * inverseDeltaTime * std::min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
 				#ifdef ACCUMULATE_IMPULSES
@@ -216,12 +216,12 @@ namespace ProjectA {
 					#ifdef ACCUMULATE_IMPULSES
 						const float32 oldNormalValue = contact.accumulatedNormalImpulse;
 
-						// TODO: lyah::max
+						// TODO(review): lyah::max
 						contact.accumulatedNormalImpulse = std::max(0.0f, contact.accumulatedNormalImpulse + normalImpulseLength);
 
 						normalImpulseLength = contact.accumulatedNormalImpulse - oldNormalValue;
 					#else
-						// TODO: lyah::max
+						// TODO(review): lyah::max
 						normalImpulseLength = std::max(0.0f, normalImpulseLength);
 					#endif
 
@@ -242,14 +242,14 @@ namespace ProjectA {
 						const float32 maxTangentImpulseLength = pair.combinedFriction * contact.accumulatedNormalImpulse;
 						const float32 oldTangentValue = contact.accumulatedTangentImpulse;
 
-						// TODO: lyah::max
+						// TODO(review): lyah::clamp
 						contact.accumulatedTangentImpulse = std::clamp(contact.accumulatedTangentImpulse + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
 
 						tangentImpulseLength = contact.accumulatedTangentImpulse - oldTangentValue;
 					#else
 						const float32 maxTangentImpulseLength = pair.combinedFriction * normalImpulseLength;
 
-						// TODO: lyah::clamp
+						// TODO(review): lyah::clamp
 						tangentImpulseLength = std::clamp(tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
 					#endif
 
@@ -318,48 +318,4 @@ namespace ProjectA {
 		entityContactPair.contactManifold.setContactCount(contactManifold.getContactCount());
 		entityContactPair.contactManifold.normal = contactManifold.normal;
 	}
-
-	/* void PhysicsEngine2D::integrate() {
-		for (const Entity entity : entities) {
-			const float32 t = safeAdvanceTimes[entity];
-
-			RigidBody2D& rigidBody = scene->getRigidBody(entity);
-
-			rigidBody.position += rigidBody.linearVelocity * t + rigidBody.linearAcceleration * t * t * 0.5f;
-			rigidBody.rotation += rigidBody.angularVelocity * t + rigidBody.angularAcceleration * t * t * 0.5f;
-
-			rigidBody.linearVelocity += (rigidBody.linearAcceleration + rigidBody.linearForces) * t * 0.5f;
-			rigidBody.angularVelocity += (rigidBody.angularAcceleration + rigidBody.torque) * t * 0.5f;
-
-			rigidBody.linearAcceleration = rigidBody.linearForces;
-			rigidBody.angularAcceleration = rigidBody.torque;
-
-			scene->updateTransform(entity);
-		}
-
-		for (const ImpulseData& impulseData : impulses) {
-			const float32 toi = safeAdvanceTimes[impulseData.entity];
-
-			// TODO: lyah::max
-			// TODO: max(0.1, t) seems to be needed with 2 entities. Both don't work when gravity is enabled.
-			// const float32 t = 1.0f - toi;
-			const float32 t = std::max(0.1f, 1.0f - toi);
-
-			RigidBody2D& rigidBody = scene->getRigidBody(impulseData.entity);
-
-			rigidBody.linearVelocity += impulseData.impulse * rigidBody.inverseMass;
-			rigidBody.angularVelocity += area(impulseData.r, impulseData.impulse) * rigidBody.inverseInertia;
-
-			rigidBody.position += rigidBody.linearVelocity * t + rigidBody.linearAcceleration * t * t * 0.5f;
-			rigidBody.rotation += rigidBody.angularVelocity * t + rigidBody.angularAcceleration * t * t * 0.5f;
-
-			rigidBody.linearVelocity += (rigidBody.linearAcceleration + rigidBody.linearForces) * t * 0.5f;
-			rigidBody.angularVelocity += (rigidBody.angularAcceleration + rigidBody.torque) * t * 0.5f;
-
-			rigidBody.linearAcceleration = rigidBody.linearForces;
-			rigidBody.angularAcceleration = rigidBody.torque;
-
-			scene->updateTransform(impulseData.entity);
-		}
-	} */
 }

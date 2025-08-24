@@ -15,7 +15,7 @@ namespace ProjectA {
 			void execute() const final override {
 				const OpenGLFramebuffer& glFramebuffer = *std::static_pointer_cast<OpenGLFramebuffer>(descriptor.framebuffer);
 
-				// TODO: Check why the framebuffer still needs to be bound to GL_DRAW_FRAMEBUFFER, even with DSA.
+				// TODO(review): It seems the framebuffer still needs to be bound to GL_DRAW_FRAMEBUFFER even with OPENGL_USE_DSA.
 				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glFramebuffer.object);
 
 				for (uint32 clearValueIndex = 0; clearValueIndex < descriptor.clearValues.size(); clearValueIndex += 1) {

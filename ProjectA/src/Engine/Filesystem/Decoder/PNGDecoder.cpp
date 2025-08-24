@@ -167,7 +167,7 @@ namespace ProjectA {
 
 			const uint32 CRC = stream.read<uint32>(true);
 
-			// TODO: Check CRC. See https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix.
+			// TODO(review): Check CRC. See https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix.
 		}
 
 		sequence<uint8> compressedData(compressedDataSize);
@@ -213,7 +213,7 @@ namespace ProjectA {
 		// Pixel at the left of `b`. If `b` is the leftmost pixel, `c` is 0.
 		const uint8* c;
 
-		// TODO: Use SIMD when the image has 4 channels.
+		// TODO: Optimize with SIMD when the image has 4 channels.
 		for (uint32 rowIndex = 0; rowIndex < file.extent.height; rowIndex += 1) {
 			const uint8 filterType = *x;
 

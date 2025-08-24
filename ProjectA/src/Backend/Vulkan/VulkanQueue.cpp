@@ -74,7 +74,7 @@ namespace ProjectA {
 	PresentStatus VulkanQueue::present(const sequence<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const {
 		PROFILE_SCOPE(FUNC_SIG);
 
-		// TODO: Find a static way of casting swapchains.
+		// TODO: Speed this up.
 		sequence<const VkSwapchainKHR*> vkSwapchains(swapchains.count);
 
 		for (uint64 swapchainIndex = 0; swapchainIndex < vkSwapchains.count; swapchainIndex += 1) {

@@ -1,8 +1,6 @@
 #pragma once
 
 namespace ProjectA {
-	// See https://registry.khronos.org/vulkan/specs/latest/man/html/VkIndexType.html.
-	// TODO: Add support for VK_INDEX_TYPE_NONE_KHR and VK_INDEX_TYPE_UINT8_KHR?
 	static VkIndexType getVkIndexType(uint8 indexTypeSize) {
 		switch (indexTypeSize) {
 			case sizeof(uint16):
@@ -12,7 +10,7 @@ namespace ProjectA {
 			default:
 				ENGINE_ASSERT(false, "Unsupported index type size.");
 
-				return VK_INDEX_TYPE_MAX_ENUM;
+				return static_cast<VkIndexType>(0);
 		}
 	}
 }

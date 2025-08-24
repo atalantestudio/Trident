@@ -132,8 +132,6 @@ namespace ProjectA {
 	template<typename T>
 	using quat alignas(4 * sizeof(T)) = lyah::quat<T>;
 
-	// TODO: Expose Lyah methods.
-
 	template<std::size_t C, typename T>
 	struct svec;
 
@@ -264,13 +262,13 @@ namespace ProjectA {
 	template<typename T>
 	using svec2 = svec<2, T>;
 
-	// TODO: lyah::lengthSquared
+	// TODO(review): lyah::lengthSquared
 	template<std::size_t C, typename T>
 	T lengthSq(const lyah::vec<C, T>& a) {
 		return lyah::dot(a, a);
 	}
 
-	// TODO: lyah::distanceSquared
+	// TODO(review): lyah::distanceSquared
 	template<std::size_t C, typename T>
 	T distanceSq(const lyah::vec<C, T>& a, const lyah::vec<C, T>& b) {
 		return lengthSq(b - a);
@@ -333,7 +331,7 @@ namespace ProjectA {
 	using lyah::radians;
 	using lyah::rcp;
 
-	// TODO: lyah::area
+	// TODO(review): lyah::area
 	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
 	// See https://stackoverflow.com/a/717367/17136841.
 	template<typename T>
@@ -382,7 +380,7 @@ namespace ProjectA {
 		return abs(area) * static_cast<T>(0.5);
 	}
 
-	// TODO: Refactor using sign flip for 2D perpendicular vectors.
+	// TODO(review): Refactor using sign flip for 2D perpendicular vectors.
 	template<typename T>
 	lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b) {
 		const lyah::vec<3, T> a_3d = {a[0], a[1], 0.0f};
@@ -392,7 +390,7 @@ namespace ProjectA {
 		return {r_3d[0], r_3d[1]};
 	}
 
-	// TODO: Refactor using sign flip for 2D perpendicular vectors.
+	// TODO(review): Refactor using sign flip for 2D perpendicular vectors.
 	template<typename T>
 	lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b, const lyah::vec<2, T>& c) {
 		const lyah::vec<2, T> b_c = {b[0] * c[1], b[1] * c[0]};
@@ -411,7 +409,7 @@ namespace ProjectA {
 		};
 	}
 
-	// TODO: Implement in Lyah.
+	// TODO(review): Implement 2x2 matrix rotation in Lyah.
 	template<typename T>
 	lyah::mat<2, 2, T> mat2x2_rotation(T angle) {
 		const T c = lyah::cos(angle);

@@ -23,11 +23,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glAttachShader);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBuffer);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindBufferRange);
-
-		// TODO: glBindFramebuffer should only be loaded in a non-DSA context.
-		//       See OpenGLEndRenderPassCommand.
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindFramebuffer);
-
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindImageTexture);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindSampler);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glBindVertexArray);
@@ -53,19 +49,13 @@ namespace ProjectA {
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetProgramiv);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetShaderInfoLog);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetShaderiv);
-
-		// TODO: There is no non-DSA variant for this function.
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glGetTextureSubImage);
-
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glLinkProgram);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glMemoryBarrier);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glMinSampleShading);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glProvokingVertex);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glSamplerParameteri);
-
-		// TODO: There is no non-DSA variant for this function.
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glTextureView);
-
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glUseProgram);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribBinding);
 		LOAD_PROCEDURE_ADDRESS(renderingContext, glVertexAttribFormat);

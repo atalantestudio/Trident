@@ -21,13 +21,16 @@ namespace ProjectA {
 
 			virtual void beginRenderPass(const BeginRenderPassDescriptor& descriptor) = 0;
 
-			// TODO: Merge bindComputePipeline and bindRenderPipeline?
+			// TODO(review)
+			// Either merge bindComputePipeline and bindRenderPipeline,
+			// or implement RenderPassCommandEncoder and ComputePassCommandEncoder.
 			virtual void bindComputePipeline(const ref<ComputePipeline>& computePipeline) = 0;
 
 			virtual void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) = 0;
 
+			// TODO(review): Change the API to take in arbitrary descriptor sets.
+			//       This would mean keeping the descriptor sets alive in the client-side renderer class.
 			// Binds all descriptor sets linked to the current pipeline.
-			// TODO: Change the API to take in argument arbitrary descriptor sets.
 			virtual void bindAllDescriptorSets() = 0;
 
 			template<typename IndexType>

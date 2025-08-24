@@ -9,10 +9,6 @@ namespace ProjectA {
 		layerInsertionIndex += 1;
 	}
 
-	void LayerStack::pushOverlay(const ref<Layer>& overlay) {
-		layers.emplace_back(overlay);
-	}
-
 	void LayerStack::removeLayer(const ref<Layer>& layer) {
 		const std::vector<ref<Layer>>::const_iterator iterator = std::find(layers.begin(), layers.begin() + layerInsertionIndex, layer);
 
@@ -23,16 +19,6 @@ namespace ProjectA {
 		layers.erase(iterator);
 
 		layerInsertionIndex -= 1;
-	}
-
-	void LayerStack::removeOverlay(const ref<Layer>& overlay) {
-		const std::vector<ref<Layer>>::const_iterator iterator = std::find(layers.begin() + layerInsertionIndex, layers.end(), overlay);
-
-		if (iterator == layers.end()) {
-			return;
-		}
-
-		layers.erase(iterator);
 	}
 
 	bool LayerStack::hasLayers() const {

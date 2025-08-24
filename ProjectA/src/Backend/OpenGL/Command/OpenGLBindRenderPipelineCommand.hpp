@@ -10,14 +10,15 @@ namespace ProjectA {
 				renderPipeline(renderPipeline)
 			{}
 
-			// TODO: glEnable(GL_FRAMEBUFFER_SRGB)
+			// TODO(review): Make glEnable/glDisable calls when initializing?
 			void execute() const final override {
+				DEBUG_ASSERT(renderPipeline->minSampleShading >= 0.0f && renderPipeline->minSampleShading <= 1.0f);
+
 				glBindVertexArray(renderPipeline->vertexArray);
 				glUseProgram(renderPipeline->program);
 				glFrontFace(renderPipeline->frontFace);
 
 				if (renderPipeline->polygonModeFace != GL_NONE) {
-					// TODO: GL_FRONT and GL_BACK seem to be invalid in code profile.
 					glPolygonMode(GL_FRONT_AND_BACK, renderPipeline->polygonMode);
 				}
 
@@ -68,6 +69,8 @@ namespace ProjectA {
 				else {
 					glDisable(GL_DEPTH_TEST);
 				}
+
+				// TODO: Handle SRGB with GL_FRAMEBUFFER_SRGB.
 			}
 
 		private:

@@ -24,7 +24,7 @@ namespace ProjectA {
 		uint32 physicalDeviceCount;
 		VkResult result;
 
-		// TODO: Call vkEnumeratePhysicalDevices once.
+		// TODO(review): Call vkEnumeratePhysicalDevices once.
 		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan physical devices ([]).", string_VkResult(result));

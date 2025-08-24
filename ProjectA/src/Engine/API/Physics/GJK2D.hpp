@@ -178,7 +178,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(A.geometry->getVertexCount() < max<uint8>());
 		DEBUG_ASSERT(B.geometry->getVertexCount() < max<uint8>());
 
-		// TODO: Use d to find the first simplex vertex.
+		// TODO(review): Use d to find the first simplex vertex and test the results.
 		// vec2<float32> d = B.position - A.position;
 		vec2<float32> d;
 
@@ -318,23 +318,19 @@ namespace ProjectA {
 		}
 
 		output.closestFeatureA.vertex = s[0].vA;
-		output.closestFeatureA.vertexIndex = s[0].iA;
 		output.closestFeatureA.setVertexCount(1);
 
 		output.closestFeatureB.vertex = s[0].vB;
-		output.closestFeatureB.vertexIndex = s[0].iB;
 		output.closestFeatureB.setVertexCount(1);
 
 		if (s.count == 2) {
 			if (s[0].iA != s[1].iA) {
 				output.closestFeatureA.edge[1] = s[1].vA;
-				output.closestFeatureA.edgeIndices[1] = s[1].iA;
 				output.closestFeatureA.setVertexCount(2);
 			}
 
 			if (s[0].iB != s[1].iB) {
 				output.closestFeatureB.edge[1] = s[1].vB;
-				output.closestFeatureB.edgeIndices[1] = s[1].iB;
 				output.closestFeatureB.setVertexCount(2);
 			}
 		}

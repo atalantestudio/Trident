@@ -101,7 +101,7 @@ namespace ProjectA {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
-		// TODO: Also check size upper bound.
+		// TODO(review): Also check size upper bound against the corresponding device limit.
 		if (descriptor.size == 0) {
 			errorCount += 1;
 
@@ -225,35 +225,35 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.format must be a valid ImageFormat value.");
 		}
 
-		// TODO: Check max width.
+		// TODO(review): Also check max width.
 		if (descriptor.extent.width == 0) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.extent.width must not be 0.");
 		}
 
-		// TODO: Check max height.
+		// TODO(review): Also check max height.
 		if (descriptor.extent.height == 0) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.extent.height must not be 0.");
 		}
 
-		// TODO: Check max depth.
+		// TODO(review): Also check max depth.
 		if (descriptor.extent.depth == 0) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.extent.depth must not be 0.");
 		}
 
-		// TODO: Check max mip level count.
+		// TODO(review): Also check max mip level count.
 		if (descriptor.mipLevelCount == 0) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.mipLevelCount must not be 0.");
 		}
 
-		// TODO: Check max array layer count.
+		// TODO(review): Also check max array layer count.
 		if (descriptor.layerCount == 0) {
 			errorCount += 1;
 
@@ -273,8 +273,8 @@ namespace ProjectA {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
-		// TODO: "subresourceRange.baseMipLevel must be less than the mipLevels specified in VkImageCreateInfo when image was created"
-		//       To implement this, we need a reference to the Image that was used to create this ImageView. Maybe put it in the descriptor?
+		// TODO(review): "subresourceRange.baseMipLevel must be less than the mipLevels specified in VkImageCreateInfo when image was created"
+		//       To implement this, we need a reference to the Image that was used to create this ImageView.
 
 		if (descriptor.mipLevelCount == 0) {
 			errorCount += 1;

@@ -47,7 +47,7 @@
 	#define PROFILER(path) ::ProjectA::Profiler profiler = ::ProjectA::Profiler(path)
 	#define PROFILE_SCOPE(name) ::ProjectA::Timer timer = ::ProjectA::Timer(name)
 
-	// TODO: Rename FUNC_SIG macro.
+	// TODO(review): Rename FUNC_SIG macro by FUNCTION_SIGNATURE.
 	#if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) || (defined(__ICC) && (__ICC >= 600)) || defined(__ghs__)
 		#define FUNC_SIG __PRETTY_FUNCTION__
 	#elif defined(__DMC__) && (__DMC__ >= 0x810)

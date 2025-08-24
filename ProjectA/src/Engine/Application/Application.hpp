@@ -67,16 +67,6 @@ namespace ProjectA {
 				layerStack.pushLayer(layer);
 			}
 
-			// TODO: Remove support for overlays.
-			template<typename OverlayType, typename... Argument>
-			void registerOverlay(Argument&&... arguments) {
-				PROFILE_SCOPE(FUNC_SIG);
-
-				const ref<Layer> overlay = createRef<OverlayType>(std::forward<Argument>(arguments)...);
-
-				layerStack.pushOverlay(overlay);
-			}
-
 		private:
 			void loop();
 

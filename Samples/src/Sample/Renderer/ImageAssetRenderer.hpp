@@ -25,7 +25,6 @@ namespace ProjectA {
 
 				// 2. Create image and copy the image staging buffer to it.
 				{
-					// TODO: On Vulkan, the data of an RGB image must first be copied to an RGBA image which supports TRANSFER_DST usage.
 					ImageDescriptor imageDescriptor;
 					imageDescriptor.type = ImageType::TEXTURE_2D;
 					imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;

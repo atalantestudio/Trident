@@ -134,7 +134,7 @@ namespace ProjectA {
 		multisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
 		multisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
 
-		// TODO: Replace with sequence once it supports allocation sizes of 0.
+		// TODO(review): Replace with sequence once it supports allocation sizes of 0.
 		std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachmentStates(descriptor.colorBlendState.attachments.size());
 
 		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.size(); colorBlendAttachmentIndex += 1) {

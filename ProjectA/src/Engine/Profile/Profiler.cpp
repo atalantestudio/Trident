@@ -7,7 +7,7 @@ namespace ProjectA {
 	bool Profiler::firstEvent = true;
 
 	void Profiler::writeEvent(const ProfileEvent& event) {
-		// TODO: Fix crash that happens when closing the window instead of the console.
+		// TODO(review): Fix crash that happens when closing the window instead of the console.
 		ENGINE_ASSERT(stream.is_open(), "Could not write to the profiler output stream.");
 
 		if (!firstEvent) {

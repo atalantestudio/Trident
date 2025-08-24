@@ -1,6 +1,5 @@
 #pragma once
 
-// TODO: Fix ~ operator.
 #define AS_FLAG(T) \
 	inline constexpr T operator ~(T a) { \
 		return static_cast<T>(~static_cast<std::underlying_type<T>::type>(a)); \

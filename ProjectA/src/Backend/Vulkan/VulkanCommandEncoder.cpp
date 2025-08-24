@@ -115,11 +115,8 @@ namespace ProjectA {
 			commandBuffer,
 			pipeline->bindPoint,
 			pipeline->layout->object,
-
-			// TODO: Allow custom descriptor set range to be bound.
 			0,
 			static_cast<uint32>(pipeline->layout->descriptorSets.size()),
-
 			pipeline->layout->descriptorSets.data(),
 			0,
 			nullptr

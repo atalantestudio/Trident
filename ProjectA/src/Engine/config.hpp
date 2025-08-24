@@ -10,7 +10,7 @@ namespace ProjectA {
 	// There is no guarantee that it will be selected at runtime.
 	#define PREFERRED_GPU_TYPE GPU_TYPE_DISCRETE
 
-	// TODO: Implement.
+	// TODO(review): Validate TTF table checksums.
 	// Verify the validity of the table checksums in a TTF file.
 	// #define TTF_PARSER_VERIFY_CHECKSUM
 

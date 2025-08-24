@@ -12,7 +12,7 @@ namespace ProjectA {
 			{}
 
 			void execute() const final override {
-				// TODO
+				// TODO(review)
 				// The index buffer offset provided when calling bindIndexBuffer is ignored on calls to drawIndexedIndirect.
 				// Use glBindBufferRange to account for the offset.
 

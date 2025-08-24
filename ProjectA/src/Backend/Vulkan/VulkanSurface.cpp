@@ -39,7 +39,7 @@ namespace ProjectA {
 	}
 
 	ImageFormat VulkanSurface::getFormat() const {
-		// TODO: Return the correct format (remap the result of VulkanSurface::selectFormat to ImageFormat enum).
+		// TODO(review): Return the correct surface format (remap the result of VulkanSurface::selectFormat to ImageFormat enum).
 		return ImageFormat::B8G8R8A8_UNORM;
 	}
 

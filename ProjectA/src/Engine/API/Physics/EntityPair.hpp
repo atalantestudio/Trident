@@ -20,22 +20,15 @@ namespace ProjectA {
 		Entity B;
 	};
 
-	// TODO: Implement.
-	//       This can help remove some calls to getRigidBody by caching the body of entity A.
-	/* struct EntityPairList {
-		Entity A;
-		std::vector<Entity> B;
-	}; */
-
 	struct EntityContactPair2D {
 		Entity A;
 		Entity B;
 		ContactManifold2D contactManifold;
 
-		// TODO: Differentiate static and dynamic friction.
+		// TODO Differentiate static and dynamic friction.
 		float32 combinedFriction;
 
-		// TODO: Store combined restitution.
+		// TODO(review): Store combined restitution.
 		// float32 combinedRestitution;
 	};
 }

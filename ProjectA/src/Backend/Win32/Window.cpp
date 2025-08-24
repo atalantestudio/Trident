@@ -186,10 +186,9 @@ namespace ProjectA {
 				// TODO: Test this path.
 				DEBUG_ASSERT(false);
 
-				const Win32WindowData* windowData = static_cast<const Win32WindowData*>(data);
-
 				WindowCloseEvent windowCloseEvent;
 
+				const Win32WindowData* windowData = static_cast<const Win32WindowData*>(data);
 				windowData->windowCloseEventListener(windowCloseEvent);
 
 				continue;

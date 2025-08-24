@@ -36,7 +36,7 @@ namespace ProjectA {
 				return components[componentIndex];
 			}
 
-			// TODO: hasComponent()
+			// TODO: Implement hasComponent.
 
 			// Sets or replaces the component belonging to the provided entity.
 			void setComponent(Entity entity, const ComponentType& component) {

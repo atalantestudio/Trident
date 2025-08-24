@@ -14,10 +14,9 @@ namespace ProjectA {
 				copyRegions(&copyRegions)
 			{}
 
-			// TODO: Use glCopyTextureSubImage* instead of glTextureSubImage*?
-			//       The description for glCopyTextureSubImage* is:
-			//       Replace a rectangular portion of a texture image with pixels from the current GL_READ_BUFFER
-			//       (rather than from main memory, as is the case for glTexSubImage2D).
+			// TODO(review): Use glCopyTextureSubImage* instead of glTextureSubImage*? The description for glCopyTextureSubImage* is:
+			//       "Replace a rectangular portion of a texture image with pixels from the current GL_READ_BUFFER
+			//       (rather than from main memory, as is the case for glTexSubImage2D)."
 			void execute() const final override {
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer);
 
@@ -37,12 +36,12 @@ namespace ProjectA {
 				}
 
 				for (const BufferImageCopyRegion& copyRegion : *copyRegions) {
-					const void* pixels = (const void*) copyRegion.bufferOffset;
+					const GLvoid* pixels = (const GLvoid*) copyRegion.bufferOffset;
 
 					// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even when creating the image).
 					switch (image->target) {
 						case GL_TEXTURE_1D:
-							// TODO: Test this path.
+							// TODO: Implement 1D textures.
 							DEBUG_ASSERT(false);
 
 							#ifdef OPENGL_USE_DSA
@@ -70,12 +69,12 @@ namespace ProjectA {
 							break;
 						case GL_TEXTURE_1D_ARRAY:
 						case GL_TEXTURE_2D:
-						case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
 						case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
-						case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
 						case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
-						case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
 						case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+						case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+						case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+						case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
 							#ifdef OPENGL_USE_DSA
 								glTextureSubImage2D(
 									image->object,

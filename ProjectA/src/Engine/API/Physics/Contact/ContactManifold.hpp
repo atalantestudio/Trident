@@ -23,7 +23,6 @@ namespace ProjectA {
 			Contact2D contacts[2];
 
 		private:
-			// TODO: Use fewer bits.
 			uint8 contactCount : 1;
 	};
 }

@@ -793,17 +793,8 @@ namespace ProjectA {
 			direction /= abs(zoomLevelDelta);
 		}
 
-		float32 zoomLevel = cameraMappedRange->zoomLevel + direction;
-
-		// TODO: lyah::max
-		if (zoomLevel < MIN_ZOOM_LEVEL) {
-			zoomLevel = MIN_ZOOM_LEVEL;
-		}
-
-		// TODO: lyah::min
-		if (zoomLevel > MAX_ZOOM_LEVEL) {
-			zoomLevel = MAX_ZOOM_LEVEL;
-		}
+		// TODO(review): lyah::clamp
+		const float32 zoomLevel = std::clamp(cameraMappedRange->zoomLevel + direction, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
 
 		cameraMappedRange->zoomLevel = zoomLevel;
 

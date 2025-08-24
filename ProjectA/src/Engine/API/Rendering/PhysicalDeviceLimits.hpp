@@ -8,7 +8,7 @@ namespace ProjectA {
 		uint64 bufferImageGranularity;
 
 		// Granularity of supported line widths.
-		float lineWidthGranularity;
+		float32 lineWidthGranularity;
 
 		// Maximum number of color attachments that can be used by a subpass in a render pass.
 		uint32 maxColorAttachmentCount;
@@ -29,7 +29,7 @@ namespace ProjectA {
 		// Maximum layer count for a layered framebuffer.
 		uint32 maxFramebufferLayerCount;
 
-		// TODO: Get this OpenGL limit.
+		// TODO(review): Retrieve limit.
 		// Maximum number of layers for an image.
 		uint32 maxImageLayerCount;
 
@@ -37,23 +37,23 @@ namespace ProjectA {
 		// Only relevant when using the Vulkan adapter.
 		uint32 maxMemoryAllocationCount;
 
-		// TODO: Get this OpenGL limit.
+		// TODO(review): Retrieve limit.
 		// Maximum number of vertex input attributes that can be specified for a graphics pipeline.
 		uint32 maxVertexInputAttributeCount;
 
-		// TODO: Get this OpenGL limit.
+		// TODO(review): Retrieve limit.
 		// Maximum vertex input attribute offset that can be added to the vertex input binding stride.
 		uint32 maxVertexInputAttributeOffset;
 
-		// TODO: Get this OpenGL limit.
+		// TODO(review): Retrieve limit.
 		// Maximum number of vertex buffers that can be specified for providing vertex input attributes to a graphics pipeline.
 		uint32 maxVertexInputBindingCount;
 
-		// TODO: Get this OpenGL limit.
+		// TODO(review): Retrieve limit.
 		// Maximum vertex input binding stride that can be specified in a vertex input binding.
 		uint32 maxVertexInputBindingStride;
 
 		// Granularity of supported point sizes.
-		float pointSizeGranularity;
+		float32 pointSizeGranularity;
 	};
 }

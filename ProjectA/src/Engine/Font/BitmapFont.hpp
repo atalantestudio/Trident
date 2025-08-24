@@ -14,12 +14,12 @@ namespace ProjectA {
 	};
 
 	struct BitmapFont {
-		// TODO: Replace by ImageAsset or similar.
+		// TODO(review): Replace by ImageAsset or similar.
 		uint32 textureIndex;
 
 		BitmapGlyphMap glyphMap;
 
-		// TODO: Remove and allow more granularity on the individual glyphs.
+		// TODO(review): Remove and allow more granularity on the individual glyphs.
 		float32 tileHeight;
 		float32 tileSpacing;
 	};

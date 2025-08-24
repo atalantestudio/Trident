@@ -15,7 +15,6 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNC_SIG);
 
 		#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-			// TODO: Check layers before creating instance?
 			checkInstanceLayers();
 		#endif
 
@@ -44,10 +43,10 @@ namespace ProjectA {
 		VkApplicationInfo applicationInfo{};
 		applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 
-		// TODO: Automatically determine application name. Same as window name?
+		// TODO(review): Is the application name the same as the window name?
 		applicationInfo.pApplicationName = "ApplicationName";
 
-		// TODO: Automatically determine application version.
+		// TODO(review): Get application version.
 		applicationInfo.applicationVersion = VK_API_VERSION_1_0;
 
 		applicationInfo.pEngineName = ENGINE_NAME;
@@ -136,9 +135,9 @@ namespace ProjectA {
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan instance layer properties ([]).", string_VkResult(result));
 
-			/*for (uint32 i = 0; i < layerPropertyCount; i += 1) {
-				ENGINE_INFO("- []", layerProperties[i].layerName);
-			}*/
+			/* for (uint32 layerPropertyIndex = 0; layerPropertyIndex < layerPropertyCount; layerPropertyIndex += 1) {
+				ENGINE_INFO("- []", layerProperties[layerPropertyIndex].layerName);
+			} */
 		}
 	#endif
 

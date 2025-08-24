@@ -8,8 +8,9 @@ namespace ProjectA {
 	// A part of an object's geometry in world-space.
 	class Feature2D {
 		public:
-			// NOTE: The vertex/edge union deletes the default constructor,
-			//       and because of that structs that use Feature2D cannot be constructed.
+			// NOTE
+			// The vertex/edge union deletes the default constructor.
+			// Because of that, structs that use Feature2D cannot be instantiated.
 			Feature2D() {}
 
 			uint32 getVertexCount() const {
@@ -26,13 +27,6 @@ namespace ProjectA {
 			union {
 				vec2<float32> vertex;
 				vec2<float32> edge[2];
-			};
-
-			// TODO: `vertexIndex`/`edgeIndices` union is deprecated; use `vertex`/`edge` union instead.
-			//       This is to account for shapes which are not represented by vertex geometry, e.g. a circle.
-			union {
-				uint32 vertexIndex;
-				uint32 edgeIndices[2];
 			};
 
 		private:

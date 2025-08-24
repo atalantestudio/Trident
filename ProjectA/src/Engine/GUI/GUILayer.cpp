@@ -29,7 +29,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
-		// TODO: Make bitmap fonts work seamlessly with True-Type fonts.
+		// TODO(review): Make bitmap fonts work seamlessly with True-Type fonts.
 		/* defaultFont->textureIndex = static_cast<uint32>(images.size());
 		defaultFont->glyphMap.map = QUIVER_BITMAP_GLYPH_MAP;
 		defaultFont->glyphMap.utfOffset = 32;
@@ -108,10 +108,10 @@ namespace ProjectA {
 			}
 			else {
 				// Validate border radius.
-				// TODO: lyah::min
+				// TODO(review): lyah::min
 				const float32 minHalfDimension = std::min(component.size.width.value, component.size.height.value) / 2.0f;
 
-				// ENGINE_ASSERT(component.borderRadius >= 0.0f && component.borderRadius <= minHalfDimension, "Invalid border radius.");
+				ENGINE_ASSERT(component.borderRadius >= 0.0f && component.borderRadius <= minHalfDimension, "Invalid border radius.");
 
 				registerSubcomponent(component.origin, component.size, component.image, component.color, component.outlineSize, component.outlineColor, component.borderRadius);
 			}
@@ -335,8 +335,8 @@ namespace ProjectA {
 		return childIndices;
 	}
 
-	// TODO: lyah::max
-	// TODO: lyah::min
+	// TODO(review): lyah::max
+	// TODO(review): lyah::min
 	void GUILayer::FitSizingWidths(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
 
@@ -371,8 +371,8 @@ namespace ProjectA {
 		parent.maximumSize.x = std::max(parent.maximumSize.x, parent.minimumSize.x);
 	}
 
-	// TODO: lyah::max
-	// TODO: lyah::min
+	// TODO(review): lyah::max
+	// TODO(review): lyah::min
 	void GUILayer::FitSizingHeights(uint32 componentIndex) {
 		GUIContainer& component = components[componentIndex];
 
@@ -406,8 +406,8 @@ namespace ProjectA {
 		component.size.height.value = componentHeight;
 	}
 
-	// TODO: lyah::max
-	// TODO: lyah::min
+	// TODO(review): lyah::max
+	// TODO(review): lyah::min
 	void GUILayer::GrowAndShrinkSizingWidthsRecursive(uint32 parentIndex) {
 		GUIContainer& parent = components[parentIndex];
 
@@ -553,8 +553,8 @@ namespace ProjectA {
 		}
 	}
 
-	// TODO: lyah::max
-	// TODO: lyah::min
+	// TODO(review): lyah::max
+	// TODO(review): lyah::min
 	void GUILayer::GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex) {
 		GUIContainer& parent = components[parentIndex];
 
@@ -716,7 +716,7 @@ namespace ProjectA {
 		}
 	}
 
-	// TODO: lyah::ceil
+	// TODO(review): lyah::ceil
 	void GUILayer::WrapText(GUIContainer& textComponent) {
 		const FontData& fontData = fonts[textComponent.font];
 		const FontAsset& fontAsset = *fontData.fontAsset;
@@ -788,8 +788,8 @@ namespace ProjectA {
 				}
 			}
 			else {
-				// TODO: Handle UTF-16 and UTF-32 characters.
-				//       For now, we just flush the current word.
+				// TODO(review): Handle UTF-16 and UTF-32 characters.
+				// NOTE: For now, we just flush the current word.
 				flushCurrentWord = true;
 			}
 
@@ -844,7 +844,7 @@ namespace ProjectA {
 
 	bool GUILayer::OutsideWord(char8 character, const FontAsset& fontAsset) const {
 		if (character < 0) {
-			// TODO: Handle UTF-16 and UTF-32 characters.
+			// TODO(review): Handle UTF-16 and UTF-32 characters.
 			return true;
 		}
 
@@ -875,7 +875,7 @@ namespace ProjectA {
 		}
 	}
 
-	// TODO: lyah::max
+	// TODO(review): lyah::max
 	void GUILayer::PositionsAndAlignment(GUIContainer& component, svec2<float32> origin) {
 		component.origin = origin;
 
@@ -1050,7 +1050,7 @@ namespace ProjectA {
 		renderer.registerSubcomponent(subcomponent);
 	}
 
-	// TODO: lyah::max
+	// TODO(review): lyah::max
 	uint32 GUILayer::calculateTextPreferredWidth(const std::string& string, const TextStyle& textStyle) const {
 		const FontAsset& fontAsset = *fonts[textStyle.font].fontAsset;
 
@@ -1061,7 +1061,7 @@ namespace ProjectA {
 
 		for (const char8 character : string) {
 			if (character < 0) {
-				// TODO: Handle UTF-16 characters.
+				// TODO(review): Handle UTF-16 characters.
 
 				continue;
 			}
@@ -1093,7 +1093,7 @@ namespace ProjectA {
 		return std::max(preferredWidth, lineWidth);
 	}
 
-	// TODO: lyah::max
+	// TODO(review): lyah::max
 	uint32 GUILayer::calculateTextMinimumWidth(const std::string& string, const TextStyle& textStyle) const {
 		const FontAsset& fontAsset = *fonts[textStyle.font].fontAsset;
 		const float32 lineHeight = textStyle.fontSize / fontAsset.getLineHeight();
@@ -1106,7 +1106,7 @@ namespace ProjectA {
 
 		for (const char8 character : string) {
 			if (character < 0) {
-				// TODO: Handle UTF-16 characters.
+				// TODO(review): Handle UTF-16 characters.
 
 				continue;
 			}

@@ -38,7 +38,7 @@ namespace ProjectA {
 			}
 
 			// Returns the glyph represented by the provided code point.
-			// TODO: If no corresponding glyph is found, the .notdef glyph is returned.
+			// TODO(review): If no corresponding glyph is found, the .notdef glyph is returned.
 			const Glyph& operator [](uint16 codePoint) const {
 				const std::list<std::pair<const uint16, uint32>, std::allocator<std::pair<const uint16, uint32>>>::const_iterator glyphIndex = unicodeMap.find(codePoint);
 

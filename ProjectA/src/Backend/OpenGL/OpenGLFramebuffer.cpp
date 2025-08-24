@@ -66,16 +66,14 @@ namespace ProjectA {
 			// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even before creating the image).
 			switch (glImage->target) {
 				case GL_TEXTURE_2D:
-
-				// TODO: Check if it's right.
 				case GL_TEXTURE_2D_MULTISAMPLE:
-
-				case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
 				case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
-				case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
 				case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
-				case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
 				case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+				case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+				case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+				case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+				case GL_TEXTURE_RECTANGLE:
 					#ifdef OPENGL_USE_DSA
 						glNamedFramebufferTexture(
 							object,

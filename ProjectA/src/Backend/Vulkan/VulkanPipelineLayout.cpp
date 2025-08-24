@@ -25,7 +25,7 @@ namespace ProjectA {
 				const DescriptorSetLayoutBinding& binding = layout.bindings[bindingIndex];
 				const VkDescriptorType descriptorType = getVkDescriptorType(binding.descriptorType);
 
-				// TODO: uint32 lyah::max(uint32, uint32)
+				// TODO(review): lyah::max
 				const uint32 descriptorCount = static_cast<uint32>(std::max(binding.buffers.size(), binding.imageViews.size()));
 
 				VkDescriptorSetLayoutBinding descriptorSetLayoutBinding{};
@@ -124,7 +124,7 @@ namespace ProjectA {
 						descriptorImageInfo.sampler = sampler;
 						descriptorImageInfo.imageView = imageView->object;
 
-						// TODO: Specify layout of current image.
+						// TODO: Specify the current image's layout.
 						if (binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER) {
 							descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 						}

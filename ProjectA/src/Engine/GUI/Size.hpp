@@ -12,8 +12,7 @@ namespace ProjectA {
 					value = fillModeOrPixels;
 				}
 				else {
-					// TODO: Remove sint32 cast?
-					fillMode = static_cast<FillMode>(static_cast<sint32>(fillModeOrPixels) + 2);
+					fillMode = static_cast<FillMode>(fillModeOrPixels + 2);
 				}
 			}
 
@@ -31,12 +30,14 @@ namespace ProjectA {
 		Size1D height;
 
 		Size1D operator [](std::size_t index) const {
-			// TODO: Assert.
+			ENGINE_ASSERT(index < 2, "Index overflow.");
+
 			return pointer_cast<const Size1D*>(this)[index];
 		}
 
 		Size1D& operator [](std::size_t index) {
-			// TODO: Assert.
+			ENGINE_ASSERT(index < 2, "Index overflow.");
+
 			return pointer_cast<Size1D*>(this)[index];
 		}
 

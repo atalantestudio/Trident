@@ -98,7 +98,7 @@ namespace ProjectA {
 			if ((memoryType.propertyFlags & memoryPropertyFlags) == memoryPropertyFlags) {
 				suitableMemoryTypeIndex = memoryTypeIndex;
 
-				// TODO: Continue searching for better types?
+				// TODO: Continue searching for better types.
 				break;
 			}
 		}
@@ -172,7 +172,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(offset + size <= memoryAllocation.offset, "The offsetted mapping size is larger than the size of the memory allocation active range.");
 
 		if (memoryAllocation.mappedSuballocationCount == 0) {
-			// TODO: For static allocations, only map the active suballocation range and not the whole memory block.
+			// TODO: (Static allocations only) Map the active suballocation range and not the whole memory block.
 			const VkResult result = vkMapMemory(device, memoryAllocation.memory, 0, memoryAllocation.size, 0, &memoryAllocation.mappedRange);
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Could not map Vulkan memory. ([])", string_VkResult(result));
@@ -199,7 +199,7 @@ namespace ProjectA {
 			const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryAllocation.memoryTypeIndex];
 
 			if (!(memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
-				// TODO: Expose vkFlushMappedMemoryRanges.
+				// TODO: Expose vkFlushMappedMemoryRanges to the graphics adapter.
 				ENGINE_WARN("Non-coherent memory must be manually flushed.");
 
 				/*VkMappedMemoryRange mappedMemoryRange{};
@@ -247,10 +247,9 @@ namespace ProjectA {
 				}
 			}
 
-			// TODO: Remove memory allocation from the list?
-
 			ENGINE_INFO("Freed memory allocation [].", memoryAllocationIndex);
 
+			// TODO(review): Remove memory allocation from the list?
 			return;
 		}
 

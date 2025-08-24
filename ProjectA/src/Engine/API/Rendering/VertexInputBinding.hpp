@@ -53,7 +53,7 @@ namespace ProjectA {
 
 				stride = offset;
 
-				// TODO: lyah::max(uint32, uint32).
+				// TODO(review): lyah::max
 				maxAlignment = std::max(maxAlignment, alignment);
 
 				remainder = stride % maxAlignment;

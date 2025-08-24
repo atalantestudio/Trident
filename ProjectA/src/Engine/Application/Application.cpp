@@ -36,7 +36,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		// TODO: Remove singleton pattern.
+		// TODO(review): Remove singleton pattern.
 		DEBUG_ASSERT(instance == nullptr);
 
 		instance = this;
@@ -60,7 +60,7 @@ namespace ProjectA {
 		// Open/create the project's property file.
 		// A project shouldn't be forced to use a window, so the property file is loaded first.
 		// TODO: When a setting is changed in the game menu, the property file is replaced with an updated version.
-		// TODO: When the user edits the property file themselves, the application verifies that the new values are valid before using them.
+		// TODO: When the user edits the property file at runtime, the application verifies that the new values are valid before using them.
 		//       If a property is invalid, the application emits a warning, but continues to use the current value.
 		const std::filesystem::path projectRootDirectory = Filesystem::getProjectRootDirectory();
 
@@ -123,7 +123,6 @@ namespace ProjectA {
 
 	Application::~Application() {
 		if (projectType == ProjectType::MAIN) {
-			// TODO: Unload assets.
 			delete assetLibrary;
 		}
 
@@ -222,7 +221,7 @@ namespace ProjectA {
 		previousTime = currentTime;
 		frameTimeAccumulator += frameTime;
 
-		// TODO: Cap frameTimeAccumumlator to avoid the "spiral of death" (increasing number of physics updates).
+		// TODO(review): Cap frameTimeAccumumlator to avoid the "spiral of death" (increasing number of physics updates).
 
 		while (frameTimeAccumulator >= FIXED_DELTA_TIME) {
 			update(FIXED_DELTA_TIME, INVERSE_FIXED_DELTA_TIME);
@@ -236,8 +235,8 @@ namespace ProjectA {
 			return;
 		}
 
-		// TODO: Interpolate between current time and frameTimeAccumulator.
-		//       Use frameTimeAccumulator / FIXED_DELTA_TIME to get a value between 0 and 1.
+		// TODO(review): Interpolate between current time and frameTimeAccumulator
+		//       (use frameTimeAccumulator / FIXED_DELTA_TIME to get a value between 0 and 1).
 		render(frameTimeAccumulator);
 
 		frameIndex += 1;

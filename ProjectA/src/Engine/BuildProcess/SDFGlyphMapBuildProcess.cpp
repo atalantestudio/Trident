@@ -237,7 +237,7 @@ namespace ProjectA {
 			const uint16 glyphHeight = trueTypeGlyph.max.y - trueTypeGlyph.min.y;
 
 			// Glyph dimension (the largest between width and height) in FUnits.
-			// TODO: uint16 lyah::max(uint16, uint16)
+			// TODO(review): lyah::max
 			const uint16 glyphDimension = std::max(glyph.width, glyphHeight);
 
 			// Glyph dimension on the high resolution image.
@@ -297,7 +297,7 @@ namespace ProjectA {
 			commandEncoder->bindComputePipeline(glyphSdfPipeline);
 			commandEncoder->bindAllDescriptorSets();
 
-			// TODO: Support custom glyph sub-image dimension (multiply down).
+			// TODO(review): Support custom glyph sub-image dimension (multiply down). See GlyphDistanceField.comp.
 			commandEncoder->dispatchGroups(8, 8, 1);
 
 			commandBuffer = commandEncoder->end();
@@ -306,7 +306,7 @@ namespace ProjectA {
 
 			device->waitIdle();
 
-			// TODO: lyah::ceil.
+			// TODO(review): lyah::ceil
 			xOffset += std::ceil(width) + SPREAD_FACTOR * 2;
 		}
 
@@ -355,7 +355,7 @@ namespace ProjectA {
 		uint64 maxGlyphEdgeCount = 0;
 
 		for (const TrueTypeFont::Glyph& glyph : glyphs) {
-			// TODO: lyah::max
+			// TODO(review): lyah::max
 			maxGlyphEdgeCount = std::max(maxGlyphEdgeCount, glyph.edges.count);
 		}
 

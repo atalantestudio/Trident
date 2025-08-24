@@ -25,7 +25,6 @@ namespace ProjectA {
 	struct DynamicEntityTag {};
 	struct StaticEntityTag {};
 
-	// TODO: Create "Runtime" directory for this kind of object?
 	class Scene2D {
 		private:
 			static constexpr uint32 LAYER_COUNT = 4;

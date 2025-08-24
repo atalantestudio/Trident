@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	template<typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+	template<typename T, std::enable_if_t<std::is_integral<T>::value, sint32> = 0>
 	T random(T min, T max) {
 		static std::random_device seeder;
 		static std::mt19937 engine(seeder());
@@ -10,7 +10,7 @@ namespace ProjectA {
 		return distribution(engine);
 	}
 
-	template<typename T, std::enable_if_t<std::is_floating_point<T>::value, int> = 0>
+	template<typename T, std::enable_if_t<std::is_floating_point<T>::value, sint32> = 0>
 	T random(T min, T max) {
 		static std::random_device seeder;
 		static std::mt19937 engine(seeder());

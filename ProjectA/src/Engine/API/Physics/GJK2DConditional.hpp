@@ -62,10 +62,10 @@ namespace ProjectA {
 		return true;
 	}
 
+	// TODO: Fix incorrect results with rotated objects.
 	// Gilbert-Johnson-Keerthi algorithm implementation in 2D.
 	// Returns true if the Minkowski difference of A and B contains the origin, and false otherwise.
 	// NOTE: In this implementation, `a` is the name of the most recent vertex added to the simplex.
-	// TODO: Fix rotations not being properly handled.
 	static bool GJK2DConditional(const RigidBody2D& A, const RigidBody2D& B) {
 		vec2<float32> d = B.position - A.position;
 

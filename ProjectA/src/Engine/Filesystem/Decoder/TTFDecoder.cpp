@@ -197,7 +197,7 @@ namespace ProjectA {
 						for (uint32 i = 0; i < count; i += 1) {
 							const uint32 j = (i + 1) % count;
 
-							// TODO: lyah::area
+							// TODO(review): lyah::area
 							signedAreaDouble += contour[i].x * contour[j].y - contour[j].x * contour[i].y;
 						}
 
@@ -291,7 +291,7 @@ namespace ProjectA {
 						T.d = stream.read<sint16>(true);
 					}
 
-					// TODO: Implement lyah::max.
+					// TODO(review): lyah::max
 					T.m = std::max(abs(T.a), abs(T.b));
 
 					static constexpr float32 G = 33.0f / 65536.0f;
@@ -300,7 +300,7 @@ namespace ProjectA {
 						T.m *= 2.0f;
 					}
 
-					// TODO: Implement lyah::max.
+					// TODO(review): lyah::max
 					T.n = std::max(abs(T.c), abs(T.d));
 
 					if (abs(abs(T.b) - abs(T.d)) <= G) {
@@ -344,7 +344,7 @@ namespace ProjectA {
 				uint32 checksum = 0;
 				uint32 longCount = (byteCount + 3) / 4;
 
-				// TODO: Refactor.
+				// TODO(review): Refactor.
 				while (longCount-- > 0) checksum += *table++;
 
 				return checksum;
@@ -415,7 +415,7 @@ namespace ProjectA {
 			tableDirectory.tag = byteStream.read<uint32>();
 
 			#ifdef TTF_PARSER_VERIFY_CHECKSUM
-				// TODO: Implement this macro.
+				// TODO(review): Implement this macro.
 				// const uint32 readChecksum = byteStream.read<uint32>(true);
 			#else
 				byteStream.jump(sizeof(uint32));

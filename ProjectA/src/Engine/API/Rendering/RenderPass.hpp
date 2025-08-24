@@ -15,7 +15,7 @@ namespace ProjectA {
 					attachmentCount += subpass->getColorAttachmentCount() + subpass->getResolveAttachmentCount();
 
 					if (subpass->hasDepthStencilAttachment()) {
-						// TODO: +1 if depth stencil resolve attachment?
+						// TODO: Do we really need to add 1 if there is a depth stencil resolve attachment?
 						attachmentCount += 1;
 						anyDepthStencilSubpass = true;
 					}

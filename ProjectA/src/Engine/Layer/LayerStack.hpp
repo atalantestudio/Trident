@@ -6,15 +6,14 @@ namespace ProjectA {
 	class LayerStack {
 		public:
 			void pushLayer(const ref<Layer>& layer);
-			void pushOverlay(const ref<Layer>& overlay);
+
 			void removeLayer(const ref<Layer>& layer);
-			void removeOverlay(const ref<Layer>& overlay);
 
 			bool hasLayers() const;
 
 			const ref<Layer>& operator [](std::size_t index) const;
 
-			// TODO: Write helper macro for iterators.
+			// TODO(review): Write helper macros for iterators.
 			std::vector<ref<Layer>>::iterator begin();
 
 			std::vector<ref<Layer>>::iterator end();

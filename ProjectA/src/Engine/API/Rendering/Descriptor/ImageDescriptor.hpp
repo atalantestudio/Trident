@@ -29,7 +29,7 @@ namespace ProjectA {
 		// The intended usage of the image.
 		ImageUsage usage;
 
-		// TODO: Replace by MemoryResourceType.
+		// TODO: Replace by new MemoryResourceType enum.
 		MemoryProperty memoryProperties;
 	};
 }

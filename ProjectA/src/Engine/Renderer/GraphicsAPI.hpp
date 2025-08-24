@@ -26,7 +26,7 @@ namespace ProjectA {
 	//             First APIs are more recent but more performant,
 	//             last APIs are older but have better support
 
-	// Define int selectedApiIndex
+	// Define sint32 selectedApiIndex
 
 	// Get "GraphicsAPI" setting (unsigned byte) from file
 		// If no setting

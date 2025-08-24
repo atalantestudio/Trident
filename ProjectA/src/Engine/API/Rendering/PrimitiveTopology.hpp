@@ -17,7 +17,7 @@ namespace ProjectA {
 		// Specifies a series of connected triangle primitives with consecutive triangles sharing an edge.
 		TRIANGLE_STRIP = 4,
 
-		// TODO: TRIANGLE_FAN
+		// TODO
 		// On Vulkan, TRIANGLE_FAN is only supported with an extension.
 		// It will be added when the device is updated to automatically enable needed extensions.
 	};
