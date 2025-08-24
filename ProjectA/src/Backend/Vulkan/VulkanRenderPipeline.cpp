@@ -134,10 +134,9 @@ namespace ProjectA {
 		multisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
 		multisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
 
-		// TODO(review): Replace with sequence once it supports allocation sizes of 0.
-		std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachmentStates(descriptor.colorBlendState.attachments.size());
+		sequence<VkPipelineColorBlendAttachmentState> colorBlendAttachmentStates(descriptor.colorBlendState.attachments.size());
 
-		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.size(); colorBlendAttachmentIndex += 1) {
+		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < colorBlendAttachmentStates.count; colorBlendAttachmentIndex += 1) {
 			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
 
 			VkPipelineColorBlendAttachmentState& colorBlendAttachmentState = colorBlendAttachmentStates[colorBlendAttachmentIndex];
@@ -157,8 +156,8 @@ namespace ProjectA {
 		colorBlendStateCreateInfo.flags = 0;
 		colorBlendStateCreateInfo.logicOpEnable = VK_FALSE;
 		colorBlendStateCreateInfo.logicOp = VK_LOGIC_OP_CLEAR;
-		colorBlendStateCreateInfo.attachmentCount = static_cast<uint32>(colorBlendAttachmentStates.size());
-		colorBlendStateCreateInfo.pAttachments = colorBlendAttachmentStates.data();
+		colorBlendStateCreateInfo.attachmentCount = static_cast<uint32>(colorBlendAttachmentStates.count);
+		colorBlendStateCreateInfo.pAttachments = &colorBlendAttachmentStates[0];
 		colorBlendStateCreateInfo.blendConstants[0] = 0.0f;
 		colorBlendStateCreateInfo.blendConstants[1] = 0.0f;
 		colorBlendStateCreateInfo.blendConstants[2] = 0.0f;

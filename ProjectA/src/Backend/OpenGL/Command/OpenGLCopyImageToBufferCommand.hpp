@@ -14,8 +14,6 @@ namespace ProjectA {
 			void execute() const final override {
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->object);
 
-				// TODO(review): Set unpack alignment depending on the image format?
-
 				for (const BufferImageCopyRegion& copyRegion : *copyRegions) {
 					// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even when creating the image).
 					switch (image->target) {
