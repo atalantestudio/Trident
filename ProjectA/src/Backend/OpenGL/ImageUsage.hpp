@@ -2,13 +2,19 @@
 
 namespace ProjectA {
 	static GLenum getGlImageUsage(ImageUsage imageUsage) {
-		static constexpr GLenum glImageUsages[] = {
-			GL_COLOR_ATTACHMENT0,
-			GL_DEPTH_ATTACHMENT,
-			// TODO: Add GL_DEPTH_STENCIL_ATTACHMENT.
-			// TODO: Add GL_STENCIL_ATTACHMENT.
-		};
+		if (imageUsage & ImageUsage::COLOR_ATTACHMENT) {
+			return GL_COLOR_ATTACHMENT0;
+		}
 
-		return glImageUsages[static_cast<uint8>(imageUsage)];
+		if (imageUsage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
+			return GL_DEPTH_STENCIL_ATTACHMENT;
+		}
+
+		// TODO: Handle GL_DEPTH_ATTACHMENT.
+		// TODO: Handle GL_STENCIL_ATTACHMENT.
+
+		ENGINE_ASSERT(false, "Unhandled image usage.");
+
+		return 0;
 	}
 }
