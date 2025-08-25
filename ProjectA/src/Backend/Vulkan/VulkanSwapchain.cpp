@@ -43,15 +43,15 @@ namespace ProjectA {
 
 		VkResult result;
 
-		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat(physicalDevice.object);
+		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat();
 
 		ENGINE_INFO("Swapchain format is []/[].", string_VkFormat(surfaceFormat.format), string_VkColorSpaceKHR(surfaceFormat.colorSpace));
 
-		const VkPresentModeKHR presentMode = surface.selectPresentMode(physicalDevice.object, descriptor.vSync);
+		const VkPresentModeKHR presentMode = surface.selectPresentMode(descriptor.vSync);
 
 		ENGINE_INFO("Swapchain present mode is [].", string_VkPresentModeKHR(presentMode));
 
-		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities(physicalDevice.object);
+		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities();
 
 		imageCount = surfaceCapabilities.minImageCount + 1;
 

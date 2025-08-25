@@ -16,6 +16,7 @@
 #include "Engine/API/Rendering/Descriptor/SubpassDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/SwapchainDescriptor.hpp"
 #include "Engine/API/Rendering/SampleCount.hpp"
+#include "Engine/Renderer/Renderer.hpp"
 #include "Engine/Validation/Descriptor.hpp"
 
 namespace ProjectA {
@@ -101,7 +102,6 @@ namespace ProjectA {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
-		// TODO(review): Also check size upper bound against the corresponding device limit.
 		if (descriptor.size == 0) {
 			errorCount += 1;
 
@@ -210,6 +210,8 @@ namespace ProjectA {
 	}
 
 	void DescriptorGuard(const ImageDescriptor& descriptor) {
+		const PhysicalDeviceLimits& limits = Renderer::getBackend()->getDevice()->getPhysicalDevice()->getLimits();
+
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
@@ -225,39 +227,69 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.format must be a valid ImageFormat value.");
 		}
 
-		// TODO(review): Also check max width.
 		if (descriptor.extent.width == 0) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.extent.width must not be 0.");
 		}
 
-		// TODO(review): Also check max height.
+		// TODO(review): lyah::max
+		if (descriptor.extent.width > std::max(limits.maxImageDimension1D, std::max(limits.maxImageDimension2D, limits.maxImageDimension3D))) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.extent.width must be less than the maximum dimension for 1D, 2D or 3D images.");
+		}
+
 		if (descriptor.extent.height == 0) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.extent.height must not be 0.");
 		}
 
-		// TODO(review): Also check max depth.
+		// TODO(review): lyah::max
+		if (descriptor.extent.height > std::max(limits.maxImageDimension2D, limits.maxImageDimension3D)) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.extent.height must be less than the maximum dimension for 2D or 3D images.");
+		}
+
 		if (descriptor.extent.depth == 0) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.extent.depth must not be 0.");
 		}
 
-		// TODO(review): Also check max mip level count.
+		if (descriptor.extent.depth > limits.maxImageDimension3D) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.extent.depth must be less than the maximum dimension for 3D images.");
+		}
+
 		if (descriptor.mipLevelCount == 0) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.mipLevelCount must not be 0.");
 		}
 
-		// TODO(review): Also check max array layer count.
+		// TODO(review): lyah::floor
+		// TODO(review): lyah::log2
+		// TODO(review): lyah::max
+		if (descriptor.mipLevelCount > std::floor(std::log2(std::max(descriptor.extent.width, std::max(descriptor.extent.height, descriptor.extent.depth)))) + 1) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.mipLevelCount must be less than the maximum mip level for this size.");
+		}
+
 		if (descriptor.layerCount == 0) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.layerCount must not be 0.");
+		}
+
+		if (descriptor.layerCount > limits.maxImageLayerCount) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.layerCount must be less than the maximum layer count.");
 		}
 
 		if (!validateSampleCount(descriptor.sampleCount)) {
@@ -269,12 +301,9 @@ namespace ProjectA {
 		ENGINE_ASSERT(errorCount == 0, "Image descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 	}
 
-	void DescriptorGuard(const ImageViewDescriptor& descriptor) {
+	void DescriptorGuard(const ImageViewDescriptor& descriptor, const Image* image) {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
-
-		// TODO(review): "subresourceRange.baseMipLevel must be less than the mipLevels specified in VkImageCreateInfo when image was created"
-		//       To implement this, we need a reference to the Image that was used to create this ImageView.
 
 		if (descriptor.mipLevelCount == 0) {
 			errorCount += 1;
@@ -282,10 +311,22 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.mipLevelCount must be greater than 0.");
 		}
 
+		if (descriptor.mipLevelCount > image->getMipLevelCount()) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.mipLevelCount must be less than the number of mip levels on the image.");
+		}
+
 		if (descriptor.layerCount == 0) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.layerCount must be greater than 0.");
+		}
+
+		if (descriptor.layerCount > image->getLayerCount()) {
+			errorCount += 1;
+
+			ENGINE_ERROR("descriptor.layerCount must be less than the number of layers on the image.");
 		}
 
 		ENGINE_ASSERT(errorCount == 0, "Image view descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);

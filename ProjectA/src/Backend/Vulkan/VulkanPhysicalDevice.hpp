@@ -3,10 +3,12 @@
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
 
+// #define DEBUG_ENUMERATE_DEVICE_EXTENSIONS
+
 namespace ProjectA {
 	class VulkanPhysicalDevice final : public PhysicalDevice, public ObjectWrapper<VkPhysicalDevice> {
 		public:
-			explicit VulkanPhysicalDevice(VkInstance instance);
+			explicit VulkanPhysicalDevice(VkPhysicalDevice physicalDevice);
 
 		private:
 			void setLimits();
@@ -14,8 +16,6 @@ namespace ProjectA {
 			void selectQueueFamilyIndices();
 
 			static void enumerateQueueFamilyProperties(const sequence<VkQueueFamilyProperties>& queueFamilies);
-
-			static uint32 calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties);
 
 			static uint32 calculateGraphicsQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties);
 

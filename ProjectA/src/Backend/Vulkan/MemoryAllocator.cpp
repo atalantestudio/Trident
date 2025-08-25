@@ -5,25 +5,30 @@
 namespace ProjectA {
 	const VulkanPhysicalDevice* MemoryAllocator::physicalDevice;
 	std::vector<MemoryAllocation> MemoryAllocator::memoryAllocations;
-	std::vector<uint32> MemoryAllocator::currentBufferMemoryAllocationIndices;
-	std::vector<uint32> MemoryAllocator::currentImageMemoryAllocationIndices;
+	sequence<uint32> MemoryAllocator::currentBufferMemoryAllocationIndices;
+	sequence<uint32> MemoryAllocator::currentImageMemoryAllocationIndices;
 	std::vector<uint32> MemoryAllocator::freeMemoryAllocationIndices;
 
 	void MemoryAllocator::initialize(const VulkanPhysicalDevice& physicalDevice) {
 		MemoryAllocator::physicalDevice = &physicalDevice;
 
-		//ENGINE_TRACE("Buffer image granularity: []", physicalDevice.properties.limits.bufferImageGranularity);
-		//ENGINE_TRACE("Max. memory allocation count: []", physicalDevice.properties.limits.maxMemoryAllocationCount);
+		ENGINE_DEBUG("Buffer image granularity: []", physicalDevice.properties.limits.bufferImageGranularity);
+		ENGINE_DEBUG("Max. memory allocation count: []", physicalDevice.properties.limits.maxMemoryAllocationCount);
 
-		currentBufferMemoryAllocationIndices.resize(physicalDevice.memoryProperties.memoryTypeCount);
+		currentBufferMemoryAllocationIndices = sequence<uint32>(physicalDevice.memoryProperties.memoryTypeCount);
 		std::fill(currentBufferMemoryAllocationIndices.begin(), currentBufferMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
 
-		currentImageMemoryAllocationIndices.resize(physicalDevice.memoryProperties.memoryTypeCount);
+		currentImageMemoryAllocationIndices = sequence<uint32>(physicalDevice.memoryProperties.memoryTypeCount);
 		std::fill(currentImageMemoryAllocationIndices.begin(), currentImageMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
 
 		#ifdef BUILD_MODE_DEBUG
-			// enumerateMemoryHeaps();
-			// enumerateMemoryTypes();
+			#ifdef DEBUG_ENUMERATE_HEAPS
+				enumerateMemoryHeaps();
+			#endif
+
+			#ifdef DEBUG_ENUMERATE_TYPES
+				enumerateMemoryTypes();
+			#endif
 		#endif
 	}
 
@@ -260,7 +265,7 @@ namespace ProjectA {
 		ENGINE_INFO("Freed suballocation from memory allocation []. The active suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
 	}
 
-	uint32 MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices) {
+	uint32 MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size) {
 		const VkDeviceSize allocationSize = std::max(size, DEFAULT_MEMORY_ALLOCATION_SIZE);
 
 		uint32 memoryAllocationIndex = static_cast<uint32>(memoryAllocations.size());
@@ -307,18 +312,17 @@ namespace ProjectA {
 			memoryAllocations[memoryAllocationIndex] = memoryAllocation;
 		}
 
-		currentMemoryAllocationIndices[memoryTypeIndex] = memoryAllocationIndex;
-
 		return memoryAllocationIndex;
 	}
 
-	MemorySuballocation MemoryAllocator::suballocate(VkDevice device, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, std::vector<uint32>& currentMemoryAllocationIndices) {
+	MemorySuballocation MemoryAllocator::suballocate(VkDevice device, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices) {
 		uint32 currentMemoryAllocationIndex = currentMemoryAllocationIndices[memoryTypeIndex];
 
 		const VkDeviceSize size = std::max(memoryRequirements.size, memoryRequirements.alignment);
 
 		if (currentMemoryAllocationIndex == UNDEFINED_MEMORY_ALLOCATION_INDEX) {
-			currentMemoryAllocationIndex = createAllocation(device, memoryTypeIndex, size, currentMemoryAllocationIndices);
+			currentMemoryAllocationIndex = createAllocation(device, memoryTypeIndex, size);
+			currentMemoryAllocationIndices[memoryTypeIndex] = currentMemoryAllocationIndex;
 		}
 
 		MemoryAllocation* currentMemoryAllocation = &memoryAllocations[currentMemoryAllocationIndex];
@@ -344,8 +348,8 @@ namespace ProjectA {
 				memoryRequirements.size
 			);
 
-			currentMemoryAllocationIndex = createAllocation(device, memoryTypeIndex, size, currentMemoryAllocationIndices);
-			currentMemoryAllocation = &memoryAllocations[currentMemoryAllocationIndex];
+			currentMemoryAllocationIndex = createAllocation(device, memoryTypeIndex, size);
+			currentMemoryAllocationIndices[memoryTypeIndex] = currentMemoryAllocationIndex;
 
 			offset = 0;
 		}

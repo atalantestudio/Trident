@@ -15,7 +15,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNC_SIG);
 
-		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat(physicalDevice.object);
+		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat();
 
 		sequence<VkAttachmentDescription> attachmentDescriptions(attachmentCount);
 		sequence<VkAttachmentReference> attachmentReferences(attachmentCount);

@@ -18,10 +18,11 @@ namespace ProjectA {
 	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const ApplicationManifest& applicationManifest, const Window& window) :
 		instance(applicationManifest),
 		surface(createRef<VulkanSurface>(instance.object, window)),
-		physicalDevice(instance.object),
+		physicalDevice(instance.selectPhysicalDevice()),
 		device(createRef<VulkanDevice>(physicalDevice, *surface))
 	{
-		surface->checkPresentQueueFamilyIndex(physicalDevice.object, physicalDevice.graphicsQueueFamilyIndex);
+		surface->setPhysicalDevice(physicalDevice.object);
+		surface->checkPresentQueueFamilyIndex(physicalDevice.graphicsQueueFamilyIndex);
 
 		MemoryAllocator::initialize(physicalDevice);
 	}

@@ -37,7 +37,7 @@ namespace ProjectA {
 				layerOffset(descriptor.layerOffset),
 				layerCount(descriptor.layerCount)
 			{
-				DEBUG_DESCRIPTOR_GUARD(descriptor);
+				DEBUG_DESCRIPTOR_GUARD(descriptor, image);
 			}
 
 		private:

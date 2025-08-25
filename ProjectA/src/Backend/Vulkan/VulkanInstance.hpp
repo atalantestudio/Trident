@@ -4,6 +4,8 @@
 #include "Engine/API/Rendering/Instance.hpp"
 #include "Engine/Application/ApplicationManifest.hpp"
 
+#define DEBUG_ENUMERATE_PHYSICAL_DEVICES
+
 namespace ProjectA {
 	class VulkanInstance final : public Instance, public ObjectWrapper<VkInstance> {
 		public:
@@ -11,14 +13,14 @@ namespace ProjectA {
 
 			~VulkanInstance() final override;
 
+			VkPhysicalDevice selectPhysicalDevice() const;
+
 		private:
 			#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
 				static void checkInstanceLayers();
 			#endif
 
-			#ifdef BUILD_MODE_DEBUG
-				void enumeratePhysicalDevices();
-			#endif
+			uint32 calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties) const;
 
 			#ifdef DEBUG_ENABLE_MESSENGER
 				static VkBool32 debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);

@@ -14,9 +14,6 @@ namespace ProjectA {
 				copyRegions(&copyRegions)
 			{}
 
-			// TODO(review): Use glCopyTextureSubImage* instead of glTextureSubImage*? The description for glCopyTextureSubImage* is:
-			//       "Replace a rectangular portion of a texture image with pixels from the current GL_READ_BUFFER
-			//       (rather than from main memory, as is the case for glTexSubImage2D)."
 			void execute() const final override {
 				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer);
 

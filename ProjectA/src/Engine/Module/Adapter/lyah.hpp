@@ -380,7 +380,6 @@ namespace ProjectA {
 		return abs(area) * static_cast<T>(0.5);
 	}
 
-	// TODO(review): Refactor using sign flip for 2D perpendicular vectors.
 	template<typename T>
 	lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b) {
 		const lyah::vec<3, T> a_3d = {a[0], a[1], 0.0f};
@@ -390,7 +389,6 @@ namespace ProjectA {
 		return {r_3d[0], r_3d[1]};
 	}
 
-	// TODO(review): Refactor using sign flip for 2D perpendicular vectors.
 	template<typename T>
 	lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b, const lyah::vec<2, T>& c) {
 		const lyah::vec<2, T> b_c = {b[0] * c[1], b[1] * c[0]};
@@ -409,7 +407,7 @@ namespace ProjectA {
 		};
 	}
 
-	// TODO(review): Implement 2x2 matrix rotation in Lyah.
+	// TODO(review): lyah::mat2x2::rotation
 	template<typename T>
 	lyah::mat<2, 2, T> mat2x2_rotation(T angle) {
 		const T c = lyah::cos(angle);

@@ -95,10 +95,6 @@ namespace ProjectA {
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan debug messenger.");
 		#endif
-
-		#ifdef BUILD_MODE_DEBUG
-			enumeratePhysicalDevices();
-		#endif
 	}
 
 	VulkanInstance::~VulkanInstance() {
@@ -136,34 +132,48 @@ namespace ProjectA {
 		}
 	#endif
 
-	#ifdef BUILD_MODE_DEBUG
-		void VulkanInstance::enumeratePhysicalDevices() {
-			uint32 physicalDeviceCount;
-			VkResult result;
+	VkPhysicalDevice VulkanInstance::selectPhysicalDevice() const {
+		PROFILE_SCOPE(FUNC_SIG);
 
-			result = vkEnumeratePhysicalDevices(object, &physicalDeviceCount, nullptr);
+		uint32 physicalDeviceCount;
+		VkResult result;
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan physical devices ([]).", string_VkResult(result));
+		result = vkEnumeratePhysicalDevices(object, &physicalDeviceCount, nullptr);
 
-			DEBUG_ASSERT(physicalDeviceCount > 0);
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan physical devices ([]).", string_VkResult(result));
+		DEBUG_ASSERT(physicalDeviceCount > 0);
 
-			sequence<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+		sequence<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
 
-			result = vkEnumeratePhysicalDevices(object, &physicalDeviceCount, &physicalDevices[0]);
+		result = vkEnumeratePhysicalDevices(object, &physicalDeviceCount, &physicalDevices[0]);
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan physical devices ([]).", string_VkResult(result));
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan physical devices ([]).", string_VkResult(result));
 
-			VkPhysicalDeviceProperties physicalDeviceProperties;
+		VkPhysicalDeviceProperties physicalDeviceProperties;
+		uint32 maxPhysicalDeviceScore = 0;
+		uint32 bestPhysicalDeviceIndex = 0;
 
+		#ifdef DEBUG_ENUMERATE_PHYSICAL_DEVICES
+			std::string physicalDeviceType;
+		#endif
+
+		#ifdef DEBUG_ENUMERATE_PHYSICAL_DEVICES
 			ENGINE_INFO("Physical devices:");
+		#endif
 
-			for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count; physicalDeviceIndex += 1) {
-				const VkPhysicalDevice physicalDevice = physicalDevices[physicalDeviceIndex];
+		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count; physicalDeviceIndex += 1) {
+			const VkPhysicalDevice physicalDevice = physicalDevices[physicalDeviceIndex];
 
-				vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+			vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
 
-				std::string physicalDeviceType;
+			const uint32 physicalDeviceScore = calculatePhysicalDeviceScore(physicalDeviceProperties);
 
+			if (physicalDeviceScore >= maxPhysicalDeviceScore) {
+				maxPhysicalDeviceScore = physicalDeviceScore;
+				bestPhysicalDeviceIndex = physicalDeviceIndex;
+			}
+
+			#ifdef DEBUG_ENUMERATE_PHYSICAL_DEVICES
 				switch (physicalDeviceProperties.deviceType) {
 					case VK_PHYSICAL_DEVICE_TYPE_OTHER:
 						physicalDeviceType = "unknown type";
@@ -188,9 +198,29 @@ namespace ProjectA {
 				}
 
 				ENGINE_INFO("- [] ([])", physicalDeviceProperties.deviceName, physicalDeviceType);
-			}
+			#endif
 		}
-	#endif
+
+		ENGINE_ASSERT(maxPhysicalDeviceScore > 0, "Could not select a suitable physical device.");
+
+		return physicalDevices[bestPhysicalDeviceIndex];
+	}
+
+	uint32 VulkanInstance::calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties) const {
+		#if PREFERRED_GPU_TYPE == GPU_TYPE_DISCRETE
+			if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+				return 1;
+			}
+		#endif
+
+		#if PREFERRED_GPU_TYPE == GPU_TYPE_INTEGRATED
+			if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
+				return 1;
+			}
+		#endif
+
+		return 0;
+	}
 
 	#ifdef DEBUG_ENABLE_MESSENGER
 		VkBool32 VulkanInstance::debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {

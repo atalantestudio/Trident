@@ -30,6 +30,9 @@ namespace ProjectA {
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_WIDTH, pointer_cast<GLint*>(&limits.maxFramebufferSize[0]));
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_HEIGHT, pointer_cast<GLint*>(&limits.maxFramebufferSize[1]));
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_LAYERS, pointer_cast<GLint*>(&limits.maxFramebufferLayerCount));
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, pointer_cast<GLint*>(&limits.maxImageDimension1D));
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, pointer_cast<GLint*>(&limits.maxImageDimension2D));
+		glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, pointer_cast<GLint*>(&limits.maxImageDimension3D));
 		glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, pointer_cast<GLint*>(&limits.maxImageLayerCount));
 
 		limits.maxMemoryAllocationCount = ~0;

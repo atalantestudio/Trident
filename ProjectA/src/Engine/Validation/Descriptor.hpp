@@ -2,6 +2,8 @@
 
 // API descriptor validators for debug mode.
 namespace ProjectA {
+	class Image;
+
 	struct AttachmentImageDescriptor;
 	struct BeginRenderPassDescriptor;
 	struct BufferDescriptor;
@@ -25,7 +27,7 @@ namespace ProjectA {
 	void DescriptorGuard(const ComputePipelineDescriptor& descriptor);
 	void DescriptorGuard(const FramebufferDescriptor& descriptor);
 	void DescriptorGuard(const ImageDescriptor& descriptor);
-	void DescriptorGuard(const ImageViewDescriptor& descriptor);
+	void DescriptorGuard(const ImageViewDescriptor& descriptor, const Image* image);
 	void DescriptorGuard(const PipelineLayoutDescriptor& descriptor);
 	void DescriptorGuard(const RenderPassDescriptor& descriptor);
 	void DescriptorGuard(const RenderPipelineDescriptor& descriptor);

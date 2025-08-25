@@ -18,44 +18,10 @@ namespace ProjectA {
 		}
 	}
 
-	VulkanPhysicalDevice::VulkanPhysicalDevice(VkInstance instance) {
+	VulkanPhysicalDevice::VulkanPhysicalDevice(VkPhysicalDevice physicalDevice) :
+		ObjectWrapper(physicalDevice)
+	{
 		PROFILE_SCOPE(FUNC_SIG);
-
-		uint32 physicalDeviceCount;
-		VkResult result;
-
-		// TODO(review): Call vkEnumeratePhysicalDevices once.
-		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan physical devices ([]).", string_VkResult(result));
-
-		DEBUG_ASSERT(physicalDeviceCount > 0);
-
-		sequence<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
-
-		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, &physicalDevices[0]);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan physical devices ([]).", string_VkResult(result));
-
-		uint32 maxPhysicalDeviceScore = 0;
-		uint32 bestPhysicalDeviceIndex = 0;
-
-		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count; physicalDeviceIndex += 1) {
-			const VkPhysicalDevice physicalDevice = physicalDevices[physicalDeviceIndex];
-
-			vkGetPhysicalDeviceProperties(physicalDevice, &properties);
-
-			const uint32 physicalDeviceScore = calculatePhysicalDeviceScore(properties);
-
-			if (physicalDeviceScore >= maxPhysicalDeviceScore) {
-				maxPhysicalDeviceScore = physicalDeviceScore;
-				bestPhysicalDeviceIndex = physicalDeviceIndex;
-			}
-		}
-
-		ENGINE_ASSERT(maxPhysicalDeviceScore > 0, "Could not select a suitable physical device.");
-
-		object = physicalDevices[bestPhysicalDeviceIndex];
 
 		vkGetPhysicalDeviceProperties(object, &properties);
 
@@ -66,6 +32,7 @@ namespace ProjectA {
 		selectQueueFamilyIndices();
 
 		uint32 extensionPropertyCount = 0;
+		VkResult result;
 
 		result = vkEnumerateDeviceExtensionProperties(object, nullptr, &extensionPropertyCount, nullptr);
 
@@ -79,13 +46,15 @@ namespace ProjectA {
 
 		enabledExtensionNames.resize(extensionPropertyCount);
 
-		ENGINE_INFO("Enabled device extensions:");
+		#ifdef DEBUG_ENUMERATE_DEVICE_EXTENSIONS
+			ENGINE_INFO("Enabled device extensions:");
 
-		/* for (uint32 extensionPropertiesIndex = 0; extensionPropertiesIndex < extensionProperties.count; extensionPropertiesIndex += 1) {
-			ENGINE_INFO("- [] (spec version: [])", extensionProperties[extensionPropertiesIndex].extensionName, extensionProperties[extensionPropertiesIndex].specVersion);
+			for (uint32 extensionPropertiesIndex = 0; extensionPropertiesIndex < extensionProperties.count; extensionPropertiesIndex += 1) {
+				ENGINE_INFO("- [] (spec version: [])", extensionProperties[extensionPropertiesIndex].extensionName, extensionProperties[extensionPropertiesIndex].specVersion);
 
-			enabledExtensionNames[extensionPropertiesIndex] = extensionProperties[extensionPropertiesIndex].extensionName;
-		} */
+				enabledExtensionNames[extensionPropertiesIndex] = extensionProperties[extensionPropertiesIndex].extensionName;
+			}
+		#endif
 
 		vkGetPhysicalDeviceFeatures(object, &features);
 		vkGetPhysicalDeviceMemoryProperties(object, &memoryProperties);
@@ -107,6 +76,9 @@ namespace ProjectA {
 		limits.maxFramebufferSize[0] = properties.limits.maxFramebufferWidth;
 		limits.maxFramebufferSize[1] = properties.limits.maxFramebufferHeight;
 		limits.maxFramebufferLayerCount = properties.limits.maxFramebufferLayers;
+		limits.maxImageDimension1D = properties.limits.maxImageDimension1D;
+		limits.maxImageDimension2D = properties.limits.maxImageDimension2D;
+		limits.maxImageDimension3D = properties.limits.maxImageDimension3D;
 		limits.maxImageLayerCount = properties.limits.maxImageArrayLayers;
 		limits.maxMemoryAllocationCount = properties.limits.maxMemoryAllocationCount;
 		limits.maxVertexInputAttributeCount = properties.limits.maxVertexInputAttributes;
@@ -180,22 +152,6 @@ namespace ProjectA {
 				string_VkQueueFlags(queueFamily.queueFlags)
 			);
 		}
-	}
-
-	uint32 VulkanPhysicalDevice::calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties) {
-		#if PREFERRED_GPU_TYPE == GPU_TYPE_DISCRETE
-			if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-				return 1;
-			}
-		#endif
-
-		#if PREFERRED_GPU_TYPE == GPU_TYPE_INTEGRATED
-			if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
-				return 1;
-			}
-		#endif
-
-		return 0;
 	}
 
 	uint32 VulkanPhysicalDevice::calculateGraphicsQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {

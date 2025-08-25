@@ -60,7 +60,7 @@ namespace ProjectA {
 			// TODO(review): Use correct SI unit.
 			float32 friction = 0.0f;
 
-			// Inertia = mass distribution over the shape
+			// Inertia = mass distribution over the shape.
 			// TODO(review): Use correct SI unit.
 			float32 inverseInertia = 1.0f;
 

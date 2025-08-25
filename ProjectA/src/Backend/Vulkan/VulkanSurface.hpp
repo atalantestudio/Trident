@@ -13,20 +13,23 @@ namespace ProjectA {
 
 			~VulkanSurface() final override;
 
+			void setPhysicalDevice(VkPhysicalDevice physicalDevice);
+
 			virtual ImageFormat getFormat() const final override;
 
-			void checkPresentQueueFamilyIndex(VkPhysicalDevice physicalDevice, uint32 graphicsQueueFamilyIndex);
+			void checkPresentQueueFamilyIndex(uint32 graphicsQueueFamilyIndex);
 
-			VkSurfaceFormatKHR selectFormat(VkPhysicalDevice physicalDevice) const;
+			VkSurfaceFormatKHR selectFormat() const;
 
-			VkPresentModeKHR selectPresentMode(VkPhysicalDevice physicalDevice, bool vSync) const;
+			VkPresentModeKHR selectPresentMode(bool vSync) const;
 
-			VkSurfaceCapabilitiesKHR getCapabilities(VkPhysicalDevice physicalDevice) const;
+			VkSurfaceCapabilitiesKHR getCapabilities() const;
 
 		public:
 			const Window& window;
 
 		private:
 			const VkInstance instance;
+			VkPhysicalDevice physicalDevice;
 	};
 }

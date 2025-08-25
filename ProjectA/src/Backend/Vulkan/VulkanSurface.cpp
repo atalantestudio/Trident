@@ -2,6 +2,8 @@
 
 #include "Backend/Vulkan/VulkanSurface.hpp"
 
+#include "Backend/Vulkan/ImageFormat.hpp"
+
 #include "Backend/Win32/Surface.hpp"
 
 namespace ProjectA {
@@ -28,7 +30,11 @@ namespace ProjectA {
 		vkDestroySurfaceKHR(instance, object, nullptr);
 	}
 
-	void VulkanSurface::checkPresentQueueFamilyIndex(VkPhysicalDevice physicalDevice, uint32 graphicsQueueFamilyIndex) {
+	void VulkanSurface::setPhysicalDevice(VkPhysicalDevice physicalDevice) {
+		this->physicalDevice = physicalDevice;
+	}
+
+	void VulkanSurface::checkPresentQueueFamilyIndex(uint32 graphicsQueueFamilyIndex) {
 		VkBool32 supported;
 		VkResult result;
 
@@ -39,11 +45,12 @@ namespace ProjectA {
 	}
 
 	ImageFormat VulkanSurface::getFormat() const {
-		// TODO(review): Return the correct surface format (remap the result of VulkanSurface::selectFormat to ImageFormat enum).
-		return ImageFormat::B8G8R8A8_UNORM;
+		const VkSurfaceFormatKHR surfaceFormat = selectFormat();
+
+		return fromVkFormat(surfaceFormat.format);
 	}
 
-	VkSurfaceFormatKHR VulkanSurface::selectFormat(VkPhysicalDevice physicalDevice) const {
+	VkSurfaceFormatKHR VulkanSurface::selectFormat() const {
 		uint32 formatCount = 0;
 		VkResult result;
 
@@ -77,7 +84,7 @@ namespace ProjectA {
 		return selectedFormat;
 	}
 
-	VkPresentModeKHR VulkanSurface::selectPresentMode(VkPhysicalDevice physicalDevice, bool vSync) const {
+	VkPresentModeKHR VulkanSurface::selectPresentMode(bool vSync) const {
 		uint32 presentModeCount = 0;
 		VkResult result;
 
@@ -114,7 +121,7 @@ namespace ProjectA {
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 
-	VkSurfaceCapabilitiesKHR VulkanSurface::getCapabilities(VkPhysicalDevice physicalDevice) const {
+	VkSurfaceCapabilitiesKHR VulkanSurface::getCapabilities() const {
 		VkSurfaceCapabilitiesKHR surfaceCapabilities;
 
 		const VkResult result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, object, &surfaceCapabilities);

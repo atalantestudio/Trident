@@ -6,6 +6,9 @@ namespace ProjectA {
 	#define UNDEFINED_MEMORY_TYPE_INDEX max<uint32>()
 	#define UNDEFINED_MEMORY_ALLOCATION_INDEX max<uint32>()
 
+	// #define DEBUG_ENUMERATE_HEAPS
+	// #define DEBUG_ENUMERATE_TYPES
+
 	struct MemoryAllocation {
 		VkDeviceMemory memory;
 		VkDeviceSize offset;
@@ -62,11 +65,11 @@ namespace ProjectA {
 
 		private:
 			// Creates a new memory allocation and returns its index.
-			static uint32 createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size, std::vector<uint32>& currentMemoryAllocationIndices);
+			static uint32 createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size);
 
 			// Creates and returns a suballocation from a memory allocation.
 			// If isBuffer is false, the suballocation is done on image memory.
-			static MemorySuballocation suballocate(VkDevice device, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, std::vector<uint32>& currentMemoryAllocationIndices);
+			static MemorySuballocation suballocate(VkDevice device, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices);
 
 		private:
 			// Memory allocations have a default size of 16Mb.
@@ -78,12 +81,12 @@ namespace ProjectA {
 			// Allocated buffer and image memory allocations.
 			static std::vector<MemoryAllocation> memoryAllocations;
 
-			// TODO(review): Merge with currentImageMemoryAllocationIndices.
+			// TODO: Try Merging with currentImageMemoryAllocationIndices.
 			// Indices of the currently active buffer memory allocations per memory type.
-			static std::vector<uint32> currentBufferMemoryAllocationIndices;
+			static sequence<uint32> currentBufferMemoryAllocationIndices;
 
 			// Indices of the currently active image memory allocations per memory type.
-			static std::vector<uint32> currentImageMemoryAllocationIndices;
+			static sequence<uint32> currentImageMemoryAllocationIndices;
 
 			static std::vector<uint32> freeMemoryAllocationIndices;
 	};
