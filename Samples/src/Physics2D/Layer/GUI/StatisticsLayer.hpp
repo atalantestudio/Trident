@@ -4,9 +4,7 @@ namespace ProjectA {
 	class StatisticsLayer : public GUILayer {
 		public:
 			void registerAssets() override {
-				const ref<FontAsset> testRegularFontAsset = Application::getAssetLibrary().findFontAsset("test-regular");
-
-				font = loadFontAsset(testRegularFontAsset);
+				font = loadFontAsset("test-regular");
 
 				textStyle.color = 0x000000ff;
 				textStyle.font = font;

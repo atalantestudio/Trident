@@ -4,9 +4,7 @@ namespace ProjectA {
 	class DemoLayer3 : public GUILayer {
 		public:
 			void registerAssets() override {
-				const ref<FontAsset> testRegularFontAsset = Application::getAssetLibrary().findFontAsset("test-regular");
-
-				font = loadFontAsset(testRegularFontAsset);
+				font = loadFontAsset("test-regular");
 			}
 
 			void GUI() override {

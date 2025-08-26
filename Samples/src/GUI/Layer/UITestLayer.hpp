@@ -4,9 +4,7 @@ namespace ProjectA {
 	class UITestLayer : public GUILayer {
 		public:
 			void registerAssets() override {
-				const ref<FontAsset> testRegularFontAsset = Application::getAssetLibrary().findFontAsset("test-regular");
-
-				font = loadFontAsset(testRegularFontAsset);
+				font = loadFontAsset("test-regular");
 
 				containerStyle.size = {FIT, FIT};
 				containerStyle.padding = {8_px, 8_px};

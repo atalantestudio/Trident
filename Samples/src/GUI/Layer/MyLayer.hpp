@@ -4,13 +4,9 @@ namespace ProjectA {
 	class MyLayer : public GUILayer {
 		public:
 			void registerAssets() override {
-				const ref<FontAsset> fontBoldAsset = Application::getAssetLibrary().findFontAsset("test-bold");
-				const ref<FontAsset> fontRegularAsset = Application::getAssetLibrary().findFontAsset("test-regular");
-				const ref<FontAsset> fontRegularItalicAsset = Application::getAssetLibrary().findFontAsset("test-regular-italic");
-
-				fontBold = loadFontAsset(fontBoldAsset);
-				fontRegular = loadFontAsset(fontRegularAsset);
-				fontRegularItalic = loadFontAsset(fontRegularItalicAsset);
+				fontBold = loadFontAsset("test-bold");
+				fontRegular = loadFontAsset("test-regular");
+				fontRegularItalic = loadFontAsset("test-regular-italic");
 
 				image = loadImage("Asset/Image/Cameraman.png");
 

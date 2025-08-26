@@ -25,7 +25,9 @@ namespace ProjectA {
 		textureArrayFlushed = true;
 	}
 
-	FontID GUILayer::loadFontAsset(const ref<FontAsset>& fontAsset) {
+	FontID GUILayer::loadFontAsset(std::string_view assetName) {
+		const ref<FontAsset> fontAsset = Application::getAssetLibrary().findFontAsset(std::string(assetName));
+
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
@@ -718,17 +720,18 @@ namespace ProjectA {
 
 	// TODO(review): lyah::ceil
 	void GUILayer::WrapText(GUIContainer& textComponent) {
+		const char8* stringPointer = textComponent.text.data();
 		const FontData& fontData = fonts[textComponent.font];
 		const FontAsset& fontAsset = *fontData.fontAsset;
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
 		const vec2<float32> imageSize = {static_cast<float32>(imageExtent.width), static_cast<float32>(imageExtent.height)};
 		const float32 lineHeight = textComponent.fontSize / fontAsset.getLineHeight();
+		const uint32 characterCount = getCharacterCount(textComponent.text);
 
 		svec2<float32> characterOffset = textComponent.origin;
 		uint32 lineCount = 1;
-		uint32 characterIndex = 0;
-		uint32 wordStartIndex = 0;
-		uint32 wordLength = 0;
+		uint32 wordByteOffset = 0;
+		uint32 wordByteLength = 0;
 		float32 wordCharacterOffsetX = 0.0f;
 		float32 postWordAdvanceWidth = 0.0f;
 		float32 postWordAdvanceHeight = 0.0f;
@@ -740,62 +743,59 @@ namespace ProjectA {
 		defaultGlyphSubcomponent.layerIndex = fontData.glyphMapImageId;
 		defaultGlyphSubcomponent.color = textComponent.color.value;
 
-		while (characterIndex < textComponent.text.size()) {
-			const char8 character = textComponent.text[characterIndex];
+		uint32 byteOffset = 0;
+		uint16 codePoint;
 
-			characterIndex += 1;
+		while (byteOffset < textComponent.text.size()) {
+			const uint32 previousByteOffset = byteOffset;
 
-			if (character >= 0) {
-				const uint16 codePoint = static_cast<uint16>(character);
+			codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
 
-				if (codePoint == '\n') {
-					lineCount += 1;
+			if (codePoint == '\n') {
+				lineCount += 1;
+				flushCurrentWord = true;
+				flushBeforeNewLine = true;
+			}
+			else {
+				const Glyph& glyph = fontAsset[codePoint];
+
+				if (glyph.whitespace) {
+					// Flush the current word if we encounter a blank character.
 					flushCurrentWord = true;
-					flushBeforeNewLine = true;
+					postWordAdvanceWidth = glyph.advanceWidth * lineHeight;
 				}
 				else {
-					const Glyph& glyph = fontAsset[codePoint];
+					const float32 advanceWidth = std::ceil(glyph.advanceWidth * lineHeight);
 
-					if (glyph.whitespace) {
-						// Flush the current word if we encounter a blank character.
+					wordCharacterOffsetX += advanceWidth;
+
+					if (wordCharacterOffsetX > textComponent.size.width.value) {
+						characterOffset.x = 0.0f;
+						characterOffset.y += textComponent.fontSize;
+						lineCount += 1;
+						wordByteLength += byteOffset - previousByteOffset;
 						flushCurrentWord = true;
-						postWordAdvanceWidth = glyph.advanceWidth * lineHeight;
-					}
-					else {
-						const float32 advanceWidth = std::ceil(glyph.advanceWidth * lineHeight);
 
-						wordCharacterOffsetX += advanceWidth;
+						while (byteOffset < textComponent.text.size()) {
+							const uint32 previousByteOffset = byteOffset;
 
-						if (wordCharacterOffsetX > textComponent.size.width.value) {
-							characterOffset.x = 0.0f;
-							characterOffset.y += textComponent.fontSize;
-							lineCount += 1;
-							wordLength += 1;
-							flushCurrentWord = true;
+							codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
 
-							for (uint32 lookAheadIndex = characterIndex; lookAheadIndex < textComponent.text.size(); lookAheadIndex += 1) {
-								const char8 character = textComponent.text[lookAheadIndex];
+							const Glyph& glyph = fontAsset[codePoint];
 
-								if (OutsideWord(character, fontAsset)) {
-									break;
-								}
-
-								wordLength += 1;
-								characterIndex += 1;
+							if (glyph.whitespace) {
+								break;
 							}
+
+							wordByteLength += byteOffset - previousByteOffset;
 						}
 					}
 				}
 			}
-			else {
-				// TODO(review): Handle UTF-16 and UTF-32 characters.
-				// NOTE: For now, we just flush the current word.
-				flushCurrentWord = true;
-			}
 
 			if (flushCurrentWord) {
 				FlushWordData flushWordData;
-				flushWordData.word = std::string_view(&textComponent.text[wordStartIndex], wordLength);
+				flushWordData.word = std::string_view(&textComponent.text[wordByteOffset], wordByteLength);
 				flushWordData.fontAsset = &fontAsset;
 				flushWordData.imageSize = imageSize;
 				flushWordData.fontSize = textComponent.fontSize;
@@ -803,8 +803,8 @@ namespace ProjectA {
 
 				FlushWord(flushWordData, textComponent.characters, characterOffset);
 
-				wordStartIndex = characterIndex;
-				wordLength = 0;
+				wordByteOffset = byteOffset;
+				wordByteLength = 0;
 				flushCurrentWord = false;
 
 				characterOffset.x += postWordAdvanceWidth;
@@ -825,12 +825,12 @@ namespace ProjectA {
 				continue;
 			}
 
-			wordLength += 1;
+			wordByteLength += byteOffset - previousByteOffset;
 		}
 
-		if (wordLength > 0 && wordStartIndex + wordLength == textComponent.text.size()) {
+		if (wordByteLength > 0 && wordByteOffset + wordByteLength == textComponent.text.size()) {
 			FlushWordData flushWordData;
-			flushWordData.word = std::string_view(&textComponent.text[wordStartIndex], wordLength);
+			flushWordData.word = std::string_view(&textComponent.text[wordByteOffset], wordByteLength);
 			flushWordData.fontAsset = &fontAsset;
 			flushWordData.imageSize = imageSize;
 			flushWordData.fontSize = textComponent.fontSize;
@@ -842,21 +842,15 @@ namespace ProjectA {
 		textComponent.size.height.value = textComponent.fontSize * lineCount;
 	}
 
-	bool GUILayer::OutsideWord(char8 character, const FontAsset& fontAsset) const {
-		if (character < 0) {
-			// TODO(review): Handle UTF-16 and UTF-32 characters.
-			return true;
-		}
-
-		const uint16 codePoint = static_cast<uint16>(character);
-		const Glyph& glyph = fontAsset[codePoint];
-
-		return glyph.whitespace;
-	}
-
 	void GUILayer::FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) {
-		for (const char8 character : data.word) {
-			const uint16 codePoint = static_cast<uint16>(character);
+		const char8* stringPointer = data.word.data();
+
+		uint32 byteOffset = 0;
+		uint16 codePoint;
+
+		while (byteOffset < data.word.size()) {
+			codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
+
 			const Glyph& glyph = (*data.fontAsset)[codePoint];
 			const float32 advanceWidth = std::ceil(glyph.advanceWidth * data.lineHeight);
 			const vec2<float32> startTextureCoordinate = {glyph.minCoordinate.x, glyph.minCoordinate.y};
@@ -1050,23 +1044,23 @@ namespace ProjectA {
 		renderer.registerSubcomponent(subcomponent);
 	}
 
+	// TODO(review): lyah::ceil
 	// TODO(review): lyah::max
 	uint32 GUILayer::calculateTextPreferredWidth(const std::string& string, const TextStyle& textStyle) const {
-		const FontAsset& fontAsset = *fonts[textStyle.font].fontAsset;
+		const char8* stringPointer = string.data();
+		const ref<FontAsset>& fontAsset = fonts[textStyle.font].fontAsset;
+		const float32 lineHeight = static_cast<float32>(fontAsset->getLineHeight());
 
+		uint32 byteOffset = 0;
+		uint16 codePoint;
 		uint32 preferredWidth = 0;
 		uint32 lineWidth = 0;
-
 		bool firstLineGlyph = true;
 
-		for (const char8 character : string) {
-			if (character < 0) {
-				// TODO(review): Handle UTF-16 characters.
+		while (byteOffset < string.size()) {
+			codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
 
-				continue;
-			}
-
-			if (character == '\n') {
+			if (codePoint == '\n') {
 				preferredWidth = std::max(preferredWidth, lineWidth);
 				lineWidth = 0;
 				firstLineGlyph = true;
@@ -1074,8 +1068,7 @@ namespace ProjectA {
 				continue;
 			}
 
-			const uint16 codePoint = static_cast<uint16>(character);
-			const Glyph& glyph = fontAsset[codePoint];
+			const Glyph& glyph = (*fontAsset)[codePoint];
 
 			if (firstLineGlyph) {
 				firstLineGlyph = false;
@@ -1085,9 +1078,9 @@ namespace ProjectA {
 				}
 			}
 
-			const float32 advanceWidth = std::ceil(glyph.advanceWidth / static_cast<float32>(fontAsset.getLineHeight()) * textStyle.fontSize);
+			const uint32 advanceWidth = static_cast<uint32>(std::ceil(glyph.advanceWidth / lineHeight) * textStyle.fontSize);
 
-			lineWidth += static_cast<uint32>(advanceWidth);
+			lineWidth += advanceWidth;
 		}
 
 		return std::max(preferredWidth, lineWidth);
@@ -1095,6 +1088,7 @@ namespace ProjectA {
 
 	// TODO(review): lyah::max
 	uint32 GUILayer::calculateTextMinimumWidth(const std::string& string, const TextStyle& textStyle) const {
+		const char8* stringPointer = string.data();
 		const FontAsset& fontAsset = *fonts[textStyle.font].fontAsset;
 		const float32 lineHeight = textStyle.fontSize / fontAsset.getLineHeight();
 
@@ -1104,19 +1098,16 @@ namespace ProjectA {
 
 		bool closeWord = false;
 
-		for (const char8 character : string) {
-			if (character < 0) {
-				// TODO(review): Handle UTF-16 characters.
+		uint32 byteOffset = 0;
+		uint16 codePoint;
 
-				continue;
-			}
+		while (byteOffset < string.size()) {
+			codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
 
-			if (character == '\n') {
+			if (codePoint == '\n') {
 				closeWord = true;
 			}
 			else {
-				const uint16 codePoint = static_cast<uint16>(character);
-
 				glyph = &fontAsset[codePoint];
 
 				if (glyph->whitespace) {
@@ -1137,5 +1128,47 @@ namespace ProjectA {
 		}
 
 		return std::max(minimumWordWidth, currentWordWidth);
+	}
+
+	uint32 GUILayer::getCharacterCount(const std::string& string) {
+		const char8* stringPointer = string.data();
+
+		uint32 characterCount = 0;
+		uint32 byteOffset = 0;
+
+		while (byteOffset < string.size()) {
+			decodeUtf16CodePoint(stringPointer, byteOffset);
+
+			characterCount += 1;
+		}
+
+		return characterCount;
+	}
+
+	uint16 GUILayer::decodeUtf16CodePoint(const char8* string, uint32& byteOffset) {
+		const uint8 firstByte = static_cast<uint8>(string[byteOffset]);
+
+		byteOffset += 1;
+
+		if (~firstByte & 0b10000000) {
+			return firstByte;
+		}
+
+		// TODO: For now, decode to .noglyph if UTF-24 or UTF-32 code points are encountered.
+		//       These unhandled code points are assumed to take up 3 bytes (UTF-24).
+		// ENGINE_ASSERT(firstByte >> 5 == 0b110, "Code points larger than UTF-16 are unhandled.");
+		if (firstByte >> 5 != 0b110) {
+			byteOffset += 2;
+
+			return 0;
+		}
+
+		const uint8 secondByte = static_cast<uint8>(string[byteOffset]);
+
+		byteOffset += 1;
+
+		const uint16 codePoint = (firstByte & 0b11111 << 6) | secondByte;
+
+		return codePoint;
 	}
 }

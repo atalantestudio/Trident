@@ -46,7 +46,7 @@ namespace ProjectA {
 			virtual void onEvent(Event& event) final override;
 
 		protected:
-			FontID loadFontAsset(const ref<FontAsset>& fontAsset);
+			FontID loadFontAsset(std::string_view assetName);
 
 			ImageID loadImage(std::string_view path);
 
@@ -69,7 +69,6 @@ namespace ProjectA {
 			void GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex);
 			void WrapTextChildrenRecursive(uint32 parentIndex);
 			void WrapText(GUIContainer& textComponent);
-			bool OutsideWord(char8 character, const FontAsset& fontAsset) const;
 			void FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin);
 			uint32 GetHoveredComponentIndex() const;
@@ -84,8 +83,12 @@ namespace ProjectA {
 
 			uint32 calculateTextPreferredWidth(const std::string& string, const TextStyle& textStyle) const;
 
-			// Returns the size 
 			uint32 calculateTextMinimumWidth(const std::string& string, const TextStyle& textStyle) const;
+
+		private:
+			static uint32 getCharacterCount(const std::string& string);
+
+			static uint16 decodeUtf16CodePoint(const char8* string, uint32& byteOffset);
 
 		protected:
 			// Shrink towards the layout direction.
