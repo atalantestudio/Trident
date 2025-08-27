@@ -23,7 +23,7 @@ namespace ProjectA {
 		SubpassDescriptor subpassDescriptor{};
 		subpassDescriptor.colorAttachments = {colorAttachment};
 		subpassDescriptor.depthStencil = true;
-		subpassDescriptor.depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
+		subpassDescriptor.depthStencilAttachment.format = DepthStencilImageFormat::D32_SFLOAT;
 		subpassDescriptor.depthStencilAttachment.sampleCount = SAMPLE_COUNT;
 		subpassDescriptor.depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
 

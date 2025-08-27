@@ -23,9 +23,8 @@ namespace ProjectA {
 	};
 
 	struct DepthStencilAttachment {
-		// TODO(review): Use a different ImageFormat enum to automatically restrict image formats?
 		// Must be a depth and/or depth stencil format.
-		ImageFormat format;
+		DepthStencilImageFormat format;
 
 		// The number of samples of the attachment. It must be either 1 or a power of 2 up to 64.
 		uint8 sampleCount : 7;

@@ -18,7 +18,7 @@ namespace ProjectA {
 					colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;
 
 					DepthStencilAttachment depthStencilAttachment{};
-					depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
+					depthStencilAttachment.format = DepthStencilImageFormat::D32_SFLOAT;
 					depthStencilAttachment.sampleCount = 1;
 					depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
 

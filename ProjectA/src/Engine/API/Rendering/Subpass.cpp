@@ -31,7 +31,7 @@ namespace ProjectA {
 
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.type = descriptor.type;
-		imageDescriptor.format = depthStencilAttachment.format;
+		imageDescriptor.format = static_cast<ImageFormat>(depthStencilAttachment.format);
 		imageDescriptor.extent = descriptor.extent;
 		imageDescriptor.mipLevelCount = descriptor.mipLevelCount;
 		imageDescriptor.layerCount = descriptor.layerCount;

@@ -665,7 +665,7 @@ namespace ProjectA {
 		}
 
 		if (descriptor.depthStencil) {
-			if (!isDepthFormat(descriptor.depthStencilAttachment.format)) {
+			if (descriptor.depthStencilAttachment.format > DepthStencilImageFormat::D24_UNORM_S8_UINT) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.depthStencilAttachment.format must be a valid depth stencil ImageFormat value.");
