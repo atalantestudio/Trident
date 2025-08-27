@@ -6,6 +6,8 @@ namespace ProjectA {
 			template<typename T>
 			static constexpr T byteswap(T value) {
 				switch (sizeof(T)) {
+					case 1:
+						return value;
 					case 2: {
 						const uint16 valueInteger = *pointer_cast<const uint16*>(&value);
 
@@ -59,8 +61,9 @@ namespace ProjectA {
 			}
 
 		protected:
-			explicit Stream(uint64 size) :
-				size(size)
+			explicit Stream(uint64 size, Endianness endianness) :
+				size(size),
+				endianness(endianness)
 			{}
 
 		public:
@@ -70,6 +73,10 @@ namespace ProjectA {
 
 			uint64 getRemainingByteSize() const {
 				return size - byteOffset;
+			}
+
+			Endianness getEndianness() const {
+				return endianness;
 			}
 
 			// Advances by the provided byte count.
@@ -96,5 +103,7 @@ namespace ProjectA {
 		protected:
 			// Offset of the currently read byte.
 			uint64 byteOffset = 0;
+
+			Endianness endianness;
 	};
 }

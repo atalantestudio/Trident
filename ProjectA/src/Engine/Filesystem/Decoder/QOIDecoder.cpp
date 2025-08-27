@@ -8,9 +8,9 @@ namespace ProjectA {
 	File<FileFormat::QOI> Filesystem::decode<FileFormat::QOI>(const sequence<uint8>& data) {
 		File<FileFormat::QOI> file;
 
-		ByteStream<StreamOperation::READ> stream(&data[0], data.count);
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count, Endianness::LITTLE_ENDIAN);
 
-		ENGINE_ASSERT(stream.read<uint32>() == STRING_TO_LITTLE_ENDIAN_UINT32("qoif"), "Invalid QOI file signature.");
+		ENGINE_ASSERT(stream.read<uint32>(true) == STRING_TO_BIG_ENDIAN_UINT32("qoif"), "Invalid QOI file signature.");
 
 		file.extent.width = stream.read<uint32>(true);
 		file.extent.height = stream.read<uint32>(true);
@@ -28,7 +28,7 @@ namespace ProjectA {
 
 				break;
 			default:
-				ENGINE_ASSERT(false, "Invalid channel count ([]).", static_cast<sint32>(channelCount));
+				ENGINE_ASSERT(false, "Unhandled channel count ([]).", static_cast<sint32>(channelCount));
 
 				break;
 		}
@@ -49,8 +49,8 @@ namespace ProjectA {
 	}
 
 	void Filesystem::QOIDecoderContentOnly(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint64 maxIterationCount) {
-		qoi_rgba texel = {0, 0, 0, 255};
-		qoi_rgba previouslySeenTexels[64]{};
+		qoi_rgba previousTexel = {0, 0, 0, 255};
+		qoi_rgba texelCache[64]{};
 
 		uint64 dataOffset = 0;
 		uint64 iterationIndex = 0;
@@ -63,19 +63,19 @@ namespace ProjectA {
 
 				stream.jump(1);
 
-				const qoi_rgba readTexel = stream.peek<qoi_rgba>();
+				const qoi_rgba texel = stream.peek<qoi_rgba>();
 
-				texel.r = readTexel.r;
-				texel.g = readTexel.g;
-				texel.b = readTexel.b;
+				previousTexel.r = texel.r;
+				previousTexel.g = texel.g;
+				previousTexel.b = texel.b;
 
 				stream.jump(tag - 251);
 
 				if (tag == 0b11111111) {
-					texel.a = readTexel.a;
+					previousTexel.a = texel.a;
 				}
 
-				std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &data[dataOffset]);
+				std::copy_n(pointer_cast<const uint8*>(&previousTexel), channelCount, &data[dataOffset]);
 
 				dataOffset += channelCount;
 				iterationIndex += channelCount + 1;
@@ -87,9 +87,9 @@ namespace ProjectA {
 
 						const qoi_index index = stream.read<qoi_index>();
 
-						texel = previouslySeenTexels[index.index];
+						previousTexel = texelCache[index.index];
 
-						std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &data[dataOffset]);
+						std::copy_n(pointer_cast<const uint8*>(&previousTexel), channelCount, &data[dataOffset]);
 
 						dataOffset += channelCount;
 						iterationIndex += 1;
@@ -101,11 +101,11 @@ namespace ProjectA {
 
 						const qoi_diff diff = stream.read<qoi_diff>();
 
-						texel.r += diff.dr - 2;
-						texel.g += diff.dg - 2;
-						texel.b += diff.db - 2;
+						previousTexel.r += diff.dr - 2;
+						previousTexel.g += diff.dg - 2;
+						previousTexel.b += diff.db - 2;
 
-						std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &data[dataOffset]);
+						std::copy_n(pointer_cast<const uint8*>(&previousTexel), channelCount, &data[dataOffset]);
 
 						dataOffset += channelCount;
 						iterationIndex += 1;
@@ -117,11 +117,11 @@ namespace ProjectA {
 
 						const qoi_luma luma = stream.read<qoi_luma>();
 
-						texel.r += luma.dg - 32 + luma.dr_dg - 8;
-						texel.g += luma.dg - 32;
-						texel.b += luma.dg - 32 + luma.db_dg - 8;
+						previousTexel.r += luma.dg - 32 + luma.dr_dg - 8;
+						previousTexel.g += luma.dg - 32;
+						previousTexel.b += luma.dg - 32 + luma.db_dg - 8;
 
-						std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &data[dataOffset]);
+						std::copy_n(pointer_cast<const uint8*>(&previousTexel), channelCount, &data[dataOffset]);
 
 						dataOffset += channelCount;
 						iterationIndex += 2;
@@ -136,7 +136,7 @@ namespace ProjectA {
 						const uint8 runLength = (tag & 0b00111111) + 1;
 
 						for (uint8 runOffset = 0; runOffset < runLength; runOffset += 1) {
-							std::copy_n(pointer_cast<const uint8*>(&texel), channelCount, &data[dataOffset]);
+							std::copy_n(pointer_cast<const uint8*>(&previousTexel), channelCount, &data[dataOffset]);
 
 							dataOffset += channelCount;
 						}
@@ -148,7 +148,7 @@ namespace ProjectA {
 				}
 			}
 
-			previouslySeenTexels[rgbaHash(texel).index] = texel;
+			texelCache[rgbaHash(previousTexel).index] = previousTexel;
 		}
 	}
 }

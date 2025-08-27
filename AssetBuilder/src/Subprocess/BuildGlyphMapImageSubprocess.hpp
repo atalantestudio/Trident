@@ -24,7 +24,7 @@ namespace ProjectA {
 					imageAsset->getExtent().depth *
 					(sizeof(uint8) + sizeof(qoi_rgba));
 
-				ByteStream<StreamOperation::WRITE> outputByteStream(maxOutputSize);
+				ByteStream<StreamOperation::WRITE> outputByteStream(maxOutputSize, Endianness::LITTLE_ENDIAN);
 				outputByteStream.write<AssetSignature>(AssetSignature::TIM);
 				outputByteStream.write<uint32>(assetIdentifier);
 				outputByteStream.write<VersionNumber>({0, 0, 0});

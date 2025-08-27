@@ -2,8 +2,6 @@
 
 #include "Backend/Win32/base.hpp"
 
-#include "Engine/Platform.hpp"
-
 namespace ProjectA {
 	const char8* Platform::windowName = nullptr;
 

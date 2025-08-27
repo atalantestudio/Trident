@@ -41,7 +41,7 @@ namespace ProjectA {
 
 					const sequence<uint8> data = Filesystem::openBuffer(assetPath);
 
-					ByteStream<StreamOperation::READ> byteStream(&data[0], data.count);
+					ByteStream<StreamOperation::READ> byteStream(&data[0], data.count, Endianness::LITTLE_ENDIAN);
 
 					const AssetSignature signature = byteStream.peek<AssetSignature>();
 
@@ -76,7 +76,7 @@ namespace ProjectA {
 
 					const sequence<uint8> data = Filesystem::openBuffer(assetPath);
 
-					ByteStream<StreamOperation::READ> byteStream(&data[0], data.count);
+					ByteStream<StreamOperation::READ> byteStream(&data[0], data.count, Endianness::LITTLE_ENDIAN);
 
 					const AssetSignature signature = byteStream.peek<AssetSignature>();
 

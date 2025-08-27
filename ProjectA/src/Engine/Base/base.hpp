@@ -7,6 +7,8 @@
 #include "Engine/Base/binary.hpp"
 #include "Engine/Base/cast.hpp"
 #include "Engine/Base/enum.hpp"
+#include "Engine/Base/Endianness.hpp"
+#include "Engine/Base/Platform.hpp"
 #include "Engine/Base/Log.hpp"
 #include "Engine/Base/Macros.hpp"
 #include "Engine/Base/Extent.hpp"
@@ -30,5 +32,3 @@
 #include "Engine/Base/Error.hpp"
 #include "Engine/Base/Random.hpp"
 #include "Engine/Base/VersionNumber.hpp"
-
-// TODO(review): Implement Endianness enum.

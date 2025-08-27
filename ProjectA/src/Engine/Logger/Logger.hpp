@@ -2,7 +2,6 @@
 
 #include "Engine/Logger/LogLevel.hpp"
 #include "Engine/Logger/LogStructure.hpp"
-#include "Engine/Platform.hpp"
 
 namespace ProjectA {
 	class Logger {

@@ -10,8 +10,8 @@ namespace ProjectA {
 	template<>
 	class ByteStream<StreamOperation::READ> : public Stream {
 		public:
-			explicit ByteStream(const uint8* data, uint64 size) :
-				Stream(size),
+			explicit ByteStream(const uint8* data, uint64 size, Endianness endianness) :
+				Stream(size, endianness),
 				data(data)
 			{}
 
@@ -29,7 +29,7 @@ namespace ProjectA {
 
 				T value = *pointer_cast<const T*>(data + byteOffset);
 
-				if (swapEndianness) {
+				if (static_cast<uint8>(endianness) + swapEndianness ^ static_cast<uint8>(Platform::getEndianness())) {
 					value = byteswap<T>(value);
 				}
 
@@ -57,8 +57,8 @@ namespace ProjectA {
 	template<>
 	class ByteStream<StreamOperation::WRITE> : public Stream {
 		public:
-			explicit ByteStream(uint64 size) :
-				Stream(size),
+			explicit ByteStream(uint64 size, Endianness endianness) :
+				Stream(size, endianness),
 				data(new uint8[size])
 			{}
 

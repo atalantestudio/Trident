@@ -54,9 +54,9 @@ namespace ProjectA {
 	File<FileFormat::PNG> Filesystem::decode(const sequence<uint8>& data) {
 		File<FileFormat::PNG> file;
 
-		ByteStream<StreamOperation::READ> stream(&data[0], data.count);
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count, Endianness::BIG_ENDIAN);
 
-		const uint64 signature = stream.read<uint64>(true);
+		const uint64 signature = stream.read<uint64>();
 
 		ENGINE_ASSERT(signature == 0x89504E470D0A1A0A, "Invalid PNG file signature.");
 
@@ -64,16 +64,16 @@ namespace ProjectA {
 		uint8 channelCount = 0;
 
 		while (stream.getRemainingByteSize() > 0) {
-			const uint32 byteLength = stream.read<uint32>(true);
-			const uint32 type = stream.read<uint32>();
+			const uint32 byteLength = stream.read<uint32>();
+			const uint32 type = stream.read<uint32>(true);
 
 			switch (type) {
 				case STRING_TO_LITTLE_ENDIAN_UINT32("IHDR"): {
-					file.extent.width = stream.read<uint32>(true);
+					file.extent.width = stream.read<uint32>();
 
 					ENGINE_ASSERT(file.extent.width > 0, "The width must be > 0.");
 
-					file.extent.height = stream.read<uint32>(true);
+					file.extent.height = stream.read<uint32>();
 
 					ENGINE_ASSERT(file.extent.height > 0, "The height must be > 0.");
 
@@ -165,7 +165,7 @@ namespace ProjectA {
 				}
 			}
 
-			const uint32 CRC = stream.read<uint32>(true);
+			const uint32 CRC = stream.read<uint32>();
 
 			// TODO: Check CRC. See https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix.
 		}
@@ -176,8 +176,8 @@ namespace ProjectA {
 		stream.seek(sizeof(uint64));
 
 		while (stream.getRemainingByteSize() > 0) {
-			const uint32 byteLength = stream.read<uint32>(true);
-			const uint32 type = stream.read<uint32>();
+			const uint32 byteLength = stream.read<uint32>();
+			const uint32 type = stream.read<uint32>(true);
 
 			if (type == STRING_TO_LITTLE_ENDIAN_UINT32("IDAT")) {
 				std::copy_n(stream.getBytePosition(), byteLength, &compressedData[compressedDataOffset]);
@@ -189,7 +189,7 @@ namespace ProjectA {
 			stream.jump(byteLength + sizeof(uint32));
 		}
 
-		BitStream<StreamOperation::READ> inflateBitStream(compressedData, compressedDataSize);
+		BitStream<StreamOperation::READ> inflateBitStream(compressedData, compressedDataSize, Endianness::LITTLE_ENDIAN);
 
 		const uint64 filteredDataSize = file.extent.width * file.extent.height * channelCount;
 		const uint64 unfilteredDataSize = filteredDataSize + file.extent.height;

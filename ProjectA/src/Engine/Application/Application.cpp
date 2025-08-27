@@ -7,7 +7,6 @@
 #include "Engine/Application/Application.hpp"
 #include "Engine/Filesystem/File/PropertyFile.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
-#include "Engine/Platform.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 #include "Engine/Debug/ScopeTimer.hpp"

@@ -10,7 +10,7 @@ namespace ProjectA {
 			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& assetOutputPath) {
 				const std::string path = directoryEntry.path().string();
 				const sequence<uint8> inputData = Filesystem::openBuffer(path);
-				const ByteStream<StreamOperation::READ> inputByteStream(&inputData[0], inputData.count);
+				const ByteStream<StreamOperation::READ> inputByteStream(&inputData[0], inputData.count, Endianness::BIG_ENDIAN);
 
 				if (!Filesystem::validateSignature<FileFormat::TTF>(inputByteStream)) {
 					ENGINE_INFO("Ignored non-TTF file \"[]\".", path);
@@ -49,7 +49,7 @@ namespace ProjectA {
 
 				const BuildGlyphMapImageSubprocess buildGlyphMapImageSubprocess(assetOutputPath, directoryEntry.path().stem().string(), fontAssetDescriptor.glyphMapImage, glyphMapImageAssetIdentifier);
 
-				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize);
+				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
 				outputByteStream.write<AssetSignature>(AssetSignature::TFO);
 				outputByteStream.write<uint32>(assetIdentifier);
 				outputByteStream.write<VersionNumber>({0, 0, 0});

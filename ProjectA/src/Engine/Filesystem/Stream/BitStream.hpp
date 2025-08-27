@@ -12,11 +12,12 @@ namespace ProjectA {
 			typedef uint64 BitStreamSize;
 
 		public:
-			explicit BitStream(const uint8* data, uint64 byteSize) :
+			explicit BitStream(const uint8* data, uint64 byteSize, Endianness endianness) :
 				data(data),
 				bitBuffer(*pointer_cast<const BitStreamSize*>(&data[0])),
 				byteSize(byteSize),
-				bitOffset(0)
+				bitOffset(0),
+				endianness(endianness)
 			{}
 
 			uint64 getBitOffset() const {
@@ -29,6 +30,10 @@ namespace ProjectA {
 
 			uint64 getRemainingBitSize() const {
 				return (byteSize - byteOffset) * 8 - bitOffset;
+			}
+
+			Endianness getEndianness() const {
+				return endianness;
 			}
 
 			// Advances the offsets by the provided bit count.
@@ -71,7 +76,7 @@ namespace ProjectA {
 
 				T value = *pointer_cast<const T*>(&bitBuffer);
 
-				if (swapEndianness) {
+				if (static_cast<uint8>(endianness) + swapEndianness ^ static_cast<uint8>(Platform::getEndianness())) {
 					value = Stream::byteswap(value);
 				}
 
@@ -130,5 +135,7 @@ namespace ProjectA {
 
 			// Offset within the bit buffer.
 			uint8 bitOffset: 6;
+
+			Endianness endianness;
 	};
 }
