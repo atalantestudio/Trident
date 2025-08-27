@@ -18,7 +18,7 @@ namespace ProjectA {
 	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface) :
 		physicalDevice(createRef<VulkanPhysicalDevice>(physicalDevice))
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		std::vector<uint32> queueFamilyIndices = {
 			physicalDevice.graphicsQueueFamilyIndex,
@@ -68,7 +68,7 @@ namespace ProjectA {
 	}
 
 	VulkanDevice::~VulkanDevice() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		for (const ref<VulkanQueue>& queue : queues) {
 			// Destroy the queue's command pool.
@@ -87,7 +87,7 @@ namespace ProjectA {
 	}
 
 	void VulkanDevice::waitForFence(const ref<Fence>& fence) const {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VkResult result = vkWaitForFences(
 			object,
@@ -101,7 +101,7 @@ namespace ProjectA {
 	}
 
 	void VulkanDevice::resetFence(const ref<Fence>& fence) const {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VkResult result = vkResetFences(
 			object,
@@ -113,7 +113,7 @@ namespace ProjectA {
 	}
 
 	AcquireNextImageStatus VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VkResult result = vkAcquireNextImageKHR(
 			object,

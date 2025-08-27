@@ -15,7 +15,7 @@ namespace ProjectA {
 		internalFormat(getGlInternalFormat(descriptor.format)),
 		format(getGlFormat(descriptor.format))
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#ifdef OPENGL_USE_DSA
 			glCreateTextures(target, 1, &object);
@@ -102,7 +102,7 @@ namespace ProjectA {
 	}
 
 	OpenGLImage::~OpenGLImage() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		glDeleteTextures(1, &object);
 	}

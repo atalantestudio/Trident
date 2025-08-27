@@ -13,7 +13,6 @@ namespace ProjectA {
 
 			const ref<Layer>& operator [](std::size_t index) const;
 
-			// TODO(review): Write helper macros for iterators.
 			std::vector<ref<Layer>>::iterator begin();
 
 			std::vector<ref<Layer>>::iterator end();

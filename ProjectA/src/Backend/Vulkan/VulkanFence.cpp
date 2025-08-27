@@ -6,7 +6,7 @@ namespace ProjectA {
 	VulkanFence::VulkanFence(VkDevice device) :
 		device(device)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		VkFenceCreateInfo fenceCreateInfo{};
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -19,7 +19,7 @@ namespace ProjectA {
 	}
 
 	VulkanFence::~VulkanFence() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroyFence(device, object, nullptr);
 	}

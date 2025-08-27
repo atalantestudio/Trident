@@ -9,7 +9,7 @@ namespace ProjectA {
 		Buffer(descriptor),
 		device(device)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		VkBufferCreateInfo bufferCreateInfo{};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -52,7 +52,7 @@ namespace ProjectA {
 	}
 
 	VulkanBuffer::~VulkanBuffer() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroyBuffer(device, object, nullptr);
 

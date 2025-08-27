@@ -6,7 +6,7 @@ namespace ProjectA {
 	class ImageAssetRenderer : public Renderer {
 		public:
 			void build() override {
-				const ref<ImageAsset> imageAsset = Application::getAssetLibrary().findImageAsset("test-regular");
+				const ref<ImageAsset> imageAsset = getApplication()->getAssetLibrary()->findImageAsset("test-regular");
 
 				const ref<Device> device = getDevice();
 

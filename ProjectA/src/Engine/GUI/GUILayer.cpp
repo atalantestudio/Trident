@@ -1,7 +1,6 @@
 #include "pch.hpp"
 
 #include "Engine/API/Event/EventDispatcher.hpp"
-#include "Engine/Application/Application.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/GUI/GUILayer.hpp"
 
@@ -26,7 +25,7 @@ namespace ProjectA {
 	}
 
 	FontID GUILayer::loadFontAsset(std::string_view assetName) {
-		const ref<FontAsset> fontAsset = Application::getAssetLibrary().findFontAsset(std::string(assetName));
+		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->findFontAsset(std::string(assetName));
 
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
@@ -942,7 +941,7 @@ namespace ProjectA {
 	}
 
 	uint32 GUILayer::GetHoveredComponentIndex() const {
-		const sint32* mousePositionInteger = Application::getWindow().getMousePosition();
+		const sint32* mousePositionInteger = getApplication()->getWindow()->getMousePosition();
 		const vec2<float32> mousePosition = {static_cast<float32>(mousePositionInteger[0]), static_cast<float32>(mousePositionInteger[1])};
 
 		for (sint32 buttonComponentIndex = static_cast<sint32>(buttonComponentIndices.size()) - 1; buttonComponentIndex >= 0; buttonComponentIndex -= 1) {
@@ -967,7 +966,7 @@ namespace ProjectA {
 	}
 
 	void GUILayer::DispatchMouseEvents() {
-		const sint32* mousePositionInteger = Application::getWindow().getMousePosition();
+		const sint32* mousePositionInteger = getApplication()->getWindow()->getMousePosition();
 		const uint32 lastHoveredComponentIndex = GetHoveredComponentIndex();
 
 		MouseMoveEvent mouseMoveEvent(mousePositionInteger[0], mousePositionInteger[1]);

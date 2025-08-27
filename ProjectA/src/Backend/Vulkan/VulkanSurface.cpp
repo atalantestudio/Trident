@@ -11,7 +11,7 @@ namespace ProjectA {
 		instance(instance),
 		window(window)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		VkResult result;
 
@@ -25,7 +25,7 @@ namespace ProjectA {
 	}
 
 	VulkanSurface::~VulkanSurface() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroySurfaceKHR(instance, object, nullptr);
 	}

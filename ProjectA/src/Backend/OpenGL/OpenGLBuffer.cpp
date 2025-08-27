@@ -13,7 +13,7 @@ namespace ProjectA {
 			, target(getGlTarget(descriptor.usage))
 		#endif
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#ifdef OPENGL_USE_DSA
 			glCreateBuffers(1, &object);
@@ -54,7 +54,7 @@ namespace ProjectA {
 	}
 
 	OpenGLBuffer::~OpenGLBuffer() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		glDeleteBuffers(1, &object);
 	}

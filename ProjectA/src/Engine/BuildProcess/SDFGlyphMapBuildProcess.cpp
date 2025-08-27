@@ -297,7 +297,7 @@ namespace ProjectA {
 			commandEncoder->bindComputePipeline(glyphSdfPipeline);
 			commandEncoder->bindAllDescriptorSets();
 
-			// TODO(review): Support custom glyph sub-image dimension (multiply down). See GlyphDistanceField.comp.
+			// TODO: Support custom glyph sub-image dimension (multiply down). See GlyphDistanceField.comp.
 			commandEncoder->dispatch(8, 8, 1);
 
 			commandBuffer = commandEncoder->end();

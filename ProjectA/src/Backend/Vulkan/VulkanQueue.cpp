@@ -22,7 +22,7 @@ namespace ProjectA {
 	}
 
 	void VulkanQueue::submit(const sequence<ref<CommandBuffer>>& commandBuffers, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		// TODO: One wait destination stage mask per wait semaphore, but the pipeline stage flags is stored into the command buffer.
 		const VkPipelineStageFlags waitDstStageMask = std::static_pointer_cast<VulkanCommandBuffer>(commandBuffers[0])->pipelineStageFlags;
@@ -72,7 +72,7 @@ namespace ProjectA {
 	}
 
 	PresentStatus VulkanQueue::present(const sequence<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		// TODO: Speed this up.
 		sequence<const VkSwapchainKHR*> vkSwapchains(swapchains.count);

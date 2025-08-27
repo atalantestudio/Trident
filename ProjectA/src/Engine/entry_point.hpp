@@ -9,7 +9,7 @@ extern "C" {
 	#endif
 }
 
-extern ProjectA::Application* createApplication(ProjectA::uint32 argumentCount, char** argumentValues);
+extern ProjectA::Application* createApplication(ProjectA::uint32 argumentCount, ProjectA::char8** argumentValues);
 
 int main(int argc, char** argv) {
 	ProjectA::Application* application;
@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
 		application->postConstruct();
 	}
 
-	if (application->hasGraphicalProcesses()) {
+	if (application->hasLayers()) {
 		PROFILER("Log/ProfileRun.json");
 
 		application->loop();

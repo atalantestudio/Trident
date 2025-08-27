@@ -11,7 +11,7 @@ namespace ProjectA {
 		ImageView(image, descriptor),
 		device(device)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VulkanImage& vkImage = *static_cast<const VulkanImage*>(image);
 
@@ -45,7 +45,7 @@ namespace ProjectA {
 	}
 
 	VulkanImageView::~VulkanImageView() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroyImageView(device, object, nullptr);
 	}

@@ -9,7 +9,7 @@ namespace ProjectA {
 		ShaderModule(descriptor),
 		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GLsizei length = static_cast<GLsizei>(code.count);
 
@@ -52,7 +52,7 @@ namespace ProjectA {
 	}
 
 	OpenGLShaderModule::~OpenGLShaderModule() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		glDeleteShader(object);
 	}

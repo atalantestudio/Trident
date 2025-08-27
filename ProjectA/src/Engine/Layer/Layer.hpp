@@ -4,23 +4,32 @@
 #include "Engine/API/Rendering/CommandEncoder.hpp"
 
 namespace ProjectA {
+	class Application;
+
 	// TODO: Rename to Subpass?
 	class Layer {
 		public:
 			virtual ~Layer() = default;
 
+			const Application* getApplication() const;
+
+			void setApplication(const Application* application);
+
 			virtual void build() = 0;
 
-			virtual void postConstruct() {}
+			virtual void postConstruct();
 
-			virtual void update(float32 deltaTime, float32 inverseDeltaTime) {}
+			virtual void update(float32 deltaTime, float32 inverseDeltaTime);
 
-			virtual void preRender() {}
+			virtual void preRender();
 
-			virtual void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {}
+			virtual void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const;
 
-			virtual void postRender() {}
+			virtual void postRender();
 
-			virtual void onEvent(Event& event) {}
+			virtual void onEvent(Event& event);
+
+		private:
+			const Application* application;
 	};
 }

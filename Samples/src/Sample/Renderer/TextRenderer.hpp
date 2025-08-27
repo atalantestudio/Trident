@@ -6,7 +6,7 @@ namespace ProjectA {
 	class TextRenderer : public Renderer {
 		public:
 			void build() override {
-				const ref<FontAsset>& fontAsset = Application::getAssetLibrary().findFontAsset("test-regular");
+				const ref<FontAsset>& fontAsset = getApplication()->getAssetLibrary()->findFontAsset("test-regular");
 				const ref<ImageAsset>& glyphMapImageAsset = fontAsset->getGlyphMapImage();
 				const ref<Device> device = getDevice();
 

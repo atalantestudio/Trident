@@ -167,7 +167,7 @@ namespace ProjectA {
 
 			const uint32 CRC = stream.read<uint32>(true);
 
-			// TODO(review): Check CRC. See https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix.
+			// TODO: Check CRC. See https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix.
 		}
 
 		sequence<uint8> compressedData(compressedDataSize);

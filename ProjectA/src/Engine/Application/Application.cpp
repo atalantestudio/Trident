@@ -13,15 +13,13 @@
 #include "Engine/Debug/ScopeTimer.hpp"
 
 namespace ProjectA {
-	Application* Application::instance = nullptr;
-	bool Application::looping = true;
-	bool Application::windowResized = false;
-	float64 Application::previousTime = 0.0;
-	float64 Application::frameTime = 0.0;
-	float64 Application::frameTimeAccumulator = 0.0;
-	uint32 Application::frameIndex = 0;
-	uint32 Application::frameInFlightIndex = 0;
-	ApplicationProperties* Application::properties = nullptr;
+	float64 Application::getFixedDeltaTime() {
+		return FIXED_DELTA_TIME;
+	}
+
+	float64 Application::getInverseFixedDeltaTime() {
+		return INVERSE_FIXED_DELTA_TIME;
+	}
 
 	std::string Application::formatWindowName(std::string_view projectName, uint8 instanceCount) {
 		if (instanceCount == 0) {
@@ -34,12 +32,7 @@ namespace ProjectA {
 	Application::Application(const ApplicationManifest& applicationManifest) :
 		projectType(applicationManifest.projectType)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
-
-		// TODO(review): Remove singleton pattern.
-		DEBUG_ASSERT(instance == nullptr);
-
-		instance = this;
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ENGINE_DEBUG("Launching.");
 
@@ -142,23 +135,27 @@ namespace ProjectA {
 		delete properties;
 	}
 
-	const Window& Application::getWindow() {
-		return *instance->window;
+	const sequence<void*>& Application::getConsoleArguments() const {
+		return consoleArguments;
 	}
 
-	const AssetLibrary& Application::getAssetLibrary() {
-		return *instance->assetLibrary;
+	void Application::setConsoleArguments(uint32 argumentCount, char8** argumentValues) {
+		consoleArguments = sequence<void*>(argumentCount);
+
+		for (uint32 consoleArgumentIndex = 0; consoleArgumentIndex < argumentCount; consoleArgumentIndex += 1) {
+			consoleArguments[consoleArgumentIndex] = static_cast<void*>(argumentValues[consoleArgumentIndex]);
+		}
 	}
 
-	float64 Application::getFixedDeltaTime() {
-		return FIXED_DELTA_TIME;
+	bool Application::hasLayers() const {
+		return layerStack.hasLayers();
 	}
 
-	float64 Application::getCurrentFrameTime() {
+	float64 Application::getCurrentFrameTime() const {
 		return frameTime;
 	}
 
-	float64 Application::getFramesPerSecond() {
+	float64 Application::getFramesPerSecond() const {
 		if (frameTime == 0.0) {
 			return 0.0;
 		}
@@ -168,8 +165,16 @@ namespace ProjectA {
 		return rendersPerSecond / 1000.0;
 	}
 
-	uint32 Application::getFrameIndex() {
+	uint32 Application::getFrameIndex() const {
 		return frameIndex;
+	}
+
+	const Window* Application::getWindow() const {
+		return window;
+	}
+
+	const AssetLibrary* Application::getAssetLibrary() const {
+		return assetLibrary;
 	}
 
 	void Application::postConstruct() {
@@ -177,22 +182,6 @@ namespace ProjectA {
 
 		for (const ref<Layer>& layer : layerStack) {
 			layer->postConstruct();
-		}
-	}
-
-	bool Application::hasGraphicalProcesses() const {
-		return layerStack.hasLayers();
-	}
-
-	const sequence<void*>& Application::getConsoleArguments() const {
-		return consoleArguments;
-	}
-
-	void Application::setConsoleArguments(uint32 argumentCount, char** argumentValues) {
-		consoleArguments = sequence<void*>(argumentCount);
-
-		for (uint32 consoleArgumentIndex = 0; consoleArgumentIndex < argumentCount; consoleArgumentIndex += 1) {
-			consoleArguments[consoleArgumentIndex] = static_cast<void*>(argumentValues[consoleArgumentIndex]);
 		}
 	}
 
@@ -213,7 +202,7 @@ namespace ProjectA {
 	}
 
 	void Application::processFrame() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const float64 currentTime = timer.getCurrentTime();
 
@@ -348,7 +337,7 @@ namespace ProjectA {
 	}
 
 	void Application::onEvent(Event& event) {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		for (std::vector<ref<Layer>>::const_reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); i += 1) {
 			if (event.handled) {
@@ -360,7 +349,7 @@ namespace ProjectA {
 	}
 
 	void Application::onWindowResize(WindowResizeEvent& event) {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		if (window->isMinimized()) {
 			return;

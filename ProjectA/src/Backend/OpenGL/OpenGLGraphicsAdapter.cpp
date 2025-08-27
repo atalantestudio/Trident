@@ -16,7 +16,7 @@
 
 namespace ProjectA {
 	void OpenGLGraphicsAdapter::loadProcedures(const OpenGLRenderingContext& renderingContext) {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#define LOAD_PROCEDURE_ADDRESS(renderingContext, procedure) procedure = static_cast<decltype(procedure)>(renderingContext.getProcedureAddress(#procedure))
 
@@ -170,7 +170,7 @@ namespace ProjectA {
 		renderingContext(window),
 		surface(createRef<OpenGLSurface>())
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		renderingContext.makeCurrent();
 

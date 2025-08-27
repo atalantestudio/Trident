@@ -18,7 +18,7 @@ namespace ProjectA {
 			}
 	};
 
-	Application* ProjectA::createApplication(uint32 argumentCount, char** argumentValues) {
+	Application* ProjectA::createApplication(uint32 argumentCount, char8** argumentValues) {
 		ApplicationManifest applicationManifest{};
 		applicationManifest.projectType = ProjectType::MAIN;
 		applicationManifest.projectName = "Physics";

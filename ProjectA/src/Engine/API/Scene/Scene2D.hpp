@@ -31,11 +31,12 @@ namespace ProjectA {
 
 		public:
 			explicit Scene2D() {
+				// NOTE
 				// An entity of a 2D scene is composed of:
 				// - 0-1 RigidBody2D
 				// - 0-1 Geometry2D subclass
 				// - 0-1 Material (base or subclass)
-				// - 0-1 DynamicEntityTag to indicate that the entity is affected by forces.
+				// - 0-1 DynamicEntityTag to indicate that the entity can be affected by forces.
 				// - 0-1 StaticEntityTag to indicate that the entity is a fixed decoration.
 				// 
 				// DynamicEntityTag and StaticEntityTag are used by the physics engine to optimize broad and narrow phases.
@@ -130,6 +131,9 @@ namespace ProjectA {
 				material->density = descriptor.density;
 				material->fillColor = descriptor.fillColor;
 				material->strokeColor = descriptor.strokeColor;
+
+				ENGINE_ASSERT(material->density > 0.0f, "Invalid material density.");
+				ENGINE_ASSERT(material->restitution >= 0.0f && material->restitution <= 1.0f, "Invalid material restitution.");
 
 				setMaterial(entity, std::static_pointer_cast<Material>(material));
 

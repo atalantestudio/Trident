@@ -17,54 +17,57 @@ int main(int argc, char** argv);
 namespace ProjectA {
 	class Application {
 		public:
+			static float64 getFixedDeltaTime();
+
+			static float64 getInverseFixedDeltaTime();
+
 			static std::string formatWindowName(std::string_view projectName, uint8 instanceCount);
 
 		public:
-			Application(const ApplicationManifest& applicationManifest);
+			explicit Application(const ApplicationManifest& applicationManifest);
 
 			virtual ~Application();
 
-			static const Window& getWindow();
+			const sequence<void*>& getConsoleArguments() const;
 
-			static const AssetLibrary& getAssetLibrary();
+			void setConsoleArguments(uint32 argumentCount, char8** argumentValues);
 
-			static float64 getFixedDeltaTime();
+			bool hasLayers() const;
 
 			// Returns the current frame time, in seconds.
-			static float64 getCurrentFrameTime();
+			float64 getCurrentFrameTime() const;
 
 			// Returns the average frames per second count.
-			static float64 getFramesPerSecond();
+			float64 getFramesPerSecond() const;
 
-			static uint32 getFrameIndex();
+			uint32 getFrameIndex() const;
+
+			const Window* getWindow() const;
+
+			const AssetLibrary* getAssetLibrary() const;
 
 			void postConstruct();
 
-			bool hasGraphicalProcesses() const;
-
-			const sequence<void*>& getConsoleArguments() const;
-
-			void setConsoleArguments(uint32 argumentCount, char** argumentValues);
-
 		protected:
+			template<typename LayerType, typename... Argument>
+			void registerLayer(Argument&&... arguments) {
+				PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+				const ref<Layer> layer = createRef<LayerType>(std::forward<Argument>(arguments)...);
+
+				layer->setApplication(this);
+				layer->build();
+
+				layerStack.pushLayer(layer);
+			}
+
 			template<typename ProcessType, typename... Argument>
 			void registerProcess(Argument&&... arguments) {
-				PROFILE_SCOPE(FUNC_SIG);
+				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 				const ref<Process> process = createRef<ProcessType>(std::forward<Argument>(arguments)...);
 
 				processes.emplace_back(process);
-			}
-
-			template<typename LayerType, typename... Argument>
-			void registerLayer(Argument&&... arguments) {
-				PROFILE_SCOPE(FUNC_SIG);
-
-				const ref<Layer> layer = createRef<LayerType>(std::forward<Argument>(arguments)...);
-
-				layer->build();
-
-				layerStack.pushLayer(layer);
 			}
 
 		private:
@@ -96,8 +99,7 @@ namespace ProjectA {
 			static constexpr float64 INVERSE_FIXED_DELTA_TIME = 1.0 / FIXED_DELTA_TIME;
 
 		public:
-			// Used by the default Renderer class to initialize in flight objects
-			// (command encoders, fences, semaphores).
+			// Used by the renderer to initialize in-flight objects (command encoders, fences, semaphores).
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
 
 		private:
@@ -106,24 +108,7 @@ namespace ProjectA {
 			};
 
 		private:
-			static Application* instance;
-
-			static bool vSync;
-			static bool looping;
-			static bool windowResized;
-
-			static float64 previousTime;
-			static float64 frameTime;
-			static float64 frameTimeAccumulator;
-
-			static uint32 frameIndex;
-
-			// In the range [0, MAX_FRAMES_IN_FLIGHT].
-			static uint32 frameInFlightIndex;
-
-			static ApplicationProperties* properties;
-
-		private:
+			ApplicationProperties* properties = nullptr;
 			ProjectType projectType;
 
 			scope<Mutex> mutex;
@@ -137,7 +122,19 @@ namespace ProjectA {
 			sequence<void*> consoleArguments;
 
 			AssetLibrary* assetLibrary = nullptr;
+
+			uint32 frameIndex = 0;
+
+			// In the range [0, MAX_FRAMES_IN_FLIGHT].
+			uint32 frameInFlightIndex = 0;
+
+			float64 previousTime = 0.0;
+			float64 frameTime = 0.0;
+			float64 frameTimeAccumulator = 0.0;
+
+			bool looping = true;
+			bool windowResized = false;
 	};
 
-	Application* createApplication(uint32 argumentCount, char** argumentValues);
+	Application* createApplication(uint32 argumentCount, char8** argumentValues);
 }

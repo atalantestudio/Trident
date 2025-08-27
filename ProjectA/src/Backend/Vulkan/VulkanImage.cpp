@@ -83,7 +83,7 @@ namespace ProjectA {
 	{}
 
 	VulkanImage::~VulkanImage() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		if (swapchainImage) {
 			return;

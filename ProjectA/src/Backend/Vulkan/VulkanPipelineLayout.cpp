@@ -13,7 +13,7 @@ namespace ProjectA {
 		PipelineLayout(descriptor),
 		device(device)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		std::vector<VkDescriptorPoolSize> descriptorPoolSizes;
 		VkResult result;
@@ -204,7 +204,7 @@ namespace ProjectA {
 	}
 
 	VulkanPipelineLayout::~VulkanPipelineLayout() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		if (descriptorSetLayouts.size() > 0) {
 			// NOTE: Only if the pool has been created with the VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT flag.

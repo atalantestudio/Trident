@@ -25,7 +25,7 @@ namespace ProjectA {
 		VulkanPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, std::static_pointer_cast<VulkanPipelineLayout>(descriptor.pipelineLayout).get()),
 		device(device)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		static constexpr VkSampleMask sampleMask = ~0;
 
@@ -245,7 +245,7 @@ namespace ProjectA {
 	}
 
 	VulkanRenderPipeline::~VulkanRenderPipeline() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroyPipeline(device, object, nullptr);
 	}

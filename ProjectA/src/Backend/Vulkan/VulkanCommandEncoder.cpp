@@ -23,7 +23,7 @@ namespace ProjectA {
 		commandBufferUsageFlag(getVkCommandBufferUsageFlag(descriptor.usage)),
 		limits(std::dynamic_pointer_cast<VulkanPhysicalDevice>(device.getPhysicalDevice())->getLimits())
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
 		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -42,7 +42,7 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::begin() const {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		VkCommandBufferBeginInfo commandBufferBeginInfo{};
 		commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -305,7 +305,7 @@ namespace ProjectA {
 	}
 
 	ref<CommandBuffer> VulkanCommandEncoder::end() const {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VkResult result = vkEndCommandBuffer(commandBuffer);
 
@@ -321,7 +321,7 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::reset() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		commandCount = 0;
 		pipeline = nullptr;

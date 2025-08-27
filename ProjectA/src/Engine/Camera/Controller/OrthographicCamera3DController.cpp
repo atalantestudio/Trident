@@ -26,7 +26,7 @@ namespace ProjectA {
 	}
 
 	void OrthographicCamera3DController::update(float32 deltaTime) {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		float32 x = 0.0f;
 		float32 y = 0.0f;
@@ -59,7 +59,7 @@ namespace ProjectA {
 	}
 
 	void OrthographicCamera3DController::onEvent(Event& event) {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		EventDispatcher eventDispatcher(event);
 
@@ -68,7 +68,7 @@ namespace ProjectA {
 	}
 
 	bool OrthographicCamera3DController::onMouseWheel(MouseWheelEvent& event) {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		zoomLevel -= static_cast<float32>(event.getDelta()) * 0.5f;
 		zoomLevel = std::max(zoomLevel, 0.25f);
@@ -80,7 +80,7 @@ namespace ProjectA {
 	}
 
 	bool OrthographicCamera3DController::onWindowResize(WindowResizeEvent& event) {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		resize({static_cast<float32>(event.getWidth()), static_cast<float32>(event.getHeight())});
 

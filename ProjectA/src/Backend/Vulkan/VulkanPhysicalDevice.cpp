@@ -21,7 +21,7 @@ namespace ProjectA {
 	VulkanPhysicalDevice::VulkanPhysicalDevice(VkPhysicalDevice physicalDevice) :
 		ObjectWrapper(physicalDevice)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkGetPhysicalDeviceProperties(object, &properties);
 

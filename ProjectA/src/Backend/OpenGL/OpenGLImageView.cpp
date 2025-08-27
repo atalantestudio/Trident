@@ -9,7 +9,7 @@ namespace ProjectA {
 	OpenGLImageView::OpenGLImageView(const Image* image, const ImageViewDescriptor& descriptor) :
 		ImageView(image, descriptor)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const OpenGLImage& glImage = *static_cast<const OpenGLImage*>(image);
 
@@ -20,7 +20,7 @@ namespace ProjectA {
 	}
 
 	OpenGLImageView::~OpenGLImageView() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		glDeleteTextures(1, &object);
 	}

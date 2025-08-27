@@ -1,5 +1,10 @@
 #pragma once
 
+#include "Engine/API/Event/EventListener.hpp"
+#include "Engine/API/Event/Mouse/MouseDownEvent.hpp"
+#include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
+#include "Engine/API/Event/Mouse/MouseUpEvent.hpp"
+
 namespace ProjectA {
 	static constexpr void OnMouseDownDefaultListener(MouseDownEvent& event) {}
 	static constexpr void OnMouseUpDefaultListener(MouseUpEvent& event) {}

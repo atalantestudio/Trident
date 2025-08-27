@@ -6,7 +6,7 @@ namespace ProjectA {
 	VulkanSemaphore::VulkanSemaphore(VkDevice device) :
 		device(device)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		VkSemaphoreCreateInfo semaphoreCreateInfo{};
 		semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -19,7 +19,7 @@ namespace ProjectA {
 	}
 
 	VulkanSemaphore::~VulkanSemaphore() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroySemaphore(device, object, nullptr);
 	}

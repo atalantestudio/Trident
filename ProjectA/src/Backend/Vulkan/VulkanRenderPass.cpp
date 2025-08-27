@@ -13,7 +13,7 @@ namespace ProjectA {
 		device(device),
 		surface(&surface)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat();
 
@@ -179,7 +179,7 @@ namespace ProjectA {
 	}
 
 	VulkanRenderPass::~VulkanRenderPass() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroyRenderPass(device.object, object, nullptr);
 	}

@@ -6,7 +6,7 @@ namespace ProjectA {
 	OpenGLRenderPass::OpenGLRenderPass(const RenderPassDescriptor& descriptor) :
 		RenderPass(descriptor)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		uint32 totalColorAttachmentCount = 0;
 

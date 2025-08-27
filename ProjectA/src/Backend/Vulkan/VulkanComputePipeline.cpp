@@ -9,7 +9,7 @@ namespace ProjectA {
 		VulkanPipeline(VK_PIPELINE_BIND_POINT_COMPUTE, std::static_pointer_cast<VulkanPipelineLayout>(descriptor.pipelineLayout).get()),
 		device(device)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		VkComputePipelineCreateInfo computePipelineCreateInfo{};
 		computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -26,7 +26,7 @@ namespace ProjectA {
 	}
 
 	VulkanComputePipeline::~VulkanComputePipeline() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroyPipeline(device, object, nullptr);
 	}

@@ -29,7 +29,7 @@ namespace ProjectA {
 		dynamicLineWidth(descriptor.dynamicState & DynamicState::LINE_WIDTH),
 		subpassIndex(descriptor.subpassIndex)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const ref<OpenGLShaderModule> vertexShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.vertexShaderModule);
 		const ref<OpenGLShaderModule> fragmentShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.fragmentShaderModule);
@@ -128,7 +128,7 @@ namespace ProjectA {
 	}
 
 	OpenGLRenderPipeline::~OpenGLRenderPipeline() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		glBindVertexArray(0);
 		glDeleteVertexArrays(1, &vertexArray);

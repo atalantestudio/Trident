@@ -9,7 +9,7 @@ namespace ProjectA {
 		ShaderModule(descriptor),
 		device(device)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		VkShaderModuleCreateInfo shaderModuleCreateInfo{};
 		shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -31,7 +31,7 @@ namespace ProjectA {
 	}
 
 	VulkanShaderModule::~VulkanShaderModule() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroyShaderModule(device, object.module, nullptr);
 	}

@@ -23,7 +23,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLSwapchain::update(const SwapchainDescriptor& descriptor) {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 

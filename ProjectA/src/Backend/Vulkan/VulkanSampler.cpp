@@ -9,7 +9,7 @@ namespace ProjectA {
         Sampler(descriptor),
 		device(device)
 	{
-        PROFILE_SCOPE(FUNC_SIG);
+        PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		VkSamplerCreateInfo samplerCreateInfo{};
 		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -37,7 +37,7 @@ namespace ProjectA {
 	}
 
 	VulkanSampler::~VulkanSampler() {
-        PROFILE_SCOPE(FUNC_SIG);
+        PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroySampler(device, object, nullptr);
 	}

@@ -28,7 +28,7 @@ void main() {
 
 	uvec2 glyphImageSize = imageSize(glyphImage);
 
-	// TODO(review): Support custom output image size (multiply up).
+	// TODO: Support custom output image size (multiply up).
 	uvec2 inputTexelCoordinate = uvec2(glyphMapSdfImageCoordinate * outputImageSize + outputImageSize / 2);
 
 	vec4 inputTexel = imageLoad(glyphImage, ivec2(inputTexelCoordinate));

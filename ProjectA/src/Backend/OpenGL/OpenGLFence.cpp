@@ -8,7 +8,7 @@ namespace ProjectA {
 	{}
 
 	void OpenGLFence::create() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		// See https://registry.khronos.org/OpenGL-Refpages/gl4/html/glFenceSync.xhtml.
 		object = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
@@ -17,7 +17,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLFence::reset() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		glDeleteSync(object);
 

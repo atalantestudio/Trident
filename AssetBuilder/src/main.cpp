@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class AssetBuilderApplication : public Application {
 		public:
-			explicit AssetBuilderApplication(const ApplicationManifest& applicationManifest, uint32 argumentCount, char** argumentValues) :
+			explicit AssetBuilderApplication(const ApplicationManifest& applicationManifest, uint32 argumentCount, char8** argumentValues) :
 				Application(applicationManifest)
 			{
 				setConsoleArguments(argumentCount, argumentValues);
@@ -16,7 +16,7 @@ namespace ProjectA {
 			}
 	};
 
-	Application* createApplication(uint32 argumentCount, char** argumentValues) {
+	Application* createApplication(uint32 argumentCount, char8** argumentValues) {
 		ApplicationManifest applicationManifest{};
 		applicationManifest.projectType = ProjectType::BUILD;
 		applicationManifest.projectName = "ProjectA Asset Builder";

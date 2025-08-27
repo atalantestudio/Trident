@@ -6,7 +6,7 @@ namespace ProjectA {
 	VulkanCommandPool::VulkanCommandPool(VkDevice device, uint32 queueFamilyIndex) :
 		device(device)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		VkCommandPoolCreateInfo commandPoolCreateInfo{};
 		commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -20,7 +20,7 @@ namespace ProjectA {
 	}
 
 	VulkanCommandPool::~VulkanCommandPool() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroyCommandPool(device, object, nullptr);
 	}

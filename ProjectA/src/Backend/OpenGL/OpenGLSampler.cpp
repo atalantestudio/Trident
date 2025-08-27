@@ -8,7 +8,7 @@ namespace ProjectA {
 	OpenGLSampler::OpenGLSampler(const SamplerDescriptor& descriptor) :
 		Sampler(descriptor)
 	{
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#ifdef OPENGL_USE_DSA
 			glCreateSamplers(1, &object);
@@ -24,7 +24,7 @@ namespace ProjectA {
 	}
 
 	OpenGLSampler::~OpenGLSampler() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		glDeleteSamplers(1, &object);
 	}

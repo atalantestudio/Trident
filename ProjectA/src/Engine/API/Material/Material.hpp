@@ -13,8 +13,6 @@ namespace ProjectA {
 	// | Static     | 0.0     | 0.4         |
 
 	struct Material {
-		// TODO(review): Validate data (density > 0.0f && restitution >= 0.0f && restitution <= 1.0f).
-
 		// Mass is assumed to be uniformly distributed.
 		float32 density = 1.0f;
 

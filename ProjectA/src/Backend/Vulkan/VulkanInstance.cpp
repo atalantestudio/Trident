@@ -12,7 +12,7 @@ namespace ProjectA {
 
 	// NOTE: ~25Mb in Release mode.
 	VulkanInstance::VulkanInstance(const ApplicationManifest& applicationManifest) {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
 			checkInstanceLayers();
@@ -98,7 +98,7 @@ namespace ProjectA {
 	}
 
 	VulkanInstance::~VulkanInstance() {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(object, "vkDestroyDebugUtilsMessengerEXT"));
@@ -133,7 +133,7 @@ namespace ProjectA {
 	#endif
 
 	VkPhysicalDevice VulkanInstance::selectPhysicalDevice() const {
-		PROFILE_SCOPE(FUNC_SIG);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		uint32 physicalDeviceCount;
 		VkResult result;

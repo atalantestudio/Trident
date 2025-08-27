@@ -10,12 +10,12 @@ namespace ProjectA {
 				textStyle.font = font;
 				textStyle.fontSize = 16.0f;
 
-				framesPerSecond = Application::getFramesPerSecond();
+				framesPerSecond = getApplication()->getFramesPerSecond();
 			}
 
 			void GUI() override {
-				if (Application::getFrameIndex() % FRAME_DELAY == 0) {
-					framesPerSecond = Application::getFramesPerSecond();
+				if (getApplication()->getFrameIndex() % FRAME_DELAY == 0) {
+					framesPerSecond = getApplication()->getFramesPerSecond();
 				}
 
 				GUIText(Logger::format("FPS: []", framesPerSecond), textStyle);
