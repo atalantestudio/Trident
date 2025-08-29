@@ -10,7 +10,7 @@ namespace ProjectA {
 			{}
 
 			void execute() const final override {
-				glLineWidth(1.0f);
+				glLineWidth(width);
 			}
 
 		private:
