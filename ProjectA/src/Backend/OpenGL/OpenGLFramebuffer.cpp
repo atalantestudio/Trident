@@ -113,11 +113,11 @@ namespace ProjectA {
 		#endif
 
 		#ifdef BUILD_MODE_DEBUG
-			GLenum status;
+			GLenum status = GL_FRAMEBUFFER_COMPLETE;
 
-			#ifdef OPENGL_USE_DSA
+			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 				status = glCheckNamedFramebufferStatus(object, GL_FRAMEBUFFER);
-			#else
+			#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 				status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			#endif
 

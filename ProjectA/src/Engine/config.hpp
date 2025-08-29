@@ -26,6 +26,7 @@ namespace ProjectA {
 	// If not, a warning is outputted and the contour's winding order is inverted.
 	#define TTF_FIX_INVERTED_CONTOURS
 
+	// TODO(review): Replace in favor of custom OpenGL version (see below).
 	// If enabled, the OpenGL adapter will use Direct State Access procedures (if available).
 	// If disabled, the OpenGL adapter will use standard procedures.
 	#define OPENGL_USE_DSA
@@ -52,74 +53,6 @@ namespace ProjectA {
 	#define OPENGL_VERSION_4_5 450
 	#define OPENGL_VERSION_4_6 460
 
-	/* #ifdef GL_VERSION_1_2
-		#define OPENGL_VERSION OPENGL_VERSION_1_2
-	#endif
-
-	#ifdef GL_VERSION_1_3
-		#define OPENGL_VERSION OPENGL_VERSION_1_3
-	#endif
-
-	#ifdef GL_VERSION_1_4
-		#define OPENGL_VERSION OPENGL_VERSION_1_4
-	#endif
-
-	#ifdef GL_VERSION_1_5
-		#define OPENGL_VERSION OPENGL_VERSION_1_5
-	#endif
-
-	#ifdef GL_VERSION_2_0
-		#define OPENGL_VERSION OPENGL_VERSION_2_0
-	#endif
-
-	#ifdef GL_VERSION_2_1
-		#define OPENGL_VERSION OPENGL_VERSION_2_1
-	#endif
-
-	#ifdef GL_VERSION_3_0
-		#define OPENGL_VERSION OPENGL_VERSION_3_0
-	#endif
-
-	#ifdef GL_VERSION_3_1
-		#define OPENGL_VERSION OPENGL_VERSION_3_1
-	#endif
-
-	#ifdef GL_VERSION_3_2
-		#define OPENGL_VERSION OPENGL_VERSION_3_2
-	#endif
-
-	#ifdef GL_VERSION_3_3
-		#define OPENGL_VERSION OPENGL_VERSION_3_3
-	#endif
-
-	#ifdef GL_VERSION_4_0
-		#define OPENGL_VERSION OPENGL_VERSION_4_0
-	#endif
-
-	#ifdef GL_VERSION_4_1
-		#define OPENGL_VERSION OPENGL_VERSION_4_1
-	#endif
-
-	#ifdef GL_VERSION_4_2
-		#define OPENGL_VERSION OPENGL_VERSION_4_2
-	#endif
-
-	#ifdef GL_VERSION_4_3
-		#define OPENGL_VERSION OPENGL_VERSION_4_3
-	#endif
-
-	#ifdef GL_VERSION_4_4
-		#define OPENGL_VERSION OPENGL_VERSION_4_4
-	#endif
-
-	#ifdef GL_VERSION_4_5
-		#define OPENGL_VERSION OPENGL_VERSION_4_5
-	#endif
-
-	#ifdef GL_VERSION_4_6
-		#define OPENGL_VERSION OPENGL_VERSION_4_6
-	#endif */
-
 	// Desired OpenGL version. Note that the current device might not be able to load this version.
 	#define OPENGL_VERSION OPENGL_VERSION_4_6
 
@@ -130,4 +63,10 @@ namespace ProjectA {
 
 	// Desired Vulkan version. Note that the current device might not be able to load this version.
 	#define VULKAN_VERSION VULKAN_VERSION_1_0
+
+	#ifdef DEBUG_ENABLE_MESSENGER
+		#if OPENGL_VERSION < OPENGL_VERSION_4_3
+			#error "Debug messenger cannot be enabled below OpenGL 4.3."
+		#endif
+	#endif
 }
