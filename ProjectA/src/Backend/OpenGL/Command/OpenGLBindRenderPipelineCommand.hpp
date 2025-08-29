@@ -13,7 +13,7 @@ namespace ProjectA {
 			void execute() const final override {
 				DEBUG_ASSERT(renderPipeline->minSampleShading >= 0.0f && renderPipeline->minSampleShading <= 1.0f);
 
-				glBindVertexArray(renderPipeline->vertexArray);
+				glBindVertexArray(renderPipeline->vaobj);
 				glUseProgram(renderPipeline->program);
 				glFrontFace(renderPipeline->frontFace);
 
@@ -42,7 +42,12 @@ namespace ProjectA {
 
 				if (renderPipeline->minSampleShading != 0.0f) {
 					glEnable(GL_SAMPLE_SHADING);
-					glMinSampleShading(renderPipeline->minSampleShading);
+
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_0
+						glMinSampleShading(renderPipeline->minSampleShading);
+					#else
+						ENGINE_ERROR_UNSUPPORTED();
+					#endif
 				}
 				else {
 					glDisable(GL_SAMPLE_SHADING);
@@ -52,11 +57,24 @@ namespace ProjectA {
 					const OpenGLDrawBuffer& drawBuffer = renderPipeline->drawBuffers[drawBufferIndex];
 
 					if (drawBuffer.blend) {
-						glEnablei(GL_BLEND, drawBufferIndex);
-						glBlendFunci(drawBufferIndex, drawBuffer.srcColorBlendFactor, drawBuffer.dstColorBlendFactor);
+						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+							glEnablei(GL_BLEND, drawBufferIndex);
+						#else
+							ENGINE_ERROR_UNSUPPORTED();
+						#endif
+
+						#if OPENGL_VERSION >= OPENGL_VERSION_4_0
+							glBlendFunci(drawBufferIndex, drawBuffer.srcColorBlendFactor, drawBuffer.dstColorBlendFactor);
+						#else
+							ENGINE_ERROR_UNSUPPORTED();
+						#endif
 					}
 					else {
-						glDisablei(GL_BLEND, drawBufferIndex);
+						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+							glDisablei(GL_BLEND, drawBufferIndex);
+						#else
+							ENGINE_ERROR_UNSUPPORTED();
+						#endif
 					}
 				}
 

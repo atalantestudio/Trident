@@ -14,10 +14,14 @@ namespace ProjectA {
 		GLsizei length = static_cast<GLsizei>(code.count);
 
 		#ifdef OPENGL_USE_SPIRV
-			glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code, length);
+			#if OPENGL_VERSION >= OPENGL_VERSION_4_6
+				glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code, length);
 
-			// TODO: Expose specialization constants.
-			glSpecializeShader(object, descriptor.entryPoint.data(), 0, nullptr, nullptr);
+				// TODO: Expose specialization constants.
+				glSpecializeShader(object, descriptor.entryPoint.data(), 0, nullptr, nullptr);
+			#else
+				ENGINE_ERROR_UNSUPPORTED();
+			#endif
 		#else
 			std::string codeString(code.begin(), code.end());
 

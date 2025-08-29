@@ -19,7 +19,7 @@ namespace ProjectA {
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			glCreateTextures(target, 1, &object);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+		#else
 			glGenTextures(1, &object);
 			glBindTexture(target, object);
 		#endif
@@ -104,11 +104,15 @@ namespace ProjectA {
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 				glGetTextureParameteriv(object, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
-			#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+			#else
 				glGetTexParameteriv(target, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
 			#endif
 
 			ENGINE_ASSERT(immutableFormat != GL_FALSE, "Only immutable image formats are not supported.");
+		#endif
+
+		#if OPENGL_VERSION < OPENGL_VERSION_4_5 && defined(OPENGL_UNBIND_AFTER_USE)
+			glBindTexture(target, 0);
 		#endif
 	}
 

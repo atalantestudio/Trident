@@ -77,14 +77,14 @@ namespace ProjectA {
 		this->indexTypeSize = indexTypeSize;
 
 		commandBuffer.emplace_back(createRef<OpenGLBindIndexBufferCommand>(
-			renderPipeline->vertexArray,
+			renderPipeline->vaobj,
 			std::static_pointer_cast<OpenGLBuffer>(indexBuffer)->object
 		));
 	}
 
 	void OpenGLCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) {
 		commandBuffer.emplace_back(createRef<OpenGLBindVertexBufferCommand>(
-			renderPipeline->vertexArray,
+			renderPipeline->vaobj,
 			bindingIndex,
 			std::static_pointer_cast<OpenGLBuffer>(vertexBuffer)->object,
 			offset,

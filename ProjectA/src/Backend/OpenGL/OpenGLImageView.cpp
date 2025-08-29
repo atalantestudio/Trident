@@ -15,7 +15,12 @@ namespace ProjectA {
 
 		// NOTE: `glCreateTextures` cannot be used here because the texture view must not be bound or initialized.
 		glGenTextures(1, &object);
-		glTextureView(object, glImage.target, glImage.object, glImage.internalFormat, 0, image->getMipLevelCount(), 0, image->getLayerCount());
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_3
+			glTextureView(object, glImage.target, glImage.object, glImage.internalFormat, 0, image->getMipLevelCount(), 0, image->getLayerCount());
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
+		#endif
 	}
 
 	OpenGLImageView::~OpenGLImageView() {

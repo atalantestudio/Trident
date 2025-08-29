@@ -15,7 +15,7 @@ namespace ProjectA {
 			void* getMappedRange(uint64 offset, uint64 size) const final override;
 
 		private:
-			#ifndef OPENGL_USE_DSA
+			#if OPENGL_VERSION < OPENGL_VERSION_4_5
 				const GLenum target;
 			#endif
 

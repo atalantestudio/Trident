@@ -25,20 +25,24 @@ namespace ProjectA {
 						case GL_TEXTURE_CUBE_MAP:
 						case GL_TEXTURE_CUBE_MAP_ARRAY:
 						case GL_TEXTURE_RECTANGLE:
-							glGetTextureSubImage(
-								image->object,
-								copyRegion.imageMipLevel,
-								copyRegion.imageOffsetX,
-								copyRegion.imageOffsetY,
-								copyRegion.imageOffsetZ + copyRegion.imageLayerOffset,
-								copyRegion.imageExtent.width,
-								copyRegion.imageExtent.height,
-								copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
-								image->format,
-								GL_UNSIGNED_BYTE,
-								static_cast<GLsizei>(buffer->size),
-								(GLvoid*) copyRegion.bufferOffset
-							);
+							#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+								glGetTextureSubImage(
+									image->object,
+									copyRegion.imageMipLevel,
+									copyRegion.imageOffsetX,
+									copyRegion.imageOffsetY,
+									copyRegion.imageOffsetZ + copyRegion.imageLayerOffset,
+									copyRegion.imageExtent.width,
+									copyRegion.imageExtent.height,
+									copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
+									image->format,
+									GL_UNSIGNED_BYTE,
+									static_cast<GLsizei>(buffer->size),
+									(GLvoid*) copyRegion.bufferOffset
+								);
+							#else
+								ENGINE_ERROR_UNSUPPORTED();
+							#endif
 
 							break;
 						default:
@@ -49,7 +53,9 @@ namespace ProjectA {
 					}
 				}
 
-				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+				#ifdef OPENGL_UNBIND_AFTER_USE
+					glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+				#endif
 			}
 
 		private:

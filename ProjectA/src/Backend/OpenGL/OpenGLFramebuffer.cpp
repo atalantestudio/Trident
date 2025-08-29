@@ -10,11 +10,15 @@ namespace ProjectA {
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferDescriptor& descriptor) :
 		Framebuffer(descriptor)
 	{
-		#ifdef OPENGL_USE_DSA
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			glCreateFramebuffers(1, &object);
-		#else
+		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 			glGenFramebuffers(1, &object);
 			glBindFramebuffer(GL_FRAMEBUFFER, object);
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
 		// All images attached to a framebuffer must have the same number of samples.
@@ -74,14 +78,14 @@ namespace ProjectA {
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
 				case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
 				case GL_TEXTURE_RECTANGLE:
-					#ifdef OPENGL_USE_DSA
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 						glNamedFramebufferTexture(
 							object,
 							attachment,
 							glImageView.object,
 							imageView->getMipLevelOffset()
 						);
-					#else
+					#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 						glFramebufferTexture2D(
 							GL_FRAMEBUFFER,
 							attachment,
@@ -89,6 +93,8 @@ namespace ProjectA {
 							glImageView.object,
 							imageView->getMipLevelOffset()
 						);
+					#else
+						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 
 					break;
@@ -102,7 +108,7 @@ namespace ProjectA {
 			boundAttachmentIndex += 1;
 		}
 
-		#ifdef OPENGL_USE_DSA
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			sequence<GLenum> colorAttachments(colorAttachmentCount);
 
 			for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < colorAttachmentCount; colorAttachmentIndex += 1) {
@@ -120,13 +126,23 @@ namespace ProjectA {
 				status = glCheckNamedFramebufferStatus(object, GL_FRAMEBUFFER);
 			#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 				status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+			#else
+				ENGINE_ERROR_UNSUPPORTED();
 			#endif
 
 			ENGINE_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
 		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_0 && defined(OPENGL_UNBIND_AFTER_USE)
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		#endif
 	}
 
 	OpenGLFramebuffer::~OpenGLFramebuffer() {
-		glDeleteFramebuffers(1, &object);
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+			glDeleteFramebuffers(1, &object);
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
+		#endif
 	}
 }

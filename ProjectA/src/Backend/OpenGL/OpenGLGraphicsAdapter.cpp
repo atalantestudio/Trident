@@ -26,18 +26,20 @@ namespace ProjectA {
 
 		loadProcedures();
 
-		#ifdef DEBUG_ENABLE_MESSENGER
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_3 && defined(DEBUG_ENABLE_MESSENGER)
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-
 			glDebugMessageCallback(debugMessageCallback, nullptr);
-
 			glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 0, GL_DEBUG_SEVERITY_NOTIFICATION, 0, "Enabled OpenGL debug message callback.");
 		#endif
 
-		glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
+			glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
+		#endif
 
-		#ifdef OPENGL_USE_DSA
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			glNamedFramebufferDrawBuffers(0, 1, &defaultFramebufferDrawBuffer);
 		#endif
 
@@ -180,83 +182,40 @@ namespace ProjectA {
 
 		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(instance.getProcedure(#procedure))
 
-		#ifdef OPENGL_USE_DSA
-			LOAD_PROCEDURE(glBlitNamedFramebuffer);
-			LOAD_PROCEDURE(glClearNamedFramebufferfi);
-			LOAD_PROCEDURE(glClearNamedFramebufferfv);
-			LOAD_PROCEDURE(glCopyNamedBufferSubData);
-			LOAD_PROCEDURE(glCreateBuffers);
-			LOAD_PROCEDURE(glCreateFramebuffers);
-			LOAD_PROCEDURE(glCreateSamplers);
-			LOAD_PROCEDURE(glCreateVertexArrays);
-			LOAD_PROCEDURE(glMapNamedBufferRange);
-			LOAD_PROCEDURE(glNamedBufferStorage);
-			LOAD_PROCEDURE(glNamedFramebufferDrawBuffers);
-			LOAD_PROCEDURE(glNamedFramebufferReadBuffer);
-			LOAD_PROCEDURE(glNamedFramebufferTexture);
-			LOAD_PROCEDURE(glTextureStorage2D);
-			LOAD_PROCEDURE(glTextureStorage2DMultisample);
-			LOAD_PROCEDURE(glTextureStorage3D);
-			LOAD_PROCEDURE(glTextureStorage3DMultisample);
-			LOAD_PROCEDURE(glUnmapNamedBuffer);
-			LOAD_PROCEDURE(glVertexArrayElementBuffer);
-			LOAD_PROCEDURE(glVertexArrayVertexBuffer);
-		#else
-			LOAD_PROCEDURE(glBindVertexBuffer);
-			LOAD_PROCEDURE(glBlitFramebuffer);
-			LOAD_PROCEDURE(glBufferStorage);
-			LOAD_PROCEDURE(glClearBufferfi);
-			LOAD_PROCEDURE(glClearBufferfv);
-			LOAD_PROCEDURE(glCopyBufferSubData);
-			LOAD_PROCEDURE(glDrawBuffers);
-			LOAD_PROCEDURE(glFramebufferTexture2D);
-			LOAD_PROCEDURE(glGenBuffers);
-			LOAD_PROCEDURE(glGenFramebuffers);
-			LOAD_PROCEDURE(glGenSamplers);
-			LOAD_PROCEDURE(glGenVertexArrays);
-			LOAD_PROCEDURE(glMapBufferRange);
-			LOAD_PROCEDURE(glUnmapBuffer);
+		LOAD_PROCEDURE(glAttachShader);
+		LOAD_PROCEDURE(glBindBuffer);
+		LOAD_PROCEDURE(glCreateProgram);
+		LOAD_PROCEDURE(glCreateShader);
+		LOAD_PROCEDURE(glCullFace);
+		LOAD_PROCEDURE(glDeleteBuffers);
+		LOAD_PROCEDURE(glDeleteProgram);
+		LOAD_PROCEDURE(glDeleteShader);
+		LOAD_PROCEDURE(glDeleteTextures);
+		LOAD_PROCEDURE(glDepthFunc);
+		LOAD_PROCEDURE(glDepthMask);
+		LOAD_PROCEDURE(glDetachShader);
+		LOAD_PROCEDURE(glDisable);
+		LOAD_PROCEDURE(glEnable);
+		LOAD_PROCEDURE(glFrontFace);
+		LOAD_PROCEDURE(glGenTextures);
+		LOAD_PROCEDURE(glGetFloatv);
+		LOAD_PROCEDURE(glGetIntegerv);
+		LOAD_PROCEDURE(glGetProgramInfoLog);
+		LOAD_PROCEDURE(glGetProgramiv);
+		LOAD_PROCEDURE(glGetShaderInfoLog);
+		LOAD_PROCEDURE(glGetShaderiv);
+
+		#if BUILD_MODE_DEBUG
+			LOAD_PROCEDURE(glGetString);
 		#endif
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_2_0
-			LOAD_PROCEDURE(glAttachShader);
-			LOAD_PROCEDURE(glBindBuffer);
-			LOAD_PROCEDURE(glCreateProgram);
-			LOAD_PROCEDURE(glCreateShader);
-			LOAD_PROCEDURE(glCullFace);
-			LOAD_PROCEDURE(glDeleteBuffers);
-			LOAD_PROCEDURE(glDeleteProgram);
-			LOAD_PROCEDURE(glDeleteShader);
-			LOAD_PROCEDURE(glDeleteTextures);
-			LOAD_PROCEDURE(glDepthFunc);
-			LOAD_PROCEDURE(glDepthMask);
-			LOAD_PROCEDURE(glDetachShader);
-			LOAD_PROCEDURE(glDisable);
-			LOAD_PROCEDURE(glDrawBuffer);
-			LOAD_PROCEDURE(glEnable);
-			LOAD_PROCEDURE(glEnableVertexAttribArray);
-			LOAD_PROCEDURE(glFrontFace);
-			LOAD_PROCEDURE(glGenTextures);
-			LOAD_PROCEDURE(glGetFloatv);
-			LOAD_PROCEDURE(glGetIntegerv);
-			LOAD_PROCEDURE(glGetProgramInfoLog);
-			LOAD_PROCEDURE(glGetProgramiv);
-			LOAD_PROCEDURE(glGetShaderInfoLog);
-			LOAD_PROCEDURE(glGetShaderiv);
-
-			#if BUILD_MODE_DEBUG
-				LOAD_PROCEDURE(glGetString);
-			#endif
-
-			LOAD_PROCEDURE(glLineWidth);
-			LOAD_PROCEDURE(glLinkProgram);
-			LOAD_PROCEDURE(glPixelStorei);
-			LOAD_PROCEDURE(glPolygonMode);
-			LOAD_PROCEDURE(glReadBuffer);
-			LOAD_PROCEDURE(glScissor);
-			LOAD_PROCEDURE(glUseProgram);
-			LOAD_PROCEDURE(glViewport);
-		#endif
+		LOAD_PROCEDURE(glLineWidth);
+		LOAD_PROCEDURE(glLinkProgram);
+		LOAD_PROCEDURE(glPixelStorei);
+		LOAD_PROCEDURE(glPolygonMode);
+		LOAD_PROCEDURE(glScissor);
+		LOAD_PROCEDURE(glUseProgram);
+		LOAD_PROCEDURE(glViewport);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 			LOAD_PROCEDURE(glBindBufferRange);
@@ -301,23 +260,11 @@ namespace ProjectA {
 			LOAD_PROCEDURE(glDispatchCompute);
 			LOAD_PROCEDURE(glDispatchComputeIndirect);
 			LOAD_PROCEDURE(glTextureView);
-			LOAD_PROCEDURE(glVertexAttribBinding);
-			LOAD_PROCEDURE(glVertexAttribFormat);
-			LOAD_PROCEDURE(glVertexAttribIFormat);
-			LOAD_PROCEDURE(glVertexAttribLFormat);
-			LOAD_PROCEDURE(glVertexBindingDivisor);
 		#endif
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			LOAD_PROCEDURE(glGetTextureSubImage);
-		#endif
-
-		#ifdef BUILD_MODE_DEBUG
-			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				LOAD_PROCEDURE(glCheckNamedFramebufferStatus);
-			#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-				LOAD_PROCEDURE(glCheckFramebufferStatus);
-			#endif
+			LOAD_PROCEDURE(glVertexArrayElementBuffer);
 		#endif
 
 		#ifdef OPENGL_USE_SPIRV
@@ -333,6 +280,22 @@ namespace ProjectA {
 		#endif
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			LOAD_PROCEDURE(glCopyNamedBufferSubData);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
+			LOAD_PROCEDURE(glCopyBufferSubData);
+		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			LOAD_PROCEDURE(glCreateBuffers);
+			LOAD_PROCEDURE(glGetNamedBufferParameteriv);
+			LOAD_PROCEDURE(glUnmapNamedBuffer);
+		#else
+			LOAD_PROCEDURE(glGenBuffers);
+			LOAD_PROCEDURE(glGetBufferParameteriv);
+			LOAD_PROCEDURE(glUnmapBuffer);
+		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			LOAD_PROCEDURE(glBindTextureUnit);
 			LOAD_PROCEDURE(glCreateTextures);
 
@@ -343,7 +306,7 @@ namespace ProjectA {
 			LOAD_PROCEDURE(glTextureSubImage1D);
 			LOAD_PROCEDURE(glTextureSubImage2D);
 			LOAD_PROCEDURE(glTextureSubImage3D);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+		#else
 			LOAD_PROCEDURE(glActiveTexture);
 			LOAD_PROCEDURE(glBindTexture);
 
@@ -356,6 +319,42 @@ namespace ProjectA {
 			LOAD_PROCEDURE(glTexSubImage3D);
 		#endif
 
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			LOAD_PROCEDURE(glBlitNamedFramebuffer);
+
+			#ifdef BUILD_MODE_DEBUG
+				LOAD_PROCEDURE(glCheckNamedFramebufferStatus);
+			#endif
+
+			LOAD_PROCEDURE(glClearNamedFramebufferfi);
+			LOAD_PROCEDURE(glClearNamedFramebufferfv);
+			LOAD_PROCEDURE(glCreateFramebuffers);
+			LOAD_PROCEDURE(glNamedFramebufferTexture);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+			LOAD_PROCEDURE(glBlitFramebuffer);
+
+			#ifdef BUILD_MODE_DEBUG
+				LOAD_PROCEDURE(glCheckFramebufferStatus);
+			#endif
+
+			LOAD_PROCEDURE(glClearBufferfi);
+			LOAD_PROCEDURE(glClearBufferfv);
+			LOAD_PROCEDURE(glFramebufferTexture2D);
+			LOAD_PROCEDURE(glGenFramebuffers);
+		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			LOAD_PROCEDURE(glCreateSamplers);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_3_3
+			LOAD_PROCEDURE(glGenSamplers);
+		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			LOAD_PROCEDURE(glCreateVertexArrays);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+			LOAD_PROCEDURE(glGenVertexArrays);
+		#endif
+
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_2
 			LOAD_PROCEDURE(glDrawArraysInstancedBaseInstance);
 			LOAD_PROCEDURE(glDrawElementsInstancedBaseVertexBaseInstance);
@@ -364,9 +363,21 @@ namespace ProjectA {
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
 			LOAD_PROCEDURE(glDrawArraysInstanced);
 			LOAD_PROCEDURE(glDrawElementsInstanced);
-		#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+		#else
 			LOAD_PROCEDURE(glDrawArrays);
 			LOAD_PROCEDURE(glDrawElements);
+		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			LOAD_PROCEDURE(glEnableVertexArrayAttrib);
+		#else
+			LOAD_PROCEDURE(glEnableVertexAttribArray);
+		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			LOAD_PROCEDURE(glMapNamedBufferRange);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+			LOAD_PROCEDURE(glMapBufferRange);
 		#endif
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_3
@@ -375,6 +386,20 @@ namespace ProjectA {
 		#elif OPENGL_VERSION >= OPENGL_VERSION_4_0
 			LOAD_PROCEDURE(glDrawArraysIndirect);
 			LOAD_PROCEDURE(glDrawElementsIndirect);
+		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			LOAD_PROCEDURE(glNamedBufferStorage);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_4_4
+			LOAD_PROCEDURE(glBufferStorage);
+		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			LOAD_PROCEDURE(glNamedFramebufferDrawBuffers);
+			LOAD_PROCEDURE(glNamedFramebufferReadBuffer);
+		#else
+			LOAD_PROCEDURE(glDrawBuffers);
+			LOAD_PROCEDURE(glReadBuffer);
 		#endif
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
@@ -391,6 +416,22 @@ namespace ProjectA {
 		#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 			LOAD_PROCEDURE(glTexStorage2DMultisample);
 			LOAD_PROCEDURE(glTexStorage3DMultisample);
+		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			LOAD_PROCEDURE(glVertexArrayAttribBinding);
+			LOAD_PROCEDURE(glVertexArrayAttribFormat);
+			LOAD_PROCEDURE(glVertexArrayAttribIFormat);
+			LOAD_PROCEDURE(glVertexArrayAttribLFormat);
+			LOAD_PROCEDURE(glVertexArrayBindingDivisor);
+			LOAD_PROCEDURE(glVertexArrayVertexBuffer);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+			LOAD_PROCEDURE(glBindVertexBuffer);
+			LOAD_PROCEDURE(glVertexAttribBinding);
+			LOAD_PROCEDURE(glVertexAttribFormat);
+			LOAD_PROCEDURE(glVertexAttribIFormat);
+			LOAD_PROCEDURE(glVertexAttribLFormat);
+			LOAD_PROCEDURE(glVertexBindingDivisor);
 		#endif
 
 		#undef LOAD_PROCEDURE

@@ -23,12 +23,17 @@ namespace ProjectA {
 
 		limits.maxBoundDescriptorSetCount = ~0;
 
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, pointer_cast<GLint*>(&limits.maxComputeWorkgroupCount[0]));
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, pointer_cast<GLint*>(&limits.maxComputeWorkgroupCount[1]));
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, pointer_cast<GLint*>(&limits.maxComputeWorkgroupCount[2]));
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, pointer_cast<GLint*>(&limits.maxComputeWorkgroupSize[0]));
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, pointer_cast<GLint*>(&limits.maxComputeWorkgroupSize[1]));
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, pointer_cast<GLint*>(&limits.maxComputeWorkgroupSize[2]));
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, pointer_cast<GLint*>(&limits.maxComputeWorkgroupCount[0]));
+			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, pointer_cast<GLint*>(&limits.maxComputeWorkgroupCount[1]));
+			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, pointer_cast<GLint*>(&limits.maxComputeWorkgroupCount[2]));
+			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, pointer_cast<GLint*>(&limits.maxComputeWorkgroupSize[0]));
+			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, pointer_cast<GLint*>(&limits.maxComputeWorkgroupSize[1]));
+			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, pointer_cast<GLint*>(&limits.maxComputeWorkgroupSize[2]));
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
+		#endif
+
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_WIDTH, pointer_cast<GLint*>(&limits.maxFramebufferSize[0]));
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_HEIGHT, pointer_cast<GLint*>(&limits.maxFramebufferSize[1]));
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_LAYERS, pointer_cast<GLint*>(&limits.maxFramebufferLayerCount));

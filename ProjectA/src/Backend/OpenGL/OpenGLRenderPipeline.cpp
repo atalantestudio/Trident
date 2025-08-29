@@ -63,18 +63,19 @@ namespace ProjectA {
 		glDetachShader(program, vertexShaderModule->object);
 		glDetachShader(program, fragmentShaderModule->object);
 
-		#ifdef OPENGL_USE_DSA
-			glCreateVertexArrays(1, &vertexArray);
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+			glCreateVertexArrays(1, &vaobj);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+			glGenVertexArrays(1, &vaobj);
+			glBindVertexArray(vaobj);
 		#else
-			glGenVertexArrays(1, &vertexArray);
+			ENGINE_ERROR_UNSUPPORTED();
 		#endif
-
-		glBindVertexArray(vertexArray);
 
 		GLuint attribindex = 0;
 
-		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.count; vertexInputBindingIndex += 1) {
-			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
+		for (uint32 bindingindex = 0; bindingindex < descriptor.vertexInputBindings.count; bindingindex += 1) {
+			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[bindingindex];
 			const std::vector<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
 
 			for (const VertexInputAttribute& attribute : attributes) {
@@ -84,7 +85,13 @@ namespace ProjectA {
 
 				switch (type) {
 					case GL_FLOAT:
-						glVertexAttribFormat(attribindex, size, type, GL_FALSE, relativeoffset);
+						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+							glVertexArrayAttribFormat(vaobj, attribindex, size, type, GL_FALSE, relativeoffset);
+						#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+							glVertexAttribFormat(attribindex, size, type, GL_FALSE, relativeoffset);
+						#else
+							ENGINE_ERROR_UNSUPPORTED();
+						#endif
 
 						break;
 					case GL_BYTE:
@@ -93,29 +100,56 @@ namespace ProjectA {
 					case GL_UNSIGNED_SHORT:
 					case GL_INT:
 					case GL_UNSIGNED_INT:
-						glVertexAttribIFormat(attribindex, size, type, relativeoffset);
+						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+							glVertexArrayAttribIFormat(vaobj, attribindex, size, type, relativeoffset);
+						#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+							glVertexAttribIFormat(attribindex, size, type, relativeoffset);
+						#else
+							ENGINE_ERROR_UNSUPPORTED();
+						#endif
 
 						break;
 					case GL_DOUBLE:
-						glVertexAttribLFormat(attribindex, size, type, relativeoffset);
+						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+							glVertexArrayAttribLFormat(vaobj, attribindex, size, type, relativeoffset);
+						#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+							glVertexAttribLFormat(attribindex, size, type, relativeoffset);
+						#else
+							ENGINE_ERROR_UNSUPPORTED();
+						#endif
 
 						break;
 					default:
 						ENGINE_ASSERT(false, "Unsupported vertex input attribute type.");
 				}
 
-				glVertexAttribBinding(attribindex, vertexInputBindingIndex);
-				glEnableVertexAttribArray(attribindex);
+				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+					glVertexArrayAttribBinding(vaobj, attribindex, bindingindex);
+				#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+					glVertexAttribBinding(attribindex, bindingindex);
+				#else
+					ENGINE_ERROR_UNSUPPORTED();
+				#endif
+
+				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+					glEnableVertexArrayAttrib(vaobj, attribindex);
+				#else
+					glEnableVertexAttribArray(attribindex);
+				#endif
 
 				if (vertexInputBinding.getInputRate() == InputRate::INSTANCE) {
-					glVertexBindingDivisor(vertexInputBindingIndex, 1);
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+						glVertexArrayBindingDivisor(vaobj, bindingindex, 1);
+					#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+						glVertexBindingDivisor(bindingindex, 1);
+					#else
+						ENGINE_ERROR_UNSUPPORTED();
+					#endif
 				}
 
 				attribindex += 1;
 			}
 		}
-
-		glBindVertexArray(0);
 
 		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.size(); colorBlendAttachmentIndex += 1) {
 			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
@@ -125,14 +159,16 @@ namespace ProjectA {
 			drawBuffer.srcColorBlendFactor = getGlBlendFactor(colorBlendAttachment.srcColorBlendFactor);
 			drawBuffer.dstColorBlendFactor = getGlBlendFactor(colorBlendAttachment.dstColorBlendFactor);
 		}
+
+		#if OPENGL_VERSION < OPENGL_VERSION_4_5 && defined(OPENGL_UNBIND_AFTER_USE)
+			glBindVertexArray(0);
+		#endif
 	}
 
 	OpenGLRenderPipeline::~OpenGLRenderPipeline() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		glBindVertexArray(0);
-		glDeleteVertexArrays(1, &vertexArray);
-
 		glDeleteProgram(program);
+		glDeleteVertexArrays(1, &vaobj);
 	}
 }

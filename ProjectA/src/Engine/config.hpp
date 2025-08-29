@@ -26,14 +26,12 @@ namespace ProjectA {
 	// If not, a warning is outputted and the contour's winding order is inverted.
 	#define TTF_FIX_INVERTED_CONTOURS
 
-	// TODO(review): Replace in favor of custom OpenGL version (see below).
-	// If enabled, the OpenGL adapter will use Direct State Access procedures (if available).
-	// If disabled, the OpenGL adapter will use standard procedures.
-	// #define OPENGL_USE_DSA
-
 	// If enabled, OpenGL shaders will be sourced from SPIR-V binaries.
 	// If disabled, they will be sourced from GLSL strings.
 	#define OPENGL_USE_SPIRV
+
+	// If enabled, OpenGL objects are cleanly unbound from their target after being used.
+	#define OPENGL_UNBIND_AFTER_USE
 
 	#define OPENGL_VERSION_1_2 120
 	#define OPENGL_VERSION_1_3 130

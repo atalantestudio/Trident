@@ -2,20 +2,16 @@
 
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 
-#ifndef OPENGL_USE_DSA
-	#include "Backend/OpenGL/BufferUsage.hpp"
-#endif
-
 namespace ProjectA {
 	OpenGLBuffer::OpenGLBuffer(const BufferDescriptor& descriptor) :
 		Buffer(descriptor)
-		#ifndef OPENGL_USE_DSA
+		#if OPENGL_VERSION < OPENGL_VERSION_4_5
 			, target(getGlTarget(descriptor.usage))
 		#endif
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		#ifdef OPENGL_USE_DSA
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			glCreateBuffers(1, &object);
 		#else
 			glGenBuffers(1, &object);
@@ -46,10 +42,29 @@ namespace ProjectA {
 
 		storageAccessFlags |= mapAccessFlags;
 
-		#ifdef OPENGL_USE_DSA
+		#ifdef OPENGL_VERSION >= OPENGL_VERSION_4_5
 			glNamedBufferStorage(object, size, nullptr, storageAccessFlags);
-		#else
+		#elif OPENGL_VERSION >= OPENGL_VERSION_4_4
 			glBufferStorage(target, size, nullptr, storageAccessFlags);
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
+		#endif
+
+		// Verify that the buffer has an immutable storage.
+		#ifdef BUILD_MODE_DEBUG
+			GLint immutableStorage = GL_FALSE;
+
+			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+				glGetNamedBufferParameteriv(object, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
+			#else
+				glGetBufferParameteriv(target, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
+			#endif
+
+			ENGINE_ASSERT(immutableStorage != GL_FALSE, "Only immutable buffer storage are not supported.");
+		#endif
+
+		#if OPENGL_VERSION < OPENGL_VERSION_4_5 && defined(OPENGL_UNBIND_AFTER_USE)
+			glBindBuffer(target, 0);
 		#endif
 	}
 
@@ -60,9 +75,11 @@ namespace ProjectA {
 	}
 
 	void OpenGLBuffer::unmap() const {
-		GLboolean result;
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		#ifdef OPENGL_USE_DSA
+		GLboolean result = GL_FALSE;
+
+		#ifdef OPENGL_VERSION >= OPENGL_VERSION_4_5
 			result = glUnmapNamedBuffer(object);
 		#else
 			glBindBuffer(target, object);
@@ -74,14 +91,18 @@ namespace ProjectA {
 	}
 
 	void* OpenGLBuffer::getMappedRange(uint64 offset, uint64 size) const {
-		void* mappedRange;
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		#ifdef OPENGL_USE_DSA
+		void* mappedRange = nullptr;
+
+		#ifdef OPENGL_VERSION >= OPENGL_VERSION_4_5
 			mappedRange = glMapNamedBufferRange(object, offset, size, mapAccessFlags);
-		#else
+		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 			glBindBuffer(target, object);
 
 			mappedRange = glMapBufferRange(target, offset, size, mapAccessFlags);
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
 		ENGINE_ASSERT(mappedRange != nullptr, "Failed to map OpenGL buffer range.");

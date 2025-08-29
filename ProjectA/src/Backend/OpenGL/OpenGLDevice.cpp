@@ -19,13 +19,17 @@ namespace ProjectA {
 	}
 
 	void OpenGLDevice::waitForFence(const ref<Fence>& fence) const {
-		const ref<OpenGLFence>& glFence = std::static_pointer_cast<OpenGLFence>(fence);
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
+			const ref<OpenGLFence>& glFence = std::static_pointer_cast<OpenGLFence>(fence);
 
-		glFence->create();
+			glFence->create();
 
-		const GLenum status = glClientWaitSync(glFence->object, GL_SYNC_FLUSH_COMMANDS_BIT, max<uint64>());
+			const GLenum status = glClientWaitSync(glFence->object, GL_SYNC_FLUSH_COMMANDS_BIT, max<uint64>());
 
-		DEBUG_ASSERT(status == GL_CONDITION_SATISFIED || status == GL_ALREADY_SIGNALED);
+			DEBUG_ASSERT(status == GL_CONDITION_SATISFIED || status == GL_ALREADY_SIGNALED);
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
+		#endif
 	}
 
 	void OpenGLDevice::resetFence(const ref<Fence>& fence) const {
@@ -37,7 +41,7 @@ namespace ProjectA {
 	AcquireNextImageStatus OpenGLDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
 		// NOTE
 		// WGL handles double buffering at a lower level.
-		// The device implementation doesn't need to emulate this behavior and thus can always return 0.
+		// The device implementation doesn't need to emulate this behavior and can always return 0.
 		imageIndex = 0;
 
 		return AcquireNextImageStatus::SUCCESS;

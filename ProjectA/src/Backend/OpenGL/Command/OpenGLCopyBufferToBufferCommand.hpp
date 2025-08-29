@@ -15,20 +15,22 @@ namespace ProjectA {
 			{}
 
 			void execute() const final override {
-				#ifndef OPENGL_USE_DSA
+				#if OPENGL_VERSION < OPENGL_VERSION_4_5
 					glBindBuffer(GL_COPY_READ_BUFFER, sourceBuffer);
 					glBindBuffer(GL_COPY_WRITE_BUFFER, destinationBuffer);
 				#endif
 
 				for (const BufferCopyRegion& copyRegion : *copyRegions) {
-					#ifdef OPENGL_USE_DSA
+					#ifdef OPENGL_VERSION >= OPENGL_VERSION_4_5
 						glCopyNamedBufferSubData(sourceBuffer, destinationBuffer, copyRegion.sourceOffset, copyRegion.destinationOffset, copyRegion.size);
-					#else
+					#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
 						glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, copyRegion.sourceOffset, copyRegion.destinationOffset, copyRegion.size);
+					#else
+						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 				}
 
-				#ifndef OPENGL_USE_DSA
+				#if OPENGL_VERSION < OPENGL_VERSION_4_5 && defined(OPENGL_UNBIND_AFTER_USE)
 					glBindBuffer(GL_COPY_READ_BUFFER, 0);
 					glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 				#endif

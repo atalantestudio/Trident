@@ -20,7 +20,7 @@ namespace ProjectA {
 					const GLenum readBuffer = GL_COLOR_ATTACHMENT0 + presentSourceAttachmentIndex;
 					const Extent2D extent = framebuffer->getExtent();
 
-					#ifdef OPENGL_USE_DSA
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 						glNamedFramebufferReadBuffer(framebuffer->object, readBuffer);
 
 						glBlitNamedFramebuffer(
@@ -37,7 +37,7 @@ namespace ProjectA {
 							GL_COLOR_BUFFER_BIT,
 							GL_NEAREST
 						);
-					#else
+					#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 						glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->object);
 						glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
@@ -56,6 +56,8 @@ namespace ProjectA {
 							GL_COLOR_BUFFER_BIT,
 							GL_NEAREST
 						);
+					#else
+						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 				}
 			}

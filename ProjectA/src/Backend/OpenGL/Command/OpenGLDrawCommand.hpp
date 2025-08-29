@@ -20,14 +20,12 @@ namespace ProjectA {
 					#pragma message "Using glDrawArraysInstanced. The baseinstance argument will be ignored."
 
 					glDrawArraysInstanced(mode, first, count, instancecount);
-				#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+				#else
 					#pragma message "Using glDrawArrays. The baseinstance argument will be ignored."
 
 					for (GLint instanceindex = 0; instanceindex < instancecount; instanceindex += 1) {
 						glDrawArrays(mode, first, count);
 					}
-				#else
-					ENGINE_ERROR_UNSUPPORTED();
 				#endif
 			}
 

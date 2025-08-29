@@ -28,7 +28,11 @@ namespace ProjectA {
 							const GLintptr offset = descriptorSetLayoutBinding.bufferOffset;
 							const GLsizeiptr size = glBuffer->size - offset;
 
-							glBindBufferRange(getGlDescriptorType(descriptorSetLayoutBinding.descriptorType), binding, glBuffer->object, offset, size);
+							#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+								glBindBufferRange(getGlDescriptorType(descriptorSetLayoutBinding.descriptorType), binding, glBuffer->object, offset, size);
+							#else
+								ENGINE_ERROR_UNSUPPORTED();
+							#endif
 						}
 
 						for (GLuint unit = 0; unit < descriptorSetLayoutBinding.imageViews.size(); unit += 1) {
@@ -37,17 +41,19 @@ namespace ProjectA {
 
 							#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 								glBindTextureUnit(binding + unit, imageView->object);
-							#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+							#else
 								glActiveTexture(GL_TEXTURE0 + binding + unit);
 								glBindTexture(image.target, imageView->object);
-							#else
-								ENGINE_ERROR_UNSUPPORTED();
 							#endif
 
 							if (unit < descriptorSetLayoutBinding.samplers.size()) {
 								const ref<OpenGLSampler>& sampler = std::static_pointer_cast<OpenGLSampler>(descriptorSetLayoutBinding.samplers[unit]);
 
-								glBindSampler(binding + unit, sampler->object);
+								#if OPENGL_VERSION >= OPENGL_VERSION_3_3
+									glBindSampler(binding + unit, sampler->object);
+								#else
+									ENGINE_ERROR_UNSUPPORTED();
+								#endif
 							}
 
 							if (isCompute) {

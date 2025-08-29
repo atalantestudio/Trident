@@ -26,14 +26,12 @@ namespace ProjectA {
 					#pragma message "Using glDrawElementsInstanced. The basevertex and baseinstance arguments will be ignored."
 
 					glDrawElementsInstanced(mode, count, type, indices, instancecount);
-				#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+				#else
 					#pragma message "Using glDrawElements. The basevertex and baseinstance arguments will be ignored."
 
 					for (GLint instanceindex = 0; instanceindex < instancecount; instanceindex += 1) {
 						glDrawElements(mode, count, type, indices);
 					}
-				#else
-					ENGINE_ERROR_UNSUPPORTED();
 				#endif
 			}
 

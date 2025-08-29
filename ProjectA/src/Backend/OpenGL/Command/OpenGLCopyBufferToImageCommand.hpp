@@ -51,7 +51,7 @@ namespace ProjectA {
 									GL_UNSIGNED_BYTE,
 									pixels
 								);
-							#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+							#else
 								glTexSubImage1D(
 									image->target,
 									copyRegion.imageMipLevel,
@@ -61,8 +61,6 @@ namespace ProjectA {
 									GL_UNSIGNED_BYTE,
 									pixels
 								);
-							#elif
-								ENGINE_ERROR_UNSUPPORTED();
 							#endif
 
 							break;
@@ -86,7 +84,7 @@ namespace ProjectA {
 									GL_UNSIGNED_BYTE,
 									pixels
 								);
-							#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+							#else
 								glTexSubImage2D(
 									image->target,
 									copyRegion.imageMipLevel,
@@ -98,8 +96,6 @@ namespace ProjectA {
 									GL_UNSIGNED_BYTE,
 									pixels
 								);
-							#else
-								ENGINE_ERROR_UNSUPPORTED();
 							#endif
 
 							break;
@@ -119,7 +115,7 @@ namespace ProjectA {
 									GL_UNSIGNED_BYTE,
 									pixels
 								);
-							#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+							#else
 								glTexSubImage3D(
 									image->target,
 									copyRegion.imageMipLevel,
@@ -133,8 +129,6 @@ namespace ProjectA {
 									GL_UNSIGNED_BYTE,
 									pixels
 								);
-							#else
-								ENGINE_ERROR_UNSUPPORTED();
 							#endif
 
 							break;
@@ -146,11 +140,13 @@ namespace ProjectA {
 					}
 				}
 
-				#if OPENGL_VERSION < OPENGL_VERSION_4_5
-					glBindTexture(image->target, 0);
-				#endif
+				#ifdef OPENGL_UNBIND_AFTER_USE
+					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+					#if OPENGL_VERSION < OPENGL_VERSION_4_5
+						glBindTexture(image->target, 0);
+					#endif
+				#endif
 			}
 
 		private:

@@ -10,7 +10,11 @@ namespace ProjectA {
 			{}
 
 			void execute() const final override {
-				glMemoryBarrier(barrier);
+				#if OPENGL_VERSION >= OPENGL_VERSION_4_2
+					glMemoryBarrier(barrier);
+				#else
+					ENGINE_ERROR_UNSUPPORTED();
+				#endif
 			}
 
 		private:

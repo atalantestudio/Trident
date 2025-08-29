@@ -12,11 +12,13 @@ namespace ProjectA {
 			{}
 
 			void execute() const final override {
-				#ifdef OPENGL_USE_DSA
+				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 					glVertexArrayElementBuffer(vertexArray, indexBuffer);
-				#else
+				#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 					glBindVertexArray(vertexArray);
 					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+				#else
+					ENGINE_ERROR_UNSUPPORTED();
 				#endif
 			}
 

@@ -10,22 +10,32 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		#ifdef OPENGL_USE_DSA
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			glCreateSamplers(1, &object);
-		#else
+		#elif OPENGL_VERSION >= OPENGL_VERSION_3_3
 			glGenSamplers(1, &object);
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
-		glSamplerParameteri(object, GL_TEXTURE_MAG_FILTER, getGlFilter(descriptor.magFilter));
-		glSamplerParameteri(object, GL_TEXTURE_MIN_FILTER, getGlFilter(descriptor.minFilter));
-		glSamplerParameteri(object, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glSamplerParameteri(object, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glSamplerParameteri(object, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
+			glSamplerParameteri(object, GL_TEXTURE_MAG_FILTER, getGlFilter(descriptor.magFilter));
+			glSamplerParameteri(object, GL_TEXTURE_MIN_FILTER, getGlFilter(descriptor.minFilter));
+			glSamplerParameteri(object, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			glSamplerParameteri(object, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glSamplerParameteri(object, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
+		#endif
 	}
 
 	OpenGLSampler::~OpenGLSampler() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		glDeleteSamplers(1, &object);
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_3
+			glDeleteSamplers(1, &object);
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
+		#endif
 	}
 }
