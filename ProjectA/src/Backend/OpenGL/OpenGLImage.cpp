@@ -17,9 +17,9 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		#ifdef OPENGL_USE_DSA
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			glCreateTextures(target, 1, &object);
-		#else
+		#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
 			glGenTextures(1, &object);
 			glBindTexture(target, object);
 		#endif
@@ -43,17 +43,21 @@ namespace ProjectA {
 			case GL_TEXTURE_RECTANGLE:
 				// TODO: Decouple multisample from non-multisample images.
 				if (sampleCount > 1) {
-					#ifdef OPENGL_USE_DSA
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 						glTextureStorage2DMultisample(object, sampleCount, internalFormat, extent.width, extent.height, GL_TRUE);
-					#else
+					#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 						glTexStorage2DMultisample(target, sampleCount, internalFormat, extent.width, extent.height, GL_TRUE);
+					#else
+						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 				}
 				else {
-					#ifdef OPENGL_USE_DSA
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 						glTextureStorage2D(object, mipLevelCount, internalFormat, extent.width, extent.height);
-					#else
+					#elif OPENGL_VERSION >= OPENGL_VERSION_4_2
 						glTexStorage2D(target, mipLevelCount, internalFormat, extent.width, extent.height);
+					#else
+						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 				}
 
@@ -68,17 +72,21 @@ namespace ProjectA {
 			case GL_TEXTURE_CUBE_MAP_ARRAY:
 				// TODO: Decouple multisample from non-multisample images.
 				if (sampleCount > 1) {
-					#ifdef OPENGL_USE_DSA
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 						glTextureStorage3DMultisample(object, sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);
-					#else
+					#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 						glTexStorage3DMultisample(target, sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);
+					#else
+						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 				}
 				else {
-					#ifdef OPENGL_USE_DSA
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 						glTextureStorage3D(object, mipLevelCount, internalFormat, extent.width, extent.height, extent.depth * layerCount);
-					#else
+					#elif OPENGL_VERSION >= OPENGL_VERSION_4_2
 						glTexStorage3D(target, mipLevelCount, internalFormat, extent.width, extent.height, extent.depth * layerCount);
+					#else
+						ENGINE_ERROR_UNSUPPORTED();
 					#endif
 				}
 
@@ -90,15 +98,18 @@ namespace ProjectA {
 				break;
 		}
 
-		glBindTexture(target, object);
+		// Verify that the texture has an immutable format.
+		#ifdef BUILD_MODE_DEBUG
+			GLint immutableFormat = GL_FALSE;
 
-		GLint immutableFormat;
+			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+				glGetTextureParameteriv(object, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
+			#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+				glGetTexParameteriv(target, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
+			#endif
 
-		glGetTexParameteriv(target, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
-
-		ENGINE_ASSERT(immutableFormat != GL_FALSE, "Only immutable image formats are not supported.");
-
-		glBindTexture(target, 0);
+			ENGINE_ASSERT(immutableFormat != GL_FALSE, "Only immutable image formats are not supported.");
+		#endif
 	}
 
 	OpenGLImage::~OpenGLImage() {

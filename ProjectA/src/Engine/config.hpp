@@ -29,7 +29,7 @@ namespace ProjectA {
 	// TODO(review): Replace in favor of custom OpenGL version (see below).
 	// If enabled, the OpenGL adapter will use Direct State Access procedures (if available).
 	// If disabled, the OpenGL adapter will use standard procedures.
-	#define OPENGL_USE_DSA
+	// #define OPENGL_USE_DSA
 
 	// If enabled, OpenGL shaders will be sourced from SPIR-V binaries.
 	// If disabled, they will be sourced from GLSL strings.
@@ -67,6 +67,12 @@ namespace ProjectA {
 	#ifdef DEBUG_ENABLE_MESSENGER
 		#if OPENGL_VERSION < OPENGL_VERSION_4_3
 			#error "Debug messenger cannot be enabled below OpenGL 4.3."
+		#endif
+	#endif
+
+	#ifdef OPENGL_USE_SPIRV
+		#if OPENGL_VERSION < OPENGL_VERSION_4_6
+			#error "SPIR-V shaders cannot be used below OpenGL 4.6."
 		#endif
 	#endif
 }

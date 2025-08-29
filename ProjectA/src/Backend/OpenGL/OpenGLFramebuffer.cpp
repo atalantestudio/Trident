@@ -112,8 +112,9 @@ namespace ProjectA {
 			glNamedFramebufferDrawBuffers(object, colorAttachmentCount, colorAttachments);
 		#endif
 
+		// Verify the status of the framebuffer.
 		#ifdef BUILD_MODE_DEBUG
-			GLenum status = GL_FRAMEBUFFER_COMPLETE;
+			GLenum status = 0;
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 				status = glCheckNamedFramebufferStatus(object, GL_FRAMEBUFFER);

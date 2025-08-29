@@ -2,7 +2,6 @@
 
 namespace ProjectA {
 	#ifdef OPENGL_USE_DSA
-		extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
 		extern PFNGLBLITNAMEDFRAMEBUFFERPROC glBlitNamedFramebuffer;
 		extern PFNGLCLEARNAMEDFRAMEBUFFERFIPROC glClearNamedFramebufferfi;
 		extern PFNGLCLEARNAMEDFRAMEBUFFERFVPROC glClearNamedFramebufferfv;
@@ -10,25 +9,16 @@ namespace ProjectA {
 		extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
 		extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
 		extern PFNGLCREATESAMPLERSPROC glCreateSamplers;
-		extern PFNGLCREATETEXTURESPROC glCreateTextures;
 		extern PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays;
 		extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
 		extern PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage;
 		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
 		extern PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC glNamedFramebufferReadBuffer;
 		extern PFNGLNAMEDFRAMEBUFFERTEXTUREPROC glNamedFramebufferTexture;
-		extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D;
-		extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;
-		extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D;
-		extern PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC glTextureStorage3DMultisample;
-		extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
-		extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
-		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
 		extern PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer;
 		extern PFNGLVERTEXARRAYELEMENTBUFFERPROC glVertexArrayElementBuffer;
 		extern PFNGLVERTEXARRAYVERTEXBUFFERPROC glVertexArrayVertexBuffer;
 	#else
-		extern PFNGLACTIVETEXTUREPROC glActiveTexture;
 		extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
 		extern PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
 		extern PFNGLBUFFERSTORAGEPROC glBufferStorage;
@@ -42,27 +32,90 @@ namespace ProjectA {
 		extern PFNGLGENSAMPLERSPROC glGenSamplers;
 		extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 		extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
-		extern PFNGLTEXSTORAGE2DPROC glTexStorage2D;
-		extern PFNGLTEXSTORAGE2DMULTISAMPLEPROC glTexStorage2DMultisample;
-		extern PFNGLTEXSTORAGE3DPROC glTexStorage3D;
-		extern PFNGLTEXSTORAGE3DMULTISAMPLEPROC glTexStorage3DMultisample;
-		extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
-		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
-		extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
 		extern PFNGLUNMAPBUFFERPROC glUnmapBuffer;
 	#endif
 
-	#ifdef OPENGL_USE_SPIRV
-		extern PFNGLSHADERBINARYPROC glShaderBinary;
-		extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
-	#else
-		extern PFNGLCOMPILESHADERPROC glCompileShader;
-		extern PFNGLSHADERSOURCEPROC glShaderSource;
+	#if OPENGL_VERSION >= OPENGL_VERSION_2_0
+		extern PFNGLATTACHSHADERPROC glAttachShader;
+		extern PFNGLBINDBUFFERPROC glBindBuffer;
+		extern PFNGLCREATEPROGRAMPROC glCreateProgram;
+		extern PFNGLCREATESHADERPROC glCreateShader;
+		extern PFNGLCULLFACEPROC glCullFace;
+		extern PFNGLDELETEBUFFERSPROC glDeleteBuffers;
+		extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
+		extern PFNGLDELETESHADERPROC glDeleteShader;
+		extern PFNGLDELETETEXTURESPROC glDeleteTextures;
+		extern PFNGLDEPTHFUNCPROC glDepthFunc;
+		extern PFNGLDEPTHMASKPROC glDepthMask;
+		extern PFNGLDETACHSHADERPROC glDetachShader;
+		extern PFNGLDISABLEPROC glDisable;
+
+		// TODO(review): Alternatively use glNamedFramebufferDrawBuffer.
+		extern PFNGLDRAWBUFFERPROC glDrawBuffer;
+
+		extern PFNGLENABLEPROC glEnable;
+
+		// TODO(review): Use glEnableVertexArrayAttrib if newer GL version.
+		extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
+
+		extern PFNGLFRONTFACEPROC glFrontFace;
+		extern PFNGLGENTEXTURESPROC glGenTextures;
+		extern PFNGLGETFLOATVPROC glGetFloatv;
+		extern PFNGLGETINTEGERVPROC glGetIntegerv;
+		extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
+		extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
+		extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
+		extern PFNGLGETSHADERIVPROC glGetShaderiv;
+
+		#if BUILD_MODE_DEBUG
+			extern PFNGLGETSTRINGPROC glGetString;
+		#endif
+
+		extern PFNGLLINEWIDTHPROC glLineWidth;
+		extern PFNGLLINKPROGRAMPROC glLinkProgram;
+		extern PFNGLPIXELSTOREIPROC glPixelStorei;
+		extern PFNGLPOLYGONMODEPROC glPolygonMode;
+
+		// TODO(review): Alternatively use glNamedFramebufferReadBuffer.
+		extern PFNGLREADBUFFERPROC glReadBuffer;
+
+		extern PFNGLSCISSORPROC glScissor;
+		extern PFNGLUSEPROGRAMPROC glUseProgram;
+		extern PFNGLVIEWPORTPROC glViewport;
 	#endif
 
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		// TODO: There is no non-DSA variant for this function. Write a custom implementation.
-		extern PFNGLGETTEXTURESUBIMAGEPROC glGetTextureSubImage;
+	#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+		extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
+		extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
+		extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
+		extern PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
+		extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
+		extern PFNGLDISABLEIPROC glDisablei;
+		extern PFNGLENABLEIPROC glEnablei;
+		extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_3_2
+		extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
+		extern PFNGLDELETESYNCPROC glDeleteSync;
+		extern PFNGLFENCESYNCPROC glFenceSync;
+		extern PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
+		extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_3_3
+		extern PFNGLBINDSAMPLERPROC glBindSampler;
+		extern PFNGLDELETESAMPLERSPROC glDeleteSamplers;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_0
+		extern PFNGLBLENDFUNCIPROC glBlendFunci;
+		extern PFNGLMINSAMPLESHADINGPROC glMinSampleShading;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_2
+		extern PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
+		extern PFNGLMEMORYBARRIERPROC glMemoryBarrier;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_3
@@ -85,81 +138,9 @@ namespace ProjectA {
 		extern PFNGLVERTEXBINDINGDIVISORPROC glVertexBindingDivisor;
 	#endif
 
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_2
-		extern PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
-		extern PFNGLMEMORYBARRIERPROC glMemoryBarrier;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_4_0
-		extern PFNGLBLENDFUNCIPROC glBlendFunci;
-		extern PFNGLMINSAMPLESHADINGPROC glMinSampleShading;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_3_3
-		extern PFNGLBINDSAMPLERPROC glBindSampler;
-		extern PFNGLDELETESAMPLERSPROC glDeleteSamplers;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_3_2
-		extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
-		extern PFNGLDELETESYNCPROC glDeleteSync;
-		extern PFNGLFENCESYNCPROC glFenceSync;
-		extern PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
-		extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-		extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
-		extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
-		extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
-		extern PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
-		extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
-		extern PFNGLDISABLEIPROC glDisablei;
-		extern PFNGLENABLEIPROC glEnablei;
-		extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
-	#endif
-
-	#if OPENGL_VERSION >= OPENGL_VERSION_2_0
-		extern PFNGLATTACHSHADERPROC glAttachShader;
-		extern PFNGLBINDBUFFERPROC glBindBuffer;
-		extern PFNGLBINDTEXTUREPROC glBindTexture;
-		extern PFNGLCREATEPROGRAMPROC glCreateProgram;
-		extern PFNGLCREATESHADERPROC glCreateShader;
-		extern PFNGLCULLFACEPROC glCullFace;
-		extern PFNGLDELETEBUFFERSPROC glDeleteBuffers;
-		extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
-		extern PFNGLDELETESHADERPROC glDeleteShader;
-		extern PFNGLDELETETEXTURESPROC glDeleteTextures;
-		extern PFNGLDEPTHFUNCPROC glDepthFunc;
-		extern PFNGLDEPTHMASKPROC glDepthMask;
-		extern PFNGLDETACHSHADERPROC glDetachShader;
-		extern PFNGLDISABLEPROC glDisable;
-		extern PFNGLENABLEPROC glEnable;
-
-		// TODO(review): Use glEnableVertexArrayAttrib if newer GL version.
-		extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
-
-		extern PFNGLFRONTFACEPROC glFrontFace;
-		extern PFNGLGENTEXTURESPROC glGenTextures;
-		extern PFNGLGETFLOATVPROC glGetFloatv;
-		extern PFNGLGETINTEGERVPROC glGetIntegerv;
-		extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
-		extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
-		extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
-		extern PFNGLGETSHADERIVPROC glGetShaderiv;
-
-		#if BUILD_MODE_DEBUG
-			extern PFNGLGETSTRINGPROC glGetString;
-		#endif
-
-		extern PFNGLGETTEXPARAMETERIVPROC glGetTexParameteriv;
-		extern PFNGLLINEWIDTHPROC glLineWidth;
-		extern PFNGLLINKPROGRAMPROC glLinkProgram;
-		extern PFNGLPIXELSTOREIPROC glPixelStorei;
-		extern PFNGLPOLYGONMODEPROC glPolygonMode;
-		extern PFNGLSCISSORPROC glScissor;
-		extern PFNGLUSEPROGRAMPROC glUseProgram;
-		extern PFNGLVIEWPORTPROC glViewport;
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		// TODO: There is no non-DSA variant for this function. Write a custom implementation.
+		extern PFNGLGETTEXTURESUBIMAGEPROC glGetTextureSubImage;
 	#endif
 
 	#ifdef BUILD_MODE_DEBUG
@@ -168,6 +149,42 @@ namespace ProjectA {
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 			extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
 		#endif
+	#endif
+
+	#ifdef OPENGL_USE_SPIRV
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_6
+			extern PFNGLSHADERBINARYPROC glShaderBinary;
+			extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
+		#endif
+	#else
+		#if OPENGL_VERSION >= OPENGL_VERSION_2_0
+			extern PFNGLCOMPILESHADERPROC glCompileShader;
+			extern PFNGLSHADERSOURCEPROC glShaderSource;
+		#endif
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
+		extern PFNGLCREATETEXTURESPROC glCreateTextures;
+
+		#ifdef BUILD_MODE_DEBUG
+			extern PFNGLGETTEXTUREPARAMETERIVPROC glGetTextureParameteriv;
+		#endif
+
+		extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
+		extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
+		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
+		extern PFNGLACTIVETEXTUREPROC glActiveTexture;
+		extern PFNGLBINDTEXTUREPROC glBindTexture;
+
+		#ifdef BUILD_MODE_DEBUG
+			extern PFNGLGETTEXPARAMETERIVPROC glGetTexParameteriv;
+		#endif
+
+		extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
+		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
+		extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_2
@@ -189,5 +206,21 @@ namespace ProjectA {
 	#elif OPENGL_VERSION >= OPENGL_VERSION_4_0
 		extern PFNGLDRAWARRAYSINDIRECTPROC glDrawArraysIndirect;
 		extern PFNGLDRAWELEMENTSINDIRECTPROC glDrawElementsIndirect;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D;
+		extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_4_2
+		extern PFNGLTEXSTORAGE2DPROC glTexStorage2D;
+		extern PFNGLTEXSTORAGE3DPROC glTexStorage3D;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;
+		extern PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC glTextureStorage3DMultisample;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+		extern PFNGLTEXSTORAGE2DMULTISAMPLEPROC glTexStorage2DMultisample;
+		extern PFNGLTEXSTORAGE3DMULTISAMPLEPROC glTexStorage3DMultisample;
 	#endif
 }

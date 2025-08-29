@@ -13,9 +13,8 @@ namespace ProjectA {
 
 		const OpenGLImage& glImage = *static_cast<const OpenGLImage*>(image);
 
-		// NOTE: `glCreateTextures` cannot be used here because the view must not be assigned a target.
+		// NOTE: `glCreateTextures` cannot be used here because the texture view must not be bound or initialized.
 		glGenTextures(1, &object);
-
 		glTextureView(object, glImage.target, glImage.object, glImage.internalFormat, 0, image->getMipLevelCount(), 0, image->getLayerCount());
 	}
 

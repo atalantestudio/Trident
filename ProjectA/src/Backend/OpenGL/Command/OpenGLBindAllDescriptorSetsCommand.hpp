@@ -35,11 +35,13 @@ namespace ProjectA {
 							const ref<OpenGLImageView>& imageView = std::static_pointer_cast<OpenGLImageView>(descriptorSetLayoutBinding.imageViews[unit]);
 							const OpenGLImage& image = *static_cast<const OpenGLImage*>(imageView->getImage());
 
-							#ifdef OPENGL_USE_DSA
+							#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 								glBindTextureUnit(binding + unit, imageView->object);
-							#else
+							#elif OPENGL_VERSION >= OPENGL_VERSION_2_0
 								glActiveTexture(GL_TEXTURE0 + binding + unit);
 								glBindTexture(image.target, imageView->object);
+							#else
+								ENGINE_ERROR_UNSUPPORTED();
 							#endif
 
 							if (unit < descriptorSetLayoutBinding.samplers.size()) {
@@ -55,8 +57,12 @@ namespace ProjectA {
 									format = GL_RGBA8;
 								}
 
-								// TODO: Use correct access.
-								glBindImageTexture(binding + unit, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, format);
+								#if OPENGL_VERSION >= OPENGL_VERSION_4_2
+									// TODO: Use correct access.
+									glBindImageTexture(binding + unit, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, format);
+								#else
+									ENGINE_ERROR_UNSUPPORTED();
+								#endif
 							}
 						}
 					}
