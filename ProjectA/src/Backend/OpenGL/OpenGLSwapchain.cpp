@@ -5,9 +5,9 @@
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
 namespace ProjectA {
-	OpenGLSwapchain::OpenGLSwapchain(const SwapchainDescriptor& descriptor, const OpenGLRenderingContext& renderingContext, const OpenGLSurface& surface) :
+	OpenGLSwapchain::OpenGLSwapchain(const SwapchainDescriptor& descriptor, const OpenGLInstance& instance, const OpenGLSurface& surface) :
 		Swapchain(descriptor),
-		renderingContext(&renderingContext),
+		instance(&instance),
 		surface(&surface)
 	{
 		const uint32 imageCount = getImageCount();
@@ -29,7 +29,7 @@ namespace ProjectA {
 
 		extent = descriptor.extent;
 
-		renderingContext->setSwapInterval(static_cast<sint32>(descriptor.vSync));
+		instance->setSwapInterval(static_cast<sint32>(descriptor.vSync));
 
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.type = ImageType::TEXTURE_2D;

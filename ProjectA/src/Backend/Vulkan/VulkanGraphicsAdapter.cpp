@@ -16,6 +16,7 @@
 
 namespace ProjectA {
 	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const ApplicationManifest& applicationManifest, const Window& window) :
+		GraphicsAdapter(window),
 		instance(applicationManifest),
 		surface(createRef<VulkanSurface>(instance.object, window)),
 		physicalDevice(instance.selectPhysicalDevice()),
@@ -85,5 +86,27 @@ namespace ProjectA {
 
 	ref<Surface> VulkanGraphicsAdapter::getSurface() const {
 		return surface;
+	}
+
+	void* VulkanGraphicsAdapter::getProcedure(std::string_view procedureName) const {
+		static const HMODULE hModule = static_cast<HMODULE>(Platform::loadLibrary("vulkan-1.dll"));
+		static const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = pointer_cast<PFN_vkGetInstanceProcAddr>(GetProcAddress(hModule, "vkGetInstanceProcAddr"));
+
+		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance.object, procedureName.data());
+
+		ENGINE_ASSERT(procedure != nullptr, "Cannot find address for procedure \"[]\".", procedureName);
+
+		return procedure;
+	}
+
+	void VulkanGraphicsAdapter::loadProcedures() const {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(getProcedure(#procedure))
+
+		// TODO(review)
+		LOAD_PROCEDURE(PROCEDURE_vkCmdDraw);
+
+		#undef LOAD_PROCEDURE
 	}
 }

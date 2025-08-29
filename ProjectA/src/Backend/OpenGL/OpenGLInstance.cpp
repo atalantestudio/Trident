@@ -1,27 +1,21 @@
 #include "pch.hpp"
 
-#include "Backend/OpenGL/OpenGLRenderingContext.hpp"
+#include "Backend/OpenGL/OpenGLInstance.hpp"
 
 #include "Backend/Win32/base.hpp"
 
 namespace ProjectA {
-	void* OpenGLRenderingContext::getProcedureAddress(std::string_view name) {
-		PROC procAddress = wglGetProcAddress(name.data());
+	void* OpenGLInstance::getWglProcedure(std::string_view procedureName) {
+		static const HMODULE hModule = static_cast<HMODULE>(Platform::loadLibrary("opengl32.dll"));
 
-		if (procAddress == nullptr) {
-			const HMODULE hModule = LoadLibrary(L"opengl32.dll");
+		const FARPROC procedure = GetProcAddress(hModule, procedureName.data());
 
-			WIN32_ASSERT(hModule != nullptr);
+		WIN32_ASSERT(procedure != nullptr);
 
-			procAddress = GetProcAddress(hModule, name.data());
-
-			WIN32_ASSERT(procAddress != nullptr);
-		}
-
-		return procAddress;
+		return procedure;
 	}
 
-	OpenGLRenderingContext::OpenGLRenderingContext(const Window& window) {
+	OpenGLInstance::OpenGLInstance(const Window& window) {
 		const Win32WindowData* windowData = static_cast<const Win32WindowData*>(window.data);
 
 		hDC = windowData->hDC;
@@ -60,17 +54,21 @@ namespace ProjectA {
 
 		WIN32_ASSERT(SetPixelFormat(hDC, format, &pfd) == TRUE);
 
+		const PFNWGLCREATECONTEXTPROC wglCreateContext = static_cast<PFNWGLCREATECONTEXTPROC>(getWglProcedure("wglCreateContext"));
+
 		const HGLRC dummyHGLRC = wglCreateContext(hDC);
 
 		WIN32_ASSERT(hGLRC != nullptr);
 
+		wglMakeCurrent = static_cast<PFNWGLMAKECURRENTPROC>(getWglProcedure("wglMakeCurrent"));
+
 		WIN32_ASSERT(wglMakeCurrent(hDC, dummyHGLRC) == TRUE);
 
-		const PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = pointer_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(wglGetProcAddress("wglCreateContextAttribsARB"));
-
-		WIN32_ASSERT(wglCreateContextAttribsARB != nullptr);
+		const PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = static_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(getProcedure("wglCreateContextAttribsARB"));
 
 		WIN32_ASSERT(wglMakeCurrent(hDC, nullptr) == TRUE);
+
+		wglDeleteContext = static_cast<PFNWGLDELETECONTEXTPROC>(getWglProcedure("wglDeleteContext"));
 
 		WIN32_ASSERT(wglDeleteContext(dummyHGLRC) == TRUE);
 
@@ -94,28 +92,39 @@ namespace ProjectA {
 		WIN32_ASSERT(hGLRC != nullptr);
 	}
 
-	OpenGLRenderingContext::~OpenGLRenderingContext() {
+	OpenGLInstance::~OpenGLInstance() {
 		WIN32_ASSERT(wglMakeCurrent(hDC, nullptr) == TRUE);
-
 		WIN32_ASSERT(wglDeleteContext(hGLRC) == TRUE);
 	}
 
-	void OpenGLRenderingContext::makeCurrent() const {
+	void* OpenGLInstance::getProcedure(std::string_view procedureName) const {
+		static const PFNWGLGETPROCADDRESSPROC wglGetProcAddress = static_cast<PFNWGLGETPROCADDRESSPROC>(getWglProcedure("wglGetProcAddress"));
+
+		const PROC procedure = wglGetProcAddress(procedureName.data());
+
+		if (procedure == nullptr || procedure == (void*) -1 || procedure == (void*) 1 || procedure == (void*) 2 || procedure == (void*) 3) {
+			return getWglProcedure(procedureName);
+		}
+
+		return procedure;
+	}
+
+	void OpenGLInstance::makeCurrent() const {
 		WIN32_ASSERT(wglMakeCurrent(hDC, hGLRC) == TRUE);
 	}
 
-	void OpenGLRenderingContext::setSwapInterval(sint32 interval) const {
-		const PFNWGLGETEXTENSIONSSTRINGEXTPROC wglGetExtensionsStringEXT = static_cast<PFNWGLGETEXTENSIONSSTRINGEXTPROC>(getProcedureAddress("wglGetExtensionsStringEXT"));
-		const std::string extensionsString = wglGetExtensionsStringEXT();
+	void OpenGLInstance::setSwapInterval(sint32 interval) const {
+		static const PFNWGLGETEXTENSIONSSTRINGEXTPROC wglGetExtensionsStringEXT = static_cast<PFNWGLGETEXTENSIONSSTRINGEXTPROC>(getProcedure("wglGetExtensionsStringEXT"));
+		static const std::string extensionsString = wglGetExtensionsStringEXT();
 
 		ENGINE_ASSERT(extensionsString.find("WGL_EXT_swap_control") != std::string::npos, "WGL_EXT_swap_control extension not supported.");
 
-		const PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = static_cast<PFNWGLSWAPINTERVALEXTPROC>(getProcedureAddress("wglSwapIntervalEXT"));
+		static const PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = static_cast<PFNWGLSWAPINTERVALEXTPROC>(getProcedure("wglSwapIntervalEXT"));
 
 		WIN32_ASSERT(wglSwapIntervalEXT(interval) == TRUE);
 	}
 
-	void OpenGLRenderingContext::swapBuffers() const {
+	void OpenGLInstance::swapBuffers() const {
 		WIN32_ASSERT(SwapBuffers(hDC) == TRUE);
 	}
 }

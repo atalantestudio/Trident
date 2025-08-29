@@ -4,11 +4,13 @@
 
 namespace ProjectA {
 	OpenGLPhysicalDevice::OpenGLPhysicalDevice() {
-		const GLubyte* vendor = glGetString(GL_VENDOR);
-		const GLubyte* renderer = glGetString(GL_RENDERER);
-		const GLubyte* version = glGetString(GL_VERSION);
+		#ifdef BUILD_MODE_DEBUG
+			const GLubyte* vendor = glGetString(GL_VENDOR);
+			const GLubyte* renderer = glGetString(GL_RENDERER);
+			const GLubyte* version = glGetString(GL_VERSION);
 
-		ENGINE_INFO("Using [] [] [].", vendor, renderer, version);
+			ENGINE_INFO("Using [] [] [].", vendor, renderer, version);
+		#endif
 
 		setLimits();
 	}

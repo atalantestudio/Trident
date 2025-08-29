@@ -1,15 +1,15 @@
 #pragma once
 
+#include "Backend/OpenGL/OpenGLInstance.hpp"
 #include "Backend/OpenGL/OpenGLPhysicalDevice.hpp"
 #include "Backend/OpenGL/OpenGLQueue.hpp"
-#include "Backend/OpenGL/OpenGLRenderingContext.hpp"
 
 #include "Engine/API/Rendering/Device.hpp"
 
 namespace ProjectA {
 	class OpenGLDevice final : public Device {
 		public:
-			explicit OpenGLDevice(const OpenGLRenderingContext& renderingContext);
+			explicit OpenGLDevice(const OpenGLInstance& instance);
 
 			ref<PhysicalDevice> getPhysicalDevice() const final override;
 

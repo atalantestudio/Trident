@@ -15,6 +15,15 @@ namespace ProjectA {
 		return pid;
 	}
 
+	void* Platform::loadLibrary(std::string_view libraryName) {
+		const LPCWSTR lpLibFileName = ConvertUTF8ToUTF16(libraryName.data());
+		const HMODULE hModule = LoadLibrary(lpLibFileName);
+
+		WIN32_ASSERT(hModule != nullptr);
+
+		return hModule;
+	}
+
 	void Platform::fatalExit(uint32 code, const std::string& message) {
 		const LPCWSTR titleString = ConvertUTF8ToUTF16(windowName);
 		const LPCWSTR messageString = ConvertUTF8ToUTF16(message.data());

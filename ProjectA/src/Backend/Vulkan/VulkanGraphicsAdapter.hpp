@@ -44,6 +44,11 @@ namespace ProjectA {
 			ref<Surface> getSurface() const final override;
 
 		private:
+			void* getProcedure(std::string_view procedureName) const;
+
+			void loadProcedures() const;
+
+		private:
 			const VulkanInstance instance;
 			const ref<VulkanSurface> surface;
 			const VulkanPhysicalDevice physicalDevice;

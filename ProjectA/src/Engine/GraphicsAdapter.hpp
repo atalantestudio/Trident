@@ -15,6 +15,10 @@
 namespace ProjectA {
 	class GraphicsAdapter {
 		public:
+			explicit GraphicsAdapter(const Window& window) :
+				window(&window)
+			{}
+
 			virtual ~GraphicsAdapter() {}
 
 			virtual ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const = 0;
@@ -44,5 +48,8 @@ namespace ProjectA {
 			virtual ref<Surface> getSurface() const = 0;
 
 			virtual ref<Device> getDevice() const = 0;
+
+		protected:
+			const Window* window;
 	};
 }

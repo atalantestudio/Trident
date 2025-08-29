@@ -9,3 +9,5 @@
 #ifdef BUILD_MODE_DEBUG
 	#include <vulkan/vk_enum_string_helper.h>
 #endif
+
+#include "Backend/Vulkan/procedures.hpp"

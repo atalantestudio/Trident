@@ -111,7 +111,7 @@ namespace ProjectA {
 			ref<FontAsset> findFontAsset(const std::string& stem) const {
 				const auto iterator = fontAssetStemToAssetIndex.find(stem);
 
-				ENGINE_ASSERT(iterator != fontAssetStemToAssetIndex.end(), "No asset exists with the provided identifier.");
+				ENGINE_ASSERT(iterator != fontAssetStemToAssetIndex.end(), "Cannot locate font asset \"[]\".", stem);
 				ENGINE_ASSERT(iterator->second < assets.size(), "The found asset index is overflowing.");
 
 				 return std::static_pointer_cast<FontAsset>(assets[iterator->second]);
@@ -120,7 +120,7 @@ namespace ProjectA {
 			ref<ImageAsset> findImageAsset(const std::string& stem) const {
 				const auto iterator = imageAssetStemToAssetIndex.find(stem);
 
-				ENGINE_ASSERT(iterator != imageAssetStemToAssetIndex.end(), "No asset exists with the provided identifier.");
+				ENGINE_ASSERT(iterator != imageAssetStemToAssetIndex.end(), "Cannot locate image asset \"[]\".", stem);
 				ENGINE_ASSERT(iterator->second < assets.size(), "The found asset index is overflowing.");
 
 				 return std::static_pointer_cast<ImageAsset>(assets[iterator->second]);

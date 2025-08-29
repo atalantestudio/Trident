@@ -69,7 +69,6 @@ project "ProjectA"
 	}
 
 	links {
-		"opengl32.lib",
 		"vulkan-1.lib",
 	}
 
@@ -113,6 +112,10 @@ project "Samples"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("obj/" .. outputdir .. "/%{prj.name}")
+
+	dependson {
+		"ProjectA",
+	}
 
 	files {
 		"%{prj.name}/src/**.cpp",
@@ -183,6 +186,10 @@ project "AssetBuilder"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("obj/" .. outputdir .. "/%{prj.name}")
+
+	dependson {
+		"ProjectA",
+	}
 
 	files {
 		"%{prj.name}/src/**.cpp",

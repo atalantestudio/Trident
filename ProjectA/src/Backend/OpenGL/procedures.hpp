@@ -18,8 +18,6 @@ namespace ProjectA {
 	extern PFNGLDELETESYNCPROC glDeleteSync;
 	extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
 	extern PFNGLDETACHSHADERPROC glDetachShader;
-	extern PFNGLENABLEIPROC glDisablei;
-	extern PFNGLENABLEIPROC glEnablei;
 	extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 	extern PFNGLFENCESYNCPROC glFenceSync;
 	extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
@@ -127,6 +125,33 @@ namespace ProjectA {
 	#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 		extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
 		extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
+		extern PFNGLDISABLEIPROC glDisablei;
+		extern PFNGLENABLEIPROC glEnablei;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_2_0
+		extern PFNGLBINDTEXTUREPROC glBindTexture;
+		extern PFNGLCULLFACEPROC glCullFace;
+		extern PFNGLDELETETEXTURESPROC glDeleteTextures;
+		extern PFNGLDEPTHFUNCPROC glDepthFunc;
+		extern PFNGLDEPTHMASKPROC glDepthMask;
+		extern PFNGLDISABLEPROC glDisable;
+		extern PFNGLENABLEPROC glEnable;
+		extern PFNGLFRONTFACEPROC glFrontFace;
+		extern PFNGLGENTEXTURESPROC glGenTextures;
+		extern PFNGLGETFLOATVPROC glGetFloatv;
+		extern PFNGLGETINTEGERVPROC glGetIntegerv;
+
+		#if BUILD_MODE_DEBUG
+			extern PFNGLGETSTRINGPROC glGetString;
+		#endif
+
+		extern PFNGLGETTEXPARAMETERIVPROC glGetTexParameteriv;
+		extern PFNGLLINEWIDTHPROC glLineWidth;
+		extern PFNGLPIXELSTOREIPROC glPixelStorei;
+		extern PFNGLPOLYGONMODEPROC glPolygonMode;
+		extern PFNGLSCISSORPROC glScissor;
+		extern PFNGLVIEWPORTPROC glViewport;
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_2

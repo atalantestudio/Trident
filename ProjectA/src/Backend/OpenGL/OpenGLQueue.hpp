@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Backend/OpenGL/OpenGLRenderingContext.hpp"
+#include "Backend/OpenGL/OpenGLInstance.hpp"
 
 #include "Engine/API/Rendering/Queue.hpp"
 
@@ -9,7 +9,7 @@ namespace ProjectA {
 
 	class OpenGLQueue final : public Queue {
 		public:
-			explicit OpenGLQueue(const OpenGLRenderingContext& renderingContext, const OpenGLDevice& device);
+			explicit OpenGLQueue(const OpenGLInstance& instance, const OpenGLDevice& device);
 
 			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
 
@@ -18,7 +18,7 @@ namespace ProjectA {
 			PresentStatus present(const sequence<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const final override;
 
 		private:
-			const OpenGLRenderingContext& renderingContext;
-			const OpenGLDevice& device;
+			const OpenGLInstance* instance;
+			const OpenGLDevice* device;
 	};
 }

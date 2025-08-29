@@ -122,4 +122,12 @@ namespace ProjectA {
 
 	// Desired OpenGL version. Note that the current device might not be able to load this version.
 	#define OPENGL_VERSION OPENGL_VERSION_4_6
+
+	#define VULKAN_VERSION_1_0 10
+	#define VULKAN_VERSION_1_1 11
+	#define VULKAN_VERSION_1_2 12
+	#define VULKAN_VERSION_1_3 13
+
+	// Desired Vulkan version. Note that the current device might not be able to load this version.
+	#define VULKAN_VERSION VULKAN_VERSION_1_0
 }

@@ -39,14 +39,6 @@ namespace ProjectA {
 		EventListener<WindowCloseEvent> windowCloseEventListener;
 	};
 
-	struct Win32DeviceContextData {
-		// Device context handle (copy of Win32WindowData.hDC).
-		HDC hDC;
-
-		// OpenGL rendering context handle.
-		HGLRC hGLRC;
-	};
-
 	struct WindowClass {
 		LPCWSTR className;
 

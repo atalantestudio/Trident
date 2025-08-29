@@ -6,15 +6,15 @@
 #include "Backend/OpenGL/OpenGLQueue.hpp"
 
 namespace ProjectA {
-	OpenGLQueue::OpenGLQueue(const OpenGLRenderingContext& renderingContext, const OpenGLDevice& device) :
-		renderingContext(renderingContext),
-		device(device)
+	OpenGLQueue::OpenGLQueue(const OpenGLInstance& instance, const OpenGLDevice& device) :
+		instance(&instance),
+		device(&device)
 	{}
 
 	ref<CommandEncoder> OpenGLQueue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		return createRef<OpenGLCommandEncoder>(device, descriptor);
+		return createRef<OpenGLCommandEncoder>(*device, descriptor);
 	}
 
 	void OpenGLQueue::submit(const sequence<ref<CommandBuffer>>& commandBuffers, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
@@ -27,12 +27,12 @@ namespace ProjectA {
 		}
 
 		if (fence != nullptr) {
-			device.waitForFence(fence);
+			device->waitForFence(fence);
 		}
 	}
 
 	PresentStatus OpenGLQueue::present(const sequence<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const {
-		renderingContext.swapBuffers();
+		instance->swapBuffers();
 
 		return PresentStatus::SUCCESS;
 	}

@@ -5,9 +5,9 @@
 #include "Backend/OpenGL/OpenGLFence.hpp"
 
 namespace ProjectA {
-	OpenGLDevice::OpenGLDevice(const OpenGLRenderingContext& renderingContext) :
+	OpenGLDevice::OpenGLDevice(const OpenGLInstance& instance) :
 		physicalDevice(createRef<OpenGLPhysicalDevice>()),
-		queue(createRef<OpenGLQueue>(renderingContext, *this))
+		queue(createRef<OpenGLQueue>(instance, *this))
 	{}
 
 	ref<PhysicalDevice> OpenGLDevice::getPhysicalDevice() const {

@@ -9,9 +9,6 @@
 namespace ProjectA {
 	class OpenGLGraphicsAdapter final : public GraphicsAdapter {
 		public:
-			static void loadProcedures(const OpenGLRenderingContext& renderingContext);
-
-		public:
 			static constexpr GLenum defaultFramebufferDrawBuffer = GL_FRONT_LEFT;
 
 		public:
@@ -48,12 +45,14 @@ namespace ProjectA {
 			ref<Surface> getSurface() const final override;
 
 		private:
+			void loadProcedures() const;
+
 			#ifdef DEBUG_ENABLE_MESSENGER
 				static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 			#endif
 
 		private:
-			const OpenGLRenderingContext renderingContext;
+			OpenGLInstance instance;
 			ref<OpenGLDevice> device;
 			ref<OpenGLSurface> surface;
 	};
