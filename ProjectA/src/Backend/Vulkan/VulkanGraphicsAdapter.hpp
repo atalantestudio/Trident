@@ -51,6 +51,7 @@ namespace ProjectA {
 			void loadInstanceProcedures() const;
 
 		private:
+			PlatformLibrary vulkan1Library;
 			ref<VulkanInstance> instance;
 			ref<VulkanSurface> surface;
 			ref<VulkanPhysicalDevice> physicalDevice;

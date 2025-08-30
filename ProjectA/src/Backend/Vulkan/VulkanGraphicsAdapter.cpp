@@ -16,7 +16,8 @@
 
 namespace ProjectA {
 	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const ApplicationManifest& applicationManifest, const Window& window) :
-		GraphicsAdapter(window)
+		GraphicsAdapter(window),
+		vulkan1Library(Platform::openLibrary("vulkan-1.dll"))
 	{
 		loadBaseProcedures();
 
@@ -97,7 +98,6 @@ namespace ProjectA {
 	}
 
 	void* VulkanGraphicsAdapter::getProcedure(VkInstance instance, std::string_view procedureName) const {
-		static const PlatformLibrary vulkan1Library = Platform::openLibrary("vulkan-1.dll");
 		static const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = pointer_cast<PFN_vkGetInstanceProcAddr>(vulkan1Library.getProcedure("vkGetInstanceProcAddr"));
 
 		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance, procedureName.data());

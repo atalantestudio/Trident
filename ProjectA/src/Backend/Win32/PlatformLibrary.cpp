@@ -4,26 +4,32 @@
 
 namespace ProjectA {
 	struct Win32PlatformLibraryData {
-		HMODULE hModule;
+		HMODULE hLibModule;
 	};
 
 	PlatformLibrary::PlatformLibrary(std::string_view libraryName) {
 		const LPCWSTR lpLibFileName = ConvertUTF8ToUTF16(libraryName.data());
-		const HMODULE hModule = LoadLibrary(lpLibFileName);
+		const HMODULE hLibModule = LoadLibrary(lpLibFileName);
 
-		WIN32_ASSERT(hModule != nullptr);
+		WIN32_ASSERT(hLibModule != nullptr);
 
 		data = new Win32PlatformLibraryData();
 
 		Win32PlatformLibraryData* libraryData = static_cast<Win32PlatformLibraryData*>(data);
 
-		libraryData->hModule = hModule;
+		libraryData->hLibModule = hLibModule;
+	}
+
+	PlatformLibrary::~PlatformLibrary() {
+		const HMODULE hLibModule = static_cast<const Win32PlatformLibraryData*>(data)->hLibModule;
+
+		WIN32_ASSERT(FreeLibrary(hLibModule) != 0);
 	}
 
 	void* PlatformLibrary::getProcedure(std::string_view procedureName) const {
-		static const HMODULE hModule = static_cast<const Win32PlatformLibraryData*>(data)->hModule;
+		static const HMODULE hLibModule = static_cast<const Win32PlatformLibraryData*>(data)->hLibModule;
 
-		const FARPROC proc = GetProcAddress(hModule, procedureName.data());
+		const FARPROC proc = GetProcAddress(hLibModule, procedureName.data());
 
 		WIN32_ASSERT(proc != nullptr);
 
