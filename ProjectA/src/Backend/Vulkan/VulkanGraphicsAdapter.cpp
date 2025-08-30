@@ -16,16 +16,20 @@
 
 namespace ProjectA {
 	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const ApplicationManifest& applicationManifest, const Window& window) :
-		GraphicsAdapter(window),
-		instance(applicationManifest),
-		surface(createRef<VulkanSurface>(instance.object, window)),
-		physicalDevice(instance.selectPhysicalDevice()),
-		device(createRef<VulkanDevice>(physicalDevice, *surface))
+		GraphicsAdapter(window)
 	{
-		surface->setPhysicalDevice(physicalDevice.object);
-		surface->checkPresentQueueFamilyIndex(physicalDevice.graphicsQueueFamilyIndex);
+		instance = createRef<VulkanInstance>(applicationManifest);
 
-		MemoryAllocator::initialize(physicalDevice);
+		loadProcedures();
+
+		surface = createRef<VulkanSurface>(instance->object, window);
+		physicalDevice = createRef<VulkanPhysicalDevice>(instance->selectPhysicalDevice());
+		device = createRef<VulkanDevice>(*physicalDevice, *surface);
+
+		surface->setPhysicalDevice(physicalDevice->object);
+		surface->checkPresentQueueFamilyIndex(physicalDevice->graphicsQueueFamilyIndex);
+
+		MemoryAllocator::initialize(*physicalDevice);
 	}
 
 	VulkanGraphicsAdapter::~VulkanGraphicsAdapter() {
@@ -57,7 +61,7 @@ namespace ProjectA {
 	}
 
 	ref<RenderPass> VulkanGraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		return createRef<VulkanRenderPass>(physicalDevice, *surface, *device, descriptor);
+		return createRef<VulkanRenderPass>(*physicalDevice, *surface, *device, descriptor);
 	}
 
 	ref<RenderPipeline> VulkanGraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
@@ -77,7 +81,7 @@ namespace ProjectA {
 	}
 
 	ref<Swapchain> VulkanGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return createRef<VulkanSwapchain>(physicalDevice, *surface, *device, descriptor);
+		return createRef<VulkanSwapchain>(*physicalDevice, *surface, *device, descriptor);
 	}
 
 	ref<Device> VulkanGraphicsAdapter::getDevice() const {
@@ -89,10 +93,10 @@ namespace ProjectA {
 	}
 
 	void* VulkanGraphicsAdapter::getProcedure(std::string_view procedureName) const {
-		static const HMODULE hModule = static_cast<HMODULE>(Platform::loadLibrary("vulkan-1.dll"));
-		static const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = pointer_cast<PFN_vkGetInstanceProcAddr>(GetProcAddress(hModule, "vkGetInstanceProcAddr"));
+		static const PlatformLibrary vulkan1Library = Platform::openLibrary("vulkan-1.dll");
+		static const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = pointer_cast<PFN_vkGetInstanceProcAddr>(vulkan1Library.getProcedure("vkGetInstanceProcAddr"));
 
-		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance.object, procedureName.data());
+		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance->object, procedureName.data());
 
 		ENGINE_ASSERT(procedure != nullptr, "Cannot find address for procedure \"[]\".", procedureName);
 
@@ -105,7 +109,7 @@ namespace ProjectA {
 		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(getProcedure(#procedure))
 
 		// TODO(review)
-		LOAD_PROCEDURE(PROCEDURE_vkCmdDraw);
+		LOAD_PROCEDURE(vkCmdDraw);
 
 		#undef LOAD_PROCEDURE
 	}

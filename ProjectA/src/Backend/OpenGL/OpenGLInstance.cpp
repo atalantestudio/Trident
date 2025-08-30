@@ -6,13 +6,9 @@
 
 namespace ProjectA {
 	void* OpenGLInstance::getWglProcedure(std::string_view procedureName) {
-		static const HMODULE hModule = static_cast<HMODULE>(Platform::loadLibrary("opengl32.dll"));
+		static const PlatformLibrary opengl32Library = Platform::openLibrary("opengl32.dll");
 
-		const FARPROC procedure = GetProcAddress(hModule, procedureName.data());
-
-		WIN32_ASSERT(procedure != nullptr);
-
-		return procedure;
+		return opengl32Library.getProcedure(procedureName);
 	}
 
 	OpenGLInstance::OpenGLInstance(const Window& window) {

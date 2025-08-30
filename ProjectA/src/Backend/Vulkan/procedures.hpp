@@ -2,5 +2,5 @@
 
 namespace ProjectA {
 	// TODO(review)
-	extern PFN_vkCmdDraw PROCEDURE_vkCmdDraw;
+	extern PFN_vkCmdDraw vkCmdDraw;
 }

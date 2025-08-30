@@ -49,9 +49,9 @@ namespace ProjectA {
 			void loadProcedures() const;
 
 		private:
-			const VulkanInstance instance;
-			const ref<VulkanSurface> surface;
-			const VulkanPhysicalDevice physicalDevice;
-			const ref<VulkanDevice> device;
+			ref<VulkanInstance> instance;
+			ref<VulkanSurface> surface;
+			ref<VulkanPhysicalDevice> physicalDevice;
+			ref<VulkanDevice> device;
 	};
 }
