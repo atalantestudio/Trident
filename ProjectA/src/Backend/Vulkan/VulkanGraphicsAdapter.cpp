@@ -18,9 +18,13 @@ namespace ProjectA {
 	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const ApplicationManifest& applicationManifest, const Window& window) :
 		GraphicsAdapter(window)
 	{
+		loadBaseProcedures();
+
 		instance = createRef<VulkanInstance>(applicationManifest);
 
-		loadProcedures();
+		loadInstanceProcedures();
+
+		instance->createDebugUtilsMessenger();
 
 		surface = createRef<VulkanSurface>(instance->object, window);
 		physicalDevice = createRef<VulkanPhysicalDevice>(instance->selectPhysicalDevice());
@@ -92,24 +96,144 @@ namespace ProjectA {
 		return surface;
 	}
 
-	void* VulkanGraphicsAdapter::getProcedure(std::string_view procedureName) const {
+	void* VulkanGraphicsAdapter::getProcedure(VkInstance instance, std::string_view procedureName) const {
 		static const PlatformLibrary vulkan1Library = Platform::openLibrary("vulkan-1.dll");
 		static const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = pointer_cast<PFN_vkGetInstanceProcAddr>(vulkan1Library.getProcedure("vkGetInstanceProcAddr"));
 
-		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance->object, procedureName.data());
+		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance, procedureName.data());
 
 		ENGINE_ASSERT(procedure != nullptr, "Cannot find address for procedure \"[]\".", procedureName);
 
 		return procedure;
 	}
 
-	void VulkanGraphicsAdapter::loadProcedures() const {
+	void VulkanGraphicsAdapter::loadBaseProcedures() const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(getProcedure(#procedure))
+		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(getProcedure(nullptr, #procedure))
 
-		// TODO(review)
+		LOAD_PROCEDURE(vkCreateInstance);
+		LOAD_PROCEDURE(vkEnumerateInstanceLayerProperties);
+
+		#undef LOAD_PROCEDURE
+	}
+
+	void VulkanGraphicsAdapter::loadInstanceProcedures() const {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(getProcedure(instance->object, #procedure))
+
+		LOAD_PROCEDURE(vkAllocateCommandBuffers);
+		LOAD_PROCEDURE(vkAllocateDescriptorSets);
+		LOAD_PROCEDURE(vkAllocateMemory);
+		LOAD_PROCEDURE(vkBeginCommandBuffer);
+		LOAD_PROCEDURE(vkBindBufferMemory);
+		LOAD_PROCEDURE(vkBindImageMemory);
+		LOAD_PROCEDURE(vkCmdBindDescriptorSets);
+		LOAD_PROCEDURE(vkCmdBindIndexBuffer);
+		LOAD_PROCEDURE(vkCmdBindPipeline);
+		LOAD_PROCEDURE(vkCmdBindVertexBuffers);
+		LOAD_PROCEDURE(vkCmdCopyBuffer);
+		LOAD_PROCEDURE(vkCmdCopyBufferToImage);
+		LOAD_PROCEDURE(vkCmdCopyImageToBuffer);
+		LOAD_PROCEDURE(vkCmdDispatch);
+		LOAD_PROCEDURE(vkCmdDispatchIndirect);
 		LOAD_PROCEDURE(vkCmdDraw);
+		LOAD_PROCEDURE(vkCmdDrawIndexed);
+		LOAD_PROCEDURE(vkCmdDrawIndexedIndirect);
+		LOAD_PROCEDURE(vkCmdDrawIndirect);
+		LOAD_PROCEDURE(vkCmdPipelineBarrier);
+		LOAD_PROCEDURE(vkCmdSetLineWidth);
+		LOAD_PROCEDURE(vkCmdSetScissor);
+		LOAD_PROCEDURE(vkCmdSetViewport);
+		LOAD_PROCEDURE(vkCreateBuffer);
+		LOAD_PROCEDURE(vkCreateCommandPool);
+		LOAD_PROCEDURE(vkCreateComputePipelines);
+		LOAD_PROCEDURE(vkCreateDescriptorPool);
+		LOAD_PROCEDURE(vkCreateDescriptorSetLayout);
+		LOAD_PROCEDURE(vkCreateDevice);
+		LOAD_PROCEDURE(vkCreateFence);
+		LOAD_PROCEDURE(vkCreateGraphicsPipelines);
+		LOAD_PROCEDURE(vkCreateImage);
+		LOAD_PROCEDURE(vkCreateImageView);
+		LOAD_PROCEDURE(vkCreatePipelineLayout);
+		LOAD_PROCEDURE(vkCreateSampler);
+		LOAD_PROCEDURE(vkCreateSemaphore);
+		LOAD_PROCEDURE(vkCreateShaderModule);
+		LOAD_PROCEDURE(vkDestroyBuffer);
+		LOAD_PROCEDURE(vkDestroyCommandPool);
+		LOAD_PROCEDURE(vkDestroyDescriptorPool);
+		LOAD_PROCEDURE(vkDestroyDescriptorSetLayout);
+		LOAD_PROCEDURE(vkDestroyDevice);
+		LOAD_PROCEDURE(vkDestroyFence);
+		LOAD_PROCEDURE(vkDestroyImage);
+		LOAD_PROCEDURE(vkDestroyImageView);
+		LOAD_PROCEDURE(vkDestroyInstance);
+		LOAD_PROCEDURE(vkDestroyPipeline);
+		LOAD_PROCEDURE(vkDestroyPipelineLayout);
+		LOAD_PROCEDURE(vkDestroySampler);
+		LOAD_PROCEDURE(vkDestroySemaphore);
+		LOAD_PROCEDURE(vkDestroyShaderModule);
+		LOAD_PROCEDURE(vkDeviceWaitIdle);
+		LOAD_PROCEDURE(vkEndCommandBuffer);
+		LOAD_PROCEDURE(vkEnumerateDeviceExtensionProperties);
+		LOAD_PROCEDURE(vkEnumeratePhysicalDevices);
+		LOAD_PROCEDURE(vkFreeCommandBuffers);
+		LOAD_PROCEDURE(vkFreeMemory);
+		LOAD_PROCEDURE(vkGetBufferMemoryRequirements);
+		LOAD_PROCEDURE(vkGetDeviceQueue);
+		LOAD_PROCEDURE(vkGetImageMemoryRequirements);
+		LOAD_PROCEDURE(vkMapMemory);
+		LOAD_PROCEDURE(vkQueueSubmit);
+		LOAD_PROCEDURE(vkResetCommandBuffer);
+		LOAD_PROCEDURE(vkResetFences);
+		LOAD_PROCEDURE(vkUnmapMemory);
+		LOAD_PROCEDURE(vkUpdateDescriptorSets);
+		LOAD_PROCEDURE(vkWaitForFences);
+
+		#if VULKAN_VERSION < VULKAN_VERSION_1_1
+			LOAD_PROCEDURE(vkGetPhysicalDeviceFeatures);
+			LOAD_PROCEDURE(vkGetPhysicalDeviceMemoryProperties);
+			LOAD_PROCEDURE(vkGetPhysicalDeviceProperties);
+			LOAD_PROCEDURE(vkGetPhysicalDeviceQueueFamilyProperties);
+		#endif
+
+		#if VULKAN_VERSION < VULKAN_VERSION_1_2
+			LOAD_PROCEDURE(vkCmdBeginRenderPass);
+			LOAD_PROCEDURE(vkCmdEndRenderPass);
+			LOAD_PROCEDURE(vkCreateRenderPass);
+		#endif
+
+		#if VULKAN_VERSION < VULKAN_VERSION_1_4
+			LOAD_PROCEDURE(vkCreateFramebuffer);
+			LOAD_PROCEDURE(vkDestroyFramebuffer);
+			LOAD_PROCEDURE(vkDestroyRenderPass);
+		#endif
+
+		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+			LOAD_PROCEDURE(vkCreateWin32SurfaceKHR);
+		#endif
+
+		#ifdef DEBUG_ENABLE_MESSENGER
+			LOAD_PROCEDURE(vkCreateDebugUtilsMessengerEXT);
+			LOAD_PROCEDURE(vkDestroyDebugUtilsMessengerEXT);
+		#endif
+
+		#ifdef VULKAN_USE_VK_KHR_surface
+			LOAD_PROCEDURE(vkDestroySurfaceKHR);
+			LOAD_PROCEDURE(vkGetPhysicalDeviceSurfaceCapabilitiesKHR);
+			LOAD_PROCEDURE(vkGetPhysicalDeviceSurfaceFormatsKHR);
+			LOAD_PROCEDURE(vkGetPhysicalDeviceSurfacePresentModesKHR);
+			LOAD_PROCEDURE(vkGetPhysicalDeviceSurfaceSupportKHR);
+		#endif
+
+		#ifdef VULKAN_USE_VK_KHR_swapchain
+			LOAD_PROCEDURE(vkAcquireNextImageKHR);
+			LOAD_PROCEDURE(vkCreateSwapchainKHR);
+			LOAD_PROCEDURE(vkDestroySwapchainKHR);
+			LOAD_PROCEDURE(vkGetSwapchainImagesKHR);
+			LOAD_PROCEDURE(vkQueuePresentKHR);
+		#endif
 
 		#undef LOAD_PROCEDURE
 	}

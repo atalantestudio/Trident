@@ -68,10 +68,6 @@ project "ProjectA"
 		vulkansdk .. "/Lib",
 	}
 
-	links {
-		"vulkan-1.lib",
-	}
-
 	filter "system:windows"
 		systemversion "latest"
 

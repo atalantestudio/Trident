@@ -11,7 +11,11 @@ namespace ProjectA {
 	#endif
 
 	// NOTE: ~25Mb in Release mode.
-	VulkanInstance::VulkanInstance(const ApplicationManifest& applicationManifest) {
+	VulkanInstance::VulkanInstance(const ApplicationManifest& applicationManifest)
+		#ifdef DEBUG_ENABLE_MESSENGER
+			: debugUtilsMessengerCreateInfo{}
+		#endif
+	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
@@ -19,7 +23,6 @@ namespace ProjectA {
 		#endif
 
 		#ifdef DEBUG_ENABLE_MESSENGER
-			VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo{};
 			debugUtilsMessengerCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 
 			// TODO: Allow changing message severity?
@@ -85,26 +88,20 @@ namespace ProjectA {
 		result = vkCreateInstance(&instanceCreateInfo, nullptr, &object);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan instance ([]).", string_VkResult(result));
+	}
 
-		#ifdef DEBUG_ENABLE_MESSENGER
-			const PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(object, "vkCreateDebugUtilsMessengerEXT"));
-
-			ENGINE_ASSERT(vkCreateDebugUtilsMessengerEXT != nullptr, "Failed to get the address of PFN_vkCreateDebugUtilsMessengerEXT.");
-
-			result = vkCreateDebugUtilsMessengerEXT(object, &debugUtilsMessengerCreateInfo, nullptr, &debugUtilsMessenger);
+	#ifdef DEBUG_ENABLE_MESSENGER
+		void VulkanInstance::createDebugUtilsMessenger() {
+			const VkResult result = vkCreateDebugUtilsMessengerEXT(object, &debugUtilsMessengerCreateInfo, nullptr, &debugUtilsMessenger);
 
 			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan debug messenger.");
-		#endif
-	}
+		}
+	#endif
 
 	VulkanInstance::~VulkanInstance() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#ifdef DEBUG_ENABLE_MESSENGER
-			const PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(object, "vkDestroyDebugUtilsMessengerEXT"));
-
-			ENGINE_ASSERT(vkDestroyDebugUtilsMessengerEXT != nullptr, "Failed to get the address of PFN_vkDestroyDebugUtilsMessengerEXT.");
-
 			vkDestroyDebugUtilsMessengerEXT(object, debugUtilsMessenger, nullptr);
 		#endif
 

@@ -44,9 +44,11 @@ namespace ProjectA {
 			ref<Surface> getSurface() const final override;
 
 		private:
-			void* getProcedure(std::string_view procedureName) const;
+			void* getProcedure(VkInstance instance, std::string_view procedureName) const;
 
-			void loadProcedures() const;
+			void loadBaseProcedures() const;
+
+			void loadInstanceProcedures() const;
 
 		private:
 			ref<VulkanInstance> instance;

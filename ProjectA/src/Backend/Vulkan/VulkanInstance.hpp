@@ -13,6 +13,8 @@ namespace ProjectA {
 
 			~VulkanInstance() final override;
 
+			void createDebugUtilsMessenger();
+
 			VkPhysicalDevice selectPhysicalDevice() const;
 
 		private:
@@ -34,6 +36,7 @@ namespace ProjectA {
 			#endif
 
 			#ifdef DEBUG_ENABLE_MESSENGER
+				VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo;
 				VkDebugUtilsMessengerEXT debugUtilsMessenger;
 			#endif
 	};

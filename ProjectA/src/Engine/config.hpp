@@ -56,18 +56,20 @@ namespace ProjectA {
 	#define VULKAN_VERSION_1_1 11
 	#define VULKAN_VERSION_1_2 12
 	#define VULKAN_VERSION_1_3 13
+	#define VULKAN_VERSION_1_4 14
 
 	// Desired Vulkan version. Note that the runtime device might not have this version.
 	#define VULKAN_VERSION VULKAN_VERSION_1_0
 
-	#ifdef DEBUG_ENABLE_MESSENGER
-		#if OPENGL_VERSION < OPENGL_VERSION_4_3
+	#define VULKAN_USE_VK_KHR_surface
+	#define VULKAN_USE_VK_KHR_swapchain
+
+	#ifdef ENABLE_OPENGL_ADAPTER
+		#if defined(DEBUG_ENABLE_MESSENGER) && OPENGL_VERSION < OPENGL_VERSION_4_3
 			#error "Debug messenger cannot be enabled below OpenGL 4.3."
 		#endif
-	#endif
 
-	#ifdef OPENGL_USE_SPIRV
-		#if OPENGL_VERSION < OPENGL_VERSION_4_6
+		#if defined(OPENGL_USE_SPIRV) && OPENGL_VERSION < OPENGL_VERSION_4_6
 			#error "SPIR-V shaders cannot be used below OpenGL 4.6."
 		#endif
 	#endif
