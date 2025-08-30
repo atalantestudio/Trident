@@ -21,7 +21,7 @@ namespace ProjectA {
 				#endif
 
 				for (const BufferCopyRegion& copyRegion : *copyRegions) {
-					#ifdef OPENGL_VERSION >= OPENGL_VERSION_4_5
+					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 						glCopyNamedBufferSubData(sourceBuffer, destinationBuffer, copyRegion.sourceOffset, copyRegion.destinationOffset, copyRegion.size);
 					#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
 						glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, copyRegion.sourceOffset, copyRegion.destinationOffset, copyRegion.size);

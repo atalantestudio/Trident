@@ -42,7 +42,7 @@ namespace ProjectA {
 
 		storageAccessFlags |= mapAccessFlags;
 
-		#ifdef OPENGL_VERSION >= OPENGL_VERSION_4_5
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			glNamedBufferStorage(object, size, nullptr, storageAccessFlags);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_4_4
 			glBufferStorage(target, size, nullptr, storageAccessFlags);
@@ -79,7 +79,7 @@ namespace ProjectA {
 
 		GLboolean result = GL_FALSE;
 
-		#ifdef OPENGL_VERSION >= OPENGL_VERSION_4_5
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			result = glUnmapNamedBuffer(object);
 		#else
 			glBindBuffer(target, object);
@@ -95,7 +95,7 @@ namespace ProjectA {
 
 		void* mappedRange = nullptr;
 
-		#ifdef OPENGL_VERSION >= OPENGL_VERSION_4_5
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			mappedRange = glMapNamedBufferRange(object, offset, size, mapAccessFlags);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 			glBindBuffer(target, object);

@@ -1,8 +1,6 @@
 #pragma once
 
 namespace ProjectA {
-	#define PROJECT_ROOT_DIRECTORY "/"
-
 	#define GPU_TYPE_DISCRETE 0
 	#define GPU_TYPE_INTEGRATED 1
 
@@ -51,7 +49,7 @@ namespace ProjectA {
 	#define OPENGL_VERSION_4_5 450
 	#define OPENGL_VERSION_4_6 460
 
-	// Desired OpenGL version. Note that the current device might not be able to load this version.
+	// Desired OpenGL version. Note that the runtime device might not have this version.
 	#define OPENGL_VERSION OPENGL_VERSION_4_6
 
 	#define VULKAN_VERSION_1_0 10
@@ -59,7 +57,7 @@ namespace ProjectA {
 	#define VULKAN_VERSION_1_2 12
 	#define VULKAN_VERSION_1_3 13
 
-	// Desired Vulkan version. Note that the current device might not be able to load this version.
+	// Desired Vulkan version. Note that the runtime device might not have this version.
 	#define VULKAN_VERSION VULKAN_VERSION_1_0
 
 	#ifdef DEBUG_ENABLE_MESSENGER
