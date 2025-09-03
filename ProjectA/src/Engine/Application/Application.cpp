@@ -28,14 +28,14 @@ namespace ProjectA {
 		return Logger::format("[] ([])", projectName, static_cast<sint32>(instanceCount));
 	}
 
-	Application::Application(const ApplicationManifest& applicationManifest) :
-		projectType(applicationManifest.projectType)
+	Application::Application(const ProjectDescriptor& projectDescriptor) :
+		projectType(projectDescriptor.type)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ENGINE_DEBUG("Launching.");
 
-		Platform::initialize(applicationManifest.projectName.data());
+		Platform::initialize(projectDescriptor.name.data());
 
 		mutex = createScope<Mutex>("Mutex");
 		mutex->acquire();
@@ -85,7 +85,7 @@ namespace ProjectA {
 		propertyFile.readProperties(properties);
 
 		WindowDescriptor windowDescriptor{};
-		windowDescriptor.name = formatWindowName(applicationManifest.projectName, sharedMemoryData->instanceCount);
+		windowDescriptor.name = formatWindowName(projectDescriptor.name, sharedMemoryData->instanceCount);
 		windowDescriptor.size.width = properties->WindowWidth;
 		windowDescriptor.size.height = properties->WindowHeight;
 		windowDescriptor.mouseDownEventListener = BIND(Application::onEvent);
@@ -103,7 +103,7 @@ namespace ProjectA {
 
 		window = new Window(windowDescriptor);
 
-		Renderer::initialize(applicationManifest, *window, properties->GraphicsAPI, properties->VSync);
+		Renderer::initialize(projectDescriptor, *window, properties->GraphicsAPI, properties->VSync);
 
 		if (projectType == ProjectType::MAIN) {
 			ENGINE_INFO("Loading assets.");

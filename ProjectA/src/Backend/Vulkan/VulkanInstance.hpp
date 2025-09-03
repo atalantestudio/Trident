@@ -2,14 +2,14 @@
 
 #include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/Instance.hpp"
-#include "Engine/Application/ApplicationManifest.hpp"
+#include "Engine/Application/ProjectDescriptor.hpp"
 
 #define DEBUG_ENUMERATE_PHYSICAL_DEVICES
 
 namespace ProjectA {
 	class VulkanInstance final : public Instance, public ObjectWrapper<VkInstance> {
 		public:
-			explicit VulkanInstance(const ApplicationManifest& applicationManifest);
+			explicit VulkanInstance(const ProjectDescriptor& projectDescriptor);
 
 			~VulkanInstance() final override;
 

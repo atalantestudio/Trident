@@ -15,7 +15,7 @@ namespace ProjectA {
 
 			static const scope<GraphicsAdapter>& getBackend();
 
-			static void initialize(const ApplicationManifest& applicationManifest, const Window& window, GraphicsAPI graphicsAPI, bool vSync);
+			static void initialize(const ProjectDescriptor& projectDescriptor, const Window& window, GraphicsAPI graphicsAPI, bool vSync);
 
 		public:
 			virtual void build() = 0;

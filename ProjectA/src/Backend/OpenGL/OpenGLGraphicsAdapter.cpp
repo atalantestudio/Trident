@@ -15,7 +15,7 @@
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
 namespace ProjectA {
-	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const ApplicationManifest& applicationManifest, const Window& window) :
+	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window) :
 		GraphicsAdapter(window),
 		instance(window),
 		surface(createRef<OpenGLSurface>())

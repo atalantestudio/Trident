@@ -30,7 +30,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
-		// TODO(review): Make bitmap fonts work seamlessly with True-Type fonts.
+		// TODO(review): Use Quiver as the default engine font.
 		/* defaultFont->textureIndex = static_cast<uint32>(images.size());
 		defaultFont->glyphMap.map = QUIVER_BITMAP_GLYPH_MAP;
 		defaultFont->glyphMap.utfOffset = 32;

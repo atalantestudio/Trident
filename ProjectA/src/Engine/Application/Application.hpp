@@ -6,8 +6,8 @@
 #include "Engine/API/Synchronization/Mutex.hpp"
 #include "Engine/API/Timer/HighResolutionTimer.hpp"
 #include "Engine/API/Window/Window.hpp"
-#include "Engine/Application/ApplicationManifest.hpp"
 #include "Engine/Application/ApplicationProperties.hpp"
+#include "Engine/Application/ProjectDescriptor.hpp"
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 #include "Engine/Layer/LayerStack.hpp"
 #include "Engine/Process/Process.hpp"
@@ -24,7 +24,7 @@ namespace ProjectA {
 			static std::string formatWindowName(std::string_view projectName, uint8 instanceCount);
 
 		public:
-			explicit Application(const ApplicationManifest& applicationManifest);
+			explicit Application(const ProjectDescriptor& projectDescriptor);
 
 			virtual ~Application();
 

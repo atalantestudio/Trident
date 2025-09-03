@@ -11,7 +11,7 @@ namespace ProjectA {
 	#endif
 
 	// NOTE: ~25Mb in Release mode.
-	VulkanInstance::VulkanInstance(const ApplicationManifest& applicationManifest)
+	VulkanInstance::VulkanInstance(const ProjectDescriptor& projectDescriptor)
 		#ifdef DEBUG_ENABLE_MESSENGER
 			: debugUtilsMessengerCreateInfo{}
 		#endif
@@ -45,8 +45,8 @@ namespace ProjectA {
 
 		VkApplicationInfo applicationInfo{};
 		applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		applicationInfo.pApplicationName = applicationManifest.projectName.data();
-		applicationInfo.applicationVersion = VK_MAKE_API_VERSION(0, applicationManifest.projectVersion.major, applicationManifest.projectVersion.minor, applicationManifest.projectVersion.patch);
+		applicationInfo.pApplicationName = projectDescriptor.name.data();
+		applicationInfo.applicationVersion = VK_MAKE_API_VERSION(0, projectDescriptor.version.major, projectDescriptor.version.minor, projectDescriptor.version.patch);
 		applicationInfo.pEngineName = ENGINE_NAME;
 		applicationInfo.engineVersion = VK_MAKE_API_VERSION(0, ENGINE_VERSION_MAJOR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
 		applicationInfo.apiVersion = VK_API_VERSION_1_0;

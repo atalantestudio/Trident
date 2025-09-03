@@ -12,7 +12,7 @@ namespace ProjectA {
 			static constexpr GLenum defaultFramebufferDrawBuffer = GL_FRONT_LEFT;
 
 		public:
-			explicit OpenGLGraphicsAdapter(const ApplicationManifest& applicationManifest, const Window& window);
+			explicit OpenGLGraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window);
 
 			~OpenGLGraphicsAdapter() final override;
 

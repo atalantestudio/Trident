@@ -15,13 +15,13 @@
 #include "Backend/Vulkan/MemoryAllocator.hpp"
 
 namespace ProjectA {
-	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const ApplicationManifest& applicationManifest, const Window& window) :
+	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window) :
 		GraphicsAdapter(window),
 		vulkan1Library(Platform::openLibrary("vulkan-1.dll"))
 	{
 		loadBaseProcedures();
 
-		instance = createRef<VulkanInstance>(applicationManifest);
+		instance = createRef<VulkanInstance>(projectDescriptor);
 
 		loadInstanceProcedures();
 

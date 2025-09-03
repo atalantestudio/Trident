@@ -9,18 +9,19 @@
 namespace ProjectA {
 	class GUIApplication : public Application {
 		public:
-			GUIApplication(const ApplicationManifest& applicationManifest) :
-				Application(applicationManifest)
+			GUIApplication(const ProjectDescriptor& projectDescriptor) :
+				Application(projectDescriptor)
 			{
 				registerLayer<TextLayer>();
 			}
 	};
 
 	Application* ProjectA::createApplication(uint32 argumentCount, char8** argumentValues) {
-		ApplicationManifest applicationManifest{};
-		applicationManifest.projectType = ProjectType::MAIN;
-		applicationManifest.projectName = "Lorem Ipsum";
+		ProjectDescriptor projectDescriptor{};
+		projectDescriptor.type = ProjectType::MAIN;
+		projectDescriptor.name = "Lorem Ipsum";
+		projectDescriptor.version = {1, 0, 0};
 
-		return new GUIApplication(applicationManifest);
+		return new GUIApplication(projectDescriptor);
 	}
 }

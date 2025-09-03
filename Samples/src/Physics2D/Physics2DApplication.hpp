@@ -10,8 +10,8 @@
 namespace ProjectA {
 	class Physics2DApplication : public Application {
 		public:
-			Physics2DApplication(const ApplicationManifest& applicationManifest) :
-				Application(applicationManifest)
+			Physics2DApplication(const ProjectDescriptor& projectDescriptor) :
+				Application(projectDescriptor)
 			{
 				registerLayer<SampleLayer>();
 				// registerLayer<StatisticsLayer>();
@@ -19,10 +19,11 @@ namespace ProjectA {
 	};
 
 	Application* ProjectA::createApplication(uint32 argumentCount, char8** argumentValues) {
-		ApplicationManifest applicationManifest{};
-		applicationManifest.projectType = ProjectType::MAIN;
-		applicationManifest.projectName = "Physics";
+		ProjectDescriptor projectDescriptor{};
+		projectDescriptor.type = ProjectType::MAIN;
+		projectDescriptor.name = "Physics";
+		projectDescriptor.version = {1, 0, 0};
 
-		return new Physics2DApplication(applicationManifest);
+		return new Physics2DApplication(projectDescriptor);
 	}
 }

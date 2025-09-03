@@ -9,18 +9,19 @@
 namespace ProjectA {
 	class ProcessApplication : public Application {
 		public:
-			ProcessApplication(const ApplicationManifest& applicationManifest) :
-				Application(applicationManifest)
+			ProcessApplication(const ProjectDescriptor& projectDescriptor) :
+				Application(projectDescriptor)
 			{
 				registerProcess<DefaultProcess>();
 			}
 	};
 
 	Application* ProjectA::createApplication(uint32 argumentCount, char8** argumentValues) {
-		ApplicationManifest applicationManifest{};
-		applicationManifest.projectType = ProjectType::MAIN;
-		applicationManifest.projectName = "Process";
+		ProjectDescriptor projectDescriptor{};
+		projectDescriptor.type = ProjectType::MAIN;
+		projectDescriptor.name = "Process";
+		projectDescriptor.version = {1, 0, 0};
 
-		return new ProcessApplication(applicationManifest);
+		return new ProcessApplication(projectDescriptor);
 	}
 }

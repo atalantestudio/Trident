@@ -10,7 +10,7 @@
 #include "Engine/API/Rendering/RenderPipeline.hpp"
 #include "Engine/API/Rendering/ShaderModule.hpp"
 #include "Engine/API/Rendering/Surface.hpp"
-#include "Engine/Application/ApplicationManifest.hpp"
+#include "Engine/Application/ProjectDescriptor.hpp"
 
 namespace ProjectA {
 	class GraphicsAdapter {
