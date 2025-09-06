@@ -8,6 +8,9 @@ namespace ProjectA {
 		std::string_view name;
 		VersionNumber version;
 
-		// TODO(review): Handle custom window icon.
+		// TODO
+		// Handle custom window icon.
+		// See https://learn.microsoft.com/en-us/windows/win32/menurc/using-icons and
+		// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-loadimagea.
 	};
 }

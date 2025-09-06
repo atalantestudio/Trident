@@ -178,9 +178,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(A.geometry->getVertexCount() < max<uint8>());
 		DEBUG_ASSERT(B.geometry->getVertexCount() < max<uint8>());
 
-		// TODO(review): Use d to find the first simplex vertex and test the results.
-		// vec2<float32> d = B.position - A.position;
-		vec2<float32> d;
+		vec2<float32> d = B.position - A.position;
 
 		Simplex2Vertex vertex;
 		vertex.iA = 0;

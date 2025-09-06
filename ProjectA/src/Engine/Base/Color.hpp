@@ -51,4 +51,10 @@ namespace ProjectA {
 			outputData[channelIndex + 3] = 255;
 		}
 	}
+
+	static void convertRGBAToRed(const sequence<uint8>& inputData, sequence<uint8>& outputData) {
+		for (uint32 texelIndex = 0, channelIndex = 0; texelIndex < outputData.count; texelIndex += 1, channelIndex += 4) {
+			outputData[texelIndex] = inputData[channelIndex];
+		}
+	}
 }

@@ -53,6 +53,8 @@ namespace ProjectA {
 			ref<ImageAsset> glyphMapImage;
 			sint32 lineHeight;
 			sequence<Glyph> glyphs;
+
+			// <code point, glyph index>
 			std::unordered_map<uint16, uint32> unicodeMap;
 	};
 }

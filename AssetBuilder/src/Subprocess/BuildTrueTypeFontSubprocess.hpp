@@ -21,6 +21,8 @@ namespace ProjectA {
 				const File<FileFormat::TTF> file = Filesystem::decode<FileFormat::TTF>(inputData);
 
 				FontAssetDescriptor fontAssetDescriptor{};
+				fontAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
+				fontAssetDescriptor.version = {1, 0, 0};
 				fontAssetDescriptor.lineHeight = file.ascent - file.descent + file.lineGap;
 				fontAssetDescriptor.unicodeMap = file.unicodeMap;
 
@@ -43,7 +45,6 @@ namespace ProjectA {
 				const uint64 outputSize =
 					7 * sizeof(uint32) + (4 * sizeof(float32) + 3 * sizeof(uint16)) * glyphCount +
 					(sizeof(uint16) + sizeof(uint32)) * file.unicodeMap.size();
-				const uint32 assetIdentifier = AssetLibrary::createAssetIdentifier();
 
 				uint32 glyphMapImageAssetIdentifier;
 
@@ -51,7 +52,7 @@ namespace ProjectA {
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
 				outputByteStream.write<AssetSignature>(AssetSignature::TFO);
-				outputByteStream.write<uint32>(assetIdentifier);
+				outputByteStream.write<uint32>(fontAssetDescriptor.identifier);
 				outputByteStream.write<VersionNumber>({0, 0, 0});
 				outputByteStream.write<uint32>(glyphMapImageAssetIdentifier);
 				outputByteStream.write<sint16>(file.ascent);
@@ -100,7 +101,7 @@ namespace ProjectA {
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputByteStream.size);
 
-				ENGINE_INFO("Generated font asset (ID: []).", assetIdentifier);
+				ENGINE_INFO("Generated font asset (ID: []).", fontAssetDescriptor.identifier);
 			}
 	};
 }
