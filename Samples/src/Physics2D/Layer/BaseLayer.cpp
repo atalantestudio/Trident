@@ -10,6 +10,7 @@ namespace ProjectA {
 	{}
 
 	void BaseLayer::postConstruct() {
+		renderer.setLayer(this);
 		renderer.build();
 		renderer.registerScene(scene);
 

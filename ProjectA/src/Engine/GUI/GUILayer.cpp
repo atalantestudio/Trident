@@ -6,6 +6,7 @@
 
 namespace ProjectA {
 	void GUILayer::build() {
+		renderer.setLayer(this);
 		renderer.build();
 
 		TextureArrayLayer defaultImageLayer;

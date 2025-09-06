@@ -75,6 +75,16 @@ namespace ProjectA {
 
 			static void setImageIndex(uint32 imageIndex);
 
+		public:
+			void setLayer(const Layer* layer) {
+				this->layer = layer;
+			}
+
+		protected:
+			const Layer* getLayer() const {
+				return layer;
+			}
+
 		private:
 			static GraphicsAPI graphicsApi;
 			static scope<GraphicsAdapter> adapter;
@@ -95,5 +105,8 @@ namespace ProjectA {
 
 			// TODO: Use scope.
 			static std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> finishedRenderSemaphores;
+
+		private:
+			const Layer* layer;
 	};
 }

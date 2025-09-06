@@ -19,7 +19,7 @@
 #define RENDERER_TRIANGLE_INDIRECT 14
 
 // Select the renderer to run.
-#define RENDERER RENDERER_TRIANGLE
+#define RENDERER RENDERER_IMAGE_ASSET
 
 #if RENDERER == RENDERER_ARRAY_TEXTURE
 	#include "../Renderer/ArrayTextureRenderer.hpp"
@@ -115,6 +115,7 @@ namespace ProjectA {
 	class SampleLayer : public Layer {
 		public:
 			void build() override {
+				renderer.setLayer(this);
 				renderer.build();
 			}
 
