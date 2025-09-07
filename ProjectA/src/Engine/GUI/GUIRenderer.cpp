@@ -333,10 +333,8 @@ namespace ProjectA {
 		std::copy(layer.data.begin(), layer.data.end(), textureArrayStagingBufferMappedRange);
 
 		textureArrayStagingBufferMappedRange += layer.data.count;
-
 		textureArrayLayerExtents[textureArrayLayerCount].width = layer.width;
 		textureArrayLayerExtents[textureArrayLayerCount].height = layer.height;
-
 		textureArrayLayerCount += 1;
 
 		return layerIndex;

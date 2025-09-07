@@ -9,7 +9,7 @@ namespace ProjectA {
 			static constexpr uint64 TIM_HEADER_SIZE = 9 * sizeof(uint32);
 
 		public:
-			// TODO: Mip level count is not handled for the moment and must be set to 1.
+			// TODO: Mip level count is not handled at the moment and must be set to 1.
 			explicit BuildGlyphMapImageSubprocess(const std::string& assetOutputPath, const std::string& assetName, const ref<ImageAsset>& imageAsset, uint32& assetIdentifier) {
 				assetIdentifier = AssetLibrary::createAssetIdentifier();
 
@@ -89,7 +89,13 @@ namespace ProjectA {
 					}
 				}
 
-				DEBUG_ASSERT(texelIndex == imageAsset->getData().count);
+				if (runLength > 0) {
+					qoi_run run;
+					run.tag = 0b11;
+					run.run = runLength - 1;
+
+					outputByteStream.write<qoi_run>(run);
+				}
 
 				const uint64 outputSize = outputByteStream.getByteOffset();
 

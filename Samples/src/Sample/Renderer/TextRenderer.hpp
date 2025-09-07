@@ -6,7 +6,7 @@ namespace ProjectA {
 	class TextRenderer : public Renderer {
 		public:
 			void build() override {
-				const ref<FontAsset>& fontAsset = getApplication()->getAssetLibrary()->findFontAsset("test-regular");
+				const ref<FontAsset>& fontAsset = getLayer()->getApplication()->getAssetLibrary()->findFontAsset("DefaultFont");
 				const ref<ImageAsset>& glyphMapImageAsset = fontAsset->getGlyphMapImage();
 				const ref<Device> device = getDevice();
 
@@ -300,7 +300,7 @@ namespace ProjectA {
 					const uint16 codePoint = static_cast<uint16>(character);
 					const Glyph& glyph = (*fontAsset)[codePoint];
 
-					const float32 advanceWidth = std::ceil(glyph.advanceWidth / 1210.0f * fontSize);
+					const float32 advanceWidth = std::ceil(glyph.advanceWidth / lineHeight * fontSize);
 
 					if (!glyph.whitespace) {
 						const float32 width = glyph.width / lineHeight * fontSize;

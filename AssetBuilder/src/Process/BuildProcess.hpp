@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Subprocess/BuildDefaultFontSubprocess.hpp"
 #include "../Subprocess/BuildTrueTypeFontSubprocess.hpp"
 
 namespace ProjectA {
@@ -12,6 +13,8 @@ namespace ProjectA {
 				const std::string assetOutputPath = rootOutputPath + "/Asset/";
 
 				const std::filesystem::directory_iterator fontDirectoryIterator(rootInputPath + "/Asset/Font");
+
+				BuildDefaultFontSubprocess defaultFontSubprocess(assetOutputPath);
 
 				for (const std::filesystem::directory_entry& directoryEntry : fontDirectoryIterator) {
 					if (directoryEntry.is_directory()) {

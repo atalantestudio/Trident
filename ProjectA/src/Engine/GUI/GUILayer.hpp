@@ -88,6 +88,7 @@ namespace ProjectA {
 		private:
 			static uint32 getCharacterCount(const std::string& string);
 
+		public:
 			static uint16 decodeUtf16CodePoint(const char8* string, uint32& byteOffset);
 
 		protected:

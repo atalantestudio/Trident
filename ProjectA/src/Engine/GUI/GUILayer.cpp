@@ -31,14 +31,6 @@ namespace ProjectA {
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
-		// TODO(review): Use Quiver as the default engine font.
-		/* defaultFont->textureIndex = static_cast<uint32>(images.size());
-		defaultFont->glyphMap.map = QUIVER_BITMAP_GLYPH_MAP;
-		defaultFont->glyphMap.utfOffset = 32;
-		defaultFont->glyphMap.count = 220;
-		defaultFont->tileHeight = 12;
-		defaultFont->tileSpacing = 1; */
-
 		fonts[fontCount].fontAsset = fontAsset;
 
 		TextureArrayLayer glyphMapImageLayer;
@@ -49,7 +41,6 @@ namespace ProjectA {
 		const FontID fontId = fontCount;
 
 		fonts[fontCount].glyphMapImageId = renderer.registerTextureArrayLayer(glyphMapImageLayer);
-
 		fontCount += 1;
 
 		return fontId;
@@ -848,6 +839,8 @@ namespace ProjectA {
 		uint32 byteOffset = 0;
 		uint16 codePoint;
 
+		const vec2<float32> imageScale = data.imageSize / renderer.TEXTURE_ARRAY_MAX_SIZE;
+
 		while (byteOffset < data.word.size()) {
 			codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
 
@@ -860,8 +853,8 @@ namespace ProjectA {
 			textCharacter.offset = {characterOffset.x + glyph.leftSideBearing * data.lineHeight, characterOffset.y};
 			textCharacter.size = {glyph.width * data.lineHeight, data.fontSize};
 			textCharacter.textureTransform =
-				mat3x3<float32>::scaling((endTextureCoordinate - startTextureCoordinate) * data.imageSize / renderer.TEXTURE_ARRAY_MAX_SIZE) *
-				mat3x3<float32>::translation(startTextureCoordinate);
+				mat3x3<float32>::scaling((endTextureCoordinate - startTextureCoordinate) * imageScale) *
+				mat3x3<float32>::translation(startTextureCoordinate * imageScale);
 
 			textCharacters.emplace_back(textCharacter);
 
@@ -1146,7 +1139,7 @@ namespace ProjectA {
 	}
 
 	uint16 GUILayer::decodeUtf16CodePoint(const char8* string, uint32& byteOffset) {
-		const uint8 firstByte = static_cast<uint8>(string[byteOffset]);
+		const uint8 firstByte = string[byteOffset];
 
 		byteOffset += 1;
 
@@ -1163,11 +1156,11 @@ namespace ProjectA {
 			return 0;
 		}
 
-		const uint8 secondByte = static_cast<uint8>(string[byteOffset]);
+		const uint8 secondByte = string[byteOffset];
 
 		byteOffset += 1;
 
-		const uint16 codePoint = (firstByte & 0b11111 << 6) | secondByte;
+		const uint16 codePoint = ((firstByte & 0b11111) << 6) | secondByte;
 
 		return codePoint;
 	}

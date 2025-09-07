@@ -5,7 +5,7 @@ namespace ProjectA {
 		public:
 			void registerAssets() override {
 				textStyle.color = 0x000000ff;
-				textStyle.font = loadFontAsset("test-regular");
+				textStyle.font = loadFontAsset("DefaultFont");
 				textStyle.fontSize = 64.0f;
 			}
 
