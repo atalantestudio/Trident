@@ -272,8 +272,8 @@ namespace ProjectA {
 		}
 
 		// TODO(review): lyah::floor
-		// TODO(review): lyah::log2
 		// TODO(review): lyah::max
+		// TODO: lyah::log2
 		if (descriptor.mipLevelCount > std::floor(std::log2(std::max(descriptor.extent.width, std::max(descriptor.extent.height, descriptor.extent.depth)))) + 1) {
 			errorCount += 1;
 

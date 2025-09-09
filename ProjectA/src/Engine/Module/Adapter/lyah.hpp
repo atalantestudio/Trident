@@ -331,7 +331,6 @@ namespace ProjectA {
 	using lyah::radians;
 	using lyah::rcp;
 
-	// TODO(review): lyah::area
 	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
 	// See https://stackoverflow.com/a/717367/17136841.
 	template<typename T>
@@ -349,6 +348,7 @@ namespace ProjectA {
 		uint32 i = 1;
 
 		while (i <= unclosedVertices.count) {
+			// TODO(review): lyah::area
 			area += closedVertices[i][0] * (closedVertices[i + 1][1] - closedVertices[i - 1][1]);
 
 			i += 1;
