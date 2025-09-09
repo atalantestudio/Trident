@@ -135,8 +135,8 @@ namespace ProjectA {
 			// selectedEntityPreviousInverseMass = rigidBody.inverseMass;
 			// selectedEntityPreviousInverseInertia = rigidBody.inverseInertia;
 
-			// rigidBody.inverseMass = 0.0f;
-			// rigidBody.inverseInertia = 0.0f;
+			// rigidBody.inverseMass = 0.0_kg;
+			// rigidBody.inverseInertia = 0.0_kg_m2;
 		}
 
 		return true;

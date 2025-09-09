@@ -122,7 +122,7 @@ namespace ProjectA {
 			RigidBody2D& rigidBody = scene->getRigidBody(entity);
 
 			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
-			if (rigidBody.inverseMass == 0.0f) {
+			if (rigidBody.inverseMass == 0.0_kg) {
 				continue;
 			}
 
@@ -275,7 +275,7 @@ namespace ProjectA {
 			RigidBody2D& rigidBody = scene->getRigidBody(entity);
 
 			// TODO: Exclude dynamic entities with an inverse mass of 0 from the loop.
-			if (rigidBody.inverseMass == 0.0f) {
+			if (rigidBody.inverseMass == 0.0_kg) {
 				continue;
 			}
 
@@ -287,8 +287,8 @@ namespace ProjectA {
 			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * halfDeltaTime;
 			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
 
-			rigidBody.force = {0.0f, 0.0f};
-			rigidBody.torque = 0.0f;
+			rigidBody.force = {0.0_N, 0.0_N};
+			rigidBody.torque = 0.0_Nm;
 		}
 	}
 

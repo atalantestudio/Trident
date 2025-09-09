@@ -43,7 +43,7 @@ namespace ProjectA {
 				const ref<ConvexHullGeometry2D> triangleGeometry = createRef<ConvexHullGeometry2D>(triangleGeometryDescriptor);
 
 				EntityDescriptor polygonDescriptor{};
-				polygonDescriptor.position = {0.45f, -0.625f};
+				polygonDescriptor.position = {0.45_m, -0.625_m};
 				polygonDescriptor.friction = 0.2f;
 				polygonDescriptor.geometry = polygonGeometry;
 				polygonDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
@@ -51,10 +51,10 @@ namespace ProjectA {
 				scene.createStaticEntity(polygonDescriptor);
 
 				EntityDescriptor triangleDescriptor{};
-				triangleDescriptor.position = {0.0f, 1.957f};
-				triangleDescriptor.angularVelocity = radians(0.4617f);
-				triangleDescriptor.friction = radians(-30.0f);
-				triangleDescriptor.mass = 1.0f;
+				triangleDescriptor.position = {0.0_m, 1.957_m};
+				triangleDescriptor.angularVelocity = radians(0.4617_w);
+				triangleDescriptor.friction = radians(-30.0_deg);
+				triangleDescriptor.mass = 1.0_kg;
 				triangleDescriptor.geometry = triangleGeometry;
 				triangleDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 

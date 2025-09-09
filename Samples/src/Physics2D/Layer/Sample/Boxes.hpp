@@ -9,7 +9,7 @@ namespace ProjectA {
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
 				EntityDescriptor floorDescriptor{};
-				floorDescriptor.position = {0.0f, -10.0f};
+				floorDescriptor.position = {0.0_m, -10.0_m};
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
@@ -18,8 +18,8 @@ namespace ProjectA {
 				scene.createStaticEntity(floorDescriptor);
 
 				EntityDescriptor boxDescriptor{};
-				boxDescriptor.position = {0.0f, 4.0f};
-				boxDescriptor.mass = 200.0f;
+				boxDescriptor.position = {0.0_m, 4.0_m};
+				boxDescriptor.mass = 200.0_kg;
 				boxDescriptor.friction = 0.2f;
 				boxDescriptor.geometry = squareGeometry;
 				boxDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};

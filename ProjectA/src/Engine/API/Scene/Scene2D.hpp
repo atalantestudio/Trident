@@ -7,12 +7,12 @@
 
 namespace ProjectA {
 	struct EntityDescriptor {
-		vec2<float32> position = {0.0f, 0.0f};
-		float32 rotation = 0.0f;
+		vec2<float32> position = {0.0_m, 0.0_m};
+		float32 rotation = 0.0_rad;
 		vec2<float32> scale = {1.0f, 1.0f};
-		vec2<float32> linearVelocity = {0.0f, 0.0f};
-		float32 angularVelocity = 0.0f;
-		float32 mass = 0.0f;
+		vec2<float32> linearVelocity = {0.0_m_s, 0.0_m_s};
+		float32 angularVelocity = 0.0_w;
+		float32 mass = 0.0_kg;
 		float32 friction = 0.0f;
 		float32 restitution = 0.0f;
 		ref<Geometry2D> geometry;
@@ -103,8 +103,8 @@ namespace ProjectA {
 				const Entity entity = createEntity(descriptor);
 
 				RigidBody2D& rigidBody = getRigidBody(entity);
-				rigidBody.inverseMass = 0.0f;
-				rigidBody.inverseInertia = 0.0f;
+				rigidBody.inverseMass = 0.0_kg;
+				rigidBody.inverseInertia = 0.0_kg_m2;
 
 				ecs.setComponent<StaticEntityTag>(entity, {});
 			}

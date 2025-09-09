@@ -9,7 +9,7 @@ namespace ProjectA {
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
 				EntityDescriptor floorDescriptor{};
-				floorDescriptor.position = {0.0f, -10.0f};
+				floorDescriptor.position = {0.0_m, -10.0_m};
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
@@ -18,7 +18,7 @@ namespace ProjectA {
 				scene.createStaticEntity(floorDescriptor);
 
 				EntityDescriptor entity0Descriptor{};
-				entity0Descriptor.position = {-1.5f, 10.0f};
+				entity0Descriptor.position = {-1.5_m, 10.0_m};
 				entity0Descriptor.scale = {12.0f, 0.5f};
 				entity0Descriptor.friction = 0.2f;
 				entity0Descriptor.geometry = squareGeometry;
@@ -27,8 +27,8 @@ namespace ProjectA {
 				scene.createStaticEntity(entity0Descriptor);
 
 				EntityDescriptor entity1Descriptor{};
-				entity1Descriptor.position = {1.0f, 6.0f};
-				entity1Descriptor.rotation = 0.3f;
+				entity1Descriptor.position = {1.0_m, 6.0_m};
+				entity1Descriptor.rotation = 0.3_rad;
 				entity1Descriptor.scale = {14.0f, 0.5f};
 				entity1Descriptor.friction = 0.2f;
 				entity1Descriptor.geometry = squareGeometry;
@@ -37,7 +37,7 @@ namespace ProjectA {
 				scene.createStaticEntity(entity1Descriptor);
 
 				EntityDescriptor entity2Descriptor{};
-				entity2Descriptor.position = {-7.0f, 4.0f};
+				entity2Descriptor.position = {-7.0_m, 4.0_m};
 				entity2Descriptor.scale = {0.5f, 3.0f};
 				entity2Descriptor.friction = 0.2f;
 				entity2Descriptor.geometry = squareGeometry;
@@ -46,25 +46,25 @@ namespace ProjectA {
 				scene.createStaticEntity(entity2Descriptor);
 
 				EntityDescriptor pusherDescriptor{};
-				pusherDescriptor.position = {-7.5f, 12.0f};
-				pusherDescriptor.linearVelocity = {4.0f, 0.0f};
+				pusherDescriptor.position = {-7.5_m, 12.0_m};
+				pusherDescriptor.linearVelocity = {4.0_m_s, 0.0_m_s};
 				pusherDescriptor.scale = {0.5f, 2.0f};
 				pusherDescriptor.friction = 0.2f;
-				pusherDescriptor.mass = 10.0f;
+				pusherDescriptor.mass = 10.0_kg;
 				pusherDescriptor.geometry = squareGeometry;
 				pusherDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
 				scene.createDynamicEntity(pusherDescriptor);
 
 				EntityDescriptor dominoDescriptor{};
-				dominoDescriptor.scale = {0.2f, 2.0f};
+				dominoDescriptor.scale = {0.2_m, 2.0_m};
 				dominoDescriptor.friction = 0.1f;
-				dominoDescriptor.mass = 10.0f;
+				dominoDescriptor.mass = 10.0_kg;
 				dominoDescriptor.geometry = squareGeometry;
 				dominoDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
 				for (uint32 dominoIndex = 0; dominoIndex < 10; dominoIndex += 1) {
-					dominoDescriptor.position = {-6.0f + dominoIndex * 1.0f, 11.125f};
+					dominoDescriptor.position = {-6.0_m + dominoIndex, 11.125_m};
 
 					scene.createDynamicEntity(dominoDescriptor);
 				}

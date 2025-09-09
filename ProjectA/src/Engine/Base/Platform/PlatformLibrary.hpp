@@ -7,7 +7,7 @@ namespace ProjectA {
 
 			~PlatformLibrary();
 
-			// TODO(review): Template argument for procedure type?
+			// TODO: Template argument for procedure type?
 			void* getProcedure(std::string_view procedureName) const;
 
 		private:

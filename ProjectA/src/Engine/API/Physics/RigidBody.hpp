@@ -30,24 +30,20 @@ namespace ProjectA {
 			// Position of the center of mass, in world-space.
 			vec2<float32> position = {0.0_m, 0.0_m};
 
-			// TODO(review): Use correct SI unit.
 			vec2<float32> linearVelocity = {0.0_m_s, 0.0_m_s};
 
-			// TODO(review): Use correct SI unit.
+			// TODO: Use linear acceleration with Verlet integration.
 			vec2<float32> linearAcceleration = {0.0_m_s2, 0.0_m_s2};
 
 			// Sum of the forces acting on the object's linear properties.
-			// TODO(review): Use correct SI unit.
-			vec2<float32> force = {0.0f, 0.0f};
+			vec2<float32> force = {0.0_N, 0.0_N};
 
-			// TODO(review): Use correct SI unit.
-			float32 rotation = 0.0f;
+			float32 rotation = 0.0_rad;
 
-			float32 angularVelocity = 0.0_m_s;
+			float32 angularVelocity = 0.0_w;
 
 			// Torque = inertia * angular acceleration (around the COM).
-			// TODO(review): Use correct SI unit.
-			float32 torque = 0.0f;
+			float32 torque = 0.0_Nm;
 
 			// NOTE: The scale of an entity isn't meant to be dynamically updated.
 			vec2<float32> scale = {1.0f, 1.0f};
@@ -56,13 +52,12 @@ namespace ProjectA {
 
 			vec2<float32> centerOfMass;
 
+			// Coefficient of friction.
 			// TODO: Differentiate static friction from dynamic friction.
-			// TODO(review): Use correct SI unit.
 			float32 friction = 0.0f;
 
 			// Inertia = mass distribution over the shape.
-			// TODO(review): Use correct SI unit.
-			float32 inverseInertia = 1.0f;
+			float32 inverseInertia = 1.0_kg_m2;
 
 			ref<Geometry2D> geometry;
 	};

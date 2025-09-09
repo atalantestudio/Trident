@@ -9,7 +9,7 @@ namespace ProjectA {
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
 				EntityDescriptor floorDescriptor{};
-				floorDescriptor.position = {0.0f, -10.0f};
+				floorDescriptor.position = {0.0_m, -10.0_m};
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
@@ -17,8 +17,8 @@ namespace ProjectA {
 				scene.createStaticEntity(floorDescriptor);
 
 				EntityDescriptor entity0Descriptor{};
-				entity0Descriptor.position = {-2.0f, 11.0f};
-				entity0Descriptor.rotation = -0.25f;
+				entity0Descriptor.position = {-2.0_m, 11.0_m};
+				entity0Descriptor.rotation = -0.25_rad;
 				entity0Descriptor.scale = {13.0f, 0.25f};
 				entity0Descriptor.friction = 0.2f;
 				entity0Descriptor.geometry = squareGeometry;
@@ -26,7 +26,7 @@ namespace ProjectA {
 				scene.createStaticEntity(entity0Descriptor);
 
 				EntityDescriptor entity1Descriptor{};
-				entity1Descriptor.position = {5.25f, 9.5f};
+				entity1Descriptor.position = {5.25_m, 9.5_m};
 				entity1Descriptor.scale = {0.25f, 1.0f};
 				entity1Descriptor.friction = 0.2f;
 				entity1Descriptor.geometry = squareGeometry;
@@ -34,8 +34,8 @@ namespace ProjectA {
 				scene.createStaticEntity(entity1Descriptor);
 
 				EntityDescriptor entity2Descriptor{};
-				entity2Descriptor.position = {2.0f, 7.0f};
-				entity2Descriptor.rotation = 0.25f;
+				entity2Descriptor.position = {2.0_m, 7.0_m};
+				entity2Descriptor.rotation = 0.25_rad;
 				entity2Descriptor.scale = {13.0f, 0.25f};
 				entity2Descriptor.friction = 0.2f;
 				entity2Descriptor.geometry = squareGeometry;
@@ -43,7 +43,7 @@ namespace ProjectA {
 				scene.createStaticEntity(entity2Descriptor);
 
 				EntityDescriptor entity3Descriptor{};
-				entity3Descriptor.position = {-5.25f, 5.5f};
+				entity3Descriptor.position = {-5.25_m, 5.5_m};
 				entity3Descriptor.scale = {0.25f, 1.0f};
 				entity3Descriptor.friction = 0.2f;
 				entity3Descriptor.geometry = squareGeometry;
@@ -51,8 +51,8 @@ namespace ProjectA {
 				scene.createStaticEntity(entity3Descriptor);
 
 				EntityDescriptor entity4Descriptor{};
-				entity4Descriptor.position = {-2.0f, 3.0f};
-				entity4Descriptor.rotation = -0.25f;
+				entity4Descriptor.position = {-2.0_m, 3.0_m};
+				entity4Descriptor.rotation = -0.25_rad;
 				entity4Descriptor.scale = {13.0f, 0.25f};
 				entity4Descriptor.friction = 0.2f;
 				entity4Descriptor.geometry = squareGeometry;
@@ -63,11 +63,11 @@ namespace ProjectA {
 
 				EntityDescriptor boxDescriptor{};
 				boxDescriptor.scale = {0.5f, 0.5f};
-				boxDescriptor.mass = 25.0f;
+				boxDescriptor.mass = 25.0_kg;
 				boxDescriptor.geometry = squareGeometry;
 
 				for (uint32 boxIndex = 0; boxIndex < 5; boxIndex += 1) {
-					boxDescriptor.position = {-7.5f + 2.0f * boxIndex, 14.0f};
+					boxDescriptor.position = {-7.5_m + boxIndex * 2.0f, 14.0_m};
 					boxDescriptor.friction = frictions[boxIndex];
 
 					scene.createDynamicEntity(boxDescriptor);
