@@ -197,7 +197,6 @@ namespace ProjectA {
 						for (uint32 i = 0; i < count; i += 1) {
 							const uint32 j = (i + 1) % count;
 
-							// TODO(review): lyah::area
 							signedAreaDouble += contour[i].x * contour[j].y - contour[j].x * contour[i].y;
 						}
 
@@ -291,8 +290,7 @@ namespace ProjectA {
 						T.d = stream.read<sint16>();
 					}
 
-					// TODO(review): lyah::max
-					T.m = std::max(abs(T.a), abs(T.b));
+					T.m = max(abs(T.a), abs(T.b));
 
 					static constexpr float32 G = 33.0f / 65536.0f;
 
@@ -300,8 +298,7 @@ namespace ProjectA {
 						T.m *= 2.0f;
 					}
 
-					// TODO(review): lyah::max
-					T.n = std::max(abs(T.c), abs(T.d));
+					T.n = max(abs(T.c), abs(T.d));
 
 					if (abs(abs(T.b) - abs(T.d)) <= G) {
 						T.n *= 2.0f;

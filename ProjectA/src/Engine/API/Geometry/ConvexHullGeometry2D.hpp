@@ -73,7 +73,7 @@ namespace ProjectA {
 				float32 radius = 0.0f;
 
 				for (const vec2<float32>& vertex : vertices) {
-					radius = std::max(radius, distanceSq(vertex, centroid));
+					radius = std::max(radius, distanceSquared(vertex, centroid));
 				}
 
 				radius = sqrt(radius);

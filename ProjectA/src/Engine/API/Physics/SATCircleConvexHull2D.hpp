@@ -23,7 +23,7 @@ namespace ProjectA {
 		}
 
 		// TODO: Since the incident body is always the circle, does the normal need to be corrected?
-		output.normal = rotate(output.normal, -output.incidentBody->rotation);
+		output.normal = output.normal * mat2x2<float32>::rotation(-output.incidentBody->rotation);
 
 		return output;
 	}

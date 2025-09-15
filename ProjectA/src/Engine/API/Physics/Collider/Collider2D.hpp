@@ -23,7 +23,7 @@ namespace ProjectA {
 	// Finds and returns the incident edge feature on a convex hull.
 	static ClipFeature2D findIncidentEdge(const RigidBody2D& incidentBody, const vec2<float32>& referenceEdgeNormal) {
 		const ref<ConvexHullGeometry2D> geometry = std::static_pointer_cast<ConvexHullGeometry2D>(incidentBody.geometry);
-		const mat2x2<float32> R = mat2x2_rotation(-incidentBody.rotation);
+		const mat2x2<float32> R = mat2x2<float32>::rotation(-incidentBody.rotation);
 
 		float32 minDotProduct = max<float32>();
 		ClipFeature2D incidentEdge{};
@@ -119,7 +119,7 @@ namespace ProjectA {
 		#endif
 	) {
 		const vec2<float32> AB = B.position - A.position;
-		const float32 lengthAB = lengthSq(AB);
+		const float32 lengthAB = lengthSquared(AB);
 
 		if (abs(lengthAB) < 0.001f) {
 			// Degenerate case: The circles are coincident.

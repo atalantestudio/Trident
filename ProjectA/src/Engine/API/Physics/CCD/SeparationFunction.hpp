@@ -115,7 +115,7 @@ namespace ProjectA {
 				const vec2<float32>& edgeLocalPoint0 = edgeObject.geometry->vertices[edgeFeature->edgeIndices[0]];
 				const vec2<float32>& edgeLocalPoint1 = edgeObject.geometry->vertices[edgeFeature->edgeIndices[1]];
 
-				separatingAxis = perpendicular(edgeLocalPoint1 - edgeLocalPoint0, 1.0f);
+				separatingAxis = perpendicularRight(edgeLocalPoint1 - edgeLocalPoint0);
 				localPoint = lerp(edgeLocalPoint0, edgeLocalPoint1, 0.5f);
 
 				const vec2<float32> edgePoint = multiplyTransform(localPoint, edgeObject.transform);

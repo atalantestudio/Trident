@@ -233,8 +233,7 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.extent.width must not be 0.");
 		}
 
-		// TODO(review): lyah::max
-		if (descriptor.extent.width > std::max(limits.maxImageDimension1D, std::max(limits.maxImageDimension2D, limits.maxImageDimension3D))) {
+		if (descriptor.extent.width > max(limits.maxImageDimension1D, max(limits.maxImageDimension2D, limits.maxImageDimension3D))) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.extent.width must be less than the maximum dimension for 1D, 2D or 3D images.");
@@ -246,8 +245,7 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.extent.height must not be 0.");
 		}
 
-		// TODO(review): lyah::max
-		if (descriptor.extent.height > std::max(limits.maxImageDimension2D, limits.maxImageDimension3D)) {
+		if (descriptor.extent.height > max(limits.maxImageDimension2D, limits.maxImageDimension3D)) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.extent.height must be less than the maximum dimension for 2D or 3D images.");
@@ -271,10 +269,7 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.mipLevelCount must not be 0.");
 		}
 
-		// TODO(review): lyah::floor
-		// TODO(review): lyah::max
-		// TODO(review): lyah::log2
-		if (descriptor.mipLevelCount > std::floor(std::log2(std::max(descriptor.extent.width, std::max(descriptor.extent.height, descriptor.extent.depth)))) + 1) {
+		if (descriptor.mipLevelCount > floor(log2(max(descriptor.extent.width, max(descriptor.extent.height, descriptor.extent.depth)))) + 1) {
 			errorCount += 1;
 
 			ENGINE_ERROR("descriptor.mipLevelCount must be less than the maximum mip level for this size.");

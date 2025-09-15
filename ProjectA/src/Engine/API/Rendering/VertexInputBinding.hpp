@@ -50,12 +50,8 @@ namespace ProjectA {
 				const uint32 size = static_cast<uint32>(sizeof(AttributeType));
 
 				offset += size;
-
 				stride = offset;
-
-				// TODO(review): lyah::max
-				maxAlignment = std::max(maxAlignment, alignment);
-
+				maxAlignment = max(maxAlignment, alignment);
 				remainder = stride % maxAlignment;
 
 				if (remainder != 0) {

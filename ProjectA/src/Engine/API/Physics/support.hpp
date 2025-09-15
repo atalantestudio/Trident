@@ -6,14 +6,14 @@ namespace ProjectA {
 	// TODO: Some geometries (e.g. CircleGeometry2D) don't implement `supportIndex`. Prefer `supportVertex` instead.
 	// Returns the index of the farthest point on `A` along `d`, in model-space.
 	static uint32 supportIndex(const RigidBody2D& A, const vec2<float32>& d) {
-		const vec2<float32> dR = rotate(d, -A.rotation);
+		const vec2<float32> dR = d * mat2x2<float32>::rotation(-A.rotation);
 
 		return A.geometry->supportIndex(dR);
 	}
 
 	// Returns the farthest point on `A` along `d`, in model-space.
 	static vec2<float32> supportVertex(const RigidBody2D& A, const vec2<float32>& d) {
-		const vec2<float32> dR = rotate(d, -A.rotation);
+		const vec2<float32> dR = d * mat2x2<float32>::rotation(-A.rotation);
 
 		return A.geometry->support(dR);
 	}

@@ -241,38 +241,8 @@ namespace ProjectA {
 		return {b.x - a.x, b.y - a.y, b.z - a.z};
 	}
 
-	template<std::size_t C, typename T>
-	constexpr T lengthSq(const svec<C, T>& a);
-
-	template<typename T>
-	constexpr T lengthSq(const svec<2, T>& a) {
-		return a.x * a.x + a.y * a.y;
-	}
-
-	template<typename T>
-	constexpr T lengthSq(const svec<3, T>& a) {
-		return a.x * a.x + a.y * a.y + a.z * a.z;
-	}
-
-	template<std::size_t C, typename T>
-	constexpr T distanceSq(const svec<C, T>& a, const svec<C, T>& b) {
-		return lengthSq(b - a);
-	}
-
 	template<typename T>
 	using svec2 = svec<2, T>;
-
-	// TODO(review): lyah::lengthSquared
-	template<std::size_t C, typename T>
-	T lengthSq(const lyah::vec<C, T>& a) {
-		return lyah::dot(a, a);
-	}
-
-	// TODO(review): lyah::distanceSquared
-	template<std::size_t C, typename T>
-	T distanceSq(const lyah::vec<C, T>& a, const lyah::vec<C, T>& b) {
-		return lengthSq(b - a);
-	}
 
 	// K-th dimensional simplex.
 	template<std::size_t K, typename T>
@@ -322,19 +292,24 @@ namespace ProjectA {
 	}
 
 	template<typename T>
-	lyah::vec<2, T> perpendicular(const lyah::vec<2, T>& a, T b) {
-		return {a[1] * b, a[0] * -b};
+	lyah::vec<2, T> perpendicularLeft(const lyah::vec<2, T>& a) {
+		return {-a[1], a[0]};
 	}
 
-	// TODO(review): Perpendicular left
-	// TODO(review): Perpendicular right
+	template<typename T>
+	lyah::vec<2, T> perpendicularRight(const lyah::vec<2, T>& a) {
+		return {a[1], -a[0]};
+	}
 
 	using lyah::abs;
+	using lyah::clamp;
 	using lyah::cos;
 	using lyah::epsilon;
 	using lyah::infinity;
 	using lyah::inverse;
 	using lyah::lerp;
+	using lyah::max;
+	using lyah::min;
 	using lyah::pi;
 	using lyah::pow;
 	using lyah::radians;
@@ -410,24 +385,6 @@ namespace ProjectA {
 		};
 	}
 
-	// TODO(review): lyah::mat2x2::rotation
-	template<typename T>
-	lyah::mat<2, 2, T> mat2x2_rotation(T angle) {
-		const T c = cos(angle);
-		const T s = sin(angle);
-
-		return {
-			c, -s,
-			s, c,
-		};
-	}
-
-	static vec2<float32> rotate(const vec2<float32>& d, float32 r) {
-		const mat2x2<float32> R = mat2x2_rotation<float32>(r);
-
-		return d * R;
-	}
-
 	static float32 signedDistanceLinePoint(const vec2<float32>& a, const vec2<float32>& b, const vec2<float32>& p) {
 		const vec2<float32> ap = p - a;
 		const vec2<float32> ab = b - a;
@@ -436,6 +393,6 @@ namespace ProjectA {
 	}
 
 	static vec2<float32> edgeNormalClockwise(const vec2<float32>& a, const vec2<float32>& b) {
-		return perpendicular(normalized(b - a), -1.0f);
+		return perpendicularLeft(normalized(b - a));
 	}
 }

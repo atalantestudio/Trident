@@ -30,7 +30,7 @@ namespace ProjectA {
 				const vec2<float32> j = polytope[indexJ];
 				const vec2<float32> ij = j - i;
 
-				vec2<float32> normal = normalized(perpendicular(ij, 1.0f));
+				vec2<float32> normal = normalized(perpendicularRight(ij));
 
 				float32 distance = dot(normal, i);
 

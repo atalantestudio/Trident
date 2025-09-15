@@ -70,7 +70,7 @@ namespace ProjectA {
 		vec2<float32> d = B.position - A.position;
 
 		// Degenerate case: The objects have the same position.
-		if (lengthSq(d) == 0.0f) {
+		if (lengthSquared(d) == 0.0f) {
 			return true;
 		}
 

@@ -30,7 +30,7 @@ namespace ProjectA {
 
 	static void queryEdgeDirections(const RigidBody2D& A, const RigidBody2D& B, SAT2DOutput& output) {
 		const ref<ConvexHullGeometry2D>& geometry = std::static_pointer_cast<ConvexHullGeometry2D>(A.geometry);
-		const mat2x2<float32> R = mat2x2_rotation(B.rotation - A.rotation);
+		const mat2x2<float32> R = mat2x2<float32>::rotation(B.rotation - A.rotation);
 
 		// TODO: Expose edge normals from ConvexHullGeometry.
 		for (uint32 edgeIndex = 0; edgeIndex < geometry->edges.count; edgeIndex += 1) {
@@ -89,7 +89,7 @@ namespace ProjectA {
 		}
 
 		// Correct normal direction.
-		output.normal = rotate(output.normal, -output.incidentBody->rotation);
+		output.normal = output.normal * mat2x2<float32>::rotation(-output.incidentBody->rotation);
 
 		return output;
 	}

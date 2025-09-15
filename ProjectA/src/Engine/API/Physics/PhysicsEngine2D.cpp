@@ -5,7 +5,7 @@
 
 namespace ProjectA {
 	vec2<float32> PhysicsEngine2D::calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, const Contact2D& contact) {
-		return B.linearVelocity + perpendicular(contact.rB, -B.angularVelocity) - A.linearVelocity - perpendicular(contact.rA, -A.angularVelocity);
+		return B.linearVelocity + cross(contact.rB, -B.angularVelocity) - A.linearVelocity - cross(contact.rA, -A.angularVelocity);
 	}
 
 	PhysicsEngine2D::PhysicsEngine2D(const PhysicsEngine2DDescriptor& descriptor) :
@@ -144,7 +144,7 @@ namespace ProjectA {
 			const RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
 			const RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
 
-			pair.contactManifold.tangent = perpendicular(pair.contactManifold.normal, 1.0f);
+			pair.contactManifold.tangent = perpendicularRight(pair.contactManifold.normal);
 			pair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
 
 			for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.getContactCount(); contactPointIndex += 1) {
@@ -178,8 +178,7 @@ namespace ProjectA {
 
 				const float32 penetrationBias = (rigidBodyA.geometry->getPenetrationBias() + rigidBodyB.geometry->getPenetrationBias()) * 0.5f;
 
-				// TODO(review): lyah::min
-				contact.bias = -penetrationBias * inverseDeltaTime * std::min(0.0f, contact.separation + ALLOWED_PENETRATION);
+				contact.bias = -penetrationBias * inverseDeltaTime * min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
 				#ifdef ACCUMULATE_IMPULSES
 					RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
@@ -216,13 +215,10 @@ namespace ProjectA {
 					#ifdef ACCUMULATE_IMPULSES
 						const float32 oldNormalValue = contact.accumulatedNormalImpulse;
 
-						// TODO(review): lyah::max
-						contact.accumulatedNormalImpulse = std::max(0.0f, contact.accumulatedNormalImpulse + normalImpulseLength);
-
+						contact.accumulatedNormalImpulse = max(0.0f, contact.accumulatedNormalImpulse + normalImpulseLength);
 						normalImpulseLength = contact.accumulatedNormalImpulse - oldNormalValue;
 					#else
-						// TODO(review): lyah::max
-						normalImpulseLength = std::max(0.0f, normalImpulseLength);
+						normalImpulseLength = max(0.0f, normalImpulseLength);
 					#endif
 
 					const vec2<float32> normalImpulse = pair.contactManifold.normal * normalImpulseLength;
@@ -242,15 +238,12 @@ namespace ProjectA {
 						const float32 maxTangentImpulseLength = pair.combinedFriction * contact.accumulatedNormalImpulse;
 						const float32 oldTangentValue = contact.accumulatedTangentImpulse;
 
-						// TODO(review): lyah::clamp
-						contact.accumulatedTangentImpulse = std::clamp(contact.accumulatedTangentImpulse + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
-
+						contact.accumulatedTangentImpulse = clamp(contact.accumulatedTangentImpulse + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
 						tangentImpulseLength = contact.accumulatedTangentImpulse - oldTangentValue;
 					#else
 						const float32 maxTangentImpulseLength = pair.combinedFriction * normalImpulseLength;
 
-						// TODO(review): lyah::clamp
-						tangentImpulseLength = std::clamp(tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
+						tangentImpulseLength = clamp(tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
 					#endif
 
 					const vec2<float32> tangentImpulse = pair.contactManifold.tangent * tangentImpulseLength;

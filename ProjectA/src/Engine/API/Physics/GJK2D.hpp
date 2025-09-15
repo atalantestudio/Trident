@@ -65,7 +65,7 @@ namespace ProjectA {
 		// In region AB.
 		s[0].u = vAB;
 		s[1].u = uAB;
-		s.divisor = lengthSq(ab);
+		s.divisor = lengthSquared(ab);
 		s.count = 2;
 	}
 
@@ -131,7 +131,7 @@ namespace ProjectA {
 			// In region AB.
 			s[0].u = vAB;
 			s[1].u = uAB;
-			s.divisor = lengthSq(ab);
+			s.divisor = lengthSquared(ab);
 			s.count = 2;
 
 			return;
@@ -143,7 +143,7 @@ namespace ProjectA {
 			s[1] = s[2];
 			s[0].u = vBC;
 			s[1].u = uBC;
-			s.divisor = lengthSq(bc);
+			s.divisor = lengthSquared(bc);
 			s.count = 2;
 
 			return;
@@ -155,7 +155,7 @@ namespace ProjectA {
 			s[0] = s[2];
 			s[0].u = vCA;
 			s[1].u = uCA;
-			s.divisor = lengthSq(ca);
+			s.divisor = lengthSquared(ca);
 			s.count = 2;
 
 			return;
@@ -249,7 +249,7 @@ namespace ProjectA {
 					break;
 			}
 
-			if (lengthSq(d) < epsilon<float32>() * epsilon<float32>()) {
+			if (lengthSquared(d) < epsilon<float32>() * epsilon<float32>()) {
 				ENGINE_WARN("GJK 2D: Vertex, edge or face overlap.");
 
 				break;

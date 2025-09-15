@@ -237,8 +237,7 @@ namespace ProjectA {
 			const uint16 glyphHeight = trueTypeGlyph.max.y - trueTypeGlyph.min.y;
 
 			// Glyph dimension (the largest between width and height) in FUnits.
-			// TODO(review): lyah::max
-			const uint16 glyphDimension = std::max(glyph.width, glyphHeight);
+			const uint16 glyphDimension = max(glyph.width, glyphHeight);
 
 			// Glyph dimension on the high resolution image.
 			// const float32 glyphHighResolutionDimension = (float32) glyph.width / (float32) glyphImage->getWidth() * (float32) glyphDimension;
@@ -306,8 +305,7 @@ namespace ProjectA {
 
 			device->waitIdle();
 
-			// TODO(review): lyah::ceil
-			xOffset += std::ceil(width) + SPREAD_FACTOR * 2;
+			xOffset += ceil(width) + SPREAD_FACTOR * 2;
 		}
 
 		// Transition the glyph map image to TRANSFER_SRC_OPTIMAL and copy its data to the final buffer.
@@ -355,8 +353,7 @@ namespace ProjectA {
 		uint64 maxGlyphEdgeCount = 0;
 
 		for (const TrueTypeFont::Glyph& glyph : glyphs) {
-			// TODO(review): lyah::max
-			maxGlyphEdgeCount = std::max(maxGlyphEdgeCount, glyph.edges.count);
+			maxGlyphEdgeCount = max(maxGlyphEdgeCount, glyph.edges.count);
 		}
 
 		return sizeof(GlyphBuffer) + maxGlyphEdgeCount * sizeof(GlyphEdge);

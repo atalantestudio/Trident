@@ -56,8 +56,7 @@ namespace ProjectA {
 		imageCount = surfaceCapabilities.minImageCount + 1;
 
 		if (surfaceCapabilities.maxImageCount > 0) {
-			// TODO(review): lyah::min
-			imageCount = std::min(imageCount, surfaceCapabilities.maxImageCount);
+			imageCount = min(imageCount, surfaceCapabilities.maxImageCount);
 		}
 
 		ENGINE_INFO("Swapchain image count is [].", imageCount);
@@ -66,9 +65,8 @@ namespace ProjectA {
 			extent = *pointer_cast<const Extent2D*>(&surfaceCapabilities.currentExtent);
 		}
 		else {
-			// TODO(review): lyah::clamp
-			extent.width = std::clamp(descriptor.extent.width, surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
-			extent.height = std::clamp(descriptor.extent.height, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
+			extent.width = clamp(descriptor.extent.width, surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
+			extent.height = clamp(descriptor.extent.height, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
 		}
 
 		ENGINE_INFO("Swapchain image extent is ([], []).", extent.width, extent.height);
