@@ -249,7 +249,7 @@ namespace ProjectA {
 					break;
 			}
 
-			if (lengthSq(d) < lyah::epsilon<float32>() * lyah::epsilon<float32>()) {
+			if (lengthSq(d) < epsilon<float32>() * epsilon<float32>()) {
 				ENGINE_WARN("GJK 2D: Vertex, edge or face overlap.");
 
 				break;

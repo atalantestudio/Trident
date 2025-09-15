@@ -30,9 +30,9 @@ void ParticleSystem::render(const ProjectA::OrthographicCamera3D& camera) {
 		}
 
 		const ProjectA::float32 remainingLife = particle.remainingLife / particle.lifetime;
-		const ProjectA::vec4<ProjectA::float32> color = lyah::lerp(particle.endColor, particle.startColor, remainingLife);
+		const ProjectA::vec4<ProjectA::float32> color = ProjectA::lerp(particle.endColor, particle.startColor, remainingLife);
 
-		const ProjectA::float32 size = lyah::lerp(particle.startSize, particle.endSize, 1.0f - remainingLife);
+		const ProjectA::float32 size = ProjectA::lerp(particle.startSize, particle.endSize, 1.0f - remainingLife);
 
 		const ProjectA::vec3<ProjectA::float32> position = {particle.position[0], particle.position[1], -0.2f};
 	}
@@ -46,7 +46,7 @@ void ParticleSystem::emitParticle(const ParticleProperties& properties) {
 	particle.remainingLife = properties.lifetime;
 
 	particle.position = properties.position;
-	particle.rotation = Random::get<ProjectA::float32>() * 2.0f * lyah::pi<ProjectA::float32>();
+	particle.rotation = Random::get<ProjectA::float32>() * 2.0f * ProjectA::pi<ProjectA::float32>();
 
 	ProjectA::float32 linearVelocityX = properties.linearVelocityBias[0] * (Random::get<ProjectA::float32>() - 0.5f);
 	ProjectA::float32 linearVelocityY = properties.linearVelocityBias[1] * (Random::get<ProjectA::float32>() - 0.5f);

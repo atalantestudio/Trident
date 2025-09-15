@@ -19,7 +19,7 @@
 #define RENDERER_TRIANGLE_INDIRECT 14
 
 // Select the renderer to run.
-#define RENDERER RENDERER_IMAGE_ASSET
+#define RENDERER RENDERER_TRIANGLE
 
 #if RENDERER == RENDERER_ARRAY_TEXTURE
 	#include "../Renderer/ArrayTextureRenderer.hpp"

@@ -42,7 +42,7 @@ namespace ProjectA {
 			float32 calculateMass(float32 density, const vec2<float32>& scale) const final override {
 				ENGINE_ASSERT(scale[0] == scale[1], "The scale must be equal in both X and Y directions.");
 
-				return density * lyah::pi<float32>() * lyah::pow(radius * scale[0], 2.0f);
+				return density * pi<float32>() * pow(radius * scale[0], 2.0f);
 			}
 
 			float32 calculateRadius() const final override {
@@ -64,7 +64,7 @@ namespace ProjectA {
 				indices = sequence<uint32>(resolution * 3);
 				vertices = sequence<vec2<float32>>(resolution);
 
-				const float32 theta = lyah::pi<float32>() * 2.0f / resolution;
+				const float32 theta = pi<float32>() * 2.0f / resolution;
 
 				float32 angle = 0.0f;
 
@@ -73,7 +73,7 @@ namespace ProjectA {
 					indices[triangleIndex * 3 + 1] = triangleIndex + 1;
 					indices[triangleIndex * 3 + 2] = triangleIndex + 2;
 
-					vertices[triangleIndex] = vec2<float32>(lyah::sin(angle), lyah::cos(angle)) * radius;
+					vertices[triangleIndex] = vec2<float32>(sin(angle), cos(angle)) * radius;
 
 					angle += theta;
 				}

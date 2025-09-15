@@ -20,9 +20,9 @@ namespace ProjectA {
 		mat4x4<float32> transform = mat4x4<float32>::rotation({0.0f, 0.0f, 1.0f}, rotation);
 
 		// TODO: Get rid of the transpose.
-		transform *= lyah::transpose(mat4x4<float32>::translation(position));
+		transform *= transpose(mat4x4<float32>::translation(position));
 
-		view = lyah::inverse(transform);
+		view = inverse(transform);
 		projectionView = projection * view;
 	}
 }

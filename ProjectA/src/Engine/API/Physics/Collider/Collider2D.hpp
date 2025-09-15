@@ -130,7 +130,7 @@ namespace ProjectA {
 		const float32 scaleA = A.scale[0];
 		const float32 scaleB = B.scale[0];
 
-		const float32 d = lengthAB - lyah::pow(A.geometry->radius * scaleA + B.geometry->radius * scaleB, 2.0f);
+		const float32 d = lengthAB - pow(A.geometry->radius * scaleA + B.geometry->radius * scaleB, 2.0f);
 
 		if (d > 0.0f) {
 			return false;

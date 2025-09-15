@@ -427,7 +427,7 @@ namespace ProjectA {
 					}
 
 					float32 smallestWidth = components[growableChildIndexCopy[0]].size.width.value;
-					float32 secondSmallestWidth = lyah::infinity<float32>();
+					float32 secondSmallestWidth = infinity<float32>();
 					float32 widthToAdd = remainingWidth;
 
 					for (const uint32 childIndex : growableChildIndexCopy) {
@@ -574,7 +574,7 @@ namespace ProjectA {
 					}
 
 					float32 smallestHeight = components[growableChildIndexCopy[0]].size.height.value;
-					float32 secondSmallestHeight = lyah::infinity<float32>();
+					float32 secondSmallestHeight = infinity<float32>();
 					float32 heightToAdd = remainingHeight;
 
 					for (const uint32 childIndex : growableChildIndexCopy) {

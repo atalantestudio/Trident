@@ -5,7 +5,7 @@
 
 namespace ProjectA {
 	vec2<float32> PhysicsEngine2D::calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, const Contact2D& contact) {
-		return B.linearVelocity + cross(B.angularVelocity, contact.rB) - A.linearVelocity - cross(A.angularVelocity, contact.rA);
+		return B.linearVelocity + perpendicular(contact.rB, -B.angularVelocity) - A.linearVelocity - perpendicular(contact.rA, -A.angularVelocity);
 	}
 
 	PhysicsEngine2D::PhysicsEngine2D(const PhysicsEngine2DDescriptor& descriptor) :
@@ -145,7 +145,7 @@ namespace ProjectA {
 			const RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
 
 			pair.contactManifold.tangent = perpendicular(pair.contactManifold.normal, 1.0f);
-			pair.combinedFriction = lyah::sqrt(rigidBodyA.friction * rigidBodyB.friction);
+			pair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
 
 			for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.getContactCount(); contactPointIndex += 1) {
 				Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];

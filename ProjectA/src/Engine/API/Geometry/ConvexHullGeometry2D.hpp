@@ -76,7 +76,7 @@ namespace ProjectA {
 					radius = std::max(radius, distanceSq(vertex, centroid));
 				}
 
-				radius = lyah::sqrt(radius);
+				radius = sqrt(radius);
 
 				return radius;
 			}

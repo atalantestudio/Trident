@@ -280,26 +280,36 @@ namespace ProjectA {
 
 	template<typename T>
 	struct sim<2, T> {
-		lyah::vec<2, T> m[3];
-		std::uint8_t count : 2;
+		public:
+			sim() :
+				count(0)
+			{}
 
-		sim() : count(0) {}
+			sim(const lyah::vec<2, T>& a) :
+				m{a},
+				count(1)
+			{}
 
-		sim(const lyah::vec<2, T>& a) : m{a}, count(1) {}
+			sim(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b) :
+				m{a, b},
+				count(2)
+			{}
 
-		sim(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b) : m{a, b}, count(2) {}
+			const lyah::vec<2, T>& operator [](std::uint8_t index) const {
+				DEBUG_ASSERT(index < count);
 
-		const lyah::vec<2, T>& operator [](std::uint8_t index) const {
-			DEBUG_ASSERT(index < count);
+				return m[index];
+			}
 
-			return m[index];
-		}
+			lyah::vec<2, T>& operator [](std::uint8_t index) {
+				DEBUG_ASSERT(index < 3);
 
-		lyah::vec<2, T>& operator [](std::uint8_t index) {
-			DEBUG_ASSERT(index < 3);
+				return m[index];
+			}
 
-			return m[index];
-		}
+		public:
+			lyah::vec<2, T> m[3];
+			std::uint8_t count : 2;
 	};
 
 	template<typename T>
@@ -312,51 +322,28 @@ namespace ProjectA {
 	}
 
 	template<typename T>
-	lyah::vec<2, T> cross(const lyah::vec<2, T>& a, float32 b) {
+	lyah::vec<2, T> perpendicular(const lyah::vec<2, T>& a, T b) {
 		return {a[1] * b, a[0] * -b};
 	}
 
-	template<typename T>
-	lyah::vec<2, T> cross(float32 a, const lyah::vec<2, T>& b) {
-		return {b[1] * -a, b[0] * a};
-	}
-
-	template<typename T>
-	lyah::vec<2, T> perpendicular(const lyah::vec<2, T>& a, T b) {
-		return {a[1] * b, a[0] * b * static_cast<T>(-1)};
-	}
+	// TODO(review): Perpendicular left
+	// TODO(review): Perpendicular right
 
 	using lyah::abs;
+	using lyah::cos;
+	using lyah::epsilon;
+	using lyah::infinity;
+	using lyah::inverse;
 	using lyah::lerp;
+	using lyah::pi;
+	using lyah::pow;
 	using lyah::radians;
-	using lyah::rcp;
+	using lyah::sin;
+	using lyah::sqrt;
+	using lyah::transpose;
 
 	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.
 	// See https://stackoverflow.com/a/717367/17136841.
-	template<typename T>
-	T area(const sequence<lyah::vec<2, T>>& unclosedVertices) {
-		T area = static_cast<T>(0.0);
-
-		// Close vertex array.
-		sequence<lyah::vec<2, T>> closedVertices(unclosedVertices.count + 2);
-
-		std::copy(unclosedVertices.begin(), unclosedVertices.end(), &closedVertices[0]);
-
-		closedVertices[unclosedVertices.count + 0] = unclosedVertices[0];
-		closedVertices[unclosedVertices.count + 1] = unclosedVertices[1];
-
-		uint32 i = 1;
-
-		while (i <= unclosedVertices.count) {
-			// TODO(review): lyah::area
-			area += closedVertices[i][0] * (closedVertices[i + 1][1] - closedVertices[i - 1][1]);
-
-			i += 1;
-		}
-
-		return abs(area) * static_cast<T>(0.5);
-	}
-
 	template<typename T>
 	T scaledArea(const sequence<lyah::vec<2, T>>& unclosedVertices, const vec2<float32>& scale) {
 		T area = static_cast<T>(0.0);
@@ -386,12 +373,28 @@ namespace ProjectA {
 		const lyah::vec<3, T> b_3d = {b[0], b[1], 0.0f};
 		const lyah::vec<3, T> r_3d = cross(a_3d, b_3d);
 
+		// TODO(review): Check if this function is correct.
+		// a_3d = {a.x, a.y, 0}
+		// b_3d = {b.x, b.y, 0}
+		/* r_3d = cross(a_3d, b_3d) = {
+			0,
+			0,
+			--- a.x * b.y - a.y * b.x, ---
+		} */
+		// return {r_3d.x, r_3d.y}
+
 		return {r_3d[0], r_3d[1]};
 	}
 
 	template<typename T>
 	lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b, const lyah::vec<2, T>& c) {
 		const lyah::vec<2, T> b_c = {b[0] * c[1], b[1] * c[0]};
+
+		// TODO(review): Check if this function is correct.
+		/* return {
+			a.y * (b.x * c.y - b.y * c.x),
+			a.x * (b.y * c.x - b.x * c.y),
+		} */
 
 		return {
 			a[1] * (b_c[0] - b_c[1]),
@@ -410,8 +413,8 @@ namespace ProjectA {
 	// TODO(review): lyah::mat2x2::rotation
 	template<typename T>
 	lyah::mat<2, 2, T> mat2x2_rotation(T angle) {
-		const T c = lyah::cos(angle);
-		const T s = lyah::sin(angle);
+		const T c = cos(angle);
+		const T s = sin(angle);
 
 		return {
 			c, -s,
@@ -430,17 +433,6 @@ namespace ProjectA {
 		const vec2<float32> ab = b - a;
 
 		return parallelogramArea(ab, ap) / length(ab);
-	}
-
-	template<typename T>
-	struct Interval {
-		T min;
-		T max;
-	};
-
-	template<typename T>
-	static T overlap(const Interval<T>& intervalA, const Interval<T>& intervalB) {
-		return std::max(intervalA.min - intervalB.max, intervalB.min - intervalA.max);
 	}
 
 	static vec2<float32> edgeNormalClockwise(const vec2<float32>& a, const vec2<float32>& b) {
