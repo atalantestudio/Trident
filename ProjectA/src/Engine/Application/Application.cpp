@@ -209,8 +209,6 @@ namespace ProjectA {
 		previousTime = currentTime;
 		frameTimeAccumulator += frameTime;
 
-		// TODO(review): Cap frameTimeAccumumlator to avoid the "spiral of death" (increasing number of physics updates).
-
 		while (frameTimeAccumulator >= FIXED_DELTA_TIME) {
 			update(FIXED_DELTA_TIME, INVERSE_FIXED_DELTA_TIME);
 
