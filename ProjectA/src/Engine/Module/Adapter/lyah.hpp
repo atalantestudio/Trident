@@ -343,34 +343,14 @@ namespace ProjectA {
 	}
 
 	template<typename T>
-	lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b) {
-		const lyah::vec<3, T> a_3d = {a[0], a[1], 0.0f};
-		const lyah::vec<3, T> b_3d = {b[0], b[1], 0.0f};
-		const lyah::vec<3, T> r_3d = cross(a_3d, b_3d);
-
-		// TODO(review): Check if this function is correct.
-		// a_3d = {a.x, a.y, 0}
-		// b_3d = {b.x, b.y, 0}
-		/* r_3d = cross(a_3d, b_3d) = {
-			0,
-			0,
-			--- a.x * b.y - a.y * b.x, ---
-		} */
-		// return {r_3d.x, r_3d.y}
-
-		return {r_3d[0], r_3d[1]};
-	}
-
-	template<typename T>
 	lyah::vec<2, T> cross2d(const lyah::vec<2, T>& a, const lyah::vec<2, T>& b, const lyah::vec<2, T>& c) {
 		const lyah::vec<2, T> b_c = {b[0] * c[1], b[1] * c[0]};
 
-		// TODO(review): Check if this function is correct.
+		// TODO: Check if this function is correct.
 		/* return {
 			a.y * (b.x * c.y - b.y * c.x),
 			a.x * (b.y * c.x - b.x * c.y),
 		} */
-
 		return {
 			a[1] * (b_c[0] - b_c[1]),
 			a[0] * (b_c[1] - b_c[0]),

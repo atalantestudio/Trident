@@ -13,7 +13,9 @@ namespace ProjectA {
 
 			~VulkanInstance() final override;
 
-			void createDebugUtilsMessenger();
+			#ifdef DEBUG_ENABLE_MESSENGER
+				void createDebugUtilsMessenger();
+			#endif
 
 			VkPhysicalDevice selectPhysicalDevice() const;
 

@@ -2,6 +2,10 @@
 
 #include "Backend/OpenGL/OpenGLBuffer.hpp"
 
+#if OPENGL_VERSION < OPENGL_VERSION_4_5
+	#include "Backend/OpenGL/BufferUsage.hpp"
+#endif
+
 namespace ProjectA {
 	OpenGLBuffer::OpenGLBuffer(const BufferDescriptor& descriptor) :
 		Buffer(descriptor)

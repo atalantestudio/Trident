@@ -13,7 +13,12 @@ namespace ProjectA {
 			void execute() const final override {
 				DEBUG_ASSERT(renderPipeline->minSampleShading >= 0.0f && renderPipeline->minSampleShading <= 1.0f);
 
-				glBindVertexArray(renderPipeline->vaobj);
+				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+					glBindVertexArray(renderPipeline->vaobj);
+				#else
+					ENGINE_ERROR_UNSUPPORTED();
+				#endif
+
 				glUseProgram(renderPipeline->program);
 				glFrontFace(renderPipeline->frontFace);
 

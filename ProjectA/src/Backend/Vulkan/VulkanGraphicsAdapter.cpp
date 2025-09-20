@@ -25,7 +25,9 @@ namespace ProjectA {
 
 		loadInstanceProcedures();
 
-		instance->createDebugUtilsMessenger();
+		#ifdef DEBUG_ENABLE_MESSENGER
+			instance->createDebugUtilsMessenger();
+		#endif
 
 		surface = createRef<VulkanSurface>(instance->object, window);
 		physicalDevice = createRef<VulkanPhysicalDevice>(instance->selectPhysicalDevice());

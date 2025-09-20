@@ -28,7 +28,7 @@ namespace ProjectA {
 		// TODO Differentiate static and dynamic friction.
 		float32 combinedFriction;
 
-		// TODO(review): Store combined restitution.
+		// TODO: Store combined restitution.
 		// float32 combinedRestitution;
 	};
 }

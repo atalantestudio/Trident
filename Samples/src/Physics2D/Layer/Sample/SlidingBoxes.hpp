@@ -13,6 +13,7 @@ namespace ProjectA {
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
+				floorDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
 				scene.createStaticEntity(floorDescriptor);
 
@@ -22,6 +23,7 @@ namespace ProjectA {
 				entity0Descriptor.scale = {13.0f, 0.25f};
 				entity0Descriptor.friction = 0.2f;
 				entity0Descriptor.geometry = squareGeometry;
+				entity0Descriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
 				scene.createStaticEntity(entity0Descriptor);
 
@@ -30,6 +32,7 @@ namespace ProjectA {
 				entity1Descriptor.scale = {0.25f, 1.0f};
 				entity1Descriptor.friction = 0.2f;
 				entity1Descriptor.geometry = squareGeometry;
+				entity1Descriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
 				scene.createStaticEntity(entity1Descriptor);
 
@@ -39,6 +42,7 @@ namespace ProjectA {
 				entity2Descriptor.scale = {13.0f, 0.25f};
 				entity2Descriptor.friction = 0.2f;
 				entity2Descriptor.geometry = squareGeometry;
+				entity2Descriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
 				scene.createStaticEntity(entity2Descriptor);
 
@@ -47,6 +51,7 @@ namespace ProjectA {
 				entity3Descriptor.scale = {0.25f, 1.0f};
 				entity3Descriptor.friction = 0.2f;
 				entity3Descriptor.geometry = squareGeometry;
+				entity3Descriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
 				scene.createStaticEntity(entity3Descriptor);
 
@@ -56,6 +61,7 @@ namespace ProjectA {
 				entity4Descriptor.scale = {13.0f, 0.25f};
 				entity4Descriptor.friction = 0.2f;
 				entity4Descriptor.geometry = squareGeometry;
+				entity4Descriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
 				scene.createStaticEntity(entity4Descriptor);
 
@@ -65,6 +71,7 @@ namespace ProjectA {
 				boxDescriptor.scale = {0.5f, 0.5f};
 				boxDescriptor.mass = 25.0_kg;
 				boxDescriptor.geometry = squareGeometry;
+				boxDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 
 				for (uint32 boxIndex = 0; boxIndex < 5; boxIndex += 1) {
 					boxDescriptor.position = {-7.5_m + boxIndex * 2.0f, 14.0_m};

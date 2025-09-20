@@ -161,7 +161,11 @@ namespace ProjectA {
 		}
 
 		#if OPENGL_VERSION < OPENGL_VERSION_4_5 && defined(OPENGL_UNBIND_AFTER_USE)
-			glBindVertexArray(0);
+			#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+				glBindVertexArray(0);
+			#else
+				ENGINE_ERROR_UNSUPPORTED();
+			#endif
 		#endif
 	}
 
@@ -169,6 +173,11 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		glDeleteProgram(program);
-		glDeleteVertexArrays(1, &vaobj);
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+			glDeleteVertexArrays(1, &vaobj);
+		#else
+			ENGINE_ERROR_UNSUPPORTED();
+		#endif
 	}
 }

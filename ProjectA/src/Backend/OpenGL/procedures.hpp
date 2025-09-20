@@ -178,14 +178,19 @@ namespace ProjectA {
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_2
 		extern PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC glDrawArraysInstancedBaseInstance;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
+		extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
+	#else
+		extern PFNGLDRAWARRAYSPROC glDrawArrays;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_2
 		extern PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXBASEINSTANCEPROC glDrawElementsInstancedBaseVertexBaseInstance;
 	#elif OPENGL_VERSION >= OPENGL_VERSION_3_2
 		extern PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXPROC glDrawElementsInstancedBaseVertex;
 	#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
-		extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
 		extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced;
 	#else
-		extern PFNGLDRAWARRAYSPROC glDrawArrays;
 		extern PFNGLDRAWELEMENTSPROC glDrawElements;
 	#endif
 
@@ -219,6 +224,7 @@ namespace ProjectA {
 		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
 		extern PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC glNamedFramebufferReadBuffer;
 	#else
+		extern PFNGLDRAWBUFFERPROC glDrawBuffer;
 		extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
 		extern PFNGLREADBUFFERPROC glReadBuffer;
 	#endif

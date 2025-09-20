@@ -65,6 +65,10 @@ namespace ProjectA {
 	#define VULKAN_USE_VK_KHR_swapchain
 
 	#ifdef ENABLE_OPENGL_ADAPTER
+		#if OPENGL_VERSION < OPENGL_VERSION_2_0
+			#error "OpenGL versions older than 2.0 cannot be used."
+		#endif
+
 		#if defined(DEBUG_ENABLE_MESSENGER) && OPENGL_VERSION < OPENGL_VERSION_4_3
 			#error "Debug messenger cannot be enabled below OpenGL 4.3."
 		#endif

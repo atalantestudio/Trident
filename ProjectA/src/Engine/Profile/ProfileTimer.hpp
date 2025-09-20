@@ -3,11 +3,11 @@
 #include "Engine/Profile/ProfileEvent.hpp"
 
 namespace ProjectA {
-	class Timer {
+	class ProfileTimer {
 		public:
-			Timer(const std::string& name);
+			explicit ProfileTimer(const std::string& name);
 
-			~Timer();
+			~ProfileTimer();
 
 		private:
 			ProfileEvent event;

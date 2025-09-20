@@ -13,6 +13,7 @@ namespace ProjectA {
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
+				floorDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
 
 				scene.createStaticEntity(floorDescriptor);
 
@@ -20,6 +21,7 @@ namespace ProjectA {
 				boxDescriptor.mass = 10.0_kg;
 				boxDescriptor.friction = 0.2f;
 				boxDescriptor.geometry = squareGeometry;
+				boxDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 
 				vec2<float32> x = {-6.0_m, 0.75_m};
 

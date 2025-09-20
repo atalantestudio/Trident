@@ -21,7 +21,7 @@ namespace ProjectA {
 					glMultiDrawElementsIndirect(mode, type, indirect, drawcount, stride);
 				#elif OPENGL_VERSION >= OPENGL_VERSION_4_0
 					for (GLsizei drawindex = 0; drawindex < drawcount; drawindex += 1) {
-						glDrawElementsIndirect(mode, indirect + drawindex * stride);
+						glDrawElementsIndirect(mode, type, indirect + drawindex * stride);
 					}
 				#else
 					ENGINE_ERROR_UNSUPPORTED();

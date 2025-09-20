@@ -9,8 +9,6 @@
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
-#include "Engine/Debug/ScopeTimer.hpp"
-
 namespace ProjectA {
 	float64 Application::getFixedDeltaTime() {
 		return FIXED_DELTA_TIME;

@@ -72,7 +72,7 @@ namespace ProjectA {
 					textureArrayDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
 					textureArrayDescriptorSetLayoutBinding.imageViews = {baboonImageView, cameramanImageView, lennaImageView, pepperImageView};
 
-					// TODO(review): Don't provide a copy of the sampler for each image.
+					// TODO: Don't provide a copy of the sampler for each image view.
 					textureArrayDescriptorSetLayoutBinding.samplers = {sampler, sampler, sampler, sampler};
 
 					DescriptorSetLayout descriptorSetLayout;

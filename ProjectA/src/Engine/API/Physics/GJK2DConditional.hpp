@@ -34,9 +34,9 @@ namespace ProjectA {
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ac = c - a;
 		const vec2<float32> ao = -a;
-		const vec2<float32> abc = cross2d(ab, ac);
 
-		if (dot(cross2d(abc, ac), ao) > 0.0f) {
+		// TODO: Fix vector cross product.
+		if (dot(ao, {0.0f, 0.0f}) > 0.0f) {
 			if (dot(ac, ao) > 0.0f) {
 				s = {a, c};
 				d = cross2d(ac, ao, ac);
@@ -51,7 +51,10 @@ namespace ProjectA {
 			return false;
 		}
 
-		if (dot(cross2d(ab, abc), ao) > 0.0f) {
+		// TODO: Fix vector cross product.
+		if (dot(ao, {0.0f, 0.0f}) > 0.0f) {
+			BREAKPOINT();
+
 			s = {a, b};
 
 			handleSimplex1(s, d);

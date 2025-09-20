@@ -17,35 +17,37 @@
 	}
 
 	#define DEBUG_PRINT(value) std::cout << #value##" = " << value << std::endl
+
+	#define ENGINE_ASSERT(condition, ...) { \
+		if (!(condition)) { \
+			ENGINE_ERROR(__VA_ARGS__); \
+			BREAKPOINT(); \
+		} \
+	}
+
+	#define CLIENT_ASSERT(condition, ...) { \
+		if (!(condition)) { \
+			CLIENT_ERROR(__VA_ARGS__); \
+			BREAKPOINT(); \
+		} \
+	}
 #else
 	#define ABORT std::abort
-	#define BREAKPOINT
+	#define BREAKPOINT()
 	#define DEBUG_ASSERT(...)
 	#define DEBUG_PRINT(...)
+	#define ENGINE_ASSERT(...)
+	#define CLIENT_ASSERT(...)
 #endif
-
-#define ENGINE_ASSERT(condition, ...) { \
-	if (!(condition)) { \
-		ENGINE_ERROR(__VA_ARGS__); \
-		BREAKPOINT(); \
-	} \
-}
-
-#define CLIENT_ASSERT(condition, ...) { \
-	if (!(condition)) { \
-		CLIENT_ERROR(__VA_ARGS__); \
-		BREAKPOINT(); \
-	} \
-}
 
 #define ENGINE_STATIC_ASSERT static_assert
 
 #ifdef BUILD_MODE_PROFILE
 	#include "Engine/Profile/Profiler.hpp"
-	#include "Engine/Profile/Timer.hpp"
+	#include "Engine/Profile/ProfileTimer.hpp"
 
-	#define PROFILER(path) ::ProjectA::Profiler profiler = ::ProjectA::Profiler(path)
-	#define PROFILE_SCOPE(name) ::ProjectA::Timer timer = ::ProjectA::Timer(name)
+	#define PROFILER(path) ::ProjectA::Profiler __profiler = ::ProjectA::Profiler(path)
+	#define PROFILE_SCOPE(name) ::ProjectA::ProfileTimer __profileTimer = ::ProjectA::ProfileTimer(name)
 
 	#if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) || (defined(__ICC) && (__ICC >= 600)) || defined(__ghs__)
 		#define FUNCTION_SIGNATURE __PRETTY_FUNCTION__

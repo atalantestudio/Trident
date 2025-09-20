@@ -357,14 +357,19 @@ namespace ProjectA {
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_2
 			LOAD_PROCEDURE(glDrawArraysInstancedBaseInstance);
+		#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
+			LOAD_PROCEDURE(glDrawArraysInstanced);
+		#else
+			LOAD_PROCEDURE(glDrawArrays);
+		#endif
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_2
 			LOAD_PROCEDURE(glDrawElementsInstancedBaseVertexBaseInstance);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_2
 			LOAD_PROCEDURE(glDrawElementsInstancedBaseVertex);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
-			LOAD_PROCEDURE(glDrawArraysInstanced);
 			LOAD_PROCEDURE(glDrawElementsInstanced);
 		#else
-			LOAD_PROCEDURE(glDrawArrays);
 			LOAD_PROCEDURE(glDrawElements);
 		#endif
 
@@ -398,6 +403,7 @@ namespace ProjectA {
 			LOAD_PROCEDURE(glNamedFramebufferDrawBuffers);
 			LOAD_PROCEDURE(glNamedFramebufferReadBuffer);
 		#else
+			LOAD_PROCEDURE(glDrawBuffer);
 			LOAD_PROCEDURE(glDrawBuffers);
 			LOAD_PROCEDURE(glReadBuffer);
 		#endif
