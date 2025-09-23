@@ -8,7 +8,7 @@ namespace ProjectA {
 			void build() override {
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
-				EntityDescriptor floorDescriptor{};
+				Entity2DDescriptor floorDescriptor{};
 				floorDescriptor.position = {0.0_m, -10.0_m};
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
@@ -17,7 +17,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(floorDescriptor);
 
-				EntityDescriptor entity0Descriptor{};
+				Entity2DDescriptor entity0Descriptor{};
 				entity0Descriptor.position = {-2.0_m, 11.0_m};
 				entity0Descriptor.rotation = -0.25_rad;
 				entity0Descriptor.scale = {13.0f, 0.25f};
@@ -27,7 +27,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(entity0Descriptor);
 
-				EntityDescriptor entity1Descriptor{};
+				Entity2DDescriptor entity1Descriptor{};
 				entity1Descriptor.position = {5.25_m, 9.5_m};
 				entity1Descriptor.scale = {0.25f, 1.0f};
 				entity1Descriptor.friction = 0.2f;
@@ -36,7 +36,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(entity1Descriptor);
 
-				EntityDescriptor entity2Descriptor{};
+				Entity2DDescriptor entity2Descriptor{};
 				entity2Descriptor.position = {2.0_m, 7.0_m};
 				entity2Descriptor.rotation = 0.25_rad;
 				entity2Descriptor.scale = {13.0f, 0.25f};
@@ -46,7 +46,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(entity2Descriptor);
 
-				EntityDescriptor entity3Descriptor{};
+				Entity2DDescriptor entity3Descriptor{};
 				entity3Descriptor.position = {-5.25_m, 5.5_m};
 				entity3Descriptor.scale = {0.25f, 1.0f};
 				entity3Descriptor.friction = 0.2f;
@@ -55,7 +55,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(entity3Descriptor);
 
-				EntityDescriptor entity4Descriptor{};
+				Entity2DDescriptor entity4Descriptor{};
 				entity4Descriptor.position = {-2.0_m, 3.0_m};
 				entity4Descriptor.rotation = -0.25_rad;
 				entity4Descriptor.scale = {13.0f, 0.25f};
@@ -67,7 +67,7 @@ namespace ProjectA {
 
 				static constexpr float32 frictions[5] = {0.75f, 0.5f, 0.35f, 0.1f, 0.0f};
 
-				EntityDescriptor boxDescriptor{};
+				Entity2DDescriptor boxDescriptor{};
 				boxDescriptor.scale = {0.5f, 0.5f};
 				boxDescriptor.mass = 25.0_kg;
 				boxDescriptor.geometry = squareGeometry;

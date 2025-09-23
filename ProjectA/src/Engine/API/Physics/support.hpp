@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/API/Physics/RigidBody.hpp"
+#include "Engine/API/Physics/RigidBody2D.hpp"
 
 namespace ProjectA {
 	// TODO: Some geometries (e.g. CircleGeometry2D) don't implement `supportIndex`. Prefer `supportVertex` instead.

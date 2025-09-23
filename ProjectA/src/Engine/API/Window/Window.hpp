@@ -15,6 +15,12 @@ namespace ProjectA {
 			// Returns the size of the client area.
 			const sint32* getSize() const;
 
+			float32 getAspectRatio() const {
+				const sint32* size = getSize();
+
+				return static_cast<float32>(size[0]) / size[1];
+			}
+
 			// Returns whether the window is maximized.
 			bool isMaximized() const;
 

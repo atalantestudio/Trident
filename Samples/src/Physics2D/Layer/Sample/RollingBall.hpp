@@ -9,7 +9,7 @@ namespace ProjectA {
 				const ref<CircleGeometry2D> circleGeometry = CircleGeometry2D::unitCircle(32);
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
-				EntityDescriptor floorDescriptor{};
+				Entity2DDescriptor floorDescriptor{};
 				floorDescriptor.position = {0.0_m, -10.0_m};
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
@@ -18,7 +18,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(floorDescriptor);
 
-				EntityDescriptor slide0Descriptor{};
+				Entity2DDescriptor slide0Descriptor{};
 				slide0Descriptor.position = {-4.0_m, 3.2_m};
 				slide0Descriptor.rotation = radians(-20.0_deg);
 				slide0Descriptor.scale = {20.0f, 0.5f};
@@ -28,7 +28,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(slide0Descriptor);
 
-				EntityDescriptor slide1Descriptor{};
+				Entity2DDescriptor slide1Descriptor{};
 				slide1Descriptor.position = {8.0_m, 0.5_m};
 				slide1Descriptor.rotation = radians(20.0_deg);
 				slide1Descriptor.scale = {5.0f, 0.5f};
@@ -38,7 +38,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(slide1Descriptor);
 
-				EntityDescriptor ballDescriptor{};
+				Entity2DDescriptor ballDescriptor{};
 				ballDescriptor.position = {-13.0_m, 10.0_m};
 				ballDescriptor.mass = 25.0_kg;
 				ballDescriptor.friction = 0.2f;

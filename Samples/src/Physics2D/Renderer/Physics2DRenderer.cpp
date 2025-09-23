@@ -2,7 +2,7 @@
 
 #include "Physics2DRenderer.hpp"
 
-#include "Engine/API/Material/ColorMaterial.hpp"
+#include "Engine/API/Material/ColorFillStrokeMaterial.hpp"
 
 namespace ProjectA {
 	void Physics2DRenderer::build() {
@@ -524,8 +524,8 @@ namespace ProjectA {
 
 			std::copy(geometry->indices.begin(), geometry->indices.end(), indexMappedRange);
 
-			instanceMappedRange->fillColor = std::static_pointer_cast<ColorMaterial>(material)->fillColor;
-			instanceMappedRange->strokeColor = std::static_pointer_cast<ColorMaterial>(material)->strokeColor;
+			instanceMappedRange->fillColor = std::static_pointer_cast<ColorFillStrokeMaterial>(material)->fillColor;
+			instanceMappedRange->strokeColor = std::static_pointer_cast<ColorFillStrokeMaterial>(material)->strokeColor;
 			instanceMappedRange->z = static_cast<float32>(entity) / instanceCount;
 
 			vertexMappedRange += geometry->getVertexCount() + 1;

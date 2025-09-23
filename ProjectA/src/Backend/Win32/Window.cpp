@@ -33,7 +33,7 @@ namespace ProjectA {
 		windowClass->className = wndClass.lpszClassName;
 		windowClass->hCursor = LoadCursorW(nullptr, IDC_ARROW);
 
-		ENGINE_DEBUG("Registered window class.");
+		// ENGINE_DEBUG("Registered window class.");
 	}
 
 	static void unregisterWindowClass() {
@@ -46,7 +46,7 @@ namespace ProjectA {
 
 		windowClass = nullptr;
 
-		ENGINE_DEBUG("Unregistered window class.");
+		// ENGINE_DEBUG("Unregistered window class.");
 	}
 
 	Window::Window(const WindowDescriptor& descriptor) {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/API/Geometry/Geometry2D.hpp"
+
 namespace ProjectA {
 	class RigidBody2D {
 		public:

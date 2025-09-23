@@ -48,16 +48,20 @@
 #include "Engine/API/Rendering/ShaderModule.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
-// Geometry
+// Geometry (2D)
 #include "Engine/API/Geometry/CircleGeometry2D.hpp"
 #include "Engine/API/Geometry/ConvexHullGeometry2D.hpp"
 #include "Engine/API/Geometry/PointGeometry2D.hpp"
 
+// Geometry (3D)
+#include "Engine/API/Geometry/3D/BoxGeometry3D.hpp"
+
 // Material
 #include "Engine/API/Material/ColorMaterial.hpp"
+#include "Engine/API/Material/ColorFillStrokeMaterial.hpp"
 
 // Physics
-#include "Engine/API/Physics/RigidBody.hpp"
+#include "Engine/API/Physics/RigidBody2D.hpp"
 #include "Engine/API/Physics/CCD/TimeOfImpact.hpp"
 #include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/GJK2DConditional.hpp"

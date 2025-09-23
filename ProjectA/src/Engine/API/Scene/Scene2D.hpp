@@ -1,12 +1,11 @@
 #pragma once
 
-#include "Engine/API/Geometry/Geometry2D.hpp"
-#include "Engine/API/Material/ColorMaterial.hpp"
-#include "Engine/API/Physics/RigidBody.hpp"
-#include "Engine/ECS/ECS.hpp"
+#include "Engine/API/Material/ColorFillStrokeMaterial.hpp"
+#include "Engine/API/Physics/RigidBody2D.hpp"
+#include "Engine/API/Scene/Scene.hpp"
 
 namespace ProjectA {
-	struct EntityDescriptor {
+	struct Entity2DDescriptor {
 		vec2<float32> position = {0.0_m, 0.0_m};
 		float32 rotation = 0.0_rad;
 		vec2<float32> scale = {1.0f, 1.0f};
@@ -25,23 +24,12 @@ namespace ProjectA {
 	struct DynamicEntityTag {};
 	struct StaticEntityTag {};
 
-	class Scene2D {
+	class Scene2D : public Scene {
 		private:
 			static constexpr uint32 LAYER_COUNT = 4;
 
 		public:
 			explicit Scene2D() {
-				// NOTE
-				// An entity of a 2D scene is composed of:
-				// - 0-1 RigidBody2D
-				// - 0-1 Geometry2D subclass
-				// - 0-1 Material (base or subclass)
-				// - 0-1 DynamicEntityTag to indicate that the entity can be affected by forces.
-				// - 0-1 StaticEntityTag to indicate that the entity is a fixed decoration.
-				// 
-				// DynamicEntityTag and StaticEntityTag are used by the physics engine to optimize broad and narrow phases.
-				// They are not cumulable.
-
 				ecs.registerComponent<RigidBody2D>();
 				ecs.registerComponent<ref<Geometry2D>>();
 				ecs.registerComponent<ref<Material>>();
@@ -53,17 +41,8 @@ namespace ProjectA {
 				return layers;
 			}
 
-			Entity getLastEntity() const {
-				return ecs.nextEntity - 1;
-			}
-
 			const RigidBody2D& getRigidBody(Entity entity) const {
 				return ecs.getComponent<RigidBody2D>(entity);
-			}
-
-			template<typename ComponentType>
-			const ComponentPool<ComponentType>& getComponentPool() const {
-				return ecs.getComponentPool<ComponentType>();
 			}
 
 			RigidBody2D& getRigidBody(Entity entity) {
@@ -78,7 +57,7 @@ namespace ProjectA {
 				return ecs.getComponent<ref<Material>>(entity);
 			}
 
-			void createDynamicEntity(const EntityDescriptor& descriptor) {
+			void createDynamicEntity(const Entity2DDescriptor& descriptor) {
 				const Entity entity = createEntity(descriptor);
 				const ref<Material>& material = getMaterial(entity);
 				RigidBody2D& rigidBody = getRigidBody(entity);
@@ -99,7 +78,7 @@ namespace ProjectA {
 				ecs.setComponent<DynamicEntityTag>(entity, {});
 			}
 
-			void createStaticEntity(const EntityDescriptor& descriptor) {
+			void createStaticEntity(const Entity2DDescriptor& descriptor) {
 				const Entity entity = createEntity(descriptor);
 
 				RigidBody2D& rigidBody = getRigidBody(entity);
@@ -118,7 +97,7 @@ namespace ProjectA {
 			}
 
 		private:
-			Entity createEntity(const EntityDescriptor& descriptor) {
+			Entity createEntity(const Entity2DDescriptor& descriptor) {
 				// TODO: Restore physical layers.
 				// ENGINE_ASSERT(descriptor.layerIndex < LAYER_COUNT, "The layer index is overflowing.");
 
@@ -127,7 +106,7 @@ namespace ProjectA {
 				setGeometry(entity, descriptor.geometry);
 
 				// TODO: Set correct restitution.
-				ref<ColorMaterial> material = createRef<ColorMaterial>();
+				ref<ColorFillStrokeMaterial> material = createRef<ColorFillStrokeMaterial>();
 				material->density = descriptor.density;
 				material->fillColor = descriptor.fillColor;
 				material->strokeColor = descriptor.strokeColor;
@@ -156,7 +135,6 @@ namespace ProjectA {
 			}
 
 		private:
-			ECS ecs;
 			std::array<std::vector<Entity>, LAYER_COUNT> layers;
 	};
 }

@@ -8,7 +8,7 @@ namespace ProjectA {
 			void build() override {
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
-				EntityDescriptor floorDescriptor{};
+				Entity2DDescriptor floorDescriptor{};
 				floorDescriptor.position = {0.0_m, -10.0_m};
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
@@ -17,7 +17,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(floorDescriptor);
 
-				EntityDescriptor swingBaseDescriptor{};
+				Entity2DDescriptor swingBaseDescriptor{};
 				swingBaseDescriptor.position = {0.0_m, 0.5_m};
 				swingBaseDescriptor.scale = {0.1f, 1.0f};
 				swingBaseDescriptor.friction = 0.0f;
@@ -26,7 +26,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(swingBaseDescriptor);
 
-				EntityDescriptor swingDescriptor{};
+				Entity2DDescriptor swingDescriptor{};
 				swingDescriptor.position = {0.0_m, 1.0_m};
 				swingDescriptor.scale = {12.0f, 0.25f};
 				swingDescriptor.mass = 100.0_kg;
@@ -36,7 +36,7 @@ namespace ProjectA {
 
 				scene.createDynamicEntity(swingDescriptor);
 
-				EntityDescriptor leftWeight0Descriptor{};
+				Entity2DDescriptor leftWeight0Descriptor{};
 				leftWeight0Descriptor.position = {-5.0_m, 2.0_m};
 				leftWeight0Descriptor.scale = {0.5f, 0.5f};
 				leftWeight0Descriptor.mass = 25.0_kg;
@@ -46,7 +46,7 @@ namespace ProjectA {
 
 				scene.createDynamicEntity(leftWeight0Descriptor);
 
-				EntityDescriptor leftWeight1Descriptor{};
+				Entity2DDescriptor leftWeight1Descriptor{};
 				leftWeight1Descriptor.position = {-5.5_m, 2.0_m};
 				leftWeight1Descriptor.scale = {0.5f, 0.5f};
 				leftWeight1Descriptor.mass = 25.0_kg;
@@ -56,7 +56,7 @@ namespace ProjectA {
 
 				scene.createDynamicEntity(leftWeight1Descriptor);
 
-				EntityDescriptor rightWeightDescriptor{};
+				Entity2DDescriptor rightWeightDescriptor{};
 				rightWeightDescriptor.position = {5.5_m, 15.0_m};
 				rightWeightDescriptor.mass = 100.0_kg;
 				rightWeightDescriptor.friction = 0.2f;

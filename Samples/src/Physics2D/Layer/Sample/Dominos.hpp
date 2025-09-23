@@ -8,7 +8,7 @@ namespace ProjectA {
 			void build() override {
 				const ref<ConvexHullGeometry2D> squareGeometry = ConvexHullGeometry2D::unitSquare();
 
-				EntityDescriptor floorDescriptor{};
+				Entity2DDescriptor floorDescriptor{};
 				floorDescriptor.position = {0.0_m, -10.0_m};
 				floorDescriptor.scale = {100.0f, 20.0f};
 				floorDescriptor.friction = 0.2f;
@@ -17,7 +17,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(floorDescriptor);
 
-				EntityDescriptor entity0Descriptor{};
+				Entity2DDescriptor entity0Descriptor{};
 				entity0Descriptor.position = {-1.5_m, 10.0_m};
 				entity0Descriptor.scale = {12.0f, 0.5f};
 				entity0Descriptor.friction = 0.2f;
@@ -26,7 +26,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(entity0Descriptor);
 
-				EntityDescriptor entity1Descriptor{};
+				Entity2DDescriptor entity1Descriptor{};
 				entity1Descriptor.position = {1.0_m, 6.0_m};
 				entity1Descriptor.rotation = 0.3_rad;
 				entity1Descriptor.scale = {14.0f, 0.5f};
@@ -36,7 +36,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(entity1Descriptor);
 
-				EntityDescriptor entity2Descriptor{};
+				Entity2DDescriptor entity2Descriptor{};
 				entity2Descriptor.position = {-7.0_m, 4.0_m};
 				entity2Descriptor.scale = {0.5f, 3.0f};
 				entity2Descriptor.friction = 0.2f;
@@ -45,7 +45,7 @@ namespace ProjectA {
 
 				scene.createStaticEntity(entity2Descriptor);
 
-				EntityDescriptor pusherDescriptor{};
+				Entity2DDescriptor pusherDescriptor{};
 				pusherDescriptor.position = {-7.5_m, 12.0_m};
 				pusherDescriptor.linearVelocity = {4.0_m_s, 0.0_m_s};
 				pusherDescriptor.scale = {0.5f, 2.0f};
@@ -56,7 +56,7 @@ namespace ProjectA {
 
 				scene.createDynamicEntity(pusherDescriptor);
 
-				EntityDescriptor dominoDescriptor{};
+				Entity2DDescriptor dominoDescriptor{};
 				dominoDescriptor.scale = {0.2_m, 2.0_m};
 				dominoDescriptor.friction = 0.1f;
 				dominoDescriptor.mass = 10.0_kg;
