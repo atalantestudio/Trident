@@ -131,23 +131,23 @@ namespace ProjectA {
 					updateTransform(entity);
 				}
 
-				uint64 geometryVertexBufferSize = 0;
-				uint64 geometryIndexBufferSize = 0;
+				uint64 vertexPositionBufferSize = 0;
+				uint64 vertexPositionIndexBufferSize = 0;
 
 				for (uint32 geometryIndex = 0; geometryIndex < geometryPool.componentCount; geometryIndex += 1) {
 					const ref<Geometry3D>& geometry = geometryPool.components[geometryIndex];
 
-					geometryVertexBufferSize += geometry->getVertexCount() * sizeof(vec3<float32>);
-					geometryIndexBufferSize += geometry->getIndexCount() * sizeof(uint16);
+					vertexPositionBufferSize += geometry->getVertexPositions().count * sizeof(vec3<float32>);
+					vertexPositionIndexBufferSize += geometry->getVertexPositionIndices().count * sizeof(uint32);
 				}
 
-				const ref<Buffer> geometryVertexStagingBuffer = createStagingBuffer(geometryVertexBufferSize);
+				const ref<Buffer> vertexPositionStagingBuffer = createStagingBuffer(vertexPositionBufferSize);
 
-				vec3<float32>* geometryVertexMappedRange = geometryVertexStagingBuffer->map<vec3<float32>>(0, geometryVertexStagingBuffer->size);
+				vec3<float32>* vertexPositionMappedRange = vertexPositionStagingBuffer->map<vec3<float32>>(0, vertexPositionStagingBuffer->size);
 
-				const ref<Buffer> geometryIndexStagingBuffer = createStagingBuffer(geometryIndexBufferSize);
+				const ref<Buffer> vertexPositionIndexStagingBuffer = createStagingBuffer(vertexPositionIndexBufferSize);
 
-				uint16* geometryIndexMappedRange = geometryIndexStagingBuffer->map<uint16>(0, geometryIndexStagingBuffer->size);
+				uint32* vertexPositionIndexMappedRange = vertexPositionIndexStagingBuffer->map<uint32>(0, vertexPositionIndexStagingBuffer->size);
 
 				uint64 vertexIndex = 0;
 				uint64 indexIndex = 0;
@@ -155,50 +155,50 @@ namespace ProjectA {
 				for (uint32 geometryIndex = 0; geometryIndex < geometryPool.componentCount; geometryIndex += 1) {
 					const ref<Geometry3D>& geometry = geometryPool.components[geometryIndex];
 
-					for (uint32 geometryVertexIndex = 0; geometryVertexIndex < geometry->getVertexCount(); geometryVertexIndex += 1) {
-						geometryVertexMappedRange[vertexIndex] = geometry->getVertices()[geometryVertexIndex];
+					for (uint32 geometryVertexIndex = 0; geometryVertexIndex < geometry->getVertexPositions().count; geometryVertexIndex += 1) {
+						vertexPositionMappedRange[vertexIndex] = geometry->getVertexPositions()[geometryVertexIndex];
 						vertexIndex += 1;
 					}
 
-					for (uint32 geometryIndexIndex = 0; geometryIndexIndex < geometry->getIndexCount(); geometryIndexIndex += 1) {
-						geometryIndexMappedRange[indexIndex] = geometry->getIndices()[geometryIndexIndex];
+					for (uint32 geometryIndexIndex = 0; geometryIndexIndex < geometry->getVertexPositionIndices().count; geometryIndexIndex += 1) {
+						vertexPositionIndexMappedRange[indexIndex] = geometry->getVertexPositionIndices()[geometryIndexIndex];
 						indexIndex += 1;
 					}
 				}
 
-				geometryVertexStagingBuffer->unmap();
+				vertexPositionStagingBuffer->unmap();
 
-				BufferDescriptor geometryVertexBufferDescriptor{};
-				geometryVertexBufferDescriptor.size = geometryVertexStagingBuffer->size;
-				geometryVertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-				geometryVertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				geometryVertexBufferDescriptor.persistent = false;
+				BufferDescriptor vertexPositionBufferDescriptor{};
+				vertexPositionBufferDescriptor.size = vertexPositionStagingBuffer->size;
+				vertexPositionBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+				vertexPositionBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+				vertexPositionBufferDescriptor.persistent = false;
 
-				geometryVertexBuffer = createBuffer(geometryVertexBufferDescriptor);
+				vertexPositionBuffer = createBuffer(vertexPositionBufferDescriptor);
 
-				geometryIndexStagingBuffer->unmap();
+				vertexPositionIndexStagingBuffer->unmap();
 
-				BufferDescriptor geometryIndexBufferDescriptor{};
-				geometryIndexBufferDescriptor.size = geometryIndexStagingBuffer->size;
-				geometryIndexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
-				geometryIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				geometryIndexBufferDescriptor.persistent = false;
+				BufferDescriptor vertexPositionIndexBufferDescriptor{};
+				vertexPositionIndexBufferDescriptor.size = vertexPositionIndexStagingBuffer->size;
+				vertexPositionIndexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
+				vertexPositionIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+				vertexPositionIndexBufferDescriptor.persistent = false;
 
-				geometryIndexBuffer = createBuffer(geometryIndexBufferDescriptor);
+				vertexPositionIndexBuffer = createBuffer(vertexPositionIndexBufferDescriptor);
 
-				sequence<BufferCopyRegion> geometryVertexBufferCopyRegions(1);
+				sequence<BufferCopyRegion> vertexPositionBufferCopyRegions(1);
 
-				BufferCopyRegion& geometryVertexBufferCopyRegion = geometryVertexBufferCopyRegions[0];
-				geometryVertexBufferCopyRegion.sourceOffset = 0;
-				geometryVertexBufferCopyRegion.destinationOffset = 0;
-				geometryVertexBufferCopyRegion.size = geometryVertexStagingBuffer->size;
+				BufferCopyRegion& vertexPositionBufferCopyRegion = vertexPositionBufferCopyRegions[0];
+				vertexPositionBufferCopyRegion.sourceOffset = 0;
+				vertexPositionBufferCopyRegion.destinationOffset = 0;
+				vertexPositionBufferCopyRegion.size = vertexPositionStagingBuffer->size;
 
-				sequence<BufferCopyRegion> geometryIndexBufferCopyRegions(1);
+				sequence<BufferCopyRegion> vertexPositionIndexBufferCopyRegions(1);
 
-				BufferCopyRegion& geometryIndexBufferCopyRegion = geometryIndexBufferCopyRegions[0];
-				geometryIndexBufferCopyRegion.sourceOffset = 0;
-				geometryIndexBufferCopyRegion.destinationOffset = 0;
-				geometryIndexBufferCopyRegion.size = geometryIndexStagingBuffer->size;
+				BufferCopyRegion& vertexPositionIndexBufferCopyRegion = vertexPositionIndexBufferCopyRegions[0];
+				vertexPositionIndexBufferCopyRegion.sourceOffset = 0;
+				vertexPositionIndexBufferCopyRegion.destinationOffset = 0;
+				vertexPositionIndexBufferCopyRegion.size = vertexPositionIndexStagingBuffer->size;
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -208,8 +208,8 @@ namespace ProjectA {
 				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
 
 				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(geometryVertexStagingBuffer, geometryVertexBuffer, geometryVertexBufferCopyRegions);
-				commandEncoder->copyBufferToBuffer(geometryIndexStagingBuffer, geometryIndexBuffer, geometryIndexBufferCopyRegions);
+				commandEncoder->copyBufferToBuffer(vertexPositionStagingBuffer, vertexPositionBuffer, vertexPositionBufferCopyRegions);
+				commandEncoder->copyBufferToBuffer(vertexPositionIndexStagingBuffer, vertexPositionIndexBuffer, vertexPositionIndexBufferCopyRegions);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -231,8 +231,8 @@ namespace ProjectA {
 				commandEncoder->bindRenderPipeline(renderPipeline);
 				commandEncoder->bindAllDescriptorSets();
 				commandEncoder->bindVertexBuffer(0, transformBuffer, 0, sizeof(mat4x4<float32>));
-				commandEncoder->bindVertexBuffer(1, geometryVertexBuffer, 0, sizeof(vec3<float32>));
-				commandEncoder->bindIndexBuffer<uint16>(geometryIndexBuffer, 0);
+				commandEncoder->bindVertexBuffer(1, vertexPositionBuffer, 0, sizeof(vec3<float32>));
+				commandEncoder->bindIndexBuffer<uint32>(vertexPositionIndexBuffer, 0);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchain->getExtent());
 
@@ -248,10 +248,10 @@ namespace ProjectA {
 					for (uint32 geometryIndex = 0; geometryIndex < rigidBody.geometryIndex; geometryIndex += 1) {
 						const ref<Geometry3D>& geometry = geometryPool.components[geometryIndex];
 
-						indexOffset += geometry->getIndexCount();
+						indexOffset += static_cast<uint32>(geometry->getVertexPositionIndices().count);
 					}
 
-					commandEncoder->drawIndexed(geometry->getIndexCount(), 1, indexOffset, instanceOffset, 0);
+					commandEncoder->drawIndexed(static_cast<uint32>(geometry->getVertexPositionIndices().count), 1, indexOffset, instanceOffset, 0);
 				}
 
 				commandEncoder->endRenderPass();
@@ -274,8 +274,14 @@ namespace ProjectA {
 			ref<Buffer> transformBuffer;
 			Transform* transformMappedRange = nullptr;
 
-			ref<Buffer> geometryVertexBuffer;
-			ref<Buffer> geometryIndexBuffer;
+			ref<Buffer> vertexPositionBuffer;
+			ref<Buffer> vertexPositionIndexBuffer;
+
+			ref<Buffer> vertexNormalBuffer;
+			ref<Buffer> vertexNormalIndexBuffer;
+
+			ref<Buffer> vertexTextureCoordinateBuffer;
+			ref<Buffer> vertexTextureCoordinateIndexBuffer;
 
 			ref<Buffer> cameraBuffer;
 			Camera* cameraMappedRange = nullptr;
