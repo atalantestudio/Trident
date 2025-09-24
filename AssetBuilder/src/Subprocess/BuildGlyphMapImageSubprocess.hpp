@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
-#include "Engine/Filesystem/Decoder/QOIDecoder.cpp"
 
 namespace ProjectA {
 	class BuildGlyphMapImageSubprocess {

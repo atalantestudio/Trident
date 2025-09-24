@@ -5,15 +5,15 @@
 namespace ProjectA {
 	class BoxGeometry3D : public Geometry3D {
 		private:
-			static inline const sequence<vec3<float32>> VERTEX_POSITIONS = {
-				{ 0.5f, -0.5f,  0.5f},
-				{ 0.5f,  0.5f,  0.5f},
-				{-0.5f,  0.5f,  0.5f},
-				{-0.5f, -0.5f,  0.5f},
-				{-0.5f, -0.5f, -0.5f},
-				{-0.5f,  0.5f, -0.5f},
-				{ 0.5f,  0.5f, -0.5f},
-				{ 0.5f, -0.5f, -0.5f},
+			static inline const sequence<float32> VERTEX_POSITION_COMPONENTS = {
+				 0.5f, -0.5f,  0.5f,
+				 0.5f,  0.5f,  0.5f,
+				-0.5f,  0.5f,  0.5f,
+				-0.5f, -0.5f,  0.5f,
+				-0.5f, -0.5f, -0.5f,
+				-0.5f,  0.5f, -0.5f,
+				 0.5f,  0.5f, -0.5f,
+				 0.5f, -0.5f, -0.5f,
 			};
 
 			static inline const sequence<uint32> TRIANGLE_VERTEX_POSITION_INDICES = {
@@ -37,13 +37,13 @@ namespace ProjectA {
 				3, 7, 0,
 			};
 
-			static inline const sequence<vec3<float32>> VERTEX_NORMALS = {
-				{ 0.0f,  0.0f,  1.0f},
-				{ 0.0f,  0.0f, -1.0f},
-				{-1.0f,  0.0f,  0.0f},
-				{ 1.0f,  0.0f,  0.0f},
-				{ 0.0f,  1.0f,  0.0f},
-				{ 0.0f, -1.0f,  0.0f},
+			static inline const sequence<float32> VERTEX_NORMAL_COMPONENTS = {
+				 0.0f,  0.0f,  1.0f,
+				 0.0f,  0.0f, -1.0f,
+				-1.0f,  0.0f,  0.0f,
+				 1.0f,  0.0f,  0.0f,
+				 0.0f,  1.0f,  0.0f,
+				 0.0f, -1.0f,  0.0f,
 			};
 
 			static inline const sequence<uint32> VERTEX_NORMAL_INDICES = {
@@ -67,11 +67,11 @@ namespace ProjectA {
 				5, 5, 5,
 			};
 
-			static inline const sequence<vec2<float32>> VERTEX_TEXTURE_COORDINATES = {
-				{0, 0},
-				{1, 0},
-				{0, 1},
-				{1, 1},
+			static inline const sequence<float32> VERTEX_TEXTURE_COORDINATE_COMPONENTS = {
+				0, 0,
+				1, 0,
+				0, 1,
+				1, 1,
 			};
 
 			static inline const sequence<uint32> VERTEX_TEXTURE_COORDINATE_INDICES = {
@@ -99,16 +99,18 @@ namespace ProjectA {
 			explicit BoxGeometry3D(const vec3<float32>& size) {
 				const vec3<float32> halfSize = size * 0.5f;
 
-				vertexPositions = VERTEX_POSITIONS;
+				vertexPositionComponents = VERTEX_POSITION_COMPONENTS;
 
-				for (uint32 vertexIndex = 0; vertexIndex < VERTEX_POSITIONS.count; vertexIndex += 1) {
-					vertexPositions[vertexIndex] *= halfSize;
+				for (uint32 vertexIndex = 0; vertexIndex < VERTEX_POSITION_COMPONENTS.count; vertexIndex += 3) {
+					vertexPositionComponents[vertexIndex + 0] *= halfSize[0];
+					vertexPositionComponents[vertexIndex + 1] *= halfSize[1];
+					vertexPositionComponents[vertexIndex + 2] *= halfSize[2];
 				}
 
 				vertexPositionIndices = TRIANGLE_VERTEX_POSITION_INDICES;
-				vertexNormals = VERTEX_NORMALS;
+				vertexNormalComponents = VERTEX_NORMAL_COMPONENTS;
 				vertexNormalIndices = VERTEX_NORMAL_INDICES;
-				vertexTextureCoordinates = VERTEX_TEXTURE_COORDINATES;
+				vertexTextureCoordinateComponents = VERTEX_TEXTURE_COORDINATE_COMPONENTS;
 				vertexTextureCoordinateIndices = VERTEX_TEXTURE_COORDINATE_INDICES;
 			}
 	};

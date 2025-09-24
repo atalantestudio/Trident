@@ -72,7 +72,7 @@ namespace ProjectA {
 					transformInputBinding.registerAttribute<mat4x4<float32>>();
 
 					VertexInputBinding geometryInputBinding(InputRate::VERTEX);
-					geometryInputBinding.registerAttribute<vec3<float32>>();
+					geometryInputBinding.registerAttribute<svec3<float32>>();
 
 					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -137,33 +137,29 @@ namespace ProjectA {
 				for (uint32 geometryIndex = 0; geometryIndex < geometryPool.componentCount; geometryIndex += 1) {
 					const ref<Geometry3D>& geometry = geometryPool.components[geometryIndex];
 
-					vertexPositionBufferSize += geometry->getVertexPositions().count * sizeof(vec3<float32>);
+					vertexPositionBufferSize += geometry->getVertexPositionComponents().count * sizeof(float32);
 					vertexPositionIndexBufferSize += geometry->getVertexPositionIndices().count * sizeof(uint32);
 				}
 
 				const ref<Buffer> vertexPositionStagingBuffer = createStagingBuffer(vertexPositionBufferSize);
 
-				vec3<float32>* vertexPositionMappedRange = vertexPositionStagingBuffer->map<vec3<float32>>(0, vertexPositionStagingBuffer->size);
+				float32* vertexPositionMappedRange = vertexPositionStagingBuffer->map<float32>(0, vertexPositionStagingBuffer->size);
 
 				const ref<Buffer> vertexPositionIndexStagingBuffer = createStagingBuffer(vertexPositionIndexBufferSize);
 
 				uint32* vertexPositionIndexMappedRange = vertexPositionIndexStagingBuffer->map<uint32>(0, vertexPositionIndexStagingBuffer->size);
 
-				uint64 vertexIndex = 0;
-				uint64 indexIndex = 0;
+				uint64 vertexPositionOffset = 0;
+				uint64 vertexPositionIndexOffset = 0;
 
 				for (uint32 geometryIndex = 0; geometryIndex < geometryPool.componentCount; geometryIndex += 1) {
 					const ref<Geometry3D>& geometry = geometryPool.components[geometryIndex];
 
-					for (uint32 geometryVertexIndex = 0; geometryVertexIndex < geometry->getVertexPositions().count; geometryVertexIndex += 1) {
-						vertexPositionMappedRange[vertexIndex] = geometry->getVertexPositions()[geometryVertexIndex];
-						vertexIndex += 1;
-					}
+					std::copy(geometry->getVertexPositionComponents().begin(), geometry->getVertexPositionComponents().end(), vertexPositionMappedRange + vertexPositionOffset);
+					std::copy(geometry->getVertexPositionIndices().begin(), geometry->getVertexPositionIndices().end(), vertexPositionIndexMappedRange + vertexPositionIndexOffset);
 
-					for (uint32 geometryIndexIndex = 0; geometryIndexIndex < geometry->getVertexPositionIndices().count; geometryIndexIndex += 1) {
-						vertexPositionIndexMappedRange[indexIndex] = geometry->getVertexPositionIndices()[geometryIndexIndex];
-						indexIndex += 1;
-					}
+					vertexPositionOffset += geometry->getVertexPositionComponents().count;
+					vertexPositionIndexOffset += geometry->getVertexPositionIndices().count;
 				}
 
 				vertexPositionStagingBuffer->unmap();
@@ -231,7 +227,7 @@ namespace ProjectA {
 				commandEncoder->bindRenderPipeline(renderPipeline);
 				commandEncoder->bindAllDescriptorSets();
 				commandEncoder->bindVertexBuffer(0, transformBuffer, 0, sizeof(mat4x4<float32>));
-				commandEncoder->bindVertexBuffer(1, vertexPositionBuffer, 0, sizeof(vec3<float32>));
+				commandEncoder->bindVertexBuffer(1, vertexPositionBuffer, 0, 3 * sizeof(float32));
 				commandEncoder->bindIndexBuffer<uint32>(vertexPositionIndexBuffer, 0);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchain->getExtent());

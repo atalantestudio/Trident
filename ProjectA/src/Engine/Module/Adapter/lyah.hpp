@@ -162,7 +162,7 @@ namespace ProjectA {
 	};
 
 	template<typename T>
-	struct alignas(4 * sizeof(T)) svec<3, T> {
+	struct /* alignas(4 * sizeof(T)) */ svec<3, T> {
 		T x;
 		T y;
 		T z;
@@ -244,6 +244,9 @@ namespace ProjectA {
 	template<typename T>
 	using svec2 = svec<2, T>;
 
+	template<typename T>
+	using svec3 = svec<3, T>;
+
 	// K-th dimensional simplex.
 	template<std::size_t K, typename T>
 	struct sim;
@@ -315,6 +318,7 @@ namespace ProjectA {
 	using lyah::radians;
 	using lyah::sin;
 	using lyah::sqrt;
+	using lyah::tau;
 	using lyah::transpose;
 
 	// Returns the absolute area of a 2D polygon defined by a sequence of vertices.

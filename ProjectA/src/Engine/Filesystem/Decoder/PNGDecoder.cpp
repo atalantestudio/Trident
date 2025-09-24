@@ -194,7 +194,7 @@ namespace ProjectA {
 		const uint64 filteredDataSize = file.extent.width * file.extent.height * channelCount;
 		const uint64 unfilteredDataSize = filteredDataSize + file.extent.height;
 
-		const sequence<uint8> unfilteredData = inflateBitStream.inflate(unfilteredDataSize);
+		const sequence<uint8> unfilteredData = inflateBitStream.inflate<uint8>(unfilteredDataSize);
 
 		file.data = sequence<uint8>(filteredDataSize);
 

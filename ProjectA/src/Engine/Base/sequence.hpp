@@ -8,55 +8,55 @@ namespace ProjectA {
 			sequence() = default;
 
 			explicit sequence(uint64 count) :
-				array(new T[count]()),
+				pointer(new T[count]()),
 				count(count)
 			{}
 
 			sequence(const std::initializer_list<T>& list) :
 				sequence(list.size())
 			{
-				std::copy(list.begin(), list.end(), array);
+				std::copy(list.begin(), list.end(), pointer);
 			}
 
 			sequence(const sequence& sequence) :
-				array(new T[sequence.count]()),
+				pointer(new T[sequence.count]()),
 				count(sequence.count)
 			{
-				std::copy(sequence.begin(), sequence.end(), array);
+				std::copy(sequence.begin(), sequence.end(), pointer);
 			}
 
 			sequence(sequence&& sequence) :
-				array(sequence.array),
+				pointer(sequence.pointer),
 				count(sequence.count)
 			{
-				sequence.array = nullptr;
+				sequence.pointer = nullptr;
 				sequence.count = 0;
 			}
 
 			~sequence() {
-				delete[] array;
+				delete[] pointer;
 			}
 
 			operator T*() const {
-				return array;
+				return pointer;
 			}
 
 			sequence& operator =(const sequence& sequence) {
-				delete[] array;
+				delete[] pointer;
 
-				array = new T[sequence.count]();
+				pointer = new T[sequence.count]();
 				count = sequence.count;
 
-				std::copy(sequence.begin(), sequence.end(), array);
+				std::copy(sequence.begin(), sequence.end(), pointer);
 
 				return *this;
 			}
 
 			sequence& operator =(sequence&& sequence) {
-				array = sequence.array;
+				pointer = sequence.pointer;
 				count = sequence.count;
 
-				sequence.array = nullptr;
+				sequence.pointer = nullptr;
 				sequence.count = 0;
 
 				return *this;
@@ -66,33 +66,33 @@ namespace ProjectA {
 			T operator [](uint64 index) const {
 				DEBUG_ASSERT(index == 0 || index < count);
 
-				return array[index];
+				return pointer[index];
 			}
 
 			T& operator [](uint64 index) {
 				DEBUG_ASSERT(index == 0 || index < count);
 
-				return array[index];
+				return pointer[index];
 			}
 
 			const T* begin() const {
-				return &array[0];
+				return &pointer[0];
 			}
 
 			T* begin() {
-				return &array[0];
+				return &pointer[0];
 			}
 
 			const T* end() const {
-				return &array[count];
+				return &pointer[count];
 			}
 
 			T* end() {
-				return &array[count];
+				return &pointer[count];
 			}
 
 		private:
-			T* array = nullptr;
+			T* pointer = nullptr;
 
 		public:
 			uint64 count = 0;

@@ -7,8 +7,6 @@ namespace ProjectA {
 		public:
 			void updateTransform() {
 				transform =
-					// TODO(3D): COM
-					// mat4x4<float32>::translation(-centerOfMass) *
 					mat4x4<float32>::scaling(scale) *
 					mat4x4<float32>::rotation({1.0f, 0.0f, 0.0f}, -rotation[0]) *
 					mat4x4<float32>::rotation({0.0f, 1.0f, 0.0f}, -rotation[1]) *

@@ -1,26 +1,46 @@
 #pragma once
 
 namespace ProjectA {
+	struct Geometry3DDescriptor {
+		sequence<float32> vertexPositionComponents;
+		sequence<uint32> vertexPositionIndices;
+		sequence<float32> vertexNormalComponents;
+		sequence<uint32> vertexNormalIndices;
+		sequence<float32> vertexTextureCoordinateComponents;
+		sequence<uint32> vertexTextureCoordinateIndices;
+	};
+
 	class Geometry3D {
 		public:
-			const sequence<vec3<float32>>& getVertexPositions() const {
-				return vertexPositions;
+			explicit Geometry3D() = default;
+
+			explicit Geometry3D(const Geometry3DDescriptor& descriptor) :
+				vertexPositionComponents(descriptor.vertexPositionComponents),
+				vertexPositionIndices(descriptor.vertexPositionIndices),
+				vertexNormalComponents(descriptor.vertexNormalComponents),
+				vertexNormalIndices(descriptor.vertexNormalIndices),
+				vertexTextureCoordinateComponents(descriptor.vertexTextureCoordinateComponents),
+				vertexTextureCoordinateIndices(descriptor.vertexTextureCoordinateIndices)
+			{}
+
+			const sequence<float32>& getVertexPositionComponents() const {
+				return vertexPositionComponents;
 			}
 
 			const sequence<uint32>& getVertexPositionIndices() const {
 				return vertexPositionIndices;
 			}
 
-			const sequence<vec3<float32>>& getVertexNormals() const {
-				return vertexNormals;
+			const sequence<float32>& getVertexNormalComponents() const {
+				return vertexNormalComponents;
 			}
 
 			const sequence<uint32>& getVertexNormalIndices() const {
 				return vertexNormalIndices;
 			}
 
-			const sequence<vec2<float32>>& getVertexTextureCoordinates() const {
-				return vertexTextureCoordinates;
+			const sequence<float32>& getVertexTextureCoordinateComponents() const {
+				return vertexTextureCoordinateComponents;
 			}
 
 			const sequence<uint32>& getVertexTextureCoordinateIndices() const {
@@ -32,11 +52,11 @@ namespace ProjectA {
 			}
 
 		protected:
-			sequence<vec3<float32>> vertexPositions;
+			sequence<float32> vertexPositionComponents;
 			sequence<uint32> vertexPositionIndices;
-			sequence<vec3<float32>> vertexNormals;
+			sequence<float32> vertexNormalComponents;
 			sequence<uint32> vertexNormalIndices;
-			sequence<vec2<float32>> vertexTextureCoordinates;
+			sequence<float32> vertexTextureCoordinateComponents;
 			sequence<uint32> vertexTextureCoordinateIndices;
 	};
 }

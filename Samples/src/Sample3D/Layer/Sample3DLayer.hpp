@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/Camera/3D/PerspectiveCamera3D.hpp"
+#include "Engine/Filesystem/Asset/FBXToGeometry.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/3D/ForwardRenderer3D.hpp"
 
@@ -15,18 +16,21 @@ namespace ProjectA {
 				renderer.setLayer(this);
 				renderer.build();
 
-				const ref<BoxGeometry3D> boxGeometry = createRef<BoxGeometry3D>(vec3<float32>(1.0_m, 1.0_m, 1.0_m));
+				static constexpr char8* fbxPath = "Asset/Model/folding_wooden_stool/folding_wooden_stool.fbx";
 
-				ref<ColorMaterial> boxMaterial = createRef<ColorMaterial>();
-				boxMaterial->color = {1.0f, 0.2f, 0.0f, 1.0f};
+				const sequence<uint8> fbxData = Filesystem::openBuffer(fbxPath);
+				const File<FileFormat::FBX> fbxFile = Filesystem::decode<FileFormat::FBX>(fbxData);
 
-				Entity3DDescriptor boxDescriptor{};
-				boxDescriptor.position = {0.0_m, 0.0_m, 1.0_m};
-				boxDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
-				boxDescriptor.geometry = boxGeometry;
-				boxDescriptor.material = boxMaterial;
+				Entity3DDescriptor entityDescriptor{};
+				/* entityDescriptor.position = {0.0_m, 0.0_m, 1.0_m};
+				entityDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
+				entityDescriptor.geometry = createRef<BoxGeometry3D>(vec3<float32>(1.0_m, 1.0_m, 1.0_m)); */
+				entityDescriptor.position = {0.0_m, -0.25_m, 1.5_m};
+				entityDescriptor.rotation = {pi<float32>() * 0.5f, 0.0_rad, 0.0_rad};
+				entityDescriptor.geometry = FBXToGeometry3D(fbxFile);
+				entityDescriptor.material = createRef<ColorMaterial>();
 
-				scene.createEntity(boxDescriptor);
+				scene.createEntity(entityDescriptor);
 
 				renderer.setScene(&scene);
 
@@ -39,10 +43,10 @@ namespace ProjectA {
 			void update(float32 deltaTime, float32 inverseDeltaTime) override {
 				static const vec3<float32> rotationAxis = {0.0f, 1.0f, 0.0f};
 
-				RigidBody3D& boxRigidBody = scene.getRigidBody(scene.getLastEntity());
-				boxRigidBody.rotation += rotationAxis * 1_rad * deltaTime;
+				RigidBody3D& rigidBody = scene.getRigidBody(scene.getLastEntity());
+				rigidBody.rotation += rotationAxis * 1_rad * deltaTime;
 
-				boxRigidBody.updateTransform();
+				rigidBody.updateTransform();
 
 				renderer.updateTransform(scene.getLastEntity());
 			}
