@@ -50,8 +50,6 @@ namespace ProjectA {
 				cameraBuffer = createBuffer(cameraBufferDescriptor);
 				cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
 
-				updateCamera();
-
 				DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
 				cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 				cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
@@ -268,11 +266,8 @@ namespace ProjectA {
 				transformMappedRange[entity].transform = scene->getRigidBody(entity).transform;
 			}
 
-		private:
 			void updateCamera() {
-				const float32 aspectRatio = this->getLayer()->getApplication()->getWindow()->getAspectRatio();
-
-				cameraMappedRange->projection = mat4x4<float32>::orthographic(-aspectRatio, aspectRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+				cameraMappedRange->projection = camera->projection;
 			}
 
 		private:

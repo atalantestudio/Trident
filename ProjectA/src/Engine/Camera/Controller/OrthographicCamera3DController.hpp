@@ -3,7 +3,7 @@
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/API/Event/Mouse/MouseWheelEvent.hpp"
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
-#include "Engine/Camera/OrthographicCamera3D.hpp"
+#include "Engine/Camera/3D/OrthographicCamera3D.hpp"
 
 namespace ProjectA {
 	class OrthographicCamera3DController {

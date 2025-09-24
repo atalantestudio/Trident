@@ -3,7 +3,11 @@
 namespace ProjectA {
 	class Camera3D {
 		public:
-			Camera3D(const mat4x4<float32>& projection);
+			explicit Camera3D(const mat4x4<float32>& projection) :
+				projection(projection),
+				view(mat4x4<float32>::identity()),
+				projectionView(projection)
+			{}
 
 		public:
 			mat4x4<float32> projection;

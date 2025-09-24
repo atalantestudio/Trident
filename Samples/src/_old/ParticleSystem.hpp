@@ -1,4 +1,4 @@
-#pragma once
+/* #pragma once
 
 #include "ProjectA.hpp"
 
@@ -30,4 +30,4 @@ class ParticleSystem {
 		std::vector<Particle> particlePool;
 
 		ProjectA::uint32 poolIndex;
-};
+}; */

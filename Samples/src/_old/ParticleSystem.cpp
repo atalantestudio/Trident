@@ -1,3 +1,5 @@
+/* #include "pch.hpp"
+
 #include "ParticleSystem.hpp"
 #include "Random.hpp"
 
@@ -61,4 +63,4 @@ void ParticleSystem::emitParticle(const ParticleProperties& properties) {
 
 	poolIndex -= 1;
 	poolIndex %= particlePool.size();
-}
+} */

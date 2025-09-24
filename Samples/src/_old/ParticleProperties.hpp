@@ -1,4 +1,4 @@
-#pragma once
+/* #pragma once
 
 #include "ProjectA.hpp"
 
@@ -12,4 +12,4 @@ struct ParticleProperties {
 	ProjectA::float32 startSize;
 	ProjectA::float32 endSize;
 	ProjectA::float32 sizeBias;
-};
+}; */

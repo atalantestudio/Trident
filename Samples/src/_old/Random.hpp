@@ -1,4 +1,4 @@
-#pragma once
+/* #pragma once
 
 #include <random>
 
@@ -19,4 +19,4 @@ class Random {
 		static ProjectA::float32 Random::get() {
 			return static_cast<ProjectA::float32>(distribution(mt)) / ProjectA::max<ProjectA::uint32>();
 		}
-};
+}; */

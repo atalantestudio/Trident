@@ -10,6 +10,10 @@ namespace ProjectA {
 				this->scene = scene;
 			}
 
+			void setCamera(const Camera3D* camera) {
+				this->camera = camera;
+			}
+
 		protected:
 			void recreateFramebuffers() {
 				const ref<Swapchain>& swapchain = getSwapchain();
@@ -43,5 +47,6 @@ namespace ProjectA {
 			ref<RenderPipeline> renderPipeline;
 
 			const Scene3D* scene = nullptr;
+			const Camera3D* camera = nullptr;
 	};
 }
