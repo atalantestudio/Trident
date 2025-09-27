@@ -53,7 +53,7 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) {
 		this->renderPipeline = std::static_pointer_cast<OpenGLRenderPipeline>(renderPipeline);
 
-		subpassIndex = this->renderPipeline->subpassIndex;
+		ENGINE_ASSERT(this->renderPipeline->subpassIndex == subpassIndex, "The pipeline must be associated to the current subpass.");
 
 		commandBuffer.emplace_back(createRef<OpenGLBindRenderPipelineCommand>(this->renderPipeline));
 	}
