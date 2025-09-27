@@ -219,8 +219,24 @@ namespace ProjectA {
 
 				RenderPipelineDescriptor readInputRenderPipelineDescriptor;
 				readInputRenderPipelineDescriptor.pipelineLayout = readInputRenderPipelineLayout;
-				readInputRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Screen.vert", vertexShaderModuleDescriptor);
-				readInputRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/ScreenInputAttachment.frag", fragmentShaderModuleDescriptor);
+
+				switch (getGraphicsApi()) {
+					case GraphicsAPI::OPENGL:
+						readInputRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/ScreenUV.vert", vertexShaderModuleDescriptor);
+						readInputRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/TextureRGBA.frag", fragmentShaderModuleDescriptor);
+
+						break;
+					case GraphicsAPI::VULKAN:
+						readInputRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Screen.vert", vertexShaderModuleDescriptor);
+						readInputRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/ScreenInputAttachment.frag", fragmentShaderModuleDescriptor);
+
+						break;
+					default:
+						ENGINE_ERROR_UNSUPPORTED();
+
+						break;
+				}
+
 				readInputRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 				readInputRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 				readInputRenderPipelineDescriptor.cullMode = CullMode::BACK;
