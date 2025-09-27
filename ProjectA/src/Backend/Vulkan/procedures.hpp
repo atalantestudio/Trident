@@ -83,6 +83,7 @@ namespace ProjectA {
 	#if VULKAN_VERSION < VULKAN_VERSION_1_2
 		extern PFN_vkCmdBeginRenderPass vkCmdBeginRenderPass;
 		extern PFN_vkCmdEndRenderPass vkCmdEndRenderPass;
+		extern PFN_vkCmdNextSubpass vkCmdNextSubpass;
 		extern PFN_vkCreateRenderPass vkCreateRenderPass;
 	#endif
 

@@ -17,15 +17,16 @@ namespace ProjectA {
 		colorAttachment.storeOperation = StoreOperation::STORE;
 
 		// TODO: Restore layout.
-		// colorAttachment.finalImageLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-		colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;
+		// colorAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+		colorAttachment.finalLayout = ImageLayout::PRESENT_SRC;
 
 		SubpassDescriptor subpassDescriptor{};
-		subpassDescriptor.colorAttachments = {colorAttachment};
-		subpassDescriptor.depthStencil = true;
-		subpassDescriptor.depthStencilAttachment.format = DepthStencilImageFormat::D32_SFLOAT;
-		subpassDescriptor.depthStencilAttachment.sampleCount = SAMPLE_COUNT;
-		subpassDescriptor.depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
+		// TODO(subpass-refactor)
+		// subpassDescriptor.colorAttachments = {colorAttachment};
+		// subpassDescriptor.depthStencil = true;
+		// subpassDescriptor.depthStencilAttachment.format = DepthStencilImageFormat::D32_SFLOAT;
+		// subpassDescriptor.depthStencilAttachment.sampleCount = SAMPLE_COUNT;
+		// subpassDescriptor.depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
 
 		subpass = createSubpass(subpassDescriptor);
 
@@ -88,10 +89,12 @@ namespace ProjectA {
 		attachmentImageViewDescriptor.layerOffset = 0;
 		attachmentImageViewDescriptor.layerCount = 1;
 
-		colorImage = renderPass->getSubpass(0)->createColorAttachmentImage(attachmentImageDescriptor, 0);
+		// TODO(subpass-refactor)
+		// colorImage = renderPass->getSubpass(0)->createColorAttachmentImage(attachmentImageDescriptor, 0);
 		colorImageView = colorImage->createView(attachmentImageViewDescriptor);
 
-		depthStencilImage = renderPass->getSubpass(0)->createDepthStencilAttachmentImage(attachmentImageDescriptor);
+		// TODO(subpass-refactor)
+		// depthStencilImage = renderPass->getSubpass(0)->createDepthStencilAttachmentImage(attachmentImageDescriptor);
 		depthStencilImageView = depthStencilImage->createView(attachmentImageViewDescriptor);
 
 		if (framebuffers.count > 0) {

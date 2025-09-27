@@ -7,6 +7,7 @@
 #include "Backend/Vulkan/ImageLayout.hpp"
 
 namespace ProjectA {
+	// TODO(subpass-refactor): Vulkan can make optimizations if we explicitly tell it that we don't care about the depth data post-rendering.
 	VulkanRenderPass::VulkanRenderPass(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const RenderPassDescriptor& descriptor) :
 		RenderPass(descriptor),
 		physicalDevice(physicalDevice),
@@ -17,29 +18,89 @@ namespace ProjectA {
 
 		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat();
 
-		sequence<VkAttachmentDescription> attachmentDescriptions(attachmentCount);
-		sequence<VkAttachmentReference> attachmentReferences(attachmentCount);
-		sequence<VkSubpassDescription> subpassDescriptions(descriptor.subpasses.count);
+		sequence<VkAttachmentDescription> attachmentDescriptions(attachments.count);
 
-		uint32 subpassAttachmentOffset = 0;
+		for (uint32 attachmentIndex = 0; attachmentIndex < attachments.count; attachmentIndex += 1) {
+			const Attachment& attachment = attachments[attachmentIndex];
+
+			VkAttachmentDescription& attachmentDescription = attachmentDescriptions[attachmentIndex];
+			attachmentDescription.flags = 0;
+			attachmentDescription.format = getVkFormat(attachment.format);
+			attachmentDescription.samples = static_cast<VkSampleCountFlagBits>(attachment.sampleCount);
+			attachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(attachment.loadOperation);
+			attachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(attachment.storeOperation);
+			attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+			// TODO: Allow custom initial layouts.
+			attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+			attachmentDescription.finalLayout = getVkImageLayout(attachment.finalLayout);
+		}
+
+		sequence<VkAttachmentReference> attachmentReferences(attachmentReferenceCount);
+		sequence<VkSubpassDescription> subpassDescriptions(descriptor.subpasses.count);
+		uint32 attachmentReferenceOffset = 0;
 
 		for (uint32 subpassIndex = 0; subpassIndex < descriptor.subpasses.count; subpassIndex += 1) {
 			const ref<Subpass>& subpass = descriptor.subpasses[subpassIndex];
-			const sequence<ColorAttachment>& colorAttachments = subpass->getColorAttachments();
-			const uint32 colorAttachmentCount = static_cast<uint32>(colorAttachments.count);
-			const uint32 resolveAttachmentCount = subpass->getResolveAttachmentCount();
-			const uint32 depthStencilAttachmentCount = static_cast<uint32>(subpass->hasDepthStencilAttachment());
+			const uint32 depthStencilAttachmentCount = static_cast<uint32>(subpass->hasDepthStencilAttachmentReference());
 
-			for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < colorAttachmentCount; colorAttachmentIndex += 1) {
-				const ColorAttachment& colorAttachment = colorAttachments[colorAttachmentIndex];
+			uint32 relativeAttachmentReferenceOffset = attachmentReferenceOffset;
 
-				VkAttachmentDescription& colorAttachmentDescription = attachmentDescriptions[subpassAttachmentOffset + colorAttachmentIndex];
+			for (uint32 colorAttachmentReferenceIndex = 0; colorAttachmentReferenceIndex < subpass->getColorAttachmentReferenceCount(); colorAttachmentReferenceIndex += 1) {
+				const AttachmentReference& colorAttachmentReference = subpass->getColorAttachmentReferences()[colorAttachmentReferenceIndex];
+
+				VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset + colorAttachmentReferenceIndex];
+				attachmentReference.attachment = colorAttachmentReference.index;
+				attachmentReference.layout = getVkImageLayout(colorAttachmentReference.layout);
+			}
+
+			relativeAttachmentReferenceOffset += subpass->getColorAttachmentReferenceCount();
+
+			if (subpass->hasDepthStencilAttachmentReference()) {
+				const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();
+
+				VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset];
+				attachmentReference.attachment = depthStencilAttachmentReference.index;
+				attachmentReference.layout = getVkImageLayout(depthStencilAttachmentReference.layout);
+
+				relativeAttachmentReferenceOffset += 1;
+			}
+
+			if (subpass->getRasterizationSampleCount() > 1) {
+				// Create resolve attachment references.
+				for (uint32 resolveAttachmentReferenceIndex = 0; resolveAttachmentReferenceIndex < subpass->getColorAttachmentReferenceCount(); resolveAttachmentReferenceIndex += 1) {
+					// const AttachmentReference& colorAttachmentReference = subpass->getColorAttachmentReferences()[resolveAttachmentReferenceIndex];
+
+					VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset + resolveAttachmentReferenceIndex];
+					// attachmentReference.attachment = colorAttachmentReference.index;
+					// attachmentReference.layout = getVkImageLayout(colorAttachmentReference.layout);
+				}
+
+				relativeAttachmentReferenceOffset += subpass->getColorAttachmentReferenceCount();
+			}
+
+			for (uint32 inputAttachmentReferenceIndex = 0; inputAttachmentReferenceIndex < subpass->getInputAttachmentReferenceCount(); inputAttachmentReferenceIndex += 1) {
+				const AttachmentReference& inputAttachmentReference = subpass->getInputAttachmentReferences()[inputAttachmentReferenceIndex];
+
+				VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset + inputAttachmentReferenceIndex];
+				attachmentReference.attachment = inputAttachmentReference.index;
+				attachmentReference.layout = getVkImageLayout(inputAttachmentReference.layout);
+			}
+
+			relativeAttachmentReferenceOffset += subpass->getInputAttachmentReferenceCount();
+
+			/* for (uint32 colorAttachmentIndex = 0; colorAttachmentReferenceIndex < subpass->getColorAttachmentCount(); colorAttachmentIndex += 1) {
+				const ColorAttachment& colorAttachment = subpass->getColorAttachments()[colorAttachmentIndex];
+
+				VkAttachmentDescription& colorAttachmentDescription = attachmentDescriptions[attachmentReferenceOffset + colorAttachmentIndex];
 				colorAttachmentDescription.flags = 0;
 				colorAttachmentDescription.format = getVkFormat(colorAttachment.format);
 				colorAttachmentDescription.samples = static_cast<VkSampleCountFlagBits>(colorAttachment.sampleCount);
 				colorAttachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(colorAttachment.loadOperation);
 
-				if (resolveAttachmentCount > 0) {
+				if (subpass->getResolveAttachmentCount() > 0) {
 					// Set the store operation in the resolve attachment instead.
 					colorAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 				}
@@ -57,77 +118,58 @@ namespace ProjectA {
 					colorAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 				}
 
-				colorAttachmentDescription.finalLayout = getVkImageLayout(colorAttachment.finalImageLayout);
+				colorAttachmentDescription.finalLayout = getVkImageLayout(colorAttachment.finalLayout);
 
-				VkAttachmentReference& colorAttachmentReference = attachmentReferences[subpassAttachmentOffset + colorAttachmentIndex];
+				VkAttachmentReference& colorAttachmentReference = attachmentReferences[attachmentReferenceOffset + colorAttachmentIndex];
 				colorAttachmentReference.attachment = colorAttachmentIndex;
 
 				// TODO: Use the same layout as the one from the attachment description?
 				colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 			}
 
-			subpassAttachmentOffset += colorAttachmentCount;
+			for (uint32 resolveAttachmentIndex = 0; resolveAttachmentIndex < subpass->getResolveAttachmentCount(); resolveAttachmentIndex += 1) {
+				const VkAttachmentDescription& colorAttachmentDescription = attachmentDescriptions[attachmentReferenceOffset - subpass->getColorAttachmentCount() - depthStencilAttachmentCount + resolveAttachmentIndex];
 
-			if (subpass->hasDepthStencilAttachment()) {
-				const DepthStencilAttachment depthStencilAttachment = subpass->getDepthStencilAttachment();
-
-				VkAttachmentDescription& depthStencilAttachmentDescription = attachmentDescriptions[subpassAttachmentOffset];
-				depthStencilAttachmentDescription.flags = 0;
-				depthStencilAttachmentDescription.format = VK_FORMAT_D32_SFLOAT;
-				depthStencilAttachmentDescription.samples = static_cast<VkSampleCountFlagBits>(depthStencilAttachment.sampleCount);
-				depthStencilAttachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(depthStencilAttachment.loadOperation);
-
-				// Vulkan can make optimizations if we explicitly tell it that we don't care about the depth data post-rendering.
-				depthStencilAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-				depthStencilAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-				depthStencilAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-				depthStencilAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				depthStencilAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-				VkAttachmentReference& depthStencilAttachmentReference = attachmentReferences[subpassAttachmentOffset];
-				depthStencilAttachmentReference.attachment = subpassAttachmentOffset;
-				depthStencilAttachmentReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-			}
-
-			subpassAttachmentOffset += depthStencilAttachmentCount;
-
-			for (uint32 resolveAttachmentIndex = 0; resolveAttachmentIndex < resolveAttachmentCount; resolveAttachmentIndex += 1) {
-				const VkAttachmentDescription& colorAttachmentDescription = attachmentDescriptions[subpassAttachmentOffset - colorAttachmentCount - depthStencilAttachmentCount + resolveAttachmentIndex];
-
-				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[subpassAttachmentOffset + resolveAttachmentIndex];
+				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[attachmentReferenceOffset + resolveAttachmentIndex];
 				resolveAttachmentDescription.flags = 0;
 				resolveAttachmentDescription.format = surfaceFormat.format;
 				resolveAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
 				resolveAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-				resolveAttachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(colorAttachments[resolveAttachmentIndex].storeOperation);
+				resolveAttachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(subpass->getColorAttachments()[resolveAttachmentIndex].storeOperation);
 				resolveAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				resolveAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 				resolveAttachmentDescription.initialLayout = colorAttachmentDescription.initialLayout;
 				resolveAttachmentDescription.finalLayout = colorAttachmentDescription.finalLayout;
 
-				VkAttachmentReference& resolveAttachmentReference = attachmentReferences[subpassAttachmentOffset + resolveAttachmentIndex];
-				resolveAttachmentReference.attachment = subpassAttachmentOffset + resolveAttachmentIndex;
+				VkAttachmentReference& resolveAttachmentReference = attachmentReferences[attachmentReferenceOffset + resolveAttachmentIndex];
+				resolveAttachmentReference.attachment = attachmentReferenceOffset + resolveAttachmentIndex;
 				resolveAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			}
+			} */
 
 			VkSubpassDescription& subpassDescription = subpassDescriptions[subpassIndex];
 			subpassDescription.flags = 0;
 			subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-			subpassDescription.inputAttachmentCount = 0;
-			subpassDescription.pInputAttachments = nullptr;
-			subpassDescription.colorAttachmentCount = colorAttachmentCount;
-			subpassDescription.pColorAttachments = &attachmentReferences[0];
+			subpassDescription.inputAttachmentCount = static_cast<uint32>(subpass->getInputAttachmentReferenceCount());
 
-			if (resolveAttachmentCount > 0) {
-				subpassDescription.pResolveAttachments = &attachmentReferences[colorAttachmentCount + depthStencilAttachmentCount];
+			if (subpass->getInputAttachmentReferenceCount() > 0) {
+				subpassDescription.pInputAttachments = &attachmentReferences[attachmentReferenceOffset + (subpass->getColorAttachmentReferenceCount() * (subpass->getRasterizationSampleCount() > 1 ? 2 : 1)) + depthStencilAttachmentCount];
+			}
+			else {
+				subpassDescription.pInputAttachments = nullptr;
+			}
+
+			subpassDescription.colorAttachmentCount = static_cast<uint32>(subpass->getColorAttachmentReferenceCount());
+			subpassDescription.pColorAttachments = &attachmentReferences[attachmentReferenceOffset];
+
+			if (subpass->getRasterizationSampleCount() > 1) {
+				subpassDescription.pResolveAttachments = &attachmentReferences[attachmentReferenceOffset + subpass->getColorAttachmentReferenceCount() + depthStencilAttachmentCount];
 			}
 			else {
 				subpassDescription.pResolveAttachments = nullptr;
 			}
 
-			if (subpass->hasDepthStencilAttachment()) {
-				subpassDescription.pDepthStencilAttachment = &attachmentReferences[colorAttachmentCount];
+			if (subpass->hasDepthStencilAttachmentReference()) {
+				subpassDescription.pDepthStencilAttachment = &attachmentReferences[attachmentReferenceOffset + subpass->getColorAttachmentReferenceCount()];
 			}
 			else {
 				subpassDescription.pDepthStencilAttachment = nullptr;
@@ -135,10 +177,13 @@ namespace ProjectA {
 
 			subpassDescription.preserveAttachmentCount = 0;
 			subpassDescription.pPreserveAttachments = nullptr;
+
+			attachmentReferenceOffset = relativeAttachmentReferenceOffset;
 		}
 
 		sequence<VkSubpassDependency> subpassDependencies(descriptor.subpassDependencies.count);
 
+		// TODO(subpass-refactor)
 		for (uint32 subpassDependencyIndex = 0; subpassDependencyIndex < descriptor.subpassDependencies.count; subpassDependencyIndex += 1) {
 			const SubpassDependency& dependency = descriptor.subpassDependencies[subpassDependencyIndex];
 
@@ -154,7 +199,7 @@ namespace ProjectA {
 			if (dependency.destinationSubpassIndex != SubpassDependency::EXTERNAL_SUBPASS) {
 				const ref<Subpass>& destinationSubpass = descriptor.subpasses[dependency.destinationSubpassIndex];
 
-				if (destinationSubpass->hasDepthStencilAttachment()) {
+				if (destinationSubpass->hasDepthStencilAttachmentReference()) {
 					subpassDependency.srcStageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 					subpassDependency.dstStageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 					subpassDependency.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
@@ -166,7 +211,7 @@ namespace ProjectA {
 		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		renderPassCreateInfo.pNext = nullptr;
 		renderPassCreateInfo.flags = 0;
-		renderPassCreateInfo.attachmentCount = attachmentCount;
+		renderPassCreateInfo.attachmentCount = static_cast<uint32>(attachmentDescriptions.count);
 		renderPassCreateInfo.pAttachments = attachmentDescriptions;
 		renderPassCreateInfo.subpassCount = static_cast<uint32>(subpassDescriptions.count);
 		renderPassCreateInfo.pSubpasses = subpassDescriptions;

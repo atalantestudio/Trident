@@ -10,5 +10,7 @@ namespace ProjectA {
 
 		// Specifies that polygons are rendered filled.
 		FILL = 2,
+
+		__MAX_ENUM,
 	};
 }

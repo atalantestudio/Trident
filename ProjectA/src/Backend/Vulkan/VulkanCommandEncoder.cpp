@@ -206,6 +206,10 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
+	void VulkanCommandEncoder::nextSubpass() const {
+		vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+	}
+
 	void VulkanCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
 		VulkanImage& vkImage = *std::static_pointer_cast<VulkanImage>(image);
 

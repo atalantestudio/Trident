@@ -8,59 +8,52 @@
 namespace ProjectA {
 	struct Subpass {
 		public:
-			Subpass() {}
+			explicit Subpass() = default;
 
 			explicit Subpass(const SubpassDescriptor& descriptor) :
-				colorAttachments(descriptor.colorAttachments),
-				rasterizationSampleCount(1),
-				depthStencil(descriptor.depthStencil),
-				depthStencilAttachment(descriptor.depthStencilAttachment)
+				colorAttachmentReferences(descriptor.colorAttachmentReferences),
+				depthStencilAttachmentReference(descriptor.depthStencilAttachmentReference),
+				inputAttachmentReferences(descriptor.inputAttachmentReferences)
 			{
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
-
-				for (const ColorAttachment& colorAttachment : colorAttachments) {
-					if (colorAttachment.sampleCount > 1) {
-						rasterizationSampleCount = colorAttachment.sampleCount;
-						resolveAttachmentCount = static_cast<uint32>(colorAttachments.count);
-
-						break;
-					}
-				}
 			}
 
-			const sequence<ColorAttachment>& getColorAttachments() const {
-				return colorAttachments;
+			uint32 getColorAttachmentReferenceCount() const {
+				return static_cast<uint32>(colorAttachmentReferences.count);
 			}
 
-			uint32 getColorAttachmentCount() const {
-				return static_cast<uint32>(colorAttachments.count);
+			const sequence<AttachmentReference>& getColorAttachmentReferences() const {
+				return colorAttachmentReferences;
 			}
 
-			uint32 getResolveAttachmentCount() const {
-				return resolveAttachmentCount;
+			bool hasDepthStencilAttachmentReference() const {
+				return depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX;
+			}
+
+			AttachmentReference getDepthStencilAttachmentReference() const {
+				return depthStencilAttachmentReference;
+			}
+
+			uint32 getInputAttachmentReferenceCount() const {
+				return static_cast<uint32>(inputAttachmentReferences.count);
+			}
+
+			const sequence<AttachmentReference>& getInputAttachmentReferences() const {
+				return inputAttachmentReferences;
 			}
 
 			uint8 getRasterizationSampleCount() const {
 				return rasterizationSampleCount;
 			}
 
-			bool hasDepthStencilAttachment() const {
-				return depthStencil;
+			void setRasterizationSampleCount(uint8 rasterizationSampleCount) {
+				this->rasterizationSampleCount = rasterizationSampleCount;
 			}
-
-			DepthStencilAttachment getDepthStencilAttachment() const {
-				return depthStencilAttachment;
-			}
-
-			ref<Image> createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 colorAttachmentIndex) const;
-
-			ref<Image> createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor) const;
 
 		private:
-			sequence<ColorAttachment> colorAttachments;
-			uint32 resolveAttachmentCount = 0;
+			sequence<AttachmentReference> colorAttachmentReferences;
+			AttachmentReference depthStencilAttachmentReference;
+			sequence<AttachmentReference> inputAttachmentReferences;
 			uint8 rasterizationSampleCount : 7;
-			bool depthStencil;
-			DepthStencilAttachment depthStencilAttachment;
 	};
 }

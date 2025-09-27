@@ -31,6 +31,8 @@ namespace ProjectA {
 		// R64G64B64A64_SINT,
 		// R64G64B64A64_UINT,
 		R64G64B64A64_FLOAT,
+
+		__MAX_ENUM,
 	};
 
 	template<typename T>

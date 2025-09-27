@@ -24,7 +24,7 @@ namespace ProjectA {
 					colorAttachment.sampleCount = 1;
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
-					colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;
+					colorAttachment.finalLayout = ImageLayout::PRESENT_SRC;
 
 					SubpassDescriptor subpassDescriptor{};
 					subpassDescriptor.colorAttachments = {colorAttachment};
@@ -92,10 +92,7 @@ namespace ProjectA {
 					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/Forward3D.frag", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-
-					// TODO: Use CullMode::BACK.
-					renderPipelineDescriptor.cullMode = CullMode::NONE;
-
+					renderPipelineDescriptor.cullMode = CullMode::BACK;
 					renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 					renderPipelineDescriptor.lineWidth = 1.0f;
 					renderPipelineDescriptor.minSampleShading = 0.0f;

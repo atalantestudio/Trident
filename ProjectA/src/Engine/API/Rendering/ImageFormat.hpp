@@ -8,17 +8,20 @@ namespace ProjectA {
 		B8G8R8A8_UNORM = 2,
 		R8G8B8A8_SRGB = 3,
 		R8G8B8A8_UNORM = 4,
+		R32G32_UINT = 5,
 
 		// Depth/depth-stencil formats.
-		D32_SFLOAT = 5,
-		D32_SFLOAT_S8_UINT = 6,
-		D24_UNORM_S8_UINT = 7,
+		D32_SFLOAT = 6,
+		D32_SFLOAT_S8_UINT = 7,
+		D24_UNORM_S8_UINT = 8,
+
+		__MAX_ENUM,
 	};
 
 	enum class DepthStencilImageFormat : uint8 {
-		D32_SFLOAT = 5,
-		D32_SFLOAT_S8_UINT = 6,
-		D24_UNORM_S8_UINT = 7,
+		D32_SFLOAT = 6,
+		D32_SFLOAT_S8_UINT = 7,
+		D24_UNORM_S8_UINT = 8,
 	};
 
 	static bool isDepthFormat(ImageFormat imageFormat) {
@@ -54,6 +57,8 @@ namespace ProjectA {
 			case ImageFormat::R8G8B8A8_SRGB:
 			case ImageFormat::R8G8B8A8_UNORM:
 				return 4;
+			case ImageFormat::R32G32_UINT:
+				return 2;
 			default:
 				ENGINE_ASSERT(false, "Unsupported image format.");
 

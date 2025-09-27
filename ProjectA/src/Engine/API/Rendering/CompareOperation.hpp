@@ -10,5 +10,7 @@ namespace ProjectA {
 		NOT_EQUAL = 5,
 		GREATER_OR_EQUAL = 6,
 		ALWAYS = 7,
+
+		__MAX_ENUM,
 	};
 }

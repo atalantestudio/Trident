@@ -2,21 +2,16 @@
 
 namespace ProjectA {
 	enum class GraphicsAPI : uint8 {
-		// NOTE (NOT IMPLEMENTED)
 		// CPU backend (headless graphics).
 		NONE = 0,
 
 		#ifdef ENABLE_OPENGL_ADAPTER
-			// NOTE
-			// OpenGL graphics API.
-			// Excellent support, but not the fastest.
+			// OpenGL graphics API. Excellent support, but not the fastest.
 			OPENGL = 1,
 		#endif
 
 		#ifdef ENABLE_VULKAN_ADAPTER
-			// NOTE
-			// Vulkan graphics API.
-			// Very fast, but not very good support.
+			// Vulkan graphics API. Very fast, but not very good support.
 			VULKAN = 2,
 		#endif
 	};

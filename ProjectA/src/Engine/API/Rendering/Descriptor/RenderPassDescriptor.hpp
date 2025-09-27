@@ -5,6 +5,7 @@
 
 namespace ProjectA {
 	struct RenderPassDescriptor {
+		sequence<Attachment> attachments;
 		sequence<ref<Subpass>> subpasses;
 		sequence<SubpassDependency> subpassDependencies;
 	};

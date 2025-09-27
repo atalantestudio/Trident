@@ -31,7 +31,7 @@ namespace ProjectA {
 
 			// Creates and returns a staging buffer.
 			// `size` is in bytes.
-			// If `persistent` is true, then the buffer is configured to be mapped permanently.
+			// If `persistent` is true, the buffer will stay mapped until it is destroyed.
 			static ref<Buffer> createStagingBuffer(uint64 size, bool persistent = false);
 
 			static ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor);

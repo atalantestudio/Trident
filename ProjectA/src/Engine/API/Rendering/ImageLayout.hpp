@@ -11,5 +11,7 @@ namespace ProjectA {
 		TRANSFER_SRC_OPTIMAL = 6,
 		TRANSFER_DST_OPTIMAL = 7,
 		PRESENT_SRC = 8,
+
+		__MAX_ENUM,
 	};
 }

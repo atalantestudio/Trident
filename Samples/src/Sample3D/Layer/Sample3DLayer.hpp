@@ -3,7 +3,7 @@
 #include "Engine/Camera/3D/PerspectiveCamera3D.hpp"
 #include "Engine/Filesystem/Asset/FBXToGeometry.hpp"
 #include "Engine/Layer/Layer.hpp"
-#include "Engine/Renderer/3D/ForwardRenderer3D.hpp"
+#include "Engine/Renderer/3D/VisibilitySubpass.hpp"
 
 namespace ProjectA {
 	class Sample3DLayer : public Layer {
@@ -75,7 +75,7 @@ namespace ProjectA {
 			static constexpr float32 FAR_PLANE = 100.0_m;
 
 		private:
-			ForwardRenderer3D renderer;
+			VisibilitySubpass renderer;
 			Scene3D scene;
 			PerspectiveCamera3D camera;
 	};

@@ -190,7 +190,7 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
 		graphicsPipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
 
-		if (subpass->hasDepthStencilAttachment()) {
+		if (subpass->hasDepthStencilAttachmentReference()) {
 			VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo{};
 			depthStencilStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 			depthStencilStateCreateInfo.pNext = nullptr;

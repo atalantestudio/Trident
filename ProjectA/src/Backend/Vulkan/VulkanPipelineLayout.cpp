@@ -40,7 +40,8 @@ namespace ProjectA {
 
 				if (
 					binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER ||
-					binding.descriptorType == DescriptorType::STORAGE_IMAGE
+					binding.descriptorType == DescriptorType::STORAGE_IMAGE ||
+					binding.descriptorType == DescriptorType::INPUT_ATTACHMENT
 				) {
 					descriptorPoolSize.descriptorCount = static_cast<uint32>(binding.imageViews.size());
 				}
@@ -123,7 +124,7 @@ namespace ProjectA {
 						descriptorImageInfo.imageView = imageView->object;
 
 						// TODO: Specify the current image's layout.
-						if (binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER) {
+						if (binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER || binding.descriptorType == DescriptorType::INPUT_ATTACHMENT) {
 							descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 						}
 						else if (binding.descriptorType == DescriptorType::STORAGE_IMAGE) {

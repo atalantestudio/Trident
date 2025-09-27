@@ -2,17 +2,16 @@
 
 namespace ProjectA {
 	static GLenum getGlDescriptorType(DescriptorType descriptorType) {
-		static constexpr GLenum glDescriptorTypes[] = {
-			GL_SHADER_STORAGE_BUFFER,
-			GL_UNIFORM_BUFFER,
-			0,
-			0,
-		};
+		if (descriptorType == DescriptorType::UNIFORM_BUFFER) {
+			return GL_UNIFORM_BUFFER;
+		}
 
-		const GLenum glDescriptorType = glDescriptorTypes[static_cast<uint8>(descriptorType)];
+		if (descriptorType == DescriptorType::STORAGE_BUFFER) {
+			return GL_SHADER_STORAGE_BUFFER;
+		}
 
-		ENGINE_ASSERT(glDescriptorType != 0, "OpenGL descriptor type not supported.");
+		ENGINE_ASSERT(false, "OpenGL descriptor type not supported.");
 
-		return glDescriptorType;
+		return 0;
 	}
 }

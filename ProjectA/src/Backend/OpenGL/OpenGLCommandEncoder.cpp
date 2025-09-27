@@ -128,6 +128,11 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLDispatchIndirectCommand>(std::static_pointer_cast<OpenGLBuffer>(buffer)->object, offset));
 	}
 
+	void OpenGLCommandEncoder::nextSubpass() const {
+		// TODO(subpass-refactor)
+		BREAKPOINT();
+	}
+
 	void OpenGLCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
 		const GLbitfield barrier = getGlBarrier(image->getLayout());
 

@@ -10,5 +10,7 @@ namespace ProjectA {
 
 		// Marks the previous contents within the render area as undefined.
 		UNDEFINED = 2,
+
+		__MAX_ENUM,
 	};
 }

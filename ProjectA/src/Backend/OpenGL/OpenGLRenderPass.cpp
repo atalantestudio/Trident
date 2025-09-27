@@ -13,17 +13,18 @@ namespace ProjectA {
 		for (uint32 subpassIndex = 0; subpassIndex < subpasses.count; subpassIndex += 1) {
 			const ref<Subpass>& subpass = subpasses[subpassIndex];
 
-			totalColorAttachmentCount += subpass->getColorAttachmentCount() + subpass->getResolveAttachmentCount() + static_cast<uint32>(subpass->hasDepthStencilAttachment());
+			// TODO(subpass-refactor)
+			/* totalColorAttachmentCount += subpass->getColorAttachmentCount() + subpass->getResolveAttachmentCount() + static_cast<uint32>(subpass->hasDepthStencilAttachment());
 
 			for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < subpass->getColorAttachmentCount(); colorAttachmentIndex += 1) {
 				const ColorAttachment& colorAttachment = subpass->getColorAttachments()[colorAttachmentIndex];
 
-				if (colorAttachment.finalImageLayout == ImageLayout::PRESENT_SRC) {
+				if (colorAttachment.finalLayout == ImageLayout::PRESENT_SRC) {
 					presentSourceAttachmentIndex = colorAttachmentIndex;
 
 					break;
 				}
-			}
+			} */
 		}
 
 		GLint maxColorAttachmentCount;

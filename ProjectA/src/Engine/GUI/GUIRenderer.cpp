@@ -16,11 +16,12 @@ namespace ProjectA {
 		// colorAttachment.loadOperation = LoadOperation::LOAD;
 
 		colorAttachment.storeOperation = StoreOperation::STORE;
-		colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;
+		colorAttachment.finalLayout = ImageLayout::PRESENT_SRC;
 
 		SubpassDescriptor subpassDescriptor{};
-		subpassDescriptor.colorAttachments = {colorAttachment};
-		subpassDescriptor.depthStencil = false;
+		// TODO(subpass-refactor)
+		// subpassDescriptor.colorAttachments = {colorAttachment};
+		// subpassDescriptor.depthStencil = false;
 
 		subpass = createSubpass(subpassDescriptor);
 

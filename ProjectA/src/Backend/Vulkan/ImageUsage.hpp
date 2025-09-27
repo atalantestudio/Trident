@@ -28,6 +28,10 @@ namespace ProjectA {
 			vkImageUsageFlags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 		}
 
+		if (imageUsage & ImageUsage::INPUT_ATTACHMENT) {
+			vkImageUsageFlags |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+		}
+
 		if (imageUsage & ImageUsage::TRANSIENT_ATTACHMENT) {
 			vkImageUsageFlags |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT;
 		}

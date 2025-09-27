@@ -7,47 +7,45 @@ namespace ProjectA {
 	class RenderPass {
 		public:
 			explicit RenderPass(const RenderPassDescriptor& descriptor) :
+				attachments(descriptor.attachments),
 				subpasses(descriptor.subpasses)
 			{
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-				for (const ref<Subpass>& subpass : subpasses) {
-					attachmentCount += subpass->getColorAttachmentCount() + subpass->getResolveAttachmentCount();
+				for (ref<Subpass>& subpass : subpasses) {
+					uint8 rasterizationSampleCount = 0;
 
-					if (subpass->hasDepthStencilAttachment()) {
-						// TODO: Do we really need to add 1 if there is a depth stencil resolve attachment?
-						attachmentCount += 1;
-						anyDepthStencilSubpass = true;
-					}
-				}
-
-				ENGINE_ASSERT(attachmentCount > 0, "A render pass must have at least 1 attachment.");
-
-				uint32 lastAttachmentIndex = attachmentCount - 1;
-
-				for (sint32 subpassIndex = static_cast<sint32>(subpasses.count) - 1; subpassIndex >= 0; subpassIndex -= 1) {
-					const ref<Subpass>& subpass = subpasses[subpassIndex];
-
-					if (subpass->hasDepthStencilAttachment()) {
-						if (subpass->getDepthStencilAttachment().loadOperation == LoadOperation::CLEAR) {
-							lastClearDepthStencilAttachmentIndex = lastAttachmentIndex;
-							lastClearAttachmentIndex = lastAttachmentIndex;
-
-							break;
+					for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
+						if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+							continue;
 						}
 
-						lastAttachmentIndex -= 1;
-					}
+						if (rasterizationSampleCount == 0) {
+							rasterizationSampleCount = attachments[colorAttachmentReference.index].sampleCount;
 
-					for (sint32 colorAttachmentIndex = static_cast<sint32>(subpass->getColorAttachmentCount()) - 1; colorAttachmentIndex >= 0; colorAttachmentIndex -= 1) {
-						if (subpass->getColorAttachments()[colorAttachmentIndex].loadOperation == LoadOperation::CLEAR) {
-							lastClearColorAttachmentIndex = lastAttachmentIndex;
-							lastClearAttachmentIndex = lastAttachmentIndex;
-
-							break;
+							continue;
 						}
 
-						lastAttachmentIndex -= (subpass->getColorAttachmentCount() + subpass->getResolveAttachmentCount()) / subpass->getColorAttachmentCount();
+						ENGINE_ASSERT(rasterizationSampleCount == attachments[colorAttachmentReference.index].sampleCount, "All color and depth/stencil attachments in a subpass must have the same sample count.");
+					}
+
+					if (subpass->getDepthStencilAttachmentReference().index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+						const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();
+
+						ENGINE_ASSERT(rasterizationSampleCount == attachments[depthStencilAttachmentReference.index].sampleCount, "All color and depth/stencil attachments in a subpass must have the same sample count.");
+
+						attachmentReferenceCount += 1;
+					}
+
+					DEBUG_ASSERT(rasterizationSampleCount > 0);
+
+					subpass->setRasterizationSampleCount(rasterizationSampleCount);
+
+					attachmentReferenceCount += subpass->getColorAttachmentReferenceCount() + subpass->getInputAttachmentReferenceCount();
+
+					// If the subpass uses multisample, add resolve attachments to the total reference count.
+					if (rasterizationSampleCount > 1) {
+						attachmentReferenceCount += subpass->getColorAttachmentReferenceCount();
 					}
 				}
 			}
@@ -55,42 +53,29 @@ namespace ProjectA {
 			virtual ~RenderPass() = default;
 
 			uint32 getAttachmentCount() const {
-				return attachmentCount;
-			}
-
-			uint32 getLastClearAttachmentIndex() const {
-				return lastClearAttachmentIndex;
-			}
-
-			bool hasAnyDepthStencilSubpass() const {
-				return anyDepthStencilSubpass;
-			}
-
-			const ref<Subpass>& getSubpass(uint32 index) const {
-				ENGINE_ASSERT(index < subpasses.count, "Subpass index overflow.");
-
-				return subpasses[index];
+				return static_cast<uint32>(attachments.count);
 			}
 
 			uint32 getSubpassCount() const {
 				return static_cast<uint32>(subpasses.count);
 			}
 
+			const ref<Subpass>& getSubpass(uint32 subpassIndex) const {
+				ENGINE_ASSERT(subpassIndex < subpasses.count, "Subpass index overflow.");
+
+				return subpasses[subpassIndex];
+			}
+
+			ref<Image> createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 attachmentIndex) const;
+
+			ref<Image> createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 subpassIndex) const;
+
+			ref<Image> createInputAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 attachmentIndex) const;
+
 		protected:
-			uint32 attachmentCount = 0;
-
-			// Largest attachment index specifying a load operation (or stencil load operation, if the attachment has a depth/stencil format) of LoadOperation::CLEAR.
-			uint32 lastClearAttachmentIndex = max<uint32>();
-
-			// These are used by the OpenGL adapter.
-			uint32 lastClearColorAttachmentIndex = max<uint32>();
-			uint32 lastClearDepthStencilAttachmentIndex = max<uint32>();
-
+			sequence<Attachment> attachments;
 			sequence<ref<Subpass>> subpasses;
-			sequence<SubpassDependency> subpassDependencies;
 
-		private:
-			// True if any subpass has a depth stencil attachment.
-			bool anyDepthStencilSubpass = false;
+			uint32 attachmentReferenceCount = 0;
 	};
 }

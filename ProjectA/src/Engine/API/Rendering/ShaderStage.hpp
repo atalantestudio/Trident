@@ -5,5 +5,7 @@ namespace ProjectA {
 		VERTEX = 0,
 		FRAGMENT = 1,
 		COMPUTE = 2,
+
+		__MAX_ENUM,
 	};
 }

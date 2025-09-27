@@ -203,6 +203,7 @@ namespace ProjectA {
 		#if VULKAN_VERSION < VULKAN_VERSION_1_2
 			LOAD_PROCEDURE(vkCmdBeginRenderPass);
 			LOAD_PROCEDURE(vkCmdEndRenderPass);
+			LOAD_PROCEDURE(vkCmdNextSubpass);
 			LOAD_PROCEDURE(vkCreateRenderPass);
 		#endif
 

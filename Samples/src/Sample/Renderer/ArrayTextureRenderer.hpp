@@ -48,7 +48,7 @@ namespace ProjectA {
 					colorAttachment.sampleCount = 1;
 					colorAttachment.loadOperation = LoadOperation::CLEAR;
 					colorAttachment.storeOperation = StoreOperation::STORE;
-					colorAttachment.finalImageLayout = ImageLayout::PRESENT_SRC;
+					colorAttachment.finalLayout = ImageLayout::PRESENT_SRC;
 
 					SubpassDescriptor subpassDescriptor{};
 					subpassDescriptor.colorAttachments = {colorAttachment};
