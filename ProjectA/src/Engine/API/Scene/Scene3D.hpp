@@ -55,5 +55,22 @@ namespace ProjectA {
 
 				ecs.setComponent<RigidBody3D>(entity, rigidBody);
 			}
+
+			// Returns the number of instances (rigid bodies) using the provided geometry.
+			uint32 getInstanceCount(uint32 geometryIndex) const {
+				const ComponentPool<RigidBody3D>& rigidBodyPool = ecs.getComponentPool<RigidBody3D>();
+
+				uint32 instanceCount = 0;
+
+				for (uint32 rigidBodyIndex = 0; rigidBodyIndex < rigidBodyPool.componentCount; rigidBodyIndex += 1) {
+					const RigidBody3D& rigidBody = rigidBodyPool.components[rigidBodyIndex];
+
+					if (rigidBody.geometryIndex == geometryIndex) {
+						instanceCount += 1;
+					}
+				}
+
+				return instanceCount;
+			}
 	};
 }
