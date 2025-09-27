@@ -34,7 +34,7 @@ namespace ProjectA {
 
 			void dispatchIndirect(const ref<Buffer>& buffer, uint64 offset) final override;
 
-			void nextSubpass() const final override;
+			void nextSubpass() final override;
 
 			void setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) final override;
 

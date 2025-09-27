@@ -16,6 +16,7 @@
 #include "Backend/OpenGL/Command/OpenGLDrawIndexedIndirectCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLDrawIndirectCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLEndRenderPassCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLNextSubpassCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetImageMemoryBarrierCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetLineWidthCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLSetScissorCommand.hpp"
@@ -37,7 +38,8 @@ namespace ProjectA {
 	void OpenGLCommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		framebuffer = std::static_pointer_cast<OpenGLFramebuffer>(descriptor.framebuffer).get();
+		framebuffer = std::static_pointer_cast<OpenGLFramebuffer>(descriptor.framebuffer);
+		renderPass = std::static_pointer_cast<OpenGLRenderPass>(framebuffer->getRenderPass());
 
 		commandBuffer.emplace_back(createRef<OpenGLBeginRenderPassCommand>(descriptor));
 	}
@@ -128,9 +130,12 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLDispatchIndirectCommand>(std::static_pointer_cast<OpenGLBuffer>(buffer)->object, offset));
 	}
 
-	void OpenGLCommandEncoder::nextSubpass() const {
-		// TODO(subpass-refactor)
-		BREAKPOINT();
+	void OpenGLCommandEncoder::nextSubpass() {
+		subpassIndex += 1;
+
+		ENGINE_ASSERT(subpassIndex < renderPass->getSubpassCount(), "All subpasses have been executed.");
+
+		commandBuffer.emplace_back(createRef<OpenGLNextSubpassCommand>(framebuffer, renderPass->getSubpass(subpassIndex)));
 	}
 
 	void OpenGLCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
@@ -221,7 +226,7 @@ namespace ProjectA {
 	}
 
 	void OpenGLCommandEncoder::endRenderPass() {
-		commandBuffer.emplace_back(createRef<OpenGLEndRenderPassCommand>(framebuffer, subpassIndex));
+		commandBuffer.emplace_back(createRef<OpenGLEndRenderPassCommand>(framebuffer));
 	}
 
 	ref<CommandBuffer> OpenGLCommandEncoder::end() const {
@@ -232,6 +237,7 @@ namespace ProjectA {
 		commandBuffer.clear();
 
 		framebuffer = nullptr;
+		renderPass = nullptr;
 		subpassIndex = 0;
 		computePipeline = nullptr;
 		renderPipeline = nullptr;

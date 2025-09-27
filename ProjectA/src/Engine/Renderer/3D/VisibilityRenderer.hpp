@@ -3,7 +3,7 @@
 #include "Engine/Renderer/3D/Renderer3D.hpp"
 
 namespace ProjectA {
-	class VisibilitySubpass : public Renderer3D {
+	class VisibilityRenderer : public Renderer3D {
 		private:
 			struct Transform {
 				mat4x4<float32> transform;
@@ -33,20 +33,26 @@ namespace ProjectA {
 					visibilityAttachment.storeOperation = StoreOperation::UNDEFINED;
 					visibilityAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
+					AttachmentReference visibilitySwapchainAttachmentReference{};
+					visibilitySwapchainAttachmentReference.index = 1;
+					visibilitySwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
 					SubpassDescriptor visibilitySubpassDescriptor{};
-					visibilitySubpassDescriptor.colorAttachmentReferences = sequence<AttachmentReference>(1);
-					visibilitySubpassDescriptor.colorAttachmentReferences[0].index = 1;
-					visibilitySubpassDescriptor.colorAttachmentReferences[0].layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+					visibilitySubpassDescriptor.colorAttachmentReferences = {visibilitySwapchainAttachmentReference};
 
 					visibilitySubpass = createSubpass(visibilitySubpassDescriptor);
 
+					AttachmentReference materialSwapchainAttachmentReference{};
+					materialSwapchainAttachmentReference.index = 0;
+					materialSwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
+					AttachmentReference materialVisibilityAttachmentReference{};
+					materialVisibilityAttachmentReference.index = 1;
+					materialVisibilityAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+
 					SubpassDescriptor materialSubpassDescriptor{};
-					materialSubpassDescriptor.colorAttachmentReferences = sequence<AttachmentReference>(1);
-					materialSubpassDescriptor.colorAttachmentReferences[0].index = 0;
-					materialSubpassDescriptor.colorAttachmentReferences[0].layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-					materialSubpassDescriptor.inputAttachmentReferences = sequence<AttachmentReference>(1);
-					materialSubpassDescriptor.inputAttachmentReferences[0].index = 1;
-					materialSubpassDescriptor.inputAttachmentReferences[0].layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+					materialSubpassDescriptor.colorAttachmentReferences = {materialSwapchainAttachmentReference};
+					materialSubpassDescriptor.inputAttachmentReferences = {materialVisibilityAttachmentReference};
 
 					materialSubpass = createSubpass(materialSubpassDescriptor);
 
@@ -268,8 +274,6 @@ namespace ProjectA {
 
 				commandEncoder->nextSubpass();
 
-				// TODO(subpass-refactor)
-
 				commandEncoder->endRenderPass();
 			}
 
@@ -284,10 +288,8 @@ namespace ProjectA {
 
 				updateVisibilityImage();
 
-				if (framebuffers.count > 0) {
-					for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
-						framebuffers[framebufferIndex].~shared_ptr();
-					}
+				for (ref<Framebuffer>& framebuffer : framebuffers) {
+					framebuffer.~shared_ptr();
 				}
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());

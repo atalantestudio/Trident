@@ -7,21 +7,23 @@ namespace ProjectA {
 	void GUIRenderer::build() {
 		const ref<Surface> surface = getSurface();
 
-		ColorAttachment colorAttachment{};
-		colorAttachment.format = surface->getFormat();
-		colorAttachment.sampleCount = 1;
+		Attachment swapchainAttachment{};
+		swapchainAttachment.format = surface->getFormat();
+		swapchainAttachment.sampleCount = 1;
 
-		// TODO: Use of CLEAR is debug-only.
-		colorAttachment.loadOperation = LoadOperation::CLEAR;
-		// colorAttachment.loadOperation = LoadOperation::LOAD;
+		// TODO: Use of CLEAR is for debug-only purposes.
+		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+		// swapchainAttachment.loadOperation = LoadOperation::LOAD;
 
-		colorAttachment.storeOperation = StoreOperation::STORE;
-		colorAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+		swapchainAttachment.storeOperation = StoreOperation::STORE;
+		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+
+		AttachmentReference swapchainAttachmentReference{};
+		swapchainAttachmentReference.index = 0;
+		swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
 		SubpassDescriptor subpassDescriptor{};
-		// TODO(subpass-refactor)
-		// subpassDescriptor.colorAttachments = {colorAttachment};
-		// subpassDescriptor.depthStencil = false;
+		subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
 
 		subpass = createSubpass(subpassDescriptor);
 
@@ -30,6 +32,7 @@ namespace ProjectA {
 		subpassDependency.destinationSubpassIndex = 0;
 
 		RenderPassDescriptor renderPassDescriptor{};
+		renderPassDescriptor.attachments = {swapchainAttachment};
 		renderPassDescriptor.subpasses = {subpass};
 		renderPassDescriptor.subpassDependencies = {subpassDependency};
 
@@ -482,10 +485,8 @@ namespace ProjectA {
 	void GUIRenderer::recreateFramebuffers() {
 		const ref<Swapchain>& swapchain = getSwapchain();
 
-		if (framebuffers.count > 0) {
-			for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
-				framebuffers[framebufferIndex].~shared_ptr();
-			}
+		for (ref<Framebuffer>& framebuffer : framebuffers) {
+			framebuffer.~shared_ptr();
 		}
 
 		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());

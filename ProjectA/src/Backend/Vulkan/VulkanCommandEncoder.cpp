@@ -206,7 +206,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::nextSubpass() const {
+	void VulkanCommandEncoder::nextSubpass() {
 		vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
 	}
 

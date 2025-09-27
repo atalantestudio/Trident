@@ -67,7 +67,6 @@ namespace ProjectA {
 		imageDescriptor.sampleCount = attachment.sampleCount;
 		imageDescriptor.usage = ImageUsage::INPUT_ATTACHMENT;
 
-		// TODO(subpass-refactor)
 		if (isDepthFormat(attachment.format)) {
 			imageDescriptor.usage |= ImageUsage::DEPTH_STENCIL_ATTACHMENT;
 		}

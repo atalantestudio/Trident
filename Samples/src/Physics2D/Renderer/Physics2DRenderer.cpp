@@ -10,27 +10,39 @@ namespace ProjectA {
 
 		const ref<Surface> surface = getSurface();
 
-		ColorAttachment colorAttachment{};
-		colorAttachment.format = surface->getFormat();
-		colorAttachment.sampleCount = SAMPLE_COUNT;
-		colorAttachment.loadOperation = LoadOperation::CLEAR;
-		colorAttachment.storeOperation = StoreOperation::STORE;
+		Attachment swapchainAttachment{};
+		swapchainAttachment.format = surface->getFormat();
+		swapchainAttachment.sampleCount = SAMPLE_COUNT;
+		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+		swapchainAttachment.storeOperation = StoreOperation::STORE;
 
 		// TODO: Restore layout.
-		// colorAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-		colorAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+		// swapchainAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+
+		Attachment depthStencilAttachment{};
+		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
+		depthStencilAttachment.sampleCount = SAMPLE_COUNT;
+		depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
+		depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
+		depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		AttachmentReference swapchainAttachmentReference{};
+		swapchainAttachmentReference.index = 0;
+		swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
+		AttachmentReference depthStencilAttachmentReference{};
+		depthStencilAttachmentReference.index = 1;
+		depthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 		SubpassDescriptor subpassDescriptor{};
-		// TODO(subpass-refactor)
-		// subpassDescriptor.colorAttachments = {colorAttachment};
-		// subpassDescriptor.depthStencil = true;
-		// subpassDescriptor.depthStencilAttachment.format = DepthStencilImageFormat::D32_SFLOAT;
-		// subpassDescriptor.depthStencilAttachment.sampleCount = SAMPLE_COUNT;
-		// subpassDescriptor.depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
+		subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
+		subpassDescriptor.depthStencilAttachmentReference = depthStencilAttachmentReference;
 
 		subpass = createSubpass(subpassDescriptor);
 
 		RenderPassDescriptor renderPassDescriptor{};
+		renderPassDescriptor.attachments = {swapchainAttachment, depthStencilAttachment};
 		renderPassDescriptor.subpasses = {subpass};
 
 		renderPass = createRenderPass(renderPassDescriptor);
@@ -89,18 +101,14 @@ namespace ProjectA {
 		attachmentImageViewDescriptor.layerOffset = 0;
 		attachmentImageViewDescriptor.layerCount = 1;
 
-		// TODO(subpass-refactor)
-		// colorImage = renderPass->getSubpass(0)->createColorAttachmentImage(attachmentImageDescriptor, 0);
+		colorImage = renderPass->createColorAttachmentImage(attachmentImageDescriptor, 0);
 		colorImageView = colorImage->createView(attachmentImageViewDescriptor);
 
-		// TODO(subpass-refactor)
-		// depthStencilImage = renderPass->getSubpass(0)->createDepthStencilAttachmentImage(attachmentImageDescriptor);
+		depthStencilImage = renderPass->createDepthStencilAttachmentImage(attachmentImageDescriptor, 0);
 		depthStencilImageView = depthStencilImage->createView(attachmentImageViewDescriptor);
 
-		if (framebuffers.count > 0) {
-			for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
-				framebuffers[framebufferIndex].~shared_ptr();
-			}
+		for (ref<Framebuffer>& framebuffer : framebuffers) {
+			framebuffer.~shared_ptr();
 		}
 
 		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());

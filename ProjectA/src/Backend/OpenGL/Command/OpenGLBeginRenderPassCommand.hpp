@@ -17,6 +17,7 @@ namespace ProjectA {
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glFramebuffer->object);
+					glBindFramebuffer(GL_READ_FRAMEBUFFER, glFramebuffer->object);
 				#else
 					ENGINE_ERROR_UNSUPPORTED();
 				#endif
@@ -44,15 +45,23 @@ namespace ProjectA {
 					}
 				}
 
-				#if OPENGL_VERSION < OPENGL_VERSION_4_5
-					sequence<GLenum> colorAttachments(glFramebuffer->getColorAttachmentCount());
+				const ref<Subpass>& subpass = glFramebuffer->getRenderPass()->getSubpass(0);
 
-					for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < colorAttachments.count; colorAttachmentIndex += 1) {
-						colorAttachments[colorAttachmentIndex] = GL_COLOR_ATTACHMENT0 + colorAttachmentIndex;
+				sequence<GLenum> bufs(subpass->getColorAttachmentReferenceCount());
+
+				for (uint32 bufIndex = 0; bufIndex < bufs.count; bufIndex += 1) {
+					const AttachmentReference& colorAttachmentReference = subpass->getColorAttachmentReferences()[bufIndex];
+
+					if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+						bufs[bufIndex] = GL_NONE;
+
+						continue;
 					}
 
-					glDrawBuffers(static_cast<GLsizei>(colorAttachments.count), colorAttachments);
-				#endif
+					bufs[bufIndex] = GL_COLOR_ATTACHMENT0 + colorAttachmentReference.index;
+				}
+
+				glDrawBuffers(static_cast<GLsizei>(bufs.count), bufs);
 			}
 
 		private:

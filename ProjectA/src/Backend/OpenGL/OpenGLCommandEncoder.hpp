@@ -4,6 +4,7 @@
 #include "Backend/OpenGL/OpenGLComputePipeline.hpp"
 #include "Backend/OpenGL/OpenGLDevice.hpp"
 #include "Backend/OpenGL/OpenGLFramebuffer.hpp"
+#include "Backend/OpenGL/OpenGLRenderPass.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
 
 #include "Engine/API/Rendering/CommandEncoder.hpp"
@@ -35,7 +36,7 @@ namespace ProjectA {
 
 			void dispatchIndirect(const ref<Buffer>& buffer, uint64 offset) final override;
 
-			void nextSubpass() const final override;
+			void nextSubpass() final override;
 
 			void setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) final override;
 
@@ -63,7 +64,8 @@ namespace ProjectA {
 			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) final override;
 
 		private:
-			OpenGLFramebuffer* framebuffer = nullptr;
+			ref<OpenGLFramebuffer> framebuffer = nullptr;
+			ref<OpenGLRenderPass> renderPass = nullptr;
 			uint32 subpassIndex = 0;
 			std::vector<ref<OpenGLCommand>> commandBuffer;
 			ref<OpenGLComputePipeline> computePipeline = nullptr;

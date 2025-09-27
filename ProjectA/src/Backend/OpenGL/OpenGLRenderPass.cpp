@@ -9,22 +9,28 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		uint32 totalColorAttachmentCount = 0;
+		bool anyPresentedColorAttachment = false;
 
-		for (uint32 subpassIndex = 0; subpassIndex < subpasses.count; subpassIndex += 1) {
-			const ref<Subpass>& subpass = subpasses[subpassIndex];
+		// Check if a color attachment has is meant to be presented.
+		for (const ref<Subpass>& subpass : subpasses) {
+			for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
+				if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+					continue;
+				}
 
-			// TODO(subpass-refactor)
-			/* totalColorAttachmentCount += subpass->getColorAttachmentCount() + subpass->getResolveAttachmentCount() + static_cast<uint32>(subpass->hasDepthStencilAttachment());
+				totalColorAttachmentCount += 1;
 
-			for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < subpass->getColorAttachmentCount(); colorAttachmentIndex += 1) {
-				const ColorAttachment& colorAttachment = subpass->getColorAttachments()[colorAttachmentIndex];
+				DEBUG_ASSERT(colorAttachmentReference.index < attachments.count);
+
+				const Attachment& colorAttachment = attachments[colorAttachmentReference.index];
 
 				if (colorAttachment.finalLayout == ImageLayout::PRESENT_SRC) {
-					presentSourceAttachmentIndex = colorAttachmentIndex;
+					ENGINE_ASSERT(!anyPresentedColorAttachment, "Only one color attachment can be presented.");
 
-					break;
+					presentSourceAttachmentIndex = colorAttachmentReference.index;
+					anyPresentedColorAttachment = true;
 				}
-			} */
+			}
 		}
 
 		GLint maxColorAttachmentCount;

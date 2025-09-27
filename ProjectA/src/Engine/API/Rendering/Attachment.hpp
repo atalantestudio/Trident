@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
+#include "Engine/API/Rendering/ImageFormat.hpp"
 #include "Engine/API/Rendering/ImageLayout.hpp"
 #include "Engine/API/Rendering/LoadOperation.hpp"
 #include "Engine/API/Rendering/StoreOperation.hpp"
@@ -22,31 +22,5 @@ namespace ProjectA {
 
 		// The layout the attachment image will be transitioned to when the render pass ends.
 		ImageLayout finalLayout;
-	};
-
-	// TODO(deprecated)
-	struct Attachment0 {
-		uint8 sampleCount : 7;
-		LoadOperation loadOperation;
-	};
-
-	// TODO(deprecated)
-	struct ColorAttachment : public Attachment0 {
-		// Must be a color format.
-		ImageFormat format;
-		StoreOperation storeOperation;
-		ImageLayout finalLayout;
-	};
-
-	// TODO(deprecated)
-	struct DepthStencilAttachment : public Attachment0 {
-		// Must be a depth and/or depth stencil format.
-		DepthStencilImageFormat format;
-	};
-
-	// TODO(deprecated)
-	struct InputAttachment : public Attachment0 {
-		ImageFormat format;
-		StoreOperation storeOperation;
 	};
 }

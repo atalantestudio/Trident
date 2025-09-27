@@ -59,8 +59,8 @@ namespace ProjectA {
 			static constexpr uint32 MAX_GLYPH_SUBCOMPONENTS = 512;
 
 		private:
-			ref<Subpass> subpass;
 			ref<RenderPass> renderPass;
+			ref<Subpass> subpass;
 
 			sequence<ref<Framebuffer>> framebuffers;
 

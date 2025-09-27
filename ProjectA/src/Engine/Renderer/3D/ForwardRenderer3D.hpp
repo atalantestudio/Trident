@@ -19,20 +19,24 @@ namespace ProjectA {
 				{
 					const ref<Surface> surface = getSurface();
 
-					ColorAttachment colorAttachment{};
-					colorAttachment.format = surface->getFormat();
-					colorAttachment.sampleCount = 1;
-					colorAttachment.loadOperation = LoadOperation::CLEAR;
-					colorAttachment.storeOperation = StoreOperation::STORE;
-					colorAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+					Attachment swapchainAttachment{};
+					swapchainAttachment.format = surface->getFormat();
+					swapchainAttachment.sampleCount = 1;
+					swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+					swapchainAttachment.storeOperation = StoreOperation::STORE;
+					swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+
+					AttachmentReference colorAttachmentReference{};
+					colorAttachmentReference.index = 0;
+					colorAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
 					SubpassDescriptor subpassDescriptor{};
-					subpassDescriptor.colorAttachments = {colorAttachment};
-					subpassDescriptor.depthStencil = false;
+					subpassDescriptor.colorAttachmentReferences = {colorAttachmentReference};
 
 					subpass = createSubpass(subpassDescriptor);
 
-					RenderPassDescriptor renderPassDescriptor;
+					RenderPassDescriptor renderPassDescriptor{};
+					renderPassDescriptor.attachments = {swapchainAttachment};
 					renderPassDescriptor.subpasses = {subpass};
 
 					renderPass = createRenderPass(renderPassDescriptor);
@@ -264,6 +268,37 @@ namespace ProjectA {
 			}
 
 		private:
+			void recreateFramebuffers() {
+				const ref<Swapchain>& swapchain = getSwapchain();
+
+				for (ref<Framebuffer>& framebuffer : framebuffers) {
+					framebuffer.~shared_ptr();
+				}
+
+				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
+
+				FramebufferDescriptor framebufferDescriptor{};
+				framebufferDescriptor.renderPass = renderPass;
+				framebufferDescriptor.imageViews = sequence<ref<ImageView>>(1);
+				framebufferDescriptor.extent = swapchain->getExtent();
+				framebufferDescriptor.layerCount = 1;
+
+				for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
+
+					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+				}
+			}
+
+		private:
+			ref<RenderPass> renderPass;
+			ref<Subpass> subpass;
+
+			sequence<ref<Framebuffer>> framebuffers;
+
+			ref<PipelineLayout> pipelineLayout;
+			ref<RenderPipeline> renderPipeline;
+
 			ref<Buffer> transformBuffer;
 			Transform* transformMappedRange = nullptr;
 

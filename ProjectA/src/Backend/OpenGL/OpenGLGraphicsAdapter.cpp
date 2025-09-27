@@ -39,10 +39,6 @@ namespace ProjectA {
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glNamedFramebufferDrawBuffers(0, 1, &defaultFramebufferDrawBuffer);
-		#endif
-
 		device = createRef<OpenGLDevice>(instance);
 	}
 
@@ -195,6 +191,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE(glDepthMask);
 		LOAD_PROCEDURE(glDetachShader);
 		LOAD_PROCEDURE(glDisable);
+		LOAD_PROCEDURE(glDrawBuffers);
 		LOAD_PROCEDURE(glEnable);
 		LOAD_PROCEDURE(glFrontFace);
 		LOAD_PROCEDURE(glGenTextures);
@@ -400,11 +397,9 @@ namespace ProjectA {
 		#endif
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			LOAD_PROCEDURE(glNamedFramebufferDrawBuffers);
 			LOAD_PROCEDURE(glNamedFramebufferReadBuffer);
 		#else
 			LOAD_PROCEDURE(glDrawBuffer);
-			LOAD_PROCEDURE(glDrawBuffers);
 			LOAD_PROCEDURE(glReadBuffer);
 		#endif
 

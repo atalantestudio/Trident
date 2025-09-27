@@ -52,7 +52,7 @@ namespace ProjectA {
 
 			virtual void dispatchIndirect(const ref<Buffer>& buffer, uint64 offset) = 0;
 
-			virtual void nextSubpass() const = 0;
+			virtual void nextSubpass() = 0;
 
 			virtual void setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) = 0;
 

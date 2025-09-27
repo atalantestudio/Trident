@@ -130,61 +130,6 @@ namespace ProjectA {
 
 			relativeAttachmentReferenceOffset += subpass->getInputAttachmentReferenceCount();
 
-			/* for (uint32 colorAttachmentIndex = 0; colorAttachmentReferenceIndex < subpass->getColorAttachmentCount(); colorAttachmentIndex += 1) {
-				const ColorAttachment& colorAttachment = subpass->getColorAttachments()[colorAttachmentIndex];
-
-				VkAttachmentDescription& colorAttachmentDescription = attachmentDescriptions[attachmentReferenceOffset + colorAttachmentIndex];
-				colorAttachmentDescription.flags = 0;
-				colorAttachmentDescription.format = getVkFormat(colorAttachment.format);
-				colorAttachmentDescription.samples = static_cast<VkSampleCountFlagBits>(colorAttachment.sampleCount);
-				colorAttachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(colorAttachment.loadOperation);
-
-				if (subpass->getResolveAttachmentCount() > 0) {
-					// Set the store operation in the resolve attachment instead.
-					colorAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-				}
-				else {
-					colorAttachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(colorAttachment.storeOperation);
-				}
-
-				colorAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-				colorAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-				if (colorAttachment.loadOperation == LoadOperation::LOAD) {
-					colorAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-				}
-				else {
-					colorAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				}
-
-				colorAttachmentDescription.finalLayout = getVkImageLayout(colorAttachment.finalLayout);
-
-				VkAttachmentReference& colorAttachmentReference = attachmentReferences[attachmentReferenceOffset + colorAttachmentIndex];
-				colorAttachmentReference.attachment = colorAttachmentIndex;
-
-				// TODO: Use the same layout as the one from the attachment description?
-				colorAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			}
-
-			for (uint32 resolveAttachmentIndex = 0; resolveAttachmentIndex < subpass->getResolveAttachmentCount(); resolveAttachmentIndex += 1) {
-				const VkAttachmentDescription& colorAttachmentDescription = attachmentDescriptions[attachmentReferenceOffset - subpass->getColorAttachmentCount() - depthStencilAttachmentCount + resolveAttachmentIndex];
-
-				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[attachmentReferenceOffset + resolveAttachmentIndex];
-				resolveAttachmentDescription.flags = 0;
-				resolveAttachmentDescription.format = surfaceFormat.format;
-				resolveAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
-				resolveAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-				resolveAttachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(subpass->getColorAttachments()[resolveAttachmentIndex].storeOperation);
-				resolveAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-				resolveAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-				resolveAttachmentDescription.initialLayout = colorAttachmentDescription.initialLayout;
-				resolveAttachmentDescription.finalLayout = colorAttachmentDescription.finalLayout;
-
-				VkAttachmentReference& resolveAttachmentReference = attachmentReferences[attachmentReferenceOffset + resolveAttachmentIndex];
-				resolveAttachmentReference.attachment = attachmentReferenceOffset + resolveAttachmentIndex;
-				resolveAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			} */
-
 			VkSubpassDescription& subpassDescription = subpassDescriptions[subpassIndex];
 			subpassDescription.flags = 0;
 			subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;

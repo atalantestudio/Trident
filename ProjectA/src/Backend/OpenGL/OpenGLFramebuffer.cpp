@@ -108,16 +108,6 @@ namespace ProjectA {
 			boundAttachmentIndex += 1;
 		}
 
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			sequence<GLenum> colorAttachments(colorAttachmentCount);
-
-			for (uint32 colorAttachmentIndex = 0; colorAttachmentIndex < colorAttachmentCount; colorAttachmentIndex += 1) {
-				colorAttachments[colorAttachmentIndex] = GL_COLOR_ATTACHMENT0 + colorAttachmentIndex;
-			}
-
-			glNamedFramebufferDrawBuffers(object, colorAttachmentCount, colorAttachments);
-		#endif
-
 		// Verify the status of the framebuffer.
 		#ifdef BUILD_MODE_DEBUG
 			GLenum status = 0;

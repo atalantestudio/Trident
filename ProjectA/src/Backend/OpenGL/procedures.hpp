@@ -14,6 +14,7 @@ namespace ProjectA {
 	extern PFNGLDEPTHMASKPROC glDepthMask;
 	extern PFNGLDETACHSHADERPROC glDetachShader;
 	extern PFNGLDISABLEPROC glDisable;
+	extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
 	extern PFNGLENABLEPROC glEnable;
 	extern PFNGLFRONTFACEPROC glFrontFace;
 	extern PFNGLGENTEXTURESPROC glGenTextures;
@@ -221,11 +222,9 @@ namespace ProjectA {
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-		extern PFNGLNAMEDFRAMEBUFFERDRAWBUFFERSPROC glNamedFramebufferDrawBuffers;
 		extern PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC glNamedFramebufferReadBuffer;
 	#else
 		extern PFNGLDRAWBUFFERPROC glDrawBuffer;
-		extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
 		extern PFNGLREADBUFFERPROC glReadBuffer;
 	#endif
 

@@ -219,8 +219,8 @@ namespace ProjectA {
 
 				RenderPipelineDescriptor readInputRenderPipelineDescriptor;
 				readInputRenderPipelineDescriptor.pipelineLayout = readInputRenderPipelineLayout;
-				readInputRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/ScreenUV.vert", vertexShaderModuleDescriptor);
-				readInputRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/ScreenInputUV.frag", fragmentShaderModuleDescriptor);
+				readInputRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Screen.vert", vertexShaderModuleDescriptor);
+				readInputRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/ScreenInputAttachment.frag", fragmentShaderModuleDescriptor);
 				readInputRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 				readInputRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 				readInputRenderPipelineDescriptor.cullMode = CullMode::BACK;
