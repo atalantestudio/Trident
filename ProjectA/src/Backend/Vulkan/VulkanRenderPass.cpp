@@ -18,7 +18,19 @@ namespace ProjectA {
 
 		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat();
 
-		sequence<VkAttachmentDescription> attachmentDescriptions(attachments.count);
+		uint32 resolveAttachmentCount = 0;
+
+		for (const ref<Subpass>& subpass : subpasses) {
+			if (subpass->getRasterizationSampleCount() == 1) {
+				continue;
+			}
+
+			resolveAttachmentCount += subpass->getResolveAttachmentReferenceCount();
+		}
+
+		sequence<VkAttachmentDescription> attachmentDescriptions(attachments.count + resolveAttachmentCount);
+
+		uint32 resolveAttachmentIndex = 0;
 
 		for (uint32 attachmentIndex = 0; attachmentIndex < attachments.count; attachmentIndex += 1) {
 			const Attachment& attachment = attachments[attachmentIndex];
@@ -32,10 +44,39 @@ namespace ProjectA {
 			attachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			attachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-			// TODO: Allow custom initial layouts.
-			attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			// TODO: Allow custom initial layouts?
+			if (attachment.loadOperation == LoadOperation::LOAD) {
+				if (isDepthFormat(attachmentDescription.format)) {
+					attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+				}
+				else {
+					attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+				}
+			}
+			else {
+				attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			}
 
 			attachmentDescription.finalLayout = getVkImageLayout(attachment.finalLayout);
+
+			if (isColorAttachment(attachmentIndex) && attachment.sampleCount > 1) {
+				// Create resolve attachment description.
+				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[attachments.count + resolveAttachmentIndex];
+				resolveAttachmentDescription.flags = 0;
+				resolveAttachmentDescription.format = surfaceFormat.format;
+				resolveAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+				resolveAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				resolveAttachmentDescription.storeOp = attachmentDescription.storeOp;
+				resolveAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				resolveAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+				resolveAttachmentDescription.initialLayout = attachmentDescription.initialLayout;
+				resolveAttachmentDescription.finalLayout = attachmentDescription.finalLayout;
+
+				// Set the store operation in the resolve attachment instead.
+				attachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+				resolveAttachmentIndex += 1;
+			}
 		}
 
 		sequence<VkAttachmentReference> attachmentReferences(attachmentReferenceCount);
@@ -71,11 +112,9 @@ namespace ProjectA {
 			if (subpass->getRasterizationSampleCount() > 1) {
 				// Create resolve attachment references.
 				for (uint32 resolveAttachmentReferenceIndex = 0; resolveAttachmentReferenceIndex < subpass->getColorAttachmentReferenceCount(); resolveAttachmentReferenceIndex += 1) {
-					// const AttachmentReference& colorAttachmentReference = subpass->getColorAttachmentReferences()[resolveAttachmentReferenceIndex];
-
 					VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset + resolveAttachmentReferenceIndex];
-					// attachmentReference.attachment = colorAttachmentReference.index;
-					// attachmentReference.layout = getVkImageLayout(colorAttachmentReference.layout);
+					attachmentReference.attachment = static_cast<uint32>(attachments.count) + resolveAttachmentReferenceIndex;
+					attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 				}
 
 				relativeAttachmentReferenceOffset += subpass->getColorAttachmentReferenceCount();
@@ -227,5 +266,17 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		vkDestroyRenderPass(device.object, object, nullptr);
+	}
+
+	bool VulkanRenderPass::isColorAttachment(uint32 attachmentIndex) const {
+		for (const ref<Subpass>& subpass : subpasses) {
+			for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
+				if (colorAttachmentReference.index == attachmentIndex) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }

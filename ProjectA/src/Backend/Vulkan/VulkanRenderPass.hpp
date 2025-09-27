@@ -14,6 +14,10 @@ namespace ProjectA {
 
 			~VulkanRenderPass() final override;
 
+		private:
+			// Returns true if this attachment is a color attachment used in any subpass.
+			bool isColorAttachment(uint32 attachmentIndex) const;
+
 		public:
 			const VulkanSurface* surface;
 

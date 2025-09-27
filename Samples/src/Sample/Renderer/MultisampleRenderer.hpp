@@ -10,20 +10,24 @@ namespace ProjectA {
 				{
 					const ref<Surface> surface = getSurface();
 
-					ColorAttachment colorAttachment{};
-					colorAttachment.format = surface->getFormat();
-					colorAttachment.sampleCount = 4;
-					colorAttachment.loadOperation = LoadOperation::CLEAR;
-					colorAttachment.storeOperation = StoreOperation::STORE;
-					colorAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+					Attachment swapchainAttachment{};
+					swapchainAttachment.format = surface->getFormat();
+					swapchainAttachment.sampleCount = 4;
+					swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+					swapchainAttachment.storeOperation = StoreOperation::STORE;
+					swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+
+					AttachmentReference swapchainAttachmentReference{};
+					swapchainAttachmentReference.index = 0;
+					swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
 					SubpassDescriptor subpassDescriptor{};
-					subpassDescriptor.colorAttachments = {colorAttachment};
-					subpassDescriptor.depthStencil = false;
+					subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
 
 					subpass = createSubpass(subpassDescriptor);
 
 					RenderPassDescriptor renderPassDescriptor{};
+					renderPassDescriptor.attachments = {swapchainAttachment};
 					renderPassDescriptor.subpasses = {subpass};
 
 					renderPass = createRenderPass(renderPassDescriptor);
@@ -161,7 +165,7 @@ namespace ProjectA {
 				colorImageDescriptor.mipLevelCount = 1;
 				colorImageDescriptor.layerCount = 1;
 
-				colorImage = renderPass->getSubpass(0)->createColorAttachmentImage(colorImageDescriptor, 0);
+				colorImage = renderPass->createColorAttachmentImage(colorImageDescriptor, 0);
 
 				ImageViewDescriptor colorImageViewDescriptor{};
 				colorImageViewDescriptor.mipLevelOffset = 0;
@@ -171,10 +175,8 @@ namespace ProjectA {
 
 				colorImageView = colorImage->createView(colorImageViewDescriptor);
 
-				if (framebuffers.count > 0) {
-					for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
-						framebuffers[framebufferIndex].~shared_ptr();
-					}
+				for (ref<Framebuffer>& framebuffer : framebuffers) {
+					framebuffer.~shared_ptr();
 				}
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
@@ -200,8 +202,8 @@ namespace ProjectA {
 			};
 
 		private:
-			ref<Subpass> subpass;
 			ref<RenderPass> renderPass;
+			ref<Subpass> subpass;
 		
 			sequence<ref<Framebuffer>> framebuffers;
 

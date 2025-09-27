@@ -81,10 +81,10 @@ namespace ProjectA {
 				ENGINE_ERROR("descriptor.framebuffer.renderPass must be a valid RenderPass.");
 			}
 			else {
-				if (descriptor.clearValues.size() > renderPass->getAttachmentCount()) {
+				if (descriptor.clearValues.size() > renderPass->getAttachmentReferenceCount()) {
 					errorCount += 1;
 
-					ENGINE_ERROR("descriptor.clearValues.count must be smaller than the number of attachments in descriptor.framebuffer.renderPass.");
+					ENGINE_ERROR("descriptor.clearValues.count must be smaller than the number of attachment references in descriptor.framebuffer.renderPass.");
 				}
 			}
 		}
@@ -147,11 +147,12 @@ namespace ProjectA {
 			ENGINE_ERROR("descriptor.renderPass must be a valid RenderPass.");
 		}
 		else {
-			if (descriptor.imageViews.count != descriptor.renderPass->getAttachmentCount()) {
+			// TODO(subpass-refactor): The number of image views must be the same as the number of attachments (including resolve), not attachment references.
+			/* if (descriptor.imageViews.count != descriptor.renderPass->getAttachmentReferenceCount()) {
 				errorCount += 1;
 
-				ENGINE_ERROR("descriptor.imageViews.count must be equal to the attachment count specified in descriptor.renderPass.");
-			}
+				ENGINE_ERROR("descriptor.imageViews.count must be equal to the attachment reference count specified in descriptor.renderPass.");
+			} */
 		}
 
 		for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count; imageViewIndex += 1) {

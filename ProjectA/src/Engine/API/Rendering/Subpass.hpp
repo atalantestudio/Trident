@@ -16,6 +16,12 @@ namespace ProjectA {
 				inputAttachmentReferences(descriptor.inputAttachmentReferences)
 			{
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
+
+				for (const AttachmentReference& colorAttachmentReference : colorAttachmentReferences) {
+					if (colorAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+						resolveAttachmentReferenceCount += 1;
+					}
+				}
 			}
 
 			uint32 getColorAttachmentReferenceCount() const {
@@ -42,6 +48,10 @@ namespace ProjectA {
 				return inputAttachmentReferences;
 			}
 
+			uint32 getResolveAttachmentReferenceCount() const {
+				return resolveAttachmentReferenceCount;
+			}
+
 			uint8 getRasterizationSampleCount() const {
 				return rasterizationSampleCount;
 			}
@@ -54,6 +64,7 @@ namespace ProjectA {
 			sequence<AttachmentReference> colorAttachmentReferences;
 			AttachmentReference depthStencilAttachmentReference;
 			sequence<AttachmentReference> inputAttachmentReferences;
+			uint32 resolveAttachmentReferenceCount = 0;
 			uint8 rasterizationSampleCount : 7;
 	};
 }

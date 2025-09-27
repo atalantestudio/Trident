@@ -91,20 +91,24 @@ namespace ProjectA {
 				{
 					const ref<Surface> surface = getSurface();
 
-					ColorAttachment colorAttachment{};
-					colorAttachment.format = surface->getFormat();
-					colorAttachment.sampleCount = 1;
-					colorAttachment.loadOperation = LoadOperation::CLEAR;
-					colorAttachment.storeOperation = StoreOperation::STORE;
-					colorAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+					Attachment swapchainAttachment{};
+					swapchainAttachment.format = surface->getFormat();
+					swapchainAttachment.sampleCount = 1;
+					swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+					swapchainAttachment.storeOperation = StoreOperation::STORE;
+					swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+
+					AttachmentReference swapchainAttachmentReference{};
+					swapchainAttachmentReference.index = 0;
+					swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
 					SubpassDescriptor subpassDescriptor{};
-					subpassDescriptor.colorAttachments = {colorAttachment};
-					subpassDescriptor.depthStencil = false;
+					subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
 
 					subpass = createSubpass(subpassDescriptor);
 
 					RenderPassDescriptor renderPassDescriptor{};
+					renderPassDescriptor.attachments = {swapchainAttachment};
 					renderPassDescriptor.subpasses = {subpass};
 
 					renderPass = createRenderPass(renderPassDescriptor);
@@ -239,10 +243,8 @@ namespace ProjectA {
 			void recreateFramebuffers() {
 				const ref<Swapchain>& swapchain = getSwapchain();
 
-				if (framebuffers.count > 0) {
-					for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
-						framebuffers[framebufferIndex].~shared_ptr();
-					}
+				for (ref<Framebuffer>& framebuffer : framebuffers) {
+					framebuffer.~shared_ptr();
 				}
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
@@ -266,8 +268,8 @@ namespace ProjectA {
 
 			ref<Sampler> sampler;
 
-			ref<Subpass> subpass;
 			ref<RenderPass> renderPass;
+			ref<Subpass> subpass;
 
 			sequence<ref<Framebuffer>> framebuffers;
 

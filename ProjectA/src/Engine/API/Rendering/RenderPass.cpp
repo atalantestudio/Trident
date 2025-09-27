@@ -10,8 +10,7 @@ namespace ProjectA {
 
 		const Attachment& attachment = attachments[attachmentIndex];
 
-		// DEBUG_ASSERT(resolveAttachmentCount > 0 || (resolveAttachmentCount == 0 && attachment.finalLayout != ImageLayout::PRESENT_SRC));
-		DEBUG_ASSERT(attachment.finalLayout != ImageLayout::PRESENT_SRC);
+		DEBUG_ASSERT(attachment.sampleCount > 1 || (attachment.sampleCount == 1 && attachment.finalLayout != ImageLayout::PRESENT_SRC));
 
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.type = descriptor.type;

@@ -20,13 +20,19 @@ namespace ProjectA {
 							continue;
 						}
 
+						const Attachment& attachment = attachments[colorAttachmentReference.index];
+
+						if (attachment.sampleCount > 1) {
+							attachmentReferenceCount += 1;
+						}
+
 						if (rasterizationSampleCount == 0) {
-							rasterizationSampleCount = attachments[colorAttachmentReference.index].sampleCount;
+							rasterizationSampleCount = attachment.sampleCount;
 
 							continue;
 						}
 
-						ENGINE_ASSERT(rasterizationSampleCount == attachments[colorAttachmentReference.index].sampleCount, "All color and depth/stencil attachments in a subpass must have the same sample count.");
+						ENGINE_ASSERT(rasterizationSampleCount == attachment.sampleCount, "All color and depth/stencil attachments in a subpass must have the same sample count.");
 					}
 
 					if (subpass->getDepthStencilAttachmentReference().index != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
@@ -42,18 +48,14 @@ namespace ProjectA {
 					subpass->setRasterizationSampleCount(rasterizationSampleCount);
 
 					attachmentReferenceCount += subpass->getColorAttachmentReferenceCount() + subpass->getInputAttachmentReferenceCount();
-
-					// If the subpass uses multisample, add resolve attachments to the total reference count.
-					if (rasterizationSampleCount > 1) {
-						attachmentReferenceCount += subpass->getColorAttachmentReferenceCount();
-					}
 				}
 			}
 
 			virtual ~RenderPass() = default;
 
-			uint32 getAttachmentCount() const {
-				return static_cast<uint32>(attachments.count);
+			// Returns the number of attachments references, including resolve references.
+			uint32 getAttachmentReferenceCount() const {
+				return static_cast<uint32>(attachmentReferenceCount);
 			}
 
 			uint32 getSubpassCount() const {
