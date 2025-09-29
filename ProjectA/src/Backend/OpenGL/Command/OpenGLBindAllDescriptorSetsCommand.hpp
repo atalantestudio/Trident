@@ -19,6 +19,8 @@ namespace ProjectA {
 			{}
 
 			void execute() const final override {
+				uint32 descriptorSetLayoutOffset = 0;
+
 				for (const DescriptorSetLayout& descriptorSetLayout : descriptorSetLayouts) {
 					for (uint32 binding = 0; binding < descriptorSetLayout.bindings.size(); binding += 1) {
 						const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout.bindings[binding];
@@ -29,7 +31,7 @@ namespace ProjectA {
 							const GLsizeiptr size = glBuffer->size - offset;
 
 							#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-								glBindBufferRange(getGlDescriptorType(descriptorSetLayoutBinding.descriptorType), binding, glBuffer->object, offset, size);
+								glBindBufferRange(getGlDescriptorType(descriptorSetLayoutBinding.descriptorType), descriptorSetLayoutOffset + binding, glBuffer->object, offset, size);
 							#else
 								ENGINE_ERROR_UNSUPPORTED();
 							#endif
@@ -40,9 +42,9 @@ namespace ProjectA {
 							const OpenGLImage& image = *static_cast<const OpenGLImage*>(imageView->getImage());
 
 							#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-								glBindTextureUnit(binding + unit, imageView->object);
+								glBindTextureUnit(descriptorSetLayoutOffset + binding + unit, imageView->object);
 							#else
-								glActiveTexture(GL_TEXTURE0 + binding + unit);
+								glActiveTexture(GL_TEXTURE0 + descriptorSetLayoutOffset + binding + unit);
 								glBindTexture(image.target, imageView->object);
 							#endif
 
@@ -50,7 +52,7 @@ namespace ProjectA {
 								const ref<OpenGLSampler>& sampler = std::static_pointer_cast<OpenGLSampler>(descriptorSetLayoutBinding.samplers[unit]);
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_3_3
-									glBindSampler(binding + unit, sampler->object);
+									glBindSampler(descriptorSetLayoutOffset + binding + unit, sampler->object);
 								#else
 									ENGINE_ERROR_UNSUPPORTED();
 								#endif
@@ -65,13 +67,15 @@ namespace ProjectA {
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_4_2
 									// TODO: Use correct access.
-									glBindImageTexture(binding + unit, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, format);
+									glBindImageTexture(descriptorSetLayoutOffset + binding + unit, imageView->object, 0, GL_FALSE, 0, GL_READ_WRITE, format);
 								#else
 									ENGINE_ERROR_UNSUPPORTED();
 								#endif
 							}
 						}
 					}
+
+					descriptorSetLayoutOffset += static_cast<uint32>(descriptorSetLayout.bindings.size());
 				}
 			}
 
