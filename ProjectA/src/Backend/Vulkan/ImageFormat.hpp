@@ -8,6 +8,7 @@ namespace ProjectA {
 			VK_FORMAT_B8G8R8A8_UNORM,
 			VK_FORMAT_R8G8B8A8_SRGB,
 			VK_FORMAT_R8G8B8A8_UNORM,
+			VK_FORMAT_R32_UINT,
 			VK_FORMAT_R32G32_UINT,
 			VK_FORMAT_D32_SFLOAT,
 			VK_FORMAT_D32_SFLOAT_S8_UINT,
@@ -29,6 +30,8 @@ namespace ProjectA {
 				return ImageFormat::R8G8B8A8_SRGB;
 			case VK_FORMAT_R8G8B8A8_UNORM:
 				return ImageFormat::R8G8B8A8_UNORM;
+			case VK_FORMAT_R32_UINT:
+				return ImageFormat::R32_UINT;
 			case VK_FORMAT_R32G32_UINT:
 				return ImageFormat::R32G32_UINT;
 			case VK_FORMAT_D32_SFLOAT:

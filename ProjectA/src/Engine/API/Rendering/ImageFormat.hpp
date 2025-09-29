@@ -3,25 +3,20 @@
 namespace ProjectA {
 	enum class ImageFormat : uint8 {
 		// Color formats.
-		R8_UNORM = 0,
-		R8G8B8_UNORM = 1,
-		B8G8R8A8_UNORM = 2,
-		R8G8B8A8_SRGB = 3,
-		R8G8B8A8_UNORM = 4,
-		R32G32_UINT = 5,
+		R8_UNORM,
+		R8G8B8_UNORM,
+		B8G8R8A8_UNORM,
+		R8G8B8A8_SRGB,
+		R8G8B8A8_UNORM,
+		R32_UINT,
+		R32G32_UINT,
 
 		// Depth/depth-stencil formats.
-		D32_SFLOAT = 6,
-		D32_SFLOAT_S8_UINT = 7,
-		D24_UNORM_S8_UINT = 8,
+		D32_SFLOAT,
+		D32_SFLOAT_S8_UINT,
+		D24_UNORM_S8_UINT,
 
 		__MAX_ENUM,
-	};
-
-	enum class DepthStencilImageFormat : uint8 {
-		D32_SFLOAT = 6,
-		D32_SFLOAT_S8_UINT = 7,
-		D24_UNORM_S8_UINT = 8,
 	};
 
 	static bool isDepthFormat(ImageFormat imageFormat) {
@@ -29,6 +24,27 @@ namespace ProjectA {
 			imageFormat == ImageFormat::D32_SFLOAT ||
 			imageFormat == ImageFormat::D32_SFLOAT_S8_UINT ||
 			imageFormat == ImageFormat::D24_UNORM_S8_UINT
+		);
+	}
+
+	static bool isFixedOrFloatingPointColorFormat(ImageFormat imageFormat) {
+		return (
+			imageFormat == ImageFormat::R8_UNORM ||
+			imageFormat == ImageFormat::R8G8B8_UNORM ||
+			imageFormat == ImageFormat::B8G8R8A8_UNORM ||
+			imageFormat == ImageFormat::R8G8B8A8_SRGB ||
+			imageFormat == ImageFormat::R8G8B8A8_UNORM
+		);
+	}
+
+	static bool isSignedIntegerColorFormat(ImageFormat imageFormat) {
+		return false;
+	}
+
+	static bool isUnsignedIntegerColorFormat(ImageFormat imageFormat) {
+		return (
+			imageFormat == ImageFormat::R32_UINT ||
+			imageFormat == ImageFormat::R32G32_UINT
 		);
 	}
 

@@ -8,7 +8,8 @@ namespace ProjectA {
 			GL_BGRA,
 			GL_RGBA,
 			GL_RGBA,
-			GL_RG,
+			GL_RED_INTEGER,
+			GL_RG_INTEGER,
 			GL_DEPTH_COMPONENT,
 			GL_DEPTH_STENCIL,
 			GL_DEPTH_STENCIL,
@@ -24,6 +25,7 @@ namespace ProjectA {
 			GL_BGRA8_EXT,
 			GL_SRGB8_ALPHA8,
 			GL_RGBA8,
+			GL_R32UI,
 			GL_RG32UI,
 			GL_DEPTH_COMPONENT32F,
 			GL_DEPTH32F_STENCIL8,
@@ -45,6 +47,8 @@ namespace ProjectA {
 				return ImageFormat::R8G8B8A8_SRGB;
 			case GL_RGBA8:
 				return ImageFormat::R8G8B8A8_UNORM;
+			case GL_R32UI:
+				return ImageFormat::R32_UINT;
 			case GL_RG32UI:
 				return ImageFormat::R32G32_UINT;
 			case GL_DEPTH_COMPONENT32F:
