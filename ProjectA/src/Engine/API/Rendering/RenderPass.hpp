@@ -58,12 +58,22 @@ namespace ProjectA {
 				return static_cast<uint32>(attachmentReferenceCount);
 			}
 
+			uint32 getAttachmentCount() const {
+				return static_cast<uint32>(attachments.count);
+			}
+
+			const Attachment& getAttachment(uint32 attachmentIndex) const {
+				DEBUG_ASSERT(attachmentIndex < attachments.count);
+
+				return attachments[attachmentIndex];
+			}
+
 			uint32 getSubpassCount() const {
 				return static_cast<uint32>(subpasses.count);
 			}
 
 			const ref<Subpass>& getSubpass(uint32 subpassIndex) const {
-				ENGINE_ASSERT(subpassIndex < subpasses.count, "Subpass index overflow.");
+				DEBUG_ASSERT(subpassIndex < subpasses.count);
 
 				return subpasses[subpassIndex];
 			}

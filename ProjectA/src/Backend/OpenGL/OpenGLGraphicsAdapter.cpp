@@ -300,6 +300,7 @@ namespace ProjectA {
 				LOAD_PROCEDURE(glGetTextureParameteriv);
 			#endif
 
+			LOAD_PROCEDURE(glTextureParameteri);
 			LOAD_PROCEDURE(glTextureSubImage1D);
 			LOAD_PROCEDURE(glTextureSubImage2D);
 			LOAD_PROCEDURE(glTextureSubImage3D);
@@ -311,6 +312,7 @@ namespace ProjectA {
 				LOAD_PROCEDURE(glGetTexParameteriv);
 			#endif
 
+			LOAD_PROCEDURE(glTexParameteri);
 			LOAD_PROCEDURE(glTexSubImage1D);
 			LOAD_PROCEDURE(glTexSubImage2D);
 			LOAD_PROCEDURE(glTexSubImage3D);
@@ -325,6 +327,8 @@ namespace ProjectA {
 
 			LOAD_PROCEDURE(glClearNamedFramebufferfi);
 			LOAD_PROCEDURE(glClearNamedFramebufferfv);
+			LOAD_PROCEDURE(glClearNamedFramebufferiv);
+			LOAD_PROCEDURE(glClearNamedFramebufferuiv);
 			LOAD_PROCEDURE(glCreateFramebuffers);
 			LOAD_PROCEDURE(glNamedFramebufferTexture);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
@@ -336,6 +340,8 @@ namespace ProjectA {
 
 			LOAD_PROCEDURE(glClearBufferfi);
 			LOAD_PROCEDURE(glClearBufferfv);
+			LOAD_PROCEDURE(glClearBufferiv);
+			LOAD_PROCEDURE(glClearBufferuiv);
 			LOAD_PROCEDURE(glFramebufferTexture2D);
 			LOAD_PROCEDURE(glGenFramebuffers);
 		#endif

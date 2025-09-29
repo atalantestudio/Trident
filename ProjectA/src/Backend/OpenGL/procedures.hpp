@@ -125,6 +125,7 @@ namespace ProjectA {
 			extern PFNGLGETTEXTUREPARAMETERIVPROC glGetTextureParameteriv;
 		#endif
 
+		extern PFNGLTEXTUREPARAMETERIPROC glTextureParameteri;
 		extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
 		extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
 		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
@@ -136,6 +137,7 @@ namespace ProjectA {
 			extern PFNGLGETTEXPARAMETERIVPROC glGetTexParameteriv;
 		#endif
 
+		extern PFNGLTEXPARAMETERIPROC glTexParameteri;
 		extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
 		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
 		extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
@@ -150,6 +152,8 @@ namespace ProjectA {
 
 		extern PFNGLCLEARNAMEDFRAMEBUFFERFIPROC glClearNamedFramebufferfi;
 		extern PFNGLCLEARNAMEDFRAMEBUFFERFVPROC glClearNamedFramebufferfv;
+		extern PFNGLCLEARNAMEDFRAMEBUFFERIVPROC glClearNamedFramebufferiv;
+		extern PFNGLCLEARNAMEDFRAMEBUFFERUIVPROC glClearNamedFramebufferuiv;
 		extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
 		extern PFNGLNAMEDFRAMEBUFFERTEXTUREPROC glNamedFramebufferTexture;
 	#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
@@ -161,6 +165,8 @@ namespace ProjectA {
 
 		extern PFNGLCLEARBUFFERFIPROC glClearBufferfi;
 		extern PFNGLCLEARBUFFERFVPROC glClearBufferfv;
+		extern PFNGLCLEARBUFFERIVPROC glClearBufferiv;
+		extern PFNGLCLEARBUFFERUIVPROC glClearBufferuiv;
 		extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
 		extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
 	#endif
