@@ -1,12 +1,14 @@
 #pragma once
 
 #include "Engine/API/Scene/Scene3D.hpp"
+#include "Engine/Camera/3D/Camera3D.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
+	template<typename SceneType>
 	class Renderer3D : public Renderer {
 		public:
-			virtual void setScene(const Scene3D* scene) {
+			virtual void setScene(const SceneType* scene) {
 				this->scene = scene;
 			}
 
@@ -15,7 +17,7 @@ namespace ProjectA {
 			}
 
 		protected:
-			const Scene3D* scene = nullptr;
+			const SceneType* scene = nullptr;
 			const Camera3D* camera = nullptr;
 	};
 }

@@ -83,7 +83,7 @@ namespace ProjectA {
 					ColorBlendAttachment colorBlendAttachment{};
 					colorBlendAttachment.blend = false;
 
-					RenderPipelineDescriptor writeInputRenderPipelineDescriptor;
+					RenderPipelineDescriptor writeInputRenderPipelineDescriptor{};
 					writeInputRenderPipelineDescriptor.pipelineLayout = writeInputRenderPipelineLayout;
 					writeInputRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 					writeInputRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Vertex2DRGB.vert", vertexShaderModuleDescriptor);
@@ -214,21 +214,18 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				ColorBlendAttachment colorBlendAttachment{};
-				colorBlendAttachment.blend = false;
-
-				RenderPipelineDescriptor readInputRenderPipelineDescriptor;
-				readInputRenderPipelineDescriptor.pipelineLayout = readInputRenderPipelineLayout;
+				ref<ShaderModule> vertexShaderModule;
+				ref<ShaderModule> fragmentShaderModule;
 
 				switch (getGraphicsApi()) {
 					case GraphicsAPI::OPENGL:
-						readInputRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/ScreenUV.vert", vertexShaderModuleDescriptor);
-						readInputRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/TextureRGBA.frag", fragmentShaderModuleDescriptor);
+						vertexShaderModule = loadShaderModule("Asset/Shader/Base/ScreenUV.vert", vertexShaderModuleDescriptor);
+						fragmentShaderModule = loadShaderModule("Asset/Shader/Base/TextureRGBA.frag", fragmentShaderModuleDescriptor);
 
 						break;
 					case GraphicsAPI::VULKAN:
-						readInputRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Screen.vert", vertexShaderModuleDescriptor);
-						readInputRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/ScreenInputAttachment.frag", fragmentShaderModuleDescriptor);
+						vertexShaderModule = loadShaderModule("Asset/Shader/Base/Screen.vert", vertexShaderModuleDescriptor);
+						fragmentShaderModule = loadShaderModule("Asset/Shader/Base/ScreenInputAttachment.frag", fragmentShaderModuleDescriptor);
 
 						break;
 					default:
@@ -237,6 +234,13 @@ namespace ProjectA {
 						break;
 				}
 
+				ColorBlendAttachment colorBlendAttachment{};
+				colorBlendAttachment.blend = false;
+
+				RenderPipelineDescriptor readInputRenderPipelineDescriptor{};
+				readInputRenderPipelineDescriptor.pipelineLayout = readInputRenderPipelineLayout;
+				readInputRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+				readInputRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 				readInputRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 				readInputRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 				readInputRenderPipelineDescriptor.cullMode = CullMode::BACK;

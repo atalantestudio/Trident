@@ -1,9 +1,10 @@
 #pragma once
 
+#include "Engine/API/Scene/Scene3D.hpp"
 #include "Engine/Renderer/3D/Renderer3D.hpp"
 
 namespace ProjectA {
-	class ForwardRenderer3D : public Renderer3D {
+	class ForwardRenderer3D : public Renderer3D<Scene3D> {
 		private:
 			struct Transform {
 				mat4x4<float32> transform;

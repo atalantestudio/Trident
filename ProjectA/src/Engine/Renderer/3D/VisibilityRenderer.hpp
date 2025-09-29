@@ -1,369 +1,121 @@
 #pragma once
 
+#include "Engine/Build/Clusterizer.hpp"
 #include "Engine/Renderer/3D/Renderer3D.hpp"
 
 namespace ProjectA {
-	class VisibilityRenderer : public Renderer3D {
+	class VisibilityRenderer : public Renderer3D<ClusteredScene> {
 		private:
-			struct Transform {
-				mat4x4<float32> transform;
+			struct Camera {
+				mat4x4<float32> projectionView;
 			};
 
-			struct Camera {
-				mat4x4<float32> projection;
+			struct Vertex {
+				uint32 positionIndex;
 			};
+
+			struct Cluster {
+				uint32 instanceIndex;
+			};
+
+			struct Instance {
+				mat4x4<float32> transform;
+				uint32 geometryIndex;
+			};
+
+			struct Geometry {
+				uint32 vertexBufferOffset;
+			};
+
+		private:
+			static constexpr uint32 VISIBILITY_SUBPASS_INDEX = 0;
+			static constexpr uint32 PRESENT_SUBPASS_INDEX = 1;
 
 		public:
 			void build() override {
-				// 1. Create render pass and subpass.
-				{
-					const ref<Surface> surface = getSurface();
+				updateRenderPass();
+				updateVisibilityImage();
+				updateVisibilityImageView();
 
-					Attachment swapchainAttachment{};
-					swapchainAttachment.format = surface->getFormat();
-					swapchainAttachment.sampleCount = 1;
-					swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-					swapchainAttachment.storeOperation = StoreOperation::STORE;
-					swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
-
-					Attachment visibilityAttachment{};
-					visibilityAttachment.format = surface->getFormat();
-					visibilityAttachment.sampleCount = 1;
-					visibilityAttachment.loadOperation = LoadOperation::CLEAR;
-					visibilityAttachment.storeOperation = StoreOperation::UNDEFINED;
-					visibilityAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-					AttachmentReference visibilitySwapchainAttachmentReference{};
-					visibilitySwapchainAttachmentReference.index = 1;
-					visibilitySwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-					SubpassDescriptor visibilitySubpassDescriptor{};
-					visibilitySubpassDescriptor.colorAttachmentReferences = {visibilitySwapchainAttachmentReference};
-
-					visibilitySubpass = createSubpass(visibilitySubpassDescriptor);
-
-					AttachmentReference materialSwapchainAttachmentReference{};
-					materialSwapchainAttachmentReference.index = 0;
-					materialSwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-					AttachmentReference materialVisibilityAttachmentReference{};
-					materialVisibilityAttachmentReference.index = 1;
-					materialVisibilityAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-
-					SubpassDescriptor materialSubpassDescriptor{};
-					materialSubpassDescriptor.colorAttachmentReferences = {materialSwapchainAttachmentReference};
-					materialSubpassDescriptor.inputAttachmentReferences = {materialVisibilityAttachmentReference};
-
-					materialSubpass = createSubpass(materialSubpassDescriptor);
-
-					RenderPassDescriptor renderPassDescriptor{};
-					renderPassDescriptor.attachments = {swapchainAttachment, visibilityAttachment};
-					renderPassDescriptor.subpasses = {visibilitySubpass, materialSubpass};
-
-					renderPass = createRenderPass(renderPassDescriptor);
-				}
-
-				// 2. Create framebuffers.
 				recreateFramebuffers();
 
-				BufferDescriptor cameraBufferDescriptor;
-				cameraBufferDescriptor.size = sizeof(Camera);
-				cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
-				cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-				cameraBufferDescriptor.persistent = true;
-
-				cameraBuffer = createBuffer(cameraBufferDescriptor);
-				cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
-
-				DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
-				cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-				cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
-				cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
-
-				// 3. Create pipeline layout.
-				{
-					DescriptorSetLayout cameraDescriptorSetLayout{};
-					cameraDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding};
-
-					PipelineLayoutDescriptor renderPipelineLayoutDescriptor{};
-					renderPipelineLayoutDescriptor.layouts = {cameraDescriptorSetLayout};
-
-					renderPipelineLayout = createPipelineLayout(renderPipelineLayoutDescriptor);
-				}
-
-				// 4. Create render pipeline.
-				{
-					VertexInputBinding transformInputBinding(InputRate::INSTANCE);
-					transformInputBinding.registerAttribute<mat4x4<float32>>();
-
-					VertexInputBinding geometryInputBinding(InputRate::VERTEX);
-					geometryInputBinding.registerAttribute<svec3<float32>>();
-
-					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-					vertexShaderModuleDescriptor.entryPoint = "main";
-
-					ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-					fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-					fragmentShaderModuleDescriptor.entryPoint = "main";
-
-					ColorBlendAttachment colorBlendAttachment{};
-					colorBlendAttachment.blend = false;
-
-					RenderPipelineDescriptor renderPipelineDescriptor;
-					renderPipelineDescriptor.pipelineLayout = renderPipelineLayout;
-					renderPipelineDescriptor.vertexInputBindings = {transformInputBinding, geometryInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Forward3D.vert", vertexShaderModuleDescriptor);
-					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/Forward3D.frag", fragmentShaderModuleDescriptor);
-					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-					renderPipelineDescriptor.cullMode = CullMode::BACK;
-					renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-					renderPipelineDescriptor.lineWidth = 1.0f;
-					renderPipelineDescriptor.minSampleShading = 0.0f;
-					renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-					renderPipelineDescriptor.depthStencilState.depthTest = false;
-					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-					renderPipelineDescriptor.renderPass = renderPass;
-					renderPipelineDescriptor.subpassIndex = 0;
-
-					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
-				}
+				createCameraBuffer();
 			}
 
-			void setScene(const Scene3D* scene) override {
+			void setScene(const ClusteredScene* scene) override {
 				Renderer3D::setScene(scene);
 
-				const ComponentPool<RigidBody3D>& rigidBodyPool = scene->getComponentPool<RigidBody3D>();
-				const ComponentPool<ref<Geometry3D>>& geometryPool = scene->getComponentPool<ref<Geometry3D>>();
+				createVertexPositionComponentBuffer();
+				createVertexBuffer();
+				createClusterBuffer();
+				createInstanceBuffer();
+				createGeometryBuffer();
 
-				const uint64 transformBufferSize = rigidBodyPool.componentCount * sizeof(mat4x4<float32>);
+				createVisibilityPipelineLayout();
+				createVisibilityRenderPipeline();
 
-				BufferDescriptor transformBufferDescriptor{};
-				transformBufferDescriptor.size = transformBufferSize;
-				transformBufferDescriptor.usage = BufferUsage::VERTEX;
-				transformBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-				transformBufferDescriptor.persistent = true;
+				createPresentPipelineLayout();
+				createPresentRenderPipeline();
 
-				transformBuffer = createBuffer(transformBufferDescriptor);
-
-				transformMappedRange = transformBuffer->map<Transform>(0, transformBuffer->size);
-
-				for (Entity entity = 0; entity <= scene->getLastEntity(); entity += 1) {
-					updateTransform(entity);
-				}
-
-				uint64 vertexPositionBufferSize = 0;
-				uint64 vertexPositionIndexBufferSize = 0;
-
-				for (uint32 geometryIndex = 0; geometryIndex < geometryPool.componentCount; geometryIndex += 1) {
-					const ref<Geometry3D>& geometry = geometryPool.components[geometryIndex];
-
-					vertexPositionBufferSize += geometry->getVertexPositionComponents().count * sizeof(float32);
-					vertexPositionIndexBufferSize += geometry->getVertexPositionIndices().count * sizeof(uint32);
-				}
-
-				const ref<Buffer> vertexPositionStagingBuffer = createStagingBuffer(vertexPositionBufferSize);
-
-				float32* vertexPositionMappedRange = vertexPositionStagingBuffer->map<float32>(0, vertexPositionStagingBuffer->size);
-
-				const ref<Buffer> vertexPositionIndexStagingBuffer = createStagingBuffer(vertexPositionIndexBufferSize);
-
-				uint32* vertexPositionIndexMappedRange = vertexPositionIndexStagingBuffer->map<uint32>(0, vertexPositionIndexStagingBuffer->size);
-
-				uint64 vertexPositionOffset = 0;
-				uint64 vertexPositionIndexOffset = 0;
-
-				for (uint32 geometryIndex = 0; geometryIndex < geometryPool.componentCount; geometryIndex += 1) {
-					const ref<Geometry3D>& geometry = geometryPool.components[geometryIndex];
-
-					std::copy(geometry->getVertexPositionComponents().begin(), geometry->getVertexPositionComponents().end(), vertexPositionMappedRange + vertexPositionOffset);
-					std::copy(geometry->getVertexPositionIndices().begin(), geometry->getVertexPositionIndices().end(), vertexPositionIndexMappedRange + vertexPositionIndexOffset);
-
-					vertexPositionOffset += geometry->getVertexPositionComponents().count;
-					vertexPositionIndexOffset += geometry->getVertexPositionIndices().count;
-				}
-
-				vertexPositionStagingBuffer->unmap();
-
-				BufferDescriptor vertexPositionBufferDescriptor{};
-				vertexPositionBufferDescriptor.size = vertexPositionStagingBuffer->size;
-				vertexPositionBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-				vertexPositionBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				vertexPositionBufferDescriptor.persistent = false;
-
-				vertexPositionBuffer = createBuffer(vertexPositionBufferDescriptor);
-
-				vertexPositionIndexStagingBuffer->unmap();
-
-				BufferDescriptor vertexPositionIndexBufferDescriptor{};
-				vertexPositionIndexBufferDescriptor.size = vertexPositionIndexStagingBuffer->size;
-				vertexPositionIndexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
-				vertexPositionIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-				vertexPositionIndexBufferDescriptor.persistent = false;
-
-				vertexPositionIndexBuffer = createBuffer(vertexPositionIndexBufferDescriptor);
-
-				sequence<BufferCopyRegion> vertexPositionBufferCopyRegions(1);
-
-				BufferCopyRegion& vertexPositionBufferCopyRegion = vertexPositionBufferCopyRegions[0];
-				vertexPositionBufferCopyRegion.sourceOffset = 0;
-				vertexPositionBufferCopyRegion.destinationOffset = 0;
-				vertexPositionBufferCopyRegion.size = vertexPositionStagingBuffer->size;
-
-				sequence<BufferCopyRegion> vertexPositionIndexBufferCopyRegions(1);
-
-				BufferCopyRegion& vertexPositionIndexBufferCopyRegion = vertexPositionIndexBufferCopyRegions[0];
-				vertexPositionIndexBufferCopyRegion.sourceOffset = 0;
-				vertexPositionIndexBufferCopyRegion.destinationOffset = 0;
-				vertexPositionIndexBufferCopyRegion.size = vertexPositionIndexStagingBuffer->size;
-
-				CommandBufferDescriptor commandBufferDescriptor{};
-				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-				const ref<Device> device = getDevice();
-				const ref<Queue> transferQueue = device->getQueue(QueueFamilyCapability::TRANSFER);
-				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
-
-				commandEncoder->begin();
-				commandEncoder->copyBufferToBuffer(vertexPositionStagingBuffer, vertexPositionBuffer, vertexPositionBufferCopyRegions);
-				commandEncoder->copyBufferToBuffer(vertexPositionIndexStagingBuffer, vertexPositionIndexBuffer, vertexPositionIndexBufferCopyRegions);
-
-				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-				transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-				device->waitIdle();
+				updateSceneBuffers();
 			}
 
-			void render(const ref<CommandEncoder>& commandEncoder) const override {
-				const ref<Swapchain>& swapchain = getSwapchain();
-				const float32 width = static_cast<float32>(swapchain->getExtent().width);
-				const float32 height = static_cast<float32>(swapchain->getExtent().height);
-
-				BeginRenderPassDescriptor beginRenderPassDescriptor;
-				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
-
-				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-				commandEncoder->bindRenderPipeline(renderPipeline);
-				commandEncoder->bindAllDescriptorSets();
-				commandEncoder->bindVertexBuffer(0, transformBuffer, 0, sizeof(mat4x4<float32>));
-				commandEncoder->bindVertexBuffer(1, vertexPositionBuffer, 0, 3 * sizeof(float32));
-				commandEncoder->bindIndexBuffer<uint32>(vertexPositionIndexBuffer, 0);
-				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchain->getExtent());
-
-				const ComponentPool<RigidBody3D>& rigidBodyPool = scene->getComponentPool<RigidBody3D>();
-				const ComponentPool<ref<Geometry3D>>& geometryPool = scene->getComponentPool<ref<Geometry3D>>();
-
-				for (uint32 instanceOffset = 0; instanceOffset < rigidBodyPool.componentCount; instanceOffset += 1) {
-					const RigidBody3D& rigidBody = rigidBodyPool.components[instanceOffset];
-					const ref<Geometry3D>& geometry = geometryPool.components[rigidBody.geometryIndex];
-
-					uint32 indexOffset = 0;
-
-					for (uint32 geometryIndex = 0; geometryIndex < rigidBody.geometryIndex; geometryIndex += 1) {
-						const ref<Geometry3D>& geometry = geometryPool.components[geometryIndex];
-
-						indexOffset += static_cast<uint32>(geometry->getVertexPositionIndices().count);
-					}
-
-					commandEncoder->drawIndexed(static_cast<uint32>(geometry->getVertexPositionIndices().count), 1, indexOffset, instanceOffset, 0);
-				}
-
-				commandEncoder->nextSubpass();
-
-				commandEncoder->endRenderPass();
-			}
+			void render(const ref<CommandEncoder>& commandEncoder) const override;
 
 			void resize(WindowResizeEvent& event) override {
+				updateVisibilityImage();
+				updateVisibilityImageView();
+
 				recreateFramebuffers();
+
 				updateCamera();
 			}
 
-			void recreateFramebuffers() {
-				const ref<Swapchain>& swapchain = getSwapchain();
-				const Extent2D swapchainExtent = swapchain->getExtent();
+			void updateCamera();
 
-				updateVisibilityImage();
+			void updateInstanceTransform(Entity entity, const mat4x4<float32>& transform);
 
-				for (ref<Framebuffer>& framebuffer : framebuffers) {
-					framebuffer.~shared_ptr();
-				}
+		private:
+			void updateRenderPass();
+			void updateVisibilityImage();
+			void updateVisibilityImageView();
+			void updateSceneBuffers();
 
-				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
+			void recreateFramebuffers();
 
-				FramebufferDescriptor framebufferDescriptor{};
-				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = sequence<ref<ImageView>>(2);
-				framebufferDescriptor.imageViews[1] = visibilityImageView;
-				framebufferDescriptor.extent = swapchain->getExtent();
-				framebufferDescriptor.layerCount = 1;
-
-				for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
-					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-
-					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-				}
-			}
-
-			void updateVisibilityImage() {
-				const Extent2D swapchainExtent = getSwapchain()->getExtent();
-
-				AttachmentImageDescriptor visibilityAttachmentImageDescriptor{};
-				visibilityAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-				visibilityAttachmentImageDescriptor.extent.width = swapchainExtent.width;
-				visibilityAttachmentImageDescriptor.extent.height = swapchainExtent.height;
-				visibilityAttachmentImageDescriptor.extent.depth = 1;
-				visibilityAttachmentImageDescriptor.mipLevelCount = 1;
-				visibilityAttachmentImageDescriptor.layerCount = 1;
-
-				visibilityImage = renderPass->createInputAttachmentImage(visibilityAttachmentImageDescriptor, 1);
-
-				ImageViewDescriptor visibilityImageViewDescriptor{};
-				visibilityImageViewDescriptor.mipLevelOffset = 0;
-				visibilityImageViewDescriptor.mipLevelCount = visibilityImage->getMipLevelCount();
-				visibilityImageViewDescriptor.layerOffset = 0;
-				visibilityImageViewDescriptor.layerCount = visibilityImage->getLayerCount();
-
-				visibilityImageView = visibilityImage->createView(visibilityImageViewDescriptor);
-			}
-
-			void updateTransform(Entity entity) {
-				transformMappedRange[entity].transform = scene->getRigidBody(entity).transform;
-			}
-
-			void updateCamera() {
-				cameraMappedRange->projection = camera->projection;
-			}
+			void createCameraBuffer();
+			void createVertexPositionComponentBuffer();
+			void createVertexBuffer();
+			void createClusterBuffer();
+			void createInstanceBuffer();
+			void createGeometryBuffer();
+			void createVisibilityPipelineLayout();
+			void createVisibilityRenderPipeline();
+			void createPresentPipelineLayout();
+			void createPresentRenderPipeline();
 
 		private:
 			ref<RenderPass> renderPass;
-			ref<Subpass> visibilitySubpass;
-			ref<Subpass> materialSubpass;
-
-			sequence<ref<Framebuffer>> framebuffers;
-
-			ref<PipelineLayout> renderPipelineLayout;
-			ref<RenderPipeline> renderPipeline;
-
-			ref<Buffer> transformBuffer;
-			Transform* transformMappedRange = nullptr;
-
-			ref<Buffer> vertexPositionBuffer;
-			ref<Buffer> vertexPositionIndexBuffer;
-
-			ref<Buffer> vertexNormalBuffer;
-			ref<Buffer> vertexNormalIndexBuffer;
-
-			ref<Buffer> vertexTextureCoordinateBuffer;
-			ref<Buffer> vertexTextureCoordinateIndexBuffer;
-
-			ref<Buffer> cameraBuffer;
-			Camera* cameraMappedRange = nullptr;
 
 			ref<Image> visibilityImage;
 			ref<ImageView> visibilityImageView;
+
+			sequence<ref<Framebuffer>> framebuffers;
+
+			ref<Buffer> cameraBuffer;
+			ref<Buffer> vertexPositionComponentBuffer;
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> clusterBuffer;
+			ref<Buffer> instanceBuffer;
+			ref<Buffer> geometryBuffer;
+
+			Camera* cameraBufferMappedRange = nullptr;
+			Instance* instanceBufferMappedRange = nullptr;
+
+			ref<PipelineLayout> visibilityPipelineLayout;
+			ref<RenderPipeline> visibilityRenderPipeline;
+
+			ref<PipelineLayout> presentPipelineLayout;
+			ref<RenderPipeline> presentRenderPipeline;
 	};
 }

@@ -32,7 +32,9 @@ namespace ProjectA {
 
 				scene.createEntity(entityDescriptor);
 
-				renderer.setScene(&scene);
+				clusteredScene = clusterizeScene(scene);
+
+				renderer.setScene(&clusteredScene);
 
 				camera.updateProjection(FIELD_OF_VIEW, getApplication()->getWindow()->getAspectRatio(), NEAR_PLANE, FAR_PLANE);
 
@@ -43,12 +45,14 @@ namespace ProjectA {
 			void update(float32 deltaTime, float32 inverseDeltaTime) override {
 				static const vec3<float32> rotationAxis = {0.0f, 1.0f, 0.0f};
 
-				RigidBody3D& rigidBody = scene.getRigidBody(scene.getLastEntity());
+				const Entity entity = scene.getLastEntity();
+
+				RigidBody3D& rigidBody = scene.getRigidBody(entity);
 				rigidBody.rotation += rotationAxis * 1_rad * deltaTime;
 
 				rigidBody.updateTransform();
 
-				renderer.updateTransform(scene.getLastEntity());
+				renderer.updateInstanceTransform(entity, rigidBody.transform);
 			}
 
 			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const override {
@@ -77,6 +81,7 @@ namespace ProjectA {
 		private:
 			VisibilityRenderer renderer;
 			Scene3D scene;
+			ClusteredScene clusteredScene;
 			PerspectiveCamera3D camera;
 	};
 }
