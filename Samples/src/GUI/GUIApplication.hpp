@@ -4,7 +4,7 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Layer/TextLayer.hpp"
+#include "Layer/UITestLayer.hpp"
 
 namespace ProjectA {
 	class GUIApplication : public Application {
@@ -12,7 +12,7 @@ namespace ProjectA {
 			GUIApplication(const ProjectDescriptor& projectDescriptor) :
 				Application(projectDescriptor)
 			{
-				registerLayer<TextLayer>();
+				registerLayer<UITestLayer>();
 			}
 	};
 
