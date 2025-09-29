@@ -11,7 +11,7 @@ namespace ProjectA {
 			explicit OpenGLCopyBufferToBufferCommand(GLuint sourceBuffer, GLuint destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) :
 				sourceBuffer(sourceBuffer),
 				destinationBuffer(destinationBuffer),
-				copyRegions(&copyRegions)
+				copyRegions(copyRegions)
 			{}
 
 			void execute() const final override {
@@ -20,7 +20,7 @@ namespace ProjectA {
 					glBindBuffer(GL_COPY_WRITE_BUFFER, destinationBuffer);
 				#endif
 
-				for (const BufferCopyRegion& copyRegion : *copyRegions) {
+				for (const BufferCopyRegion& copyRegion : copyRegions) {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 						glCopyNamedBufferSubData(sourceBuffer, destinationBuffer, copyRegion.sourceOffset, copyRegion.destinationOffset, copyRegion.size);
 					#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
@@ -39,6 +39,6 @@ namespace ProjectA {
 		private:
 			const GLuint sourceBuffer;
 			const GLuint destinationBuffer;
-			const sequence<BufferCopyRegion>* copyRegions;
+			sequence<BufferCopyRegion> copyRegions;
 	};
 }
