@@ -18,6 +18,13 @@ namespace ProjectA {
 		visibilityAttachment.storeOperation = StoreOperation::UNDEFINED;
 		visibilityAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
+		Attachment depthStencilAttachment{};
+		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
+		depthStencilAttachment.sampleCount = 1;
+		depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
+		depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
+		depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
 		AttachmentReference writeSwapchainAttachmentReference{};
 		writeSwapchainAttachmentReference.index = 0;
 		writeSwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
@@ -30,8 +37,13 @@ namespace ProjectA {
 		readVisibilityAttachmentReference.index = 1;
 		readVisibilityAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 
+		AttachmentReference writeDepthStencilAttachmentReference{};
+		writeDepthStencilAttachmentReference.index = 2;
+		writeDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
 		SubpassDescriptor visibilitySubpassDescriptor{};
 		visibilitySubpassDescriptor.colorAttachmentReferences = {writeVisibilityAttachmentReference};
+		visibilitySubpassDescriptor.depthStencilAttachmentReference = writeDepthStencilAttachmentReference;
 
 		SubpassDescriptor presentSubpassDescriptor{};
 		presentSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
@@ -41,7 +53,7 @@ namespace ProjectA {
 		const ref<Subpass> presentSubpass = createSubpass(presentSubpassDescriptor);
 
 		RenderPassDescriptor renderPassDescriptor{};
-		renderPassDescriptor.attachments = {swapchainAttachment, visibilityAttachment};
+		renderPassDescriptor.attachments = {swapchainAttachment, visibilityAttachment, depthStencilAttachment};
 		renderPassDescriptor.subpasses = {visibilitySubpass, presentSubpass};
 
 		renderPass = createRenderPass(renderPassDescriptor);
@@ -69,6 +81,30 @@ namespace ProjectA {
 		visibilityImageViewDescriptor.layerCount = visibilityImage->getLayerCount();
 
 		visibilityImageView = visibilityImage->createView(visibilityImageViewDescriptor);
+	}
+
+	void VisibilityRenderer::updateDepthStencilImage() {
+		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+
+		AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
+		depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
+		depthStencilAttachmentImageDescriptor.extent.width = swapchainExtent.width;
+		depthStencilAttachmentImageDescriptor.extent.height = swapchainExtent.height;
+		depthStencilAttachmentImageDescriptor.extent.depth = 1;
+		depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
+		depthStencilAttachmentImageDescriptor.layerCount = 1;
+
+		depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, VISIBILITY_SUBPASS_INDEX);
+	}
+
+	void VisibilityRenderer::updateDepthStencilImageView() {
+		ImageViewDescriptor depthStencilImageViewDescriptor{};
+		depthStencilImageViewDescriptor.mipLevelOffset = 0;
+		depthStencilImageViewDescriptor.mipLevelCount = depthStencilImage->getMipLevelCount();
+		depthStencilImageViewDescriptor.layerOffset = 0;
+		depthStencilImageViewDescriptor.layerCount = depthStencilImage->getLayerCount();
+
+		depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
 	}
 
 	void VisibilityRenderer::updateSceneBuffers() {
@@ -171,7 +207,7 @@ namespace ProjectA {
 		getDevice()->waitIdle();
 	}
 
-	void VisibilityRenderer::recreateFramebuffers() {
+	void VisibilityRenderer::updateFramebuffers() {
 		const ref<Swapchain>& swapchain = getSwapchain();
 		const Extent2D swapchainExtent = swapchain->getExtent();
 
@@ -183,8 +219,7 @@ namespace ProjectA {
 
 		FramebufferDescriptor framebufferDescriptor{};
 		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = sequence<ref<ImageView>>(2);
-		framebufferDescriptor.imageViews[1] = visibilityImageView;
+		framebufferDescriptor.imageViews = {nullptr, visibilityImageView, depthStencilImageView};
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
@@ -354,6 +389,8 @@ namespace ProjectA {
 		visibilityRenderPipelineDescriptor.minSampleShading = 0.0f;
 		visibilityRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		visibilityRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		// visibilityRenderPipelineDescriptor.depthStencilState.depthWrite = true;
+		// visibilityRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER; // TODO: Use LESS.
 		visibilityRenderPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
 		visibilityRenderPipelineDescriptor.renderPass = renderPass;
 		visibilityRenderPipelineDescriptor.subpassIndex = VISIBILITY_SUBPASS_INDEX;
@@ -436,9 +473,16 @@ namespace ProjectA {
 	}
 
 	void VisibilityRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
+		const ClearValue swapchainClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
+		const ClearValue visibilityClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
+
+		ClearValue depthStencilClearValue{};
+		// depthStencilClearValue.depth = 1.0f;
+		// depthStencilClearValue.stencil = 0;
+
 		BeginRenderPassDescriptor beginRenderPassDescriptor{};
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
+		beginRenderPassDescriptor.clearValues = {swapchainClearValue, visibilityClearValue, depthStencilClearValue};
 
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 		const float32 width = static_cast<float32>(swapchainExtent.width);

@@ -22,11 +22,8 @@ namespace ProjectA {
 				const File<FileFormat::FBX> fbxFile = Filesystem::decode<FileFormat::FBX>(fbxData);
 
 				Entity3DDescriptor entityDescriptor{};
-				/* entityDescriptor.position = {0.0_m, 0.0_m, 1.0_m};
-				entityDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
-				entityDescriptor.geometry = createRef<BoxGeometry3D>(vec3<float32>(1.0_m, 1.0_m, 1.0_m)); */
-				entityDescriptor.position = {0.0_m, -0.25_m, 1.5_m};
-				entityDescriptor.rotation = {pi<float32>() * 0.5f, 0.0_rad, 0.0_rad};
+				entityDescriptor.position = {0.0_m, -0.225_m, 0.85_m};
+				entityDescriptor.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad};
 				entityDescriptor.geometry = FBXToGeometry3D(fbxFile);
 				entityDescriptor.material = createRef<ColorMaterial>();
 

@@ -36,8 +36,9 @@ namespace ProjectA {
 				updateRenderPass();
 				updateVisibilityImage();
 				updateVisibilityImageView();
-
-				recreateFramebuffers();
+				updateDepthStencilImage();
+				updateDepthStencilImageView();
+				updateFramebuffers();
 
 				createCameraBuffer();
 			}
@@ -50,10 +51,8 @@ namespace ProjectA {
 				createClusterBuffer();
 				createInstanceBuffer();
 				createGeometryBuffer();
-
 				createVisibilityPipelineLayout();
 				createVisibilityRenderPipeline();
-
 				createPresentPipelineLayout();
 				createPresentRenderPipeline();
 
@@ -65,9 +64,9 @@ namespace ProjectA {
 			void resize(WindowResizeEvent& event) override {
 				updateVisibilityImage();
 				updateVisibilityImageView();
-
-				recreateFramebuffers();
-
+				updateDepthStencilImage();
+				updateDepthStencilImageView();
+				updateFramebuffers();
 				updateCamera();
 			}
 
@@ -79,9 +78,10 @@ namespace ProjectA {
 			void updateRenderPass();
 			void updateVisibilityImage();
 			void updateVisibilityImageView();
+			void updateDepthStencilImage();
+			void updateDepthStencilImageView();
 			void updateSceneBuffers();
-
-			void recreateFramebuffers();
+			void updateFramebuffers();
 
 			void createCameraBuffer();
 			void createVertexPositionComponentBuffer();
@@ -99,6 +99,9 @@ namespace ProjectA {
 
 			ref<Image> visibilityImage;
 			ref<ImageView> visibilityImageView;
+
+			ref<Image> depthStencilImage;
+			ref<ImageView> depthStencilImageView;
 
 			sequence<ref<Framebuffer>> framebuffers;
 
