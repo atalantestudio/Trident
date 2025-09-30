@@ -40,6 +40,7 @@ namespace ProjectA {
 				updateDepthStencilImageView();
 				updateFramebuffers();
 
+				createIndirectBuffer();
 				createCameraBuffer();
 			}
 
@@ -83,6 +84,7 @@ namespace ProjectA {
 			void updateSceneBuffers();
 			void updateFramebuffers();
 
+			void createIndirectBuffer();
 			void createCameraBuffer();
 			void createVertexPositionComponentBuffer();
 			void createVertexBuffer();
@@ -105,6 +107,7 @@ namespace ProjectA {
 
 			sequence<ref<Framebuffer>> framebuffers;
 
+			ref<Buffer> indirectBuffer;
 			ref<Buffer> cameraBuffer;
 			ref<Buffer> vertexPositionComponentBuffer;
 			ref<Buffer> vertexBuffer;
@@ -112,6 +115,7 @@ namespace ProjectA {
 			ref<Buffer> instanceBuffer;
 			ref<Buffer> geometryBuffer;
 
+			uint32* indirectBufferMappedRange = nullptr;
 			Camera* cameraBufferMappedRange = nullptr;
 			Instance* instanceBufferMappedRange = nullptr;
 

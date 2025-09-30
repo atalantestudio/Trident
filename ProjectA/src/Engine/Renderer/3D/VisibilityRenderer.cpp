@@ -108,6 +108,11 @@ namespace ProjectA {
 	}
 
 	void VisibilityRenderer::updateSceneBuffers() {
+		indirectBufferMappedRange[0] = CLUSTER_VERTEX_COUNT;
+		indirectBufferMappedRange[1] = static_cast<uint32>(scene->clusters.count);
+		indirectBufferMappedRange[2] = 0;
+		indirectBufferMappedRange[3] = 0;
+
 		const uint64 stagingBufferSize = vertexPositionComponentBuffer->size + vertexBuffer->size + clusterBuffer->size + instanceBuffer->size /* + geometryBuffer->size */;
 
 		const ref<Buffer> stagingBuffer = createStagingBuffer(stagingBufferSize);
@@ -230,6 +235,18 @@ namespace ProjectA {
 		}
 	}
 
+	void VisibilityRenderer::createIndirectBuffer() {
+		BufferDescriptor indirectBufferDescriptor{};
+		indirectBufferDescriptor.size = 4 * sizeof(uint32);
+		indirectBufferDescriptor.usage = BufferUsage::INDIRECT;
+		indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		indirectBufferDescriptor.persistent = true;
+
+		indirectBuffer = createBuffer(indirectBufferDescriptor);
+
+		indirectBufferMappedRange = indirectBuffer->map<uint32>(0, indirectBuffer->size);
+	}
+
 	void VisibilityRenderer::createCameraBuffer() {
 		BufferDescriptor cameraBufferDescriptor{};
 		cameraBufferDescriptor.size = sizeof(Camera);
@@ -246,7 +263,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor vertexPositionComponentBufferDescriptor{};
-		vertexPositionComponentBufferDescriptor.size = scene->clusters.count * CLUSTER_INDEX_COUNT * 3 * sizeof(float32);
+		vertexPositionComponentBufferDescriptor.size = scene->clusters.count * CLUSTER_VERTEX_COUNT * 3 * sizeof(float32);
 		vertexPositionComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexPositionComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
@@ -257,7 +274,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor vertexBufferDescriptor{};
-		vertexBufferDescriptor.size = scene->clusters.count * CLUSTER_INDEX_COUNT * sizeof(Vertex);
+		vertexBufferDescriptor.size = scene->clusters.count * CLUSTER_VERTEX_COUNT * sizeof(Vertex);
 		vertexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
@@ -496,11 +513,7 @@ namespace ProjectA {
 		{
 			commandEncoder->bindRenderPipeline(visibilityRenderPipeline);
 			commandEncoder->bindAllDescriptorSets();
-
-			const uint32 instanceCount = static_cast<uint32>(scene->clusters.count);
-
-			// TODO: Use indirect drawing.
-			commandEncoder->draw(CLUSTER_INDEX_COUNT, instanceCount, 0, 0);
+			commandEncoder->drawIndirect(indirectBuffer, 0, 1, 0);
 		}
 
 		commandEncoder->nextSubpass();

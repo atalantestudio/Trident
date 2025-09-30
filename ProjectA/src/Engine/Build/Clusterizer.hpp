@@ -4,7 +4,7 @@
 
 namespace ProjectA {
 	static constexpr uint32 CLUSTER_TRIANGLE_COUNT = 128;
-	static constexpr uint32 CLUSTER_INDEX_COUNT = CLUSTER_TRIANGLE_COUNT * 3;
+	static constexpr uint32 CLUSTER_VERTEX_COUNT = CLUSTER_TRIANGLE_COUNT * 3;
 
 	struct ClusteredInstance {
 		uint32 geometryIndex;
@@ -53,7 +53,7 @@ namespace ProjectA {
 
 			// NOTE: Vertex position indices SHOULD BE AS MANY as vertex normal indices.
 			const uint32 indexCount = static_cast<uint32>(geometry->getVertexPositionIndices().count);
-			const uint32 clusterCount = static_cast<uint32>(ceil(static_cast<float32>(indexCount) / CLUSTER_INDEX_COUNT));
+			const uint32 clusterCount = static_cast<uint32>(ceil(static_cast<float32>(indexCount) / CLUSTER_VERTEX_COUNT));
 
 			ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[geometryIndex];
 			clusteredGeometry.clusterCount = clusterCount;
@@ -62,7 +62,7 @@ namespace ProjectA {
 			totalVertexPositionComponentCount += static_cast<uint32>(geometry->getVertexPositionComponents().count);
 			totalVertexNormalComponentCount += static_cast<uint32>(geometry->getVertexNormalComponents().count);
 			totalVertexTextureCoordinateComponentCount += static_cast<uint32>(geometry->getVertexTextureCoordinateComponents().count);
-			totalIndexCount += clusterCount * CLUSTER_INDEX_COUNT;
+			totalIndexCount += clusterCount * CLUSTER_VERTEX_COUNT;
 			totalClusterCount += clusterCount;
 			totalInstanceCount += clusteredGeometry.instanceCount;
 		}
@@ -103,7 +103,7 @@ namespace ProjectA {
 				std::copy(geometry->getVertexNormalIndices().begin(), geometry->getVertexNormalIndices().end(), clusteredScene.vertexNormalIndices.begin() + indexOffset);
 				std::copy(geometry->getVertexTextureCoordinateIndices().begin(), geometry->getVertexTextureCoordinateIndices().end(), clusteredScene.vertexTextureCoordinateIndices.begin() + indexOffset);
 
-				indexOffset += clusteredGeometry.clusterCount * CLUSTER_INDEX_COUNT;
+				indexOffset += clusteredGeometry.clusterCount * CLUSTER_VERTEX_COUNT;
 
 				for (uint32 relativeClusterIndex = 0; relativeClusterIndex < clusteredGeometry.clusterCount; relativeClusterIndex += 1) {
 					Cluster& cluster = clusteredScene.clusters[clusterOffset + relativeClusterIndex];
