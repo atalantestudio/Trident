@@ -1,8 +1,9 @@
 #include "pch.hpp"
 
-#include "Engine/BuildProcess/SDFGlyphMapBuildProcess.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
+
+#include "GenerateSDFGlyphMapProcess.hpp"
 
 namespace ProjectA {
 	static constexpr uint64 MAX_GLYPH_COUNT = 2048;
@@ -10,7 +11,7 @@ namespace ProjectA {
 	static constexpr uint32 GLYPH_SUBIMAGE_DIMENSION = 64;
 	static constexpr uint32 SPREAD_FACTOR = 0;
 
-	SDFGlyphMapBuildProcess::SDFGlyphMapBuildProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& output) {
+	GenerateSDFGlyphMapProcess::GenerateSDFGlyphMapProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& output) {
 		ENGINE_ASSERT(file.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
 		output.extent = GLYPH_MAP_IMAGE_EXTENT;
@@ -128,7 +129,7 @@ namespace ProjectA {
 
 		ComputePipelineDescriptor glyphImagePipelineDescriptor;
 		glyphImagePipelineDescriptor.pipelineLayout = glyphImagePipelineLayout;
-		glyphImagePipelineDescriptor.computeShaderModule = Renderer::loadShaderModule("../ProjectA/src/Asset/Shader/GlyphImage.comp", glyphImageShaderModuleDescriptor);
+		glyphImagePipelineDescriptor.computeShaderModule = Renderer::loadShaderModule("GlyphImage.comp", glyphImageShaderModuleDescriptor);
 
 		const ref<ComputePipeline> glyphImagePipeline = Renderer::createComputePipeline(glyphImagePipelineDescriptor);
 
@@ -184,7 +185,7 @@ namespace ProjectA {
 
 		ComputePipelineDescriptor glyphSdfPipelineDescriptor;
 		glyphSdfPipelineDescriptor.pipelineLayout = glyphSdfPipelineLayout;
-		glyphSdfPipelineDescriptor.computeShaderModule = Renderer::loadShaderModule("../ProjectA/src/Asset/Shader/GlyphDistanceField.comp", glyphSdfShaderModuleDescriptor);
+		glyphSdfPipelineDescriptor.computeShaderModule = Renderer::loadShaderModule("GlyphDistanceField.comp", glyphSdfShaderModuleDescriptor);
 
 		const ref<ComputePipeline> glyphSdfPipeline = Renderer::createComputePipeline(glyphSdfPipelineDescriptor);
 
@@ -349,7 +350,7 @@ namespace ProjectA {
 		glyphMapStagingBuffer->unmap();
 	}
 
-	uint64 SDFGlyphMapBuildProcess::computeMaxGlyphByteSize(const sequence<TrueTypeFont::Glyph>& glyphs) {
+	uint64 GenerateSDFGlyphMapProcess::computeMaxGlyphByteSize(const sequence<TrueTypeFont::Glyph>& glyphs) {
 		uint64 maxGlyphEdgeCount = 0;
 
 		for (const TrueTypeFont::Glyph& glyph : glyphs) {

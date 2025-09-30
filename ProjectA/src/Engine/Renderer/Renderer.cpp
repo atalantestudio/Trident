@@ -173,7 +173,8 @@ namespace ProjectA {
 	}
 
 	ref<ShaderModule> Renderer::loadShaderModule(std::string_view path, const ShaderModuleDescriptor& descriptor) {
-		std::string pathString(path);
+		std::string pathString = "Asset/Shader/";
+		pathString += path;
 
 		if (
 			graphicsApi == GraphicsAPI::VULKAN

@@ -85,8 +85,8 @@ namespace ProjectA {
 					RenderPipelineDescriptor writeInputRenderPipelineDescriptor{};
 					writeInputRenderPipelineDescriptor.pipelineLayout = writeInputRenderPipelineLayout;
 					writeInputRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-					writeInputRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Asset/Shader/Base/Vertex2DRGB.vert", vertexShaderModuleDescriptor);
-					writeInputRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Asset/Shader/Base/ColorRGB.frag", fragmentShaderModuleDescriptor);
+					writeInputRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Base/Vertex2DRGB.vert", vertexShaderModuleDescriptor);
+					writeInputRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Base/ColorRGB.frag", fragmentShaderModuleDescriptor);
 					writeInputRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					writeInputRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 					writeInputRenderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -218,13 +218,13 @@ namespace ProjectA {
 
 				switch (getGraphicsApi()) {
 					case GraphicsAPI::OPENGL:
-						vertexShaderModule = loadShaderModule("Asset/Shader/Base/ScreenUV.vert", vertexShaderModuleDescriptor);
-						fragmentShaderModule = loadShaderModule("Asset/Shader/Base/TextureRGBA.frag", fragmentShaderModuleDescriptor);
+						vertexShaderModule = loadShaderModule("Base/ScreenUV.vert", vertexShaderModuleDescriptor);
+						fragmentShaderModule = loadShaderModule("Base/TextureRGBA.frag", fragmentShaderModuleDescriptor);
 
 						break;
 					case GraphicsAPI::VULKAN:
-						vertexShaderModule = loadShaderModule("Asset/Shader/Base/Screen.vert", vertexShaderModuleDescriptor);
-						fragmentShaderModule = loadShaderModule("Asset/Shader/Base/ScreenInputAttachment.frag", fragmentShaderModuleDescriptor);
+						vertexShaderModule = loadShaderModule("Base/Screen.vert", vertexShaderModuleDescriptor);
+						fragmentShaderModule = loadShaderModule("Base/ScreenInputAttachment.frag", fragmentShaderModuleDescriptor);
 
 						break;
 					default:

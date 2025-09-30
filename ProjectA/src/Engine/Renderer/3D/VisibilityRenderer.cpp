@@ -376,11 +376,11 @@ namespace ProjectA {
 
 		switch (getGraphicsApi()) {
 			case GraphicsAPI::OPENGL:
-				vertexShaderModule = loadShaderModule("Asset/Shader/Visibility/VisibilitySingleSet.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule("Visibility/VisibilitySingleSet.vert", vertexShaderModuleDescriptor);
 
 				break;
 			case GraphicsAPI::VULKAN:
-				vertexShaderModule = loadShaderModule("Asset/Shader/Visibility/Visibility.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule("Visibility/Visibility.vert", vertexShaderModuleDescriptor);
 
 				break;
 			default:
@@ -389,7 +389,7 @@ namespace ProjectA {
 				break;
 		}
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Asset/Shader/Visibility/Visibility.frag", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Visibility/Visibility.frag", fragmentShaderModuleDescriptor);
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
@@ -444,13 +444,13 @@ namespace ProjectA {
 
 		switch (getGraphicsApi()) {
 			case GraphicsAPI::OPENGL:
-				vertexShaderModule = loadShaderModule("Asset/Shader/Base/ScreenUV.vert", vertexShaderModuleDescriptor);
-				fragmentShaderModule = loadShaderModule("Asset/Shader/Visibility/DebugTextureSampler.frag", fragmentShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule("Base/ScreenUV.vert", vertexShaderModuleDescriptor);
+				fragmentShaderModule = loadShaderModule("Visibility/DebugTextureSampler.frag", fragmentShaderModuleDescriptor);
 
 				break;
 			case GraphicsAPI::VULKAN:
-				vertexShaderModule = loadShaderModule("Asset/Shader/Base/Screen.vert", vertexShaderModuleDescriptor);
-				fragmentShaderModule = loadShaderModule("Asset/Shader/Visibility/DebugInputAttachment.frag", fragmentShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule("Base/Screen.vert", vertexShaderModuleDescriptor);
+				fragmentShaderModule = loadShaderModule("Visibility/DebugInputAttachment.frag", fragmentShaderModuleDescriptor);
 
 				break;
 			default:

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Engine/BuildProcess/SDFGlyphMapBuildProcess.hpp"
-
 #include "BuildGlyphMapImageSubprocess.hpp"
+#include "../Process/GenerateSDFGlyphMapProcess.hpp"
 
 namespace ProjectA {
 	class BuildTrueTypeFontSubprocess {
@@ -28,7 +27,7 @@ namespace ProjectA {
 
 				SDFGlyphMap sdfGlyphMap;
 
-				SDFGlyphMapBuildProcess(file, sdfGlyphMap);
+				GenerateSDFGlyphMapProcess(file, sdfGlyphMap);
 
 				fontAssetDescriptor.glyphs = sdfGlyphMap.glyphs;
 

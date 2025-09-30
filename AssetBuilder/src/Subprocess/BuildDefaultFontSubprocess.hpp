@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Engine/BuildProcess/SDFGlyphMapBuildProcess.hpp"
-
 #include "BuildGlyphMapImageSubprocess.hpp"
 
 namespace ProjectA {

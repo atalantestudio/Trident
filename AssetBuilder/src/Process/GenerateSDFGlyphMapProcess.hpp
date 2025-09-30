@@ -11,7 +11,7 @@ namespace ProjectA {
 		sequence<Glyph> glyphs;
 	};
 
-	class SDFGlyphMapBuildProcess : public Process {
+	class GenerateSDFGlyphMapProcess : public Process {
 		private:
 			struct FontStorage {
 				uint32 outputGlyphSize;
@@ -41,7 +41,7 @@ namespace ProjectA {
 			};
 
 		public:
-			explicit SDFGlyphMapBuildProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& sdfGlyphMap);
+			explicit GenerateSDFGlyphMapProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& sdfGlyphMap);
 
 		private:
 			static uint64 computeMaxGlyphByteSize(const sequence<TrueTypeFont::Glyph>& glyphs);
