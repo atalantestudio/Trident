@@ -60,7 +60,6 @@ namespace ProjectA {
 
 		private:
 			ref<RenderPass> renderPass;
-			ref<Subpass> subpass;
 
 			sequence<ref<Framebuffer>> framebuffers;
 

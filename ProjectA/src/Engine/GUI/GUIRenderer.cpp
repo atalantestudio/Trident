@@ -25,7 +25,7 @@ namespace ProjectA {
 		SubpassDescriptor subpassDescriptor{};
 		subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
 
-		subpass = createSubpass(subpassDescriptor);
+		const ref<Subpass> subpass = createSubpass(subpassDescriptor);
 
 		SubpassDependency subpassDependency{};
 		subpassDependency.sourceSubpassIndex = SubpassDependency::EXTERNAL_SUBPASS;
@@ -437,18 +437,18 @@ namespace ProjectA {
 			return;
 		}
 
-		const ref<Swapchain>& swapchain = getSwapchain();
-		const float32 width = static_cast<float32>(swapchain->getExtent().width);
-		const float32 height = static_cast<float32>(swapchain->getExtent().height);
-
 		const ClearValue clearValue = {1.0f, 1.0f, 1.0f, 1.0f};
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor;
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 		beginRenderPassDescriptor.clearValues = {clearValue};
 
+		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+		const float32 width = static_cast<float32>(swapchainExtent.width);
+		const float32 height = static_cast<float32>(swapchainExtent.height);
+
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-		commandEncoder->setScissor(0, 0, swapchain->getExtent());
+		commandEncoder->setScissor(0, 0, swapchainExtent);
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 
 		if (subcomponentCount > 0) {
@@ -493,7 +493,7 @@ namespace ProjectA {
 
 		FramebufferDescriptor framebufferDescriptor{};
 		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = sequence<ref<ImageView>>(1);
+		framebufferDescriptor.imageViews = {nullptr};
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 

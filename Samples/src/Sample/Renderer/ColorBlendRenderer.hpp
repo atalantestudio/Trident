@@ -24,7 +24,7 @@ namespace ProjectA {
 					SubpassDescriptor subpassDescriptor{};
 					subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
 
-					subpass = createSubpass(subpassDescriptor);
+					const ref<Subpass> subpass = createSubpass(subpassDescriptor);
 
 					RenderPassDescriptor renderPassDescriptor{};
 					renderPassDescriptor.attachments = {swapchainAttachment};
@@ -156,19 +156,19 @@ namespace ProjectA {
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
-				const ref<Swapchain>& swapchain = getSwapchain();
-				const float32 width = static_cast<float32>(swapchain->getExtent().width);
-				const float32 height = static_cast<float32>(swapchain->getExtent().height);
-
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
+
+				const Extent2D swapchainExtent = getSwapchain()->getExtent();
+				const float32 width = static_cast<float32>(swapchainExtent.width);
+				const float32 height = static_cast<float32>(swapchainExtent.height);
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchain->getExtent());
+				commandEncoder->setScissor(0, 0, swapchainExtent);
 
 				for (uint32 instanceIndex = 0; instanceIndex < INSTANCE_COUNT; instanceIndex += 1) {
 					const uint32 vertexOffset = 3 * static_cast<uint32>(instanceIndex);
@@ -196,7 +196,7 @@ namespace ProjectA {
 
 				FramebufferDescriptor framebufferDescriptor{};
 				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = sequence<ref<ImageView>>(1);
+				framebufferDescriptor.imageViews = {nullptr};
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
@@ -223,7 +223,6 @@ namespace ProjectA {
 
 		private:
 			ref<RenderPass> renderPass;
-			ref<Subpass> subpass;
 
 			sequence<ref<Framebuffer>> framebuffers;
 

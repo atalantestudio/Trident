@@ -90,7 +90,6 @@ namespace ProjectA {
 			static constexpr float32 DEFAULT_ZOOM_LEVEL = 32.0f;
 
 		private:
-			ref<Subpass> subpass;
 			ref<RenderPass> renderPass;
 
 			sequence<ref<Framebuffer>> framebuffers;

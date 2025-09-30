@@ -39,7 +39,7 @@ namespace ProjectA {
 		subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
 		subpassDescriptor.depthStencilAttachmentReference = depthStencilAttachmentReference;
 
-		subpass = createSubpass(subpassDescriptor);
+		const ref<Subpass> subpass = createSubpass(subpassDescriptor);
 
 		RenderPassDescriptor renderPassDescriptor{};
 		renderPassDescriptor.attachments = {swapchainAttachment, depthStencilAttachment};
@@ -115,9 +115,7 @@ namespace ProjectA {
 
 		FramebufferDescriptor framebufferDescriptor{};
 		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = sequence<ref<ImageView>>(3);
-		framebufferDescriptor.imageViews[0] = colorImageView;
-		framebufferDescriptor.imageViews[1] = depthStencilImageView;
+		framebufferDescriptor.imageViews = {colorImageView, depthStencilImageView, nullptr};
 		framebufferDescriptor.extent = extent;
 		framebufferDescriptor.layerCount = 1;
 
@@ -854,10 +852,6 @@ namespace ProjectA {
 	void Physics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		updateCentersOfMass();
 
-		const ref<Swapchain>& swapchain = getSwapchain();
-		const float32 width = static_cast<float32>(swapchain->getExtent().width);
-		const float32 height = static_cast<float32>(swapchain->getExtent().height);
-
 		const ClearValue colorClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
 		ClearValue depthStencilClearValue{};
@@ -868,9 +862,13 @@ namespace ProjectA {
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 		beginRenderPassDescriptor.clearValues = {colorClearValue, depthStencilClearValue, colorClearValue};
 
+		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+		const float32 width = static_cast<float32>(swapchainExtent.width);
+		const float32 height = static_cast<float32>(swapchainExtent.height);
+
 		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, swapchain->getExtent());
+		commandEncoder->setScissor(0, 0, swapchainExtent);
 
 		renderGrid(commandEncoder);
 		renderScene(commandEncoder);

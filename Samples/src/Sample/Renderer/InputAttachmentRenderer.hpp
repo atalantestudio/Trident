@@ -30,11 +30,6 @@ namespace ProjectA {
 					writeInputAttachmentReference.index = 1;
 					writeInputAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
-					SubpassDescriptor writeInputSubpassDescriptor{};
-					writeInputSubpassDescriptor.colorAttachmentReferences = {writeInputAttachmentReference};
-
-					writeInputSubpass = createSubpass(writeInputSubpassDescriptor);
-
 					AttachmentReference writeSwapchainAttachmentReference{};
 					writeSwapchainAttachmentReference.index = 0;
 					writeSwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
@@ -43,11 +38,15 @@ namespace ProjectA {
 					readInputAttachmentReference.index = 1;
 					readInputAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 
+					SubpassDescriptor writeInputSubpassDescriptor{};
+					writeInputSubpassDescriptor.colorAttachmentReferences = {writeInputAttachmentReference};
+
 					SubpassDescriptor readInputSubpassDescriptor{};
 					readInputSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
 					readInputSubpassDescriptor.inputAttachmentReferences = {readInputAttachmentReference};
 
-					readInputSubpass = createSubpass(readInputSubpassDescriptor);
+					const ref<Subpass> writeInputSubpass = createSubpass(writeInputSubpassDescriptor);
+					const ref<Subpass> readInputSubpass = createSubpass(readInputSubpassDescriptor);
 
 					RenderPassDescriptor renderPassDescriptor{};
 					renderPassDescriptor.attachments = {swapchainAttachment, inputAttachment};
@@ -161,17 +160,17 @@ namespace ProjectA {
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
-				const ref<Swapchain>& swapchain = getSwapchain();
-				const float32 width = static_cast<float32>(swapchain->getExtent().width);
-				const float32 height = static_cast<float32>(swapchain->getExtent().height);
-
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
 
+				const Extent2D swapchainExtent = getSwapchain()->getExtent();
+				const float32 width = static_cast<float32>(swapchainExtent.width);
+				const float32 height = static_cast<float32>(swapchainExtent.height);
+
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchain->getExtent());
+				commandEncoder->setScissor(0, 0, swapchainExtent);
 
 				commandEncoder->bindRenderPipeline(writeInputRenderPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
@@ -294,8 +293,7 @@ namespace ProjectA {
 
 					FramebufferDescriptor framebufferDescriptor{};
 					framebufferDescriptor.renderPass = renderPass;
-					framebufferDescriptor.imageViews = sequence<ref<ImageView>>(2);
-					framebufferDescriptor.imageViews[1] = inputImageView;
+					framebufferDescriptor.imageViews = {nullptr, inputImageView};
 					framebufferDescriptor.extent = swapchainExtent;
 					framebufferDescriptor.layerCount = 1;
 
@@ -321,8 +319,6 @@ namespace ProjectA {
 
 		private:
 			ref<RenderPass> renderPass;
-			ref<Subpass> writeInputSubpass;
-			ref<Subpass> readInputSubpass;
 
 			sequence<ref<Framebuffer>> framebuffers;
 
