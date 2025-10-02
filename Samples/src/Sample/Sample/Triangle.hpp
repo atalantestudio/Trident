@@ -11,7 +11,7 @@ namespace ProjectA {
 			};
 
 		private:
-			static constexpr uint32 VERTEX_BUFFER_SIZE = 3 * sizeof(Vertex);
+			static constexpr uint32 VERTEX_COUNT = 3;
 
 		public:
 			void build() override {
@@ -113,7 +113,7 @@ namespace ProjectA {
 			}
 
 			void buildVertexBuffer() {
-				const ref<Buffer> vertexStagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE);
+				const ref<Buffer> vertexStagingBuffer = createStagingBuffer(VERTEX_COUNT * sizeof(Vertex));
 
 				Vertex* vertexStagingBufferMappedRange = vertexStagingBuffer->map<Vertex>(0, vertexStagingBuffer->size);
 				vertexStagingBufferMappedRange[0].vertex = {-0.5f, -0.5f};
