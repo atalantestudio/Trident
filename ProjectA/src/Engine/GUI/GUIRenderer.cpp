@@ -4,7 +4,8 @@
 #include "Engine/GUI/GUIRenderer.hpp"
 
 namespace ProjectA {
-	void GUIRenderer::build() {
+	// TODO
+	/* void GUIRenderer::build() {
 		const ref<Surface> surface = getSurface();
 
 		Attachment swapchainAttachment{};
@@ -225,18 +226,18 @@ namespace ProjectA {
 	void GUIRenderer::initializeRenderPipeline() {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
+		cameraDescriptorSetLayoutBinding.shaderStages = ShaderStage::VERTEX;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
 
 		DescriptorSetLayoutBinding nearestTextureArrayDescriptorSetLayoutBinding{};
 		nearestTextureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		nearestTextureArrayDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		nearestTextureArrayDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
 		nearestTextureArrayDescriptorSetLayoutBinding.imageViews = {textureArrayView};
 		nearestTextureArrayDescriptorSetLayoutBinding.samplers = {nearestSampler};
 
 		DescriptorSetLayoutBinding linearTextureArrayDescriptorSetLayoutBinding{};
 		linearTextureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		linearTextureArrayDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		linearTextureArrayDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
 		linearTextureArrayDescriptorSetLayoutBinding.imageViews = {textureArrayView};
 		linearTextureArrayDescriptorSetLayoutBinding.samplers = {linearSampler};
 
@@ -453,7 +454,11 @@ namespace ProjectA {
 
 		if (subcomponentCount > 0) {
 			commandEncoder->bindRenderPipeline(subcomponentRenderPipeline);
-			commandEncoder->bindAllDescriptorSets();
+
+			// TODO
+			BREAKPOINT();
+			// commandEncoder->bindDescriptorSets();
+
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(GUISubcomponent));
@@ -462,7 +467,11 @@ namespace ProjectA {
 
 		if (glyphSubcomponentCount > 0) {
 			commandEncoder->bindRenderPipeline(glyphSubcomponentRenderPipeline);
-			commandEncoder->bindAllDescriptorSets();
+
+			// TODO
+			BREAKPOINT();
+			// commandEncoder->bindDescriptorSets();
+
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GUIGlyphSubcomponent));
@@ -502,5 +511,5 @@ namespace ProjectA {
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 		}
-	}
+	} */
 }

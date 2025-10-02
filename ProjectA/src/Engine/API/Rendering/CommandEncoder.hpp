@@ -7,6 +7,7 @@
 #include "Engine/API/Rendering/ComputePipeline.hpp"
 #include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/CommandBufferDescriptor.hpp"
+#include "Engine/API/Rendering/DescriptorSet.hpp"
 #include "Engine/API/Rendering/Image.hpp"
 #include "Engine/API/Rendering/ImageLayout.hpp"
 #include "Engine/API/Rendering/PipelineStage.hpp"
@@ -27,10 +28,9 @@ namespace ProjectA {
 
 			virtual void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) = 0;
 
-			// Binds all descriptor sets linked to the current pipeline.
-			// TODO: Change the API to take in arbitrary descriptor sets.
-			// This would mean keeping the descriptor sets alive in the client-side renderer class.
-			virtual void bindAllDescriptorSets() = 0;
+			// Binds descriptor sets to the command buffer.
+			// The pipeline bind point is taken from the currently bound pipeline.
+			virtual void bindDescriptorSets(const ref<PipelineLayout>& pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) = 0;
 
 			// Binds the provided index buffer.
 			// The `offset` is in bytes and must be a multiple of IndexType.

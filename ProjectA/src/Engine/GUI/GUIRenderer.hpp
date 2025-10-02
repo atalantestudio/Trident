@@ -49,7 +49,7 @@ namespace ProjectA {
 		public:
 			static constexpr uint32 TEXTURE_ARRAY_MAX_WIDTH = 2048;
 			static constexpr uint32 TEXTURE_ARRAY_MAX_HEIGHT = 2048;
-			static inline const vec2<float32> TEXTURE_ARRAY_MAX_SIZE = {2048.0f, 2048.0f};
+			static inline const vec2<float32> TEXTURE_ARRAY_MAX_SIZE = {static_cast<uint32>(TEXTURE_ARRAY_MAX_WIDTH), static_cast<uint32>(TEXTURE_ARRAY_MAX_HEIGHT)};
 
 		private:
 			static constexpr uint32 TEXTURE_ARRAY_MAX_LAYER_COUNT = 8;

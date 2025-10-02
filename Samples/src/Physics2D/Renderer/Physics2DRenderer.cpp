@@ -5,7 +5,8 @@
 #include "Engine/API/Material/ColorFillStrokeMaterial.hpp"
 
 namespace ProjectA {
-	void Physics2DRenderer::build() {
+	// TODO
+	/* void Physics2DRenderer::build() {
 		ENGINE_STATIC_ASSERT(SAMPLE_COUNT > 1);
 
 		const ref<Surface> surface = getSurface();
@@ -202,7 +203,7 @@ namespace ProjectA {
 	void Physics2DRenderer::initializeGridRenderPipeline() {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		cameraDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
 
 		// TODO: The camera's projection isn't needed here, but the offset must be a multiple of the minUniformBufferAlignment physical device limit.
@@ -211,7 +212,7 @@ namespace ProjectA {
 
 		DescriptorSetLayoutBinding viewDescriptorSetLayoutBinding;
 		viewDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		viewDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		viewDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
 		viewDescriptorSetLayoutBinding.buffers = {viewUniformBuffer};
 
 		DescriptorSetLayout gridPipelineDescriptorSetLayout;
@@ -325,12 +326,12 @@ namespace ProjectA {
 	void Physics2DRenderer::initializeDistanceRenderPipeline() {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
+		cameraDescriptorSetLayoutBinding.shaderStages = ShaderStage::VERTEX;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
 
 		DescriptorSetLayoutBinding viewDescriptorSetLayoutBinding;
 		viewDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		viewDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		viewDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
 		viewDescriptorSetLayoutBinding.buffers = {viewUniformBuffer};
 
 		DescriptorSetLayout distanceDescriptorSetLayout;
@@ -404,7 +405,7 @@ namespace ProjectA {
 	void Physics2DRenderer::initializeFeaturePipelineLayout() {
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
+		cameraDescriptorSetLayoutBinding.shaderStages = ShaderStage::VERTEX;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
 
 		DescriptorSetLayout featureDescriptorSetLayout;
@@ -607,12 +608,12 @@ namespace ProjectA {
 
 		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
+		cameraDescriptorSetLayoutBinding.shaderStages = ShaderStage::VERTEX;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraUniformBuffer};
 
 		DescriptorSetLayoutBinding viewDescriptorSetLayoutBinding;
 		viewDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		viewDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+		viewDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
 		viewDescriptorSetLayoutBinding.buffers = {viewUniformBuffer};
 
 		DescriptorSetLayout descriptorSetLayout;
@@ -711,7 +712,7 @@ namespace ProjectA {
 
 		DescriptorSetLayoutBinding placeholderDescriptorSetLayoutBinding;
 		placeholderDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		placeholderDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
+		placeholderDescriptorSetLayoutBinding.shaderStages = ShaderStage::VERTEX;
 		placeholderDescriptorSetLayoutBinding.buffers = {placeholderUniformBuffer};
 
 		DescriptorSetLayout placeholderFillDescriptorSetLayout;
@@ -884,14 +885,22 @@ namespace ProjectA {
 
 	void Physics2DRenderer::renderGrid(const ref<CommandEncoder>& commandEncoder) const {
 		commandEncoder->bindRenderPipeline(gridRenderPipeline);
-		commandEncoder->bindAllDescriptorSets();
+
+		// TODO
+		BREAKPOINT();
+		// commandEncoder->bindDescriptorSets();
+
 		commandEncoder->bindVertexBuffer(0, gridVertexBuffer, 0, sizeof(svec2<float32>));
 		commandEncoder->draw(3, 1, 0, 0);
 	}
 
 	void Physics2DRenderer::renderScene(const ref<CommandEncoder>& commandEncoder) const {
 		commandEncoder->bindRenderPipeline(fillRenderPipeline);
-		commandEncoder->bindAllDescriptorSets();
+
+		// TODO
+		BREAKPOINT();
+		// commandEncoder->bindDescriptorSets();
+
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 
 		uint32 rigidBodyIndex = 0;
@@ -913,7 +922,10 @@ namespace ProjectA {
 		}
 
 		commandEncoder->bindRenderPipeline(strokeRenderPipeline);
-		commandEncoder->bindAllDescriptorSets();
+
+		// TODO
+		BREAKPOINT();
+		// commandEncoder->bindDescriptorSets();
 
 		rigidBodyIndex = 0;
 		vertexOffset = 0;
@@ -938,14 +950,22 @@ namespace ProjectA {
 		}
 
 		commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
-		commandEncoder->bindAllDescriptorSets();
+
+		// TODO
+		BREAKPOINT();
+		// commandEncoder->bindDescriptorSets();
+
 		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0, sizeof(vec3<float32>));
 		commandEncoder->draw(rigidBodyPool.componentCount, 1, 0, 0);
 	}
 
 	void Physics2DRenderer::renderDistance(const ref<CommandEncoder>& commandEncoder) const {
 		commandEncoder->bindRenderPipeline(distanceRenderPipeline);
-		commandEncoder->bindAllDescriptorSets();
+
+		// TODO
+		BREAKPOINT();
+		// commandEncoder->bindDescriptorSets();
+
 		commandEncoder->bindVertexBuffer(0, closestPointBuffer, 0, sizeof(svec2<float32>));
 		commandEncoder->draw(2, 1, 0, 0);
 	}
@@ -953,14 +973,22 @@ namespace ProjectA {
 	void Physics2DRenderer::renderFeatures(const ref<CommandEncoder>& commandEncoder) const {
 		if (vertexFeatureCount > 0) {
 			commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
-			commandEncoder->bindAllDescriptorSets();
+
+			// TODO
+			BREAKPOINT();
+			// commandEncoder->bindDescriptorSets();
+
 			commandEncoder->bindVertexBuffer(0, vertexFeatureBuffer, 0, sizeof(svec2<float32>));
 			commandEncoder->draw(vertexFeatureCount, 1, 0, 0);
 		}
 
 		if (edgeVertexFeatureCount > 0) {
 			commandEncoder->bindRenderPipeline(edgeFeatureRenderPipeline);
-			commandEncoder->bindAllDescriptorSets();
+
+			// TODO
+			BREAKPOINT();
+			// commandEncoder->bindDescriptorSets();
+
 			commandEncoder->bindVertexBuffer(0, edgeVertexFeatureBuffer, 0, sizeof(svec2<float32>));
 			commandEncoder->draw(edgeVertexFeatureCount, 1, 0, 0);
 		}
@@ -982,19 +1010,31 @@ namespace ProjectA {
 		const ref<Geometry2D>& geometry = scene->getGeometry(selectedInstanceIndex);
 
 		commandEncoder->bindRenderPipeline(placeholderCenterOfMassRenderPipeline);
-		commandEncoder->bindAllDescriptorSets();
+
+		// TODO
+		BREAKPOINT();
+		// commandEncoder->bindDescriptorSets();
+
 		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, selectedInstanceIndex * sizeof(vec3<float32>), sizeof(svec2<float32>));
 		commandEncoder->draw(1, 1, 0, 0);
 
 		commandEncoder->bindRenderPipeline(placeholderFillRenderPipeline);
-		commandEncoder->bindAllDescriptorSets();
+
+		// TODO
+		BREAKPOINT();
+		// commandEncoder->bindDescriptorSets();
+
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
 		commandEncoder->bindVertexBuffer(1, instanceBuffer, selectedInstanceIndex * sizeof(Instance), sizeof(Instance));
 		commandEncoder->drawIndexed(geometry->getIndexCount(), 1, 0, 0, 0);
 
 		commandEncoder->bindRenderPipeline(placeholderStrokeRenderPipeline);
-		commandEncoder->bindAllDescriptorSets();
+
+		// TODO
+		BREAKPOINT();
+		// commandEncoder->bindDescriptorSets();
+
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
 		commandEncoder->draw(geometry->getVertexCount() + 1, 1, 0, 0);
 	}
@@ -1048,5 +1088,5 @@ namespace ProjectA {
 		edgeVertexFeatureCount = 0;
 		closestPointMappedRange[0] = {0.0f, 0.0f};
 		closestPointMappedRange[1] = {0.0f, 0.0f};
-	}
+	} */
 }

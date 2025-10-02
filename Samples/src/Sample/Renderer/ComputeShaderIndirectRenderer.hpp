@@ -149,7 +149,7 @@ namespace ProjectA {
 				{
 					DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding;
 					imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
-					imageDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
+					imageDescriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
 					imageDescriptorSetLayoutBinding.samplers = {sampler};
 					imageDescriptorSetLayoutBinding.imageViews = {imageView};
 
@@ -187,7 +187,11 @@ namespace ProjectA {
 
 					commandEncoder->begin();
 					commandEncoder->bindComputePipeline(computePipeline);
-					commandEncoder->bindAllDescriptorSets();
+
+					// TODO
+					BREAKPOINT();
+					// commandEncoder->bindDescriptorSets();
+
 					commandEncoder->dispatchIndirect(indirectBuffer, 0);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
@@ -249,7 +253,7 @@ namespace ProjectA {
 				{
 					DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding;
 					imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-					imageDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+					imageDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
 					imageDescriptorSetLayoutBinding.samplers = {sampler};
 					imageDescriptorSetLayoutBinding.imageViews = {imageView};
 
@@ -310,7 +314,11 @@ namespace ProjectA {
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
-				commandEncoder->bindAllDescriptorSets();
+
+				// TODO
+				BREAKPOINT();
+				// commandEncoder->bindDescriptorSets();
+
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);

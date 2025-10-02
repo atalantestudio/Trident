@@ -144,7 +144,7 @@ namespace ProjectA {
 				{
 					DescriptorSetLayoutBinding textureArrayDescriptorSetLayoutBinding;
 					textureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-					textureArrayDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+					textureArrayDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
 					textureArrayDescriptorSetLayoutBinding.imageViews = {textureArrayView};
 					textureArrayDescriptorSetLayoutBinding.samplers = {sampler};
 
@@ -307,7 +307,11 @@ namespace ProjectA {
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
-				commandEncoder->bindAllDescriptorSets();
+
+				// TODO
+				BREAKPOINT();
+				// commandEncoder->bindDescriptorSets();
+
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
 				commandEncoder->bindVertexBuffer(1, instanceVertexBuffer, 0, sizeof(Instance));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);

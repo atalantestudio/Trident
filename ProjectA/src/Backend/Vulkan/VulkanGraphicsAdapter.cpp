@@ -3,6 +3,7 @@
 #include "Backend/Vulkan/VulkanBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
 #include "Backend/Vulkan/VulkanComputePipeline.hpp"
+#include "Backend/Vulkan/VulkanDescriptorSetLayout.hpp"
 #include "Backend/Vulkan/VulkanFence.hpp"
 #include "Backend/Vulkan/VulkanFramebuffer.hpp"
 #include "Backend/Vulkan/VulkanGraphicsAdapter.hpp"
@@ -49,6 +50,10 @@ namespace ProjectA {
 
 	ref<ComputePipeline> VulkanGraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
 		return createRef<VulkanComputePipeline>(device->object, descriptor);
+	}
+
+	ref<DescriptorSetLayout> VulkanGraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
+		return createRef<VulkanDescriptorSetLayout>(device->object, bindings);
 	}
 
 	ref<Fence> VulkanGraphicsAdapter::createFence() const {

@@ -25,6 +25,8 @@ namespace ProjectA {
 
 			virtual ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const = 0;
 
+			virtual ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const = 0;
+
 			virtual ref<Fence> createFence() const = 0;
 
 			virtual ref<Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor) const = 0;

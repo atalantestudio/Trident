@@ -40,6 +40,19 @@ namespace ProjectA {
 				updateDepthStencilImageView();
 				updateFramebuffers();
 
+				createCameraDescriptorSetLayout();
+				createClusterDescriptorSetLayout();
+				createInstanceDescriptorSetLayout();
+				createVisibilityDescriptorSetLayout();
+
+				allocateDescriptorSets();
+
+				createVisibilityPipelineLayout();
+				createPresentPipelineLayout();
+
+				createVisibilityRenderPipeline();
+				createPresentRenderPipeline();
+
 				createIndirectBuffer();
 				createCameraBuffer();
 			}
@@ -52,12 +65,10 @@ namespace ProjectA {
 				createClusterBuffer();
 				createInstanceBuffer();
 				createGeometryBuffer();
-				createVisibilityPipelineLayout();
-				createVisibilityRenderPipeline();
-				createPresentPipelineLayout();
-				createPresentRenderPipeline();
 
 				updateSceneBuffers();
+
+				updateAllDescriptorSets();
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override;
@@ -65,10 +76,15 @@ namespace ProjectA {
 			void resize(WindowResizeEvent& event) override {
 				updateVisibilityImage();
 				updateVisibilityImageView();
+
 				updateDepthStencilImage();
 				updateDepthStencilImageView();
+
 				updateFramebuffers();
+
 				updateCamera();
+
+				updateVisibilityDescriptorSet();
 			}
 
 			void updateCamera();
@@ -83,7 +99,19 @@ namespace ProjectA {
 			void updateDepthStencilImageView();
 			void updateSceneBuffers();
 			void updateFramebuffers();
+			void updateAllDescriptorSets();
+			void updateVisibilityDescriptorSet();
 
+			void allocateDescriptorSets();
+
+			void createCameraDescriptorSetLayout();
+			void createClusterDescriptorSetLayout();
+			void createInstanceDescriptorSetLayout();
+			void createVisibilityDescriptorSetLayout();
+			void createVisibilityPipelineLayout();
+			void createPresentPipelineLayout();
+			void createVisibilityRenderPipeline();
+			void createPresentRenderPipeline();
 			void createIndirectBuffer();
 			void createCameraBuffer();
 			void createVertexPositionComponentBuffer();
@@ -91,10 +119,6 @@ namespace ProjectA {
 			void createClusterBuffer();
 			void createInstanceBuffer();
 			void createGeometryBuffer();
-			void createVisibilityPipelineLayout();
-			void createVisibilityRenderPipeline();
-			void createPresentPipelineLayout();
-			void createPresentRenderPipeline();
 
 		private:
 			ref<RenderPass> renderPass;
@@ -107,6 +131,22 @@ namespace ProjectA {
 
 			sequence<ref<Framebuffer>> framebuffers;
 
+			ref<DescriptorSetLayout> cameraDescriptorSetLayout;
+			ref<DescriptorSetLayout> clusterDescriptorSetLayout;
+			ref<DescriptorSetLayout> instanceDescriptorSetLayout;
+			ref<DescriptorSetLayout> visibilityDescriptorSetLayout;
+
+			ref<DescriptorSet> cameraDescriptorSet;
+			ref<DescriptorSet> clusterDescriptorSet;
+			ref<DescriptorSet> instanceDescriptorSet;
+			ref<DescriptorSet> visibilityDescriptorSet;
+
+			ref<PipelineLayout> visibilityPipelineLayout;
+			ref<PipelineLayout> presentPipelineLayout;
+
+			ref<RenderPipeline> visibilityRenderPipeline;
+			ref<RenderPipeline> presentRenderPipeline;
+
 			ref<Buffer> indirectBuffer;
 			ref<Buffer> cameraBuffer;
 			ref<Buffer> vertexPositionComponentBuffer;
@@ -118,11 +158,5 @@ namespace ProjectA {
 			uint32* indirectBufferMappedRange = nullptr;
 			Camera* cameraBufferMappedRange = nullptr;
 			Instance* instanceBufferMappedRange = nullptr;
-
-			ref<PipelineLayout> visibilityPipelineLayout;
-			ref<RenderPipeline> visibilityRenderPipeline;
-
-			ref<PipelineLayout> presentPipelineLayout;
-			ref<RenderPipeline> presentRenderPipeline;
 	};
 }

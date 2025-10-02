@@ -235,6 +235,183 @@ namespace ProjectA {
 		}
 	}
 
+	void VisibilityRenderer::updateAllDescriptorSets() {
+		DescriptorBuffer cameraDescriptorBuffer{};
+		cameraDescriptorBuffer.buffer = cameraBuffer;
+		cameraDescriptorBuffer.offset = 0;
+		cameraDescriptorBuffer.size = cameraBuffer->size;
+
+		DescriptorBuffer vertexPositionComponentDescriptorBuffer{};
+		vertexPositionComponentDescriptorBuffer.buffer = vertexPositionComponentBuffer;
+		vertexPositionComponentDescriptorBuffer.offset = 0;
+		vertexPositionComponentDescriptorBuffer.size = vertexPositionComponentBuffer->size;
+
+		DescriptorBuffer vertexDescriptorBuffer{};
+		vertexDescriptorBuffer.buffer = vertexBuffer;
+		vertexDescriptorBuffer.offset = 0;
+		vertexDescriptorBuffer.size = vertexBuffer->size;
+
+		DescriptorBuffer clusterDescriptorBuffer{};
+		clusterDescriptorBuffer.buffer = clusterBuffer;
+		clusterDescriptorBuffer.offset = 0;
+		clusterDescriptorBuffer.size = clusterBuffer->size;
+
+		DescriptorBuffer instanceDescriptorBuffer{};
+		instanceDescriptorBuffer.buffer = instanceBuffer;
+		instanceDescriptorBuffer.offset = 0;
+		instanceDescriptorBuffer.size = instanceBuffer->size;
+
+		DescriptorBuffer geometryDescriptorBuffer{};
+		geometryDescriptorBuffer.buffer = geometryBuffer;
+		geometryDescriptorBuffer.offset = 0;
+		geometryDescriptorBuffer.size = geometryBuffer->size;
+
+		DescriptorImage visibilityDescriptorImage{};
+		visibilityDescriptorImage.imageView = visibilityImageView;
+		visibilityDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+		visibilityDescriptorImage.sampler = nullptr;
+
+		WriteDescriptorSet cameraWriteDescriptorSet{};
+		cameraWriteDescriptorSet.descriptorSet = cameraDescriptorSet;
+		cameraWriteDescriptorSet.bindingIndex = 0;
+		cameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
+
+		WriteDescriptorSet vertexPositionComponentWriteDescriptorSet{};
+		vertexPositionComponentWriteDescriptorSet.descriptorSet = clusterDescriptorSet;
+		vertexPositionComponentWriteDescriptorSet.bindingIndex = 0;
+		vertexPositionComponentWriteDescriptorSet.descriptorBuffers = {vertexPositionComponentDescriptorBuffer};
+
+		WriteDescriptorSet vertexWriteDescriptorSet{};
+		vertexWriteDescriptorSet.descriptorSet = clusterDescriptorSet;
+		vertexWriteDescriptorSet.bindingIndex = 1;
+		vertexWriteDescriptorSet.descriptorBuffers = {vertexDescriptorBuffer};
+
+		WriteDescriptorSet clusterWriteDescriptorSet{};
+		clusterWriteDescriptorSet.descriptorSet = clusterDescriptorSet;
+		clusterWriteDescriptorSet.bindingIndex = 2;
+		clusterWriteDescriptorSet.descriptorBuffers = {clusterDescriptorBuffer};
+
+		WriteDescriptorSet instanceWriteDescriptorSet{};
+		instanceWriteDescriptorSet.descriptorSet = instanceDescriptorSet;
+		instanceWriteDescriptorSet.bindingIndex = 0;
+		instanceWriteDescriptorSet.descriptorBuffers = {instanceDescriptorBuffer};
+
+		WriteDescriptorSet geometryWriteDescriptorSet{};
+		geometryWriteDescriptorSet.descriptorSet = instanceDescriptorSet;
+		geometryWriteDescriptorSet.bindingIndex = 1;
+		geometryWriteDescriptorSet.descriptorBuffers = {geometryDescriptorBuffer};
+
+		WriteDescriptorSet visibilityWriteDescriptorSet{};
+		visibilityWriteDescriptorSet.descriptorSet = visibilityDescriptorSet;
+		visibilityWriteDescriptorSet.bindingIndex = 0;
+		visibilityWriteDescriptorSet.descriptorImages = {visibilityDescriptorImage};
+
+		getDevice()->updateDescriptorSets({
+			cameraWriteDescriptorSet,
+			vertexPositionComponentWriteDescriptorSet,
+			vertexWriteDescriptorSet,
+			clusterWriteDescriptorSet,
+			instanceWriteDescriptorSet,
+			geometryWriteDescriptorSet,
+			visibilityWriteDescriptorSet,
+		});
+	}
+
+	void VisibilityRenderer::updateVisibilityDescriptorSet() {
+		DescriptorImage visibilityDescriptorImage{};
+		visibilityDescriptorImage.imageView = visibilityImageView;
+		visibilityDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+		visibilityDescriptorImage.sampler = nullptr;
+
+		WriteDescriptorSet visibilityWriteDescriptorSet{};
+		visibilityWriteDescriptorSet.descriptorSet = visibilityDescriptorSet;
+		visibilityWriteDescriptorSet.bindingIndex = 0;
+		visibilityWriteDescriptorSet.descriptorImages = {visibilityDescriptorImage};
+
+		getDevice()->updateDescriptorSets({
+			visibilityWriteDescriptorSet,
+		});
+	}
+
+	void VisibilityRenderer::allocateDescriptorSets() {
+		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({
+			cameraDescriptorSetLayout,
+			clusterDescriptorSetLayout,
+			instanceDescriptorSetLayout,
+			visibilityDescriptorSetLayout,
+		});
+
+		cameraDescriptorSet = descriptorSets[0];
+		clusterDescriptorSet = descriptorSets[1];
+		instanceDescriptorSet = descriptorSets[2];
+		visibilityDescriptorSet = descriptorSets[3];
+	}
+
+	void VisibilityRenderer::createCameraDescriptorSetLayout() {
+		DescriptorSetLayoutBinding cameraBufferBinding{};
+		cameraBufferBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		cameraBufferBinding.descriptorCount = 1;
+		cameraBufferBinding.shaderStages = ShaderStage::VERTEX;
+
+		cameraDescriptorSetLayout = createDescriptorSetLayout({cameraBufferBinding});
+	}
+
+	void VisibilityRenderer::createClusterDescriptorSetLayout() {
+		DescriptorSetLayoutBinding vertexPositionComponentBufferBinding{};
+		vertexPositionComponentBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexPositionComponentBufferBinding.descriptorCount = 1;
+		vertexPositionComponentBufferBinding.shaderStages = ShaderStage::VERTEX;
+
+		DescriptorSetLayoutBinding vertexBufferBinding{};
+		vertexBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexBufferBinding.descriptorCount = 1;
+		vertexBufferBinding.shaderStages = ShaderStage::VERTEX;
+
+		DescriptorSetLayoutBinding clusterBufferBinding{};
+		clusterBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		clusterBufferBinding.descriptorCount = 1;
+		clusterBufferBinding.shaderStages = ShaderStage::VERTEX;
+
+		clusterDescriptorSetLayout = createDescriptorSetLayout({vertexPositionComponentBufferBinding, vertexBufferBinding, clusterBufferBinding});
+	}
+
+	void VisibilityRenderer::createInstanceDescriptorSetLayout() {
+		DescriptorSetLayoutBinding instanceBufferBinding{};
+		instanceBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		instanceBufferBinding.descriptorCount = 1;
+		instanceBufferBinding.shaderStages = ShaderStage::VERTEX;
+
+		DescriptorSetLayoutBinding geometryBufferBinding{};
+		geometryBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		geometryBufferBinding.descriptorCount = 1;
+		geometryBufferBinding.shaderStages = ShaderStage::VERTEX;
+
+		instanceDescriptorSetLayout = createDescriptorSetLayout({instanceBufferBinding, geometryBufferBinding});
+	}
+
+	void VisibilityRenderer::createVisibilityDescriptorSetLayout() {
+		DescriptorSetLayoutBinding visibilityImageBinding{};
+		visibilityImageBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
+		visibilityImageBinding.descriptorCount = 1;
+		visibilityImageBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		visibilityDescriptorSetLayout = createDescriptorSetLayout({visibilityImageBinding});
+	}
+
+	void VisibilityRenderer::createVisibilityPipelineLayout() {
+		PipelineLayoutDescriptor visibilityPipelineLayoutDescriptor{};
+		visibilityPipelineLayoutDescriptor.descriptorSetLayouts = {cameraDescriptorSetLayout, clusterDescriptorSetLayout, instanceDescriptorSetLayout};
+
+		visibilityPipelineLayout = createPipelineLayout(visibilityPipelineLayoutDescriptor);
+	}
+
+	void VisibilityRenderer::createPresentPipelineLayout() {
+		PipelineLayoutDescriptor presentPipelineLayoutDescriptor{};
+		presentPipelineLayoutDescriptor.descriptorSetLayouts = {visibilityDescriptorSetLayout};
+
+		presentPipelineLayout = createPipelineLayout(presentPipelineLayoutDescriptor);
+	}
+
 	void VisibilityRenderer::createIndirectBuffer() {
 		BufferDescriptor indirectBufferDescriptor{};
 		indirectBufferDescriptor.size = 4 * sizeof(uint32);
@@ -317,52 +494,6 @@ namespace ProjectA {
 		geometryBuffer = createBuffer(geometryBufferDescriptor);
 	}
 
-	void VisibilityRenderer::createVisibilityPipelineLayout() {
-		DescriptorSetLayoutBinding cameraBufferBinding{};
-		cameraBufferBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraBufferBinding.stageFlags = ShaderStage::VERTEX;
-		cameraBufferBinding.buffers = {cameraBuffer};
-
-		DescriptorSetLayoutBinding vertexPositionComponentBufferBinding{};
-		vertexPositionComponentBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		vertexPositionComponentBufferBinding.stageFlags = ShaderStage::VERTEX;
-		vertexPositionComponentBufferBinding.buffers = {vertexPositionComponentBuffer};
-
-		DescriptorSetLayoutBinding vertexBufferBinding{};
-		vertexBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		vertexBufferBinding.stageFlags = ShaderStage::VERTEX;
-		vertexBufferBinding.buffers = {vertexBuffer};
-
-		DescriptorSetLayoutBinding clusterBufferBinding{};
-		clusterBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		clusterBufferBinding.stageFlags = ShaderStage::VERTEX;
-		clusterBufferBinding.buffers = {clusterBuffer};
-
-		DescriptorSetLayoutBinding instanceBufferBinding{};
-		instanceBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		instanceBufferBinding.stageFlags = ShaderStage::VERTEX;
-		instanceBufferBinding.buffers = {instanceBuffer};
-
-		DescriptorSetLayoutBinding geometryBufferBinding{};
-		geometryBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		geometryBufferBinding.stageFlags = ShaderStage::VERTEX;
-		geometryBufferBinding.buffers = {geometryBuffer};
-
-		DescriptorSetLayout cameraDescriptorSetLayout{};
-		cameraDescriptorSetLayout.bindings = {cameraBufferBinding};
-
-		DescriptorSetLayout clusterDescriptorSetLayout{};
-		clusterDescriptorSetLayout.bindings = {vertexPositionComponentBufferBinding, vertexBufferBinding, clusterBufferBinding};
-
-		DescriptorSetLayout instanceDescriptorSetLayout{};
-		instanceDescriptorSetLayout.bindings = {instanceBufferBinding, geometryBufferBinding};
-
-		PipelineLayoutDescriptor visibilityPipelineLayoutDescriptor{};
-		visibilityPipelineLayoutDescriptor.layouts = {cameraDescriptorSetLayout, clusterDescriptorSetLayout, instanceDescriptorSetLayout};
-
-		visibilityPipelineLayout = createPipelineLayout(visibilityPipelineLayoutDescriptor);
-	}
-
 	void VisibilityRenderer::createVisibilityRenderPipeline() {
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -413,21 +544,6 @@ namespace ProjectA {
 		visibilityRenderPipelineDescriptor.subpassIndex = VISIBILITY_SUBPASS_INDEX;
 
 		visibilityRenderPipeline = createRenderPipeline(visibilityRenderPipelineDescriptor);
-	}
-
-	void VisibilityRenderer::createPresentPipelineLayout() {
-		DescriptorSetLayoutBinding visibilityImageViewBinding{};
-		visibilityImageViewBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
-		visibilityImageViewBinding.stageFlags = ShaderStage::FRAGMENT;
-		visibilityImageViewBinding.imageViews = {visibilityImageView};
-
-		DescriptorSetLayout visibilityDescriptorSetLayout{};
-		visibilityDescriptorSetLayout.bindings = {visibilityImageViewBinding};
-
-		PipelineLayoutDescriptor presentPipelineLayoutDescriptor{};
-		presentPipelineLayoutDescriptor.layouts = {visibilityDescriptorSetLayout};
-
-		presentPipelineLayout = createPipelineLayout(presentPipelineLayoutDescriptor);
 	}
 
 	void VisibilityRenderer::createPresentRenderPipeline() {
@@ -494,8 +610,8 @@ namespace ProjectA {
 		const ClearValue visibilityClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
 		ClearValue depthStencilClearValue{};
-		// depthStencilClearValue.depth = 1.0f;
-		// depthStencilClearValue.stencil = 0;
+		depthStencilClearValue.depth = 1.0f;
+		depthStencilClearValue.stencil = 0;
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor{};
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
@@ -512,7 +628,7 @@ namespace ProjectA {
 		// Visibility subpass
 		{
 			commandEncoder->bindRenderPipeline(visibilityRenderPipeline);
-			commandEncoder->bindAllDescriptorSets();
+			commandEncoder->bindDescriptorSets(visibilityPipelineLayout, {cameraDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
 			commandEncoder->drawIndirect(indirectBuffer, 0, 1, 0);
 		}
 
@@ -521,7 +637,7 @@ namespace ProjectA {
 		// Present subpass
 		{
 			commandEncoder->bindRenderPipeline(presentRenderPipeline);
-			commandEncoder->bindAllDescriptorSets();
+			commandEncoder->bindDescriptorSets(presentPipelineLayout, {visibilityDescriptorSet});
 			commandEncoder->draw(3, 1, 0, 0);
 		}
 

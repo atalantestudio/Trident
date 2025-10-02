@@ -1,8 +1,8 @@
 #include "pch.hpp"
 
 #include "Backend/OpenGL/Command/OpenGLBeginRenderPassCommand.hpp"
-#include "Backend/OpenGL/Command/OpenGLBindAllDescriptorSetsCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindComputePipelineCommand.hpp"
+#include "Backend/OpenGL/Command/OpenGLBindDescriptorSetsCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindIndexBufferCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindRenderPipelineCommand.hpp"
 #include "Backend/OpenGL/Command/OpenGLBindVertexBufferCommand.hpp"
@@ -58,19 +58,8 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLBindRenderPipelineCommand>(this->renderPipeline));
 	}
 
-	void OpenGLCommandEncoder::bindAllDescriptorSets() {
-		DEBUG_ASSERT(computePipeline != nullptr || renderPipeline != nullptr);
-
-		const std::vector<DescriptorSetLayout>* descriptorSetLayouts;
-
-		if (computePipeline != nullptr) {
-			descriptorSetLayouts = &computePipeline->layout.descriptorSetLayouts;
-		}
-		else {
-			descriptorSetLayouts = &renderPipeline->layout.descriptorSetLayouts;
-		}
-
-		commandBuffer.emplace_back(createRef<OpenGLBindAllDescriptorSetsCommand>(*descriptorSetLayouts, computePipeline != nullptr));
+	void OpenGLCommandEncoder::bindDescriptorSets(const ref<PipelineLayout>& pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) {
+		commandBuffer.emplace_back(createRef<OpenGLBindDescriptorSetsCommand>(descriptorSets));
 	}
 
 	void OpenGLCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {

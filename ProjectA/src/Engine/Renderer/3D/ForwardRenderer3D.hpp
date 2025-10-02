@@ -57,7 +57,7 @@ namespace ProjectA {
 
 				DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
 				cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-				cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
+				cameraDescriptorSetLayoutBinding.shaderStages = ShaderStage::VERTEX;
 				cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
 
 				// 3. Create pipeline layout.
@@ -227,7 +227,11 @@ namespace ProjectA {
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
-				commandEncoder->bindAllDescriptorSets();
+
+				// TODO
+				BREAKPOINT();
+				// commandEncoder->bindDescriptorSets();
+
 				commandEncoder->bindVertexBuffer(0, transformBuffer, 0, sizeof(mat4x4<float32>));
 				commandEncoder->bindVertexBuffer(1, vertexPositionBuffer, 0, 3 * sizeof(float32));
 				commandEncoder->bindIndexBuffer<uint32>(vertexPositionIndexBuffer, 0);

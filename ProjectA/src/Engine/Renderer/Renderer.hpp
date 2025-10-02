@@ -36,6 +36,8 @@ namespace ProjectA {
 
 			static ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor);
 
+			static ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings);
+
 			static ref<Fence> createFence();
 
 			static ref<Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor);

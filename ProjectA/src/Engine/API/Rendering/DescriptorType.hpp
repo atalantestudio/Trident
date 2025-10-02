@@ -14,4 +14,36 @@ namespace ProjectA {
 
 		__MAX_ENUM,
 	};
+
+	static bool isBufferDescriptorType(DescriptorType descriptorType) {
+		switch (descriptorType) {
+			case DescriptorType::COMBINED_IMAGE_SAMPLER:
+			case DescriptorType::STORAGE_IMAGE:
+			case DescriptorType::INPUT_ATTACHMENT:
+				return false;
+			case DescriptorType::UNIFORM_BUFFER:
+			case DescriptorType::STORAGE_BUFFER:
+				return true;
+			default:
+				DEBUG_ASSERT(false);
+
+				return false;
+		}
+	}
+
+	static bool isImageDescriptorType(DescriptorType descriptorType) {
+		switch (descriptorType) {
+			case DescriptorType::COMBINED_IMAGE_SAMPLER:
+			case DescriptorType::STORAGE_IMAGE:
+			case DescriptorType::INPUT_ATTACHMENT:
+				return true;
+			case DescriptorType::UNIFORM_BUFFER:
+			case DescriptorType::STORAGE_BUFFER:
+				return false;
+			default:
+				DEBUG_ASSERT(false);
+
+				return false;
+		}
+	}
 }

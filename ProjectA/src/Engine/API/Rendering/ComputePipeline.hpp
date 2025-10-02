@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Engine/API/Rendering/Pipeline.hpp"
 #include "Engine/API/Rendering/Descriptor/ComputePipelineDescriptor.hpp"
 #include "Engine/Validation/Descriptor.hpp"
 
 namespace ProjectA {
-	class ComputePipeline : public Pipeline {
+	class ComputePipeline {
 		public:
 			virtual ~ComputePipeline() = default;
 

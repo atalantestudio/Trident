@@ -22,7 +22,7 @@ namespace ProjectA {
 
 			void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) final override;
 
-			void bindAllDescriptorSets() final override;
+			void bindDescriptorSets(const ref<PipelineLayout>& pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) final override;
 
 			void bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) final override;
 

@@ -1,12 +1,13 @@
 #include "pch.hpp"
 
 #include "Backend/Vulkan/VulkanComputePipeline.hpp"
+#include "Backend/Vulkan/VulkanPipelineLayout.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 
 namespace ProjectA {
-	VulkanComputePipeline::VulkanComputePipeline(VkDevice device, const ComputePipelineDescriptor& descriptor) :
+	VulkanComputePipeline::VulkanComputePipeline(const VkDevice device, const ComputePipelineDescriptor& descriptor) :
+		VulkanPipeline(VK_PIPELINE_BIND_POINT_COMPUTE),
 		ComputePipeline(descriptor),
-		VulkanPipeline(VK_PIPELINE_BIND_POINT_COMPUTE, std::static_pointer_cast<VulkanPipelineLayout>(descriptor.pipelineLayout).get()),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -16,7 +17,7 @@ namespace ProjectA {
 		computePipelineCreateInfo.pNext = nullptr;
 		computePipelineCreateInfo.flags = 0;
 		computePipelineCreateInfo.stage = std::static_pointer_cast<VulkanShaderModule>(descriptor.computeShaderModule)->object;
-		computePipelineCreateInfo.layout = layout->object;
+		computePipelineCreateInfo.layout = std::static_pointer_cast<VulkanPipelineLayout>(descriptor.pipelineLayout)->object;
 		computePipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		computePipelineCreateInfo.basePipelineIndex = 0;
 

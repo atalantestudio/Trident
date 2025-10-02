@@ -12,7 +12,8 @@ namespace ProjectA {
 	static constexpr uint32 SPREAD_FACTOR = 0;
 
 	GenerateSDFGlyphMapProcess::GenerateSDFGlyphMapProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& output) {
-		ENGINE_ASSERT(file.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
+		// TODO
+		/* ENGINE_ASSERT(file.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
 		output.extent = GLYPH_MAP_IMAGE_EXTENT;
 		output.glyphs = sequence<Glyph>(file.glyphs.count);
@@ -98,17 +99,17 @@ namespace ProjectA {
 
 		DescriptorSetLayoutBinding fontBufferDescriptorSetLayoutBinding;
 		fontBufferDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		fontBufferDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
+		fontBufferDescriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
 		fontBufferDescriptorSetLayoutBinding.buffers = {fontStorageBuffer};
 
 		DescriptorSetLayoutBinding glyphBufferDescriptorSetLayoutBinding;
 		glyphBufferDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		glyphBufferDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
+		glyphBufferDescriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
 		glyphBufferDescriptorSetLayoutBinding.buffers = {glyphBuffer};
 
 		DescriptorSetLayoutBinding glyphImageDescriptorSetLayoutBinding;
 		glyphImageDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
-		glyphImageDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
+		glyphImageDescriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
 		glyphImageDescriptorSetLayoutBinding.imageViews = {glyphImageView};
 
 		DescriptorSetLayout glyphImageDescriptorSetLayout;
@@ -158,12 +159,12 @@ namespace ProjectA {
 
 		DescriptorSetLayoutBinding glyphMapSdfImageDescriptorSetLayoutBinding;
 		glyphMapSdfImageDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
-		glyphMapSdfImageDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
+		glyphMapSdfImageDescriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
 		glyphMapSdfImageDescriptorSetLayoutBinding.imageViews = {glyphMapSdfImageView};
 
 		DescriptorSetLayoutBinding glyphIndexDescriptorSetLayoutBinding;
 		glyphIndexDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		glyphIndexDescriptorSetLayoutBinding.stageFlags = ShaderStage::COMPUTE;
+		glyphIndexDescriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
 		glyphIndexDescriptorSetLayoutBinding.buffers = {glyphOffsetBuffer};
 
 		DescriptorSetLayout glyphSdfDescriptorSetLayout;
@@ -289,13 +290,19 @@ namespace ProjectA {
 			commandEncoder->reset();
 			commandEncoder->begin();
 			commandEncoder->bindComputePipeline(glyphImagePipeline);
-			commandEncoder->bindAllDescriptorSets();
+
+			// TODO
+			BREAKPOINT();
+			// commandEncoder->bindDescriptorSets();
 
 			// TODO: Dispatch less groups depending on the size of the glyph area.
 			commandEncoder->dispatch(128, 128, 1);
 
 			commandEncoder->bindComputePipeline(glyphSdfPipeline);
-			commandEncoder->bindAllDescriptorSets();
+
+			// TODO
+			BREAKPOINT();
+			// commandEncoder->bindDescriptorSets();
 
 			// TODO: Support custom glyph sub-image dimension (multiply down). See GlyphDistanceField.comp.
 			commandEncoder->dispatch(8, 8, 1);
@@ -347,7 +354,7 @@ namespace ProjectA {
 
 		std::copy(glyphMapStagingBufferMappedRange, glyphMapStagingBufferMappedRange + glyphMapStagingBuffer->size, &output.data[0]);
 
-		glyphMapStagingBuffer->unmap();
+		glyphMapStagingBuffer->unmap(); */
 	}
 
 	uint64 GenerateSDFGlyphMapProcess::computeMaxGlyphByteSize(const sequence<TrueTypeFont::Glyph>& glyphs) {

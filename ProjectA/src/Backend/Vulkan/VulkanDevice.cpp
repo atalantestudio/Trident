@@ -1,11 +1,17 @@
 #include "pch.hpp"
 
+#include "Backend/Vulkan/VulkanBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
+#include "Backend/Vulkan/VulkanDescriptorSet.hpp"
+#include "Backend/Vulkan/VulkanDescriptorSetLayout.hpp"
 #include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanFence.hpp"
 #include "Backend/Vulkan/VulkanSemaphore.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 #include "Backend/Vulkan/VulkanSwapchain.hpp"
+
+#include "Backend/Vulkan/DescriptorType.hpp"
+#include "Backend/Vulkan/ImageLayout.hpp"
 
 namespace ProjectA {
 	// TODO: Client-side extension request.
@@ -75,6 +81,10 @@ namespace ProjectA {
 			queue.~shared_ptr();
 		}
 
+		for (const VkDescriptorPool descriptorPool : descriptorPools) {
+			vkDestroyDescriptorPool(object, descriptorPool, nullptr);
+		}
+
 		vkDestroyDevice(object, nullptr);
 	}
 
@@ -84,32 +94,6 @@ namespace ProjectA {
 
 	ref<Queue> VulkanDevice::getQueue(QueueFamilyCapability queueFamilyCapability) const {
 		return queues[static_cast<uint32>(queueFamilyCapability)];
-	}
-
-	void VulkanDevice::waitForFence(const ref<Fence>& fence) const {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		const VkResult result = vkWaitForFences(
-			object,
-			1,
-			&std::static_pointer_cast<VulkanFence>(fence)->object,
-			VK_TRUE,
-			max<uint64>()
-		);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to wait for Vulkan fence ([]).", string_VkResult(result));
-	}
-
-	void VulkanDevice::resetFence(const ref<Fence>& fence) const {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
-		const VkResult result = vkResetFences(
-			object,
-			1,
-			&std::static_pointer_cast<VulkanFence>(fence)->object
-		);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan fence ([]).", string_VkResult(result));
 	}
 
 	AcquireNextImageStatus VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
@@ -124,21 +108,230 @@ namespace ProjectA {
 			&imageIndex
 		);
 
-		if (result == VK_SUCCESS) {
-			return AcquireNextImageStatus::SUCCESS;
+		switch (result) {
+			case VK_SUCCESS:
+				return AcquireNextImageStatus::SUCCESS;
+			case VK_SUBOPTIMAL_KHR:
+				return AcquireNextImageStatus::SUBOPTIMAL;
+			case VK_ERROR_OUT_OF_DATE_KHR:
+				return AcquireNextImageStatus::ERROR_OUT_OF_DATE;
+			default:
+				ENGINE_ASSERT(false, "Unhandled status.");
+
+				return AcquireNextImageStatus::ERROR_UNHANDLED;
+		}
+	}
+
+	sequence<ref<DescriptorSet>> VulkanDevice::allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) {
+		VkResult result;
+
+		const uint32 descriptorSetCount = static_cast<uint32>(descriptorSetLayouts.count);
+
+		sequence<VkDescriptorSetLayout> vkDescriptorSetLayouts(descriptorSetCount);
+		sequence<uint32> descriptorCountPerType(static_cast<uint32>(DescriptorType::__MAX_ENUM));
+
+		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptorSetLayouts.count; descriptorSetLayoutIndex += 1) {
+			const ref<DescriptorSetLayout>& descriptorSetLayout = descriptorSetLayouts[descriptorSetLayoutIndex];
+
+			for (const DescriptorSetLayoutBinding descriptorSetLayoutBinding : descriptorSetLayout->bindings) {
+				descriptorCountPerType[static_cast<uint32>(descriptorSetLayoutBinding.descriptorType)] += descriptorSetLayoutBinding.descriptorCount;
+			}
+
+			vkDescriptorSetLayouts[descriptorSetLayoutIndex] = std::static_pointer_cast<VulkanDescriptorSetLayout>(descriptorSetLayout)->object;
 		}
 
-		if (result == VK_SUBOPTIMAL_KHR) {
-			return AcquireNextImageStatus::SUBOPTIMAL;
+		uint32 descriptorPoolSizeCount = 0;
+
+		for (const uint32 descriptorCount : descriptorCountPerType) {
+			if (descriptorCount > 0) {
+				descriptorPoolSizeCount += 1;
+			}
 		}
 
-		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-			return AcquireNextImageStatus::ERROR_OUT_OF_DATE;
+		sequence<VkDescriptorPoolSize> vkDescriptorPoolSizes(descriptorPoolSizeCount);
+
+		for (uint32 descriptorPoolSizeIndex = 0, descriptorType = 0; descriptorType < descriptorCountPerType.count; descriptorType += 1) {
+			if (descriptorCountPerType[descriptorType] == 0) {
+				continue;
+			}
+
+			VkDescriptorPoolSize& vkDescriptorPoolSize = vkDescriptorPoolSizes[descriptorPoolSizeIndex];
+			vkDescriptorPoolSize.type = static_cast<VkDescriptorType>(descriptorType);
+			vkDescriptorPoolSize.descriptorCount = descriptorCountPerType[descriptorType];
+
+			descriptorPoolSizeIndex += 1;
 		}
 
-		DEBUG_ASSERT(false);
+		VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
+		descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		descriptorPoolCreateInfo.pNext = nullptr;
+		descriptorPoolCreateInfo.flags = 0;
+		descriptorPoolCreateInfo.maxSets = descriptorSetCount;
+		descriptorPoolCreateInfo.poolSizeCount = descriptorPoolSizeCount;
+		descriptorPoolCreateInfo.pPoolSizes = vkDescriptorPoolSizes;
 
-		return AcquireNextImageStatus::ERROR_UNHANDLED;
+		VkDescriptorPool descriptorPool;
+
+		result = vkCreateDescriptorPool(object, &descriptorPoolCreateInfo, nullptr, &descriptorPool);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan descriptor pool ([]).", string_VkResult(result));
+
+		descriptorPools.emplace_back(descriptorPool);
+
+		VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
+		descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		descriptorSetAllocateInfo.pNext = nullptr;
+		descriptorSetAllocateInfo.descriptorPool = descriptorPool;
+		descriptorSetAllocateInfo.descriptorSetCount = descriptorSetCount;
+		descriptorSetAllocateInfo.pSetLayouts = vkDescriptorSetLayouts;
+
+		sequence<VkDescriptorSet> vkDescriptorSets(descriptorSetCount);
+
+		result = vkAllocateDescriptorSets(object, &descriptorSetAllocateInfo, vkDescriptorSets);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan descriptor sets ([]).", string_VkResult(result));
+
+		sequence<ref<DescriptorSet>> descriptorSets(descriptorSetLayouts.count);
+
+		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count; descriptorSetIndex += 1) {
+			const ref<DescriptorSetLayout>& descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
+
+			ref<VulkanDescriptorSet> descriptorSet = createRef<VulkanDescriptorSet>(vkDescriptorSets[descriptorSetIndex]);
+			descriptorSet->bindings = sequence<VulkanDescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count);
+
+			for (uint32 descriptorSetBindingIndex = 0; descriptorSetBindingIndex < descriptorSet->bindings.count; descriptorSetBindingIndex += 1) {
+				const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout->bindings[descriptorSetBindingIndex];
+
+				VulkanDescriptorSet::DescriptorSetBinding& vkDescriptorSetBinding = descriptorSet->bindings[descriptorSetBindingIndex];
+				vkDescriptorSetBinding.descriptorType = descriptorSetLayoutBinding.descriptorType;
+			}
+
+			descriptorSets[descriptorSetIndex] = descriptorSet;
+		}
+
+		return descriptorSets;
+	}
+
+	void VulkanDevice::resetFence(const ref<Fence>& fence) const {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VkResult result = vkResetFences(
+			object,
+			1,
+			&std::static_pointer_cast<VulkanFence>(fence)->object
+		);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan fence ([]).", string_VkResult(result));
+	}
+
+	void VulkanDevice::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
+		uint64 descriptorBufferInfoCount = 0;
+		uint64 descriptorImageInfoCount = 0;
+
+		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
+			const ref<VulkanDescriptorSet>& descriptorSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet);
+			const VulkanDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
+
+			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
+				descriptorBufferInfoCount += writeDescriptorSet.descriptorBuffers.count;
+			}
+			else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
+				descriptorImageInfoCount += writeDescriptorSet.descriptorImages.count;
+			}
+			else {
+				ENGINE_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
+			}
+		}
+
+		sequence<VkWriteDescriptorSet> vkWriteDescriptorSets(writeDescriptorSets.count);
+		sequence<VkDescriptorBufferInfo> descriptorBufferInfos(descriptorBufferInfoCount);
+		sequence<VkDescriptorImageInfo> descriptorImageInfos(descriptorImageInfoCount);
+
+		uint32 writeDescriptorSetIndex = 0;
+		uint32 descriptorBufferInfoOffset = 0;
+		uint32 descriptorImageInfoOffset = 0;
+
+		while (writeDescriptorSetIndex < writeDescriptorSets.count) {
+			const WriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[writeDescriptorSetIndex];
+			const ref<VulkanDescriptorSet>& descriptorSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet);
+			const VulkanDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
+
+			VkWriteDescriptorSet& vkWriteDescriptorSet = vkWriteDescriptorSets[writeDescriptorSetIndex];
+			vkWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			vkWriteDescriptorSet.pNext = nullptr;
+			vkWriteDescriptorSet.dstSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet)->object;
+			vkWriteDescriptorSet.dstBinding = writeDescriptorSet.bindingIndex;
+			vkWriteDescriptorSet.dstArrayElement = 0;
+			vkWriteDescriptorSet.descriptorType = getVkDescriptorType(descriptorSetBinding.descriptorType);
+
+			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
+				const uint32 descriptorBufferCount = static_cast<uint32>(writeDescriptorSet.descriptorBuffers.count);
+
+				for (uint32 descriptorBufferIndex = 0; descriptorBufferIndex < descriptorBufferCount; descriptorBufferIndex += 1) {
+					const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
+
+					VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[descriptorBufferInfoOffset + descriptorBufferIndex];
+					descriptorBufferInfo.buffer = std::static_pointer_cast<VulkanBuffer>(descriptorBuffer.buffer)->object;
+					descriptorBufferInfo.offset = descriptorBuffer.offset;
+					descriptorBufferInfo.range = descriptorBuffer.size;
+				}
+
+				vkWriteDescriptorSet.descriptorCount = descriptorBufferCount;
+				vkWriteDescriptorSet.pBufferInfo = &descriptorBufferInfos[descriptorBufferInfoOffset];
+
+				descriptorBufferInfoOffset += descriptorBufferCount;
+			}
+			else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
+				const uint32 descriptorImageCount = static_cast<uint32>(writeDescriptorSet.descriptorImages.count);
+
+				for (uint32 descriptorImageIndex = 0; descriptorImageIndex < descriptorImageCount; descriptorImageIndex += 1) {
+					const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
+					const ref<VulkanImageView>& imageView = std::static_pointer_cast<VulkanImageView>(descriptorImage.imageView);
+
+					VkDescriptorImageInfo& descriptorImageInfo = descriptorImageInfos[descriptorImageInfoOffset + descriptorImageIndex];
+
+					// TODO: Allow custom sampler.
+					descriptorImageInfo.sampler = nullptr;
+
+					descriptorImageInfo.imageView = imageView->object;
+					descriptorImageInfo.imageLayout = getVkImageLayout(descriptorImage.imageLayout);
+				}
+
+				vkWriteDescriptorSet.descriptorCount = descriptorImageCount;
+				vkWriteDescriptorSet.pImageInfo = &descriptorImageInfos[descriptorImageInfoOffset];
+
+				descriptorImageInfoOffset += descriptorImageCount;
+			}
+			else {
+				ENGINE_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
+			}
+
+			vkWriteDescriptorSet.pTexelBufferView = nullptr;
+
+			writeDescriptorSetIndex += 1;
+		}
+
+		vkUpdateDescriptorSets(
+			object,
+			static_cast<uint32>(vkWriteDescriptorSets.count),
+			vkWriteDescriptorSets,
+			0,
+			nullptr
+		);
+	}
+
+	void VulkanDevice::waitForFence(const ref<Fence>& fence) const {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		const VkResult result = vkWaitForFences(
+			object,
+			1,
+			&std::static_pointer_cast<VulkanFence>(fence)->object,
+			VK_TRUE,
+			max<uint64>()
+		);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to wait for Vulkan fence ([]).", string_VkResult(result));
 	}
 
 	void VulkanDevice::waitIdle() const {

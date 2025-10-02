@@ -73,7 +73,7 @@ namespace ProjectA {
 				{
 					DescriptorSetLayoutBinding textureArrayDescriptorSetLayoutBinding;
 					textureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-					textureArrayDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+					textureArrayDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
 					textureArrayDescriptorSetLayoutBinding.imageViews = {baboonImageView, cameramanImageView, lennaImageView, pepperImageView};
 
 					// TODO: Don't provide a copy of the sampler for each image view.
@@ -236,7 +236,11 @@ namespace ProjectA {
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
-				commandEncoder->bindAllDescriptorSets();
+
+				// TODO
+				BREAKPOINT();
+				// commandEncoder->bindDescriptorSets();
+
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, instanceVertexBuffer, 0, sizeof(Instance));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);

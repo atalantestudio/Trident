@@ -326,64 +326,22 @@ namespace ProjectA {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
-		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptor.layouts.size(); descriptorSetLayoutIndex += 1) {
-			const DescriptorSetLayout& descriptorSetLayout = descriptor.layouts[descriptorSetLayoutIndex];
+		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptor.descriptorSetLayouts.count; descriptorSetLayoutIndex += 1) {
+			const ref<DescriptorSetLayout>& descriptorSetLayout = descriptor.descriptorSetLayouts[descriptorSetLayoutIndex];
 
-			for (uint32 descriptorSetLayoutBindingIndex = 0; descriptorSetLayoutBindingIndex < descriptorSetLayout.bindings.size(); descriptorSetLayoutBindingIndex += 1) {
-				const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout.bindings[descriptorSetLayoutBindingIndex];
+			for (uint32 descriptorSetLayoutBindingIndex = 0; descriptorSetLayoutBindingIndex < descriptorSetLayout->bindings.count; descriptorSetLayoutBindingIndex += 1) {
+				const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout->bindings[descriptorSetLayoutBindingIndex];
 
 				if (descriptorSetLayoutBinding.descriptorType >= DescriptorType::__MAX_ENUM) {
 					errorCount += 1;
 
-					ENGINE_ERROR("descriptor.layouts[[]].bindings[[]].descriptorType must be a valid DescriptorType value.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
+					ENGINE_ERROR("descriptor.descriptorSetLayouts[[]]->bindings[[]].descriptorType must be a valid DescriptorType value.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
 				}
 
-				if (descriptorSetLayoutBinding.stageFlags >= ShaderStage::__MAX_ENUM) {
+				if (descriptorSetLayoutBinding.descriptorCount == 0) {
 					errorCount += 1;
 
-					ENGINE_ERROR("descriptor.layouts[[]].bindings[[]].stageFlags must be a valid ShaderStage value.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
-				}
-
-				for (uint32 bufferIndex = 0; bufferIndex < descriptorSetLayoutBinding.buffers.size(); bufferIndex += 1) {
-					const ref<Buffer>& buffer = descriptorSetLayoutBinding.buffers[bufferIndex];
-
-					if (buffer == nullptr) {
-						errorCount += 1;
-
-						ENGINE_ERROR("descriptor.layouts[[]].bindings[[]].buffers[[]] must be a valid Buffer.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex, bufferIndex);
-					}
-				}
-
-				if (!descriptorSetLayoutBinding.buffers.empty() && descriptorSetLayoutBinding.bufferOffset > 0) {
-					errorCount += 1;
-
-					ENGINE_ERROR("descriptor.layouts[[]].bindings[[]].bufferOffset must be 0 if the binding doesn't have any buffers.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
-				}
-
-				for (uint32 imageViewIndex = 0; imageViewIndex < descriptorSetLayoutBinding.imageViews.size(); imageViewIndex += 1) {
-					const ref<ImageView>& imageView = descriptorSetLayoutBinding.imageViews[imageViewIndex];
-
-					if (imageView == nullptr) {
-						errorCount += 1;
-
-						ENGINE_ERROR("descriptor.layouts[[]].bindings[[]].imageViews[[]] must be a valid ImageView.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex, imageViewIndex);
-					}
-				}
-
-				for (uint32 samplerIndex = 0; samplerIndex < descriptorSetLayoutBinding.samplers.size(); samplerIndex += 1) {
-					const ref<Sampler>& sampler = descriptorSetLayoutBinding.samplers[samplerIndex];
-
-					if (sampler == nullptr) {
-						errorCount += 1;
-
-						ENGINE_ERROR("descriptor.layouts[[]].bindings[[]].samplers[[]] must be a valid Sampler.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex, samplerIndex);
-					}
-				}
-
-				if (!descriptorSetLayoutBinding.samplers.empty() && (descriptorSetLayoutBinding.imageViews.size() != descriptorSetLayoutBinding.samplers.size())) {
-					errorCount += 1;
-
-					ENGINE_ERROR("The number of image views in descriptor.layouts[[]].bindings[[]].imageViews and the number of samplers in descriptor.layouts[[]].bindings[[]].samplers must be the same.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex, descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
+					ENGINE_ERROR("descriptor.descriptorSetLayouts[[]]->bindings[[]].descriptorCount must not be 0.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
 				}
 			}
 		}

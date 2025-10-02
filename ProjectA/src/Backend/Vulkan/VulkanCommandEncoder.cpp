@@ -4,8 +4,10 @@
 #include "Backend/Vulkan/VulkanCommandBuffer.hpp"
 #include "Backend/Vulkan/VulkanCommandEncoder.hpp"
 #include "Backend/Vulkan/VulkanComputePipeline.hpp"
+#include "Backend/Vulkan/VulkanDescriptorSet.hpp"
 #include "Backend/Vulkan/VulkanFramebuffer.hpp"
 #include "Backend/Vulkan/VulkanImage.hpp"
+#include "Backend/Vulkan/VulkanPipelineLayout.hpp"
 #include "Backend/Vulkan/VulkanRenderPass.hpp"
 #include "Backend/Vulkan/VulkanRenderPipeline.hpp"
 
@@ -110,14 +112,20 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::bindAllDescriptorSets() {
+	void VulkanCommandEncoder::bindDescriptorSets(const ref<PipelineLayout>& pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) {
+		sequence<VkDescriptorSet> vkDescriptorSets(descriptorSets.count);
+
+		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count; descriptorSetIndex += 1) {
+			vkDescriptorSets[descriptorSetIndex] = std::static_pointer_cast<VulkanDescriptorSet>(descriptorSets[descriptorSetIndex])->object;
+		}
+
 		vkCmdBindDescriptorSets(
 			commandBuffer,
 			pipeline->bindPoint,
-			pipeline->layout->object,
+			std::static_pointer_cast<VulkanPipelineLayout>(pipelineLayout)->object,
 			0,
-			static_cast<uint32>(pipeline->layout->descriptorSets.size()),
-			pipeline->layout->descriptorSets.data(),
+			static_cast<uint32>(vkDescriptorSets.count),
+			vkDescriptorSets,
 			0,
 			nullptr
 		);

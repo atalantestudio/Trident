@@ -139,12 +139,12 @@ namespace ProjectA {
 				{
 					DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 					cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-					cameraDescriptorSetLayoutBinding.stageFlags = ShaderStage::VERTEX;
+					cameraDescriptorSetLayoutBinding.shaderStages = ShaderStage::VERTEX;
 					cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
 
 					DescriptorSetLayoutBinding glyphMapImageDescriptorSetLayoutBinding;
 					glyphMapImageDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-					glyphMapImageDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+					glyphMapImageDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
 					glyphMapImageDescriptorSetLayoutBinding.imageViews = {glyphMapImageView};
 					glyphMapImageDescriptorSetLayoutBinding.samplers = {glyphMapImageSampler};
 
@@ -275,7 +275,11 @@ namespace ProjectA {
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
-				commandEncoder->bindAllDescriptorSets();
+
+				// TODO
+				BREAKPOINT();
+				// commandEncoder->bindDescriptorSets();
+
 				commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);

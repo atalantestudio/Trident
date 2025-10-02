@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Backend/OpenGL/OpenGLDrawBuffer.hpp"
-#include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 
-#include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
 #include "Engine/API/Rendering/RenderPipeline.hpp"
 
 namespace ProjectA {
@@ -14,8 +12,6 @@ namespace ProjectA {
 			~OpenGLRenderPipeline() final override;
 
 		public:
-			const OpenGLPipelineLayout& layout;
-
 			const GLuint program;
 			GLuint vaobj;
 
@@ -27,7 +23,7 @@ namespace ProjectA {
 			const GLfloat lineWidth;
 			const GLfloat minSampleShading;
 
-			std::vector<OpenGLDrawBuffer> drawBuffers;
+			sequence<OpenGLDrawBuffer> drawBuffers;
 
 			const GLboolean depthTest;
 			const GLboolean depthWrite;

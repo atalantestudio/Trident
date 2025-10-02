@@ -100,6 +100,10 @@ namespace ProjectA {
 		return adapter->createComputePipeline(descriptor);
 	}
 
+	ref<DescriptorSetLayout> Renderer::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) {
+		return adapter->createDescriptorSetLayout(bindings);
+	}
+
 	ref<Fence> Renderer::createFence() {
 		return adapter->createFence();
 	}

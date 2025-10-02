@@ -4,6 +4,6 @@
 
 namespace ProjectA {
 	struct PipelineLayoutDescriptor {
-		std::vector<DescriptorSetLayout> layouts;
+		sequence<ref<DescriptorSetLayout>> descriptorSetLayouts;
 	};
 }

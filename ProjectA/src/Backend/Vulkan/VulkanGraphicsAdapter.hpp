@@ -19,6 +19,8 @@ namespace ProjectA {
 
 			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const final override;
 
+			ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const final override;
+
 			ref<Fence> createFence() const final override;
 
 			ref<Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor) const final override;

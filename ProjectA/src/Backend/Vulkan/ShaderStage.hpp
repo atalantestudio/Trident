@@ -2,20 +2,22 @@
 
 namespace ProjectA {
 	static VkShaderStageFlagBits getVkShaderStageFlagBits(ShaderStage shaderStage) {
+		VkShaderStageFlags vkShaderStageFlags = 0;
+
 		if (shaderStage == ShaderStage::VERTEX) {
-			return VK_SHADER_STAGE_VERTEX_BIT;
+			vkShaderStageFlags |= VK_SHADER_STAGE_VERTEX_BIT;
 		}
 
 		if (shaderStage == ShaderStage::FRAGMENT) {
-			return VK_SHADER_STAGE_FRAGMENT_BIT;
+			vkShaderStageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
 		}
 
 		if (shaderStage == ShaderStage::COMPUTE) {
-			return VK_SHADER_STAGE_COMPUTE_BIT;
+			vkShaderStageFlags |= VK_SHADER_STAGE_COMPUTE_BIT;
 		}
 
-		DEBUG_ASSERT(false);
+		DEBUG_ASSERT(vkShaderStageFlags != 0);
 
-		return VK_SHADER_STAGE_FLAG_BITS_MAX_ENUM;
+		return static_cast<VkShaderStageFlagBits>(vkShaderStageFlags);
 	}
 }

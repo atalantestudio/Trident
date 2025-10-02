@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	static GLenum getGlDescriptorType(DescriptorType descriptorType) {
+	static GLenum getGlBufferDescriptorType(DescriptorType descriptorType) {
 		if (descriptorType == DescriptorType::UNIFORM_BUFFER) {
 			return GL_UNIFORM_BUFFER;
 		}
@@ -10,7 +10,7 @@ namespace ProjectA {
 			return GL_SHADER_STORAGE_BUFFER;
 		}
 
-		ENGINE_ASSERT(false, "OpenGL descriptor type not supported.");
+		ENGINE_ASSERT(false, "This type is not a buffer descriptor type.");
 
 		return 0;
 	}

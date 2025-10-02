@@ -6,11 +6,9 @@
 #include "Backend/OpenGL/OpenGLFramebuffer.hpp"
 #include "Backend/OpenGL/OpenGLGraphicsAdapter.hpp"
 #include "Backend/OpenGL/OpenGLImage.hpp"
-#include "Backend/OpenGL/OpenGLPipelineLayout.hpp"
 #include "Backend/OpenGL/OpenGLRenderPass.hpp"
 #include "Backend/OpenGL/OpenGLRenderPipeline.hpp"
 #include "Backend/OpenGL/OpenGLSampler.hpp"
-#include "Backend/OpenGL/OpenGLSemaphore.hpp"
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 #include "Backend/OpenGL/OpenGLSwapchain.hpp"
 
@@ -64,8 +62,12 @@ namespace ProjectA {
 		return createRef<OpenGLComputePipeline>(descriptor);
 	}
 
+	ref<DescriptorSetLayout> OpenGLGraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
+		return createRef<DescriptorSetLayout>(bindings);
+	}
+
 	ref<PipelineLayout> OpenGLGraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
-		return createRef<OpenGLPipelineLayout>(descriptor);
+		return createRef<PipelineLayout>(descriptor);
 	}
 
 	ref<RenderPass> OpenGLGraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
@@ -81,7 +83,7 @@ namespace ProjectA {
 	}
 
 	ref<Semaphore> OpenGLGraphicsAdapter::createSemaphore() const {
-		return createRef<OpenGLSemaphore>();
+		return createRef<Semaphore>();
 	}
 
 	ref<ShaderModule> OpenGLGraphicsAdapter::createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const {

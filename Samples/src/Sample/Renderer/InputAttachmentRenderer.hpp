@@ -178,7 +178,11 @@ namespace ProjectA {
 
 				commandEncoder->nextSubpass();
 				commandEncoder->bindRenderPipeline(readInputRenderPipeline);
-				commandEncoder->bindAllDescriptorSets();
+
+				// TODO
+				BREAKPOINT();
+				// commandEncoder->bindDescriptorSets();
+
 				commandEncoder->draw(3, 1, 0, 0);
 
 				commandEncoder->endRenderPass();
@@ -192,7 +196,7 @@ namespace ProjectA {
 			void createReadInputRenderPipelineLayout() {
 				DescriptorSetLayoutBinding inputAttachmentDescriptorSetLayoutBinding{};
 				inputAttachmentDescriptorSetLayoutBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
-				inputAttachmentDescriptorSetLayoutBinding.stageFlags = ShaderStage::FRAGMENT;
+				inputAttachmentDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
 				inputAttachmentDescriptorSetLayoutBinding.imageViews = {inputImageView};
 
 				DescriptorSetLayout inputAttachmentDescriptorSetLayout{};
