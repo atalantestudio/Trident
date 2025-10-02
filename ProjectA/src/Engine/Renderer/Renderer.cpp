@@ -187,9 +187,9 @@ namespace ProjectA {
 			#endif
 		) {
 			pathString += ".spv";
-
-			path = pathString;
 		}
+
+		path = pathString;
 
 		const sequence<uint8> code = Filesystem::openBuffer(path);
 
