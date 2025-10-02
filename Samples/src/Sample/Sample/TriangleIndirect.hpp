@@ -1,9 +1,11 @@
 #pragma once
 
+#include "ProjectA.hpp"
+
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	class MultisampleRenderer : public Renderer {
+	class SampleRenderer : public Renderer {
 		public:
 			void build() override {
 				// 1. Create render pass and subpass.
@@ -12,7 +14,7 @@ namespace ProjectA {
 
 					Attachment swapchainAttachment{};
 					swapchainAttachment.format = surface->getFormat();
-					swapchainAttachment.sampleCount = 4;
+					swapchainAttachment.sampleCount = 1;
 					swapchainAttachment.loadOperation = LoadOperation::CLEAR;
 					swapchainAttachment.storeOperation = StoreOperation::STORE;
 					swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
@@ -49,7 +51,7 @@ namespace ProjectA {
 					vertexInputBinding.registerAttribute<svec2<float32>>();
 					vertexInputBinding.registerAttribute<vec3<float32>>();
 
- 					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 					vertexShaderModuleDescriptor.entryPoint = "main";
 
@@ -60,7 +62,7 @@ namespace ProjectA {
 					ColorBlendAttachment colorBlendAttachment{};
 					colorBlendAttachment.blend = false;
 
-					RenderPipelineDescriptor renderPipelineDescriptor{};
+					RenderPipelineDescriptor renderPipelineDescriptor;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
 					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Base/Vertex2DRGB.vert", vertexShaderModuleDescriptor);
@@ -80,13 +82,13 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
+				ref<Buffer> vertexStagingBuffer;
+
 				// 5. Create vertex buffer.
 				{
-					const ref<Device> device = getDevice();
+					static constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
 
-					constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
-
-					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
+					vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
 
 					Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
 
@@ -99,19 +101,57 @@ namespace ProjectA {
 
 					vertexStagingBuffer->unmap();
 
-					BufferDescriptor vertexBufferDescriptor;
+					BufferDescriptor vertexBufferDescriptor{};
 					vertexBufferDescriptor.size = vertexBufferSize;
 					vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 					vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+					vertexBufferDescriptor.persistent = false;
 
 					vertexBuffer = createBuffer(vertexBufferDescriptor);
+				}
 
-					sequence<BufferCopyRegion> bufferCopyRegions(1);
+				ref<Buffer> indirectStagingBuffer;
 
-					BufferCopyRegion& vertexBufferCopyRegion = bufferCopyRegions[0];
+				// 6. Create indirect buffer.
+				{
+					static constexpr uint64 indirectBufferSize = sizeof(DrawIndirectCommand);
+
+					indirectStagingBuffer = createStagingBuffer(indirectBufferSize);
+
+					DrawIndirectCommand* drawIndirectCommands = indirectStagingBuffer->map<DrawIndirectCommand>(0, indirectBufferSize);
+					drawIndirectCommands[0].vertexCount = 3;
+					drawIndirectCommands[0].instanceCount = 1;
+					drawIndirectCommands[0].vertexOffset = 0;
+					drawIndirectCommands[0].instanceOffset = 0;
+
+					indirectStagingBuffer->unmap();
+
+					BufferDescriptor indirectBufferDescriptor{};
+					indirectBufferDescriptor.size = indirectBufferSize;
+					indirectBufferDescriptor.usage = BufferUsage::INDIRECT | BufferUsage::TRANSFER_DST;
+					indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+					indirectBufferDescriptor.persistent = false;
+
+					indirectBuffer = createBuffer(indirectBufferDescriptor);
+				}
+
+				// 7. Write to vertex and indirect buffers.
+				{
+					const ref<Device> device = getDevice();
+
+					sequence<BufferCopyRegion> vertexBufferCopyRegions(1);
+
+					BufferCopyRegion& vertexBufferCopyRegion = vertexBufferCopyRegions[0];
 					vertexBufferCopyRegion.sourceOffset = 0;
 					vertexBufferCopyRegion.destinationOffset = 0;
-					vertexBufferCopyRegion.size = vertexBufferSize;
+					vertexBufferCopyRegion.size = vertexStagingBuffer->size;
+
+					sequence<BufferCopyRegion> indirectBufferCopyRegions(1);
+
+					BufferCopyRegion& indirectBufferCopyRegion = indirectBufferCopyRegions[0];
+					indirectBufferCopyRegion.sourceOffset = 0;
+					indirectBufferCopyRegion.destinationOffset = 0;
+					indirectBufferCopyRegion.size = indirectStagingBuffer->size;
 
 					CommandBufferDescriptor commandBufferDescriptor{};
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -120,7 +160,8 @@ namespace ProjectA {
 					const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
-					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, bufferCopyRegions);
+					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, vertexBufferCopyRegions);
+					commandEncoder->copyBufferToBuffer(indirectStagingBuffer, indirectBuffer, indirectBufferCopyRegions);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -133,7 +174,7 @@ namespace ProjectA {
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
+				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
@@ -144,7 +185,7 @@ namespace ProjectA {
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
-				commandEncoder->draw(3, 1, 0, 0);
+				commandEncoder->drawIndirect(indirectBuffer, 0, 1, 0);
 				commandEncoder->endRenderPass();
 			}
 
@@ -155,25 +196,6 @@ namespace ProjectA {
 		private:
 			void recreateFramebuffers() {
 				const ref<Swapchain>& swapchain = getSwapchain();
-				const Extent2D extent = swapchain->getExtent();
-
-				AttachmentImageDescriptor colorImageDescriptor{};
-				colorImageDescriptor.type = ImageType::TEXTURE_2D;
-				colorImageDescriptor.extent.width = extent.width;
-				colorImageDescriptor.extent.height = extent.height;
-				colorImageDescriptor.extent.depth = 1;
-				colorImageDescriptor.mipLevelCount = 1;
-				colorImageDescriptor.layerCount = 1;
-
-				colorImage = renderPass->createColorAttachmentImage(colorImageDescriptor, 0);
-
-				ImageViewDescriptor colorImageViewDescriptor{};
-				colorImageViewDescriptor.mipLevelOffset = 0;
-				colorImageViewDescriptor.mipLevelCount = colorImage->getMipLevelCount();
-				colorImageViewDescriptor.layerOffset = 0;
-				colorImageViewDescriptor.layerCount = colorImage->getLayerCount();
-
-				colorImageView = colorImage->createView(colorImageViewDescriptor);
 
 				for (ref<Framebuffer>& framebuffer : framebuffers) {
 					framebuffer.~shared_ptr();
@@ -183,12 +205,12 @@ namespace ProjectA {
 
 				FramebufferDescriptor framebufferDescriptor{};
 				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {colorImageView, nullptr};
-				framebufferDescriptor.extent = extent;
+				framebufferDescriptor.imageViews = {nullptr};
+				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
 				for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
-					framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
+					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 				}
@@ -202,15 +224,13 @@ namespace ProjectA {
 
 		private:
 			ref<RenderPass> renderPass;
-		
-			sequence<ref<Framebuffer>> framebuffers;
 
-			ref<Image> colorImage;
-			ref<ImageView> colorImageView;
+			sequence<ref<Framebuffer>> framebuffers;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
 
 			ref<Buffer> vertexBuffer;
+			ref<Buffer> indirectBuffer;
 	};
 }

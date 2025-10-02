@@ -3,7 +3,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	class DefaultRenderer : public Renderer {
+	class SampleRenderer : public Renderer {
 		public:
 			void build() override {
 				BREAKPOINT();

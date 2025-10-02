@@ -3,7 +3,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	class ArrayTextureRenderer : public Renderer {
+	class SampleRenderer : public Renderer {
 		public:
 			void build() override {
 				const ref<Device> device = getDevice();

@@ -3,7 +3,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	class DepthTestRenderer : public Renderer {
+	class SampleRenderer : public Renderer {
 		public:
 			void build() override {
 				// 1. Create render pass and subpass.
@@ -17,29 +17,17 @@ namespace ProjectA {
 					swapchainAttachment.storeOperation = StoreOperation::STORE;
 					swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
 
-					Attachment depthStencilAttachment{};
-					depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
-					depthStencilAttachment.sampleCount = 1;
-					depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
-					depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
-					depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
 					AttachmentReference swapchainAttachmentReference{};
 					swapchainAttachmentReference.index = 0;
 					swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
-					AttachmentReference depthStencilAttachmentReference{};
-					depthStencilAttachmentReference.index = 1;
-					depthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
 					SubpassDescriptor subpassDescriptor{};
 					subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
-					subpassDescriptor.depthStencilAttachmentReference = depthStencilAttachmentReference;
 
 					const ref<Subpass> subpass = createSubpass(subpassDescriptor);
 
 					RenderPassDescriptor renderPassDescriptor{};
-					renderPassDescriptor.attachments = {swapchainAttachment, depthStencilAttachment};
+					renderPassDescriptor.attachments = {swapchainAttachment};
 					renderPassDescriptor.subpasses = {subpass};
 
 					renderPass = createRenderPass(renderPassDescriptor);
@@ -58,10 +46,10 @@ namespace ProjectA {
 				// 4. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-					vertexInputBinding.registerAttribute<vec3<float32>>();
+					vertexInputBinding.registerAttribute<svec2<float32>>();
 
 					VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-					instanceInputBinding.registerAttribute<vec3<float32>>();
+					instanceInputBinding.registerAttribute<vec4<float32>>();
 
 					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -72,13 +60,15 @@ namespace ProjectA {
 					fragmentShaderModuleDescriptor.entryPoint = "main";
 
 					ColorBlendAttachment colorBlendAttachment{};
-					colorBlendAttachment.blend = false;
+					colorBlendAttachment.blend = true;
+					colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
+					colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
 					RenderPipelineDescriptor renderPipelineDescriptor{};
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Base/Vertex3DRGB.vert", vertexShaderModuleDescriptor);
-					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Base/ColorRGB.frag", fragmentShaderModuleDescriptor);
+					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Base/Vertex2DRGBA.vert", vertexShaderModuleDescriptor);
+					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Base/ColorRGBA.frag", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 					renderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -86,9 +76,7 @@ namespace ProjectA {
 					renderPipelineDescriptor.lineWidth = 1.0f;
 					renderPipelineDescriptor.minSampleShading = 0.0f;
 					renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-					renderPipelineDescriptor.depthStencilState.depthTest = true;
-					renderPipelineDescriptor.depthStencilState.depthWrite = true;
-					renderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
+					renderPipelineDescriptor.depthStencilState.depthTest = false;
 					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 					renderPipelineDescriptor.renderPass = renderPass;
 					renderPipelineDescriptor.subpassIndex = 0;
@@ -104,12 +92,12 @@ namespace ProjectA {
 
 					Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, VERTEX_BUFFER_SIZE);
 
-					vertexMappedRange[0].vertex = {-0.75f,  0.75f,  1.0f};
-					vertexMappedRange[1].vertex = { 0.25f,  0.75f,  1.0f};
-					vertexMappedRange[2].vertex = {-0.75f, -0.75f,  1.0f};
-					vertexMappedRange[3].vertex = {-0.5f,   0.5f,   0.0f};
-					vertexMappedRange[4].vertex = { 0.5f,   0.5f,   0.0f};
-					vertexMappedRange[5].vertex = {-0.5f,  -0.5f,   0.0f};
+					vertexMappedRange[0].vertex = {-0.75f,  0.75f};
+					vertexMappedRange[1].vertex = { 0.25f,  0.75f};
+					vertexMappedRange[2].vertex = {-0.75f, -0.75f};
+					vertexMappedRange[3].vertex = {-0.5f,   0.5f};
+					vertexMappedRange[4].vertex = { 0.5f,   0.5f};
+					vertexMappedRange[5].vertex = {-0.5f,  -0.5f};
 
 					vertexStagingBuffer->unmap();
 
@@ -124,8 +112,8 @@ namespace ProjectA {
 
 					Instance* instances = instanceStagingBuffer->map<Instance>(0, INSTANCE_BUFFER_SIZE);
 
-					instances[0].color = {1.0f, 1.0f, 1.0f};
-					instances[1].color = {1.0f, 0.2f, 0.0f};
+					instances[0].color = {1.0f, 1.0f, 1.0f, 1.0f};
+					instances[1].color = {1.0f, 0.2f, 0.0f, 0.5f};
 
 					instanceStagingBuffer->unmap();
 
@@ -153,8 +141,8 @@ namespace ProjectA {
 					CommandBufferDescriptor commandBufferDescriptor{};
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
-					const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
-					const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
+					const ref<Queue> transferQueue = device->getQueue(QueueFamilyCapability::TRANSFER);
+					const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
 					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, vertexBufferCopyRegions);
@@ -162,8 +150,7 @@ namespace ProjectA {
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
-					graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
+					transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
 					device->waitIdle();
 				}
 			}
@@ -171,7 +158,7 @@ namespace ProjectA {
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
 				BeginRenderPassDescriptor beginRenderPassDescriptor;
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
+				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
@@ -200,25 +187,6 @@ namespace ProjectA {
 		private:
 			void recreateFramebuffers() {
 				const ref<Swapchain>& swapchain = getSwapchain();
-				const Extent2D extent = swapchain->getExtent();
-
-				AttachmentImageDescriptor depthStencilImageDescriptor{};
-				depthStencilImageDescriptor.type = ImageType::TEXTURE_2D;
-				depthStencilImageDescriptor.extent.width = extent.width;
-				depthStencilImageDescriptor.extent.height = extent.height;
-				depthStencilImageDescriptor.extent.depth = 1;
-				depthStencilImageDescriptor.mipLevelCount = 1;
-				depthStencilImageDescriptor.layerCount = 1;
-
-				depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilImageDescriptor, 0);
-
-				ImageViewDescriptor depthStencilImageViewDescriptor{};
-				depthStencilImageViewDescriptor.mipLevelOffset = 0;
-				depthStencilImageViewDescriptor.mipLevelCount = depthStencilImage->getMipLevelCount();
-				depthStencilImageViewDescriptor.layerOffset = 0;
-				depthStencilImageViewDescriptor.layerCount = depthStencilImage->getLayerCount();
-
-				depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
 
 				for (ref<Framebuffer>& framebuffer : framebuffers) {
 					framebuffer.~shared_ptr();
@@ -228,8 +196,8 @@ namespace ProjectA {
 
 				FramebufferDescriptor framebufferDescriptor{};
 				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
-				framebufferDescriptor.extent = extent;
+				framebufferDescriptor.imageViews = {nullptr};
+				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
 				for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
@@ -241,11 +209,11 @@ namespace ProjectA {
 
 		private:
 			struct Vertex {
-				vec3<float32> vertex;
+				svec2<float32> vertex;
 			};
 
 			struct Instance {
-				vec3<float32> color;
+				vec4<float32> color;
 			};
 
 		private:
@@ -257,9 +225,6 @@ namespace ProjectA {
 			ref<RenderPass> renderPass;
 
 			sequence<ref<Framebuffer>> framebuffers;
-
-			ref<Image> depthStencilImage;
-			ref<ImageView> depthStencilImageView;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;

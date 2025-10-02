@@ -5,7 +5,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	class TriangleRenderer : public Renderer {
+	class SampleRenderer : public Renderer {
 		public:
 			void build() override {
 				// 1. Create render pass and subpass.
@@ -82,13 +82,13 @@ namespace ProjectA {
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 				}
 
-				// 5. Create vertex buffer.
+				ref<Buffer> vertexStagingBuffer;
+
+				// 5. Create vertex staging buffer.
 				{
 					static constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
 
-					const ref<Device> device = getDevice();
-
-					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
+					vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
 
 					Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
 
@@ -101,20 +101,89 @@ namespace ProjectA {
 
 					vertexStagingBuffer->unmap();
 
-					BufferDescriptor vertexBufferDescriptor;
+					BufferDescriptor vertexBufferDescriptor{};
 					vertexBufferDescriptor.size = vertexBufferSize;
 					vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 					vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 					vertexBufferDescriptor.persistent = false;
 
 					vertexBuffer = createBuffer(vertexBufferDescriptor);
+				}
 
-					sequence<BufferCopyRegion> bufferCopyRegions(1);
+				ref<Buffer> indexStagingBuffer;
 
-					BufferCopyRegion& vertexBufferCopyRegion = bufferCopyRegions[0];
+				// 6. Create index buffer.
+				{
+					static constexpr uint64 indexBufferSize = 3 * sizeof(uint16);
+
+					indexStagingBuffer = createStagingBuffer(indexBufferSize);
+
+					uint16* indexStagingBufferRange = indexStagingBuffer->map<uint16>(0, indexBufferSize);
+					indexStagingBufferRange[0] = 0;
+					indexStagingBufferRange[1] = 1;
+					indexStagingBufferRange[2] = 2;
+
+					indexStagingBuffer->unmap();
+
+					BufferDescriptor indexBufferDescriptor{};
+					indexBufferDescriptor.size = indexBufferSize;
+					indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
+					indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+					indexBufferDescriptor.persistent = false;
+
+					indexBuffer = createBuffer(indexBufferDescriptor);
+				}
+
+				ref<Buffer> indirectStagingBuffer;
+
+				// 7. Create indirect buffer.
+				{
+					static constexpr uint64 indirectBufferSize = sizeof(DrawIndexedIndirectCommand);
+
+					indirectStagingBuffer = createStagingBuffer(indirectBufferSize);
+
+					DrawIndexedIndirectCommand* drawIndexedIndirectCommands = indirectStagingBuffer->map<DrawIndexedIndirectCommand>(0, indirectBufferSize);
+					drawIndexedIndirectCommands[0].indexCount = 3;
+					drawIndexedIndirectCommands[0].instanceCount = 1;
+					drawIndexedIndirectCommands[0].indexOffset = 0;
+					drawIndexedIndirectCommands[0].vertexBias = 0;
+					drawIndexedIndirectCommands[0].instanceOffset = 0;
+
+					indirectStagingBuffer->unmap();
+
+					BufferDescriptor indirectBufferDescriptor{};
+					indirectBufferDescriptor.size = indirectBufferSize;
+					indirectBufferDescriptor.usage = BufferUsage::INDIRECT | BufferUsage::TRANSFER_DST;
+					indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+					indirectBufferDescriptor.persistent = false;
+
+					indirectBuffer = createBuffer(indirectBufferDescriptor);
+				}
+
+				// 8. Write to vertex, index and indirect buffers.
+				{
+					const ref<Device> device = getDevice();
+
+					sequence<BufferCopyRegion> vertexBufferCopyRegions(1);
+
+					BufferCopyRegion& vertexBufferCopyRegion = vertexBufferCopyRegions[0];
 					vertexBufferCopyRegion.sourceOffset = 0;
 					vertexBufferCopyRegion.destinationOffset = 0;
-					vertexBufferCopyRegion.size = vertexBufferSize;
+					vertexBufferCopyRegion.size = vertexStagingBuffer->size;
+
+					sequence<BufferCopyRegion> indexBufferCopyRegions(1);
+
+					BufferCopyRegion& indexBufferCopyRegion = indexBufferCopyRegions[0];
+					indexBufferCopyRegion.sourceOffset = 0;
+					indexBufferCopyRegion.destinationOffset = 0;
+					indexBufferCopyRegion.size = indexStagingBuffer->size;
+
+					sequence<BufferCopyRegion> indirectBufferCopyRegions(1);
+
+					BufferCopyRegion& indirectBufferCopyRegion = indirectBufferCopyRegions[0];
+					indirectBufferCopyRegion.sourceOffset = 0;
+					indirectBufferCopyRegion.destinationOffset = 0;
+					indirectBufferCopyRegion.size = indirectStagingBuffer->size;
 
 					CommandBufferDescriptor commandBufferDescriptor{};
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -123,7 +192,9 @@ namespace ProjectA {
 					const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
 
 					commandEncoder->begin();
-					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, bufferCopyRegions);
+					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, vertexBufferCopyRegions);
+					commandEncoder->copyBufferToBuffer(indexStagingBuffer, indexBuffer, indexBufferCopyRegions);
+					commandEncoder->copyBufferToBuffer(indirectStagingBuffer, indirectBuffer, indirectBufferCopyRegions);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -145,9 +216,10 @@ namespace ProjectA {
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+				commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
-				commandEncoder->draw(3, 1, 0, 0);
+				commandEncoder->drawIndexedIndirect(indirectBuffer, 0, 1, 0);
 				commandEncoder->endRenderPass();
 			}
 
@@ -193,5 +265,7 @@ namespace ProjectA {
 			ref<RenderPipeline> renderPipeline;
 
 			ref<Buffer> vertexBuffer;
+			ref<Buffer> indexBuffer;
+			ref<Buffer> indirectBuffer;
 	};
 }

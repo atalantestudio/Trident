@@ -3,7 +3,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	class TextRenderer : public Renderer {
+	class SampleRenderer : public Renderer {
 		public:
 			void build() override {
 				const ref<FontAsset>& fontAsset = getLayer()->getApplication()->getAssetLibrary()->findFontAsset("DefaultFont");

@@ -2,57 +2,11 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
-// PNG test images:
-// - ../ProjectA/src/Asset/Image/icon-black.png		OK
-// - ../ProjectA/src/Asset/Image/icon-white.png		OK
-// - ../ProjectA/src/Asset/Image/Quiver.png			OK
-// - Asset/Image/qoi_test_images/dice.png			OK
-// - Asset/Image/qoi_test_images/edgecase.png		OK
-// - Asset/Image/qoi_test_images/kodim10.png		OK
-// - Asset/Image/qoi_test_images/kodim23.png		OK
-// - Asset/Image/qoi_test_images/qoi_logo.png		OK
-// - Asset/Image/qoi_test_images/testcard.png		OK
-// - Asset/Image/qoi_test_images/testcard_rgba.png	OK
-// - Asset/Image/qoi_test_images/wikipedia_008.png	OK
-// - Asset/Image/Baboon.png							OK
-// - Asset/Image/Cameraman.png						OK
-// - Asset/Image/checkerboard_cm0.png				OK
-// - Asset/Image/checkerboard_cm9.png				OK
-// - Asset/Image/checkerboard1.png					OK
-// - Asset/Image/checkerboard2.png					OK
-// - Asset/Image/graffiti.png						OK
-// - Asset/Image/Horse_rgb.png						OK
-// - Asset/Image/Horse_rgba.png						OK
-// - Asset/Image/Lenna.png							OK
-// - Asset/Image/MetallicGold.png					OK
-// - Asset/Image/Pepper.png							OK
-// - Asset/Image/RPGpack_sheet_2X.png				OK
-// - Asset/Image/test_inflate_0.png					OK
-// - Asset/Image/test_inflate_1.png					OK
-// - Asset/Image/test_inflate_1b.png				OK
-// - Asset/Image/test_inflate_2.png					OK
-// - Asset/Image/test_inflate_9.png					OK
-// - Asset/Image/test_inflate2_0.png				OK
-// - Asset/Image/test_inflate2_9.png				OK
-// - Asset/Image/Zelda.png							OK
-
-// QOI test images:
-// - Asset/Image/qoi_test_images/dice.qoi			OK
-// - Asset/Image/qoi_test_images/edgecase.qoi		OK
-// - Asset/Image/qoi_test_images/kodim10.qoi		OK
-// - Asset/Image/qoi_test_images/kodim23.qoi		OK
-// - Asset/Image/qoi_test_images/qoi_logo.qoi		OK
-// - Asset/Image/qoi_test_images/testcard.qoi		OK
-// - Asset/Image/qoi_test_images/testcard_rgba.qoi	OK
-// - Asset/Image/qoi_test_images/wikipedia_008.qoi	OK
-// - Asset/Image/test1.qoi							OK
 namespace ProjectA {
-	class ImageRenderer : public Renderer {
+	class SampleRenderer : public Renderer {
 		public:
 			void build() override {
-				const sequence<uint8> data = Filesystem::openBuffer("Asset/Image/Zelda.png");
-				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(data);
-				// const File<FileFormat::QOI> file = Filesystem::decode<FileFormat::QOI>(data);
+				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->findImageAsset("DefaultFont");
 
 				const ref<Device> device = getDevice();
 
@@ -60,24 +14,23 @@ namespace ProjectA {
 
 				// 1. Create image staging buffer and copy the image data to it.
 				{
-					imageStagingBuffer = createStagingBuffer(file.data.count);
+					imageStagingBuffer = createStagingBuffer(imageAsset->getData().count);
 
 					uint8* imageStagingBufferMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->size);
 
-					std::copy(file.data.begin(), file.data.end(), imageStagingBufferMappedRange);
+					std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), imageStagingBufferMappedRange);
 
 					imageStagingBuffer->unmap();
 				}
 
 				// 2. Create image and copy the image staging buffer to it.
 				{
-					// NOTE: On Vulkan, the data of an RGB image must first be copied to an RGBA image which supports TRANSFER_DST usage.
 					ImageDescriptor imageDescriptor;
 					imageDescriptor.type = ImageType::TEXTURE_2D;
-					imageDescriptor.format = file.format;
-					imageDescriptor.extent = file.extent;
-					imageDescriptor.mipLevelCount = 1;
-					imageDescriptor.layerCount = 1;
+					imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
+					imageDescriptor.extent = imageAsset->getExtent();
+					imageDescriptor.mipLevelCount = imageAsset->getMipLevelCount();
+					imageDescriptor.layerCount = imageAsset->getLayerCount();
 					imageDescriptor.sampleCount = 1;
 					imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
 					imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;

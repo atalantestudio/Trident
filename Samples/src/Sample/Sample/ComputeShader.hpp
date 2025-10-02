@@ -3,7 +3,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	class ComputeShaderIndirectRenderer : public Renderer {
+	class SampleRenderer : public Renderer {
 		public:
 			void build() override {
 				const ref<Device> device = getDevice();
@@ -62,90 +62,9 @@ namespace ProjectA {
 					sampler = createSampler(samplerDescriptor);
 				}
 
-				ref<Buffer> vertexStagingBuffer;
-
-				// 5. Create vertex buffer.
-				{
-					constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
-
-					vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
-
-					Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
-
-					vertexMappedRange[0].vertex = {-1.0f,  1.0f};
-					vertexMappedRange[1].vertex = { 3.0f,  1.0f};
-					vertexMappedRange[2].vertex = {-1.0f, -3.0f};
-
-					vertexStagingBuffer->unmap();
-
-					BufferDescriptor vertexBufferDescriptor;
-					vertexBufferDescriptor.size = vertexBufferSize;
-					vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-					vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-					vertexBuffer = createBuffer(vertexBufferDescriptor);
-				}
-
-				ref<Buffer> indirectStagingBuffer;
-
-				// 6. Create indirect buffer.
-				{
-					static constexpr uint64 indirectBufferSize = sizeof(DispatchIndirectCommand);
-
-					indirectStagingBuffer = createStagingBuffer(indirectBufferSize);
-
-					DispatchIndirectCommand* dispatchIndirectCommands = indirectStagingBuffer->map<DispatchIndirectCommand>(0, indirectBufferSize);
-					dispatchIndirectCommands[0].x = 2;
-					dispatchIndirectCommands[0].y = 2;
-					dispatchIndirectCommands[0].z = 1;
-
-					indirectStagingBuffer->unmap();
-
-					BufferDescriptor indirectBufferDescriptor{};
-					indirectBufferDescriptor.size = indirectBufferSize;
-					indirectBufferDescriptor.usage = BufferUsage::INDIRECT | BufferUsage::TRANSFER_DST;
-					indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-					indirectBufferDescriptor.persistent = false;
-
-					indirectBuffer = createBuffer(indirectBufferDescriptor);
-				}
-
-				// 7. Write to vertex and indirect buffers.
-				{
-					sequence<BufferCopyRegion> vertexBufferCopyRegions(1);
-
-					BufferCopyRegion& vertexBufferCopyRegion = vertexBufferCopyRegions[0];
-					vertexBufferCopyRegion.sourceOffset = 0;
-					vertexBufferCopyRegion.destinationOffset = 0;
-					vertexBufferCopyRegion.size = vertexStagingBuffer->size;
-
-					sequence<BufferCopyRegion> indirectBufferCopyRegions(1);
-
-					BufferCopyRegion& indirectBufferCopyRegion = indirectBufferCopyRegions[0];
-					indirectBufferCopyRegion.sourceOffset = 0;
-					indirectBufferCopyRegion.destinationOffset = 0;
-					indirectBufferCopyRegion.size = indirectStagingBuffer->size;
-
-					CommandBufferDescriptor commandBufferDescriptor{};
-					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-					const ref<Queue> transferQueue = device->getQueue(QueueFamilyCapability::TRANSFER);
-					const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
-
-					commandEncoder->begin();
-					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, vertexBufferCopyRegions);
-					commandEncoder->copyBufferToBuffer(indirectStagingBuffer, indirectBuffer, indirectBufferCopyRegions);
-
-					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-					transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-					device->waitIdle();
-				}
-
 				ref<PipelineLayout> computePipelineLayout;
 
-				// 8. Create compute pipeline layout.
+				// 5. Create compute pipeline layout.
 				{
 					DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding;
 					imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
@@ -164,7 +83,7 @@ namespace ProjectA {
 
 				ref<ComputePipeline> computePipeline;
 
-				// 9. Create compute pipeline.
+				// 6. Create compute pipeline.
 				{
 					ShaderModuleDescriptor computeShaderModuleDescriptor{};
 					computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
@@ -177,7 +96,7 @@ namespace ProjectA {
 					computePipeline = createComputePipeline(computePipelineDescriptor);
 				}
 
-				// 10. Dispatch work groups.
+				// 7. Dispatch work groups.
 				{
 					CommandBufferDescriptor commandBufferDescriptor{};
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -192,7 +111,7 @@ namespace ProjectA {
 					BREAKPOINT();
 					// commandEncoder->bindDescriptorSets();
 
-					commandEncoder->dispatchIndirect(indirectBuffer, 0);
+					commandEncoder->dispatch(2, 2, 1);
 
 					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -201,7 +120,7 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				// 11. Transition image layout.
+				// 8. Transition image layout.
 				{
 					CommandBufferDescriptor commandBufferDescriptor{};
 					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -219,7 +138,7 @@ namespace ProjectA {
 					device->waitIdle();
 				}
 
-				// 12. Create render pass and subpass.
+				// 9. Create render pass and subpass.
 				{
 					const ref<Surface> surface = getSurface();
 
@@ -246,10 +165,10 @@ namespace ProjectA {
 					renderPass = createRenderPass(renderPassDescriptor);
 				}
 
-				// 13. Create framebuffers.
+				// 10. Create framebuffers.
 				recreateFramebuffers();
 
-				// 14. Create render pipeline layout.
+				// 11. Create render pipeline layout.
 				{
 					DescriptorSetLayoutBinding imageDescriptorSetLayoutBinding;
 					imageDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
@@ -266,7 +185,7 @@ namespace ProjectA {
 					renderPipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
 
-				// 15. Create render pipeline.
+				// 12. Create render pipeline.
 				{
 					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 					vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -300,6 +219,50 @@ namespace ProjectA {
 					renderPipelineDescriptor.subpassIndex = 0;
 
 					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
+				}
+
+				// 13. Create vertex buffer.
+				{
+					constexpr uint64 vertexBufferSize = 3 * sizeof(Vertex);
+
+					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
+
+					Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, vertexBufferSize);
+
+					vertexMappedRange[0].vertex = {-1.0f,  1.0f};
+					vertexMappedRange[1].vertex = { 3.0f,  1.0f};
+					vertexMappedRange[2].vertex = {-1.0f, -3.0f};
+
+					vertexStagingBuffer->unmap();
+
+					BufferDescriptor vertexBufferDescriptor;
+					vertexBufferDescriptor.size = vertexBufferSize;
+					vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+					vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+					vertexBuffer = createBuffer(vertexBufferDescriptor);
+
+					sequence<BufferCopyRegion> bufferCopyRegions(1);
+
+					BufferCopyRegion& vertexBufferCopyRegion = bufferCopyRegions[0];
+					vertexBufferCopyRegion.sourceOffset = 0;
+					vertexBufferCopyRegion.destinationOffset = 0;
+					vertexBufferCopyRegion.size = vertexBufferSize;
+
+					CommandBufferDescriptor commandBufferDescriptor{};
+					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+					const ref<Queue> transferQueue = device->getQueue(QueueFamilyCapability::TRANSFER);
+					const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
+
+					commandEncoder->begin();
+					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, bufferCopyRegions);
+
+					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+					transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
+					device->waitIdle();
 				}
 			}
 
@@ -373,6 +336,5 @@ namespace ProjectA {
 			ref<RenderPipeline> renderPipeline;
 
 			ref<Buffer> vertexBuffer;
-			ref<Buffer> indirectBuffer;
 	};
 }
