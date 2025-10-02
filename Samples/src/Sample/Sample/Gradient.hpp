@@ -7,7 +7,6 @@ namespace ProjectA {
 		public:
 			void build() override {
 				buildRenderPass();
-				buildPipelineLayout();
 				buildRenderPipeline();
 
 				updateFramebuffers();
@@ -59,13 +58,11 @@ namespace ProjectA {
 				renderPass = createRenderPass(renderPassDescriptor);
 			}
 
-			void buildPipelineLayout() {
+			void buildRenderPipeline() {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 
-				pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
-			}
+				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
-			void buildRenderPipeline() {
 				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
@@ -124,7 +121,6 @@ namespace ProjectA {
 		private:
 			ref<RenderPass> renderPass;
 			sequence<ref<Framebuffer>> framebuffers;
-			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
 	};
 }
