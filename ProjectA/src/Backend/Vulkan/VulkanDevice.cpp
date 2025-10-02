@@ -6,6 +6,7 @@
 #include "Backend/Vulkan/VulkanDescriptorSetLayout.hpp"
 #include "Backend/Vulkan/VulkanDevice.hpp"
 #include "Backend/Vulkan/VulkanFence.hpp"
+#include "Backend/Vulkan/VulkanSampler.hpp"
 #include "Backend/Vulkan/VulkanSemaphore.hpp"
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 #include "Backend/Vulkan/VulkanSwapchain.hpp"
@@ -290,8 +291,12 @@ namespace ProjectA {
 
 					VkDescriptorImageInfo& descriptorImageInfo = descriptorImageInfos[descriptorImageInfoOffset + descriptorImageIndex];
 
-					// TODO: Allow custom sampler.
-					descriptorImageInfo.sampler = nullptr;
+					if (descriptorImage.sampler != nullptr) {
+						descriptorImageInfo.sampler = std::static_pointer_cast<VulkanSampler>(descriptorImage.sampler)->object;
+					}
+					else {
+						descriptorImageInfo.sampler = nullptr;
+					}
 
 					descriptorImageInfo.imageView = imageView->object;
 					descriptorImageInfo.imageLayout = getVkImageLayout(descriptorImage.imageLayout);
