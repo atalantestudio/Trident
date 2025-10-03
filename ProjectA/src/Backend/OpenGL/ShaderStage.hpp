@@ -1,6 +1,7 @@
 #pragma once
 
 namespace ProjectA {
+	// TODO: Treat as flag.
 	static GLenum getGlShaderStage(ShaderStage shaderStage) {
 		if (shaderStage == ShaderStage::VERTEX) {
 			return GL_VERTEX_SHADER;
