@@ -14,17 +14,20 @@ namespace ProjectA {
 
 		public:
 			void build() override {
-				buildImage();
-				buildImageView();
-				buildVertexAndIndexBuffers();
-
+				setupImage();
+				setupImageView();
+				createBuffers();
 				writeImage();
 
-				buildRenderPass();
-				buildSampler();
-				buildImageDescriptorSetLayout();
-				buildPipelineLayout();
-				buildRenderPipeline();
+				setupRenderPass();
+				setupSampler();
+
+				createImageDescriptorSetLayout();
+				allocateImageDescriptorSetLayout();
+				updateImageDescriptorSetLayout();
+
+				setupPipelineLayout();
+				setupRenderPipeline();
 
 				recreateFramebuffers();
 			}
@@ -53,7 +56,7 @@ namespace ProjectA {
 			}
 
 		private:
-			void buildImage() {
+			void setupImage() {
 				ImageDescriptor imageDescriptor{};
 				imageDescriptor.type = ImageType::TEXTURE_2D;
 				imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
@@ -69,7 +72,7 @@ namespace ProjectA {
 				image = createImage(imageDescriptor);
 			}
 
-			void buildImageView() {
+			void setupImageView() {
 				ImageViewDescriptor imageViewDescriptor{};
 				imageViewDescriptor.mipLevelOffset = 0;
 				imageViewDescriptor.mipLevelCount = image->getMipLevelCount();
@@ -79,7 +82,7 @@ namespace ProjectA {
 				imageView = image->createView(imageViewDescriptor);
 			}
 
-			void buildRenderPass() {
+			void setupRenderPass() {
 				Attachment swapchainAttachment{};
 				swapchainAttachment.format = getSurface()->getFormat();
 				swapchainAttachment.sampleCount = 1;
@@ -103,18 +106,22 @@ namespace ProjectA {
 				renderPass = createRenderPass(renderPassDescriptor);
 			}
 
-			void buildImageDescriptorSetLayout() {
+			void createImageDescriptorSetLayout() {
 				DescriptorSetLayoutBinding imageBinding{};
 				imageBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
 				imageBinding.descriptorCount = 1;
 				imageBinding.shaderStages = ShaderStage::FRAGMENT;
 
 				imageDescriptorSetLayout = createDescriptorSetLayout({imageBinding});
+			}
 
+			void allocateImageDescriptorSetLayout() {
 				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({imageDescriptorSetLayout});
 
 				imageDescriptorSet = descriptorSets[0];
+			}
 
+			void updateImageDescriptorSetLayout() {
 				DescriptorImage descriptorImage{};
 				descriptorImage.imageView = imageView;
 				descriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
@@ -128,14 +135,14 @@ namespace ProjectA {
 				getDevice()->updateDescriptorSets({imageWriteDescriptorSet});
 			}
 
-			void buildPipelineLayout() {
+			void setupPipelineLayout() {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 				pipelineLayoutDescriptor.descriptorSetLayouts = {imageDescriptorSetLayout};
 
 				pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 			}
 
-			void buildRenderPipeline() {
+			void setupRenderPipeline() {
 				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 				vertexInputBinding.registerAttribute<svec2<float32>>();
 
@@ -173,7 +180,7 @@ namespace ProjectA {
 				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 			}
 
-			void buildVertexAndIndexBuffers() {
+			void createBuffers() {
 				const ref<Buffer> stagingBuffer = createStagingBuffer(VERTEX_COUNT * sizeof(Vertex) + sizeof(DispatchIndirectCommand));
 
 				uint8* stagingBufferMappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
@@ -230,7 +237,7 @@ namespace ProjectA {
 				getDevice()->waitIdle();
 			}
 
-			void buildSampler() {
+			void setupSampler() {
 				SamplerDescriptor samplerDescriptor{};
 				samplerDescriptor.magFilter = SamplerFilter::NEAREST;
 				samplerDescriptor.minFilter = SamplerFilter::NEAREST;

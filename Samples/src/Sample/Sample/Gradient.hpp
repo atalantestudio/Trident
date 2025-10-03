@@ -6,8 +6,8 @@ namespace ProjectA {
 	class SampleRenderer : public Renderer {
 		public:
 			void build() override {
-				buildRenderPass();
-				buildRenderPipeline();
+				setupRenderPass();
+				setupRenderPipeline();
 
 				recreateFramebuffers();
 			}
@@ -34,7 +34,7 @@ namespace ProjectA {
 			}
 
 		private:
-			void buildRenderPass() {
+			void setupRenderPass() {
 				Attachment swapchainAttachment{};
 				swapchainAttachment.format = getSurface()->getFormat();
 				swapchainAttachment.sampleCount = 1;
@@ -58,7 +58,7 @@ namespace ProjectA {
 				renderPass = createRenderPass(renderPassDescriptor);
 			}
 
-			void buildRenderPipeline() {
+			void setupRenderPipeline() {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 
 				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);

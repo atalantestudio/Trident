@@ -16,9 +16,9 @@ namespace ProjectA {
 
 		public:
 			void build() override {
-				buildRenderPass();
-				buildRenderPipeline();
-				buildVertexAndIndexBuffers();
+				setupRenderPass();
+				setupRenderPipeline();
+				createBuffers();
 
 				recreateFramebuffers();
 			}
@@ -47,7 +47,7 @@ namespace ProjectA {
 			}
 
 		private:
-			void buildRenderPass() {
+			void setupRenderPass() {
 				Attachment swapchainAttachment{};
 				swapchainAttachment.format = getSurface()->getFormat();
 				swapchainAttachment.sampleCount = 1;
@@ -71,7 +71,7 @@ namespace ProjectA {
 				renderPass = createRenderPass(renderPassDescriptor);
 			}
 
-			void buildRenderPipeline() {
+			void setupRenderPipeline() {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 
 				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
@@ -114,7 +114,7 @@ namespace ProjectA {
 				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 			}
 
-			void buildVertexAndIndexBuffers() {
+			void createBuffers() {
 				const ref<Buffer> stagingBuffer = createStagingBuffer(VERTEX_COUNT * sizeof(Vertex) + INDEX_COUNT * sizeof(uint16));
 
 				uint8* stagingBufferMappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
