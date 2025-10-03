@@ -6,61 +6,6 @@
 
 namespace ProjectA {
 	class Physics2DRenderer : public Renderer {
-		public:
-			void build() override;
-
-			// After registering the scene, the vertex buffer cannot be resized.
-			void registerScene(const Scene2D& scene);
-
-			// x and y are in the range [0, viewport].
-			const vec2<float32>& getNdcMousePosition() const;
-
-			// x and y are in the range [0, viewport].
-			void setMousePosition(float32 x, float32 y);
-
-			void zoom(float32 zoomLevelDelta);
-
-			void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const;
-
-			void render(const ref<CommandEncoder>& commandEncoder) const override;
-
-			void selectEntity(Entity entity);
-
-			void setPlaceholderOffset(const vec2<float32>& offset) const;
-
-			void resize(WindowResizeEvent& event) override;
-
-			void writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
-
-			void registerFeature(const Feature2D& feature);
-
-			void clearRegisteredData();
-
-		private:
-			void recreateFramebuffers();
-
-			void initializeViewUniformBuffer();
-			void initializeCameraUniformBuffer();
-			void initializeGridVertexBuffer();
-			void initializeGridRenderPipeline();
-			void initializeCenterOfMassBuffer();
-			void initializeCenterOfMassRenderPipeline();
-			void initializeClosestPointBuffer();
-			void initializeDistanceRenderPipeline();
-			void initializeVertexFeatureBuffer();
-			void initializeEdgeVertexFeatureBuffer();
-			void initializeFeaturePipelineLayout();
-			void initializeVertexFeatureRenderPipeline();
-			void initializeEdgeFeatureRenderPipeline();
-
-			void updateCentersOfMass() const;
-
-			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
-			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
-			void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
-			void renderFeatures(const ref<CommandEncoder>& commandEncoder) const;
-			void renderSelectedInstancePlaceholder(const ref<CommandEncoder>& commandEncoder) const;
-
 		private:
 			struct Instance {
 				mat3x3<float32> world;
@@ -70,12 +15,12 @@ namespace ProjectA {
 				uint32 selected = 0;
 			};
 
-			struct CameraUniform {
+			struct Camera {
 				mat3x3<float32> projection;
 				float32 zoomLevel;
 			};
 
-			struct ViewUniform {
+			struct View {
 				svec2<float32> viewport;
 			};
 
@@ -89,18 +34,106 @@ namespace ProjectA {
 			static constexpr float32 MAX_ZOOM_LEVEL = 64.0f;
 			static constexpr float32 DEFAULT_ZOOM_LEVEL = 32.0f;
 
+		public:
+			void build() override;
+
+			// After registering the scene, the vertex buffer cannot be resized.
+			/* void registerScene(const Scene2D& scene);
+
+			// x and y are in the range [0, viewport].
+			const vec2<float32>& getNdcMousePosition() const;
+
+			// x and y are in the range [0, viewport].
+			void setMousePosition(float32 x, float32 y);
+
+			void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const; */
+
+			void render(const ref<CommandEncoder>& commandEncoder) const override;
+
+			/* void selectEntity(Entity entity);
+
+			void setPlaceholderOffset(const vec2<float32>& offset) const; */
+
+			void resize(WindowResizeEvent& event) override;
+
+			void zoom(float32 zoomLevelDelta);
+
+			/* void writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
+
+			void registerFeature(const Feature2D& feature);
+
+			void clearRegisteredData(); */
+
+		private:
+			void setupRenderPass();
+
+			void createCameraBuffer();
+			void createViewBuffer();
+
+			void createCameraViewDescriptorSetLayout();
+
+			void allocateDescriptorSets();
+
+			void updateCameraViewDescriptorSet();
+
+			void createCameraViewPipelineLayout();
+
+			void createGridRenderPipeline();
+
+			/////
+
+			/* void createCenterOfMassBuffer();
+			void createCenterOfMassRenderPipeline();
+			void createClosestPointBuffer();
+			void createDistanceRenderPipeline();
+			void createVertexFeatureBuffer();
+			void createEdgeVertexFeatureBuffer();
+			void createFeaturePipelineLayout();
+			void createVertexFeatureRenderPipeline();
+			void createEdgeFeatureRenderPipeline(); */
+
+			void recreateMultisampleImage();
+			void recreateMultisampleImageView();
+			void recreateDepthStencilImage();
+			void recreateDepthStencilImageView();
+			void recreateFramebuffers();
+
+			void updateCameraProjection() const;
+			void updateViewport() const;
+			// void updateCentersOfMass() const;
+
+			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
+			/* void renderScene(const ref<CommandEncoder>& commandEncoder) const;
+			void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
+			void renderFeatures(const ref<CommandEncoder>& commandEncoder) const;
+			void renderSelectedInstancePlaceholder(const ref<CommandEncoder>& commandEncoder) const; */
+
 		private:
 			ref<RenderPass> renderPass;
 
-			sequence<ref<Framebuffer>> framebuffers;
-
-			ref<Image> colorImage;
-			ref<ImageView> colorImageView;
-
+			ref<Image> multisampleImage;
 			ref<Image> depthStencilImage;
+
+			ref<ImageView> multisampleImageView;
 			ref<ImageView> depthStencilImageView;
 
-			ref<Buffer> gridVertexBuffer;
+			sequence<ref<Framebuffer>> framebuffers;
+
+			ref<DescriptorSetLayout> cameraViewDescriptorSetLayout;
+
+			ref<DescriptorSet> cameraViewDescriptorSet;
+
+			ref<PipelineLayout> cameraViewPipelineLayout;
+
+			ref<RenderPipeline> gridRenderPipeline;
+
+			ref<Buffer> cameraBuffer;
+			ref<Buffer> viewBuffer;
+			ref<Buffer> closestPointBuffer;
+
+			Camera* cameraBufferMappedRange = nullptr;
+			View* viewBufferMappedRange = nullptr;
+			svec2<float32>* closestPointBufferMappedRange = nullptr;
 
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
@@ -118,18 +151,6 @@ namespace ProjectA {
 
 			ref<Buffer> instanceBuffer;
 			Instance* instanceMappedRange = nullptr;
-
-			ref<Buffer> closestPointBuffer;
-			svec2<float32>* closestPointMappedRange = nullptr;
-
-			ref<Buffer> cameraUniformBuffer;
-			CameraUniform* cameraMappedRange = nullptr;
-
-			ref<Buffer> viewUniformBuffer;
-			ViewUniform* viewMappedRange = nullptr;
-
-			ref<PipelineLayout> gridPipelineLayout;
-			ref<RenderPipeline> gridRenderPipeline;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> fillRenderPipeline;
