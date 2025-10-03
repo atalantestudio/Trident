@@ -63,7 +63,8 @@ namespace ProjectA {
 			}
 
 			const Attachment& getAttachment(uint32 attachmentIndex) const {
-				DEBUG_ASSERT(attachmentIndex < attachments.count);
+				// TODO: This causes overflow with multisample attachments.
+				DEBUG_ASSERT(attachmentIndex < attachmentReferenceCount);
 
 				return attachments[attachmentIndex];
 			}
