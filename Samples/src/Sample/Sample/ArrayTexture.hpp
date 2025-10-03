@@ -111,7 +111,7 @@ namespace ProjectA {
 					RenderPipelineDescriptor renderPipelineDescriptor{};
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("ArrayTextureOrTextureArray.vert", vertexShaderModuleDescriptor);
+					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("VertexOffset2DUVTextureIndex.vert", vertexShaderModuleDescriptor);
 					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("ArrayTexture.frag", fragmentShaderModuleDescriptor);
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;

@@ -6,7 +6,7 @@ namespace ProjectA {
 	class SampleRenderer : public Renderer {
 		private:
 			struct Vertex {
-				svec2<float32> vertex;
+				svec2<float32> position;
 				vec3<float32> color;
 			};
 
@@ -116,11 +116,11 @@ namespace ProjectA {
 				const ref<Buffer> vertexStagingBuffer = createStagingBuffer(VERTEX_COUNT * sizeof(Vertex));
 
 				Vertex* vertexStagingBufferMappedRange = vertexStagingBuffer->map<Vertex>(0, vertexStagingBuffer->size);
-				vertexStagingBufferMappedRange[0].vertex = {-0.5f, -0.5f};
+				vertexStagingBufferMappedRange[0].position = {-0.5f, -0.5f};
 				vertexStagingBufferMappedRange[0].color = {1.0f, 0.0f, 0.0f};
-				vertexStagingBufferMappedRange[1].vertex = {0.0f, 0.5f};
+				vertexStagingBufferMappedRange[1].position = {0.0f, 0.5f};
 				vertexStagingBufferMappedRange[1].color = {0.0f, 1.0f, 0.0f};
-				vertexStagingBufferMappedRange[2].vertex = {0.5f, -0.5f};
+				vertexStagingBufferMappedRange[2].position = {0.5f, -0.5f};
 				vertexStagingBufferMappedRange[2].color = {0.0f, 0.0f, 1.0f};
 
 				vertexStagingBuffer->unmap();

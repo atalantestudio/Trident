@@ -6,7 +6,7 @@ namespace ProjectA {
 	class SampleRenderer : public Renderer {
 		private:
 			struct Vertex {
-				svec2<float32> vertex;
+				svec2<float32> position;
 				vec3<float32> color;
 			};
 
@@ -120,11 +120,11 @@ namespace ProjectA {
 				uint8* stagingBufferMappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
 
 				Vertex* vertexStagingBufferMappedRange = pointer_cast<Vertex*>(stagingBufferMappedRange);
-				vertexStagingBufferMappedRange[0].vertex = {-0.5f, -0.5f};
+				vertexStagingBufferMappedRange[0].position = {-0.5f, -0.5f};
 				vertexStagingBufferMappedRange[0].color = {1.0f, 0.0f, 0.0f};
-				vertexStagingBufferMappedRange[1].vertex = {0.0f, 0.5f};
+				vertexStagingBufferMappedRange[1].position = {0.0f, 0.5f};
 				vertexStagingBufferMappedRange[1].color = {0.0f, 1.0f, 0.0f};
-				vertexStagingBufferMappedRange[2].vertex = {0.5f, -0.5f};
+				vertexStagingBufferMappedRange[2].position = {0.5f, -0.5f};
 				vertexStagingBufferMappedRange[2].color = {0.0f, 0.0f, 1.0f};
 
 				uint16* indexStagingBufferMappedRange = pointer_cast<uint16*>(stagingBufferMappedRange + VERTEX_COUNT * sizeof(Vertex));

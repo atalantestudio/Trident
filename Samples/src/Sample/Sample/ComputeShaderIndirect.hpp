@@ -184,9 +184,9 @@ namespace ProjectA {
 				vertexStagingBufferMappedRange[2].vertex = {-1.0f, -3.0f};
 
 				DispatchIndirectCommand* indirectStagingBufferMappedRange = pointer_cast<DispatchIndirectCommand*>(stagingBufferMappedRange + VERTEX_COUNT * sizeof(Vertex));
-				indirectStagingBufferMappedRange->x = 2;
-				indirectStagingBufferMappedRange->y = 2;
-				indirectStagingBufferMappedRange->z = 1;
+				indirectStagingBufferMappedRange[0].x = 2;
+				indirectStagingBufferMappedRange[0].y = 2;
+				indirectStagingBufferMappedRange[0].z = 1;
 
 				stagingBuffer->unmap();
 
