@@ -16,6 +16,10 @@ namespace ProjectA {
 				svec2<float32> viewport;
 			};
 
+			struct Vertex {
+				svec2<float32> position;
+			};
+
 			struct Instance {
 				mat3x3<float32> world;
 				vec4<float32> fillColor;
@@ -24,11 +28,20 @@ namespace ProjectA {
 				uint32 selected = 0;
 			};
 
+			struct CenterOfMass {
+				vec3<float32> position;
+			};
+
+			struct ClosestPoint {
+				svec2<float32> position;
+			};
+
 			struct Placeholder {
 				svec2<float32> offset;
 			};
 
 		private:
+			static constexpr bool ENABLE_DISTANCE = false;
 			static constexpr uint8 SAMPLE_COUNT = 4;
 			static constexpr float32 MIN_ZOOM_LEVEL = 1.0f;
 			static constexpr float32 MAX_ZOOM_LEVEL = 64.0f;
@@ -37,21 +50,21 @@ namespace ProjectA {
 		public:
 			void build() override;
 
+			// x and y are in the range [0, viewport].
+			const vec2<float32>& getNdcMousePosition() const;
+
 			void setScene(const Scene2D& scene);
 			void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const;
 			void setInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
 
 			// x and y are in the range [0, viewport].
-			/* const vec2<float32>& getNdcMousePosition() const;
-
-			// x and y are in the range [0, viewport].
 			void setMousePosition(float32 x, float32 y);
 
-			void setPlaceholderOffset(const vec2<float32>& offset) const; */
+			// void setPlaceholderOffset(const vec2<float32>& offset) const;
+
+			void selectEntity(Entity entity);
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override;
-
-			// void selectEntity(Entity entity);
 
 			void resize(WindowResizeEvent& event) override;
 
@@ -71,6 +84,7 @@ namespace ProjectA {
 			void recreateFramebuffers();
 			void recreateVertexBuffer(uint64 size);
 			void recreateInstanceBuffer(uint64 size);
+			void recreateCenterOfMassBuffer(uint64 size);
 			void recreateIndexBuffer(uint64 size);
 
 			void createCameraBuffer();
@@ -81,9 +95,9 @@ namespace ProjectA {
 			void createGridRenderPipeline();
 			void createFillRenderPipeline();
 			void createStrokeRenderPipeline();
+			void createCenterOfMassRenderPipeline();
 			void createDistanceRenderPipeline();
 			/* void createCenterOfMassBuffer();
-			void createCenterOfMassRenderPipeline();
 			void createVertexFeatureBuffer();
 			void createEdgeVertexFeatureBuffer();
 			void createFeaturePipelineLayout();
@@ -95,9 +109,9 @@ namespace ProjectA {
 			void copyBuffers(const ref<Buffer>& stagingBuffer) const;
 
 			void updateCameraViewDescriptorSet() const;
+			void updateCentersOfMass() const;
 			void updateCameraProjection() const;
 			void updateViewport() const;
-			// void updateCentersOfMass() const;
 
 			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
@@ -106,6 +120,8 @@ namespace ProjectA {
 			// void renderSelectedInstancePlaceholder(const ref<CommandEncoder>& commandEncoder) const;
 
 		private:
+			const Scene2D* scene = nullptr;
+
 			ref<RenderPass> renderPass;
 
 			ref<Image> multisampleImage;
@@ -125,62 +141,45 @@ namespace ProjectA {
 			ref<RenderPipeline> gridRenderPipeline;
 			ref<RenderPipeline> fillRenderPipeline;
 			ref<RenderPipeline> strokeRenderPipeline;
+			ref<RenderPipeline> centerOfMassRenderPipeline;
 			ref<RenderPipeline> distanceRenderPipeline;
 
 			ref<Buffer> cameraBuffer;
 			ref<Buffer> viewBuffer;
 			ref<Buffer> closestPointBuffer;
 			ref<Buffer> vertexBuffer;
-			ref<Buffer> indexBuffer;
 			ref<Buffer> instanceBuffer;
+			ref<Buffer> centerOfMassBuffer;
+			ref<Buffer> indexBuffer;
 
 			Camera* cameraBufferMappedRange = nullptr;
 			View* viewBufferMappedRange = nullptr;
-			svec2<float32>* closestPointBufferMappedRange = nullptr;
+			ClosestPoint* closestPointBufferMappedRange = nullptr;
 			Instance* instanceBufferMappedRange = nullptr;
-
-			/////
-
-			ref<Buffer> centerOfMassBuffer;
-			vec3<float32>* centerOfMassMappedRange = nullptr;
-
-			ref<Buffer> vertexFeatureBuffer;
-			svec2<float32>* vertexFeatureMappedRange = nullptr;
-			uint32 vertexFeatureCount = 0;
-
-			ref<Buffer> edgeVertexFeatureBuffer;
-			svec2<float32>* edgeVertexFeatureMappedRange = nullptr;
-			uint32 edgeVertexFeatureCount = 0;
-
-			ref<PipelineLayout> pipelineLayout;
-
-			ref<Buffer> placeholderBuffer;
-
-			Placeholder* placeholderBufferMappedRange = nullptr;
-
-			ref<PipelineLayout> placeholderFillPipelineLayout;
-			ref<RenderPipeline> placeholderFillRenderPipeline;
-
-			ref<PipelineLayout> placeholderStrokePipelineLayout;
-			ref<RenderPipeline> placeholderStrokeRenderPipeline;
-
-			// The center of mass pipeline uses the same layout as the closest feature pipelines.
-			ref<RenderPipeline> centerOfMassRenderPipeline;
-
-			ref<RenderPipeline> placeholderCenterOfMassRenderPipeline;
-
-			ref<PipelineLayout> featurePipelineLayout;
-			ref<RenderPipeline> vertexFeatureRenderPipeline;
-			ref<RenderPipeline> edgeFeatureRenderPipeline;
-
-			uint32 indexCount = 0;
-			uint32 gridVertexCount = 0;
+			CenterOfMass* centerOfMassBufferMappedRange = nullptr;
 
 			vec2<float32> mousePosition;
 			vec2<float32> ndcMousePosition;
 
 			uint32 selectedInstanceIndex = max<uint32>();
 
-			const Scene2D* scene = nullptr;
+			/////
+
+			ref<Buffer> vertexFeatureBuffer;
+			svec2<float32>* vertexFeatureMappedRange = nullptr;
+			uint32 vertexFeatureCount = 0;
+			ref<Buffer> edgeVertexFeatureBuffer;
+			svec2<float32>* edgeVertexFeatureMappedRange = nullptr;
+			uint32 edgeVertexFeatureCount = 0;
+			ref<Buffer> placeholderBuffer;
+			Placeholder* placeholderBufferMappedRange = nullptr;
+			ref<PipelineLayout> placeholderFillPipelineLayout;
+			ref<RenderPipeline> placeholderFillRenderPipeline;
+			ref<PipelineLayout> placeholderStrokePipelineLayout;
+			ref<RenderPipeline> placeholderStrokeRenderPipeline;
+			ref<RenderPipeline> placeholderCenterOfMassRenderPipeline;
+			ref<PipelineLayout> featurePipelineLayout;
+			ref<RenderPipeline> vertexFeatureRenderPipeline;
+			ref<RenderPipeline> edgeFeatureRenderPipeline;
 	};
 }

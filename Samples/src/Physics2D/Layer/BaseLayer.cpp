@@ -35,7 +35,7 @@ namespace ProjectA {
 			renderer.setInstanceTransform(rigidBodyIndex, rigidBody.transform);
 		}
 
-		// renderer.selectEntity(selectedEntity);
+		renderer.selectEntity(selectedEntity);
 
 		if (selectedEntity != max<uint32>()) {
 			// renderer.setPlaceholderOffset(placeholderOffset);
@@ -88,7 +88,7 @@ namespace ProjectA {
 	}
 
 	void BaseLayer::checkHover() {
-		/* hoveredEntity = max<uint32>();
+		hoveredEntity = max<uint32>();
 
 		const ComponentPool<RigidBody2D>& rigidBodyComponentPool = scene.getComponentPool<RigidBody2D>();
 
@@ -113,7 +113,7 @@ namespace ProjectA {
 
 				break;
 			}
-		} */
+		}
 	}
 
 	void BaseLayer::onEvent(Event& event) {
@@ -144,7 +144,7 @@ namespace ProjectA {
 	}
 
 	bool BaseLayer::onMouseMove(MouseMoveEvent& event) {
-		/* const float32 x = static_cast<float32>(event.getX());
+		const float32 x = static_cast<float32>(event.getX());
 		const float32 y = static_cast<float32>(event.getY());
 
 		const vec2<float32> previousPosition = renderer.getNdcMousePosition();
@@ -156,7 +156,7 @@ namespace ProjectA {
 			const vec2<float32> positionDelta = position - previousPosition;
 
 			placeholderOffset += positionDelta;
-		} */
+		}
 
 		return true;
 	}
