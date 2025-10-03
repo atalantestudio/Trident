@@ -2,269 +2,31 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
-// PNG test images:
-// - ../ProjectA/src/Asset/Image/icon-black.png		OK
-// - ../ProjectA/src/Asset/Image/icon-white.png		OK
-// - ../ProjectA/src/Asset/Image/Quiver.png			OK
-// - Asset/Image/qoi_test_images/dice.png			OK
-// - Asset/Image/qoi_test_images/edgecase.png		OK
-// - Asset/Image/qoi_test_images/kodim10.png		OK
-// - Asset/Image/qoi_test_images/kodim23.png		OK
-// - Asset/Image/qoi_test_images/qoi_logo.png		OK
-// - Asset/Image/qoi_test_images/testcard.png		OK
-// - Asset/Image/qoi_test_images/testcard_rgba.png	OK
-// - Asset/Image/qoi_test_images/wikipedia_008.png	OK
-// - Asset/Image/Baboon.png							OK
-// - Asset/Image/Cameraman.png						OK
-// - Asset/Image/checkerboard_cm0.png				OK
-// - Asset/Image/checkerboard_cm9.png				OK
-// - Asset/Image/checkerboard1.png					OK
-// - Asset/Image/checkerboard2.png					OK
-// - Asset/Image/graffiti.png						OK
-// - Asset/Image/Horse_rgb.png						OK
-// - Asset/Image/Horse_rgba.png						OK
-// - Asset/Image/Lenna.png							OK
-// - Asset/Image/MetallicGold.png					OK
-// - Asset/Image/Pepper.png							OK
-// - Asset/Image/RPGpack_sheet_2X.png				OK
-// - Asset/Image/test_inflate_0.png					OK
-// - Asset/Image/test_inflate_1.png					OK
-// - Asset/Image/test_inflate_1b.png				OK
-// - Asset/Image/test_inflate_2.png					OK
-// - Asset/Image/test_inflate_9.png					OK
-// - Asset/Image/test_inflate2_0.png				OK
-// - Asset/Image/test_inflate2_9.png				OK
-// - Asset/Image/Zelda.png							OK
-
-// QOI test images:
-// - Asset/Image/qoi_test_images/dice.qoi			OK
-// - Asset/Image/qoi_test_images/edgecase.qoi		OK
-// - Asset/Image/qoi_test_images/kodim10.qoi		OK
-// - Asset/Image/qoi_test_images/kodim23.qoi		OK
-// - Asset/Image/qoi_test_images/qoi_logo.qoi		OK
-// - Asset/Image/qoi_test_images/testcard.qoi		OK
-// - Asset/Image/qoi_test_images/testcard_rgba.qoi	OK
-// - Asset/Image/qoi_test_images/wikipedia_008.qoi	OK
-// - Asset/Image/test1.qoi							OK
 namespace ProjectA {
 	class SampleRenderer : public Renderer {
+		private:
+			static constexpr char8* IMAGE_PATH = "Asset/Image/Zelda.png";
+
 		public:
 			void build() override {
-				const sequence<uint8> data = Filesystem::openBuffer("Asset/Image/Zelda.png");
-				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(data);
-				// const File<FileFormat::QOI> file = Filesystem::decode<FileFormat::QOI>(data);
+				setupRenderPass();
 
-				const ref<Device> device = getDevice();
+				loadImage();
+				setupImageView();
+				setupSampler();
 
-				ref<Buffer> imageStagingBuffer;
-
-				// 1. Create image staging buffer and copy the image data to it.
-				{
-					imageStagingBuffer = createStagingBuffer(file.data.count);
-
-					uint8* imageStagingBufferMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->size);
-
-					std::copy(file.data.begin(), file.data.end(), imageStagingBufferMappedRange);
-
-					imageStagingBuffer->unmap();
-				}
-
-				// 2. Create image and copy the image staging buffer to it.
-				{
-					// NOTE: On Vulkan, the data of an RGB image must first be copied to an RGBA image which supports TRANSFER_DST usage.
-					ImageDescriptor imageDescriptor;
-					imageDescriptor.type = ImageType::TEXTURE_2D;
-					imageDescriptor.format = file.format;
-					imageDescriptor.extent = file.extent;
-					imageDescriptor.mipLevelCount = 1;
-					imageDescriptor.layerCount = 1;
-					imageDescriptor.sampleCount = 1;
-					imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
-					imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
-
-					image = createImage(imageDescriptor);
-
-					sequence<BufferImageCopyRegion> bufferImageCopyRegions(1);
-
-					BufferImageCopyRegion& bufferImageCopyRegion = bufferImageCopyRegions[0];
-					bufferImageCopyRegion.bufferOffset = 0;
-					bufferImageCopyRegion.imageOffsetX = 0;
-					bufferImageCopyRegion.imageOffsetY = 0;
-					bufferImageCopyRegion.imageOffsetZ = 0;
-					bufferImageCopyRegion.imageExtent = image->getExtent();
-					bufferImageCopyRegion.imageMipLevel = 0;
-					bufferImageCopyRegion.imageLayerOffset = 0;
-					bufferImageCopyRegion.imageLayerCount = 1;
-
-					CommandBufferDescriptor commandBufferDescriptor;
-					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-					const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
-					const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
-
-					commandEncoder->begin();
-					commandEncoder->setImageMemoryBarrier(image, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-					commandEncoder->copyBufferToImage(imageStagingBuffer, image, bufferImageCopyRegions);
-					commandEncoder->setImageMemoryBarrier(image, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-
-					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-					graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-					device->waitIdle();
-				}
-
-				// 3. Create image view.
-				{
-					ImageViewDescriptor imageViewDescriptor{};
-					imageViewDescriptor.mipLevelOffset = 0;
-					imageViewDescriptor.mipLevelCount = image->getMipLevelCount();
-					imageViewDescriptor.layerOffset = 0;
-					imageViewDescriptor.layerCount = image->getLayerCount();
-
-					imageView = image->createView(imageViewDescriptor);
-				}
-
-				// 4. Create image sampler.
-				{
-					SamplerDescriptor samplerDescriptor{};
-					samplerDescriptor.magFilter = SamplerFilter::NEAREST;
-					samplerDescriptor.minFilter = SamplerFilter::NEAREST;
-
-					sampler = createSampler(samplerDescriptor);
-				}
-
-				// 5. Create render pass and subpass.
-				{
-					const ref<Surface> surface = getSurface();
-
-					Attachment swapchainAttachment{};
-					swapchainAttachment.format = surface->getFormat();
-					swapchainAttachment.sampleCount = 1;
-					swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-					swapchainAttachment.storeOperation = StoreOperation::STORE;
-					swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
-
-					AttachmentReference swapchainAttachmentReference{};
-					swapchainAttachmentReference.index = 0;
-					swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-					SubpassDescriptor subpassDescriptor{};
-					subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
-
-					const ref<Subpass> subpass = createSubpass(subpassDescriptor);
-
-					RenderPassDescriptor renderPassDescriptor{};
-					renderPassDescriptor.attachments = {swapchainAttachment};
-					renderPassDescriptor.subpasses = {subpass};
-
-					renderPass = createRenderPass(renderPassDescriptor);
-				}
-
-				// 6. Create framebuffers.
 				recreateFramebuffers();
 
-				// 7. Create pipeline layout.
-				{
-					DescriptorSetLayoutBinding textureDescriptorSetLayoutBinding;
-					textureDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-					textureDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
-					textureDescriptorSetLayoutBinding.imageViews = {imageView};
-					textureDescriptorSetLayoutBinding.samplers = {sampler};
+				createImageDescriptorSetLayout();
+				allocateImageDescriptorSet();
+				updateImageDescriptorSet();
 
-					DescriptorSetLayout descriptorSetLayout;
-					descriptorSetLayout.bindings = {textureDescriptorSetLayoutBinding};
-
-					PipelineLayoutDescriptor pipelineLayoutDescriptor;
-					pipelineLayoutDescriptor.layouts = {descriptorSetLayout};
-
-					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
-				}
-
-				// 8. Create render pipeline.
-				{
-					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-					vertexInputBinding.registerAttribute<svec2<float32>>();
-
-					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-					vertexShaderModuleDescriptor.entryPoint = "main";
-
-					ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-					fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-					fragmentShaderModuleDescriptor.entryPoint = "main";
-
-					ColorBlendAttachment colorBlendAttachment{};
-					colorBlendAttachment.blend = true;
-					colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-					colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
-
-					RenderPipelineDescriptor renderPipelineDescriptor{};
-					renderPipelineDescriptor.renderPass = renderPass;
-					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Base/Vertex2DUV.vert", vertexShaderModuleDescriptor);
-					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Base/TextureRGBAFlipY.frag", fragmentShaderModuleDescriptor);
-					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-					renderPipelineDescriptor.cullMode = CullMode::BACK;
-					renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-					renderPipelineDescriptor.lineWidth = 1.0f;
-					renderPipelineDescriptor.minSampleShading = 0.0f;
-					renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-					renderPipelineDescriptor.depthStencilState.depthTest = false;
-					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-
-					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
-				}
-
-				// 9. Create vertex buffer.
-				{
-					constexpr uint64 vertexBufferSize = 3 * sizeof(svec2<float32>);
-
-					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
-
-					svec2<float32>* vertexMappedRange = vertexStagingBuffer->map<svec2<float32>>(0, vertexBufferSize);
-
-					vertexMappedRange[0] = {-1.0f,  1.0f};
-					vertexMappedRange[1] = { 3.0f,  1.0f};
-					vertexMappedRange[2] = {-1.0f, -3.0f};
-
-					vertexStagingBuffer->unmap();
-
-					BufferDescriptor vertexBufferDescriptor;
-					vertexBufferDescriptor.size = vertexBufferSize;
-					vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-					vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-					vertexBuffer = createBuffer(vertexBufferDescriptor);
-
-					sequence<BufferCopyRegion> bufferCopyRegions(1);
-
-					BufferCopyRegion& vertexBufferCopyRegion = bufferCopyRegions[0];
-					vertexBufferCopyRegion.sourceOffset = 0;
-					vertexBufferCopyRegion.destinationOffset = 0;
-					vertexBufferCopyRegion.size = vertexBufferSize;
-
-					CommandBufferDescriptor commandBufferDescriptor{};
-					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-					const ref<Queue> transferQueue = device->getQueue(QueueFamilyCapability::TRANSFER);
-					const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
-
-					commandEncoder->begin();
-					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, bufferCopyRegions);
-
-					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-					transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-					device->waitIdle();
-				}
+				setupPipelineLayout();
+				setupRenderPipeline();
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
-				BeginRenderPassDescriptor beginRenderPassDescriptor;
+				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}};
 
@@ -273,15 +35,10 @@ namespace ProjectA {
 				const float32 height = static_cast<float32>(swapchainExtent.height);
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-				commandEncoder->bindRenderPipeline(renderPipeline);
-
-				// TODO
-				BREAKPOINT();
-				// commandEncoder->bindDescriptorSets();
-
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
+				commandEncoder->bindRenderPipeline(renderPipeline);
+				commandEncoder->bindDescriptorSets(pipelineLayout, {imageDescriptorSet});
 				commandEncoder->draw(3, 1, 0, 0);
 				commandEncoder->endRenderPass();
 			}
@@ -291,6 +48,101 @@ namespace ProjectA {
 			}
 
 		private:
+			void setupRenderPass() {
+				Attachment swapchainAttachment{};
+				swapchainAttachment.format = getSurface()->getFormat();
+				swapchainAttachment.sampleCount = 1;
+				swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+				swapchainAttachment.storeOperation = StoreOperation::STORE;
+				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+
+				AttachmentReference swapchainAttachmentReference{};
+				swapchainAttachmentReference.index = 0;
+				swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
+				SubpassDescriptor subpassDescriptor{};
+				subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
+
+				const ref<Subpass> subpass = createSubpass(subpassDescriptor);
+
+				RenderPassDescriptor renderPassDescriptor{};
+				renderPassDescriptor.attachments = {swapchainAttachment};
+				renderPassDescriptor.subpasses = {subpass};
+
+				renderPass = createRenderPass(renderPassDescriptor);
+			}
+
+			void loadImage() {
+				const sequence<uint8> buffer = Filesystem::openBuffer(IMAGE_PATH);
+				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(buffer);
+
+				const ref<Buffer> imageStagingBuffer = createStagingBuffer(file.data.count);
+
+				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->size);
+
+				std::copy(file.data.begin(), file.data.end(), imageStagingBufferMappedRange);
+
+				imageStagingBuffer->unmap();
+
+				// NOTE: On Vulkan, the data of an RGB image must first be copied to an RGBA image which supports TRANSFER_DST usage.
+				ImageDescriptor imageDescriptor{};
+				imageDescriptor.type = ImageType::TEXTURE_2D;
+				imageDescriptor.format = file.format;
+				imageDescriptor.extent = file.extent;
+				imageDescriptor.mipLevelCount = 1;
+				imageDescriptor.layerCount = 1;
+				imageDescriptor.sampleCount = 1;
+				imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
+				imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+
+				image = createImage(imageDescriptor);
+
+				BufferImageCopyRegion bufferImageCopyRegion{};
+				bufferImageCopyRegion.bufferOffset = 0;
+				bufferImageCopyRegion.imageOffsetX = 0;
+				bufferImageCopyRegion.imageOffsetY = 0;
+				bufferImageCopyRegion.imageOffsetZ = 0;
+				bufferImageCopyRegion.imageExtent = image->getExtent();
+				bufferImageCopyRegion.imageMipLevel = 0;
+				bufferImageCopyRegion.imageLayerOffset = 0;
+				bufferImageCopyRegion.imageLayerCount = 1;
+
+				CommandBufferDescriptor commandBufferDescriptor{};
+				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
+				const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
+
+				commandEncoder->begin();
+				commandEncoder->setImageMemoryBarrier(image, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+				commandEncoder->copyBufferToImage(imageStagingBuffer, image, {bufferImageCopyRegion});
+				commandEncoder->setImageMemoryBarrier(image, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
+				getDevice()->waitIdle();
+			}
+
+			void setupImageView() {
+				ImageViewDescriptor imageViewDescriptor{};
+				imageViewDescriptor.mipLevelOffset = 0;
+				imageViewDescriptor.mipLevelCount = image->getMipLevelCount();
+				imageViewDescriptor.layerOffset = 0;
+				imageViewDescriptor.layerCount = image->getLayerCount();
+
+				imageView = image->createView(imageViewDescriptor);
+			}
+
+			void setupSampler() {
+				SamplerDescriptor samplerDescriptor{};
+				samplerDescriptor.magFilter = SamplerFilter::NEAREST;
+				samplerDescriptor.minFilter = SamplerFilter::NEAREST;
+
+				sampler = createSampler(samplerDescriptor);
+			}
+
 			void recreateFramebuffers() {
 				const ref<Swapchain>& swapchain = getSwapchain();
 
@@ -313,19 +165,87 @@ namespace ProjectA {
 				}
 			}
 
+			void createImageDescriptorSetLayout() {
+				DescriptorSetLayoutBinding imageBinding{};
+				imageBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+				imageBinding.descriptorCount = 1;
+				imageBinding.shaderStages = ShaderStage::FRAGMENT;
+
+				imageDescriptorSetLayout = createDescriptorSetLayout({imageBinding});
+			}
+
+			void allocateImageDescriptorSet() {
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({imageDescriptorSetLayout});
+
+				imageDescriptorSet = descriptorSets[0];
+			}
+
+			void updateImageDescriptorSet() {
+				DescriptorImage descriptorImage{};
+				descriptorImage.imageView = imageView;
+				descriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+				descriptorImage.sampler = sampler;
+
+				WriteDescriptorSet imageWriteDescriptorSet{};
+				imageWriteDescriptorSet.descriptorSet = imageDescriptorSet;
+				imageWriteDescriptorSet.bindingIndex = 0;
+				imageWriteDescriptorSet.descriptorImages = {descriptorImage};
+
+				getDevice()->updateDescriptorSets({imageWriteDescriptorSet});
+			}
+
+			void setupPipelineLayout() {
+				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
+				pipelineLayoutDescriptor.descriptorSetLayouts = {imageDescriptorSetLayout};
+
+				pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+			}
+
+			void setupRenderPipeline() {
+				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+				vertexShaderModuleDescriptor.entryPoint = "main";
+
+				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+				fragmentShaderModuleDescriptor.entryPoint = "main";
+
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule("Base/ScreenUV.vert", vertexShaderModuleDescriptor);
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Base/TextureRGBAFlipY.frag", fragmentShaderModuleDescriptor);
+
+				ColorBlendAttachment colorBlendAttachment{};
+				colorBlendAttachment.blend = true;
+				colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
+				colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+
+				RenderPipelineDescriptor renderPipelineDescriptor{};
+				renderPipelineDescriptor.pipelineLayout = pipelineLayout;
+				renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+				renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+				renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+				renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+				renderPipelineDescriptor.cullMode = CullMode::BACK;
+				renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+				renderPipelineDescriptor.lineWidth = 1.0f;
+				renderPipelineDescriptor.minSampleShading = 0.0f;
+				renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				renderPipelineDescriptor.depthStencilState.depthTest = false;
+				renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+				renderPipelineDescriptor.renderPass = renderPass;
+				renderPipelineDescriptor.subpassIndex = 0;
+
+				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
+			}
+
 		private:
+			ref<RenderPass> renderPass;
 			ref<Image> image;
 			ref<ImageView> imageView;
-
 			ref<Sampler> sampler;
-
-			ref<RenderPass> renderPass;
-
 			sequence<ref<Framebuffer>> framebuffers;
-
+			ref<DescriptorSetLayout> imageDescriptorSetLayout;
+			ref<DescriptorSet> imageDescriptorSet;
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
-
-			ref<Buffer> vertexBuffer;
 	};
 }
