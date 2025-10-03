@@ -16,6 +16,7 @@ namespace ProjectA {
 
 		createCameraBuffer();
 		createViewBuffer();
+		createClosestPointBuffer();
 
 		createCameraViewDescriptorSetLayout();
 
@@ -28,13 +29,11 @@ namespace ProjectA {
 		createGridRenderPipeline();
 		createFillRenderPipeline();
 		createStrokeRenderPipeline();
+		createDistanceRenderPipeline();
 
 		/////
 
-		/* createClosestPointBuffer();
-		createDistanceRenderPipeline();
-
-		createVertexFeatureBuffer();
+		/* createVertexFeatureBuffer();
 		createEdgeVertexFeatureBuffer();
 
 		createFeaturePipelineLayout();
@@ -187,40 +186,6 @@ namespace ProjectA {
 		indexBuffer = createBuffer(indexBufferDescriptor);		
 	}
 
-	void Physics2DRenderer::copyBuffers(const ref<Buffer>& stagingBuffer) const {
-		BufferCopyRegion vertexBufferCopyRegion{};
-		vertexBufferCopyRegion.sourceOffset = 0;
-		vertexBufferCopyRegion.destinationOffset = 0;
-		vertexBufferCopyRegion.size = vertexBuffer->size;
-
-		BufferCopyRegion instanceBufferCopyRegion{};
-		instanceBufferCopyRegion.sourceOffset = vertexBuffer->size;
-		instanceBufferCopyRegion.destinationOffset = 0;
-		instanceBufferCopyRegion.size = instanceBuffer->size;
-
-		BufferCopyRegion indexBufferCopyRegion{};
-		indexBufferCopyRegion.sourceOffset = vertexBuffer->size + instanceBuffer->size;
-		indexBufferCopyRegion.destinationOffset = 0;
-		indexBufferCopyRegion.size = indexBuffer->size;
-
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
-		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
-
-		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
-		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, {instanceBufferCopyRegion});
-		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, {indexBufferCopyRegion});
-
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-		transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-		getDevice()->waitIdle();
-	}
-
 	void Physics2DRenderer::createCameraBuffer() {
 		BufferDescriptor cameraBufferDescriptor{};
 		cameraBufferDescriptor.size = sizeof(Camera);
@@ -246,6 +211,18 @@ namespace ProjectA {
 		viewBufferMappedRange = viewBuffer->map<View>(0, viewBuffer->size);
 	}
 
+	void Physics2DRenderer::createClosestPointBuffer() {
+		BufferDescriptor closestPointBufferDescriptor{};
+		closestPointBufferDescriptor.size = 2 * sizeof(svec2<float32>);
+		closestPointBufferDescriptor.usage = BufferUsage::VERTEX;
+		closestPointBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		closestPointBufferDescriptor.persistent = true;
+
+		closestPointBuffer = createBuffer(closestPointBufferDescriptor);
+
+		closestPointBufferMappedRange = closestPointBuffer->map<svec2<float32>>(0, closestPointBuffer->size);
+	}
+
 	void Physics2DRenderer::createCameraViewDescriptorSetLayout() {
 		DescriptorSetLayoutBinding cameraBinding{};
 		cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
@@ -258,42 +235,6 @@ namespace ProjectA {
 		viewBinding.shaderStages = ShaderStage::FRAGMENT;
 
 		cameraViewDescriptorSetLayout = createDescriptorSetLayout({cameraBinding, viewBinding});
-	}
-
-	void Physics2DRenderer::allocateDescriptorSets() {
-		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({cameraViewDescriptorSetLayout});
-
-		cameraViewDescriptorSet = descriptorSets[0];
-	}
-
-	void Physics2DRenderer::updateCameraViewDescriptorSet() {
-		DescriptorBuffer cameraDescriptorBuffer{};
-		cameraDescriptorBuffer.buffer = cameraBuffer;
-
-		// TODO
-		// The camera's projection isn't used when rendering the grid.
-		// The offset must be a multiple of the minUniformBufferAlignment physical device limit.
-		cameraDescriptorBuffer.offset = 0;
-		// cameraDescriptorBuffer.offset = sizeof(Camera::projection);
-
-		cameraDescriptorBuffer.size = cameraBuffer->size;
-
-		DescriptorBuffer viewDescriptorBuffer{};
-		viewDescriptorBuffer.buffer = viewBuffer;
-		viewDescriptorBuffer.offset = 0;
-		viewDescriptorBuffer.size = viewBuffer->size;
-
-		WriteDescriptorSet cameraWriteDescriptorSet{};
-		cameraWriteDescriptorSet.descriptorSet = cameraViewDescriptorSet;
-		cameraWriteDescriptorSet.bindingIndex = 0;
-		cameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
-
-		WriteDescriptorSet viewWriteDescriptorSet{};
-		viewWriteDescriptorSet.descriptorSet = cameraViewDescriptorSet;
-		viewWriteDescriptorSet.bindingIndex = 1;
-		viewWriteDescriptorSet.descriptorBuffers = {viewDescriptorBuffer};
-
-		getDevice()->updateDescriptorSets({cameraWriteDescriptorSet, viewWriteDescriptorSet});
 	}
 
 	void Physics2DRenderer::createCameraViewPipelineLayout() {
@@ -360,14 +301,14 @@ namespace ProjectA {
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/Fill.vert", vertexShaderModuleDescriptor);
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Base/FragmentRGBA.frag", fragmentShaderModuleDescriptor);
 
-		ColorBlendAttachment transparentColorBlendAttachment{};
-		transparentColorBlendAttachment.blend = true;
-		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = true;
+		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
+		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
 		RenderPipelineDescriptor fillRenderPipelineDescriptor{};
 		fillRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
-		 fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
 		fillRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		fillRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		fillRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
@@ -376,7 +317,7 @@ namespace ProjectA {
 		fillRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		fillRenderPipelineDescriptor.lineWidth = 1.0f;
 		fillRenderPipelineDescriptor.minSampleShading = 0.0f;
-		fillRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
+		fillRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		fillRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		fillRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		fillRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
@@ -409,10 +350,10 @@ namespace ProjectA {
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/Stroke.vert", vertexShaderModuleDescriptor);
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/Stroke.frag", fragmentShaderModuleDescriptor);
 
-		ColorBlendAttachment transparentColorBlendAttachment{};
-		transparentColorBlendAttachment.blend = true;
-		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = true;
+		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
+		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
 		RenderPipelineDescriptor strokeRenderPipelineDescriptor{};
 		strokeRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
@@ -425,7 +366,7 @@ namespace ProjectA {
 		strokeRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		strokeRenderPipelineDescriptor.lineWidth = 1.0f;
 		strokeRenderPipelineDescriptor.minSampleShading = 0.0f;
-		strokeRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
+		strokeRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		strokeRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		strokeRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		strokeRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
@@ -436,70 +377,29 @@ namespace ProjectA {
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
 	}
 
-	/* void Physics2DRenderer::createCenterOfMassBuffer() {
-		const uint32 rigidBodyCount = scene->getComponentPool<RigidBody2D>().componentCount;
-		const uint64 centerOfMassBufferSize = rigidBodyCount * sizeof(vec3<float32>);
-
-		BufferDescriptor centerOfMassBufferDescriptor;
-		centerOfMassBufferDescriptor.size = centerOfMassBufferSize;
-		centerOfMassBufferDescriptor.usage = BufferUsage::VERTEX;
-		centerOfMassBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		centerOfMassBufferDescriptor.persistent = true;
-
-		centerOfMassBuffer = createBuffer(centerOfMassBufferDescriptor);
-		centerOfMassMappedRange = centerOfMassBuffer->map<vec3<float32>>(0, centerOfMassBufferSize);
-	}
-
-	void Physics2DRenderer::createClosestPointBuffer() {
-		BufferDescriptor closestPointBufferDescriptor{};
-		closestPointBufferDescriptor.size = 2 * sizeof(svec2<float32>);
-		closestPointBufferDescriptor.usage = BufferUsage::VERTEX;
-		closestPointBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		closestPointBufferDescriptor.persistent = true;
-
-		closestPointBuffer = createBuffer(closestPointBufferDescriptor);
-
-		closestPointBufferMappedRange = closestPointBuffer->map<svec2<float32>>(0, closestPointBuffer->size);
-	}
-
 	void Physics2DRenderer::createDistanceRenderPipeline() {
-		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
-		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraDescriptorSetLayoutBinding.shaderStages = ShaderStage::VERTEX;
-		cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
+		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+		vertexInputBinding.registerAttribute<svec2<float32>>();
 
-		DescriptorSetLayoutBinding viewDescriptorSetLayoutBinding;
-		viewDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		viewDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
-		viewDescriptorSetLayoutBinding.buffers = {viewUniformBuffer};
+		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexShaderModuleDescriptor.entryPoint = "main";
 
-		DescriptorSetLayout distanceDescriptorSetLayout;
-		distanceDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, viewDescriptorSetLayoutBinding};
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		PipelineLayoutDescriptor distancePipelineLayoutDescriptor;
-		distancePipelineLayoutDescriptor.layouts = {distanceDescriptorSetLayout};
-
-		distancePipelineLayout = createPipelineLayout(distancePipelineLayoutDescriptor);
-
-		VertexInputBinding distanceVertexInputBinding(InputRate::VERTEX);
-		distanceVertexInputBinding.registerAttribute<svec2<float32>>();
-
-		ShaderModuleDescriptor distanceVertexShaderModuleDescriptor{};
-		distanceVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		distanceVertexShaderModuleDescriptor.entryPoint = "main";
-
-		ShaderModuleDescriptor distanceFragmentShaderModuleDescriptor{};
-		distanceFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		distanceFragmentShaderModuleDescriptor.entryPoint = "main";
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/Distance.vert", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/Distance.frag", fragmentShaderModuleDescriptor);
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
 
-		RenderPipelineDescriptor distanceRenderPipelineDescriptor;
-		distanceRenderPipelineDescriptor.pipelineLayout = distancePipelineLayout;
-		distanceRenderPipelineDescriptor.vertexInputBindings = {distanceVertexInputBinding};
-		distanceRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Physics2D/Distance.vert", distanceVertexShaderModuleDescriptor);
-		distanceRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Physics2D/Distance.frag", distanceFragmentShaderModuleDescriptor);
+		RenderPipelineDescriptor distanceRenderPipelineDescriptor{};
+		distanceRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
+		distanceRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding};
+		distanceRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		distanceRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
 		distanceRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_LIST;
 		distanceRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
 		distanceRenderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -515,7 +415,91 @@ namespace ProjectA {
 		distanceRenderPipeline = createRenderPipeline(distanceRenderPipelineDescriptor);
 	}
 
-	void Physics2DRenderer::createCenterOfMassRenderPipeline() {
+	void Physics2DRenderer::allocateDescriptorSets() {
+		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({cameraViewDescriptorSetLayout});
+
+		cameraViewDescriptorSet = descriptorSets[0];
+	}
+
+	void Physics2DRenderer::copyBuffers(const ref<Buffer>& stagingBuffer) const {
+		BufferCopyRegion vertexBufferCopyRegion{};
+		vertexBufferCopyRegion.sourceOffset = 0;
+		vertexBufferCopyRegion.destinationOffset = 0;
+		vertexBufferCopyRegion.size = vertexBuffer->size;
+
+		BufferCopyRegion instanceBufferCopyRegion{};
+		instanceBufferCopyRegion.sourceOffset = vertexBuffer->size;
+		instanceBufferCopyRegion.destinationOffset = 0;
+		instanceBufferCopyRegion.size = instanceBuffer->size;
+
+		BufferCopyRegion indexBufferCopyRegion{};
+		indexBufferCopyRegion.sourceOffset = vertexBuffer->size + instanceBuffer->size;
+		indexBufferCopyRegion.destinationOffset = 0;
+		indexBufferCopyRegion.size = indexBuffer->size;
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
+
+		commandEncoder->begin();
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, {instanceBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, {indexBufferCopyRegion});
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
+		getDevice()->waitIdle();
+	}
+
+	void Physics2DRenderer::updateCameraViewDescriptorSet() const {
+		DescriptorBuffer cameraDescriptorBuffer{};
+		cameraDescriptorBuffer.buffer = cameraBuffer;
+
+		// TODO
+		// The camera's projection isn't used when rendering the grid.
+		// The offset must be a multiple of the minUniformBufferAlignment physical device limit.
+		cameraDescriptorBuffer.offset = 0;
+		// cameraDescriptorBuffer.offset = sizeof(Camera::projection);
+
+		cameraDescriptorBuffer.size = cameraBuffer->size;
+
+		DescriptorBuffer viewDescriptorBuffer{};
+		viewDescriptorBuffer.buffer = viewBuffer;
+		viewDescriptorBuffer.offset = 0;
+		viewDescriptorBuffer.size = viewBuffer->size;
+
+		WriteDescriptorSet cameraWriteDescriptorSet{};
+		cameraWriteDescriptorSet.descriptorSet = cameraViewDescriptorSet;
+		cameraWriteDescriptorSet.bindingIndex = 0;
+		cameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
+
+		WriteDescriptorSet viewWriteDescriptorSet{};
+		viewWriteDescriptorSet.descriptorSet = cameraViewDescriptorSet;
+		viewWriteDescriptorSet.bindingIndex = 1;
+		viewWriteDescriptorSet.descriptorBuffers = {viewDescriptorBuffer};
+
+		getDevice()->updateDescriptorSets({cameraWriteDescriptorSet, viewWriteDescriptorSet});
+	}
+
+	/* void Physics2DRenderer::createCenterOfMassBuffer() {
+		const uint32 rigidBodyCount = scene->getComponentPool<RigidBody2D>().componentCount;
+		const uint64 centerOfMassBufferSize = rigidBodyCount * sizeof(vec3<float32>);
+
+		BufferDescriptor centerOfMassBufferDescriptor;
+		centerOfMassBufferDescriptor.size = centerOfMassBufferSize;
+		centerOfMassBufferDescriptor.usage = BufferUsage::VERTEX;
+		centerOfMassBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		centerOfMassBufferDescriptor.persistent = true;
+
+		centerOfMassBuffer = createBuffer(centerOfMassBufferDescriptor);
+		centerOfMassMappedRange = centerOfMassBuffer->map<vec3<float32>>(0, centerOfMassBufferSize);
+	} */
+
+	/* void Physics2DRenderer::createCenterOfMassRenderPipeline() {
 		VertexInputBinding centerOfMassVertexInputBinding(InputRate::VERTEX);
 		centerOfMassVertexInputBinding.registerAttribute<vec3<float32>>();
 
@@ -762,10 +746,10 @@ namespace ProjectA {
 		ColorBlendAttachment opaqueColorBlendAttachment{};
 		opaqueColorBlendAttachment.blend = false;
 
-		ColorBlendAttachment transparentColorBlendAttachment{};
-		transparentColorBlendAttachment.blend = true;
-		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = true;
+		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
+		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 
 		RenderPipelineDescriptor fillRenderPipelineDescriptor;
 		fillRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
@@ -778,7 +762,7 @@ namespace ProjectA {
 		fillRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		fillRenderPipelineDescriptor.lineWidth = 1.0f;
 		fillRenderPipelineDescriptor.minSampleShading = 0.0f;
-		fillRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
+		fillRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		fillRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		fillRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		fillRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
@@ -806,7 +790,7 @@ namespace ProjectA {
 		strokeRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		strokeRenderPipelineDescriptor.lineWidth = 1.0f;
 		strokeRenderPipelineDescriptor.minSampleShading = 0.0f;
-		strokeRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
+		strokeRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		strokeRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		strokeRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		strokeRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
@@ -852,7 +836,7 @@ namespace ProjectA {
 		fillRenderPipelineDescriptor.pipelineLayout = placeholderFillPipelineLayout;
 		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, placeholderFillInstanceInputBinding};
 		fillRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Physics2D/PlaceholderFill.vert", vertexShaderModuleDescriptor);
-		fillRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
+		fillRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		fillRenderPipelineDescriptor.depthStencilState.depthTest = false;
 
 		placeholderFillRenderPipeline = createRenderPipeline(fillRenderPipelineDescriptor);
@@ -869,7 +853,7 @@ namespace ProjectA {
 		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, placeholderStrokeInstanceInputBinding};
 		strokeRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Physics2D/PlaceholderStroke.vert", vertexShaderModuleDescriptor);
 		strokeRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Physics2D/PlaceholderStroke.frag", fragmentShaderModuleDescriptor);
-		strokeRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
+		strokeRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		strokeRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 
@@ -898,6 +882,11 @@ namespace ProjectA {
 		initializeCenterOfMassRenderPipeline(); */
 	}
 
+	void Physics2DRenderer::setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const {
+		closestPointBufferMappedRange[0] = {closestPointA[0], closestPointA[1]};
+		closestPointBufferMappedRange[1] = {closestPointB[0], closestPointB[1]};
+	}
+
 	void Physics2DRenderer::setInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const {
 		instanceBufferMappedRange[instanceIndex].world = transform;
 	}
@@ -917,11 +906,6 @@ namespace ProjectA {
 		y = -(y / swapchain->getExtent().height - 0.5f) * verticalCellCount;
 
 		ndcMousePosition = {x, y};
-	}
-
-	void Physics2DRenderer::setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const {
-		closestPointMappedRange[0] = {closestPointA[0], closestPointA[1]};
-		closestPointMappedRange[1] = {closestPointB[0], closestPointB[1]};
 	} */
 
 	void Physics2DRenderer::updateCameraProjection() const {
@@ -1015,8 +999,8 @@ namespace ProjectA {
 
 		renderGrid(commandEncoder);
 		renderScene(commandEncoder);
-		/* renderDistance(commandEncoder);
-		renderFeatures(commandEncoder);
+		renderDistance(commandEncoder);
+		/* renderFeatures(commandEncoder);
 
 		if (selectedInstanceIndex != max<uint32>()) {
 			renderSelectedInstancePlaceholder(commandEncoder);
@@ -1091,18 +1075,14 @@ namespace ProjectA {
 		commandEncoder->draw(rigidBodyPool.componentCount, 1, 0, 0); */
 	}
 
-	/* void Physics2DRenderer::renderDistance(const ref<CommandEncoder>& commandEncoder) const {
+	void Physics2DRenderer::renderDistance(const ref<CommandEncoder>& commandEncoder) const {
 		commandEncoder->bindRenderPipeline(distanceRenderPipeline);
-
-		// TODO
-		BREAKPOINT();
-		// commandEncoder->bindDescriptorSets();
-
+		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
 		commandEncoder->bindVertexBuffer(0, closestPointBuffer, 0, sizeof(svec2<float32>));
 		commandEncoder->draw(2, 1, 0, 0);
 	}
 
-	void Physics2DRenderer::renderFeatures(const ref<CommandEncoder>& commandEncoder) const {
+	/* void Physics2DRenderer::renderFeatures(const ref<CommandEncoder>& commandEncoder) const {
 		if (vertexFeatureCount > 0) {
 			commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
 
@@ -1200,12 +1180,13 @@ namespace ProjectA {
 
 				break;
 		}
-	}
+	} */
 
 	void Physics2DRenderer::clearRegisteredData() {
-		vertexFeatureCount = 0;
-		edgeVertexFeatureCount = 0;
-		closestPointMappedRange[0] = {0.0f, 0.0f};
-		closestPointMappedRange[1] = {0.0f, 0.0f};
-	} */
+		closestPointBufferMappedRange[0] = {0.0f, 0.0f};
+		closestPointBufferMappedRange[1] = {0.0f, 0.0f};
+
+		// vertexFeatureCount = 0;
+		// edgeVertexFeatureCount = 0;
+	}
 }

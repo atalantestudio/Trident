@@ -164,9 +164,7 @@ namespace ProjectA {
 		const GJK2DOutput gjkOutput = GJK2D(pointA, B);
 
 		#ifdef BUILD_MODE_DEBUG
-			if (visualizationData != nullptr) {
-				visualizationData->gjkOutput = gjkOutput;
-			}
+			visualizationData->gjkOutput = gjkOutput;
 		#endif
 
 		const float32 d = gjkOutput.distance - A.geometry->radius * scaleA;
@@ -187,9 +185,7 @@ namespace ProjectA {
 		const SAT2DOutput satOutput = SATCircleConvexHull2D(A, B);
 
 		#ifdef BUILD_MODE_DEBUG
-			if (visualizationData != nullptr) {
-				visualizationData->satOutput = satOutput;
-			}
+			visualizationData->satOutput = satOutput;
 		#endif
 
 		contactManifold->normal = -satOutput.normal;
@@ -211,9 +207,7 @@ namespace ProjectA {
 		const SAT2DOutput satOutput = SAT2D(A, B);
 
 		#ifdef BUILD_MODE_DEBUG
-			if (visualizationData != nullptr) {
-				visualizationData->satOutput = satOutput;
-			}
+			visualizationData->satOutput = satOutput;
 		#endif
 
 		if (satOutput.separation > 0.0f) {

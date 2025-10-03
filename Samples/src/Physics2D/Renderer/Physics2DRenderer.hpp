@@ -7,14 +7,6 @@
 namespace ProjectA {
 	class Physics2DRenderer : public Renderer {
 		private:
-			struct Instance {
-				mat3x3<float32> world;
-				vec4<float32> fillColor;
-				vec4<float32> strokeColor;
-				float32 depth;
-				uint32 selected = 0;
-			};
-
 			struct Camera {
 				mat3x3<float32> projection;
 				float32 zoomLevel;
@@ -22,6 +14,14 @@ namespace ProjectA {
 
 			struct View {
 				svec2<float32> viewport;
+			};
+
+			struct Instance {
+				mat3x3<float32> world;
+				vec4<float32> fillColor;
+				vec4<float32> strokeColor;
+				float32 depth;
+				uint32 selected = 0;
 			};
 
 			struct Placeholder {
@@ -37,9 +37,8 @@ namespace ProjectA {
 		public:
 			void build() override;
 
-			// After registering the scene, the vertex buffer cannot be resized.
 			void setScene(const Scene2D& scene);
-
+			void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const;
 			void setInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
 
 			// x and y are in the range [0, viewport].
@@ -48,51 +47,22 @@ namespace ProjectA {
 			// x and y are in the range [0, viewport].
 			void setMousePosition(float32 x, float32 y);
 
-			void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const; */
+			void setPlaceholderOffset(const vec2<float32>& offset) const; */
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override;
 
-			/* void selectEntity(Entity entity);
-
-			void setPlaceholderOffset(const vec2<float32>& offset) const; */
+			// void selectEntity(Entity entity);
 
 			void resize(WindowResizeEvent& event) override;
 
 			void zoom(float32 zoomLevelDelta);
 
-			/* void registerFeature(const Feature2D& feature);
+			// void registerFeature(const Feature2D& feature);
 
-			void clearRegisteredData(); */
+			void clearRegisteredData();
 
 		private:
 			void setupRenderPass();
-
-			void createCameraBuffer();
-			void createViewBuffer();
-
-			void createCameraViewDescriptorSetLayout();
-
-			void allocateDescriptorSets();
-
-			void updateCameraViewDescriptorSet();
-
-			void createCameraViewPipelineLayout();
-
-			void createGridRenderPipeline();
-			void createFillRenderPipeline();
-			void createStrokeRenderPipeline();
-
-			/////
-
-			/* void createCenterOfMassBuffer();
-			void createCenterOfMassRenderPipeline();
-			void createClosestPointBuffer();
-			void createDistanceRenderPipeline();
-			void createVertexFeatureBuffer();
-			void createEdgeVertexFeatureBuffer();
-			void createFeaturePipelineLayout();
-			void createVertexFeatureRenderPipeline();
-			void createEdgeFeatureRenderPipeline(); */
 
 			void recreateMultisampleImage();
 			void recreateMultisampleImageView();
@@ -103,17 +73,37 @@ namespace ProjectA {
 			void recreateInstanceBuffer(uint64 size);
 			void recreateIndexBuffer(uint64 size);
 
+			void createCameraBuffer();
+			void createViewBuffer();
+			void createClosestPointBuffer();
+			void createCameraViewDescriptorSetLayout();
+			void createCameraViewPipelineLayout();
+			void createGridRenderPipeline();
+			void createFillRenderPipeline();
+			void createStrokeRenderPipeline();
+			void createDistanceRenderPipeline();
+			/* void createCenterOfMassBuffer();
+			void createCenterOfMassRenderPipeline();
+			void createVertexFeatureBuffer();
+			void createEdgeVertexFeatureBuffer();
+			void createFeaturePipelineLayout();
+			void createVertexFeatureRenderPipeline();
+			void createEdgeFeatureRenderPipeline(); */
+
+			void allocateDescriptorSets();
+
 			void copyBuffers(const ref<Buffer>& stagingBuffer) const;
 
+			void updateCameraViewDescriptorSet() const;
 			void updateCameraProjection() const;
 			void updateViewport() const;
 			// void updateCentersOfMass() const;
 
 			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
-			/* void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
-			void renderFeatures(const ref<CommandEncoder>& commandEncoder) const;
-			void renderSelectedInstancePlaceholder(const ref<CommandEncoder>& commandEncoder) const; */
+			void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
+			// void renderFeatures(const ref<CommandEncoder>& commandEncoder) const;
+			// void renderSelectedInstancePlaceholder(const ref<CommandEncoder>& commandEncoder) const;
 
 		private:
 			ref<RenderPass> renderPass;
@@ -134,14 +124,15 @@ namespace ProjectA {
 
 			ref<RenderPipeline> gridRenderPipeline;
 			ref<RenderPipeline> fillRenderPipeline;
+			ref<RenderPipeline> strokeRenderPipeline;
+			ref<RenderPipeline> distanceRenderPipeline;
 
 			ref<Buffer> cameraBuffer;
 			ref<Buffer> viewBuffer;
+			ref<Buffer> closestPointBuffer;
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> indexBuffer;
 			ref<Buffer> instanceBuffer;
-
-			ref<Buffer> closestPointBuffer;
 
 			Camera* cameraBufferMappedRange = nullptr;
 			View* viewBufferMappedRange = nullptr;
@@ -162,7 +153,6 @@ namespace ProjectA {
 			uint32 edgeVertexFeatureCount = 0;
 
 			ref<PipelineLayout> pipelineLayout;
-			ref<RenderPipeline> strokeRenderPipeline;
 
 			ref<Buffer> placeholderBuffer;
 
@@ -178,9 +168,6 @@ namespace ProjectA {
 			ref<RenderPipeline> centerOfMassRenderPipeline;
 
 			ref<RenderPipeline> placeholderCenterOfMassRenderPipeline;
-
-			ref<PipelineLayout> distancePipelineLayout;
-			ref<RenderPipeline> distanceRenderPipeline;
 
 			ref<PipelineLayout> featurePipelineLayout;
 			ref<RenderPipeline> vertexFeatureRenderPipeline;

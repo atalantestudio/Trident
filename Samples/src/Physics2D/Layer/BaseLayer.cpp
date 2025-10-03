@@ -41,26 +41,26 @@ namespace ProjectA {
 			// renderer.setPlaceholderOffset(placeholderOffset);
 		}
 
-		// renderer.clearRegisteredData();
+		renderer.clearRegisteredData();
 
-		/* if (visualizationData.contactManifold.contactCount > 0) {
+		const SAT2DOutput& satOutput = visualizationData.satOutput;
+
+		if (satOutput.separation > 0.0f) {
+			renderer.setClosestPoints(satOutput.incidentSupportPoint, satOutput.referenceEdge.edge[0]);
+
+			// renderer.registerFeature(visualizationData.gjkOutput.closestFeatureA);
+			// renderer.registerFeature(visualizationData.gjkOutput.closestFeatureB);
+		}
+
+		/* if (visualizationData.contactManifold.getContactCount() > 0) {
 			Feature2D contactManifold;
-			contactManifold.setVertexCount(visualizationData.contactManifold.contactCount);
+			contactManifold.setVertexCount(visualizationData.contactManifold.getContactCount());
 
 			for (uint8 contactIndex = 0; contactIndex < contactManifold.getVertexCount(); contactIndex += 1) {
 				contactManifold.edge[contactIndex] = visualizationData.contactManifold.contacts[contactIndex].position;
 			}
 
-			renderer.registerFeature(contactManifold);
-
-			visualizationData.contactManifold.contactCount = 0;
-		} */
-
-		/* if (visualizationData.gjkOutput.closestFeatureA.count > 0) {
-			renderer.setClosestPoints(visualizationData.gjkOutput.closestA, visualizationData.gjkOutput.closestB);
-			renderer.clearRegisteredData();
-			renderer.registerFeature(visualizationData.gjkOutput.closestFeatureA);
-			renderer.registerFeature(visualizationData.gjkOutput.closestFeatureB);
+			// renderer.registerFeature(contactManifold);
 		} */
 
 		/* if (visualizationData.satOutput.separation <= 0.0f) {
