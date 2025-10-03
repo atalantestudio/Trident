@@ -20,7 +20,7 @@ namespace ProjectA {
 				buildRenderPipeline();
 				buildVertexAndIndexBuffers();
 
-				updateFramebuffers();
+				recreateFramebuffers();
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
@@ -43,7 +43,7 @@ namespace ProjectA {
 			}
 
 			void resize(WindowResizeEvent& event) override {
-				updateFramebuffers();
+				recreateFramebuffers();
 			}
 
 		private:
@@ -176,7 +176,7 @@ namespace ProjectA {
 				getDevice()->waitIdle();
 			}
 
-			void updateFramebuffers() {
+			void recreateFramebuffers() {
 				const ref<Swapchain>& swapchain = getSwapchain();
 
 				for (ref<Framebuffer>& framebuffer : framebuffers) {

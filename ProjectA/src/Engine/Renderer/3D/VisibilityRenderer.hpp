@@ -38,7 +38,7 @@ namespace ProjectA {
 				updateVisibilityImageView();
 				updateDepthStencilImage();
 				updateDepthStencilImageView();
-				updateFramebuffers();
+				recreateFramebuffers();
 
 				createCameraDescriptorSetLayout();
 				createClusterDescriptorSetLayout();
@@ -80,7 +80,7 @@ namespace ProjectA {
 				updateDepthStencilImage();
 				updateDepthStencilImageView();
 
-				updateFramebuffers();
+				recreateFramebuffers();
 
 				updateCamera();
 
@@ -98,7 +98,7 @@ namespace ProjectA {
 			void updateDepthStencilImage();
 			void updateDepthStencilImageView();
 			void updateSceneBuffers();
-			void updateFramebuffers();
+			void recreateFramebuffers();
 			void updateAllDescriptorSets();
 			void updateVisibilityDescriptorSet();
 

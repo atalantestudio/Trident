@@ -212,7 +212,7 @@ namespace ProjectA {
 		getDevice()->waitIdle();
 	}
 
-	void VisibilityRenderer::updateFramebuffers() {
+	void VisibilityRenderer::recreateFramebuffers() {
 		const ref<Swapchain>& swapchain = getSwapchain();
 		const Extent2D swapchainExtent = swapchain->getExtent();
 
