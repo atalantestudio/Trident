@@ -348,54 +348,54 @@ namespace ProjectA {
 	}
 
 	void VisibilityRenderer::createCameraDescriptorSetLayout() {
-		DescriptorSetLayoutBinding cameraBufferBinding{};
-		cameraBufferBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraBufferBinding.descriptorCount = 1;
-		cameraBufferBinding.shaderStages = ShaderStage::VERTEX;
+		DescriptorSetLayoutBinding cameraBinding{};
+		cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		cameraBinding.descriptorCount = 1;
+		cameraBinding.shaderStages = ShaderStage::VERTEX;
 
-		cameraDescriptorSetLayout = createDescriptorSetLayout({cameraBufferBinding});
+		cameraDescriptorSetLayout = createDescriptorSetLayout({cameraBinding});
 	}
 
 	void VisibilityRenderer::createClusterDescriptorSetLayout() {
-		DescriptorSetLayoutBinding vertexPositionComponentBufferBinding{};
-		vertexPositionComponentBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		vertexPositionComponentBufferBinding.descriptorCount = 1;
-		vertexPositionComponentBufferBinding.shaderStages = ShaderStage::VERTEX;
+		DescriptorSetLayoutBinding vertexPositionComponentBinding{};
+		vertexPositionComponentBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexPositionComponentBinding.descriptorCount = 1;
+		vertexPositionComponentBinding.shaderStages = ShaderStage::VERTEX;
 
-		DescriptorSetLayoutBinding vertexBufferBinding{};
-		vertexBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		vertexBufferBinding.descriptorCount = 1;
-		vertexBufferBinding.shaderStages = ShaderStage::VERTEX;
+		DescriptorSetLayoutBinding vertexBinding{};
+		vertexBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexBinding.descriptorCount = 1;
+		vertexBinding.shaderStages = ShaderStage::VERTEX;
 
-		DescriptorSetLayoutBinding clusterBufferBinding{};
-		clusterBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		clusterBufferBinding.descriptorCount = 1;
-		clusterBufferBinding.shaderStages = ShaderStage::VERTEX;
+		DescriptorSetLayoutBinding clusterBinding{};
+		clusterBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		clusterBinding.descriptorCount = 1;
+		clusterBinding.shaderStages = ShaderStage::VERTEX;
 
-		clusterDescriptorSetLayout = createDescriptorSetLayout({vertexPositionComponentBufferBinding, vertexBufferBinding, clusterBufferBinding});
+		clusterDescriptorSetLayout = createDescriptorSetLayout({vertexPositionComponentBinding, vertexBinding, clusterBinding});
 	}
 
 	void VisibilityRenderer::createInstanceDescriptorSetLayout() {
-		DescriptorSetLayoutBinding instanceBufferBinding{};
-		instanceBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		instanceBufferBinding.descriptorCount = 1;
-		instanceBufferBinding.shaderStages = ShaderStage::VERTEX;
+		DescriptorSetLayoutBinding instanceBinding{};
+		instanceBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		instanceBinding.descriptorCount = 1;
+		instanceBinding.shaderStages = ShaderStage::VERTEX;
 
-		DescriptorSetLayoutBinding geometryBufferBinding{};
-		geometryBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		geometryBufferBinding.descriptorCount = 1;
-		geometryBufferBinding.shaderStages = ShaderStage::VERTEX;
+		DescriptorSetLayoutBinding geometryBinding{};
+		geometryBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		geometryBinding.descriptorCount = 1;
+		geometryBinding.shaderStages = ShaderStage::VERTEX;
 
-		instanceDescriptorSetLayout = createDescriptorSetLayout({instanceBufferBinding, geometryBufferBinding});
+		instanceDescriptorSetLayout = createDescriptorSetLayout({instanceBinding, geometryBinding});
 	}
 
 	void VisibilityRenderer::createVisibilityDescriptorSetLayout() {
-		DescriptorSetLayoutBinding visibilityImageBinding{};
-		visibilityImageBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
-		visibilityImageBinding.descriptorCount = 1;
-		visibilityImageBinding.shaderStages = ShaderStage::FRAGMENT;
+		DescriptorSetLayoutBinding visibilityBinding{};
+		visibilityBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
+		visibilityBinding.descriptorCount = 1;
+		visibilityBinding.shaderStages = ShaderStage::FRAGMENT;
 
-		visibilityDescriptorSetLayout = createDescriptorSetLayout({visibilityImageBinding});
+		visibilityDescriptorSetLayout = createDescriptorSetLayout({visibilityBinding});
 	}
 
 	void VisibilityRenderer::createVisibilityPipelineLayout() {

@@ -4,300 +4,55 @@
 
 namespace ProjectA {
 	class SampleRenderer : public Renderer {
+		private:
+			struct Vertex {
+				svec2<float32> position;
+			};
+
+			struct Instance {
+				svec2<float32> vertexOffset;
+				uint32 textureArrayIndex;
+			};
+
+		private:
+			static constexpr uint32 ASSET_COUNT = 4;
+			static constexpr uint32 TEXTURE_ARRAY_IMAGE_WIDTH = 512;
+			static constexpr uint32 TEXTURE_ARRAY_IMAGE_HEIGHT = 512;
+			static constexpr uint32 VERTEX_BUFFER_SIZE = 6 * sizeof(Vertex);
+			static constexpr uint32 INSTANCE_BUFFER_SIZE = 4 * sizeof(Instance);
+
+			static constexpr char8* ASSET_PATHS[] = {
+				"Asset/Image/Baboon.png",
+				"Asset/Image/Cameraman.png",
+				"Asset/Image/Lenna.png",
+				"Asset/Image/Pepper.png",
+			};
+
 		public:
 			void build() override {
-				const ref<Device> device = getDevice();
+				setupRenderPass();
 
-				std::array<File<FileFormat::PNG>, ASSET_PATHS.size()> assets;
-				uint64 size = 0;
+				createTextureArrayImage();
+				createTextureArrayImageView();
 
-				// 1. Load assets.
-				{
-					for (uint32 assetIndex = 0; assetIndex < assets.size(); assetIndex += 1) {
-						const std::string_view path = ASSET_PATHS[assetIndex];
-						const sequence<uint8> data = Filesystem::openBuffer(path);
+				loadAssets();
 
-						assets[assetIndex] = Filesystem::decode<FileFormat::PNG>(data);
-
-						size += assets[assetIndex].data.count;
-					}
-				}
-
-				ref<Buffer> textureArrayStagingBuffer;
-
-				// 2. Create staging buffer to hold asset data.
-				{
-					textureArrayStagingBuffer = createStagingBuffer(size);
-					uint8* textureArrayMappedRange = textureArrayStagingBuffer->map<uint8>(0, size);
-
-					for (uint32 assetIndex = 0; assetIndex < assets.size(); assetIndex += 1) {
-						const File<FileFormat::PNG>& asset = assets[assetIndex];
-
-						std::copy(asset.data.begin(), asset.data.end(), textureArrayMappedRange);
-
-						textureArrayMappedRange += asset.data.count;
-					}
-
-					textureArrayStagingBuffer->unmap();
-				}
-
-				// 3. Create texture array.
-				{
-					ImageDescriptor textureArrayDescriptor;
-					textureArrayDescriptor.type = ImageType::TEXTURE_2D;
-					textureArrayDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-					textureArrayDescriptor.extent.width = TEXTURE_ARRAY_WIDTH;
-					textureArrayDescriptor.extent.height = TEXTURE_ARRAY_HEIGHT;
-					textureArrayDescriptor.extent.depth = 1;
-					textureArrayDescriptor.mipLevelCount = 1;
-					textureArrayDescriptor.layerCount = 4;
-					textureArrayDescriptor.sampleCount = 1;
-					textureArrayDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
-					textureArrayDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
-
-					textureArray = createImage(textureArrayDescriptor);
-				}
-
-				// 4. Copy asset data to the texture array.
-				{
-					sequence<BufferImageCopyRegion> copyRegions(1);
-
-					BufferImageCopyRegion& copyRegion = copyRegions[0];
-					copyRegion.bufferOffset = 0;
-					copyRegion.imageOffsetX = 0;
-					copyRegion.imageOffsetY = 0;
-					copyRegion.imageOffsetZ = 0;
-					copyRegion.imageExtent = textureArray->getExtent();
-					copyRegion.imageMipLevel = 0;
-					copyRegion.imageLayerOffset = 0;
-					copyRegion.imageLayerCount = static_cast<uint32>(assets.size());
-
-					CommandBufferDescriptor commandBufferDescriptor;
-					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-					const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
-					const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
-
-					commandEncoder->begin();
-					commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-					commandEncoder->copyBufferToImage(textureArrayStagingBuffer, textureArray, copyRegions);
-					commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-
-					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-					graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-					device->waitIdle();
-				}
-
-				// 5. Create texture array view.
-				{
-					ImageViewDescriptor textureArrayViewDescriptor{};
-					textureArrayViewDescriptor.mipLevelOffset = 0;
-					textureArrayViewDescriptor.mipLevelCount = textureArray->getMipLevelCount();
-					textureArrayViewDescriptor.layerOffset = 0;
-					textureArrayViewDescriptor.layerCount = textureArray->getLayerCount();
-
-					textureArrayView = textureArray->createView(textureArrayViewDescriptor);
-				}
-
-				// 6. Create sampler.
-				{
-					SamplerDescriptor samplerDescriptor{};
-					samplerDescriptor.magFilter = SamplerFilter::LINEAR;
-					samplerDescriptor.minFilter = SamplerFilter::NEAREST;
-
-					sampler = createSampler(samplerDescriptor);
-				}
-
-				// 7. Create render pass and subpass.
-				{
-					const ref<Surface> surface = getSurface();
-
-					Attachment swapchainAttachment{};
-					swapchainAttachment.format = surface->getFormat();
-					swapchainAttachment.sampleCount = 1;
-					swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-					swapchainAttachment.storeOperation = StoreOperation::STORE;
-					swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
-
-					AttachmentReference swapchainAttachmentReference{};
-					swapchainAttachmentReference.index = 0;
-					swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-					SubpassDescriptor subpassDescriptor{};
-					subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
-
-					const ref<Subpass> subpass = createSubpass(subpassDescriptor);
-
-					RenderPassDescriptor renderPassDescriptor{};
-					renderPassDescriptor.attachments = {swapchainAttachment};
-					renderPassDescriptor.subpasses = {subpass};
-
-					renderPass = createRenderPass(renderPassDescriptor);
-				}
-
-				// 8. Create framebuffers.
 				recreateFramebuffers();
 
-				// 9. Create pipeline layout.
-				{
-					DescriptorSetLayoutBinding textureArrayDescriptorSetLayoutBinding;
-					textureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-					textureArrayDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
-					textureArrayDescriptorSetLayoutBinding.imageViews = {textureArrayView};
-					textureArrayDescriptorSetLayoutBinding.samplers = {sampler};
+				setupSampler();
 
-					DescriptorSetLayout descriptorSetLayout;
-					descriptorSetLayout.bindings = {textureArrayDescriptorSetLayoutBinding};
+				createTextureArrayImageDescriptorSetLayout();
+				allocateTextureArrayImageDescriptorSet();
+				updateTextureArrayImageDescriptorSet();
 
-					PipelineLayoutDescriptor pipelineLayoutDescriptor;
-					pipelineLayoutDescriptor.layouts = {descriptorSetLayout};
+				setupPipelineLayout();
+				setupRenderPipeline();
 
-					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
-				}
-
-				// 10. Create render pipeline.
-				{
-					VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-					vertexInputBinding.registerAttribute<svec2<float32>>();
-
-					VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-					instanceInputBinding.registerAttribute<svec2<float32>>();
-					instanceInputBinding.registerAttribute<uint32>();
-
-					ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-					vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-					vertexShaderModuleDescriptor.entryPoint = "main";
-
-					ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-					fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-					fragmentShaderModuleDescriptor.entryPoint = "main";
-
-					ColorBlendAttachment colorBlendAttachment{};
-					colorBlendAttachment.blend = false;
-
-					RenderPipelineDescriptor renderPipelineDescriptor{};
-					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
-					renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("ArrayTextureOrTextureArray.vert", vertexShaderModuleDescriptor);
-					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("TextureArray.frag", fragmentShaderModuleDescriptor);
-					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-					renderPipelineDescriptor.cullMode = CullMode::BACK;
-					renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-					renderPipelineDescriptor.lineWidth = 1.0f;
-					renderPipelineDescriptor.minSampleShading = 0.0f;
-					renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-					renderPipelineDescriptor.depthStencilState.depthTest = false;
-					renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-					renderPipelineDescriptor.renderPass = renderPass;
-					renderPipelineDescriptor.subpassIndex = 0;
-
-					renderPipeline = createRenderPipeline(renderPipelineDescriptor);
-				}
-
-				// 11. Create vertex buffer.
-				{
-					constexpr uint64 vertexBufferSize = 6 * sizeof(svec2<float32>);
-
-					const ref<Buffer> vertexStagingBuffer = createStagingBuffer(vertexBufferSize);
-
-					svec2<float32>* vertexMappedRange = vertexStagingBuffer->map<svec2<float32>>(0, vertexBufferSize);
-
-					vertexMappedRange[0] = {-0.5f,  0.5f};
-					vertexMappedRange[1] = { 0.5f,  0.5f};
-					vertexMappedRange[2] = { 0.5f, -0.5f};
-					vertexMappedRange[3] = {-0.5f,  0.5f};
-					vertexMappedRange[4] = { 0.5f, -0.5f};
-					vertexMappedRange[5] = {-0.5f, -0.5f};
-
-					vertexStagingBuffer->unmap();
-
-					BufferDescriptor vertexBufferDescriptor;
-					vertexBufferDescriptor.size = vertexBufferSize;
-					vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-					vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-					vertexBuffer = createBuffer(vertexBufferDescriptor);
-
-					sequence<BufferCopyRegion> bufferCopyRegions(1);
-
-					BufferCopyRegion& vertexBufferCopyRegion = bufferCopyRegions[0];
-					vertexBufferCopyRegion.sourceOffset = 0;
-					vertexBufferCopyRegion.destinationOffset = 0;
-					vertexBufferCopyRegion.size = vertexBufferSize;
-
-					CommandBufferDescriptor commandBufferDescriptor{};
-					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-					const ref<Queue> transferQueue = device->getQueue(QueueFamilyCapability::TRANSFER);
-					const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
-
-					commandEncoder->begin();
-					commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, bufferCopyRegions);
-
-					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-					transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-					device->waitIdle();
-				}
-
-				// 12. Create instance buffer.
-				{
-					const ref<Device> device = getDevice();
-
-					constexpr uint64 instanceVertexBufferSize = 4 * sizeof(Instance);
-
-					const ref<Buffer> instanceVertexStagingBuffer = createStagingBuffer(instanceVertexBufferSize);
-
-					Instance* instances = instanceVertexStagingBuffer->map<Instance>(0, instanceVertexBufferSize);
-
-					instances[0].vertexOffset = {-0.5f, 0.5f};
-					instances[0].textureArrayIndex = 0;
-					instances[1].vertexOffset = {0.5f, 0.5f};
-					instances[1].textureArrayIndex = 1;
-					instances[2].vertexOffset = {-0.5f, -0.5f};
-					instances[2].textureArrayIndex = 2;
-					instances[3].vertexOffset = {0.5f, -0.5f};
-					instances[3].textureArrayIndex = 3;
-
-					instanceVertexStagingBuffer->unmap();
-
-					BufferDescriptor instanceVertexBufferDescriptor;
-					instanceVertexBufferDescriptor.size = instanceVertexBufferSize;
-					instanceVertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-					instanceVertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-					instanceVertexBuffer = createBuffer(instanceVertexBufferDescriptor);
-
-					sequence<BufferCopyRegion> bufferCopyRegions(1);
-
-					BufferCopyRegion& instanceBufferCopyRegion = bufferCopyRegions[0];
-					instanceBufferCopyRegion.sourceOffset = 0;
-					instanceBufferCopyRegion.destinationOffset = 0;
-					instanceBufferCopyRegion.size = instanceVertexBufferSize;
-
-					CommandBufferDescriptor commandBufferDescriptor{};
-					commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-					const ref<Queue> transferQueue = device->getQueue(QueueFamilyCapability::TRANSFER);
-					const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
-
-					commandEncoder->begin();
-					commandEncoder->copyBufferToBuffer(instanceVertexStagingBuffer, instanceVertexBuffer, bufferCopyRegions);
-
-					const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-					transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-					device->waitIdle();
-				}
+				createVertexAndInstanceBuffers();
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
-				BeginRenderPassDescriptor beginRenderPassDescriptor;
+				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
@@ -306,16 +61,12 @@ namespace ProjectA {
 				const float32 height = static_cast<float32>(swapchainExtent.height);
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-				commandEncoder->bindRenderPipeline(renderPipeline);
-
-				// TODO
-				BREAKPOINT();
-				// commandEncoder->bindDescriptorSets();
-
-				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
-				commandEncoder->bindVertexBuffer(1, instanceVertexBuffer, 0, sizeof(Instance));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
+				commandEncoder->bindRenderPipeline(renderPipeline);
+				commandEncoder->bindDescriptorSets(pipelineLayout, {textureArrayDescriptorSet});
+				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(svec2<float32>));
+				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0, sizeof(Instance));
 				commandEncoder->draw(24, 4, 0, 0);
 				commandEncoder->endRenderPass();
 			}
@@ -325,6 +76,111 @@ namespace ProjectA {
 			}
 
 		private:
+			void setupRenderPass() {
+				Attachment swapchainAttachment{};
+				swapchainAttachment.format = getSurface()->getFormat();
+				swapchainAttachment.sampleCount = 1;
+				swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+				swapchainAttachment.storeOperation = StoreOperation::STORE;
+				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+
+				AttachmentReference swapchainAttachmentReference{};
+				swapchainAttachmentReference.index = 0;
+				swapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
+				SubpassDescriptor subpassDescriptor{};
+				subpassDescriptor.colorAttachmentReferences = {swapchainAttachmentReference};
+
+				const ref<Subpass> subpass = createSubpass(subpassDescriptor);
+
+				RenderPassDescriptor renderPassDescriptor{};
+				renderPassDescriptor.attachments = {swapchainAttachment};
+				renderPassDescriptor.subpasses = {subpass};
+
+				renderPass = createRenderPass(renderPassDescriptor);
+			}
+
+			void createTextureArrayImage() {
+				ImageDescriptor textureArrayImageDescriptor{};
+				textureArrayImageDescriptor.type = ImageType::TEXTURE_2D;
+				textureArrayImageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
+				textureArrayImageDescriptor.extent.width = TEXTURE_ARRAY_IMAGE_WIDTH;
+				textureArrayImageDescriptor.extent.height = TEXTURE_ARRAY_IMAGE_HEIGHT;
+				textureArrayImageDescriptor.extent.depth = 1;
+				textureArrayImageDescriptor.mipLevelCount = 1;
+				textureArrayImageDescriptor.layerCount = 4;
+				textureArrayImageDescriptor.sampleCount = 1;
+				textureArrayImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
+				textureArrayImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+
+				textureArrayImage = createImage(textureArrayImageDescriptor);
+			}
+
+			void createTextureArrayImageView() {
+				ImageViewDescriptor textureArrayImageViewDescriptor{};
+				textureArrayImageViewDescriptor.mipLevelOffset = 0;
+				textureArrayImageViewDescriptor.mipLevelCount = textureArrayImage->getMipLevelCount();
+				textureArrayImageViewDescriptor.layerOffset = 0;
+				textureArrayImageViewDescriptor.layerCount = textureArrayImage->getLayerCount();
+
+				textureArrayImageView = textureArrayImage->createView(textureArrayImageViewDescriptor);
+			}
+
+			void loadAssets() {
+				sequence<File<FileFormat::PNG>> assets(ASSET_COUNT);
+				uint64 textureArrayImageSize = 0;
+
+				for (uint32 assetIndex = 0; assetIndex < assets.count; assetIndex += 1) {
+					const sequence<uint8> assetData = Filesystem::openBuffer(ASSET_PATHS[assetIndex]);
+
+					File<FileFormat::PNG>& asset = assets[assetIndex];
+					asset = Filesystem::decode<FileFormat::PNG>(assetData);
+
+					textureArrayImageSize += asset.data.count;
+				}
+
+				const ref<Buffer> textureArrayImageStagingBuffer = createStagingBuffer(textureArrayImageSize);
+
+				uint8* textureArrayImageStagingBufferMappedRange = textureArrayImageStagingBuffer->map<uint8>(0, textureArrayImageStagingBuffer->size);
+
+				for (uint32 assetIndex = 0; assetIndex < assets.count; assetIndex += 1) {
+					const File<FileFormat::PNG>& asset = assets[assetIndex];
+
+					std::copy(asset.data.begin(), asset.data.end(), textureArrayImageStagingBufferMappedRange);
+
+					textureArrayImageStagingBufferMappedRange += asset.data.count;
+				}
+
+				textureArrayImageStagingBuffer->unmap();
+
+				BufferImageCopyRegion bufferImageCopyRegion{};
+				bufferImageCopyRegion.bufferOffset = 0;
+				bufferImageCopyRegion.imageOffsetX = 0;
+				bufferImageCopyRegion.imageOffsetY = 0;
+				bufferImageCopyRegion.imageOffsetZ = 0;
+				bufferImageCopyRegion.imageExtent = textureArrayImage->getExtent();
+				bufferImageCopyRegion.imageMipLevel = 0;
+				bufferImageCopyRegion.imageLayerOffset = 0;
+				bufferImageCopyRegion.imageLayerCount = static_cast<uint32>(assets.count);
+
+				CommandBufferDescriptor commandBufferDescriptor{};
+				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
+				const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
+
+				commandEncoder->begin();
+				commandEncoder->setImageMemoryBarrier(textureArrayImage, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+				commandEncoder->copyBufferToImage(textureArrayImageStagingBuffer, textureArrayImage, {bufferImageCopyRegion});
+				commandEncoder->setImageMemoryBarrier(textureArrayImage, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
+				getDevice()->waitIdle();
+			}
+
 			void recreateFramebuffers() {
 				const ref<Swapchain>& swapchain = getSwapchain();
 
@@ -340,45 +196,175 @@ namespace ProjectA {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < swapchain->getImageCount(); framebufferIndex += 1) {
+				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count; framebufferIndex += 1) {
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 				}
 			}
 
-		private:
-			struct Instance {
-				svec2<float32> vertexOffset;
-				uint32 textureArrayIndex;
-			};
+			void setupSampler() {
+				SamplerDescriptor samplerDescriptor{};
+				samplerDescriptor.magFilter = SamplerFilter::LINEAR;
+				samplerDescriptor.minFilter = SamplerFilter::NEAREST;
+
+				sampler = createSampler(samplerDescriptor);
+			}
+
+			void createTextureArrayImageDescriptorSetLayout() {
+				DescriptorSetLayoutBinding textureArrayBinding{};
+				textureArrayBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+				textureArrayBinding.descriptorCount = 1;
+				textureArrayBinding.shaderStages = ShaderStage::FRAGMENT;
+
+				textureArrayDescriptorSetLayout = createDescriptorSetLayout({textureArrayBinding});
+			}
+
+			void allocateTextureArrayImageDescriptorSet() {
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({textureArrayDescriptorSetLayout});
+
+				textureArrayDescriptorSet = descriptorSets[0];
+			}
+
+			void updateTextureArrayImageDescriptorSet() {
+				DescriptorImage textureArrayDescriptorImage{};
+				textureArrayDescriptorImage.imageView = textureArrayImageView;
+				textureArrayDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+				textureArrayDescriptorImage.sampler = sampler;
+
+				WriteDescriptorSet textureArrayWriteDescriptorSet{};
+				textureArrayWriteDescriptorSet.descriptorSet = textureArrayDescriptorSet;
+				textureArrayWriteDescriptorSet.bindingIndex = 0;
+				textureArrayWriteDescriptorSet.descriptorImages = {textureArrayDescriptorImage};
+
+				getDevice()->updateDescriptorSets({textureArrayWriteDescriptorSet});
+			}
+
+			void setupPipelineLayout() {
+				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
+				pipelineLayoutDescriptor.descriptorSetLayouts = {textureArrayDescriptorSetLayout};
+
+				pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
+			}
+
+			void setupRenderPipeline() {
+				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+				vertexInputBinding.registerAttribute<svec2<float32>>();
+
+				VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
+				instanceInputBinding.registerAttribute<svec2<float32>>();
+				instanceInputBinding.registerAttribute<uint32>();
+
+				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+				vertexShaderModuleDescriptor.entryPoint = "main";
+
+				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+				fragmentShaderModuleDescriptor.entryPoint = "main";
+
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule("ArrayTextureOrTextureArray.vert", vertexShaderModuleDescriptor);
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule("TextureArray.frag", fragmentShaderModuleDescriptor);
+
+				ColorBlendAttachment colorBlendAttachment{};
+				colorBlendAttachment.blend = false;
+
+				RenderPipelineDescriptor renderPipelineDescriptor{};
+				renderPipelineDescriptor.pipelineLayout = pipelineLayout;
+				renderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+				renderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+				renderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+				renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+				renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+				renderPipelineDescriptor.cullMode = CullMode::BACK;
+				renderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+				renderPipelineDescriptor.lineWidth = 1.0f;
+				renderPipelineDescriptor.minSampleShading = 0.0f;
+				renderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				renderPipelineDescriptor.depthStencilState.depthTest = false;
+				renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+				renderPipelineDescriptor.renderPass = renderPass;
+				renderPipelineDescriptor.subpassIndex = 0;
+
+				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
+			}
+
+			void createVertexAndInstanceBuffers() {
+				const ref<Buffer> stagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE + INSTANCE_BUFFER_SIZE);
+
+				uint8* stagingBufferMappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
+
+				Vertex* vertexStagingBufferMappedRange = pointer_cast<Vertex*>(stagingBufferMappedRange);
+				vertexStagingBufferMappedRange[0].position = {-0.5f,  0.5f};
+				vertexStagingBufferMappedRange[1].position = { 0.5f,  0.5f};
+				vertexStagingBufferMappedRange[2].position = { 0.5f, -0.5f};
+				vertexStagingBufferMappedRange[3].position = {-0.5f,  0.5f};
+				vertexStagingBufferMappedRange[4].position = { 0.5f, -0.5f};
+				vertexStagingBufferMappedRange[5].position = {-0.5f, -0.5f};
+
+				Instance* instanceStagingBufferMappedRange = pointer_cast<Instance*>(stagingBufferMappedRange + VERTEX_BUFFER_SIZE);
+				instanceStagingBufferMappedRange[0].vertexOffset = {-0.5f, 0.5f};
+				instanceStagingBufferMappedRange[0].textureArrayIndex = 0;
+				instanceStagingBufferMappedRange[1].vertexOffset = {0.5f, 0.5f};
+				instanceStagingBufferMappedRange[1].textureArrayIndex = 1;
+				instanceStagingBufferMappedRange[2].vertexOffset = {-0.5f, -0.5f};
+				instanceStagingBufferMappedRange[2].textureArrayIndex = 2;
+				instanceStagingBufferMappedRange[3].vertexOffset = {0.5f, -0.5f};
+				instanceStagingBufferMappedRange[3].textureArrayIndex = 3;
+
+				stagingBuffer->unmap();
+
+				BufferDescriptor vertexBufferDescriptor{};
+				vertexBufferDescriptor.size = VERTEX_BUFFER_SIZE;
+				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+				BufferDescriptor instanceBufferDescriptor{};
+				instanceBufferDescriptor.size = INSTANCE_BUFFER_SIZE;
+				instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+				instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+				vertexBuffer = createBuffer(vertexBufferDescriptor);
+				instanceBuffer = createBuffer(instanceBufferDescriptor);
+
+				BufferCopyRegion vertexBufferCopyRegion{};
+				vertexBufferCopyRegion.sourceOffset = 0;
+				vertexBufferCopyRegion.destinationOffset = 0;
+				vertexBufferCopyRegion.size = vertexBuffer->size;
+
+				BufferCopyRegion instanceBufferCopyRegion{};
+				instanceBufferCopyRegion.sourceOffset = vertexBuffer->size;
+				instanceBufferCopyRegion.destinationOffset = 0;
+				instanceBufferCopyRegion.size = instanceBuffer->size;
+
+				CommandBufferDescriptor commandBufferDescriptor{};
+				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
+
+				commandEncoder->begin();
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
+				commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, {instanceBufferCopyRegion});
+
+				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+				transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
+				getDevice()->waitIdle();
+			}
 
 		private:
-			static constexpr std::array<std::string_view, 4> ASSET_PATHS = {
-				"Asset/Image/Baboon.png",
-				"Asset/Image/Cameraman.png",
-				"Asset/Image/Lenna.png",
-				"Asset/Image/Pepper.png",
-			};
-
-			static constexpr uint32 TEXTURE_ARRAY_WIDTH = 512;
-			static constexpr uint32 TEXTURE_ARRAY_HEIGHT = 512;
-
-		private:
-			ref<Image> textureArray;
-			ref<ImageView> textureArrayView;
-
-			ref<Sampler> sampler;
-
 			ref<RenderPass> renderPass;
-
+			ref<Image> textureArrayImage;
+			ref<ImageView> textureArrayImageView;
 			sequence<ref<Framebuffer>> framebuffers;
-
+			ref<Sampler> sampler;
+			ref<DescriptorSetLayout> textureArrayDescriptorSetLayout;
+			ref<DescriptorSet> textureArrayDescriptorSet;
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
-
 			ref<Buffer> vertexBuffer;
-
-			ref<Buffer> instanceVertexBuffer;
+			ref<Buffer> instanceBuffer;
 	};
 }
