@@ -112,17 +112,19 @@ namespace ProjectA {
 		#endif
 
 		// Set default texture parameters.
-		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glTextureParameteri(object, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTextureParameteri(object, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTextureParameteri(object, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTextureParameteri(object, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		#else
-			glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		#endif
+		if (sampleCount == 1) {
+			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+				glTextureParameteri(object, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTextureParameteri(object, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTextureParameteri(object, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTextureParameteri(object, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			#else
+				glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			#endif
+		}
 
 		#if OPENGL_VERSION < OPENGL_VERSION_4_5 && defined(OPENGL_UNBIND_AFTER_USE)
 			glBindTexture(target, 0);
