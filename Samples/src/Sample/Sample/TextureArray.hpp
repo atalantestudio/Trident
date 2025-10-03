@@ -131,10 +131,10 @@ namespace ProjectA {
 				uint64 textureArrayImageSize = 0;
 
 				for (uint32 assetIndex = 0; assetIndex < assets.count; assetIndex += 1) {
-					const sequence<uint8> assetData = Filesystem::openBuffer(ASSET_PATHS[assetIndex]);
+					const sequence<uint8> assetBuffer = Filesystem::openBuffer(ASSET_PATHS[assetIndex]);
 
 					File<FileFormat::PNG>& asset = assets[assetIndex];
-					asset = Filesystem::decode<FileFormat::PNG>(assetData);
+					asset = Filesystem::decode<FileFormat::PNG>(assetBuffer);
 
 					textureArrayImageSize += asset.data.count;
 				}
