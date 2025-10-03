@@ -120,7 +120,7 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule("Base/Vertex2DRGBA.vert", vertexShaderModuleDescriptor);
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Base/ColorRGBA.frag", fragmentShaderModuleDescriptor);
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Base/FragmentRGBA.frag", fragmentShaderModuleDescriptor);
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = true;

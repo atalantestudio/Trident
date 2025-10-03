@@ -11,7 +11,7 @@ namespace ProjectA {
 				mat3x3<float32> world;
 				vec4<float32> fillColor;
 				vec4<float32> strokeColor;
-				float32 z;
+				float32 depth;
 				uint32 selected = 0;
 			};
 
@@ -24,7 +24,7 @@ namespace ProjectA {
 				svec2<float32> viewport;
 			};
 
-			struct PlaceholderUniform {
+			struct Placeholder {
 				svec2<float32> offset;
 			};
 
@@ -38,10 +38,12 @@ namespace ProjectA {
 			void build() override;
 
 			// After registering the scene, the vertex buffer cannot be resized.
-			/* void registerScene(const Scene2D& scene);
+			void setScene(const Scene2D& scene);
+
+			void setInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
 
 			// x and y are in the range [0, viewport].
-			const vec2<float32>& getNdcMousePosition() const;
+			/* const vec2<float32>& getNdcMousePosition() const;
 
 			// x and y are in the range [0, viewport].
 			void setMousePosition(float32 x, float32 y);
@@ -58,9 +60,7 @@ namespace ProjectA {
 
 			void zoom(float32 zoomLevelDelta);
 
-			/* void writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
-
-			void registerFeature(const Feature2D& feature);
+			/* void registerFeature(const Feature2D& feature);
 
 			void clearRegisteredData(); */
 
@@ -79,6 +79,8 @@ namespace ProjectA {
 			void createCameraViewPipelineLayout();
 
 			void createGridRenderPipeline();
+			void createFillRenderPipeline();
+			void createStrokeRenderPipeline();
 
 			/////
 
@@ -97,14 +99,19 @@ namespace ProjectA {
 			void recreateDepthStencilImage();
 			void recreateDepthStencilImageView();
 			void recreateFramebuffers();
+			void recreateVertexBuffer(uint64 size);
+			void recreateInstanceBuffer(uint64 size);
+			void recreateIndexBuffer(uint64 size);
+
+			void copyBuffers(const ref<Buffer>& stagingBuffer) const;
 
 			void updateCameraProjection() const;
 			void updateViewport() const;
 			// void updateCentersOfMass() const;
 
 			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
-			/* void renderScene(const ref<CommandEncoder>& commandEncoder) const;
-			void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
+			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
+			/* void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
 			void renderFeatures(const ref<CommandEncoder>& commandEncoder) const;
 			void renderSelectedInstancePlaceholder(const ref<CommandEncoder>& commandEncoder) const; */
 
@@ -126,17 +133,22 @@ namespace ProjectA {
 			ref<PipelineLayout> cameraViewPipelineLayout;
 
 			ref<RenderPipeline> gridRenderPipeline;
+			ref<RenderPipeline> fillRenderPipeline;
 
 			ref<Buffer> cameraBuffer;
 			ref<Buffer> viewBuffer;
+			ref<Buffer> vertexBuffer;
+			ref<Buffer> indexBuffer;
+			ref<Buffer> instanceBuffer;
+
 			ref<Buffer> closestPointBuffer;
 
 			Camera* cameraBufferMappedRange = nullptr;
 			View* viewBufferMappedRange = nullptr;
 			svec2<float32>* closestPointBufferMappedRange = nullptr;
+			Instance* instanceBufferMappedRange = nullptr;
 
-			ref<Buffer> vertexBuffer;
-			ref<Buffer> indexBuffer;
+			/////
 
 			ref<Buffer> centerOfMassBuffer;
 			vec3<float32>* centerOfMassMappedRange = nullptr;
@@ -149,15 +161,12 @@ namespace ProjectA {
 			svec2<float32>* edgeVertexFeatureMappedRange = nullptr;
 			uint32 edgeVertexFeatureCount = 0;
 
-			ref<Buffer> instanceBuffer;
-			Instance* instanceMappedRange = nullptr;
-
 			ref<PipelineLayout> pipelineLayout;
-			ref<RenderPipeline> fillRenderPipeline;
 			ref<RenderPipeline> strokeRenderPipeline;
 
-			ref<Buffer> placeholderUniformBuffer;
-			PlaceholderUniform* placeholderMappedRange = nullptr;
+			ref<Buffer> placeholderBuffer;
+
+			Placeholder* placeholderBufferMappedRange = nullptr;
 
 			ref<PipelineLayout> placeholderFillPipelineLayout;
 			ref<RenderPipeline> placeholderFillRenderPipeline;

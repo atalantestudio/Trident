@@ -26,6 +26,8 @@ namespace ProjectA {
 		createCameraViewPipelineLayout();
 
 		createGridRenderPipeline();
+		createFillRenderPipeline();
+		createStrokeRenderPipeline();
 
 		/////
 
@@ -155,6 +157,70 @@ namespace ProjectA {
 		}
 	}
 
+	void Physics2DRenderer::recreateVertexBuffer(uint64 size) {
+		BufferDescriptor vertexBufferDescriptor{};
+		vertexBufferDescriptor.size = size;
+		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		vertexBuffer = createBuffer(vertexBufferDescriptor);
+	}
+
+	void Physics2DRenderer::recreateInstanceBuffer(uint64 size) {
+		BufferDescriptor instanceBufferDescriptor{};
+		instanceBufferDescriptor.size = size;
+		instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		instanceBufferDescriptor.persistent = true;
+
+		instanceBuffer = createBuffer(instanceBufferDescriptor);
+
+		instanceBufferMappedRange = instanceBuffer->map<Instance>(0, instanceBuffer->size);
+	}
+
+	void Physics2DRenderer::recreateIndexBuffer(uint64 size) {
+		BufferDescriptor indexBufferDescriptor{};
+		indexBufferDescriptor.size = size;
+		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
+		indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		indexBuffer = createBuffer(indexBufferDescriptor);		
+	}
+
+	void Physics2DRenderer::copyBuffers(const ref<Buffer>& stagingBuffer) const {
+		BufferCopyRegion vertexBufferCopyRegion{};
+		vertexBufferCopyRegion.sourceOffset = 0;
+		vertexBufferCopyRegion.destinationOffset = 0;
+		vertexBufferCopyRegion.size = vertexBuffer->size;
+
+		BufferCopyRegion instanceBufferCopyRegion{};
+		instanceBufferCopyRegion.sourceOffset = vertexBuffer->size;
+		instanceBufferCopyRegion.destinationOffset = 0;
+		instanceBufferCopyRegion.size = instanceBuffer->size;
+
+		BufferCopyRegion indexBufferCopyRegion{};
+		indexBufferCopyRegion.sourceOffset = vertexBuffer->size + instanceBuffer->size;
+		indexBufferCopyRegion.destinationOffset = 0;
+		indexBufferCopyRegion.size = indexBuffer->size;
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
+
+		commandEncoder->begin();
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, {instanceBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, {indexBufferCopyRegion});
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
+		getDevice()->waitIdle();
+	}
+
 	void Physics2DRenderer::createCameraBuffer() {
 		BufferDescriptor cameraBufferDescriptor{};
 		cameraBufferDescriptor.size = sizeof(Camera);
@@ -184,7 +250,7 @@ namespace ProjectA {
 		DescriptorSetLayoutBinding cameraBinding{};
 		cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraBinding.descriptorCount = 1;
-		cameraBinding.shaderStages = ShaderStage::FRAGMENT;
+		cameraBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
 
 		DescriptorSetLayoutBinding viewBinding{};
 		viewBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
@@ -204,9 +270,11 @@ namespace ProjectA {
 		DescriptorBuffer cameraDescriptorBuffer{};
 		cameraDescriptorBuffer.buffer = cameraBuffer;
 
-		// TODO: The camera's projection isn't needed here, but the offset must be a multiple of the minUniformBufferAlignment physical device limit.
+		// TODO
+		// The camera's projection isn't used when rendering the grid.
+		// The offset must be a multiple of the minUniformBufferAlignment physical device limit.
 		cameraDescriptorBuffer.offset = 0;
-		// cameraDescriptorBuffer.offset = sizeof(CameraUniform::projection);
+		// cameraDescriptorBuffer.offset = sizeof(Camera::projection);
 
 		cameraDescriptorBuffer.size = cameraBuffer->size;
 
@@ -250,7 +318,7 @@ namespace ProjectA {
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
 
-		RenderPipelineDescriptor gridRenderPipelineDescriptor;
+		RenderPipelineDescriptor gridRenderPipelineDescriptor{};
 		gridRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
 		gridRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
 		gridRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
@@ -269,6 +337,103 @@ namespace ProjectA {
 		gridRenderPipelineDescriptor.subpassIndex = 0;
 
 		gridRenderPipeline = createRenderPipeline(gridRenderPipelineDescriptor);
+	}
+
+	void Physics2DRenderer::createFillRenderPipeline() {
+		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+		vertexInputBinding.registerAttribute<svec2<float32>>();
+
+		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
+		instanceInputBinding.registerAttribute<mat3x3<float32>>();
+		instanceInputBinding.registerAttribute<vec4<float32>>();
+		instanceInputBinding.registerAttribute<vec4<float32>>();
+		instanceInputBinding.registerAttribute<float32>();
+
+		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexShaderModuleDescriptor.entryPoint = "main";
+
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/Fill.vert", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Base/FragmentRGBA.frag", fragmentShaderModuleDescriptor);
+
+		ColorBlendAttachment transparentColorBlendAttachment{};
+		transparentColorBlendAttachment.blend = true;
+		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
+		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+
+		RenderPipelineDescriptor fillRenderPipelineDescriptor{};
+		fillRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
+		 fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		fillRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		fillRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		fillRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		fillRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		fillRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		fillRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		fillRenderPipelineDescriptor.lineWidth = 1.0f;
+		fillRenderPipelineDescriptor.minSampleShading = 0.0f;
+		fillRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
+		fillRenderPipelineDescriptor.depthStencilState.depthTest = true;
+		fillRenderPipelineDescriptor.depthStencilState.depthWrite = true;
+		fillRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
+		fillRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		fillRenderPipelineDescriptor.renderPass = renderPass;
+		fillRenderPipelineDescriptor.subpassIndex = 0;
+
+		fillRenderPipeline = createRenderPipeline(fillRenderPipelineDescriptor);
+	}
+
+	void Physics2DRenderer::createStrokeRenderPipeline() {
+		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+		vertexInputBinding.registerAttribute<svec2<float32>>();
+
+		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
+		instanceInputBinding.registerAttribute<mat3x3<float32>>();
+		instanceInputBinding.registerAttribute<vec4<float32>>();
+		instanceInputBinding.registerAttribute<vec4<float32>>();
+		instanceInputBinding.registerAttribute<float32>();
+		instanceInputBinding.registerAttribute<uint32>();
+
+		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexShaderModuleDescriptor.entryPoint = "main";
+
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/Stroke.vert", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/Stroke.frag", fragmentShaderModuleDescriptor);
+
+		ColorBlendAttachment transparentColorBlendAttachment{};
+		transparentColorBlendAttachment.blend = true;
+		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
+		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+
+		RenderPipelineDescriptor strokeRenderPipelineDescriptor{};
+		strokeRenderPipelineDescriptor.pipelineLayout = cameraViewPipelineLayout;
+		strokeRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		strokeRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		strokeRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		strokeRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::LINE_STRIP;
+		strokeRenderPipelineDescriptor.polygonMode = PolygonMode::LINE;
+		strokeRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		strokeRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		strokeRenderPipelineDescriptor.lineWidth = 1.0f;
+		strokeRenderPipelineDescriptor.minSampleShading = 0.0f;
+		strokeRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
+		strokeRenderPipelineDescriptor.depthStencilState.depthTest = true;
+		strokeRenderPipelineDescriptor.depthStencilState.depthWrite = true;
+		strokeRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER_OR_EQUAL;
+		strokeRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR | DynamicState::LINE_WIDTH;
+		strokeRenderPipelineDescriptor.renderPass = renderPass;
+		strokeRenderPipelineDescriptor.subpassIndex = 0;
+
+		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
 	}
 
 	/* void Physics2DRenderer::createCenterOfMassBuffer() {
@@ -496,41 +661,39 @@ namespace ProjectA {
 		edgeFeatureRenderPipelineDescriptor.subpassIndex = 0;
 
 		edgeFeatureRenderPipeline = createRenderPipeline(edgeFeatureRenderPipelineDescriptor);
-	}
+	} */
 
-	void Physics2DRenderer::registerScene(const Scene2D& scene) {
+	void Physics2DRenderer::setScene(const Scene2D& scene) {
 		this->scene = &scene;
 
-		uint32 vertexCount = 0;
-		uint32 instanceCount = 0;
-
 		const ComponentPool<RigidBody2D>& rigidBodyPool = scene.getComponentPool<RigidBody2D>();
+		const uint32 instanceCount = rigidBodyPool.componentCount;
 
-		for (uint32 rigidBodyIndex = 0; rigidBodyIndex < rigidBodyPool.componentCount; rigidBodyIndex += 1) {
-			const Entity entity = rigidBodyPool.componentIndexToEntity[rigidBodyIndex];
+		uint32 vertexCount = 0;
+
+		for (uint32 instanceIndex = 0; instanceIndex < instanceCount; instanceIndex += 1) {
+			const Entity entity = rigidBodyPool.componentIndexToEntity[instanceIndex];
 			const ref<Geometry2D>& geometry = scene.getGeometry(entity);
 
 			vertexCount += geometry->getVertexCount() + 1;
 			indexCount += geometry->getIndexCount();
-			instanceCount += 1;
 		}
 
 		const uint64 vertexBufferSize = vertexCount * sizeof(svec2<float32>);
-		const uint64 indexBufferSize = indexCount * sizeof(uint16);
 		const uint64 instanceBufferSize = instanceCount * sizeof(Instance);
+		const uint64 indexBufferSize = indexCount * sizeof(uint16);
 
-		const uint64 stagingBufferSize = vertexBufferSize + indexBufferSize + instanceBufferSize;
+		const ref<Buffer> stagingBuffer = createStagingBuffer(vertexBufferSize + indexBufferSize + instanceBufferSize);
 
-		const ref<Device> device = getDevice();
-		const ref<Buffer> stagingBuffer = createStagingBuffer(stagingBufferSize);
+		uint8* mappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
+		svec2<float32>* vertexMappedRange = pointer_cast<svec2<float32>*>(mappedRange);
+		Instance* instanceMappedRange = pointer_cast<Instance*>(mappedRange + vertexBufferSize);
+		uint16* indexMappedRange = pointer_cast<uint16*>(mappedRange + vertexBufferSize + instanceBufferSize);
 
-		void* mappedRange = stagingBuffer->map<void>(0, stagingBufferSize);
-		svec2<float32>* vertexMappedRange = static_cast<svec2<float32>*>(mappedRange);
-		uint16* indexMappedRange = pointer_cast<uint16*>(vertexMappedRange + vertexCount);
-		Instance* instanceMappedRange = pointer_cast<Instance*>(indexMappedRange + indexCount);
+		const float32 inverseInstanceCount = 1.0f / instanceCount;
 
-		for (uint32 rigidBodyIndex = 0; rigidBodyIndex < rigidBodyPool.componentCount; rigidBodyIndex += 1) {
-			const Entity entity = rigidBodyPool.componentIndexToEntity[rigidBodyIndex];
+		for (uint32 instanceIndex = 0; instanceIndex < instanceCount; instanceIndex += 1) {
+			const Entity entity = rigidBodyPool.componentIndexToEntity[instanceIndex];
 			const ref<Geometry2D>& geometry = scene.getGeometry(entity);
 			const ref<Material>& material = scene.getMaterial(entity);
 
@@ -541,83 +704,27 @@ namespace ProjectA {
 			}
 
 			// Duplicate the first vertex for line rendering.
-			vertexMappedRange[geometry->getVertexCount()] = {geometry->vertices[0][0],geometry->vertices[0][1]};
+			vertexMappedRange[geometry->getVertexCount()] = {geometry->vertices[0][0], geometry->vertices[0][1]};
+			vertexMappedRange += geometry->getVertexCount() + 1;
+
+			instanceMappedRange[instanceIndex].fillColor = std::static_pointer_cast<ColorFillStrokeMaterial>(material)->fillColor;
+			instanceMappedRange[instanceIndex].strokeColor = std::static_pointer_cast<ColorFillStrokeMaterial>(material)->strokeColor;
+			instanceMappedRange[instanceIndex].depth = entity * inverseInstanceCount;
 
 			std::copy(geometry->indices.begin(), geometry->indices.end(), indexMappedRange);
 
-			instanceMappedRange->fillColor = std::static_pointer_cast<ColorFillStrokeMaterial>(material)->fillColor;
-			instanceMappedRange->strokeColor = std::static_pointer_cast<ColorFillStrokeMaterial>(material)->strokeColor;
-			instanceMappedRange->z = static_cast<float32>(entity) / instanceCount;
-
-			vertexMappedRange += geometry->getVertexCount() + 1;
 			indexMappedRange += geometry->getIndexCount();
-			instanceMappedRange += 1;
 		}
 
 		stagingBuffer->unmap();
 
-		BufferDescriptor vertexBufferDescriptor;
-		vertexBufferDescriptor.size = vertexBufferSize;
-		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+		recreateVertexBuffer(vertexBufferSize);
+		recreateInstanceBuffer(instanceBufferSize);
+		recreateIndexBuffer(indexBufferSize);
 
-		vertexBuffer = createBuffer(vertexBufferDescriptor);
+		copyBuffers(stagingBuffer);
 
-		BufferDescriptor indexBufferDescriptor;
-		indexBufferDescriptor.size = indexBufferSize;
-		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
-		indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		indexBuffer = createBuffer(indexBufferDescriptor);
-
-		BufferDescriptor instanceBufferDescriptor;
-		instanceBufferDescriptor.size = instanceBufferSize;
-		instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-		instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		instanceBufferDescriptor.persistent = true;
-
-		instanceBuffer = createBuffer(instanceBufferDescriptor);
-		this->instanceMappedRange = instanceBuffer->map<Instance>(0, instanceBufferSize);
-
-		sequence<BufferCopyRegion> vertexBufferCopyRegions(1);
-
-		BufferCopyRegion& vertexBufferCopyRegion = vertexBufferCopyRegions[0];
-		vertexBufferCopyRegion.sourceOffset = 0;
-		vertexBufferCopyRegion.destinationOffset = 0;
-		vertexBufferCopyRegion.size = vertexBufferSize;
-
-		sequence<BufferCopyRegion> indexBufferCopyRegions(1);
-
-		BufferCopyRegion& indexBufferCopyRegion = indexBufferCopyRegions[0];
-		indexBufferCopyRegion.sourceOffset = vertexBufferSize;
-		indexBufferCopyRegion.destinationOffset = 0;
-		indexBufferCopyRegion.size = indexBufferSize;
-
-		sequence<BufferCopyRegion> instanceBufferCopyRegions(1);
-
-		BufferCopyRegion& instanceBufferCopyRegion = instanceBufferCopyRegions[0];
-		instanceBufferCopyRegion.sourceOffset = vertexBufferSize + indexBufferSize;
-		instanceBufferCopyRegion.destinationOffset = 0;
-		instanceBufferCopyRegion.size = instanceBufferSize;
-
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-		const ref<Queue> transferQueue = device->getQueue(QueueFamilyCapability::TRANSFER);
-		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
-
-		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, vertexBufferCopyRegions);
-		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, indexBufferCopyRegions);
-		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, instanceBufferCopyRegions);
-
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-		transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-		device->waitIdle();
-
-		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
+		/* DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding;
 		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		cameraDescriptorSetLayoutBinding.shaderStages = ShaderStage::VERTEX;
 		cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
@@ -664,7 +771,7 @@ namespace ProjectA {
 		fillRenderPipelineDescriptor.pipelineLayout = pipelineLayout;
 		fillRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, fillInstanceInputBinding};
 		fillRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("Physics2D/Fill.vert", vertexShaderModuleDescriptor);
-		fillRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Physics2D/Fill.frag", fragmentShaderModuleDescriptor);
+		fillRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Base/FragmentRGBA.frag", fragmentShaderModuleDescriptor);
 		fillRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		fillRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		fillRenderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -709,7 +816,7 @@ namespace ProjectA {
 
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
 
-		constexpr uint64 placeholderBufferSize = sizeof(PlaceholderUniform);
+		constexpr uint64 placeholderBufferSize = sizeof(Placeholder);
 
 		BufferDescriptor placeholderBufferDescriptor;
 		placeholderBufferDescriptor.size = placeholderBufferSize;
@@ -717,14 +824,15 @@ namespace ProjectA {
 		placeholderBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		placeholderBufferDescriptor.persistent = true;
 
-		placeholderUniformBuffer = createBuffer(placeholderBufferDescriptor);
-		placeholderMappedRange = placeholderUniformBuffer->map<PlaceholderUniform>(0, placeholderBufferSize);
-		placeholderMappedRange->offset = {0.0f, 0.0f};
+		placeholderBuffer = createBuffer(placeholderBufferDescriptor);
+
+		placeholderBufferMappedRange = placeholderBuffer->map<Placeholder>(0, placeholderBufferSize);
+		placeholderBufferMappedRange->offset = {0.0f, 0.0f};
 
 		DescriptorSetLayoutBinding placeholderDescriptorSetLayoutBinding;
 		placeholderDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 		placeholderDescriptorSetLayoutBinding.shaderStages = ShaderStage::VERTEX;
-		placeholderDescriptorSetLayoutBinding.buffers = {placeholderUniformBuffer};
+		placeholderDescriptorSetLayoutBinding.buffers = {placeholderBuffer};
 
 		DescriptorSetLayout placeholderFillDescriptorSetLayout;
 		placeholderFillDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, placeholderDescriptorSetLayoutBinding};
@@ -787,10 +895,14 @@ namespace ProjectA {
 		placeholderCenterOfMassRenderPipeline = createRenderPipeline(placeholderCenterOfMassRenderPipelineDescriptor);
 
 		initializeCenterOfMassBuffer();
-		initializeCenterOfMassRenderPipeline();
+		initializeCenterOfMassRenderPipeline(); */
 	}
 
-	const vec2<float32>& Physics2DRenderer::getNdcMousePosition() const {
+	void Physics2DRenderer::setInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const {
+		instanceBufferMappedRange[instanceIndex].world = transform;
+	}
+
+	/* const vec2<float32>& Physics2DRenderer::getNdcMousePosition() const {
 		return ndcMousePosition;
 	}
 
@@ -861,7 +973,7 @@ namespace ProjectA {
 
 	void Physics2DRenderer::selectEntity(Entity entity) {
 		if (selectedInstanceIndex != max<uint32>()) {
-			instanceMappedRange[selectedInstanceIndex].selected = 0;
+			instanceBufferMappedRange[selectedInstanceIndex].selected = 0;
 		}
 
 		if (entity == max<uint32>()) {
@@ -873,11 +985,11 @@ namespace ProjectA {
 		const ComponentPool<RigidBody2D>& instancePool = scene->getComponentPool<RigidBody2D>();
 
 		selectedInstanceIndex = instancePool.entityToComponentIndex[entity];
-		instanceMappedRange[selectedInstanceIndex].selected = 1;
+		instanceBufferMappedRange[selectedInstanceIndex].selected = 1;
 	}
 
 	void Physics2DRenderer::setPlaceholderOffset(const vec2<float32>& offset) const {
-		placeholderMappedRange->offset = {offset[0], offset[1]};
+		placeholderBufferMappedRange->offset = {offset[0], offset[1]};
 	} */
 
 	void Physics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
@@ -902,8 +1014,8 @@ namespace ProjectA {
 		commandEncoder->setScissor(0, 0, swapchainExtent);
 
 		renderGrid(commandEncoder);
-		/* renderScene(commandEncoder);
-		renderDistance(commandEncoder);
+		renderScene(commandEncoder);
+		/* renderDistance(commandEncoder);
 		renderFeatures(commandEncoder);
 
 		if (selectedInstanceIndex != max<uint32>()) {
@@ -919,50 +1031,46 @@ namespace ProjectA {
 		commandEncoder->draw(3, 1, 0, 0);
 	}
 
-	/* void Physics2DRenderer::renderScene(const ref<CommandEncoder>& commandEncoder) const {
+	void Physics2DRenderer::renderScene(const ref<CommandEncoder>& commandEncoder) const {
 		commandEncoder->bindRenderPipeline(fillRenderPipeline);
-
-		// TODO
-		BREAKPOINT();
-		// commandEncoder->bindDescriptorSets();
-
+		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 
-		uint32 rigidBodyIndex = 0;
-		uint32 vertexOffset = 0;
-
 		const ComponentPool<RigidBody2D>& rigidBodyPool = scene->getComponentPool<RigidBody2D>();
+		const uint32 instanceCount = rigidBodyPool.componentCount;
 
-		for (uint32 indexOffset = 0; rigidBodyIndex < rigidBodyPool.componentCount; rigidBodyIndex += 1) {
-			const ref<Geometry2D>& geometry = rigidBodyPool.components[rigidBodyIndex].geometry;
+		uint32 instanceIndex = 0;
+		uint32 vertexOffset = 0;
+		uint32 indexOffset = 0;
+
+		while (instanceIndex < instanceCount) {
+			const ref<Geometry2D>& geometry = rigidBodyPool.components[instanceIndex].geometry;
 			const uint32 indexCount = geometry->getIndexCount();
 			const uint32 vertexCount = geometry->getVertexCount() + 1;
 
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
-			commandEncoder->bindVertexBuffer(1, instanceBuffer, rigidBodyIndex * sizeof(Instance), sizeof(Instance));
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceIndex * sizeof(Instance), sizeof(Instance));
 			commandEncoder->drawIndexed(indexCount, 1, indexOffset, 0, 0);
 
-			indexOffset += indexCount;
+			instanceIndex += 1;
 			vertexOffset += vertexCount;
+			indexOffset += indexCount;
 		}
 
 		commandEncoder->bindRenderPipeline(strokeRenderPipeline);
+		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
 
-		// TODO
-		BREAKPOINT();
-		// commandEncoder->bindDescriptorSets();
-
-		rigidBodyIndex = 0;
+		instanceIndex = 0;
 		vertexOffset = 0;
 
-		for (; rigidBodyIndex < rigidBodyPool.componentCount; rigidBodyIndex += 1) {
-			const ref<Geometry2D>& geometry = rigidBodyPool.components[rigidBodyIndex].geometry;
+		while (instanceIndex < instanceCount) {
+			const ref<Geometry2D>& geometry = rigidBodyPool.components[instanceIndex].geometry;
 			const uint32 vertexCount = geometry->getVertexCount() + 1;
 
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(svec2<float32>), sizeof(svec2<float32>));
-			commandEncoder->bindVertexBuffer(1, instanceBuffer, rigidBodyIndex * sizeof(Instance), sizeof(Instance));
+			commandEncoder->bindVertexBuffer(1, instanceBuffer, instanceIndex * sizeof(Instance), sizeof(Instance));
 
-			if (rigidBodyIndex == selectedInstanceIndex) {
+			if (instanceIndex == selectedInstanceIndex) {
 				commandEncoder->setLineWidth(2.0f);
 			}
 			else {
@@ -971,20 +1079,19 @@ namespace ProjectA {
 
 			commandEncoder->draw(vertexCount, 1, 0, 0);
 
+			instanceIndex += 1;
 			vertexOffset += vertexCount;
 		}
 
-		commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
-
+		/* commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
 		// TODO
 		BREAKPOINT();
 		// commandEncoder->bindDescriptorSets();
-
 		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0, sizeof(vec3<float32>));
-		commandEncoder->draw(rigidBodyPool.componentCount, 1, 0, 0);
+		commandEncoder->draw(rigidBodyPool.componentCount, 1, 0, 0); */
 	}
 
-	void Physics2DRenderer::renderDistance(const ref<CommandEncoder>& commandEncoder) const {
+	/* void Physics2DRenderer::renderDistance(const ref<CommandEncoder>& commandEncoder) const {
 		commandEncoder->bindRenderPipeline(distanceRenderPipeline);
 
 		// TODO
@@ -1075,11 +1182,7 @@ namespace ProjectA {
 		updateViewport();
 	}
 
-	/* void Physics2DRenderer::writeInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const {
-		instanceMappedRange[instanceIndex].world = transform;
-	}
-
-	void Physics2DRenderer::registerFeature(const Feature2D& feature) {
+	/* void Physics2DRenderer::registerFeature(const Feature2D& feature) {
 		switch (feature.getVertexCount()) {
 			case 1:
 				vertexFeatureMappedRange[vertexFeatureCount] = {feature.vertex[0], feature.vertex[1]};

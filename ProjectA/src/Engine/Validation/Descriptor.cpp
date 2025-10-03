@@ -593,12 +593,6 @@ namespace ProjectA {
 		uint32 warningCount = 0;
 		uint32 errorCount = 0;
 
-		if (descriptor.stage >= ShaderStage::__MAX_ENUM) {
-			errorCount += 1;
-
-			ENGINE_ERROR("descriptor.stage must be a valid ShaderStage value.");
-		}
-
 		if (descriptor.entryPoint.empty()) {
 			errorCount += 1;
 

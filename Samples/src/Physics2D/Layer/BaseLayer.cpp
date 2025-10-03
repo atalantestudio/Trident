@@ -13,7 +13,7 @@ namespace ProjectA {
 	void BaseLayer::postConstruct() {
 		renderer.setLayer(this);
 		renderer.build();
-		// renderer.registerScene(scene);
+		renderer.setScene(scene);
 
 		physicsEngine.registerScene(scene);
 	}
@@ -32,7 +32,7 @@ namespace ProjectA {
 			const Entity entity = static_cast<Entity>(rigidBodyComponentPool.componentIndexToEntity[rigidBodyIndex]);
 			const RigidBody2D& rigidBody = scene.getRigidBody(entity);
 
-			// renderer.writeInstanceTransform(rigidBodyIndex, rigidBody.transform);
+			renderer.setInstanceTransform(rigidBodyIndex, rigidBody.transform);
 		}
 
 		// renderer.selectEntity(selectedEntity);
