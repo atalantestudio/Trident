@@ -84,6 +84,6 @@ namespace ProjectA {
 			}
 
 		private:
-			BeginRenderPassDescriptor descriptor;
+			const BeginRenderPassDescriptor descriptor;
 	};
 }

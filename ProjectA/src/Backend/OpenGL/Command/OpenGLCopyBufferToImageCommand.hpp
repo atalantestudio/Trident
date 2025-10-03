@@ -11,7 +11,7 @@ namespace ProjectA {
 			explicit OpenGLCopyBufferToImageCommand(GLuint buffer, const OpenGLImage* image, const sequence<BufferImageCopyRegion>& copyRegions) :
 				buffer(buffer),
 				image(image),
-				copyRegions(&copyRegions)
+				copyRegions(copyRegions)
 			{}
 
 			void execute() const final override {
@@ -32,7 +32,7 @@ namespace ProjectA {
 						break;
 				}
 
-				for (const BufferImageCopyRegion& copyRegion : *copyRegions) {
+				for (const BufferImageCopyRegion& copyRegion : copyRegions) {
 					const GLvoid* pixels = (const GLvoid*) copyRegion.bufferOffset;
 
 					// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even when creating the image).
@@ -152,6 +152,6 @@ namespace ProjectA {
 		private:
 			const GLuint buffer;
 			const OpenGLImage* image;
-			const sequence<BufferImageCopyRegion>* copyRegions;
+			const sequence<BufferImageCopyRegion> copyRegions;
 	};
 }

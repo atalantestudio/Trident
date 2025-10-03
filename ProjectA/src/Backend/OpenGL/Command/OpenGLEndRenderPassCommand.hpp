@@ -64,6 +64,6 @@ namespace ProjectA {
 			}
 
 		private:
-			const ref<OpenGLFramebuffer>& framebuffer;
+			const ref<OpenGLFramebuffer> framebuffer;
 	};
 }

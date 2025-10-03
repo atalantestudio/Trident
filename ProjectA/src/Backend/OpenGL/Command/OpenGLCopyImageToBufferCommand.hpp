@@ -8,13 +8,13 @@ namespace ProjectA {
 			explicit OpenGLCopyImageToBufferCommand(const OpenGLImage* image, const OpenGLBuffer* buffer, const sequence<BufferImageCopyRegion>& copyRegions) :
 				image(image),
 				buffer(buffer),
-				copyRegions(&copyRegions)
+				copyRegions(copyRegions)
 			{}
 
 			void execute() const final override {
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer->object);
 
-				for (const BufferImageCopyRegion& copyRegion : *copyRegions) {
+				for (const BufferImageCopyRegion& copyRegion : copyRegions) {
 					// TODO: Move that switch out of the loop. The function to call must be known beforehand (maybe even when creating the image).
 					switch (image->target) {
 						case GL_TEXTURE_1D:
@@ -61,6 +61,6 @@ namespace ProjectA {
 		private:
 			const OpenGLImage* image;
 			const OpenGLBuffer* buffer;
-			const sequence<BufferImageCopyRegion>* copyRegions;
+			const sequence<BufferImageCopyRegion> copyRegions;
 	};
 }

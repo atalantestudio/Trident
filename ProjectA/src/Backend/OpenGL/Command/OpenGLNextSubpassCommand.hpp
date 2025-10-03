@@ -39,7 +39,7 @@ namespace ProjectA {
 			}
 
 		private:
-			const ref<OpenGLFramebuffer>& framebuffer;
-			const ref<Subpass>& subpass;
+			const ref<OpenGLFramebuffer> framebuffer;
+			const ref<Subpass> subpass;
 	};
 }

@@ -39,6 +39,6 @@ namespace ProjectA {
 		private:
 			const GLuint sourceBuffer;
 			const GLuint destinationBuffer;
-			sequence<BufferCopyRegion> copyRegions;
+			const sequence<BufferCopyRegion> copyRegions;
 	};
 }
