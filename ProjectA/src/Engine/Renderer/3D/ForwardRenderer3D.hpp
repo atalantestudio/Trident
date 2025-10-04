@@ -55,18 +55,33 @@ namespace ProjectA {
 				cameraBuffer = createBuffer(cameraBufferDescriptor);
 				cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
 
-				DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
-				cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-				cameraDescriptorSetLayoutBinding.shaderStages = ShaderStage::VERTEX;
-				cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
-
 				// 3. Create pipeline layout.
 				{
-					DescriptorSetLayout cameraDescriptorSetLayout{};
-					cameraDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding};
+					DescriptorSetLayoutBinding cameraBinding{};
+					cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+					cameraBinding.descriptorCount = 1;
+					cameraBinding.shaderStages = ShaderStage::VERTEX;
+
+					cameraDescriptorSetLayout = createDescriptorSetLayout({cameraBinding});
+
+					const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({cameraDescriptorSetLayout});
+
+					cameraDescriptorSet = descriptorSets[0];
+
+					DescriptorBuffer cameraDescriptorBuffer{};
+					cameraDescriptorBuffer.buffer = cameraBuffer;
+					cameraDescriptorBuffer.offset = 0;
+					cameraDescriptorBuffer.size = cameraBuffer->size;
+
+					WriteDescriptorSet cameraWriteDescriptorSet{};
+					cameraWriteDescriptorSet.descriptorSet = cameraDescriptorSet;
+					cameraWriteDescriptorSet.bindingIndex = 0;
+					cameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
+
+					getDevice()->updateDescriptorSets({cameraWriteDescriptorSet});
 
 					PipelineLayoutDescriptor pipelineLayoutDescriptor{};
-					pipelineLayoutDescriptor.layouts = {cameraDescriptorSetLayout};
+					pipelineLayoutDescriptor.descriptorSetLayouts = {cameraDescriptorSetLayout};
 
 					pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 				}
@@ -217,26 +232,22 @@ namespace ProjectA {
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
-				const ref<Swapchain>& swapchain = getSwapchain();
-				const float32 width = static_cast<float32>(swapchain->getExtent().width);
-				const float32 height = static_cast<float32>(swapchain->getExtent().height);
+				const Extent2D swapchainExtent = getSwapchain()->getExtent();
+				const float32 width = static_cast<float32>(swapchainExtent.width);
+				const float32 height = static_cast<float32>(swapchainExtent.height);
 
-				BeginRenderPassDescriptor beginRenderPassDescriptor;
+				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(renderPipeline);
-
-				// TODO
-				BREAKPOINT();
-				// commandEncoder->bindDescriptorSets();
-
+				commandEncoder->bindDescriptorSets(pipelineLayout, {cameraDescriptorSet});
 				commandEncoder->bindVertexBuffer(0, transformBuffer, 0, sizeof(mat4x4<float32>));
 				commandEncoder->bindVertexBuffer(1, vertexPositionBuffer, 0, 3 * sizeof(float32));
 				commandEncoder->bindIndexBuffer<uint32>(vertexPositionIndexBuffer, 0);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-				commandEncoder->setScissor(0, 0, swapchain->getExtent());
+				commandEncoder->setScissor(0, 0, swapchainExtent);
 
 				const ComponentPool<RigidBody3D>& rigidBodyPool = scene->getComponentPool<RigidBody3D>();
 				const ComponentPool<ref<Geometry3D>>& geometryPool = scene->getComponentPool<ref<Geometry3D>>();
@@ -300,6 +311,9 @@ namespace ProjectA {
 			ref<Subpass> subpass;
 
 			sequence<ref<Framebuffer>> framebuffers;
+
+			ref<DescriptorSetLayout> cameraDescriptorSetLayout;
+			ref<DescriptorSet> cameraDescriptorSet;
 
 			ref<PipelineLayout> pipelineLayout;
 			ref<RenderPipeline> renderPipeline;
