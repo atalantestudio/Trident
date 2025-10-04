@@ -4,13 +4,13 @@ layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 layout(set = 0, binding = 0, r8) uniform readonly image2D glyphImage;
 
-layout(set = 0, binding = 1, r8) uniform writeonly image2D glyphMapSdfImage;
+layout(set = 0, binding = 1, r8) uniform writeonly image2D glyphMapImage;
 
 layout(set = 0, binding = 2) buffer readonly Font {
 	uint outputGlyphSize;
 } font;
 
-layout(set = 0, binding = 3) buffer Glyph {
+layout(set = 0, binding = 3) buffer readonly Glyph {
 	uvec2 offset;
 	uint spreadFactor;
 } glyph;
@@ -19,17 +19,17 @@ void main() {
 	// Size of the a glyph part in the map.
 	uvec2 outputImageSize = uvec2(font.outputGlyphSize, font.outputGlyphSize);
 
-	uvec2 glyphMapSdfImageCoordinate = gl_GlobalInvocationID.xy;
+	uvec2 glyphMapImageCoordinate = gl_GlobalInvocationID.xy;
 
 	// Make sure that the coordinate is inside the glyph sub-image.
-	if (glyphMapSdfImageCoordinate.x >= outputImageSize.x || glyphMapSdfImageCoordinate.y >= outputImageSize.y) {
+	if (glyphMapImageCoordinate.x >= outputImageSize.x || glyphMapImageCoordinate.y >= outputImageSize.y) {
 		return;
 	}
 
 	uvec2 glyphImageSize = imageSize(glyphImage);
 
 	// TODO: Support custom output image size (multiply up).
-	uvec2 inputTexelCoordinate = uvec2(glyphMapSdfImageCoordinate * outputImageSize + outputImageSize / 2);
+	uvec2 inputTexelCoordinate = uvec2(glyphMapImageCoordinate * outputImageSize + outputImageSize / 2);
 
 	vec4 inputTexel = imageLoad(glyphImage, ivec2(inputTexelCoordinate));
 	vec4 outputTexel = vec4(0.0, 0.0, 0.0, 1.0);
@@ -75,5 +75,5 @@ void main() {
 
 	outputTexel.r = (closestDistance / spread) * 0.5 + 0.5;
 
-	imageStore(glyphMapSdfImage, ivec2(glyph.offset + glyphMapSdfImageCoordinate), outputTexel);
+	imageStore(glyphMapImage, ivec2(glyph.offset + glyphMapImageCoordinate), outputTexel);
 }

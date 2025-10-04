@@ -6,209 +6,80 @@
 #include "GenerateSDFGlyphMapProcess.hpp"
 
 namespace ProjectA {
-	static constexpr uint64 MAX_GLYPH_COUNT = 2048;
-	static constexpr Extent2D GLYPH_MAP_IMAGE_EXTENT = {2048, 2048};
-	static constexpr uint32 GLYPH_SUBIMAGE_DIMENSION = 64;
-	static constexpr uint32 SPREAD_FACTOR = 0;
+	uint64 GenerateSDFGlyphMapProcess::computeMaxGlyphByteSize(const sequence<TrueTypeFont::Glyph>& glyphs) {
+		uint64 maxGlyphEdgeCount = 0;
+
+		for (const TrueTypeFont::Glyph& glyph : glyphs) {
+			maxGlyphEdgeCount = max(maxGlyphEdgeCount, glyph.edges.count);
+		}
+
+		return sizeof(GlyphBuffer) + maxGlyphEdgeCount * sizeof(GlyphEdge);
+	}
 
 	GenerateSDFGlyphMapProcess::GenerateSDFGlyphMapProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& output) {
-		// TODO
-		/* ENGINE_ASSERT(file.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
+		ENGINE_ASSERT(file.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
 		output.extent = GLYPH_MAP_IMAGE_EXTENT;
 		output.glyphs = sequence<Glyph>(file.glyphs.count);
 
+		const ref<Buffer> fontStagingBuffer = Renderer::createStagingBuffer(sizeof(FontStorage));
+
+		FontStorage* fontStagingBufferMappedRange = fontStagingBuffer->map<FontStorage>(0, fontStagingBuffer->size);
+		fontStagingBufferMappedRange->outputGlyphSize = GLYPH_SUBIMAGE_DIMENSION;
+		fontStagingBufferMappedRange->spreadFactor = SPREAD_FACTOR;
+		fontStagingBufferMappedRange->ascent = file.ascent;
+		fontStagingBufferMappedRange->descent = file.descent;
+
+		fontStagingBuffer->unmap();
+
+		createFontBuffer();
+		createGlyphBuffer(computeMaxGlyphByteSize(file.glyphs));
+
+		createGlyphOffsetBuffer();
+
+		createGlyphImage();
+		createGlyphImageView();
+
+		createGlyphMapImage();
+		createGlyphMapImageView();
+
+		createDescriptorSetLayoutsAndSets();
+
+		allocateDescriptorSets();
+
+		updateDescriptorSets();
+
+		createGlyphImagePipelineLayout();
+		createGlyphImageComputePipeline();
+
+		createGlyphSdfPipelineLayout();
+		createGlyphSdfComputePipeline();
+
 		const ref<Device> device = Renderer::getDevice();
 		const ref<Queue> computeQueue = device->getQueue(QueueFamilyCapability::COMPUTE);
 
-		CommandBufferDescriptor autoCommandBufferDescriptor{};
-		autoCommandBufferDescriptor.usage = CommandBufferUsage::AUTO;
-
-		CommandBufferDescriptor oneTimeSubmitCommandBufferDescriptor{};
-		oneTimeSubmitCommandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
 		ref<CommandEncoder> commandEncoder;
 		ref<CommandBuffer> commandBuffer;
 
-		const uint64 glyphBufferSize = computeMaxGlyphByteSize(file.glyphs);
 
-		constexpr uint64 fontBufferSize = sizeof(FontStorage);
-
-		const ref<Buffer> fontStagingBuffer = Renderer::createStagingBuffer(fontBufferSize);
-
-		FontStorage* fontMappedRange = fontStagingBuffer->map<FontStorage>(0, fontBufferSize);
-
-		fontMappedRange->outputGlyphSize = GLYPH_SUBIMAGE_DIMENSION;
-		fontMappedRange->spreadFactor = SPREAD_FACTOR;
-		fontMappedRange->ascent = file.ascent;
-		fontMappedRange->descent = file.descent;
-
-		fontStagingBuffer->unmap();
-
-		BufferDescriptor fontStorageBufferDescriptor;
-		fontStorageBufferDescriptor.size = fontBufferSize;
-		fontStorageBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
-		fontStorageBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		const ref<Buffer> fontStorageBuffer = Renderer::createBuffer(fontStorageBufferDescriptor);
-
-		BufferDescriptor glyphBufferDescriptor;
-		glyphBufferDescriptor.size = glyphBufferSize;
-		glyphBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
-		glyphBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		glyphBufferDescriptor.persistent = true;
-
-		const ref<Buffer> glyphBuffer = Renderer::createBuffer(glyphBufferDescriptor);
-
-		GlyphBuffer* glyphMappedRange = glyphBuffer->map<GlyphBuffer>(0, glyphBufferSize);
-
-		constexpr uint64 glyphOffsetBufferSize = 3 * sizeof(float32);
-
-		BufferDescriptor glyphOffsetBufferDescriptor;
-		glyphOffsetBufferDescriptor.size = glyphOffsetBufferSize;
-		glyphOffsetBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
-		glyphOffsetBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		glyphOffsetBufferDescriptor.persistent = true;
-
-		const ref<Buffer> glyphOffsetBuffer = Renderer::createBuffer(glyphOffsetBufferDescriptor);
-
-		uint32* glyphOffsetMappedRange = glyphOffsetBuffer->map<uint32>(0, glyphOffsetBufferSize);
-
-		// Used for generating the distance field for each glyph.
-		ImageDescriptor glyphImageDescriptor{};
-		glyphImageDescriptor.type = ImageType::TEXTURE_2D;
-		glyphImageDescriptor.format = ImageFormat::R8_UNORM;
-		glyphImageDescriptor.extent.width = 4096;
-		glyphImageDescriptor.extent.height = 4096;
-		glyphImageDescriptor.extent.depth = 1;
-		glyphImageDescriptor.mipLevelCount = 1;
-		glyphImageDescriptor.layerCount = 1;
-		glyphImageDescriptor.sampleCount = 1;
-		glyphImageDescriptor.usage = ImageUsage::STORAGE;
-		glyphImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
-
-		const ref<Image> glyphImage = Renderer::createImage(glyphImageDescriptor);
-
-		ImageViewDescriptor glyphImageViewDescriptor;
-		glyphImageViewDescriptor.mipLevelOffset = 0;
-		glyphImageViewDescriptor.mipLevelCount = glyphImage->getMipLevelCount();
-		glyphImageViewDescriptor.layerOffset = 0;
-		glyphImageViewDescriptor.layerCount = glyphImage->getLayerCount();
-
-		const ref<ImageView> glyphImageView = glyphImage->createView(glyphImageViewDescriptor);
-
-		DescriptorSetLayoutBinding fontBufferDescriptorSetLayoutBinding;
-		fontBufferDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		fontBufferDescriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
-		fontBufferDescriptorSetLayoutBinding.buffers = {fontStorageBuffer};
-
-		DescriptorSetLayoutBinding glyphBufferDescriptorSetLayoutBinding;
-		glyphBufferDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		glyphBufferDescriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
-		glyphBufferDescriptorSetLayoutBinding.buffers = {glyphBuffer};
-
-		DescriptorSetLayoutBinding glyphImageDescriptorSetLayoutBinding;
-		glyphImageDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
-		glyphImageDescriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
-		glyphImageDescriptorSetLayoutBinding.imageViews = {glyphImageView};
-
-		DescriptorSetLayout glyphImageDescriptorSetLayout;
-		glyphImageDescriptorSetLayout.bindings = {
-			fontBufferDescriptorSetLayoutBinding,
-			glyphBufferDescriptorSetLayoutBinding,
-			glyphImageDescriptorSetLayoutBinding,
-		};
-
-		PipelineLayoutDescriptor glyphImagePipelineLayoutDescriptor;
-		glyphImagePipelineLayoutDescriptor.layouts = {glyphImageDescriptorSetLayout};
-
-		const ref<PipelineLayout> glyphImagePipelineLayout = Renderer::createPipelineLayout(glyphImagePipelineLayoutDescriptor);
-
-		ShaderModuleDescriptor glyphImageShaderModuleDescriptor{};
-		glyphImageShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
-		glyphImageShaderModuleDescriptor.entryPoint = "main";
-
-		ComputePipelineDescriptor glyphImagePipelineDescriptor;
-		glyphImagePipelineDescriptor.pipelineLayout = glyphImagePipelineLayout;
-		glyphImagePipelineDescriptor.computeShaderModule = Renderer::loadShaderModule("GlyphImage.comp", glyphImageShaderModuleDescriptor);
-
-		const ref<ComputePipeline> glyphImagePipeline = Renderer::createComputePipeline(glyphImagePipelineDescriptor);
-
-		// Contains every glyph distance fields.
-		ImageDescriptor glyphMapSdfImageDescriptor{};
-		glyphMapSdfImageDescriptor.type = ImageType::TEXTURE_2D;
-		glyphMapSdfImageDescriptor.format = ImageFormat::R8_UNORM;
-		glyphMapSdfImageDescriptor.extent.width = output.extent.width;
-		glyphMapSdfImageDescriptor.extent.height = output.extent.height;
-		glyphMapSdfImageDescriptor.extent.depth = 1;
-		glyphMapSdfImageDescriptor.mipLevelCount = 1;
-		glyphMapSdfImageDescriptor.layerCount = 1;
-		glyphMapSdfImageDescriptor.sampleCount = 1;
-		glyphMapSdfImageDescriptor.usage = ImageUsage::STORAGE | ImageUsage::TRANSFER_SRC;
-		glyphMapSdfImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
-
-		ref<Image> glyphMapImage = Renderer::createImage(glyphMapSdfImageDescriptor);
-
-		ImageViewDescriptor glyphMapSdfImageViewDescriptor{};
-		glyphMapSdfImageViewDescriptor.mipLevelOffset = 0;
-		glyphMapSdfImageViewDescriptor.mipLevelCount = glyphMapImage->getMipLevelCount();
-		glyphMapSdfImageViewDescriptor.layerOffset = 0;
-		glyphMapSdfImageViewDescriptor.layerCount = glyphMapImage->getLayerCount();
-
-		const ref<ImageView> glyphMapSdfImageView = glyphMapImage->createView(glyphMapSdfImageViewDescriptor);
-
-		DescriptorSetLayoutBinding glyphMapSdfImageDescriptorSetLayoutBinding;
-		glyphMapSdfImageDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
-		glyphMapSdfImageDescriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
-		glyphMapSdfImageDescriptorSetLayoutBinding.imageViews = {glyphMapSdfImageView};
-
-		DescriptorSetLayoutBinding glyphIndexDescriptorSetLayoutBinding;
-		glyphIndexDescriptorSetLayoutBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		glyphIndexDescriptorSetLayoutBinding.shaderStages = ShaderStage::COMPUTE;
-		glyphIndexDescriptorSetLayoutBinding.buffers = {glyphOffsetBuffer};
-
-		DescriptorSetLayout glyphSdfDescriptorSetLayout;
-		glyphSdfDescriptorSetLayout.bindings = {
-			glyphImageDescriptorSetLayoutBinding,
-			glyphMapSdfImageDescriptorSetLayoutBinding,
-			fontBufferDescriptorSetLayoutBinding,
-			glyphIndexDescriptorSetLayoutBinding,
-		};
-
-		PipelineLayoutDescriptor glyphSdfPipelineLayoutDescriptor;
-		glyphSdfPipelineLayoutDescriptor.layouts = {glyphSdfDescriptorSetLayout};
-
-		const ref<PipelineLayout> glyphSdfPipelineLayout = Renderer::createPipelineLayout(glyphSdfPipelineLayoutDescriptor);
-
-		ShaderModuleDescriptor glyphSdfShaderModuleDescriptor{};
-		glyphSdfShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
-		glyphSdfShaderModuleDescriptor.entryPoint = "main";
-
-		ComputePipelineDescriptor glyphSdfPipelineDescriptor;
-		glyphSdfPipelineDescriptor.pipelineLayout = glyphSdfPipelineLayout;
-		glyphSdfPipelineDescriptor.computeShaderModule = Renderer::loadShaderModule("GlyphDistanceField.comp", glyphSdfShaderModuleDescriptor);
-
-		const ref<ComputePipeline> glyphSdfPipeline = Renderer::createComputePipeline(glyphSdfPipelineDescriptor);
-
-		// Copy the font staging buffer to the font storage buffer and transition the glyph and glyph map images from UNDEFINED to GENERAL.
-
-		sequence<BufferCopyRegion> fontBufferCopyRegions(1);
-
-		BufferCopyRegion& fontBufferCopyRegion = fontBufferCopyRegions[0];
+		BufferCopyRegion fontBufferCopyRegion{};
 		fontBufferCopyRegion.sourceOffset = 0;
 		fontBufferCopyRegion.destinationOffset = 0;
-		fontBufferCopyRegion.size = fontBufferSize;
+		fontBufferCopyRegion.size = fontBuffer->size;
 
-		commandEncoder = computeQueue->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
+		// Copy the font staging buffer to the font storage buffer and transition the glyph and glyph map images from UNDEFINED to GENERAL.
+		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(fontStagingBuffer, fontStorageBuffer, fontBufferCopyRegions);
+		commandEncoder->copyBufferToBuffer(fontStagingBuffer, fontBuffer, {fontBufferCopyRegion});
 		commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 		commandBuffer = commandEncoder->end();
 
 		computeQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
 		device->waitIdle();
 
 		float32 xOffset = 0;
@@ -217,7 +88,7 @@ namespace ProjectA {
 		const Extent3D& glyphMapExtent = glyphMapImage->getExtent();
 		const float32 lineHeight = static_cast<float32>(file.ascent - file.descent);
 
-		commandEncoder = computeQueue->createCommandEncoder(autoCommandBufferDescriptor);
+		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 
 		const ref<Fence> writeBufferFence = Renderer::createFence();
 
@@ -289,20 +160,14 @@ namespace ProjectA {
 
 			commandEncoder->reset();
 			commandEncoder->begin();
-			commandEncoder->bindComputePipeline(glyphImagePipeline);
-
-			// TODO
-			BREAKPOINT();
-			// commandEncoder->bindDescriptorSets();
+			commandEncoder->bindComputePipeline(glyphImageComputePipeline);
+			commandEncoder->bindDescriptorSets(glyphImagePipelineLayout, {glyphImageDescriptorSet});
 
 			// TODO: Dispatch less groups depending on the size of the glyph area.
 			commandEncoder->dispatch(128, 128, 1);
 
-			commandEncoder->bindComputePipeline(glyphSdfPipeline);
-
-			// TODO
-			BREAKPOINT();
-			// commandEncoder->bindDescriptorSets();
+			commandEncoder->bindComputePipeline(glyphSdfComputePipeline);
+			commandEncoder->bindDescriptorSets(glyphSdfPipelineLayout, {glyphSdfDescriptorSet});
 
 			// TODO: Support custom glyph sub-image dimension (multiply down). See GlyphDistanceField.comp.
 			commandEncoder->dispatch(8, 8, 1);
@@ -318,16 +183,14 @@ namespace ProjectA {
 
 		// Transition the glyph map image to TRANSFER_SRC_OPTIMAL and copy its data to the final buffer.
 
-		BufferDescriptor glyphMapStagingBufferDescriptor;
+		BufferDescriptor glyphMapStagingBufferDescriptor{};
 		glyphMapStagingBufferDescriptor.size = output.extent.width * output.extent.height;
 		glyphMapStagingBufferDescriptor.usage = BufferUsage::TRANSFER_DST;
 		glyphMapStagingBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		glyphMapStagingBufferDescriptor.persistent = false;
 
-		ref<Buffer> glyphMapStagingBuffer = Renderer::createBuffer(glyphMapStagingBufferDescriptor);
+		const ref<Buffer> glyphMapStagingBuffer = Renderer::createBuffer(glyphMapStagingBufferDescriptor);
 
-		sequence<BufferImageCopyRegion> bufferImageCopyRegions(1);
-		BufferImageCopyRegion& glyphMapCopyRegion = bufferImageCopyRegions[0];
+		BufferImageCopyRegion glyphMapCopyRegion{};
 		glyphMapCopyRegion.bufferOffset = 0;
 		glyphMapCopyRegion.imageOffsetX = 0;
 		glyphMapCopyRegion.imageOffsetY = 0;
@@ -337,10 +200,10 @@ namespace ProjectA {
 		glyphMapCopyRegion.imageLayerOffset = 0;
 		glyphMapCopyRegion.imageLayerCount = glyphMapImage->getLayerCount();
 
-		commandEncoder = computeQueue->createCommandEncoder(oneTimeSubmitCommandBufferDescriptor);
+		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 		commandEncoder->begin();
 		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::TRANSFER_SRC_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, bufferImageCopyRegions);
+		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, {glyphMapCopyRegion});
 
 		commandBuffer = commandEncoder->end();
 
@@ -350,20 +213,245 @@ namespace ProjectA {
 
 		output.data = sequence<uint8>(glyphMapStagingBuffer->size);
 
-		const uint8* glyphMapStagingBufferMappedRange = glyphMapStagingBuffer->map<uint8>(0, glyphMapStagingBuffer->size);
+		const uint8* glyphMapMappedRange = glyphMapStagingBuffer->map<uint8>(0, glyphMapStagingBuffer->size);
 
-		std::copy(glyphMapStagingBufferMappedRange, glyphMapStagingBufferMappedRange + glyphMapStagingBuffer->size, &output.data[0]);
+		std::copy_n(glyphMapMappedRange, glyphMapStagingBuffer->size, &output.data[0]);
 
-		glyphMapStagingBuffer->unmap(); */
+		glyphMapStagingBuffer->unmap();
 	}
 
-	uint64 GenerateSDFGlyphMapProcess::computeMaxGlyphByteSize(const sequence<TrueTypeFont::Glyph>& glyphs) {
-		uint64 maxGlyphEdgeCount = 0;
+	void GenerateSDFGlyphMapProcess::createFontBuffer() {
+		BufferDescriptor fontBufferDescriptor{};
+		fontBufferDescriptor.size = sizeof(FontStorage);
+		fontBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		fontBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
-		for (const TrueTypeFont::Glyph& glyph : glyphs) {
-			maxGlyphEdgeCount = max(maxGlyphEdgeCount, glyph.edges.count);
-		}
+		fontBuffer = Renderer::createBuffer(fontBufferDescriptor);
+	}
 
-		return sizeof(GlyphBuffer) + maxGlyphEdgeCount * sizeof(GlyphEdge);
+	void GenerateSDFGlyphMapProcess::createGlyphBuffer(uint64 size) {
+		BufferDescriptor glyphBufferDescriptor{};
+		glyphBufferDescriptor.size = size;
+		glyphBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		glyphBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		glyphBufferDescriptor.persistent = true;
+
+		glyphBuffer = Renderer::createBuffer(glyphBufferDescriptor);
+
+		glyphMappedRange = glyphBuffer->map<GlyphBuffer>(0, glyphBuffer->size);
+	}
+
+	void GenerateSDFGlyphMapProcess::createGlyphOffsetBuffer() {
+		BufferDescriptor glyphOffsetBufferDescriptor{};
+		glyphOffsetBufferDescriptor.size = 3 * sizeof(float32);
+		glyphOffsetBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		glyphOffsetBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		glyphOffsetBufferDescriptor.persistent = true;
+
+		glyphOffsetBuffer = Renderer::createBuffer(glyphOffsetBufferDescriptor);
+
+		glyphOffsetMappedRange = glyphOffsetBuffer->map<uint32>(0, glyphOffsetBuffer->size);
+	}
+
+	void GenerateSDFGlyphMapProcess::createGlyphImage() {
+		ImageDescriptor glyphImageDescriptor{};
+		glyphImageDescriptor.type = ImageType::TEXTURE_2D;
+		glyphImageDescriptor.format = ImageFormat::R8_UNORM;
+		glyphImageDescriptor.extent.width = 4096;
+		glyphImageDescriptor.extent.height = 4096;
+		glyphImageDescriptor.extent.depth = 1;
+		glyphImageDescriptor.mipLevelCount = 1;
+		glyphImageDescriptor.layerCount = 1;
+		glyphImageDescriptor.sampleCount = 1;
+		glyphImageDescriptor.usage = ImageUsage::STORAGE;
+		glyphImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+
+		glyphImage = Renderer::createImage(glyphImageDescriptor);
+	}
+
+	void GenerateSDFGlyphMapProcess::createGlyphImageView() {
+		ImageViewDescriptor glyphImageViewDescriptor{};
+		glyphImageViewDescriptor.mipLevelOffset = 0;
+		glyphImageViewDescriptor.mipLevelCount = glyphImage->getMipLevelCount();
+		glyphImageViewDescriptor.layerOffset = 0;
+		glyphImageViewDescriptor.layerCount = glyphImage->getLayerCount();
+
+		glyphImageView = glyphImage->createView(glyphImageViewDescriptor);
+	}
+
+	void GenerateSDFGlyphMapProcess::createDescriptorSetLayoutsAndSets() {
+		DescriptorSetLayoutBinding fontBufferBinding{};
+		fontBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		fontBufferBinding.descriptorCount = 1;
+		fontBufferBinding.shaderStages = ShaderStage::COMPUTE;
+
+		DescriptorSetLayoutBinding glyphBufferBinding{};
+		glyphBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		glyphBufferBinding.descriptorCount = 1;
+		glyphBufferBinding.shaderStages = ShaderStage::COMPUTE;
+
+		DescriptorSetLayoutBinding glyphImageBinding{};
+		glyphImageBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
+		glyphImageBinding.descriptorCount = 1;
+		glyphImageBinding.shaderStages = ShaderStage::COMPUTE;
+
+		DescriptorSetLayoutBinding glyphMapImageBinding{};
+		glyphMapImageBinding.descriptorType = DescriptorType::STORAGE_IMAGE;
+		glyphMapImageBinding.descriptorCount = 1;
+		glyphMapImageBinding.shaderStages = ShaderStage::COMPUTE;
+
+		DescriptorSetLayoutBinding glyphOffsetBufferBinding{};
+		glyphOffsetBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		glyphOffsetBufferBinding.descriptorCount = 1;
+		glyphOffsetBufferBinding.shaderStages = ShaderStage::COMPUTE;
+
+		glyphImageDescriptorSetLayout = Renderer::createDescriptorSetLayout({fontBufferBinding, glyphBufferBinding, glyphImageBinding});
+		glyphSdfDescriptorSetLayout = Renderer::createDescriptorSetLayout({glyphImageBinding, glyphMapImageBinding, fontBufferBinding, glyphOffsetBufferBinding});
+	}
+
+	void GenerateSDFGlyphMapProcess::createGlyphImagePipelineLayout() {
+		PipelineLayoutDescriptor glyphImagePipelineLayoutDescriptor{};
+		glyphImagePipelineLayoutDescriptor.descriptorSetLayouts = {glyphImageDescriptorSetLayout};
+
+		glyphImagePipelineLayout = Renderer::createPipelineLayout(glyphImagePipelineLayoutDescriptor);
+	}
+
+	void GenerateSDFGlyphMapProcess::createGlyphImageComputePipeline() {
+		ShaderModuleDescriptor computeShaderModuleDescriptor{};
+		computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
+		computeShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> computeShaderModule = Renderer::loadShaderModule("GlyphImage.comp", computeShaderModuleDescriptor);
+
+		ComputePipelineDescriptor glyphImageComputePipelineDescriptor{};
+		glyphImageComputePipelineDescriptor.pipelineLayout = glyphImagePipelineLayout;
+		glyphImageComputePipelineDescriptor.computeShaderModule = computeShaderModule;
+
+		glyphImageComputePipeline = Renderer::createComputePipeline(glyphImageComputePipelineDescriptor);
+	}
+
+	void GenerateSDFGlyphMapProcess::createGlyphMapImage() {
+		// Contains every glyph distance fields.
+		ImageDescriptor glyphMapImageDescriptor{};
+		glyphMapImageDescriptor.type = ImageType::TEXTURE_2D;
+		glyphMapImageDescriptor.format = ImageFormat::R8_UNORM;
+		glyphMapImageDescriptor.extent.width = GLYPH_MAP_IMAGE_EXTENT.width;
+		glyphMapImageDescriptor.extent.height = GLYPH_MAP_IMAGE_EXTENT.height;
+		glyphMapImageDescriptor.extent.depth = 1;
+		glyphMapImageDescriptor.mipLevelCount = 1;
+		glyphMapImageDescriptor.layerCount = 1;
+		glyphMapImageDescriptor.sampleCount = 1;
+		glyphMapImageDescriptor.usage = ImageUsage::STORAGE | ImageUsage::TRANSFER_SRC;
+		glyphMapImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+
+		glyphMapImage = Renderer::createImage(glyphMapImageDescriptor);
+	}
+
+	void GenerateSDFGlyphMapProcess::createGlyphMapImageView() {
+		ImageViewDescriptor glyphMapImageViewDescriptor{};
+		glyphMapImageViewDescriptor.mipLevelOffset = 0;
+		glyphMapImageViewDescriptor.mipLevelCount = glyphMapImage->getMipLevelCount();
+		glyphMapImageViewDescriptor.layerOffset = 0;
+		glyphMapImageViewDescriptor.layerCount = glyphMapImage->getLayerCount();
+
+		glyphMapImageView = glyphMapImage->createView(glyphMapImageViewDescriptor);
+	}
+
+	void GenerateSDFGlyphMapProcess::createGlyphSdfPipelineLayout() {
+		PipelineLayoutDescriptor glyphSdfPipelineLayoutDescriptor{};
+		glyphSdfPipelineLayoutDescriptor.descriptorSetLayouts = {glyphSdfDescriptorSetLayout};
+
+		glyphSdfPipelineLayout = Renderer::createPipelineLayout(glyphSdfPipelineLayoutDescriptor);
+	}
+
+	void GenerateSDFGlyphMapProcess::createGlyphSdfComputePipeline() {
+		ShaderModuleDescriptor computeShaderModuleDescriptor{};
+		computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
+		computeShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> computeShaderModule = Renderer::loadShaderModule("GlyphDistanceField.comp", computeShaderModuleDescriptor);
+
+		ComputePipelineDescriptor glyphSdfComputePipelineDescriptor{};
+		glyphSdfComputePipelineDescriptor.pipelineLayout = glyphSdfPipelineLayout;
+		glyphSdfComputePipelineDescriptor.computeShaderModule = computeShaderModule;
+
+		glyphSdfComputePipeline = Renderer::createComputePipeline(glyphSdfComputePipelineDescriptor);
+	}
+
+	void GenerateSDFGlyphMapProcess::allocateDescriptorSets() {
+		const sequence<ref<DescriptorSet>> descriptorSets = Renderer::getDevice()->allocateDescriptorSets({glyphImageDescriptorSetLayout, glyphSdfDescriptorSetLayout});
+
+		glyphImageDescriptorSet = descriptorSets[0];
+		glyphSdfDescriptorSet = descriptorSets[1];
+	}
+
+	void GenerateSDFGlyphMapProcess::updateDescriptorSets() const {
+		DescriptorBuffer fontDescriptorBuffer{};
+		fontDescriptorBuffer.buffer = fontBuffer;
+		fontDescriptorBuffer.offset = 0;
+		fontDescriptorBuffer.size = fontBuffer->size;
+
+		DescriptorBuffer glyphDescriptorBuffer{};
+		glyphDescriptorBuffer.buffer = glyphBuffer;
+		glyphDescriptorBuffer.offset = 0;
+		glyphDescriptorBuffer.size = glyphBuffer->size;
+
+		DescriptorBuffer glyphOffsetDescriptorBuffer{};
+		glyphOffsetDescriptorBuffer.buffer = glyphOffsetBuffer;
+		glyphOffsetDescriptorBuffer.offset = 0;
+		glyphOffsetDescriptorBuffer.size = glyphOffsetBuffer->size;
+
+		DescriptorImage glyphDescriptorImage{};
+		glyphDescriptorImage.imageView = glyphImageView;
+		glyphDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+
+		DescriptorImage glyphMapDescriptorImage{};
+		glyphMapDescriptorImage.imageView = glyphMapImageView;
+		glyphMapDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+
+		WriteDescriptorSet glyphImageFontWriteDescriptorSet{};
+		glyphImageFontWriteDescriptorSet.descriptorSet = glyphImageDescriptorSet;
+		glyphImageFontWriteDescriptorSet.bindingIndex = 0;
+		glyphImageFontWriteDescriptorSet.descriptorBuffers = {fontDescriptorBuffer};
+
+		WriteDescriptorSet glyphImageGlyphBufferWriteDescriptorSet{};
+		glyphImageGlyphBufferWriteDescriptorSet.descriptorSet = glyphImageDescriptorSet;
+		glyphImageGlyphBufferWriteDescriptorSet.bindingIndex = 1;
+		glyphImageGlyphBufferWriteDescriptorSet.descriptorBuffers = {glyphDescriptorBuffer};
+
+		WriteDescriptorSet glyphImageGlyphImageWriteDescriptorSet{};
+		glyphImageGlyphImageWriteDescriptorSet.descriptorSet = glyphImageDescriptorSet;
+		glyphImageGlyphImageWriteDescriptorSet.bindingIndex = 2;
+		glyphImageGlyphImageWriteDescriptorSet.descriptorImages = {glyphDescriptorImage};
+
+		WriteDescriptorSet glyphSdfGlyphImageWriteDescriptorSet{};
+		glyphSdfGlyphImageWriteDescriptorSet.descriptorSet = glyphSdfDescriptorSet;
+		glyphSdfGlyphImageWriteDescriptorSet.bindingIndex = 0;
+		glyphSdfGlyphImageWriteDescriptorSet.descriptorImages = {glyphDescriptorImage};
+
+		WriteDescriptorSet glyphSdfGlyphMapWriteDescriptorSet{};
+		glyphSdfGlyphMapWriteDescriptorSet.descriptorSet = glyphSdfDescriptorSet;
+		glyphSdfGlyphMapWriteDescriptorSet.bindingIndex = 1;
+		glyphSdfGlyphMapWriteDescriptorSet.descriptorImages = {glyphMapDescriptorImage};
+
+		WriteDescriptorSet glyphSdfFontWriteDescriptorSet{};
+		glyphSdfFontWriteDescriptorSet.descriptorSet = glyphSdfDescriptorSet;
+		glyphSdfFontWriteDescriptorSet.bindingIndex = 2;
+		glyphSdfFontWriteDescriptorSet.descriptorBuffers = {fontDescriptorBuffer};
+
+		WriteDescriptorSet glyphSdfGlyphOffsetWriteDescriptorSet{};
+		glyphSdfGlyphOffsetWriteDescriptorSet.descriptorSet = glyphSdfDescriptorSet;
+		glyphSdfGlyphOffsetWriteDescriptorSet.bindingIndex = 3;
+		glyphSdfGlyphOffsetWriteDescriptorSet.descriptorBuffers = {glyphOffsetDescriptorBuffer};
+
+		Renderer::getDevice()->updateDescriptorSets({
+			glyphImageFontWriteDescriptorSet,
+			glyphImageGlyphBufferWriteDescriptorSet,
+			glyphImageGlyphImageWriteDescriptorSet,
+			glyphSdfGlyphImageWriteDescriptorSet,
+			glyphSdfGlyphMapWriteDescriptorSet,
+			glyphSdfFontWriteDescriptorSet,
+			glyphSdfGlyphOffsetWriteDescriptorSet,
+		});
 	}
 }
