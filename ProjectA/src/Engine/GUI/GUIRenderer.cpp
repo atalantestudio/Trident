@@ -4,17 +4,131 @@
 #include "Engine/GUI/GUIRenderer.hpp"
 
 namespace ProjectA {
-	// TODO
-	/* void GUIRenderer::build() {
-		const ref<Surface> surface = getSurface();
+	void GUIRenderer::build() {
+		setupRenderPass();
 
+		recreateFramebuffers();
+
+		createCameraBuffer();
+		createVertexBuffer();
+		createIndexBuffer();
+		createSubcomponentBuffer();
+		createGlyphSubcomponentBuffer();
+		createTextureArrayStagingBuffer();
+
+		createTextureArrayImage();
+		createTextureArrayImageView();
+
+		createNearestSampler();
+		createLinearSampler();
+
+		createDescriptorSetLayouts();
+
+		allocateDescriptorSets();
+
+		copyBuffers();
+
+		createSubcomponentPipelineLayout();
+		createGlyphSubcomponentPipelineLayout();
+
+		createSubcomponentRenderPipeline();
+		createGlyphSubcomponentRenderPipeline();
+
+		updateDescriptorSets();
+		updateCameraProjection();
+	}
+
+	Extent2D GUIRenderer::getTextureArrayLayerExtent(uint32 layerIndex) const {
+		ENGINE_ASSERT(layerIndex < textureArrayLayerCount, "Layer index overflow.");
+
+		return textureArrayLayerExtents[layerIndex];
+	}
+
+	void GUIRenderer::flushTextureArrayStagingBuffer() const {
+		DEBUG_ASSERT(textureArrayLayerCount > 0);
+
+		textureArrayStagingBuffer->unmap();
+
+		sequence<BufferImageCopyRegion> bufferImageCopyRegions(textureArrayLayerCount);
+		uint64 bufferOffset = 0;
+
+		for (uint32 layerIndex = 0; layerIndex < textureArrayLayerCount; layerIndex += 1) {
+			const Extent2D extent = textureArrayLayerExtents[layerIndex];
+
+			BufferImageCopyRegion& bufferImageCopyRegion = bufferImageCopyRegions[layerIndex];
+			bufferImageCopyRegion.bufferOffset = bufferOffset;
+			bufferImageCopyRegion.imageOffsetX = 0;
+			bufferImageCopyRegion.imageOffsetY = 0;
+			bufferImageCopyRegion.imageOffsetZ = 0;
+			bufferImageCopyRegion.imageExtent.width = extent.width;
+			bufferImageCopyRegion.imageExtent.height = extent.height;
+			bufferImageCopyRegion.imageExtent.depth = 1;
+			bufferImageCopyRegion.imageMipLevel = 0;
+			bufferImageCopyRegion.imageLayerOffset = layerIndex;
+			bufferImageCopyRegion.imageLayerCount = 1;
+
+			bufferOffset += extent.width * extent.height * TEXTURE_ARRAY_LAYER_BPP;
+		}
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
+		const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
+
+		commandEncoder->begin();
+		commandEncoder->setImageMemoryBarrier(textureArrayImage, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+		commandEncoder->copyBufferToImage(textureArrayStagingBuffer, textureArrayImage, bufferImageCopyRegions);
+		commandEncoder->setImageMemoryBarrier(textureArrayImage, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
+		getDevice()->waitIdle();
+
+		textureArrayStagingBuffer.~shared_ptr();
+	}
+
+	uint32 GUIRenderer::registerTextureArrayLayer(const TextureArrayLayer& layer) {
+		ENGINE_ASSERT(textureArrayLayerCount + 1 <= TEXTURE_ARRAY_MAX_LAYER_COUNT, "Too many client-side images.");
+		ENGINE_ASSERT(layer.width <= TEXTURE_ARRAY_MAX_WIDTH, "Image width ([]) is larger than the maximum width ([]).", layer.width, TEXTURE_ARRAY_MAX_WIDTH);
+		ENGINE_ASSERT(layer.height <= TEXTURE_ARRAY_MAX_HEIGHT, "Image height ([]) is larger than the maximum height ([]).", layer.height, TEXTURE_ARRAY_MAX_HEIGHT);
+
+		const uint32 layerIndex = textureArrayLayerCount;
+
+		std::copy(layer.data.begin(), layer.data.end(), textureArrayStagingBufferMappedRange);
+
+		textureArrayStagingBufferMappedRange += layer.data.count;
+		textureArrayLayerExtents[textureArrayLayerCount].width = layer.width;
+		textureArrayLayerExtents[textureArrayLayerCount].height = layer.height;
+		textureArrayLayerCount += 1;
+
+		return layerIndex;
+	}
+
+	void GUIRenderer::registerSubcomponent(const GUISubcomponent& subcomponent) {
+		DEBUG_ASSERT(subcomponentCount < MAX_SUBCOMPONENTS);
+
+		subcomponentBufferMappedRange[subcomponentCount] = subcomponent;
+		subcomponentCount += 1;
+	}
+
+	void GUIRenderer::registerGlyphSubcomponent(const GUIGlyphSubcomponent& glyphSubcomponent) {
+		DEBUG_ASSERT(glyphSubcomponentCount < MAX_GLYPH_SUBCOMPONENTS);
+
+		glyphSubcomponentBufferMappedRange[glyphSubcomponentCount] = glyphSubcomponent;
+		glyphSubcomponentCount += 1;
+	}
+
+	void GUIRenderer::setupRenderPass() {
 		Attachment swapchainAttachment{};
-		swapchainAttachment.format = surface->getFormat();
+		swapchainAttachment.format = getSurface()->getFormat();
 		swapchainAttachment.sampleCount = 1;
 
-		// TODO: Use of CLEAR is for debug-only purposes.
-		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+		// TODO: Use LoadOperation::LOAD.
 		// swapchainAttachment.loadOperation = LoadOperation::LOAD;
+		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
 
 		swapchainAttachment.storeOperation = StoreOperation::STORE;
 		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
@@ -38,457 +152,6 @@ namespace ProjectA {
 		renderPassDescriptor.subpassDependencies = {subpassDependency};
 
 		renderPass = createRenderPass(renderPassDescriptor);
-
-		recreateFramebuffers();
-
-		initializeVertexBuffer();
-		initializeIndexBuffer();
-		initializeSubcomponentBuffer();
-		initializeCameraBuffer();
-
-		ImageDescriptor textureArrayDescriptor;
-		textureArrayDescriptor.type = ImageType::TEXTURE_2D;
-		textureArrayDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
-		textureArrayDescriptor.extent.width = TEXTURE_ARRAY_MAX_WIDTH;
-		textureArrayDescriptor.extent.height = TEXTURE_ARRAY_MAX_HEIGHT;
-		textureArrayDescriptor.extent.depth = 1;
-		textureArrayDescriptor.mipLevelCount = 1;
-		textureArrayDescriptor.layerCount = TEXTURE_ARRAY_MAX_LAYER_COUNT;
-		textureArrayDescriptor.sampleCount = 1;
-		textureArrayDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
-		textureArrayDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
-
-		textureArray = createImage(textureArrayDescriptor);
-
-		ImageViewDescriptor textureArrayViewDescriptor{};
-		textureArrayViewDescriptor.mipLevelOffset = 0;
-		textureArrayViewDescriptor.mipLevelCount = textureArray->getMipLevelCount();
-		textureArrayViewDescriptor.layerOffset = 0;
-		textureArrayViewDescriptor.layerCount = textureArray->getLayerCount();
-
-		textureArrayView = textureArray->createView(textureArrayViewDescriptor);
-
-		static constexpr uint64 textureArrayStagingBufferSize = TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_MAX_LAYER_COUNT * TEXTURE_ARRAY_LAYER_BPP;
-
-		textureArrayStagingBuffer = createStagingBuffer(textureArrayStagingBufferSize);
-		textureArrayStagingBufferMappedRange = textureArrayStagingBuffer->map<uint8>(0, textureArrayStagingBufferSize);
-
-		SamplerDescriptor nearestSamplerDescriptor{};
-		nearestSamplerDescriptor.magFilter = SamplerFilter::NEAREST;
-		nearestSamplerDescriptor.minFilter = SamplerFilter::NEAREST;
-
-		nearestSampler = createSampler(nearestSamplerDescriptor);
-
-		SamplerDescriptor linearSamplerDescriptor{};
-		linearSamplerDescriptor.magFilter = SamplerFilter::NEAREST;
-		linearSamplerDescriptor.minFilter = SamplerFilter::LINEAR;
-
-		linearSampler = createSampler(linearSamplerDescriptor);
-
-		initializeRenderPipeline();
-
-		updateCamera();
-	}
-
-	void GUIRenderer::initializeVertexBuffer() {
-		static constexpr uint64 size = 6 * sizeof(Vertex);
-
-		const ref<Device> device = getDevice();
-
-		const ref<Buffer> vertexStagingBuffer = createStagingBuffer(size);
-
-		Vertex* vertexMappedRange = vertexStagingBuffer->map<Vertex>(0, size);
-
-		vertexMappedRange[0].vertex = {0.0f, 0.0f};
-		vertexMappedRange[0].textureCoordinate = {0.0f, 0.0f};
-		vertexMappedRange[1].vertex = {1.0f, 0.0f};
-		vertexMappedRange[1].textureCoordinate = {1.0f, 0.0f};
-		vertexMappedRange[2].vertex = {1.0f, 1.0f};
-		vertexMappedRange[2].textureCoordinate = {1.0f, 1.0f};
-		vertexMappedRange[3].vertex = {0.0f, 1.0f};
-		vertexMappedRange[3].textureCoordinate = {0.0f, 1.0f};
-
-		vertexStagingBuffer->unmap();
-
-		BufferDescriptor vertexBufferDescriptor;
-		vertexBufferDescriptor.size = size;
-		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		vertexBuffer = createBuffer(vertexBufferDescriptor);
-
-		sequence<BufferCopyRegion> vertexBufferCopyRegions(1);
-
-		BufferCopyRegion& vertexBufferCopyRegion = vertexBufferCopyRegions[0];
-		vertexBufferCopyRegion.sourceOffset = 0;
-		vertexBufferCopyRegion.destinationOffset = 0;
-		vertexBufferCopyRegion.size = size;
-
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-		const ref<Queue> transferQueue = device->getQueue(QueueFamilyCapability::TRANSFER);
-		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
-
-		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(vertexStagingBuffer, vertexBuffer, vertexBufferCopyRegions);
-
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-		transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-		device->waitIdle();
-	}
-
-	void GUIRenderer::initializeIndexBuffer() {
-		const ref<Device> device = getDevice();
-
-		const std::vector<uint16> indices = {
-			0, 1, 2,
-			0, 2, 3,
-		};
-
-		const uint64 size = indices.size() * sizeof(uint16);
-
-		const ref<Buffer> indexStagingBuffer = createStagingBuffer(size);
-
-		uint16* mappedRange = indexStagingBuffer->map<uint16>(0, size);
-
-		std::copy(indices.begin(), indices.end(), mappedRange);
-
-		indexStagingBuffer->unmap();
-
-		BufferDescriptor indexBufferDescriptor;
-		indexBufferDescriptor.size = size;
-		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
-		indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		indexBuffer = createBuffer(indexBufferDescriptor);
-
-		sequence<BufferCopyRegion> indexBufferCopyRegions(1);
-
-		BufferCopyRegion& indexBufferCopyRegion = indexBufferCopyRegions[0];
-		indexBufferCopyRegion.sourceOffset = 0;
-		indexBufferCopyRegion.destinationOffset = 0;
-		indexBufferCopyRegion.size = size;
-
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-		const ref<Queue> transferQueue = device->getQueue(QueueFamilyCapability::TRANSFER);
-		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
-
-		commandEncoder->begin();
-		commandEncoder->copyBufferToBuffer(indexStagingBuffer, indexBuffer, indexBufferCopyRegions);
-
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-		transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-		device->waitIdle();
-	}
-
-	void GUIRenderer::initializeSubcomponentBuffer() {
-		constexpr uint64 subcomponentBufferSize = MAX_SUBCOMPONENTS * sizeof(GUISubcomponent);
-
-		BufferDescriptor subcomponentBufferDescriptor;
-		subcomponentBufferDescriptor.size = subcomponentBufferSize;
-		subcomponentBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-		subcomponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		subcomponentBufferDescriptor.persistent = true;
-
-		subcomponentBuffer = createBuffer(subcomponentBufferDescriptor);
-		subcomponentMappedRange = subcomponentBuffer->map<GUISubcomponent>(0, subcomponentBufferSize);
-
-		constexpr uint64 glyphSubcomponentBufferSize = MAX_GLYPH_SUBCOMPONENTS * sizeof(GUIGlyphSubcomponent);
-
-		BufferDescriptor glyphSubcomponentBufferDescriptor;
-		glyphSubcomponentBufferDescriptor.size = glyphSubcomponentBufferSize;
-		glyphSubcomponentBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
-		glyphSubcomponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		glyphSubcomponentBufferDescriptor.persistent = true;
-
-		glyphSubcomponentBuffer = createBuffer(glyphSubcomponentBufferDescriptor);
-		glyphSubcomponentMappedRange = glyphSubcomponentBuffer->map<GUIGlyphSubcomponent>(0, glyphSubcomponentBufferSize);
-	}
-
-	void GUIRenderer::initializeCameraBuffer() {
-		BufferDescriptor cameraBufferDescriptor;
-		cameraBufferDescriptor.size = sizeof(mat3x3<float32>);
-		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
-		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		cameraBufferDescriptor.persistent = true;
-
-		cameraBuffer = createBuffer(cameraBufferDescriptor);
-		cameraMappedRange = cameraBuffer->map<mat3x3<float32>>(0, cameraBufferDescriptor.size);
-	}
-
-	void GUIRenderer::initializeRenderPipeline() {
-		DescriptorSetLayoutBinding cameraDescriptorSetLayoutBinding{};
-		cameraDescriptorSetLayoutBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraDescriptorSetLayoutBinding.shaderStages = ShaderStage::VERTEX;
-		cameraDescriptorSetLayoutBinding.buffers = {cameraBuffer};
-
-		DescriptorSetLayoutBinding nearestTextureArrayDescriptorSetLayoutBinding{};
-		nearestTextureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		nearestTextureArrayDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
-		nearestTextureArrayDescriptorSetLayoutBinding.imageViews = {textureArrayView};
-		nearestTextureArrayDescriptorSetLayoutBinding.samplers = {nearestSampler};
-
-		DescriptorSetLayoutBinding linearTextureArrayDescriptorSetLayoutBinding{};
-		linearTextureArrayDescriptorSetLayoutBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
-		linearTextureArrayDescriptorSetLayoutBinding.shaderStages = ShaderStage::FRAGMENT;
-		linearTextureArrayDescriptorSetLayoutBinding.imageViews = {textureArrayView};
-		linearTextureArrayDescriptorSetLayoutBinding.samplers = {linearSampler};
-
-		DescriptorSetLayout nearestDescriptorSetLayout;
-		nearestDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, nearestTextureArrayDescriptorSetLayoutBinding};
-
-		DescriptorSetLayout linearDescriptorSetLayout;
-		linearDescriptorSetLayout.bindings = {cameraDescriptorSetLayoutBinding, linearTextureArrayDescriptorSetLayoutBinding};
-
-		PipelineLayoutDescriptor nearestPipelineLayoutDescriptor;
-		nearestPipelineLayoutDescriptor.layouts = {nearestDescriptorSetLayout};
-
-		PipelineLayoutDescriptor linearPipelineLayoutDescriptor;
-		linearPipelineLayoutDescriptor.layouts = {linearDescriptorSetLayout};
-
-		subcomponentPipelineLayout = createPipelineLayout(nearestPipelineLayoutDescriptor);
-
-		glyphSubcomponentPipelineLayout = createPipelineLayout(linearPipelineLayoutDescriptor);
-
-		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
-
-		VertexInputBinding subcomponentInputBinding(InputRate::INSTANCE);
-		subcomponentInputBinding.registerAttribute<vec4<float32>>(); // Bounds
-		subcomponentInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
-		subcomponentInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
-		subcomponentInputBinding.registerAttribute<vec4<float32>>(); // Color
-		subcomponentInputBinding.registerAttribute<vec4<float32>>(); // Outline color
-		subcomponentInputBinding.registerAttribute<uint32>(); // Texture array layer index
-		subcomponentInputBinding.registerAttribute<float32>(); // Outline size
-		subcomponentInputBinding.registerAttribute<float32>(); // Border radius
-
-		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
-
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
-
-		ColorBlendAttachment transparentColorBlendAttachment{};
-		transparentColorBlendAttachment.blend = true;
-		transparentColorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
-		transparentColorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
-
-		RenderPipelineDescriptor subcomponentRenderPipelineDescriptor;
-		subcomponentRenderPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
-		subcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, subcomponentInputBinding};
-		subcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../../../../../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert", vertexShaderModuleDescriptor);
-		subcomponentRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("../../../../../ProjectA/src/Asset/Shader/GUI/Subcomponent.frag", fragmentShaderModuleDescriptor);
-		subcomponentRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		subcomponentRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		subcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		subcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		subcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
-		subcomponentRenderPipelineDescriptor.minSampleShading = 0.5f;
-		subcomponentRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
-		subcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		subcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		subcomponentRenderPipelineDescriptor.renderPass = renderPass;
-		subcomponentRenderPipelineDescriptor.subpassIndex = 0;
-
-		subcomponentRenderPipeline = createRenderPipeline(subcomponentRenderPipelineDescriptor);
-
-		VertexInputBinding glyphSubcomponentVertexInputBinding(InputRate::INSTANCE);
-		glyphSubcomponentVertexInputBinding.registerAttribute<mat3x3<float32>>();
-		glyphSubcomponentVertexInputBinding.registerAttribute<mat3x3<float32>>();
-		glyphSubcomponentVertexInputBinding.registerAttribute<uint32>();
-		glyphSubcomponentVertexInputBinding.registerAttribute<vec4<float32>>();
-
-		RenderPipelineDescriptor glyphSubcomponentRenderPipelineDescriptor;
-		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = glyphSubcomponentPipelineLayout;
-		glyphSubcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, glyphSubcomponentVertexInputBinding};
-		glyphSubcomponentRenderPipelineDescriptor.vertexShaderModule = loadShaderModule("../../../../../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.vert", vertexShaderModuleDescriptor);
-		glyphSubcomponentRenderPipelineDescriptor.fragmentShaderModule = loadShaderModule("../../../../../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.frag", fragmentShaderModuleDescriptor);
-		glyphSubcomponentRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		glyphSubcomponentRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		glyphSubcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		glyphSubcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		glyphSubcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
-		glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 1.0f;
-		glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {transparentColorBlendAttachment};
-		glyphSubcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		glyphSubcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-		glyphSubcomponentRenderPipelineDescriptor.renderPass = renderPass;
-		glyphSubcomponentRenderPipelineDescriptor.subpassIndex = 0;
-
-		glyphSubcomponentRenderPipeline = createRenderPipeline(glyphSubcomponentRenderPipelineDescriptor);
-	}
-
-	uint32 GUIRenderer::registerTextureArrayLayer(const TextureArrayLayer& layer) {
-		ENGINE_ASSERT(textureArrayLayerCount + 1 <= TEXTURE_ARRAY_MAX_LAYER_COUNT, "Too many client-side images.");
-		ENGINE_ASSERT(layer.width <= TEXTURE_ARRAY_MAX_WIDTH, "Image width ([]) is larger than the maximum width ([]).", layer.width, TEXTURE_ARRAY_MAX_WIDTH);
-		ENGINE_ASSERT(layer.height <= TEXTURE_ARRAY_MAX_HEIGHT, "Image height ([]) is larger than the maximum height ([]).", layer.height, TEXTURE_ARRAY_MAX_HEIGHT);
-
-		const uint32 layerIndex = textureArrayLayerCount;
-
-		std::copy(layer.data.begin(), layer.data.end(), textureArrayStagingBufferMappedRange);
-
-		textureArrayStagingBufferMappedRange += layer.data.count;
-		textureArrayLayerExtents[textureArrayLayerCount].width = layer.width;
-		textureArrayLayerExtents[textureArrayLayerCount].height = layer.height;
-		textureArrayLayerCount += 1;
-
-		return layerIndex;
-	}
-
-	void GUIRenderer::flushTextureArrayStagingBuffer() const {
-		DEBUG_ASSERT(textureArrayLayerCount > 0);
-
-		textureArrayStagingBuffer->unmap();
-
-		sequence<BufferImageCopyRegion> copyRegions(textureArrayLayerCount);
-		uint64 bufferOffset = 0;
-
-		for (uint32 layerIndex = 0; layerIndex < textureArrayLayerCount; layerIndex += 1) {
-			const Extent2D extent = textureArrayLayerExtents[layerIndex];
-
-			BufferImageCopyRegion& copyRegion = copyRegions[layerIndex];
-			copyRegion.bufferOffset = bufferOffset;
-			copyRegion.imageOffsetX = 0;
-			copyRegion.imageOffsetY = 0;
-			copyRegion.imageOffsetZ = 0;
-			copyRegion.imageExtent.width = extent.width;
-			copyRegion.imageExtent.height = extent.height;
-			copyRegion.imageExtent.depth = 1;
-			copyRegion.imageMipLevel = 0;
-			copyRegion.imageLayerOffset = layerIndex;
-			copyRegion.imageLayerCount = 1;
-
-			bufferOffset += extent.width * extent.height * TEXTURE_ARRAY_LAYER_BPP;
-		}
-
-		const ref<Device> device = getDevice();
-
-		CommandBufferDescriptor commandBufferDescriptor;
-		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
-
-		const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
-		const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
-
-		commandEncoder->begin();
-
-		commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-		commandEncoder->copyBufferToImage(textureArrayStagingBuffer, textureArray, copyRegions);
-		commandEncoder->setImageMemoryBarrier(textureArray, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-
-		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
-
-		graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-		device->waitIdle();
-
-		textureArrayStagingBuffer.~shared_ptr();
-	}
-
-	Extent2D GUIRenderer::getTextureArrayLayerExtent(uint32 layerIndex) const {
-		ENGINE_ASSERT(layerIndex < textureArrayLayerCount, "Layer index overflow.");
-
-		return textureArrayLayerExtents[layerIndex];
-	}
-
-	void GUIRenderer::registerSubcomponent(const GUISubcomponent& subcomponent) {
-		DEBUG_ASSERT(subcomponentCount < MAX_SUBCOMPONENTS);
-
-		subcomponentMappedRange[subcomponentCount] = subcomponent;
-		subcomponentCount += 1;
-	}
-
-	void GUIRenderer::registerGlyphSubcomponent(const GUIGlyphSubcomponent& glyphSubcomponent) {
-		DEBUG_ASSERT(glyphSubcomponentCount < MAX_GLYPH_SUBCOMPONENTS);
-
-		glyphSubcomponentMappedRange[glyphSubcomponentCount] = glyphSubcomponent;
-		glyphSubcomponentCount += 1;
-	}
-
-	void GUIRenderer::updateCamera() const {
-		const ref<Swapchain>& swapchain = getSwapchain();
-		const float32 width = static_cast<float32>(swapchain->getExtent().width);
-		const float32 height = static_cast<float32>(swapchain->getExtent().height);
-
-		const mat3x3<float32> cameraProjection = {
-			2.0f / width, 0.0f, 0.0f,
-			0.0f, -2.0f / height, 0.0f,
-			-1.0f, 1.0f, 1.0f,
-		};
-
-		*cameraMappedRange = cameraProjection;
-	}
-
-	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
-		if (subcomponentCount == 0 && glyphSubcomponentCount == 0) {
-			ENGINE_WARN("No GUI components to render.");
-
-			// TODO: If the command encoder is left empty, the attachments will not be transitioned into the final layout.
-			BREAKPOINT();
-
-			return;
-		}
-
-		const ClearValue clearValue = {1.0f, 1.0f, 1.0f, 1.0f};
-
-		BeginRenderPassDescriptor beginRenderPassDescriptor;
-		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-		beginRenderPassDescriptor.clearValues = {clearValue};
-
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-		const float32 width = static_cast<float32>(swapchainExtent.width);
-		const float32 height = static_cast<float32>(swapchainExtent.height);
-
-		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-		commandEncoder->setScissor(0, 0, swapchainExtent);
-		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-
-		if (subcomponentCount > 0) {
-			commandEncoder->bindRenderPipeline(subcomponentRenderPipeline);
-
-			// TODO
-			BREAKPOINT();
-			// commandEncoder->bindDescriptorSets();
-
-			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(GUISubcomponent));
-			commandEncoder->drawIndexed(6, subcomponentCount, 0, 0, 0);
-		}
-
-		if (glyphSubcomponentCount > 0) {
-			commandEncoder->bindRenderPipeline(glyphSubcomponentRenderPipeline);
-
-			// TODO
-			BREAKPOINT();
-			// commandEncoder->bindDescriptorSets();
-
-			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
-			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
-			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GUIGlyphSubcomponent));
-			commandEncoder->drawIndexed(6, glyphSubcomponentCount, 0, 0, 0);
-		}
-
-		commandEncoder->endRenderPass();
-	}
-
-	void GUIRenderer::resize(WindowResizeEvent& event) {
-		recreateFramebuffers();
-		updateCamera();
-	}
-
-	void GUIRenderer::resetCounters() {
-		subcomponentCount = 0;
-		glyphSubcomponentCount = 0;
 	}
 
 	void GUIRenderer::recreateFramebuffers() {
@@ -511,5 +174,406 @@ namespace ProjectA {
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 		}
-	} */
+	}
+
+	void GUIRenderer::createCameraBuffer() {
+		BufferDescriptor cameraBufferDescriptor{};
+		cameraBufferDescriptor.size = sizeof(Camera);
+		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
+		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		cameraBufferDescriptor.persistent = true;
+
+		cameraBuffer = createBuffer(cameraBufferDescriptor);
+
+		cameraBufferMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
+	}
+
+	void GUIRenderer::createVertexBuffer() {
+		BufferDescriptor vertexBufferDescriptor{};
+		vertexBufferDescriptor.size = VERTEX_BUFFER_SIZE;
+		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		vertexBuffer = createBuffer(vertexBufferDescriptor);
+	}
+
+	void GUIRenderer::createIndexBuffer() {
+		BufferDescriptor indexBufferDescriptor{};
+		indexBufferDescriptor.size = INDEX_BUFFER_SIZE;
+		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
+		indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		indexBuffer = createBuffer(indexBufferDescriptor);
+	}
+
+	void GUIRenderer::createSubcomponentBuffer() {
+		BufferDescriptor subcomponentBufferDescriptor{};
+		subcomponentBufferDescriptor.size = SUBCOMPONENT_BUFFER_SIZE;
+		subcomponentBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		subcomponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		subcomponentBufferDescriptor.persistent = true;
+
+		subcomponentBuffer = createBuffer(subcomponentBufferDescriptor);
+
+		subcomponentBufferMappedRange = subcomponentBuffer->map<GUISubcomponent>(0, subcomponentBuffer->size);
+	}
+
+	void GUIRenderer::createGlyphSubcomponentBuffer() {
+		BufferDescriptor glyphSubcomponentBufferDescriptor{};
+		glyphSubcomponentBufferDescriptor.size = GLYPH_SUBCOMPONENT_BUFFER_SIZE;
+		glyphSubcomponentBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+		glyphSubcomponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		glyphSubcomponentBufferDescriptor.persistent = true;
+
+		glyphSubcomponentBuffer = createBuffer(glyphSubcomponentBufferDescriptor);
+
+		glyphSubcomponentBufferMappedRange = glyphSubcomponentBuffer->map<GUIGlyphSubcomponent>(0, glyphSubcomponentBuffer->size);
+	}
+
+	void GUIRenderer::createTextureArrayStagingBuffer() {
+		textureArrayStagingBuffer = createStagingBuffer(TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_MAX_LAYER_COUNT * TEXTURE_ARRAY_LAYER_BPP);
+
+		textureArrayStagingBufferMappedRange = textureArrayStagingBuffer->map<uint8>(0, textureArrayStagingBuffer->size);
+	}
+
+	void GUIRenderer::createTextureArrayImage() {
+		ImageDescriptor textureArrayImageDescriptor{};
+		textureArrayImageDescriptor.type = ImageType::TEXTURE_2D;
+		textureArrayImageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
+		textureArrayImageDescriptor.extent.width = TEXTURE_ARRAY_MAX_WIDTH;
+		textureArrayImageDescriptor.extent.height = TEXTURE_ARRAY_MAX_HEIGHT;
+		textureArrayImageDescriptor.extent.depth = 1;
+		textureArrayImageDescriptor.mipLevelCount = 1;
+		textureArrayImageDescriptor.layerCount = TEXTURE_ARRAY_MAX_LAYER_COUNT;
+		textureArrayImageDescriptor.sampleCount = 1;
+		textureArrayImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
+		textureArrayImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+
+		textureArrayImage = createImage(textureArrayImageDescriptor);
+	}
+
+	void GUIRenderer::createTextureArrayImageView() {
+		ImageViewDescriptor textureArrayImageViewDescriptor{};
+		textureArrayImageViewDescriptor.mipLevelOffset = 0;
+		textureArrayImageViewDescriptor.mipLevelCount = textureArrayImage->getMipLevelCount();
+		textureArrayImageViewDescriptor.layerOffset = 0;
+		textureArrayImageViewDescriptor.layerCount = textureArrayImage->getLayerCount();
+
+		textureArrayImageView = textureArrayImage->createView(textureArrayImageViewDescriptor);
+	}
+
+	void GUIRenderer::createNearestSampler() {
+		SamplerDescriptor nearestSamplerDescriptor{};
+		nearestSamplerDescriptor.magFilter = SamplerFilter::NEAREST;
+		nearestSamplerDescriptor.minFilter = SamplerFilter::NEAREST;
+
+		nearestSampler = createSampler(nearestSamplerDescriptor);
+	}
+
+	void GUIRenderer::createLinearSampler() {
+		SamplerDescriptor linearSamplerDescriptor{};
+		linearSamplerDescriptor.magFilter = SamplerFilter::NEAREST;
+		linearSamplerDescriptor.minFilter = SamplerFilter::LINEAR;
+
+		linearSampler = createSampler(linearSamplerDescriptor);
+	}
+
+	void GUIRenderer::createDescriptorSetLayouts() {
+		DescriptorSetLayoutBinding cameraBinding{};
+		cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		cameraBinding.descriptorCount = 1;
+		cameraBinding.shaderStages = ShaderStage::VERTEX;
+
+		DescriptorSetLayoutBinding nearestTextureArrayBinding{};
+		nearestTextureArrayBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		nearestTextureArrayBinding.descriptorCount = 1;
+		nearestTextureArrayBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		DescriptorSetLayoutBinding linearTextureArrayBinding{};
+		linearTextureArrayBinding.descriptorType = DescriptorType::COMBINED_IMAGE_SAMPLER;
+		linearTextureArrayBinding.descriptorCount = 1;
+		linearTextureArrayBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		subcomponentDescriptorSetLayout = createDescriptorSetLayout({cameraBinding, nearestTextureArrayBinding});
+		glyphSubcomponentDescriptorSetLayout = createDescriptorSetLayout({cameraBinding, linearTextureArrayBinding});
+	}
+
+	void GUIRenderer::createSubcomponentPipelineLayout() {
+		PipelineLayoutDescriptor subcomponentPipelineLayoutDescriptor{};
+		subcomponentPipelineLayoutDescriptor.descriptorSetLayouts = {subcomponentDescriptorSetLayout};
+
+		subcomponentPipelineLayout = createPipelineLayout(subcomponentPipelineLayoutDescriptor);
+	}
+
+	void GUIRenderer::createGlyphSubcomponentPipelineLayout() {
+		PipelineLayoutDescriptor glyphSubcomponentPipelineLayoutDescriptor{};
+		glyphSubcomponentPipelineLayoutDescriptor.descriptorSetLayouts = {glyphSubcomponentDescriptorSetLayout};
+
+		glyphSubcomponentPipelineLayout = createPipelineLayout(glyphSubcomponentPipelineLayoutDescriptor);
+	}
+
+	void GUIRenderer::createSubcomponentRenderPipeline() {
+		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
+
+		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
+		instanceInputBinding.registerAttribute<vec4<float32>>(); // Bounds
+		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
+		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
+		instanceInputBinding.registerAttribute<vec4<float32>>(); // Color
+		instanceInputBinding.registerAttribute<vec4<float32>>(); // Outline color
+		instanceInputBinding.registerAttribute<uint32>(); // Texture array layer index
+		instanceInputBinding.registerAttribute<float32>(); // Outline size
+		instanceInputBinding.registerAttribute<float32>(); // Border radius
+
+		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexShaderModuleDescriptor.entryPoint = "main";
+
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../../../../../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../../../../../ProjectA/src/Asset/Shader/GUI/Subcomponent.frag", fragmentShaderModuleDescriptor);
+
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = true;
+		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
+		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+
+		RenderPipelineDescriptor subcomponentRenderPipelineDescriptor{};
+		subcomponentRenderPipelineDescriptor.pipelineLayout = subcomponentPipelineLayout;
+		subcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		subcomponentRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		subcomponentRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		subcomponentRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		subcomponentRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		subcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		subcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		subcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
+		subcomponentRenderPipelineDescriptor.minSampleShading = 0.5f;
+		subcomponentRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		subcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		subcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		subcomponentRenderPipelineDescriptor.renderPass = renderPass;
+		subcomponentRenderPipelineDescriptor.subpassIndex = 0;
+
+		subcomponentRenderPipeline = createRenderPipeline(subcomponentRenderPipelineDescriptor);
+	}
+
+	void GUIRenderer::createGlyphSubcomponentRenderPipeline() {
+		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
+		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
+
+		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
+		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
+		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
+		instanceInputBinding.registerAttribute<uint32>(); // Layer index
+		instanceInputBinding.registerAttribute<vec4<float32>>(); // Color
+
+		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexShaderModuleDescriptor.entryPoint = "main";
+
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../../../../../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.vert", vertexShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../../../../../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.frag", fragmentShaderModuleDescriptor);
+
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = true;
+		colorBlendAttachment.srcColorBlendFactor = BlendFactor::SRC_ALPHA;
+		colorBlendAttachment.dstColorBlendFactor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+
+		RenderPipelineDescriptor glyphSubcomponentRenderPipelineDescriptor{};
+		glyphSubcomponentRenderPipelineDescriptor.pipelineLayout = glyphSubcomponentPipelineLayout;
+		glyphSubcomponentRenderPipelineDescriptor.vertexInputBindings = {vertexInputBinding, instanceInputBinding};
+		glyphSubcomponentRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		glyphSubcomponentRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		glyphSubcomponentRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		glyphSubcomponentRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		glyphSubcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		glyphSubcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		glyphSubcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
+		glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 1.0f;
+		glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		glyphSubcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		glyphSubcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+		glyphSubcomponentRenderPipelineDescriptor.renderPass = renderPass;
+		glyphSubcomponentRenderPipelineDescriptor.subpassIndex = 0;
+
+		glyphSubcomponentRenderPipeline = createRenderPipeline(glyphSubcomponentRenderPipelineDescriptor);
+	}
+
+	void GUIRenderer::allocateDescriptorSets() {
+		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({subcomponentDescriptorSetLayout, glyphSubcomponentDescriptorSetLayout});
+
+		subcomponentDescriptorSet = descriptorSets[0];
+		glyphSubcomponentDescriptorSet = descriptorSets[1];
+	}
+
+	void GUIRenderer::copyBuffers() const {
+		const ref<Buffer> stagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE);
+
+		uint8* mappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
+
+		Vertex* vertexMappedRange = pointer_cast<Vertex*>(mappedRange);
+		vertexMappedRange[0].position = {0.0f, 0.0f};
+		vertexMappedRange[0].textureCoordinate = {0.0f, 0.0f};
+		vertexMappedRange[1].position = {1.0f, 0.0f};
+		vertexMappedRange[1].textureCoordinate = {1.0f, 0.0f};
+		vertexMappedRange[2].position = {1.0f, 1.0f};
+		vertexMappedRange[2].textureCoordinate = {1.0f, 1.0f};
+		vertexMappedRange[3].position = {0.0f, 1.0f};
+		vertexMappedRange[3].textureCoordinate = {0.0f, 1.0f};
+
+		uint16* indexMappedRange = pointer_cast<uint16*>(mappedRange + VERTEX_BUFFER_SIZE);
+		indexMappedRange[0] = 0;
+		indexMappedRange[1] = 1;
+		indexMappedRange[2] = 2;
+		indexMappedRange[3] = 0;
+		indexMappedRange[4] = 2;
+		indexMappedRange[5] = 3;
+
+		stagingBuffer->unmap();
+
+		BufferCopyRegion vertexBufferCopyRegion{};
+		vertexBufferCopyRegion.sourceOffset = 0;
+		vertexBufferCopyRegion.destinationOffset = 0;
+		vertexBufferCopyRegion.size = vertexBuffer->size;
+
+		BufferCopyRegion indexBufferCopyRegion{};
+		indexBufferCopyRegion.sourceOffset = vertexBuffer->size;
+		indexBufferCopyRegion.destinationOffset = 0;
+		indexBufferCopyRegion.size = indexBuffer->size;
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
+		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
+
+		commandEncoder->begin();
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(stagingBuffer, indexBuffer, {indexBufferCopyRegion});
+
+		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
+
+		transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+
+		getDevice()->waitIdle();
+	}
+
+	void GUIRenderer::updateDescriptorSets() const {
+		DescriptorBuffer cameraDescriptorBuffer{};
+		cameraDescriptorBuffer.buffer = cameraBuffer;
+		cameraDescriptorBuffer.offset = 0;
+		cameraDescriptorBuffer.size = cameraBuffer->size;
+
+		DescriptorImage nearestTextureArrayDescriptorImage{};
+		nearestTextureArrayDescriptorImage.imageView = textureArrayImageView;
+		nearestTextureArrayDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+		nearestTextureArrayDescriptorImage.sampler = nearestSampler;
+
+		DescriptorImage linearTextureArrayDescriptorImage{};
+		linearTextureArrayDescriptorImage.imageView = textureArrayImageView;
+		linearTextureArrayDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+		linearTextureArrayDescriptorImage.sampler = linearSampler;
+
+		WriteDescriptorSet subcomponentCameraWriteDescriptorSet{};
+		subcomponentCameraWriteDescriptorSet.descriptorSet = subcomponentDescriptorSet;
+		subcomponentCameraWriteDescriptorSet.bindingIndex = 0;
+		subcomponentCameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
+
+		WriteDescriptorSet subcomponentNearestTextureArrayWriteDescriptorSet{};
+		subcomponentNearestTextureArrayWriteDescriptorSet.descriptorSet = subcomponentDescriptorSet;
+		subcomponentNearestTextureArrayWriteDescriptorSet.bindingIndex = 1;
+		subcomponentNearestTextureArrayWriteDescriptorSet.descriptorImages = {nearestTextureArrayDescriptorImage};
+
+		WriteDescriptorSet glyphSubcomponentCameraWriteDescriptorSet{};
+		glyphSubcomponentCameraWriteDescriptorSet.descriptorSet = glyphSubcomponentDescriptorSet;
+		glyphSubcomponentCameraWriteDescriptorSet.bindingIndex = 0;
+		glyphSubcomponentCameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
+
+		WriteDescriptorSet glyphSubcomponentLinearTextureArrayWriteDescriptorSet{};
+		glyphSubcomponentLinearTextureArrayWriteDescriptorSet.descriptorSet = glyphSubcomponentDescriptorSet;
+		glyphSubcomponentLinearTextureArrayWriteDescriptorSet.bindingIndex = 1;
+		glyphSubcomponentLinearTextureArrayWriteDescriptorSet.descriptorImages = {linearTextureArrayDescriptorImage};
+
+		getDevice()->updateDescriptorSets({
+			subcomponentCameraWriteDescriptorSet,
+			subcomponentNearestTextureArrayWriteDescriptorSet,
+			glyphSubcomponentCameraWriteDescriptorSet,
+			glyphSubcomponentLinearTextureArrayWriteDescriptorSet,
+		});
+	}
+
+	void GUIRenderer::updateCameraProjection() const {
+		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+
+		cameraBufferMappedRange->projection = {
+			 2.0f / swapchainExtent.width,  0.0f,                           0.0f,
+			 0.0f,                         -2.0f / swapchainExtent.height,  0.0f,
+			-1.0f,                          1.0f,                           1.0f,
+		};
+	}
+
+	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
+		if (subcomponentCount == 0 && glyphSubcomponentCount == 0) {
+			ENGINE_WARN("No GUI components to render.");
+
+			// TODO
+			// If no commands have been encoded, the attachments will not be transitioned into the final layout.
+			// Handle properly the case where the command buffer is empty.
+			BREAKPOINT();
+
+			return;
+		}
+
+		BeginRenderPassDescriptor beginRenderPassDescriptor{};
+		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
+		beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}};
+
+		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+		const float32 width = static_cast<float32>(swapchainExtent.width);
+		const float32 height = static_cast<float32>(swapchainExtent.height);
+
+		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
+		commandEncoder->setScissor(0, 0, swapchainExtent);
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+
+		if (subcomponentCount > 0) {
+			commandEncoder->bindRenderPipeline(subcomponentRenderPipeline);
+			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, {subcomponentDescriptorSet});
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(GUISubcomponent));
+			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
+			commandEncoder->drawIndexed(6, subcomponentCount, 0, 0, 0);
+		}
+
+		if (glyphSubcomponentCount > 0) {
+			commandEncoder->bindRenderPipeline(glyphSubcomponentRenderPipeline);
+			commandEncoder->bindDescriptorSets(glyphSubcomponentPipelineLayout, {glyphSubcomponentDescriptorSet});
+			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
+			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GUIGlyphSubcomponent));
+			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
+			commandEncoder->drawIndexed(6, glyphSubcomponentCount, 0, 0, 0);
+		}
+
+		commandEncoder->endRenderPass();
+	}
+
+	void GUIRenderer::resize(WindowResizeEvent& event) {
+		recreateFramebuffers();
+
+		updateCameraProjection();
+	}
+
+	void GUIRenderer::resetCounters() {
+		subcomponentCount = 0;
+		glyphSubcomponentCount = 0;
+	}
 }

@@ -22,16 +22,6 @@ namespace ProjectA {
 		output.extent = GLYPH_MAP_IMAGE_EXTENT;
 		output.glyphs = sequence<Glyph>(file.glyphs.count);
 
-		const ref<Buffer> fontStagingBuffer = Renderer::createStagingBuffer(sizeof(FontStorage));
-
-		FontStorage* fontStagingBufferMappedRange = fontStagingBuffer->map<FontStorage>(0, fontStagingBuffer->size);
-		fontStagingBufferMappedRange->outputGlyphSize = GLYPH_SUBIMAGE_DIMENSION;
-		fontStagingBufferMappedRange->spreadFactor = SPREAD_FACTOR;
-		fontStagingBufferMappedRange->ascent = file.ascent;
-		fontStagingBufferMappedRange->descent = file.descent;
-
-		fontStagingBuffer->unmap();
-
 		createFontBuffer();
 		createGlyphBuffer(computeMaxGlyphByteSize(file.glyphs));
 
@@ -62,35 +52,40 @@ namespace ProjectA {
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
 		ref<CommandEncoder> commandEncoder;
-		ref<CommandBuffer> commandBuffer;
 
+		const ref<Buffer> fontStagingBuffer = Renderer::createStagingBuffer(sizeof(FontStorage));
+
+		FontStorage* fontStagingBufferMappedRange = fontStagingBuffer->map<FontStorage>(0, fontStagingBuffer->size);
+		fontStagingBufferMappedRange->outputGlyphSize = GLYPH_SUBIMAGE_DIMENSION;
+		fontStagingBufferMappedRange->spreadFactor = SPREAD_FACTOR;
+		fontStagingBufferMappedRange->ascent = file.ascent;
+		fontStagingBufferMappedRange->descent = file.descent;
+
+		fontStagingBuffer->unmap();
 
 		BufferCopyRegion fontBufferCopyRegion{};
 		fontBufferCopyRegion.sourceOffset = 0;
 		fontBufferCopyRegion.destinationOffset = 0;
 		fontBufferCopyRegion.size = fontBuffer->size;
 
-		// Copy the font staging buffer to the font storage buffer and transition the glyph and glyph map images from UNDEFINED to GENERAL.
 		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 		commandEncoder->begin();
 		commandEncoder->copyBufferToBuffer(fontStagingBuffer, fontBuffer, {fontBufferCopyRegion});
 		commandEncoder->setImageMemoryBarrier(glyphImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-		commandBuffer = commandEncoder->end();
+		computeQueue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
 
-		computeQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
 		device->waitIdle();
 
 		float32 xOffset = 0;
 		float32 yOffset = 0;
 
+		const ref<Fence> writeBufferFence = Renderer::createFence();
 		const Extent3D& glyphMapExtent = glyphMapImage->getExtent();
 		const float32 lineHeight = static_cast<float32>(file.ascent - file.descent);
 
 		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
-
-		const ref<Fence> writeBufferFence = Renderer::createFence();
 
 		for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count; glyphIndex += 1) {
 			const TrueTypeFont::Glyph& trueTypeGlyph = file.glyphs[glyphIndex];
@@ -163,7 +158,7 @@ namespace ProjectA {
 			commandEncoder->bindComputePipeline(glyphImageComputePipeline);
 			commandEncoder->bindDescriptorSets(glyphImagePipelineLayout, {glyphImageDescriptorSet});
 
-			// TODO: Dispatch less groups depending on the size of the glyph area.
+			// TODO: Dispatch less groups depending on the size of the area occupied by the glyph.
 			commandEncoder->dispatch(128, 128, 1);
 
 			commandEncoder->bindComputePipeline(glyphSdfComputePipeline);
@@ -172,16 +167,12 @@ namespace ProjectA {
 			// TODO: Support custom glyph sub-image dimension (multiply down). See GlyphDistanceField.comp.
 			commandEncoder->dispatch(8, 8, 1);
 
-			commandBuffer = commandEncoder->end();
-
-			computeQueue->submit({commandBuffer}, nullptr, nullptr, writeBufferFence);
+			computeQueue->submit({commandEncoder->end()}, nullptr, nullptr, writeBufferFence);
 
 			device->waitIdle();
 
 			xOffset += ceil(width) + SPREAD_FACTOR * 2;
 		}
-
-		// Transition the glyph map image to TRANSFER_SRC_OPTIMAL and copy its data to the final buffer.
 
 		BufferDescriptor glyphMapStagingBufferDescriptor{};
 		glyphMapStagingBufferDescriptor.size = output.extent.width * output.extent.height;
@@ -190,24 +181,22 @@ namespace ProjectA {
 
 		const ref<Buffer> glyphMapStagingBuffer = Renderer::createBuffer(glyphMapStagingBufferDescriptor);
 
-		BufferImageCopyRegion glyphMapCopyRegion{};
-		glyphMapCopyRegion.bufferOffset = 0;
-		glyphMapCopyRegion.imageOffsetX = 0;
-		glyphMapCopyRegion.imageOffsetY = 0;
-		glyphMapCopyRegion.imageOffsetZ = 0;
-		glyphMapCopyRegion.imageExtent = glyphMapImage->getExtent();
-		glyphMapCopyRegion.imageMipLevel = 0;
-		glyphMapCopyRegion.imageLayerOffset = 0;
-		glyphMapCopyRegion.imageLayerCount = glyphMapImage->getLayerCount();
+		BufferImageCopyRegion glyphMapBufferImageCopyRegion{};
+		glyphMapBufferImageCopyRegion.bufferOffset = 0;
+		glyphMapBufferImageCopyRegion.imageOffsetX = 0;
+		glyphMapBufferImageCopyRegion.imageOffsetY = 0;
+		glyphMapBufferImageCopyRegion.imageOffsetZ = 0;
+		glyphMapBufferImageCopyRegion.imageExtent = glyphMapImage->getExtent();
+		glyphMapBufferImageCopyRegion.imageMipLevel = 0;
+		glyphMapBufferImageCopyRegion.imageLayerOffset = 0;
+		glyphMapBufferImageCopyRegion.imageLayerCount = glyphMapImage->getLayerCount();
 
 		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 		commandEncoder->begin();
 		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::TRANSFER_SRC_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, {glyphMapCopyRegion});
+		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, {glyphMapBufferImageCopyRegion});
 
-		commandBuffer = commandEncoder->end();
-
-		computeQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
+		computeQueue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
 
 		device->waitIdle();
 
@@ -403,11 +392,11 @@ namespace ProjectA {
 
 		DescriptorImage glyphDescriptorImage{};
 		glyphDescriptorImage.imageView = glyphImageView;
-		glyphDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+		glyphDescriptorImage.imageLayout = ImageLayout::GENERAL;
 
 		DescriptorImage glyphMapDescriptorImage{};
 		glyphMapDescriptorImage.imageView = glyphMapImageView;
-		glyphMapDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+		glyphMapDescriptorImage.imageLayout = ImageLayout::GENERAL;
 
 		WriteDescriptorSet glyphImageFontWriteDescriptorSet{};
 		glyphImageFontWriteDescriptorSet.descriptorSet = glyphImageDescriptorSet;

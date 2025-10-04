@@ -13,6 +13,8 @@ namespace ProjectA {
 			};
 
 		private:
+			static constexpr char8* DEFAULT_FONT_NAME = "DefaultFont";
+
 			static constexpr sint16 ASCENT = 9;
 			static constexpr sint16 DESCENT = -3;
 			static constexpr sint16 LINE_GAP = 0;
@@ -261,7 +263,7 @@ namespace ProjectA {
 					outputByteStream.write<uint32>(unicodeEntry.second);
 				}
 
-				const std::string outputPath = assetOutputPath + "/Font/DefaultFont.tfo";
+				const std::string outputPath = assetOutputPath + "/Font/" + DEFAULT_FONT_NAME + ".tfo";
 
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputByteStream.size);
