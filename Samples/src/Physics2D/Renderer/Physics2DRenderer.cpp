@@ -516,7 +516,23 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/PlaceholderFill.vert", vertexShaderModuleDescriptor);
+		ref<ShaderModule> vertexShaderModule;
+
+		switch (getGraphicsApi()) {
+			case GraphicsAPI::OPENGL:
+				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderFillSingleSet.vert", vertexShaderModuleDescriptor);
+
+				break;
+			case GraphicsAPI::VULKAN:
+				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderFill.vert", vertexShaderModuleDescriptor);
+
+				break;
+			default:
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+		}
+
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Base/FragmentRGBA.frag", fragmentShaderModuleDescriptor);
 
 		ColorBlendAttachment colorBlendAttachment{};
@@ -559,7 +575,23 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/PlaceholderStroke.vert", vertexShaderModuleDescriptor);
+		ref<ShaderModule> vertexShaderModule;
+
+		switch (getGraphicsApi()) {
+			case GraphicsAPI::OPENGL:
+				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderStrokeSingleSet.vert", vertexShaderModuleDescriptor);
+
+				break;
+			case GraphicsAPI::VULKAN:
+				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderStroke.vert", vertexShaderModuleDescriptor);
+
+				break;
+			default:
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+		}
+
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/PlaceholderStroke.frag", fragmentShaderModuleDescriptor);
 
 		ColorBlendAttachment colorBlendAttachment{};
@@ -599,7 +631,23 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/PlaceholderCenterOfMass.vert", vertexShaderModuleDescriptor);
+		ref<ShaderModule> vertexShaderModule;
+
+		switch (getGraphicsApi()) {
+			case GraphicsAPI::OPENGL:
+				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderCenterOfMassSingleSet.vert", vertexShaderModuleDescriptor);
+
+				break;
+			case GraphicsAPI::VULKAN:
+				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderCenterOfMass.vert", vertexShaderModuleDescriptor);
+
+				break;
+			default:
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+		}
+
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/CenterOfMass.frag", fragmentShaderModuleDescriptor);
 
 		ColorBlendAttachment colorBlendAttachment{};
@@ -1132,7 +1180,7 @@ namespace ProjectA {
 
 		commandEncoder->bindRenderPipeline(placeholderCenterOfMassRenderPipeline);
 		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, {cameraViewDescriptorSet, placeholderDescriptorSet});
-		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, selectedInstanceIndex * sizeof(CenterOfMass), sizeof(svec2<float32>));
+		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, selectedInstanceIndex * sizeof(CenterOfMass), sizeof(CenterOfMass));
 		commandEncoder->draw(1, 1, 0, 0);
 
 		commandEncoder->bindRenderPipeline(placeholderFillRenderPipeline);
@@ -1145,6 +1193,7 @@ namespace ProjectA {
 		commandEncoder->bindRenderPipeline(placeholderStrokeRenderPipeline);
 		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, {cameraViewDescriptorSet, placeholderDescriptorSet});
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(Vertex), sizeof(Vertex));
+		commandEncoder->bindVertexBuffer(1, instanceBuffer, selectedInstanceIndex * sizeof(Instance), sizeof(Instance));
 		commandEncoder->draw(geometry->getVertexCount() + 1, 1, 0, 0);
 	}
 

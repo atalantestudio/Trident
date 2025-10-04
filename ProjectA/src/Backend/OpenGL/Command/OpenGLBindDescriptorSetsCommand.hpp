@@ -34,7 +34,6 @@ namespace ProjectA {
 
 							const GLenum target = getGlBufferDescriptorType(descriptorSetBinding.descriptorType);
 
-							// TODO: Should multiple buffers be bound on the same binding index?
 							for (uint32 descriptorBufferIndex = 0; descriptorBufferIndex < descriptorSetBinding.descriptorBuffers.count; descriptorBufferIndex += 1) {
 								const DescriptorBuffer& descriptorBuffer = descriptorSetBinding.descriptorBuffers[descriptorBufferIndex];
 
