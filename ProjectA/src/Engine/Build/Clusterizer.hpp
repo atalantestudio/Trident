@@ -7,6 +7,7 @@ namespace ProjectA {
 	static constexpr uint32 CLUSTER_VERTEX_COUNT = CLUSTER_TRIANGLE_COUNT * 3;
 
 	struct ClusteredInstance {
+		mat4x4<float32> transform;
 		uint32 geometryIndex;
 	};
 
@@ -113,6 +114,7 @@ namespace ProjectA {
 				clusterOffset += clusteredGeometry.clusterCount;
 
 				ClusteredInstance& clusteredInstance = clusteredScene.instances[instanceOffset + relativeInstanceIndex];
+				clusteredInstance.transform = scene.getRigidBody(instanceOffset + relativeInstanceIndex).transform;
 				clusteredInstance.geometryIndex = geometryIndex;
 			}
 

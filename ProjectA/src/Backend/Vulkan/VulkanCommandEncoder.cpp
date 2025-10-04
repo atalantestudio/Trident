@@ -63,11 +63,17 @@ namespace ProjectA {
 		const VulkanFramebuffer& framebuffer = *std::static_pointer_cast<VulkanFramebuffer>(descriptor.framebuffer);
 		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(framebuffer.getRenderPass());
 
-		sequence<VkClearValue> clearValues(descriptor.clearValues.size());
+		sequence<VkClearValue> clearValues(descriptor.clearValues.count);
 
+		// TODO: Refactor clear values.
 		for (uint64 clearValueIndex = 0; clearValueIndex < clearValues.count; clearValueIndex += 1) {
-			clearValues[clearValueIndex].depthStencil.depth = descriptor.clearValues[clearValueIndex].depth;
-			clearValues[clearValueIndex].depthStencil.stencil = descriptor.clearValues[clearValueIndex].stencil;
+			if (descriptor.clearValues[clearValueIndex].depth != 0.0f || descriptor.clearValues[clearValueIndex].stencil != 0) {
+				clearValues[clearValueIndex].depthStencil.depth = descriptor.clearValues[clearValueIndex].depth;
+				clearValues[clearValueIndex].depthStencil.stencil = descriptor.clearValues[clearValueIndex].stencil;
+
+				continue;
+			}
+
 			clearValues[clearValueIndex].color.float32[0] = descriptor.clearValues[clearValueIndex].color[0];
 			clearValues[clearValueIndex].color.float32[1] = descriptor.clearValues[clearValueIndex].color[1];
 			clearValues[clearValueIndex].color.float32[2] = descriptor.clearValues[clearValueIndex].color[2];

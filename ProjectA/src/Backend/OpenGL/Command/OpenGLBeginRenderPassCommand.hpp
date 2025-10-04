@@ -34,7 +34,7 @@ namespace ProjectA {
 				glDrawBuffers(static_cast<GLsizei>(bufs.count), bufs);
 
 				// Clear attachments with a load operation of LoadOperation::CLEAR.
-				for (uint32 attachmentIndex = 0; attachmentIndex < descriptor.clearValues.size(); attachmentIndex += 1) {
+				for (uint32 attachmentIndex = 0; attachmentIndex < descriptor.clearValues.count; attachmentIndex += 1) {
 					const ClearValue& clearValue = descriptor.clearValues[attachmentIndex];
 					const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
 

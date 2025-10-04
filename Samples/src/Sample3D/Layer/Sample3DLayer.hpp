@@ -7,6 +7,11 @@
 
 namespace ProjectA {
 	class Sample3DLayer : public Layer {
+		private:
+			static constexpr float32 FIELD_OF_VIEW = radians(60.0_deg);
+			static constexpr float32 NEAR_PLANE = 0.001_m;
+			static constexpr float32 FAR_PLANE = 100.0_m;
+
 		public:
 			explicit Sample3DLayer() :
 				camera(mat4x4<float32>::identity())
@@ -16,14 +21,18 @@ namespace ProjectA {
 				renderer.setLayer(this);
 				renderer.build();
 
-				static constexpr char8* fbxPath = "Asset/Model/folding_wooden_stool/folding_wooden_stool.fbx";
+				static constexpr char8* fbxPath = "Asset/Model/lemon/lemon.fbx";
 
 				const sequence<uint8> fbxData = Filesystem::openBuffer(fbxPath);
 				const File<FileFormat::FBX> fbxFile = Filesystem::decode<FileFormat::FBX>(fbxData);
 
 				Entity3DDescriptor entityDescriptor{};
-				entityDescriptor.position = {0.0_m, -0.225_m, 0.85_m};
-				entityDescriptor.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad};
+				// folding_wooden_stool
+				// entityDescriptor.position = {0.0_m, -0.225_m, 0.85_m};
+				// entityDescriptor.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad};
+				// lemon
+				entityDescriptor.position = {0.0_m, 0.0_m, 0.1_m};
+				entityDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
 				entityDescriptor.geometry = FBXToGeometry3D(fbxFile);
 				entityDescriptor.material = createRef<ColorMaterial>();
 
@@ -69,11 +78,6 @@ namespace ProjectA {
 
 				return true;
 			}
-
-		private:
-			static constexpr float32 FIELD_OF_VIEW = radians(60.0_deg);
-			static constexpr float32 NEAR_PLANE = 0.0_m;
-			static constexpr float32 FAR_PLANE = 100.0_m;
 
 		private:
 			VisibilityRenderer renderer;

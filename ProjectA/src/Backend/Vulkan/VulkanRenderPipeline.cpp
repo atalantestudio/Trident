@@ -212,14 +212,14 @@ namespace ProjectA {
 			depthStencilStateCreateInfo.front.failOp = VK_STENCIL_OP_KEEP;
 			depthStencilStateCreateInfo.front.passOp = VK_STENCIL_OP_KEEP;
 			depthStencilStateCreateInfo.front.depthFailOp = VK_STENCIL_OP_KEEP;
-			depthStencilStateCreateInfo.front.compareOp = VK_COMPARE_OP_NEVER;
+			depthStencilStateCreateInfo.front.compareOp = VK_COMPARE_OP_ALWAYS;
 			depthStencilStateCreateInfo.front.compareMask = 0;
 			depthStencilStateCreateInfo.front.writeMask = 0;
 			depthStencilStateCreateInfo.front.reference = 0;
 			depthStencilStateCreateInfo.back.failOp = VK_STENCIL_OP_KEEP;
 			depthStencilStateCreateInfo.back.passOp = VK_STENCIL_OP_KEEP;
 			depthStencilStateCreateInfo.back.depthFailOp = VK_STENCIL_OP_KEEP;
-			depthStencilStateCreateInfo.back.compareOp = VK_COMPARE_OP_NEVER;
+			depthStencilStateCreateInfo.back.compareOp = VK_COMPARE_OP_ALWAYS;
 			depthStencilStateCreateInfo.back.compareMask = 0;
 			depthStencilStateCreateInfo.back.writeMask = 0;
 			depthStencilStateCreateInfo.back.reference = 0;

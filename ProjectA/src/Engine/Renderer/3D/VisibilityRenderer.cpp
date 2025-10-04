@@ -92,9 +92,14 @@ namespace ProjectA {
 		const ref<Subpass> visibilitySubpass = createSubpass(visibilitySubpassDescriptor);
 		const ref<Subpass> screenSubpass = createSubpass(screenSubpassDescriptor);
 
+		SubpassDependency subpassDependency{};
+		subpassDependency.sourceSubpassIndex = SubpassDependency::EXTERNAL_SUBPASS;
+		subpassDependency.destinationSubpassIndex = 0;
+
 		RenderPassDescriptor renderPassDescriptor{};
 		renderPassDescriptor.attachments = {swapchainAttachment, visibilityAttachment, depthStencilAttachment};
 		renderPassDescriptor.subpasses = {visibilitySubpass, screenSubpass};
+		renderPassDescriptor.subpassDependencies = {subpassDependency};
 
 		renderPass = createRenderPass(renderPassDescriptor);
 	}
@@ -237,14 +242,14 @@ namespace ProjectA {
 
 	void VisibilityRenderer::createIndirectBuffer() {
 		BufferDescriptor indirectBufferDescriptor{};
-		indirectBufferDescriptor.size = 4 * sizeof(uint32);
+		indirectBufferDescriptor.size = sizeof(DrawIndirectCommand);
 		indirectBufferDescriptor.usage = BufferUsage::INDIRECT;
 		indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		indirectBufferDescriptor.persistent = true;
 
 		indirectBuffer = createBuffer(indirectBufferDescriptor);
 
-		indirectMappedRange = indirectBuffer->map<uint32>(0, indirectBuffer->size);
+		indirectMappedRange = indirectBuffer->map<DrawIndirectCommand>(0, indirectBuffer->size);
 	}
 
 	void VisibilityRenderer::createCameraBuffer() {
@@ -360,9 +365,9 @@ namespace ProjectA {
 		visibilityRenderPipelineDescriptor.lineWidth = 1.0f;
 		visibilityRenderPipelineDescriptor.minSampleShading = 0.0f;
 		visibilityRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		visibilityRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		// visibilityRenderPipelineDescriptor.depthStencilState.depthWrite = true;
-		// visibilityRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER; // TODO: Use LESS.
+		visibilityRenderPipelineDescriptor.depthStencilState.depthTest = true;
+		visibilityRenderPipelineDescriptor.depthStencilState.depthWrite = true;
+		visibilityRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::LESS;
 		visibilityRenderPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
 		visibilityRenderPipelineDescriptor.renderPass = renderPass;
 		visibilityRenderPipelineDescriptor.subpassIndex = VISIBILITY_SUBPASS_INDEX;
@@ -436,10 +441,10 @@ namespace ProjectA {
 	}
 
 	void VisibilityRenderer::fillSceneBuffers() {
-		indirectMappedRange[0] = CLUSTER_VERTEX_COUNT;
-		indirectMappedRange[1] = static_cast<uint32>(scene->clusters.count);
-		indirectMappedRange[2] = 0;
-		indirectMappedRange[3] = 0;
+		indirectMappedRange[0].vertexCount = CLUSTER_VERTEX_COUNT;
+		indirectMappedRange[0].instanceCount = static_cast<uint32>(scene->clusters.count);
+		indirectMappedRange[0].vertexOffset = 0;
+		indirectMappedRange[0].instanceOffset = 0;
 
 		const uint64 stagingBufferSize = vertexPositionComponentBuffer->size + vertexBuffer->size + clusterBuffer->size + instanceBuffer->size /* + geometryBuffer->size */;
 
@@ -493,8 +498,7 @@ namespace ProjectA {
 		Instance* instanceMappedRange = stagingBuffer->map<Instance>(stagingBufferOffset, instanceBuffer->size);
 
 		for (uint32 instanceIndex = 0; instanceIndex < scene->instances.count; instanceIndex += 1) {
-			// TODO
-			instanceMappedRange[instanceIndex].transform = mat4x4<float32>::identity();
+			instanceMappedRange[instanceIndex].transform = scene->instances[instanceIndex].transform;
 			instanceMappedRange[instanceIndex].geometryIndex = scene->instances[instanceIndex].geometryIndex;
 		}
 

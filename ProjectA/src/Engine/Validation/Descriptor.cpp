@@ -81,7 +81,7 @@ namespace ProjectA {
 				ENGINE_ERROR("descriptor.framebuffer.renderPass must be a valid RenderPass.");
 			}
 			else {
-				if (descriptor.clearValues.size() > renderPass->getAttachmentReferenceCount()) {
+				if (descriptor.clearValues.count > renderPass->getAttachmentReferenceCount()) {
 					errorCount += 1;
 
 					ENGINE_ERROR("descriptor.clearValues.count must be smaller than the number of attachment references in descriptor.framebuffer.renderPass.");

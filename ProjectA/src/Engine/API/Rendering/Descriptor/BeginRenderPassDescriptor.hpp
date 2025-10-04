@@ -7,8 +7,7 @@ namespace ProjectA {
 	struct BeginRenderPassDescriptor {
 		ref<Framebuffer> framebuffer;
 
-		// TODO: Use sequence<ClearValue>.
 		// 1 clear value per attachment.
-		std::vector<ClearValue> clearValues;
+		sequence<ClearValue> clearValues;
 	};
 }

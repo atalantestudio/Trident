@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ProjectA.hpp"
+
 #include "Engine/Build/Clusterizer.hpp"
 #include "Engine/Renderer/3D/SceneRenderer.hpp"
 
@@ -111,7 +113,7 @@ namespace ProjectA {
 			ref<Buffer> instanceBuffer;
 			ref<Buffer> geometryBuffer;
 
-			uint32* indirectMappedRange;
+			DrawIndirectCommand* indirectMappedRange;
 			Camera* cameraMappedRange;
 			Instance* instanceMappedRange;
 	};

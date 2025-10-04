@@ -385,6 +385,8 @@ namespace ProjectA {
 	// - coordinateSystem is 1 for left-handed and -1 for right-handed.
 	// - bias defaults to pi / 2.
 	static mat4x4<float32> perspective(float32 fieldOfView, float32 aspectRatio, float32 nearPlane, float32 farPlane, float32 coordinateSystem, float32 bias = pi<float32>() * 0.5f) {
+		ENGINE_ASSERT(nearPlane > 0.0f, "Invalid near plane.");
+
 		const float32 f = tan(bias - fieldOfView * 0.5f);
 		const float32 range = farPlane - nearPlane;
 
