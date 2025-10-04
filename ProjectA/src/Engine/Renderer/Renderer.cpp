@@ -125,14 +125,10 @@ namespace ProjectA {
 	}
 
 	ref<RenderPipeline> Renderer::createRenderPipeline(const RenderPipelineDescriptor& descriptor) {
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
 		return adapter->createRenderPipeline(descriptor);
 	}
 
 	ref<Sampler> Renderer::createSampler(const SamplerDescriptor& descriptor) {
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
 		return adapter->createSampler(descriptor);
 	}
 

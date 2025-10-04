@@ -164,14 +164,14 @@ namespace ProjectA {
 		colorBlendStateCreateInfo.blendConstants[2] = 0.0f;
 		colorBlendStateCreateInfo.blendConstants[3] = 0.0f;
 
-		const std::vector<VkDynamicState> dynamicStates = getVkDynamicStates(descriptor.dynamicState);
+		const sequence<VkDynamicState> dynamicStates = getVkDynamicStates(descriptor.dynamicState);
 
 		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
 		dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		dynamicStateCreateInfo.pNext = nullptr;
 		dynamicStateCreateInfo.flags = 0;
-		dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32>(dynamicStates.size());
-		dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
+		dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32>(dynamicStates.count);
+		dynamicStateCreateInfo.pDynamicStates = dynamicStates;
 
 		const std::array<VkPipelineShaderStageCreateInfo, 2> shaderStageCreateInfos = {
 			std::static_pointer_cast<VulkanShaderModule>(descriptor.vertexShaderModule)->object,

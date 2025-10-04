@@ -231,6 +231,9 @@ namespace ProjectA {
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
 			const ref<VulkanDescriptorSet>& descriptorSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet);
+
+			ENGINE_ASSERT(writeDescriptorSet.bindingIndex < descriptorSet->bindings.count, "This descriptor set doesn't have binding index [].", writeDescriptorSet.bindingIndex);
+
 			const VulkanDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {

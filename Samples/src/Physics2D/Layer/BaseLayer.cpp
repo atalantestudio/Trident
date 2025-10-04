@@ -38,7 +38,7 @@ namespace ProjectA {
 		renderer.selectEntity(selectedEntity);
 
 		if (selectedEntity != max<uint32>()) {
-			// renderer.setPlaceholderOffset(placeholderOffset);
+			renderer.setPlaceholderOffset(placeholderOffset);
 		}
 
 		renderer.clearRegisteredData();
