@@ -3,7 +3,7 @@
 #include "Engine/Camera/3D/PerspectiveCamera3D.hpp"
 #include "Engine/Filesystem/Asset/FBXToGeometry.hpp"
 #include "Engine/Layer/Layer.hpp"
-#include "Engine/Renderer/3D/ForwardRenderer3D.hpp"
+#include "Engine/Renderer/3D/VisibilityRenderer.hpp"
 
 namespace ProjectA {
 	class Sample3DLayer : public Layer {
@@ -29,10 +29,9 @@ namespace ProjectA {
 
 				scene.createEntity(entityDescriptor);
 
-				// clusteredScene = clusterizeScene(scene);
+				clusteredScene = clusterizeScene(scene);
 
-				// renderer.setScene(&clusteredScene);
-				renderer.setScene(&scene);
+				renderer.setScene(&clusteredScene);
 
 				camera.updateProjection(FIELD_OF_VIEW, getApplication()->getWindow()->getAspectRatio(), NEAR_PLANE, FAR_PLANE);
 
@@ -50,8 +49,7 @@ namespace ProjectA {
 
 				rigidBody.updateTransform();
 
-				// renderer.updateInstanceTransform(entity, rigidBody.transform);
-				renderer.updateTransform(entity);
+				renderer.updateInstanceTransform(entity, rigidBody.transform);
 			}
 
 			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const override {
@@ -78,9 +76,9 @@ namespace ProjectA {
 			static constexpr float32 FAR_PLANE = 100.0_m;
 
 		private:
-			ForwardRenderer3D renderer;
+			VisibilityRenderer renderer;
 			Scene3D scene;
-			// ClusteredScene clusteredScene;
+			ClusteredScene clusteredScene;
 			PerspectiveCamera3D camera;
 	};
 }

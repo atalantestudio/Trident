@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Engine/Build/Clusterizer.hpp"
-#include "Engine/Renderer/3D/Renderer3D.hpp"
+#include "Engine/Renderer/3D/SceneRenderer.hpp"
 
 namespace ProjectA {
-	class VisibilityRenderer : public Renderer3D<ClusteredScene> {
+	class VisibilityRenderer : public SceneRenderer<ClusteredScene> {
 		private:
 			struct Camera {
 				mat4x4<float32> projectionView;
@@ -29,89 +29,38 @@ namespace ProjectA {
 
 		private:
 			static constexpr uint32 VISIBILITY_SUBPASS_INDEX = 0;
-			static constexpr uint32 PRESENT_SUBPASS_INDEX = 1;
+			static constexpr uint32 SCREEN_SUBPASS_INDEX = 1;
 
 		public:
-			void build() override {
-				updateRenderPass();
-				updateVisibilityImage();
-				updateVisibilityImageView();
-				updateDepthStencilImage();
-				updateDepthStencilImageView();
-				recreateFramebuffers();
+			void build() override;
 
-				createCameraDescriptorSetLayout();
-				createClusterDescriptorSetLayout();
-				createInstanceDescriptorSetLayout();
-				createVisibilityDescriptorSetLayout();
-
-				allocateDescriptorSets();
-
-				createVisibilityPipelineLayout();
-				createPresentPipelineLayout();
-
-				createVisibilityRenderPipeline();
-				createPresentRenderPipeline();
-
-				createIndirectBuffer();
-				createCameraBuffer();
-			}
-
-			void setScene(const ClusteredScene* scene) override {
-				Renderer3D::setScene(scene);
-
-				createVertexPositionComponentBuffer();
-				createVertexBuffer();
-				createClusterBuffer();
-				createInstanceBuffer();
-				createGeometryBuffer();
-
-				updateSceneBuffers();
-
-				updateAllDescriptorSets();
-			}
+			void setScene(const ClusteredScene* scene) override;
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override;
 
-			void resize(WindowResizeEvent& event) override {
-				updateVisibilityImage();
-				updateVisibilityImageView();
-
-				updateDepthStencilImage();
-				updateDepthStencilImageView();
-
-				recreateFramebuffers();
-
-				updateCamera();
-
-				updateVisibilityDescriptorSet();
-			}
+			void resize(WindowResizeEvent& event) override;
 
 			void updateCamera();
 
 			void updateInstanceTransform(Entity entity, const mat4x4<float32>& transform);
 
 		private:
-			void updateRenderPass();
-			void updateVisibilityImage();
-			void updateVisibilityImageView();
-			void updateDepthStencilImage();
-			void updateDepthStencilImageView();
-			void updateSceneBuffers();
-			void recreateFramebuffers();
-			void updateAllDescriptorSets();
-			void updateVisibilityDescriptorSet();
+			void setupRenderPass();
 
-			void allocateDescriptorSets();
+			void recreateVisibilityImage();
+			void recreateVisibilityImageView();
+			void recreateDepthStencilImage();
+			void recreateDepthStencilImageView();
+			void recreateFramebuffers();
 
 			void createCameraDescriptorSetLayout();
 			void createClusterDescriptorSetLayout();
 			void createInstanceDescriptorSetLayout();
 			void createVisibilityDescriptorSetLayout();
 			void createVisibilityPipelineLayout();
-			void createPresentPipelineLayout();
+			void createScreenPipelineLayout();
 			void createVisibilityRenderPipeline();
-			void createPresentRenderPipeline();
+			void createScreenRenderPipeline();
 			void createIndirectBuffer();
 			void createCameraBuffer();
 			void createVertexPositionComponentBuffer();
@@ -119,6 +68,13 @@ namespace ProjectA {
 			void createClusterBuffer();
 			void createInstanceBuffer();
 			void createGeometryBuffer();
+
+			void allocateDescriptorSets();
+
+			void fillSceneBuffers();
+
+			void updateAllDescriptorSets();
+			void updateVisibilityDescriptorSet();
 
 		private:
 			ref<RenderPass> renderPass;
@@ -142,10 +98,10 @@ namespace ProjectA {
 			ref<DescriptorSet> visibilityDescriptorSet;
 
 			ref<PipelineLayout> visibilityPipelineLayout;
-			ref<PipelineLayout> presentPipelineLayout;
+			ref<PipelineLayout> screenPipelineLayout;
 
 			ref<RenderPipeline> visibilityRenderPipeline;
-			ref<RenderPipeline> presentRenderPipeline;
+			ref<RenderPipeline> screenRenderPipeline;
 
 			ref<Buffer> indirectBuffer;
 			ref<Buffer> cameraBuffer;
@@ -155,8 +111,8 @@ namespace ProjectA {
 			ref<Buffer> instanceBuffer;
 			ref<Buffer> geometryBuffer;
 
-			uint32* indirectBufferMappedRange = nullptr;
-			Camera* cameraBufferMappedRange = nullptr;
-			Instance* instanceBufferMappedRange = nullptr;
+			uint32* indirectMappedRange;
+			Camera* cameraMappedRange;
+			Instance* instanceMappedRange;
 	};
 }

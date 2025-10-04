@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Engine/API/Scene/Scene3D.hpp"
-#include "Engine/Renderer/3D/Renderer3D.hpp"
+#include "Engine/Renderer/3D/SceneRenderer.hpp"
 
 namespace ProjectA {
-	class ForwardRenderer3D : public Renderer3D<Scene3D> {
+	class ForwardRenderer3D : public SceneRenderer<Scene3D> {
 		private:
 			struct Transform {
 				mat4x4<float32> transform;
@@ -127,7 +127,7 @@ namespace ProjectA {
 			}
 
 			void setScene(const Scene3D* scene) override {
-				Renderer3D::setScene(scene);
+				SceneRenderer::setScene(scene);
 
 				const ComponentPool<RigidBody3D>& rigidBodyPool = scene->getComponentPool<RigidBody3D>();
 				const ComponentPool<ref<Geometry3D>>& geometryPool = scene->getComponentPool<ref<Geometry3D>>();

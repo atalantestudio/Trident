@@ -3,7 +3,47 @@
 #include "Engine/Renderer/3D/VisibilityRenderer.hpp"
 
 namespace ProjectA {
-	void VisibilityRenderer::updateRenderPass() {
+	void VisibilityRenderer::build() {
+		setupRenderPass();
+
+		recreateVisibilityImage();
+		recreateVisibilityImageView();
+		recreateDepthStencilImage();
+		recreateDepthStencilImageView();
+		recreateFramebuffers();
+
+		createCameraDescriptorSetLayout();
+		createClusterDescriptorSetLayout();
+		createInstanceDescriptorSetLayout();
+		createVisibilityDescriptorSetLayout();
+
+		allocateDescriptorSets();
+
+		createVisibilityPipelineLayout();
+		createScreenPipelineLayout();
+
+		createVisibilityRenderPipeline();
+		createScreenRenderPipeline();
+
+		createIndirectBuffer();
+		createCameraBuffer();
+	}
+
+	void VisibilityRenderer::setScene(const ClusteredScene* scene) {
+		SceneRenderer::setScene(scene);
+
+		createVertexPositionComponentBuffer();
+		createVertexBuffer();
+		createClusterBuffer();
+		createInstanceBuffer();
+		createGeometryBuffer();
+
+		fillSceneBuffers();
+
+		updateAllDescriptorSets();
+	}
+
+	void VisibilityRenderer::setupRenderPass() {
 		Attachment swapchainAttachment{};
 		swapchainAttachment.format = getSurface()->getFormat();
 		swapchainAttachment.sampleCount = 1;
@@ -45,21 +85,21 @@ namespace ProjectA {
 		visibilitySubpassDescriptor.colorAttachmentReferences = {writeVisibilityAttachmentReference};
 		visibilitySubpassDescriptor.depthStencilAttachmentReference = writeDepthStencilAttachmentReference;
 
-		SubpassDescriptor presentSubpassDescriptor{};
-		presentSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
-		presentSubpassDescriptor.inputAttachmentReferences = {readVisibilityAttachmentReference};
+		SubpassDescriptor screenSubpassDescriptor{};
+		screenSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
+		screenSubpassDescriptor.inputAttachmentReferences = {readVisibilityAttachmentReference};
 
 		const ref<Subpass> visibilitySubpass = createSubpass(visibilitySubpassDescriptor);
-		const ref<Subpass> presentSubpass = createSubpass(presentSubpassDescriptor);
+		const ref<Subpass> screenSubpass = createSubpass(screenSubpassDescriptor);
 
 		RenderPassDescriptor renderPassDescriptor{};
 		renderPassDescriptor.attachments = {swapchainAttachment, visibilityAttachment, depthStencilAttachment};
-		renderPassDescriptor.subpasses = {visibilitySubpass, presentSubpass};
+		renderPassDescriptor.subpasses = {visibilitySubpass, screenSubpass};
 
 		renderPass = createRenderPass(renderPassDescriptor);
 	}
 
-	void VisibilityRenderer::updateVisibilityImage() {
+	void VisibilityRenderer::recreateVisibilityImage() {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
 		AttachmentImageDescriptor visibilityAttachmentImageDescriptor{};
@@ -73,7 +113,7 @@ namespace ProjectA {
 		visibilityImage = renderPass->createInputAttachmentImage(visibilityAttachmentImageDescriptor, 1);
 	}
 
-	void VisibilityRenderer::updateVisibilityImageView() {
+	void VisibilityRenderer::recreateVisibilityImageView() {
 		ImageViewDescriptor visibilityImageViewDescriptor{};
 		visibilityImageViewDescriptor.mipLevelOffset = 0;
 		visibilityImageViewDescriptor.mipLevelCount = visibilityImage->getMipLevelCount();
@@ -83,7 +123,7 @@ namespace ProjectA {
 		visibilityImageView = visibilityImage->createView(visibilityImageViewDescriptor);
 	}
 
-	void VisibilityRenderer::updateDepthStencilImage() {
+	void VisibilityRenderer::recreateDepthStencilImage() {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
 		AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
@@ -97,7 +137,7 @@ namespace ProjectA {
 		depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, VISIBILITY_SUBPASS_INDEX);
 	}
 
-	void VisibilityRenderer::updateDepthStencilImageView() {
+	void VisibilityRenderer::recreateDepthStencilImageView() {
 		ImageViewDescriptor depthStencilImageViewDescriptor{};
 		depthStencilImageViewDescriptor.mipLevelOffset = 0;
 		depthStencilImageViewDescriptor.mipLevelCount = depthStencilImage->getMipLevelCount();
@@ -107,11 +147,299 @@ namespace ProjectA {
 		depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
 	}
 
-	void VisibilityRenderer::updateSceneBuffers() {
-		indirectBufferMappedRange[0] = CLUSTER_VERTEX_COUNT;
-		indirectBufferMappedRange[1] = static_cast<uint32>(scene->clusters.count);
-		indirectBufferMappedRange[2] = 0;
-		indirectBufferMappedRange[3] = 0;
+	void VisibilityRenderer::recreateFramebuffers() {
+		const ref<Swapchain>& swapchain = getSwapchain();
+		const Extent2D swapchainExtent = swapchain->getExtent();
+
+		for (ref<Framebuffer>& framebuffer : framebuffers) {
+			framebuffer.~shared_ptr();
+		}
+
+		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
+
+		FramebufferDescriptor framebufferDescriptor{};
+		framebufferDescriptor.renderPass = renderPass;
+		framebufferDescriptor.imageViews = {nullptr, visibilityImageView, depthStencilImageView};
+		framebufferDescriptor.extent = swapchain->getExtent();
+		framebufferDescriptor.layerCount = 1;
+
+		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count; framebufferIndex += 1) {
+			framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
+
+			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+		}
+	}
+
+	void VisibilityRenderer::createCameraDescriptorSetLayout() {
+		DescriptorSetLayoutBinding cameraBinding{};
+		cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		cameraBinding.descriptorCount = 1;
+		cameraBinding.shaderStages = ShaderStage::VERTEX;
+
+		cameraDescriptorSetLayout = createDescriptorSetLayout({cameraBinding});
+	}
+
+	void VisibilityRenderer::createClusterDescriptorSetLayout() {
+		DescriptorSetLayoutBinding vertexPositionComponentBinding{};
+		vertexPositionComponentBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexPositionComponentBinding.descriptorCount = 1;
+		vertexPositionComponentBinding.shaderStages = ShaderStage::VERTEX;
+
+		DescriptorSetLayoutBinding vertexBinding{};
+		vertexBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexBinding.descriptorCount = 1;
+		vertexBinding.shaderStages = ShaderStage::VERTEX;
+
+		DescriptorSetLayoutBinding clusterBinding{};
+		clusterBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		clusterBinding.descriptorCount = 1;
+		clusterBinding.shaderStages = ShaderStage::VERTEX;
+
+		clusterDescriptorSetLayout = createDescriptorSetLayout({vertexPositionComponentBinding, vertexBinding, clusterBinding});
+	}
+
+	void VisibilityRenderer::createInstanceDescriptorSetLayout() {
+		DescriptorSetLayoutBinding instanceBinding{};
+		instanceBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		instanceBinding.descriptorCount = 1;
+		instanceBinding.shaderStages = ShaderStage::VERTEX;
+
+		DescriptorSetLayoutBinding geometryBinding{};
+		geometryBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		geometryBinding.descriptorCount = 1;
+		geometryBinding.shaderStages = ShaderStage::VERTEX;
+
+		instanceDescriptorSetLayout = createDescriptorSetLayout({instanceBinding, geometryBinding});
+	}
+
+	void VisibilityRenderer::createVisibilityDescriptorSetLayout() {
+		DescriptorSetLayoutBinding visibilityBinding{};
+		visibilityBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
+		visibilityBinding.descriptorCount = 1;
+		visibilityBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		visibilityDescriptorSetLayout = createDescriptorSetLayout({visibilityBinding});
+	}
+
+	void VisibilityRenderer::createVisibilityPipelineLayout() {
+		PipelineLayoutDescriptor visibilityPipelineLayoutDescriptor{};
+		visibilityPipelineLayoutDescriptor.descriptorSetLayouts = {cameraDescriptorSetLayout, clusterDescriptorSetLayout, instanceDescriptorSetLayout};
+
+		visibilityPipelineLayout = createPipelineLayout(visibilityPipelineLayoutDescriptor);
+	}
+
+	void VisibilityRenderer::createScreenPipelineLayout() {
+		PipelineLayoutDescriptor screenPipelineLayoutDescriptor{};
+		screenPipelineLayoutDescriptor.descriptorSetLayouts = {visibilityDescriptorSetLayout};
+
+		screenPipelineLayout = createPipelineLayout(screenPipelineLayoutDescriptor);
+	}
+
+	void VisibilityRenderer::createIndirectBuffer() {
+		BufferDescriptor indirectBufferDescriptor{};
+		indirectBufferDescriptor.size = 4 * sizeof(uint32);
+		indirectBufferDescriptor.usage = BufferUsage::INDIRECT;
+		indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		indirectBufferDescriptor.persistent = true;
+
+		indirectBuffer = createBuffer(indirectBufferDescriptor);
+
+		indirectMappedRange = indirectBuffer->map<uint32>(0, indirectBuffer->size);
+	}
+
+	void VisibilityRenderer::createCameraBuffer() {
+		BufferDescriptor cameraBufferDescriptor{};
+		cameraBufferDescriptor.size = sizeof(Camera);
+		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
+		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		cameraBufferDescriptor.persistent = true;
+
+		cameraBuffer = createBuffer(cameraBufferDescriptor);
+
+		cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
+	}
+
+	void VisibilityRenderer::createVertexPositionComponentBuffer() {
+		DEBUG_ASSERT(scene != nullptr);
+
+		BufferDescriptor vertexPositionComponentBufferDescriptor{};
+		vertexPositionComponentBufferDescriptor.size = scene->clusters.count * CLUSTER_VERTEX_COUNT * 3 * sizeof(float32);
+		vertexPositionComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexPositionComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		vertexPositionComponentBuffer = createBuffer(vertexPositionComponentBufferDescriptor);
+	}
+
+	void VisibilityRenderer::createVertexBuffer() {
+		DEBUG_ASSERT(scene != nullptr);
+
+		BufferDescriptor vertexBufferDescriptor{};
+		vertexBufferDescriptor.size = scene->clusters.count * CLUSTER_VERTEX_COUNT * sizeof(Vertex);
+		vertexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		vertexBuffer = createBuffer(vertexBufferDescriptor);
+	}
+
+	void VisibilityRenderer::createClusterBuffer() {
+		DEBUG_ASSERT(scene != nullptr);
+
+		BufferDescriptor clusterBufferDescriptor{};
+		clusterBufferDescriptor.size = scene->clusters.count * sizeof(Cluster);
+		clusterBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		clusterBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		clusterBuffer = createBuffer(clusterBufferDescriptor);
+	}
+
+	void VisibilityRenderer::createInstanceBuffer() {
+		DEBUG_ASSERT(scene != nullptr);
+
+		BufferDescriptor instanceBufferDescriptor{};
+		instanceBufferDescriptor.size = scene->instances.count * sizeof(Instance);
+		instanceBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+		instanceBufferDescriptor.persistent = true;
+
+		instanceBuffer = createBuffer(instanceBufferDescriptor);
+
+		instanceMappedRange = instanceBuffer->map<Instance>(0, instanceBuffer->size);
+	}
+
+	void VisibilityRenderer::createGeometryBuffer() {
+		DEBUG_ASSERT(scene != nullptr);
+
+		BufferDescriptor geometryBufferDescriptor{};
+		geometryBufferDescriptor.size = scene->geometries.count * sizeof(Geometry);
+		geometryBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		geometryBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		geometryBuffer = createBuffer(geometryBufferDescriptor);
+	}
+
+	void VisibilityRenderer::createVisibilityRenderPipeline() {
+		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexShaderModuleDescriptor.entryPoint = "main";
+
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		ref<ShaderModule> vertexShaderModule;
+		ref<ShaderModule> fragmentShaderModule;
+
+		switch (getGraphicsApi()) {
+			case GraphicsAPI::OPENGL:
+				vertexShaderModule = loadShaderModule("Visibility/VisibilitySingleSet.vert", vertexShaderModuleDescriptor);
+				fragmentShaderModule = loadShaderModule("Visibility/VisibilityGL.frag", fragmentShaderModuleDescriptor);
+
+				break;
+			case GraphicsAPI::VULKAN:
+				vertexShaderModule = loadShaderModule("Visibility/Visibility.vert", vertexShaderModuleDescriptor);
+				fragmentShaderModule = loadShaderModule("Visibility/VisibilitySPV.frag", fragmentShaderModuleDescriptor);
+
+				break;
+			default:
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+		}
+
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = false;
+
+		RenderPipelineDescriptor visibilityRenderPipelineDescriptor{};
+		visibilityRenderPipelineDescriptor.pipelineLayout = visibilityPipelineLayout;
+		visibilityRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		visibilityRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		visibilityRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		visibilityRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		visibilityRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		visibilityRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		visibilityRenderPipelineDescriptor.lineWidth = 1.0f;
+		visibilityRenderPipelineDescriptor.minSampleShading = 0.0f;
+		visibilityRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		visibilityRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		// visibilityRenderPipelineDescriptor.depthStencilState.depthWrite = true;
+		// visibilityRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER; // TODO: Use LESS.
+		visibilityRenderPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
+		visibilityRenderPipelineDescriptor.renderPass = renderPass;
+		visibilityRenderPipelineDescriptor.subpassIndex = VISIBILITY_SUBPASS_INDEX;
+
+		visibilityRenderPipeline = createRenderPipeline(visibilityRenderPipelineDescriptor);
+	}
+
+	void VisibilityRenderer::createScreenRenderPipeline() {
+		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
+		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+		vertexShaderModuleDescriptor.entryPoint = "main";
+
+		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
+		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		ref<ShaderModule> vertexShaderModule;
+		ref<ShaderModule> fragmentShaderModule;
+
+		switch (getGraphicsApi()) {
+			case GraphicsAPI::OPENGL:
+				vertexShaderModule = loadShaderModule("Base/ScreenUV.vert", vertexShaderModuleDescriptor);
+				fragmentShaderModule = loadShaderModule("Visibility/DebugTextureSampler.frag", fragmentShaderModuleDescriptor);
+
+				break;
+			case GraphicsAPI::VULKAN:
+				vertexShaderModule = loadShaderModule("Base/Screen.vert", vertexShaderModuleDescriptor);
+				fragmentShaderModule = loadShaderModule("Visibility/DebugInputAttachment.frag", fragmentShaderModuleDescriptor);
+
+				break;
+			default:
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+		}
+
+		ColorBlendAttachment colorBlendAttachment{};
+		colorBlendAttachment.blend = false;
+
+		RenderPipelineDescriptor screenRenderPipelineDescriptor{};
+		screenRenderPipelineDescriptor.pipelineLayout = screenPipelineLayout;
+		screenRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		screenRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		screenRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		screenRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		screenRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		screenRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		screenRenderPipelineDescriptor.lineWidth = 1.0f;
+		screenRenderPipelineDescriptor.minSampleShading = 0.0f;
+		screenRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		screenRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		screenRenderPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
+		screenRenderPipelineDescriptor.renderPass = renderPass;
+		screenRenderPipelineDescriptor.subpassIndex = SCREEN_SUBPASS_INDEX;
+
+		screenRenderPipeline = createRenderPipeline(screenRenderPipelineDescriptor);
+	}
+
+	void VisibilityRenderer::allocateDescriptorSets() {
+		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({
+			cameraDescriptorSetLayout,
+			clusterDescriptorSetLayout,
+			instanceDescriptorSetLayout,
+			visibilityDescriptorSetLayout,
+		});
+
+		cameraDescriptorSet = descriptorSets[0];
+		clusterDescriptorSet = descriptorSets[1];
+		instanceDescriptorSet = descriptorSets[2];
+		visibilityDescriptorSet = descriptorSets[3];
+	}
+
+	void VisibilityRenderer::fillSceneBuffers() {
+		indirectMappedRange[0] = CLUSTER_VERTEX_COUNT;
+		indirectMappedRange[1] = static_cast<uint32>(scene->clusters.count);
+		indirectMappedRange[2] = 0;
+		indirectMappedRange[3] = 0;
 
 		const uint64 stagingBufferSize = vertexPositionComponentBuffer->size + vertexBuffer->size + clusterBuffer->size + instanceBuffer->size /* + geometryBuffer->size */;
 
@@ -212,29 +540,6 @@ namespace ProjectA {
 		getDevice()->waitIdle();
 	}
 
-	void VisibilityRenderer::recreateFramebuffers() {
-		const ref<Swapchain>& swapchain = getSwapchain();
-		const Extent2D swapchainExtent = swapchain->getExtent();
-
-		for (ref<Framebuffer>& framebuffer : framebuffers) {
-			framebuffer.~shared_ptr();
-		}
-
-		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
-
-		FramebufferDescriptor framebufferDescriptor{};
-		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = {nullptr, visibilityImageView, depthStencilImageView};
-		framebufferDescriptor.extent = swapchain->getExtent();
-		framebufferDescriptor.layerCount = 1;
-
-		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count; framebufferIndex += 1) {
-			framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
-
-			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-		}
-	}
-
 	void VisibilityRenderer::updateAllDescriptorSets() {
 		DescriptorBuffer cameraDescriptorBuffer{};
 		cameraDescriptorBuffer.buffer = cameraBuffer;
@@ -333,276 +638,12 @@ namespace ProjectA {
 		});
 	}
 
-	void VisibilityRenderer::allocateDescriptorSets() {
-		const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({
-			cameraDescriptorSetLayout,
-			clusterDescriptorSetLayout,
-			instanceDescriptorSetLayout,
-			visibilityDescriptorSetLayout,
-		});
-
-		cameraDescriptorSet = descriptorSets[0];
-		clusterDescriptorSet = descriptorSets[1];
-		instanceDescriptorSet = descriptorSets[2];
-		visibilityDescriptorSet = descriptorSets[3];
-	}
-
-	void VisibilityRenderer::createCameraDescriptorSetLayout() {
-		DescriptorSetLayoutBinding cameraBinding{};
-		cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraBinding.descriptorCount = 1;
-		cameraBinding.shaderStages = ShaderStage::VERTEX;
-
-		cameraDescriptorSetLayout = createDescriptorSetLayout({cameraBinding});
-	}
-
-	void VisibilityRenderer::createClusterDescriptorSetLayout() {
-		DescriptorSetLayoutBinding vertexPositionComponentBinding{};
-		vertexPositionComponentBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		vertexPositionComponentBinding.descriptorCount = 1;
-		vertexPositionComponentBinding.shaderStages = ShaderStage::VERTEX;
-
-		DescriptorSetLayoutBinding vertexBinding{};
-		vertexBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		vertexBinding.descriptorCount = 1;
-		vertexBinding.shaderStages = ShaderStage::VERTEX;
-
-		DescriptorSetLayoutBinding clusterBinding{};
-		clusterBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		clusterBinding.descriptorCount = 1;
-		clusterBinding.shaderStages = ShaderStage::VERTEX;
-
-		clusterDescriptorSetLayout = createDescriptorSetLayout({vertexPositionComponentBinding, vertexBinding, clusterBinding});
-	}
-
-	void VisibilityRenderer::createInstanceDescriptorSetLayout() {
-		DescriptorSetLayoutBinding instanceBinding{};
-		instanceBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		instanceBinding.descriptorCount = 1;
-		instanceBinding.shaderStages = ShaderStage::VERTEX;
-
-		DescriptorSetLayoutBinding geometryBinding{};
-		geometryBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
-		geometryBinding.descriptorCount = 1;
-		geometryBinding.shaderStages = ShaderStage::VERTEX;
-
-		instanceDescriptorSetLayout = createDescriptorSetLayout({instanceBinding, geometryBinding});
-	}
-
-	void VisibilityRenderer::createVisibilityDescriptorSetLayout() {
-		DescriptorSetLayoutBinding visibilityBinding{};
-		visibilityBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
-		visibilityBinding.descriptorCount = 1;
-		visibilityBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		visibilityDescriptorSetLayout = createDescriptorSetLayout({visibilityBinding});
-	}
-
-	void VisibilityRenderer::createVisibilityPipelineLayout() {
-		PipelineLayoutDescriptor visibilityPipelineLayoutDescriptor{};
-		visibilityPipelineLayoutDescriptor.descriptorSetLayouts = {cameraDescriptorSetLayout, clusterDescriptorSetLayout, instanceDescriptorSetLayout};
-
-		visibilityPipelineLayout = createPipelineLayout(visibilityPipelineLayoutDescriptor);
-	}
-
-	void VisibilityRenderer::createPresentPipelineLayout() {
-		PipelineLayoutDescriptor presentPipelineLayoutDescriptor{};
-		presentPipelineLayoutDescriptor.descriptorSetLayouts = {visibilityDescriptorSetLayout};
-
-		presentPipelineLayout = createPipelineLayout(presentPipelineLayoutDescriptor);
-	}
-
-	void VisibilityRenderer::createIndirectBuffer() {
-		BufferDescriptor indirectBufferDescriptor{};
-		indirectBufferDescriptor.size = 4 * sizeof(uint32);
-		indirectBufferDescriptor.usage = BufferUsage::INDIRECT;
-		indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		indirectBufferDescriptor.persistent = true;
-
-		indirectBuffer = createBuffer(indirectBufferDescriptor);
-
-		indirectBufferMappedRange = indirectBuffer->map<uint32>(0, indirectBuffer->size);
-	}
-
-	void VisibilityRenderer::createCameraBuffer() {
-		BufferDescriptor cameraBufferDescriptor{};
-		cameraBufferDescriptor.size = sizeof(Camera);
-		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
-		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		cameraBufferDescriptor.persistent = true;
-
-		cameraBuffer = createBuffer(cameraBufferDescriptor);
-
-		cameraBufferMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
-	}
-
-	void VisibilityRenderer::createVertexPositionComponentBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor vertexPositionComponentBufferDescriptor{};
-		vertexPositionComponentBufferDescriptor.size = scene->clusters.count * CLUSTER_VERTEX_COUNT * 3 * sizeof(float32);
-		vertexPositionComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
-		vertexPositionComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		vertexPositionComponentBuffer = createBuffer(vertexPositionComponentBufferDescriptor);
-	}
-
-	void VisibilityRenderer::createVertexBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor vertexBufferDescriptor{};
-		vertexBufferDescriptor.size = scene->clusters.count * CLUSTER_VERTEX_COUNT * sizeof(Vertex);
-		vertexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
-		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		vertexBuffer = createBuffer(vertexBufferDescriptor);
-	}
-
-	void VisibilityRenderer::createClusterBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor clusterBufferDescriptor{};
-		clusterBufferDescriptor.size = scene->clusters.count * sizeof(Cluster);
-		clusterBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
-		clusterBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		clusterBuffer = createBuffer(clusterBufferDescriptor);
-	}
-
-	void VisibilityRenderer::createInstanceBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor instanceBufferDescriptor{};
-		instanceBufferDescriptor.size = scene->instances.count * sizeof(Instance);
-		instanceBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
-		instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		instanceBufferDescriptor.persistent = true;
-
-		instanceBuffer = createBuffer(instanceBufferDescriptor);
-
-		instanceBufferMappedRange = instanceBuffer->map<Instance>(0, instanceBuffer->size);
-	}
-
-	void VisibilityRenderer::createGeometryBuffer() {
-		DEBUG_ASSERT(scene != nullptr);
-
-		BufferDescriptor geometryBufferDescriptor{};
-		geometryBufferDescriptor.size = scene->geometries.count * sizeof(Geometry);
-		geometryBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
-		geometryBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		geometryBuffer = createBuffer(geometryBufferDescriptor);
-	}
-
-	void VisibilityRenderer::createVisibilityRenderPipeline() {
-		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
-
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
-
-		ref<ShaderModule> vertexShaderModule;
-
-		switch (getGraphicsApi()) {
-			case GraphicsAPI::OPENGL:
-				vertexShaderModule = loadShaderModule("Visibility/VisibilitySingleSet.vert", vertexShaderModuleDescriptor);
-
-				break;
-			case GraphicsAPI::VULKAN:
-				vertexShaderModule = loadShaderModule("Visibility/Visibility.vert", vertexShaderModuleDescriptor);
-
-				break;
-			default:
-				ENGINE_ERROR_UNSUPPORTED();
-
-				break;
-		}
-
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Visibility/Visibility.frag", fragmentShaderModuleDescriptor);
-
-		ColorBlendAttachment colorBlendAttachment{};
-		colorBlendAttachment.blend = false;
-
-		RenderPipelineDescriptor visibilityRenderPipelineDescriptor{};
-		visibilityRenderPipelineDescriptor.pipelineLayout = visibilityPipelineLayout;
-		visibilityRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		visibilityRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		visibilityRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		visibilityRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		visibilityRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		visibilityRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		visibilityRenderPipelineDescriptor.lineWidth = 1.0f;
-		visibilityRenderPipelineDescriptor.minSampleShading = 0.0f;
-		visibilityRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		visibilityRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		// visibilityRenderPipelineDescriptor.depthStencilState.depthWrite = true;
-		// visibilityRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::GREATER; // TODO: Use LESS.
-		visibilityRenderPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
-		visibilityRenderPipelineDescriptor.renderPass = renderPass;
-		visibilityRenderPipelineDescriptor.subpassIndex = VISIBILITY_SUBPASS_INDEX;
-
-		visibilityRenderPipeline = createRenderPipeline(visibilityRenderPipelineDescriptor);
-	}
-
-	void VisibilityRenderer::createPresentRenderPipeline() {
-		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-		vertexShaderModuleDescriptor.entryPoint = "main";
-
-		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-		fragmentShaderModuleDescriptor.entryPoint = "main";
-
-		ref<ShaderModule> vertexShaderModule;
-		ref<ShaderModule> fragmentShaderModule;
-
-		switch (getGraphicsApi()) {
-			case GraphicsAPI::OPENGL:
-				vertexShaderModule = loadShaderModule("Base/ScreenUV.vert", vertexShaderModuleDescriptor);
-				fragmentShaderModule = loadShaderModule("Visibility/DebugTextureSampler.frag", fragmentShaderModuleDescriptor);
-
-				break;
-			case GraphicsAPI::VULKAN:
-				vertexShaderModule = loadShaderModule("Base/Screen.vert", vertexShaderModuleDescriptor);
-				fragmentShaderModule = loadShaderModule("Visibility/DebugInputAttachment.frag", fragmentShaderModuleDescriptor);
-
-				break;
-			default:
-				ENGINE_ERROR_UNSUPPORTED();
-
-				break;
-		}
-
-		ColorBlendAttachment colorBlendAttachment{};
-		colorBlendAttachment.blend = false;
-
-		RenderPipelineDescriptor presentRenderPipelineDescriptor{};
-		presentRenderPipelineDescriptor.pipelineLayout = presentPipelineLayout;
-		presentRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		presentRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		presentRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		presentRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		presentRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		presentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		presentRenderPipelineDescriptor.lineWidth = 1.0f;
-		presentRenderPipelineDescriptor.minSampleShading = 0.0f;
-		presentRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		presentRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		presentRenderPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
-		presentRenderPipelineDescriptor.renderPass = renderPass;
-		presentRenderPipelineDescriptor.subpassIndex = PRESENT_SUBPASS_INDEX;
-
-		presentRenderPipeline = createRenderPipeline(presentRenderPipelineDescriptor);
-	}
-
 	void VisibilityRenderer::updateCamera() {
-		cameraBufferMappedRange->projectionView = camera->projection;
+		cameraMappedRange->projectionView = camera->projection;
 	}
 
 	void VisibilityRenderer::updateInstanceTransform(Entity entity, const mat4x4<float32>& transform) {
-		instanceBufferMappedRange[entity].transform = transform;
+		instanceMappedRange[entity].transform = transform;
 	}
 
 	void VisibilityRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
@@ -634,13 +675,25 @@ namespace ProjectA {
 
 		commandEncoder->nextSubpass();
 
-		// Present subpass
+		// Screen subpass
 		{
-			commandEncoder->bindRenderPipeline(presentRenderPipeline);
-			commandEncoder->bindDescriptorSets(presentPipelineLayout, {visibilityDescriptorSet});
+			commandEncoder->bindRenderPipeline(screenRenderPipeline);
+			commandEncoder->bindDescriptorSets(screenPipelineLayout, {visibilityDescriptorSet});
 			commandEncoder->draw(3, 1, 0, 0);
 		}
 
 		commandEncoder->endRenderPass();
+	}
+
+	void VisibilityRenderer::resize(WindowResizeEvent& event) {
+		recreateVisibilityImage();
+		recreateVisibilityImageView();
+		recreateDepthStencilImage();
+		recreateDepthStencilImageView();
+		recreateFramebuffers();
+
+		updateVisibilityDescriptorSet();
+
+		updateCamera();
 	}
 }

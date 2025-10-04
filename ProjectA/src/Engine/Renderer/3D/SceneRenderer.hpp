@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	template<typename SceneType>
-	class Renderer3D : public Renderer {
+	class SceneRenderer : public Renderer {
 		public:
 			virtual void setScene(const SceneType* scene) {
 				this->scene = scene;
