@@ -4,7 +4,6 @@
 
 #include "BaseLayer.hpp"
 
-// TODO: Restore renderer features (debug-only).
 namespace ProjectA {
 	BaseLayer::BaseLayer() :
 		physicsEngine(getPhysicsEngineDescriptor())
@@ -43,33 +42,52 @@ namespace ProjectA {
 
 		renderer.clearRegisteredData();
 
-		const SAT2DOutput& satOutput = visualizationData.satOutput;
+		#if VISUALIZE_MODE == VISUALIZE_MODE_CONTACT_MANIFOLD
+			if (visualizationData.contactManifold.getContactCount() > 0) {
+				Feature2D contactManifold{};
+				contactManifold.setVertexCount(visualizationData.contactManifold.getContactCount());
 
-		if (satOutput.separation > 0.0f) {
-			renderer.setClosestPoints(satOutput.incidentSupportPoint, satOutput.referenceEdge.edge[0]);
+				for (uint8 contactIndex = 0; contactIndex < contactManifold.getVertexCount(); contactIndex += 1) {
+					contactManifold.edge[contactIndex] = visualizationData.contactManifold.contacts[contactIndex].position;
+				}
 
-			// renderer.registerFeature(visualizationData.gjkOutput.closestFeatureA);
-			// renderer.registerFeature(visualizationData.gjkOutput.closestFeatureB);
-		}
-
-		/* if (visualizationData.contactManifold.getContactCount() > 0) {
-			Feature2D contactManifold;
-			contactManifold.setVertexCount(visualizationData.contactManifold.getContactCount());
-
-			for (uint8 contactIndex = 0; contactIndex < contactManifold.getVertexCount(); contactIndex += 1) {
-				contactManifold.edge[contactIndex] = visualizationData.contactManifold.contacts[contactIndex].position;
+				#ifdef SHOW_FEATURES
+					renderer.registerFeature(contactManifold);
+				#endif
 			}
+		#endif
 
-			// renderer.registerFeature(contactManifold);
-		} */
+		#if VISUALIZE_MODE == VISUALIZE_MODE_CLOSEST_POINTS
+			if (visualizationData.satOutput.separation > 0.0f) {
+				const vec2<float32>& closestA = visualizationData.satOutput.incidentSupportPoint;
+				const vec2<float32> closestB = closestA - visualizationData.satOutput.normal * visualizationData.satOutput.separation;
 
-		/* if (visualizationData.satOutput.separation <= 0.0f) {
-			const vec2<float32>& closestA = visualizationData.satOutput.incidentSupportPoint;
-			const vec2<float32> closestB = closestA - visualizationData.satOutput.normal * visualizationData.satOutput.separation;
+				#ifdef SHOW_DISTANCE
+					renderer.setClosestPoints(closestA, closestB);
+				#endif
 
-			renderer.setClosestPoints(closestA, closestB);
-			renderer.registerFeature(visualizationData.satOutput.referenceEdge);
-		} */
+				#ifdef SHOW_FEATURES
+					Feature2D vertexFeatureA{};
+					vertexFeatureA.setVertexCount(1);
+					vertexFeatureA.vertex = closestA;
+
+					Feature2D vertexFeatureB{};
+					vertexFeatureB.setVertexCount(1);
+					vertexFeatureB.vertex = closestB;
+
+					renderer.registerFeature(vertexFeatureA);
+					renderer.registerFeature(vertexFeatureB);
+				#endif
+			}
+		#endif
+
+		#if VISUALIZE_MODE == VISUALIZE_MODE_REFERENCE_EDGE_TOUCHING
+			if (visualizationData.satOutput.separation <= 0.0f) {
+				#ifdef SHOW_FEATURES
+					renderer.registerFeature(visualizationData.satOutput.referenceEdge);
+				#endif
+			}
+		#endif
 	}
 
 	void BaseLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {

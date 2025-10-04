@@ -5,6 +5,12 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
+	// Toggle vertex/edge feature rendering.
+	#define SHOW_FEATURES
+
+	// Toggle closest point distance rendering.
+	#define SHOW_DISTANCE
+
 	class Physics2DRenderer : public Renderer {
 		private:
 			struct Camera {
@@ -32,16 +38,11 @@ namespace ProjectA {
 				vec3<float32> position;
 			};
 
-			struct ClosestPoint {
-				svec2<float32> position;
-			};
-
 			struct Placeholder {
 				svec2<float32> offset;
 			};
 
 		private:
-			static constexpr bool ENABLE_RENDER_DISTANCE = true;
 			static constexpr uint8 SAMPLE_COUNT = 4;
 			static constexpr float32 MIN_ZOOM_LEVEL = 1.0f;
 			static constexpr float32 MAX_ZOOM_LEVEL = 64.0f;
@@ -54,7 +55,11 @@ namespace ProjectA {
 			const vec2<float32>& getNdcMousePosition() const;
 
 			void setScene(const Scene2D& scene);
-			void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const;
+
+			#ifdef SHOW_DISTANCE
+				void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const;
+			#endif
+
 			void setInstanceTransform(uint32 instanceIndex, const mat3x3<float32>& transform) const;
 
 			// `x` and `y` are in the [0, viewport] range.
@@ -62,7 +67,9 @@ namespace ProjectA {
 
 			void setPlaceholderOffset(const vec2<float32>& offset) const;
 
-			// void registerFeature(const Feature2D& feature);
+			#ifdef SHOW_FEATURES
+				void registerFeature(const Feature2D& feature);
+			#endif
 
 			void selectEntity(Entity entity);
 
@@ -90,7 +97,16 @@ namespace ProjectA {
 			void createCameraBuffer();
 			void createViewBuffer();
 			void createPlaceholderBuffer();
-			void createClosestPointBuffer();
+
+			#ifdef SHOW_DISTANCE
+				void createClosestPointBuffer();
+			#endif
+
+			#ifdef SHOW_FEATURES
+				void createVertexFeatureBuffer();
+				void createEdgeFeatureBuffer();
+			#endif
+
 			void createCameraViewDescriptorSetLayout();
 			void createPlaceholderDescriptorSetLayout();
 			void createCameraViewPipelineLayout();
@@ -102,12 +118,15 @@ namespace ProjectA {
 			void createPlaceholderFillRenderPipeline();
 			void createPlaceholderStrokeRenderPipeline();
 			void createPlaceholderCenterOfMassRenderPipeline();
-			void createDistanceRenderPipeline();
-			// void createVertexFeatureBuffer();
-			// void createEdgeVertexFeatureBuffer();
-			// void createFeaturePipelineLayout();
-			// void createVertexFeatureRenderPipeline();
-			// void createEdgeFeatureRenderPipeline();
+
+			#ifdef SHOW_DISTANCE
+				void createDistanceRenderPipeline();
+			#endif
+
+			#ifdef SHOW_FEATURES
+				void createVertexFeatureRenderPipeline();
+				void createEdgeFeatureRenderPipeline();
+			#endif
 
 			void allocateDescriptorSets();
 
@@ -122,8 +141,14 @@ namespace ProjectA {
 			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
 			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
 			void renderSelectedInstancePlaceholder(const ref<CommandEncoder>& commandEncoder) const;
-			void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
-			// void renderFeatures(const ref<CommandEncoder>& commandEncoder) const;
+
+			#ifdef SHOW_DISTANCE
+				void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
+			#endif
+
+			#ifdef SHOW_FEATURES
+				void renderFeatures(const ref<CommandEncoder>& commandEncoder) const;
+			#endif
 
 		private:
 			const Scene2D* scene = nullptr;
@@ -154,12 +179,29 @@ namespace ProjectA {
 			ref<RenderPipeline> placeholderFillRenderPipeline;
 			ref<RenderPipeline> placeholderStrokeRenderPipeline;
 			ref<RenderPipeline> placeholderCenterOfMassRenderPipeline;
-			ref<RenderPipeline> distanceRenderPipeline;
+
+			#ifdef SHOW_DISTANCE
+				ref<RenderPipeline> distanceRenderPipeline;
+			#endif
+
+			#ifdef SHOW_FEATURES
+				ref<RenderPipeline> vertexFeatureRenderPipeline;
+				ref<RenderPipeline> edgeFeatureRenderPipeline;
+			#endif
 
 			ref<Buffer> cameraBuffer;
 			ref<Buffer> viewBuffer;
 			ref<Buffer> placeholderBuffer;
-			ref<Buffer> closestPointBuffer;
+
+			#ifdef SHOW_DISTANCE
+				ref<Buffer> closestPointBuffer;
+			#endif
+
+			#ifdef SHOW_FEATURES
+				ref<Buffer> vertexFeatureBuffer;
+				ref<Buffer> edgeFeatureBuffer;
+			#endif
+
 			ref<Buffer> vertexBuffer;
 			ref<Buffer> instanceBuffer;
 			ref<Buffer> centerOfMassBuffer;
@@ -168,7 +210,16 @@ namespace ProjectA {
 			Camera* cameraBufferMappedRange = nullptr;
 			View* viewBufferMappedRange = nullptr;
 			Placeholder* placeholderBufferMappedRange = nullptr;
-			ClosestPoint* closestPointBufferMappedRange = nullptr;
+
+			#ifdef SHOW_DISTANCE
+				Vertex* closestPointBufferMappedRange = nullptr;
+			#endif
+
+			#ifdef SHOW_FEATURES
+				Vertex* vertexFeatureBufferMappedRange = nullptr;
+				Vertex* edgeFeatureBufferMappedRange = nullptr;
+			#endif
+
 			Instance* instanceBufferMappedRange = nullptr;
 			CenterOfMass* centerOfMassBufferMappedRange = nullptr;
 
@@ -177,18 +228,9 @@ namespace ProjectA {
 
 			uint32 selectedInstanceIndex = max<uint32>();
 
-			/////
-
-			ref<PipelineLayout> featurePipelineLayout;
-
-			ref<Buffer> vertexFeatureBuffer;
-			svec2<float32>* vertexFeatureMappedRange = nullptr;
-			uint32 vertexFeatureCount = 0;
-			ref<RenderPipeline> vertexFeatureRenderPipeline;
-
-			ref<Buffer> edgeVertexFeatureBuffer;
-			svec2<float32>* edgeVertexFeatureMappedRange = nullptr;
-			uint32 edgeVertexFeatureCount = 0;
-			ref<RenderPipeline> edgeFeatureRenderPipeline;
+			#ifdef SHOW_FEATURES
+				uint32 vertexFeatureCount = 0;
+				uint32 edgeFeatureCount = 0;
+			#endif
 	};
 }

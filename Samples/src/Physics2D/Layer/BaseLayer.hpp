@@ -5,6 +5,13 @@
 #include "../Renderer/Physics2DRenderer.hpp"
 
 namespace ProjectA {
+	#define VISUALIZE_MODE_NONE 0
+	#define VISUALIZE_MODE_CONTACT_MANIFOLD 1
+	#define VISUALIZE_MODE_CLOSEST_POINTS 2
+	#define VISUALIZE_MODE_REFERENCE_EDGE_TOUCHING 3
+
+	#define VISUALIZE_MODE VISUALIZE_MODE_NONE
+
 	class BaseLayer : public Layer {
 		public:
 			explicit BaseLayer();
