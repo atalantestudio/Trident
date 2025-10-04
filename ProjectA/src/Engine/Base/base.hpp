@@ -5,6 +5,7 @@
 #include "Engine/Base/context.hpp"
 #include "Engine/Base/types.hpp"
 #include "Engine/Base/binary.hpp"
+#include "Engine/Base/bit.hpp"
 #include "Engine/Base/cast.hpp"
 #include "Engine/Base/enum.hpp"
 #include "Engine/Base/Endianness.hpp"
