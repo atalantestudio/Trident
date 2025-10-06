@@ -291,7 +291,7 @@ namespace ProjectA {
 
 		GJK2DOutput output;
 
-		const float32 div = lyah::rcp(s.divisor);
+		const float32 div = 1.0f / s.divisor;
 
 		switch (s.count) {
 			case 1:
