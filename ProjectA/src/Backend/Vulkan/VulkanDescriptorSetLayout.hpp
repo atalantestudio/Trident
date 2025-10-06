@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class VulkanDescriptorSetLayout final : public DescriptorSetLayout, public ObjectWrapper<VkDescriptorSetLayout> {
 		public:
-			explicit VulkanDescriptorSetLayout(const VkDevice device, const sequence<DescriptorSetLayoutBinding>& descriptorSetLayoutBindings);
+			explicit VulkanDescriptorSetLayout(VkDevice device, const sequence<DescriptorSetLayoutBinding>& descriptorSetLayoutBindings);
 
 			~VulkanDescriptorSetLayout() final override;
 

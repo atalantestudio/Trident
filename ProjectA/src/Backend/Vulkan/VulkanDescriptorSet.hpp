@@ -11,7 +11,7 @@ namespace ProjectA {
 			};
 
 		public:
-			explicit VulkanDescriptorSet(const VkDescriptorSet descriptorSet) :
+			explicit VulkanDescriptorSet(VkDescriptorSet descriptorSet) :
 				ObjectWrapper(descriptorSet)
 			{}
 

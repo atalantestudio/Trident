@@ -6,7 +6,7 @@
 #include "Backend/Vulkan/ShaderStage.hpp"
 
 namespace ProjectA {
-	VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(const VkDevice device, const sequence<DescriptorSetLayoutBinding>& descriptorSetLayoutBindings) :
+	VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(VkDevice device, const sequence<DescriptorSetLayoutBinding>& descriptorSetLayoutBindings) :
 		DescriptorSetLayout(descriptorSetLayoutBindings),
 		device(device)
 	{

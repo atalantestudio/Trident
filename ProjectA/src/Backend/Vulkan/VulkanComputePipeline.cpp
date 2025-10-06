@@ -5,7 +5,7 @@
 #include "Backend/Vulkan/VulkanShaderModule.hpp"
 
 namespace ProjectA {
-	VulkanComputePipeline::VulkanComputePipeline(const VkDevice device, const ComputePipelineDescriptor& descriptor) :
+	VulkanComputePipeline::VulkanComputePipeline(VkDevice device, const ComputePipelineDescriptor& descriptor) :
 		VulkanPipeline(VK_PIPELINE_BIND_POINT_COMPUTE),
 		ComputePipeline(descriptor),
 		device(device)
