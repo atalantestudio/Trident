@@ -74,23 +74,25 @@ namespace ProjectA {
 									#endif
 								}
 
-								#if OPENGL_VERSION >= OPENGL_VERSION_4_2
-									glBindImageTexture(
-										descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex,
-										imageView->object,
-										0,
-										GL_FALSE,
-										0,
+								if (isFixedOrFloatingPointColorFormat(image->getFormat())) {
+									#if OPENGL_VERSION >= OPENGL_VERSION_4_2
+										glBindImageTexture(
+											descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex,
+											imageView->object,
+											0,
+											GL_FALSE,
+											0,
 
-										// TODO: Use correct access.
-										GL_READ_WRITE,
+											// TODO: Use correct access.
+											GL_READ_WRITE,
 
-										// TODO: Remove condition.
-										image->internalFormat == GL_SRGB8_ALPHA8 ? GL_RGBA8 : image->internalFormat
-									);
-								#else
-									ENGINE_ERROR_UNSUPPORTED();
-								#endif
+											// TODO: Remove condition.
+											image->internalFormat == GL_SRGB8_ALPHA8 ? GL_RGBA8 : image->internalFormat
+										);
+									#else
+										ENGINE_ERROR_UNSUPPORTED();
+									#endif
+								}
 							}
 						}
 						else {
