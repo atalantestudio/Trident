@@ -47,6 +47,29 @@ namespace ProjectA {
 		imageDescriptor.layerCount = descriptor.layerCount;
 		imageDescriptor.sampleCount = attachment.sampleCount;
 		imageDescriptor.usage = ImageUsage::DEPTH_STENCIL_ATTACHMENT;
+
+		bool isInputAttachment = false;
+
+		for (uint32 nextSubpassIndex = subpassIndex; nextSubpassIndex < subpasses.count; nextSubpassIndex += 1) {
+			const ref<Subpass>& subpass = subpasses[nextSubpassIndex];
+
+			for (const AttachmentReference& inputAttachmentReference : subpass->getInputAttachmentReferences()) {
+				if (inputAttachmentReference.index == attachmentIndex) {
+					isInputAttachment = true;
+
+					break;
+				}
+			}
+
+			if (isInputAttachment) {
+				break;
+			}
+		}
+
+		if (isInputAttachment) {
+			imageDescriptor.usage |= ImageUsage::INPUT_ATTACHMENT;
+		}
+
 		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 		return Renderer::createImage(imageDescriptor);
