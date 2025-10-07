@@ -175,7 +175,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(size > 0, "The mapping size must not be 0.");
 		ENGINE_ASSERT(offset <= memoryAllocation.offset, "The mapping offset is outside of the used range for the memory allocation.");
-		ENGINE_ASSERT(offset + size <= memoryAllocation.offset, "The offsetted mapping size is larger than the size of the memory allocation active range.");
+		ENGINE_ASSERT(offset + size <= memoryAllocation.offset, "The offsetted mapping size ([]) is larger than the size of the memory allocation active range ([]).", offset + size, memoryAllocation.offset);
 
 		if (memoryAllocation.mappedSuballocationCount == 0) {
 			// TODO: (Static allocations only) Map the active suballocation range and not the whole memory block.
