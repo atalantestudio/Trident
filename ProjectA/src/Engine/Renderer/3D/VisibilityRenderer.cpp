@@ -1,5 +1,6 @@
 #include "pch.hpp"
 
+#include "Engine/Camera/3D/PerspectiveCamera3D.hpp"
 #include "Engine/Renderer/3D/VisibilityRenderer.hpp"
 
 namespace ProjectA {
@@ -15,15 +16,15 @@ namespace ProjectA {
 		createCameraDescriptorSetLayout();
 		createClusterDescriptorSetLayout();
 		createInstanceDescriptorSetLayout();
-		createVisibilityDescriptorSetLayout();
+		createDebugDescriptorSetLayout();
 
 		allocateDescriptorSets();
 
 		createVisibilityPipelineLayout();
-		createScreenPipelineLayout();
+		createDebugPipelineLayout();
 
 		createVisibilityRenderPipeline();
-		createScreenRenderPipeline();
+		createDebugRenderPipeline();
 
 		createIndirectBuffer();
 		createCameraBuffer();
@@ -40,7 +41,17 @@ namespace ProjectA {
 
 		fillSceneBuffers();
 
-		updateAllDescriptorSets();
+		updateBufferDescriptorSets();
+		updateDebugDescriptorSet();
+	}
+
+	void VisibilityRenderer::setCamera(const Camera3D* camera) {
+		SceneRenderer::setCamera(camera);
+
+		const PerspectiveCamera3D* perspectiveCamera = pointer_cast<const PerspectiveCamera3D*>(camera);
+
+		cameraMappedRange->nearPlane = perspectiveCamera->getNearPlane();
+		cameraMappedRange->farPlane = perspectiveCamera->getFarPlane();
 	}
 
 	void VisibilityRenderer::setupRenderPass() {
@@ -72,25 +83,29 @@ namespace ProjectA {
 		AttachmentReference writeVisibilityAttachmentReference{};
 		writeVisibilityAttachmentReference.index = 1;
 		writeVisibilityAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
+		AttachmentReference writeDepthStencilAttachmentReference{};
+		writeDepthStencilAttachmentReference.index = 2;
+		writeDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
  
 		AttachmentReference readVisibilityAttachmentReference{};
 		readVisibilityAttachmentReference.index = 1;
 		readVisibilityAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 
-		AttachmentReference writeDepthStencilAttachmentReference{};
-		writeDepthStencilAttachmentReference.index = 2;
-		writeDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		AttachmentReference readDepthStencilAttachmentReference{};
+		readDepthStencilAttachmentReference.index = 2;
+		readDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
 		SubpassDescriptor visibilitySubpassDescriptor{};
 		visibilitySubpassDescriptor.colorAttachmentReferences = {writeVisibilityAttachmentReference};
 		visibilitySubpassDescriptor.depthStencilAttachmentReference = writeDepthStencilAttachmentReference;
 
-		SubpassDescriptor screenSubpassDescriptor{};
-		screenSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
-		screenSubpassDescriptor.inputAttachmentReferences = {readVisibilityAttachmentReference};
+		SubpassDescriptor debugSubpassDescriptor{};
+		debugSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
+		debugSubpassDescriptor.inputAttachmentReferences = {readVisibilityAttachmentReference, readDepthStencilAttachmentReference};
 
 		const ref<Subpass> visibilitySubpass = createSubpass(visibilitySubpassDescriptor);
-		const ref<Subpass> screenSubpass = createSubpass(screenSubpassDescriptor);
+		const ref<Subpass> debugSubpass = createSubpass(debugSubpassDescriptor);
 
 		SubpassDependency subpassDependency{};
 		subpassDependency.sourceSubpassIndex = SubpassDependency::EXTERNAL_SUBPASS;
@@ -98,7 +113,7 @@ namespace ProjectA {
 
 		RenderPassDescriptor renderPassDescriptor{};
 		renderPassDescriptor.attachments = {swapchainAttachment, visibilityAttachment, depthStencilAttachment};
-		renderPassDescriptor.subpasses = {visibilitySubpass, screenSubpass};
+		renderPassDescriptor.subpasses = {visibilitySubpass, debugSubpass};
 		renderPassDescriptor.subpassDependencies = {subpassDependency};
 
 		renderPass = createRenderPass(renderPassDescriptor);
@@ -217,13 +232,23 @@ namespace ProjectA {
 		instanceDescriptorSetLayout = createDescriptorSetLayout({instanceBinding, geometryBinding});
 	}
 
-	void VisibilityRenderer::createVisibilityDescriptorSetLayout() {
+	void VisibilityRenderer::createDebugDescriptorSetLayout() {
+		DescriptorSetLayoutBinding cameraBinding{};
+		cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+		cameraBinding.descriptorCount = 1;
+		cameraBinding.shaderStages = ShaderStage::FRAGMENT;
+
 		DescriptorSetLayoutBinding visibilityBinding{};
 		visibilityBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
 		visibilityBinding.descriptorCount = 1;
 		visibilityBinding.shaderStages = ShaderStage::FRAGMENT;
 
-		visibilityDescriptorSetLayout = createDescriptorSetLayout({visibilityBinding});
+		DescriptorSetLayoutBinding depthStencilBinding{};
+		depthStencilBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
+		depthStencilBinding.descriptorCount = 1;
+		depthStencilBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		debugDescriptorSetLayout = createDescriptorSetLayout({cameraBinding, visibilityBinding, depthStencilBinding});
 	}
 
 	void VisibilityRenderer::createVisibilityPipelineLayout() {
@@ -233,11 +258,11 @@ namespace ProjectA {
 		visibilityPipelineLayout = createPipelineLayout(visibilityPipelineLayoutDescriptor);
 	}
 
-	void VisibilityRenderer::createScreenPipelineLayout() {
-		PipelineLayoutDescriptor screenPipelineLayoutDescriptor{};
-		screenPipelineLayoutDescriptor.descriptorSetLayouts = {visibilityDescriptorSetLayout};
+	void VisibilityRenderer::createDebugPipelineLayout() {
+		PipelineLayoutDescriptor debugPipelineLayoutDescriptor{};
+		debugPipelineLayoutDescriptor.descriptorSetLayouts = {debugDescriptorSetLayout};
 
-		screenPipelineLayout = createPipelineLayout(screenPipelineLayoutDescriptor);
+		debugPipelineLayout = createPipelineLayout(debugPipelineLayoutDescriptor);
 	}
 
 	void VisibilityRenderer::createIndirectBuffer() {
@@ -268,7 +293,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor vertexPositionComponentBufferDescriptor{};
-		vertexPositionComponentBufferDescriptor.size = scene->clusters.count * CLUSTER_VERTEX_COUNT * 3 * sizeof(float32);
+		vertexPositionComponentBufferDescriptor.size = scene->clusters.count * CLUSTER_INDEX_COUNT * 3 * sizeof(float32);
 		vertexPositionComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexPositionComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
@@ -279,7 +304,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor vertexBufferDescriptor{};
-		vertexBufferDescriptor.size = scene->clusters.count * CLUSTER_VERTEX_COUNT * sizeof(Vertex);
+		vertexBufferDescriptor.size = scene->clusters.count * CLUSTER_INDEX_COUNT * sizeof(Vertex);
 		vertexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
@@ -375,7 +400,7 @@ namespace ProjectA {
 		visibilityRenderPipeline = createRenderPipeline(visibilityRenderPipelineDescriptor);
 	}
 
-	void VisibilityRenderer::createScreenRenderPipeline() {
+	void VisibilityRenderer::createDebugRenderPipeline() {
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
@@ -390,11 +415,11 @@ namespace ProjectA {
 		switch (getGraphicsApi()) {
 			case GraphicsAPI::OPENGL:
 				vertexShaderModule = loadShaderModule("Base/ScreenUV.vert", vertexShaderModuleDescriptor);
-				fragmentShaderModule = loadShaderModule("Visibility/DebugTextureSampler.frag", fragmentShaderModuleDescriptor);
+				fragmentShaderModule = loadShaderModule("Visibility/DebugInputAttachment.frag", fragmentShaderModuleDescriptor);
 
 				break;
 			case GraphicsAPI::VULKAN:
-				vertexShaderModule = loadShaderModule("Base/Screen.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule("Base/ScreenUVFlipY.vert", vertexShaderModuleDescriptor);
 				fragmentShaderModule = loadShaderModule("Visibility/DebugInputAttachment.frag", fragmentShaderModuleDescriptor);
 
 				break;
@@ -407,23 +432,23 @@ namespace ProjectA {
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
 
-		RenderPipelineDescriptor screenRenderPipelineDescriptor{};
-		screenRenderPipelineDescriptor.pipelineLayout = screenPipelineLayout;
-		screenRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
-		screenRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
-		screenRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-		screenRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
-		screenRenderPipelineDescriptor.cullMode = CullMode::BACK;
-		screenRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-		screenRenderPipelineDescriptor.lineWidth = 1.0f;
-		screenRenderPipelineDescriptor.minSampleShading = 0.0f;
-		screenRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-		screenRenderPipelineDescriptor.depthStencilState.depthTest = false;
-		screenRenderPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
-		screenRenderPipelineDescriptor.renderPass = renderPass;
-		screenRenderPipelineDescriptor.subpassIndex = SCREEN_SUBPASS_INDEX;
+		RenderPipelineDescriptor debugRenderPipelineDescriptor{};
+		debugRenderPipelineDescriptor.pipelineLayout = debugPipelineLayout;
+		debugRenderPipelineDescriptor.vertexShaderModule = vertexShaderModule;
+		debugRenderPipelineDescriptor.fragmentShaderModule = fragmentShaderModule;
+		debugRenderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+		debugRenderPipelineDescriptor.polygonMode = PolygonMode::FILL;
+		debugRenderPipelineDescriptor.cullMode = CullMode::BACK;
+		debugRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+		debugRenderPipelineDescriptor.lineWidth = 1.0f;
+		debugRenderPipelineDescriptor.minSampleShading = 0.0f;
+		debugRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		debugRenderPipelineDescriptor.depthStencilState.depthTest = false;
+		debugRenderPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
+		debugRenderPipelineDescriptor.renderPass = renderPass;
+		debugRenderPipelineDescriptor.subpassIndex = DEBUG_SUBPASS_INDEX;
 
-		screenRenderPipeline = createRenderPipeline(screenRenderPipelineDescriptor);
+		debugRenderPipeline = createRenderPipeline(debugRenderPipelineDescriptor);
 	}
 
 	void VisibilityRenderer::allocateDescriptorSets() {
@@ -431,30 +456,25 @@ namespace ProjectA {
 			cameraDescriptorSetLayout,
 			clusterDescriptorSetLayout,
 			instanceDescriptorSetLayout,
-			visibilityDescriptorSetLayout,
+			debugDescriptorSetLayout,
 		});
 
 		cameraDescriptorSet = descriptorSets[0];
 		clusterDescriptorSet = descriptorSets[1];
 		instanceDescriptorSet = descriptorSets[2];
-		visibilityDescriptorSet = descriptorSets[3];
+		debugDescriptorSet = descriptorSets[3];
 	}
 
-	void VisibilityRenderer::fillSceneBuffers() {
-		indirectMappedRange[0].vertexCount = CLUSTER_VERTEX_COUNT;
-		indirectMappedRange[0].instanceCount = static_cast<uint32>(scene->clusters.count);
-		indirectMappedRange[0].vertexOffset = 0;
-		indirectMappedRange[0].instanceOffset = 0;
+	void VisibilityRenderer::fillSceneBuffers() const {
+		fillIndirectBuffer();
 
-		const uint64 stagingBufferSize = vertexPositionComponentBuffer->size + vertexBuffer->size + clusterBuffer->size + instanceBuffer->size /* + geometryBuffer->size */;
-
-		const ref<Buffer> stagingBuffer = createStagingBuffer(stagingBufferSize);
+		const ref<Buffer> stagingBuffer = createStagingBuffer(vertexPositionComponentBuffer->size + vertexBuffer->size + clusterBuffer->size + instanceBuffer->size + geometryBuffer->size);
 
 		uint64 stagingBufferOffset = 0;
 
 		float32* vertexPositionComponentMappedRange = stagingBuffer->map<float32>(stagingBufferOffset, vertexPositionComponentBuffer->size);
 
-		std::copy(scene->vertexPositionComponents.begin(), scene->vertexPositionComponents.end(), vertexPositionComponentMappedRange);
+		fillVertexPositionComponentBuffer(vertexPositionComponentMappedRange);
 
 		BufferCopyRegion vertexPositionComponentBufferCopyRegion{};
 		vertexPositionComponentBufferCopyRegion.sourceOffset = stagingBufferOffset;
@@ -467,9 +487,7 @@ namespace ProjectA {
 
 		Vertex* vertexMappedRange = stagingBuffer->map<Vertex>(stagingBufferOffset, vertexBuffer->size);
 
-		for (uint32 vertexIndex = 0; vertexIndex < scene->vertexPositionIndices.count; vertexIndex += 1) {
-			vertexMappedRange[vertexIndex].positionIndex = scene->vertexPositionIndices[vertexIndex];
-		}
+		fillVertexBuffer(vertexMappedRange);
 
 		BufferCopyRegion vertexBufferCopyRegion{};
 		vertexBufferCopyRegion.sourceOffset = stagingBufferOffset;
@@ -482,9 +500,7 @@ namespace ProjectA {
 
 		Cluster* clusterMappedRange = stagingBuffer->map<Cluster>(stagingBufferOffset, clusterBuffer->size);
 
-		for (uint32 clusterIndex = 0; clusterIndex < scene->clusters.count; clusterIndex += 1) {
-			clusterMappedRange[clusterIndex].instanceIndex = scene->clusters[clusterIndex].instanceIndex;
-		}
+		fillClusterBuffer(clusterMappedRange);
 
 		BufferCopyRegion clusterBufferCopyRegion{};
 		clusterBufferCopyRegion.sourceOffset = stagingBufferOffset;
@@ -497,10 +513,7 @@ namespace ProjectA {
 
 		Instance* instanceMappedRange = stagingBuffer->map<Instance>(stagingBufferOffset, instanceBuffer->size);
 
-		for (uint32 instanceIndex = 0; instanceIndex < scene->instances.count; instanceIndex += 1) {
-			instanceMappedRange[instanceIndex].transform = scene->instances[instanceIndex].transform;
-			instanceMappedRange[instanceIndex].geometryIndex = scene->instances[instanceIndex].geometryIndex;
-		}
+		fillInstanceBuffer(instanceMappedRange);
 
 		BufferCopyRegion instanceBufferCopyRegion{};
 		instanceBufferCopyRegion.sourceOffset = stagingBufferOffset;
@@ -511,18 +524,16 @@ namespace ProjectA {
 
 		stagingBuffer->unmap();
 
-		/* Geometry* geometryMappedRange = stagingBuffer->map<Geometry>(stagingBufferOffset, geometryBuffer->size);
+		Geometry* geometryMappedRange = stagingBuffer->map<Geometry>(stagingBufferOffset, geometryBuffer->size);
 
-		for (uint32 geometryIndex = 0; geometryIndex < scene->geometries.count; geometryIndex += 1) {
-			geometryMappedRange[geometryIndex].vertexBufferOffset = 0;
-		}
+		fillGeometryBuffer(geometryMappedRange);
 
 		BufferCopyRegion geometryBufferCopyRegion{};
 		geometryBufferCopyRegion.sourceOffset = stagingBufferOffset;
 		geometryBufferCopyRegion.destinationOffset = 0;
 		geometryBufferCopyRegion.size = geometryBuffer->size;
 
-		stagingBuffer->unmap(); */
+		stagingBuffer->unmap();
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -535,7 +546,7 @@ namespace ProjectA {
 		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
 		commandEncoder->copyBufferToBuffer(stagingBuffer, clusterBuffer, {clusterBufferCopyRegion});
 		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, {instanceBufferCopyRegion});
-		// commandEncoder->copyBufferToBuffer(stagingBuffer, geometryBuffer, {geometryBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(stagingBuffer, geometryBuffer, {geometryBufferCopyRegion});
 
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
@@ -544,7 +555,62 @@ namespace ProjectA {
 		getDevice()->waitIdle();
 	}
 
-	void VisibilityRenderer::updateAllDescriptorSets() {
+	void VisibilityRenderer::fillIndirectBuffer() const {
+		indirectMappedRange[0].vertexCount = CLUSTER_INDEX_COUNT;
+		indirectMappedRange[0].instanceCount = static_cast<uint32>(scene->clusters.count);
+		indirectMappedRange[0].vertexOffset = 0;
+		indirectMappedRange[0].instanceOffset = 0;
+	}
+
+	void VisibilityRenderer::fillVertexPositionComponentBuffer(float32* mappedRange) const {
+		std::copy(scene->vertexPositionComponents.begin(), scene->vertexPositionComponents.end(), mappedRange);
+	}
+
+	void VisibilityRenderer::fillVertexBuffer(Vertex* mappedRange) const {
+		for (uint32 vertexIndex = 0; vertexIndex < scene->vertexPositionIndices.count; vertexIndex += 1) {
+			mappedRange[vertexIndex].positionIndex = scene->vertexPositionIndices[vertexIndex];
+		}
+	}
+
+	void VisibilityRenderer::fillClusterBuffer(Cluster* mappedRange) const {
+		for (uint32 clusterIndex = 0; clusterIndex < scene->clusters.count; clusterIndex += 1) {
+			mappedRange[clusterIndex].instanceIndex = scene->clusters[clusterIndex].instanceIndex;
+		}
+	}
+
+	void VisibilityRenderer::fillInstanceBuffer(Instance* mappedRange) const {
+		sequence<uint32> geometryInstanceRollbacks(scene->geometries.count);
+
+		uint32 currentGeometryIndex = 0;
+
+		for (uint32 instanceIndex = 0; instanceIndex < scene->instances.count; instanceIndex += 1) {
+			const auto& instance = scene->instances[instanceIndex];
+			const auto& geometry = scene->geometries[instance.geometryIndex];
+
+			uint32 rollback = geometryInstanceRollbacks[currentGeometryIndex];
+
+			if (currentGeometryIndex != instance.geometryIndex) {
+				rollback -= scene->geometries[currentGeometryIndex].clusterCount * CLUSTER_INDEX_COUNT;
+			}
+
+			mappedRange[instanceIndex].transform = instance.transform;
+			mappedRange[instanceIndex].geometryIndex = instance.geometryIndex;
+			mappedRange[instanceIndex].indexRollback = rollback;
+
+			currentGeometryIndex = instance.geometryIndex;
+
+			geometryInstanceRollbacks[currentGeometryIndex] += geometry.clusterCount * CLUSTER_INDEX_COUNT;
+		}
+	}
+
+	void VisibilityRenderer::fillGeometryBuffer(Geometry* mappedRange) const {
+		for (uint32 geometryIndex = 0; geometryIndex < scene->geometries.count; geometryIndex += 1) {
+			mappedRange[geometryIndex].vertexOffset = scene->geometries[geometryIndex].vertexOffset;
+			mappedRange[geometryIndex].clusterCount = scene->geometries[geometryIndex].clusterCount;
+		}
+	}
+
+	void VisibilityRenderer::updateBufferDescriptorSets() {
 		DescriptorBuffer cameraDescriptorBuffer{};
 		cameraDescriptorBuffer.buffer = cameraBuffer;
 		cameraDescriptorBuffer.offset = 0;
@@ -575,10 +641,10 @@ namespace ProjectA {
 		geometryDescriptorBuffer.offset = 0;
 		geometryDescriptorBuffer.size = geometryBuffer->size;
 
-		DescriptorImage visibilityDescriptorImage{};
-		visibilityDescriptorImage.imageView = visibilityImageView;
-		visibilityDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-		visibilityDescriptorImage.sampler = nullptr;
+		DescriptorBuffer debugCameraDescriptorBuffer{};
+		debugCameraDescriptorBuffer.buffer = cameraBuffer;
+		debugCameraDescriptorBuffer.offset = sizeof(mat4x4<float32>);
+		debugCameraDescriptorBuffer.size = 2 * sizeof(float32);
 
 		WriteDescriptorSet cameraWriteDescriptorSet{};
 		cameraWriteDescriptorSet.descriptorSet = cameraDescriptorSet;
@@ -610,10 +676,10 @@ namespace ProjectA {
 		geometryWriteDescriptorSet.bindingIndex = 1;
 		geometryWriteDescriptorSet.descriptorBuffers = {geometryDescriptorBuffer};
 
-		WriteDescriptorSet visibilityWriteDescriptorSet{};
-		visibilityWriteDescriptorSet.descriptorSet = visibilityDescriptorSet;
-		visibilityWriteDescriptorSet.bindingIndex = 0;
-		visibilityWriteDescriptorSet.descriptorImages = {visibilityDescriptorImage};
+		WriteDescriptorSet debugCameraWriteDescriptorSet{};
+		debugCameraWriteDescriptorSet.descriptorSet = debugDescriptorSet;
+		debugCameraWriteDescriptorSet.bindingIndex = 0;
+		debugCameraWriteDescriptorSet.descriptorBuffers = {debugCameraDescriptorBuffer};
 
 		getDevice()->updateDescriptorSets({
 			cameraWriteDescriptorSet,
@@ -622,27 +688,38 @@ namespace ProjectA {
 			clusterWriteDescriptorSet,
 			instanceWriteDescriptorSet,
 			geometryWriteDescriptorSet,
-			visibilityWriteDescriptorSet,
+			debugCameraWriteDescriptorSet,
 		});
 	}
 
-	void VisibilityRenderer::updateVisibilityDescriptorSet() {
+	void VisibilityRenderer::updateDebugDescriptorSet() {
 		DescriptorImage visibilityDescriptorImage{};
 		visibilityDescriptorImage.imageView = visibilityImageView;
 		visibilityDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 		visibilityDescriptorImage.sampler = nullptr;
 
-		WriteDescriptorSet visibilityWriteDescriptorSet{};
-		visibilityWriteDescriptorSet.descriptorSet = visibilityDescriptorSet;
-		visibilityWriteDescriptorSet.bindingIndex = 0;
-		visibilityWriteDescriptorSet.descriptorImages = {visibilityDescriptorImage};
+		DescriptorImage depthStencilDescriptorImage{};
+		depthStencilDescriptorImage.imageView = depthStencilImageView;
+		depthStencilDescriptorImage.imageLayout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+		depthStencilDescriptorImage.sampler = nullptr;
+
+		WriteDescriptorSet debugVisibilityWriteDescriptorSet{};
+		debugVisibilityWriteDescriptorSet.descriptorSet = debugDescriptorSet;
+		debugVisibilityWriteDescriptorSet.bindingIndex = 1;
+		debugVisibilityWriteDescriptorSet.descriptorImages = {visibilityDescriptorImage};
+
+		WriteDescriptorSet debugDepthStencilWriteDescriptorSet{};
+		debugDepthStencilWriteDescriptorSet.descriptorSet = debugDescriptorSet;
+		debugDepthStencilWriteDescriptorSet.bindingIndex = 2;
+		debugDepthStencilWriteDescriptorSet.descriptorImages = {depthStencilDescriptorImage};
 
 		getDevice()->updateDescriptorSets({
-			visibilityWriteDescriptorSet,
+			debugVisibilityWriteDescriptorSet,
+			debugDepthStencilWriteDescriptorSet,
 		});
 	}
 
-	void VisibilityRenderer::updateCamera() {
+	void VisibilityRenderer::updateCameraProjection() {
 		cameraMappedRange->projectionView = camera->projection;
 	}
 
@@ -679,10 +756,10 @@ namespace ProjectA {
 
 		commandEncoder->nextSubpass();
 
-		// Screen subpass
+		// Debug subpass
 		{
-			commandEncoder->bindRenderPipeline(screenRenderPipeline);
-			commandEncoder->bindDescriptorSets(screenPipelineLayout, {visibilityDescriptorSet});
+			commandEncoder->bindRenderPipeline(debugRenderPipeline);
+			commandEncoder->bindDescriptorSets(debugPipelineLayout, {debugDescriptorSet});
 			commandEncoder->draw(3, 1, 0, 0);
 		}
 
@@ -696,8 +773,8 @@ namespace ProjectA {
 		recreateDepthStencilImageView();
 		recreateFramebuffers();
 
-		updateVisibilityDescriptorSet();
+		updateDebugDescriptorSet();
 
-		updateCamera();
+		updateCameraProjection();
 	}
 }

@@ -1,76 +1,114 @@
 #pragma once
 
-#include "Engine/API/Material/Material.hpp"
 #include "Engine/API/Physics/RigidBody3D.hpp"
 #include "Engine/API/Scene/Scene.hpp"
 
 namespace ProjectA {
-	struct Entity3DDescriptor {
+	struct InstanceDescriptor {
+		uint32 geometryIndex;
 		vec3<float32> position = {0.0_m, 0.0_m, 0.0_m};
 		vec3<float32> rotation = {0.0_rad, 0.0_rad, 0.0_rad};
 		vec3<float32> scale = {1.0f, 1.0f, 1.0f};
-		ref<Geometry3D> geometry;
-		ref<Material> material;
 	};
 
 	class Scene3D : public Scene {
+		private:
+			static constexpr uint32 MAX_GEOMETRY_COUNT = 4;
+			static constexpr uint32 MAX_INSTANCE_COUNT = 4;
+
 		public:
-			explicit Scene3D() {
-				ecs.registerComponent<RigidBody3D>();
-				ecs.registerComponent<ref<Geometry3D>>();
-				ecs.registerComponent<ref<Material>>();
+			explicit Scene3D() :
+				geometries(MAX_GEOMETRY_COUNT),
+				instances(MAX_INSTANCE_COUNT)
+			{}
+
+			const sequence<RigidBody3D>& getInstances() const {
+				return instances;
 			}
 
-			RigidBody3D& getRigidBody(Entity entity) {
-				return ecs.getComponent<RigidBody3D>(entity);
+			uint32 getInstanceCount() const {
+				return instanceCount;
 			}
 
-			const RigidBody3D& getRigidBody(Entity entity) const {
-				return ecs.getComponent<RigidBody3D>(entity);
+			RigidBody3D& getInstance(uint32 instanceIndex) {
+				DEBUG_ASSERT(instanceIndex < instanceCount);
+
+				return instances[instanceIndex];
 			}
 
-			const ref<Geometry3D>& getGeometry(Entity entity) const {
-				return ecs.getComponent<ref<Geometry3D>>(entity);
+			const RigidBody3D& getInstance(uint32 instanceIndex) const {
+				DEBUG_ASSERT(instanceIndex < instanceCount);
+
+				return instances[instanceIndex];
 			}
 
-			const ref<Material>& getMaterial(Entity entity) const {
-				return ecs.getComponent<ref<Material>>(entity);
+			const sequence<ref<Geometry3D>>& getGeometries() const {
+				return geometries;
 			}
 
-			void createEntity(const Entity3DDescriptor& descriptor) {
-				const Entity entity = ecs.createEntity();
+			uint32 getGeometryCount() const {
+				return geometryCount;
+			}
 
-				const uint32 geometryIndex = ecs.getComponentPool<ref<Geometry3D>>().componentCount;
+			const ref<Geometry3D>& getGeometry(uint32 geometryIndex) const {
+				DEBUG_ASSERT(geometryIndex < geometryCount);
 
-				ecs.setComponent<ref<Geometry3D>>(entity, descriptor.geometry);
-				ecs.setComponent<ref<Material>>(entity, std::static_pointer_cast<Material>(descriptor.material));
+				return geometries[geometryIndex];
+			}
 
-				RigidBody3D rigidBody{};
+			// Registers the provided geometry and returns its index in the geometry array.
+			uint32 registerGeometry(const ref<Geometry3D>& geometry) {
+				DEBUG_ASSERT(geometryCount < MAX_GEOMETRY_COUNT);
+
+				const uint32 geometryIndex = geometryCount;
+
+				geometries[geometryIndex] = geometry;
+
+				geometryCount += 1;
+
+				return geometryIndex;
+			}
+
+			// Registers the provided instance and returns its index in the instance array.
+			uint32 registerInstance(const InstanceDescriptor& descriptor) {
+				DEBUG_ASSERT(descriptor.geometryIndex < geometryCount);
+				DEBUG_ASSERT(instanceCount < MAX_INSTANCE_COUNT);
+
+				const uint32 instanceIndex = instanceCount;
+
+				RigidBody3D& rigidBody = instances[instanceIndex];
 				rigidBody.position = descriptor.position;
 				rigidBody.rotation = descriptor.rotation;
 				rigidBody.scale = descriptor.scale;
-				rigidBody.geometryIndex = geometryIndex;
+				rigidBody.geometryIndex = descriptor.geometryIndex;
 
 				rigidBody.updateTransform();
 
-				ecs.setComponent<RigidBody3D>(entity, rigidBody);
+				instanceCount += 1;
+
+				return instanceIndex;
 			}
 
 			// Returns the number of instances (rigid bodies) using the provided geometry.
 			uint32 getInstanceCount(uint32 geometryIndex) const {
-				const ComponentPool<RigidBody3D>& rigidBodyPool = ecs.getComponentPool<RigidBody3D>();
+				uint32 count = 0;
 
-				uint32 instanceCount = 0;
-
-				for (uint32 rigidBodyIndex = 0; rigidBodyIndex < rigidBodyPool.componentCount; rigidBodyIndex += 1) {
-					const RigidBody3D& rigidBody = rigidBodyPool.components[rigidBodyIndex];
+				for (uint32 instanceIndex = 0; instanceIndex < instanceCount; instanceIndex += 1) {
+					const RigidBody3D& rigidBody = instances[instanceIndex];
 
 					if (rigidBody.geometryIndex == geometryIndex) {
-						instanceCount += 1;
+						count += 1;
 					}
 				}
 
-				return instanceCount;
+				return count;
 			}
+
+		private:
+			sequence<RigidBody3D> instances;
+			sequence<ref<Geometry3D>> geometries;
+
+			uint32 instanceCount = 0;
+			uint32 geometryCount = 0;
 	};
 }

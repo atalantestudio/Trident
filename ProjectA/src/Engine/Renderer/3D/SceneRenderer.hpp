@@ -12,7 +12,7 @@ namespace ProjectA {
 				this->scene = scene;
 			}
 
-			void setCamera(const Camera3D* camera) {
+			virtual void setCamera(const Camera3D* camera) {
 				this->camera = camera;
 			}
 

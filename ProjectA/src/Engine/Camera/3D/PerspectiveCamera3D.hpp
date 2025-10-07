@@ -5,9 +5,19 @@
 namespace ProjectA {
 	class PerspectiveCamera3D : public Camera3D {
 		public:
-			explicit PerspectiveCamera3D(const mat4x4<float32>& projection) :
-				Camera3D(projection)
+			explicit PerspectiveCamera3D(const mat4x4<float32>& projection, float32 nearPlane, float32 farPlane) :
+				Camera3D(projection),
+				nearPlane(nearPlane),
+				farPlane(farPlane)
 			{}
+
+			float32 getNearPlane() const {
+				return nearPlane;
+			}
+
+			float32 getFarPlane() const {
+				return farPlane;
+			}
 
 			void updateView() {
 				// TODO
@@ -19,5 +29,9 @@ namespace ProjectA {
 				projection = perspective(fieldOfView, aspectRatio, nearPlane, farPlane, 1.0f);
 				projectionView = projection * view;
 			}
+
+		private:
+			float32 nearPlane;
+			float32 farPlane;
 	};
 }

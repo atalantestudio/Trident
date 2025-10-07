@@ -14,29 +14,74 @@ namespace ProjectA {
 
 		public:
 			explicit Sample3DLayer() :
-				camera(mat4x4<float32>::identity())
+				camera(mat4x4<float32>::identity(), NEAR_PLANE, FAR_PLANE)
 			{}
 
 			void build() override {
 				renderer.setLayer(this);
 				renderer.build();
 
-				static constexpr char8* fbxPath = "Asset/Model/lemon/lemon.fbx";
+				static constexpr char8* lemonPath = "Asset/Model/lemon/lemon.fbx";
+				static constexpr char8* stoolPath = "Asset/Model/folding_wooden_stool/folding_wooden_stool.fbx";
 
-				const sequence<uint8> fbxData = Filesystem::openBuffer(fbxPath);
-				const File<FileFormat::FBX> fbxFile = Filesystem::decode<FileFormat::FBX>(fbxData);
+				const sequence<uint8> lemonData = Filesystem::openBuffer(lemonPath);
+				const File<FileFormat::FBX> lemonFile = Filesystem::decode<FileFormat::FBX>(lemonData);
 
-				Entity3DDescriptor entityDescriptor{};
-				// folding_wooden_stool
-				// entityDescriptor.position = {0.0_m, -0.225_m, 0.85_m};
-				// entityDescriptor.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad};
-				// lemon
-				entityDescriptor.position = {0.0_m, 0.0_m, 0.1_m};
-				entityDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
-				entityDescriptor.geometry = FBXToGeometry3D(fbxFile);
-				entityDescriptor.material = createRef<ColorMaterial>();
+				const sequence<uint8> stoolData = Filesystem::openBuffer(stoolPath);
+				const File<FileFormat::FBX> stoolFile = Filesystem::decode<FileFormat::FBX>(stoolData);
 
-				scene.createEntity(entityDescriptor);
+				const uint32 lemonGeometryIndex = scene.registerGeometry(FBXToGeometry3D(lemonFile));
+				const uint32 stoolGeometryIndex = scene.registerGeometry(FBXToGeometry3D(stoolFile));
+
+				InstanceDescriptor lemon1InstanceDescriptor{};
+				lemon1InstanceDescriptor.geometryIndex = lemonGeometryIndex;
+				lemon1InstanceDescriptor.position = {-0.1_m, 0.0_m, 0.3_m};
+				lemon1InstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
+
+				InstanceDescriptor lemon2InstanceDescriptor{};
+				lemon2InstanceDescriptor.geometryIndex = lemonGeometryIndex;
+				lemon2InstanceDescriptor.position = {0.0_m, 0.0_m, 0.3_m};
+				lemon2InstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
+
+				InstanceDescriptor stoolInstanceDescriptor{};
+				stoolInstanceDescriptor.geometryIndex = stoolGeometryIndex;
+				stoolInstanceDescriptor.position = {0.5_m, -0.225_m, 1.0_m};
+				stoolInstanceDescriptor.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad};
+
+				scene.registerInstance(lemon1InstanceDescriptor);
+				scene.registerInstance(lemon2InstanceDescriptor);
+				scene.registerInstance(stoolInstanceDescriptor);
+
+				/* static constexpr char8* shelfPath = "Asset/Model/shelf/shelf.fbx";
+				static constexpr char8* woodenTable02Path = "Asset/Model/wooden_table_02/wooden_table_02.fbx";
+
+				const sequence<uint8> shelfData = Filesystem::openBuffer(shelfPath);
+				const File<FileFormat::FBX> shelfFile = Filesystem::decode<FileFormat::FBX>(shelfData);
+
+				const sequence<uint8> woodenTable02Data = Filesystem::openBuffer(woodenTable02Path);
+				const File<FileFormat::FBX> woodenTable02File = Filesystem::decode<FileFormat::FBX>(woodenTable02Data);
+
+				const uint32 woodenTable02GeometryIndex = scene.registerGeometry(FBXToGeometry3D(woodenTable02File));
+				const uint32 shelfGeometryIndex = scene.registerGeometry(FBXToGeometry3D(shelfFile));
+
+				InstanceDescriptor shelf1InstanceDescriptor{};
+				shelf1InstanceDescriptor.geometryIndex = shelfGeometryIndex;
+				shelf1InstanceDescriptor.position = {-2.0_m, -1.0_m, 3.0_m};
+				shelf1InstanceDescriptor.rotation = {pi<float32>() * 0.5f, 0.0_rad, 0.0_rad};
+
+				InstanceDescriptor woodenTable02InstanceDescriptor{};
+				woodenTable02InstanceDescriptor.geometryIndex = woodenTable02GeometryIndex;
+				woodenTable02InstanceDescriptor.position = {0.0_m, -1.0_m, 3.0_m};
+				woodenTable02InstanceDescriptor.rotation = {pi<float32>() * 0.5f, pi<float32>(), 0.0_rad};
+
+				InstanceDescriptor shelf2InstanceDescriptor{};
+				shelf2InstanceDescriptor.geometryIndex = shelfGeometryIndex;
+				shelf2InstanceDescriptor.position = {2.0_m, -1.0_m, 3.0_m};
+				shelf2InstanceDescriptor.rotation = {pi<float32>() * 0.5f, pi<float32>(), 0.0_rad};
+
+				scene.registerInstance(shelf1InstanceDescriptor);
+				scene.registerInstance(woodenTable02InstanceDescriptor);
+				scene.registerInstance(shelf2InstanceDescriptor); */
 
 				clusteredScene = clusterizeScene(scene);
 
@@ -45,20 +90,19 @@ namespace ProjectA {
 				camera.updateProjection(FIELD_OF_VIEW, getApplication()->getWindow()->getAspectRatio(), NEAR_PLANE, FAR_PLANE);
 
 				renderer.setCamera(&camera);
-				renderer.updateCamera();
+				renderer.updateCameraProjection();
 			}
 
 			void update(float32 deltaTime, float32 inverseDeltaTime) override {
+				static constexpr uint32 instanceIndex = 0;
 				static const vec3<float32> rotationAxis = {0.0f, 1.0f, 0.0f};
 
-				const Entity entity = scene.getLastEntity();
-
-				RigidBody3D& rigidBody = scene.getRigidBody(entity);
+				RigidBody3D& rigidBody = scene.getInstance(instanceIndex);
 				rigidBody.rotation += rotationAxis * 1_rad * deltaTime;
 
 				rigidBody.updateTransform();
 
-				renderer.updateInstanceTransform(entity, rigidBody.transform);
+				renderer.updateInstanceTransform(instanceIndex, rigidBody.transform);
 			}
 
 			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const override {
