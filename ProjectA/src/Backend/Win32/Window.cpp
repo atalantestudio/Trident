@@ -165,16 +165,16 @@ namespace ProjectA {
 		return windowData.minimized;
 	}
 
-	bool Window::isCursorCaptured() const {
-		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
-
-		return windowData.cursorCaptured;
-	}
-
 	const sint32* Window::getMousePosition() const {
 		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
 
 		return &windowData.cursorX;
+	}
+
+	bool Window::isPointerLocked() const {
+		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
+
+		return windowData.pointerLocked;
 	}
 
 	void Window::show() const {
@@ -184,7 +184,7 @@ namespace ProjectA {
 		ShowWindow(windowData->hWnd, SW_NORMAL);
 	}
 
-	void Window::captureCursor() const {
+	void Window::lockPointer() const {
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
 		RECT rect;
@@ -196,18 +196,23 @@ namespace ProjectA {
 
 		WIN32_ASSERT(ClipCursor(&rect) != 0);
 
-		windowData->cursorCaptured = true;
+		ShowCursor(false);
+
+		windowData->pointerLocked = true;
 	}
 
-	void Window::releaseCursor() const {
+	void Window::unlockPointer() const {
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
 		WIN32_ASSERT(ClipCursor(nullptr) != 0);
 
-		windowData->cursorCaptured = false;
+		ShowCursor(true);
+
+		windowData->pointerLocked = false;
 	}
 
 	void Window::processMessages() const {
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 		MSG msg;
 
 		while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -217,7 +222,6 @@ namespace ProjectA {
 
 				WindowCloseEvent windowCloseEvent;
 
-				const Win32WindowData* windowData = static_cast<const Win32WindowData*>(data);
 				windowData->windowCloseEventListener(windowCloseEvent);
 
 				continue;
@@ -225,6 +229,20 @@ namespace ProjectA {
 
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
+		}
+
+		// TODO: Verify that the condition is correct.
+		// windowData->cursorX != windowData->sizeX / 2 || windowData->cursorY != windowData->sizeY / 2
+		if (windowData->pointerLocked) {
+			POINT point{};
+			point.x = windowData->sizeX / 2;
+			point.y = windowData->sizeY / 2;
+
+			windowData->cursorX = point.x;
+			windowData->cursorY = point.y;
+
+			WIN32_ASSERT(ClientToScreen(windowData->hWnd, &point) != 0);
+			WIN32_ASSERT(SetCursorPos(point.x, point.y) != 0);
 		}
 	}
 

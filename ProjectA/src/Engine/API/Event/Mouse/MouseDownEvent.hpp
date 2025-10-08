@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class MouseDownEvent : public Event {
 		public:
-			MouseDownEvent(MouseButton button) :
+			explicit MouseDownEvent(MouseButton button) :
 				button(button)
 			{}
 

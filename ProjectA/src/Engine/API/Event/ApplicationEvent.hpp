@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class ApplicationEvent : public Event {
 		protected:
-			ApplicationEvent() = default;
+			explicit ApplicationEvent() = default;
 
 		public:
 			EVENT_CATEGORY(EventCategory::APPLICATION)
@@ -13,21 +13,21 @@ namespace ProjectA {
 
 	class ApplicationRenderEvent : public ApplicationEvent {
 		public:
-			ApplicationRenderEvent() = default;
+			explicit ApplicationRenderEvent() = default;
 
 			EVENT_TYPE(EventType::APPLICATION_RENDER)
 	};
 
 	class ApplicationTickEvent : public ApplicationEvent {
 		public:
-			ApplicationTickEvent() = default;
+			explicit ApplicationTickEvent() = default;
 
 			EVENT_TYPE(EventType::APPLICATION_TICK)
 	};
 
 	class ApplicationUpdateEvent : public ApplicationEvent {
 		public:
-			ApplicationUpdateEvent() = default;
+			explicit ApplicationUpdateEvent() = default;
 
 			EVENT_TYPE(EventType::APPLICATION_UPDATE)
 	};

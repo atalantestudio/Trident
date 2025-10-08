@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class WindowEvent : public Event {
 		protected:
-			WindowEvent() = default;
+			explicit WindowEvent() = default;
 
 		public:
 			EVENT_CATEGORY(EventCategory::WINDOW)

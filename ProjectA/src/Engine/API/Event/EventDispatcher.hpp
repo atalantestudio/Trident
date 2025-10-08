@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class EventDispatcher {
 		public:
-			EventDispatcher(Event& event) :
+			explicit EventDispatcher(Event& event) :
 				event(event)
 			{}
 

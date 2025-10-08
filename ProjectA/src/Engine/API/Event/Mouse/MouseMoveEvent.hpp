@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class MouseMoveEvent : public Event {
 		public:
-			MouseMoveEvent(sint32 x, sint32 y) :
+			explicit MouseMoveEvent(sint32 x, sint32 y) :
 				x(x),
 				y(y)
 			{}

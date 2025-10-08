@@ -99,7 +99,7 @@ namespace ProjectA {
 		updateDebugDescriptorSet();
 	}
 
-	void VisibilityRenderer::updateCameraProjection() {
+	void VisibilityRenderer::updateCameraProjectionView() {
 		cameraMappedRange->projectionView = getCameraController<PerspectiveCamera>().getCamera().getProjectionView();
 	}
 

@@ -84,7 +84,7 @@ namespace ProjectA {
 				cameraController.updateProjection();
 
 				renderer.setCameraController<PerspectiveCamera>(&cameraController);
-				renderer.updateCameraProjection();
+				renderer.updateCameraProjectionView();
 			}
 
 			void update(float32 deltaTime, float32 inverseDeltaTime) override {
@@ -97,6 +97,16 @@ namespace ProjectA {
 				rigidBody.updateTransform();
 
 				renderer.updateInstanceTransform(instanceIndex, rigidBody.transform);
+
+				// cameraController.update(deltaTime);
+
+				// renderer.updateCameraProjectionView();
+			}
+
+			void preRender() override {
+				// TODO: Move to update().
+				cameraController.update(0.0f);
+				renderer.updateCameraProjectionView();
 			}
 
 			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const override {
@@ -106,6 +116,7 @@ namespace ProjectA {
 			void onEvent(Event& event) override {
 				EventDispatcher eventDispatcher(event);
 				eventDispatcher.dispatch<MouseDownEvent>(BIND(onMouseDown));
+				eventDispatcher.dispatch<MouseMoveEvent>(BIND(onMouseMove));
 				eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 
 				renderer.onEvent(event);
@@ -115,12 +126,27 @@ namespace ProjectA {
 			bool onMouseDown(MouseDownEvent& event) {
 				const Window* window = getApplication()->getWindow();
 
-				if (!window->isCursorCaptured()) {
-					window->captureCursor();
+				if (!window->isPointerLocked()) {
+					window->lockPointer();
 				}
 				else {
-					window->releaseCursor();
+					window->unlockPointer();
 				}
+
+				return true;
+			}
+
+			bool onMouseMove(MouseMoveEvent& event) {
+				static constexpr float32 SENSITIVITY = 0.075f;
+
+				if (!getApplication()->getWindow()->isPointerLocked()) {
+					return true;
+				}
+
+				const float32 pitch = event.getY() * SENSITIVITY;
+				const float32 yaw = event.getX() * SENSITIVITY;
+
+				cameraController.rotate({radians(pitch), radians(yaw), 0.0f});
 
 				return true;
 			}
@@ -128,8 +154,6 @@ namespace ProjectA {
 			bool onWindowResize(WindowResizeEvent& event) {
 				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
 				cameraController.updateProjection();
-
-				renderer.updateCameraProjection();
 
 				return true;
 			}

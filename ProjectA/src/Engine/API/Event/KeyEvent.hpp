@@ -7,7 +7,7 @@ namespace ProjectA {
 		protected:
 			KeyCode keyCode;
 
-			KeyEvent(KeyCode keyCode) : keyCode(keyCode) {}
+			explicit KeyEvent(KeyCode keyCode) : keyCode(keyCode) {}
 
 		public:
 			EVENT_CATEGORY(EventCategory::INPUT | EventCategory::KEYBOARD)
@@ -22,7 +22,7 @@ namespace ProjectA {
 			sint32 pressCount;
 
 		public:
-			KeyPressEvent(KeyCode keyCode, sint32 pressCount) : KeyEvent(keyCode), pressCount(pressCount) {}
+			explicit KeyPressEvent(KeyCode keyCode, sint32 pressCount) : KeyEvent(keyCode), pressCount(pressCount) {}
 
 			EVENT_TYPE(EventType::KEY_PRESS)
 
@@ -33,14 +33,14 @@ namespace ProjectA {
 
 	class KeyReleaseEvent : public KeyEvent {
 		public:
-			KeyReleaseEvent(KeyCode keyCode) : KeyEvent(keyCode) {}
+			explicit KeyReleaseEvent(KeyCode keyCode) : KeyEvent(keyCode) {}
 
 			EVENT_TYPE(EventType::KEY_RELEASE)
 	};
 
 	class KeyTypeEvent : public KeyEvent {
 		public:
-			KeyTypeEvent(KeyCode keyCode) : KeyEvent(keyCode) {}
+			explicit KeyTypeEvent(KeyCode keyCode) : KeyEvent(keyCode) {}
 
 			EVENT_TYPE(EventType::KEY_TYPE)
 	};

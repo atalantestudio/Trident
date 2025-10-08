@@ -294,12 +294,36 @@ namespace ProjectA {
 			case WM_MOUSEMOVE: {
 				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove.
 
-				windowData->cursorX = GET_X_LPARAM(lParam);
-				windowData->cursorY = GET_Y_LPARAM(lParam);
+				const sint32 x = GET_X_LPARAM(lParam);
+				const sint32 y = GET_Y_LPARAM(lParam);
 
-				MouseMoveEvent mouseMoveEvent(windowData->cursorX, windowData->cursorY);
+				sint32 eventX;
+				sint32 eventY;
+
+				if (windowData->pointerLocked) {
+					const sint32 deltaX = x - windowData->cursorX;
+					const sint32 deltaY = y - windowData->cursorY;
+
+					eventX = windowData->virtualCursorPositionX + deltaX;
+					eventY = windowData->virtualCursorPositionY + deltaY;
+
+					windowData->virtualCursorPositionX = deltaX;
+					windowData->virtualCursorPositionY = deltaY;
+				}
+				else {
+					eventX = x;
+					eventY = y;
+
+					windowData->virtualCursorPositionX = x;
+					windowData->virtualCursorPositionY = y;
+				}
+
+				MouseMoveEvent mouseMoveEvent(eventX, eventY);
 
 				windowData->mouseMoveEventListener(mouseMoveEvent);
+
+				windowData->cursorX = x;
+				windowData->cursorY = y;
 
 				return 0;
 			}

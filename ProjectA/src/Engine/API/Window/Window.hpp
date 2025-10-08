@@ -21,22 +21,23 @@ namespace ProjectA {
 				return static_cast<float32>(size[0]) / size[1];
 			}
 
-			// Returns whether the window is maximized.
 			bool isMaximized() const;
 
-			// Returns whether the window is minimized.
 			bool isMinimized() const;
-
-			bool isCursorCaptured() const;
 
 			// Returns the position of the mouse, relative to the top-left corner of the client area.
 			const sint32* getMousePosition() const;
 
+			bool isPointerLocked() const;
+
 			void show() const;
 
-			void captureCursor() const;
+			// Hides the pointer and captures it into the client area.
+			// While in this state, mouse move events store the mouse delta instead of a relative position.
+			void lockPointer() const;
 
-			void releaseCursor() const;
+			// Shows the pointer and releases it from the client area.
+			void unlockPointer() const;
 
 			// Peeks, translates and dispatches incoming non-queued messages.
 			void processMessages() const;

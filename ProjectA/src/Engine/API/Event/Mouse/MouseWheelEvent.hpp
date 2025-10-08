@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class MouseWheelEvent : public Event {
 		public:
-			MouseWheelEvent(sint16 delta) :
+			explicit MouseWheelEvent(sint16 delta) :
 				delta(delta)
 			{}
 

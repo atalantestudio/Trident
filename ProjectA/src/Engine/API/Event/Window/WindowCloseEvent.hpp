@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class WindowCloseEvent : public WindowEvent {
 		public:
-			WindowCloseEvent() = default;
+			explicit WindowCloseEvent() = default;
 
 			EVENT_TYPE(EventType::WINDOW_CLOSE)
 	};

@@ -5,7 +5,7 @@
 namespace ProjectA {
 	class WindowResizeEvent : public WindowEvent {
 		public:
-			WindowResizeEvent(sint32 width, sint32 height) :
+			explicit WindowResizeEvent(sint32 width, sint32 height) :
 				width(width),
 				height(height)
 			{}

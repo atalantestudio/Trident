@@ -20,12 +20,25 @@ namespace ProjectA {
 				camera.updateProjection();
 			}
 
-			void updateView() {
-				// TODO
+			void update(float32 deltaTime) override {
+				camera.updateView(rotationAccumulator);
+				camera.updateProjectionView();
+
+				movementAccumulator = {0.0_m, 0.0_m, 0.0_m};
+				rotationAccumulator = {0.0f, 0.0f, 0.0f};
 			}
 
-			void update(float32 deltaTime) override {
-				// TODO
+			void move(const vec3<float32>& offset) {
+				movementAccumulator += offset;
 			}
+
+			// NOTE: `eulerAngles` must be given in radians.
+			void rotate(const vec3<float32>& eulerAngles) {
+				rotationAccumulator += eulerAngles;
+			}
+
+		private:
+			vec3<float32> movementAccumulator = {0.0_m, 0.0_m, 0.0_m};
+			vec3<float32> rotationAccumulator = {0.0f, 0.0f, 0.0f};
 	};
 }

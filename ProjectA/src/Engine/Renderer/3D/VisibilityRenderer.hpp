@@ -50,7 +50,7 @@ namespace ProjectA {
 
 			void resize(WindowResizeEvent& event) override;
 
-			void updateCameraProjection();
+			void updateCameraProjectionView();
 
 			void updateInstanceTransform(Entity entity, const mat4x4<float32>& transform);
 
