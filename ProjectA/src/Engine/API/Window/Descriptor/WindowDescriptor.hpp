@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Event/EventListener.hpp"
+#include "Engine/API/Event/KeyEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseDownEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseUpEvent.hpp"
@@ -14,6 +15,8 @@ namespace ProjectA {
 
 		Extent2D size;
 
+		EventListener<KeyDownEvent> keyDownEventListener;
+		EventListener<KeyUpEvent> keyUpEventListener;
 		EventListener<MouseDownEvent> mouseDownEventListener;
 		EventListener<MouseMoveEvent> mouseMoveEventListener;
 		EventListener<MouseUpEvent> mouseUpEventListener;

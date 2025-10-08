@@ -7,6 +7,9 @@
 
 namespace ProjectA {
 	class Sample3DLayer : public Layer {
+		private:
+			static constexpr float32 SENSITIVITY = 0.075f;
+
 		public:
 			explicit Sample3DLayer() {}
 
@@ -115,6 +118,7 @@ namespace ProjectA {
 
 			void onEvent(Event& event) override {
 				EventDispatcher eventDispatcher(event);
+				// eventDispatcher.dispatch<KeyDownEvent>(BIND(onKeyDown));
 				eventDispatcher.dispatch<MouseDownEvent>(BIND(onMouseDown));
 				eventDispatcher.dispatch<MouseMoveEvent>(BIND(onMouseMove));
 				eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
@@ -123,6 +127,27 @@ namespace ProjectA {
 			}
 
 		private:
+			/* bool onKeyDown(KeyDownEvent& event) {
+				switch (event.getKeyCode()) {
+					case KeyCode::P: {
+						const Window* window = getApplication()->getWindow();
+
+						if (!window->isPointerLocked()) {
+							window->lockPointer();
+						}
+						else {
+							window->unlockPointer();
+						}
+
+						break;
+					}
+					default:
+						break;
+				}
+
+				return true;
+			} */
+
 			bool onMouseDown(MouseDownEvent& event) {
 				const Window* window = getApplication()->getWindow();
 
@@ -137,16 +162,16 @@ namespace ProjectA {
 			}
 
 			bool onMouseMove(MouseMoveEvent& event) {
-				static constexpr float32 SENSITIVITY = 0.075f;
-
 				if (!getApplication()->getWindow()->isPointerLocked()) {
 					return true;
 				}
 
-				const float32 pitch = event.getY() * SENSITIVITY;
-				const float32 yaw = event.getX() * SENSITIVITY;
+				// TODO: Correct initial delta values when first locking the pointer.
+				const float32 pitch = static_cast<float32>(event.getY());
+				const float32 yaw = static_cast<float32>(event.getX());
+				const vec3<float32> rotation = {pitch, yaw, 0.0_deg};
 
-				cameraController.rotate({radians(pitch), radians(yaw), 0.0f});
+				cameraController.addAngularMotion(radians(rotation));
 
 				return true;
 			}

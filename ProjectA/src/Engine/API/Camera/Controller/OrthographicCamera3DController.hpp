@@ -61,27 +61,27 @@ namespace ProjectA {
 				float32 x = 0.0f;
 				float32 y = 0.0f;
 
-				// TODO: Implement Input.
-				/*if (Input::isKeyPressed(KeyCode::A)) {
+				// TODO: Re-implement Input.
+				/* if (Input::isKeyDown(KeyCode::A)) {
 					x -= speed * deltaTime;
 				}
-				else if (Input::isKeyPressed(KeyCode::D)) {
+				else if (Input::isKeyDown(KeyCode::D)) {
 					x += speed * deltaTime;
 				}
 
-				if (Input::isKeyPressed(KeyCode::W)) {
+				if (Input::isKeyDown(KeyCode::W)) {
 					y += speed * deltaTime;
 				}
-				else if (Input::isKeyPressed(KeyCode::S)) {
+				else if (Input::isKeyDown(KeyCode::S)) {
 					y -= speed * deltaTime;
 				}
 
-				if (Input::isKeyPressed(KeyCode::Q)) {
+				if (Input::isKeyDown(KeyCode::Q)) {
 					rotation += rotationSpeed * deltaTime;
 				}
-				else if (Input::isKeyPressed(KeyCode::E)) {
+				else if (Input::isKeyDown(KeyCode::E)) {
 					rotation -= rotationSpeed * deltaTime;
-				}*/
+				} */
 
 				position += {x, y, 0.0f};
 

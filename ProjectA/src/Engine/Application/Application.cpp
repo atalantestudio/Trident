@@ -86,6 +86,8 @@ namespace ProjectA {
 		windowDescriptor.name = formatWindowName(projectDescriptor.name, sharedMemoryData->instanceCount);
 		windowDescriptor.size.width = properties->WindowWidth;
 		windowDescriptor.size.height = properties->WindowHeight;
+		windowDescriptor.keyDownEventListener = BIND(Application::onEvent);
+		windowDescriptor.keyUpEventListener = BIND(Application::onEvent);
 		windowDescriptor.mouseDownEventListener = BIND(Application::onEvent);
 		windowDescriptor.mouseMoveEventListener = BIND(Application::onEvent);
 		windowDescriptor.mouseUpEventListener = BIND(Application::onEvent);

@@ -5,6 +5,9 @@
 
 namespace ProjectA {
 	class FlyCameraController : public CameraController<PerspectiveCamera> {
+		private:
+			static constexpr float32 ROTATION_SPEED = 0.075f;
+
 		public:
 			FlyCameraController() {
 				camera.setFieldOfView(radians(60.0_deg));
@@ -21,24 +24,26 @@ namespace ProjectA {
 			}
 
 			void update(float32 deltaTime) override {
-				camera.updateView(rotationAccumulator);
+				camera.updatePosition(linearMotionOffset);
+				camera.updateOrientation(angularMotionOffset);
+				camera.updateView();
 				camera.updateProjectionView();
 
-				movementAccumulator = {0.0_m, 0.0_m, 0.0_m};
-				rotationAccumulator = {0.0f, 0.0f, 0.0f};
+				linearMotionOffset = {0.0_m, 0.0_m, 0.0_m};
+				angularMotionOffset = {0.0_rad, 0.0_rad, 0.0_rad};
 			}
 
-			void move(const vec3<float32>& offset) {
-				movementAccumulator += offset;
+			void addLinearMotion(const vec3<float32>& motion) {
+				linearMotionOffset += motion;
 			}
 
-			// NOTE: `eulerAngles` must be given in radians.
-			void rotate(const vec3<float32>& eulerAngles) {
-				rotationAccumulator += eulerAngles;
+			// NOTE: `motion` must be given in radians.
+			void addAngularMotion(const vec3<float32>& motion) {
+				angularMotionOffset += motion * ROTATION_SPEED;
 			}
 
 		private:
-			vec3<float32> movementAccumulator = {0.0_m, 0.0_m, 0.0_m};
-			vec3<float32> rotationAccumulator = {0.0f, 0.0f, 0.0f};
+			vec3<float32> linearMotionOffset = {0.0_m, 0.0_m, 0.0_m};
+			vec3<float32> angularMotionOffset = {0.0_rad, 0.0_rad, 0.0_rad};
 	};
 }

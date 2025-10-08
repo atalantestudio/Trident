@@ -2,45 +2,53 @@
 
 #include "Engine/API/Event/Event.hpp"
 
+// TODO: Refactor (+ create Event/Keyboard directory).
 namespace ProjectA {
 	class KeyEvent : public Event {
-		protected:
-			KeyCode keyCode;
-
-			explicit KeyEvent(KeyCode keyCode) : keyCode(keyCode) {}
-
 		public:
 			EVENT_CATEGORY(EventCategory::INPUT | EventCategory::KEYBOARD)
 
 			KeyCode getKeyCode() const {
 				return keyCode;
 			}
+
+		protected:
+			KeyCode keyCode;
+
+			explicit KeyEvent(KeyCode keyCode) : keyCode(keyCode) {}
 	};
 
-	class KeyPressEvent : public KeyEvent {
-		private:
-			sint32 pressCount;
-
+	class KeyDownEvent : public KeyEvent {
 		public:
-			explicit KeyPressEvent(KeyCode keyCode, sint32 pressCount) : KeyEvent(keyCode), pressCount(pressCount) {}
+			explicit KeyDownEvent(KeyCode keyCode, uint32 repeatCount) :
+				KeyEvent(keyCode),
+				repeatCount(repeatCount)
+			{}
 
-			EVENT_TYPE(EventType::KEY_PRESS)
+			EVENT_TYPE(EventType::KEY_DOWN)
 
-			sint32 getPressCount() const {
-				return pressCount;
+			uint32 getRepeatCount() const {
+				return repeatCount;
 			}
+
+		private:
+			uint32 repeatCount;
 	};
 
-	class KeyReleaseEvent : public KeyEvent {
+	class KeyUpEvent : public KeyEvent {
 		public:
-			explicit KeyReleaseEvent(KeyCode keyCode) : KeyEvent(keyCode) {}
+			explicit KeyUpEvent(KeyCode keyCode) :
+				KeyEvent(keyCode)
+			{}
 
-			EVENT_TYPE(EventType::KEY_RELEASE)
+			EVENT_TYPE(EventType::KEY_UP)
 	};
 
 	class KeyTypeEvent : public KeyEvent {
 		public:
-			explicit KeyTypeEvent(KeyCode keyCode) : KeyEvent(keyCode) {}
+			explicit KeyTypeEvent(KeyCode keyCode) :
+				KeyEvent(keyCode)
+			{}
 
 			EVENT_TYPE(EventType::KEY_TYPE)
 	};

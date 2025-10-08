@@ -67,28 +67,30 @@ namespace ProjectA {
 				this->farPlane = farPlane;
 			}
 
-			void updateView(const vec3<float32>& rotationAccumulator) {
-				const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, rotationAccumulator[0]);
-				const quat<float32> yaw = quat<float32>::axisAngle(UP, rotationAccumulator[1]);
-				const quat<float32> roll = quat<float32>::axisAngle(FORWARD, rotationAccumulator[2]);
+			void updatePosition(const vec3<float32>& offset) {
+				// TODO: Implement.
+			}
+
+			void updateOrientation(const vec3<float32>& offset) {
+				const quat<float32> pitch = quat<float32>::axisAngle(RIGHT, offset[0]);
+				const quat<float32> yaw = quat<float32>::axisAngle(UP, offset[1]);
+				const quat<float32> roll = quat<float32>::axisAngle(FORWARD, offset[2]);
 
 				orientation = orientation * pitch;
 				orientation = yaw * orientation;
 				orientation = orientation * roll;
 				orientation = normalized(orientation);
+			}
 
-				const mat4x4<float32> viewRotationOnly = mat4x4<float32>(orientation);
+			void updateView() {
+				view = mat4x4<float32>(orientation);
 
-				// TODO: Negate position?
-				const vec3<float32> translation = -position * orientation;
-				const vec4<float32> translationRow = {translation[0], translation[1], translation[2], viewRotationOnly[3][3]};
+				// TODO: Refactor.
+				const vec3<float32> positionInverse = -position;
+				const quat<float32> translation = conjugate(orientation) * quat<float32>(0.0f, positionInverse[0], positionInverse[1], positionInverse[2]) * orientation;
+				const vec4<float32> translationRow = {translation[1], translation[2], translation[3], 1.0f};
 
-				view = {
-					viewRotationOnly[0],
-					viewRotationOnly[1],
-					viewRotationOnly[2],
-					translationRow,
-				};
+				view = {view[0], view[1], view[2], translationRow};
 			}
 
 			void updateProjection() {
@@ -98,18 +100,18 @@ namespace ProjectA {
 			}
 
 			void updateProjectionView() {
-				// TODO: Check multiplication order.
+				// TODO: Check why the "projection * view" multiplication order doesn't return the right matrix.
 				projectionView = view * projection;
 			}
 
 		private:
 			vec3<float32> position = {0.0_m, 0.0_m, -0.4_m};
 
-			vec3<float32> forward = {0.0f, 0.0f, 0.0f};
+			// vec3<float32> forward = {0.0f, 0.0f, 0.0f};
 			// TODO: Store right vector?
-			vec3<float32> up = {0.0f, 0.0f, 0.0f};
+			// vec3<float32> up = {0.0f, 0.0f, 0.0f};
 
-			quat<float32> orientation = quat<float32>::identity();
+			quat<float32> orientation = quat<float32>::axisAngle(FORWARD, 0.0_rad);
 
 			float32 fieldOfView = 0.0f;
 			float32 aspectRatio = 0.0f;
