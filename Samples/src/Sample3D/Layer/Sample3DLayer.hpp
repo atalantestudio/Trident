@@ -105,15 +105,31 @@ namespace ProjectA {
 
 			void onEvent(Event& event) override {
 				EventDispatcher eventDispatcher(event);
+				eventDispatcher.dispatch<MouseDownEvent>(BIND(onMouseDown));
 				eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
+
+				renderer.onEvent(event);
 			}
 
 		private:
+			bool onMouseDown(MouseDownEvent& event) {
+				const Window* window = getApplication()->getWindow();
+
+				if (!window->isCursorCaptured()) {
+					window->captureCursor();
+				}
+				else {
+					window->releaseCursor();
+				}
+
+				return true;
+			}
+
 			bool onWindowResize(WindowResizeEvent& event) {
 				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
 				cameraController.updateProjection();
 
-				renderer.resize(event);
+				renderer.updateCameraProjection();
 
 				return true;
 			}

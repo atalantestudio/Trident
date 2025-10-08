@@ -27,10 +27,16 @@ namespace ProjectA {
 			// Returns whether the window is minimized.
 			bool isMinimized() const;
 
+			bool isCursorCaptured() const;
+
 			// Returns the position of the mouse, relative to the top-left corner of the client area.
 			const sint32* getMousePosition() const;
 
 			void show() const;
+
+			void captureCursor() const;
+
+			void releaseCursor() const;
 
 			// Peeks, translates and dispatches incoming non-queued messages.
 			void processMessages() const;

@@ -54,6 +54,8 @@ namespace ProjectA {
 
 			void updateInstanceTransform(Entity entity, const mat4x4<float32>& transform);
 
+			void onEvent(Event& event) override;
+
 		private:
 			void setupRenderPass();
 
@@ -91,6 +93,8 @@ namespace ProjectA {
 
 			void updateBufferDescriptorSets();
 			void updateDebugDescriptorSet();
+
+			bool onWindowResize(WindowResizeEvent& event);
 
 		private:
 			ref<RenderPass> renderPass;

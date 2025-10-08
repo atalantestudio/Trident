@@ -50,6 +50,68 @@ namespace ProjectA {
 		cameraMappedRange->farPlane = camera.getFarPlane();
 	}
 
+	void VisibilityRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
+		const ClearValue swapchainClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
+		const ClearValue visibilityClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
+
+		ClearValue depthStencilClearValue{};
+		depthStencilClearValue.depth = 1.0f;
+		depthStencilClearValue.stencil = 0;
+
+		BeginRenderPassDescriptor beginRenderPassDescriptor{};
+		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
+		beginRenderPassDescriptor.clearValues = {swapchainClearValue, visibilityClearValue, depthStencilClearValue};
+
+		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+		const float32 width = static_cast<float32>(swapchainExtent.width);
+		const float32 height = static_cast<float32>(swapchainExtent.height);
+
+		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
+		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
+		commandEncoder->setScissor(0, 0, swapchainExtent);
+
+		// Visibility subpass
+		{
+			commandEncoder->bindRenderPipeline(visibilityRenderPipeline);
+			commandEncoder->bindDescriptorSets(visibilityPipelineLayout, {cameraDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
+			commandEncoder->drawIndirect(indirectBuffer, 0, 1, 0);
+		}
+
+		commandEncoder->nextSubpass();
+
+		// Debug subpass
+		{
+			commandEncoder->bindRenderPipeline(debugRenderPipeline);
+			commandEncoder->bindDescriptorSets(debugPipelineLayout, {debugDescriptorSet});
+			commandEncoder->draw(3, 1, 0, 0);
+		}
+
+		commandEncoder->endRenderPass();
+	}
+
+	void VisibilityRenderer::resize(WindowResizeEvent& event) {
+		recreateVisibilityImage();
+		recreateVisibilityImageView();
+		recreateDepthStencilImage();
+		recreateDepthStencilImageView();
+		recreateFramebuffers();
+
+		updateDebugDescriptorSet();
+	}
+
+	void VisibilityRenderer::updateCameraProjection() {
+		cameraMappedRange->projectionView = getCameraController<PerspectiveCamera>().getCamera().getProjectionView();
+	}
+
+	void VisibilityRenderer::updateInstanceTransform(Entity entity, const mat4x4<float32>& transform) {
+		instanceMappedRange[entity].transform = transform;
+	}
+
+	void VisibilityRenderer::onEvent(Event& event) {
+		EventDispatcher eventDispatcher(event);
+		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
+	}
+
 	void VisibilityRenderer::setupRenderPass() {
 		Attachment swapchainAttachment{};
 		swapchainAttachment.format = getSurface()->getFormat();
@@ -715,62 +777,9 @@ namespace ProjectA {
 		});
 	}
 
-	void VisibilityRenderer::updateCameraProjection() {
-		cameraMappedRange->projectionView = getCameraController<PerspectiveCamera>().getCamera().getProjectionView();
-	}
+	bool VisibilityRenderer::onWindowResize(WindowResizeEvent& event) {
+		resize(event);
 
-	void VisibilityRenderer::updateInstanceTransform(Entity entity, const mat4x4<float32>& transform) {
-		instanceMappedRange[entity].transform = transform;
-	}
-
-	void VisibilityRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
-		const ClearValue swapchainClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
-		const ClearValue visibilityClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
-
-		ClearValue depthStencilClearValue{};
-		depthStencilClearValue.depth = 1.0f;
-		depthStencilClearValue.stencil = 0;
-
-		BeginRenderPassDescriptor beginRenderPassDescriptor{};
-		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-		beginRenderPassDescriptor.clearValues = {swapchainClearValue, visibilityClearValue, depthStencilClearValue};
-
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-		const float32 width = static_cast<float32>(swapchainExtent.width);
-		const float32 height = static_cast<float32>(swapchainExtent.height);
-
-		commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-		commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
-		commandEncoder->setScissor(0, 0, swapchainExtent);
-
-		// Visibility subpass
-		{
-			commandEncoder->bindRenderPipeline(visibilityRenderPipeline);
-			commandEncoder->bindDescriptorSets(visibilityPipelineLayout, {cameraDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
-			commandEncoder->drawIndirect(indirectBuffer, 0, 1, 0);
-		}
-
-		commandEncoder->nextSubpass();
-
-		// Debug subpass
-		{
-			commandEncoder->bindRenderPipeline(debugRenderPipeline);
-			commandEncoder->bindDescriptorSets(debugPipelineLayout, {debugDescriptorSet});
-			commandEncoder->draw(3, 1, 0, 0);
-		}
-
-		commandEncoder->endRenderPass();
-	}
-
-	void VisibilityRenderer::resize(WindowResizeEvent& event) {
-		recreateVisibilityImage();
-		recreateVisibilityImageView();
-		recreateDepthStencilImage();
-		recreateDepthStencilImageView();
-		recreateFramebuffers();
-
-		updateDebugDescriptorSet();
-
-		updateCameraProjection();
+		return true;
 	}
 }

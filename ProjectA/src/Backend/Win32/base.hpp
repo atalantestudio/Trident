@@ -26,6 +26,7 @@ namespace ProjectA {
 
 		bool minimized;
 		bool maximized;
+		bool cursorCaptured;
 
 		// TODO: Use vec2<sint32> (no SIMD).
 		sint32 cursorX;

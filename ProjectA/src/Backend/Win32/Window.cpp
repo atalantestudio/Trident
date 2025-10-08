@@ -165,6 +165,12 @@ namespace ProjectA {
 		return windowData.minimized;
 	}
 
+	bool Window::isCursorCaptured() const {
+		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
+
+		return windowData.cursorCaptured;
+	}
+
 	const sint32* Window::getMousePosition() const {
 		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
 
@@ -176,6 +182,29 @@ namespace ProjectA {
 
 		// The event loop starts after showing the window.
 		ShowWindow(windowData->hWnd, SW_NORMAL);
+	}
+
+	void Window::captureCursor() const {
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
+
+		RECT rect;
+
+		WIN32_ASSERT(GetClientRect(windowData->hWnd, &rect) != 0);
+
+		WIN32_ASSERT(ClientToScreen(windowData->hWnd, pointer_cast<LPPOINT>(&rect.left)) != 0);
+		WIN32_ASSERT(ClientToScreen(windowData->hWnd, pointer_cast<LPPOINT>(&rect.right)) != 0);
+
+		WIN32_ASSERT(ClipCursor(&rect) != 0);
+
+		windowData->cursorCaptured = true;
+	}
+
+	void Window::releaseCursor() const {
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
+
+		WIN32_ASSERT(ClipCursor(nullptr) != 0);
+
+		windowData->cursorCaptured = false;
 	}
 
 	void Window::processMessages() const {
