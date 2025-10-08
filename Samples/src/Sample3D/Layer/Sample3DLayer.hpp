@@ -1,21 +1,14 @@
 #pragma once
 
-#include "Engine/Camera/3D/PerspectiveCamera3D.hpp"
+#include "Engine/API/Camera/Controller/FlyCameraController.hpp"
 #include "Engine/Filesystem/Asset/FBXToGeometry.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/3D/VisibilityRenderer.hpp"
 
 namespace ProjectA {
 	class Sample3DLayer : public Layer {
-		private:
-			static constexpr float32 FIELD_OF_VIEW = radians(60.0_deg);
-			static constexpr float32 NEAR_PLANE = 0.001_m;
-			static constexpr float32 FAR_PLANE = 100.0_m;
-
 		public:
-			explicit Sample3DLayer() :
-				camera(mat4x4<float32>::identity(), NEAR_PLANE, FAR_PLANE)
-			{}
+			explicit Sample3DLayer() {}
 
 			void build() override {
 				renderer.setLayer(this);
@@ -87,9 +80,10 @@ namespace ProjectA {
 
 				renderer.setScene(&clusteredScene);
 
-				camera.updateProjection(FIELD_OF_VIEW, getApplication()->getWindow()->getAspectRatio(), NEAR_PLANE, FAR_PLANE);
+				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
+				cameraController.updateProjection();
 
-				renderer.setCamera(&camera);
+				renderer.setCameraController<PerspectiveCamera>(&cameraController);
 				renderer.updateCameraProjection();
 			}
 
@@ -116,7 +110,8 @@ namespace ProjectA {
 
 		private:
 			bool onWindowResize(WindowResizeEvent& event) {
-				camera.updateProjection(FIELD_OF_VIEW, getApplication()->getWindow()->getAspectRatio(), NEAR_PLANE, FAR_PLANE);
+				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
+				cameraController.updateProjection();
 
 				renderer.resize(event);
 
@@ -127,6 +122,6 @@ namespace ProjectA {
 			VisibilityRenderer renderer;
 			Scene3D scene;
 			ClusteredScene clusteredScene;
-			PerspectiveCamera3D camera;
+			FlyCameraController cameraController;
 	};
 }

@@ -42,9 +42,9 @@ namespace ProjectA {
 		public:
 			void build() override;
 
-			void setScene(const ClusteredScene* scene) override;
+			void postSetScene() override;
 
-			void setCamera(const Camera3D* camera) override;
+			void postSetCameraController() override;
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override;
 

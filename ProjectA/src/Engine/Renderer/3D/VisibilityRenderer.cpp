@@ -1,6 +1,6 @@
 #include "pch.hpp"
 
-#include "Engine/Camera/3D/PerspectiveCamera3D.hpp"
+#include "Engine/API/Camera/PerspectiveCamera.hpp"
 #include "Engine/Renderer/3D/VisibilityRenderer.hpp"
 
 namespace ProjectA {
@@ -30,9 +30,7 @@ namespace ProjectA {
 		createCameraBuffer();
 	}
 
-	void VisibilityRenderer::setScene(const ClusteredScene* scene) {
-		SceneRenderer::setScene(scene);
-
+	void VisibilityRenderer::postSetScene() {
 		createVertexPositionComponentBuffer();
 		createVertexBuffer();
 		createClusterBuffer();
@@ -45,13 +43,11 @@ namespace ProjectA {
 		updateDebugDescriptorSet();
 	}
 
-	void VisibilityRenderer::setCamera(const Camera3D* camera) {
-		SceneRenderer::setCamera(camera);
+	void VisibilityRenderer::postSetCameraController() {
+		const PerspectiveCamera& camera = getCameraController<PerspectiveCamera>().getCamera();
 
-		const PerspectiveCamera3D* perspectiveCamera = pointer_cast<const PerspectiveCamera3D*>(camera);
-
-		cameraMappedRange->nearPlane = perspectiveCamera->getNearPlane();
-		cameraMappedRange->farPlane = perspectiveCamera->getFarPlane();
+		cameraMappedRange->nearPlane = camera.getNearPlane();
+		cameraMappedRange->farPlane = camera.getFarPlane();
 	}
 
 	void VisibilityRenderer::setupRenderPass() {
@@ -720,7 +716,7 @@ namespace ProjectA {
 	}
 
 	void VisibilityRenderer::updateCameraProjection() {
-		cameraMappedRange->projectionView = camera->projection;
+		cameraMappedRange->projectionView = getCameraController<PerspectiveCamera>().getCamera().getProjectionView();
 	}
 
 	void VisibilityRenderer::updateInstanceTransform(Entity entity, const mat4x4<float32>& transform) {

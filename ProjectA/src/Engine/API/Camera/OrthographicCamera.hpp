@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Engine/Camera/3D/Camera3D.hpp"
+#include "Engine/API/Camera/Camera.hpp"
 
 namespace ProjectA {
-	class OrthographicCamera3D : public Camera3D {
+	class OrthographicCamera : public Camera {
 		public:
-			explicit OrthographicCamera3D(float32 left, float32 right, float32 bottom, float32 top, float32 nearPlane, float32 farPlane) :
-				Camera3D(mat4x4<float32>::orthographic(left, right, bottom, top, nearPlane, farPlane))
+			explicit OrthographicCamera(float32 left, float32 right, float32 bottom, float32 top, float32 nearPlane, float32 farPlane) :
+				Camera(mat4x4<float32>::orthographic(left, right, bottom, top, nearPlane, farPlane))
 			{}
 
 			void updateProjection(float32 left, float32 right, float32 bottom, float32 top, float32 nearPlane, float32 farPlane) {
