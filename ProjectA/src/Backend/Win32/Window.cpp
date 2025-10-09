@@ -198,6 +198,8 @@ namespace ProjectA {
 
 		ShowCursor(false);
 
+		windowData->virtualCursorPositionX = 0;
+		windowData->virtualCursorPositionY = 0;
 		windowData->pointerLocked = true;
 	}
 
