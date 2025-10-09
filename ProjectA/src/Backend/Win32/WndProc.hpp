@@ -291,6 +291,36 @@ namespace ProjectA {
 
 				break;
 			}
+			case WM_KEYDOWN: {
+				// const uint16 lParamHi = HIWORD(lParam);
+
+				// const bool extendedKey = HIWORD(lParam) & KF_EXTENDED;
+				// ENGINE_DEBUG("Extended key = []", extendedKey);
+
+				const uint32 code = static_cast<uint32>(wParam);
+				// const uint32 scanCode = MapVirtualKeyW(code, MAPVK_VK_TO_VSC);
+
+				windowData->keyMap[code] = true;
+
+				KeyDownEvent keyDownEvent(static_cast<KeyCode>(code));
+
+				windowData->keyDownEventListener(keyDownEvent);
+
+				return 0;
+			}
+			case WM_KEYUP: {
+				// const uint16 lParamHi = HIWORD(lParam);
+
+				const uint32 code = static_cast<uint32>(wParam);
+
+				windowData->keyMap[code] = false;
+
+				KeyUpEvent keyUpEvent(static_cast<KeyCode>(code));
+
+				windowData->keyUpEventListener(keyUpEvent);
+
+				return 0;
+			}
 			case WM_MOUSEMOVE: {
 				// See https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousemove.
 

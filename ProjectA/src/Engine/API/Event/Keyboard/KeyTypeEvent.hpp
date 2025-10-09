@@ -10,7 +10,7 @@ namespace ProjectA {
 				keyCode(keyCode)
 			{}
 
-			EVENT_TYPE(EventType::KEY_DOWN)
+			EVENT_TYPE(EventType::KEY_TYPE)
 			EVENT_CATEGORY(EventCategory::INPUT | EventCategory::KEYBOARD)
 
 			KeyCode getKeyCode() const {

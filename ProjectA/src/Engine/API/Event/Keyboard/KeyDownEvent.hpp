@@ -6,9 +6,8 @@
 namespace ProjectA {
 	class KeyDownEvent : public Event {
 		public:
-			explicit KeyDownEvent(KeyCode keyCode, uint16 repeatCount) :
-				keyCode(keyCode),
-				repeatCount(repeatCount)
+			explicit KeyDownEvent(KeyCode keyCode) :
+				keyCode(keyCode)
 			{}
 
 			EVENT_TYPE(EventType::KEY_DOWN)
@@ -18,12 +17,7 @@ namespace ProjectA {
 				return keyCode;
 			}
 
-			uint16 getRepeatCount() const {
-				return repeatCount;
-			}
-
 		private:
 			KeyCode keyCode;
-			uint16 repeatCount;
 	};
 }

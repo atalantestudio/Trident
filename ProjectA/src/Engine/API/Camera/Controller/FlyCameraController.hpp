@@ -24,8 +24,8 @@ namespace ProjectA {
 			}
 
 			void update(float32 deltaTime) override {
-				camera.updatePosition(linearMotionOffset);
-				camera.updateOrientation(angularMotionOffset);
+				camera.updatePosition(linearMotionOffset * deltaTime);
+				camera.updateOrientation(angularMotionOffset * deltaTime);
 				camera.updateView();
 				camera.updateProjectionView();
 

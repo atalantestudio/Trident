@@ -5,11 +5,11 @@ namespace ProjectA {
 
 	enum class KeyCode : uint16 {
 		SPACE			= 32,
-		APOSTROPHE		= 39,	// '
-		COMMA			= 44,	// ,
-		MINUS			= 45,	// -
-		PERIOD			= 46,	// .
-		SLASH			= 47,	// /
+		APOSTROPHE		= 39, // '
+		COMMA			= 44, // ,
+		MINUS			= 45, // -
+		PERIOD			= 46, // .
+		SLASH			= 47, // /
 		DIGIT_0			= 48,
 		DIGIT_1			= 49,
 		DIGIT_2			= 50,
@@ -20,8 +20,8 @@ namespace ProjectA {
 		DIGIT_7			= 55,
 		DIGIT_8			= 56,
 		DIGIT_9			= 57,
-		SEMICOLON		= 59,	// ;
-		EQUAL			= 61,	// =
+		SEMICOLON		= 59, // ;
+		EQUAL			= 61, // =
 		A				= 65,
 		B				= 66,
 		C				= 67,
@@ -48,10 +48,10 @@ namespace ProjectA {
 		X				= 88,
 		Y				= 89,
 		Z				= 90,
-		LEFT_BRACKET	= 91,	// [
-		BACKSLASH		= 92,	// '\'
-		RIGHT_BRACKET	= 93,	// ]
-		GRAVE_ACCENT	= 96,	// `
+		LEFT_BRACKET	= 91, // [
+		BACKSLASH		= 92, // '\'
+		RIGHT_BRACKET	= 93, // ]
+		GRAVE_ACCENT	= 96, // `
 		WORLD_1			= 161,
 		WORLD_2			= 162,
 		ESCAPE			= 256,
@@ -123,6 +123,8 @@ namespace ProjectA {
 		RIGHT_CONTROL	= 345,
 		RIGHT_ALT		= 346,
 		RIGHT_SUPER		= 347,
+
+		__MAX_ENUM,
 	};
 
 	AS_PRINTABLE(KeyCode);

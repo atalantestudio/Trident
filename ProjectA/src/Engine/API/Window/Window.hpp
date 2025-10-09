@@ -21,6 +21,8 @@ namespace ProjectA {
 				return static_cast<float32>(size[0]) / size[1];
 			}
 
+			bool isKeyDown(KeyCode keyCode) const;
+
 			bool isMaximized() const;
 
 			bool isMinimized() const;
@@ -44,6 +46,7 @@ namespace ProjectA {
 
 			void waitMessage() const;
 
+		// TODO: Make data and key map private?
 		public:
 			void* data;
 	};

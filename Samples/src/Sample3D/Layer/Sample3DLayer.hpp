@@ -7,12 +7,7 @@
 
 namespace ProjectA {
 	class Sample3DLayer : public Layer {
-		private:
-			static constexpr float32 SENSITIVITY = 0.075f;
-
 		public:
-			explicit Sample3DLayer() {}
-
 			void build() override {
 				renderer.setLayer(this);
 				renderer.build();
@@ -91,24 +86,16 @@ namespace ProjectA {
 			}
 
 			void update(float32 deltaTime, float32 inverseDeltaTime) override {
-				static constexpr uint32 instanceIndex = 0;
-				static const vec3<float32> rotationAxis = {0.0f, 1.0f, 0.0f};
+				/* if (getApplication()->getWindow()->isKeyDown(KeyCode::D)) {
+					ENGINE_DEBUG("D Down");
+				} */
 
-				RigidBody3D& rigidBody = scene.getInstance(instanceIndex);
-				rigidBody.rotation += rotationAxis * 1_rad * deltaTime;
+				cameraController.update(deltaTime);
 
-				rigidBody.updateTransform();
-
-				renderer.updateInstanceTransform(instanceIndex, rigidBody.transform);
-
-				// cameraController.update(deltaTime);
-
-				// renderer.updateCameraProjectionView();
+				animateInstanceTest(deltaTime);
 			}
 
 			void preRender() override {
-				// TODO: Move to update().
-				cameraController.update(0.0f);
 				renderer.updateCameraProjectionView();
 			}
 
@@ -118,8 +105,7 @@ namespace ProjectA {
 
 			void onEvent(Event& event) override {
 				EventDispatcher eventDispatcher(event);
-				// eventDispatcher.dispatch<KeyDownEvent>(BIND(onKeyDown));
-				eventDispatcher.dispatch<MouseDownEvent>(BIND(onMouseDown));
+				eventDispatcher.dispatch<KeyDownEvent>(BIND(onKeyDown));
 				eventDispatcher.dispatch<MouseMoveEvent>(BIND(onMouseMove));
 				eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 
@@ -127,7 +113,7 @@ namespace ProjectA {
 			}
 
 		private:
-			/* bool onKeyDown(KeyDownEvent& event) {
+			bool onKeyDown(KeyDownEvent& event) {
 				switch (event.getKeyCode()) {
 					case KeyCode::P: {
 						const Window* window = getApplication()->getWindow();
@@ -146,19 +132,6 @@ namespace ProjectA {
 				}
 
 				return true;
-			} */
-
-			bool onMouseDown(MouseDownEvent& event) {
-				const Window* window = getApplication()->getWindow();
-
-				if (!window->isPointerLocked()) {
-					window->lockPointer();
-				}
-				else {
-					window->unlockPointer();
-				}
-
-				return true;
 			}
 
 			bool onMouseMove(MouseMoveEvent& event) {
@@ -166,7 +139,6 @@ namespace ProjectA {
 					return true;
 				}
 
-				// TODO: Correct initial delta values when first locking the pointer.
 				const float32 pitch = static_cast<float32>(event.getY());
 				const float32 yaw = static_cast<float32>(event.getX());
 				const vec3<float32> rotation = {pitch, yaw, 0.0_deg};
@@ -181,6 +153,18 @@ namespace ProjectA {
 				cameraController.updateProjection();
 
 				return true;
+			}
+
+			void animateInstanceTest(float32 deltaTime) {
+				static constexpr uint32 INSTANCE_INDEX = 0;
+				static constexpr float32 ROTATION_SPEED = 1_rad;
+				static const vec3<float32> ROTATION_AXIS = {0.0f, 1.0f, 0.0f};
+
+				RigidBody3D& rigidBody = scene.getInstance(INSTANCE_INDEX);
+				rigidBody.rotation += ROTATION_SPEED * ROTATION_AXIS * deltaTime;
+				rigidBody.updateTransform();
+
+				renderer.updateInstanceTransform(INSTANCE_INDEX, rigidBody.transform);
 			}
 
 		private:

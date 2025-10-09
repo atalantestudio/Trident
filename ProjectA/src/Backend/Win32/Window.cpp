@@ -104,12 +104,16 @@ namespace ProjectA {
 		windowData->sizeX = descriptor.size.width;
 		windowData->sizeY = descriptor.size.height;
 
+		windowData->keyDownEventListener = descriptor.keyDownEventListener;
+		windowData->keyUpEventListener = descriptor.keyUpEventListener;
 		windowData->mouseDownEventListener = descriptor.mouseDownEventListener;
 		windowData->mouseMoveEventListener = descriptor.mouseMoveEventListener;
 		windowData->mouseUpEventListener = descriptor.mouseUpEventListener;
 		windowData->mouseWheelEventListener = descriptor.mouseWheelEventListener;
 		windowData->windowCloseEventListener = descriptor.windowCloseEventListener;
 		windowData->windowResizeEventListener = descriptor.windowResizeEventListener;
+
+		windowData->keyMap = sequence<bool>(static_cast<uint32>(KeyCode::__MAX_ENUM));
 
 		WIN32_ASSERT(SetPropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, windowClass));
 		WIN32_ASSERT(SetPropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData));
@@ -151,6 +155,12 @@ namespace ProjectA {
 		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
 
 		return &windowData.sizeX;
+	}
+
+	bool Window::isKeyDown(KeyCode keyCode) const {
+		const Win32WindowData& windowData = *static_cast<const Win32WindowData*>(data);
+
+		return windowData.keyMap[static_cast<uint32>(keyCode)];
 	}
 
 	bool Window::isMaximized() const {
