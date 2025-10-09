@@ -5,6 +5,9 @@
 
 namespace ProjectA {
 	class FlyCameraController : public CameraController<PerspectiveCamera> {
+		private:
+			static constexpr float32 ROTATION_SPEED = 2.0f;
+
 		public:
 			FlyCameraController() {
 				camera.setPosition({0.0_m, 0.0_m, -0.4_m});
@@ -38,7 +41,7 @@ namespace ProjectA {
 
 			// NOTE: `motion` must be given in radians.
 			void addAngularMotion(const vec3<float32>& motion) {
-				angularMotionOffset += motion;
+				angularMotionOffset += motion * ROTATION_SPEED;
 			}
 
 		private:

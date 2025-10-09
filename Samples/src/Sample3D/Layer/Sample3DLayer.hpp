@@ -92,8 +92,6 @@ namespace ProjectA {
 				move(deltaTime);
 
 				cameraController.update(deltaTime);
-
-				animateInstanceTest(deltaTime);
 			}
 
 			void preRender() override {
@@ -179,18 +177,6 @@ namespace ProjectA {
 				const vec3<float32> wishdir = normalized(wishvel) * MOVEMENT_SPEED * deltaTime;
 
 				cameraController.getCamera().setPosition(cameraController.getCamera().getPosition() + wishdir);
-			}
-
-			void animateInstanceTest(float32 deltaTime) {
-				static constexpr uint32 INSTANCE_INDEX = 0;
-				static constexpr float32 ROTATION_SPEED = 1_rad;
-				static const vec3<float32> ROTATION_AXIS = {0.0f, 1.0f, 0.0f};
-
-				RigidBody3D& rigidBody = scene.getInstance(INSTANCE_INDEX);
-				rigidBody.rotation += ROTATION_SPEED * ROTATION_AXIS * deltaTime;
-				rigidBody.updateTransform();
-
-				renderer.updateInstanceTransform(INSTANCE_INDEX, rigidBody.transform);
 			}
 
 		private:

@@ -9,6 +9,7 @@ namespace ProjectA {
 	struct ClusteredInstance {
 		mat4x4<float32> transform;
 		uint32 geometryIndex;
+		sint32 clusterOffset;
 	};
 
 	struct Cluster {
@@ -20,6 +21,9 @@ namespace ProjectA {
 
 		// Per instance cluster count.
 		uint32 clusterCount;
+
+		// Index of the first cluster belonging to this geometry.
+		uint32 clusterOffset;
 
 		// Number of instances using this geometry.
 		uint32 instanceCount;
@@ -55,6 +59,8 @@ namespace ProjectA {
 		uint32 totalClusterCount = 0;
 		uint32 totalInstanceCount = 0;
 
+		uint32 clusterOffset = 0;
+
 		for (uint32 geometryIndex = 0; geometryIndex < scene.getGeometryCount(); geometryIndex += 1) {
 			const ref<Geometry3D>& geometry = geometries[geometryIndex];
 
@@ -69,6 +75,7 @@ namespace ProjectA {
 			ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[geometryIndex];
 			clusteredGeometry.vertexCount = static_cast<uint32>(geometry->getVertexPositionComponents().count / 3);
 			clusteredGeometry.clusterCount = clusterCount;
+			clusteredGeometry.clusterOffset = clusterOffset;
 			clusteredGeometry.instanceCount = instanceCount;
 
 			totalVertexPositionComponentCount += geometry->getVertexPositionComponents().count;
@@ -77,6 +84,8 @@ namespace ProjectA {
 			totalIndexCount += clusterCount * CLUSTER_INDEX_COUNT;
 			totalClusterCount += clusterCount * instanceCount;
 			totalInstanceCount += instanceCount;
+
+			clusterOffset += clusterCount;
 		}
 
 		clusteredScene.clusters = sequence<Cluster>(totalClusterCount);
@@ -96,11 +105,7 @@ namespace ProjectA {
 		uint32 vertexOffset = 0;
 
 		// Cluster-wise index offset, including degenerate indices.
-		uint32 clusterIndexOffset = 0;
-
-		uint32 globalInstanceIndex = 0;
-
-		uint32 clusterOffset = 0;
+		uint32 indexOffset = 0;
 
 		for (uint32 geometryIndex = 0; geometryIndex < scene.getGeometryCount(); geometryIndex += 1) {
 			const ref<Geometry3D>& geometry = geometries[geometryIndex];
@@ -108,36 +113,38 @@ namespace ProjectA {
 			ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[geometryIndex];
 			clusteredGeometry.vertexOffset = vertexOffset;
 
-			vertexOffset += clusteredGeometry.vertexCount;
-
 			std::copy(geometry->getVertexPositionComponents().begin(), geometry->getVertexPositionComponents().end(), clusteredScene.vertexPositionComponents.begin() + vertexPositionComponentOffset);
 			// std::copy(geometry->getVertexNormalComponents().begin(), geometry->getVertexNormalComponents().end(), clusteredScene.vertexNormalComponents.begin() + vertexNormalComponentOffset);
 			// std::copy(geometry->getVertexTextureCoordinateComponents().begin(), geometry->getVertexTextureCoordinateComponents().end(), clusteredScene.vertexTextureCoordinateComponents.begin() + vertexTextureCoordinateComponentOffset);
 
-			std::copy(geometry->getVertexPositionIndices().begin(), geometry->getVertexPositionIndices().end(), clusteredScene.vertexPositionIndices.begin() + clusterIndexOffset);
-			// std::copy(geometry->getVertexNormalIndices().begin(), geometry->getVertexNormalIndices().end(), clusteredScene.vertexNormalIndices.begin() + clusterIndexOffset);
-			// std::copy(geometry->getVertexTextureCoordinateIndices().begin(), geometry->getVertexTextureCoordinateIndices().end(), clusteredScene.vertexTextureCoordinateIndices.begin() + clusterIndexOffset);
+			std::copy(geometry->getVertexPositionIndices().begin(), geometry->getVertexPositionIndices().end(), clusteredScene.vertexPositionIndices.begin() + indexOffset);
+			// std::copy(geometry->getVertexNormalIndices().begin(), geometry->getVertexNormalIndices().end(), clusteredScene.vertexNormalIndices.begin() + indexOffset);
+			// std::copy(geometry->getVertexTextureCoordinateIndices().begin(), geometry->getVertexTextureCoordinateIndices().end(), clusteredScene.vertexTextureCoordinateIndices.begin() + indexOffset);
 
-			clusterIndexOffset += clusteredGeometry.clusterCount * CLUSTER_INDEX_COUNT;
-
+			vertexOffset += clusteredGeometry.vertexCount;
+			indexOffset += clusteredGeometry.clusterCount * CLUSTER_INDEX_COUNT;
 			vertexPositionComponentOffset += static_cast<uint32>(geometry->getVertexPositionComponents().count);
 			// vertexNormalComponentOffset += static_cast<uint32>(geometry->getVertexNormalComponents().count);
 			// vertexTextureCoordinateComponentOffset += static_cast<uint32>(geometry->getVertexTextureCoordinateComponents().count);
+		}
 
-			// Loop over the instances using this geometry.
-			for (uint32 instanceIndex = 0; instanceIndex < clusteredGeometry.instanceCount; instanceIndex += 1, globalInstanceIndex += 1) {
-				// Loop over the clusters of this instance.
-				for (uint32 clusterIndex = 0; clusterIndex < clusteredGeometry.clusterCount; clusterIndex += 1) {
-					Cluster& cluster = clusteredScene.clusters[clusterOffset + clusterIndex];
-					cluster.instanceIndex = globalInstanceIndex;
-				}
+		clusterOffset = 0;
 
-				clusterOffset += clusteredGeometry.clusterCount;
+		for (uint32 instanceIndex = 0; instanceIndex < scene.getInstanceCount(); instanceIndex += 1) {
+			const RigidBody3D& instance = scene.getInstance(instanceIndex);
+			const ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[instance.geometryIndex];
 
-				ClusteredInstance& clusteredInstance = clusteredScene.instances[globalInstanceIndex];
-				clusteredInstance.transform = scene.getInstance(globalInstanceIndex).transform;
-				clusteredInstance.geometryIndex = geometryIndex;
+			ClusteredInstance& clusteredInstance = clusteredScene.instances[instanceIndex];
+			clusteredInstance.transform = instance.transform;
+			clusteredInstance.geometryIndex = instance.geometryIndex;
+			clusteredInstance.clusterOffset = clusteredGeometry.clusterOffset - clusterOffset;
+
+			for (uint32 clusterIndex = 0; clusterIndex < clusteredGeometry.clusterCount; clusterIndex += 1) {
+				Cluster& cluster = clusteredScene.clusters[clusterOffset + clusterIndex];
+				cluster.instanceIndex = instanceIndex;
 			}
+
+			clusterOffset += clusteredGeometry.clusterCount;
 		}
 
 		return clusteredScene;

@@ -26,8 +26,8 @@ namespace ProjectA {
 				mat4x4<float32> transform;
 				uint32 geometryIndex;
 
-				// Value to subtract from the index offset to get to the start of the geometry used by this instance.
-				uint32 indexRollback;
+				// Use as an offset in the index buffer to access the start of the geometry used by this instance.
+				sint32 clusterOffset;
 			};
 
 			struct Geometry {

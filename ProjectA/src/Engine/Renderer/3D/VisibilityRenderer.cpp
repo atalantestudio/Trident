@@ -637,27 +637,13 @@ namespace ProjectA {
 	}
 
 	void VisibilityRenderer::fillInstanceBuffer(Instance* mappedRange) const {
-		sequence<uint32> geometryInstanceRollbacks(scene->geometries.count);
-
-		uint32 currentGeometryIndex = 0;
-
 		for (uint32 instanceIndex = 0; instanceIndex < scene->instances.count; instanceIndex += 1) {
 			const auto& instance = scene->instances[instanceIndex];
 			const auto& geometry = scene->geometries[instance.geometryIndex];
 
-			uint32 rollback = geometryInstanceRollbacks[currentGeometryIndex];
-
-			if (currentGeometryIndex != instance.geometryIndex) {
-				rollback -= scene->geometries[currentGeometryIndex].clusterCount * CLUSTER_INDEX_COUNT;
-			}
-
 			mappedRange[instanceIndex].transform = instance.transform;
 			mappedRange[instanceIndex].geometryIndex = instance.geometryIndex;
-			mappedRange[instanceIndex].indexRollback = rollback;
-
-			currentGeometryIndex = instance.geometryIndex;
-
-			geometryInstanceRollbacks[currentGeometryIndex] += geometry.clusterCount * CLUSTER_INDEX_COUNT;
+			mappedRange[instanceIndex].clusterOffset = instance.clusterOffset;
 		}
 	}
 
