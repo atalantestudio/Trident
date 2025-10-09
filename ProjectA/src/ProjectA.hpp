@@ -9,7 +9,8 @@
 
 // Event
 #include "Engine/API/Event/EventDispatcher.hpp"
-#include "Engine/API/Event/KeyEvent.hpp"
+#include "Engine/API/Event/Keyboard/KeyDownEvent.hpp"
+#include "Engine/API/Event/Keyboard/KeyUpEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseDownEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseUpEvent.hpp"

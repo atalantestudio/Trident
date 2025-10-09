@@ -1,12 +1,13 @@
 #pragma once
 
-#include "Engine/API/Event/WindowEvent.hpp"
+#include "Engine/API/Event/Event.hpp"
 
 namespace ProjectA {
-	class WindowCloseEvent : public WindowEvent {
+	class WindowCloseEvent : public Event {
 		public:
 			explicit WindowCloseEvent() = default;
 
 			EVENT_TYPE(EventType::WINDOW_CLOSE)
+			EVENT_CATEGORY(EventCategory::WINDOW)
 	};
 }

@@ -2,18 +2,15 @@
 
 namespace ProjectA {
 	enum class EventType : uint8 {
-		NONE = 0,
-		APPLICATION_RENDER = 1,
-		APPLICATION_TICK = 2,
-		APPLICATION_UPDATE = 3,
-		KEY_DOWN = 4,
-		KEY_UP = 5,
-		KEY_TYPE = 6,
-		MOUSE_DOWN = 7,
-		MOUSE_UP = 8,
-		MOUSE_MOVE = 9,
-		MOUSE_WHEEL = 10,
-		WINDOW_CLOSE = 11,
-		WINDOW_RESIZE = 12,
+		NONE,
+		KEY_DOWN,
+		KEY_UP,
+		KEY_TYPE,
+		MOUSE_DOWN,
+		MOUSE_UP,
+		MOUSE_MOVE,
+		MOUSE_WHEEL,
+		WINDOW_CLOSE,
+		WINDOW_RESIZE,
 	};
 }

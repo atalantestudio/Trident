@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/API/Event/Event.hpp"
-#include "Engine/MouseButton.hpp"
+#include "Engine/Base/MouseButton.hpp"
 
 namespace ProjectA {
 	class MouseDownEvent : public Event {

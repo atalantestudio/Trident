@@ -1,14 +1,17 @@
 #pragma once
 
-#include "Engine/API/Event/WindowEvent.hpp"
+#include "Engine/API/Event/Event.hpp"
 
 namespace ProjectA {
-	class WindowResizeEvent : public WindowEvent {
+	class WindowResizeEvent : public Event {
 		public:
 			explicit WindowResizeEvent(sint32 width, sint32 height) :
 				width(width),
 				height(height)
 			{}
+
+			EVENT_TYPE(EventType::WINDOW_RESIZE)
+			EVENT_CATEGORY(EventCategory::WINDOW)
 
 			sint32 getWidth() const {
 				return width;
@@ -17,8 +20,6 @@ namespace ProjectA {
 			sint32 getHeight() const {
 				return height;
 			}
-
-			EVENT_TYPE(EventType::WINDOW_RESIZE)
 
 		private:
 			// TODO: Use vec2<sint32>.

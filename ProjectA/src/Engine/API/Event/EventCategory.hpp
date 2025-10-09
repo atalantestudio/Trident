@@ -3,12 +3,11 @@
 namespace ProjectA {
 	enum class EventCategory : uint8 {
 		NONE = 0,
-		APPLICATION = BIT(0),
-		INPUT = BIT(1),
-		KEYBOARD = BIT(2),
-		MOUSE = BIT(3),
-		MOUSE_BUTTON = BIT(4),
-		WINDOW = BIT(5),
+		INPUT = BIT(0),
+		KEYBOARD = BIT(1),
+		MOUSE = BIT(2),
+		MOUSE_BUTTON = BIT(3),
+		WINDOW = BIT(4),
 	};
 
 	AS_FLAG(EventCategory);

@@ -28,6 +28,6 @@
 #include "Engine/Module/Adapter/lyah.hpp"
 
 #include "Engine/Base/Color.hpp"
-#include "Engine/KeyCode.hpp"
+#include "Engine/Base/KeyCode.hpp"
 
 #include "Engine/Manifest.hpp"

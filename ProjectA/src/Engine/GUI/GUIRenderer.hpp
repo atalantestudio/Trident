@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/API/Event/WindowEvent.hpp"
+#include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/GUI/TextureArrayLayer.hpp"
 #include "Engine/GUI/Subcomponent.hpp"
 #include "Engine/ECS/ECS.hpp"
