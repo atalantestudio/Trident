@@ -76,32 +76,18 @@ namespace ProjectA {
 				const quat<float32> yaw = quat<float32>::axisAngle(UP, offset[1]);
 				const quat<float32> roll = quat<float32>::axisAngle(FORWARD, offset[2]);
 
-				orientation = orientation * pitch;
-				orientation = yaw * orientation;
-				orientation = orientation * roll;
-				orientation = normalized(orientation);
-			}
-
-			void updateView() {
-				view = mat4x4<float32>(orientation);
-
-				// TODO: Refactor.
-				const vec3<float32> positionInverse = -position;
-				const quat<float32> translation = conjugate(orientation) * quat<float32>(0.0f, positionInverse[0], positionInverse[1], positionInverse[2]) * orientation;
-				const vec4<float32> translationRow = {translation[1], translation[2], translation[3], 1.0f};
-
-				view = {view[0], view[1], view[2], translationRow};
+				orientation = normalized((yaw * orientation * pitch) * roll);
 			}
 
 			void updateProjection() {
-				// TODO: What to do if some values haven't been set?
-
 				projection = perspective(fieldOfView, aspectRatio, nearPlane, farPlane, 1.0f);
 			}
 
-			void updateProjectionView() {
-				// TODO: Check why the "projection * view" multiplication order doesn't return the right matrix.
-				projectionView = view * projection;
+			void updateView() {
+				const vec3<float32> translation = -position * conjugate(orientation);
+
+				view = mat4x4<float32>(orientation);
+				view[3] = {translation[0], translation[1], translation[2], 1.0f};
 			}
 
 		private:

@@ -15,6 +15,11 @@ namespace ProjectA {
 				return projectionView;
 			}
 
+			void updateProjectionView() {
+				// TODO: Check why the "projection * view" multiplication order doesn't return the right matrix.
+				projectionView = view * projection;
+			}
+
 		protected:
 			mat4x4<float32> projection = mat4x4<float32>::identity();
 			mat4x4<float32> view = mat4x4<float32>::identity();
