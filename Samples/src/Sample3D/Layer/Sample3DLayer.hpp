@@ -7,6 +7,9 @@
 
 namespace ProjectA {
 	class Sample3DLayer : public Layer {
+		private:
+			static constexpr float32 MOVEMENT_SPEED = 10.0f;
+
 		public:
 			void build() override {
 				renderer.setLayer(this);
@@ -86,9 +89,7 @@ namespace ProjectA {
 			}
 
 			void update(float32 deltaTime, float32 inverseDeltaTime) override {
-				/* if (getApplication()->getWindow()->isKeyDown(KeyCode::D)) {
-					ENGINE_DEBUG("D Down");
-				} */
+				move(deltaTime);
 
 				cameraController.update(deltaTime);
 
@@ -115,7 +116,7 @@ namespace ProjectA {
 		private:
 			bool onKeyDown(KeyDownEvent& event) {
 				switch (event.getKeyCode()) {
-					case KeyCode::P: {
+					case KeyCode::SPACE: {
 						const Window* window = getApplication()->getWindow();
 
 						if (!window->isPointerLocked()) {
@@ -153,6 +154,31 @@ namespace ProjectA {
 				cameraController.updateProjection();
 
 				return true;
+			}
+
+			void move(float32 deltaTime) {
+				const Window& window = *getApplication()->getWindow();
+
+				const vec3<float32> forward = cameraController.getCamera().getForward();
+				const vec3<float32> right = cameraController.getCamera().getRight();
+
+				const uint32 forwardKeyState = static_cast<uint32>(window.isKeyDown(KeyCode::Z));
+				const uint32 backKeyState = static_cast<uint32>(window.isKeyDown(KeyCode::S));
+				const uint32 rightKeyState = static_cast<uint32>(window.isKeyDown(KeyCode::D));
+				const uint32 leftKeyState = static_cast<uint32>(window.isKeyDown(KeyCode::Q));
+
+				const float32 forwardmove = static_cast<float32>(forwardKeyState) - backKeyState;
+				const float32 rightmove = static_cast<float32>(rightKeyState) - leftKeyState;
+
+				vec3<float32> wishvel = forward * forwardmove + right * rightmove;
+
+				if (lengthSquared(wishvel) < epsilon<float32>()) {
+					return;
+				}
+
+				const vec3<float32> wishdir = normalized(wishvel) * MOVEMENT_SPEED * deltaTime;
+
+				cameraController.getCamera().setPosition(cameraController.getCamera().getPosition() + wishdir);
 			}
 
 			void animateInstanceTest(float32 deltaTime) {

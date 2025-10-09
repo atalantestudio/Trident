@@ -8,6 +8,10 @@ namespace ProjectA {
 				return camera;
 			}
 
+			CameraType& getCamera() {
+				return camera;
+			}
+
 			virtual void update(float32 deltaTime) = 0;
 
 		protected:

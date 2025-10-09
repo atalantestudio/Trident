@@ -5,11 +5,9 @@
 
 namespace ProjectA {
 	class FlyCameraController : public CameraController<PerspectiveCamera> {
-		private:
-			static constexpr float32 ROTATION_SPEED = 1.0f;
-
 		public:
 			FlyCameraController() {
+				camera.setPosition({0.0_m, 0.0_m, -0.4_m});
 				camera.setFieldOfView(radians(60.0_deg));
 				camera.setNearPlane(0.001_m);
 				camera.setFarPlane(100.0_m);
@@ -24,26 +22,27 @@ namespace ProjectA {
 			}
 
 			void update(float32 deltaTime) override {
-				camera.updatePosition(linearMotionOffset * deltaTime);
+				// camera.updatePosition(linearMotionOffset * deltaTime);
 				camera.updateOrientation(angularMotionOffset * deltaTime);
+
 				camera.updateView();
 				camera.updateProjectionView();
 
-				linearMotionOffset = {0.0_m, 0.0_m, 0.0_m};
+				// linearMotionOffset = {0.0_m, 0.0_m, 0.0_m};
 				angularMotionOffset = {0.0_rad, 0.0_rad, 0.0_rad};
 			}
 
-			void addLinearMotion(const vec3<float32>& motion) {
+			/* void addLinearMotion(const vec3<float32>& motion) {
 				linearMotionOffset += motion;
-			}
+			} */
 
 			// NOTE: `motion` must be given in radians.
 			void addAngularMotion(const vec3<float32>& motion) {
-				angularMotionOffset += motion * ROTATION_SPEED;
+				angularMotionOffset += motion;
 			}
 
 		private:
-			vec3<float32> linearMotionOffset = {0.0_m, 0.0_m, 0.0_m};
+			// vec3<float32> linearMotionOffset = {0.0_m, 0.0_m, 0.0_m};
 			vec3<float32> angularMotionOffset = {0.0_rad, 0.0_rad, 0.0_rad};
 	};
 }
