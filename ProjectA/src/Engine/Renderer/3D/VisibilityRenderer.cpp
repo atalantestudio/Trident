@@ -32,7 +32,7 @@ namespace ProjectA {
 
 	void VisibilityRenderer::postSetScene() {
 		createVertexPositionComponentBuffer();
-		createVertexBuffer();
+		createVertexPositionIndexBuffer();
 		createClusterBuffer();
 		createInstanceBuffer();
 		createGeometryBuffer();
@@ -358,15 +358,15 @@ namespace ProjectA {
 		vertexPositionComponentBuffer = createBuffer(vertexPositionComponentBufferDescriptor);
 	}
 
-	void VisibilityRenderer::createVertexBuffer() {
+	void VisibilityRenderer::createVertexPositionIndexBuffer() {
 		DEBUG_ASSERT(scene != nullptr);
 
-		BufferDescriptor vertexBufferDescriptor{};
-		vertexBufferDescriptor.size = scene->clusters.count * CLUSTER_INDEX_COUNT * sizeof(Vertex);
-		vertexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
-		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+		BufferDescriptor vertexPositionIndexBufferDescriptor{};
+		vertexPositionIndexBufferDescriptor.size = scene->clusters.count * CLUSTER_INDEX_COUNT * sizeof(uint32);
+		vertexPositionIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexPositionIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
-		vertexBuffer = createBuffer(vertexBufferDescriptor);
+		vertexPositionIndexBuffer = createBuffer(vertexPositionIndexBufferDescriptor);
 	}
 
 	void VisibilityRenderer::createClusterBuffer() {
@@ -526,7 +526,7 @@ namespace ProjectA {
 	void VisibilityRenderer::fillSceneBuffers() const {
 		fillIndirectBuffer();
 
-		const ref<Buffer> stagingBuffer = createStagingBuffer(vertexPositionComponentBuffer->size + vertexBuffer->size + clusterBuffer->size + instanceBuffer->size + geometryBuffer->size);
+		const ref<Buffer> stagingBuffer = createStagingBuffer(vertexPositionComponentBuffer->size + vertexPositionIndexBuffer->size + clusterBuffer->size + instanceBuffer->size + geometryBuffer->size);
 
 		uint64 stagingBufferOffset = 0;
 
@@ -543,18 +543,18 @@ namespace ProjectA {
 
 		stagingBuffer->unmap();
 
-		Vertex* vertexMappedRange = stagingBuffer->map<Vertex>(stagingBufferOffset, vertexBuffer->size);
+		uint32* vertexPositionIndexMappedRange = stagingBuffer->map<uint32>(stagingBufferOffset, vertexPositionIndexBuffer->size);
 
-		fillVertexBuffer(vertexMappedRange);
+		fillVertexPositionIndexBuffer(vertexPositionIndexMappedRange);
 
-		BufferCopyRegion vertexBufferCopyRegion{};
-		vertexBufferCopyRegion.sourceOffset = stagingBufferOffset;
-		vertexBufferCopyRegion.destinationOffset = 0;
-		vertexBufferCopyRegion.size = vertexBuffer->size;
+		BufferCopyRegion vertexPositionIndexBufferCopyRegion{};
+		vertexPositionIndexBufferCopyRegion.sourceOffset = stagingBufferOffset;
+		vertexPositionIndexBufferCopyRegion.destinationOffset = 0;
+		vertexPositionIndexBufferCopyRegion.size = vertexPositionIndexBuffer->size;
 
 		stagingBuffer->unmap();
 
-		stagingBufferOffset += vertexBuffer->size;
+		stagingBufferOffset += vertexPositionIndexBuffer->size;
 
 		Cluster* clusterMappedRange = stagingBuffer->map<Cluster>(stagingBufferOffset, clusterBuffer->size);
 
@@ -601,7 +601,7 @@ namespace ProjectA {
 
 		commandEncoder->begin();
 		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexPositionComponentBuffer, {vertexPositionComponentBufferCopyRegion});
-		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexBuffer, {vertexBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexPositionIndexBuffer, {vertexPositionIndexBufferCopyRegion});
 		commandEncoder->copyBufferToBuffer(stagingBuffer, clusterBuffer, {clusterBufferCopyRegion});
 		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, {instanceBufferCopyRegion});
 		commandEncoder->copyBufferToBuffer(stagingBuffer, geometryBuffer, {geometryBufferCopyRegion});
@@ -624,10 +624,8 @@ namespace ProjectA {
 		std::copy(scene->vertexPositionComponents.begin(), scene->vertexPositionComponents.end(), mappedRange);
 	}
 
-	void VisibilityRenderer::fillVertexBuffer(Vertex* mappedRange) const {
-		for (uint32 vertexIndex = 0; vertexIndex < scene->vertexPositionIndices.count; vertexIndex += 1) {
-			mappedRange[vertexIndex].positionIndex = scene->vertexPositionIndices[vertexIndex];
-		}
+	void VisibilityRenderer::fillVertexPositionIndexBuffer(uint32* mappedRange) const {
+		std::copy(scene->vertexPositionIndices.begin(), scene->vertexPositionIndices.end(), mappedRange);
 	}
 
 	void VisibilityRenderer::fillClusterBuffer(Cluster* mappedRange) const {
@@ -665,10 +663,10 @@ namespace ProjectA {
 		vertexPositionComponentDescriptorBuffer.offset = 0;
 		vertexPositionComponentDescriptorBuffer.size = vertexPositionComponentBuffer->size;
 
-		DescriptorBuffer vertexDescriptorBuffer{};
-		vertexDescriptorBuffer.buffer = vertexBuffer;
-		vertexDescriptorBuffer.offset = 0;
-		vertexDescriptorBuffer.size = vertexBuffer->size;
+		DescriptorBuffer vertexPositionIndexDescriptorBuffer{};
+		vertexPositionIndexDescriptorBuffer.buffer = vertexPositionIndexBuffer;
+		vertexPositionIndexDescriptorBuffer.offset = 0;
+		vertexPositionIndexDescriptorBuffer.size = vertexPositionIndexBuffer->size;
 
 		DescriptorBuffer clusterDescriptorBuffer{};
 		clusterDescriptorBuffer.buffer = clusterBuffer;
@@ -700,10 +698,10 @@ namespace ProjectA {
 		vertexPositionComponentWriteDescriptorSet.bindingIndex = 0;
 		vertexPositionComponentWriteDescriptorSet.descriptorBuffers = {vertexPositionComponentDescriptorBuffer};
 
-		WriteDescriptorSet vertexWriteDescriptorSet{};
-		vertexWriteDescriptorSet.descriptorSet = clusterDescriptorSet;
-		vertexWriteDescriptorSet.bindingIndex = 1;
-		vertexWriteDescriptorSet.descriptorBuffers = {vertexDescriptorBuffer};
+		WriteDescriptorSet vertexPositionIndexWriteDescriptorSet{};
+		vertexPositionIndexWriteDescriptorSet.descriptorSet = clusterDescriptorSet;
+		vertexPositionIndexWriteDescriptorSet.bindingIndex = 1;
+		vertexPositionIndexWriteDescriptorSet.descriptorBuffers = {vertexPositionIndexDescriptorBuffer};
 
 		WriteDescriptorSet clusterWriteDescriptorSet{};
 		clusterWriteDescriptorSet.descriptorSet = clusterDescriptorSet;
@@ -728,7 +726,7 @@ namespace ProjectA {
 		getDevice()->updateDescriptorSets({
 			cameraWriteDescriptorSet,
 			vertexPositionComponentWriteDescriptorSet,
-			vertexWriteDescriptorSet,
+			vertexPositionIndexWriteDescriptorSet,
 			clusterWriteDescriptorSet,
 			instanceWriteDescriptorSet,
 			geometryWriteDescriptorSet,

@@ -14,10 +14,6 @@ namespace ProjectA {
 				float32 farPlane;
 			};
 
-			struct Vertex {
-				uint32 positionIndex;
-			};
-
 			struct Cluster {
 				uint32 instanceIndex;
 			};
@@ -76,7 +72,7 @@ namespace ProjectA {
 			void createIndirectBuffer();
 			void createCameraBuffer();
 			void createVertexPositionComponentBuffer();
-			void createVertexBuffer();
+			void createVertexPositionIndexBuffer();
 			void createClusterBuffer();
 			void createInstanceBuffer();
 			void createGeometryBuffer();
@@ -86,7 +82,7 @@ namespace ProjectA {
 			void fillSceneBuffers() const;
 			void fillIndirectBuffer() const;
 			void fillVertexPositionComponentBuffer(float32* mappedRange) const;
-			void fillVertexBuffer(Vertex* mappedRange) const;
+			void fillVertexPositionIndexBuffer(uint32* mappedRange) const;
 			void fillClusterBuffer(Cluster* mappedRange) const;
 			void fillInstanceBuffer(Instance* mappedRange) const;
 			void fillGeometryBuffer(Geometry* mappedRange) const;
@@ -126,7 +122,7 @@ namespace ProjectA {
 			ref<Buffer> indirectBuffer;
 			ref<Buffer> cameraBuffer;
 			ref<Buffer> vertexPositionComponentBuffer;
-			ref<Buffer> vertexBuffer;
+			ref<Buffer> vertexPositionIndexBuffer;
 			ref<Buffer> clusterBuffer;
 			ref<Buffer> instanceBuffer;
 			ref<Buffer> geometryBuffer;
