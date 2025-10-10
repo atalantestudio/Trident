@@ -31,6 +31,9 @@ namespace ProjectA {
 			glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 0, GL_DEBUG_SEVERITY_NOTIFICATION, 0, "Enabled OpenGL debug message callback.");
 		#endif
 
+		// Disabling multisample can help get crisp lines.
+		glDisable(GL_MULTISAMPLE);
+
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
 			glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
 		#else
