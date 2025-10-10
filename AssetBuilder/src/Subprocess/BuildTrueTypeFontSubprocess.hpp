@@ -12,7 +12,7 @@ namespace ProjectA {
 				const ByteStream<StreamOperation::READ> inputByteStream(&inputData[0], inputData.count, Endianness::BIG_ENDIAN);
 
 				if (!Filesystem::validateSignature<FileFormat::TTF>(inputByteStream)) {
-					ENGINE_INFO("Ignored non-TTF file \"[]\".", path);
+					ENGINE_INFO("Ignoring non-TTF file \"[]\".", path);
 
 					return;
 				}

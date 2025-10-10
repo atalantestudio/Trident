@@ -352,7 +352,7 @@ namespace ProjectA {
 	// Returns true if the provided file has a valid TTF signature.
 	template<>
 	bool Filesystem::validateSignature<FileFormat::TTF>(const ByteStream<StreamOperation::READ>& stream) {
-		if (stream.getRemainingByteSize() < sizeof(uint32)) {
+		if (stream.getRemainingSize() < sizeof(uint32)) {
 			return false;
 		}
 

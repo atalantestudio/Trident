@@ -2,7 +2,8 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Process/BuildProcess.hpp"
+#include "Process/BuildFontProcess.hpp"
+#include "Process/BuildGeometryProcess.hpp"
 
 namespace ProjectA {
 	class AssetBuilderApplication : public Application {
@@ -12,7 +13,8 @@ namespace ProjectA {
 			{
 				setConsoleArguments(argumentCount, argumentValues);
 
-				registerProcess<BuildProcess>(getConsoleArguments());
+				registerProcess<BuildFontProcess>(getConsoleArguments());
+				registerProcess<BuildGeometryProcess>(getConsoleArguments());
 			}
 	};
 

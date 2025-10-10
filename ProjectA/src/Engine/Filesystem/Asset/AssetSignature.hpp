@@ -3,6 +3,7 @@
 namespace ProjectA {
 	enum class AssetSignature : uint32 {
 		TFO = 0x491b9ec5,
+		TGE = 0xc13057a5,
 		TIM = 0x513f8fd2,
 	};
 }

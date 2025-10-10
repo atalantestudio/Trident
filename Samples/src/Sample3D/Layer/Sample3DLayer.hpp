@@ -15,17 +15,24 @@ namespace ProjectA {
 				renderer.setLayer(this);
 				renderer.build();
 
-				static constexpr char8* lemonPath = "Asset/Model/lemon/lemon.fbx";
+				const AssetLibrary& assetLibrary = *getApplication()->getAssetLibrary();
+				const ref<GeometryAsset>& lemonGeometryAsset = assetLibrary.findGeometryAsset("lemon");
+				const ref<GeometryAsset>& stoolGeometryAsset = assetLibrary.findGeometryAsset("folding_wooden_stool");
+
+				const ref<Geometry3D> lemonGeometry = createRef<Geometry3D>(lemonGeometryAsset);
+				const ref<Geometry3D> stoolGeometry = createRef<Geometry3D>(stoolGeometryAsset);
+
+				/* static constexpr char8* lemonPath = "Asset/Model/lemon/lemon.fbx";
 				static constexpr char8* stoolPath = "Asset/Model/folding_wooden_stool/folding_wooden_stool.fbx";
 
 				const sequence<uint8> lemonData = Filesystem::openBuffer(lemonPath);
 				const File<FileFormat::FBX> lemonFile = Filesystem::decode<FileFormat::FBX>(lemonData);
 
 				const sequence<uint8> stoolData = Filesystem::openBuffer(stoolPath);
-				const File<FileFormat::FBX> stoolFile = Filesystem::decode<FileFormat::FBX>(stoolData);
+				const File<FileFormat::FBX> stoolFile = Filesystem::decode<FileFormat::FBX>(stoolData); */
 
-				const uint32 lemonGeometryIndex = scene.registerGeometry(FBXToGeometry3D(lemonFile));
-				const uint32 stoolGeometryIndex = scene.registerGeometry(FBXToGeometry3D(stoolFile));
+				const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
+				const uint32 stoolGeometryIndex = scene.registerGeometry(stoolGeometry);
 
 				InstanceDescriptor lemon1InstanceDescriptor{};
 				lemon1InstanceDescriptor.geometryIndex = lemonGeometryIndex;

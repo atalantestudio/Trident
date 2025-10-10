@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/Filesystem/Asset/FontAsset.hpp"
+#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
 #include "Engine/Filesystem/Asset/AssetSignature.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -28,6 +29,12 @@ namespace ProjectA {
 			void loadAssets() {
 				std::filesystem::recursive_directory_iterator assetIterator;
 
+				assetIterator = std::filesystem::recursive_directory_iterator(std::filesystem::current_path() / "Asset/Geometry");
+
+				for (const std::filesystem::directory_entry& assetEntry : assetIterator) {
+					loadGeometryAsset(assetEntry);
+				}
+
 				assetIterator = std::filesystem::recursive_directory_iterator(std::filesystem::current_path() / "Asset/Image");
 
 				for (const std::filesystem::directory_entry& assetEntry : assetIterator) {
@@ -51,24 +58,28 @@ namespace ProjectA {
 			}
 
 			ref<FontAsset> findFontAsset(const std::string& stem) const {
-				const auto iterator = fontAssetStemToAssetIndex.find(stem);
+				return findAssetByStem<FontAsset>(fontAssetStemToAssetIndex, stem);
+			}
 
-				ENGINE_ASSERT(iterator != fontAssetStemToAssetIndex.end(), "Cannot locate font asset \"[]\".", stem);
-				ENGINE_ASSERT(iterator->second < assets.size(), "The found asset index is overflowing.");
-
-				return std::static_pointer_cast<FontAsset>(assets[iterator->second]);
+			ref<GeometryAsset> findGeometryAsset(const std::string& stem) const {
+				return findAssetByStem<GeometryAsset>(geometryAssetStemToAssetIndex, stem);
 			}
 
 			ref<ImageAsset> findImageAsset(const std::string& stem) const {
-				const auto iterator = imageAssetStemToAssetIndex.find(stem);
-
-				ENGINE_ASSERT(iterator != imageAssetStemToAssetIndex.end(), "Cannot locate image asset \"[]\".", stem);
-				ENGINE_ASSERT(iterator->second < assets.size(), "The found asset index is overflowing.");
-
-				return std::static_pointer_cast<ImageAsset>(assets[iterator->second]);
+				return findAssetByStem<ImageAsset>(imageAssetStemToAssetIndex, stem);
 			}
 
 		private:
+			template<typename AssetType>
+			ref<AssetType> findAssetByStem(const std::unordered_map<std::string, uint32>& assetStemToAssetIndex, const std::string& stem) const {
+				const auto iterator = assetStemToAssetIndex.find(stem);
+
+				ENGINE_ASSERT(iterator != assetStemToAssetIndex.end(), "Cannot locate asset \"[]\".", stem);
+				ENGINE_ASSERT(iterator->second < assets.size(), "The found asset index is overflowing.");
+
+				return std::static_pointer_cast<AssetType>(assets[iterator->second]);
+			}
+
 			void loadFontAsset(const std::filesystem::directory_entry& assetEntry) {
 				if (assetEntry.is_directory()) {
 					return;
@@ -98,6 +109,37 @@ namespace ProjectA {
 				fontAssetStemToAssetIndex.insert({stem, fontAssetIndex});
 
 				assets.emplace_back(fontAsset);
+			}
+
+			void loadGeometryAsset(const std::filesystem::directory_entry& assetEntry) {
+				if (assetEntry.is_directory()) {
+					return;
+				}
+
+				const std::string assetPath = assetEntry.path().string();
+
+				const sequence<uint8> data = Filesystem::openBuffer(assetPath);
+
+				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count, Endianness::LITTLE_ENDIAN);
+
+				const AssetSignature signature = byteStream.peek<AssetSignature>();
+
+				if (signature != AssetSignature::TGE) {
+					return;
+				}
+
+				byteStream.jump(sizeof(AssetSignature));
+
+				const ref<GeometryAsset> geometryAsset = Filesystem::decodeAsset<GeometryAsset>(byteStream);
+
+				const uint32 geometryAssetIndex = static_cast<uint32>(assets.size());
+
+				const std::string stem = assetEntry.path().stem().string();
+
+				assetIdentifierToAssetIndex.insert({geometryAsset->identifier, geometryAssetIndex});
+				geometryAssetStemToAssetIndex.insert({stem, geometryAssetIndex});
+
+				assets.emplace_back(geometryAsset);
 			}
 
 			void loadImageAsset(const std::filesystem::directory_entry& assetEntry) {
@@ -173,7 +215,7 @@ namespace ProjectA {
 				}
 
 				const uint64 unicodeMapOffset = byteStream.getByteOffset();
-				const uint64 unicodeMapSize = byteStream.getRemainingByteSize() / (sizeof(uint16) + sizeof(uint32));
+				const uint64 unicodeMapSize = byteStream.getRemainingSize() / (sizeof(uint16) + sizeof(uint32));
 
 				fontAssetDescriptor.unicodeMap.reserve(unicodeMapSize);
 
@@ -208,7 +250,7 @@ namespace ProjectA {
 
 				imageAssetDescriptor.data = sequence<uint8>(imageAssetDescriptor.layerCount * imageAssetDescriptor.extent.width * imageAssetDescriptor.extent.height * imageAssetDescriptor.extent.depth * CHANNEL_COUNT);
 
-				const uint64 maxIterationCount = byteStream.getRemainingByteSize();
+				const uint64 maxIterationCount = byteStream.getRemainingSize();
 
 				Filesystem::QOIDecoderContentOnly(byteStream, imageAssetDescriptor.data, CHANNEL_COUNT, maxIterationCount);
 
@@ -219,6 +261,7 @@ namespace ProjectA {
 			std::vector<ref<Asset>> assets;
 			std::unordered_map<uint32, uint32> assetIdentifierToAssetIndex;
 			std::unordered_map<std::string, uint32> fontAssetStemToAssetIndex;
+			std::unordered_map<std::string, uint32> geometryAssetStemToAssetIndex;
 			std::unordered_map<std::string, uint32> imageAssetStemToAssetIndex;
 	};
 }

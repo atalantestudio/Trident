@@ -134,6 +134,17 @@ namespace ProjectA {
 		return Node;
 	}
 
+	template<>
+	bool Filesystem::validateSignature<FileFormat::FBX>(const ByteStream<StreamOperation::READ>& stream) {
+		if (stream.getRemainingSize() < 22) {
+			return false;
+		}
+
+		const char8* magic = pointer_cast<const char8*>(stream.getBytePosition());
+
+		return std::strcmp(magic, "Kaydara FBX Binary  \x00") == 0;
+	}
+
 	// https://code.blender.org/2013/08/fbx-binary-file-format-specification
 	// https://banexdevblog.wordpress.com/2014/06/23/a-quick-tutorial-about-the-fbx-ascii-format
 	template<>
@@ -142,9 +153,7 @@ namespace ProjectA {
 
 		ByteStream<StreamOperation::READ> stream(&data[0], data.count, Endianness::LITTLE_ENDIAN);
 
-		const char8* magic = pointer_cast<const char8*>(stream.getBytePosition());
-
-		ENGINE_ASSERT(std::strcmp(magic, "Kaydara FBX Binary  \x00") == 0, "Invalid TTF file signature.");
+		ENGINE_ASSERT(Filesystem::validateSignature<FileFormat::FBX>(stream), "Invalid FBX file signature.");
 
 		stream.jump(21);
 

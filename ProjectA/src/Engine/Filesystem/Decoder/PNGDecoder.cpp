@@ -63,7 +63,7 @@ namespace ProjectA {
 		uint64 compressedDataSize = 0;
 		uint8 channelCount = 0;
 
-		while (stream.getRemainingByteSize() > 0) {
+		while (stream.getRemainingSize() > 0) {
 			const uint32 byteLength = stream.read<uint32>();
 			const uint32 type = stream.read<uint32>(true);
 
@@ -175,7 +175,7 @@ namespace ProjectA {
 
 		stream.seek(sizeof(uint64));
 
-		while (stream.getRemainingByteSize() > 0) {
+		while (stream.getRemainingSize() > 0) {
 			const uint32 byteLength = stream.read<uint32>();
 			const uint32 type = stream.read<uint32>(true);
 

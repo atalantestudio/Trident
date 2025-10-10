@@ -23,6 +23,16 @@ namespace ProjectA {
 				vertexTextureCoordinateIndices(descriptor.vertexTextureCoordinateIndices)
 			{}
 
+			explicit Geometry3D(const ref<GeometryAsset>& geometryAsset) :
+				vertexPositionComponents(geometryAsset->getVertexPositionComponents()),
+				vertexPositionIndices(geometryAsset->getIndices().count)
+			{
+				// TODO: Copy the array instead of using a loop.
+				for (uint32 indexOffset = 0; indexOffset < vertexPositionIndices.count; indexOffset += 1) {
+					vertexPositionIndices[indexOffset] = geometryAsset->getIndices()[indexOffset].positionIndex;
+				}
+			}
+
 			const sequence<float32>& getVertexPositionComponents() const {
 				return vertexPositionComponents;
 			}
@@ -58,5 +68,7 @@ namespace ProjectA {
 			sequence<uint32> vertexNormalIndices;
 			sequence<float32> vertexTextureCoordinateComponents;
 			sequence<uint32> vertexTextureCoordinateIndices;
+
+			// TODO: Store cluster count?
 	};
 }

@@ -36,6 +36,9 @@ namespace ProjectA {
 		template<FileFormat FileFormat>
 		File<FileFormat> decode(const sequence<uint8>& data);
 
+		template<typename AssetType>
+		ref<AssetType> decodeAsset(ByteStream<StreamOperation::READ>& byteStream);
+
 		void QOIDecoderContentOnly(ByteStream<StreamOperation::READ>& stream, sequence<uint8>& data, uint8 channelCount, uint64 maxIterationCount);
 	};
 }
