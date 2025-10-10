@@ -1,14 +1,13 @@
 #pragma once
 
 #include "Engine/API/Camera/Controller/FlyCameraController.hpp"
-#include "Engine/Filesystem/Asset/FBXToGeometry.hpp"
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/3D/VisibilityRenderer.hpp"
 
 namespace ProjectA {
 	class Sample3DLayer : public Layer {
 		private:
-			static constexpr float32 MOVEMENT_SPEED = 10.0f;
+			static constexpr float32 MOVEMENT_SPEED = 1.0f;
 
 		public:
 			void build() override {
@@ -17,22 +16,19 @@ namespace ProjectA {
 
 				const AssetLibrary& assetLibrary = *getApplication()->getAssetLibrary();
 				const ref<GeometryAsset>& lemonGeometryAsset = assetLibrary.findGeometryAsset("lemon");
+				// const ref<GeometryAsset>& shelfGeometryAsset = assetLibrary.findGeometryAsset("shelf");
 				const ref<GeometryAsset>& stoolGeometryAsset = assetLibrary.findGeometryAsset("folding_wooden_stool");
+				// const ref<GeometryAsset>& tableGeometryAsset = assetLibrary.findGeometryAsset("wooden_table");
 
 				const ref<Geometry3D> lemonGeometry = createRef<Geometry3D>(lemonGeometryAsset);
+				// const ref<Geometry3D> shelfGeometry = createRef<Geometry3D>(shelfGeometryAsset);
 				const ref<Geometry3D> stoolGeometry = createRef<Geometry3D>(stoolGeometryAsset);
-
-				/* static constexpr char8* lemonPath = "Asset/Model/lemon/lemon.fbx";
-				static constexpr char8* stoolPath = "Asset/Model/folding_wooden_stool/folding_wooden_stool.fbx";
-
-				const sequence<uint8> lemonData = Filesystem::openBuffer(lemonPath);
-				const File<FileFormat::FBX> lemonFile = Filesystem::decode<FileFormat::FBX>(lemonData);
-
-				const sequence<uint8> stoolData = Filesystem::openBuffer(stoolPath);
-				const File<FileFormat::FBX> stoolFile = Filesystem::decode<FileFormat::FBX>(stoolData); */
+				// const ref<Geometry3D> tableGeometry = createRef<Geometry3D>(tableGeometryAsset);
 
 				const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
+				// const uint32 shelfGeometryIndex = scene.registerGeometry(shelfGeometry);
 				const uint32 stoolGeometryIndex = scene.registerGeometry(stoolGeometry);
+				// const uint32 tableGeometryIndex = scene.registerGeometry(tableGeometry);
 
 				InstanceDescriptor lemon1InstanceDescriptor{};
 				lemon1InstanceDescriptor.geometryIndex = lemonGeometryIndex;
@@ -49,23 +45,7 @@ namespace ProjectA {
 				stoolInstanceDescriptor.position = {0.5_m, -0.225_m, 1.0_m};
 				stoolInstanceDescriptor.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad};
 
-				scene.registerInstance(lemon1InstanceDescriptor);
-				scene.registerInstance(lemon2InstanceDescriptor);
-				scene.registerInstance(stoolInstanceDescriptor);
-
-				/* static constexpr char8* shelfPath = "Asset/Model/shelf/shelf.fbx";
-				static constexpr char8* woodenTable02Path = "Asset/Model/wooden_table_02/wooden_table_02.fbx";
-
-				const sequence<uint8> shelfData = Filesystem::openBuffer(shelfPath);
-				const File<FileFormat::FBX> shelfFile = Filesystem::decode<FileFormat::FBX>(shelfData);
-
-				const sequence<uint8> woodenTable02Data = Filesystem::openBuffer(woodenTable02Path);
-				const File<FileFormat::FBX> woodenTable02File = Filesystem::decode<FileFormat::FBX>(woodenTable02Data);
-
-				const uint32 woodenTable02GeometryIndex = scene.registerGeometry(FBXToGeometry3D(woodenTable02File));
-				const uint32 shelfGeometryIndex = scene.registerGeometry(FBXToGeometry3D(shelfFile));
-
-				InstanceDescriptor shelf1InstanceDescriptor{};
+				/* InstanceDescriptor shelf1InstanceDescriptor{};
 				shelf1InstanceDescriptor.geometryIndex = shelfGeometryIndex;
 				shelf1InstanceDescriptor.position = {-2.0_m, -1.0_m, 3.0_m};
 				shelf1InstanceDescriptor.rotation = {pi<float32>() * 0.5f, 0.0_rad, 0.0_rad};
@@ -78,11 +58,14 @@ namespace ProjectA {
 				InstanceDescriptor shelf2InstanceDescriptor{};
 				shelf2InstanceDescriptor.geometryIndex = shelfGeometryIndex;
 				shelf2InstanceDescriptor.position = {2.0_m, -1.0_m, 3.0_m};
-				shelf2InstanceDescriptor.rotation = {pi<float32>() * 0.5f, pi<float32>(), 0.0_rad};
+				shelf2InstanceDescriptor.rotation = {pi<float32>() * 0.5f, pi<float32>(), 0.0_rad}; */
 
-				scene.registerInstance(shelf1InstanceDescriptor);
-				scene.registerInstance(woodenTable02InstanceDescriptor);
-				scene.registerInstance(shelf2InstanceDescriptor); */
+				scene.registerInstance(lemon1InstanceDescriptor);
+				scene.registerInstance(lemon2InstanceDescriptor);
+				scene.registerInstance(stoolInstanceDescriptor);
+				// scene.registerInstance(shelf1InstanceDescriptor);
+				// scene.registerInstance(woodenTable02InstanceDescriptor);
+				// scene.registerInstance(shelf2InstanceDescriptor);
 
 				clusteredScene = clusterizeScene(scene);
 
