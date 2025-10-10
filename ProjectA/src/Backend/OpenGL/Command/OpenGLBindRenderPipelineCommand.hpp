@@ -46,6 +46,7 @@ namespace ProjectA {
 				}
 
 				if (renderPipeline->minSampleShading != 0.0f) {
+					glEnable(GL_MULTISAMPLE);
 					glEnable(GL_SAMPLE_SHADING);
 
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_0
@@ -55,6 +56,7 @@ namespace ProjectA {
 					#endif
 				}
 				else {
+					glDisable(GL_MULTISAMPLE);
 					glDisable(GL_SAMPLE_SHADING);
 				}
 
