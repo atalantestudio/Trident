@@ -71,7 +71,8 @@ namespace ProjectA {
 				return byteOffset;
 			}
 
-			uint64 getRemainingByteSize() const {
+			// Returns the remaining byte size.
+			uint64 getRemainingSize() const {
 				return size - byteOffset;
 			}
 
@@ -82,7 +83,7 @@ namespace ProjectA {
 			// Advances by the provided byte count.
 			// `byteCount` must be less than or equal to the remaining bytes in the offsetted stream.
 			void jump(uint64 byteCount) {
-				const uint64 remainingByteSize = getRemainingByteSize();
+				const uint64 remainingByteSize = getRemainingSize();
 
 				ENGINE_ASSERT(byteCount <= remainingByteSize, "Attempted to jump [] bytes, but only [] were remaining.", byteCount, remainingByteSize);
 

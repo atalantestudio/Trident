@@ -23,7 +23,7 @@ namespace ProjectA {
 			// The byte size of T must be <= the remaining bytes in the stream.
 			template<typename T>
 			T peek(bool swapEndianness = false) const {
-				const uint64 remainingByteSize = getRemainingByteSize();
+				const uint64 remainingByteSize = getRemainingSize();
 
 				ENGINE_ASSERT(sizeof(T) <= remainingByteSize, "Attempted to peek [] bytes, but only [] were remaining.", sizeof(T), remainingByteSize);
 
@@ -59,16 +59,24 @@ namespace ProjectA {
 		public:
 			explicit ByteStream(uint64 size, Endianness endianness) :
 				Stream(size, endianness),
-				data(new uint8[size])
+				data(new uint8[size]())
 			{}
 
 			~ByteStream() {
 				delete[] data;
 			}
 
+			const uint8* getBytePosition() const {
+				return data + byteOffset;
+			}
+
+			uint8* getBytePosition() {
+				return data + byteOffset;
+			}
+
 			template<typename T>
 			void write(T value, bool swapEndianness = false) {
-				const uint64 remainingByteSize = getRemainingByteSize();
+				const uint64 remainingByteSize = getRemainingSize();
 
 				ENGINE_ASSERT(sizeof(T) <= remainingByteSize, "Attempted to write [] bytes, but only [] were remaining.", sizeof(T), remainingByteSize);
 

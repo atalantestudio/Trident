@@ -11,6 +11,9 @@ namespace ProjectA {
 		private:
 			typedef uint64 BitStreamSize;
 
+		private:
+			static constexpr uint8 MAX_READ_OR_PEEK_BIT_COUNT = 8 * sizeof(BitStreamSize);
+
 		public:
 			explicit BitStream(const uint8* data, uint64 byteSize, Endianness endianness) :
 				data(data),
@@ -28,6 +31,7 @@ namespace ProjectA {
 				return data + byteOffset + bitOffset / 8;
 			}
 
+			// Returns the remaining bit size.
 			uint64 getRemainingBitSize() const {
 				return (byteSize - byteOffset) * 8 - bitOffset;
 			}
@@ -45,7 +49,7 @@ namespace ProjectA {
 
 				uint8 jumpBitCount = 0;
 
-				if (bitCount > static_cast<uint8>((sizeof(BitStreamSize) * 8 - 1) - bitOffset)) {
+				if (bitOffset + bitCount >= sizeof(BitStreamSize) * 8) {
 					jumpBitCount = bitOffset;
 
 					const uint64 jumpByteCount = (bitOffset + bitCount) / (sizeof(bitBuffer) * 8);
@@ -68,7 +72,7 @@ namespace ProjectA {
 			template<typename T>
 			T peek(uint8 bitCount, bool swapEndianness = false) const {
 				ENGINE_ASSERT(bitCount <= sizeof(T) * 8, "Cannot peek [] bits for a []-bit type.", static_cast<sint32>(bitCount), sizeof(T) * 8);
-				ENGINE_ASSERT(bitCount <= MAX_READ_OR_PEEK_BIT_COUNT, "Cannot peek more than [] bits at once.", MAX_READ_OR_PEEK_BIT_COUNT);
+				ENGINE_ASSERT(bitCount <= MAX_READ_OR_PEEK_BIT_COUNT, "Cannot peek more than [] bits at once.", static_cast<sint32>(MAX_READ_OR_PEEK_BIT_COUNT));
 
 				const uint64 remainingBitSize = getRemainingBitSize();
 
@@ -88,7 +92,10 @@ namespace ProjectA {
 					valueStreamSize |= (*((BitStreamSize*) (data + byteOffset + sizeof(bitBuffer)))) << offset;
 				}
 
-				valueStreamSize &= ((1ULL << bitCount) - 1);
+				// Create a mask from the bit count.
+				const BitStreamSize bitCountMask = (static_cast<BitStreamSize>(1) << bitCount) - 1;
+
+				valueStreamSize &= bitCountMask;
 
 				return *pointer_cast<const T*>(&valueStreamSize);
 			}
@@ -107,7 +114,6 @@ namespace ProjectA {
 			}
 
 			// TODO: Implement seek<T>(uint8 bitCount).
-			// TODO: Implement write<T>(uint8 bitCount).
 
 			// Uncompresses data using the DEFLATE decompression algorithm.
 			// `uncompressedSize` is multiplied by the size of T.
@@ -243,14 +249,116 @@ namespace ProjectA {
 			void parseCompressedZlibBlock(uint8* data, uint64& dataOffset, uint8 BTYPE);
 
 		private:
-			static constexpr uint8 MAX_READ_OR_PEEK_BIT_COUNT = 8 * sizeof(BitStreamSize);
-
-		private:
 			// TODO: Should stream be BitStreamSize* instead?
 			const uint8* data;
 
-			// Bit accumulator (missed opportunity to name this "bitBucket").
+			// Bit accumulator.
+			// Missed opportunity to name this "bitBucket".
 			BitStreamSize bitBuffer = 0;
+
+			// Size of the stream in bytes.
+			uint64 byteSize;
+
+			// Offset of byte that is currently being read.
+			uint64 byteOffset = 0;
+
+			// Offset within the bit buffer.
+			uint8 bitOffset: 6;
+
+			Endianness endianness;
+	};
+
+	// TODO: Remove duplicated methods.
+	template<>
+	class BitStream<StreamOperation::WRITE> {
+		private:
+			typedef uint64 BitStreamSize;
+
+		private:
+			static constexpr uint8 MAX_WRITE_BIT_COUNT = 8 * sizeof(BitStreamSize);
+
+		public:
+			explicit BitStream(uint8* data, uint64 byteSize, Endianness endianness) :
+				data(data),
+				byteSize(byteSize),
+				bitOffset(0),
+				endianness(endianness)
+			{}
+
+			uint64 getBitOffset() const {
+				return byteOffset * 8 + bitOffset;
+			}
+
+			const uint8* getBytePosition() const {
+				return data + byteOffset + bitOffset / 8;
+			}
+
+			// Returns the remaining bit size.
+			uint64 getRemainingBitSize() const {
+				return (byteSize - byteOffset) * 8 - bitOffset;
+			}
+
+			Endianness getEndianness() const {
+				return endianness;
+			}
+
+			// Advances the offsets by the provided bit count.
+			// The bit count must be <= the remaining bits in the stream.
+			void jump(uint64 bitCount) {
+				const uint64 remainingBitSize = getRemainingBitSize();
+
+				ENGINE_ASSERT(bitCount <= remainingBitSize, "Attempted to jump [] bits, but only [] were remaining.", bitCount, remainingBitSize);
+
+				uint8 jumpBitCount = 0;
+
+				if (bitOffset + bitCount >= sizeof(BitStreamSize) * 8) {
+					jumpBitCount = bitOffset;
+
+					const uint64 jumpByteCount = (bitOffset + bitCount) / (sizeof(BitStreamSize) * 8);
+
+					bitOffset = 0;
+					byteOffset += sizeof(BitStreamSize) * jumpByteCount;
+				}
+
+				jumpBitCount = (jumpBitCount + bitCount) % (sizeof(BitStreamSize) * 8);
+
+				bitOffset += jumpBitCount;
+			}
+
+			// TODO: Implement seek<T>(uint8 bitCount).
+
+			// Writes `bitCount` bits of `value` to the stream.
+			template<typename T>
+			void write(T value, uint8 bitCount) {
+				ENGINE_ASSERT(bitCount <= sizeof(T) * 8, "The bit count ([]) cannot be greater than the number of bits in the value ([]).", static_cast<sint32>(bitCount), sizeof(T) * 8);
+				ENGINE_ASSERT(bitCount <= MAX_WRITE_BIT_COUNT, "Cannot write more than [] bits at once.", static_cast<sint32>(MAX_WRITE_BIT_COUNT));
+
+				const uint64 remainingBitSize = getRemainingBitSize();
+
+				ENGINE_ASSERT(bitCount <= remainingBitSize, "Attempted to write [] bits, but only [] were remaining.", static_cast<sint32>(bitCount), remainingBitSize);
+
+				// Create a mask from the bit count.
+				const T bitCountMask = (static_cast<T>(1) << bitCount) - 1;
+
+				const BitStreamSize partToBeUpdated = static_cast<BitStreamSize>(bitCountMask) << bitOffset;
+
+				BitStreamSize* bitBuffer = pointer_cast<BitStreamSize*>(data + byteOffset);
+
+				bitBuffer[0] |= static_cast<BitStreamSize>(value & bitCountMask) << bitOffset;
+
+				if (bitOffset + bitCount >= sizeof(BitStreamSize) * 8) {
+					// If the value overflows the offsetted bit buffer, continue the write beyond the bit buffer.
+					const BitStreamSize offset = sizeof(BitStreamSize) * 8 - bitOffset;
+
+					bitBuffer[1] |= static_cast<BitStreamSize>(value & bitCountMask) >> offset;
+				}
+
+				jump(bitCount);
+			}
+
+		private:
+			// TODO: Should stream be BitStreamSize* instead?
+			uint8* data;
 
 			// Size of the stream in bytes.
 			uint64 byteSize;
