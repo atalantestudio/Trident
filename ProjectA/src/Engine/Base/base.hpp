@@ -11,7 +11,10 @@
 #include "Engine/Base/Endianness.hpp"
 #include "Engine/Base/Platform/Platform.hpp"
 #include "Engine/Base/Log.hpp"
+
+// TODO: Import BREAKPOINT macro above everything else.
 #include "Engine/Base/Macros.hpp"
+
 #include "Engine/Base/Extent.hpp"
 #include "Engine/Base/Limits.hpp"
 #include "Engine/Base/UDL.hpp"

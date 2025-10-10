@@ -7,4 +7,16 @@ namespace ProjectA {
 
 		return ((setBitCount + (setBitCount >> 3)) & 030707070707) % 63;
 	}
+
+	// Returns the number of bits necessary to store the provided value.
+	static uint8 calculateBitCount(uint32 value) {
+		uint8 bitCount = 0;
+
+		while (value) {
+			bitCount += 1;
+			value >>= 1;
+		}
+
+		return bitCount;
+	}
 }
