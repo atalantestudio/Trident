@@ -25,12 +25,12 @@ namespace ProjectA {
 		const uint32 largestIndex = vertexCount - 1;
 		const uint8 indexBitCount = calculateBitCount(largestIndex);
 
-		geometryAssetDescriptor.indices = sequence<Index>(indexCount);
+		geometryAssetDescriptor.vertexPositionIndices = sequence<uint32>(indexCount);
 
 		BitStream<StreamOperation::READ> bitStream(byteStream.getBytePosition(), byteStream.getRemainingSize(), Endianness::LITTLE_ENDIAN);
 
 		for (uint32 indexOffset = 0; indexOffset < indexCount; indexOffset += 1) {
-			geometryAssetDescriptor.indices[indexOffset].positionIndex = bitStream.read<uint32>(indexBitCount);
+			geometryAssetDescriptor.vertexPositionIndices[indexOffset] = bitStream.read<uint32>(indexBitCount);
 		}
 
 		return createRef<GeometryAsset>(geometryAssetDescriptor);

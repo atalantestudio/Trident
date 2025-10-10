@@ -25,13 +25,8 @@ namespace ProjectA {
 
 			explicit Geometry3D(const ref<GeometryAsset>& geometryAsset) :
 				vertexPositionComponents(geometryAsset->getVertexPositionComponents()),
-				vertexPositionIndices(geometryAsset->getIndices().count)
-			{
-				// TODO: Copy the array instead of using a loop.
-				for (uint32 indexOffset = 0; indexOffset < vertexPositionIndices.count; indexOffset += 1) {
-					vertexPositionIndices[indexOffset] = geometryAsset->getIndices()[indexOffset].positionIndex;
-				}
-			}
+				vertexPositionIndices(geometryAsset->getVertexPositionIndices())
+			{}
 
 			const sequence<float32>& getVertexPositionComponents() const {
 				return vertexPositionComponents;

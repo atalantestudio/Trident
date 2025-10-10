@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/API/Geometry/Index.hpp"
 #include "Engine/Filesystem/Asset/Asset.hpp"
 
 namespace ProjectA {
@@ -12,7 +11,7 @@ namespace ProjectA {
 		sequence<float32> vertexPositionComponents;
 
 		// Indices arranged in clusters. Not including degenerate indices.
-		sequence<Index> indices;
+		sequence<uint32> vertexPositionIndices;
 	};
 
 	class GeometryAsset : public Asset {
@@ -21,7 +20,7 @@ namespace ProjectA {
 				Asset(descriptor),
 				clusterCount(descriptor.clusterCount),
 				vertexPositionComponents(descriptor.vertexPositionComponents),
-				indices(descriptor.indices)
+				vertexPositionIndices(descriptor.vertexPositionIndices)
 			{}
 
 			uint32 getClusterCount() const {
@@ -32,13 +31,13 @@ namespace ProjectA {
 				return vertexPositionComponents;
 			}
 
-			const sequence<Index>& getIndices() const {
-				return indices;
+			const sequence<uint32>& getVertexPositionIndices() const {
+				return vertexPositionIndices;
 			}
 
 		private:
 			uint32 clusterCount;
 			sequence<float32> vertexPositionComponents;
-			sequence<Index> indices;
+			sequence<uint32> vertexPositionIndices;
 	};
 }
