@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class FlyCameraController : public CameraController<PerspectiveCamera> {
 		private:
-			static constexpr float32 ROTATION_SPEED = 2.0f;
+			static constexpr float32 ROTATION_SPEED = 5.0f;
 
 		public:
 			FlyCameraController() {

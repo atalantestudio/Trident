@@ -147,26 +147,26 @@ namespace ProjectA {
 			void move(float32 deltaTime) {
 				const Window& window = *getApplication()->getWindow();
 
-				const vec3<float32> forward = cameraController.getCamera().getForward();
-				const vec3<float32> right = cameraController.getCamera().getRight();
+				if (!window.isPointerLocked()) {
+					return;
+				}
 
-				const uint32 forwardKeyState = static_cast<uint32>(window.isKeyDown(KeyCode::Z));
-				const uint32 backKeyState = static_cast<uint32>(window.isKeyDown(KeyCode::S));
-				const uint32 rightKeyState = static_cast<uint32>(window.isKeyDown(KeyCode::D));
-				const uint32 leftKeyState = static_cast<uint32>(window.isKeyDown(KeyCode::Q));
+				PerspectiveCamera& camera = cameraController.getCamera();
 
-				const float32 forwardmove = static_cast<float32>(forwardKeyState) - backKeyState;
-				const float32 rightmove = static_cast<float32>(rightKeyState) - leftKeyState;
+				const float32 forward = static_cast<float32>(window.isKeyDown(KeyCode::Z));
+				const float32 back = static_cast<float32>(window.isKeyDown(KeyCode::S));
+				const float32 right = static_cast<float32>(window.isKeyDown(KeyCode::D));
+				const float32 left = static_cast<float32>(window.isKeyDown(KeyCode::Q));
 
-				vec3<float32> wishvel = forward * forwardmove + right * rightmove;
+				const vec3<float32> wishvel = camera.getForward() * (forward - back) + camera.getRight() * (right - left);
 
-				if (lengthSquared(wishvel) < epsilon<float32>()) {
+				if (lengthSquared(wishvel) == 0.0f) {
 					return;
 				}
 
 				const vec3<float32> wishdir = normalized(wishvel) * MOVEMENT_SPEED * deltaTime;
 
-				cameraController.getCamera().setPosition(cameraController.getCamera().getPosition() + wishdir);
+				camera.setPosition(camera.getPosition() + wishdir);
 			}
 
 		private:

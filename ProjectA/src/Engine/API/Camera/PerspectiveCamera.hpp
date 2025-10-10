@@ -116,7 +116,6 @@ namespace ProjectA {
 		private:
 			vec3<float32> position = {0.0_m, 0.0_m, 0.0_m};
 			quat<float32> orientation = quat<float32>::axisAngle(FORWARD, 0.0_rad);
-
 			float32 fieldOfView = 0.0f;
 			float32 aspectRatio = 0.0f;
 			float32 nearPlane = 0.001f;
