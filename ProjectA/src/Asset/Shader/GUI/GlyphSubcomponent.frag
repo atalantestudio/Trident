@@ -13,7 +13,7 @@ in VertexOutput {
 
 layout(set = 0, binding = 1) uniform sampler2DArray textureArraySampler;
 
-layout(location = 0) out vec4 color;
+layout(location = 0) out vec4 fragment;
 
 void main() {
 	float value = smoothstep(
@@ -22,10 +22,10 @@ void main() {
 		texture(textureArraySampler, vertexOutput.textureCoordinate).r
 	);
 
-	color = vertexOutput.color * value;
+	fragment = vertexOutput.color * value;
 
 	/* float offsetDistance = texture(glyphMapSampler, vertexOutput.imageCoordinate.xy - DROP_SHADOW_OFFSET).r;
 	float dropShadow = smoothstep(0.0, 1.0, offsetDistance);
 
-	color = mix(DROP_SHADOW_COLOR * dropShadow, color, color.a); */
+	fragment = mix(DROP_SHADOW_COLOR * dropShadow, fragment, fragment.a); */
 }

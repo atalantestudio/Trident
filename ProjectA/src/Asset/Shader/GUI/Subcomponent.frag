@@ -27,7 +27,7 @@ in FragmentInput {
 
 layout(set = 0, binding = 1) uniform sampler2DArray textureArraySampler;
 
-layout(location = 0) out vec4 color;
+layout(location = 0) out vec4 fragment;
 
 void main() {
 	vec2 minBounds = fragmentInput.bounds.xy;
@@ -47,6 +47,5 @@ void main() {
 	float content = smoothstep(-fw, fw, -d - outlineSize);
 
 	// TODO: Calculate the correct outline inner radius.
-	color = fragmentInput.outlineColor * content * outlineSize;
-	color += fragmentInput.color * texture(textureArraySampler, fragmentInput.textureCoordinate) * content;
+	fragment = fragmentInput.outlineColor * content * outlineSize + fragmentInput.color * texture(textureArraySampler, fragmentInput.textureCoordinate) * content;
 }
