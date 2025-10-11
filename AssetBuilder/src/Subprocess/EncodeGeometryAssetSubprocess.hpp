@@ -231,24 +231,32 @@ namespace ProjectA {
 					vertexTextureCoordinateComponents = UVProperty->Contents;
 					vertexTextureCoordinateIndices = sequence<uint32>(vertexPositionIndices.count);
 
-					uint32 vertexOffset = 0;
+					uint32 polygonOffset = 0;
+					uint32 indexOffset = 0;
 
-					for (uint32 polygonOffset = 0; polygonOffset < UVIndexProperty->Contents.count; polygonOffset += 1) {
-						for (uint32 triangleOffset = 0; triangleOffset < UVIndexProperty->Contents.count - polygonOffset; triangleOffset += 1) {
-							const sint32 vertexN2Index = PolygonVertexIndexProperty->Contents[polygonOffset + triangleOffset + 2];
+					// TODO: This section is similar to the index count section above; maybe try merging the two.
+					while (polygonOffset < UVIndexProperty->Contents.count) {
+						uint32 triangleOffset = 0;
 
-							vertexTextureCoordinateIndices[vertexOffset] = UVIndexProperty->Contents[polygonOffset];
-							vertexTextureCoordinateIndices[vertexOffset] = UVIndexProperty->Contents[polygonOffset + triangleOffset + 1];
-							vertexTextureCoordinateIndices[vertexOffset] = UVIndexProperty->Contents[polygonOffset + triangleOffset + 2];
+						while (triangleOffset < UVIndexProperty->Contents.count - polygonOffset) {
+							const sint32 indexC = PolygonVertexIndexProperty->Contents[polygonOffset + triangleOffset + 2];
 
-							vertexOffset += 3;
+							vertexTextureCoordinateIndices[indexOffset + 0] = UVIndexProperty->Contents[polygonOffset];
+							vertexTextureCoordinateIndices[indexOffset + 1] = UVIndexProperty->Contents[polygonOffset + triangleOffset + 1];
+							vertexTextureCoordinateIndices[indexOffset + 2] = UVIndexProperty->Contents[polygonOffset + triangleOffset + 2];
 
-							if (vertexN2Index < 0) {
+							indexOffset += 3;
+
+							if (indexC < 0) {
 								polygonOffset += triangleOffset + 2;
 
 								break;
 							}
+
+							triangleOffset += 1;
 						}
+
+						polygonOffset += 1;
 					}
 				}
 				else {
