@@ -28,6 +28,8 @@ namespace ProjectA {
 
 		createIndirectBuffer();
 		createCameraBuffer();
+
+		updateViewport();
 	}
 
 	void VisibilityRenderer::postSetScene() {
@@ -103,8 +105,12 @@ namespace ProjectA {
 		updateDebugInputAttachmentDescriptorSets();
 	}
 
-	void VisibilityRenderer::updateCameraProjectionView() {
+	void VisibilityRenderer::updateCameraProjectionView() const {
 		cameraMappedRange->projectionView = getCameraController<PerspectiveCamera>().getCamera().getProjectionView();
+	}
+
+	void VisibilityRenderer::updateViewport() const {
+		cameraMappedRange->viewport = getSwapchain()->getExtent();
 	}
 
 	void VisibilityRenderer::updateInstanceTransform(Entity entity, const mat4x4<float32>& transform) {
@@ -828,11 +834,6 @@ namespace ProjectA {
 		geometryDescriptorBuffer.offset = 0;
 		geometryDescriptorBuffer.size = geometryBuffer->size;
 
-		DescriptorBuffer debugCameraDescriptorBuffer{};
-		debugCameraDescriptorBuffer.buffer = cameraBuffer;
-		debugCameraDescriptorBuffer.offset = sizeof(mat4x4<float32>);
-		debugCameraDescriptorBuffer.size = 2 * sizeof(float32);
-
 		DescriptorBuffer vertexPositionComponentDescriptorBuffer{};
 		vertexPositionComponentDescriptorBuffer.buffer = vertexPositionComponentBuffer;
 		vertexPositionComponentDescriptorBuffer.offset = 0;
@@ -896,7 +897,7 @@ namespace ProjectA {
 		WriteDescriptorSet debugCameraWriteDescriptorSet{};
 		debugCameraWriteDescriptorSet.descriptorSet = debugDescriptorSet;
 		debugCameraWriteDescriptorSet.bindingIndex = 0;
-		debugCameraWriteDescriptorSet.descriptorBuffers = {debugCameraDescriptorBuffer};
+		debugCameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
 
 		WriteDescriptorSet debugVertexPositionComponentWriteDescriptorSet{};
 		debugVertexPositionComponentWriteDescriptorSet.descriptorSet = debugDescriptorSet;

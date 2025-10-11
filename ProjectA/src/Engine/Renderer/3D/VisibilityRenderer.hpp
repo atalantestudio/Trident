@@ -12,6 +12,7 @@ namespace ProjectA {
 				mat4x4<float32> projectionView;
 				float32 nearPlane;
 				float32 farPlane;
+				Extent2D viewport;
 			};
 
 			struct Cluster {
@@ -46,7 +47,9 @@ namespace ProjectA {
 
 			void resize(WindowResizeEvent& event) override;
 
-			void updateCameraProjectionView();
+			void updateCameraProjectionView() const;
+
+			void updateViewport() const;
 
 			void updateInstanceTransform(Entity entity, const mat4x4<float32>& transform);
 

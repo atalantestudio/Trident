@@ -35,6 +35,7 @@ namespace ProjectA {
 
 			void preRender() override {
 				renderer.updateCameraProjectionView();
+				renderer.updateViewport();
 			}
 
 			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const override {
