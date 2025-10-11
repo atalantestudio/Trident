@@ -176,11 +176,11 @@ namespace ProjectA {
 			subpassDependency.dstSubpass = dependency.destinationSubpassIndex;
 			subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 			subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-			subpassDependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-			subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			subpassDependency.srcAccessMask = 0;
+			subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 			subpassDependency.dependencyFlags = 0;
 
-			if (dependency.destinationSubpassIndex != SubpassDependency::EXTERNAL_SUBPASS) {
+			/* if (dependency.destinationSubpassIndex != SubpassDependency::EXTERNAL_SUBPASS) {
 				const ref<Subpass>& destinationSubpass = descriptor.subpasses[dependency.destinationSubpassIndex];
 
 				if (destinationSubpass->hasDepthStencilAttachmentReference()) {
@@ -188,7 +188,7 @@ namespace ProjectA {
 					subpassDependency.dstStageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 					subpassDependency.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 				}
-			}
+			} */
 		}
 
 		VkRenderPassCreateInfo renderPassCreateInfo{};

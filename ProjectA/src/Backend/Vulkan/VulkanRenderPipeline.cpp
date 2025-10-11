@@ -173,7 +173,7 @@ namespace ProjectA {
 		dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32>(dynamicStates.count);
 		dynamicStateCreateInfo.pDynamicStates = dynamicStates;
 
-		const std::array<VkPipelineShaderStageCreateInfo, 2> shaderStageCreateInfos = {
+		const sequence<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
 			std::static_pointer_cast<VulkanShaderModule>(descriptor.vertexShaderModule)->object,
 			std::static_pointer_cast<VulkanShaderModule>(descriptor.fragmentShaderModule)->object,
 		};
@@ -182,8 +182,8 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		graphicsPipelineCreateInfo.pNext = nullptr;
 		graphicsPipelineCreateInfo.flags = 0;
-		graphicsPipelineCreateInfo.stageCount = static_cast<uint32>(shaderStageCreateInfos.size());
-		graphicsPipelineCreateInfo.pStages = shaderStageCreateInfos.data();
+		graphicsPipelineCreateInfo.stageCount = static_cast<uint32>(shaderStageCreateInfos.count);
+		graphicsPipelineCreateInfo.pStages = shaderStageCreateInfos;
 		graphicsPipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
 		graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
 		graphicsPipelineCreateInfo.pTessellationState = nullptr;

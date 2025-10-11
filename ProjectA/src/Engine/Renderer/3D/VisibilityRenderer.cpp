@@ -513,17 +513,14 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
 		ref<ShaderModule> vertexShaderModule;
-		ref<ShaderModule> fragmentShaderModule;
 
 		switch (getGraphicsApi()) {
 			case GraphicsAPI::OPENGL:
 				vertexShaderModule = loadShaderModule("Visibility/VisibilityGL.vert", vertexShaderModuleDescriptor);
-				fragmentShaderModule = loadShaderModule("Visibility/VisibilityGL.frag", fragmentShaderModuleDescriptor);
 
 				break;
 			case GraphicsAPI::VULKAN:
 				vertexShaderModule = loadShaderModule("Visibility/VisibilityVK.vert", vertexShaderModuleDescriptor);
-				fragmentShaderModule = loadShaderModule("Visibility/VisibilityVK.frag", fragmentShaderModuleDescriptor);
 
 				break;
 			default:
@@ -531,6 +528,8 @@ namespace ProjectA {
 
 				break;
 		}
+
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Visibility/Visibility.frag", fragmentShaderModuleDescriptor);
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
@@ -575,7 +574,7 @@ namespace ProjectA {
 
 				break;
 			case GraphicsAPI::VULKAN:
-				vertexShaderModule = loadShaderModule("Base/ScreenUVFlipY.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule("Base/Screen.vert", vertexShaderModuleDescriptor);
 				fragmentShaderModule = loadShaderModule("Visibility/VisibilityDebugVK.frag", fragmentShaderModuleDescriptor);
 
 				break;
