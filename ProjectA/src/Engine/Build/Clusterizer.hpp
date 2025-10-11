@@ -38,12 +38,12 @@ namespace ProjectA {
 		sequence<ClusteredInstance> instances;
 
 		sequence<float32> vertexPositionComponents;
-		// sequence<float32> vertexNormalComponents;
-		// sequence<float32> vertexTextureCoordinateComponents;
+		sequence<float32> vertexNormalComponents;
+		sequence<float32> vertexTextureCoordinateComponents;
 
 		sequence<uint32> vertexPositionIndices;
-		// sequence<uint32> vertexNormalIndices;
-		// sequence<uint32> vertexTextureCoordinateIndices;
+		sequence<uint32> vertexNormalIndices;
+		sequence<uint32> vertexTextureCoordinateIndices;
 	};
 
 	static ClusteredScene clusterizeScene(const Scene3D& scene) {
@@ -53,8 +53,8 @@ namespace ProjectA {
 		clusteredScene.geometries = sequence<ClusteredGeometry>(scene.getGeometryCount());
 
 		uint64 totalVertexPositionComponentCount = 0;
-		// uint64 totalVertexNormalComponentCount = 0;
-		// uint64 totalVertexTextureCoordinateComponentCount = 0;
+		uint64 totalVertexNormalComponentCount = 0;
+		uint64 totalVertexTextureCoordinateComponentCount = 0;
 		uint32 totalIndexCount = 0;
 		uint32 totalClusterCount = 0;
 		uint32 totalInstanceCount = 0;
@@ -67,7 +67,7 @@ namespace ProjectA {
 			const uint64 indexCount = geometry->getVertexPositionIndices().count;
 
 			// TODO: Position indices SHOULD BE AS MANY as normal indices (and texture coordinate indices?).
-			// DEBUG_ASSERT(indexCount == geometry->getVertexNormalIndices().count && indexCount == geometry->getVertexTextureCoordinateIndices().count);
+			DEBUG_ASSERT(indexCount == geometry->getVertexNormalIndices().count && indexCount == geometry->getVertexTextureCoordinateIndices().count);
 
 			const uint32 clusterCount = static_cast<uint32>(ceil(static_cast<float32>(indexCount) / CLUSTER_INDEX_COUNT));
 			const uint32 instanceCount = scene.getInstanceCount(geometryIndex);
@@ -79,8 +79,8 @@ namespace ProjectA {
 			clusteredGeometry.instanceCount = instanceCount;
 
 			totalVertexPositionComponentCount += geometry->getVertexPositionComponents().count;
-			// totalVertexNormalComponentCount += geometry->getVertexNormalComponents().count;
-			// totalVertexTextureCoordinateComponentCount += geometry->getVertexTextureCoordinateComponents().count;
+			totalVertexNormalComponentCount += geometry->getVertexNormalComponents().count;
+			totalVertexTextureCoordinateComponentCount += geometry->getVertexTextureCoordinateComponents().count;
 			totalIndexCount += clusterCount * CLUSTER_INDEX_COUNT;
 			totalClusterCount += clusterCount * instanceCount;
 			totalInstanceCount += instanceCount;
@@ -92,15 +92,15 @@ namespace ProjectA {
 		clusteredScene.instances = sequence<ClusteredInstance>(totalInstanceCount);
 
 		clusteredScene.vertexPositionComponents = sequence<float32>(totalVertexPositionComponentCount);
-		// clusteredScene.vertexNormalComponents = sequence<float32>(totalVertexNormalComponentCount);
-		// clusteredScene.vertexTextureCoordinateComponents = sequence<float32>(totalVertexTextureCoordinateComponentCount);
+		clusteredScene.vertexNormalComponents = sequence<float32>(totalVertexNormalComponentCount);
+		clusteredScene.vertexTextureCoordinateComponents = sequence<float32>(totalVertexTextureCoordinateComponentCount);
 		clusteredScene.vertexPositionIndices = sequence<uint32>(totalIndexCount);
-		// clusteredScene.vertexNormalIndices = sequence<uint32>(totalIndexCount);
-		// clusteredScene.vertexTextureCoordinateIndices = sequence<uint32>(totalIndexCount);
+		clusteredScene.vertexNormalIndices = sequence<uint32>(totalIndexCount);
+		clusteredScene.vertexTextureCoordinateIndices = sequence<uint32>(totalIndexCount);
 
 		uint32 vertexPositionComponentOffset = 0;
-		// uint32 vertexNormalComponentOffset = 0;
-		// uint32 vertexTextureCoordinateComponentOffset = 0;
+		uint32 vertexNormalComponentOffset = 0;
+		uint32 vertexTextureCoordinateComponentOffset = 0;
 
 		uint32 vertexOffset = 0;
 
@@ -114,18 +114,18 @@ namespace ProjectA {
 			clusteredGeometry.vertexOffset = vertexOffset;
 
 			std::copy(geometry->getVertexPositionComponents().begin(), geometry->getVertexPositionComponents().end(), clusteredScene.vertexPositionComponents.begin() + vertexPositionComponentOffset);
-			// std::copy(geometry->getVertexNormalComponents().begin(), geometry->getVertexNormalComponents().end(), clusteredScene.vertexNormalComponents.begin() + vertexNormalComponentOffset);
-			// std::copy(geometry->getVertexTextureCoordinateComponents().begin(), geometry->getVertexTextureCoordinateComponents().end(), clusteredScene.vertexTextureCoordinateComponents.begin() + vertexTextureCoordinateComponentOffset);
+			std::copy(geometry->getVertexNormalComponents().begin(), geometry->getVertexNormalComponents().end(), clusteredScene.vertexNormalComponents.begin() + vertexNormalComponentOffset);
+			std::copy(geometry->getVertexTextureCoordinateComponents().begin(), geometry->getVertexTextureCoordinateComponents().end(), clusteredScene.vertexTextureCoordinateComponents.begin() + vertexTextureCoordinateComponentOffset);
 
 			std::copy(geometry->getVertexPositionIndices().begin(), geometry->getVertexPositionIndices().end(), clusteredScene.vertexPositionIndices.begin() + indexOffset);
-			// std::copy(geometry->getVertexNormalIndices().begin(), geometry->getVertexNormalIndices().end(), clusteredScene.vertexNormalIndices.begin() + indexOffset);
-			// std::copy(geometry->getVertexTextureCoordinateIndices().begin(), geometry->getVertexTextureCoordinateIndices().end(), clusteredScene.vertexTextureCoordinateIndices.begin() + indexOffset);
+			std::copy(geometry->getVertexNormalIndices().begin(), geometry->getVertexNormalIndices().end(), clusteredScene.vertexNormalIndices.begin() + indexOffset);
+			std::copy(geometry->getVertexTextureCoordinateIndices().begin(), geometry->getVertexTextureCoordinateIndices().end(), clusteredScene.vertexTextureCoordinateIndices.begin() + indexOffset);
 
 			vertexOffset += clusteredGeometry.vertexCount;
 			indexOffset += clusteredGeometry.clusterCount * CLUSTER_INDEX_COUNT;
 			vertexPositionComponentOffset += static_cast<uint32>(geometry->getVertexPositionComponents().count);
-			// vertexNormalComponentOffset += static_cast<uint32>(geometry->getVertexNormalComponents().count);
-			// vertexTextureCoordinateComponentOffset += static_cast<uint32>(geometry->getVertexTextureCoordinateComponents().count);
+			vertexNormalComponentOffset += static_cast<uint32>(geometry->getVertexNormalComponents().count);
+			vertexTextureCoordinateComponentOffset += static_cast<uint32>(geometry->getVertexTextureCoordinateComponents().count);
 		}
 
 		clusterOffset = 0;

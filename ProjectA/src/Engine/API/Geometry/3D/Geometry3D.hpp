@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/Filesystem/Asset/GeometryAsset.hpp"
+
 namespace ProjectA {
 	struct Geometry3DDescriptor {
 		sequence<float32> vertexPositionComponents;
@@ -10,6 +12,7 @@ namespace ProjectA {
 		sequence<uint32> vertexTextureCoordinateIndices;
 	};
 
+	// TODO: Unify the vertex position/normal/texture coordinate indices since they are all the same length.
 	class Geometry3D {
 		public:
 			static constexpr uint32 VERTEX_POSITION_STRIDE = 3;

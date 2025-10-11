@@ -72,7 +72,11 @@ namespace ProjectA {
 			void createIndirectBuffer();
 			void createCameraBuffer();
 			void createVertexPositionComponentBuffer();
+			void createVertexNormalComponentBuffer();
+			void createVertexTextureCoordinateComponentBuffer();
 			void createVertexPositionIndexBuffer();
+			void createVertexNormalIndexBuffer();
+			void createVertexTextureCoordinateIndexBuffer();
 			void createClusterBuffer();
 			void createInstanceBuffer();
 			void createGeometryBuffer();
@@ -82,13 +86,17 @@ namespace ProjectA {
 			void fillSceneBuffers() const;
 			void fillIndirectBuffer() const;
 			void fillVertexPositionComponentBuffer(float32* mappedRange) const;
+			void fillVertexNormalComponentBuffer(float32* mappedRange) const;
+			void fillVertexTextureCoordinateComponentBuffer(float32* mappedRange) const;
 			void fillVertexPositionIndexBuffer(uint32* mappedRange) const;
+			void fillVertexNormalIndexBuffer(uint32* mappedRange) const;
+			void fillVertexTextureCoordinateIndexBuffer(uint32* mappedRange) const;
 			void fillClusterBuffer(Cluster* mappedRange) const;
 			void fillInstanceBuffer(Instance* mappedRange) const;
 			void fillGeometryBuffer(Geometry* mappedRange) const;
 
 			void updateBufferDescriptorSets();
-			void updateDebugDescriptorSet();
+			void updateDebugInputAttachmentDescriptorSets();
 
 			bool onWindowResize(WindowResizeEvent& event);
 
@@ -122,7 +130,11 @@ namespace ProjectA {
 			ref<Buffer> indirectBuffer;
 			ref<Buffer> cameraBuffer;
 			ref<Buffer> vertexPositionComponentBuffer;
+			ref<Buffer> vertexNormalComponentBuffer;
+			ref<Buffer> vertexTextureCoordinateComponentBuffer;
 			ref<Buffer> vertexPositionIndexBuffer;
+			ref<Buffer> vertexNormalIndexBuffer;
+			ref<Buffer> vertexTextureCoordinateIndexBuffer;
 			ref<Buffer> clusterBuffer;
 			ref<Buffer> instanceBuffer;
 			ref<Buffer> geometryBuffer;

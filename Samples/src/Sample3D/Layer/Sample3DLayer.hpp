@@ -4,69 +4,19 @@
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/3D/VisibilityRenderer.hpp"
 
+#include "../Scene/Suzanne.hpp"
+
 namespace ProjectA {
 	class Sample3DLayer : public Layer {
 		private:
-			static constexpr float32 MOVEMENT_SPEED = 1.0f;
+			static constexpr float32 MOVEMENT_SPEED = 0.5f;
 
 		public:
 			void build() override {
 				renderer.setLayer(this);
 				renderer.build();
 
-				const AssetLibrary& assetLibrary = *getApplication()->getAssetLibrary();
-				const ref<GeometryAsset>& lemonGeometryAsset = assetLibrary.findGeometryAsset("lemon");
-				// const ref<GeometryAsset>& shelfGeometryAsset = assetLibrary.findGeometryAsset("shelf");
-				const ref<GeometryAsset>& stoolGeometryAsset = assetLibrary.findGeometryAsset("folding_wooden_stool");
-				// const ref<GeometryAsset>& tableGeometryAsset = assetLibrary.findGeometryAsset("wooden_table");
-
-				const ref<Geometry3D> lemonGeometry = createRef<Geometry3D>(lemonGeometryAsset);
-				// const ref<Geometry3D> shelfGeometry = createRef<Geometry3D>(shelfGeometryAsset);
-				const ref<Geometry3D> stoolGeometry = createRef<Geometry3D>(stoolGeometryAsset);
-				// const ref<Geometry3D> tableGeometry = createRef<Geometry3D>(tableGeometryAsset);
-
-				const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
-				// const uint32 shelfGeometryIndex = scene.registerGeometry(shelfGeometry);
-				const uint32 stoolGeometryIndex = scene.registerGeometry(stoolGeometry);
-				// const uint32 tableGeometryIndex = scene.registerGeometry(tableGeometry);
-
-				InstanceDescriptor lemon1InstanceDescriptor{};
-				lemon1InstanceDescriptor.geometryIndex = lemonGeometryIndex;
-				lemon1InstanceDescriptor.position = {-0.1_m, 0.0_m, 0.3_m};
-				lemon1InstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
-
-				InstanceDescriptor lemon2InstanceDescriptor{};
-				lemon2InstanceDescriptor.geometryIndex = lemonGeometryIndex;
-				lemon2InstanceDescriptor.position = {0.0_m, 0.0_m, 0.3_m};
-				lemon2InstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
-
-				InstanceDescriptor stoolInstanceDescriptor{};
-				stoolInstanceDescriptor.geometryIndex = stoolGeometryIndex;
-				stoolInstanceDescriptor.position = {0.5_m, -0.225_m, 1.0_m};
-				stoolInstanceDescriptor.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad};
-
-				/* InstanceDescriptor shelf1InstanceDescriptor{};
-				shelf1InstanceDescriptor.geometryIndex = shelfGeometryIndex;
-				shelf1InstanceDescriptor.position = {-2.0_m, -1.0_m, 3.0_m};
-				shelf1InstanceDescriptor.rotation = {pi<float32>() * 0.5f, 0.0_rad, 0.0_rad};
-
-				InstanceDescriptor woodenTable02InstanceDescriptor{};
-				woodenTable02InstanceDescriptor.geometryIndex = woodenTable02GeometryIndex;
-				woodenTable02InstanceDescriptor.position = {0.0_m, -1.0_m, 3.0_m};
-				woodenTable02InstanceDescriptor.rotation = {pi<float32>() * 0.5f, pi<float32>(), 0.0_rad};
-
-				InstanceDescriptor shelf2InstanceDescriptor{};
-				shelf2InstanceDescriptor.geometryIndex = shelfGeometryIndex;
-				shelf2InstanceDescriptor.position = {2.0_m, -1.0_m, 3.0_m};
-				shelf2InstanceDescriptor.rotation = {pi<float32>() * 0.5f, pi<float32>(), 0.0_rad}; */
-
-				scene.registerInstance(lemon1InstanceDescriptor);
-				scene.registerInstance(lemon2InstanceDescriptor);
-				scene.registerInstance(stoolInstanceDescriptor);
-				// scene.registerInstance(shelf1InstanceDescriptor);
-				// scene.registerInstance(woodenTable02InstanceDescriptor);
-				// scene.registerInstance(shelf2InstanceDescriptor);
-
+				scene = createScene(*getApplication()->getAssetLibrary());
 				clusteredScene = clusterizeScene(scene);
 
 				renderer.setScene(&clusteredScene);
@@ -75,7 +25,6 @@ namespace ProjectA {
 				cameraController.updateProjection();
 
 				renderer.setCameraController<PerspectiveCamera>(&cameraController);
-				renderer.updateCameraProjectionView();
 			}
 
 			void update(float32 deltaTime, float32 inverseDeltaTime) override {

@@ -32,7 +32,11 @@ namespace ProjectA {
 
 	void VisibilityRenderer::postSetScene() {
 		createVertexPositionComponentBuffer();
+		createVertexNormalComponentBuffer();
+		createVertexTextureCoordinateComponentBuffer();
 		createVertexPositionIndexBuffer();
+		createVertexNormalIndexBuffer();
+		createVertexTextureCoordinateIndexBuffer();
 		createClusterBuffer();
 		createInstanceBuffer();
 		createGeometryBuffer();
@@ -40,7 +44,7 @@ namespace ProjectA {
 		fillSceneBuffers();
 
 		updateBufferDescriptorSets();
-		updateDebugDescriptorSet();
+		updateDebugInputAttachmentDescriptorSets();
 	}
 
 	void VisibilityRenderer::postSetCameraController() {
@@ -82,7 +86,7 @@ namespace ProjectA {
 		// Debug subpass
 		{
 			commandEncoder->bindRenderPipeline(debugRenderPipeline);
-			commandEncoder->bindDescriptorSets(debugPipelineLayout, {debugDescriptorSet});
+			commandEncoder->bindDescriptorSets(debugPipelineLayout, {debugDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
 			commandEncoder->draw(3, 1, 0, 0);
 		}
 
@@ -96,7 +100,7 @@ namespace ProjectA {
 		recreateDepthStencilImageView();
 		recreateFramebuffers();
 
-		updateDebugDescriptorSet();
+		updateDebugInputAttachmentDescriptorSets();
 	}
 
 	void VisibilityRenderer::updateCameraProjectionView() {
@@ -271,7 +275,7 @@ namespace ProjectA {
 		DescriptorSetLayoutBinding clusterBinding{};
 		clusterBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
 		clusterBinding.descriptorCount = 1;
-		clusterBinding.shaderStages = ShaderStage::VERTEX;
+		clusterBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
 
 		clusterDescriptorSetLayout = createDescriptorSetLayout({vertexPositionComponentBinding, vertexBinding, clusterBinding});
 	}
@@ -280,12 +284,12 @@ namespace ProjectA {
 		DescriptorSetLayoutBinding instanceBinding{};
 		instanceBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
 		instanceBinding.descriptorCount = 1;
-		instanceBinding.shaderStages = ShaderStage::VERTEX;
+		instanceBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
 
 		DescriptorSetLayoutBinding geometryBinding{};
 		geometryBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
 		geometryBinding.descriptorCount = 1;
-		geometryBinding.shaderStages = ShaderStage::VERTEX;
+		geometryBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
 
 		instanceDescriptorSetLayout = createDescriptorSetLayout({instanceBinding, geometryBinding});
 	}
@@ -306,7 +310,47 @@ namespace ProjectA {
 		depthStencilBinding.descriptorCount = 1;
 		depthStencilBinding.shaderStages = ShaderStage::FRAGMENT;
 
-		debugDescriptorSetLayout = createDescriptorSetLayout({cameraBinding, visibilityBinding, depthStencilBinding});
+		DescriptorSetLayoutBinding vertexPositionComponentBinding{};
+		vertexPositionComponentBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexPositionComponentBinding.descriptorCount = 1;
+		vertexPositionComponentBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		DescriptorSetLayoutBinding vertexNormalComponentBinding{};
+		vertexNormalComponentBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexNormalComponentBinding.descriptorCount = 1;
+		vertexNormalComponentBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		DescriptorSetLayoutBinding vertexTextureCoordinateComponentBinding{};
+		vertexTextureCoordinateComponentBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexTextureCoordinateComponentBinding.descriptorCount = 1;
+		vertexTextureCoordinateComponentBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		DescriptorSetLayoutBinding vertexPositionIndexBinding{};
+		vertexPositionIndexBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexPositionIndexBinding.descriptorCount = 1;
+		vertexPositionIndexBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		DescriptorSetLayoutBinding vertexNormalIndexBinding{};
+		vertexNormalIndexBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexNormalIndexBinding.descriptorCount = 1;
+		vertexNormalIndexBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		DescriptorSetLayoutBinding vertexTextureCoordinateIndexBinding{};
+		vertexTextureCoordinateIndexBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexTextureCoordinateIndexBinding.descriptorCount = 1;
+		vertexTextureCoordinateIndexBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		debugDescriptorSetLayout = createDescriptorSetLayout({
+			cameraBinding,
+			visibilityBinding,
+			depthStencilBinding,
+			vertexPositionComponentBinding,
+			vertexNormalComponentBinding,
+			vertexTextureCoordinateComponentBinding,
+			vertexPositionIndexBinding,
+			vertexNormalIndexBinding,
+			vertexTextureCoordinateIndexBinding,
+		});
 	}
 
 	void VisibilityRenderer::createVisibilityPipelineLayout() {
@@ -318,7 +362,7 @@ namespace ProjectA {
 
 	void VisibilityRenderer::createDebugPipelineLayout() {
 		PipelineLayoutDescriptor debugPipelineLayoutDescriptor{};
-		debugPipelineLayoutDescriptor.descriptorSetLayouts = {debugDescriptorSetLayout};
+		debugPipelineLayoutDescriptor.descriptorSetLayouts = {debugDescriptorSetLayout, clusterDescriptorSetLayout, instanceDescriptorSetLayout};
 
 		debugPipelineLayout = createPipelineLayout(debugPipelineLayoutDescriptor);
 	}
@@ -351,22 +395,66 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor vertexPositionComponentBufferDescriptor{};
-		vertexPositionComponentBufferDescriptor.size = scene->clusters.count * CLUSTER_INDEX_COUNT * 3 * sizeof(float32);
+		vertexPositionComponentBufferDescriptor.size = scene->vertexPositionComponents.count * sizeof(float32);
 		vertexPositionComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexPositionComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		vertexPositionComponentBuffer = createBuffer(vertexPositionComponentBufferDescriptor);
 	}
 
+	void VisibilityRenderer::createVertexNormalComponentBuffer() {
+		DEBUG_ASSERT(scene != nullptr);
+
+		BufferDescriptor vertexNormalComponentBufferDescriptor{};
+		vertexNormalComponentBufferDescriptor.size = scene->vertexNormalComponents.count * sizeof(float32);
+		vertexNormalComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexNormalComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		vertexNormalComponentBuffer = createBuffer(vertexNormalComponentBufferDescriptor);
+	}
+
+	void VisibilityRenderer::createVertexTextureCoordinateComponentBuffer() {
+		DEBUG_ASSERT(scene != nullptr);
+
+		BufferDescriptor vertexTextureCoordinateComponentBufferDescriptor{};
+		vertexTextureCoordinateComponentBufferDescriptor.size = scene->vertexTextureCoordinateComponents.count * sizeof(float32);
+		vertexTextureCoordinateComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexTextureCoordinateComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		vertexTextureCoordinateComponentBuffer = createBuffer(vertexTextureCoordinateComponentBufferDescriptor);
+	}
+
 	void VisibilityRenderer::createVertexPositionIndexBuffer() {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor vertexPositionIndexBufferDescriptor{};
-		vertexPositionIndexBufferDescriptor.size = scene->clusters.count * CLUSTER_INDEX_COUNT * sizeof(uint32);
+		vertexPositionIndexBufferDescriptor.size = scene->vertexPositionIndices.count * sizeof(uint32);
 		vertexPositionIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexPositionIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		vertexPositionIndexBuffer = createBuffer(vertexPositionIndexBufferDescriptor);
+	}
+
+	void VisibilityRenderer::createVertexNormalIndexBuffer() {
+		DEBUG_ASSERT(scene != nullptr);
+
+		BufferDescriptor vertexNormalIndexBufferDescriptor{};
+		vertexNormalIndexBufferDescriptor.size = scene->vertexNormalIndices.count * sizeof(uint32);
+		vertexNormalIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexNormalIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		vertexNormalIndexBuffer = createBuffer(vertexNormalIndexBufferDescriptor);
+	}
+
+	void VisibilityRenderer::createVertexTextureCoordinateIndexBuffer() {
+		DEBUG_ASSERT(scene != nullptr);
+
+		BufferDescriptor vertexTextureCoordinateIndexBufferDescriptor{};
+		vertexTextureCoordinateIndexBufferDescriptor.size = scene->vertexTextureCoordinateIndices.count * sizeof(uint32);
+		vertexTextureCoordinateIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexTextureCoordinateIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		vertexTextureCoordinateIndexBuffer = createBuffer(vertexTextureCoordinateIndexBufferDescriptor);
 	}
 
 	void VisibilityRenderer::createClusterBuffer() {
@@ -419,13 +507,13 @@ namespace ProjectA {
 
 		switch (getGraphicsApi()) {
 			case GraphicsAPI::OPENGL:
-				vertexShaderModule = loadShaderModule("Visibility/VisibilitySingleSet.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule("Visibility/VisibilityGL.vert", vertexShaderModuleDescriptor);
 				fragmentShaderModule = loadShaderModule("Visibility/VisibilityGL.frag", fragmentShaderModuleDescriptor);
 
 				break;
 			case GraphicsAPI::VULKAN:
-				vertexShaderModule = loadShaderModule("Visibility/Visibility.vert", vertexShaderModuleDescriptor);
-				fragmentShaderModule = loadShaderModule("Visibility/VisibilitySPV.frag", fragmentShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule("Visibility/VisibilityVK.vert", vertexShaderModuleDescriptor);
+				fragmentShaderModule = loadShaderModule("Visibility/VisibilityVK.frag", fragmentShaderModuleDescriptor);
 
 				break;
 			default:
@@ -473,12 +561,12 @@ namespace ProjectA {
 		switch (getGraphicsApi()) {
 			case GraphicsAPI::OPENGL:
 				vertexShaderModule = loadShaderModule("Base/ScreenUV.vert", vertexShaderModuleDescriptor);
-				fragmentShaderModule = loadShaderModule("Visibility/DebugInputAttachment.frag", fragmentShaderModuleDescriptor);
+				fragmentShaderModule = loadShaderModule("Visibility/VisibilityDebugGL.frag", fragmentShaderModuleDescriptor);
 
 				break;
 			case GraphicsAPI::VULKAN:
 				vertexShaderModule = loadShaderModule("Base/ScreenUVFlipY.vert", vertexShaderModuleDescriptor);
-				fragmentShaderModule = loadShaderModule("Visibility/DebugInputAttachment.frag", fragmentShaderModuleDescriptor);
+				fragmentShaderModule = loadShaderModule("Visibility/VisibilityDebugVK.frag", fragmentShaderModuleDescriptor);
 
 				break;
 			default:
@@ -526,68 +614,115 @@ namespace ProjectA {
 	void VisibilityRenderer::fillSceneBuffers() const {
 		fillIndirectBuffer();
 
-		const ref<Buffer> stagingBuffer = createStagingBuffer(vertexPositionComponentBuffer->size + vertexPositionIndexBuffer->size + clusterBuffer->size + instanceBuffer->size + geometryBuffer->size);
+		const ref<Buffer> stagingBuffer = createStagingBuffer(
+			vertexPositionComponentBuffer->size +
+			vertexNormalComponentBuffer->size +
+			vertexTextureCoordinateComponentBuffer->size +
+			vertexPositionIndexBuffer->size +
+			vertexNormalIndexBuffer->size +
+			vertexTextureCoordinateIndexBuffer->size +
+			clusterBuffer->size +
+			instanceBuffer->size +
+			geometryBuffer->size
+		);
 
-		uint64 stagingBufferOffset = 0;
+		uint8* mappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
+		uint64 sourceOffset = 0;
 
-		float32* vertexPositionComponentMappedRange = stagingBuffer->map<float32>(stagingBufferOffset, vertexPositionComponentBuffer->size);
+		float32* vertexPositionComponentMappedRange = pointer_cast<float32*>(mappedRange + sourceOffset);
 
 		fillVertexPositionComponentBuffer(vertexPositionComponentMappedRange);
 
 		BufferCopyRegion vertexPositionComponentBufferCopyRegion{};
-		vertexPositionComponentBufferCopyRegion.sourceOffset = stagingBufferOffset;
+		vertexPositionComponentBufferCopyRegion.sourceOffset = sourceOffset;
 		vertexPositionComponentBufferCopyRegion.destinationOffset = 0;
 		vertexPositionComponentBufferCopyRegion.size = vertexPositionComponentBuffer->size;
 
-		stagingBufferOffset += vertexPositionComponentBuffer->size;
+		sourceOffset += vertexPositionComponentBuffer->size;
 
-		stagingBuffer->unmap();
+		float32* vertexNormalComponentMappedRange = pointer_cast<float32*>(mappedRange + sourceOffset);
 
-		uint32* vertexPositionIndexMappedRange = stagingBuffer->map<uint32>(stagingBufferOffset, vertexPositionIndexBuffer->size);
+		fillVertexNormalComponentBuffer(vertexNormalComponentMappedRange);
+
+		BufferCopyRegion vertexNormalComponentBufferCopyRegion{};
+		vertexNormalComponentBufferCopyRegion.sourceOffset = sourceOffset;
+		vertexNormalComponentBufferCopyRegion.destinationOffset = 0;
+		vertexNormalComponentBufferCopyRegion.size = vertexNormalComponentBuffer->size;
+
+		sourceOffset += vertexNormalComponentBuffer->size;
+
+		float32* vertexTextureCoordinateComponentMappedRange = pointer_cast<float32*>(mappedRange + sourceOffset);
+
+		fillVertexTextureCoordinateComponentBuffer(vertexTextureCoordinateComponentMappedRange);
+
+		BufferCopyRegion vertexTextureCoordinateComponentBufferCopyRegion{};
+		vertexTextureCoordinateComponentBufferCopyRegion.sourceOffset = sourceOffset;
+		vertexTextureCoordinateComponentBufferCopyRegion.destinationOffset = 0;
+		vertexTextureCoordinateComponentBufferCopyRegion.size = vertexTextureCoordinateComponentBuffer->size;
+
+		sourceOffset += vertexTextureCoordinateComponentBuffer->size;
+
+		uint32* vertexPositionIndexMappedRange = pointer_cast<uint32*>(mappedRange + sourceOffset);
 
 		fillVertexPositionIndexBuffer(vertexPositionIndexMappedRange);
 
 		BufferCopyRegion vertexPositionIndexBufferCopyRegion{};
-		vertexPositionIndexBufferCopyRegion.sourceOffset = stagingBufferOffset;
+		vertexPositionIndexBufferCopyRegion.sourceOffset = sourceOffset;
 		vertexPositionIndexBufferCopyRegion.destinationOffset = 0;
 		vertexPositionIndexBufferCopyRegion.size = vertexPositionIndexBuffer->size;
 
-		stagingBuffer->unmap();
+		sourceOffset += vertexPositionIndexBuffer->size;
 
-		stagingBufferOffset += vertexPositionIndexBuffer->size;
+		uint32* vertexNormalIndexMappedRange = pointer_cast<uint32*>(mappedRange + sourceOffset);
 
-		Cluster* clusterMappedRange = stagingBuffer->map<Cluster>(stagingBufferOffset, clusterBuffer->size);
+		fillVertexNormalIndexBuffer(vertexNormalIndexMappedRange);
+
+		BufferCopyRegion vertexNormalIndexBufferCopyRegion{};
+		vertexNormalIndexBufferCopyRegion.sourceOffset = sourceOffset;
+		vertexNormalIndexBufferCopyRegion.destinationOffset = 0;
+		vertexNormalIndexBufferCopyRegion.size = vertexNormalIndexBuffer->size;
+
+		sourceOffset += vertexNormalIndexBuffer->size;
+
+		uint32* vertexTextureCoordinateIndexMappedRange = pointer_cast<uint32*>(mappedRange + sourceOffset);
+
+		fillVertexTextureCoordinateIndexBuffer(vertexTextureCoordinateIndexMappedRange);
+
+		BufferCopyRegion vertexTextureCoordinateIndexBufferCopyRegion{};
+		vertexTextureCoordinateIndexBufferCopyRegion.sourceOffset = sourceOffset;
+		vertexTextureCoordinateIndexBufferCopyRegion.destinationOffset = 0;
+		vertexTextureCoordinateIndexBufferCopyRegion.size = vertexTextureCoordinateIndexBuffer->size;
+
+		sourceOffset += vertexTextureCoordinateIndexBuffer->size;
+
+		Cluster* clusterMappedRange = pointer_cast<Cluster*>(mappedRange + sourceOffset);
 
 		fillClusterBuffer(clusterMappedRange);
 
 		BufferCopyRegion clusterBufferCopyRegion{};
-		clusterBufferCopyRegion.sourceOffset = stagingBufferOffset;
+		clusterBufferCopyRegion.sourceOffset = sourceOffset;
 		clusterBufferCopyRegion.destinationOffset = 0;
 		clusterBufferCopyRegion.size = clusterBuffer->size;
 
-		stagingBufferOffset += clusterBuffer->size;
+		sourceOffset += clusterBuffer->size;
 
-		stagingBuffer->unmap();
-
-		Instance* instanceMappedRange = stagingBuffer->map<Instance>(stagingBufferOffset, instanceBuffer->size);
+		Instance* instanceMappedRange = pointer_cast<Instance*>(mappedRange + sourceOffset);
 
 		fillInstanceBuffer(instanceMappedRange);
 
 		BufferCopyRegion instanceBufferCopyRegion{};
-		instanceBufferCopyRegion.sourceOffset = stagingBufferOffset;
+		instanceBufferCopyRegion.sourceOffset = sourceOffset;
 		instanceBufferCopyRegion.destinationOffset = 0;
 		instanceBufferCopyRegion.size = instanceBuffer->size;
 
-		stagingBufferOffset += instanceBuffer->size;
+		sourceOffset += instanceBuffer->size;
 
-		stagingBuffer->unmap();
-
-		Geometry* geometryMappedRange = stagingBuffer->map<Geometry>(stagingBufferOffset, geometryBuffer->size);
+		Geometry* geometryMappedRange = pointer_cast<Geometry*>(mappedRange + sourceOffset);
 
 		fillGeometryBuffer(geometryMappedRange);
 
 		BufferCopyRegion geometryBufferCopyRegion{};
-		geometryBufferCopyRegion.sourceOffset = stagingBufferOffset;
+		geometryBufferCopyRegion.sourceOffset = sourceOffset;
 		geometryBufferCopyRegion.destinationOffset = 0;
 		geometryBufferCopyRegion.size = geometryBuffer->size;
 
@@ -601,7 +736,11 @@ namespace ProjectA {
 
 		commandEncoder->begin();
 		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexPositionComponentBuffer, {vertexPositionComponentBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexNormalComponentBuffer, {vertexNormalComponentBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexTextureCoordinateComponentBuffer, {vertexTextureCoordinateComponentBufferCopyRegion});
 		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexPositionIndexBuffer, {vertexPositionIndexBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexNormalIndexBuffer, {vertexNormalIndexBufferCopyRegion});
+		commandEncoder->copyBufferToBuffer(stagingBuffer, vertexTextureCoordinateIndexBuffer, {vertexTextureCoordinateIndexBufferCopyRegion});
 		commandEncoder->copyBufferToBuffer(stagingBuffer, clusterBuffer, {clusterBufferCopyRegion});
 		commandEncoder->copyBufferToBuffer(stagingBuffer, instanceBuffer, {instanceBufferCopyRegion});
 		commandEncoder->copyBufferToBuffer(stagingBuffer, geometryBuffer, {geometryBufferCopyRegion});
@@ -624,8 +763,24 @@ namespace ProjectA {
 		std::copy(scene->vertexPositionComponents.begin(), scene->vertexPositionComponents.end(), mappedRange);
 	}
 
+	void VisibilityRenderer::fillVertexNormalComponentBuffer(float32* mappedRange) const {
+		std::copy(scene->vertexNormalComponents.begin(), scene->vertexNormalComponents.end(), mappedRange);
+	}
+
+	void VisibilityRenderer::fillVertexTextureCoordinateComponentBuffer(float32* mappedRange) const {
+		std::copy(scene->vertexTextureCoordinateComponents.begin(), scene->vertexTextureCoordinateComponents.end(), mappedRange);
+	}
+
 	void VisibilityRenderer::fillVertexPositionIndexBuffer(uint32* mappedRange) const {
 		std::copy(scene->vertexPositionIndices.begin(), scene->vertexPositionIndices.end(), mappedRange);
+	}
+
+	void VisibilityRenderer::fillVertexNormalIndexBuffer(uint32* mappedRange) const {
+		std::copy(scene->vertexNormalIndices.begin(), scene->vertexNormalIndices.end(), mappedRange);
+	}
+
+	void VisibilityRenderer::fillVertexTextureCoordinateIndexBuffer(uint32* mappedRange) const {
+		std::copy(scene->vertexTextureCoordinateIndices.begin(), scene->vertexTextureCoordinateIndices.end(), mappedRange);
 	}
 
 	void VisibilityRenderer::fillClusterBuffer(Cluster* mappedRange) const {
@@ -658,16 +813,6 @@ namespace ProjectA {
 		cameraDescriptorBuffer.offset = 0;
 		cameraDescriptorBuffer.size = cameraBuffer->size;
 
-		DescriptorBuffer vertexPositionComponentDescriptorBuffer{};
-		vertexPositionComponentDescriptorBuffer.buffer = vertexPositionComponentBuffer;
-		vertexPositionComponentDescriptorBuffer.offset = 0;
-		vertexPositionComponentDescriptorBuffer.size = vertexPositionComponentBuffer->size;
-
-		DescriptorBuffer vertexPositionIndexDescriptorBuffer{};
-		vertexPositionIndexDescriptorBuffer.buffer = vertexPositionIndexBuffer;
-		vertexPositionIndexDescriptorBuffer.offset = 0;
-		vertexPositionIndexDescriptorBuffer.size = vertexPositionIndexBuffer->size;
-
 		DescriptorBuffer clusterDescriptorBuffer{};
 		clusterDescriptorBuffer.buffer = clusterBuffer;
 		clusterDescriptorBuffer.offset = 0;
@@ -687,6 +832,36 @@ namespace ProjectA {
 		debugCameraDescriptorBuffer.buffer = cameraBuffer;
 		debugCameraDescriptorBuffer.offset = sizeof(mat4x4<float32>);
 		debugCameraDescriptorBuffer.size = 2 * sizeof(float32);
+
+		DescriptorBuffer vertexPositionComponentDescriptorBuffer{};
+		vertexPositionComponentDescriptorBuffer.buffer = vertexPositionComponentBuffer;
+		vertexPositionComponentDescriptorBuffer.offset = 0;
+		vertexPositionComponentDescriptorBuffer.size = vertexPositionComponentBuffer->size;
+
+		DescriptorBuffer vertexNormalComponentDescriptorBuffer{};
+		vertexNormalComponentDescriptorBuffer.buffer = vertexNormalComponentBuffer;
+		vertexNormalComponentDescriptorBuffer.offset = 0;
+		vertexNormalComponentDescriptorBuffer.size = vertexNormalComponentBuffer->size;
+
+		DescriptorBuffer vertexTextureCoordinateComponentDescriptorBuffer{};
+		vertexTextureCoordinateComponentDescriptorBuffer.buffer = vertexTextureCoordinateComponentBuffer;
+		vertexTextureCoordinateComponentDescriptorBuffer.offset = 0;
+		vertexTextureCoordinateComponentDescriptorBuffer.size = vertexTextureCoordinateComponentBuffer->size;
+
+		DescriptorBuffer vertexPositionIndexDescriptorBuffer{};
+		vertexPositionIndexDescriptorBuffer.buffer = vertexPositionIndexBuffer;
+		vertexPositionIndexDescriptorBuffer.offset = 0;
+		vertexPositionIndexDescriptorBuffer.size = vertexPositionIndexBuffer->size;
+
+		DescriptorBuffer vertexNormalIndexDescriptorBuffer{};
+		vertexNormalIndexDescriptorBuffer.buffer = vertexNormalIndexBuffer;
+		vertexNormalIndexDescriptorBuffer.offset = 0;
+		vertexNormalIndexDescriptorBuffer.size = vertexNormalIndexBuffer->size;
+
+		DescriptorBuffer vertexTextureCoordinateIndexDescriptorBuffer{};
+		vertexTextureCoordinateIndexDescriptorBuffer.buffer = vertexTextureCoordinateIndexBuffer;
+		vertexTextureCoordinateIndexDescriptorBuffer.offset = 0;
+		vertexTextureCoordinateIndexDescriptorBuffer.size = vertexTextureCoordinateIndexBuffer->size;
 
 		WriteDescriptorSet cameraWriteDescriptorSet{};
 		cameraWriteDescriptorSet.descriptorSet = cameraDescriptorSet;
@@ -723,6 +898,36 @@ namespace ProjectA {
 		debugCameraWriteDescriptorSet.bindingIndex = 0;
 		debugCameraWriteDescriptorSet.descriptorBuffers = {debugCameraDescriptorBuffer};
 
+		WriteDescriptorSet debugVertexPositionComponentWriteDescriptorSet{};
+		debugVertexPositionComponentWriteDescriptorSet.descriptorSet = debugDescriptorSet;
+		debugVertexPositionComponentWriteDescriptorSet.bindingIndex = 3;
+		debugVertexPositionComponentWriteDescriptorSet.descriptorBuffers = {vertexPositionComponentDescriptorBuffer};
+
+		WriteDescriptorSet debugVertexNormalComponentWriteDescriptorSet{};
+		debugVertexNormalComponentWriteDescriptorSet.descriptorSet = debugDescriptorSet;
+		debugVertexNormalComponentWriteDescriptorSet.bindingIndex = 4;
+		debugVertexNormalComponentWriteDescriptorSet.descriptorBuffers = {vertexNormalComponentDescriptorBuffer};
+
+		WriteDescriptorSet debugVertexTextureCoordinateComponentWriteDescriptorSet{};
+		debugVertexTextureCoordinateComponentWriteDescriptorSet.descriptorSet = debugDescriptorSet;
+		debugVertexTextureCoordinateComponentWriteDescriptorSet.bindingIndex = 5;
+		debugVertexTextureCoordinateComponentWriteDescriptorSet.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer};
+
+		WriteDescriptorSet debugVertexPositionIndexWriteDescriptorSet{};
+		debugVertexPositionIndexWriteDescriptorSet.descriptorSet = debugDescriptorSet;
+		debugVertexPositionIndexWriteDescriptorSet.bindingIndex = 6;
+		debugVertexPositionIndexWriteDescriptorSet.descriptorBuffers = {vertexPositionIndexDescriptorBuffer};
+
+		WriteDescriptorSet debugVertexNormalIndexWriteDescriptorSet{};
+		debugVertexNormalIndexWriteDescriptorSet.descriptorSet = debugDescriptorSet;
+		debugVertexNormalIndexWriteDescriptorSet.bindingIndex = 7;
+		debugVertexNormalIndexWriteDescriptorSet.descriptorBuffers = {vertexNormalIndexDescriptorBuffer};
+
+		WriteDescriptorSet debugVertexTextureCoordinateIndexWriteDescriptorSet{};
+		debugVertexTextureCoordinateIndexWriteDescriptorSet.descriptorSet = debugDescriptorSet;
+		debugVertexTextureCoordinateIndexWriteDescriptorSet.bindingIndex = 8;
+		debugVertexTextureCoordinateIndexWriteDescriptorSet.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer};
+
 		getDevice()->updateDescriptorSets({
 			cameraWriteDescriptorSet,
 			vertexPositionComponentWriteDescriptorSet,
@@ -731,10 +936,16 @@ namespace ProjectA {
 			instanceWriteDescriptorSet,
 			geometryWriteDescriptorSet,
 			debugCameraWriteDescriptorSet,
+			debugVertexPositionComponentWriteDescriptorSet,
+			debugVertexNormalComponentWriteDescriptorSet,
+			debugVertexTextureCoordinateComponentWriteDescriptorSet,
+			debugVertexPositionIndexWriteDescriptorSet,
+			debugVertexNormalIndexWriteDescriptorSet,
+			debugVertexTextureCoordinateIndexWriteDescriptorSet,
 		});
 	}
 
-	void VisibilityRenderer::updateDebugDescriptorSet() {
+	void VisibilityRenderer::updateDebugInputAttachmentDescriptorSets() {
 		DescriptorImage visibilityDescriptorImage{};
 		visibilityDescriptorImage.imageView = visibilityImageView;
 		visibilityDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;

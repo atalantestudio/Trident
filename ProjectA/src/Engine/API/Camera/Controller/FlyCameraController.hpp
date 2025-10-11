@@ -12,7 +12,7 @@ namespace ProjectA {
 			FlyCameraController() {
 				camera.setPosition({0.0_m, 0.0_m, -0.4_m});
 				camera.setFieldOfView(radians(60.0_deg));
-				camera.setNearPlane(0.001_m);
+				camera.setNearPlane(0.01_m);
 				camera.setFarPlane(100.0_m);
 			}
 
