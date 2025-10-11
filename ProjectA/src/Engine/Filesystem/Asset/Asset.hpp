@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Engine/Filesystem/Asset/AssetSignature.hpp"
+
 namespace ProjectA {
 	struct AssetDescriptor {
 		uint32 identifier;
@@ -7,6 +9,9 @@ namespace ProjectA {
 	};
 
 	class Asset {
+		public:
+			static constexpr uint64 HEADER_SIZE = sizeof(AssetSignature) + sizeof(uint32) + sizeof(VersionNumber);
+
 		public:
 			explicit Asset(const AssetDescriptor& descriptor) :
 				identifier(descriptor.identifier),

@@ -23,6 +23,11 @@ namespace ProjectA {
 				endianness(endianness)
 			{}
 
+			// TODO: Move to a new parent class.
+			uint64 getByteOffset() const {
+				return byteOffset;
+			}
+
 			uint64 getBitOffset() const {
 				return byteOffset * 8 + bitOffset;
 			}
@@ -284,6 +289,11 @@ namespace ProjectA {
 				bitOffset(0),
 				endianness(endianness)
 			{}
+
+			// TODO: Move to a new parent class.
+			uint64 getByteOffset() const {
+				return byteOffset;
+			}
 
 			uint64 getBitOffset() const {
 				return byteOffset * 8 + bitOffset;
