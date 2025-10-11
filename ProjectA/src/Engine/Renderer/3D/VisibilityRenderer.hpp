@@ -13,6 +13,7 @@ namespace ProjectA {
 				float32 nearPlane;
 				float32 farPlane;
 				Extent2D viewport;
+				vec3<float32> position;
 			};
 
 			struct Cluster {
@@ -46,6 +47,8 @@ namespace ProjectA {
 			void render(const ref<CommandEncoder>& commandEncoder) const override;
 
 			void resize(WindowResizeEvent& event) override;
+
+			void updateCameraPosition() const;
 
 			void updateCameraProjectionView() const;
 

@@ -34,8 +34,8 @@ namespace ProjectA {
 			}
 
 			void preRender() override {
+				renderer.updateCameraPosition();
 				renderer.updateCameraProjectionView();
-				renderer.updateViewport();
 			}
 
 			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const override {
@@ -90,6 +90,8 @@ namespace ProjectA {
 			bool onWindowResize(WindowResizeEvent& event) {
 				cameraController.setAspectRatio(getApplication()->getWindow()->getAspectRatio());
 				cameraController.updateProjection();
+
+				renderer.updateViewport();
 
 				return true;
 			}

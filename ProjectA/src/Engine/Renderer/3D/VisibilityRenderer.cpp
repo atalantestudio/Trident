@@ -105,6 +105,10 @@ namespace ProjectA {
 		updateDebugInputAttachmentDescriptorSets();
 	}
 
+	void VisibilityRenderer::updateCameraPosition() const {
+		cameraMappedRange->position = getCameraController<PerspectiveCamera>().getCamera().getPosition();
+	}
+
 	void VisibilityRenderer::updateCameraProjectionView() const {
 		cameraMappedRange->projectionView = getCameraController<PerspectiveCamera>().getCamera().getProjectionView();
 	}
