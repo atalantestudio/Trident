@@ -240,7 +240,6 @@ project "AssetBuilder"
 		runtime "Release"
 		optimize "on"
 
--- TSL transpiler
 project "tsc"
 	location "%{prj.name}"
 	kind "ConsoleApp"
@@ -258,6 +257,11 @@ project "tsc"
 	files {
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/src/**.hpp",
+	}
+
+	removefiles {
+		-- Emscripten entry point file
+		"%{prj.name}/src/Module.cpp",
 	}
 
 	includedirs {

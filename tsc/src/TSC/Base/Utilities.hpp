@@ -1,0 +1,8 @@
+#pragma once
+
+namespace ProjectA {
+	template<typename T, typename... U>
+	constexpr ref<T> createRef(U&&... arguments) {
+		return std::make_shared<T>(std::forward<U>(arguments)...);
+	}
+}

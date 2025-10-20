@@ -74,7 +74,8 @@ namespace ProjectA {
 		public:
 			CompilationResult* compilationResult;
 			AST ast;
-			uint32 tokenIndex = 0;
+			uint32 tokenIndex;
+			uint8 annotationFlag;
 			Position position;
 	};
 }

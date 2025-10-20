@@ -24,6 +24,7 @@ namespace ProjectA {
 	};
 
 	struct VariableStatement : public BaseStatement<StatementType::VARIABLE> {
+		uint32 annotationFlag;
 		uint32 annotationInstanceIndexOffset;
 		uint32 annotationInstanceCount;
 		uint32 typeExpressionIndex;

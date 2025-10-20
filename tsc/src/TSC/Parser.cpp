@@ -1,4 +1,8 @@
-#include "pch.hpp"
+#ifdef __EMSCRIPTEN__
+	#include "Base/Base.hpp"
+#else
+	#include "pch.hpp"
+#endif
 
 #include "Case.hpp"
 #include "Parser.hpp"
@@ -33,6 +37,7 @@ namespace ProjectA {
 		this->compilationResult = &compilationResult;
 		ast = {};
 		tokenIndex = 0;
+		annotationFlag = 0;
 		position = {};
 
 		skipEmptyLines();
@@ -122,8 +127,11 @@ namespace ProjectA {
 
 	bool Parser::parseConstantOrFunctionStatement() {
 		ref<VariableStatement> statement = createRef<VariableStatement>();
+		statement->annotationFlag = annotationFlag;
 		statement->annotationInstanceIndexOffset = static_cast<uint32>(ast.annotationInstances.size());
 		statement->annotationInstanceCount = static_cast<uint32>(ast.annotationInstances.size()) - statement->annotationInstanceIndexOffset;
+
+		annotationFlag = 0;
 
 		if (!parseTypeExpression()) {
 			return false;
@@ -243,8 +251,11 @@ namespace ProjectA {
 
 	bool Parser::parseMemberOrParameterStatement() {
 		ref<VariableStatement> statement = createRef<VariableStatement>();
+		statement->annotationFlag = annotationFlag;
 		statement->annotationInstanceIndexOffset = static_cast<uint32>(ast.annotationInstances.size());
 		statement->annotationInstanceCount = static_cast<uint32>(ast.annotationInstances.size()) - statement->annotationInstanceIndexOffset;
+
+		annotationFlag = 0;
 
 		if (!parseTypeExpression()) {
 			return false;
@@ -415,8 +426,11 @@ namespace ProjectA {
 
 	bool Parser::parseVariableStatement() {
 		ref<VariableStatement> statement = createRef<VariableStatement>();
+		statement->annotationFlag = annotationFlag;
 		statement->annotationInstanceIndexOffset = static_cast<uint32>(ast.annotationInstances.size());
 		statement->annotationInstanceCount = static_cast<uint32>(ast.annotationInstances.size()) - statement->annotationInstanceIndexOffset;
+
+		annotationFlag = 0;
 
 		if (!parseTypeExpression()) {
 			return false;
@@ -797,10 +811,11 @@ namespace ProjectA {
 
 			AnnotationInstance annotationInstance{};
 
-			for (uint32 annotationIndex = 0; annotationIndex < static_cast<uint32>(Annotation::__COUNT); annotationIndex += 1) {
+			for (uint32 annotationIndex = 0; annotationIndex < ANNOTATION_COUNT; annotationIndex += 1) {
 				const char8* annotation = ANNOTATION_STRINGS[annotationIndex];
 
 				if (read().value == annotation) {
+					annotationFlag |= BIT(annotationIndex);
 					annotationInstance.annotation = static_cast<Annotation>(BIT(annotationIndex));
 
 					break;

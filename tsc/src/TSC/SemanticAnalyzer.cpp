@@ -1,4 +1,8 @@
-#include "pch.hpp"
+#ifdef __EMSCRIPTEN__
+	#include "Base/Base.hpp"
+#else
+	#include "pch.hpp"
+#endif
 
 #include "SemanticAnalyzer.hpp"
 

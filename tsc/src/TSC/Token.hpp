@@ -4,6 +4,7 @@
 #include "TokenType.hpp"
 
 namespace ProjectA {
+	// TODO: Find a way to serialize without having to write getters.
 	class Token {
 		public:
 			uint32 getTypeIndex() const {

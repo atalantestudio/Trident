@@ -2,6 +2,7 @@
 
 #include "Engine/Filesystem/Filesystem.hpp"
 
+#include "GLSLTranspiler.hpp"
 #include "Lexer.hpp"
 #include "Parser.hpp"
 // #include "SemanticAnalyzer.hpp"
@@ -176,6 +177,7 @@ namespace ProjectA {
 				const ref<VariableStatement> variableStatement = std::static_pointer_cast<VariableStatement>(statement);
 
 				stream << getIndent(indent) << "\"Type\": \"VariableStatement\",\n";
+				stream << getIndent(indent) << "\"AnnotationFlag\": " << variableStatement->annotationFlag << ",\n";
 				stream << getIndent(indent) << "\"Annotations\": [\n";
 
 				indent += 1;
@@ -360,34 +362,39 @@ namespace ProjectA {
 			return 1;
 		}
 
-		std::ofstream stream("Test/test0.ast.json");
+		GLSLTranspiler transpiler;
+		transpiler.write("Test/test0.glsl", result, ast);
 
-		DEBUG_ASSERT(stream.is_open());
+		#if 1
+			std::ofstream stream("Test/test0.ast.json");
 
-		uint32 indent = 0;
+			DEBUG_ASSERT(stream.is_open());
 
-		stream << "[\n";
+			uint32 indent = 0;
 
-		indent += 1;
+			stream << "[\n";
 
-		for (uint32 globalScopeStatementIndexOffset = 0; globalScopeStatementIndexOffset < ast.globalScopeStatementIndices.size(); globalScopeStatementIndexOffset += 1) {
-			const uint32 globalScopeStatementIndex = ast.globalScopeStatementIndices[globalScopeStatementIndexOffset];
+			indent += 1;
 
-			stream << getIndent(indent);
+			for (uint32 globalScopeStatementIndexOffset = 0; globalScopeStatementIndexOffset < ast.globalScopeStatementIndices.size(); globalScopeStatementIndexOffset += 1) {
+				const uint32 globalScopeStatementIndex = ast.globalScopeStatementIndices[globalScopeStatementIndexOffset];
 
-			writeStatement(stream, indent, result, ast, globalScopeStatementIndex);
+				stream << getIndent(indent);
 
-			if (globalScopeStatementIndexOffset + 1 < ast.globalScopeStatementIndices.size()) {
-				stream << ",";
+				writeStatement(stream, indent, result, ast, globalScopeStatementIndex);
+
+				if (globalScopeStatementIndexOffset + 1 < ast.globalScopeStatementIndices.size()) {
+					stream << ",";
+				}
+
+				stream << "\n";
 			}
 
-			stream << "\n";
-		}
+			indent -= 1;
 
-		indent -= 1;
-
-		stream << "]";
-		stream.close();
+			stream << "]";
+			stream.close();
+		#endif
 
 		return 0;
 	}

@@ -8,11 +8,11 @@ namespace ProjectA {
 		POSITION = BIT(3),
 		SET = BIT(4),
 		VERTEX_INDEX = BIT(5),
-
-		__COUNT = 6,
 	};
 
 	AS_FLAG(Annotation);
+
+	static constexpr uint8 ANNOTATION_COUNT = 6;
 
 	enum class AnnotationType : uint8 {
 		// VOID,
@@ -22,7 +22,7 @@ namespace ProjectA {
 	static constexpr Annotation ANNOTATION_TYPE_VOID = Annotation::INSTANCE_INDEX | Annotation::POSITION | Annotation::VERTEX_INDEX;
 	static constexpr Annotation ANNOTATION_TYPE_UINT32 = Annotation::BINDING | Annotation::CONSTANT | Annotation::SET;
 
-	static constexpr const char8* ANNOTATION_STRINGS[static_cast<uint32>(Annotation::__COUNT)] = {
+	static constexpr const char8* ANNOTATION_STRINGS[ANNOTATION_COUNT] = {
 		"binding",
 		"constant",
 		"instanceIndex",
@@ -39,7 +39,7 @@ namespace ProjectA {
 			case Annotation::POSITION: return "position";
 			case Annotation::SET: return "set";
 			case Annotation::VERTEX_INDEX: return "vertexIndex";
-			default: return "UNDEFINED";
+			default: return "[unknown annotation]";
 		}
 	}
 }

@@ -5,6 +5,7 @@
 #include "SemanticTokenType.hpp"
 
 namespace ProjectA {
+	// TODO: Find a way to serialize without having to write getters.
 	class SemanticToken {
 		public:
 			uint32 getTypeIndex() const {
