@@ -37,6 +37,7 @@ namespace ProjectA {
 		this->compilationResult = &compilationResult;
 		ast = {};
 		tokenIndex = 0;
+		currentAnnotationCount = 0;
 		annotationFlag = 0;
 		position = {};
 
@@ -128,9 +129,10 @@ namespace ProjectA {
 	bool Parser::parseConstantOrFunctionStatement() {
 		ref<VariableStatement> statement = createRef<VariableStatement>();
 		statement->annotationFlag = annotationFlag;
-		statement->annotationInstanceIndexOffset = static_cast<uint32>(ast.annotationInstances.size());
-		statement->annotationInstanceCount = static_cast<uint32>(ast.annotationInstances.size()) - statement->annotationInstanceIndexOffset;
+		statement->annotationInstanceIndexOffset = currentAnnotationCount;
+		statement->annotationInstanceCount = static_cast<uint32>(ast.annotationInstances.size()) - currentAnnotationCount;
 
+		currentAnnotationCount += statement->annotationInstanceCount;
 		annotationFlag = 0;
 
 		if (!parseTypeExpression()) {
@@ -252,9 +254,10 @@ namespace ProjectA {
 	bool Parser::parseMemberOrParameterStatement() {
 		ref<VariableStatement> statement = createRef<VariableStatement>();
 		statement->annotationFlag = annotationFlag;
-		statement->annotationInstanceIndexOffset = static_cast<uint32>(ast.annotationInstances.size());
-		statement->annotationInstanceCount = static_cast<uint32>(ast.annotationInstances.size()) - statement->annotationInstanceIndexOffset;
+		statement->annotationInstanceIndexOffset = currentAnnotationCount;
+		statement->annotationInstanceCount = static_cast<uint32>(ast.annotationInstances.size()) - currentAnnotationCount;
 
+		currentAnnotationCount += statement->annotationInstanceCount;
 		annotationFlag = 0;
 
 		if (!parseTypeExpression()) {
@@ -427,9 +430,10 @@ namespace ProjectA {
 	bool Parser::parseVariableStatement() {
 		ref<VariableStatement> statement = createRef<VariableStatement>();
 		statement->annotationFlag = annotationFlag;
-		statement->annotationInstanceIndexOffset = static_cast<uint32>(ast.annotationInstances.size());
-		statement->annotationInstanceCount = static_cast<uint32>(ast.annotationInstances.size()) - statement->annotationInstanceIndexOffset;
+		statement->annotationInstanceIndexOffset = currentAnnotationCount;
+		statement->annotationInstanceCount = static_cast<uint32>(ast.annotationInstances.size()) - currentAnnotationCount;
 
+		currentAnnotationCount = statement->annotationInstanceCount;
 		annotationFlag = 0;
 
 		if (!parseTypeExpression()) {

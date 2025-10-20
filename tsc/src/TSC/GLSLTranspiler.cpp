@@ -57,9 +57,25 @@ namespace ProjectA {
 			return;
 		}
 
-		const ref<Expression>& typeExpression = ast->expressions[memberStatement->typeExpressionIndex];
-
 		stream << indent();
+
+		if (memberStatement->annotationFlag & Annotation::LOCATION) {
+			stream << "layout(";
+
+			const AnnotationInstance* locationAnnotationInstance = nullptr;
+
+			for (uint32 annotationInstanceIndex = 0; annotationInstanceIndex < memberStatement->annotationInstanceCount; annotationInstanceIndex += 1) {
+				locationAnnotationInstance = &ast->annotationInstances[memberStatement->annotationInstanceIndexOffset + annotationInstanceIndex];
+
+				if (locationAnnotationInstance->annotation == Annotation::LOCATION) {
+					break;
+				}
+			}
+
+			stream << "location = " << locationAnnotationInstance->value.value << ") ";
+		}
+
+		const ref<Expression>& typeExpression = ast->expressions[memberStatement->typeExpressionIndex];
 
 		writeTypeExpression(std::static_pointer_cast<TypeExpression>(typeExpression));
 

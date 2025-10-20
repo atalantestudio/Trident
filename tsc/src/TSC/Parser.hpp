@@ -75,6 +75,7 @@ namespace ProjectA {
 			CompilationResult* compilationResult;
 			AST ast;
 			uint32 tokenIndex;
+			uint32 currentAnnotationCount;
 			uint8 annotationFlag;
 			Position position;
 	};

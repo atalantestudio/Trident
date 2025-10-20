@@ -260,8 +260,9 @@ project "tsc"
 	}
 
 	removefiles {
-		-- Emscripten entry point file
-		"%{prj.name}/src/Module.cpp",
+		-- Emscripten files
+		"%{prj.name}/src/TSC/Base/**.hpp",
+		"%{prj.name}/src/TSC/Module.cpp",
 	}
 
 	includedirs {
