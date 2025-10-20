@@ -6,11 +6,11 @@
 	} \
 	\
 	inline constexpr bool operator &(T a, T b) { \
-		return static_cast<bool>(static_cast<sint32>(a) & static_cast<sint32>(b)); \
+		return static_cast<bool>(static_cast<std::underlying_type<T>>(a) & static_cast<std::underlying_type<T>>(b)); \
 	} \
 	\
 	inline constexpr T operator |(T a, T b) { \
-		return static_cast<T>(static_cast<sint32>(a) | static_cast<sint32>(b)); \
+		return static_cast<T>(static_cast<std::underlying_type<T>>(a) | static_cast<std::underlying_type<T>>(b)); \
 	} \
 	inline constexpr T& operator |=(T& a, T b) { \
 		return a = a | b; \
@@ -22,5 +22,5 @@
 
 #define AS_PRINTABLE(T) \
 	inline std::ostream& operator <<(std::ostream& stream, T a) { \
-		return stream << static_cast<sint32>(a); \
+		return stream << static_cast<std::underlying_type<T>>(a); \
 	}

@@ -2,9 +2,9 @@
 
 #ifdef BUILD_MODE_DEBUG
 	#if COMPILER == COMPILER_MSVC
-		#define BREAKPOINT __debugbreak
+		#define BREAKPOINT() __debugbreak()
 	#else
-		#define BREAKPOINT
+		#define BREAKPOINT()
 	#endif
 
 	#define ABORT BREAKPOINT

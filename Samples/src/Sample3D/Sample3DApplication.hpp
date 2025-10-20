@@ -9,7 +9,7 @@
 namespace ProjectA {
 	class Sample3DApplication : public Application {
 		public:
-			Sample3DApplication(const ProjectDescriptor& projectDescriptor) :
+			explicit Sample3DApplication(const ProjectDescriptor& projectDescriptor) :
 				Application(projectDescriptor)
 			{
 				registerLayer<Sample3DLayer>();

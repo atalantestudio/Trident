@@ -10,7 +10,7 @@
 namespace ProjectA {
 	class Physics2DApplication : public Application {
 		public:
-			Physics2DApplication(const ProjectDescriptor& projectDescriptor) :
+			explicit Physics2DApplication(const ProjectDescriptor& projectDescriptor) :
 				Application(projectDescriptor)
 			{
 				registerLayer<SampleLayer>();

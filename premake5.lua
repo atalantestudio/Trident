@@ -239,3 +239,72 @@ project "AssetBuilder"
 
 		runtime "Release"
 		optimize "on"
+
+-- TSL transpiler
+project "tsc"
+	location "%{prj.name}"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
+
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("obj/" .. outputdir .. "/%{prj.name}")
+
+	dependson {
+		"ProjectA",
+	}
+
+	files {
+		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/src/**.hpp",
+	}
+
+	includedirs {
+		"ProjectA/src",
+		"ProjectA/vendor",
+		"ProjectA/vendor/API",
+		"ProjectA/vendor/lyah",
+		vulkansdk .. "/Include", -- TODO: Temporary
+	}
+
+	links {
+		"ProjectA",
+	}
+
+	defines {
+		"PROJECT_NAME=\"%{prj.name}\"",
+	}
+
+	postbuildcommands {
+		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Test]",
+		"{COPYDIR} Test/** %[bin/" .. outputdir .. "/%{prj.name}/Test/**]",
+		"IF EXIST %[%{prj.name}.tpr] {COPYFILE} %[%{prj.name}.tpr] %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.tpr]",
+	}
+
+	filter "system:windows"
+		systemversion "latest"
+
+	filter "configurations:Debug"
+		defines {
+			"BUILD_MODE_DEBUG",
+		}
+
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Profile"
+		defines {
+			"BUILD_MODE_PROFILE",
+		}
+
+		runtime "Release"
+		optimize "on"
+
+	filter "configurations:Release"
+		defines {
+			"BUILD_MODE_RELEASE",
+		}
+
+		runtime "Release"
+		optimize "on"

@@ -9,7 +9,7 @@
 namespace ProjectA {
 	class GUIApplication : public Application {
 		public:
-			GUIApplication(const ProjectDescriptor& projectDescriptor) :
+			explicit GUIApplication(const ProjectDescriptor& projectDescriptor) :
 				Application(projectDescriptor)
 			{
 				registerLayer<MyLayer>();

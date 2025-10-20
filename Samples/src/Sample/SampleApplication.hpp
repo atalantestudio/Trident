@@ -9,7 +9,7 @@
 namespace ProjectA {
 	class SampleApplication : public Application {
 		public:
-			SampleApplication(const ProjectDescriptor& projectDescriptor) :
+			explicit SampleApplication(const ProjectDescriptor& projectDescriptor) :
 				Application(projectDescriptor)
 			{
 				registerLayer<SampleLayer>();
