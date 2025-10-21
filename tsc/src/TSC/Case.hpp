@@ -1,8 +1,12 @@
 #pragma once
 
 namespace ProjectA {
-	static bool isPascalCase(const char8* string) {
-		const char8* character = string;
+	static bool isCamelCaseOrSnakeCase(const char8* characters) {
+		return characters[0] >= 'a' && characters[0] <= 'z';
+	}
+
+	static bool isPascalCase(const char8* characters) {
+		const char8* character = characters;
 
 		// Check that the first letter is uppercase.
 		if (*character < 'A' || *character > 'Z') {
@@ -21,8 +25,8 @@ namespace ProjectA {
 		return true;
 	}
 
-	static bool isScreamingSnakeCase(const char8* string) {
-		const char8* character = string;
+	static bool isScreamingSnakeCase(const char8* characters) {
+		const char8* character = characters;
 
 		while (*character != '\0') {
 			if (!((*character >= 'A' && *character <= 'Z') || (*character >= '0' && *character <= '9') || *character == '_')) {

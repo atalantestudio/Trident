@@ -36,7 +36,14 @@ namespace ProjectA {
 			.function("getStartLineIndex", &Diagnostic::getStartLineIndex)
 			.function("getStartCharacterOffset", &Diagnostic::getStartCharacterOffset)
 			.function("getEndLineIndex", &Diagnostic::getEndLineIndex)
-			.function("getEndCharacterOffset", &Diagnostic::getEndCharacterOffset);
+			.function("getEndCharacterOffset", &Diagnostic::getEndCharacterOffset)
+			.function("getRelatedInformations", &Diagnostic::getRelatedInformations);
+		emscripten::class_<DiagnosticRelatedInformation>("DiagnosticRelatedInformation")
+			.function("getStartLineIndex", &DiagnosticRelatedInformation::getStartLineIndex)
+			.function("getStartCharacterOffset", &DiagnosticRelatedInformation::getStartCharacterOffset)
+			.function("getEndLineIndex", &DiagnosticRelatedInformation::getEndLineIndex)
+			.function("getEndCharacterOffset", &DiagnosticRelatedInformation::getEndCharacterOffset)
+			.function("getMessage", &DiagnosticRelatedInformation::getMessage);
 		emscripten::class_<SemanticToken>("SemanticToken")
 			.function("getTypeIndex", &SemanticToken::getTypeIndex)
 			.function("getModifiers", &SemanticToken::getModifiers)
@@ -53,6 +60,7 @@ namespace ProjectA {
 		emscripten::function("compile", &compile);
 
 		emscripten::register_vector<Diagnostic>("DiagnosticVector");
+		emscripten::register_vector<DiagnosticRelatedInformation>("DiagnosticRelatedInformationVector");
 		emscripten::register_vector<SemanticToken>("SemanticTokenVector");
 		emscripten::register_vector<Token>("TokenVector");
 	}

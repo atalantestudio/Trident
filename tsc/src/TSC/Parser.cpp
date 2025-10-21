@@ -10,7 +10,7 @@
 namespace ProjectA {
 	#define EXPECT(condition, message) \
 		if (!(condition)) { \
-			compilationResult->registerDiagnostic(DiagnosticSeverity::ERROR, message, tokenIndex); \
+			compilationResult->generateDiagnostic(DiagnosticSeverity::ERROR, message, tokenIndex); \
 			\
 			return false; \
 		}
@@ -47,6 +47,7 @@ namespace ProjectA {
 		currentAnnotationCount = 0;
 		annotationFlag = 0;
 		position = {};
+		parentStatementIndex = ~0;
 
 		skipEmptyLines();
 
@@ -90,6 +91,11 @@ namespace ProjectA {
 
 		skipEmptyLines();
 
+		ast.statements.emplace_back(statement);
+		ast.globalScopeStatementIndices.emplace_back(getLastStatementIndex());
+
+		parentStatementIndex = getLastStatementIndex();
+
 		while (read().type != TokenType::RIGHT_CURLY_BRACE && read().type != TokenType::END_OF_FILE) {
 			if (read().type == TokenType::LEFT_SQUARE_BRACKET) {
 				if (!parseAnnotationInstances()) {
@@ -114,9 +120,6 @@ namespace ProjectA {
 		EXPECT(read().type != TokenType::END_OF_FILE, "[STRUCTURE] Expected '}' but got EOF.");
 
 		jump();
-
-		ast.statements.emplace_back(statement);
-		ast.globalScopeStatementIndices.emplace_back(getLastStatementIndex());
 
 		// TODO: Update UDT here, e.g.
 		// ast.userDefinedTypes.emplace_back(compilationResult->tokens[statement->identifierTokenIndex].value);
@@ -143,7 +146,35 @@ namespace ProjectA {
 
 		statement->identifierTokenIndex = tokenIndex;
 
-		compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::MEMBER, 0);
+		const ref<StructureStatement> parentStatement = std::static_pointer_cast<StructureStatement>(ast.statements[parentStatementIndex]);
+
+		for (uint32 memberIndex = 0; memberIndex < parentStatement->memberIdentifierTokenIndices.size(); memberIndex += 1) {
+			const Token& memberIdentifierToken = compilationResult->tokens[parentStatement->memberIdentifierTokenIndices[memberIndex]];
+
+			if (read().value == memberIdentifierToken.value) {
+				DiagnosticRelatedInformation relatedInformation{};
+				relatedInformation.start = memberIdentifierToken.start;
+				relatedInformation.end = memberIdentifierToken.getEnd();
+				relatedInformation.message = "\"" + memberIdentifierToken.value + "\" is defined here.";
+
+				Diagnostic diagnostic{};
+				diagnostic.severity = DiagnosticSeverity::ERROR;
+				diagnostic.message = "Duplicate member identifier \"" + read().value + "\".";
+				diagnostic.start = read().start;
+				diagnostic.end = read().getEnd();
+				diagnostic.relatedInformations.emplace_back(relatedInformation);
+
+				compilationResult->diagnostics.emplace_back(diagnostic);
+
+				break;
+			}
+		}
+
+		parentStatement->memberIdentifierTokenIndices.emplace_back(tokenIndex);
+
+		if (!registerVariableSemanticToken(read())) {
+			compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::MEMBER, 0);
+		}
 
 		jump();
 
@@ -616,7 +647,7 @@ namespace ProjectA {
 			return parseFunctionCallOrGroupExpression();
 		}
 
-		compilationResult->registerDiagnostic(DiagnosticSeverity::ERROR, "[PRIMARY] Expected an expression but got " + getTokenString(read()) + ".", tokenIndex);
+		compilationResult->generateDiagnostic(DiagnosticSeverity::ERROR, "[PRIMARY] Expected an expression but got " + getTokenString(read()) + ".", tokenIndex);
 
 		return false;
 	}
@@ -779,10 +810,10 @@ namespace ProjectA {
 
 			if (read().type != TokenType::RIGHT_SQUARE_BRACKET) {
 				if (annotationInstance.value.value.empty()) {
-					compilationResult->registerDiagnostic(DiagnosticSeverity::ERROR, "[ANNOTATION_INSTANCE] Expected a literal or ']' but got " + getTokenString(read()) + ".", tokenIndex);
+					compilationResult->generateDiagnostic(DiagnosticSeverity::ERROR, "[ANNOTATION_INSTANCE] Expected a literal or ']' but got " + getTokenString(read()) + ".", tokenIndex);
 				}
 				else {
-					compilationResult->registerDiagnostic(DiagnosticSeverity::ERROR, "[ANNOTATION_INSTANCE] Expected ']' but got " + getTokenString(read()) + ".", tokenIndex);
+					compilationResult->generateDiagnostic(DiagnosticSeverity::ERROR, "[ANNOTATION_INSTANCE] Expected ']' but got " + getTokenString(read()) + ".", tokenIndex);
 				}
 
 				return false;
@@ -864,5 +895,23 @@ namespace ProjectA {
 
 			jump();
 		}
+	}
+
+	bool Parser::registerVariableSemanticToken(const Token& token) const {
+		const char8* value = token.value.c_str();
+
+		if (isScreamingSnakeCase(value)) {
+			compilationResult->registerSemanticToken(token, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
+
+			return true;
+		}
+
+		if (isPascalCase(value)) {
+			compilationResult->registerSemanticToken(token, SemanticTokenType::STRUCTURE, 0);
+
+			return true;
+		}
+
+		return false;
 	}
 }

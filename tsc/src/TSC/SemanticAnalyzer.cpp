@@ -41,7 +41,7 @@ namespace ProjectA {
 
 		// WARNING: Structure is empty.
 		if (statement->memberStatementIndices.empty()) {
-			compilationResult->registerDiagnostic(
+			compilationResult->generateDiagnostic(
 				DiagnosticSeverity::WARNING,
 				"Structure is empty.",
 				identifierToken.start,
@@ -57,7 +57,7 @@ namespace ProjectA {
 
 			if (combinedMemberAnnotationFlag & Annotation::POSITION && combinedAnnotationFlag & Annotation::POSITION) {
 				// ERROR: Multiple members are annotated with "position".
-				compilationResult->registerDiagnostic(
+				compilationResult->generateDiagnostic(
 					DiagnosticSeverity::ERROR,
 					"Multiple members are annotated with \"" + getAnnotationString(Annotation::POSITION) + "\".",
 					identifierToken.start,
@@ -78,7 +78,7 @@ namespace ProjectA {
 		if (isScreamingSnakeCaseWord(identifierToken)) {
 			if (statement->initializerExpressionIndex == UNDEFINED_INDEX) {
 				// ERROR: Constant is not initialized.
-				compilationResult->registerDiagnostic(
+				compilationResult->generateDiagnostic(
 					DiagnosticSeverity::ERROR,
 					"Constant is not initialized.",
 					identifierToken.start,
@@ -100,7 +100,7 @@ namespace ProjectA {
 
 		// ERROR: Function has no return statement.
 		if (scopeStatement->statementIndices.empty()) {
-			compilationResult->registerDiagnostic(
+			compilationResult->generateDiagnostic(
 				DiagnosticSeverity::ERROR,
 				"Function " + getTokenString(identifierToken) + " has no return statement.",
 				identifierToken.start,
@@ -112,7 +112,7 @@ namespace ProjectA {
 
 		// ERROR: The last statement of a function body must be a return statement.
 		if (lastStatement->statementType != StatementType::RETURN) {
-			compilationResult->registerDiagnostic(
+			compilationResult->generateDiagnostic(
 				DiagnosticSeverity::ERROR,
 				"The last statement of a function body must be a return statement.",
 				identifierToken.start,
@@ -145,7 +145,7 @@ namespace ProjectA {
 
 		/* if (!isLanguageType(typeToken)) {
 			// ERROR: Type "type" is not a language type.
-			compilationResult->registerDiagnostic(
+			compilationResult->generateDiagnostic(
 				DiagnosticSeverity::ERROR,
 				"Type " + getTokenString(typeToken) + " is not a language type.",
 				typeToken.start,
@@ -161,7 +161,7 @@ namespace ProjectA {
 
 			if (!isLanguageType(templateArgumentToken)) {
 				// ERROR: Template argument type "templateArgument" is not a language type.
-				compilationResult->registerDiagnostic(
+				compilationResult->generateDiagnostic(
 					DiagnosticSeverity::ERROR,
 					"Template argument type " + getTokenString(typeToken) + " is not a language type.",
 					typeToken.start,
@@ -174,7 +174,7 @@ namespace ProjectA {
 
 			if ((isVectorType(typeToken) || isMatrixType(typeToken)) && !isScalarType(templateArgumentToken)) {
 				// ERROR: "templateArgument" is not a valid "type" template argument.
-				compilationResult->registerDiagnostic(
+				compilationResult->generateDiagnostic(
 					DiagnosticSeverity::ERROR,
 					getTokenString(templateArgumentToken) + " is not a valid " + getTokenString(typeToken) + " template argument.",
 					templateArgumentToken.start,
@@ -185,7 +185,7 @@ namespace ProjectA {
 
 		if ((isVectorType(typeToken) || isMatrixType(typeToken)) && statement->templateArgumentTokenIndex == UNDEFINED_INDEX) {
 			// ERROR: Type "type" requires a template argument but was not provided with one.
-			compilationResult->registerDiagnostic(
+			compilationResult->generateDiagnostic(
 				DiagnosticSeverity::ERROR,
 				"Type " + getTokenString(typeToken) + " requires a template argument but was not provided with one.",
 				typeToken.start,
@@ -195,7 +195,7 @@ namespace ProjectA {
 
 		// ERROR: "identifier" is a reserved word.
 		if (isReservedWord(identifierToken)) {
-			compilationResult->registerDiagnostic(
+			compilationResult->generateDiagnostic(
 				DiagnosticSeverity::ERROR,
 				getTokenString(identifierToken) + " is a reserved word.",
 				identifierToken.start,
@@ -216,7 +216,7 @@ namespace ProjectA {
 		if (!isReservedWord(typeToken)) {
 			// ERROR: Cannot use template arguments on user-defined structure.
 			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
-				compilationResult->registerDiagnostic(
+				compilationResult->generateDiagnostic(
 					DiagnosticSeverity::ERROR,
 					"Cannot use template arguments on user-defined structure.",
 					typeToken.start,
@@ -237,7 +237,7 @@ namespace ProjectA {
 		if (isScalarType(typeToken)) {
 			// ERROR: Scalar type "type" does not accept template arguments.
 			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
-				compilationResult->registerDiagnostic(
+				compilationResult->generateDiagnostic(
 					DiagnosticSeverity::ERROR,
 					"Scalar type " + getTokenString(typeToken) + " does not accept template arguments.",
 					typeToken.start,
@@ -252,7 +252,7 @@ namespace ProjectA {
 
 			// ERROR: "templateArgumentType" cannot be used as a template argument for type "type".
 			if (!isScalarType(templateArgumentToken)) {
-				compilationResult->registerDiagnostic(
+				compilationResult->generateDiagnostic(
 					DiagnosticSeverity::ERROR,
 					getTokenString(templateArgumentToken) + " cannot be used as a template argument for type " + getTokenString(typeToken) + ".",
 					templateArgumentToken.start,
@@ -269,7 +269,7 @@ namespace ProjectA {
 
 			// ERROR: "templateArgumentType" cannot be used as a template argument for type "type".
 			if (!isFloatingPointScalarType(templateArgumentToken)) {
-				compilationResult->registerDiagnostic(
+				compilationResult->generateDiagnostic(
 					DiagnosticSeverity::ERROR,
 					getTokenString(templateArgumentToken) + " cannot be used as a template argument for type " + getTokenString(typeToken) + ".",
 					templateArgumentToken.start,
@@ -350,7 +350,7 @@ namespace ProjectA {
 
 		if (isReservedWord(identifierToken)) {
 			// ERROR: Identifier "identifier" is reserved.
-			compilationResult->registerDiagnostic(
+			compilationResult->generateDiagnostic(
 				DiagnosticSeverity::ERROR,
 				"Identifier " + getTokenString(identifierToken) + " is reserved.",
 				identifierToken.start,
@@ -385,7 +385,7 @@ namespace ProjectA {
 
 			if (combinedAnnotationFlag & annotationInstance.annotation) {
 				// ERROR: Duplicate instance of annotation "annotation".
-				compilationResult->registerDiagnostic(
+				compilationResult->generateDiagnostic(
 					DiagnosticSeverity::ERROR,
 					"Duplicate instance of annotation \"" + getAnnotationString(annotationInstance.annotation) + "\".",
 					annotationInstance.identifier.start,
@@ -401,7 +401,7 @@ namespace ProjectA {
 			if (!annotationInstance.value.value.empty()) {
 				// ERROR: Annotation "annotation" doesn't require a value but was provided with one.
 				if (ANNOTATION_TYPE_VOID & annotationInstance.annotation) {
-					compilationResult->registerDiagnostic(
+					compilationResult->generateDiagnostic(
 						DiagnosticSeverity::ERROR,
 						"Annotation \"" + getAnnotationString(annotationInstance.annotation) + "\" doesn't require a value but was provided with one.",
 						annotationInstance.value.start,
@@ -411,7 +411,7 @@ namespace ProjectA {
 
 				if (ANNOTATION_TYPE_UINT32 & annotationInstance.annotation && (annotationInstance.value.type < TokenType::LITERAL_FLOATING_POINT || annotationInstance.value.type > TokenType::LITERAL_INTEGER_BASE_16)) {
 					// ERROR: Annotation "annotation" requires a uint32 value but was not provided with an integer value.
-					compilationResult->registerDiagnostic(
+					compilationResult->generateDiagnostic(
 						DiagnosticSeverity::ERROR,
 						"Annotation \"" + getAnnotationString(annotationInstance.annotation) + "\" requires a uint32 value but was not provided with an integer value.",
 						annotationInstance.value.start,
@@ -422,7 +422,7 @@ namespace ProjectA {
 			else {
 				if (ANNOTATION_TYPE_UINT32 & annotationInstance.annotation) {
 					// ERROR: Annotation "annotation" requires a uint32 value but was not provided with one.
-					compilationResult->registerDiagnostic(
+					compilationResult->generateDiagnostic(
 						DiagnosticSeverity::ERROR,
 						"Annotation \"" + getAnnotationString(annotationInstance.annotation) + "\" requires a uint32 value but was not provided with one.",
 						annotationInstance.identifier.start,
@@ -438,7 +438,7 @@ namespace ProjectA {
 		if (combinedAnnotationFlag & Annotation::POSITION && (typeToken.value != "vec4" || templateArgumentToken.value != "float32")) {
 			// ERROR: Cannot annotate member of type "type" with annotation "position".
 			if (!templateArgumentToken.value.empty()) {
-				compilationResult->registerDiagnostic(
+				compilationResult->generateDiagnostic(
 					DiagnosticSeverity::ERROR,
 					"Cannot annotate member of type \"" + typeToken.value + "<" + getTokenString(templateArgumentToken) + ">\" with annotation \"" + getAnnotationString(Annotation::POSITION) + "\".",
 					typeToken.start,
@@ -446,7 +446,7 @@ namespace ProjectA {
 				);
 			}
 			else {
-				compilationResult->registerDiagnostic(
+				compilationResult->generateDiagnostic(
 					DiagnosticSeverity::ERROR,
 					"Cannot annotate member of type " + getTokenString(typeToken) + " with annotation \"" + getAnnotationString(Annotation::POSITION) + "\".",
 					typeToken.start,

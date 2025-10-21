@@ -65,6 +65,10 @@ namespace ProjectA {
 			void skipEmptyLines();
 			void synchronize();
 
+			// Registers a semantic token for a variable/constant/member/parameter.
+			// If false is returned, it means the parser needs more context to register the token.
+			bool registerVariableSemanticToken(const Token& token) const;
+
 		public:
 			CompilationResult* compilationResult;
 			AST ast;
@@ -72,5 +76,7 @@ namespace ProjectA {
 			uint32 currentAnnotationCount;
 			uint8 annotationFlag;
 			Position position;
+
+			uint32 parentStatementIndex;
 	};
 }

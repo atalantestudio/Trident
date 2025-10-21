@@ -56,13 +56,13 @@ namespace ProjectA {
 				semanticTokens.emplace_back(semanticToken);
 			}
 
-			void registerDiagnostic(DiagnosticSeverity severity, const std::string& message, uint32 tokenIndex) {
+			void generateDiagnostic(DiagnosticSeverity severity, const std::string& message, uint32 tokenIndex) {
 				const Token& token = tokens[tokenIndex];
 
-				registerDiagnostic(severity, message, token.start, token.getEnd());
+				generateDiagnostic(severity, message, token.start, token.getEnd());
 			}
 
-			void registerDiagnostic(DiagnosticSeverity severity, const std::string& message, Position start, Position end) {
+			void generateDiagnostic(DiagnosticSeverity severity, const std::string& message, Position start, Position end) {
 				Diagnostic diagnostic{};
 				diagnostic.severity = severity;
 				diagnostic.message = message;
