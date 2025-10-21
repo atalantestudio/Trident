@@ -7,6 +7,7 @@ namespace ProjectA {
 		// NOTE: Used by constants, function parameters and local scope variables.
 		VARIABLE,
 
+		PARAMETER,
 		FUNCTION,
 		EXPRESSION,
 		SCOPE,

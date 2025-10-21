@@ -230,25 +230,45 @@ namespace ProjectA {
 
 				writeExpression(stream, indent, result, ast, functionStatement->returnTypeExpressionIndex);
 
-				stream << getIndent(indent) << "\"Identifier\": " << getTokenString(identifierToken) << ",\n";
+				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
 				stream << getIndent(indent) << "\"Arguments\": [\n";
 
 				indent += 1;
 
-				for (const uint32 parameterStatementIndex : functionStatement->parameterStatementIndices) {
+				for (uint32 parameterStatementIndexOffset = 0; parameterStatementIndexOffset < functionStatement->parameterStatementIndices.size(); parameterStatementIndexOffset += 1) {
+					const uint32 parameterStatementIndex = functionStatement->parameterStatementIndices[parameterStatementIndexOffset];
+
 					stream << getIndent(indent);
 
 					writeStatement(stream, indent, result, ast, parameterStatementIndex);
+
+					if (parameterStatementIndexOffset + 1 < functionStatement->parameterStatementIndices.size()) {
+						stream << ",";
+					}
+
+					stream << "\n";
 				}
 
 				indent -= 1;
 
 				stream << getIndent(indent) << "],\n";
-				stream << getIndent(indent) << "\"Scope\": [\n";
+				stream << getIndent(indent) << "\"Scope\": ";
 
 				writeStatement(stream, indent, result, ast, functionStatement->scopeStatementIndex);
 
-				stream << getIndent(indent) << "]";
+				break;
+			}
+			case StatementType::PARAMETER: {
+				const ref<ParameterStatement> parameterStatement = std::static_pointer_cast<ParameterStatement>(statement);
+
+				stream << getIndent(indent) << "\"Type\": \"ParameterStatement\",\n";
+				stream << getIndent(indent) << "\"_Type\": ";
+
+				writeExpression(stream, indent, result, ast, parameterStatement->typeExpressionIndex);
+
+				const Token& identifierToken = result.tokens[parameterStatement->identifierTokenIndex];
+
+				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\"";
 
 				break;
 			}
@@ -266,11 +286,27 @@ namespace ProjectA {
 				const ref<ScopeStatement> scopeStatement = std::static_pointer_cast<ScopeStatement>(statement);
 
 				stream << getIndent(indent) << "\"Type\": \"ScopeStatement\",\n";
-				stream << getIndent(indent) << "\"Statements\": ";
+				stream << getIndent(indent) << "\"Statements\": [\n";
 
-				for (const uint32 statementIndex : scopeStatement->statementIndices) {
+				indent += 1;
+
+				for (uint32 statementIndexOffset = 0; statementIndexOffset < scopeStatement->statementIndices.size(); statementIndexOffset += 1) {
+					const uint32 statementIndex = scopeStatement->statementIndices[statementIndexOffset];
+
+					stream << getIndent(indent);
+
 					writeStatement(stream, indent, result, ast, statementIndex);
+
+					if (statementIndexOffset + 1 < scopeStatement->statementIndices.size()) {
+						stream << ",";
+					}
+
+					stream << "\n";
 				}
+
+				indent -= 1;
+
+				stream << getIndent(indent) << "]";
 
 				break;
 			}

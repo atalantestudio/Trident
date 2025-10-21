@@ -14,14 +14,10 @@ namespace ProjectA {
 		private:
 			bool parseGlobalScopeStatement();
 			bool parseStructureStatement();
-
-			// Returns a variable statement which is guaranteed to have an initializer.
+			bool parseMemberStatement();
 			bool parseConstantOrFunctionStatement();
-
-			bool parseFunctionStatement(const ref<VariableStatement>& constantStatement);
-
-			// Returns a variable statement which is guaranteed to not have an initializer.
-			bool parseMemberOrParameterStatement();
+			bool parseFunctionStatement();
+			bool parseParameterStatement();
 
 			bool parseLocalScopeStatement();
 			bool parseScopeStatement();
@@ -30,8 +26,6 @@ namespace ProjectA {
 			bool parseWhileStatementStart();
 			bool parseExpressionStatement();
 			bool parseIfOrWhileStatementEnd(uint32& conditionExpressionIndex, uint32& scopeStatementIndex);
-
-			// Can parse a variable or member access statement.
 			bool parseVariableStatement();
 
 			bool parseTypeExpression();

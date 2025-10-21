@@ -36,6 +36,11 @@ namespace ProjectA {
 		uint32 initializerExpressionIndex = ~0;
 	};
 
+	struct ParameterStatement : public BaseStatement<StatementType::PARAMETER> {
+		uint32 typeExpressionIndex;
+		uint32 identifierTokenIndex;
+	};
+
 	struct FunctionStatement : public BaseStatement<StatementType::FUNCTION> {
 		uint32 returnTypeExpressionIndex;
 		uint32 identifierTokenIndex;

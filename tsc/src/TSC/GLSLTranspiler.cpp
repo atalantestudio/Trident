@@ -28,6 +28,8 @@ namespace ProjectA {
 		switch (statement->statementType) {
 			case StatementType::STRUCTURE:
 				return writeStructureStatement(std::static_pointer_cast<StructureStatement>(statement));
+			case StatementType::FUNCTION:
+				return writeFunctionStatement(std::static_pointer_cast<FunctionStatement>(statement));
 			default:
 				// TODO
 				break;
@@ -82,6 +84,50 @@ namespace ProjectA {
 		const Token& identifierToken = result->tokens[memberStatement->identifierTokenIndex];
 
 		stream << " _" << getTokenString(identifierToken) << ";\n";
+	}
+
+	void GLSLTranspiler::writeFunctionStatement(const ref<FunctionStatement> functionStatement) {
+		stream << indent();
+
+		const ref<TypeExpression> returnTypeExpression = std::static_pointer_cast<TypeExpression>(ast->expressions[functionStatement->returnTypeExpressionIndex]);
+
+		writeTypeExpression(returnTypeExpression);
+
+		const Token& identifierToken = result->tokens[functionStatement->identifierTokenIndex];
+
+		stream << " _" << getTokenString(identifierToken) << "(";
+
+		for (uint32 parameterStatementIndexOffset = 0; parameterStatementIndexOffset < functionStatement->parameterStatementIndices.size(); parameterStatementIndexOffset += 1) {
+			const uint32 parameterStatementIndex = functionStatement->parameterStatementIndices[parameterStatementIndexOffset];
+
+			const ref<ParameterStatement> parameterStatement = std::static_pointer_cast<ParameterStatement>(ast->statements[parameterStatementIndex]);
+
+			writeParameterStatement(parameterStatement);
+
+			if (parameterStatementIndexOffset + 1 < functionStatement->parameterStatementIndices.size()) {
+				stream << ", ";
+			}
+		}
+
+		stream << ") {\n";
+
+		_indent += 1;
+
+		stream << indent() << "//\n";
+
+		_indent -= 1;
+
+		stream << "}";
+	}
+
+	void GLSLTranspiler::writeParameterStatement(const ref<ParameterStatement> parameterStatement) {
+		const ref<TypeExpression> typeExpression = std::static_pointer_cast<TypeExpression>(ast->expressions[parameterStatement->typeExpressionIndex]);
+
+		writeTypeExpression(typeExpression);
+
+		const Token& identifierToken = result->tokens[parameterStatement->identifierTokenIndex];
+
+		stream << " _" << getTokenString(identifierToken);
 	}
 
 	void GLSLTranspiler::writeTypeExpression(const ref<TypeExpression> expression) {

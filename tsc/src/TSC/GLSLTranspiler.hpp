@@ -15,6 +15,8 @@ namespace ProjectA {
 			void writeStatement(uint32 globalScopeStatementIndex);
 			void writeStructureStatement(const ref<StructureStatement> statement);
 			void writeMemberStatement(const ref<VariableStatement> memberStatement);
+			void writeFunctionStatement(const ref<FunctionStatement> functionStatement);
+			void writeParameterStatement(const ref<ParameterStatement> parameterStatement);
 
 			void writeTypeExpression(const ref<TypeExpression> expression);
 
