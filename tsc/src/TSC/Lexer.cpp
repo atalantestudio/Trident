@@ -17,52 +17,22 @@ namespace ProjectA {
 		characterIndex = 0;
 
 		while (characterIndex < characters.size()) {
-			if (testLetter(read())) {
+			/* if (testLetter(read())) {
 				Token token{};
 				token.start = position;
 				token.characterCount = 0;
+
+				while (testAlphanumeric(peek(1))) {
+					jump(1);
+				}
 
 				readIdentifier(token);
 
 				continue;
-			}
+			} */
 
-			if (testDigit(read())) {
-				Token token{};
-				token.type = TokenType::LITERAL_INTEGER;
-				token.start = position;
-				token.characterCount = 0;
-
-				while (testDigit(read())) {
-					jump(1);
-
-					if (testLetter(read())) {
-						token.type = TokenType::USER_DEFINED;
-
-						break;
-					}
-
-					if (read() == '.') {
-						token.type = TokenType::LITERAL_FLOATING_POINT;
-
-						if (testDigit(peek(1))) {
-							jump(2);
-
-							while (testDigit(read())) {
-								jump(1);
-							}
-						}
-
-						break;
-					}
-				}
-
-				if (token.type == TokenType::USER_DEFINED) {
-					readIdentifier(token);
-				}
-				else {
-					readNumber(token);
-				}
+			if (testDecimalDigit(read())) {
+				readNumberLiteral();
 
 				continue;
 			}
@@ -70,6 +40,51 @@ namespace ProjectA {
 			const char8 character = read();
 
 			switch (character) {
+				case ',': {
+					registerToken(TokenType::COMMA, 1);
+
+					break;
+				}
+				case '.': {
+					registerToken(TokenType::DOT, 1);
+
+					break;
+				}
+				case '{': {
+					registerToken(TokenType::LEFT_CURLY_BRACE, 1);
+
+					break;
+				}
+				case '(': {
+					registerToken(TokenType::LEFT_PARENTHESIS, 1);
+
+					break;
+				}
+				case '[': {
+					registerToken(TokenType::LEFT_SQUARE_BRACKET, 1);
+
+					break;
+				}
+				case '}': {
+					registerToken(TokenType::RIGHT_CURLY_BRACE, 1);
+
+					break;
+				}
+				case ')': {
+					registerToken(TokenType::RIGHT_PARENTHESIS, 1);
+
+					break;
+				}
+				case ']': {
+					registerToken(TokenType::RIGHT_SQUARE_BRACKET, 1);
+
+					break;
+				}
+				case '~': {
+					registerToken(TokenType::TILDE, 1);
+
+					break;
+				}
 				case '&': {
 					if (peek(1) == '=') {
 						registerToken(TokenType::AMPERSAND_EQUAL, 2);
@@ -100,31 +115,6 @@ namespace ProjectA {
 
 					break;
 				}
-				case ',': {
-					registerToken(TokenType::COMMA, 1);
-
-					break;
-				}
-				case '.': {
-					registerToken(TokenType::DOT, 1);
-
-					break;
-				}
-				case '{': {
-					registerToken(TokenType::LEFT_CURLY_BRACE, 1);
-
-					break;
-				}
-				case '(': {
-					registerToken(TokenType::LEFT_PARENTHESIS, 1);
-
-					break;
-				}
-				case '[': {
-					registerToken(TokenType::LEFT_SQUARE_BRACKET, 1);
-
-					break;
-				}
 				case '+': {
 					if (peek(1) == '=') {
 						registerToken(TokenType::PLUS_EQUAL, 2);
@@ -142,26 +132,6 @@ namespace ProjectA {
 					else {
 						registerToken(TokenType::MINUS, 1);
 					}
-
-					break;
-				}
-				case '}': {
-					registerToken(TokenType::RIGHT_CURLY_BRACE, 1);
-
-					break;
-				}
-				case ')': {
-					registerToken(TokenType::RIGHT_PARENTHESIS, 1);
-
-					break;
-				}
-				case ']': {
-					registerToken(TokenType::RIGHT_SQUARE_BRACKET, 1);
-
-					break;
-				}
-				case '~': {
-					registerToken(TokenType::TILDE, 1);
 
 					break;
 				}
@@ -282,7 +252,7 @@ namespace ProjectA {
 				default: {
 					this->compilationResult->registerDiagnostic(
 						DiagnosticSeverity::ERROR,
-						std::string("Unexpected character '") + character + "'.",
+						"[LEXER] Unexpected character '" + std::string(1, character) + "'.",
 						position,
 						{position.lineIndex, characterIndex + 1}
 					);
@@ -321,33 +291,125 @@ namespace ProjectA {
 		return characters[characterIndex + index];
 	}
 
-	bool Lexer::testAlphanumeric(char8 character) const {
-		return testLetter(character) || testDigit(character);
+	bool Lexer::testBinaryDigit(char8 character) const {
+		return character == '0' || character == '1';
 	}
 
-	bool Lexer::testDigit(char8 character) const {
+	bool Lexer::testOctalDigit(char8 character) const {
+		return character >= '0' && character <= '7';
+	}
+
+	bool Lexer::testDecimalDigit(char8 character) const {
 		return character >= '0' && character <= '9';
+	}
+
+	bool Lexer::testHexadecimalDigit(char8 character) const {
+		return (character >= '0' && character <= '9') || (character >= 'a' && character <= 'f');
 	}
 
 	bool Lexer::testLetter(char8 character) const {
 		return (character >= 'A' && character <= 'Z') || (character >= 'a' && character <= 'z') || character == '_';
 	}
 
-	void Lexer::readNumber(Token& token) {
-		token.characterCount = position.characterOffset - token.start.characterOffset;
-		token.value = std::string(&characters[characterIndex - token.characterCount], &characters[characterIndex]);
+	bool Lexer::testAlphanumeric(char8 character) const {
+		return testLetter(character) || testDecimalDigit(character);
+	}
 
-		compilationResult->registerSemanticToken(token, SemanticTokenType::NUMBER, 0);
+	void Lexer::readNumberLiteral() {
+		Token token{};
+		token.start = position;
+
+		if (read() == '0' && testLetter(peek(1))) {
+			const char8 prefix = peek(1);
+
+			jump(2);
+
+			switch (prefix) {
+				case 'b': {
+					if (!testBinaryDigit(read())) {
+						return;
+					}
+
+					while (testBinaryDigit(read())) {
+						jump(1);
+					}
+
+					token.type = TokenType::LITERAL_INTEGER_BASE_2;
+
+					registerNumberLiteral(token);
+
+					break;
+				}
+				case 'o': {
+					if (!testOctalDigit(read())) {
+						return;
+					}
+
+					while (testOctalDigit(read())) {
+						jump(1);
+					}
+
+					token.type = TokenType::LITERAL_INTEGER_BASE_8;
+
+					registerNumberLiteral(token);
+
+					break;
+				}
+				case 'h': {
+					if (!testHexadecimalDigit(read())) {
+						return;
+					}
+
+					while (testHexadecimalDigit(read())) {
+						jump(1);
+					}
+
+					token.type = TokenType::LITERAL_INTEGER_BASE_16;
+
+					registerNumberLiteral(token);
+
+					break;
+				}
+				default: {
+					break;
+				}
+			}
+
+			return;
+		}
+
+		token.type = TokenType::LITERAL_INTEGER_BASE_10;
+
+		jump(1);
+
+		while (testDecimalDigit(read())) {
+			jump(1);
+		}
+
+		if (read() == '.' && testDecimalDigit(peek(1))) {
+			token.type = TokenType::LITERAL_FLOATING_POINT;
+
+			jump(2);
+
+			while (testDecimalDigit(read())) {
+				jump(1);
+			}
+		}
+
+		registerNumberLiteral(token);
+	}
+
+	void Lexer::registerNumberLiteral(Token& token) {
+		token.characterCount = position.characterOffset - token.start.characterOffset;
+		token.value = std::string(&characters[characterIndex - token.characterCount], token.characterCount);
+
+		compilationResult->registerSemanticToken(SemanticTokenType::NUMBER, 0, token.start, token.characterCount);
 		compilationResult->tokens.emplace_back(token);
 	}
 
 	void Lexer::readIdentifier(Token& token) {
-		while (testAlphanumeric(read())) {
-			jump(1);
-		}
-
 		const uint32 characterCount = position.characterOffset - token.start.characterOffset;
-		const std::string value = std::string(&characters[characterIndex - characterCount], &characters[characterIndex]);
+		const std::string value = std::string(&characters[characterIndex - characterCount], token.characterCount);
 
 		token.type = getIdentifierTokenTypeIndex(value.c_str());
 		token.characterCount = characterCount;

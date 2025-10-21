@@ -1,0 +1,69 @@
+/* NOTE: Tokenization of identifiers starting with a number literal.
+
+while (characterIndex < characters.size()) {
+	if (testLetter(read())) {
+		Token token{};
+		token.start = position;
+		token.characterCount = 0;
+
+		readIdentifier(token);
+
+		continue;
+	}
+
+	if (testDigit(read())) {
+		Token token{};
+		token.type = TokenType::LITERAL_INTEGER;
+		token.start = position;
+		token.characterCount = 0;
+
+		while (testDigit(read())) {
+			jump(1);
+
+			if (testLetter(read())) {
+				token.type = TokenType::USER_DEFINED;
+
+				break;
+			}
+
+			if (read() == '.') {
+				token.type = TokenType::LITERAL_FLOATING_POINT;
+
+				if (testDigit(peek(1))) {
+					jump(2);
+
+					while (testDigit(read())) {
+						jump(1);
+					}
+				}
+
+				break;
+			}
+		}
+
+		if (token.type == TokenType::USER_DEFINED) {
+			readIdentifier(token);
+		}
+		else {
+			readNumber(token);
+		}
+
+		continue;
+	}
+
+	// Parse other characters...
+}
+
+void readNumber(Token& token) {
+	// Register token...
+}
+
+void readIdentifier(Token& token) {
+	while (testAlphanumeric(read())) {
+		jump(1);
+	}
+
+	// Register token...
+}
+
+*/

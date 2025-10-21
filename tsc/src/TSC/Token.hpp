@@ -111,7 +111,10 @@ namespace ProjectA {
 			case END_OF_FILE: return "EOF";
 			case END_OF_LINE: return "EOL";
 			case LITERAL_FLOATING_POINT:
-			case LITERAL_INTEGER:
+			case LITERAL_INTEGER_BASE_2:
+			case LITERAL_INTEGER_BASE_8:
+			case LITERAL_INTEGER_BASE_10:
+			case LITERAL_INTEGER_BASE_16:
 			case USER_DEFINED:
 			default: {
 				return token.value;

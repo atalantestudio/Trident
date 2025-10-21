@@ -608,7 +608,7 @@ namespace ProjectA {
 			return true;
 		}
 
-		if (read().type == TokenType::LITERAL_FLOATING_POINT || read().type == TokenType::LITERAL_INTEGER) {
+		if (read().type >= TokenType::LITERAL_FLOATING_POINT && read().type <= TokenType::LITERAL_INTEGER_BASE_16) {
 			return parseNumberExpression();
 		}
 
