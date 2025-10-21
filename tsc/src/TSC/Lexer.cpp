@@ -17,19 +17,21 @@ namespace ProjectA {
 		characterIndex = 0;
 
 		while (characterIndex < characters.size()) {
-			/* if (testLetter(read())) {
+			if (testLetter(read())) {
 				Token token{};
 				token.start = position;
 				token.characterCount = 0;
 
-				while (testAlphanumeric(peek(1))) {
+				jump(1);
+
+				while (testAlphanumeric(read())) {
 					jump(1);
 				}
 
 				readIdentifier(token);
 
 				continue;
-			} */
+			}
 
 			if (testDecimalDigit(read())) {
 				readNumberLiteral();
@@ -408,12 +410,9 @@ namespace ProjectA {
 	}
 
 	void Lexer::readIdentifier(Token& token) {
-		const uint32 characterCount = position.characterOffset - token.start.characterOffset;
-		const std::string value = std::string(&characters[characterIndex - characterCount], token.characterCount);
-
-		token.type = getIdentifierTokenTypeIndex(value.c_str());
-		token.characterCount = characterCount;
-		token.value = value;
+		token.characterCount = position.characterOffset - token.start.characterOffset;
+		token.value = std::string(&characters[characterIndex - token.characterCount], token.characterCount);
+		token.type = getIdentifierTokenTypeIndex(token.value.c_str());
 
 		compilationResult->tokens.emplace_back(token);
 

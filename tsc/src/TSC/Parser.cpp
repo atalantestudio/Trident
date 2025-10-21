@@ -125,7 +125,7 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseMemberStatement() {
-		ref<VariableStatement> statement = createRef<VariableStatement>();
+		ref<StructureMemberStatement> statement = createRef<StructureMemberStatement>();
 		statement->annotationFlag = annotationFlag;
 		statement->annotationInstanceIndexOffset = currentAnnotationCount;
 		statement->annotationInstanceCount = static_cast<uint32>(ast.annotationInstances.size()) - currentAnnotationCount;
@@ -143,6 +143,8 @@ namespace ProjectA {
 
 		statement->identifierTokenIndex = tokenIndex;
 
+		compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::MEMBER, 0);
+
 		jump();
 
 		ast.statements.emplace_back(statement);
@@ -151,7 +153,7 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseConstantOrFunctionStatement() {
-		ref<VariableStatement> statement = createRef<VariableStatement>();
+		ref<GlobalScopeConstantStatement> statement = createRef<GlobalScopeConstantStatement>();
 		statement->annotationFlag = annotationFlag;
 		statement->annotationInstanceIndexOffset = currentAnnotationCount;
 		statement->annotationInstanceCount = static_cast<uint32>(ast.annotationInstances.size()) - currentAnnotationCount;
@@ -178,8 +180,6 @@ namespace ProjectA {
 		jump();
 
 		EXPECT(read().type == TokenType::EQUAL, "[CONSTANT] Expected '=' but got " + getTokenString(read()) + ".");
-
-		statement->initializerOperatorTokenIndex = tokenIndex;
 
 		compilationResult->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
 		compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR, 0);
@@ -259,9 +259,12 @@ namespace ProjectA {
 
 		ref<ParameterStatement> statement = createRef<ParameterStatement>();
 		statement->typeExpressionIndex = getLastExpressionIndex();
-		statement->identifierTokenIndex = tokenIndex;
 
 		EXPECT(read().type >= TokenType::USER_DEFINED, "[PARAMETER] Expected an identifier but got " + getTokenString(read()) + ".");
+
+		statement->identifierTokenIndex = tokenIndex;
+
+		compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::PARAMETER, 0);
 
 		jump();
 
@@ -405,35 +408,32 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseVariableStatement() {
-		ref<VariableStatement> statement = createRef<VariableStatement>();
-		statement->annotationFlag = annotationFlag;
-		statement->annotationInstanceIndexOffset = currentAnnotationCount;
-		statement->annotationInstanceCount = static_cast<uint32>(ast.annotationInstances.size()) - currentAnnotationCount;
-
-		currentAnnotationCount = statement->annotationInstanceCount;
-		annotationFlag = 0;
-
 		if (!parseTypeExpression()) {
 			return false;
 		}
 
+		ref<VariableStatement> statement = createRef<VariableStatement>();
 		statement->typeExpressionIndex = getLastExpressionIndex();
 
 		EXPECT(read().type >= TokenType::USER_DEFINED, "[VARIABLE] Expected a UDI but got " + getTokenString(read()) + ".");
 
-		const bool constant = isScreamingSnakeCase(read().value.c_str());
-
 		statement->identifierTokenIndex = tokenIndex;
+		statement->constant = isScreamingSnakeCase(read().value.c_str());
 
-		compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, constant ? SemanticTokenModifier::CONSTANT : 0);
+		if (statement->constant) {
+			compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
+		}
+		else {
+			compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, 0);
+		}
 
 		jump();
 
-		EXPECT(!constant || (constant && read().type == TokenType::EQUAL), "[VARIABLE/CONSTANT] Expected '=' but got " + getTokenString(read()) + ".");
+		if (statement->constant) {
+			EXPECT(read().type == TokenType::EQUAL, "[VARIABLE/CONSTANT] Expected '=' but got " + getTokenString(read()) + ".");
+		}
 
 		if (read().type == TokenType::EQUAL) {
-			statement->initializerOperatorTokenIndex = tokenIndex;
-
 			compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR, 0);
 
 			jump();
@@ -625,6 +625,10 @@ namespace ProjectA {
 		ref<IdentifierExpression> expression = createRef<IdentifierExpression>();
 		expression->identifierTokenIndex = tokenIndex;
 
+		if (isScreamingSnakeCase(read().value.c_str())) {
+			compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
+		}
+
 		jump();
 
 		ast.expressions.emplace_back(expression);
@@ -755,6 +759,8 @@ namespace ProjectA {
 
 			annotationInstance.identifier = read();
 
+			compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::ANNOTATION, 0);
+
 			jump();
 
 			// The value can be provided either as a literal or as a constant identifier.
@@ -766,7 +772,7 @@ namespace ProjectA {
 
 				annotationInstance.value = read();
 
-				compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
+				compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::NUMBER, 0);
 
 				jump();
 			}
@@ -785,6 +791,8 @@ namespace ProjectA {
 			jump();
 
 			ast.annotationInstances.emplace_back(annotationInstance);
+
+			skipEmptyLines();
 		}
 
 		return true;

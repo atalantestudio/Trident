@@ -7,18 +7,26 @@
 #include "CompilationResult.hpp"
 
 namespace ProjectA {
-	class GLSLTranspiler {
+	class GLSLCodeGenerator {
 		public:
 			void write(const char8* path, const CompilationResult& result, const AST& ast);
 
 		private:
 			void writeStatement(uint32 globalScopeStatementIndex);
+			void writeGlobalScopeConstant(const ref<GlobalScopeConstantStatement> statement);
 			void writeStructureStatement(const ref<StructureStatement> statement);
-			void writeMemberStatement(const ref<VariableStatement> memberStatement);
-			void writeFunctionStatement(const ref<FunctionStatement> functionStatement);
-			void writeParameterStatement(const ref<ParameterStatement> parameterStatement);
+			void writeMemberStatement(const ref<StructureMemberStatement> statement);
+			void writeFunctionStatement(const ref<FunctionStatement> statement);
+			void writeParameterStatement(const ref<ParameterStatement> statement);
 
-			void writeTypeExpression(const ref<TypeExpression> expression);
+			void writeExpression(uint32 expressionIndex);
+			void writeNumberExpression(uint32 expressionIndex);
+			void writeIdentifierExpression(uint32 expressionIndex);
+			void writeUnaryExpression(uint32 expressionIndex);
+			void writeBinaryExpression(uint32 expressionIndex);
+			void writeTypeExpression(uint32 expressionIndex);
+
+			void writeAnnotations(uint32 annotationInstanceIndexOffset, uint32 annotationInstanceCount);
 
 			std::string indent() const {
 				return std::string(_indent, '\t');
@@ -79,7 +87,7 @@ namespace ProjectA {
 					default: {
 						ENGINE_ASSERT(typeToken.type >= TokenType::USER_DEFINED, "Invalid type.");
 
-						return "_" + result->identifiers[typeToken.type - TokenType::USER_DEFINED];
+						return result->identifiers[typeToken.type - TokenType::USER_DEFINED];
 					}
 				}
 			}

@@ -2,10 +2,9 @@
 
 #include "Engine/Filesystem/Filesystem.hpp"
 
-#include "GLSLTranspiler.hpp"
+#include "GLSLCodeGenerator.hpp"
 #include "Lexer.hpp"
 #include "Parser.hpp"
-// #include "SemanticAnalyzer.hpp"
 
 namespace ProjectA {
 	std::string getIndent(uint32 indent) {
@@ -173,17 +172,17 @@ namespace ProjectA {
 
 				break;
 			}
-			case StatementType::VARIABLE: {
-				const ref<VariableStatement> variableStatement = std::static_pointer_cast<VariableStatement>(statement);
+			case StatementType::STRUCTURE_MEMBER: {
+				const ref<StructureMemberStatement> structureMemberStatement = std::static_pointer_cast<StructureMemberStatement>(statement);
 
-				stream << getIndent(indent) << "\"Type\": \"VariableStatement\",\n";
-				stream << getIndent(indent) << "\"AnnotationFlag\": " << variableStatement->annotationFlag << ",\n";
+				stream << getIndent(indent) << "\"Type\": \"StructureMemberStatement\",\n";
+				stream << getIndent(indent) << "\"AnnotationFlag\": " << structureMemberStatement->annotationFlag << ",\n";
 				stream << getIndent(indent) << "\"Annotations\": [\n";
 
 				indent += 1;
 
-				for (uint32 annotationInstanceIndex = 0; annotationInstanceIndex < variableStatement->annotationInstanceCount; annotationInstanceIndex += 1) {
-					const AnnotationInstance& annotationInstance = ast.annotationInstances[variableStatement->annotationInstanceIndexOffset + annotationInstanceIndex];
+				for (uint32 annotationInstanceIndex = 0; annotationInstanceIndex < structureMemberStatement->annotationInstanceCount; annotationInstanceIndex += 1) {
+					const AnnotationInstance& annotationInstance = ast.annotationInstances[structureMemberStatement->annotationInstanceIndexOffset + annotationInstanceIndex];
 
 					stream << getIndent(indent) << "{\n";
 
@@ -205,11 +204,69 @@ namespace ProjectA {
 				stream << getIndent(indent) << "],\n";
 				stream << getIndent(indent) << "\"_Type\": ";
 
+				writeExpression(stream, indent, result, ast, structureMemberStatement->typeExpressionIndex);
+
+				const Token& identifierToken = result.tokens[structureMemberStatement->identifierTokenIndex];
+
+				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\"";
+
+				break;
+			}
+			case StatementType::GLOBAL_SCOPE_CONSTANT: {
+				const ref<GlobalScopeConstantStatement> constantStatement = std::static_pointer_cast<GlobalScopeConstantStatement>(statement);
+
+				stream << getIndent(indent) << "\"Type\": \"GlobalScopeConstantStatement\",\n";
+				stream << getIndent(indent) << "\"AnnotationFlag\": " << constantStatement->annotationFlag << ",\n";
+				stream << getIndent(indent) << "\"Annotations\": [\n";
+
+				indent += 1;
+
+				for (uint32 annotationInstanceIndex = 0; annotationInstanceIndex < constantStatement->annotationInstanceCount; annotationInstanceIndex += 1) {
+					const AnnotationInstance& annotationInstance = ast.annotationInstances[constantStatement->annotationInstanceIndexOffset + annotationInstanceIndex];
+
+					stream << getIndent(indent) << "{\n";
+
+					indent += 1;
+
+					stream << getIndent(indent) << "\"Annotation\": \"" << getAnnotationString(annotationInstance.annotation) << "\",\n";
+
+					if (!annotationInstance.value.value.empty()) {
+						stream << getIndent(indent) << "\"Value\": \"" << getTokenString(annotationInstance.value) << "\",\n";
+					}
+
+					indent -= 1;
+
+					stream << getIndent(indent) << "},\n";
+				}
+
+				indent -= 1;
+
+				stream << getIndent(indent) << "],\n";
+				stream << getIndent(indent) << "\"_Type\": ";
+
+				writeExpression(stream, indent, result, ast, constantStatement->typeExpressionIndex);
+
+				const Token& identifierToken = result.tokens[constantStatement->identifierTokenIndex];
+
+				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
+				stream << getIndent(indent) << "\"Initializer\": ";
+
+				writeExpression(stream, indent, result, ast, constantStatement->initializerExpressionIndex);
+
+				break;
+			}
+			case StatementType::VARIABLE: {
+				const ref<VariableStatement> variableStatement = std::static_pointer_cast<VariableStatement>(statement);
+
+				stream << getIndent(indent) << "\"Type\": \"VariableStatement\",\n";
+				stream << getIndent(indent) << "\"_Type\": ";
+
 				writeExpression(stream, indent, result, ast, variableStatement->typeExpressionIndex);
 
 				const Token& identifierToken = result.tokens[variableStatement->identifierTokenIndex];
 
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
+				stream << getIndent(indent) << "\"IsConstant\": \"" << std::to_string(variableStatement->constant) << "\",\n";
 				stream << getIndent(indent) << "\"Initializer\": ";
 
 				if (variableStatement->initializerExpressionIndex != ~0) {
@@ -398,8 +455,8 @@ namespace ProjectA {
 			return 1;
 		}
 
-		GLSLTranspiler transpiler;
-		transpiler.write("Test/test0.glsl", result, ast);
+		GLSLCodeGenerator generator;
+		generator.write("Test/test0.glsl", result, ast);
 
 		#if 1
 			std::ofstream stream("Test/test0.ast.json");

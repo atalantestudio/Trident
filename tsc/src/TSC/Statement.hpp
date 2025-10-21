@@ -23,16 +23,27 @@ namespace ProjectA {
 		std::vector<uint32> memberStatementIndices;
 	};
 
-	struct VariableStatement : public BaseStatement<StatementType::VARIABLE> {
+	struct StructureMemberStatement : public BaseStatement<StatementType::STRUCTURE_MEMBER> {
 		uint32 annotationFlag;
 		uint32 annotationInstanceIndexOffset;
 		uint32 annotationInstanceCount;
 		uint32 typeExpressionIndex;
 		uint32 identifierTokenIndex;
+	};
 
-		// TODO: Register '=' semantic token before the semantic analysis; this way, the token index will not need to be stored in the expression.
-		uint32 initializerOperatorTokenIndex = ~0;
+	struct GlobalScopeConstantStatement : public BaseStatement<StatementType::GLOBAL_SCOPE_CONSTANT> {
+		uint32 annotationFlag;
+		uint32 annotationInstanceIndexOffset;
+		uint32 annotationInstanceCount;
+		uint32 typeExpressionIndex;
+		uint32 identifierTokenIndex;
+		uint32 initializerExpressionIndex;
+	};
 
+	struct VariableStatement : public BaseStatement<StatementType::VARIABLE> {
+		uint32 typeExpressionIndex;
+		uint32 identifierTokenIndex;
+		bool constant = false;
 		uint32 initializerExpressionIndex = ~0;
 	};
 

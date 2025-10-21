@@ -16,6 +16,9 @@ namespace ProjectA {
 		// Identifiers that declare or reference a local or global variable or member.
 		VARIABLE,
 
+		// Identifiers that declare or reference a structure member variable.
+		MEMBER,
+
 		// Identifiers that declare or reference a function parameter/argument.
 		PARAMETER,
 

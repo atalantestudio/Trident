@@ -88,8 +88,6 @@ namespace ProjectA {
 				return;
 			}
 
-			compilationResult->registerSemanticToken(statement->initializerOperatorTokenIndex, SemanticTokenType::OPERATOR, 0);
-
 			analyzeExpression(statement->initializerExpressionIndex);
 		}
 	}

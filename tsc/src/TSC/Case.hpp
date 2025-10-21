@@ -5,18 +5,8 @@ namespace ProjectA {
 		const char8* character = string;
 
 		// Check that the first letter is uppercase.
-		while (*character != '\0') {
-			if (*character >= '0' && *character <= '9') {
-				character += 1;
-
-				continue;
-			}
-
-			if (*character < 'A' || *character > 'Z') {
-				return false;
-			}
-
-			break;
+		if (*character < 'A' || *character > 'Z') {
+			return false;
 		}
 
 		// Check that there is no '_' in the remaining characters.
