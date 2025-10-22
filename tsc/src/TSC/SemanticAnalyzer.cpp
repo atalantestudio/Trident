@@ -391,25 +391,47 @@ namespace ProjectA {
 			}
 
 			switch (annotationInstance.annotation) {
-				case Annotation::BINDING:
-					return analyzeBindingAnnotation(annotationInstance);
-				case Annotation::CONSTANT:
-					return analyzeConstantAnnotation(annotationInstance);
-				case Annotation::INSTANCE_INDEX:
-					return analyzeInstanceIndexAnnotation(annotationInstance);
-				case Annotation::LOCATION:
-					return analyzeLocationAnnotation(annotationInstance);
-				case Annotation::POSITION:
-					return analyzePositionAnnotation(annotationInstance);
-				case Annotation::SET:
-					return analyzeSetAnnotation(annotationInstance);
-				case Annotation::VERTEX_INDEX:
-					return analyzeVertexIndexAnnotation(annotationInstance);
-				default:
+				case Annotation::BINDING: {
+					analyzeBindingAnnotation(annotationInstance);
+
+					break;
+				}
+				case Annotation::CONSTANT: {
+					analyzeConstantAnnotation(annotationInstance);
+
+					break;
+				}
+				case Annotation::INSTANCE_INDEX: {
+					analyzeInstanceIndexAnnotation(annotationInstance);
+
+					break;
+				}
+				case Annotation::LOCATION: {
+					analyzeLocationAnnotation(annotationInstance);
+
+					break;
+				}
+				case Annotation::POSITION: {
+					analyzePositionAnnotation(annotationInstance);
+
+					break;
+				}
+				case Annotation::SET: {
+					analyzeSetAnnotation(annotationInstance);
+
+					break;
+				}
+				case Annotation::VERTEX_INDEX: {
+					analyzeVertexIndexAnnotation(annotationInstance);
+
+					break;
+				}
+				default: {
 					// TODO
 					BREAKPOINT();
 
 					break;
+				}
 			}
 
 			uniqueAnnotationFlag |= annotationInstance.annotation;
