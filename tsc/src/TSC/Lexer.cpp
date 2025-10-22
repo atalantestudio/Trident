@@ -15,6 +15,7 @@ namespace ProjectA {
 		position.lineIndex = 0;
 		position.characterOffset = 0;
 		characterIndex = 0;
+		unexpectedCharacter = false;
 
 		while (characterIndex < characters.size()) {
 			if (testLetter(read())) {
@@ -252,7 +253,11 @@ namespace ProjectA {
 					break;
 				}
 				default: {
-					generateDiagnostic<DiagnosticCode::UNEXPECTED_CHARACTER>(*this->compilationResult, character, position);
+					if (!unexpectedCharacter) {
+						generateDiagnostic<DiagnosticCode::UNEXPECTED_CHARACTER>(*this->compilationResult, character, position);
+
+						unexpectedCharacter = true;
+					}
 				}
 				case '\t':
 				case '\r':

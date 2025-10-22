@@ -34,5 +34,6 @@ namespace ProjectA {
 			CompilationResult* compilationResult;
 			Position position;
 			uint32 characterIndex;
+			bool unexpectedCharacter;
 	};
 }
