@@ -90,6 +90,17 @@ namespace ProjectA {
 		if (!isCamelCaseOrSnakeCase(identifierToken.value.c_str())) {
 			generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE>(*result, identifierToken);
 		}
+
+		const ref<TypeExpression> typeExpression = std::static_pointer_cast<TypeExpression>(ast->expressions[memberStatement->typeExpressionIndex]);
+		const Token& typeToken = result->tokens[typeExpression->typeTokenIndex];
+
+		const Token& structureIdentifierToken = result->tokens[structureStatement->identifierTokenIndex];
+
+		if (typeToken.value == structureIdentifierToken.value) {
+			generateDiagnostic<DiagnosticCode::INCOMPLETE_TYPE>(*result, typeToken);
+		}
+
+		ast->userDefinedTypes.emplace_back(structureIdentifierToken);
 	}
 
 	/* void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement> statement) {
@@ -244,7 +255,6 @@ namespace ProjectA {
 		if (typeToken.type <= TokenType::TYPE_UINT32 || typeToken.type >= TokenType::USER_DEFINED) {
 			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
 				const Token& templateArgumentToken = result->tokens[typeExpression->templateArgumentTokenIndex];
-				const Token& rightAngleBracketToken = result->tokens[typeExpression->rightAngleBracketTokenIndex];
 
 				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*result, typeToken, templateArgumentToken);
 			}
@@ -277,6 +287,20 @@ namespace ProjectA {
 		}
 
 		if (typeToken.type >= TokenType::USER_DEFINED) {
+			bool undefined = true;
+
+			for (const std::string& userDefinedType : ast->userDefinedTypes) {
+				if (typeToken.value == userDefinedType) {
+					undefined = false;
+
+					break;
+				}
+			}
+
+			if (undefined) {
+				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*result, typeToken);
+			}
+
 			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
 				const Token& templateArgumentToken = result->tokens[typeExpression->templateArgumentTokenIndex];
 

@@ -152,6 +152,20 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::INCOMPLETE_TYPE> {
+		explicit generateDiagnostic(CompilationResult& result, const Token& typeToken) {
+			Diagnostic diagnostic{};
+			diagnostic.code = DiagnosticCode::INCOMPLETE_TYPE;
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.message = Logger::format("Incomplete type \"[]\".", typeToken.value);
+			diagnostic.start = typeToken.start;
+			diagnostic.end = typeToken.getEnd();
+
+			result.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
 			Diagnostic diagnostic{};

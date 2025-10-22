@@ -415,7 +415,8 @@ namespace ProjectA {
 	}
 
 	static sint32 tsc(const char8* path) {
-		const sequence<uint8> buffer = Filesystem::openBuffer("Test/test0.tsl");
+		// const sequence<uint8> buffer = Filesystem::openBuffer("Test/test0.tsl");
+		const sequence<uint8> buffer = Filesystem::openBuffer("Test/diagnostic.tsl");
 		const std::string characters(buffer.begin(), buffer.end());
 
 		CompilationResult result{};
@@ -455,10 +456,10 @@ namespace ProjectA {
 			return 1;
 		}
 
-		GLSLCodeGenerator generator;
-		generator.write("Test/test0.glsl", result, ast);
+		// GLSLCodeGenerator generator;
+		// generator.write("Test/test0.glsl", result, ast);
 
-		#if 1
+		#if 0
 			std::ofstream stream("Test/test0.ast.json");
 
 			DEBUG_ASSERT(stream.is_open());
