@@ -68,7 +68,7 @@ namespace ProjectA {
 
 			// Registers a semantic token for a variable/constant/member/parameter.
 			// If false is returned, it means the parser needs more context to register the token.
-			bool registerVariableSemanticToken(const Token& token) const;
+			bool registerVariableSemanticToken(const Token& token, bool preferStructure = false) const;
 
 		public:
 			CompilationResult* compilationResult;

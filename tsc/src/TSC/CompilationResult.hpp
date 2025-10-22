@@ -166,6 +166,34 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::DUPLICATE_ANNOTATION> {
+		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
+			Diagnostic diagnostic{};
+			diagnostic.code = DiagnosticCode::DUPLICATE_ANNOTATION;
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.message = Logger::format("Duplicate annotation \"[]\".", getTokenString(identifierToken));
+			diagnostic.start = identifierToken.start;
+			diagnostic.end = identifierToken.getEnd();
+
+			result.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE> {
+		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
+			Diagnostic diagnostic{};
+			diagnostic.code = DiagnosticCode::MISSING_ANNOTATION_VALUE;
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.message = Logger::format("Missing value for annotation \"[]\".", getTokenString(identifierToken));
+			diagnostic.start = identifierToken.getEnd();
+			diagnostic.end = identifierToken.getEnd();
+
+			result.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
 			Diagnostic diagnostic{};
@@ -180,12 +208,26 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE> {
+		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
+			Diagnostic diagnostic{};
+			diagnostic.code = DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE;
+			diagnostic.severity = DiagnosticSeverity::WARNING;
+			diagnostic.message = "Use PascalCase for structure identifiers.";
+			diagnostic.start = identifierToken.start;
+			diagnostic.end = identifierToken.getEnd();
+
+			result.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
 			Diagnostic diagnostic{};
 			diagnostic.code = DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE;
 			diagnostic.severity = DiagnosticSeverity::WARNING;
-			diagnostic.message = "Use camelCase or PascalCase for member identifiers.";
+			diagnostic.message = "Use camelCase or snake_case for member identifiers.";
 			diagnostic.start = identifierToken.start;
 			diagnostic.end = identifierToken.getEnd();
 

@@ -86,9 +86,7 @@ namespace ProjectA {
 		ref<StructureStatement> statement = createRef<StructureStatement>();
 		statement->identifierTokenIndex = tokenIndex;
 
-		EXPECT(isPascalCase(read().value.c_str()), "[STRUCTURE] Structure name is not in PascalCase.");
-
-		compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::STRUCTURE, 0);
+		registerVariableSemanticToken(read(), true);
 
 		jump();
 		jump();
@@ -517,7 +515,7 @@ namespace ProjectA {
 		expression->typeTokenIndex = tokenIndex;
 
 		if (read().type >= TokenType::USER_DEFINED) {
-			compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::STRUCTURE, 0);
+			registerVariableSemanticToken(read(), true);
 		}
 
 		if (peek().type == TokenType::LEFT_ANGLE_BRACKET) {
@@ -529,7 +527,7 @@ namespace ProjectA {
 			expression->templateArgumentTokenIndex = tokenIndex;
 
 			if (read().type >= TokenType::USER_DEFINED) {
-				registerVariableSemanticToken(read());
+				registerVariableSemanticToken(read(), true);
 			}
 
 			jump();
@@ -816,30 +814,34 @@ namespace ProjectA {
 
 			EXPECT(annotationInstance.annotation != static_cast<Annotation>(0), "[ANNOTATION_INSTANCE] Unknown annotation " + getTokenString(read()) + ".");
 
-			annotationInstance.identifier = read();
+			annotationInstance.identifierTokenIndex = tokenIndex;
 
 			compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::ANNOTATION, 0);
 
 			jump();
 
-			if (read().type >= TokenType::LITERAL_FLOATING_POINT && read().type <= TokenType::LITERAL_INTEGER_BASE_16) {
-				annotationInstance.value = read();
+			if (!(ANNOTATION_TYPE_VOID & annotationInstance.annotation)) {
+				if (read().type < TokenType::LITERAL_FLOATING_POINT || read().type > TokenType::LITERAL_INTEGER_BASE_16) {
+					const Token& identifierToken = compilationResult->tokens[annotationInstance.identifierTokenIndex];
 
-				compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::NUMBER, 0);
-
-				jump();
-			}
-
-			if (read().type != TokenType::RIGHT_SQUARE_BRACKET) {
-				if (annotationInstance.value.value.empty()) {
-					compilationResult->generateDiagnostic(DiagnosticSeverity::ERROR, "[ANNOTATION_INSTANCE] Expected a literal or ']' but got " + getTokenString(read()) + ".", tokenIndex);
+					// TODO
+					/* compilationResult->generateDiagnostic(
+						DiagnosticSeverity::ERROR,
+						"[ANNOTATION_INSTANCE] Expected a literal but got " + getTokenString(read()) + ".",
+						identifierToken.getEnd(),
+						identifierToken.getEnd()
+					); */
 				}
 				else {
-					compilationResult->generateDiagnostic(DiagnosticSeverity::ERROR, "[ANNOTATION_INSTANCE] Expected ']' but got " + getTokenString(read()) + ".", tokenIndex);
-				}
+					annotationInstance.valueTokenIndex = tokenIndex;
 
-				return false;
+					compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::NUMBER, 0);
+
+					jump();
+				}
 			}
+
+			EXPECT(read().type == TokenType::RIGHT_SQUARE_BRACKET, "[ANNOTATION_INSTANCE] Expected ']' but got " + getTokenString(read()) + ".");
 
 			jump();
 
@@ -915,19 +917,35 @@ namespace ProjectA {
 		}
 	}
 
-	bool Parser::registerVariableSemanticToken(const Token& token) const {
+	bool Parser::registerVariableSemanticToken(const Token& token, bool preferStructure) const {
 		const char8* value = token.value.c_str();
 
-		if (isScreamingSnakeCase(value)) {
-			compilationResult->registerSemanticToken(token, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
+		// TODO: Refactor.
+		if (preferStructure) {
+			if (isPascalCase(value)) {
+				compilationResult->registerSemanticToken(token, SemanticTokenType::STRUCTURE, 0);
 
-			return true;
+				return true;
+			}
+
+			if (isScreamingSnakeCase(value)) {
+				compilationResult->registerSemanticToken(token, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
+
+				return true;
+			}
 		}
+		else {
+			if (isScreamingSnakeCase(value)) {
+				compilationResult->registerSemanticToken(token, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
 
-		if (isPascalCase(value)) {
-			compilationResult->registerSemanticToken(token, SemanticTokenType::STRUCTURE, 0);
+				return true;
+			}
 
-			return true;
+			if (isPascalCase(value)) {
+				compilationResult->registerSemanticToken(token, SemanticTokenType::STRUCTURE, 0);
+
+				return true;
+			}
 		}
 
 		return false;

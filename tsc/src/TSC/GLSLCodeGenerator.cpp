@@ -333,7 +333,9 @@ namespace ProjectA {
 
 			switch (annotationInstance.annotation) {
 				case Annotation::LOCATION: {
-					stream << "location = " << annotationInstance.value.value << "";
+					const Token& valueToken = result->tokens[annotationInstance.valueTokenIndex];
+
+					stream << "location = " << getTokenString(valueToken) << "";
 
 					break;
 				}

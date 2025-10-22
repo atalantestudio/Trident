@@ -1,12 +1,11 @@
 #pragma once
 
 #include "Annotation.hpp"
-#include "Token.hpp"
 
 namespace ProjectA {
 	struct AnnotationInstance {
 		Annotation annotation = static_cast<Annotation>(0);
-		Token identifier;
-		Token value;
+		uint32 identifierTokenIndex = 0;
+		uint32 valueTokenIndex = static_cast<uint32>(~0);
 	};
 }

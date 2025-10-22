@@ -11,6 +11,47 @@ namespace ProjectA {
 		return std::string(indent, '\t');
 	}
 
+	void writeAnnotations(std::ofstream& stream, uint32& indent, const CompilationResult& result, const AST& ast, uint32 annotationInstanceIndexOffset, uint32 annotationInstanceCount) {
+		stream << "[\n";
+
+		indent += 1;
+
+		for (uint32 annotationInstanceIndex = 0; annotationInstanceIndex < annotationInstanceCount; annotationInstanceIndex += 1) {
+			const AnnotationInstance& annotationInstance = ast.annotationInstances[annotationInstanceIndexOffset + annotationInstanceIndex];
+
+			stream << getIndent(indent) << "{\n";
+
+			indent += 1;
+
+			const Token& identifierToken = result.tokens[annotationInstance.identifierTokenIndex];
+
+			stream << getIndent(indent) << "\"Annotation\": \"" << getTokenString(identifierToken) << "\",\n";
+
+			if (annotationInstance.valueTokenIndex != ~0) {
+				const Token& valueTokenIndex = result.tokens[annotationInstance.valueTokenIndex];
+
+				stream << ",\n";
+				stream << getIndent(indent) << "\"Value\": \"" << getTokenString(valueTokenIndex) << "\"";
+			}
+
+			stream << "\n";
+
+			indent -= 1;
+
+			stream << getIndent(indent) << "}";
+
+			if (annotationInstanceIndex + 1 < annotationInstanceCount) {
+				stream << ",";
+			}
+
+			stream << "\n";
+		}
+
+		indent -= 1;
+
+		stream << getIndent(indent) << "]";
+	}
+
 	void writeExpression(std::ofstream& stream, uint32& indent, const CompilationResult& result, const AST& ast, uint32 expressionIndex) {
 		const ref<Expression>& expression = ast.expressions[expressionIndex];
 
@@ -186,40 +227,11 @@ namespace ProjectA {
 
 				stream << getIndent(indent) << "\"Type\": \"StructureMemberStatement\",\n";
 				stream << getIndent(indent) << "\"AnnotationFlag\": " << structureMemberStatement->annotationFlag << ",\n";
-				stream << getIndent(indent) << "\"Annotations\": [\n";
+				stream << getIndent(indent) << "\"Annotations\": ";
 
-				indent += 1;
+				writeAnnotations(stream, indent, result, ast, structureMemberStatement->annotationInstanceIndexOffset, structureMemberStatement->annotationInstanceCount);
 
-				for (uint32 annotationInstanceIndex = 0; annotationInstanceIndex < structureMemberStatement->annotationInstanceCount; annotationInstanceIndex += 1) {
-					const AnnotationInstance& annotationInstance = ast.annotationInstances[structureMemberStatement->annotationInstanceIndexOffset + annotationInstanceIndex];
-
-					stream << getIndent(indent) << "{\n";
-
-					indent += 1;
-
-					stream << getIndent(indent) << "\"Annotation\": \"" << getAnnotationString(annotationInstance.annotation) << "\"";
-
-					if (!annotationInstance.value.value.empty()) {
-						stream << ",\n";
-						stream << getIndent(indent) << "\"Value\": \"" << getTokenString(annotationInstance.value) << "\"";
-					}
-
-					stream << "\n";
-
-					indent -= 1;
-
-					stream << getIndent(indent) << "}";
-					
-					if (annotationInstanceIndex + 1 < structureMemberStatement->annotationInstanceCount) {
-						stream << ",";
-					}
-
-					stream << "\n";
-				}
-
-				indent -= 1;
-
-				stream << getIndent(indent) << "],\n";
+				stream << "\n";
 				stream << getIndent(indent) << "\"_Type\": ";
 
 				writeExpression(stream, indent, result, ast, structureMemberStatement->typeExpressionIndex);
@@ -236,31 +248,11 @@ namespace ProjectA {
 
 				stream << getIndent(indent) << "\"Type\": \"GlobalScopeConstantStatement\",\n";
 				stream << getIndent(indent) << "\"AnnotationFlag\": " << constantStatement->annotationFlag << ",\n";
-				stream << getIndent(indent) << "\"Annotations\": [\n";
+				stream << getIndent(indent) << "\"Annotations\": ";
 
-				indent += 1;
+				writeAnnotations(stream, indent, result, ast, constantStatement->annotationInstanceIndexOffset, constantStatement->annotationInstanceCount);
 
-				for (uint32 annotationInstanceIndex = 0; annotationInstanceIndex < constantStatement->annotationInstanceCount; annotationInstanceIndex += 1) {
-					const AnnotationInstance& annotationInstance = ast.annotationInstances[constantStatement->annotationInstanceIndexOffset + annotationInstanceIndex];
-
-					stream << getIndent(indent) << "{\n";
-
-					indent += 1;
-
-					stream << getIndent(indent) << "\"Annotation\": \"" << getAnnotationString(annotationInstance.annotation) << "\",\n";
-
-					if (!annotationInstance.value.value.empty()) {
-						stream << getIndent(indent) << "\"Value\": \"" << getTokenString(annotationInstance.value) << "\",\n";
-					}
-
-					indent -= 1;
-
-					stream << getIndent(indent) << "},\n";
-				}
-
-				indent -= 1;
-
-				stream << getIndent(indent) << "],\n";
+				stream << "\n";
 				stream << getIndent(indent) << "\"_Type\": ";
 
 				writeExpression(stream, indent, result, ast, constantStatement->typeExpressionIndex);

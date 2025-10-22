@@ -16,7 +16,7 @@ namespace ProjectA {
 	static constexpr uint8 ANNOTATION_COUNT = 7;
 
 	enum class AnnotationType : uint8 {
-		// VOID,
+		NONE,
 		UINT32,
 	};
 
@@ -32,17 +32,4 @@ namespace ProjectA {
 		"set",
 		"vertexIndex",
 	};
-
-	static std::string getAnnotationString(Annotation annotation) {
-		switch (annotation) {
-			case Annotation::BINDING: return "binding";
-			case Annotation::CONSTANT: return "constant";
-			case Annotation::INSTANCE_INDEX: return "instanceIndex";
-			case Annotation::LOCATION: return "location";
-			case Annotation::POSITION: return "position";
-			case Annotation::SET: return "set";
-			case Annotation::VERTEX_INDEX: return "vertexIndex";
-			default: return "[unknown annotation]";
-		}
-	}
 }

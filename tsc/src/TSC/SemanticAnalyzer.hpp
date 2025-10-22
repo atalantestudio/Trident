@@ -41,7 +41,14 @@ namespace ProjectA {
 			// void analyzeIdentifier(uint32 identifierTokenIndex);
 
 			// Returns a flag representing the combined annotations of the member.
-			Annotation analyzeAnnotationInstances(const ref<VariableStatement>& statement);
+			void analyzeAnnotationInstances(uint32 annotationInstanceIndexOffset, uint32 annotationInstanceCount);
+			void analyzeBindingAnnotation(const AnnotationInstance& annotationInstance);
+			void analyzeConstantAnnotation(const AnnotationInstance& annotationInstance);
+			void analyzeInstanceIndexAnnotation(const AnnotationInstance& annotationInstance);
+			void analyzeLocationAnnotation(const AnnotationInstance& annotationInstance);
+			void analyzePositionAnnotation(const AnnotationInstance& annotationInstance);
+			void analyzeSetAnnotation(const AnnotationInstance& annotationInstance);
+			void analyzeVertexIndexAnnotation(const AnnotationInstance& annotationInstance);
 
 			// bool isLanguageType(const Token& identifier) const;
 			// bool isScalarType(const Token& identifier) const;
