@@ -12,7 +12,7 @@ namespace ProjectA {
 
 		public:
 			void setCompilationResult(CompilationResult& compilationResult);
-			void setAst(const AST& ast);
+			void setAst(AST& ast);
 
 			void analyzeStructureStatement(const ref<StructureStatement>& statement);
 			void analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<StructureMemberStatement>& memberStatement);
@@ -56,7 +56,7 @@ namespace ProjectA {
 
 		private:
 			CompilationResult* result;
-			const AST* ast;
+			AST* ast;
 	};
 
 	/* uint32 getTypeScalarCount(Type type) const {

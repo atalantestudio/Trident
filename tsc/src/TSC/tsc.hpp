@@ -33,7 +33,7 @@ namespace ProjectA {
 				const Token& identifierToken = result.tokens[identifierExpression->identifierTokenIndex];
 
 				stream << getIndent(indent) << "\"Type\": \"IdentifierExpression\",\n";
-				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken);
+				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\"";
 
 				break;
 			}
@@ -83,7 +83,9 @@ namespace ProjectA {
 
 				writeExpression(stream, indent, result, ast, memberAccessExpression->leftExpressionIndex);
 
-				stream << getIndent(indent) << "\"MemberIdentifier\": \"" << memberAccessExpression->memberIdentifier << "\"";
+				const Token& identifierTokenIndex = result.tokens[memberAccessExpression->identifierTokenIndex];
+
+				stream << getIndent(indent) << "\"MemberIdentifier\": \"" << getTokenString(identifierTokenIndex) << "\"";
 
 				break;
 			}
@@ -415,8 +417,8 @@ namespace ProjectA {
 	}
 
 	static sint32 tsc(const char8* path) {
-		// const sequence<uint8> buffer = Filesystem::openBuffer("Test/test0.tsl");
-		const sequence<uint8> buffer = Filesystem::openBuffer("Test/diagnostic.tsl");
+		const sequence<uint8> buffer = Filesystem::openBuffer("Test/test0.tsl");
+		// const sequence<uint8> buffer = Filesystem::openBuffer("Test/diagnostic.tsl");
 		const std::string characters(buffer.begin(), buffer.end());
 
 		CompilationResult result{};
@@ -456,10 +458,10 @@ namespace ProjectA {
 			return 1;
 		}
 
-		// GLSLCodeGenerator generator;
-		// generator.write("Test/test0.glsl", result, ast);
+		GLSLCodeGenerator generator;
+		generator.write("Test/test0.glsl", result, ast);
 
-		#if 0
+		#if 1
 			std::ofstream stream("Test/test0.ast.json");
 
 			DEBUG_ASSERT(stream.is_open());

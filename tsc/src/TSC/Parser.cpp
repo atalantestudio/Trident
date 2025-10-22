@@ -662,11 +662,12 @@ namespace ProjectA {
 	bool Parser::parseMemberAccessExpression() {
 		jump();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[MEMBER_ACCESS] Expected an identifier but got " + getTokenString(read()) + ".");
-
 		ref<MemberAccessExpression> expression = createRef<MemberAccessExpression>();
 		expression->leftExpressionIndex = getLastExpressionIndex();
-		expression->memberIdentifier = read().value;
+
+		EXPECT(read().type >= TokenType::USER_DEFINED, "[MEMBER_ACCESS] Expected an identifier but got " + getTokenString(read()) + ".");
+
+		expression->identifierTokenIndex = tokenIndex;
 
 		jump();
 
@@ -782,13 +783,7 @@ namespace ProjectA {
 
 			jump();
 
-			// The value can be provided either as a literal or as a constant identifier.
-			if (read().type >= TokenType::LITERAL_FLOATING_POINT) {
-				EXPECT(
-					read().type < TokenType::USER_DEFINED || (read().type >= TokenType::USER_DEFINED && isScreamingSnakeCase(read().value.c_str())),
-					"[ANNOTATION_INSTANCE] Constant identifier " + getTokenString(read()) + " is not written in screaming snake case."
-				);
-
+			if (read().type >= TokenType::LITERAL_FLOATING_POINT && read().type <= TokenType::LITERAL_INTEGER_BASE_16) {
 				annotationInstance.value = read();
 
 				compilationResult->registerSemanticToken(tokenIndex, SemanticTokenType::NUMBER, 0);
@@ -831,10 +826,6 @@ namespace ProjectA {
 		}
 
 		return static_cast<uint32>(ast.expressions.size()) - 1;
-	}
-
-	Position Parser::getPosition() const {
-		return position;
 	}
 
 	Token Parser::read() const {

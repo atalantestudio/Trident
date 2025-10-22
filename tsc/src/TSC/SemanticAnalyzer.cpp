@@ -12,7 +12,7 @@ namespace ProjectA {
 		this->result = &compilationResult;
 	}
 
-	void SemanticAnalyzer::setAst(const AST& ast) {
+	void SemanticAnalyzer::setAst(AST& ast) {
 		this->ast = &ast;
 	}
 
@@ -100,7 +100,7 @@ namespace ProjectA {
 			generateDiagnostic<DiagnosticCode::INCOMPLETE_TYPE>(*result, typeToken);
 		}
 
-		ast->userDefinedTypes.emplace_back(structureIdentifierToken);
+		ast->userDefinedTypes.emplace_back(structureIdentifierToken.value);
 	}
 
 	/* void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement> statement) {
@@ -309,89 +309,6 @@ namespace ProjectA {
 
 			return;
 		}
-
-		/*
-			if type is scalar or user-defined {
-				error if template argument is defined
-			}
-
-			if type is vector {
-				error if template argument is not scalar
-			}
-
-			if type is matrix {
-				error if template argument is not float32/float64
-			}
-		*/
-
-		/* if (!isReservedWord(typeToken)) {
-			// ERROR: Cannot use template arguments on user-defined structure.
-			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
-				compilationResult->generateDiagnostic(
-					DiagnosticSeverity::ERROR,
-					"Cannot use template arguments on user-defined structure.",
-					typeToken.start,
-					typeToken.getEnd()
-				);
-
-				return;
-			}
-
-			compilationResult->registerSemanticToken(typeExpression->typeTokenIndex, SemanticTokenType::STRUCTURE, 0);
-
-			return;
-		}
-
-		compilationResult->registerSemanticToken(typeExpression->typeTokenIndex, SemanticTokenType::KEYWORD, 0);
-
-		// Scalar type (float, sint, uint)
-		if (isScalarType(typeToken)) {
-			// ERROR: Scalar type "type" does not accept template arguments.
-			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
-				compilationResult->generateDiagnostic(
-					DiagnosticSeverity::ERROR,
-					"Scalar type " + getTokenString(typeToken) + " does not accept template arguments.",
-					typeToken.start,
-					typeToken.getEnd()
-				);
-			}
-		}
-
-		// Vector type (with float/sint/uint template argument)
-		if (isVectorType(typeToken)) {
-			const Token& templateArgumentToken = compilationResult->tokens[typeExpression->templateArgumentTokenIndex];
-
-			// ERROR: "templateArgumentType" cannot be used as a template argument for type "type".
-			if (!isScalarType(templateArgumentToken)) {
-				compilationResult->generateDiagnostic(
-					DiagnosticSeverity::ERROR,
-					getTokenString(templateArgumentToken) + " cannot be used as a template argument for type " + getTokenString(typeToken) + ".",
-					templateArgumentToken.start,
-					templateArgumentToken.getEnd()
-				);
-
-				return;
-			}
-		}
-
-		// - Matrix type (with float32/float64 template argument)
-		if (isMatrixType(typeToken)) {
-			const Token& templateArgumentToken = compilationResult->tokens[typeExpression->templateArgumentTokenIndex];
-
-			// ERROR: "templateArgumentType" cannot be used as a template argument for type "type".
-			if (!isFloatingPointScalarType(templateArgumentToken)) {
-				compilationResult->generateDiagnostic(
-					DiagnosticSeverity::ERROR,
-					getTokenString(templateArgumentToken) + " cannot be used as a template argument for type " + getTokenString(typeToken) + ".",
-					templateArgumentToken.start,
-					templateArgumentToken.getEnd()
-				);
-
-				return;
-			}
-		}
-
-		compilationResult->registerSemanticToken(typeExpression->templateArgumentTokenIndex, SemanticTokenType::KEYWORD, 0); */
 	}
 
 	/* void SemanticAnalyzer::analyzeExpression(uint32 expressionIndex) {
@@ -425,7 +342,6 @@ namespace ProjectA {
 	}
 
 	void SemanticAnalyzer::analyzeIdentifierExpression(const ref<IdentifierExpression> expression) {
-		// TODO: Check if the identifier is defined in the current scope.
 		// TODO: Select correct semantic token type.
 		// compilationResult->registerSemanticToken(expression->identifierTokenIndex, SemanticTokenType::VARIABLE);
 	}

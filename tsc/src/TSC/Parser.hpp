@@ -57,8 +57,6 @@ namespace ProjectA {
 			uint32 getLastStatementIndex() const;
 			uint32 getLastExpressionIndex() const;
 
-			Position getPosition() const;
-
 			Token read() const;
 			Token peek() const;
 

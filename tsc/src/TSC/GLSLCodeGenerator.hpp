@@ -12,18 +12,25 @@ namespace ProjectA {
 			void write(const char8* path, const CompilationResult& result, const AST& ast);
 
 		private:
-			void writeStatement(uint32 globalScopeStatementIndex);
-			void writeGlobalScopeConstant(const ref<GlobalScopeConstantStatement> statement);
-			void writeStructureStatement(const ref<StructureStatement> statement);
-			void writeMemberStatement(const ref<StructureMemberStatement> statement);
-			void writeFunctionStatement(const ref<FunctionStatement> statement);
-			void writeParameterStatement(const ref<ParameterStatement> statement);
+			void writeStatement(uint32 statementIndex);
+			void writeGlobalScopeConstant(uint32 statementIndex);
+			void writeStructureStatement(uint32 statementIndex);
+			void writeMemberStatement(uint32 statementIndex);
+			void writeFunctionStatement(uint32 statementIndex);
+			void writeVariableStatement(uint32 statementIndex);
+			void writeParameterStatement(uint32 statementIndex);
+			void writeIfStatement(uint32 statementIndex);
+			void writeWhileStatement(uint32 statementIndex);
+			void writeScopeStatement(uint32 statementIndex);
+			void writeReturnStatement(uint32 statementIndex);
+			void writeExpressionStatement(uint32 statementIndex);
 
 			void writeExpression(uint32 expressionIndex);
 			void writeNumberExpression(uint32 expressionIndex);
 			void writeIdentifierExpression(uint32 expressionIndex);
 			void writeUnaryExpression(uint32 expressionIndex);
 			void writeBinaryExpression(uint32 expressionIndex);
+			void writeMemberAccessExpression(uint32 expressionIndex);
 			void writeTypeExpression(uint32 expressionIndex);
 
 			void writeAnnotations(uint32 annotationInstanceIndexOffset, uint32 annotationInstanceCount);

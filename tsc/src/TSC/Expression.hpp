@@ -43,7 +43,7 @@ namespace ProjectA {
 
 	struct MemberAccessExpression : public BaseExpression<ExpressionType::MEMBER_ACCESS> {
 		uint32 leftExpressionIndex;
-		std::string memberIdentifier;
+		uint32 identifierTokenIndex;
 	};
 
 	struct FunctionCallExpression : public BaseExpression<ExpressionType::FUNCTION_CALL> {
