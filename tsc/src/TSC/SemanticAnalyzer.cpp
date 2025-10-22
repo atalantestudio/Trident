@@ -7,7 +7,15 @@
 #include "SemanticAnalyzer.hpp"
 
 namespace ProjectA {
-	void SemanticAnalyzer::analyze(CompilationResult& compilationResult, const AST& ast) {
+	void SemanticAnalyzer::setCompilationResult(CompilationResult& compilationResult) {
+		this->result = &compilationResult;
+	}
+
+	void SemanticAnalyzer::setAst(const AST& ast) {
+		this->ast = &ast;
+	}
+
+	/* void SemanticAnalyzer::analyze(CompilationResult& compilationResult, const AST& ast) {
 		this->compilationResult = &compilationResult;
 		this->ast = &ast;
 
@@ -16,9 +24,9 @@ namespace ProjectA {
 
 			analyzeStatement(globalScopeStatement);
 		}
-	}
+	} */
 
-	void SemanticAnalyzer::analyzeStatement(const ref<Statement>& statement) {
+	/* void SemanticAnalyzer::analyzeStatement(const ref<Statement>& statement) {
 		switch (statement->statementType) {
 			case StatementType::STRUCTURE:
 				return analyzeStructureStatement(std::static_pointer_cast<StructureStatement>(statement));
@@ -32,24 +40,18 @@ namespace ProjectA {
 				// TODO
 				break;
 		}
-	}
+	} */
 
-	void SemanticAnalyzer::analyzeStructureStatement(const ref<StructureStatement> statement) {
-		analyzeIdentifier(statement->identifierTokenIndex);
+	void SemanticAnalyzer::analyzeStructureStatement(const ref<StructureStatement>& statement) {
+		// analyzeIdentifier(statement->identifierTokenIndex);
 
-		const Token& identifierToken = compilationResult->tokens[statement->identifierTokenIndex];
-
-		// WARNING: Structure is empty.
 		if (statement->memberStatementIndices.empty()) {
-			compilationResult->generateDiagnostic(
-				DiagnosticSeverity::WARNING,
-				"Structure is empty.",
-				identifierToken.start,
-				identifierToken.getEnd()
-			);
+			const Token& identifierToken = result->tokens[statement->identifierTokenIndex];
+
+			generateDiagnostic<DiagnosticCode::WARNING_EMPTY_STRUCTURE>(*result, identifierToken);
 		}
 
-		Annotation combinedAnnotationFlag = static_cast<Annotation>(0);
+		/* Annotation combinedAnnotationFlag = static_cast<Annotation>(0);
 
 		for (uint32 memberStatementIndex = 0; memberStatementIndex < statement->memberStatementIndices.size(); memberStatementIndex += 1) {
 			const ref<VariableStatement> memberStatement = std::static_pointer_cast<VariableStatement>(ast->statements[memberStatementIndex]);
@@ -57,7 +59,7 @@ namespace ProjectA {
 
 			if (combinedMemberAnnotationFlag & Annotation::POSITION && combinedAnnotationFlag & Annotation::POSITION) {
 				// ERROR: Multiple members are annotated with "position".
-				compilationResult->generateDiagnostic(
+				result->generateDiagnostic(
 					DiagnosticSeverity::ERROR,
 					"Multiple members are annotated with \"" + getAnnotationString(Annotation::POSITION) + "\".",
 					identifierToken.start,
@@ -66,10 +68,24 @@ namespace ProjectA {
 			}
 
 			combinedAnnotationFlag |= combinedMemberAnnotationFlag;
+		} */
+	}
+
+	void SemanticAnalyzer::analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<StructureMemberStatement>& memberStatement) {
+		const Token& identifierToken = result->tokens[memberStatement->identifierTokenIndex];
+
+		for (const uint32 memberIdentifierTokenIndex : structureStatement->memberIdentifierTokenIndices) {
+			const Token& definitionToken = result->tokens[memberIdentifierTokenIndex];
+
+			if (identifierToken.value == definitionToken.value) {
+				generateDiagnostic<DiagnosticCode::ERROR_REDEFINITION>(*result, definitionToken, identifierToken);
+
+				break;
+			}
 		}
 	}
 
-	void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement> statement) {
+	/* void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement> statement) {
 		analyzeTypeExpression(statement->typeExpressionIndex);
 		analyzeIdentifier(statement->identifierTokenIndex);
 
@@ -133,12 +149,12 @@ namespace ProjectA {
 
 			analyzeStatement(statement);
 		}
-	}
+	} */
 
 	Annotation SemanticAnalyzer::analyzeMemberStatement(const ref<VariableStatement> statement) {
 		const Annotation combinedAnnotationFlag = analyzeAnnotationInstances(statement);
 
-		analyzeTypeExpression(statement->typeExpressionIndex);
+		// analyzeTypeExpression(statement->typeExpressionIndex);
 
 		// const Token& typeToken = compilationResult->tokens[statement->typeExpressionTokenIndex];
 		// const Token& identifierToken = compilationResult->tokens[statement->identifierTokenIndex];
@@ -209,7 +225,7 @@ namespace ProjectA {
 		return combinedAnnotationFlag;
 	}
 
-	void SemanticAnalyzer::analyzeTypeExpression(uint32 typeExpressionIndex) {
+	/* void SemanticAnalyzer::analyzeTypeExpression(uint32 typeExpressionIndex) {
 		const ref<TypeExpression> typeExpression = std::static_pointer_cast<TypeExpression>(ast->expressions[typeExpressionIndex]);
 		const Token& typeToken = compilationResult->tokens[typeExpression->typeTokenIndex];
 
@@ -375,7 +391,7 @@ namespace ProjectA {
 		}
 
 		compilationResult->registerSemanticToken(identifierTokenIndex, SemanticTokenType::VARIABLE, 0);
-	}
+	} */
 
 	Annotation SemanticAnalyzer::analyzeAnnotationInstances(const ref<VariableStatement>& statement) {
 		Annotation combinedAnnotationFlag = static_cast<Annotation>(0);
@@ -458,7 +474,7 @@ namespace ProjectA {
 		return combinedAnnotationFlag;
 	}
 
-	bool SemanticAnalyzer::isLanguageType(const Token& identifier) const {
+	/* bool SemanticAnalyzer::isLanguageType(const Token& identifier) const {
 		return isScalarType(identifier) || isVectorType(identifier) || isMatrixType(identifier);
 	}
 
@@ -524,5 +540,5 @@ namespace ProjectA {
 		}
 
 		return true;
-	}
+	} */
 }

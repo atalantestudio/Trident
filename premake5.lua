@@ -57,6 +57,10 @@ project "ProjectA"
 		"%{prj.name}/vendor/lyah/lyah/**.hpp",
 	}
 
+	removefiles {
+		"%{prj.name}/src/**.emscripten.cpp",
+	}
+
 	includedirs {
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/API",

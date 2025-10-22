@@ -49,6 +49,9 @@ namespace ProjectA {
 		position = {};
 		parentStatementIndex = ~0;
 
+		analyzer.setCompilationResult(compilationResult);
+		analyzer.setAst(ast);
+
 		skipEmptyLines();
 
 		while (read().type != TokenType::END_OF_FILE) {
@@ -121,6 +124,8 @@ namespace ProjectA {
 
 		jump();
 
+		analyzer.analyzeStructureStatement(statement);
+
 		// TODO: Update UDT here, e.g.
 		// ast.userDefinedTypes.emplace_back(compilationResult->tokens[statement->identifierTokenIndex].value);
 
@@ -148,28 +153,9 @@ namespace ProjectA {
 
 		const ref<StructureStatement> parentStatement = std::static_pointer_cast<StructureStatement>(ast.statements[parentStatementIndex]);
 
-		for (uint32 memberIndex = 0; memberIndex < parentStatement->memberIdentifierTokenIndices.size(); memberIndex += 1) {
-			const Token& memberIdentifierToken = compilationResult->tokens[parentStatement->memberIdentifierTokenIndices[memberIndex]];
+		analyzer.analyzeMemberStatement(parentStatement, statement);
 
-			if (read().value == memberIdentifierToken.value) {
-				DiagnosticRelatedInformation relatedInformation{};
-				relatedInformation.start = memberIdentifierToken.start;
-				relatedInformation.end = memberIdentifierToken.getEnd();
-				relatedInformation.message = "\"" + memberIdentifierToken.value + "\" is defined here.";
-
-				Diagnostic diagnostic{};
-				diagnostic.severity = DiagnosticSeverity::ERROR;
-				diagnostic.message = "Duplicate member identifier \"" + read().value + "\".";
-				diagnostic.start = read().start;
-				diagnostic.end = read().getEnd();
-				diagnostic.relatedInformations.emplace_back(relatedInformation);
-
-				compilationResult->diagnostics.emplace_back(diagnostic);
-
-				break;
-			}
-		}
-
+		// NOTE: The identifier token index must be added AFTER the semantic analysis has been done on the member.
 		parentStatement->memberIdentifierTokenIndices.emplace_back(tokenIndex);
 
 		if (!registerVariableSemanticToken(read())) {

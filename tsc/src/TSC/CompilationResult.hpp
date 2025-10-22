@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Diagnostic.hpp"
+#include "DiagnosticCode.hpp"
 #include "SemanticToken.hpp"
 #include "SemanticTokenModifier.hpp"
 #include "SemanticTokenType.hpp"
@@ -57,8 +58,10 @@ namespace ProjectA {
 			}
 
 			void generateDiagnostic(DiagnosticSeverity severity, const std::string& message, uint32 tokenIndex) {
-				const Token& token = tokens[tokenIndex];
+				generateDiagnostic(severity, message, tokens[tokenIndex]);
+			}
 
+			void generateDiagnostic(DiagnosticSeverity severity, const std::string& message, const Token& token) {
 				generateDiagnostic(severity, message, token.start, token.getEnd());
 			}
 
@@ -80,5 +83,42 @@ namespace ProjectA {
 
 			// TODO
 			// const char8* identifierBuffer;
+	};
+
+	template<DiagnosticCode DiagnosticCode>
+	struct generateDiagnostic;
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::ERROR_REDEFINITION> {
+		explicit generateDiagnostic(CompilationResult& result, const Token& definitionToken, const Token& redefinitionToken) {
+			DiagnosticReference diagnosticReference{};
+			diagnosticReference.start = definitionToken.start;
+			diagnosticReference.end = definitionToken.getEnd();
+			diagnosticReference.message = Logger::format("\"[]\" is defined here.", definitionToken.value);
+
+			Diagnostic diagnostic{};
+			diagnostic.code = DiagnosticCode::ERROR_REDEFINITION;
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.message = Logger::format("Redefinition of \"[]\".", redefinitionToken.value);
+			diagnostic.start = redefinitionToken.start;
+			diagnostic.end = redefinitionToken.getEnd();
+			diagnostic.references.emplace_back(diagnosticReference);
+
+			result.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::WARNING_EMPTY_STRUCTURE> {
+		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
+			Diagnostic diagnostic{};
+			diagnostic.code = DiagnosticCode::WARNING_EMPTY_STRUCTURE;
+			diagnostic.severity = DiagnosticSeverity::WARNING;
+			diagnostic.message = "Structure is empty.";
+			diagnostic.start = identifierToken.start;
+			diagnostic.end = identifierToken.getEnd();
+
+			result.diagnostics.emplace_back(diagnostic);
+		}
 	};
 }

@@ -3,6 +3,7 @@
 #include "AST.hpp"
 #include "CompilationResult.hpp"
 #include "Position.hpp"
+#include "SemanticAnalyzer.hpp"
 #include "Statement.hpp"
 #include "Token.hpp"
 
@@ -78,5 +79,7 @@ namespace ProjectA {
 			Position position;
 
 			uint32 parentStatementIndex;
+
+			SemanticAnalyzer analyzer;
 	};
 }

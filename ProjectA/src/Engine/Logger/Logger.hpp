@@ -1,7 +1,12 @@
 #pragma once
 
-#include "Engine/Logger/LogLevel.hpp"
-#include "Engine/Logger/LogStructure.hpp"
+#ifdef __EMSCRIPTEN__
+	#include "LogLevel.hpp"
+	#include "LogStructure.hpp"
+#else
+	#include "Engine/Logger/LogLevel.hpp"
+	#include "Engine/Logger/LogStructure.hpp"
+#endif
 
 namespace ProjectA {
 	class Logger {
@@ -158,7 +163,9 @@ namespace ProjectA {
 
 				log(LogLevel::FATAL, message);
 
-				Platform::fatalExit(code, message);
+				#ifndef __EMSCRIPTEN__
+					Platform::fatalExit(code, message);
+				#endif
 			}
 
 		private:
