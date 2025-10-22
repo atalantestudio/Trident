@@ -10,19 +10,7 @@
 namespace ProjectA {
 	class CompilationResult {
 		public:
-			const std::vector<Token>& getTokens() const {
-				return tokens;
-			}
-
-			const std::vector<SemanticToken>& getSemanticTokens() const {
-				return semanticTokens;
-			}
-
-			const std::vector<Diagnostic>& getDiagnostics() const {
-				return diagnostics;
-			}
-
-			void registerToken(TokenType type, Position start, uint32 characterCount) {
+			void registerToken(TokenType type, DocumentPosition start, uint32 characterCount) {
 				Token token{};
 				token.type = type;
 				token.start = start;
@@ -47,7 +35,7 @@ namespace ProjectA {
 				registerSemanticToken(type, modifiers, token.start, token.characterCount);
 			}
 
-			void registerSemanticToken(SemanticTokenType type, uint32 modifiers, Position start, uint32 characterCount) {
+			void registerSemanticToken(SemanticTokenType type, uint32 modifiers, DocumentPosition start, uint32 characterCount) {
 				SemanticToken semanticToken{};
 				semanticToken.type = type;
 				semanticToken.modifiers = modifiers;
@@ -57,20 +45,20 @@ namespace ProjectA {
 				semanticTokens.emplace_back(semanticToken);
 			}
 
-			void generateDiagnostic(DiagnosticSeverity severity, const std::string& message, uint32 tokenIndex) {
-				generateDiagnostic(severity, message, tokens[tokenIndex]);
+			void generateDiagnostic(uint32 tokenIndex, const std::string& message, DiagnosticSeverity severity) {
+				generateDiagnostic(tokens[tokenIndex], message, severity);
 			}
 
-			void generateDiagnostic(DiagnosticSeverity severity, const std::string& message, const Token& token) {
-				generateDiagnostic(severity, message, token.start, token.getEnd());
+			void generateDiagnostic(const Token& token, const std::string& message, DiagnosticSeverity severity) {
+				generateDiagnostic(token.start, token.getEnd(), message, severity);
 			}
 
-			void generateDiagnostic(DiagnosticSeverity severity, const std::string& message, Position start, Position end) {
+			void generateDiagnostic(DocumentPosition start, DocumentPosition end, const std::string& message, DiagnosticSeverity severity) {
 				Diagnostic diagnostic{};
-				diagnostic.severity = severity;
-				diagnostic.message = message;
 				diagnostic.start = start;
 				diagnostic.end = end;
+				diagnostic.message = message;
+				diagnostic.severity = severity;
 
 				diagnostics.emplace_back(diagnostic);
 			}
@@ -79,10 +67,10 @@ namespace ProjectA {
 			std::vector<Token> tokens;
 			std::vector<SemanticToken> semanticTokens;
 			std::vector<Diagnostic> diagnostics;
-			std::vector<std::string> identifiers;
 
 			// TODO
 			// const char8* identifierBuffer;
+			std::vector<std::string> identifiers;
 	};
 
 	template<DiagnosticCode DiagnosticCode>
@@ -90,14 +78,14 @@ namespace ProjectA {
 
 	template<>
 	struct generateDiagnostic<DiagnosticCode::UNEXPECTED_CHARACTER> {
-		explicit generateDiagnostic(CompilationResult& result, char8 character, Position start) {
+		explicit generateDiagnostic(CompilationResult& result, char8 character, DocumentPosition start) {
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::UNEXPECTED_CHARACTER;
-			diagnostic.severity = DiagnosticSeverity::ERROR;
-			diagnostic.message = Logger::format("Unexpected character \"[]\".", character);
 			diagnostic.start = start;
 			diagnostic.end.lineIndex = start.lineIndex;
 			diagnostic.end.characterOffset = 1;
+			diagnostic.message = Logger::format("Unexpected character \"[]\".", character);
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::UNEXPECTED_CHARACTER;
 
 			result.diagnostics.emplace_back(diagnostic);
 		}
@@ -112,11 +100,11 @@ namespace ProjectA {
 			diagnosticReference.message = Logger::format("\"[]\" is defined here.", definitionToken.value);
 
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::REDEFINITION;
-			diagnostic.severity = DiagnosticSeverity::ERROR;
-			diagnostic.message = Logger::format("Redefinition of \"[]\".", redefinitionToken.value);
 			diagnostic.start = redefinitionToken.start;
 			diagnostic.end = redefinitionToken.getEnd();
+			diagnostic.message = Logger::format("Redefinition of \"[]\".", redefinitionToken.value);
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::REDEFINITION;
 			diagnostic.references.emplace_back(diagnosticReference);
 
 			result.diagnostics.emplace_back(diagnostic);
@@ -127,11 +115,11 @@ namespace ProjectA {
 	struct generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& typeToken, const Token& templateArgumentToken) {
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
-			diagnostic.severity = DiagnosticSeverity::ERROR;
-			diagnostic.message = Logger::format("\"[]\" cannot be used as a template argument for type \"[]\".", templateArgumentToken.value, typeToken.value);
 			diagnostic.start = templateArgumentToken.start;
 			diagnostic.end = templateArgumentToken.getEnd();
+			diagnostic.message = Logger::format("\"[]\" cannot be used as a template argument for type \"[]\".", templateArgumentToken.value, typeToken.value);
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
 
 			result.diagnostics.emplace_back(diagnostic);
 		}
@@ -141,11 +129,11 @@ namespace ProjectA {
 	struct generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& typeToken) {
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::UNDEFINED_TYPE;
-			diagnostic.severity = DiagnosticSeverity::ERROR;
-			diagnostic.message = Logger::format("Undefined type \"[]\".", typeToken.value);
 			diagnostic.start = typeToken.start;
 			diagnostic.end = typeToken.getEnd();
+			diagnostic.message = Logger::format("Undefined type \"[]\".", typeToken.value);
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::UNDEFINED_TYPE;
 
 			result.diagnostics.emplace_back(diagnostic);
 		}
@@ -155,11 +143,11 @@ namespace ProjectA {
 	struct generateDiagnostic<DiagnosticCode::INCOMPLETE_TYPE> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& typeToken) {
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::INCOMPLETE_TYPE;
-			diagnostic.severity = DiagnosticSeverity::ERROR;
-			diagnostic.message = Logger::format("Incomplete type \"[]\".", typeToken.value);
 			diagnostic.start = typeToken.start;
 			diagnostic.end = typeToken.getEnd();
+			diagnostic.message = Logger::format("Incomplete type \"[]\".", typeToken.value);
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::INCOMPLETE_TYPE;
 
 			result.diagnostics.emplace_back(diagnostic);
 		}
@@ -169,11 +157,11 @@ namespace ProjectA {
 	struct generateDiagnostic<DiagnosticCode::DUPLICATE_ANNOTATION> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::DUPLICATE_ANNOTATION;
-			diagnostic.severity = DiagnosticSeverity::ERROR;
-			diagnostic.message = Logger::format("Duplicate annotation \"[]\".", getTokenString(identifierToken));
 			diagnostic.start = identifierToken.start;
 			diagnostic.end = identifierToken.getEnd();
+			diagnostic.message = Logger::format("Duplicate annotation \"[]\".", getTokenString(identifierToken));
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::DUPLICATE_ANNOTATION;
 
 			result.diagnostics.emplace_back(diagnostic);
 		}
@@ -183,11 +171,11 @@ namespace ProjectA {
 	struct generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::MISSING_ANNOTATION_VALUE;
-			diagnostic.severity = DiagnosticSeverity::ERROR;
-			diagnostic.message = Logger::format("Missing value for annotation \"[]\".", getTokenString(identifierToken));
 			diagnostic.start = identifierToken.getEnd();
 			diagnostic.end = identifierToken.getEnd();
+			diagnostic.message = Logger::format("Missing value for annotation \"[]\".", getTokenString(identifierToken));
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::MISSING_ANNOTATION_VALUE;
 
 			result.diagnostics.emplace_back(diagnostic);
 		}
@@ -197,11 +185,11 @@ namespace ProjectA {
 	struct generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::EMPTY_STRUCTURE;
-			diagnostic.severity = DiagnosticSeverity::WARNING;
-			diagnostic.message = "Structure is empty.";
 			diagnostic.start = identifierToken.start;
 			diagnostic.end = identifierToken.getEnd();
+			diagnostic.message = "Structure is empty.";
+			diagnostic.severity = DiagnosticSeverity::WARNING;
+			diagnostic.code = DiagnosticCode::EMPTY_STRUCTURE;
 
 			result.diagnostics.emplace_back(diagnostic);
 		}
@@ -211,11 +199,11 @@ namespace ProjectA {
 	struct generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE;
-			diagnostic.severity = DiagnosticSeverity::WARNING;
-			diagnostic.message = "Use PascalCase for structure identifiers.";
 			diagnostic.start = identifierToken.start;
 			diagnostic.end = identifierToken.getEnd();
+			diagnostic.message = "Use PascalCase for structure identifiers.";
+			diagnostic.severity = DiagnosticSeverity::WARNING;
+			diagnostic.code = DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE;
 
 			result.diagnostics.emplace_back(diagnostic);
 		}
@@ -225,11 +213,11 @@ namespace ProjectA {
 	struct generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE;
-			diagnostic.severity = DiagnosticSeverity::WARNING;
-			diagnostic.message = "Use camelCase or snake_case for member identifiers.";
 			diagnostic.start = identifierToken.start;
 			diagnostic.end = identifierToken.getEnd();
+			diagnostic.message = "Use camelCase or snake_case for member identifiers.";
+			diagnostic.severity = DiagnosticSeverity::WARNING;
+			diagnostic.code = DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE;
 
 			result.diagnostics.emplace_back(diagnostic);
 		}

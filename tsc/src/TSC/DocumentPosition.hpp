@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	struct Position {
+	struct DocumentPosition {
 		uint32 lineIndex;
 
 		// Offset relative to the start of the line.

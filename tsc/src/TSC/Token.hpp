@@ -1,34 +1,17 @@
 #pragma once
 
-#include "Position.hpp"
+#include "DocumentPosition.hpp"
 #include "TokenType.hpp"
 
 namespace ProjectA {
-	// TODO: Find a way to serialize without having to write getters.
 	class Token {
 		public:
 			uint32 getTypeIndex() const {
 				return type;
 			}
 
-			uint32 getLineIndex() const {
-				return start.lineIndex;
-			}
-
-			uint32 getCharacterOffset() const {
-				return start.characterOffset;
-			}
-
-			uint32 getCharacterCount() const {
-				return characterCount;
-			}
-
-			const std::string& getValue() const {
-				return value;
-			}
-
-			Position getEnd() const {
-				Position end{};
+			DocumentPosition getEnd() const {
+				DocumentPosition end{};
 				end.lineIndex = start.lineIndex;
 				end.characterOffset = start.characterOffset + characterCount;
 
@@ -37,7 +20,7 @@ namespace ProjectA {
 
 		public:
 			uint32 type;
-			Position start;
+			DocumentPosition start;
 			uint32 characterCount;
 
 			// TODO: Replace value by an offset into a buffer stored in CompilationResult.

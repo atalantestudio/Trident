@@ -233,7 +233,7 @@ namespace ProjectA {
 						break;
 					}
 
-					const Position start = position;
+					const DocumentPosition start = position;
 
 					jump(2);
 

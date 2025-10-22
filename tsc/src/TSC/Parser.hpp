@@ -2,7 +2,7 @@
 
 #include "AST.hpp"
 #include "CompilationResult.hpp"
-#include "Position.hpp"
+#include "DocumentPosition.hpp"
 #include "SemanticAnalyzer.hpp"
 #include "Statement.hpp"
 #include "Token.hpp"
@@ -76,7 +76,7 @@ namespace ProjectA {
 			uint32 tokenIndex;
 			uint32 currentAnnotationCount;
 			uint8 annotationFlag;
-			Position position;
+			DocumentPosition position;
 
 			uint32 parentStatementIndex;
 			uint32 visitedWhileCount;

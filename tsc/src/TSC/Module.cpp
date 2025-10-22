@@ -27,35 +27,38 @@ namespace ProjectA {
 
 	EMSCRIPTEN_BINDINGS(Module) {
 		emscripten::class_<CompilationResult>("CompilationResult")
-			.function("getTokens", &CompilationResult::getTokens)
-			.function("getSemanticTokens", &CompilationResult::getSemanticTokens)
-			.function("getDiagnostics", &CompilationResult::getDiagnostics);
+			.property("tokens", &CompilationResult::tokens)
+			.property("semanticTokens", &CompilationResult::semanticTokens)
+			.property("diagnostics", &CompilationResult::diagnostics);
+
 		emscripten::class_<Diagnostic>("Diagnostic")
+			.property("start", &Diagnostic::start)
+			.property("end", &Diagnostic::end)
+			.property("message", &Diagnostic::message)
+			.property("references", &Diagnostic::references)
 			.function("getSeverityIndex", &Diagnostic::getSeverityIndex)
-			.function("getMessage", &Diagnostic::getMessage)
-			.function("getStartLineIndex", &Diagnostic::getStartLineIndex)
-			.function("getStartCharacterOffset", &Diagnostic::getStartCharacterOffset)
-			.function("getEndLineIndex", &Diagnostic::getEndLineIndex)
-			.function("getEndCharacterOffset", &Diagnostic::getEndCharacterOffset)
-			.function("getReferences", &Diagnostic::getReferences);
+			.function("getCodeIndex", &Diagnostic::getCodeIndex);
+
 		emscripten::class_<DiagnosticReference>("DiagnosticReference")
-			.function("getStartLineIndex", &DiagnosticReference::getStartLineIndex)
-			.function("getStartCharacterOffset", &DiagnosticReference::getStartCharacterOffset)
-			.function("getEndLineIndex", &DiagnosticReference::getEndLineIndex)
-			.function("getEndCharacterOffset", &DiagnosticReference::getEndCharacterOffset)
-			.function("getMessage", &DiagnosticReference::getMessage);
+			.property("start", &DiagnosticReference::start)
+			.property("end", &DiagnosticReference::end)
+			.property("message", &DiagnosticReference::message);
+
+		emscripten::class_<DocumentPosition>("DocumentPosition")
+			.property("line", &DocumentPosition::lineIndex)
+			.property("character", &DocumentPosition::characterOffset);
+
 		emscripten::class_<SemanticToken>("SemanticToken")
-			.function("getTypeIndex", &SemanticToken::getTypeIndex)
-			.function("getModifiers", &SemanticToken::getModifiers)
-			.function("getLine", &SemanticToken::getLineIndex)
-			.function("getCharacter", &SemanticToken::getCharacterOffset)
-			.function("getLength", &SemanticToken::getCharacterCount);
+			.property("start", &SemanticToken::start)
+			.property("length", &SemanticToken::characterCount)
+			.property("modifiers", &SemanticToken::modifiers)
+			.function("getTypeIndex", &SemanticToken::getTypeIndex);
+
 		emscripten::class_<Token>("Token")
-			.function("getTypeIndex", &Token::getTypeIndex)
-			.function("getLine", &Token::getLineIndex)
-			.function("getCharacter", &Token::getCharacterOffset)
-			.function("getLength", &Token::getCharacterCount)
-			.function("getValue", &Token::getValue);
+			.property("start", &Token::start)
+			.property("length", &Token::characterCount)
+			.property("value", &Token::value)
+			.function("getTypeIndex", &Token::getTypeIndex);
 
 		emscripten::function("compile", &compile);
 

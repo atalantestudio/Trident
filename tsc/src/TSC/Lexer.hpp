@@ -32,7 +32,7 @@ namespace ProjectA {
 		private:
 			std::string characters;
 			CompilationResult* compilationResult;
-			Position position;
+			DocumentPosition position;
 			uint32 characterIndex;
 			bool unexpectedCharacter;
 	};

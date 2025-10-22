@@ -10,7 +10,7 @@
 namespace ProjectA {
 	#define EXPECT(condition, message) \
 		if (!(condition)) { \
-			compilationResult->generateDiagnostic(DiagnosticSeverity::ERROR, message, tokenIndex); \
+			compilationResult->generateDiagnostic(tokenIndex, message, DiagnosticSeverity::ERROR); \
 			\
 			return false; \
 		}
@@ -672,7 +672,7 @@ namespace ProjectA {
 			return parseFunctionCallOrGroupExpression();
 		}
 
-		compilationResult->generateDiagnostic(DiagnosticSeverity::ERROR, "[PRIMARY] Expected an expression but got " + getTokenString(read()) + ".", tokenIndex);
+		compilationResult->generateDiagnostic(tokenIndex, "[PRIMARY] Expected an expression but got " + getTokenString(read()) + ".", DiagnosticSeverity::ERROR);
 
 		return false;
 	}
