@@ -482,14 +482,16 @@ namespace ProjectA {
 		}
 
 		if (peek().type == TokenType::LEFT_ANGLE_BRACKET) {
-			EXPECT(read().type < TokenType::USER_DEFINED, "[TYPE] Cannot apply template argument to user-defined identifier " + getTokenString(read()) + ".");
-
 			jump();
 			jump();
 
-			EXPECT(read().type >= FIRST_TYPE_INDEX && read().type <= LAST_TYPE_INDEX, "[TYPE] Expected a valid template argument but got " + getTokenString(read()) + ".");
+			EXPECT((read().type >= FIRST_TYPE_INDEX && read().type <= LAST_TYPE_INDEX) || read().type >= TokenType::USER_DEFINED, "[TYPE] Expected a valid template argument but got " + getTokenString(read()) + ".");
 
 			expression->templateArgumentTokenIndex = tokenIndex;
+
+			if (read().type >= TokenType::USER_DEFINED) {
+				registerVariableSemanticToken(read());
+			}
 
 			jump();
 

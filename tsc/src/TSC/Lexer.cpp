@@ -252,7 +252,7 @@ namespace ProjectA {
 					break;
 				}
 				default: {
-					generateDiagnostic<DiagnosticCode::ERROR_UNEXPECTED_CHARACTER>(*this->compilationResult, character, position);
+					generateDiagnostic<DiagnosticCode::UNEXPECTED_CHARACTER>(*this->compilationResult, character, position);
 				}
 				case '\t':
 				case '\r':

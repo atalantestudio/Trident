@@ -4,6 +4,7 @@
 	#include "pch.hpp"
 #endif
 
+#include "Case.hpp"
 #include "SemanticAnalyzer.hpp"
 
 namespace ProjectA {
@@ -48,7 +49,7 @@ namespace ProjectA {
 		if (statement->memberStatementIndices.empty()) {
 			const Token& identifierToken = result->tokens[statement->identifierTokenIndex];
 
-			generateDiagnostic<DiagnosticCode::WARNING_EMPTY_STRUCTURE>(*result, identifierToken);
+			generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(*result, identifierToken);
 		}
 
 		/* Annotation combinedAnnotationFlag = static_cast<Annotation>(0);
@@ -72,16 +73,22 @@ namespace ProjectA {
 	}
 
 	void SemanticAnalyzer::analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<StructureMemberStatement>& memberStatement) {
+		analyzeTypeExpression(memberStatement->typeExpressionIndex);
+
 		const Token& identifierToken = result->tokens[memberStatement->identifierTokenIndex];
 
 		for (const uint32 memberIdentifierTokenIndex : structureStatement->memberIdentifierTokenIndices) {
 			const Token& definitionToken = result->tokens[memberIdentifierTokenIndex];
 
 			if (identifierToken.value == definitionToken.value) {
-				generateDiagnostic<DiagnosticCode::ERROR_REDEFINITION>(*result, definitionToken, identifierToken);
+				generateDiagnostic<DiagnosticCode::REDEFINITION>(*result, definitionToken, identifierToken);
 
 				break;
 			}
+		}
+
+		if (!isCamelCaseOrSnakeCase(identifierToken.value.c_str())) {
+			generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE>(*result, identifierToken);
 		}
 	}
 
@@ -225,11 +232,75 @@ namespace ProjectA {
 		return combinedAnnotationFlag;
 	}
 
-	/* void SemanticAnalyzer::analyzeTypeExpression(uint32 typeExpressionIndex) {
+	void SemanticAnalyzer::analyzeTypeExpression(uint32 typeExpressionIndex) {
 		const ref<TypeExpression> typeExpression = std::static_pointer_cast<TypeExpression>(ast->expressions[typeExpressionIndex]);
-		const Token& typeToken = compilationResult->tokens[typeExpression->typeTokenIndex];
+		const Token& typeToken = result->tokens[typeExpression->typeTokenIndex];
 
-		if (!isReservedWord(typeToken)) {
+		if (typeToken.type < TokenType::TYPE_FLOAT32) {
+			// TODO: Generate diagnostic for this case?
+			return;
+		}
+
+		if (typeToken.type <= TokenType::TYPE_UINT32 || typeToken.type >= TokenType::USER_DEFINED) {
+			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
+				const Token& templateArgumentToken = result->tokens[typeExpression->templateArgumentTokenIndex];
+				const Token& rightAngleBracketToken = result->tokens[typeExpression->rightAngleBracketTokenIndex];
+
+				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*result, typeToken, templateArgumentToken);
+			}
+
+			return;
+		}
+
+		if (typeToken.type <= TokenType::TYPE_VEC4) {
+			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
+				const Token& templateArgumentToken = result->tokens[typeExpression->templateArgumentTokenIndex];
+
+				if (templateArgumentToken.type < TokenType::TYPE_FLOAT32 || templateArgumentToken.type > TokenType::TYPE_UINT32) {
+					generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*result, typeToken, templateArgumentToken);
+
+					return;
+				}
+			}
+		}
+
+		if (typeToken.type <= TokenType::TYPE_MAT4X4) {
+			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
+				const Token& templateArgumentToken = result->tokens[typeExpression->templateArgumentTokenIndex];
+
+				if (templateArgumentToken.type < TokenType::TYPE_FLOAT32 || templateArgumentToken.type > TokenType::TYPE_FLOAT64) {
+					generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*result, typeToken, templateArgumentToken);
+
+					return;
+				}
+			}
+		}
+
+		if (typeToken.type >= TokenType::USER_DEFINED) {
+			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
+				const Token& templateArgumentToken = result->tokens[typeExpression->templateArgumentTokenIndex];
+
+				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*result, typeToken, templateArgumentToken);
+			}
+
+			return;
+		}
+
+		/*
+			if type is scalar or user-defined {
+				error if template argument is defined
+			}
+
+			if type is vector {
+				error if template argument is not scalar
+			}
+
+			if type is matrix {
+				error if template argument is not float32/float64
+			}
+		*/
+
+		/* if (!isReservedWord(typeToken)) {
 			// ERROR: Cannot use template arguments on user-defined structure.
 			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
 				compilationResult->generateDiagnostic(
@@ -296,10 +367,10 @@ namespace ProjectA {
 			}
 		}
 
-		compilationResult->registerSemanticToken(typeExpression->templateArgumentTokenIndex, SemanticTokenType::KEYWORD, 0);
+		compilationResult->registerSemanticToken(typeExpression->templateArgumentTokenIndex, SemanticTokenType::KEYWORD, 0); */
 	}
 
-	void SemanticAnalyzer::analyzeExpression(uint32 expressionIndex) {
+	/* void SemanticAnalyzer::analyzeExpression(uint32 expressionIndex) {
 		const ref<Expression>& expression = ast->expressions[expressionIndex];
 
 		switch (expression->type) {

@@ -89,10 +89,10 @@ namespace ProjectA {
 	struct generateDiagnostic;
 
 	template<>
-	struct generateDiagnostic<DiagnosticCode::ERROR_UNEXPECTED_CHARACTER> {
+	struct generateDiagnostic<DiagnosticCode::UNEXPECTED_CHARACTER> {
 		explicit generateDiagnostic(CompilationResult& result, char8 character, Position start) {
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::ERROR_UNEXPECTED_CHARACTER;
+			diagnostic.code = DiagnosticCode::UNEXPECTED_CHARACTER;
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.message = Logger::format("Unexpected character \"[]\".", character);
 			diagnostic.start = start;
@@ -104,7 +104,7 @@ namespace ProjectA {
 	};
 
 	template<>
-	struct generateDiagnostic<DiagnosticCode::ERROR_REDEFINITION> {
+	struct generateDiagnostic<DiagnosticCode::REDEFINITION> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& definitionToken, const Token& redefinitionToken) {
 			DiagnosticReference diagnosticReference{};
 			diagnosticReference.start = definitionToken.start;
@@ -112,7 +112,7 @@ namespace ProjectA {
 			diagnosticReference.message = Logger::format("\"[]\" is defined here.", definitionToken.value);
 
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::ERROR_REDEFINITION;
+			diagnostic.code = DiagnosticCode::REDEFINITION;
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.message = Logger::format("Redefinition of \"[]\".", redefinitionToken.value);
 			diagnostic.start = redefinitionToken.start;
@@ -124,12 +124,54 @@ namespace ProjectA {
 	};
 
 	template<>
-	struct generateDiagnostic<DiagnosticCode::WARNING_EMPTY_STRUCTURE> {
+	struct generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT> {
+		explicit generateDiagnostic(CompilationResult& result, const Token& typeToken, const Token& templateArgumentToken) {
+			Diagnostic diagnostic{};
+			diagnostic.code = DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.message = Logger::format("\"[]\" cannot be used as a template argument for type \"[]\".", templateArgumentToken.value, typeToken.value);
+			diagnostic.start = templateArgumentToken.start;
+			diagnostic.end = templateArgumentToken.getEnd();
+
+			result.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE> {
+		explicit generateDiagnostic(CompilationResult& result, const Token& typeToken) {
+			Diagnostic diagnostic{};
+			diagnostic.code = DiagnosticCode::UNDEFINED_TYPE;
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.message = Logger::format("Undefined type \"[]\".", typeToken.value);
+			diagnostic.start = typeToken.start;
+			diagnostic.end = typeToken.getEnd();
+
+			result.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
 			Diagnostic diagnostic{};
-			diagnostic.code = DiagnosticCode::WARNING_EMPTY_STRUCTURE;
+			diagnostic.code = DiagnosticCode::EMPTY_STRUCTURE;
 			diagnostic.severity = DiagnosticSeverity::WARNING;
 			diagnostic.message = "Structure is empty.";
+			diagnostic.start = identifierToken.start;
+			diagnostic.end = identifierToken.getEnd();
+
+			result.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE> {
+		explicit generateDiagnostic(CompilationResult& result, const Token& identifierToken) {
+			Diagnostic diagnostic{};
+			diagnostic.code = DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE;
+			diagnostic.severity = DiagnosticSeverity::WARNING;
+			diagnostic.message = "Use camelCase or PascalCase for member identifiers.";
 			diagnostic.start = identifierToken.start;
 			diagnostic.end = identifierToken.getEnd();
 

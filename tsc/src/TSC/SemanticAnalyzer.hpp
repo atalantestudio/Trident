@@ -28,7 +28,7 @@ namespace ProjectA {
 			// Returns a flag representing the combined annotations of the member.
 			Annotation analyzeMemberStatement(const ref<VariableStatement> statement);
 
-			// void analyzeTypeExpression(uint32 typeExpressionIndex);
+			void analyzeTypeExpression(uint32 typeExpressionIndex);
 			// void analyzeExpression(uint32 expressionIndex);
 			// void analyzeNumberExpression(const ref<NumberExpression> expression);
 			// void analyzeIdentifierExpression(const ref<IdentifierExpression> expression);
