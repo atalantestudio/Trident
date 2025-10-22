@@ -1,8 +1,5 @@
 #pragma once
 
-// TODO: Remove.
-#include "pch.hpp"
-
 #include "AST.hpp"
 #include "CompilationResult.hpp"
 
@@ -19,9 +16,11 @@ namespace ProjectA {
 			void writeFunctionStatement(uint32 statementIndex);
 			void writeVariableStatement(uint32 statementIndex);
 			void writeParameterStatement(uint32 statementIndex);
+			void writeScopeStatement(uint32 statementIndex);
 			void writeIfStatement(uint32 statementIndex);
 			void writeWhileStatement(uint32 statementIndex);
-			void writeScopeStatement(uint32 statementIndex);
+			void writeBreakStatement();
+			void writeNextStatement();
 			void writeReturnStatement(uint32 statementIndex);
 			void writeExpressionStatement(uint32 statementIndex);
 

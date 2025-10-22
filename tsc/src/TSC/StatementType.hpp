@@ -15,6 +15,8 @@ namespace ProjectA {
 		SCOPE,
 		IF,
 		WHILE,
+		BREAK,
+		NEXT,
 		RETURN,
 	};
 }

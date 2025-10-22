@@ -48,6 +48,7 @@ namespace ProjectA {
 		annotationFlag = 0;
 		position = {};
 		parentStatementIndex = ~0;
+		visitedWhileCount = 0;
 
 		analyzer.setCompilationResult(compilationResult);
 		analyzer.setAst(ast);
@@ -313,11 +314,45 @@ namespace ProjectA {
 			return parseWhileStatementStart();
 		}
 
+		if (visitedWhileCount > 0) {
+			if (read().type == TokenType::KEYWORD_BREAK) {
+				return parseBreakStatement();
+			}
+
+			if (read().type == TokenType::KEYWORD_NEXT) {
+				return parseNextStatement();
+			}
+		}
+
 		if (read().type >= TokenType::USER_DEFINED && ((peek().type >= TokenType::EQUAL && peek().type <= TokenType::VERTICAL_BAR_EQUAL) || peek().type == TokenType::DOT)) {
 			return parseExpressionStatement();
 		}
 
 		return parseVariableStatement();
+	}
+
+	bool Parser::parseBreakStatement() {
+		const ref<BreakStatement> statement = createRef<BreakStatement>();
+
+		jump();
+
+		EXPECT(read().type == TokenType::END_OF_LINE, "[NEXT] Expected EOL but got " + getTokenString(read()) + ".");
+
+		ast.statements.emplace_back(statement);
+
+		return true;
+	}
+
+	bool Parser::parseNextStatement() {
+		const ref<NextStatement> statement = createRef<NextStatement>();
+
+		jump();
+
+		EXPECT(read().type == TokenType::END_OF_LINE, "[NEXT] Expected EOL but got " + getTokenString(read()) + ".");
+
+		ast.statements.emplace_back(statement);
+
+		return true;
 	}
 
 	bool Parser::parseExpressionStatement() {
@@ -352,6 +387,8 @@ namespace ProjectA {
 	bool Parser::parseWhileStatementStart() {
 		jump();
 
+		visitedWhileCount += 1;
+
 		ref<WhileStatement> statement = createRef<WhileStatement>();
 
 		if (!parseIfOrWhileStatementEnd(statement->conditionExpressionIndex, statement->scopeStatementIndex)) {
@@ -359,6 +396,8 @@ namespace ProjectA {
 		}
 
 		ast.statements.emplace_back(statement);
+
+		visitedWhileCount -= 1;
 
 		return true;
 	}

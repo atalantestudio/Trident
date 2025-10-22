@@ -34,18 +34,24 @@ namespace ProjectA {
 				return writeFunctionStatement(statementIndex);
 			case StatementType::VARIABLE:
 				return writeVariableStatement(statementIndex);
+			case StatementType::SCOPE:
+				return writeScopeStatement(statementIndex);
 			case StatementType::IF:
 				return writeIfStatement(statementIndex);
 			case StatementType::WHILE:
 				return writeWhileStatement(statementIndex);
-			case StatementType::SCOPE:
-				return writeScopeStatement(statementIndex);
+			case StatementType::BREAK:
+				return writeBreakStatement();
+			case StatementType::NEXT:
+				return writeNextStatement();
 			case StatementType::RETURN:
 				return writeReturnStatement(statementIndex);
 			case StatementType::EXPRESSION:
 				return writeExpressionStatement(statementIndex);
 			default:
 				// TODO
+				BREAKPOINT();
+
 				break;
 		}
 	}
@@ -165,6 +171,24 @@ namespace ProjectA {
 		stream << " " << getTokenString(identifierToken);
 	}
 
+	void GLSLCodeGenerator::writeScopeStatement(uint32 statementIndex) {
+		const ref<ScopeStatement> statement = std::static_pointer_cast<ScopeStatement>(ast->statements[statementIndex]);
+
+		stream << "{\n";
+
+		_indent += 1;
+
+		for (const uint32 statementIndex : statement->statementIndices) {
+			writeStatement(statementIndex);
+
+			stream << "\n";
+		}
+
+		_indent -= 1;
+
+		stream << indent() << "}";
+	}
+
 	void GLSLCodeGenerator::writeIfStatement(uint32 statementIndex) {
 		const ref<IfStatement> statement = std::static_pointer_cast<IfStatement>(ast->statements[statementIndex]);
 
@@ -189,22 +213,12 @@ namespace ProjectA {
 		writeScopeStatement(statement->scopeStatementIndex);
 	}
 
-	void GLSLCodeGenerator::writeScopeStatement(uint32 statementIndex) {
-		const ref<ScopeStatement> statement = std::static_pointer_cast<ScopeStatement>(ast->statements[statementIndex]);
+	void GLSLCodeGenerator::writeBreakStatement() {
+		stream << indent() << "break;";
+	}
 
-		stream << "{\n";
-
-		_indent += 1;
-
-		for (const uint32 statementIndex : statement->statementIndices) {
-			writeStatement(statementIndex);
-
-			stream << "\n";
-		}
-
-		_indent -= 1;
-
-		stream << indent() << "}";
+	void GLSLCodeGenerator::writeNextStatement() {
+		stream << indent() << "continue;";
 	}
 
 	void GLSLCodeGenerator::writeReturnStatement(uint32 statementIndex) {
@@ -243,6 +257,8 @@ namespace ProjectA {
 				return writeMemberAccessExpression(expressionIndex);
 			default:
 				// TODO
+				BREAKPOINT();
+
 				break;
 		}
 	}

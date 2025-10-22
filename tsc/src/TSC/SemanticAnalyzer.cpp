@@ -252,6 +252,30 @@ namespace ProjectA {
 			return;
 		}
 
+		if (typeToken.type >= TokenType::USER_DEFINED) {
+			bool undefined = true;
+
+			for (const std::string& userDefinedType : ast->userDefinedTypes) {
+				if (getTokenString(typeToken) == userDefinedType) {
+					undefined = false;
+
+					break;
+				}
+			}
+
+			if (undefined) {
+				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*result, typeToken);
+			}
+
+			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
+				const Token& templateArgumentToken = result->tokens[typeExpression->templateArgumentTokenIndex];
+
+				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*result, typeToken, templateArgumentToken);
+			}
+
+			return;
+		}
+
 		if (typeToken.type <= TokenType::TYPE_UINT32 || typeToken.type >= TokenType::USER_DEFINED) {
 			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
 				const Token& templateArgumentToken = result->tokens[typeExpression->templateArgumentTokenIndex];
@@ -284,30 +308,6 @@ namespace ProjectA {
 					return;
 				}
 			}
-		}
-
-		if (typeToken.type >= TokenType::USER_DEFINED) {
-			bool undefined = true;
-
-			for (const std::string& userDefinedType : ast->userDefinedTypes) {
-				if (typeToken.value == userDefinedType) {
-					undefined = false;
-
-					break;
-				}
-			}
-
-			if (undefined) {
-				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*result, typeToken);
-			}
-
-			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
-				const Token& templateArgumentToken = result->tokens[typeExpression->templateArgumentTokenIndex];
-
-				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*result, typeToken, templateArgumentToken);
-			}
-
-			return;
 		}
 	}
 

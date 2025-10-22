@@ -58,6 +58,8 @@ namespace ProjectA {
 
 				writeExpression(stream, indent, result, ast, binaryExpression->leftExpressionIndex);
 
+				stream << ",\n";
+
 				stream << getIndent(indent) << "\"Operator\": \"" << getTokenString(operatorToken) << "\",\n";
 				stream << getIndent(indent) << "\"Right\": ";
 
@@ -129,11 +131,16 @@ namespace ProjectA {
 
 				break;
 			}
+			default:
+				// TODO
+				BREAKPOINT();
+
+				break;
 		}
 
 		indent -= 1;
 
-		stream << "\n" << getIndent(indent) << "},\n";
+		stream << "\n" << getIndent(indent) << "}";
 	}
 
 	void writeStatement(std::ofstream& stream, uint32& indent, const CompilationResult& result, const AST& ast, uint32 statementIndex) {
@@ -190,15 +197,24 @@ namespace ProjectA {
 
 					indent += 1;
 
-					stream << getIndent(indent) << "\"Annotation\": \"" << getAnnotationString(annotationInstance.annotation) << "\",\n";
+					stream << getIndent(indent) << "\"Annotation\": \"" << getAnnotationString(annotationInstance.annotation) << "\"";
 
 					if (!annotationInstance.value.value.empty()) {
-						stream << getIndent(indent) << "\"Value\": \"" << getTokenString(annotationInstance.value) << "\",\n";
+						stream << ",\n";
+						stream << getIndent(indent) << "\"Value\": \"" << getTokenString(annotationInstance.value) << "\"";
 					}
+
+					stream << "\n";
 
 					indent -= 1;
 
-					stream << getIndent(indent) << "},\n";
+					stream << getIndent(indent) << "}";
+					
+					if (annotationInstanceIndex + 1 < structureMemberStatement->annotationInstanceCount) {
+						stream << ",";
+					}
+
+					stream << "\n";
 				}
 
 				indent -= 1;
@@ -210,6 +226,7 @@ namespace ProjectA {
 
 				const Token& identifierToken = result.tokens[structureMemberStatement->identifierTokenIndex];
 
+				stream << ",\n";
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\"";
 
 				break;
@@ -250,6 +267,7 @@ namespace ProjectA {
 
 				const Token& identifierToken = result.tokens[constantStatement->identifierTokenIndex];
 
+				stream << ",\n";
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
 				stream << getIndent(indent) << "\"Initializer\": ";
 
@@ -267,6 +285,7 @@ namespace ProjectA {
 
 				const Token& identifierToken = result.tokens[variableStatement->identifierTokenIndex];
 
+				stream << ",\n";
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
 				stream << getIndent(indent) << "\"IsConstant\": \"" << std::to_string(variableStatement->constant) << "\",\n";
 				stream << getIndent(indent) << "\"Initializer\": ";
@@ -289,6 +308,7 @@ namespace ProjectA {
 
 				writeExpression(stream, indent, result, ast, functionStatement->returnTypeExpressionIndex);
 
+				stream << ",\n";
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
 				stream << getIndent(indent) << "\"Arguments\": [\n";
 
@@ -327,6 +347,7 @@ namespace ProjectA {
 
 				const Token& identifierToken = result.tokens[parameterStatement->identifierTokenIndex];
 
+				stream << ",\n";
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\"";
 
 				break;
@@ -377,6 +398,7 @@ namespace ProjectA {
 
 				writeExpression(stream, indent, result, ast, ifStatement->conditionExpressionIndex);
 
+				stream << ",\n";
 				stream << getIndent(indent) << "\"Scope\": ";
 
 				writeStatement(stream, indent, result, ast, ifStatement->scopeStatementIndex);
@@ -391,9 +413,20 @@ namespace ProjectA {
 
 				writeExpression(stream, indent, result, ast, whileStatement->conditionExpressionIndex);
 
+				stream << ",\n";
 				stream << getIndent(indent) << "\"Scope\": ";
 
 				writeStatement(stream, indent, result, ast, whileStatement->scopeStatementIndex);
+
+				break;
+			}
+			case StatementType::BREAK: {
+				stream << getIndent(indent) << "\"Type\": \"BreakStatement\"";
+
+				break;
+			}
+			case StatementType::NEXT: {
+				stream << getIndent(indent) << "\"Type\": \"NextStatement\"";
 
 				break;
 			}
@@ -408,6 +441,9 @@ namespace ProjectA {
 				break;
 			}
 			default:
+				// TODO
+				BREAKPOINT();
+
 				break;
 		}
 

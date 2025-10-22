@@ -24,6 +24,8 @@ namespace ProjectA {
 			bool parseScopeStatement();
 			bool parseIfStatementStart();
 			bool parseReturnStatement();
+			bool parseBreakStatement();
+			bool parseNextStatement();
 			bool parseWhileStatementStart();
 			bool parseExpressionStatement();
 			bool parseIfOrWhileStatementEnd(uint32& conditionExpressionIndex, uint32& scopeStatementIndex);
@@ -77,6 +79,7 @@ namespace ProjectA {
 			Position position;
 
 			uint32 parentStatementIndex;
+			uint32 visitedWhileCount;
 
 			SemanticAnalyzer analyzer;
 	};

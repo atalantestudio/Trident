@@ -78,6 +78,10 @@ namespace ProjectA {
 		uint32 scopeStatementIndex;
 	};
 
+	struct BreakStatement : public BaseStatement<StatementType::BREAK> {};
+
+	struct NextStatement : public BaseStatement<StatementType::NEXT> {};
+
 	struct ReturnStatement : public BaseStatement<StatementType::RETURN> {
 		uint32 expressionIndex;
 	};
