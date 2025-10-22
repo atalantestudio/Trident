@@ -89,6 +89,21 @@ namespace ProjectA {
 	struct generateDiagnostic;
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::ERROR_UNEXPECTED_CHARACTER> {
+		explicit generateDiagnostic(CompilationResult& result, char8 character, Position start) {
+			Diagnostic diagnostic{};
+			diagnostic.code = DiagnosticCode::ERROR_UNEXPECTED_CHARACTER;
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.message = Logger::format("Unexpected character \"[]\".", character);
+			diagnostic.start = start;
+			diagnostic.end.lineIndex = start.lineIndex;
+			diagnostic.end.characterOffset = 1;
+
+			result.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::ERROR_REDEFINITION> {
 		explicit generateDiagnostic(CompilationResult& result, const Token& definitionToken, const Token& redefinitionToken) {
 			DiagnosticReference diagnosticReference{};

@@ -252,12 +252,7 @@ namespace ProjectA {
 					break;
 				}
 				default: {
-					this->compilationResult->generateDiagnostic(
-						DiagnosticSeverity::ERROR,
-						"[LEXER] Unexpected character '" + std::string(1, character) + "'.",
-						position,
-						{position.lineIndex, characterIndex + 1}
-					);
+					generateDiagnostic<DiagnosticCode::ERROR_UNEXPECTED_CHARACTER>(*this->compilationResult, character, position);
 				}
 				case '\t':
 				case '\r':
