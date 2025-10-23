@@ -276,27 +276,13 @@ namespace ProjectA {
 	};
 
 	template<>
-	struct generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE> {
-		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
-			Diagnostic diagnostic{};
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
-			diagnostic.message = "Structure is empty.";
-			diagnostic.severity = DiagnosticSeverity::WARNING;
-			diagnostic.code = DiagnosticCode::EMPTY_STRUCTURE;
-
-			output.diagnostics.emplace_back(diagnostic);
-		}
-	};
-
-	template<>
 	struct generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE> {
 		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
 			Diagnostic diagnostic{};
 			diagnostic.start = identifierToken.start;
 			diagnostic.end = identifierToken.getEnd();
 			diagnostic.message = "Use PascalCase for structure identifiers.";
-			diagnostic.severity = DiagnosticSeverity::WARNING;
+			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE;
 
 			output.diagnostics.emplace_back(diagnostic);
@@ -310,8 +296,36 @@ namespace ProjectA {
 			diagnostic.start = identifierToken.start;
 			diagnostic.end = identifierToken.getEnd();
 			diagnostic.message = "Use camelCase or snake_case for member identifiers.";
-			diagnostic.severity = DiagnosticSeverity::WARNING;
+			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
+			Diagnostic diagnostic{};
+			diagnostic.start = identifierToken.start;
+			diagnostic.end = identifierToken.getEnd();
+			diagnostic.message = "Use SCREAMING_SNAKE_CASE for constant identifiers.";
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
+			Diagnostic diagnostic{};
+			diagnostic.start = identifierToken.start;
+			diagnostic.end = identifierToken.getEnd();
+			diagnostic.message = "Structure is empty.";
+			diagnostic.severity = DiagnosticSeverity::WARNING;
+			diagnostic.code = DiagnosticCode::EMPTY_STRUCTURE;
 
 			output.diagnostics.emplace_back(diagnostic);
 		}

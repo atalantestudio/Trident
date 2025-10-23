@@ -12,12 +12,17 @@ namespace ProjectA {
 		this->output = compilationOutput;
 	}
 
-	void SemanticAnalyzer::analyzeStructureStatement(const ref<StructureStatement>& statement) {
+	void SemanticAnalyzer::analyzeStructureStatement(const ref<StructureStatement>& statement) const {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
 		if (!isPascalCase(identifierToken.value, identifierToken.characterCount)) {
 			generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE>(*output, identifierToken);
+
+			return;
 		}
+
+		// TODO: Structure statement index.
+		output->define(statement->identifierTokenIndex, 0);
 
 		if (statement->memberStatementIndices.empty()) {
 			generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(*output, identifierToken);
@@ -43,7 +48,7 @@ namespace ProjectA {
 		} */
 	}
 
-	void SemanticAnalyzer::analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<StructureMemberStatement>& memberStatement) {
+	void SemanticAnalyzer::analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<StructureMemberStatement>& memberStatement) const {
 		analyzeAnnotationInstances(memberStatement->annotationInstanceIndexOffset, memberStatement->annotationInstanceCount);
 		analyzeTypeExpression(memberStatement->typeExpressionIndex);
 
@@ -74,6 +79,18 @@ namespace ProjectA {
 		}
 
 		output->ast.userDefinedTypes.emplace_back(getTokenString(structureIdentifierToken));
+	}
+
+	void SemanticAnalyzer::analyzeGlobalScopeConstantStatement(const ref<GlobalScopeConstantStatement>& statement) const {
+		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+
+		if (!isScreamingSnakeCase(identifierToken.value, identifierToken.characterCount)) {
+			generateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE>(*output, identifierToken);
+
+			return;
+		}
+
+		output->define(statement->identifierTokenIndex);
 	}
 
 	/* void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement> statement) {
@@ -212,7 +229,7 @@ namespace ProjectA {
 		// ERROR: The identifier must not be written in SCREAMING_SNAKE_CASE.
 	} */
 
-	void SemanticAnalyzer::analyzeTypeExpression(uint32 typeExpressionIndex) {
+	void SemanticAnalyzer::analyzeTypeExpression(uint32 typeExpressionIndex) const {
 		const ref<TypeExpression> typeExpression = std::static_pointer_cast<TypeExpression>(output->ast.expressions[typeExpressionIndex]);
 		const Token& typeToken = output->tokens[typeExpression->typeTokenIndex];
 
@@ -391,7 +408,7 @@ namespace ProjectA {
 		compilationOutput->registerSemanticToken(identifierTokenIndex, SemanticTokenType::VARIABLE, 0);
 	} */
 
-	void SemanticAnalyzer::analyzeAnnotationInstances(uint32 annotationInstanceIndexOffset, uint32 annotationInstanceCount) {
+	void SemanticAnalyzer::analyzeAnnotationInstances(uint32 annotationInstanceIndexOffset, uint32 annotationInstanceCount) const {
 		Annotation uniqueAnnotationFlag = static_cast<Annotation>(0);
 
 		for (uint32 annotationInstanceIndex = 0; annotationInstanceIndex < annotationInstanceCount; annotationInstanceIndex += 1) {
@@ -512,7 +529,7 @@ namespace ProjectA {
 		// return combinedAnnotationFlag;
 	}
 
-	void SemanticAnalyzer::analyzeBindingAnnotation(const AnnotationInstance& annotationInstance) {
+	void SemanticAnalyzer::analyzeBindingAnnotation(const AnnotationInstance& annotationInstance) const {
 		if (annotationInstance.valueTokenIndex == ~0) {
 			const Token& identifierToken = output->tokens[annotationInstance.identifierTokenIndex];
 
@@ -520,7 +537,7 @@ namespace ProjectA {
 		}
 	}
 
-	void SemanticAnalyzer::analyzeConstantAnnotation(const AnnotationInstance& annotationInstance) {
+	void SemanticAnalyzer::analyzeConstantAnnotation(const AnnotationInstance& annotationInstance) const {
 		if (annotationInstance.valueTokenIndex == ~0) {
 			const Token& identifierToken = output->tokens[annotationInstance.identifierTokenIndex];
 
@@ -528,9 +545,9 @@ namespace ProjectA {
 		}
 	}
 
-	void SemanticAnalyzer::analyzeInstanceIndexAnnotation(const AnnotationInstance& annotationInstance) {}
+	void SemanticAnalyzer::analyzeInstanceIndexAnnotation(const AnnotationInstance& annotationInstance) const {}
 
-	void SemanticAnalyzer::analyzeLocationAnnotation(const AnnotationInstance& annotationInstance) {
+	void SemanticAnalyzer::analyzeLocationAnnotation(const AnnotationInstance& annotationInstance) const {
 		if (annotationInstance.valueTokenIndex == ~0) {
 			const Token& identifierToken = output->tokens[annotationInstance.identifierTokenIndex];
 
@@ -538,9 +555,9 @@ namespace ProjectA {
 		}
 	}
 
-	void SemanticAnalyzer::analyzePositionAnnotation(const AnnotationInstance& annotationInstance) {}
+	void SemanticAnalyzer::analyzePositionAnnotation(const AnnotationInstance& annotationInstance) const {}
 
-	void SemanticAnalyzer::analyzeSetAnnotation(const AnnotationInstance& annotationInstance) {
+	void SemanticAnalyzer::analyzeSetAnnotation(const AnnotationInstance& annotationInstance) const {
 		if (annotationInstance.valueTokenIndex == ~0) {
 			const Token& identifierToken = output->tokens[annotationInstance.identifierTokenIndex];
 
@@ -548,5 +565,5 @@ namespace ProjectA {
 		}
 	}
 
-	void SemanticAnalyzer::analyzeVertexIndexAnnotation(const AnnotationInstance& annotationInstance) {}
+	void SemanticAnalyzer::analyzeVertexIndexAnnotation(const AnnotationInstance& annotationInstance) const {}
 }

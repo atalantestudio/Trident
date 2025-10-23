@@ -90,7 +90,6 @@ namespace ProjectA {
 
 		const uint32 structureStatementIndex = static_cast<uint32>(output->ast.statements.size());
 
-		output->define(tokenIndex, structureStatementIndex);
 		output->registerCompletionItem(tokenIndex, CompletionItemKind::STRUCTURE);
 
 		jump();
@@ -196,16 +195,14 @@ namespace ProjectA {
 
 		statement->identifierTokenIndex = tokenIndex;
 
-		EXPECT(isScreamingSnakeCase(read().value, read().characterCount), "[CONSTANT] Constant identifier " + getTokenString(read()) + " is not written in SCREAMING_SNAKE_CASE.");
+		output->registerCompletionItem(statement->identifierTokenIndex, CompletionItemKind::CONSTANT);
 
-		output->define(tokenIndex);
-		output->registerCompletionItem(tokenIndex, CompletionItemKind::CONSTANT);
+		registerVariableSemanticToken(read(), false);
 
 		jump();
 
 		EXPECT(read().type == TokenType::EQUAL, "[CONSTANT] Expected '=' but got " + getTokenString(read()) + ".");
 
-		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
 		output->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR, 0);
 
 		jump();
@@ -218,6 +215,8 @@ namespace ProjectA {
 		statement->initializerExpressionIndex = getLastExpressionIndex();
 		output->ast.statements.emplace_back(statement);
 		output->ast.globalScopeStatementIndices.emplace_back(getLastStatementIndex());
+
+		analyzer.analyzeGlobalScopeConstantStatement(statement);
 
 		EXPECT(read().type == TokenType::END_OF_FILE || read().type == TokenType::END_OF_LINE, "[CONSTANT] Expected EOL but got " + getTokenString(read()) + ".");
 
@@ -236,7 +235,9 @@ namespace ProjectA {
 
 		statement->identifierTokenIndex = tokenIndex;
 
+		// TODO: Only define if the identifier is valid (case, etc.).
 		output->define(tokenIndex);
+
 		output->registerCompletionItem(tokenIndex, CompletionItemKind::FUNCTION);
 		output->registerSemanticToken(tokenIndex, SemanticTokenType::FUNCTION, 0);
 
