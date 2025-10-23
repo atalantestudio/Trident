@@ -10,14 +10,14 @@
 
 #define DEBUG_ASSERT(condition) { \
 	if (!(condition)) { \
-		ENGINE_ERROR("Debug assertion failed."); \
+		MODULE_ERROR("Debug assertion failed."); \
 		BREAKPOINT(); \
 	} \
 }
 
-#define ENGINE_ASSERT(condition, ...) { \
+#define MODULE_ASSERT(condition, ...) { \
 	if (!(condition)) { \
-		ENGINE_ERROR(__VA_ARGS__); \
+		MODULE_ERROR(__VA_ARGS__); \
 		BREAKPOINT(); \
 	} \
 }

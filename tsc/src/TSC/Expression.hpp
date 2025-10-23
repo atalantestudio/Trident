@@ -3,56 +3,60 @@
 #include "ExpressionType.hpp"
 
 namespace ProjectA {
-	struct Expression {
-		explicit Expression(ExpressionType type) :
-			type(type)
-		{}
+	static constexpr uint32 UNDEFINED_EXPRESSION = ~0;
+	static constexpr uint32 UNDEFINED_TOKEN = ~0;
 
+	struct ExpressionReference {
 		ExpressionType type;
+		uint32 byteOffset;
 	};
 
 	template<ExpressionType ExpressionType>
-	struct BaseExpression : public Expression {
-		explicit BaseExpression() :
-			Expression(ExpressionType)
-		{}
-	};
+	struct Expression;
 
-	struct IdentifierExpression : public BaseExpression<ExpressionType::IDENTIFIER> {
+	template<>
+	struct Expression<ExpressionType::IDENTIFIER> {
 		uint32 identifierTokenIndex;
 	};
 
-	struct NumberExpression : public BaseExpression<ExpressionType::NUMBER> {
+	template<>
+	struct Expression<ExpressionType::NUMBER> {
 		uint32 numberTokenIndex;
 	};
 
-	struct UnaryExpression : public BaseExpression<ExpressionType::UNARY> {
+	template<>
+	struct Expression<ExpressionType::UNARY> {
 		uint32 operatorTokenIndex;
-		uint32 rightExpressionIndex;
+		uint32 rightExpressionReferenceIndex;
 	};
 
-	struct BinaryExpression : public BaseExpression<ExpressionType::BINARY> {
-		uint32 leftExpressionIndex;
+	template<>
+	struct Expression<ExpressionType::BINARY> {
+		uint32 leftExpressionReferenceIndex;
 		uint32 operatorTokenIndex;
-		uint32 rightExpressionIndex;
+		uint32 rightExpressionReferenceIndex;
 	};
 
-	struct GroupExpression : public BaseExpression<ExpressionType::GROUP> {
-		uint32 expressionIndex;
+	template<>
+	struct Expression<ExpressionType::GROUP> {
+		uint32 expressionReferenceIndex;
 	};
 
-	struct MemberAccessExpression : public BaseExpression<ExpressionType::MEMBER_ACCESS> {
-		uint32 leftExpressionIndex;
+	template<>
+	struct Expression<ExpressionType::MEMBER_ACCESS> {
+		uint32 leftExpressionReferenceIndex;
 		uint32 identifierTokenIndex;
 	};
 
-	struct FunctionCallExpression : public BaseExpression<ExpressionType::FUNCTION_CALL> {
-		uint32 calleeExpressionIndex;
-		std::vector<uint32> argumentExpressionIndices;
+	template<>
+	struct Expression<ExpressionType::FUNCTION_CALL> {
+		uint32 calleeExpressionReferenceIndex;
+		std::vector<uint32> argumentExpressionReferenceIndices;
 	};
 
-	struct TypeExpression : public BaseExpression<ExpressionType::TYPE> {
+	template<>
+	struct Expression<ExpressionType::TYPE> {
 		uint32 typeTokenIndex;
-		uint32 templateArgumentTokenIndex = ~0;
+		uint32 templateArgumentTokenIndex = UNDEFINED_TOKEN;
 	};
 }

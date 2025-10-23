@@ -13,25 +13,25 @@ namespace ProjectA {
 			void setCompilationOutput(CompilationOutput* compilationOutput);
 
 			void analyzeStructureStatement(const ref<StructureStatement>& statement) const;
-			void analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<StructureMemberStatement>& memberStatement) const;
-			void analyzeGlobalScopeConstantStatement(const ref<GlobalScopeConstantStatement>& statement) const;
+			void analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& memberStatement) const;
+			void analyzeConstantStatement(const ref<ConstantStatement>& statement) const;
 			void analyzeFunctionStatement(uint32 statementIndex) const;
 			void analyzeVariableStatement(const ref<VariableStatement>& statement) const;
 
-			void analyzeIdentifierExpression(const ref<IdentifierExpression>& expression) const;
-			void analyzeMemberAccessExpression(const ref<MemberAccessExpression>& expression) const;
+			void analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression) const;
+			void analyzeMemberAccessExpression(const Expression<ExpressionType::MEMBER_ACCESS>& expression) const;
 
 		private:
-			void analyzeTypeExpression(uint32 typeExpressionIndex) const;
+			void analyzeTypeExpression(uint32 referenceIndex) const;
 
-			void analyzeAnnotationInstances(uint32 annotationInstanceIndexOffset, uint32 annotationInstanceCount) const;
-			void analyzeBindingAnnotation(const AnnotationInstance& annotationInstance) const;
-			void analyzeConstantAnnotation(const AnnotationInstance& annotationInstance) const;
-			void analyzeInstanceIndexAnnotation(const AnnotationInstance& annotationInstance) const;
-			void analyzeLocationAnnotation(const AnnotationInstance& annotationInstance) const;
-			void analyzePositionAnnotation(const AnnotationInstance& annotationInstance) const;
-			void analyzeSetAnnotation(const AnnotationInstance& annotationInstance) const;
-			void analyzeVertexIndexAnnotation(const AnnotationInstance& annotationInstance) const;
+			void analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const;
+			void analyzeBindingAnnotation(const AnnotationBlock& annotationBlock) const;
+			void analyzeConstantAnnotation(const AnnotationBlock& annotationBlock) const;
+			void analyzeInstanceIndexAnnotation(const AnnotationBlock& annotationBlock) const;
+			void analyzeLocationAnnotation(const AnnotationBlock& annotationBlock) const;
+			void analyzePositionAnnotation(const AnnotationBlock& annotationBlock) const;
+			void analyzeSetAnnotation(const AnnotationBlock& annotationBlock) const;
+			void analyzeVertexIndexAnnotation(const AnnotationBlock& annotationBlock) const;
 
 			bool isLanguageFunction(const Token& token) const;
 

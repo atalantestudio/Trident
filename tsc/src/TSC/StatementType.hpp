@@ -3,8 +3,8 @@
 namespace ProjectA {
 	enum class StatementType : uint8 {
 		STRUCTURE,
-		STRUCTURE_MEMBER,
-		GLOBAL_SCOPE_CONSTANT,
+		MEMBER,
+		CONSTANT,
 
 		// NOTE: Used by constants, function parameters and local scope variables.
 		VARIABLE,

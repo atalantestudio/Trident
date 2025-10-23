@@ -52,10 +52,10 @@ namespace ProjectA {
 			bool parseNumberExpression();
 			bool parseGroupExpression();
 
-			bool parseAnnotationInstances();
+			bool parseAnnotationBlocks();
 
 			uint32 getLastStatementIndex() const;
-			uint32 getLastExpressionIndex() const;
+			uint32 getLastExpressionReferenceIndex() const;
 
 			Token read() const;
 			Token peek() const;

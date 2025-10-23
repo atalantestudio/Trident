@@ -50,9 +50,9 @@ namespace ProjectA {
 		} */
 	}
 
-	void SemanticAnalyzer::analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<StructureMemberStatement>& memberStatement) const {
-		analyzeAnnotationInstances(memberStatement->annotationInstanceIndexOffset, memberStatement->annotationInstanceCount);
-		analyzeTypeExpression(memberStatement->typeExpressionIndex);
+	void SemanticAnalyzer::analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& memberStatement) const {
+		analyzeAnnotationBlocks(memberStatement->annotationBlockIndexOffset, memberStatement->annotationBlockCount);
+		analyzeTypeExpression(memberStatement->typeExpressionReferenceIndex);
 
 		const Token& identifierToken = output->tokens[memberStatement->identifierTokenIndex];
 		const std::string identifierTokenString = getTokenString(identifierToken);
@@ -71,8 +71,9 @@ namespace ProjectA {
 			generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE>(*output, identifierToken);
 		}
 
-		const ref<TypeExpression> typeExpression = std::static_pointer_cast<TypeExpression>(output->ast.expressions[memberStatement->typeExpressionIndex]);
-		const Token& typeToken = output->tokens[typeExpression->typeTokenIndex];
+		const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(memberStatement->typeExpressionReferenceIndex);
+		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+		const Token& typeToken = output->tokens[typeExpression.typeTokenIndex];
 
 		const Token& structureIdentifierToken = output->tokens[structureStatement->identifierTokenIndex];
 
@@ -83,7 +84,7 @@ namespace ProjectA {
 		output->ast.userDefinedTypes.emplace_back(getTokenString(structureIdentifierToken));
 	}
 
-	void SemanticAnalyzer::analyzeGlobalScopeConstantStatement(const ref<GlobalScopeConstantStatement>& statement) const {
+	void SemanticAnalyzer::analyzeConstantStatement(const ref<ConstantStatement>& statement) const {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
 		if (!isScreamingSnakeCase(identifierToken.value, identifierToken.characterCount)) {
@@ -122,12 +123,13 @@ namespace ProjectA {
 	}
 
 	void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement>& statement) const {
-		analyzeTypeExpression(statement->typeExpressionIndex);
+		analyzeTypeExpression(statement->typeExpressionReferenceIndex);
 	}
 
-	void SemanticAnalyzer::analyzeTypeExpression(uint32 typeExpressionIndex) const {
-		const ref<TypeExpression> typeExpression = std::static_pointer_cast<TypeExpression>(output->ast.expressions[typeExpressionIndex]);
-		const Token& typeToken = output->tokens[typeExpression->typeTokenIndex];
+	void SemanticAnalyzer::analyzeTypeExpression(uint32 referenceIndex) const {
+		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
+		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(expressionReference.byteOffset);
+		const Token& typeToken = output->tokens[typeExpression.typeTokenIndex];
 
 		if (typeToken.type < TokenType::TYPE_FLOAT32) {
 			// TODO: Generate diagnostic for this case?
@@ -149,8 +151,8 @@ namespace ProjectA {
 				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, typeToken);
 			}
 
-			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
-				const Token& templateArgumentToken = output->tokens[typeExpression->templateArgumentTokenIndex];
+			if (typeExpression.templateArgumentTokenIndex != UNDEFINED_INDEX) {
+				const Token& templateArgumentToken = output->tokens[typeExpression.templateArgumentTokenIndex];
 
 				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, typeToken, templateArgumentToken);
 			}
@@ -159,8 +161,8 @@ namespace ProjectA {
 		}
 
 		if (typeToken.type <= TokenType::TYPE_UINT32 || typeToken.type >= TokenType::USER_DEFINED) {
-			if (typeExpression->templateArgumentTokenIndex != UNDEFINED_INDEX) {
-				const Token& templateArgumentToken = output->tokens[typeExpression->templateArgumentTokenIndex];
+			if (typeExpression.templateArgumentTokenIndex != UNDEFINED_INDEX) {
+				const Token& templateArgumentToken = output->tokens[typeExpression.templateArgumentTokenIndex];
 
 				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, typeToken, templateArgumentToken);
 			}
@@ -169,13 +171,13 @@ namespace ProjectA {
 		}
 
 		if (typeToken.type <= TokenType::TYPE_VEC4) {
-			if (typeExpression->templateArgumentTokenIndex == UNDEFINED_INDEX) {
+			if (typeExpression.templateArgumentTokenIndex == UNDEFINED_INDEX) {
 				generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT>(*output, typeToken);
 
 				return;
 			}
 
-			const Token& templateArgumentToken = output->tokens[typeExpression->templateArgumentTokenIndex];
+			const Token& templateArgumentToken = output->tokens[typeExpression.templateArgumentTokenIndex];
 
 			if (templateArgumentToken.type < TokenType::TYPE_FLOAT32 || templateArgumentToken.type > TokenType::TYPE_UINT32) {
 				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, typeToken, templateArgumentToken);
@@ -185,13 +187,13 @@ namespace ProjectA {
 		}
 
 		if (typeToken.type <= TokenType::TYPE_MAT4X4) {
-			if (typeExpression->templateArgumentTokenIndex == UNDEFINED_INDEX) {
+			if (typeExpression.templateArgumentTokenIndex == UNDEFINED_INDEX) {
 				generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT>(*output, typeToken);
 
 				return;
 			}
 
-			const Token& templateArgumentToken = output->tokens[typeExpression->templateArgumentTokenIndex];
+			const Token& templateArgumentToken = output->tokens[typeExpression.templateArgumentTokenIndex];
 
 			if (templateArgumentToken.type < TokenType::TYPE_FLOAT32 || templateArgumentToken.type > TokenType::TYPE_FLOAT64) {
 				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, typeToken, templateArgumentToken);
@@ -201,41 +203,41 @@ namespace ProjectA {
 		}
 	}
 
-	void SemanticAnalyzer::analyzeIdentifierExpression(const ref<IdentifierExpression>& expression) const {
-		const Token& identifierToken = output->tokens[expression->identifierTokenIndex];
+	void SemanticAnalyzer::analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression) const {
+		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
 
 		if (!output->isDefined(identifierToken) && !isLanguageFunction(identifierToken)) {
 			generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, identifierToken);
 		}
 	}
 
-	void SemanticAnalyzer::analyzeMemberAccessExpression(const ref<MemberAccessExpression>& expression) const {
+	void SemanticAnalyzer::analyzeMemberAccessExpression(const Expression<ExpressionType::MEMBER_ACCESS>& expression) const {
 		// The left expression has already been analyzed; only check the identifier.
 
-		const Token& identifierToken = output->tokens[expression->identifierTokenIndex];
+		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
 
 		if (!output->isDefined(identifierToken)) {
 			generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, identifierToken);
 		}
 	}
 
-	/* void SemanticAnalyzer::analyzeNumberExpression(const ref<NumberExpression> expression) {
+	/* void SemanticAnalyzer::analyzeNumberExpression(const ref<Expression<ExpressionType::NUMBER>> expression) {
 		// TODO: Check if the number is too large.
 		compilationOutput->registerSemanticToken(expression->numberTokenIndex, SemanticTokenType::NUMBER, 0);
 	}
 
-	void SemanticAnalyzer::analyzeIdentifierExpression(const ref<IdentifierExpression> expression) {
+	void SemanticAnalyzer::analyzeIdentifierExpression(const ref<Expression<ExpressionType::IDENTIFIER>> expression) {
 		// TODO: Select correct semantic token type.
 		// compilationOutput->registerSemanticToken(expression->identifierTokenIndex, SemanticTokenType::VARIABLE);
 	}
 
-	void SemanticAnalyzer::analyzeUnaryExpression(const ref<UnaryExpression> expression) {
+	void SemanticAnalyzer::analyzeUnaryExpression(const ref<Expression<ExpressionType::UNARY>> expression) {
 		compilationOutput->registerSemanticToken(expression->operatorTokenIndex, SemanticTokenType::OPERATOR, 0);
 
 		analyzeExpression(expression->rightExpressionIndex);
 	}
 
-	void SemanticAnalyzer::analyzeBinaryExpression(const ref<BinaryExpression> expression) {
+	void SemanticAnalyzer::analyzeBinaryExpression(const ref<Expression<ExpressionType::BINARY>> expression) {
 		analyzeExpression(expression->leftExpressionIndex);
 
 		compilationOutput->registerSemanticToken(expression->operatorTokenIndex, SemanticTokenType::OPERATOR, 0);
@@ -243,16 +245,8 @@ namespace ProjectA {
 		analyzeExpression(expression->rightExpressionIndex);
 	}
 
-	void SemanticAnalyzer::analyzeGroupExpression(const ref<GroupExpression> expression) {
+	void SemanticAnalyzer::analyzeGroupExpression(const ref<Expression<ExpressionType::GROUP>> expression) {
 		analyzeExpression(expression->expressionIndex);
-	}
-
-	void SemanticAnalyzer::analyzeMemberAccessExpression(const ref<MemberAccessExpression> expression) {
-		// TODO
-	}
-
-	void SemanticAnalyzer::analyzeFunctionCallExpression(const ref<FunctionCallExpression> expression) {
-		// TODO
 	}
 
 	void SemanticAnalyzer::analyzeIdentifier(uint32 identifierTokenIndex) {
@@ -287,53 +281,53 @@ namespace ProjectA {
 		compilationOutput->registerSemanticToken(identifierTokenIndex, SemanticTokenType::VARIABLE, 0);
 	} */
 
-	void SemanticAnalyzer::analyzeAnnotationInstances(uint32 annotationInstanceIndexOffset, uint32 annotationInstanceCount) const {
+	void SemanticAnalyzer::analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const {
 		Annotation uniqueAnnotationFlag = static_cast<Annotation>(0);
 
-		for (uint32 annotationInstanceIndex = 0; annotationInstanceIndex < annotationInstanceCount; annotationInstanceIndex += 1) {
-			const AnnotationInstance& annotationInstance = output->ast.annotationInstances[annotationInstanceIndexOffset + annotationInstanceIndex];
+		for (uint32 annotationBlockIndex = 0; annotationBlockIndex < annotationBlockCount; annotationBlockIndex += 1) {
+			const AnnotationBlock& annotationBlock = output->ast.annotationBlocks[annotationBlockIndexOffset + annotationBlockIndex];
 
-			if (uniqueAnnotationFlag & annotationInstance.annotation) {
-				const Token& identifierToken = output->tokens[annotationInstance.identifierTokenIndex];
+			if (uniqueAnnotationFlag & annotationBlock.annotation) {
+				const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
 				generateDiagnostic<DiagnosticCode::DUPLICATE_ANNOTATION>(*output, identifierToken);
 
 				continue;
 			}
 
-			switch (annotationInstance.annotation) {
+			switch (annotationBlock.annotation) {
 				case Annotation::BINDING: {
-					analyzeBindingAnnotation(annotationInstance);
+					analyzeBindingAnnotation(annotationBlock);
 
 					break;
 				}
 				case Annotation::CONSTANT: {
-					analyzeConstantAnnotation(annotationInstance);
+					analyzeConstantAnnotation(annotationBlock);
 
 					break;
 				}
 				case Annotation::INSTANCE_INDEX: {
-					analyzeInstanceIndexAnnotation(annotationInstance);
+					analyzeInstanceIndexAnnotation(annotationBlock);
 
 					break;
 				}
 				case Annotation::LOCATION: {
-					analyzeLocationAnnotation(annotationInstance);
+					analyzeLocationAnnotation(annotationBlock);
 
 					break;
 				}
 				case Annotation::POSITION: {
-					analyzePositionAnnotation(annotationInstance);
+					analyzePositionAnnotation(annotationBlock);
 
 					break;
 				}
 				case Annotation::SET: {
-					analyzeSetAnnotation(annotationInstance);
+					analyzeSetAnnotation(annotationBlock);
 
 					break;
 				}
 				case Annotation::VERTEX_INDEX: {
-					analyzeVertexIndexAnnotation(annotationInstance);
+					analyzeVertexIndexAnnotation(annotationBlock);
 
 					break;
 				}
@@ -345,38 +339,38 @@ namespace ProjectA {
 				}
 			}
 
-			uniqueAnnotationFlag |= annotationInstance.annotation;
+			uniqueAnnotationFlag |= annotationBlock.annotation;
 		}
 
-			/* if (!annotationInstance.value.value.empty()) {
+			/* if (!annotationBlock.value.value.empty()) {
 				// ERROR: Annotation "annotation" doesn't require a value but was provided with one.
-				if (ANNOTATION_TYPE_VOID & annotationInstance.annotation) {
+				if (ANNOTATION_TYPE_VOID & annotationBlock.annotation) {
 					compilationOutput->generateDiagnostic(
 						DiagnosticSeverity::ERROR,
-						"Annotation \"" + getAnnotationString(annotationInstance.annotation) + "\" doesn't require a value but was provided with one.",
-						annotationInstance.value.start,
-						annotationInstance.value.getEnd()
+						"Annotation \"" + getAnnotationString(annotationBlock.annotation) + "\" doesn't require a value but was provided with one.",
+						annotationBlock.value.start,
+						annotationBlock.value.getEnd()
 					);
 				}
 
-				if (ANNOTATION_TYPE_UINT32 & annotationInstance.annotation && (annotationInstance.value.type < TokenType::LITERAL_FLOATING_POINT || annotationInstance.value.type > TokenType::LITERAL_INTEGER_BASE_16)) {
+				if (ANNOTATION_TYPE_UINT32 & annotationBlock.annotation && (annotationBlock.value.type < TokenType::LITERAL_FLOATING_POINT || annotationBlock.value.type > TokenType::LITERAL_INTEGER_BASE_16)) {
 					// ERROR: Annotation "annotation" requires a uint32 value but was not provided with an integer value.
 					compilationOutput->generateDiagnostic(
 						DiagnosticSeverity::ERROR,
-						"Annotation \"" + getAnnotationString(annotationInstance.annotation) + "\" requires a uint32 value but was not provided with an integer value.",
-						annotationInstance.value.start,
-						annotationInstance.value.getEnd()
+						"Annotation \"" + getAnnotationString(annotationBlock.annotation) + "\" requires a uint32 value but was not provided with an integer value.",
+						annotationBlock.value.start,
+						annotationBlock.value.getEnd()
 					);
 				}
 			}
 			else {
-				if (ANNOTATION_TYPE_UINT32 & annotationInstance.annotation) {
+				if (ANNOTATION_TYPE_UINT32 & annotationBlock.annotation) {
 					// ERROR: Annotation "annotation" requires a uint32 value but was not provided with one.
 					compilationOutput->generateDiagnostic(
 						DiagnosticSeverity::ERROR,
-						"Annotation \"" + getAnnotationString(annotationInstance.annotation) + "\" requires a uint32 value but was not provided with one.",
-						annotationInstance.identifier.start,
-						annotationInstance.identifier.getEnd()
+						"Annotation \"" + getAnnotationString(annotationBlock.annotation) + "\" requires a uint32 value but was not provided with one.",
+						annotationBlock.identifier.start,
+						annotationBlock.identifier.getEnd()
 					);
 				}
 			}
@@ -408,43 +402,43 @@ namespace ProjectA {
 		// return combinedAnnotationFlag;
 	}
 
-	void SemanticAnalyzer::analyzeBindingAnnotation(const AnnotationInstance& annotationInstance) const {
-		if (annotationInstance.valueTokenIndex == ~0) {
-			const Token& identifierToken = output->tokens[annotationInstance.identifierTokenIndex];
+	void SemanticAnalyzer::analyzeBindingAnnotation(const AnnotationBlock& annotationBlock) const {
+		if (annotationBlock.valueTokenIndex == ~0) {
+			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
 			generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, identifierToken);
 		}
 	}
 
-	void SemanticAnalyzer::analyzeConstantAnnotation(const AnnotationInstance& annotationInstance) const {
-		if (annotationInstance.valueTokenIndex == ~0) {
-			const Token& identifierToken = output->tokens[annotationInstance.identifierTokenIndex];
+	void SemanticAnalyzer::analyzeConstantAnnotation(const AnnotationBlock& annotationBlock) const {
+		if (annotationBlock.valueTokenIndex == ~0) {
+			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
 			generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, identifierToken);
 		}
 	}
 
-	void SemanticAnalyzer::analyzeInstanceIndexAnnotation(const AnnotationInstance& annotationInstance) const {}
+	void SemanticAnalyzer::analyzeInstanceIndexAnnotation(const AnnotationBlock& annotationBlock) const {}
 
-	void SemanticAnalyzer::analyzeLocationAnnotation(const AnnotationInstance& annotationInstance) const {
-		if (annotationInstance.valueTokenIndex == ~0) {
-			const Token& identifierToken = output->tokens[annotationInstance.identifierTokenIndex];
-
-			generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, identifierToken);
-		}
-	}
-
-	void SemanticAnalyzer::analyzePositionAnnotation(const AnnotationInstance& annotationInstance) const {}
-
-	void SemanticAnalyzer::analyzeSetAnnotation(const AnnotationInstance& annotationInstance) const {
-		if (annotationInstance.valueTokenIndex == ~0) {
-			const Token& identifierToken = output->tokens[annotationInstance.identifierTokenIndex];
+	void SemanticAnalyzer::analyzeLocationAnnotation(const AnnotationBlock& annotationBlock) const {
+		if (annotationBlock.valueTokenIndex == ~0) {
+			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
 			generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, identifierToken);
 		}
 	}
 
-	void SemanticAnalyzer::analyzeVertexIndexAnnotation(const AnnotationInstance& annotationInstance) const {}
+	void SemanticAnalyzer::analyzePositionAnnotation(const AnnotationBlock& annotationBlock) const {}
+
+	void SemanticAnalyzer::analyzeSetAnnotation(const AnnotationBlock& annotationBlock) const {
+		if (annotationBlock.valueTokenIndex == ~0) {
+			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
+
+			generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, identifierToken);
+		}
+	}
+
+	void SemanticAnalyzer::analyzeVertexIndexAnnotation(const AnnotationBlock& annotationBlock) const {}
 
 	bool SemanticAnalyzer::isLanguageFunction(const Token& token) const {
 		return token.type >= FIRST_FUNCTION_INDEX && token.type <= LAST_FUNCTION_INDEX;

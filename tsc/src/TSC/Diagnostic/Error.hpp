@@ -16,7 +16,7 @@ namespace ProjectA {
 			diagnostic.start = start;
 			diagnostic.end.lineIndex = start.lineIndex;
 			diagnostic.end.characterOffset = 1;
-			diagnostic.message = Logger::format("Unexpected character \"[]\".", character);
+			diagnostic.message = MODULE_FORMAT("Unexpected character \"[]\".", character);
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::UNEXPECTED_CHARACTER;
 
@@ -44,7 +44,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = includeStatement.start;
 			diagnostic.end = includeStatement.end;
-			diagnostic.message = Logger::format("Include file not found at \"[]\".", includeStatement.path);
+			diagnostic.message = MODULE_FORMAT("Include file not found at \"[]\".", includeStatement.path);
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::INCLUDE_FILE_NOT_FOUND;
 
@@ -58,12 +58,12 @@ namespace ProjectA {
 			DiagnosticReference diagnosticReference{};
 			diagnosticReference.start = definitionToken.start;
 			diagnosticReference.end = definitionToken.getEnd();
-			diagnosticReference.message = Logger::format("\"[]\" is defined here.", getTokenString(definitionToken));
+			diagnosticReference.message = MODULE_FORMAT("\"[]\" is defined here.", getTokenString(definitionToken));
 
 			Diagnostic diagnostic{};
 			diagnostic.start = redefinitionToken.start;
 			diagnostic.end = redefinitionToken.getEnd();
-			diagnostic.message = Logger::format("Redefinition of \"[]\".", getTokenString(redefinitionToken));
+			diagnostic.message = MODULE_FORMAT("Redefinition of \"[]\".", getTokenString(redefinitionToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::REDEFINITION;
 			diagnostic.references.emplace_back(diagnosticReference);
@@ -78,7 +78,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = typeToken.start;
 			diagnostic.end = typeToken.getEnd();
-			diagnostic.message = Logger::format("Missing template argument for type \"[]\".", getTokenString(typeToken));
+			diagnostic.message = MODULE_FORMAT("Missing template argument for type \"[]\".", getTokenString(typeToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::MISSING_TEMPLATE_ARGUMENT;
 
@@ -92,7 +92,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = templateArgumentToken.start;
 			diagnostic.end = templateArgumentToken.getEnd();
-			diagnostic.message = Logger::format("\"[]\" cannot be used as a template argument for type \"[]\".", getTokenString(templateArgumentToken), getTokenString(typeToken));
+			diagnostic.message = MODULE_FORMAT("\"[]\" cannot be used as a template argument for type \"[]\".", getTokenString(templateArgumentToken), getTokenString(typeToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
 
@@ -106,7 +106,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = typeToken.start;
 			diagnostic.end = typeToken.getEnd();
-			diagnostic.message = Logger::format("Undefined type \"[]\".", getTokenString(typeToken));
+			diagnostic.message = MODULE_FORMAT("Undefined type \"[]\".", getTokenString(typeToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::UNDEFINED_TYPE;
 
@@ -120,7 +120,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = typeToken.start;
 			diagnostic.end = typeToken.getEnd();
-			diagnostic.message = Logger::format("Incomplete type \"[]\".", getTokenString(typeToken));
+			diagnostic.message = MODULE_FORMAT("Incomplete type \"[]\".", getTokenString(typeToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::INCOMPLETE_TYPE;
 
@@ -134,7 +134,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = identifierToken.start;
 			diagnostic.end = identifierToken.getEnd();
-			diagnostic.message = Logger::format("Duplicate annotation \"[]\".", getTokenString(identifierToken));
+			diagnostic.message = MODULE_FORMAT("Duplicate annotation \"[]\".", getTokenString(identifierToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::DUPLICATE_ANNOTATION;
 
@@ -148,7 +148,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = identifierToken.getEnd();
 			diagnostic.end = identifierToken.getEnd();
-			diagnostic.message = Logger::format("Missing value for annotation \"[]\".", getTokenString(identifierToken));
+			diagnostic.message = MODULE_FORMAT("Missing value for annotation \"[]\".", getTokenString(identifierToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::MISSING_ANNOTATION_VALUE;
 
@@ -162,7 +162,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = identifierToken.start;
 			diagnostic.end = identifierToken.getEnd();
-			diagnostic.message = Logger::format("Undefined identifier \"[]\".", getTokenString(identifierToken));
+			diagnostic.message = MODULE_FORMAT("Undefined identifier \"[]\".", getTokenString(identifierToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::UNDEFINED_IDENTIFIER;
 
@@ -232,7 +232,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = identifierToken.start;
 			diagnostic.end = identifierToken.getEnd();
-			diagnostic.message = Logger::format("Function \"[]\" doesn't end with a return statement.", getTokenString(identifierToken));
+			diagnostic.message = MODULE_FORMAT("Function \"[]\" doesn't end with a return statement.", getTokenString(identifierToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::NO_RETURN;
 

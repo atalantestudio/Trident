@@ -132,7 +132,7 @@ namespace ProjectA {
 			case EXCLAMATION: return "!";
 			case TILDE: return "~";
 			default: {
-				ENGINE_ASSERT(false, "Invalid type.");
+				MODULE_ASSERT(false, "Invalid type.");
 
 				return "???";
 			}

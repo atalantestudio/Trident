@@ -31,44 +31,44 @@ namespace ProjectA {
 		std::vector<uint32> memberIdentifierTokenIndices;
 	};
 
-	struct StructureMemberStatement : public BaseStatement<StatementType::STRUCTURE_MEMBER> {
+	struct MemberStatement : public BaseStatement<StatementType::MEMBER> {
 		uint32 annotationFlag;
-		uint32 annotationInstanceIndexOffset;
-		uint32 annotationInstanceCount;
-		uint32 typeExpressionIndex;
+		uint32 annotationBlockIndexOffset;
+		uint32 annotationBlockCount;
+		uint32 typeExpressionReferenceIndex;
 		uint32 identifierTokenIndex;
 	};
 
-	struct GlobalScopeConstantStatement : public BaseStatement<StatementType::GLOBAL_SCOPE_CONSTANT> {
+	struct ConstantStatement : public BaseStatement<StatementType::CONSTANT> {
 		uint32 annotationFlag;
-		uint32 annotationInstanceIndexOffset;
-		uint32 annotationInstanceCount;
-		uint32 typeExpressionIndex;
+		uint32 annotationBlockIndexOffset;
+		uint32 annotationBlockCount;
+		uint32 typeExpressionReferenceIndex;
 		uint32 identifierTokenIndex;
-		uint32 initializerExpressionIndex;
+		uint32 initializerExpressionReferenceIndex;
 	};
 
 	struct VariableStatement : public BaseStatement<StatementType::VARIABLE> {
-		uint32 typeExpressionIndex;
+		uint32 typeExpressionReferenceIndex;
 		uint32 identifierTokenIndex;
 		bool constant = false;
-		uint32 initializerExpressionIndex = ~0;
+		uint32 initializerExpressionReferenceIndex = ~0;
 	};
 
 	struct ParameterStatement : public BaseStatement<StatementType::PARAMETER> {
-		uint32 typeExpressionIndex;
+		uint32 typeExpressionReferenceIndex;
 		uint32 identifierTokenIndex;
 	};
 
 	struct FunctionStatement : public BaseStatement<StatementType::FUNCTION> {
-		uint32 returnTypeExpressionIndex;
+		uint32 returnTypeExpressionReferenceIndex;
 		uint32 identifierTokenIndex;
 		std::vector<uint32> parameterStatementIndices;
 		uint32 scopeStatementIndex;
 	};
 
 	struct ExpressionStatement : public BaseStatement<StatementType::EXPRESSION> {
-		uint32 expressionIndex;
+		uint32 expressionReferenceIndex;
 	};
 
 	struct ScopeStatement : public BaseStatement<StatementType::SCOPE> {
@@ -76,12 +76,12 @@ namespace ProjectA {
 	};
 
 	struct IfStatement : public BaseStatement<StatementType::IF> {
-		uint32 conditionExpressionIndex;
+		uint32 conditionExpressionReferenceIndex;
 		uint32 scopeStatementIndex;
 	};
 
 	struct WhileStatement : public BaseStatement<StatementType::WHILE> {
-		uint32 conditionExpressionIndex;
+		uint32 conditionExpressionReferenceIndex;
 		uint32 scopeStatementIndex;
 	};
 
@@ -90,6 +90,6 @@ namespace ProjectA {
 	struct NextStatement : public BaseStatement<StatementType::NEXT> {};
 
 	struct ReturnStatement : public BaseStatement<StatementType::RETURN> {
-		uint32 expressionIndex;
+		uint32 expressionReferenceIndex;
 	};
 }

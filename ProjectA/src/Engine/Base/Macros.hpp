@@ -25,6 +25,9 @@
 		} \
 	}
 
+	// TODO: Create a dedicated module logger instance.
+	#define MODULE_ASSERT ENGINE_ASSERT
+
 	#define CLIENT_ASSERT(condition, ...) { \
 		if (!(condition)) { \
 			CLIENT_ERROR(__VA_ARGS__); \

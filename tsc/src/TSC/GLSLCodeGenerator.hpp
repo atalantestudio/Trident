@@ -1,41 +1,44 @@
 #pragma once
 
 #include "TSC/CompilationOutput.hpp"
+#include "TSC/Token.hpp"
+#include "TSC/TokenType.hpp"
 
 namespace ProjectA {
 	class GLSLCodeGenerator {
 		public:
-			void write(const char8* path, const CompilationOutput* _output);
+			void write(std::ofstream& stream, const CompilationOutput& output);
 
 		private:
-			void writeStatement(uint32 statementIndex);
-			void writeGlobalScopeConstant(uint32 statementIndex);
-			void writeStructureStatement(uint32 statementIndex);
-			void writeMemberStatement(uint32 statementIndex);
-			void writeFunctionStatement(uint32 statementIndex);
-			void writeVariableStatement(uint32 statementIndex);
-			void writeParameterStatement(uint32 statementIndex);
-			void writeScopeStatement(uint32 statementIndex);
-			void writeIfStatement(uint32 statementIndex);
-			void writeWhileStatement(uint32 statementIndex);
-			void writeBreakStatement();
-			void writeNextStatement();
-			void writeReturnStatement(uint32 statementIndex);
-			void writeExpressionStatement(uint32 statementIndex);
+			void writeStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeStructureStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeMemberStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeConstantStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeVariableStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeParameterStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeFunctionStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeExpressionStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeScopeStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeIfStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeWhileStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeBreakStatement(std::ofstream& stream) const;
+			void writeNextStatement(std::ofstream& stream) const;
+			void writeReturnStatement(std::ofstream& stream, uint32 statementIndex);
 
-			void writeExpression(uint32 expressionIndex);
-			void writeNumberExpression(uint32 expressionIndex);
-			void writeIdentifierExpression(uint32 expressionIndex);
-			void writeUnaryExpression(uint32 expressionIndex);
-			void writeBinaryExpression(uint32 expressionIndex);
-			void writeMemberAccessExpression(uint32 expressionIndex);
-			void writeTypeExpression(uint32 expressionIndex);
+			void writeExpression(std::ofstream& stream, uint32 referenceIndex);
+			void writeNumberExpression(std::ofstream& stream, uint32 byteOffset) const;
+			void writeIdentifierExpression(std::ofstream& stream, uint32 byteOffset) const;
+			void writeUnaryExpression(std::ofstream& stream, uint32 byteOffset);
+			void writeBinaryExpression(std::ofstream& stream, uint32 byteOffset);
+			void writeGroupExpression(std::ofstream& stream, uint32 byteOffset);
+			void writeMemberAccessExpression(std::ofstream& stream, uint32 byteOffset);
+			void writeFunctionCallExpression(std::ofstream& stream, uint32 byteOffset);
+			void writeTypeExpression(std::ofstream& stream, uint32 byteOffset) const;
 
-			void writeAnnotations(uint32 annotationInstanceIndexOffset, uint32 annotationInstanceCount);
+			void writeAnnotationBlocks(std::ofstream& stream, uint32 indexOffset, uint32 count);
 
-			std::string indent() const {
-				return std::string(_indent, '\t');
-			}
+			void indent();
+			void unindent();
 
 			std::string getGlslTemplateArgumentPrefix(const Token& templateArgumentToken) const {
 				switch (templateArgumentToken.type) {
@@ -48,7 +51,7 @@ namespace ProjectA {
 					case TokenType::TYPE_UINT32:
 						return "u";
 					default: {
-						ENGINE_ASSERT(false, "Invalid type.");
+						MODULE_ASSERT(false, "Invalid type.");
 
 						return "";
 					}
@@ -90,7 +93,7 @@ namespace ProjectA {
 						return getGlslTemplateArgumentPrefix(templateArgumentToken) + typeString;
 					}
 					default: {
-						ENGINE_ASSERT(typeToken.type >= TokenType::USER_DEFINED, "Invalid type.");
+						MODULE_ASSERT(typeToken.type >= TokenType::USER_DEFINED, "Invalid type.");
 
 						return output->identifiers[typeToken.type - TokenType::USER_DEFINED];
 					}
@@ -98,8 +101,9 @@ namespace ProjectA {
 			}
 
 		private:
-			std::ofstream stream;
-			uint32 _indent = 0;
 			const CompilationOutput* output;
+
+			uint32 indentationLevel;
+			std::string indentation;
 	};
 }

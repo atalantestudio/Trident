@@ -17,6 +17,9 @@
 	#define CLIENT_WARN(...) ::ProjectA::Logger::clientLogger.warn(__VA_ARGS__)
 	#define CLIENT_ERROR(...) ::ProjectA::Logger::clientLogger.error(__VA_ARGS__)
 	#define CLIENT_FATAL(...) ::ProjectA::Logger::clientLogger.fatal(__VA_ARGS__)
+
+	// TODO: Create dedicated module logger instance.
+	#define MODULE_FORMAT(...) ::ProjectA::Logger::engineLogger.format(__VA_ARGS__)
 #else
 	#define ENGINE_TRACE(...)
 	#define ENGINE_TRACE_PREFORMATTED(...)
@@ -32,4 +35,6 @@
 	#define CLIENT_WARN(...)
 	#define CLIENT_ERROR(...)
 	#define CLIENT_FATAL(...)
+
+	#define MODULE_FORMAT(...)
 #endif

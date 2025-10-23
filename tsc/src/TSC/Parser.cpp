@@ -21,9 +21,9 @@ namespace ProjectA {
 		} \
 		\
 		while (condition) { \
-			ref<BinaryExpression> expression = createRef<BinaryExpression>(); \
-			expression->leftExpressionIndex = getLastExpressionIndex(); \
-			expression->operatorTokenIndex = tokenIndex; \
+			Expression<ExpressionType::BINARY> expression{}; \
+			expression.leftExpressionReferenceIndex = getLastExpressionReferenceIndex(); \
+			expression.operatorTokenIndex = tokenIndex; \
 			\
 			output->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR, 0); \
 			\
@@ -33,9 +33,9 @@ namespace ProjectA {
 				return false; \
 			} \
 			\
-			expression->rightExpressionIndex = getLastExpressionIndex(); \
+			expression.rightExpressionReferenceIndex = getLastExpressionReferenceIndex(); \
 			\
-			output->ast.expressions.emplace_back(expression); \
+			output->ast.addExpression(expression); \
 		} \
 		\
 		return true;
@@ -72,7 +72,7 @@ namespace ProjectA {
 		}
 
 		if (read().type == TokenType::LEFT_SQUARE_BRACKET) {
-			if (!parseAnnotationInstances()) {
+			if (!parseAnnotationBlocks()) {
 				return false;
 			}
 		}
@@ -102,7 +102,7 @@ namespace ProjectA {
 
 		while (read().type != TokenType::RIGHT_CURLY_BRACE && read().type != TokenType::END_OF_FILE) {
 			if (read().type == TokenType::LEFT_SQUARE_BRACKET) {
-				if (!parseAnnotationInstances()) {
+				if (!parseAnnotationBlocks()) {
 					return false;
 				}
 			}
@@ -134,19 +134,19 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseMemberStatement() {
-		ref<StructureMemberStatement> statement = createRef<StructureMemberStatement>();
+		ref<MemberStatement> statement = createRef<MemberStatement>();
 		statement->annotationFlag = annotationFlag;
-		statement->annotationInstanceIndexOffset = currentAnnotationCount;
-		statement->annotationInstanceCount = static_cast<uint32>(output->ast.annotationInstances.size()) - currentAnnotationCount;
+		statement->annotationBlockIndexOffset = currentAnnotationCount;
+		statement->annotationBlockCount = static_cast<uint32>(output->ast.annotationBlocks.size()) - currentAnnotationCount;
 
-		currentAnnotationCount += statement->annotationInstanceCount;
+		currentAnnotationCount += statement->annotationBlockCount;
 		annotationFlag = 0;
 
 		if (!parseTypeExpression()) {
 			return false;
 		}
 
-		statement->typeExpressionIndex = getLastExpressionIndex();
+		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		EXPECT(read().type >= TokenType::USER_DEFINED, "[MEMBER] Expected an identifier but got " + getTokenString(read()) + ".");
 
@@ -171,12 +171,12 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseConstantOrFunctionStatement() {
-		ref<GlobalScopeConstantStatement> statement = createRef<GlobalScopeConstantStatement>();
+		ref<ConstantStatement> statement = createRef<ConstantStatement>();
 		statement->annotationFlag = annotationFlag;
-		statement->annotationInstanceIndexOffset = currentAnnotationCount;
-		statement->annotationInstanceCount = static_cast<uint32>(output->ast.annotationInstances.size()) - currentAnnotationCount;
+		statement->annotationBlockIndexOffset = currentAnnotationCount;
+		statement->annotationBlockCount = static_cast<uint32>(output->ast.annotationBlocks.size()) - currentAnnotationCount;
 
-		currentAnnotationCount += statement->annotationInstanceCount;
+		currentAnnotationCount += statement->annotationBlockCount;
 		annotationFlag = 0;
 
 		if (!parseTypeExpression()) {
@@ -187,7 +187,7 @@ namespace ProjectA {
 			return parseFunctionStatement();
 		}
 
-		statement->typeExpressionIndex = getLastExpressionIndex();
+		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		EXPECT(read().type >= TokenType::USER_DEFINED, "[CONSTANT] Expected an identifier but got " + getTokenString(read()) + ".");
 
@@ -210,11 +210,11 @@ namespace ProjectA {
 			return false;
 		}
 
-		statement->initializerExpressionIndex = getLastExpressionIndex();
+		statement->initializerExpressionReferenceIndex = getLastExpressionReferenceIndex();
 		output->ast.statements.emplace_back(statement);
 		output->ast.globalScopeStatementIndices.emplace_back(getLastStatementIndex());
 
-		analyzer.analyzeGlobalScopeConstantStatement(statement);
+		analyzer.analyzeConstantStatement(statement);
 
 		EXPECT(read().type == TokenType::END_OF_FILE || read().type == TokenType::END_OF_LINE, "[CONSTANT] Expected EOL but got " + getTokenString(read()) + ".");
 
@@ -227,7 +227,7 @@ namespace ProjectA {
 		// TODO: A function return type cannot be annotated.
 
 		ref<FunctionStatement> statement = createRef<FunctionStatement>();
-		statement->returnTypeExpressionIndex = getLastExpressionIndex();
+		statement->returnTypeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		EXPECT(read().type >= TokenType::USER_DEFINED, "[FUNCTION] Expected a UDI but got " + getTokenString(read()) + ".");
 
@@ -285,7 +285,7 @@ namespace ProjectA {
 		}
 
 		ref<ParameterStatement> statement = createRef<ParameterStatement>();
-		statement->typeExpressionIndex = getLastExpressionIndex();
+		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		EXPECT(read().type >= TokenType::USER_DEFINED, "[PARAMETER] Expected an identifier but got " + getTokenString(read()) + ".");
 
@@ -302,7 +302,7 @@ namespace ProjectA {
 
 	bool Parser::parseLocalScopeStatement() {
 		if (read().type == TokenType::LEFT_SQUARE_BRACKET) {
-			if (!parseAnnotationInstances()) {
+			if (!parseAnnotationBlocks()) {
 				return false;
 			}
 		}
@@ -370,7 +370,7 @@ namespace ProjectA {
 		}
 
 		ref<ExpressionStatement> statement = createRef<ExpressionStatement>();
-		statement->expressionIndex = getLastExpressionIndex();
+		statement->expressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		output->ast.statements.emplace_back(statement);
 
@@ -384,7 +384,7 @@ namespace ProjectA {
 
 		ref<IfStatement> statement = createRef<IfStatement>();
 
-		if (!parseIfOrWhileStatementEnd(statement->conditionExpressionIndex, statement->scopeStatementIndex)) {
+		if (!parseIfOrWhileStatementEnd(statement->conditionExpressionReferenceIndex, statement->scopeStatementIndex)) {
 			return false;
 		}
 
@@ -400,7 +400,7 @@ namespace ProjectA {
 
 		ref<WhileStatement> statement = createRef<WhileStatement>();
 
-		if (!parseIfOrWhileStatementEnd(statement->conditionExpressionIndex, statement->scopeStatementIndex)) {
+		if (!parseIfOrWhileStatementEnd(statement->conditionExpressionReferenceIndex, statement->scopeStatementIndex)) {
 			return false;
 		}
 
@@ -440,13 +440,13 @@ namespace ProjectA {
 		return true;
 	}
 
-	bool Parser::parseIfOrWhileStatementEnd(uint32& conditionExpressionIndex, uint32& scopeStatementIndex) {
+	bool Parser::parseIfOrWhileStatementEnd(uint32& conditionExpressionReferenceIndex, uint32& scopeStatementIndex) {
 		// NOTE: Parse logical OR or higher precedence expression.
 		if (!parseLogicalOrExpression()) {
 			return false;
 		}
 
-		conditionExpressionIndex = getLastExpressionIndex();
+		conditionExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		EXPECT(read().type == TokenType::LEFT_CURLY_BRACE, "[IF/WHILE] Expected '{' but got " + getTokenString(read()) + ".");
 
@@ -469,7 +469,7 @@ namespace ProjectA {
 			return false;
 		}
 
-		statement->expressionIndex = getLastExpressionIndex();
+		statement->expressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		output->ast.statements.emplace_back(statement);
 
@@ -482,7 +482,7 @@ namespace ProjectA {
 		}
 
 		ref<VariableStatement> statement = createRef<VariableStatement>();
-		statement->typeExpressionIndex = getLastExpressionIndex();
+		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		EXPECT(read().type >= TokenType::USER_DEFINED, "[VARIABLE] Expected a UDI but got " + getTokenString(read()) + ".");
 
@@ -516,7 +516,7 @@ namespace ProjectA {
 				return false;
 			}
 
-			statement->initializerExpressionIndex = getLastExpressionIndex();
+			statement->initializerExpressionReferenceIndex = getLastExpressionReferenceIndex();
 		}
 
 		output->ast.statements.emplace_back(statement);
@@ -532,8 +532,8 @@ namespace ProjectA {
 			"[TYPE] Expected a language or user-defined type but got " + getTokenString(read()) + "."
 		);
 
-		ref<TypeExpression> expression = createRef<TypeExpression>();
-		expression->typeTokenIndex = tokenIndex;
+		Expression<ExpressionType::TYPE> expression{};
+		expression.typeTokenIndex = tokenIndex;
 
 		if (read().type >= TokenType::USER_DEFINED) {
 			registerVariableSemanticToken(read(), true);
@@ -545,7 +545,7 @@ namespace ProjectA {
 
 			EXPECT((read().type >= FIRST_TYPE_INDEX && read().type <= LAST_TYPE_INDEX) || read().type >= TokenType::USER_DEFINED, "[TYPE] Expected a valid template argument but got " + getTokenString(read()) + ".");
 
-			expression->templateArgumentTokenIndex = tokenIndex;
+			expression.templateArgumentTokenIndex = tokenIndex;
 
 			if (read().type >= TokenType::USER_DEFINED) {
 				registerVariableSemanticToken(read(), true);
@@ -558,22 +558,22 @@ namespace ProjectA {
 
 		jump();
 
-		output->ast.expressions.emplace_back(expression);
+		output->ast.addExpression(expression);
 
 		return true;
 	}
 
 	bool Parser::parseAssignmentOrCompoundExpression() {
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[ASSIGNMENT] Expected an user-defined identifier but got " + getTokenString(read()) + ".");
+		EXPECT(read().type >= TokenType::USER_DEFINED, "[ASSIGNMENT] Expected a user-defined identifier but got " + getTokenString(read()) + ".");
 
 		if (!parseIdentifierExpression()) {
 			return false;
 		}
 
 		if (read().type >= TokenType::EQUAL && read().type <= TokenType::VERTICAL_BAR_EQUAL) {
-			ref<BinaryExpression> expression = createRef<BinaryExpression>();
-			expression->leftExpressionIndex = getLastExpressionIndex();
-			expression->operatorTokenIndex = tokenIndex;
+			Expression<ExpressionType::BINARY> expression{};
+			expression.leftExpressionReferenceIndex = getLastExpressionReferenceIndex();
+			expression.operatorTokenIndex = tokenIndex;
 
 			output->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR, 0);
 
@@ -583,9 +583,9 @@ namespace ProjectA {
 				return false;
 			}
 
-			expression->rightExpressionIndex = getLastExpressionIndex();
+			expression.rightExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-			output->ast.expressions.emplace_back(expression);
+			output->ast.addExpression(expression);
 		}
 
 		return true;
@@ -637,8 +637,8 @@ namespace ProjectA {
 
 	bool Parser::parseUnaryExpression() {
 		if (read().type >= TokenType::PLUS && read().type <= TokenType::TILDE) {
-			ref<UnaryExpression> expression = createRef<UnaryExpression>();
-			expression->operatorTokenIndex = tokenIndex;
+			Expression<ExpressionType::UNARY> expression{};
+			expression.operatorTokenIndex = tokenIndex;
 
 			output->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR, 0);
 
@@ -648,9 +648,9 @@ namespace ProjectA {
 				return false;
 			}
 
-			expression->rightExpressionIndex = getLastExpressionIndex();
+			expression.rightExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-			output->ast.expressions.emplace_back(expression);
+			output->ast.addExpression(expression);
 
 			return true;
 		}
@@ -699,8 +699,8 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseIdentifierExpression() {
-		ref<IdentifierExpression> expression = createRef<IdentifierExpression>();
-		expression->identifierTokenIndex = tokenIndex;
+		Expression<ExpressionType::IDENTIFIER> expression{};
+		expression.identifierTokenIndex = tokenIndex;
 
 		if (isScreamingSnakeCase(read().value, read().characterCount)) {
 			output->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
@@ -708,7 +708,7 @@ namespace ProjectA {
 
 		jump();
 
-		output->ast.expressions.emplace_back(expression);
+		output->ast.addExpression(expression);
 
 		analyzer.analyzeIdentifierExpression(expression);
 
@@ -722,16 +722,16 @@ namespace ProjectA {
 	bool Parser::parseMemberAccessExpression() {
 		jump();
 
-		ref<MemberAccessExpression> expression = createRef<MemberAccessExpression>();
-		expression->leftExpressionIndex = getLastExpressionIndex();
+		Expression<ExpressionType::MEMBER_ACCESS> expression{};
+		expression.leftExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		EXPECT(read().type >= TokenType::USER_DEFINED, "[MEMBER_ACCESS] Expected an identifier but got " + getTokenString(read()) + ".");
 
-		expression->identifierTokenIndex = tokenIndex;
+		expression.identifierTokenIndex = tokenIndex;
 
 		jump();
 
-		output->ast.expressions.emplace_back(expression);
+		output->ast.addExpression(expression);
 
 		if (read().type == TokenType::DOT) {
 			return parseMemberAccessExpression();
@@ -741,16 +741,15 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseFunctionCallOrGroupExpression() {
-		ref<FunctionCallExpression> expression = createRef<FunctionCallExpression>();
+		const uint32 lastExpressionReferenceIndex = getLastExpressionReferenceIndex();
+		const ExpressionReference& lastExpressionReference = output->ast.getExpressionReference(lastExpressionReferenceIndex);
 
-		const uint32 lastExpressionIndex = getLastExpressionIndex();
-		const ref<Expression> lastExpression = output->ast.expressions[lastExpressionIndex];
-
-		if (lastExpression->type != ExpressionType::TYPE && lastExpression->type != ExpressionType::IDENTIFIER) {
+		if (lastExpressionReference.type != ExpressionType::TYPE && lastExpressionReference.type != ExpressionType::IDENTIFIER) {
 			return parseGroupExpression();
 		}
 
-		expression->calleeExpressionIndex = lastExpressionIndex;
+		Expression<ExpressionType::FUNCTION_CALL> expression{};
+		expression.calleeExpressionReferenceIndex = lastExpressionReferenceIndex;
 
 		jump();
 
@@ -760,7 +759,7 @@ namespace ProjectA {
 				return false;
 			}
 
-			expression->argumentExpressionIndices.emplace_back(getLastExpressionIndex());
+			expression.argumentExpressionReferenceIndices.emplace_back(getLastExpressionReferenceIndex());
 
 			if (read().type == TokenType::RIGHT_PARENTHESIS) {
 				break;
@@ -775,7 +774,7 @@ namespace ProjectA {
 
 		jump();
 
-		output->ast.expressions.emplace_back(expression);
+		output->ast.addExpression(expression);
 
 		if (read().type == TokenType::DOT) {
 			return parseMemberAccessExpression();
@@ -792,60 +791,60 @@ namespace ProjectA {
 			return false;
 		}
 
-		ref<GroupExpression> expression = createRef<GroupExpression>();
-		expression->expressionIndex = getLastExpressionIndex();
+		Expression<ExpressionType::GROUP> expression{};
+		expression.expressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[GROUP] Expected ')' but got " + getTokenString(read()) + ".");
 
 		jump();
 
-		output->ast.expressions.emplace_back(expression);
+		output->ast.addExpression(expression);
 
 		return true;
 	}
 
 	bool Parser::parseNumberExpression() {
-		ref<NumberExpression> expression = createRef<NumberExpression>();
-		expression->numberTokenIndex = tokenIndex;
+		Expression<ExpressionType::NUMBER> expression{};
+		expression.numberTokenIndex = tokenIndex;
 
 		jump();
 
-		output->ast.expressions.emplace_back(expression);
+		output->ast.addExpression(expression);
 
 		return true;
 	}
 
-	bool Parser::parseAnnotationInstances() {
+	bool Parser::parseAnnotationBlocks() {
 		while (read().type == TokenType::LEFT_SQUARE_BRACKET) {
 			jump();
 
 			// Annotations are considered user-defined identifiers because they can be used to name variables.
 			EXPECT(read().type >= TokenType::USER_DEFINED, "[ANNOTATION_INSTANCE] Expected an annotation but got " + getTokenString(read()) + ".");
 
-			AnnotationInstance annotationInstance{};
+			AnnotationBlock annotationBlock{};
 
 			for (uint32 annotationIndex = 0; annotationIndex < ANNOTATION_COUNT; annotationIndex += 1) {
 				const char8* annotation = ANNOTATION_STRINGS[annotationIndex];
 
 				if (getTokenString(read()) == annotation) {
 					annotationFlag |= BIT(annotationIndex);
-					annotationInstance.annotation = static_cast<Annotation>(BIT(annotationIndex));
+					annotationBlock.annotation = static_cast<Annotation>(BIT(annotationIndex));
 
 					break;
 				}
 			}
 
-			EXPECT(annotationInstance.annotation != static_cast<Annotation>(0), "[ANNOTATION_INSTANCE] Unknown annotation " + getTokenString(read()) + ".");
+			EXPECT(annotationBlock.annotation != static_cast<Annotation>(0), "[ANNOTATION_INSTANCE] Unknown annotation " + getTokenString(read()) + ".");
 
-			annotationInstance.identifierTokenIndex = tokenIndex;
+			annotationBlock.identifierTokenIndex = tokenIndex;
 
 			output->registerSemanticToken(tokenIndex, SemanticTokenType::ANNOTATION, 0);
 
 			jump();
 
-			if (!(ANNOTATION_TYPE_VOID & annotationInstance.annotation)) {
+			if (!(ANNOTATION_TYPE_VOID & annotationBlock.annotation)) {
 				if (read().type < TokenType::LITERAL_FLOATING_POINT || read().type > TokenType::LITERAL_INTEGER_BASE_16) {
-					const Token& identifierToken = output->tokens[annotationInstance.identifierTokenIndex];
+					const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
 					// TODO
 					/* output->generateDiagnostic(
@@ -856,7 +855,7 @@ namespace ProjectA {
 					); */
 				}
 				else {
-					annotationInstance.valueTokenIndex = tokenIndex;
+					annotationBlock.valueTokenIndex = tokenIndex;
 
 					output->registerSemanticToken(tokenIndex, SemanticTokenType::NUMBER, 0);
 
@@ -868,7 +867,7 @@ namespace ProjectA {
 
 			jump();
 
-			output->ast.annotationInstances.emplace_back(annotationInstance);
+			output->ast.annotationBlocks.emplace_back(annotationBlock);
 
 			skipEmptyLines();
 		}
@@ -877,19 +876,15 @@ namespace ProjectA {
 	}
 
 	uint32 Parser::getLastStatementIndex() const {
-		if (output->ast.statements.empty()) {
-			return ~0;
-		}
+		DEBUG_ASSERT(!output->ast.statements.empty());
 
 		return static_cast<uint32>(output->ast.statements.size()) - 1;
 	}
 
-	uint32 Parser::getLastExpressionIndex() const {
-		if (output->ast.expressions.empty()) {
-			return ~0;
-		}
+	uint32 Parser::getLastExpressionReferenceIndex() const {
+		DEBUG_ASSERT(!output->ast.expressionReferences.empty());
 
-		return static_cast<uint32>(output->ast.expressions.size()) - 1;
+		return static_cast<uint32>(output->ast.expressionReferences.size()) - 1;
 	}
 
 	Token Parser::read() const {
