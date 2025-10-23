@@ -15,6 +15,7 @@ namespace ProjectA {
 			void analyzeStructureStatement(const ref<StructureStatement>& statement) const;
 			void analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<StructureMemberStatement>& memberStatement) const;
 			void analyzeGlobalScopeConstantStatement(const ref<GlobalScopeConstantStatement>& statement) const;
+			void analyzeFunctionStatement(uint32 statementIndex) const;
 			// void analyze(CompilationOutput& compilationOutput, const AST& ast);
 
 			void analyzeIdentifierExpression(const ref<IdentifierExpression>& expression) const;

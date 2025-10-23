@@ -4,6 +4,7 @@
 	#include "pch.hpp"
 #endif
 
+#include "Diagnostic/Error.hpp"
 #include "Lexer.hpp"
 #include "Token.hpp"
 

@@ -235,11 +235,7 @@ namespace ProjectA {
 
 		statement->identifierTokenIndex = tokenIndex;
 
-		// TODO: Only define if the identifier is valid (case, etc.).
-		output->define(tokenIndex);
-
-		output->registerCompletionItem(tokenIndex, CompletionItemKind::FUNCTION);
-		output->registerSemanticToken(tokenIndex, SemanticTokenType::FUNCTION, 0);
+		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::FUNCTION, 0);
 
 		jump();
 		jump();
@@ -268,14 +264,19 @@ namespace ProjectA {
 
 		EXPECT(read().type == TokenType::LEFT_CURLY_BRACE, "[FUNCTION] Expected '{' but got " + getTokenString(read()) + ".");
 
+		statement->scopeStatementIndex = getLastStatementIndex() + 1;
+
 		if (!parseScopeStatement()) {
 			return false;
 		}
 
-		statement->scopeStatementIndex = getLastStatementIndex();
-
 		output->ast.statements.emplace_back(statement);
 		output->ast.globalScopeStatementIndices.emplace_back(getLastStatementIndex());
+
+		analyzer.analyzeFunctionStatement(getLastStatementIndex());
+
+		// TODO: Correct highlighting.
+		output->registerCompletionItem(statement->identifierTokenIndex, CompletionItemKind::FUNCTION);
 
 		return true;
 	}
@@ -415,6 +416,8 @@ namespace ProjectA {
 	bool Parser::parseScopeStatement() {
 		ref<ScopeStatement> statement = createRef<ScopeStatement>();
 
+		output->ast.statements.emplace_back(statement);
+
 		jump();
 		skipEmptyLines();
 
@@ -436,8 +439,6 @@ namespace ProjectA {
 
 		output->closeDefinitionStack();
 
-		output->ast.statements.emplace_back(statement);
-
 		return true;
 	}
 
@@ -451,11 +452,11 @@ namespace ProjectA {
 
 		EXPECT(read().type == TokenType::LEFT_CURLY_BRACE, "[IF/WHILE] Expected '{' but got " + getTokenString(read()) + ".");
 
+		scopeStatementIndex = getLastStatementIndex() + 1;
+
 		if (!parseScopeStatement()) {
 			return false;
 		}
-
-		scopeStatementIndex = getLastStatementIndex();
 
 		return true;
 	}

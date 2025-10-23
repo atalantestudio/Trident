@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DocumentPosition.hpp"
+#include "../DocumentPosition.hpp"
 
 namespace ProjectA {
 	struct DiagnosticReference {

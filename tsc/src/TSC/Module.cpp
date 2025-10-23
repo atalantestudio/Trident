@@ -1,8 +1,8 @@
 #include "Base/Base.hpp"
 
 #include "CompilationOutput.hpp"
-#include "Diagnostic.hpp"
-#include "DiagnosticReference.hpp"
+#include "Diagnostic/Diagnostic.hpp"
+#include "Diagnostic/DiagnosticReference.hpp"
 #include "DocumentPosition.hpp"
 #include "Lexer.hpp"
 #include "Parser.hpp"

@@ -2,10 +2,10 @@
 
 #include "Engine/Filesystem/Filesystem.hpp"
 
-#include "CompilationOutput.hpp"
-#include "GLSLCodeGenerator.hpp"
-#include "Lexer.hpp"
-#include "Parser.hpp"
+#include "TSC/CompilationOutput.hpp"
+#include "TSC/GLSLCodeGenerator.hpp"
+#include "TSC/Lexer.hpp"
+#include "TSC/Parser.hpp"
 
 namespace ProjectA {
 	std::string getIndent(uint32 indent) {

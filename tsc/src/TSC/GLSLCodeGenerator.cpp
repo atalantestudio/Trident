@@ -1,6 +1,6 @@
 #include "pch.hpp"
 
-#include "GLSLCodeGenerator.hpp"
+#include "TSC/GLSLCodeGenerator.hpp"
 
 namespace ProjectA {
 	void GLSLCodeGenerator::write(const char8* path, const CompilationOutput* _output) {

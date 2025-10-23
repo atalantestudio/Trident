@@ -5,6 +5,8 @@
 #endif
 
 #include "Case.hpp"
+#include "Diagnostic/Error.hpp"
+#include "Diagnostic/Warning.hpp"
 #include "SemanticAnalyzer.hpp"
 
 namespace ProjectA {
@@ -91,6 +93,32 @@ namespace ProjectA {
 		}
 
 		output->define(statement->identifierTokenIndex);
+	}
+
+	void SemanticAnalyzer::analyzeFunctionStatement(uint32 statementIndex) const {
+		const ref<FunctionStatement> statement = std::static_pointer_cast<FunctionStatement>(output->ast.statements[statementIndex]);
+		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+
+		if (!isCamelCaseOrSnakeCase(identifierToken.value, identifierToken.characterCount)) {
+			generateDiagnostic<DiagnosticCode::INVALID_FUNCTION_IDENTIFIER_CASE>(*output, identifierToken);
+
+			return;
+		}
+
+		output->define(statement->identifierTokenIndex);
+
+		if (statementIndex == 0) {
+			generateDiagnostic<DiagnosticCode::NO_RETURN>(*output, identifierToken);
+
+			return;
+		}
+
+		const uint32 previousStatementIndex = statementIndex - 1;
+		const ref<Statement> previousStatement = output->ast.statements[previousStatementIndex];
+
+		if (previousStatement->statementType != StatementType::RETURN) {
+			generateDiagnostic<DiagnosticCode::NO_RETURN>(*output, identifierToken);
+		}
 	}
 
 	/* void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement> statement) {

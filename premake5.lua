@@ -275,6 +275,7 @@ project "tsc"
 		"ProjectA/vendor/API",
 		"ProjectA/vendor/lyah",
 		vulkansdk .. "/Include", -- TODO: Temporary
+		"%{prj.name}/src",
 	}
 
 	links {

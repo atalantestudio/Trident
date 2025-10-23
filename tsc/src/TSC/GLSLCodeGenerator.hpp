@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CompilationOutput.hpp"
+#include "TSC/CompilationOutput.hpp"
 
 namespace ProjectA {
 	class GLSLCodeGenerator {
