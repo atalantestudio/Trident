@@ -5,6 +5,7 @@
 #include "DiagnosticCode.hpp"
 #include "DiagnosticSeverity.hpp"
 #include "generateDiagnostic.hpp"
+#include "../Statement.hpp"
 #include "../Token.hpp"
 
 namespace ProjectA {
@@ -18,6 +19,34 @@ namespace ProjectA {
 			diagnostic.message = Logger::format("Unexpected character \"[]\".", character);
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::UNEXPECTED_CHARACTER;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::MISSING_INCLUDE_PATH> {
+		explicit generateDiagnostic(CompilationOutput& output, DocumentPosition start, DocumentPosition end) {
+			Diagnostic diagnostic{};
+			diagnostic.start = start;
+			diagnostic.end = end;
+			diagnostic.message = "Missing include path.";
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::MISSING_INCLUDE_PATH;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::INCLUDE_FILE_NOT_FOUND> {
+		explicit generateDiagnostic(CompilationOutput& output, const IncludeStatement& includeStatement) {
+			Diagnostic diagnostic{};
+			diagnostic.start = includeStatement.start;
+			diagnostic.end = includeStatement.end;
+			diagnostic.message = Logger::format("Include file not found at \"[]\".", includeStatement.path);
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::INCLUDE_FILE_NOT_FOUND;
 
 			output.diagnostics.emplace_back(diagnostic);
 		}

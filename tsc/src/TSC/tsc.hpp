@@ -6,6 +6,7 @@
 #include "TSC/GLSLCodeGenerator.hpp"
 #include "TSC/Lexer.hpp"
 #include "TSC/Parser.hpp"
+#include "TSC/Preprocessor.hpp"
 
 namespace ProjectA {
 	std::string getIndent(uint32 indent) {
@@ -446,12 +447,17 @@ namespace ProjectA {
 	}
 
 	static sint32 tsc(const char8* path) {
-		const sequence<uint8> buffer = Filesystem::openBuffer("Test/test0.tsl");
-		// const sequence<uint8> buffer = Filesystem::openBuffer("Test/diagnostic.tsl");
-		const std::string text(buffer.begin(), buffer.end());
+		// const sequence<uint8> buffer = Filesystem::openBuffer("Test/test0.tsl");
+		const sequence<uint8> buffer = Filesystem::openBuffer("Test/include.tsl");
+		const std::string code(buffer.begin(), buffer.end());
 
 		CompilationOutput output{};
-		output.text = text;
+		// output.text = code;
+
+		Preprocessor preprocessor(&output);
+		preprocessor.link(code);
+
+		BREAKPOINT();
 
 		Lexer lexer;
 		lexer.tokenize(&output);

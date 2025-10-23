@@ -68,7 +68,6 @@ namespace ProjectA {
 
 	bool Parser::parseGlobalScopeStatement() {
 		if (read().type >= TokenType::USER_DEFINED && peek().type == TokenType::LEFT_CURLY_BRACE) {
-			// A structure statement must start with a UDI followed by '{'.
 			return parseStructureStatement();
 		}
 
@@ -78,7 +77,6 @@ namespace ProjectA {
 			}
 		}
 
-		// The constant and function statements can either start with a UDI, language type or '[' (annotation).
 		return parseConstantOrFunctionStatement();
 	}
 

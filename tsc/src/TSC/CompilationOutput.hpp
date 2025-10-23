@@ -157,7 +157,7 @@ namespace ProjectA {
 			std::vector<std::string> identifiers;
 
 			std::vector<DefinitionStack> definitionStacks;
-			uint32 currentDefinitionStackIndex;
+			uint32 currentDefinitionStackIndex = 0;
 
 			std::vector<CompletionItem> completionItems;
 	};

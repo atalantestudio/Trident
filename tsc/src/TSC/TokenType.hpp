@@ -5,6 +5,8 @@ namespace ProjectA {
 		KEYWORD_AND,
 		KEYWORD_BREAK,
 		KEYWORD_IF,
+
+		// NOTE: The "include" keyword is handed by the Preprocessor class.
 		KEYWORD_NEXT,
 		KEYWORD_OR,
 		KEYWORD_RETURN,

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DocumentPosition.hpp"
 #include "StatementType.hpp"
 
 namespace ProjectA {
@@ -16,6 +17,12 @@ namespace ProjectA {
 		explicit BaseStatement() :
 			Statement(StatementType)
 		{}
+	};
+
+	struct IncludeStatement {
+		DocumentPosition start;
+		DocumentPosition end;
+		std::string path;
 	};
 
 	struct StructureStatement : public BaseStatement<StatementType::STRUCTURE> {
