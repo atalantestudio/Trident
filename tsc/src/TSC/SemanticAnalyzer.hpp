@@ -16,33 +16,14 @@ namespace ProjectA {
 			void analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<StructureMemberStatement>& memberStatement) const;
 			void analyzeGlobalScopeConstantStatement(const ref<GlobalScopeConstantStatement>& statement) const;
 			void analyzeFunctionStatement(uint32 statementIndex) const;
-			// void analyze(CompilationOutput& compilationOutput, const AST& ast);
+			void analyzeVariableStatement(const ref<VariableStatement>& statement) const;
 
 			void analyzeIdentifierExpression(const ref<IdentifierExpression>& expression) const;
 			void analyzeMemberAccessExpression(const ref<MemberAccessExpression>& expression) const;
 
 		private:
-			// void analyzeStatement(const ref<Statement>& statement);
-			// void analyzeVariableStatement(const ref<VariableStatement> statement);
-			// void analyzeFunctionStatement(const ref<FunctionStatement> statement);
-			// void analyzeExpressionStatement(const ref<ExpressionStatement> statement);
-			// void analyzeScopeStatement(const ref<ScopeStatement> statement);
-
-			// Returns a flag representing the combined annotations of the member.
-			// Annotation analyzeMemberStatement(const ref<VariableStatement> statement);
-
 			void analyzeTypeExpression(uint32 typeExpressionIndex) const;
-			// void analyzeExpression(uint32 expressionIndex);
-			// void analyzeNumberExpression(const ref<NumberExpression> expression);
-			// void analyzeUnaryExpression(const ref<UnaryExpression> expression);
-			// void analyzeBinaryExpression(const ref<BinaryExpression> expression);
-			// void analyzeGroupExpression(const ref<GroupExpression> expression);
-			// void analyzeMemberAccessExpression(const ref<MemberAccessExpression> expression);
-			// void analyzeFunctionCallExpression(const ref<FunctionCallExpression> expression);
 
-			// void analyzeIdentifier(uint32 identifierTokenIndex);
-
-			// Returns a flag representing the combined annotations of the member.
 			void analyzeAnnotationInstances(uint32 annotationInstanceIndexOffset, uint32 annotationInstanceCount) const;
 			void analyzeBindingAnnotation(const AnnotationInstance& annotationInstance) const;
 			void analyzeConstantAnnotation(const AnnotationInstance& annotationInstance) const;
@@ -52,16 +33,7 @@ namespace ProjectA {
 			void analyzeSetAnnotation(const AnnotationInstance& annotationInstance) const;
 			void analyzeVertexIndexAnnotation(const AnnotationInstance& annotationInstance) const;
 
-			// bool isLanguageType(const Token& identifier) const;
-			// bool isScalarType(const Token& identifier) const;
-			// bool isFloatingPointScalarType(const Token& identifier) const;
-			// bool isVectorType(const Token& identifier) const;
-			// bool isMatrixType(const Token& identifier) const;
-			// bool isUserDefinedType(const Token& identifier) const;
-			// bool isReservedWord(const Token& identifier) const;
-
-			// bool isPascalCaseWord(const Token& identifier) const;
-			// bool isScreamingSnakeCaseWord(const Token& identifier) const;
+			bool isLanguageFunction(const Token& token) const;
 
 		private:
 			CompilationOutput* output;

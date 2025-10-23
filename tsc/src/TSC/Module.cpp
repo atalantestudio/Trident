@@ -31,8 +31,8 @@ namespace ProjectA {
 			.property("diagnostics", &CompilationOutput::diagnostics);
 
 		emscripten::class_<CompletionItem>("CompletionItem")
+			.property("label", &CompletionItem::label)
 			.property("end", &CompletionItem::end)
-			.function("getLabel", &CompletionItem::getLabel)
 			.function("getKindIndex", &CompletionItem::getKindIndex);
 
 		emscripten::class_<Diagnostic>("Diagnostic")

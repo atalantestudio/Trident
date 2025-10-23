@@ -90,7 +90,7 @@ namespace ProjectA {
 
 		const uint32 structureStatementIndex = static_cast<uint32>(output->ast.statements.size());
 
-		output->registerCompletionItem(tokenIndex, CompletionItemKind::STRUCTURE);
+		output->registerCompletionItem(getTokenString(read()), CompletionItemKind::STRUCTURE);
 
 		jump();
 		jump();
@@ -195,7 +195,7 @@ namespace ProjectA {
 
 		statement->identifierTokenIndex = tokenIndex;
 
-		output->registerCompletionItem(statement->identifierTokenIndex, CompletionItemKind::CONSTANT);
+		output->registerCompletionItem(getTokenString(output->tokens[statement->identifierTokenIndex]), CompletionItemKind::CONSTANT);
 
 		registerVariableSemanticToken(read(), false);
 
@@ -276,7 +276,7 @@ namespace ProjectA {
 		analyzer.analyzeFunctionStatement(getLastStatementIndex());
 
 		// TODO: Correct highlighting.
-		output->registerCompletionItem(statement->identifierTokenIndex, CompletionItemKind::FUNCTION);
+		output->registerCompletionItem(getTokenString(output->tokens[statement->identifierTokenIndex]), CompletionItemKind::FUNCTION);
 
 		return true;
 	}
@@ -491,7 +491,7 @@ namespace ProjectA {
 		statement->identifierTokenIndex = tokenIndex;
 
 		output->define(tokenIndex);
-		output->registerCompletionItem(tokenIndex, CompletionItemKind::VARIABLE);
+		output->registerCompletionItem(getTokenString(read()), CompletionItemKind::VARIABLE);
 
 		statement->constant = isScreamingSnakeCase(read().value, read().characterCount);
 
@@ -522,6 +522,8 @@ namespace ProjectA {
 		}
 
 		output->ast.statements.emplace_back(statement);
+
+		analyzer.analyzeVariableStatement(statement);
 
 		return true;
 	}

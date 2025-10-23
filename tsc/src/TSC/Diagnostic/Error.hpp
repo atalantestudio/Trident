@@ -44,6 +44,20 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& typeToken) {
+			Diagnostic diagnostic{};
+			diagnostic.start = typeToken.start;
+			diagnostic.end = typeToken.getEnd();
+			diagnostic.message = Logger::format("Missing template argument for type \"[]\".", getTokenString(typeToken));
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::MISSING_TEMPLATE_ARGUMENT;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT> {
 		explicit generateDiagnostic(CompilationOutput& output, const Token& typeToken, const Token& templateArgumentToken) {
 			Diagnostic diagnostic{};

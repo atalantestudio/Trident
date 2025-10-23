@@ -12,6 +12,10 @@
 namespace ProjectA {
 	class CompilationOutput {
 		public:
+			explicit CompilationOutput() {
+				registerDefaultCompletionItems();
+			}
+
 			void registerToken(TokenType type, DocumentPosition start, uint32 characterCount) {
 				Token token{};
 				token.type = type;
@@ -120,16 +124,22 @@ namespace ProjectA {
 				return false;
 			}
 
-			void registerCompletionItem(uint32 tokenIndex, CompletionItemKind kind) {
-				const Token& token = tokens[tokenIndex];
-
+			void registerCompletionItem(const std::string& label, CompletionItemKind kind) {
 				CompletionItem completionItem{};
-				completionItem.label = token.value;
-				completionItem.labelSize = token.characterCount;
+				completionItem.label = label;
 				completionItem.kind = kind;
-				completionItem.end = token.getEnd();
+				completionItem.end = {0, 0};
 
 				completionItems.emplace_back(completionItem);
+			}
+
+		private:
+			void registerDefaultCompletionItems() {
+				for (uint32 functionIndex = FIRST_FUNCTION_INDEX; functionIndex <= LAST_FUNCTION_INDEX; functionIndex += 1) {
+					const std::string functionIdentifier = RESERVED_KEYWORDS[functionIndex];
+
+					registerCompletionItem(functionIdentifier, CompletionItemKind::FUNCTION);
+				}
 			}
 
 		public:
