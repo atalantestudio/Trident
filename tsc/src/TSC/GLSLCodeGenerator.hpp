@@ -1,12 +1,11 @@
 #pragma once
 
-#include "AST.hpp"
-#include "CompilationResult.hpp"
+#include "CompilationOutput.hpp"
 
 namespace ProjectA {
 	class GLSLCodeGenerator {
 		public:
-			void write(const char8* path, const CompilationResult& result, const AST& ast);
+			void write(const char8* path, const CompilationOutput* _output);
 
 		private:
 			void writeStatement(uint32 statementIndex);
@@ -57,7 +56,7 @@ namespace ProjectA {
 			}
 
 			std::string getGlslType(uint32 typeTokenIndex, uint32 templateArgumentTokenIndex) const {
-				const Token& typeToken = result->tokens[typeTokenIndex];
+				const Token& typeToken = output->tokens[typeTokenIndex];
 
 				switch (typeToken.type) {
 					case TokenType::TYPE_FLOAT32:
@@ -86,14 +85,14 @@ namespace ProjectA {
 							return typeString;
 						}
 
-						const Token& templateArgumentToken = result->tokens[templateArgumentTokenIndex];
+						const Token& templateArgumentToken = output->tokens[templateArgumentTokenIndex];
 
 						return getGlslTemplateArgumentPrefix(templateArgumentToken) + typeString;
 					}
 					default: {
 						ENGINE_ASSERT(typeToken.type >= TokenType::USER_DEFINED, "Invalid type.");
 
-						return result->identifiers[typeToken.type - TokenType::USER_DEFINED];
+						return output->identifiers[typeToken.type - TokenType::USER_DEFINED];
 					}
 				}
 			}
@@ -101,7 +100,6 @@ namespace ProjectA {
 		private:
 			std::ofstream stream;
 			uint32 _indent = 0;
-			const CompilationResult* result;
-			const AST* ast;
+			const CompilationOutput* output;
 	};
 }

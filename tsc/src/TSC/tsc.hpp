@@ -2,6 +2,7 @@
 
 #include "Engine/Filesystem/Filesystem.hpp"
 
+#include "CompilationOutput.hpp"
 #include "GLSLCodeGenerator.hpp"
 #include "Lexer.hpp"
 #include "Parser.hpp"
@@ -11,24 +12,24 @@ namespace ProjectA {
 		return std::string(indent, '\t');
 	}
 
-	void writeAnnotations(std::ofstream& stream, uint32& indent, const CompilationResult& result, const AST& ast, uint32 annotationInstanceIndexOffset, uint32 annotationInstanceCount) {
+	void writeAnnotations(std::ofstream& stream, uint32& indent, const CompilationOutput* output, uint32 annotationInstanceIndexOffset, uint32 annotationInstanceCount) {
 		stream << "[\n";
 
 		indent += 1;
 
 		for (uint32 annotationInstanceIndex = 0; annotationInstanceIndex < annotationInstanceCount; annotationInstanceIndex += 1) {
-			const AnnotationInstance& annotationInstance = ast.annotationInstances[annotationInstanceIndexOffset + annotationInstanceIndex];
+			const AnnotationInstance& annotationInstance = output->ast.annotationInstances[annotationInstanceIndexOffset + annotationInstanceIndex];
 
 			stream << getIndent(indent) << "{\n";
 
 			indent += 1;
 
-			const Token& identifierToken = result.tokens[annotationInstance.identifierTokenIndex];
+			const Token& identifierToken = output->tokens[annotationInstance.identifierTokenIndex];
 
-			stream << getIndent(indent) << "\"Annotation\": \"" << getTokenString(identifierToken) << "\",\n";
+			stream << getIndent(indent) << "\"Annotation\": \"" << getTokenString(identifierToken) << "\"";
 
 			if (annotationInstance.valueTokenIndex != ~0) {
-				const Token& valueTokenIndex = result.tokens[annotationInstance.valueTokenIndex];
+				const Token& valueTokenIndex = output->tokens[annotationInstance.valueTokenIndex];
 
 				stream << ",\n";
 				stream << getIndent(indent) << "\"Value\": \"" << getTokenString(valueTokenIndex) << "\"";
@@ -52,8 +53,8 @@ namespace ProjectA {
 		stream << getIndent(indent) << "]";
 	}
 
-	void writeExpression(std::ofstream& stream, uint32& indent, const CompilationResult& result, const AST& ast, uint32 expressionIndex) {
-		const ref<Expression>& expression = ast.expressions[expressionIndex];
+	void writeExpression(std::ofstream& stream, uint32& indent, const CompilationOutput* output, uint32 expressionIndex) {
+		const ref<Expression>& expression = output->ast.expressions[expressionIndex];
 
 		stream << "{\n";
 
@@ -62,7 +63,7 @@ namespace ProjectA {
 		switch (expression->type) {
 			case ExpressionType::NUMBER: {
 				const ref<NumberExpression> numberExpression = std::static_pointer_cast<NumberExpression>(expression);
-				const Token& numberToken = result.tokens[numberExpression->numberTokenIndex];
+				const Token& numberToken = output->tokens[numberExpression->numberTokenIndex];
 
 				stream << getIndent(indent) << "\"Type\": \"NumberExpression\",\n";
 				stream << getIndent(indent) << "\"Number\": \"" << getTokenString(numberToken) << "\"";
@@ -71,7 +72,7 @@ namespace ProjectA {
 			}
 			case ExpressionType::IDENTIFIER: {
 				const ref<IdentifierExpression> identifierExpression = std::static_pointer_cast<IdentifierExpression>(expression);
-				const Token& identifierToken = result.tokens[identifierExpression->identifierTokenIndex];
+				const Token& identifierToken = output->tokens[identifierExpression->identifierTokenIndex];
 
 				stream << getIndent(indent) << "\"Type\": \"IdentifierExpression\",\n";
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\"";
@@ -80,31 +81,31 @@ namespace ProjectA {
 			}
 			case ExpressionType::UNARY: {
 				const ref<UnaryExpression> unaryExpression = std::static_pointer_cast<UnaryExpression>(expression);
-				const Token& operatorToken = result.tokens[unaryExpression->operatorTokenIndex];
+				const Token& operatorToken = output->tokens[unaryExpression->operatorTokenIndex];
 
 				stream << getIndent(indent) << "\"Type\": \"UnaryExpression\",\n";
 				stream << getIndent(indent) << "\"Operator\": \"" << getTokenString(operatorToken) << ",\n";
 				stream << getIndent(indent) << "\"Right\": ";
 
-				writeExpression(stream, indent, result, ast, unaryExpression->rightExpressionIndex);
+				writeExpression(stream, indent, output, unaryExpression->rightExpressionIndex);
 
 				break;
 			}
 			case ExpressionType::BINARY: {
 				const ref<BinaryExpression> binaryExpression = std::static_pointer_cast<BinaryExpression>(expression);
-				const Token& operatorToken = result.tokens[binaryExpression->operatorTokenIndex];
+				const Token& operatorToken = output->tokens[binaryExpression->operatorTokenIndex];
 
 				stream << getIndent(indent) << "\"Type\": \"BinaryExpression\",\n";
 				stream << getIndent(indent) << "\"Left\": ";
 
-				writeExpression(stream, indent, result, ast, binaryExpression->leftExpressionIndex);
+				writeExpression(stream, indent, output, binaryExpression->leftExpressionIndex);
 
 				stream << ",\n";
 
 				stream << getIndent(indent) << "\"Operator\": \"" << getTokenString(operatorToken) << "\",\n";
 				stream << getIndent(indent) << "\"Right\": ";
 
-				writeExpression(stream, indent, result, ast, binaryExpression->rightExpressionIndex);
+				writeExpression(stream, indent, output, binaryExpression->rightExpressionIndex);
 
 				break;
 			}
@@ -114,7 +115,7 @@ namespace ProjectA {
 				stream << getIndent(indent) << "\"Type\": \"GroupExpression\",\n";
 				stream << getIndent(indent) << "\"Expression\": ";
 
-				writeExpression(stream, indent, result, ast, groupExpression->expressionIndex);
+				writeExpression(stream, indent, output, groupExpression->expressionIndex);
 
 				break;
 			}
@@ -124,9 +125,9 @@ namespace ProjectA {
 				stream << getIndent(indent) << "\"Type\": \"MemberAccessExpression\",\n";
 				stream << getIndent(indent) << "\"Left\": ";
 
-				writeExpression(stream, indent, result, ast, memberAccessExpression->leftExpressionIndex);
+				writeExpression(stream, indent, output, memberAccessExpression->leftExpressionIndex);
 
-				const Token& identifierTokenIndex = result.tokens[memberAccessExpression->identifierTokenIndex];
+				const Token& identifierTokenIndex = output->tokens[memberAccessExpression->identifierTokenIndex];
 
 				stream << getIndent(indent) << "\"MemberIdentifier\": \"" << getTokenString(identifierTokenIndex) << "\"";
 
@@ -138,7 +139,7 @@ namespace ProjectA {
 				stream << getIndent(indent) << "\"Type\": \"FunctionCallExpression\",\n";
 				stream << getIndent(indent) << "\"Callee\": ";
 
-				writeExpression(stream, indent, result, ast, functionCallExpression->calleeExpressionIndex);
+				writeExpression(stream, indent, output, functionCallExpression->calleeExpressionIndex);
 
 				stream << getIndent(indent) << "\"Arguments\": [\n";
 
@@ -147,7 +148,7 @@ namespace ProjectA {
 				for (const uint32 argumentExpressionIndex : functionCallExpression->argumentExpressionIndices) {
 					stream << getIndent(indent);
 
-					writeExpression(stream, indent, result, ast, argumentExpressionIndex);
+					writeExpression(stream, indent, output, argumentExpressionIndex);
 				}
 
 				indent -= 1;
@@ -158,13 +159,13 @@ namespace ProjectA {
 			}
 			case ExpressionType::TYPE: {
 				const ref<TypeExpression> typeExpression = std::static_pointer_cast<TypeExpression>(expression);
-				const Token& typeToken = result.tokens[typeExpression->typeTokenIndex];
+				const Token& typeToken = output->tokens[typeExpression->typeTokenIndex];
 
 				stream << getIndent(indent) << "\"Type\": \"TypeExpression\",\n";
 				stream << getIndent(indent) << "\"_Type\": \"" << getTokenString(typeToken) << "\"";
 
 				if (typeExpression->templateArgumentTokenIndex != ~0) {
-					const Token& templateArgumentToken = result.tokens[typeExpression->templateArgumentTokenIndex];
+					const Token& templateArgumentToken = output->tokens[typeExpression->templateArgumentTokenIndex];
 
 					stream << ",\n";
 					stream << getIndent(indent) << "\"TemplateArgument\": \"" << getTokenString(templateArgumentToken) << "\"";
@@ -184,8 +185,8 @@ namespace ProjectA {
 		stream << "\n" << getIndent(indent) << "}";
 	}
 
-	void writeStatement(std::ofstream& stream, uint32& indent, const CompilationResult& result, const AST& ast, uint32 statementIndex) {
-		const ref<Statement>& statement = ast.statements[statementIndex];
+	void writeStatement(std::ofstream& stream, uint32& indent, const CompilationOutput* output, uint32 statementIndex) {
+		const ref<Statement>& statement = output->ast.statements[statementIndex];
 
 		stream << "{\n";
 
@@ -194,7 +195,7 @@ namespace ProjectA {
 		switch (statement->statementType) {
 			case StatementType::STRUCTURE: {
 				const ref<StructureStatement> structureStatement = std::static_pointer_cast<StructureStatement>(statement);
-				const Token& identifierToken = result.tokens[structureStatement->identifierTokenIndex];
+				const Token& identifierToken = output->tokens[structureStatement->identifierTokenIndex];
 
 				stream << getIndent(indent) << "\"Type\": \"StructureStatement\",\n";
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
@@ -207,7 +208,7 @@ namespace ProjectA {
 
 					stream << getIndent(indent);
 
-					writeStatement(stream, indent, result, ast, memberStatementIndex);
+					writeStatement(stream, indent, output, memberStatementIndex);
 
 					if (memberStatementIndexOffset + 1 < structureStatement->memberStatementIndices.size()) {
 						stream << ",";
@@ -229,14 +230,14 @@ namespace ProjectA {
 				stream << getIndent(indent) << "\"AnnotationFlag\": " << structureMemberStatement->annotationFlag << ",\n";
 				stream << getIndent(indent) << "\"Annotations\": ";
 
-				writeAnnotations(stream, indent, result, ast, structureMemberStatement->annotationInstanceIndexOffset, structureMemberStatement->annotationInstanceCount);
+				writeAnnotations(stream, indent, output, structureMemberStatement->annotationInstanceIndexOffset, structureMemberStatement->annotationInstanceCount);
 
-				stream << "\n";
+				stream << ",\n";
 				stream << getIndent(indent) << "\"_Type\": ";
 
-				writeExpression(stream, indent, result, ast, structureMemberStatement->typeExpressionIndex);
+				writeExpression(stream, indent, output, structureMemberStatement->typeExpressionIndex);
 
-				const Token& identifierToken = result.tokens[structureMemberStatement->identifierTokenIndex];
+				const Token& identifierToken = output->tokens[structureMemberStatement->identifierTokenIndex];
 
 				stream << ",\n";
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\"";
@@ -250,20 +251,20 @@ namespace ProjectA {
 				stream << getIndent(indent) << "\"AnnotationFlag\": " << constantStatement->annotationFlag << ",\n";
 				stream << getIndent(indent) << "\"Annotations\": ";
 
-				writeAnnotations(stream, indent, result, ast, constantStatement->annotationInstanceIndexOffset, constantStatement->annotationInstanceCount);
+				writeAnnotations(stream, indent, output, constantStatement->annotationInstanceIndexOffset, constantStatement->annotationInstanceCount);
 
-				stream << "\n";
+				stream << ",\n";
 				stream << getIndent(indent) << "\"_Type\": ";
 
-				writeExpression(stream, indent, result, ast, constantStatement->typeExpressionIndex);
+				writeExpression(stream, indent, output, constantStatement->typeExpressionIndex);
 
-				const Token& identifierToken = result.tokens[constantStatement->identifierTokenIndex];
+				const Token& identifierToken = output->tokens[constantStatement->identifierTokenIndex];
 
 				stream << ",\n";
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
 				stream << getIndent(indent) << "\"Initializer\": ";
 
-				writeExpression(stream, indent, result, ast, constantStatement->initializerExpressionIndex);
+				writeExpression(stream, indent, output, constantStatement->initializerExpressionIndex);
 
 				break;
 			}
@@ -273,9 +274,9 @@ namespace ProjectA {
 				stream << getIndent(indent) << "\"Type\": \"VariableStatement\",\n";
 				stream << getIndent(indent) << "\"_Type\": ";
 
-				writeExpression(stream, indent, result, ast, variableStatement->typeExpressionIndex);
+				writeExpression(stream, indent, output, variableStatement->typeExpressionIndex);
 
-				const Token& identifierToken = result.tokens[variableStatement->identifierTokenIndex];
+				const Token& identifierToken = output->tokens[variableStatement->identifierTokenIndex];
 
 				stream << ",\n";
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
@@ -283,7 +284,7 @@ namespace ProjectA {
 				stream << getIndent(indent) << "\"Initializer\": ";
 
 				if (variableStatement->initializerExpressionIndex != ~0) {
-					writeExpression(stream, indent, result, ast, variableStatement->initializerExpressionIndex);
+					writeExpression(stream, indent, output, variableStatement->initializerExpressionIndex);
 				}
 				else {
 					stream << "null";
@@ -293,12 +294,12 @@ namespace ProjectA {
 			}
 			case StatementType::FUNCTION: {
 				const ref<FunctionStatement> functionStatement = std::static_pointer_cast<FunctionStatement>(statement);
-				const Token& identifierToken = result.tokens[functionStatement->identifierTokenIndex];
+				const Token& identifierToken = output->tokens[functionStatement->identifierTokenIndex];
 
 				stream << getIndent(indent) << "\"Type\": \"FunctionStatement\",\n";
 				stream << getIndent(indent) << "\"ReturnType\": ";
 
-				writeExpression(stream, indent, result, ast, functionStatement->returnTypeExpressionIndex);
+				writeExpression(stream, indent, output, functionStatement->returnTypeExpressionIndex);
 
 				stream << ",\n";
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
@@ -311,7 +312,7 @@ namespace ProjectA {
 
 					stream << getIndent(indent);
 
-					writeStatement(stream, indent, result, ast, parameterStatementIndex);
+					writeStatement(stream, indent, output, parameterStatementIndex);
 
 					if (parameterStatementIndexOffset + 1 < functionStatement->parameterStatementIndices.size()) {
 						stream << ",";
@@ -325,7 +326,7 @@ namespace ProjectA {
 				stream << getIndent(indent) << "],\n";
 				stream << getIndent(indent) << "\"Scope\": ";
 
-				writeStatement(stream, indent, result, ast, functionStatement->scopeStatementIndex);
+				writeStatement(stream, indent, output, functionStatement->scopeStatementIndex);
 
 				break;
 			}
@@ -335,9 +336,9 @@ namespace ProjectA {
 				stream << getIndent(indent) << "\"Type\": \"ParameterStatement\",\n";
 				stream << getIndent(indent) << "\"_Type\": ";
 
-				writeExpression(stream, indent, result, ast, parameterStatement->typeExpressionIndex);
+				writeExpression(stream, indent, output, parameterStatement->typeExpressionIndex);
 
-				const Token& identifierToken = result.tokens[parameterStatement->identifierTokenIndex];
+				const Token& identifierToken = output->tokens[parameterStatement->identifierTokenIndex];
 
 				stream << ",\n";
 				stream << getIndent(indent) << "\"Identifier\": \"" << getTokenString(identifierToken) << "\"";
@@ -350,7 +351,7 @@ namespace ProjectA {
 				stream << getIndent(indent) << "\"Type\": \"ExpressionStatement\",\n";
 				stream << getIndent(indent) << "\"Expression\": ";
 
-				writeExpression(stream, indent, result, ast, expressionStatement->expressionIndex);
+				writeExpression(stream, indent, output, expressionStatement->expressionIndex);
 
 				break;
 			}
@@ -367,7 +368,7 @@ namespace ProjectA {
 
 					stream << getIndent(indent);
 
-					writeStatement(stream, indent, result, ast, statementIndex);
+					writeStatement(stream, indent, output, statementIndex);
 
 					if (statementIndexOffset + 1 < scopeStatement->statementIndices.size()) {
 						stream << ",";
@@ -388,12 +389,12 @@ namespace ProjectA {
 				stream << getIndent(indent) << "\"Type\": \"IfStatement\",\n";
 				stream << getIndent(indent) << "\"Condition\": ";
 
-				writeExpression(stream, indent, result, ast, ifStatement->conditionExpressionIndex);
+				writeExpression(stream, indent, output, ifStatement->conditionExpressionIndex);
 
 				stream << ",\n";
 				stream << getIndent(indent) << "\"Scope\": ";
 
-				writeStatement(stream, indent, result, ast, ifStatement->scopeStatementIndex);
+				writeStatement(stream, indent, output, ifStatement->scopeStatementIndex);
 
 				break;
 			}
@@ -403,12 +404,12 @@ namespace ProjectA {
 				stream << getIndent(indent) << "\"Type\": \"WhileStatement\",\n";
 				stream << getIndent(indent) << "\"Condition\": ";
 
-				writeExpression(stream, indent, result, ast, whileStatement->conditionExpressionIndex);
+				writeExpression(stream, indent, output, whileStatement->conditionExpressionIndex);
 
 				stream << ",\n";
 				stream << getIndent(indent) << "\"Scope\": ";
 
-				writeStatement(stream, indent, result, ast, whileStatement->scopeStatementIndex);
+				writeStatement(stream, indent, output, whileStatement->scopeStatementIndex);
 
 				break;
 			}
@@ -428,7 +429,7 @@ namespace ProjectA {
 				stream << getIndent(indent) << "\"Type\": \"ReturnStatement\",\n";
 				stream << getIndent(indent) << "\"Expression\": ";
 
-				writeExpression(stream, indent, result, ast, returnStatement->expressionIndex);
+				writeExpression(stream, indent, output, returnStatement->expressionIndex);
 
 				break;
 			}
@@ -447,19 +448,20 @@ namespace ProjectA {
 	static sint32 tsc(const char8* path) {
 		const sequence<uint8> buffer = Filesystem::openBuffer("Test/test0.tsl");
 		// const sequence<uint8> buffer = Filesystem::openBuffer("Test/diagnostic.tsl");
-		const std::string characters(buffer.begin(), buffer.end());
+		const std::string text(buffer.begin(), buffer.end());
 
-		CompilationResult result{};
+		CompilationOutput output{};
+		output.text = text;
 
 		Lexer lexer;
-		lexer.tokenize(characters, result);
+		lexer.tokenize(&output);
 
 		Parser parser;
-		const AST ast = parser.parse(result);
+		parser.parse(&output);
 
 		bool hasError = false;
 
-		for (const Diagnostic& diagnostic : result.diagnostics) {
+		for (const Diagnostic& diagnostic : output.diagnostics) {
 			switch (diagnostic.severity) {
 				case DiagnosticSeverity::ERROR: {
 					ENGINE_ERROR(diagnostic.message);
@@ -487,7 +489,7 @@ namespace ProjectA {
 		}
 
 		GLSLCodeGenerator generator;
-		generator.write("Test/test0.glsl", result, ast);
+		generator.write("Test/test0.glsl", &output);
 
 		#if 1
 			std::ofstream stream("Test/test0.ast.json");
@@ -500,14 +502,14 @@ namespace ProjectA {
 
 			indent += 1;
 
-			for (uint32 globalScopeStatementIndexOffset = 0; globalScopeStatementIndexOffset < ast.globalScopeStatementIndices.size(); globalScopeStatementIndexOffset += 1) {
-				const uint32 globalScopeStatementIndex = ast.globalScopeStatementIndices[globalScopeStatementIndexOffset];
+			for (uint32 globalScopeStatementIndexOffset = 0; globalScopeStatementIndexOffset < output.ast.globalScopeStatementIndices.size(); globalScopeStatementIndexOffset += 1) {
+				const uint32 globalScopeStatementIndex = output.ast.globalScopeStatementIndices[globalScopeStatementIndexOffset];
 
 				stream << getIndent(indent);
 
-				writeStatement(stream, indent, result, ast, globalScopeStatementIndex);
+				writeStatement(stream, indent, &output, globalScopeStatementIndex);
 
-				if (globalScopeStatementIndexOffset + 1 < ast.globalScopeStatementIndices.size()) {
+				if (globalScopeStatementIndexOffset + 1 < output.ast.globalScopeStatementIndices.size()) {
 					stream << ",";
 				}
 

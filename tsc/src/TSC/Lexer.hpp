@@ -1,12 +1,12 @@
 #pragma once
 
-#include "CompilationResult.hpp"
+#include "CompilationOutput.hpp"
 #include "TokenType.hpp"
 
 namespace ProjectA {
 	class Lexer {
 		public:
-			void tokenize(const std::string& characters, CompilationResult& compilationResult);
+			void tokenize(CompilationOutput* _output);
 
 		private:
 			void jump(sint32 characterCount);
@@ -30,8 +30,7 @@ namespace ProjectA {
 			void registerToken(TokenType type, uint32 characterCount);
 
 		private:
-			std::string characters;
-			CompilationResult* compilationResult;
+			CompilationOutput* output;
 			DocumentPosition position;
 			uint32 characterIndex;
 			bool unexpectedCharacter;

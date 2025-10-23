@@ -1,7 +1,6 @@
 #pragma once
 
-#include "AST.hpp"
-#include "CompilationResult.hpp"
+#include "CompilationOutput.hpp"
 #include "DocumentPosition.hpp"
 #include "SemanticAnalyzer.hpp"
 #include "Statement.hpp"
@@ -10,7 +9,7 @@
 namespace ProjectA {
 	class Parser {
 		public:
-			AST parse(CompilationResult& compilationResult);
+			void parse(CompilationOutput* _output);
 
 		private:
 			bool parseGlobalScopeStatement();
@@ -71,8 +70,7 @@ namespace ProjectA {
 			bool registerVariableSemanticToken(const Token& token, bool preferStructure = false) const;
 
 		public:
-			CompilationResult* compilationResult;
-			AST ast;
+			CompilationOutput* output;
 			uint32 tokenIndex;
 			uint32 currentAnnotationCount;
 			uint8 annotationFlag;

@@ -23,7 +23,7 @@ namespace ProjectA {
 			DocumentPosition start;
 			uint32 characterCount;
 
-			// TODO: Replace value by an offset into a buffer stored in CompilationResult.
+			// TODO: Replace value by an offset into a buffer stored in CompilationOutput.
 			std::string value;
 			// uint32 identifierBufferOffset = ~0;
 	};

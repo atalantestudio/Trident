@@ -3,17 +3,16 @@
 #include "GLSLCodeGenerator.hpp"
 
 namespace ProjectA {
-	void GLSLCodeGenerator::write(const char8* path, const CompilationResult& result, const AST& ast) {
+	void GLSLCodeGenerator::write(const char8* path, const CompilationOutput* _output) {
 		stream.open(path);
 
 		DEBUG_ASSERT(stream.is_open());
 
-		this->result = &result;
-		this->ast = &ast;
+		output = _output;
 
 		stream << "#version 310 es";
 
-		for (const uint32 globalScopeStatementIndex : this->ast->globalScopeStatementIndices) {
+		for (const uint32 globalScopeStatementIndex : output->ast.globalScopeStatementIndices) {
 			stream << "\n";
 
 			writeStatement(globalScopeStatementIndex);
@@ -23,7 +22,7 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeStatement(uint32 statementIndex) {
-		const ref<Statement> statement = ast->statements[statementIndex];
+		const ref<Statement> statement = output->ast.statements[statementIndex];
 
 		switch (statement->statementType) {
 			case StatementType::GLOBAL_SCOPE_CONSTANT:
@@ -57,7 +56,7 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeGlobalScopeConstant(uint32 statementIndex) {
-		const ref<GlobalScopeConstantStatement> statement = std::static_pointer_cast<GlobalScopeConstantStatement>(ast->statements[statementIndex]);
+		const ref<GlobalScopeConstantStatement> statement = std::static_pointer_cast<GlobalScopeConstantStatement>(output->ast.statements[statementIndex]);
 
 		writeAnnotations(statement->annotationInstanceIndexOffset, statement->annotationInstanceCount);
 
@@ -65,7 +64,7 @@ namespace ProjectA {
 
 		writeTypeExpression(statement->typeExpressionIndex);
 
-		const Token& identifierToken = result->tokens[statement->identifierTokenIndex];
+		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
 		stream << " " << getTokenString(identifierToken) << " = ";
 
@@ -75,8 +74,8 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeStructureStatement(uint32 statementIndex) {
-		const ref<StructureStatement> statement = std::static_pointer_cast<StructureStatement>(ast->statements[statementIndex]);
-		const Token& identifierToken = result->tokens[statement->identifierTokenIndex];
+		const ref<StructureStatement> statement = std::static_pointer_cast<StructureStatement>(output->ast.statements[statementIndex]);
+		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
 		stream << indent() << "struct " << getTokenString(identifierToken) << " {\n";
 
@@ -92,7 +91,7 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeMemberStatement(uint32 statementIndex) {
-		const ref<StructureMemberStatement> statement = std::static_pointer_cast<StructureMemberStatement>(ast->statements[statementIndex]);
+		const ref<StructureMemberStatement> statement = std::static_pointer_cast<StructureMemberStatement>(output->ast.statements[statementIndex]);
 
 		if (statement->annotationFlag & (Annotation::INSTANCE_INDEX | Annotation::POSITION | Annotation::VERTEX_INDEX)) {
 			return;
@@ -104,19 +103,19 @@ namespace ProjectA {
 
 		writeTypeExpression(statement->typeExpressionIndex);
 
-		const Token& identifierToken = result->tokens[statement->identifierTokenIndex];
+		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
 		stream << " " << getTokenString(identifierToken) << ";\n";
 	}
 
 	void GLSLCodeGenerator::writeFunctionStatement(uint32 statementIndex) {
-		const ref<FunctionStatement> statement = std::static_pointer_cast<FunctionStatement>(ast->statements[statementIndex]);
+		const ref<FunctionStatement> statement = std::static_pointer_cast<FunctionStatement>(output->ast.statements[statementIndex]);
 
 		stream << indent();
 
 		writeTypeExpression(statement->returnTypeExpressionIndex);
 
-		const Token& identifierToken = result->tokens[statement->identifierTokenIndex];
+		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
 		stream << " " << getTokenString(identifierToken) << "(";
 
@@ -136,7 +135,7 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeVariableStatement(uint32 statementIndex) {
-		const ref<VariableStatement> statement = std::static_pointer_cast<VariableStatement>(ast->statements[statementIndex]);
+		const ref<VariableStatement> statement = std::static_pointer_cast<VariableStatement>(output->ast.statements[statementIndex]);
 
 		stream << indent();
 
@@ -148,7 +147,7 @@ namespace ProjectA {
 
 		stream << " ";
 
-		const Token& identifierToken = result->tokens[statement->identifierTokenIndex];
+		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
 		stream << identifierToken.value;
 
@@ -162,17 +161,17 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeParameterStatement(uint32 statementIndex) {
-		const ref<ParameterStatement> statement = std::static_pointer_cast<ParameterStatement>(ast->statements[statementIndex]);
+		const ref<ParameterStatement> statement = std::static_pointer_cast<ParameterStatement>(output->ast.statements[statementIndex]);
 
 		writeTypeExpression(statement->typeExpressionIndex);
 
-		const Token& identifierToken = result->tokens[statement->identifierTokenIndex];
+		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
 		stream << " " << getTokenString(identifierToken);
 	}
 
 	void GLSLCodeGenerator::writeScopeStatement(uint32 statementIndex) {
-		const ref<ScopeStatement> statement = std::static_pointer_cast<ScopeStatement>(ast->statements[statementIndex]);
+		const ref<ScopeStatement> statement = std::static_pointer_cast<ScopeStatement>(output->ast.statements[statementIndex]);
 
 		stream << "{\n";
 
@@ -190,7 +189,7 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeIfStatement(uint32 statementIndex) {
-		const ref<IfStatement> statement = std::static_pointer_cast<IfStatement>(ast->statements[statementIndex]);
+		const ref<IfStatement> statement = std::static_pointer_cast<IfStatement>(output->ast.statements[statementIndex]);
 
 		stream << indent() << "if (";
 
@@ -202,7 +201,7 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeWhileStatement(uint32 statementIndex) {
-		const ref<WhileStatement> statement = std::static_pointer_cast<WhileStatement>(ast->statements[statementIndex]);
+		const ref<WhileStatement> statement = std::static_pointer_cast<WhileStatement>(output->ast.statements[statementIndex]);
 
 		stream << indent() << "while (";
 
@@ -222,7 +221,7 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeReturnStatement(uint32 statementIndex) {
-		const ref<ReturnStatement> statement = std::static_pointer_cast<ReturnStatement>(ast->statements[statementIndex]);
+		const ref<ReturnStatement> statement = std::static_pointer_cast<ReturnStatement>(output->ast.statements[statementIndex]);
 
 		stream << indent() << "return ";
 
@@ -232,7 +231,7 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeExpressionStatement(uint32 statementIndex) {
-		const ref<ExpressionStatement> statement = std::static_pointer_cast<ExpressionStatement>(ast->statements[statementIndex]);
+		const ref<ExpressionStatement> statement = std::static_pointer_cast<ExpressionStatement>(output->ast.statements[statementIndex]);
 
 		stream << indent();
 		
@@ -242,7 +241,7 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeExpression(uint32 expressionIndex) {
-		const ref<Expression>& expression = ast->expressions[expressionIndex];
+		const ref<Expression>& expression = output->ast.expressions[expressionIndex];
 
 		switch (expression->type) {
 			case ExpressionType::NUMBER:
@@ -264,15 +263,15 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeIdentifierExpression(uint32 expressionIndex) {
-		const ref<IdentifierExpression> expression = std::static_pointer_cast<IdentifierExpression>(ast->expressions[expressionIndex]);
-		const Token& identifierToken = result->tokens[expression->identifierTokenIndex];
+		const ref<IdentifierExpression> expression = std::static_pointer_cast<IdentifierExpression>(output->ast.expressions[expressionIndex]);
+		const Token& identifierToken = output->tokens[expression->identifierTokenIndex];
 
 		stream << identifierToken.value;
 	}
 
 	void GLSLCodeGenerator::writeNumberExpression(uint32 expressionIndex) {
-		const ref<NumberExpression> expression = std::static_pointer_cast<NumberExpression>(ast->expressions[expressionIndex]);
-		const Token& numberToken = result->tokens[expression->numberTokenIndex];
+		const ref<NumberExpression> expression = std::static_pointer_cast<NumberExpression>(output->ast.expressions[expressionIndex]);
+		const Token& numberToken = output->tokens[expression->numberTokenIndex];
 
 		// TODO
 		ENGINE_ASSERT(
@@ -286,8 +285,8 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeUnaryExpression(uint32 expressionIndex) {
-		const ref<UnaryExpression> expression = std::static_pointer_cast<UnaryExpression>(ast->expressions[expressionIndex]);
-		const Token& operatorToken = result->tokens[expression->operatorTokenIndex];
+		const ref<UnaryExpression> expression = std::static_pointer_cast<UnaryExpression>(output->ast.expressions[expressionIndex]);
+		const Token& operatorToken = output->tokens[expression->operatorTokenIndex];
 
 		stream << getOperatorTokenString(operatorToken);
 
@@ -295,8 +294,8 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeBinaryExpression(uint32 expressionIndex) {
-		const ref<BinaryExpression> expression = std::static_pointer_cast<BinaryExpression>(ast->expressions[expressionIndex]);
-		const Token& operatorToken = result->tokens[expression->operatorTokenIndex];
+		const ref<BinaryExpression> expression = std::static_pointer_cast<BinaryExpression>(output->ast.expressions[expressionIndex]);
+		const Token& operatorToken = output->tokens[expression->operatorTokenIndex];
 
 		writeExpression(expression->leftExpressionIndex);
 
@@ -306,17 +305,17 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeMemberAccessExpression(uint32 expressionIndex) {
-		const ref<MemberAccessExpression> expression = std::static_pointer_cast<MemberAccessExpression>(ast->expressions[expressionIndex]);
+		const ref<MemberAccessExpression> expression = std::static_pointer_cast<MemberAccessExpression>(output->ast.expressions[expressionIndex]);
 
 		writeExpression(expression->leftExpressionIndex);
 
-		const Token& identifierToken = result->tokens[expression->identifierTokenIndex];
+		const Token& identifierToken = output->tokens[expression->identifierTokenIndex];
 
 		stream << "." << identifierToken.value;
 	}
 
 	void GLSLCodeGenerator::writeTypeExpression(uint32 expressionIndex) {
-		const ref<TypeExpression> expression = std::static_pointer_cast<TypeExpression>(ast->expressions[expressionIndex]);
+		const ref<TypeExpression> expression = std::static_pointer_cast<TypeExpression>(output->ast.expressions[expressionIndex]);
 
 		stream << getGlslType(expression->typeTokenIndex, expression->templateArgumentTokenIndex);
 	}
@@ -329,11 +328,11 @@ namespace ProjectA {
 		stream << "layout(";
 
 		for (uint32 annotationInstanceIndex = 0; annotationInstanceIndex < annotationInstanceCount; annotationInstanceIndex += 1) {
-			const AnnotationInstance& annotationInstance = ast->annotationInstances[annotationInstanceIndexOffset + annotationInstanceIndex];
+			const AnnotationInstance& annotationInstance = output->ast.annotationInstances[annotationInstanceIndexOffset + annotationInstanceIndex];
 
 			switch (annotationInstance.annotation) {
 				case Annotation::LOCATION: {
-					const Token& valueToken = result->tokens[annotationInstance.valueTokenIndex];
+					const Token& valueToken = output->tokens[annotationInstance.valueTokenIndex];
 
 					stream << "location = " << getTokenString(valueToken) << "";
 

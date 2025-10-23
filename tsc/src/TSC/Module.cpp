@@ -1,35 +1,33 @@
 #include "Base/Base.hpp"
 
-#include "AST.hpp"
-#include "CompilationResult.hpp"
+#include "CompilationOutput.hpp"
 #include "Diagnostic.hpp"
+#include "DiagnosticReference.hpp"
+#include "DocumentPosition.hpp"
 #include "Lexer.hpp"
 #include "Parser.hpp"
-#include "SemanticAnalyzer.hpp"
 #include "SemanticToken.hpp"
 #include "Token.hpp"
 
 namespace ProjectA {
-	CompilationResult compile(const std::string& text) {
-		CompilationResult compilationResult{};
+	CompilationOutput compile(const std::string& text) {
+		CompilationOutput output{};
+		output.text = text;
 
 		Lexer lexer;
-		lexer.tokenize(text, compilationResult);
+		lexer.tokenize(&output);
 
 		Parser parser;
-		const AST ast = parser.parse(compilationResult);
+		parser.parse(&output);
 
-		// SemanticAnalyzer semanticAnalyzer;
-		// semanticAnalyzer.analyze(compilationResult, ast);
-
-		return compilationResult;
+		return output;
 	}
 
 	EMSCRIPTEN_BINDINGS(Module) {
-		emscripten::class_<CompilationResult>("CompilationResult")
-			.property("tokens", &CompilationResult::tokens)
-			.property("semanticTokens", &CompilationResult::semanticTokens)
-			.property("diagnostics", &CompilationResult::diagnostics);
+		emscripten::class_<CompilationOutput>("CompilationOutput")
+			.property("tokens", &CompilationOutput::tokens)
+			.property("semanticTokens", &CompilationOutput::semanticTokens)
+			.property("diagnostics", &CompilationOutput::diagnostics);
 
 		emscripten::class_<Diagnostic>("Diagnostic")
 			.property("start", &Diagnostic::start)

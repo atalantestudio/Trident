@@ -8,16 +8,15 @@
 #include "Token.hpp"
 
 namespace ProjectA {
-	void Lexer::tokenize(const std::string& characters, CompilationResult& compilationResult) {
-		this->characters = characters;
-		this->compilationResult = &compilationResult;
+	void Lexer::tokenize(CompilationOutput* _output) {
+		output = _output;
 
 		position.lineIndex = 0;
 		position.characterOffset = 0;
 		characterIndex = 0;
 		unexpectedCharacter = false;
 
-		while (characterIndex < characters.size()) {
+		while (characterIndex < output->text.size()) {
 			if (testLetter(read())) {
 				Token token{};
 				token.start = position;
@@ -241,10 +240,10 @@ namespace ProjectA {
 						jump(1);
 					}
 
-					this->compilationResult->registerSemanticToken(SemanticTokenType::COMMENT, 0, start, position.characterOffset - start.characterOffset);
+					output->registerSemanticToken(SemanticTokenType::COMMENT, 0, start, position.characterOffset - start.characterOffset);
 				}
 				case '\n': {
-					this->compilationResult->registerToken(TokenType::END_OF_LINE, position, 0);
+					output->registerToken(TokenType::END_OF_LINE, position, 0);
 
 					characterIndex += 1;
 					position.lineIndex += 1;
@@ -254,7 +253,7 @@ namespace ProjectA {
 				}
 				default: {
 					if (!unexpectedCharacter) {
-						generateDiagnostic<DiagnosticCode::UNEXPECTED_CHARACTER>(*this->compilationResult, character, position);
+						generateDiagnostic<DiagnosticCode::UNEXPECTED_CHARACTER>(*output, character, position);
 
 						unexpectedCharacter = true;
 					}
@@ -286,11 +285,11 @@ namespace ProjectA {
 	}
 
 	char8 Lexer::peek(uint32 index) const {
-		if (characterIndex + index >= characters.size()) {
+		if (characterIndex + index >= output->text.size()) {
 			return '\0';
 		}
 
-		return characters[characterIndex + index];
+		return output->text[characterIndex + index];
 	}
 
 	bool Lexer::testBinaryDigit(char8 character) const {
@@ -403,21 +402,21 @@ namespace ProjectA {
 
 	void Lexer::registerNumberLiteral(Token& token) {
 		token.characterCount = position.characterOffset - token.start.characterOffset;
-		token.value = std::string(&characters[characterIndex - token.characterCount], token.characterCount);
+		token.value = std::string(&output->text[characterIndex - token.characterCount], token.characterCount);
 
-		compilationResult->registerSemanticToken(SemanticTokenType::NUMBER, 0, token.start, token.characterCount);
-		compilationResult->tokens.emplace_back(token);
+		output->registerSemanticToken(SemanticTokenType::NUMBER, 0, token.start, token.characterCount);
+		output->tokens.emplace_back(token);
 	}
 
 	void Lexer::readIdentifier(Token& token) {
 		token.characterCount = position.characterOffset - token.start.characterOffset;
-		token.value = std::string(&characters[characterIndex - token.characterCount], token.characterCount);
+		token.value = std::string(&output->text[characterIndex - token.characterCount], token.characterCount);
 		token.type = getIdentifierTokenTypeIndex(token.value.c_str());
 
-		compilationResult->tokens.emplace_back(token);
+		output->tokens.emplace_back(token);
 
 		if (token.type <= LAST_KEYWORD_INDEX) {
-			compilationResult->registerSemanticToken(token, SemanticTokenType::KEYWORD, 0);
+			output->registerSemanticToken(token, SemanticTokenType::KEYWORD, 0);
 		}
 	}
 
@@ -436,21 +435,21 @@ namespace ProjectA {
 		identifierIndex = 0;
 
 		// Test against user-defined identifiers.
-		while (identifierIndex < compilationResult->identifiers.size()) {
-			if (std::strcmp(identifier, compilationResult->identifiers[identifierIndex].c_str()) == 0) {
+		while (identifierIndex < output->identifiers.size()) {
+			if (std::strcmp(identifier, output->identifiers[identifierIndex].c_str()) == 0) {
 				return TokenType::USER_DEFINED + identifierIndex;
 			}
 
 			identifierIndex += 1;
 		}
 
-		compilationResult->identifiers.emplace_back(identifier);
+		output->identifiers.emplace_back(identifier);
 
 		return TokenType::USER_DEFINED + identifierIndex;
 	}
 
 	void Lexer::registerToken(TokenType type, uint32 characterCount) {
-		compilationResult->registerToken(type, position, characterCount);
+		output->registerToken(type, position, characterCount);
 
 		jump(characterCount);
 	}

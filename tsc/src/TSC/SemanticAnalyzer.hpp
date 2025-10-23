@@ -1,7 +1,6 @@
 #pragma once
 
-#include "AST.hpp"
-#include "CompilationResult.hpp"
+#include "CompilationOutput.hpp"
 #include "Statement.hpp"
 #include "Token.hpp"
 
@@ -11,12 +10,11 @@ namespace ProjectA {
 			static constexpr uint32 UNDEFINED_INDEX = ~0;
 
 		public:
-			void setCompilationResult(CompilationResult& compilationResult);
-			void setAst(AST& ast);
+			void setCompilationOutput(CompilationOutput* compilationOutput);
 
 			void analyzeStructureStatement(const ref<StructureStatement>& statement);
 			void analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<StructureMemberStatement>& memberStatement);
-			// void analyze(CompilationResult& compilationResult, const AST& ast);
+			// void analyze(CompilationOutput& compilationOutput, const AST& ast);
 
 		private:
 			// void analyzeStatement(const ref<Statement>& statement);
@@ -62,8 +60,7 @@ namespace ProjectA {
 			// bool isScreamingSnakeCaseWord(const Token& identifier) const;
 
 		private:
-			CompilationResult* result;
-			AST* ast;
+			CompilationOutput* output;
 	};
 
 	/* uint32 getTypeScalarCount(Type type) const {
