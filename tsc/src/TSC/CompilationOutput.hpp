@@ -103,12 +103,12 @@ namespace ProjectA {
 			DiagnosticReference diagnosticReference{};
 			diagnosticReference.start = definitionToken.start;
 			diagnosticReference.end = definitionToken.getEnd();
-			diagnosticReference.message = Logger::format("\"[]\" is defined here.", definitionToken.value);
+			diagnosticReference.message = Logger::format("\"[]\" is defined here.", getTokenString(definitionToken));
 
 			Diagnostic diagnostic{};
 			diagnostic.start = redefinitionToken.start;
 			diagnostic.end = redefinitionToken.getEnd();
-			diagnostic.message = Logger::format("Redefinition of \"[]\".", redefinitionToken.value);
+			diagnostic.message = Logger::format("Redefinition of \"[]\".", getTokenString(redefinitionToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::REDEFINITION;
 			diagnostic.references.emplace_back(diagnosticReference);
@@ -123,7 +123,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = templateArgumentToken.start;
 			diagnostic.end = templateArgumentToken.getEnd();
-			diagnostic.message = Logger::format("\"[]\" cannot be used as a template argument for type \"[]\".", templateArgumentToken.value, typeToken.value);
+			diagnostic.message = Logger::format("\"[]\" cannot be used as a template argument for type \"[]\".", getTokenString(templateArgumentToken), getTokenString(typeToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
 
@@ -137,7 +137,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = typeToken.start;
 			diagnostic.end = typeToken.getEnd();
-			diagnostic.message = Logger::format("Undefined type \"[]\".", typeToken.value);
+			diagnostic.message = Logger::format("Undefined type \"[]\".", getTokenString(typeToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::UNDEFINED_TYPE;
 
@@ -151,7 +151,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = typeToken.start;
 			diagnostic.end = typeToken.getEnd();
-			diagnostic.message = Logger::format("Incomplete type \"[]\".", typeToken.value);
+			diagnostic.message = Logger::format("Incomplete type \"[]\".", getTokenString(typeToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::INCOMPLETE_TYPE;
 

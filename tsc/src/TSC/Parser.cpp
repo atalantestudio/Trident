@@ -188,7 +188,7 @@ namespace ProjectA {
 
 		statement->identifierTokenIndex = tokenIndex;
 
-		EXPECT(isScreamingSnakeCase(read().value.c_str()), "[CONSTANT] Constant identifier " + getTokenString(read()) + " is not written in SCREAMING_SNAKE_CASE.");
+		EXPECT(isScreamingSnakeCase(read().value, read().characterCount), "[CONSTANT] Constant identifier " + getTokenString(read()) + " is not written in SCREAMING_SNAKE_CASE.");
 
 		jump();
 
@@ -469,7 +469,7 @@ namespace ProjectA {
 		EXPECT(read().type >= TokenType::USER_DEFINED, "[VARIABLE] Expected a UDI but got " + getTokenString(read()) + ".");
 
 		statement->identifierTokenIndex = tokenIndex;
-		statement->constant = isScreamingSnakeCase(read().value.c_str());
+		statement->constant = isScreamingSnakeCase(read().value, read().characterCount);
 
 		if (statement->constant) {
 			output->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
@@ -678,7 +678,7 @@ namespace ProjectA {
 		ref<IdentifierExpression> expression = createRef<IdentifierExpression>();
 		expression->identifierTokenIndex = tokenIndex;
 
-		if (isScreamingSnakeCase(read().value.c_str())) {
+		if (isScreamingSnakeCase(read().value, read().characterCount)) {
 			output->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
 		}
 
@@ -801,7 +801,7 @@ namespace ProjectA {
 			for (uint32 annotationIndex = 0; annotationIndex < ANNOTATION_COUNT; annotationIndex += 1) {
 				const char8* annotation = ANNOTATION_STRINGS[annotationIndex];
 
-				if (read().value == annotation) {
+				if (getTokenString(read()) == annotation) {
 					annotationFlag |= BIT(annotationIndex);
 					annotationInstance.annotation = static_cast<Annotation>(BIT(annotationIndex));
 
@@ -915,30 +915,28 @@ namespace ProjectA {
 	}
 
 	bool Parser::registerVariableSemanticToken(const Token& token, bool preferStructure) const {
-		const char8* value = token.value.c_str();
-
 		// TODO: Refactor.
 		if (preferStructure) {
-			if (isPascalCase(value)) {
+			if (isPascalCase(token.value, token.characterCount)) {
 				output->registerSemanticToken(token, SemanticTokenType::STRUCTURE, 0);
 
 				return true;
 			}
 
-			if (isScreamingSnakeCase(value)) {
+			if (isScreamingSnakeCase(token.value, token.characterCount)) {
 				output->registerSemanticToken(token, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
 
 				return true;
 			}
 		}
 		else {
-			if (isScreamingSnakeCase(value)) {
+			if (isScreamingSnakeCase(token.value, token.characterCount)) {
 				output->registerSemanticToken(token, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
 
 				return true;
 			}
 
-			if (isPascalCase(value)) {
+			if (isPascalCase(token.value, token.characterCount)) {
 				output->registerSemanticToken(token, SemanticTokenType::STRUCTURE, 0);
 
 				return true;

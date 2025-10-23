@@ -15,7 +15,7 @@ namespace ProjectA {
 	void SemanticAnalyzer::analyzeStructureStatement(const ref<StructureStatement>& statement) {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		if (!isPascalCase(identifierToken.value.c_str())) {
+		if (!isPascalCase(identifierToken.value, identifierToken.characterCount)) {
 			generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE>(*output, identifierToken);
 		}
 
@@ -48,18 +48,19 @@ namespace ProjectA {
 		analyzeTypeExpression(memberStatement->typeExpressionIndex);
 
 		const Token& identifierToken = output->tokens[memberStatement->identifierTokenIndex];
+		const std::string identifierTokenString = getTokenString(identifierToken);
 
 		for (const uint32 memberIdentifierTokenIndex : structureStatement->memberIdentifierTokenIndices) {
 			const Token& definitionToken = output->tokens[memberIdentifierTokenIndex];
 
-			if (identifierToken.value == definitionToken.value) {
+			if (identifierTokenString == getTokenString(definitionToken)) {
 				generateDiagnostic<DiagnosticCode::REDEFINITION>(*output, definitionToken, identifierToken);
 
 				break;
 			}
 		}
 
-		if (!isCamelCaseOrSnakeCase(identifierToken.value.c_str())) {
+		if (!isCamelCaseOrSnakeCase(identifierToken.value, identifierToken.characterCount)) {
 			generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE>(*output, identifierToken);
 		}
 
@@ -68,11 +69,11 @@ namespace ProjectA {
 
 		const Token& structureIdentifierToken = output->tokens[structureStatement->identifierTokenIndex];
 
-		if (typeToken.value == structureIdentifierToken.value) {
+		if (getTokenString(typeToken) == getTokenString(structureIdentifierToken)) {
 			generateDiagnostic<DiagnosticCode::INCOMPLETE_TYPE>(*output, typeToken);
 		}
 
-		output->ast.userDefinedTypes.emplace_back(structureIdentifierToken.value);
+		output->ast.userDefinedTypes.emplace_back(getTokenString(structureIdentifierToken));
 	}
 
 	/* void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement> statement) {
@@ -530,72 +531,4 @@ namespace ProjectA {
 	}
 
 	void SemanticAnalyzer::analyzeVertexIndexAnnotation(const AnnotationInstance& annotationInstance) {}
-
-	/* bool SemanticAnalyzer::isLanguageType(const Token& identifier) const {
-		return isScalarType(identifier) || isVectorType(identifier) || isMatrixType(identifier);
-	}
-
-	bool SemanticAnalyzer::isScalarType(const Token& identifier) const {
-		return isFloatingPointScalarType(identifier) || identifier.value == "sint32" || identifier.value == "uint32";
-	}
-
-	bool SemanticAnalyzer::isFloatingPointScalarType(const Token& identifier) const {
-		return identifier.value == "float32" || identifier.value == "float64";
-	}
-
-	bool SemanticAnalyzer::isVectorType(const Token& identifier) const {
-		return identifier.value == "vec2" || identifier.value == "vec3" || identifier.value == "vec4";
-	}
-
-	bool SemanticAnalyzer::isMatrixType(const Token& identifier) const {
-		return (
-			identifier.value == "mat2x2" ||
-			identifier.value == "mat2x3" ||
-			identifier.value == "mat2x4" ||
-			identifier.value == "mat3x2" ||
-			identifier.value == "mat3x3" ||
-			identifier.value == "mat3x4" ||
-			identifier.value == "mat4x2" ||
-			identifier.value == "mat4x3" ||
-			identifier.value == "mat4x4"
-		);
-	}
-
-	bool SemanticAnalyzer::isUserDefinedType(const Token& identifier) const {
-		for (const std::string& type : ast.userDefinedTypes) {
-			if (identifier.value == type) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	bool SemanticAnalyzer::isReservedWord(const Token& identifier) const {
-		return isLanguageType(identifier);
-	}
-
-	bool SemanticAnalyzer::isPascalCaseWord(const Token& identifier) const {
-		if (identifier.value[0] < 'A' || identifier.value[0] > 'Z') {
-			return false;
-		}
-
-		for (const char8 character : identifier.value) {
-			if (character == '_') {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	bool SemanticAnalyzer::isScreamingSnakeCaseWord(const Token& identifier) const {
-		for (const char8 character : identifier.value) {
-			if ((character < 'A' || character > 'Z') && character != '_') {
-				return false;
-			}
-		}
-
-		return true;
-	} */
 }

@@ -55,7 +55,6 @@ namespace ProjectA {
 		emscripten::class_<Token>("Token")
 			.property("start", &Token::start)
 			.property("length", &Token::characterCount)
-			.property("value", &Token::value)
 			.function("getTypeIndex", &Token::getTypeIndex);
 
 		emscripten::function("compile", &compile);

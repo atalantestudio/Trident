@@ -25,7 +25,7 @@ namespace ProjectA {
 			void registerNumberLiteral(Token& token);
 			void readIdentifier(Token& token);
 
-			uint32 getIdentifierTokenTypeIndex(const char8* identifier) const;
+			uint32 getIdentifierTokenTypeIndex(const std::string& identifier) const;
 
 			void registerToken(TokenType type, uint32 characterCount);
 

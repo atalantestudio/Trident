@@ -149,7 +149,7 @@ namespace ProjectA {
 
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		stream << identifierToken.value;
+		stream << getTokenString(identifierToken);
 
 		if (statement->initializerExpressionIndex != ~0) {
 			stream << " = ";
@@ -266,7 +266,7 @@ namespace ProjectA {
 		const ref<IdentifierExpression> expression = std::static_pointer_cast<IdentifierExpression>(output->ast.expressions[expressionIndex]);
 		const Token& identifierToken = output->tokens[expression->identifierTokenIndex];
 
-		stream << identifierToken.value;
+		stream << getTokenString(identifierToken);
 	}
 
 	void GLSLCodeGenerator::writeNumberExpression(uint32 expressionIndex) {
@@ -281,7 +281,7 @@ namespace ProjectA {
 			"Bases 2, 8 and 16 are not supported yet."
 		);
 
-		stream << numberToken.value;
+		stream << getTokenString(numberToken);
 	}
 
 	void GLSLCodeGenerator::writeUnaryExpression(uint32 expressionIndex) {
@@ -311,7 +311,7 @@ namespace ProjectA {
 
 		const Token& identifierToken = output->tokens[expression->identifierTokenIndex];
 
-		stream << "." << identifierToken.value;
+		stream << "." << getTokenString(identifierToken);
 	}
 
 	void GLSLCodeGenerator::writeTypeExpression(uint32 expressionIndex) {

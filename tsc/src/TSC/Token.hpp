@@ -7,7 +7,7 @@ namespace ProjectA {
 	class Token {
 		public:
 			uint32 getTypeIndex() const {
-				return type;
+				return static_cast<uint32>(type);
 			}
 
 			DocumentPosition getEnd() const {
@@ -19,13 +19,10 @@ namespace ProjectA {
 			}
 
 		public:
-			uint32 type;
+			TokenType type;
 			DocumentPosition start;
 			uint32 characterCount;
-
-			// TODO: Replace value by an offset into a buffer stored in CompilationOutput.
-			std::string value;
-			// uint32 identifierBufferOffset = ~0;
+			const char8* value = nullptr;
 	};
 
 	inline const std::string getTokenString(const Token& token) {
@@ -100,7 +97,7 @@ namespace ProjectA {
 			case LITERAL_INTEGER_BASE_16:
 			case USER_DEFINED:
 			default: {
-				return token.value;
+				return std::string(token.value, token.characterCount);
 			}
 		}
 	}

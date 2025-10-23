@@ -402,7 +402,7 @@ namespace ProjectA {
 
 	void Lexer::registerNumberLiteral(Token& token) {
 		token.characterCount = position.characterOffset - token.start.characterOffset;
-		token.value = std::string(&output->text[characterIndex - token.characterCount], token.characterCount);
+		token.value = &output->text[characterIndex - token.characterCount];
 
 		output->registerSemanticToken(SemanticTokenType::NUMBER, 0, token.start, token.characterCount);
 		output->tokens.emplace_back(token);
@@ -410,8 +410,14 @@ namespace ProjectA {
 
 	void Lexer::readIdentifier(Token& token) {
 		token.characterCount = position.characterOffset - token.start.characterOffset;
-		token.value = std::string(&output->text[characterIndex - token.characterCount], token.characterCount);
-		token.type = getIdentifierTokenTypeIndex(token.value.c_str());
+
+		const char8* value = &output->text[characterIndex - token.characterCount];
+
+		token.type = static_cast<TokenType>(getIdentifierTokenTypeIndex(std::string(value, token.characterCount)));
+
+		if (token.type >= TokenType::USER_DEFINED) {
+			token.value = value;
+		}
 
 		output->tokens.emplace_back(token);
 
@@ -420,12 +426,12 @@ namespace ProjectA {
 		}
 	}
 
-	uint32 Lexer::getIdentifierTokenTypeIndex(const char8* identifier) const {
+	uint32 Lexer::getIdentifierTokenTypeIndex(const std::string& identifier) const {
 		uint32 identifierIndex = 0;
 
 		// Test against reserved keywords.
 		while (identifierIndex < RESERVED_KEYWORD_COUNT) {
-			if (std::strcmp(identifier, RESERVED_KEYWORDS[identifierIndex]) == 0) {
+			if (identifier == RESERVED_KEYWORDS[identifierIndex]) {
 				return identifierIndex;
 			}
 
@@ -436,7 +442,7 @@ namespace ProjectA {
 
 		// Test against user-defined identifiers.
 		while (identifierIndex < output->identifiers.size()) {
-			if (std::strcmp(identifier, output->identifiers[identifierIndex].c_str()) == 0) {
+			if (identifier == output->identifiers[identifierIndex]) {
 				return TokenType::USER_DEFINED + identifierIndex;
 			}
 
