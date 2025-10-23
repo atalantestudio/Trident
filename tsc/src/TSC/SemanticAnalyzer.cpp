@@ -280,6 +280,24 @@ namespace ProjectA {
 		}
 	}
 
+	void SemanticAnalyzer::analyzeIdentifierExpression(const ref<IdentifierExpression>& expression) const {
+		const Token& identifierToken = output->tokens[expression->identifierTokenIndex];
+
+		if (!output->isDefined(identifierToken)) {
+			generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, identifierToken);
+		}
+	}
+
+	void SemanticAnalyzer::analyzeMemberAccessExpression(const ref<MemberAccessExpression>& expression) const {
+		// The left expression has already been analyzed; only check the identifier.
+
+		const Token& identifierToken = output->tokens[expression->identifierTokenIndex];
+
+		if (!output->isDefined(identifierToken)) {
+			generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, identifierToken);
+		}
+	}
+
 	/* void SemanticAnalyzer::analyzeExpression(uint32 expressionIndex) {
 		const ref<Expression>& expression = ast.expressions[expressionIndex];
 

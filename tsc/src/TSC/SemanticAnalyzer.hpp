@@ -16,6 +16,9 @@ namespace ProjectA {
 			void analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<StructureMemberStatement>& memberStatement);
 			// void analyze(CompilationOutput& compilationOutput, const AST& ast);
 
+			void analyzeIdentifierExpression(const ref<IdentifierExpression>& expression) const;
+			void analyzeMemberAccessExpression(const ref<MemberAccessExpression>& expression) const;
+
 		private:
 			// void analyzeStatement(const ref<Statement>& statement);
 			// void analyzeVariableStatement(const ref<VariableStatement> statement);
@@ -24,12 +27,11 @@ namespace ProjectA {
 			// void analyzeScopeStatement(const ref<ScopeStatement> statement);
 
 			// Returns a flag representing the combined annotations of the member.
-			Annotation analyzeMemberStatement(const ref<VariableStatement> statement);
+			// Annotation analyzeMemberStatement(const ref<VariableStatement> statement);
 
 			void analyzeTypeExpression(uint32 typeExpressionIndex);
 			// void analyzeExpression(uint32 expressionIndex);
 			// void analyzeNumberExpression(const ref<NumberExpression> expression);
-			// void analyzeIdentifierExpression(const ref<IdentifierExpression> expression);
 			// void analyzeUnaryExpression(const ref<UnaryExpression> expression);
 			// void analyzeBinaryExpression(const ref<BinaryExpression> expression);
 			// void analyzeGroupExpression(const ref<GroupExpression> expression);

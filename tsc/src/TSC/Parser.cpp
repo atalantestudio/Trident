@@ -51,6 +51,7 @@ namespace ProjectA {
 		visitedWhileCount = 0;
 
 		analyzer.setCompilationOutput(output);
+		output->openDefinitionStack();
 
 		skipEmptyLines();
 
@@ -61,6 +62,8 @@ namespace ProjectA {
 
 			skipEmptyLines();
 		}
+
+		output->closeDefinitionStack();
 	}
 
 	bool Parser::parseGlobalScopeStatement() {
@@ -84,6 +87,11 @@ namespace ProjectA {
 		statement->identifierTokenIndex = tokenIndex;
 
 		registerVariableSemanticToken(read(), true);
+
+		const uint32 structureStatementIndex = static_cast<uint32>(output->ast.statements.size());
+
+		output->define(tokenIndex, structureStatementIndex);
+		output->registerCompletionItem(tokenIndex, CompletionItemKind::STRUCTURE);
 
 		jump();
 		jump();
@@ -190,6 +198,9 @@ namespace ProjectA {
 
 		EXPECT(isScreamingSnakeCase(read().value, read().characterCount), "[CONSTANT] Constant identifier " + getTokenString(read()) + " is not written in SCREAMING_SNAKE_CASE.");
 
+		output->define(tokenIndex);
+		output->registerCompletionItem(tokenIndex, CompletionItemKind::CONSTANT);
+
 		jump();
 
 		EXPECT(read().type == TokenType::EQUAL, "[CONSTANT] Expected '=' but got " + getTokenString(read()) + ".");
@@ -220,10 +231,13 @@ namespace ProjectA {
 
 		ref<FunctionStatement> statement = createRef<FunctionStatement>();
 		statement->returnTypeExpressionIndex = getLastExpressionIndex();
-		statement->identifierTokenIndex = tokenIndex;
 
 		EXPECT(read().type >= TokenType::USER_DEFINED, "[FUNCTION] Expected a UDI but got " + getTokenString(read()) + ".");
 
+		statement->identifierTokenIndex = tokenIndex;
+
+		output->define(tokenIndex);
+		output->registerCompletionItem(tokenIndex, CompletionItemKind::FUNCTION);
 		output->registerSemanticToken(tokenIndex, SemanticTokenType::FUNCTION, 0);
 
 		jump();
@@ -403,6 +417,8 @@ namespace ProjectA {
 		jump();
 		skipEmptyLines();
 
+		output->openDefinitionStack();
+
 		while (read().type != TokenType::RIGHT_CURLY_BRACE && read().type != TokenType::END_OF_FILE) {
 			if (!parseLocalScopeStatement()) {
 				return false;
@@ -416,6 +432,8 @@ namespace ProjectA {
 		EXPECT(read().type == TokenType::RIGHT_CURLY_BRACE, "[SCOPE] Expected '}' but got " + getTokenString(read()) + ".");
 
 		jump();
+
+		output->closeDefinitionStack();
 
 		output->ast.statements.emplace_back(statement);
 
@@ -469,6 +487,10 @@ namespace ProjectA {
 		EXPECT(read().type >= TokenType::USER_DEFINED, "[VARIABLE] Expected a UDI but got " + getTokenString(read()) + ".");
 
 		statement->identifierTokenIndex = tokenIndex;
+
+		output->define(tokenIndex);
+		output->registerCompletionItem(tokenIndex, CompletionItemKind::VARIABLE);
+
 		statement->constant = isScreamingSnakeCase(read().value, read().characterCount);
 
 		if (statement->constant) {
@@ -685,6 +707,8 @@ namespace ProjectA {
 		jump();
 
 		output->ast.expressions.emplace_back(expression);
+
+		analyzer.analyzeIdentifierExpression(expression);
 
 		if (read().type == TokenType::DOT) {
 			return parseMemberAccessExpression();
