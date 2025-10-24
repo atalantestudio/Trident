@@ -3,465 +3,410 @@
 #include "TSC/ASTDebugger.hpp"
 
 namespace ProjectA {
-	void ASTDebugger::write(std::ofstream& stream, const CompilationOutput& output) {
+	ASTDebugger::ASTDebugger(std::string_view path, const CompilationOutput& output) :
+		logger(path, 4)
+	{
 		this->output = &output;
-		indentationLevel = 0;
-		indentation = "";
 
-		stream << "[\n";
+		logger.openArray();
 
-		indent();
+		for (const uint32 statementIndex : output.ast.globalScopeStatementIndices) {
+			logger.openObject();
 
-		for (uint32 statementIndexOffset = 0; statementIndexOffset < output.ast.globalScopeStatementIndices.size(); statementIndexOffset += 1) {
-			stream << indentation;
+			writeStatement(statementIndex);
 
-			const uint32 statementIndex = output.ast.globalScopeStatementIndices[statementIndexOffset];
-
-			writeStatement(stream, statementIndex);
-
-			if (statementIndexOffset + 1 < output.ast.globalScopeStatementIndices.size()) {
-				stream << ",";
-			}
-
-			stream << "\n";
+			logger.closeObject();
 		}
 
-		unindent();
-
-		stream << "]";
+		logger.closeArray();
 	}
 
-	void ASTDebugger::writeStatement(std::ofstream& stream, uint32 statementIndex) {
+	void ASTDebugger::writeStatement(uint32 statementIndex) {
 		const ref<Statement>& statement = output->ast.statements[statementIndex];
 
-		stream << "{\n";
-
-		indent();
-
 		switch (statement->statementType) {
-			case StatementType::STRUCTURE: writeStructureStatement(stream, statementIndex); break;
-			case StatementType::MEMBER: writeMemberStatement(stream, statementIndex); break;
-			case StatementType::CONSTANT: writeConstantStatement(stream, statementIndex); break;
-			case StatementType::VARIABLE: writeVariableStatement(stream, statementIndex); break;
-			case StatementType::PARAMETER: writeParameterStatement(stream, statementIndex); break;
-			case StatementType::FUNCTION: writeFunctionStatement(stream, statementIndex); break;
-			case StatementType::EXPRESSION: writeExpressionStatement(stream, statementIndex); break;
-			case StatementType::SCOPE: writeScopeStatement(stream, statementIndex); break;
-			case StatementType::IF: writeIfStatement(stream, statementIndex); break;
-			case StatementType::WHILE: writeWhileStatement(stream, statementIndex); break;
-			case StatementType::BREAK: writeBreakStatement(stream); break;
-			case StatementType::NEXT: writeNextStatement(stream); break;
-			case StatementType::RETURN: writeReturnStatement(stream, statementIndex); break;
+			case StatementType::STRUCTURE: writeStructureStatement(statementIndex); break;
+			case StatementType::MEMBER: writeMemberStatement(statementIndex); break;
+			case StatementType::CONSTANT: writeConstantStatement(statementIndex); break;
+			case StatementType::VARIABLE: writeVariableStatement(statementIndex); break;
+			case StatementType::PARAMETER: writeParameterStatement(statementIndex); break;
+			case StatementType::FUNCTION: writeFunctionStatement(statementIndex); break;
+			case StatementType::EXPRESSION: writeExpressionStatement(statementIndex); break;
+			case StatementType::SCOPE: writeScopeStatement(statementIndex); break;
+			case StatementType::IF: writeIfStatement(statementIndex); break;
+			case StatementType::WHILE: writeWhileStatement(statementIndex); break;
+			case StatementType::BREAK: writeBreakStatement(); break;
+			case StatementType::NEXT: writeNextStatement(); break;
+			case StatementType::RETURN: writeReturnStatement(statementIndex); break;
 		}
-
-		unindent();
-
-		stream << "\n";
-		stream << indentation << "}";
 	}
 
-	void ASTDebugger::writeStructureStatement(std::ofstream& stream, uint32 statementIndex) {
+	void ASTDebugger::writeStructureStatement(uint32 statementIndex) {
 		const ref<StructureStatement> statement = std::static_pointer_cast<StructureStatement>(output->ast.statements[statementIndex]);
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		stream << indentation << "\"Type\": \"StructureStatement\",\n";
-		stream << indentation << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
-		stream << indentation << "\"Members\": [\n";
+		logger.property("Type", "StructureStatement");
+		logger.property("Identifier", getTokenString(identifierToken));
+		logger.propertyArray("Members");
 
-		indent();
+		for (const uint32 statementIndex : statement->memberStatementIndices) {
+			logger.openObject();
 
-		for (uint32 statementIndexOffset = 0; statementIndexOffset < statement->memberStatementIndices.size(); statementIndexOffset += 1) {
-			stream << indentation;
+			writeStatement(statementIndex);
 
-			writeStatement(stream, statement->memberStatementIndices[statementIndexOffset]);
-
-			if (statementIndexOffset + 1 < statement->memberStatementIndices.size()) {
-				stream << ",";
-			}
-
-			stream << "\n";
+			logger.closeObject();
 		}
 
-		unindent();
-
-		stream << indentation << "]";
+		logger.closeArray();
 	}
 
-	void ASTDebugger::writeMemberStatement(std::ofstream& stream, uint32 statementIndex) {
+	void ASTDebugger::writeMemberStatement(uint32 statementIndex) {
 		const ref<MemberStatement> statement = std::static_pointer_cast<MemberStatement>(output->ast.statements[statementIndex]);
 
-		stream << indentation << "\"Type\": \"MemberStatement\",\n";
-		stream << indentation << "\"AnnotationFlag\": " << statement->annotationFlag << ",\n";
-		stream << indentation << "\"Annotations\": ";
+		logger.property("Type", "MemberStatement");
+		logger.property("AnnotationFlag", statement->annotationFlag);
 
-		writeAnnotationBlocks(stream, statement->annotationBlockIndexOffset, statement->annotationBlockCount);
+		writeAnnotationBlocks(statement->annotationBlockIndexOffset, statement->annotationBlockCount);
 
-		stream << ",\n";
-		stream << indentation << "\"_Type\": ";
+		logger.propertyObject("_Type");
 
-		writeExpression(stream, statement->typeExpressionReferenceIndex);
+		writeExpression(statement->typeExpressionReferenceIndex);
+
+		logger.closeObject();
 
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		stream << ",\n";
-		stream << indentation << "\"Identifier\": \"" << getTokenString(identifierToken) << "\"";
+		logger.property("Identifier", getTokenString(identifierToken));
 	}
 
-	void ASTDebugger::writeConstantStatement(std::ofstream& stream, uint32 statementIndex) {
+	void ASTDebugger::writeConstantStatement(uint32 statementIndex) {
 		const ref<ConstantStatement> statement = std::static_pointer_cast<ConstantStatement>(output->ast.statements[statementIndex]);
-
-		stream << indentation << "\"Type\": \"ConstantStatement\",\n";
-		stream << indentation << "\"AnnotationFlag\": " << statement->annotationFlag << ",\n";
-		stream << indentation << "\"Annotations\": ";
-
-		writeAnnotationBlocks(stream, statement->annotationBlockIndexOffset, statement->annotationBlockCount);
-
-		stream << ",\n";
-		stream << indentation << "\"_Type\": ";
-
-		writeExpression(stream, statement->typeExpressionReferenceIndex);
-
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		stream << ",\n";
-		stream << indentation << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
-		stream << indentation << "\"Initializer\": ";
+		logger.property("Type", "ConstantStatement");
+		logger.property("AnnotationFlag", statement->annotationFlag);
 
-		writeExpression(stream, statement->initializerExpressionReferenceIndex);
+		writeAnnotationBlocks(statement->annotationBlockIndexOffset, statement->annotationBlockCount);
+
+		logger.propertyObject("_Type");
+
+		writeExpression(statement->typeExpressionReferenceIndex);
+
+		logger.closeObject();
+		logger.property("Identifier", getTokenString(identifierToken));
+		logger.propertyObject("Initializer");
+
+		writeExpression(statement->initializerExpressionReferenceIndex);
+
+		logger.closeObject();
 	}
 
-	void ASTDebugger::writeVariableStatement(std::ofstream& stream, uint32 statementIndex) {
+	void ASTDebugger::writeVariableStatement(uint32 statementIndex) {
 		const ref<VariableStatement> statement = std::static_pointer_cast<VariableStatement>(output->ast.statements[statementIndex]);
-
-		stream << indentation << "\"Type\": \"VariableStatement\",\n";
-		stream << indentation << "\"_Type\": ";
-
-		writeExpression(stream, statement->typeExpressionReferenceIndex);
-
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		stream << ",\n";
-		stream << indentation << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
-		stream << indentation << "\"Constant\": \"" << std::to_string(statement->constant) << "\",\n";
-		stream << indentation << "\"Initializer\": ";
+		logger.property("Type", "VariableStatement");
+		logger.propertyObject("_Type");
+
+		writeExpression(statement->typeExpressionReferenceIndex);
+
+		logger.closeObject();
+		logger.property("Identifier", getTokenString(identifierToken));
+		logger.property("Constant", statement->constant);
 
 		if (statement->initializerExpressionReferenceIndex != UNDEFINED_EXPRESSION) {
-			writeExpression(stream, statement->initializerExpressionReferenceIndex);
+			logger.propertyObject("Initializer");
 
-			return;
+			writeExpression(statement->initializerExpressionReferenceIndex);
+
+			logger.closeObject();
 		}
-
-		stream << "null";
+		else {
+			logger.property("Initializer", "null");
+		}
 	}
 
-	void ASTDebugger::writeParameterStatement(std::ofstream& stream, uint32 statementIndex) {
+	void ASTDebugger::writeParameterStatement(uint32 statementIndex) {
 		const ref<ParameterStatement> statement = std::static_pointer_cast<ParameterStatement>(output->ast.statements[statementIndex]);
-
-		stream << indentation << "\"Type\": \"ParameterStatement\",\n";
-		stream << indentation << "\"_Type\": ";
-
-		writeExpression(stream, statement->typeExpressionReferenceIndex);
-
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		stream << ",\n";
-		stream << indentation << "\"Identifier\": \"" << getTokenString(identifierToken) << "\"";
+		logger.property("Type", "ParameterStatement");
+		logger.propertyObject("_Type");
+
+		writeExpression(statement->typeExpressionReferenceIndex);
+
+		logger.closeObject();
+		logger.property("Identifier", getTokenString(identifierToken));
 	}
 
-	void ASTDebugger::writeFunctionStatement(std::ofstream& stream, uint32 statementIndex) {
+	void ASTDebugger::writeFunctionStatement(uint32 statementIndex) {
 		const ref<FunctionStatement> statement = std::static_pointer_cast<FunctionStatement>(output->ast.statements[statementIndex]);
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		stream << indentation << "\"Type\": \"FunctionStatement\",\n";
-		stream << indentation << "\"ReturnType\": ";
+		logger.property("Type", "FunctionStatement");
+		logger.propertyObject("ReturnType");
 
-		writeExpression(stream, statement->returnTypeExpressionReferenceIndex);
+		writeExpression(statement->returnTypeExpressionReferenceIndex);
 
-		stream << ",\n";
-		stream << indentation << "\"Identifier\": \"" << getTokenString(identifierToken) << "\",\n";
-		stream << indentation << "\"Arguments\": [\n";
+		logger.closeObject();
+		logger.property("Identifier", getTokenString(identifierToken));
+		logger.propertyArray("Arguments");
 
-		indent();
+		for (const uint32 statementIndex : statement->parameterStatementIndices) {
+			logger.openObject();
 
-		for (uint32 statementIndexOffset = 0; statementIndexOffset < statement->parameterStatementIndices.size(); statementIndexOffset += 1) {
-			stream << indentation;
+			writeStatement(statementIndex);
 
-			writeStatement(stream, statement->parameterStatementIndices[statementIndexOffset]);
-
-			if (statementIndexOffset + 1 < statement->parameterStatementIndices.size()) {
-				stream << ",";
-			}
-
-			stream << "\n";
+			logger.closeObject();
 		}
 
-		unindent();
+		logger.closeArray();
+		logger.propertyObject("Scope");
 
-		stream << indentation << "],\n";
-		stream << indentation << "\"Scope\": ";
+		writeStatement(statement->scopeStatementIndex);
 
-		writeStatement(stream, statement->scopeStatementIndex);
+		logger.closeObject();
 	}
 
-	void ASTDebugger::writeExpressionStatement(std::ofstream& stream, uint32 statementIndex) {
+	void ASTDebugger::writeExpressionStatement(uint32 statementIndex) {
 		const ref<ExpressionStatement> statement = std::static_pointer_cast<ExpressionStatement>(output->ast.statements[statementIndex]);
 
-		stream << indentation << "\"Type\": \"ExpressionStatement\",\n";
-		stream << indentation << "\"Expression\": ";
+		logger.property("Type", "ExpressionStatement");
+		logger.propertyObject("Expression");
 
-		writeExpression(stream, statement->expressionReferenceIndex);
+		writeExpression(statement->expressionReferenceIndex);
+
+		logger.closeObject();
 	}
 
-	void ASTDebugger::writeScopeStatement(std::ofstream& stream, uint32 statementIndex) {
+	void ASTDebugger::writeScopeStatement(uint32 statementIndex) {
 		const ref<ScopeStatement> statement = std::static_pointer_cast<ScopeStatement>(output->ast.statements[statementIndex]);
 
-		stream << indentation << "\"Type\": \"ScopeStatement\",\n";
-		stream << indentation << "\"Statements\": [\n";
+		logger.property("Type", "ScopeStatement");
+		logger.propertyArray("Statements");
 
-		indent();
+		for (const uint32 statementIndex : statement->statementIndices) {
+			logger.openObject();
 
-		for (uint32 statementIndexOffset = 0; statementIndexOffset < statement->statementIndices.size(); statementIndexOffset += 1) {
-			stream << indentation;
+			writeStatement(statementIndex);
 
-			writeStatement(stream, statement->statementIndices[statementIndexOffset]);
-
-			if (statementIndexOffset + 1 < statement->statementIndices.size()) {
-				stream << ",";
-			}
-
-			stream << "\n";
+			logger.closeObject();
 		}
 
-		unindent();
-
-		stream << indentation << "]";
+		logger.closeArray();
 	}
 
-	void ASTDebugger::writeIfStatement(std::ofstream& stream, uint32 statementIndex) {
+	void ASTDebugger::writeIfStatement(uint32 statementIndex) {
 		const ref<IfStatement> statement = std::static_pointer_cast<IfStatement>(output->ast.statements[statementIndex]);
 
-		stream << indentation << "\"Type\": \"IfStatement\",\n";
-		stream << indentation << "\"Condition\": ";
+		logger.property("Type", "IfStatement");
+		logger.propertyObject("Condition");
 
-		writeExpression(stream, statement->conditionExpressionReferenceIndex);
+		writeExpression(statement->conditionExpressionReferenceIndex);
 
-		stream << ",\n";
-		stream << indentation << "\"Scope\": ";
+		logger.closeObject();
+		logger.propertyObject("Scope");
 
-		writeStatement(stream, statement->scopeStatementIndex);
+		writeStatement(statement->scopeStatementIndex);
+
+		logger.closeObject();
 	}
 
-	void ASTDebugger::writeWhileStatement(std::ofstream& stream, uint32 statementIndex) {
+	void ASTDebugger::writeWhileStatement(uint32 statementIndex) {
 		const ref<WhileStatement> statement = std::static_pointer_cast<WhileStatement>(output->ast.statements[statementIndex]);
 
-		stream << indentation << "\"Type\": \"WhileStatement\",\n";
-		stream << indentation << "\"Condition\": ";
+		logger.property("Type", "WhileStatement");
+		logger.propertyObject("Condition");
 
-		writeExpression(stream, statement->conditionExpressionReferenceIndex);
+		writeExpression(statement->conditionExpressionReferenceIndex);
 
-		stream << ",\n";
-		stream << indentation << "\"Scope\": ";
+		logger.closeObject();
+		logger.propertyObject("Scope");
 
-		writeStatement(stream, statement->scopeStatementIndex);
+		writeStatement(statement->scopeStatementIndex);
+
+		logger.closeObject();
 	}
 
-	void ASTDebugger::writeBreakStatement(std::ofstream& stream) const {
-		stream << indentation << "\"Type\": \"BreakStatement\"";
+	void ASTDebugger::writeBreakStatement() {
+		logger.property("Type", "BreakStatement");
 	}
 
-	void ASTDebugger::writeNextStatement(std::ofstream& stream) const {
-		stream << indentation << "\"Type\": \"NextStatement\"";
+	void ASTDebugger::writeNextStatement() {
+		logger.property("Type", "NextStatement");
 	}
 
-	void ASTDebugger::writeReturnStatement(std::ofstream& stream, uint32 statementIndex) {
+	void ASTDebugger::writeReturnStatement(uint32 statementIndex) {
 		const ref<ReturnStatement> statement = std::static_pointer_cast<ReturnStatement>(output->ast.statements[statementIndex]);
 
-		stream << indentation << "\"Type\": \"ReturnStatement\",\n";
-		stream << indentation << "\"Expression\": ";
+		logger.property("Type", "ReturnStatement");
+		logger.propertyObject("Expression");
 
-		writeExpression(stream, statement->expressionReferenceIndex);
+		writeExpression(statement->expressionReferenceIndex);
+
+		logger.closeObject();
 	}
 
-	void ASTDebugger::writeExpression(std::ofstream& stream, uint32 referenceIndex) {
-		stream << "{\n";
-
-		indent();
-
+	void ASTDebugger::writeExpression(uint32 referenceIndex) {
 		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
 
 		switch (expressionReference.type) {
-			case ExpressionType::NUMBER: writeNumberExpression(stream, expressionReference.byteOffset); break;
-			case ExpressionType::IDENTIFIER: writeIdentifierExpression(stream, expressionReference.byteOffset); break;
-			case ExpressionType::UNARY: writeUnaryExpression(stream, expressionReference.byteOffset); break;
-			case ExpressionType::BINARY: writeBinaryExpression(stream, expressionReference.byteOffset); break;
-			case ExpressionType::GROUP: writeGroupExpression(stream, expressionReference.byteOffset); break;
-			case ExpressionType::MEMBER_ACCESS: writeMemberAccessExpression(stream, expressionReference.byteOffset); break;
-			case ExpressionType::FUNCTION_CALL: writeFunctionCallExpression(stream, expressionReference.byteOffset); break;
-			case ExpressionType::TYPE: writeTypeExpression(stream, expressionReference.byteOffset); break;
+			case ExpressionType::NUMBER: writeNumberExpression(expressionReference.byteOffset); break;
+			case ExpressionType::IDENTIFIER: writeIdentifierExpression(expressionReference.byteOffset); break;
+			case ExpressionType::UNARY: writeUnaryExpression(expressionReference.byteOffset); break;
+			case ExpressionType::BINARY: writeBinaryExpression(expressionReference.byteOffset); break;
+			case ExpressionType::GROUP: writeGroupExpression(expressionReference.byteOffset); break;
+			case ExpressionType::MEMBER_ACCESS: writeMemberAccessExpression(expressionReference.byteOffset); break;
+			case ExpressionType::FUNCTION_CALL: writeFunctionCallExpression(expressionReference.byteOffset); break;
+			case ExpressionType::TYPE: writeTypeExpression(expressionReference.byteOffset); break;
 		}
-
-		unindent();
-
-		stream << "\n" << indentation << "}";
 	}
 
-	void ASTDebugger::writeNumberExpression(std::ofstream& stream, uint32 byteOffset) const {
+	void ASTDebugger::writeNumberExpression(uint32 byteOffset) {
 		const Expression<ExpressionType::NUMBER>& expression = output->ast.getExpression<ExpressionType::NUMBER>(byteOffset);
 		const Token& numberToken = output->tokens[expression.numberTokenIndex];
 
-		stream << indentation << "\"Type\": \"NumberExpression\",\n";
-		stream << indentation << "\"Number\": \"" << getTokenString(numberToken) << "\"";
+		logger.property("Type", "NumberExpression");
+
+		switch (numberToken.type) {
+			case TokenType::LITERAL_FLOATING_POINT:
+				logger.property("Number", std::stof(getTokenString(numberToken)));
+
+				break;
+			case TokenType::LITERAL_INTEGER_BASE_2:
+			case TokenType::LITERAL_INTEGER_BASE_8:
+			case TokenType::LITERAL_INTEGER_BASE_10:
+			case TokenType::LITERAL_INTEGER_BASE_16:
+				logger.property("Number", std::stoi(getTokenString(numberToken)));
+
+				break;
+			default:
+				break;
+		}
 	}
 
-	void ASTDebugger::writeIdentifierExpression(std::ofstream& stream, uint32 byteOffset) const {
+	void ASTDebugger::writeIdentifierExpression(uint32 byteOffset) {
 		const Expression<ExpressionType::IDENTIFIER>& expression = output->ast.getExpression<ExpressionType::IDENTIFIER>(byteOffset);
 		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
 
-		stream << indentation << "\"Type\": \"IdentifierExpression\",\n";
-		stream << indentation << "\"Identifier\": \"" << getTokenString(identifierToken) << "\"";
+		logger.property("Type", "IdentifierExpression");
+		logger.property("Identifier", getTokenString(identifierToken));
 	}
 
-	void ASTDebugger::writeUnaryExpression(std::ofstream& stream, uint32 byteOffset) {
+	void ASTDebugger::writeUnaryExpression(uint32 byteOffset) {
 		const Expression<ExpressionType::UNARY>& expression = output->ast.getExpression<ExpressionType::UNARY>(byteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
-		stream << indentation << "\"Type\": \"UnaryExpression\",\n";
-		stream << indentation << "\"Operator\": \"" << getTokenString(operatorToken) << ",\n";
-		stream << indentation << "\"Right\": ";
+		logger.property("Type", "UnaryExpression");
+		logger.property("Operator", getTokenString(operatorToken));
+		logger.propertyObject("Right");
 
-		writeExpression(stream, expression.rightExpressionReferenceIndex);
+		writeExpression(expression.rightExpressionReferenceIndex);
+
+		logger.closeObject();
 	}
 
-	void ASTDebugger::writeBinaryExpression(std::ofstream& stream, uint32 byteOffset) {
+	void ASTDebugger::writeBinaryExpression(uint32 byteOffset) {
 		const Expression<ExpressionType::BINARY>& expression = output->ast.getExpression<ExpressionType::BINARY>(byteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
-		stream << indentation << "\"Type\": \"BinaryExpression\",\n";
-		stream << indentation << "\"Left\": ";
+		logger.property("Type", "BinaryExpression");
+		logger.propertyObject("Left");
 
-		writeExpression(stream, expression.leftExpressionReferenceIndex);
+		writeExpression(expression.leftExpressionReferenceIndex);
 
-		stream << ",\n";
-		stream << indentation << "\"Operator\": \"" << getTokenString(operatorToken) << "\",\n";
-		stream << indentation << "\"Right\": ";
+		logger.closeObject();
+		logger.property("Operator", getTokenString(operatorToken));
+		logger.propertyObject("Right");
 
-		writeExpression(stream, expression.rightExpressionReferenceIndex);
+		writeExpression(expression.rightExpressionReferenceIndex);
+
+		logger.closeObject();
 	}
 
-	void ASTDebugger::writeGroupExpression(std::ofstream& stream, uint32 byteOffset) {
+	void ASTDebugger::writeGroupExpression(uint32 byteOffset) {
 		const Expression<ExpressionType::GROUP>& expression = output->ast.getExpression<ExpressionType::GROUP>(byteOffset);
 
-		stream << indentation << "\"Type\": \"Expression<ExpressionType::GROUP>\",\n";
-		stream << indentation << "\"Expression\": ";
+		logger.property("Type", "GroupExpression");
+		logger.propertyObject("Expression");
 
-		writeExpression(stream, expression.expressionReferenceIndex);
+		writeExpression(expression.expressionReferenceIndex);
+
+		logger.closeObject();
 	}
 
-	void ASTDebugger::writeMemberAccessExpression(std::ofstream& stream, uint32 byteOffset) {
+	void ASTDebugger::writeMemberAccessExpression(uint32 byteOffset) {
 		const Expression<ExpressionType::MEMBER_ACCESS>& expression = output->ast.getExpression<ExpressionType::MEMBER_ACCESS>(byteOffset);
 		const Token& identifierTokenIndex = output->tokens[expression.identifierTokenIndex];
 
-		stream << indentation << "\"Type\": \"MemberAccessExpression\",\n";
-		stream << indentation << "\"Left\": ";
+		logger.property("Type", "MemberAccessExpression");
+		logger.propertyObject("Left");
 
-		writeExpression(stream, expression.leftExpressionReferenceIndex);
+		writeExpression(expression.leftExpressionReferenceIndex);
 
-		stream << indentation << "\"MemberIdentifier\": \"" << getTokenString(identifierTokenIndex) << "\"";
+		logger.closeObject();
+		logger.property("MemberIdentifier", getTokenString(identifierTokenIndex));
 	}
 
-	void ASTDebugger::writeFunctionCallExpression(std::ofstream& stream, uint32 byteOffset) {
+	void ASTDebugger::writeFunctionCallExpression(uint32 byteOffset) {
 		const Expression<ExpressionType::FUNCTION_CALL>& expression = output->ast.getExpression<ExpressionType::FUNCTION_CALL>(byteOffset);
 
-		stream << indentation << "\"Type\": \"FunctionCallExpression\",\n";
-		stream << indentation << "\"Callee\": ";
+		logger.property("Type", "FunctionCallExpression");
+		logger.propertyObject("Callee");
 
-		writeExpression(stream, expression.calleeExpressionReferenceIndex);
+		writeExpression(expression.calleeExpressionReferenceIndex);
 
-		stream << indentation << "\"Arguments\": [\n";
-
-		indent();
+		logger.closeObject();
+		logger.propertyArray("Arguments");
 
 		for (const uint32 expressionReferenceIndex : expression.argumentExpressionReferenceIndices) {
-			stream << indentation;
+			logger.openObject();
 
-			writeExpression(stream, expressionReferenceIndex);
+			writeExpression(expressionReferenceIndex);
 
-			// TODO: Add trailing comma?
+			logger.closeObject();
 		}
 
-		unindent();
-
-		stream << indentation << "]";
+		logger.closeArray();
 	}
 
-	void ASTDebugger::writeTypeExpression(std::ofstream& stream, uint32 byteOffset) const {
+	void ASTDebugger::writeTypeExpression(uint32 byteOffset) {
 		const Expression<ExpressionType::TYPE>& expression = output->ast.getExpression<ExpressionType::TYPE>(byteOffset);
 		const Token& typeToken = output->tokens[expression.typeTokenIndex];
 
-		stream << indentation << "\"Type\": \"TypeExpression\",\n";
-		stream << indentation << "\"_Type\": \"" << getTokenString(typeToken) << "\",\n";
-		stream << indentation << "\"TemplateArgument\": ";
+		logger.property("Type", "TypeExpression");
+		logger.property("_Type", getTokenString(typeToken));
+
+		std::string templateArgument = "null";
 
 		if (expression.templateArgumentTokenIndex != UNDEFINED_TOKEN) {
 			const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
 
-			stream << "\"" << getTokenString(templateArgumentToken) << "\"";
-
-			return;
+			templateArgument = getTokenString(templateArgumentToken);
 		}
 
-		stream << "null";
+		logger.property("TemplateArgument", templateArgument);
 	}
 
-	void ASTDebugger::writeAnnotationBlocks(std::ofstream& stream, uint32 indexOffset, uint32 count) {
-		stream << "[\n";
-
-		indent();
+	void ASTDebugger::writeAnnotationBlocks(uint32 indexOffset, uint32 count) {
+		logger.propertyArray("Annotations");
 
 		for (uint32 index = 0; index < count; index += 1) {
-			stream << indentation << "{\n";
-
-			indent();
-
 			const AnnotationBlock& annotationBlock = output->ast.annotationBlocks[indexOffset + index];
 			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
-			stream << indentation << "\"Annotation\": \"" << getTokenString(identifierToken) << "\"";
+			logger.openObject();
+			logger.property("Annotation", getTokenString(identifierToken));
 
 			if (annotationBlock.valueTokenIndex != UNDEFINED_ANNOTATION_VALUE) {
-				const Token& valueTokenIndex = output->tokens[annotationBlock.valueTokenIndex];
+				const Token& valueToken = output->tokens[annotationBlock.valueTokenIndex];
 
-				stream << ",\n";
-				stream << indentation << "\"Value\": \"" << getTokenString(valueTokenIndex) << "\"";
+				logger.property("Value", std::stoul(getTokenString(valueToken)));
 			}
 
-			stream << "\n";
-
-			unindent();
-
-			stream << indentation << "}";
-
-			if (index + 1 < count) {
-				stream << ",";
-			}
-
-			stream << "\n";
+			logger.closeObject();
 		}
 
-		unindent();
-
-		stream << indentation << "]";
-	}
-
-	void ASTDebugger::indent() {
-		indentationLevel += 1;
-		indentation = std::string(indentationLevel, '\t');
-	}
-
-	void ASTDebugger::unindent() {
-		DEBUG_ASSERT(indentationLevel > 0);
-
-		indentationLevel -= 1;
-		indentation = std::string(indentationLevel, '\t');
+		logger.closeArray();
 	}
 }

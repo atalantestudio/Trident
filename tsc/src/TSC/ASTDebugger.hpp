@@ -1,47 +1,44 @@
 #pragma once
 
+#include "Engine/Logger/FileLogger/JSONFileLogger.hpp"
+
 #include "TSC/CompilationOutput.hpp"
 
 namespace ProjectA {
 	class ASTDebugger {
 		public:
-			void write(std::ofstream& stream, const CompilationOutput& output);
+			explicit ASTDebugger(std::string_view path, const CompilationOutput& output);
 
 		private:
-			void writeStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeStructureStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeMemberStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeConstantStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeVariableStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeParameterStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeFunctionStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeExpressionStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeScopeStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeIfStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeWhileStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeBreakStatement(std::ofstream& stream) const;
-			void writeNextStatement(std::ofstream& stream) const;
-			void writeReturnStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeStatement(uint32 statementIndex);
+			void writeStructureStatement(uint32 statementIndex);
+			void writeMemberStatement(uint32 statementIndex);
+			void writeConstantStatement(uint32 statementIndex);
+			void writeVariableStatement(uint32 statementIndex);
+			void writeParameterStatement(uint32 statementIndex);
+			void writeFunctionStatement(uint32 statementIndex);
+			void writeExpressionStatement(uint32 statementIndex);
+			void writeScopeStatement(uint32 statementIndex);
+			void writeIfStatement(uint32 statementIndex);
+			void writeWhileStatement(uint32 statementIndex);
+			void writeBreakStatement();
+			void writeNextStatement();
+			void writeReturnStatement(uint32 statementIndex);
 
-			void writeExpression(std::ofstream& stream, uint32 referenceIndex);
-			void writeNumberExpression(std::ofstream& stream, uint32 byteOffset) const;
-			void writeIdentifierExpression(std::ofstream& stream, uint32 byteOffset) const;
-			void writeUnaryExpression(std::ofstream& stream, uint32 byteOffset);
-			void writeBinaryExpression(std::ofstream& stream, uint32 byteOffset);
-			void writeGroupExpression(std::ofstream& stream, uint32 byteOffset);
-			void writeMemberAccessExpression(std::ofstream& stream, uint32 byteOffset);
-			void writeFunctionCallExpression(std::ofstream& stream, uint32 byteOffset);
-			void writeTypeExpression(std::ofstream& stream, uint32 byteOffset) const;
+			void writeExpression(uint32 referenceIndex);
+			void writeNumberExpression(uint32 byteOffset);
+			void writeIdentifierExpression(uint32 byteOffset);
+			void writeUnaryExpression(uint32 byteOffset);
+			void writeBinaryExpression(uint32 byteOffset);
+			void writeGroupExpression(uint32 byteOffset);
+			void writeMemberAccessExpression(uint32 byteOffset);
+			void writeFunctionCallExpression(uint32 byteOffset);
+			void writeTypeExpression(uint32 byteOffset);
 
-			void writeAnnotationBlocks(std::ofstream& stream, uint32 indexOffset, uint32 count);
-
-			void indent();
-			void unindent();
+			void writeAnnotationBlocks(uint32 indexOffset, uint32 count);
 
 		private:
+			FileLogger<FileFormat::JSON> logger;
 			const CompilationOutput* output;
-
-			uint32 indentationLevel;
-			std::string indentation;
 	};
 }

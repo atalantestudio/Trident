@@ -1,11 +1,12 @@
 #pragma once
 
 namespace ProjectA {
-	// File formats supported by the engine for decoding, encoding or both.
-	enum FileFormat : uint8 {
-		FBX = 0,
-		PNG = 1,
-		QOI = 2,
-		TTF = 3,
+	// File formats supported by the engine for decoding, encoding or/and logging.
+	enum class FileFormat : uint8 {
+		FBX,
+		JSON,
+		PNG,
+		QOI,
+		TTF,
 	};
 }

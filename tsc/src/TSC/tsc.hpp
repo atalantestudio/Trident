@@ -56,25 +56,20 @@ namespace ProjectA {
 			return 1;
 		}
 
-		std::ofstream targetStream("Test/test0.glsl");
+		// Visualize AST.
+		ASTDebugger astDebugger("Test/test0.ast.json", output);
 
-		DEBUG_ASSERT(targetStream.is_open());
+		// Generate GLSL.
+		{
+			std::ofstream targetStream("Test/test0.glsl");
 
-		GLSLCodeGenerator generator;
-		generator.write(targetStream, output);
+			DEBUG_ASSERT(targetStream.is_open());
 
-		targetStream.close();
+			GLSLCodeGenerator generator;
+			generator.write(targetStream, output);
 
-		#if 1
-			std::ofstream stream("Test/test0.ast.json");
-
-			DEBUG_ASSERT(stream.is_open());
-
-			ASTDebugger astDebugger;
-			astDebugger.write(stream, output);
-
-			stream.close();
-		#endif
+			targetStream.close();
+		}
 
 		return 0;
 	}
