@@ -7,7 +7,7 @@ namespace ProjectA {
 		public:
 			explicit Preprocessor(CompilationOutput* output);
 
-			void link(const std::string& _code);
+			void link(const std::string& code);
 
 		private:
 			void jump(uint32 characterCount);

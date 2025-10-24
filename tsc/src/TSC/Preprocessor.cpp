@@ -9,8 +9,8 @@
 #include "Statement.hpp"
 
 namespace ProjectA {
-	Preprocessor::Preprocessor(CompilationOutput* _output) {
-		output = _output;
+	Preprocessor::Preprocessor(CompilationOutput* output) {
+		this->output = output;
 	}
 
 	void Preprocessor::link(const std::string& code) {
