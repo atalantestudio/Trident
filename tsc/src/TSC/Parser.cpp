@@ -99,7 +99,6 @@ namespace ProjectA {
 
 		jump();
 		jump();
-
 		jumpEol();
 
 		output->ast.statements.emplace_back(statement);
@@ -221,15 +220,13 @@ namespace ProjectA {
 		analyzer.analyzeConstantStatement(statement);
 
 		EXPECT(read().type == TokenType::END_OF_FILE || read().type == TokenType::END_OF_LINE, "[CONSTANT] Expected EOL but got " + output->getTokenString(read()) + ".");
-
 		jumpEol();
 
 		return true;
 	}
 
+	// TODO: A function return type should not be annotatable.
 	bool Parser::parseFunctionStatement() {
-		// TODO: A function return type cannot be annotated.
-
 		ref<FunctionStatement> statement = createRef<FunctionStatement>();
 		statement->returnTypeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
@@ -242,6 +239,9 @@ namespace ProjectA {
 		jump();
 		jump();
 		jumpEol();
+
+		// Open a definition scope to register parameters.
+		output->openDefinitionScope();
 
 		while (read().type != TokenType::RIGHT_PARENTHESIS && read().type != TokenType::END_OF_FILE) {
 			if (!parseParameterStatement()) {
@@ -274,11 +274,9 @@ namespace ProjectA {
 
 		output->ast.statements.emplace_back(statement);
 		output->ast.globalScopeStatementIndices.emplace_back(getLastStatementIndex());
-
-		analyzer.analyzeFunctionStatement(getLastStatementIndex());
-
-		// TODO: Correct highlighting.
+		output->closeDefinitionScope();
 		output->registerCompletionItem(output->getTokenString(output->tokens[statement->identifierTokenIndex]), CompletionItemKind::FUNCTION);
+		analyzer.analyzeFunctionStatement(getLastStatementIndex());
 
 		return true;
 	}
@@ -301,7 +299,6 @@ namespace ProjectA {
 		jump();
 
 		output->ast.statements.emplace_back(statement);
-
 		analyzer.analyzeParameterStatement(statement);
 
 		return true;
@@ -426,7 +423,7 @@ namespace ProjectA {
 		jump();
 		jumpEol();
 
-		output->openDefinitionStack();
+		output->openDefinitionScope();
 
 		while (read().type != TokenType::RIGHT_CURLY_BRACE && read().type != TokenType::END_OF_FILE) {
 			if (!parseLocalScopeStatement()) {
@@ -442,7 +439,7 @@ namespace ProjectA {
 
 		jump();
 
-		output->closeDefinitionStack();
+		output->closeDefinitionScope();
 
 		return true;
 	}
@@ -495,8 +492,6 @@ namespace ProjectA {
 
 		statement->identifierTokenIndex = tokenIndex;
 
-		output->define(tokenIndex);
-
 		registerVariableSemanticToken(read(), false);
 
 		statement->constant = isScreamingSnakeCase(output->getIdentifier(read().type));
@@ -529,7 +524,6 @@ namespace ProjectA {
 		}
 
 		output->ast.statements.emplace_back(statement);
-
 		analyzer.analyzeVariableStatement(statement);
 
 		return true;

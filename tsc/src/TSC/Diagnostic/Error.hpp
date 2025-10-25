@@ -82,11 +82,13 @@ namespace ProjectA {
 
 	template<>
 	struct generateDiagnostic<DiagnosticCode::REDEFINITION> {
-		explicit generateDiagnostic(CompilationOutput& output, const Token& definitionToken, const Token& redefinitionToken) {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& redefinitionToken, uint32 firstDefinitionTokenIndex) {
+			const Token& firstDefinitionToken = output.tokens[firstDefinitionTokenIndex];
+
 			DiagnosticReference diagnosticReference{};
-			diagnosticReference.start = definitionToken.start;
-			diagnosticReference.end = definitionToken.getEnd();
-			diagnosticReference.message = MODULE_FORMAT("\"[]\" is defined here.", output.getTokenString(definitionToken));
+			diagnosticReference.start = firstDefinitionToken.start;
+			diagnosticReference.end = firstDefinitionToken.getEnd();
+			diagnosticReference.message = MODULE_FORMAT("\"[]\" is defined here.", output.getTokenString(firstDefinitionToken));
 
 			Diagnostic diagnostic{};
 			diagnostic.start = redefinitionToken.start;

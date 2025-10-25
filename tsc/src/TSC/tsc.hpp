@@ -11,7 +11,7 @@
 
 namespace ProjectA {
 	static sint32 tsc(const char8* path) {
-		const sequence<uint8> buffer = Filesystem::openBuffer("Test/test0.tsl");
+		const sequence<uint8> buffer = Filesystem::openBuffer("Test/test3.tsl");
 		// const sequence<uint8> buffer = Filesystem::openBuffer("Test/include.tsl");
 		const std::string code(buffer.begin(), buffer.end());
 

@@ -24,8 +24,7 @@ namespace ProjectA {
 			return;
 		}
 
-		// TODO: Structure statement index.
-		output->define(statement->identifierTokenIndex, 0);
+		output->define(statement);
 
 		if (statement->memberStatementIndices.empty()) {
 			generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(*output, identifierToken);
@@ -61,7 +60,7 @@ namespace ProjectA {
 			const Token& definitionToken = output->tokens[memberIdentifierTokenIndex];
 
 			if (identifierTokenString == output->getTokenString(definitionToken)) {
-				generateDiagnostic<DiagnosticCode::REDEFINITION>(*output, definitionToken, identifierToken);
+				generateDiagnostic<DiagnosticCode::REDEFINITION>(*output, identifierToken, memberIdentifierTokenIndex);
 
 				break;
 			}
@@ -91,7 +90,7 @@ namespace ProjectA {
 			return;
 		}
 
-		output->define(statement->identifierTokenIndex);
+		output->define(statement);
 	}
 
 	void SemanticAnalyzer::analyzeFunctionStatement(uint32 statementIndex) const {
@@ -104,7 +103,8 @@ namespace ProjectA {
 			return;
 		}
 
-		output->define(statement->identifierTokenIndex);
+		// TODO: Define function?
+		// output->define(statement);
 
 		if (statementIndex == 0) {
 			generateDiagnostic<DiagnosticCode::NO_RETURN>(*output, identifierToken);
@@ -128,6 +128,8 @@ namespace ProjectA {
 
 			return;
 		}
+
+		output->define(statement);
 	}
 
 	void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement>& statement) const {
@@ -138,6 +140,16 @@ namespace ProjectA {
 
 			return;
 		}
+
+		const Definition* previousDefinition = output->getFirstDefinition(output->getIdentifier(identifierToken.type));
+
+		if (previousDefinition != nullptr) {
+			generateDiagnostic<DiagnosticCode::REDEFINITION>(*output, identifierToken, previousDefinition->tokenIndex);
+
+			return;
+		}
+
+		output->define(statement);
 	}
 
 	void SemanticAnalyzer::analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) const {
@@ -190,19 +202,29 @@ namespace ProjectA {
 
 	void SemanticAnalyzer::analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression) const {
 		const Token& token = output->tokens[expression.tokenIndex];
+		const Definition* definition = output->getFirstDefinition(output->getIdentifier(token.type));
 
-		if (!output->isDefined(token) && !isLanguageFunction(token)) {
-			generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, token);
+		if (definition == nullptr) {
+			if (!isLanguageFunction(token)) {
+				generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, token);
+
+				return;
+			}
+
+			return;
 		}
+
+		output->registerSemanticToken(token, definition->semanticTokenType, definition->semanticTokenModifierFlag);
 	}
 
 	void SemanticAnalyzer::analyzeMemberAccessExpression(const Expression<ExpressionType::MEMBER_ACCESS>& expression) const {
-		// The left expression has already been analyzed; only check the identifier.
-
 		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
+		const Definition* definition = output->getFirstDefinition(output->getIdentifier(identifierToken.type));
 
-		if (!output->isDefined(identifierToken)) {
+		if (definition == nullptr) {
 			generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, identifierToken);
+
+			return;
 		}
 	}
 

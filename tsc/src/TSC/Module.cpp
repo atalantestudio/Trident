@@ -1,6 +1,7 @@
 #include "Base/Base.hpp"
 
 #include "CompilationOutput.hpp"
+#include "Definition.hpp"
 #include "Diagnostic/Diagnostic.hpp"
 #include "Diagnostic/DiagnosticReference.hpp"
 #include "DocumentPosition.hpp"
@@ -26,14 +27,21 @@ namespace ProjectA {
 	EMSCRIPTEN_BINDINGS(Module) {
 		emscripten::class_<CompilationOutput>("CompilationOutput")
 			.property("completionItems", &CompilationOutput::completionItems)
-			.property("tokens", &CompilationOutput::tokens)
+			.property("definitions", &CompilationOutput::definitionsForCompletion)
+			.property("diagnostics", &CompilationOutput::diagnostics)
 			.property("semanticTokens", &CompilationOutput::semanticTokens)
-			.property("diagnostics", &CompilationOutput::diagnostics);
+			.property("tokens", &CompilationOutput::tokens);
 
 		emscripten::class_<CompletionItem>("CompletionItem")
 			.property("label", &CompletionItem::label)
 			.property("end", &CompletionItem::end)
 			.function("getKindIndex", &CompletionItem::getKindIndex);
+
+		emscripten::class_<Definition>("Definition")
+			.property("end", &Definition::end)
+			.property("semanticTokenModifiers", &Definition::semanticTokenModifierFlag)
+			.property("identifier", &Definition::identifier)
+			.function("getSemanticTokenTypeIndex", &Definition::getSemanticTokenTypeIndex);
 
 		emscripten::class_<Diagnostic>("Diagnostic")
 			.property("start", &Diagnostic::start)
@@ -66,6 +74,7 @@ namespace ProjectA {
 		emscripten::function("compile", &compile);
 
 		emscripten::register_vector<CompletionItem>("CompletionItemVector");
+		emscripten::register_vector<Definition>("DefinitionVector");
 		emscripten::register_vector<Diagnostic>("DiagnosticVector");
 		emscripten::register_vector<DiagnosticReference>("DiagnosticReferenceVector");
 		emscripten::register_vector<SemanticToken>("SemanticTokenVector");

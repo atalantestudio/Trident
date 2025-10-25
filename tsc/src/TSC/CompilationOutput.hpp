@@ -2,7 +2,7 @@
 
 #include "AST.hpp"
 #include "CompletionItem.hpp"
-#include "DefinitionStack.hpp"
+#include "Definition.hpp"
 #include "Diagnostic/Diagnostic.hpp"
 #include "SemanticToken.hpp"
 #include "SemanticTokenModifier.hpp"
@@ -75,50 +75,75 @@ namespace ProjectA {
 				diagnostics.emplace_back(diagnostic);
 			}
 
-			const DefinitionStack& getCurrentDefinitionStack() const {
-				DEBUG_ASSERT(currentDefinitionStackIndex < definitionStacks.size());
-
-				return definitionStacks[currentDefinitionStackIndex];
+			void openDefinitionScope() {
+				scopeInsertionIndices.emplace_back(static_cast<uint32>(definitions.size()));
 			}
 
-			void openDefinitionStack() {
-				DefinitionStack definitionStack{};
+			void closeDefinitionScope() {
+				DEBUG_ASSERT(scopeInsertionIndices.size() > 0);
 
-				definitionStacks.emplace_back(definitionStack);
+				const uint32 scopeInsertionIndex = scopeInsertionIndices.back();
 
-				currentDefinitionStackIndex = static_cast<uint32>(definitionStacks.size()) - 1;
+				definitions.resize(scopeInsertionIndex);
+				scopeInsertionIndices.pop_back();
 			}
 
-			void closeDefinitionStack() {
-				DEBUG_ASSERT(currentDefinitionStackIndex > 0);
+			const Definition* getFirstDefinition(const std::string& identifier) const {
+				for (uint32 definitionIndex = 0; definitionIndex < definitions.size(); definitionIndex += 1) {
+					const Definition& definition = definitions[definitionIndex];
 
-				currentDefinitionStackIndex -= 1;
-			}
-
-			void define(uint32 tokenIndex, uint32 structureStatementIndex = ~0) {
-				const Token& token = tokens[tokenIndex];
-
-				Definition definition{};
-				definition.identifier = getIdentifier(token.type);
-				definition.structureStatementIndex = structureStatementIndex;
-
-				definitionStacks[currentDefinitionStackIndex].stack.emplace_back(definition);
-			}
-
-			bool isDefined(const Token& token) const {
-				const std::string& identifier = getIdentifier(token.type);
-
-				for (sint32 definitionStackIndex = static_cast<sint32>(currentDefinitionStackIndex); definitionStackIndex >= 0; definitionStackIndex -= 1) {
-					const DefinitionStack& definitionStack = definitionStacks[definitionStackIndex];
-
-					for (const Definition& definition : definitionStack.stack) {
-						if (identifier == definition.identifier) {
-							return true;
-						}
+					if (identifier == definition.identifier) {
+						return &definition;
 					}
 				}
 
-				return false;
+				return nullptr;
+			}
+
+			void define(PackedType type, SemanticTokenType semanticTokenType, uint32 semanticTokenModifierFlag, uint32 identifierTokenIndex) {
+				const Token& identifierToken = tokens[identifierTokenIndex];
+
+				Definition definition{};
+				definition.end = identifierToken.getEnd();
+				definition.type = type;
+				definition.semanticTokenType = semanticTokenType;
+				definition.semanticTokenModifierFlag = semanticTokenModifierFlag;
+				definition.tokenIndex = identifierTokenIndex;
+				definition.identifier = getIdentifier(identifierToken.type);
+
+				definitions.emplace_back(definition);
+				definitionsForCompletion.emplace_back(definition);
+			}
+
+			void define(const ref<StructureStatement>& statement) {
+				define(PackedType(TokenType::USER_DEFINED, 0), SemanticTokenType::STRUCTURE, 0, statement->identifierTokenIndex);
+			}
+
+			void define(const ref<ConstantStatement>& statement) {
+				const ExpressionReference& typeExpressionReference = ast.getExpressionReference(statement->typeExpressionReferenceIndex);
+				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+
+				define(typeExpression.type, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT, statement->identifierTokenIndex);
+			}
+
+			void define(const ref<ParameterStatement>& statement) {
+				const ExpressionReference& typeExpressionReference = ast.getExpressionReference(statement->typeExpressionReferenceIndex);
+				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+
+				define(typeExpression.type, SemanticTokenType::PARAMETER, 0, statement->identifierTokenIndex);
+			}
+
+			void define(const ref<VariableStatement>& statement) {
+				const ExpressionReference& typeExpressionReference = ast.getExpressionReference(statement->typeExpressionReferenceIndex);
+				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+
+				uint32 modifierFlag = 0;
+
+				if (statement->constant) {
+					modifierFlag |= SemanticTokenModifier::CONSTANT;
+				}
+
+				define(typeExpression.type, SemanticTokenType::VARIABLE, modifierFlag, statement->identifierTokenIndex);
 			}
 
 			void registerCompletionItem(const std::string& label, CompletionItemKind kind) {
@@ -224,8 +249,9 @@ namespace ProjectA {
 			std::vector<SemanticToken> semanticTokens;
 			std::vector<Diagnostic> diagnostics;
 			std::vector<std::string> userDefinedIdentifiers;
-			std::vector<DefinitionStack> definitionStacks = {{}};
-			uint32 currentDefinitionStackIndex = 0;
+			std::vector<Definition> definitions;
+			std::vector<Definition> definitionsForCompletion;
+			std::vector<uint32> scopeInsertionIndices = {0};
 			std::vector<CompletionItem> completionItems;
 	};
 }
