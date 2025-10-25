@@ -242,6 +242,8 @@ namespace ProjectA {
 					}
 
 					output->registerSemanticToken(SemanticTokenType::COMMENT, 0, start, position.characterOffset - start.characterOffset);
+
+					break;
 				}
 				case '\r': {
 					jump(1);
