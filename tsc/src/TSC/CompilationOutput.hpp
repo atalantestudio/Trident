@@ -70,9 +70,7 @@ namespace ProjectA {
 			}
 
 			const DefinitionStack& getCurrentDefinitionStack() const {
-				if (currentDefinitionStackIndex >= definitionStacks.size()) {
-					BREAKPOINT();
-				}
+				DEBUG_ASSERT(currentDefinitionStackIndex < definitionStacks.size());
 
 				return definitionStacks[currentDefinitionStackIndex];
 			}
@@ -86,9 +84,7 @@ namespace ProjectA {
 			}
 
 			void closeDefinitionStack() {
-				if (currentDefinitionStackIndex == 0) {
-					BREAKPOINT();
-				}
+				DEBUG_ASSERT(currentDefinitionStackIndex > 0);
 
 				currentDefinitionStackIndex -= 1;
 			}
@@ -156,7 +152,7 @@ namespace ProjectA {
 			// TODO
 			std::vector<std::string> identifiers;
 
-			std::vector<DefinitionStack> definitionStacks;
+			std::vector<DefinitionStack> definitionStacks = {{}};
 			uint32 currentDefinitionStackIndex = 0;
 
 			std::vector<CompletionItem> completionItems;

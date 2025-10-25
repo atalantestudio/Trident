@@ -323,7 +323,7 @@ namespace ProjectA {
 				}
 				default: {
 					// TODO
-					BREAKPOINT();
+					ENGINE_ERROR_UNIMPLEMENTED();
 
 					break;
 				}

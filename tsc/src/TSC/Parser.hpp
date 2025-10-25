@@ -61,7 +61,7 @@ namespace ProjectA {
 			Token peek() const;
 
 			void jump();
-			void skipEmptyLines();
+			void jumpEol();
 			void synchronize();
 
 			// Registers a semantic token for a variable/constant/member/parameter.

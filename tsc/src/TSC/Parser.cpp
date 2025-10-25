@@ -51,19 +51,16 @@ namespace ProjectA {
 		visitedWhileCount = 0;
 
 		analyzer.setCompilationOutput(output);
-		output->openDefinitionStack();
 
-		skipEmptyLines();
+		jumpEol();
 
 		while (read().type != TokenType::END_OF_FILE) {
 			if (!parseGlobalScopeStatement()) {
 				synchronize();
 			}
 
-			skipEmptyLines();
+			jumpEol();
 		}
-
-		output->closeDefinitionStack();
 	}
 
 	bool Parser::parseGlobalScopeStatement() {
@@ -93,7 +90,7 @@ namespace ProjectA {
 		jump();
 		jump();
 
-		skipEmptyLines();
+		jumpEol();
 
 		output->ast.statements.emplace_back(statement);
 		output->ast.globalScopeStatementIndices.emplace_back(getLastStatementIndex());
@@ -118,7 +115,7 @@ namespace ProjectA {
 				"[FUNCTION] Expected '}' or EOF or EOL but got " + getTokenString(read()) + "."
 			);
 
-			skipEmptyLines();
+			jumpEol();
 		}
 
 		EXPECT(read().type != TokenType::END_OF_FILE, "[STRUCTURE] Expected '}' but got EOF.");
@@ -218,7 +215,7 @@ namespace ProjectA {
 
 		EXPECT(read().type == TokenType::END_OF_FILE || read().type == TokenType::END_OF_LINE, "[CONSTANT] Expected EOL but got " + getTokenString(read()) + ".");
 
-		skipEmptyLines();
+		jumpEol();
 
 		return true;
 	}
@@ -237,7 +234,7 @@ namespace ProjectA {
 
 		jump();
 		jump();
-		skipEmptyLines();
+		jumpEol();
 
 		while (read().type != TokenType::RIGHT_PARENTHESIS && read().type != TokenType::END_OF_FILE) {
 			if (!parseParameterStatement()) {
@@ -253,7 +250,7 @@ namespace ProjectA {
 			EXPECT(read().type == TokenType::COMMA || read().type == TokenType::END_OF_LINE, "[FUNCTION] Expected ',' or EOL but got " + getTokenString(read()) + ".");
 
 			jump();
-			skipEmptyLines();
+			jumpEol();
 		}
 
 		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[FUNCTION] Expected ')' but got " + getTokenString(read()) + ".");
@@ -417,7 +414,7 @@ namespace ProjectA {
 		output->ast.statements.emplace_back(statement);
 
 		jump();
-		skipEmptyLines();
+		jumpEol();
 
 		output->openDefinitionStack();
 
@@ -428,7 +425,7 @@ namespace ProjectA {
 
 			statement->statementIndices.emplace_back(getLastStatementIndex());
 
-			skipEmptyLines();
+			jumpEol();
 		}
 
 		EXPECT(read().type == TokenType::RIGHT_CURLY_BRACE, "[SCOPE] Expected '}' but got " + getTokenString(read()) + ".");
@@ -869,7 +866,7 @@ namespace ProjectA {
 
 			output->ast.annotationBlocks.emplace_back(annotationBlock);
 
-			skipEmptyLines();
+			jumpEol();
 		}
 
 		return true;
@@ -910,27 +907,14 @@ namespace ProjectA {
 		tokenIndex += 1;
 	}
 
-	void Parser::skipEmptyLines() {
-		while (read().type == TokenType::END_OF_LINE) {
-			tokenIndex += 1;
+	void Parser::jumpEol() {
+		if (read().type == TokenType::END_OF_LINE) {
+			jump();
 		}
 	}
 
 	void Parser::synchronize() {
-		while (read().type != TokenType::END_OF_FILE) {
-			skipEmptyLines();
-
-			/* switch (read().type) {
-				case TokenType::KEYWORD_IF:
-				case TokenType::KEYWORD_WHILE:
-				case TokenType::KEYWORD_RETURN: {
-					return;
-				}
-				default: {
-					break;
-				}
-			} */
-
+		while (read().type != TokenType::END_OF_LINE && read().type != TokenType::END_OF_FILE) {
 			jump();
 		}
 	}

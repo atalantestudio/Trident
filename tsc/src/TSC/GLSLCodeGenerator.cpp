@@ -289,7 +289,7 @@ namespace ProjectA {
 
 	void GLSLCodeGenerator::writeFunctionCallExpression(std::ofstream& stream, uint32 byteOffset) {
 		// TODO
-		BREAKPOINT();
+		ENGINE_ERROR_UNIMPLEMENTED();
 	}
 
 	void GLSLCodeGenerator::writeTypeExpression(std::ofstream& stream, uint32 byteOffset) const {

@@ -243,8 +243,13 @@ namespace ProjectA {
 
 					output->registerSemanticToken(SemanticTokenType::COMMENT, 0, start, position.characterOffset - start.characterOffset);
 				}
-				case '\n': {
+				case '\n':
+				case '\r': {
 					output->registerToken(TokenType::END_OF_LINE, position, 0);
+
+					while (peek(1) == '\r' || peek(1) == '\n') {
+						jump(1);
+					}
 
 					characterIndex += 1;
 					position.lineIndex += 1;
@@ -260,7 +265,6 @@ namespace ProjectA {
 					}
 				}
 				case '\t':
-				case '\r':
 				case ' ': {
 					jump(1);
 
