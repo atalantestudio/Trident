@@ -163,7 +163,7 @@ namespace ProjectA {
 		// NOTE: The identifier token index must be added AFTER the semantic analysis has been done on the member.
 		parentStatement->memberIdentifierTokenIndices.emplace_back(tokenIndex);
 
-		if (!registerVariableSemanticToken(read())) {
+		if (!registerVariableSemanticToken(read(), false)) {
 			output->registerSemanticToken(tokenIndex, SemanticTokenType::MEMBER, 0);
 		}
 
@@ -295,11 +295,14 @@ namespace ProjectA {
 
 		statement->identifierTokenIndex = tokenIndex;
 
+		// TODO: Register token depending on the case.
 		output->registerSemanticToken(tokenIndex, SemanticTokenType::PARAMETER, 0);
 
 		jump();
 
 		output->ast.statements.emplace_back(statement);
+
+		analyzer.analyzeParameterStatement(statement);
 
 		return true;
 	}
@@ -493,7 +496,8 @@ namespace ProjectA {
 		statement->identifierTokenIndex = tokenIndex;
 
 		output->define(tokenIndex);
-		output->registerCompletionItem(output->getTokenString(read()), CompletionItemKind::VARIABLE);
+
+		registerVariableSemanticToken(read(), false);
 
 		statement->constant = isScreamingSnakeCase(output->getIdentifier(read().type));
 

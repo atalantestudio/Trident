@@ -13,6 +13,7 @@ namespace ProjectA {
 			void analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& memberStatement) const;
 			void analyzeConstantStatement(const ref<ConstantStatement>& statement) const;
 			void analyzeFunctionStatement(uint32 statementIndex) const;
+			void analyzeParameterStatement(const ref<ParameterStatement>& statement) const;
 			void analyzeVariableStatement(const ref<VariableStatement>& statement) const;
 
 			void analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression) const;
@@ -20,8 +21,6 @@ namespace ProjectA {
 			void analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) const;
 
 		private:
-			void analyzeTypeExpression(uint32 referenceIndex) const;
-
 			void analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const;
 			void analyzeBindingAnnotation(const AnnotationBlock& annotationBlock) const;
 			void analyzeConstantAnnotation(const AnnotationBlock& annotationBlock) const;

@@ -262,6 +262,34 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::INVALID_PARAMETER_IDENTIFIER_CASE> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
+			Diagnostic diagnostic{};
+			diagnostic.start = identifierToken.start;
+			diagnostic.end = identifierToken.getEnd();
+			diagnostic.message = "Use camelCase or snake_case for function parameter identifiers.";
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::INVALID_PARAMETER_IDENTIFIER_CASE;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::INVALID_VARIABLE_IDENTIFIER_CASE> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
+			Diagnostic diagnostic{};
+			diagnostic.start = identifierToken.start;
+			diagnostic.end = identifierToken.getEnd();
+			diagnostic.message = "Use camelCase or snake_case for variable identifiers.";
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::INVALID_VARIABLE_IDENTIFIER_CASE;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::NO_RETURN> {
 		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
 			Diagnostic diagnostic{};

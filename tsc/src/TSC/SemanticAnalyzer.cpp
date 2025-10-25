@@ -53,7 +53,6 @@ namespace ProjectA {
 
 	void SemanticAnalyzer::analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& memberStatement) const {
 		analyzeAnnotationBlocks(memberStatement->annotationBlockIndexOffset, memberStatement->annotationBlockCount);
-		analyzeTypeExpression(memberStatement->typeExpressionReferenceIndex);
 
 		const Token& identifierToken = output->tokens[memberStatement->identifierTokenIndex];
 		const std::string identifierTokenString = output->getTokenString(identifierToken);
@@ -121,15 +120,24 @@ namespace ProjectA {
 		}
 	}
 
-	void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement>& statement) const {
-		analyzeTypeExpression(statement->typeExpressionReferenceIndex);
+	void SemanticAnalyzer::analyzeParameterStatement(const ref<ParameterStatement>& statement) const {
+		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+
+		if (!isCamelCaseOrSnakeCase(output->getIdentifier(identifierToken.type))) {
+			generateDiagnostic<DiagnosticCode::INVALID_PARAMETER_IDENTIFIER_CASE>(*output, identifierToken);
+
+			return;
+		}
 	}
 
-	void SemanticAnalyzer::analyzeTypeExpression(uint32 referenceIndex) const {
-		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
-		const Expression<ExpressionType::TYPE>& expression = output->ast.getExpression<ExpressionType::TYPE>(expressionReference.byteOffset);
+	void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement>& statement) const {
+		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		return analyzeTypeExpression(expression);
+		if (!isCamelCaseOrSnakeCase(output->getIdentifier(identifierToken.type)) && !isScreamingSnakeCase(output->getIdentifier(identifierToken.type))) {
+			generateDiagnostic<DiagnosticCode::INVALID_VARIABLE_IDENTIFIER_CASE>(*output, identifierToken);
+
+			return;
+		}
 	}
 
 	void SemanticAnalyzer::analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) const {
