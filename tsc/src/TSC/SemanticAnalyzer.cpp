@@ -7,6 +7,7 @@
 #include "Case.hpp"
 #include "Diagnostic/Error.hpp"
 #include "Diagnostic/Warning.hpp"
+#include "Language/BaseType.hpp"
 #include "SemanticAnalyzer.hpp"
 
 namespace ProjectA {
@@ -80,8 +81,6 @@ namespace ProjectA {
 		if (output->getTokenString(typeToken) == output->getTokenString(structureIdentifierToken)) {
 			generateDiagnostic<DiagnosticCode::INCOMPLETE_TYPE>(*output, typeToken);
 		}
-
-		output->ast.userDefinedTypes.emplace_back(output->getTokenString(structureIdentifierToken));
 	}
 
 	void SemanticAnalyzer::analyzeConstantStatement(const ref<ConstantStatement>& statement) const {
@@ -134,78 +133,49 @@ namespace ProjectA {
 	}
 
 	void SemanticAnalyzer::analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) const {
-		const Token& typeToken = output->tokens[expression.typeTokenIndex];
+		if (expression.type.hasUserDefinedType()) {
+			const std::string& identifier = output->getTokenString(output->tokens[expression.typeTokenIndex]);
+			bool undefinedType = true;
 
-		if (typeToken.type < TokenType::TYPE_FLOAT32) {
-			// TODO: Generate diagnostic for this case?
-			return;
-		}
-
-		if (typeToken.type >= TokenType::USER_DEFINED) {
-			bool undefined = true;
-
-			for (const std::string& userDefinedType : output->ast.userDefinedTypes) {
-				if (output->getTokenString(typeToken) == userDefinedType) {
-					undefined = false;
+			for (const std::string& userDefinedIdentifier : output->userDefinedIdentifiers) {
+				if (identifier == userDefinedIdentifier) {
+					undefinedType = false;
 
 					break;
 				}
 			}
 
-			if (undefined) {
-				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, typeToken);
-			}
-
-			if (expression.templateArgumentTokenIndex != UNDEFINED_INDEX) {
-				const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
-
-				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, typeToken, templateArgumentToken);
-			}
-
-			return;
-		}
-
-		if (typeToken.type <= TokenType::TYPE_UINT32 || typeToken.type >= TokenType::USER_DEFINED) {
-			if (expression.templateArgumentTokenIndex != UNDEFINED_INDEX) {
-				const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
-
-				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, typeToken, templateArgumentToken);
-			}
-
-			return;
-		}
-
-		if (typeToken.type <= TokenType::TYPE_VEC4) {
-			if (expression.templateArgumentTokenIndex == UNDEFINED_INDEX) {
-				generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT>(*output, typeToken);
+			if (undefinedType) {
+				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, expression.typeTokenIndex);
 
 				return;
 			}
 
-			const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
+			if (expression.type.templateArgumentIndex > 0) {
+				const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
 
-			if (templateArgumentToken.type < TokenType::TYPE_FLOAT32 || templateArgumentToken.type > TokenType::TYPE_UINT32) {
-				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, typeToken, templateArgumentToken);
-			}
-
-			return;
-		}
-
-		if (typeToken.type <= TokenType::TYPE_MAT4X4) {
-			if (expression.templateArgumentTokenIndex == UNDEFINED_INDEX) {
-				generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT>(*output, typeToken);
+				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex, expression.templateArgumentTokenIndex);
 
 				return;
 			}
+		}
 
-			const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
+		if (TEMPLATE_ARGUMENT_MASKS[expression.type.typeIndex] & expression.type.templateArgumentIndex) {
+			// No errors.
+			return;
+		}
 
-			if (templateArgumentToken.type < TokenType::TYPE_FLOAT32 || templateArgumentToken.type > TokenType::TYPE_FLOAT64) {
-				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, typeToken, templateArgumentToken);
+		if (expression.type.templateArgumentIndex == 0) {
+			if (TEMPLATE_ARGUMENT_MASKS[expression.type.typeIndex] == 0) {
+				return;
 			}
+
+			generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex);
 
 			return;
 		}
+
+		generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex, expression.templateArgumentTokenIndex);
 	}
 
 	void SemanticAnalyzer::analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression) const {

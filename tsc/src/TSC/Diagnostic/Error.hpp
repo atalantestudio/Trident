@@ -74,7 +74,9 @@ namespace ProjectA {
 
 	template<>
 	struct generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT> {
-		explicit generateDiagnostic(CompilationOutput& output, const Token& typeToken) {
+		explicit generateDiagnostic(CompilationOutput& output, uint32 typeTokenIndex) {
+			const Token& typeToken = output.tokens[typeTokenIndex];
+
 			Diagnostic diagnostic{};
 			diagnostic.start = typeToken.start;
 			diagnostic.end = typeToken.getEnd();
@@ -88,7 +90,10 @@ namespace ProjectA {
 
 	template<>
 	struct generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT> {
-		explicit generateDiagnostic(CompilationOutput& output, const Token& typeToken, const Token& templateArgumentToken) {
+		explicit generateDiagnostic(CompilationOutput& output, uint32 typeTokenIndex, uint32 templateArgumentTokenIndex) {
+			const Token& typeToken = output.tokens[typeTokenIndex];
+			const Token& templateArgumentToken = output.tokens[templateArgumentTokenIndex];
+
 			Diagnostic diagnostic{};
 			diagnostic.start = templateArgumentToken.start;
 			diagnostic.end = templateArgumentToken.getEnd();
@@ -102,7 +107,9 @@ namespace ProjectA {
 
 	template<>
 	struct generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE> {
-		explicit generateDiagnostic(CompilationOutput& output, const Token& typeToken) {
+		explicit generateDiagnostic(CompilationOutput& output, uint32 typeTokenIndex) {
+			const Token& typeToken = output.tokens[typeTokenIndex];
+
 			Diagnostic diagnostic{};
 			diagnostic.start = typeToken.start;
 			diagnostic.end = typeToken.getEnd();

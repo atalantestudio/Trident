@@ -6,9 +6,6 @@
 
 namespace ProjectA {
 	class SemanticAnalyzer {
-		private:
-			static constexpr uint32 UNDEFINED_INDEX = ~0;
-
 		public:
 			void setCompilationOutput(CompilationOutput* compilationOutput);
 

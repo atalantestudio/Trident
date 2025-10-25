@@ -57,7 +57,7 @@ namespace ProjectA {
 		}
 
 		// Visualize AST.
-		ASTDebugger astDebugger("Test/test0.ast.json", output);
+		ASTDebugger("Test/test0.ast.json", output);
 
 		// Generate GLSL.
 		{

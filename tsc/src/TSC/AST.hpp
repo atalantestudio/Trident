@@ -41,8 +41,5 @@ namespace ProjectA {
 		std::vector<uint8> expressionBuffer;
 
 		std::vector<AnnotationBlock> annotationBlocks;
-
-		// TODO: Remove.
-		std::vector<std::string> userDefinedTypes;
 	};
 }
