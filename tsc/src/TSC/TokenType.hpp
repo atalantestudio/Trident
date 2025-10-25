@@ -93,7 +93,7 @@ namespace ProjectA {
 		END_OF_FILE,
 		END_OF_LINE,
 
-		// Literals
+		// Number literals
 		LITERAL_FLOATING_POINT,
 		LITERAL_INTEGER_BASE_2,
 		LITERAL_INTEGER_BASE_8,

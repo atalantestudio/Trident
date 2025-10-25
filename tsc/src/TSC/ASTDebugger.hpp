@@ -26,7 +26,7 @@ namespace ProjectA {
 			void writeReturnStatement(uint32 statementIndex);
 
 			void writeExpression(uint32 referenceIndex);
-			void writeNumberExpression(uint32 byteOffset);
+			void writeLiteralExpression(uint32 byteOffset);
 			void writeIdentifierExpression(uint32 byteOffset);
 			void writeUnaryExpression(uint32 byteOffset);
 			void writeBinaryExpression(uint32 byteOffset);

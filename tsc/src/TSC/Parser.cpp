@@ -686,7 +686,7 @@ namespace ProjectA {
 		}
 
 		if (read().type >= TokenType::LITERAL_FLOATING_POINT && read().type <= TokenType::LITERAL_INTEGER_BASE_16) {
-			return parseNumberExpression();
+			return parseLiteralExpression();
 		}
 
 		if (read().type == TokenType::LEFT_PARENTHESIS) {
@@ -700,7 +700,7 @@ namespace ProjectA {
 
 	bool Parser::parseIdentifierExpression() {
 		Expression<ExpressionType::IDENTIFIER> expression{};
-		expression.identifierTokenIndex = tokenIndex;
+		expression.tokenIndex = tokenIndex;
 
 		if (isScreamingSnakeCase(read().value, read().characterCount)) {
 			output->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
@@ -783,6 +783,17 @@ namespace ProjectA {
 		return true;
 	}
 
+	bool Parser::parseLiteralExpression() {
+		Expression<ExpressionType::LITERAL> expression{};
+		expression.tokenIndex = tokenIndex;
+
+		jump();
+
+		output->ast.addExpression(expression);
+
+		return true;
+	}
+
 	bool Parser::parseGroupExpression() {
 		jump();
 
@@ -795,17 +806,6 @@ namespace ProjectA {
 		expression.expressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[GROUP] Expected ')' but got " + getTokenString(read()) + ".");
-
-		jump();
-
-		output->ast.addExpression(expression);
-
-		return true;
-	}
-
-	bool Parser::parseNumberExpression() {
-		Expression<ExpressionType::NUMBER> expression{};
-		expression.numberTokenIndex = tokenIndex;
 
 		jump();
 

@@ -219,7 +219,7 @@ namespace ProjectA {
 		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
 
 		switch (expressionReference.type) {
-			case ExpressionType::NUMBER: writeNumberExpression(stream, expressionReference.byteOffset); break;
+			case ExpressionType::LITERAL: writeLiteralExpression(stream, expressionReference.byteOffset); break;
 			case ExpressionType::IDENTIFIER: writeIdentifierExpression(stream, expressionReference.byteOffset); break;
 			case ExpressionType::UNARY: writeUnaryExpression(stream, expressionReference.byteOffset); break;
 			case ExpressionType::BINARY: writeBinaryExpression(stream, expressionReference.byteOffset); break;
@@ -231,21 +231,21 @@ namespace ProjectA {
 		}
 	}
 
-	void GLSLCodeGenerator::writeNumberExpression(std::ofstream& stream, uint32 byteOffset) const {
-		const Expression<ExpressionType::NUMBER>& expression = output->ast.getExpression<ExpressionType::NUMBER>(byteOffset);
-		const Token& numberToken = output->tokens[expression.numberTokenIndex];
+	void GLSLCodeGenerator::writeLiteralExpression(std::ofstream& stream, uint32 byteOffset) const {
+		const Expression<ExpressionType::LITERAL>& expression = output->ast.getExpression<ExpressionType::LITERAL>(byteOffset);
+		const Token& token = output->tokens[expression.tokenIndex];
 
 		// TODO: Add support for base 2/8/16 notations.
-		DEBUG_ASSERT(numberToken.type == TokenType::LITERAL_INTEGER_BASE_10 || numberToken.type == TokenType::LITERAL_FLOATING_POINT);
+		DEBUG_ASSERT(token.type == TokenType::LITERAL_INTEGER_BASE_10 || token.type == TokenType::LITERAL_FLOATING_POINT);
 
-		stream << getTokenString(numberToken);
+		stream << getTokenString(token);
 	}
 
 	void GLSLCodeGenerator::writeIdentifierExpression(std::ofstream& stream, uint32 byteOffset) const {
 		const Expression<ExpressionType::IDENTIFIER>& expression = output->ast.getExpression<ExpressionType::IDENTIFIER>(byteOffset);
-		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
+		const Token& token = output->tokens[expression.tokenIndex];
 
-		stream << getTokenString(identifierToken);
+		stream << getTokenString(token);
 	}
 
 	void GLSLCodeGenerator::writeUnaryExpression(std::ofstream& stream, uint32 byteOffset) {

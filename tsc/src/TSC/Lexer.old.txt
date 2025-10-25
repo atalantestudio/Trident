@@ -45,7 +45,7 @@ while (characterIndex < characters.size()) {
 			readIdentifier(token);
 		}
 		else {
-			readNumber(token);
+			readNumberLiteral(token);
 		}
 
 		continue;
@@ -54,7 +54,7 @@ while (characterIndex < characters.size()) {
 	// Parse other characters...
 }
 
-void readNumber(Token& token) {
+void readNumberLiteral(Token& token) {
 	// Register token...
 }
 

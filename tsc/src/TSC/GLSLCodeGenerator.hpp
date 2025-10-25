@@ -26,7 +26,7 @@ namespace ProjectA {
 			void writeReturnStatement(std::ofstream& stream, uint32 statementIndex);
 
 			void writeExpression(std::ofstream& stream, uint32 referenceIndex);
-			void writeNumberExpression(std::ofstream& stream, uint32 byteOffset) const;
+			void writeLiteralExpression(std::ofstream& stream, uint32 byteOffset) const;
 			void writeIdentifierExpression(std::ofstream& stream, uint32 byteOffset) const;
 			void writeUnaryExpression(std::ofstream& stream, uint32 byteOffset);
 			void writeBinaryExpression(std::ofstream& stream, uint32 byteOffset);

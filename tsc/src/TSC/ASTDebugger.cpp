@@ -251,7 +251,7 @@ namespace ProjectA {
 		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
 
 		switch (expressionReference.type) {
-			case ExpressionType::NUMBER: writeNumberExpression(expressionReference.byteOffset); break;
+			case ExpressionType::LITERAL: writeLiteralExpression(expressionReference.byteOffset); break;
 			case ExpressionType::IDENTIFIER: writeIdentifierExpression(expressionReference.byteOffset); break;
 			case ExpressionType::UNARY: writeUnaryExpression(expressionReference.byteOffset); break;
 			case ExpressionType::BINARY: writeBinaryExpression(expressionReference.byteOffset); break;
@@ -262,22 +262,22 @@ namespace ProjectA {
 		}
 	}
 
-	void ASTDebugger::writeNumberExpression(uint32 byteOffset) {
-		const Expression<ExpressionType::NUMBER>& expression = output->ast.getExpression<ExpressionType::NUMBER>(byteOffset);
-		const Token& numberToken = output->tokens[expression.numberTokenIndex];
+	void ASTDebugger::writeLiteralExpression(uint32 byteOffset) {
+		const Expression<ExpressionType::LITERAL>& expression = output->ast.getExpression<ExpressionType::LITERAL>(byteOffset);
+		const Token& token = output->tokens[expression.tokenIndex];
 
-		logger.property("Type", "NumberExpression");
+		logger.property("Type", "LiteralExpression");
 
-		switch (numberToken.type) {
+		switch (token.type) {
 			case TokenType::LITERAL_FLOATING_POINT:
-				logger.property("Number", std::stof(getTokenString(numberToken)));
+				logger.property("Literal", std::stof(getTokenString(token)));
 
 				break;
 			case TokenType::LITERAL_INTEGER_BASE_2:
 			case TokenType::LITERAL_INTEGER_BASE_8:
 			case TokenType::LITERAL_INTEGER_BASE_10:
 			case TokenType::LITERAL_INTEGER_BASE_16:
-				logger.property("Number", std::stoi(getTokenString(numberToken)));
+				logger.property("Literal", std::stoi(getTokenString(token)));
 
 				break;
 			default:
@@ -287,10 +287,10 @@ namespace ProjectA {
 
 	void ASTDebugger::writeIdentifierExpression(uint32 byteOffset) {
 		const Expression<ExpressionType::IDENTIFIER>& expression = output->ast.getExpression<ExpressionType::IDENTIFIER>(byteOffset);
-		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
+		const Token& token = output->tokens[expression.tokenIndex];
 
 		logger.property("Type", "IdentifierExpression");
-		logger.property("Identifier", getTokenString(identifierToken));
+		logger.property("Identifier", getTokenString(token));
 	}
 
 	void ASTDebugger::writeUnaryExpression(uint32 byteOffset) {

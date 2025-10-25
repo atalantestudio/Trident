@@ -204,10 +204,10 @@ namespace ProjectA {
 	}
 
 	void SemanticAnalyzer::analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression) const {
-		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
+		const Token& token = output->tokens[expression.tokenIndex];
 
-		if (!output->isDefined(identifierToken) && !isLanguageFunction(identifierToken)) {
-			generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, identifierToken);
+		if (!output->isDefined(token) && !isLanguageFunction(token)) {
+			generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, token);
 		}
 	}
 
@@ -221,17 +221,7 @@ namespace ProjectA {
 		}
 	}
 
-	/* void SemanticAnalyzer::analyzeNumberExpression(const ref<Expression<ExpressionType::NUMBER>> expression) {
-		// TODO: Check if the number is too large.
-		compilationOutput->registerSemanticToken(expression->numberTokenIndex, SemanticTokenType::NUMBER, 0);
-	}
-
-	void SemanticAnalyzer::analyzeIdentifierExpression(const ref<Expression<ExpressionType::IDENTIFIER>> expression) {
-		// TODO: Select correct semantic token type.
-		// compilationOutput->registerSemanticToken(expression->identifierTokenIndex, SemanticTokenType::VARIABLE);
-	}
-
-	void SemanticAnalyzer::analyzeUnaryExpression(const ref<Expression<ExpressionType::UNARY>> expression) {
+	/* void SemanticAnalyzer::analyzeUnaryExpression(const ref<Expression<ExpressionType::UNARY>> expression) {
 		compilationOutput->registerSemanticToken(expression->operatorTokenIndex, SemanticTokenType::OPERATOR, 0);
 
 		analyzeExpression(expression->rightExpressionIndex);

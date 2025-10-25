@@ -49,7 +49,7 @@ namespace ProjectA {
 			bool parseIdentifierExpression();
 			bool parseMemberAccessExpression();
 			bool parseFunctionCallOrGroupExpression();
-			bool parseNumberExpression();
+			bool parseLiteralExpression();
 			bool parseGroupExpression();
 
 			bool parseAnnotationBlocks();

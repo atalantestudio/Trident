@@ -2,7 +2,7 @@
 
 namespace ProjectA {
 	enum class ExpressionType : uint8 {
-		NUMBER,
+		LITERAL,
 		IDENTIFIER,
 		UNARY,
 		BINARY,

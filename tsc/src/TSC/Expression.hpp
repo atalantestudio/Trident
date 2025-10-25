@@ -15,13 +15,13 @@ namespace ProjectA {
 	struct Expression;
 
 	template<>
-	struct Expression<ExpressionType::IDENTIFIER> {
-		uint32 identifierTokenIndex;
+	struct Expression<ExpressionType::LITERAL> {
+		uint32 tokenIndex;
 	};
 
 	template<>
-	struct Expression<ExpressionType::NUMBER> {
-		uint32 numberTokenIndex;
+	struct Expression<ExpressionType::IDENTIFIER> {
+		uint32 tokenIndex;
 	};
 
 	template<>
