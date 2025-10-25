@@ -158,6 +158,8 @@ namespace ProjectA {
 
 				return;
 			}
+
+			return;
 		}
 
 		if (TEMPLATE_ARGUMENT_MASKS[expression.type.typeIndex] & expression.type.templateArgumentIndex) {
