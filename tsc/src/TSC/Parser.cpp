@@ -152,7 +152,7 @@ namespace ProjectA {
 
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[MEMBER] Expected an identifier but got " + output->getTokenString(read()) + ".");
+		EXPECT2(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		statement->identifierTokenIndex = tokenIndex;
 
@@ -291,7 +291,7 @@ namespace ProjectA {
 		ref<ParameterStatement> statement = createRef<ParameterStatement>();
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[PARAMETER] Expected an identifier but got " + output->getTokenString(read()) + ".");
+		EXPECT2(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		statement->identifierTokenIndex = tokenIndex;
 
@@ -711,7 +711,7 @@ namespace ProjectA {
 			return parseFunctionCallOrGroupExpression();
 		}
 
-		output->generateDiagnostic(tokenIndex, "[PRIMARY] Expected an expression but got " + output->getTokenString(read()) + ".", DiagnosticSeverity::ERROR);
+		generateDiagnostic<DiagnosticCode::MISSING_EXPRESSION>(*output, read());
 
 		return false;
 	}
@@ -743,7 +743,7 @@ namespace ProjectA {
 		Expression<ExpressionType::MEMBER_ACCESS> expression{};
 		expression.leftExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[MEMBER_ACCESS] Expected an identifier but got " + output->getTokenString(read()) + ".");
+		EXPECT2(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		expression.identifierTokenIndex = tokenIndex;
 
