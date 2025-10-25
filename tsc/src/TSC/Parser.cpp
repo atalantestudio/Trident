@@ -5,12 +5,22 @@
 #endif
 
 #include "Case.hpp"
+#include "Diagnostic/Error.hpp"
 #include "Parser.hpp"
 
 namespace ProjectA {
 	#define EXPECT(condition, message) \
 		if (!(condition)) { \
 			output->generateDiagnostic(tokenIndex, message, DiagnosticSeverity::ERROR); \
+			\
+			return false; \
+		}
+
+	#define EXPECT2(condition, diagnosticCode, ...) \
+		if (!(condition)) { \
+			generateDiagnostic<diagnosticCode>(*output, __VA_ARGS__); \
+			\
+			BREAKPOINT(); \
 			\
 			return false; \
 		}
@@ -183,7 +193,7 @@ namespace ProjectA {
 
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[CONSTANT] Expected an identifier but got " + output->getTokenString(read()) + ".");
+		EXPECT2(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		statement->identifierTokenIndex = tokenIndex;
 

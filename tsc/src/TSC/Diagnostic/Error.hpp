@@ -53,6 +53,20 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::MISSING_IDENTIFIER> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& token) {
+			Diagnostic diagnostic{};
+			diagnostic.start = token.start;
+			diagnostic.end = token.getEnd();
+			diagnostic.message = "Expected an identifier.";
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::MISSING_IDENTIFIER;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::REDEFINITION> {
 		explicit generateDiagnostic(CompilationOutput& output, const Token& definitionToken, const Token& redefinitionToken) {
 			DiagnosticReference diagnosticReference{};

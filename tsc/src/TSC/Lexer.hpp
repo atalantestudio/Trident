@@ -28,6 +28,7 @@ namespace ProjectA {
 			uint32 getIdentifierTokenTypeIndex(const std::string& identifier) const;
 
 			void registerToken(TokenType type, uint32 characterCount);
+			void registerEndOfToken(TokenType type);
 
 		private:
 			CompilationOutput* output;

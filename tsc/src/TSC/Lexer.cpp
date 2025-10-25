@@ -249,7 +249,7 @@ namespace ProjectA {
 					jump(1);
 				}
 				case '\n': {
-					output->registerToken(TokenType::END_OF_LINE, position, 0);
+					registerEndOfToken(TokenType::END_OF_LINE);
 
 					while (read() == '\n') {
 						characterIndex += 1;
@@ -279,13 +279,7 @@ namespace ProjectA {
 			}
 		}
 
-		DocumentPosition eof = position;
-
-		if (!output->tokens.empty()) {
-			eof = output->tokens.back().getEnd();
-		}
-
-		output->registerToken(TokenType::END_OF_FILE, eof, 0);
+		registerEndOfToken(TokenType::END_OF_FILE);
 	}
 
 	void Lexer::jump(sint32 characterCount) {
@@ -471,5 +465,15 @@ namespace ProjectA {
 		output->registerToken(type, position, characterCount);
 
 		jump(characterCount);
+	}
+
+	void Lexer::registerEndOfToken(TokenType type) {
+		DocumentPosition start = position;
+
+		if (output->tokens.size() > 0) {
+			start = output->tokens.back().getEnd();
+		}
+
+		output->registerToken(type, start, 0);
 	}
 }
