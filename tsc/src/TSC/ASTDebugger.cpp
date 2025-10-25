@@ -337,7 +337,7 @@ namespace ProjectA {
 
 	void ASTDebugger::writeMemberAccessExpression(uint32 byteOffset) {
 		const Expression<ExpressionType::MEMBER_ACCESS>& expression = output->ast.getExpression<ExpressionType::MEMBER_ACCESS>(byteOffset);
-		const Token& identifierTokenIndex = output->tokens[expression.identifierTokenIndex];
+		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
 
 		logger.property("Type", "MemberAccessExpression");
 		logger.propertyObject("Left");
@@ -345,7 +345,7 @@ namespace ProjectA {
 		writeExpression(expression.leftExpressionReferenceIndex);
 
 		logger.closeObject();
-		logger.property("MemberIdentifier", getTokenString(identifierTokenIndex));
+		logger.property("MemberIdentifier", getTokenString(identifierToken));
 	}
 
 	void ASTDebugger::writeFunctionCallExpression(uint32 byteOffset) {
