@@ -279,7 +279,13 @@ namespace ProjectA {
 			}
 		}
 
-		registerToken(TokenType::END_OF_FILE, 0);
+		DocumentPosition eof = position;
+
+		if (!output->tokens.empty()) {
+			eof = output->tokens.back().getEnd();
+		}
+
+		output->registerToken(TokenType::END_OF_FILE, eof, 0);
 	}
 
 	void Lexer::jump(sint32 characterCount) {
