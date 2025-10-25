@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ExpressionType.hpp"
+#include "PackedType.hpp"
 
 namespace ProjectA {
 	static constexpr uint32 UNDEFINED_EXPRESSION = ~0;
@@ -56,6 +57,7 @@ namespace ProjectA {
 
 	template<>
 	struct Expression<ExpressionType::TYPE> {
+		PackedType type;
 		uint32 typeTokenIndex;
 		uint32 templateArgumentTokenIndex = UNDEFINED_TOKEN;
 	};

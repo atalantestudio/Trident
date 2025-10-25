@@ -41,7 +41,7 @@ namespace ProjectA {
 		const ref<StructureStatement> statement = std::static_pointer_cast<StructureStatement>(output->ast.statements[statementIndex]);
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		stream << indentation << "struct " << getTokenString(identifierToken) << " {\n";
+		stream << indentation << "struct " << output->getTokenString(identifierToken) << " {\n";
 
 		indent();
 
@@ -68,7 +68,7 @@ namespace ProjectA {
 		writeAnnotationBlocks(stream, statement->annotationBlockIndexOffset, statement->annotationBlockCount);
 		writeExpression(stream, statement->typeExpressionReferenceIndex);
 
-		stream << " " << getTokenString(identifierToken) << ";\n";
+		stream << " " << output->getTokenString(identifierToken) << ";\n";
 	}
 
 	void GLSLCodeGenerator::writeConstantStatement(std::ofstream& stream, uint32 statementIndex) {
@@ -81,7 +81,7 @@ namespace ProjectA {
 
 		writeExpression(stream, statement->typeExpressionReferenceIndex);
 
-		stream << " " << getTokenString(identifierToken) << " = ";
+		stream << " " << output->getTokenString(identifierToken) << " = ";
 
 		writeExpression(stream, statement->initializerExpressionReferenceIndex);
 
@@ -102,7 +102,7 @@ namespace ProjectA {
 		writeExpression(stream, statement->typeExpressionReferenceIndex);
 
 		stream << " ";
-		stream << getTokenString(identifierToken);
+		stream << output->getTokenString(identifierToken);
 
 		if (statement->initializerExpressionReferenceIndex != UNDEFINED_EXPRESSION) {
 			stream << " = ";
@@ -119,7 +119,7 @@ namespace ProjectA {
 
 		writeExpression(stream, statement->typeExpressionReferenceIndex);
 
-		stream << " " << getTokenString(identifierToken);
+		stream << " " << output->getTokenString(identifierToken);
 	}
 
 	void GLSLCodeGenerator::writeFunctionStatement(std::ofstream& stream, uint32 statementIndex) {
@@ -130,7 +130,7 @@ namespace ProjectA {
 
 		writeExpression(stream, statement->returnTypeExpressionReferenceIndex);
 
-		stream << " " << getTokenString(identifierToken) << "(";
+		stream << " " << output->getTokenString(identifierToken) << "(";
 
 		for (uint32 statementIndexOffset = 0; statementIndexOffset < statement->parameterStatementIndices.size(); statementIndexOffset += 1) {
 			writeStatement(stream, statement->parameterStatementIndices[statementIndexOffset]);
@@ -238,14 +238,14 @@ namespace ProjectA {
 		// TODO: Add support for base 2/8/16 notations.
 		DEBUG_ASSERT(token.type == TokenType::LITERAL_INTEGER_BASE_10 || token.type == TokenType::LITERAL_FLOATING_POINT);
 
-		stream << getTokenString(token);
+		stream << output->getTokenString(token);
 	}
 
 	void GLSLCodeGenerator::writeIdentifierExpression(std::ofstream& stream, uint32 byteOffset) const {
 		const Expression<ExpressionType::IDENTIFIER>& expression = output->ast.getExpression<ExpressionType::IDENTIFIER>(byteOffset);
 		const Token& token = output->tokens[expression.tokenIndex];
 
-		stream << getTokenString(token);
+		stream << output->getTokenString(token);
 	}
 
 	void GLSLCodeGenerator::writeUnaryExpression(std::ofstream& stream, uint32 byteOffset) {
@@ -284,7 +284,7 @@ namespace ProjectA {
 
 		writeExpression(stream, expression.leftExpressionReferenceIndex);
 
-		stream << "." << getTokenString(identifierToken);
+		stream << "." << output->getTokenString(identifierToken);
 	}
 
 	void GLSLCodeGenerator::writeFunctionCallExpression(std::ofstream& stream, uint32 byteOffset) {
@@ -312,7 +312,7 @@ namespace ProjectA {
 				case Annotation::LOCATION: {
 					const Token& valueToken = output->tokens[annotationBlock.valueTokenIndex];
 
-					stream << "location = " << getTokenString(valueToken) << "";
+					stream << "location = " << output->getTokenString(valueToken) << "";
 
 					break;
 				}

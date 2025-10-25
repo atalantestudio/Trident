@@ -7,6 +7,14 @@
 namespace ProjectA {
 	class GLSLCodeGenerator {
 		public:
+			static constexpr const char8* GLSL_TYPE_PREFIXES[] = {
+				"", // float
+				"d", // double
+				"i", // int
+				"u", // uint
+			};
+
+		public:
 			void write(std::ofstream& stream, const CompilationOutput& output);
 
 		private:
@@ -40,36 +48,22 @@ namespace ProjectA {
 			void indent();
 			void unindent();
 
-			std::string getGlslTemplateArgumentPrefix(const Token& templateArgumentToken) const {
-				switch (templateArgumentToken.type) {
-					case TokenType::TYPE_FLOAT32:
-						return "";
-					case TokenType::TYPE_FLOAT64:
-						return "d";
-					case TokenType::TYPE_SINT32:
-						return "i";
-					case TokenType::TYPE_UINT32:
-						return "u";
-					default: {
-						MODULE_ASSERT(false, "Invalid type.");
-
-						return "";
-					}
-				}
-			}
-
 			std::string getGlslType(uint32 typeTokenIndex, uint32 templateArgumentTokenIndex) const {
 				const Token& typeToken = output->tokens[typeTokenIndex];
 
 				switch (typeToken.type) {
-					case TokenType::TYPE_FLOAT32:
+					case TokenType::TYPE_FLOAT32: {
 						return "float";
-					case TokenType::TYPE_FLOAT64:
+					}
+					case TokenType::TYPE_FLOAT64: {
 						return "double";
-					case TokenType::TYPE_SINT32:
+					}
+					case TokenType::TYPE_SINT32: {
 						return "int";
-					case TokenType::TYPE_UINT32:
+					}
+					case TokenType::TYPE_UINT32: {
 						return "uint";
+					}
 					case TokenType::TYPE_VEC2:
 					case TokenType::TYPE_VEC3:
 					case TokenType::TYPE_VEC4:
@@ -82,20 +76,20 @@ namespace ProjectA {
 					case TokenType::TYPE_MAT4X2:
 					case TokenType::TYPE_MAT4X3:
 					case TokenType::TYPE_MAT4X4: {
-						const std::string typeString = getTokenString(typeToken);
+						const std::string typeString = output->getTokenString(typeToken);
 
-						if (templateArgumentTokenIndex == ~0) {
+						if (templateArgumentTokenIndex == UNDEFINED_TOKEN) {
 							return typeString;
 						}
 
 						const Token& templateArgumentToken = output->tokens[templateArgumentTokenIndex];
 
-						return getGlslTemplateArgumentPrefix(templateArgumentToken) + typeString;
+						return GLSL_TYPE_PREFIXES[templateArgumentToken.type - TokenType::TYPE_FLOAT32] + typeString;
 					}
 					default: {
 						MODULE_ASSERT(typeToken.type >= TokenType::USER_DEFINED, "Invalid type.");
 
-						return output->identifiers[typeToken.type - TokenType::USER_DEFINED];
+						return output->userDefinedIdentifiers[typeToken.type - TokenType::USER_DEFINED];
 					}
 				}
 			}

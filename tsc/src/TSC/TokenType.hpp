@@ -2,17 +2,20 @@
 
 namespace ProjectA {
 	enum TokenType : uint32 {
+		// Keywords
 		KEYWORD_AND,
 		KEYWORD_BREAK,
 		KEYWORD_IF,
 
-		// NOTE: The "include" keyword is handed by the Preprocessor class.
+		// NOTE: The "include" keyword is handled by the Preprocessor class.
+
 		KEYWORD_NEXT,
 		KEYWORD_OR,
 		KEYWORD_RETURN,
 		KEYWORD_WHILE,
 		KEYWORD_XOR,
 
+		// Language types
 		TYPE_FLOAT32,
 		TYPE_FLOAT64,
 		TYPE_SINT32,
@@ -30,6 +33,7 @@ namespace ProjectA {
 		TYPE_MAT4X3,
 		TYPE_MAT4X4,
 
+		// Language functions
 		FUNCTION_NORMALIZED,
 
 		// Offsets and counters
@@ -100,8 +104,8 @@ namespace ProjectA {
 		LITERAL_INTEGER_BASE_10,
 		LITERAL_INTEGER_BASE_16,
 
-		// User-defined identifiers (structures, structure members, variables, constants, functions)
-		// NOTE: All unique identifiers are indexed relatively to this value, e.g. the third user-defined identifier will have the token type USER_DEFINED + 2.
+		// User-defined types (structures, structure members, variables, constants, functions)
+		// NOTE: All unique identifiers are indexed relatively to this value. For example, the third user-defined type will be USER_DEFINED + 2.
 		USER_DEFINED,
 	};
 

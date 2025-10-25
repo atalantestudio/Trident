@@ -85,7 +85,7 @@ namespace ProjectA {
 
 		const uint32 structureStatementIndex = static_cast<uint32>(output->ast.statements.size());
 
-		output->registerCompletionItem(getTokenString(read()), CompletionItemKind::STRUCTURE);
+		output->registerCompletionItem(output->getTokenString(read()), CompletionItemKind::STRUCTURE);
 
 		jump();
 		jump();
@@ -112,7 +112,7 @@ namespace ProjectA {
 
 			EXPECT(
 				read().type == TokenType::RIGHT_CURLY_BRACE || read().type == TokenType::END_OF_FILE || read().type == TokenType::END_OF_LINE,
-				"[FUNCTION] Expected '}' or EOF or EOL but got " + getTokenString(read()) + "."
+				"[FUNCTION] Expected '}' or EOF or EOL but got " + output->getTokenString(read()) + "."
 			);
 
 			jumpEol();
@@ -123,9 +123,6 @@ namespace ProjectA {
 		jump();
 
 		analyzer.analyzeStructureStatement(statement);
-
-		// TODO: Update UDT here, e.g.
-		// output->ast.userDefinedTypes.emplace_back(output->tokens[statement->identifierTokenIndex].value);
 
 		return true;
 	}
@@ -145,7 +142,7 @@ namespace ProjectA {
 
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[MEMBER] Expected an identifier but got " + getTokenString(read()) + ".");
+		EXPECT(read().type >= TokenType::USER_DEFINED, "[MEMBER] Expected an identifier but got " + output->getTokenString(read()) + ".");
 
 		statement->identifierTokenIndex = tokenIndex;
 
@@ -186,17 +183,17 @@ namespace ProjectA {
 
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[CONSTANT] Expected an identifier but got " + getTokenString(read()) + ".");
+		EXPECT(read().type >= TokenType::USER_DEFINED, "[CONSTANT] Expected an identifier but got " + output->getTokenString(read()) + ".");
 
 		statement->identifierTokenIndex = tokenIndex;
 
-		output->registerCompletionItem(getTokenString(output->tokens[statement->identifierTokenIndex]), CompletionItemKind::CONSTANT);
+		output->registerCompletionItem(output->getTokenString(output->tokens[statement->identifierTokenIndex]), CompletionItemKind::CONSTANT);
 
 		registerVariableSemanticToken(read(), false);
 
 		jump();
 
-		EXPECT(read().type == TokenType::EQUAL, "[CONSTANT] Expected '=' but got " + getTokenString(read()) + ".");
+		EXPECT(read().type == TokenType::EQUAL, "[CONSTANT] Expected '=' but got " + output->getTokenString(read()) + ".");
 
 		output->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR, 0);
 
@@ -213,7 +210,7 @@ namespace ProjectA {
 
 		analyzer.analyzeConstantStatement(statement);
 
-		EXPECT(read().type == TokenType::END_OF_FILE || read().type == TokenType::END_OF_LINE, "[CONSTANT] Expected EOL but got " + getTokenString(read()) + ".");
+		EXPECT(read().type == TokenType::END_OF_FILE || read().type == TokenType::END_OF_LINE, "[CONSTANT] Expected EOL but got " + output->getTokenString(read()) + ".");
 
 		jumpEol();
 
@@ -226,7 +223,7 @@ namespace ProjectA {
 		ref<FunctionStatement> statement = createRef<FunctionStatement>();
 		statement->returnTypeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[FUNCTION] Expected a UDI but got " + getTokenString(read()) + ".");
+		EXPECT(read().type >= TokenType::USER_DEFINED, "[FUNCTION] Expected a UDI but got " + output->getTokenString(read()) + ".");
 
 		statement->identifierTokenIndex = tokenIndex;
 
@@ -247,17 +244,17 @@ namespace ProjectA {
 				break;
 			}
 
-			EXPECT(read().type == TokenType::COMMA || read().type == TokenType::END_OF_LINE, "[FUNCTION] Expected ',' or EOL but got " + getTokenString(read()) + ".");
+			EXPECT(read().type == TokenType::COMMA || read().type == TokenType::END_OF_LINE, "[FUNCTION] Expected ',' or EOL but got " + output->getTokenString(read()) + ".");
 
 			jump();
 			jumpEol();
 		}
 
-		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[FUNCTION] Expected ')' but got " + getTokenString(read()) + ".");
+		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[FUNCTION] Expected ')' but got " + output->getTokenString(read()) + ".");
 
 		jump();
 
-		EXPECT(read().type == TokenType::LEFT_CURLY_BRACE, "[FUNCTION] Expected '{' but got " + getTokenString(read()) + ".");
+		EXPECT(read().type == TokenType::LEFT_CURLY_BRACE, "[FUNCTION] Expected '{' but got " + output->getTokenString(read()) + ".");
 
 		statement->scopeStatementIndex = getLastStatementIndex() + 1;
 
@@ -271,7 +268,7 @@ namespace ProjectA {
 		analyzer.analyzeFunctionStatement(getLastStatementIndex());
 
 		// TODO: Correct highlighting.
-		output->registerCompletionItem(getTokenString(output->tokens[statement->identifierTokenIndex]), CompletionItemKind::FUNCTION);
+		output->registerCompletionItem(output->getTokenString(output->tokens[statement->identifierTokenIndex]), CompletionItemKind::FUNCTION);
 
 		return true;
 	}
@@ -284,7 +281,7 @@ namespace ProjectA {
 		ref<ParameterStatement> statement = createRef<ParameterStatement>();
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[PARAMETER] Expected an identifier but got " + getTokenString(read()) + ".");
+		EXPECT(read().type >= TokenType::USER_DEFINED, "[PARAMETER] Expected an identifier but got " + output->getTokenString(read()) + ".");
 
 		statement->identifierTokenIndex = tokenIndex;
 
@@ -342,7 +339,7 @@ namespace ProjectA {
 
 		jump();
 
-		EXPECT(read().type == TokenType::END_OF_LINE, "[NEXT] Expected EOL but got " + getTokenString(read()) + ".");
+		EXPECT(read().type == TokenType::END_OF_LINE, "[NEXT] Expected EOL but got " + output->getTokenString(read()) + ".");
 
 		output->ast.statements.emplace_back(statement);
 
@@ -354,7 +351,7 @@ namespace ProjectA {
 
 		jump();
 
-		EXPECT(read().type == TokenType::END_OF_LINE, "[NEXT] Expected EOL but got " + getTokenString(read()) + ".");
+		EXPECT(read().type == TokenType::END_OF_LINE, "[NEXT] Expected EOL but got " + output->getTokenString(read()) + ".");
 
 		output->ast.statements.emplace_back(statement);
 
@@ -371,7 +368,7 @@ namespace ProjectA {
 
 		output->ast.statements.emplace_back(statement);
 
-		EXPECT(read().type == TokenType::RIGHT_CURLY_BRACE || read().type == TokenType::END_OF_LINE, "[EXPRESSION] Expected '}' but got " + getTokenString(read()) + ".");
+		EXPECT(read().type == TokenType::RIGHT_CURLY_BRACE || read().type == TokenType::END_OF_LINE, "[EXPRESSION] Expected '}' but got " + output->getTokenString(read()) + ".");
 
 		return true;
 	}
@@ -428,7 +425,7 @@ namespace ProjectA {
 			jumpEol();
 		}
 
-		EXPECT(read().type == TokenType::RIGHT_CURLY_BRACE, "[SCOPE] Expected '}' but got " + getTokenString(read()) + ".");
+		EXPECT(read().type == TokenType::RIGHT_CURLY_BRACE, "[SCOPE] Expected '}' but got " + output->getTokenString(read()) + ".");
 
 		jump();
 
@@ -445,7 +442,7 @@ namespace ProjectA {
 
 		conditionExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type == TokenType::LEFT_CURLY_BRACE, "[IF/WHILE] Expected '{' but got " + getTokenString(read()) + ".");
+		EXPECT(read().type == TokenType::LEFT_CURLY_BRACE, "[IF/WHILE] Expected '{' but got " + output->getTokenString(read()) + ".");
 
 		scopeStatementIndex = getLastStatementIndex() + 1;
 
@@ -481,26 +478,27 @@ namespace ProjectA {
 		ref<VariableStatement> statement = createRef<VariableStatement>();
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[VARIABLE] Expected a UDI but got " + getTokenString(read()) + ".");
+		EXPECT(read().type >= TokenType::USER_DEFINED, "[VARIABLE] Expected a UDI but got " + output->getTokenString(read()) + ".");
 
 		statement->identifierTokenIndex = tokenIndex;
 
 		output->define(tokenIndex);
-		output->registerCompletionItem(getTokenString(read()), CompletionItemKind::VARIABLE);
+		output->registerCompletionItem(output->getTokenString(read()), CompletionItemKind::VARIABLE);
 
-		statement->constant = isScreamingSnakeCase(read().value, read().characterCount);
+		statement->constant = isScreamingSnakeCase(output->getIdentifier(read().type));
+
+		uint32 modifiers = 0;
 
 		if (statement->constant) {
-			output->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
+			modifiers |= SemanticTokenModifier::CONSTANT;
 		}
-		else {
-			output->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, 0);
-		}
+
+		output->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, modifiers);
 
 		jump();
 
 		if (statement->constant) {
-			EXPECT(read().type == TokenType::EQUAL, "[VARIABLE/CONSTANT] Expected '=' but got " + getTokenString(read()) + ".");
+			EXPECT(read().type == TokenType::EQUAL, "[VARIABLE/CONSTANT] Expected '=' but got " + output->getTokenString(read()) + ".");
 		}
 
 		if (read().type == TokenType::EQUAL) {
@@ -524,10 +522,14 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseTypeExpression() {
+		const uint32 typeIndex = read().type;
+
 		EXPECT(
-			(read().type >= FIRST_TYPE_INDEX && read().type <= LAST_TYPE_INDEX) || read().type >= TokenType::USER_DEFINED,
-			"[TYPE] Expected a language or user-defined type but got " + getTokenString(read()) + "."
+			(typeIndex >= FIRST_TYPE_INDEX && typeIndex <= LAST_TYPE_INDEX) || typeIndex >= TokenType::USER_DEFINED,
+			"[TYPE] Expected a language or user-defined type but got " + output->getTokenString(read()) + "."
 		);
+
+		uint32 templateArgumentIndex = 0;
 
 		Expression<ExpressionType::TYPE> expression{};
 		expression.typeTokenIndex = tokenIndex;
@@ -540,7 +542,12 @@ namespace ProjectA {
 			jump();
 			jump();
 
-			EXPECT((read().type >= FIRST_TYPE_INDEX && read().type <= LAST_TYPE_INDEX) || read().type >= TokenType::USER_DEFINED, "[TYPE] Expected a valid template argument but got " + getTokenString(read()) + ".");
+			templateArgumentIndex = read().type;
+
+			EXPECT(
+				(templateArgumentIndex >= FIRST_TYPE_INDEX && templateArgumentIndex <= LAST_TYPE_INDEX) || templateArgumentIndex >= TokenType::USER_DEFINED,
+				"[TYPE] Expected a valid template argument but got " + output->getTokenString(read()) + "."
+			);
 
 			expression.templateArgumentTokenIndex = tokenIndex;
 
@@ -550,10 +557,14 @@ namespace ProjectA {
 
 			jump();
 
-			EXPECT(read().type == TokenType::RIGHT_ANGLE_BRACKET, "[TYPE] Expected '>' but got " + getTokenString(read()) + ".");
+			EXPECT(read().type == TokenType::RIGHT_ANGLE_BRACKET, "[TYPE] Expected '>' but got " + output->getTokenString(read()) + ".");
 		}
 
 		jump();
+
+		expression.type = PackedType(typeIndex, templateArgumentIndex);
+
+		analyzer.analyzeTypeExpression(expression);
 
 		output->ast.addExpression(expression);
 
@@ -561,7 +572,7 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseAssignmentOrCompoundExpression() {
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[ASSIGNMENT] Expected a user-defined identifier but got " + getTokenString(read()) + ".");
+		EXPECT(read().type >= TokenType::USER_DEFINED, "[ASSIGNMENT] Expected a user-defined identifier but got " + output->getTokenString(read()) + ".");
 
 		if (!parseIdentifierExpression()) {
 			return false;
@@ -661,7 +672,7 @@ namespace ProjectA {
 				return false;
 			}
 
-			EXPECT(read().type == TokenType::LEFT_PARENTHESIS, "[PRIMARY] Expected '(' but got " + getTokenString(read()) + ".");
+			EXPECT(read().type == TokenType::LEFT_PARENTHESIS, "[PRIMARY] Expected '(' but got " + output->getTokenString(read()) + ".");
 
 			return parseFunctionCallOrGroupExpression();
 		}
@@ -690,7 +701,7 @@ namespace ProjectA {
 			return parseFunctionCallOrGroupExpression();
 		}
 
-		output->generateDiagnostic(tokenIndex, "[PRIMARY] Expected an expression but got " + getTokenString(read()) + ".", DiagnosticSeverity::ERROR);
+		output->generateDiagnostic(tokenIndex, "[PRIMARY] Expected an expression but got " + output->getTokenString(read()) + ".", DiagnosticSeverity::ERROR);
 
 		return false;
 	}
@@ -699,7 +710,7 @@ namespace ProjectA {
 		Expression<ExpressionType::IDENTIFIER> expression{};
 		expression.tokenIndex = tokenIndex;
 
-		if (isScreamingSnakeCase(read().value, read().characterCount)) {
+		if (isScreamingSnakeCase(output->getIdentifier(read().type))) {
 			output->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
 		}
 
@@ -722,7 +733,7 @@ namespace ProjectA {
 		Expression<ExpressionType::MEMBER_ACCESS> expression{};
 		expression.leftExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[MEMBER_ACCESS] Expected an identifier but got " + getTokenString(read()) + ".");
+		EXPECT(read().type >= TokenType::USER_DEFINED, "[MEMBER_ACCESS] Expected an identifier but got " + output->getTokenString(read()) + ".");
 
 		expression.identifierTokenIndex = tokenIndex;
 
@@ -762,12 +773,12 @@ namespace ProjectA {
 				break;
 			}
 
-			EXPECT(read().type == TokenType::COMMA, "[FUNCTION_CALL] Expected ',' but got " + getTokenString(read()) + ".");
+			EXPECT(read().type == TokenType::COMMA, "[FUNCTION_CALL] Expected ',' but got " + output->getTokenString(read()) + ".");
 
 			jump();
 		}
 
-		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[FUNCTION_CALL] Expected ')' but got " + getTokenString(read()) + ".");
+		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[FUNCTION_CALL] Expected ')' but got " + output->getTokenString(read()) + ".");
 
 		jump();
 
@@ -802,7 +813,7 @@ namespace ProjectA {
 		Expression<ExpressionType::GROUP> expression{};
 		expression.expressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[GROUP] Expected ')' but got " + getTokenString(read()) + ".");
+		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[GROUP] Expected ')' but got " + output->getTokenString(read()) + ".");
 
 		jump();
 
@@ -816,14 +827,14 @@ namespace ProjectA {
 			jump();
 
 			// Annotations are considered user-defined identifiers because they can be used to name variables.
-			EXPECT(read().type >= TokenType::USER_DEFINED, "[ANNOTATION_INSTANCE] Expected an annotation but got " + getTokenString(read()) + ".");
+			EXPECT(read().type >= TokenType::USER_DEFINED, "[ANNOTATION_INSTANCE] Expected an annotation but got " + output->getTokenString(read()) + ".");
 
 			AnnotationBlock annotationBlock{};
 
 			for (uint32 annotationIndex = 0; annotationIndex < ANNOTATION_COUNT; annotationIndex += 1) {
 				const char8* annotation = ANNOTATION_STRINGS[annotationIndex];
 
-				if (getTokenString(read()) == annotation) {
+				if (output->getTokenString(read()) == annotation) {
 					annotationFlag |= BIT(annotationIndex);
 					annotationBlock.annotation = static_cast<Annotation>(BIT(annotationIndex));
 
@@ -831,7 +842,7 @@ namespace ProjectA {
 				}
 			}
 
-			EXPECT(annotationBlock.annotation != static_cast<Annotation>(0), "[ANNOTATION_INSTANCE] Unknown annotation " + getTokenString(read()) + ".");
+			EXPECT(annotationBlock.annotation != static_cast<Annotation>(0), "[ANNOTATION_INSTANCE] Unknown annotation " + output->getTokenString(read()) + ".");
 
 			annotationBlock.identifierTokenIndex = tokenIndex;
 
@@ -846,7 +857,7 @@ namespace ProjectA {
 					// TODO
 					/* output->generateDiagnostic(
 						DiagnosticSeverity::ERROR,
-						"[ANNOTATION_INSTANCE] Expected a literal but got " + getTokenString(read()) + ".",
+						"[ANNOTATION_INSTANCE] Expected a literal but got " + output->getTokenString(read()) + ".",
 						identifierToken.getEnd(),
 						identifierToken.getEnd()
 					); */
@@ -860,7 +871,7 @@ namespace ProjectA {
 				}
 			}
 
-			EXPECT(read().type == TokenType::RIGHT_SQUARE_BRACKET, "[ANNOTATION_INSTANCE] Expected ']' but got " + getTokenString(read()) + ".");
+			EXPECT(read().type == TokenType::RIGHT_SQUARE_BRACKET, "[ANNOTATION_INSTANCE] Expected ']' but got " + output->getTokenString(read()) + ".");
 
 			jump();
 
@@ -908,7 +919,7 @@ namespace ProjectA {
 	}
 
 	void Parser::jumpEol() {
-		if (read().type == TokenType::END_OF_LINE) {
+		while (read().type == TokenType::END_OF_LINE) {
 			jump();
 		}
 	}
@@ -920,28 +931,30 @@ namespace ProjectA {
 	}
 
 	bool Parser::registerVariableSemanticToken(const Token& token, bool preferStructure) const {
+		const std::string& identifier = output->getIdentifier(token.type);
+
 		// TODO: Refactor.
 		if (preferStructure) {
-			if (isPascalCase(token.value, token.characterCount)) {
+			if (isPascalCase(identifier)) {
 				output->registerSemanticToken(token, SemanticTokenType::STRUCTURE, 0);
 
 				return true;
 			}
 
-			if (isScreamingSnakeCase(token.value, token.characterCount)) {
+			if (isScreamingSnakeCase(identifier)) {
 				output->registerSemanticToken(token, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
 
 				return true;
 			}
 		}
 		else {
-			if (isScreamingSnakeCase(token.value, token.characterCount)) {
+			if (isScreamingSnakeCase(identifier)) {
 				output->registerSemanticToken(token, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
 
 				return true;
 			}
 
-			if (isPascalCase(token.value, token.characterCount)) {
+			if (isPascalCase(identifier)) {
 				output->registerSemanticToken(token, SemanticTokenType::STRUCTURE, 0);
 
 				return true;

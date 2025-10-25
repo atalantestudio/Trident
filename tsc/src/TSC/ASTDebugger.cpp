@@ -46,7 +46,7 @@ namespace ProjectA {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
 		logger.property("Type", "StructureStatement");
-		logger.property("Identifier", getTokenString(identifierToken));
+		logger.property("Identifier", output->getTokenString(identifierToken));
 		logger.propertyArray("Members");
 
 		for (const uint32 statementIndex : statement->memberStatementIndices) {
@@ -76,7 +76,7 @@ namespace ProjectA {
 
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		logger.property("Identifier", getTokenString(identifierToken));
+		logger.property("Identifier", output->getTokenString(identifierToken));
 	}
 
 	void ASTDebugger::writeConstantStatement(uint32 statementIndex) {
@@ -93,7 +93,7 @@ namespace ProjectA {
 		writeExpression(statement->typeExpressionReferenceIndex);
 
 		logger.closeObject();
-		logger.property("Identifier", getTokenString(identifierToken));
+		logger.property("Identifier", output->getTokenString(identifierToken));
 		logger.propertyObject("Initializer");
 
 		writeExpression(statement->initializerExpressionReferenceIndex);
@@ -111,7 +111,7 @@ namespace ProjectA {
 		writeExpression(statement->typeExpressionReferenceIndex);
 
 		logger.closeObject();
-		logger.property("Identifier", getTokenString(identifierToken));
+		logger.property("Identifier", output->getTokenString(identifierToken));
 		logger.property("Constant", statement->constant);
 
 		if (statement->initializerExpressionReferenceIndex != UNDEFINED_EXPRESSION) {
@@ -136,7 +136,7 @@ namespace ProjectA {
 		writeExpression(statement->typeExpressionReferenceIndex);
 
 		logger.closeObject();
-		logger.property("Identifier", getTokenString(identifierToken));
+		logger.property("Identifier", output->getTokenString(identifierToken));
 	}
 
 	void ASTDebugger::writeFunctionStatement(uint32 statementIndex) {
@@ -149,7 +149,7 @@ namespace ProjectA {
 		writeExpression(statement->returnTypeExpressionReferenceIndex);
 
 		logger.closeObject();
-		logger.property("Identifier", getTokenString(identifierToken));
+		logger.property("Identifier", output->getTokenString(identifierToken));
 		logger.propertyArray("Arguments");
 
 		for (const uint32 statementIndex : statement->parameterStatementIndices) {
@@ -270,14 +270,14 @@ namespace ProjectA {
 
 		switch (token.type) {
 			case TokenType::LITERAL_FLOATING_POINT:
-				logger.property("Literal", std::stof(getTokenString(token)));
+				logger.property("Literal", std::stof(output->getTokenString(token)));
 
 				break;
 			case TokenType::LITERAL_INTEGER_BASE_2:
 			case TokenType::LITERAL_INTEGER_BASE_8:
 			case TokenType::LITERAL_INTEGER_BASE_10:
 			case TokenType::LITERAL_INTEGER_BASE_16:
-				logger.property("Literal", std::stoi(getTokenString(token)));
+				logger.property("Literal", std::stoi(output->getTokenString(token)));
 
 				break;
 			default:
@@ -290,7 +290,7 @@ namespace ProjectA {
 		const Token& token = output->tokens[expression.tokenIndex];
 
 		logger.property("Type", "IdentifierExpression");
-		logger.property("Identifier", getTokenString(token));
+		logger.property("Identifier", output->getTokenString(token));
 	}
 
 	void ASTDebugger::writeUnaryExpression(uint32 byteOffset) {
@@ -298,7 +298,7 @@ namespace ProjectA {
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
 		logger.property("Type", "UnaryExpression");
-		logger.property("Operator", getTokenString(operatorToken));
+		logger.property("Operator", output->getTokenString(operatorToken));
 		logger.propertyObject("Right");
 
 		writeExpression(expression.rightExpressionReferenceIndex);
@@ -316,7 +316,7 @@ namespace ProjectA {
 		writeExpression(expression.leftExpressionReferenceIndex);
 
 		logger.closeObject();
-		logger.property("Operator", getTokenString(operatorToken));
+		logger.property("Operator", output->getTokenString(operatorToken));
 		logger.propertyObject("Right");
 
 		writeExpression(expression.rightExpressionReferenceIndex);
@@ -345,7 +345,7 @@ namespace ProjectA {
 		writeExpression(expression.leftExpressionReferenceIndex);
 
 		logger.closeObject();
-		logger.property("MemberIdentifier", getTokenString(identifierToken));
+		logger.property("MemberIdentifier", output->getTokenString(identifierToken));
 	}
 
 	void ASTDebugger::writeFunctionCallExpression(uint32 byteOffset) {
@@ -375,14 +375,14 @@ namespace ProjectA {
 		const Token& typeToken = output->tokens[expression.typeTokenIndex];
 
 		logger.property("Type", "TypeExpression");
-		logger.property("_Type", getTokenString(typeToken));
+		logger.property("_Type", output->getTokenString(typeToken));
 
 		std::string templateArgument = "null";
 
 		if (expression.templateArgumentTokenIndex != UNDEFINED_TOKEN) {
 			const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
 
-			templateArgument = getTokenString(templateArgumentToken);
+			templateArgument = output->getTokenString(templateArgumentToken);
 		}
 
 		logger.property("TemplateArgument", templateArgument);
@@ -396,12 +396,12 @@ namespace ProjectA {
 			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
 			logger.openObject();
-			logger.property("Annotation", getTokenString(identifierToken));
+			logger.property("Annotation", output->getTokenString(identifierToken));
 
 			if (annotationBlock.valueTokenIndex != UNDEFINED_ANNOTATION_VALUE) {
 				const Token& valueToken = output->tokens[annotationBlock.valueTokenIndex];
 
-				logger.property("Value", std::stoul(getTokenString(valueToken)));
+				logger.property("Value", std::stoul(output->getTokenString(valueToken)));
 			}
 
 			logger.closeObject();

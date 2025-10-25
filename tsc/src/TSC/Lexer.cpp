@@ -243,17 +243,21 @@ namespace ProjectA {
 
 					output->registerSemanticToken(SemanticTokenType::COMMENT, 0, start, position.characterOffset - start.characterOffset);
 				}
-				case '\n':
 				case '\r': {
+					jump(1);
+				}
+				case '\n': {
 					output->registerToken(TokenType::END_OF_LINE, position, 0);
 
-					while (peek(1) == '\r' || peek(1) == '\n') {
-						jump(1);
-					}
+					while (read() == '\n') {
+						characterIndex += 1;
+						position.lineIndex += 1;
+						position.characterOffset = 0;
 
-					characterIndex += 1;
-					position.lineIndex += 1;
-					position.characterOffset = 0;
+						if (read() == '\r') {
+							jump(1);
+						}
+					}
 
 					break;
 				}
@@ -416,13 +420,9 @@ namespace ProjectA {
 	void Lexer::readIdentifier(Token& token) {
 		token.characterCount = position.characterOffset - token.start.characterOffset;
 
-		const char8* value = &output->text[characterIndex - token.characterCount];
+		const std::string identifier(&output->text[characterIndex - token.characterCount], token.characterCount);
 
-		token.type = static_cast<TokenType>(getIdentifierTokenTypeIndex(std::string(value, token.characterCount)));
-
-		if (token.type >= TokenType::USER_DEFINED) {
-			token.value = value;
-		}
+		token.type = static_cast<TokenType>(getIdentifierTokenTypeIndex(identifier));
 
 		output->tokens.emplace_back(token);
 
@@ -446,15 +446,15 @@ namespace ProjectA {
 		identifierIndex = 0;
 
 		// Test against user-defined identifiers.
-		while (identifierIndex < output->identifiers.size()) {
-			if (identifier == output->identifiers[identifierIndex]) {
+		while (identifierIndex < output->userDefinedIdentifiers.size()) {
+			if (identifier == output->userDefinedIdentifiers[identifierIndex]) {
 				return TokenType::USER_DEFINED + identifierIndex;
 			}
 
 			identifierIndex += 1;
 		}
 
-		output->identifiers.emplace_back(identifier);
+		output->userDefinedIdentifiers.emplace_back(identifier);
 
 		return TokenType::USER_DEFINED + identifierIndex;
 	}

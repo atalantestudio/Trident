@@ -5,6 +5,10 @@ namespace ProjectA {
 		return characters[0] >= 'a' && characters[0] <= 'z';
 	}
 
+	static bool isCamelCaseOrSnakeCase(const std::string& characters) {
+		return isCamelCaseOrSnakeCase(characters.c_str(), static_cast<uint32>(characters.size()));
+	}
+
 	static bool isPascalCase(const char8* characters, uint32 characterCount) {
 		// Check that the first letter is uppercase.
 		if (characters[0] < 'A' || characters[0] > 'Z') {
@@ -27,6 +31,10 @@ namespace ProjectA {
 		return true;
 	}
 
+	static bool isPascalCase(const std::string& characters) {
+		return isPascalCase(characters.c_str(), static_cast<uint32>(characters.size()));
+	}
+
 	static bool isScreamingSnakeCase(const char8* characters, uint32 characterCount) {
 		uint32 characterIndex = 0;
 
@@ -41,5 +49,9 @@ namespace ProjectA {
 		}
 
 		return true;
+	}
+
+	static bool isScreamingSnakeCase(const std::string& characters) {
+		return isScreamingSnakeCase(characters.c_str(), static_cast<uint32>(characters.size()));
 	}
 }

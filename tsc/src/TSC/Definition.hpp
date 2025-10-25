@@ -2,8 +2,7 @@
 
 namespace ProjectA {
 	struct Definition {
-		const char8* identifier;
-		uint32 identifierSize;
+		std::string identifier;
 		uint32 structureStatementIndex = static_cast<uint32>(~0);
 	};
 }

@@ -20,6 +20,7 @@ namespace ProjectA {
 
 			void analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression) const;
 			void analyzeMemberAccessExpression(const Expression<ExpressionType::MEMBER_ACCESS>& expression) const;
+			void analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) const;
 
 		private:
 			void analyzeTypeExpression(uint32 referenceIndex) const;
