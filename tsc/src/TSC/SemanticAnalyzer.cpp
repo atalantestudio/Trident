@@ -111,14 +111,18 @@ namespace ProjectA {
 
 	void SemanticAnalyzer::analyzeParameterStatement(const ref<ParameterStatement>& statement) const {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+		const std::string& identifier = output->getIdentifier(identifierToken.type);
 
-		if (!isCamelCaseOrSnakeCase(output->getIdentifier(identifierToken.type))) {
+		if (!isCamelCaseOrSnakeCase(identifier)) {
 			generateDiagnostic<DiagnosticCode::INVALID_PARAMETER_IDENTIFIER_CASE>(*output, identifierToken);
 
 			return;
 		}
 
-		output->define(statement);
+		const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
+		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+
+		output->defineForNextScope(typeExpression.type, SemanticTokenType::PARAMETER, identifier);
 	}
 
 	void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement>& statement) const {

@@ -26,17 +26,11 @@ namespace ProjectA {
 
 	EMSCRIPTEN_BINDINGS(Module) {
 		emscripten::class_<CompilationOutput>("CompilationOutput")
-			// .property("completionItems", &CompilationOutput::completionItems)
 			.property("definitions", &CompilationOutput::definitions)
 			.property("diagnostics", &CompilationOutput::diagnostics)
 			.property("scopes", &CompilationOutput::scopes)
 			.property("semanticTokens", &CompilationOutput::semanticTokens)
 			.property("tokens", &CompilationOutput::tokens);
-
-		emscripten::class_<CompletionItem>("CompletionItem")
-			.property("label", &CompletionItem::label)
-			.property("end", &CompletionItem::end)
-			.function("getKindIndex", &CompletionItem::getKindIndex);
 
 		emscripten::class_<Definition>("Definition")
 			.property("end", &Definition::end)
@@ -81,7 +75,6 @@ namespace ProjectA {
 
 		emscripten::function("compile", &compile);
 
-		emscripten::register_vector<CompletionItem>("CompletionItemVector");
 		emscripten::register_vector<Definition>("DefinitionVector");
 		emscripten::register_vector<Diagnostic>("DiagnosticVector");
 		emscripten::register_vector<DiagnosticReference>("DiagnosticReferenceVector");

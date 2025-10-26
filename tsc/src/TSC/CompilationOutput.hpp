@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AST.hpp"
-#include "CompletionItem.hpp"
 #include "Definition.hpp"
 #include "Diagnostic/Diagnostic.hpp"
 #include "Scope.hpp"
@@ -14,7 +13,7 @@ namespace ProjectA {
 	class CompilationOutput {
 		public:
 			explicit CompilationOutput() {
-				registerDefaultCompletionItems();
+				registerDefaultDefinitions();
 			}
 
 			const std::string& getIdentifier(uint32 typeIndex) const {
@@ -80,11 +79,13 @@ namespace ProjectA {
 				Scope scope{};
 				scope.start = start;
 				scope.parentScopeIndex = currentScopeIndex;
-				scope.definitionIndexOffset = static_cast<uint32>(openScopeDefinitions.size());
+				scope.definitionIndexOffset = static_cast<uint32>(openScopeDefinitions.size()) - nextScopeDefinitionCount;
 
 				currentScopeIndex = static_cast<uint32>(scopes.size());
 
 				scopes.emplace_back(scope);
+
+				nextScopeDefinitionCount = 0;
 			}
 
 			void closeScope(DocumentPosition end) {
@@ -93,15 +94,16 @@ namespace ProjectA {
 				scope.definitionCount = static_cast<uint32>(openScopeDefinitions.size()) - scope.definitionIndexOffset;
 
 				if (scope.definitionCount > 0) {
-					const uint32 definitionInsertionOffset = static_cast<uint32>(definitions.size());
+					const uint32 insertionOffset = static_cast<uint32>(definitions.size());
 
-					definitions.resize(definitionInsertionOffset + scope.definitionCount);
+					// Allocate space for scope definitions.
+					definitions.resize(definitions.size() + scope.definitionCount);
 
-					std::copy_n(&openScopeDefinitions[scope.definitionIndexOffset], scope.definitionCount, &definitions[definitionInsertionOffset]);
+					std::copy_n(&openScopeDefinitions[scope.definitionIndexOffset], scope.definitionCount, &definitions[insertionOffset]);
 
 					openScopeDefinitions.resize(scope.definitionIndexOffset);
 
-					scope.definitionIndexOffset = definitionInsertionOffset;
+					scope.definitionIndexOffset = insertionOffset;
 				}
 
 				currentScopeIndex = scope.parentScopeIndex;
@@ -150,14 +152,6 @@ namespace ProjectA {
 				define(PackedType(0, 0), SemanticTokenType::FUNCTION, 0, statement->identifierTokenIndex, end);
 			}
 
-			void define(const ref<ParameterStatement>& statement) {
-				const ExpressionReference& typeExpressionReference = ast.getExpressionReference(statement->typeExpressionReferenceIndex);
-				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
-				const Token& identifierToken = tokens[statement->identifierTokenIndex];
-
-				define(typeExpression.type, SemanticTokenType::PARAMETER, 0, statement->identifierTokenIndex, identifierToken.getEnd());
-			}
-
 			void define(const ref<VariableStatement>& statement) {
 				const ExpressionReference& typeExpressionReference = ast.getExpressionReference(statement->typeExpressionReferenceIndex);
 				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
@@ -171,14 +165,18 @@ namespace ProjectA {
 				define(typeExpression.type, SemanticTokenType::VARIABLE, modifierFlag, statement->identifierTokenIndex, identifierToken.getEnd());
 			}
 
-			void registerCompletionItem(const std::string& label, CompletionItemKind kind) {
-				// TODO
-				/* CompletionItem completionItem{};
-				completionItem.label = label;
-				completionItem.kind = kind;
-				completionItem.end = {0, 0};
+			void defineForNextScope(PackedType type, SemanticTokenType semanticTokenType, const std::string& identifier) {
+				Definition definition{};
+				definition.end = {0, 0};
+				definition.type = type;
+				definition.semanticTokenType = semanticTokenType;
+				definition.semanticTokenModifierFlag = 0;
+				definition.tokenIndex = ~0;
+				definition.identifier = identifier;
 
-				completionItems.emplace_back(completionItem); */
+				openScopeDefinitions.emplace_back(definition);
+
+				nextScopeDefinitionCount += 1;
 			}
 
 			std::string getTokenString(const Token& token) const {
@@ -257,11 +255,11 @@ namespace ProjectA {
 			}
 
 		private:
-			void registerDefaultCompletionItems() {
+			void registerDefaultDefinitions() {
 				for (uint32 functionIndex = FIRST_FUNCTION_INDEX; functionIndex <= LAST_FUNCTION_INDEX; functionIndex += 1) {
 					const std::string functionIdentifier = RESERVED_KEYWORDS[functionIndex];
 
-					registerCompletionItem(functionIdentifier, CompletionItemKind::FUNCTION);
+					defineForNextScope(PackedType(0, 0), SemanticTokenType::FUNCTION, functionIdentifier);
 				}
 			}
 
@@ -277,10 +275,9 @@ namespace ProjectA {
 			std::vector<std::string> userDefinedIdentifiers;
 
 			std::vector<Definition> openScopeDefinitions;
+			uint32 nextScopeDefinitionCount = 0;
 			std::vector<Definition> definitions;
 			std::vector<Scope> scopes;
 			uint32 currentScopeIndex = UNDEFINED_SCOPE;
-
-			// std::vector<CompletionItem> completionItems;
 	};
 }

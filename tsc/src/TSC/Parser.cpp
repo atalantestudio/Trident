@@ -98,8 +98,6 @@ namespace ProjectA {
 
 		const uint32 structureStatementIndex = static_cast<uint32>(output->ast.statements.size());
 
-		output->registerCompletionItem(output->getTokenString(read()), CompletionItemKind::STRUCTURE);
-
 		jump();
 		jump();
 		jumpEol();
@@ -199,8 +197,6 @@ namespace ProjectA {
 
 		statement->identifierTokenIndex = tokenIndex;
 
-		output->registerCompletionItem(output->getTokenString(output->tokens[statement->identifierTokenIndex]), CompletionItemKind::CONSTANT);
-
 		registerVariableSemanticToken(read(), false);
 
 		jump();
@@ -243,9 +239,6 @@ namespace ProjectA {
 		jump();
 		jumpEol();
 
-		// TODO: Open a definition scope to register parameters.
-		// output->openScope(position);
-
 		while (read().type != TokenType::RIGHT_PARENTHESIS && read().type != TokenType::END_OF_FILE) {
 			if (!parseParameterStatement()) {
 				return false;
@@ -276,8 +269,6 @@ namespace ProjectA {
 
 		output->ast.statements.emplace_back(statement);
 		output->ast.globalScopeStatementIndices.emplace_back(getLastStatementIndex());
-		// output->closeScope(position);
-		output->registerCompletionItem(output->getTokenString(output->tokens[statement->identifierTokenIndex]), CompletionItemKind::FUNCTION);
 		analyzer.analyzeFunctionStatement(getLastStatementIndex(), position);
 
 		return true;
