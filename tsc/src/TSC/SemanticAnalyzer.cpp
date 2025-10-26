@@ -69,16 +69,6 @@ namespace ProjectA {
 		if (!isCamelCaseOrSnakeCase(output->getIdentifier(identifierToken.type))) {
 			generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE>(*output, identifierToken);
 		}
-
-		const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(memberStatement->typeExpressionReferenceIndex);
-		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
-		const Token& typeToken = output->tokens[typeExpression.typeTokenIndex];
-
-		const Token& structureIdentifierToken = output->tokens[structureStatement->identifierTokenIndex];
-
-		if (output->getTokenString(typeToken) == output->getTokenString(structureIdentifierToken)) {
-			generateDiagnostic<DiagnosticCode::INCOMPLETE_TYPE>(*output, typeToken);
-		}
 	}
 
 	void SemanticAnalyzer::analyzeConstantStatement(const ref<ConstantStatement>& statement) const {
@@ -153,18 +143,10 @@ namespace ProjectA {
 
 	void SemanticAnalyzer::analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) const {
 		if (expression.type.hasUserDefinedType()) {
-			const std::string& identifier = output->getTokenString(output->tokens[expression.typeTokenIndex]);
-			bool undefinedType = true;
+			const std::string& identifier = output->getIdentifier(output->tokens[expression.typeTokenIndex].type);
+			const Definition* definition = output->getFirstDefinition(identifier);
 
-			for (const std::string& userDefinedIdentifier : output->userDefinedIdentifiers) {
-				if (identifier == userDefinedIdentifier) {
-					undefinedType = false;
-
-					break;
-				}
-			}
-
-			if (undefinedType) {
+			if (definition == nullptr) {
 				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, expression.typeTokenIndex);
 
 				return;
