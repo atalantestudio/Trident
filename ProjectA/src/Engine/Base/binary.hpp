@@ -1,6 +1,6 @@
 #pragma once
 
-#define BIT(index) 1 << index
+#define BIT(index) (1 << (index))
 
 #define STRING_TO_BIG_ENDIAN_UINT32(type) ( \
 	(static_cast<uint32>(type[0]) << 24) | \

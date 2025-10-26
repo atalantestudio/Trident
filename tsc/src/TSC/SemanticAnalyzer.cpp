@@ -181,18 +181,19 @@ namespace ProjectA {
 			return;
 		}
 
-		if (TEMPLATE_ARGUMENT_MASKS[expression.type.typeIndex] & expression.type.templateArgumentIndex) {
-			// No errors.
-			return;
-		}
+		const uint16 templateArgumentMask = TEMPLATE_ARGUMENT_MASKS[expression.type.typeIndex];
 
 		if (expression.type.templateArgumentIndex == 0) {
-			if (TEMPLATE_ARGUMENT_MASKS[expression.type.typeIndex] == 0) {
+			if (templateArgumentMask == 0) {
 				return;
 			}
 
 			generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex);
 
+			return;
+		}
+
+		if (templateArgumentMask & BIT(expression.type.templateArgumentIndex - 1)) {
 			return;
 		}
 
