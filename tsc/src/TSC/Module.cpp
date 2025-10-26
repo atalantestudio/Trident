@@ -26,9 +26,10 @@ namespace ProjectA {
 
 	EMSCRIPTEN_BINDINGS(Module) {
 		emscripten::class_<CompilationOutput>("CompilationOutput")
-			.property("completionItems", &CompilationOutput::completionItems)
-			.property("definitions", &CompilationOutput::definitionsForCompletion)
+			// .property("completionItems", &CompilationOutput::completionItems)
+			.property("definitions", &CompilationOutput::definitions)
 			.property("diagnostics", &CompilationOutput::diagnostics)
+			.property("scopes", &CompilationOutput::scopes)
 			.property("semanticTokens", &CompilationOutput::semanticTokens)
 			.property("tokens", &CompilationOutput::tokens);
 
@@ -60,6 +61,13 @@ namespace ProjectA {
 			.property("line", &DocumentPosition::lineIndex)
 			.property("character", &DocumentPosition::characterOffset);
 
+		emscripten::class_<Scope>("Scope")
+			.property("start", &Scope::start)
+			.property("end", &Scope::end)
+			.property("parentScopeIndex", &Scope::parentScopeIndex)
+			.property("definitionIndexOffset", &Scope::definitionIndexOffset)
+			.property("definitionCount", &Scope::definitionCount);
+
 		emscripten::class_<SemanticToken>("SemanticToken")
 			.property("start", &SemanticToken::start)
 			.property("length", &SemanticToken::characterCount)
@@ -77,6 +85,7 @@ namespace ProjectA {
 		emscripten::register_vector<Definition>("DefinitionVector");
 		emscripten::register_vector<Diagnostic>("DiagnosticVector");
 		emscripten::register_vector<DiagnosticReference>("DiagnosticReferenceVector");
+		emscripten::register_vector<Scope>("ScopeVector");
 		emscripten::register_vector<SemanticToken>("SemanticTokenVector");
 		emscripten::register_vector<Token>("TokenVector");
 	}

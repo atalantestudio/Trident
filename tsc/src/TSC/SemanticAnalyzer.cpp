@@ -15,7 +15,7 @@ namespace ProjectA {
 		this->output = compilationOutput;
 	}
 
-	void SemanticAnalyzer::analyzeStructureStatement(const ref<StructureStatement>& statement) const {
+	void SemanticAnalyzer::analyzeStructureStatement(const ref<StructureStatement>& statement, DocumentPosition end) const {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
 		if (!isPascalCase(output->getIdentifier(identifierToken.type))) {
@@ -24,7 +24,7 @@ namespace ProjectA {
 			return;
 		}
 
-		output->define(statement);
+		output->define(statement, end);
 
 		if (statement->memberStatementIndices.empty()) {
 			generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(*output, identifierToken);
@@ -93,7 +93,7 @@ namespace ProjectA {
 		output->define(statement);
 	}
 
-	void SemanticAnalyzer::analyzeFunctionStatement(uint32 statementIndex) const {
+	void SemanticAnalyzer::analyzeFunctionStatement(uint32 statementIndex, DocumentPosition end) const {
 		const ref<FunctionStatement> statement = std::static_pointer_cast<FunctionStatement>(output->ast.statements[statementIndex]);
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
@@ -103,8 +103,7 @@ namespace ProjectA {
 			return;
 		}
 
-		// TODO: Define function?
-		// output->define(statement);
+		output->define(statement, end);
 
 		if (statementIndex == 0) {
 			generateDiagnostic<DiagnosticCode::NO_RETURN>(*output, identifierToken);

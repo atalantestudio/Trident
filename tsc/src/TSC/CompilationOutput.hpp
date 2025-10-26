@@ -4,6 +4,7 @@
 #include "CompletionItem.hpp"
 #include "Definition.hpp"
 #include "Diagnostic/Diagnostic.hpp"
+#include "Scope.hpp"
 #include "SemanticToken.hpp"
 #include "SemanticTokenModifier.hpp"
 #include "SemanticTokenType.hpp"
@@ -75,22 +76,40 @@ namespace ProjectA {
 				diagnostics.emplace_back(diagnostic);
 			}
 
-			void openDefinitionScope() {
-				scopeInsertionIndices.emplace_back(static_cast<uint32>(definitions.size()));
+			void openScope(DocumentPosition start) {
+				Scope scope{};
+				scope.start = start;
+				scope.parentScopeIndex = currentScopeIndex;
+				scope.definitionIndexOffset = static_cast<uint32>(openScopeDefinitions.size());
+
+				currentScopeIndex = static_cast<uint32>(scopes.size());
+
+				scopes.emplace_back(scope);
 			}
 
-			void closeDefinitionScope() {
-				DEBUG_ASSERT(scopeInsertionIndices.size() > 0);
+			void closeScope(DocumentPosition end) {
+				Scope& scope = scopes[currentScopeIndex];
+				scope.end = end;
+				scope.definitionCount = static_cast<uint32>(openScopeDefinitions.size()) - scope.definitionIndexOffset;
 
-				const uint32 scopeInsertionIndex = scopeInsertionIndices.back();
+				if (scope.definitionCount > 0) {
+					const uint32 definitionInsertionOffset = static_cast<uint32>(definitions.size());
 
-				definitions.resize(scopeInsertionIndex);
-				scopeInsertionIndices.pop_back();
+					definitions.resize(definitionInsertionOffset + scope.definitionCount);
+
+					std::copy_n(&openScopeDefinitions[scope.definitionIndexOffset], scope.definitionCount, &definitions[definitionInsertionOffset]);
+
+					openScopeDefinitions.resize(scope.definitionIndexOffset);
+
+					scope.definitionIndexOffset = definitionInsertionOffset;
+				}
+
+				currentScopeIndex = scope.parentScopeIndex;
 			}
 
 			const Definition* getFirstDefinition(const std::string& identifier) const {
-				for (uint32 definitionIndex = 0; definitionIndex < definitions.size(); definitionIndex += 1) {
-					const Definition& definition = definitions[definitionIndex];
+				for (uint32 definitionIndex = 0; definitionIndex < openScopeDefinitions.size(); definitionIndex += 1) {
+					const Definition& definition = openScopeDefinitions[definitionIndex];
 
 					if (identifier == definition.identifier) {
 						return &definition;
@@ -100,59 +119,66 @@ namespace ProjectA {
 				return nullptr;
 			}
 
-			void define(PackedType type, SemanticTokenType semanticTokenType, uint32 semanticTokenModifierFlag, uint32 identifierTokenIndex) {
+			void define(PackedType type, SemanticTokenType semanticTokenType, uint32 semanticTokenModifierFlag, uint32 identifierTokenIndex, DocumentPosition end) {
 				const Token& identifierToken = tokens[identifierTokenIndex];
 
 				Definition definition{};
-				definition.end = identifierToken.getEnd();
+				definition.end = end;
 				definition.type = type;
 				definition.semanticTokenType = semanticTokenType;
 				definition.semanticTokenModifierFlag = semanticTokenModifierFlag;
 				definition.tokenIndex = identifierTokenIndex;
 				definition.identifier = getIdentifier(identifierToken.type);
 
-				definitions.emplace_back(definition);
-				definitionsForCompletion.emplace_back(definition);
+				openScopeDefinitions.emplace_back(definition);
 			}
 
-			void define(const ref<StructureStatement>& statement) {
-				define(PackedType(TokenType::USER_DEFINED, 0), SemanticTokenType::STRUCTURE, 0, statement->identifierTokenIndex);
+			void define(const ref<StructureStatement>& statement, DocumentPosition end) {
+				define(PackedType(TokenType::USER_DEFINED, 0), SemanticTokenType::STRUCTURE, 0, statement->identifierTokenIndex, end);
 			}
 
 			void define(const ref<ConstantStatement>& statement) {
 				const ExpressionReference& typeExpressionReference = ast.getExpressionReference(statement->typeExpressionReferenceIndex);
 				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+				const Token& identifierToken = tokens[statement->identifierTokenIndex];
 
-				define(typeExpression.type, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT, statement->identifierTokenIndex);
+				define(typeExpression.type, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT, statement->identifierTokenIndex, identifierToken.getEnd());
+			}
+
+			void define(const ref<FunctionStatement>& statement, DocumentPosition end) {
+				// TODO: Function definitions don't need a type.
+				define(PackedType(0, 0), SemanticTokenType::FUNCTION, 0, statement->identifierTokenIndex, end);
 			}
 
 			void define(const ref<ParameterStatement>& statement) {
 				const ExpressionReference& typeExpressionReference = ast.getExpressionReference(statement->typeExpressionReferenceIndex);
 				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+				const Token& identifierToken = tokens[statement->identifierTokenIndex];
 
-				define(typeExpression.type, SemanticTokenType::PARAMETER, 0, statement->identifierTokenIndex);
+				define(typeExpression.type, SemanticTokenType::PARAMETER, 0, statement->identifierTokenIndex, identifierToken.getEnd());
 			}
 
 			void define(const ref<VariableStatement>& statement) {
 				const ExpressionReference& typeExpressionReference = ast.getExpressionReference(statement->typeExpressionReferenceIndex);
 				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
-
+				const Token& identifierToken = tokens[statement->identifierTokenIndex];
 				uint32 modifierFlag = 0;
 
 				if (statement->constant) {
 					modifierFlag |= SemanticTokenModifier::CONSTANT;
 				}
 
-				define(typeExpression.type, SemanticTokenType::VARIABLE, modifierFlag, statement->identifierTokenIndex);
+				define(typeExpression.type, SemanticTokenType::VARIABLE, modifierFlag, statement->identifierTokenIndex, identifierToken.getEnd());
 			}
 
 			void registerCompletionItem(const std::string& label, CompletionItemKind kind) {
-				CompletionItem completionItem{};
+				// TODO
+				/* CompletionItem completionItem{};
 				completionItem.label = label;
 				completionItem.kind = kind;
 				completionItem.end = {0, 0};
 
-				completionItems.emplace_back(completionItem);
+				completionItems.emplace_back(completionItem); */
 			}
 
 			std::string getTokenString(const Token& token) const {
@@ -249,9 +275,12 @@ namespace ProjectA {
 			std::vector<SemanticToken> semanticTokens;
 			std::vector<Diagnostic> diagnostics;
 			std::vector<std::string> userDefinedIdentifiers;
+
+			std::vector<Definition> openScopeDefinitions;
 			std::vector<Definition> definitions;
-			std::vector<Definition> definitionsForCompletion;
-			std::vector<uint32> scopeInsertionIndices = {0};
-			std::vector<CompletionItem> completionItems;
+			std::vector<Scope> scopes;
+			uint32 currentScopeIndex = UNDEFINED_SCOPE;
+
+			// std::vector<CompletionItem> completionItems;
 	};
 }

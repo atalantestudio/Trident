@@ -249,6 +249,7 @@ namespace ProjectA {
 					jump(1);
 				}
 				case '\n': {
+					// TODO: Store the token range.
 					registerEndOfToken(TokenType::END_OF_LINE);
 
 					while (read() == '\n') {

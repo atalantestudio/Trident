@@ -61,6 +61,7 @@ namespace ProjectA {
 		visitedWhileCount = 0;
 
 		analyzer.setCompilationOutput(output);
+		output->openScope(position);
 
 		jumpEol();
 
@@ -71,6 +72,8 @@ namespace ProjectA {
 
 			jumpEol();
 		}
+
+		output->closeScope(position);
 	}
 
 	bool Parser::parseGlobalScopeStatement() {
@@ -127,11 +130,11 @@ namespace ProjectA {
 			jumpEol();
 		}
 
-		EXPECT(read().type != TokenType::END_OF_FILE, "[STRUCTURE] Expected '}' but got EOF.");
+		EXPECT(read().type == TokenType::RIGHT_CURLY_BRACE, "[STRUCTURE] Expected '}' but got EOF.");
+
+		analyzer.analyzeStructureStatement(statement, read().getEnd());
 
 		jump();
-
-		analyzer.analyzeStructureStatement(statement);
 
 		return true;
 	}
@@ -240,8 +243,8 @@ namespace ProjectA {
 		jump();
 		jumpEol();
 
-		// Open a definition scope to register parameters.
-		output->openDefinitionScope();
+		// TODO: Open a definition scope to register parameters.
+		// output->openScope(position);
 
 		while (read().type != TokenType::RIGHT_PARENTHESIS && read().type != TokenType::END_OF_FILE) {
 			if (!parseParameterStatement()) {
@@ -261,12 +264,11 @@ namespace ProjectA {
 		}
 
 		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[FUNCTION] Expected ')' but got " + output->getTokenString(read()) + ".");
-
 		jump();
 
 		EXPECT(read().type == TokenType::LEFT_CURLY_BRACE, "[FUNCTION] Expected '{' but got " + output->getTokenString(read()) + ".");
 
-		statement->scopeStatementIndex = getLastStatementIndex() + 1;
+		statement->scopeStatementIndex = static_cast<uint32>(output->ast.statements.size());
 
 		if (!parseScopeStatement()) {
 			return false;
@@ -274,9 +276,9 @@ namespace ProjectA {
 
 		output->ast.statements.emplace_back(statement);
 		output->ast.globalScopeStatementIndices.emplace_back(getLastStatementIndex());
-		output->closeDefinitionScope();
+		// output->closeScope(position);
 		output->registerCompletionItem(output->getTokenString(output->tokens[statement->identifierTokenIndex]), CompletionItemKind::FUNCTION);
-		analyzer.analyzeFunctionStatement(getLastStatementIndex());
+		analyzer.analyzeFunctionStatement(getLastStatementIndex(), position);
 
 		return true;
 	}
@@ -421,9 +423,10 @@ namespace ProjectA {
 		output->ast.statements.emplace_back(statement);
 
 		jump();
-		jumpEol();
 
-		output->openDefinitionScope();
+		output->openScope(position);
+
+		jumpEol();
 
 		while (read().type != TokenType::RIGHT_CURLY_BRACE && read().type != TokenType::END_OF_FILE) {
 			if (!parseLocalScopeStatement()) {
@@ -436,10 +439,9 @@ namespace ProjectA {
 		}
 
 		EXPECT(read().type == TokenType::RIGHT_CURLY_BRACE, "[SCOPE] Expected '}' but got " + output->getTokenString(read()) + ".");
-
 		jump();
 
-		output->closeDefinitionScope();
+		output->closeScope(position);
 
 		return true;
 	}

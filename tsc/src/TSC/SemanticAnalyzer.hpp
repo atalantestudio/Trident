@@ -9,10 +9,10 @@ namespace ProjectA {
 		public:
 			void setCompilationOutput(CompilationOutput* compilationOutput);
 
-			void analyzeStructureStatement(const ref<StructureStatement>& statement) const;
+			void analyzeStructureStatement(const ref<StructureStatement>& statement, DocumentPosition end) const;
 			void analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& memberStatement) const;
 			void analyzeConstantStatement(const ref<ConstantStatement>& statement) const;
-			void analyzeFunctionStatement(uint32 statementIndex) const;
+			void analyzeFunctionStatement(uint32 statementIndex, DocumentPosition end) const;
 			void analyzeParameterStatement(const ref<ParameterStatement>& statement) const;
 			void analyzeVariableStatement(const ref<VariableStatement>& statement) const;
 

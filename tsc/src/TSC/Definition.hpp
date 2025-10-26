@@ -3,7 +3,6 @@
 #include "DocumentPosition.hpp"
 #include "PackedType.hpp"
 #include "SemanticTokenType.hpp"
-#include "SemanticTokenModifier.hpp"
 
 namespace ProjectA {
 	struct Definition {
