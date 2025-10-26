@@ -2,10 +2,6 @@
 
 namespace ProjectA {
 	enum class SemanticTokenType : uint8 {
-		// Identifiers that reference annotations.
-		// The annotation square brackets are included in the semantic token.
-		ANNOTATION,
-
 		// Tokens that represent a comment.
 		COMMENT,
 

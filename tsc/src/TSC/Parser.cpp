@@ -852,11 +852,14 @@ namespace ProjectA {
 				}
 			}
 
-			EXPECT(annotationBlock.annotation != static_cast<Annotation>(0), "[ANNOTATION_INSTANCE] Unknown annotation " + output->getTokenString(read()) + ".");
-
 			annotationBlock.identifierTokenIndex = tokenIndex;
 
-			output->registerSemanticToken(tokenIndex, SemanticTokenType::ANNOTATION, 0);
+			if (annotationBlock.annotation == static_cast<Annotation>(0)) {
+				generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, read());
+			}
+			else {
+				output->registerSemanticToken(annotationBlock.identifierTokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::PREDEFINED);
+			}
 
 			jump();
 
