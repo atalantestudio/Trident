@@ -19,8 +19,10 @@ namespace ProjectA {
 			}
 
 			uint32 getSize(PackedType type) const {
-				if (type.hasUserDefinedType() || type.hasUserDefinedTemplateArgument()) {
-					// TODO
+				DEBUG_ASSERT(!type.hasUserDefinedTemplateArgument());
+
+				if (type.hasUserDefinedType()) {
+					// TODO: Return the size from the corresponding definition.
 					BREAKPOINT();
 
 					return 0;
@@ -32,12 +34,14 @@ namespace ProjectA {
 					index = type.templateArgumentIndex;
 				}
 
-				return TYPE_COMPONENT_COUNTS[type.typeIndex] * TYPE_BYTE_SIZES[index];
+				return TYPE_COMPONENT_COUNTS[type.typeIndex] * TYPE_ALIGNMENTS[index];
 			}
 
 			uint32 getAlignment(PackedType type) const {
-				if (type.hasUserDefinedType() || type.hasUserDefinedTemplateArgument()) {
-					// TODO
+				DEBUG_ASSERT(!type.hasUserDefinedTemplateArgument());
+
+				if (type.hasUserDefinedType()) {
+					// TODO: Return the alignment from the corresponding definition.
 					BREAKPOINT();
 
 					return 0;
