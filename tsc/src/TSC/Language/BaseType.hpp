@@ -2,6 +2,9 @@
 
 namespace ProjectA {
 	enum BaseType : uint8 {
+		// TODO
+		OTHER,
+
 		// Scalar types
 		FLOAT32,
 		FLOAT64,
@@ -25,8 +28,8 @@ namespace ProjectA {
 		MAT4X4,
 	};
 
-	// TODO: Remember to change the mask size when adding more types.
-	static constexpr uint16 TEMPLATE_ARGUMENT_MASKS[] = {
+	static constexpr uint32 TYPE_TEMPLATE_ARGUMENT_MASKS[] = {
+		0,
 		0,
 		0,
 		0,
@@ -43,5 +46,49 @@ namespace ProjectA {
 		BIT(FLOAT32) | BIT(FLOAT64),
 		BIT(FLOAT32) | BIT(FLOAT64),
 		BIT(FLOAT32) | BIT(FLOAT64),
+	};
+
+	static constexpr uint8 TYPE_COMPONENT_COUNTS[] = {
+		0,
+		1,
+		1,
+		1,
+		1,
+		2,
+		3,
+		4,
+		4,
+		8,
+		8,
+		6,
+		12,
+		12,
+		8,
+		16,
+		16,
+	};
+
+	static constexpr uint8 TYPE_ALIGNMENTS[] = {
+		0,
+		4,
+		8,
+		4,
+		4,
+
+		// Multiply by the scalar alignment.
+		2,
+		4,
+		4,
+
+		// Multiply by the scalar alignment.
+		2,
+		4,
+		4,
+		2,
+		4,
+		4,
+		2,
+		4,
+		4,
 	};
 }

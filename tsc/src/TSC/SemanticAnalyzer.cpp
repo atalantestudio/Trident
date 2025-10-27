@@ -86,14 +86,15 @@ namespace ProjectA {
 	void SemanticAnalyzer::analyzeFunctionStatement(uint32 statementIndex, DocumentPosition end) const {
 		const ref<FunctionStatement> statement = std::static_pointer_cast<FunctionStatement>(output->ast.statements[statementIndex]);
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+		const std::string& identifier = output->getIdentifier(identifierToken.type);
 
-		if (!isCamelCaseOrSnakeCase(output->getIdentifier(identifierToken.type))) {
+		if (!isCamelCaseOrSnakeCase(identifier)) {
 			generateDiagnostic<DiagnosticCode::INVALID_FUNCTION_IDENTIFIER_CASE>(*output, identifierToken);
 
 			return;
 		}
 
-		output->define(statement, end);
+		output->defineFunction(identifier, end);
 
 		if (statementIndex == 0) {
 			generateDiagnostic<DiagnosticCode::NO_RETURN>(*output, identifierToken);
@@ -101,6 +102,7 @@ namespace ProjectA {
 			return;
 		}
 
+		// TODO: Check that there is no return statement.
 		const uint32 previousStatementIndex = statementIndex - 1;
 		const ref<Statement> previousStatement = output->ast.statements[previousStatementIndex];
 
@@ -122,7 +124,8 @@ namespace ProjectA {
 		const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
 		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
 
-		output->defineForNextScope(typeExpression.type, SemanticTokenType::PARAMETER, identifier);
+		output->define(typeExpression.type, SemanticTokenType::PARAMETER, 0, statement->identifierTokenIndex, identifierToken.getEnd());
+		output->nextScopeDefinitionCount += 1;
 	}
 
 	void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement>& statement) const {
@@ -167,7 +170,7 @@ namespace ProjectA {
 			return;
 		}
 
-		const uint16 templateArgumentMask = TEMPLATE_ARGUMENT_MASKS[expression.type.typeIndex];
+		const uint16 templateArgumentMask = TYPE_TEMPLATE_ARGUMENT_MASKS[expression.type.typeIndex];
 
 		if (expression.type.templateArgumentIndex == 0) {
 			if (templateArgumentMask == 0) {
@@ -200,7 +203,7 @@ namespace ProjectA {
 			return;
 		}
 
-		output->registerSemanticToken(token, definition->semanticTokenType, definition->semanticTokenModifierFlag);
+		output->registerSemanticToken(expression.tokenIndex, definition->semanticTokenType, definition->semanticTokenModifierFlag);
 	}
 
 	void SemanticAnalyzer::analyzeMemberAccessExpression(const Expression<ExpressionType::MEMBER_ACCESS>& expression) const {

@@ -563,7 +563,7 @@ namespace ProjectA {
 
 		jump();
 
-		expression.type = PackedType(typeIndex, templateArgumentIndex);
+		expression.type = PackedType::fromTypeExpression(typeIndex, templateArgumentIndex);
 
 		analyzer.analyzeTypeExpression(expression);
 
@@ -711,10 +711,6 @@ namespace ProjectA {
 		Expression<ExpressionType::IDENTIFIER> expression{};
 		expression.tokenIndex = tokenIndex;
 
-		if (isScreamingSnakeCase(output->getIdentifier(read().type))) {
-			output->registerSemanticToken(tokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
-		}
-
 		jump();
 
 		output->ast.addExpression(expression);
@@ -757,10 +753,10 @@ namespace ProjectA {
 			return parseGroupExpression();
 		}
 
+		jump();
+
 		Expression<ExpressionType::FUNCTION_CALL> expression{};
 		expression.calleeExpressionReferenceIndex = lastExpressionReferenceIndex;
-
-		jump();
 
 		while (read().type != TokenType::RIGHT_PARENTHESIS && read().type != TokenType::END_OF_FILE) {
 			// NOTE: Parse logical OR or higher precedence expression.
@@ -775,12 +771,10 @@ namespace ProjectA {
 			}
 
 			EXPECT(read().type == TokenType::COMMA, "[FUNCTION_CALL] Expected ',' but got " + output->getTokenString(read()) + ".");
-
 			jump();
 		}
 
 		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[FUNCTION_CALL] Expected ')' but got " + output->getTokenString(read()) + ".");
-
 		jump();
 
 		output->ast.addExpression(expression);
@@ -796,9 +790,9 @@ namespace ProjectA {
 		Expression<ExpressionType::LITERAL> expression{};
 		expression.tokenIndex = tokenIndex;
 
-		jump();
-
 		output->ast.addExpression(expression);
+
+		jump();
 
 		return true;
 	}
@@ -815,7 +809,6 @@ namespace ProjectA {
 		expression.expressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[GROUP] Expected ')' but got " + output->getTokenString(read()) + ".");
-
 		jump();
 
 		output->ast.addExpression(expression);
@@ -858,30 +851,20 @@ namespace ProjectA {
 				if (read().type < TokenType::LITERAL_FLOATING_POINT || read().type > TokenType::LITERAL_INTEGER_BASE_16) {
 					const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
-					// TODO
-					/* output->generateDiagnostic(
-						DiagnosticSeverity::ERROR,
-						"[ANNOTATION_INSTANCE] Expected a literal but got " + output->getTokenString(read()) + ".",
-						identifierToken.getEnd(),
-						identifierToken.getEnd()
-					); */
+					output->generateDiagnostic(tokenIndex, "[ANNOTATION_INSTANCE] Expected a literal but got " + output->getTokenString(read()) + ".", DiagnosticSeverity::ERROR);
 				}
 				else {
 					annotationBlock.valueTokenIndex = tokenIndex;
-
-					output->registerSemanticToken(tokenIndex, SemanticTokenType::NUMBER, 0);
 
 					jump();
 				}
 			}
 
 			EXPECT(read().type == TokenType::RIGHT_SQUARE_BRACKET, "[ANNOTATION_INSTANCE] Expected ']' but got " + output->getTokenString(read()) + ".");
-
 			jump();
+			jumpEol();
 
 			output->ast.annotationBlocks.emplace_back(annotationBlock);
-
-			jumpEol();
 		}
 
 		return true;

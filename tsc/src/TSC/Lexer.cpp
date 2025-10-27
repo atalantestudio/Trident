@@ -416,7 +416,7 @@ namespace ProjectA {
 		token.characterCount = position.characterOffset - token.start.characterOffset;
 		token.value = &output->text[characterIndex - token.characterCount];
 
-		output->registerSemanticToken(SemanticTokenType::NUMBER, 0, token.start, token.characterCount);
+		output->registerSemanticToken(token, SemanticTokenType::NUMBER, 0);
 		output->tokens.emplace_back(token);
 	}
 

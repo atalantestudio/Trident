@@ -17,6 +17,9 @@ namespace ProjectA {
 		uint32 tokenIndex;
 		std::string identifier;
 
+		uint32 size;
+		uint32 alignment;
+
 		// TODO
 		// uint32 parentStructureIndex = static_cast<uint32>(~0);
 	};

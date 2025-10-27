@@ -3,6 +3,7 @@
 #include "AST.hpp"
 #include "Definition.hpp"
 #include "Diagnostic/Diagnostic.hpp"
+#include "Language/BaseType.hpp"
 #include "Scope.hpp"
 #include "SemanticToken.hpp"
 #include "SemanticTokenModifier.hpp"
@@ -32,9 +33,7 @@ namespace ProjectA {
 			}
 
 			void registerSemanticToken(uint32 tokenIndex, SemanticTokenType type, uint32 modifiers) {
-				const Token& token = tokens[tokenIndex];
-
-				registerSemanticToken(token, type, modifiers);
+				registerSemanticToken(tokens[tokenIndex], type, modifiers);
 			}
 
 			void registerSemanticToken(const Token& token, SemanticTokenType type, uint32 modifiers) {
@@ -58,17 +57,11 @@ namespace ProjectA {
 			}
 
 			void generateDiagnostic(uint32 tokenIndex, const std::string& message, DiagnosticSeverity severity) {
-				generateDiagnostic(tokens[tokenIndex], message, severity);
-			}
+				const Token& token = tokens[tokenIndex];
 
-			void generateDiagnostic(const Token& token, const std::string& message, DiagnosticSeverity severity) {
-				generateDiagnostic(token.start, token.getEnd(), message, severity);
-			}
-
-			void generateDiagnostic(DocumentPosition start, DocumentPosition end, const std::string& message, DiagnosticSeverity severity) {
 				Diagnostic diagnostic{};
-				diagnostic.start = start;
-				diagnostic.end = end;
+				diagnostic.start = token.start;
+				diagnostic.end = token.getEnd();
 				diagnostic.message = message;
 				diagnostic.severity = severity;
 
@@ -131,12 +124,22 @@ namespace ProjectA {
 				definition.semanticTokenModifierFlag = semanticTokenModifierFlag;
 				definition.tokenIndex = identifierTokenIndex;
 				definition.identifier = getIdentifier(identifierToken.type);
+				definition.size = TYPE_COMPONENT_COUNTS[type.typeIndex];
+				definition.alignment = TYPE_ALIGNMENTS[type.typeIndex];
+
+				if (type.templateArgumentIndex > 0) {
+					definition.size *= TYPE_ALIGNMENTS[type.templateArgumentIndex - 1];
+					definition.alignment *= TYPE_ALIGNMENTS[type.templateArgumentIndex - 1];
+				}
+				else {
+					definition.size *= TYPE_ALIGNMENTS[type.typeIndex];
+				}
 
 				openScopeDefinitions.emplace_back(definition);
 			}
 
 			void define(const ref<StructureStatement>& statement, DocumentPosition end) {
-				define(PackedType(TokenType::USER_DEFINED, 0), SemanticTokenType::STRUCTURE, 0, statement->identifierTokenIndex, end);
+				define(PackedType::fromTypeExpression(TokenType::USER_DEFINED, 0), SemanticTokenType::STRUCTURE, 0, statement->identifierTokenIndex, end);
 			}
 
 			void define(const ref<ConstantStatement>& statement) {
@@ -145,11 +148,6 @@ namespace ProjectA {
 				const Token& identifierToken = tokens[statement->identifierTokenIndex];
 
 				define(typeExpression.type, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT, statement->identifierTokenIndex, identifierToken.getEnd());
-			}
-
-			void define(const ref<FunctionStatement>& statement, DocumentPosition end) {
-				// TODO: Function definitions don't need a type.
-				define(PackedType(0, 0), SemanticTokenType::FUNCTION, 0, statement->identifierTokenIndex, end);
 			}
 
 			void define(const ref<VariableStatement>& statement) {
@@ -165,18 +163,26 @@ namespace ProjectA {
 				define(typeExpression.type, SemanticTokenType::VARIABLE, modifierFlag, statement->identifierTokenIndex, identifierToken.getEnd());
 			}
 
-			void defineForNextScope(PackedType type, SemanticTokenType semanticTokenType, const std::string& identifier) {
+			void defineFunction(const std::string& identifier, DocumentPosition end) {
 				Definition definition{};
-				definition.end = {0, 0};
-				definition.type = type;
-				definition.semanticTokenType = semanticTokenType;
+				definition.end = end;
+				definition.type = PackedType(BaseType::OTHER, BaseType::OTHER);
+				definition.semanticTokenType = SemanticTokenType::FUNCTION;
 				definition.semanticTokenModifierFlag = 0;
 				definition.tokenIndex = ~0;
 				definition.identifier = identifier;
+				definition.size = TYPE_COMPONENT_COUNTS[definition.type.typeIndex];
+				definition.alignment = TYPE_ALIGNMENTS[definition.type.typeIndex];
+
+				if (definition.type.templateArgumentIndex > 0) {
+					definition.size *= TYPE_ALIGNMENTS[definition.type.templateArgumentIndex - 1];
+					definition.alignment *= TYPE_ALIGNMENTS[definition.type.templateArgumentIndex - 1];
+				}
+				else {
+					definition.size *= TYPE_ALIGNMENTS[definition.type.typeIndex];
+				}
 
 				openScopeDefinitions.emplace_back(definition);
-
-				nextScopeDefinitionCount += 1;
 			}
 
 			std::string getTokenString(const Token& token) const {
@@ -259,7 +265,9 @@ namespace ProjectA {
 				for (uint32 functionIndex = FIRST_FUNCTION_INDEX; functionIndex <= LAST_FUNCTION_INDEX; functionIndex += 1) {
 					const std::string functionIdentifier = RESERVED_KEYWORDS[functionIndex];
 
-					defineForNextScope(PackedType(0, 0), SemanticTokenType::FUNCTION, functionIdentifier);
+					defineFunction(functionIdentifier, {0, 0});
+
+					nextScopeDefinitionCount += 1;
 				}
 			}
 

@@ -8,7 +8,6 @@
 #include "Lexer.hpp"
 #include "Parser.hpp"
 #include "SemanticToken.hpp"
-#include "Token.hpp"
 
 namespace ProjectA {
 	CompilationOutput compile(const std::string& text) {
@@ -29,13 +28,14 @@ namespace ProjectA {
 			.property("definitions", &CompilationOutput::definitions)
 			.property("diagnostics", &CompilationOutput::diagnostics)
 			.property("scopes", &CompilationOutput::scopes)
-			.property("semanticTokens", &CompilationOutput::semanticTokens)
-			.property("tokens", &CompilationOutput::tokens);
+			.property("semanticTokens", &CompilationOutput::semanticTokens);
 
 		emscripten::class_<Definition>("Definition")
 			.property("end", &Definition::end)
 			.property("semanticTokenModifiers", &Definition::semanticTokenModifierFlag)
 			.property("identifier", &Definition::identifier)
+			.property("size", &Definition::size)
+			.property("alignment", &Definition::alignment)
 			.function("getSemanticTokenTypeIndex", &Definition::getSemanticTokenTypeIndex);
 
 		emscripten::class_<Diagnostic>("Diagnostic")
@@ -68,11 +68,6 @@ namespace ProjectA {
 			.property("modifiers", &SemanticToken::modifiers)
 			.function("getTypeIndex", &SemanticToken::getTypeIndex);
 
-		emscripten::class_<Token>("Token")
-			.property("start", &Token::start)
-			.property("length", &Token::characterCount)
-			.property("type", &Token::type);
-
 		emscripten::function("compile", &compile);
 
 		emscripten::register_vector<Definition>("DefinitionVector");
@@ -80,6 +75,5 @@ namespace ProjectA {
 		emscripten::register_vector<DiagnosticReference>("DiagnosticReferenceVector");
 		emscripten::register_vector<Scope>("ScopeVector");
 		emscripten::register_vector<SemanticToken>("SemanticTokenVector");
-		emscripten::register_vector<Token>("TokenVector");
 	}
 }
