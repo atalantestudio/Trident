@@ -115,6 +115,22 @@ namespace ProjectA {
 		}
 
 		output->define(statement);
+
+		const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
+		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+
+		ExpressionEvaluation evaluation{};
+		evaluation.constant = true;
+		evaluation.value = 0;
+
+		evaluateExpression(statement->initializerExpressionReferenceIndex, evaluation);
+
+		// TODO: Also check vector/matrix/user-defined types.
+		if (typeExpression.type.typeIndex >= BaseType::FLOAT32 && typeExpression.type.typeIndex <= BaseType::UINT32) {
+			if (!(evaluation.intermediateType & BIT(typeExpression.type.typeIndex))) {
+				generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, identifierToken);
+			}
+		}
 	}
 
 	void SemanticAnalyzer::analyzeFunctionStatement(uint32 statementIndex, DocumentPosition end) const {
@@ -180,6 +196,24 @@ namespace ProjectA {
 		}
 
 		output->define(statement);
+
+		if (statement->constant) {
+			const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
+			const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+
+			ExpressionEvaluation evaluation{};
+			evaluation.constant = true;
+			evaluation.value = 0;
+
+			evaluateExpression(statement->initializerExpressionReferenceIndex, evaluation);
+
+			// TODO: Also check vector/matrix/user-defined types.
+			if (typeExpression.type.typeIndex >= BaseType::FLOAT32 && typeExpression.type.typeIndex <= BaseType::UINT32) {
+				if (!(evaluation.intermediateType & BIT(typeExpression.type.typeIndex))) {
+					generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, identifierToken);
+				}
+			}
+		}
 	}
 
 	void SemanticAnalyzer::analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) const {
@@ -228,7 +262,7 @@ namespace ProjectA {
 		const Definition* definition = output->getFirstDefinition(output->getIdentifier(token.type));
 
 		if (definition == nullptr) {
-			if (!isLanguageFunction(token)) {
+			if (token.type < FIRST_FUNCTION_INDEX || token.type > LAST_FUNCTION_INDEX) {
 				generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, token);
 
 				return;
@@ -267,38 +301,6 @@ namespace ProjectA {
 
 	void SemanticAnalyzer::analyzeGroupExpression(const ref<Expression<ExpressionType::GROUP>> expression) {
 		analyzeExpression(expression->expressionIndex);
-	}
-
-	void SemanticAnalyzer::analyzeIdentifier(uint32 identifierTokenIndex) {
-		const Token& identifierToken = compilationOutput->tokens[identifierTokenIndex];
-
-		if (isReservedWord(identifierToken)) {
-			// ERROR: Identifier "identifier" is reserved.
-			compilationOutput->generateDiagnostic(
-				DiagnosticSeverity::ERROR,
-				"Identifier " + output->getTokenString(identifierToken) + " is reserved.",
-				identifierToken.start,
-				identifierToken.getEnd()
-			);
-
-			compilationOutput->registerSemanticToken(identifierTokenIndex, SemanticTokenType::KEYWORD, 0);
-
-			return;
-		}
-
-		if (isScreamingSnakeCaseWord(identifierToken)) {
-			compilationOutput->registerSemanticToken(identifierTokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT);
-
-			return;
-		}
-
-		if (isPascalCaseWord(identifierToken)) {
-			compilationOutput->registerSemanticToken(identifierTokenIndex, SemanticTokenType::STRUCTURE, 0);
-
-			return;
-		}
-
-		compilationOutput->registerSemanticToken(identifierTokenIndex, SemanticTokenType::VARIABLE, 0);
 	} */
 
 	void SemanticAnalyzer::analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const {
@@ -316,38 +318,15 @@ namespace ProjectA {
 			}
 
 			switch (annotationBlock.annotation) {
-				case Annotation::BINDING: {
-					analyzeBindingAnnotation(annotationBlock);
-
-					break;
-				}
-				case Annotation::CONSTANT: {
-					analyzeConstantAnnotation(annotationBlock);
-
-					break;
-				}
-				case Annotation::INSTANCE_INDEX: {
-					analyzeInstanceIndexAnnotation(annotationBlock);
-
-					break;
-				}
-				case Annotation::LOCATION: {
-					analyzeLocationAnnotation(annotationBlock);
-
-					break;
-				}
-				case Annotation::POSITION: {
-					analyzePositionAnnotation(annotationBlock);
-
-					break;
-				}
+				case Annotation::BINDING:
+				case Annotation::CONSTANT:
+				case Annotation::LOCATION:
 				case Annotation::SET: {
-					analyzeSetAnnotation(annotationBlock);
+					if (annotationBlock.valueTokenIndex == ~0) {
+						const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
-					break;
-				}
-				case Annotation::VERTEX_INDEX: {
-					analyzeVertexIndexAnnotation(annotationBlock);
+						generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, identifierToken);
+					}
 
 					break;
 				}
@@ -422,45 +401,225 @@ namespace ProjectA {
 		// return combinedAnnotationFlag;
 	}
 
-	void SemanticAnalyzer::analyzeBindingAnnotation(const AnnotationBlock& annotationBlock) const {
-		if (annotationBlock.valueTokenIndex == ~0) {
-			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
+	void SemanticAnalyzer::evaluateExpression(uint32 referenceIndex, ExpressionEvaluation& evaluation) const {
+		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
 
-			generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, identifierToken);
+		switch (expressionReference.type) {
+			case ExpressionType::LITERAL: return evaluateLiteralExpression(expressionReference, evaluation);
+			case ExpressionType::IDENTIFIER: return evaluateIdentifierExpression(expressionReference, evaluation);
+			case ExpressionType::UNARY: return evaluateUnaryExpression(expressionReference, evaluation);
+			case ExpressionType::BINARY: return evaluateBinaryExpression(expressionReference, evaluation);
+			case ExpressionType::GROUP: return evaluateGroupExpression(expressionReference, evaluation);
+			case ExpressionType::MEMBER_ACCESS: return evaluateMemberAccessExpression(expressionReference, evaluation);
+			case ExpressionType::FUNCTION_CALL: return evaluateFunctionCallExpression(expressionReference, evaluation);
+			case ExpressionType::TYPE: return evaluateTypeExpression(expressionReference, evaluation);
 		}
 	}
 
-	void SemanticAnalyzer::analyzeConstantAnnotation(const AnnotationBlock& annotationBlock) const {
-		if (annotationBlock.valueTokenIndex == ~0) {
-			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
+	void SemanticAnalyzer::evaluateLiteralExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
+		if (!evaluation.constant) {
+			return;
+		}
 
-			generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, identifierToken);
+		const Expression<ExpressionType::LITERAL>& expression = output->ast.getExpression<ExpressionType::LITERAL>(reference.byteOffset);
+		const Token& token = output->tokens[expression.tokenIndex];
+
+		// TODO: Directly access the literal?
+		evaluation.value = std::stoull(output->getTokenString(token));
+		evaluation.intermediateType = BIT(FLOAT32) | BIT(FLOAT64);
+
+		if (token.type == TokenType::LITERAL_INTEGER) {
+			evaluation.intermediateType |= BIT(SINT32) | BIT(UINT32);
 		}
 	}
 
-	void SemanticAnalyzer::analyzeInstanceIndexAnnotation(const AnnotationBlock& annotationBlock) const {}
+	void SemanticAnalyzer::evaluateIdentifierExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
+		if (!evaluation.constant) {
+			return;
+		}
 
-	void SemanticAnalyzer::analyzeLocationAnnotation(const AnnotationBlock& annotationBlock) const {
-		if (annotationBlock.valueTokenIndex == ~0) {
-			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
+		// TODO
+	}
 
-			generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, identifierToken);
+	void SemanticAnalyzer::evaluateUnaryExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
+		if (!evaluation.constant) {
+			return;
+		}
+
+		const Expression<ExpressionType::UNARY>& expression = output->ast.getExpression<ExpressionType::UNARY>(reference.byteOffset);
+		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
+
+		switch (operatorToken.type) {
+			case TokenType::MINUS: {
+				evaluation.value = -evaluation.value;
+
+				break;
+			}
+			case TokenType::EXCLAMATION: {
+				evaluation.value = !evaluation.value;
+
+				break;
+			}
+			case TokenType::TILDE: {
+				evaluation.value = ~evaluation.value;
+
+				break;
+			}
+			default: {
+				DEBUG_ASSERT(false);
+			}
+			case TokenType::PLUS: {
+				break;
+			}
+		}
+
+		evaluateExpression(expression.rightExpressionReferenceIndex, evaluation);
+	}
+
+	void SemanticAnalyzer::evaluateBinaryExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
+		if (!evaluation.constant) {
+			return;
+		}
+
+		const Expression<ExpressionType::BINARY>& expression = output->ast.getExpression<ExpressionType::BINARY>(reference.byteOffset);
+		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
+
+		ExpressionEvaluation rightEvaluation{};
+		rightEvaluation.constant = true;
+		rightEvaluation.value = 0;
+
+		evaluateExpression(expression.leftExpressionReferenceIndex, evaluation);
+		evaluateExpression(expression.rightExpressionReferenceIndex, rightEvaluation);
+
+		switch (operatorToken.type) {
+			case TokenType::EQUAL:
+			case TokenType::ASTERISK_EQUAL:
+			case TokenType::SLASH_EQUAL:
+			case TokenType::PLUS_EQUAL:
+			case TokenType::MINUS_EQUAL:
+			case TokenType::LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET_EQUAL:
+			case TokenType::RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET_EQUAL:
+			case TokenType::AMPERSAND_EQUAL:
+			case TokenType::CARET_EQUAL:
+			case TokenType::VERTICAL_BAR_EQUAL: {
+				evaluation.constant = false;
+
+				break;
+			}
+			case TokenType::VERTICAL_BAR: {
+				evaluation.value |= rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::CARET: {
+				evaluation.value ^= rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::AMPERSAND: {
+				evaluation.value &= rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET: {
+				evaluation.value <<= rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET: {
+				evaluation.value >>= rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::EQUAL_EQUAL: {
+				evaluation.value = evaluation.value == rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::EXCLAMATION_EQUAL: {
+				evaluation.value = evaluation.value != rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::LEFT_ANGLE_BRACKET: {
+				evaluation.value = evaluation.value < rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::LEFT_ANGLE_BRACKET_EQUAL: {
+				evaluation.value = evaluation.value <= rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::RIGHT_ANGLE_BRACKET: {
+				evaluation.value = evaluation.value > rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::RIGHT_ANGLE_BRACKET_EQUAL: {
+				evaluation.value = evaluation.value >= rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::ASTERISK: {
+				evaluation.value *= rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::SLASH: {
+				evaluation.value /= rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::PLUS: {
+				evaluation.value += rightEvaluation.value;
+
+				break;
+			}
+			case TokenType::MINUS: {
+				evaluation.value -= rightEvaluation.value;
+
+				break;
+			}
+			default: {
+				DEBUG_ASSERT(false);
+
+				break;
+			}
 		}
 	}
 
-	void SemanticAnalyzer::analyzePositionAnnotation(const AnnotationBlock& annotationBlock) const {}
-
-	void SemanticAnalyzer::analyzeSetAnnotation(const AnnotationBlock& annotationBlock) const {
-		if (annotationBlock.valueTokenIndex == ~0) {
-			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
-
-			generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, identifierToken);
+	void SemanticAnalyzer::evaluateGroupExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
+		if (!evaluation.constant) {
+			return;
 		}
+
+		const Expression<ExpressionType::GROUP>& expression = output->ast.getExpression<ExpressionType::GROUP>(reference.byteOffset);
+
+		evaluateExpression(expression.expressionReferenceIndex, evaluation);
 	}
 
-	void SemanticAnalyzer::analyzeVertexIndexAnnotation(const AnnotationBlock& annotationBlock) const {}
+	void SemanticAnalyzer::evaluateMemberAccessExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
+		if (!evaluation.constant) {
+			return;
+		}
 
-	bool SemanticAnalyzer::isLanguageFunction(const Token& token) const {
-		return token.type >= FIRST_FUNCTION_INDEX && token.type <= LAST_FUNCTION_INDEX;
+		// TODO
+	}
+
+	void SemanticAnalyzer::evaluateFunctionCallExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
+		if (!evaluation.constant) {
+			return;
+		}
+
+		// TODO
+	}
+
+	void SemanticAnalyzer::evaluateTypeExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
+		if (!evaluation.constant) {
+			return;
+		}
+
+		// TODO
 	}
 }

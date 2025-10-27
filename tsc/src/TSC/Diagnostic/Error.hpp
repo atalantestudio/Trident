@@ -225,6 +225,20 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::INVALID_CONVERSION> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
+			Diagnostic diagnostic{};
+			diagnostic.start = identifierToken.start;
+			diagnostic.end = identifierToken.getEnd();
+			diagnostic.message = "Invalid conversion.";
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::INVALID_CONVERSION;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE> {
 		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
 			Diagnostic diagnostic{};

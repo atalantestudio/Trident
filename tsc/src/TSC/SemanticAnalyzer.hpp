@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CompilationOutput.hpp"
+#include "ExpressionEvaluation.hpp"
 #include "Statement.hpp"
 #include "Token.hpp"
 
@@ -22,15 +23,16 @@ namespace ProjectA {
 
 		private:
 			void analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const;
-			void analyzeBindingAnnotation(const AnnotationBlock& annotationBlock) const;
-			void analyzeConstantAnnotation(const AnnotationBlock& annotationBlock) const;
-			void analyzeInstanceIndexAnnotation(const AnnotationBlock& annotationBlock) const;
-			void analyzeLocationAnnotation(const AnnotationBlock& annotationBlock) const;
-			void analyzePositionAnnotation(const AnnotationBlock& annotationBlock) const;
-			void analyzeSetAnnotation(const AnnotationBlock& annotationBlock) const;
-			void analyzeVertexIndexAnnotation(const AnnotationBlock& annotationBlock) const;
 
-			bool isLanguageFunction(const Token& token) const;
+			void evaluateExpression(uint32 referenceIndex, ExpressionEvaluation& evaluation) const;
+			void evaluateLiteralExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
+			void evaluateIdentifierExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
+			void evaluateUnaryExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
+			void evaluateBinaryExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
+			void evaluateGroupExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
+			void evaluateMemberAccessExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
+			void evaluateFunctionCallExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
+			void evaluateTypeExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
 
 		private:
 			CompilationOutput* output;
