@@ -35,12 +35,4 @@ namespace ProjectA {
 		private:
 			CompilationOutput* output;
 	};
-
-	/* uint32 getTypeScalarCount(Type type) const {
-		DEBUG_ASSERT(type >= Type::VEC2);
-
-		const uint32 typeIndex = static_cast<uint32>(type) - 4;
-
-		return typeIndex / 3 + typeIndex % 3;
-	} */
 }

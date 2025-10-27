@@ -4,6 +4,7 @@
 #include "Definition.hpp"
 #include "Diagnostic/Diagnostic.hpp"
 #include "Language/BaseType.hpp"
+#include "PackedType.hpp"
 #include "Scope.hpp"
 #include "SemanticToken.hpp"
 #include "SemanticTokenModifier.hpp"
@@ -15,6 +16,38 @@ namespace ProjectA {
 		public:
 			explicit CompilationOutput() {
 				registerDefaultDefinitions();
+			}
+
+			uint32 getSize(PackedType type) const {
+				if (type.hasUserDefinedType() || type.hasUserDefinedTemplateArgument()) {
+					// TODO
+					BREAKPOINT();
+
+					return 0;
+				}
+
+				uint32 index = type.typeIndex;
+
+				if (type.templateArgumentIndex > 0) {
+					index = type.templateArgumentIndex;
+				}
+
+				return TYPE_COMPONENT_COUNTS[type.typeIndex] * TYPE_BYTE_SIZES[index];
+			}
+
+			uint32 getAlignment(PackedType type) const {
+				if (type.hasUserDefinedType() || type.hasUserDefinedTemplateArgument()) {
+					// TODO
+					BREAKPOINT();
+
+					return 0;
+				}
+
+				if (type.templateArgumentIndex > 0) {
+					return TYPE_ALIGNMENTS[type.typeIndex] * TYPE_ALIGNMENTS[type.templateArgumentIndex];
+				}
+
+				return TYPE_ALIGNMENTS[type.typeIndex];
 			}
 
 			const std::string& getIdentifier(uint32 typeIndex) const {
@@ -114,7 +147,7 @@ namespace ProjectA {
 				return nullptr;
 			}
 
-			void define(PackedType type, SemanticTokenType semanticTokenType, uint32 semanticTokenModifierFlag, uint32 identifierTokenIndex, DocumentPosition end) {
+			void define(PackedType type, SemanticTokenType semanticTokenType, uint32 semanticTokenModifierFlag, uint32 identifierTokenIndex, DocumentPosition end, uint32 size = 0, uint32 alignment = 0) {
 				const Token& identifierToken = tokens[identifierTokenIndex];
 
 				Definition definition{};
@@ -124,22 +157,29 @@ namespace ProjectA {
 				definition.semanticTokenModifierFlag = semanticTokenModifierFlag;
 				definition.tokenIndex = identifierTokenIndex;
 				definition.identifier = getIdentifier(identifierToken.type);
-				definition.size = TYPE_COMPONENT_COUNTS[type.typeIndex];
-				definition.alignment = TYPE_ALIGNMENTS[type.typeIndex];
 
-				if (type.templateArgumentIndex > 0) {
-					definition.size *= TYPE_ALIGNMENTS[type.templateArgumentIndex - 1];
-					definition.alignment *= TYPE_ALIGNMENTS[type.templateArgumentIndex - 1];
+				if (size == 0 && alignment == 0) {
+					definition.size = TYPE_COMPONENT_COUNTS[type.typeIndex];
+					definition.alignment = TYPE_ALIGNMENTS[type.typeIndex];
+
+					if (type.templateArgumentIndex > 0) {
+						definition.size *= TYPE_ALIGNMENTS[type.templateArgumentIndex];
+						definition.alignment *= TYPE_ALIGNMENTS[type.templateArgumentIndex];
+					}
+					else {
+						definition.size *= TYPE_ALIGNMENTS[type.typeIndex];
+					}
 				}
 				else {
-					definition.size *= TYPE_ALIGNMENTS[type.typeIndex];
+					definition.size = size;
+					definition.alignment = alignment;
 				}
 
 				openScopeDefinitions.emplace_back(definition);
 			}
 
-			void define(const ref<StructureStatement>& statement, DocumentPosition end) {
-				define(PackedType::fromTypeExpression(TokenType::USER_DEFINED, 0), SemanticTokenType::STRUCTURE, 0, statement->identifierTokenIndex, end);
+			void defineStructure(const ref<StructureStatement>& statement, DocumentPosition end, uint32 size, uint32 alignment) {
+				define(PackedType::fromTypeExpression(TokenType::USER_DEFINED, 0), SemanticTokenType::STRUCTURE, 0, statement->identifierTokenIndex, end, size, alignment);
 			}
 
 			void define(const ref<ConstantStatement>& statement) {
@@ -175,8 +215,8 @@ namespace ProjectA {
 				definition.alignment = TYPE_ALIGNMENTS[definition.type.typeIndex];
 
 				if (definition.type.templateArgumentIndex > 0) {
-					definition.size *= TYPE_ALIGNMENTS[definition.type.templateArgumentIndex - 1];
-					definition.alignment *= TYPE_ALIGNMENTS[definition.type.templateArgumentIndex - 1];
+					definition.size *= TYPE_ALIGNMENTS[definition.type.templateArgumentIndex];
+					definition.alignment *= TYPE_ALIGNMENTS[definition.type.templateArgumentIndex];
 				}
 				else {
 					definition.size *= TYPE_ALIGNMENTS[definition.type.typeIndex];

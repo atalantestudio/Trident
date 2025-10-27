@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	enum BaseType : uint8 {
+	enum BaseType : uint16 {
 		// TODO
 		OTHER,
 
@@ -75,12 +75,12 @@ namespace ProjectA {
 		4,
 		4,
 
-		// Multiply by the scalar alignment.
+		// NOTE
+		// Below are the aligned component counts for vector and matrix types.
+		// To get the alignment, multiply by the template argument (scalar) alignment.
 		2,
 		4,
 		4,
-
-		// Multiply by the scalar alignment.
 		2,
 		4,
 		4,

@@ -9,18 +9,18 @@ namespace ProjectA {
 			PackedType packedType;
 
 			if (typeIndex >= TokenType::USER_DEFINED) {
-				packedType.typeIndex = static_cast<uint16>(typeIndex - (TokenType::USER_DEFINED - TokenType::TYPE_MAT4X4));
+				packedType.typeIndex = static_cast<BaseType>(typeIndex - (TokenType::USER_DEFINED - TokenType::TYPE_MAT4X4) + 1);
 			}
 			else {
-				packedType.typeIndex = static_cast<uint16>(typeIndex - TokenType::TYPE_FLOAT32);
+				packedType.typeIndex = static_cast<BaseType>(typeIndex - TokenType::TYPE_FLOAT32 + 1);
 			}
 
 			if (templateArgumentIndex != 0) {
 				if (templateArgumentIndex >= TokenType::USER_DEFINED) {
-					packedType.templateArgumentIndex = static_cast<uint16>(templateArgumentIndex - (TokenType::USER_DEFINED - TokenType::TYPE_MAT4X4) + 1);
+					packedType.templateArgumentIndex = static_cast<BaseType>(templateArgumentIndex - (TokenType::USER_DEFINED - TokenType::TYPE_MAT4X4) + 1);
 				}
 				else {
-					packedType.templateArgumentIndex = static_cast<uint16>(templateArgumentIndex - TokenType::TYPE_FLOAT32 + 1);
+					packedType.templateArgumentIndex = static_cast<BaseType>(templateArgumentIndex - TokenType::TYPE_FLOAT32 + 1);
 				}
 			}
 
@@ -35,19 +35,14 @@ namespace ProjectA {
 		{}
 
 		bool hasUserDefinedType() const {
-			return typeIndex + TokenType::TYPE_FLOAT32 > TokenType::TYPE_MAT4X4;
+			return typeIndex + TokenType::TYPE_FLOAT32 - 1 > TokenType::TYPE_MAT4X4;
 		}
 
 		bool hasUserDefinedTemplateArgument() const {
 			return templateArgumentIndex + TokenType::TYPE_FLOAT32 - 1 > TokenType::TYPE_MAT4X4;
 		}
 
-		// This word represents the token type index, offsetted by -TokenType::TYPE_FLOAT32.
-		// If it is greater than TokenType::TYPE_MAT4X4, it is a user-defined type. The type index is then offsetted by TokenType::USER_DEFINED.
-		uint16 typeIndex = 0;
-
-		// This word is the token template argument index.
-		// It uses the same rules as typeIndex but has an additional offset of -1, allowing it to represent a 'null' template argument.
-		uint16 templateArgumentIndex = 0;
+		BaseType typeIndex = BaseType::OTHER;
+		BaseType templateArgumentIndex = BaseType::OTHER;
 	};
 }

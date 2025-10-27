@@ -11,6 +11,16 @@
 #include "SemanticAnalyzer.hpp"
 
 namespace ProjectA {
+	// TODO: Move inside Base directory.
+	// https://www.w3.org/TR/WGSL/#roundup
+	static uint32 roundUp(uint32 k, uint32 n) {
+		if (k == 0) {
+			return 0;
+		}
+
+		return (static_cast<uint32>(ceil(static_cast<float32>(n) / k))) * k;
+	}
+
 	void SemanticAnalyzer::setCompilationOutput(CompilationOutput* compilationOutput) {
 		this->output = compilationOutput;
 	}
@@ -24,11 +34,35 @@ namespace ProjectA {
 			return;
 		}
 
-		output->define(statement, end);
+		uint32 size = 0;
+		uint32 alignment = 0;
+		uint32 lastMemberOffset = 0;
+		uint32 lastMemberSize = 0;
 
 		if (statement->memberStatementIndices.empty()) {
 			generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(*output, identifierToken);
 		}
+
+		for (const uint32 statementIndex : statement->memberStatementIndices) {
+			const ref<MemberStatement>& statement = std::static_pointer_cast<MemberStatement>(output->ast.statements[statementIndex]);
+			const ExpressionReference& expressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
+			const Expression<ExpressionType::TYPE>& expression = output->ast.getExpression<ExpressionType::TYPE>(expressionReference.byteOffset);
+
+
+			lastMemberOffset += lastMemberSize;
+			lastMemberSize = output->getSize(expression.type);
+			size += lastMemberSize;
+
+			#ifdef __EMSCRIPTEN__
+				alignment = alignment > output->getAlignment(expression.type) ? alignment : output->getAlignment(expression.type);
+			#else
+				alignment = max(alignment, output->getAlignment(expression.type));
+			#endif
+		}
+
+		size = roundUp(alignment, lastMemberOffset + lastMemberSize);
+
+		output->defineStructure(statement, end, size, alignment);
 
 		/* Annotation combinedAnnotationFlag = static_cast<Annotation>(0);
 
@@ -182,7 +216,7 @@ namespace ProjectA {
 			return;
 		}
 
-		if (templateArgumentMask & BIT(expression.type.templateArgumentIndex - 1)) {
+		if (templateArgumentMask & BIT(expression.type.templateArgumentIndex)) {
 			return;
 		}
 
