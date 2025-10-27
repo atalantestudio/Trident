@@ -5,6 +5,9 @@
 
 namespace ProjectA {
 	class Lexer {
+		private:
+			static bool parseNumberLiteral(const char8* characters, uint32 characterCount, uint8 base, uint64& number);
+
 		public:
 			void tokenize(CompilationOutput* _output);
 
@@ -22,7 +25,7 @@ namespace ProjectA {
 			bool testAlphanumeric(char8 character) const;
 
 			void readNumberLiteral();
-			void registerNumberLiteral(Token& token);
+			void registerNumberLiteral(Token& token, uint32 offset, uint8 base);
 			void readIdentifier(Token& token);
 
 			uint32 getIdentifierTokenTypeIndex(const std::string& identifier) const;

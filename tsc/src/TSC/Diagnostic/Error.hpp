@@ -53,6 +53,37 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::NUMBER_OVERFLOW> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& token) {
+			Diagnostic diagnostic{};
+			diagnostic.start = token.start;
+			diagnostic.end = token.getEnd();
+			diagnostic.message = "Number exceeds the range of a 64-bit unsigned integer.";
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::NUMBER_OVERFLOW;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::INVALID_NUMBER_LITERAL> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& token) {
+			Diagnostic diagnostic{};
+			diagnostic.start = token.start;
+
+			// The token could not be finished, so we do not known its full range.
+			diagnostic.end = token.start;
+
+			diagnostic.message = "Invalid number literal.";
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::INVALID_NUMBER_LITERAL;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::MISSING_EXPRESSION> {
 		explicit generateDiagnostic(CompilationOutput& output, const Token& token) {
 			Diagnostic diagnostic{};

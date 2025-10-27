@@ -269,19 +269,21 @@ namespace ProjectA {
 		logger.property("Type", "LiteralExpression");
 
 		switch (token.type) {
-			case TokenType::LITERAL_FLOATING_POINT:
-				logger.property("Literal", std::stof(output->getTokenString(token)));
+			case TokenType::LITERAL_FLOATING_POINT: {
+				logger.property("LiteralType", "FloatingPoint");
+				logger.property("Literal", std::stold(output->getTokenString(token)));
 
 				break;
-			case TokenType::LITERAL_INTEGER_BASE_2:
-			case TokenType::LITERAL_INTEGER_BASE_8:
-			case TokenType::LITERAL_INTEGER_BASE_10:
-			case TokenType::LITERAL_INTEGER_BASE_16:
-				logger.property("Literal", std::stoi(output->getTokenString(token)));
+			}
+			case TokenType::LITERAL_INTEGER: {
+				logger.property("LiteralType", "Integer");
+				logger.property("Literal", std::stoull(output->getTokenString(token)));
 
 				break;
-			default:
+			}
+			default: {
 				break;
+			}
 		}
 	}
 

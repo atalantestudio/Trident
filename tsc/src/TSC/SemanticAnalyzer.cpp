@@ -373,7 +373,7 @@ namespace ProjectA {
 					);
 				}
 
-				if (ANNOTATION_TYPE_UINT32 & annotationBlock.annotation && (annotationBlock.value.type < TokenType::LITERAL_FLOATING_POINT || annotationBlock.value.type > TokenType::LITERAL_INTEGER_BASE_16)) {
+				if (ANNOTATION_TYPE_UINT32 & annotationBlock.annotation && (annotationBlock.value.type != TokenType::LITERAL_FLOATING_POINT && annotationBlock.value.type != TokenType::LITERAL_INTEGER)) {
 					// ERROR: Annotation "annotation" requires a uint32 value but was not provided with an integer value.
 					compilationOutput->generateDiagnostic(
 						DiagnosticSeverity::ERROR,

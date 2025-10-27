@@ -99,10 +99,7 @@ namespace ProjectA {
 
 		// Number literals
 		LITERAL_FLOATING_POINT,
-		LITERAL_INTEGER_BASE_2,
-		LITERAL_INTEGER_BASE_8,
-		LITERAL_INTEGER_BASE_10,
-		LITERAL_INTEGER_BASE_16,
+		LITERAL_INTEGER,
 
 		// User-defined types (structures, structure members, variables, constants, functions)
 		// NOTE: All unique identifiers are indexed relatively to this value. For example, the third user-defined type will be USER_DEFINED + 2.

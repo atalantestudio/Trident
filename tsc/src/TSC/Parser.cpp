@@ -694,7 +694,7 @@ namespace ProjectA {
 			return true;
 		}
 
-		if (read().type >= TokenType::LITERAL_FLOATING_POINT && read().type <= TokenType::LITERAL_INTEGER_BASE_16) {
+		if (read().type == TokenType::LITERAL_FLOATING_POINT || read().type == TokenType::LITERAL_INTEGER) {
 			return parseLiteralExpression();
 		}
 
@@ -848,7 +848,7 @@ namespace ProjectA {
 			jump();
 
 			if (!(ANNOTATION_TYPE_VOID & annotationBlock.annotation)) {
-				if (read().type < TokenType::LITERAL_FLOATING_POINT || read().type > TokenType::LITERAL_INTEGER_BASE_16) {
+				if (read().type != TokenType::LITERAL_FLOATING_POINT && read().type != TokenType::LITERAL_INTEGER) {
 					const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
 					output->generateDiagnostic(tokenIndex, "[ANNOTATION_INSTANCE] Expected a literal but got " + output->getTokenString(read()) + ".", DiagnosticSeverity::ERROR);

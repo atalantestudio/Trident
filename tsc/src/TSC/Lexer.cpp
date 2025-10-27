@@ -9,6 +9,43 @@
 #include "Token.hpp"
 
 namespace ProjectA {
+	// TODO: Move inside Base directory.
+	bool Lexer::parseNumberLiteral(const char8* characters, uint32 characterCount, uint8 base, uint64& number) {
+		uint32 characterIndex = 0;
+		char8 character;
+		uint8 digit;
+
+		while (characterIndex < characterCount) {
+			character = characters[characterIndex];
+			digit = 0;
+
+			if (character >= '0' && character <= '9') {
+				// Parse 0-9 digit.
+				digit = character - '0';
+			}
+			else if (character >= 'a' && character <= 'f') {
+				// Parse 11-16 digit.
+				digit = character - 'W';
+			}
+
+			#ifdef __EMSCRIPTEN__
+				if (number > (std::numeric_limits<uint64>::max() - digit) / base) return false;
+			#else
+				if (number > (max<uint64>() - digit) / base) {
+					// 64-bit number overflow.
+					return false;
+				}
+			#endif
+
+			number *= base;
+			number += digit;
+
+			characterIndex += 1;
+		}
+
+		return true;
+	}
+
 	void Lexer::tokenize(CompilationOutput* _output) {
 		output = _output;
 
@@ -330,68 +367,71 @@ namespace ProjectA {
 
 	void Lexer::readNumberLiteral() {
 		Token token{};
+		token.type = TokenType::LITERAL_INTEGER;
 		token.start = position;
 
-		if (read() == '0' && testLetter(peek(1))) {
+		if (read() == '0') {
 			const char8 prefix = peek(1);
 
-			jump(2);
+			if (testLetter(prefix)) {
+				jump(2);
 
-			switch (prefix) {
-				case 'b': {
-					if (!testBinaryDigit(read())) {
-						return;
+				switch (prefix) {
+					case 'b': {
+						if (!testBinaryDigit(read())) {
+							return;
+						}
+
+						while (testBinaryDigit(read())) {
+							jump(1);
+						}
+
+						registerNumberLiteral(token, 2, 2);
+
+						break;
 					}
+					case 'o': {
+						if (!testOctalDigit(read())) {
+							return;
+						}
 
-					while (testBinaryDigit(read())) {
-						jump(1);
+						while (testOctalDigit(read())) {
+							jump(1);
+						}
+
+						registerNumberLiteral(token, 2, 8);
+
+						break;
 					}
+					case 'h': {
+						if (!testHexadecimalDigit(read())) {
+							return;
+						}
 
-					token.type = TokenType::LITERAL_INTEGER_BASE_2;
+						while (testHexadecimalDigit(read())) {
+							jump(1);
+						}
 
-					registerNumberLiteral(token);
+						registerNumberLiteral(token, 2, 16);
 
-					break;
+						break;
+					}
+					default: {
+						break;
+					}
 				}
-				case 'o': {
-					if (!testOctalDigit(read())) {
-						return;
-					}
 
-					while (testOctalDigit(read())) {
-						jump(1);
-					}
-
-					token.type = TokenType::LITERAL_INTEGER_BASE_8;
-
-					registerNumberLiteral(token);
-
-					break;
-				}
-				case 'h': {
-					if (!testHexadecimalDigit(read())) {
-						return;
-					}
-
-					while (testHexadecimalDigit(read())) {
-						jump(1);
-					}
-
-					token.type = TokenType::LITERAL_INTEGER_BASE_16;
-
-					registerNumberLiteral(token);
-
-					break;
-				}
-				default: {
-					break;
-				}
+				return;
 			}
 
-			return;
-		}
+			if (prefix != '.') {
+				generateDiagnostic<DiagnosticCode::INVALID_NUMBER_LITERAL>(*output, token);
 
-		token.type = TokenType::LITERAL_INTEGER_BASE_10;
+				jump(2);
+
+				return;
+			}
+		}
 
 		jump(1);
 
@@ -409,12 +449,20 @@ namespace ProjectA {
 			}
 		}
 
-		registerNumberLiteral(token);
+		registerNumberLiteral(token, 0, 10);
 	}
 
-	void Lexer::registerNumberLiteral(Token& token) {
+	void Lexer::registerNumberLiteral(Token& token, uint32 offset, uint8 base) {
 		token.characterCount = position.characterOffset - token.start.characterOffset;
-		token.value = &output->text[characterIndex - token.characterCount];
+		token.value = &output->text[characterIndex - token.characterCount + offset];
+
+		uint64 number = 0;
+
+		if (!parseNumberLiteral(token.value, token.characterCount - offset, base, number)) {
+			generateDiagnostic<DiagnosticCode::NUMBER_OVERFLOW>(*output, token);
+		}
+
+		// TODO: Store number?
 
 		output->registerSemanticToken(token, SemanticTokenType::NUMBER, 0);
 		output->tokens.emplace_back(token);

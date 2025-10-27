@@ -235,8 +235,7 @@ namespace ProjectA {
 		const Expression<ExpressionType::LITERAL>& expression = output->ast.getExpression<ExpressionType::LITERAL>(byteOffset);
 		const Token& token = output->tokens[expression.tokenIndex];
 
-		// TODO: Add support for base 2/8/16 notations.
-		DEBUG_ASSERT(token.type == TokenType::LITERAL_INTEGER_BASE_10 || token.type == TokenType::LITERAL_FLOATING_POINT);
+		DEBUG_ASSERT(token.type == TokenType::LITERAL_INTEGER || token.type == TokenType::LITERAL_FLOATING_POINT);
 
 		stream << output->getTokenString(token);
 	}
