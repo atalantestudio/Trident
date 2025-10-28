@@ -62,7 +62,7 @@ namespace ProjectA {
 			}
 
 			const UserDefinedType* getUserDefinedType(uint16 typeIndex) const {
-				const uint16 index = typeIndex - TokenType::TYPE_MAT4X4 - 1;
+				const uint16 index = typeIndex - BaseType::USER_DEFINED;
 
 				if (index >= userDefinedTypes.size()) {
 					return nullptr;
@@ -71,11 +71,21 @@ namespace ProjectA {
 				return &userDefinedTypes[index];
 			}
 
-			const std::string& getIdentifier(uint32 typeIndex) const {
-				DEBUG_ASSERT(typeIndex >= TokenType::USER_DEFINED);
-				DEBUG_ASSERT(typeIndex - TokenType::USER_DEFINED < userDefinedIdentifiers.size());
+			uint32 getUserDefinedTypeIndex(TokenType type) const {
+				for (uint32 userDefinedTypeIndex = 0; userDefinedTypeIndex < userDefinedTypes.size(); userDefinedTypeIndex += 1) {
+					if (userDefinedTypes[userDefinedTypeIndex].identifierIndex == type - TokenType::TYPE_USER_DEFINED) {
+						return userDefinedTypeIndex;
+					}
+				}
 
-				return userDefinedIdentifiers[typeIndex - TokenType::USER_DEFINED];
+				return ~0;
+			}
+
+			const std::string& getIdentifier(uint32 typeIndex) const {
+				DEBUG_ASSERT(typeIndex >= TokenType::TYPE_USER_DEFINED);
+				DEBUG_ASSERT(typeIndex - TokenType::TYPE_USER_DEFINED < userDefinedIdentifiers.size());
+
+				return userDefinedIdentifiers[typeIndex - TokenType::TYPE_USER_DEFINED];
 			}
 
 			uint64 getLiteral(uint32 index) const {
@@ -225,12 +235,13 @@ namespace ProjectA {
 			}
 
 			void defineStructure(const ref<StructureStatement>& statement, DocumentPosition end, uint32 size, uint32 alignment) {
-				define(PackedType::fromTypeExpression(TokenType::USER_DEFINED, 0), SemanticTokenType::STRUCTURE, 0, statement->identifierTokenIndex, end, size, alignment);
-
 				Token& identifierToken = tokens[statement->identifierTokenIndex];
 				identifierToken.index = static_cast<uint32>(userDefinedTypes.size());
 
+				define(PackedType::fromTypeExpression(TokenType::TYPE_USER_DEFINED, identifierToken.index, 0), SemanticTokenType::STRUCTURE, 0, statement->identifierTokenIndex, end, size, alignment);
+
 				UserDefinedType userDefinedType{};
+				userDefinedType.identifierIndex = identifierToken.type - TokenType::TYPE_USER_DEFINED;
 				userDefinedType.size = size;
 				userDefinedType.alignment = alignment;
 
@@ -351,9 +362,8 @@ namespace ProjectA {
 					case RIGHT_CURLY_BRACE: return "}";
 					case RIGHT_PARENTHESIS: return ")";
 					case RIGHT_SQUARE_BRACKET: return "]";
-					case END_OF_FILE: return "EOF";
 					case END_OF_LINE: return "EOL";
-					case USER_DEFINED:
+					case TYPE_USER_DEFINED:
 					default: return getIdentifier(type);
 				}
 			}

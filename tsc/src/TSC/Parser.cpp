@@ -71,7 +71,7 @@ namespace ProjectA {
 
 		jumpEol();
 
-		while (!read(TokenType::END_OF_FILE)) {
+		while (tokenIndex < output->tokens.size()) {
 			if (!parseGlobalScopeStatement()) {
 				synchronize();
 			}
@@ -83,7 +83,7 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseGlobalScopeStatement() {
-		if (read().type >= TokenType::USER_DEFINED && peek().type == TokenType::LEFT_CURLY_BRACE) {
+		if (read().type >= TokenType::TYPE_USER_DEFINED && peek().type == TokenType::LEFT_CURLY_BRACE) {
 			return parseStructureStatement();
 		}
 
@@ -111,21 +111,23 @@ namespace ProjectA {
 
 		parentStatementIndex = getLastStatementIndex();
 
-		while (!read(TokenType::RIGHT_CURLY_BRACE) && !read(TokenType::END_OF_FILE)) {
+		while (!read(TokenType::RIGHT_CURLY_BRACE)) {
 			if (read(TokenType::LEFT_SQUARE_BRACKET) && !parseAnnotationBlocks()) {
 				return false;
 			}
 
 			if (!parseMemberStatement(statement)) {
-				return false;
+				synchronize();
+
+				break;
 			}
 
 			statement->memberStatementIndices.emplace_back(getLastStatementIndex());
 
 			EXPECT(
-				read(TokenType::RIGHT_CURLY_BRACE) || read(TokenType::END_OF_FILE) || read(TokenType::END_OF_LINE),
+				read(TokenType::RIGHT_CURLY_BRACE) || read(TokenType::END_OF_LINE),
 				DiagnosticCode::UNEXPECTED_TOKEN,
-				"'}' or EOF or EOL",
+				"'}' or EOL",
 				read()
 			);
 
@@ -153,10 +155,9 @@ namespace ProjectA {
 		}
 
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
-
-		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
-
 		statement->identifierTokenIndex = tokenIndex;
+
+		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		jump();
 
@@ -184,10 +185,9 @@ namespace ProjectA {
 		}
 
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
-
-		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
-
 		statement->identifierTokenIndex = tokenIndex;
+
+		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		registerVariableSemanticToken(read(), false);
 
@@ -210,7 +210,7 @@ namespace ProjectA {
 		output->ast.globalScopeStatementIndices.emplace_back(getLastStatementIndex());
 		analyzer.analyzeConstantStatement(statement);
 
-		EXPECT(read(TokenType::END_OF_FILE) || read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::END_OF_LINE, read());
+		EXPECT(read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::END_OF_LINE, read());
 
 		jumpEol();
 
@@ -221,16 +221,15 @@ namespace ProjectA {
 	bool Parser::parseFunctionStatement() {
 		ref<FunctionStatement> statement = createRef<FunctionStatement>();
 		statement->returnTypeExpressionReferenceIndex = getLastExpressionReferenceIndex();
-
-		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
-
 		statement->identifierTokenIndex = tokenIndex;
+
+		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		jump();
 		jump();
 		jumpEol();
 
-		while (!read(TokenType::RIGHT_PARENTHESIS) && !read(TokenType::END_OF_FILE)) {
+		while (!read(TokenType::RIGHT_PARENTHESIS)) {
 			if (!parseParameterStatement()) {
 				return false;
 			}
@@ -270,10 +269,9 @@ namespace ProjectA {
 
 		ref<ParameterStatement> statement = createRef<ParameterStatement>();
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
-
-		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
-
 		statement->identifierTokenIndex = tokenIndex;
+
+		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		jump();
 
@@ -324,7 +322,7 @@ namespace ProjectA {
 			}
 		}
 
-		if (read().type >= TokenType::USER_DEFINED && ((peek().type >= TokenType::EQUAL && peek().type <= TokenType::VERTICAL_BAR_EQUAL) || peek().type == TokenType::DOT)) {
+		if (read().type >= TokenType::TYPE_USER_DEFINED && ((peek().type >= TokenType::EQUAL && peek().type <= TokenType::VERTICAL_BAR_EQUAL) || peek().type == TokenType::DOT)) {
 			return parseExpressionStatement();
 		}
 
@@ -403,7 +401,7 @@ namespace ProjectA {
 
 		jumpEol();
 
-		while (!read(TokenType::RIGHT_CURLY_BRACE) && !read(TokenType::END_OF_FILE)) {
+		while (!read(TokenType::RIGHT_CURLY_BRACE)) {
 			if (!parseLocalScopeStatement()) {
 				return false;
 			}
@@ -459,10 +457,9 @@ namespace ProjectA {
 
 		ref<VariableStatement> statement = createRef<VariableStatement>();
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
-
-		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
-
 		statement->identifierTokenIndex = tokenIndex;
+
+		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		registerVariableSemanticToken(read(), false);
 
@@ -502,11 +499,19 @@ namespace ProjectA {
 
 	bool Parser::parseTypeExpression() {
 		EXPECT_OLD(
-			(read().type >= FIRST_TYPE_INDEX && read().type <= LAST_TYPE_INDEX) || read().type >= TokenType::USER_DEFINED,
+			(read().type >= FIRST_TYPE_INDEX && read().type <= LAST_TYPE_INDEX) || read().type >= TokenType::TYPE_USER_DEFINED,
 			"[TYPE] Expected a language or user-defined type but got " + output->getTokenString(read()) + "."
 		);
 
-		const uint32 typeIndex = read().type;
+		const TokenType type = read().type;
+
+		if (type >= TokenType::TYPE_USER_DEFINED) {
+			// Update the user defined type index.
+			Token& token = output->tokens[tokenIndex];
+			token.index = output->getUserDefinedTypeIndex(token.type);
+		}
+
+		const uint32 typeIndex = read().index;
 		uint32 templateArgumentIndex = 0;
 
 		Expression<ExpressionType::TYPE> expression{};
@@ -521,7 +526,7 @@ namespace ProjectA {
 			expression.templateArgumentTokenIndex = tokenIndex;
 
 			EXPECT_OLD(
-				(templateArgumentIndex >= FIRST_TYPE_INDEX && templateArgumentIndex <= LAST_TYPE_INDEX) || templateArgumentIndex >= TokenType::USER_DEFINED,
+				(templateArgumentIndex >= FIRST_TYPE_INDEX && templateArgumentIndex <= LAST_TYPE_INDEX) || templateArgumentIndex >= TokenType::TYPE_USER_DEFINED,
 				"[TYPE] Expected a valid template argument but got " + output->getTokenString(read()) + "."
 			);
 
@@ -530,7 +535,7 @@ namespace ProjectA {
 			CONSUME(TokenType::RIGHT_ANGLE_BRACKET);
 		}
 
-		expression.type = PackedType::fromTypeExpression(typeIndex, templateArgumentIndex);
+		expression.type = PackedType::fromTypeExpression(type, typeIndex, templateArgumentIndex);
 
 		output->ast.addExpression(expression);
 		analyzer.analyzeTypeExpression(expression);
@@ -539,7 +544,7 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseAssignmentOrCompoundExpression() {
-		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		if (!parseIdentifierExpression()) {
 			return false;
@@ -645,7 +650,7 @@ namespace ProjectA {
 			return parseCallOrGroupExpression();
 		}
 
-		if (read().type >= TokenType::USER_DEFINED || (read().type >= FIRST_FUNCTION_INDEX && read().type <= LAST_FUNCTION_INDEX)) {
+		if (read().type >= TokenType::TYPE_USER_DEFINED || (read().type >= FIRST_FUNCTION_INDEX && read().type <= LAST_FUNCTION_INDEX)) {
 			if (!parseIdentifierExpression()) {
 				return false;
 			}
@@ -693,7 +698,7 @@ namespace ProjectA {
 		expression.leftExpressionReferenceIndex = getLastExpressionReferenceIndex();
 		expression.identifierTokenIndex = tokenIndex;
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 		jump();
 
 		output->ast.addExpression(expression);
@@ -718,7 +723,7 @@ namespace ProjectA {
 		Expression<ExpressionType::CALL> expression{};
 		expression.calleeExpressionReferenceIndex = lastExpressionReferenceIndex;
 
-		while (!read(TokenType::RIGHT_PARENTHESIS) && !read(TokenType::END_OF_FILE)) {
+		while (!read(TokenType::RIGHT_PARENTHESIS)) {
 			// NOTE: Parse logical OR or higher precedence expression.
 			if (!parseLogicalOrExpression()) {
 				return false;
@@ -777,9 +782,10 @@ namespace ProjectA {
 		while (read(TokenType::LEFT_SQUARE_BRACKET)) {
 			jump();
 
-			EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+			EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 			AnnotationBlock annotationBlock{};
+			annotationBlock.identifierTokenIndex = tokenIndex;
 
 			for (uint32 annotationIndex = 0; annotationIndex < ANNOTATION_COUNT; annotationIndex += 1) {
 				const char8* annotation = ANNOTATION_STRINGS[annotationIndex];
@@ -791,8 +797,6 @@ namespace ProjectA {
 					break;
 				}
 			}
-
-			annotationBlock.identifierTokenIndex = tokenIndex;
 
 			if (annotationBlock.annotation == static_cast<Annotation>(0)) {
 				generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, read());
@@ -843,6 +847,10 @@ namespace ProjectA {
 	}
 
 	Token Parser::read() const {
+		if (tokenIndex >= output->tokens.size()) {
+			return output->tokens.back();
+		}
+
 		return output->tokens[tokenIndex];
 	}
 
@@ -855,24 +863,22 @@ namespace ProjectA {
 	}
 
 	void Parser::jump() {
-		if (read(TokenType::END_OF_FILE)) {
-			return;
-		}
-
 		position = read().getEnd();
 		tokenIndex += 1;
 	}
 
 	void Parser::jumpEol() {
-		while (read(TokenType::END_OF_LINE)) {
+		while (read(TokenType::END_OF_LINE) && tokenIndex < output->tokens.size()) {
 			jump();
 		}
 	}
 
 	void Parser::synchronize() {
-		while (!read(TokenType::END_OF_LINE) && !read(TokenType::END_OF_FILE)) {
+		while (!read(TokenType::END_OF_LINE) && tokenIndex < output->tokens.size()) {
 			jump();
 		}
+
+		jumpEol();
 	}
 
 	bool Parser::registerVariableSemanticToken(const Token& token, bool preferStructure) const {

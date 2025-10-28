@@ -94,7 +94,6 @@ namespace ProjectA {
 		RIGHT_SQUARE_BRACKET,
 
 		// Special
-		END_OF_FILE,
 		END_OF_LINE,
 
 		// Number literals
@@ -102,8 +101,8 @@ namespace ProjectA {
 		LITERAL_INTEGER,
 
 		// User-defined types (structures, structure members, variables, constants, functions)
-		// NOTE: All unique identifiers are indexed relatively to this value. For example, the third user-defined type will be USER_DEFINED + 2.
-		USER_DEFINED,
+		// NOTE: All unique identifiers are indexed relatively to this value. For example, the third user-defined type will be TYPE_USER_DEFINED + 2.
+		TYPE_USER_DEFINED,
 	};
 
 	static constexpr uint32 FIRST_TYPE_INDEX = TYPE_FLOAT32;

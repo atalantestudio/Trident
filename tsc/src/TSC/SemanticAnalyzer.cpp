@@ -245,10 +245,9 @@ namespace ProjectA {
 		if (expression.type.hasUserDefinedType()) {
 			output->registerSemanticToken(expression.typeTokenIndex, SemanticTokenType::STRUCTURE, 0);
 
-			const std::string& identifier = output->getIdentifier(output->tokens[expression.typeTokenIndex].type);
-			const Definition* definition = output->getFirstDefinition(identifier);
+			const UserDefinedType* userDefinedType = output->getUserDefinedType(expression.type.typeIndex);
 
-			if (definition == nullptr) {
+			if (userDefinedType == nullptr) {
 				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, expression.typeTokenIndex);
 
 				return;

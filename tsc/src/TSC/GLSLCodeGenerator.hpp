@@ -88,9 +88,9 @@ namespace ProjectA {
 						return GLSL_TYPE_PREFIXES[templateArgumentToken.type - TokenType::TYPE_FLOAT32] + typeString;
 					}
 					default: {
-						MODULE_ASSERT(typeToken.type >= TokenType::USER_DEFINED, "Invalid type.");
+						MODULE_ASSERT(typeToken.type >= TokenType::TYPE_USER_DEFINED, "Invalid type.");
 
-						return output->userDefinedIdentifiers[typeToken.type - TokenType::USER_DEFINED];
+						return output->userDefinedIdentifiers[typeToken.type - TokenType::TYPE_USER_DEFINED];
 					}
 				}
 			}

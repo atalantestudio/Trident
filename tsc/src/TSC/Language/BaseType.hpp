@@ -26,6 +26,8 @@ namespace ProjectA {
 		MAT4X2,
 		MAT4X3,
 		MAT4X4,
+
+		USER_DEFINED,
 	};
 
 	static constexpr uint32 TYPE_TEMPLATE_ARGUMENT_MASKS[] = {

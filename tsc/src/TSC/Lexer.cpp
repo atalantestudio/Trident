@@ -317,7 +317,7 @@ namespace ProjectA {
 			}
 		}
 
-		registerEndOfToken(TokenType::END_OF_FILE);
+		// registerEndOfToken(TokenType::END_OF_LINE);
 	}
 
 	void Lexer::jump(sint32 characterCount) {
@@ -494,7 +494,7 @@ namespace ProjectA {
 		// Test against user-defined identifiers.
 		while (identifierIndex < output->userDefinedIdentifiers.size()) {
 			if (identifier == output->userDefinedIdentifiers[identifierIndex]) {
-				return TokenType::USER_DEFINED + identifierIndex;
+				return TokenType::TYPE_USER_DEFINED + identifierIndex;
 			}
 
 			identifierIndex += 1;
@@ -502,7 +502,7 @@ namespace ProjectA {
 
 		output->userDefinedIdentifiers.emplace_back(identifier);
 
-		return TokenType::USER_DEFINED + identifierIndex;
+		return TokenType::TYPE_USER_DEFINED + identifierIndex;
 	}
 
 	void Lexer::registerToken(TokenType type, uint32 characterCount) {
