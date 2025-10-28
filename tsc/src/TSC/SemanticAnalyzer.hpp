@@ -11,7 +11,7 @@ namespace ProjectA {
 			void setCompilationOutput(CompilationOutput* compilationOutput);
 
 			void analyzeStructureStatement(const ref<StructureStatement>& statement, DocumentPosition end) const;
-			void analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& memberStatement) const;
+			void analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& statement) const;
 			void analyzeConstantStatement(const ref<ConstantStatement>& statement) const;
 			void analyzeFunctionStatement(uint32 statementIndex, DocumentPosition end) const;
 			void analyzeParameterStatement(const ref<ParameterStatement>& statement) const;

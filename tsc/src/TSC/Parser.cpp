@@ -116,7 +116,7 @@ namespace ProjectA {
 				return false;
 			}
 
-			if (!parseMemberStatement()) {
+			if (!parseMemberStatement(statement)) {
 				return false;
 			}
 
@@ -139,7 +139,7 @@ namespace ProjectA {
 		return true;
 	}
 
-	bool Parser::parseMemberStatement() {
+	bool Parser::parseMemberStatement(ref<StructureStatement>& structureStatement) {
 		ref<MemberStatement> statement = createRef<MemberStatement>();
 		statement->annotationFlag = annotationFlag;
 		statement->annotationBlockIndexOffset = currentAnnotationCount;
@@ -158,20 +158,10 @@ namespace ProjectA {
 
 		statement->identifierTokenIndex = tokenIndex;
 
-		const ref<StructureStatement> parentStatement = std::static_pointer_cast<StructureStatement>(output->ast.statements[parentStatementIndex]);
-
-		analyzer.analyzeMemberStatement(parentStatement, statement);
-
-		// NOTE: The identifier token index must be added AFTER the semantic analysis has been done on the member.
-		parentStatement->memberIdentifierTokenIndices.emplace_back(tokenIndex);
-
-		if (!registerVariableSemanticToken(read(), false)) {
-			output->registerSemanticToken(tokenIndex, SemanticTokenType::MEMBER, 0);
-		}
-
 		jump();
 
 		output->ast.statements.emplace_back(statement);
+		analyzer.analyzeMemberStatement(structureStatement, statement);
 
 		return true;
 	}

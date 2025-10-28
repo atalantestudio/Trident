@@ -48,7 +48,6 @@ namespace ProjectA {
 			const ExpressionReference& expressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
 			const Expression<ExpressionType::TYPE>& expression = output->ast.getExpression<ExpressionType::TYPE>(expressionReference.byteOffset);
 
-
 			lastMemberOffset += lastMemberSize;
 			lastMemberSize = output->getSize(expression.type);
 			size += lastMemberSize;
@@ -84,17 +83,20 @@ namespace ProjectA {
 		} */
 	}
 
-	void SemanticAnalyzer::analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& memberStatement) const {
-		analyzeAnnotationBlocks(memberStatement->annotationBlockIndexOffset, memberStatement->annotationBlockCount);
+	void SemanticAnalyzer::analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& statement) const {
+		analyzeAnnotationBlocks(statement->annotationBlockIndexOffset, statement->annotationBlockCount);
 
-		const Token& identifierToken = output->tokens[memberStatement->identifierTokenIndex];
+		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::MEMBER, 0);
+
+		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 		const std::string identifierTokenString = output->getTokenString(identifierToken);
 
-		for (const uint32 memberIdentifierTokenIndex : structureStatement->memberIdentifierTokenIndices) {
-			const Token& definitionToken = output->tokens[memberIdentifierTokenIndex];
+		for (const uint32 memberStatementIndex : structureStatement->memberStatementIndices) {
+			const ref<MemberStatement> memberStatement = std::static_pointer_cast<MemberStatement>(output->ast.statements[memberStatementIndex]);
+			const Token& definitionToken = output->tokens[memberStatement->identifierTokenIndex];
 
 			if (identifierTokenString == output->getTokenString(definitionToken)) {
-				generateDiagnostic<DiagnosticCode::REDEFINITION>(*output, identifierToken, memberIdentifierTokenIndex);
+				generateDiagnostic<DiagnosticCode::REDEFINITION>(*output, identifierToken, memberStatement->identifierTokenIndex);
 
 				break;
 			}
@@ -428,7 +430,7 @@ namespace ProjectA {
 		const Expression<ExpressionType::LITERAL>& expression = output->ast.getExpression<ExpressionType::LITERAL>(expressionReference.byteOffset);
 		const Token& token = output->tokens[expression.tokenIndex];
 
-		evaluation.value = output->getLiteral(token.literalIndex);
+		evaluation.value = output->getLiteral(token.index);
 
 		if (token.type == TokenType::LITERAL_FLOATING_POINT) {
 			if (evaluation.intermediateType.typeIndex != BaseType::FLOAT32 && evaluation.intermediateType.typeIndex != BaseType::FLOAT64) {

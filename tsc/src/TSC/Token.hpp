@@ -17,7 +17,10 @@ namespace ProjectA {
 			TokenType type;
 			DocumentPosition start;
 			uint32 characterCount;
-			uint32 literalIndex;
+
+			// If `type` is TokenType::LITERAL_FLOATING_POINT or TokenType::LITERAL_INTEGER, use to index into CompilationOutput::literals.
+			// If `type` is TokenType::USER_DEFINED and the token is used to declare a structure, use to index into CompilationOutput::userDefinedTypes.
+			uint32 index = static_cast<uint32>(~0);
 	};
 
 	inline std::string getOperatorTokenString(const Token& token) {

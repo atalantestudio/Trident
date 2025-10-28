@@ -10,6 +10,7 @@
 #include "SemanticTokenModifier.hpp"
 #include "SemanticTokenType.hpp"
 #include "Token.hpp"
+#include "UserDefinedType.hpp"
 
 namespace ProjectA {
 	class CompilationOutput {
@@ -22,10 +23,13 @@ namespace ProjectA {
 				DEBUG_ASSERT(!type.hasUserDefinedTemplateArgument());
 
 				if (type.hasUserDefinedType()) {
-					// TODO: Return the size from the corresponding definition.
-					BREAKPOINT();
+					const UserDefinedType* userDefinedType = getUserDefinedType(type.typeIndex);
 
-					return 0;
+					if (userDefinedType == nullptr) {
+						return 0;
+					}
+
+					return userDefinedType->size;
 				}
 
 				uint32 index = type.typeIndex;
@@ -41,10 +45,13 @@ namespace ProjectA {
 				DEBUG_ASSERT(!type.hasUserDefinedTemplateArgument());
 
 				if (type.hasUserDefinedType()) {
-					// TODO: Return the alignment from the corresponding definition.
-					BREAKPOINT();
+					const UserDefinedType* userDefinedType = getUserDefinedType(type.typeIndex);
 
-					return 0;
+					if (userDefinedType == nullptr) {
+						return 0;
+					}
+
+					return userDefinedType->alignment;
 				}
 
 				if (type.templateArgumentIndex > 0) {
@@ -54,6 +61,16 @@ namespace ProjectA {
 				return TYPE_ALIGNMENTS[type.typeIndex];
 			}
 
+			const UserDefinedType* getUserDefinedType(uint16 typeIndex) const {
+				const uint16 index = typeIndex - TokenType::TYPE_MAT4X4 - 1;
+
+				if (index >= userDefinedTypes.size()) {
+					return nullptr;
+				}
+
+				return &userDefinedTypes[index];
+			}
+
 			const std::string& getIdentifier(uint32 typeIndex) const {
 				DEBUG_ASSERT(typeIndex >= TokenType::USER_DEFINED);
 				DEBUG_ASSERT(typeIndex - TokenType::USER_DEFINED < userDefinedIdentifiers.size());
@@ -61,10 +78,10 @@ namespace ProjectA {
 				return userDefinedIdentifiers[typeIndex - TokenType::USER_DEFINED];
 			}
 
-			uint64 getLiteral(uint32 literalIndex) const {
-				DEBUG_ASSERT(literalIndex < literals.size());
+			uint64 getLiteral(uint32 index) const {
+				DEBUG_ASSERT(index < literals.size());
 
-				return literals[literalIndex];
+				return literals[index];
 			}
 
 			std::string getFullTypeString(BaseType type, BaseType templateArgument) const {
@@ -209,6 +226,15 @@ namespace ProjectA {
 
 			void defineStructure(const ref<StructureStatement>& statement, DocumentPosition end, uint32 size, uint32 alignment) {
 				define(PackedType::fromTypeExpression(TokenType::USER_DEFINED, 0), SemanticTokenType::STRUCTURE, 0, statement->identifierTokenIndex, end, size, alignment);
+
+				Token& identifierToken = tokens[statement->identifierTokenIndex];
+				identifierToken.index = static_cast<uint32>(userDefinedTypes.size());
+
+				UserDefinedType userDefinedType{};
+				userDefinedType.size = size;
+				userDefinedType.alignment = alignment;
+
+				userDefinedTypes.emplace_back(userDefinedType);
 			}
 
 			void define(const ref<ConstantStatement>& statement) {
@@ -256,7 +282,7 @@ namespace ProjectA {
 
 			std::string getTokenString(const Token& token) const {
 				if (token.type == TokenType::LITERAL_FLOATING_POINT || token.type == TokenType::LITERAL_INTEGER) {
-					return std::to_string(getLiteral(token.literalIndex));
+					return std::to_string(getLiteral(token.index));
 				}
 
 				return getTokenString(token.type);
@@ -358,6 +384,7 @@ namespace ProjectA {
 
 			std::vector<Definition> openScopeDefinitions;
 			uint32 nextScopeDefinitionCount = 0;
+			std::vector<UserDefinedType> userDefinedTypes;
 			std::vector<Definition> definitions;
 			std::vector<Scope> scopes;
 			uint32 currentScopeIndex = UNDEFINED_SCOPE;

@@ -13,7 +13,7 @@ namespace ProjectA {
 		private:
 			bool parseGlobalScopeStatement();
 			bool parseStructureStatement();
-			bool parseMemberStatement();
+			bool parseMemberStatement(ref<StructureStatement>& structureStatement);
 			bool parseConstantOrFunctionStatement();
 			bool parseFunctionStatement();
 			bool parseParameterStatement();

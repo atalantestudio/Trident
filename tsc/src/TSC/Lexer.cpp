@@ -456,7 +456,7 @@ namespace ProjectA {
 			generateDiagnostic<DiagnosticCode::NUMBER_OVERFLOW>(*output, token);
 		}
 
-		token.literalIndex = static_cast<uint32>(output->literals.size());
+		token.index = static_cast<uint32>(output->literals.size());
 
 		output->literals.emplace_back(number);
 		output->registerSemanticToken(token, SemanticTokenType::NUMBER, 0);
