@@ -84,6 +84,31 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::UNEXPECTED_TOKEN> {
+		explicit generateDiagnostic(CompilationOutput& output, TokenType expectedType, const Token& unexpectedToken) {
+			Diagnostic diagnostic{};
+			diagnostic.start = unexpectedToken.start;
+			diagnostic.end = unexpectedToken.getEnd();
+			diagnostic.message = MODULE_FORMAT("Expected '[]'.", output.getTokenString(expectedType));
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::UNEXPECTED_TOKEN;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+
+		explicit generateDiagnostic(CompilationOutput& output, const char8* typeString, const Token& unexpectedToken) {
+			Diagnostic diagnostic{};
+			diagnostic.start = unexpectedToken.start;
+			diagnostic.end = unexpectedToken.getEnd();
+			diagnostic.message = MODULE_FORMAT("Expected [].", typeString);
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::UNEXPECTED_TOKEN;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::MISSING_EXPRESSION> {
 		explicit generateDiagnostic(CompilationOutput& output, const Token& token) {
 			Diagnostic diagnostic{};
@@ -226,13 +251,27 @@ namespace ProjectA {
 
 	template<>
 	struct generateDiagnostic<DiagnosticCode::INVALID_CONVERSION> {
-		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& token) {
 			Diagnostic diagnostic{};
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.start = token.start;
+			diagnostic.end = token.getEnd();
 			diagnostic.message = "Invalid conversion.";
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::INVALID_CONVERSION;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& literalToken, BaseType type, BaseType templateArgument) {
+			Diagnostic diagnostic{};
+			diagnostic.start = literalToken.start;
+			diagnostic.end = literalToken.getEnd();
+			diagnostic.message = MODULE_FORMAT("Floating-point number literal requires explicit cast in order to be assigned to type [].", output.getFullTypeString(type, templateArgument));
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT;
 
 			output.diagnostics.emplace_back(diagnostic);
 		}

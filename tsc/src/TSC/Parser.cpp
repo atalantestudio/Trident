@@ -9,14 +9,7 @@
 #include "Parser.hpp"
 
 namespace ProjectA {
-	#define EXPECT(condition, message) \
-		if (!(condition)) { \
-			output->generateDiagnostic(tokenIndex, message, DiagnosticSeverity::ERROR); \
-			\
-			return false; \
-		}
-
-	#define EXPECT2(condition, diagnosticCode, ...) \
+	#define EXPECT(condition, diagnosticCode, ...) \
 		if (!(condition)) { \
 			generateDiagnostic<diagnosticCode>(*output, __VA_ARGS__); \
 			\
@@ -25,7 +18,20 @@ namespace ProjectA {
 			return false; \
 		}
 
-	#define BINARY_EXPRESSION(condition, callback) \
+	// TODO: Replace by EXPECT.
+	#define EXPECT_OLD(condition, message) \
+		if (!(condition)) { \
+			output->generateDiagnostic(tokenIndex, message, DiagnosticSeverity::ERROR); \
+			\
+			return false; \
+		}
+
+	#define CONSUME(type) \
+		EXPECT(read(type), DiagnosticCode::UNEXPECTED_TOKEN, type, read()) \
+		\
+		jump();
+
+	#define PARSE_BINARY_EXPRESSION(condition, callback) \
 		if (!callback()) { \
 			return false; \
 		} \
@@ -65,7 +71,7 @@ namespace ProjectA {
 
 		jumpEol();
 
-		while (read().type != TokenType::END_OF_FILE) {
+		while (!read(TokenType::END_OF_FILE)) {
 			if (!parseGlobalScopeStatement()) {
 				synchronize();
 			}
@@ -81,10 +87,8 @@ namespace ProjectA {
 			return parseStructureStatement();
 		}
 
-		if (read().type == TokenType::LEFT_SQUARE_BRACKET) {
-			if (!parseAnnotationBlocks()) {
-				return false;
-			}
+		if (read(TokenType::LEFT_SQUARE_BRACKET) && !parseAnnotationBlocks()) {
+			return false;
 		}
 
 		return parseConstantOrFunctionStatement();
@@ -107,11 +111,9 @@ namespace ProjectA {
 
 		parentStatementIndex = getLastStatementIndex();
 
-		while (read().type != TokenType::RIGHT_CURLY_BRACE && read().type != TokenType::END_OF_FILE) {
-			if (read().type == TokenType::LEFT_SQUARE_BRACKET) {
-				if (!parseAnnotationBlocks()) {
-					return false;
-				}
+		while (!read(TokenType::RIGHT_CURLY_BRACE) && !read(TokenType::END_OF_FILE)) {
+			if (read(TokenType::LEFT_SQUARE_BRACKET) && !parseAnnotationBlocks()) {
+				return false;
 			}
 
 			if (!parseMemberStatement()) {
@@ -121,18 +123,18 @@ namespace ProjectA {
 			statement->memberStatementIndices.emplace_back(getLastStatementIndex());
 
 			EXPECT(
-				read().type == TokenType::RIGHT_CURLY_BRACE || read().type == TokenType::END_OF_FILE || read().type == TokenType::END_OF_LINE,
-				"[FUNCTION] Expected '}' or EOF or EOL but got " + output->getTokenString(read()) + "."
+				read(TokenType::RIGHT_CURLY_BRACE) || read(TokenType::END_OF_FILE) || read(TokenType::END_OF_LINE),
+				DiagnosticCode::UNEXPECTED_TOKEN,
+				"'}' or EOF or EOL",
+				read()
 			);
 
 			jumpEol();
 		}
 
-		EXPECT(read().type == TokenType::RIGHT_CURLY_BRACE, "[STRUCTURE] Expected '}' but got EOF.");
+		CONSUME(TokenType::RIGHT_CURLY_BRACE);
 
 		analyzer.analyzeStructureStatement(statement, read().getEnd());
-
-		jump();
 
 		return true;
 	}
@@ -152,7 +154,7 @@ namespace ProjectA {
 
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT2(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		statement->identifierTokenIndex = tokenIndex;
 
@@ -193,7 +195,7 @@ namespace ProjectA {
 
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT2(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		statement->identifierTokenIndex = tokenIndex;
 
@@ -201,7 +203,7 @@ namespace ProjectA {
 
 		jump();
 
-		EXPECT(read().type == TokenType::EQUAL, "[CONSTANT] Expected '=' but got " + output->getTokenString(read()) + ".");
+		EXPECT(read(TokenType::EQUAL), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::EQUAL, read());
 
 		output->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR, 0);
 
@@ -213,53 +215,50 @@ namespace ProjectA {
 		}
 
 		statement->initializerExpressionReferenceIndex = getLastExpressionReferenceIndex();
+
 		output->ast.statements.emplace_back(statement);
 		output->ast.globalScopeStatementIndices.emplace_back(getLastStatementIndex());
-
 		analyzer.analyzeConstantStatement(statement);
 
-		EXPECT(read().type == TokenType::END_OF_FILE || read().type == TokenType::END_OF_LINE, "[CONSTANT] Expected EOL but got " + output->getTokenString(read()) + ".");
+		EXPECT(read(TokenType::END_OF_FILE) || read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::END_OF_LINE, read());
+
 		jumpEol();
 
 		return true;
 	}
 
-	// TODO: A function return type should not be annotatable.
+	// TODO: It should not be possible to annotate the return type of a function.
 	bool Parser::parseFunctionStatement() {
 		ref<FunctionStatement> statement = createRef<FunctionStatement>();
 		statement->returnTypeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[FUNCTION] Expected a UDI but got " + output->getTokenString(read()) + ".");
+		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		statement->identifierTokenIndex = tokenIndex;
-
-		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::FUNCTION, 0);
 
 		jump();
 		jump();
 		jumpEol();
 
-		while (read().type != TokenType::RIGHT_PARENTHESIS && read().type != TokenType::END_OF_FILE) {
+		while (!read(TokenType::RIGHT_PARENTHESIS) && !read(TokenType::END_OF_FILE)) {
 			if (!parseParameterStatement()) {
 				return false;
 			}
 
 			statement->parameterStatementIndices.emplace_back(getLastStatementIndex());
 
-			if (read().type == TokenType::RIGHT_PARENTHESIS) {
+			if (read(TokenType::RIGHT_PARENTHESIS)) {
 				break;
 			}
 
-			EXPECT(read().type == TokenType::COMMA || read().type == TokenType::END_OF_LINE, "[FUNCTION] Expected ',' or EOL but got " + output->getTokenString(read()) + ".");
+			EXPECT_OLD(read(TokenType::COMMA) || read(TokenType::END_OF_LINE), "[FUNCTION] Expected ',' or EOL but got " + output->getTokenString(read()) + ".");
 
 			jump();
 			jumpEol();
 		}
 
-		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[FUNCTION] Expected ')' but got " + output->getTokenString(read()) + ".");
-		jump();
-
-		EXPECT(read().type == TokenType::LEFT_CURLY_BRACE, "[FUNCTION] Expected '{' but got " + output->getTokenString(read()) + ".");
+		CONSUME(TokenType::RIGHT_PARENTHESIS);
+		CONSUME(TokenType::LEFT_CURLY_BRACE);
 
 		statement->scopeStatementIndex = static_cast<uint32>(output->ast.statements.size());
 
@@ -282,12 +281,9 @@ namespace ProjectA {
 		ref<ParameterStatement> statement = createRef<ParameterStatement>();
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT2(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		statement->identifierTokenIndex = tokenIndex;
-
-		// TODO: Register token depending on the case.
-		output->registerSemanticToken(tokenIndex, SemanticTokenType::PARAMETER, 0);
 
 		jump();
 
@@ -298,34 +294,42 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseLocalScopeStatement() {
-		if (read().type == TokenType::LEFT_SQUARE_BRACKET) {
+		if (read(TokenType::LEFT_SQUARE_BRACKET)) {
 			if (!parseAnnotationBlocks()) {
 				return false;
 			}
 		}
 
-		if (read().type == TokenType::LEFT_CURLY_BRACE) {
+		if (read(TokenType::LEFT_CURLY_BRACE)) {
+			jump();
+
 			return parseScopeStatement();
 		}
 
-		if (read().type == TokenType::KEYWORD_IF) {
+		if (read(TokenType::KEYWORD_IF)) {
 			return parseIfStatementStart();
 		}
 
-		if (read().type == TokenType::KEYWORD_RETURN) {
+		if (read(TokenType::KEYWORD_RETURN)) {
+			jump();
+
 			return parseReturnStatement();
 		}
 
-		if (read().type == TokenType::KEYWORD_WHILE) {
+		if (read(TokenType::KEYWORD_WHILE)) {
 			return parseWhileStatementStart();
 		}
 
 		if (visitedWhileCount > 0) {
-			if (read().type == TokenType::KEYWORD_BREAK) {
+			if (read(TokenType::KEYWORD_BREAK)) {
+				jump();
+
 				return parseBreakStatement();
 			}
 
-			if (read().type == TokenType::KEYWORD_NEXT) {
+			if (read(TokenType::KEYWORD_NEXT)) {
+				jump();
+
 				return parseNextStatement();
 			}
 		}
@@ -338,25 +342,17 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseBreakStatement() {
-		const ref<BreakStatement> statement = createRef<BreakStatement>();
+		output->ast.statements.emplace_back(createRef<BreakStatement>());
 
-		jump();
-
-		EXPECT(read().type == TokenType::END_OF_LINE, "[NEXT] Expected EOL but got " + output->getTokenString(read()) + ".");
-
-		output->ast.statements.emplace_back(statement);
+		EXPECT(read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::END_OF_LINE, read());
 
 		return true;
 	}
 
 	bool Parser::parseNextStatement() {
-		const ref<NextStatement> statement = createRef<NextStatement>();
+		output->ast.statements.emplace_back(createRef<NextStatement>());
 
-		jump();
-
-		EXPECT(read().type == TokenType::END_OF_LINE, "[NEXT] Expected EOL but got " + output->getTokenString(read()) + ".");
-
-		output->ast.statements.emplace_back(statement);
+		EXPECT(read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::END_OF_LINE, read());
 
 		return true;
 	}
@@ -371,7 +367,8 @@ namespace ProjectA {
 
 		output->ast.statements.emplace_back(statement);
 
-		EXPECT(read().type == TokenType::RIGHT_CURLY_BRACE || read().type == TokenType::END_OF_LINE, "[EXPRESSION] Expected '}' but got " + output->getTokenString(read()) + ".");
+		// TODO: Why expect EOL?
+		EXPECT(read(TokenType::RIGHT_CURLY_BRACE) || read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::RIGHT_CURLY_BRACE, read());
 
 		return true;
 	}
@@ -412,14 +409,11 @@ namespace ProjectA {
 		ref<ScopeStatement> statement = createRef<ScopeStatement>();
 
 		output->ast.statements.emplace_back(statement);
-
-		jump();
-
 		output->openScope(position);
 
 		jumpEol();
 
-		while (read().type != TokenType::RIGHT_CURLY_BRACE && read().type != TokenType::END_OF_FILE) {
+		while (!read(TokenType::RIGHT_CURLY_BRACE) && !read(TokenType::END_OF_FILE)) {
 			if (!parseLocalScopeStatement()) {
 				return false;
 			}
@@ -429,8 +423,7 @@ namespace ProjectA {
 			jumpEol();
 		}
 
-		EXPECT(read().type == TokenType::RIGHT_CURLY_BRACE, "[SCOPE] Expected '}' but got " + output->getTokenString(read()) + ".");
-		jump();
+		CONSUME(TokenType::RIGHT_CURLY_BRACE);
 
 		output->closeScope(position);
 
@@ -444,10 +437,9 @@ namespace ProjectA {
 		}
 
 		conditionExpressionReferenceIndex = getLastExpressionReferenceIndex();
-
-		EXPECT(read().type == TokenType::LEFT_CURLY_BRACE, "[IF/WHILE] Expected '{' but got " + output->getTokenString(read()) + ".");
-
 		scopeStatementIndex = getLastStatementIndex() + 1;
+
+		CONSUME(TokenType::LEFT_CURLY_BRACE);
 
 		if (!parseScopeStatement()) {
 			return false;
@@ -457,15 +449,12 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseReturnStatement() {
-		jump();
-
-		ref<ReturnStatement> statement = createRef<ReturnStatement>();
-
 		// NOTE: Parse logical OR or higher precedence expression.
 		if (!parseLogicalOrExpression()) {
 			return false;
 		}
 
+		ref<ReturnStatement> statement = createRef<ReturnStatement>();
 		statement->expressionReferenceIndex = getLastExpressionReferenceIndex();
 
 		output->ast.statements.emplace_back(statement);
@@ -481,7 +470,7 @@ namespace ProjectA {
 		ref<VariableStatement> statement = createRef<VariableStatement>();
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[VARIABLE] Expected a UDI but got " + output->getTokenString(read()) + ".");
+		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		statement->identifierTokenIndex = tokenIndex;
 
@@ -499,11 +488,7 @@ namespace ProjectA {
 
 		jump();
 
-		if (statement->constant) {
-			EXPECT(read().type == TokenType::EQUAL, "[VARIABLE/CONSTANT] Expected '=' but got " + output->getTokenString(read()) + ".");
-		}
-
-		if (read().type == TokenType::EQUAL) {
+		if (read(TokenType::EQUAL)) {
 			output->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR, 0);
 
 			jump();
@@ -515,6 +500,9 @@ namespace ProjectA {
 
 			statement->initializerExpressionReferenceIndex = getLastExpressionReferenceIndex();
 		}
+		else if (statement->constant) {
+			generateDiagnostic<DiagnosticCode::UNEXPECTED_TOKEN>(*output, TokenType::EQUAL, read());
+		}
 
 		output->ast.statements.emplace_back(statement);
 		analyzer.analyzeVariableStatement(statement);
@@ -523,57 +511,45 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseTypeExpression() {
-		const uint32 typeIndex = read().type;
-
-		EXPECT(
-			(typeIndex >= FIRST_TYPE_INDEX && typeIndex <= LAST_TYPE_INDEX) || typeIndex >= TokenType::USER_DEFINED,
+		EXPECT_OLD(
+			(read().type >= FIRST_TYPE_INDEX && read().type <= LAST_TYPE_INDEX) || read().type >= TokenType::USER_DEFINED,
 			"[TYPE] Expected a language or user-defined type but got " + output->getTokenString(read()) + "."
 		);
 
+		const uint32 typeIndex = read().type;
 		uint32 templateArgumentIndex = 0;
 
 		Expression<ExpressionType::TYPE> expression{};
 		expression.typeTokenIndex = tokenIndex;
 
-		if (read().type >= TokenType::USER_DEFINED) {
-			registerVariableSemanticToken(read(), true);
-		}
+		jump();
 
-		if (peek().type == TokenType::LEFT_ANGLE_BRACKET) {
-			jump();
+		if (read(TokenType::LEFT_ANGLE_BRACKET)) {
 			jump();
 
 			templateArgumentIndex = read().type;
+			expression.templateArgumentTokenIndex = tokenIndex;
 
-			EXPECT(
+			EXPECT_OLD(
 				(templateArgumentIndex >= FIRST_TYPE_INDEX && templateArgumentIndex <= LAST_TYPE_INDEX) || templateArgumentIndex >= TokenType::USER_DEFINED,
 				"[TYPE] Expected a valid template argument but got " + output->getTokenString(read()) + "."
 			);
 
-			expression.templateArgumentTokenIndex = tokenIndex;
-
-			if (read().type >= TokenType::USER_DEFINED) {
-				registerVariableSemanticToken(read(), true);
-			}
-
 			jump();
 
-			EXPECT(read().type == TokenType::RIGHT_ANGLE_BRACKET, "[TYPE] Expected '>' but got " + output->getTokenString(read()) + ".");
+			CONSUME(TokenType::RIGHT_ANGLE_BRACKET);
 		}
-
-		jump();
 
 		expression.type = PackedType::fromTypeExpression(typeIndex, templateArgumentIndex);
 
-		analyzer.analyzeTypeExpression(expression);
-
 		output->ast.addExpression(expression);
+		analyzer.analyzeTypeExpression(expression);
 
 		return true;
 	}
 
 	bool Parser::parseAssignmentOrCompoundExpression() {
-		EXPECT(read().type >= TokenType::USER_DEFINED, "[ASSIGNMENT] Expected a user-defined identifier but got " + output->getTokenString(read()) + ".");
+		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		if (!parseIdentifierExpression()) {
 			return false;
@@ -601,47 +577,47 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseLogicalOrExpression() {
-		BINARY_EXPRESSION(read().type == TokenType::KEYWORD_OR, parseLogicalXorExpression);
+		PARSE_BINARY_EXPRESSION(read(TokenType::KEYWORD_OR), parseLogicalXorExpression);
 	}
 
 	bool Parser::parseLogicalXorExpression() {
-		BINARY_EXPRESSION(read().type == TokenType::KEYWORD_XOR, parseLogicalAndExpression);
+		PARSE_BINARY_EXPRESSION(read(TokenType::KEYWORD_XOR), parseLogicalAndExpression);
 	}
 
 	bool Parser::parseLogicalAndExpression() {
-		BINARY_EXPRESSION(read().type == TokenType::KEYWORD_AND, parseBitwiseOrExpression);
+		PARSE_BINARY_EXPRESSION(read(TokenType::KEYWORD_AND), parseBitwiseOrExpression);
 	}
 
 	bool Parser::parseBitwiseOrExpression() {
-		BINARY_EXPRESSION(read().type == TokenType::VERTICAL_BAR, parseBitwiseXorExpression);
+		PARSE_BINARY_EXPRESSION(read(TokenType::VERTICAL_BAR), parseBitwiseXorExpression);
 	}
 
 	bool Parser::parseBitwiseXorExpression() {
-		BINARY_EXPRESSION(read().type == TokenType::CARET, parseBitwiseAndExpression);
+		PARSE_BINARY_EXPRESSION(read(TokenType::CARET), parseBitwiseAndExpression);
 	}
 
 	bool Parser::parseBitwiseAndExpression() {
-		BINARY_EXPRESSION(read().type == TokenType::AMPERSAND, parseEqualityExpression);
+		PARSE_BINARY_EXPRESSION(read(TokenType::AMPERSAND), parseEqualityExpression);
 	}
 
 	bool Parser::parseEqualityExpression() {
-		BINARY_EXPRESSION(read().type == TokenType::EQUAL_EQUAL || read().type == TokenType::EXCLAMATION_EQUAL, parseRelationalExpression);
+		PARSE_BINARY_EXPRESSION(read(TokenType::EQUAL_EQUAL) || read(TokenType::EXCLAMATION_EQUAL), parseRelationalExpression);
 	}
 
 	bool Parser::parseRelationalExpression() {
-		BINARY_EXPRESSION(read().type >= TokenType::LEFT_ANGLE_BRACKET && read().type <= TokenType::RIGHT_ANGLE_BRACKET_EQUAL, parseBitwiseShiftExpression);
+		PARSE_BINARY_EXPRESSION(read().type >= TokenType::LEFT_ANGLE_BRACKET && read().type <= TokenType::RIGHT_ANGLE_BRACKET_EQUAL, parseBitwiseShiftExpression);
 	}
 
 	bool Parser::parseBitwiseShiftExpression() {
-		BINARY_EXPRESSION(read().type == TokenType::LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET || read().type == TokenType::RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET, parseAdditiveExpression);
+		PARSE_BINARY_EXPRESSION(read(TokenType::LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET) || read(TokenType::RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET), parseAdditiveExpression);
 	}
 
 	bool Parser::parseAdditiveExpression() {
-		BINARY_EXPRESSION(read().type == TokenType::MINUS || read().type == TokenType::PLUS, parseMultiplicativeExpression);
+		PARSE_BINARY_EXPRESSION(read(TokenType::MINUS) || read(TokenType::PLUS), parseMultiplicativeExpression);
 	}
 
 	bool Parser::parseMultiplicativeExpression() {
-		BINARY_EXPRESSION(read().type == TokenType::ASTERISK || read().type == TokenType::SLASH, parseUnaryExpression);
+		PARSE_BINARY_EXPRESSION(read(TokenType::ASTERISK) || read(TokenType::SLASH), parseUnaryExpression);
 	}
 
 	bool Parser::parseUnaryExpression() {
@@ -653,6 +629,7 @@ namespace ProjectA {
 
 			jump();
 
+			// NOTE: Don't allow unary expressions following each other, e.g. --i.
 			if (!parsePrimaryExpression()) {
 				return false;
 			}
@@ -673,33 +650,29 @@ namespace ProjectA {
 				return false;
 			}
 
-			EXPECT(read().type == TokenType::LEFT_PARENTHESIS, "[PRIMARY] Expected '(' but got " + output->getTokenString(read()) + ".");
+			EXPECT(read(TokenType::LEFT_PARENTHESIS), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::LEFT_PARENTHESIS, read());
 
-			return parseFunctionCallOrGroupExpression();
+			return parseCallOrGroupExpression();
 		}
 
 		if (read().type >= TokenType::USER_DEFINED || (read().type >= FIRST_FUNCTION_INDEX && read().type <= LAST_FUNCTION_INDEX)) {
-			if (read().type >= FIRST_FUNCTION_INDEX && read().type <= LAST_FUNCTION_INDEX) {
-				output->registerSemanticToken(tokenIndex, SemanticTokenType::FUNCTION, SemanticTokenModifier::PREDEFINED);
-			}
-
 			if (!parseIdentifierExpression()) {
 				return false;
 			}
 
-			if (read().type == TokenType::LEFT_PARENTHESIS) {
-				return parseFunctionCallOrGroupExpression();
+			if (read(TokenType::LEFT_PARENTHESIS)) {
+				return parseCallOrGroupExpression();
 			}
 
 			return true;
 		}
 
-		if (read().type == TokenType::LITERAL_FLOATING_POINT || read().type == TokenType::LITERAL_INTEGER) {
+		if (read(TokenType::LITERAL_FLOATING_POINT) || read(TokenType::LITERAL_INTEGER)) {
 			return parseLiteralExpression();
 		}
 
-		if (read().type == TokenType::LEFT_PARENTHESIS) {
-			return parseFunctionCallOrGroupExpression();
+		if (read(TokenType::LEFT_PARENTHESIS)) {
+			return parseCallOrGroupExpression();
 		}
 
 		generateDiagnostic<DiagnosticCode::MISSING_EXPRESSION>(*output, read());
@@ -711,13 +684,12 @@ namespace ProjectA {
 		Expression<ExpressionType::IDENTIFIER> expression{};
 		expression.tokenIndex = tokenIndex;
 
-		jump();
-
+		analyzer.analyzeIdentifierExpression(expression);
 		output->ast.addExpression(expression);
 
-		analyzer.analyzeIdentifierExpression(expression);
+		jump();
 
-		if (read().type == TokenType::DOT) {
+		if (read(TokenType::DOT)) {
 			return parseMemberAccessExpression();
 		}
 
@@ -729,23 +701,21 @@ namespace ProjectA {
 
 		Expression<ExpressionType::MEMBER_ACCESS> expression{};
 		expression.leftExpressionReferenceIndex = getLastExpressionReferenceIndex();
-
-		EXPECT2(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
-
 		expression.identifierTokenIndex = tokenIndex;
 
+		EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 		jump();
 
 		output->ast.addExpression(expression);
 
-		if (read().type == TokenType::DOT) {
+		if (read(TokenType::DOT)) {
 			return parseMemberAccessExpression();
 		}
 
 		return true;
 	}
 
-	bool Parser::parseFunctionCallOrGroupExpression() {
+	bool Parser::parseCallOrGroupExpression() {
 		const uint32 lastExpressionReferenceIndex = getLastExpressionReferenceIndex();
 		const ExpressionReference& lastExpressionReference = output->ast.getExpressionReference(lastExpressionReferenceIndex);
 
@@ -755,31 +725,29 @@ namespace ProjectA {
 
 		jump();
 
-		Expression<ExpressionType::FUNCTION_CALL> expression{};
+		Expression<ExpressionType::CALL> expression{};
 		expression.calleeExpressionReferenceIndex = lastExpressionReferenceIndex;
 
-		while (read().type != TokenType::RIGHT_PARENTHESIS && read().type != TokenType::END_OF_FILE) {
+		while (!read(TokenType::RIGHT_PARENTHESIS) && !read(TokenType::END_OF_FILE)) {
 			// NOTE: Parse logical OR or higher precedence expression.
 			if (!parseLogicalOrExpression()) {
 				return false;
 			}
 
-			expression.argumentExpressionReferenceIndices.emplace_back(getLastExpressionReferenceIndex());
+			expression.argumentCount += 1;
 
-			if (read().type == TokenType::RIGHT_PARENTHESIS) {
-				break;
+			EXPECT(read(TokenType::RIGHT_PARENTHESIS) || read(TokenType::COMMA), DiagnosticCode::UNEXPECTED_TOKEN, "')' or ','", read());
+
+			if (read(TokenType::COMMA)) {
+				jump();
 			}
-
-			EXPECT(read().type == TokenType::COMMA, "[FUNCTION_CALL] Expected ',' but got " + output->getTokenString(read()) + ".");
-			jump();
 		}
 
-		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[FUNCTION_CALL] Expected ')' but got " + output->getTokenString(read()) + ".");
-		jump();
+		CONSUME(TokenType::RIGHT_PARENTHESIS);
 
 		output->ast.addExpression(expression);
 
-		if (read().type == TokenType::DOT) {
+		if (read(TokenType::DOT)) {
 			return parseMemberAccessExpression();
 		}
 
@@ -808,20 +776,18 @@ namespace ProjectA {
 		Expression<ExpressionType::GROUP> expression{};
 		expression.expressionReferenceIndex = getLastExpressionReferenceIndex();
 
-		EXPECT(read().type == TokenType::RIGHT_PARENTHESIS, "[GROUP] Expected ')' but got " + output->getTokenString(read()) + ".");
-		jump();
-
 		output->ast.addExpression(expression);
+
+		CONSUME(TokenType::RIGHT_PARENTHESIS);
 
 		return true;
 	}
 
 	bool Parser::parseAnnotationBlocks() {
-		while (read().type == TokenType::LEFT_SQUARE_BRACKET) {
+		while (read(TokenType::LEFT_SQUARE_BRACKET)) {
 			jump();
 
-			// Annotations are considered user-defined identifiers because they can be used to name variables.
-			EXPECT(read().type >= TokenType::USER_DEFINED, "[ANNOTATION_INSTANCE] Expected an annotation but got " + output->getTokenString(read()) + ".");
+			EXPECT(read().type >= TokenType::USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 			AnnotationBlock annotationBlock{};
 
@@ -848,7 +814,7 @@ namespace ProjectA {
 			jump();
 
 			if (!(ANNOTATION_TYPE_VOID & annotationBlock.annotation)) {
-				if (read().type != TokenType::LITERAL_FLOATING_POINT && read().type != TokenType::LITERAL_INTEGER) {
+				if (!read(TokenType::LITERAL_FLOATING_POINT) && !read(TokenType::LITERAL_INTEGER)) {
 					const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
 					output->generateDiagnostic(tokenIndex, "[ANNOTATION_INSTANCE] Expected a literal but got " + output->getTokenString(read()) + ".", DiagnosticSeverity::ERROR);
@@ -860,8 +826,8 @@ namespace ProjectA {
 				}
 			}
 
-			EXPECT(read().type == TokenType::RIGHT_SQUARE_BRACKET, "[ANNOTATION_INSTANCE] Expected ']' but got " + output->getTokenString(read()) + ".");
-			jump();
+			CONSUME(TokenType::RIGHT_SQUARE_BRACKET);
+
 			jumpEol();
 
 			output->ast.annotationBlocks.emplace_back(annotationBlock);
@@ -882,6 +848,10 @@ namespace ProjectA {
 		return static_cast<uint32>(output->ast.expressionReferences.size()) - 1;
 	}
 
+	bool Parser::read(TokenType type) const {
+		return read().type == type;
+	}
+
 	Token Parser::read() const {
 		return output->tokens[tokenIndex];
 	}
@@ -895,24 +865,22 @@ namespace ProjectA {
 	}
 
 	void Parser::jump() {
-		if (read().type == TokenType::END_OF_FILE) {
+		if (read(TokenType::END_OF_FILE)) {
 			return;
 		}
 
-		position = read().start;
-		position.characterOffset += read().characterCount;
-
+		position = read().getEnd();
 		tokenIndex += 1;
 	}
 
 	void Parser::jumpEol() {
-		while (read().type == TokenType::END_OF_LINE) {
+		while (read(TokenType::END_OF_LINE)) {
 			jump();
 		}
 	}
 
 	void Parser::synchronize() {
-		while (read().type != TokenType::END_OF_LINE && read().type != TokenType::END_OF_FILE) {
+		while (!read(TokenType::END_OF_LINE) && !read(TokenType::END_OF_FILE)) {
 			jump();
 		}
 	}

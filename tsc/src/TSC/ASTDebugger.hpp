@@ -32,7 +32,7 @@ namespace ProjectA {
 			void writeBinaryExpression(uint32 byteOffset);
 			void writeGroupExpression(uint32 byteOffset);
 			void writeMemberAccessExpression(uint32 byteOffset);
-			void writeFunctionCallExpression(uint32 byteOffset);
+			void writeCallExpression(uint32 byteOffset);
 			void writeTypeExpression(uint32 byteOffset);
 
 			void writeAnnotationBlocks(uint32 indexOffset, uint32 count);

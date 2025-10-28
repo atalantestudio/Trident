@@ -1,12 +1,13 @@
 #pragma once
 
+#include "PackedType.hpp"
+
 namespace ProjectA {
 	struct ExpressionEvaluation {
-		uint32 intermediateType = 0;
-		bool constant = true;
-		sint64 value = 0;
+		PackedType intermediateType;
+		sint64 value;
 
-		// TODO
-		// TokenType literalType;
+		bool casting;
+		bool constant;
 	};
 }

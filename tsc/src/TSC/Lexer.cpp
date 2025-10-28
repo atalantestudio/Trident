@@ -424,13 +424,7 @@ namespace ProjectA {
 				return;
 			}
 
-			if (prefix != '.') {
-				generateDiagnostic<DiagnosticCode::INVALID_NUMBER_LITERAL>(*output, token);
-
-				jump(2);
-
-				return;
-			}
+			// TODO: Invalid 0[0-9]{1} literal check.
 		}
 
 		jump(1);
@@ -454,16 +448,17 @@ namespace ProjectA {
 
 	void Lexer::registerNumberLiteral(Token& token, uint32 offset, uint8 base) {
 		token.characterCount = position.characterOffset - token.start.characterOffset;
-		token.value = &output->text[characterIndex - token.characterCount + offset];
 
+		const char8* characters = &output->text[characterIndex - token.characterCount + offset];
 		uint64 number = 0;
 
-		if (!parseNumberLiteral(token.value, token.characterCount - offset, base, number)) {
+		if (!parseNumberLiteral(characters, token.characterCount - offset, base, number)) {
 			generateDiagnostic<DiagnosticCode::NUMBER_OVERFLOW>(*output, token);
 		}
 
-		// TODO: Store number?
+		token.literalIndex = static_cast<uint32>(output->literals.size());
 
+		output->literals.emplace_back(number);
 		output->registerSemanticToken(token, SemanticTokenType::NUMBER, 0);
 		output->tokens.emplace_back(token);
 	}

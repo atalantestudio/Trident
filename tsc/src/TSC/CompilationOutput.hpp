@@ -56,8 +56,33 @@ namespace ProjectA {
 
 			const std::string& getIdentifier(uint32 typeIndex) const {
 				DEBUG_ASSERT(typeIndex >= TokenType::USER_DEFINED);
+				DEBUG_ASSERT(typeIndex - TokenType::USER_DEFINED < userDefinedIdentifiers.size());
 
 				return userDefinedIdentifiers[typeIndex - TokenType::USER_DEFINED];
+			}
+
+			uint64 getLiteral(uint32 literalIndex) const {
+				DEBUG_ASSERT(literalIndex < literals.size());
+
+				return literals[literalIndex];
+			}
+
+			std::string getFullTypeString(BaseType type, BaseType templateArgument) const {
+				std::string typeString = getTypeString(type);
+
+				if (templateArgument == BaseType::OTHER) {
+					return typeString;
+				}
+
+				return typeString + '<' + getTypeString(templateArgument) + '>';
+			}
+
+			std::string getTypeString(BaseType type) const {
+				if (type == BaseType::OTHER) {
+					return "[user-defined]";
+				}
+
+				return RESERVED_KEYWORDS[type + TokenType::TYPE_FLOAT32 - 1];
 			}
 
 			void registerToken(TokenType type, DocumentPosition start, uint32 characterCount) {
@@ -230,7 +255,15 @@ namespace ProjectA {
 			}
 
 			std::string getTokenString(const Token& token) const {
-				switch (token.type) {
+				if (token.type == TokenType::LITERAL_FLOATING_POINT || token.type == TokenType::LITERAL_INTEGER) {
+					return std::to_string(getLiteral(token.literalIndex));
+				}
+
+				return getTokenString(token.type);
+			}
+
+			std::string getTokenString(TokenType type) const {
+				switch (type) {
 					case KEYWORD_AND: return "AND";
 					case KEYWORD_BREAK: return "BREAK";
 					case KEYWORD_IF: return "IF";
@@ -255,49 +288,47 @@ namespace ProjectA {
 					case TYPE_MAT4X2: return "mat4x2";
 					case TYPE_MAT4X3: return "mat4x3";
 					case TYPE_MAT4X4: return "mat4x4";
-					case FUNCTION_NORMALIZED: return "\"normalized\"";
-					case RESERVED_KEYWORD_COUNT: return "[reserved keyword]";
-					case EQUAL: return "'='";
-					case ASTERISK_EQUAL: return "'*='";
-					case SLASH_EQUAL: return "'/='";
-					case PLUS_EQUAL: return "'+='";
-					case MINUS_EQUAL: return "'-='";
-					case LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET_EQUAL: return "'<<='";
-					case RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET_EQUAL: return "'>>='";
-					case AMPERSAND_EQUAL: return "'&='";
-					case CARET_EQUAL: return "'^='";
-					case VERTICAL_BAR_EQUAL: return "'|='";
-					case VERTICAL_BAR: return "'|'";
-					case CARET: return "'^'";
-					case AMPERSAND: return "'&'";
-					case LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET: return "'<<'";
-					case RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET: return "'>>'";
-					case EQUAL_EQUAL: return "'=='";
-					case EXCLAMATION_EQUAL: return "'!='";
-					case LEFT_ANGLE_BRACKET: return "'<'";
-					case LEFT_ANGLE_BRACKET_EQUAL: return "'<='";
-					case RIGHT_ANGLE_BRACKET: return "'>'";
-					case RIGHT_ANGLE_BRACKET_EQUAL: return "'>='";
-					case ASTERISK: return "'*'";
-					case SLASH: return "'/'";
-					case PLUS: return "'+'";
-					case MINUS: return "'-'";
-					case EXCLAMATION: return "'!'";
-					case TILDE: return "'~'";
-					case COMMA: return "','";
-					case DOT: return "'.'";
-					case LEFT_CURLY_BRACE: return "'{'";
-					case LEFT_PARENTHESIS: return "'('";
-					case LEFT_SQUARE_BRACKET: return "'['";
-					case RIGHT_CURLY_BRACE: return "'}'";
-					case RIGHT_PARENTHESIS: return "')'";
-					case RIGHT_SQUARE_BRACKET: return "']'";
+					case FUNCTION_NORMALIZED: return "normalized";
+					case RESERVED_KEYWORD_COUNT: return "[RESERVED]";
+					case EQUAL: return "=";
+					case ASTERISK_EQUAL: return "*=";
+					case SLASH_EQUAL: return "/=";
+					case PLUS_EQUAL: return "+=";
+					case MINUS_EQUAL: return "-=";
+					case LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET_EQUAL: return "<<=";
+					case RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET_EQUAL: return ">>=";
+					case AMPERSAND_EQUAL: return "&=";
+					case CARET_EQUAL: return "^=";
+					case VERTICAL_BAR_EQUAL: return "|=";
+					case VERTICAL_BAR: return "|";
+					case CARET: return "^";
+					case AMPERSAND: return "&";
+					case LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET: return "<<";
+					case RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET: return ">>";
+					case EQUAL_EQUAL: return "==";
+					case EXCLAMATION_EQUAL: return "!=";
+					case LEFT_ANGLE_BRACKET: return "<";
+					case LEFT_ANGLE_BRACKET_EQUAL: return "<=";
+					case RIGHT_ANGLE_BRACKET: return ">";
+					case RIGHT_ANGLE_BRACKET_EQUAL: return ">=";
+					case ASTERISK: return "*";
+					case SLASH: return "/";
+					case PLUS: return "+";
+					case MINUS: return "-";
+					case EXCLAMATION: return "!";
+					case TILDE: return "~";
+					case COMMA: return ",";
+					case DOT: return ".";
+					case LEFT_CURLY_BRACE: return "{";
+					case LEFT_PARENTHESIS: return "(";
+					case LEFT_SQUARE_BRACKET: return "[";
+					case RIGHT_CURLY_BRACE: return "}";
+					case RIGHT_PARENTHESIS: return ")";
+					case RIGHT_SQUARE_BRACKET: return "]";
 					case END_OF_FILE: return "EOF";
 					case END_OF_LINE: return "EOL";
-					case LITERAL_FLOATING_POINT:
-					case LITERAL_INTEGER: return std::string(token.value, token.characterCount);
 					case USER_DEFINED:
-					default: return getIdentifier(token.type);
+					default: return getIdentifier(type);
 				}
 			}
 
@@ -321,6 +352,8 @@ namespace ProjectA {
 			std::vector<Token> tokens;
 			std::vector<SemanticToken> semanticTokens;
 			std::vector<Diagnostic> diagnostics;
+
+			std::vector<uint64> literals;
 			std::vector<std::string> userDefinedIdentifiers;
 
 			std::vector<Definition> openScopeDefinitions;

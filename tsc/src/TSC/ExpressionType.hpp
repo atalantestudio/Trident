@@ -8,7 +8,7 @@ namespace ProjectA {
 		BINARY,
 		GROUP,
 		MEMBER_ACCESS,
-		FUNCTION_CALL,
+		CALL,
 		TYPE,
 	};
 }

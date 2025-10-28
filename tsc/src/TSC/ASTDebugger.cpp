@@ -257,7 +257,7 @@ namespace ProjectA {
 			case ExpressionType::BINARY: writeBinaryExpression(expressionReference.byteOffset); break;
 			case ExpressionType::GROUP: writeGroupExpression(expressionReference.byteOffset); break;
 			case ExpressionType::MEMBER_ACCESS: writeMemberAccessExpression(expressionReference.byteOffset); break;
-			case ExpressionType::FUNCTION_CALL: writeFunctionCallExpression(expressionReference.byteOffset); break;
+			case ExpressionType::CALL: writeCallExpression(expressionReference.byteOffset); break;
 			case ExpressionType::TYPE: writeTypeExpression(expressionReference.byteOffset); break;
 		}
 	}
@@ -350,16 +350,19 @@ namespace ProjectA {
 		logger.property("MemberIdentifier", output->getTokenString(identifierToken));
 	}
 
-	void ASTDebugger::writeFunctionCallExpression(uint32 byteOffset) {
-		const Expression<ExpressionType::FUNCTION_CALL>& expression = output->ast.getExpression<ExpressionType::FUNCTION_CALL>(byteOffset);
+	void ASTDebugger::writeCallExpression(uint32 byteOffset) {
+		const Expression<ExpressionType::CALL>& expression = output->ast.getExpression<ExpressionType::CALL>(byteOffset);
 
-		logger.property("Type", "FunctionCallExpression");
+		logger.property("Type", "CallExpression");
 		logger.propertyObject("Callee");
 
 		writeExpression(expression.calleeExpressionReferenceIndex);
 
 		logger.closeObject();
-		logger.propertyArray("Arguments");
+		logger.property("ArgumentCount", expression.argumentCount);
+
+		// TODO: Fix reference indices being undefined.
+		/* logger.propertyArray("Arguments");
 
 		for (const uint32 expressionReferenceIndex : expression.argumentExpressionReferenceIndices) {
 			logger.openObject();
@@ -369,7 +372,7 @@ namespace ProjectA {
 			logger.closeObject();
 		}
 
-		logger.closeArray();
+		logger.closeArray(); */
 	}
 
 	void ASTDebugger::writeTypeExpression(uint32 byteOffset) {

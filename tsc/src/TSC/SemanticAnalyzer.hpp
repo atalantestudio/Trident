@@ -24,15 +24,15 @@ namespace ProjectA {
 		private:
 			void analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const;
 
-			void evaluateExpression(uint32 referenceIndex, ExpressionEvaluation& evaluation) const;
-			void evaluateLiteralExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
-			void evaluateIdentifierExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
-			void evaluateUnaryExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
-			void evaluateBinaryExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
-			void evaluateGroupExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
-			void evaluateMemberAccessExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
-			void evaluateFunctionCallExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
-			void evaluateTypeExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const;
+			void evaluateExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
+			void evaluateLiteralExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
+			void evaluateIdentifierExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
+			void evaluateUnaryExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
+			void evaluateBinaryExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
+			void evaluateGroupExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
+			void evaluateMemberAccessExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
+			void evaluateCallExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
+			void evaluateTypeExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
 
 		private:
 			CompilationOutput* output;

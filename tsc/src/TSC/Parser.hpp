@@ -48,7 +48,7 @@ namespace ProjectA {
 
 			bool parseIdentifierExpression();
 			bool parseMemberAccessExpression();
-			bool parseFunctionCallOrGroupExpression();
+			bool parseCallOrGroupExpression();
 			bool parseLiteralExpression();
 			bool parseGroupExpression();
 
@@ -56,6 +56,8 @@ namespace ProjectA {
 
 			uint32 getLastStatementIndex() const;
 			uint32 getLastExpressionReferenceIndex() const;
+
+			bool read(TokenType type) const;
 
 			Token read() const;
 			Token peek() const;

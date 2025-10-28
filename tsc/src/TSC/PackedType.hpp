@@ -42,6 +42,14 @@ namespace ProjectA {
 			return templateArgumentIndex + TokenType::TYPE_FLOAT32 - 1 > TokenType::TYPE_MAT4X4;
 		}
 
+		bool operator ==(const PackedType& other) const {
+			return typeIndex == other.typeIndex && templateArgumentIndex == other.templateArgumentIndex;
+		}
+
+		bool operator !=(const PackedType& other) const {
+			return !operator ==(other);
+		}
+
 		BaseType typeIndex = BaseType::OTHER;
 		BaseType templateArgumentIndex = BaseType::OTHER;
 	};

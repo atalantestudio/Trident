@@ -31,7 +31,7 @@ namespace ProjectA {
 		if (!isPascalCase(output->getIdentifier(identifierToken.type))) {
 			generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE>(*output, identifierToken);
 
-			return;
+			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
 		}
 
 		uint32 size = 0;
@@ -102,6 +102,8 @@ namespace ProjectA {
 
 		if (!isCamelCaseOrSnakeCase(output->getIdentifier(identifierToken.type))) {
 			generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE>(*output, identifierToken);
+
+			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
 		}
 	}
 
@@ -111,7 +113,7 @@ namespace ProjectA {
 		if (!isScreamingSnakeCase(output->getIdentifier(identifierToken.type))) {
 			generateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE>(*output, identifierToken);
 
-			return;
+			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
 		}
 
 		output->define(statement);
@@ -120,16 +122,29 @@ namespace ProjectA {
 		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
 
 		ExpressionEvaluation evaluation{};
+		evaluation.intermediateType = typeExpression.type;
+		evaluation.casting = false;
 		evaluation.constant = true;
 		evaluation.value = 0;
 
-		evaluateExpression(statement->initializerExpressionReferenceIndex, evaluation);
+		/* TODO
+		Start the eval with type = constant type.
+		If different type found:
+		- If converting is true, OK
+		- Else, conversion error
 
-		// TODO: Also check vector/matrix/user-defined types.
-		if (typeExpression.type.typeIndex >= BaseType::FLOAT32 && typeExpression.type.typeIndex <= BaseType::UINT32) {
-			if (!(evaluation.intermediateType & BIT(typeExpression.type.typeIndex))) {
-				generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, identifierToken);
-			}
+		If constructor found:
+		- diagnostic if same type
+		- set type to constructor type
+		- set converting to true
+		*/
+
+		uint32 referenceCount = 0;
+
+		evaluateExpression(statement->initializerExpressionReferenceIndex, referenceCount, evaluation);
+
+		if (evaluation.intermediateType != typeExpression.type) {
+			generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, identifierToken);
 		}
 	}
 
@@ -138,10 +153,12 @@ namespace ProjectA {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 		const std::string& identifier = output->getIdentifier(identifierToken.type);
 
+		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::FUNCTION, 0);
+
 		if (!isCamelCaseOrSnakeCase(identifier)) {
 			generateDiagnostic<DiagnosticCode::INVALID_FUNCTION_IDENTIFIER_CASE>(*output, identifierToken);
 
-			return;
+			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
 		}
 
 		output->defineFunction(identifier, end);
@@ -165,10 +182,12 @@ namespace ProjectA {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 		const std::string& identifier = output->getIdentifier(identifierToken.type);
 
+		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::PARAMETER, 0);
+
 		if (!isCamelCaseOrSnakeCase(identifier)) {
 			generateDiagnostic<DiagnosticCode::INVALID_PARAMETER_IDENTIFIER_CASE>(*output, identifierToken);
 
-			return;
+			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
 		}
 
 		const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
@@ -184,7 +203,7 @@ namespace ProjectA {
 		if (!isCamelCaseOrSnakeCase(output->getIdentifier(identifierToken.type)) && !isScreamingSnakeCase(output->getIdentifier(identifierToken.type))) {
 			generateDiagnostic<DiagnosticCode::INVALID_VARIABLE_IDENTIFIER_CASE>(*output, identifierToken);
 
-			return;
+			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
 		}
 
 		const Definition* previousDefinition = output->getFirstDefinition(output->getIdentifier(identifierToken.type));
@@ -201,7 +220,11 @@ namespace ProjectA {
 			const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
 			const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
 
-			ExpressionEvaluation evaluation{};
+			// TODO
+			BREAKPOINT();
+
+			/* ExpressionEvaluation evaluation{};
+			evaluation.casting = false;
 			evaluation.constant = true;
 			evaluation.value = 0;
 
@@ -209,15 +232,17 @@ namespace ProjectA {
 
 			// TODO: Also check vector/matrix/user-defined types.
 			if (typeExpression.type.typeIndex >= BaseType::FLOAT32 && typeExpression.type.typeIndex <= BaseType::UINT32) {
-				if (!(evaluation.intermediateType & BIT(typeExpression.type.typeIndex))) {
+				if (evaluation.intermediateType != typeExpression.type) {
 					generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, identifierToken);
 				}
-			}
+			} */
 		}
 	}
 
 	void SemanticAnalyzer::analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) const {
 		if (expression.type.hasUserDefinedType()) {
+			output->registerSemanticToken(expression.typeTokenIndex, SemanticTokenType::STRUCTURE, 0);
+
 			const std::string& identifier = output->getIdentifier(output->tokens[expression.typeTokenIndex].type);
 			const Definition* definition = output->getFirstDefinition(identifier);
 
@@ -268,6 +293,8 @@ namespace ProjectA {
 				return;
 			}
 
+			output->registerSemanticToken(token, SemanticTokenType::FUNCTION, SemanticTokenModifier::PREDEFINED);
+
 			return;
 		}
 
@@ -284,24 +311,6 @@ namespace ProjectA {
 			return;
 		}
 	}
-
-	/* void SemanticAnalyzer::analyzeUnaryExpression(const ref<Expression<ExpressionType::UNARY>> expression) {
-		compilationOutput->registerSemanticToken(expression->operatorTokenIndex, SemanticTokenType::OPERATOR, 0);
-
-		analyzeExpression(expression->rightExpressionIndex);
-	}
-
-	void SemanticAnalyzer::analyzeBinaryExpression(const ref<Expression<ExpressionType::BINARY>> expression) {
-		analyzeExpression(expression->leftExpressionIndex);
-
-		compilationOutput->registerSemanticToken(expression->operatorTokenIndex, SemanticTokenType::OPERATOR, 0);
-
-		analyzeExpression(expression->rightExpressionIndex);
-	}
-
-	void SemanticAnalyzer::analyzeGroupExpression(const ref<Expression<ExpressionType::GROUP>> expression) {
-		analyzeExpression(expression->expressionIndex);
-	} */
 
 	void SemanticAnalyzer::analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const {
 		Annotation uniqueAnnotationFlag = static_cast<Annotation>(0);
@@ -397,56 +406,51 @@ namespace ProjectA {
 				);
 			}
 		} */
-
-		// return combinedAnnotationFlag;
 	}
 
-	void SemanticAnalyzer::evaluateExpression(uint32 referenceIndex, ExpressionEvaluation& evaluation) const {
+	void SemanticAnalyzer::evaluateExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const {
 		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
 
 		switch (expressionReference.type) {
-			case ExpressionType::LITERAL: return evaluateLiteralExpression(expressionReference, evaluation);
-			case ExpressionType::IDENTIFIER: return evaluateIdentifierExpression(expressionReference, evaluation);
-			case ExpressionType::UNARY: return evaluateUnaryExpression(expressionReference, evaluation);
-			case ExpressionType::BINARY: return evaluateBinaryExpression(expressionReference, evaluation);
-			case ExpressionType::GROUP: return evaluateGroupExpression(expressionReference, evaluation);
-			case ExpressionType::MEMBER_ACCESS: return evaluateMemberAccessExpression(expressionReference, evaluation);
-			case ExpressionType::FUNCTION_CALL: return evaluateFunctionCallExpression(expressionReference, evaluation);
-			case ExpressionType::TYPE: return evaluateTypeExpression(expressionReference, evaluation);
+			case ExpressionType::LITERAL: return evaluateLiteralExpression(referenceIndex, referenceCount, evaluation);
+			case ExpressionType::IDENTIFIER: return evaluateIdentifierExpression(referenceIndex, referenceCount, evaluation);
+			case ExpressionType::UNARY: return evaluateUnaryExpression(referenceIndex, referenceCount, evaluation);
+			case ExpressionType::BINARY: return evaluateBinaryExpression(referenceIndex, referenceCount, evaluation);
+			case ExpressionType::GROUP: return evaluateGroupExpression(referenceIndex, referenceCount, evaluation);
+			case ExpressionType::MEMBER_ACCESS: return evaluateMemberAccessExpression(referenceIndex, referenceCount, evaluation);
+			case ExpressionType::CALL: return evaluateCallExpression(referenceIndex, referenceCount, evaluation);
+			case ExpressionType::TYPE: return evaluateTypeExpression(referenceIndex, referenceCount, evaluation);
 		}
 	}
 
-	void SemanticAnalyzer::evaluateLiteralExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
-		if (!evaluation.constant) {
-			return;
-		}
-
-		const Expression<ExpressionType::LITERAL>& expression = output->ast.getExpression<ExpressionType::LITERAL>(reference.byteOffset);
+	void SemanticAnalyzer::evaluateLiteralExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const {
+		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
+		const Expression<ExpressionType::LITERAL>& expression = output->ast.getExpression<ExpressionType::LITERAL>(expressionReference.byteOffset);
 		const Token& token = output->tokens[expression.tokenIndex];
 
-		// TODO: Directly access the literal?
-		evaluation.value = std::stoull(output->getTokenString(token));
-		evaluation.intermediateType = BIT(FLOAT32) | BIT(FLOAT64);
+		evaluation.value = output->getLiteral(token.literalIndex);
 
-		if (token.type == TokenType::LITERAL_INTEGER) {
-			evaluation.intermediateType |= BIT(SINT32) | BIT(UINT32);
+		if (token.type == TokenType::LITERAL_FLOATING_POINT) {
+			if (evaluation.intermediateType.typeIndex != BaseType::FLOAT32 && evaluation.intermediateType.typeIndex != BaseType::FLOAT64) {
+				generateDiagnostic<DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT>(*output, token, evaluation.intermediateType.typeIndex, evaluation.intermediateType.templateArgumentIndex);
+
+				// TODO: Stop evaluating the expression.
+				return;
+			}
 		}
+
+		referenceCount += 1;
 	}
 
-	void SemanticAnalyzer::evaluateIdentifierExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
-		if (!evaluation.constant) {
-			return;
-		}
-
+	void SemanticAnalyzer::evaluateIdentifierExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const {
 		// TODO
+
+		referenceCount += 1;
 	}
 
-	void SemanticAnalyzer::evaluateUnaryExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
-		if (!evaluation.constant) {
-			return;
-		}
-
-		const Expression<ExpressionType::UNARY>& expression = output->ast.getExpression<ExpressionType::UNARY>(reference.byteOffset);
+	void SemanticAnalyzer::evaluateUnaryExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const {
+		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
+		const Expression<ExpressionType::UNARY>& expression = output->ast.getExpression<ExpressionType::UNARY>(expressionReference.byteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
 		switch (operatorToken.type) {
@@ -473,23 +477,22 @@ namespace ProjectA {
 			}
 		}
 
-		evaluateExpression(expression.rightExpressionReferenceIndex, evaluation);
+		evaluateExpression(expression.rightExpressionReferenceIndex, referenceCount, evaluation);
+
+		referenceCount += 1;
 	}
 
-	void SemanticAnalyzer::evaluateBinaryExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
-		if (!evaluation.constant) {
-			return;
-		}
-
-		const Expression<ExpressionType::BINARY>& expression = output->ast.getExpression<ExpressionType::BINARY>(reference.byteOffset);
+	void SemanticAnalyzer::evaluateBinaryExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const {
+		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
+		const Expression<ExpressionType::BINARY>& expression = output->ast.getExpression<ExpressionType::BINARY>(expressionReference.byteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
 		ExpressionEvaluation rightEvaluation{};
 		rightEvaluation.constant = true;
 		rightEvaluation.value = 0;
 
-		evaluateExpression(expression.leftExpressionReferenceIndex, evaluation);
-		evaluateExpression(expression.rightExpressionReferenceIndex, rightEvaluation);
+		evaluateExpression(expression.leftExpressionReferenceIndex, referenceCount, evaluation);
+		evaluateExpression(expression.rightExpressionReferenceIndex, referenceCount, rightEvaluation);
 
 		switch (operatorToken.type) {
 			case TokenType::EQUAL:
@@ -587,39 +590,59 @@ namespace ProjectA {
 				break;
 			}
 		}
+
+		referenceCount += 1;
 	}
 
-	void SemanticAnalyzer::evaluateGroupExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
-		if (!evaluation.constant) {
-			return;
-		}
+	void SemanticAnalyzer::evaluateGroupExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const {
+		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
+		const Expression<ExpressionType::GROUP>& expression = output->ast.getExpression<ExpressionType::GROUP>(expressionReference.byteOffset);
 
-		const Expression<ExpressionType::GROUP>& expression = output->ast.getExpression<ExpressionType::GROUP>(reference.byteOffset);
+		evaluateExpression(expression.expressionReferenceIndex, referenceCount, evaluation);
 
-		evaluateExpression(expression.expressionReferenceIndex, evaluation);
+		referenceCount += 1;
 	}
 
-	void SemanticAnalyzer::evaluateMemberAccessExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
-		if (!evaluation.constant) {
-			return;
-		}
-
+	void SemanticAnalyzer::evaluateMemberAccessExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const {
 		// TODO
+
+		referenceCount += 1;
 	}
 
-	void SemanticAnalyzer::evaluateFunctionCallExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
-		if (!evaluation.constant) {
+	void SemanticAnalyzer::evaluateCallExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const {
+		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
+		const Expression<ExpressionType::CALL>& expression = output->ast.getExpression<ExpressionType::CALL>(expressionReference.byteOffset);
+
+		evaluateExpression(expression.calleeExpressionReferenceIndex, referenceCount, evaluation);
+
+		uint32 argumentExpressionReferenceIndex = referenceIndex - 1;
+		uint32 argumentIndex = 0;
+
+		while (argumentIndex < expression.argumentCount) {
+			uint32 argumentExpressionReferenceOffset = 0;
+
+			evaluateExpression(argumentExpressionReferenceIndex, argumentExpressionReferenceOffset, evaluation);
+
+			argumentExpressionReferenceIndex -= argumentExpressionReferenceOffset;
+			argumentIndex += 1;
+		}
+	}
+
+	void SemanticAnalyzer::evaluateTypeExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const {
+		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
+		const Expression<ExpressionType::TYPE>& expression = output->ast.getExpression<ExpressionType::TYPE>(expressionReference.byteOffset);
+		const Token& typeToken = output->tokens[expression.typeTokenIndex];
+
+		if (!evaluation.casting && expression.type != evaluation.intermediateType) {
+			generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, typeToken);
+
+			// TODO: Stop evaluation.
 			return;
 		}
 
-		// TODO
-	}
+		evaluation.intermediateType = expression.type;
+		evaluation.casting = true;
 
-	void SemanticAnalyzer::evaluateTypeExpression(const ExpressionReference& reference, ExpressionEvaluation& evaluation) const {
-		if (!evaluation.constant) {
-			return;
-		}
-
-		// TODO
+		referenceCount += 1;
 	}
 }

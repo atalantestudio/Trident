@@ -17,7 +17,7 @@ namespace ProjectA {
 			TokenType type;
 			DocumentPosition start;
 			uint32 characterCount;
-			const char8* value = nullptr;
+			uint32 literalIndex;
 	};
 
 	inline std::string getOperatorTokenString(const Token& token) {
@@ -50,9 +50,10 @@ namespace ProjectA {
 			case EXCLAMATION: return "!";
 			case TILDE: return "~";
 			default: {
-				MODULE_ASSERT(false, "Invalid type.");
+				// TODO
+				BREAKPOINT();
 
-				return "???";
+				return "";
 			}
 		}
 	}

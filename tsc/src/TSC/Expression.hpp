@@ -50,9 +50,12 @@ namespace ProjectA {
 	};
 
 	template<>
-	struct Expression<ExpressionType::FUNCTION_CALL> {
+	struct Expression<ExpressionType::CALL> {
+		// NOTE: This can either reference a type expression (constructor call) or an identifier expression (function call).
 		uint32 calleeExpressionReferenceIndex;
-		std::vector<uint32> argumentExpressionReferenceIndices;
+
+		// The argument expressions are located between the callee expression and this expression.
+		uint32 argumentCount;
 	};
 
 	template<>
