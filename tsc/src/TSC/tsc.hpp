@@ -24,6 +24,12 @@ namespace ProjectA {
 		Lexer lexer;
 		lexer.tokenize(&output);
 
+		if (output.tokens.empty()) {
+			ENGINE_ERROR("No tokens generated.");
+
+			return 1;
+		}
+
 		Parser parser;
 		parser.parse(&output);
 

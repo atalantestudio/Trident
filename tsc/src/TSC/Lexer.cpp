@@ -317,7 +317,7 @@ namespace ProjectA {
 			}
 		}
 
-		// registerEndOfToken(TokenType::END_OF_LINE);
+		registerEndOfToken(TokenType::END_OF_LINE);
 	}
 
 	void Lexer::jump(sint32 characterCount) {

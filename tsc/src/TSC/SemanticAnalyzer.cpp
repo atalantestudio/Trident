@@ -7,7 +7,7 @@
 #include "Case.hpp"
 #include "Diagnostic/Error.hpp"
 #include "Diagnostic/Warning.hpp"
-#include "Language/BaseType.hpp"
+#include "Language/Type.hpp"
 #include "SemanticAnalyzer.hpp"
 
 namespace ProjectA {
@@ -27,6 +27,9 @@ namespace ProjectA {
 
 	void SemanticAnalyzer::analyzeStructureStatement(const ref<StructureStatement>& statement, DocumentPosition end) const {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+		const uint32 memberCount = static_cast<uint32>(statement->memberStatementIndices.size());
+
+		output->defineStructure(statement, end, memberCount);
 
 		if (!isPascalCase(output->getIdentifier(identifierToken.type))) {
 			generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE>(*output, identifierToken);
@@ -34,23 +37,23 @@ namespace ProjectA {
 			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
 		}
 
-		uint32 size = 0;
-		uint32 alignment = 0;
-		uint32 lastMemberOffset = 0;
-		uint32 lastMemberSize = 0;
-
 		if (statement->memberStatementIndices.empty()) {
 			generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(*output, identifierToken);
 		}
 
+		uint32 alignment = 0;
+		uint32 lastMemberOffset = 0;
+		uint32 lastMemberSize = 0;
+
 		for (const uint32 statementIndex : statement->memberStatementIndices) {
-			const ref<MemberStatement>& statement = std::static_pointer_cast<MemberStatement>(output->ast.statements[statementIndex]);
-			const ExpressionReference& expressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
+			const ref<MemberStatement>& memberStatement = std::static_pointer_cast<MemberStatement>(output->ast.statements[statementIndex]);
+			const ExpressionReference& expressionReference = output->ast.getExpressionReference(memberStatement->typeExpressionReferenceIndex);
 			const Expression<ExpressionType::TYPE>& expression = output->ast.getExpression<ExpressionType::TYPE>(expressionReference.byteOffset);
+
+			output->defineMember(memberStatement);
 
 			lastMemberOffset += lastMemberSize;
 			lastMemberSize = output->getSize(expression.type);
-			size += lastMemberSize;
 
 			#ifdef __EMSCRIPTEN__
 				alignment = alignment > output->getAlignment(expression.type) ? alignment : output->getAlignment(expression.type);
@@ -59,9 +62,9 @@ namespace ProjectA {
 			#endif
 		}
 
-		size = roundUp(alignment, lastMemberOffset + lastMemberSize);
+		const uint32 size = roundUp(alignment, lastMemberOffset + lastMemberSize);
 
-		output->defineStructure(statement, end, size, alignment);
+		output->updateStructureDefinition(size, alignment);
 
 		/* Annotation combinedAnnotationFlag = static_cast<Annotation>(0);
 
@@ -163,7 +166,7 @@ namespace ProjectA {
 			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
 		}
 
-		output->defineFunction(identifier, end);
+		output->defineFunction(identifierToken, end);
 
 		if (statementIndex == 0) {
 			generateDiagnostic<DiagnosticCode::NO_RETURN>(*output, identifierToken);
@@ -233,7 +236,7 @@ namespace ProjectA {
 			evaluateExpression(statement->initializerExpressionReferenceIndex, evaluation);
 
 			// TODO: Also check vector/matrix/user-defined types.
-			if (typeExpression.type.typeIndex >= BaseType::FLOAT32 && typeExpression.type.typeIndex <= BaseType::UINT32) {
+			if (typeExpression.type.typeIndex >= Type::FLOAT32 && typeExpression.type.typeIndex <= Type::UINT32) {
 				if (evaluation.intermediateType != typeExpression.type) {
 					generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, identifierToken);
 				}
@@ -243,8 +246,6 @@ namespace ProjectA {
 
 	void SemanticAnalyzer::analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) const {
 		if (expression.type.hasUserDefinedType()) {
-			output->registerSemanticToken(expression.typeTokenIndex, SemanticTokenType::STRUCTURE, 0);
-
 			const UserDefinedType* userDefinedType = output->getUserDefinedType(expression.type.typeIndex);
 
 			if (userDefinedType == nullptr) {
@@ -260,6 +261,8 @@ namespace ProjectA {
 
 				return;
 			}
+
+			output->registerSemanticToken(expression.typeTokenIndex, SemanticTokenType::STRUCTURE, 0);
 
 			return;
 		}
@@ -432,8 +435,8 @@ namespace ProjectA {
 		evaluation.value = output->getLiteral(token.index);
 
 		if (token.type == TokenType::LITERAL_FLOATING_POINT) {
-			if (evaluation.intermediateType.typeIndex != BaseType::FLOAT32 && evaluation.intermediateType.typeIndex != BaseType::FLOAT64) {
-				generateDiagnostic<DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT>(*output, token, evaluation.intermediateType.typeIndex, evaluation.intermediateType.templateArgumentIndex);
+			if (evaluation.intermediateType.typeIndex != Type::FLOAT32 && evaluation.intermediateType.typeIndex != Type::FLOAT64) {
+				generateDiagnostic<DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT>(*output, token, evaluation.intermediateType);
 
 				// TODO: Stop evaluating the expression.
 				return;

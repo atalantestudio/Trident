@@ -6,10 +6,16 @@
 
 namespace ProjectA {
 	struct Definition {
+		uint32 getPackedType() const {
+			return *pointer_cast<const uint32*>(&type);
+		}
+
 		uint32 getSemanticTokenTypeIndex() const {
 			return static_cast<uint32>(semanticTokenType);
 		}
 
+		DocumentPosition identifierStart;
+		DocumentPosition identifierEnd;
 		DocumentPosition end;
 		PackedType type;
 		SemanticTokenType semanticTokenType;
@@ -17,10 +23,9 @@ namespace ProjectA {
 		uint32 tokenIndex;
 		std::string identifier;
 
-		uint32 size;
-		uint32 alignment;
-
-		// TODO
-		// uint32 parentStructureIndex = static_cast<uint32>(~0);
+		// (Structure definitions only)
+		// Number of members in the structure.
+		// The N member definitions directly preceed the structure definition.
+		uint32 memberCount = 0;
 	};
 }

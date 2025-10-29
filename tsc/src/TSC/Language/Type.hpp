@@ -1,9 +1,8 @@
 #pragma once
 
 namespace ProjectA {
-	enum BaseType : uint16 {
-		// TODO
-		OTHER,
+	enum Type : uint16 {
+		NONE,
 
 		// Scalar types
 		FLOAT32,

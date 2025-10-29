@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Language/BaseType.hpp"
+#include "Language/Type.hpp"
 #include "TokenType.hpp"
 
 namespace ProjectA {
@@ -9,14 +9,19 @@ namespace ProjectA {
 			PackedType packedType;
 
 			if (type >= TokenType::TYPE_USER_DEFINED) {
-				packedType.typeIndex = static_cast<BaseType>(BaseType::USER_DEFINED + typeIndex);
+				if (typeIndex == ~0) {
+					packedType.typeIndex = static_cast<Type>(~0);
+				}
+				else {
+					packedType.typeIndex = static_cast<Type>(Type::USER_DEFINED + typeIndex);
+				}
 			}
 			else {
-				packedType.typeIndex = static_cast<BaseType>(type - TokenType::TYPE_FLOAT32 + 1);
+				packedType.typeIndex = static_cast<Type>(type - TokenType::TYPE_FLOAT32 + 1);
 			}
 
 			if (templateArgumentIndex > 0) {
-				packedType.templateArgumentIndex = static_cast<BaseType>(templateArgumentIndex - TokenType::TYPE_FLOAT32 + 1);
+				packedType.templateArgumentIndex = static_cast<Type>(templateArgumentIndex - TokenType::TYPE_FLOAT32 + 1);
 			}
 
 			return packedType;
@@ -24,17 +29,17 @@ namespace ProjectA {
 
 		PackedType() = default;
 
-		explicit PackedType(BaseType type, BaseType templateArgument) :
+		explicit PackedType(Type type, Type templateArgument) :
 			typeIndex(type),
 			templateArgumentIndex(templateArgument)
 		{}
 
 		bool hasUserDefinedType() const {
-			return typeIndex > BaseType::USER_DEFINED;
+			return typeIndex >= Type::USER_DEFINED;
 		}
 
 		bool hasUserDefinedTemplateArgument() const {
-			return templateArgumentIndex > BaseType::USER_DEFINED;
+			return templateArgumentIndex >= Type::USER_DEFINED;
 		}
 
 		bool operator ==(const PackedType& other) const {
@@ -45,7 +50,7 @@ namespace ProjectA {
 			return !operator ==(other);
 		}
 
-		BaseType typeIndex = BaseType::OTHER;
-		BaseType templateArgumentIndex = BaseType::OTHER;
+		Type typeIndex = Type::NONE;
+		Type templateArgumentIndex = Type::NONE;
 	};
 }

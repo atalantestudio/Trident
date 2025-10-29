@@ -265,11 +265,11 @@ namespace ProjectA {
 
 	template<>
 	struct generateDiagnostic<DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT> {
-		explicit generateDiagnostic(CompilationOutput& output, const Token& literalToken, BaseType type, BaseType templateArgument) {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& literalToken, PackedType type) {
 			Diagnostic diagnostic{};
 			diagnostic.start = literalToken.start;
 			diagnostic.end = literalToken.getEnd();
-			diagnostic.message = MODULE_FORMAT("Floating-point number literal requires explicit cast in order to be assigned to type [].", output.getFullTypeString(type, templateArgument));
+			diagnostic.message = MODULE_FORMAT("Floating-point number literal requires explicit cast in order to be assigned to type [].", output.getPackedTypeString(type));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT;
 

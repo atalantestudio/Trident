@@ -28,14 +28,19 @@ namespace ProjectA {
 			.property("definitions", &CompilationOutput::definitions)
 			.property("diagnostics", &CompilationOutput::diagnostics)
 			.property("scopes", &CompilationOutput::scopes)
-			.property("semanticTokens", &CompilationOutput::semanticTokens);
+			.property("semanticTokens", &CompilationOutput::semanticTokens)
+			.function("getSize", &CompilationOutput::_emscripten_getSize)
+			.function("getAlignment", &CompilationOutput::_emscripten_getAlignment)
+			.function("getPackedTypeString", &CompilationOutput::_emscripten_getPackedTypeString);
 
 		emscripten::class_<Definition>("Definition")
+			.property("identifierStart", &Definition::identifierStart)
+			.property("identifierEnd", &Definition::identifierEnd)
 			.property("end", &Definition::end)
 			.property("semanticTokenModifiers", &Definition::semanticTokenModifierFlag)
 			.property("identifier", &Definition::identifier)
-			.property("size", &Definition::size)
-			.property("alignment", &Definition::alignment)
+			.property("memberCount", &Definition::memberCount)
+			.function("getPackedType", &Definition::getPackedType)
 			.function("getSemanticTokenTypeIndex", &Definition::getSemanticTokenTypeIndex);
 
 		emscripten::class_<Diagnostic>("Diagnostic")
