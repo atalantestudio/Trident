@@ -250,6 +250,20 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::UNDEFINED_ANNOTATION> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& token) {
+			Diagnostic diagnostic{};
+			diagnostic.start = token.start;
+			diagnostic.end = token.getEnd();
+			diagnostic.message = MODULE_FORMAT("Undefined annotation \"[]\".", output.getTokenString(token));
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::UNDEFINED_ANNOTATION;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::INVALID_CONVERSION> {
 		explicit generateDiagnostic(CompilationOutput& output, const Token& token) {
 			Diagnostic diagnostic{};

@@ -1,6 +1,18 @@
 #pragma once
 
 #define AS_FLAG(T) \
+	inline constexpr bool operator ==(T a, std::underlying_type<T>::type b) { \
+		return a == static_cast<T>(b); \
+	} \
+	inline constexpr bool operator !=(T a, std::underlying_type<T>::type b) { \
+		return a != static_cast<T>(b); \
+	} \
+	inline constexpr bool operator <(T a, std::underlying_type<T>::type b) { \
+		return a < static_cast<T>(b); \
+	} \
+	inline constexpr bool operator >(T a, std::underlying_type<T>::type b) { \
+		return a > static_cast<T>(b); \
+	} \
 	inline constexpr T operator ~(T a) { \
 		return static_cast<T>(~static_cast<std::underlying_type<T>::type>(a)); \
 	} \

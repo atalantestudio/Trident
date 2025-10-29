@@ -789,20 +789,19 @@ namespace ProjectA {
 					annotationFlag |= BIT(annotationIndex);
 					annotationBlock.annotation = static_cast<Annotation>(BIT(annotationIndex));
 
+					output->registerSemanticToken(annotationBlock.identifierTokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::PREDEFINED);
+
 					break;
 				}
 			}
 
-			if (annotationBlock.annotation == static_cast<Annotation>(0)) {
-				generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, read());
-			}
-			else {
-				output->registerSemanticToken(annotationBlock.identifierTokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::PREDEFINED);
+			if (annotationBlock.annotation == 0) {
+				generateDiagnostic<DiagnosticCode::UNDEFINED_ANNOTATION>(*output, read());
 			}
 
 			jump();
 
-			if (!(ANNOTATION_TYPE_VOID & annotationBlock.annotation)) {
+			if (annotationBlock.annotation > 0 && !(ANNOTATION_TYPE_VOID & annotationBlock.annotation)) {
 				if (!read(TokenType::LITERAL_FLOATING_POINT) && !read(TokenType::LITERAL_INTEGER)) {
 					const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
