@@ -8,9 +8,9 @@ namespace ProjectA {
 		static PackedType fromTypeExpression(TokenType type, uint32 typeIndex, uint32 templateArgumentIndex) {
 			PackedType packedType;
 
-			if (type >= TokenType::TYPE_USER_DEFINED) {
+			if (type == TokenType::IDENTIFIER) {
 				if (typeIndex == ~0) {
-					packedType.typeIndex = static_cast<Type>(~0);
+					packedType.typeIndex = Type::NONE;
 				}
 				else {
 					packedType.typeIndex = static_cast<Type>(Type::USER_DEFINED + typeIndex);
@@ -29,9 +29,9 @@ namespace ProjectA {
 
 		PackedType() = default;
 
-		explicit PackedType(Type type, Type templateArgument) :
-			typeIndex(type),
-			templateArgumentIndex(templateArgument)
+		explicit PackedType(Type typeIndex, Type templateArgumentIndex) :
+			typeIndex(typeIndex),
+			templateArgumentIndex(templateArgumentIndex)
 		{}
 
 		bool hasUserDefinedType() const {

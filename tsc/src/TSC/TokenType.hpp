@@ -1,6 +1,7 @@
 #pragma once
 
 namespace ProjectA {
+	// TODO: Restore class enum.
 	enum TokenType : uint32 {
 		// Keywords
 		KEYWORD_AND,
@@ -100,9 +101,9 @@ namespace ProjectA {
 		LITERAL_FLOATING_POINT,
 		LITERAL_INTEGER,
 
-		// User-defined types (structures, structure members, variables, constants, functions)
-		// NOTE: All unique identifiers are indexed relatively to this value. For example, the third user-defined type will be TYPE_USER_DEFINED + 2.
-		TYPE_USER_DEFINED,
+		// This value represents all unique identifiers for structures/members/variables/constants/functions/parameters, as well as annotations.
+		// NOTE: All unique identifiers are indexed relatively to this value. For example, the third user-defined type will be IDENTIFIER + 2.
+		IDENTIFIER,
 	};
 
 	static constexpr uint32 FIRST_TYPE_INDEX = TYPE_FLOAT32;

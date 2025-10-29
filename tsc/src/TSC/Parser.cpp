@@ -63,7 +63,6 @@ namespace ProjectA {
 		currentAnnotationCount = 0;
 		annotationFlag = 0;
 		position = {};
-		parentStatementIndex = ~0;
 		visitedWhileCount = 0;
 
 		analyzer.setCompilationOutput(output);
@@ -83,7 +82,7 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseGlobalScopeStatement() {
-		if (read().type >= TokenType::TYPE_USER_DEFINED && peek().type == TokenType::LEFT_CURLY_BRACE) {
+		if (read().type >= TokenType::IDENTIFIER && peek().type == TokenType::LEFT_CURLY_BRACE) {
 			return parseStructureStatement();
 		}
 
@@ -109,20 +108,20 @@ namespace ProjectA {
 		output->ast.statements.emplace_back(statement);
 		output->ast.globalScopeStatementIndices.emplace_back(getLastStatementIndex());
 
-		parentStatementIndex = getLastStatementIndex();
+		const uint32 statementIndex = getLastStatementIndex();
 
 		while (!read(TokenType::RIGHT_CURLY_BRACE)) {
 			if (read(TokenType::LEFT_SQUARE_BRACKET) && !parseAnnotationBlocks()) {
 				return false;
 			}
 
-			if (!parseMemberStatement(statement)) {
+			if (!parseMemberStatement(statementIndex, statement)) {
 				synchronize();
 
 				break;
 			}
 
-			statement->memberStatementIndices.emplace_back(getLastStatementIndex());
+			statement->memberCount += 1;
 
 			EXPECT(
 				read(TokenType::RIGHT_CURLY_BRACE) || read(TokenType::END_OF_LINE),
@@ -136,12 +135,12 @@ namespace ProjectA {
 
 		CONSUME(TokenType::RIGHT_CURLY_BRACE);
 
-		analyzer.analyzeStructureStatement(statement, read().getEnd());
+		analyzer.analyzeStructureStatement(statementIndex, statement, read().getEnd());
 
 		return true;
 	}
 
-	bool Parser::parseMemberStatement(ref<StructureStatement>& structureStatement) {
+	bool Parser::parseMemberStatement(uint32 structureStatementIndex, ref<StructureStatement>& structureStatement) {
 		ref<MemberStatement> statement = createRef<MemberStatement>();
 		statement->annotationFlag = annotationFlag;
 		statement->annotationBlockIndexOffset = currentAnnotationCount;
@@ -157,12 +156,12 @@ namespace ProjectA {
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 		statement->identifierTokenIndex = tokenIndex;
 
-		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+		EXPECT(read().type >= TokenType::IDENTIFIER, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		jump();
 
 		output->ast.statements.emplace_back(statement);
-		analyzer.analyzeMemberStatement(structureStatement, statement);
+		analyzer.analyzeMemberStatement(structureStatementIndex, structureStatement, statement);
 
 		return true;
 	}
@@ -187,7 +186,7 @@ namespace ProjectA {
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 		statement->identifierTokenIndex = tokenIndex;
 
-		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+		EXPECT(read().type >= TokenType::IDENTIFIER, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		registerVariableSemanticToken(read(), false);
 
@@ -223,7 +222,7 @@ namespace ProjectA {
 		statement->returnTypeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 		statement->identifierTokenIndex = tokenIndex;
 
-		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+		EXPECT(read().type >= TokenType::IDENTIFIER, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		jump();
 		jump();
@@ -271,7 +270,7 @@ namespace ProjectA {
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 		statement->identifierTokenIndex = tokenIndex;
 
-		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+		EXPECT(read().type >= TokenType::IDENTIFIER, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		jump();
 
@@ -322,7 +321,7 @@ namespace ProjectA {
 			}
 		}
 
-		if (read().type >= TokenType::TYPE_USER_DEFINED && ((peek().type >= TokenType::EQUAL && peek().type <= TokenType::VERTICAL_BAR_EQUAL) || peek().type == TokenType::DOT)) {
+		if (read().type >= TokenType::IDENTIFIER && ((peek().type >= TokenType::EQUAL && peek().type <= TokenType::VERTICAL_BAR_EQUAL) || peek().type == TokenType::DOT)) {
 			return parseExpressionStatement();
 		}
 
@@ -459,11 +458,11 @@ namespace ProjectA {
 		statement->typeExpressionReferenceIndex = getLastExpressionReferenceIndex();
 		statement->identifierTokenIndex = tokenIndex;
 
-		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+		EXPECT(read().type >= TokenType::IDENTIFIER, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		registerVariableSemanticToken(read(), false);
 
-		statement->constant = isScreamingSnakeCase(output->getIdentifier(read().type));
+		statement->constant = isScreamingSnakeCase(output->getIdentifier(read()));
 
 		uint32 modifiers = 0;
 
@@ -499,20 +498,17 @@ namespace ProjectA {
 
 	bool Parser::parseTypeExpression() {
 		EXPECT_OLD(
-			(read().type >= FIRST_TYPE_INDEX && read().type <= LAST_TYPE_INDEX) || read().type >= TokenType::TYPE_USER_DEFINED,
+			(read().type >= FIRST_TYPE_INDEX && read().type <= LAST_TYPE_INDEX) || read().type >= TokenType::IDENTIFIER,
 			"[TYPE] Expected a language or user-defined type but got " + output->getTokenString(read()) + "."
 		);
 
 		const TokenType type = read().type;
-
-		if (type >= TokenType::TYPE_USER_DEFINED) {
-			// Update the user defined type index.
-			Token& token = output->tokens[tokenIndex];
-			token.index = output->getUserDefinedTypeIndex(token.type);
-		}
-
-		const uint32 typeIndex = read().index;
+		uint32 typeIndex = 0;
 		uint32 templateArgumentIndex = 0;
+
+		if (type == TokenType::IDENTIFIER) {
+			typeIndex = output->getUserDefinedTypeIndex(read().index);
+		}
 
 		Expression<ExpressionType::TYPE> expression{};
 		expression.typeTokenIndex = tokenIndex;
@@ -526,7 +522,7 @@ namespace ProjectA {
 			expression.templateArgumentTokenIndex = tokenIndex;
 
 			EXPECT_OLD(
-				(templateArgumentIndex >= FIRST_TYPE_INDEX && templateArgumentIndex <= LAST_TYPE_INDEX) || templateArgumentIndex >= TokenType::TYPE_USER_DEFINED,
+				(templateArgumentIndex >= FIRST_TYPE_INDEX && templateArgumentIndex <= LAST_TYPE_INDEX) || templateArgumentIndex >= TokenType::IDENTIFIER,
 				"[TYPE] Expected a valid template argument but got " + output->getTokenString(read()) + "."
 			);
 
@@ -544,7 +540,7 @@ namespace ProjectA {
 	}
 
 	bool Parser::parseAssignmentOrCompoundExpression() {
-		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+		EXPECT(read().type >= TokenType::IDENTIFIER, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 		if (!parseIdentifierExpression()) {
 			return false;
@@ -650,7 +646,7 @@ namespace ProjectA {
 			return parseCallOrGroupExpression();
 		}
 
-		if (read().type >= TokenType::TYPE_USER_DEFINED || (read().type >= FIRST_FUNCTION_INDEX && read().type <= LAST_FUNCTION_INDEX)) {
+		if (read().type >= TokenType::IDENTIFIER || (read().type >= FIRST_FUNCTION_INDEX && read().type <= LAST_FUNCTION_INDEX)) {
 			if (!parseIdentifierExpression()) {
 				return false;
 			}
@@ -698,7 +694,7 @@ namespace ProjectA {
 		expression.leftExpressionReferenceIndex = getLastExpressionReferenceIndex();
 		expression.identifierTokenIndex = tokenIndex;
 
-		EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+		EXPECT(read().type >= TokenType::IDENTIFIER, DiagnosticCode::MISSING_IDENTIFIER, read());
 		jump();
 
 		output->ast.addExpression(expression);
@@ -782,7 +778,7 @@ namespace ProjectA {
 		while (read(TokenType::LEFT_SQUARE_BRACKET)) {
 			jump();
 
-			EXPECT(read().type >= TokenType::TYPE_USER_DEFINED, DiagnosticCode::MISSING_IDENTIFIER, read());
+			EXPECT(read().type >= TokenType::IDENTIFIER, DiagnosticCode::MISSING_IDENTIFIER, read());
 
 			AnnotationBlock annotationBlock{};
 			annotationBlock.identifierTokenIndex = tokenIndex;
@@ -882,7 +878,7 @@ namespace ProjectA {
 	}
 
 	bool Parser::registerVariableSemanticToken(const Token& token, bool preferStructure) const {
-		const std::string& identifier = output->getIdentifier(token.type);
+		const std::string& identifier = output->getIdentifier(token);
 
 		// TODO: Refactor.
 		if (preferStructure) {

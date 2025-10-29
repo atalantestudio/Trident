@@ -1,8 +1,10 @@
 #pragma once
 
 namespace ProjectA {
-	enum Type : uint16 {
+	enum Type : uint32 {
 		NONE,
+
+		FUNCTION = NONE,
 
 		// Scalar types
 		FLOAT32,
@@ -26,6 +28,9 @@ namespace ProjectA {
 		MAT4X3,
 		MAT4X4,
 
+		// NOTE
+		// User-defined types are indexed relatively to this value.
+		// E.g. the 3rd user-defined type will be USER_DEFINED + 2.
 		USER_DEFINED,
 	};
 

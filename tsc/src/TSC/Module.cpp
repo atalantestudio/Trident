@@ -40,7 +40,8 @@ namespace ProjectA {
 			.property("semanticTokenModifiers", &Definition::semanticTokenModifierFlag)
 			.property("identifier", &Definition::identifier)
 			.property("memberCount", &Definition::memberCount)
-			.function("getPackedType", &Definition::getPackedType)
+			.function("getTypeIndex", &Definition::getTypeIndex)
+			.function("getTemplateArgumentIndex", &Definition::getTemplateArgumentIndex)
 			.function("getSemanticTokenTypeIndex", &Definition::getSemanticTokenTypeIndex);
 
 		emscripten::class_<Diagnostic>("Diagnostic")

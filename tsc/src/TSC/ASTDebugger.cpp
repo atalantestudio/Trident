@@ -45,14 +45,16 @@ namespace ProjectA {
 		const ref<StructureStatement> statement = std::static_pointer_cast<StructureStatement>(output->ast.statements[statementIndex]);
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		logger.property("Type", "StructureStatement");
+		logger.property("StatementType", "StructureStatement");
 		logger.property("Identifier", output->getTokenString(identifierToken));
 		logger.propertyArray("Members");
 
-		for (const uint32 statementIndex : statement->memberStatementIndices) {
+		const uint32 memberStatementOffset = statementIndex + 1;
+
+		for (uint32 memberIndex = 0; memberIndex < statement->memberCount; memberIndex += 1) {
 			logger.openObject();
 
-			writeStatement(statementIndex);
+			writeStatement(memberStatementOffset + memberIndex);
 
 			logger.closeObject();
 		}
@@ -63,12 +65,12 @@ namespace ProjectA {
 	void ASTDebugger::writeMemberStatement(uint32 statementIndex) {
 		const ref<MemberStatement> statement = std::static_pointer_cast<MemberStatement>(output->ast.statements[statementIndex]);
 
-		logger.property("Type", "MemberStatement");
+		logger.property("StatementType", "MemberStatement");
 		logger.property("AnnotationFlag", statement->annotationFlag);
 
 		writeAnnotationBlocks(statement->annotationBlockIndexOffset, statement->annotationBlockCount);
 
-		logger.propertyObject("_Type");
+		logger.propertyObject("Type");
 
 		writeExpression(statement->typeExpressionReferenceIndex);
 
@@ -83,12 +85,12 @@ namespace ProjectA {
 		const ref<ConstantStatement> statement = std::static_pointer_cast<ConstantStatement>(output->ast.statements[statementIndex]);
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		logger.property("Type", "ConstantStatement");
+		logger.property("StatementType", "ConstantStatement");
 		logger.property("AnnotationFlag", statement->annotationFlag);
 
 		writeAnnotationBlocks(statement->annotationBlockIndexOffset, statement->annotationBlockCount);
 
-		logger.propertyObject("_Type");
+		logger.propertyObject("Type");
 
 		writeExpression(statement->typeExpressionReferenceIndex);
 
@@ -105,8 +107,8 @@ namespace ProjectA {
 		const ref<VariableStatement> statement = std::static_pointer_cast<VariableStatement>(output->ast.statements[statementIndex]);
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		logger.property("Type", "VariableStatement");
-		logger.propertyObject("_Type");
+		logger.property("StatementType", "VariableStatement");
+		logger.propertyObject("Type");
 
 		writeExpression(statement->typeExpressionReferenceIndex);
 
@@ -130,8 +132,8 @@ namespace ProjectA {
 		const ref<ParameterStatement> statement = std::static_pointer_cast<ParameterStatement>(output->ast.statements[statementIndex]);
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		logger.property("Type", "ParameterStatement");
-		logger.propertyObject("_Type");
+		logger.property("StatementType", "ParameterStatement");
+		logger.propertyObject("Type");
 
 		writeExpression(statement->typeExpressionReferenceIndex);
 
@@ -143,7 +145,7 @@ namespace ProjectA {
 		const ref<FunctionStatement> statement = std::static_pointer_cast<FunctionStatement>(output->ast.statements[statementIndex]);
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		logger.property("Type", "FunctionStatement");
+		logger.property("StatementType", "FunctionStatement");
 		logger.propertyObject("ReturnType");
 
 		writeExpression(statement->returnTypeExpressionReferenceIndex);
@@ -171,7 +173,7 @@ namespace ProjectA {
 	void ASTDebugger::writeExpressionStatement(uint32 statementIndex) {
 		const ref<ExpressionStatement> statement = std::static_pointer_cast<ExpressionStatement>(output->ast.statements[statementIndex]);
 
-		logger.property("Type", "ExpressionStatement");
+		logger.property("StatementType", "ExpressionStatement");
 		logger.propertyObject("Expression");
 
 		writeExpression(statement->expressionReferenceIndex);
@@ -182,7 +184,7 @@ namespace ProjectA {
 	void ASTDebugger::writeScopeStatement(uint32 statementIndex) {
 		const ref<ScopeStatement> statement = std::static_pointer_cast<ScopeStatement>(output->ast.statements[statementIndex]);
 
-		logger.property("Type", "ScopeStatement");
+		logger.property("StatementType", "ScopeStatement");
 		logger.propertyArray("Statements");
 
 		for (const uint32 statementIndex : statement->statementIndices) {
@@ -199,7 +201,7 @@ namespace ProjectA {
 	void ASTDebugger::writeIfStatement(uint32 statementIndex) {
 		const ref<IfStatement> statement = std::static_pointer_cast<IfStatement>(output->ast.statements[statementIndex]);
 
-		logger.property("Type", "IfStatement");
+		logger.property("StatementType", "IfStatement");
 		logger.propertyObject("Condition");
 
 		writeExpression(statement->conditionExpressionReferenceIndex);
@@ -215,7 +217,7 @@ namespace ProjectA {
 	void ASTDebugger::writeWhileStatement(uint32 statementIndex) {
 		const ref<WhileStatement> statement = std::static_pointer_cast<WhileStatement>(output->ast.statements[statementIndex]);
 
-		logger.property("Type", "WhileStatement");
+		logger.property("StatementType", "WhileStatement");
 		logger.propertyObject("Condition");
 
 		writeExpression(statement->conditionExpressionReferenceIndex);
@@ -229,17 +231,17 @@ namespace ProjectA {
 	}
 
 	void ASTDebugger::writeBreakStatement() {
-		logger.property("Type", "BreakStatement");
+		logger.property("StatementType", "BreakStatement");
 	}
 
 	void ASTDebugger::writeNextStatement() {
-		logger.property("Type", "NextStatement");
+		logger.property("StatementType", "NextStatement");
 	}
 
 	void ASTDebugger::writeReturnStatement(uint32 statementIndex) {
 		const ref<ReturnStatement> statement = std::static_pointer_cast<ReturnStatement>(output->ast.statements[statementIndex]);
 
-		logger.property("Type", "ReturnStatement");
+		logger.property("StatementType", "ReturnStatement");
 		logger.propertyObject("Expression");
 
 		writeExpression(statement->expressionReferenceIndex);
@@ -266,18 +268,18 @@ namespace ProjectA {
 		const Expression<ExpressionType::LITERAL>& expression = output->ast.getExpression<ExpressionType::LITERAL>(byteOffset);
 		const Token& token = output->tokens[expression.tokenIndex];
 
-		logger.property("Type", "LiteralExpression");
+		logger.property("ExpressionType", "LiteralExpression");
 
 		switch (token.type) {
 			case TokenType::LITERAL_FLOATING_POINT: {
 				logger.property("LiteralType", "FloatingPoint");
-				logger.property("Literal", std::stold(output->getTokenString(token)));
+				logger.propertyNonString("Literal", std::stold(output->getTokenString(token)));
 
 				break;
 			}
 			case TokenType::LITERAL_INTEGER: {
 				logger.property("LiteralType", "Integer");
-				logger.property("Literal", std::stoull(output->getTokenString(token)));
+				logger.propertyNonString("Literal", std::stoull(output->getTokenString(token)));
 
 				break;
 			}
@@ -291,7 +293,7 @@ namespace ProjectA {
 		const Expression<ExpressionType::IDENTIFIER>& expression = output->ast.getExpression<ExpressionType::IDENTIFIER>(byteOffset);
 		const Token& token = output->tokens[expression.tokenIndex];
 
-		logger.property("Type", "IdentifierExpression");
+		logger.property("ExpressionType", "IdentifierExpression");
 		logger.property("Identifier", output->getTokenString(token));
 	}
 
@@ -299,7 +301,7 @@ namespace ProjectA {
 		const Expression<ExpressionType::UNARY>& expression = output->ast.getExpression<ExpressionType::UNARY>(byteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
-		logger.property("Type", "UnaryExpression");
+		logger.property("ExpressionType", "UnaryExpression");
 		logger.property("Operator", output->getTokenString(operatorToken));
 		logger.propertyObject("Right");
 
@@ -312,7 +314,7 @@ namespace ProjectA {
 		const Expression<ExpressionType::BINARY>& expression = output->ast.getExpression<ExpressionType::BINARY>(byteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
-		logger.property("Type", "BinaryExpression");
+		logger.property("ExpressionType", "BinaryExpression");
 		logger.propertyObject("Left");
 
 		writeExpression(expression.leftExpressionReferenceIndex);
@@ -329,7 +331,7 @@ namespace ProjectA {
 	void ASTDebugger::writeGroupExpression(uint32 byteOffset) {
 		const Expression<ExpressionType::GROUP>& expression = output->ast.getExpression<ExpressionType::GROUP>(byteOffset);
 
-		logger.property("Type", "GroupExpression");
+		logger.property("ExpressionType", "GroupExpression");
 		logger.propertyObject("Expression");
 
 		writeExpression(expression.expressionReferenceIndex);
@@ -341,7 +343,7 @@ namespace ProjectA {
 		const Expression<ExpressionType::MEMBER_ACCESS>& expression = output->ast.getExpression<ExpressionType::MEMBER_ACCESS>(byteOffset);
 		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
 
-		logger.property("Type", "MemberAccessExpression");
+		logger.property("ExpressionType", "MemberAccessExpression");
 		logger.propertyObject("Left");
 
 		writeExpression(expression.leftExpressionReferenceIndex);
@@ -353,7 +355,7 @@ namespace ProjectA {
 	void ASTDebugger::writeCallExpression(uint32 byteOffset) {
 		const Expression<ExpressionType::CALL>& expression = output->ast.getExpression<ExpressionType::CALL>(byteOffset);
 
-		logger.property("Type", "CallExpression");
+		logger.property("ExpressionType", "CallExpression");
 		logger.propertyObject("Callee");
 
 		writeExpression(expression.calleeExpressionReferenceIndex);
@@ -379,18 +381,9 @@ namespace ProjectA {
 		const Expression<ExpressionType::TYPE>& expression = output->ast.getExpression<ExpressionType::TYPE>(byteOffset);
 		const Token& typeToken = output->tokens[expression.typeTokenIndex];
 
-		logger.property("Type", "TypeExpression");
-		logger.property("_Type", output->getTokenString(typeToken));
-
-		std::string templateArgument = "null";
-
-		if (expression.templateArgumentTokenIndex != UNDEFINED_TOKEN) {
-			const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
-
-			templateArgument = output->getTokenString(templateArgumentToken);
-		}
-
-		logger.property("TemplateArgument", templateArgument);
+		logger.property("ExpressionType", "TypeExpression");
+		logger.propertyNonString("TypeIndex", expression.type.typeIndex);
+		logger.propertyNonString("TemplateArgumentIndex", expression.type.templateArgumentIndex);
 	}
 
 	void ASTDebugger::writeAnnotationBlocks(uint32 indexOffset, uint32 count) {

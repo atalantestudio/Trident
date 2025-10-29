@@ -45,8 +45,10 @@ namespace ProjectA {
 
 		indent();
 
-		for (const uint32 statementIndex : statement->memberStatementIndices) {
-			writeStatement(stream, statementIndex);
+		const uint32 memberStatementOffset = statementIndex + 1;
+
+		for (uint32 memberIndex = 0; memberIndex < statement->memberCount; memberIndex += 1) {
+			writeStatement(stream, memberStatementOffset + memberIndex);
 		}
 
 		unindent();
@@ -263,7 +265,7 @@ namespace ProjectA {
 		const Expression<ExpressionType::UNARY>& expression = output->ast.getExpression<ExpressionType::UNARY>(expressionReference.byteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
-		stream << getOperatorTokenString(operatorToken);
+		stream << output->getNonIdentifierTokenString(operatorToken.type);
 
 		writeExpression(stream, expression.rightExpressionReferenceIndex, referenceCount);
 
@@ -277,7 +279,7 @@ namespace ProjectA {
 
 		writeExpression(stream, expression.leftExpressionReferenceIndex, referenceCount);
 
-		stream << " " << getOperatorTokenString(operatorToken) << " ";
+		stream << " " << output->getNonIdentifierTokenString(operatorToken.type) << " ";
 
 		writeExpression(stream, expression.rightExpressionReferenceIndex, referenceCount);
 

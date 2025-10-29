@@ -89,7 +89,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = unexpectedToken.start;
 			diagnostic.end = unexpectedToken.getEnd();
-			diagnostic.message = MODULE_FORMAT("Expected '[]'.", output.getTokenString(expectedType));
+			diagnostic.message = MODULE_FORMAT("Expected '[]'.", output.getNonIdentifierTokenString(expectedType));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::UNEXPECTED_TOKEN;
 
@@ -199,7 +199,7 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = typeToken.start;
 			diagnostic.end = typeToken.getEnd();
-			diagnostic.message = MODULE_FORMAT("Undefined type \"[]\".", output.getTokenString(typeToken));
+			diagnostic.message = MODULE_FORMAT("Undefined or incomplete type \"[]\".", output.getTokenString(typeToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::UNDEFINED_TYPE;
 

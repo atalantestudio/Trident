@@ -468,7 +468,7 @@ namespace ProjectA {
 
 		const std::string identifier(&output->text[characterIndex - token.characterCount], token.characterCount);
 
-		token.type = static_cast<TokenType>(getIdentifierTokenTypeIndex(identifier));
+		setTokenTypeAndIndex(token, identifier);
 
 		output->tokens.emplace_back(token);
 
@@ -477,32 +477,38 @@ namespace ProjectA {
 		}
 	}
 
-	uint32 Lexer::getIdentifierTokenTypeIndex(const std::string& identifier) const {
+	void Lexer::setTokenTypeAndIndex(Token& token, const std::string& identifier) const {
 		uint32 identifierIndex = 0;
 
 		// Test against reserved keywords.
 		while (identifierIndex < RESERVED_KEYWORD_COUNT) {
 			if (identifier == RESERVED_KEYWORDS[identifierIndex]) {
-				return identifierIndex;
+				token.type = static_cast<TokenType>(identifierIndex);
+
+				return;
 			}
 
 			identifierIndex += 1;
 		}
+
+		token.type = TokenType::IDENTIFIER;
 
 		identifierIndex = 0;
 
 		// Test against user-defined identifiers.
-		while (identifierIndex < output->userDefinedIdentifiers.size()) {
-			if (identifier == output->userDefinedIdentifiers[identifierIndex]) {
-				return TokenType::TYPE_USER_DEFINED + identifierIndex;
+		while (identifierIndex < output->identifiers.size()) {
+			if (identifier == output->identifiers[identifierIndex]) {
+				token.index = identifierIndex;
+
+				return;
 			}
 
 			identifierIndex += 1;
 		}
 
-		output->userDefinedIdentifiers.emplace_back(identifier);
+		token.index = static_cast<uint32>(identifierIndex);
 
-		return TokenType::TYPE_USER_DEFINED + identifierIndex;
+		output->identifiers.emplace_back(identifier);
 	}
 
 	void Lexer::registerToken(TokenType type, uint32 characterCount) {

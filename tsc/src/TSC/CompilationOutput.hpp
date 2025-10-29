@@ -19,8 +19,16 @@ namespace ProjectA {
 				// registerDefaultDefinitions();
 			}
 
-			uint32 _emscripten_getSize(uint32 type) const {
-				return getSize(*pointer_cast<const PackedType*>(&type));
+			uint32 _emscripten_getSize(uint32 typeIndex, uint32 templateArgumentIndex) const {
+				return getSize(PackedType(static_cast<Type>(typeIndex), static_cast<Type>(templateArgumentIndex)));
+			}
+
+			uint32 _emscripten_getAlignment(uint32 typeIndex, uint32 templateArgumentIndex) const {
+				return getAlignment(PackedType(static_cast<Type>(typeIndex), static_cast<Type>(templateArgumentIndex)));
+			}
+
+			std::string _emscripten_getPackedTypeString(uint32 typeIndex, uint32 templateArgumentIndex) const {
+				return getPackedTypeString(PackedType(static_cast<Type>(typeIndex), static_cast<Type>(templateArgumentIndex)));
 			}
 
 			uint32 getSize(PackedType type) const {
@@ -45,10 +53,6 @@ namespace ProjectA {
 				return TYPE_COMPONENT_COUNTS[type.typeIndex] * TYPE_ALIGNMENTS[index];
 			}
 
-			uint32 _emscripten_getAlignment(uint32 type) const {
-				return getAlignment(*pointer_cast<const PackedType*>(&type));
-			}
-
 			uint32 getAlignment(PackedType type) const {
 				DEBUG_ASSERT(!type.hasUserDefinedTemplateArgument());
 
@@ -69,8 +73,8 @@ namespace ProjectA {
 				return TYPE_ALIGNMENTS[type.typeIndex];
 			}
 
-			const UserDefinedType* getUserDefinedType(uint16 typeIndex) const {
-				const uint16 index = typeIndex - Type::USER_DEFINED;
+			const UserDefinedType* getUserDefinedType(Type typeIndex) const {
+				const uint32 index = typeIndex - Type::USER_DEFINED;
 
 				if (index >= userDefinedTypes.size()) {
 					return nullptr;
@@ -79,9 +83,9 @@ namespace ProjectA {
 				return &userDefinedTypes[index];
 			}
 
-			uint32 getUserDefinedTypeIndex(TokenType type) const {
+			uint32 getUserDefinedTypeIndex(uint32 identifierIndex) const {
 				for (uint32 userDefinedTypeIndex = 0; userDefinedTypeIndex < userDefinedTypes.size(); userDefinedTypeIndex += 1) {
-					if (userDefinedTypes[userDefinedTypeIndex].identifierIndex == type - TokenType::TYPE_USER_DEFINED) {
+					if (userDefinedTypes[userDefinedTypeIndex].identifierIndex == identifierIndex) {
 						return userDefinedTypeIndex;
 					}
 				}
@@ -89,21 +93,21 @@ namespace ProjectA {
 				return ~0;
 			}
 
-			const std::string& getIdentifier(uint32 typeIndex) const {
-				DEBUG_ASSERT(typeIndex >= TokenType::TYPE_USER_DEFINED);
-				DEBUG_ASSERT(typeIndex - TokenType::TYPE_USER_DEFINED < userDefinedIdentifiers.size());
+			std::string getIdentifier(const Token& token) const {
+				if (token.type >= FIRST_FUNCTION_INDEX && token.type <= LAST_FUNCTION_INDEX) {
+					return RESERVED_KEYWORDS[token.type - FIRST_FUNCTION_INDEX];
+				}
 
-				return userDefinedIdentifiers[typeIndex - TokenType::TYPE_USER_DEFINED];
+				DEBUG_ASSERT(token.type == TokenType::IDENTIFIER);
+				DEBUG_ASSERT(token.index < identifiers.size());
+
+				return identifiers[token.index];
 			}
 
 			uint64 getLiteral(uint32 index) const {
 				DEBUG_ASSERT(index < literals.size());
 
 				return literals[index];
-			}
-
-			std::string _emscripten_getPackedTypeString(uint32 packedType) const {
-				return getPackedTypeString(*pointer_cast<const PackedType*>(&packedType));
 			}
 
 			std::string getPackedTypeString(PackedType packedType) const {
@@ -128,8 +132,9 @@ namespace ProjectA {
 				const UserDefinedType* userDefinedType = getUserDefinedType(packedType);
 
 				DEBUG_ASSERT(userDefinedType != nullptr);
+				DEBUG_ASSERT(userDefinedType->identifierIndex < identifiers.size());
 
-				return getIdentifier(userDefinedType->identifierIndex);
+				return identifiers[userDefinedType->identifierIndex];
 			}
 
 			void registerToken(TokenType type, DocumentPosition start, uint32 characterCount) {
@@ -234,16 +239,14 @@ namespace ProjectA {
 				definition.semanticTokenType = semanticTokenType;
 				definition.semanticTokenModifierFlag = semanticTokenModifierFlag;
 				definition.tokenIndex = identifierTokenIndex;
-				definition.identifier = getIdentifier(identifierToken.type);
+				definition.identifier = getIdentifier(identifierToken);
 
 				openScopeDefinitions.emplace_back(definition);
 			}
 
 			void defineStructure(const ref<StructureStatement>& statement, DocumentPosition end, uint32 memberCount) {
-				Token& identifierToken = tokens[statement->identifierTokenIndex];
-				identifierToken.index = static_cast<uint32>(userDefinedTypes.size());
-
-				const PackedType type = PackedType::fromTypeExpression(TokenType::TYPE_USER_DEFINED, identifierToken.index, 0);
+				const Token& identifierToken = tokens[statement->identifierTokenIndex];
+				const PackedType type = PackedType::fromTypeExpression(TokenType::IDENTIFIER, identifierToken.index, 0);
 
 				Definition definition{};
 				definition.identifierStart = identifierToken.start;
@@ -253,14 +256,14 @@ namespace ProjectA {
 				definition.semanticTokenType = SemanticTokenType::STRUCTURE;
 				definition.semanticTokenModifierFlag = 0;
 				definition.tokenIndex = statement->identifierTokenIndex;
-				definition.identifier = getIdentifier(identifierToken.type);
+				definition.identifier = getIdentifier(identifierToken);
 
 				openScopeDefinitions.emplace_back(definition);
 
 				lastUserDefinedTypeIndex = static_cast<uint32>(userDefinedTypes.size());
 
 				UserDefinedType userDefinedType{};
-				userDefinedType.identifierIndex = identifierToken.type - TokenType::TYPE_USER_DEFINED;
+				userDefinedType.identifierIndex = identifierToken.type - TokenType::IDENTIFIER;
 
 				userDefinedTypes.emplace_back(userDefinedType);
 			}
@@ -286,7 +289,7 @@ namespace ProjectA {
 				definition.semanticTokenType = SemanticTokenType::MEMBER;
 				definition.semanticTokenModifierFlag = 0;
 				definition.tokenIndex = statement->identifierTokenIndex;
-				definition.identifier = getIdentifier(identifierToken.type);
+				definition.identifier = getIdentifier(identifierToken);
 
 				openScopeDefinitions.emplace_back(definition);
 			}
@@ -335,7 +338,7 @@ namespace ProjectA {
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
 				definition.semanticTokenModifierFlag = 0;
 				definition.tokenIndex = ~0;
-				definition.identifier = getIdentifier(identifierToken.type);
+				definition.identifier = getIdentifier(identifierToken);
 
 				openScopeDefinitions.emplace_back(definition);
 			}
@@ -345,75 +348,84 @@ namespace ProjectA {
 					return std::to_string(getLiteral(token.index));
 				}
 
-				return getTokenString(token.type);
+				if (token.type == TokenType::IDENTIFIER) {
+					DEBUG_ASSERT(token.index < identifiers.size());
+
+					return identifiers[token.index];
+				}
+
+				return getNonIdentifierTokenString(token.type);
 			}
 
-			std::string getTokenString(TokenType type) const {
+			std::string getNonIdentifierTokenString(TokenType type) const {
 				switch (type) {
-					case KEYWORD_AND: return "AND";
-					case KEYWORD_BREAK: return "BREAK";
-					case KEYWORD_IF: return "IF";
-					case KEYWORD_NEXT: return "NEXT";
-					case KEYWORD_OR: return "OR";
-					case KEYWORD_RETURN: return "RETURN";
-					case KEYWORD_WHILE: return "WHILE";
-					case KEYWORD_XOR: return "XOR";
-					case TYPE_FLOAT32: return "float32";
-					case TYPE_FLOAT64: return "float64";
-					case TYPE_SINT32: return "sint32";
-					case TYPE_UINT32: return "uint32";
-					case TYPE_VEC2: return "vec2";
-					case TYPE_VEC3: return "vec3";
-					case TYPE_VEC4: return "vec4";
-					case TYPE_MAT2X2: return "mat2x2";
-					case TYPE_MAT2X3: return "mat2x3";
-					case TYPE_MAT2X4: return "mat2x4";
-					case TYPE_MAT3X2: return "mat3x2";
-					case TYPE_MAT3X3: return "mat3x3";
-					case TYPE_MAT3X4: return "mat3x4";
-					case TYPE_MAT4X2: return "mat4x2";
-					case TYPE_MAT4X3: return "mat4x3";
-					case TYPE_MAT4X4: return "mat4x4";
-					case FUNCTION_NORMALIZED: return "normalized";
-					case RESERVED_KEYWORD_COUNT: return "[RESERVED]";
-					case EQUAL: return "=";
-					case ASTERISK_EQUAL: return "*=";
-					case SLASH_EQUAL: return "/=";
-					case PLUS_EQUAL: return "+=";
-					case MINUS_EQUAL: return "-=";
-					case LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET_EQUAL: return "<<=";
-					case RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET_EQUAL: return ">>=";
-					case AMPERSAND_EQUAL: return "&=";
-					case CARET_EQUAL: return "^=";
-					case VERTICAL_BAR_EQUAL: return "|=";
-					case VERTICAL_BAR: return "|";
-					case CARET: return "^";
-					case AMPERSAND: return "&";
-					case LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET: return "<<";
-					case RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET: return ">>";
-					case EQUAL_EQUAL: return "==";
-					case EXCLAMATION_EQUAL: return "!=";
-					case LEFT_ANGLE_BRACKET: return "<";
-					case LEFT_ANGLE_BRACKET_EQUAL: return "<=";
-					case RIGHT_ANGLE_BRACKET: return ">";
-					case RIGHT_ANGLE_BRACKET_EQUAL: return ">=";
-					case ASTERISK: return "*";
-					case SLASH: return "/";
-					case PLUS: return "+";
-					case MINUS: return "-";
-					case EXCLAMATION: return "!";
-					case TILDE: return "~";
-					case COMMA: return ",";
-					case DOT: return ".";
-					case LEFT_CURLY_BRACE: return "{";
-					case LEFT_PARENTHESIS: return "(";
-					case LEFT_SQUARE_BRACKET: return "[";
-					case RIGHT_CURLY_BRACE: return "}";
-					case RIGHT_PARENTHESIS: return ")";
-					case RIGHT_SQUARE_BRACKET: return "]";
-					case END_OF_LINE: return "EOL";
-					case TYPE_USER_DEFINED:
-					default: return getIdentifier(type);
+					case TokenType::KEYWORD_AND: return "AND";
+					case TokenType::KEYWORD_BREAK: return "BREAK";
+					case TokenType::KEYWORD_IF: return "IF";
+					case TokenType::KEYWORD_NEXT: return "NEXT";
+					case TokenType::KEYWORD_OR: return "OR";
+					case TokenType::KEYWORD_RETURN: return "RETURN";
+					case TokenType::KEYWORD_WHILE: return "WHILE";
+					case TokenType::KEYWORD_XOR: return "XOR";
+					case TokenType::TYPE_FLOAT32: return "float32";
+					case TokenType::TYPE_FLOAT64: return "float64";
+					case TokenType::TYPE_SINT32: return "sint32";
+					case TokenType::TYPE_UINT32: return "uint32";
+					case TokenType::TYPE_VEC2: return "vec2";
+					case TokenType::TYPE_VEC3: return "vec3";
+					case TokenType::TYPE_VEC4: return "vec4";
+					case TokenType::TYPE_MAT2X2: return "mat2x2";
+					case TokenType::TYPE_MAT2X3: return "mat2x3";
+					case TokenType::TYPE_MAT2X4: return "mat2x4";
+					case TokenType::TYPE_MAT3X2: return "mat3x2";
+					case TokenType::TYPE_MAT3X3: return "mat3x3";
+					case TokenType::TYPE_MAT3X4: return "mat3x4";
+					case TokenType::TYPE_MAT4X2: return "mat4x2";
+					case TokenType::TYPE_MAT4X3: return "mat4x3";
+					case TokenType::TYPE_MAT4X4: return "mat4x4";
+					case TokenType::FUNCTION_NORMALIZED: return "normalized";
+					case TokenType::RESERVED_KEYWORD_COUNT: return "[RESERVED]";
+					case TokenType::EQUAL: return "=";
+					case TokenType::ASTERISK_EQUAL: return "*=";
+					case TokenType::SLASH_EQUAL: return "/=";
+					case TokenType::PLUS_EQUAL: return "+=";
+					case TokenType::MINUS_EQUAL: return "-=";
+					case TokenType::LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET_EQUAL: return "<<=";
+					case TokenType::RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET_EQUAL: return ">>=";
+					case TokenType::AMPERSAND_EQUAL: return "&=";
+					case TokenType::CARET_EQUAL: return "^=";
+					case TokenType::VERTICAL_BAR_EQUAL: return "|=";
+					case TokenType::VERTICAL_BAR: return "|";
+					case TokenType::CARET: return "^";
+					case TokenType::AMPERSAND: return "&";
+					case TokenType::LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET: return "<<";
+					case TokenType::RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET: return ">>";
+					case TokenType::EQUAL_EQUAL: return "==";
+					case TokenType::EXCLAMATION_EQUAL: return "!=";
+					case TokenType::LEFT_ANGLE_BRACKET: return "<";
+					case TokenType::LEFT_ANGLE_BRACKET_EQUAL: return "<=";
+					case TokenType::RIGHT_ANGLE_BRACKET: return ">";
+					case TokenType::RIGHT_ANGLE_BRACKET_EQUAL: return ">=";
+					case TokenType::ASTERISK: return "*";
+					case TokenType::SLASH: return "/";
+					case TokenType::PLUS: return "+";
+					case TokenType::MINUS: return "-";
+					case TokenType::EXCLAMATION: return "!";
+					case TokenType::TILDE: return "~";
+					case TokenType::COMMA: return ",";
+					case TokenType::DOT: return ".";
+					case TokenType::LEFT_CURLY_BRACE: return "{";
+					case TokenType::LEFT_PARENTHESIS: return "(";
+					case TokenType::LEFT_SQUARE_BRACKET: return "[";
+					case TokenType::RIGHT_CURLY_BRACE: return "}";
+					case TokenType::RIGHT_PARENTHESIS: return ")";
+					case TokenType::RIGHT_SQUARE_BRACKET: return "]";
+					case TokenType::END_OF_LINE: return "EOL";
+					default: {
+						DEBUG_ASSERT(false);
+
+						return "";
+					}
 				}
 			}
 
@@ -439,7 +451,7 @@ namespace ProjectA {
 			std::vector<Diagnostic> diagnostics;
 
 			std::vector<uint64> literals;
-			std::vector<std::string> userDefinedIdentifiers;
+			std::vector<std::string> identifiers;
 
 			std::vector<Definition> openScopeDefinitions;
 			uint32 nextScopeDefinitionCount = 0;

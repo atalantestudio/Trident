@@ -27,7 +27,7 @@ namespace ProjectA {
 
 	struct StructureStatement : public BaseStatement<StatementType::STRUCTURE> {
 		uint32 identifierTokenIndex;
-		std::vector<uint32> memberStatementIndices;
+		uint32 memberCount;
 	};
 
 	struct MemberStatement : public BaseStatement<StatementType::MEMBER> {

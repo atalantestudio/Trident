@@ -21,7 +21,7 @@ while (characterIndex < characters.size()) {
 			jump(1);
 
 			if (testLetter(read())) {
-				token.type = TokenType::TYPE_USER_DEFINED;
+				token.type = TokenType::IDENTIFIER;
 
 				break;
 			}
@@ -41,7 +41,7 @@ while (characterIndex < characters.size()) {
 			}
 		}
 
-		if (token.type == TokenType::TYPE_USER_DEFINED) {
+		if (token.type == TokenType::IDENTIFIER) {
 			readIdentifier(token);
 		}
 		else {

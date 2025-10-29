@@ -13,7 +13,7 @@ namespace ProjectA {
 		private:
 			bool parseGlobalScopeStatement();
 			bool parseStructureStatement();
-			bool parseMemberStatement(ref<StructureStatement>& structureStatement);
+			bool parseMemberStatement(uint32 structureStatementIndex, ref<StructureStatement>& structureStatement);
 			bool parseConstantOrFunctionStatement();
 			bool parseFunctionStatement();
 			bool parseParameterStatement();
@@ -76,8 +76,6 @@ namespace ProjectA {
 			uint32 currentAnnotationCount;
 			uint8 annotationFlag;
 			DocumentPosition position;
-
-			uint32 parentStatementIndex;
 			uint32 visitedWhileCount;
 
 			SemanticAnalyzer analyzer;

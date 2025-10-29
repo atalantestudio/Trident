@@ -6,8 +6,12 @@
 
 namespace ProjectA {
 	struct Definition {
-		uint32 getPackedType() const {
-			return *pointer_cast<const uint32*>(&type);
+		uint32 getTypeIndex() const {
+			return type.typeIndex;
+		}
+
+		uint32 getTemplateArgumentIndex() const {
+			return type.templateArgumentIndex;
 		}
 
 		uint32 getSemanticTokenTypeIndex() const {
@@ -25,7 +29,7 @@ namespace ProjectA {
 
 		// (Structure definitions only)
 		// Number of members in the structure.
-		// The N member definitions directly preceed the structure definition.
-		uint32 memberCount = 0;
+		// The N member definitions directly follow the structure definition.
+		uint32 memberCount;
 	};
 }

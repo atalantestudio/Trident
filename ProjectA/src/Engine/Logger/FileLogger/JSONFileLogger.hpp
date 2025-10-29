@@ -65,8 +65,14 @@ namespace ProjectA {
 			void property(std::string_view name, Argument&& valueArgument) {
 				propertyStart();
 
-				// TODO: Remove " if the value is not meant to be a string.
 				writeLine(Logger::format("\"[]\": \"[]\"", name, std::forward<Argument>(valueArgument)));
+			}
+
+			template<typename Argument>
+			void propertyNonString(std::string_view name, Argument&& valueArgument) {
+				propertyStart();
+
+				writeLine(Logger::format("\"[]\": []", name, std::forward<Argument>(valueArgument)));
 			}
 
 			template<typename... Argument>
@@ -135,6 +141,16 @@ namespace ProjectA {
 
 			void writeLine(const std::string& value) {
 				stream << std::setw(currentScopeIndex * tabSize + value.size()) << value;
+			}
+
+			bool isDigitOnly(const std::string& value) {
+				for (const char8 character : value) {
+					if (character < '0' || character > '9') {
+						return false;
+					}
+				}
+
+				return true;
 			}
 
 		private:

@@ -25,28 +25,28 @@ namespace ProjectA {
 		this->output = compilationOutput;
 	}
 
-	void SemanticAnalyzer::analyzeStructureStatement(const ref<StructureStatement>& statement, DocumentPosition end) const {
+	void SemanticAnalyzer::analyzeStructureStatement(uint32 statementIndex, const ref<StructureStatement>& statement, DocumentPosition end) const {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
-		const uint32 memberCount = static_cast<uint32>(statement->memberStatementIndices.size());
 
-		output->defineStructure(statement, end, memberCount);
+		output->defineStructure(statement, end, statement->memberCount);
 
-		if (!isPascalCase(output->getIdentifier(identifierToken.type))) {
+		if (!isPascalCase(output->getIdentifier(identifierToken))) {
 			generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE>(*output, identifierToken);
 
 			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
 		}
 
-		if (statement->memberStatementIndices.empty()) {
+		if (statement->memberCount == 0) {
 			generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(*output, identifierToken);
 		}
 
+		const uint32 memberStatementOffset = statementIndex + 1;
 		uint32 alignment = 0;
 		uint32 lastMemberOffset = 0;
 		uint32 lastMemberSize = 0;
 
-		for (const uint32 statementIndex : statement->memberStatementIndices) {
-			const ref<MemberStatement>& memberStatement = std::static_pointer_cast<MemberStatement>(output->ast.statements[statementIndex]);
+		for (uint32 memberIndex = 0; memberIndex < statement->memberCount; memberIndex += 1) {
+			const ref<MemberStatement>& memberStatement = std::static_pointer_cast<MemberStatement>(output->ast.statements[memberStatementOffset + memberIndex]);
 			const ExpressionReference& expressionReference = output->ast.getExpressionReference(memberStatement->typeExpressionReferenceIndex);
 			const Expression<ExpressionType::TYPE>& expression = output->ast.getExpression<ExpressionType::TYPE>(expressionReference.byteOffset);
 
@@ -86,16 +86,17 @@ namespace ProjectA {
 		} */
 	}
 
-	void SemanticAnalyzer::analyzeMemberStatement(const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& statement) const {
+	void SemanticAnalyzer::analyzeMemberStatement(uint32 structureStatementIndex, const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& statement) const {
 		analyzeAnnotationBlocks(statement->annotationBlockIndexOffset, statement->annotationBlockCount);
 
 		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::MEMBER, 0);
 
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 		const std::string identifierTokenString = output->getTokenString(identifierToken);
+		const uint32 memberStatementOffset = structureStatementIndex + 1;
 
-		for (const uint32 memberStatementIndex : structureStatement->memberStatementIndices) {
-			const ref<MemberStatement> memberStatement = std::static_pointer_cast<MemberStatement>(output->ast.statements[memberStatementIndex]);
+		for (uint32 memberIndex = 0; memberIndex < structureStatement->memberCount; memberIndex += 1) {
+			const ref<MemberStatement> memberStatement = std::static_pointer_cast<MemberStatement>(output->ast.statements[memberStatementOffset + memberIndex]);
 			const Token& definitionToken = output->tokens[memberStatement->identifierTokenIndex];
 
 			if (identifierTokenString == output->getTokenString(definitionToken)) {
@@ -105,7 +106,7 @@ namespace ProjectA {
 			}
 		}
 
-		if (!isCamelCaseOrSnakeCase(output->getIdentifier(identifierToken.type))) {
+		if (!isCamelCaseOrSnakeCase(output->getIdentifier(identifierToken))) {
 			generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE>(*output, identifierToken);
 
 			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
@@ -115,7 +116,7 @@ namespace ProjectA {
 	void SemanticAnalyzer::analyzeConstantStatement(const ref<ConstantStatement>& statement) const {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
-		if (!isScreamingSnakeCase(output->getIdentifier(identifierToken.type))) {
+		if (!isScreamingSnakeCase(output->getIdentifier(identifierToken))) {
 			generateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE>(*output, identifierToken);
 
 			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
@@ -156,7 +157,7 @@ namespace ProjectA {
 	void SemanticAnalyzer::analyzeFunctionStatement(uint32 statementIndex, DocumentPosition end) const {
 		const ref<FunctionStatement> statement = std::static_pointer_cast<FunctionStatement>(output->ast.statements[statementIndex]);
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
-		const std::string& identifier = output->getIdentifier(identifierToken.type);
+		const std::string& identifier = output->getIdentifier(identifierToken);
 
 		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::FUNCTION, 0);
 
@@ -185,7 +186,7 @@ namespace ProjectA {
 
 	void SemanticAnalyzer::analyzeParameterStatement(const ref<ParameterStatement>& statement) const {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
-		const std::string& identifier = output->getIdentifier(identifierToken.type);
+		const std::string& identifier = output->getIdentifier(identifierToken);
 
 		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::PARAMETER, 0);
 
@@ -204,14 +205,15 @@ namespace ProjectA {
 
 	void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement>& statement) const {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+		const std::string& identifier = output->getIdentifier(identifierToken);
 
-		if (!isCamelCaseOrSnakeCase(output->getIdentifier(identifierToken.type)) && !isScreamingSnakeCase(output->getIdentifier(identifierToken.type))) {
+		if (!isCamelCaseOrSnakeCase(identifier) && !isScreamingSnakeCase(identifier)) {
 			generateDiagnostic<DiagnosticCode::INVALID_VARIABLE_IDENTIFIER_CASE>(*output, identifierToken);
 
 			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
 		}
 
-		const Definition* previousDefinition = output->getFirstDefinition(output->getIdentifier(identifierToken.type));
+		const Definition* previousDefinition = output->getFirstDefinition(identifier);
 
 		if (previousDefinition != nullptr) {
 			generateDiagnostic<DiagnosticCode::REDEFINITION>(*output, identifierToken, previousDefinition->tokenIndex);
@@ -245,7 +247,7 @@ namespace ProjectA {
 	}
 
 	void SemanticAnalyzer::analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) const {
-		if (expression.type.hasUserDefinedType()) {
+		if (expression.type.typeIndex == Type::NONE || expression.type.hasUserDefinedType()) {
 			const UserDefinedType* userDefinedType = output->getUserDefinedType(expression.type.typeIndex);
 
 			if (userDefinedType == nullptr) {
@@ -287,17 +289,17 @@ namespace ProjectA {
 	}
 
 	void SemanticAnalyzer::analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression) const {
-		const Token& token = output->tokens[expression.tokenIndex];
-		const Definition* definition = output->getFirstDefinition(output->getIdentifier(token.type));
+		const Token& identifierToken = output->tokens[expression.tokenIndex];
+		const Definition* definition = output->getFirstDefinition(output->getIdentifier(identifierToken));
 
 		if (definition == nullptr) {
-			if (token.type < FIRST_FUNCTION_INDEX || token.type > LAST_FUNCTION_INDEX) {
-				generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, token);
+			if (identifierToken.type < FIRST_FUNCTION_INDEX || identifierToken.type > LAST_FUNCTION_INDEX) {
+				generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, identifierToken);
 
 				return;
 			}
 
-			output->registerSemanticToken(token, SemanticTokenType::FUNCTION, SemanticTokenModifier::PREDEFINED);
+			output->registerSemanticToken(identifierToken, SemanticTokenType::FUNCTION, SemanticTokenModifier::PREDEFINED);
 
 			return;
 		}
@@ -307,7 +309,7 @@ namespace ProjectA {
 
 	void SemanticAnalyzer::analyzeMemberAccessExpression(const Expression<ExpressionType::MEMBER_ACCESS>& expression) const {
 		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
-		const Definition* definition = output->getFirstDefinition(output->getIdentifier(identifierToken.type));
+		const Definition* definition = output->getFirstDefinition(output->getIdentifier(identifierToken));
 
 		if (definition == nullptr) {
 			generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, identifierToken);

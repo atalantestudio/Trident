@@ -2,6 +2,8 @@
 
 namespace ProjectA {
 	enum class DiagnosticCode : uint8 {
+		// TODO: "NO_ERRORS" success diagnostic code?
+
 		// Errors
 		UNEXPECTED_CHARACTER,
 		MISSING_INCLUDE_PATH,
