@@ -30,7 +30,7 @@ namespace ProjectA {
 
 		// NOTE
 		// User-defined types are indexed relatively to this value.
-		// E.g. the 3rd user-defined type will be USER_DEFINED + 2.
+		// E.g. the third user-defined type will be USER_DEFINED + 2.
 		USER_DEFINED,
 	};
 

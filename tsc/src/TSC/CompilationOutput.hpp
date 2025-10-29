@@ -245,8 +245,10 @@ namespace ProjectA {
 			}
 
 			void defineStructure(const ref<StructureStatement>& statement, DocumentPosition end, uint32 memberCount) {
+				lastUserDefinedTypeIndex = static_cast<uint32>(userDefinedTypes.size());
+
 				const Token& identifierToken = tokens[statement->identifierTokenIndex];
-				const PackedType type = PackedType::fromTypeExpression(TokenType::IDENTIFIER, identifierToken.index, 0);
+				const PackedType type = PackedType::fromTypeExpression(TokenType::IDENTIFIER, lastUserDefinedTypeIndex, 0);
 
 				Definition definition{};
 				definition.identifierStart = identifierToken.start;
@@ -258,12 +260,14 @@ namespace ProjectA {
 				definition.tokenIndex = statement->identifierTokenIndex;
 				definition.identifier = getIdentifier(identifierToken);
 
+				if (type.typeIndex == 20) {
+					BREAKPOINT();
+				}
+
 				openScopeDefinitions.emplace_back(definition);
 
-				lastUserDefinedTypeIndex = static_cast<uint32>(userDefinedTypes.size());
-
 				UserDefinedType userDefinedType{};
-				userDefinedType.identifierIndex = identifierToken.type - TokenType::IDENTIFIER;
+				userDefinedType.identifierIndex = identifierToken.index;
 
 				userDefinedTypes.emplace_back(userDefinedType);
 			}
@@ -320,7 +324,7 @@ namespace ProjectA {
 				definition.identifierStart = end;
 				definition.identifierEnd = end;
 				definition.end = end;
-				definition.type = PackedType(Type::NONE, Type::NONE);
+				definition.type = PackedType(Type::FUNCTION, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
 				definition.semanticTokenModifierFlag = 0;
 				definition.tokenIndex = ~0;
@@ -334,7 +338,7 @@ namespace ProjectA {
 				definition.identifierStart = identifierToken.start;
 				definition.identifierEnd = identifierToken.getEnd();
 				definition.end = end;
-				definition.type = PackedType(Type::NONE, Type::NONE);
+				definition.type = PackedType(Type::FUNCTION, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
 				definition.semanticTokenModifierFlag = 0;
 				definition.tokenIndex = ~0;
@@ -451,15 +455,15 @@ namespace ProjectA {
 			std::vector<Diagnostic> diagnostics;
 
 			std::vector<uint64> literals;
+
 			std::vector<std::string> identifiers;
+			std::vector<UserDefinedType> userDefinedTypes;
+			uint32 lastUserDefinedTypeIndex = UNDEFINED_INDEX;
 
 			std::vector<Definition> openScopeDefinitions;
 			uint32 nextScopeDefinitionCount = 0;
-			std::vector<UserDefinedType> userDefinedTypes;
 			std::vector<Definition> definitions;
 			std::vector<Scope> scopes;
 			uint32 currentScopeIndex = UNDEFINED_SCOPE;
-
-			uint32 lastUserDefinedTypeIndex = static_cast<uint32>(~0);
 	};
 }

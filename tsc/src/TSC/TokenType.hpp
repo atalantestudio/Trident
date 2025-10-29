@@ -101,8 +101,7 @@ namespace ProjectA {
 		LITERAL_FLOATING_POINT,
 		LITERAL_INTEGER,
 
-		// This value represents all unique identifiers for structures/members/variables/constants/functions/parameters, as well as annotations.
-		// NOTE: All unique identifiers are indexed relatively to this value. For example, the third user-defined type will be IDENTIFIER + 2.
+		// Unique identifiers (including annotation names).
 		IDENTIFIER,
 	};
 
