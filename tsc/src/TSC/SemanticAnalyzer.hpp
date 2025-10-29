@@ -22,6 +22,8 @@ namespace ProjectA {
 			void analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) const;
 
 		private:
+			const AnnotationBlock& getAnnotationBlock(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount, Annotation annotation) const;
+
 			void analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const;
 
 			void evaluateExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;

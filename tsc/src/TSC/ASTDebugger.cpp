@@ -66,7 +66,7 @@ namespace ProjectA {
 		const ref<MemberStatement> statement = std::static_pointer_cast<MemberStatement>(output->ast.statements[statementIndex]);
 
 		logger.property("StatementType", "MemberStatement");
-		logger.property("AnnotationFlag", statement->annotationFlag);
+		logger.propertyNonString("AnnotationFlag", statement->annotationFlag);
 
 		writeAnnotationBlocks(statement->annotationBlockIndexOffset, statement->annotationBlockCount);
 
@@ -86,7 +86,7 @@ namespace ProjectA {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
 		logger.property("StatementType", "ConstantStatement");
-		logger.property("AnnotationFlag", statement->annotationFlag);
+		logger.propertyNonString("AnnotationFlag", statement->annotationFlag);
 
 		writeAnnotationBlocks(statement->annotationBlockIndexOffset, statement->annotationBlockCount);
 
@@ -389,8 +389,8 @@ namespace ProjectA {
 	void ASTDebugger::writeAnnotationBlocks(uint32 indexOffset, uint32 count) {
 		logger.propertyArray("Annotations");
 
-		for (uint32 index = 0; index < count; index += 1) {
-			const AnnotationBlock& annotationBlock = output->ast.annotationBlocks[indexOffset + index];
+		for (uint32 annotationBlockIndex = 0; annotationBlockIndex < count; annotationBlockIndex += 1) {
+			const AnnotationBlock& annotationBlock = output->ast.annotationBlocks[indexOffset + annotationBlockIndex];
 			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
 			logger.openObject();
@@ -399,7 +399,7 @@ namespace ProjectA {
 			if (annotationBlock.valueTokenIndex != UNDEFINED_ANNOTATION_VALUE) {
 				const Token& valueToken = output->tokens[annotationBlock.valueTokenIndex];
 
-				logger.property("Value", std::stoul(output->getTokenString(valueToken)));
+				logger.propertyNonString("Value", std::stoul(output->getTokenString(valueToken)));
 			}
 
 			logger.closeObject();

@@ -292,6 +292,22 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION> {
+		explicit generateDiagnostic(CompilationOutput& output, Annotation annotation, PackedType type, uint32 annotationTokenIndex) {
+			const Token& annotationToken = output.tokens[annotationTokenIndex];
+
+			Diagnostic diagnostic{};
+			diagnostic.start = annotationToken.start;
+			diagnostic.end = annotationToken.getEnd();
+			diagnostic.message = MODULE_FORMAT("Annotation \"[]\" cannot be used on a member of type [].", ANNOTATION_STRINGS[static_cast<uint32>(annotation)], output.getPackedTypeString(type));
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE> {
 		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
 			Diagnostic diagnostic{};

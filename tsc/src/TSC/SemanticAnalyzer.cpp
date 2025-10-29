@@ -111,6 +111,18 @@ namespace ProjectA {
 
 			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
 		}
+
+		if (statement->annotationFlag & BIT(static_cast<uint32>(Annotation::POSITION))) {
+			const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
+			const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+			const PackedType type = typeExpression.type;
+
+			if (type.typeIndex != Type::VEC4 || type.templateArgumentIndex != Type::FLOAT32) {
+				const AnnotationBlock& annotationBlock = getAnnotationBlock(statement->annotationBlockIndexOffset, statement->annotationBlockIndexOffset, Annotation::POSITION);
+
+				generateDiagnostic<DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION>(*output, Annotation::POSITION, type, annotationBlock.identifierTokenIndex);
+			}
+		}
 	}
 
 	void SemanticAnalyzer::analyzeConstantStatement(const ref<ConstantStatement>& statement) const {
@@ -318,13 +330,34 @@ namespace ProjectA {
 		}
 	}
 
+	const AnnotationBlock& SemanticAnalyzer::getAnnotationBlock(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount, Annotation annotation) const {
+		DEBUG_ASSERT(annotationBlockCount > 0);
+
+		uint32 annotationBlockIndex = 0;
+
+		while (annotationBlockIndex < annotationBlockCount - 1) {
+			const AnnotationBlock& annotationBlock = output->ast.annotationBlocks[annotationBlockIndexOffset + annotationBlockIndex];
+
+			if (annotationBlock.annotation == annotation) {
+				return annotationBlock;
+			}
+
+			annotationBlockIndex += 1;
+		}
+
+		DEBUG_ASSERT(false);
+
+		// should never be here
+		return output->ast.annotationBlocks[annotationBlockIndexOffset + annotationBlockIndex];
+	}
+
 	void SemanticAnalyzer::analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const {
-		Annotation uniqueAnnotationFlag = static_cast<Annotation>(0);
+		uint32 uniqueAnnotationFlag = 0;
 
 		for (uint32 annotationBlockIndex = 0; annotationBlockIndex < annotationBlockCount; annotationBlockIndex += 1) {
 			const AnnotationBlock& annotationBlock = output->ast.annotationBlocks[annotationBlockIndexOffset + annotationBlockIndex];
 
-			if (uniqueAnnotationFlag & annotationBlock.annotation) {
+			if (uniqueAnnotationFlag & BIT(static_cast<uint32>(annotationBlock.annotation))) {
 				const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
 				generateDiagnostic<DiagnosticCode::DUPLICATE_ANNOTATION>(*output, identifierToken);
@@ -353,12 +386,12 @@ namespace ProjectA {
 				}
 			}
 
-			uniqueAnnotationFlag |= annotationBlock.annotation;
+			uniqueAnnotationFlag |= BIT(static_cast<uint32>(annotationBlock.annotation));
 		}
 
 			/* if (!annotationBlock.value.value.empty()) {
 				// ERROR: Annotation "annotation" doesn't require a value but was provided with one.
-				if (ANNOTATION_TYPE_VOID & annotationBlock.annotation) {
+				if (ANNOTATION_TYPE_NONE & annotationBlock.annotation) {
 					compilationOutput->generateDiagnostic(
 						DiagnosticSeverity::ERROR,
 						"Annotation \"" + getAnnotationString(annotationBlock.annotation) + "\" doesn't require a value but was provided with one.",

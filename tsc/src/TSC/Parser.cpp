@@ -782,12 +782,11 @@ namespace ProjectA {
 			AnnotationBlock annotationBlock{};
 			annotationBlock.identifierTokenIndex = tokenIndex;
 
-			for (uint32 annotationIndex = 0; annotationIndex < ANNOTATION_COUNT; annotationIndex += 1) {
-				const char8* annotation = ANNOTATION_STRINGS[annotationIndex];
-
-				if (output->getTokenString(read()) == annotation) {
-					annotationFlag |= BIT(annotationIndex);
-					annotationBlock.annotation = static_cast<Annotation>(BIT(annotationIndex));
+			// Find which annotation this block refers to.
+			for (uint32 annotation = 0; annotation < static_cast<uint32>(Annotation::__COUNT); annotation += 1) {
+				if (output->getTokenString(read()) == ANNOTATION_STRINGS[annotation]) {
+					annotationBlock.annotation = static_cast<Annotation>(annotation);
+					annotationFlag |= BIT(annotation);
 
 					output->registerSemanticToken(annotationBlock.identifierTokenIndex, SemanticTokenType::VARIABLE, SemanticTokenModifier::PREDEFINED);
 
@@ -795,13 +794,13 @@ namespace ProjectA {
 				}
 			}
 
-			if (annotationBlock.annotation == 0) {
+			if (annotationBlock.annotation == UNDEFINED_ANNOTATION) {
 				generateDiagnostic<DiagnosticCode::UNDEFINED_ANNOTATION>(*output, read());
 			}
 
 			jump();
 
-			if (annotationBlock.annotation > 0 && !(ANNOTATION_TYPE_VOID & annotationBlock.annotation)) {
+			if (annotationBlock.annotation != UNDEFINED_ANNOTATION && !(ANNOTATION_TYPE_NONE & BIT(static_cast<uint32>(annotationBlock.annotation)))) {
 				if (!read(TokenType::LITERAL_FLOATING_POINT) && !read(TokenType::LITERAL_INTEGER)) {
 					const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
