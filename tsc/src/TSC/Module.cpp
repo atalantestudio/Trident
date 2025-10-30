@@ -34,8 +34,7 @@ namespace ProjectA {
 			.function("getPackedTypeString", &CompilationOutput::_emscripten_getPackedTypeString);
 
 		emscripten::class_<Definition>("Definition")
-			.property("identifierStart", &Definition::identifierStart)
-			.property("identifierEnd", &Definition::identifierEnd)
+			.property("identifierRange", &Definition::identifierRange)
 			.property("end", &Definition::end)
 			.property("identifier", &Definition::identifier)
 			.property("memberCount", &Definition::memberCount)
@@ -61,6 +60,10 @@ namespace ProjectA {
 			.property("line", &DocumentPosition::lineIndex)
 			.property("character", &DocumentPosition::characterOffset);
 
+		emscripten::class_<DocumentRange>("DocumentRange")
+			.property("start", &DocumentRange::start)
+			.property("end", &DocumentRange::end);
+
 		emscripten::class_<Scope>("Scope")
 			.property("start", &Scope::start)
 			.property("end", &Scope::end)
@@ -69,8 +72,7 @@ namespace ProjectA {
 			.property("definitionCount", &Scope::definitionCount);
 
 		emscripten::class_<SemanticToken>("SemanticToken")
-			.property("start", &SemanticToken::start)
-			.property("length", &SemanticToken::characterCount)
+			.property("range", &SemanticToken::range)
 			.function("getTypeIndex", &SemanticToken::getTypeIndex);
 
 		emscripten::function("compile", &compile);

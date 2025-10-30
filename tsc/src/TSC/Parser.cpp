@@ -46,7 +46,7 @@ namespace ProjectA {
 			Expression<ExpressionType::BINARY> expression{}; \
 			expression.operatorTokenIndex = tokenIndex; \
 			\
-			output->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR); \
+			output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex); \
 			\
 			jump(); \
 			\
@@ -183,7 +183,7 @@ namespace ProjectA {
 
 		EXPECT(read(TokenType::EQUAL), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::EQUAL, read());
 
-		output->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR);
+		output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
 
 		jump();
 
@@ -422,14 +422,14 @@ namespace ProjectA {
 			semanticTokenType = SemanticTokenType::CONSTANT;
 		}
 
-		output->registerSemanticToken(tokenIndex, semanticTokenType);
+		output->registerSemanticToken(semanticTokenType, tokenIndex);
 
 		jump();
 
 		if (read(TokenType::EQUAL)) {
 			statement->initializer = true;
 
-			output->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR);
+			output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
 
 			jump();
 
@@ -501,7 +501,7 @@ namespace ProjectA {
 			Expression<ExpressionType::BINARY> expression{};
 			expression.operatorTokenIndex = tokenIndex;
 
-			output->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR);
+			output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
 
 			jump();
 
@@ -532,7 +532,7 @@ namespace ProjectA {
 			Expression<ExpressionType::UNARY> expression{};
 			expression.operatorTokenIndex = tokenIndex;
 
-			output->registerSemanticToken(tokenIndex, SemanticTokenType::OPERATOR);
+			output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
 
 			jump();
 
@@ -700,7 +700,7 @@ namespace ProjectA {
 					annotationBlock.annotation = static_cast<Annotation>(annotation);
 					annotationFlag |= BIT(annotation);
 
-					output->registerSemanticToken(annotationBlock.identifierTokenIndex, SemanticTokenType::PREDEFINED);
+					output->registerSemanticToken(SemanticTokenType::PREDEFINED, annotationBlock.identifierTokenIndex);
 
 					break;
 				}
@@ -716,7 +716,7 @@ namespace ProjectA {
 				if (!read(TokenType::LITERAL_FLOATING_POINT) && !read(TokenType::LITERAL_INTEGER)) {
 					const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
-					output->generateDiagnostic(tokenIndex, "[ANNOTATION_INSTANCE] Expected a literal but got " + output->getTokenString(read()) + ".", DiagnosticSeverity::ERROR);
+					generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, read());
 				}
 				else {
 					annotationBlock.valueTokenIndex = tokenIndex;

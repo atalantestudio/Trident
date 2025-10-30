@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DocumentPosition.hpp"
+#include "DocumentRange.hpp"
 #include "PackedType.hpp"
 #include "SemanticTokenType.hpp"
 
@@ -22,8 +23,7 @@ namespace ProjectA {
 			return static_cast<sint32>(evaluatedInitializer);
 		}
 
-		DocumentPosition identifierStart;
-		DocumentPosition identifierEnd;
+		DocumentRange identifierRange;
 		DocumentPosition end;
 		PackedType type;
 		SemanticTokenType semanticTokenType;
@@ -33,7 +33,7 @@ namespace ProjectA {
 		// TODO: Adapt for constructors, e.g. `vec3<float32>(x, y, z)`.
 		sint64 evaluatedInitializer;
 
-		// (Structure definitions only)
+		// NOTE (Structure definitions only)
 		// Number of members in the structure.
 		// The N member definitions directly follow the structure definition.
 		uint32 memberCount;

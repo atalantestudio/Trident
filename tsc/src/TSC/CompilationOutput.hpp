@@ -145,38 +145,19 @@ namespace ProjectA {
 				tokens.emplace_back(token);
 			}
 
-			void registerSemanticToken(uint32 tokenIndex, SemanticTokenType type) {
-				registerSemanticToken(tokens[tokenIndex], type);
-			}
-
-			void registerSemanticToken(const Token& token, SemanticTokenType type) {
-				SemanticToken semanticToken{};
-				semanticToken.type = type;
-				semanticToken.start = token.start;
-				semanticToken.characterCount = token.characterCount;
-
-				registerSemanticToken(type, token.start, token.characterCount);
-			}
-
-			void registerSemanticToken(SemanticTokenType type, DocumentPosition start, uint32 characterCount) {
-				SemanticToken semanticToken{};
-				semanticToken.type = type;
-				semanticToken.start = start;
-				semanticToken.characterCount = characterCount;
-
-				semanticTokens.emplace_back(semanticToken);
-			}
-
-			void generateDiagnostic(uint32 tokenIndex, const std::string& message, DiagnosticSeverity severity) {
+			void registerSemanticToken(SemanticTokenType type, uint32 tokenIndex) {
 				const Token& token = tokens[tokenIndex];
 
-				Diagnostic diagnostic{};
-				diagnostic.start = token.start;
-				diagnostic.end = token.getEnd();
-				diagnostic.message = message;
-				diagnostic.severity = severity;
+				registerSemanticToken(type, token.start, token.getEnd());
+			}
 
-				diagnostics.emplace_back(diagnostic);
+			void registerSemanticToken(SemanticTokenType type, DocumentPosition start, DocumentPosition end) {
+				SemanticToken semanticToken{};
+				semanticToken.type = type;
+				semanticToken.range.start = start;
+				semanticToken.range.end = end;
+
+				semanticTokens.emplace_back(semanticToken);
 			}
 
 			void openScope(DocumentPosition start) {
@@ -229,8 +210,8 @@ namespace ProjectA {
 				const Token& identifierToken = tokens[identifierTokenIndex];
 
 				Definition definition{};
-				definition.identifierStart = identifierToken.start;
-				definition.identifierEnd = identifierToken.getEnd();
+				definition.identifierRange.start = identifierToken.start;
+				definition.identifierRange.end = identifierToken.getEnd();
 				definition.end = end;
 				definition.type = type;
 				definition.semanticTokenType = semanticTokenType;
@@ -245,8 +226,8 @@ namespace ProjectA {
 				const PackedType type = PackedType::fromTypeExpression(TokenType::IDENTIFIER, static_cast<uint32>(userDefinedTypes.size()), 0);
 
 				Definition definition{};
-				definition.identifierStart = identifierToken.start;
-				definition.identifierEnd = identifierToken.getEnd();
+				definition.identifierRange.start = identifierToken.start;
+				definition.identifierRange.end = identifierToken.getEnd();
 				definition.end = end;
 				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::STRUCTURE;
@@ -265,9 +246,9 @@ namespace ProjectA {
 				const Token& identifierToken = tokens[statement->identifierTokenIndex];
 
 				Definition definition{};
-				definition.identifierStart = identifierToken.start;
-				definition.identifierEnd = identifierToken.getEnd();
-				definition.end = definition.identifierEnd;
+				definition.identifierRange.start = identifierToken.start;
+				definition.identifierRange.end = identifierToken.getEnd();
+				definition.end = definition.identifierRange.end;
 				definition.type = typeExpression.type;
 				definition.semanticTokenType = SemanticTokenType::MEMBER;
 				definition.tokenIndex = statement->identifierTokenIndex;
@@ -295,8 +276,8 @@ namespace ProjectA {
 
 			Definition& defineFunction(const std::string& identifier, DocumentPosition end) {
 				Definition definition{};
-				definition.identifierStart = end;
-				definition.identifierEnd = end;
+				definition.identifierRange.start = end;
+				definition.identifierRange.end = end;
 				definition.end = end;
 				definition.type = PackedType(Type::FUNCTION, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
@@ -308,8 +289,8 @@ namespace ProjectA {
 
 			Definition& defineFunction(const Token& identifierToken, DocumentPosition end) {
 				Definition definition{};
-				definition.identifierStart = identifierToken.start;
-				definition.identifierEnd = identifierToken.getEnd();
+				definition.identifierRange.start = identifierToken.start;
+				definition.identifierRange.end = identifierToken.getEnd();
 				definition.end = end;
 				definition.type = PackedType(Type::FUNCTION, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;

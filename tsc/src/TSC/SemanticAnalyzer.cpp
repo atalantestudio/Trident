@@ -35,7 +35,7 @@ namespace ProjectA {
 			generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE>(*output, identifierToken);
 		}
 		else {
-			output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::STRUCTURE);
+			output->registerSemanticToken(SemanticTokenType::STRUCTURE, statement->identifierTokenIndex);
 		}
 
 		if (statement->memberCount == 0) {
@@ -88,7 +88,7 @@ namespace ProjectA {
 	void SemanticAnalyzer::analyzeMemberStatement(uint32 structureStatementIndex, const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& statement) const {
 		analyzeAnnotationBlocks(statement->annotationBlockIndexOffset, statement->annotationBlockCount);
 
-		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::MEMBER);
+		output->registerSemanticToken(SemanticTokenType::MEMBER, statement->identifierTokenIndex);
 
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 		const std::string identifierTokenString = output->getTokenString(identifierToken);
@@ -138,7 +138,7 @@ namespace ProjectA {
 			return;
 		}
 		else {
-			output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::CONSTANT);
+			output->registerSemanticToken(SemanticTokenType::CONSTANT, statement->identifierTokenIndex);
 		}
 
 		Definition& definition = output->defineConstant(statement, typeExpression);
@@ -184,7 +184,7 @@ namespace ProjectA {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 		const std::string& identifier = output->getIdentifier(identifierToken);
 
-		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::FUNCTION);
+		output->registerSemanticToken(SemanticTokenType::FUNCTION, statement->identifierTokenIndex);
 
 		if (!isCamelCaseOrSnakeCase(identifier)) {
 			generateDiagnostic<DiagnosticCode::INVALID_FUNCTION_IDENTIFIER_CASE>(*output, identifierToken);
@@ -213,7 +213,7 @@ namespace ProjectA {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 		const std::string& identifier = output->getIdentifier(identifierToken);
 
-		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::PARAMETER);
+		output->registerSemanticToken(SemanticTokenType::PARAMETER, statement->identifierTokenIndex);
 
 		if (!isCamelCaseOrSnakeCase(identifier)) {
 			generateDiagnostic<DiagnosticCode::INVALID_PARAMETER_IDENTIFIER_CASE>(*output, identifierToken);
@@ -240,10 +240,10 @@ namespace ProjectA {
 		}
 
 		if (statement->constant) {
-			output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::CONSTANT);
+			output->registerSemanticToken(SemanticTokenType::CONSTANT, statement->identifierTokenIndex);
 		}
 		else {
-			output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::VARIABLE);
+			output->registerSemanticToken(SemanticTokenType::VARIABLE, statement->identifierTokenIndex);
 		}
 
 		const Definition* previousDefinition = output->getFirstDefinition(identifier);
@@ -299,12 +299,12 @@ namespace ProjectA {
 				return;
 			}
 
-			output->registerSemanticToken(identifierToken, SemanticTokenType::PREDEFINED);
+			output->registerSemanticToken(SemanticTokenType::PREDEFINED, expression.tokenIndex);
 
 			return;
 		}
 
-		output->registerSemanticToken(expression.tokenIndex, definition->semanticTokenType);
+		output->registerSemanticToken(definition->semanticTokenType, expression.tokenIndex);
 	}
 
 	void SemanticAnalyzer::analyzeMemberAccessExpression(const Expression<ExpressionType::MEMBER_ACCESS>& expression) {
@@ -340,7 +340,7 @@ namespace ProjectA {
 				return;
 			}
 
-			output->registerSemanticToken(expression.typeTokenIndex, SemanticTokenType::STRUCTURE);
+			output->registerSemanticToken(SemanticTokenType::STRUCTURE, expression.typeTokenIndex);
 
 			return;
 		}
