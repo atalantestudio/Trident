@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CompilationOutput.hpp"
+#include "Diagnostic/DiagnosticCode.hpp"
 #include "DocumentPosition.hpp"
 #include "SemanticAnalyzer.hpp"
 #include "Token.hpp"
@@ -8,51 +9,51 @@
 namespace ProjectA {
 	class Parser {
 		public:
-			void parse(CompilationOutput* _output);
+			void parse(CompilationOutput* output);
 
 		private:
-			bool parseGlobalScopeStatement();
-			bool parseStructureStatement();
-			bool parseMemberStatement(uint32 structureStatementIndex, ref<StructureStatement>& structureStatement);
-			bool parseConstantOrFunctionStatement();
-			bool parseFunctionStatement();
-			bool parseParameterStatement();
+			DiagnosticCode parseGlobalScopeStatement();
+			DiagnosticCode parseStructureStatement();
+			DiagnosticCode parseMemberStatement(uint32 structureStatementIndex, ref<StructureStatement>& structureStatement);
+			DiagnosticCode parseConstantOrFunctionStatement();
+			DiagnosticCode parseFunctionStatement();
+			DiagnosticCode parseParameterStatement();
 
-			bool parseLocalScopeStatement();
-			bool parseScopeStatement();
-			bool parseIfStatementStart();
-			bool parseReturnStatement();
-			bool parseBreakStatement();
-			bool parseNextStatement();
-			bool parseWhileStatementStart();
-			bool parseExpressionStatement();
-			bool parseIfOrWhileStatementEnd(uint32& conditionExpressionIndex, uint32& scopeStatementIndex);
-			bool parseVariableStatement();
+			DiagnosticCode parseLocalScopeStatement();
+			DiagnosticCode parseScopeStatement();
+			DiagnosticCode parseIfStatementStart();
+			DiagnosticCode parseReturnStatement();
+			DiagnosticCode parseBreakStatement();
+			DiagnosticCode parseNextStatement();
+			DiagnosticCode parseWhileStatementStart();
+			DiagnosticCode parseExpressionStatement();
+			DiagnosticCode parseIfOrWhileStatementEnd(uint32& scopeStatementIndex);
+			DiagnosticCode parseVariableStatement();
 
-			bool parseTypeExpression();
+			DiagnosticCode parseTypeExpression();
 
-			bool parseAssignmentOrCompoundExpression();
-			bool parseLogicalOrExpression();
-			bool parseLogicalXorExpression();
-			bool parseLogicalAndExpression();
-			bool parseBitwiseOrExpression();
-			bool parseBitwiseXorExpression();
-			bool parseBitwiseAndExpression();
-			bool parseEqualityExpression();
-			bool parseRelationalExpression();
-			bool parseBitwiseShiftExpression();
-			bool parseAdditiveExpression();
-			bool parseMultiplicativeExpression();
-			bool parseUnaryExpression();
-			bool parsePrimaryExpression();
+			DiagnosticCode parseAssignmentOrCompoundExpression();
+			DiagnosticCode parseLogicalOrExpression();
+			DiagnosticCode parseLogicalXorExpression();
+			DiagnosticCode parseLogicalAndExpression();
+			DiagnosticCode parseBitwiseOrExpression();
+			DiagnosticCode parseBitwiseXorExpression();
+			DiagnosticCode parseBitwiseAndExpression();
+			DiagnosticCode parseEqualityExpression();
+			DiagnosticCode parseRelationalExpression();
+			DiagnosticCode parseBitwiseShiftExpression();
+			DiagnosticCode parseAdditiveExpression();
+			DiagnosticCode parseMultiplicativeExpression();
+			DiagnosticCode parseUnaryExpression();
+			DiagnosticCode parsePrimaryExpression();
 
-			bool parseIdentifierExpression();
-			bool parseMemberAccessExpression();
-			bool parseCallOrGroupExpression();
-			bool parseLiteralExpression();
-			bool parseGroupExpression();
+			DiagnosticCode parseIdentifierExpression();
+			DiagnosticCode parseMemberAccessExpression();
+			DiagnosticCode parseCallOrGroupExpression(uint32 insertionIndex);
+			DiagnosticCode parseLiteralExpression();
+			DiagnosticCode parseGroupExpression();
 
-			bool parseAnnotationBlocks();
+			DiagnosticCode parseAnnotationBlocks();
 
 			uint32 getLastStatementIndex() const;
 			uint32 getLastExpressionReferenceIndex() const;

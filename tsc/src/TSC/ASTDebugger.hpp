@@ -25,7 +25,7 @@ namespace ProjectA {
 			void writeNextStatement();
 			void writeReturnStatement(uint32 statementIndex);
 
-			void writeExpression(uint32 referenceIndex);
+			void writeNextExpression();
 			void writeLiteralExpression(uint32 byteOffset);
 			void writeIdentifierExpression(uint32 byteOffset);
 			void writeUnaryExpression(uint32 byteOffset);
@@ -40,5 +40,6 @@ namespace ProjectA {
 		private:
 			FileLogger<FileFormat::JSON> logger;
 			const CompilationOutput* output;
+			uint32 currentExpressionReferenceIndex;
 	};
 }

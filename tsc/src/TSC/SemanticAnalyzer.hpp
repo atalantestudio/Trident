@@ -12,31 +12,32 @@ namespace ProjectA {
 
 			void analyzeStructureStatement(uint32 statementIndex, const ref<StructureStatement>& statement, DocumentPosition end) const;
 			void analyzeMemberStatement(uint32 structureStatementIndex, const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& statement) const;
-			void analyzeConstantStatement(const ref<ConstantStatement>& statement) const;
+			void analyzeConstantStatement(const ref<ConstantStatement>& statement);
 			void analyzeFunctionStatement(uint32 statementIndex, DocumentPosition end) const;
 			void analyzeParameterStatement(const ref<ParameterStatement>& statement) const;
 			void analyzeVariableStatement(const ref<VariableStatement>& statement) const;
 
-			void analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression) const;
-			void analyzeMemberAccessExpression(const Expression<ExpressionType::MEMBER_ACCESS>& expression) const;
-			void analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) const;
+			void analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression);
+			void analyzeMemberAccessExpression(const Expression<ExpressionType::MEMBER_ACCESS>& expression);
+			void analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression);
 
 		private:
 			const AnnotationBlock& getAnnotationBlock(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount, Annotation annotation) const;
 
 			void analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const;
 
-			void evaluateExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
-			void evaluateLiteralExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
-			void evaluateIdentifierExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
-			void evaluateUnaryExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
-			void evaluateBinaryExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
-			void evaluateGroupExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
-			void evaluateMemberAccessExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
-			void evaluateCallExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
-			void evaluateTypeExpression(uint32 referenceIndex, uint32& referenceCount, ExpressionEvaluation& evaluation) const;
+			void evaluateNextExpression(ExpressionEvaluation& evaluation);
+			void evaluateLiteralExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
+			void evaluateIdentifierExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
+			void evaluateUnaryExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
+			void evaluateBinaryExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
+			void evaluateGroupExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
+			void evaluateMemberAccessExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
+			void evaluateCallExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
+			void evaluateTypeExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
 
 		private:
 			CompilationOutput* output;
+			uint32 currentExpressionReferenceIndex;
 	};
 }

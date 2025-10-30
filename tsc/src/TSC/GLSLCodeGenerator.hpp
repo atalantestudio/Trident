@@ -29,20 +29,19 @@ namespace ProjectA {
 			void writeScopeStatement(std::ofstream& stream, uint32 statementIndex);
 			void writeIfStatement(std::ofstream& stream, uint32 statementIndex);
 			void writeWhileStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeBreakStatement(std::ofstream& stream) const;
-			void writeNextStatement(std::ofstream& stream) const;
+			void writeBreakStatement(std::ofstream& stream);
+			void writeNextStatement(std::ofstream& stream);
 			void writeReturnStatement(std::ofstream& stream, uint32 statementIndex);
 
-			void writeExpression(std::ofstream& stream, uint32 referenceIndex);
-			void writeExpression(std::ofstream& stream, uint32 referenceIndex, uint32& referenceCount);
-			void writeLiteralExpression(std::ofstream& stream, uint32 referenceIndex, uint32& referenceCount) const;
-			void writeIdentifierExpression(std::ofstream& stream, uint32 referenceIndex, uint32& referenceCount) const;
-			void writeUnaryExpression(std::ofstream& stream, uint32 referenceIndex, uint32& referenceCount);
-			void writeBinaryExpression(std::ofstream& stream, uint32 referenceIndex, uint32& referenceCount);
-			void writeGroupExpression(std::ofstream& stream, uint32 referenceIndex, uint32& referenceCount);
-			void writeMemberAccessExpression(std::ofstream& stream, uint32 referenceIndex, uint32& referenceCount);
-			void writeCallExpression(std::ofstream& stream, uint32 referenceIndex, uint32& referenceCount);
-			void writeTypeExpression(std::ofstream& stream, uint32 referenceIndex, uint32& referenceCount) const;
+			void writeNextExpression(std::ofstream& stream);
+			void writeLiteralExpression(std::ofstream& stream, uint32 byteOffset);
+			void writeIdentifierExpression(std::ofstream& stream, uint32 byteOffset);
+			void writeUnaryExpression(std::ofstream& stream, uint32 byteOffset);
+			void writeBinaryExpression(std::ofstream& stream, uint32 byteOffset);
+			void writeGroupExpression(std::ofstream& stream, uint32 byteOffset);
+			void writeMemberAccessExpression(std::ofstream& stream, uint32 byteOffset);
+			void writeCallExpression(std::ofstream& stream, uint32 byteOffset);
+			void writeTypeExpression(std::ofstream& stream, uint32 byteOffset);
 
 			void writeAnnotationBlocks(std::ofstream& stream, uint32 indexOffset, uint32 count);
 
@@ -98,6 +97,7 @@ namespace ProjectA {
 		private:
 			const CompilationOutput* output;
 
+			uint32 currentExpressionReferenceIndex;
 			uint32 indentationLevel;
 			std::string indentation;
 	};

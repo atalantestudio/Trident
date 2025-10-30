@@ -260,10 +260,6 @@ namespace ProjectA {
 				definition.tokenIndex = statement->identifierTokenIndex;
 				definition.identifier = getIdentifier(identifierToken);
 
-				if (type.typeIndex == 20) {
-					BREAKPOINT();
-				}
-
 				openScopeDefinitions.emplace_back(definition);
 
 				UserDefinedType userDefinedType{};
@@ -280,9 +276,7 @@ namespace ProjectA {
 				lastUserDefinedTypeIndex = static_cast<uint32>(~0);
 			}
 
-			void defineMember(const ref<MemberStatement>& statement) {
-				const ExpressionReference& typeExpressionReference = ast.getExpressionReference(statement->typeExpressionReferenceIndex);
-				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+			void defineMember(const ref<MemberStatement>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
 				const Token& identifierToken = tokens[statement->identifierTokenIndex];
 
 				Definition definition{};
@@ -298,9 +292,7 @@ namespace ProjectA {
 				openScopeDefinitions.emplace_back(definition);
 			}
 
-			void define(const ref<ConstantStatement>& statement) {
-				const ExpressionReference& typeExpressionReference = ast.getExpressionReference(statement->typeExpressionReferenceIndex);
-				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+			void define(const ref<ConstantStatement>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
 				const Token& identifierToken = tokens[statement->identifierTokenIndex];
 
 				define(typeExpression.type, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT, statement->identifierTokenIndex, identifierToken.getEnd());

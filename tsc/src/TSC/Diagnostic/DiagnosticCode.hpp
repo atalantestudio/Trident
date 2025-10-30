@@ -2,7 +2,7 @@
 
 namespace ProjectA {
 	enum class DiagnosticCode : uint8 {
-		// TODO: "NO_ERRORS" success diagnostic code?
+		SUCCESS,
 
 		// Errors
 		UNEXPECTED_CHARACTER,

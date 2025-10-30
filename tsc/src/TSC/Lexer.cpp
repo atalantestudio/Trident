@@ -46,9 +46,8 @@ namespace ProjectA {
 		return true;
 	}
 
-	void Lexer::tokenize(CompilationOutput* _output) {
-		output = _output;
-
+	void Lexer::tokenize(CompilationOutput* output) {
+		this->output = output;
 		position.lineIndex = 0;
 		position.characterOffset = 0;
 		characterIndex = 0;

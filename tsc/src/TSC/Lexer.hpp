@@ -9,7 +9,7 @@ namespace ProjectA {
 			static bool parseNumberLiteral(const char8* characters, uint32 characterCount, uint8 base, uint64& number);
 
 		public:
-			void tokenize(CompilationOutput* _output);
+			void tokenize(CompilationOutput* output);
 
 		private:
 			void jump(sint32 characterCount);

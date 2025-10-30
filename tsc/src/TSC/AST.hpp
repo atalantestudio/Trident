@@ -5,41 +5,62 @@
 #include "Statement.hpp"
 
 namespace ProjectA {
-	struct AST {
-		const ExpressionReference& getExpressionReference(uint32 index) const {
-			DEBUG_ASSERT(index < expressionReferences.size());
+	class AST {
+		public:
+			uint32 getExpressionReferenceCount() const {
+				return static_cast<uint32>(expressionReferences.size());
+			}
 
-			return expressionReferences[index];
-		}
+			const ExpressionReference& getExpressionReference(uint32 index) const {
+				DEBUG_ASSERT(index < expressionReferences.size());
 
-		template<ExpressionType ExpressionType>
-		const Expression<ExpressionType>& getExpression(uint32 byteOffset) const {
-			DEBUG_ASSERT(byteOffset + sizeof(Expression<ExpressionType>) <= expressionBuffer.size());
+				return expressionReferences[index];
+			}
 
-			return *pointer_cast<const Expression<ExpressionType>*>(&expressionBuffer[byteOffset]);
-		}
+			template<ExpressionType ExpressionType>
+			const Expression<ExpressionType>& getExpression(uint32 byteOffset) const {
+				DEBUG_ASSERT(byteOffset + sizeof(Expression<ExpressionType>) <= expressionBuffer.size());
 
-		template<ExpressionType ExpressionType>
-		void addExpression(const Expression<ExpressionType>& expression) {
-			const uint64 byteOffset = expressionBuffer.size();
+				return *pointer_cast<const Expression<ExpressionType>*>(&expressionBuffer[byteOffset]);
+			}
 
-			expressionBuffer.resize(byteOffset + sizeof(Expression<ExpressionType>));
+			template<ExpressionType ExpressionType>
+			void addExpression(const Expression<ExpressionType>& expression) {
+				const uint64 byteOffset = expressionBuffer.size();
 
-			std::copy_n(pointer_cast<const uint8*>(&expression), sizeof(Expression<ExpressionType>), &expressionBuffer[byteOffset]);
+				expressionBuffer.resize(byteOffset + sizeof(Expression<ExpressionType>));
 
-			ExpressionReference expressionReference{};
-			expressionReference.type = ExpressionType;
-			expressionReference.byteOffset = static_cast<uint32>(byteOffset);
+				std::copy_n(pointer_cast<const uint8*>(&expression), sizeof(Expression<ExpressionType>), &expressionBuffer[byteOffset]);
 
-			expressionReferences.emplace_back(expressionReference);
-		}
+				ExpressionReference expressionReference{};
+				expressionReference.type = ExpressionType;
+				expressionReference.byteOffset = static_cast<uint32>(byteOffset);
 
-		std::vector<ref<Statement>> statements;
-		std::vector<uint32> globalScopeStatementIndices;
+				expressionReferences.emplace_back(expressionReference);
+			}
 
-		std::vector<ExpressionReference> expressionReferences;
-		std::vector<uint8> expressionBuffer;
+			template<ExpressionType ExpressionType>
+			void insertExpression(const Expression<ExpressionType>& expression, uint32 index) {
+				const uint64 byteOffset = expressionBuffer.size();
 
-		std::vector<AnnotationBlock> annotationBlocks;
+				expressionBuffer.resize(byteOffset + sizeof(Expression<ExpressionType>));
+
+				std::copy_n(pointer_cast<const uint8*>(&expression), sizeof(Expression<ExpressionType>), &expressionBuffer[byteOffset]);
+
+				ExpressionReference expressionReference{};
+				expressionReference.type = ExpressionType;
+				expressionReference.byteOffset = static_cast<uint32>(byteOffset);
+
+				expressionReferences.insert(expressionReferences.begin() + index, expressionReference);
+			}
+
+		public:
+			std::vector<ref<Statement>> statements;
+			std::vector<uint32> globalScopeStatementIndices;
+
+			std::vector<ExpressionReference> expressionReferences;
+			std::vector<uint8> expressionBuffer;
+
+			std::vector<AnnotationBlock> annotationBlocks;
 	};
 }

@@ -7,6 +7,7 @@ namespace ProjectA {
 		logger(path, 4)
 	{
 		this->output = &output;
+		currentExpressionReferenceIndex = 0;
 
 		logger.openArray();
 
@@ -72,7 +73,7 @@ namespace ProjectA {
 
 		logger.propertyObject("Type");
 
-		writeExpression(statement->typeExpressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 
@@ -92,13 +93,13 @@ namespace ProjectA {
 
 		logger.propertyObject("Type");
 
-		writeExpression(statement->typeExpressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 		logger.property("Identifier", output->getTokenString(identifierToken));
 		logger.propertyObject("Initializer");
 
-		writeExpression(statement->initializerExpressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 	}
@@ -110,16 +111,16 @@ namespace ProjectA {
 		logger.property("StatementType", "VariableStatement");
 		logger.propertyObject("Type");
 
-		writeExpression(statement->typeExpressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 		logger.property("Identifier", output->getTokenString(identifierToken));
 		logger.property("Constant", statement->constant);
 
-		if (statement->initializerExpressionReferenceIndex != UNDEFINED_EXPRESSION) {
+		if (statement->initializer) {
 			logger.propertyObject("Initializer");
 
-			writeExpression(statement->initializerExpressionReferenceIndex);
+			writeNextExpression();
 
 			logger.closeObject();
 		}
@@ -135,7 +136,7 @@ namespace ProjectA {
 		logger.property("StatementType", "ParameterStatement");
 		logger.propertyObject("Type");
 
-		writeExpression(statement->typeExpressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 		logger.property("Identifier", output->getTokenString(identifierToken));
@@ -148,7 +149,7 @@ namespace ProjectA {
 		logger.property("StatementType", "FunctionStatement");
 		logger.propertyObject("ReturnType");
 
-		writeExpression(statement->returnTypeExpressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 		logger.property("Identifier", output->getTokenString(identifierToken));
@@ -176,7 +177,7 @@ namespace ProjectA {
 		logger.property("StatementType", "ExpressionStatement");
 		logger.propertyObject("Expression");
 
-		writeExpression(statement->expressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 	}
@@ -204,7 +205,7 @@ namespace ProjectA {
 		logger.property("StatementType", "IfStatement");
 		logger.propertyObject("Condition");
 
-		writeExpression(statement->conditionExpressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 		logger.propertyObject("Scope");
@@ -220,7 +221,7 @@ namespace ProjectA {
 		logger.property("StatementType", "WhileStatement");
 		logger.propertyObject("Condition");
 
-		writeExpression(statement->conditionExpressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 		logger.propertyObject("Scope");
@@ -244,13 +245,15 @@ namespace ProjectA {
 		logger.property("StatementType", "ReturnStatement");
 		logger.propertyObject("Expression");
 
-		writeExpression(statement->expressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 	}
 
-	void ASTDebugger::writeExpression(uint32 referenceIndex) {
-		const ExpressionReference& expressionReference = output->ast.getExpressionReference(referenceIndex);
+	void ASTDebugger::writeNextExpression() {
+		const ExpressionReference& expressionReference = output->ast.getExpressionReference(currentExpressionReferenceIndex);
+
+		currentExpressionReferenceIndex += 1;
 
 		switch (expressionReference.type) {
 			case ExpressionType::LITERAL: writeLiteralExpression(expressionReference.byteOffset); break;
@@ -305,7 +308,7 @@ namespace ProjectA {
 		logger.property("Operator", output->getTokenString(operatorToken));
 		logger.propertyObject("Right");
 
-		writeExpression(expression.rightExpressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 	}
@@ -317,13 +320,13 @@ namespace ProjectA {
 		logger.property("ExpressionType", "BinaryExpression");
 		logger.propertyObject("Left");
 
-		writeExpression(expression.leftExpressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 		logger.property("Operator", output->getTokenString(operatorToken));
 		logger.propertyObject("Right");
 
-		writeExpression(expression.rightExpressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 	}
@@ -334,7 +337,7 @@ namespace ProjectA {
 		logger.property("ExpressionType", "GroupExpression");
 		logger.propertyObject("Expression");
 
-		writeExpression(expression.expressionReferenceIndex);
+		writeNextExpression();
 
 		logger.closeObject();
 	}
@@ -344,11 +347,14 @@ namespace ProjectA {
 		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
 
 		logger.property("ExpressionType", "MemberAccessExpression");
-		logger.propertyObject("Left");
 
-		writeExpression(expression.leftExpressionReferenceIndex);
+		// TODO: Write parent expression.
+		/* logger.propertyObject("Parent");
 
-		logger.closeObject();
+		writeNextExpression();
+
+		logger.closeObject(); */
+
 		logger.property("MemberIdentifier", output->getTokenString(identifierToken));
 	}
 
@@ -356,25 +362,34 @@ namespace ProjectA {
 		const Expression<ExpressionType::CALL>& expression = output->ast.getExpression<ExpressionType::CALL>(byteOffset);
 
 		logger.property("ExpressionType", "CallExpression");
-		logger.propertyObject("Callee");
 
-		writeExpression(expression.calleeExpressionReferenceIndex);
+		if (expression.explicitCallee) {
+			logger.propertyObject("Callee");
 
-		logger.closeObject();
-		logger.property("ArgumentCount", expression.argumentCount);
-
-		// TODO: Fix reference indices being undefined.
-		/* logger.propertyArray("Arguments");
-
-		for (const uint32 expressionReferenceIndex : expression.argumentExpressionReferenceIndices) {
-			logger.openObject();
-
-			writeExpression(expressionReferenceIndex);
+			writeNextExpression();
 
 			logger.closeObject();
 		}
+		else {
+			logger.property("Callee", "null");
+		}
 
-		logger.closeArray(); */
+		logger.property("ArgumentCount", expression.argumentCount);
+		logger.propertyArray("Arguments");
+
+		uint32 argumentIndex = 0;
+
+		while (argumentIndex < expression.argumentCount) {
+			logger.openObject();
+
+			writeNextExpression();
+
+			logger.closeObject();
+
+			argumentIndex += 1;
+		}
+
+		logger.closeArray();
 	}
 
 	void ASTDebugger::writeTypeExpression(uint32 byteOffset) {
