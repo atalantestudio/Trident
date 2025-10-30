@@ -250,6 +250,20 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::EXPRESSION_NOT_CONSTANT> {
+		explicit generateDiagnostic(CompilationOutput& output, DocumentPosition start, DocumentPosition end) {
+			Diagnostic diagnostic{};
+			diagnostic.start = start;
+			diagnostic.end = end;
+			diagnostic.message = "Expression is not constant.";
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::EXPRESSION_NOT_CONSTANT;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::UNDEFINED_ANNOTATION> {
 		explicit generateDiagnostic(CompilationOutput& output, const Token& token) {
 			Diagnostic diagnostic{};

@@ -56,20 +56,15 @@ namespace ProjectA {
 			DiagnosticCode parseAnnotationBlocks();
 
 			uint32 getLastStatementIndex() const;
-			uint32 getLastExpressionReferenceIndex() const;
-
-			bool read(TokenType type) const;
 
 			Token read() const;
 			Token peek() const;
 
+			bool read(TokenType type) const;
+
 			void jump();
 			void jumpEol();
 			void synchronize();
-
-			// Registers a semantic token for a variable/constant/member/parameter.
-			// If false is returned, it means the parser needs more context to register the token.
-			bool registerVariableSemanticToken(const Token& token, bool preferStructure) const;
 
 		public:
 			CompilationOutput* output;
@@ -78,7 +73,6 @@ namespace ProjectA {
 			uint8 annotationFlag;
 			DocumentPosition position;
 			uint32 visitedWhileCount;
-
 			SemanticAnalyzer analyzer;
 	};
 }

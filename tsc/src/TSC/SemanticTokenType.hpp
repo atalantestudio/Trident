@@ -32,5 +32,11 @@ namespace ProjectA {
 
 		// Tokens that represent a string literal.
 		STRING,
+
+		// Identifiers that declare or reference a local or global constant.
+		CONSTANT,
+
+		// For symbols that are part of the standard library.
+		PREDEFINED,
 	};
 }

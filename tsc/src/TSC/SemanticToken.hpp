@@ -1,7 +1,6 @@
 #pragma once
 
 #include "DocumentPosition.hpp"
-#include "SemanticTokenModifier.hpp"
 #include "SemanticTokenType.hpp"
 
 namespace ProjectA {
@@ -15,6 +14,5 @@ namespace ProjectA {
 			DocumentPosition start;
 			uint32 characterCount;
 			SemanticTokenType type;
-			uint32 modifiers;
 	};
 }

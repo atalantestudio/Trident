@@ -277,7 +277,7 @@ namespace ProjectA {
 						jump(1);
 					}
 
-					output->registerSemanticToken(SemanticTokenType::COMMENT, 0, start, position.characterOffset - start.characterOffset);
+					output->registerSemanticToken(SemanticTokenType::COMMENT, start, position.characterOffset - start.characterOffset);
 
 					break;
 				}
@@ -458,7 +458,7 @@ namespace ProjectA {
 		token.index = static_cast<uint32>(output->literals.size());
 
 		output->literals.emplace_back(number);
-		output->registerSemanticToken(token, SemanticTokenType::NUMBER, 0);
+		output->registerSemanticToken(token, SemanticTokenType::NUMBER);
 		output->tokens.emplace_back(token);
 	}
 
@@ -472,7 +472,7 @@ namespace ProjectA {
 		output->tokens.emplace_back(token);
 
 		if (token.type <= LAST_KEYWORD_INDEX) {
-			output->registerSemanticToken(token, SemanticTokenType::KEYWORD, 0);
+			output->registerSemanticToken(token, SemanticTokenType::KEYWORD);
 		}
 	}
 

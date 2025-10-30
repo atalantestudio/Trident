@@ -26,15 +26,16 @@ namespace ProjectA {
 		currentExpressionReferenceIndex = 0;
 	}
 
-	void SemanticAnalyzer::analyzeStructureStatement(uint32 statementIndex, const ref<StructureStatement>& statement, DocumentPosition end) const {
-		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+	void SemanticAnalyzer::analyzeStructureStatement(uint32 statementIndex, const ref<StructureStatement>& statement, DocumentPosition end, uint32 memberTypeExpressionReferenceOffset) {
+		UserDefinedType& userDefinedType = output->defineStructure(statement, end);
 
-		output->defineStructure(statement, end, statement->memberCount);
+		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 
 		if (!isPascalCase(output->getIdentifier(identifierToken))) {
 			generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE>(*output, identifierToken);
-
-			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
+		}
+		else {
+			output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::STRUCTURE);
 		}
 
 		if (statement->memberCount == 0) {
@@ -42,14 +43,12 @@ namespace ProjectA {
 		}
 
 		const uint32 memberStatementOffset = statementIndex + 1;
-		uint32 alignment = 0;
 		uint32 lastMemberOffset = 0;
 		uint32 lastMemberSize = 0;
 
-		// TODO
-		/* for (uint32 memberIndex = 0; memberIndex < statement->memberCount; memberIndex += 1) {
+		for (uint32 memberIndex = 0; memberIndex < statement->memberCount; memberIndex += 1) {
 			const ref<MemberStatement>& memberStatement = std::static_pointer_cast<MemberStatement>(output->ast.statements[memberStatementOffset + memberIndex]);
-			const ExpressionReference& expressionReference = output->ast.getExpressionReference(memberStatement->typeExpressionReferenceIndex);
+			const ExpressionReference& expressionReference = output->ast.getExpressionReference(memberTypeExpressionReferenceOffset + memberIndex);
 			const Expression<ExpressionType::TYPE>& expression = output->ast.getExpression<ExpressionType::TYPE>(expressionReference.byteOffset);
 
 			output->defineMember(memberStatement, expression);
@@ -58,15 +57,13 @@ namespace ProjectA {
 			lastMemberSize = output->getSize(expression.type);
 
 			#ifdef __EMSCRIPTEN__
-				alignment = alignment > output->getAlignment(expression.type) ? alignment : output->getAlignment(expression.type);
+				userDefinedType.alignment = userDefinedType.alignment > output->getAlignment(expression.type) ? userDefinedType.alignment : output->getAlignment(expression.type);
 			#else
-				alignment = max(alignment, output->getAlignment(expression.type));
+				userDefinedType.alignment = max(userDefinedType.alignment, output->getAlignment(expression.type));
 			#endif
-		} */
+		}
 
-		const uint32 size = roundUp(alignment, lastMemberOffset + lastMemberSize);
-
-		output->updateStructureDefinition(size, alignment);
+		userDefinedType.size = roundUp(userDefinedType.alignment, lastMemberOffset + lastMemberSize);
 
 		/* Annotation combinedAnnotationFlag = static_cast<Annotation>(0);
 
@@ -91,7 +88,7 @@ namespace ProjectA {
 	void SemanticAnalyzer::analyzeMemberStatement(uint32 structureStatementIndex, const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& statement) const {
 		analyzeAnnotationBlocks(statement->annotationBlockIndexOffset, statement->annotationBlockCount);
 
-		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::MEMBER, 0);
+		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::MEMBER);
 
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 		const std::string identifierTokenString = output->getTokenString(identifierToken);
@@ -130,24 +127,27 @@ namespace ProjectA {
 
 	void SemanticAnalyzer::analyzeConstantStatement(const ref<ConstantStatement>& statement) {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+		const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(currentExpressionReferenceIndex);
+		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+
+		analyzeTypeExpression(typeExpression);
 
 		if (!isScreamingSnakeCase(output->getIdentifier(identifierToken))) {
 			generateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE>(*output, identifierToken);
 
-			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
+			return;
+		}
+		else {
+			output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::CONSTANT);
 		}
 
-		// TODO
-		/* const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
-		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
-
-		output->define(statement);
+		Definition& definition = output->defineConstant(statement, typeExpression);
 
 		ExpressionEvaluation evaluation{};
 		evaluation.intermediateType = typeExpression.type;
 		evaluation.casting = false;
 		evaluation.constant = true;
-		evaluation.value = 0; */
+		evaluation.value = 0;
 
 		/* TODO
 		Start the eval with type = constant type.
@@ -161,11 +161,22 @@ namespace ProjectA {
 		- set converting to true
 		*/
 
-		/* evaluateNextExpression(evaluation);
+		evaluateNextExpression(evaluation);
+
+		if (!evaluation.constant) {
+			// TODO: Provide the expression range instead of the identifier range.
+			generateDiagnostic<DiagnosticCode::EXPRESSION_NOT_CONSTANT>(*output, identifierToken.start, identifierToken.getEnd());
+
+			return;
+		}
 
 		if (evaluation.intermediateType != typeExpression.type) {
 			generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, identifierToken);
-		} */
+
+			return;
+		}
+
+		definition.evaluatedInitializer = evaluation.value;
 	}
 
 	void SemanticAnalyzer::analyzeFunctionStatement(uint32 statementIndex, DocumentPosition end) const {
@@ -173,7 +184,7 @@ namespace ProjectA {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 		const std::string& identifier = output->getIdentifier(identifierToken);
 
-		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::FUNCTION, 0);
+		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::FUNCTION);
 
 		if (!isCamelCaseOrSnakeCase(identifier)) {
 			generateDiagnostic<DiagnosticCode::INVALID_FUNCTION_IDENTIFIER_CASE>(*output, identifierToken);
@@ -202,7 +213,7 @@ namespace ProjectA {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 		const std::string& identifier = output->getIdentifier(identifierToken);
 
-		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::PARAMETER, 0);
+		output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::PARAMETER);
 
 		if (!isCamelCaseOrSnakeCase(identifier)) {
 			generateDiagnostic<DiagnosticCode::INVALID_PARAMETER_IDENTIFIER_CASE>(*output, identifierToken);
@@ -218,7 +229,7 @@ namespace ProjectA {
 		output->nextScopeDefinitionCount += 1;
 	}
 
-	void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement>& statement) const {
+	void SemanticAnalyzer::analyzeVariableStatement(const ref<VariableStatement>& statement) {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 		const std::string& identifier = output->getIdentifier(identifierToken);
 
@@ -226,6 +237,13 @@ namespace ProjectA {
 			generateDiagnostic<DiagnosticCode::INVALID_VARIABLE_IDENTIFIER_CASE>(*output, identifierToken);
 
 			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
+		}
+
+		if (statement->constant) {
+			output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::CONSTANT);
+		}
+		else {
+			output->registerSemanticToken(statement->identifierTokenIndex, SemanticTokenType::VARIABLE);
 		}
 
 		const Definition* previousDefinition = output->getFirstDefinition(identifier);
@@ -236,28 +254,35 @@ namespace ProjectA {
 			return;
 		}
 
-		output->define(statement);
+		const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(currentExpressionReferenceIndex);
+		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
 
+		analyzeTypeExpression(typeExpression);
+
+		output->defineVariableOrConstant(statement, typeExpression);
+
+		// TODO: Test this path.
 		if (statement->constant) {
-			const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
-			const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
-
-			// TODO
-			BREAKPOINT();
-
-			/* ExpressionEvaluation evaluation{};
+			ExpressionEvaluation evaluation{};
 			evaluation.casting = false;
 			evaluation.constant = true;
 			evaluation.value = 0;
 
-			evaluateExpression(statement->initializerExpressionReferenceIndex, evaluation);
+			evaluateNextExpression(evaluation);
+
+			if (!evaluation.constant) {
+				// TODO: Provide the expression range instead of the identifier range.
+				generateDiagnostic<DiagnosticCode::EXPRESSION_NOT_CONSTANT>(*output, identifierToken.start, identifierToken.getEnd());
+
+				return;
+			}
 
 			// TODO: Also check vector/matrix/user-defined types.
-			if (typeExpression.type.typeIndex >= Type::FLOAT32 && typeExpression.type.typeIndex <= Type::UINT32) {
-				if (evaluation.intermediateType != typeExpression.type) {
-					generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, identifierToken);
-				}
-			} */
+			if (evaluation.intermediateType != typeExpression.type) {
+				generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, identifierToken);
+
+				return;
+			}
 		}
 	}
 
@@ -274,12 +299,12 @@ namespace ProjectA {
 				return;
 			}
 
-			output->registerSemanticToken(identifierToken, SemanticTokenType::FUNCTION, SemanticTokenModifier::PREDEFINED);
+			output->registerSemanticToken(identifierToken, SemanticTokenType::PREDEFINED);
 
 			return;
 		}
 
-		output->registerSemanticToken(expression.tokenIndex, definition->semanticTokenType, definition->semanticTokenModifierFlag);
+		output->registerSemanticToken(expression.tokenIndex, definition->semanticTokenType);
 	}
 
 	void SemanticAnalyzer::analyzeMemberAccessExpression(const Expression<ExpressionType::MEMBER_ACCESS>& expression) {
@@ -315,7 +340,7 @@ namespace ProjectA {
 				return;
 			}
 
-			output->registerSemanticToken(expression.typeTokenIndex, SemanticTokenType::STRUCTURE, 0);
+			output->registerSemanticToken(expression.typeTokenIndex, SemanticTokenType::STRUCTURE);
 
 			return;
 		}
@@ -498,6 +523,8 @@ namespace ProjectA {
 		const Expression<ExpressionType::UNARY>& expression = output->ast.getExpression<ExpressionType::UNARY>(byteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
+		evaluateNextExpression(evaluation);
+
 		switch (operatorToken.type) {
 			case TokenType::MINUS: {
 				evaluation.value = -evaluation.value;
@@ -521,11 +548,9 @@ namespace ProjectA {
 				break;
 			}
 		}
-
-		evaluateNextExpression(evaluation);
 	}
 
-	void SemanticAnalyzer::evaluateBinaryExpression(ExpressionEvaluation& evaluation, uint32 byteOffset) {
+	void SemanticAnalyzer::evaluateBinaryExpression(ExpressionEvaluation& leftEvaluation, uint32 byteOffset) {
 		const Expression<ExpressionType::BINARY>& expression = output->ast.getExpression<ExpressionType::BINARY>(byteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
@@ -533,8 +558,8 @@ namespace ProjectA {
 		rightEvaluation.constant = true;
 		rightEvaluation.value = 0;
 
-		evaluateNextExpression(evaluation);
-		evaluateNextExpression(evaluation);
+		evaluateNextExpression(leftEvaluation);
+		evaluateNextExpression(rightEvaluation);
 
 		switch (operatorToken.type) {
 			case TokenType::EQUAL:
@@ -547,82 +572,82 @@ namespace ProjectA {
 			case TokenType::AMPERSAND_EQUAL:
 			case TokenType::CARET_EQUAL:
 			case TokenType::VERTICAL_BAR_EQUAL: {
-				evaluation.constant = false;
+				leftEvaluation.constant = false;
 
 				break;
 			}
 			case TokenType::VERTICAL_BAR: {
-				evaluation.value |= rightEvaluation.value;
+				leftEvaluation.value |= rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::CARET: {
-				evaluation.value ^= rightEvaluation.value;
+				leftEvaluation.value ^= rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::AMPERSAND: {
-				evaluation.value &= rightEvaluation.value;
+				leftEvaluation.value &= rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET: {
-				evaluation.value <<= rightEvaluation.value;
+				leftEvaluation.value <<= rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET: {
-				evaluation.value >>= rightEvaluation.value;
+				leftEvaluation.value >>= rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::EQUAL_EQUAL: {
-				evaluation.value = evaluation.value == rightEvaluation.value;
+				leftEvaluation.value = leftEvaluation.value == rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::EXCLAMATION_EQUAL: {
-				evaluation.value = evaluation.value != rightEvaluation.value;
+				leftEvaluation.value = leftEvaluation.value != rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::LEFT_ANGLE_BRACKET: {
-				evaluation.value = evaluation.value < rightEvaluation.value;
+				leftEvaluation.value = leftEvaluation.value < rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::LEFT_ANGLE_BRACKET_EQUAL: {
-				evaluation.value = evaluation.value <= rightEvaluation.value;
+				leftEvaluation.value = leftEvaluation.value <= rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::RIGHT_ANGLE_BRACKET: {
-				evaluation.value = evaluation.value > rightEvaluation.value;
+				leftEvaluation.value = leftEvaluation.value > rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::RIGHT_ANGLE_BRACKET_EQUAL: {
-				evaluation.value = evaluation.value >= rightEvaluation.value;
+				leftEvaluation.value = leftEvaluation.value >= rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::ASTERISK: {
-				evaluation.value *= rightEvaluation.value;
+				leftEvaluation.value *= rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::SLASH: {
-				evaluation.value /= rightEvaluation.value;
+				leftEvaluation.value /= rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::PLUS: {
-				evaluation.value += rightEvaluation.value;
+				leftEvaluation.value += rightEvaluation.value;
 
 				break;
 			}
 			case TokenType::MINUS: {
-				evaluation.value -= rightEvaluation.value;
+				leftEvaluation.value -= rightEvaluation.value;
 
 				break;
 			}

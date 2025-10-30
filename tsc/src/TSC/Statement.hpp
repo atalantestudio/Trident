@@ -50,7 +50,6 @@ namespace ProjectA {
 	};
 
 	struct VariableStatement : public BaseStatement<StatementType::VARIABLE> {
-		uint32 typeExpressionReferenceIndex;
 		uint32 identifierTokenIndex;
 		bool constant;
 		bool initializer;

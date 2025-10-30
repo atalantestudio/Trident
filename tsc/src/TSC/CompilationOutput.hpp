@@ -7,7 +7,6 @@
 #include "PackedType.hpp"
 #include "Scope.hpp"
 #include "SemanticToken.hpp"
-#include "SemanticTokenModifier.hpp"
 #include "SemanticTokenType.hpp"
 #include "Token.hpp"
 #include "UserDefinedType.hpp"
@@ -146,24 +145,22 @@ namespace ProjectA {
 				tokens.emplace_back(token);
 			}
 
-			void registerSemanticToken(uint32 tokenIndex, SemanticTokenType type, uint32 modifiers) {
-				registerSemanticToken(tokens[tokenIndex], type, modifiers);
+			void registerSemanticToken(uint32 tokenIndex, SemanticTokenType type) {
+				registerSemanticToken(tokens[tokenIndex], type);
 			}
 
-			void registerSemanticToken(const Token& token, SemanticTokenType type, uint32 modifiers) {
+			void registerSemanticToken(const Token& token, SemanticTokenType type) {
 				SemanticToken semanticToken{};
 				semanticToken.type = type;
-				semanticToken.modifiers = modifiers;
 				semanticToken.start = token.start;
 				semanticToken.characterCount = token.characterCount;
 
-				registerSemanticToken(type, modifiers, token.start, token.characterCount);
+				registerSemanticToken(type, token.start, token.characterCount);
 			}
 
-			void registerSemanticToken(SemanticTokenType type, uint32 modifiers, DocumentPosition start, uint32 characterCount) {
+			void registerSemanticToken(SemanticTokenType type, DocumentPosition start, uint32 characterCount) {
 				SemanticToken semanticToken{};
 				semanticToken.type = type;
-				semanticToken.modifiers = modifiers;
 				semanticToken.start = start;
 				semanticToken.characterCount = characterCount;
 
@@ -228,7 +225,7 @@ namespace ProjectA {
 				return nullptr;
 			}
 
-			void define(PackedType type, SemanticTokenType semanticTokenType, uint32 semanticTokenModifierFlag, uint32 identifierTokenIndex, DocumentPosition end, uint32 size = 0, uint32 alignment = 0) {
+			Definition& define(PackedType type, SemanticTokenType semanticTokenType, uint32 identifierTokenIndex, DocumentPosition end, uint32 size = 0, uint32 alignment = 0) {
 				const Token& identifierToken = tokens[identifierTokenIndex];
 
 				Definition definition{};
@@ -237,18 +234,15 @@ namespace ProjectA {
 				definition.end = end;
 				definition.type = type;
 				definition.semanticTokenType = semanticTokenType;
-				definition.semanticTokenModifierFlag = semanticTokenModifierFlag;
 				definition.tokenIndex = identifierTokenIndex;
 				definition.identifier = getIdentifier(identifierToken);
 
-				openScopeDefinitions.emplace_back(definition);
+				return openScopeDefinitions.emplace_back(definition);
 			}
 
-			void defineStructure(const ref<StructureStatement>& statement, DocumentPosition end, uint32 memberCount) {
-				lastUserDefinedTypeIndex = static_cast<uint32>(userDefinedTypes.size());
-
+			UserDefinedType& defineStructure(const ref<StructureStatement>& statement, DocumentPosition end) {
 				const Token& identifierToken = tokens[statement->identifierTokenIndex];
-				const PackedType type = PackedType::fromTypeExpression(TokenType::IDENTIFIER, lastUserDefinedTypeIndex, 0);
+				const PackedType type = PackedType::fromTypeExpression(TokenType::IDENTIFIER, static_cast<uint32>(userDefinedTypes.size()), 0);
 
 				Definition definition{};
 				definition.identifierStart = identifierToken.start;
@@ -256,7 +250,6 @@ namespace ProjectA {
 				definition.end = end;
 				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::STRUCTURE;
-				definition.semanticTokenModifierFlag = 0;
 				definition.tokenIndex = statement->identifierTokenIndex;
 				definition.identifier = getIdentifier(identifierToken);
 
@@ -265,18 +258,10 @@ namespace ProjectA {
 				UserDefinedType userDefinedType{};
 				userDefinedType.identifierIndex = identifierToken.index;
 
-				userDefinedTypes.emplace_back(userDefinedType);
+				return userDefinedTypes.emplace_back(userDefinedType);
 			}
 
-			void updateStructureDefinition(uint32 size, uint32 alignment) {
-				UserDefinedType& userDefinedType = userDefinedTypes[lastUserDefinedTypeIndex];
-				userDefinedType.size = size;
-				userDefinedType.alignment = alignment;
-
-				lastUserDefinedTypeIndex = static_cast<uint32>(~0);
-			}
-
-			void defineMember(const ref<MemberStatement>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
+			Definition& defineMember(const ref<MemberStatement>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
 				const Token& identifierToken = tokens[statement->identifierTokenIndex];
 
 				Definition definition{};
@@ -285,58 +270,53 @@ namespace ProjectA {
 				definition.end = definition.identifierEnd;
 				definition.type = typeExpression.type;
 				definition.semanticTokenType = SemanticTokenType::MEMBER;
-				definition.semanticTokenModifierFlag = 0;
 				definition.tokenIndex = statement->identifierTokenIndex;
 				definition.identifier = getIdentifier(identifierToken);
 
-				openScopeDefinitions.emplace_back(definition);
+				return openScopeDefinitions.emplace_back(definition);
 			}
 
-			void define(const ref<ConstantStatement>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
+			Definition& defineConstant(const ref<ConstantStatement>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
 				const Token& identifierToken = tokens[statement->identifierTokenIndex];
 
-				define(typeExpression.type, SemanticTokenType::VARIABLE, SemanticTokenModifier::CONSTANT, statement->identifierTokenIndex, identifierToken.getEnd());
+				return define(typeExpression.type, SemanticTokenType::CONSTANT, statement->identifierTokenIndex, identifierToken.getEnd());
 			}
 
-			void define(const ref<VariableStatement>& statement) {
-				const ExpressionReference& typeExpressionReference = ast.getExpressionReference(statement->typeExpressionReferenceIndex);
-				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+			Definition& defineVariableOrConstant(const ref<VariableStatement>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
 				const Token& identifierToken = tokens[statement->identifierTokenIndex];
-				uint32 modifierFlag = 0;
+				SemanticTokenType semanticTokenType = SemanticTokenType::VARIABLE;
 
 				if (statement->constant) {
-					modifierFlag |= SemanticTokenModifier::CONSTANT;
+					semanticTokenType = SemanticTokenType::CONSTANT;
 				}
 
-				define(typeExpression.type, SemanticTokenType::VARIABLE, modifierFlag, statement->identifierTokenIndex, identifierToken.getEnd());
+				return define(typeExpression.type, semanticTokenType, statement->identifierTokenIndex, identifierToken.getEnd());
 			}
 
-			void defineFunction(const std::string& identifier, DocumentPosition end) {
+			Definition& defineFunction(const std::string& identifier, DocumentPosition end) {
 				Definition definition{};
 				definition.identifierStart = end;
 				definition.identifierEnd = end;
 				definition.end = end;
 				definition.type = PackedType(Type::FUNCTION, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
-				definition.semanticTokenModifierFlag = 0;
 				definition.tokenIndex = ~0;
 				definition.identifier = identifier;
 
-				openScopeDefinitions.emplace_back(definition);
+				return openScopeDefinitions.emplace_back(definition);
 			}
 
-			void defineFunction(const Token& identifierToken, DocumentPosition end) {
+			Definition& defineFunction(const Token& identifierToken, DocumentPosition end) {
 				Definition definition{};
 				definition.identifierStart = identifierToken.start;
 				definition.identifierEnd = identifierToken.getEnd();
 				definition.end = end;
 				definition.type = PackedType(Type::FUNCTION, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
-				definition.semanticTokenModifierFlag = 0;
 				definition.tokenIndex = ~0;
 				definition.identifier = getIdentifier(identifierToken);
 
-				openScopeDefinitions.emplace_back(definition);
+				return openScopeDefinitions.emplace_back(definition);
 			}
 
 			std::string getTokenString(const Token& token) const {
@@ -450,7 +430,6 @@ namespace ProjectA {
 
 			std::vector<std::string> identifiers;
 			std::vector<UserDefinedType> userDefinedTypes;
-			uint32 lastUserDefinedTypeIndex = UNDEFINED_INDEX;
 
 			std::vector<Definition> openScopeDefinitions;
 			uint32 nextScopeDefinitionCount = 0;

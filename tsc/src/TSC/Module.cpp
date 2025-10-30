@@ -37,12 +37,12 @@ namespace ProjectA {
 			.property("identifierStart", &Definition::identifierStart)
 			.property("identifierEnd", &Definition::identifierEnd)
 			.property("end", &Definition::end)
-			.property("semanticTokenModifiers", &Definition::semanticTokenModifierFlag)
 			.property("identifier", &Definition::identifier)
 			.property("memberCount", &Definition::memberCount)
 			.function("getTypeIndex", &Definition::getTypeIndex)
 			.function("getTemplateArgumentIndex", &Definition::getTemplateArgumentIndex)
-			.function("getSemanticTokenTypeIndex", &Definition::getSemanticTokenTypeIndex);
+			.function("getSemanticTokenTypeIndex", &Definition::getSemanticTokenTypeIndex)
+			.function("getEvaluatedInitializer", &Definition::getEvaluatedInitializer);
 
 		emscripten::class_<Diagnostic>("Diagnostic")
 			.property("start", &Diagnostic::start)
@@ -71,7 +71,6 @@ namespace ProjectA {
 		emscripten::class_<SemanticToken>("SemanticToken")
 			.property("start", &SemanticToken::start)
 			.property("length", &SemanticToken::characterCount)
-			.property("modifiers", &SemanticToken::modifiers)
 			.function("getTypeIndex", &SemanticToken::getTypeIndex);
 
 		emscripten::function("compile", &compile);
