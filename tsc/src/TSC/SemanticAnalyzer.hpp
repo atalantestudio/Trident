@@ -2,6 +2,7 @@
 
 #include "CompilationOutput.hpp"
 #include "ExpressionEvaluation.hpp"
+#include "OperatorType.hpp"
 #include "Statement.hpp"
 #include "Token.hpp"
 
@@ -11,15 +12,17 @@ namespace ProjectA {
 			void setCompilationOutput(CompilationOutput* compilationOutput);
 
 			void analyzeStructureStatement(uint32 statementIndex, const ref<StructureStatement>& statement, DocumentPosition end, uint32 memberTypeExpressionReferenceOffset);
-			void analyzeMemberStatement(uint32 structureStatementIndex, const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& statement) const;
+			void analyzeMemberStatement(uint32 structureStatementIndex, const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& statement);
 			void analyzeConstantStatement(const ref<ConstantStatement>& statement);
-			void analyzeFunctionStatement(uint32 statementIndex, DocumentPosition end) const;
+			void analyzeFunctionStatement(const ref<FunctionStatement>& statement, uint32 parameterTypeExpressionOffset, DocumentPosition end);
 			void analyzeParameterStatement(const ref<ParameterStatement>& statement) const;
 			void analyzeVariableStatement(const ref<VariableStatement>& statement);
+			void analyzeReturnStatement(const ref<ReturnStatement>& statement);
 
 			void analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression);
 			void analyzeMemberAccessExpression(const Expression<ExpressionType::MEMBER_ACCESS>& expression);
-			void analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression);
+
+			DiagnosticCode analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression);
 
 		private:
 			const AnnotationBlock& getAnnotationBlock(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount, Annotation annotation) const;
@@ -35,6 +38,9 @@ namespace ProjectA {
 			void evaluateMemberAccessExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
 			void evaluateCallExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
 			void evaluateTypeExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
+
+			sint64 applyBinaryOperator(sint64 lvalue, sint64 rvalue, OperatorType operatorType) const;
+			sint64 applyUnaryOperator(sint64 rvalue, OperatorType operatorType) const;
 
 		private:
 			CompilationOutput* output;

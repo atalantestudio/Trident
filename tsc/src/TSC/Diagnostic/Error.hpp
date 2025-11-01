@@ -250,6 +250,34 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::UNDEFINED_FUNCTION> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
+			Diagnostic diagnostic{};
+			diagnostic.start = identifierToken.start;
+			diagnostic.end = identifierToken.getEnd();
+			diagnostic.message = MODULE_FORMAT("Undefined function \"[]\".", output.getTokenString(identifierToken));
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::UNDEFINED_FUNCTION;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::UNDEFINED_FUNCTION_OVERLOAD> {
+		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
+			Diagnostic diagnostic{};
+			diagnostic.start = identifierToken.start;
+			diagnostic.end = identifierToken.getEnd();
+			diagnostic.message = MODULE_FORMAT("Cannot find overload for function \"[]\".", output.getTokenString(identifierToken));
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::UNDEFINED_FUNCTION_OVERLOAD;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::EXPRESSION_NOT_CONSTANT> {
 		explicit generateDiagnostic(CompilationOutput& output, DocumentPosition start, DocumentPosition end) {
 			Diagnostic diagnostic{};
@@ -313,9 +341,24 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = annotationToken.start;
 			diagnostic.end = annotationToken.getEnd();
-			diagnostic.message = MODULE_FORMAT("Annotation \"[]\" cannot be used on a member of type [].", ANNOTATION_STRINGS[static_cast<uint32>(annotation)], output.getPackedTypeString(type));
+			diagnostic.message = MODULE_FORMAT("Annotation \"[]\" cannot be used on a member of type [].", ANNOTATION_STRINGS[annotation], output.getPackedTypeString(type));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::ARGUMENT_COUNT_MISMATCH> {
+		// TODO: Highlight the argument range.
+		explicit generateDiagnostic(CompilationOutput& output, PackedType type, uint32 expectedArgumentCount, uint32 argumentCount) {
+			Diagnostic diagnostic{};
+			diagnostic.start = {0, 0};
+			diagnostic.end = {0, 0};
+			diagnostic.message = MODULE_FORMAT("[] constructor requires [] argument(s) but was provided with [].", output.getPackedTypeString(type), expectedArgumentCount, argumentCount);
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::ARGUMENT_COUNT_MISMATCH;
 
 			output.diagnostics.emplace_back(diagnostic);
 		}

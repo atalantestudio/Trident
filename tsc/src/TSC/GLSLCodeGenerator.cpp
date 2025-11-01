@@ -60,7 +60,7 @@ namespace ProjectA {
 	void GLSLCodeGenerator::writeMemberStatement(std::ofstream& stream, uint32 statementIndex) {
 		const ref<MemberStatement> statement = std::static_pointer_cast<MemberStatement>(output->ast.statements[statementIndex]);
 
-		if (statement->annotationFlag & (BIT(static_cast<uint32>(Annotation::INSTANCE_INDEX)) | BIT(static_cast<uint32>(Annotation::POSITION)) | BIT(static_cast<uint32>(Annotation::VERTEX_INDEX)))) {
+		if (statement->annotationFlag & ENTRY_POINT_ANNOTATION_MASK) {
 			currentExpressionReferenceIndex += 1;
 
 			return;

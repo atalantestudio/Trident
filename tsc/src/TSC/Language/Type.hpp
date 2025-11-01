@@ -54,7 +54,7 @@ namespace ProjectA {
 		BIT(FLOAT32) | BIT(FLOAT64),
 	};
 
-	static constexpr uint8 TYPE_COMPONENT_COUNTS[] = {
+	static constexpr uint8 TYPE_ALIGNED_COMPONENT_COUNTS[] = {
 		0,
 		1,
 		1,
@@ -96,5 +96,25 @@ namespace ProjectA {
 		2,
 		4,
 		4,
+	};
+
+	static constexpr uint8 TYPE_COMPONENT_COUNTS[] = {
+		0,
+		1,
+		1,
+		1,
+		1,
+		2,
+		3,
+		4,
+		4,
+		6,
+		8,
+		6,
+		9,
+		12,
+		8,
+		12,
+		16,
 	};
 }

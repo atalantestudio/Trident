@@ -3,6 +3,7 @@
 #include "AST.hpp"
 #include "Definition.hpp"
 #include "Diagnostic/Diagnostic.hpp"
+#include "Function.hpp"
 #include "Language/Type.hpp"
 #include "PackedType.hpp"
 #include "Scope.hpp"
@@ -45,11 +46,11 @@ namespace ProjectA {
 
 				uint32 index = type.typeIndex;
 
-				if (type.templateArgumentIndex > 0) {
+				if (type.templateArgumentIndex > Type::NONE) {
 					index = type.templateArgumentIndex;
 				}
 
-				return TYPE_COMPONENT_COUNTS[type.typeIndex] * TYPE_ALIGNMENTS[index];
+				return TYPE_ALIGNED_COMPONENT_COUNTS[type.typeIndex] * TYPE_ALIGNMENTS[index];
 			}
 
 			uint32 getAlignment(PackedType type) const {
@@ -65,7 +66,7 @@ namespace ProjectA {
 					return userDefinedType->alignment;
 				}
 
-				if (type.templateArgumentIndex > 0) {
+				if (type.templateArgumentIndex > Type::NONE) {
 					return TYPE_ALIGNMENTS[type.typeIndex] * TYPE_ALIGNMENTS[type.templateArgumentIndex];
 				}
 
@@ -80,6 +81,37 @@ namespace ProjectA {
 				}
 
 				return &userDefinedTypes[index];
+			}
+
+			bool isValidUserDefinedType(PackedType type) const {
+				DEBUG_ASSERT(type.hasUserDefinedType());
+
+				return getUserDefinedType(type.typeIndex) != nullptr;
+			}
+
+			uint32 getComponentCount(PackedType type) const {
+				if (type.hasUserDefinedType()) {
+					return getUserDefinedType(type.typeIndex)->constructorArgumentCount;
+				}
+
+				uint32 count = TYPE_COMPONENT_COUNTS[type.typeIndex];
+
+				if (type.templateArgumentIndex > Type::NONE) {
+					count *= TYPE_COMPONENT_COUNTS[type.templateArgumentIndex];
+				}
+
+				return count;
+			}
+
+			// TODO: Also check return type.
+			uint32 getFunctionIndex(uint32 identifierIndex) const {
+				for (uint32 functionIndex = 0; functionIndex < functions.size(); functionIndex += 1) {
+					if (functions[functionIndex].identifierIndex == identifierIndex) {
+						return functionIndex;
+					}
+				}
+
+				return ~0;
 			}
 
 			uint32 getUserDefinedTypeIndex(uint32 identifierIndex) const {
@@ -238,6 +270,7 @@ namespace ProjectA {
 
 				UserDefinedType userDefinedType{};
 				userDefinedType.identifierIndex = identifierToken.index;
+				userDefinedType.constructorArgumentCount = statement->memberCount;
 
 				return userDefinedTypes.emplace_back(userDefinedType);
 			}
@@ -274,7 +307,11 @@ namespace ProjectA {
 				return define(typeExpression.type, semanticTokenType, statement->identifierTokenIndex, identifierToken.getEnd());
 			}
 
-			Definition& defineFunction(const std::string& identifier, DocumentPosition end) {
+			Definition& defineFunction(const ref<FunctionStatement>& statement, uint32 parameterTypeExpressionOffset, DocumentPosition end) {
+				const Token& identifierToken = tokens[statement->identifierTokenIndex];
+
+				registerFunctionOverload(statement, parameterTypeExpressionOffset);
+
 				Definition definition{};
 				definition.identifierRange.start = end;
 				definition.identifierRange.end = end;
@@ -282,7 +319,7 @@ namespace ProjectA {
 				definition.type = PackedType(Type::FUNCTION, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
 				definition.tokenIndex = ~0;
-				definition.identifier = identifier;
+				definition.identifier = getIdentifier(identifierToken);
 
 				return openScopeDefinitions.emplace_back(definition);
 			}
@@ -387,7 +424,7 @@ namespace ProjectA {
 			}
 
 		private:
-			void registerDefaultDefinitions() {
+			/* void registerDefaultDefinitions() {
 				for (uint32 functionIndex = FIRST_FUNCTION_INDEX; functionIndex <= LAST_FUNCTION_INDEX; functionIndex += 1) {
 					const std::string functionIdentifier = RESERVED_KEYWORDS[functionIndex];
 
@@ -395,12 +432,55 @@ namespace ProjectA {
 
 					nextScopeDefinitionCount += 1;
 				}
+			} */
+
+			void registerFunctionOverload(const ref<FunctionStatement>& statement, uint32 parameterTypeExpressionOffset) {
+				const Token& identifierToken = tokens[statement->identifierTokenIndex];
+				const uint32 identifierIndex = identifierToken.index;
+
+				uint32 functionIndex = getFunctionIndex(identifierIndex);
+
+				if (functionIndex == ~0) {
+					functionIndex = registerFunction(identifierIndex);
+				}
+
+				// TODO: Compare with other overloads.
+				FunctionOverload functionOverload{};
+				uint32 parameterIndex = 0;
+
+				functionOverload.parameters.resize(statement->parameterStatementIndices.size());
+
+				while (parameterIndex < statement->parameterStatementIndices.size()) {
+					const ExpressionReference& parameterTypeExpressionReference = ast.getExpressionReference(parameterTypeExpressionOffset + parameterIndex);
+					const Expression<ExpressionType::TYPE>& parameterTypeExpression = ast.getExpression<ExpressionType::TYPE>(parameterTypeExpressionReference.byteOffset);
+
+					functionOverload.parameters[parameterIndex].type = parameterTypeExpression.type;
+
+					parameterIndex += 1;
+				}
+
+				functions[functionIndex].overloads.emplace_back(functionOverload);
+			}
+
+			// Registers a new function and returns its index.
+			uint32 registerFunction(uint32 identifierIndex) {
+				const uint32 functionIndex = static_cast<uint32>(functions.size());
+
+				Function function{};
+				function.identifierIndex = identifierIndex;
+
+				functions.emplace_back(function);
+
+				return functionIndex;
 			}
 
 		public:
 			// Source code. Must be conserved to show advanced errors.
 			// TODO: Is this the preprocessed source code?
 			std::string text;
+
+			// Language and user-defined functions.
+			std::vector<Function> functions;
 
 			AST ast;
 			std::vector<Token> tokens;

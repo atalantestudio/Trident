@@ -115,7 +115,7 @@ namespace ProjectA {
 
 		logger.closeObject();
 		logger.property("Identifier", output->getTokenString(identifierToken));
-		logger.property("Constant", statement->constant);
+		logger.propertyNonString("Constant", statement->constant);
 
 		if (statement->initializer) {
 			logger.propertyObject("Initializer");
@@ -374,7 +374,7 @@ namespace ProjectA {
 			logger.property("Callee", "null");
 		}
 
-		logger.property("ArgumentCount", expression.argumentCount);
+		logger.propertyNonString("ArgumentCount", expression.argumentCount);
 		logger.propertyArray("Arguments");
 
 		uint32 argumentIndex = 0;
@@ -411,10 +411,10 @@ namespace ProjectA {
 			logger.openObject();
 			logger.property("Annotation", output->getTokenString(identifierToken));
 
-			if (annotationBlock.valueTokenIndex != UNDEFINED_ANNOTATION_VALUE) {
+			if (annotationBlock.valueTokenIndex != UNDEFINED_TOKEN) {
 				const Token& valueToken = output->tokens[annotationBlock.valueTokenIndex];
 
-				logger.propertyNonString("Value", std::stoul(output->getTokenString(valueToken)));
+				logger.propertyNonString("Value", std::stoull(output->getTokenString(valueToken)));
 			}
 
 			logger.closeObject();

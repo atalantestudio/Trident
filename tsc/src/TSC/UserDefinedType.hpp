@@ -5,5 +5,6 @@ namespace ProjectA {
 		uint32 identifierIndex;
 		uint32 size;
 		uint32 alignment;
+		uint32 constructorArgumentCount;
 	};
 }

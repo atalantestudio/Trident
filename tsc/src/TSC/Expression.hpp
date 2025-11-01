@@ -31,23 +31,28 @@ namespace ProjectA {
 	struct Expression<ExpressionType::UNARY> {
 		// TODO: Replace by an unary operator index.
 		uint32 operatorTokenIndex;
+
+		// The right expression directly follows.
 	};
 
 	template<>
 	struct Expression<ExpressionType::BINARY> {
-		// TODO: Replace by an binary operator index.
+		// TODO: Replace by a binary operator index.
 		uint32 operatorTokenIndex;
+
+		// The left and right expressions directly follow.
 	};
 
 	template<>
-	struct Expression<ExpressionType::GROUP> {};
+	struct Expression<ExpressionType::GROUP> {
+		// The expression directly follows.
+	};
 
 	template<>
 	struct Expression<ExpressionType::MEMBER_ACCESS> {
-		// TODO: Should preceed.
-		uint32 leftExpressionReferenceIndex;
-
 		uint32 identifierTokenIndex;
+
+		// TODO: The right expression directly follows.
 	};
 
 	template<>

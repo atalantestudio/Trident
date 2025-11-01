@@ -9,12 +9,11 @@ namespace ProjectA {
 			PackedType packedType;
 
 			if (type == TokenType::IDENTIFIER) {
-				if (typeIndex == ~0) {
-					packedType.typeIndex = Type::NONE;
+				if (typeIndex < ~0) {
+					typeIndex += Type::USER_DEFINED;
 				}
-				else {
-					packedType.typeIndex = static_cast<Type>(Type::USER_DEFINED + typeIndex);
-				}
+
+				packedType.typeIndex = static_cast<Type>(typeIndex);
 			}
 			else {
 				packedType.typeIndex = static_cast<Type>(type - TokenType::TYPE_FLOAT32 + 1);

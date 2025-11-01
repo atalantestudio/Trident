@@ -85,8 +85,15 @@ namespace ProjectA {
 		} */
 	}
 
-	void SemanticAnalyzer::analyzeMemberStatement(uint32 structureStatementIndex, const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& statement) const {
+	void SemanticAnalyzer::analyzeMemberStatement(uint32 structureStatementIndex, const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& statement) {
 		analyzeAnnotationBlocks(statement->annotationBlockIndexOffset, statement->annotationBlockCount);
+
+		const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(currentExpressionReferenceIndex);
+		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+
+		if (analyzeTypeExpression(typeExpression) != DiagnosticCode::SUCCESS) {
+			return;
+		}
 
 		output->registerSemanticToken(SemanticTokenType::MEMBER, statement->identifierTokenIndex);
 
@@ -111,10 +118,7 @@ namespace ProjectA {
 			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
 		}
 
-		// TODO
-		/* if (statement->annotationFlag & BIT(static_cast<uint32>(Annotation::POSITION))) {
-			const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(statement->typeExpressionReferenceIndex);
-			const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+		if (statement->annotationFlag & BIT(static_cast<uint32>(Annotation::POSITION))) {
 			const PackedType type = typeExpression.type;
 
 			if (type.typeIndex != Type::VEC4 || type.templateArgumentIndex != Type::FLOAT32) {
@@ -122,7 +126,7 @@ namespace ProjectA {
 
 				generateDiagnostic<DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION>(*output, Annotation::POSITION, type, annotationBlock.identifierTokenIndex);
 			}
-		} */
+		}
 	}
 
 	void SemanticAnalyzer::analyzeConstantStatement(const ref<ConstantStatement>& statement) {
@@ -130,7 +134,9 @@ namespace ProjectA {
 		const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(currentExpressionReferenceIndex);
 		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
 
-		analyzeTypeExpression(typeExpression);
+		if (analyzeTypeExpression(typeExpression) != DiagnosticCode::SUCCESS) {
+			return;
+		}
 
 		if (!isScreamingSnakeCase(output->getIdentifier(identifierToken))) {
 			generateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE>(*output, identifierToken);
@@ -144,21 +150,24 @@ namespace ProjectA {
 		Definition& definition = output->defineConstant(statement, typeExpression);
 
 		ExpressionEvaluation evaluation{};
+		evaluation.type = typeExpression.type;
 		evaluation.intermediateType = typeExpression.type;
 		evaluation.casting = false;
 		evaluation.constant = true;
-		evaluation.value = 0;
 
-		/* TODO
-		Start the eval with type = constant type.
-		If different type found:
-		- If converting is true, OK
-		- Else, conversion error
+		// TODO
+		/*
+			Start the evaluation with type = constant type.
 
-		If constructor found:
-		- diagnostic if same type
-		- set type to constructor type
-		- set converting to true
+			If different type found:
+			- If converting is true, OK
+			- Else, conversion error
+
+			If constructor found:
+			- compare the number of arguments with each overload of the constructor/function
+			- info diagnostic if same type
+			- set type to constructor type
+			- set converting to true
 		*/
 
 		evaluateNextExpression(evaluation);
@@ -176,37 +185,45 @@ namespace ProjectA {
 			return;
 		}
 
-		definition.evaluatedInitializer = evaluation.value;
+		definition.evaluatedInitializer = evaluation.components.back();
 	}
 
-	void SemanticAnalyzer::analyzeFunctionStatement(uint32 statementIndex, DocumentPosition end) const {
-		const ref<FunctionStatement> statement = std::static_pointer_cast<FunctionStatement>(output->ast.statements[statementIndex]);
+	void SemanticAnalyzer::analyzeFunctionStatement(const ref<FunctionStatement>& statement, uint32 parameterTypeExpressionOffset, DocumentPosition end) {
 		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
 		const std::string& identifier = output->getIdentifier(identifierToken);
-
-		output->registerSemanticToken(SemanticTokenType::FUNCTION, statement->identifierTokenIndex);
 
 		if (!isCamelCaseOrSnakeCase(identifier)) {
 			generateDiagnostic<DiagnosticCode::INVALID_FUNCTION_IDENTIFIER_CASE>(*output, identifierToken);
 
-			// NOTE: This situation is invalid, but we still continue to help the user search for references to replace.
-		}
-
-		output->defineFunction(identifierToken, end);
-
-		if (statementIndex == 0) {
-			generateDiagnostic<DiagnosticCode::NO_RETURN>(*output, identifierToken);
-
 			return;
 		}
 
+		if (statement->returnType) {
+			const ExpressionReference& returnTypeExpressionReference = output->ast.getExpressionReference(currentExpressionReferenceIndex);
+			const Expression<ExpressionType::TYPE>& returnTypeExpression = output->ast.getExpression<ExpressionType::TYPE>(returnTypeExpressionReference.byteOffset);
+
+			if (analyzeTypeExpression(returnTypeExpression) != DiagnosticCode::SUCCESS) {
+				return;
+			}
+		}
+
+		output->registerSemanticToken(SemanticTokenType::FUNCTION, statement->identifierTokenIndex);
+		output->defineFunction(statement, parameterTypeExpressionOffset, end);
+
+		// TODO
+		/* if (statementIndex == 0) {
+			generateDiagnostic<DiagnosticCode::NO_RETURN>(*output, identifierToken);
+
+			return;
+		} */
+
 		// TODO: Check that there is no return statement.
-		const uint32 previousStatementIndex = statementIndex - 1;
+		/* const uint32 previousStatementIndex = statementIndex - 1;
 		const ref<Statement> previousStatement = output->ast.statements[previousStatementIndex];
 
 		if (previousStatement->statementType != StatementType::RETURN) {
 			generateDiagnostic<DiagnosticCode::NO_RETURN>(*output, identifierToken);
-		}
+		} */
 	}
 
 	void SemanticAnalyzer::analyzeParameterStatement(const ref<ParameterStatement>& statement) const {
@@ -257,33 +274,53 @@ namespace ProjectA {
 		const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(currentExpressionReferenceIndex);
 		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
 
-		analyzeTypeExpression(typeExpression);
+		if (analyzeTypeExpression(typeExpression) != DiagnosticCode::SUCCESS) {
+			return;
+		}
 
 		output->defineVariableOrConstant(statement, typeExpression);
 
-		// TODO: Test this path.
-		if (statement->constant) {
-			ExpressionEvaluation evaluation{};
-			evaluation.casting = false;
-			evaluation.constant = true;
-			evaluation.value = 0;
+		ExpressionEvaluation evaluation{};
+		evaluation.type = typeExpression.type;
+		evaluation.intermediateType = typeExpression.type;
+		evaluation.casting = false;
+		evaluation.constant = statement->constant;
 
-			evaluateNextExpression(evaluation);
+		evaluateNextExpression(evaluation);
 
-			if (!evaluation.constant) {
-				// TODO: Provide the expression range instead of the identifier range.
-				generateDiagnostic<DiagnosticCode::EXPRESSION_NOT_CONSTANT>(*output, identifierToken.start, identifierToken.getEnd());
+		if (statement->constant && !evaluation.constant) {
+			// TODO: Provide the expression range instead of the identifier range.
+			generateDiagnostic<DiagnosticCode::EXPRESSION_NOT_CONSTANT>(*output, identifierToken.start, identifierToken.getEnd());
 
-				return;
-			}
-
-			// TODO: Also check vector/matrix/user-defined types.
-			if (evaluation.intermediateType != typeExpression.type) {
-				generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, identifierToken);
-
-				return;
-			}
+			return;
 		}
+
+		// TODO: Also check vector/matrix/user-defined types.
+		if (evaluation.intermediateType != typeExpression.type) {
+			generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, identifierToken);
+
+			return;
+		}
+	}
+
+	void SemanticAnalyzer::analyzeReturnStatement(const ref<ReturnStatement>& statement) {
+		// TODO
+		const PackedType type(Type::NONE, Type::NONE);
+
+		ExpressionEvaluation evaluation{};
+		evaluation.type = type;
+		evaluation.intermediateType = type;
+		evaluation.casting = false;
+		evaluation.constant = true;
+
+		evaluateNextExpression(evaluation);
+
+		// TODO
+		/* if (evaluation.intermediateType != type) {
+			generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(*output, identifierToken);
+
+			return;
+		} */
 	}
 
 	void SemanticAnalyzer::analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression) {
@@ -320,16 +357,14 @@ namespace ProjectA {
 		}
 	}
 
-	void SemanticAnalyzer::analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) {
+	DiagnosticCode SemanticAnalyzer::analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression) {
 		currentExpressionReferenceIndex += 1;
 
-		if (expression.type.typeIndex == Type::NONE || expression.type.hasUserDefinedType()) {
-			const UserDefinedType* userDefinedType = output->getUserDefinedType(expression.type.typeIndex);
-
-			if (userDefinedType == nullptr) {
+		if (expression.type.hasUserDefinedType()) {
+			if (!output->isValidUserDefinedType(expression.type)) {
 				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, expression.typeTokenIndex);
 
-				return;
+				return DiagnosticCode::UNDEFINED_TYPE;
 			}
 
 			if (expression.type.templateArgumentIndex > 0) {
@@ -337,31 +372,33 @@ namespace ProjectA {
 
 				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex, expression.templateArgumentTokenIndex);
 
-				return;
+				return DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
 			}
 
 			output->registerSemanticToken(SemanticTokenType::STRUCTURE, expression.typeTokenIndex);
 
-			return;
+			return DiagnosticCode::SUCCESS;
 		}
 
 		const uint16 templateArgumentMask = TYPE_TEMPLATE_ARGUMENT_MASKS[expression.type.typeIndex];
 
 		if (expression.type.templateArgumentIndex == 0) {
 			if (templateArgumentMask == 0) {
-				return;
+				return DiagnosticCode::SUCCESS;
 			}
 
 			generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex);
 
-			return;
+			return DiagnosticCode::MISSING_TEMPLATE_ARGUMENT;
 		}
 
 		if (templateArgumentMask & BIT(expression.type.templateArgumentIndex)) {
-			return;
+			return DiagnosticCode::SUCCESS;
 		}
 
 		generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex, expression.templateArgumentTokenIndex);
+
+		return DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
 	}
 
 	const AnnotationBlock& SemanticAnalyzer::getAnnotationBlock(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount, Annotation annotation) const {
@@ -390,8 +427,9 @@ namespace ProjectA {
 
 		for (uint32 annotationBlockIndex = 0; annotationBlockIndex < annotationBlockCount; annotationBlockIndex += 1) {
 			const AnnotationBlock& annotationBlock = output->ast.annotationBlocks[annotationBlockIndexOffset + annotationBlockIndex];
+			const uint32 annotationBit = BIT(annotationBlock.annotation);
 
-			if (uniqueAnnotationFlag & BIT(static_cast<uint32>(annotationBlock.annotation))) {
+			if (uniqueAnnotationFlag & annotationBit) {
 				const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
 				generateDiagnostic<DiagnosticCode::DUPLICATE_ANNOTATION>(*output, identifierToken);
@@ -420,65 +458,8 @@ namespace ProjectA {
 				}
 			}
 
-			uniqueAnnotationFlag |= BIT(static_cast<uint32>(annotationBlock.annotation));
+			uniqueAnnotationFlag |= annotationBit;
 		}
-
-			/* if (!annotationBlock.value.value.empty()) {
-				// ERROR: Annotation "annotation" doesn't require a value but was provided with one.
-				if (ANNOTATION_TYPE_NONE & annotationBlock.annotation) {
-					compilationOutput->generateDiagnostic(
-						DiagnosticSeverity::ERROR,
-						"Annotation \"" + getAnnotationString(annotationBlock.annotation) + "\" doesn't require a value but was provided with one.",
-						annotationBlock.value.start,
-						annotationBlock.value.getEnd()
-					);
-				}
-
-				if (ANNOTATION_TYPE_UINT32 & annotationBlock.annotation && (annotationBlock.value.type != TokenType::LITERAL_FLOATING_POINT && annotationBlock.value.type != TokenType::LITERAL_INTEGER)) {
-					// ERROR: Annotation "annotation" requires a uint32 value but was not provided with an integer value.
-					compilationOutput->generateDiagnostic(
-						DiagnosticSeverity::ERROR,
-						"Annotation \"" + getAnnotationString(annotationBlock.annotation) + "\" requires a uint32 value but was not provided with an integer value.",
-						annotationBlock.value.start,
-						annotationBlock.value.getEnd()
-					);
-				}
-			}
-			else {
-				if (ANNOTATION_TYPE_UINT32 & annotationBlock.annotation) {
-					// ERROR: Annotation "annotation" requires a uint32 value but was not provided with one.
-					compilationOutput->generateDiagnostic(
-						DiagnosticSeverity::ERROR,
-						"Annotation \"" + getAnnotationString(annotationBlock.annotation) + "\" requires a uint32 value but was not provided with one.",
-						annotationBlock.identifier.start,
-						annotationBlock.identifier.getEnd()
-					);
-				}
-			}
-		}
-
-		const Token& typeToken = compilationOutput->tokens[statement->typeTokenIndex];
-		const Token& templateArgumentToken = compilationOutput->tokens[statement->templateArgumentTokenIndex];
-
-		if (combinedAnnotationFlag & Annotation::POSITION && (typeToken.value != "vec4" || templateArgumentToken.value != "float32")) {
-			// ERROR: Cannot annotate member of type "type" with annotation "position".
-			if (!templateArgumentToken.value.empty()) {
-				compilationOutput->generateDiagnostic(
-					DiagnosticSeverity::ERROR,
-					"Cannot annotate member of type \"" + typeToken.value + "<" + output->getTokenString(templateArgumentToken) + ">\" with annotation \"" + getAnnotationString(Annotation::POSITION) + "\".",
-					typeToken.start,
-					templateArgumentToken.getEnd()
-				);
-			}
-			else {
-				compilationOutput->generateDiagnostic(
-					DiagnosticSeverity::ERROR,
-					"Cannot annotate member of type " + output->getTokenString(typeToken) + " with annotation \"" + getAnnotationString(Annotation::POSITION) + "\".",
-					typeToken.start,
-					typeToken.getEnd()
-				);
-			}
-		} */
 	}
 
 	void SemanticAnalyzer::evaluateNextExpression(ExpressionEvaluation& evaluation) {
@@ -501,16 +482,15 @@ namespace ProjectA {
 	void SemanticAnalyzer::evaluateLiteralExpression(ExpressionEvaluation& evaluation, uint32 byteOffset) {
 		const Expression<ExpressionType::LITERAL>& expression = output->ast.getExpression<ExpressionType::LITERAL>(byteOffset);
 		const Token& token = output->tokens[expression.tokenIndex];
+		const sint64 component = output->getLiteral(token.index);
 
-		evaluation.value = output->getLiteral(token.index);
+		evaluation.components.back() = component;
 
-		if (token.type == TokenType::LITERAL_FLOATING_POINT) {
-			if (evaluation.intermediateType.typeIndex != Type::FLOAT32 && evaluation.intermediateType.typeIndex != Type::FLOAT64) {
-				generateDiagnostic<DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT>(*output, token, evaluation.intermediateType);
+		if (token.type == TokenType::LITERAL_FLOATING_POINT && evaluation.intermediateType.typeIndex != Type::FLOAT32 && evaluation.intermediateType.typeIndex != Type::FLOAT64) {
+			generateDiagnostic<DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT>(*output, token, evaluation.intermediateType);
 
-				// TODO: Stop evaluating the expression.
-				return;
-			}
+			// TODO: Stop evaluating the expression.
+			return;
 		}
 	}
 
@@ -525,29 +505,7 @@ namespace ProjectA {
 
 		evaluateNextExpression(evaluation);
 
-		switch (operatorToken.type) {
-			case TokenType::MINUS: {
-				evaluation.value = -evaluation.value;
-
-				break;
-			}
-			case TokenType::EXCLAMATION: {
-				evaluation.value = !evaluation.value;
-
-				break;
-			}
-			case TokenType::TILDE: {
-				evaluation.value = ~evaluation.value;
-
-				break;
-			}
-			default: {
-				DEBUG_ASSERT(false);
-			}
-			case TokenType::PLUS: {
-				break;
-			}
-		}
+		evaluation.components.back() += (applyUnaryOperator(evaluation.components.back(), static_cast<OperatorType>(operatorToken.type - TokenType::PLUS)));
 	}
 
 	void SemanticAnalyzer::evaluateBinaryExpression(ExpressionEvaluation& leftEvaluation, uint32 byteOffset) {
@@ -556,7 +514,7 @@ namespace ProjectA {
 
 		ExpressionEvaluation rightEvaluation{};
 		rightEvaluation.constant = true;
-		rightEvaluation.value = 0;
+		rightEvaluation.components.back() = 0;
 
 		evaluateNextExpression(leftEvaluation);
 		evaluateNextExpression(rightEvaluation);
@@ -574,89 +532,14 @@ namespace ProjectA {
 			case TokenType::VERTICAL_BAR_EQUAL: {
 				leftEvaluation.constant = false;
 
-				break;
-			}
-			case TokenType::VERTICAL_BAR: {
-				leftEvaluation.value |= rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::CARET: {
-				leftEvaluation.value ^= rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::AMPERSAND: {
-				leftEvaluation.value &= rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET: {
-				leftEvaluation.value <<= rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET: {
-				leftEvaluation.value >>= rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::EQUAL_EQUAL: {
-				leftEvaluation.value = leftEvaluation.value == rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::EXCLAMATION_EQUAL: {
-				leftEvaluation.value = leftEvaluation.value != rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::LEFT_ANGLE_BRACKET: {
-				leftEvaluation.value = leftEvaluation.value < rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::LEFT_ANGLE_BRACKET_EQUAL: {
-				leftEvaluation.value = leftEvaluation.value <= rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::RIGHT_ANGLE_BRACKET: {
-				leftEvaluation.value = leftEvaluation.value > rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::RIGHT_ANGLE_BRACKET_EQUAL: {
-				leftEvaluation.value = leftEvaluation.value >= rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::ASTERISK: {
-				leftEvaluation.value *= rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::SLASH: {
-				leftEvaluation.value /= rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::PLUS: {
-				leftEvaluation.value += rightEvaluation.value;
-
-				break;
-			}
-			case TokenType::MINUS: {
-				leftEvaluation.value -= rightEvaluation.value;
-
-				break;
+				return;
 			}
 			default: {
-				DEBUG_ASSERT(false);
-
 				break;
 			}
 		}
+
+		leftEvaluation.components.back() = applyBinaryOperator(leftEvaluation.components.back(), rightEvaluation.components.back(), static_cast<OperatorType>(operatorToken.type - TokenType::VERTICAL_BAR));
 	}
 
 	void SemanticAnalyzer::evaluateGroupExpression(ExpressionEvaluation& evaluation, uint32 byteOffset) {
@@ -674,13 +557,120 @@ namespace ProjectA {
 		const Expression<ExpressionType::CALL>& expression = output->ast.getExpression<ExpressionType::CALL>(byteOffset);
 
 		if (expression.explicitCallee) {
+			const ExpressionReference& calleeExpressionReference = output->ast.getExpressionReference(currentExpressionReferenceIndex);
+
+			currentExpressionReferenceIndex += 1;
+
+			switch (calleeExpressionReference.type) {
+				case ExpressionType::IDENTIFIER: {
+					// Function call
+					const Expression<ExpressionType::IDENTIFIER>& identifierExpression = output->ast.getExpression<ExpressionType::IDENTIFIER>(calleeExpressionReference.byteOffset);
+					const Token& identifierToken = output->tokens[identifierExpression.tokenIndex];
+					const uint32 functionIndex = output->getFunctionIndex(identifierToken.index);
+
+					if (functionIndex == ~0) {
+						generateDiagnostic<DiagnosticCode::UNDEFINED_FUNCTION>(*output, identifierToken);
+
+						return;
+					}
+
+					// TODO
+					// 3. For each overload, compare the parameter count and types with the actual arguments provided in the call expression.
+					// 4. If no overload match (count isn't the same OR a type doesn't match), generate UNDEFINED_OVERLOAD diagnostic.
+					const Function& function = output->functions[functionIndex];
+					uint32 overloadIndex = 0;
+					bool resolvedOverload = false;
+
+					while (overloadIndex < function.overloads.size()) {
+						const FunctionOverload& overload = function.overloads[overloadIndex];
+						const uint32 parameterCount = static_cast<uint32>(overload.parameters.size());
+
+						uint32 parameterIndex = 0;
+
+						// NOTE
+						// Even if the parameter count is different, we must compare the overload
+						// because the component count of the unwrapped arguments might still match.
+						while (parameterIndex < parameterCount) {
+							const FunctionOverloadParameter& parameter = overload.parameters[parameterIndex];
+
+							ExpressionEvaluation argumentEvaluation{};
+							argumentEvaluation.type = parameter.type;
+							argumentEvaluation.intermediateType = parameter.type;
+							argumentEvaluation.constant = false;
+							argumentEvaluation.casting = false;
+
+							evaluateNextExpression(argumentEvaluation);
+
+							parameterIndex += static_cast<uint32>(argumentEvaluation.components.size());
+						}
+
+						if (parameterCount == expression.argumentCount) {
+							resolvedOverload = true;
+
+							break;
+						}
+
+						overloadIndex += 1;
+					}
+
+					if (!resolvedOverload) {
+						// TODO: Also compare unwrapped argument count.
+						generateDiagnostic<DiagnosticCode::UNDEFINED_FUNCTION_OVERLOAD>(*output, identifierToken);
+
+						return;
+					}
+
+					BREAKPOINT();
+
+					break;
+				}
+				case ExpressionType::TYPE: {
+					// Explicit constructor call
+					const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(calleeExpressionReference.byteOffset);
+					const PackedType type = typeExpression.type;
+
+					const uint32 expectedArgumentCount = output->getComponentCount(type);
+
+					if (expression.argumentCount != expectedArgumentCount) {
+						generateDiagnostic<DiagnosticCode::ARGUMENT_COUNT_MISMATCH>(*output, type, expectedArgumentCount, expression.argumentCount);
+
+						return;
+					}
+
+					BREAKPOINT();
+
+					break;
+				}
+				default: {
+					break;
+				}
+			}
+
 			evaluateNextExpression(evaluation);
 		}
+		else {
+			// Implicit constructor call
+			const PackedType type = evaluation.type;
+			const uint32 expectedArgumentCount = output->getComponentCount(type);
+
+			if (expression.argumentCount != expectedArgumentCount) {
+				generateDiagnostic<DiagnosticCode::ARGUMENT_COUNT_MISMATCH>(*output, type, expectedArgumentCount, expression.argumentCount);
+
+				return;
+			}
+		}
+
+		BREAKPOINT();
 
 		uint32 argumentIndex = 0;
 
 		while (argumentIndex < expression.argumentCount) {
-			evaluateNextExpression(evaluation);
+			ExpressionEvaluation argumentEvaluation{};
+
+			evaluateNextExpression(argumentEvaluation);
+
+			// TODO
+			// evaluation.components.emplace_back(argumentEvaluation.components);
 
 			argumentIndex += 1;
 		}
@@ -699,5 +689,82 @@ namespace ProjectA {
 
 		evaluation.intermediateType = expression.type;
 		evaluation.casting = true;
+	}
+
+	sint64 SemanticAnalyzer::applyBinaryOperator(sint64 lvalue, sint64 rvalue, OperatorType operatorType) const {
+		switch (operatorType) {
+			case OperatorType::VERTICAL_BAR: {
+				return lvalue |= rvalue;
+			}
+			case OperatorType::CARET: {
+				return lvalue ^= rvalue;
+			}
+			case OperatorType::AMPERSAND: {
+				return lvalue &= rvalue;
+			}
+			case OperatorType::LEFT_ANGLE_BRACKET_LEFT_ANGLE_BRACKET: {
+				return lvalue <<= rvalue;
+			}
+			case OperatorType::RIGHT_ANGLE_BRACKET_RIGHT_ANGLE_BRACKET: {
+				return lvalue >>= rvalue;
+			}
+			case OperatorType::EQUAL_EQUAL: {
+				return lvalue == rvalue;
+			}
+			case OperatorType::EXCLAMATION_EQUAL: {
+				return lvalue != rvalue;
+			}
+			case OperatorType::LEFT_ANGLE_BRACKET: {
+				return lvalue < rvalue;
+			}
+			case OperatorType::LEFT_ANGLE_BRACKET_EQUAL: {
+				return lvalue <= rvalue;
+			}
+			case OperatorType::RIGHT_ANGLE_BRACKET: {
+				return lvalue > rvalue;
+			}
+			case OperatorType::RIGHT_ANGLE_BRACKET_EQUAL: {
+				return lvalue >= rvalue;
+			}
+			case OperatorType::ASTERISK: {
+				return lvalue *= rvalue;
+			}
+			case OperatorType::SLASH: {
+				return lvalue /= rvalue;
+			}
+			case OperatorType::PLUS: {
+				return lvalue += rvalue;
+			}
+			case OperatorType::MINUS: {
+				return lvalue -= rvalue;
+			}
+			default: {
+				DEBUG_ASSERT(false);
+
+				return 0;
+			}
+		}
+	}
+
+	sint64 SemanticAnalyzer::applyUnaryOperator(sint64 rvalue, OperatorType operatorType) const {
+		switch (operatorType) {
+			case OperatorType::PLUS: {
+				return rvalue;
+			}
+			case OperatorType::MINUS: {
+				return -rvalue;
+			}
+			case OperatorType::EXCLAMATION: {
+				return !rvalue;
+			}
+			case OperatorType::TILDE: {
+				return ~rvalue;
+			}
+			default: {
+				DEBUG_ASSERT(false);
+
+				return 0;
+			}
+		}
 	}
 }

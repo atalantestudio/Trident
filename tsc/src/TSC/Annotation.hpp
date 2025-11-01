@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	enum class Annotation : uint32 {
+	enum Annotation : uint8 {
 		BINDING,
 		CONSTANT,
 		INSTANCE_INDEX,
@@ -10,22 +10,14 @@ namespace ProjectA {
 		SET,
 		VERTEX_INDEX,
 
-		__COUNT,
+		ANNOTATION_COUNT,
 	};
 
-	AS_FLAG(Annotation);
+	static constexpr uint32 ENTRY_POINT_ANNOTATION_MASK = BIT(INSTANCE_INDEX) | BIT(POSITION) | BIT(VERTEX_INDEX);
+	static constexpr uint32 ANNOTATION_TYPE_NONE = BIT(INSTANCE_INDEX) | BIT(POSITION) | BIT(VERTEX_INDEX);
+	static constexpr uint32 ANNOTATION_TYPE_UINT32 = BIT(BINDING) | BIT(CONSTANT) | BIT(LOCATION) | BIT(SET);
 
-	static constexpr uint32 ANNOTATION_TYPE_NONE =
-		BIT(static_cast<uint32>(Annotation::INSTANCE_INDEX)) |
-		BIT(static_cast<uint32>(Annotation::POSITION)) |
-		BIT(static_cast<uint32>(Annotation::VERTEX_INDEX));
-	static constexpr uint32 ANNOTATION_TYPE_UINT32 =
-		BIT(static_cast<uint32>(Annotation::BINDING)) |
-		BIT(static_cast<uint32>(Annotation::CONSTANT)) |
-		BIT(static_cast<uint32>(Annotation::LOCATION)) |
-		BIT(static_cast<uint32>(Annotation::SET));
-
-	static constexpr const char8* ANNOTATION_STRINGS[static_cast<uint32>(Annotation::__COUNT)] = {
+	static constexpr const char8* ANNOTATION_STRINGS[ANNOTATION_COUNT] = {
 		"binding",
 		"constant",
 		"instanceIndex",

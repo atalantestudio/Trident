@@ -49,13 +49,11 @@ namespace ProjectA {
 
 			DiagnosticCode parseIdentifierExpression();
 			DiagnosticCode parseMemberAccessExpression();
-			DiagnosticCode parseCallOrGroupExpression(uint32 insertionIndex);
+			DiagnosticCode parseCallOrGroupExpression(uint32 insertionIndex, bool explicitCallee);
 			DiagnosticCode parseLiteralExpression();
 			DiagnosticCode parseGroupExpression();
 
 			DiagnosticCode parseAnnotationBlocks();
-
-			uint32 getLastStatementIndex() const;
 
 			Token read() const;
 			Token peek() const;
