@@ -201,7 +201,7 @@ namespace ProjectA {
 
 			void openScope(DocumentPosition start) {
 				Scope scope{};
-				scope.start = start;
+				scope.range.start = start;
 				scope.parentScopeIndex = currentScopeIndex;
 				scope.definitionIndexOffset = static_cast<uint32>(openScopeDefinitions.size()) - nextScopeDefinitionCount;
 				scope.referenceIndexOffset = static_cast<uint32>(openScopeReferences.size());
@@ -215,7 +215,7 @@ namespace ProjectA {
 
 			void closeScope(DocumentPosition end) {
 				Scope& scope = scopes[currentScopeIndex];
-				scope.end = end;
+				scope.range.end = end;
 				scope.definitionCount = static_cast<uint32>(openScopeDefinitions.size()) - scope.definitionIndexOffset;
 				scope.referenceCount = static_cast<uint32>(openScopeReferences.size()) - scope.referenceIndexOffset;
 
@@ -583,6 +583,6 @@ namespace ProjectA {
 			std::vector<Reference> references;
 
 			std::vector<Scope> scopes;
-			uint32 currentScopeIndex = UNDEFINED_SCOPE;
+			uint32 currentScopeIndex = static_cast<uint32>(~0);
 	};
 }

@@ -74,8 +74,7 @@ namespace ProjectA {
 			.property("identifierRange", &Reference::identifierRange);
 
 		emscripten::class_<Scope>("Scope")
-			.property("start", &Scope::start)
-			.property("end", &Scope::end)
+			.property("range", &Scope::range)
 			.property("parentScopeIndex", &Scope::parentScopeIndex)
 			.property("definitionIndexOffset", &Scope::definitionIndexOffset)
 			.property("definitionCount", &Scope::definitionCount)

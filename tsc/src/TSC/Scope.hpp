@@ -3,11 +3,8 @@
 #include "DocumentPosition.hpp"
 
 namespace ProjectA {
-	static constexpr uint32 UNDEFINED_SCOPE = ~0;
-
 	struct Scope {
-		DocumentPosition start;
-		DocumentPosition end;
+		DocumentRange range;
 		uint32 parentScopeIndex;
 
 		uint32 definitionIndexOffset;
