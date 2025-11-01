@@ -407,7 +407,7 @@ namespace ProjectA {
 
 		evaluation.setValue(definition.evaluatedInitializer);
 
-		// TODO: If the definition isn't constant, generate error diagnostic.
+		// TODO: Generate appropriate error diagnostic if the evaluation isn't constant.
 
 		return DiagnosticCode::SUCCESS;
 	}

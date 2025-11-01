@@ -9,7 +9,11 @@ namespace ProjectA {
 		DocumentPosition start;
 		DocumentPosition end;
 		uint32 parentScopeIndex;
+
 		uint32 definitionIndexOffset;
 		uint32 definitionCount;
+
+		uint32 referenceIndexOffset;
+		uint32 referenceCount;
 	};
 }

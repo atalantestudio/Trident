@@ -78,7 +78,9 @@ namespace ProjectA {
 			.property("end", &Scope::end)
 			.property("parentScopeIndex", &Scope::parentScopeIndex)
 			.property("definitionIndexOffset", &Scope::definitionIndexOffset)
-			.property("definitionCount", &Scope::definitionCount);
+			.property("definitionCount", &Scope::definitionCount)
+			.property("referenceIndexOffset", &Scope::referenceIndexOffset)
+			.property("referenceCount", &Scope::referenceCount);
 
 		emscripten::class_<SemanticToken>("SemanticToken")
 			.property("range", &SemanticToken::range)

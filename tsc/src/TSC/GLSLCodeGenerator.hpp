@@ -43,7 +43,7 @@ namespace ProjectA {
 			void writeCallExpression(std::ofstream& stream, uint32 byteOffset);
 			void writeTypeExpression(std::ofstream& stream, uint32 byteOffset);
 
-			void writeAnnotationBlocks(std::ofstream& stream, uint32 indexOffset, uint32 count);
+			void writeAnnotationBlocks(std::ofstream& stream, uint32 annotationBlockIndexOffset, uint32 annotationBlockCount);
 
 			void indent();
 			void unindent();

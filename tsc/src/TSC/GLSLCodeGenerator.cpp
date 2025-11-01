@@ -399,7 +399,7 @@ namespace ProjectA {
 	}
 
 	void GLSLCodeGenerator::writeAnnotationBlocks(std::ofstream& stream, uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) {
-		if (count == 0) {
+		if (annotationBlockCount == 0) {
 			return;
 		}
 
@@ -428,7 +428,7 @@ namespace ProjectA {
 				}
 			}
 
-			if (annotationBlockIndex < count) {
+			if (annotationBlockIndex < annotationBlockCount) {
 				stream << ", ";
 			}
 		}

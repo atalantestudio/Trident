@@ -204,6 +204,7 @@ namespace ProjectA {
 				scope.start = start;
 				scope.parentScopeIndex = currentScopeIndex;
 				scope.definitionIndexOffset = static_cast<uint32>(openScopeDefinitions.size()) - nextScopeDefinitionCount;
+				scope.referenceIndexOffset = static_cast<uint32>(openScopeReferences.size());
 
 				currentScopeIndex = static_cast<uint32>(scopes.size());
 
@@ -216,6 +217,7 @@ namespace ProjectA {
 				Scope& scope = scopes[currentScopeIndex];
 				scope.end = end;
 				scope.definitionCount = static_cast<uint32>(openScopeDefinitions.size()) - scope.definitionIndexOffset;
+				scope.referenceCount = static_cast<uint32>(openScopeReferences.size()) - scope.referenceIndexOffset;
 
 				if (scope.definitionCount > 0) {
 					const uint32 insertionOffset = static_cast<uint32>(definitions.size());
@@ -228,6 +230,19 @@ namespace ProjectA {
 					openScopeDefinitions.resize(scope.definitionIndexOffset);
 
 					scope.definitionIndexOffset = insertionOffset;
+				}
+
+				if (scope.referenceCount > 0) {
+					const uint32 insertionOffset = static_cast<uint32>(references.size());
+
+					// Allocate space for scope references.
+					references.resize(references.size() + scope.referenceCount);
+
+					std::copy_n(&openScopeReferences[scope.referenceIndexOffset], scope.referenceCount, &references[insertionOffset]);
+
+					openScopeReferences.resize(scope.referenceIndexOffset);
+
+					scope.referenceIndexOffset = insertionOffset;
 				}
 
 				currentScopeIndex = scope.parentScopeIndex;
@@ -262,7 +277,11 @@ namespace ProjectA {
 				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
-				return openScopeDefinitions.emplace_back(definition);
+				Definition& result = openScopeDefinitions.emplace_back(definition);
+
+				createReferenceFromLastDefinition(identifierTokenIndex);
+
+				return result;
 			}
 
 			Definition& defineStructure(const Statement<StatementType::STRUCTURE>& statement) {
@@ -287,7 +306,11 @@ namespace ProjectA {
 				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
-				return openScopeDefinitions.emplace_back(definition);
+				Definition& result = openScopeDefinitions.emplace_back(definition);
+
+				createReferenceFromLastDefinition(statement.identifierTokenIndex);
+
+				return result;
 			}
 
 			Definition& defineMember(const Statement<StatementType::MEMBER>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
@@ -324,7 +347,7 @@ namespace ProjectA {
 
 				Definition& result = openScopeDefinitions.emplace_back(definition);
 
-				createReference(static_cast<uint32>(openScopeDefinitions.size() - 1), statement.identifierTokenIndex);
+				createReferenceFromLastDefinition(statement.identifierTokenIndex);
 
 				return result;
 			}
@@ -355,21 +378,17 @@ namespace ProjectA {
 				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
-				return openScopeDefinitions.emplace_back(definition);
+				Definition& result = openScopeDefinitions.emplace_back(definition);
+
+				createReferenceFromLastDefinition(statement.identifierTokenIndex);
+
+				return result;
 			}
 
-			Definition& defineFunction(const Token& identifierToken, DocumentPosition end) {
-				Definition definition{};
-				definition.identifierRange.start = identifierToken.start;
-				definition.identifierRange.end = identifierToken.getEnd();
-				definition.end = end;
-				definition.type = PackedType(Type::FUNCTION, Type::NONE);
-				definition.semanticTokenType = SemanticTokenType::FUNCTION;
-				definition.tokenIndex = ~0;
-				definition.identifierIndex = identifierToken.index;
-				definition.evaluatedInitializer = 0;
+			void createReferenceFromLastDefinition(uint32 identifierTokenIndex) {
+				const uint32 definitionIndex = static_cast<uint32>(openScopeDefinitions.size() - 1);
 
-				return openScopeDefinitions.emplace_back(definition);
+				createReference(definitionIndex, identifierTokenIndex);
 			}
 
 			void createReference(uint32 definitionIndex, uint32 identifierTokenIndex) {
@@ -384,7 +403,7 @@ namespace ProjectA {
 				reference.identifierRange.start = identifierToken.start;
 				reference.identifierRange.end = identifierToken.getEnd();
 
-				references.emplace_back(reference);
+				openScopeReferences.emplace_back(reference);
 			}
 
 			std::string getTokenString(const Token& token) const {
@@ -560,7 +579,7 @@ namespace ProjectA {
 			uint32 nextScopeDefinitionCount = 0;
 			std::vector<Definition> definitions;
 
-			// TODO: Finish reference system.
+			std::vector<Reference> openScopeReferences;
 			std::vector<Reference> references;
 
 			std::vector<Scope> scopes;
