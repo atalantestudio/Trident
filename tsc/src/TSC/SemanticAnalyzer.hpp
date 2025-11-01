@@ -37,7 +37,8 @@ namespace ProjectA {
 			DiagnosticCode analyzeCallExpression();
 			DiagnosticCode analyzeTypeExpression() const;
 
-			void analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount);
+			void analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const;
+			DiagnosticCode analyzeAnnotationBlock(const AnnotationBlock& annotationBlock, uint32 annotationFlag) const;
 
 			sint64 applyUnaryOperator(sint64 rvalue, OperatorType operatorType) const;
 			sint64 applyBinaryOperator(sint64 lvalue, sint64 rvalue, OperatorType operatorType) const;

@@ -5,15 +5,12 @@
 
 namespace ProjectA {
 	struct PackedType {
-		static PackedType fromTypeExpression(TokenType type, uint32 typeIndex, uint32 templateArgumentIndex) {
+		static PackedType fromTypeExpression(TokenType type, uint32 typeIdentifierIndex, uint32 templateArgumentIndex) {
 			PackedType packedType;
 
 			if (type == TokenType::IDENTIFIER) {
-				if (typeIndex < ~0) {
-					typeIndex += Type::USER_DEFINED;
-				}
-
-				packedType.typeIndex = static_cast<Type>(typeIndex);
+				packedType.typeIndex = Type::NONE;
+				packedType.typeIdentifierIndex = typeIdentifierIndex;
 			}
 			else {
 				packedType.typeIndex = static_cast<Type>(type - TokenType::TYPE_FLOAT32 + 1);
@@ -33,6 +30,10 @@ namespace ProjectA {
 			templateArgumentIndex(templateArgumentIndex)
 		{}
 
+		bool unfinished() const {
+			return typeIndex == Type::NONE;
+		}
+
 		bool hasUserDefinedType() const {
 			return typeIndex >= Type::USER_DEFINED;
 		}
@@ -50,6 +51,7 @@ namespace ProjectA {
 		}
 
 		Type typeIndex = Type::NONE;
+		uint32 typeIdentifierIndex = 0;
 		Type templateArgumentIndex = Type::NONE;
 	};
 }

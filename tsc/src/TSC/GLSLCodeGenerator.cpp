@@ -398,7 +398,7 @@ namespace ProjectA {
 		stream << getGlslType(expression.typeTokenIndex, expression.templateArgumentTokenIndex);
 	}
 
-	void GLSLCodeGenerator::writeAnnotationBlocks(std::ofstream& stream, uint32 indexOffset, uint32 count) {
+	void GLSLCodeGenerator::writeAnnotationBlocks(std::ofstream& stream, uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) {
 		if (count == 0) {
 			return;
 		}
@@ -407,8 +407,8 @@ namespace ProjectA {
 
 		uint32 annotationBlockIndex = 0;
 
-		while (annotationBlockIndex < count) {
-			const AnnotationBlock& annotationBlock = output->ast.annotationBlocks[indexOffset + annotationBlockIndex];
+		while (annotationBlockIndex < annotationBlockCount) {
+			const AnnotationBlock& annotationBlock = output->ast.getAnnotationBlock(annotationBlockIndexOffset + annotationBlockCount);
 
 			annotationBlockIndex += 1;
 

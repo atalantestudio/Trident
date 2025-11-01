@@ -28,7 +28,7 @@ namespace ProjectA {
 		PackedType type;
 		SemanticTokenType semanticTokenType;
 		uint32 tokenIndex;
-		std::string identifier;
+		uint32 identifierIndex;
 
 		// TODO: Adapt for constructors, e.g. `vec3<float32>(x, y, z)`.
 		sint64 evaluatedInitializer;

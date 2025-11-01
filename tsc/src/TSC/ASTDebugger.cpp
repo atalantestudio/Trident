@@ -485,7 +485,7 @@ namespace ProjectA {
 		uint32 annotationBlockIndex = 0;
 
 		while (annotationBlockIndex < annotationBlockCount) {
-			const AnnotationBlock& annotationBlock = output->ast.annotationBlocks[annotationBlockIndexOffset + annotationBlockIndex];
+			const AnnotationBlock& annotationBlock = output->ast.getAnnotationBlock(annotationBlockIndexOffset + annotationBlockIndex);
 			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
 			logger.openObject();

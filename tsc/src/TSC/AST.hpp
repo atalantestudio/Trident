@@ -11,6 +11,10 @@ namespace ProjectA {
 				return statementCount;
 			}
 
+			uint32 getStatementBufferByteSize() const {
+				return static_cast<uint32>(statementBuffer.size());
+			}
+
 			StatementType getStatementType(uint32 byteOffset) const {
 				DEBUG_ASSERT(byteOffset + sizeof(StatementType) <= statementBuffer.size());
 
@@ -25,10 +29,10 @@ namespace ProjectA {
 			}
 
 			template<StatementType StatementType>
-			Statement<StatementType>& getLastStatement() {
-				DEBUG_ASSERT(statementBuffer.size() >= sizeof(Statement<StatementType>));
+			Statement<StatementType>& getStatement(uint32 byteOffset) {
+				DEBUG_ASSERT(byteOffset + sizeof(Statement<StatementType>) <= statementBuffer.size());
 
-				return *pointer_cast<Statement<StatementType>*>(&statementBuffer[statementBuffer.size() - sizeof(Statement<StatementType>)]);
+				return *pointer_cast<Statement<StatementType>*>(&statementBuffer[byteOffset]);
 			}
 
 			template<StatementType StatementType>
@@ -90,13 +94,44 @@ namespace ProjectA {
 				expressionReferences.insert(expressionReferences.begin() + index, expressionReference);
 			}
 
-		public:
-			// TODO: Make private.
-			std::vector<AnnotationBlock> annotationBlocks;
+			uint32 getAnnotationBlockCount() const {
+				return static_cast<uint32>(annotationBlocks.size());
+			}
+
+			const AnnotationBlock& getAnnotationBlock(uint32 annotationBlockIndex) const {
+				DEBUG_ASSERT(annotationBlockIndex < annotationBlocks.size());
+
+				return annotationBlocks[annotationBlockIndex];
+			}
+
+			template<Annotation Annotation>
+			const AnnotationBlock& getAnnotationBlock(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const {
+				DEBUG_ASSERT(annotationBlockCount > 0);
+				DEBUG_ASSERT(annotationBlockIndexOffset + annotationBlockCount < annotationBlocks.size());
+
+				uint32 annotationBlockIndex = 0;
+
+				while (annotationBlockIndex < annotationBlockCount - 1) {
+					const AnnotationBlock& annotationBlock = annotationBlocks[annotationBlockIndexOffset + annotationBlockIndex];
+
+					if (annotationBlock.annotation == Annotation) {
+						return annotationBlock;
+					}
+
+					annotationBlockIndex += 1;
+				}
+
+				return annotationBlocks[annotationBlockIndexOffset + annotationBlockIndex];
+			}
+
+			void addAnnotationBlock(const AnnotationBlock& annotationBlock) {
+				annotationBlocks.emplace_back(annotationBlock);
+			}
 
 		private:
 			std::vector<uint8> statementBuffer;
 			std::vector<uint8> expressionBuffer;
+			std::vector<AnnotationBlock> annotationBlocks;
 
 			// TODO: Remove.
 			std::vector<ExpressionReference> expressionReferences;

@@ -33,6 +33,7 @@ namespace ProjectA {
 			.property("references", &CompilationOutput::references)
 			.property("scopes", &CompilationOutput::scopes)
 			.property("semanticTokens", &CompilationOutput::semanticTokens)
+			.function("getIdentifier", &CompilationOutput::_emscripten_getIdentifier)
 			.function("getSize", &CompilationOutput::_emscripten_getSize)
 			.function("getAlignment", &CompilationOutput::_emscripten_getAlignment)
 			.function("getPackedTypeString", &CompilationOutput::_emscripten_getPackedTypeString);
@@ -40,7 +41,7 @@ namespace ProjectA {
 		emscripten::class_<Definition>("Definition")
 			.property("identifierRange", &Definition::identifierRange)
 			.property("end", &Definition::end)
-			.property("identifier", &Definition::identifier)
+			.property("identifierIndex", &Definition::identifierIndex)
 			.property("memberCount", &Definition::memberCount)
 			.function("getTypeIndex", &Definition::getTypeIndex)
 			.function("getTemplateArgumentIndex", &Definition::getTemplateArgumentIndex)

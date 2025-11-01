@@ -132,25 +132,30 @@ namespace ProjectA {
 			return DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE;
 		}
 
-		UserDefinedType& userDefinedType = output->defineStructure(statement);
+		output->defineStructure(statement);
+
+		UserDefinedType& userDefinedType = output->getLastUserDefinedType();
 		uint32 memberIndex = 0;
+		uint32 memberDefinitionIndex = 0;
 		uint32 lastMemberOffset = 0;
 		uint32 lastMemberSize = 0;
 
 		memberDefinitionOffset = output->getOpenScopeDefinitionCount();
 
 		while (memberIndex < statement.memberCount) {
+			memberIndex += 1;
+
 			if (analyzeStatement() != DiagnosticCode::SUCCESS) {
 				continue;
 			}
 
-			const Definition& definition = output->getOpenScopeDefinition(memberDefinitionOffset + memberIndex);
+			const Definition& definition = output->getOpenScopeDefinition(memberDefinitionOffset + memberDefinitionIndex);
 
 			lastMemberOffset += lastMemberSize;
 			lastMemberSize = output->getSize(definition.type);
 			userDefinedType.alignment = max(userDefinedType.alignment, output->getAlignment(definition.type));
 
-			memberIndex += 1;
+			memberDefinitionIndex += 1;
 		}
 
 		if (statement.memberCount == 0) {
@@ -169,19 +174,37 @@ namespace ProjectA {
 		// Type
 		TRY(analyzeExpression());
 
-		if (memberDefinitionOffset == ~0) {
+		if (memberDefinitionOffset == 0 || memberDefinitionOffset == ~0) {
 			return DiagnosticCode::UNHANDLED;
+		}
+
+		const Token& typeToken = output->tokens[typeExpression.typeTokenIndex];
+
+		if (typeToken.type == TokenType::IDENTIFIER) {
+			const Definition& definition = output->getOpenScopeDefinition(memberDefinitionOffset - 1);
+
+			if (typeToken.index == definition.identifierIndex) {
+				generateDiagnostic<DiagnosticCode::INCOMPLETE_TYPE>(*output, typeExpression.typeTokenIndex);
+
+				return DiagnosticCode::INCOMPLETE_TYPE;
+			}
 		}
 
 		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 		const std::string identifier = output->getIdentifier(identifierToken);
+
+		if (!isCamelCaseOrSnakeCase(identifier)) {
+			generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE>(*output, identifierToken);
+
+			return DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE;
+		}
 
 		uint32 memberDefinitionIndex = memberDefinitionOffset;
 
 		while (memberDefinitionIndex < output->getOpenScopeDefinitionCount()) {
 			const Definition& definition = output->getOpenScopeDefinition(memberDefinitionIndex);
 
-			if (identifier == definition.identifier) {
+			if (identifierToken.index == definition.identifierIndex) {
 				generateDiagnostic<DiagnosticCode::REDEFINITION>(*output, identifierToken, definition.tokenIndex);
 
 				return DiagnosticCode::REDEFINITION;
@@ -190,9 +213,17 @@ namespace ProjectA {
 			memberDefinitionIndex += 1;
 		}
 
+		output->defineMember(statement, typeExpression);
+
 		analyzeAnnotationBlocks(statement.annotationBlockIndexOffset, statement.annotationBlockCount);
 
-		output->defineMember(statement, typeExpression);
+		if (statement.annotationFlag & BIT(POSITION) && typeExpression.type != PackedType(Type::VEC4, Type::FLOAT32)) {
+			const AnnotationBlock& annotationBlock = output->ast.getAnnotationBlock<POSITION>(statement.annotationBlockIndexOffset, statement.annotationBlockCount);
+
+			generateDiagnostic<DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION>(*output, Annotation::POSITION, typeExpression.type, annotationBlock.identifierTokenIndex);
+
+			return DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION;
+		}
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -426,12 +457,8 @@ namespace ProjectA {
 		const Expression<ExpressionType::CALL>& expression = output->ast.getExpression<ExpressionType::CALL>(expressionByteOffset);
 
 		if (expression.explicitCallee) {
-			// Explicit
 			// Identifier/Type
 			TRY(analyzeExpression());
-		}
-		else {
-			// Implicit
 		}
 
 		uint32 argumentIndex = 0;
@@ -449,13 +476,18 @@ namespace ProjectA {
 	DiagnosticCode SemanticAnalyzer::analyzeTypeExpression() const {
 		const Expression<ExpressionType::TYPE>& expression = output->ast.getExpression<ExpressionType::TYPE>(expressionByteOffset);
 
-		if (expression.type.hasUserDefinedType()) {
-			if (!output->isValidUserDefinedType(expression.type)) {
+		if (expression.type.unfinished()) {
+			const uint32 userDefinedTypeIndex = output->getUserDefinedTypeIndex(expression.type.typeIdentifierIndex);
+
+			if (userDefinedTypeIndex == ~0) {
 				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, expression.typeTokenIndex);
 
 				return DiagnosticCode::UNDEFINED_TYPE;
 			}
 
+			output->registerSemanticToken(SemanticTokenType::STRUCTURE, expression.typeTokenIndex);
+
+			// NOTE: As of now, user-defined types cannot have template arguments.
 			if (expression.type.templateArgumentIndex > 0) {
 				const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
 
@@ -464,42 +496,83 @@ namespace ProjectA {
 				return DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
 			}
 
-			// output->registerSemanticToken(SemanticTokenType::STRUCTURE, expression.typeTokenIndex);
-
 			return DiagnosticCode::SUCCESS;
 		}
 
+		output->registerSemanticToken(SemanticTokenType::KEYWORD, expression.typeTokenIndex);
+
 		const uint16 templateArgumentMask = TYPE_TEMPLATE_ARGUMENT_MASKS[expression.type.typeIndex];
 
-		if (!(templateArgumentMask & BIT(expression.type.templateArgumentIndex))) {
-			if (expression.type.templateArgumentIndex > Type::NONE) {
+		if (expression.type.templateArgumentIndex > Type::NONE) {
+			if (!(templateArgumentMask & BIT(expression.type.templateArgumentIndex))) {
 				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex, expression.templateArgumentTokenIndex);
 
 				return DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
 			}
 
-			if (templateArgumentMask > 0) {
-				generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex);
+			output->registerSemanticToken(SemanticTokenType::KEYWORD, expression.templateArgumentTokenIndex);
 
-				return DiagnosticCode::MISSING_TEMPLATE_ARGUMENT;
-			}
+			return DiagnosticCode::SUCCESS;
 		}
 
-		output->registerSemanticToken(SemanticTokenType::KEYWORD, expression.typeTokenIndex);
-		// TODO: Register another semantic token for the template argument.
+		if (templateArgumentMask > 0) {
+			generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex);
+
+			return DiagnosticCode::MISSING_TEMPLATE_ARGUMENT;
+		}
 
 		return DiagnosticCode::SUCCESS;
 	}
 
-	void SemanticAnalyzer::analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) {
+	void SemanticAnalyzer::analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const {
 		uint32 annotationBlockIndex = 0;
+		uint32 annotationFlag = 0;
 
 		while (annotationBlockIndex < annotationBlockCount) {
-			// TODO
-			BREAKPOINT();
+			const AnnotationBlock& annotationBlock = output->ast.getAnnotationBlock(annotationBlockIndexOffset + annotationBlockIndex);
 
 			annotationBlockIndex += 1;
+
+			if (analyzeAnnotationBlock(annotationBlock, annotationFlag) != DiagnosticCode::SUCCESS) {
+				continue;
+			}
+
+			annotationFlag |= BIT(annotationBlock.annotation);
+
+			output->registerSemanticToken(SemanticTokenType::PREDEFINED, annotationBlock.identifierTokenIndex);
 		}
+	}
+
+	DiagnosticCode SemanticAnalyzer::analyzeAnnotationBlock(const AnnotationBlock& annotationBlock, uint32 annotationFlag) const {
+		if (annotationFlag & BIT(annotationBlock.annotation)) {
+			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
+
+			generateDiagnostic<DiagnosticCode::DUPLICATE_ANNOTATION>(*output, identifierToken);
+
+			return DiagnosticCode::DUPLICATE_ANNOTATION;
+		}
+
+		switch (annotationBlock.annotation) {
+			case Annotation::BINDING:
+			case Annotation::CONSTANT:
+			case Annotation::LOCATION:
+			case Annotation::SET: {
+				if (annotationBlock.valueTokenIndex == ~0) {
+					const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
+
+					generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, identifierToken);
+
+					return DiagnosticCode::MISSING_ANNOTATION_VALUE;
+				}
+
+				break;
+			}
+			default: {
+				break;
+			}
+		}
+
+		return DiagnosticCode::SUCCESS;
 	}
 
 	sint64 SemanticAnalyzer::applyUnaryOperator(sint64 rvalue, OperatorType operatorType) const {

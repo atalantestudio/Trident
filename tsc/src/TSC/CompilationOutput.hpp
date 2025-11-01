@@ -20,6 +20,12 @@ namespace ProjectA {
 				// registerDefaultDefinitions();
 			}
 
+			const std::string& _emscripten_getIdentifier(uint32 identifierIndex) const {
+				DEBUG_ASSERT(identifierIndex < identifiers.size());
+
+				return identifiers[identifierIndex];
+			}
+
 			uint32 _emscripten_getSize(uint32 typeIndex, uint32 templateArgumentIndex) const {
 				return getSize(PackedType(static_cast<Type>(typeIndex), static_cast<Type>(templateArgumentIndex)));
 			}
@@ -227,20 +233,15 @@ namespace ProjectA {
 				currentScopeIndex = scope.parentScopeIndex;
 			}
 
-			uint32 getDefinitionIndex(uint32 identifierTokenIndex) const {
-				const Token& identifierToken = tokens[identifierTokenIndex];
-				const std::string identifier = getIdentifier(identifierToken);
-
-				return getDefinitionIndex(identifier);
-			}
-
 			// Compares the identifier string to the identifiers of the open definitions; that is, the definitions whose parent scopes are not yet closed.
 			// Returns ~0 if no corresponding definition is found.
-			uint32 getDefinitionIndex(const std::string& identifier) const {
+			uint32 getDefinitionIndex(uint32 identifierTokenIndex) const {
+				const Token& identifierToken = tokens[identifierTokenIndex];
+
 				for (uint32 definitionIndex = 0; definitionIndex < openScopeDefinitions.size(); definitionIndex += 1) {
 					const Definition& definition = openScopeDefinitions[definitionIndex];
 
-					if (identifier == definition.identifier) {
+					if (identifierToken.index == definition.identifierIndex) {
 						return definitionIndex;
 					}
 				}
@@ -258,17 +259,23 @@ namespace ProjectA {
 				definition.type = type;
 				definition.semanticTokenType = semanticTokenType;
 				definition.tokenIndex = identifierTokenIndex;
-				definition.identifier = getIdentifier(identifierToken);
+				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
 				return openScopeDefinitions.emplace_back(definition);
 			}
 
-			UserDefinedType& defineStructure(const Statement<StatementType::STRUCTURE>& statement) {
+			Definition& defineStructure(const Statement<StatementType::STRUCTURE>& statement) {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 				const PackedType type = PackedType::fromTypeExpression(TokenType::IDENTIFIER, static_cast<uint32>(userDefinedTypes.size()), 0);
 
 				registerSemanticToken(SemanticTokenType::STRUCTURE, statement.identifierTokenIndex);
+
+				UserDefinedType userDefinedType{};
+				userDefinedType.identifierIndex = identifierToken.index;
+				userDefinedType.constructorArgumentCount = statement.memberCount;
+
+				userDefinedTypes.emplace_back(userDefinedType);
 
 				Definition definition{};
 				definition.identifierRange.start = identifierToken.start;
@@ -277,16 +284,10 @@ namespace ProjectA {
 				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::STRUCTURE;
 				definition.tokenIndex = statement.identifierTokenIndex;
-				definition.identifier = getIdentifier(identifierToken);
+				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
-				openScopeDefinitions.emplace_back(definition);
-
-				UserDefinedType userDefinedType{};
-				userDefinedType.identifierIndex = identifierToken.index;
-				userDefinedType.constructorArgumentCount = statement.memberCount;
-
-				return userDefinedTypes.emplace_back(userDefinedType);
+				return openScopeDefinitions.emplace_back(definition);
 			}
 
 			Definition& defineMember(const Statement<StatementType::MEMBER>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
@@ -299,7 +300,7 @@ namespace ProjectA {
 				definition.type = typeExpression.type;
 				definition.semanticTokenType = SemanticTokenType::MEMBER;
 				definition.tokenIndex = statement.identifierTokenIndex;
-				definition.identifier = getIdentifier(identifierToken);
+				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
 				return openScopeDefinitions.emplace_back(definition);
@@ -318,7 +319,7 @@ namespace ProjectA {
 				definition.type = typeExpression.type;
 				definition.semanticTokenType = SemanticTokenType::CONSTANT;
 				definition.tokenIndex = statement.identifierTokenIndex;
-				definition.identifier = getIdentifier(identifierToken);
+				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
 				Definition& result = openScopeDefinitions.emplace_back(definition);
@@ -351,7 +352,7 @@ namespace ProjectA {
 				definition.type = PackedType(Type::FUNCTION, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
 				definition.tokenIndex = ~0;
-				definition.identifier = getIdentifier(identifierToken);
+				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
 				return openScopeDefinitions.emplace_back(definition);
@@ -365,7 +366,7 @@ namespace ProjectA {
 				definition.type = PackedType(Type::FUNCTION, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
 				definition.tokenIndex = ~0;
-				definition.identifier = getIdentifier(identifierToken);
+				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
 				return openScopeDefinitions.emplace_back(definition);
@@ -480,6 +481,10 @@ namespace ProjectA {
 				DEBUG_ASSERT(definitionIndex < openScopeDefinitions.size());
 
 				return openScopeDefinitions[definitionIndex];
+			}
+
+			UserDefinedType& getLastUserDefinedType() {
+				return userDefinedTypes.back();
 			}
 
 		private:

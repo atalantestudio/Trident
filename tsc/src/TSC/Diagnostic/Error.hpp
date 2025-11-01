@@ -199,9 +199,25 @@ namespace ProjectA {
 			Diagnostic diagnostic{};
 			diagnostic.start = typeToken.start;
 			diagnostic.end = typeToken.getEnd();
-			diagnostic.message = MODULE_FORMAT("Undefined or incomplete type \"[]\".", output.getTokenString(typeToken));
+			diagnostic.message = MODULE_FORMAT("Undefined type \"[]\".", output.getTokenString(typeToken));
 			diagnostic.severity = DiagnosticSeverity::ERROR;
 			diagnostic.code = DiagnosticCode::UNDEFINED_TYPE;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
+	struct generateDiagnostic<DiagnosticCode::INCOMPLETE_TYPE> {
+		explicit generateDiagnostic(CompilationOutput& output, uint32 typeTokenIndex) {
+			const Token& typeToken = output.tokens[typeTokenIndex];
+
+			Diagnostic diagnostic{};
+			diagnostic.start = typeToken.start;
+			diagnostic.end = typeToken.getEnd();
+			diagnostic.message = MODULE_FORMAT("Incomplete type \"[]\".", output.getTokenString(typeToken));
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::INCOMPLETE_TYPE;
 
 			output.diagnostics.emplace_back(diagnostic);
 		}

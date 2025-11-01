@@ -98,9 +98,11 @@ namespace ProjectA {
 		jump();
 		jumpEol();
 
+		const uint32 statementByteOffset = output->ast.getStatementBufferByteSize();
+
 		output->ast.addStatement(statement);
 
-		Statement<StatementType::STRUCTURE>& statementReference = output->ast.getLastStatement<StatementType::STRUCTURE>();
+		uint32 memberCount = 0;
 
 		while (!read(TokenType::RIGHT_CURLY_BRACE) && !read(TokenType::END_OF_LINE)) {
 			if (read(TokenType::LEFT_SQUARE_BRACKET)) {
@@ -113,7 +115,7 @@ namespace ProjectA {
 				break;
 			}
 
-			statementReference.memberCount += 1;
+			memberCount += 1;
 
 			EXPECT(read(TokenType::RIGHT_CURLY_BRACE) || read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, "'}' or EOL", read());
 
@@ -122,6 +124,8 @@ namespace ProjectA {
 
 		CONSUME(TokenType::RIGHT_CURLY_BRACE);
 
+		Statement<StatementType::STRUCTURE>& statementReference = output->ast.getStatement<StatementType::STRUCTURE>(statementByteOffset);
+		statementReference.memberCount = memberCount;
 		statementReference.end = position;
 
 		return DiagnosticCode::SUCCESS;
@@ -130,7 +134,7 @@ namespace ProjectA {
 	DiagnosticCode Parser::parseMemberStatement() {
 		Statement<StatementType::MEMBER> statement{};
 		statement.annotationBlockIndexOffset = currentAnnotationCount;
-		statement.annotationBlockCount = static_cast<uint32>(output->ast.annotationBlocks.size()) - currentAnnotationCount;
+		statement.annotationBlockCount = static_cast<uint32>(output->ast.getAnnotationBlockCount()) - currentAnnotationCount;
 		statement.annotationFlag = annotationFlag;
 
 		currentAnnotationCount += statement.annotationBlockCount;
@@ -150,7 +154,7 @@ namespace ProjectA {
 	DiagnosticCode Parser::parseConstantOrFunctionStatement() {
 		Statement<StatementType::CONSTANT> statement{};
 		statement.annotationBlockIndexOffset = currentAnnotationCount;
-		statement.annotationBlockCount = static_cast<uint32>(output->ast.annotationBlocks.size()) - currentAnnotationCount;
+		statement.annotationBlockCount = static_cast<uint32>(output->ast.getAnnotationBlockCount()) - currentAnnotationCount;
 		statement.annotationFlag = annotationFlag;
 
 		currentAnnotationCount += statement.annotationBlockCount;
@@ -188,9 +192,11 @@ namespace ProjectA {
 
 		CONSUME_IDENTIFIER();
 
+		const uint32 statementByteOffset = output->ast.getStatementBufferByteSize();
+
 		output->ast.addStatement(statement);
 
-		Statement<StatementType::FUNCTION>& statementReference = output->ast.getLastStatement<StatementType::FUNCTION>();
+		uint32 parameterCount = 0;
 
 		// TODO: Position must be the end of the scope, but the scope statements must be analyzed in order.
 		// analyzer.analyzeFunctionStatement(statement, output->ast.getExpressionCount(), position);
@@ -203,7 +209,7 @@ namespace ProjectA {
 		while (!read(TokenType::RIGHT_PARENTHESIS)) {
 			TRY(parseParameterStatement());
 
-			statementReference.parameterCount += 1;
+			parameterCount += 1;
 
 			if (read(TokenType::RIGHT_PARENTHESIS)) {
 				break;
@@ -219,6 +225,9 @@ namespace ProjectA {
 		CONSUME(TokenType::LEFT_CURLY_BRACE);
 
 		TRY(parseScopeStatement());
+
+		Statement<StatementType::FUNCTION>& statementReference = output->ast.getStatement<StatementType::FUNCTION>(statementByteOffset);
+		statementReference.parameterCount = parameterCount;
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -346,22 +355,26 @@ namespace ProjectA {
 		Statement<StatementType::SCOPE> statement{};
 		statement.range.start = position;
 
+		const uint32 statementByteOffset = output->ast.getStatementBufferByteSize();
+
 		output->ast.addStatement(statement);
 
-		Statement<StatementType::SCOPE>& statementReference = output->ast.getLastStatement<StatementType::SCOPE>();
+		uint32 statementCount = 0;
 
 		jumpEol();
 
 		while (!read(TokenType::RIGHT_CURLY_BRACE)) {
 			TRY(parseLocalScopeStatement());
 
-			statementReference.statementCount += 1;
+			statementCount += 1;
 
 			jumpEol();
 		}
 
 		CONSUME(TokenType::RIGHT_CURLY_BRACE);
 
+		Statement<StatementType::SCOPE>& statementReference = output->ast.getStatement<StatementType::SCOPE>(statementByteOffset);
+		statementReference.statementCount = statementCount;
 		statementReference.range.end = position;
 
 		return DiagnosticCode::SUCCESS;
@@ -435,12 +448,8 @@ namespace ProjectA {
 		); */
 
 		const TokenType type = read().type;
-		uint32 typeIndex = 0;
+		uint32 typeIdentifierIndex = read().index;
 		uint32 templateArgumentIndex = 0;
-
-		if (type == TokenType::IDENTIFIER) {
-			typeIndex = output->getUserDefinedTypeIndex(read().index);
-		}
 
 		Expression<ExpressionType::TYPE> expression{};
 		expression.typeTokenIndex = tokenIndex;
@@ -464,7 +473,7 @@ namespace ProjectA {
 			CONSUME(TokenType::RIGHT_ANGLE_BRACKET);
 		}
 
-		expression.type = PackedType::fromTypeExpression(type, typeIndex, templateArgumentIndex);
+		expression.type = PackedType::fromTypeExpression(type, typeIdentifierIndex, templateArgumentIndex);
 
 		output->ast.addExpression(expression);
 
@@ -710,7 +719,7 @@ namespace ProjectA {
 				jump();
 			}
 
-			output->ast.annotationBlocks.emplace_back(annotationBlock);
+			output->ast.addAnnotationBlock(annotationBlock);
 		}
 
 		return DiagnosticCode::SUCCESS;
