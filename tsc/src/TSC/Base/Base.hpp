@@ -29,3 +29,13 @@
 #define MODULE_INFO(...) ::ProjectA::Logger::engineLogger.info(__VA_ARGS__)
 #define MODULE_WARN(...) ::ProjectA::Logger::engineLogger.warn(__VA_ARGS__)
 #define MODULE_ERROR(...) ::ProjectA::Logger::engineLogger.error(__VA_ARGS__)
+
+namespace ProjectA {
+	static uint32 max(uint32 a, uint32 b) {
+		if (a > b) {
+			return a;
+		}
+
+		return b;
+	}
+}

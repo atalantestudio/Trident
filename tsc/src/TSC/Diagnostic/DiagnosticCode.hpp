@@ -4,6 +4,9 @@ namespace ProjectA {
 	enum class DiagnosticCode : uint8 {
 		SUCCESS,
 
+		// NOTE: Only used for unreachable cases in SemanticAnalyzer that must return a value.
+		UNHANDLED,
+
 		// Errors
 		UNEXPECTED_CHARACTER,
 		MISSING_INCLUDE_PATH,

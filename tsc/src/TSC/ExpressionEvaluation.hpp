@@ -3,16 +3,41 @@
 #include "PackedType.hpp"
 
 namespace ProjectA {
-	struct ExpressionEvaluation {
-		// The type the expression must evaluate to in the end.
-		PackedType type;
+	class ExpressionEvaluation {
+		public:
+			ExpressionEvaluation() = default;
 
-		// An intermediate type the expression is explicitly allowed to evaluate to while being analyzed.
-		PackedType intermediateType;
+			explicit ExpressionEvaluation(PackedType type, bool constant) :
+				type(type),
+				intermediateType(type),
+				constant(constant)
+			{}
 
-		std::vector<sint64> components = {0};
+			sint64 getValue() const {
+				return components[lastComponentIndex];
+			}
 
-		bool casting;
-		bool constant;
+			void setValue(sint64 value) {
+				components[lastComponentIndex] = value;
+			}
+
+			void addComponent(sint64 value) {
+				components.emplace_back(value);
+				lastComponentIndex += 1;
+			}
+
+		public:
+			// The type the expression must evaluate to in the end.
+			PackedType type;
+
+			// An intermediate type the expression is explicitly allowed to evaluate to while being analyzed.
+			PackedType intermediateType;
+
+			bool casting = false;
+			bool constant;
+
+		private:
+			std::vector<sint64> components = {0};
+			uint32 lastComponentIndex = 0;
 	};
 }

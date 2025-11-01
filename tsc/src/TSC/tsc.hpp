@@ -8,6 +8,7 @@
 #include "TSC/Lexer.hpp"
 #include "TSC/Parser.hpp"
 #include "TSC/Preprocessor.hpp"
+#include "TSC/SemanticAnalyzer.hpp"
 
 namespace ProjectA {
 	static sint32 tsc(const char8* path) {
@@ -32,6 +33,8 @@ namespace ProjectA {
 
 		Parser parser;
 		parser.parse(&output);
+
+		SemanticAnalyzer semanticAnalyzer(output);
 
 		bool hasError = false;
 

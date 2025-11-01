@@ -5,51 +5,135 @@
 namespace ProjectA {
 	void GLSLCodeGenerator::write(std::ofstream& stream, const CompilationOutput& output) {
 		this->output = &output;
-		currentExpressionReferenceIndex = 0;
+		statementIndex = 0;
+		statementByteOffset = 0;
+		expressionReferenceIndex = 0;
 		indentationLevel = 0;
 		indentation = "";
 
 		stream << "#version 310 es";
 
-		for (const uint32 statementIndex : output.ast.globalScopeStatementIndices) {
+		while (statementIndex < this->output->ast.getStatementCount()) {
 			stream << "\n";
 
-			writeStatement(stream, statementIndex);
+			writeStatement(stream);
 		}
 	}
 
-	void GLSLCodeGenerator::writeStatement(std::ofstream& stream, uint32 statementIndex) {
-		const ref<Statement>& statement = output->ast.statements[statementIndex];
+	void GLSLCodeGenerator::writeStatement(std::ofstream& stream) {
+		const uint32 byteOffset = statementByteOffset;
+		const StatementType type = output->ast.getStatementType(byteOffset);
 
-		switch (statement->statementType) {
-			case StatementType::STRUCTURE: writeStructureStatement(stream, statementIndex); break;
-			case StatementType::MEMBER: writeMemberStatement(stream, statementIndex); break;
-			case StatementType::CONSTANT: writeConstantStatement(stream, statementIndex); break;
-			case StatementType::VARIABLE: writeVariableStatement(stream, statementIndex); break;
-			case StatementType::PARAMETER: writeParameterStatement(stream, statementIndex); break;
-			case StatementType::FUNCTION: writeFunctionStatement(stream, statementIndex); break;
-			case StatementType::EXPRESSION: writeExpressionStatement(stream, statementIndex); break;
-			case StatementType::SCOPE: writeScopeStatement(stream, statementIndex); break;
-			case StatementType::IF: writeIfStatement(stream, statementIndex); break;
-			case StatementType::WHILE: writeWhileStatement(stream, statementIndex); break;
-			case StatementType::BREAK: writeBreakStatement(stream); break;
-			case StatementType::NEXT: writeNextStatement(stream); break;
-			case StatementType::RETURN: writeReturnStatement(stream, statementIndex); break;
+		statementIndex += 1;
+
+		switch (type) {
+			case StatementType::STRUCTURE: {
+				statementByteOffset += sizeof(Statement<StatementType::STRUCTURE>);
+
+				writeStructureStatement(stream, output->ast.getStatement<StatementType::STRUCTURE>(byteOffset));
+
+				break;
+			}
+			case StatementType::MEMBER: {
+				statementByteOffset += sizeof(Statement<StatementType::MEMBER>);
+
+				writeMemberStatement(stream, output->ast.getStatement<StatementType::MEMBER>(byteOffset));
+
+				break;
+			}
+			case StatementType::CONSTANT: {
+				statementByteOffset += sizeof(Statement<StatementType::CONSTANT>);
+
+				writeConstantStatement(stream, output->ast.getStatement<StatementType::CONSTANT>(byteOffset));
+
+				break;
+			}
+			case StatementType::VARIABLE: {
+				statementByteOffset += sizeof(Statement<StatementType::VARIABLE>);
+
+				writeVariableStatement(stream, output->ast.getStatement<StatementType::VARIABLE>(byteOffset));
+
+				break;
+			}
+			case StatementType::PARAMETER: {
+				statementByteOffset += sizeof(Statement<StatementType::PARAMETER>);
+
+				writeParameterStatement(stream, output->ast.getStatement<StatementType::PARAMETER>(byteOffset));
+
+				break;
+			}
+			case StatementType::FUNCTION: {
+				statementByteOffset += sizeof(Statement<StatementType::FUNCTION>);
+
+				writeFunctionStatement(stream, output->ast.getStatement<StatementType::FUNCTION>(byteOffset));
+
+				break;
+			}
+			case StatementType::EXPRESSION: {
+				statementByteOffset += sizeof(Statement<StatementType::EXPRESSION>);
+
+				writeExpressionStatement(stream, output->ast.getStatement<StatementType::EXPRESSION>(byteOffset));
+
+				break;
+			}
+			case StatementType::SCOPE: {
+				statementByteOffset += sizeof(Statement<StatementType::SCOPE>);
+
+				writeScopeStatement(stream, output->ast.getStatement<StatementType::SCOPE>(byteOffset));
+
+				break;
+			}
+			case StatementType::IF: {
+				statementByteOffset += sizeof(Statement<StatementType::IF>);
+
+				writeIfStatement(stream, output->ast.getStatement<StatementType::IF>(byteOffset));
+
+				break;
+			}
+			case StatementType::WHILE: {
+				statementByteOffset += sizeof(Statement<StatementType::WHILE>);
+
+				writeWhileStatement(stream, output->ast.getStatement<StatementType::WHILE>(byteOffset));
+
+				break;
+			}
+			case StatementType::BREAK: {
+				statementByteOffset += sizeof(Statement<StatementType::BREAK>);
+
+				writeBreakStatement(stream, output->ast.getStatement<StatementType::BREAK>(byteOffset));
+
+				break;
+			}
+			case StatementType::NEXT: {
+				statementByteOffset += sizeof(Statement<StatementType::NEXT>);
+
+				writeNextStatement(stream, output->ast.getStatement<StatementType::NEXT>(byteOffset));
+
+				break;
+			}
+			case StatementType::RETURN: {
+				statementByteOffset += sizeof(Statement<StatementType::RETURN>);
+
+				writeReturnStatement(stream, output->ast.getStatement<StatementType::RETURN>(byteOffset));
+
+				break;
+			}
 		}
 	}
 
-	void GLSLCodeGenerator::writeStructureStatement(std::ofstream& stream, uint32 statementIndex) {
-		const ref<StructureStatement> statement = std::static_pointer_cast<StructureStatement>(output->ast.statements[statementIndex]);
-		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+	void GLSLCodeGenerator::writeStructureStatement(std::ofstream& stream, const Statement<StatementType::STRUCTURE>& statement) {
+		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 
 		stream << indentation << "struct " << output->getTokenString(identifierToken) << " {\n";
 
 		indent();
 
-		const uint32 memberStatementOffset = statementIndex + 1;
+		uint32 memberIndex = 0;
 
-		for (uint32 memberIndex = 0; memberIndex < statement->memberCount; memberIndex += 1) {
-			writeStatement(stream, memberStatementOffset + memberIndex);
+		while (memberIndex < statement.memberCount) {
+			writeStatement(stream);
+
+			memberIndex += 1;
 		}
 
 		unindent();
@@ -57,120 +141,117 @@ namespace ProjectA {
 		stream << "};";
 	}
 
-	void GLSLCodeGenerator::writeMemberStatement(std::ofstream& stream, uint32 statementIndex) {
-		const ref<MemberStatement> statement = std::static_pointer_cast<MemberStatement>(output->ast.statements[statementIndex]);
-
-		if (statement->annotationFlag & ENTRY_POINT_ANNOTATION_MASK) {
-			currentExpressionReferenceIndex += 1;
+	void GLSLCodeGenerator::writeMemberStatement(std::ofstream& stream, const Statement<StatementType::MEMBER>& statement) {
+		if (statement.annotationFlag & ENTRY_POINT_ANNOTATION_MASK) {
+			expressionReferenceIndex += 1;
 
 			return;
 		}
 
-		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 
 		stream << indentation;
 
-		writeAnnotationBlocks(stream, statement->annotationBlockIndexOffset, statement->annotationBlockCount);
-		writeNextExpression(stream);
+		writeAnnotationBlocks(stream, statement.annotationBlockIndexOffset, statement.annotationBlockCount);
+		writeExpression(stream);
 
 		stream << " " << output->getTokenString(identifierToken) << ";\n";
 	}
 
-	void GLSLCodeGenerator::writeConstantStatement(std::ofstream& stream, uint32 statementIndex) {
-		const ref<ConstantStatement> statement = std::static_pointer_cast<ConstantStatement>(output->ast.statements[statementIndex]);
-		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+	void GLSLCodeGenerator::writeConstantStatement(std::ofstream& stream, const Statement<StatementType::CONSTANT>& statement) {
+		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 
-		writeAnnotationBlocks(stream, statement->annotationBlockIndexOffset, statement->annotationBlockCount);
+		writeAnnotationBlocks(stream, statement.annotationBlockIndexOffset, statement.annotationBlockCount);
 
 		stream << "const ";
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 
 		stream << " " << output->getTokenString(identifierToken) << " = ";
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 
 		stream << ";";
 	}
 
-	void GLSLCodeGenerator::writeVariableStatement(std::ofstream& stream, uint32 statementIndex) {
-		const ref<VariableStatement> statement = std::static_pointer_cast<VariableStatement>(output->ast.statements[statementIndex]);
-
+	void GLSLCodeGenerator::writeVariableStatement(std::ofstream& stream, const Statement<StatementType::VARIABLE>& statement) {
 		stream << indentation;
 
-		if (statement->constant) {
+		if (statement.constant) {
 			stream << "const ";
 		}
 
-		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 
 		stream << " ";
 		stream << output->getTokenString(identifierToken);
 
-		if (statement->initializer) {
+		if (statement.initializer) {
 			stream << " = ";
 
-			writeNextExpression(stream);
+			writeExpression(stream);
 		}
 
 		stream << ";";
 	}
 
-	void GLSLCodeGenerator::writeParameterStatement(std::ofstream& stream, uint32 statementIndex) {
-		const ref<ParameterStatement> statement = std::static_pointer_cast<ParameterStatement>(output->ast.statements[statementIndex]);
-		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+	void GLSLCodeGenerator::writeParameterStatement(std::ofstream& stream, const Statement<StatementType::PARAMETER>& statement) {
+		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 
 		stream << " " << output->getTokenString(identifierToken);
 	}
 
-	void GLSLCodeGenerator::writeFunctionStatement(std::ofstream& stream, uint32 statementIndex) {
-		const ref<FunctionStatement> statement = std::static_pointer_cast<FunctionStatement>(output->ast.statements[statementIndex]);
-		const Token& identifierToken = output->tokens[statement->identifierTokenIndex];
+	void GLSLCodeGenerator::writeFunctionStatement(std::ofstream& stream, const Statement<StatementType::FUNCTION>& statement) {
+		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 
 		stream << indentation;
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 
 		stream << " " << output->getTokenString(identifierToken) << "(";
 
-		for (uint32 statementIndexOffset = 0; statementIndexOffset < statement->parameterStatementIndices.size(); statementIndexOffset += 1) {
-			writeStatement(stream, statement->parameterStatementIndices[statementIndexOffset]);
+		uint32 parameterIndex = 0;
 
-			if (statementIndexOffset + 1 < statement->parameterStatementIndices.size()) {
+		while (parameterIndex < statement.parameterCount) {
+			writeStatement(stream);
+
+			parameterIndex += 1;
+
+			if (parameterIndex < statement.parameterCount) {
 				stream << ", ";
 			}
 		}
 
 		stream << ") ";
 
-		writeStatement(stream, statement->scopeStatementIndex);
+		writeStatement(stream);
 	}
 
-	void GLSLCodeGenerator::writeExpressionStatement(std::ofstream& stream, uint32 statementIndex) {
-		const ref<ExpressionStatement> statement = std::static_pointer_cast<ExpressionStatement>(output->ast.statements[statementIndex]);
-
+	void GLSLCodeGenerator::writeExpressionStatement(std::ofstream& stream, const Statement<StatementType::EXPRESSION>& statement) {
 		stream << indentation;
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 
 		stream << ";";
 	}
 
-	void GLSLCodeGenerator::writeScopeStatement(std::ofstream& stream, uint32 statementIndex) {
-		const ref<ScopeStatement> statement = std::static_pointer_cast<ScopeStatement>(output->ast.statements[statementIndex]);
-
+	void GLSLCodeGenerator::writeScopeStatement(std::ofstream& stream, const Statement<StatementType::SCOPE>& statement) {
 		stream << "{\n";
 
 		indent();
 
-		for (const uint32 statementIndex : statement->statementIndices) {
-			writeStatement(stream, statementIndex);
+		uint32 statementIndex = 0;
+
+		while (statementIndex < statement.statementCount) {
+			writeStatement(stream);
 
 			stream << "\n";
+
+			statementIndex += 1;
 		}
 
 		unindent();
@@ -178,52 +259,48 @@ namespace ProjectA {
 		stream << indentation << "}";
 	}
 
-	void GLSLCodeGenerator::writeIfStatement(std::ofstream& stream, uint32 statementIndex) {
-		const ref<IfStatement> statement = std::static_pointer_cast<IfStatement>(output->ast.statements[statementIndex]);
-
+	void GLSLCodeGenerator::writeIfStatement(std::ofstream& stream, const Statement<StatementType::IF>& statement) {
 		stream << indentation << "if (";
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 
 		stream << ") ";
 
-		writeScopeStatement(stream, statement->scopeStatementIndex);
+		// Scope
+		writeStatement(stream);
 	}
 
-	void GLSLCodeGenerator::writeWhileStatement(std::ofstream& stream, uint32 statementIndex) {
-		const ref<WhileStatement> statement = std::static_pointer_cast<WhileStatement>(output->ast.statements[statementIndex]);
-
+	void GLSLCodeGenerator::writeWhileStatement(std::ofstream& stream, const Statement<StatementType::WHILE>& statement) {
 		stream << indentation << "while (";
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 
 		stream << ") ";
 
-		writeScopeStatement(stream, statement->scopeStatementIndex);
+		// Scope
+		writeStatement(stream);
 	}
 
-	void GLSLCodeGenerator::writeBreakStatement(std::ofstream& stream) {
+	void GLSLCodeGenerator::writeBreakStatement(std::ofstream& stream, const Statement<StatementType::BREAK>& statement) {
 		stream << indentation << "break;";
 	}
 
-	void GLSLCodeGenerator::writeNextStatement(std::ofstream& stream) {
+	void GLSLCodeGenerator::writeNextStatement(std::ofstream& stream, const Statement<StatementType::NEXT>& statement) {
 		stream << indentation << "continue;";
 	}
 
-	void GLSLCodeGenerator::writeReturnStatement(std::ofstream& stream, uint32 statementIndex) {
-		const ref<ReturnStatement> statement = std::static_pointer_cast<ReturnStatement>(output->ast.statements[statementIndex]);
-
+	void GLSLCodeGenerator::writeReturnStatement(std::ofstream& stream, const Statement<StatementType::RETURN>& statement) {
 		stream << indentation << "return ";
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 
 		stream << ";";
 	}
 
-	void GLSLCodeGenerator::writeNextExpression(std::ofstream& stream) {
-		const ExpressionReference& expressionReference = output->ast.getExpressionReference(currentExpressionReferenceIndex);
+	void GLSLCodeGenerator::writeExpression(std::ofstream& stream) {
+		const ExpressionReference& expressionReference = output->ast.getExpressionReference(expressionReferenceIndex);
 
-		currentExpressionReferenceIndex += 1;
+		expressionReferenceIndex += 1;
 
 		switch (expressionReference.type) {
 			case ExpressionType::LITERAL: writeLiteralExpression(stream, expressionReference.byteOffset); break;
@@ -259,18 +336,18 @@ namespace ProjectA {
 
 		stream << output->getNonIdentifierTokenString(operatorToken.type);
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 	}
 
 	void GLSLCodeGenerator::writeBinaryExpression(std::ofstream& stream, uint32 byteOffset) {
 		const Expression<ExpressionType::BINARY>& expression = output->ast.getExpression<ExpressionType::BINARY>(byteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 
 		stream << " " << output->getNonIdentifierTokenString(operatorToken.type) << " ";
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 	}
 
 	void GLSLCodeGenerator::writeGroupExpression(std::ofstream& stream, uint32 byteOffset) {
@@ -278,7 +355,7 @@ namespace ProjectA {
 
 		stream << "(";
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 
 		stream << ")";
 	}
@@ -287,7 +364,7 @@ namespace ProjectA {
 		const Expression<ExpressionType::MEMBER_ACCESS>& expression = output->ast.getExpression<ExpressionType::MEMBER_ACCESS>(byteOffset);
 		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
 
-		writeNextExpression(stream);
+		writeExpression(stream);
 
 		stream << "." << output->getTokenString(identifierToken);
 	}
@@ -297,13 +374,13 @@ namespace ProjectA {
 		uint32 argumentIndex = 0;
 
 		if (expression.explicitCallee) {
-			writeNextExpression(stream);
+			writeExpression(stream);
 		}
 
 		stream << "(";
 
 		while (argumentIndex < expression.argumentCount) {
-			writeNextExpression(stream);
+			writeExpression(stream);
 
 			argumentIndex += 1;
 

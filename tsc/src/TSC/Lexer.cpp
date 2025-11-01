@@ -459,7 +459,7 @@ namespace ProjectA {
 
 		output->literals.emplace_back(number);
 		output->tokens.emplace_back(token);
-		output->registerSemanticToken(SemanticTokenType::NUMBER, static_cast<uint32>(output->tokens.size() - 1));
+		// output->registerSemanticToken(SemanticTokenType::NUMBER, static_cast<uint32>(output->tokens.size() - 1));
 	}
 
 	void Lexer::readIdentifier(Token& token) {
@@ -472,7 +472,7 @@ namespace ProjectA {
 		output->tokens.emplace_back(token);
 
 		if (token.type <= LAST_KEYWORD_INDEX) {
-			output->registerSemanticToken(SemanticTokenType::KEYWORD, static_cast<uint32>(output->tokens.size() - 1));
+			// output->registerSemanticToken(SemanticTokenType::KEYWORD, static_cast<uint32>(output->tokens.size() - 1));
 		}
 	}
 

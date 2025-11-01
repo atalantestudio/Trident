@@ -18,22 +18,22 @@ namespace ProjectA {
 			void write(std::ofstream& stream, const CompilationOutput& output);
 
 		private:
-			void writeStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeStructureStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeMemberStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeConstantStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeVariableStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeParameterStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeFunctionStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeExpressionStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeScopeStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeIfStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeWhileStatement(std::ofstream& stream, uint32 statementIndex);
-			void writeBreakStatement(std::ofstream& stream);
-			void writeNextStatement(std::ofstream& stream);
-			void writeReturnStatement(std::ofstream& stream, uint32 statementIndex);
+			void writeStatement(std::ofstream& stream);
+			void writeStructureStatement(std::ofstream& stream, const Statement<StatementType::STRUCTURE>& statement);
+			void writeMemberStatement(std::ofstream& stream, const Statement<StatementType::MEMBER>& statement);
+			void writeConstantStatement(std::ofstream& stream, const Statement<StatementType::CONSTANT>& statement);
+			void writeVariableStatement(std::ofstream& stream, const Statement<StatementType::VARIABLE>& statement);
+			void writeParameterStatement(std::ofstream& stream, const Statement<StatementType::PARAMETER>& statement);
+			void writeFunctionStatement(std::ofstream& stream, const Statement<StatementType::FUNCTION>& statement);
+			void writeExpressionStatement(std::ofstream& stream, const Statement<StatementType::EXPRESSION>& statement);
+			void writeScopeStatement(std::ofstream& stream, const Statement<StatementType::SCOPE>& statement);
+			void writeIfStatement(std::ofstream& stream, const Statement<StatementType::IF>& statement);
+			void writeWhileStatement(std::ofstream& stream, const Statement<StatementType::WHILE>& statement);
+			void writeBreakStatement(std::ofstream& stream, const Statement<StatementType::BREAK>& statement);
+			void writeNextStatement(std::ofstream& stream, const Statement<StatementType::NEXT>& statement);
+			void writeReturnStatement(std::ofstream& stream, const Statement<StatementType::RETURN>& statement);
 
-			void writeNextExpression(std::ofstream& stream);
+			void writeExpression(std::ofstream& stream);
 			void writeLiteralExpression(std::ofstream& stream, uint32 byteOffset);
 			void writeIdentifierExpression(std::ofstream& stream, uint32 byteOffset);
 			void writeUnaryExpression(std::ofstream& stream, uint32 byteOffset);
@@ -97,7 +97,9 @@ namespace ProjectA {
 		private:
 			const CompilationOutput* output;
 
-			uint32 currentExpressionReferenceIndex;
+			uint32 statementIndex;
+			uint32 statementByteOffset;
+			uint32 expressionReferenceIndex;
 			uint32 indentationLevel;
 			std::string indentation;
 	};

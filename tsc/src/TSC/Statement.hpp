@@ -1,23 +1,12 @@
 #pragma once
 
 #include "DocumentPosition.hpp"
+#include "DocumentRange.hpp"
 #include "StatementType.hpp"
 
 namespace ProjectA {
-	struct Statement {
-		explicit Statement(StatementType type) :
-			statementType(type)
-		{}
-
-		StatementType statementType;
-	};
-
 	template<StatementType StatementType>
-	struct BaseStatement : public Statement {
-		explicit BaseStatement() :
-			Statement(StatementType)
-		{}
-	};
+	struct Statement;
 
 	struct IncludeStatement {
 		DocumentPosition start;
@@ -25,79 +14,123 @@ namespace ProjectA {
 		std::string path;
 	};
 
-	struct StructureStatement : public BaseStatement<StatementType::STRUCTURE> {
+	template<>
+	struct Statement<StatementType::STRUCTURE> {
+		StatementType type = StatementType::STRUCTURE;
+
 		uint32 identifierTokenIndex;
 		uint32 memberCount;
+		DocumentPosition end;
 	};
 
-	struct MemberStatement : public BaseStatement<StatementType::MEMBER> {
-		uint32 annotationFlag;
+	template<>
+	struct Statement<StatementType::MEMBER> {
+		StatementType type = StatementType::MEMBER;
+
 		uint32 annotationBlockIndexOffset;
 		uint32 annotationBlockCount;
-		uint32 identifierTokenIndex;
+		uint32 annotationFlag;
 
-		// The type expression is the next expression in the AST buffer.
+		// The type expression is the next expression.
+
+		uint32 identifierTokenIndex;
 	};
 
-	struct ConstantStatement : public BaseStatement<StatementType::CONSTANT> {
-		uint32 annotationFlag;
+	template<>
+	struct Statement<StatementType::CONSTANT> {
+		StatementType type = StatementType::CONSTANT;
+
 		uint32 annotationBlockIndexOffset;
 		uint32 annotationBlockCount;
+		uint32 annotationFlag;
+
+		// The type expression is the next expression.
+
 		uint32 identifierTokenIndex;
 
-		// The type expression is the next expression in the AST buffer.
-		// The initializer expression is the next expression in the AST buffer.
+		// The initializer expression is the next expression.
 	};
 
-	struct VariableStatement : public BaseStatement<StatementType::VARIABLE> {
+	template<>
+	struct Statement<StatementType::VARIABLE> {
+		StatementType type = StatementType::VARIABLE;
+
+		// The type expression is the next expression.
+
 		uint32 identifierTokenIndex;
 		bool constant;
+
+		// If initializer is true, the initializer expression is the next expression.
 		bool initializer;
-
-		// The type expression is the next expression in the AST buffer.
-		// If initializer is true, the initializer expression is the next expression in the AST buffer.
 	};
 
-	struct ParameterStatement : public BaseStatement<StatementType::PARAMETER> {
+	template<>
+	struct Statement<StatementType::PARAMETER> {
+		StatementType type = StatementType::PARAMETER;
+
+		// The type expression is the next expression.
+
 		uint32 identifierTokenIndex;
-
-		// The type expression is the next expression in the AST buffer.
 	};
 
-	struct FunctionStatement : public BaseStatement<StatementType::FUNCTION> {
+	template<>
+	struct Statement<StatementType::FUNCTION> {
+		StatementType type = StatementType::FUNCTION;
+
+		// If returnType is true, the return type expression is the next expression.
 		bool returnType;
+
 		uint32 identifierTokenIndex;
-		std::vector<uint32> parameterStatementIndices;
-		uint32 scopeStatementIndex;
+		uint32 parameterCount;
 
-		// If returnType is true, the return type expression is the next expression in the AST buffer.
+		// The scope statement is the next statement.
 	};
 
-	struct ExpressionStatement : public BaseStatement<StatementType::EXPRESSION> {
-		// The expression is the next expression in the AST buffer.
+	template<>
+	struct Statement<StatementType::EXPRESSION> {
+		StatementType type = StatementType::EXPRESSION;
+
+		// The expression is the next expression.
 	};
 
-	struct ScopeStatement : public BaseStatement<StatementType::SCOPE> {
-		std::vector<uint32> statementIndices;
+	template<>
+	struct Statement<StatementType::SCOPE> {
+		StatementType type = StatementType::SCOPE;
+
+		uint32 statementCount;
+		DocumentRange range;
 	};
 
-	struct IfStatement : public BaseStatement<StatementType::IF> {
-		uint32 scopeStatementIndex;
+	template<>
+	struct Statement<StatementType::IF> {
+		StatementType type = StatementType::IF;
 
-		// The condition expression is the next expression in the AST buffer.
+		// The condition expression is the next expression.
+		// The scope statement is the next statement.
 	};
 
-	struct WhileStatement : public BaseStatement<StatementType::WHILE> {
-		uint32 scopeStatementIndex;
+	template<>
+	struct Statement<StatementType::WHILE> {
+		StatementType type = StatementType::WHILE;
 
-		// The condition expression is the next expression in the AST buffer.
+		// The condition expression is the next expression.
+		// The scope statement is the next statement.
 	};
 
-	struct BreakStatement : public BaseStatement<StatementType::BREAK> {};
+	template<>
+	struct Statement<StatementType::BREAK> {
+		StatementType type = StatementType::BREAK;
+	};
 
-	struct NextStatement : public BaseStatement<StatementType::NEXT> {};
+	template<>
+	struct Statement<StatementType::NEXT> {
+		StatementType type = StatementType::NEXT;
+	};
 
-	struct ReturnStatement : public BaseStatement<StatementType::RETURN> {
-		// The expression is the next expression in the AST buffer.
+	template<>
+	struct Statement<StatementType::RETURN> {
+		StatementType type = StatementType::RETURN;
+
+		// The expression is the next expression.
 	};
 }

@@ -7,6 +7,7 @@
 #include "DocumentPosition.hpp"
 #include "Lexer.hpp"
 #include "Parser.hpp"
+#include "SemanticAnalyzer.hpp"
 #include "SemanticToken.hpp"
 
 namespace ProjectA {
@@ -20,6 +21,8 @@ namespace ProjectA {
 		Parser parser;
 		parser.parse(&output);
 
+		SemanticAnalyzer semanticAnalyzer(output);
+
 		return output;
 	}
 
@@ -27,6 +30,7 @@ namespace ProjectA {
 		emscripten::class_<CompilationOutput>("CompilationOutput")
 			.property("definitions", &CompilationOutput::definitions)
 			.property("diagnostics", &CompilationOutput::diagnostics)
+			.property("references", &CompilationOutput::references)
 			.property("scopes", &CompilationOutput::scopes)
 			.property("semanticTokens", &CompilationOutput::semanticTokens)
 			.function("getSize", &CompilationOutput::_emscripten_getSize)
@@ -64,6 +68,10 @@ namespace ProjectA {
 			.property("start", &DocumentRange::start)
 			.property("end", &DocumentRange::end);
 
+		emscripten::class_<Reference>("Reference")
+			.property("definitionIndex", &Reference::definitionIndex)
+			.property("identifierRange", &Reference::identifierRange);
+
 		emscripten::class_<Scope>("Scope")
 			.property("start", &Scope::start)
 			.property("end", &Scope::end)
@@ -80,6 +88,7 @@ namespace ProjectA {
 		emscripten::register_vector<Definition>("DefinitionVector");
 		emscripten::register_vector<Diagnostic>("DiagnosticVector");
 		emscripten::register_vector<DiagnosticReference>("DiagnosticReferenceVector");
+		emscripten::register_vector<Reference>("ReferenceVector");
 		emscripten::register_vector<Scope>("ScopeVector");
 		emscripten::register_vector<SemanticToken>("SemanticTokenVector");
 	}

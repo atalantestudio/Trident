@@ -138,8 +138,8 @@ namespace ProjectA {
 
 	template<>
 	struct generateDiagnostic<DiagnosticCode::REDEFINITION> {
-		explicit generateDiagnostic(CompilationOutput& output, const Token& redefinitionToken, uint32 firstDefinitionTokenIndex) {
-			const Token& firstDefinitionToken = output.tokens[firstDefinitionTokenIndex];
+		explicit generateDiagnostic(CompilationOutput& output, const Token& redefinitionToken, uint32 definitionTokenIndex) {
+			const Token& firstDefinitionToken = output.tokens[definitionTokenIndex];
 
 			DiagnosticReference diagnosticReference{};
 			diagnosticReference.start = firstDefinitionToken.start;
@@ -237,6 +237,12 @@ namespace ProjectA {
 
 	template<>
 	struct generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER> {
+		explicit generateDiagnostic(CompilationOutput& output, uint32 identifierTokenIndex) {
+			const Token& identifierToken = output.tokens[identifierTokenIndex];
+
+			generateDiagnostic(output, identifierToken);
+		}
+
 		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
 			Diagnostic diagnostic{};
 			diagnostic.start = identifierToken.start;

@@ -6,6 +6,7 @@
 #include "Function.hpp"
 #include "Language/Type.hpp"
 #include "PackedType.hpp"
+#include "Reference.hpp"
 #include "Scope.hpp"
 #include "SemanticToken.hpp"
 #include "SemanticTokenType.hpp"
@@ -226,16 +227,25 @@ namespace ProjectA {
 				currentScopeIndex = scope.parentScopeIndex;
 			}
 
-			const Definition* getFirstDefinition(const std::string& identifier) const {
+			uint32 getDefinitionIndex(uint32 identifierTokenIndex) const {
+				const Token& identifierToken = tokens[identifierTokenIndex];
+				const std::string identifier = getIdentifier(identifierToken);
+
+				return getDefinitionIndex(identifier);
+			}
+
+			// Compares the identifier string to the identifiers of the open definitions; that is, the definitions whose parent scopes are not yet closed.
+			// Returns ~0 if no corresponding definition is found.
+			uint32 getDefinitionIndex(const std::string& identifier) const {
 				for (uint32 definitionIndex = 0; definitionIndex < openScopeDefinitions.size(); definitionIndex += 1) {
 					const Definition& definition = openScopeDefinitions[definitionIndex];
 
 					if (identifier == definition.identifier) {
-						return &definition;
+						return definitionIndex;
 					}
 				}
 
-				return nullptr;
+				return ~0;
 			}
 
 			Definition& define(PackedType type, SemanticTokenType semanticTokenType, uint32 identifierTokenIndex, DocumentPosition end, uint32 size = 0, uint32 alignment = 0) {
@@ -249,34 +259,38 @@ namespace ProjectA {
 				definition.semanticTokenType = semanticTokenType;
 				definition.tokenIndex = identifierTokenIndex;
 				definition.identifier = getIdentifier(identifierToken);
+				definition.evaluatedInitializer = 0;
 
 				return openScopeDefinitions.emplace_back(definition);
 			}
 
-			UserDefinedType& defineStructure(const ref<StructureStatement>& statement, DocumentPosition end) {
-				const Token& identifierToken = tokens[statement->identifierTokenIndex];
+			UserDefinedType& defineStructure(const Statement<StatementType::STRUCTURE>& statement) {
+				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 				const PackedType type = PackedType::fromTypeExpression(TokenType::IDENTIFIER, static_cast<uint32>(userDefinedTypes.size()), 0);
+
+				registerSemanticToken(SemanticTokenType::STRUCTURE, statement.identifierTokenIndex);
 
 				Definition definition{};
 				definition.identifierRange.start = identifierToken.start;
 				definition.identifierRange.end = identifierToken.getEnd();
-				definition.end = end;
+				definition.end = statement.end;
 				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::STRUCTURE;
-				definition.tokenIndex = statement->identifierTokenIndex;
+				definition.tokenIndex = statement.identifierTokenIndex;
 				definition.identifier = getIdentifier(identifierToken);
+				definition.evaluatedInitializer = 0;
 
 				openScopeDefinitions.emplace_back(definition);
 
 				UserDefinedType userDefinedType{};
 				userDefinedType.identifierIndex = identifierToken.index;
-				userDefinedType.constructorArgumentCount = statement->memberCount;
+				userDefinedType.constructorArgumentCount = statement.memberCount;
 
 				return userDefinedTypes.emplace_back(userDefinedType);
 			}
 
-			Definition& defineMember(const ref<MemberStatement>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
-				const Token& identifierToken = tokens[statement->identifierTokenIndex];
+			Definition& defineMember(const Statement<StatementType::MEMBER>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
+				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 
 				Definition definition{};
 				definition.identifierRange.start = identifierToken.start;
@@ -284,31 +298,49 @@ namespace ProjectA {
 				definition.end = definition.identifierRange.end;
 				definition.type = typeExpression.type;
 				definition.semanticTokenType = SemanticTokenType::MEMBER;
-				definition.tokenIndex = statement->identifierTokenIndex;
+				definition.tokenIndex = statement.identifierTokenIndex;
 				definition.identifier = getIdentifier(identifierToken);
+				definition.evaluatedInitializer = 0;
 
 				return openScopeDefinitions.emplace_back(definition);
 			}
 
-			Definition& defineConstant(const ref<ConstantStatement>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
-				const Token& identifierToken = tokens[statement->identifierTokenIndex];
+			Definition& defineConstant(const Statement<StatementType::CONSTANT>& statement, const ExpressionReference& typeExpressionReference) {
+				DEBUG_ASSERT(typeExpressionReference.type == ExpressionType::TYPE);
 
-				return define(typeExpression.type, SemanticTokenType::CONSTANT, statement->identifierTokenIndex, identifierToken.getEnd());
+				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+				const Token& identifierToken = tokens[statement.identifierTokenIndex];
+
+				Definition definition{};
+				definition.identifierRange.start = identifierToken.start;
+				definition.identifierRange.end = identifierToken.getEnd();
+				definition.end = identifierToken.getEnd();
+				definition.type = typeExpression.type;
+				definition.semanticTokenType = SemanticTokenType::CONSTANT;
+				definition.tokenIndex = statement.identifierTokenIndex;
+				definition.identifier = getIdentifier(identifierToken);
+				definition.evaluatedInitializer = 0;
+
+				Definition& result = openScopeDefinitions.emplace_back(definition);
+
+				createReference(static_cast<uint32>(openScopeDefinitions.size() - 1), statement.identifierTokenIndex);
+
+				return result;
 			}
 
-			Definition& defineVariableOrConstant(const ref<VariableStatement>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
-				const Token& identifierToken = tokens[statement->identifierTokenIndex];
+			Definition& defineVariableOrConstant(const Statement<StatementType::VARIABLE>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
+				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 				SemanticTokenType semanticTokenType = SemanticTokenType::VARIABLE;
 
-				if (statement->constant) {
+				if (statement.constant) {
 					semanticTokenType = SemanticTokenType::CONSTANT;
 				}
 
-				return define(typeExpression.type, semanticTokenType, statement->identifierTokenIndex, identifierToken.getEnd());
+				return define(typeExpression.type, semanticTokenType, statement.identifierTokenIndex, identifierToken.getEnd());
 			}
 
-			Definition& defineFunction(const ref<FunctionStatement>& statement, uint32 parameterTypeExpressionOffset, DocumentPosition end) {
-				const Token& identifierToken = tokens[statement->identifierTokenIndex];
+			Definition& defineFunction(const Statement<StatementType::FUNCTION>& statement, uint32 parameterTypeExpressionOffset, DocumentPosition end) {
+				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 
 				registerFunctionOverload(statement, parameterTypeExpressionOffset);
 
@@ -320,6 +352,7 @@ namespace ProjectA {
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
 				definition.tokenIndex = ~0;
 				definition.identifier = getIdentifier(identifierToken);
+				definition.evaluatedInitializer = 0;
 
 				return openScopeDefinitions.emplace_back(definition);
 			}
@@ -333,8 +366,24 @@ namespace ProjectA {
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
 				definition.tokenIndex = ~0;
 				definition.identifier = getIdentifier(identifierToken);
+				definition.evaluatedInitializer = 0;
 
 				return openScopeDefinitions.emplace_back(definition);
+			}
+
+			void createReference(uint32 definitionIndex, uint32 identifierTokenIndex) {
+				const Definition& definition = getOpenScopeDefinition(definitionIndex);
+				const Token& identifierToken = tokens[identifierTokenIndex];
+
+				registerSemanticToken(definition.semanticTokenType, identifierTokenIndex);
+
+				Reference reference{};
+				reference.definitionIndex = definitionIndex;
+				reference.identifierIndex = identifierToken.index;
+				reference.identifierRange.start = identifierToken.start;
+				reference.identifierRange.end = identifierToken.getEnd();
+
+				references.emplace_back(reference);
 			}
 
 			std::string getTokenString(const Token& token) const {
@@ -423,6 +472,16 @@ namespace ProjectA {
 				}
 			}
 
+			uint32 getOpenScopeDefinitionCount() const {
+				return static_cast<uint32>(openScopeDefinitions.size());
+			}
+
+			const Definition& getOpenScopeDefinition(uint32 definitionIndex) const {
+				DEBUG_ASSERT(definitionIndex < openScopeDefinitions.size());
+
+				return openScopeDefinitions[definitionIndex];
+			}
+
 		private:
 			/* void registerDefaultDefinitions() {
 				for (uint32 functionIndex = FIRST_FUNCTION_INDEX; functionIndex <= LAST_FUNCTION_INDEX; functionIndex += 1) {
@@ -434,8 +493,8 @@ namespace ProjectA {
 				}
 			} */
 
-			void registerFunctionOverload(const ref<FunctionStatement>& statement, uint32 parameterTypeExpressionOffset) {
-				const Token& identifierToken = tokens[statement->identifierTokenIndex];
+			void registerFunctionOverload(const Statement<StatementType::FUNCTION>& statement, uint32 parameterTypeExpressionOffset) {
+				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 				const uint32 identifierIndex = identifierToken.index;
 
 				uint32 functionIndex = getFunctionIndex(identifierIndex);
@@ -446,11 +505,11 @@ namespace ProjectA {
 
 				// TODO: Compare with other overloads.
 				FunctionOverload functionOverload{};
+				functionOverload.parameters.resize(statement.parameterCount);
+
 				uint32 parameterIndex = 0;
 
-				functionOverload.parameters.resize(statement->parameterStatementIndices.size());
-
-				while (parameterIndex < statement->parameterStatementIndices.size()) {
+				while (parameterIndex < statement.parameterCount) {
 					const ExpressionReference& parameterTypeExpressionReference = ast.getExpressionReference(parameterTypeExpressionOffset + parameterIndex);
 					const Expression<ExpressionType::TYPE>& parameterTypeExpression = ast.getExpression<ExpressionType::TYPE>(parameterTypeExpressionReference.byteOffset);
 
@@ -495,6 +554,10 @@ namespace ProjectA {
 			std::vector<Definition> openScopeDefinitions;
 			uint32 nextScopeDefinitionCount = 0;
 			std::vector<Definition> definitions;
+
+			// TODO: Finish reference system.
+			std::vector<Reference> references;
+
 			std::vector<Scope> scopes;
 			uint32 currentScopeIndex = UNDEFINED_SCOPE;
 	};

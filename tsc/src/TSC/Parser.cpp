@@ -38,7 +38,7 @@ namespace ProjectA {
 	}
 
 	#define PARSE_BINARY_EXPRESSION(condition, callback) { \
-		const uint32 insertionIndex = output->ast.getExpressionReferenceCount(); \
+		const uint32 insertionIndex = output->ast.getExpressionCount(); \
 		\
 		TRY(callback()); \
 		\
@@ -46,7 +46,7 @@ namespace ProjectA {
 			Expression<ExpressionType::BINARY> expression{}; \
 			expression.operatorTokenIndex = tokenIndex; \
 			\
-			output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex); \
+			/* output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex); */ \
 			\
 			jump(); \
 			\
@@ -67,9 +67,6 @@ namespace ProjectA {
 		position = {};
 		visitedWhileCount = 0;
 
-		analyzer.setCompilationOutput(output);
-		output->openScope(position);
-
 		jumpEol();
 
 		while (tokenIndex < output->tokens.size()) {
@@ -79,8 +76,6 @@ namespace ProjectA {
 
 			jumpEol();
 		}
-
-		output->closeScope(position);
 	}
 
 	DiagnosticCode Parser::parseGlobalScopeStatement() {
@@ -96,82 +91,69 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode Parser::parseStructureStatement() {
-		ref<StructureStatement> statement = createRef<StructureStatement>();
-		statement->identifierTokenIndex = tokenIndex;
-
-		const uint32 structureStatementIndex = static_cast<uint32>(output->ast.statements.size());
+		Statement<StatementType::STRUCTURE> statement{};
+		statement.identifierTokenIndex = tokenIndex;
 
 		jump();
 		jump();
 		jumpEol();
 
-		output->ast.statements.emplace_back(statement);
+		output->ast.addStatement(statement);
 
-		const uint32 statementIndex = static_cast<uint32>(output->ast.statements.size() - 1);
-
-		output->ast.globalScopeStatementIndices.emplace_back(statementIndex);
-
-		const uint32 memberTypeExpressionReferenceOffset = output->ast.getExpressionReferenceCount();
+		Statement<StatementType::STRUCTURE>& statementReference = output->ast.getLastStatement<StatementType::STRUCTURE>();
 
 		while (!read(TokenType::RIGHT_CURLY_BRACE) && !read(TokenType::END_OF_LINE)) {
 			if (read(TokenType::LEFT_SQUARE_BRACKET)) {
 				TRY(parseAnnotationBlocks());
 			}
 
-			if (parseMemberStatement(statementIndex, statement) != DiagnosticCode::SUCCESS) {
+			if (parseMemberStatement() != DiagnosticCode::SUCCESS) {
 				synchronize();
 
 				break;
 			}
 
-			statement->memberCount += 1;
+			statementReference.memberCount += 1;
 
-			EXPECT(
-				read(TokenType::RIGHT_CURLY_BRACE) || read(TokenType::END_OF_LINE),
-				DiagnosticCode::UNEXPECTED_TOKEN,
-				"'}' or EOL",
-				read()
-			);
+			EXPECT(read(TokenType::RIGHT_CURLY_BRACE) || read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, "'}' or EOL", read());
 
 			jumpEol();
 		}
 
 		CONSUME(TokenType::RIGHT_CURLY_BRACE);
 
-		analyzer.analyzeStructureStatement(statementIndex, statement, read().getEnd(), memberTypeExpressionReferenceOffset);
+		statementReference.end = position;
 
 		return DiagnosticCode::SUCCESS;
 	}
 
-	DiagnosticCode Parser::parseMemberStatement(uint32 structureStatementIndex, ref<StructureStatement>& structureStatement) {
-		ref<MemberStatement> statement = createRef<MemberStatement>();
-		statement->annotationFlag = annotationFlag;
-		statement->annotationBlockIndexOffset = currentAnnotationCount;
-		statement->annotationBlockCount = static_cast<uint32>(output->ast.annotationBlocks.size()) - currentAnnotationCount;
+	DiagnosticCode Parser::parseMemberStatement() {
+		Statement<StatementType::MEMBER> statement{};
+		statement.annotationBlockIndexOffset = currentAnnotationCount;
+		statement.annotationBlockCount = static_cast<uint32>(output->ast.annotationBlocks.size()) - currentAnnotationCount;
+		statement.annotationFlag = annotationFlag;
 
-		currentAnnotationCount += statement->annotationBlockCount;
+		currentAnnotationCount += statement.annotationBlockCount;
 		annotationFlag = 0;
 
 		TRY(parseTypeExpression());
 
-		statement->identifierTokenIndex = tokenIndex;
+		statement.identifierTokenIndex = tokenIndex;
 
 		CONSUME_IDENTIFIER();
 
-		output->ast.statements.emplace_back(statement);
-
-		analyzer.analyzeMemberStatement(structureStatementIndex, structureStatement, statement);
+		output->ast.addStatement(statement);
 
 		return DiagnosticCode::SUCCESS;
 	}
 
 	DiagnosticCode Parser::parseConstantOrFunctionStatement() {
-		ref<ConstantStatement> statement = createRef<ConstantStatement>();
-		statement->annotationFlag = annotationFlag;
-		statement->annotationBlockIndexOffset = currentAnnotationCount;
-		statement->annotationBlockCount = static_cast<uint32>(output->ast.annotationBlocks.size()) - currentAnnotationCount;
+		Statement<StatementType::CONSTANT> statement{};
+		statement.annotationBlockIndexOffset = currentAnnotationCount;
+		statement.annotationBlockCount = static_cast<uint32>(output->ast.annotationBlocks.size()) - currentAnnotationCount;
+		statement.annotationFlag = annotationFlag;
 
-		currentAnnotationCount += statement->annotationBlockCount;
+		currentAnnotationCount += statement.annotationBlockCount;
 		annotationFlag = 0;
 
 		TRY(parseTypeExpression());
@@ -180,43 +162,38 @@ namespace ProjectA {
 			return parseFunctionStatement();
 		}
 
-		statement->identifierTokenIndex = tokenIndex;
+		statement.identifierTokenIndex = tokenIndex;
 
 		CONSUME_IDENTIFIER();
 
 		EXPECT(read(TokenType::EQUAL), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::EQUAL, read());
 
-		output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
+		// output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
 
 		jump();
 
 		TRY(parseLogicalOrExpression());
 
+		output->ast.addStatement(statement);
+
 		EXPECT(read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::END_OF_LINE, read());
-
-		output->ast.statements.emplace_back(statement);
-		output->ast.globalScopeStatementIndices.emplace_back(static_cast<uint32>(output->ast.statements.size() - 1));
-
-		analyzer.analyzeConstantStatement(statement);
 
 		return DiagnosticCode::SUCCESS;
 	}
 
-	// TODO: It should not be possible to annotate the return type of a function.
 	DiagnosticCode Parser::parseFunctionStatement() {
-		ref<FunctionStatement> statement = createRef<FunctionStatement>();
-		statement->returnType = true;
-		statement->identifierTokenIndex = tokenIndex;
+		Statement<StatementType::FUNCTION> statement{};
+		statement.returnType = true;
+		statement.identifierTokenIndex = tokenIndex;
 
 		CONSUME_IDENTIFIER();
 
-		output->ast.statements.emplace_back(statement);
-		output->ast.globalScopeStatementIndices.emplace_back(static_cast<uint32>(output->ast.statements.size() - 1));
+		output->ast.addStatement(statement);
 
-		const uint32 parameterTypeExpressionOffset = output->ast.getExpressionReferenceCount();
+		Statement<StatementType::FUNCTION>& statementReference = output->ast.getLastStatement<StatementType::FUNCTION>();
 
 		// TODO: Position must be the end of the scope, but the scope statements must be analyzed in order.
-		analyzer.analyzeFunctionStatement(statement, parameterTypeExpressionOffset, position);
+		// analyzer.analyzeFunctionStatement(statement, output->ast.getExpressionCount(), position);
 
 		// We already know it is a '('.
 		jump();
@@ -226,7 +203,7 @@ namespace ProjectA {
 		while (!read(TokenType::RIGHT_PARENTHESIS)) {
 			TRY(parseParameterStatement());
 
-			statement->parameterStatementIndices.emplace_back(static_cast<uint32>(output->ast.statements.size() - 1));
+			statementReference.parameterCount += 1;
 
 			if (read(TokenType::RIGHT_PARENTHESIS)) {
 				break;
@@ -241,8 +218,6 @@ namespace ProjectA {
 		CONSUME(TokenType::RIGHT_PARENTHESIS);
 		CONSUME(TokenType::LEFT_CURLY_BRACE);
 
-		statement->scopeStatementIndex = static_cast<uint32>(output->ast.statements.size());
-
 		TRY(parseScopeStatement());
 
 		return DiagnosticCode::SUCCESS;
@@ -251,13 +226,12 @@ namespace ProjectA {
 	DiagnosticCode Parser::parseParameterStatement() {
 		TRY(parseTypeExpression());
 
-		ref<ParameterStatement> statement = createRef<ParameterStatement>();
-		statement->identifierTokenIndex = tokenIndex;
+		Statement<StatementType::PARAMETER> statement{};
+		statement.identifierTokenIndex = tokenIndex;
 
 		CONSUME_IDENTIFIER();
 
-		output->ast.statements.emplace_back(statement);
-		// analyzer.analyzeParameterStatement(statement);
+		output->ast.addStatement(statement);
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -313,7 +287,9 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode Parser::parseBreakStatement() {
-		output->ast.statements.emplace_back(createRef<BreakStatement>());
+		const Statement<StatementType::BREAK> statement{};
+
+		output->ast.addStatement(statement);
 
 		EXPECT(read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::END_OF_LINE, read());
 
@@ -321,7 +297,9 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode Parser::parseNextStatement() {
-		output->ast.statements.emplace_back(createRef<NextStatement>());
+		const Statement<StatementType::NEXT> statement{};
+
+		output->ast.addStatement(statement);
 
 		EXPECT(read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::END_OF_LINE, read());
 
@@ -331,35 +309,33 @@ namespace ProjectA {
 	DiagnosticCode Parser::parseExpressionStatement() {
 		TRY(parseAssignmentOrCompoundExpression());
 
-		const ref<ExpressionStatement> statement = createRef<ExpressionStatement>();
+		const Statement<StatementType::EXPRESSION> statement{};
 
-		output->ast.statements.emplace_back(statement);
+		output->ast.addStatement(statement);
 
-		// TODO: Why expect EOL?
-		// EXPECT(read(TokenType::RIGHT_CURLY_BRACE) || read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::RIGHT_CURLY_BRACE, read());
-		EXPECT(read(TokenType::RIGHT_CURLY_BRACE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::RIGHT_CURLY_BRACE, read());
+		EXPECT(read(TokenType::RIGHT_CURLY_BRACE) || read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, "'}' or EOL", read());
 
 		return DiagnosticCode::SUCCESS;
 	}
 
 	DiagnosticCode Parser::parseIfStatementStart() {
-		ref<IfStatement> statement = createRef<IfStatement>();
+		const Statement<StatementType::IF> statement{};
 
-		TRY(parseIfOrWhileStatementEnd(statement->scopeStatementIndex));
+		output->ast.addStatement(statement);
 
-		output->ast.statements.emplace_back(statement);
+		TRY(parseIfOrWhileStatementEnd());
 
 		return DiagnosticCode::SUCCESS;
 	}
 
 	DiagnosticCode Parser::parseWhileStatementStart() {
+		const Statement<StatementType::WHILE> statement{};
+
+		output->ast.addStatement(statement);
+
 		visitedWhileCount += 1;
 
-		ref<WhileStatement> statement = createRef<WhileStatement>();
-
-		TRY(parseIfOrWhileStatementEnd(statement->scopeStatementIndex));
-
-		output->ast.statements.emplace_back(statement);
+		TRY(parseIfOrWhileStatementEnd());
 
 		visitedWhileCount -= 1;
 
@@ -367,32 +343,32 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode Parser::parseScopeStatement() {
-		ref<ScopeStatement> statement = createRef<ScopeStatement>();
+		Statement<StatementType::SCOPE> statement{};
+		statement.range.start = position;
 
-		output->ast.statements.emplace_back(statement);
-		output->openScope(position);
+		output->ast.addStatement(statement);
+
+		Statement<StatementType::SCOPE>& statementReference = output->ast.getLastStatement<StatementType::SCOPE>();
 
 		jumpEol();
 
 		while (!read(TokenType::RIGHT_CURLY_BRACE)) {
 			TRY(parseLocalScopeStatement());
 
-			statement->statementIndices.emplace_back(static_cast<uint32>(output->ast.statements.size()) - 1);
+			statementReference.statementCount += 1;
 
 			jumpEol();
 		}
 
 		CONSUME(TokenType::RIGHT_CURLY_BRACE);
 
-		output->closeScope(position);
+		statementReference.range.end = position;
 
 		return DiagnosticCode::SUCCESS;
 	}
 
-	DiagnosticCode Parser::parseIfOrWhileStatementEnd(uint32& scopeStatementIndex) {
+	DiagnosticCode Parser::parseIfOrWhileStatementEnd() {
 		TRY(parseLogicalOrExpression());
-
-		scopeStatementIndex = static_cast<uint32>(output->ast.statements.size());
 
 		CONSUME(TokenType::LEFT_CURLY_BRACE);
 
@@ -402,13 +378,11 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode Parser::parseReturnStatement() {
+		const Statement<StatementType::RETURN> statement{};
+
 		TRY(parseLogicalOrExpression());
 
-		const ref<ReturnStatement> statement = createRef<ReturnStatement>();
-
-		output->ast.statements.emplace_back(statement);
-
-		analyzer.analyzeReturnStatement(statement);
+		output->ast.addStatement(statement);
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -416,42 +390,39 @@ namespace ProjectA {
 	DiagnosticCode Parser::parseVariableStatement() {
 		TRY(parseTypeExpression());
 
-		ref<VariableStatement> statement = createRef<VariableStatement>();
-		statement->identifierTokenIndex = tokenIndex;
-
 		EXPECT(read(TokenType::IDENTIFIER), DiagnosticCode::MISSING_IDENTIFIER, read());
 
-		statement->constant = isScreamingSnakeCase(output->getIdentifier(read()));
-		statement->initializer = false;
+		Statement<StatementType::VARIABLE> statement{};
+		statement.identifierTokenIndex = tokenIndex;
+		statement.constant = isScreamingSnakeCase(output->getIdentifier(read()));
+		statement.initializer = false;
 
 		SemanticTokenType semanticTokenType = SemanticTokenType::VARIABLE;
 
-		if (statement->constant) {
-			statement->initializer = true;
+		if (statement.constant) {
+			statement.initializer = true;
 
 			semanticTokenType = SemanticTokenType::CONSTANT;
 		}
 
-		output->registerSemanticToken(semanticTokenType, tokenIndex);
+		// output->registerSemanticToken(semanticTokenType, tokenIndex);
 
 		jump();
 
 		if (read(TokenType::EQUAL)) {
-			statement->initializer = true;
+			statement.initializer = true;
 
-			output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
+			// output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
 
 			jump();
 
 			TRY(parseLogicalOrExpression());
 		}
-		else if (statement->constant) {
+		else if (statement.constant) {
 			generateDiagnostic<DiagnosticCode::UNEXPECTED_TOKEN>(*output, TokenType::EQUAL, read());
 		}
 
-		output->ast.statements.emplace_back(statement);
-
-		analyzer.analyzeVariableStatement(statement);
+		output->ast.addStatement(statement);
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -503,7 +474,7 @@ namespace ProjectA {
 	DiagnosticCode Parser::parseAssignmentOrCompoundExpression() {
 		EXPECT(read(TokenType::IDENTIFIER), DiagnosticCode::MISSING_IDENTIFIER, read());
 
-		const uint32 insertionIndex = output->ast.getExpressionReferenceCount();
+		const uint32 insertionIndex = output->ast.getExpressionCount();
 
 		TRY(parseIdentifierExpression());
 
@@ -511,7 +482,7 @@ namespace ProjectA {
 			Expression<ExpressionType::BINARY> expression{};
 			expression.operatorTokenIndex = tokenIndex;
 
-			output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
+			// output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
 
 			jump();
 
@@ -536,13 +507,13 @@ namespace ProjectA {
 	DiagnosticCode Parser::parseMultiplicativeExpression() PARSE_BINARY_EXPRESSION(read(TokenType::ASTERISK) || read(TokenType::SLASH), parseUnaryExpression)
 
 	DiagnosticCode Parser::parseUnaryExpression() {
-		const uint32 insertionIndex = output->ast.getExpressionReferenceCount();
+		const uint32 insertionIndex = output->ast.getExpressionCount();
 
 		if (read().type >= TokenType::PLUS && read().type <= TokenType::TILDE) {
 			Expression<ExpressionType::UNARY> expression{};
 			expression.operatorTokenIndex = tokenIndex;
 
-			output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
+			// output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
 
 			jump();
 
@@ -559,7 +530,7 @@ namespace ProjectA {
 
 	DiagnosticCode Parser::parsePrimaryExpression() {
 		if (read().type >= FIRST_TYPE_INDEX && read().type <= LAST_TYPE_INDEX) {
-			const uint32 insertionIndex = output->ast.getExpressionReferenceCount();
+			const uint32 insertionIndex = output->ast.getExpressionCount();
 
 			TRY(parseTypeExpression());
 
@@ -569,7 +540,7 @@ namespace ProjectA {
 		}
 
 		if (read(TokenType::IDENTIFIER) || (read().type >= FIRST_FUNCTION_INDEX && read().type <= LAST_FUNCTION_INDEX)) {
-			const uint32 insertionIndex = output->ast.getExpressionReferenceCount();
+			const uint32 insertionIndex = output->ast.getExpressionCount();
 
 			TRY(parseIdentifierExpression());
 
@@ -585,7 +556,7 @@ namespace ProjectA {
 		}
 
 		if (read(TokenType::LEFT_PARENTHESIS)) {
-			const uint32 insertionIndex = output->ast.getExpressionReferenceCount();
+			const uint32 insertionIndex = output->ast.getExpressionCount();
 
 			return parseCallOrGroupExpression(insertionIndex, false);
 		}
@@ -599,7 +570,6 @@ namespace ProjectA {
 		Expression<ExpressionType::IDENTIFIER> expression{};
 		expression.tokenIndex = tokenIndex;
 
-		// analyzer.analyzeIdentifierExpression(expression);
 		output->ast.addExpression(expression);
 
 		jump();
@@ -630,7 +600,7 @@ namespace ProjectA {
 
 	DiagnosticCode Parser::parseCallOrGroupExpression(uint32 insertionIndex, bool explicitCallee) {
 		// TODO: Refactor.
-		const ExpressionReference& lastExpressionReference = output->ast.getExpressionReference(static_cast<uint32>(output->ast.expressionReferences.size()) - 1);
+		const ExpressionReference& lastExpressionReference = output->ast.getExpressionReference(output->ast.getExpressionCount() - 1);
 
 		if (lastExpressionReference.type != ExpressionType::TYPE && lastExpressionReference.type != ExpressionType::IDENTIFIER) {
 			return parseGroupExpression();
@@ -698,16 +668,20 @@ namespace ProjectA {
 			AnnotationBlock annotationBlock{};
 			annotationBlock.identifierTokenIndex = tokenIndex;
 
+			uint32 annotation = 0;
+
 			// Find which annotation this block refers to.
-			for (uint32 annotation = 0; annotation < ANNOTATION_COUNT; annotation += 1) {
+			while (annotation < ANNOTATION_COUNT) {
 				if (output->getTokenString(read()) == ANNOTATION_STRINGS[annotation]) {
 					annotationBlock.annotation = static_cast<Annotation>(annotation);
 					annotationFlag |= BIT(annotation);
 
-					output->registerSemanticToken(SemanticTokenType::PREDEFINED, annotationBlock.identifierTokenIndex);
+					// output->registerSemanticToken(SemanticTokenType::PREDEFINED, annotationBlock.identifierTokenIndex);
 
 					break;
 				}
+
+				annotation += 1;
 			}
 
 			if (annotationBlock.annotation == UNDEFINED_ANNOTATION) {

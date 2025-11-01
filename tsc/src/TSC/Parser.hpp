@@ -3,7 +3,6 @@
 #include "CompilationOutput.hpp"
 #include "Diagnostic/DiagnosticCode.hpp"
 #include "DocumentPosition.hpp"
-#include "SemanticAnalyzer.hpp"
 #include "Token.hpp"
 
 namespace ProjectA {
@@ -14,7 +13,7 @@ namespace ProjectA {
 		private:
 			DiagnosticCode parseGlobalScopeStatement();
 			DiagnosticCode parseStructureStatement();
-			DiagnosticCode parseMemberStatement(uint32 structureStatementIndex, ref<StructureStatement>& structureStatement);
+			DiagnosticCode parseMemberStatement();
 			DiagnosticCode parseConstantOrFunctionStatement();
 			DiagnosticCode parseFunctionStatement();
 			DiagnosticCode parseParameterStatement();
@@ -27,7 +26,7 @@ namespace ProjectA {
 			DiagnosticCode parseNextStatement();
 			DiagnosticCode parseWhileStatementStart();
 			DiagnosticCode parseExpressionStatement();
-			DiagnosticCode parseIfOrWhileStatementEnd(uint32& scopeStatementIndex);
+			DiagnosticCode parseIfOrWhileStatementEnd();
 			DiagnosticCode parseVariableStatement();
 
 			DiagnosticCode parseTypeExpression();
@@ -71,6 +70,5 @@ namespace ProjectA {
 			uint8 annotationFlag;
 			DocumentPosition position;
 			uint32 visitedWhileCount;
-			SemanticAnalyzer analyzer;
 	};
 }

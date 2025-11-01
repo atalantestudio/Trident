@@ -10,36 +10,40 @@ namespace ProjectA {
 			explicit ASTDebugger(std::string_view path, const CompilationOutput& output);
 
 		private:
-			void writeStatement(uint32 statementIndex);
-			void writeStructureStatement(uint32 statementIndex);
-			void writeMemberStatement(uint32 statementIndex);
-			void writeConstantStatement(uint32 statementIndex);
-			void writeVariableStatement(uint32 statementIndex);
-			void writeParameterStatement(uint32 statementIndex);
-			void writeFunctionStatement(uint32 statementIndex);
-			void writeExpressionStatement(uint32 statementIndex);
-			void writeScopeStatement(uint32 statementIndex);
-			void writeIfStatement(uint32 statementIndex);
-			void writeWhileStatement(uint32 statementIndex);
-			void writeBreakStatement();
-			void writeNextStatement();
-			void writeReturnStatement(uint32 statementIndex);
+			void writeStatement();
+			void writeStructureStatement(const Statement<StatementType::STRUCTURE>& statement);
+			void writeMemberStatement(const Statement<StatementType::MEMBER>& statement);
+			void writeConstantStatement(const Statement<StatementType::CONSTANT>& statement);
+			void writeVariableStatement(const Statement<StatementType::VARIABLE>& statement);
+			void writeParameterStatement(const Statement<StatementType::PARAMETER>& statement);
+			void writeFunctionStatement(const Statement<StatementType::FUNCTION>& statement);
+			void writeExpressionStatement(const Statement<StatementType::EXPRESSION>& statement);
+			void writeScopeStatement(const Statement<StatementType::SCOPE>& statement);
+			void writeIfStatement(const Statement<StatementType::IF>& statement);
+			void writeWhileStatement(const Statement<StatementType::WHILE>& statement);
+			void writeBreakStatement(const Statement<StatementType::BREAK>& statement);
+			void writeNextStatement(const Statement<StatementType::NEXT>& statement);
+			void writeReturnStatement(const Statement<StatementType::RETURN>& statement);
 
-			void writeNextExpression();
-			void writeLiteralExpression(uint32 byteOffset);
-			void writeIdentifierExpression(uint32 byteOffset);
-			void writeUnaryExpression(uint32 byteOffset);
-			void writeBinaryExpression(uint32 byteOffset);
-			void writeGroupExpression(uint32 byteOffset);
-			void writeMemberAccessExpression(uint32 byteOffset);
-			void writeCallExpression(uint32 byteOffset);
-			void writeTypeExpression(uint32 byteOffset);
+			void writeExpression();
+			void writeLiteralExpression();
+			void writeIdentifierExpression();
+			void writeUnaryExpression();
+			void writeBinaryExpression();
+			void writeGroupExpression();
+			void writeMemberAccessExpression();
+			void writeCallExpression();
+			void writeTypeExpression();
 
 			void writeAnnotationBlocks(uint32 indexOffset, uint32 count);
 
 		private:
 			FileLogger<FileFormat::JSON> logger;
 			const CompilationOutput* output;
-			uint32 currentExpressionReferenceIndex;
+
+			uint32 statementIndex;
+			uint32 statementByteOffset;
+			uint32 expressionReferenceIndex;
+			uint32 expressionByteOffset;
 	};
 }

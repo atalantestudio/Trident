@@ -7,8 +7,42 @@
 namespace ProjectA {
 	class AST {
 		public:
-			uint32 getExpressionReferenceCount() const {
-				return static_cast<uint32>(expressionReferences.size());
+			uint32 getStatementCount() const {
+				return statementCount;
+			}
+
+			StatementType getStatementType(uint32 byteOffset) const {
+				DEBUG_ASSERT(byteOffset + sizeof(StatementType) <= statementBuffer.size());
+
+				return *pointer_cast<const StatementType*>(&statementBuffer[byteOffset]);
+			}
+
+			template<StatementType StatementType>
+			const Statement<StatementType>& getStatement(uint32 byteOffset) const {
+				DEBUG_ASSERT(byteOffset + sizeof(Statement<StatementType>) <= statementBuffer.size());
+
+				return *pointer_cast<const Statement<StatementType>*>(&statementBuffer[byteOffset]);
+			}
+
+			template<StatementType StatementType>
+			Statement<StatementType>& getLastStatement() {
+				DEBUG_ASSERT(statementBuffer.size() >= sizeof(Statement<StatementType>));
+
+				return *pointer_cast<Statement<StatementType>*>(&statementBuffer[statementBuffer.size() - sizeof(Statement<StatementType>)]);
+			}
+
+			template<StatementType StatementType>
+			void addStatement(const Statement<StatementType>& statement) {
+				const uint64 byteOffset = statementBuffer.size();
+
+				statementBuffer.resize(byteOffset + sizeof(Statement<StatementType>));
+				statementCount += 1;
+
+				std::copy_n(pointer_cast<const uint8*>(&statement), sizeof(Statement<StatementType>), &statementBuffer[byteOffset]);
+			}
+
+			uint32 getExpressionCount() const {
+				return expressionCount;
 			}
 
 			const ExpressionReference& getExpressionReference(uint32 index) const {
@@ -29,6 +63,7 @@ namespace ProjectA {
 				const uint64 byteOffset = expressionBuffer.size();
 
 				expressionBuffer.resize(byteOffset + sizeof(Expression<ExpressionType>));
+				expressionCount += 1;
 
 				std::copy_n(pointer_cast<const uint8*>(&expression), sizeof(Expression<ExpressionType>), &expressionBuffer[byteOffset]);
 
@@ -44,6 +79,7 @@ namespace ProjectA {
 				const uint64 byteOffset = expressionBuffer.size();
 
 				expressionBuffer.resize(byteOffset + sizeof(Expression<ExpressionType>));
+				expressionCount += 1;
 
 				std::copy_n(pointer_cast<const uint8*>(&expression), sizeof(Expression<ExpressionType>), &expressionBuffer[byteOffset]);
 
@@ -55,12 +91,17 @@ namespace ProjectA {
 			}
 
 		public:
-			std::vector<ref<Statement>> statements;
-			std::vector<uint32> globalScopeStatementIndices;
+			// TODO: Make private.
+			std::vector<AnnotationBlock> annotationBlocks;
 
-			std::vector<ExpressionReference> expressionReferences;
+		private:
+			std::vector<uint8> statementBuffer;
 			std::vector<uint8> expressionBuffer;
 
-			std::vector<AnnotationBlock> annotationBlocks;
+			// TODO: Remove.
+			std::vector<ExpressionReference> expressionReferences;
+
+			uint32 statementCount = 0;
+			uint32 expressionCount = 0;
 	};
 }

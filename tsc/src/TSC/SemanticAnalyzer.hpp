@@ -1,49 +1,57 @@
 #pragma once
 
 #include "CompilationOutput.hpp"
+#include "Diagnostic/DiagnosticCode.hpp"
 #include "ExpressionEvaluation.hpp"
 #include "OperatorType.hpp"
 #include "Statement.hpp"
-#include "Token.hpp"
 
 namespace ProjectA {
 	class SemanticAnalyzer {
 		public:
-			void setCompilationOutput(CompilationOutput* compilationOutput);
-
-			void analyzeStructureStatement(uint32 statementIndex, const ref<StructureStatement>& statement, DocumentPosition end, uint32 memberTypeExpressionReferenceOffset);
-			void analyzeMemberStatement(uint32 structureStatementIndex, const ref<StructureStatement>& structureStatement, const ref<MemberStatement>& statement);
-			void analyzeConstantStatement(const ref<ConstantStatement>& statement);
-			void analyzeFunctionStatement(const ref<FunctionStatement>& statement, uint32 parameterTypeExpressionOffset, DocumentPosition end);
-			void analyzeParameterStatement(const ref<ParameterStatement>& statement) const;
-			void analyzeVariableStatement(const ref<VariableStatement>& statement);
-			void analyzeReturnStatement(const ref<ReturnStatement>& statement);
-
-			void analyzeIdentifierExpression(const Expression<ExpressionType::IDENTIFIER>& expression);
-			void analyzeMemberAccessExpression(const Expression<ExpressionType::MEMBER_ACCESS>& expression);
-
-			DiagnosticCode analyzeTypeExpression(const Expression<ExpressionType::TYPE>& expression);
+			explicit SemanticAnalyzer(CompilationOutput& output);
 
 		private:
-			const AnnotationBlock& getAnnotationBlock(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount, Annotation annotation) const;
+			DiagnosticCode analyzeStatement();
+			DiagnosticCode analyzeStructureStatement(const Statement<StatementType::STRUCTURE>& statement);
+			DiagnosticCode analyzeMemberStatement(const Statement<StatementType::MEMBER>& statement);
+			DiagnosticCode analyzeConstantStatement(const Statement<StatementType::CONSTANT>& statement);
+			DiagnosticCode analyzeVariableStatement(const Statement<StatementType::VARIABLE>& statement);
+			DiagnosticCode analyzeParameterStatement(const Statement<StatementType::PARAMETER>& statement);
+			DiagnosticCode analyzeFunctionStatement(const Statement<StatementType::FUNCTION>& statement);
+			DiagnosticCode analyzeExpressionStatement(const Statement<StatementType::EXPRESSION>& statement);
+			DiagnosticCode analyzeScopeStatement(const Statement<StatementType::SCOPE>& statement);
+			DiagnosticCode analyzeIfStatement(const Statement<StatementType::IF>& statement);
+			DiagnosticCode analyzeWhileStatement(const Statement<StatementType::WHILE>& statement);
+			DiagnosticCode analyzeBreakStatement(const Statement<StatementType::BREAK>& statement);
+			DiagnosticCode analyzeNextStatement(const Statement<StatementType::NEXT>& statement);
+			DiagnosticCode analyzeReturnStatement(const Statement<StatementType::RETURN>& statement);
 
-			void analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const;
+			DiagnosticCode analyzeExpression();
+			DiagnosticCode analyzeLiteralExpression();
+			DiagnosticCode analyzeIdentifierExpression();
+			DiagnosticCode analyzeUnaryExpression();
+			DiagnosticCode analyzeBinaryExpression();
+			DiagnosticCode analyzeGroupExpression();
+			DiagnosticCode analyzeMemberAccessExpression() const;
+			DiagnosticCode analyzeCallExpression();
+			DiagnosticCode analyzeTypeExpression() const;
 
-			void evaluateNextExpression(ExpressionEvaluation& evaluation);
-			void evaluateLiteralExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
-			void evaluateIdentifierExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
-			void evaluateUnaryExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
-			void evaluateBinaryExpression(ExpressionEvaluation& leftEvaluation, uint32 byteOffset);
-			void evaluateGroupExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
-			void evaluateMemberAccessExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
-			void evaluateCallExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
-			void evaluateTypeExpression(ExpressionEvaluation& evaluation, uint32 byteOffset);
+			void analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount);
 
-			sint64 applyBinaryOperator(sint64 lvalue, sint64 rvalue, OperatorType operatorType) const;
 			sint64 applyUnaryOperator(sint64 rvalue, OperatorType operatorType) const;
+			sint64 applyBinaryOperator(sint64 lvalue, sint64 rvalue, OperatorType operatorType) const;
 
 		private:
 			CompilationOutput* output;
-			uint32 currentExpressionReferenceIndex;
+
+			uint32 statementIndex;
+			uint32 statementByteOffset;
+			uint32 expressionReferenceIndex;
+			uint32 expressionByteOffset;
+			uint32 memberDefinitionOffset;
+			DocumentPosition position;
+
+			ExpressionEvaluation evaluation;
 	};
 }
