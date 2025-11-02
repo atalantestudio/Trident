@@ -2,15 +2,10 @@
 
 #include "Annotation.hpp"
 
-// TODO: Move UNDEFINED_TOKEN to a base file.
-#include "Expression.hpp"
-
 namespace ProjectA {
-	static constexpr Annotation UNDEFINED_ANNOTATION = static_cast<Annotation>(~0);
-
 	struct AnnotationBlock {
-		Annotation annotation = UNDEFINED_ANNOTATION;
+		Annotation annotation = static_cast<Annotation>(~0);
 		uint32 identifierTokenIndex = 0;
-		uint32 valueTokenIndex = UNDEFINED_TOKEN;
+		uint32 valueTokenIndex = static_cast<uint32>(~0);
 	};
 }

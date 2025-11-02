@@ -35,7 +35,7 @@ namespace ProjectA {
 			DiagnosticCode analyzeGroupExpression();
 			DiagnosticCode analyzeMemberAccessExpression() const;
 			DiagnosticCode analyzeCallExpression();
-			DiagnosticCode analyzeTypeExpression() const;
+			DiagnosticCode analyzeTypeExpression();
 
 			void analyzeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) const;
 			DiagnosticCode analyzeAnnotationBlock(const AnnotationBlock& annotationBlock, uint32 annotationFlag) const;
@@ -51,8 +51,8 @@ namespace ProjectA {
 			uint32 expressionReferenceIndex;
 			uint32 expressionByteOffset;
 			uint32 memberDefinitionOffset;
+			PackedType currentType;
 			DocumentPosition position;
-
 			ExpressionEvaluation evaluation;
 	};
 }

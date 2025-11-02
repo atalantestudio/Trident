@@ -206,7 +206,7 @@ namespace ProjectA {
 			logger.closeObject();
 		}
 		else {
-			logger.property("Initializer", "null");
+			logger.propertyNonString("Initializer", "null");
 		}
 	}
 
@@ -449,7 +449,7 @@ namespace ProjectA {
 			logger.closeObject();
 		}
 		else {
-			logger.property("Callee", "null");
+			logger.propertyNonString("Callee", "null");
 		}
 
 		logger.propertyNonString("ArgumentCount", expression.argumentCount);
@@ -475,8 +475,16 @@ namespace ProjectA {
 		const Token& typeToken = output->tokens[expression.typeTokenIndex];
 
 		logger.property("ExpressionType", "TypeExpression");
-		logger.propertyNonString("TypeIndex", expression.type.typeIndex);
-		logger.propertyNonString("TemplateArgumentIndex", expression.type.templateArgumentIndex);
+		logger.property("TypeIdentifier", output->getTokenString(typeToken));
+
+		if (expression.templateArgumentTokenIndex != ~0) {
+			const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
+
+			logger.property("TemplateArgumentIdentifier", output->getTokenString(templateArgumentToken));
+		}
+		else {
+			logger.propertyNonString("TemplateArgumentIdentifier", "null");
+		}
 	}
 
 	void ASTDebugger::writeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) {
@@ -491,7 +499,7 @@ namespace ProjectA {
 			logger.openObject();
 			logger.property("Annotation", output->getTokenString(identifierToken));
 
-			if (annotationBlock.valueTokenIndex != UNDEFINED_TOKEN) {
+			if (annotationBlock.valueTokenIndex != ~0) {
 				const Token& valueToken = output->tokens[annotationBlock.valueTokenIndex];
 
 				logger.propertyNonString("Value", std::stoull(output->getTokenString(valueToken)));

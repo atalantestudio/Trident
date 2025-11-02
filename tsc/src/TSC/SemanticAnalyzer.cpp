@@ -28,6 +28,7 @@ namespace ProjectA {
 		expressionReferenceIndex = 0;
 		expressionByteOffset = 0;
 		memberDefinitionOffset = ~0;
+		currentType = PackedType(Type::NONE, Type::NONE);
 		position = {0, 0};
 
 		this->output->openScope(position);
@@ -158,11 +159,14 @@ namespace ProjectA {
 			memberDefinitionIndex += 1;
 		}
 
+		static constexpr uint32 MIN_SIZE_OR_ALIGNMENT = 1;
+
+		userDefinedType.size = max(MIN_SIZE_OR_ALIGNMENT, roundUp(userDefinedType.alignment, lastMemberOffset + lastMemberSize));
+		userDefinedType.alignment = max(MIN_SIZE_OR_ALIGNMENT, userDefinedType.alignment);
+
 		if (statement.memberCount == 0) {
 			generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(*output, identifierToken);
 		}
-
-		userDefinedType.size = roundUp(userDefinedType.alignment, lastMemberOffset + lastMemberSize);
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -213,14 +217,14 @@ namespace ProjectA {
 			memberDefinitionIndex += 1;
 		}
 
-		output->defineMember(statement, typeExpression);
+		output->defineMember(statement, currentType);
 
 		analyzeAnnotationBlocks(statement.annotationBlockIndexOffset, statement.annotationBlockCount);
 
-		if (statement.annotationFlag & BIT(POSITION) && typeExpression.type != PackedType(Type::VEC4, Type::FLOAT32)) {
+		if (statement.annotationFlag & BIT(POSITION) && currentType != PackedType(Type::VEC4, Type::FLOAT32)) {
 			const AnnotationBlock& annotationBlock = output->ast.getAnnotationBlock<POSITION>(statement.annotationBlockIndexOffset, statement.annotationBlockCount);
 
-			generateDiagnostic<DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION>(*output, Annotation::POSITION, typeExpression.type, annotationBlock.identifierTokenIndex);
+			generateDiagnostic<DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION>(*output, Annotation::POSITION, currentType, annotationBlock.identifierTokenIndex);
 
 			return DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION;
 		}
@@ -229,9 +233,6 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode SemanticAnalyzer::analyzeConstantStatement(const Statement<StatementType::CONSTANT>& statement) {
-		const ExpressionReference& typeExpressionReference = output->ast.getExpressionReference(expressionReferenceIndex);
-		const Expression<ExpressionType::TYPE>& typeExpression = output->ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
-
 		analyzeAnnotationBlocks(statement.annotationBlockIndexOffset, statement.annotationBlockCount);
 
 		// Type
@@ -246,14 +247,14 @@ namespace ProjectA {
 			return DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE;
 		}
 
-		evaluation = ExpressionEvaluation(typeExpression.type, true);
+		evaluation = ExpressionEvaluation(currentType, true);
 
 		// Initializer
 		TRY(analyzeExpression());
 
 		output->registerSemanticToken(SemanticTokenType::CONSTANT, statement.identifierTokenIndex);
 
-		Definition& definition = output->defineConstant(statement, typeExpressionReference);
+		Definition& definition = output->defineConstant(statement, currentType);
 		definition.evaluatedInitializer = evaluation.getValue();
 
 		return DiagnosticCode::SUCCESS;
@@ -473,13 +474,16 @@ namespace ProjectA {
 		return DiagnosticCode::SUCCESS;
 	}
 
-	DiagnosticCode SemanticAnalyzer::analyzeTypeExpression() const {
+	DiagnosticCode SemanticAnalyzer::analyzeTypeExpression() {
 		const Expression<ExpressionType::TYPE>& expression = output->ast.getExpression<ExpressionType::TYPE>(expressionByteOffset);
+		const Token& typeToken = output->tokens[expression.typeTokenIndex];
 
-		if (expression.type.unfinished()) {
-			const uint32 userDefinedTypeIndex = output->getUserDefinedTypeIndex(expression.type.typeIdentifierIndex);
+		Type templateArgument = Type::NONE;
 
-			if (userDefinedTypeIndex == ~0) {
+		if (typeToken.type == TokenType::IDENTIFIER) {
+			const uint32 typeIndex = output->getUserDefinedTypeIndex(typeToken.index);
+
+			if (typeIndex == ~0) {
 				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, expression.typeTokenIndex);
 
 				return DiagnosticCode::UNDEFINED_TYPE;
@@ -487,8 +491,8 @@ namespace ProjectA {
 
 			output->registerSemanticToken(SemanticTokenType::STRUCTURE, expression.typeTokenIndex);
 
-			// NOTE: As of now, user-defined types cannot have template arguments.
-			if (expression.type.templateArgumentIndex > 0) {
+			// TODO: Allow user-defined types to have template arguments in the context of uniforms/storage buffers.
+			if (expression.templateArgumentTokenIndex != ~0) {
 				const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
 
 				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex, expression.templateArgumentTokenIndex);
@@ -496,21 +500,45 @@ namespace ProjectA {
 				return DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
 			}
 
+			currentType = PackedType::userDefined(typeIndex, templateArgument);
+
 			return DiagnosticCode::SUCCESS;
 		}
 
+		if (typeToken.type < FIRST_TYPE_INDEX || typeToken.type > LAST_TYPE_INDEX) {
+			generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, expression.typeTokenIndex);
+
+			return DiagnosticCode::UNDEFINED_TYPE;
+		}
+
+		const Type type = static_cast<Type>(typeToken.type - FIRST_TYPE_INDEX + 1);
+
 		output->registerSemanticToken(SemanticTokenType::KEYWORD, expression.typeTokenIndex);
 
-		const uint16 templateArgumentMask = TYPE_TEMPLATE_ARGUMENT_MASKS[expression.type.typeIndex];
+		if (expression.templateArgumentTokenIndex != ~0) {
+			const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
 
-		if (expression.type.templateArgumentIndex > Type::NONE) {
-			if (!(templateArgumentMask & BIT(expression.type.templateArgumentIndex))) {
+			if (templateArgumentToken.type < FIRST_TYPE_INDEX || templateArgumentToken.type > LAST_TYPE_INDEX) {
+				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, expression.templateArgumentTokenIndex);
+
+				return DiagnosticCode::UNDEFINED_TYPE;
+			}
+
+			templateArgument = static_cast<Type>(templateArgumentToken.type - FIRST_TYPE_INDEX + 1);
+		}
+
+		const uint16 templateArgumentMask = TYPE_TEMPLATE_ARGUMENT_MASKS[static_cast<uint32>(type)];
+
+		if (templateArgument > Type::NONE) {
+			if (!(templateArgumentMask & BIT(templateArgument))) {
 				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex, expression.templateArgumentTokenIndex);
 
 				return DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
 			}
 
 			output->registerSemanticToken(SemanticTokenType::KEYWORD, expression.templateArgumentTokenIndex);
+
+			currentType = PackedType(type, templateArgument);
 
 			return DiagnosticCode::SUCCESS;
 		}
@@ -520,6 +548,8 @@ namespace ProjectA {
 
 			return DiagnosticCode::MISSING_TEMPLATE_ARGUMENT;
 		}
+
+		currentType = PackedType(type, templateArgument);
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -564,6 +594,8 @@ namespace ProjectA {
 
 					return DiagnosticCode::MISSING_ANNOTATION_VALUE;
 				}
+
+				output->registerSemanticToken(SemanticTokenType::NUMBER, annotationBlock.valueTokenIndex);
 
 				break;
 			}

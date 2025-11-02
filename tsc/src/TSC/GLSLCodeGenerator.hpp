@@ -78,7 +78,7 @@ namespace ProjectA {
 					case TokenType::TYPE_MAT4X4: {
 						const std::string typeString = output->getTokenString(typeToken);
 
-						if (templateArgumentTokenIndex == UNDEFINED_TOKEN) {
+						if (templateArgumentTokenIndex == ~0) {
 							return typeString;
 						}
 

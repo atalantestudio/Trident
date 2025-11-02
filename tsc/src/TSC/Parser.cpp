@@ -447,10 +447,6 @@ namespace ProjectA {
 			"[TYPE] Expected a language or user-defined type but got " + output->getTokenString(read()) + "."
 		); */
 
-		const TokenType type = read().type;
-		uint32 typeIdentifierIndex = read().index;
-		uint32 templateArgumentIndex = 0;
-
 		Expression<ExpressionType::TYPE> expression{};
 		expression.typeTokenIndex = tokenIndex;
 
@@ -459,7 +455,6 @@ namespace ProjectA {
 		if (read(TokenType::LEFT_ANGLE_BRACKET)) {
 			jump();
 
-			templateArgumentIndex = read().type;
 			expression.templateArgumentTokenIndex = tokenIndex;
 
 			// TODO
@@ -472,8 +467,6 @@ namespace ProjectA {
 
 			CONSUME(TokenType::RIGHT_ANGLE_BRACKET);
 		}
-
-		expression.type = PackedType::fromTypeExpression(type, typeIdentifierIndex, templateArgumentIndex);
 
 		output->ast.addExpression(expression);
 
@@ -693,13 +686,13 @@ namespace ProjectA {
 				annotation += 1;
 			}
 
-			if (annotationBlock.annotation == UNDEFINED_ANNOTATION) {
+			if (annotationBlock.annotation == static_cast<Annotation>(~0)) {
 				generateDiagnostic<DiagnosticCode::UNDEFINED_ANNOTATION>(*output, read());
 			}
 
 			jump();
 
-			if (annotationBlock.annotation != UNDEFINED_ANNOTATION && !(ANNOTATION_TYPE_NONE & BIT(annotationBlock.annotation))) {
+			if (annotationBlock.annotation != static_cast<Annotation>(~0) && !(ANNOTATION_TYPE_NONE & BIT(annotationBlock.annotation))) {
 				if (read(TokenType::LITERAL_INTEGER)) {
 					annotationBlock.valueTokenIndex = tokenIndex;
 

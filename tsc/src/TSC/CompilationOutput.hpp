@@ -286,7 +286,7 @@ namespace ProjectA {
 
 			Definition& defineStructure(const Statement<StatementType::STRUCTURE>& statement) {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
-				const PackedType type = PackedType::fromTypeExpression(TokenType::IDENTIFIER, static_cast<uint32>(userDefinedTypes.size()), 0);
+				const uint32 userDefinedTypeIndex = static_cast<uint32>(userDefinedTypes.size());
 
 				registerSemanticToken(SemanticTokenType::STRUCTURE, statement.identifierTokenIndex);
 
@@ -300,7 +300,7 @@ namespace ProjectA {
 				definition.identifierRange.start = identifierToken.start;
 				definition.identifierRange.end = identifierToken.getEnd();
 				definition.end = statement.end;
-				definition.type = type;
+				definition.type = PackedType::userDefined(userDefinedTypeIndex, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::STRUCTURE;
 				definition.tokenIndex = statement.identifierTokenIndex;
 				definition.identifierIndex = identifierToken.index;
@@ -313,33 +313,34 @@ namespace ProjectA {
 				return result;
 			}
 
-			Definition& defineMember(const Statement<StatementType::MEMBER>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
+			Definition& defineMember(const Statement<StatementType::MEMBER>& statement, PackedType type) {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 
 				Definition definition{};
 				definition.identifierRange.start = identifierToken.start;
 				definition.identifierRange.end = identifierToken.getEnd();
 				definition.end = definition.identifierRange.end;
-				definition.type = typeExpression.type;
+				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::MEMBER;
 				definition.tokenIndex = statement.identifierTokenIndex;
 				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
-				return openScopeDefinitions.emplace_back(definition);
+				Definition& result = openScopeDefinitions.emplace_back(definition);
+
+				createReferenceFromLastDefinition(statement.identifierTokenIndex);
+
+				return result;
 			}
 
-			Definition& defineConstant(const Statement<StatementType::CONSTANT>& statement, const ExpressionReference& typeExpressionReference) {
-				DEBUG_ASSERT(typeExpressionReference.type == ExpressionType::TYPE);
-
-				const Expression<ExpressionType::TYPE>& typeExpression = ast.getExpression<ExpressionType::TYPE>(typeExpressionReference.byteOffset);
+			Definition& defineConstant(const Statement<StatementType::CONSTANT>& statement, PackedType type) {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 
 				Definition definition{};
 				definition.identifierRange.start = identifierToken.start;
 				definition.identifierRange.end = identifierToken.getEnd();
 				definition.end = identifierToken.getEnd();
-				definition.type = typeExpression.type;
+				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::CONSTANT;
 				definition.tokenIndex = statement.identifierTokenIndex;
 				definition.identifierIndex = identifierToken.index;
@@ -352,7 +353,7 @@ namespace ProjectA {
 				return result;
 			}
 
-			Definition& defineVariableOrConstant(const Statement<StatementType::VARIABLE>& statement, const Expression<ExpressionType::TYPE>& typeExpression) {
+			Definition& defineVariableOrConstant(const Statement<StatementType::VARIABLE>& statement, PackedType type) {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 				SemanticTokenType semanticTokenType = SemanticTokenType::VARIABLE;
 
@@ -360,7 +361,7 @@ namespace ProjectA {
 					semanticTokenType = SemanticTokenType::CONSTANT;
 				}
 
-				return define(typeExpression.type, semanticTokenType, statement.identifierTokenIndex, identifierToken.getEnd());
+				return define(type, semanticTokenType, statement.identifierTokenIndex, identifierToken.getEnd());
 			}
 
 			Definition& defineFunction(const Statement<StatementType::FUNCTION>& statement, uint32 parameterTypeExpressionOffset, DocumentPosition end) {
@@ -534,10 +535,11 @@ namespace ProjectA {
 				uint32 parameterIndex = 0;
 
 				while (parameterIndex < statement.parameterCount) {
-					const ExpressionReference& parameterTypeExpressionReference = ast.getExpressionReference(parameterTypeExpressionOffset + parameterIndex);
+					// TODO
+					/* const ExpressionReference& parameterTypeExpressionReference = ast.getExpressionReference(parameterTypeExpressionOffset + parameterIndex);
 					const Expression<ExpressionType::TYPE>& parameterTypeExpression = ast.getExpression<ExpressionType::TYPE>(parameterTypeExpressionReference.byteOffset);
 
-					functionOverload.parameters[parameterIndex].type = parameterTypeExpression.type;
+					functionOverload.parameters[parameterIndex].type = parameterTypeExpression.type; */
 
 					parameterIndex += 1;
 				}
