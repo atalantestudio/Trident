@@ -3,7 +3,6 @@
 #include "DiagnosticCode.hpp"
 #include "DiagnosticReference.hpp"
 #include "DiagnosticSeverity.hpp"
-#include "../DocumentPosition.hpp"
 
 namespace ProjectA {
 	class Diagnostic {

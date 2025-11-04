@@ -5,7 +5,6 @@
 #endif
 
 #include "Case.hpp"
-#include "Diagnostic/Error.hpp"
 #include "Parser.hpp"
 
 namespace ProjectA {
@@ -18,15 +17,11 @@ namespace ProjectA {
 	}
 
 	#define EXPECT(condition, diagnosticCode, ...) if (!(condition)) { \
-		generateDiagnostic<diagnosticCode>(*output, __VA_ARGS__); \
-		\
-		BREAKPOINT(); \
-		\
-		return diagnosticCode; \
+		return output->generateDiagnostic<diagnosticCode>(__VA_ARGS__); \
 	}
 
 	#define CONSUME(type) { \
-		EXPECT(read(type), DiagnosticCode::UNEXPECTED_TOKEN, type, read()) \
+		EXPECT(read(type), DiagnosticCode::UNEXPECTED_TOKEN, output->getNonIdentifierTokenString(type), read()); \
 		\
 		jump(); \
 	}
@@ -170,7 +165,7 @@ namespace ProjectA {
 
 		CONSUME_IDENTIFIER();
 
-		EXPECT(read(TokenType::EQUAL), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::EQUAL, read());
+		EXPECT(read(TokenType::EQUAL), DiagnosticCode::UNEXPECTED_TOKEN, output->getNonIdentifierTokenString(TokenType::EQUAL), read());
 
 		// output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
 
@@ -180,7 +175,7 @@ namespace ProjectA {
 
 		output->ast.addStatement(statement);
 
-		EXPECT(read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::END_OF_LINE, read());
+		EXPECT(read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, output->getNonIdentifierTokenString(TokenType::END_OF_LINE), read());
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -300,7 +295,7 @@ namespace ProjectA {
 
 		output->ast.addStatement(statement);
 
-		EXPECT(read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::END_OF_LINE, read());
+		EXPECT(read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, output->getNonIdentifierTokenString(TokenType::END_OF_LINE), read());
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -310,7 +305,7 @@ namespace ProjectA {
 
 		output->ast.addStatement(statement);
 
-		EXPECT(read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::END_OF_LINE, read());
+		EXPECT(read(TokenType::END_OF_LINE), DiagnosticCode::UNEXPECTED_TOKEN, output->getNonIdentifierTokenString(TokenType::END_OF_LINE), read());
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -432,7 +427,7 @@ namespace ProjectA {
 			TRY(parseLogicalOrExpression());
 		}
 		else if (statement.constant) {
-			generateDiagnostic<DiagnosticCode::UNEXPECTED_TOKEN>(*output, TokenType::EQUAL, read());
+			output->generateDiagnostic<DiagnosticCode::UNEXPECTED_TOKEN>(output->getNonIdentifierTokenString(TokenType::EQUAL), read());
 		}
 
 		output->ast.addStatement(statement);
@@ -536,7 +531,7 @@ namespace ProjectA {
 
 			TRY(parseTypeExpression());
 
-			EXPECT(read(TokenType::LEFT_PARENTHESIS), DiagnosticCode::UNEXPECTED_TOKEN, TokenType::LEFT_PARENTHESIS, read());
+			EXPECT(read(TokenType::LEFT_PARENTHESIS), DiagnosticCode::UNEXPECTED_TOKEN, output->getNonIdentifierTokenString(TokenType::LEFT_PARENTHESIS), read());
 
 			return parseCallOrGroupExpression(insertionIndex, true);
 		}
@@ -563,9 +558,7 @@ namespace ProjectA {
 			return parseCallOrGroupExpression(insertionIndex, false);
 		}
 
-		generateDiagnostic<DiagnosticCode::MISSING_EXPRESSION>(*output, read());
-
-		return DiagnosticCode::MISSING_EXPRESSION;
+		return output->generateDiagnostic<DiagnosticCode::MISSING_EXPRESSION>(read());
 	}
 
 	DiagnosticCode Parser::parseIdentifierExpression() {
@@ -687,7 +680,7 @@ namespace ProjectA {
 			}
 
 			if (annotationBlock.annotation == static_cast<Annotation>(~0)) {
-				generateDiagnostic<DiagnosticCode::UNDEFINED_ANNOTATION>(*output, read());
+				output->generateDiagnostic<DiagnosticCode::UNDEFINED_ANNOTATION>(read(), output->getTokenString(read()));
 			}
 
 			jump();
@@ -699,7 +692,7 @@ namespace ProjectA {
 					jump();
 				}
 				else {
-					generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, read());
+					output->generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(read(), output->getTokenString(read()));
 
 					// TODO: Synchronize?
 				}

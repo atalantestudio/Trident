@@ -4,9 +4,7 @@
 	#include "pch.hpp"
 #endif
 
-#include "Diagnostic/Error.hpp"
 #include "Lexer.hpp"
-#include "Token.hpp"
 
 namespace ProjectA {
 	// TODO: Move inside Base directory.
@@ -302,7 +300,7 @@ namespace ProjectA {
 				}
 				default: {
 					if (!unexpectedCharacter) {
-						generateDiagnostic<DiagnosticCode::UNEXPECTED_CHARACTER>(*output, character, position);
+						output->generateDiagnostic<DiagnosticCode::UNEXPECTED_CHARACTER>(character, position);
 
 						unexpectedCharacter = true;
 					}
@@ -452,7 +450,7 @@ namespace ProjectA {
 		uint64 number = 0;
 
 		if (!parseNumberLiteral(characters, token.characterCount - offset, base, number)) {
-			generateDiagnostic<DiagnosticCode::NUMBER_OVERFLOW>(*output, token);
+			output->generateDiagnostic<DiagnosticCode::NUMBER_OVERFLOW>(token);
 		}
 
 		token.index = static_cast<uint32>(output->literals.size());

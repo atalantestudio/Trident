@@ -6,7 +6,6 @@
 
 #include "Base/Utilities.hpp"
 #include "Case.hpp"
-#include "Diagnostic/Error.hpp"
 #include "SemanticAnalyzer.hpp"
 
 namespace ProjectA {
@@ -127,17 +126,15 @@ namespace ProjectA {
 		const std::string identifier = output->getIdentifier(identifierToken);
 
 		if (!isPascalCase(identifier)) {
-			generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE>(*output, identifierToken);
-
-			return DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE;
+			return output->generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE>(identifierToken);
 		}
 
 		output->defineStructure(statement);
 
 		if (statement.memberCount == 0) {
-			generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(*output, {identifierToken.start, identifierToken.getEnd()});
+			const DocumentRange identifierRange = {identifierToken.start, identifierToken.getEnd()};
 
-			return DiagnosticCode::EMPTY_STRUCTURE;
+			return output->generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(identifierRange);
 		}
 
 		UserDefinedType& userDefinedType = output->getLastUserDefinedType();
@@ -186,9 +183,7 @@ namespace ProjectA {
 			const Definition& definition = output->getOpenScopeDefinition(memberDefinitionOffset - 1);
 
 			if (typeToken.index == definition.identifierIndex) {
-				generateDiagnostic<DiagnosticCode::INCOMPLETE_TYPE>(*output, typeExpression.typeTokenIndex);
-
-				return DiagnosticCode::INCOMPLETE_TYPE;
+				return output->generateDiagnostic<DiagnosticCode::INCOMPLETE_TYPE>(typeToken, output->getTokenString(typeToken));
 			}
 		}
 
@@ -196,9 +191,7 @@ namespace ProjectA {
 		const std::string identifier = output->getIdentifier(identifierToken);
 
 		if (!isCamelCaseOrSnakeCase(identifier)) {
-			generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE>(*output, identifierToken);
-
-			return DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE;
+			return output->generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE>(identifierToken);
 		}
 
 		uint32 memberDefinitionIndex = memberDefinitionOffset;
@@ -207,9 +200,11 @@ namespace ProjectA {
 			const Definition& definition = output->getOpenScopeDefinition(memberDefinitionIndex);
 
 			if (identifierToken.index == definition.identifierIndex) {
-				generateDiagnostic<DiagnosticCode::REDEFINITION>(*output, identifierToken, definition.tokenIndex);
+				const Token& definitionToken = output->tokens[definition.tokenIndex];
+				const std::string definitionTokenString = output->getTokenString(definitionToken);
+				const std::string redefinitionTokenString = output->getTokenString(identifierToken);
 
-				return DiagnosticCode::REDEFINITION;
+				return output->generateDiagnostic<DiagnosticCode::REDEFINITION>(identifierToken, redefinitionTokenString, definitionToken, definitionTokenString);
 			}
 
 			memberDefinitionIndex += 1;
@@ -221,10 +216,9 @@ namespace ProjectA {
 
 		if (statement.annotationFlag & BIT(POSITION) && currentType != PackedType(Type::VEC4, Type::FLOAT32)) {
 			const AnnotationBlock& annotationBlock = output->ast.getAnnotationBlock<POSITION>(statement.annotationBlockIndexOffset, statement.annotationBlockCount);
+			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
-			generateDiagnostic<DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION>(*output, Annotation::POSITION, currentType, annotationBlock.identifierTokenIndex);
-
-			return DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION;
+			return output->generateDiagnostic<DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION>(Annotation::POSITION, identifierToken, output->getPackedTypeString(currentType));
 		}
 
 		return DiagnosticCode::SUCCESS;
@@ -240,9 +234,7 @@ namespace ProjectA {
 		const std::string identifier = output->getIdentifier(identifierToken);
 
 		if (!isScreamingSnakeCase(identifier)) {
-			generateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE>(*output, identifierToken);
-
-			return DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE;
+			return output->generateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE>(identifierToken);
 		}
 
 		evaluation = ExpressionEvaluation(currentType, true);
@@ -379,9 +371,7 @@ namespace ProjectA {
 
 		if (literalToken.type == TokenType::LITERAL_FLOATING_POINT) {
 			if (evaluation.intermediateType.typeIndex != Type::FLOAT32 && evaluation.intermediateType.typeIndex != Type::FLOAT64) {
-				generateDiagnostic<DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT>(*output, literalToken, evaluation.intermediateType);
-
-				return DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT;
+				return output->generateDiagnostic<DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT>(literalToken, output->getPackedTypeString(evaluation.intermediateType));
 			}
 		}
 
@@ -395,9 +385,9 @@ namespace ProjectA {
 		const uint32 definitionIndex = output->getDefinitionIndex(expression.tokenIndex);
 
 		if (definitionIndex == ~0) {
-			generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(*output, expression.tokenIndex);
+			const Token& identifierToken = output->tokens[expression.tokenIndex];
 
-			return DiagnosticCode::UNDEFINED_IDENTIFIER;
+			return output->generateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER>(identifierToken, output->getTokenString(identifierToken));
 		}
 
 		output->createReference(definitionIndex, expression.tokenIndex);
@@ -482,20 +472,18 @@ namespace ProjectA {
 			const uint32 typeIndex = output->getUserDefinedTypeIndex(typeToken.index);
 
 			if (typeIndex == ~0) {
-				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, expression.typeTokenIndex);
-
-				return DiagnosticCode::UNDEFINED_TYPE;
+				return output->generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(typeToken, output->getTokenString(typeToken));
 			}
 
 			output->registerSemanticToken(SemanticTokenType::STRUCTURE, expression.typeTokenIndex);
 
 			// TODO: Allow user-defined types to have template arguments in the context of uniforms/storage buffers.
 			if (expression.templateArgumentTokenIndex != ~0) {
+				const std::string typeTokenString = output->getTokenString(typeToken);
 				const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
+				const std::string templateArgumentTokenString = output->getTokenString(templateArgumentToken);
 
-				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex, expression.templateArgumentTokenIndex);
-
-				return DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
+				return output->generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(typeTokenString, templateArgumentToken, templateArgumentTokenString);
 			}
 
 			currentType = PackedType::userDefined(typeIndex, templateArgument);
@@ -504,9 +492,7 @@ namespace ProjectA {
 		}
 
 		if (typeToken.type < FIRST_TYPE_INDEX || typeToken.type > LAST_TYPE_INDEX) {
-			generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, expression.typeTokenIndex);
-
-			return DiagnosticCode::UNDEFINED_TYPE;
+			return output->generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(typeToken, output->getTokenString(typeToken));
 		}
 
 		const Type type = static_cast<Type>(typeToken.type - FIRST_TYPE_INDEX + 1);
@@ -517,9 +503,7 @@ namespace ProjectA {
 			const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
 
 			if (templateArgumentToken.type < FIRST_TYPE_INDEX || templateArgumentToken.type > LAST_TYPE_INDEX) {
-				generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(*output, expression.templateArgumentTokenIndex);
-
-				return DiagnosticCode::UNDEFINED_TYPE;
+				return output->generateDiagnostic<DiagnosticCode::UNDEFINED_TYPE>(templateArgumentToken, output->getTokenString(templateArgumentToken));
 			}
 
 			templateArgument = static_cast<Type>(templateArgumentToken.type - FIRST_TYPE_INDEX + 1);
@@ -529,9 +513,9 @@ namespace ProjectA {
 
 		if (templateArgument > Type::NONE) {
 			if (!(templateArgumentMask & BIT(templateArgument))) {
-				generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex, expression.templateArgumentTokenIndex);
+				const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
 
-				return DiagnosticCode::INVALID_TEMPLATE_ARGUMENT;
+				return output->generateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT>(output->getTokenString(typeToken), templateArgumentToken, output->getTokenString(templateArgumentToken));
 			}
 
 			output->registerSemanticToken(SemanticTokenType::KEYWORD, expression.templateArgumentTokenIndex);
@@ -542,9 +526,7 @@ namespace ProjectA {
 		}
 
 		if (templateArgumentMask > 0) {
-			generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT>(*output, expression.typeTokenIndex);
-
-			return DiagnosticCode::MISSING_TEMPLATE_ARGUMENT;
+			return output->generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT>(typeToken, output->getTokenString(typeToken));
 		}
 
 		currentType = PackedType(type, templateArgument);
@@ -575,9 +557,7 @@ namespace ProjectA {
 		if (annotationFlag & BIT(annotationBlock.annotation)) {
 			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
-			generateDiagnostic<DiagnosticCode::DUPLICATE_ANNOTATION>(*output, identifierToken);
-
-			return DiagnosticCode::DUPLICATE_ANNOTATION;
+			return output->generateDiagnostic<DiagnosticCode::DUPLICATE_ANNOTATION>(identifierToken, output->getTokenString(identifierToken));
 		}
 
 		switch (annotationBlock.annotation) {
@@ -588,9 +568,7 @@ namespace ProjectA {
 				if (annotationBlock.valueTokenIndex == ~0) {
 					const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
-					generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(*output, identifierToken);
-
-					return DiagnosticCode::MISSING_ANNOTATION_VALUE;
+					return output->generateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE>(identifierToken, output->getTokenString(identifierToken));
 				}
 
 				output->registerSemanticToken(SemanticTokenType::NUMBER, annotationBlock.valueTokenIndex);

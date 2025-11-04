@@ -3,6 +3,7 @@
 #include "AST.hpp"
 #include "Definition.hpp"
 #include "Diagnostic/Diagnostic.hpp"
+#include "Diagnostic/GenerateDiagnostic.hpp"
 #include "Function.hpp"
 #include "Language/Type.hpp"
 #include "PackedType.hpp"
@@ -36,6 +37,19 @@ namespace ProjectA {
 
 			std::string _emscripten_getPackedTypeString(uint32 typeIndex, uint32 templateArgumentIndex) const {
 				return getPackedTypeString(PackedType(static_cast<Type>(typeIndex), static_cast<Type>(templateArgumentIndex)));
+			}
+
+			template<DiagnosticCode Code, typename... Argument>
+			DiagnosticCode generateDiagnostic(Argument&&... arguments) {
+				Diagnostic diagnostic{};
+				diagnostic.severity = DiagnosticSeverity::ERROR;
+				diagnostic.code = Code;
+
+				GenerateDiagnostic<Code>::prepare(diagnostic, std::forward<Argument>(arguments)...);
+
+				diagnostics.emplace_back(diagnostic);
+
+				return Code;
 			}
 
 			uint32 getSize(PackedType type) const {
@@ -199,9 +213,9 @@ namespace ProjectA {
 				semanticTokens.emplace_back(semanticToken);
 			}
 
-			void openScope(DocumentPosition start) {
+			void openScope(DocumentPosition position) {
 				Scope scope{};
-				scope.range.start = start;
+				scope.range.start = position;
 				scope.parentScopeIndex = currentScopeIndex;
 				scope.definitionIndexOffset = static_cast<uint32>(openScopeDefinitions.size()) - nextScopeDefinitionCount;
 				scope.referenceIndexOffset = static_cast<uint32>(openScopeReferences.size());
@@ -213,9 +227,9 @@ namespace ProjectA {
 				nextScopeDefinitionCount = 0;
 			}
 
-			void closeScope(DocumentPosition end) {
+			void closeScope(DocumentPosition position) {
 				Scope& scope = scopes[currentScopeIndex];
-				scope.range.end = end;
+				scope.range.end = position;
 				scope.definitionCount = static_cast<uint32>(openScopeDefinitions.size()) - scope.definitionIndexOffset;
 				scope.referenceCount = static_cast<uint32>(openScopeReferences.size()) - scope.referenceIndexOffset;
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "DocumentPosition.hpp"
 #include "DocumentRange.hpp"
 #include "StatementType.hpp"
 

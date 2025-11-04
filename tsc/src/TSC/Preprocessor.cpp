@@ -4,7 +4,6 @@
 	#include "pch.hpp"
 #endif
 
-#include "Diagnostic/Error.hpp"
 #include "Preprocessor.hpp"
 #include "Statement.hpp"
 
@@ -48,7 +47,7 @@ namespace ProjectA {
 				}
 
 				if (!testBlank(read())) {
-					generateDiagnostic<DiagnosticCode::UNEXPECTED_CHARACTER>(*output, read(), position);
+					output->generateDiagnostic<DiagnosticCode::UNEXPECTED_CHARACTER>(read(), position);
 
 					continue;
 				}
@@ -68,7 +67,7 @@ namespace ProjectA {
 				const uint32 characterCount = position.characterOffset - includePathStart.characterOffset;
 
 				if (characterCount == 0) {
-					generateDiagnostic<DiagnosticCode::MISSING_INCLUDE_PATH>(*output, includeKeywordStart, includeKeywordEnd);
+					output->generateDiagnostic<DiagnosticCode::MISSING_INCLUDE_PATH>(includeKeywordStart, includeKeywordEnd);
 
 					continue;
 				}
@@ -91,7 +90,7 @@ namespace ProjectA {
 			std::ifstream stream(includeStatement.path);
 
 			if (!stream.is_open()) {
-				generateDiagnostic<DiagnosticCode::INCLUDE_FILE_NOT_FOUND>(*output, includeStatement);
+				output->generateDiagnostic<DiagnosticCode::INCLUDE_FILE_NOT_FOUND>(includeStatement);
 
 				continue;
 			}

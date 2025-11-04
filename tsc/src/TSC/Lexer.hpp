@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CompilationOutput.hpp"
-#include "TokenType.hpp"
+#include "DocumentPosition.hpp"
 
 namespace ProjectA {
 	class Lexer {
