@@ -36,6 +36,10 @@ namespace ProjectA {
 		// NOTE (Structure definitions only)
 		// Number of members in the structure.
 		// The N member definitions directly follow the structure definition.
-		uint32 memberCount;
+		uint32 memberCount = 0;
+
+		// NOTE (Member definitions only)
+		// Index of the structure definition that contains this member.
+		uint32 parentDefinitionIndex = static_cast<uint32>(~0);
 	};
 }

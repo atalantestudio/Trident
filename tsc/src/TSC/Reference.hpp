@@ -5,7 +5,6 @@
 namespace ProjectA {
 	struct Reference {
 		uint32 definitionIndex;
-		uint32 identifierIndex;
 		DocumentRange identifierRange;
 	};
 }

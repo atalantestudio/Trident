@@ -232,6 +232,7 @@ namespace ProjectA {
 					scope.definitionIndexOffset = insertionOffset;
 				}
 
+				// TODO: Merge with definition copy.
 				if (scope.referenceCount > 0) {
 					const uint32 insertionOffset = static_cast<uint32>(references.size());
 
@@ -400,7 +401,6 @@ namespace ProjectA {
 
 				Reference reference{};
 				reference.definitionIndex = definitionIndex;
-				reference.identifierIndex = identifierToken.index;
 				reference.identifierRange.start = identifierToken.start;
 				reference.identifierRange.end = identifierToken.getEnd();
 
