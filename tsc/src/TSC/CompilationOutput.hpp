@@ -202,7 +202,7 @@ namespace ProjectA {
 				registerSemanticToken(type, tokens[tokenIndex].getRange());
 			}
 
-			void registerSemanticToken(SemanticTokenType type, DocumentRange range) {
+			void registerSemanticToken(SemanticTokenType type, const DocumentRange& range) {
 				SemanticToken semanticToken{};
 				semanticToken.type = type;
 				semanticToken.range = range;
@@ -212,7 +212,7 @@ namespace ProjectA {
 
 			void openScope(DocumentPosition position) {
 				Scope scope{};
-				scope.range.start = position;
+				scope.range = {position, position};
 				scope.parentScopeIndex = currentScopeIndex;
 				scope.definitionIndexOffset = static_cast<uint32>(openScopeDefinitions.size()) - nextScopeDefinitionCount;
 				scope.referenceIndexOffset = static_cast<uint32>(openScopeReferences.size());
@@ -279,8 +279,6 @@ namespace ProjectA {
 			Definition& defineStructure(const Statement<StatementType::STRUCTURE>& statement) {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 				const uint32 userDefinedTypeIndex = static_cast<uint32>(userDefinedTypes.size());
-
-				registerSemanticToken(SemanticTokenType::STRUCTURE, statement.identifierTokenIndex);
 
 				UserDefinedType userDefinedType{};
 				userDefinedType.identifierIndex = identifierToken.index;
@@ -367,15 +365,33 @@ namespace ProjectA {
 				return result;
 			}
 
-			Definition& defineFunction(const Statement<StatementType::FUNCTION>& statement, uint32 parameterTypeExpressionOffset, DocumentPosition end) {
+			Definition& defineParameter(const Statement<StatementType::PARAMETER>& statement, PackedType type) {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 
-				registerFunctionOverload(statement, parameterTypeExpressionOffset);
+				Definition definition{};
+				definition.identifierRange = identifierToken.getRange();
+				definition.end = definition.identifierRange.end;
+				definition.type = type;
+				definition.semanticTokenType = SemanticTokenType::PARAMETER;
+				definition.tokenIndex = statement.identifierTokenIndex;
+				definition.identifierIndex = identifierToken.index;
+				definition.evaluatedInitializer = 0;
+
+				Definition& result = openScopeDefinitions.emplace_back(definition);
+
+				createReferenceFromLastDefinition(statement.identifierTokenIndex);
+
+				return result;
+			}
+
+			Definition& defineFunction(const Statement<StatementType::FUNCTION>& statement, uint32 parameterTypeExpressionByteOffset) {
+				const Token& identifierToken = tokens[statement.identifierTokenIndex];
+
+				registerFunctionOverload(statement, parameterTypeExpressionByteOffset);
 
 				Definition definition{};
-				definition.identifierRange.start = end;
-				definition.identifierRange.end = end;
-				definition.end = end;
+				definition.identifierRange = identifierToken.getRange();
+				definition.end = statement.end;
 				definition.type = PackedType(Type::FUNCTION, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
 				definition.tokenIndex = ~0;

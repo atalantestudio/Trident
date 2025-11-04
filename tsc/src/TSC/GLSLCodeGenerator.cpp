@@ -408,7 +408,7 @@ namespace ProjectA {
 		uint32 annotationBlockIndex = 0;
 
 		while (annotationBlockIndex < annotationBlockCount) {
-			const AnnotationBlock& annotationBlock = output->ast.getAnnotationBlock(annotationBlockIndexOffset + annotationBlockCount);
+			const AnnotationBlock& annotationBlock = output->ast.getAnnotationBlock(annotationBlockIndexOffset + annotationBlockIndex);
 
 			annotationBlockIndex += 1;
 

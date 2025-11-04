@@ -82,6 +82,8 @@ namespace ProjectA {
 		uint32 parameterCount;
 
 		// The scope statement is the next statement.
+
+		DocumentPosition end;
 	};
 
 	template<>

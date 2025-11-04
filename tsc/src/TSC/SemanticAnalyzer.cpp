@@ -21,7 +21,6 @@ namespace ProjectA {
 
 	SemanticAnalyzer::SemanticAnalyzer(CompilationOutput& output) {
 		this->output = &output;
-		statementIndex = 0;
 		statementByteOffset = 0;
 		expressionReferenceIndex = 0;
 		expressionByteOffset = 0;
@@ -31,7 +30,7 @@ namespace ProjectA {
 
 		this->output->openScope(position);
 
-		while (statementIndex < this->output->ast.getStatementCount()) {
+		while (statementByteOffset < this->output->ast.getStatementBufferByteSize()) {
 			analyzeStatement();
 		}
 
@@ -44,8 +43,6 @@ namespace ProjectA {
 	DiagnosticCode SemanticAnalyzer::analyzeStatement() {
 		const uint32 byteOffset = statementByteOffset;
 		const StatementType type = output->ast.getStatementType(byteOffset);
-
-		statementIndex += 1;
 
 		switch (type) {
 			case StatementType::STRUCTURE: {
@@ -118,7 +115,7 @@ namespace ProjectA {
 		// TODO: Should never be here.
 		BREAKPOINT();
 
-		return DiagnosticCode::SUCCESS;
+		return DiagnosticCode::UNHANDLED;
 	}
 
 	DiagnosticCode SemanticAnalyzer::analyzeStructureStatement(const Statement<StatementType::STRUCTURE>& statement) {
@@ -126,7 +123,20 @@ namespace ProjectA {
 		const std::string identifier = output->getIdentifier(identifierToken);
 
 		if (!isPascalCase(identifier)) {
-			return output->generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE>(identifierToken);
+			return output->generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE>(identifierToken.getRange());
+		}
+
+		output->registerSemanticToken(SemanticTokenType::STRUCTURE, identifierToken.getRange());
+
+		const uint32 definitionIndex = output->getDefinitionIndex(statement.identifierTokenIndex);
+
+		if (definitionIndex != ~0) {
+			const Definition& definition = output->getOpenScopeDefinition(definitionIndex);
+			const Token& definitionToken = output->tokens[definition.tokenIndex];
+			const std::string definitionTokenString = output->getTokenString(definitionToken);
+			const std::string redefinitionTokenString = output->getTokenString(identifierToken);
+
+			return output->generateDiagnostic<DiagnosticCode::REDEFINITION>(identifierToken, redefinitionTokenString, definitionToken, definitionTokenString);
 		}
 
 		output->defineStructure(statement);
@@ -189,7 +199,7 @@ namespace ProjectA {
 		const std::string identifier = output->getIdentifier(identifierToken);
 
 		if (!isCamelCaseOrSnakeCase(identifier)) {
-			return output->generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE>(identifierToken);
+			return output->generateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE>(identifierToken.getRange());
 		}
 
 		uint32 memberDefinitionIndex = memberDefinitionOffset;
@@ -232,7 +242,7 @@ namespace ProjectA {
 		const std::string identifier = output->getIdentifier(identifierToken);
 
 		if (!isScreamingSnakeCase(identifier)) {
-			return output->generateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE>(identifierToken);
+			return output->generateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE>(identifierToken.getRange());
 		}
 
 		evaluation = ExpressionEvaluation(currentType, true);
@@ -262,18 +272,44 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode SemanticAnalyzer::analyzeParameterStatement(const Statement<StatementType::PARAMETER>& statement) {
-		// TODO
-		BREAKPOINT();
+		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
+		const std::string& identifier = output->getIdentifier(identifierToken);
+
+		if (!isCamelCaseOrSnakeCase(identifier)) {
+			return output->generateDiagnostic<DiagnosticCode::INVALID_PARAMETER_IDENTIFIER_CASE>(identifierToken.getRange());
+		}
+
+		output->registerSemanticToken(SemanticTokenType::PARAMETER, statement.identifierTokenIndex);
+
+		// Type
+		TRY(analyzeExpression());
+
+		output->defineParameter(statement, currentType);
+
+		// Define the parameter for the next scope (function).
+		output->nextScopeDefinitionCount += 1;
 
 		return DiagnosticCode::SUCCESS;
 	}
 
 	DiagnosticCode SemanticAnalyzer::analyzeFunctionStatement(const Statement<StatementType::FUNCTION>& statement) {
+		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
+		const std::string& identifier = output->getIdentifier(identifierToken);
+
+		if (!isCamelCaseOrSnakeCase(identifier)) {
+			return output->generateDiagnostic<DiagnosticCode::INVALID_FUNCTION_IDENTIFIER_CASE>(identifierToken.getRange());
+		}
+
 		if (statement.returnType) {
 			// Return type
 			// TODO: It should not be possible to annotate the return type of a function.
 			TRY(analyzeExpression());
 		}
+
+		const uint32 parameterTypeExpressionByteOffset = expressionByteOffset;
+
+		output->registerSemanticToken(SemanticTokenType::FUNCTION, statement.identifierTokenIndex);
+		output->defineFunction(statement, parameterTypeExpressionByteOffset);
 
 		uint32 parameterIndex = 0;
 
@@ -305,7 +341,7 @@ namespace ProjectA {
 			statementIndex += 1;
 		}
 
-		output->openScope(statement.range.end);
+		output->closeScope(statement.range.end);
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -358,7 +394,7 @@ namespace ProjectA {
 		// TODO: Should never be here.
 		BREAKPOINT();
 
-		return DiagnosticCode::SUCCESS;
+		return DiagnosticCode::UNHANDLED;
 	}
 
 	DiagnosticCode SemanticAnalyzer::analyzeLiteralExpression() {

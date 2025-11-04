@@ -168,7 +168,7 @@ namespace ProjectA {
 
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::EXPRESSION_NOT_CONSTANT> {
-		static void prepare(Diagnostic& diagnostic, DocumentRange range) {
+		static void prepare(Diagnostic& diagnostic, const DocumentRange& range) {
 			diagnostic.range = range;
 			diagnostic.message = "Expression is not constant.";
 		}
@@ -219,57 +219,9 @@ namespace ProjectA {
 
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE> {
-		static void prepare(Diagnostic& diagnostic, DocumentRange identifierRange) {
+		static void prepare(Diagnostic& diagnostic, const DocumentRange& identifierRange) {
 			diagnostic.range = identifierRange;
 			diagnostic.message = "Structure is empty.";
-		}
-	};
-
-	template<>
-	struct GenerateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE> {
-		static void prepare(Diagnostic& diagnostic, const Token& identifierToken) {
-			diagnostic.range = identifierToken.getRange();
-			diagnostic.message = "Use PascalCase for structure identifiers.";
-		}
-	};
-
-	template<>
-	struct GenerateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE> {
-		static void prepare(Diagnostic& diagnostic, const Token& identifierToken) {
-			diagnostic.range = identifierToken.getRange();
-			diagnostic.message = "Use camelCase or snake_case for member identifiers.";
-		}
-	};
-
-	template<>
-	struct GenerateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE> {
-		static void prepare(Diagnostic& diagnostic, const Token& identifierToken) {
-			diagnostic.range = identifierToken.getRange();
-			diagnostic.message = "Use SCREAMING_SNAKE_CASE for constant identifiers.";
-		}
-	};
-
-	template<>
-	struct GenerateDiagnostic<DiagnosticCode::INVALID_FUNCTION_IDENTIFIER_CASE> {
-		static void prepare(Diagnostic& diagnostic, const Token& identifierToken) {
-			diagnostic.range = identifierToken.getRange();
-			diagnostic.message = "Use camelCase or snake_case for function identifiers.";
-		}
-	};
-
-	template<>
-	struct GenerateDiagnostic<DiagnosticCode::INVALID_PARAMETER_IDENTIFIER_CASE> {
-		static void prepare(Diagnostic& diagnostic, const Token& identifierToken) {
-			diagnostic.range = identifierToken.getRange();
-			diagnostic.message = "Use camelCase or snake_case for function parameter identifiers.";
-		}
-	};
-
-	template<>
-	struct GenerateDiagnostic<DiagnosticCode::INVALID_VARIABLE_IDENTIFIER_CASE> {
-		static void prepare(Diagnostic& diagnostic, const Token& identifierToken) {
-			diagnostic.range = identifierToken.getRange();
-			diagnostic.message = "Use camelCase or snake_case for variable identifiers.";
 		}
 	};
 
@@ -278,6 +230,54 @@ namespace ProjectA {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken, const std::string& identifierTokenString) {
 			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Function \"[]\" doesn't end with a return statement.", identifierTokenString);
+		}
+	};
+
+	template<>
+	struct GenerateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE> {
+		static void prepare(Diagnostic& diagnostic, const DocumentRange& identifierRange) {
+			diagnostic.range = identifierRange;
+			diagnostic.message = "Use PascalCase for structure identifiers.";
+		}
+	};
+
+	template<>
+	struct GenerateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE> {
+		static void prepare(Diagnostic& diagnostic, const DocumentRange& identifierRange) {
+			diagnostic.range = identifierRange;
+			diagnostic.message = "Use camelCase or snake_case for member identifiers.";
+		}
+	};
+
+	template<>
+	struct GenerateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE> {
+		static void prepare(Diagnostic& diagnostic, const DocumentRange& identifierRange) {
+			diagnostic.range = identifierRange;
+			diagnostic.message = "Use SCREAMING_SNAKE_CASE for constant identifiers.";
+		}
+	};
+
+	template<>
+	struct GenerateDiagnostic<DiagnosticCode::INVALID_FUNCTION_IDENTIFIER_CASE> {
+		static void prepare(Diagnostic& diagnostic, const DocumentRange& identifierRange) {
+			diagnostic.range = identifierRange;
+			diagnostic.message = "Use camelCase or snake_case for function identifiers.";
+		}
+	};
+
+	template<>
+	struct GenerateDiagnostic<DiagnosticCode::INVALID_PARAMETER_IDENTIFIER_CASE> {
+		static void prepare(Diagnostic& diagnostic, const DocumentRange& identifierRange) {
+			diagnostic.range = identifierRange;
+			diagnostic.message = "Use camelCase or snake_case for function parameter identifiers.";
+		}
+	};
+
+	template<>
+	struct GenerateDiagnostic<DiagnosticCode::INVALID_VARIABLE_IDENTIFIER_CASE> {
+		static void prepare(Diagnostic& diagnostic, const DocumentRange& identifierRange) {
+			diagnostic.range = identifierRange;
+			diagnostic.message = "Use camelCase or snake_case for variable identifiers.";
 		}
 	};
 }

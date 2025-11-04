@@ -95,8 +95,6 @@ namespace ProjectA {
 
 		const uint32 statementByteOffset = output->ast.getStatementBufferByteSize();
 
-		output->ast.addStatement(statement);
-
 		uint32 memberCount = 0;
 
 		while (!read(TokenType::RIGHT_CURLY_BRACE) && !read(TokenType::END_OF_LINE)) {
@@ -119,9 +117,10 @@ namespace ProjectA {
 
 		CONSUME(TokenType::RIGHT_CURLY_BRACE);
 
-		Statement<StatementType::STRUCTURE>& statementReference = output->ast.getStatement<StatementType::STRUCTURE>(statementByteOffset);
-		statementReference.memberCount = memberCount;
-		statementReference.end = position;
+		statement.memberCount = memberCount;
+		statement.end = position;
+
+		output->ast.insertStatement(statement, statementByteOffset);
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -189,8 +188,6 @@ namespace ProjectA {
 
 		const uint32 statementByteOffset = output->ast.getStatementBufferByteSize();
 
-		output->ast.addStatement(statement);
-
 		uint32 parameterCount = 0;
 
 		// TODO: Position must be the end of the scope, but the scope statements must be analyzed in order.
@@ -221,8 +218,10 @@ namespace ProjectA {
 
 		TRY(parseScopeStatement());
 
-		Statement<StatementType::FUNCTION>& statementReference = output->ast.getStatement<StatementType::FUNCTION>(statementByteOffset);
-		statementReference.parameterCount = parameterCount;
+		statement.parameterCount = parameterCount;
+		statement.end = position;
+
+		output->ast.insertStatement(statement, statementByteOffset);
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -352,8 +351,6 @@ namespace ProjectA {
 
 		const uint32 statementByteOffset = output->ast.getStatementBufferByteSize();
 
-		output->ast.addStatement(statement);
-
 		uint32 statementCount = 0;
 
 		jumpEol();
@@ -368,9 +365,10 @@ namespace ProjectA {
 
 		CONSUME(TokenType::RIGHT_CURLY_BRACE);
 
-		Statement<StatementType::SCOPE>& statementReference = output->ast.getStatement<StatementType::SCOPE>(statementByteOffset);
-		statementReference.statementCount = statementCount;
-		statementReference.range.end = position;
+		statement.statementCount = statementCount;
+		statement.range.end = position;
+
+		output->ast.insertStatement(statement, statementByteOffset);
 
 		return DiagnosticCode::SUCCESS;
 	}

@@ -29,13 +29,6 @@ namespace ProjectA {
 			}
 
 			template<StatementType StatementType>
-			Statement<StatementType>& getStatement(uint32 byteOffset) {
-				DEBUG_ASSERT(byteOffset + sizeof(Statement<StatementType>) <= statementBuffer.size());
-
-				return *pointer_cast<Statement<StatementType>*>(&statementBuffer[byteOffset]);
-			}
-
-			template<StatementType StatementType>
 			void addStatement(const Statement<StatementType>& statement) {
 				const uint64 byteOffset = statementBuffer.size();
 
@@ -43,6 +36,18 @@ namespace ProjectA {
 				statementCount += 1;
 
 				std::copy_n(pointer_cast<const uint8*>(&statement), sizeof(Statement<StatementType>), &statementBuffer[byteOffset]);
+			}
+
+			template<StatementType StatementType>
+			void insertStatement(const Statement<StatementType>& statement, uint32 byteOffset) {
+				DEBUG_ASSERT(byteOffset <= statementBuffer.size());
+
+				std::vector<uint8> statementBytes(sizeof(Statement<StatementType>));
+
+				std::copy_n(pointer_cast<const uint8*>(&statement), statementBytes.size(), statementBytes.begin());
+
+				statementBuffer.insert(statementBuffer.begin() + byteOffset, statementBytes.begin(), statementBytes.end());
+				statementCount += 1;
 			}
 
 			uint32 getExpressionCount() const {
