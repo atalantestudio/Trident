@@ -387,6 +387,20 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE> {
+		explicit generateDiagnostic(CompilationOutput& output, DocumentRange identifierRange) {
+			Diagnostic diagnostic{};
+			diagnostic.start = identifierRange.start;
+			diagnostic.end = identifierRange.end;
+			diagnostic.message = "Structure is empty.";
+			diagnostic.severity = DiagnosticSeverity::ERROR;
+			diagnostic.code = DiagnosticCode::EMPTY_STRUCTURE;
+
+			output.diagnostics.emplace_back(diagnostic);
+		}
+	};
+
+	template<>
 	struct generateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE> {
 		explicit generateDiagnostic(CompilationOutput& output, const Token& identifierToken) {
 			Diagnostic diagnostic{};

@@ -7,7 +7,6 @@
 #include "Base/Utilities.hpp"
 #include "Case.hpp"
 #include "Diagnostic/Error.hpp"
-#include "Diagnostic/Warning.hpp"
 #include "SemanticAnalyzer.hpp"
 
 namespace ProjectA {
@@ -135,6 +134,12 @@ namespace ProjectA {
 
 		output->defineStructure(statement);
 
+		if (statement.memberCount == 0) {
+			generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(*output, {identifierToken.start, identifierToken.getEnd()});
+
+			return DiagnosticCode::EMPTY_STRUCTURE;
+		}
+
 		UserDefinedType& userDefinedType = output->getLastUserDefinedType();
 		uint32 memberIndex = 0;
 		uint32 memberDefinitionIndex = 0;
@@ -159,14 +164,7 @@ namespace ProjectA {
 			memberDefinitionIndex += 1;
 		}
 
-		static constexpr uint32 MIN_SIZE_OR_ALIGNMENT = 1;
-
-		userDefinedType.size = max(MIN_SIZE_OR_ALIGNMENT, roundUp(userDefinedType.alignment, lastMemberOffset + lastMemberSize));
-		userDefinedType.alignment = max(MIN_SIZE_OR_ALIGNMENT, userDefinedType.alignment);
-
-		if (statement.memberCount == 0) {
-			generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(*output, identifierToken);
-		}
+		userDefinedType.size = roundUp(userDefinedType.alignment, lastMemberOffset + lastMemberSize);
 
 		return DiagnosticCode::SUCCESS;
 	}
