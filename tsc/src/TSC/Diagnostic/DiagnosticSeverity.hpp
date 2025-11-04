@@ -6,7 +6,7 @@ namespace ProjectA {
 		WARNING,
 		INFO,
 
-		// TODO: Remove _OR_WIP suffix.
+		// TODO: Remove suffix.
 		HINT_OR_WIP,
 	};
 }
