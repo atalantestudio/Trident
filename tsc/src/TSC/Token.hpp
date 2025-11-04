@@ -5,12 +5,8 @@
 
 namespace ProjectA {
 	struct Token {
-		DocumentPosition getEnd() const {
-			DocumentPosition end{};
-			end.lineIndex = start.lineIndex;
-			end.characterOffset = start.characterOffset + characterCount;
-
-			return end;
+		DocumentRange getRange() const {
+			return {start, {start.lineIndex, start.characterOffset + characterCount}};
 		}
 
 		public:

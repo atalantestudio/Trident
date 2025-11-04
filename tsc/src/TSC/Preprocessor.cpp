@@ -73,8 +73,8 @@ namespace ProjectA {
 				}
 
 				IncludeStatement statement{};
-				statement.start = includePathStart;
-				statement.end = position;
+				statement.range.start = includePathStart;
+				statement.range.end = position;
 				statement.path = std::string(&code[includePathStart.characterOffset], position.characterOffset - includePathStart.characterOffset);
 
 				includeStatements.emplace_back(statement);

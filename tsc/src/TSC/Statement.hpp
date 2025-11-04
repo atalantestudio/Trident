@@ -8,8 +8,7 @@ namespace ProjectA {
 	struct Statement;
 
 	struct IncludeStatement {
-		DocumentPosition start;
-		DocumentPosition end;
+		DocumentRange range;
 		std::string path;
 	};
 

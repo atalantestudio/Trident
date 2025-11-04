@@ -16,8 +16,7 @@ namespace ProjectA {
 			}
 
 		public:
-			DocumentPosition start;
-			DocumentPosition end;
+			DocumentRange range;
 			std::string message;
 			DiagnosticSeverity severity;
 			DiagnosticCode code;

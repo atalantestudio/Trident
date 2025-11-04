@@ -13,9 +13,9 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::UNEXPECTED_CHARACTER> {
 		static void prepare(Diagnostic& diagnostic, char8 character, DocumentPosition start) {
-			diagnostic.start = start;
-			diagnostic.end.lineIndex = start.lineIndex;
-			diagnostic.end.characterOffset = 1;
+			diagnostic.range.start = start;
+			diagnostic.range.end.lineIndex = start.lineIndex;
+			diagnostic.range.end.characterOffset = 1;
 			diagnostic.message = MODULE_FORMAT("Unexpected character \"[]\".", character);
 		}
 	};
@@ -23,8 +23,8 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::MISSING_INCLUDE_PATH> {
 		static void prepare(Diagnostic& diagnostic, DocumentPosition start, DocumentPosition end) {
-			diagnostic.start = start;
-			diagnostic.end = end;
+			diagnostic.range.start = start;
+			diagnostic.range.end = end;
 			diagnostic.message = "Missing include path.";
 		}
 	};
@@ -32,8 +32,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INCLUDE_FILE_NOT_FOUND> {
 		static void prepare(Diagnostic& diagnostic, const IncludeStatement& includeStatement) {
-			diagnostic.start = includeStatement.start;
-			diagnostic.end = includeStatement.end;
+			diagnostic.range = includeStatement.range;
 			diagnostic.message = MODULE_FORMAT("Include file not found at \"[]\".", includeStatement.path);
 		}
 	};
@@ -41,8 +40,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::NUMBER_OVERFLOW> {
 		static void prepare(Diagnostic& diagnostic, const Token& token) {
-			diagnostic.start = token.start;
-			diagnostic.end = token.getEnd();
+			diagnostic.range = token.getRange();
 			diagnostic.message = "Number exceeds the range of a 64-bit unsigned integer.";
 		}
 	};
@@ -50,10 +48,10 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INVALID_NUMBER_LITERAL> {
 		static void prepare(Diagnostic& diagnostic, const Token& token) {
-			diagnostic.start = token.start;
+			diagnostic.range.start = token.start;
 
-			// The token could not be finished, so we do not known its full range.
-			diagnostic.end = token.start;
+			// The token could not be finished.
+			diagnostic.range.end = token.start;
 
 			diagnostic.message = "Invalid number literal.";
 		}
@@ -62,8 +60,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::UNEXPECTED_TOKEN> {
 		static void prepare(Diagnostic& diagnostic, const std::string& tokenString, const Token& unexpectedToken) {
-			diagnostic.start = unexpectedToken.start;
-			diagnostic.end = unexpectedToken.getEnd();
+			diagnostic.range = unexpectedToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Expected '[]'.", tokenString);
 		}
 	};
@@ -71,8 +68,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::MISSING_EXPRESSION> {
 		static void prepare(Diagnostic& diagnostic, const Token& token) {
-			diagnostic.start = token.start;
-			diagnostic.end = token.getEnd();
+			diagnostic.range = token.getRange();
 			diagnostic.message = "Expected an expression.";
 		}
 	};
@@ -80,8 +76,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::MISSING_IDENTIFIER> {
 		static void prepare(Diagnostic& diagnostic, const Token& token) {
-			diagnostic.start = token.start;
-			diagnostic.end = token.getEnd();
+			diagnostic.range = token.getRange();
 			diagnostic.message = "Expected an identifier.";
 		}
 	};
@@ -90,12 +85,10 @@ namespace ProjectA {
 	struct GenerateDiagnostic<DiagnosticCode::REDEFINITION> {
 		static void prepare(Diagnostic& diagnostic, const Token& redefinitionToken, const std::string& redefinitionTokenString, const Token& definitionToken, const std::string& definitionTokenString) {
 			DiagnosticReference diagnosticReference{};
-			diagnosticReference.start = definitionToken.start;
-			diagnosticReference.end = definitionToken.getEnd();
+			diagnosticReference.range = definitionToken.getRange();
 			diagnosticReference.message = MODULE_FORMAT("\"[]\" is defined here.", definitionTokenString);
 
-			diagnostic.start = redefinitionToken.start;
-			diagnostic.end = redefinitionToken.getEnd();
+			diagnostic.range = redefinitionToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Redefinition of \"[]\".", redefinitionTokenString);
 			diagnostic.references.emplace_back(diagnosticReference);
 		}
@@ -104,8 +97,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT> {
 		static void prepare(Diagnostic& diagnostic, const Token& typeToken, const std::string& typeTokenString) {
-			diagnostic.start = typeToken.start;
-			diagnostic.end = typeToken.getEnd();
+			diagnostic.range = typeToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Missing template argument for type \"[]\".", typeTokenString);
 		}
 	};
@@ -113,8 +105,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INVALID_TEMPLATE_ARGUMENT> {
 		static void prepare(Diagnostic& diagnostic, const std::string& typeTokenString, const Token& templateArgumentToken, const std::string& templateArgumentTokenString) {
-			diagnostic.start = templateArgumentToken.start;
-			diagnostic.end = templateArgumentToken.getEnd();
+			diagnostic.range = templateArgumentToken.getRange();
 			diagnostic.message = MODULE_FORMAT("\"[]\" cannot be used as a template argument for type \"[]\".", templateArgumentTokenString, typeTokenString);
 		}
 	};
@@ -122,8 +113,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::UNDEFINED_TYPE> {
 		static void prepare(Diagnostic& diagnostic, const Token& typeToken, const std::string& typeTokenString) {
-			diagnostic.start = typeToken.start;
-			diagnostic.end = typeToken.getEnd();
+			diagnostic.range = typeToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Undefined type \"[]\".", typeTokenString);
 		}
 	};
@@ -131,8 +121,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INCOMPLETE_TYPE> {
 		static void prepare(Diagnostic& diagnostic, const Token& typeToken, const std::string& typeTokenString) {
-			diagnostic.start = typeToken.start;
-			diagnostic.end = typeToken.getEnd();
+			diagnostic.range = typeToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Incomplete type \"[]\".", typeTokenString);
 		}
 	};
@@ -140,8 +129,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::DUPLICATE_ANNOTATION> {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken, const std::string& identifierTokenString) {
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Duplicate annotation \"[]\".", identifierTokenString);
 		}
 	};
@@ -149,8 +137,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::MISSING_ANNOTATION_VALUE> {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken, const std::string& identifierTokenString) {
-			diagnostic.start = identifierToken.getEnd();
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Missing value for annotation \"[]\".", identifierTokenString);
 		}
 	};
@@ -158,8 +145,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::UNDEFINED_IDENTIFIER> {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken, const std::string& identifierTokenString) {
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Undefined identifier \"[]\".", identifierTokenString);
 		}
 	};
@@ -167,8 +153,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::UNDEFINED_FUNCTION> {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken, const std::string& identifierTokenString) {
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Undefined function \"[]\".", identifierTokenString);
 		}
 	};
@@ -176,17 +161,15 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::UNDEFINED_FUNCTION_OVERLOAD> {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken, const std::string& identifierTokenString) {
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Cannot find overload for function \"[]\".", identifierTokenString);
 		}
 	};
 
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::EXPRESSION_NOT_CONSTANT> {
-		static void prepare(Diagnostic& diagnostic, DocumentPosition start, DocumentPosition end) {
-			diagnostic.start = start;
-			diagnostic.end = end;
+		static void prepare(Diagnostic& diagnostic, DocumentRange range) {
+			diagnostic.range = range;
 			diagnostic.message = "Expression is not constant.";
 		}
 	};
@@ -194,8 +177,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::UNDEFINED_ANNOTATION> {
 		static void prepare(Diagnostic& diagnostic, const Token& token, const std::string& tokenString) {
-			diagnostic.start = token.start;
-			diagnostic.end = token.getEnd();
+			diagnostic.range = token.getRange();
 			diagnostic.message = MODULE_FORMAT("Undefined annotation \"[]\".", tokenString);
 		}
 	};
@@ -203,8 +185,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INVALID_CONVERSION> {
 		static void prepare(Diagnostic& diagnostic, const Token& token) {
-			diagnostic.start = token.start;
-			diagnostic.end = token.getEnd();
+			diagnostic.range = token.getRange();
 			diagnostic.message = "Invalid conversion.";
 		}
 	};
@@ -212,17 +193,15 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INVALID_FLOATING_POINT_ASSIGNMENT> {
 		static void prepare(Diagnostic& diagnostic, const Token& literalToken, const std::string& typeString) {
-			diagnostic.start = literalToken.start;
-			diagnostic.end = literalToken.getEnd();
+			diagnostic.range = literalToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Floating-point number literal requires explicit cast in order to be assigned to type [].", typeString);
 		}
 	};
 
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION> {
-		static void prepare(Diagnostic& diagnostic, Annotation annotation, const Token& annotationToken, const std::string& typeString) {
-			diagnostic.start = annotationToken.start;
-			diagnostic.end = annotationToken.getEnd();
+		static void prepare(Diagnostic& diagnostic, Annotation annotation, const Token& identifierToken, const std::string& typeString) {
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Annotation \"[]\" cannot be used on a member of type [].", ANNOTATION_STRINGS[annotation], typeString);
 		}
 	};
@@ -231,8 +210,8 @@ namespace ProjectA {
 	struct GenerateDiagnostic<DiagnosticCode::ARGUMENT_COUNT_MISMATCH> {
 		static void prepare(Diagnostic& diagnostic, const std::string& typeString, uint32 expectedArgumentCount, uint32 argumentCount) {
 			// TODO: Highlight the correct argument range.
-			diagnostic.start = {0, 0};
-			diagnostic.end = {0, 0};
+			diagnostic.range.start = {0, 0};
+			diagnostic.range.end = {0, 0};
 
 			diagnostic.message = MODULE_FORMAT("[] constructor requires [] argument(s) but was provided with [].", typeString, expectedArgumentCount, argumentCount);
 		}
@@ -241,8 +220,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE> {
 		static void prepare(Diagnostic& diagnostic, DocumentRange identifierRange) {
-			diagnostic.start = identifierRange.start;
-			diagnostic.end = identifierRange.end;
+			diagnostic.range = identifierRange;
 			diagnostic.message = "Structure is empty.";
 		}
 	};
@@ -250,8 +228,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE> {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken) {
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = "Use PascalCase for structure identifiers.";
 		}
 	};
@@ -259,8 +236,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INVALID_MEMBER_IDENTIFIER_CASE> {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken) {
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = "Use camelCase or snake_case for member identifiers.";
 		}
 	};
@@ -268,8 +244,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INVALID_CONSTANT_IDENTIFIER_CASE> {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken) {
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = "Use SCREAMING_SNAKE_CASE for constant identifiers.";
 		}
 	};
@@ -277,8 +252,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INVALID_FUNCTION_IDENTIFIER_CASE> {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken) {
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = "Use camelCase or snake_case for function identifiers.";
 		}
 	};
@@ -286,8 +260,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INVALID_PARAMETER_IDENTIFIER_CASE> {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken) {
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = "Use camelCase or snake_case for function parameter identifiers.";
 		}
 	};
@@ -295,8 +268,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INVALID_VARIABLE_IDENTIFIER_CASE> {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken) {
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = "Use camelCase or snake_case for variable identifiers.";
 		}
 	};
@@ -304,8 +276,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::NO_RETURN> {
 		static void prepare(Diagnostic& diagnostic, const Token& identifierToken, const std::string& identifierTokenString) {
-			diagnostic.start = identifierToken.start;
-			diagnostic.end = identifierToken.getEnd();
+			diagnostic.range = identifierToken.getRange();
 			diagnostic.message = MODULE_FORMAT("Function \"[]\" doesn't end with a return statement.", identifierTokenString);
 		}
 	};

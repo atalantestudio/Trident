@@ -132,9 +132,7 @@ namespace ProjectA {
 		output->defineStructure(statement);
 
 		if (statement.memberCount == 0) {
-			const DocumentRange identifierRange = {identifierToken.start, identifierToken.getEnd()};
-
-			return output->generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(identifierRange);
+			return output->generateDiagnostic<DiagnosticCode::EMPTY_STRUCTURE>(identifierToken.getRange());
 		}
 
 		UserDefinedType& userDefinedType = output->getLastUserDefinedType();

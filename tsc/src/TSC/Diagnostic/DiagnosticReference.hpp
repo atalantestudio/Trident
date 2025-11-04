@@ -1,11 +1,10 @@
 #pragma once
 
-#include "../DocumentPosition.hpp"
+#include "../DocumentRange.hpp"
 
 namespace ProjectA {
 	struct DiagnosticReference {
-		DocumentPosition start;
-		DocumentPosition end;
+		DocumentRange range;
 		std::string message;
 	};
 }

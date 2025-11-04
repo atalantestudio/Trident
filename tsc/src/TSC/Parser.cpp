@@ -732,7 +732,7 @@ namespace ProjectA {
 	}
 
 	void Parser::jump() {
-		position = read().getEnd();
+		position = read().getRange().end;
 		tokenIndex += 1;
 	}
 

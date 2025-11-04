@@ -275,7 +275,7 @@ namespace ProjectA {
 						jump(1);
 					}
 
-					output->registerSemanticToken(SemanticTokenType::COMMENT, start, position);
+					output->registerSemanticToken(SemanticTokenType::COMMENT, {start, position});
 
 					break;
 				}
@@ -518,7 +518,7 @@ namespace ProjectA {
 		DocumentPosition start = position;
 
 		if (output->tokens.size() > 0) {
-			start = output->tokens.back().getEnd();
+			start = output->tokens.back().getRange().end;
 		}
 
 		output->registerToken(type, start, 0);

@@ -49,16 +49,14 @@ namespace ProjectA {
 			.function("getEvaluatedInitializer", &Definition::getEvaluatedInitializer);
 
 		emscripten::class_<Diagnostic>("Diagnostic")
-			.property("start", &Diagnostic::start)
-			.property("end", &Diagnostic::end)
+			.property("range", &Diagnostic::range)
 			.property("message", &Diagnostic::message)
 			.property("references", &Diagnostic::references)
 			.function("getSeverityIndex", &Diagnostic::getSeverityIndex)
 			.function("getCodeIndex", &Diagnostic::getCodeIndex);
 
 		emscripten::class_<DiagnosticReference>("DiagnosticReference")
-			.property("start", &DiagnosticReference::start)
-			.property("end", &DiagnosticReference::end)
+			.property("range", &DiagnosticReference::range)
 			.property("message", &DiagnosticReference::message);
 
 		emscripten::class_<DocumentPosition>("DocumentPosition")

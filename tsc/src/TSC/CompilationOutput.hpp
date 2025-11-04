@@ -199,16 +199,13 @@ namespace ProjectA {
 			}
 
 			void registerSemanticToken(SemanticTokenType type, uint32 tokenIndex) {
-				const Token& token = tokens[tokenIndex];
-
-				registerSemanticToken(type, token.start, token.getEnd());
+				registerSemanticToken(type, tokens[tokenIndex].getRange());
 			}
 
-			void registerSemanticToken(SemanticTokenType type, DocumentPosition start, DocumentPosition end) {
+			void registerSemanticToken(SemanticTokenType type, DocumentRange range) {
 				SemanticToken semanticToken{};
 				semanticToken.type = type;
-				semanticToken.range.start = start;
-				semanticToken.range.end = end;
+				semanticToken.range = range;
 
 				semanticTokens.emplace_back(semanticToken);
 			}
@@ -279,26 +276,6 @@ namespace ProjectA {
 				return ~0;
 			}
 
-			Definition& define(PackedType type, SemanticTokenType semanticTokenType, uint32 identifierTokenIndex, DocumentPosition end, uint32 size = 0, uint32 alignment = 0) {
-				const Token& identifierToken = tokens[identifierTokenIndex];
-
-				Definition definition{};
-				definition.identifierRange.start = identifierToken.start;
-				definition.identifierRange.end = identifierToken.getEnd();
-				definition.end = end;
-				definition.type = type;
-				definition.semanticTokenType = semanticTokenType;
-				definition.tokenIndex = identifierTokenIndex;
-				definition.identifierIndex = identifierToken.index;
-				definition.evaluatedInitializer = 0;
-
-				Definition& result = openScopeDefinitions.emplace_back(definition);
-
-				createReferenceFromLastDefinition(identifierTokenIndex);
-
-				return result;
-			}
-
 			Definition& defineStructure(const Statement<StatementType::STRUCTURE>& statement) {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 				const uint32 userDefinedTypeIndex = static_cast<uint32>(userDefinedTypes.size());
@@ -312,8 +289,7 @@ namespace ProjectA {
 				userDefinedTypes.emplace_back(userDefinedType);
 
 				Definition definition{};
-				definition.identifierRange.start = identifierToken.start;
-				definition.identifierRange.end = identifierToken.getEnd();
+				definition.identifierRange = identifierToken.getRange();
 				definition.end = statement.end;
 				definition.type = PackedType::userDefined(userDefinedTypeIndex, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::STRUCTURE;
@@ -332,8 +308,7 @@ namespace ProjectA {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 
 				Definition definition{};
-				definition.identifierRange.start = identifierToken.start;
-				definition.identifierRange.end = identifierToken.getEnd();
+				definition.identifierRange = identifierToken.getRange();
 				definition.end = definition.identifierRange.end;
 				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::MEMBER;
@@ -352,9 +327,8 @@ namespace ProjectA {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 
 				Definition definition{};
-				definition.identifierRange.start = identifierToken.start;
-				definition.identifierRange.end = identifierToken.getEnd();
-				definition.end = identifierToken.getEnd();
+				definition.identifierRange = identifierToken.getRange();
+				definition.end = definition.identifierRange.end;
 				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::CONSTANT;
 				definition.tokenIndex = statement.identifierTokenIndex;
@@ -369,14 +343,28 @@ namespace ProjectA {
 			}
 
 			Definition& defineVariableOrConstant(const Statement<StatementType::VARIABLE>& statement, PackedType type) {
-				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 				SemanticTokenType semanticTokenType = SemanticTokenType::VARIABLE;
 
 				if (statement.constant) {
 					semanticTokenType = SemanticTokenType::CONSTANT;
 				}
 
-				return define(type, semanticTokenType, statement.identifierTokenIndex, identifierToken.getEnd());
+				const Token& identifierToken = tokens[statement.identifierTokenIndex];
+
+				Definition definition{};
+				definition.identifierRange = identifierToken.getRange();
+				definition.end = definition.identifierRange.end;
+				definition.type = type;
+				definition.semanticTokenType = semanticTokenType;
+				definition.tokenIndex = statement.identifierTokenIndex;
+				definition.identifierIndex = identifierToken.index;
+				definition.evaluatedInitializer = 0;
+
+				Definition& result = openScopeDefinitions.emplace_back(definition);
+
+				createReferenceFromLastDefinition(statement.identifierTokenIndex);
+
+				return result;
 			}
 
 			Definition& defineFunction(const Statement<StatementType::FUNCTION>& statement, uint32 parameterTypeExpressionOffset, DocumentPosition end) {
@@ -415,8 +403,7 @@ namespace ProjectA {
 
 				Reference reference{};
 				reference.definitionIndex = definitionIndex;
-				reference.identifierRange.start = identifierToken.start;
-				reference.identifierRange.end = identifierToken.getEnd();
+				reference.identifierRange = identifierToken.getRange();
 
 				openScopeReferences.emplace_back(reference);
 			}
