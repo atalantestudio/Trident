@@ -27,11 +27,14 @@ namespace ProjectA {
 		DocumentPosition end;
 		PackedType type;
 		SemanticTokenType semanticTokenType;
-		uint32 tokenIndex;
+		uint32 identifierTokenIndex;
 		uint32 identifierIndex;
 
 		// TODO: Adapt for constructors, e.g. `vec3<float32>(x, y, z)`.
 		sint64 evaluatedInitializer;
+
+		// NOTE: Only used by the compiler to generate unused object info diagnostics.
+		uint32 referenceCount = 0;
 
 		// NOTE (Structure definitions only)
 		// Number of members in the structure.

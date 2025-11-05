@@ -236,6 +236,11 @@ namespace ProjectA {
 				scope.definitionCount = static_cast<uint32>(openScopeDefinitions.size()) - scope.definitionIndexOffset;
 				scope.referenceCount = static_cast<uint32>(openScopeReferences.size()) - scope.referenceIndexOffset;
 
+				// NOTE: Don't generate UNUSED_OBJECT diagnostics for global-scope objects as they may be used in other files.
+				if (currentScopeIndex > 0) {
+					analyzeCurrentScopeUnusedObjects();
+				}
+
 				if (scope.definitionCount > 0) {
 					const uint32 insertionOffset = static_cast<uint32>(definitions.size());
 
@@ -297,7 +302,7 @@ namespace ProjectA {
 				definition.end = statement.end;
 				definition.type = PackedType::userDefined(userDefinedTypeIndex, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::STRUCTURE;
-				definition.tokenIndex = statement.identifierTokenIndex;
+				definition.identifierTokenIndex = statement.identifierTokenIndex;
 				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
@@ -316,7 +321,7 @@ namespace ProjectA {
 				definition.end = definition.identifierRange.end;
 				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::MEMBER;
-				definition.tokenIndex = statement.identifierTokenIndex;
+				definition.identifierTokenIndex = statement.identifierTokenIndex;
 				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
@@ -335,7 +340,7 @@ namespace ProjectA {
 				definition.end = definition.identifierRange.end;
 				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::CONSTANT;
-				definition.tokenIndex = statement.identifierTokenIndex;
+				definition.identifierTokenIndex = statement.identifierTokenIndex;
 				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
@@ -360,7 +365,7 @@ namespace ProjectA {
 				definition.end = definition.identifierRange.end;
 				definition.type = type;
 				definition.semanticTokenType = semanticTokenType;
-				definition.tokenIndex = statement.identifierTokenIndex;
+				definition.identifierTokenIndex = statement.identifierTokenIndex;
 				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
@@ -379,7 +384,7 @@ namespace ProjectA {
 				definition.end = definition.identifierRange.end;
 				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::PARAMETER;
-				definition.tokenIndex = statement.identifierTokenIndex;
+				definition.identifierTokenIndex = statement.identifierTokenIndex;
 				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
@@ -400,7 +405,7 @@ namespace ProjectA {
 				definition.end = statement.end;
 				definition.type = PackedType(Type::FUNCTION, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
-				definition.tokenIndex = ~0;
+				definition.identifierTokenIndex = statement.identifierTokenIndex;
 				definition.identifierIndex = identifierToken.index;
 				definition.evaluatedInitializer = 0;
 
@@ -419,6 +424,9 @@ namespace ProjectA {
 			}
 
 			void createReference(uint32 definitionIndex, const Token& identifierToken) {
+				Definition& definition = openScopeDefinitions[definitionIndex];
+				definition.referenceCount += 1;
+
 				Reference reference{};
 				reference.definitionIndex = definitionIndex - nextScopeDefinitionOffset;
 				reference.identifierRange = identifierToken.getRange();
@@ -581,6 +589,25 @@ namespace ProjectA {
 				functions.emplace_back(function);
 
 				return functionIndex;
+			}
+
+			void analyzeCurrentScopeUnusedObjects() {
+				const Scope& scope = scopes[currentScopeIndex];
+
+				uint32 definitionIndex = 0;
+
+				while (definitionIndex < scope.definitionCount) {
+					const Definition& definition = openScopeDefinitions[scope.definitionIndexOffset + definitionIndex];
+
+					// The first reference is always there and has the same range as the definition.
+					if (definition.referenceCount <= 1) {
+						const Token& identifierToken = tokens[definition.identifierTokenIndex];
+
+						generateDiagnostic<DiagnosticCode::UNUSED_OBJECT>(identifierToken.getRange());
+					}
+
+					definitionIndex += 1;
+				}
 			}
 
 		public:

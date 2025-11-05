@@ -131,7 +131,7 @@ namespace ProjectA {
 
 		if (definitionIndex != ~0) {
 			const Definition& definition = output->getOpenScopeDefinition(definitionIndex);
-			const Token& definitionToken = output->tokens[definition.tokenIndex];
+			const Token& definitionToken = output->tokens[definition.identifierTokenIndex];
 			const std::string definitionTokenString = output->getTokenString(definitionToken);
 
 			// NOTE: Don't analyze redefined members.
@@ -217,7 +217,7 @@ namespace ProjectA {
 			const Definition& definition = output->getOpenScopeDefinition(memberDefinitionIndex);
 
 			if (identifierToken.index == definition.identifierIndex) {
-				const Token& definitionToken = output->tokens[definition.tokenIndex];
+				const Token& definitionToken = output->tokens[definition.identifierTokenIndex];
 				const std::string definitionTokenString = output->getTokenString(definitionToken);
 				const std::string redefinitionTokenString = output->getTokenString(identifierToken);
 
@@ -294,7 +294,7 @@ namespace ProjectA {
 
 		if (definitionIndex != ~0) {
 			const Definition& definition = output->getOpenScopeDefinition(definitionIndex);
-			const Token& definitionToken = output->tokens[definition.tokenIndex];
+			const Token& definitionToken = output->tokens[definition.identifierTokenIndex];
 			const std::string definitionTokenString = output->getTokenString(definitionToken);
 
 			return output->generateDiagnostic<DiagnosticCode::REDEFINITION>(identifierToken, output->getTokenString(identifierToken), definitionToken, definitionTokenString);
@@ -549,14 +549,29 @@ namespace ProjectA {
 		const Expression<ExpressionType::BINARY>& expression = output->ast.getExpression<ExpressionType::BINARY>(expressionByteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
-		TRY(analyzeExpression());
-
-		const sint64 lvalue = evaluation.getValue();
+		evaluation = ExpressionEvaluation({Type::NONE, Type::NONE}, true);
 
 		TRY(analyzeExpression());
 
-		// TODO: Generate an error if the lvalue is constant and the operation is assignment.
-		evaluation.setValue(applyBinaryOperator(lvalue, evaluation.getValue(), static_cast<OperatorType>(operatorToken.type - TokenType::VERTICAL_BAR + BINARY_OPERATOR_OFFSET)));
+		const ExpressionEvaluation lvalue = evaluation;
+
+		evaluation = ExpressionEvaluation(lvalue.type, lvalue.constant);
+
+		TRY(analyzeExpression());
+
+		const ExpressionEvaluation& rvalue = evaluation;
+
+		if (operatorToken.type >= TokenType::EQUAL && operatorToken.type <= TokenType::VERTICAL_BAR_EQUAL) {
+			if (lvalue.constant && !rvalue.constant) {
+				const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
+
+				return output->generateDiagnostic<DiagnosticCode::CONSTANT_ASSIGNMENT>(operatorToken.getRange());
+			}
+
+			return DiagnosticCode::SUCCESS;
+		}
+
+		evaluation.setValue(applyBinaryOperator(lvalue.getValue(), evaluation.getValue(), static_cast<OperatorType>(operatorToken.type - TokenType::VERTICAL_BAR + BINARY_OPERATOR_OFFSET)));
 
 		return DiagnosticCode::SUCCESS;
 	}

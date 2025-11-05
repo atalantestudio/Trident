@@ -41,7 +41,7 @@ namespace ProjectA {
 			Expression<ExpressionType::BINARY> expression{}; \
 			expression.operatorTokenIndex = tokenIndex; \
 			\
-			/* output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex); */ \
+			output->registerSemanticToken(SemanticTokenType::OPERATOR, expression.operatorTokenIndex); \
 			\
 			jump(); \
 			\
@@ -166,7 +166,7 @@ namespace ProjectA {
 
 		EXPECT(read(TokenType::EQUAL), DiagnosticCode::UNEXPECTED_TOKEN, output->getNonIdentifierTokenString(TokenType::EQUAL), read());
 
-		// output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
+		output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
 
 		jump();
 
@@ -425,7 +425,7 @@ namespace ProjectA {
 		if (read(TokenType::EQUAL)) {
 			statement.initializer = true;
 
-			// output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
+			output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
 
 			jump();
 
@@ -488,7 +488,7 @@ namespace ProjectA {
 			Expression<ExpressionType::BINARY> expression{};
 			expression.operatorTokenIndex = tokenIndex;
 
-			// output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
+			output->registerSemanticToken(SemanticTokenType::OPERATOR, expression.operatorTokenIndex);
 
 			jump();
 
@@ -515,15 +515,15 @@ namespace ProjectA {
 	DiagnosticCode Parser::parseUnaryExpression() {
 		const uint32 insertionIndex = output->ast.getExpressionCount();
 
+		// NOTE: Don't allow unary expressions following each other, e.g. --i.
 		if (read().type >= TokenType::PLUS && read().type <= TokenType::TILDE) {
 			Expression<ExpressionType::UNARY> expression{};
 			expression.operatorTokenIndex = tokenIndex;
 
-			// output->registerSemanticToken(SemanticTokenType::OPERATOR, tokenIndex);
+			output->registerSemanticToken(SemanticTokenType::OPERATOR, expression.operatorTokenIndex);
 
 			jump();
 
-			// NOTE: Don't allow unary expressions following each other, e.g. --i.
 			TRY(parsePrimaryExpression());
 
 			output->ast.insertExpression(expression, insertionIndex);

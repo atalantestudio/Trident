@@ -234,6 +234,14 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct GenerateDiagnostic<DiagnosticCode::CONSTANT_ASSIGNMENT> {
+		static void prepare(Diagnostic& diagnostic, const DocumentRange& operatorRange) {
+			diagnostic.range = operatorRange;
+			diagnostic.message = "Cannot assign to a constant post-initialization.";
+		}
+	};
+
+	template<>
 	struct GenerateDiagnostic<DiagnosticCode::INVALID_STRUCTURE_IDENTIFIER_CASE> {
 		static void prepare(Diagnostic& diagnostic, const DocumentRange& identifierRange) {
 			diagnostic.range = identifierRange;
@@ -278,6 +286,15 @@ namespace ProjectA {
 		static void prepare(Diagnostic& diagnostic, const DocumentRange& identifierRange) {
 			diagnostic.range = identifierRange;
 			diagnostic.message = "Use camelCase or snake_case for variable identifiers.";
+		}
+	};
+
+	template<>
+	struct GenerateDiagnostic<DiagnosticCode::UNUSED_OBJECT> {
+		static void prepare(Diagnostic& diagnostic, const DocumentRange& identifierRange) {
+			diagnostic.severity = DiagnosticSeverity::HINT_OR_WIP;
+			diagnostic.range = identifierRange;
+			diagnostic.message = "Object is unused.";
 		}
 	};
 }
