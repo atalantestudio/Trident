@@ -210,18 +210,24 @@ namespace ProjectA {
 				semanticTokens.emplace_back(semanticToken);
 			}
 
+			void prepareNextScope() {
+				nextScopeDefinitionOffset = static_cast<uint32>(openScopeDefinitions.size());
+				nextScopeReferenceOffset = static_cast<uint32>(openScopeReferences.size());
+			}
+
 			void openScope(DocumentPosition position) {
 				Scope scope{};
 				scope.range = {position, position};
 				scope.parentScopeIndex = currentScopeIndex;
 				scope.definitionIndexOffset = static_cast<uint32>(openScopeDefinitions.size()) - nextScopeDefinitionCount;
-				scope.referenceIndexOffset = static_cast<uint32>(openScopeReferences.size());
+				scope.referenceIndexOffset = static_cast<uint32>(openScopeReferences.size()) - nextScopeReferenceCount;
 
 				currentScopeIndex = static_cast<uint32>(scopes.size());
 
 				scopes.emplace_back(scope);
 
 				nextScopeDefinitionCount = 0;
+				nextScopeReferenceCount = 0;
 			}
 
 			void closeScope(DocumentPosition position) {
@@ -418,7 +424,7 @@ namespace ProjectA {
 				registerSemanticToken(definition.semanticTokenType, identifierTokenIndex);
 
 				Reference reference{};
-				reference.definitionIndex = definitionIndex;
+				reference.definitionIndex = definitionIndex - nextScopeDefinitionOffset;
 				reference.identifierRange = identifierToken.getRange();
 
 				openScopeReferences.emplace_back(reference);
@@ -524,6 +530,11 @@ namespace ProjectA {
 				return userDefinedTypes.back();
 			}
 
+			void markPreviousDefinitionForNextScope() {
+				nextScopeDefinitionCount += 1;
+				nextScopeReferenceCount += 1;
+			}
+
 		private:
 			/* void registerDefaultDefinitions() {
 				for (uint32 functionIndex = FIRST_FUNCTION_INDEX; functionIndex <= LAST_FUNCTION_INDEX; functionIndex += 1) {
@@ -595,10 +606,13 @@ namespace ProjectA {
 			std::vector<UserDefinedType> userDefinedTypes;
 
 			std::vector<Definition> openScopeDefinitions;
+			uint32 nextScopeDefinitionOffset = 0;
 			uint32 nextScopeDefinitionCount = 0;
 			std::vector<Definition> definitions;
-
+			
 			std::vector<Reference> openScopeReferences;
+			uint32 nextScopeReferenceOffset = 0;
+			uint32 nextScopeReferenceCount = 0;
 			std::vector<Reference> references;
 
 			std::vector<Scope> scopes;

@@ -52,7 +52,6 @@ namespace ProjectA {
 			uint32 expressionByteOffset;
 			uint32 memberDefinitionOffset;
 			PackedType currentType;
-			DocumentPosition position;
 			ExpressionEvaluation evaluation;
 	};
 }

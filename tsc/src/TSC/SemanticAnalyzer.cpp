@@ -26,15 +26,14 @@ namespace ProjectA {
 		expressionByteOffset = 0;
 		memberDefinitionOffset = ~0;
 		currentType = PackedType(Type::NONE, Type::NONE);
-		position = {0, 0};
 
-		this->output->openScope(position);
+		this->output->openScope({0, 0});
 
 		while (statementByteOffset < this->output->ast.getStatementBufferByteSize()) {
 			analyzeStatement();
 		}
 
-		this->output->closeScope(position);
+		this->output->closeScope(this->output->tokens.back().getRange().end);
 
 		// Finished analyzing
 		BREAKPOINT();
@@ -285,9 +284,7 @@ namespace ProjectA {
 		TRY(analyzeExpression());
 
 		output->defineParameter(statement, currentType);
-
-		// Define the parameter for the next scope (function).
-		output->nextScopeDefinitionCount += 1;
+		output->markPreviousDefinitionForNextScope();
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -310,6 +307,7 @@ namespace ProjectA {
 
 		output->registerSemanticToken(SemanticTokenType::FUNCTION, statement.identifierTokenIndex);
 		output->defineFunction(statement, parameterTypeExpressionByteOffset);
+		output->prepareNextScope();
 
 		uint32 parameterIndex = 0;
 
