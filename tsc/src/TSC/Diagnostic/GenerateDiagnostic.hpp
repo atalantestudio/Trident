@@ -292,7 +292,7 @@ namespace ProjectA {
 	template<>
 	struct GenerateDiagnostic<DiagnosticCode::UNUSED_OBJECT> {
 		static void prepare(Diagnostic& diagnostic, const DocumentRange& identifierRange) {
-			diagnostic.severity = DiagnosticSeverity::HINT_OR_WIP;
+			diagnostic.severity = DiagnosticSeverity::HINT;
 			diagnostic.range = identifierRange;
 			diagnostic.message = "Object is unused.";
 		}

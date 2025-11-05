@@ -5,8 +5,6 @@ namespace ProjectA {
 		ERROR,
 		WARNING,
 		INFO,
-
-		// TODO: Remove suffix.
-		HINT_OR_WIP,
+		HINT,
 	};
 }

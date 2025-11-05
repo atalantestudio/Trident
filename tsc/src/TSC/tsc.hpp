@@ -53,7 +53,7 @@ namespace ProjectA {
 					break;
 				}
 				case DiagnosticSeverity::INFO:
-				case DiagnosticSeverity::HINT_OR_WIP: {
+				case DiagnosticSeverity::HINT: {
 					ENGINE_INFO(diagnostic.message);
 
 					break;
