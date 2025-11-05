@@ -27,6 +27,7 @@ namespace ProjectA {
 		memberDefinitionOffset = ~0;
 		currentType = {Type::NONE, Type::NONE};
 		returnType = {Type::NONE, Type::NONE};
+		unreachableCode = false;
 
 		this->output->openScope({0, 0});
 
@@ -229,11 +230,15 @@ namespace ProjectA {
 
 		output->defineMember(statement, currentType);
 
-		if (statement.annotationFlag & BIT(POSITION) && currentType != PackedType(Type::VEC4, Type::FLOAT32)) {
-			const AnnotationBlock& annotationBlock = output->ast.getAnnotationBlock<POSITION>(statement.annotationBlockIndexOffset, statement.annotationBlockCount);
-			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
+		if (statement.annotationFlag & BIT(POSITION)) {
+			static constexpr PackedType POSITION_TYPE = {Type::VEC4, Type::FLOAT32};
 
-			return output->generateDiagnostic<DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION>(Annotation::POSITION, identifierToken, output->getPackedTypeString(currentType));
+			if (currentType != POSITION_TYPE) {
+				const AnnotationBlock& annotationBlock = output->ast.getAnnotationBlock<POSITION>(statement.annotationBlockIndexOffset, statement.annotationBlockCount);
+				const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
+
+				return output->generateDiagnostic<DiagnosticCode::INVALID_ANNOTATION_TYPE_COMBINATION>(Annotation::POSITION, identifierToken, output->getPackedTypeString(currentType));
+			}
 		}
 
 		return DiagnosticCode::SUCCESS;
@@ -427,6 +432,8 @@ namespace ProjectA {
 
 		output->closeScope(statement.range.end);
 
+		unreachableCode = false;
+
 		return DiagnosticCode::SUCCESS;
 	}
 
@@ -477,10 +484,14 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode SemanticAnalyzer::analyzeBreakStatement(const Statement<StatementType::BREAK>& statement) {
+		unreachableCode = true;
+
 		return DiagnosticCode::SUCCESS;
 	}
 
 	DiagnosticCode SemanticAnalyzer::analyzeNextStatement(const Statement<StatementType::NEXT>& statement) {
+		unreachableCode = true;
+
 		return DiagnosticCode::SUCCESS;
 	}
 
@@ -493,6 +504,8 @@ namespace ProjectA {
 			// TODO: Use correct token.
 			return output->generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(output->tokens[0]);
 		}
+
+		unreachableCode = true;
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -697,7 +710,7 @@ namespace ProjectA {
 
 			output->registerSemanticToken(SemanticTokenType::KEYWORD, expression.templateArgumentTokenIndex);
 
-			currentType = PackedType(type, templateArgument);
+			currentType = {type, templateArgument};
 
 			return DiagnosticCode::SUCCESS;
 		}
@@ -706,7 +719,7 @@ namespace ProjectA {
 			return output->generateDiagnostic<DiagnosticCode::MISSING_TEMPLATE_ARGUMENT>(typeToken, output->getTokenString(typeToken));
 		}
 
-		currentType = PackedType(type, templateArgument);
+		currentType = {type, templateArgument};
 
 		return DiagnosticCode::SUCCESS;
 	}

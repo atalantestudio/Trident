@@ -5,20 +5,10 @@
 
 namespace ProjectA {
 	struct PackedType {
-		static PackedType userDefined(uint32 typeIndex, Type templateArgument) {
-			PackedType packedType{};
-			packedType.typeIndex = static_cast<Type>(Type::USER_DEFINED + typeIndex);
-			packedType.templateArgumentIndex = templateArgument;
-
-			return packedType;
+		// NOTE: This method assumes that the template argument is not user-defined.
+		static PackedType userDefined(uint32 typeIndex, uint32 templateArgumentIndex) {
+			return {Type::USER_DEFINED + typeIndex, templateArgumentIndex};
 		}
-
-		PackedType() = default;
-
-		PackedType(Type typeIndex, Type templateArgumentIndex) :
-			typeIndex(typeIndex),
-			templateArgumentIndex(templateArgumentIndex)
-		{}
 
 		bool hasUserDefinedType() const {
 			return typeIndex >= Type::USER_DEFINED;
@@ -33,10 +23,10 @@ namespace ProjectA {
 		}
 
 		bool operator !=(const PackedType& other) const {
-			return !operator ==(other);
+			return !(*this == other);
 		}
 
-		Type typeIndex = Type::NONE;
-		Type templateArgumentIndex = Type::NONE;
+		uint32 typeIndex = Type::NONE;
+		uint32 templateArgumentIndex = Type::NONE;
 	};
 }

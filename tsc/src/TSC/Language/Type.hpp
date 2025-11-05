@@ -4,8 +4,6 @@ namespace ProjectA {
 	enum Type : uint32 {
 		NONE,
 
-		FUNCTION = NONE,
-
 		// Scalar types
 		FLOAT32,
 		FLOAT64,

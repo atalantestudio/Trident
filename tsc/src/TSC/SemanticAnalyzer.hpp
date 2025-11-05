@@ -56,6 +56,8 @@ namespace ProjectA {
 			// Return type of the current function.
 			PackedType returnType;
 
+			bool unreachableCode;
+
 			ExpressionEvaluation evaluation;
 	};
 }

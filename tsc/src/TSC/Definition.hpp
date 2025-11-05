@@ -1,6 +1,5 @@
 #pragma once
 
-#include "DocumentPosition.hpp"
 #include "DocumentRange.hpp"
 #include "PackedType.hpp"
 #include "SemanticTokenType.hpp"
@@ -23,8 +22,10 @@ namespace ProjectA {
 			return static_cast<sint32>(evaluatedInitializer);
 		}
 
-		DocumentRange identifierRange;
+		// TODO: Store the full definition range.
 		DocumentPosition end;
+
+		DocumentRange identifierRange;
 		PackedType type;
 		SemanticTokenType semanticTokenType;
 		uint32 identifierTokenIndex;

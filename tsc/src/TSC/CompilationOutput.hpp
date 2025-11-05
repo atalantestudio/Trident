@@ -28,15 +28,15 @@ namespace ProjectA {
 			}
 
 			uint32 _emscripten_getSize(uint32 typeIndex, uint32 templateArgumentIndex) const {
-				return getSize(PackedType(static_cast<Type>(typeIndex), static_cast<Type>(templateArgumentIndex)));
+				return getSize({static_cast<Type>(typeIndex), static_cast<Type>(templateArgumentIndex)});
 			}
 
 			uint32 _emscripten_getAlignment(uint32 typeIndex, uint32 templateArgumentIndex) const {
-				return getAlignment(PackedType(static_cast<Type>(typeIndex), static_cast<Type>(templateArgumentIndex)));
+				return getAlignment({static_cast<Type>(typeIndex), static_cast<Type>(templateArgumentIndex)});
 			}
 
 			std::string _emscripten_getPackedTypeString(uint32 typeIndex, uint32 templateArgumentIndex) const {
-				return getPackedTypeString(PackedType(static_cast<Type>(typeIndex), static_cast<Type>(templateArgumentIndex)));
+				return getPackedTypeString({static_cast<Type>(typeIndex), static_cast<Type>(templateArgumentIndex)});
 			}
 
 			template<DiagnosticCode Code, typename... Argument>
@@ -94,7 +94,7 @@ namespace ProjectA {
 				return TYPE_ALIGNMENTS[type.typeIndex];
 			}
 
-			const UserDefinedType* getUserDefinedType(Type typeIndex) const {
+			const UserDefinedType* getUserDefinedType(uint32 typeIndex) const {
 				const uint32 index = typeIndex - Type::USER_DEFINED;
 
 				if (index >= userDefinedTypes.size()) {
@@ -172,16 +172,16 @@ namespace ProjectA {
 				return typeString;
 			}
 
-			std::string getTypeString(Type packedType) const {
-				if (packedType == Type::NONE) {
+			std::string getTypeString(uint32 typeIndex) const {
+				if (typeIndex == Type::NONE) {
 					return "";
 				}
 
-				if (packedType < Type::USER_DEFINED) {
-					return RESERVED_KEYWORDS[packedType + TokenType::TYPE_FLOAT32 - 1];
+				if (typeIndex < Type::USER_DEFINED) {
+					return RESERVED_KEYWORDS[typeIndex + TokenType::TYPE_FLOAT32 - 1];
 				}
 
-				const UserDefinedType* userDefinedType = getUserDefinedType(packedType);
+				const UserDefinedType* userDefinedType = getUserDefinedType(typeIndex);
 
 				DEBUG_ASSERT(userDefinedType != nullptr);
 				DEBUG_ASSERT(userDefinedType->identifierIndex < identifiers.size());
@@ -298,8 +298,8 @@ namespace ProjectA {
 				userDefinedTypes.emplace_back(userDefinedType);
 
 				Definition definition{};
-				definition.identifierRange = identifierToken.getRange();
 				definition.end = statement.end;
+				definition.identifierRange = identifierToken.getRange();
 				definition.type = PackedType::userDefined(userDefinedTypeIndex, Type::NONE);
 				definition.semanticTokenType = SemanticTokenType::STRUCTURE;
 				definition.identifierTokenIndex = statement.identifierTokenIndex;
@@ -317,8 +317,8 @@ namespace ProjectA {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 
 				Definition definition{};
-				definition.identifierRange = identifierToken.getRange();
 				definition.end = definition.identifierRange.end;
+				definition.identifierRange = identifierToken.getRange();
 				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::MEMBER;
 				definition.identifierTokenIndex = statement.identifierTokenIndex;
@@ -336,8 +336,8 @@ namespace ProjectA {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 
 				Definition definition{};
-				definition.identifierRange = identifierToken.getRange();
 				definition.end = definition.identifierRange.end;
+				definition.identifierRange = identifierToken.getRange();
 				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::CONSTANT;
 				definition.identifierTokenIndex = statement.identifierTokenIndex;
@@ -361,8 +361,8 @@ namespace ProjectA {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 
 				Definition definition{};
-				definition.identifierRange = identifierToken.getRange();
 				definition.end = definition.identifierRange.end;
+				definition.identifierRange = identifierToken.getRange();
 				definition.type = type;
 				definition.semanticTokenType = semanticTokenType;
 				definition.identifierTokenIndex = statement.identifierTokenIndex;
@@ -380,8 +380,8 @@ namespace ProjectA {
 				const Token& identifierToken = tokens[statement.identifierTokenIndex];
 
 				Definition definition{};
-				definition.identifierRange = identifierToken.getRange();
 				definition.end = definition.identifierRange.end;
+				definition.identifierRange = identifierToken.getRange();
 				definition.type = type;
 				definition.semanticTokenType = SemanticTokenType::PARAMETER;
 				definition.identifierTokenIndex = statement.identifierTokenIndex;
@@ -401,9 +401,9 @@ namespace ProjectA {
 				registerFunctionOverload(statement, parameterTypeExpressionByteOffset);
 
 				Definition definition{};
-				definition.identifierRange = identifierToken.getRange();
 				definition.end = statement.end;
-				definition.type = PackedType(Type::FUNCTION, Type::NONE);
+				definition.identifierRange = identifierToken.getRange();
+				definition.type = {Type::NONE, Type::NONE};
 				definition.semanticTokenType = SemanticTokenType::FUNCTION;
 				definition.identifierTokenIndex = statement.identifierTokenIndex;
 				definition.identifierIndex = identifierToken.index;
