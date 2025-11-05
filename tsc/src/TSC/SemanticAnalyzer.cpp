@@ -255,7 +255,7 @@ namespace ProjectA {
 
 		output->registerSemanticToken(SemanticTokenType::CONSTANT, statement.identifierTokenIndex);
 
-		evaluation = ExpressionEvaluation(currentType, true);
+		evaluation = ExpressionEvaluation(currentType);
 
 		// Initializer
 		TRY(analyzeExpression());
@@ -306,7 +306,7 @@ namespace ProjectA {
 		output->defineVariableOrConstant(statement, currentType);
 
 		if (statement.initializer) {
-			evaluation = ExpressionEvaluation(currentType, statement.constant);
+			evaluation = ExpressionEvaluation(currentType);
 
 			// Initializer
 			TRY(analyzeExpression());
@@ -334,6 +334,22 @@ namespace ProjectA {
 
 		// Type
 		TRY(analyzeExpression());
+
+		uint32 parameterDefinitionIndex = memberDefinitionOffset;
+
+		while (parameterDefinitionIndex < output->getOpenScopeDefinitionCount()) {
+			const Definition& definition = output->getOpenScopeDefinition(parameterDefinitionIndex);
+
+			if (identifierToken.index == definition.identifierIndex) {
+				const Token& definitionToken = output->tokens[definition.identifierTokenIndex];
+				const std::string definitionTokenString = output->getTokenString(definitionToken);
+				const std::string redefinitionTokenString = output->getTokenString(identifierToken);
+
+				return output->generateDiagnostic<DiagnosticCode::REDEFINITION>(identifierToken, redefinitionTokenString, definitionToken, definitionTokenString);
+			}
+
+			parameterDefinitionIndex += 1;
+		}
 
 		// TODO: Search for redefinition errors.
 		output->defineParameter(statement, currentType);
@@ -363,16 +379,20 @@ namespace ProjectA {
 
 		uint32 parameterIndex = 0;
 
+		memberDefinitionOffset = output->getOpenScopeDefinitionCount();
+
 		while (parameterIndex < statement.parameterCount) {
+			parameterIndex += 1;
+
 			// Parameter
 			analyzeStatement();
-
-			parameterIndex += 1;
 		}
+
+		memberDefinitionOffset = ~0;
 
 		// Scope
 		// TODO: Search for return statement errors.
-		analyzeStatement();
+		TRY(analyzeStatement());
 
 		// Cler return type.
 		returnType = {Type::NONE, Type::NONE};
@@ -381,8 +401,7 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode SemanticAnalyzer::analyzeExpressionStatement(const Statement<StatementType::EXPRESSION>& statement) {
-		// NOTE: User-defined functions cannot be constant.
-		evaluation = ExpressionEvaluation(returnType, false);
+		evaluation = ExpressionEvaluation(returnType);
 
 		// Condition
 		TRY(analyzeExpression());
@@ -413,7 +432,7 @@ namespace ProjectA {
 
 	DiagnosticCode SemanticAnalyzer::analyzeIfStatement(const Statement<StatementType::IF>& statement) {
 		// NOTE: User-defined functions cannot be constant.
-		evaluation = ExpressionEvaluation(returnType, false);
+		evaluation = ExpressionEvaluation(returnType);
 
 		// Condition
 		TRY(analyzeExpression());
@@ -431,7 +450,7 @@ namespace ProjectA {
 
 	DiagnosticCode SemanticAnalyzer::analyzeWhileStatement(const Statement<StatementType::WHILE>& statement) {
 		// NOTE: User-defined functions cannot be constant.
-		evaluation = ExpressionEvaluation(returnType, false);
+		evaluation = ExpressionEvaluation(returnType);
 
 		// Condition
 		TRY(analyzeExpression());
@@ -457,7 +476,7 @@ namespace ProjectA {
 
 	DiagnosticCode SemanticAnalyzer::analyzeReturnStatement(const Statement<StatementType::RETURN>& statement) {
 		// NOTE: User-defined functions cannot be constant.
-		evaluation = ExpressionEvaluation(returnType, false);
+		evaluation = ExpressionEvaluation(returnType);
 
 		TRY(analyzeExpression());
 
@@ -549,13 +568,13 @@ namespace ProjectA {
 		const Expression<ExpressionType::BINARY>& expression = output->ast.getExpression<ExpressionType::BINARY>(expressionByteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
-		evaluation = ExpressionEvaluation({Type::NONE, Type::NONE}, true);
+		evaluation = ExpressionEvaluation({Type::NONE, Type::NONE});
 
 		TRY(analyzeExpression());
 
 		const ExpressionEvaluation lvalue = evaluation;
 
-		evaluation = ExpressionEvaluation(lvalue.type, lvalue.constant);
+		evaluation = ExpressionEvaluation(lvalue.type);
 
 		TRY(analyzeExpression());
 

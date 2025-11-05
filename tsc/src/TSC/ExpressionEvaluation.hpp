@@ -7,10 +7,9 @@ namespace ProjectA {
 		public:
 			ExpressionEvaluation() = default;
 
-			explicit ExpressionEvaluation(PackedType type, bool constant) :
+			explicit ExpressionEvaluation(PackedType type) :
 				type(type),
-				intermediateType(type),
-				constant(constant)
+				intermediateType(type)
 			{}
 
 			sint64 getValue() const {
@@ -34,7 +33,9 @@ namespace ProjectA {
 			PackedType intermediateType;
 
 			bool casting = false;
-			bool constant;
+
+			// The expressions is marked as constant by default, but this can change while evaluating.
+			bool constant = true;
 
 		private:
 			std::vector<sint64> components = {0};
