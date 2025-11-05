@@ -257,19 +257,19 @@ namespace ProjectA {
 		if (read(TokenType::KEYWORD_IF)) {
 			jump();
 
-			return parseIfStatementStart();
+			return parseIfStatement();
+		}
+
+		if (read(TokenType::KEYWORD_WHILE)) {
+			jump();
+
+			return parseWhileStatement();
 		}
 
 		if (read(TokenType::KEYWORD_RETURN)) {
 			jump();
 
 			return parseReturnStatement();
-		}
-
-		if (read(TokenType::KEYWORD_WHILE)) {
-			jump();
-
-			return parseWhileStatementStart();
 		}
 
 		if (visitedWhileCount > 0) {
@@ -325,26 +325,48 @@ namespace ProjectA {
 		return DiagnosticCode::SUCCESS;
 	}
 
-	DiagnosticCode Parser::parseIfStatementStart() {
-		const Statement<StatementType::IF> statement{};
+	DiagnosticCode Parser::parseIfStatement() {
+		const uint32 statementByteOffset = output->ast.getStatementBufferByteSize();
 
-		output->ast.addStatement(statement);
+		Statement<StatementType::IF> statement{};
+		statement.conditionExpressionRange.start = read().start;
 
-		TRY(parseIfOrWhileStatementEnd());
+		TRY(parseLogicalOrExpression());
+
+		statement.conditionExpressionRange.end = position;
+
+		CONSUME(TokenType::LEFT_CURLY_BRACE);
+
+		visitedWhileCount += 1;
+
+		TRY(parseScopeStatement());
+
+		visitedWhileCount -= 1;
+
+		output->ast.insertStatement(statement, statementByteOffset);
 
 		return DiagnosticCode::SUCCESS;
 	}
 
-	DiagnosticCode Parser::parseWhileStatementStart() {
-		const Statement<StatementType::WHILE> statement{};
+	DiagnosticCode Parser::parseWhileStatement() {
+		const uint32 statementByteOffset = output->ast.getStatementBufferByteSize();
 
-		output->ast.addStatement(statement);
+		Statement<StatementType::WHILE> statement{};
+		statement.conditionExpressionRange.start = read().start;
+
+		TRY(parseLogicalOrExpression());
+
+		statement.conditionExpressionRange.end = position;
+
+		CONSUME(TokenType::LEFT_CURLY_BRACE);
 
 		visitedWhileCount += 1;
 
-		TRY(parseIfOrWhileStatementEnd());
+		TRY(parseScopeStatement());
 
 		visitedWhileCount -= 1;
+
+		output->ast.insertStatement(statement, statementByteOffset);
 
 		return DiagnosticCode::SUCCESS;
 	}
@@ -367,22 +389,12 @@ namespace ProjectA {
 			jumpEol();
 		}
 
-		CONSUME(TokenType::RIGHT_CURLY_BRACE);
-
 		statement.statementCount = statementCount;
 		statement.range.end = position;
 
+		CONSUME(TokenType::RIGHT_CURLY_BRACE);
+
 		output->ast.insertStatement(statement, statementByteOffset);
-
-		return DiagnosticCode::SUCCESS;
-	}
-
-	DiagnosticCode Parser::parseIfOrWhileStatementEnd() {
-		TRY(parseLogicalOrExpression());
-
-		CONSUME(TokenType::LEFT_CURLY_BRACE);
-
-		TRY(parseScopeStatement());
 
 		return DiagnosticCode::SUCCESS;
 	}

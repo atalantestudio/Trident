@@ -290,6 +290,24 @@ namespace ProjectA {
 	};
 
 	template<>
+	struct GenerateDiagnostic<DiagnosticCode::INFINITE_LOOP> {
+		static void prepare(Diagnostic& diagnostic, const DocumentRange& conditionExpressionRange) {
+			diagnostic.severity = DiagnosticSeverity::WARNING;
+			diagnostic.range = conditionExpressionRange;
+			diagnostic.message = "Loop may be infinite.";
+		}
+	};
+
+	template<>
+	struct GenerateDiagnostic<DiagnosticCode::UNREACHABLE_CODE> {
+		static void prepare(Diagnostic& diagnostic, const DocumentRange& range) {
+			diagnostic.severity = DiagnosticSeverity::HINT;
+			diagnostic.range = range;
+			diagnostic.message = "Unreachable code.";
+		}
+	};
+
+	template<>
 	struct GenerateDiagnostic<DiagnosticCode::UNUSED_OBJECT> {
 		static void prepare(Diagnostic& diagnostic, const DocumentRange& identifierRange) {
 			diagnostic.severity = DiagnosticSeverity::HINT;

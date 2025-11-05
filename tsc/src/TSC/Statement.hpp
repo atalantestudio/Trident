@@ -110,6 +110,9 @@ namespace ProjectA {
 		StatementType type = StatementType::IF;
 
 		// The condition expression is the next expression.
+
+		DocumentRange conditionExpressionRange;
+
 		// The scope statement is the next statement.
 	};
 
@@ -118,6 +121,9 @@ namespace ProjectA {
 		StatementType type = StatementType::WHILE;
 
 		// The condition expression is the next expression.
+
+		DocumentRange conditionExpressionRange;
+
 		// The scope statement is the next statement.
 	};
 

@@ -20,13 +20,12 @@ namespace ProjectA {
 
 			DiagnosticCode parseLocalScopeStatement();
 			DiagnosticCode parseScopeStatement();
-			DiagnosticCode parseIfStatementStart();
+			DiagnosticCode parseIfStatement();
 			DiagnosticCode parseReturnStatement();
 			DiagnosticCode parseBreakStatement();
 			DiagnosticCode parseNextStatement();
-			DiagnosticCode parseWhileStatementStart();
+			DiagnosticCode parseWhileStatement();
 			DiagnosticCode parseExpressionStatement();
-			DiagnosticCode parseIfOrWhileStatementEnd();
 			DiagnosticCode parseVariableStatement();
 
 			DiagnosticCode parseTypeExpression();

@@ -431,15 +431,17 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode SemanticAnalyzer::analyzeIfStatement(const Statement<StatementType::IF>& statement) {
-		// NOTE: User-defined functions cannot be constant.
 		evaluation = ExpressionEvaluation(returnType);
 
 		// Condition
 		TRY(analyzeExpression());
 
-		if (evaluation.intermediateType != evaluation.type) {
-			// TODO: Use correct token.
-			return output->generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(output->tokens[0]);
+		if (evaluation.constant && !evaluation.getValue()) {
+			const Statement<StatementType::SCOPE>& scopeStatement = output->ast.getStatement<StatementType::SCOPE>(statementByteOffset);
+
+			output->generateDiagnostic<DiagnosticCode::UNREACHABLE_CODE>(scopeStatement.range);
+
+			// TODO: Jump over scope statement.
 		}
 
 		// Scope
@@ -449,15 +451,23 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode SemanticAnalyzer::analyzeWhileStatement(const Statement<StatementType::WHILE>& statement) {
-		// NOTE: User-defined functions cannot be constant.
 		evaluation = ExpressionEvaluation(returnType);
 
 		// Condition
 		TRY(analyzeExpression());
 
-		if (evaluation.intermediateType != evaluation.type) {
-			// TODO: Use correct token.
-			return output->generateDiagnostic<DiagnosticCode::INVALID_CONVERSION>(output->tokens[0]);
+		if (evaluation.constant) {
+			if (evaluation.getValue()) {
+				// TODO: This can be a false positive; check for BREAK statements accessible within the loop.
+				output->generateDiagnostic<DiagnosticCode::INFINITE_LOOP>(statement.conditionExpressionRange);
+			}
+			else {
+				const Statement<StatementType::SCOPE>& scopeStatement = output->ast.getStatement<StatementType::SCOPE>(statementByteOffset);
+
+				output->generateDiagnostic<DiagnosticCode::UNREACHABLE_CODE>(scopeStatement.range);
+
+				// TODO: Jump over scope statement.
+			}
 		}
 
 		// Scope
@@ -475,7 +485,6 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode SemanticAnalyzer::analyzeReturnStatement(const Statement<StatementType::RETURN>& statement) {
-		// NOTE: User-defined functions cannot be constant.
 		evaluation = ExpressionEvaluation(returnType);
 
 		TRY(analyzeExpression());

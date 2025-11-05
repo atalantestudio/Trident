@@ -43,10 +43,12 @@ namespace ProjectA {
 		INVALID_VARIABLE_IDENTIFIER_CASE,
 
 		// TODO: Warnings
+		INFINITE_LOOP,
 
 		// TODO: Informations
 
 		// Hints
+		UNREACHABLE_CODE,
 		UNUSED_OBJECT,
 	};
 }
