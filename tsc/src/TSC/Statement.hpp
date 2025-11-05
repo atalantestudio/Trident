@@ -47,6 +47,8 @@ namespace ProjectA {
 		uint32 identifierTokenIndex;
 
 		// The initializer expression is the next expression.
+
+		DocumentRange initializerExpressionRange;
 	};
 
 	template<>
@@ -60,6 +62,8 @@ namespace ProjectA {
 
 		// If initializer is true, the initializer expression is the next expression.
 		bool initializer;
+
+		DocumentRange initializerExpressionRange;
 	};
 
 	template<>
@@ -132,5 +136,7 @@ namespace ProjectA {
 		StatementType type = StatementType::RETURN;
 
 		// The expression is the next expression.
+
+		DocumentRange expressionRange;
 	};
 }

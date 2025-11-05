@@ -170,7 +170,11 @@ namespace ProjectA {
 
 		jump();
 
+		statement.initializerExpressionRange.start = read().start;
+
 		TRY(parseLogicalOrExpression());
+
+		statement.initializerExpressionRange.end = position;
 
 		output->ast.addStatement(statement);
 
@@ -384,9 +388,12 @@ namespace ProjectA {
 	}
 
 	DiagnosticCode Parser::parseReturnStatement() {
-		const Statement<StatementType::RETURN> statement{};
+		Statement<StatementType::RETURN> statement{};
+		statement.expressionRange.start = read().start;
 
 		TRY(parseLogicalOrExpression());
+
+		statement.expressionRange.end = position;
 
 		output->ast.addStatement(statement);
 
@@ -422,7 +429,11 @@ namespace ProjectA {
 
 			jump();
 
+			statement.initializerExpressionRange.start = read().start;
+
 			TRY(parseLogicalOrExpression());
+
+			statement.initializerExpressionRange.end = position;
 		}
 		else if (statement.constant) {
 			output->generateDiagnostic<DiagnosticCode::UNEXPECTED_TOKEN>(output->getNonIdentifierTokenString(TokenType::EQUAL), read());

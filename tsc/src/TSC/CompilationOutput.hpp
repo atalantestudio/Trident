@@ -413,16 +413,12 @@ namespace ProjectA {
 
 			void createReferenceFromLastDefinition(uint32 identifierTokenIndex) {
 				const uint32 definitionIndex = static_cast<uint32>(openScopeDefinitions.size() - 1);
-
-				createReference(definitionIndex, identifierTokenIndex);
-			}
-
-			void createReference(uint32 definitionIndex, uint32 identifierTokenIndex) {
-				const Definition& definition = getOpenScopeDefinition(definitionIndex);
 				const Token& identifierToken = tokens[identifierTokenIndex];
 
-				registerSemanticToken(definition.semanticTokenType, identifierTokenIndex);
+				createReference(definitionIndex, identifierToken);
+			}
 
+			void createReference(uint32 definitionIndex, const Token& identifierToken) {
 				Reference reference{};
 				reference.definitionIndex = definitionIndex - nextScopeDefinitionOffset;
 				reference.identifierRange = identifierToken.getRange();

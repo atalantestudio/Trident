@@ -15,7 +15,7 @@ namespace ProjectA {
 
 		PackedType() = default;
 
-		explicit PackedType(Type typeIndex, Type templateArgumentIndex) :
+		PackedType(Type typeIndex, Type templateArgumentIndex) :
 			typeIndex(typeIndex),
 			templateArgumentIndex(templateArgumentIndex)
 		{}

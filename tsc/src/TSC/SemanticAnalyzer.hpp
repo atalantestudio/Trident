@@ -52,6 +52,10 @@ namespace ProjectA {
 			uint32 expressionByteOffset;
 			uint32 memberDefinitionOffset;
 			PackedType currentType;
+
+			// Return type of the current function.
+			PackedType returnType;
+
 			ExpressionEvaluation evaluation;
 	};
 }
