@@ -36,25 +36,30 @@ namespace ProjectA {
 
 		SemanticAnalyzer semanticAnalyzer(output);
 
+		const std::string absolutePath = std::filesystem::absolute("Test/test3.tsl").string();
+
+		Logger logger("TestLogger", LogLevel::ALL);
+		logger.logStructure = LogStructure::NONE;
+		logger.spacing = 0;
+
 		bool hasError = false;
 
 		for (const Diagnostic& diagnostic : output.diagnostics) {
 			switch (diagnostic.severity) {
 				case DiagnosticSeverity::ERROR: {
-					ENGINE_ERROR(diagnostic.message);
-
+					logger.error("[]:[]: []", absolutePath, diagnostic.range.start, diagnostic.message);
 					hasError = true;
 
 					break;
 				}
 				case DiagnosticSeverity::WARNING: {
-					ENGINE_WARN(diagnostic.message);
+					logger.warn("[]:[]: []", absolutePath, diagnostic.range.start, diagnostic.message);
 
 					break;
 				}
 				case DiagnosticSeverity::INFO:
 				case DiagnosticSeverity::HINT: {
-					ENGINE_INFO(diagnostic.message);
+					logger.info("[]:[]: []", absolutePath, diagnostic.range.start, diagnostic.message);
 
 					break;
 				}

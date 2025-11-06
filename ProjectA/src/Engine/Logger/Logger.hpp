@@ -11,6 +11,10 @@
 namespace ProjectA {
 	class Logger {
 		public:
+			static void setArgumentInjectionPattern(std::string_view pattern) {
+				argumentInjectionPattern = pattern;
+			}
+
 			template<typename CurrentArgument>
 			static std::string format(CurrentArgument&& argument) {
 				formatStream << argument;
@@ -43,6 +47,25 @@ namespace ProjectA {
 
 		private:
 			static void clearFormatStream();
+
+		public:
+			// TODO: These members must not be inside Logger.
+			static Logger engineLogger;
+			static Logger clientLogger;
+
+		private:
+			static constexpr std::size_t TIME_PADDING = 14;
+			static constexpr std::size_t LEVEL_NAME_PADDING = 5;
+			static constexpr uint8 LOG_LEVEL_BACKGROUND_COLORS[] = {0, 0, 0, 0, 101, 107};
+			static constexpr uint8 LOG_LEVEL_FOREGROUND_COLORS[] = {97, 37, 94, 93, 97, 30};
+			static constexpr const char8* LOG_LEVEL_NAMES[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
+			static std::ostream* LOG_LEVEL_OUTPUT_STREAMS[];
+
+			static std::size_t namePadding;
+
+			static std::ostringstream formatStream;
+
+			static inline std::string_view argumentInjectionPattern = "[]";
 
 		private:
 			void clear();
@@ -105,7 +128,7 @@ namespace ProjectA {
 			}
 
 		public:
-			Logger(std::string_view name, LogLevel minimumLogLevel = LogLevel::ALL);
+			explicit Logger(std::string_view name, LogLevel minimumLogLevel);
 
 			template<typename Argument>
 			void trace(Argument&& argument) {
@@ -168,31 +191,13 @@ namespace ProjectA {
 				#endif
 			}
 
-		private:
-			static constexpr std::size_t TIME_PADDING = 14;
-			static constexpr std::size_t LEVEL_NAME_PADDING = 5;
-			static constexpr uint8 LOG_LEVEL_BACKGROUND_COLORS[] = {0, 0, 0, 0, 101, 107};
-			static constexpr uint8 LOG_LEVEL_FOREGROUND_COLORS[] = {97, 37, 94, 93, 97, 30};
-			static constexpr const char8* LOG_LEVEL_NAMES[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
-			static std::ostream* LOG_LEVEL_OUTPUT_STREAMS[];
-
-			static std::size_t namePadding;
-
-			static std::ostringstream formatStream;
-
 		public:
-			static Logger engineLogger;
-			static Logger clientLogger;
-
-			static constexpr std::string_view argumentInjectionPattern = "[]";
-
-		private:
-			std::ostringstream stream;
-
-		public:
-			std::string name;
 			LogLevel minimumLogLevel;
 			LogStructure logStructure = LogStructure::TIME | LogStructure::LOGGER_NAME | LogStructure::LOG_LEVEL_NAME;
 			std::size_t spacing = 3;
+
+		private:
+			std::string_view name;
+			std::ostringstream stream;
 	};
 }

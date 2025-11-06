@@ -22,7 +22,10 @@ namespace ProjectA {
 
 	void Logger::writeTime() {}
 
-	Logger::Logger(std::string_view name, LogLevel minimumLogLevel) : name(name), minimumLogLevel(minimumLogLevel) {
+	Logger::Logger(std::string_view name, LogLevel minimumLogLevel) :
+		name(name),
+		minimumLogLevel(minimumLogLevel)
+	{
 		if (name.size() > namePadding) {
 			namePadding = name.size();
 		}
