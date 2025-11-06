@@ -112,7 +112,7 @@ namespace ProjectA {
 
 			uint32 getComponentCount(PackedType type) const {
 				if (type.hasUserDefinedType()) {
-					return getUserDefinedType(type.typeIndex)->constructorArgumentCount;
+					return getUserDefinedType(type.typeIndex)->memberCount;
 				}
 
 				uint32 count = TYPE_COMPONENT_COUNTS[type.typeIndex];
@@ -293,7 +293,13 @@ namespace ProjectA {
 
 				UserDefinedType userDefinedType{};
 				userDefinedType.identifierIndex = identifierToken.index;
-				userDefinedType.constructorArgumentCount = statement.memberCount;
+				userDefinedType.memberCount = statement.memberCount;
+
+				// NOTE: The size/alignment are updated after analyzing the member statements.
+				userDefinedType.size = 0;
+				userDefinedType.alignment = 0;
+
+				userDefinedType.entryPoint = false;
 
 				userDefinedTypes.emplace_back(userDefinedType);
 
