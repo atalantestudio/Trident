@@ -34,25 +34,28 @@ namespace ProjectA {
 		Renderer::graphicsApi = graphicsApi;
 
 		switch (Renderer::graphicsApi) {
-			case GraphicsAPI::NONE:
+			case GraphicsAPI::NONE: {
 				ENGINE_WARN("Headless graphics are not supported.");
 
 				break;
+			}
 			#ifdef ENABLE_OPENGL_ADAPTER
-				case GraphicsAPI::OPENGL:
+				case GraphicsAPI::OPENGL: {
 					ENGINE_INFO("Using OpenGL graphics adapter.");
 
 					adapter = createScope<OpenGLGraphicsAdapter>(projectDescriptor, window);
 
 					break;
+				}
 			#endif
 			#ifdef ENABLE_VULKAN_ADAPTER
-				case GraphicsAPI::VULKAN:
+				case GraphicsAPI::VULKAN: {
 					ENGINE_INFO("Using Vulkan graphics adapter.");
 
 					adapter = createScope<VulkanGraphicsAdapter>(projectDescriptor, window);
 
 					break;
+				}
 			#endif
 		}
 

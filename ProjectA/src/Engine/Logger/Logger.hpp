@@ -15,8 +15,8 @@ namespace ProjectA {
 				argumentInjectionPattern = pattern;
 			}
 
-			template<typename CurrentArgument>
-			static std::string format(CurrentArgument&& argument) {
+			template<typename Argument>
+			static std::string format(Argument&& argument) {
 				formatStream << argument;
 
 				const std::string log = formatStream.str();
@@ -72,13 +72,13 @@ namespace ProjectA {
 
 			void writeTime();
 
-			template<typename... T>
-			void log(LogLevel logLevel, std::string_view pattern, T&&... arguments) {
+			template<typename... Argument>
+			void log(LogLevel logLevel, std::string_view pattern, Argument&&... arguments) {
 				if (logLevel < minimumLogLevel) {
 					return;
 				}
 
-				std::string log = format(pattern, std::forward<T>(arguments)...);
+				std::string log = format(pattern, std::forward<Argument>(arguments)...);
 				const sint32 logLevelIndex = static_cast<sint32>(logLevel) - 1;
 				const std::string ansiSet = "\033[" + std::to_string(LOG_LEVEL_BACKGROUND_COLORS[logLevelIndex]) + ';' + std::to_string(LOG_LEVEL_FOREGROUND_COLORS[logLevelIndex]) + 'm';
 				std::size_t padding = 0;
