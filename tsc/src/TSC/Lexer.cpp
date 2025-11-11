@@ -51,7 +51,7 @@ namespace ProjectA {
 		characterIndex = 0;
 		unexpectedCharacter = false;
 
-		while (characterIndex < output->text.size()) {
+		while (characterIndex < output->document.getCharacterCount()) {
 			if (testLetter(read())) {
 				Token token{};
 				token.start = position;
@@ -331,11 +331,11 @@ namespace ProjectA {
 	}
 
 	char8 Lexer::peek(uint32 index) const {
-		if (characterIndex + index >= output->text.size()) {
+		if (characterIndex + index >= output->document.getCharacterCount()) {
 			return '\0';
 		}
 
-		return output->text[characterIndex + index];
+		return output->document.getText()[characterIndex + index];
 	}
 
 	bool Lexer::testBinaryDigit(char8 character) const {
@@ -446,7 +446,7 @@ namespace ProjectA {
 	void Lexer::registerNumberLiteral(Token& token, uint32 offset, uint8 base) {
 		token.characterCount = position.characterOffset - token.start.characterOffset;
 
-		const char8* characters = &output->text[characterIndex - token.characterCount + offset];
+		const char8* characters = &output->document.getText()[characterIndex - token.characterCount + offset];
 		uint64 number = 0;
 
 		if (!parseNumberLiteral(characters, token.characterCount - offset, base, number)) {
@@ -463,7 +463,7 @@ namespace ProjectA {
 	void Lexer::readIdentifier(Token& token) {
 		token.characterCount = position.characterOffset - token.start.characterOffset;
 
-		const std::string identifier(&output->text[characterIndex - token.characterCount], token.characterCount);
+		const std::string identifier(&output->document.getText()[characterIndex - token.characterCount], token.characterCount);
 
 		setTokenTypeAndIndex(token, identifier);
 

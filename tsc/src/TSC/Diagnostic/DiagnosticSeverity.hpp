@@ -6,9 +6,11 @@ namespace ProjectA {
 	#undef ERROR
 
 	enum class DiagnosticSeverity : uint8 {
-		ERROR,
-		WARNING,
+		// TODO: Merge INFO and HINT?
 		INFO,
 		HINT,
+
+		WARNING,
+		ERROR,
 	};
 }

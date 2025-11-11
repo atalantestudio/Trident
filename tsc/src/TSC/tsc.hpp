@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Engine/Filesystem/Filesystem.hpp"
 
@@ -11,13 +11,105 @@
 #include "TSC/SemanticAnalyzer.hpp"
 
 namespace ProjectA {
+	static void writeLine(const CompilationOutput& output, ConsoleLogger& logger, uint32 lineIndex, uint64 maxLineIndex, bool dimmed) {
+		if (dimmed) {
+			logger.writeEscapeCodes(ConsoleEscapeCode::DIMMED);
+		}
+
+		logger.writePadded(logger.getOutputStream(), logger.format(lineIndex + 1), maxLineIndex);
+		logger.print(logger.format("\t[]\n", output.document.getLine(lineIndex)));
+
+		if (dimmed) {
+			logger.writeEscapeCodes(ConsoleEscapeCode::RESET_BRIGHT);
+		}
+	}
+
+	static bool logTslErrors(const CompilationOutput& output) {
+		const std::string absolutePath = std::filesystem::absolute("Test/test3.tsl").string();
+
+		ConsoleLogger logger(std::cout, LogLevel::ALL, "TSLC");
+		bool hasError = false;
+
+		for (const Diagnostic& diagnostic : output.diagnostics) {
+			switch (diagnostic.severity) {
+				case DiagnosticSeverity::INFO:
+				case DiagnosticSeverity::HINT: {
+					logger.writeEscapeCodes(ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_BLUE, ConsoleEscapeCode::FOREGROUND_COLOR_WHITE);
+					logger.print(" INFO ");
+					logger.writeEscapeCodes(ConsoleEscapeCode::RESET_BACKGROUND_COLOR, ConsoleEscapeCode::RESET_FOREGROUND_COLOR);
+					logger.print(logger.format(" []:[]: []\n", absolutePath, diagnostic.range.start, diagnostic.message));
+
+					break;
+				}
+				case DiagnosticSeverity::WARNING: {
+					// TODO: INFO and ERROR look good with BRIGHT/BOLD but for some reason it WARNING.
+					logger.writeEscapeCodes(ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_YELLOW, ConsoleEscapeCode::FOREGROUND_COLOR_BLACK);
+					logger.print(" WARNING ");
+					logger.writeEscapeCodes(ConsoleEscapeCode::RESET_BACKGROUND_COLOR, ConsoleEscapeCode::RESET_FOREGROUND_COLOR);
+					logger.print(logger.format(" []:[]: []\n", absolutePath, diagnostic.range.start, diagnostic.message));
+
+					break;
+				}
+				case DiagnosticSeverity::ERROR: {
+					hasError = true;
+
+					logger.writeEscapeCodes(ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_RED, ConsoleEscapeCode::FOREGROUND_COLOR_WHITE);
+					logger.print(" ERROR ");
+					logger.writeEscapeCodes(ConsoleEscapeCode::RESET_BACKGROUND_COLOR, ConsoleEscapeCode::RESET_FOREGROUND_COLOR);
+					logger.print(logger.format(" []:[]: []\n", absolutePath, diagnostic.range.start, diagnostic.message));
+
+					break;
+				}
+			}
+
+			if (diagnostic.severity == DiagnosticSeverity::ERROR && diagnostic.range.start.lineIndex == diagnostic.range.end.lineIndex) {
+				logger.print("\n");
+
+				uint64 maxLineIndex = diagnostic.range.start.lineIndex;
+
+				if (diagnostic.range.start.lineIndex < output.document.getLineCount() - 1) {
+					maxLineIndex += 1;
+				}
+
+				const uint64 maxLineIndexSize = Logger::format(maxLineIndex).count();
+
+				if (diagnostic.range.start.lineIndex > 0) {
+					// Write preceding line.
+					writeLine(output, logger, diagnostic.range.start.lineIndex - 1, maxLineIndexSize, true);
+				}
+
+				writeLine(output, logger, diagnostic.range.start.lineIndex, maxLineIndexSize, false);
+
+				logger.writeEscapeCodes(ConsoleEscapeCode::FOREGROUND_COLOR_LIGHT_RED);
+				logger.getOutputStream() << std::setw(8 + diagnostic.range.end.characterOffset) << std::string(diagnostic.range.end.characterOffset - diagnostic.range.start.characterOffset, '^') << '\n';
+				logger.writeEscapeCodes(ConsoleEscapeCode::RESET_FOREGROUND_COLOR);
+
+				if (diagnostic.range.start.lineIndex < output.document.getLineCount() - 1) {
+					// Write following line.
+					writeLine(output, logger, diagnostic.range.start.lineIndex + 1, maxLineIndexSize, true);
+				}
+			}
+
+			logger.print("\n");
+		}
+
+		// TODO: Set color based on the most important diagnostic found. Use green if there are no diagnostics.
+		// TODO: Show compilation time.
+		// logger.writeEscapeCodes(ConsoleEscapeCode::FOREGROUND_COLOR_LIGHT_GREEN);
+		// logger.print("Done in []ms.");
+		// logger.writeEscapeCodes(ConsoleEscapeCode::RESET_FOREGROUND_COLOR);
+
+		logger.print("\n");
+
+		return hasError;
+	}
+
 	static sint32 tsc(const char8* path) {
 		const sequence<uint8> buffer = Filesystem::openBuffer("Test/test3.tsl");
 		// const sequence<uint8> buffer = Filesystem::openBuffer("Test/include.tsl");
 		const std::string code(buffer.begin(), buffer.end());
 
-		CompilationOutput output{};
-		output.text = code;
+		CompilationOutput output(code);
 
 		// Preprocessor preprocessor(&output);
 		// preprocessor.link(code);
@@ -36,34 +128,7 @@ namespace ProjectA {
 
 		SemanticAnalyzer semanticAnalyzer(output);
 
-		const std::string absolutePath = std::filesystem::absolute("Test/test3.tsl").string();
-
-		// TODO
-		ConsoleLogger logger(std::cout, LogLevel::ALL, "TSL");
-
-		bool hasError = false;
-
-		for (const Diagnostic& diagnostic : output.diagnostics) {
-			switch (diagnostic.severity) {
-				case DiagnosticSeverity::ERROR: {
-					logger.error(__func__, __FILE__, __LINE__, "[]:[]: []", absolutePath, diagnostic.range.start, diagnostic.message);
-					hasError = true;
-
-					break;
-				}
-				case DiagnosticSeverity::WARNING: {
-					logger.warning("[]:[]: []", absolutePath, diagnostic.range.start, diagnostic.message);
-
-					break;
-				}
-				case DiagnosticSeverity::INFO:
-				case DiagnosticSeverity::HINT: {
-					logger.info("[]:[]: []", absolutePath, diagnostic.range.start, diagnostic.message);
-
-					break;
-				}
-			}
-		}
+		const bool hasError = logTslErrors(output);
 
 		if (hasError) {
 			return 1;

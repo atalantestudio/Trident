@@ -4,6 +4,7 @@
 #include "Definition.hpp"
 #include "Diagnostic/Diagnostic.hpp"
 #include "Diagnostic/GenerateDiagnostic.hpp"
+#include "Document.hpp"
 #include "Function.hpp"
 #include "Language/Type.hpp"
 #include "PackedType.hpp"
@@ -17,7 +18,9 @@
 namespace ProjectA {
 	class CompilationOutput {
 		public:
-			explicit CompilationOutput() {
+			explicit CompilationOutput(const str8& text) :
+				document(text)
+			{
 				// registerDefaultDefinitions();
 			}
 
@@ -617,9 +620,8 @@ namespace ProjectA {
 			}
 
 		public:
-			// Source code. Must be conserved to show advanced errors.
-			// TODO: Is this the preprocessed source code?
-			std::string text;
+			// TODO: Should this be the preprocessed source code?
+			Document document;
 
 			// Language and user-defined functions.
 			std::vector<Function> functions;
