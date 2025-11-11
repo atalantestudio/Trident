@@ -239,6 +239,6 @@ namespace ProjectA {
 			#endif
 		}
 
-		ENGINE_WARN("Reached last safe iteration.");
+		ENGINE_WARNING("BitStream::inflate: Reached last safe iteration.");
 	}
 }

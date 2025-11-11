@@ -110,7 +110,7 @@ namespace ProjectA {
 			handleSimplex1(s, d);
 		}
 
-		ENGINE_WARN("GJK 2D (conditional): Iteration limit reached.");
+		ENGINE_WARNING("GJK 2D (conditional): Iteration limit reached.");
 
 		return false;
 	}

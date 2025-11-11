@@ -7,9 +7,9 @@ namespace ProjectA {
 	class BuildTrueTypeFontSubprocess {
 		public:
 			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& assetOutputPath) {
-				const std::string path = directoryEntry.path().string();
+				const str8 path = directoryEntry.path().string();
 				const sequence<uint8> inputData = Filesystem::openBuffer(path);
-				const ByteStream<StreamOperation::READ> inputByteStream(&inputData[0], inputData.count, Endianness::BIG_ENDIAN);
+				const ByteStream<StreamOperation::READ> inputByteStream(&inputData[0], inputData.count(), Endianness::BIG_ENDIAN);
 
 				if (!Filesystem::validateSignature<FileFormat::TTF>(inputByteStream)) {
 					ENGINE_INFO("Ignoring non-TTF file \"[]\".", path);
@@ -40,7 +40,7 @@ namespace ProjectA {
 
 				fontAssetDescriptor.glyphMapImage = createRef<ImageAsset>(glyphMapImageAssetDescriptor);
 
-				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count);
+				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count());
 				const uint64 outputSize =
 					7 * sizeof(uint32) + (4 * sizeof(float32) + 3 * sizeof(uint16)) * glyphCount +
 					(sizeof(uint16) + sizeof(uint32)) * file.unicodeMap.size();

@@ -116,7 +116,7 @@ namespace ProjectA {
 				imageViewDescriptor.layerOffset = 0;
 				imageViewDescriptor.layerCount = imageDescriptor.layerCount;
 
-				for (uint32 assetIndex = 0; assetIndex < assets.count; assetIndex += 1) {
+				for (uint32 assetIndex = 0; assetIndex < assets.count(); assetIndex += 1) {
 					const sequence<uint8> assetBuffer = Filesystem::openBuffer(ASSET_PATHS[assetIndex]);
 
 					File<FileFormat::PNG>& asset = assets[assetIndex];

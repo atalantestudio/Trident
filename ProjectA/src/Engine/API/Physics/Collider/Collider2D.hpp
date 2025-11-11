@@ -32,7 +32,7 @@ namespace ProjectA {
 		incidentEdge.setVertexCount(2);
 
 		// TODO: Expose edge normals from ConvexHullGeometry.
-		for (uint32 edgeIndex = 0; edgeIndex < geometry->edges.count; edgeIndex += 1) {
+		for (uint32 edgeIndex = 0; edgeIndex < geometry->edges.count(); edgeIndex += 1) {
 			const Edge& edge = geometry->edges[edgeIndex];
 			const vec2<float32>& a = incidentBody.geometry->vertices[edge.indexA];
 			const vec2<float32>& b = incidentBody.geometry->vertices[edge.indexB];
@@ -50,12 +50,12 @@ namespace ProjectA {
 		}
 
 		incidentEdge.edge[0].position = multiplyTransform(incidentEdge.edge[0].position, incidentBody.transform);
-		incidentEdge.edge[0].id.incidentEdge0Index = (incidentEdgeIndex - 1) % geometry->edges.count;
+		incidentEdge.edge[0].id.incidentEdge0Index = (incidentEdgeIndex - 1) % geometry->edges.count();
 		incidentEdge.edge[0].id.incidentEdge1Index = incidentEdgeIndex;
 
 		incidentEdge.edge[1].position = multiplyTransform(incidentEdge.edge[1].position, incidentBody.transform);
 		incidentEdge.edge[1].id.incidentEdge0Index = incidentEdgeIndex;
-		incidentEdge.edge[1].id.incidentEdge1Index = (incidentEdgeIndex + 1) % geometry->edges.count;
+		incidentEdge.edge[1].id.incidentEdge1Index = (incidentEdgeIndex + 1) % geometry->edges.count();
 
 		return incidentEdge;
 	}
@@ -219,7 +219,7 @@ namespace ProjectA {
 
 		const ref<ConvexHullGeometry2D> referenceGeometry = std::static_pointer_cast<ConvexHullGeometry2D>(satOutput.referenceBody->geometry);
 
-		const uint32 leftEdgeIndex = (satOutput.referenceEdgeIndex - 1) % referenceGeometry->edges.count;
+		const uint32 leftEdgeIndex = (satOutput.referenceEdgeIndex - 1) % referenceGeometry->edges.count();
 
 		ClipFeature2D clippedIncidentEdge = incidentEdge;
 		clippedIncidentEdge = clipEdge(clippedIncidentEdge, -referenceRightEdgeNormal, -dot(referenceRightEdgeNormal, satOutput.referenceEdge.edge[0]), leftEdgeIndex);
@@ -228,7 +228,7 @@ namespace ProjectA {
 			return false;
 		}
 
-		const uint32 rightEdgeIndex = (satOutput.referenceEdgeIndex + 1) % referenceGeometry->edges.count;
+		const uint32 rightEdgeIndex = (satOutput.referenceEdgeIndex + 1) % referenceGeometry->edges.count();
 
 		clippedIncidentEdge = clipEdge(clippedIncidentEdge, referenceRightEdgeNormal, dot(referenceRightEdgeNormal, satOutput.referenceEdge.edge[1]), rightEdgeIndex);
 
@@ -243,7 +243,7 @@ namespace ProjectA {
 			contactManifold->normal = -contactManifold->normal;
 
 			// TODO
-			/*uint32 temp;
+			/* uint32 temp;
 
 			temp = clippedIncidentEdge.edge[0].id.incidentEdge0Index;
 			clippedIncidentEdge.edge[0].id.referenceEdge0Index = temp;
@@ -255,7 +255,7 @@ namespace ProjectA {
 			clippedIncidentEdge.edge[1].id.referenceEdge0Index = temp;
 
 			temp = clippedIncidentEdge.edge[1].id.incidentEdge1Index;
-			clippedIncidentEdge.edge[1].id.referenceEdge1Index = temp;*/
+			clippedIncidentEdge.edge[1].id.referenceEdge1Index = temp; */
 		}
 
 		const float32 referenceNormalOffset = dot(satOutput.referenceEdge.edge[0], satOutput.normal);

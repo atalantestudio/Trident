@@ -70,7 +70,7 @@ namespace ProjectA {
 		// Read as many bits as possible to get a code entry index.
 		const uint16 codeIndex = stream.peek<uint16>(maxCodeLength);
 
-		ENGINE_ASSERT(codeIndex < dictionary.count, "The code index is overflowing.");
+		ENGINE_ASSERT(codeIndex < dictionary.count(), "The code index is overflowing.");
 
 		const HuffmanCode& huffmanCode = dictionary[codeIndex];
 

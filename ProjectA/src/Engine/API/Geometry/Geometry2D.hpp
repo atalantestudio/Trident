@@ -6,11 +6,11 @@ namespace ProjectA {
 	class Geometry2D {
 		public:
 			uint32 getIndexCount() const {
-				return static_cast<uint32>(indices.count);
+				return static_cast<uint32>(indices.count());
 			}
 
 			uint32 getVertexCount() const {
-				return static_cast<uint32>(vertices.count);
+				return static_cast<uint32>(vertices.count());
 			}
 
 			virtual float32 getPenetrationBias() const = 0;

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Engine/Logger/FileLogger/JSONFileLogger.hpp"
+#include "Engine/Filesystem/FileWriter/JSONFileWriter.hpp"
 
 #include "TSC/CompilationOutput.hpp"
 
 namespace ProjectA {
 	class ASTDebugger {
 		public:
-			explicit ASTDebugger(std::string_view path, const CompilationOutput& output);
+			explicit ASTDebugger(const str8& path, const CompilationOutput& output);
 
 		private:
 			void writeStatement();
@@ -38,7 +38,7 @@ namespace ProjectA {
 			void writeAnnotationBlocks(uint32 indexOffset, uint32 count);
 
 		private:
-			FileLogger<FileFormat::JSON> logger;
+			FileWriter<FileFormat::JSON> writer;
 			const CompilationOutput* output;
 
 			uint32 statementIndex;

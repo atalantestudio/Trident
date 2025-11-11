@@ -44,7 +44,7 @@ namespace ProjectA {
 		// Swapchain images are not associated with client-side usage.
 		imageDescriptor.usage = static_cast<ImageUsage>(0);
 
-		for (uint32 imageIndex = 0; imageIndex < images.count; imageIndex += 1) {
+		for (uint32 imageIndex = 0; imageIndex < images.count(); imageIndex += 1) {
 			images[imageIndex] = createRef<OpenGLImage>(imageDescriptor);
 		}
 

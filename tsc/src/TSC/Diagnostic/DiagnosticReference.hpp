@@ -4,7 +4,11 @@
 
 namespace ProjectA {
 	struct DiagnosticReference {
+		std::string getMessage() const {
+			return std::string(&message[0], message.count());
+		}
+
 		DocumentRange range;
-		std::string message;
+		str8 message;
 	};
 }

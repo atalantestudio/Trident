@@ -17,7 +17,7 @@ namespace ProjectA {
 			virtual uint32 getImageCount() const = 0;
 
 			const ref<ImageView>& getImageView(uint32 index) const {
-				ENGINE_ASSERT(index < imageViews.count, "Image view index overflow.");
+				ENGINE_ASSERT(index < imageViews.count(), "Image view index overflow.");
 
 				return imageViews[index];
 			}
@@ -36,7 +36,7 @@ namespace ProjectA {
 				imageViewDescriptor.mipLevelOffset = 0;
 				imageViewDescriptor.layerOffset = 0;
 
-				for (uint32 imageViewIndex = 0; imageViewIndex < imageViews.count; imageViewIndex += 1) {
+				for (uint32 imageViewIndex = 0; imageViewIndex < imageViews.count(); imageViewIndex += 1) {
 					const ref<Image>& image = images[imageViewIndex];
 
 					imageViewDescriptor.mipLevelCount = image->getMipLevelCount();

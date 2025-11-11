@@ -1,51 +1,10 @@
 #pragma once
 
-#ifdef BUILD_MODE_DEBUG
-	#if COMPILER == COMPILER_MSVC
-		#define BREAKPOINT() __debugbreak()
-	#else
-		#define BREAKPOINT()
-	#endif
-
-	#define ABORT BREAKPOINT
-
-	#define DEBUG_ASSERT(condition) { \
-		if (!(condition)) { \
-			ENGINE_ERROR("Debug assertion failed."); \
-			BREAKPOINT(); \
-		} \
-	}
-
-	#define DEBUG_PRINT(value) std::cout << #value##" = " << value << std::endl
-
-	#define ENGINE_ASSERT(condition, ...) { \
-		if (!(condition)) { \
-			ENGINE_ERROR(__VA_ARGS__); \
-			BREAKPOINT(); \
-		} \
-	}
-
-	// TODO: Create a dedicated module logger instance.
-	#define MODULE_ASSERT ENGINE_ASSERT
-
-	#define CLIENT_ASSERT(condition, ...) { \
-		if (!(condition)) { \
-			CLIENT_ERROR(__VA_ARGS__); \
-			BREAKPOINT(); \
-		} \
-	}
-#else
-	#define ABORT std::abort
-	#define BREAKPOINT()
-	#define DEBUG_ASSERT(...)
-	#define DEBUG_PRINT(...)
-	#define ENGINE_ASSERT(...)
-	#define CLIENT_ASSERT(...)
-#endif
-
 #define ENGINE_STATIC_ASSERT static_assert
 
-#ifdef BUILD_MODE_PROFILE
+// TODO
+// #ifdef BUILD_MODE_PROFILE
+#if 0
 	#include "Engine/Profile/Profiler.hpp"
 	#include "Engine/Profile/ProfileTimer.hpp"
 
@@ -75,6 +34,7 @@
 	#define PROFILE_SCOPE(...)
 #endif
 
+// TODO: Check min C++ version for this code.
 #define BIND(function) [this](auto&&... arguments) { \
 	return this->function(std::forward<decltype(arguments)>(arguments)...); \
 }

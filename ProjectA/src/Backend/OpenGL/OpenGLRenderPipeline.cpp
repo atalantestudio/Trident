@@ -31,6 +31,10 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		if (descriptor.cullMode == CullMode::FRONT_AND_BACK) {
+			ENGINE_WARNING("[OpenGL] The polygon mode is discarded because the cull mode is FRONT_AND_BACK.");
+		}
+
 		const ref<OpenGLShaderModule> vertexShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.vertexShaderModule);
 		const ref<OpenGLShaderModule> fragmentShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.fragmentShaderModule);
 
@@ -51,7 +55,7 @@ namespace ProjectA {
 
 			sequence<GLchar> infoLog(infoLogLength);
 
-			glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog);
+			glGetProgramInfoLog(program, infoLogLength, nullptr, &infoLog[0]);
 
 			ENGINE_ERROR("Program linking failed:\n[]", infoLog);
 
@@ -74,7 +78,7 @@ namespace ProjectA {
 
 		GLuint attribindex = 0;
 
-		for (uint32 bindingindex = 0; bindingindex < descriptor.vertexInputBindings.count; bindingindex += 1) {
+		for (uint32 bindingindex = 0; bindingindex < descriptor.vertexInputBindings.count(); bindingindex += 1) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[bindingindex];
 			const std::vector<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
 

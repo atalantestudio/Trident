@@ -44,7 +44,7 @@ namespace ProjectA {
 	};
 
 	static void convertRedToRGBA(const sequence<uint8>& inputData, sequence<uint8>& outputData) {
-		for (uint32 texelIndex = 0, channelIndex = 0; texelIndex < inputData.count; texelIndex += 1, channelIndex += 4) {
+		for (uint32 texelIndex = 0, channelIndex = 0; texelIndex < inputData.count(); texelIndex += 1, channelIndex += 4) {
 			outputData[channelIndex + 0] = inputData[texelIndex];
 			outputData[channelIndex + 1] = 0;
 			outputData[channelIndex + 2] = 0;
@@ -53,7 +53,7 @@ namespace ProjectA {
 	}
 
 	static void convertRGBAToRed(const sequence<uint8>& inputData, sequence<uint8>& outputData) {
-		for (uint32 texelIndex = 0, channelIndex = 0; texelIndex < outputData.count; texelIndex += 1, channelIndex += 4) {
+		for (uint32 texelIndex = 0, channelIndex = 0; texelIndex < outputData.count(); texelIndex += 1, channelIndex += 4) {
 			outputData[texelIndex] = inputData[channelIndex];
 		}
 	}

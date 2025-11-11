@@ -60,7 +60,7 @@ namespace ProjectA {
 					glDisable(GL_SAMPLE_SHADING);
 				}
 
-				for (uint32 drawBufferIndex = 0; drawBufferIndex < renderPipeline->drawBuffers.count; drawBufferIndex += 1) {
+				for (uint32 drawBufferIndex = 0; drawBufferIndex < renderPipeline->drawBuffers.count(); drawBufferIndex += 1) {
 					const OpenGLDrawBuffer& drawBuffer = renderPipeline->drawBuffers[drawBufferIndex];
 
 					if (drawBuffer.blend) {

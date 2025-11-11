@@ -243,7 +243,7 @@ namespace ProjectA {
 					}
 				}
 
-				ENGINE_WARN("Reached last safe iteration.");
+				ENGINE_WARNING("Reached last safe iteration.");
 
 				return data;
 			}

@@ -66,7 +66,7 @@ namespace ProjectA {
 
 		WIN32_ASSERT(AdjustWindowRectEx(&rect, dwStyle, bMenu, dwExStyle) != 0);
 
-		const LPCWSTR lpWindowName = ConvertUTF8ToUTF16(descriptor.name.data());
+		const LPCWSTR lpWindowName = ConvertUTF8ToUTF16(&descriptor.name[0]);
 		constexpr sint32 X = CW_USEDEFAULT;
 		constexpr sint32 Y = CW_USEDEFAULT;
 		const sint32 nWidth = rect.right - rect.left;

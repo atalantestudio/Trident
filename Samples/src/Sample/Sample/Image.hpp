@@ -76,7 +76,7 @@ namespace ProjectA {
 				const sequence<uint8> buffer = Filesystem::openBuffer(IMAGE_PATH);
 				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(buffer);
 
-				const ref<Buffer> imageStagingBuffer = createStagingBuffer(file.data.count);
+				const ref<Buffer> imageStagingBuffer = createStagingBuffer(file.data.count());
 
 				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->size);
 

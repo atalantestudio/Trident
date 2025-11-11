@@ -99,7 +99,7 @@ namespace ProjectA {
 
 		std::copy(layer.data.begin(), layer.data.end(), textureArrayStagingBufferMappedRange);
 
-		textureArrayStagingBufferMappedRange += layer.data.count;
+		textureArrayStagingBufferMappedRange += layer.data.count();
 		textureArrayLayerExtents[textureArrayLayerCount].width = layer.width;
 		textureArrayLayerExtents[textureArrayLayerCount].height = layer.height;
 		textureArrayLayerCount += 1;
@@ -169,7 +169,7 @@ namespace ProjectA {
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
-		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count; framebufferIndex += 1) {
+		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
 			framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
@@ -523,7 +523,7 @@ namespace ProjectA {
 
 	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
 		if (subcomponentCount == 0 && glyphSubcomponentCount == 0) {
-			ENGINE_WARN("No GUI components to render.");
+			ENGINE_WARNING("No GUI components to render.");
 
 			// TODO
 			// If no commands have been encoded, the attachments will not be transitioned into the final layout.

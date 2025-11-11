@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Engine/Filesystem/Asset/FontAsset.hpp"
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
@@ -57,22 +57,22 @@ namespace ProjectA {
 				return assets[iterator->second];
 			}
 
-			ref<FontAsset> findFontAsset(const std::string& stem) const {
+			ref<FontAsset> findFontAsset(const str8& stem) const {
 				return findAssetByStem<FontAsset>(fontAssetStemToAssetIndex, stem);
 			}
 
-			ref<GeometryAsset> findGeometryAsset(const std::string& stem) const {
+			ref<GeometryAsset> findGeometryAsset(const str8& stem) const {
 				return findAssetByStem<GeometryAsset>(geometryAssetStemToAssetIndex, stem);
 			}
 
-			ref<ImageAsset> findImageAsset(const std::string& stem) const {
+			ref<ImageAsset> findImageAsset(const str8& stem) const {
 				return findAssetByStem<ImageAsset>(imageAssetStemToAssetIndex, stem);
 			}
 
 		private:
 			template<typename AssetType>
-			ref<AssetType> findAssetByStem(const std::unordered_map<std::string, uint32>& assetStemToAssetIndex, const std::string& stem) const {
-				const auto iterator = assetStemToAssetIndex.find(stem);
+			ref<AssetType> findAssetByStem(const std::unordered_map<std::string, uint32>& assetStemToAssetIndex, const str8& stem) const {
+				const auto iterator = assetStemToAssetIndex.find(std::string(&stem[0], stem.count()));
 
 				ENGINE_ASSERT(iterator != assetStemToAssetIndex.end(), "Cannot locate asset \"[]\".", stem);
 				ENGINE_ASSERT(iterator->second < assets.size(), "The found asset index is overflowing.");
@@ -85,11 +85,10 @@ namespace ProjectA {
 					return;
 				}
 
-				const std::string assetPath = assetEntry.path().string();
-
+				const str8 assetPath = assetEntry.path().string();
 				const sequence<uint8> data = Filesystem::openBuffer(assetPath);
 
-				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count, Endianness::LITTLE_ENDIAN);
+				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
 				const AssetSignature signature = byteStream.peek<AssetSignature>();
 
@@ -116,11 +115,10 @@ namespace ProjectA {
 					return;
 				}
 
-				const std::string assetPath = assetEntry.path().string();
-
+				const str8 assetPath = assetEntry.path().string();
 				const sequence<uint8> data = Filesystem::openBuffer(assetPath);
 
-				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count, Endianness::LITTLE_ENDIAN);
+				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
 				const AssetSignature signature = byteStream.peek<AssetSignature>();
 
@@ -147,11 +145,10 @@ namespace ProjectA {
 					return;
 				}
 
-				const std::string assetPath = assetEntry.path().string();
-
+				const str8 assetPath = assetEntry.path().string();
 				const sequence<uint8> data = Filesystem::openBuffer(assetPath);
 
-				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count, Endianness::LITTLE_ENDIAN);
+				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
 				const AssetSignature signature = byteStream.peek<AssetSignature>();
 

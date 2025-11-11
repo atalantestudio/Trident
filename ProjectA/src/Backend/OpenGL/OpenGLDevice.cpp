@@ -21,15 +21,15 @@ namespace ProjectA {
 	}
 
 	sequence<ref<DescriptorSet>> OpenGLDevice::allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) {
-		sequence<ref<DescriptorSet>> descriptorSets(descriptorSetLayouts.count);
+		sequence<ref<DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 
-		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count; descriptorSetIndex += 1) {
+		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
 			const ref<DescriptorSetLayout>& descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
 
 			ref<OpenGLDescriptorSet>& descriptorSet = createRef<OpenGLDescriptorSet>();
-			descriptorSet->bindings = sequence<OpenGLDescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count);
+			descriptorSet->bindings = sequence<OpenGLDescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
 
-			for (uint32 descriptorSetBindingIndex = 0; descriptorSetBindingIndex < descriptorSet->bindings.count; descriptorSetBindingIndex += 1) {
+			for (uint32 descriptorSetBindingIndex = 0; descriptorSetBindingIndex < descriptorSet->bindings.count(); descriptorSetBindingIndex += 1) {
 				const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout->bindings[descriptorSetBindingIndex];
 
 				OpenGLDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[descriptorSetBindingIndex];
@@ -76,12 +76,12 @@ namespace ProjectA {
 			OpenGLDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
-				DEBUG_ASSERT(writeDescriptorSet.descriptorBuffers.count > 0);
+				DEBUG_ASSERT(writeDescriptorSet.descriptorBuffers.count() > 0);
 
 				std::copy(writeDescriptorSet.descriptorBuffers.begin(), writeDescriptorSet.descriptorBuffers.end(), descriptorSetBinding.descriptorBuffers.begin());
 			}
 			else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
-				DEBUG_ASSERT(writeDescriptorSet.descriptorImages.count > 0);
+				DEBUG_ASSERT(writeDescriptorSet.descriptorImages.count() > 0);
 
 				std::copy(writeDescriptorSet.descriptorImages.begin(), writeDescriptorSet.descriptorImages.end(), descriptorSetBinding.descriptorImages.begin());
 			}

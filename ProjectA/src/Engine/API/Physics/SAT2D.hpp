@@ -33,7 +33,7 @@ namespace ProjectA {
 		const mat2x2<float32> R = mat2x2<float32>::rotation(B.rotation - A.rotation);
 
 		// TODO: Expose edge normals from ConvexHullGeometry.
-		for (uint32 edgeIndex = 0; edgeIndex < geometry->edges.count; edgeIndex += 1) {
+		for (uint32 edgeIndex = 0; edgeIndex < geometry->edges.count(); edgeIndex += 1) {
 			const Edge& edge = geometry->edges[edgeIndex];
 			const vec2<float32>& a = geometry->vertices[edge.indexA];
 			const vec2<float32>& b = geometry->vertices[edge.indexB];

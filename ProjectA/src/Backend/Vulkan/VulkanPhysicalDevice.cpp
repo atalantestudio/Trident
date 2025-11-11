@@ -140,7 +140,7 @@ namespace ProjectA {
 	}
 
 	void VulkanPhysicalDevice::enumerateQueueFamilyProperties(const sequence<VkQueueFamilyProperties>& queueFamilies) {
-		for (uint32 queueFamilyIndex = 0; queueFamilyIndex < queueFamilies.count; queueFamilyIndex += 1) {
+		for (uint32 queueFamilyIndex = 0; queueFamilyIndex < queueFamilies.count(); queueFamilyIndex += 1) {
 			const VkQueueFamilyProperties& queueFamily = queueFamilies[queueFamilyIndex];
 
 			ENGINE_INFO(

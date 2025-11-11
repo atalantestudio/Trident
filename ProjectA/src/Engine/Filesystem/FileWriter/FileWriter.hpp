@@ -4,17 +4,17 @@
 
 namespace ProjectA {
 	template<FileFormat FileFormat>
-	class FileLogger;
+	class FileWriter;
 
-	class BaseFileLogger {
+	class BaseFileWriter {
 		public:
-			explicit BaseFileLogger(std::string_view path) : 
-				stream(path.data(), std::ios::out | std::ios::trunc)
+			explicit BaseFileWriter(const str8& path) : 
+				stream(&path[0], std::ios::out | std::ios::trunc)
 			{
 				ENGINE_ASSERT(stream.is_open(), "Cannot open \"[]\" for file logging.", path);
 			}
 
-			~BaseFileLogger() {
+			~BaseFileWriter() {
 				stream.close();
 			}
 

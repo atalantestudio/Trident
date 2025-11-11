@@ -1,49 +1,13 @@
 #include "pch.hpp"
 
-#include "Engine/Logger/Logger.hpp"
-
 namespace ProjectA {
-	std::ostream* Logger::LOG_LEVEL_OUTPUT_STREAMS[] = {&std::cerr, &std::cerr, &std::cout, &std::cerr, &std::cerr, &std::cerr};
+	ConsoleLogger engineLogger(std::cout, LogLevel::ALL, "ENGINE");
 
-	std::size_t Logger::namePadding = 0;
+	#ifdef ENABLE_OPENGL_ADAPTER
+		ConsoleLogger openGlLogger(std::cout, LogLevel::ALL, "OPENGL");
+	#endif
 
-	std::ostringstream Logger::formatStream;
-
-	Logger Logger::engineLogger("ENGINE", LogLevel::ALL);
-	Logger Logger::clientLogger("CLIENT", LogLevel::ALL);
-
-	void Logger::clearFormatStream() {
-		formatStream.str(std::string());
-	}
-
-	void Logger::clear() {
-		stream.str(std::string());
-	}
-
-	void Logger::writeTime() {
-		const std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-		const std::time_t time = std::chrono::system_clock::to_time_t(now);
-		const std::chrono::milliseconds milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now - std::chrono::time_point_cast<std::chrono::seconds>(now));
-		std::tm buffer;
-
-		localtime_s(&buffer, &time);
-
-		stream << '[';
-		stream << std::put_time(&buffer, "%H:%M:%S");
-		stream << '.';
-		stream << std::setw(3);
-		stream << std::setfill('0');
-		stream << milliseconds.count();
-		stream << std::setfill(' ');
-		stream << ']';
-	}
-
-	Logger::Logger(std::string_view name, LogLevel minimumLogLevel) :
-		name(name),
-		minimumLogLevel(minimumLogLevel)
-	{
-		if (name.size() > namePadding) {
-			namePadding = name.size();
-		}
-	}
+	#ifdef ENABLE_VULKAN_ADAPTER
+		ConsoleLogger vulkanLogger(std::cout, LogLevel::ALL, "VULKAN");
+	#endif
 }

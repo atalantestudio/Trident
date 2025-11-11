@@ -54,7 +54,7 @@ namespace ProjectA {
 	File<FileFormat::PNG> Filesystem::decode(const sequence<uint8>& data) {
 		File<FileFormat::PNG> file;
 
-		ByteStream<StreamOperation::READ> stream(&data[0], data.count, Endianness::BIG_ENDIAN);
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::BIG_ENDIAN);
 
 		const uint64 signature = stream.read<uint64>();
 
@@ -157,7 +157,7 @@ namespace ProjectA {
 				default: {
 					const char8* typeString = pointer_cast<const char8*>(&type);
 
-					ENGINE_WARN("Ignoring unsupported PNG chunk of type \"[][][][]\".", typeString[0], typeString[1], typeString[2], typeString[3]);
+					ENGINE_WARNING("Ignoring unsupported PNG chunk of type \"[][][][]\".", typeString[0], typeString[1], typeString[2], typeString[3]);
 
 					stream.jump(byteLength);
 
@@ -189,7 +189,7 @@ namespace ProjectA {
 			stream.jump(byteLength + sizeof(uint32));
 		}
 
-		BitStream<StreamOperation::READ> inflateBitStream(compressedData, compressedDataSize, Endianness::LITTLE_ENDIAN);
+		BitStream<StreamOperation::READ> inflateBitStream(&compressedData[0], compressedDataSize, Endianness::LITTLE_ENDIAN);
 
 		const uint64 filteredDataSize = file.extent.width * file.extent.height * channelCount;
 		const uint64 unfilteredDataSize = filteredDataSize + file.extent.height;
@@ -202,7 +202,7 @@ namespace ProjectA {
 		uint32 bAdvance = 0;
 
 		// Current pixel.
-		const uint8* x = unfilteredData;
+		const uint8* x = &unfilteredData[0];
 
 		// Pixel at the left of `x`. If `x` is the leftmost pixel, `a` is 0.
 		const uint8* a;

@@ -27,9 +27,9 @@ namespace ProjectA {
 		// TODO: One wait destination stage mask per wait semaphore, but the pipeline stage flags is stored into the command buffer.
 		const VkPipelineStageFlags waitDstStageMask = std::static_pointer_cast<VulkanCommandBuffer>(commandBuffers[0])->pipelineStageFlags;
 
-		sequence<VkCommandBuffer> vkCommandBuffers(commandBuffers.count);
+		sequence<VkCommandBuffer> vkCommandBuffers(commandBuffers.count());
 
-		for (uint32 commandBufferIndex = 0; commandBufferIndex < commandBuffers.count; commandBufferIndex += 1) {
+		for (uint32 commandBufferIndex = 0; commandBufferIndex < commandBuffers.count(); commandBufferIndex += 1) {
 			vkCommandBuffers[commandBufferIndex] = std::static_pointer_cast<VulkanCommandBuffer>(commandBuffers[commandBufferIndex])->object;
 		}
 
@@ -48,8 +48,8 @@ namespace ProjectA {
 			submitInfo.pWaitDstStageMask = &waitDstStageMask;
 		}
 
-		submitInfo.commandBufferCount = static_cast<uint32>(vkCommandBuffers.count);
-		submitInfo.pCommandBuffers = vkCommandBuffers;
+		submitInfo.commandBufferCount = static_cast<uint32>(vkCommandBuffers.count());
+		submitInfo.pCommandBuffers = &vkCommandBuffers[0];
 
 		if (signalSemaphore == nullptr) {
 			submitInfo.signalSemaphoreCount = 0;
@@ -75,9 +75,9 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		// TODO: Speed this up.
-		sequence<const VkSwapchainKHR*> vkSwapchains(swapchains.count);
+		sequence<const VkSwapchainKHR*> vkSwapchains(swapchains.count());
 
-		for (uint64 swapchainIndex = 0; swapchainIndex < vkSwapchains.count; swapchainIndex += 1) {
+		for (uint64 swapchainIndex = 0; swapchainIndex < vkSwapchains.count(); swapchainIndex += 1) {
 			vkSwapchains[swapchainIndex] = &std::static_pointer_cast<VulkanSwapchain>(swapchains[swapchainIndex])->object;
 		}
 
@@ -86,9 +86,9 @@ namespace ProjectA {
 		presentInfo.pNext = nullptr;
 		presentInfo.waitSemaphoreCount = 1;
 		presentInfo.pWaitSemaphores = &std::static_pointer_cast<VulkanSemaphore>(waitSemaphore)->object;
-		presentInfo.swapchainCount = static_cast<uint32>(vkSwapchains.count);
+		presentInfo.swapchainCount = static_cast<uint32>(vkSwapchains.count());
 		presentInfo.pSwapchains = vkSwapchains[0];
-		presentInfo.pImageIndices = imageIndices;
+		presentInfo.pImageIndices = &imageIndices[0];
 		presentInfo.pResults = nullptr;
 
 		const VkResult result = vkQueuePresentKHR(object, &presentInfo);

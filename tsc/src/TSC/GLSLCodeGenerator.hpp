@@ -87,7 +87,7 @@ namespace ProjectA {
 						return GLSL_TYPE_PREFIXES[templateArgumentToken.type - TokenType::TYPE_FLOAT32] + typeString;
 					}
 					default: {
-						MODULE_ASSERT(typeToken.type == TokenType::IDENTIFIER, "Invalid type.");
+						ASSERT(typeToken.type == TokenType::IDENTIFIER);
 
 						return output->identifiers[typeToken.index];
 					}

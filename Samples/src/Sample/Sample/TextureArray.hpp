@@ -130,7 +130,7 @@ namespace ProjectA {
 				sequence<File<FileFormat::PNG>> assets(ASSET_COUNT);
 				uint64 textureArrayImageSize = 0;
 
-				for (uint32 assetIndex = 0; assetIndex < assets.count; assetIndex += 1) {
+				for (uint32 assetIndex = 0; assetIndex < assets.count(); assetIndex += 1) {
 					const sequence<uint8> assetBuffer = Filesystem::openBuffer(ASSET_PATHS[assetIndex]);
 
 					File<FileFormat::PNG>& asset = assets[assetIndex];

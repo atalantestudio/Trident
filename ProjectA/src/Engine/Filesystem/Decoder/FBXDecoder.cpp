@@ -52,7 +52,7 @@ namespace ProjectA {
 		// TODO: Add null terminator for the string case?
 		std::copy_n(stream.getBytePosition(), Length, Property->Data.begin());
 
-		stream.jump(Property->Data.count);
+		stream.jump(Property->Data.count());
 
 		return Property;
 	}
@@ -128,7 +128,7 @@ namespace ProjectA {
 		}
 
 		if (Node.NestedList.size() >= MAX_CHILD_NODE_ITERATIONS) {
-			ENGINE_WARN("Recursion limit reached for node \"[]\" ([]).", &Node.Name[0], MAX_CHILD_NODE_ITERATIONS);
+			ENGINE_WARNING("Recursion limit reached for node \"[]\" ([]).", &Node.Name[0], MAX_CHILD_NODE_ITERATIONS);
 		}
 
 		return Node;
@@ -151,7 +151,7 @@ namespace ProjectA {
 	File<FileFormat::FBX> Filesystem::decode(const sequence<uint8>& data) {
 		File<FileFormat::FBX> file;
 
-		ByteStream<StreamOperation::READ> stream(&data[0], data.count, Endianness::LITTLE_ENDIAN);
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
 		ENGINE_ASSERT(Filesystem::validateSignature<FileFormat::FBX>(stream), "Invalid FBX file signature.");
 

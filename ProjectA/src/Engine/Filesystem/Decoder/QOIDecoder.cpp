@@ -8,7 +8,7 @@ namespace ProjectA {
 	File<FileFormat::QOI> Filesystem::decode<FileFormat::QOI>(const sequence<uint8>& data) {
 		File<FileFormat::QOI> file;
 
-		ByteStream<StreamOperation::READ> stream(&data[0], data.count, Endianness::LITTLE_ENDIAN);
+		ByteStream<StreamOperation::READ> stream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
 		ENGINE_ASSERT(stream.read<uint32>(true) == STRING_TO_BIG_ENDIAN_UINT32("qoif"), "Invalid QOI file signature.");
 
@@ -41,7 +41,7 @@ namespace ProjectA {
 
 		// We cannot parse more than the total byte size - (14-byte header + 8-byte footer).
 		// NOTE: This implementation doesn't look at the footer.
-		const uint64 maxIterationCount = data.count - 22;
+		const uint64 maxIterationCount = data.count() - 22;
 
 		QOIDecoderContentOnly(stream, file.data, channelCount, maxIterationCount);
 

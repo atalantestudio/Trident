@@ -201,7 +201,7 @@ namespace ProjectA {
 						}
 
 						if (signedAreaDouble > 0.0f) {
-							ENGINE_WARN("Glyph [] has a single counter-clockwise contour. Reversing the contour winding order.", glyphIndex);
+							ENGINE_WARNING("Glyph [] has a single counter-clockwise contour. Reversing the contour winding order.", glyphIndex);
 
 							std::reverse(contour.begin(), contour.end());
 						}
@@ -376,7 +376,7 @@ namespace ProjectA {
 
 		File<FileFormat::TTF> file;
 
-		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count, Endianness::BIG_ENDIAN);
+		ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::BIG_ENDIAN);
 
 		OffsetSubtable offsetSubtable{};
 		offsetSubtable.scalerType = byteStream.read<uint32>();
@@ -507,14 +507,29 @@ namespace ProjectA {
 			glyphOffset = byteStream.read<uint16>() * 2;
 		}
 
-		const uint16 regCount = static_cast<uint16>(glyphLengths.count / 8);
+		const uint16 regCount = static_cast<uint16>(glyphLengths.count() / 8);
+		uint16 regOffset = 0;
 
-		for (uint16 regIndex = 0; regIndex < regCount; regIndex += 1) {
-			const __m128i next = _mm_load_si128(pointer_cast<const __m128i*>(&glyphOffsets[regIndex * 8 + 1]));
-			const __m128i curr = _mm_load_si128(pointer_cast<const __m128i*>(&glyphOffsets[regIndex * 8]));
+		/* TODO: Add reg<C, T> to lyah.
+		
+		while (regOffset < regCount * 8) {
+			const lyah::reg<8, uint16> current(&glyphOffsets[regOffset]);
+			const lyah::reg<8, uint16> next(&glyphOffsets[regOffset + 1]);
+			const lyah::reg<8, uint16> subtracted = next - current;
+
+			lyah::store(&glyphLengths[regOffset], subtracted);
+
+			regOffset += 8;
+		} */
+
+		while (regOffset < regCount * 8) {
+			const __m128i curr = _mm_load_si128(pointer_cast<const __m128i*>(&glyphOffsets[regOffset]));
+			const __m128i next = _mm_load_si128(pointer_cast<const __m128i*>(&glyphOffsets[regOffset + 1]));
 			const __m128i sub = _mm_sub_epi16(next, curr);
 
-			_mm_store_si128(pointer_cast<__m128i*>(&glyphLengths[regIndex * 8]), sub);
+			_mm_store_si128(pointer_cast<__m128i*>(&glyphLengths[regOffset]), sub);
+
+			regOffset += 8;
 		}
 
 		// Leave last glyph length as 0.
@@ -529,7 +544,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(tableOffset != tableOffsetMap.end(), "Could not find 'glyf' table.");
 
-		for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count; glyphIndex += 1) {
+		for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count(); glyphIndex += 1) {
 			if (glyphLengths[glyphIndex] == 0) {
 				// Glyph has no outlines.
 				// Since compound glyphs have no reason to reference "empty" glyphs, this check can be omitted within the depth of a compound glyph.
@@ -618,7 +633,7 @@ namespace ProjectA {
 				}
 			}
 
-			ENGINE_WARN("The Unicode table was not found on the first iteration.");
+			ENGINE_WARNING("The Unicode table was not found on the first iteration.");
 		}
 
 		ENGINE_ASSERT(unicodeTableOffset > 0, "Failed to find Unicode table.");

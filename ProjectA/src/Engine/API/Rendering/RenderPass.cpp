@@ -6,7 +6,7 @@
 namespace ProjectA {
 	ref<Image> RenderPass::createColorAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 attachmentIndex) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
-		DEBUG_ASSERT(attachmentIndex < attachments.count);
+		DEBUG_ASSERT(attachmentIndex < attachments.count());
 
 		const Attachment& attachment = attachments[attachmentIndex];
 
@@ -27,7 +27,7 @@ namespace ProjectA {
 
 	ref<Image> RenderPass::createDepthStencilAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 subpassIndex) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
-		DEBUG_ASSERT(subpassIndex < subpasses.count);
+		DEBUG_ASSERT(subpassIndex < subpasses.count());
 
 		const ref<Subpass>& subpass = subpasses[subpassIndex];
 
@@ -35,7 +35,7 @@ namespace ProjectA {
 
 		const uint32 attachmentIndex = subpass->getDepthStencilAttachmentReference().index;
 
-		DEBUG_ASSERT(attachmentIndex < attachments.count);
+		DEBUG_ASSERT(attachmentIndex < attachments.count());
 
 		const Attachment& attachment = attachments[attachmentIndex];
 
@@ -50,7 +50,7 @@ namespace ProjectA {
 
 		bool isInputAttachment = false;
 
-		for (uint32 nextSubpassIndex = subpassIndex; nextSubpassIndex < subpasses.count; nextSubpassIndex += 1) {
+		for (uint32 nextSubpassIndex = subpassIndex; nextSubpassIndex < subpasses.count(); nextSubpassIndex += 1) {
 			const ref<Subpass>& subpass = subpasses[nextSubpassIndex];
 
 			for (const AttachmentReference& inputAttachmentReference : subpass->getInputAttachmentReferences()) {
@@ -77,7 +77,7 @@ namespace ProjectA {
 
 	ref<Image> RenderPass::createInputAttachmentImage(const AttachmentImageDescriptor& descriptor, uint32 attachmentIndex) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
-		DEBUG_ASSERT(attachmentIndex < attachments.count);
+		DEBUG_ASSERT(attachmentIndex < attachments.count());
 
 		const Attachment& attachment = attachments[attachmentIndex];
 

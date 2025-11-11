@@ -31,7 +31,7 @@ namespace ProjectA {
 
 		private:
 			// The number of vertices used.
-			flag vertexCount : 1;
+			uint8 vertexCount : 1;
 	};
 
 	struct ClipVertex2D {
@@ -65,6 +65,6 @@ namespace ProjectA {
 
 		private:
 			// The number of vertices used.
-			flag vertexCount : 1;
+			uint8 vertexCount : 1;
 	};
 }

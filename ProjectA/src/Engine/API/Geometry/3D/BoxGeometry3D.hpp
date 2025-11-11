@@ -101,7 +101,7 @@ namespace ProjectA {
 
 				vertexPositionComponents = VERTEX_POSITION_COMPONENTS;
 
-				for (uint32 vertexIndex = 0; vertexIndex < VERTEX_POSITION_COMPONENTS.count; vertexIndex += 3) {
+				for (uint32 vertexIndex = 0; vertexIndex < VERTEX_POSITION_COMPONENTS.count(); vertexIndex += 3) {
 					vertexPositionComponents[vertexIndex + 0] *= halfSize[0];
 					vertexPositionComponents[vertexIndex + 1] *= halfSize[1];
 					vertexPositionComponents[vertexIndex + 2] *= halfSize[2];

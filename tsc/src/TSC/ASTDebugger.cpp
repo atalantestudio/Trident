@@ -3,8 +3,8 @@
 #include "TSC/ASTDebugger.hpp"
 
 namespace ProjectA {
-	ASTDebugger::ASTDebugger(std::string_view path, const CompilationOutput& output) :
-		logger(path, 4)
+	ASTDebugger::ASTDebugger(const str8& path, const CompilationOutput& output) :
+		writer(path, 4)
 	{
 		this->output = &output;
 		statementIndex = 0;
@@ -12,17 +12,17 @@ namespace ProjectA {
 		expressionReferenceIndex = 0;
 		expressionByteOffset = 0;
 
-		logger.openArray();
+		writer.openArray();
 
 		while (statementIndex < output.ast.getStatementCount()) {
-			logger.openObject();
+			writer.openObject();
 
 			writeStatement();
 
-			logger.closeObject();
+			writer.closeObject();
 		}
 
-		logger.closeArray();
+		writer.closeArray();
 	}
 
 	void ASTDebugger::writeStatement() {
@@ -129,202 +129,202 @@ namespace ProjectA {
 	void ASTDebugger::writeStructureStatement(const Statement<StatementType::STRUCTURE>& statement) {
 		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 
-		logger.property("StatementType", "StructureStatement");
-		logger.property("Identifier", output->getTokenString(identifierToken));
-		logger.propertyArray("Members");
+		writer.property("StatementType", "StructureStatement");
+		writer.property("Identifier", output->getTokenString(identifierToken));
+		writer.propertyArray("Members");
 
 		uint32 memberIndex = 0;
 
 		while (memberIndex < statement.memberCount) {
-			logger.openObject();
+			writer.openObject();
 
 			writeStatement();
 
-			logger.closeObject();
+			writer.closeObject();
 
 			memberIndex += 1;
 		}
 
-		logger.closeArray();
+		writer.closeArray();
 	}
 
 	void ASTDebugger::writeMemberStatement(const Statement<StatementType::MEMBER>& statement) {
-		logger.property("StatementType", "MemberStatement");
-		logger.propertyNonString("AnnotationFlag", statement.annotationFlag);
+		writer.property("StatementType", "MemberStatement");
+		writer.propertyNonString("AnnotationFlag", statement.annotationFlag);
 
 		writeAnnotationBlocks(statement.annotationBlockIndexOffset, statement.annotationBlockCount);
 
-		logger.propertyObject("Type");
+		writer.propertyObject("Type");
 
 		writeExpression();
 
-		logger.closeObject();
+		writer.closeObject();
 
 		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 
-		logger.property("Identifier", output->getTokenString(identifierToken));
+		writer.property("Identifier", output->getTokenString(identifierToken));
 	}
 
 	void ASTDebugger::writeConstantStatement(const Statement<StatementType::CONSTANT>& statement) {
 		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 
-		logger.property("StatementType", "ConstantStatement");
-		logger.propertyNonString("AnnotationFlag", statement.annotationFlag);
+		writer.property("StatementType", "ConstantStatement");
+		writer.propertyNonString("AnnotationFlag", statement.annotationFlag);
 
 		writeAnnotationBlocks(statement.annotationBlockIndexOffset, statement.annotationBlockCount);
 
-		logger.propertyObject("Type");
+		writer.propertyObject("Type");
 
 		writeExpression();
 
-		logger.closeObject();
-		logger.property("Identifier", output->getTokenString(identifierToken));
-		logger.propertyObject("Initializer");
+		writer.closeObject();
+		writer.property("Identifier", output->getTokenString(identifierToken));
+		writer.propertyObject("Initializer");
 
 		writeExpression();
 
-		logger.closeObject();
+		writer.closeObject();
 	}
 
 	void ASTDebugger::writeVariableStatement(const Statement<StatementType::VARIABLE>& statement) {
 		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 
-		logger.property("StatementType", "VariableStatement");
-		logger.propertyObject("Type");
+		writer.property("StatementType", "VariableStatement");
+		writer.propertyObject("Type");
 
 		writeExpression();
 
-		logger.closeObject();
-		logger.property("Identifier", output->getTokenString(identifierToken));
-		logger.propertyNonString("Constant", statement.constant);
+		writer.closeObject();
+		writer.property("Identifier", output->getTokenString(identifierToken));
+		writer.propertyNonString("Constant", statement.constant);
 
 		if (statement.initializer) {
-			logger.propertyObject("Initializer");
+			writer.propertyObject("Initializer");
 
 			writeExpression();
 
-			logger.closeObject();
+			writer.closeObject();
 		}
 		else {
-			logger.propertyNonString("Initializer", "null");
+			writer.propertyNonString("Initializer", "null");
 		}
 	}
 
 	void ASTDebugger::writeParameterStatement(const Statement<StatementType::PARAMETER>& statement) {
 		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 
-		logger.property("StatementType", "ParameterStatement");
-		logger.propertyObject("Type");
+		writer.property("StatementType", "ParameterStatement");
+		writer.propertyObject("Type");
 
 		writeExpression();
 
-		logger.closeObject();
-		logger.property("Identifier", output->getTokenString(identifierToken));
+		writer.closeObject();
+		writer.property("Identifier", output->getTokenString(identifierToken));
 	}
 
 	void ASTDebugger::writeFunctionStatement(const Statement<StatementType::FUNCTION>& statement) {
 		const Token& identifierToken = output->tokens[statement.identifierTokenIndex];
 
-		logger.property("StatementType", "FunctionStatement");
-		logger.propertyObject("ReturnType");
+		writer.property("StatementType", "FunctionStatement");
+		writer.propertyObject("ReturnType");
 
 		writeExpression();
 
-		logger.closeObject();
-		logger.property("Identifier", output->getTokenString(identifierToken));
-		logger.propertyArray("Arguments");
+		writer.closeObject();
+		writer.property("Identifier", output->getTokenString(identifierToken));
+		writer.propertyArray("Arguments");
 
 		uint32 parameterIndex = 0;
 
 		while (parameterIndex < statement.parameterCount) {
-			logger.openObject();
+			writer.openObject();
 
 			writeStatement();
 
-			logger.closeObject();
+			writer.closeObject();
 
 			parameterIndex += 1;
 		}
 
-		logger.closeArray();
-		logger.propertyObject("Scope");
+		writer.closeArray();
+		writer.propertyObject("Scope");
 
 		writeStatement();
 
-		logger.closeObject();
+		writer.closeObject();
 	}
 
 	void ASTDebugger::writeExpressionStatement(const Statement<StatementType::EXPRESSION>& statement) {
-		logger.property("StatementType", "ExpressionStatement");
-		logger.propertyObject("Expression");
+		writer.property("StatementType", "ExpressionStatement");
+		writer.propertyObject("Expression");
 
 		writeExpression();
 
-		logger.closeObject();
+		writer.closeObject();
 	}
 
 	void ASTDebugger::writeScopeStatement(const Statement<StatementType::SCOPE>& statement) {
-		logger.property("StatementType", "ScopeStatement");
-		logger.propertyArray("Statements");
+		writer.property("StatementType", "ScopeStatement");
+		writer.propertyArray("Statements");
 
 		uint32 statementIndex = 0;
 
 		while (statementIndex < statement.statementCount) {
-			logger.openObject();
+			writer.openObject();
 
 			writeStatement();
 
-			logger.closeObject();
+			writer.closeObject();
 
 			statementIndex += 1;
 		}
 
-		logger.closeArray();
+		writer.closeArray();
 	}
 
 	void ASTDebugger::writeIfStatement(const Statement<StatementType::IF>& statement) {
-		logger.property("StatementType", "IfStatement");
-		logger.propertyObject("Condition");
+		writer.property("StatementType", "IfStatement");
+		writer.propertyObject("Condition");
 
 		writeExpression();
 
-		logger.closeObject();
-		logger.propertyObject("Scope");
+		writer.closeObject();
+		writer.propertyObject("Scope");
 
 		writeStatement();
 
-		logger.closeObject();
+		writer.closeObject();
 	}
 
 	void ASTDebugger::writeWhileStatement(const Statement<StatementType::WHILE>& statement) {
-		logger.property("StatementType", "WhileStatement");
-		logger.propertyObject("Condition");
+		writer.property("StatementType", "WhileStatement");
+		writer.propertyObject("Condition");
 
 		writeExpression();
 
-		logger.closeObject();
-		logger.propertyObject("Scope");
+		writer.closeObject();
+		writer.propertyObject("Scope");
 
 		writeStatement();
 
-		logger.closeObject();
+		writer.closeObject();
 	}
 
 	void ASTDebugger::writeBreakStatement(const Statement<StatementType::BREAK>& statement) {
-		logger.property("StatementType", "BreakStatement");
+		writer.property("StatementType", "BreakStatement");
 	}
 
 	void ASTDebugger::writeNextStatement(const Statement<StatementType::NEXT>& statement) {
-		logger.property("StatementType", "NextStatement");
+		writer.property("StatementType", "NextStatement");
 	}
 
 	void ASTDebugger::writeReturnStatement(const Statement<StatementType::RETURN>& statement) {
-		logger.property("StatementType", "ReturnStatement");
-		logger.propertyObject("Expression");
+		writer.property("StatementType", "ReturnStatement");
+		writer.propertyObject("Expression");
 
 		writeExpression();
 
-		logger.closeObject();
+		writer.closeObject();
 	}
 
 	void ASTDebugger::writeExpression() {
@@ -349,18 +349,18 @@ namespace ProjectA {
 		const Expression<ExpressionType::LITERAL>& expression = output->ast.getExpression<ExpressionType::LITERAL>(expressionByteOffset);
 		const Token& token = output->tokens[expression.tokenIndex];
 
-		logger.property("ExpressionType", "LiteralExpression");
+		writer.property("ExpressionType", "LiteralExpression");
 
 		switch (token.type) {
 			case TokenType::LITERAL_FLOATING_POINT: {
-				logger.property("LiteralType", "FloatingPoint");
-				logger.propertyNonString("Literal", std::stold(output->getTokenString(token)));
+				writer.property("LiteralType", "FloatingPoint");
+				writer.propertyNonString("Literal", std::stold(output->getTokenString(token)));
 
 				break;
 			}
 			case TokenType::LITERAL_INTEGER: {
-				logger.property("LiteralType", "Integer");
-				logger.propertyNonString("Literal", std::stoull(output->getTokenString(token)));
+				writer.property("LiteralType", "Integer");
+				writer.propertyNonString("Literal", std::stoull(output->getTokenString(token)));
 
 				break;
 			}
@@ -374,121 +374,121 @@ namespace ProjectA {
 		const Expression<ExpressionType::IDENTIFIER>& expression = output->ast.getExpression<ExpressionType::IDENTIFIER>(expressionByteOffset);
 		const Token& token = output->tokens[expression.tokenIndex];
 
-		logger.property("ExpressionType", "IdentifierExpression");
-		logger.property("Identifier", output->getTokenString(token));
+		writer.property("ExpressionType", "IdentifierExpression");
+		writer.property("Identifier", output->getTokenString(token));
 	}
 
 	void ASTDebugger::writeUnaryExpression() {
 		const Expression<ExpressionType::UNARY>& expression = output->ast.getExpression<ExpressionType::UNARY>(expressionByteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
-		logger.property("ExpressionType", "UnaryExpression");
-		logger.property("Operator", output->getTokenString(operatorToken));
-		logger.propertyObject("Right");
+		writer.property("ExpressionType", "UnaryExpression");
+		writer.property("Operator", output->getTokenString(operatorToken));
+		writer.propertyObject("Right");
 
 		writeExpression();
 
-		logger.closeObject();
+		writer.closeObject();
 	}
 
 	void ASTDebugger::writeBinaryExpression() {
 		const Expression<ExpressionType::BINARY>& expression = output->ast.getExpression<ExpressionType::BINARY>(expressionByteOffset);
 		const Token& operatorToken = output->tokens[expression.operatorTokenIndex];
 
-		logger.property("ExpressionType", "BinaryExpression");
-		logger.propertyObject("Left");
+		writer.property("ExpressionType", "BinaryExpression");
+		writer.propertyObject("Left");
 
 		writeExpression();
 
-		logger.closeObject();
-		logger.property("Operator", output->getTokenString(operatorToken));
-		logger.propertyObject("Right");
+		writer.closeObject();
+		writer.property("Operator", output->getTokenString(operatorToken));
+		writer.propertyObject("Right");
 
 		writeExpression();
 
-		logger.closeObject();
+		writer.closeObject();
 	}
 
 	void ASTDebugger::writeGroupExpression() {
 		const Expression<ExpressionType::GROUP>& expression = output->ast.getExpression<ExpressionType::GROUP>(expressionByteOffset);
 
-		logger.property("ExpressionType", "GroupExpression");
-		logger.propertyObject("Expression");
+		writer.property("ExpressionType", "GroupExpression");
+		writer.propertyObject("Expression");
 
 		writeExpression();
 
-		logger.closeObject();
+		writer.closeObject();
 	}
 
 	void ASTDebugger::writeMemberAccessExpression() {
 		const Expression<ExpressionType::MEMBER_ACCESS>& expression = output->ast.getExpression<ExpressionType::MEMBER_ACCESS>(expressionByteOffset);
 		const Token& identifierToken = output->tokens[expression.identifierTokenIndex];
 
-		logger.property("ExpressionType", "MemberAccessExpression");
+		writer.property("ExpressionType", "MemberAccessExpression");
 
 		// TODO: Write parent expression.
-		/* logger.propertyObject("Parent");
+		/* writer.propertyObject("Parent");
 
 		writeExpression();
 
-		logger.closeObject(); */
+		writer.closeObject(); */
 
-		logger.property("MemberIdentifier", output->getTokenString(identifierToken));
+		writer.property("MemberIdentifier", output->getTokenString(identifierToken));
 	}
 
 	void ASTDebugger::writeCallExpression() {
 		const Expression<ExpressionType::CALL>& expression = output->ast.getExpression<ExpressionType::CALL>(expressionByteOffset);
 
-		logger.property("ExpressionType", "CallExpression");
+		writer.property("ExpressionType", "CallExpression");
 
 		if (expression.explicitCallee) {
-			logger.propertyObject("Callee");
+			writer.propertyObject("Callee");
 
 			writeExpression();
 
-			logger.closeObject();
+			writer.closeObject();
 		}
 		else {
-			logger.propertyNonString("Callee", "null");
+			writer.propertyNonString("Callee", "null");
 		}
 
-		logger.propertyNonString("ArgumentCount", expression.argumentCount);
-		logger.propertyArray("Arguments");
+		writer.propertyNonString("ArgumentCount", expression.argumentCount);
+		writer.propertyArray("Arguments");
 
 		uint32 argumentIndex = 0;
 
 		while (argumentIndex < expression.argumentCount) {
-			logger.openObject();
+			writer.openObject();
 
 			writeExpression();
 
-			logger.closeObject();
+			writer.closeObject();
 
 			argumentIndex += 1;
 		}
 
-		logger.closeArray();
+		writer.closeArray();
 	}
 
 	void ASTDebugger::writeTypeExpression() {
 		const Expression<ExpressionType::TYPE>& expression = output->ast.getExpression<ExpressionType::TYPE>(expressionByteOffset);
 		const Token& typeToken = output->tokens[expression.typeTokenIndex];
 
-		logger.property("ExpressionType", "TypeExpression");
-		logger.property("TypeIdentifier", output->getTokenString(typeToken));
+		writer.property("ExpressionType", "TypeExpression");
+		writer.property("TypeIdentifier", output->getTokenString(typeToken));
 
 		if (expression.templateArgumentTokenIndex != ~0) {
 			const Token& templateArgumentToken = output->tokens[expression.templateArgumentTokenIndex];
 
-			logger.property("TemplateArgumentIdentifier", output->getTokenString(templateArgumentToken));
+			writer.property("TemplateArgumentIdentifier", output->getTokenString(templateArgumentToken));
 		}
 		else {
-			logger.propertyNonString("TemplateArgumentIdentifier", "null");
+			writer.propertyNonString("TemplateArgumentIdentifier", "null");
 		}
 	}
 
 	void ASTDebugger::writeAnnotationBlocks(uint32 annotationBlockIndexOffset, uint32 annotationBlockCount) {
-		logger.propertyArray("Annotations");
+		writer.propertyArray("Annotations");
 
 		uint32 annotationBlockIndex = 0;
 
@@ -496,20 +496,20 @@ namespace ProjectA {
 			const AnnotationBlock& annotationBlock = output->ast.getAnnotationBlock(annotationBlockIndexOffset + annotationBlockIndex);
 			const Token& identifierToken = output->tokens[annotationBlock.identifierTokenIndex];
 
-			logger.openObject();
-			logger.property("Annotation", output->getTokenString(identifierToken));
+			writer.openObject();
+			writer.property("Annotation", output->getTokenString(identifierToken));
 
 			if (annotationBlock.valueTokenIndex != ~0) {
 				const Token& valueToken = output->tokens[annotationBlock.valueTokenIndex];
 
-				logger.propertyNonString("Value", std::stoull(output->getTokenString(valueToken)));
+				writer.propertyNonString("Value", std::stoull(output->getTokenString(valueToken)));
 			}
 
-			logger.closeObject();
+			writer.closeObject();
 
 			annotationBlockIndex += 1;
 		}
 
-		logger.closeArray();
+		writer.closeArray();
 	}
 }

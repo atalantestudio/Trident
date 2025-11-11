@@ -10,17 +10,17 @@ namespace ProjectA {
 		uint64 maxGlyphEdgeCount = 0;
 
 		for (const TrueTypeFont::Glyph& glyph : glyphs) {
-			maxGlyphEdgeCount = max(maxGlyphEdgeCount, glyph.edges.count);
+			maxGlyphEdgeCount = max(maxGlyphEdgeCount, glyph.edges.count());
 		}
 
 		return sizeof(GlyphBuffer) + maxGlyphEdgeCount * sizeof(GlyphEdge);
 	}
 
 	GenerateSDFGlyphMapProcess::GenerateSDFGlyphMapProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& output) {
-		ENGINE_ASSERT(file.glyphs.count < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
+		ENGINE_ASSERT(file.glyphs.count() < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
 
 		output.extent = GLYPH_MAP_IMAGE_EXTENT;
-		output.glyphs = sequence<Glyph>(file.glyphs.count);
+		output.glyphs = sequence<Glyph>(file.glyphs.count());
 
 		createFontBuffer();
 		createGlyphBuffer(computeMaxGlyphByteSize(file.glyphs));
@@ -87,7 +87,7 @@ namespace ProjectA {
 
 		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 
-		for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count; glyphIndex += 1) {
+		for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count(); glyphIndex += 1) {
 			const TrueTypeFont::Glyph& trueTypeGlyph = file.glyphs[glyphIndex];
 			const TrueTypeFont::longHorMetric& hMetric = file.hMetrics[glyphIndex];
 
@@ -116,11 +116,11 @@ namespace ProjectA {
 			glyphMappedRange->minCoordinateX = trueTypeGlyph.min.x;
 			glyphMappedRange->minCoordinateY = trueTypeGlyph.min.y;
 			glyphMappedRange->dimension = glyphDimension;
-			glyphMappedRange->edgeCount = static_cast<uint32>(trueTypeGlyph.edges.count);
+			glyphMappedRange->edgeCount = static_cast<uint32>(trueTypeGlyph.edges.count());
 
 			GlyphEdge* glyphEdgeMappedRange = pointer_cast<GlyphEdge*>(glyphMappedRange + 1);
 
-			for (uint32 edgeIndex = 0; edgeIndex < trueTypeGlyph.edges.count; edgeIndex += 1) {
+			for (uint32 edgeIndex = 0; edgeIndex < trueTypeGlyph.edges.count(); edgeIndex += 1) {
 				const TrueTypeFont::Edge& edge = trueTypeGlyph.edges[edgeIndex];
 
 				glyphEdgeMappedRange[edgeIndex].startX = edge.start.x;

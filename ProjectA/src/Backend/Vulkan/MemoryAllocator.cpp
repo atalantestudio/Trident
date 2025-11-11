@@ -68,25 +68,22 @@ namespace ProjectA {
 			}
 		}
 
-		std::string MemoryAllocator::formatSize(uint64 size) {
-			float64 decimalSize = static_cast<float64>(size);
+		str8 MemoryAllocator::formatSize(uint64 size) {
+			const float64 decimalSize = static_cast<float64>(size);
 
 			if (size >= 1000000000000) {
-				// Tb.
 				return Logger::format("[]Tb", decimalSize / 1000000000000.0);
 			}
 
 			if (size >= 1000000000) {
-				// Gb.
 				return Logger::format("[]Gb", decimalSize / 1000000000.0);
 			}
 
 			if (size >= 1000000) {
-				// Mb.
 				return Logger::format("[]Mb", decimalSize / 1000000.0);
 			}
 
-			return std::to_string(decimalSize);
+			return Logger::format(decimalSize);
 		}
 	#endif
 
@@ -116,14 +113,12 @@ namespace ProjectA {
 		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentBufferMemoryAllocationIndices);
 		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		ENGINE_INFO(
-			"Creating new memory suballocation ([]) for buffer resource inside memory allocation [].\n"
-			"	Offset = []\n"
-			"	Required size = []\n"
-			"	Size = [] ([])\n"
-			"	Alignment = []",
-			memoryAllocation.suballocationCount,
-			memorySuballocation.allocationIndex,
+		ENGINE_INFO("Creating new memory suballocation ([]) for buffer resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
+		ENGINE_DEBUG(
+			"- Offset = []\n"
+			"- Required size = []\n"
+			"- Size = [] ([])\n"
+			"- Alignment = []",
 			memorySuballocation.offset,
 			memoryRequirements.size,
 			memorySuballocation.size,
@@ -145,14 +140,12 @@ namespace ProjectA {
 		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentImageMemoryAllocationIndices);
 		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		ENGINE_INFO(
-			"Creating new memory suballocation ([]) for image resource inside memory allocation [].\n"
-			"	Offset = []\n"
-			"	Required size = []\n"
-			"	Size = [] ([])\n"
-			"	Alignment = []",
-			memoryAllocation.suballocationCount,
-			memorySuballocation.allocationIndex,
+		ENGINE_INFO("Created new memory suballocation ([]) for image resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
+		ENGINE_DEBUG(
+			"- Offset = []\n"
+			"- Required size = []\n"
+			"- Size = [] ([])\n"
+			"- Alignment = []",
 			memorySuballocation.offset,
 			memoryRequirements.size,
 			memorySuballocation.size,
@@ -206,7 +199,7 @@ namespace ProjectA {
 
 			if (!(memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
 				// TODO: Expose vkFlushMappedMemoryRanges to the graphics adapter.
-				ENGINE_WARN("Non-coherent memory must be manually flushed.");
+				ENGINE_WARNING("Non-coherent memory must be manually flushed.");
 
 				/*VkMappedMemoryRange mappedMemoryRange{};
 				mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -276,10 +269,10 @@ namespace ProjectA {
 			freeMemoryAllocationIndices.pop_back();
 		}
 
-		ENGINE_INFO(
-			"Creating new memory allocation ([]).\n"
-			"	Property flags = []\n"
-			"	Size = [] ([])",
+		ENGINE_INFO("Creating new memory allocation [].", memoryAllocationIndex);
+		ENGINE_DEBUG(
+			"- Property flags = []\n"
+			"- Size = [] ([])",
 			memoryAllocationIndex,
 			string_VkMemoryPropertyFlags(physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex].propertyFlags),
 			allocationSize,
@@ -339,7 +332,7 @@ namespace ProjectA {
 		// If the current memory allocation cannot fully hold this suballocation, close it and open a new one.
 		// In some cases the aligned offset can be larger than size of the allocation.
 		if (offset > currentMemoryAllocation->size || currentMemoryAllocation->size - offset < size) {
-			ENGINE_WARN(
+			ENGINE_WARNING(
 				"Remaining size in memory allocation [] ([]) is insufficient for suballocation with size [] and alignment [] (base size = []).",
 				currentMemoryAllocationIndex,
 				currentMemoryAllocation->size - offset,

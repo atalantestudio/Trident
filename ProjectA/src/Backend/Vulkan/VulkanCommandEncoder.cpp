@@ -63,10 +63,10 @@ namespace ProjectA {
 		const VulkanFramebuffer& framebuffer = *std::static_pointer_cast<VulkanFramebuffer>(descriptor.framebuffer);
 		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(framebuffer.getRenderPass());
 
-		sequence<VkClearValue> clearValues(descriptor.clearValues.count);
+		sequence<VkClearValue> clearValues(descriptor.clearValues.count());
 
 		// TODO: Refactor clear values.
-		for (uint64 clearValueIndex = 0; clearValueIndex < clearValues.count; clearValueIndex += 1) {
+		for (uint64 clearValueIndex = 0; clearValueIndex < clearValues.count(); clearValueIndex += 1) {
 			if (descriptor.clearValues[clearValueIndex].depth != 0.0f || descriptor.clearValues[clearValueIndex].stencil != 0) {
 				clearValues[clearValueIndex].depthStencil.depth = descriptor.clearValues[clearValueIndex].depth;
 				clearValues[clearValueIndex].depthStencil.stencil = descriptor.clearValues[clearValueIndex].stencil;
@@ -88,9 +88,9 @@ namespace ProjectA {
 		renderPassBeginInfo.renderArea.offset.x = 0;
 		renderPassBeginInfo.renderArea.offset.y = 0;
 		renderPassBeginInfo.renderArea.extent = *pointer_cast<const VkExtent2D*>(&framebuffer.getExtent());
-		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.count);
+		renderPassBeginInfo.clearValueCount = static_cast<uint32>(clearValues.count());
 
-		if (clearValues.count == 0) {
+		if (clearValues.count() == 0) {
 			renderPassBeginInfo.pClearValues = nullptr;
 		}
 		else {
@@ -119,9 +119,9 @@ namespace ProjectA {
 	}
 
 	void VulkanCommandEncoder::bindDescriptorSets(const ref<PipelineLayout>& pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) {
-		sequence<VkDescriptorSet> vkDescriptorSets(descriptorSets.count);
+		sequence<VkDescriptorSet> vkDescriptorSets(descriptorSets.count());
 
-		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count; descriptorSetIndex += 1) {
+		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
 			vkDescriptorSets[descriptorSetIndex] = std::static_pointer_cast<VulkanDescriptorSet>(descriptorSets[descriptorSetIndex])->object;
 		}
 
@@ -130,8 +130,8 @@ namespace ProjectA {
 			pipeline->bindPoint,
 			std::static_pointer_cast<VulkanPipelineLayout>(pipelineLayout)->object,
 			0,
-			static_cast<uint32>(vkDescriptorSets.count),
-			vkDescriptorSets,
+			static_cast<uint32>(vkDescriptorSets.count()),
+			&vkDescriptorSets[0],
 			0,
 			nullptr
 		);
@@ -167,7 +167,7 @@ namespace ProjectA {
 			commandBuffer,
 			std::static_pointer_cast<VulkanBuffer>(sourceBuffer)->object,
 			std::static_pointer_cast<VulkanBuffer>(destinationBuffer)->object,
-			static_cast<uint32>(copyRegions.count),
+			static_cast<uint32>(copyRegions.count()),
 			pointer_cast<const VkBufferCopy*>(&copyRegions[0])
 		);
 
@@ -182,8 +182,8 @@ namespace ProjectA {
 			std::static_pointer_cast<VulkanBuffer>(sourceBuffer)->object,
 			std::static_pointer_cast<VulkanImage>(destinationImage)->object,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			static_cast<uint32>(bufferImageCopies.count),
-			bufferImageCopies
+			static_cast<uint32>(bufferImageCopies.count()),
+			&bufferImageCopies[0]
 		);
 
 		commandCount += 1;
@@ -197,8 +197,8 @@ namespace ProjectA {
 			std::static_pointer_cast<VulkanImage>(sourceImage)->object,
 			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 			std::static_pointer_cast<VulkanBuffer>(destinationBuffer)->object,
-			static_cast<uint32>(bufferImageCopies.count),
-			bufferImageCopies
+			static_cast<uint32>(bufferImageCopies.count()),
+			&bufferImageCopies[0]
 		);
 
 		commandCount += 1;
@@ -350,9 +350,9 @@ namespace ProjectA {
 	}
 
 	sequence<VkBufferImageCopy> VulkanCommandEncoder::parseBufferImageCopyRegions(const sequence<BufferImageCopyRegion>& copyRegions) {
-		sequence<VkBufferImageCopy> bufferImageCopies(copyRegions.count);
+		sequence<VkBufferImageCopy> bufferImageCopies(copyRegions.count());
 
-		for (uint32 bufferImageCopyIndex = 0; bufferImageCopyIndex < bufferImageCopies.count; bufferImageCopyIndex += 1) {
+		for (uint32 bufferImageCopyIndex = 0; bufferImageCopyIndex < bufferImageCopies.count(); bufferImageCopyIndex += 1) {
 			const BufferImageCopyRegion& copyRegion = copyRegions[bufferImageCopyIndex];
 			VkBufferImageCopy& bufferImageCopy = bufferImageCopies[bufferImageCopyIndex];
 

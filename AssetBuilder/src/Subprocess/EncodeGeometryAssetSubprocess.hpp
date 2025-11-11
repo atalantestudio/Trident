@@ -7,10 +7,10 @@
 namespace ProjectA {
 	// TODO: Assert that FBX nodes exist before using them.
 	static void EncodeGeometryAssetSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& assetOutputPath) {
-		const std::string path = directoryEntry.path().string();
+		const str8 path = directoryEntry.path().string();
 		const sequence<uint8> inputData = Filesystem::openBuffer(path);
 
-		if (!Filesystem::validateSignature<FileFormat::FBX>(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count, Endianness::LITTLE_ENDIAN))) {
+		if (!Filesystem::validateSignature<FileFormat::FBX>(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count(), Endianness::LITTLE_ENDIAN))) {
 			ENGINE_INFO("Ignoring non-FBX file \"[]\".", path);
 
 			return;
@@ -31,8 +31,8 @@ namespace ProjectA {
 
 		const sequence<float64>& vertexPositionComponents = VerticesProperty->Contents;
 
-		ENGINE_ASSERT(vertexPositionComponents.count >= 3, "Invalid vertex position component buffer length.");
-		ENGINE_ASSERT(PolygonVertexIndexProperty->Contents.count >= 3, "Invalid vertex position index buffer length.");
+		ENGINE_ASSERT(vertexPositionComponents.count() >= 3, "Invalid vertex position component buffer length.");
+		ENGINE_ASSERT(PolygonVertexIndexProperty->Contents.count() >= 3, "Invalid vertex position index buffer length.");
 
 		uint32 indexCount = 0;
 
@@ -41,8 +41,8 @@ namespace ProjectA {
 			uint32 polygonOffset = 0;
 			uint32 triangleOffset = 0;
 
-			while (polygonOffset < PolygonVertexIndexProperty->Contents.count) {
-				while (triangleOffset < PolygonVertexIndexProperty->Contents.count - polygonOffset) {
+			while (polygonOffset < PolygonVertexIndexProperty->Contents.count()) {
+				while (triangleOffset < PolygonVertexIndexProperty->Contents.count() - polygonOffset) {
 					const sint32 thirdIndex = PolygonVertexIndexProperty->Contents[polygonOffset + triangleOffset + 2];
 
 					indexCount += 3;
@@ -68,10 +68,10 @@ namespace ProjectA {
 		uint32 indexOffset = 0;
 
 		// Parse vertex position indices.
-		while (polygonOffset < PolygonVertexIndexProperty->Contents.count) {
+		while (polygonOffset < PolygonVertexIndexProperty->Contents.count()) {
 			uint32 triangleOffset = 0;
 
-			while (triangleOffset < PolygonVertexIndexProperty->Contents.count - polygonOffset) {
+			while (triangleOffset < PolygonVertexIndexProperty->Contents.count() - polygonOffset) {
 				const sint32 indexA = PolygonVertexIndexProperty->Contents[polygonOffset];
 				const sint32 indexB = PolygonVertexIndexProperty->Contents[polygonOffset + triangleOffset + 1];
 				const sint32 indexC = PolygonVertexIndexProperty->Contents[polygonOffset + triangleOffset + 2];
@@ -116,16 +116,16 @@ namespace ProjectA {
 			const ref<FBXSpecialProperty> ReferenceInformationTypeProperty = std::static_pointer_cast<FBXSpecialProperty>(ReferenceInformationTypeNode->PropertyList[0]);
 			const ref<FBXArrayProperty<float64>> NormalsProperty = std::static_pointer_cast<FBXArrayProperty<float64>>(NormalsNode->PropertyList[0]);
 
-			const std::string_view MappingInformationType(pointer_cast<const char8*>(MappingInformationTypeProperty->Data.begin()), MappingInformationTypeProperty->Data.count);
-			const std::string_view ReferenceInformationType(pointer_cast<const char8*>(ReferenceInformationTypeProperty->Data.begin()), ReferenceInformationTypeProperty->Data.count);
+			const std::string_view MappingInformationType(pointer_cast<const char8*>(MappingInformationTypeProperty->Data.begin()), MappingInformationTypeProperty->Data.count());
+			const std::string_view ReferenceInformationType(pointer_cast<const char8*>(ReferenceInformationTypeProperty->Data.begin()), ReferenceInformationTypeProperty->Data.count());
 
 			if (MappingInformationType == "ByPolygonVertex") {
 				if (ReferenceInformationType == "Direct") {
-					vertexNormalComponents = sequence<float64>(vertexPositionComponents.count);
+					vertexNormalComponents = sequence<float64>(vertexPositionComponents.count());
 					vertexNormalIndices = vertexPositionIndices;
 
 					// Sum normals for each individual vertex.
-					for (uint32 vertexNormalIndexOffset = 0; vertexNormalIndexOffset < PolygonVertexIndexProperty->Contents.count; vertexNormalIndexOffset += 1) {
+					for (uint32 vertexNormalIndexOffset = 0; vertexNormalIndexOffset < PolygonVertexIndexProperty->Contents.count(); vertexNormalIndexOffset += 1) {
 						const uint32 vertexNormalIndex = PolygonVertexIndexProperty->Contents[vertexNormalIndexOffset] < 0 ? ~PolygonVertexIndexProperty->Contents[vertexNormalIndexOffset] : PolygonVertexIndexProperty->Contents[vertexNormalIndexOffset];
 
 						vertexNormalComponents[vertexNormalIndex * 3 + 0] += NormalsProperty->Contents[vertexNormalIndexOffset * 3 + 0];
@@ -134,7 +134,7 @@ namespace ProjectA {
 					}
 
 					// Normalize the sum and overwrite.
-					for (uint32 vertexNormalIndexOffset = 0; vertexNormalIndexOffset < vertexNormalComponents.count; vertexNormalIndexOffset += 3) {
+					for (uint32 vertexNormalIndexOffset = 0; vertexNormalIndexOffset < vertexNormalComponents.count(); vertexNormalIndexOffset += 3) {
 						const vec3<float64> normal = normalized(vec3<float64>(
 							vertexNormalComponents[vertexNormalIndexOffset + 0],
 							vertexNormalComponents[vertexNormalIndexOffset + 1],
@@ -166,9 +166,9 @@ namespace ProjectA {
 
 					const ref<FBXArrayProperty<sint32>> NormalsIndexProperty = std::static_pointer_cast<FBXArrayProperty<sint32>>(NormalsIndexNode->PropertyList[0]);
 
-					vertexNormalComponents = sequence<float64>(NormalsProperty->Contents.count);
+					vertexNormalComponents = sequence<float64>(NormalsProperty->Contents.count());
 
-					for (uint32 index = 0; index < NormalsIndexProperty->Contents.count; index += 1) {
+					for (uint32 index = 0; index < NormalsIndexProperty->Contents.count(); index += 1) {
 						const sint32 normalIndex = NormalsIndexProperty->Contents[index];
 
 						ENGINE_ASSERT(normalIndex >= 0, "Invalid normal index.");
@@ -194,7 +194,7 @@ namespace ProjectA {
 			}
 		}
 
-		ENGINE_ASSERT(vertexNormalIndices.count == vertexPositionIndices.count, "Vertex normal index count is inconsistent with vertex position index count.");
+		ENGINE_ASSERT(vertexNormalIndices.count() == vertexPositionIndices.count(), "Vertex normal index count is inconsistent with vertex position index count.");
 
 		sequence<float64> vertexTextureCoordinateComponents;
 		sequence<uint32> vertexTextureCoordinateIndices;
@@ -214,8 +214,8 @@ namespace ProjectA {
 			const ref<FBXSpecialProperty> ReferenceInformationTypeProperty = std::static_pointer_cast<FBXSpecialProperty>(ReferenceInformationTypeNode->PropertyList[0]);
 			const ref<FBXArrayProperty<float64>> UVProperty = std::static_pointer_cast<FBXArrayProperty<float64>>(UVNode->PropertyList[0]);
 
-			const std::string_view MappingInformationType(pointer_cast<const char8*>(MappingInformationTypeProperty->Data.begin()), MappingInformationTypeProperty->Data.count);
-			const std::string_view ReferenceInformationType(pointer_cast<const char8*>(ReferenceInformationTypeProperty->Data.begin()), ReferenceInformationTypeProperty->Data.count);
+			const std::string_view MappingInformationType(pointer_cast<const char8*>(MappingInformationTypeProperty->Data.begin()), MappingInformationTypeProperty->Data.count());
+			const std::string_view ReferenceInformationType(pointer_cast<const char8*>(ReferenceInformationTypeProperty->Data.begin()), ReferenceInformationTypeProperty->Data.count());
 
 			if (MappingInformationType == "ByPolygonVertex") {
 				if (ReferenceInformationType == "Direct") {
@@ -229,16 +229,16 @@ namespace ProjectA {
 					const ref<FBXArrayProperty<sint32>> UVIndexProperty = std::static_pointer_cast<FBXArrayProperty<sint32>>(UVIndexNode->PropertyList[0]);
 
 					vertexTextureCoordinateComponents = UVProperty->Contents;
-					vertexTextureCoordinateIndices = sequence<uint32>(vertexPositionIndices.count);
+					vertexTextureCoordinateIndices = sequence<uint32>(vertexPositionIndices.count());
 
 					uint32 polygonOffset = 0;
 					uint32 indexOffset = 0;
 
 					// TODO: This section is similar to the index count section above; maybe try merging the two.
-					while (polygonOffset < UVIndexProperty->Contents.count) {
+					while (polygonOffset < UVIndexProperty->Contents.count()) {
 						uint32 triangleOffset = 0;
 
-						while (triangleOffset < UVIndexProperty->Contents.count - polygonOffset) {
+						while (triangleOffset < UVIndexProperty->Contents.count() - polygonOffset) {
 							const sint32 indexC = PolygonVertexIndexProperty->Contents[polygonOffset + triangleOffset + 2];
 
 							vertexTextureCoordinateIndices[indexOffset + 0] = UVIndexProperty->Contents[polygonOffset];
@@ -293,30 +293,30 @@ namespace ProjectA {
 			}
 		}
 
-		ENGINE_ASSERT(vertexTextureCoordinateIndices.count == vertexPositionIndices.count, "Vertex texture coordinate index count is inconsistent with vertex position index count.");
+		ENGINE_ASSERT(vertexTextureCoordinateIndices.count() == vertexPositionIndices.count(), "Vertex texture coordinate index count is inconsistent with vertex position index count.");
 
 		const uint32 geometryAssetIdentifier = AssetLibrary::createAssetIdentifier();
 		const uint32 clusterCount = static_cast<uint32>(ceil(static_cast<float32>(indexCount) / CLUSTER_INDEX_COUNT));
-		const uint32 vertexPositionCount = static_cast<uint32>(vertexPositionComponents.count) / Geometry3D::VERTEX_POSITION_STRIDE;
-		const uint32 vertexNormalCount = static_cast<uint32>(vertexNormalComponents.count) / Geometry3D::VERTEX_NORMAL_STRIDE;
-		const uint32 vertexTextureCoordinateCount = static_cast<uint32>(vertexTextureCoordinateComponents.count) / Geometry3D::VERTEX_TEXTURE_COORDINATE_STRIDE;
+		const uint32 vertexPositionCount = static_cast<uint32>(vertexPositionComponents.count()) / Geometry3D::VERTEX_POSITION_STRIDE;
+		const uint32 vertexNormalCount = static_cast<uint32>(vertexNormalComponents.count()) / Geometry3D::VERTEX_NORMAL_STRIDE;
+		const uint32 vertexTextureCoordinateCount = static_cast<uint32>(vertexTextureCoordinateComponents.count()) / Geometry3D::VERTEX_TEXTURE_COORDINATE_STRIDE;
 
 		const uint32 largestVertexPositionIndex = vertexPositionCount - 1;
 		const uint32 largestVertexNormalIndex = vertexNormalCount - 1;
 		const uint32 largestVertexTextureCoordinateIndex = vertexTextureCoordinateCount - 1;
 
-		const uint8 vertexPositionIndexBitCount = calculateBitCount(largestVertexPositionIndex);
-		const uint8 vertexNormalIndexBitCount = calculateBitCount(largestVertexNormalIndex);
-		const uint8 vertexTextureCoordinateIndexBitCount = calculateBitCount(largestVertexTextureCoordinateIndex);
+		const uint8 vertexPositionIndexBitCount = countBits(largestVertexPositionIndex);
+		const uint8 vertexNormalIndexBitCount = countBits(largestVertexNormalIndex);
+		const uint8 vertexTextureCoordinateIndexBitCount = countBits(largestVertexTextureCoordinateIndex);
 
 		const uint64 totalIndexByteCount = static_cast<uint64>(ceil(indexCount * (vertexPositionIndexBitCount + vertexNormalIndexBitCount + vertexTextureCoordinateIndexBitCount) / 8.0f));
 
 		const uint64 outputSize =
 			Asset::HEADER_SIZE +
 			5 * sizeof(uint32) +
-			vertexPositionComponents.count * sizeof(float32) +
-			vertexNormalComponents.count * sizeof(float32) +
-			vertexTextureCoordinateComponents.count * sizeof(float32) +
+			vertexPositionComponents.count() * sizeof(float32) +
+			vertexNormalComponents.count() * sizeof(float32) +
+			vertexTextureCoordinateComponents.count() * sizeof(float32) +
 			totalIndexByteCount;
 
 		ByteStream<StreamOperation::WRITE> byteStream(outputSize, Endianness::LITTLE_ENDIAN);

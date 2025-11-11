@@ -46,9 +46,9 @@ namespace ProjectA {
 			virtual void onEvent(Event& event) final override;
 
 		protected:
-			FontID loadFontAsset(std::string_view assetName);
+			FontID loadFontAsset(const str8& assetName);
 
-			ImageID loadImage(std::string_view path);
+			ImageID loadImage(const str8& path);
 
 			void openComponent(const ContainerStyle& style);
 

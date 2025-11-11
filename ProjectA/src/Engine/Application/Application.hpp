@@ -21,7 +21,7 @@ namespace ProjectA {
 
 			static float64 getInverseFixedDeltaTime();
 
-			static std::string formatWindowName(std::string_view projectName, uint8 instanceCount);
+			static str8 formatWindowName(const str8& projectName, uint8 instanceCount);
 
 		public:
 			explicit Application(const ProjectDescriptor& projectDescriptor);

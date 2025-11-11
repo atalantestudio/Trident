@@ -57,7 +57,7 @@ namespace ProjectA {
 		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		deviceCreateInfo.pNext = nullptr;
 		deviceCreateInfo.flags = 0;
-		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32>(deviceQueueCreateInfos.count);
+		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32>(deviceQueueCreateInfos.count());
 		deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfos[0];
 		deviceCreateInfo.enabledExtensionCount = static_cast<uint32>(enabledExtensionNames.size());
 		deviceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
@@ -126,12 +126,12 @@ namespace ProjectA {
 	sequence<ref<DescriptorSet>> VulkanDevice::allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) {
 		VkResult result;
 
-		const uint32 descriptorSetCount = static_cast<uint32>(descriptorSetLayouts.count);
+		const uint32 descriptorSetCount = static_cast<uint32>(descriptorSetLayouts.count());
 
 		sequence<VkDescriptorSetLayout> vkDescriptorSetLayouts(descriptorSetCount);
 		sequence<uint32> descriptorCountPerType(static_cast<uint32>(DescriptorType::__MAX_ENUM));
 
-		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptorSetLayouts.count; descriptorSetLayoutIndex += 1) {
+		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptorSetLayouts.count(); descriptorSetLayoutIndex += 1) {
 			const ref<DescriptorSetLayout>& descriptorSetLayout = descriptorSetLayouts[descriptorSetLayoutIndex];
 
 			for (const DescriptorSetLayoutBinding descriptorSetLayoutBinding : descriptorSetLayout->bindings) {
@@ -151,7 +151,7 @@ namespace ProjectA {
 
 		sequence<VkDescriptorPoolSize> vkDescriptorPoolSizes(descriptorPoolSizeCount);
 
-		for (uint32 descriptorPoolSizeIndex = 0, descriptorType = 0; descriptorType < descriptorCountPerType.count; descriptorType += 1) {
+		for (uint32 descriptorPoolSizeIndex = 0, descriptorType = 0; descriptorType < descriptorCountPerType.count(); descriptorType += 1) {
 			if (descriptorCountPerType[descriptorType] == 0) {
 				continue;
 			}
@@ -169,7 +169,7 @@ namespace ProjectA {
 		descriptorPoolCreateInfo.flags = 0;
 		descriptorPoolCreateInfo.maxSets = descriptorSetCount;
 		descriptorPoolCreateInfo.poolSizeCount = descriptorPoolSizeCount;
-		descriptorPoolCreateInfo.pPoolSizes = vkDescriptorPoolSizes;
+		descriptorPoolCreateInfo.pPoolSizes = &vkDescriptorPoolSizes[0];
 
 		VkDescriptorPool descriptorPool;
 
@@ -184,23 +184,23 @@ namespace ProjectA {
 		descriptorSetAllocateInfo.pNext = nullptr;
 		descriptorSetAllocateInfo.descriptorPool = descriptorPool;
 		descriptorSetAllocateInfo.descriptorSetCount = descriptorSetCount;
-		descriptorSetAllocateInfo.pSetLayouts = vkDescriptorSetLayouts;
+		descriptorSetAllocateInfo.pSetLayouts = &vkDescriptorSetLayouts[0];
 
 		sequence<VkDescriptorSet> vkDescriptorSets(descriptorSetCount);
 
-		result = vkAllocateDescriptorSets(object, &descriptorSetAllocateInfo, vkDescriptorSets);
+		result = vkAllocateDescriptorSets(object, &descriptorSetAllocateInfo, &vkDescriptorSets[0]);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan descriptor sets ([]).", string_VkResult(result));
 
-		sequence<ref<DescriptorSet>> descriptorSets(descriptorSetLayouts.count);
+		sequence<ref<DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 
-		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count; descriptorSetIndex += 1) {
+		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
 			const ref<DescriptorSetLayout>& descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
 
 			ref<VulkanDescriptorSet> descriptorSet = createRef<VulkanDescriptorSet>(vkDescriptorSets[descriptorSetIndex]);
-			descriptorSet->bindings = sequence<VulkanDescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count);
+			descriptorSet->bindings = sequence<VulkanDescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
 
-			for (uint32 descriptorSetBindingIndex = 0; descriptorSetBindingIndex < descriptorSet->bindings.count; descriptorSetBindingIndex += 1) {
+			for (uint32 descriptorSetBindingIndex = 0; descriptorSetBindingIndex < descriptorSet->bindings.count(); descriptorSetBindingIndex += 1) {
 				const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout->bindings[descriptorSetBindingIndex];
 
 				VulkanDescriptorSet::DescriptorSetBinding& vkDescriptorSetBinding = descriptorSet->bindings[descriptorSetBindingIndex];
@@ -232,22 +232,22 @@ namespace ProjectA {
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
 			const ref<VulkanDescriptorSet>& descriptorSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet);
 
-			ENGINE_ASSERT(writeDescriptorSet.bindingIndex < descriptorSet->bindings.count, "This descriptor set doesn't have binding index [].", writeDescriptorSet.bindingIndex);
+			ENGINE_ASSERT(writeDescriptorSet.bindingIndex < descriptorSet->bindings.count(), "This descriptor set doesn't have binding index [].", writeDescriptorSet.bindingIndex);
 
 			const VulkanDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
-				descriptorBufferInfoCount += writeDescriptorSet.descriptorBuffers.count;
+				descriptorBufferInfoCount += writeDescriptorSet.descriptorBuffers.count();
 			}
 			else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
-				descriptorImageInfoCount += writeDescriptorSet.descriptorImages.count;
+				descriptorImageInfoCount += writeDescriptorSet.descriptorImages.count();
 			}
 			else {
 				ENGINE_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
 			}
 		}
 
-		sequence<VkWriteDescriptorSet> vkWriteDescriptorSets(writeDescriptorSets.count);
+		sequence<VkWriteDescriptorSet> vkWriteDescriptorSets(writeDescriptorSets.count());
 		sequence<VkDescriptorBufferInfo> descriptorBufferInfos(descriptorBufferInfoCount);
 		sequence<VkDescriptorImageInfo> descriptorImageInfos(descriptorImageInfoCount);
 
@@ -255,7 +255,7 @@ namespace ProjectA {
 		uint32 descriptorBufferInfoOffset = 0;
 		uint32 descriptorImageInfoOffset = 0;
 
-		while (writeDescriptorSetIndex < writeDescriptorSets.count) {
+		while (writeDescriptorSetIndex < writeDescriptorSets.count()) {
 			const WriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[writeDescriptorSetIndex];
 			const ref<VulkanDescriptorSet>& descriptorSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet);
 			const VulkanDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
@@ -269,7 +269,7 @@ namespace ProjectA {
 			vkWriteDescriptorSet.descriptorType = getVkDescriptorType(descriptorSetBinding.descriptorType);
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
-				const uint32 descriptorBufferCount = static_cast<uint32>(writeDescriptorSet.descriptorBuffers.count);
+				const uint32 descriptorBufferCount = static_cast<uint32>(writeDescriptorSet.descriptorBuffers.count());
 
 				for (uint32 descriptorBufferIndex = 0; descriptorBufferIndex < descriptorBufferCount; descriptorBufferIndex += 1) {
 					const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
@@ -286,7 +286,7 @@ namespace ProjectA {
 				descriptorBufferInfoOffset += descriptorBufferCount;
 			}
 			else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
-				const uint32 descriptorImageCount = static_cast<uint32>(writeDescriptorSet.descriptorImages.count);
+				const uint32 descriptorImageCount = static_cast<uint32>(writeDescriptorSet.descriptorImages.count());
 
 				for (uint32 descriptorImageIndex = 0; descriptorImageIndex < descriptorImageCount; descriptorImageIndex += 1) {
 					const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
@@ -321,8 +321,8 @@ namespace ProjectA {
 
 		vkUpdateDescriptorSets(
 			object,
-			static_cast<uint32>(vkWriteDescriptorSets.count),
-			vkWriteDescriptorSets,
+			static_cast<uint32>(vkWriteDescriptorSets.count()),
+			&vkWriteDescriptorSets[0],
 			0,
 			nullptr
 		);

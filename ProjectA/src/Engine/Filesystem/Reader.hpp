@@ -3,8 +3,8 @@
 namespace ProjectA {
 	class Reader {
 		public:
-			explicit Reader(std::string_view path) :
-				stream(path.data())
+			explicit Reader(const str8& path) :
+				stream(&path[0])
 			{}
 
 			Reader& operator =(Reader& reader) {
@@ -36,7 +36,7 @@ namespace ProjectA {
 			sequence<uint8> read(uint64 count) {
 				sequence<uint8> data(count);
 
-				stream.read(pointer_cast<char8*>(data), data.count);
+				stream.read(pointer_cast<char8*>(&data[0]), data.count());
 
 				return data;
 			}

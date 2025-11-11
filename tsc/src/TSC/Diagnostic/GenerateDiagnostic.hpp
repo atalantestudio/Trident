@@ -5,6 +5,10 @@
 #include "../Statement.hpp"
 #include "../Token.hpp"
 
+#ifndef MODULE_FORMAT
+	#define MODULE_FORMAT(...) ::ProjectA::Logger::format(__VA_ARGS__)
+#endif
+
 namespace ProjectA {
 	// TODO: Make private in CompilationOutput.
 	template<DiagnosticCode DiagnosticCode>

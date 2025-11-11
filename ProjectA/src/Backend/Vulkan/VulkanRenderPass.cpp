@@ -28,11 +28,11 @@ namespace ProjectA {
 			resolveAttachmentCount += subpass->getResolveAttachmentReferenceCount();
 		}
 
-		sequence<VkAttachmentDescription> attachmentDescriptions(attachments.count + resolveAttachmentCount);
+		sequence<VkAttachmentDescription> attachmentDescriptions(attachments.count() + resolveAttachmentCount);
 
 		uint32 resolveAttachmentIndex = 0;
 
-		for (uint32 attachmentIndex = 0; attachmentIndex < attachments.count; attachmentIndex += 1) {
+		for (uint32 attachmentIndex = 0; attachmentIndex < attachments.count(); attachmentIndex += 1) {
 			const Attachment& attachment = attachments[attachmentIndex];
 
 			VkAttachmentDescription& attachmentDescription = attachmentDescriptions[attachmentIndex];
@@ -61,7 +61,7 @@ namespace ProjectA {
 
 			if (isColorAttachment(attachmentIndex) && attachment.sampleCount > 1) {
 				// Create resolve attachment description.
-				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[attachments.count + resolveAttachmentIndex];
+				VkAttachmentDescription& resolveAttachmentDescription = attachmentDescriptions[attachments.count() + resolveAttachmentIndex];
 				resolveAttachmentDescription.flags = 0;
 				resolveAttachmentDescription.format = surfaceFormat.format;
 				resolveAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -80,10 +80,10 @@ namespace ProjectA {
 		}
 
 		sequence<VkAttachmentReference> attachmentReferences(attachmentReferenceCount);
-		sequence<VkSubpassDescription> subpassDescriptions(descriptor.subpasses.count);
+		sequence<VkSubpassDescription> subpassDescriptions(descriptor.subpasses.count());
 		uint32 attachmentReferenceOffset = 0;
 
-		for (uint32 subpassIndex = 0; subpassIndex < descriptor.subpasses.count; subpassIndex += 1) {
+		for (uint32 subpassIndex = 0; subpassIndex < descriptor.subpasses.count(); subpassIndex += 1) {
 			const ref<Subpass>& subpass = descriptor.subpasses[subpassIndex];
 			const uint32 depthStencilAttachmentCount = static_cast<uint32>(subpass->hasDepthStencilAttachmentReference());
 
@@ -113,7 +113,7 @@ namespace ProjectA {
 				// Create resolve attachment references.
 				for (uint32 resolveAttachmentReferenceIndex = 0; resolveAttachmentReferenceIndex < subpass->getColorAttachmentReferenceCount(); resolveAttachmentReferenceIndex += 1) {
 					VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset + resolveAttachmentReferenceIndex];
-					attachmentReference.attachment = static_cast<uint32>(attachments.count) + resolveAttachmentReferenceIndex;
+					attachmentReference.attachment = static_cast<uint32>(attachments.count()) + resolveAttachmentReferenceIndex;
 					attachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 				}
 
@@ -165,10 +165,10 @@ namespace ProjectA {
 			attachmentReferenceOffset = relativeAttachmentReferenceOffset;
 		}
 
-		sequence<VkSubpassDependency> subpassDependencies(descriptor.subpassDependencies.count);
+		sequence<VkSubpassDependency> subpassDependencies(descriptor.subpassDependencies.count());
 
 		// TODO(subpass-refactor)
-		for (uint32 subpassDependencyIndex = 0; subpassDependencyIndex < descriptor.subpassDependencies.count; subpassDependencyIndex += 1) {
+		for (uint32 subpassDependencyIndex = 0; subpassDependencyIndex < descriptor.subpassDependencies.count(); subpassDependencyIndex += 1) {
 			const SubpassDependency& dependency = descriptor.subpassDependencies[subpassDependencyIndex];
 
 			VkSubpassDependency& subpassDependency = subpassDependencies[subpassDependencyIndex];
@@ -195,12 +195,12 @@ namespace ProjectA {
 		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		renderPassCreateInfo.pNext = nullptr;
 		renderPassCreateInfo.flags = 0;
-		renderPassCreateInfo.attachmentCount = static_cast<uint32>(attachmentDescriptions.count);
-		renderPassCreateInfo.pAttachments = attachmentDescriptions;
-		renderPassCreateInfo.subpassCount = static_cast<uint32>(subpassDescriptions.count);
-		renderPassCreateInfo.pSubpasses = subpassDescriptions;
-		renderPassCreateInfo.dependencyCount = static_cast<uint32>(subpassDependencies.count);
-		renderPassCreateInfo.pDependencies = subpassDependencies;
+		renderPassCreateInfo.attachmentCount = static_cast<uint32>(attachmentDescriptions.count());
+		renderPassCreateInfo.pAttachments = &attachmentDescriptions[0];
+		renderPassCreateInfo.subpassCount = static_cast<uint32>(subpassDescriptions.count());
+		renderPassCreateInfo.pSubpasses = &subpassDescriptions[0];
+		renderPassCreateInfo.dependencyCount = static_cast<uint32>(subpassDependencies.count());
+		renderPassCreateInfo.pDependencies = &subpassDependencies[0];
 
 		const VkResult result = vkCreateRenderPass(device.object, &renderPassCreateInfo, nullptr, &object);
 

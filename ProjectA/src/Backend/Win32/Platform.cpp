@@ -10,18 +10,16 @@ namespace ProjectA {
 	}
 
 	uint32 Platform::getCurrentProcessId() {
-		const DWORD pid = GetCurrentProcessId();
-
-		return pid;
+		return GetCurrentProcessId();
 	}
 
 	PlatformLibrary Platform::openLibrary(std::string_view libraryName) {
 		return PlatformLibrary(libraryName);
 	}
 
-	void Platform::fatalExit(uint32 code, const std::string& message) {
+	void Platform::fatalExit(uint32 code, const str8& message) {
 		const LPCWSTR titleString = ConvertUTF8ToUTF16(windowName);
-		const LPCWSTR messageString = ConvertUTF8ToUTF16(message.data());
+		const LPCWSTR messageString = ConvertUTF8ToUTF16(&message[0]);
 
 		WIN32_ASSERT(MessageBoxW(nullptr, messageString, titleString, MB_OK | MB_ICONERROR) != 0);
 

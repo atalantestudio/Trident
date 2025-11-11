@@ -12,7 +12,7 @@
 
 namespace ProjectA {
 	struct WindowDescriptor {
-		std::string name;
+		str8 name;
 
 		Extent2D size;
 

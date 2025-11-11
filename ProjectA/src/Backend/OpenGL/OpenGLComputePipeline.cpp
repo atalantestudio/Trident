@@ -26,7 +26,7 @@ namespace ProjectA {
 
 			sequence<GLchar> infoLog(infoLogLength);
 
-			glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog);
+			glGetProgramInfoLog(program, infoLogLength, nullptr, &infoLog[0]);
 
 			ENGINE_ERROR("Program linking failed:\n[]", infoLog);
 

@@ -45,7 +45,7 @@ namespace ProjectA {
 
 		VkApplicationInfo applicationInfo{};
 		applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		applicationInfo.pApplicationName = projectDescriptor.name.data();
+		applicationInfo.pApplicationName = &projectDescriptor.name[0];
 		applicationInfo.applicationVersion = VK_MAKE_API_VERSION(0, projectDescriptor.version.major, projectDescriptor.version.minor, projectDescriptor.version.patch);
 		applicationInfo.pEngineName = ENGINE_NAME;
 		applicationInfo.engineVersion = VK_MAKE_API_VERSION(0, ENGINE_VERSION_MAJOR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
@@ -158,7 +158,7 @@ namespace ProjectA {
 			ENGINE_INFO("Physical devices:");
 		#endif
 
-		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count; physicalDeviceIndex += 1) {
+		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count(); physicalDeviceIndex += 1) {
 			const VkPhysicalDevice physicalDevice = physicalDevices[physicalDeviceIndex];
 
 			vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
@@ -222,22 +222,26 @@ namespace ProjectA {
 	#ifdef DEBUG_ENABLE_MESSENGER
 		VkBool32 VulkanInstance::debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
 			switch (messageSeverity) {
-				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-					ENGINE_TRACE_PREFORMATTED(pCallbackData->pMessage);
+				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: {
+					VULKAN_DEBUG(pCallbackData->pMessage);
 
 					break;
-				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-					ENGINE_INFO(pCallbackData->pMessage);
+				}
+				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT: {
+					VULKAN_INFO(pCallbackData->pMessage);
 
 					break;
-				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-					ENGINE_WARN(pCallbackData->pMessage);
+				}
+				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT: {
+					VULKAN_WARNING(pCallbackData->pMessage);
 
 					break;
-				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-					ENGINE_ERROR(pCallbackData->pMessage);
+				}
+				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT: {
+					VULKAN_ERROR(pCallbackData->pMessage);
 
 					break;
+				}
 			}
 
 			return VK_FALSE;

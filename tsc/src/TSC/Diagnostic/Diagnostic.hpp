@@ -15,9 +15,13 @@ namespace ProjectA {
 				return static_cast<uint32>(code);
 			}
 
+			std::string getMessage() const {
+				return std::string(&message[0], message.count());
+			}
+
 		public:
 			DocumentRange range;
-			std::string message;
+			str8 message;
 			DiagnosticSeverity severity;
 			DiagnosticCode code;
 			std::vector<DiagnosticReference> references;

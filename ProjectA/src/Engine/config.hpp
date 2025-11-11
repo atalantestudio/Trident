@@ -1,9 +1,8 @@
 #pragma once
 
-namespace ProjectA {
-	#define GPU_TYPE_DISCRETE 0
-	#define GPU_TYPE_INTEGRATED 1
+#include "Engine/config_defines.hpp"
 
+namespace ProjectA {
 	// The physical device preferred by the application.
 	// There is no guarantee that it will be selected at runtime.
 	#define PREFERRED_GPU_TYPE GPU_TYPE_DISCRETE
@@ -31,32 +30,8 @@ namespace ProjectA {
 	// If enabled, OpenGL objects are cleanly unbound from their target after being used.
 	#define OPENGL_UNBIND_AFTER_USE
 
-	#define OPENGL_VERSION_1_2 120
-	#define OPENGL_VERSION_1_3 130
-	#define OPENGL_VERSION_1_4 140
-	#define OPENGL_VERSION_1_5 150
-	#define OPENGL_VERSION_2_0 200
-	#define OPENGL_VERSION_2_1 210
-	#define OPENGL_VERSION_3_0 300
-	#define OPENGL_VERSION_3_1 310
-	#define OPENGL_VERSION_3_2 320
-	#define OPENGL_VERSION_3_3 330
-	#define OPENGL_VERSION_4_0 400
-	#define OPENGL_VERSION_4_1 410
-	#define OPENGL_VERSION_4_2 420
-	#define OPENGL_VERSION_4_3 430
-	#define OPENGL_VERSION_4_4 440
-	#define OPENGL_VERSION_4_5 450
-	#define OPENGL_VERSION_4_6 460
-
 	// Desired OpenGL version. Note that the runtime device might not have this version.
 	#define OPENGL_VERSION OPENGL_VERSION_4_6
-
-	#define VULKAN_VERSION_1_0 10
-	#define VULKAN_VERSION_1_1 11
-	#define VULKAN_VERSION_1_2 12
-	#define VULKAN_VERSION_1_3 13
-	#define VULKAN_VERSION_1_4 14
 
 	// Desired Vulkan version. Note that the runtime device might not have this version.
 	#define VULKAN_VERSION VULKAN_VERSION_1_0

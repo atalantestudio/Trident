@@ -25,7 +25,7 @@ namespace ProjectA {
 			}
 
 			uint32 getColorAttachmentReferenceCount() const {
-				return static_cast<uint32>(colorAttachmentReferences.count);
+				return static_cast<uint32>(colorAttachmentReferences.count());
 			}
 
 			const sequence<AttachmentReference>& getColorAttachmentReferences() const {
@@ -41,7 +41,7 @@ namespace ProjectA {
 			}
 
 			uint32 getInputAttachmentReferenceCount() const {
-				return static_cast<uint32>(inputAttachmentReferences.count);
+				return static_cast<uint32>(inputAttachmentReferences.count());
 			}
 
 			const sequence<AttachmentReference>& getInputAttachmentReferences() const {

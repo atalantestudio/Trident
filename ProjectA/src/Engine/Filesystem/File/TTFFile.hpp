@@ -83,7 +83,7 @@ namespace ProjectA {
 			sequence<Edge> edges;
 
 			bool emptyOrUnparsed() const {
-				return edges.count == 0;
+				return edges.count() == 0;
 			}
 		};
 

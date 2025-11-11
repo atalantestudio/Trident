@@ -163,7 +163,7 @@ namespace ProjectA {
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
-		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count; framebufferIndex += 1) {
+		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
 			framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
@@ -871,7 +871,7 @@ namespace ProjectA {
 			const ref<Geometry2D>& geometry = scene.getGeometry(entity);
 			const ref<Material>& material = scene.getMaterial(entity);
 
-			for (uint32 vertexIndex = 0; vertexIndex < geometry->vertices.count; vertexIndex += 1) {
+			for (uint32 vertexIndex = 0; vertexIndex < geometry->vertices.count(); vertexIndex += 1) {
 				const vec2<float32>& vertex = geometry->vertices[vertexIndex];
 
 				vertexMappedRange[vertexIndex].position = {vertex[0], vertex[1]};

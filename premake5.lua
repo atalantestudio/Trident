@@ -53,7 +53,12 @@ project "ProjectA"
 	files {
 		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/src/**.hpp",
-		"%{prj.name}/vendor/API/**.h",
+		"%{prj.name}/vendor/API/GL/glcorearb.h",
+		"%{prj.name}/vendor/API/GL/glext.h",
+		"%{prj.name}/vendor/API/GL/wglext.h",
+		"%{prj.name}/vendor/API/KHR/khrplatform.h",
+		"%{prj.name}/vendor/Logger/**.cpp",
+		"%{prj.name}/vendor/Logger/**.hpp",
 		"%{prj.name}/vendor/lyah/lyah/**.hpp",
 	}
 
@@ -64,6 +69,7 @@ project "ProjectA"
 	includedirs {
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/API",
+		"%{prj.name}/vendor/Logger",
 		"%{prj.name}/vendor/lyah",
 		vulkansdk .. "/Include",
 	}
@@ -124,8 +130,8 @@ project "Samples"
 
 	includedirs {
 		"ProjectA/src",
-		"ProjectA/vendor",
 		"ProjectA/vendor/API",
+		"ProjectA/vendor/Logger",
 		"ProjectA/vendor/lyah",
 		vulkansdk .. "/Include", -- TODO: Temporary
 	}
@@ -199,8 +205,8 @@ project "AssetBuilder"
 
 	includedirs {
 		"ProjectA/src",
-		"ProjectA/vendor",
 		"ProjectA/vendor/API",
+		"ProjectA/vendor/Logger",
 		"ProjectA/vendor/lyah",
 		vulkansdk .. "/Include", -- TODO: Temporary
 	}
@@ -271,8 +277,8 @@ project "tsc"
 
 	includedirs {
 		"ProjectA/src",
-		"ProjectA/vendor",
 		"ProjectA/vendor/API",
+		"ProjectA/vendor/Logger",
 		"ProjectA/vendor/lyah",
 		vulkansdk .. "/Include", -- TODO: Temporary
 		"%{prj.name}/src",

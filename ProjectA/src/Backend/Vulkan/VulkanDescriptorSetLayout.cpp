@@ -12,15 +12,15 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		sequence<VkDescriptorSetLayoutBinding> vkDescriptorSetLayoutBindings(descriptorSetLayoutBindings.count);
+		sequence<VkDescriptorSetLayoutBinding> vkDescriptorSetLayoutBindings(descriptorSetLayoutBindings.count());
 
 		VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo{};
 		descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		descriptorSetLayoutCreateInfo.pNext = nullptr;
 		descriptorSetLayoutCreateInfo.flags = 0;
-		descriptorSetLayoutCreateInfo.bindingCount = static_cast<uint32>(vkDescriptorSetLayoutBindings.count);
+		descriptorSetLayoutCreateInfo.bindingCount = static_cast<uint32>(vkDescriptorSetLayoutBindings.count());
 
-		for (uint32 descriptorSetLayoutBindingIndex = 0; descriptorSetLayoutBindingIndex < descriptorSetLayoutBindings.count; descriptorSetLayoutBindingIndex += 1) {
+		for (uint32 descriptorSetLayoutBindingIndex = 0; descriptorSetLayoutBindingIndex < descriptorSetLayoutBindings.count(); descriptorSetLayoutBindingIndex += 1) {
 			const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex];
 
 			VkDescriptorSetLayoutBinding& vkDescriptorSetLayoutBinding = vkDescriptorSetLayoutBindings[descriptorSetLayoutBindingIndex];
@@ -31,7 +31,7 @@ namespace ProjectA {
 			vkDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 		}
 
-		descriptorSetLayoutCreateInfo.pBindings = vkDescriptorSetLayoutBindings;
+		descriptorSetLayoutCreateInfo.pBindings = &vkDescriptorSetLayoutBindings[0];
 
 		const VkResult result = vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, nullptr, &object);
 

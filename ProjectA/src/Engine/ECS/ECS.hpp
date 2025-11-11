@@ -20,7 +20,7 @@ namespace ProjectA {
 				const uint32 componentPoolIndex = getComponentPoolIndex<ComponentType>();
 
 				if (componentPoolIndex < componentPools.size()) {
-					ENGINE_WARN("Component type is already registered.");
+					ENGINE_WARNING("Component type is already registered.");
 
 					return;
 				}

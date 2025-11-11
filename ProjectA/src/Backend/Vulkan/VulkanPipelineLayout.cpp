@@ -10,9 +10,9 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		sequence<VkDescriptorSetLayout> vkDescriptorSetLayouts(descriptor.descriptorSetLayouts.count);
+		sequence<VkDescriptorSetLayout> vkDescriptorSetLayouts(descriptor.descriptorSetLayouts.count());
 
-		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptor.descriptorSetLayouts.count; descriptorSetLayoutIndex += 1) {
+		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptor.descriptorSetLayouts.count(); descriptorSetLayoutIndex += 1) {
 			vkDescriptorSetLayouts[descriptorSetLayoutIndex] = std::static_pointer_cast<VulkanDescriptorSetLayout>(descriptor.descriptorSetLayouts[descriptorSetLayoutIndex])->object;
 		}
 
@@ -20,8 +20,8 @@ namespace ProjectA {
 		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutCreateInfo.pNext = nullptr;
 		pipelineLayoutCreateInfo.flags = 0;
-		pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32>(vkDescriptorSetLayouts.count);
-		pipelineLayoutCreateInfo.pSetLayouts = vkDescriptorSetLayouts;
+		pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32>(vkDescriptorSetLayouts.count());
+		pipelineLayoutCreateInfo.pSetLayouts = &vkDescriptorSetLayouts[0];
 		pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 		pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 

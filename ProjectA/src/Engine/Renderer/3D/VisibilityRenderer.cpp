@@ -255,7 +255,7 @@ namespace ProjectA {
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
-		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count; framebufferIndex += 1) {
+		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
 			framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
@@ -405,7 +405,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor vertexPositionComponentBufferDescriptor{};
-		vertexPositionComponentBufferDescriptor.size = scene->vertexPositionComponents.count * sizeof(float32);
+		vertexPositionComponentBufferDescriptor.size = scene->vertexPositionComponents.count() * sizeof(float32);
 		vertexPositionComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexPositionComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
@@ -416,7 +416,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor vertexNormalComponentBufferDescriptor{};
-		vertexNormalComponentBufferDescriptor.size = scene->vertexNormalComponents.count * sizeof(float32);
+		vertexNormalComponentBufferDescriptor.size = scene->vertexNormalComponents.count() * sizeof(float32);
 		vertexNormalComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexNormalComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
@@ -427,7 +427,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor vertexTextureCoordinateComponentBufferDescriptor{};
-		vertexTextureCoordinateComponentBufferDescriptor.size = scene->vertexTextureCoordinateComponents.count * sizeof(float32);
+		vertexTextureCoordinateComponentBufferDescriptor.size = scene->vertexTextureCoordinateComponents.count() * sizeof(float32);
 		vertexTextureCoordinateComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexTextureCoordinateComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
@@ -438,7 +438,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor vertexPositionIndexBufferDescriptor{};
-		vertexPositionIndexBufferDescriptor.size = scene->vertexPositionIndices.count * sizeof(uint32);
+		vertexPositionIndexBufferDescriptor.size = scene->vertexPositionIndices.count() * sizeof(uint32);
 		vertexPositionIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexPositionIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
@@ -449,7 +449,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor vertexNormalIndexBufferDescriptor{};
-		vertexNormalIndexBufferDescriptor.size = scene->vertexNormalIndices.count * sizeof(uint32);
+		vertexNormalIndexBufferDescriptor.size = scene->vertexNormalIndices.count() * sizeof(uint32);
 		vertexNormalIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexNormalIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
@@ -460,7 +460,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor vertexTextureCoordinateIndexBufferDescriptor{};
-		vertexTextureCoordinateIndexBufferDescriptor.size = scene->vertexTextureCoordinateIndices.count * sizeof(uint32);
+		vertexTextureCoordinateIndexBufferDescriptor.size = scene->vertexTextureCoordinateIndices.count() * sizeof(uint32);
 		vertexTextureCoordinateIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexTextureCoordinateIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
@@ -471,7 +471,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor clusterBufferDescriptor{};
-		clusterBufferDescriptor.size = scene->clusters.count * sizeof(Cluster);
+		clusterBufferDescriptor.size = scene->clusters.count() * sizeof(Cluster);
 		clusterBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		clusterBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
@@ -482,7 +482,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor instanceBufferDescriptor{};
-		instanceBufferDescriptor.size = scene->instances.count * sizeof(Instance);
+		instanceBufferDescriptor.size = scene->instances.count() * sizeof(Instance);
 		instanceBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		instanceBufferDescriptor.persistent = true;
@@ -496,7 +496,7 @@ namespace ProjectA {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor geometryBufferDescriptor{};
-		geometryBufferDescriptor.size = scene->geometries.count * sizeof(Geometry);
+		geometryBufferDescriptor.size = scene->geometries.count() * sizeof(Geometry);
 		geometryBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		geometryBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
@@ -763,7 +763,7 @@ namespace ProjectA {
 
 	void VisibilityRenderer::fillIndirectBuffer() const {
 		indirectMappedRange[0].vertexCount = CLUSTER_INDEX_COUNT;
-		indirectMappedRange[0].instanceCount = static_cast<uint32>(scene->clusters.count);
+		indirectMappedRange[0].instanceCount = static_cast<uint32>(scene->clusters.count());
 		indirectMappedRange[0].vertexOffset = 0;
 		indirectMappedRange[0].instanceOffset = 0;
 	}
@@ -793,13 +793,13 @@ namespace ProjectA {
 	}
 
 	void VisibilityRenderer::fillClusterBuffer(Cluster* mappedRange) const {
-		for (uint32 clusterIndex = 0; clusterIndex < scene->clusters.count; clusterIndex += 1) {
+		for (uint32 clusterIndex = 0; clusterIndex < scene->clusters.count(); clusterIndex += 1) {
 			mappedRange[clusterIndex].instanceIndex = scene->clusters[clusterIndex].instanceIndex;
 		}
 	}
 
 	void VisibilityRenderer::fillInstanceBuffer(Instance* mappedRange) const {
-		for (uint32 instanceIndex = 0; instanceIndex < scene->instances.count; instanceIndex += 1) {
+		for (uint32 instanceIndex = 0; instanceIndex < scene->instances.count(); instanceIndex += 1) {
 			const auto& instance = scene->instances[instanceIndex];
 			const auto& geometry = scene->geometries[instance.geometryIndex];
 
@@ -810,7 +810,7 @@ namespace ProjectA {
 	}
 
 	void VisibilityRenderer::fillGeometryBuffer(Geometry* mappedRange) const {
-		for (uint32 geometryIndex = 0; geometryIndex < scene->geometries.count; geometryIndex += 1) {
+		for (uint32 geometryIndex = 0; geometryIndex < scene->geometries.count(); geometryIndex += 1) {
 			mappedRange[geometryIndex].vertexOffset = scene->geometries[geometryIndex].vertexOffset;
 			mappedRange[geometryIndex].clusterCount = scene->geometries[geometryIndex].clusterCount;
 		}

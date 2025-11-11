@@ -26,15 +26,15 @@ namespace ProjectA {
 				// Bind every attachment for clearing.
 				sequence<GLenum> bufs(renderPass->getAttachmentCount());
 
-				for (uint32 bufIndex = 0; bufIndex < bufs.count; bufIndex += 1) {
+				for (uint32 bufIndex = 0; bufIndex < bufs.count(); bufIndex += 1) {
 					bufs[bufIndex] = GL_COLOR_ATTACHMENT0 + bufIndex;
 				}
 
 				// TODO(draw-buffers): Use glNamedFramebufferDrawBuffers in OpenGL 4.5+.
-				glDrawBuffers(static_cast<GLsizei>(bufs.count), bufs);
+				glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
 
 				// Clear attachments with a load operation of LoadOperation::CLEAR.
-				for (uint32 attachmentIndex = 0; attachmentIndex < descriptor.clearValues.count; attachmentIndex += 1) {
+				for (uint32 attachmentIndex = 0; attachmentIndex < descriptor.clearValues.count(); attachmentIndex += 1) {
 					const ClearValue& clearValue = descriptor.clearValues[attachmentIndex];
 					const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
 

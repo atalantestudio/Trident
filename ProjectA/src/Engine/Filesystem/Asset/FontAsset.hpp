@@ -34,7 +34,7 @@ namespace ProjectA {
 			}
 
 			uint32 getGlyphCount() const {
-				return static_cast<uint32>(glyphs.count);
+				return static_cast<uint32>(glyphs.count());
 			}
 
 			// Returns the glyph represented by the provided code point.

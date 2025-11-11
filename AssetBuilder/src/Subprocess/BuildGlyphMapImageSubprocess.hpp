@@ -32,7 +32,7 @@ namespace ProjectA {
 				outputByteStream.write<uint32>(imageAsset->getMipLevelCount());
 				outputByteStream.write<uint32>(imageAsset->getLayerCount());
 
-				sequence<uint8> rgbaDataPerChannel(imageAsset->getData().count * 4);
+				sequence<uint8> rgbaDataPerChannel(imageAsset->getData().count() * 4);
 
 				convertRedToRGBA(imageAsset->getData(), rgbaDataPerChannel);
 

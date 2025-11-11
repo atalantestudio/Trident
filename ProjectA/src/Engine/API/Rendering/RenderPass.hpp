@@ -59,7 +59,7 @@ namespace ProjectA {
 			}
 
 			uint32 getAttachmentCount() const {
-				return static_cast<uint32>(attachments.count);
+				return static_cast<uint32>(attachments.count());
 			}
 
 			const Attachment& getAttachment(uint32 attachmentIndex) const {
@@ -70,11 +70,11 @@ namespace ProjectA {
 			}
 
 			uint32 getSubpassCount() const {
-				return static_cast<uint32>(subpasses.count);
+				return static_cast<uint32>(subpasses.count());
 			}
 
 			const ref<Subpass>& getSubpass(uint32 subpassIndex) const {
-				DEBUG_ASSERT(subpassIndex < subpasses.count);
+				DEBUG_ASSERT(subpassIndex < subpasses.count());
 
 				return subpasses[subpassIndex];
 			}

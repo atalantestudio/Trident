@@ -38,7 +38,7 @@ namespace ProjectA {
 
 		uint32 location = 0;
 
-		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.count; vertexInputBindingIndex += 1) {
+		for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.count(); vertexInputBindingIndex += 1) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 
 			VkVertexInputBindingDescription vertexInputBindingDescription{};
@@ -137,7 +137,7 @@ namespace ProjectA {
 
 		sequence<VkPipelineColorBlendAttachmentState> colorBlendAttachmentStates(descriptor.colorBlendState.attachments.size());
 
-		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < colorBlendAttachmentStates.count; colorBlendAttachmentIndex += 1) {
+		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < colorBlendAttachmentStates.count(); colorBlendAttachmentIndex += 1) {
 			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
 
 			VkPipelineColorBlendAttachmentState& colorBlendAttachmentState = colorBlendAttachmentStates[colorBlendAttachmentIndex];
@@ -157,7 +157,7 @@ namespace ProjectA {
 		colorBlendStateCreateInfo.flags = 0;
 		colorBlendStateCreateInfo.logicOpEnable = VK_FALSE;
 		colorBlendStateCreateInfo.logicOp = VK_LOGIC_OP_CLEAR;
-		colorBlendStateCreateInfo.attachmentCount = static_cast<uint32>(colorBlendAttachmentStates.count);
+		colorBlendStateCreateInfo.attachmentCount = static_cast<uint32>(colorBlendAttachmentStates.count());
 		colorBlendStateCreateInfo.pAttachments = &colorBlendAttachmentStates[0];
 		colorBlendStateCreateInfo.blendConstants[0] = 0.0f;
 		colorBlendStateCreateInfo.blendConstants[1] = 0.0f;
@@ -170,8 +170,8 @@ namespace ProjectA {
 		dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		dynamicStateCreateInfo.pNext = nullptr;
 		dynamicStateCreateInfo.flags = 0;
-		dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32>(dynamicStates.count);
-		dynamicStateCreateInfo.pDynamicStates = dynamicStates;
+		dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32>(dynamicStates.count());
+		dynamicStateCreateInfo.pDynamicStates = &dynamicStates[0];
 
 		const sequence<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
 			std::static_pointer_cast<VulkanShaderModule>(descriptor.vertexShaderModule)->object,
@@ -182,8 +182,8 @@ namespace ProjectA {
 		graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		graphicsPipelineCreateInfo.pNext = nullptr;
 		graphicsPipelineCreateInfo.flags = 0;
-		graphicsPipelineCreateInfo.stageCount = static_cast<uint32>(shaderStageCreateInfos.count);
-		graphicsPipelineCreateInfo.pStages = shaderStageCreateInfos;
+		graphicsPipelineCreateInfo.stageCount = static_cast<uint32>(shaderStageCreateInfos.count());
+		graphicsPipelineCreateInfo.pStages = &shaderStageCreateInfos[0];
 		graphicsPipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
 		graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
 		graphicsPipelineCreateInfo.pTessellationState = nullptr;

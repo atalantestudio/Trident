@@ -38,22 +38,21 @@ namespace ProjectA {
 
 		const std::string absolutePath = std::filesystem::absolute("Test/test3.tsl").string();
 
-		Logger logger("TestLogger", LogLevel::ALL);
-		logger.logStructure = LogStructure::NONE;
-		logger.spacing = 0;
+		// TODO
+		ConsoleLogger logger(std::cout, LogLevel::ALL, "TSL");
 
 		bool hasError = false;
 
 		for (const Diagnostic& diagnostic : output.diagnostics) {
 			switch (diagnostic.severity) {
 				case DiagnosticSeverity::ERROR: {
-					logger.error("[]:[]: []", absolutePath, diagnostic.range.start, diagnostic.message);
+					logger.error(__func__, __FILE__, __LINE__, "[]:[]: []", absolutePath, diagnostic.range.start, diagnostic.message);
 					hasError = true;
 
 					break;
 				}
 				case DiagnosticSeverity::WARNING: {
-					logger.warn("[]:[]: []", absolutePath, diagnostic.range.start, diagnostic.message);
+					logger.warning("[]:[]: []", absolutePath, diagnostic.range.start, diagnostic.message);
 
 					break;
 				}

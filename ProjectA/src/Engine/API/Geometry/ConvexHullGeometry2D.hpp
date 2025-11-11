@@ -89,7 +89,7 @@ namespace ProjectA {
 				float32 maxValue = dot(vertices[0], d);
 				uint32 maxValueIndex = 0;
 
-				for (uint32 vertexIndex = 1; vertexIndex < vertices.count; vertexIndex += 1) {
+				for (uint32 vertexIndex = 1; vertexIndex < vertices.count(); vertexIndex += 1) {
 					const float32 value = dot(vertices[vertexIndex], d);
 
 					if (value > maxValue) {

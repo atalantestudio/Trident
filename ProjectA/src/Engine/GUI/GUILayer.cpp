@@ -25,8 +25,8 @@ namespace ProjectA {
 		textureArrayFlushed = true;
 	}
 
-	FontID GUILayer::loadFontAsset(std::string_view assetName) {
-		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->findFontAsset(std::string(assetName));
+	FontID GUILayer::loadFontAsset(const str8& assetName) {
+		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->findFontAsset(assetName);
 
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
@@ -46,7 +46,7 @@ namespace ProjectA {
 		return fontId;
 	}
 
-	ImageID GUILayer::loadImage(std::string_view path) {
+	ImageID GUILayer::loadImage(const str8& path) {
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
 		const sequence<uint8> data = Filesystem::openBuffer(path);

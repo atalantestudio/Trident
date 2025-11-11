@@ -13,10 +13,6 @@ namespace ProjectA {
 
 	// Returns the visible face using the cull mode value.
 	static GLenum getGlPolygonModeFace(CullMode cullMode) {
-		if (cullMode == CullMode::FRONT_AND_BACK) {
-			ENGINE_WARN("OpenGL: The polygon mode is discarded because the cull mode is FRONT_AND_BACK.");
-		}
-
 		static constexpr GLenum glFaces[] = {
 			GL_FRONT_AND_BACK,
 			GL_BACK,

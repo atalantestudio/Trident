@@ -173,7 +173,7 @@ namespace ProjectA {
 				ENGINE_ASSERT(file.format == ImageFormat::R8G8B8A8_UNORM, "The default font must be created from an RGBA PNG.");
 				ENGINE_ASSERT(file.extent.depth == 1, "The default font file must not have depth.");
 
-				sequence<uint8> data(file.data.count / 4);
+				sequence<uint8> data(file.data.count() / 4);
 
 				convertRGBAToRed(file.data, data);
 
@@ -191,7 +191,7 @@ namespace ProjectA {
 				fontAssetDescriptor.lineHeight = ASCENT - DESCENT + LINE_GAP;
 				fontAssetDescriptor.glyphs = sequence<Glyph>(144);
 
-				for (uint32 glyphIndex = 0; glyphIndex < fontAssetDescriptor.glyphs.count; glyphIndex += 1) {
+				for (uint32 glyphIndex = 0; glyphIndex < fontAssetDescriptor.glyphs.count(); glyphIndex += 1) {
 					const BitmapGlyph& bitmapGlyph = BITMAP_GLYPHS[glyphIndex];
 
 					uint32 byteOffset = 0;
@@ -208,7 +208,7 @@ namespace ProjectA {
 					fontAssetDescriptor.unicodeMap.insert({codePoint, glyphIndex});
 				}
 
-				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count);
+				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count());
 				const uint64 outputSize =
 					7 * sizeof(uint32) + (4 * sizeof(float32) + 3 * sizeof(uint16)) * glyphCount +
 					(sizeof(uint16) + sizeof(uint32)) * fontAssetDescriptor.unicodeMap.size();

@@ -20,7 +20,7 @@ namespace ProjectA {
 
 				totalColorAttachmentCount += 1;
 
-				DEBUG_ASSERT(colorAttachmentReference.index < attachments.count);
+				DEBUG_ASSERT(colorAttachmentReference.index < attachments.count());
 
 				const Attachment& colorAttachment = attachments[colorAttachmentReference.index];
 

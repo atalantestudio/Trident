@@ -65,7 +65,7 @@ namespace ProjectA {
 			}
 
 			uint32 getTriangleCount() const {
-				return static_cast<uint32>(vertexPositionIndices.count) / 3;
+				return static_cast<uint32>(vertexPositionIndices.count()) / 3;
 			}
 
 		protected:

@@ -6,3 +6,7 @@
 	path = Samples/Asset
 	url = git@github.com:atalantestudio/SampleAssetPack
 	branch = main
+[submodule "ProjectA/vendor/Logger"]
+	path = ProjectA/vendor/Logger
+	url = git@github.com:atalantestudio/Logger
+	branch = main

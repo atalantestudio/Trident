@@ -1,4 +1,4 @@
-#include "pch.hpp"
+﻿#include "pch.hpp"
 
 #include "Engine/API/Event/Mouse/MouseDownEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"
@@ -18,9 +18,9 @@ namespace ProjectA {
 		return INVERSE_FIXED_DELTA_TIME;
 	}
 
-	std::string Application::formatWindowName(std::string_view projectName, uint8 instanceCount) {
+	str8 Application::formatWindowName(const str8& projectName, uint8 instanceCount) {
 		if (instanceCount == 0) {
-			return std::string(projectName);
+			return projectName;
 		}
 
 		return Logger::format("[] ([])", projectName, static_cast<sint32>(instanceCount));
@@ -33,7 +33,7 @@ namespace ProjectA {
 
 		ENGINE_DEBUG("Launching.");
 
-		Platform::initialize(projectDescriptor.name.data());
+		Platform::initialize(&projectDescriptor.name[0]);
 
 		mutex = createScope<Mutex>("Mutex");
 		mutex->acquire();
@@ -42,7 +42,11 @@ namespace ProjectA {
 		sharedMemoryData = static_cast<SharedMemoryData*>(sharedMemory->map(0, sizeof(SharedMemoryData)));
 
 		if (sharedMemoryData->instanceCount > MAX_PARALLEL_INSTANCES) {
-			ENGINE_FATAL(EOVERFLOW, "More than [] instances running in parallel.", static_cast<sint32>(MAX_PARALLEL_INSTANCES));
+			const str8 message = Logger::format("More than [] instances running in parallel.", static_cast<sint32>(MAX_PARALLEL_INSTANCES));
+
+			ENGINE_ERROR(message);
+
+			Platform::fatalExit(EOVERFLOW, message);
 
 			return;
 		}
@@ -54,13 +58,13 @@ namespace ProjectA {
 		//       If a property is invalid, the application emits a warning, but continues to use the current value.
 		const std::filesystem::path projectRootDirectory = Filesystem::getProjectRootDirectory();
 
-		const std::string propertyFilePath = Logger::format("[]\\[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
+		const str8 propertyFilePath = Logger::format("[]\\[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
 
 		// Try to open the property file located at "[PROJECT_ROOT_DIRECTORY]/[PROJECT_NAME].tpr".
 		Reader propertyFileReader = Filesystem::openReader(propertyFilePath);
 
 		if (!propertyFileReader.fileExists()) {
-			ENGINE_WARN("Could not find property file \"[]\".", propertyFilePath);
+			ENGINE_WARNING("Could not find property file \"[]\".", propertyFilePath);
 
 			// If the property file cannot be found, create a new one with default values.
 			Writer propertyFileWriter = Filesystem::openWriter(propertyFilePath);
@@ -71,7 +75,7 @@ namespace ProjectA {
 
 			std::copy(defaultFileData.begin(), defaultFileData.end(), &data[0]);
 
-			propertyFileWriter.write(&data[0], data.count);
+			propertyFileWriter.write(&data[0], data.count());
 
 			ENGINE_INFO("Created new property file with default values.");
 		}
@@ -79,6 +83,7 @@ namespace ProjectA {
 		properties = new ApplicationProperties();
 		propertyFileReader = Filesystem::openReader(propertyFilePath);
 
+		// TODO: Detect if the properties are invalid due to the file not being found.
 		PropertyFile propertyFile(propertyFileReader);
 		propertyFile.readProperties(properties);
 

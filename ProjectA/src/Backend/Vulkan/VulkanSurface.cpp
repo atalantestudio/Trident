@@ -106,7 +106,7 @@ namespace ProjectA {
 				}
 			}
 
-			ENGINE_WARN("V-Sync is disabled but no matching present mode was found. Reverting to FIFO present mode.");
+			ENGINE_WARNING("V-Sync is disabled but no matching present mode was found. Reverting to FIFO present mode.");
 
 			return VK_PRESENT_MODE_FIFO_KHR;
 		}

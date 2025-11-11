@@ -47,7 +47,7 @@ namespace ProjectA {
 
 				static void enumerateMemoryTypes();
 
-				static std::string formatSize(uint64 size);
+				static str8 formatSize(uint64 size);
 			#endif
 
 			// Finds a suitable memory type for the requirements, and returns its index.

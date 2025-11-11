@@ -250,7 +250,7 @@ namespace ProjectA {
 			}
 
 			if (lengthSquared(d) < epsilon<float32>() * epsilon<float32>()) {
-				ENGINE_WARN("GJK 2D: Vertex, edge or face overlap.");
+				ENGINE_WARNING("GJK 2D: Vertex, edge or face overlap.");
 
 				break;
 			}
@@ -282,7 +282,7 @@ namespace ProjectA {
 
 			#ifdef BUILD_MODE_DEBUG
 				if (i == GJK_2D_ITERATION_LIMIT - 1) {
-					ENGINE_WARN("GJK 2D: Iteration limit reached.");
+					ENGINE_WARNING("GJK 2D: Iteration limit reached.");
 				}
 			#endif
 

@@ -105,7 +105,7 @@ namespace ProjectA {
 
 		sequence<VkImage> vkImages(imageCount);
 
-		result = vkGetSwapchainImagesKHR(device.object, object, &imageCount, vkImages);
+		result = vkGetSwapchainImagesKHR(device.object, object, &imageCount, &vkImages[0]);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images ([]).", string_VkResult(result));
 

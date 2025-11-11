@@ -5,7 +5,7 @@
 namespace ProjectA {
 	struct ProjectDescriptor {
 		ProjectType type;
-		std::string_view name;
+		str8 name;
 		VersionNumber version;
 
 		// TODO

@@ -25,7 +25,7 @@ namespace ProjectA {
 		// Use this information to find if the framebuffer contains multisampled attachments or not.
 		bool resolve = false;
 
-		for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count; imageViewIndex += 1) {
+		for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count(); imageViewIndex += 1) {
 			const ref<ImageView>& imageView = descriptor.imageViews[imageViewIndex];
 
 			if (imageView->getImage()->getSampleCount() > 1) {
@@ -37,7 +37,7 @@ namespace ProjectA {
 
 		uint32 boundAttachmentIndex = 0;
 
-		for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count; imageViewIndex += 1) {
+		for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count(); imageViewIndex += 1) {
 			const ref<ImageView>& imageView = descriptor.imageViews[imageViewIndex];
 			const OpenGLImage* glImage = static_cast<const OpenGLImage*>(imageView->getImage());
 			const OpenGLImageView& glImageView = *std::static_pointer_cast<OpenGLImageView>(imageView);

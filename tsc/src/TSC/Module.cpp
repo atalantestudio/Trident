@@ -50,14 +50,14 @@ namespace ProjectA {
 
 		emscripten::class_<Diagnostic>("Diagnostic")
 			.property("range", &Diagnostic::range)
-			.property("message", &Diagnostic::message)
 			.property("references", &Diagnostic::references)
 			.function("getSeverityIndex", &Diagnostic::getSeverityIndex)
-			.function("getCodeIndex", &Diagnostic::getCodeIndex);
+			.function("getCodeIndex", &Diagnostic::getCodeIndex)
+			.function("getMessage", &Diagnostic::getMessage);
 
 		emscripten::class_<DiagnosticReference>("DiagnosticReference")
 			.property("range", &DiagnosticReference::range)
-			.property("message", &DiagnosticReference::message);
+			.function("getMessage", &DiagnosticReference::getMessage);
 
 		emscripten::class_<DocumentPosition>("DocumentPosition")
 			.property("line", &DocumentPosition::lineIndex)

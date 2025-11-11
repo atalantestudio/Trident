@@ -41,9 +41,9 @@ namespace ProjectA {
 		const uint32 largestVertexNormalIndex = vertexNormalCount - 1;
 		const uint32 largestVertexTextureCoordinateIndex = vertexTextureCoordinateCount - 1;
 
-		const uint8 vertexPositionIndexBitCount = calculateBitCount(largestVertexPositionIndex);
-		const uint8 vertexNormalIndexBitCount = calculateBitCount(largestVertexNormalIndex);
-		const uint8 vertexTextureCoordinateIndexBitCount = calculateBitCount(largestVertexTextureCoordinateIndex);
+		const uint8 vertexPositionIndexBitCount = countBits(largestVertexPositionIndex);
+		const uint8 vertexNormalIndexBitCount = countBits(largestVertexNormalIndex);
+		const uint8 vertexTextureCoordinateIndexBitCount = countBits(largestVertexTextureCoordinateIndex);
 
 		const uint32 indexCount = byteStream.read<uint32>();
 

@@ -35,7 +35,7 @@ namespace ProjectA {
 
 		switch (Renderer::graphicsApi) {
 			case GraphicsAPI::NONE: {
-				ENGINE_WARN("Headless graphics are not supported.");
+				ENGINE_WARNING("Headless graphics are not supported.");
 
 				break;
 			}
@@ -190,7 +190,7 @@ namespace ProjectA {
 
 		path = pathString;
 
-		const sequence<uint8> code = Filesystem::openBuffer(path);
+		const sequence<uint8> code = Filesystem::openBuffer(path.data());
 
 		return adapter->createShaderModule(code, descriptor);
 	}

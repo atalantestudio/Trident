@@ -1,23 +1,27 @@
 #pragma once
 
-#if COMPILER == COMPILER_MSVC
-	#define BREAKPOINT() __debugbreak()
-#else
-	#define BREAKPOINT()
+#ifndef BREAKPOINT
+	#if COMPILER == COMPILER_MSVC
+		#define BREAKPOINT() __debugbreak()
+	#else
+		#define BREAKPOINT()
+	#endif
 #endif
 
-#define ABORT std::abort
+#ifndef ABORT
+	#define ABORT std::abort
+#endif
 
-#define DEBUG_ASSERT(condition) { \
-	if (!(condition)) { \
-		MODULE_ERROR("Debug assertion failed."); \
-		BREAKPOINT(); \
-	} \
-}
+#ifndef DEBUG_ASSERT
+	#define DEBUG_ASSERT(condition) { \
+		if (!(condition)) { \
+			BREAKPOINT(); \
+		} \
+	}
+#endif
 
 #define MODULE_ASSERT(condition, ...) { \
 	if (!(condition)) { \
-		MODULE_ERROR(__VA_ARGS__); \
 		BREAKPOINT(); \
 	} \
 }

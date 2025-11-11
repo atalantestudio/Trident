@@ -64,23 +64,23 @@ namespace ProjectA {
 		for (uint32 geometryIndex = 0; geometryIndex < scene.getGeometryCount(); geometryIndex += 1) {
 			const ref<Geometry3D>& geometry = geometries[geometryIndex];
 
-			const uint64 indexCount = geometry->getVertexPositionIndices().count;
+			const uint64 indexCount = geometry->getVertexPositionIndices().count();
 
 			// TODO: Position indices SHOULD BE AS MANY as normal indices (and texture coordinate indices?).
-			DEBUG_ASSERT(indexCount == geometry->getVertexNormalIndices().count && indexCount == geometry->getVertexTextureCoordinateIndices().count);
+			DEBUG_ASSERT(indexCount == geometry->getVertexNormalIndices().count() && indexCount == geometry->getVertexTextureCoordinateIndices().count());
 
 			const uint32 clusterCount = static_cast<uint32>(ceil(static_cast<float32>(indexCount) / CLUSTER_INDEX_COUNT));
 			const uint32 instanceCount = scene.getInstanceCount(geometryIndex);
 
 			ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[geometryIndex];
-			clusteredGeometry.vertexCount = static_cast<uint32>(geometry->getVertexPositionComponents().count / 3);
+			clusteredGeometry.vertexCount = static_cast<uint32>(geometry->getVertexPositionComponents().count() / 3);
 			clusteredGeometry.clusterCount = clusterCount;
 			clusteredGeometry.clusterOffset = clusterOffset;
 			clusteredGeometry.instanceCount = instanceCount;
 
-			totalVertexPositionComponentCount += geometry->getVertexPositionComponents().count;
-			totalVertexNormalComponentCount += geometry->getVertexNormalComponents().count;
-			totalVertexTextureCoordinateComponentCount += geometry->getVertexTextureCoordinateComponents().count;
+			totalVertexPositionComponentCount += geometry->getVertexPositionComponents().count();
+			totalVertexNormalComponentCount += geometry->getVertexNormalComponents().count();
+			totalVertexTextureCoordinateComponentCount += geometry->getVertexTextureCoordinateComponents().count();
 			totalIndexCount += clusterCount * CLUSTER_INDEX_COUNT;
 			totalClusterCount += clusterCount * instanceCount;
 			totalInstanceCount += instanceCount;
@@ -123,9 +123,9 @@ namespace ProjectA {
 
 			vertexOffset += clusteredGeometry.vertexCount;
 			indexOffset += clusteredGeometry.clusterCount * CLUSTER_INDEX_COUNT;
-			vertexPositionComponentOffset += static_cast<uint32>(geometry->getVertexPositionComponents().count);
-			vertexNormalComponentOffset += static_cast<uint32>(geometry->getVertexNormalComponents().count);
-			vertexTextureCoordinateComponentOffset += static_cast<uint32>(geometry->getVertexTextureCoordinateComponents().count);
+			vertexPositionComponentOffset += static_cast<uint32>(geometry->getVertexPositionComponents().count());
+			vertexNormalComponentOffset += static_cast<uint32>(geometry->getVertexNormalComponents().count());
+			vertexTextureCoordinateComponentOffset += static_cast<uint32>(geometry->getVertexTextureCoordinateComponents().count());
 		}
 
 		clusterOffset = 0;

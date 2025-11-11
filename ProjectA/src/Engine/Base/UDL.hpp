@@ -1,10 +1,10 @@
 #pragma once
 
-#define DEFINE_UDL(literal, type) \
+#define UDL(literal, type) \
 	constexpr type operator ""_##literal(unsigned long long int a) { \
 		const type b = static_cast<type>(a); \
 		\
-		DEBUG_ASSERT(a == static_cast<unsigned long long int>(b)); \
+		ASSERT(a == static_cast<unsigned long long int>(b)); \
 		\
 		return b; \
 	} \
@@ -14,17 +14,17 @@
 	}
 
 namespace ProjectA {
-	DEFINE_UDL(deg, float32);
-	DEFINE_UDL(kg, float32);
-	DEFINE_UDL(kg_m2, float32);
-	DEFINE_UDL(m, float32);
-	DEFINE_UDL(m_s, float32);
-	DEFINE_UDL(m_s2, float32);
-	DEFINE_UDL(N, float32);
-	DEFINE_UDL(Nm, float32);
-	DEFINE_UDL(px, float32);
-	DEFINE_UDL(rad, float32);
+	UDL(deg, float32);
+	UDL(kg, float32);
+	UDL(kg_m2, float32);
+	UDL(m, float32);
+	UDL(m_s, float32);
+	UDL(m_s2, float32);
+	UDL(N, float32);
+	UDL(Nm, float32);
+	UDL(px, float32);
+	UDL(rad, float32);
 
 	// Omega (ω)
-	DEFINE_UDL(w, float32);
+	UDL(w, float32);
 }

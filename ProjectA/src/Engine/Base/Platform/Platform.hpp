@@ -6,8 +6,7 @@ namespace ProjectA {
 	// Platform-agnostic helper functions.
 	class Platform {
 		public:
-			// Initializes the platform.
-			// This name is used as the title of application windows and error pop-ups.
+			// `windowName` is the title of windows and error pop-ups belonging to the current application.
 			static void initialize(const char8* windowName);
 
 			// Returns the identifier of the current process.
@@ -16,7 +15,7 @@ namespace ProjectA {
 			static PlatformLibrary openLibrary(std::string_view libraryName);
 
 			// Shows an fatal error message box, then exits.
-			static void fatalExit(uint32 code, const std::string& message);
+			static void fatalExit(uint32 code, const str8& message);
 
 			static void waitForInput();
 

@@ -12,6 +12,7 @@
 			"defines": [
 				"BUILD_MODE_DEBUG"
 			],
+			// TODO: Change to C++11.
 			"cppStandard": "c++17",
 			"intelliSenseMode": "windows-msvc-x64"
 		},
@@ -27,6 +28,7 @@
 			"defines": [
 				"BUILD_MODE_PROFILE"
 			],
+			// TODO: Change to C++11.
 			"cppStandard": "c++17",
 			"intelliSenseMode": "windows-msvc-x64"
 		},
@@ -42,6 +44,7 @@
 			"defines": [
 				"BUILD_MODE_RELEASE"
 			],
+			// TODO: Change to C++11.
 			"cppStandard": "c++17",
 			"intelliSenseMode": "windows-msvc-x64"
 		}

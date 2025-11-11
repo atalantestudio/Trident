@@ -11,11 +11,11 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		GLsizei length = static_cast<GLsizei>(code.count);
+		GLsizei length = static_cast<GLsizei>(code.count());
 
 		#ifdef OPENGL_USE_SPIRV
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_6
-				glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, code, length);
+				glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, &code[0], length);
 
 				// TODO: Expose specialization constants.
 				glSpecializeShader(object, descriptor.entryPoint.data(), 0, nullptr, nullptr);
@@ -76,7 +76,7 @@ namespace ProjectA {
 
 		sequence<GLchar> infoLog(infoLogLength);
 
-		glGetShaderInfoLog(object, infoLogLength, nullptr, infoLog);
+		glGetShaderInfoLog(object, infoLogLength, nullptr, &infoLog[0]);
 		glDeleteShader(object);
 
 		ENGINE_ERROR("Shader module compilation failed:\n[]", infoLog);

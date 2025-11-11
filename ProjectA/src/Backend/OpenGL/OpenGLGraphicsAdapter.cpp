@@ -96,7 +96,7 @@ namespace ProjectA {
 
 	#ifdef DEBUG_ENABLE_MESSENGER
 		void OpenGLGraphicsAdapter::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-			static constexpr std::string_view log = "[[] []] []";
+			static constexpr char8* log = "[[] []] []";
 			static constexpr char8* sourceStrings[] = {
 				"OpenGL API",
 				"Window-system API",
@@ -151,16 +151,16 @@ namespace ProjectA {
 
 			switch (severity) {
 				case GL_DEBUG_SEVERITY_NOTIFICATION:
-					ENGINE_INFO(log, sourceString, typeString, message);
+					OPENGL_INFO(log, sourceString, typeString, message);
 
 					break;
 				case GL_DEBUG_SEVERITY_LOW:
 				case GL_DEBUG_SEVERITY_MEDIUM:
-					ENGINE_WARN(log, sourceString, typeString, message);
+					OPENGL_WARNING(log, sourceString, typeString, message);
 
 					break;
 				case GL_DEBUG_SEVERITY_HIGH:
-					ENGINE_ERROR(log, sourceString, typeString, message);
+					OPENGL_ERROR(log, sourceString, typeString, message);
 
 					break;
 			}

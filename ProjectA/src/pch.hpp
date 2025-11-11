@@ -1,5 +1,6 @@
-#pragma once
+﻿#pragma once
 
+// TODO: Conditionally import per module.
 #include <array>
 #include <cstdint>
 #include <filesystem>
@@ -9,20 +10,33 @@
 #include <random>
 #include <sstream>
 
+// TODO: Conditionally import per module.
 #ifdef BUILD_MODE_DEBUG
 	#include <chrono>
 	#include <iomanip>
 #endif
 
+// TODO: Conditionally import per module.
 #ifdef BUILD_MODE_PROFILE
 	#include <algorithm>
 	#include <thread>
 #endif
 
+#include "Engine/Base/base.hpp"
+
+// TODO: Handle in ModuleBase?
+#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+	#undef max
+	#undef min
+#endif
+
 // Register modules.
+#include "Engine/Module/Include/Logger.hpp"
 #include "Engine/Module/Include/lyah.hpp"
 
-#include "Engine/Base/base.hpp"
+#include "Engine/Base/Log.hpp"
+#include "Engine/Base/Extent.hpp"
+#include "Engine/Base/String.hpp"
 
 // Register module adapters.
 #include "Engine/Module/Adapter/lyah.hpp"

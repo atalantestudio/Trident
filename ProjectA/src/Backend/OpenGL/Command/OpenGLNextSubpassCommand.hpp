@@ -12,7 +12,7 @@ namespace ProjectA {
 			static void setDrawBuffers(const ref<Subpass>& subpass) {
 				sequence<GLenum> bufs(subpass->getColorAttachmentReferenceCount());
 
-				for (uint32 bufIndex = 0; bufIndex < bufs.count; bufIndex += 1) {
+				for (uint32 bufIndex = 0; bufIndex < bufs.count(); bufIndex += 1) {
 					const AttachmentReference& colorAttachmentReference = subpass->getColorAttachmentReferences()[bufIndex];
 
 					if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
@@ -25,7 +25,7 @@ namespace ProjectA {
 				}
 
 				// TODO(draw-buffers): Use glNamedFramebufferDrawBuffers in OpenGL 4.5+.
-				glDrawBuffers(static_cast<GLsizei>(bufs.count), bufs);
+				glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
 			}
 
 		public:

@@ -328,16 +328,16 @@ namespace ProjectA {
 		T area = static_cast<T>(0.0);
 
 		// Close vertex array.
-		sequence<lyah::vec<2, T>> closedVertices(unclosedVertices.count + 2);
+		sequence<lyah::vec<2, T>> closedVertices(unclosedVertices.count() + 2);
 
 		std::copy(unclosedVertices.begin(), unclosedVertices.end(), &closedVertices[0]);
 
-		closedVertices[unclosedVertices.count + 0] = unclosedVertices[0];
-		closedVertices[unclosedVertices.count + 1] = unclosedVertices[1];
+		closedVertices[unclosedVertices.count() + 0] = unclosedVertices[0];
+		closedVertices[unclosedVertices.count() + 1] = unclosedVertices[1];
 
 		uint32 i = 1;
 
-		while (i <= unclosedVertices.count) {
+		while (i <= unclosedVertices.count()) {
 			area += closedVertices[i][0] * scale[0] * (closedVertices[i + 1][1] * scale[1] - closedVertices[i - 1][1] * scale[1]);
 
 			i += 1;
