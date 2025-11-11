@@ -1,3 +1,4 @@
-Asset/Shader/**/*.spv
 Log
+Trace
 *.tpr
+Asset/Shader/**/*.spv

@@ -15,20 +15,20 @@ int main(int argc, char** argv) {
 	ProjectA::Application* application;
 
 	{
-		PROFILER("Log/ProfileStart.json");
+		PROFILER("Trace/ProfileStart.json");
 
 		application = ProjectA::createApplication(static_cast<ProjectA::uint32>(argc), argv);
 		application->postConstruct();
 	}
 
 	if (application->hasLayers()) {
-		PROFILER("Log/ProfileRun.json");
+		PROFILER("Trace/ProfileRun.json");
 
 		application->loop();
 	}
 
 	{
-		PROFILER("Log/ProfileEnd.json");
+		PROFILER("Trace/ProfileEnd.json");
 
 		delete application;
 	}

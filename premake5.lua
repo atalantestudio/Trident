@@ -149,6 +149,8 @@ project "Samples"
 		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Geometry]",
 		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Image]",
 		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Asset/Shader]",
+		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Log]",
+		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Trace]",
 
 		-- TODO: The original image resources are copied while standalone image assets are not handled.
 		"{COPYDIR} Asset/Image/** %[bin/" .. outputdir .. "/%{prj.name}/Asset/Image/**]",
