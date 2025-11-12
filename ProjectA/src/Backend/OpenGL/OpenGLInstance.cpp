@@ -5,7 +5,7 @@
 #include "Backend/Win32/base.hpp"
 
 namespace ProjectA {
-	void* OpenGLInstance::getWglProcedure(std::string_view procedureName) {
+	void* OpenGLInstance::getWglProcedure(const str8& procedureName) {
 		static const PlatformLibrary opengl32Library = Platform::openLibrary("opengl32.dll");
 
 		return opengl32Library.getProcedure(procedureName);
@@ -93,10 +93,10 @@ namespace ProjectA {
 		WIN32_ASSERT(wglDeleteContext(hGLRC) == TRUE);
 	}
 
-	void* OpenGLInstance::getProcedure(std::string_view procedureName) const {
+	void* OpenGLInstance::getProcedure(const str8& procedureName) const {
 		static const PFNWGLGETPROCADDRESSPROC wglGetProcAddress = static_cast<PFNWGLGETPROCADDRESSPROC>(getWglProcedure("wglGetProcAddress"));
 
-		const PROC procedure = wglGetProcAddress(procedureName.data());
+		const PROC procedure = wglGetProcAddress(&procedureName[0]);
 
 		if (procedure == nullptr || procedure == (void*) -1 || procedure == (void*) 1 || procedure == (void*) 2 || procedure == (void*) 3) {
 			return getWglProcedure(procedureName);

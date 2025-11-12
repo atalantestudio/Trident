@@ -10,14 +10,14 @@ namespace ProjectA {
 
 	class OpenGLInstance {
 		private:
-			static void* getWglProcedure(std::string_view procedureName);
+			static void* getWglProcedure(const str8& procedureName);
 
 		public:
 			explicit OpenGLInstance(const Window& window);
 
 			~OpenGLInstance();
 
-			void* getProcedure(std::string_view procedureName) const;
+			void* getProcedure(const str8& procedureName) const;
 
 			void makeCurrent() const;
 

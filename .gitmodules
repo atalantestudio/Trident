@@ -2,11 +2,11 @@
 	path = ProjectA/vendor/lyah
 	url = git@github.com:atalantestudio/lyah
 	branch = main
+[submodule "ProjectA/vendor/scroll"]
+	path = ProjectA/vendor/scroll
+	url = git@github.com:atalantestudio/scroll
+	branch = main
 [submodule "Samples/Asset"]
 	path = Samples/Asset
 	url = git@github.com:atalantestudio/SampleAssetPack
-	branch = main
-[submodule "ProjectA/vendor/Logger"]
-	path = ProjectA/vendor/Logger
-	url = git@github.com:atalantestudio/Logger
 	branch = main

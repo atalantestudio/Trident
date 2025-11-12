@@ -31,8 +31,8 @@
 #endif
 
 // Register modules.
-#include "Engine/Module/Include/Logger.hpp"
 #include "Engine/Module/Include/lyah.hpp"
+#include "Engine/Module/Include/scroll.hpp"
 
 #include "Engine/Base/Log.hpp"
 #include "Engine/Base/Extent.hpp"
@@ -40,6 +40,7 @@
 
 // Register module adapters.
 #include "Engine/Module/Adapter/lyah.hpp"
+#include "Engine/Module/Adapter/scroll.hpp"
 
 #include "Engine/Base/Color.hpp"
 #include "Engine/Base/KeyCode.hpp"
