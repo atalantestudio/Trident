@@ -77,7 +77,7 @@ namespace ProjectA {
 #endif
 
 #define ENGINE_ERROR_UNIMPLEMENTED() { \
-	ENGINE_ERROR("This feature is not implemented."); \
+	ENGINE_ERROR("This feature is not yet implemented."); \
 	ABORT(); \
 }
 

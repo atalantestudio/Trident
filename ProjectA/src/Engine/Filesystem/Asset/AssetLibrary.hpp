@@ -74,7 +74,7 @@ namespace ProjectA {
 			ref<AssetType> findAssetByStem(const std::unordered_map<std::string, uint32>& assetStemToAssetIndex, const str8& stem) const {
 				const auto iterator = assetStemToAssetIndex.find(std::string(&stem[0], stem.count()));
 
-				ENGINE_ASSERT(iterator != assetStemToAssetIndex.end(), "Cannot locate asset \"[]\".", stem);
+				ENGINE_ASSERT(iterator != assetStemToAssetIndex.end(), "Asset \"[]\" not found.", stem);
 				ENGINE_ASSERT(iterator->second < assets.size(), "The found asset index is overflowing.");
 
 				return std::static_pointer_cast<AssetType>(assets[iterator->second]);
