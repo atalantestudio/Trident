@@ -12,7 +12,7 @@ namespace ProjectA {
 			// Returns the identifier of the current process.
 			static uint32 getCurrentProcessId();
 
-			static PlatformLibrary openLibrary(std::string_view libraryName);
+			static PlatformLibrary openLibrary(const str8& libraryName);
 
 			// Shows an fatal error message box, then exits.
 			static void fatalExit(uint32 code, const str8& message);

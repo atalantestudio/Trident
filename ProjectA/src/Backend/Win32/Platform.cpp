@@ -13,7 +13,7 @@ namespace ProjectA {
 		return GetCurrentProcessId();
 	}
 
-	PlatformLibrary Platform::openLibrary(std::string_view libraryName) {
+	PlatformLibrary Platform::openLibrary(const str8& libraryName) {
 		return PlatformLibrary(libraryName);
 	}
 
