@@ -8,8 +8,8 @@
 	#define BUILD_MODE BUILD_MODE_RELEASE
 #endif
 
-// TODO
-#include <Base/Base.hpp>
+// TODO: For now, use scroll's module base as the default base for the engine.
+#include <Base/Base/Base.hpp>
 
 #if STANDARD < STANDARD_CPP11
 	#error "Unsupported C++ version."

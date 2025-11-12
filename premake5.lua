@@ -58,8 +58,7 @@ project "ProjectA"
 		"%{prj.name}/vendor/API/GL/wglext.h",
 		"%{prj.name}/vendor/API/KHR/khrplatform.h",
 		"%{prj.name}/vendor/lyah/lyah/**.hpp",
-		"%{prj.name}/vendor/scroll/**.cpp",
-		"%{prj.name}/vendor/scroll/**.hpp",
+		"%{prj.name}/vendor/scroll/scroll/**.hpp",
 	}
 
 	removefiles {
