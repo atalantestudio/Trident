@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Engine/Filesystem/FileWriter/JSONFileWriter.hpp"
 
@@ -7,7 +7,7 @@
 namespace ProjectA {
 	class ASTDebugger {
 		public:
-			explicit ASTDebugger(const str8& path, const CompilationOutput& output);
+			explicit ASTDebugger(view<char8> path, const CompilationOutput& output);
 
 		private:
 			void writeStatement();

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "BuildGlyphMapImageSubprocess.hpp"
 #include "../Process/GenerateSDFGlyphMapProcess.hpp"
@@ -7,7 +7,7 @@ namespace ProjectA {
 	class BuildTrueTypeFontSubprocess {
 		public:
 			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& assetOutputPath) {
-				const str8 path = directoryEntry.path().string();
+				const sequence<char8> path = directoryEntry.path().string().c_str();
 				const sequence<uint8> inputData = Filesystem::openBuffer(path);
 				const ByteStream<StreamOperation::READ> inputByteStream(&inputData[0], inputData.count(), Endianness::BIG_ENDIAN);
 
@@ -95,12 +95,19 @@ namespace ProjectA {
 					outputByteStream.write<uint32>(unicodeEntry.second);
 				}
 
-				const std::string outputPath = assetOutputPath + "Font/" + directoryEntry.path().stem().string() + ".tfo";
+				const std::string stem = directoryEntry.path().stem().string();
+
+				// NOTE: Count '\0'.
+				sequence<char8> outputPath(assetOutputPath.size() + stem.size() + 10);
+				std::copy(assetOutputPath.begin(), assetOutputPath.end(), &outputPath[0]);
+				std::copy_n("Font/", 5, &outputPath[assetOutputPath.size()]);
+				std::copy(stem.begin(), stem.end(), &outputPath[assetOutputPath.size() + 5]);
+				std::copy_n(".tfo", 4, &outputPath[assetOutputPath.size() + stem.size() + 5]);
 
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputByteStream.size);
 
-				ENGINE_INFO("Generated font asset (ID: []).", fontAssetDescriptor.identifier);
+				ENGINE_INFO("Generated font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
 			}
 	};
 }

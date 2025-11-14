@@ -1,4 +1,4 @@
-#include "pch.hpp"
+﻿#include "pch.hpp"
 
 #include "Engine/API/Event/EventDispatcher.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -25,7 +25,7 @@ namespace ProjectA {
 		textureArrayFlushed = true;
 	}
 
-	FontID GUILayer::loadFontAsset(const str8& assetName) {
+	FontID GUILayer::loadFontAsset(view<char8> assetName) {
 		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->findFontAsset(assetName);
 
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
@@ -46,7 +46,7 @@ namespace ProjectA {
 		return fontId;
 	}
 
-	ImageID GUILayer::loadImage(const str8& path) {
+	ImageID GUILayer::loadImage(view<char8> path) {
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
 		const sequence<uint8> data = Filesystem::openBuffer(path);

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "../DocumentRange.hpp"
 
@@ -9,6 +9,6 @@ namespace ProjectA {
 		}
 
 		DocumentRange range;
-		str8 message;
+		sequence<char8> message;
 	};
 }

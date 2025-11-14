@@ -57,21 +57,21 @@ namespace ProjectA {
 				return assets[iterator->second];
 			}
 
-			ref<FontAsset> findFontAsset(const str8& stem) const {
+			ref<FontAsset> findFontAsset(view<char8> stem) const {
 				return findAssetByStem<FontAsset>(fontAssetStemToAssetIndex, stem);
 			}
 
-			ref<GeometryAsset> findGeometryAsset(const str8& stem) const {
+			ref<GeometryAsset> findGeometryAsset(view<char8> stem) const {
 				return findAssetByStem<GeometryAsset>(geometryAssetStemToAssetIndex, stem);
 			}
 
-			ref<ImageAsset> findImageAsset(const str8& stem) const {
+			ref<ImageAsset> findImageAsset(view<char8> stem) const {
 				return findAssetByStem<ImageAsset>(imageAssetStemToAssetIndex, stem);
 			}
 
 		private:
 			template<typename AssetType>
-			ref<AssetType> findAssetByStem(const std::unordered_map<std::string, uint32>& assetStemToAssetIndex, const str8& stem) const {
+			ref<AssetType> findAssetByStem(const std::unordered_map<std::string, uint32>& assetStemToAssetIndex, view<char8> stem) const {
 				const auto iterator = assetStemToAssetIndex.find(std::string(&stem[0], stem.count()));
 
 				ENGINE_ASSERT(iterator != assetStemToAssetIndex.end(), "Asset \"[]\" not found.", stem);
@@ -85,7 +85,7 @@ namespace ProjectA {
 					return;
 				}
 
-				const str8 assetPath = assetEntry.path().string();
+				const sequence<char8> assetPath = assetEntry.path().string().c_str();
 				const sequence<uint8> data = Filesystem::openBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
@@ -115,7 +115,7 @@ namespace ProjectA {
 					return;
 				}
 
-				const str8 assetPath = assetEntry.path().string();
+				const sequence<char8> assetPath = assetEntry.path().string().c_str();
 				const sequence<uint8> data = Filesystem::openBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
@@ -145,7 +145,7 @@ namespace ProjectA {
 					return;
 				}
 
-				const str8 assetPath = assetEntry.path().string();
+				const sequence<char8> assetPath = assetEntry.path().string().c_str();
 				const sequence<uint8> data = Filesystem::openBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);

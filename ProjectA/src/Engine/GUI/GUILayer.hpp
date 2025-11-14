@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Engine/GUI/Component/Container.hpp"
 #include "Engine/GUI/ComponentStyle/ContainerStyle.hpp"
@@ -46,9 +46,9 @@ namespace ProjectA {
 			virtual void onEvent(Event& event) final override;
 
 		protected:
-			FontID loadFontAsset(const str8& assetName);
+			FontID loadFontAsset(view<char8> assetName);
 
-			ImageID loadImage(const str8& path);
+			ImageID loadImage(view<char8> path);
 
 			void openComponent(const ContainerStyle& style);
 

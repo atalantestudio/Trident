@@ -1,4 +1,4 @@
-#include "pch.hpp"
+﻿#include "pch.hpp"
 
 #include "Engine/Filesystem/FileWriter/FileWriter.hpp"
 
@@ -6,7 +6,7 @@ namespace ProjectA {
 	template<>
 	class FileWriter<FileFormat::JSON> : public BaseFileWriter {
 		public:
-			explicit FileWriter(const str8& path, uint32 tabSize) :
+			explicit FileWriter(view<char8> path, uint32 tabSize) :
 				BaseFileWriter(path),
 				tabSize(tabSize)
 			{
@@ -62,27 +62,27 @@ namespace ProjectA {
 			}
 
 			template<typename Argument>
-			void property(const str8& name, Argument&& valueArgument) {
+			void property(view<char8> name, Argument&& valueArgument) {
 				propertyStart();
 
 				writeLine(Logger::format("\"[]\": \"[]\"", name, std::forward<Argument>(valueArgument)));
 			}
 
 			template<typename Argument>
-			void propertyNonString(const str8& name, Argument&& valueArgument) {
+			void propertyNonString(view<char8> name, Argument&& valueArgument) {
 				propertyStart();
 
 				writeLine(Logger::format("\"[]\": []", name, std::forward<Argument>(valueArgument)));
 			}
 
 			template<typename... Argument>
-			void property(const str8& name, const str8* valuePattern, Argument&&... valueArguments) {
+			void property(view<char8> name, view<char8> valuePattern, Argument&&... valueArguments) {
 				propertyStart();
 
-				writeLine(Logger::format("\"[]\": []", name, Logger::format(pattern, std::forward<Argument>(arguments)...)));
+				writeLine(Logger::format("\"[]\": []", name, Logger::format(valuePattern, std::forward<Argument>(arguments)...)));
 			}
 
-			void propertyArray(const str8& name) {
+			void propertyArray(view<char8> name) {
 				DEBUG_ASSERT(itemsPerScope[0] <= 1);
 
 				if (itemsPerScope[currentScopeIndex] > 0) {
@@ -98,7 +98,7 @@ namespace ProjectA {
 				indent();
 			}
 
-			void propertyObject(const str8& name) {
+			void propertyObject(view<char8> name) {
 				DEBUG_ASSERT(itemsPerScope[0] <= 1);
 
 				if (itemsPerScope[currentScopeIndex] > 0) {
@@ -139,11 +139,11 @@ namespace ProjectA {
 				stream << '\n';
 			}
 
-			void writeLine(const str8& value) {
+			void writeLine(view<char8> value) {
 				stream << std::setw(currentScopeIndex * tabSize + value.count()) << value;
 			}
 
-			bool isDigitOnly(const str8& value) {
+			bool isDigitOnly(view<char8> value) {
 				for (const char8 character : value) {
 					if (character < '0' || character > '9') {
 						return false;

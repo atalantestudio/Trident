@@ -11,7 +11,7 @@ namespace ProjectA {
 		return getProjectRootDirectory().filename();
 	}
 
-	sequence<uint8> Filesystem::openBuffer(const str8& path) {
+	sequence<uint8> Filesystem::openBuffer(view<char8> path) {
 		std::ifstream stream(&path[0], std::ios::ate | std::ios::binary);
 
 		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
@@ -28,11 +28,11 @@ namespace ProjectA {
 		return buffer;
 	}
 
-	Reader Filesystem::openReader(const str8& path) {
+	Reader Filesystem::openReader(view<char8> path) {
 		return Reader(path);
 	}
 
-	Writer Filesystem::openWriter(const str8& path) {
+	Writer Filesystem::openWriter(view<char8> path) {
 		return Writer(path);
 	}
 }

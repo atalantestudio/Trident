@@ -8,6 +8,8 @@
 	#define BUILD_MODE BUILD_MODE_RELEASE
 #endif
 
+#define USER_NAMESPACE ProjectA
+
 // TODO: For now, use scroll's module base as the default base for the engine.
 #include <Base/Base/Base.hpp>
 
@@ -60,12 +62,6 @@
 #ifdef ENABLE_VULKAN_ADAPTER
 	#include "Backend/Vulkan/base.hpp"
 #endif
-
-namespace ProjectA {
-	// TODO: Replace sequence<T> by buffer<T>.
-	template<typename T>
-	using sequence = buffer<T>;
-}
 
 #include "Engine/Base/Random.hpp"
 #include "Engine/Base/VersionNumber.hpp"

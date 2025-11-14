@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Engine/Build/Clusterizer.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -7,7 +7,7 @@
 namespace ProjectA {
 	// TODO: Assert that FBX nodes exist before using them.
 	static void EncodeGeometryAssetSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& assetOutputPath) {
-		const str8 path = directoryEntry.path().string();
+		const sequence<char8> path = directoryEntry.path().string().c_str();
 		const sequence<uint8> inputData = Filesystem::openBuffer(path);
 
 		if (!Filesystem::validateSignature<FileFormat::FBX>(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count(), Endianness::LITTLE_ENDIAN))) {
@@ -358,11 +358,18 @@ namespace ProjectA {
 			bitStream.write<uint32>(vertexTextureCoordinateIndex, vertexTextureCoordinateIndexBitCount);
 		}
 
-		const std::string outputPath = assetOutputPath + "Geometry/" + directoryEntry.path().stem().string() + ".tge";
+		const std::string stem = directoryEntry.path().stem().string();
+
+		// NOTE: Count '\0'.
+		sequence<char8> outputPath(assetOutputPath.size() + stem.size() + 14);
+		std::copy(assetOutputPath.begin(), assetOutputPath.end(), &outputPath[0]);
+		std::copy_n("Geometry/", 9, &outputPath[assetOutputPath.size()]);
+		std::copy(stem.begin(), stem.end(), &outputPath[assetOutputPath.size() + 9]);
+		std::copy_n(".tge", 4, &outputPath[assetOutputPath.size() + 9 + stem.size()]);
 
 		Writer writer = Filesystem::openWriter(outputPath);
 		writer.write(byteStream.data, byteStream.size);
 
-		ENGINE_INFO("Generated geometry asset (ID: []).", geometryAssetIdentifier);
+		ENGINE_INFO("Generated geometry asset \"[]\" (ID: []).", outputPath, geometryAssetIdentifier);
 	}
 }

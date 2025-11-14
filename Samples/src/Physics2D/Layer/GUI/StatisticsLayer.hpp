@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace ProjectA {
 	class StatisticsLayer : public GUILayer {
@@ -22,9 +22,9 @@ namespace ProjectA {
 
 				/* GUIComponent({212_px, EXPAND}, {8_px, 8_px}, VERTICAL, 8_px) {
 					GUIComponent({196_px, 96_px}, {12_px, 12_px}, VERTICAL, 0_px, gray) {
-						const std::string string = Logger::format("FPS: []", framesPerSecond);
+						const sequence<char8> fps = Logger::format("FPS: []", framesPerSecond);
 
-						GUIText(string, textStyle);
+						GUIText(fps, textStyle);
 					}
 
 					GUIComponent({196_px, 148_px}, {12_px, 12_px}, VERTICAL, 8_px, gray) {

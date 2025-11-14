@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "DiagnosticCode.hpp"
 #include "DiagnosticReference.hpp"
@@ -21,7 +21,7 @@ namespace ProjectA {
 
 		public:
 			DocumentRange range;
-			str8 message;
+			sequence<char8> message;
 			DiagnosticSeverity severity;
 			DiagnosticCode code;
 			std::vector<DiagnosticReference> references;

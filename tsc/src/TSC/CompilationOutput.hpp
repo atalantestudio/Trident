@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "AST.hpp"
 #include "Definition.hpp"
@@ -18,7 +18,7 @@
 namespace ProjectA {
 	class CompilationOutput {
 		public:
-			explicit CompilationOutput(const str8& text) :
+			explicit CompilationOutput(const sequence<char8>& text) :
 				document(text)
 			{
 				// registerDefaultDefinitions();

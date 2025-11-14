@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Backend/Vulkan/VulkanPhysicalDevice.hpp"
 
@@ -47,7 +47,7 @@ namespace ProjectA {
 
 				static void enumerateMemoryTypes();
 
-				static str8 formatSize(uint64 size);
+				static sequence<char8> formatSize(uint64 size);
 			#endif
 
 			// Finds a suitable memory type for the requirements, and returns its index.

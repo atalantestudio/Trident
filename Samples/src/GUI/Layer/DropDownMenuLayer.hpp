@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace ProjectA {
 	class DropDownMenuLayer : public GUILayer {
@@ -18,7 +18,9 @@ namespace ProjectA {
 				menu.debugName = "menu";
 
 				GUIComponent(menu) {
-					for (const std::string& label : itemLabels) {
+					for (uint8 itemIndex = 0; itemIndex < 5; itemIndex += 1) {
+						const char8* label = itemLabels[itemIndex];
+
 						ContainerStyle item{};
 						item.size = {EXPAND, 40_px};
 						item.minimumSize.y = 40_px;
@@ -41,7 +43,7 @@ namespace ProjectA {
 								itemLabel.font = font;
 								itemLabel.fontSize = 32;
 
-								GUIText(label, itemLabel);
+								GUIText(std::string(label), itemLabel);
 							}
 
 							ContainerStyle itemImage{};
@@ -56,7 +58,13 @@ namespace ProjectA {
 			}
 
 		private:
-			static inline const std::array<std::string, 5> itemLabels = {"Copy", "Paste", "Delete", "Layer", "Comment"};
+			static inline constexpr char8* itemLabels[5] = {
+				"Copy",
+				"Paste",
+				"Delete",
+				"Layer",
+				"Comment",
+			};
 
 			FontID font;
 	};

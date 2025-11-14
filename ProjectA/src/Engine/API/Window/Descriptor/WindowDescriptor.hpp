@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Engine/API/Event/EventListener.hpp"
 #include "Engine/API/Event/Keyboard/KeyDownEvent.hpp"
@@ -12,7 +12,7 @@
 
 namespace ProjectA {
 	struct WindowDescriptor {
-		str8 name;
+		sequence<char8> name;
 
 		Extent2D size;
 

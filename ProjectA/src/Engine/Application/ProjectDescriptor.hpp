@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "Engine/Application/ProjectType.hpp"
 
 namespace ProjectA {
 	struct ProjectDescriptor {
 		ProjectType type;
-		str8 name;
+		sequence<char8> name;
 		VersionNumber version;
 
 		// TODO

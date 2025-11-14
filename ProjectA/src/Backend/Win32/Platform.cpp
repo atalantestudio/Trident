@@ -1,4 +1,4 @@
-#include "pch.hpp"
+﻿#include "pch.hpp"
 
 #include "Backend/Win32/base.hpp"
 
@@ -13,11 +13,11 @@ namespace ProjectA {
 		return GetCurrentProcessId();
 	}
 
-	PlatformLibrary Platform::openLibrary(const str8& libraryName) {
+	PlatformLibrary Platform::openLibrary(view<char8> libraryName) {
 		return PlatformLibrary(libraryName);
 	}
 
-	void Platform::fatalExit(uint32 code, const str8& message) {
+	void Platform::fatalExit(uint32 code, view<char8> message) {
 		const LPCWSTR titleString = ConvertUTF8ToUTF16(windowName);
 		const LPCWSTR messageString = ConvertUTF8ToUTF16(&message[0]);
 

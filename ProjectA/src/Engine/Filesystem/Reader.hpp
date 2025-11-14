@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 
 namespace ProjectA {
 	class Reader {
 		public:
-			explicit Reader(const str8& path) :
+			explicit Reader(view<char8> path) :
 				stream(&path[0])
 			{}
 

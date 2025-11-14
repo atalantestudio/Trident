@@ -1,4 +1,4 @@
-#include "pch.hpp"
+﻿#include "pch.hpp"
 
 #include "Backend/Vulkan/MemoryAllocator.hpp"
 
@@ -58,7 +58,7 @@ namespace ProjectA {
 				const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
 
 				ENGINE_DEBUG(
-					"Memory type []:\n"
+					"- Memory type []:\n"
 					"- Property flags: []\n"
 					"- Heap: []",
 					memoryTypeIndex,
@@ -68,7 +68,7 @@ namespace ProjectA {
 			}
 		}
 
-		str8 MemoryAllocator::formatSize(uint64 size) {
+		sequence<char8> MemoryAllocator::formatSize(uint64 size) {
 			const float64 decimalSize = static_cast<float64>(size);
 
 			if (size >= 1000000000000) {
@@ -273,7 +273,6 @@ namespace ProjectA {
 		ENGINE_DEBUG(
 			"- Property flags = []\n"
 			"- Size = [] ([])",
-			memoryAllocationIndex,
 			string_VkMemoryPropertyFlags(physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex].propertyFlags),
 			allocationSize,
 			formatSize(allocationSize)

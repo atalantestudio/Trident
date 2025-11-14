@@ -97,10 +97,7 @@ namespace ProjectA {
 			return Node;
 		}
 
-		Node.Name = sequence<char8>(NameLen + 1);
-		Node.Name[NameLen] = '\0';
-
-		std::copy_n(stream.getBytePosition(), NameLen, Node.Name.begin());
+		Node.Name = sequence<char8>(pointer_cast<const char8*>(stream.getBytePosition()), NameLen);
 
 		stream.jump(NameLen);
 

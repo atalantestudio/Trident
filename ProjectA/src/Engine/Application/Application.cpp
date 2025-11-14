@@ -18,7 +18,7 @@ namespace ProjectA {
 		return INVERSE_FIXED_DELTA_TIME;
 	}
 
-	str8 Application::formatWindowName(const str8& projectName, uint8 instanceCount) {
+	sequence<char8> Application::formatWindowName(view<char8> projectName, uint8 instanceCount) {
 		if (instanceCount == 0) {
 			return projectName;
 		}
@@ -42,7 +42,7 @@ namespace ProjectA {
 		sharedMemoryData = static_cast<SharedMemoryData*>(sharedMemory->map(0, sizeof(SharedMemoryData)));
 
 		if (sharedMemoryData->instanceCount > MAX_PARALLEL_INSTANCES) {
-			const str8 message = Logger::format("More than [] instances running in parallel.", static_cast<sint32>(MAX_PARALLEL_INSTANCES));
+			const sequence<char8> message = Logger::format("More than [] instances running in parallel.", static_cast<sint32>(MAX_PARALLEL_INSTANCES));
 
 			ENGINE_ERROR(message);
 
@@ -58,7 +58,7 @@ namespace ProjectA {
 		//       If a property is invalid, the application emits a warning, but continues to use the current value.
 		const std::filesystem::path projectRootDirectory = Filesystem::getProjectRootDirectory();
 
-		const str8 propertyFilePath = Logger::format("[]\\[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
+		const sequence<char8> propertyFilePath = Logger::format("[]\\[].tpr", projectRootDirectory.string(), projectRootDirectory.filename().string());
 
 		// Try to open the property file located at "[PROJECT_ROOT_DIRECTORY]/[PROJECT_NAME].tpr".
 		Reader propertyFileReader = Filesystem::openReader(propertyFilePath);

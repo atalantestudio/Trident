@@ -1,4 +1,4 @@
-#include "pch.hpp"
+﻿#include "pch.hpp"
 
 #include "Backend/Win32/base.hpp"
 
@@ -7,7 +7,7 @@ namespace ProjectA {
 		HMODULE hLibModule;
 	};
 
-	PlatformLibrary::PlatformLibrary(const str8& libraryName) {
+	PlatformLibrary::PlatformLibrary(view<char8> libraryName) {
 		const LPCWSTR lpLibFileName = ConvertUTF8ToUTF16(&libraryName[0]);
 		const HMODULE hLibModule = LoadLibrary(lpLibFileName);
 
@@ -28,7 +28,7 @@ namespace ProjectA {
 		WIN32_ASSERT(FreeLibrary(hLibModule) != 0);
 	}
 
-	void* PlatformLibrary::getProcedure(const str8& procedureName) const {
+	void* PlatformLibrary::getProcedure(view<char8> procedureName) const {
 		static const HMODULE hLibModule = static_cast<const Win32PlatformLibraryData*>(data)->hLibModule;
 
 		const FARPROC proc = GetProcAddress(hLibModule, &procedureName[0]);

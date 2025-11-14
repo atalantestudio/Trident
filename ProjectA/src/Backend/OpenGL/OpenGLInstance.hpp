@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Engine/API/Window/Window.hpp"
 
@@ -10,14 +10,14 @@ namespace ProjectA {
 
 	class OpenGLInstance {
 		private:
-			static void* getWglProcedure(const str8& procedureName);
+			static void* getWglProcedure(view<char8> procedureName);
 
 		public:
 			explicit OpenGLInstance(const Window& window);
 
 			~OpenGLInstance();
 
-			void* getProcedure(const str8& procedureName) const;
+			void* getProcedure(view<char8> procedureName) const;
 
 			void makeCurrent() const;
 

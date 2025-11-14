@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "BuildGlyphMapImageSubprocess.hpp"
 
@@ -135,7 +135,7 @@ namespace ProjectA {
 				{"â", 5, 99.0f, 48.0f},
 				{"ã", 5, 105.0f, 48.0f},
 				{"ä", 5, 111.0f, 48.0f},
-				{"ȧ", 5, 117.0f, 48.0f},
+				{"\xC8\xA7", 5, 117.0f, 48.0f}, // 'ȧ'
 				{"æ", 7, 0.0f, 60.0f},
 				{"ç", 5, 8.0f, 60.0f},
 				{"è", 5, 14.0f, 60.0f},
@@ -263,12 +263,17 @@ namespace ProjectA {
 					outputByteStream.write<uint32>(unicodeEntry.second);
 				}
 
-				const std::string outputPath = assetOutputPath + "/Font/" + DEFAULT_FONT_NAME + ".tfo";
+				// NOTE: Count '\0'.
+				sequence<char8> outputPath(assetOutputPath.size() + std::strlen(DEFAULT_FONT_NAME) + 11);
+				std::copy(assetOutputPath.begin(), assetOutputPath.end(), &outputPath[0]);
+				std::copy_n("/Font/", 6, &outputPath[assetOutputPath.size()]);
+				std::copy_n(DEFAULT_FONT_NAME, std::strlen(DEFAULT_FONT_NAME), &outputPath[assetOutputPath.size() + 6]);
+				std::copy_n(".tfo", 4, &outputPath[assetOutputPath.size() + std::strlen(DEFAULT_FONT_NAME) + 6]);
 
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputByteStream.size);
 
-				ENGINE_INFO("Generated default font asset (ID: []).", fontAssetDescriptor.identifier);
+				ENGINE_INFO("Generated default font asset \"[]\" (ID: []).", outputPath, fontAssetDescriptor.identifier);
 			}
 	};
 }

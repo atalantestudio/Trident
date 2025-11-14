@@ -1,9 +1,9 @@
-#include "pch.hpp"
+﻿#include "pch.hpp"
 
 #include "TSC/ASTDebugger.hpp"
 
 namespace ProjectA {
-	ASTDebugger::ASTDebugger(const str8& path, const CompilationOutput& output) :
+	ASTDebugger::ASTDebugger(view<char8> path, const CompilationOutput& output) :
 		writer(path, 4)
 	{
 		this->output = &output;

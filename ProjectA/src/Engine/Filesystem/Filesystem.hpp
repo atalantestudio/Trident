@@ -18,7 +18,7 @@ namespace ProjectA {
 
 		// Returns the data of the file at the provided path as a byte sequence.
 		// `path` is relative to the working directory.
-		sequence<uint8> openBuffer(const str8& path);
+		sequence<uint8> openBuffer(view<char8> path);
 
 		// TODO
 		// Opens a file for permanent reading or writing.
@@ -27,9 +27,9 @@ namespace ProjectA {
 		// template<OpenMode OpenMode, typename StreamType>
 		// StreamType* open(std::string_view path);
 
-		Reader openReader(const str8& path);
+		Reader openReader(view<char8> path);
 
-		Writer openWriter(const str8& path);
+		Writer openWriter(view<char8> path);
 
 		template<FileFormat FileFormat>
 		bool validateSignature(const ByteStream<StreamOperation::READ>& stream);

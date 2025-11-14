@@ -1,10 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "Diagnostic.hpp"
 #include "../Annotation.hpp"
 #include "../Statement.hpp"
 #include "../Token.hpp"
 
+// TODO
 #ifndef MODULE_FORMAT
 	#define MODULE_FORMAT(...) ::ProjectA::Logger::format(__VA_ARGS__)
 #endif

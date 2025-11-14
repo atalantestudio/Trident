@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Engine/API/Event/Window/WindowCloseEvent.hpp"
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
@@ -21,7 +21,7 @@ namespace ProjectA {
 
 			static float64 getInverseFixedDeltaTime();
 
-			static str8 formatWindowName(const str8& projectName, uint8 instanceCount);
+			static sequence<char8> formatWindowName(view<char8> projectName, uint8 instanceCount);
 
 		public:
 			explicit Application(const ProjectDescriptor& projectDescriptor);

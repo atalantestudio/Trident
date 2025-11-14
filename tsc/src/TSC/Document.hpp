@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 namespace ProjectA {
 	class Document {
 		public:
 			Document() = default;
 
-			explicit Document(const str8& text) :
+			explicit Document(const sequence<char8>& text) :
 				text(text)
 			{
 				ASSERT(text.count() > 0);
@@ -21,47 +21,45 @@ namespace ProjectA {
 				return lineStarts.size() - 1;
 			}
 
-			const str8& getText() const {
+			view<char8> getText() const {
 				return text;
 			}
 
-			str8 getLine(uint64 lineIndex) const {
+			view<char8> getLine(uint64 lineIndex) const {
 				ASSERT(lineIndex < lineStarts.size());
 
 				const char8* lineStart = lineStarts[lineIndex];
 				const char8* lineEnd = lineEnds[lineIndex];
 
-				str8 line(lineEnd - lineStart);
-
-				std::copy(lineStart, lineEnd, &line[0]);
-
-				return line;
+				return view<char8>(lineStart, lineEnd - lineStart);
 			}
 
 		private:
 			void storeLines() {
+				const view<char8> textView(text);
+
 				uint64 offset = 0;
 
 				while (true) {
-					lineStarts.emplace_back(&text[offset]);
+					lineStarts.emplace_back(&textView[offset]);
 
-					offset = text.find('\n', offset);
+					offset = textView.find('\n', offset);
 
-					if (offset >= text.count()) {
+					if (offset >= textView.count()) {
 						break;
 					}
 
-					lineEnds.emplace_back(&text[offset]);
+					lineEnds.emplace_back(&textView[offset]);
 
 					offset += 1;
 				}
 
 				// Push EOF.
-				lineEnds.emplace_back(text.end());
+				lineEnds.emplace_back(textView.end());
 			}
 
 		private:
-			str8 text;
+			sequence<char8> text;
 
 			// NOTE: Also includes END_OF_FILE.
 			std::vector<const char8*> lineStarts;

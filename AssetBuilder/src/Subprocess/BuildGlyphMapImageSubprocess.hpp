@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
@@ -60,7 +60,7 @@ namespace ProjectA {
 								}
 
 								if (runLength > 0) {
-									qoi_run run;
+									qoi_run run{};
 									run.tag = 0b11;
 									run.run = runLength - 1;
 
@@ -70,7 +70,7 @@ namespace ProjectA {
 								}
 
 								if (texel == texelCache[texelHash.index]) {
-									qoi_index index;
+									qoi_index index{};
 									index.tag = 0b00;
 									index.index = texelHash.index;
 
@@ -89,7 +89,7 @@ namespace ProjectA {
 				}
 
 				if (runLength > 0) {
-					qoi_run run;
+					qoi_run run{};
 					run.tag = 0b11;
 					run.run = runLength - 1;
 
@@ -98,12 +98,17 @@ namespace ProjectA {
 
 				const uint64 outputSize = outputByteStream.getByteOffset();
 
-				const std::string outputPath = assetOutputPath + "Image/" + assetName + ".tim";
+				// NOTE: Count '\0'.
+				sequence<char8> outputPath(assetOutputPath.size() + assetName.size() + 11);
+				std::copy(assetOutputPath.begin(), assetOutputPath.end(), &outputPath[0]);
+				std::copy_n("Image/", 6, &outputPath[assetOutputPath.size()]);
+				std::copy(assetName.begin(), assetName.end(), &outputPath[assetOutputPath.size() + 6]);
+				std::copy_n(".tim", 4, &outputPath[assetOutputPath.size() + assetName.size() + 6]);
 
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputSize);
 
-				ENGINE_INFO("Generated glyph map image asset (ID: []).", assetIdentifier);
+				ENGINE_INFO("Generated glyph map image asset \"[]\" (ID: []).", outputPath, assetIdentifier);
 			}
 	};
 }

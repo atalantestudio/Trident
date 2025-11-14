@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Engine/Base/Platform/PlatformLibrary.hpp"
 
@@ -12,10 +12,10 @@ namespace ProjectA {
 			// Returns the identifier of the current process.
 			static uint32 getCurrentProcessId();
 
-			static PlatformLibrary openLibrary(const str8& libraryName);
+			static PlatformLibrary openLibrary(view<char8> libraryName);
 
 			// Shows an fatal error message box, then exits.
-			static void fatalExit(uint32 code, const str8& message);
+			static void fatalExit(uint32 code, view<char8> message);
 
 			static void waitForInput();
 
