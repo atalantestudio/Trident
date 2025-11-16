@@ -70,7 +70,7 @@
 		{
 			"label": "Clean",
 			"type": "shell",
-			"command": "rm -rf bin/* && rm -rf obj/*",
+			"command": "rm -rf .vs && rm -rf bin && rm -rf obj",
 			"group": {
 				"kind": "build"
 			},
