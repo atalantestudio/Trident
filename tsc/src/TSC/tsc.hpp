@@ -13,14 +13,13 @@
 namespace ProjectA {
 	static void writeLine(const CompilationOutput& output, ConsoleLogger& logger, uint32 lineIndex, uint64 maxLineIndex, bool dimmed) {
 		if (dimmed) {
-			logger.writeEscapeCodes(ConsoleEscapeCode::DIMMED);
+			logger << ConsoleEscapeCode::DIMMED;
 		}
 
-		logger.getOutputStream() << std::setw(maxLineIndex) << lineIndex + 1;
-		logger.write(logger.format("\t[]\n", output.document.getLine(lineIndex)));
+		logger.padLeft(maxLineIndex) << lineIndex + 1 << logger.format("\t[]\n", output.document.getLine(lineIndex));
 
 		if (dimmed) {
-			logger.writeEscapeCodes(ConsoleEscapeCode::RESET_BRIGHT);
+			logger << ConsoleEscapeCode::RESET_BRIGHT;
 		}
 	}
 
@@ -34,43 +33,38 @@ namespace ProjectA {
 			switch (diagnostic.severity) {
 				case DiagnosticSeverity::INFO:
 				case DiagnosticSeverity::HINT: {
-					logger.writeEscapeCodes(ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_BLUE, ConsoleEscapeCode::FOREGROUND_COLOR_WHITE);
-					logger.write(" INFO ");
-					logger.writeEscapeCodes(ConsoleEscapeCode::RESET_BACKGROUND_COLOR, ConsoleEscapeCode::RESET_FOREGROUND_COLOR);
-					logger.write(logger.format(" []:[]: []\n", absolutePath, diagnostic.range.start, diagnostic.message));
+					logger << ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_BLUE << ConsoleEscapeCode::FOREGROUND_COLOR_WHITE;
+					logger << " INFO ";
+					logger << ConsoleEscapeCode::RESET_BACKGROUND_COLOR << ConsoleEscapeCode::RESET_FOREGROUND_COLOR;
+					logger << logger.format(" []:[]: []\n", absolutePath, diagnostic.range.start, diagnostic.message);
 
 					break;
 				}
 				case DiagnosticSeverity::WARNING: {
 					// TODO: INFO and ERROR look good with BRIGHT/BOLD but for some reason it WARNING.
-					logger.writeEscapeCodes(ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_YELLOW, ConsoleEscapeCode::FOREGROUND_COLOR_BLACK);
-					logger.write(" WARNING ");
-					logger.writeEscapeCodes(ConsoleEscapeCode::RESET_BACKGROUND_COLOR, ConsoleEscapeCode::RESET_FOREGROUND_COLOR);
-					logger.write(logger.format(" []:[]: []\n", absolutePath, diagnostic.range.start, diagnostic.message));
+					logger << ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_YELLOW << ConsoleEscapeCode::FOREGROUND_COLOR_BLACK;
+					logger << " WARNING ";
+					logger << ConsoleEscapeCode::RESET_BACKGROUND_COLOR << ConsoleEscapeCode::RESET_FOREGROUND_COLOR;
+					logger << logger.format(" []:[]: []\n", absolutePath, diagnostic.range.start, diagnostic.message);
 
 					break;
 				}
 				case DiagnosticSeverity::ERROR: {
 					hasError = true;
 
-					logger.writeEscapeCodes(ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_RED, ConsoleEscapeCode::FOREGROUND_COLOR_WHITE);
-					logger.write(" ERROR ");
-					logger.writeEscapeCodes(ConsoleEscapeCode::RESET_BACKGROUND_COLOR, ConsoleEscapeCode::RESET_FOREGROUND_COLOR);
-					logger.write(logger.format(" []:[]: []\n", absolutePath, diagnostic.range.start, diagnostic.message));
+					logger << ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_RED << ConsoleEscapeCode::FOREGROUND_COLOR_WHITE;
+					logger << " ERROR ";
+					logger << ConsoleEscapeCode::RESET_BACKGROUND_COLOR << ConsoleEscapeCode::RESET_FOREGROUND_COLOR;
+					logger << logger.format(" []:[]: []\n", absolutePath, diagnostic.range.start, diagnostic.message);
 
 					break;
 				}
 			}
 
 			if (diagnostic.severity == DiagnosticSeverity::ERROR && diagnostic.range.start.lineIndex == diagnostic.range.end.lineIndex) {
-				logger.write("\n");
+				logger << '\n';
 
-				uint64 maxLineIndex = diagnostic.range.start.lineIndex;
-
-				if (diagnostic.range.start.lineIndex < output.document.getLineCount() - 1) {
-					maxLineIndex += 1;
-				}
-
+				const uint64 maxLineIndex = diagnostic.range.end.lineIndex + 1;
 				const uint64 maxLineIndexSize = Logger::format(maxLineIndex).count();
 
 				if (diagnostic.range.start.lineIndex > 0) {
@@ -80,9 +74,12 @@ namespace ProjectA {
 
 				writeLine(output, logger, diagnostic.range.start.lineIndex, maxLineIndexSize, false);
 
-				logger.writeEscapeCodes(ConsoleEscapeCode::FOREGROUND_COLOR_LIGHT_RED);
-				logger.getOutputStream() << std::setw(8 + diagnostic.range.end.characterOffset) << std::string(max(static_cast<uint32>(1), diagnostic.range.end.characterOffset - diagnostic.range.start.characterOffset), '^') << '\n';
-				logger.writeEscapeCodes(ConsoleEscapeCode::RESET_FOREGROUND_COLOR);
+				const uint32 characterOffset = diagnostic.range.start.characterOffset;
+				const uint32 characterCount = max(static_cast<uint32>(1), diagnostic.range.end.characterOffset - characterOffset);
+
+				logger << ConsoleEscapeCode::FOREGROUND_COLOR_LIGHT_RED;
+				logger.padLeft(8 + characterOffset + characterCount) << std::string(characterCount, '^') << '\n';
+				logger << ConsoleEscapeCode::RESET_FOREGROUND_COLOR;
 
 				if (diagnostic.range.start.lineIndex < output.document.getLineCount() - 1) {
 					// Write following line.
@@ -90,16 +87,15 @@ namespace ProjectA {
 				}
 			}
 
-			logger.write("\n");
+			logger << '\n';
 		}
 
 		// TODO: Set color based on the most important diagnostic found. Use green if there are no diagnostics.
 		// TODO: Show compilation time.
-		// logger.writeEscapeCodes(ConsoleEscapeCode::FOREGROUND_COLOR_LIGHT_GREEN);
-		// logger.write("Done in []ms.");
-		// logger.writeEscapeCodes(ConsoleEscapeCode::RESET_FOREGROUND_COLOR);
-
-		logger.write("\n");
+		// logger << ConsoleEscapeCode::FOREGROUND_COLOR_LIGHT_GREEN;
+		// logger << "Done in []ms.";
+		// logger << ConsoleEscapeCode::RESET_FOREGROUND_COLOR;
+		// logger << '\n';
 
 		return hasError;
 	}
