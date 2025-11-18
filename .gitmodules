@@ -1,3 +1,7 @@
+[submodule "ProjectA/vendor/Base"]
+	path = ProjectA/vendor/Base
+	url = git@github.com:atalantestudio/ModuleBase
+	branch = main
 [submodule "ProjectA/vendor/lyah"]
 	path = ProjectA/vendor/lyah
 	url = git@github.com:atalantestudio/lyah
