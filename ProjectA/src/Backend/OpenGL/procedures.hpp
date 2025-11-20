@@ -80,7 +80,7 @@ namespace ProjectA {
 		extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
 		extern PFNGLDISPATCHCOMPUTEINDIRECTPROC glDispatchComputeIndirect;
 
-		// TODO: Write a custom implementation for texture views on older GL versions.
+		// TODO: Write a texture view abstraction for older GL versions.
 		extern PFNGLTEXTUREVIEWPROC glTextureView;
 	#endif
 
