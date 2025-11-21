@@ -221,6 +221,11 @@ namespace ProjectA {
 
 	#ifdef DEBUG_ENABLE_MESSENGER
 		VkBool32 VulkanInstance::debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+			// TODO: Don't proceed if the logger has already been freed.
+			if (strncmp(pCallbackData->pMessage, "Unloading layer library", 24) != 0) {
+				return VK_FALSE;
+			}
+
 			switch (messageSeverity) {
 				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: {
 					VULKAN_DEBUG(pCallbackData->pMessage);
