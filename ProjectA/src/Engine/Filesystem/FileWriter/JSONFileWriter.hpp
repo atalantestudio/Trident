@@ -140,7 +140,7 @@ namespace ProjectA {
 			}
 
 			void writeLine(view<char8> value) {
-				stream << std::setw(currentScopeIndex * tabSize + value.count()) << value;
+				stream << std::setw(currentScopeIndex * tabSize + value.count()) << &value[0];
 			}
 
 			bool isDigitOnly(view<char8> value) {

@@ -1,13 +1,13 @@
-#include "pch.hpp"
+﻿#include "pch.hpp"
 
 #include "Backend/OpenGL/OpenGLPhysicalDevice.hpp"
 
 namespace ProjectA {
 	OpenGLPhysicalDevice::OpenGLPhysicalDevice() {
 		#ifdef BUILD_MODE_DEBUG
-			const GLubyte* vendor = glGetString(GL_VENDOR);
-			const GLubyte* renderer = glGetString(GL_RENDERER);
-			const GLubyte* version = glGetString(GL_VERSION);
+			const GLchar* vendor = pointer_cast<const GLchar*>(glGetString(GL_VENDOR));
+			const GLchar* renderer = pointer_cast<const GLchar*>(glGetString(GL_RENDERER));
+			const GLchar* version = pointer_cast<const GLchar*>(glGetString(GL_VERSION));
 
 			ENGINE_INFO("Using [] [] [].", vendor, renderer, version);
 		#endif

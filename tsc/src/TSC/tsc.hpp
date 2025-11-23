@@ -26,7 +26,7 @@ namespace ProjectA {
 	static bool logTslErrors(const CompilationOutput& output) {
 		const std::string absolutePath = std::filesystem::absolute("Test/test3.tsl").string();
 
-		ConsoleLogger logger(std::cout, LogLevel::ALL, "TSLC");
+		ConsoleLogger logger(std::cout, LogLevel::ALL, "tslc");
 		bool hasError = false;
 
 		for (const Diagnostic& diagnostic : output.diagnostics) {
@@ -65,7 +65,7 @@ namespace ProjectA {
 				logger << '\n';
 
 				const uint64 maxLineIndex = diagnostic.range.end.lineIndex + 1;
-				const uint64 maxLineIndexSize = Logger::format(maxLineIndex).count();
+				const uint64 maxLineIndexSize = toString(maxLineIndex).size();
 
 				if (diagnostic.range.start.lineIndex > 0) {
 					// Write preceding line.

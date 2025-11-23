@@ -83,7 +83,9 @@ namespace ProjectA {
 				return Logger::format("[]Mb", decimalSize / 1000000.0);
 			}
 
-			return Logger::format(decimalSize);
+			const std::string formattedSize = toString(decimalSize);
+
+			return sequence<char8>(&formattedSize[0], formattedSize.size());
 		}
 	#endif
 

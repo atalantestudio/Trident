@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace ProjectA {
 	struct DocumentPosition {
@@ -8,10 +8,7 @@ namespace ProjectA {
 		uint32 characterOffset;
 	};
 
-	// TODO: Use std::ostream or std::ostringstream?
-	inline std::ostream& operator <<(std::ostream& stream, DocumentPosition position) {
-		stream << position.lineIndex + 1 << ":" << position.characterOffset + 1;
-
-		return stream;
+	inline TextBuffer& operator<<(TextBuffer& buffer, DocumentPosition position) {
+		return buffer << position.lineIndex + 1 << ':' << position.characterOffset + 1;
 	}
 }

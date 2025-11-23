@@ -96,8 +96,8 @@ namespace ProjectA {
 
 	#ifdef DEBUG_ENABLE_MESSENGER
 		void OpenGLGraphicsAdapter::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-			static constexpr char8* log = "[[] []] []";
-			static constexpr char8* sourceStrings[] = {
+			static constexpr view<char8> PATTERN = "[[] []] []";
+			static constexpr view<char8> SOURCE_STRINGS[] = {
 				"OpenGL API",
 				"Window-system API",
 				"Shader compiler",
@@ -106,9 +106,9 @@ namespace ProjectA {
 				"Unknown source",
 			};
 
-			const char8* sourceString = sourceStrings[source - GL_DEBUG_SOURCE_API];
+			const view<char8> sourceString = SOURCE_STRINGS[source - GL_DEBUG_SOURCE_API];
 
-			std::string_view typeString;
+			view<char8> typeString;
 
 			switch (type) {
 				case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
@@ -150,19 +150,22 @@ namespace ProjectA {
 			}
 
 			switch (severity) {
-				case GL_DEBUG_SEVERITY_NOTIFICATION:
-					OPENGL_INFO(log, sourceString, typeString, message);
+				case GL_DEBUG_SEVERITY_NOTIFICATION: {
+					OPENGL_INFO(PATTERN, sourceString, typeString, message);
 
 					break;
+				}
 				case GL_DEBUG_SEVERITY_LOW:
-				case GL_DEBUG_SEVERITY_MEDIUM:
-					OPENGL_WARNING(log, sourceString, typeString, message);
+				case GL_DEBUG_SEVERITY_MEDIUM: {
+					OPENGL_WARNING(PATTERN, sourceString, typeString, message);
 
 					break;
-				case GL_DEBUG_SEVERITY_HIGH:
-					OPENGL_ERROR(log, sourceString, typeString, message);
+				}
+				case GL_DEBUG_SEVERITY_HIGH: {
+					OPENGL_ERROR(PATTERN, sourceString, typeString, message);
 
 					break;
+				}
 			}
 		}
 	#endif
