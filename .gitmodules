@@ -10,6 +10,10 @@
 	path = ProjectA/vendor/scroll
 	url = git@github.com:atalantestudio/scroll
 	branch = main
+[submodule "ProjectA/vendor/tsl"]
+	path = ProjectA/vendor/tsl
+	url = git@github.com:atalantestudio/tsl
+	branch = main
 [submodule "Samples/Asset"]
 	path = Samples/Asset
 	url = git@github.com:atalantestudio/SampleAssetPack
