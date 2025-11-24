@@ -48,6 +48,8 @@ namespace ProjectA {
 
 			void postConstruct();
 
+			sint32 runProcesses() const;
+
 		protected:
 			template<typename LayerType, typename... Argument>
 			void registerLayer(Argument&&... arguments) {
@@ -61,11 +63,14 @@ namespace ProjectA {
 				layerStack.pushLayer(layer);
 			}
 
-			template<typename ProcessType, typename... Argument>
-			void registerProcess(Argument&&... arguments) {
+			template<typename ProcessType>
+			void registerProcess() {
 				PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-				const ref<Process> process = createRef<ProcessType>(std::forward<Argument>(arguments)...);
+				const uint32 processId = static_cast<uint32>(processes.size());
+
+				ref<Process> process = createRef<ProcessType>();
+				process->setId(processId);
 
 				processes.emplace_back(process);
 			}

@@ -2,8 +2,8 @@
 
 #include "Engine/Process/Process.hpp"
 
-#include "../Subprocess/BuildDefaultFontSubprocess.hpp"
-#include "../Subprocess/BuildTrueTypeFontSubprocess.hpp"
+#include "Subprocess/BuildDefaultFontSubprocess.hpp"
+#include "Subprocess/BuildTrueTypeFontSubprocess.hpp"
 
 namespace ProjectA {
 	class BuildFontProcess : public Process {
@@ -12,9 +12,9 @@ namespace ProjectA {
 			static constexpr uint32 PROJECT_OUTPUT_PATH_ARGUMENT_INDEX = 2;
 
 		public:
-			explicit BuildFontProcess(const sequence<void*>& consoleArguments) {
-				const std::string rootInputPath = static_cast<const char8*>(consoleArguments[PROJECT_INPUT_PATH_ARGUMENT_INDEX]);
-				const std::string rootOutputPath = static_cast<const char8*>(consoleArguments[PROJECT_OUTPUT_PATH_ARGUMENT_INDEX]);
+			sint32 main(const sequence<void*>& arguments) override {
+				const std::string rootInputPath = static_cast<const char8*>(arguments[PROJECT_INPUT_PATH_ARGUMENT_INDEX]);
+				const std::string rootOutputPath = static_cast<const char8*>(arguments[PROJECT_OUTPUT_PATH_ARGUMENT_INDEX]);
 				const std::string assetOutputPath = rootOutputPath + "/Asset/";
 
 				const std::filesystem::recursive_directory_iterator fontDirectoryIterator(rootInputPath + "/Asset/Font");
@@ -30,6 +30,8 @@ namespace ProjectA {
 				}
 
 				ENGINE_INFO("Done building font assets.");
+
+				return 0;
 			}
 	};
 }

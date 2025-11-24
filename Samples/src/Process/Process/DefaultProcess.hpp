@@ -2,14 +2,13 @@
 
 #include "ProjectA.hpp"
 
-#include "Engine/Build/Clusterizer.hpp"
-#include "Engine/Filesystem/Asset/FBXToGeometry.hpp"
-
 namespace ProjectA {
 	class DefaultProcess : public Process {
 		public:
-			explicit DefaultProcess() {
+			sint32 main(const sequence<void*>& arguments) override {
 				BREAKPOINT();
+
+				return 0;
 			}
 	};
 }

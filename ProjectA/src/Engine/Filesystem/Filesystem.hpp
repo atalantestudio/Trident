@@ -18,7 +18,11 @@ namespace ProjectA {
 
 		// Returns the data of the file at the provided path as a byte sequence.
 		// `path` is relative to the working directory.
-		sequence<uint8> openBuffer(view<char8> path);
+		sequence<uint8> openByteBuffer(view<char8> path);
+
+		// Returns the data of the file at the provided path as a byte sequence.
+		// `path` is relative to the working directory.
+		sequence<char8> openTextBuffer(view<char8> path);
 
 		// TODO
 		// Opens a file for permanent reading or writing.

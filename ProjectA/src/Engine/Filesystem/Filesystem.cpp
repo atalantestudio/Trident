@@ -11,7 +11,7 @@ namespace ProjectA {
 		return getProjectRootDirectory().filename();
 	}
 
-	sequence<uint8> Filesystem::openBuffer(view<char8> path) {
+	sequence<uint8> Filesystem::openByteBuffer(view<char8> path) {
 		std::ifstream stream(&path[0], std::ios::ate | std::ios::binary);
 
 		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
@@ -22,7 +22,30 @@ namespace ProjectA {
 
 		sequence<uint8> buffer(count);
 
-		stream.read(pointer_cast<char8*>(&buffer[0]), count);
+		if (count > 0) {
+			stream.read(pointer_cast<char8*>(&buffer[0]), count);
+		}
+
+		stream.close();
+
+		return buffer;
+	}
+
+	sequence<char8> Filesystem::openTextBuffer(view<char8> path) {
+		std::ifstream stream(&path[0], std::ios::ate);
+
+		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
+
+		const std::streampos count = stream.tellg();
+
+		stream.seekg(0, std::ios::beg);
+
+		sequence<char8> buffer(count);
+
+		if (count > 0) {
+			stream.read(&buffer[0], count);
+		}
+
 		stream.close();
 
 		return buffer;

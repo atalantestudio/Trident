@@ -86,7 +86,7 @@ namespace ProjectA {
 				}
 
 				const sequence<char8> assetPath = assetEntry.path().string().c_str();
-				const sequence<uint8> data = Filesystem::openBuffer(assetPath);
+				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
@@ -116,7 +116,7 @@ namespace ProjectA {
 				}
 
 				const sequence<char8> assetPath = assetEntry.path().string().c_str();
-				const sequence<uint8> data = Filesystem::openBuffer(assetPath);
+				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
@@ -146,7 +146,7 @@ namespace ProjectA {
 				}
 
 				const sequence<char8> assetPath = assetEntry.path().string().c_str();
-				const sequence<uint8> data = Filesystem::openBuffer(assetPath);
+				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 

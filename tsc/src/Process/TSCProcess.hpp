@@ -98,7 +98,12 @@ namespace ProjectA {
 				return hasError;
 			}
 
-			static sint32 main(const sequence<char8>& text) {
+		public:
+			sint32 main(const sequence<void*>& arguments) override {
+				const char8* path = pointer_cast<const char8*>(arguments[PATH_ARGUMENT_INDEX]);
+				const sequence<uint8> buffer = Filesystem::openByteBuffer("Test/test3.tsl");
+				const sequence<char8> text = *pointer_cast<const sequence<char8>*>(&buffer);
+
 				// TODO
 				// CompilationContext context(text);
 				// 
@@ -150,17 +155,6 @@ namespace ProjectA {
 				}
 
 				return 0;
-			}
-
-		public:
-			explicit TSCProcess(const sequence<void*>& consoleArguments) {
-				const char8* path = pointer_cast<const char8*>(consoleArguments[PATH_ARGUMENT_INDEX]);
-				const sequence<uint8> buffer = Filesystem::openBuffer("Test/test3.tsl");
-				const sequence<char8> text = *pointer_cast<const sequence<char8>*>(&buffer);
-
-				const sint32 code = main(text);
-
-				ENGINE_INFO("The TSC process terminated with code [].", code);
 			}
 	};
 }

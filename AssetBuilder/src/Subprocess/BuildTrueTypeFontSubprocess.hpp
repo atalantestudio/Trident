@@ -8,7 +8,7 @@ namespace ProjectA {
 		public:
 			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& assetOutputPath) {
 				const sequence<char8> path = directoryEntry.path().string().c_str();
-				const sequence<uint8> inputData = Filesystem::openBuffer(path);
+				const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
 				const ByteStream<StreamOperation::READ> inputByteStream(&inputData[0], inputData.count(), Endianness::BIG_ENDIAN);
 
 				if (!Filesystem::validateSignature<FileFormat::TTF>(inputByteStream)) {

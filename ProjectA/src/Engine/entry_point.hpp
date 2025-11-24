@@ -21,6 +21,18 @@ int main(int argc, char** argv) {
 		application->postConstruct();
 	}
 
+	{
+		PROFILER("Trace/processes.json");
+
+		const int code = application->runProcesses();
+
+		if (code != 0) {
+			ENGINE_DEBUG("Application exited with code [].", code);
+
+			return code;
+		}
+	}
+
 	if (application->hasLayers()) {
 		PROFILER("Trace/ProfileRun.json");
 

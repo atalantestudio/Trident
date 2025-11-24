@@ -4,6 +4,7 @@
 
 #include "Process/BuildFontProcess.hpp"
 #include "Process/BuildGeometryProcess.hpp"
+#include "Process/BuildShaderModuleProcess.hpp"
 
 namespace ProjectA {
 	class AssetBuilderApplication : public Application {
@@ -13,8 +14,9 @@ namespace ProjectA {
 			{
 				setConsoleArguments(argumentCount, argumentValues);
 
-				registerProcess<BuildFontProcess>(getConsoleArguments());
-				registerProcess<BuildGeometryProcess>(getConsoleArguments());
+				// registerProcess<BuildFontProcess>();
+				// registerProcess<BuildGeometryProcess>();
+				registerProcess<BuildShaderModuleProcess>();
 			}
 	};
 

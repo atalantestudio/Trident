@@ -14,7 +14,7 @@ namespace ProjectA {
 			{
 				setConsoleArguments(argumentCount, argumentValues);
 
-				registerProcess<TSCProcess>(getConsoleArguments());
+				registerProcess<TSCProcess>();
 			}
 	};
 

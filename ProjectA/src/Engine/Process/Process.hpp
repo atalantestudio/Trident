@@ -1,12 +1,22 @@
-#pragma once
+﻿#pragma once
 
 namespace ProjectA {
-	// Support for generic one-time and/or non-graphical computations.
+	// Generic one-time computations.
 	class Process {
 		public:
-			// NOTE: Process computations are ran through the constructor.
-			// TODO: Make computations run inside sint32 main().
+			uint32 getId() const {
+				return id;
+			}
 
-			virtual ~Process() = default;
+			void setId(uint32 id) {
+				this->id = id;
+			}
+
+			// NOTE: Implement to run a process computation.
+			virtual sint32 main(const sequence<void*>& arguments) = 0;
+
+		private:
+			// Index of this process in the application process list.
+			uint32 id;
 	};
 }

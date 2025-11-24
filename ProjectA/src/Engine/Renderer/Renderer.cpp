@@ -190,7 +190,7 @@ namespace ProjectA {
 
 		path = pathString;
 
-		const sequence<uint8> code = Filesystem::openBuffer(path.data());
+		const sequence<uint8> code = Filesystem::openByteBuffer(path.data());
 
 		return adapter->createShaderModule(code, descriptor);
 	}

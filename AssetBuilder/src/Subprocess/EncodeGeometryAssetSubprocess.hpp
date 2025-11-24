@@ -8,7 +8,7 @@ namespace ProjectA {
 	// TODO: Assert that FBX nodes exist before using them.
 	static void EncodeGeometryAssetSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& assetOutputPath) {
 		const sequence<char8> path = directoryEntry.path().string().c_str();
-		const sequence<uint8> inputData = Filesystem::openBuffer(path);
+		const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
 
 		if (!Filesystem::validateSignature<FileFormat::FBX>(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count(), Endianness::LITTLE_ENDIAN))) {
 			ENGINE_INFO("Ignoring non-FBX file \"[]\".", path);

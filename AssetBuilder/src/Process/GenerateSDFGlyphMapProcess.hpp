@@ -2,7 +2,6 @@
 
 #include "Engine/Filesystem/File/TTFFile.hpp"
 #include "Engine/Font/Glyph.hpp"
-#include "Engine/Process/Process.hpp"
 
 namespace ProjectA {
 	struct SDFGlyphMap {
@@ -11,7 +10,7 @@ namespace ProjectA {
 		sequence<Glyph> glyphs;
 	};
 
-	class GenerateSDFGlyphMapProcess : public Process {
+	class GenerateSDFGlyphMapProcess {
 		private:
 			struct FontStorage {
 				uint32 outputGlyphSize;

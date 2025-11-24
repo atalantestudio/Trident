@@ -189,6 +189,22 @@ namespace ProjectA {
 		}
 	}
 
+	sint32 Application::runProcesses() const {
+		sint32 code = 0;
+
+		for (const ref<Process>& process : processes) {
+			code = process->main(consoleArguments);
+
+			if (code != 0) {
+				ENGINE_DEBUG("Process [] exited with code [].", process->getId(), code);
+
+				break;
+			}
+		}
+
+		return code;
+	}
+
 	void Application::loop() {
 		window->show();
 

@@ -73,7 +73,7 @@ namespace ProjectA {
 			}
 
 			void loadImage() {
-				const sequence<uint8> buffer = Filesystem::openBuffer(IMAGE_PATH);
+				const sequence<uint8> buffer = Filesystem::openByteBuffer(IMAGE_PATH);
 				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(buffer);
 
 				const ref<Buffer> imageStagingBuffer = createStagingBuffer(file.data.count());
