@@ -5,6 +5,7 @@ namespace ProjectA {
 	class Process {
 		public:
 			// NOTE: Process computations are ran through the constructor.
+			// TODO: Make computations run inside sint32 main().
 
 			virtual ~Process() = default;
 	};

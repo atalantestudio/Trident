@@ -16,8 +16,8 @@ outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
 vulkansdk = os.getenv("VULKAN_SDK")
 
 -- Checkout submodules.
-os.execute("git config --global --add safe.directory *")
-os.execute("git submodule update --init")
+-- os.execute("git config --global --add safe.directory *")
+-- os.execute("git submodule update --init")
 
 --[[ os.mkdir("ProjectA/vendor/API/GL")
 os.mkdir("ProjectA/vendor/API/KHR")
@@ -60,10 +60,13 @@ project "ProjectA"
 		"%{prj.name}/vendor/Base/Base/**.hpp",
 		"%{prj.name}/vendor/lyah/lyah/**.hpp",
 		"%{prj.name}/vendor/scroll/scroll/**.hpp",
+		"%{prj.name}/vendor/tsl/tsl/**.cpp",
+		"%{prj.name}/vendor/tsl/tsl/**.hpp",
 	}
 
 	removefiles {
-		"%{prj.name}/src/**.emscripten.cpp",
+		"tsc/src/TSC/old/**",
+		"%{prj.name}/vendor/tsl/tsl/tslc.cpp",
 	}
 
 	includedirs {
@@ -72,6 +75,7 @@ project "ProjectA"
 		"%{prj.name}/vendor/Base",
 		"%{prj.name}/vendor/lyah",
 		"%{prj.name}/vendor/scroll",
+		"%{prj.name}/vendor/tsl",
 		vulkansdk .. "/Include",
 	}
 
@@ -135,6 +139,7 @@ project "Samples"
 		"ProjectA/vendor/Base",
 		"ProjectA/vendor/lyah",
 		"ProjectA/vendor/scroll",
+		"ProjectA/vendor/tsl",
 		vulkansdk .. "/Include", -- TODO: Temporary
 	}
 
@@ -213,6 +218,7 @@ project "AssetBuilder"
 		"ProjectA/vendor/Base",
 		"ProjectA/vendor/lyah",
 		"ProjectA/vendor/scroll",
+		"ProjectA/vendor/tsl",
 		vulkansdk .. "/Include", -- TODO: Temporary
 	}
 
@@ -225,82 +231,6 @@ project "AssetBuilder"
 	}
 
 	postbuildcommands {
-		"IF EXIST %[%{prj.name}.tpr] {COPYFILE} %[%{prj.name}.tpr] %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.tpr]",
-	}
-
-	filter "system:windows"
-		systemversion "latest"
-
-	filter "configurations:Debug"
-		defines {
-			"BUILD_MODE_DEBUG",
-		}
-
-		runtime "Debug"
-		symbols "on"
-
-	filter "configurations:Profile"
-		defines {
-			"BUILD_MODE_PROFILE",
-		}
-
-		runtime "Release"
-		optimize "on"
-
-	filter "configurations:Release"
-		defines {
-			"BUILD_MODE_RELEASE",
-		}
-
-		runtime "Release"
-		optimize "on"
-
-project "tsc"
-	location "%{prj.name}"
-	kind "ConsoleApp"
-	language "C++"
-	cppdialect "C++17"
-	staticruntime "on"
-
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("obj/" .. outputdir .. "/%{prj.name}")
-
-	dependson {
-		"ProjectA",
-	}
-
-	files {
-		"%{prj.name}/src/**.cpp",
-		"%{prj.name}/src/**.hpp",
-	}
-
-	removefiles {
-		-- Emscripten files
-		"%{prj.name}/src/TSC/Base/**.hpp",
-		"%{prj.name}/src/TSC/Module.cpp",
-	}
-
-	includedirs {
-		"ProjectA/src",
-		"ProjectA/vendor/API",
-		"ProjectA/vendor/Base",
-		"ProjectA/vendor/lyah",
-		"ProjectA/vendor/scroll",
-		vulkansdk .. "/Include", -- TODO: Temporary
-		"%{prj.name}/src",
-	}
-
-	links {
-		"ProjectA",
-	}
-
-	defines {
-		"PROJECT_NAME=\"%{prj.name}\"",
-	}
-
-	postbuildcommands {
-		"MKDIR %[bin/" .. outputdir .. "/%{prj.name}/Test]",
-		"{COPYDIR} Test/** %[bin/" .. outputdir .. "/%{prj.name}/Test/**]",
 		"IF EXIST %[%{prj.name}.tpr] {COPYFILE} %[%{prj.name}.tpr] %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.tpr]",
 	}
 

@@ -81,42 +81,6 @@
 			"environment": [],
 			"console": "integratedTerminal",
 			"preLaunchTask": "Build (Release)"
-		},
-		{
-			"name": "Run TSL Compiler (Debug)",
-			"type": "cppvsdbg",
-			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/tsc/tsc.exe",
-			"args": [],
-			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/bin/windows_x86_64_Debug/tsc",
-			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Debug)"
-		},
-		{
-			"name": "Run TSL Compiler (Profile)",
-			"type": "cppvsdbg",
-			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Profile/tsc/tsc.exe",
-			"args": [],
-			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/bin/windows_x86_64_Debug/tsc",
-			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Profile)"
-		},
-		{
-			"name": "Run TSL Compiler (Release)",
-			"type": "cppvsdbg",
-			"request": "launch",
-			"program": "${workspaceFolder}/bin/windows_x86_64_Release/tsc/tsc.exe",
-			"args": [],
-			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/bin/windows_x86_64_Debug/tsc",
-			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Release)"
 		}
 	]
 }

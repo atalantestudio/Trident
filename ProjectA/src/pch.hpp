@@ -60,8 +60,11 @@
 // Register modules.
 #include "Engine/Module/Include/lyah.hpp"
 #include "Engine/Module/Include/scroll.hpp"
+#include "Engine/Module/Include/tsl.hpp"
 
-// TODO: The Scroll adapter must be included before Log.hpp because it includes the scroll namespace.
+// TODO
+// The Scroll adapter must be included before Log.hpp because it includes the scroll namespace,
+// but Extent.hpp is a dependency of the Lyah adapter.
 #include "Engine/Module/Adapter/scroll.hpp"
 
 #include "Engine/Base/Log.hpp"
@@ -70,6 +73,7 @@
 
 // Register module adapters.
 #include "Engine/Module/Adapter/lyah.hpp"
+#include "Engine/Module/Adapter/tsl.hpp"
 
 #include "Engine/Base/Color.hpp"
 #include "Engine/Base/KeyCode.hpp"
