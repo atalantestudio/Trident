@@ -81,6 +81,18 @@
 			"environment": [],
 			"console": "integratedTerminal",
 			"preLaunchTask": "Build (Release)"
+		},
+		{
+			"name": "Run TSL LSP Server (Debug)",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/windows_x86_64_Debug/tsllsp/tsllsp.exe",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}/ProjectA/vendor/tsl",
+			"environment": [],
+			"console": "integratedTerminal",
+			"preLaunchTask": "Build (Debug)"
 		}
 	]
 }

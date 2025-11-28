@@ -9,6 +9,7 @@ namespace ProjectA {
 				const sequence<char8> text = Filesystem::openTextBuffer(path);
 
 				CompilationInput input{};
+				input.path = path;
 				input.text = text;
 
 				CompilationOutput output(input);
@@ -61,32 +62,27 @@ namespace ProjectA {
 					switch (diagnostic.severity) {
 						case DiagnosticSeverity::INFO:
 						case DiagnosticSeverity::HINT: {
-							logger << ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_BLUE << ConsoleEscapeCode::FOREGROUND_COLOR_WHITE;
-							logger << " INFO ";
-							logger << ConsoleEscapeCode::RESET_BACKGROUND_COLOR << ConsoleEscapeCode::RESET_FOREGROUND_COLOR;
-							logger << logger.format(" []:[]: []\n", output.path, diagnostic.range.start, diagnostic.message);
+							logger << ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_BLUE << ConsoleEscapeCode::FOREGROUND_COLOR_WHITE << " INFO ";
 
 							break;
 						}
 						case DiagnosticSeverity::WARNING: {
-							logger << ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_YELLOW << ConsoleEscapeCode::FOREGROUND_COLOR_BLACK;
-							logger << " WARNING ";
-							logger << ConsoleEscapeCode::RESET_BACKGROUND_COLOR << ConsoleEscapeCode::RESET_FOREGROUND_COLOR;
-							logger << logger.format(" []:[]: []\n", output.path, diagnostic.range.start, diagnostic.message);
+							logger << ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_YELLOW << ConsoleEscapeCode::FOREGROUND_COLOR_BLACK << " WARNING ";
 
 							break;
 						}
 						case DiagnosticSeverity::ERROR: {
-							hasError = true;
+							logger << ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_RED << ConsoleEscapeCode::FOREGROUND_COLOR_WHITE << " ERROR ";
 
-							logger << ConsoleEscapeCode::BACKGROUND_COLOR_LIGHT_RED << ConsoleEscapeCode::FOREGROUND_COLOR_WHITE;
-							logger << " ERROR ";
-							logger << ConsoleEscapeCode::RESET_BACKGROUND_COLOR << ConsoleEscapeCode::RESET_FOREGROUND_COLOR;
-							logger << logger.format(" []:[]: []\n", output.path, diagnostic.range.start, diagnostic.message);
+							hasError = true;
 
 							break;
 						}
 					}
+
+					logger << ConsoleEscapeCode::RESET_BACKGROUND_COLOR << ConsoleEscapeCode::RESET_FOREGROUND_COLOR;
+					logger << ' ' << diagnostic.message << ' ' << ConsoleEscapeCode::FOREGROUND_COLOR_LIGHT_GRAY << Logger::format("[]:[]", output.path, diagnostic.range.start);
+					logger << ConsoleEscapeCode::RESET_FOREGROUND_COLOR << '\n';
 
 					if (diagnostic.severity == DiagnosticSeverity::ERROR && diagnostic.range.start.lineIndex == diagnostic.range.end.lineIndex) {
 						logger << '\n';
