@@ -298,6 +298,10 @@ project "tsllsp"
 		"ProjectA",
 	}
 
+	postbuildcommands {
+		"{COPYFILE} %[bin/" .. outputdir .. "/%{prj.name}/%{prj.name}.exe] C:/Users/Mattéo/.vscode/extensions/tsl/src/lsp.exe", -- TODO: (debug-only)
+	}
+
 	filter "system:windows"
 		systemversion "latest"
 
