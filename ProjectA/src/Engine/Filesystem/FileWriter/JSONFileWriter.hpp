@@ -68,13 +68,6 @@ namespace ProjectA {
 				writeLine(Logger::format("\"[]\": \"[]\"", name, std::forward<Argument>(valueArgument)));
 			}
 
-			template<typename Argument>
-			void propertyNonString(view<char8> name, Argument&& valueArgument) {
-				propertyStart();
-
-				writeLine(Logger::format("\"[]\": []", name, std::forward<Argument>(valueArgument)));
-			}
-
 			template<typename... Argument>
 			void property(view<char8> name, view<char8> valuePattern, Argument&&... valueArguments) {
 				propertyStart();
