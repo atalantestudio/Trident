@@ -5,7 +5,10 @@
 			"includePath": [
 				"ProjectA/src",
 				"ProjectA/vendor/API",
+				"ProjectA/vendor/Base",
 				"ProjectA/vendor/lyah",
+				"ProjectA/vendor/scroll",
+				"ProjectA/vendor/tsl",
 				"${env:VULKAN_SDK}/Include",
 				"tsc/src"
 			],
@@ -21,7 +24,10 @@
 			"includePath": [
 				"ProjectA/src",
 				"ProjectA/vendor/API",
+				"ProjectA/vendor/Base",
 				"ProjectA/vendor/lyah",
+				"ProjectA/vendor/scroll",
+				"ProjectA/vendor/tsl",
 				"${env:VULKAN_SDK}/Include",
 				"tsc/src"
 			],
@@ -37,7 +43,10 @@
 			"includePath": [
 				"ProjectA/src",
 				"ProjectA/vendor/API",
+				"ProjectA/vendor/Base",
 				"ProjectA/vendor/lyah",
+				"ProjectA/vendor/scroll",
+				"ProjectA/vendor/tsl",
 				"${env:VULKAN_SDK}/Include",
 				"tsc/src"
 			],
