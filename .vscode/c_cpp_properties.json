@@ -9,8 +9,7 @@
 				"ProjectA/vendor/lyah",
 				"ProjectA/vendor/scroll",
 				"ProjectA/vendor/tsl",
-				"${env:VULKAN_SDK}/Include",
-				"tsc/src"
+				"${env:VULKAN_SDK}/Include"
 			],
 			"defines": [
 				"BUILD_MODE_DEBUG"
@@ -28,8 +27,7 @@
 				"ProjectA/vendor/lyah",
 				"ProjectA/vendor/scroll",
 				"ProjectA/vendor/tsl",
-				"${env:VULKAN_SDK}/Include",
-				"tsc/src"
+				"${env:VULKAN_SDK}/Include"
 			],
 			"defines": [
 				"BUILD_MODE_PROFILE"
@@ -47,8 +45,7 @@
 				"ProjectA/vendor/lyah",
 				"ProjectA/vendor/scroll",
 				"ProjectA/vendor/tsl",
-				"${env:VULKAN_SDK}/Include",
-				"tsc/src"
+				"${env:VULKAN_SDK}/Include"
 			],
 			"defines": [
 				"BUILD_MODE_RELEASE"

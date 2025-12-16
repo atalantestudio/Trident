@@ -261,6 +261,70 @@ project "AssetBuilder"
 		runtime "Release"
 		optimize "on"
 
+project "tslc"
+	location "ProjectA/vendor/tsl"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "on"
+
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("obj/" .. outputdir .. "/%{prj.name}")
+
+	dependson {
+		"ProjectA",
+	}
+
+	files {
+		"ProjectA/vendor/tsl/**.cpp",
+		"ProjectA/vendor/tsl/**.hpp",
+	}
+
+	removefiles {
+		"ProjectA/vendor/tsl/tsl/LSP/lsp.cpp",
+	}
+
+	includedirs {
+		"ProjectA/src",
+		"ProjectA/vendor/API", -- TODO: Remove.
+		"ProjectA/vendor/Base",
+		"ProjectA/vendor/lyah", -- TODO: Remove.
+		"ProjectA/vendor/scroll",
+		"ProjectA/vendor/tsl",
+		vulkansdk .. "/Include", -- TODO: Remove.
+	}
+
+	links {
+		"ProjectA",
+	}
+
+	filter "system:windows"
+		systemversion "latest"
+
+	filter "configurations:Debug"
+		defines {
+			"BUILD_MODE_DEBUG",
+		}
+
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Profile"
+		defines {
+			"BUILD_MODE_PROFILE",
+		}
+
+		runtime "Release"
+		optimize "on"
+
+	filter "configurations:Release"
+		defines {
+			"BUILD_MODE_RELEASE",
+		}
+
+		runtime "Release"
+		optimize "on"
+
 project "tsllsp"
 	location "ProjectA/vendor/tsl"
 	kind "ConsoleApp"
