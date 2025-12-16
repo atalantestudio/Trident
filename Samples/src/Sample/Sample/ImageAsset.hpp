@@ -74,7 +74,7 @@ namespace ProjectA {
 
 			void loadImageAsset() {
 				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->findImageAsset(IMAGE_ASSET_NAME);
-				const ref<Buffer> imageAssetStagingBuffer = createStagingBuffer(imageAsset->getData().count);
+				const ref<Buffer> imageAssetStagingBuffer = createStagingBuffer(imageAsset->getData().count());
 
 				uint8* imageAssetStagingBufferMappedRange = imageAssetStagingBuffer->map<uint8>(0, imageAssetStagingBuffer->size);
 
@@ -155,7 +155,7 @@ namespace ProjectA {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count; framebufferIndex += 1) {
+				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);

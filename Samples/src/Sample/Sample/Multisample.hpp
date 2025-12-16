@@ -3,6 +3,7 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
+	// TODO: Fix multisample on OpenGL (see Engine/API/Rendering/RenderPass.hpp:66).
 	class SampleRenderer : public Renderer {
 		private:
 			struct Vertex {
@@ -114,7 +115,7 @@ namespace ProjectA {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count; framebufferIndex += 1) {
+				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
 					framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);

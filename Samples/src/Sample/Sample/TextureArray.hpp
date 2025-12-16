@@ -136,19 +136,19 @@ namespace ProjectA {
 					File<FileFormat::PNG>& asset = assets[assetIndex];
 					asset = Filesystem::decode<FileFormat::PNG>(assetBuffer);
 
-					textureArrayImageSize += asset.data.count;
+					textureArrayImageSize += asset.data.count();
 				}
 
 				const ref<Buffer> textureArrayImageStagingBuffer = createStagingBuffer(textureArrayImageSize);
 
 				uint8* textureArrayImageStagingBufferMappedRange = textureArrayImageStagingBuffer->map<uint8>(0, textureArrayImageStagingBuffer->size);
 
-				for (uint32 assetIndex = 0; assetIndex < assets.count; assetIndex += 1) {
+				for (uint32 assetIndex = 0; assetIndex < assets.count(); assetIndex += 1) {
 					const File<FileFormat::PNG>& asset = assets[assetIndex];
 
 					std::copy(asset.data.begin(), asset.data.end(), textureArrayImageStagingBufferMappedRange);
 
-					textureArrayImageStagingBufferMappedRange += asset.data.count;
+					textureArrayImageStagingBufferMappedRange += asset.data.count();
 				}
 
 				textureArrayImageStagingBuffer->unmap();
@@ -161,7 +161,7 @@ namespace ProjectA {
 				bufferImageCopyRegion.imageExtent = textureArrayImage->getExtent();
 				bufferImageCopyRegion.imageMipLevel = 0;
 				bufferImageCopyRegion.imageLayerOffset = 0;
-				bufferImageCopyRegion.imageLayerCount = static_cast<uint32>(assets.count);
+				bufferImageCopyRegion.imageLayerCount = static_cast<uint32>(assets.count());
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -196,7 +196,7 @@ namespace ProjectA {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count; framebufferIndex += 1) {
+				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);

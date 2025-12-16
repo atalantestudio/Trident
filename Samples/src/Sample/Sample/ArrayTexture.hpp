@@ -122,7 +122,7 @@ namespace ProjectA {
 					File<FileFormat::PNG>& asset = assets[assetIndex];
 					asset = Filesystem::decode<FileFormat::PNG>(assetBuffer);
 
-					stagingBufferSize += asset.data.count;
+					stagingBufferSize += asset.data.count();
 
 					imageDescriptor.extent = asset.extent;
 
@@ -137,7 +137,7 @@ namespace ProjectA {
 				for (const File<FileFormat::PNG>& asset : assets) {
 					std::copy(asset.data.begin(), asset.data.end(), stagingBufferMappedRange);
 
-					stagingBufferMappedRange += asset.data.count;
+					stagingBufferMappedRange += asset.data.count();
 				}
 
 				stagingBuffer->unmap();
@@ -159,7 +159,7 @@ namespace ProjectA {
 
 				commandEncoder->begin();
 
-				for (uint32 assetIndex = 0; assetIndex < assets.count; assetIndex += 1) {
+				for (uint32 assetIndex = 0; assetIndex < assets.count(); assetIndex += 1) {
 					const ref<Image>& image = images[assetIndex];
 
 					bufferImageCopyRegion.imageExtent = image->getExtent();
@@ -168,7 +168,7 @@ namespace ProjectA {
 					commandEncoder->copyBufferToImage(stagingBuffer, image, {bufferImageCopyRegion});
 					commandEncoder->setImageMemoryBarrier(image, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
-					bufferImageCopyRegion.bufferOffset += assets[assetIndex].data.count;
+					bufferImageCopyRegion.bufferOffset += assets[assetIndex].data.count();
 				}
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
@@ -204,7 +204,7 @@ namespace ProjectA {
 			void updateArrayTextureDescriptorSet() {
 				sequence<DescriptorImage> descriptorImages(ASSET_COUNT);
 
-				for (uint32 descriptorImageIndex = 0; descriptorImageIndex < descriptorImages.count; descriptorImageIndex += 1) {
+				for (uint32 descriptorImageIndex = 0; descriptorImageIndex < descriptorImages.count(); descriptorImageIndex += 1) {
 					DescriptorImage& descriptorImage = descriptorImages[descriptorImageIndex];
 					descriptorImage.imageView = imageViews[descriptorImageIndex];
 					descriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
@@ -234,7 +234,7 @@ namespace ProjectA {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count; framebufferIndex += 1) {
+				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
