@@ -84,6 +84,9 @@ namespace ProjectA {
 	using atl::float32;
 	using atl::float64;
 
+	using atl::index;
+
+	using atl::range;
 	using atl::sequence;
 	using atl::view;
 
