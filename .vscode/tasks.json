@@ -9,7 +9,8 @@
 				"kind": "build"
 			},
 			"presentation": {
-				"clear": true
+				"clear": true,
+				"showReuseMessage": false
 			},
 			"problemMatcher": "$msCompile"
 		},
@@ -27,7 +28,8 @@
 			},
 			"presentation": {
 				"group": "Build",
-				"clear": true
+				"clear": true,
+				"showReuseMessage": false
 			},
 			"problemMatcher": "$msCompile"
 		},
@@ -45,7 +47,8 @@
 			},
 			"presentation": {
 				"group": "Build",
-				"clear": true
+				"clear": true,
+				"showReuseMessage": false
 			},
 			"problemMatcher": "$msCompile"
 		},
@@ -63,7 +66,8 @@
 			},
 			"presentation": {
 				"group": "Build",
-				"clear": true
+				"clear": true,
+				"showReuseMessage": false
 			},
 			"problemMatcher": "$msCompile"
 		},
@@ -75,7 +79,8 @@
 				"kind": "build"
 			},
 			"presentation": {
-				"clear": true
+				"clear": true,
+				"showReuseMessage": false
 			}
 		}
 	]
