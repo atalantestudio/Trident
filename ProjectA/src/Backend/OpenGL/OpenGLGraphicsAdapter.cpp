@@ -96,73 +96,20 @@ namespace ProjectA {
 
 	#ifdef DEBUG_ENABLE_MESSENGER
 		void OpenGLGraphicsAdapter::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-			static constexpr view<char8> PATTERN = "[[] []] []";
-			static constexpr view<char8> SOURCE_STRINGS[] = {
-				"OpenGL API",
-				"Window-system API",
-				"Shader compiler",
-				"Third-party",
-				"Application",
-				"Unknown source",
-			};
-
-			const view<char8> sourceString = SOURCE_STRINGS[source - GL_DEBUG_SOURCE_API];
-
-			view<char8> typeString;
-
-			switch (type) {
-				case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-					typeString = "deprecation warning";
-
-					break;
-				case GL_DEBUG_TYPE_ERROR:
-					typeString = "error";
-
-					break;
-				case GL_DEBUG_TYPE_MARKER:
-					typeString = "command stream annotation";
-
-					break;
-				case GL_DEBUG_TYPE_OTHER:
-					typeString = "message";
-
-					break;
-				case GL_DEBUG_TYPE_PERFORMANCE:
-					typeString = "performance warning";
-
-					break;
-				case GL_DEBUG_TYPE_POP_GROUP:
-					typeString = "group popping";
-
-					break;
-				case GL_DEBUG_TYPE_PORTABILITY:
-					typeString = "portability warning";
-
-					break;
-				case GL_DEBUG_TYPE_PUSH_GROUP:
-					typeString = "group pushing";
-
-					break;
-				case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-					typeString = "undefined behavior warning";
-
-					break;
-			}
-
 			switch (severity) {
 				case GL_DEBUG_SEVERITY_NOTIFICATION: {
-					OPENGL_INFO(PATTERN, sourceString, typeString, message);
+					OPENGL_INFO(message);
 
 					break;
 				}
 				case GL_DEBUG_SEVERITY_LOW:
 				case GL_DEBUG_SEVERITY_MEDIUM: {
-					OPENGL_WARNING(PATTERN, sourceString, typeString, message);
+					OPENGL_WARNING(message);
 
 					break;
 				}
 				case GL_DEBUG_SEVERITY_HIGH: {
-					OPENGL_ERROR(PATTERN, sourceString, typeString, message);
+					OPENGL_ERROR(message);
 
 					break;
 				}
