@@ -1,10 +1,25 @@
 # ProjectA
 
-C++ 3D game engine (rendering, physics and audio) with integrated math and GUI APIs.
+ProjectA is a game engine made for technical teams. Its low-level API allows developers to create high performance games and applications.
+
+### Features
+
+- Graphics abstraction (OpenGL/Vulkan)
+- Visibility renderer
+- 2D physics engine
+- ECS
+- GUI API
+- Custom shader language
+- Filesystem abstraction
+- Custom file formats (geometry, image, font)
+- Window abstraction (Win32)
 
 ## Dependencies
 
+Premake is the only library that's not managed by the studio.
+
 - [Lyah](https://github.com/atalantestudio/lyah)
+- [Scroll](https://github.com/atalantestudio/scroll)
 - [SampleAssetPack](https://github.com/atalantestudio/SampleAssetPack)
 - [Premake](https://github.com/premake/premake-core)
 
