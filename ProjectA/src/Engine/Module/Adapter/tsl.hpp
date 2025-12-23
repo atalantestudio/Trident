@@ -1,7 +1,6 @@
 #pragma once
 
 namespace ProjectA {
-	using tsl::ASTDebugger;
 	using tsl::CompilationContext;
 	using tsl::CompilationInput;
 	using tsl::Diagnostic;

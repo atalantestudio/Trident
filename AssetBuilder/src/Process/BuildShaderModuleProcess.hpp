@@ -2,12 +2,14 @@
 
 #include "Engine/Process/Process.hpp"
 
+#include "tsl/AST/ASTDebugger.hpp"
 #include "tsl/compile.hpp"
+#include "tsl/Generator/GLSLGenerator.hpp"
 
 namespace ProjectA {
 	class BuildShaderModuleProcess : public Process {
 		private:
-			sint32 processFile(view<char8> path, view<char8> astPath) {
+			sint32 processFile(view<char8> path, view<char8> astPath, view<char8> glslPath) {
 				const sequence<char8> text = Filesystem::openTextBuffer(path);
 
 				CompilationInput input{};
@@ -26,18 +28,15 @@ namespace ProjectA {
 					return 1;
 				}
 
-				// Visualize AST.
 				tsl::ASTDebugger(astPath, context);
 
-				/* std::ofstream targetStream("Test/test.glsl");
+				std::ofstream targetStream(&glslPath[0]);
 
 				DEBUG_ASSERT(targetStream.is_open());
 
-				// Generate GLSL.
-				GLSLGenerator generator;
-				generator.write(targetStream, context);
+				tsl::GLSLGenerator(context, targetStream);
 
-				targetStream.close(); */
+				targetStream.close();
 
 				return 0;
 			}
@@ -177,6 +176,7 @@ namespace ProjectA {
 
 					const std::string path = directoryEntry.path().string();
 					const std::string astPath = std::filesystem::path(directoryEntry.path()).replace_filename("test.ast.json").string();
+					const std::string glslPath = std::filesystem::path(directoryEntry.path()).replace_filename("test.glsl").string();
 
 					// TODO: (debug-only)
 					/* #if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
@@ -185,7 +185,7 @@ namespace ProjectA {
 						ShellExecuteA(0, "open", &command[0], &path[0], NULL, SW_SHOW);
 					#endif */
 
-					code = processFile(view<char8>(&path[0], path.size()), view<char8>(&astPath[0], astPath.size()));
+					code = processFile(view<char8>(&path[0], path.size()), view<char8>(&astPath[0], astPath.size()), view<char8>(&glslPath[0], glslPath.size()));
 				}
 
 				const uint64 end = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();
