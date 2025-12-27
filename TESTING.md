@@ -15,8 +15,6 @@ All of the following criteria must be regularly tested:
 
 ### PNG
 
-- [x] ../ProjectA/src/Asset/Image/icon-black.png
-- [x] ../ProjectA/src/Asset/Image/icon-white.png
 - [x] ../ProjectA/src/Asset/Image/Quiver.png
 - [x] Asset/Image/qoi_test_images/dice.png
 - [x] Asset/Image/qoi_test_images/edgecase.png
