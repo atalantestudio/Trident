@@ -25,7 +25,7 @@ namespace ProjectA {
 		Entity B;
 		ContactManifold2D contactManifold;
 
-		// TODO Differentiate static and dynamic friction.
+		// TODO: Differentiate static and dynamic friction.
 		float32 combinedFriction;
 
 		// TODO: Store combined restitution.
