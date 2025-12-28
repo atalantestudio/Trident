@@ -102,8 +102,6 @@ namespace ProjectA {
 
 		sharedMemoryData->instanceCount += 1;
 
-		ENGINE_DEBUG("Running new instance. Updated count = [].", static_cast<sint32>(sharedMemoryData->instanceCount));
-
 		mutex->release();
 
 		window = new Window(windowDescriptor);
@@ -130,8 +128,6 @@ namespace ProjectA {
 		mutex->acquire();
 
 		sharedMemoryData->instanceCount -= 1;
-
-		ENGINE_DEBUG("Killing instance. Updated count = [].", static_cast<sint32>(sharedMemoryData->instanceCount));
 
 		sharedMemory->unmap(sharedMemoryData);
 

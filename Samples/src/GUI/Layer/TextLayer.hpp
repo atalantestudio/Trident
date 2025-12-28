@@ -1,19 +1,25 @@
 #pragma once
 
 namespace ProjectA {
-	class TextLayer : public GUILayer {
+	class SampleLayer : public GUILayer {
 		public:
 			void registerAssets() override {
+				containerStyle.size.width = FIT;
+				containerStyle.padding = {16_px, 16_px};
+
 				textStyle.color = 0x000000ff;
-				textStyle.font = loadFontAsset("DefaultFont");
-				textStyle.fontSize = 64.0f;
+				textStyle.font = loadFontAsset("test-regular");
+				textStyle.fontSize = 28.0f;
 			}
 
 			void GUI() override {
-				GUIText("Quá trình mã hóa và.", textStyle);
+				GUIComponent(containerStyle) {
+					GUIText("Quá trình mã hóa và.", textStyle);
+				}
 			}
 
 		private:
+			ContainerStyle containerStyle;
 			TextStyle textStyle;
 	};
 }

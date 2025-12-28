@@ -2,7 +2,8 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "../Sample/Triangle.hpp"
+#include "../Sample/ComputeShaderIndirect.hpp"
+// #include "../Sample/TextureArray.hpp"
 
 namespace ProjectA {
 	class SampleLayer : public Layer {

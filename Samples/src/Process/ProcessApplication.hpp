@@ -19,7 +19,7 @@ namespace ProjectA {
 	Application* ProjectA::createApplication(uint32 argumentCount, char8** argumentValues) {
 		ProjectDescriptor projectDescriptor{};
 		projectDescriptor.type = ProjectType::MAIN;
-		projectDescriptor.name = "Process";
+		projectDescriptor.name = "ProjectA Sample";
 		projectDescriptor.version = {1, 0, 0};
 
 		return new ProcessApplication(projectDescriptor);

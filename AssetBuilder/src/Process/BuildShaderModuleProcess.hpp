@@ -156,8 +156,7 @@ namespace ProjectA {
 			sint32 main(const sequence<void*>& arguments) override {
 				const std::filesystem::path inputPath = pointer_cast<const char8*>(arguments[PROJECT_INPUT_PATH_ARGUMENT_INDEX]);
 				const std::filesystem::path outputPath = pointer_cast<const char8*>(arguments[PROJECT_OUTPUT_PATH_ARGUMENT_INDEX]);
-
-				const std::filesystem::recursive_directory_iterator shaderDirectoryIterator(inputPath / "Asset/Shader");
+				const std::filesystem::recursive_directory_iterator shaderDirectoryIterator(inputPath / "Asset/Shader/TSL");
 				const uint64 start = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();
 
 				logger << '\n';
@@ -169,14 +168,14 @@ namespace ProjectA {
 						continue;
 					}
 
-					// TODO: Extract asset information from a pre-built manifest file.
+					// TODO: Extract asset information from a pre-built manifest file?
 					if (directoryEntry.path().extension() != ".tsl") {
 						continue;
 					}
 
 					const std::string path = directoryEntry.path().string();
-					const std::string astPath = std::filesystem::path(directoryEntry.path()).replace_filename("test.ast.json").string();
-					const std::string glslPath = std::filesystem::path(directoryEntry.path()).replace_filename("test.glsl").string();
+					const std::string astPath = std::filesystem::path(directoryEntry.path()).replace_extension("ast.json").string();
+					const std::string glslPath = std::filesystem::path(directoryEntry.path()).replace_extension("glsl").string();
 
 					// TODO: (debug-only)
 					/* #if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS

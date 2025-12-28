@@ -5,7 +5,11 @@
 #include "Engine/entry_point.hpp"
 
 // #include "Layer/GUI/StatisticsLayer.hpp"
-#include "Layer/Sample/Boxes.hpp"
+
+#include "Layer/Sample/RollingBall.hpp"
+// #include "Layer/Sample/SlidingBoxes.hpp"
+// #include "Layer/Sample/Stacking.hpp"
+// #include "Layer/Sample/Swing.hpp"
 
 namespace ProjectA {
 	class Physics2DApplication : public Application {
@@ -21,7 +25,7 @@ namespace ProjectA {
 	Application* ProjectA::createApplication(uint32 argumentCount, char8** argumentValues) {
 		ProjectDescriptor projectDescriptor{};
 		projectDescriptor.type = ProjectType::MAIN;
-		projectDescriptor.name = "Physics";
+		projectDescriptor.name = "ProjectA Sample";
 		projectDescriptor.version = {1, 0, 0};
 
 		return new Physics2DApplication(projectDescriptor);

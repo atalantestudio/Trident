@@ -4,7 +4,9 @@
 
 #include "Engine/entry_point.hpp"
 
-#include "Layer/MyLayer.hpp"
+// #include "Layer/EventTestLayer.hpp"
+#include "Layer/SampleLayer.hpp"
+// #include "Layer/TextLayer.hpp"
 
 namespace ProjectA {
 	class GUIApplication : public Application {
@@ -12,14 +14,14 @@ namespace ProjectA {
 			explicit GUIApplication(const ProjectDescriptor& projectDescriptor) :
 				Application(projectDescriptor)
 			{
-				registerLayer<MyLayer>();
+				registerLayer<SampleLayer>();
 			}
 	};
 
 	Application* ProjectA::createApplication(uint32 argumentCount, char8** argumentValues) {
 		ProjectDescriptor projectDescriptor{};
 		projectDescriptor.type = ProjectType::MAIN;
-		projectDescriptor.name = "Lorem Ipsum";
+		projectDescriptor.name = "ProjectA Sample";
 		projectDescriptor.version = {1, 0, 0};
 
 		return new GUIApplication(projectDescriptor);

@@ -7,6 +7,9 @@ namespace ProjectA {
 	void GUIRenderer::build() {
 		setupRenderPass();
 
+		createSwapchainImage();
+		createSwapchainImageView();
+
 		recreateFramebuffers();
 
 		createCameraBuffer();
@@ -124,7 +127,7 @@ namespace ProjectA {
 	void GUIRenderer::setupRenderPass() {
 		Attachment swapchainAttachment{};
 		swapchainAttachment.format = getSurface()->getFormat();
-		swapchainAttachment.sampleCount = 1;
+		swapchainAttachment.sampleCount = 8;
 
 		// TODO: Use LoadOperation::LOAD.
 		// swapchainAttachment.loadOperation = LoadOperation::LOAD;
@@ -165,12 +168,12 @@ namespace ProjectA {
 
 		FramebufferDescriptor framebufferDescriptor{};
 		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = {nullptr};
+		framebufferDescriptor.imageViews = {swapchainImageView, nullptr};
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
 		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
-			framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
+			framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 		}
@@ -250,6 +253,30 @@ namespace ProjectA {
 		textureArrayImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 		textureArrayImage = createImage(textureArrayImageDescriptor);
+	}
+
+	void GUIRenderer::createSwapchainImage() {
+		const Extent2D swapchainExtent = getSwapchain()->getExtent();
+
+		AttachmentImageDescriptor swapchainImageDescriptor{};
+		swapchainImageDescriptor.type = ImageType::TEXTURE_2D;
+		swapchainImageDescriptor.extent.width = swapchainExtent.width;
+		swapchainImageDescriptor.extent.height = swapchainExtent.height;
+		swapchainImageDescriptor.extent.depth = 1;
+		swapchainImageDescriptor.mipLevelCount = 1;
+		swapchainImageDescriptor.layerCount = 1;
+
+		swapchainImage = renderPass->createColorAttachmentImage(swapchainImageDescriptor, 0);
+	}
+
+	void GUIRenderer::createSwapchainImageView() {
+		ImageViewDescriptor swapchainImageViewDescriptor{};
+		swapchainImageViewDescriptor.mipLevelOffset = 0;
+		swapchainImageViewDescriptor.mipLevelCount = swapchainImage->getMipLevelCount();
+		swapchainImageViewDescriptor.layerOffset = 0;
+		swapchainImageViewDescriptor.layerCount = swapchainImage->getLayerCount();
+
+		swapchainImageView = swapchainImage->createView(swapchainImageViewDescriptor);
 	}
 
 	void GUIRenderer::createTextureArrayImageView() {
@@ -567,6 +594,9 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::resize(WindowResizeEvent& event) {
+		createSwapchainImage();
+		createSwapchainImageView();
+
 		recreateFramebuffers();
 
 		updateCameraProjection();

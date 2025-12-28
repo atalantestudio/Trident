@@ -14,8 +14,8 @@ namespace ProjectA {
 			{
 				setConsoleArguments(argumentCount, argumentValues);
 
-				// registerProcess<BuildFontProcess>();
-				// registerProcess<BuildGeometryProcess>();
+				registerProcess<BuildFontProcess>();
+				registerProcess<BuildGeometryProcess>();
 				registerProcess<BuildShaderModuleProcess>();
 			}
 	};

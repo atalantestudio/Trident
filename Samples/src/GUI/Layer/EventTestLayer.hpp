@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	class UITestLayer : public GUILayer {
+	class SampleLayer : public GUILayer {
 		public:
 			void registerAssets() override {
 				font = loadFontAsset("test-regular");
@@ -19,7 +19,7 @@ namespace ProjectA {
 
 				buttonStyle.size = {FIT, FIT};
 				buttonStyle.padding = {10_px, 8_px};
-				buttonStyle.color = 0xffffffff;
+				buttonStyle.color = 0x757575ff;
 				buttonStyle.layoutSpacing = 8_px;
 				buttonStyle.outlineColor = 0xd9d9d9ff;
 				buttonStyle.eventListeners = &buttonEventListeners;
@@ -74,7 +74,7 @@ namespace ProjectA {
 			}
 
 			void onMouseClick(MouseUpEvent& event) {
-				ENGINE_DEBUG("Click");
+				ENGINE_DEBUG("Received MouseUpEvent.");
 			}
 
 		private:

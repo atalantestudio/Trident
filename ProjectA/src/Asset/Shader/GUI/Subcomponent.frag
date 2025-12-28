@@ -47,5 +47,6 @@ void main() {
 	float content = smoothstep(-fw, fw, -d - outlineSize);
 
 	// TODO: Calculate the correct outline inner radius.
-	fragment = fragmentInput.outlineColor * content * outlineSize + fragmentInput.color * texture(textureArraySampler, fragmentInput.textureCoordinate) * content;
+	// TODO: Restore content.
+	fragment = fragmentInput.outlineColor * content * outlineSize + fragmentInput.color * texture(textureArraySampler, fragmentInput.textureCoordinate); // * content;
 }

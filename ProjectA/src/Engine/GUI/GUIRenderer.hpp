@@ -63,7 +63,9 @@ namespace ProjectA {
 			void createSubcomponentBuffer();
 			void createGlyphSubcomponentBuffer();
 			void createTextureArrayStagingBuffer();
+			void createSwapchainImage();
 			void createTextureArrayImage();
+			void createSwapchainImageView();
 			void createTextureArrayImageView();
 			void createNearestSampler();
 			void createLinearSampler();
@@ -105,8 +107,10 @@ namespace ProjectA {
 			ref<Buffer> glyphSubcomponentBuffer;
 			ref<Buffer> textureArrayStagingBuffer;
 
+			ref<Image> swapchainImage;
 			ref<Image> textureArrayImage;
 
+			ref<ImageView> swapchainImageView;
 			ref<ImageView> textureArrayImageView;
 
 			ref<Sampler> nearestSampler;

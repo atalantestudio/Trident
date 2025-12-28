@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	class MyLayer : public GUILayer {
+	class SampleLayer : public GUILayer {
 		public:
 			void registerAssets() override {
 				fontBold = loadFontAsset("test-bold");
@@ -26,20 +26,20 @@ namespace ProjectA {
 
 				titleStyle.color = 0x000000ff;
 				titleStyle.font = fontBold;
-				titleStyle.fontSize = 24.0f;
+				titleStyle.fontSize = 28.0f;
 
 				paragraphStyle.color = 0x000000ff;
 				paragraphStyle.font = fontRegular;
-				paragraphStyle.fontSize = 16.0f;
+				paragraphStyle.fontSize = 20.0f;
 
 				legendStyle.color = 0x757575ff;
 				legendStyle.font = fontRegularItalic;
-				legendStyle.fontSize = 14.0f;
+				legendStyle.fontSize = 16.0f;
 			}
 
 			void GUI() override {
 				GUIComponent(containerStyle) {
-					GUIText("The Lorem Ipsum", titleStyle);
+					GUIText("Lorem Ipsum", titleStyle);
 
 					GUIText(
 						"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n"
