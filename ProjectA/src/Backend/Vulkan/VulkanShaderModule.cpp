@@ -5,6 +5,14 @@
 #include "Backend/Vulkan/ShaderStage.hpp"
 
 namespace ProjectA {
+	VulkanShaderModule::VulkanShaderModule(VkDevice device, const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) :
+		ShaderModule(descriptor),
+		device(device)
+	{
+		// TODO
+		ENGINE_ERROR_UNIMPLEMENTED();
+	}
+
 	VulkanShaderModule::VulkanShaderModule(VkDevice device, const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) :
 		ShaderModule(descriptor),
 		device(device)
@@ -26,7 +34,7 @@ namespace ProjectA {
 		object.pNext = nullptr;
 		object.flags = 0;
 		object.stage = getVkShaderStageFlagBits(descriptor.stage);
-		object.pName = descriptor.entryPoint.data();
+		object.pName = &descriptor.entryPoint[0];
 		object.pSpecializationInfo = nullptr;
 	}
 

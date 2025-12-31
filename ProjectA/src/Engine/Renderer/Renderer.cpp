@@ -175,6 +175,10 @@ namespace ProjectA {
 		return swapchain;
 	}
 
+	ref<ShaderModule> Renderer::loadShaderModule(const ref<ShaderModuleAsset>& shaderModuleAsset, const ShaderModuleDescriptor& descriptor) {
+		return adapter->createShaderModule(shaderModuleAsset, descriptor);
+	}
+
 	ref<ShaderModule> Renderer::loadShaderModule(std::string_view path, const ShaderModuleDescriptor& descriptor) {
 		std::string pathString = "Asset/Shader/";
 		pathString += path;

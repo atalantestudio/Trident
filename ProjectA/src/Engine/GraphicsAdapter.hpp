@@ -11,6 +11,7 @@
 #include "Engine/API/Rendering/ShaderModule.hpp"
 #include "Engine/API/Rendering/Surface.hpp"
 #include "Engine/Application/ProjectDescriptor.hpp"
+#include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 
 namespace ProjectA {
 	class GraphicsAdapter {
@@ -43,6 +44,9 @@ namespace ProjectA {
 
 			virtual ref<Semaphore> createSemaphore() const = 0;
 
+			virtual ref<ShaderModule> createShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) const = 0;
+
+			// TODO: Deprecate.
 			virtual ref<ShaderModule> createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const = 0;
 
 			virtual ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const = 0;

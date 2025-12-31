@@ -6,8 +6,8 @@
 namespace ProjectA {
 	class BuildTrueTypeFontSubprocess {
 		public:
-			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& assetOutputPath) {
-				const sequence<char8> path = directoryEntry.path().string().c_str();
+			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
+				const sequence<char8> path = directoryEntry.path().string();
 				const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
 				const ByteStream<StreamOperation::READ> inputByteStream(&inputData[0], inputData.count(), Endianness::BIG_ENDIAN);
 
@@ -96,13 +96,14 @@ namespace ProjectA {
 				}
 
 				const std::string stem = directoryEntry.path().stem().string();
+				const std::string assetOutputPathString = assetOutputPath.string();
 
-				// NOTE: Count '\0'.
-				sequence<char8> outputPath(assetOutputPath.size() + stem.size() + 10);
-				std::copy(assetOutputPath.begin(), assetOutputPath.end(), &outputPath[0]);
-				std::copy_n("Font/", 5, &outputPath[assetOutputPath.size()]);
-				std::copy(stem.begin(), stem.end(), &outputPath[assetOutputPath.size() + 5]);
-				std::copy_n(".tfo", 4, &outputPath[assetOutputPath.size() + stem.size() + 5]);
+				// Count '\0'.
+				sequence<char8> outputPath(assetOutputPathString.size() + stem.size() + 10);
+				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
+				std::copy_n("Font/", 5, &outputPath[assetOutputPathString.size()]);
+				std::copy(stem.begin(), stem.end(), &outputPath[assetOutputPathString.size() + 5]);
+				std::copy_n(".tfo", 4, &outputPath[assetOutputPathString.size() + stem.size() + 5]);
 
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputByteStream.size);

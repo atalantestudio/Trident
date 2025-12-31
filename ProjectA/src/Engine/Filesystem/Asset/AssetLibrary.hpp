@@ -1,9 +1,10 @@
 ﻿#pragma once
 
+#include "Engine/Filesystem/Asset/AssetSignature.hpp"
 #include "Engine/Filesystem/Asset/FontAsset.hpp"
 #include "Engine/Filesystem/Asset/GeometryAsset.hpp"
 #include "Engine/Filesystem/Asset/ImageAsset.hpp"
-#include "Engine/Filesystem/Asset/AssetSignature.hpp"
+#include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/Stream/ByteStream.hpp"
 
@@ -32,19 +33,41 @@ namespace ProjectA {
 				assetIterator = std::filesystem::recursive_directory_iterator(std::filesystem::current_path() / "Asset/Geometry");
 
 				for (const std::filesystem::directory_entry& assetEntry : assetIterator) {
+					if (assetEntry.is_directory()) {
+						continue;
+					}
+
 					loadGeometryAsset(assetEntry);
 				}
 
 				assetIterator = std::filesystem::recursive_directory_iterator(std::filesystem::current_path() / "Asset/Image");
 
 				for (const std::filesystem::directory_entry& assetEntry : assetIterator) {
+					if (assetEntry.is_directory()) {
+						continue;
+					}
+
 					loadImageAsset(assetEntry);
 				}
 
 				assetIterator = std::filesystem::recursive_directory_iterator(std::filesystem::current_path() / "Asset/Font");
 
 				for (const std::filesystem::directory_entry& assetEntry : assetIterator) {
+					if (assetEntry.is_directory()) {
+						continue;
+					}
+
 					loadFontAsset(assetEntry);
+				}
+
+				assetIterator = std::filesystem::recursive_directory_iterator(std::filesystem::current_path() / "Asset/Shader");
+
+				for (const std::filesystem::directory_entry& assetEntry : assetIterator) {
+					if (assetEntry.is_directory()) {
+						continue;
+					}
+
+					loadShaderModuleAsset(assetEntry);
 				}
 			}
 
@@ -69,6 +92,10 @@ namespace ProjectA {
 				return findAssetByStem<ImageAsset>(imageAssetStemToAssetIndex, stem);
 			}
 
+			ref<ShaderModuleAsset> findShaderModuleAsset(view<char8> stem) const {
+				return findAssetByStem<ShaderModuleAsset>(shaderModuleAssetStemToAssetIndex, stem);
+			}
+
 		private:
 			template<typename AssetType>
 			ref<AssetType> findAssetByStem(const std::unordered_map<std::string, uint32>& assetStemToAssetIndex, view<char8> stem) const {
@@ -81,11 +108,7 @@ namespace ProjectA {
 			}
 
 			void loadFontAsset(const std::filesystem::directory_entry& assetEntry) {
-				if (assetEntry.is_directory()) {
-					return;
-				}
-
-				const sequence<char8> assetPath = assetEntry.path().string().c_str();
+				const sequence<char8> assetPath = assetEntry.path().string();
 				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
@@ -99,23 +122,16 @@ namespace ProjectA {
 				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<FontAsset> fontAsset = decodeFontAsset(byteStream);
-
 				const uint32 fontAssetIndex = static_cast<uint32>(assets.size());
-
 				const std::string stem = assetEntry.path().stem().string();
 
 				assetIdentifierToAssetIndex.insert({fontAsset->identifier, fontAssetIndex});
 				fontAssetStemToAssetIndex.insert({stem, fontAssetIndex});
-
 				assets.emplace_back(fontAsset);
 			}
 
 			void loadGeometryAsset(const std::filesystem::directory_entry& assetEntry) {
-				if (assetEntry.is_directory()) {
-					return;
-				}
-
-				const sequence<char8> assetPath = assetEntry.path().string().c_str();
+				const sequence<char8> assetPath = assetEntry.path().string();
 				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
@@ -129,23 +145,16 @@ namespace ProjectA {
 				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<GeometryAsset> geometryAsset = Filesystem::decodeAsset<GeometryAsset>(byteStream);
-
 				const uint32 geometryAssetIndex = static_cast<uint32>(assets.size());
-
 				const std::string stem = assetEntry.path().stem().string();
 
 				assetIdentifierToAssetIndex.insert({geometryAsset->identifier, geometryAssetIndex});
 				geometryAssetStemToAssetIndex.insert({stem, geometryAssetIndex});
-
 				assets.emplace_back(geometryAsset);
 			}
 
 			void loadImageAsset(const std::filesystem::directory_entry& assetEntry) {
-				if (assetEntry.is_directory()) {
-					return;
-				}
-
-				const sequence<char8> assetPath = assetEntry.path().string().c_str();
+				const sequence<char8> assetPath = assetEntry.path().string();
 				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
@@ -159,15 +168,35 @@ namespace ProjectA {
 				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<ImageAsset> imageAsset = decodeImageAsset(byteStream);
-
 				const uint32 imageAssetIndex = static_cast<uint32>(assets.size());
-
 				const std::string stem = assetEntry.path().stem().string();
 
 				assetIdentifierToAssetIndex.insert({imageAsset->identifier, imageAssetIndex});
 				imageAssetStemToAssetIndex.insert({stem, imageAssetIndex});
-
 				assets.emplace_back(imageAsset);
+			}
+
+			void loadShaderModuleAsset(const std::filesystem::directory_entry& assetEntry) {
+				const sequence<char8> assetPath = assetEntry.path().string();
+				const sequence<uint8> data = Filesystem::openByteBuffer(assetPath);
+
+				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
+
+				const AssetSignature signature = byteStream.peek<AssetSignature>();
+
+				if (signature != AssetSignature::TSM) {
+					return;
+				}
+
+				byteStream.jump(sizeof(AssetSignature));
+
+				const ref<ShaderModuleAsset> shaderModuleAsset = decodeShaderModuleAsset(byteStream);
+				const uint32 shaderModuleAssetIndex = static_cast<uint32>(assets.size());
+				const std::string stem = assetEntry.path().stem().string();
+
+				assetIdentifierToAssetIndex.insert({shaderModuleAsset->identifier, shaderModuleAssetIndex});
+				shaderModuleAssetStemToAssetIndex.insert({stem, shaderModuleAssetIndex});
+				assets.emplace_back(shaderModuleAsset);
 			}
 
 			ref<FontAsset> decodeFontAsset(ByteStream<StreamOperation::READ>& byteStream) const {
@@ -231,6 +260,34 @@ namespace ProjectA {
 				return createRef<FontAsset>(fontAssetDescriptor);
 			}
 
+			ref<ShaderModuleAsset> decodeShaderModuleAsset(ByteStream<StreamOperation::READ>& byteStream) const {
+				ShaderModuleAssetDescriptor shaderModuleAssetDescriptor{};
+				shaderModuleAssetDescriptor.identifier = byteStream.read<uint32>();
+				shaderModuleAssetDescriptor.version = byteStream.read<VersionNumber>();
+				shaderModuleAssetDescriptor.glslCode = sequence<char8>(byteStream.read<uint32>());
+
+				for (char8& character : shaderModuleAssetDescriptor.glslCode) {
+					character = byteStream.read<char8>();
+				}
+
+				const uint32 entryPointCount = byteStream.read<uint32>();
+
+				shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.reserve(entryPointCount);
+
+				for (uint32 entryPointIndex = 0; entryPointIndex < entryPointCount; entryPointIndex += 1) {
+					const uint32 identifierSize = byteStream.read<uint32>();
+					const view<char8> identifier(pointer_cast<const char8*>(byteStream.getBytePosition()), identifierSize);
+
+					byteStream.jump(identifierSize);
+
+					const uint32 activationOffset = byteStream.read<uint32>();
+
+					shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.insert({identifier, activationOffset});
+				}
+
+				return createRef<ShaderModuleAsset>(shaderModuleAssetDescriptor);
+			}
+
 			ref<ImageAsset> decodeImageAsset(ByteStream<StreamOperation::READ>& byteStream) const {
 				ImageAssetDescriptor imageAssetDescriptor{};
 				imageAssetDescriptor.identifier = byteStream.read<uint32>();
@@ -260,5 +317,6 @@ namespace ProjectA {
 			std::unordered_map<std::string, uint32> fontAssetStemToAssetIndex;
 			std::unordered_map<std::string, uint32> geometryAssetStemToAssetIndex;
 			std::unordered_map<std::string, uint32> imageAssetStemToAssetIndex;
+			std::unordered_map<std::string, uint32> shaderModuleAssetStemToAssetIndex;
 	};
 }

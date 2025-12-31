@@ -7,7 +7,7 @@
 namespace ProjectA {
 	// TODO: Assert that FBX nodes exist before using them.
 	static void EncodeGeometryAssetSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& assetOutputPath) {
-		const sequence<char8> path = directoryEntry.path().string().c_str();
+		const sequence<char8> path = directoryEntry.path().string();
 		const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
 
 		if (!Filesystem::validateSignature<FileFormat::FBX>(ByteStream<StreamOperation::READ>(&inputData[0], inputData.count(), Endianness::LITTLE_ENDIAN))) {
@@ -360,7 +360,7 @@ namespace ProjectA {
 
 		const std::string stem = directoryEntry.path().stem().string();
 
-		// NOTE: Count '\0'.
+		// Count '\0'.
 		sequence<char8> outputPath(assetOutputPath.size() + stem.size() + 14);
 		std::copy(assetOutputPath.begin(), assetOutputPath.end(), &outputPath[0]);
 		std::copy_n("Geometry/", 9, &outputPath[assetOutputPath.size()]);

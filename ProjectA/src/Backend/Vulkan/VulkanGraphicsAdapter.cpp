@@ -88,6 +88,10 @@ namespace ProjectA {
 		return createRef<VulkanSemaphore>(device->object);
 	}
 
+	ref<ShaderModule> VulkanGraphicsAdapter::createShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) const {
+		return createRef<VulkanShaderModule>(device->object, asset, descriptor);
+	}
+
 	ref<ShaderModule> VulkanGraphicsAdapter::createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const {
 		return createRef<VulkanShaderModule>(device->object, code, descriptor);
 	}

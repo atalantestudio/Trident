@@ -9,12 +9,13 @@
 namespace ProjectA {
 	class BuildShaderModuleProcess : public Process {
 		private:
-			sint32 processFile(view<char8> path, view<char8> astPath, view<char8> glslPath) {
-				const sequence<char8> text = Filesystem::openTextBuffer(path);
+			sint32 processFile(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
+				const sequence<char8> path = directoryEntry.path().string();
+				const sequence<char8> inputData = Filesystem::openTextBuffer(path);
 
 				CompilationInput input{};
 				input.path = path;
-				input.text = text;
+				input.text = inputData;
 
 				CompilationContext context{};
 				context.document.text = input.text;
@@ -28,15 +29,69 @@ namespace ProjectA {
 					return 1;
 				}
 
+				const std::string astPathString = std::filesystem::path(directoryEntry.path()).replace_extension("ast.json").string();
+				const view<char8> astPath = view<char8>(&astPathString[0], astPathString.size());
+
 				tsl::ASTDebugger(astPath, context);
 
-				std::ofstream targetStream(&glslPath[0]);
+				tsl::ShaderModuleAssetDescriptor glslDescriptor{};
 
-				DEBUG_ASSERT(targetStream.is_open());
+				tsl::GLSLGenerator(context, glslDescriptor);
 
-				tsl::GLSLGenerator(context, targetStream);
+				ShaderModuleAssetDescriptor shaderModuleAssetDescriptor{};
+				shaderModuleAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
+				shaderModuleAssetDescriptor.version = {1, 0, 0};
+				shaderModuleAssetDescriptor.glslCode = glslDescriptor.glslCode;
+				shaderModuleAssetDescriptor.glslEntryPointActivationOffsets = glslDescriptor.glslEntryPointActivationOffsets;
 
-				targetStream.close();
+				uint64 outputSize = sizeof(AssetSignature) + sizeof(VersionNumber) + 2 * sizeof(uint32);
+
+				for (const auto& glslEntryPointActivationOffsetEntry : shaderModuleAssetDescriptor.glslEntryPointActivationOffsets) {
+					outputSize += glslEntryPointActivationOffsetEntry.first.count() + 2 * sizeof(uint32);
+				}
+
+				outputSize += sizeof(uint32) + shaderModuleAssetDescriptor.glslCode.count();
+
+				const uint32 entryPointCount = static_cast<uint32>(shaderModuleAssetDescriptor.glslEntryPointActivationOffsets.size());
+
+				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
+				outputByteStream.write<AssetSignature>(AssetSignature::TSM);
+				outputByteStream.write<uint32>(shaderModuleAssetDescriptor.identifier);
+				outputByteStream.write<VersionNumber>({0, 0, 0});
+				outputByteStream.write<uint32>(static_cast<uint32>(shaderModuleAssetDescriptor.glslCode.count()));
+
+				for (const char8 character : shaderModuleAssetDescriptor.glslCode) {
+					outputByteStream.write<char8>(character);
+				}
+
+				outputByteStream.write<uint32>(entryPointCount);
+
+				for (const auto& glslEntryPointActivationOffsetEntry : shaderModuleAssetDescriptor.glslEntryPointActivationOffsets) {
+					outputByteStream.write<uint32>(static_cast<uint32>(glslEntryPointActivationOffsetEntry.first.count()));
+
+					for (const char8 character : glslEntryPointActivationOffsetEntry.first) {
+						outputByteStream.write<char8>(character);
+					}
+				}
+
+				for (const auto& glslEntryPointActivationOffsetEntry : shaderModuleAssetDescriptor.glslEntryPointActivationOffsets) {
+					outputByteStream.write<uint32>(glslEntryPointActivationOffsetEntry.second);
+				}
+
+				const std::string stem = directoryEntry.path().stem().string();
+				const std::string assetOutputPathString = assetOutputPath.string();
+
+				// Count '\0'.
+				sequence<char8> outputPath(assetOutputPathString.size() + stem.size() + 12);
+				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
+				std::copy_n("Shader/", 7, &outputPath[assetOutputPathString.size()]);
+				std::copy(stem.begin(), stem.end(), &outputPath[assetOutputPathString.size() + 7]);
+				std::copy_n(".tsm", 4, &outputPath[assetOutputPathString.size() + stem.size() + 7]);
+
+				Writer writer = Filesystem::openWriter(outputPath);
+				writer.write(outputByteStream.data, outputByteStream.size);
+
+				ENGINE_INFO("Generated shader module asset \"[]\" (ID: []).", outputPath, shaderModuleAssetDescriptor.identifier);
 
 				return 0;
 			}
@@ -154,14 +209,16 @@ namespace ProjectA {
 			{}
 
 			sint32 main(const sequence<void*>& arguments) override {
-				const std::filesystem::path inputPath = pointer_cast<const char8*>(arguments[PROJECT_INPUT_PATH_ARGUMENT_INDEX]);
-				const std::filesystem::path outputPath = pointer_cast<const char8*>(arguments[PROJECT_OUTPUT_PATH_ARGUMENT_INDEX]);
-				const std::filesystem::recursive_directory_iterator shaderDirectoryIterator(inputPath / "Asset/Shader/TSL");
-				const uint64 start = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();
+				const std::filesystem::path rootInputPath = pointer_cast<const char8*>(arguments[PROJECT_INPUT_PATH_ARGUMENT_INDEX]);
+				const std::filesystem::path rootOutputPath = pointer_cast<const char8*>(arguments[PROJECT_OUTPUT_PATH_ARGUMENT_INDEX]);
+				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/";
+				const std::filesystem::recursive_directory_iterator shaderDirectoryIterator(rootInputPath / "Asset/Shader");
 
 				logger << '\n';
 
 				sint32 code = 0;
+
+				const uint64 start = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();
 
 				for (const std::filesystem::directory_entry& directoryEntry : shaderDirectoryIterator) {
 					if (directoryEntry.is_directory()) {
@@ -173,10 +230,6 @@ namespace ProjectA {
 						continue;
 					}
 
-					const std::string path = directoryEntry.path().string();
-					const std::string astPath = std::filesystem::path(directoryEntry.path()).replace_extension("ast.json").string();
-					const std::string glslPath = std::filesystem::path(directoryEntry.path()).replace_extension("glsl").string();
-
 					// TODO: (debug-only)
 					/* #if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 						const std::string command = (outputPath / "../tslc/tslc.exe").string();
@@ -184,7 +237,7 @@ namespace ProjectA {
 						ShellExecuteA(0, "open", &command[0], &path[0], NULL, SW_SHOW);
 					#endif */
 
-					code = processFile(view<char8>(&path[0], path.size()), view<char8>(&astPath[0], astPath.size()), view<char8>(&glslPath[0], glslPath.size()));
+					code = processFile(directoryEntry, assetOutputPath);
 				}
 
 				const uint64 end = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();

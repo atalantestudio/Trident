@@ -1,10 +1,41 @@
-#include "pch.hpp"
+﻿#include "pch.hpp"
 
 #include "Backend/OpenGL/OpenGLShaderModule.hpp"
 
 #include "Backend/OpenGL/ShaderStage.hpp"
 
 namespace ProjectA {
+	OpenGLShaderModule::OpenGLShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) :
+		ShaderModule(descriptor),
+		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
+	{
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ENGINE_ASSERT(descriptor.stage == ShaderStage::VERTEX, "Only vertex shaders can be loaded as .tsm assets.");
+
+		#ifdef OPENGL_USE_SPIRV
+			// TODO
+			ENGINE_ERROR_UNIMPLEMENTED();
+		#else
+			sequence<char8> code = asset->getGlslCode();
+
+			const std::unordered_map<sequence<char8>, uint32>& entryPointActivationOffsets = asset->getGlslEntryPointActivationOffsets();
+			const std::unordered_map<sequence<char8>, uint32>::const_iterator entryPointActivationOffsetEntry = find(entryPointActivationOffsets, descriptor.entryPoint);
+
+			ENGINE_ASSERT(entryPointActivationOffsetEntry != entryPointActivationOffsets.end(), "Entry point \"[]\" is not present in the shader module.", descriptor.entryPoint);
+
+			code[entryPointActivationOffsetEntry->second] = '1';
+
+			const GLchar* const string = static_cast<const GLchar* const>(&code[0]);
+			const GLsizei length = static_cast<GLsizei>(code.count());
+
+			glShaderSource(object, 1, &string, &length);
+			glCompileShader(object);
+		#endif
+
+		checkCompileStatus();
+	}
+
 	OpenGLShaderModule::OpenGLShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) :
 		ShaderModule(descriptor),
 		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))

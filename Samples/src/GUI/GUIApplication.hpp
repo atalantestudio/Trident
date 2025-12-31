@@ -4,9 +4,7 @@
 
 #include "Engine/entry_point.hpp"
 
-// #include "Layer/EventTestLayer.hpp"
 #include "Layer/SampleLayer.hpp"
-// #include "Layer/TextLayer.hpp"
 
 namespace ProjectA {
 	class GUIApplication : public Application {

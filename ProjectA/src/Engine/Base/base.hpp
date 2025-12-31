@@ -92,6 +92,7 @@ namespace ProjectA {
 
 	using atl::countBits;
 	using atl::countSetBits;
+	using atl::find;
 
 	using atl::pointer_cast;
 

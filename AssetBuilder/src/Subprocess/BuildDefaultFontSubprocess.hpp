@@ -166,7 +166,7 @@ namespace ProjectA {
 			};
 
 		public:
-			explicit BuildDefaultFontSubprocess(const std::string& assetOutputPath) {
+			explicit BuildDefaultFontSubprocess(const std::filesystem::path& assetOutputPath) {
 				const sequence<uint8> buffer = Filesystem::openByteBuffer("../ProjectA/src/Asset/Image/quiver.png");
 				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(buffer);
 
@@ -263,12 +263,14 @@ namespace ProjectA {
 					outputByteStream.write<uint32>(unicodeEntry.second);
 				}
 
-				// NOTE: Count '\0'.
-				sequence<char8> outputPath(assetOutputPath.size() + std::strlen(DEFAULT_FONT_NAME) + 11);
-				std::copy(assetOutputPath.begin(), assetOutputPath.end(), &outputPath[0]);
-				std::copy_n("/Font/", 6, &outputPath[assetOutputPath.size()]);
-				std::copy_n(DEFAULT_FONT_NAME, std::strlen(DEFAULT_FONT_NAME), &outputPath[assetOutputPath.size() + 6]);
-				std::copy_n(".tfo", 4, &outputPath[assetOutputPath.size() + std::strlen(DEFAULT_FONT_NAME) + 6]);
+				const std::string assetOutputPathString = assetOutputPath.string();
+
+				// Count '\0'.
+				sequence<char8> outputPath(assetOutputPathString.size() + std::strlen(DEFAULT_FONT_NAME) + 11);
+				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
+				std::copy_n("/Font/", 6, &outputPath[assetOutputPathString.size()]);
+				std::copy_n(DEFAULT_FONT_NAME, std::strlen(DEFAULT_FONT_NAME), &outputPath[assetOutputPathString.size() + 6]);
+				std::copy_n(".tfo", 4, &outputPath[assetOutputPathString.size() + std::strlen(DEFAULT_FONT_NAME) + 6]);
 
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputByteStream.size);

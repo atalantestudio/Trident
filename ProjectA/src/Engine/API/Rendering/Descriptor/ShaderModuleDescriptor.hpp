@@ -5,6 +5,6 @@
 namespace ProjectA {
 	struct ShaderModuleDescriptor {
 		ShaderStage stage;
-		std::string_view entryPoint;
+		view<char8> entryPoint;
 	};
 }

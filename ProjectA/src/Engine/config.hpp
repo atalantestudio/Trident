@@ -25,7 +25,7 @@ namespace ProjectA {
 
 	// If enabled, OpenGL shaders will be sourced from SPIR-V binaries.
 	// If disabled, they will be sourced from GLSL strings.
-	#define OPENGL_USE_SPIRV
+	// #define OPENGL_USE_SPIRV
 
 	// If enabled, OpenGL objects are cleanly unbound from their target after being used.
 	#define OPENGL_UNBIND_AFTER_USE

@@ -596,7 +596,7 @@ namespace ProjectA {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
-			if (descriptor.entryPoint.empty()) {
+			if (descriptor.entryPoint.count() == 0) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.entryPoint must not be empty.");

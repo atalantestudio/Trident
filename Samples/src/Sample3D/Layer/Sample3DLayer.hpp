@@ -4,8 +4,7 @@
 #include "Engine/Layer/Layer.hpp"
 #include "Engine/Renderer/3D/VisibilityRenderer.hpp"
 
-#include "../Scene/LemonAndStool.hpp"
-// #include "../Scene/Suzanne.hpp"
+#include "../Scene/Suzanne.hpp"
 
 namespace ProjectA {
 	class Sample3DLayer : public Layer {

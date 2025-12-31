@@ -2,8 +2,7 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "../Sample/ComputeShaderIndirect.hpp"
-// #include "../Sample/TextureArray.hpp"
+#include "../Sample/Gradient.hpp"
 
 namespace ProjectA {
 	class SampleLayer : public Layer {
