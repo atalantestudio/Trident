@@ -1,0 +1,23 @@
+#pragma once
+
+#include "Backend/GL/Command/Command.hpp"
+
+namespace ProjectA {
+	class OpenGLSetScissorCommand final : public OpenGLCommand {
+		public:
+			explicit OpenGLSetScissorCommand(GLint xOffset, GLint yOffset, Extent2D extent) :
+				xOffset(xOffset),
+				yOffset(yOffset),
+				extent(extent)
+			{}
+
+			void execute() const final override {
+				glScissor(xOffset, yOffset, extent.width, extent.height);
+			}
+
+		private:
+			const GLint xOffset;
+			const GLint yOffset;
+			const Extent2D extent;
+	};
+}

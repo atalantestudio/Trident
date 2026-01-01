@@ -40,18 +40,21 @@
 	#include "Engine/Base/Windows.hpp"
 #endif
 
-#ifdef ENABLE_OPENGL_ADAPTER
-	#include "Backend/OpenGL/base.hpp"
+#ifdef ENABLE_DX12_ADAPTER
+	#include "Backend/DX12/Base.hpp"
 #endif
 
-#ifdef ENABLE_VULKAN_ADAPTER
-	#include "Backend/Vulkan/base.hpp"
+#ifdef ENABLE_GL_ADAPTER
+	#include "Backend/GL/Base.hpp"
+#endif
+
+#ifdef ENABLE_VK_ADAPTER
+	#include "Backend/VK/Base.hpp"
 #endif
 
 #include "Engine/Base/Random.hpp"
 #include "Engine/Base/VersionNumber.hpp"
 
-// TODO: Handle in ModuleBase?
 #if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 	#undef max
 	#undef min
@@ -79,3 +82,7 @@
 #include "Engine/Base/KeyCode.hpp"
 
 #include "Engine/Manifest.hpp"
+
+#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+	#include "Backend/Win32/base.hpp"
+#endif

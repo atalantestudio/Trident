@@ -7,11 +7,16 @@ namespace ProjectA {
 	// There is no guarantee that it will be selected at runtime.
 	#define PREFERRED_GPU_TYPE GPU_TYPE_DISCRETE
 
+	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+		// Toggle DirectX 12 graphics adapter.
+		#define ENABLE_DX12_ADAPTER
+	#endif
+
 	// Toggle OpenGL graphics adapter.
-	#define ENABLE_OPENGL_ADAPTER
+	#define ENABLE_GL_ADAPTER
 
 	// Toggle Vulkan graphics adapter.
-	#define ENABLE_VULKAN_ADAPTER
+	#define ENABLE_VK_ADAPTER
 
 	// Toggle debug messages from the graphics API.
 	#define DEBUG_ENABLE_MESSENGER
@@ -25,7 +30,7 @@ namespace ProjectA {
 
 	// If enabled, OpenGL shaders will be sourced from SPIR-V binaries.
 	// If disabled, they will be sourced from GLSL strings.
-	// #define OPENGL_USE_SPIRV
+	#define OPENGL_USE_SPIRV
 
 	// If enabled, OpenGL objects are cleanly unbound from their target after being used.
 	#define OPENGL_UNBIND_AFTER_USE
@@ -39,16 +44,16 @@ namespace ProjectA {
 	#define VULKAN_USE_VK_KHR_surface
 	#define VULKAN_USE_VK_KHR_swapchain
 
-	#ifdef ENABLE_OPENGL_ADAPTER
+	#ifdef ENABLE_GL_ADAPTER
 		#if OPENGL_VERSION < OPENGL_VERSION_2_0
 			#error "OpenGL versions older than 2.0 cannot be used."
 		#endif
 
-		#if defined(DEBUG_ENABLE_MESSENGER) && OPENGL_VERSION < OPENGL_VERSION_4_3
+		#if OPENGL_VERSION < OPENGL_VERSION_4_3 && defined(DEBUG_ENABLE_MESSENGER)
 			#error "Debug messenger cannot be enabled below OpenGL 4.3."
 		#endif
 
-		#if defined(OPENGL_USE_SPIRV) && OPENGL_VERSION < OPENGL_VERSION_4_6
+		#if OPENGL_VERSION < OPENGL_VERSION_4_6 && defined(OPENGL_USE_SPIRV)
 			#error "SPIR-V shaders cannot be used below OpenGL 4.6."
 		#endif
 	#endif

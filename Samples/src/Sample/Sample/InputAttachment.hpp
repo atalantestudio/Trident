@@ -261,20 +261,28 @@ namespace ProjectA {
 				ref<ShaderModule> fragmentShaderModule;
 
 				switch (getGraphicsApi()) {
-					case GraphicsAPI::OPENGL:
+					case GraphicsAPI::CPU: {
+						ENGINE_ERROR_UNSUPPORTED();
+
+						break;
+					}
+					case GraphicsAPI::DX12: {
+						ENGINE_ERROR_UNIMPLEMENTED();
+
+						break;
+					}
+					case GraphicsAPI::GL: {
 						vertexShaderModule = loadShaderModule("Base/ScreenUV.vert", vertexShaderModuleDescriptor);
 						fragmentShaderModule = loadShaderModule("Base/TextureRGBA.frag", fragmentShaderModuleDescriptor);
 
 						break;
-					case GraphicsAPI::VULKAN:
+					}
+					case GraphicsAPI::VK: {
 						vertexShaderModule = loadShaderModule("Base/Screen.vert", vertexShaderModuleDescriptor);
 						fragmentShaderModule = loadShaderModule("Base/ScreenInputAttachment.frag", fragmentShaderModuleDescriptor);
 
 						break;
-					default:
-						ENGINE_ERROR_UNSUPPORTED();
-
-						break;
+					}
 				}
 
 				ColorBlendAttachment colorBlendAttachment{};

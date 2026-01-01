@@ -1,11 +1,15 @@
 #include "pch.hpp"
 
-#ifdef ENABLE_OPENGL_ADAPTER
-	#include "Backend/OpenGL/OpenGLGraphicsAdapter.hpp"
+#ifdef ENABLE_DX12_ADAPTER
+	#include "Backend/DX12/GraphicsAdapter.hpp"
 #endif
 
-#ifdef ENABLE_VULKAN_ADAPTER
-	#include "Backend/Vulkan/VulkanGraphicsAdapter.hpp"
+#ifdef ENABLE_GL_ADAPTER
+	#include "Backend/GL/GraphicsAdapter.hpp"
+#endif
+
+#ifdef ENABLE_VK_ADAPTER
+	#include "Backend/VK/GraphicsAdapter.hpp"
 #endif
 
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -13,7 +17,7 @@
 #include "Engine/Validation/Descriptor.hpp"
 
 namespace ProjectA {
-	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::NONE;
+	GraphicsAPI Renderer::graphicsApi = GraphicsAPI::CPU;
 	scope<GraphicsAdapter> Renderer::adapter = nullptr;
 	uint32 Renderer::imageIndex = 0;
 	ref<Swapchain> Renderer::swapchain = nullptr;
@@ -26,21 +30,26 @@ namespace ProjectA {
 		return graphicsApi;
 	}
 
-	const scope<GraphicsAdapter>& Renderer::getBackend() {
-		return adapter;
-	}
-
 	void Renderer::initialize(const ProjectDescriptor& projectDescriptor, const Window& window, GraphicsAPI graphicsApi, bool vSync) {
 		Renderer::graphicsApi = graphicsApi;
 
 		switch (Renderer::graphicsApi) {
-			case GraphicsAPI::NONE: {
-				ENGINE_WARNING("Headless graphics are not supported.");
+			case GraphicsAPI::CPU: {
+				ENGINE_ERROR_UNSUPPORTED();
 
 				break;
 			}
-			#ifdef ENABLE_OPENGL_ADAPTER
-				case GraphicsAPI::OPENGL: {
+			#ifdef ENABLE_DX12_ADAPTER
+				case GraphicsAPI::DX12: {
+					ENGINE_INFO("Using DirectX 12 graphics adapter.");
+
+					adapter = createScope<DX12::GraphicsAdapter>(projectDescriptor, window);
+
+					break;
+				}
+			#endif
+			#ifdef ENABLE_GL_ADAPTER
+				case GraphicsAPI::GL: {
 					ENGINE_INFO("Using OpenGL graphics adapter.");
 
 					adapter = createScope<OpenGLGraphicsAdapter>(projectDescriptor, window);
@@ -48,8 +57,8 @@ namespace ProjectA {
 					break;
 				}
 			#endif
-			#ifdef ENABLE_VULKAN_ADAPTER
-				case GraphicsAPI::VULKAN: {
+			#ifdef ENABLE_VK_ADAPTER
+				case GraphicsAPI::VK: {
 					ENGINE_INFO("Using Vulkan graphics adapter.");
 
 					adapter = createScope<VulkanGraphicsAdapter>(projectDescriptor, window);
@@ -184,9 +193,9 @@ namespace ProjectA {
 		pathString += path;
 
 		if (
-			graphicsApi == GraphicsAPI::VULKAN
+			graphicsApi == GraphicsAPI::VK
 			#ifdef OPENGL_USE_SPIRV
-				|| graphicsApi == GraphicsAPI::OPENGL
+				|| graphicsApi == GraphicsAPI::GL
 			#endif
 		) {
 			pathString += ".spv";

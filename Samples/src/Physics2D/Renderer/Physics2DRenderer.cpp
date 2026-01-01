@@ -519,18 +519,26 @@ namespace ProjectA {
 		ref<ShaderModule> vertexShaderModule;
 
 		switch (getGraphicsApi()) {
-			case GraphicsAPI::OPENGL:
-				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderFillSingleSet.vert", vertexShaderModuleDescriptor);
-
-				break;
-			case GraphicsAPI::VULKAN:
-				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderFill.vert", vertexShaderModuleDescriptor);
-
-				break;
-			default:
+			case GraphicsAPI::CPU: {
 				ENGINE_ERROR_UNSUPPORTED();
 
 				break;
+			}
+			case GraphicsAPI::DX12: {
+				ENGINE_ERROR_UNIMPLEMENTED();
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderFillSingleSet.vert", vertexShaderModuleDescriptor);
+
+				break;
+			}
+			case GraphicsAPI::VK: {
+				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderFill.vert", vertexShaderModuleDescriptor);
+
+				break;
+			}
 		}
 
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Base/FragmentRGBA.frag", fragmentShaderModuleDescriptor);
@@ -578,18 +586,26 @@ namespace ProjectA {
 		ref<ShaderModule> vertexShaderModule;
 
 		switch (getGraphicsApi()) {
-			case GraphicsAPI::OPENGL:
-				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderStrokeSingleSet.vert", vertexShaderModuleDescriptor);
-
-				break;
-			case GraphicsAPI::VULKAN:
-				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderStroke.vert", vertexShaderModuleDescriptor);
-
-				break;
-			default:
+			case GraphicsAPI::CPU: {
 				ENGINE_ERROR_UNSUPPORTED();
 
 				break;
+			}
+			case GraphicsAPI::DX12: {
+				ENGINE_ERROR_UNIMPLEMENTED();
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderStrokeSingleSet.vert", vertexShaderModuleDescriptor);
+
+				break;
+			}
+			case GraphicsAPI::VK: {
+				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderStroke.vert", vertexShaderModuleDescriptor);
+
+				break;
+			}
 		}
 
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/PlaceholderStroke.frag", fragmentShaderModuleDescriptor);
@@ -634,18 +650,26 @@ namespace ProjectA {
 		ref<ShaderModule> vertexShaderModule;
 
 		switch (getGraphicsApi()) {
-			case GraphicsAPI::OPENGL:
-				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderCenterOfMassSingleSet.vert", vertexShaderModuleDescriptor);
-
-				break;
-			case GraphicsAPI::VULKAN:
-				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderCenterOfMass.vert", vertexShaderModuleDescriptor);
-
-				break;
-			default:
+			case GraphicsAPI::CPU: {
 				ENGINE_ERROR_UNSUPPORTED();
 
 				break;
+			}
+			case GraphicsAPI::DX12: {
+				ENGINE_ERROR_UNIMPLEMENTED();
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderCenterOfMassSingleSet.vert", vertexShaderModuleDescriptor);
+
+				break;
+			}
+			case GraphicsAPI::VK: {
+				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderCenterOfMass.vert", vertexShaderModuleDescriptor);
+
+				break;
+			}
 		}
 
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/CenterOfMass.frag", fragmentShaderModuleDescriptor);

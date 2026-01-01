@@ -515,18 +515,26 @@ namespace ProjectA {
 		ref<ShaderModule> vertexShaderModule;
 
 		switch (getGraphicsApi()) {
-			case GraphicsAPI::OPENGL:
-				vertexShaderModule = loadShaderModule("Visibility/VisibilityGL.vert", vertexShaderModuleDescriptor);
-
-				break;
-			case GraphicsAPI::VULKAN:
-				vertexShaderModule = loadShaderModule("Visibility/VisibilityVK.vert", vertexShaderModuleDescriptor);
-
-				break;
-			default:
+			case GraphicsAPI::CPU: {
 				ENGINE_ERROR_UNSUPPORTED();
 
 				break;
+			}
+			case GraphicsAPI::DX12: {
+				ENGINE_ERROR_UNIMPLEMENTED();
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				vertexShaderModule = loadShaderModule("Visibility/VisibilityGL.vert", vertexShaderModuleDescriptor);
+
+				break;
+			}
+			case GraphicsAPI::VK: {
+				vertexShaderModule = loadShaderModule("Visibility/VisibilityVK.vert", vertexShaderModuleDescriptor);
+
+				break;
+			}
 		}
 
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Visibility/Visibility.frag", fragmentShaderModuleDescriptor);
@@ -568,12 +576,16 @@ namespace ProjectA {
 		ref<ShaderModule> fragmentShaderModule;
 
 		switch (getGraphicsApi()) {
-			case GraphicsAPI::OPENGL:
+			case GraphicsAPI::DX12:
+				ENGINE_ERROR_UNIMPLEMENTED();
+
+				break;
+			case GraphicsAPI::GL:
 				vertexShaderModule = loadShaderModule("Base/ScreenUV.vert", vertexShaderModuleDescriptor);
 				fragmentShaderModule = loadShaderModule("Visibility/VisibilityDebugGL.frag", fragmentShaderModuleDescriptor);
 
 				break;
-			case GraphicsAPI::VULKAN:
+			case GraphicsAPI::VK:
 				vertexShaderModule = loadShaderModule("Base/Screen.vert", vertexShaderModuleDescriptor);
 				fragmentShaderModule = loadShaderModule("Visibility/VisibilityDebugVK.frag", fragmentShaderModuleDescriptor);
 

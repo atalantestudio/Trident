@@ -3,17 +3,15 @@
 #include "Engine/API/Event/Window/WindowResizeEvent.hpp"
 #include "Engine/API/Rendering/CommandEncoder.hpp"
 #include "Engine/API/Rendering/Descriptor/PipelineLayoutDescriptor.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/API/Graphics/GraphicsAPI.hpp"
 #include "Engine/API/Window/Window.hpp"
 #include "Engine/Application/Application.hpp"
-#include "Engine/GraphicsAdapter.hpp"
-#include "Engine/Renderer/GraphicsAPI.hpp"
 
 namespace ProjectA {
 	class Renderer {
 		public:
 			static GraphicsAPI getGraphicsApi();
-
-			static const scope<GraphicsAdapter>& getBackend();
 
 			static void initialize(const ProjectDescriptor& projectDescriptor, const Window& window, GraphicsAPI graphicsAPI, bool vSync);
 

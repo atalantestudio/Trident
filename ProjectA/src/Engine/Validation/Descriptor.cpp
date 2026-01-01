@@ -208,7 +208,7 @@ namespace ProjectA {
 		}
 
 		void DescriptorGuard(const ImageDescriptor& descriptor) {
-			const PhysicalDeviceLimits& limits = Renderer::getBackend()->getDevice()->getPhysicalDevice()->getLimits();
+			const PhysicalDeviceLimits& limits = Renderer::getDevice()->getPhysicalDevice()->getLimits();
 
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;

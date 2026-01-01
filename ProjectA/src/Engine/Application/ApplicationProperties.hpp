@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Renderer/GraphicsAPI.hpp"
+#include "Engine/API/Graphics/GraphicsAPI.hpp"
 
 namespace ProjectA {
 	// The properties from this list can be edited in the project's property file (.tpr).

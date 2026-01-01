@@ -1,0 +1,46 @@
+#pragma once
+
+#include "Backend/VK/PhysicalDevice.hpp"
+#include "Backend/VK/Queue.hpp"
+#include "Backend/VK/Surface.hpp"
+
+#include "Engine/API/ObjectWrapper.hpp"
+#include "Engine/API/Rendering/Device.hpp"
+
+namespace ProjectA {
+	class VulkanDevice final : public Device, public ObjectWrapper<VkDevice> {
+		public:
+			explicit VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface);
+
+			~VulkanDevice() final override;
+
+			AcquireNextImageStatus acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const final override;
+
+			sequence<ref<DescriptorSet>> allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) final override;
+
+			ref<PhysicalDevice> getPhysicalDevice() const final override;
+
+			ref<Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const final override;
+
+			void resetFence(const ref<Fence>& fence) const final override;
+
+			void updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const final override;
+
+			void waitForFence(const ref<Fence>& fence) const final override;
+
+			void waitIdle() const final override;
+
+		private:
+			static constexpr uint32 GRAPHICS_QUEUE_INDEX = 0;
+
+			static const std::vector<const char8*> enabledExtensionNames;
+
+		private:
+			VkPhysicalDeviceMemoryProperties memoryProperties;
+			std::vector<VkDescriptorPool> descriptorPools;
+
+			const ref<VulkanPhysicalDevice> physicalDevice;
+			std::array<uint32, 3> queueIndices;
+			std::array<ref<VulkanQueue>, 3> queues;
+	};
+}

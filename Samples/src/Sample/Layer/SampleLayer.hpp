@@ -2,7 +2,7 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "../Sample/Gradient.hpp"
+#include "../Sample/ArrayTexture.hpp"
 
 namespace ProjectA {
 	class SampleLayer : public Layer {
