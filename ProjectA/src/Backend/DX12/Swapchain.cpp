@@ -88,17 +88,19 @@ namespace ProjectA {
 		images = sequence<ref<ProjectA::Image>>(imageCount);
 		imageViews = sequence<ref<ProjectA::ImageView>>(imageCount);
 
-		const D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle(rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+		// TODO: Use an explicit cast.
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptorHandle(rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
 		uint32 imageIndex = 0;
 
 		while (imageIndex < imageCount) {
-			images[imageIndex] = createRef<DX12::Image>(device, cpuDescriptorHandle);
+			images[imageIndex] = createRef<DX12::Image>(device, rtvDescriptorHandle);
 
 			result = swapChain->GetBuffer(imageIndex, IID_PPV_ARGS(&std::static_pointer_cast<DX12::Image>(images[imageIndex])->resource));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Could not retrieve buffer from newly created render target view.");
 
+			rtvDescriptorHandle.ptr += rtvDescriptorSize;
 			imageIndex += 1;
 		}
 	}

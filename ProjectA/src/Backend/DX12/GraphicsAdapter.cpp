@@ -44,7 +44,7 @@ namespace ProjectA {
 	}
 
 	ref<Fence> DX12::GraphicsAdapter::createFence() const {
-		return createRef<DX12::Fence>();
+		return createRef<DX12::Fence>(*device);
 	}
 
 	ref<Framebuffer> DX12::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
@@ -60,7 +60,7 @@ namespace ProjectA {
 	}
 
 	ref<PipelineLayout> DX12::GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
-		return createRef<DX12::PipelineLayout>(descriptor);
+		return createRef<DX12::PipelineLayout>(descriptor, *device);
 	}
 
 	ref<RenderPass> DX12::GraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
