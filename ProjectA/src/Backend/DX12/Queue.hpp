@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Backend/DX12/CommandPool.hpp"
 #include "Backend/DX12/Device.hpp"
 
 #include "Engine/API/Rendering/Queue.hpp"
@@ -20,5 +21,8 @@ namespace ProjectA {
 
 		public:
 			ComPtr<ID3D12CommandQueue> commandQueue;
+
+		private:
+			DX12::CommandPool commandPool;
 	};
 }

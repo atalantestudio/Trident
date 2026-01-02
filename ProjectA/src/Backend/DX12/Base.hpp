@@ -11,6 +11,7 @@ namespace ProjectA::DX12 {
 	using Microsoft::WRL::ComPtr;
 
 	class CommandBuffer;
+	class CommandPool;
 	class Device;
 	class GraphicsAdapter;
 	class Image;

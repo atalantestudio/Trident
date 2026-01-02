@@ -8,7 +8,11 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	DX12::Queue::Queue(const Device& device, D3D12_COMMAND_LIST_TYPE commandListType) {
+	DX12::Queue::Queue(const Device& device, D3D12_COMMAND_LIST_TYPE commandListType) :
+		commandPool(device, commandListType)
+	{
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		D3D12_COMMAND_QUEUE_DESC commandQueueDescriptor{};
 		commandQueueDescriptor.Type = commandListType;
 		commandQueueDescriptor.Priority = 0;
