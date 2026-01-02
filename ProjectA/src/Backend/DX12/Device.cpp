@@ -59,7 +59,7 @@ namespace ProjectA {
 		return queues[static_cast<uint32>(queueFamilyCapability)];
 	}
 
-	void DX12::Device::resetFence(const ref<Fence>& fence) const {
+	void DX12::Device::resetFence(const ref<ProjectA::Fence>& fence) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 	}
 
@@ -67,7 +67,7 @@ namespace ProjectA {
 		ENGINE_ERROR_UNIMPLEMENTED();
 	}
 
-	void DX12::Device::waitForFence(const ref<Fence>& fence) const {
+	void DX12::Device::waitForFence(const ref<ProjectA::Fence>& fence) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 	}
 

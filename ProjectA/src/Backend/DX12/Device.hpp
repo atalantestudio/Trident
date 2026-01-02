@@ -22,11 +22,11 @@ namespace ProjectA {
 
 			ref<ProjectA::Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const final override;
 
-			void resetFence(const ref<Fence>& fence) const final override;
+			void resetFence(const ref<ProjectA::Fence>& fence) const final override;
 
 			void updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const final override;
 
-			void waitForFence(const ref<Fence>& fence) const final override;
+			void waitForFence(const ref<ProjectA::Fence>& fence) const final override;
 
 			void waitIdle() const final override;
 

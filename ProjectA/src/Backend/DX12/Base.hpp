@@ -14,6 +14,7 @@ namespace ProjectA::DX12 {
 	class CommandEncoder;
 	class CommandPool;
 	class Device;
+	class Fence;
 	class GraphicsAdapter;
 	class Image;
 	class Instance;

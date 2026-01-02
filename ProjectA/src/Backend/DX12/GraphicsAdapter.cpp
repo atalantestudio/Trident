@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Backend/DX12/Fence.hpp"
 #include "Backend/DX12/GraphicsAdapter.hpp"
 #include "Backend/DX12/PipelineLayout.hpp"
 #include "Backend/DX12/Swapchain.hpp"
@@ -43,9 +44,7 @@ namespace ProjectA {
 	}
 
 	ref<Fence> DX12::GraphicsAdapter::createFence() const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
+		return createRef<DX12::Fence>();
 	}
 
 	ref<Framebuffer> DX12::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
