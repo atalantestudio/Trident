@@ -89,7 +89,7 @@ namespace ProjectA {
 		extern PFNGLVERTEXARRAYELEMENTBUFFERPROC glVertexArrayElementBuffer;
 	#endif
 
-	#ifdef OPENGL_USE_SPIRV
+	#ifdef GL_SOURCE_FROM_SPIRV
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_6
 			extern PFNGLSHADERBINARYPROC glShaderBinary;
 			extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;

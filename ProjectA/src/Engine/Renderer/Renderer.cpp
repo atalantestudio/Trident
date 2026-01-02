@@ -194,7 +194,7 @@ namespace ProjectA {
 
 		if (
 			graphicsApi == GraphicsAPI::VK
-			#ifdef OPENGL_USE_SPIRV
+			#ifdef GL_SOURCE_FROM_SPIRV
 				|| graphicsApi == GraphicsAPI::GL
 			#endif
 		) {

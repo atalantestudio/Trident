@@ -222,7 +222,7 @@ namespace ProjectA {
 			LOAD_PROCEDURE(glVertexArrayElementBuffer);
 		#endif
 
-		#ifdef OPENGL_USE_SPIRV
+		#ifdef GL_SOURCE_FROM_SPIRV
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_6
 				LOAD_PROCEDURE(glShaderBinary);
 				LOAD_PROCEDURE(glSpecializeShader);

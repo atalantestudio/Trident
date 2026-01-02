@@ -12,7 +12,7 @@
 	#include <GL/wglext.h>
 #endif
 
-#ifndef OPENGL_USE_SPIRV
+#ifndef GL_SOURCE_FROM_SPIRV
 	// TODO: Remove when TSL is ready.
 	// NOTE: <regex> is used for custom entrypoints within a GLSL shader.
 	#include <regex>

@@ -10,10 +10,18 @@ namespace ProjectA {
 	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 		// Toggle DirectX 12 graphics adapter.
 		#define ENABLE_DX12_ADAPTER
+
+		// If enabled, DX12 shaders will be sourced from SPIR-V binaries.
+		// If disabled, they will be sourced from HLSL strings.
+		#define DX12_SOURCE_FROM_SPIRV
 	#endif
 
 	// Toggle OpenGL graphics adapter.
 	#define ENABLE_GL_ADAPTER
+
+	// If enabled, OpenGL shaders will be sourced from SPIR-V binaries.
+	// If disabled, they will be sourced from GLSL strings.
+	#define GL_SOURCE_FROM_SPIRV
 
 	// Toggle Vulkan graphics adapter.
 	#define ENABLE_VK_ADAPTER
@@ -27,10 +35,6 @@ namespace ProjectA {
 	// If enabled, glyphs with a single contour are checked to ensure that the contour is clockwise.
 	// If not, a warning is outputted and the contour's winding order is inverted.
 	#define TTF_FIX_INVERTED_CONTOURS
-
-	// If enabled, OpenGL shaders will be sourced from SPIR-V binaries.
-	// If disabled, they will be sourced from GLSL strings.
-	#define OPENGL_USE_SPIRV
 
 	// If enabled, OpenGL objects are cleanly unbound from their target after being used.
 	#define OPENGL_UNBIND_AFTER_USE
@@ -53,7 +57,7 @@ namespace ProjectA {
 			#error "Debug messenger cannot be enabled below OpenGL 4.3."
 		#endif
 
-		#if OPENGL_VERSION < OPENGL_VERSION_4_6 && defined(OPENGL_USE_SPIRV)
+		#if OPENGL_VERSION < OPENGL_VERSION_4_6 && defined(GL_SOURCE_FROM_SPIRV)
 			#error "SPIR-V shaders cannot be used below OpenGL 4.6."
 		#endif
 	#endif

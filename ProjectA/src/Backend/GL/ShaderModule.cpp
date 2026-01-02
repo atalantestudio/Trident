@@ -13,7 +13,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(descriptor.stage == ShaderStage::VERTEX, "Only vertex shaders can be loaded as .tsm assets.");
 
-		#ifdef OPENGL_USE_SPIRV
+		#ifdef GL_SOURCE_FROM_SPIRV
 			// TODO
 			ENGINE_ERROR_UNIMPLEMENTED();
 		#else
@@ -44,7 +44,7 @@ namespace ProjectA {
 
 		GLsizei length = static_cast<GLsizei>(code.count());
 
-		#ifdef OPENGL_USE_SPIRV
+		#ifdef GL_SOURCE_FROM_SPIRV
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_6
 				glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, &code[0], length);
 
