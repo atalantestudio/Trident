@@ -219,7 +219,7 @@ namespace ProjectA {
 				ENGINE_ERROR("descriptor.type must be a valid ImageType value.");
 			}
 
-			if (descriptor.format >= ImageFormat::__MAX_ENUM) {
+			if (descriptor.format >= ImageFormat::count) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.format must be a valid ImageFormat value.");
@@ -335,7 +335,7 @@ namespace ProjectA {
 				for (uint32 descriptorSetLayoutBindingIndex = 0; descriptorSetLayoutBindingIndex < descriptorSetLayout->bindings.count(); descriptorSetLayoutBindingIndex += 1) {
 					const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout->bindings[descriptorSetLayoutBindingIndex];
 
-					if (descriptorSetLayoutBinding.descriptorType >= DescriptorType::__MAX_ENUM) {
+					if (descriptorSetLayoutBinding.descriptorType >= DescriptorType::count) {
 						errorCount += 1;
 
 						ENGINE_ERROR("descriptor.descriptorSetLayouts[[]]->bindings[[]].descriptorType must be a valid DescriptorType value.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
@@ -365,7 +365,7 @@ namespace ProjectA {
 			for (uint32 attachmentIndex = 0; attachmentIndex < descriptor.attachments.count(); attachmentIndex += 1) {
 				const Attachment& attachment = descriptor.attachments[attachmentIndex];
 
-				if (attachment.format >= ImageFormat::__MAX_ENUM) {
+				if (attachment.format >= ImageFormat::count) {
 					errorCount += 1;
 
 					ENGINE_ERROR("descriptor.attachments[[]].format must be a valid ImageFormat value.", attachmentIndex);

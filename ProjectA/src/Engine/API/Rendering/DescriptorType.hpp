@@ -12,10 +12,12 @@ namespace ProjectA {
 		// TODO: Add SAMPLER.
 		// TODO: Add SAMPLED_IMAGE.
 
-		__MAX_ENUM,
+		count,
 	};
 
 	static bool isBufferDescriptorType(DescriptorType descriptorType) {
+		DEBUG_ASSERT(descriptorType < DescriptorType::count);
+
 		switch (descriptorType) {
 			case DescriptorType::COMBINED_IMAGE_SAMPLER:
 			case DescriptorType::STORAGE_IMAGE:
@@ -24,14 +26,14 @@ namespace ProjectA {
 			case DescriptorType::UNIFORM_BUFFER:
 			case DescriptorType::STORAGE_BUFFER:
 				return true;
-			default:
-				DEBUG_ASSERT(false);
-
-				return false;
 		}
+
+		return false;
 	}
 
 	static bool isImageDescriptorType(DescriptorType descriptorType) {
+		DEBUG_ASSERT(descriptorType < DescriptorType::count);
+
 		switch (descriptorType) {
 			case DescriptorType::COMBINED_IMAGE_SAMPLER:
 			case DescriptorType::STORAGE_IMAGE:
@@ -40,10 +42,8 @@ namespace ProjectA {
 			case DescriptorType::UNIFORM_BUFFER:
 			case DescriptorType::STORAGE_BUFFER:
 				return false;
-			default:
-				DEBUG_ASSERT(false);
-
-				return false;
 		}
+
+		return false;
 	}
 }

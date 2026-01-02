@@ -24,6 +24,14 @@ namespace ProjectA {
 			BREAKPOINT(); \
 		} \
 	}
+
+	#define ADAPTER_ASSERT(condition, ...) { \
+		if (!(condition)) { \
+			::ProjectA::GraphicsAdapter::logger.error(__func__, __FILE__, __LINE__, __VA_ARGS__); \
+			\
+			BREAKPOINT(); \
+		} \
+	}
 #else
 	#define ENGINE_TRACE(...)
 	#define ENGINE_DEBUG(...)

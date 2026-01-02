@@ -16,7 +16,7 @@ namespace ProjectA {
 		D32_SFLOAT_S8_UINT,
 		D24_UNORM_S8_UINT,
 
-		__MAX_ENUM,
+		count,
 	};
 
 	static bool isDepthFormat(ImageFormat imageFormat) {

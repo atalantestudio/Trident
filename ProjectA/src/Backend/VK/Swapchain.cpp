@@ -11,7 +11,9 @@ namespace ProjectA {
 		device(device),
 		surface(surface)
 	{
-		updateInternal(descriptor);
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		recreate(descriptor);
 	}
 
 	VulkanSwapchain::~VulkanSwapchain() {
@@ -28,17 +30,17 @@ namespace ProjectA {
 	}
 
 	void VulkanSwapchain::update(const SwapchainDescriptor& descriptor) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		for (const ref<ImageView>& imageView : imageViews) {
 			imageView.~shared_ptr();
 		}
 
-		updateInternal(descriptor);
+		recreate(descriptor);
 	}
 
 	// NOTE: ~59Mb in Release mode.
-	void VulkanSwapchain::updateInternal(const SwapchainDescriptor& descriptor) {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
+	void VulkanSwapchain::recreate(const SwapchainDescriptor& descriptor) {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		VkResult result;
@@ -110,12 +112,11 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images ([]).", string_VkResult(result));
 
 		images = sequence<ref<Image>>(imageCount);
+		imageViews = sequence<ref<ImageView>>(imageCount);
 
 		for (uint32 imageIndex = 0; imageIndex < imageCount; imageIndex += 1) {
 			images[imageIndex] = createRef<VulkanImage>(device.object, vkImages[imageIndex], surfaceFormat.format, extent);
 		}
-
-		imageViews = sequence<ref<ImageView>>(imageCount);
 
 		createImageViews();
 	}

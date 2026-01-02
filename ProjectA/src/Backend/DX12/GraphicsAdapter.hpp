@@ -5,11 +5,16 @@
 
 #include "Backend/DX12/Device.hpp"
 #include "Backend/DX12/Instance.hpp"
+#include "Backend/DX12/Surface.hpp"
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
-namespace ProjectA::DX12 {
-	class GraphicsAdapter final : public ProjectA::GraphicsAdapter {
+namespace ProjectA {
+	namespace DX12 {
+		class GraphicsAdapter;
+	}
+
+	class DX12::GraphicsAdapter final : public ProjectA::GraphicsAdapter {
 		public:
 			explicit GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window);
 
@@ -40,16 +45,15 @@ namespace ProjectA::DX12 {
 			ref<ShaderModule> createShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) const final override;
 			ref<ShaderModule> createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const final override;
 
-			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const final override;
+			ref<ProjectA::Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const final override;
 
 			ref<ProjectA::Device> getDevice() const final override;
 
-			ref<Surface> getSurface() const final override;
+			ref<ProjectA::Surface> getSurface() const final override;
 
 		private:
 			ref<Instance> instance;
+			ref<Surface> surface;
 			ref<Device> device;
-			// ref<Surface> surface;
-			// ref<PhysicalDevice> physicalDevice;
 	};
 }

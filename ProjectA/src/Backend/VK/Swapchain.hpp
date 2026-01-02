@@ -20,7 +20,7 @@ namespace ProjectA {
 			void update(const SwapchainDescriptor& descriptor) final override;
 
 		private:
-			void updateInternal(const SwapchainDescriptor& descriptor);
+			void recreate(const SwapchainDescriptor& descriptor);
 
 		private:
 			const VulkanPhysicalDevice& physicalDevice;

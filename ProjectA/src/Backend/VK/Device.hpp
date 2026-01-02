@@ -31,16 +31,13 @@ namespace ProjectA {
 			void waitIdle() const final override;
 
 		private:
-			static constexpr uint32 GRAPHICS_QUEUE_INDEX = 0;
-
 			static const std::vector<const char8*> enabledExtensionNames;
 
 		private:
+			const VulkanPhysicalDevice& physicalDevice;
+
 			VkPhysicalDeviceMemoryProperties memoryProperties;
 			std::vector<VkDescriptorPool> descriptorPools;
-
-			const ref<VulkanPhysicalDevice> physicalDevice;
-			std::array<uint32, 3> queueIndices;
 			std::array<ref<VulkanQueue>, 3> queues;
 	};
 }

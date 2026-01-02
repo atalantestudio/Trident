@@ -5,8 +5,8 @@
 
 #include "Backend/DX12/Instance.hpp"
 
-namespace ProjectA::DX12 {
-	Instance::Instance() {
+namespace ProjectA {
+	DX12::Instance::Instance() {
 		UINT flags = 0;
 
 		#ifdef BUILD_MODE_DEBUG

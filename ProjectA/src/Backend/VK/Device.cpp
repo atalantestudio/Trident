@@ -22,7 +22,7 @@ namespace ProjectA {
 
 	// NOTE: ~3Mb in Release mode.
 	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface) :
-		physicalDevice(createRef<VulkanPhysicalDevice>(physicalDevice))
+		physicalDevice(physicalDevice)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -89,7 +89,7 @@ namespace ProjectA {
 	}
 
 	ref<PhysicalDevice> VulkanDevice::getPhysicalDevice() const {
-		return physicalDevice;
+		return createRef<VulkanPhysicalDevice>(physicalDevice);
 	}
 
 	ref<Queue> VulkanDevice::getQueue(QueueFamilyCapability queueFamilyCapability) const {
@@ -128,7 +128,7 @@ namespace ProjectA {
 		const uint32 descriptorSetCount = static_cast<uint32>(descriptorSetLayouts.count());
 
 		sequence<VkDescriptorSetLayout> vkDescriptorSetLayouts(descriptorSetCount);
-		sequence<uint32> descriptorCountPerType(static_cast<uint32>(DescriptorType::__MAX_ENUM));
+		sequence<uint32> descriptorCountPerType(static_cast<uint32>(DescriptorType::count));
 
 		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptorSetLayouts.count(); descriptorSetLayoutIndex += 1) {
 			const ref<DescriptorSetLayout>& descriptorSetLayout = descriptorSetLayouts[descriptorSetLayoutIndex];
