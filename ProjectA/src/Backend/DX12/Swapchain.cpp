@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Backend/DX12/Image.hpp"
 #include "Backend/DX12/ImageFormat.hpp"
 #include "Backend/DX12/Queue.hpp"
 #include "Backend/DX12/Swapchain.hpp"
@@ -32,6 +33,10 @@ namespace ProjectA {
 	void DX12::Swapchain::update(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		for (const ref<ImageView>& imageView : imageViews) {
+			imageView.~shared_ptr();
+		}
+
 		recreate(descriptor);
 	}
 
@@ -39,6 +44,8 @@ namespace ProjectA {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		HRESULT result;
+
+		extent = descriptor.extent;
 
 		DXGI_SWAP_CHAIN_DESC1 swapchainDescriptor{};
 		swapchainDescriptor.Width = descriptor.extent.width;
@@ -66,6 +73,33 @@ namespace ProjectA {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to move swapchain.");
 
-		extent = descriptor.extent;
+		D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDescriptor{};
+		rtvDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+		rtvDescriptorHeapDescriptor.NumDescriptors = imageCount;
+		rtvDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		rtvDescriptorHeapDescriptor.NodeMask = 0;
+
+		result = device.device->CreateDescriptorHeap(&rtvDescriptorHeapDescriptor, IID_PPV_ARGS(&rtvDescriptorHeap));
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create RTV descriptor heap.");
+
+		rtvDescriptorSize = device.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+		images = sequence<ref<ProjectA::Image>>(imageCount);
+		imageViews = sequence<ref<ProjectA::ImageView>>(imageCount);
+
+		const D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle(rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+		uint32 imageIndex = 0;
+
+		while (imageIndex < imageCount) {
+			images[imageIndex] = createRef<DX12::Image>(device, cpuDescriptorHandle);
+
+			result = swapChain->GetBuffer(imageIndex, IID_PPV_ARGS(&std::static_pointer_cast<DX12::Image>(images[imageIndex])->resource));
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Could not retrieve buffer from newly created render target view.");
+
+			imageIndex += 1;
+		}
 	}
 }
