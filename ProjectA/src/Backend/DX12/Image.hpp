@@ -8,10 +8,6 @@
 #include "Engine/API/Rendering/Image.hpp"
 
 namespace ProjectA {
-	namespace DX12 {
-		class Image;
-	}
-
 	class DX12::Image final : public ProjectA::Image {
 		public:
 			// Render Target View constructor.

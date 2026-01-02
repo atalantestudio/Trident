@@ -10,10 +10,6 @@
 #include "Engine/API/Rendering/Swapchain.hpp"
 
 namespace ProjectA {
-	namespace DX12 {
-		class Swapchain;
-	}
-
 	class DX12::Swapchain final : public ProjectA::Swapchain {
 		public:
 			explicit Swapchain(const SwapchainDescriptor& descriptor, const DX12::Instance& instance, const DX12::Surface& surface, const DX12::Device& device);

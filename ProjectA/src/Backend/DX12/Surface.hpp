@@ -9,10 +9,6 @@
 #include "Engine/API/Window/Window.hpp"
 
 namespace ProjectA {
-	namespace DX12 {
-		class Surface;
-	}
-
 	class DX12::Surface : public ProjectA::Surface {
 		public:
 			explicit Surface(const DX12::Instance& instance, const Window& window);

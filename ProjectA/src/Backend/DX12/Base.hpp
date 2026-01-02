@@ -9,4 +9,13 @@
 
 namespace ProjectA::DX12 {
 	using Microsoft::WRL::ComPtr;
+
+	class CommandBuffer;
+	class Device;
+	class GraphicsAdapter;
+	class Image;
+	class Instance;
+	class Queue;
+	class Surface;
+	class Swapchain;
 }

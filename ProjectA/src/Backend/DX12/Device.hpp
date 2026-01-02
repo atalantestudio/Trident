@@ -8,10 +8,6 @@
 #include "Engine/API/Rendering/Device.hpp"
 
 namespace ProjectA {
-	namespace DX12 {
-		class Device;
-	}
-
 	class DX12::Device final : public ProjectA::Device {
 		public:
 			explicit Device(const DX12::Instance& instance);

@@ -5,8 +5,8 @@
 
 #include "Engine/API/Rendering/CommandBuffer.hpp"
 
-namespace ProjectA::DX12 {
-	class CommandBuffer final : public ProjectA::CommandBuffer {
+namespace ProjectA {
+	class DX12::CommandBuffer final : public ProjectA::CommandBuffer {
 		public:
 			// TODO
 	};

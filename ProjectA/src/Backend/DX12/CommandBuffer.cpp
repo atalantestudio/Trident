@@ -5,6 +5,6 @@
 
 #include "Backend/DX12/CommandBuffer.hpp"
 
-namespace ProjectA::DX12 {
+namespace ProjectA {
 	// TODO
 }

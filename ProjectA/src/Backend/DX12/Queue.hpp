@@ -8,10 +8,6 @@
 #include "Engine/API/Rendering/Queue.hpp"
 
 namespace ProjectA {
-	namespace DX12 {
-		class Queue;
-	}
-
 	class DX12::Queue final : public ProjectA::Queue {
 		public:
 			explicit Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType);
