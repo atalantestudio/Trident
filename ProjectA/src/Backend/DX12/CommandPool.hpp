@@ -12,7 +12,7 @@ namespace ProjectA {
 		public:
 			explicit CommandPool(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE type);
 
-		private:
+		public:
 			ComPtr<ID3D12CommandAllocator> commandAllocator;
 	};
 }

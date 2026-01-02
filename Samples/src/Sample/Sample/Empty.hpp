@@ -5,7 +5,9 @@
 namespace ProjectA {
 	class SampleRenderer : public Renderer {
 		public:
-			void build() override {}
+			void build() override {
+				BREAKPOINT();
+			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {}
 

@@ -3,12 +3,14 @@
 
 #include "pch.hpp"
 
+#include "Backend/DX12/CommandEncoder.hpp"
 #include "Backend/DX12/Queue.hpp"
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	DX12::Queue::Queue(const Device& device, D3D12_COMMAND_LIST_TYPE commandListType) :
+		device(device),
 		commandPool(device, commandListType)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -25,9 +27,7 @@ namespace ProjectA {
 	}
 
 	ref<ProjectA::CommandEncoder> DX12::Queue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
+		return createRef<DX12::CommandEncoder>(descriptor, device, commandPool);
 	}
 
 	void DX12::Queue::submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, const ref<ProjectA::Semaphore>& waitSemaphore, const ref<ProjectA::Semaphore>& signalSemaphore, const ref<ProjectA::Fence>& fence) const {

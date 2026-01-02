@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Backend/DX12/GraphicsAdapter.hpp"
+#include "Backend/DX12/PipelineLayout.hpp"
 #include "Backend/DX12/Swapchain.hpp"
 
 namespace ProjectA {
@@ -14,102 +15,98 @@ namespace ProjectA {
 
 		logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
 
-		instance = createRef<Instance>();
-		surface = createRef<Surface>(*instance, window);
-		device = createRef<Device>(*instance);
+		instance = createRef<DX12::Instance>();
+		surface = createRef<DX12::Surface>(*instance, window);
+		device = createRef<DX12::Device>(*instance);
 	}
 
 	DX12::GraphicsAdapter::~GraphicsAdapter() {
 		ENGINE_ERROR_UNIMPLEMENTED();
 	}
 
-	ref<ProjectA::Buffer> DX12::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
+	ref<Buffer> DX12::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
 	}
 
-	ref<ProjectA::ComputePipeline> DX12::GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
+	ref<ComputePipeline> DX12::GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
 	}
 
-	ref<ProjectA::DescriptorSetLayout> DX12::GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
+	ref<DescriptorSetLayout> DX12::GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
 	}
 
-	ref<ProjectA::Fence> DX12::GraphicsAdapter::createFence() const {
+	ref<Fence> DX12::GraphicsAdapter::createFence() const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
 	}
 
-	ref<ProjectA::Framebuffer> DX12::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
+	ref<Framebuffer> DX12::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
 	}
 
-	ref<ProjectA::Image> DX12::GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
+	ref<Image> DX12::GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
 	}
 
-	ref<ProjectA::PipelineLayout> DX12::GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
+	ref<PipelineLayout> DX12::GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
+		return createRef<DX12::PipelineLayout>(descriptor);
+	}
+
+	ref<RenderPass> DX12::GraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
 	}
 
-	ref<ProjectA::RenderPass> DX12::GraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
+	ref<RenderPipeline> DX12::GraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
 	}
 
-	ref<ProjectA::RenderPipeline> DX12::GraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
+	ref<Sampler> DX12::GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
 	}
 
-	ref<ProjectA::Sampler> DX12::GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
+	ref<Semaphore> DX12::GraphicsAdapter::createSemaphore() const {
+		return createRef<Semaphore>();
+	}
+
+	ref<ShaderModule> DX12::GraphicsAdapter::createShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
 	}
 
-	ref<ProjectA::Semaphore> DX12::GraphicsAdapter::createSemaphore() const {
+	ref<ShaderModule> DX12::GraphicsAdapter::createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
 	}
 
-	ref<ProjectA::ShaderModule> DX12::GraphicsAdapter::createShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
-	}
-
-	ref<ProjectA::ShaderModule> DX12::GraphicsAdapter::createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
-	}
-
-	ref<ProjectA::Swapchain> DX12::GraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
+	ref<Swapchain> DX12::GraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
 		return createRef<DX12::Swapchain>(descriptor, *instance, *surface, *device);
 	}
 
-	ref<ProjectA::Device> DX12::GraphicsAdapter::getDevice() const {
+	ref<Device> DX12::GraphicsAdapter::getDevice() const {
 		return device;
 	}
 
-	ref<ProjectA::Surface> DX12::GraphicsAdapter::getSurface() const {
+	ref<Surface> DX12::GraphicsAdapter::getSurface() const {
 		return surface;
 	}
 }

@@ -23,6 +23,7 @@ namespace ProjectA {
 			ComPtr<ID3D12CommandQueue> commandQueue;
 
 		private:
+			const DX12::Device& device;
 			DX12::CommandPool commandPool;
 	};
 }

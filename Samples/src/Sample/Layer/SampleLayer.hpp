@@ -2,7 +2,7 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "../Sample/ArrayTexture.hpp"
+#include "../Sample/Empty.hpp"
 
 namespace ProjectA {
 	class SampleLayer : public Layer {

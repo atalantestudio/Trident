@@ -11,11 +11,13 @@ namespace ProjectA::DX12 {
 	using Microsoft::WRL::ComPtr;
 
 	class CommandBuffer;
+	class CommandEncoder;
 	class CommandPool;
 	class Device;
 	class GraphicsAdapter;
 	class Image;
 	class Instance;
+	class PipelineLayout;
 	class Queue;
 	class Surface;
 	class Swapchain;
