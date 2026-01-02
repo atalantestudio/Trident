@@ -10,6 +10,8 @@ namespace ProjectA {
 	DX12::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window) :
 		ProjectA::GraphicsAdapter(window)
 	{
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
 
 		instance = createRef<Instance>();

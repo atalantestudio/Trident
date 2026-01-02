@@ -7,6 +7,8 @@
 
 namespace ProjectA {
 	DX12::Image::Image(const DX12::Device& device, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		device.device->CreateRenderTargetView(resource.Get(), nullptr, cpuDescriptorHandle);
 	}
 

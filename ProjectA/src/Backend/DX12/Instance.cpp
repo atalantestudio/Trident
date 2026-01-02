@@ -7,6 +7,8 @@
 
 namespace ProjectA {
 	DX12::Instance::Instance() {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		UINT flags = 0;
 
 		#ifdef BUILD_MODE_DEBUG

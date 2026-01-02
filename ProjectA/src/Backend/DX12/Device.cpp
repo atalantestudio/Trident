@@ -9,6 +9,8 @@
 
 namespace ProjectA {
 	DX12::Device::Device(const DX12::Instance& instance) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		HRESULT result;
 
 		result = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
