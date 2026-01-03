@@ -91,6 +91,7 @@ project "ProjectA"
 		-- TODO: Conditionally include.
 		links {
 			"d3d12.lib",
+			"d3dcompiler.lib",
 			"dxgi.lib",
 		}
 

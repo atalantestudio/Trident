@@ -208,6 +208,10 @@ namespace ProjectA {
 		return adapter->createShaderModule(code, descriptor);
 	}
 
+	ref<ShaderModule> Renderer::loadHlslShaderModule(const sequence<char8>& code, const ShaderModuleDescriptor& descriptor) {
+		return adapter->createShaderModule(*pointer_cast<const sequence<uint8>*>(&code), descriptor);
+	}
+
 	void Renderer::setImageIndex(uint32 imageIndex) {
 		Renderer::imageIndex = imageIndex;
 	}

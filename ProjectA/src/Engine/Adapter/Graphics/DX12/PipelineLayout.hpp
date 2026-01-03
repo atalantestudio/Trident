@@ -15,6 +15,6 @@ namespace ProjectA {
 			~PipelineLayout() final override;
 
 		private:
-			ComPtr<ID3DBlob> rootSignature;
+			ComPtr<ID3D12RootSignature> rootSignature;
 	};
 }

@@ -6,6 +6,7 @@
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
+#include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 
 namespace ProjectA {
@@ -86,15 +87,13 @@ namespace ProjectA {
 	}
 
 	ref<ShaderModule> DX12::GraphicsAdapter::createShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		ADAPTER_ASSERT(false, "Shader module assets are not supported within DX12 pipelines.");
 
 		return nullptr;
 	}
 
 	ref<ShaderModule> DX12::GraphicsAdapter::createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
+		return createRef<DX12::ShaderModule>(code, descriptor);
 	}
 
 	ref<Swapchain> DX12::GraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {

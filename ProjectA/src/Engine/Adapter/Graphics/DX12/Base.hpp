@@ -4,6 +4,7 @@
 #pragma once
 
 #include <d3d12.h>
+#include <D3Dcompiler.h>
 #include <dxgi1_6.h>
 #include <wrl.h>
 
@@ -20,6 +21,7 @@ namespace ProjectA::DX12 {
 	class Instance;
 	class PipelineLayout;
 	class Queue;
+	class ShaderModule;
 	class Surface;
 	class Swapchain;
 }
