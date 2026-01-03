@@ -3,8 +3,8 @@
 #include "Engine/API/Rendering/VertexInputAttributeType.hpp"
 
 namespace ProjectA {
-	static VkFormat getVkFormat(VertexInputAttributeType vertexInputAttributeType) {
-		static constexpr VkFormat vkFormats[] = {
+	VkFormat getVkFormat(VertexInputAttributeType vertexInputAttributeType) {
+		static constexpr VkFormat VERTEX_INPUT_ATTRIBUTE_TYPES[] = {
 			VK_FORMAT_R8_SINT,
 			VK_FORMAT_R8_UINT,
 			VK_FORMAT_R16_SINT,
@@ -23,6 +23,6 @@ namespace ProjectA {
 			VK_FORMAT_R64G64B64A64_SFLOAT,
 		};
 
-		return vkFormats[static_cast<uint32>(vertexInputAttributeType)];
+		return VERTEX_INPUT_ATTRIBUTE_TYPES[static_cast<uint32>(vertexInputAttributeType)];
 	}
 }

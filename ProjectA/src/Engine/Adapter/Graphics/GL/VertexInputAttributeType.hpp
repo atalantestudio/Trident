@@ -4,8 +4,8 @@
 
 namespace ProjectA {
 	// Returns the number of component per generic vertex attribute.
-	static GLint getGlSize(VertexInputAttributeType type) {
-		static constexpr GLint glSizes[] = {
+	GLint getGlSize(VertexInputAttributeType type) {
+		static constexpr GLint VERTEX_INPUT_ATTRIBUTE_SIZES[] = {
 			1,
 			1,
 			1,
@@ -24,7 +24,7 @@ namespace ProjectA {
 			4,
 		};
 
-		const GLint glSize = glSizes[static_cast<uint32>(type)];
+		const GLint glSize = VERTEX_INPUT_ATTRIBUTE_SIZES[static_cast<uint32>(type)];
 
 		if (glSize == 0) {
 			ENGINE_ERROR("64-bit unsigned/signed integers as vertex input attributes aren't supported by OpenGL.");
@@ -33,8 +33,8 @@ namespace ProjectA {
 		return glSize;
 	}
 
-	static GLenum getGlType(VertexInputAttributeType type) {
-		static constexpr GLenum glTypes[] = {
+	GLenum getGlType(VertexInputAttributeType type) {
+		static constexpr GLenum VERTEX_INPUT_ATTRIBUTE_TYPES[] = {
 			GL_BYTE,
 			GL_UNSIGNED_BYTE,
 			GL_SHORT,
@@ -53,7 +53,7 @@ namespace ProjectA {
 			GL_DOUBLE,
 		};
 
-		const GLenum glType = glTypes[static_cast<uint32>(type)];
+		const GLenum glType = VERTEX_INPUT_ATTRIBUTE_TYPES[static_cast<uint32>(type)];
 
 		if (glType == 0) {
 			ENGINE_ERROR("64-bit unsigned/signed integers as vertex input attributes aren't supported by OpenGL.");

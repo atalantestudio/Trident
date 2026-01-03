@@ -17,7 +17,7 @@ namespace ProjectA {
 		RIGHT = BUTTON_1,
 		MIDDLE = BUTTON_2,
 
-		__MAX_ENUM,
+		count,
 	};
 
 	AS_PRINTABLE(MouseButton);

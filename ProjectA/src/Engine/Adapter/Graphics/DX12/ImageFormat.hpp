@@ -3,17 +3,16 @@
 
 #pragma once
 
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Rendering/ImageFormat.hpp"
 
 namespace ProjectA::DX12 {
 	DXGI_FORMAT getFormat(ImageFormat imageFormat) {
-		DEBUG_ASSERT(imageFormat < ImageFormat::count);
-
 		switch (imageFormat) {
 			case ImageFormat::R8_UNORM:
 				return DXGI_FORMAT_R8_UNORM;
 			case ImageFormat::R8G8B8_UNORM:
-				ENGINE_ASSERT(false, "R8G8B8_UNORM format is not supported.");
+				ADAPTER_ASSERT(false, "R8G8B8_UNORM format is not supported.");
 
 				return DXGI_FORMAT_UNKNOWN;
 			case ImageFormat::B8G8R8A8_UNORM:
@@ -35,8 +34,10 @@ namespace ProjectA::DX12 {
 				return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 			case ImageFormat::D24_UNORM_S8_UINT:
 				return DXGI_FORMAT_D24_UNORM_S8_UINT;
-		}
+			default:
+				ADAPTER_ASSERT(false, "Undefined format.");
 
-		return DXGI_FORMAT_UNKNOWN;
+				return DXGI_FORMAT_UNKNOWN;
+		}
 	}
 }

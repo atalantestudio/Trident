@@ -11,6 +11,6 @@ namespace ProjectA {
 		GREATER_OR_EQUAL = 6,
 		ALWAYS = 7,
 
-		__MAX_ENUM,
+		count,
 	};
 }

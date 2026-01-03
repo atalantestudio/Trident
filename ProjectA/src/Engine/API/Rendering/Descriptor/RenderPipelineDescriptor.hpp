@@ -32,7 +32,10 @@ namespace ProjectA {
 		PolygonMode polygonMode;
 		CullMode cullMode;
 		FrontFace frontFace;
+
+		// NOTE: Not supported by the DX12 adapter.
 		float32 lineWidth;
+
 		float32 minSampleShading;
 		ColorBlendState colorBlendState;
 		DepthStencilState depthStencilState;

@@ -21,6 +21,6 @@ namespace ProjectA {
 		// On Vulkan, TRIANGLE_FAN is only supported with an extension.
 		// It will be added when the device is updated to automatically enable needed extensions.
 
-		__MAX_ENUM,
+		count,
 	};
 }

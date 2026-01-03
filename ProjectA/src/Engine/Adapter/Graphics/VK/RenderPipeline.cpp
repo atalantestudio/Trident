@@ -27,7 +27,7 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		static constexpr VkSampleMask sampleMask = ~0;
+		static constexpr VkSampleMask sampleMask = max<VkSampleMask>();
 
 		const ref<Subpass>& subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
 		const VulkanRenderPass& renderPass = *std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);

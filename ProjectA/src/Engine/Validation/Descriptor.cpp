@@ -27,7 +27,7 @@ namespace ProjectA {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
-			if (descriptor.type >= ImageType::__MAX_ENUM) {
+			if (descriptor.type >= ImageType::count) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.type must be a valid ImageType value.");
@@ -213,7 +213,7 @@ namespace ProjectA {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
-			if (descriptor.type >= ImageType::__MAX_ENUM) {
+			if (descriptor.type >= ImageType::count) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.type must be a valid ImageType value.");
@@ -377,19 +377,19 @@ namespace ProjectA {
 					ENGINE_ERROR("descriptor.attachments[[]].sampleCount must either be 1 or a power of 2 (up to 64).", attachmentIndex);
 				}
 
-				if (attachment.loadOperation >= LoadOperation::__MAX_ENUM) {
+				if (attachment.loadOperation >= LoadOperation::count) {
 					errorCount += 1;
 
 					ENGINE_ERROR("descriptor.attachments[[]].loadOperation must be a valid LoadOperation value.", attachmentIndex);
 				}
 
-				if (attachment.storeOperation >= StoreOperation::__MAX_ENUM) {
+				if (attachment.storeOperation >= StoreOperation::count) {
 					errorCount += 1;
 
 					ENGINE_ERROR("descriptor.attachments[[]].storeOperation must be a valid StoreOperation value.", attachmentIndex);
 				}
 
-				if (attachment.finalLayout >= ImageLayout::__MAX_ENUM) {
+				if (attachment.finalLayout >= ImageLayout::count) {
 					errorCount += 1;
 
 					ENGINE_ERROR("descriptor.attachments[[]].finalLayout must be a valid ImageLayout value.", attachmentIndex);
@@ -418,7 +418,7 @@ namespace ProjectA {
 			for (uint32 vertexInputBindingIndex = 0; vertexInputBindingIndex < descriptor.vertexInputBindings.count(); vertexInputBindingIndex += 1) {
 				const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 
-				if (vertexInputBinding.getInputRate() >= InputRate::__MAX_ENUM) {
+				if (vertexInputBinding.getInputRate() >= InputRate::count) {
 					errorCount += 1;
 
 					ENGINE_ERROR("descriptor.vertexInputBindings[[]].inputRate must be a valid InputRate value.", vertexInputBindingIndex);
@@ -429,7 +429,7 @@ namespace ProjectA {
 				for (uint32 vertexInputAttributeIndex = 0; vertexInputAttributeIndex < vertexInputAttributes.size(); vertexInputAttributeIndex += 1) {
 					const VertexInputAttribute& vertexInputAttribute = vertexInputAttributes[vertexInputAttributeIndex];
 
-					if (vertexInputAttribute.type >= VertexInputAttributeType::__MAX_ENUM) {
+					if (vertexInputAttribute.type >= VertexInputAttributeType::count) {
 						errorCount += 1;
 
 						ENGINE_ERROR("descriptor.vertexInputBindings[[]].attributes[[]].type must be a valid VertexInputAttributeType value.", vertexInputBindingIndex, vertexInputAttributeIndex);
@@ -449,25 +449,25 @@ namespace ProjectA {
 				ENGINE_ERROR("descriptor.fragmentShaderModule must be a valid fragment ShaderModule.");
 			}
 
-			if (descriptor.primitiveTopology >= PrimitiveTopology::__MAX_ENUM) {
+			if (descriptor.primitiveTopology >= PrimitiveTopology::count) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.primitiveTopology must be a valid PrimitiveTopology value.");
 			}
 
-			if (descriptor.polygonMode >= PolygonMode::__MAX_ENUM) {
+			if (descriptor.polygonMode >= PolygonMode::count) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.polygonMode must be a valid PolygonMode value.");
 			}
 
-			if (descriptor.cullMode >= CullMode::__MAX_ENUM) {
+			if (descriptor.cullMode >= CullMode::count) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.cullMode must be a valid CullMode value.");
 			}
 
-			if (descriptor.frontFace >= FrontFace::__MAX_ENUM) {
+			if (descriptor.frontFace >= FrontFace::count) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.frontFace must be a valid FrontFace value.");
@@ -504,13 +504,13 @@ namespace ProjectA {
 				}
 
 				if (colorBlendAttachment.blend) {
-					if (colorBlendAttachment.srcColorBlendFactor >= BlendFactor::__MAX_ENUM) {
+					if (colorBlendAttachment.srcColorBlendFactor >= BlendFactor::count) {
 						errorCount += 1;
 
 						ENGINE_ERROR("If descriptor.colorBlendState.attachments[[]].blend is true, descriptor.colorBlendState.attachments[[]].srcColorBlendFactor must be a valid BlendFactor value.", colorBlendAttachmentIndex, colorBlendAttachmentIndex);
 					}
 
-					if (colorBlendAttachment.dstColorBlendFactor >= BlendFactor::__MAX_ENUM) {
+					if (colorBlendAttachment.dstColorBlendFactor >= BlendFactor::count) {
 						errorCount += 1;
 
 						ENGINE_ERROR("If descriptor.colorBlendState.attachments[[]].blend is true, descriptor.colorBlendState.attachments[[]].dstColorBlendFactor must be a valid BlendFactor value.", colorBlendAttachmentIndex, colorBlendAttachmentIndex);
@@ -531,7 +531,7 @@ namespace ProjectA {
 					ENGINE_ERROR("If descriptor.depthStencilState.depthStencil is true, descriptor.depthStencilState.depthWrite must be either true or false.");
 				}
 
-				if (descriptor.depthStencilState.compareOperation >= CompareOperation::__MAX_ENUM) {
+				if (descriptor.depthStencilState.compareOperation >= CompareOperation::count) {
 					errorCount += 1;
 
 					ENGINE_ERROR("If descriptor.depthStencilState.depthStencil is true, descriptor.depthStencilState.compareOperation must be a valid CompareOperation value.");
@@ -577,13 +577,13 @@ namespace ProjectA {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
-			if (descriptor.magFilter >= SamplerFilter::__MAX_ENUM) {
+			if (descriptor.magFilter >= SamplerFilter::count) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.magFilter must be a valid SamplerFilter value.");
 			}
 
-			if (descriptor.minFilter >= SamplerFilter::__MAX_ENUM) {
+			if (descriptor.minFilter >= SamplerFilter::count) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.minFilter must be a valid SamplerFilter value.");
@@ -625,7 +625,7 @@ namespace ProjectA {
 
 				anyUsedColorAttachment = true;
 
-				if (colorAttachmentReference.layout >= ImageLayout::__MAX_ENUM) {
+				if (colorAttachmentReference.layout >= ImageLayout::count) {
 					errorCount += 1;
 
 					ENGINE_ERROR("descriptor.colorAttachmentReferences[[]].layout must be a valid ImageLayout value.", colorAttachmentReferenceIndex);
@@ -638,7 +638,7 @@ namespace ProjectA {
 				ENGINE_ERROR("descriptor.colorAttachmentReferences must contain at least one used attachment.");
 			}
 
-			if (descriptor.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX && descriptor.depthStencilAttachmentReference.layout >= ImageLayout::__MAX_ENUM) {
+			if (descriptor.depthStencilAttachmentReference.index != AttachmentReference::UNUSED_ATTACHMENT_INDEX && descriptor.depthStencilAttachmentReference.layout >= ImageLayout::count) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.depthStencilAttachmentReference.layout must be a valid ImageLayout value.");
@@ -653,7 +653,7 @@ namespace ProjectA {
 
 				anyUsedColorAttachment = true;
 
-				if (inputAttachmentReference.layout >= ImageLayout::__MAX_ENUM) {
+				if (inputAttachmentReference.layout >= ImageLayout::count) {
 					errorCount += 1;
 
 					ENGINE_ERROR("descriptor.inputAttachmentReferences[[]].layout must be a valid ImageLayout value.", inputAttachmentReferenceIndex);

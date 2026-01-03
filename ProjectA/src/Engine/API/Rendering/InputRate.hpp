@@ -5,6 +5,6 @@ namespace ProjectA {
 		VERTEX = 0,
 		INSTANCE = 1,
 
-		__MAX_ENUM,
+		count,
 	};
 }

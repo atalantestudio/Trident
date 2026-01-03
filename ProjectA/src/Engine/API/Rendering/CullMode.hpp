@@ -7,6 +7,6 @@ namespace ProjectA {
 		BACK = 2,
 		FRONT_AND_BACK = 3,
 
-		__MAX_ENUM,
+		count,
 	};
 }

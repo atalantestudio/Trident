@@ -9,6 +9,9 @@ namespace ProjectA {
 			virtual ~RenderPipeline() = default;
 
 		protected:
+			// TODO: Used by the DX12 adapter (WIP).
+			RenderPipeline() = default;
+
 			explicit RenderPipeline(const RenderPipelineDescriptor& descriptor) {
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 			}

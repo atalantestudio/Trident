@@ -124,7 +124,7 @@ namespace ProjectA {
 		RIGHT_ALT		= 346,
 		RIGHT_SUPER		= 347,
 
-		__MAX_ENUM,
+		count,
 	};
 
 	AS_PRINTABLE(KeyCode);

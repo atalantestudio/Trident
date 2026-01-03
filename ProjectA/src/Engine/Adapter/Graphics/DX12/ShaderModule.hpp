@@ -10,7 +10,7 @@ namespace ProjectA {
 		public:
 			explicit ShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor);
 
-		private:
+		public:
 			ComPtr<ID3DBlob> blob;
 	};
 }

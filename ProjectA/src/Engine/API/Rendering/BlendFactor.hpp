@@ -22,6 +22,6 @@ namespace ProjectA {
 		SRC1_ALPHA = 17,
 		ONE_MINUS_SRC1_ALPHA = 18,
 
-		__MAX_ENUM,
+		count,
 	};
 }

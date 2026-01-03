@@ -8,6 +8,6 @@ namespace ProjectA {
 		// Marks the contents generated during the render pass and within the render area as undefined.
 		UNDEFINED = 1,
 
-		__MAX_ENUM,
+		count,
 	};
 }

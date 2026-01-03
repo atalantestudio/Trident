@@ -5,6 +5,6 @@ namespace ProjectA {
 		NEAREST = 0,
 		LINEAR = 1,
 
-		__MAX_ENUM,
+		count,
 	};
 }

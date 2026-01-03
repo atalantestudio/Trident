@@ -113,7 +113,7 @@ namespace ProjectA {
 		windowData->windowCloseEventListener = descriptor.windowCloseEventListener;
 		windowData->windowResizeEventListener = descriptor.windowResizeEventListener;
 
-		windowData->keyMap = sequence<bool>(static_cast<uint32>(KeyCode::__MAX_ENUM));
+		windowData->keyMap = sequence<bool>(static_cast<uint32>(KeyCode::count));
 
 		WIN32_ASSERT(SetPropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, windowClass));
 		WIN32_ASSERT(SetPropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData));
