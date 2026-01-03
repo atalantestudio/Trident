@@ -1,0 +1,120 @@
+#include "pch.hpp"
+
+#include "Engine/Adapter/Graphics/VK/procedures.hpp"
+
+namespace ProjectA {
+	PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers;
+	PFN_vkAllocateDescriptorSets vkAllocateDescriptorSets;
+	PFN_vkAllocateMemory vkAllocateMemory;
+	PFN_vkBeginCommandBuffer vkBeginCommandBuffer;
+	PFN_vkBindBufferMemory vkBindBufferMemory;
+	PFN_vkBindImageMemory vkBindImageMemory;
+	PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets;
+	PFN_vkCmdBindIndexBuffer vkCmdBindIndexBuffer;
+	PFN_vkCmdBindPipeline vkCmdBindPipeline;
+	PFN_vkCmdBindVertexBuffers vkCmdBindVertexBuffers;
+	PFN_vkCmdCopyBuffer vkCmdCopyBuffer;
+	PFN_vkCmdCopyBufferToImage vkCmdCopyBufferToImage;
+	PFN_vkCmdCopyImageToBuffer vkCmdCopyImageToBuffer;
+	PFN_vkCmdDispatch vkCmdDispatch;
+	PFN_vkCmdDispatchIndirect vkCmdDispatchIndirect;
+	PFN_vkCmdDraw vkCmdDraw;
+	PFN_vkCmdDrawIndexed vkCmdDrawIndexed;
+	PFN_vkCmdDrawIndexedIndirect vkCmdDrawIndexedIndirect;
+	PFN_vkCmdDrawIndirect vkCmdDrawIndirect;
+	PFN_vkCmdPipelineBarrier vkCmdPipelineBarrier;
+	PFN_vkCmdSetLineWidth vkCmdSetLineWidth;
+	PFN_vkCmdSetScissor vkCmdSetScissor;
+	PFN_vkCmdSetViewport vkCmdSetViewport;
+	PFN_vkCreateBuffer vkCreateBuffer;
+	PFN_vkCreateCommandPool vkCreateCommandPool;
+	PFN_vkCreateComputePipelines vkCreateComputePipelines;
+	PFN_vkCreateDescriptorPool vkCreateDescriptorPool;
+	PFN_vkCreateDescriptorSetLayout vkCreateDescriptorSetLayout;
+	PFN_vkCreateDevice vkCreateDevice;
+	PFN_vkCreateFence vkCreateFence;
+	PFN_vkCreateGraphicsPipelines vkCreateGraphicsPipelines;
+	PFN_vkCreateImage vkCreateImage;
+	PFN_vkCreateImageView vkCreateImageView;
+	PFN_vkCreateInstance vkCreateInstance;
+	PFN_vkCreatePipelineLayout vkCreatePipelineLayout;
+	PFN_vkCreateSampler vkCreateSampler;
+	PFN_vkCreateSemaphore vkCreateSemaphore;
+	PFN_vkCreateShaderModule vkCreateShaderModule;
+	PFN_vkDestroyBuffer vkDestroyBuffer;
+	PFN_vkDestroyCommandPool vkDestroyCommandPool;
+	PFN_vkDestroyDescriptorPool vkDestroyDescriptorPool;
+	PFN_vkDestroyDescriptorSetLayout vkDestroyDescriptorSetLayout;
+	PFN_vkDestroyDevice vkDestroyDevice;
+	PFN_vkDestroyFence vkDestroyFence;
+	PFN_vkDestroyImage vkDestroyImage;
+	PFN_vkDestroyImageView vkDestroyImageView;
+	PFN_vkDestroyInstance vkDestroyInstance;
+	PFN_vkDestroyPipeline vkDestroyPipeline;
+	PFN_vkDestroyPipelineLayout vkDestroyPipelineLayout;
+	PFN_vkDestroySampler vkDestroySampler;
+	PFN_vkDestroySemaphore vkDestroySemaphore;
+	PFN_vkDestroyShaderModule vkDestroyShaderModule;
+	PFN_vkDeviceWaitIdle vkDeviceWaitIdle;
+	PFN_vkEndCommandBuffer vkEndCommandBuffer;
+	PFN_vkEnumerateDeviceExtensionProperties vkEnumerateDeviceExtensionProperties;
+	PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties;
+	PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices;
+	PFN_vkFreeCommandBuffers vkFreeCommandBuffers;
+	PFN_vkFreeMemory vkFreeMemory;
+	PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements;
+	PFN_vkGetDeviceQueue vkGetDeviceQueue;
+	PFN_vkGetImageMemoryRequirements vkGetImageMemoryRequirements;
+	PFN_vkMapMemory vkMapMemory;
+	PFN_vkQueueSubmit vkQueueSubmit;
+	PFN_vkResetCommandBuffer vkResetCommandBuffer;
+	PFN_vkResetFences vkResetFences;
+	PFN_vkUnmapMemory vkUnmapMemory;
+	PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;
+	PFN_vkWaitForFences vkWaitForFences;
+
+	#if VULKAN_VERSION < VULKAN_VERSION_1_1
+		PFN_vkGetPhysicalDeviceFeatures vkGetPhysicalDeviceFeatures;
+		PFN_vkGetPhysicalDeviceMemoryProperties vkGetPhysicalDeviceMemoryProperties;
+		PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties;
+		PFN_vkGetPhysicalDeviceQueueFamilyProperties vkGetPhysicalDeviceQueueFamilyProperties;
+	#endif
+
+	#if VULKAN_VERSION < VULKAN_VERSION_1_2
+		PFN_vkCmdBeginRenderPass vkCmdBeginRenderPass;
+		PFN_vkCmdEndRenderPass vkCmdEndRenderPass;
+		PFN_vkCmdNextSubpass vkCmdNextSubpass;
+		PFN_vkCreateRenderPass vkCreateRenderPass;
+	#endif
+
+	#if VULKAN_VERSION < VULKAN_VERSION_1_4
+		PFN_vkCreateFramebuffer vkCreateFramebuffer;
+		PFN_vkDestroyFramebuffer vkDestroyFramebuffer;
+		PFN_vkDestroyRenderPass vkDestroyRenderPass;
+	#endif
+
+	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+		PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR;
+	#endif
+
+	#ifdef DEBUG_ENABLE_MESSENGER
+		PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
+		PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
+	#endif
+
+	#ifdef VULKAN_USE_VK_KHR_surface
+		PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR;
+		PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR vkGetPhysicalDeviceSurfaceCapabilitiesKHR;
+		PFN_vkGetPhysicalDeviceSurfaceFormatsKHR vkGetPhysicalDeviceSurfaceFormatsKHR;
+		PFN_vkGetPhysicalDeviceSurfacePresentModesKHR vkGetPhysicalDeviceSurfacePresentModesKHR;
+		PFN_vkGetPhysicalDeviceSurfaceSupportKHR vkGetPhysicalDeviceSurfaceSupportKHR;
+	#endif
+
+	#ifdef VULKAN_USE_VK_KHR_swapchain
+		PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR;
+		PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR;
+		PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR;
+		PFN_vkGetSwapchainImagesKHR vkGetSwapchainImagesKHR;
+		PFN_vkQueuePresentKHR vkQueuePresentKHR;
+	#endif
+}

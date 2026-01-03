@@ -1,15 +1,15 @@
 #include "pch.hpp"
 
 #ifdef ENABLE_DX12_ADAPTER
-	#include "Backend/DX12/GraphicsAdapter.hpp"
+	#include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #endif
 
 #ifdef ENABLE_GL_ADAPTER
-	#include "Backend/GL/GraphicsAdapter.hpp"
+	#include "Engine/Adapter/Graphics/GL/GraphicsAdapter.hpp"
 #endif
 
 #ifdef ENABLE_VK_ADAPTER
-	#include "Backend/VK/GraphicsAdapter.hpp"
+	#include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
 #endif
 
 #include "Engine/Filesystem/Filesystem.hpp"

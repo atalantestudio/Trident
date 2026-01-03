@@ -1,0 +1,21 @@
+#pragma once
+
+#include <GL/glcorearb.h>
+
+#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+	#include <gl/GL.h>
+#endif
+
+#include <GL/glext.h>
+
+#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+	#include <GL/wglext.h>
+#endif
+
+#ifndef GL_SOURCE_FROM_SPIRV
+	// TODO: Remove when TSL is ready.
+	// NOTE: <regex> is used for custom entrypoints within a GLSL shader.
+	#include <regex>
+#endif
+
+#include "Engine/Adapter/Graphics/GL/procedures.hpp"

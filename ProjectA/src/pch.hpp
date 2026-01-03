@@ -41,15 +41,15 @@
 #endif
 
 #ifdef ENABLE_DX12_ADAPTER
-	#include "Backend/DX12/Base.hpp"
+	#include "Engine/Adapter/Graphics/DX12/Base.hpp"
 #endif
 
 #ifdef ENABLE_GL_ADAPTER
-	#include "Backend/GL/Base.hpp"
+	#include "Engine/Adapter/Graphics/GL/Base.hpp"
 #endif
 
 #ifdef ENABLE_VK_ADAPTER
-	#include "Backend/VK/Base.hpp"
+	#include "Engine/Adapter/Graphics/VK/Base.hpp"
 #endif
 
 #include "Engine/Base/Random.hpp"
@@ -84,5 +84,5 @@
 #include "Engine/Manifest.hpp"
 
 #if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
-	#include "Backend/Win32/base.hpp"
+	#include "Engine/Adapter/Window/Win32/base.hpp"
 #endif

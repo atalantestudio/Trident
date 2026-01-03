@@ -51,13 +51,7 @@ project "ProjectA"
 	}
 
 	files {
-		-- TODO: Conditionally include.
-		"%{prj.name}/src/Backend/DX12/**.cpp",
-		"%{prj.name}/src/Backend/GL/**.cpp",
-		"%{prj.name}/src/Backend/VK/**.cpp",
-
-		"%{prj.name}/src/Engine/**.cpp",
-		"%{prj.name}/src/*.cpp",
+		"%{prj.name}/src/**.cpp",
 		"%{prj.name}/vendor/API/GL/glcorearb.h",
 		"%{prj.name}/vendor/API/GL/glext.h",
 		"%{prj.name}/vendor/API/GL/wglext.h",
@@ -91,7 +85,7 @@ project "ProjectA"
 		systemversion "latest"
 
 		files {
-			"%{prj.name}/src/Backend/Win32/**.cpp",
+			"%{prj.name}/src/Engine/Adapter/Window/Win32/**.cpp",
 		}
 
 		-- TODO: Conditionally include.
