@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Backend/DX12/Device.hpp"
 #include "Backend/DX12/CommandPool.hpp"
+#include "Backend/DX12/Device.hpp"
 
 #include "Engine/API/Rendering/CommandEncoder.hpp"
 
@@ -63,6 +63,6 @@ namespace ProjectA {
 			void bindIndexBuffer(const ref<ProjectA::Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) final override;
 
 		private:
-			ComPtr<ID3D12GraphicsCommandList> commandList;
+			// ComPtr<ID3D12CommandList> commandList;
 	};
 }

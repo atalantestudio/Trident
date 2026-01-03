@@ -11,10 +11,14 @@ namespace ProjectA {
 	DX12::CommandEncoder::CommandEncoder(const CommandBufferDescriptor& descriptor, const DX12::Device& device, const DX12::CommandPool& commandPool) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		// TODO: Get pipeline state ComPtr.
-		// const HRESULT result = device.device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandPool.commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList));
+		HRESULT result;
+		ComPtr<ID3D12CommandList> commandList;
 
-		// ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command list.");
+		result = device.device->CreateCommandList(0, commandPool.type, commandPool.commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList));
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command list.");
+
+		// TODO: Store returned command list.
 	}
 
 	void DX12::CommandEncoder::begin() const {

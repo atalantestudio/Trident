@@ -9,6 +9,8 @@
 
 namespace ProjectA {
 	DX12::Fence::Fence(const DX12::Device& device) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
 		const HRESULT result = device.device->CreateFence(1, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create fence.");

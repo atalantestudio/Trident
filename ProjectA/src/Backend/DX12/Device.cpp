@@ -7,6 +7,8 @@
 #include "Backend/DX12/Queue.hpp"
 #include "Backend/DX12/Swapchain.hpp"
 
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
+
 namespace ProjectA {
 	DX12::Device::Device(const DX12::Instance& instance) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -16,18 +18,22 @@ namespace ProjectA {
 		result = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
 
 		if (FAILED(result)) {
+			ProjectA::GraphicsAdapter::logger.warning("Failed to create device using the primary display adapter. Falling back to a WARP adapter.");
+
 			ComPtr<IDXGIAdapter> adapter;
 
-			instance.factory->EnumWarpAdapter(IID_PPV_ARGS(&adapter));
+			result = instance.factory->EnumWarpAdapter(IID_PPV_ARGS(&adapter));
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate WARP adapter.");
 
 			result = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
 
-			ENGINE_ASSERT(SUCCEEDED(result), "Could not create WARP device.");
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create device using the WARP adapter.");
 		}
 
-		queues[static_cast<uint32>(QueueFamilyCapability::GRAPHICS)] = createRef<Queue>(*this, D3D12_COMMAND_LIST_TYPE_DIRECT);
-		queues[static_cast<uint32>(QueueFamilyCapability::COMPUTE)] = createRef<Queue>(*this, D3D12_COMMAND_LIST_TYPE_COMPUTE);
-		queues[static_cast<uint32>(QueueFamilyCapability::TRANSFER)] = createRef<Queue>(*this, D3D12_COMMAND_LIST_TYPE_COPY);
+		queues[static_cast<uint32>(QueueFamilyCapability::GRAPHICS)] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_DIRECT);
+		queues[static_cast<uint32>(QueueFamilyCapability::COMPUTE)] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COMPUTE);
+		queues[static_cast<uint32>(QueueFamilyCapability::TRANSFER)] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COPY);
 	}
 
 	DX12::Device::~Device() {

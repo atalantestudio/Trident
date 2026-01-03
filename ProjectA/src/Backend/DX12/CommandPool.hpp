@@ -14,5 +14,6 @@ namespace ProjectA {
 
 		public:
 			ComPtr<ID3D12CommandAllocator> commandAllocator;
+			D3D12_COMMAND_LIST_TYPE type;
 	};
 }

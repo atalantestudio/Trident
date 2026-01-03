@@ -12,7 +12,7 @@ namespace ProjectA {
 		public:
 			explicit Device(const DX12::Instance& instance);
 
-			~Device();
+			~Device() final override;
 
 			AcquireNextImageStatus acquireNextImage(const ref<ProjectA::Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const final override;
 

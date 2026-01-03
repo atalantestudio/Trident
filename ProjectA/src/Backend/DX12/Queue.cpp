@@ -9,19 +9,21 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	DX12::Queue::Queue(const Device& device, D3D12_COMMAND_LIST_TYPE commandListType) :
+	DX12::Queue::Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType) :
 		device(device),
 		commandPool(device, commandListType)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		HRESULT result;
+
 		D3D12_COMMAND_QUEUE_DESC commandQueueDescriptor{};
 		commandQueueDescriptor.Type = commandListType;
-		commandQueueDescriptor.Priority = 0;
+		commandQueueDescriptor.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 		commandQueueDescriptor.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 		commandQueueDescriptor.NodeMask = 0;
 
-		const HRESULT result = device.device->CreateCommandQueue(&commandQueueDescriptor, IID_PPV_ARGS(&commandQueue));
+		result = device.device->CreateCommandQueue(&commandQueueDescriptor, IID_PPV_ARGS(&commandQueue));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command queue.");
 	}

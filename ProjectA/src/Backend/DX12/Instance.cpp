@@ -5,22 +5,29 @@
 
 #include "Backend/DX12/Instance.hpp"
 
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
+
 namespace ProjectA {
 	DX12::Instance::Instance() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		HRESULT result;
 		UINT flags = 0;
 
 		#ifdef BUILD_MODE_DEBUG
 			ComPtr<ID3D12Debug> debug;
 
-			if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug)))) {
-				flags |= DXGI_CREATE_FACTORY_DEBUG;
+			result = D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
 
-				debug->EnableDebugLayer();
-			}
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get debug controller.");
+
+			flags |= DXGI_CREATE_FACTORY_DEBUG;
+
+			debug->EnableDebugLayer();
 		#endif
 
-		ENGINE_ASSERT(SUCCEEDED(CreateDXGIFactory2(flags, IID_PPV_ARGS(&factory))), "Could not create DXGI factory.");
+		result = CreateDXGIFactory2(flags, IID_PPV_ARGS(&factory));
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create DXGI factory.");
 	}
 }

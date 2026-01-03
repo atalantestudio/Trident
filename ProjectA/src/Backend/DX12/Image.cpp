@@ -9,7 +9,8 @@ namespace ProjectA {
 	DX12::Image::Image(const DX12::Device& device, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		device.device->CreateRenderTargetView(resource.Get(), nullptr, cpuDescriptorHandle);
+		// TODO: This causes the device adapter to close.
+		// device.device->CreateRenderTargetView(resource.Get(), nullptr, cpuDescriptorHandle);
 	}
 
 	DX12::Image::~Image() {

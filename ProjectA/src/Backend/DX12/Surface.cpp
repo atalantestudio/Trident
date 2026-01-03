@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Backend/DX12/Surface.hpp"
+#include "Backend/Win32/base.hpp"
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
@@ -11,11 +12,13 @@ namespace ProjectA {
 	DX12::Surface::Surface(const DX12::Instance& instance, const Window& window) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		HRESULT result;
+
 		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 			this->window = pointer_cast<const Win32WindowData*>(window.data)->hWnd;
 
 			// Don't support fullscreen transitions.
-			const HRESULT result = instance.factory->MakeWindowAssociation(this->window, DXGI_MWA_NO_ALT_ENTER);
+			result = instance.factory->MakeWindowAssociation(this->window, DXGI_MWA_NO_ALT_ENTER);
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to disable fullscreen transitions.");
 		#else
