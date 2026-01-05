@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class DX12::ShaderModule : public ProjectA::ShaderModule {
 		public:
-			explicit ShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor);
+			explicit ShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor);
 
 		public:
 			ComPtr<ID3DBlob> blob;

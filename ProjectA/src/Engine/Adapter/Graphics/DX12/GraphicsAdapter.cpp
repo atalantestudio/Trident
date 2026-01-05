@@ -66,9 +66,7 @@ namespace ProjectA {
 	}
 
 	ref<RenderPass> DX12::GraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
+		return createRef<RenderPass>(descriptor);
 	}
 
 	ref<RenderPipeline> DX12::GraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
@@ -91,7 +89,7 @@ namespace ProjectA {
 		return nullptr;
 	}
 
-	ref<ShaderModule> DX12::GraphicsAdapter::createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const {
+	ref<ShaderModule> DX12::GraphicsAdapter::createShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor) const {
 		return createRef<DX12::ShaderModule>(code, descriptor);
 	}
 

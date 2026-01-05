@@ -92,7 +92,7 @@ namespace ProjectA {
 		return createRef<OpenGLShaderModule>(asset, descriptor);
 	}
 
-	ref<ShaderModule> OpenGLGraphicsAdapter::createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const {
+	ref<ShaderModule> OpenGLGraphicsAdapter::createShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor) const {
 		return createRef<OpenGLShaderModule>(code, descriptor);
 	}
 

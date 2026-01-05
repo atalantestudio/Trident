@@ -7,7 +7,7 @@
 #include "Engine/API/Rendering/ImageFormat.hpp"
 
 namespace ProjectA::DX12 {
-	DXGI_FORMAT getFormat(ImageFormat imageFormat) {
+	inline DXGI_FORMAT getFormat(ImageFormat imageFormat) {
 		switch (imageFormat) {
 			case ImageFormat::R8_UNORM:
 				return DXGI_FORMAT_R8_UNORM;

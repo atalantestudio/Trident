@@ -188,7 +188,7 @@ namespace ProjectA {
 		return adapter->createShaderModule(shaderModuleAsset, descriptor);
 	}
 
-	ref<ShaderModule> Renderer::loadShaderModule(std::string_view path, const ShaderModuleDescriptor& descriptor) {
+	ref<ShaderModule> Renderer::loadShaderModule(view<char8> path, const ShaderModuleDescriptor& descriptor) {
 		std::string pathString = "Asset/Shader/";
 		pathString += path;
 
@@ -201,15 +201,15 @@ namespace ProjectA {
 			pathString += ".spv";
 		}
 
-		path = pathString;
+		path = view<char8>(&pathString[0], pathString.size());
 
-		const sequence<uint8> code = Filesystem::openByteBuffer(path.data());
+		const sequence<char8> code = Filesystem::openTextBuffer(&path[0]);
 
-		return adapter->createShaderModule(code, descriptor);
+		return adapter->createShaderModule(view<char8>(&code[0], code.count()), descriptor);
 	}
 
-	ref<ShaderModule> Renderer::loadHlslShaderModule(const sequence<char8>& code, const ShaderModuleDescriptor& descriptor) {
-		return adapter->createShaderModule(*pointer_cast<const sequence<uint8>*>(&code), descriptor);
+	ref<ShaderModule> Renderer::loadHlslShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor) {
+		return adapter->createShaderModule(code, descriptor);
 	}
 
 	void Renderer::setImageIndex(uint32 imageIndex) {

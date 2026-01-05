@@ -12,7 +12,7 @@ namespace ProjectA {
 		ENGINE_ERROR_UNIMPLEMENTED();
 	}
 
-	VulkanShaderModule::VulkanShaderModule(VkDevice device, const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) :
+	VulkanShaderModule::VulkanShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor, VkDevice device) :
 		ShaderModule(descriptor),
 		device(device)
 	{

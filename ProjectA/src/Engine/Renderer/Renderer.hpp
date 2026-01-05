@@ -73,11 +73,11 @@ namespace ProjectA {
 			static ref<ShaderModule> loadShaderModule(const ref<ShaderModuleAsset>& shaderModuleAsset, const ShaderModuleDescriptor& descriptor);
 
 			// TODO: Deprecate.
-			static ref<ShaderModule> loadShaderModule(std::string_view path, const ShaderModuleDescriptor& descriptor);
+			static ref<ShaderModule> loadShaderModule(view<char8> path, const ShaderModuleDescriptor& descriptor);
 
 			// Use to create HLSL shader modules.
 			// NOTE: This function will be removed once TSL can be transpiled to HLSL (or DXIL).
-			static ref<ShaderModule> loadHlslShaderModule(const sequence<char8>& code, const ShaderModuleDescriptor& descriptor);
+			static ref<ShaderModule> loadHlslShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor);
 
 			static void setImageIndex(uint32 imageIndex);
 

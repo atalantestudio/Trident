@@ -10,7 +10,7 @@ namespace ProjectA {
 			explicit VulkanShaderModule(VkDevice device, const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor);
 
 			// TODO: Deprecate.
-			explicit VulkanShaderModule(VkDevice device, const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor);
+			explicit VulkanShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor, VkDevice device);
 
 			~VulkanShaderModule() final override;
 

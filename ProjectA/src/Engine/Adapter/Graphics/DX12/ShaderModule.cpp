@@ -7,7 +7,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	DX12::ShaderModule::ShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) :
+	DX12::ShaderModule::ShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor) :
 		ProjectA::ShaderModule(descriptor)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);

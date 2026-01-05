@@ -35,8 +35,4 @@ namespace ProjectA {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create root signature.");
 	}
-
-	DX12::PipelineLayout::~PipelineLayout() {
-		ENGINE_ERROR_UNIMPLEMENTED();
-	}
 }

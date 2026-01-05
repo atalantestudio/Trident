@@ -12,8 +12,6 @@ namespace ProjectA {
 		public:
 			explicit PipelineLayout(const PipelineLayoutDescriptor& descriptor, const DX12::Device& device);
 
-			~PipelineLayout() final override;
-
 		public:
 			ComPtr<ID3D12RootSignature> rootSignature;
 	};

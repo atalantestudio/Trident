@@ -3,20 +3,30 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/DX12/BlendFactor.hpp"
 #include "Engine/Adapter/Graphics/DX12/CullMode.hpp"
+#include "Engine/Adapter/Graphics/DX12/ImageFormat.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/PrimitiveTopology.hpp"
 #include "Engine/Adapter/Graphics/DX12/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/DX12/VertexInputAttributeType.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	DX12::RenderPipeline::RenderPipeline(const RenderPipelineDescriptor& descriptor, const DX12::Device& device)
-		// : ProjectA::RenderPipeline(descriptor)
+	DX12::RenderPipeline::RenderPipeline(const RenderPipelineDescriptor& descriptor, const DX12::Device& device) :
+		ProjectA::RenderPipeline(descriptor)
 	{
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ADAPTER_ASSERT(descriptor.colorBlendState.attachments.size() <= 8 && descriptor.renderPass->getAttachmentCount() <= 8, "Too many color blend attachments.");
+
+		HRESULT result;
+
 		const ref<DX12::PipelineLayout> pipelineLayout = std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout);
 		const ref<DX12::ShaderModule> vertexShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.vertexShaderModule);
 		const ref<DX12::ShaderModule> fragmentShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.fragmentShaderModule);
+		const ref<RenderPass>& renderPass = descriptor.renderPass;
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescriptor{};
 		graphicsPipelineStateDescriptor.pRootSignature = pipelineLayout->rootSignature.Get();
@@ -38,19 +48,28 @@ namespace ProjectA {
 		graphicsPipelineStateDescriptor.StreamOutput.NumStrides = 0;
 		graphicsPipelineStateDescriptor.StreamOutput.RasterizedStream = 0;
 
-		// TODO: Set correct blend state.
 		graphicsPipelineStateDescriptor.BlendState.AlphaToCoverageEnable = FALSE;
 		graphicsPipelineStateDescriptor.BlendState.IndependentBlendEnable = FALSE;
-		graphicsPipelineStateDescriptor.BlendState.RenderTarget[0].BlendEnable = FALSE;
-		graphicsPipelineStateDescriptor.BlendState.RenderTarget[0].LogicOpEnable = FALSE;
-		graphicsPipelineStateDescriptor.BlendState.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
-		graphicsPipelineStateDescriptor.BlendState.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
-		graphicsPipelineStateDescriptor.BlendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-		graphicsPipelineStateDescriptor.BlendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-		graphicsPipelineStateDescriptor.BlendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-		graphicsPipelineStateDescriptor.BlendState.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-		graphicsPipelineStateDescriptor.BlendState.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
-		graphicsPipelineStateDescriptor.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+		uint32 renderTargetBlendDescriptorIndex = 0;
+
+		while (renderTargetBlendDescriptorIndex < descriptor.colorBlendState.attachments.size()) {
+			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[renderTargetBlendDescriptorIndex];
+
+			D3D12_RENDER_TARGET_BLEND_DESC& renderTargetBlendDescriptor = graphicsPipelineStateDescriptor.BlendState.RenderTarget[renderTargetBlendDescriptorIndex];
+			renderTargetBlendDescriptor.BlendEnable = colorBlendAttachment.blend;
+			renderTargetBlendDescriptor.LogicOpEnable = FALSE;
+			renderTargetBlendDescriptor.SrcBlend = getBlendFactor(colorBlendAttachment.srcColorBlendFactor);
+			renderTargetBlendDescriptor.DestBlend = getBlendFactor(colorBlendAttachment.dstColorBlendFactor);
+			renderTargetBlendDescriptor.BlendOp = D3D12_BLEND_OP_ADD;
+			renderTargetBlendDescriptor.SrcBlendAlpha = D3D12_BLEND_ONE;
+			renderTargetBlendDescriptor.DestBlendAlpha = D3D12_BLEND_ZERO;
+			renderTargetBlendDescriptor.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+			renderTargetBlendDescriptor.LogicOp = D3D12_LOGIC_OP_NOOP;
+			renderTargetBlendDescriptor.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+			renderTargetBlendDescriptorIndex += 1;
+		}
 
 		graphicsPipelineStateDescriptor.SampleMask = max<UINT>();
 
@@ -62,7 +81,7 @@ namespace ProjectA {
 		graphicsPipelineStateDescriptor.RasterizerState.SlopeScaledDepthBias = 0.0f;
 		graphicsPipelineStateDescriptor.RasterizerState.DepthClipEnable = FALSE;
 
-		// TODO: Set correct multisample state.
+		// TODO: Set correct multisample state (depends on the render pass).
 		graphicsPipelineStateDescriptor.RasterizerState.MultisampleEnable = FALSE;
 
 		graphicsPipelineStateDescriptor.RasterizerState.AntialiasedLineEnable = FALSE;
@@ -111,8 +130,28 @@ namespace ProjectA {
 				const VertexInputAttribute& vertexInputAttribute = vertexInputAttributes[vertexInputAttributeIndex];
 
 				D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = inputElementDescriptors[inputElementDescriptorIndex];
-				inputElementDescriptor.SemanticName = nullptr;
-				inputElementDescriptor.SemanticIndex = max<UINT>();
+
+				// TODO (debug-only)
+				switch (vertexInputAttributeIndex) {
+					case 0: {
+						inputElementDescriptor.SemanticName = "POSITION";
+
+						break;
+					}
+					case 1: {
+						inputElementDescriptor.SemanticName = "COLOR";
+
+						break;
+					}
+					default: {
+						inputElementDescriptor.SemanticName = "";
+
+						break;
+					}
+				}
+
+				inputElementDescriptor.SemanticIndex = 0;
+
 				inputElementDescriptor.Format = getVertexInputAttributeType(vertexInputAttribute.type);
 				inputElementDescriptor.InputSlot = vertexInputBindingIndex;
 				inputElementDescriptor.AlignedByteOffset = vertexInputAttribute.offset;
@@ -132,12 +171,21 @@ namespace ProjectA {
 		graphicsPipelineStateDescriptor.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 		graphicsPipelineStateDescriptor.PrimitiveTopologyType = getPrimitiveTopologyType(descriptor.primitiveTopology);
 
-		// TODO: Set correct render targets.
-		graphicsPipelineStateDescriptor.NumRenderTargets = 1;
-		graphicsPipelineStateDescriptor.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+		graphicsPipelineStateDescriptor.NumRenderTargets = renderPass->getAttachmentCount();
+
+		uint32 attachmentIndex = 0;
+
+		while (attachmentIndex < renderPass->getAttachmentCount()) {
+			const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
+
+			graphicsPipelineStateDescriptor.RTVFormats[attachmentIndex] = getFormat(attachment.format);
+
+			attachmentIndex += 1;
+		}
+
 		graphicsPipelineStateDescriptor.DSVFormat = DXGI_FORMAT_UNKNOWN;
 
-		// TODO: Set correct sample count.
+		// TODO: Set correct sample count (depends on the render pass).
 		graphicsPipelineStateDescriptor.SampleDesc.Count = 1;
 
 		graphicsPipelineStateDescriptor.SampleDesc.Quality = 0;
@@ -146,6 +194,8 @@ namespace ProjectA {
 		graphicsPipelineStateDescriptor.CachedPSO.CachedBlobSizeInBytes = 0;
 		graphicsPipelineStateDescriptor.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-		BREAKPOINT();
+		result = device.device->CreateGraphicsPipelineState(&graphicsPipelineStateDescriptor, IID_PPV_ARGS(&pipelineState));
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create graphics pipeline state.");
 	}
 }

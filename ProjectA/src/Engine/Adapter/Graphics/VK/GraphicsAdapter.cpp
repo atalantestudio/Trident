@@ -93,8 +93,8 @@ namespace ProjectA {
 		return createRef<VulkanShaderModule>(device->object, asset, descriptor);
 	}
 
-	ref<ShaderModule> VulkanGraphicsAdapter::createShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) const {
-		return createRef<VulkanShaderModule>(device->object, code, descriptor);
+	ref<ShaderModule> VulkanGraphicsAdapter::createShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor) const {
+		return createRef<VulkanShaderModule>(code, descriptor, device->object);
 	}
 
 	ref<Swapchain> VulkanGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {

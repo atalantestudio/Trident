@@ -10,7 +10,7 @@ namespace ProjectA {
 			explicit OpenGLShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor);
 
 			// TODO: Deprecate.
-			explicit OpenGLShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor);
+			explicit OpenGLShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor);
 
 			~OpenGLShaderModule() final override;
 

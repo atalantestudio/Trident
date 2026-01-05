@@ -36,7 +36,7 @@ namespace ProjectA {
 		checkCompileStatus();
 	}
 
-	OpenGLShaderModule::OpenGLShaderModule(const sequence<uint8>& code, const ShaderModuleDescriptor& descriptor) :
+	OpenGLShaderModule::OpenGLShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor) :
 		ShaderModule(descriptor),
 		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
 	{
