@@ -3,6 +3,7 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
@@ -28,9 +29,7 @@ namespace ProjectA {
 	}
 
 	ref<Buffer> DX12::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
+		return createRef<DX12::Buffer>(descriptor, *device);
 	}
 
 	ref<ComputePipeline> DX12::GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
@@ -46,7 +45,7 @@ namespace ProjectA {
 	}
 
 	ref<Fence> DX12::GraphicsAdapter::createFence() const {
-		return createRef<DX12::Fence>(*device);
+		return createRef<DX12::Fence>(*device, true);
 	}
 
 	ref<Framebuffer> DX12::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {

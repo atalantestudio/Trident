@@ -63,6 +63,8 @@ namespace ProjectA {
 			void bindIndexBuffer(const ref<ProjectA::Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) final override;
 
 		private:
-			// ComPtr<ID3D12CommandList> commandList;
+			ComPtr<ID3D12CommandAllocator> commandAllocator;
+			ComPtr<ID3D12GraphicsCommandList> commandList;
+			uint32 commandCount = 0;
 	};
 }

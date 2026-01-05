@@ -8,9 +8,9 @@
 namespace ProjectA {
 	class VulkanBuffer final : public Buffer, public ObjectWrapper<VkBuffer> {
 		public:
-			VulkanBuffer(VkDevice device, const BufferDescriptor& descriptor);
+			explicit VulkanBuffer(VkDevice device, const BufferDescriptor& descriptor);
 
-			~VulkanBuffer();
+			~VulkanBuffer() final override;
 
 			void unmap() const final override;
 

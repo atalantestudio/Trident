@@ -1,0 +1,24 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#pragma once
+
+#include "Engine/API/Rendering/MemoryProperty.hpp"
+
+namespace ProjectA::DX12 {
+	inline D3D12_HEAP_TYPE getHeapType(MemoryProperty memoryProperties) {
+		if (memoryProperties & MemoryProperty::DEVICE_LOCAL) {
+			return D3D12_HEAP_TYPE_DEFAULT;
+		}
+
+		if (memoryProperties & MemoryProperty::HOST_COHERENT) {
+			return D3D12_HEAP_TYPE_UPLOAD;
+		}
+
+		if (memoryProperties & MemoryProperty::HOST_VISIBLE) {
+			return D3D12_HEAP_TYPE_READBACK;
+		}
+
+		return D3D12_HEAP_TYPE_CUSTOM;
+	}
+}

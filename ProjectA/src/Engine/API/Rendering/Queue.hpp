@@ -14,5 +14,7 @@ namespace ProjectA {
 			virtual void submit(const sequence<ref<CommandBuffer>>& commandBuffers, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const = 0;
 
 			virtual PresentStatus present(const sequence<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const = 0;
+
+			virtual void waitIdle() const = 0;
 	};
 }

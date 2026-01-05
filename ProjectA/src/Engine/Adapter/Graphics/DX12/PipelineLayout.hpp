@@ -8,7 +8,7 @@
 #include "Engine/API/Rendering/PipelineLayout.hpp"
 
 namespace ProjectA {
-	class DX12::PipelineLayout : public ProjectA::PipelineLayout {
+	class DX12::PipelineLayout final : public ProjectA::PipelineLayout {
 		public:
 			explicit PipelineLayout(const PipelineLayoutDescriptor& descriptor, const DX12::Device& device);
 

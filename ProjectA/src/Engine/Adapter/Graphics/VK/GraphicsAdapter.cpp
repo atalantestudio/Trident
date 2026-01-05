@@ -58,7 +58,7 @@ namespace ProjectA {
 	}
 
 	ref<Fence> VulkanGraphicsAdapter::createFence() const {
-		return createRef<VulkanFence>(device->object);
+		return createRef<VulkanFence>(device->object, true);
 	}
 
 	ref<Framebuffer> VulkanGraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
@@ -197,6 +197,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE(vkGetImageMemoryRequirements);
 		LOAD_PROCEDURE(vkMapMemory);
 		LOAD_PROCEDURE(vkQueueSubmit);
+		LOAD_PROCEDURE(vkQueueWaitIdle);
 		LOAD_PROCEDURE(vkResetCommandBuffer);
 		LOAD_PROCEDURE(vkResetFences);
 		LOAD_PROCEDURE(vkUnmapMemory);

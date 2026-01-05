@@ -11,6 +11,7 @@
 namespace ProjectA::DX12 {
 	using Microsoft::WRL::ComPtr;
 
+	class Buffer;
 	class CommandBuffer;
 	class CommandEncoder;
 	class CommandPool;

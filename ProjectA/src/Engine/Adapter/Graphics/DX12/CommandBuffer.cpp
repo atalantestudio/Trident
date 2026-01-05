@@ -6,5 +6,8 @@
 #include "Engine/Adapter/Graphics/DX12/CommandBuffer.hpp"
 
 namespace ProjectA {
-	// TODO
+	DX12::CommandBuffer::CommandBuffer(ComPtr<ID3D12GraphicsCommandList> commandList, uint32 commandCount) :
+		ProjectA::CommandBuffer(commandCount),
+		commandList(commandList)
+	{}
 }

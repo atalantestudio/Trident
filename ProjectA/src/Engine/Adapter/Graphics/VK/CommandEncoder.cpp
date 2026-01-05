@@ -138,17 +138,6 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {
-		vkCmdBindIndexBuffer(
-			commandBuffer,
-			std::static_pointer_cast<VulkanBuffer>(indexBuffer)->object,
-			offset,
-			getVkIndexType(indexTypeSize)
-		);
-
-		commandCount += 1;
-	}
-
 	void VulkanCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) {
 		vkCmdBindVertexBuffers(
 			commandBuffer,
@@ -221,6 +210,8 @@ namespace ProjectA {
 
 	void VulkanCommandEncoder::nextSubpass() {
 		vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+
+		commandCount += 1;
 	}
 
 	void VulkanCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
@@ -346,6 +337,17 @@ namespace ProjectA {
 		const VkResult result = vkResetCommandBuffer(commandBuffer, 0);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan command buffer ([]).", string_VkResult(result));
+	}
+
+	void VulkanCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {
+		vkCmdBindIndexBuffer(
+			commandBuffer,
+			std::static_pointer_cast<VulkanBuffer>(indexBuffer)->object,
+			offset,
+			getVkIndexType(indexTypeSize)
+		);
+
+		commandCount += 1;
 	}
 
 	sequence<VkBufferImageCopy> VulkanCommandEncoder::parseBufferImageCopyRegions(const sequence<BufferImageCopyRegion>& copyRegions) {

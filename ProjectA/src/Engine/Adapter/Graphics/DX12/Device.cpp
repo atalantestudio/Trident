@@ -78,6 +78,8 @@ namespace ProjectA {
 	}
 
 	void DX12::Device::waitIdle() const {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		for (const ref<ProjectA::Queue>& queue : queues) {
+			queue->waitIdle();
+		}
 	}
 }

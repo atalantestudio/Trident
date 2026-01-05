@@ -17,6 +17,8 @@ namespace ProjectA {
 
 			PresentStatus present(const sequence<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const final override;
 
+			void waitIdle() const final override;
+
 		private:
 			const OpenGLInstance* instance;
 			const OpenGLDevice* device;

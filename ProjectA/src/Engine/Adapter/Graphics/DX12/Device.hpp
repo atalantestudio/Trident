@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
 
 #include "Engine/API/Rendering/Device.hpp"

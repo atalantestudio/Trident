@@ -8,11 +8,11 @@
 #include "Engine/API/Rendering/Fence.hpp"
 
 namespace ProjectA {
-	class DX12::Fence : public ProjectA::Fence {
+	class DX12::Fence final : public ProjectA::Fence {
 		public:
-			explicit Fence(const DX12::Device& device);
+			explicit Fence(const DX12::Device& device, bool signaled);
 
-		private:
+		public:
 			ComPtr<ID3D12Fence> fence;
 	};
 }

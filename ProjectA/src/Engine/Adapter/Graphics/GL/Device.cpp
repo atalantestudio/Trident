@@ -105,5 +105,7 @@ namespace ProjectA {
 		#endif
 	}
 
-	void OpenGLDevice::waitIdle() const {}
+	void OpenGLDevice::waitIdle() const {
+		glFinish();
+	}
 }

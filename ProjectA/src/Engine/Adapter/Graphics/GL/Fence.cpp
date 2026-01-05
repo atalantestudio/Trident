@@ -3,9 +3,13 @@
 #include "Engine/Adapter/Graphics/GL/Fence.hpp"
 
 namespace ProjectA {
-	OpenGLFence::OpenGLFence() :
+	OpenGLFence::OpenGLFence(bool signaled) :
 		ObjectWrapper(nullptr)
-	{}
+	{
+		if (!signaled) {
+			create();
+		}
+	}
 
 	void OpenGLFence::create() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);

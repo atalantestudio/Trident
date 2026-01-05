@@ -109,4 +109,10 @@ namespace ProjectA {
 
 		return PresentStatus::ERROR_UNHANDLED;
 	}
+
+	void VulkanQueue::waitIdle() const {
+		const VkResult result = vkQueueWaitIdle(object);
+
+		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to idle wait ([]).", string_VkResult(result));
+	}
 }

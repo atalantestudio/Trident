@@ -19,11 +19,15 @@ namespace ProjectA {
 
 			PresentStatus present(const sequence<ref<ProjectA::Swapchain>>& swapchains, const ref<ProjectA::Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const final override;
 
+			void waitIdle() const final override;
+
 		public:
 			ComPtr<ID3D12CommandQueue> commandQueue;
 
 		private:
 			const DX12::Device& device;
 			DX12::CommandPool commandPool;
+			ref<DX12::Fence> idleFence;
+			HANDLE idleEvent;
 	};
 }

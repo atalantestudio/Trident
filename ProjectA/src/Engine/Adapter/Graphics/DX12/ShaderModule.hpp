@@ -6,7 +6,7 @@
 #include "Engine/API/Rendering/ShaderModule.hpp"
 
 namespace ProjectA {
-	class DX12::ShaderModule : public ProjectA::ShaderModule {
+	class DX12::ShaderModule final : public ProjectA::ShaderModule {
 		public:
 			explicit ShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor);
 

@@ -65,6 +65,7 @@ namespace ProjectA {
 	extern PFN_vkGetImageMemoryRequirements vkGetImageMemoryRequirements;
 	extern PFN_vkMapMemory vkMapMemory;
 	extern PFN_vkQueueSubmit vkQueueSubmit;
+	extern PFN_vkQueueWaitIdle vkQueueWaitIdle;
 	extern PFN_vkResetCommandBuffer vkResetCommandBuffer;
 	extern PFN_vkResetFences vkResetFences;
 	extern PFN_vkUnmapMemory vkUnmapMemory;

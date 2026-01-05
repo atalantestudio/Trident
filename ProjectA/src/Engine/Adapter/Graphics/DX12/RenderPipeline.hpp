@@ -7,7 +7,7 @@
 #include "Engine/API/Rendering/RenderPipeline.hpp"
 
 namespace ProjectA {
-	class DX12::RenderPipeline : public ProjectA::RenderPipeline {
+	class DX12::RenderPipeline final : public ProjectA::RenderPipeline {
 		public:
 			explicit RenderPipeline(const RenderPipelineDescriptor& descriptor, const DX12::Device& device);
 

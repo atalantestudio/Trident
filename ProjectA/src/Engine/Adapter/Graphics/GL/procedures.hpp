@@ -17,6 +17,7 @@ namespace ProjectA {
 	extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
 	extern PFNGLENABLEPROC glEnable;
 	extern PFNGLFRONTFACEPROC glFrontFace;
+	extern PFNGLFINISHPROC glFinish;
 	extern PFNGLGENTEXTURESPROC glGenTextures;
 	extern PFNGLGETFLOATVPROC glGetFloatv;
 	extern PFNGLGETINTEGERVPROC glGetIntegerv;

@@ -36,4 +36,8 @@ namespace ProjectA {
 
 		return PresentStatus::SUCCESS;
 	}
+
+	void OpenGLQueue::waitIdle() const {
+		glFinish();
+	}
 }

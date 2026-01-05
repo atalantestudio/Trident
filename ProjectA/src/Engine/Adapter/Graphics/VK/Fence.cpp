@@ -3,7 +3,7 @@
 #include "Engine/Adapter/Graphics/VK/Fence.hpp"
 
 namespace ProjectA {
-	VulkanFence::VulkanFence(VkDevice device) :
+	VulkanFence::VulkanFence(VkDevice device, bool signaled) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -11,7 +11,11 @@ namespace ProjectA {
 		VkFenceCreateInfo fenceCreateInfo{};
 		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceCreateInfo.pNext = nullptr;
-		fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+		fenceCreateInfo.flags = 0;
+
+		if (signaled) {
+			fenceCreateInfo.flags |= VK_FENCE_CREATE_SIGNALED_BIT;
+		}
 
 		const VkResult result = vkCreateFence(device, &fenceCreateInfo, nullptr, &object);
 

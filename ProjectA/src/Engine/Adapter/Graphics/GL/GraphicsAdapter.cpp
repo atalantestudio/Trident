@@ -49,7 +49,7 @@ namespace ProjectA {
 	}
 
 	ref<Fence> OpenGLGraphicsAdapter::createFence() const {
-		return createRef<OpenGLFence>();
+		return createRef<OpenGLFence>(true);
 	}
 
 	ref<Framebuffer> OpenGLGraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
@@ -152,6 +152,7 @@ namespace ProjectA {
 		LOAD_PROCEDURE(glDrawBuffers);
 		LOAD_PROCEDURE(glEnable);
 		LOAD_PROCEDURE(glFrontFace);
+		LOAD_PROCEDURE(glFinish);
 		LOAD_PROCEDURE(glGenTextures);
 		LOAD_PROCEDURE(glGetFloatv);
 		LOAD_PROCEDURE(glGetIntegerv);
