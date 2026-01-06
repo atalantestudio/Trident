@@ -53,8 +53,7 @@ namespace ProjectA {
 
 		commandList->OMSetRenderTargets(1, &rtvDescriptorHandle, false, nullptr);
 
-		// TODO (debug-only)
-		const float32 clearColor[4] = {1.0f, 0.2f, 0.0f, 1.0f};
+		ADAPTER_ASSERT(descriptor.clearValues.count() == 1, "Too many clear values.");
 
 		D3D12_RECT rectangle{};
 		rectangle.left = 0;
@@ -62,7 +61,7 @@ namespace ProjectA {
 		rectangle.right = swapchain->getExtent().width;
 		rectangle.bottom = swapchain->getExtent().height;
 
-		commandList->ClearRenderTargetView(rtvDescriptorHandle, clearColor, 1, &rectangle);
+		commandList->ClearRenderTargetView(rtvDescriptorHandle, descriptor.clearValues[0].color, 1, &rectangle);
 
 		commandCount += 1;
 	}
@@ -172,9 +171,12 @@ namespace ProjectA {
 	void DX12::CommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
 		D3D12_VIEWPORT viewport{};
 		viewport.TopLeftX = origin[0];
-		viewport.TopLeftY = origin[1];
-		viewport.Width = size[0];
-		viewport.Height = size[1];
+
+		// TODO: Allow the origin's Y to be flipped, like in Vulkan?
+		viewport.TopLeftY = 0.0f;
+
+		viewport.Width = abs(size[0]);
+		viewport.Height = abs(size[1]);
 		viewport.MinDepth = minDepth;
 		viewport.MaxDepth = maxDepth;
 
