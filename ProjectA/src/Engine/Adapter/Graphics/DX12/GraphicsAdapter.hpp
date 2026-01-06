@@ -14,8 +14,6 @@ namespace ProjectA {
 		public:
 			explicit GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window);
 
-			~GraphicsAdapter() final override;
-
 			ref<ProjectA::Buffer> createBuffer(const BufferDescriptor& descriptor) const final override;
 
 			ref<ProjectA::ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const final override;

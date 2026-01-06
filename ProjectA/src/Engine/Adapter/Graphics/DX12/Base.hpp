@@ -4,6 +4,7 @@
 #pragma once
 
 #include <d3d12.h>
+#include <d3dcommon.h>
 #include <D3Dcompiler.h>
 #include <dxgi1_6.h>
 #include <wrl.h>

@@ -11,7 +11,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	DX12::Queue::Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType) :
+	DX12::Queue::Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType, uint64 index) :
 		device(device),
 		commandPool(device, commandListType)
 	{
@@ -27,14 +27,20 @@ namespace ProjectA {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command queue.");
 
-		idleFence = createRef<DX12::Fence>(device, false);
+		idleFence = createRef<DX12::Fence>(device, 0);
 		idleEvent = CreateEvent(nullptr, false, false, nullptr);
 
 		WIN32_ASSERT(idleEvent != nullptr);
 	}
 
+	DX12::Queue::~Queue() {
+		const BOOL result = CloseHandle(idleEvent);
+
+		WIN32_ASSERT(result != 0);
+	}
+
 	ref<ProjectA::CommandEncoder> DX12::Queue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
-		return device.commandEncoder;
+		return createRef<DX12::CommandEncoder>(descriptor, device, commandPool);
 	}
 
 	void DX12::Queue::submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, const ref<ProjectA::Semaphore>& waitSemaphore, const ref<ProjectA::Semaphore>& signalSemaphore, const ref<ProjectA::Fence>& fence) const {
@@ -69,7 +75,7 @@ namespace ProjectA {
 
 		result = commandQueue->Signal(idleFence->fence.Get(), 1);
 
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to command queue.");
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to queue idle fence.");
 
 		result = idleFence->fence->SetEventOnCompletion(1, idleEvent);
 

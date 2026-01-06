@@ -17,9 +17,19 @@ namespace ProjectA {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const HRESULT result = device.device->CreateCommandList(0, commandPool.type, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList));
+		ADAPTER_ASSERT(descriptor.usage != CommandBufferUsage::SIMULTANEOUS_USE, "SIMULTANEOUS_USE is not supported on command lists.");
+
+		HRESULT result;
+
+		result = device.device->CreateCommandList(0, commandPool.type, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command list.");
+
+		if (descriptor.usage == CommandBufferUsage::AUTO) {
+			result = commandList->Close();
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to close command list.");
+		}
 	}
 
 	void DX12::CommandEncoder::begin() const {}
@@ -31,16 +41,28 @@ namespace ProjectA {
 		D3D12_RESOURCE_BARRIER resourceBarrier{};
 		resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		resourceBarrier.Transition.pResource = swapchain->getImage(0)->resource.Get();
+		resourceBarrier.Transition.pResource = swapchain->getImage(Renderer::getImageIndex())->resource.Get();
 		resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 		resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
 		commandList->ResourceBarrier(1, &resourceBarrier);
 
-		const D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptorHandle(swapchain->rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptorHandle = swapchain->rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		rtvDescriptorHandle.ptr += Renderer::getImageIndex() * swapchain->rtvDescriptorSize;
 
 		commandList->OMSetRenderTargets(1, &rtvDescriptorHandle, false, nullptr);
+
+		// TODO (debug-only)
+		const float32 clearColor[4] = {1.0f, 0.2f, 0.0f, 1.0f};
+
+		D3D12_RECT rectangle{};
+		rectangle.left = 0;
+		rectangle.top = 0;
+		rectangle.right = swapchain->getExtent().width;
+		rectangle.bottom = swapchain->getExtent().height;
+
+		commandList->ClearRenderTargetView(rtvDescriptorHandle, clearColor, 1, &rectangle);
 
 		commandCount += 1;
 	}
@@ -52,8 +74,11 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::bindRenderPipeline(const ref<ProjectA::RenderPipeline>& renderPipeline) {
-		commandList->SetPipelineState(std::static_pointer_cast<DX12::RenderPipeline>(renderPipeline)->pipelineState.Get());
-		commandList->SetGraphicsRootSignature(std::static_pointer_cast<DX12::RenderPipeline>(renderPipeline)->pipelineLayout->rootSignature.Get());
+		const ref<DX12::RenderPipeline> pipeline = std::static_pointer_cast<DX12::RenderPipeline>(renderPipeline);
+
+		commandList->SetPipelineState(pipeline->pipelineState.Get());
+		commandList->SetGraphicsRootSignature(pipeline->pipelineLayout->rootSignature.Get());
+		commandList->IASetPrimitiveTopology(pipeline->primitiveTopology);
 
 		commandCount += 1;
 	}
@@ -189,7 +214,7 @@ namespace ProjectA {
 		D3D12_RESOURCE_BARRIER resourceBarrier{};
 		resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		resourceBarrier.Transition.pResource = swapchain->getImage(0)->resource.Get();
+		resourceBarrier.Transition.pResource = swapchain->getImage(Renderer::getImageIndex())->resource.Get();
 		resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;

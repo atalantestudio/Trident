@@ -14,5 +14,6 @@ namespace ProjectA {
 		public:
 			ref<DX12::PipelineLayout> pipelineLayout;
 			ComPtr<ID3D12PipelineState> pipelineState;
+			D3D_PRIMITIVE_TOPOLOGY primitiveTopology;
 	};
 }

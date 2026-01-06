@@ -15,19 +15,21 @@ namespace ProjectA {
 		UINT flags = 0;
 
 		#ifdef BUILD_MODE_DEBUG
-			ComPtr<ID3D12Debug> debug;
+			{
+				ComPtr<ID3D12Debug> debug;
 
-			result = D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
+				result = D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
 
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get debug controller.");
+				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get debug interface.");
+
+				debug->EnableDebugLayer();
+			}
 
 			flags |= DXGI_CREATE_FACTORY_DEBUG;
-
-			debug->EnableDebugLayer();
 		#endif
 
 		result = CreateDXGIFactory2(flags, IID_PPV_ARGS(&factory));
 
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create DXGI factory.");
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create factory.");
 	}
 }

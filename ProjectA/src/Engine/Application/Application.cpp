@@ -238,8 +238,9 @@ namespace ProjectA {
 			return;
 		}
 
-		// TODO: Interpolate between current time and frameTimeAccumulator
-		//       (use frameTimeAccumulator / FIXED_DELTA_TIME to get a value between 0 and 1).
+		// TODO
+		// Interpolate between current time and frameTimeAccumulator.
+		// Use frameTimeAccumulator / FIXED_DELTA_TIME to get a value between 0 and 1.
 		render(frameTimeAccumulator);
 
 		frameIndex += 1;

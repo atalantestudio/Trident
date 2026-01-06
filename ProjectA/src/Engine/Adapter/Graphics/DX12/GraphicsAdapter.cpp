@@ -20,12 +20,8 @@ namespace ProjectA {
 		logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
 
 		instance = createRef<DX12::Instance>();
-		surface = createRef<DX12::Surface>(*instance, window);
+		surface = createRef<DX12::Surface>(window);
 		device = createRef<DX12::Device>(*instance);
-	}
-
-	DX12::GraphicsAdapter::~GraphicsAdapter() {
-		ENGINE_ERROR_UNIMPLEMENTED();
 	}
 
 	ref<Buffer> DX12::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
@@ -45,7 +41,7 @@ namespace ProjectA {
 	}
 
 	ref<Fence> DX12::GraphicsAdapter::createFence() const {
-		return createRef<DX12::Fence>(*device, true);
+		return createRef<DX12::Fence>(*device, 1);
 	}
 
 	ref<Framebuffer> DX12::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {

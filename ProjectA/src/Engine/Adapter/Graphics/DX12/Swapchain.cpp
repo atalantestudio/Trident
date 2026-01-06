@@ -20,10 +20,10 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		recreate(descriptor);
-	}
 
-	DX12::Swapchain::~Swapchain() {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		const HRESULT result = instance.factory->MakeWindowAssociation(surface.window, DXGI_MWA_NO_ALT_ENTER);
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to disable fullscreen transitions.");	
 	}
 
 	uint32 DX12::Swapchain::getImageCount() const {
@@ -92,10 +92,8 @@ namespace ProjectA {
 		images = sequence<ref<ProjectA::Image>>(imageCount);
 		imageViews = sequence<ref<ProjectA::ImageView>>(imageCount);
 
-		// TODO: Use an explicit cast.
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptorHandle(rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-
 		uint32 imageIndex = 0;
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptorHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
 		while (imageIndex < imageCount) {
 			images[imageIndex] = createRef<DX12::Image>(device, *this, imageIndex, rtvDescriptorHandle);

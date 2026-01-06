@@ -9,6 +9,8 @@
 namespace ProjectA {
 	class Queue {
 		public:
+			virtual ~Queue() = default;
+
 			virtual ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const = 0;
 
 			virtual void submit(const sequence<ref<CommandBuffer>>& commandBuffers, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const = 0;

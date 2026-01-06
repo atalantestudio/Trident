@@ -15,8 +15,6 @@ namespace ProjectA {
 		public:
 			explicit Swapchain(const SwapchainDescriptor& descriptor, const DX12::Instance& instance, const DX12::Surface& surface, const DX12::Device& device);
 
-			~Swapchain() final override;
-
 			uint32 getImageCount() const final override;
 
 			void update(const SwapchainDescriptor& descriptor) final override;
@@ -30,14 +28,12 @@ namespace ProjectA {
 		public:
 			ComPtr<IDXGISwapChain3> swapChain;
 			ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
-
 			uint32 imageCount = 3;
+			uint32 rtvDescriptorSize;
 
 		private:
 			const DX12::Instance& instance;
 			const DX12::Surface& surface;
 			const DX12::Device& device;
-
-			uint32 rtvDescriptorSize;
 	};
 }

@@ -8,6 +8,7 @@
 #include "Engine/Adapter/Graphics/DX12/ImageFormat.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/PrimitiveTopology.hpp"
+#include "Engine/Adapter/Graphics/DX12/PrimitiveTopologyType.hpp"
 #include "Engine/Adapter/Graphics/DX12/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/DX12/VertexInputAttributeType.hpp"
@@ -16,7 +17,8 @@
 namespace ProjectA {
 	DX12::RenderPipeline::RenderPipeline(const RenderPipelineDescriptor& descriptor, const DX12::Device& device) :
 		ProjectA::RenderPipeline(descriptor),
-		pipelineLayout(std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout))
+		pipelineLayout(std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout)),
+		primitiveTopology(getPrimitiveTopology(descriptor.primitiveTopology))
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 

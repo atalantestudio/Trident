@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
 
@@ -34,7 +33,6 @@ namespace ProjectA {
 
 		public:
 			ComPtr<ID3D12Device> device;
-			ref<DX12::CommandEncoder> commandEncoder;
 
 		private:
 			ref<ProjectA::Queue> queues[3];

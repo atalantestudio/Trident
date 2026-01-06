@@ -104,7 +104,6 @@ namespace ProjectA {
 			static constexpr float64 INVERSE_FIXED_DELTA_TIME = 1.0 / FIXED_DELTA_TIME;
 
 		public:
-			// Used by the renderer to initialize in-flight objects (command encoders, fences, semaphores).
 			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
 
 		private:

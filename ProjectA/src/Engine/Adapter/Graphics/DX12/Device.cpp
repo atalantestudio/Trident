@@ -31,14 +31,9 @@ namespace ProjectA {
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create device using the WARP adapter.");
 		}
 
-		queues[0] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_DIRECT);
-		queues[1] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COMPUTE);
-		queues[2] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COPY);
-
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
-
-		commandEncoder = createRef<DX12::CommandEncoder>(commandBufferDescriptor, *this, std::static_pointer_cast<DX12::Queue>(queues[0])->commandPool);
+		queues[0] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_DIRECT, 1);
+		queues[1] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COMPUTE, 1);
+		queues[2] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COPY, 1);
 
 		fenceEvent = CreateEvent(nullptr, false, false, nullptr);
 
@@ -46,11 +41,13 @@ namespace ProjectA {
 	}
 
 	DX12::Device::~Device() {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		const BOOL result = CloseHandle(fenceEvent);
+
+		WIN32_ASSERT(result != 0);
 	}
 
 	AcquireNextImageStatus DX12::Device::acquireNextImage(const ref<ProjectA::Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
-		imageIndex = std::static_pointer_cast<Swapchain>(swapchain)->swapChain->GetCurrentBackBufferIndex();
+		imageIndex = std::static_pointer_cast<DX12::Swapchain>(swapchain)->swapChain->GetCurrentBackBufferIndex();
 
 		return AcquireNextImageStatus::SUCCESS;
 	}
@@ -83,7 +80,16 @@ namespace ProjectA {
 	}
 
 	void DX12::Device::waitForFence(const ref<ProjectA::Fence>& fence) const {
+		const ref<DX12::Fence> _fence = std::static_pointer_cast<DX12::Fence>(fence);
+
+		// TODO: Handle all queues.
+		const ref<DX12::Queue> queue = std::static_pointer_cast<DX12::Queue>(getQueue(QueueFamilyCapability::GRAPHICS));
+
 		HRESULT result;
+
+		result = queue->commandQueue->Signal(_fence->fence.Get(), 1);
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
 
 		result = ResetEvent(fenceEvent);
 
@@ -95,7 +101,7 @@ namespace ProjectA {
 
 		const DWORD code = WaitForSingleObject(fenceEvent, INFINITE);
 
-		ADAPTER_ASSERT(code == WAIT_OBJECT_0 || code == WAIT_TIMEOUT, "Failed to wait for event.");
+		ADAPTER_ASSERT(code == WAIT_OBJECT_0, "Failed to wait for event.");
 	}
 
 	void DX12::Device::waitIdle() const {

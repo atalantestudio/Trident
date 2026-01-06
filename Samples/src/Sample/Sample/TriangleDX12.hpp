@@ -173,6 +173,7 @@ namespace ProjectA {
 			}
 
 			void recreateFramebuffers() {
+				// TODO: Create DX12 framebuffer abstraction.
 				/* const ref<Swapchain>& swapchain = getSwapchain();
 
 				for (ref<Framebuffer>& framebuffer : framebuffers) {

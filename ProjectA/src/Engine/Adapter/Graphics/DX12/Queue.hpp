@@ -11,7 +11,9 @@
 namespace ProjectA {
 	class DX12::Queue final : public ProjectA::Queue {
 		public:
-			explicit Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType);
+			explicit Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType, uint64 index);
+
+			~Queue() final override;
 
 			ref<ProjectA::CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
 

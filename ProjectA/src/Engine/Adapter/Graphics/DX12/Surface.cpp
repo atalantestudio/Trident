@@ -6,21 +6,14 @@
 #include "Engine/Adapter/Graphics/DX12/Surface.hpp"
 #include "Engine/Adapter/Window/Win32/base.hpp"
 
-#include "Engine/API/Graphics/GraphicsAdapter.hpp"
-
 namespace ProjectA {
-	DX12::Surface::Surface(const DX12::Instance& instance, const Window& window) {
+	DX12::Surface::Surface(const Window& window) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		HRESULT result;
 
 		#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 			this->window = pointer_cast<const Win32WindowData*>(window.data)->hWnd;
-
-			// Don't support fullscreen transitions.
-			result = instance.factory->MakeWindowAssociation(this->window, DXGI_MWA_NO_ALT_ENTER);
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to disable fullscreen transitions.");
 		#else
 			#error "Unsupported operating system."
 		#endif
