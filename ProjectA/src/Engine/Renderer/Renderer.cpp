@@ -87,11 +87,6 @@ namespace ProjectA {
 			flightFences[frameIndex] = adapter->createFence();
 			acquireNextImageSemaphores[frameIndex] = adapter->createSemaphore();
 			finishedRenderSemaphores[frameIndex] = adapter->createSemaphore();
-
-			// TODO: DX12 doesn't seem to allow multiple co-existing command encoders.
-			if (graphicsApi == GraphicsAPI::DX12) {
-				break;
-			}
 		}
 	}
 

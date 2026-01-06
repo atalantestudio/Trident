@@ -66,9 +66,9 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan device ([]).", string_VkResult(result));
 
-		queues[static_cast<uint32>(QueueFamilyCapability::GRAPHICS)] = createRef<VulkanQueue>(*this, physicalDevice.graphicsQueueFamilyIndex);
-		queues[static_cast<uint32>(QueueFamilyCapability::COMPUTE)] = createRef<VulkanQueue>(*this, physicalDevice.computeQueueFamilyIndex);
-		queues[static_cast<uint32>(QueueFamilyCapability::TRANSFER)] = createRef<VulkanQueue>(*this, physicalDevice.transferQueueFamilyIndex);
+		queues[0] = createRef<VulkanQueue>(*this, physicalDevice.graphicsQueueFamilyIndex);
+		queues[1] = createRef<VulkanQueue>(*this, physicalDevice.computeQueueFamilyIndex);
+		queues[2] = createRef<VulkanQueue>(*this, physicalDevice.transferQueueFamilyIndex);
 
 		vkGetPhysicalDeviceMemoryProperties(physicalDevice.object, &memoryProperties);
 	}

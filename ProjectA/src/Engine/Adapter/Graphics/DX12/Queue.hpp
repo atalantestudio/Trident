@@ -23,10 +23,10 @@ namespace ProjectA {
 
 		public:
 			ComPtr<ID3D12CommandQueue> commandQueue;
+			DX12::CommandPool commandPool;
 
 		private:
 			const DX12::Device& device;
-			DX12::CommandPool commandPool;
 			ref<DX12::Fence> idleFence;
 			HANDLE idleEvent;
 	};

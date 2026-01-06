@@ -33,7 +33,7 @@ namespace ProjectA {
 	}
 
 	ref<ProjectA::CommandEncoder> DX12::Queue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
-		return createRef<DX12::CommandEncoder>(descriptor, device, commandPool);
+		return device.commandEncoder;
 	}
 
 	void DX12::Queue::submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, const ref<ProjectA::Semaphore>& waitSemaphore, const ref<ProjectA::Semaphore>& signalSemaphore, const ref<ProjectA::Fence>& fence) const {

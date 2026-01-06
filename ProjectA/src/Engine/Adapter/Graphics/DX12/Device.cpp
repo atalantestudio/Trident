@@ -31,9 +31,14 @@ namespace ProjectA {
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create device using the WARP adapter.");
 		}
 
-		queues[static_cast<uint32>(QueueFamilyCapability::GRAPHICS)] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_DIRECT);
-		queues[static_cast<uint32>(QueueFamilyCapability::COMPUTE)] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COMPUTE);
-		queues[static_cast<uint32>(QueueFamilyCapability::TRANSFER)] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COPY);
+		queues[0] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_DIRECT);
+		queues[1] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COMPUTE);
+		queues[2] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COPY);
+
+		CommandBufferDescriptor commandBufferDescriptor{};
+		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+
+		commandEncoder = createRef<DX12::CommandEncoder>(commandBufferDescriptor, *this, std::static_pointer_cast<DX12::Queue>(queues[0])->commandPool);
 	}
 
 	DX12::Device::~Device() {
