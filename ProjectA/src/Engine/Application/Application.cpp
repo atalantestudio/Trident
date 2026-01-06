@@ -272,7 +272,7 @@ namespace ProjectA {
 		if (acquireNextImageStatus == AcquireNextImageStatus::ERROR_OUT_OF_DATE) {
 			ENGINE_DEBUG("Recreating out-of-date swapchain.");
 
-			// TODO: Test this path.
+			// TODO: This path doesn't seem to be called.
 			DEBUG_ASSERT(false);
 
 			resize();

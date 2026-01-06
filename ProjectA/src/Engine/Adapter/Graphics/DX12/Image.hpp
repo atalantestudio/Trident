@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
+#include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 
 #include "Engine/API/Rendering/Image.hpp"
 
@@ -11,7 +12,7 @@ namespace ProjectA {
 	class DX12::Image final : public ProjectA::Image {
 		public:
 			// Render Target View constructor.
-			explicit Image(const DX12::Device& device, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle);
+			explicit Image(const DX12::Device& device, const DX12::Swapchain& swapchain, uint32 imageIndex, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle);
 
 			~Image() final override;
 

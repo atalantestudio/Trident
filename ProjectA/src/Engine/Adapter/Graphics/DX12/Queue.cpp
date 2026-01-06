@@ -6,6 +6,7 @@
 #include "Engine/Adapter/Graphics/DX12/CommandBuffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/DX12/Queue.hpp"
+#include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
@@ -50,7 +51,14 @@ namespace ProjectA {
 	}
 
 	PresentStatus DX12::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, const ref<ProjectA::Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		HRESULT result;
+
+		for (const ref<ProjectA::Swapchain>& swapchain : swapchains) {
+			// TODO: Set correct swap interval.
+			result = std::static_pointer_cast<DX12::Swapchain>(swapchain)->swapChain->Present(1, 0);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to present.");
+		}
 
 		return PresentStatus::SUCCESS;
 	}
@@ -69,6 +77,6 @@ namespace ProjectA {
 
 		const DWORD code = WaitForSingleObject(idleEvent, INFINITE);
 
-		ADAPTER_ASSERT(code == WAIT_OBJECT_0 || code == WAIT_TIMEOUT, "Failed to idle wait.");
+		ADAPTER_ASSERT(code == WAIT_OBJECT_0 || code == WAIT_TIMEOUT, "Failed to wait for event.");
 	}
 }

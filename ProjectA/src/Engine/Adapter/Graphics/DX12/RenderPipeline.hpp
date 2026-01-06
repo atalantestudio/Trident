@@ -11,7 +11,8 @@ namespace ProjectA {
 		public:
 			explicit RenderPipeline(const RenderPipelineDescriptor& descriptor, const DX12::Device& device);
 
-		private:
+		public:
+			ref<DX12::PipelineLayout> pipelineLayout;
 			ComPtr<ID3D12PipelineState> pipelineState;
 	};
 }

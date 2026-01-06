@@ -331,12 +331,12 @@ namespace ProjectA {
 	void VulkanCommandEncoder::reset() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		commandCount = 0;
-		pipeline = nullptr;
-
 		const VkResult result = vkResetCommandBuffer(commandBuffer, 0);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan command buffer ([]).", string_VkResult(result));
+
+		commandCount = 0;
+		pipeline = nullptr;
 	}
 
 	void VulkanCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {

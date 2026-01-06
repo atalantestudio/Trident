@@ -38,5 +38,6 @@ namespace ProjectA {
 
 		private:
 			ref<ProjectA::Queue> queues[3];
+			HANDLE fenceEvent;
 	};
 }

@@ -15,7 +15,8 @@
 
 namespace ProjectA {
 	DX12::RenderPipeline::RenderPipeline(const RenderPipelineDescriptor& descriptor, const DX12::Device& device) :
-		ProjectA::RenderPipeline(descriptor)
+		ProjectA::RenderPipeline(descriptor),
+		pipelineLayout(std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout))
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 

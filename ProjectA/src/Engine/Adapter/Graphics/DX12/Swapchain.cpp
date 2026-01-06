@@ -40,6 +40,10 @@ namespace ProjectA {
 		recreate(descriptor);
 	}
 
+	ref<DX12::Image> DX12::Swapchain::getImage(uint32 imageIndex) const {
+		return std::static_pointer_cast<DX12::Image>(images[imageIndex]);
+	}
+
 	void DX12::Swapchain::recreate(const SwapchainDescriptor& descriptor) {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
@@ -94,11 +98,7 @@ namespace ProjectA {
 		uint32 imageIndex = 0;
 
 		while (imageIndex < imageCount) {
-			images[imageIndex] = createRef<DX12::Image>(device, rtvDescriptorHandle);
-
-			result = swapChain->GetBuffer(imageIndex, IID_PPV_ARGS(&std::static_pointer_cast<DX12::Image>(images[imageIndex])->resource));
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Could not retrieve buffer from newly created render target view.");
+			images[imageIndex] = createRef<DX12::Image>(device, *this, imageIndex, rtvDescriptorHandle);
 
 			rtvDescriptorHandle.ptr += rtvDescriptorSize;
 			imageIndex += 1;

@@ -43,7 +43,7 @@ namespace ProjectA {
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
-				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
+				// beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
@@ -173,7 +173,7 @@ namespace ProjectA {
 			}
 
 			void recreateFramebuffers() {
-				const ref<Swapchain>& swapchain = getSwapchain();
+				/* const ref<Swapchain>& swapchain = getSwapchain();
 
 				for (ref<Framebuffer>& framebuffer : framebuffers) {
 					framebuffer.~shared_ptr();
@@ -191,7 +191,7 @@ namespace ProjectA {
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
-				}
+				} */
 			}
 
 		private:

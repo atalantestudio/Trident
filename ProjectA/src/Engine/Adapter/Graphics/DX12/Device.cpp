@@ -39,6 +39,10 @@ namespace ProjectA {
 		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
 		commandEncoder = createRef<DX12::CommandEncoder>(commandBufferDescriptor, *this, std::static_pointer_cast<DX12::Queue>(queues[0])->commandPool);
+
+		fenceEvent = CreateEvent(nullptr, false, false, nullptr);
+
+		WIN32_ASSERT(fenceEvent != nullptr);
 	}
 
 	DX12::Device::~Device() {
@@ -47,8 +51,6 @@ namespace ProjectA {
 
 	AcquireNextImageStatus DX12::Device::acquireNextImage(const ref<ProjectA::Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
 		imageIndex = std::static_pointer_cast<Swapchain>(swapchain)->swapChain->GetCurrentBackBufferIndex();
-
-		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return AcquireNextImageStatus::SUCCESS;
 	}
@@ -71,7 +73,9 @@ namespace ProjectA {
 	}
 
 	void DX12::Device::resetFence(const ref<ProjectA::Fence>& fence) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		const HRESULT result = std::static_pointer_cast<DX12::Fence>(fence)->fence->Signal(0);
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
 	}
 
 	void DX12::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
@@ -79,7 +83,19 @@ namespace ProjectA {
 	}
 
 	void DX12::Device::waitForFence(const ref<ProjectA::Fence>& fence) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		HRESULT result;
+
+		result = ResetEvent(fenceEvent);
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to reset event.");
+
+		result = std::static_pointer_cast<DX12::Fence>(fence)->fence->SetEventOnCompletion(1, fenceEvent);
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set event on fence completion.");
+
+		const DWORD code = WaitForSingleObject(fenceEvent, INFINITE);
+
+		ADAPTER_ASSERT(code == WAIT_OBJECT_0 || code == WAIT_TIMEOUT, "Failed to wait for event.");
 	}
 
 	void DX12::Device::waitIdle() const {

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
+#include "Engine/Adapter/Graphics/DX12/Image.hpp"
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
 #include "Engine/Adapter/Graphics/DX12/Surface.hpp"
 
@@ -19,6 +20,9 @@ namespace ProjectA {
 			uint32 getImageCount() const final override;
 
 			void update(const SwapchainDescriptor& descriptor) final override;
+
+			// TODO (debug-only)
+			ref<DX12::Image> getImage(uint32 imageIndex) const;
 
 		private:
 			void recreate(const SwapchainDescriptor& descriptor);
