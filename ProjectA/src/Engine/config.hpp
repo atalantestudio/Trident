@@ -7,6 +7,10 @@ namespace ProjectA {
 	// There is no guarantee that it will be selected at runtime.
 	#define PREFERRED_GPU_TYPE GPU_TYPE_DISCRETE
 
+	// TODO: Implement setting.
+	// Prioritize selection of CPU graphics adapters.
+	// #define PREFER_SOFTWARE_ADAPTER
+
 	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
 		// Toggle DirectX 12 graphics adapter.
 		#define ENABLE_DX12_ADAPTER

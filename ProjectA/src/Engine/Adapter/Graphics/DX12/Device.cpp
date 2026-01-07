@@ -13,12 +13,16 @@ namespace ProjectA {
 	DX12::Device::Device(const DX12::Instance& instance) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		HRESULT result;
+		HRESULT result = -1;
 
-		result = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
+		#ifndef PREFER_SOFTWARE_ADAPTER
+			result = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
+		#endif
 
 		if (FAILED(result)) {
-			ProjectA::GraphicsAdapter::logger.warning("Failed to create device using the primary display adapter. Falling back to a WARP adapter.");
+			#ifndef PREFER_SOFTWARE_ADAPTER
+				ProjectA::GraphicsAdapter::logger.warning("Failed to create device using the primary display adapter. Falling back to a WARP adapter.");
+			#endif
 
 			ComPtr<IDXGIAdapter> adapter;
 
