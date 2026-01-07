@@ -25,10 +25,9 @@ namespace ProjectA {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command list.");
 
+		// Only 1 open command encoder at a time.
 		if (descriptor.usage == CommandBufferUsage::AUTO) {
-			result = commandList->Close();
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to close command list.");
+			end();
 		}
 	}
 

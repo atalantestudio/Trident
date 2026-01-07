@@ -11,7 +11,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	DX12::Queue::Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType, uint64 index) :
+	DX12::Queue::Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType) :
 		device(device),
 		commandPool(device, commandListType)
 	{
@@ -54,6 +54,13 @@ namespace ProjectA {
 		}
 
 		commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.count()), &commandLists[0]);
+
+		// TODO
+		/* if (fence != nullptr) {
+			const HRESULT result = commandQueue->Signal(std::static_pointer_cast<DX12::Fence>(fence)->fence.Get(), 1);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
+		} */
 	}
 
 	PresentStatus DX12::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, const ref<ProjectA::Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const {
@@ -83,6 +90,11 @@ namespace ProjectA {
 
 		const DWORD code = WaitForSingleObject(idleEvent, INFINITE);
 
-		ADAPTER_ASSERT(code == WAIT_OBJECT_0 || code == WAIT_TIMEOUT, "Failed to wait for event.");
+		ADAPTER_ASSERT(code == WAIT_OBJECT_0, "Failed to wait for event.");
+
+		// TODO: Reset fence?
+		/* result = idleFence->fence->Signal(0);
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to reset queue idle fence."); */
 	}
 }

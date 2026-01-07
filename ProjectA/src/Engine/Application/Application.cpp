@@ -259,16 +259,18 @@ namespace ProjectA {
 		PROFILE_SCOPE("Application render");
 
 		const ref<Device> device = Renderer::getDevice();
+		const ref<Swapchain>& swapchain = Renderer::getSwapchain();
+		const ref<Fence>& flightFence = Renderer::getFlightFence(frameInFlightIndex);
+		const ref<Semaphore>& acquireNextImageSemaphore = Renderer::getAcquireNextImageSemaphore(frameInFlightIndex);
+		const ref<Semaphore>& finishedRenderSemaphore = Renderer::getFinishedRenderSemaphore(frameInFlightIndex);
+		const ref<CommandEncoder>& commandEncoder = Renderer::getCommandEncoder(frameInFlightIndex);
 
-		device->waitForFence(Renderer::getFlightFence(frameInFlightIndex));
+		device->waitForFence(flightFence);
+		device->resetFence(flightFence);
 
 		uint32 imageIndex;
 
-		const AcquireNextImageStatus acquireNextImageStatus = device->acquireNextImage(
-			Renderer::getSwapchain(),
-			Renderer::getAcquireNextImageSemaphore(frameInFlightIndex),
-			imageIndex
-		);
+		const AcquireNextImageStatus acquireNextImageStatus = device->acquireNextImage(swapchain, acquireNextImageSemaphore, imageIndex);
 
 		if (acquireNextImageStatus == AcquireNextImageStatus::ERROR_OUT_OF_DATE) {
 			ENGINE_DEBUG("Recreating out-of-date swapchain.");
@@ -283,11 +285,7 @@ namespace ProjectA {
 
 		ENGINE_ASSERT(acquireNextImageStatus == AcquireNextImageStatus::SUBOPTIMAL || acquireNextImageStatus == AcquireNextImageStatus::SUCCESS, "Failed to acquire the next swapchain image.");
 
-		device->resetFence(Renderer::getFlightFence(frameInFlightIndex));
-
 		Renderer::setImageIndex(imageIndex);
-
-		const ref<CommandEncoder>& commandEncoder = Renderer::getCommandEncoder(frameInFlightIndex);
 
 		commandEncoder->reset();
 		commandEncoder->begin();
@@ -303,15 +301,15 @@ namespace ProjectA {
 
 		graphicsQueue->submit(
 			{commandBuffer},
-			Renderer::getAcquireNextImageSemaphore(frameInFlightIndex), // Must be waited on before submitting.
-			Renderer::getFinishedRenderSemaphore(frameInFlightIndex), // Will be signaled once the command buffer has finished executing.
-			Renderer::getFlightFence(frameInFlightIndex) // Will be signaled once the command buffer has finished executing.
+			acquireNextImageSemaphore, // Must be waited on before submitting.
+			finishedRenderSemaphore, // Will be signaled once the command buffer has finished executing.
+			flightFence // Will be signaled once the command buffer has finished executing.
 		);
 
 		const PresentStatus presentStatus = graphicsQueue->present(
-			{Renderer::getSwapchain()},
-			Renderer::getFinishedRenderSemaphore(frameInFlightIndex), // Must be waited on before presenting.
-			{Renderer::getImageIndex()}
+			{swapchain},
+			finishedRenderSemaphore, // Must be waited on before presenting.
+			{imageIndex}
 		);
 
 		if (presentStatus == PresentStatus::ERROR_OUT_OF_DATE || presentStatus == PresentStatus::SUBOPTIMAL || windowResized) {
@@ -354,12 +352,12 @@ namespace ProjectA {
 	void Application::onEvent(Event& event) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (std::vector<ref<Layer>>::const_reverse_iterator i = layerStack.rbegin(); i != layerStack.rend(); i += 1) {
+		for (std::vector<ref<Layer>>::const_reverse_iterator layerIterator = layerStack.rbegin(); layerIterator != layerStack.rend(); layerIterator += 1) {
 			if (event.handled) {
 				break;
 			}
 
-			(*i)->onEvent(event);
+			(*layerIterator)->onEvent(event);
 		}
 	}
 

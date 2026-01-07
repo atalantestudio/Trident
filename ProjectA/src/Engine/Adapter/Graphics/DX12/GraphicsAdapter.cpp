@@ -75,7 +75,7 @@ namespace ProjectA {
 	}
 
 	ref<Semaphore> DX12::GraphicsAdapter::createSemaphore() const {
-		return createRef<Semaphore>();
+		return createRef<ProjectA::Semaphore>();
 	}
 
 	ref<ShaderModule> DX12::GraphicsAdapter::createShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) const {

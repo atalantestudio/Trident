@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/DX12/CommandPool.hpp"
+#include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 
 #include "Engine/API/Rendering/Queue.hpp"
@@ -11,7 +12,7 @@
 namespace ProjectA {
 	class DX12::Queue final : public ProjectA::Queue {
 		public:
-			explicit Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType, uint64 index);
+			explicit Queue(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE commandListType);
 
 			~Queue() final override;
 

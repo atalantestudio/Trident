@@ -35,9 +35,9 @@ namespace ProjectA {
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create device using the WARP adapter.");
 		}
 
-		queues[0] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_DIRECT, 1);
-		queues[1] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COMPUTE, 1);
-		queues[2] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COPY, 1);
+		queues[0] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_DIRECT);
+		queues[1] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COMPUTE);
+		queues[2] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COPY);
 
 		fenceEvent = CreateEvent(nullptr, false, false, nullptr);
 
@@ -50,7 +50,7 @@ namespace ProjectA {
 		WIN32_ASSERT(result != 0);
 	}
 
-	AcquireNextImageStatus DX12::Device::acquireNextImage(const ref<ProjectA::Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
+	AcquireNextImageStatus DX12::Device::acquireNextImage(const ref<ProjectA::Swapchain>& swapchain, const ref<ProjectA::Semaphore>& semaphore, uint32& imageIndex) const {
 		imageIndex = std::static_pointer_cast<DX12::Swapchain>(swapchain)->swapChain->GetCurrentBackBufferIndex();
 
 		return AcquireNextImageStatus::SUCCESS;
@@ -63,7 +63,6 @@ namespace ProjectA {
 	}
 
 	ref<PhysicalDevice> DX12::Device::getPhysicalDevice() const {
-		// TODO
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
@@ -84,14 +83,12 @@ namespace ProjectA {
 	}
 
 	void DX12::Device::waitForFence(const ref<ProjectA::Fence>& fence) const {
-		const ref<DX12::Fence> _fence = std::static_pointer_cast<DX12::Fence>(fence);
-
-		// TODO: Handle all queues.
+		// TODO: Move this inside Queue::submit().
 		const ref<DX12::Queue> queue = std::static_pointer_cast<DX12::Queue>(getQueue(QueueFamilyCapability::GRAPHICS));
 
 		HRESULT result;
 
-		result = queue->commandQueue->Signal(_fence->fence.Get(), 1);
+		result = queue->commandQueue->Signal(std::static_pointer_cast<DX12::Fence>(fence)->fence.Get(), 1);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
 
