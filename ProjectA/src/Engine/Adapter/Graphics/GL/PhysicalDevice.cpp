@@ -1,6 +1,7 @@
 ﻿#include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/PhysicalDevice.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	OpenGLPhysicalDevice::OpenGLPhysicalDevice() {
@@ -49,5 +50,27 @@ namespace ProjectA {
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, pointer_cast<GLint*>(&limits.maxVertexInputBindingCount));
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIB_STRIDE, pointer_cast<GLint*>(&limits.maxVertexInputBindingStride));
 		glGetFloatv(GL_SMOOTH_POINT_SIZE_GRANULARITY, &limits.pointSizeGranularity);
+
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_6
+			GLint shaderBinaryFormatCount;
+
+			glGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, &shaderBinaryFormatCount);
+
+			sequence<GLint> shaderBinaryFormats(shaderBinaryFormatCount);
+
+			glGetIntegerv(GL_SHADER_BINARY_FORMATS, &shaderBinaryFormats[0]);
+
+			uint32 spirvShaderBinaryFormatIndex = 0;
+
+			while (spirvShaderBinaryFormatIndex < shaderBinaryFormats.count()) {
+				if (shaderBinaryFormats[spirvShaderBinaryFormatIndex] == GL_SHADER_BINARY_FORMAT_SPIR_V) {
+					break;
+				}
+
+				spirvShaderBinaryFormatIndex += 1;
+			}
+
+			ADAPTER_ASSERT(spirvShaderBinaryFormatIndex < shaderBinaryFormats.count(), "GL_SHADER_BINARY_FORMAT_SPIR_V is not supported.");
+		#endif
 	}
 }

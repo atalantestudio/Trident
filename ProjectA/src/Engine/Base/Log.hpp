@@ -41,6 +41,7 @@ namespace ProjectA {
 
 	#define DEBUG_ASSERT(...)
 	#define ENGINE_ASSERT(...)
+	#define ADAPTER_ASSERT(...)
 #endif
 
 // This feature is not yet implemented.
