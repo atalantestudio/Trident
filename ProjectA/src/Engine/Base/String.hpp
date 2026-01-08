@@ -1,19 +1,6 @@
 #pragma once
 
 namespace ProjectA {
-	// Trims whitespace. White lines not included.
-	inline std::string trim(const std::string& string) {
-		const std::size_t firstNotSpace = string.find_first_not_of(' ');
-
-		if (firstNotSpace == std::string::npos) {
-			return string;
-		}
-
-		const std::size_t lastNotSpace = string.find_last_not_of(' ');
-
-		return string.substr(firstNotSpace, (lastNotSpace - firstNotSpace + 1));
-	}
-
 	inline std::ostringstream& operator <<(std::ostringstream& stream, __m128 m) {
 		const std::float_t* buffer = m.m128_f32;
 

@@ -16,7 +16,7 @@ namespace ProjectA {
 
 		private:
 			template<typename T>
-			static T parseValueString(const std::string& valueString, std::string_view propertyName) {
+			static T parseValueString(view<char8> valueString, std::string_view propertyName) {
 				uint32 value = 0;
 
 				for (const char8 character : valueString) {
@@ -28,7 +28,7 @@ namespace ProjectA {
 			}
 
 			template<>
-			static bool parseValueString(const std::string& valueString, std::string_view propertyName) {
+			static bool parseValueString(view<char8> valueString, std::string_view propertyName) {
 				if (valueString == "true") {
 					return true;
 				}
@@ -77,13 +77,14 @@ namespace ProjectA {
 						continue;
 					}
 
-					const std::size_t valueStringStartOffset = line.find(':', propertyNameOffset) + 1;
+					const std::size_t valueStartOffset = line.find(':', propertyNameOffset) + 1;
 
-					ENGINE_ASSERT(valueStringStartOffset != std::string::npos, "The property file is corrupted.");
+					ENGINE_ASSERT(valueStartOffset != std::string::npos, "The property file is corrupted.");
 
-					const std::string valueString = trim(line.substr(valueStringStartOffset, line.size()));
+					const view<char8> value(&line[valueStartOffset], line.size() - valueStartOffset);
+					const view<char8> trimmedValue = trim(value);
 
-					return parseValueString<T>(valueString, propertyName);
+					return parseValueString<T>(trimmedValue, propertyName);
 				}
 
 				ENGINE_ERROR("Could not find the value for \"[]\" in the property file.", propertyName);
