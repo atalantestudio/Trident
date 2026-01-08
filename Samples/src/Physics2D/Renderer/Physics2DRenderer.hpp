@@ -130,7 +130,7 @@ namespace ProjectA {
 
 			void allocateDescriptorSets();
 
-			void copyBuffers(const ref<Buffer>& stagingBuffer) const;
+			void copyBuffers(ref<Buffer> stagingBuffer) const;
 
 			void updateCameraViewDescriptorSet() const;
 			void updatePlaceholderDescriptorSet() const;

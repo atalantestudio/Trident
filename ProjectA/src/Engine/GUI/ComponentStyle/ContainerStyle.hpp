@@ -23,6 +23,6 @@ namespace ProjectA {
 		// TODO: If the ContainerStyle instance is not properly initialized, its event listeners will be null, thus crashing the GUI layer.
 		const EventListeners* eventListeners = {};
 
-		std::string_view debugName;
+		view<char8> debugName;
 	};
 }

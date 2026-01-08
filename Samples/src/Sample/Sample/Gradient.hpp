@@ -74,8 +74,8 @@ namespace ProjectA {
 				const AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
 				const ref<ShaderModuleAsset> vertexShaderModuleAsset = assetLibrary->findShaderModuleAsset("Screen");
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleAsset, vertexShaderModuleDescriptor);
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Base/Gradient.frag", fragmentShaderModuleDescriptor);
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, vertexShaderModuleAsset);
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/Gradient.frag");
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;
@@ -100,11 +100,7 @@ namespace ProjectA {
 			}
 
 			void recreateFramebuffers() {
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				for (ref<Framebuffer>& framebuffer : framebuffers) {
-					framebuffer.~shared_ptr();
-				}
+				const ref<Swapchain> swapchain = getSwapchain();
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 

@@ -47,7 +47,10 @@ namespace ProjectA {
 
 				uint32 glyphMapImageAssetIdentifier;
 
-				const BuildGlyphMapImageSubprocess buildGlyphMapImageSubprocess(assetOutputPath, directoryEntry.path().stem().string(), fontAssetDescriptor.glyphMapImage, glyphMapImageAssetIdentifier);
+				const std::string assetNameString = directoryEntry.path().stem().string();
+				const view<char8> assetName(&assetNameString[0], assetNameString.size());
+
+				BuildGlyphMapImageSubprocess(assetOutputPath, assetName, fontAssetDescriptor.glyphMapImage, glyphMapImageAssetIdentifier);
 
 				ByteStream<StreamOperation::WRITE> outputByteStream(outputSize, Endianness::LITTLE_ENDIAN);
 				outputByteStream.write<AssetSignature>(AssetSignature::TFO);

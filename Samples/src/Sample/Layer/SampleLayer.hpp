@@ -2,7 +2,7 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "../Sample/Empty.hpp"
+#include "../Sample/Triangle.hpp"
 
 namespace ProjectA {
 	class SampleLayer : public Layer {

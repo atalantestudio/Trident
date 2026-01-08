@@ -29,7 +29,7 @@ namespace ProjectA {
 		// `path` is relative to the working directory.
 		// The returned value is the file pointer. It must be managed by the application.
 		// template<OpenMode OpenMode, typename StreamType>
-		// StreamType* open(std::string_view path);
+		// StreamType* open(view<char8> path);
 
 		Reader openReader(view<char8> path);
 

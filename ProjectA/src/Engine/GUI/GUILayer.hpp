@@ -16,7 +16,7 @@ namespace ProjectA {
 			};
 
 			struct FlushWordData {
-				std::string_view word;
+				view<char8> word;
 
 				const FontAsset* fontAsset;
 				vec2<float32> imageSize;

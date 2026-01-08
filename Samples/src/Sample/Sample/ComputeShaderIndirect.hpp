@@ -154,8 +154,8 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule("Base/Vertex2DUV.vert", vertexShaderModuleDescriptor);
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Base/TextureRGBAFlipY.frag", fragmentShaderModuleDescriptor);
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/Vertex2DUV.vert");
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/TextureRGBAFlipY.frag");
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;
@@ -251,10 +251,8 @@ namespace ProjectA {
 				imageBinding.shaderStages = ShaderStage::COMPUTE;
 
 				const ref<DescriptorSetLayout> imageDescriptorSetLayout = createDescriptorSetLayout({imageBinding});
-
 				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({imageDescriptorSetLayout});
-
-				const ref<DescriptorSet>& imageDescriptorSet = descriptorSets[0];
+				const ref<DescriptorSet> imageDescriptorSet = descriptorSets[0];
 
 				DescriptorImage descriptorImage{};
 				descriptorImage.imageView = imageView;
@@ -277,7 +275,7 @@ namespace ProjectA {
 				computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 				computeShaderModuleDescriptor.entryPoint = "main";
 
-				const ref<ShaderModule> computeShaderModule = loadShaderModule("ImageUVGradient.comp", computeShaderModuleDescriptor);
+				const ref<ShaderModule> computeShaderModule = loadShaderModule(computeShaderModuleDescriptor, "ImageUVGradient.comp");
 
 				ComputePipelineDescriptor computePipelineDescriptor{};
 				computePipelineDescriptor.pipelineLayout = pipelineLayout;
@@ -305,11 +303,7 @@ namespace ProjectA {
 			}
 
 			void recreateFramebuffers() {
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				for (ref<Framebuffer>& framebuffer : framebuffers) {
-					framebuffer.~shared_ptr();
-				}
+				const ref<Swapchain> swapchain = getSwapchain();
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 

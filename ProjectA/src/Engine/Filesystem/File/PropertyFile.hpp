@@ -16,7 +16,7 @@ namespace ProjectA {
 
 		private:
 			template<typename T>
-			static T parseValueString(view<char8> valueString, std::string_view propertyName) {
+			static T parseValueString(view<char8> valueString, view<char8> propertyName) {
 				uint32 value = 0;
 
 				for (const char8 character : valueString) {
@@ -28,7 +28,7 @@ namespace ProjectA {
 			}
 
 			template<>
-			static bool parseValueString(view<char8> valueString, std::string_view propertyName) {
+			static bool parseValueString(view<char8> valueString, view<char8> propertyName) {
 				if (valueString == "true") {
 					return true;
 				}
@@ -64,7 +64,7 @@ namespace ProjectA {
 
 		private:
 			template<typename T>
-			T getProperty(std::string_view propertyName) {
+			T getProperty(view<char8> propertyName) {
 				reader->seekg(std::ios::beg);
 
 				std::string line;

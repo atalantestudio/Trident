@@ -89,7 +89,7 @@ namespace ProjectA {
 		graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
 		graphicsQueue->waitIdle();
 
-		textureArrayStagingBuffer.~shared_ptr();
+		textureArrayStagingBuffer->~Buffer();
 	}
 
 	uint32 GUIRenderer::registerTextureArrayLayer(const TextureArrayLayer& layer) {
@@ -157,11 +157,7 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::recreateFramebuffers() {
-		const ref<Swapchain>& swapchain = getSwapchain();
-
-		for (ref<Framebuffer>& framebuffer : framebuffers) {
-			framebuffer.~shared_ptr();
-		}
+		const ref<Swapchain> swapchain = getSwapchain();
 
 		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 

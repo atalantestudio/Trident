@@ -48,7 +48,7 @@ namespace ProjectA {
 			ref<Surface> getSurface() const final override;
 
 		private:
-			void* getProcedure(VkInstance instance, std::string_view procedureName) const;
+			void* getProcedure(VkInstance instance, view<char8> procedureName) const;
 
 			void loadBaseProcedures() const;
 

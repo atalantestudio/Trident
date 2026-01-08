@@ -31,7 +31,7 @@ namespace ProjectA {
 				vertexTextureCoordinateIndices(descriptor.vertexTextureCoordinateIndices)
 			{}
 
-			explicit Geometry3D(const ref<GeometryAsset>& geometryAsset) :
+			explicit Geometry3D(ref<GeometryAsset> geometryAsset) :
 				vertexPositionComponents(geometryAsset->getVertexPositionComponents()),
 				vertexNormalComponents(geometryAsset->getVertexNormalComponents()),
 				vertexTextureCoordinateComponents(geometryAsset->getVertexTextureCoordinateComponents()),

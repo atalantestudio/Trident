@@ -42,7 +42,7 @@ namespace ProjectA {
 		firstEvent = false;
 	}
 
-	Profiler::Profiler(std::string_view path) {
+	Profiler::Profiler(view<char8> path) {
 		stream.open(path.data());
 
 		ENGINE_ASSERT(stream.is_open(), "Could not open the profiler output stream.");

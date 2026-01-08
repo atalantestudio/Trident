@@ -154,11 +154,7 @@ namespace ProjectA {
 			}
 
 			void recreateFramebuffers() {
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				for (ref<Framebuffer>& framebuffer : framebuffers) {
-					framebuffer.~shared_ptr();
-				}
+				const ref<Swapchain> swapchain = getSwapchain();
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 

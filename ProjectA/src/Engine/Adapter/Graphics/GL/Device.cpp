@@ -24,7 +24,7 @@ namespace ProjectA {
 		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
 			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
 
-			ref<OpenGLDescriptorSet>& descriptorSet = createRef<OpenGLDescriptorSet>();
+			const ref<OpenGLDescriptorSet> descriptorSet = createRef<OpenGLDescriptorSet>();
 			descriptorSet->bindings = sequence<OpenGLDescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
 
 			for (uint32 descriptorSetBindingIndex = 0; descriptorSetBindingIndex < descriptorSet->bindings.count(); descriptorSetBindingIndex += 1) {
@@ -66,11 +66,7 @@ namespace ProjectA {
 
 	void OpenGLDevice::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
-			const ref<OpenGLDescriptorSet> descriptorSetConst = std::static_pointer_cast<OpenGLDescriptorSet>(writeDescriptorSet.descriptorSet);
-
-			// TODO: Find another way without using const_cast.
-			ref<OpenGLDescriptorSet>& descriptorSet = const_cast<ref<OpenGLDescriptorSet>&>(descriptorSetConst);
-
+			const ref<OpenGLDescriptorSet> descriptorSet = std::static_pointer_cast<OpenGLDescriptorSet>(writeDescriptorSet.descriptorSet);
 			OpenGLDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {

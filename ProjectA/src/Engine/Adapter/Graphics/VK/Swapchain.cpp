@@ -17,10 +17,9 @@ namespace ProjectA {
 	}
 
 	VulkanSwapchain::~VulkanSwapchain() {
-		for (const ref<ImageView>& imageView : imageViews) {
+		for (const ref<ImageView> imageView : imageViews) {
 			imageView.~shared_ptr();
 		}
-
 		// The swapchain images are automatically destroyed with the swapchain.
 		vkDestroySwapchainKHR(device.object, object, nullptr);
 	}
@@ -32,7 +31,7 @@ namespace ProjectA {
 	void VulkanSwapchain::update(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (const ref<ImageView>& imageView : imageViews) {
+		for (const ref<ImageView> imageView : imageViews) {
 			imageView.~shared_ptr();
 		}
 

@@ -5,13 +5,13 @@
 namespace ProjectA {
 	class LayerStack {
 		public:
-			void pushLayer(const ref<Layer>& layer);
+			void pushLayer(ref<Layer> layer);
 
-			void removeLayer(const ref<Layer>& layer);
+			void removeLayer(ref<Layer> layer);
 
 			bool hasLayers() const;
 
-			const ref<Layer>& operator [](std::size_t index) const;
+			ref<Layer> operator [](std::size_t index) const;
 
 			std::vector<ref<Layer>>::iterator begin();
 

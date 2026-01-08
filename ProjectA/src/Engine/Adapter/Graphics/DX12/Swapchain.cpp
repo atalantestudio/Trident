@@ -33,7 +33,7 @@ namespace ProjectA {
 	void DX12::Swapchain::update(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (const ref<ImageView>& imageView : imageViews) {
+		for (const ref<ProjectA::ImageView> imageView : imageViews) {
 			imageView.~shared_ptr();
 		}
 

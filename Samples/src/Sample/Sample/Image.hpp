@@ -143,11 +143,7 @@ namespace ProjectA {
 			}
 
 			void recreateFramebuffers() {
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				for (ref<Framebuffer>& framebuffer : framebuffers) {
-					framebuffer.~shared_ptr();
-				}
+				const ref<Swapchain> swapchain = getSwapchain();
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
@@ -209,8 +205,8 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule("Base/ScreenUV.vert", vertexShaderModuleDescriptor);
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Base/TextureRGBAFlipY.frag", fragmentShaderModuleDescriptor);
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/ScreenUV.vert");
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/TextureRGBAFlipY.frag");
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = true;

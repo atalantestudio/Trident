@@ -9,7 +9,7 @@ namespace ProjectA {
 
 		public:
 			// TODO: Mip level count is not handled at the moment and must be set to 1.
-			explicit BuildGlyphMapImageSubprocess(const std::filesystem::path& assetOutputPath, const std::string& assetName, const ref<ImageAsset>& imageAsset, uint32& assetIdentifier) {
+			explicit BuildGlyphMapImageSubprocess(const std::filesystem::path& assetOutputPath, view<char8> assetName, ref<ImageAsset> imageAsset, uint32& assetIdentifier) {
 				assetIdentifier = AssetLibrary::createAssetIdentifier();
 
 				const uint8 channelCount = getChannelCount(imageAsset->getFormat());
@@ -100,11 +100,11 @@ namespace ProjectA {
 				const std::string assetOutputPathString = assetOutputPath.string();
 
 				// Count '\0'.
-				sequence<char8> outputPath(assetOutputPathString.size() + assetName.size() + 11);
+				sequence<char8> outputPath(assetOutputPathString.size() + assetName.count() + 11);
 				std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
 				std::copy_n("Image/", 6, &outputPath[assetOutputPathString.size()]);
 				std::copy(assetName.begin(), assetName.end(), &outputPath[assetOutputPathString.size() + 6]);
-				std::copy_n(".tim", 4, &outputPath[assetOutputPathString.size() + assetName.size() + 6]);
+				std::copy_n(".tim", 4, &outputPath[assetOutputPathString.size() + assetName.count() + 6]);
 
 				Writer writer = Filesystem::openWriter(outputPath);
 				writer.write(outputByteStream.data, outputSize);

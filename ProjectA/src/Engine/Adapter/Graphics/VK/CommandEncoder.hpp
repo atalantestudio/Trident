@@ -70,7 +70,6 @@ namespace ProjectA {
 			VkCommandBuffer commandBuffer;
 			uint32 commandCount = 0;
 			ref<VulkanPipeline> pipeline;
-
-			const PhysicalDeviceLimits& limits;
+			PhysicalDeviceLimits limits;
 	};
 }

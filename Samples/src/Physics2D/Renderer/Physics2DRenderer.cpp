@@ -149,11 +149,7 @@ namespace ProjectA {
 	}
 
 	void Physics2DRenderer::recreateFramebuffers() {
-		const ref<Swapchain>& swapchain = getSwapchain();
-
-		for (ref<Framebuffer>& framebuffer : framebuffers) {
-			framebuffer.~shared_ptr();
-		}
+		const ref<Swapchain> swapchain = getSwapchain();
 
 		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
@@ -710,8 +706,8 @@ namespace ProjectA {
 			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 			fragmentShaderModuleDescriptor.entryPoint = "main";
 
-			const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/Distance.vert", vertexShaderModuleDescriptor);
-			const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/Distance.frag", fragmentShaderModuleDescriptor);
+			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/Distance.vert");
+			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Distance.frag");
 
 			ColorBlendAttachment colorBlendAttachment{};
 			colorBlendAttachment.blend = false;
@@ -750,8 +746,8 @@ namespace ProjectA {
 			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 			fragmentShaderModuleDescriptor.entryPoint = "main";
 
-			const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/VertexFeature.vert", vertexShaderModuleDescriptor);
-			const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/VertexFeature.frag", fragmentShaderModuleDescriptor);
+			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/VertexFeature.vert");
+			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/VertexFeature.frag");
 
 			ColorBlendAttachment colorBlendAttachment{};
 			colorBlendAttachment.blend = false;
@@ -788,8 +784,8 @@ namespace ProjectA {
 			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 			fragmentShaderModuleDescriptor.entryPoint = "main";
 
-			const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/EdgeFeature.vert", vertexShaderModuleDescriptor);
-			const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/EdgeFeature.frag", fragmentShaderModuleDescriptor);
+			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/EdgeFeature.vert");
+			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/EdgeFeature.frag");
 
 			ColorBlendAttachment colorBlendAttachment{};
 			colorBlendAttachment.blend = false;
@@ -822,7 +818,7 @@ namespace ProjectA {
 		placeholderDescriptorSet = descriptorSets[1];
 	}
 
-	void Physics2DRenderer::copyBuffers(const ref<Buffer>& stagingBuffer) const {
+	void Physics2DRenderer::copyBuffers(ref<Buffer> stagingBuffer) const {
 		BufferCopyRegion vertexBufferCopyRegion{};
 		vertexBufferCopyRegion.sourceOffset = 0;
 		vertexBufferCopyRegion.destinationOffset = 0;
@@ -870,7 +866,7 @@ namespace ProjectA {
 
 		for (uint32 instanceIndex = 0; instanceIndex < instanceCount; instanceIndex += 1) {
 			const Entity entity = rigidBodyPool.componentIndexToEntity[instanceIndex];
-			const ref<Geometry2D>& geometry = scene.getGeometry(entity);
+			const ref<Geometry2D> geometry = scene.getGeometry(entity);
 
 			vertexCount += geometry->getVertexCount() + 1;
 			indexCount += geometry->getIndexCount();
@@ -891,8 +887,8 @@ namespace ProjectA {
 
 		for (uint32 instanceIndex = 0; instanceIndex < instanceCount; instanceIndex += 1) {
 			const Entity entity = rigidBodyPool.componentIndexToEntity[instanceIndex];
-			const ref<Geometry2D>& geometry = scene.getGeometry(entity);
-			const ref<Material>& material = scene.getMaterial(entity);
+			const ref<Geometry2D> geometry = scene.getGeometry(entity);
+			const ref<Material> material = scene.getMaterial(entity);
 
 			for (uint32 vertexIndex = 0; vertexIndex < geometry->vertices.count(); vertexIndex += 1) {
 				const vec2<float32>& vertex = geometry->vertices[vertexIndex];
@@ -1139,7 +1135,7 @@ namespace ProjectA {
 		uint32 indexOffset = 0;
 
 		while (instanceIndex < instanceCount) {
-			const ref<Geometry2D>& geometry = rigidBodyPool.components[instanceIndex].geometry;
+			const ref<Geometry2D> geometry = rigidBodyPool.components[instanceIndex].geometry;
 			const uint32 indexCount = geometry->getIndexCount();
 			const uint32 vertexCount = geometry->getVertexCount() + 1;
 
@@ -1159,7 +1155,7 @@ namespace ProjectA {
 		vertexOffset = 0;
 
 		while (instanceIndex < instanceCount) {
-			const ref<Geometry2D>& geometry = rigidBodyPool.components[instanceIndex].geometry;
+			const ref<Geometry2D> geometry = rigidBodyPool.components[instanceIndex].geometry;
 			const uint32 vertexCount = geometry->getVertexCount() + 1;
 
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(Vertex), sizeof(Vertex));
@@ -1194,12 +1190,12 @@ namespace ProjectA {
 		uint32 vertexOffset = 0;
 
 		for (Entity entity = 0; entity < selectedInstanceIndex; entity += 1) {
-			const ref<Geometry2D>& geometry = scene->getGeometry(entity);
+			const ref<Geometry2D> geometry = scene->getGeometry(entity);
 
 			vertexOffset += geometry->getVertexCount() + 1;
 		}
 
-		const ref<Geometry2D>& geometry = scene->getGeometry(selectedInstanceIndex);
+		const ref<Geometry2D> geometry = scene->getGeometry(selectedInstanceIndex);
 
 		commandEncoder->bindRenderPipeline(placeholderCenterOfMassRenderPipeline);
 		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, {cameraViewDescriptorSet, placeholderDescriptorSet});

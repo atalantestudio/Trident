@@ -240,12 +240,7 @@ namespace ProjectA {
 	}
 
 	void VisibilityRenderer::recreateFramebuffers() {
-		const ref<Swapchain>& swapchain = getSwapchain();
-		const Extent2D swapchainExtent = swapchain->getExtent();
-
-		for (ref<Framebuffer>& framebuffer : framebuffers) {
-			framebuffer.~shared_ptr();
-		}
+		const ref<Swapchain> swapchain = getSwapchain();
 
 		framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 

@@ -49,17 +49,17 @@ namespace ProjectA {
 				return ecs.getComponent<RigidBody2D>(entity);
 			}
 
-			const ref<Geometry2D>& getGeometry(Entity entity) const {
+			ref<Geometry2D> getGeometry(Entity entity) const {
 				return ecs.getComponent<ref<Geometry2D>>(entity);
 			}
 
-			const ref<Material>& getMaterial(Entity entity) const {
+			ref<Material> getMaterial(Entity entity) const {
 				return ecs.getComponent<ref<Material>>(entity);
 			}
 
 			void createDynamicEntity(const Entity2DDescriptor& descriptor) {
 				const Entity entity = createEntity(descriptor);
-				const ref<Material>& material = getMaterial(entity);
+				const ref<Material> material = getMaterial(entity);
 				RigidBody2D& rigidBody = getRigidBody(entity);
 
 				const float32 m = descriptor.mass;
@@ -88,11 +88,11 @@ namespace ProjectA {
 				ecs.setComponent<StaticEntityTag>(entity, {});
 			}
 
-			void setGeometry(Entity entity, const ref<Geometry2D>& geometry) {
+			void setGeometry(Entity entity, ref<Geometry2D> geometry) {
 				ecs.setComponent<ref<Geometry2D>>(entity, geometry);
 			}
 
-			void setMaterial(Entity entity, const ref<Material>& material) {
+			void setMaterial(Entity entity, ref<Material> material) {
 				ecs.setComponent<ref<Material>>(entity, material);
 			}
 

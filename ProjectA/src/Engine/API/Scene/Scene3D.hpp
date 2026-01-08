@@ -50,14 +50,14 @@ namespace ProjectA {
 				return geometryCount;
 			}
 
-			const ref<Geometry3D>& getGeometry(uint32 geometryIndex) const {
+			ref<Geometry3D> getGeometry(uint32 geometryIndex) const {
 				DEBUG_ASSERT(geometryIndex < geometryCount);
 
 				return geometries[geometryIndex];
 			}
 
 			// Registers the provided geometry and returns its index in the geometry array.
-			uint32 registerGeometry(const ref<Geometry3D>& geometry) {
+			uint32 registerGeometry(ref<Geometry3D> geometry) {
 				DEBUG_ASSERT(geometryCount < MAX_GEOMETRY_COUNT);
 
 				const uint32 geometryIndex = geometryCount;

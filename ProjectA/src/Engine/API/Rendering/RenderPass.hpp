@@ -12,7 +12,7 @@ namespace ProjectA {
 			{
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-				for (ref<Subpass>& subpass : subpasses) {
+				for (ref<Subpass> subpass : subpasses) {
 					uint8 rasterizationSampleCount = 0;
 
 					for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {

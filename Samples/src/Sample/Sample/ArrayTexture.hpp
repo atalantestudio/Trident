@@ -160,7 +160,7 @@ namespace ProjectA {
 				commandEncoder->begin();
 
 				for (uint32 assetIndex = 0; assetIndex < assets.count(); assetIndex += 1) {
-					const ref<Image>& image = images[assetIndex];
+					const ref<Image> image = images[assetIndex];
 
 					bufferImageCopyRegion.imageExtent = image->getExtent();
 
@@ -219,11 +219,7 @@ namespace ProjectA {
 			}
 
 			void recreateFramebuffers() {
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				for (ref<Framebuffer>& framebuffer : framebuffers) {
-					framebuffer.~shared_ptr();
-				}
+				const ref<Swapchain> swapchain = getSwapchain();
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 
@@ -263,8 +259,8 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule("VertexOffset2DUVTextureIndex.vert", vertexShaderModuleDescriptor);
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule("ArrayTexture.frag", fragmentShaderModuleDescriptor);
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "VertexOffset2DUVTextureIndex.vert");
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "ArrayTexture.frag");
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;

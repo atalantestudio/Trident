@@ -776,7 +776,7 @@ namespace ProjectA {
 
 			if (flushCurrentWord) {
 				FlushWordData flushWordData;
-				flushWordData.word = std::string_view(&textComponent.text[wordByteOffset], wordByteLength);
+				flushWordData.word = view<char8>(&textComponent.text[wordByteOffset], wordByteLength);
 				flushWordData.fontAsset = &fontAsset;
 				flushWordData.imageSize = imageSize;
 				flushWordData.fontSize = textComponent.fontSize;
@@ -811,7 +811,7 @@ namespace ProjectA {
 
 		if (wordByteLength > 0 && wordByteOffset + wordByteLength == textComponent.text.size()) {
 			FlushWordData flushWordData;
-			flushWordData.word = std::string_view(&textComponent.text[wordByteOffset], wordByteLength);
+			flushWordData.word = view<char8>(&textComponent.text[wordByteOffset], wordByteLength);
 			flushWordData.fontAsset = &fontAsset;
 			flushWordData.imageSize = imageSize;
 			flushWordData.fontSize = textComponent.fontSize;
@@ -824,14 +824,14 @@ namespace ProjectA {
 	}
 
 	void GUILayer::FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) {
-		const char8* stringPointer = data.word.data();
+		const char8* stringPointer = &data.word[0];
 
 		uint32 byteOffset = 0;
 		uint16 codePoint;
 
 		const vec2<float32> imageScale = data.imageSize / renderer.TEXTURE_ARRAY_MAX_SIZE;
 
-		while (byteOffset < data.word.size()) {
+		while (byteOffset < data.word.count()) {
 			codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
 
 			const Glyph& glyph = (*data.fontAsset)[codePoint];
@@ -1028,7 +1028,7 @@ namespace ProjectA {
 
 	uint32 GUILayer::calculateTextPreferredWidth(const std::string& string, const TextStyle& textStyle) const {
 		const char8* stringPointer = string.data();
-		const ref<FontAsset>& fontAsset = fonts[textStyle.font].fontAsset;
+		const ref<FontAsset> fontAsset = fonts[textStyle.font].fontAsset;
 		const float32 lineHeight = static_cast<float32>(fontAsset->getLineHeight());
 
 		uint32 byteOffset = 0;

@@ -21,7 +21,7 @@ namespace ProjectA {
 				unicodeMap(descriptor.unicodeMap)
 			{}
 
-			const ref<ImageAsset>& getGlyphMapImage() const {
+			ref<ImageAsset> getGlyphMapImage() const {
 				return glyphMapImage;
 			}
 

@@ -108,8 +108,8 @@ namespace ProjectA {
 					RenderPipelineDescriptor renderPipelineDescriptor;
 					renderPipelineDescriptor.pipelineLayout = pipelineLayout;
 					renderPipelineDescriptor.vertexInputBindings = {transformInputBinding, geometryInputBinding};
-					renderPipelineDescriptor.vertexShaderModule = loadShaderModule("Base/Forward3D.vert", vertexShaderModuleDescriptor);
-					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule("Base/Forward3D.frag", fragmentShaderModuleDescriptor);
+					renderPipelineDescriptor.vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/Forward3D.vert");
+					renderPipelineDescriptor.fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/Forward3D.frag");
 					renderPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 					renderPipelineDescriptor.polygonMode = PolygonMode::FILL;
 					renderPipelineDescriptor.cullMode = CullMode::BACK;
@@ -152,7 +152,7 @@ namespace ProjectA {
 				uint64 vertexPositionIndexBufferSize = 0;
 
 				for (uint32 geometryIndex = 0; geometryIndex < geometryPool.componentCount; geometryIndex += 1) {
-					const ref<Geometry3D>& geometry = geometryPool.components[geometryIndex];
+					const ref<Geometry3D> geometry = geometryPool.components[geometryIndex];
 
 					vertexPositionBufferSize += geometry->getVertexPositionComponents().count * sizeof(float32);
 					vertexPositionIndexBufferSize += geometry->getVertexPositionIndices().count * sizeof(uint32);
@@ -170,7 +170,7 @@ namespace ProjectA {
 				uint64 vertexPositionIndexOffset = 0;
 
 				for (uint32 geometryIndex = 0; geometryIndex < geometryPool.componentCount; geometryIndex += 1) {
-					const ref<Geometry3D>& geometry = geometryPool.components[geometryIndex];
+					const ref<Geometry3D> geometry = geometryPool.components[geometryIndex];
 
 					std::copy(geometry->getVertexPositionComponents().begin(), geometry->getVertexPositionComponents().end(), vertexPositionMappedRange + vertexPositionOffset);
 					std::copy(geometry->getVertexPositionIndices().begin(), geometry->getVertexPositionIndices().end(), vertexPositionIndexMappedRange + vertexPositionIndexOffset);
@@ -253,12 +253,12 @@ namespace ProjectA {
 
 				for (uint32 instanceOffset = 0; instanceOffset < rigidBodyPool.componentCount; instanceOffset += 1) {
 					const RigidBody3D& rigidBody = rigidBodyPool.components[instanceOffset];
-					const ref<Geometry3D>& geometry = geometryPool.components[rigidBody.geometryIndex];
+					const ref<Geometry3D> geometry = geometryPool.components[rigidBody.geometryIndex];
 
 					uint32 indexOffset = 0;
 
 					for (uint32 geometryIndex = 0; geometryIndex < rigidBody.geometryIndex; geometryIndex += 1) {
-						const ref<Geometry3D>& geometry = geometryPool.components[geometryIndex];
+						const ref<Geometry3D> geometry = geometryPool.components[geometryIndex];
 
 						indexOffset += static_cast<uint32>(geometry->getVertexPositionIndices().count);
 					}
@@ -284,11 +284,7 @@ namespace ProjectA {
 
 		private:
 			void recreateFramebuffers() {
-				const ref<Swapchain>& swapchain = getSwapchain();
-
-				for (ref<Framebuffer>& framebuffer : framebuffers) {
-					framebuffer.~shared_ptr();
-				}
+				const ref<Swapchain> swapchain = getSwapchain();
 
 				framebuffers = sequence<ref<Framebuffer>>(swapchain->getImageCount());
 

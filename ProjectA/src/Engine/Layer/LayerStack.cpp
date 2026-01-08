@@ -3,13 +3,13 @@
 #include "Engine/Layer/LayerStack.hpp"
 
 namespace ProjectA {
-	void LayerStack::pushLayer(const ref<Layer>& layer) {
+	void LayerStack::pushLayer(ref<Layer> layer) {
 		layers.emplace(layers.begin() + layerInsertionIndex, layer);
 
 		layerInsertionIndex += 1;
 	}
 
-	void LayerStack::removeLayer(const ref<Layer>& layer) {
+	void LayerStack::removeLayer(ref<Layer> layer) {
 		const std::vector<ref<Layer>>::const_iterator iterator = std::find(layers.begin(), layers.begin() + layerInsertionIndex, layer);
 
 		if (iterator == layers.begin() + layerInsertionIndex) {
@@ -25,7 +25,7 @@ namespace ProjectA {
 		return layerInsertionIndex > 0;
 	}
 
-	const ref<Layer>& LayerStack::operator [](std::size_t index) const {
+	ref<Layer> LayerStack::operator [](std::size_t index) const {
 		ENGINE_ASSERT(index < layers.size(), "Index overflow.");
 
 		return layers[index];

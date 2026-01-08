@@ -10,7 +10,7 @@ namespace ProjectA {
 		float32 fontSize;
 		const EventListeners* eventListeners;
 
-		// TODO: Debug-only.
-		std::string_view debugName;
+		// TODO (debug-only)
+		view<char8> debugName;
 	};
 }

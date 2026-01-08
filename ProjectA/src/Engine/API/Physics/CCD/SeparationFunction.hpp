@@ -26,7 +26,7 @@ namespace ProjectA {
 
 	static PhysicalObjectCopy2D copyPhysicalObject(const Scene2D& scene, Entity entity) {
 		const RigidBody2D& rigidBody = scene.getRigidBody(entity);
-		const ref<Geometry2D>& geometry = scene.getGeometry(entity);
+		const ref<Geometry2D> geometry = scene.getGeometry(entity);
 
 		PhysicalObjectCopy2D copy{};
 		copy.entity = entity;

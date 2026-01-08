@@ -62,7 +62,7 @@ namespace ProjectA {
 		uint32 clusterOffset = 0;
 
 		for (uint32 geometryIndex = 0; geometryIndex < scene.getGeometryCount(); geometryIndex += 1) {
-			const ref<Geometry3D>& geometry = geometries[geometryIndex];
+			const ref<Geometry3D> geometry = geometries[geometryIndex];
 
 			const uint64 indexCount = geometry->getVertexPositionIndices().count();
 
@@ -108,7 +108,7 @@ namespace ProjectA {
 		uint32 indexOffset = 0;
 
 		for (uint32 geometryIndex = 0; geometryIndex < scene.getGeometryCount(); geometryIndex += 1) {
-			const ref<Geometry3D>& geometry = geometries[geometryIndex];
+			const ref<Geometry3D> geometry = geometries[geometryIndex];
 
 			ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[geometryIndex];
 			clusteredGeometry.vertexOffset = vertexOffset;

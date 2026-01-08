@@ -9,8 +9,8 @@ namespace ProjectA {
 		HANDLE hFileMappingObject;
 	};
 
-	SharedMemory::SharedMemory(std::string_view name, uint64 size) {
-		const LPCWSTR lpName = ConvertUTF8ToUTF16(name.data());
+	SharedMemory::SharedMemory(view<char8> name, uint64 size) {
+		const LPCWSTR lpName = ConvertUTF8ToUTF16(&name[0]);
 
 		Win32SharedMemoryData* sharedMemoryData = new Win32SharedMemoryData();
 

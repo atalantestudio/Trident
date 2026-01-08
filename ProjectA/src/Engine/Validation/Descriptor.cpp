@@ -76,7 +76,7 @@ namespace ProjectA {
 				ENGINE_ERROR("descriptor.framebuffer must be a valid Framebuffer.");
 			}
 			else {
-				const ref<RenderPass>& renderPass = descriptor.framebuffer->getRenderPass();
+				const ref<RenderPass> renderPass = descriptor.framebuffer->getRenderPass();
 
 				if (renderPass == nullptr) {
 					errorCount += 1;
@@ -159,7 +159,7 @@ namespace ProjectA {
 			}
 
 			for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count(); imageViewIndex += 1) {
-				const ref<ImageView>& imageView = descriptor.imageViews[imageViewIndex];
+				const ref<ImageView> imageView = descriptor.imageViews[imageViewIndex];
 
 				if (imageView == nullptr) {
 					errorCount += 1;
@@ -330,7 +330,7 @@ namespace ProjectA {
 			uint32 errorCount = 0;
 
 			for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptor.descriptorSetLayouts.count(); descriptorSetLayoutIndex += 1) {
-				const ref<DescriptorSetLayout>& descriptorSetLayout = descriptor.descriptorSetLayouts[descriptorSetLayoutIndex];
+				const ref<DescriptorSetLayout> descriptorSetLayout = descriptor.descriptorSetLayouts[descriptorSetLayoutIndex];
 
 				for (uint32 descriptorSetLayoutBindingIndex = 0; descriptorSetLayoutBindingIndex < descriptorSetLayout->bindings.count(); descriptorSetLayoutBindingIndex += 1) {
 					const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout->bindings[descriptorSetLayoutBindingIndex];

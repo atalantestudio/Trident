@@ -112,10 +112,10 @@ namespace ProjectA {
 		return surface;
 	}
 
-	void* VulkanGraphicsAdapter::getProcedure(VkInstance instance, std::string_view procedureName) const {
+	void* VulkanGraphicsAdapter::getProcedure(VkInstance instance, view<char8> procedureName) const {
 		static const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = pointer_cast<PFN_vkGetInstanceProcAddr>(vulkan1Library.getProcedure("vkGetInstanceProcAddr"));
 
-		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance, procedureName.data());
+		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance, &procedureName[0]);
 
 		ENGINE_ASSERT(procedure != nullptr, "Cannot find address for procedure \"[]\".", procedureName);
 

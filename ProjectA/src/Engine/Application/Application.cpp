@@ -117,22 +117,11 @@ namespace ProjectA {
 	}
 
 	Application::~Application() {
-		if (projectType == ProjectType::MAIN) {
-			delete assetLibrary;
-		}
-
-		for (const ref<Process>& process : processes) {
-			process.~shared_ptr();
-		}
-
 		mutex->acquire();
 
 		sharedMemoryData->instanceCount -= 1;
 
 		sharedMemory->unmap(sharedMemoryData);
-
-		delete window;
-		delete properties;
 	}
 
 	const sequence<void*>& Application::getConsoleArguments() const {
@@ -180,7 +169,7 @@ namespace ProjectA {
 	void Application::postConstruct() {
 		PROFILE_SCOPE("Application post-construct");
 
-		for (const ref<Layer>& layer : layerStack) {
+		for (const ref<Layer> layer : layerStack) {
 			layer->postConstruct();
 		}
 	}
@@ -188,7 +177,7 @@ namespace ProjectA {
 	sint32 Application::runProcesses() const {
 		sint32 code = 0;
 
-		for (const ref<Process>& process : processes) {
+		for (const ref<Process> process : processes) {
 			code = process->main(consoleArguments);
 
 			if (code != 0) {
@@ -250,7 +239,7 @@ namespace ProjectA {
 	void Application::update(float64 deltaTime, float64 inverseDeltaTime) {
 		PROFILE_SCOPE("Application update/integrate");
 
-		for (const ref<Layer>& layer : layerStack) {
+		for (const ref<Layer> layer : layerStack) {
 			layer->update(static_cast<float32>(deltaTime), static_cast<float32>(inverseDeltaTime));
 		}
 	}

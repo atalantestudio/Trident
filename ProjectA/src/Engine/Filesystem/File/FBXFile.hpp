@@ -73,9 +73,9 @@ namespace ProjectA {
 	template<>
 	class File<FileFormat::FBX> {
 		public:
-			static const FBXNode* searchNodeRecursive(const std::vector<FBXNode>& NestedList, std::string_view Name, const FBXNode* ResultNode = nullptr) {
+			static const FBXNode* searchNodeRecursive(const std::vector<FBXNode>& NestedList, view<char8> Name, const FBXNode* ResultNode = nullptr) {
 				for (const FBXNode& Node : NestedList) {
-					if (std::strcmp(&Node.Name[0], Name.data()) == 0) {
+					if (Name == Node.Name) {
 						ResultNode = &Node;
 
 						break;

@@ -76,8 +76,8 @@ namespace ProjectA {
 	VulkanDevice::~VulkanDevice() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (const ref<VulkanQueue>& queue : queues) {
-			// Destroy the queue's command pool.
+		// Destroy the command pools before the device.
+		for (const ref<VulkanQueue> queue : queues) {
 			queue.~shared_ptr();
 		}
 
