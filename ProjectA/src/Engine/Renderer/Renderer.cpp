@@ -152,11 +152,11 @@ namespace ProjectA {
 		return createRef<Subpass>(descriptor);
 	}
 
-	const ref<Semaphore>& Renderer::getAcquireNextImageSemaphore(uint32 frameInFlightIndex) {
+	ref<Semaphore> Renderer::getAcquireNextImageSemaphore(uint32 frameInFlightIndex) {
 		return acquireNextImageSemaphores[frameInFlightIndex];
 	}
 
-	const ref<CommandEncoder>& Renderer::getCommandEncoder(uint32 frameInFlightIndex) {
+	ref<CommandEncoder> Renderer::getCommandEncoder(uint32 frameInFlightIndex) {
 		return commandEncoders[frameInFlightIndex];
 	}
 
@@ -164,11 +164,11 @@ namespace ProjectA {
 		return adapter->getDevice();
 	}
 
-	const ref<Semaphore>& Renderer::getFinishedRenderSemaphore(uint32 frameInFlightIndex) {
+	ref<Semaphore> Renderer::getFinishedRenderSemaphore(uint32 frameInFlightIndex) {
 		return finishedRenderSemaphores[frameInFlightIndex];
 	}
 
-	const ref<Fence>& Renderer::getFlightFence(uint32 frameInFlightIndex) {
+	ref<Fence> Renderer::getFlightFence(uint32 frameInFlightIndex) {
 		return flightFences[frameInFlightIndex];
 	}
 
@@ -180,15 +180,15 @@ namespace ProjectA {
 		return adapter->getSurface();
 	}
 
-	const ref<Swapchain>& Renderer::getSwapchain() {
+	ref<Swapchain> Renderer::getSwapchain() {
 		return swapchain;
 	}
 
-	ref<ShaderModule> Renderer::loadShaderModule(const ref<ShaderModuleAsset>& shaderModuleAsset, const ShaderModuleDescriptor& descriptor) {
-		return adapter->createShaderModule(shaderModuleAsset, descriptor);
+	ref<ShaderModule> Renderer::loadShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) {
+		return adapter->createShaderModule(descriptor, asset);
 	}
 
-	ref<ShaderModule> Renderer::loadShaderModule(view<char8> path, const ShaderModuleDescriptor& descriptor) {
+	ref<ShaderModule> Renderer::loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) {
 		std::string pathString = "Asset/Shader/";
 		pathString += path;
 
@@ -205,11 +205,13 @@ namespace ProjectA {
 
 		const sequence<char8> code = Filesystem::openTextBuffer(&path[0]);
 
-		return adapter->createShaderModule(view<char8>(&code[0], code.count()), descriptor);
+		return adapter->createShaderModule(descriptor, view<char8>(&code[0], code.count()));
 	}
 
-	ref<ShaderModule> Renderer::loadHlslShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor) {
-		return adapter->createShaderModule(code, descriptor);
+	ref<ShaderModule> Renderer::loadHlslShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) {
+		DEBUG_ASSERT(graphicsApi == GraphicsAPI::DX12);
+
+		return adapter->createShaderModule(descriptor, code);
 	}
 
 	void Renderer::setImageIndex(uint32 imageIndex) {

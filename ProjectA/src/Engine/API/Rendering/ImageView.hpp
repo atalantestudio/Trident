@@ -30,7 +30,7 @@ namespace ProjectA {
 			}
 
 		protected:
-			explicit ImageView(const Image* image, const ImageViewDescriptor& descriptor) :
+			explicit ImageView(const ImageViewDescriptor& descriptor, const Image* image) :
 				image(image),
 				mipLevelOffset(descriptor.mipLevelOffset),
 				mipLevelCount(descriptor.mipLevelCount),

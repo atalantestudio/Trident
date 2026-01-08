@@ -23,7 +23,7 @@ namespace ProjectA {
 
 			virtual void preRender();
 
-			virtual void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const;
+			virtual void render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const;
 
 			virtual void postRender();
 

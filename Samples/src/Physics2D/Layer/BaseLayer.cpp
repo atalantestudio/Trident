@@ -90,7 +90,7 @@ namespace ProjectA {
 		#endif
 	}
 
-	void BaseLayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
+	void BaseLayer::render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const {
 		renderer.render(commandEncoder);
 	}
 

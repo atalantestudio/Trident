@@ -21,8 +21,8 @@ namespace ProjectA {
 			void execute() const final override {
 				uint32 descriptorSetLayoutOffset = 0;
 
-				for (const ref<DescriptorSet>& descriptorSet : descriptorSets) {
-					const ref<OpenGLDescriptorSet>& glDescriptorSet = std::static_pointer_cast<OpenGLDescriptorSet>(descriptorSet);
+				for (const ref<DescriptorSet> descriptorSet : descriptorSets) {
+					const ref<OpenGLDescriptorSet> glDescriptorSet = std::static_pointer_cast<OpenGLDescriptorSet>(descriptorSet);
 
 					for (uint32 bindingIndex = 0; bindingIndex < glDescriptorSet->bindings.count(); bindingIndex += 1) {
 						const OpenGLDescriptorSet::DescriptorSetBinding& descriptorSetBinding = glDescriptorSet->bindings[bindingIndex];
@@ -53,8 +53,8 @@ namespace ProjectA {
 						else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
 							for (GLuint descriptorImageIndex = 0; descriptorImageIndex < descriptorSetBinding.descriptorImages.count(); descriptorImageIndex += 1) {
 								const DescriptorImage& descriptorImage = descriptorSetBinding.descriptorImages[descriptorImageIndex];
-								const ref<OpenGLImageView>& imageView = std::static_pointer_cast<OpenGLImageView>(descriptorImage.imageView);
-								const OpenGLImage* image = pointer_cast<const OpenGLImage*>(imageView->getImage());
+								const ref<OpenGLImageView> imageView = std::static_pointer_cast<OpenGLImageView>(descriptorImage.imageView);
+								const OpenGLImage* image = static_cast<const OpenGLImage*>(imageView->getImage());
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 									glBindTextureUnit(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, imageView->object);

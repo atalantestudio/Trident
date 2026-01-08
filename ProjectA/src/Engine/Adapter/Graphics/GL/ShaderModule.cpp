@@ -5,7 +5,7 @@
 #include "Engine/Adapter/Graphics/GL/ShaderStage.hpp"
 
 namespace ProjectA {
-	OpenGLShaderModule::OpenGLShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) :
+	OpenGLShaderModule::OpenGLShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) :
 		ShaderModule(descriptor),
 		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
 	{
@@ -36,7 +36,7 @@ namespace ProjectA {
 		checkCompileStatus();
 	}
 
-	OpenGLShaderModule::OpenGLShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor) :
+	OpenGLShaderModule::OpenGLShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) :
 		ShaderModule(descriptor),
 		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
 	{

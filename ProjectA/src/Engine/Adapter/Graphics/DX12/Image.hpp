@@ -14,7 +14,8 @@ namespace ProjectA {
 			// Render Target View constructor.
 			explicit Image(const DX12::Device& device, const DX12::Swapchain& swapchain, uint32 imageIndex, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle);
 
-			ref<ProjectA::ImageView> createViewInternal(const ProjectA::Image* image, const ImageViewDescriptor& descriptor) const final override;
+		protected:
+			ref<ProjectA::ImageView> createViewInternal(const ImageViewDescriptor& descriptor, const ProjectA::Image* image) const final override;
 
 		public:
 			ComPtr<ID3D12Resource> resource;

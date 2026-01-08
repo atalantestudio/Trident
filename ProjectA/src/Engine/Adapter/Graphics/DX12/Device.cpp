@@ -50,7 +50,7 @@ namespace ProjectA {
 		WIN32_ASSERT(result != 0);
 	}
 
-	AcquireNextImageStatus DX12::Device::acquireNextImage(const ref<ProjectA::Swapchain>& swapchain, const ref<ProjectA::Semaphore>& semaphore, uint32& imageIndex) const {
+	AcquireNextImageStatus DX12::Device::acquireNextImage(ref<ProjectA::Swapchain> swapchain, ref<ProjectA::Semaphore> semaphore, uint32& imageIndex) const {
 		imageIndex = std::static_pointer_cast<DX12::Swapchain>(swapchain)->swapChain->GetCurrentBackBufferIndex();
 
 		return AcquireNextImageStatus::SUCCESS;
@@ -72,7 +72,7 @@ namespace ProjectA {
 		return queues[static_cast<uint32>(queueFamilyCapability)];
 	}
 
-	void DX12::Device::resetFence(const ref<ProjectA::Fence>& fence) const {
+	void DX12::Device::resetFence(ref<ProjectA::Fence> fence) const {
 		const HRESULT result = std::static_pointer_cast<DX12::Fence>(fence)->fence->Signal(0);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
@@ -82,7 +82,7 @@ namespace ProjectA {
 		ENGINE_ERROR_UNIMPLEMENTED();
 	}
 
-	void DX12::Device::waitForFence(const ref<ProjectA::Fence>& fence) const {
+	void DX12::Device::waitForFence(ref<ProjectA::Fence> fence) const {
 		// TODO: Move this inside Queue::submit().
 		const ref<DX12::Queue> queue = std::static_pointer_cast<DX12::Queue>(getQueue(QueueFamilyCapability::GRAPHICS));
 
@@ -106,7 +106,7 @@ namespace ProjectA {
 	}
 
 	void DX12::Device::waitIdle() const {
-		for (const ref<ProjectA::Queue>& queue : queues) {
+		for (const ref<ProjectA::Queue> queue : queues) {
 			queue->waitIdle();
 		}
 	}

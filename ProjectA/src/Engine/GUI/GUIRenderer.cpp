@@ -360,8 +360,8 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../../../../../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert", vertexShaderModuleDescriptor);
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../../../../../ProjectA/src/Asset/Shader/GUI/Subcomponent.frag", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "../../../../../ProjectA/src/Asset/Shader/GUI/Subcomponent.vert");
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "../../../../../ProjectA/src/Asset/Shader/GUI/Subcomponent.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = true;
@@ -406,8 +406,8 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("../../../../../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.vert", vertexShaderModuleDescriptor);
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("../../../../../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.frag", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "../../../../../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.vert");
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "../../../../../ProjectA/src/Asset/Shader/GUI/GlyphSubcomponent.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = true;
@@ -546,7 +546,7 @@ namespace ProjectA {
 		};
 	}
 
-	void GUIRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
+	void GUIRenderer::render(ref<CommandEncoder> commandEncoder) const {
 		if (subcomponentCount == 0 && glyphSubcomponentCount == 0) {
 			ENGINE_WARNING("No GUI components to render.");
 

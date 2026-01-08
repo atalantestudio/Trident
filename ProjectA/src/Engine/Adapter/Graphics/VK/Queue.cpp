@@ -21,7 +21,7 @@ namespace ProjectA {
 		return createRef<VulkanCommandEncoder>(device, commandPool.object, descriptor);
 	}
 
-	void VulkanQueue::submit(const sequence<ref<CommandBuffer>>& commandBuffers, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
+	void VulkanQueue::submit(const sequence<ref<CommandBuffer>>& commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence) const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		// TODO: One wait destination stage mask per wait semaphore, but the pipeline stage flags is stored into the command buffer.
@@ -71,7 +71,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to submit Vulkan queue ([]).", string_VkResult(result));
 	}
 
-	PresentStatus VulkanQueue::present(const sequence<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const {
+	PresentStatus VulkanQueue::present(const sequence<ref<Swapchain>>& swapchains, ref<Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		// TODO: Speed this up.

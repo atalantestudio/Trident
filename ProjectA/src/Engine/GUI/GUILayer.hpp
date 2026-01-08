@@ -36,7 +36,7 @@ namespace ProjectA {
 
 			void preRender() final override;
 
-			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const final override;
+			void render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const final override;
 
 			void postRender() final override;
 

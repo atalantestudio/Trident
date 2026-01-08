@@ -101,7 +101,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::bindComputePipeline(const ref<ComputePipeline>& computePipeline) {
+	void VulkanCommandEncoder::bindComputePipeline(ref<ComputePipeline> computePipeline) {
 		this->pipeline = std::dynamic_pointer_cast<VulkanPipeline>(computePipeline);
 
 		vkCmdBindPipeline(commandBuffer, this->pipeline->bindPoint, this->pipeline->object);
@@ -109,7 +109,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) {
+	void VulkanCommandEncoder::bindRenderPipeline(ref<RenderPipeline> renderPipeline) {
 		this->pipeline = std::dynamic_pointer_cast<VulkanPipeline>(renderPipeline);
 
 		vkCmdBindPipeline(commandBuffer, this->pipeline->bindPoint, this->pipeline->object);
@@ -117,7 +117,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::bindDescriptorSets(const ref<PipelineLayout>& pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) {
+	void VulkanCommandEncoder::bindDescriptorSets(ref<PipelineLayout> pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) {
 		sequence<VkDescriptorSet> vkDescriptorSets(descriptorSets.count());
 
 		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
@@ -138,7 +138,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) {
+	void VulkanCommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) {
 		vkCmdBindVertexBuffers(
 			commandBuffer,
 			bindingIndex,
@@ -150,7 +150,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) {
+	void VulkanCommandEncoder::copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) {
 		vkCmdCopyBuffer(
 			commandBuffer,
 			std::static_pointer_cast<VulkanBuffer>(sourceBuffer)->object,
@@ -162,7 +162,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
+	void VulkanCommandEncoder::copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
 		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions);
 
 		vkCmdCopyBufferToImage(
@@ -177,7 +177,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::copyImageToBuffer(const ref<Image>& sourceImage, const ref<Buffer>& destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) {
+	void VulkanCommandEncoder::copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) {
 		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions);
 
 		vkCmdCopyImageToBuffer(
@@ -202,8 +202,8 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::dispatchIndirect(const ref<Buffer>& buffer, uint64 offset) {
-		vkCmdDispatchIndirect(commandBuffer, std::static_pointer_cast<VulkanBuffer>(buffer)->object, offset);
+	void VulkanCommandEncoder::dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset) {
+		vkCmdDispatchIndirect(commandBuffer, std::static_pointer_cast<VulkanBuffer>(buffer)->object, bufferOffset);
 
 		commandCount += 1;
 	}
@@ -214,7 +214,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
+	void VulkanCommandEncoder::setImageMemoryBarrier(ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
 		VulkanImage& vkImage = *std::static_pointer_cast<VulkanImage>(image);
 
 		VkImageMemoryBarrier imageMemoryBarrier{};
@@ -268,7 +268,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
+	void VulkanCommandEncoder::setViewport(vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth) {
 		VkViewport viewport{};
 		viewport.x = origin[0];
 		viewport.y = origin[1];
@@ -288,8 +288,8 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::drawIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) {
-		vkCmdDrawIndirect(commandBuffer, std::static_pointer_cast<VulkanBuffer>(buffer)->object, offset, drawCount, stride);
+	void VulkanCommandEncoder::drawIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+		vkCmdDrawIndirect(commandBuffer, std::static_pointer_cast<VulkanBuffer>(buffer)->object, bufferOffset, drawCount, stride);
 
 		commandCount += 1;
 	}
@@ -300,8 +300,8 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void VulkanCommandEncoder::drawIndexedIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) {
-		vkCmdDrawIndexedIndirect(commandBuffer, std::static_pointer_cast<VulkanBuffer>(buffer)->object, offset, drawCount, stride);
+	void VulkanCommandEncoder::drawIndexedIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
+		vkCmdDrawIndexedIndirect(commandBuffer, std::static_pointer_cast<VulkanBuffer>(buffer)->object, bufferOffset, drawCount, stride);
 
 		commandCount += 1;
 	}
@@ -339,7 +339,7 @@ namespace ProjectA {
 		pipeline = nullptr;
 	}
 
-	void VulkanCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {
+	void VulkanCommandEncoder::bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
 		vkCmdBindIndexBuffer(
 			commandBuffer,
 			std::static_pointer_cast<VulkanBuffer>(indexBuffer)->object,

@@ -15,7 +15,8 @@ namespace ProjectA {
 
 			~VulkanImage() final override;
 
-			ref<ImageView> createViewInternal(const Image* image, const ImageViewDescriptor& descriptor) const final override;
+		protected:
+			ref<ImageView> createViewInternal(const ImageViewDescriptor& descriptor, const Image* image) const final override;
 
 		private:
 			static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent);

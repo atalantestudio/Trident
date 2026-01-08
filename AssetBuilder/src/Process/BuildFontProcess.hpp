@@ -25,7 +25,7 @@ namespace ProjectA {
 						continue;
 					}
 
-					const BuildTrueTypeFontSubprocess subprocess(directoryEntry, assetOutputPath);
+					BuildTrueTypeFontSubprocess(directoryEntry, assetOutputPath);
 				}
 
 				ENGINE_INFO("Done building font assets.");

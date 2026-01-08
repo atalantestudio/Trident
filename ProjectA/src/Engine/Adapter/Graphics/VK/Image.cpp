@@ -93,10 +93,10 @@ namespace ProjectA {
 		MemoryAllocator::freeSuballocation(device, memorySuballocation.allocationIndex);
 	}
 
-	ref<ImageView> VulkanImage::createViewInternal(const Image* image, const ImageViewDescriptor& descriptor) const {
+	ref<ImageView> VulkanImage::createViewInternal(const ImageViewDescriptor& descriptor, const Image* image) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor, image);
 
-		return createRef<VulkanImageView>(device, image, descriptor);
+		return createRef<VulkanImageView>(descriptor, image, device);
 	}
 
 	ImageDescriptor VulkanImage::createSwapchainImageDescriptor(Extent2D extent) {

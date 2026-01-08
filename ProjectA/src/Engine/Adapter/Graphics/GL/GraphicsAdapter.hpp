@@ -38,8 +38,8 @@ namespace ProjectA {
 
 			ref<Semaphore> createSemaphore() const final override;
 
-			ref<ShaderModule> createShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) const final override;
-			ref<ShaderModule> createShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor) const final override;
+			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const final override;
+			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const final override;
 
 			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const final override;
 

@@ -56,7 +56,7 @@ namespace ProjectA {
 		cameraMappedRange->farPlane = camera.getFarPlane();
 	}
 
-	void VisibilityRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
+	void VisibilityRenderer::render(ref<CommandEncoder> commandEncoder) const {
 		const ClearValue swapchainClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 		const ClearValue visibilityClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
@@ -526,18 +526,18 @@ namespace ProjectA {
 				break;
 			}
 			case GraphicsAPI::GL: {
-				vertexShaderModule = loadShaderModule("Visibility/VisibilityGL.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Visibility/VisibilityGL.vert");
 
 				break;
 			}
 			case GraphicsAPI::VK: {
-				vertexShaderModule = loadShaderModule("Visibility/VisibilityVK.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Visibility/VisibilityVK.vert");
 
 				break;
 			}
 		}
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Visibility/Visibility.frag", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Visibility/Visibility.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
@@ -581,13 +581,13 @@ namespace ProjectA {
 
 				break;
 			case GraphicsAPI::GL:
-				vertexShaderModule = loadShaderModule("Base/ScreenUV.vert", vertexShaderModuleDescriptor);
-				fragmentShaderModule = loadShaderModule("Visibility/VisibilityDebugGL.frag", fragmentShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/ScreenUV.vert");
+				fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Visibility/VisibilityDebugGL.frag");
 
 				break;
 			case GraphicsAPI::VK:
-				vertexShaderModule = loadShaderModule("Base/Screen.vert", vertexShaderModuleDescriptor);
-				fragmentShaderModule = loadShaderModule("Visibility/VisibilityDebugVK.frag", fragmentShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/Screen.vert");
+				fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Visibility/VisibilityDebugVK.frag");
 
 				break;
 			default:

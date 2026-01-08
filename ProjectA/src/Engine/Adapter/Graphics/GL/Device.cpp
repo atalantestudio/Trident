@@ -11,10 +11,8 @@ namespace ProjectA {
 		queue(createRef<OpenGLQueue>(instance, *this))
 	{}
 
-	AcquireNextImageStatus OpenGLDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
-		// NOTE
-		// WGL handles double buffering at a lower level.
-		// The device implementation doesn't need to emulate this behavior and can always return 0.
+	AcquireNextImageStatus OpenGLDevice::acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {
+		// The buffering is handled by WGL.
 		imageIndex = 0;
 
 		return AcquireNextImageStatus::SUCCESS;
@@ -24,7 +22,7 @@ namespace ProjectA {
 		sequence<ref<DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 
 		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
-			const ref<DescriptorSetLayout>& descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
+			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
 
 			ref<OpenGLDescriptorSet>& descriptorSet = createRef<OpenGLDescriptorSet>();
 			descriptorSet->bindings = sequence<OpenGLDescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
@@ -60,15 +58,15 @@ namespace ProjectA {
 		return queue;
 	}
 
-	void OpenGLDevice::resetFence(const ref<Fence>& fence) const {
-		const ref<OpenGLFence>& glFence = std::static_pointer_cast<OpenGLFence>(fence);
+	void OpenGLDevice::resetFence(ref<Fence> fence) const {
+		const ref<OpenGLFence> glFence = std::static_pointer_cast<OpenGLFence>(fence);
 
 		glFence->reset();
 	}
 
 	void OpenGLDevice::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
-			const ref<OpenGLDescriptorSet>& descriptorSetConst = std::static_pointer_cast<OpenGLDescriptorSet>(writeDescriptorSet.descriptorSet);
+			const ref<OpenGLDescriptorSet> descriptorSetConst = std::static_pointer_cast<OpenGLDescriptorSet>(writeDescriptorSet.descriptorSet);
 
 			// TODO: Find another way without using const_cast.
 			ref<OpenGLDescriptorSet>& descriptorSet = const_cast<ref<OpenGLDescriptorSet>&>(descriptorSetConst);
@@ -91,9 +89,9 @@ namespace ProjectA {
 		}
 	}
 
-	void OpenGLDevice::waitForFence(const ref<Fence>& fence) const {
+	void OpenGLDevice::waitForFence(ref<Fence> fence) const {
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
-			const ref<OpenGLFence>& glFence = std::static_pointer_cast<OpenGLFence>(fence);
+			const ref<OpenGLFence> glFence = std::static_pointer_cast<OpenGLFence>(fence);
 
 			glFence->create();
 

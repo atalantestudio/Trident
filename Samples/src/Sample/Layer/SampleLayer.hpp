@@ -2,7 +2,7 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "../Sample/TriangleDX12.hpp"
+#include "../Sample/Empty.hpp"
 
 namespace ProjectA {
 	class SampleLayer : public Layer {
@@ -12,7 +12,7 @@ namespace ProjectA {
 				renderer.build();
 			}
 
-			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const override {
+			void render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const override {
 				renderer.render(commandEncoder);
 			}
 

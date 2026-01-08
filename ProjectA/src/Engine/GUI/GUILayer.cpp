@@ -110,7 +110,7 @@ namespace ProjectA {
 		}
 	}
 
-	void GUILayer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {
+	void GUILayer::render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const {
 		renderer.render(commandEncoder);
 	}
 

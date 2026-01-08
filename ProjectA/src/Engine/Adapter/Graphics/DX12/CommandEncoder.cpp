@@ -65,13 +65,13 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::bindComputePipeline(const ref<ProjectA::ComputePipeline>& computePipeline) {
+	void DX12::CommandEncoder::bindComputePipeline(ref<ProjectA::ComputePipeline> computePipeline) {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::bindRenderPipeline(const ref<ProjectA::RenderPipeline>& renderPipeline) {
+	void DX12::CommandEncoder::bindRenderPipeline(ref<ProjectA::RenderPipeline> renderPipeline) {
 		const ref<DX12::RenderPipeline> pipeline = std::static_pointer_cast<DX12::RenderPipeline>(renderPipeline);
 
 		commandList->SetPipelineState(pipeline->pipelineState.Get());
@@ -81,13 +81,13 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::bindDescriptorSets(const ref<ProjectA::PipelineLayout>& pipelineLayout, const sequence<ref<ProjectA::DescriptorSet>>& descriptorSets) {
+	void DX12::CommandEncoder::bindDescriptorSets(ref<ProjectA::PipelineLayout> pipelineLayout, const sequence<ref<ProjectA::DescriptorSet>>& descriptorSets) {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<ProjectA::Buffer>& vertexBuffer, uint64 offset, uint32 stride) {
+	void DX12::CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<ProjectA::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
 		const ComPtr<ID3D12Resource>& resource = std::static_pointer_cast<DX12::Buffer>(vertexBuffer)->resource;
 
 		ADAPTER_ASSERT(offset < resource->GetDesc().Width, "The vertex buffer bind offset is overflowing.");
@@ -102,7 +102,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::copyBufferToBuffer(const ref<ProjectA::Buffer>& sourceBuffer, const ref<ProjectA::Buffer>& destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) {
+	void DX12::CommandEncoder::copyBufferToBuffer(ref<ProjectA::Buffer> sourceBuffer, ref<ProjectA::Buffer> destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) {
 		const ref<DX12::Buffer> srcBuffer = std::static_pointer_cast<DX12::Buffer>(sourceBuffer);
 		const ref<DX12::Buffer> dstBuffer = std::static_pointer_cast<DX12::Buffer>(destinationBuffer);
 
@@ -113,13 +113,13 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::copyBufferToImage(const ref<ProjectA::Buffer>& sourceBuffer, const ref<ProjectA::Image>& destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
+	void DX12::CommandEncoder::copyBufferToImage(ref<ProjectA::Buffer> sourceBuffer, ref<ProjectA::Image> destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::copyImageToBuffer(const ref<ProjectA::Image>& sourceImage, const ref<ProjectA::Buffer>& destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) {
+	void DX12::CommandEncoder::copyImageToBuffer(ref<ProjectA::Image> sourceImage, ref<ProjectA::Buffer> destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		commandCount += 1;
@@ -131,7 +131,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::dispatchIndirect(const ref<ProjectA::Buffer>& buffer, uint64 offset) {
+	void DX12::CommandEncoder::dispatchIndirect(ref<ProjectA::Buffer> buffer, uint64 bufferOffset) {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		commandCount += 1;
@@ -143,7 +143,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::setImageMemoryBarrier(const ref<ProjectA::Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
+	void DX12::CommandEncoder::setImageMemoryBarrier(ref<ProjectA::Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		commandCount += 1;
@@ -167,7 +167,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
+	void DX12::CommandEncoder::setViewport(vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth) {
 		D3D12_VIEWPORT viewport{};
 		viewport.TopLeftX = origin[0];
 
@@ -190,7 +190,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::drawIndirect(const ref<ProjectA::Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) {
+	void DX12::CommandEncoder::drawIndirect(ref<ProjectA::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		commandCount += 1;
@@ -202,7 +202,7 @@ namespace ProjectA {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::drawIndexedIndirect(const ref<ProjectA::Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) {
+	void DX12::CommandEncoder::drawIndexedIndirect(ref<ProjectA::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		commandCount += 1;
@@ -247,7 +247,7 @@ namespace ProjectA {
 		commandCount = 0;
 	}
 
-	void DX12::CommandEncoder::bindIndexBuffer(const ref<ProjectA::Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {
+	void DX12::CommandEncoder::bindIndexBuffer(ref<ProjectA::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		commandCount += 1;

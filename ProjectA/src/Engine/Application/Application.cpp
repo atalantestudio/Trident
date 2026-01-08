@@ -259,11 +259,11 @@ namespace ProjectA {
 		PROFILE_SCOPE("Application render");
 
 		const ref<Device> device = Renderer::getDevice();
-		const ref<Swapchain>& swapchain = Renderer::getSwapchain();
-		const ref<Fence>& flightFence = Renderer::getFlightFence(frameInFlightIndex);
-		const ref<Semaphore>& acquireNextImageSemaphore = Renderer::getAcquireNextImageSemaphore(frameInFlightIndex);
-		const ref<Semaphore>& finishedRenderSemaphore = Renderer::getFinishedRenderSemaphore(frameInFlightIndex);
-		const ref<CommandEncoder>& commandEncoder = Renderer::getCommandEncoder(frameInFlightIndex);
+		const ref<Swapchain> swapchain = Renderer::getSwapchain();
+		const ref<Fence> flightFence = Renderer::getFlightFence(frameInFlightIndex);
+		const ref<Semaphore> acquireNextImageSemaphore = Renderer::getAcquireNextImageSemaphore(frameInFlightIndex);
+		const ref<Semaphore> finishedRenderSemaphore = Renderer::getFinishedRenderSemaphore(frameInFlightIndex);
+		const ref<CommandEncoder> commandEncoder = Renderer::getCommandEncoder(frameInFlightIndex);
 
 		device->waitForFence(flightFence);
 		device->resetFence(flightFence);
@@ -290,7 +290,7 @@ namespace ProjectA {
 		commandEncoder->reset();
 		commandEncoder->begin();
 
-		for (const ref<Layer>& layer : layerStack) {
+		for (const ref<Layer> layer : layerStack) {
 			layer->preRender();
 			layer->render(remainingFrameTime, commandEncoder);
 			layer->postRender();

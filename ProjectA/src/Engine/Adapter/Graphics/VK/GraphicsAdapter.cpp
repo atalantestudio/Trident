@@ -89,12 +89,15 @@ namespace ProjectA {
 		return createRef<VulkanSemaphore>(device->object);
 	}
 
-	ref<ShaderModule> VulkanGraphicsAdapter::createShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) const {
-		return createRef<VulkanShaderModule>(device->object, asset, descriptor);
+	ref<ShaderModule> VulkanGraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
+		// TODO: Add support for SPIR-V shader module assets.
+		ENGINE_ERROR_UNIMPLEMENTED();
+
+		return nullptr;
 	}
 
-	ref<ShaderModule> VulkanGraphicsAdapter::createShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor) const {
-		return createRef<VulkanShaderModule>(code, descriptor, device->object);
+	ref<ShaderModule> VulkanGraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
+		return createRef<VulkanShaderModule>(descriptor, code, device->object);
 	}
 
 	ref<Swapchain> VulkanGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {

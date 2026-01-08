@@ -19,7 +19,7 @@ namespace ProjectA {
 		device.device->CreateRenderTargetView(resource.Get(), nullptr, cpuDescriptorHandle);
 	}
 
-	ref<ProjectA::ImageView> DX12::Image::createViewInternal(const ProjectA::Image* image, const ImageViewDescriptor& descriptor) const {
+	ref<ProjectA::ImageView> DX12::Image::createViewInternal(const ImageViewDescriptor& descriptor, const ProjectA::Image* image) const {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;

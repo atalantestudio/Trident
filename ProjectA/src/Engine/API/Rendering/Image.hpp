@@ -5,6 +5,7 @@
 #include "Engine/Validation/Descriptor.hpp"
 
 namespace ProjectA {
+	class Image;
 	class ImageView;
 	struct ImageViewDescriptor;
 
@@ -44,7 +45,7 @@ namespace ProjectA {
 			}
 
 			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const {
-				return createViewInternal(this, descriptor);
+				return createViewInternal(descriptor, this);
 			}
 
 		protected:
@@ -58,7 +59,7 @@ namespace ProjectA {
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 			}
 
-			virtual ref<ImageView> createViewInternal(const Image* image, const ImageViewDescriptor& descriptor) const = 0;
+			virtual ref<ImageView> createViewInternal(const ImageViewDescriptor& descriptor, const Image* image) const = 0;
 
 		protected:
 			ImageFormat format;

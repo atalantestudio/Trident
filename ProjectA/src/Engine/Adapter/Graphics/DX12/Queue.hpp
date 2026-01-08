@@ -18,9 +18,9 @@ namespace ProjectA {
 
 			ref<ProjectA::CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
 
-			void submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, const ref<ProjectA::Semaphore>& waitSemaphore, const ref<ProjectA::Semaphore>& signalSemaphore, const ref<ProjectA::Fence>& fence) const final override;
+			void submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, ref<ProjectA::Semaphore> waitSemaphore, ref<ProjectA::Semaphore> signalSemaphore, ref<ProjectA::Fence> fence) const final override;
 
-			PresentStatus present(const sequence<ref<ProjectA::Swapchain>>& swapchains, const ref<ProjectA::Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const final override;
+			PresentStatus present(const sequence<ref<ProjectA::Swapchain>>& swapchains, ref<ProjectA::Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const final override;
 
 			void waitIdle() const final override;
 

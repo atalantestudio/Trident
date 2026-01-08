@@ -29,7 +29,6 @@ namespace ProjectA {
 		const ref<DX12::PipelineLayout> pipelineLayout = std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout);
 		const ref<DX12::ShaderModule> vertexShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.vertexShaderModule);
 		const ref<DX12::ShaderModule> fragmentShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.fragmentShaderModule);
-		const ref<RenderPass>& renderPass = descriptor.renderPass;
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescriptor{};
 		graphicsPipelineStateDescriptor.pRootSignature = pipelineLayout->rootSignature.Get();
@@ -174,12 +173,12 @@ namespace ProjectA {
 		graphicsPipelineStateDescriptor.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 		graphicsPipelineStateDescriptor.PrimitiveTopologyType = getPrimitiveTopologyType(descriptor.primitiveTopology);
 
-		graphicsPipelineStateDescriptor.NumRenderTargets = renderPass->getAttachmentCount();
+		graphicsPipelineStateDescriptor.NumRenderTargets = descriptor.renderPass->getAttachmentCount();
 
 		uint32 attachmentIndex = 0;
 
-		while (attachmentIndex < renderPass->getAttachmentCount()) {
-			const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
+		while (attachmentIndex < descriptor.renderPass->getAttachmentCount()) {
+			const Attachment& attachment = descriptor.renderPass->getAttachment(attachmentIndex);
 
 			graphicsPipelineStateDescriptor.RTVFormats[attachmentIndex] = getFormat(attachment.format);
 

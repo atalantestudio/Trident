@@ -14,7 +14,7 @@ namespace ProjectA {
 
 			void execute() const final override {
 				const ref<OpenGLFramebuffer> glFramebuffer = std::static_pointer_cast<OpenGLFramebuffer>(descriptor.framebuffer);
-				const ref<RenderPass>& renderPass = glFramebuffer->getRenderPass();
+				const ref<RenderPass> renderPass = glFramebuffer->getRenderPass();
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
 					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glFramebuffer->object);

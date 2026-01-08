@@ -24,37 +24,37 @@ namespace ProjectA {
 
 			// TODO: Either merge bindComputePipeline and bindRenderPipeline,
 			// or implement RenderPassCommandEncoder and ComputePassCommandEncoder.
-			virtual void bindComputePipeline(const ref<ComputePipeline>& computePipeline) = 0;
+			virtual void bindComputePipeline(ref<ComputePipeline> computePipeline) = 0;
 
-			virtual void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) = 0;
+			virtual void bindRenderPipeline(ref<RenderPipeline> renderPipeline) = 0;
 
 			// Binds descriptor sets to the command buffer.
 			// The pipeline bind point is taken from the currently bound pipeline.
-			virtual void bindDescriptorSets(const ref<PipelineLayout>& pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) = 0;
+			virtual void bindDescriptorSets(ref<PipelineLayout> pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) = 0;
 
 			// Binds the provided index buffer.
 			// The `offset` is in bytes and must be a multiple of IndexType.
 			template<typename IndexType>
-			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset) {
+			void bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset) {
 				bindIndexBuffer(indexBuffer, offset, sizeof(IndexType));
 			}
 
 			// `stride` is only used by OpenGL when calling glBindVertexBuffer.
-			virtual void bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) = 0;
+			virtual void bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) = 0;
 
-			virtual void copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) = 0;
+			virtual void copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) = 0;
 
-			virtual void copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
+			virtual void copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
 
-			virtual void copyImageToBuffer(const ref<Image>& sourceImage, const ref<Buffer>& destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
+			virtual void copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
 
 			virtual void dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) = 0;
 
-			virtual void dispatchIndirect(const ref<Buffer>& buffer, uint64 offset) = 0;
+			virtual void dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset) = 0;
 
 			virtual void nextSubpass() = 0;
 
-			virtual void setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) = 0;
+			virtual void setImageMemoryBarrier(ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) = 0;
 
 			virtual void setLineWidth(float32 lineWidth) = 0;
 
@@ -64,7 +64,7 @@ namespace ProjectA {
 
 			// Updates the viewport area.
 			// NOTE: This should only be used if the render pipeline's dynamic state contains VIEWPORT.
-			virtual void setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) = 0;
+			virtual void setViewport(vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth) = 0;
 
 			// Draws primitives.
 			// - `vertexCount` is the number of total vertices to draw.
@@ -75,10 +75,10 @@ namespace ProjectA {
 
 			// Draws primitives using arguments from an indirect buffer.
 			// - `buffer` is the buffer containing draw arguments.
-			// - `offset` is the offset into `buffer` where arguments begin, in bytes.
+			// - `bufferOffset` is the offset into `buffer` where arguments begin, in bytes.
 			// - `drawCount` is the number of draw calls to execute. Cannot be 0.
 			// - `stride` is the distance between successive sets of draw arguments, in bytes. Ignored if `drawCount` is 0 or 1.
-			virtual void drawIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) = 0;
+			virtual void drawIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) = 0;
 
 			// Draws primitives with indexed vertices.
 			// - `indexCount` is the number of total indices to draw.
@@ -90,10 +90,10 @@ namespace ProjectA {
 
 			// Draws primitives with indexed vertices, using arguments from an indirect buffer.
 			// - `buffer` is the buffer containing draw arguments.
-			// - `offset` is the offset into `buffer` where arguments begin, in bytes.
+			// - `bufferOffset` is the offset into `buffer` where arguments begin, in bytes.
 			// - `drawCount` is the number of draw calls to execute. Cannot be 0.
 			// - `stride` is the distance between successive sets of draw arguments, in bytes. Ignored if `drawCount` is 0 or 1.
-			virtual void drawIndexedIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) = 0;
+			virtual void drawIndexedIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) = 0;
 
 			virtual void endRenderPass() = 0;
 
@@ -102,9 +102,9 @@ namespace ProjectA {
 			virtual void reset() = 0;
 
 		protected:
-			virtual void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) = 0;
+			virtual void bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) = 0;
 	};
 
-	template void CommandEncoder::bindIndexBuffer<uint16>(const ref<Buffer>& indexBuffer, uint64 offset);
-	template void CommandEncoder::bindIndexBuffer<uint32>(const ref<Buffer>& indexBuffer, uint64 offset);
+	template void CommandEncoder::bindIndexBuffer<uint16>(ref<Buffer> indexBuffer, uint64 offset);
+	template void CommandEncoder::bindIndexBuffer<uint32>(ref<Buffer> indexBuffer, uint64 offset);
 }

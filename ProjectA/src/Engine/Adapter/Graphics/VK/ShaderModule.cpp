@@ -4,15 +4,7 @@
 #include "Engine/Adapter/Graphics/VK/ShaderStage.hpp"
 
 namespace ProjectA {
-	VulkanShaderModule::VulkanShaderModule(VkDevice device, const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) :
-		ShaderModule(descriptor),
-		device(device)
-	{
-		// TODO
-		ENGINE_ERROR_UNIMPLEMENTED();
-	}
-
-	VulkanShaderModule::VulkanShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor, VkDevice device) :
+	VulkanShaderModule::VulkanShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code, VkDevice device) :
 		ShaderModule(descriptor),
 		device(device)
 	{

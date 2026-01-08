@@ -18,7 +18,7 @@ namespace ProjectA {
 
 	void Layer::preRender() {}
 
-	void Layer::render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const {}
+	void Layer::render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const {}
 
 	void Layer::postRender() {}
 

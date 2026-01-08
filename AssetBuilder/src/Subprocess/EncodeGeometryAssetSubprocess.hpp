@@ -6,7 +6,7 @@
 
 namespace ProjectA {
 	// TODO: Assert that FBX nodes exist before using them.
-	static void EncodeGeometryAssetSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::string& assetOutputPath) {
+	static void EncodeGeometryAssetSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
 		const sequence<char8> path = directoryEntry.path().string();
 		const sequence<uint8> inputData = Filesystem::openByteBuffer(path);
 
@@ -300,14 +300,9 @@ namespace ProjectA {
 		const uint32 vertexPositionCount = static_cast<uint32>(vertexPositionComponents.count()) / Geometry3D::VERTEX_POSITION_STRIDE;
 		const uint32 vertexNormalCount = static_cast<uint32>(vertexNormalComponents.count()) / Geometry3D::VERTEX_NORMAL_STRIDE;
 		const uint32 vertexTextureCoordinateCount = static_cast<uint32>(vertexTextureCoordinateComponents.count()) / Geometry3D::VERTEX_TEXTURE_COORDINATE_STRIDE;
-
-		const uint32 largestVertexPositionIndex = vertexPositionCount - 1;
-		const uint32 largestVertexNormalIndex = vertexNormalCount - 1;
-		const uint32 largestVertexTextureCoordinateIndex = vertexTextureCoordinateCount - 1;
-
-		const uint8 vertexPositionIndexBitCount = countBits(largestVertexPositionIndex);
-		const uint8 vertexNormalIndexBitCount = countBits(largestVertexNormalIndex);
-		const uint8 vertexTextureCoordinateIndexBitCount = countBits(largestVertexTextureCoordinateIndex);
+		const uint8 vertexPositionIndexBitCount = countBits(vertexPositionCount - 1);
+		const uint8 vertexNormalIndexBitCount = countBits(vertexNormalCount - 1);
+		const uint8 vertexTextureCoordinateIndexBitCount = countBits(vertexTextureCoordinateCount - 1);
 
 		const uint64 totalIndexByteCount = static_cast<uint64>(ceil(indexCount * (vertexPositionIndexBitCount + vertexNormalIndexBitCount + vertexTextureCoordinateIndexBitCount) / 8.0f));
 
@@ -359,13 +354,14 @@ namespace ProjectA {
 		}
 
 		const std::string stem = directoryEntry.path().stem().string();
+		const std::string assetOutputPathString = assetOutputPath.string();
 
 		// Count '\0'.
-		sequence<char8> outputPath(assetOutputPath.size() + stem.size() + 14);
-		std::copy(assetOutputPath.begin(), assetOutputPath.end(), &outputPath[0]);
-		std::copy_n("Geometry/", 9, &outputPath[assetOutputPath.size()]);
-		std::copy(stem.begin(), stem.end(), &outputPath[assetOutputPath.size() + 9]);
-		std::copy_n(".tge", 4, &outputPath[assetOutputPath.size() + 9 + stem.size()]);
+		sequence<char8> outputPath(assetOutputPathString.size() + stem.size() + 14);
+		std::copy(assetOutputPathString.begin(), assetOutputPathString.end(), &outputPath[0]);
+		std::copy_n("Geometry/", 9, &outputPath[assetOutputPathString.size()]);
+		std::copy(stem.begin(), stem.end(), &outputPath[assetOutputPathString.size() + 9]);
+		std::copy_n(".tge", 4, &outputPath[assetOutputPathString.size() + 9 + stem.size()]);
 
 		Writer writer = Filesystem::openWriter(outputPath);
 		writer.write(byteStream.data, byteStream.size);

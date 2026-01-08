@@ -71,7 +71,7 @@ namespace ProjectA {
 				}
 			}
 
-			const ref<Asset>& findAsset(uint32 identifier) const {
+			ref<Asset> findAsset(uint32 identifier) const {
 				const auto iterator = assetIdentifierToAssetIndex.find(identifier);
 
 				ENGINE_ASSERT(iterator != assetIdentifierToAssetIndex.end(), "No asset exists with the provided identifier.");

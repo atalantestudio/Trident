@@ -7,7 +7,7 @@ namespace ProjectA {
 		public:
 			void build() override {}
 
-			void render(const ref<CommandEncoder>& commandEncoder) const override {}
+			void render(ref<CommandEncoder> commandEncoder) const override {}
 
 			void resize(WindowResizeEvent& event) override {}
 	};

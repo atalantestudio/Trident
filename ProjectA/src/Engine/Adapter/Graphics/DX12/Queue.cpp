@@ -43,7 +43,7 @@ namespace ProjectA {
 		return createRef<DX12::CommandEncoder>(descriptor, device, commandPool);
 	}
 
-	void DX12::Queue::submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, const ref<ProjectA::Semaphore>& waitSemaphore, const ref<ProjectA::Semaphore>& signalSemaphore, const ref<ProjectA::Fence>& fence) const {
+	void DX12::Queue::submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, ref<ProjectA::Semaphore> waitSemaphore, ref<ProjectA::Semaphore> signalSemaphore, ref<ProjectA::Fence> fence) const {
 		sequence<ID3D12CommandList*> commandLists(commandBuffers.count());
 		uint32 commandListIndex = 0;
 
@@ -63,10 +63,10 @@ namespace ProjectA {
 		} */
 	}
 
-	PresentStatus DX12::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, const ref<ProjectA::Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const {
+	PresentStatus DX12::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, ref<ProjectA::Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const {
 		HRESULT result;
 
-		for (const ref<ProjectA::Swapchain>& swapchain : swapchains) {
+		for (const ref<ProjectA::Swapchain> swapchain : swapchains) {
 			// TODO: Set correct swap interval.
 			result = std::static_pointer_cast<DX12::Swapchain>(swapchain)->swapChain->Present(1, 0);
 

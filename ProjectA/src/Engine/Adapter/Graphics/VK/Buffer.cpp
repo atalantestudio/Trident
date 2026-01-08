@@ -20,6 +20,8 @@ namespace ProjectA {
 		bufferCreateInfo.queueFamilyIndexCount = 0;
 		bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
+		ENGINE_TRACE("Creating VkBuffer.");
+
 		const VkResult result = vkCreateBuffer(device, &bufferCreateInfo, nullptr, &object);
 
 		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan buffer ([]).", string_VkResult(result));

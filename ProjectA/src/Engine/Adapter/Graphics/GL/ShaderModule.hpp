@@ -7,10 +7,10 @@
 namespace ProjectA {
 	class OpenGLShaderModule final : public ShaderModule, public ObjectWrapper<GLuint> {
 		public:
-			explicit OpenGLShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor);
+			explicit OpenGLShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset);
 
 			// TODO: Deprecate.
-			explicit OpenGLShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor);
+			explicit OpenGLShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code);
 
 			~OpenGLShaderModule() final override;
 

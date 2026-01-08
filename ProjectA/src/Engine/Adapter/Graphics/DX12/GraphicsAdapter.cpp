@@ -78,14 +78,14 @@ namespace ProjectA {
 		return createRef<ProjectA::Semaphore>();
 	}
 
-	ref<ShaderModule> DX12::GraphicsAdapter::createShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) const {
+	ref<ShaderModule> DX12::GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
 		ADAPTER_ASSERT(false, "Shader module assets are not supported within DX12 pipelines.");
 
 		return nullptr;
 	}
 
-	ref<ShaderModule> DX12::GraphicsAdapter::createShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor) const {
-		return createRef<DX12::ShaderModule>(code, descriptor);
+	ref<ShaderModule> DX12::GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
+		return createRef<DX12::ShaderModule>(descriptor, code);
 	}
 
 	ref<Swapchain> DX12::GraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {

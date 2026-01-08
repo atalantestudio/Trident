@@ -29,7 +29,7 @@ namespace ProjectA {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 		DEBUG_ASSERT(subpassIndex < subpasses.count());
 
-		const ref<Subpass>& subpass = subpasses[subpassIndex];
+		const ref<Subpass> subpass = subpasses[subpassIndex];
 
 		ENGINE_ASSERT(subpass->hasDepthStencilAttachmentReference(), "The subpass doesn't use a depth/stencil attachment.");
 
@@ -51,7 +51,7 @@ namespace ProjectA {
 		bool isInputAttachment = false;
 
 		for (uint32 nextSubpassIndex = subpassIndex; nextSubpassIndex < subpasses.count(); nextSubpassIndex += 1) {
-			const ref<Subpass>& subpass = subpasses[nextSubpassIndex];
+			const ref<Subpass> subpass = subpasses[nextSubpassIndex];
 
 			for (const AttachmentReference& inputAttachmentReference : subpass->getInputAttachmentReferences()) {
 				if (inputAttachmentReference.index == attachmentIndex) {

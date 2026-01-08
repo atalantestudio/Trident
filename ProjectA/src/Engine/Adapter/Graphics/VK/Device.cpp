@@ -96,7 +96,7 @@ namespace ProjectA {
 		return queues[static_cast<uint32>(queueFamilyCapability)];
 	}
 
-	AcquireNextImageStatus VulkanDevice::acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const {
+	AcquireNextImageStatus VulkanDevice::acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VkResult result = vkAcquireNextImageKHR(
@@ -131,7 +131,7 @@ namespace ProjectA {
 		sequence<uint32> descriptorCountPerType(static_cast<uint32>(DescriptorType::count));
 
 		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptorSetLayouts.count(); descriptorSetLayoutIndex += 1) {
-			const ref<DescriptorSetLayout>& descriptorSetLayout = descriptorSetLayouts[descriptorSetLayoutIndex];
+			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetLayoutIndex];
 
 			for (const DescriptorSetLayoutBinding descriptorSetLayoutBinding : descriptorSetLayout->bindings) {
 				descriptorCountPerType[static_cast<uint32>(descriptorSetLayoutBinding.descriptorType)] += descriptorSetLayoutBinding.descriptorCount;
@@ -194,7 +194,7 @@ namespace ProjectA {
 		sequence<ref<DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 
 		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
-			const ref<DescriptorSetLayout>& descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
+			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
 
 			ref<VulkanDescriptorSet> descriptorSet = createRef<VulkanDescriptorSet>(vkDescriptorSets[descriptorSetIndex]);
 			descriptorSet->bindings = sequence<VulkanDescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
@@ -212,7 +212,7 @@ namespace ProjectA {
 		return descriptorSets;
 	}
 
-	void VulkanDevice::resetFence(const ref<Fence>& fence) const {
+	void VulkanDevice::resetFence(ref<Fence> fence) const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VkResult result = vkResetFences(
@@ -229,7 +229,7 @@ namespace ProjectA {
 		uint64 descriptorImageInfoCount = 0;
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
-			const ref<VulkanDescriptorSet>& descriptorSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet);
+			const ref<VulkanDescriptorSet> descriptorSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet);
 
 			ENGINE_ASSERT(writeDescriptorSet.bindingIndex < descriptorSet->bindings.count(), "This descriptor set doesn't have binding index [].", writeDescriptorSet.bindingIndex);
 
@@ -256,7 +256,7 @@ namespace ProjectA {
 
 		while (writeDescriptorSetIndex < writeDescriptorSets.count()) {
 			const WriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[writeDescriptorSetIndex];
-			const ref<VulkanDescriptorSet>& descriptorSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet);
+			const ref<VulkanDescriptorSet> descriptorSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet);
 			const VulkanDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			VkWriteDescriptorSet& vkWriteDescriptorSet = vkWriteDescriptorSets[writeDescriptorSetIndex];
@@ -289,7 +289,7 @@ namespace ProjectA {
 
 				for (uint32 descriptorImageIndex = 0; descriptorImageIndex < descriptorImageCount; descriptorImageIndex += 1) {
 					const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
-					const ref<VulkanImageView>& imageView = std::static_pointer_cast<VulkanImageView>(descriptorImage.imageView);
+					const ref<VulkanImageView> imageView = std::static_pointer_cast<VulkanImageView>(descriptorImage.imageView);
 
 					VkDescriptorImageInfo& descriptorImageInfo = descriptorImageInfos[descriptorImageInfoOffset + descriptorImageIndex];
 
@@ -327,7 +327,7 @@ namespace ProjectA {
 		);
 	}
 
-	void VulkanDevice::waitForFence(const ref<Fence>& fence) const {
+	void VulkanDevice::waitForFence(ref<Fence> fence) const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VkResult result = vkWaitForFences(

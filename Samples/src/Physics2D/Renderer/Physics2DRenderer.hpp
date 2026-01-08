@@ -73,7 +73,7 @@ namespace ProjectA {
 
 			void selectEntity(Entity entity);
 
-			void render(const ref<CommandEncoder>& commandEncoder) const override;
+			void render(ref<CommandEncoder> commandEncoder) const override;
 
 			void resize(WindowResizeEvent& event) override;
 
@@ -138,16 +138,16 @@ namespace ProjectA {
 			void updateCameraProjection() const;
 			void updateViewport() const;
 
-			void renderGrid(const ref<CommandEncoder>& commandEncoder) const;
-			void renderScene(const ref<CommandEncoder>& commandEncoder) const;
-			void renderSelectedInstancePlaceholder(const ref<CommandEncoder>& commandEncoder) const;
+			void renderGrid(ref<CommandEncoder> commandEncoder) const;
+			void renderScene(ref<CommandEncoder> commandEncoder) const;
+			void renderSelectedInstancePlaceholder(ref<CommandEncoder> commandEncoder) const;
 
 			#ifdef SHOW_DISTANCE
-				void renderDistance(const ref<CommandEncoder>& commandEncoder) const;
+				void renderDistance(ref<CommandEncoder> commandEncoder) const;
 			#endif
 
 			#ifdef SHOW_FEATURES
-				void renderFeatures(const ref<CommandEncoder>& commandEncoder) const;
+				void renderFeatures(ref<CommandEncoder> commandEncoder) const;
 			#endif
 
 		private:

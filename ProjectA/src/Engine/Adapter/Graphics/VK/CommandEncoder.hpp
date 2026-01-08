@@ -16,41 +16,41 @@ namespace ProjectA {
 
 			void beginRenderPass(const BeginRenderPassDescriptor& descriptor) final override;
 
-			void bindComputePipeline(const ref<ComputePipeline>& computePipeline) final override;
+			void bindComputePipeline(ref<ComputePipeline> computePipeline) final override;
 
-			void bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) final override;
+			void bindRenderPipeline(ref<RenderPipeline> renderPipeline) final override;
 
-			void bindDescriptorSets(const ref<PipelineLayout>& pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) final override;
+			void bindDescriptorSets(ref<PipelineLayout> pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) final override;
 
-			void bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) final override;
+			void bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) final override;
 
-			void copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) final override;
+			void copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) final override;
 
-			void copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) final override;
+			void copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) final override;
 
-			void copyImageToBuffer(const ref<Image>& sourceImage, const ref<Buffer>& destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) final override;
+			void copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) final override;
 
 			void dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) final override;
 
-			void dispatchIndirect(const ref<Buffer>& buffer, uint64 offset) final override;
+			void dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset) final override;
 
 			void nextSubpass() final override;
 
-			void setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) final override;
+			void setImageMemoryBarrier(ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) final override;
 
 			void setLineWidth(float32 lineWidth) final override;
 
 			void setScissor(sint32 xOffset, sint32 yOffset, Extent2D extent) final override;
 
-			void setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) final override;
+			void setViewport(vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth) final override;
 
 			void draw(uint32 vertexCount, uint32 instanceCount, uint32 vertexOffset, uint32 instanceOffset) final override;
 
-			void drawIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) final override;
+			void drawIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) final override;
 
 			void drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) final override;
 
-			void drawIndexedIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) final override;
+			void drawIndexedIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) final override;
 
 			void endRenderPass() final override;
 
@@ -59,7 +59,7 @@ namespace ProjectA {
 			void reset() final override;
 
 		protected:
-			void bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) final override;
+			void bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) final override;
 
 			static sequence<VkBufferImageCopy> parseBufferImageCopyRegions(const sequence<BufferImageCopyRegion>& copyRegions);
 

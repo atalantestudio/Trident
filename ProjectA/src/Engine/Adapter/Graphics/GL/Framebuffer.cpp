@@ -26,7 +26,7 @@ namespace ProjectA {
 		bool resolve = false;
 
 		for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count(); imageViewIndex += 1) {
-			const ref<ImageView>& imageView = descriptor.imageViews[imageViewIndex];
+			const ref<ImageView> imageView = descriptor.imageViews[imageViewIndex];
 
 			if (imageView->getImage()->getSampleCount() > 1) {
 				resolve = true;
@@ -38,9 +38,9 @@ namespace ProjectA {
 		uint32 boundAttachmentIndex = 0;
 
 		for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count(); imageViewIndex += 1) {
-			const ref<ImageView>& imageView = descriptor.imageViews[imageViewIndex];
+			const ref<ImageView> imageView = descriptor.imageViews[imageViewIndex];
+			const ref<OpenGLImageView> glImageView = std::static_pointer_cast<OpenGLImageView>(imageView);
 			const OpenGLImage* glImage = static_cast<const OpenGLImage*>(imageView->getImage());
-			const OpenGLImageView& glImageView = *std::static_pointer_cast<OpenGLImageView>(imageView);
 
 			if (resolve && imageView->getImage()->getSampleCount() == 1) {
 				continue;
@@ -82,7 +82,7 @@ namespace ProjectA {
 						glNamedFramebufferTexture(
 							object,
 							attachment,
-							glImageView.object,
+							glImageView->object,
 							imageView->getMipLevelOffset()
 						);
 					#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
@@ -90,7 +90,7 @@ namespace ProjectA {
 							GL_FRAMEBUFFER,
 							attachment,
 							glImage->target,
-							glImageView.object,
+							glImageView->object,
 							imageView->getMipLevelOffset()
 						);
 					#else

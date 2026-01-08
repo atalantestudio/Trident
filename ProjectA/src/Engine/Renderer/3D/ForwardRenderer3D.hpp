@@ -230,7 +230,7 @@ namespace ProjectA {
 				transferQueue->waitIdle();
 			}
 
-			void render(const ref<CommandEncoder>& commandEncoder) const override {
+			void render(ref<CommandEncoder> commandEncoder) const override {
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);

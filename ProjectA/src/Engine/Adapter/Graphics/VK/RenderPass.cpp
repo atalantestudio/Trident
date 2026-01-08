@@ -19,7 +19,7 @@ namespace ProjectA {
 
 		uint32 resolveAttachmentCount = 0;
 
-		for (const ref<Subpass>& subpass : subpasses) {
+		for (const ref<Subpass> subpass : subpasses) {
 			if (subpass->getRasterizationSampleCount() == 1) {
 				continue;
 			}
@@ -83,7 +83,7 @@ namespace ProjectA {
 		uint32 attachmentReferenceOffset = 0;
 
 		for (uint32 subpassIndex = 0; subpassIndex < descriptor.subpasses.count(); subpassIndex += 1) {
-			const ref<Subpass>& subpass = descriptor.subpasses[subpassIndex];
+			const ref<Subpass> subpass = descriptor.subpasses[subpassIndex];
 			const uint32 depthStencilAttachmentCount = static_cast<uint32>(subpass->hasDepthStencilAttachmentReference());
 
 			uint32 relativeAttachmentReferenceOffset = attachmentReferenceOffset;
@@ -180,7 +180,7 @@ namespace ProjectA {
 			subpassDependency.dependencyFlags = 0;
 
 			/* if (dependency.destinationSubpassIndex != SubpassDependency::EXTERNAL_SUBPASS) {
-				const ref<Subpass>& destinationSubpass = descriptor.subpasses[dependency.destinationSubpassIndex];
+				const ref<Subpass> destinationSubpass = descriptor.subpasses[dependency.destinationSubpassIndex];
 
 				if (destinationSubpass->hasDepthStencilAttachmentReference()) {
 					subpassDependency.srcStageMask |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
@@ -213,7 +213,7 @@ namespace ProjectA {
 	}
 
 	bool VulkanRenderPass::isColorAttachment(uint32 attachmentIndex) const {
-		for (const ref<Subpass>& subpass : subpasses) {
+		for (const ref<Subpass> subpass : subpasses) {
 			for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
 				if (colorAttachmentReference.index == attachmentIndex) {
 					return true;

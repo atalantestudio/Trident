@@ -7,12 +7,12 @@
 namespace ProjectA {
 	class OpenGLEndRenderPassCommand final : public OpenGLCommand {
 		public:
-			explicit OpenGLEndRenderPassCommand(const ref<OpenGLFramebuffer>& framebuffer) :
+			explicit OpenGLEndRenderPassCommand(ref<OpenGLFramebuffer> framebuffer) :
 				framebuffer(framebuffer)
 			{}
 
 			void execute() const final override {
-				const ref<OpenGLRenderPass>& renderPass = std::static_pointer_cast<OpenGLRenderPass>(framebuffer->getRenderPass());
+				const ref<OpenGLRenderPass> renderPass = std::static_pointer_cast<OpenGLRenderPass>(framebuffer->getRenderPass());
 				const uint32 presentSourceAttachmentIndex = renderPass->getPresentSourceAttachmentIndex();
 
 				if (presentSourceAttachmentIndex == max<uint32>()) {
@@ -64,6 +64,6 @@ namespace ProjectA {
 			}
 
 		private:
-			const ref<OpenGLFramebuffer> framebuffer;
+			ref<OpenGLFramebuffer> framebuffer;
 	};
 }

@@ -73,7 +73,7 @@ namespace ProjectA {
 				return static_cast<uint32>(subpasses.count());
 			}
 
-			const ref<Subpass>& getSubpass(uint32 subpassIndex) const {
+			ref<Subpass> getSubpass(uint32 subpassIndex) const {
 				DEBUG_ASSERT(subpassIndex < subpasses.count());
 
 				return subpasses[subpassIndex];

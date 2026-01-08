@@ -6,8 +6,8 @@ namespace ProjectA {
 	static Scene3D createScene(const AssetLibrary& assetLibrary) {
 		Scene3D scene;
 
-		const ref<GeometryAsset>& shelfGeometryAsset = assetLibrary.findGeometryAsset("shelf");
-		const ref<GeometryAsset>& tableGeometryAsset = assetLibrary.findGeometryAsset("wooden_table_02");
+		const ref<GeometryAsset> shelfGeometryAsset = assetLibrary.findGeometryAsset("shelf");
+		const ref<GeometryAsset> tableGeometryAsset = assetLibrary.findGeometryAsset("wooden_table_02");
 
 		const ref<Geometry3D> shelfGeometry = createRef<Geometry3D>(shelfGeometryAsset);
 		const ref<Geometry3D> tableGeometry = createRef<Geometry3D>(tableGeometryAsset);

@@ -38,7 +38,7 @@ namespace ProjectA {
 				renderer.updateCameraProjectionView();
 			}
 
-			void render(float64 remainingFrameTime, const ref<CommandEncoder>& commandEncoder) const override {
+			void render(float64 remainingFrameTime, ref<CommandEncoder> commandEncoder) const override {
 				renderer.render(commandEncoder);
 			}
 

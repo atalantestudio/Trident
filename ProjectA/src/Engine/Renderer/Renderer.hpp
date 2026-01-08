@@ -18,7 +18,7 @@ namespace ProjectA {
 		public:
 			virtual void build() = 0;
 
-			virtual void render(const ref<CommandEncoder>& commandEncoder) const = 0;
+			virtual void render(ref<CommandEncoder> commandEncoder) const = 0;
 
 			virtual void resize(WindowResizeEvent& event);
 
@@ -54,30 +54,30 @@ namespace ProjectA {
 
 			static ref<Subpass> createSubpass(const SubpassDescriptor& descriptor);
 
-			static const ref<Semaphore>& getAcquireNextImageSemaphore(uint32 frameInFlightIndex);
+			static ref<Semaphore> getAcquireNextImageSemaphore(uint32 frameInFlightIndex);
 
-			static const ref<CommandEncoder>& getCommandEncoder(uint32 frameInFlightIndex);
+			static ref<CommandEncoder> getCommandEncoder(uint32 frameInFlightIndex);
 
 			static ref<Device> getDevice();
 
-			static const ref<Semaphore>& getFinishedRenderSemaphore(uint32 frameInFlightIndex);
+			static ref<Semaphore> getFinishedRenderSemaphore(uint32 frameInFlightIndex);
 
-			static const ref<Fence>& getFlightFence(uint32 frameInFlightIndex);
+			static ref<Fence> getFlightFence(uint32 frameInFlightIndex);
 
 			static uint32 getImageIndex();
 
 			static ref<Surface> getSurface();
 
-			static const ref<Swapchain>& getSwapchain();
+			static ref<Swapchain> getSwapchain();
 
-			static ref<ShaderModule> loadShaderModule(const ref<ShaderModuleAsset>& shaderModuleAsset, const ShaderModuleDescriptor& descriptor);
+			static ref<ShaderModule> loadShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset);
 
 			// TODO: Deprecate.
-			static ref<ShaderModule> loadShaderModule(view<char8> path, const ShaderModuleDescriptor& descriptor);
+			static ref<ShaderModule> loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path);
 
 			// Use to create HLSL shader modules.
 			// NOTE: This function will be removed once TSL can be transpiled to HLSL (or DXIL).
-			static ref<ShaderModule> loadHlslShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor);
+			static ref<ShaderModule> loadHlslShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code);
 
 			static void setImageIndex(uint32 imageIndex);
 

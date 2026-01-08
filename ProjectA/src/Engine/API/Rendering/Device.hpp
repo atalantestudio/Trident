@@ -13,7 +13,7 @@ namespace ProjectA {
 			virtual ~Device() = default;
 
 			// Acquires the next available swapchain image and writes its index to imageIndex.
-			virtual AcquireNextImageStatus acquireNextImage(const ref<Swapchain>& swapchain, const ref<Semaphore>& semaphore, uint32& imageIndex) const = 0;
+			virtual AcquireNextImageStatus acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const = 0;
 
 			virtual sequence<ref<DescriptorSet>> allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) = 0;
 
@@ -21,11 +21,11 @@ namespace ProjectA {
 
 			virtual ref<Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const = 0;
 
-			virtual void resetFence(const ref<Fence>& fence) const = 0;
+			virtual void resetFence(ref<Fence> fence) const = 0;
 
 			virtual void updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const = 0;
 
-			virtual void waitForFence(const ref<Fence>& fence) const = 0;
+			virtual void waitForFence(ref<Fence> fence) const = 0;
 
 			// Waits until all queues created with the device reach an idle state.
 			// To wait on a particular queue, see `Queue::waitIdle`.

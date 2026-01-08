@@ -336,8 +336,8 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Base/ScreenUVNDC.vert", vertexShaderModuleDescriptor);
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/Grid.frag", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/ScreenUVNDC.vert");
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Grid.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
@@ -381,8 +381,8 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/Fill.vert", vertexShaderModuleDescriptor);
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Base/FragmentRGBA.frag", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/Fill.vert");
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/FragmentRGBA.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = true;
@@ -430,8 +430,8 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/Stroke.vert", vertexShaderModuleDescriptor);
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/Stroke.frag", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/Stroke.vert");
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Stroke.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = true;
@@ -472,8 +472,8 @@ namespace ProjectA {
 		centerOfMassFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		centerOfMassFragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule("Physics2D/CenterOfMass.vert", centerOfMassVertexShaderModuleDescriptor);
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/CenterOfMass.frag", centerOfMassFragmentShaderModuleDescriptor);
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule(centerOfMassVertexShaderModuleDescriptor, "Physics2D/CenterOfMass.vert");
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(centerOfMassFragmentShaderModuleDescriptor, "Physics2D/CenterOfMass.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
@@ -530,18 +530,18 @@ namespace ProjectA {
 				break;
 			}
 			case GraphicsAPI::GL: {
-				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderFillSingleSet.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderFillSingleSet.vert");
 
 				break;
 			}
 			case GraphicsAPI::VK: {
-				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderFill.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderFill.vert");
 
 				break;
 			}
 		}
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Base/FragmentRGBA.frag", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/FragmentRGBA.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = true;
@@ -597,18 +597,18 @@ namespace ProjectA {
 				break;
 			}
 			case GraphicsAPI::GL: {
-				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderStrokeSingleSet.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderStrokeSingleSet.vert");
 
 				break;
 			}
 			case GraphicsAPI::VK: {
-				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderStroke.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderStroke.vert");
 
 				break;
 			}
 		}
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/PlaceholderStroke.frag", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/PlaceholderStroke.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = true;
@@ -661,18 +661,18 @@ namespace ProjectA {
 				break;
 			}
 			case GraphicsAPI::GL: {
-				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderCenterOfMassSingleSet.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderCenterOfMassSingleSet.vert");
 
 				break;
 			}
 			case GraphicsAPI::VK: {
-				vertexShaderModule = loadShaderModule("Physics2D/PlaceholderCenterOfMass.vert", vertexShaderModuleDescriptor);
+				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/PlaceholderCenterOfMass.vert");
 
 				break;
 			}
 		}
 
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule("Physics2D/CenterOfMass.frag", fragmentShaderModuleDescriptor);
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/CenterOfMass.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;
@@ -1083,7 +1083,7 @@ namespace ProjectA {
 		setMousePosition(mousePosition[0], mousePosition[1]);
 	}
 
-	void Physics2DRenderer::render(const ref<CommandEncoder>& commandEncoder) const {
+	void Physics2DRenderer::render(ref<CommandEncoder> commandEncoder) const {
 		ClearValue colorClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
 		ClearValue depthStencilClearValue{};
@@ -1120,13 +1120,13 @@ namespace ProjectA {
 		commandEncoder->endRenderPass();
 	}
 
-	void Physics2DRenderer::renderGrid(const ref<CommandEncoder>& commandEncoder) const {
+	void Physics2DRenderer::renderGrid(ref<CommandEncoder> commandEncoder) const {
 		commandEncoder->bindRenderPipeline(gridRenderPipeline);
 		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
 		commandEncoder->draw(3, 1, 0, 0);
 	}
 
-	void Physics2DRenderer::renderScene(const ref<CommandEncoder>& commandEncoder) const {
+	void Physics2DRenderer::renderScene(ref<CommandEncoder> commandEncoder) const {
 		commandEncoder->bindRenderPipeline(fillRenderPipeline);
 		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
@@ -1186,7 +1186,7 @@ namespace ProjectA {
 		commandEncoder->draw(instanceCount, 1, 0, 0);
 	}
 
-	void Physics2DRenderer::renderSelectedInstancePlaceholder(const ref<CommandEncoder>& commandEncoder) const {
+	void Physics2DRenderer::renderSelectedInstancePlaceholder(ref<CommandEncoder> commandEncoder) const {
 		const uint32 instanceCount = scene->getComponentPool<RigidBody2D>().componentCount;
 
 		DEBUG_ASSERT(selectedInstanceIndex < instanceCount);
@@ -1221,7 +1221,7 @@ namespace ProjectA {
 	}
 
 	#ifdef SHOW_DISTANCE
-		void Physics2DRenderer::renderDistance(const ref<CommandEncoder>& commandEncoder) const {
+		void Physics2DRenderer::renderDistance(ref<CommandEncoder> commandEncoder) const {
 			commandEncoder->bindRenderPipeline(distanceRenderPipeline);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
 			commandEncoder->bindVertexBuffer(0, closestPointBuffer, 0, sizeof(Vertex));
@@ -1230,7 +1230,7 @@ namespace ProjectA {
 	#endif
 
 	#ifdef SHOW_FEATURES
-		void Physics2DRenderer::renderFeatures(const ref<CommandEncoder>& commandEncoder) const {
+		void Physics2DRenderer::renderFeatures(ref<CommandEncoder> commandEncoder) const {
 			if (vertexFeatureCount > 0) {
 				commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
 				commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});

@@ -12,11 +12,10 @@ namespace ProjectA {
 
 		public:
 			sint32 main(const sequence<void*>& arguments) override {
-				const std::string rootInputPath = static_cast<const char8*>(arguments[PROJECT_INPUT_PATH_ARGUMENT_INDEX]);
-				const std::string rootOutputPath = static_cast<const char8*>(arguments[PROJECT_OUTPUT_PATH_ARGUMENT_INDEX]);
-				const std::string assetOutputPath = rootOutputPath + "/Asset/";
-
-				const std::filesystem::recursive_directory_iterator geometryDirectoryIterator(rootInputPath + "/Asset/Geometry");
+				const std::filesystem::path rootInputPath = pointer_cast<const char8*>(arguments[PROJECT_INPUT_PATH_ARGUMENT_INDEX]);
+				const std::filesystem::path rootOutputPath = pointer_cast<const char8*>(arguments[PROJECT_OUTPUT_PATH_ARGUMENT_INDEX]);
+				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/";
+				const std::filesystem::recursive_directory_iterator geometryDirectoryIterator(rootInputPath / "/Asset/Geometry");
 
 				for (const std::filesystem::directory_entry& directoryEntry : geometryDirectoryIterator) {
 					if (directoryEntry.is_directory()) {

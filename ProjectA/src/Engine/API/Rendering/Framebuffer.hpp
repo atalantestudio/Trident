@@ -8,7 +8,7 @@ namespace ProjectA {
 		public:
 			virtual ~Framebuffer() = default;
 
-			const ref<RenderPass>& getRenderPass() const {
+			ref<RenderPass> getRenderPass() const {
 				return renderPass;
 			}
 

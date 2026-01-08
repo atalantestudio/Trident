@@ -36,7 +36,7 @@ namespace ProjectA {
 				createVertexBuffer();
 			}
 
-			void render(const ref<CommandEncoder>& commandEncoder) const override {
+			void render(ref<CommandEncoder> commandEncoder) const override {
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};

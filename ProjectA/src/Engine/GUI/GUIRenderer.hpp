@@ -46,7 +46,7 @@ namespace ProjectA {
 
 			void registerGlyphSubcomponent(const GUIGlyphSubcomponent& glyphSubcomponent);
 
-			void render(const ref<CommandEncoder>& commandEncoder) const final override;
+			void render(ref<CommandEncoder> commandEncoder) const final override;
 
 			void resize(WindowResizeEvent& event) final override;
 

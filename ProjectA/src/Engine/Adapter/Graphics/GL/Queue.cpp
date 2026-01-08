@@ -17,11 +17,11 @@ namespace ProjectA {
 		return createRef<OpenGLCommandEncoder>(*device, descriptor);
 	}
 
-	void OpenGLQueue::submit(const sequence<ref<CommandBuffer>>& commandBuffers, const ref<Semaphore>& waitSemaphore, const ref<Semaphore>& signalSemaphore, const ref<Fence>& fence) const {
-		for (const ref<CommandBuffer>& commandBuffer : commandBuffers) {
+	void OpenGLQueue::submit(const sequence<ref<CommandBuffer>>& commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence) const {
+		for (const ref<CommandBuffer> commandBuffer : commandBuffers) {
 			const OpenGLCommandBuffer& glCommandBuffer = *std::static_pointer_cast<OpenGLCommandBuffer>(commandBuffer);
 
-			for (const ref<OpenGLCommand>& command : glCommandBuffer) {
+			for (const ref<OpenGLCommand> command : glCommandBuffer) {
 				command->execute();
 			}
 		}
@@ -31,7 +31,7 @@ namespace ProjectA {
 		}
 	}
 
-	PresentStatus OpenGLQueue::present(const sequence<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const {
+	PresentStatus OpenGLQueue::present(const sequence<ref<Swapchain>>& swapchains, ref<Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const {
 		instance->swapBuffers();
 
 		return PresentStatus::SUCCESS;

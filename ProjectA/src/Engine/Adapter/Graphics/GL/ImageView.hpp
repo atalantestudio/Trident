@@ -6,7 +6,7 @@
 namespace ProjectA {
 	class OpenGLImageView final : public ImageView, public ObjectWrapper<GLuint> {
 		public:
-			explicit OpenGLImageView(const Image* image, const ImageViewDescriptor& descriptor);
+			explicit OpenGLImageView(const ImageViewDescriptor& descriptor, const Image* image);
 
 			~OpenGLImageView() final;
 	};

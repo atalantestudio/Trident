@@ -46,10 +46,10 @@ namespace ProjectA {
 
 			virtual ref<Semaphore> createSemaphore() const = 0;
 
-			virtual ref<ShaderModule> createShaderModule(const ref<ShaderModuleAsset>& asset, const ShaderModuleDescriptor& descriptor) const = 0;
+			virtual ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const = 0;
 
 			// TODO: Deprecate.
-			virtual ref<ShaderModule> createShaderModule(view<char8> code, const ShaderModuleDescriptor& descriptor) const = 0;
+			virtual ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const = 0;
 
 			virtual ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const = 0;
 

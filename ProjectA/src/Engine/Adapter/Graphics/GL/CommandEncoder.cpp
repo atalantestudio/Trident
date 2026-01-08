@@ -44,13 +44,13 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLBeginRenderPassCommand>(descriptor));
 	}
 
-	void OpenGLCommandEncoder::bindComputePipeline(const ref<ComputePipeline>& computePipeline) {
+	void OpenGLCommandEncoder::bindComputePipeline(ref<ComputePipeline> computePipeline) {
 		this->computePipeline = std::static_pointer_cast<OpenGLComputePipeline>(computePipeline);
 
 		commandBuffer.emplace_back(createRef<OpenGLBindComputePipelineCommand>(this->computePipeline));
 	}
 
-	void OpenGLCommandEncoder::bindRenderPipeline(const ref<RenderPipeline>& renderPipeline) {
+	void OpenGLCommandEncoder::bindRenderPipeline(ref<RenderPipeline> renderPipeline) {
 		this->renderPipeline = std::static_pointer_cast<OpenGLRenderPipeline>(renderPipeline);
 
 		ENGINE_ASSERT(this->renderPipeline->subpassIndex == subpassIndex, "The pipeline must be associated to the current subpass.");
@@ -58,11 +58,11 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLBindRenderPipelineCommand>(this->renderPipeline));
 	}
 
-	void OpenGLCommandEncoder::bindDescriptorSets(const ref<PipelineLayout>& pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) {
+	void OpenGLCommandEncoder::bindDescriptorSets(ref<PipelineLayout> pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) {
 		commandBuffer.emplace_back(createRef<OpenGLBindDescriptorSetsCommand>(descriptorSets));
 	}
 
-	void OpenGLCommandEncoder::bindIndexBuffer(const ref<Buffer>& indexBuffer, uint64 offset, uint8 indexTypeSize) {
+	void OpenGLCommandEncoder::bindIndexBuffer(ref<Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
 		indexOffset = static_cast<uint32>(offset);
 		indexType = getGlIndexType(indexTypeSize);
 		this->indexTypeSize = indexTypeSize;
@@ -73,7 +73,7 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::bindVertexBuffer(uint32 bindingIndex, const ref<Buffer>& vertexBuffer, uint64 offset, uint32 stride) {
+	void OpenGLCommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) {
 		commandBuffer.emplace_back(createRef<OpenGLBindVertexBufferCommand>(
 			renderPipeline->vaobj,
 			bindingIndex,
@@ -83,7 +83,7 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::copyBufferToBuffer(const ref<Buffer>& sourceBuffer, const ref<Buffer>& destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) {
+	void OpenGLCommandEncoder::copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) {
 		commandBuffer.emplace_back(createRef<OpenGLCopyBufferToBufferCommand>(
 			std::static_pointer_cast<OpenGLBuffer>(sourceBuffer)->object,
 			std::static_pointer_cast<OpenGLBuffer>(destinationBuffer)->object,
@@ -91,7 +91,7 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::copyBufferToImage(const ref<Buffer>& sourceBuffer, const ref<Image>& destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
+	void OpenGLCommandEncoder::copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
 		commandBuffer.emplace_back(createRef<OpenGLCopyBufferToImageCommand>(
 			std::static_pointer_cast<OpenGLBuffer>(sourceBuffer)->object,
 			std::static_pointer_cast<OpenGLImage>(destinationImage).get(),
@@ -99,7 +99,7 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::copyImageToBuffer(const ref<Image>& sourceImage, const ref<Buffer>& destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) {
+	void OpenGLCommandEncoder::copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) {
 		commandBuffer.emplace_back(createRef<OpenGLCopyImageToBufferCommand>(
 			std::static_pointer_cast<OpenGLImage>(sourceImage).get(),
 			std::static_pointer_cast<OpenGLBuffer>(destinationBuffer).get(),
@@ -115,8 +115,8 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLDispatchCommand>(groupCountX, groupCountY, groupCountZ));
 	}
 
-	void OpenGLCommandEncoder::dispatchIndirect(const ref<Buffer>& buffer, uint64 offset) {
-		commandBuffer.emplace_back(createRef<OpenGLDispatchIndirectCommand>(std::static_pointer_cast<OpenGLBuffer>(buffer)->object, offset));
+	void OpenGLCommandEncoder::dispatchIndirect(ref<Buffer> buffer, uint64 bufferOffset) {
+		commandBuffer.emplace_back(createRef<OpenGLDispatchIndirectCommand>(std::static_pointer_cast<OpenGLBuffer>(buffer)->object, bufferOffset));
 	}
 
 	void OpenGLCommandEncoder::nextSubpass() {
@@ -127,7 +127,7 @@ namespace ProjectA {
 		commandBuffer.emplace_back(createRef<OpenGLNextSubpassCommand>(framebuffer, renderPass->getSubpass(subpassIndex)));
 	}
 
-	void OpenGLCommandEncoder::setImageMemoryBarrier(const ref<Image>& image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
+	void OpenGLCommandEncoder::setImageMemoryBarrier(ref<Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
 		const GLbitfield barrier = getGlBarrier(image->getLayout());
 
 		if (barrier == 0) {
@@ -151,7 +151,7 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::setViewport(const vec2<float32>& origin, const vec2<float32>& size, float32 minDepth, float32 maxDepth) {
+	void OpenGLCommandEncoder::setViewport(vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth) {
 		commandBuffer.emplace_back(createRef<OpenGLSetViewportCommand>(
 			static_cast<GLint>(origin[0]),
 
@@ -173,14 +173,14 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::drawIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) {
+	void OpenGLCommandEncoder::drawIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		ENGINE_ASSERT(buffer->usage & BufferUsage::INDIRECT, "This buffer cannot be used as an indirect buffer.");
 		ENGINE_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
 
 		commandBuffer.emplace_back(createRef<OpenGLDrawIndirectCommand>(
 			renderPipeline->primitiveTopology,
 			std::static_pointer_cast<OpenGLBuffer>(buffer)->object,
-			(const GLubyte*) offset,
+			(const GLubyte*) bufferOffset,
 			drawCount,
 			stride
 		));
@@ -200,7 +200,7 @@ namespace ProjectA {
 		));
 	}
 
-	void OpenGLCommandEncoder::drawIndexedIndirect(const ref<Buffer>& buffer, uint64 offset, uint32 drawCount, uint32 stride) {
+	void OpenGLCommandEncoder::drawIndexedIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
 		ENGINE_ASSERT(buffer->usage & BufferUsage::INDIRECT, "This buffer cannot be used as an indirect buffer.");
 		ENGINE_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
 
@@ -208,7 +208,7 @@ namespace ProjectA {
 			renderPipeline->primitiveTopology,
 			indexType,
 			std::static_pointer_cast<OpenGLBuffer>(buffer)->object,
-			(const GLubyte*) offset,
+			(const GLubyte*) bufferOffset,
 			drawCount,
 			stride
 		));

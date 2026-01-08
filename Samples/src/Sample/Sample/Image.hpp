@@ -25,7 +25,7 @@ namespace ProjectA {
 				setupRenderPipeline();
 			}
 
-			void render(const ref<CommandEncoder>& commandEncoder) const override {
+			void render(ref<CommandEncoder> commandEncoder) const override {
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}};

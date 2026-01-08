@@ -9,7 +9,7 @@ namespace ProjectA {
 	class OpenGLNextSubpassCommand final : public OpenGLCommand {
 		public:
 			// Selects draw buffers on the currently bound framebuffer.
-			static void setDrawBuffers(const ref<Subpass>& subpass) {
+			static void setDrawBuffers(ref<Subpass> subpass) {
 				sequence<GLenum> bufs(subpass->getColorAttachmentReferenceCount());
 
 				for (uint32 bufIndex = 0; bufIndex < bufs.count(); bufIndex += 1) {
@@ -29,7 +29,7 @@ namespace ProjectA {
 			}
 
 		public:
-			explicit OpenGLNextSubpassCommand(const ref<OpenGLFramebuffer>& framebuffer, const ref<Subpass>& subpass) :
+			explicit OpenGLNextSubpassCommand(ref<OpenGLFramebuffer> framebuffer, ref<Subpass> subpass) :
 				framebuffer(framebuffer),
 				subpass(subpass)
 			{}
@@ -39,7 +39,7 @@ namespace ProjectA {
 			}
 
 		private:
-			const ref<OpenGLFramebuffer> framebuffer;
-			const ref<Subpass> subpass;
+			ref<OpenGLFramebuffer> framebuffer;
+			ref<Subpass> subpass;
 	};
 }
