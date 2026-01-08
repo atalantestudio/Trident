@@ -113,13 +113,9 @@ namespace ProjectA {
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-				const AssetSignature signature = byteStream.peek<AssetSignature>();
-
-				if (signature != AssetSignature::TFO) {
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.read<AssetSignature>() != AssetSignature::TFO) {
 					return;
 				}
-
-				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<FontAsset> fontAsset = decodeFontAsset(byteStream);
 				const uint32 fontAssetIndex = static_cast<uint32>(assets.size());
@@ -136,13 +132,9 @@ namespace ProjectA {
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-				const AssetSignature signature = byteStream.peek<AssetSignature>();
-
-				if (signature != AssetSignature::TGE) {
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.read<AssetSignature>() != AssetSignature::TGE) {
 					return;
 				}
-
-				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<GeometryAsset> geometryAsset = Filesystem::decodeAsset<GeometryAsset>(byteStream);
 				const uint32 geometryAssetIndex = static_cast<uint32>(assets.size());
@@ -159,13 +151,9 @@ namespace ProjectA {
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-				const AssetSignature signature = byteStream.peek<AssetSignature>();
-
-				if (signature != AssetSignature::TIM) {
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.read<AssetSignature>() != AssetSignature::TIM) {
 					return;
 				}
-
-				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<ImageAsset> imageAsset = decodeImageAsset(byteStream);
 				const uint32 imageAssetIndex = static_cast<uint32>(assets.size());
@@ -182,13 +170,9 @@ namespace ProjectA {
 
 				ByteStream<StreamOperation::READ> byteStream(&data[0], data.count(), Endianness::LITTLE_ENDIAN);
 
-				const AssetSignature signature = byteStream.peek<AssetSignature>();
-
-				if (signature != AssetSignature::TSM) {
+				if (byteStream.getRemainingSize() < sizeof(AssetSignature) || byteStream.read<AssetSignature>() != AssetSignature::TSM) {
 					return;
 				}
-
-				byteStream.jump(sizeof(AssetSignature));
 
 				const ref<ShaderModuleAsset> shaderModuleAsset = decodeShaderModuleAsset(byteStream);
 				const uint32 shaderModuleAssetIndex = static_cast<uint32>(assets.size());
