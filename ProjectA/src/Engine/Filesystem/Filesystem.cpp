@@ -32,7 +32,10 @@ namespace ProjectA {
 	}
 
 	sequence<char8> Filesystem::openTextBuffer(view<char8> path) {
-		std::ifstream stream(&path[0], std::ios::ate);
+		// NOTE
+		// std::ios::binary was added because of hangs in the shader validator when creating SPIR-V shaders in either OpenGL or Vulkan.
+		// See also https://stackoverflow.com/a/26993247.
+		std::ifstream stream(&path[0], std::ios::ate | std::ios::binary);
 
 		ENGINE_ASSERT(stream.is_open(), "Failed to open file \"[]\".", path);
 
