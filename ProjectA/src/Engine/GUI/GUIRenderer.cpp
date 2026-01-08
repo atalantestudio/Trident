@@ -87,8 +87,7 @@ namespace ProjectA {
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 		graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-		getDevice()->waitIdle();
+		graphicsQueue->waitIdle();
 
 		textureArrayStagingBuffer.~shared_ptr();
 	}
@@ -490,8 +489,7 @@ namespace ProjectA {
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 		transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-		getDevice()->waitIdle();
+		transferQueue->waitIdle();
 	}
 
 	void GUIRenderer::updateDescriptorSets() const {

@@ -852,8 +852,7 @@ namespace ProjectA {
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 		transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-		getDevice()->waitIdle();
+		transferQueue->waitIdle();
 	}
 
 	const vec2<float32>& Physics2DRenderer::getNdcMousePosition() const {

@@ -227,8 +227,7 @@ namespace ProjectA {
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 				transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-				device->waitIdle();
+				transferQueue->waitIdle();
 			}
 
 			void render(const ref<CommandEncoder>& commandEncoder) const override {

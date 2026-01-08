@@ -27,6 +27,8 @@ namespace ProjectA {
 
 			virtual void waitForFence(const ref<Fence>& fence) const = 0;
 
+			// Waits until all queues created with the device reach an idle state.
+			// To wait on a particular queue, see `Queue::waitIdle`.
 			virtual void waitIdle() const = 0;
 	};
 }

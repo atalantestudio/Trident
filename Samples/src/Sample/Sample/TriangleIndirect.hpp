@@ -171,8 +171,7 @@ namespace ProjectA {
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 				transferQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-				getDevice()->waitIdle();
+				transferQueue->waitIdle();
 			}
 
 			void recreateFramebuffers() {

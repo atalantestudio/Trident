@@ -118,8 +118,7 @@ namespace ProjectA {
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 
 				graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
-
-				getDevice()->waitIdle();
+				graphicsQueue->waitIdle();
 			}
 
 			void setupImageView() {

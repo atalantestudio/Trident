@@ -17,6 +17,7 @@ namespace ProjectA {
 
 			virtual PresentStatus present(const sequence<ref<Swapchain>>& swapchains, const ref<Semaphore>& waitSemaphore, const sequence<uint32>& imageIndices) const = 0;
 
+			// Waits until the queue reaches an idle state.
 			virtual void waitIdle() const = 0;
 	};
 }

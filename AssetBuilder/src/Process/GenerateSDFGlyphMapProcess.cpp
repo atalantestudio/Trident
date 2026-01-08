@@ -75,8 +75,7 @@ namespace ProjectA {
 		commandEncoder->setImageMemoryBarrier(glyphMapImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 		computeQueue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
-
-		device->waitIdle();
+		computeQueue->waitIdle();
 
 		float32 xOffset = 0;
 		float32 yOffset = 0;
@@ -168,8 +167,7 @@ namespace ProjectA {
 			commandEncoder->dispatch(8, 8, 1);
 
 			computeQueue->submit({commandEncoder->end()}, nullptr, nullptr, writeBufferFence);
-
-			device->waitIdle();
+			computeQueue->waitIdle();
 
 			xOffset += ceil(width) + SPREAD_FACTOR * 2;
 		}
@@ -197,8 +195,7 @@ namespace ProjectA {
 		commandEncoder->copyImageToBuffer(glyphMapImage, glyphMapStagingBuffer, {glyphMapBufferImageCopyRegion});
 
 		computeQueue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
-
-		device->waitIdle();
+		computeQueue->waitIdle();
 
 		output.data = sequence<uint8>(glyphMapStagingBuffer->size);
 
