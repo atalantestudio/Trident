@@ -50,7 +50,7 @@ namespace ProjectA {
 			#endif
 			#ifdef ENABLE_GL_ADAPTER
 				case GraphicsAPI::GL: {
-					ENGINE_INFO("Using OpenGL graphics adapter.");
+					ENGINE_INFO("Using OpenGL [] graphics adapter.", OPENGL_VERSION);
 
 					adapter = createScope<OpenGLGraphicsAdapter>(projectDescriptor, window);
 
