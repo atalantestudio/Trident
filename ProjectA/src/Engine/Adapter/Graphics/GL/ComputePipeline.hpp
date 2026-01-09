@@ -1,13 +1,16 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/ComputePipeline.hpp"
 
 namespace ProjectA {
-	class OpenGLComputePipeline final : public ComputePipeline {
+	class GL::ComputePipeline final : public ProjectA::ComputePipeline {
 		public:
-			explicit OpenGLComputePipeline(const ComputePipelineDescriptor& descriptor);
+			explicit ComputePipeline(const ComputePipelineDescriptor& descriptor);
 
-			~OpenGLComputePipeline() final override;
+			~ComputePipeline() final override;
 
 		public:
 			const GLuint program;

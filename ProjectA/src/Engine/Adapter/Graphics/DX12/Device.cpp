@@ -50,7 +50,7 @@ namespace ProjectA {
 		WIN32_ASSERT(result != 0);
 	}
 
-	AcquireNextImageStatus DX12::Device::acquireNextImage(ref<ProjectA::Swapchain> swapchain, ref<ProjectA::Semaphore> semaphore, uint32& imageIndex) const {
+	AcquireNextImageStatus DX12::Device::acquireNextImage(ref<ProjectA::Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {
 		imageIndex = std::static_pointer_cast<DX12::Swapchain>(swapchain)->swapChain->GetCurrentBackBufferIndex();
 
 		return AcquireNextImageStatus::SUCCESS;

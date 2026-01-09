@@ -1,17 +1,17 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
-
-#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/CommandBuffer.hpp"
 
 namespace ProjectA {
-	class OpenGLCommandBuffer final : public CommandBuffer, public ObjectWrapper<const std::vector<ref<OpenGLCommand>>> {
+	class GL::CommandBuffer final : public ProjectA::CommandBuffer {
 		public:
-			explicit OpenGLCommandBuffer(const std::vector<ref<OpenGLCommand>>& commandBuffer);
+			explicit CommandBuffer(const std::vector<ref<GL::Command>>& commands);
 
-			std::vector<ref<OpenGLCommand>>::const_iterator begin() const;
-
-			std::vector<ref<OpenGLCommand>>::const_iterator end() const;
+		public:
+			sequence<ref<GL::Command>> commands;
 	};
 }

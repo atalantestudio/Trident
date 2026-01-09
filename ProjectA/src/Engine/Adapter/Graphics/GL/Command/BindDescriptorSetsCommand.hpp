@@ -1,38 +1,39 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 #include "Engine/Adapter/Graphics/GL/Buffer.hpp"
+#include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 #include "Engine/Adapter/Graphics/GL/DescriptorSet.hpp"
+#include "Engine/Adapter/Graphics/GL/DescriptorType.hpp"
 #include "Engine/Adapter/Graphics/GL/Image.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageView.hpp"
 #include "Engine/Adapter/Graphics/GL/Sampler.hpp"
-
-#include "Engine/Adapter/Graphics/GL/DescriptorType.hpp"
-
 #include "Engine/API/Rendering/DescriptorSet.hpp"
 
 namespace ProjectA {
-	class OpenGLBindDescriptorSetsCommand final : public OpenGLCommand {
+	class GL::BindDescriptorSetsCommand final : public GL::Command {
 		public:
-			explicit OpenGLBindDescriptorSetsCommand(const sequence<ref<DescriptorSet>>& descriptorSets) :
+			explicit BindDescriptorSetsCommand(const sequence<ref<ProjectA::DescriptorSet>>& descriptorSets) :
 				descriptorSets(descriptorSets)
 			{}
 
 			void execute() const final override {
 				uint32 descriptorSetLayoutOffset = 0;
 
-				for (const ref<DescriptorSet> descriptorSet : descriptorSets) {
-					const ref<OpenGLDescriptorSet> glDescriptorSet = std::static_pointer_cast<OpenGLDescriptorSet>(descriptorSet);
+				for (const ref<ProjectA::DescriptorSet> descriptorSet : descriptorSets) {
+					const ref<GL::DescriptorSet> glDescriptorSet = std::static_pointer_cast<GL::DescriptorSet>(descriptorSet);
 
 					for (uint32 bindingIndex = 0; bindingIndex < glDescriptorSet->bindings.count(); bindingIndex += 1) {
-						const OpenGLDescriptorSet::DescriptorSetBinding& descriptorSetBinding = glDescriptorSet->bindings[bindingIndex];
+						const GL::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = glDescriptorSet->bindings[bindingIndex];
 
 						if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
 							#if OPENGL_VERSION < OPENGL_VERSION_4_3
 								ENGINE_ASSERT(descriptorType != DescriptorType::STORAGE_BUFFER, "Storage buffers are not supported before OpenGL 4.3.");
 							#endif
 
-							const GLenum target = getGlBufferDescriptorType(descriptorSetBinding.descriptorType);
+							const GLenum target = getBufferDescriptorType(descriptorSetBinding.descriptorType);
 
 							for (uint32 descriptorBufferIndex = 0; descriptorBufferIndex < descriptorSetBinding.descriptorBuffers.count(); descriptorBufferIndex += 1) {
 								const DescriptorBuffer& descriptorBuffer = descriptorSetBinding.descriptorBuffers[descriptorBufferIndex];
@@ -41,7 +42,7 @@ namespace ProjectA {
 									glBindBufferRange(
 										target,
 										descriptorSetLayoutOffset + bindingIndex + descriptorBufferIndex,
-										std::static_pointer_cast<OpenGLBuffer>(descriptorBuffer.buffer)->object,
+										std::static_pointer_cast<GL::Buffer>(descriptorBuffer.buffer)->buffer,
 										descriptorBuffer.offset,
 										descriptorBuffer.size
 									);
@@ -53,21 +54,21 @@ namespace ProjectA {
 						else if (isImageDescriptorType(descriptorSetBinding.descriptorType)) {
 							for (GLuint descriptorImageIndex = 0; descriptorImageIndex < descriptorSetBinding.descriptorImages.count(); descriptorImageIndex += 1) {
 								const DescriptorImage& descriptorImage = descriptorSetBinding.descriptorImages[descriptorImageIndex];
-								const ref<OpenGLImageView> imageView = std::static_pointer_cast<OpenGLImageView>(descriptorImage.imageView);
-								const OpenGLImage* image = static_cast<const OpenGLImage*>(imageView->getImage());
+								const ref<GL::ImageView> imageView = std::static_pointer_cast<GL::ImageView>(descriptorImage.imageView);
+								const GL::Image* image = static_cast<const GL::Image*>(imageView->getImage());
 
 								#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-									glBindTextureUnit(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, imageView->object);
+									glBindTextureUnit(descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex, imageView->texture);
 								#else
 									glActiveTexture(GL_TEXTURE0 + descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex);
-									glBindTexture(image->target, imageView->object);
+									glBindTexture(image->target, imageView->texture);
 								#endif
 
 								if (descriptorImage.sampler != nullptr) {
 									#if OPENGL_VERSION >= OPENGL_VERSION_3_3
 										glBindSampler(
 											descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex,
-											std::static_pointer_cast<OpenGLSampler>(descriptorImage.sampler)->object
+											std::static_pointer_cast<GL::Sampler>(descriptorImage.sampler)->sampler
 										);
 									#else
 										ENGINE_ERROR_UNSUPPORTED();
@@ -78,7 +79,7 @@ namespace ProjectA {
 									#if OPENGL_VERSION >= OPENGL_VERSION_4_2
 										glBindImageTexture(
 											descriptorSetLayoutOffset + bindingIndex + descriptorImageIndex,
-											imageView->object,
+											imageView->texture,
 											0,
 											GL_FALSE,
 											0,
@@ -105,6 +106,6 @@ namespace ProjectA {
 			}
 
 		private:
-			const sequence<ref<DescriptorSet>> descriptorSets;
+			sequence<ref<ProjectA::DescriptorSet>> descriptorSets;
 	};
 }

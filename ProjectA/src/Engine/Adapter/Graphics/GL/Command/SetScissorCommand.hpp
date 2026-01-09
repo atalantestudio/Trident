@@ -1,11 +1,14 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 
 namespace ProjectA {
-	class OpenGLSetScissorCommand final : public OpenGLCommand {
+	class GL::SetScissorCommand final : public GL::Command {
 		public:
-			explicit OpenGLSetScissorCommand(GLint xOffset, GLint yOffset, Extent2D extent) :
+			explicit SetScissorCommand(GLint xOffset, GLint yOffset, Extent2D extent) :
 				xOffset(xOffset),
 				yOffset(yOffset),
 				extent(extent)
@@ -16,8 +19,8 @@ namespace ProjectA {
 			}
 
 		private:
-			const GLint xOffset;
-			const GLint yOffset;
-			const Extent2D extent;
+			GLint xOffset;
+			GLint yOffset;
+			Extent2D extent;
 	};
 }

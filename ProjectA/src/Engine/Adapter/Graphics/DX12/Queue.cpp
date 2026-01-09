@@ -43,7 +43,7 @@ namespace ProjectA {
 		return createRef<DX12::CommandEncoder>(descriptor, device, commandPool);
 	}
 
-	void DX12::Queue::submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, ref<ProjectA::Semaphore> waitSemaphore, ref<ProjectA::Semaphore> signalSemaphore, ref<ProjectA::Fence> fence) const {
+	void DX12::Queue::submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<ProjectA::Fence> fence) const {
 		sequence<ID3D12CommandList*> commandLists(commandBuffers.count());
 		uint32 commandListIndex = 0;
 
@@ -63,7 +63,7 @@ namespace ProjectA {
 		} */
 	}
 
-	PresentStatus DX12::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, ref<ProjectA::Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const {
+	PresentStatus DX12::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, ref<Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const {
 		HRESULT result;
 
 		for (const ref<ProjectA::Swapchain> swapchain : swapchains) {

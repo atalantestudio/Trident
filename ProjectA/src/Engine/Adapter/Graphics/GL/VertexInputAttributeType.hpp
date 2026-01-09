@@ -1,10 +1,14 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Rendering/VertexInputAttributeType.hpp"
 
-namespace ProjectA {
+namespace ProjectA::GL {
 	// Returns the number of component per generic vertex attribute.
-	GLint getGlSize(VertexInputAttributeType type) {
+	inline GLint getSize(VertexInputAttributeType type) {
 		static constexpr GLint VERTEX_INPUT_ATTRIBUTE_SIZES[] = {
 			1,
 			1,
@@ -26,14 +30,12 @@ namespace ProjectA {
 
 		const GLint glSize = VERTEX_INPUT_ATTRIBUTE_SIZES[static_cast<uint32>(type)];
 
-		if (glSize == 0) {
-			ENGINE_ERROR("64-bit unsigned/signed integers as vertex input attributes aren't supported by OpenGL.");
-		}
+		ADAPTER_ASSERT(glSize != 0, "64-bit unsigned/signed integers as vertex input attributes aren't natively supported.");
 
 		return glSize;
 	}
 
-	GLenum getGlType(VertexInputAttributeType type) {
+	inline GLenum getType(VertexInputAttributeType type) {
 		static constexpr GLenum VERTEX_INPUT_ATTRIBUTE_TYPES[] = {
 			GL_BYTE,
 			GL_UNSIGNED_BYTE,
@@ -55,9 +57,7 @@ namespace ProjectA {
 
 		const GLenum glType = VERTEX_INPUT_ATTRIBUTE_TYPES[static_cast<uint32>(type)];
 
-		if (glType == 0) {
-			ENGINE_ERROR("64-bit unsigned/signed integers as vertex input attributes aren't supported by OpenGL.");
-		}
+		ADAPTER_ASSERT(glType != 0, "64-bit unsigned/signed integers as vertex input attributes aren't natively supported.");
 
 		return glType;
 	}

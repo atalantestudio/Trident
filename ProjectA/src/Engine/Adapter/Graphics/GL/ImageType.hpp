@@ -1,16 +1,19 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/ImageType.hpp"
 
-namespace ProjectA {
-	static GLenum getGlImageType(ImageType imageType, uint8 sampleCount, uint32 layerCount) {
+namespace ProjectA::GL {
+	inline GLenum getImageType(ImageType imageType, uint8 sampleCount, uint32 layerCount) {
 		if (imageType == ImageType::TEXTURE_2D) {
 			if (sampleCount > 1) {
 				return GL_TEXTURE_2D_MULTISAMPLE;
 
 				if (layerCount > 1) {
 					// TODO: Implement multisampled 2D texture arrays.
-					ENGINE_ASSERT(false, "Multisampled 2D texture arrays are not implemented.");
+					ENGINE_ERROR_UNIMPLEMENTED();
 
 					return GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
 				}
@@ -23,7 +26,7 @@ namespace ProjectA {
 			return GL_TEXTURE_2D;
 		}
 
-		DEBUG_ASSERT(false);
+		ENGINE_ERROR_UNSUPPORTED();
 
 		return 0;
 	}

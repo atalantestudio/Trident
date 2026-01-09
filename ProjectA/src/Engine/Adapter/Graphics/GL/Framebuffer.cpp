@@ -1,22 +1,24 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/GL/Image.hpp"
+#include "Engine/Adapter/Graphics/GL/ImageFormat.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageView.hpp"
 
-#include "Engine/Adapter/Graphics/GL/ImageFormat.hpp"
-
 namespace ProjectA {
-	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferDescriptor& descriptor) :
-		Framebuffer(descriptor)
+	GL::Framebuffer::Framebuffer(const FramebufferDescriptor& descriptor) :
+		ProjectA::Framebuffer(descriptor)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glCreateFramebuffers(1, &object);
+			glCreateFramebuffers(1, &framebuffer);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glGenFramebuffers(1, &object);
-			glBindFramebuffer(GL_FRAMEBUFFER, object);
+			glGenFramebuffers(1, &framebuffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		#else
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
@@ -26,7 +28,7 @@ namespace ProjectA {
 		bool resolve = false;
 
 		for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count(); imageViewIndex += 1) {
-			const ref<ImageView> imageView = descriptor.imageViews[imageViewIndex];
+			const ref<ProjectA::ImageView> imageView = descriptor.imageViews[imageViewIndex];
 
 			if (imageView->getImage()->getSampleCount() > 1) {
 				resolve = true;
@@ -38,9 +40,9 @@ namespace ProjectA {
 		uint32 boundAttachmentIndex = 0;
 
 		for (uint32 imageViewIndex = 0; imageViewIndex < descriptor.imageViews.count(); imageViewIndex += 1) {
-			const ref<ImageView> imageView = descriptor.imageViews[imageViewIndex];
-			const ref<OpenGLImageView> glImageView = std::static_pointer_cast<OpenGLImageView>(imageView);
-			const OpenGLImage* glImage = static_cast<const OpenGLImage*>(imageView->getImage());
+			const ref<ProjectA::ImageView> imageView = descriptor.imageViews[imageViewIndex];
+			const ref<GL::ImageView> glImageView = std::static_pointer_cast<GL::ImageView>(imageView);
+			const GL::Image* glImage = static_cast<const GL::Image*>(imageView->getImage());
 
 			if (resolve && imageView->getImage()->getSampleCount() == 1) {
 				continue;
@@ -48,7 +50,7 @@ namespace ProjectA {
 
 			GLenum attachment;
 
-			const ImageFormat internalFormat = fromGlInternalFormat(glImage->internalFormat);
+			const ImageFormat internalFormat = fromInternalFormat(glImage->internalFormat);
 
 			// TODO: Handle stencil-only internal formats with GL_STENCIL_ATTACHMENT.
 			switch (internalFormat) {
@@ -80,9 +82,9 @@ namespace ProjectA {
 				case GL_TEXTURE_RECTANGLE:
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 						glNamedFramebufferTexture(
-							object,
+							framebuffer,
 							attachment,
-							glImageView->object,
+							glImageView->texture,
 							imageView->getMipLevelOffset()
 						);
 					#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
@@ -90,7 +92,7 @@ namespace ProjectA {
 							GL_FRAMEBUFFER,
 							attachment,
 							glImage->target,
-							glImageView->object,
+							glImageView->texture,
 							imageView->getMipLevelOffset()
 						);
 					#else
@@ -113,7 +115,7 @@ namespace ProjectA {
 			GLenum status = 0;
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				status = glCheckNamedFramebufferStatus(object, GL_FRAMEBUFFER);
+				status = glCheckNamedFramebufferStatus(framebuffer, GL_FRAMEBUFFER);
 			#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 				status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			#else
@@ -128,9 +130,9 @@ namespace ProjectA {
 		#endif
 	}
 
-	OpenGLFramebuffer::~OpenGLFramebuffer() {
+	GL::Framebuffer::~Framebuffer() {
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glDeleteFramebuffers(1, &object);
+			glDeleteFramebuffers(1, &framebuffer);
 		#else
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif

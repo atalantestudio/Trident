@@ -34,7 +34,7 @@ namespace ProjectA {
 
 			ref<ProjectA::Sampler> createSampler(const SamplerDescriptor& descriptor) const final override;
 
-			ref<ProjectA::Semaphore> createSemaphore() const final override;
+			ref<Semaphore> createSemaphore() const final override;
 
 			ref<ProjectA::ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const final override;
 			ref<ProjectA::ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const final override;

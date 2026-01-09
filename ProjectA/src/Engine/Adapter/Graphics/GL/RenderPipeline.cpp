@@ -1,7 +1,7 @@
-#include "pch.hpp"
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
 
-#include "Engine/Adapter/Graphics/GL/RenderPipeline.hpp"
-#include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
+#include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/BlendFactor.hpp"
 #include "Engine/Adapter/Graphics/GL/CompareOperation.hpp"
@@ -9,23 +9,25 @@
 #include "Engine/Adapter/Graphics/GL/FrontFace.hpp"
 #include "Engine/Adapter/Graphics/GL/PolygonMode.hpp"
 #include "Engine/Adapter/Graphics/GL/PrimitiveTopology.hpp"
+#include "Engine/Adapter/Graphics/GL/RenderPipeline.hpp"
+#include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/GL/VertexInputAttributeType.hpp"
 
 namespace ProjectA {
-	OpenGLRenderPipeline::OpenGLRenderPipeline(const RenderPipelineDescriptor& descriptor) :
-		RenderPipeline(descriptor),
+	GL::RenderPipeline::RenderPipeline(const RenderPipelineDescriptor& descriptor) :
+		ProjectA::RenderPipeline(descriptor),
 		program(glCreateProgram()),
-		primitiveTopology(getGlPrimitiveTopology(descriptor.primitiveTopology)),
-		frontFace(getGlFrontFace(descriptor.frontFace)),
-		cullMode(getGlCullMode(descriptor.cullMode)),
-		polygonModeFace(getGlPolygonModeFace(descriptor.cullMode)),
-		polygonMode(getGlPolygonMode(descriptor.polygonMode)),
+		primitiveTopology(getPrimitiveTopology(descriptor.primitiveTopology)),
+		frontFace(getFrontFace(descriptor.frontFace)),
+		cullMode(getCullMode(descriptor.cullMode)),
+		polygonModeFace(getPolygonModeFace(descriptor.cullMode)),
+		polygonMode(getPolygonMode(descriptor.polygonMode)),
 		lineWidth(descriptor.lineWidth),
 		minSampleShading(descriptor.minSampleShading),
 		drawBuffers(descriptor.colorBlendState.attachments.size()),
 		depthTest(descriptor.depthStencilState.depthTest),
 		depthWrite(descriptor.depthStencilState.depthWrite),
-		depthFunc(getGlDepthFunc(descriptor.depthStencilState.compareOperation)),
+		depthFunc(getDepthFunc(descriptor.depthStencilState.compareOperation)),
 		dynamicLineWidth(descriptor.dynamicState & DynamicState::LINE_WIDTH),
 		subpassIndex(descriptor.subpassIndex)
 	{
@@ -35,11 +37,11 @@ namespace ProjectA {
 			ENGINE_WARNING("[OpenGL] The polygon mode is discarded because the cull mode is FRONT_AND_BACK.");
 		}
 
-		const ref<OpenGLShaderModule> vertexShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.vertexShaderModule);
-		const ref<OpenGLShaderModule> fragmentShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.fragmentShaderModule);
+		const ref<GL::ShaderModule> vertexShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.vertexShaderModule);
+		const ref<GL::ShaderModule> fragmentShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.fragmentShaderModule);
 
-		glAttachShader(program, vertexShaderModule->object);
-		glAttachShader(program, fragmentShaderModule->object);
+		glAttachShader(program, vertexShaderModule->shader);
+		glAttachShader(program, fragmentShaderModule->shader);
 		glLinkProgram(program);
 
 		GLint linkStatus;
@@ -64,14 +66,14 @@ namespace ProjectA {
 			return;
 		}
 
-		glDetachShader(program, vertexShaderModule->object);
-		glDetachShader(program, fragmentShaderModule->object);
+		glDetachShader(program, vertexShaderModule->shader);
+		glDetachShader(program, fragmentShaderModule->shader);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glCreateVertexArrays(1, &vaobj);
+			glCreateVertexArrays(1, &vertexArray);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glGenVertexArrays(1, &vaobj);
-			glBindVertexArray(vaobj);
+			glGenVertexArrays(1, &vertexArray);
+			glBindVertexArray(vertexArray);
 		#else
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
@@ -83,14 +85,14 @@ namespace ProjectA {
 			const std::vector<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
 
 			for (const VertexInputAttribute& attribute : attributes) {
-				const GLenum type = getGlType(attribute.type);
-				const GLint size = getGlSize(attribute.type);
+				const GLenum type = getType(attribute.type);
+				const GLint size = getSize(attribute.type);
 				const GLuint relativeoffset = attribute.offset;
 
 				switch (type) {
 					case GL_FLOAT:
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glVertexArrayAttribFormat(vaobj, attribindex, size, type, GL_FALSE, relativeoffset);
+							glVertexArrayAttribFormat(vertexArray, attribindex, size, type, GL_FALSE, relativeoffset);
 						#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 							glVertexAttribFormat(attribindex, size, type, GL_FALSE, relativeoffset);
 						#else
@@ -105,7 +107,7 @@ namespace ProjectA {
 					case GL_INT:
 					case GL_UNSIGNED_INT:
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glVertexArrayAttribIFormat(vaobj, attribindex, size, type, relativeoffset);
+							glVertexArrayAttribIFormat(vertexArray, attribindex, size, type, relativeoffset);
 						#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 							glVertexAttribIFormat(attribindex, size, type, relativeoffset);
 						#else
@@ -115,7 +117,7 @@ namespace ProjectA {
 						break;
 					case GL_DOUBLE:
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glVertexArrayAttribLFormat(vaobj, attribindex, size, type, relativeoffset);
+							glVertexArrayAttribLFormat(vertexArray, attribindex, size, type, relativeoffset);
 						#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 							glVertexAttribLFormat(attribindex, size, type, relativeoffset);
 						#else
@@ -128,7 +130,7 @@ namespace ProjectA {
 				}
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					glVertexArrayAttribBinding(vaobj, attribindex, bindingindex);
+					glVertexArrayAttribBinding(vertexArray, attribindex, bindingindex);
 				#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 					glVertexAttribBinding(attribindex, bindingindex);
 				#else
@@ -136,14 +138,14 @@ namespace ProjectA {
 				#endif
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					glEnableVertexArrayAttrib(vaobj, attribindex);
+					glEnableVertexArrayAttrib(vertexArray, attribindex);
 				#else
 					glEnableVertexAttribArray(attribindex);
 				#endif
 
 				if (vertexInputBinding.getInputRate() == InputRate::INSTANCE) {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glVertexArrayBindingDivisor(vaobj, bindingindex, 1);
+						glVertexArrayBindingDivisor(vertexArray, bindingindex, 1);
 					#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 						glVertexBindingDivisor(bindingindex, 1);
 					#else
@@ -158,10 +160,10 @@ namespace ProjectA {
 		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.size(); colorBlendAttachmentIndex += 1) {
 			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
 
-			OpenGLDrawBuffer& drawBuffer = drawBuffers[colorBlendAttachmentIndex];
+			DrawBuffer& drawBuffer = drawBuffers[colorBlendAttachmentIndex];
 			drawBuffer.blend = colorBlendAttachment.blend;
-			drawBuffer.srcColorBlendFactor = getGlBlendFactor(colorBlendAttachment.srcColorBlendFactor);
-			drawBuffer.dstColorBlendFactor = getGlBlendFactor(colorBlendAttachment.dstColorBlendFactor);
+			drawBuffer.srcColorBlendFactor = getBlendFactor(colorBlendAttachment.srcColorBlendFactor);
+			drawBuffer.dstColorBlendFactor = getBlendFactor(colorBlendAttachment.dstColorBlendFactor);
 		}
 
 		#if OPENGL_VERSION < OPENGL_VERSION_4_5 && defined(OPENGL_UNBIND_AFTER_USE)
@@ -173,13 +175,13 @@ namespace ProjectA {
 		#endif
 	}
 
-	OpenGLRenderPipeline::~OpenGLRenderPipeline() {
+	GL::RenderPipeline::~RenderPipeline() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		glDeleteProgram(program);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glDeleteVertexArrays(1, &vaobj);
+			glDeleteVertexArrays(1, &vertexArray);
 		#else
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif

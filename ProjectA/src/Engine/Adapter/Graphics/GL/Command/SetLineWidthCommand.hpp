@@ -1,11 +1,14 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 
 namespace ProjectA {
-	class OpenGLSetLineWidthCommand final : public OpenGLCommand {
+	class GL::SetLineWidthCommand final : public GL::Command {
 		public:
-			explicit OpenGLSetLineWidthCommand(GLfloat width) :
+			explicit SetLineWidthCommand(GLfloat width) :
 				width(width)
 			{}
 
@@ -14,6 +17,6 @@ namespace ProjectA {
 			}
 
 		private:
-			const GLfloat width;
+			GLfloat width;
 	};
 }

@@ -52,7 +52,7 @@ namespace ProjectA {
 				case GraphicsAPI::GL: {
 					ENGINE_INFO("Using OpenGL [] graphics adapter.", OPENGL_VERSION);
 
-					adapter = createScope<OpenGLGraphicsAdapter>(projectDescriptor, window);
+					adapter = createScope<GL::GraphicsAdapter>(projectDescriptor, window);
 
 					break;
 				}

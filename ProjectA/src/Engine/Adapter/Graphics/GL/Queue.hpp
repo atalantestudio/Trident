@@ -1,26 +1,27 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
+#include "Engine/Adapter/Graphics/GL/Device.hpp"
 #include "Engine/Adapter/Graphics/GL/Instance.hpp"
-
 #include "Engine/API/Rendering/Queue.hpp"
 
 namespace ProjectA {
-	class OpenGLDevice;
-
-	class OpenGLQueue final : public Queue {
+	class GL::Queue final : public ProjectA::Queue {
 		public:
-			explicit OpenGLQueue(const OpenGLInstance& instance, const OpenGLDevice& device);
+			explicit Queue(const GL::Instance& instance, const GL::Device& device);
 
-			ref<CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
+			ref<ProjectA::CommandEncoder> createCommandEncoder(const CommandBufferDescriptor& descriptor) const final override;
 
-			void submit(const sequence<ref<CommandBuffer>>& commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence) const final override;
+			void submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<ProjectA::Fence> fence) const final override;
 
-			PresentStatus present(const sequence<ref<Swapchain>>& swapchains, ref<Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const final override;
+			PresentStatus present(const sequence<ref<ProjectA::Swapchain>>& swapchains, ref<Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const final override;
 
 			void waitIdle() const final override;
 
 		private:
-			const OpenGLInstance* instance;
-			const OpenGLDevice* device;
+			const GL::Instance& instance;
+			const GL::Device& device;
 	};
 }

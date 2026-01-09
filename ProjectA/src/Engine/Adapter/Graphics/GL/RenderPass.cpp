@@ -1,10 +1,13 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/RenderPass.hpp"
 
 namespace ProjectA {
-	OpenGLRenderPass::OpenGLRenderPass(const RenderPassDescriptor& descriptor) :
-		RenderPass(descriptor)
+	GL::RenderPass::RenderPass(const RenderPassDescriptor& descriptor) :
+		ProjectA::RenderPass(descriptor)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 

@@ -1,19 +1,27 @@
-#pragma once
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
 
-#include "Engine/Adapter/Graphics/GL/DrawBuffer.hpp"
+#pragma once
 
 #include "Engine/API/Rendering/RenderPipeline.hpp"
 
 namespace ProjectA {
-	class OpenGLRenderPipeline final : public RenderPipeline {
+	class GL::RenderPipeline final : public ProjectA::RenderPipeline {
 		public:
-			explicit OpenGLRenderPipeline(const RenderPipelineDescriptor& descriptor);
+			struct DrawBuffer {
+				GLboolean blend;
+				GLenum srcColorBlendFactor;
+				GLenum dstColorBlendFactor;
+			};
 
-			~OpenGLRenderPipeline() final override;
+		public:
+			explicit RenderPipeline(const RenderPipelineDescriptor& descriptor);
+
+			~RenderPipeline() final override;
 
 		public:
 			const GLuint program;
-			GLuint vaobj;
+			GLuint vertexArray;
 
 			const GLenum primitiveTopology;
 			const GLenum frontFace;
@@ -23,7 +31,7 @@ namespace ProjectA {
 			const GLfloat lineWidth;
 			const GLfloat minSampleShading;
 
-			sequence<OpenGLDrawBuffer> drawBuffers;
+			sequence<DrawBuffer> drawBuffers;
 
 			const GLboolean depthTest;
 			const GLboolean depthWrite;

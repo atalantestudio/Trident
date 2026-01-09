@@ -1,9 +1,12 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/PrimitiveTopology.hpp"
 
-namespace ProjectA {
-	static GLenum getGlPrimitiveTopology(PrimitiveTopology primitiveTopology) {
+namespace ProjectA::GL {
+	inline GLenum getPrimitiveTopology(PrimitiveTopology primitiveTopology) {
 		static constexpr GLenum glPrimitiveTopologies[] = {
 			GL_POINTS,
 			GL_LINES,

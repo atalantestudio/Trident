@@ -1,25 +1,28 @@
-﻿#include "pch.hpp"
+﻿// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
-
 #include "Engine/Adapter/Graphics/GL/ShaderStage.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	OpenGLShaderModule::OpenGLShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) :
-		ShaderModule(descriptor),
-		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
+	GL::ShaderModule::ShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) :
+		ProjectA::ShaderModule(descriptor),
+		shader(glCreateShader(getShaderStage(descriptor.stage)))
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ENGINE_ASSERT(descriptor.stage == ShaderStage::VERTEX, "Only vertex shaders can be loaded as .tsm assets.");
+		ADAPTER_ASSERT(descriptor.stage == ShaderStage::VERTEX, "Only vertex shaders can be loaded as .tsm assets.");
 
 		#ifdef GL_SOURCE_FROM_SPIRV
 			// TODO
 			ENGINE_ERROR_UNIMPLEMENTED();
 		#else
-			sequence<char8> code = asset->getGlslCode();
+			sequence<char8> code = asset->getslCode();
 
-			const std::unordered_map<sequence<char8>, uint32>& entryPointActivationOffsets = asset->getGlslEntryPointActivationOffsets();
+			const std::unordered_map<sequence<char8>, uint32>& entryPointActivationOffsets = asset->getslEntryPointActivationOffsets();
 			const std::unordered_map<sequence<char8>, uint32>::const_iterator entryPointActivationOffsetEntry = find(entryPointActivationOffsets, descriptor.entryPoint);
 
 			ENGINE_ASSERT(entryPointActivationOffsetEntry != entryPointActivationOffsets.end(), "Entry point \"[]\" is not present in the shader module.", descriptor.entryPoint);
@@ -29,16 +32,16 @@ namespace ProjectA {
 			const GLchar* const string = static_cast<const GLchar* const>(&code[0]);
 			const GLsizei length = static_cast<GLsizei>(code.count());
 
-			glShaderSource(object, 1, &string, &length);
-			glCompileShader(object);
+			glShaderSource(shader, 1, &string, &length);
+			glCompileShader(shader);
 		#endif
 
 		checkCompileStatus();
 	}
 
-	OpenGLShaderModule::OpenGLShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) :
-		ShaderModule(descriptor),
-		ObjectWrapper(glCreateShader(getGlShaderStage(descriptor.stage)))
+	GL::ShaderModule::ShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) :
+		ProjectA::ShaderModule(descriptor),
+		shader(glCreateShader(getShaderStage(descriptor.stage)))
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -46,10 +49,10 @@ namespace ProjectA {
 
 		#ifdef GL_SOURCE_FROM_SPIRV
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_6
-				glShaderBinary(1, &object, GL_SHADER_BINARY_FORMAT_SPIR_V, &code[0], length);
+				glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, &code[0], length);
 
 				// TODO: Expose specialization constants.
-				glSpecializeShader(object, &descriptor.entryPoint[0], 0, nullptr, nullptr);
+				glSpecializeShader(shader, &descriptor.entryPoint[0], 0, nullptr, nullptr);
 			#else
 				ENGINE_ERROR_UNSUPPORTED();
 			#endif
@@ -63,7 +66,7 @@ namespace ProjectA {
 
 				const bool match = std::regex_search(codeString, matchResults, postVersionDirective);
 
-				ENGINE_ASSERT(match, "Could not find #version directive in GLSL string.");
+				ADAPTER_ASSERT(match, "Could not find #version directive in GLSL string.");
 
 				const std::size_t offset = matchResults[0].length();
 
@@ -79,23 +82,23 @@ namespace ProjectA {
 
 			const GLchar* const string = static_cast<const GLchar* const>(codeString.data());
 
-			glShaderSource(object, 1, &string, &length);
-			glCompileShader(object);
+			glShaderSource(shader, 1, &string, &length);
+			glCompileShader(shader);
 		#endif
 
 		checkCompileStatus();
 	}
 
-	OpenGLShaderModule::~OpenGLShaderModule() {
+	GL::ShaderModule::~ShaderModule() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		glDeleteShader(object);
+		glDeleteShader(shader);
 	}
 
-	void OpenGLShaderModule::checkCompileStatus() const {
+	void GL::ShaderModule::checkCompileStatus() const {
 		GLint compileStatus;
 
-		glGetShaderiv(object, GL_COMPILE_STATUS, &compileStatus);
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
 
 		if (compileStatus == GL_TRUE) {
 			return;
@@ -103,15 +106,13 @@ namespace ProjectA {
 
 		GLint infoLogLength;
 
-		glGetShaderiv(object, GL_INFO_LOG_LENGTH, &infoLogLength);
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
 
 		sequence<GLchar> infoLog(infoLogLength);
 
-		glGetShaderInfoLog(object, infoLogLength, nullptr, &infoLog[0]);
-		glDeleteShader(object);
+		glGetShaderInfoLog(shader, infoLogLength, nullptr, &infoLog[0]);
+		glDeleteShader(shader);
 
-		ENGINE_ERROR("Shader module compilation failed:\n[]", infoLog);
-
-		DEBUG_ASSERT(false);
+		ADAPTER_ASSERT(false, "Shader module compilation failed:\n[]", infoLog);
 	}
 }

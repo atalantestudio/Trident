@@ -1,9 +1,13 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Rendering/ImageUsage.hpp"
 
-namespace ProjectA {
-	static GLenum getGlImageUsage(ImageUsage imageUsage) {
+namespace ProjectA::GL {
+	inline GLenum getImageUsage(ImageUsage imageUsage) {
 		if (imageUsage & ImageUsage::COLOR_ATTACHMENT) {
 			return GL_COLOR_ATTACHMENT0;
 		}
@@ -15,7 +19,7 @@ namespace ProjectA {
 		// TODO: Handle GL_DEPTH_ATTACHMENT.
 		// TODO: Handle GL_STENCIL_ATTACHMENT.
 
-		ENGINE_ASSERT(false, "Unhandled image usage.");
+		ADAPTER_ASSERT(false, "Unsupported image usage.");
 
 		return 0;
 	}

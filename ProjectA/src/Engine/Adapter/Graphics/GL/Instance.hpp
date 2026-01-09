@@ -1,5 +1,9 @@
-﻿#pragma once
+﻿// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
 
+#pragma once
+
+#include "Engine/API/Rendering/Instance.hpp"
 #include "Engine/API/Window/Window.hpp"
 
 namespace ProjectA {
@@ -8,14 +12,14 @@ namespace ProjectA {
 	typedef WINGDIAPI PROC (WINAPI *PFNWGLGETPROCADDRESSPROC)(LPCSTR);
 	typedef WINGDIAPI BOOL (WINAPI *PFNWGLMAKECURRENTPROC)(HDC, HGLRC);
 
-	class OpenGLInstance {
+	class GL::Instance final : public ProjectA::Instance {
 		private:
 			static void* getWglProcedure(view<char8> procedureName);
 
 		public:
-			explicit OpenGLInstance(const Window& window);
+			explicit Instance(const Window& window);
 
-			~OpenGLInstance();
+			~Instance() final override;
 
 			void* getProcedure(view<char8> procedureName) const;
 

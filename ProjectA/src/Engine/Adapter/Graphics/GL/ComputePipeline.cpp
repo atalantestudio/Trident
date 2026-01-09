@@ -1,18 +1,21 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
 
 namespace ProjectA {
-	OpenGLComputePipeline::OpenGLComputePipeline(const ComputePipelineDescriptor& descriptor) :
-		ComputePipeline(descriptor),
+	GL::ComputePipeline::ComputePipeline(const ComputePipelineDescriptor& descriptor) :
+		ProjectA::ComputePipeline(descriptor),
 		program(glCreateProgram())
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const ref<OpenGLShaderModule> computeShaderModule = std::static_pointer_cast<OpenGLShaderModule>(descriptor.computeShaderModule);
+		const ref<GL::ShaderModule> computeShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.computeShaderModule);
 
-		glAttachShader(program, computeShaderModule->object);
+		glAttachShader(program, computeShaderModule->shader);
 		glLinkProgram(program);
 
 		GLint linkStatus;
@@ -35,10 +38,10 @@ namespace ProjectA {
 			return;
 		}
 
-		glDetachShader(program, computeShaderModule->object);
+		glDetachShader(program, computeShaderModule->shader);
 	}
 
-	OpenGLComputePipeline::~OpenGLComputePipeline() {
+	GL::ComputePipeline::~ComputePipeline() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		glDeleteProgram(program);

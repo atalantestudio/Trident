@@ -1,17 +1,19 @@
-﻿#include "pch.hpp"
+﻿// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/Instance.hpp"
-
 #include "Engine/Adapter/Window/Win32/base.hpp"
 
 namespace ProjectA {
-	void* OpenGLInstance::getWglProcedure(view<char8> procedureName) {
+	void* GL::Instance::getWglProcedure(view<char8> procedureName) {
 		static const PlatformLibrary opengl32Library = Platform::openLibrary("opengl32.dll");
 
 		return opengl32Library.getProcedure(procedureName);
 	}
 
-	OpenGLInstance::OpenGLInstance(const Window& window) {
+	GL::Instance::Instance(const Window& window) {
 		const Win32WindowData* windowData = static_cast<const Win32WindowData*>(window.data);
 
 		hDC = windowData->hDC;
@@ -88,12 +90,12 @@ namespace ProjectA {
 		WIN32_ASSERT(hGLRC != nullptr);
 	}
 
-	OpenGLInstance::~OpenGLInstance() {
+	GL::Instance::~Instance() {
 		WIN32_ASSERT(wglMakeCurrent(hDC, nullptr) == TRUE);
 		WIN32_ASSERT(wglDeleteContext(hGLRC) == TRUE);
 	}
 
-	void* OpenGLInstance::getProcedure(view<char8> procedureName) const {
+	void* GL::Instance::getProcedure(view<char8> procedureName) const {
 		static const PFNWGLGETPROCADDRESSPROC wglGetProcAddress = static_cast<PFNWGLGETPROCADDRESSPROC>(getWglProcedure("wglGetProcAddress"));
 
 		const PROC procedure = wglGetProcAddress(&procedureName[0]);
@@ -105,11 +107,11 @@ namespace ProjectA {
 		return procedure;
 	}
 
-	void OpenGLInstance::makeCurrent() const {
+	void GL::Instance::makeCurrent() const {
 		WIN32_ASSERT(wglMakeCurrent(hDC, hGLRC) == TRUE);
 	}
 
-	void OpenGLInstance::setSwapInterval(sint32 interval) const {
+	void GL::Instance::setSwapInterval(sint32 interval) const {
 		static const PFNWGLGETEXTENSIONSSTRINGEXTPROC wglGetExtensionsStringEXT = static_cast<PFNWGLGETEXTENSIONSSTRINGEXTPROC>(getProcedure("wglGetExtensionsStringEXT"));
 		static const std::string extensionsString = wglGetExtensionsStringEXT();
 
@@ -120,7 +122,7 @@ namespace ProjectA {
 		WIN32_ASSERT(wglSwapIntervalEXT(interval) == TRUE);
 	}
 
-	void OpenGLInstance::swapBuffers() const {
+	void GL::Instance::swapBuffers() const {
 		WIN32_ASSERT(SwapBuffers(hDC) == TRUE);
 	}
 }

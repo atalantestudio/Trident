@@ -1,12 +1,14 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 #include "Engine/Adapter/Graphics/GL/Framebuffer.hpp"
-
 #include "Engine/API/Rendering/Subpass.hpp"
 
 namespace ProjectA {
-	class OpenGLNextSubpassCommand final : public OpenGLCommand {
+	class GL::NextSubpassCommand final : public GL::Command {
 		public:
 			// Selects draw buffers on the currently bound framebuffer.
 			static void setDrawBuffers(ref<Subpass> subpass) {
@@ -29,7 +31,7 @@ namespace ProjectA {
 			}
 
 		public:
-			explicit OpenGLNextSubpassCommand(ref<OpenGLFramebuffer> framebuffer, ref<Subpass> subpass) :
+			explicit NextSubpassCommand(ref<GL::Framebuffer> framebuffer, ref<Subpass> subpass) :
 				framebuffer(framebuffer),
 				subpass(subpass)
 			{}
@@ -39,7 +41,7 @@ namespace ProjectA {
 			}
 
 		private:
-			ref<OpenGLFramebuffer> framebuffer;
+			ref<GL::Framebuffer> framebuffer;
 			ref<Subpass> subpass;
 	};
 }

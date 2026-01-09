@@ -1,9 +1,12 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/Surface.hpp"
 
 namespace ProjectA {
-	class OpenGLSurface final : public Surface {
+	class GL::Surface final : public ProjectA::Surface {
 		public:
 			ImageFormat getFormat() const final override;
 	};

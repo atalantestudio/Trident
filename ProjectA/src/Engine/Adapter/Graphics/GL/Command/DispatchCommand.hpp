@@ -1,27 +1,30 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 
 namespace ProjectA {
-	class OpenGLDispatchCommand final : public OpenGLCommand {
+	class GL::DispatchCommand final : public GL::Command {
 		public:
-			explicit OpenGLDispatchCommand(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z) :
-				num_groups_x(num_groups_x),
-				num_groups_y(num_groups_y),
-				num_groups_z(num_groups_z)
+			explicit DispatchCommand(GLuint numGroupsX, GLuint numGroupsY, GLuint numGroupsZ) :
+				numGroupsX(numGroupsX),
+				numGroupsY(numGroupsY),
+				numGroupsZ(numGroupsZ)
 			{}
 
 			void execute() const final override {
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_3
-					glDispatchCompute(num_groups_x, num_groups_y, num_groups_z);
+					glDispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
 				#else
 					ENGINE_ERROR_UNSUPPORTED();
 				#endif
 			}
 
 		private:
-			const GLuint num_groups_x;
-			const GLuint num_groups_y;
-			const GLuint num_groups_z;
+			GLuint numGroupsX;
+			GLuint numGroupsY;
+			GLuint numGroupsZ;
 	};
 }

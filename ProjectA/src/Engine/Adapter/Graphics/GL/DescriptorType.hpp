@@ -1,9 +1,13 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Rendering/DescriptorType.hpp"
 
-namespace ProjectA {
-	static GLenum getGlBufferDescriptorType(DescriptorType descriptorType) {
+namespace ProjectA::GL {
+	inline GLenum getBufferDescriptorType(DescriptorType descriptorType) {
 		if (descriptorType == DescriptorType::UNIFORM_BUFFER) {
 			return GL_UNIFORM_BUFFER;
 		}
@@ -12,7 +16,7 @@ namespace ProjectA {
 			return GL_SHADER_STORAGE_BUFFER;
 		}
 
-		ENGINE_ASSERT(false, "This type is not a buffer descriptor type.");
+		ADAPTER_ASSERT(false, "This type is not a buffer descriptor type.");
 
 		return 0;
 	}

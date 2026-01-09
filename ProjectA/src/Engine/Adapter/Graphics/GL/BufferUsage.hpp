@@ -1,9 +1,13 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Rendering/BufferUsage.hpp"
 
-namespace ProjectA {
-	static GLenum getGlTarget(BufferUsage bufferUsage) {
+namespace ProjectA::GL {
+	inline GLenum getTarget(BufferUsage bufferUsage) {
 		if (bufferUsage & BufferUsage::TRANSFER_SRC) {
 			return GL_COPY_READ_BUFFER;
 		}
@@ -32,7 +36,7 @@ namespace ProjectA {
 			return GL_DRAW_INDIRECT_BUFFER;
 		}
 
-		ENGINE_ASSERT(false, "Unhandled buffer usage.");
+		ADAPTER_ASSERT(false, "Unhandled buffer usage.");
 
 		return 0;
 	}

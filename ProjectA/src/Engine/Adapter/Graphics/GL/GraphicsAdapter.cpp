@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/Buffer.hpp"
@@ -13,16 +16,17 @@
 #include "Engine/Adapter/Graphics/GL/Swapchain.hpp"
 
 namespace ProjectA {
-	OpenGLGraphicsAdapter::OpenGLGraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window) :
-		GraphicsAdapter(window),
-		instance(window),
-		surface(createRef<OpenGLSurface>())
+	GL::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window) :
+		ProjectA::GraphicsAdapter(window)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		logger = ConsoleLogger(std::cout, LogLevel::ALL, "OPENGL");
 
-		instance.makeCurrent();
+		instance = createRef<GL::Instance>(window);
+		instance->makeCurrent();
+
+		surface = createRef<GL::Surface>();
 
 		loadProcedures();
 
@@ -39,69 +43,67 @@ namespace ProjectA {
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
-		device = createRef<OpenGLDevice>(instance);
+		device = createRef<GL::Device>(*instance);
 	}
 
-	OpenGLGraphicsAdapter::~OpenGLGraphicsAdapter() {}
-
-	ref<Buffer> OpenGLGraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
-		return createRef<OpenGLBuffer>(descriptor);
+	ref<Buffer> GL::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
+		return createRef<GL::Buffer>(descriptor);
 	}
 
-	ref<Fence> OpenGLGraphicsAdapter::createFence() const {
-		return createRef<OpenGLFence>(true);
+	ref<Fence> GL::GraphicsAdapter::createFence() const {
+		return createRef<GL::Fence>(true);
 	}
 
-	ref<Framebuffer> OpenGLGraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
-		return createRef<OpenGLFramebuffer>(descriptor);
+	ref<Framebuffer> GL::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
+		return createRef<GL::Framebuffer>(descriptor);
 	}
 
-	ref<Image> OpenGLGraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
-		return createRef<OpenGLImage>(descriptor);
+	ref<Image> GL::GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
+		return createRef<GL::Image>(descriptor);
 	}
 
-	ref<ComputePipeline> OpenGLGraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
-		return createRef<OpenGLComputePipeline>(descriptor);
+	ref<ComputePipeline> GL::GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
+		return createRef<GL::ComputePipeline>(descriptor);
 	}
 
-	ref<DescriptorSetLayout> OpenGLGraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
+	ref<DescriptorSetLayout> GL::GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
 		return createRef<DescriptorSetLayout>(bindings);
 	}
 
-	ref<PipelineLayout> OpenGLGraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
+	ref<PipelineLayout> GL::GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
 		return createRef<PipelineLayout>(descriptor);
 	}
 
-	ref<RenderPass> OpenGLGraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		return createRef<OpenGLRenderPass>(descriptor);
+	ref<RenderPass> GL::GraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
+		return createRef<GL::RenderPass>(descriptor);
 	}
 
-	ref<RenderPipeline> OpenGLGraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
-		return createRef<OpenGLRenderPipeline>(descriptor);
+	ref<RenderPipeline> GL::GraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
+		return createRef<GL::RenderPipeline>(descriptor);
 	}
 
-	ref<Sampler> OpenGLGraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
-		return createRef<OpenGLSampler>(descriptor);
+	ref<Sampler> GL::GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
+		return createRef<GL::Sampler>(descriptor);
 	}
 
-	ref<Semaphore> OpenGLGraphicsAdapter::createSemaphore() const {
+	ref<Semaphore> GL::GraphicsAdapter::createSemaphore() const {
 		return createRef<Semaphore>();
 	}
 
-	ref<ShaderModule> OpenGLGraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
-		return createRef<OpenGLShaderModule>(descriptor, asset);
+	ref<ShaderModule> GL::GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
+		return createRef<GL::ShaderModule>(descriptor, asset);
 	}
 
-	ref<ShaderModule> OpenGLGraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
-		return createRef<OpenGLShaderModule>(descriptor, code);
+	ref<ShaderModule> GL::GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
+		return createRef<GL::ShaderModule>(descriptor, code);
 	}
 
-	ref<Swapchain> OpenGLGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return createRef<OpenGLSwapchain>(descriptor, instance, *surface);
+	ref<Swapchain> GL::GraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
+		return createRef<GL::Swapchain>(descriptor, *instance, *surface);
 	}
 
 	#ifdef DEBUG_ENABLE_MESSENGER
-		void OpenGLGraphicsAdapter::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+		void GL::GraphicsAdapter::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 			switch (severity) {
 				case GL_DEBUG_SEVERITY_NOTIFICATION: {
 					logger.info(message);
@@ -123,18 +125,18 @@ namespace ProjectA {
 		}
 	#endif
 
-	ref<Device> OpenGLGraphicsAdapter::getDevice() const {
+	ref<Device> GL::GraphicsAdapter::getDevice() const {
 		return device;
 	}
 
-	ref<Surface> OpenGLGraphicsAdapter::getSurface() const {
+	ref<Surface> GL::GraphicsAdapter::getSurface() const {
 		return surface;
 	}
 
-	void OpenGLGraphicsAdapter::loadProcedures() const {
+	void GL::GraphicsAdapter::loadProcedures() const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(instance.getProcedure(#procedure))
+		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(instance->getProcedure(#procedure))
 
 		LOAD_PROCEDURE(glAttachShader);
 		LOAD_PROCEDURE(glBindBuffer);

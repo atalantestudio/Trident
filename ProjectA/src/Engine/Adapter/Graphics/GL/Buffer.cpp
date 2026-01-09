@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/Buffer.hpp"
@@ -7,19 +10,19 @@
 #endif
 
 namespace ProjectA {
-	OpenGLBuffer::OpenGLBuffer(const BufferDescriptor& descriptor) :
-		Buffer(descriptor)
+	GL::Buffer::Buffer(const BufferDescriptor& descriptor) :
+		ProjectA::Buffer(descriptor)
 		#if OPENGL_VERSION < OPENGL_VERSION_4_5
-			, target(getGlTarget(descriptor.usage))
+			, target(getTarget(descriptor.usage))
 		#endif
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glCreateBuffers(1, &object);
+			glCreateBuffers(1, &buffer);
 		#else
-			glGenBuffers(1, &object);
-			glBindBuffer(target, object);
+			glGenBuffers(1, &buffer);
+			glBindBuffer(target, buffer);
 		#endif
 
 		if (
@@ -47,7 +50,7 @@ namespace ProjectA {
 		storageAccessFlags |= mapAccessFlags;
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glNamedBufferStorage(object, size, nullptr, storageAccessFlags);
+			glNamedBufferStorage(buffer, size, nullptr, storageAccessFlags);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_4_4
 			glBufferStorage(target, size, nullptr, storageAccessFlags);
 		#else
@@ -59,7 +62,7 @@ namespace ProjectA {
 			GLint immutableStorage = GL_FALSE;
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				glGetNamedBufferParameteriv(object, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
+				glGetNamedBufferParameteriv(buffer, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
 			#else
 				glGetBufferParameteriv(target, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
 			#endif
@@ -72,21 +75,21 @@ namespace ProjectA {
 		#endif
 	}
 
-	OpenGLBuffer::~OpenGLBuffer() {
+	GL::Buffer::~Buffer() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		glDeleteBuffers(1, &object);
+		glDeleteBuffers(1, &buffer);
 	}
 
-	void OpenGLBuffer::unmap() const {
+	void GL::Buffer::unmap() const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		GLboolean result = GL_FALSE;
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			result = glUnmapNamedBuffer(object);
+			result = glUnmapNamedBuffer(buffer);
 		#else
-			glBindBuffer(target, object);
+			glBindBuffer(target, buffer);
 
 			result = glUnmapBuffer(target);
 		#endif
@@ -94,15 +97,15 @@ namespace ProjectA {
 		ENGINE_ASSERT(result == GL_TRUE, "Failed to unmap OpenGL buffer.");
 	}
 
-	void* OpenGLBuffer::getMappedRange(uint64 offset, uint64 size) const {
+	void* GL::Buffer::getMappedRange(uint64 offset, uint64 size) const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		void* mappedRange = nullptr;
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			mappedRange = glMapNamedBufferRange(object, offset, size, mapAccessFlags);
+			mappedRange = glMapNamedBufferRange(buffer, offset, size, mapAccessFlags);
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-			glBindBuffer(target, object);
+			glBindBuffer(target, buffer);
 
 			mappedRange = glMapBufferRange(target, offset, size, mapAccessFlags);
 		#else

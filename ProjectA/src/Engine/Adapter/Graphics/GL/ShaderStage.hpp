@@ -1,10 +1,14 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Rendering/ShaderStage.hpp"
 
-namespace ProjectA {
+namespace ProjectA::GL {
 	// TODO: Treat as flag.
-	static GLenum getGlShaderStage(ShaderStage shaderStage) {
+	inline GLenum getShaderStage(ShaderStage shaderStage) {
 		if (shaderStage == ShaderStage::VERTEX) {
 			return GL_VERTEX_SHADER;
 		}
@@ -17,7 +21,7 @@ namespace ProjectA {
 			return GL_COMPUTE_SHADER;
 		}
 
-		DEBUG_ASSERT(false);
+		ADAPTER_ASSERT(false, "Unsupported shader stage.");
 
 		return 0;
 	}

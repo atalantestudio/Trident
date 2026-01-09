@@ -1,11 +1,14 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 
 namespace ProjectA {
-	class OpenGLDrawCommand final : public OpenGLCommand {
+	class GL::DrawCommand final : public GL::Command {
 		public:
-			explicit OpenGLDrawCommand(GLenum mode, GLint first, GLsizei count, GLsizei instancecount, GLuint baseinstance) :
+			explicit DrawCommand(GLenum mode, GLint first, GLsizei count, GLsizei instancecount, GLuint baseinstance) :
 				mode(mode),
 				first(first),
 				count(count),
@@ -30,10 +33,10 @@ namespace ProjectA {
 			}
 
 		private:
-			const GLenum mode;
-			const GLint first;
-			const GLsizei count;
-			const GLsizei instancecount;
-			const GLuint baseinstance;
+			GLenum mode;
+			GLint first;
+			GLsizei count;
+			GLsizei instancecount;
+			GLuint baseinstance;
 	};
 }

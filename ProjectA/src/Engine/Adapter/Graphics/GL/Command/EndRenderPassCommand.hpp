@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
@@ -5,14 +8,14 @@
 #include "Engine/Adapter/Graphics/GL/RenderPass.hpp"
 
 namespace ProjectA {
-	class OpenGLEndRenderPassCommand final : public OpenGLCommand {
+	class GL::EndRenderPassCommand final : public GL::Command {
 		public:
-			explicit OpenGLEndRenderPassCommand(ref<OpenGLFramebuffer> framebuffer) :
+			explicit EndRenderPassCommand(ref<GL::Framebuffer> framebuffer) :
 				framebuffer(framebuffer)
 			{}
 
 			void execute() const final override {
-				const ref<OpenGLRenderPass> renderPass = std::static_pointer_cast<OpenGLRenderPass>(framebuffer->getRenderPass());
+				const ref<GL::RenderPass> renderPass = std::static_pointer_cast<GL::RenderPass>(framebuffer->getRenderPass());
 				const uint32 presentSourceAttachmentIndex = renderPass->getPresentSourceAttachmentIndex();
 
 				if (presentSourceAttachmentIndex == max<uint32>()) {
@@ -23,10 +26,10 @@ namespace ProjectA {
 				const Extent2D extent = framebuffer->getExtent();
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-					glNamedFramebufferReadBuffer(framebuffer->object, readBuffer);
+					glNamedFramebufferReadBuffer(framebuffer->framebuffer, readBuffer);
 
 					glBlitNamedFramebuffer(
-						framebuffer->object,
+						framebuffer->framebuffer,
 						0,
 						0,
 						0,
@@ -40,11 +43,11 @@ namespace ProjectA {
 						GL_NEAREST
 					);
 				#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
-					glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->object);
+					glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer->framebuffer);
 					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 					glReadBuffer(readBuffer);
-					glDrawBuffer(OpenGLGraphicsAdapter::defaultFramebufferDrawBuffer);
+					glDrawBuffer(GL::GraphicsAdapter::defaultFramebufferDrawBuffer);
 
 					glBlitFramebuffer(
 						0,
@@ -64,6 +67,6 @@ namespace ProjectA {
 			}
 
 		private:
-			ref<OpenGLFramebuffer> framebuffer;
+			ref<GL::Framebuffer> framebuffer;
 	};
 }

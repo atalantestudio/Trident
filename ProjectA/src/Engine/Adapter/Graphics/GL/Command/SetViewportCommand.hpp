@@ -1,11 +1,14 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 
 namespace ProjectA {
-	class OpenGLSetViewportCommand final : public OpenGLCommand {
+	class GL::SetViewportCommand final : public GL::Command {
 		public:
-			explicit OpenGLSetViewportCommand(GLint x, GLint y, GLsizei width, GLsizei height) :
+			explicit SetViewportCommand(GLint x, GLint y, GLsizei width, GLsizei height) :
 				x(x),
 				y(y),
 				width(width),
@@ -17,9 +20,9 @@ namespace ProjectA {
 			}
 
 		private:
-			const GLint x;
-			const GLint y;
-			const GLsizei width;
-			const GLsizei height;
+			GLint x;
+			GLint y;
+			GLsizei width;
+			GLsizei height;
 	};
 }

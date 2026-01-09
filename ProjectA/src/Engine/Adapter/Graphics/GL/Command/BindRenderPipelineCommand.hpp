@@ -1,12 +1,15 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 #include "Engine/Adapter/Graphics/GL/RenderPipeline.hpp"
 
 namespace ProjectA {
-	class OpenGLBindRenderPipelineCommand final : public OpenGLCommand {
+	class GL::BindRenderPipelineCommand final : public GL::Command {
 		public:
-			explicit OpenGLBindRenderPipelineCommand(ref<OpenGLRenderPipeline> renderPipeline) :
+			explicit BindRenderPipelineCommand(ref<GL::RenderPipeline> renderPipeline) :
 				renderPipeline(renderPipeline)
 			{}
 
@@ -14,7 +17,7 @@ namespace ProjectA {
 				DEBUG_ASSERT(renderPipeline->minSampleShading >= 0.0f && renderPipeline->minSampleShading <= 1.0f);
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-					glBindVertexArray(renderPipeline->vaobj);
+					glBindVertexArray(renderPipeline->vertexArray);
 				#else
 					ENGINE_ERROR_UNSUPPORTED();
 				#endif
@@ -61,7 +64,7 @@ namespace ProjectA {
 				}
 
 				for (uint32 drawBufferIndex = 0; drawBufferIndex < renderPipeline->drawBuffers.count(); drawBufferIndex += 1) {
-					const OpenGLDrawBuffer& drawBuffer = renderPipeline->drawBuffers[drawBufferIndex];
+					const GL::RenderPipeline::DrawBuffer& drawBuffer = renderPipeline->drawBuffers[drawBufferIndex];
 
 					if (drawBuffer.blend) {
 						#if OPENGL_VERSION >= OPENGL_VERSION_3_0
@@ -98,6 +101,6 @@ namespace ProjectA {
 			}
 
 		private:
-			ref<OpenGLRenderPipeline> renderPipeline;
+			ref<GL::RenderPipeline> renderPipeline;
 	};
 }

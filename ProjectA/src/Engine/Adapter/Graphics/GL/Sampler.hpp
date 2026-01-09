@@ -1,14 +1,18 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/API/Rendering/Descriptor/SamplerDescriptor.hpp"
 #include "Engine/API/Rendering/Sampler.hpp"
 
 namespace ProjectA {
-	class OpenGLSampler final : public Sampler, public ObjectWrapper<GLuint> {
+	class GL::Sampler final : public ProjectA::Sampler {
 		public:
-			explicit OpenGLSampler(const SamplerDescriptor& descriptor);
+			explicit Sampler(const SamplerDescriptor& descriptor);
 
-			~OpenGLSampler() final override;
+			~Sampler() final override;
+
+		public:
+			GLuint sampler;
 	};
 }

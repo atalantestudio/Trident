@@ -1,10 +1,13 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/DescriptorSet.hpp"
 #include "Engine/API/Rendering/DescriptorType.hpp"
 
 namespace ProjectA {
-	class OpenGLDescriptorSet final : public DescriptorSet {
+	class GL::DescriptorSet final : public ProjectA::DescriptorSet {
 		public:
 			struct DescriptorSetBinding {
 				DescriptorType descriptorType;

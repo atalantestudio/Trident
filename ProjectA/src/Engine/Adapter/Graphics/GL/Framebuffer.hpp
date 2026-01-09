@@ -1,13 +1,18 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/Framebuffer.hpp"
-#include "Engine/API/ObjectWrapper.hpp"
 
 namespace ProjectA {
-	class OpenGLFramebuffer final : public Framebuffer, public ObjectWrapper<GLuint> {
+	class GL::Framebuffer final : public ProjectA::Framebuffer {
 		public:
-			explicit OpenGLFramebuffer(const FramebufferDescriptor& descriptor);
+			explicit Framebuffer(const FramebufferDescriptor& descriptor);
 
-			~OpenGLFramebuffer() final override;
+			~Framebuffer() final override;
+
+		public:
+			GLuint framebuffer;
 	};
 }

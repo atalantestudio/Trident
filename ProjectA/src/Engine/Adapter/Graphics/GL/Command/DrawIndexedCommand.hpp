@@ -1,11 +1,14 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 
 namespace ProjectA {
-	class OpenGLDrawIndexedCommand final : public OpenGLCommand {
+	class GL::DrawIndexedCommand final : public GL::Command {
 		public:
-			explicit OpenGLDrawIndexedCommand(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices, GLsizei instancecount, GLint basevertex, GLuint baseinstance) :
+			explicit DrawIndexedCommand(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices, GLsizei instancecount, GLint basevertex, GLuint baseinstance) :
 				mode(mode),
 				count(count),
 				type(type),
@@ -36,12 +39,12 @@ namespace ProjectA {
 			}
 
 		private:
-			const GLenum mode;
-			const GLsizei count;
-			const GLenum type;
+			GLenum mode;
+			GLsizei count;
+			GLenum type;
 			const GLvoid* indices;
-			const GLsizei instancecount;
-			const GLint basevertex;
-			const GLuint baseinstance;
+			GLsizei instancecount;
+			GLint basevertex;
+			GLuint baseinstance;
 	};
 }

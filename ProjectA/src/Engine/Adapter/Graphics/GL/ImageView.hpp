@@ -1,13 +1,18 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/ImageView.hpp"
 
 namespace ProjectA {
-	class OpenGLImageView final : public ImageView, public ObjectWrapper<GLuint> {
+	class GL::ImageView final : public ProjectA::ImageView {
 		public:
-			explicit OpenGLImageView(const ImageViewDescriptor& descriptor, const Image* image);
+			explicit ImageView(const ImageViewDescriptor& descriptor, const ProjectA::Image* image);
 
-			~OpenGLImageView() final;
+			~ImageView() final;
+
+		public:
+			GLuint texture;
 	};
 }

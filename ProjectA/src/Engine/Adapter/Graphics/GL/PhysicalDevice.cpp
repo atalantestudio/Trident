@@ -1,22 +1,25 @@
-﻿#include "pch.hpp"
+﻿// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/PhysicalDevice.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	OpenGLPhysicalDevice::OpenGLPhysicalDevice() {
+	GL::PhysicalDevice::PhysicalDevice() {
 		#ifdef BUILD_MODE_DEBUG
 			const GLchar* vendor = pointer_cast<const GLchar*>(glGetString(GL_VENDOR));
 			const GLchar* renderer = pointer_cast<const GLchar*>(glGetString(GL_RENDERER));
 			const GLchar* version = pointer_cast<const GLchar*>(glGetString(GL_VERSION));
 
-			ENGINE_INFO("Using [] [] [].", vendor, renderer, version);
+			ProjectA::GraphicsAdapter::logger.info("Using [] [] [].", vendor, renderer, version);
 		#endif
 
 		setLimits();
 	}
 
-	void OpenGLPhysicalDevice::setLimits() {
+	void GL::PhysicalDevice::setLimits() {
 		limits.bufferImageGranularity = 0;
 
 		glGetFloatv(GL_SMOOTH_LINE_WIDTH_GRANULARITY, &limits.lineWidthGranularity);

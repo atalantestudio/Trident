@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/CommandBuffer.hpp"
@@ -6,38 +9,36 @@
 #include "Engine/Adapter/Graphics/GL/Queue.hpp"
 
 namespace ProjectA {
-	OpenGLQueue::OpenGLQueue(const OpenGLInstance& instance, const OpenGLDevice& device) :
-		instance(&instance),
-		device(&device)
+	GL::Queue::Queue(const GL::Instance& instance, const GL::Device& device) :
+		instance(instance),
+		device(device)
 	{}
 
-	ref<CommandEncoder> OpenGLQueue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
-		DEBUG_DESCRIPTOR_GUARD(descriptor);
-
-		return createRef<OpenGLCommandEncoder>(*device, descriptor);
+	ref<CommandEncoder> GL::Queue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
+		return createRef<GL::CommandEncoder>(descriptor, device);
 	}
 
-	void OpenGLQueue::submit(const sequence<ref<CommandBuffer>>& commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Fence> fence) const {
-		for (const ref<CommandBuffer> commandBuffer : commandBuffers) {
-			const OpenGLCommandBuffer& glCommandBuffer = *std::static_pointer_cast<OpenGLCommandBuffer>(commandBuffer);
+	void GL::Queue::submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<ProjectA::Fence> fence) const {
+		for (const ref<ProjectA::CommandBuffer> commandBuffer : commandBuffers) {
+			const ref<GL::CommandBuffer> glCommandBuffer = std::static_pointer_cast<GL::CommandBuffer>(commandBuffer);
 
-			for (const ref<OpenGLCommand> command : glCommandBuffer) {
+			for (const ref<GL::Command> command : glCommandBuffer->commands) {
 				command->execute();
 			}
 		}
 
 		if (fence != nullptr) {
-			device->waitForFence(fence);
+			device.waitForFence(fence);
 		}
 	}
 
-	PresentStatus OpenGLQueue::present(const sequence<ref<Swapchain>>& swapchains, ref<Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const {
-		instance->swapBuffers();
+	PresentStatus GL::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, ref<Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const {
+		instance.swapBuffers();
 
 		return PresentStatus::SUCCESS;
 	}
 
-	void OpenGLQueue::waitIdle() const {
+	void GL::Queue::waitIdle() const {
 		glFinish();
 	}
 }

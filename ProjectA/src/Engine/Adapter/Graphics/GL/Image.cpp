@@ -1,27 +1,29 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/Image.hpp"
-#include "Engine/Adapter/Graphics/GL/ImageView.hpp"
-
 #include "Engine/Adapter/Graphics/GL/ImageFormat.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageType.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageUsage.hpp"
+#include "Engine/Adapter/Graphics/GL/ImageView.hpp"
 
 namespace ProjectA {
-	OpenGLImage::OpenGLImage(const ImageDescriptor& descriptor) :
-		Image(descriptor),
-		target(getGlImageType(descriptor.type, sampleCount, layerCount)),
+	GL::Image::Image(const ImageDescriptor& descriptor) :
+		ProjectA::Image(descriptor),
+		target(getImageType(descriptor.type, sampleCount, layerCount)),
 		usage(descriptor.usage),
-		internalFormat(getGlInternalFormat(descriptor.format)),
-		format(getGlFormat(descriptor.format))
+		internalFormat(getInternalFormat(descriptor.format)),
+		format(GL::getFormat(descriptor.format))
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-			glCreateTextures(target, 1, &object);
+			glCreateTextures(target, 1, &texture);
 		#else
-			glGenTextures(1, &object);
-			glBindTexture(target, object);
+			glGenTextures(1, &texture);
+			glBindTexture(target, texture);
 		#endif
 
 		switch (target) {
@@ -44,7 +46,7 @@ namespace ProjectA {
 				// TODO: Decouple multisample from non-multisample images.
 				if (sampleCount > 1) {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glTextureStorage2DMultisample(object, sampleCount, internalFormat, extent.width, extent.height, GL_TRUE);
+						glTextureStorage2DMultisample(texture, sampleCount, internalFormat, extent.width, extent.height, GL_TRUE);
 					#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 						glTexStorage2DMultisample(target, sampleCount, internalFormat, extent.width, extent.height, GL_TRUE);
 					#else
@@ -53,7 +55,7 @@ namespace ProjectA {
 				}
 				else {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glTextureStorage2D(object, mipLevelCount, internalFormat, extent.width, extent.height);
+						glTextureStorage2D(texture, mipLevelCount, internalFormat, extent.width, extent.height);
 					#elif OPENGL_VERSION >= OPENGL_VERSION_4_2
 						glTexStorage2D(target, mipLevelCount, internalFormat, extent.width, extent.height);
 					#else
@@ -73,7 +75,7 @@ namespace ProjectA {
 				// TODO: Decouple multisample from non-multisample images.
 				if (sampleCount > 1) {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glTextureStorage3DMultisample(object, sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);
+						glTextureStorage3DMultisample(texture, sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);
 					#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
 						glTexStorage3DMultisample(target, sampleCount, internalFormat, extent.width, extent.height, extent.depth * layerCount, GL_TRUE);
 					#else
@@ -82,7 +84,7 @@ namespace ProjectA {
 				}
 				else {
 					#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-						glTextureStorage3D(object, mipLevelCount, internalFormat, extent.width, extent.height, extent.depth * layerCount);
+						glTextureStorage3D(texture, mipLevelCount, internalFormat, extent.width, extent.height, extent.depth * layerCount);
 					#elif OPENGL_VERSION >= OPENGL_VERSION_4_2
 						glTexStorage3D(target, mipLevelCount, internalFormat, extent.width, extent.height, extent.depth * layerCount);
 					#else
@@ -103,7 +105,7 @@ namespace ProjectA {
 			GLint immutableFormat = GL_FALSE;
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				glGetTextureParameteriv(object, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
+				glGetTextureParameteriv(texture, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
 			#else
 				glGetTexParameteriv(target, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
 			#endif
@@ -114,10 +116,10 @@ namespace ProjectA {
 		// Set default texture parameters.
 		if (sampleCount == 1) {
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-				glTextureParameteri(object, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTextureParameteri(object, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTextureParameteri(object, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTextureParameteri(object, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			#else
 				glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 				glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -131,15 +133,15 @@ namespace ProjectA {
 		#endif
 	}
 
-	OpenGLImage::~OpenGLImage() {
+	GL::Image::~Image() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		glDeleteTextures(1, &object);
+		glDeleteTextures(1, &texture);
 	}
 
-	ref<ImageView> OpenGLImage::createViewInternal(const ImageViewDescriptor& descriptor, const Image* image) const {
+	ref<ImageView> GL::Image::createViewInternal(const ImageViewDescriptor& descriptor, const ProjectA::Image* image) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor, image);
 
-		return createRef<OpenGLImageView>(descriptor, image);
+		return createRef<GL::ImageView>(descriptor, image);
 	}
 }

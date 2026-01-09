@@ -1,11 +1,14 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 
 namespace ProjectA {
-	class OpenGLSetImageMemoryBarrierCommand final : public OpenGLCommand {
+	class GL::SetImageMemoryBarrierCommand final : public GL::Command {
 		public:
-			explicit OpenGLSetImageMemoryBarrierCommand(GLbitfield barrier) :
+			explicit SetImageMemoryBarrierCommand(GLbitfield barrier) :
 				barrier(barrier)
 			{}
 
@@ -18,6 +21,6 @@ namespace ProjectA {
 			}
 
 		private:
-			const GLbitfield barrier;
+			GLbitfield barrier;
 	};
 }

@@ -1,24 +1,26 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/NextSubpassCommand.hpp"
 #include "Engine/Adapter/Graphics/GL/Framebuffer.hpp"
-
 #include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
 
 namespace ProjectA {
-	class OpenGLBeginRenderPassCommand final : public OpenGLCommand {
+	class GL::BeginRenderPassCommand final : public GL::Command {
 		public:
-			explicit OpenGLBeginRenderPassCommand(const BeginRenderPassDescriptor& descriptor) :
+			explicit BeginRenderPassCommand(const BeginRenderPassDescriptor& descriptor) :
 				descriptor(descriptor)
 			{}
 
 			void execute() const final override {
-				const ref<OpenGLFramebuffer> glFramebuffer = std::static_pointer_cast<OpenGLFramebuffer>(descriptor.framebuffer);
-				const ref<RenderPass> renderPass = glFramebuffer->getRenderPass();
+				const ref<GL::Framebuffer> glFramebuffer = std::static_pointer_cast<GL::Framebuffer>(descriptor.framebuffer);
+				const ref<ProjectA::RenderPass> renderPass = glFramebuffer->getRenderPass();
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_3_0
-					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glFramebuffer->object);
-					glBindFramebuffer(GL_READ_FRAMEBUFFER, glFramebuffer->object);
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glFramebuffer->framebuffer);
+					glBindFramebuffer(GL_READ_FRAMEBUFFER, glFramebuffer->framebuffer);
 				#else
 					ENGINE_ERROR_UNSUPPORTED();
 				#endif
@@ -44,7 +46,7 @@ namespace ProjectA {
 
 					if (isDepthFormat(attachment.format)) {
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferfi(glFramebuffer->object, GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
+							glClearNamedFramebufferfi(glFramebuffer->framebuffer, GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
 						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 							glClearBufferfi(GL_DEPTH_STENCIL, 0, clearValue.depth, clearValue.stencil);
 						#else
@@ -53,7 +55,7 @@ namespace ProjectA {
 					}
 					else if (isSignedIntegerColorFormat(attachment.format)) {
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferiv(glFramebuffer->object, GL_COLOR, attachmentIndex, pointer_cast<const GLint*>(clearValue.color));
+							glClearNamedFramebufferiv(glFramebuffer->framebuffer, GL_COLOR, attachmentIndex, pointer_cast<const GLint*>(clearValue.color));
 						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 							glClearBufferiv(GL_COLOR, attachmentIndex, clearValue.color);
 						#else
@@ -62,7 +64,7 @@ namespace ProjectA {
 					}
 					else if (isUnsignedIntegerColorFormat(attachment.format)) {
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferuiv(glFramebuffer->object, GL_COLOR, attachmentIndex, pointer_cast<const GLuint*>(clearValue.color));
+							glClearNamedFramebufferuiv(glFramebuffer->framebuffer, GL_COLOR, attachmentIndex, pointer_cast<const GLuint*>(clearValue.color));
 						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 							glClearBufferuiv(GL_COLOR, attachmentIndex, clearValue.color);
 						#else
@@ -71,7 +73,7 @@ namespace ProjectA {
 					}
 					else {
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5
-							glClearNamedFramebufferfv(glFramebuffer->object, GL_COLOR, attachmentIndex, clearValue.color);
+							glClearNamedFramebufferfv(glFramebuffer->framebuffer, GL_COLOR, attachmentIndex, clearValue.color);
 						#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 							glClearBufferfv(GL_COLOR, attachmentIndex, clearValue.color);
 						#else
@@ -80,10 +82,10 @@ namespace ProjectA {
 					}
 				}
 
-				OpenGLNextSubpassCommand::setDrawBuffers(renderPass->getSubpass(0));
+				GL::NextSubpassCommand::setDrawBuffers(renderPass->getSubpass(0));
 			}
 
 		private:
-			const BeginRenderPassDescriptor descriptor;
+			BeginRenderPassDescriptor descriptor;
 	};
 }

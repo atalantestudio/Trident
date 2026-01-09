@@ -1,11 +1,14 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 
 namespace ProjectA {
-	class OpenGLDrawIndexedIndirectCommand final : public OpenGLCommand {
+	class GL::DrawIndexedIndirectCommand final : public GL::Command {
 		public:
-			explicit OpenGLDrawIndexedIndirectCommand(GLenum mode, GLenum type, GLenum buffer, const GLubyte* indirect, GLsizei drawcount, GLsizei stride) :
+			explicit DrawIndexedIndirectCommand(GLenum mode, GLenum type, GLenum buffer, const GLubyte* indirect, GLsizei drawcount, GLsizei stride) :
 				mode(mode),
 				type(type),
 				buffer(buffer),
@@ -29,11 +32,11 @@ namespace ProjectA {
 			}
 
 		private:
-			const GLenum mode;
-			const GLenum type;
-			const GLenum buffer;
+			GLenum mode;
+			GLenum type;
+			GLenum buffer;
 			const GLubyte* indirect;
-			const GLsizei drawcount;
-			const GLsizei stride;
+			GLsizei drawcount;
+			GLsizei stride;
 	};
 }

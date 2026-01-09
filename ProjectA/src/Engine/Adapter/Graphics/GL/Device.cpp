@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/CommandBuffer.hpp"
@@ -6,31 +9,31 @@
 #include "Engine/Adapter/Graphics/GL/Fence.hpp"
 
 namespace ProjectA {
-	OpenGLDevice::OpenGLDevice(const OpenGLInstance& instance) :
-		physicalDevice(createRef<OpenGLPhysicalDevice>()),
-		queue(createRef<OpenGLQueue>(instance, *this))
+	GL::Device::Device(const GL::Instance& instance) :
+		physicalDevice(createRef<GL::PhysicalDevice>()),
+		queue(createRef<GL::Queue>(instance, *this))
 	{}
 
-	AcquireNextImageStatus OpenGLDevice::acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {
+	AcquireNextImageStatus GL::Device::acquireNextImage(ref<ProjectA::Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {
 		// The buffering is handled by WGL.
 		imageIndex = 0;
 
 		return AcquireNextImageStatus::SUCCESS;
 	}
 
-	sequence<ref<DescriptorSet>> OpenGLDevice::allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) {
-		sequence<ref<DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
+	sequence<ref<ProjectA::DescriptorSet>> GL::Device::allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) {
+		sequence<ref<ProjectA::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 
 		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
 			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
+			const ref<GL::DescriptorSet> descriptorSet = createRef<GL::DescriptorSet>();
 
-			const ref<OpenGLDescriptorSet> descriptorSet = createRef<OpenGLDescriptorSet>();
-			descriptorSet->bindings = sequence<OpenGLDescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
+			descriptorSet->bindings = sequence<GL::DescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
 
 			for (uint32 descriptorSetBindingIndex = 0; descriptorSetBindingIndex < descriptorSet->bindings.count(); descriptorSetBindingIndex += 1) {
 				const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout->bindings[descriptorSetBindingIndex];
 
-				OpenGLDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[descriptorSetBindingIndex];
+				GL::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[descriptorSetBindingIndex];
 				descriptorSetBinding.descriptorType = descriptorSetLayoutBinding.descriptorType;
 
 				if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
@@ -50,24 +53,22 @@ namespace ProjectA {
 		return descriptorSets;
 	}
 
-	ref<PhysicalDevice> OpenGLDevice::getPhysicalDevice() const {
+	ref<PhysicalDevice> GL::Device::getPhysicalDevice() const {
 		return physicalDevice;
 	}
 
-	ref<Queue> OpenGLDevice::getQueue(QueueFamilyCapability queueFamilyCapability) const {
+	ref<Queue> GL::Device::getQueue(QueueFamilyCapability queueFamilyCapability) const {
 		return queue;
 	}
 
-	void OpenGLDevice::resetFence(ref<Fence> fence) const {
-		const ref<OpenGLFence> glFence = std::static_pointer_cast<OpenGLFence>(fence);
-
-		glFence->reset();
+	void GL::Device::resetFence(ref<ProjectA::Fence> fence) const {
+		std::static_pointer_cast<GL::Fence>(fence)->reset();
 	}
 
-	void OpenGLDevice::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
+	void GL::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
-			const ref<OpenGLDescriptorSet> descriptorSet = std::static_pointer_cast<OpenGLDescriptorSet>(writeDescriptorSet.descriptorSet);
-			OpenGLDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
+			const ref<GL::DescriptorSet> descriptorSet = std::static_pointer_cast<GL::DescriptorSet>(writeDescriptorSet.descriptorSet);
+			GL::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
 				DEBUG_ASSERT(writeDescriptorSet.descriptorBuffers.count() > 0);
@@ -85,13 +86,13 @@ namespace ProjectA {
 		}
 	}
 
-	void OpenGLDevice::waitForFence(ref<Fence> fence) const {
+	void GL::Device::waitForFence(ref<ProjectA::Fence> fence) const {
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_2
-			const ref<OpenGLFence> glFence = std::static_pointer_cast<OpenGLFence>(fence);
+			const ref<GL::Fence> glFence = std::static_pointer_cast<GL::Fence>(fence);
 
 			glFence->create();
 
-			const GLenum status = glClientWaitSync(glFence->object, GL_SYNC_FLUSH_COMMANDS_BIT, max<uint64>());
+			const GLenum status = glClientWaitSync(glFence->sync, GL_SYNC_FLUSH_COMMANDS_BIT, max<uint64>());
 
 			DEBUG_ASSERT(status == GL_CONDITION_SATISFIED || status == GL_ALREADY_SIGNALED);
 		#else
@@ -99,7 +100,7 @@ namespace ProjectA {
 		#endif
 	}
 
-	void OpenGLDevice::waitIdle() const {
+	void GL::Device::waitIdle() const {
 		glFinish();
 	}
 }

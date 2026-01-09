@@ -1,12 +1,15 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 #include "Engine/Adapter/Graphics/GL/Buffer.hpp"
+#include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 
 namespace ProjectA {
-	class OpenGLBindIndexBufferCommand final : public OpenGLCommand {
+	class GL::BindIndexBufferCommand final : public GL::Command {
 		public:
-			explicit OpenGLBindIndexBufferCommand(GLuint vertexArray, GLuint indexBuffer) :
+			explicit BindIndexBufferCommand(GLuint vertexArray, GLuint indexBuffer) :
 				vertexArray(vertexArray),
 				indexBuffer(indexBuffer)
 			{}
@@ -23,7 +26,7 @@ namespace ProjectA {
 			}
 
 		private:
-			const GLuint vertexArray;
-			const GLuint indexBuffer;
+			GLuint vertexArray;
+			GLuint indexBuffer;
 	};
 }

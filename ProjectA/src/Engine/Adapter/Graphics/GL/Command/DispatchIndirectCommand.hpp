@@ -1,11 +1,14 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 
 namespace ProjectA {
-	class OpenGLDispatchIndirectCommand final : public OpenGLCommand {
+	class GL::DispatchIndirectCommand final : public GL::Command {
 		public:
-			explicit OpenGLDispatchIndirectCommand(GLuint buffer, GLintptr indirect) :
+			explicit DispatchIndirectCommand(GLuint buffer, GLintptr indirect) :
 				buffer(buffer),
 				indirect(indirect)
 			{}
@@ -21,7 +24,7 @@ namespace ProjectA {
 			}
 
 		private:
-			const GLuint buffer;
-			const GLintptr indirect;
+			GLuint buffer;
+			GLintptr indirect;
 	};
 }

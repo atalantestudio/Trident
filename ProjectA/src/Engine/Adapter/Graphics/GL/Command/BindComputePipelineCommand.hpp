@@ -1,12 +1,15 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 #include "Engine/Adapter/Graphics/GL/ComputePipeline.hpp"
 
 namespace ProjectA {
-	class OpenGLBindComputePipelineCommand final : public OpenGLCommand {
+	class GL::BindComputePipelineCommand final : public GL::Command {
 		public:
-			explicit OpenGLBindComputePipelineCommand(ref<OpenGLComputePipeline> computePipeline) :
+			explicit BindComputePipelineCommand(ref<GL::ComputePipeline> computePipeline) :
 				program(computePipeline->program)
 			{}
 
@@ -15,6 +18,6 @@ namespace ProjectA {
 			}
 
 		private:
-			const GLuint program;
+			GLuint program;
 	};
 }

@@ -15,7 +15,7 @@ namespace ProjectA {
 
 			~Device() final override;
 
-			AcquireNextImageStatus acquireNextImage(ref<ProjectA::Swapchain> swapchain, ref<ProjectA::Semaphore> semaphore, uint32& imageIndex) const final override;
+			AcquireNextImageStatus acquireNextImage(ref<ProjectA::Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const final override;
 
 			sequence<ref<DescriptorSet>> allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) final override;
 
