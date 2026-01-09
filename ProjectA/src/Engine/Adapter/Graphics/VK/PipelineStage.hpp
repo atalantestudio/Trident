@@ -1,9 +1,12 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/PipelineStage.hpp"
 
-namespace ProjectA {
-	static VkPipelineStageFlagBits getPipelineStageFlagBits(PipelineStage pipelineStage) {
+namespace ProjectA::VK {
+	inline VkPipelineStageFlagBits getPipelineStageFlagBits(PipelineStage pipelineStage) {
 		static constexpr VkPipelineStageFlagBits vkPipelineStages[] = {
 			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,

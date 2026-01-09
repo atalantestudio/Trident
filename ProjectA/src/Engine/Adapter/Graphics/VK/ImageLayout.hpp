@@ -1,10 +1,13 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/ImageLayout.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
-namespace ProjectA {
-	static VkImageLayout getImageLayout(ImageLayout imageLayout) {
+namespace ProjectA::VK {
+	inline VkImageLayout getImageLayout(ImageLayout imageLayout) {
 		static constexpr VkImageLayout vkImageLayouts[] = {
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_GENERAL,
@@ -20,7 +23,7 @@ namespace ProjectA {
 		return vkImageLayouts[static_cast<uint8>(imageLayout)];
 	}
 
-	static VkAccessFlags getAccessFlags(ImageLayout imageLayout) {
+	inline VkAccessFlags getAccessFlags(ImageLayout imageLayout) {
 		ADAPTER_ASSERT(imageLayout != ImageLayout::PRESENT_SRC, "PRESENT_SRC cannot be used with access flags.");
 
 		static constexpr VkAccessFlags vkAccessFlags[] = {

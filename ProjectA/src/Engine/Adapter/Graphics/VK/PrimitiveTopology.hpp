@@ -1,9 +1,12 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/PrimitiveTopology.hpp"
 
-namespace ProjectA {
-	static VkPrimitiveTopology getPrimitiveTopology(PrimitiveTopology primitiveTopology) {
+namespace ProjectA::VK {
+	inline VkPrimitiveTopology getPrimitiveTopology(PrimitiveTopology primitiveTopology) {
 		static constexpr VkPrimitiveTopology vkPrimitiveTopologies[] = {
 			VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
 			VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
