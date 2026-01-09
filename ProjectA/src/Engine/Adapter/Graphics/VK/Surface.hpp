@@ -5,8 +5,6 @@
 
 #include "Engine/Adapter/Graphics/VK/Instance.hpp"
 #include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
-
-#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/Surface.hpp"
 #include "Engine/API/Window/Window.hpp"
 
