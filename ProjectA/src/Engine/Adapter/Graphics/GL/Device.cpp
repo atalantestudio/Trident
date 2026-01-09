@@ -7,6 +7,7 @@
 #include "Engine/Adapter/Graphics/GL/DescriptorSet.hpp"
 #include "Engine/Adapter/Graphics/GL/Device.hpp"
 #include "Engine/Adapter/Graphics/GL/Fence.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	GL::Device::Device(const GL::Instance& instance) :
@@ -43,7 +44,7 @@ namespace ProjectA {
 					descriptorSetBinding.descriptorImages = sequence<DescriptorImage>(descriptorSetLayoutBinding.descriptorCount);
 				}
 				else {
-					ENGINE_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
+					ADAPTER_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
 				}
 			}
 
@@ -81,7 +82,7 @@ namespace ProjectA {
 				std::copy(writeDescriptorSet.descriptorImages.begin(), writeDescriptorSet.descriptorImages.end(), descriptorSetBinding.descriptorImages.begin());
 			}
 			else {
-				ENGINE_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
+				ADAPTER_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
 			}
 		}
 	}

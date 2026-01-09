@@ -57,7 +57,7 @@ namespace ProjectA {
 	void GL::CommandEncoder::bindRenderPipeline(ref<ProjectA::RenderPipeline> renderPipeline) {
 		this->renderPipeline = std::static_pointer_cast<GL::RenderPipeline>(renderPipeline);
 
-		ENGINE_ASSERT(this->renderPipeline->subpassIndex == subpassIndex, "The pipeline must be associated to the current subpass.");
+		ADAPTER_ASSERT(this->renderPipeline->subpassIndex == subpassIndex, "The pipeline must be associated to the current subpass.");
 
 		commands.emplace_back(createRef<GL::BindRenderPipelineCommand>(this->renderPipeline));
 	}
@@ -112,9 +112,9 @@ namespace ProjectA {
 	}
 
 	void GL::CommandEncoder::dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
-		ENGINE_ASSERT(groupCountX <= limits.maxComputeWorkgroupCount[0], "Group count in the X axis must not exceed [].", limits.maxComputeWorkgroupCount[0]);
-		ENGINE_ASSERT(groupCountY <= limits.maxComputeWorkgroupCount[1], "Group count in the Y axis must not exceed [].", limits.maxComputeWorkgroupCount[1]);
-		ENGINE_ASSERT(groupCountZ <= limits.maxComputeWorkgroupCount[2], "Group count in the Z axis must not exceed [].", limits.maxComputeWorkgroupCount[2]);
+		ADAPTER_ASSERT(groupCountX <= limits.maxComputeWorkgroupCount[0], "Group count in the X axis must not exceed [].", limits.maxComputeWorkgroupCount[0]);
+		ADAPTER_ASSERT(groupCountY <= limits.maxComputeWorkgroupCount[1], "Group count in the Y axis must not exceed [].", limits.maxComputeWorkgroupCount[1]);
+		ADAPTER_ASSERT(groupCountZ <= limits.maxComputeWorkgroupCount[2], "Group count in the Z axis must not exceed [].", limits.maxComputeWorkgroupCount[2]);
 
 		commands.emplace_back(createRef<GL::DispatchCommand>(groupCountX, groupCountY, groupCountZ));
 	}
@@ -126,7 +126,7 @@ namespace ProjectA {
 	void GL::CommandEncoder::nextSubpass() {
 		subpassIndex += 1;
 
-		ENGINE_ASSERT(subpassIndex < renderPass->getSubpassCount(), "All subpasses have been executed.");
+		ADAPTER_ASSERT(subpassIndex < renderPass->getSubpassCount(), "All subpasses have been executed.");
 
 		commands.emplace_back(createRef<GL::NextSubpassCommand>(framebuffer, renderPass->getSubpass(subpassIndex)));
 	}
@@ -174,8 +174,8 @@ namespace ProjectA {
 	}
 
 	void GL::CommandEncoder::drawIndirect(ref<ProjectA::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
-		ENGINE_ASSERT(buffer->usage & BufferUsage::INDIRECT, "This buffer cannot be used as an indirect buffer.");
-		ENGINE_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
+		ADAPTER_ASSERT(buffer->usage & BufferUsage::INDIRECT, "This buffer cannot be used as an indirect buffer.");
+		ADAPTER_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
 
 		commands.emplace_back(createRef<GL::DrawIndirectCommand>(
 			renderPipeline->primitiveTopology,
@@ -201,8 +201,8 @@ namespace ProjectA {
 	}
 
 	void GL::CommandEncoder::drawIndexedIndirect(ref<ProjectA::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
-		ENGINE_ASSERT(buffer->usage & BufferUsage::INDIRECT, "This buffer cannot be used as an indirect buffer.");
-		ENGINE_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
+		ADAPTER_ASSERT(buffer->usage & BufferUsage::INDIRECT, "This buffer cannot be used as an indirect buffer.");
+		ADAPTER_ASSERT(drawCount > 0, "A DrawIndirect command must result in at least 1 draw call.");
 
 		commands.emplace_back(createRef<GL::DrawIndexedIndirectCommand>(
 			renderPipeline->primitiveTopology,

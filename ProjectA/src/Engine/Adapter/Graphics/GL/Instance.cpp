@@ -5,6 +5,7 @@
 
 #include "Engine/Adapter/Graphics/GL/Instance.hpp"
 #include "Engine/Adapter/Window/Win32/base.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	void* GL::Instance::getWglProcedure(view<char8> procedureName) {
@@ -115,7 +116,7 @@ namespace ProjectA {
 		static const PFNWGLGETEXTENSIONSSTRINGEXTPROC wglGetExtensionsStringEXT = static_cast<PFNWGLGETEXTENSIONSSTRINGEXTPROC>(getProcedure("wglGetExtensionsStringEXT"));
 		static const std::string extensionsString = wglGetExtensionsStringEXT();
 
-		ENGINE_ASSERT(extensionsString.find("WGL_EXT_swap_control") != std::string::npos, "WGL_EXT_swap_control extension not supported.");
+		ADAPTER_ASSERT(extensionsString.find("WGL_EXT_swap_control") != std::string::npos, "WGL_EXT_swap_control extension not supported.");
 
 		static const PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = static_cast<PFNWGLSWAPINTERVALEXTPROC>(getProcedure("wglSwapIntervalEXT"));
 

@@ -25,7 +25,7 @@ namespace ProjectA {
 			const std::unordered_map<sequence<char8>, uint32>& entryPointActivationOffsets = asset->getslEntryPointActivationOffsets();
 			const std::unordered_map<sequence<char8>, uint32>::const_iterator entryPointActivationOffsetEntry = find(entryPointActivationOffsets, descriptor.entryPoint);
 
-			ENGINE_ASSERT(entryPointActivationOffsetEntry != entryPointActivationOffsets.end(), "Entry point \"[]\" is not present in the shader module.", descriptor.entryPoint);
+			ADAPTER_ASSERT(entryPointActivationOffsetEntry != entryPointActivationOffsets.end(), "Entry point \"[]\" is not present in the shader module.", descriptor.entryPoint);
 
 			code[entryPointActivationOffsetEntry->second] = '1';
 

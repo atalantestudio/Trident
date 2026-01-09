@@ -3,9 +3,8 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 #include "Engine/Adapter/Graphics/GL/Buffer.hpp"
-
+#include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 #include "Engine/API/Rendering/BufferCopyRegion.hpp"
 
 namespace ProjectA {

@@ -5,6 +5,7 @@
 
 #include "Engine/Adapter/Graphics/GL/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	GL::ComputePipeline::ComputePipeline(const ComputePipelineDescriptor& descriptor) :
@@ -31,9 +32,7 @@ namespace ProjectA {
 
 			glGetProgramInfoLog(program, infoLogLength, nullptr, &infoLog[0]);
 
-			ENGINE_ERROR("Program linking failed:\n[]", infoLog);
-
-			DEBUG_ASSERT(false);
+			ADAPTER_ASSERT(false, "Program linking failed:\n[]", infoLog);
 
 			return;
 		}

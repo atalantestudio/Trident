@@ -9,6 +9,8 @@
 	#include "Engine/Adapter/Graphics/GL/BufferUsage.hpp"
 #endif
 
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
+
 namespace ProjectA {
 	GL::Buffer::Buffer(const BufferDescriptor& descriptor) :
 		ProjectA::Buffer(descriptor)
@@ -67,7 +69,7 @@ namespace ProjectA {
 				glGetBufferParameteriv(target, GL_BUFFER_IMMUTABLE_STORAGE, &immutableStorage);
 			#endif
 
-			ENGINE_ASSERT(immutableStorage != GL_FALSE, "Only immutable buffer storage are not supported.");
+			ADAPTER_ASSERT(immutableStorage != GL_FALSE, "Only immutable buffer storage are not supported.");
 		#endif
 
 		#if OPENGL_VERSION < OPENGL_VERSION_4_5 && defined(OPENGL_UNBIND_AFTER_USE)
@@ -94,7 +96,7 @@ namespace ProjectA {
 			result = glUnmapBuffer(target);
 		#endif
 
-		ENGINE_ASSERT(result == GL_TRUE, "Failed to unmap OpenGL buffer.");
+		ADAPTER_ASSERT(result == GL_TRUE, "Failed to unmap OpenGL buffer.");
 	}
 
 	void* GL::Buffer::getMappedRange(uint64 offset, uint64 size) const {
@@ -112,7 +114,7 @@ namespace ProjectA {
 			ENGINE_ERROR_UNSUPPORTED();
 		#endif
 
-		ENGINE_ASSERT(mappedRange != nullptr, "Failed to map OpenGL buffer range.");
+		ADAPTER_ASSERT(mappedRange != nullptr, "Failed to map OpenGL buffer range.");
 
 		return mappedRange;
 	}

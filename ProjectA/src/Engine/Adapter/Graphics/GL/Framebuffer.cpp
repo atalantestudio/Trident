@@ -7,6 +7,7 @@
 #include "Engine/Adapter/Graphics/GL/Image.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageFormat.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageView.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	GL::Framebuffer::Framebuffer(const FramebufferDescriptor& descriptor) :
@@ -101,8 +102,7 @@ namespace ProjectA {
 
 					break;
 				default:
-					ENGINE_ERROR("Unhandled image target ([]).", glImage->target);
-					DEBUG_ASSERT(false);
+					ADAPTER_ASSERT(false, "Unhandled image target ([]).", glImage->target);
 
 					break;
 			}
@@ -122,7 +122,7 @@ namespace ProjectA {
 				ENGINE_ERROR_UNSUPPORTED();
 			#endif
 
-			ENGINE_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
+			ADAPTER_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
 		#endif
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_0 && defined(OPENGL_UNBIND_AFTER_USE)

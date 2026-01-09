@@ -30,7 +30,7 @@ namespace ProjectA {
 
 						if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
 							#if OPENGL_VERSION < OPENGL_VERSION_4_3
-								ENGINE_ASSERT(descriptorType != DescriptorType::STORAGE_BUFFER, "Storage buffers are not supported before OpenGL 4.3.");
+								ADAPTER_ASSERT(descriptorType != DescriptorType::STORAGE_BUFFER, "Storage buffers are not supported before OpenGL 4.3.");
 							#endif
 
 							const GLenum target = getBufferDescriptorType(descriptorSetBinding.descriptorType);
@@ -97,7 +97,7 @@ namespace ProjectA {
 							}
 						}
 						else {
-							ENGINE_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
+							ADAPTER_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
 						}
 					}
 

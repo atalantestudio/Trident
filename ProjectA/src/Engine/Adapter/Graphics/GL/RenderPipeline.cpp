@@ -12,6 +12,7 @@
 #include "Engine/Adapter/Graphics/GL/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/GL/VertexInputAttributeType.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	GL::RenderPipeline::RenderPipeline(const RenderPipelineDescriptor& descriptor) :
@@ -34,7 +35,7 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		if (descriptor.cullMode == CullMode::FRONT_AND_BACK) {
-			ENGINE_WARNING("[OpenGL] The polygon mode is discarded because the cull mode is FRONT_AND_BACK.");
+			ProjectA::GraphicsAdapter::logger.warning("Cull mode is FRONT_AND_BACK; discarding polygon mode.");
 		}
 
 		const ref<GL::ShaderModule> vertexShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.vertexShaderModule);
@@ -59,9 +60,7 @@ namespace ProjectA {
 
 			glGetProgramInfoLog(program, infoLogLength, nullptr, &infoLog[0]);
 
-			ENGINE_ERROR("Program linking failed:\n[]", infoLog);
-
-			DEBUG_ASSERT(false);
+			ADAPTER_ASSERT(false, "Program linking failed:\n[]", infoLog);
 
 			return;
 		}
@@ -126,7 +125,7 @@ namespace ProjectA {
 
 						break;
 					default:
-						ENGINE_ASSERT(false, "Unsupported vertex input attribute type.");
+						ADAPTER_ASSERT(false, "Unsupported vertex input attribute type.");
 				}
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_5

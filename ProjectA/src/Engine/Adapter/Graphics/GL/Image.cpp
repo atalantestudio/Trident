@@ -8,6 +8,7 @@
 #include "Engine/Adapter/Graphics/GL/ImageType.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageUsage.hpp"
 #include "Engine/Adapter/Graphics/GL/ImageView.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	GL::Image::Image(const ImageDescriptor& descriptor) :
@@ -30,7 +31,7 @@ namespace ProjectA {
 			case GL_PROXY_TEXTURE_1D:
 			case GL_TEXTURE_1D:
 				// TODO: Implement 1D images.
-				ENGINE_ASSERT(false, "1D images are not supported.");
+				ADAPTER_ASSERT(false, "1D images are not supported.");
 
 				break;
 			case GL_PROXY_TEXTURE_1D_ARRAY:
@@ -94,8 +95,7 @@ namespace ProjectA {
 
 				break;
 			default:
-				ENGINE_ERROR("Unhandled image target ([]).", target);
-				DEBUG_ASSERT(false);
+				ADAPTER_ASSERT(false, "Unhandled image target ([]).", target);
 
 				break;
 		}
@@ -110,7 +110,7 @@ namespace ProjectA {
 				glGetTexParameteriv(target, GL_TEXTURE_IMMUTABLE_FORMAT, &immutableFormat);
 			#endif
 
-			ENGINE_ASSERT(immutableFormat != GL_FALSE, "Only immutable image formats are not supported.");
+			ADAPTER_ASSERT(immutableFormat != GL_FALSE, "Only immutable image formats are not supported.");
 		#endif
 
 		// Set default texture parameters.

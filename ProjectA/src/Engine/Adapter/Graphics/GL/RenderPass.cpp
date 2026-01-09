@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/GL/RenderPass.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	GL::RenderPass::RenderPass(const RenderPassDescriptor& descriptor) :
@@ -28,7 +29,7 @@ namespace ProjectA {
 				const Attachment& colorAttachment = attachments[colorAttachmentReference.index];
 
 				if (colorAttachment.finalLayout == ImageLayout::PRESENT_SRC) {
-					ENGINE_ASSERT(!anyPresentedColorAttachment, "Only one color attachment can be presented.");
+					ADAPTER_ASSERT(!anyPresentedColorAttachment, "Only one color attachment can be presented.");
 
 					presentSourceAttachmentIndex = colorAttachmentReference.index;
 					anyPresentedColorAttachment = true;
@@ -40,6 +41,6 @@ namespace ProjectA {
 
 		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachmentCount);
 
-		ENGINE_ASSERT(totalColorAttachmentCount < static_cast<uint32>(maxColorAttachmentCount), "A render pass cannot contain more than [] color attachments.", maxColorAttachmentCount);
+		ADAPTER_ASSERT(totalColorAttachmentCount < static_cast<uint32>(maxColorAttachmentCount), "A render pass cannot contain more than [] color attachments.", maxColorAttachmentCount);
 	}
 }

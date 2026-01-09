@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Rendering/BufferImageCopyRegion.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	class GL::CopyImageToBufferCommand final : public GL::Command {
@@ -49,8 +50,7 @@ namespace ProjectA {
 
 							break;
 						default:
-							ENGINE_ERROR("Unhandled image target ([]).", sourceImage->target);
-							DEBUG_ASSERT(false);
+							ADAPTER_ASSERT(false, "Unhandled image target ([]).", sourceImage->target);
 
 							break;
 					}

@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 #include "Engine/Adapter/Graphics/GL/Buffer.hpp"
+#include "Engine/Adapter/Graphics/GL/Command/Command.hpp"
 
 namespace ProjectA {
 	class GL::BindVertexBufferCommand final : public GL::Command {
