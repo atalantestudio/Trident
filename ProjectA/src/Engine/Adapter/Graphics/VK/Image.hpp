@@ -1,32 +1,35 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
-
-#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/Image.hpp"
 
 namespace ProjectA {
-	class VulkanImage final : public Image, public ObjectWrapper<VkImage> {
+	class VK::Image final : public ProjectA::Image {
 		public:
-			explicit VulkanImage(VkDevice device, const ImageDescriptor& descriptor);
+			explicit Image(const ImageDescriptor& descriptor, const VK::Device& device);
 
-			// NOTE: Use this constructor to create a wrapper around a swapchain image.
-			explicit VulkanImage(VkDevice device, VkImage image, VkFormat format, Extent2D extent);
+			// Render target constructor (wrapper around a swapchain image).
+			explicit Image(const VK::Device& device, VkImage image, VkFormat format, Extent2D extent);
 
-			~VulkanImage() final override;
+			~Image() final override;
 
 		protected:
-			ref<ImageView> createViewInternal(const ImageViewDescriptor& descriptor, const Image* image) const final override;
+			ref<ProjectA::ImageView> createViewInternal(const ImageViewDescriptor& descriptor, const ProjectA::Image* image) const final override;
 
 		private:
 			static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent);
 
 		public:
+			VkImage image;
 			VkImageType type;
 			VkFormat format;
 
 		private:
-			VkDevice device;
+			const VK::Device& device;
 			MemorySuballocation memorySuballocation;
 			bool swapchainImage;
 	};

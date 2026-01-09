@@ -1,17 +1,22 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/API/Rendering/ShaderModule.hpp"
-#include "Engine/Filesystem/Asset/ShaderModuleAsset.hpp"
 
 namespace ProjectA {
-	class VulkanShaderModule final : public ShaderModule, public ObjectWrapper<VkPipelineShaderStageCreateInfo> {
+	class VK::ShaderModule final : public ProjectA::ShaderModule {
 		public:
-			explicit VulkanShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code, VkDevice device);
+			explicit ShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code, const VK::Device& device);
 
-			~VulkanShaderModule() final override;
+			~ShaderModule() final override;
+
+		public:
+			VkPipelineShaderStageCreateInfo createInfo;
 
 		private:
-			const VkDevice device;
+			const VK::Device& device;
 	};
 }

@@ -1,16 +1,22 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/API/Rendering/PipelineLayout.hpp"
 
 namespace ProjectA {
-	class VulkanPipelineLayout final : public PipelineLayout, public ObjectWrapper<VkPipelineLayout> {
+	class VK::PipelineLayout final : public ProjectA::PipelineLayout {
 		public:
-			explicit VulkanPipelineLayout(VkDevice device, const PipelineLayoutDescriptor& descriptor);
+			explicit PipelineLayout(const PipelineLayoutDescriptor& descriptor, const VK::Device& device);
 
-			~VulkanPipelineLayout() final override;
+			~PipelineLayout() final override;
+
+		public:
+			VkPipelineLayout pipelineLayout;
 
 		private:
-			const VkDevice device;
+			const VK::Device& device;
 	};
 }

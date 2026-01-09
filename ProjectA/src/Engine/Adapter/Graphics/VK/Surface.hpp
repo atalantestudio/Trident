@@ -1,5 +1,9 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
+#include "Engine/Adapter/Graphics/VK/Instance.hpp"
 #include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
 
 #include "Engine/API/ObjectWrapper.hpp"
@@ -7,13 +11,13 @@
 #include "Engine/API/Window/Window.hpp"
 
 namespace ProjectA {
-	class VulkanSurface final : public Surface, public ObjectWrapper<VkSurfaceKHR> {
+	class VK::Surface final : public ProjectA::Surface {
 		public:
-			explicit VulkanSurface(VkInstance instance, const Window& window);
+			explicit Surface(const Window& window, const VK::Instance& instance);
 
-			~VulkanSurface() final override;
+			~Surface() final override;
 
-			void setPhysicalDevice(VkPhysicalDevice physicalDevice);
+			void setPhysicalDevice(const VK::PhysicalDevice& physicalDevice);
 
 			virtual ImageFormat getFormat() const final override;
 
@@ -26,10 +30,11 @@ namespace ProjectA {
 			VkSurfaceCapabilitiesKHR getCapabilities() const;
 
 		public:
+			VkSurfaceKHR surface;
 			const Window& window;
 
 		private:
-			const VkInstance instance;
+			const VK::Instance& instance;
 			VkPhysicalDevice physicalDevice;
 	};
 }

@@ -1,28 +1,28 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
-#include "Engine/Adapter/Graphics/VK/ImageView.hpp"
 #include "Engine/Adapter/Graphics/VK/Surface.hpp"
-
-#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/RenderPass.hpp"
 
 namespace ProjectA {
-	class VulkanRenderPass final : public RenderPass, public ObjectWrapper<VkRenderPass> {
+	class VK::RenderPass final : public ProjectA::RenderPass {
 		public:
-			explicit VulkanRenderPass(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const RenderPassDescriptor& descriptor);
+			explicit RenderPass(const RenderPassDescriptor& descriptor, const VK::Surface& surface, const VK::Device& device);
 
-			~VulkanRenderPass() final override;
+			~RenderPass() final override;
 
 		private:
 			// Returns true if this attachment is a color attachment used in any subpass.
 			bool isColorAttachment(uint32 attachmentIndex) const;
 
 		public:
-			const VulkanSurface* surface;
+			VkRenderPass renderPass;
+			const VK::Surface& surface;
 
 		private:
-			const VulkanPhysicalDevice& physicalDevice;
-			const VulkanDevice& device;
+			const VK::Device& device;
 	};
 }

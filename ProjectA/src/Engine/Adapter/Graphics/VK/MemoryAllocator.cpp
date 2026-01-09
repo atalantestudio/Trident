@@ -1,19 +1,24 @@
-﻿#include "pch.hpp"
+﻿// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
+#include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	const VulkanPhysicalDevice* MemoryAllocator::physicalDevice;
+	const VK::PhysicalDevice* MemoryAllocator::physicalDevice;
 	std::vector<MemoryAllocation> MemoryAllocator::memoryAllocations;
 	sequence<uint32> MemoryAllocator::currentBufferMemoryAllocationIndices;
 	sequence<uint32> MemoryAllocator::currentImageMemoryAllocationIndices;
 	std::vector<uint32> MemoryAllocator::freeMemoryAllocationIndices;
 
-	void MemoryAllocator::initialize(const VulkanPhysicalDevice& physicalDevice) {
+	void MemoryAllocator::initialize(const VK::PhysicalDevice& physicalDevice) {
 		MemoryAllocator::physicalDevice = &physicalDevice;
 
-		ENGINE_DEBUG("Buffer image granularity: []", physicalDevice.properties.limits.bufferImageGranularity);
-		ENGINE_DEBUG("Max. memory allocation count: []", physicalDevice.properties.limits.maxMemoryAllocationCount);
+		ProjectA::GraphicsAdapter::logger.debug("Buffer image granularity: []", physicalDevice.properties.limits.bufferImageGranularity);
+		ProjectA::GraphicsAdapter::logger.debug("Max. memory allocation count: []", physicalDevice.properties.limits.maxMemoryAllocationCount);
 
 		currentBufferMemoryAllocationIndices = sequence<uint32>(physicalDevice.memoryProperties.memoryTypeCount);
 		std::fill(currentBufferMemoryAllocationIndices.begin(), currentBufferMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
@@ -41,7 +46,7 @@ namespace ProjectA {
 			for (uint32 memoryHeapIndex = 0; memoryHeapIndex < physicalDevice->memoryProperties.memoryHeapCount; memoryHeapIndex += 1) {
 				const VkMemoryHeap& memoryHeap = physicalDevice->memoryProperties.memoryHeaps[memoryHeapIndex];
 
-				ENGINE_DEBUG(
+				ProjectA::GraphicsAdapter::logger.debug(
 					"Memory heap []:\n"
 					"- Size: [] ([])\n"
 					"- Flags: []",
@@ -57,7 +62,7 @@ namespace ProjectA {
 			for (uint32 memoryTypeIndex = 0; memoryTypeIndex < physicalDevice->memoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
 				const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
 
-				ENGINE_DEBUG(
+				ProjectA::GraphicsAdapter::logger.debug(
 					"- Memory type []:\n"
 					"- Property flags: []\n"
 					"- Heap: []",
@@ -115,8 +120,8 @@ namespace ProjectA {
 		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentBufferMemoryAllocationIndices);
 		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		ENGINE_INFO("Creating new memory suballocation ([]) for buffer resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
-		ENGINE_DEBUG(
+		ProjectA::GraphicsAdapter::logger.info("Creating new memory suballocation ([]) for buffer resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
+		ProjectA::GraphicsAdapter::logger.debug(
 			"- Offset = []\n"
 			"- Required size = []\n"
 			"- Size = [] ([])\n"
@@ -130,7 +135,7 @@ namespace ProjectA {
 
 		const VkResult result = vkBindBufferMemory(device, buffer, memoryAllocation.memory, memorySuballocation.offset);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Could not bind memory for Vulkan buffer ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Could not bind memory for buffer ([]).", string_VkResult(result));
 
 		memoryAllocation.offset = memorySuballocation.offset + memorySuballocation.size;
 		memoryAllocation.suballocationCount += 1;
@@ -142,8 +147,8 @@ namespace ProjectA {
 		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentImageMemoryAllocationIndices);
 		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		ENGINE_INFO("Created new memory suballocation ([]) for image resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
-		ENGINE_DEBUG(
+		ProjectA::GraphicsAdapter::logger.info("Created new memory suballocation ([]) for image resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
+		ProjectA::GraphicsAdapter::logger.debug(
 			"- Offset = []\n"
 			"- Required size = []\n"
 			"- Size = [] ([])\n"
@@ -157,7 +162,7 @@ namespace ProjectA {
 
 		const VkResult result = vkBindImageMemory(device, image, memoryAllocation.memory, memorySuballocation.offset);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Could not bind memory for Vulkan image ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Could not bind memory for image ([]).", string_VkResult(result));
 
 		memoryAllocation.offset = memorySuballocation.offset + memorySuballocation.size;
 		memoryAllocation.suballocationCount += 1;
@@ -168,17 +173,17 @@ namespace ProjectA {
 	void* MemoryAllocator::mapSuballocation(VkDevice device, const MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size) {
 		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		ENGINE_ASSERT(size > 0, "The mapping size must not be 0.");
-		ENGINE_ASSERT(offset <= memoryAllocation.offset, "The mapping offset is outside of the used range for the memory allocation.");
-		ENGINE_ASSERT(offset + size <= memoryAllocation.offset, "The offsetted mapping size ([]) is larger than the size of the memory allocation active range ([]).", offset + size, memoryAllocation.offset);
+		ADAPTER_ASSERT(size > 0, "The mapping size must not be 0.");
+		ADAPTER_ASSERT(offset <= memoryAllocation.offset, "The mapping offset is outside of the used range for the memory allocation.");
+		ADAPTER_ASSERT(offset + size <= memoryAllocation.offset, "The offsetted mapping size ([]) is larger than the size of the memory allocation active range ([]).", offset + size, memoryAllocation.offset);
 
 		if (memoryAllocation.mappedSuballocationCount == 0) {
 			// TODO: (Static allocations only) Map the active suballocation range and not the whole memory block.
 			const VkResult result = vkMapMemory(device, memoryAllocation.memory, 0, memoryAllocation.size, 0, &memoryAllocation.mappedRange);
 
-			ENGINE_ASSERT(result == VK_SUCCESS, "Could not map Vulkan memory. ([])", string_VkResult(result));
+			ADAPTER_ASSERT(result == VK_SUCCESS, "Could not map memory. ([])", string_VkResult(result));
 
-			ENGINE_INFO(
+			ProjectA::GraphicsAdapter::logger.info(
 				"Mapped range ([], []) of memory allocation [].",
 				0,
 				memoryAllocation.size,
@@ -201,7 +206,7 @@ namespace ProjectA {
 
 			if (!(memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
 				// TODO: Expose vkFlushMappedMemoryRanges to the graphics adapter.
-				ENGINE_WARNING("Non-coherent memory must be manually flushed.");
+				ProjectA::GraphicsAdapter::logger.warning("Non-coherent memory must be manually flushed.");
 
 				/*VkMappedMemoryRange mappedMemoryRange{};
 				mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -213,12 +218,12 @@ namespace ProjectA {
 				// Manually flush the mapped range.
 				const VkResult result = vkFlushMappedMemoryRanges(device, 1, &mappedMemoryRange);
 
-				ENGINE_ASSERT(result == VK_SUCCESS, "Could not flush mapped memory range ([]).", string_VkResult(result));*/
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Could not flush mapped memory range ([]).", string_VkResult(result));*/
 			}
 
 			vkUnmapMemory(device, memoryAllocation.memory);
 
-			ENGINE_INFO("Unmapped memory allocation [].", memoryAllocationIndex);
+			ProjectA::GraphicsAdapter::logger.info("Unmapped memory allocation [].", memoryAllocationIndex);
 
 			memoryAllocation.mappedRange = nullptr;
 			memoryAllocation.mappedSuballocationCount = 0;
@@ -248,7 +253,7 @@ namespace ProjectA {
 				}
 			}
 
-			ENGINE_INFO("Freed memory allocation [].", memoryAllocationIndex);
+			ProjectA::GraphicsAdapter::logger.info("Freed memory allocation [].", memoryAllocationIndex);
 
 			freeMemoryAllocationIndices.emplace_back(memoryAllocationIndex);
 
@@ -257,7 +262,7 @@ namespace ProjectA {
 
 		memoryAllocation.suballocationCount -= 1;
 
-		ENGINE_INFO("Freed suballocation from memory allocation []. The active suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
+		ProjectA::GraphicsAdapter::logger.info("Freed suballocation from memory allocation []. The active suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
 	}
 
 	uint32 MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size) {
@@ -271,8 +276,8 @@ namespace ProjectA {
 			freeMemoryAllocationIndices.pop_back();
 		}
 
-		ENGINE_INFO("Creating new memory allocation [].", memoryAllocationIndex);
-		ENGINE_DEBUG(
+		ProjectA::GraphicsAdapter::logger.info("Creating new memory allocation [].", memoryAllocationIndex);
+		ProjectA::GraphicsAdapter::logger.debug(
 			"- Property flags = []\n"
 			"- Size = [] ([])",
 			string_VkMemoryPropertyFlags(physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex].propertyFlags),
@@ -290,7 +295,7 @@ namespace ProjectA {
 
 		const VkResult result = vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &memoryAllocation.memory);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan memory ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to allocate memory ([]).", string_VkResult(result));
 
 		memoryAllocation.offset = 0;
 		memoryAllocation.size = allocationSize;
@@ -333,7 +338,7 @@ namespace ProjectA {
 		// If the current memory allocation cannot fully hold this suballocation, close it and open a new one.
 		// In some cases the aligned offset can be larger than size of the allocation.
 		if (offset > currentMemoryAllocation->size || currentMemoryAllocation->size - offset < size) {
-			ENGINE_WARNING(
+			ProjectA::GraphicsAdapter::logger.warning(
 				"Remaining size in memory allocation [] ([]) is insufficient for suballocation with size [] and alignment [] (base size = []).",
 				currentMemoryAllocationIndex,
 				currentMemoryAllocation->size - offset,

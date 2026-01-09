@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/DescriptorSetLayout.hpp"
@@ -5,8 +8,8 @@
 #include "Engine/Adapter/Graphics/VK/ShaderStage.hpp"
 
 namespace ProjectA {
-	VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(VkDevice device, const sequence<DescriptorSetLayoutBinding>& descriptorSetLayoutBindings) :
-		DescriptorSetLayout(descriptorSetLayoutBindings),
+	VK::DescriptorSetLayout::DescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& descriptorSetLayoutBindings, const VK::Device& device) :
+		ProjectA::DescriptorSetLayout(descriptorSetLayoutBindings),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -24,22 +27,22 @@ namespace ProjectA {
 
 			VkDescriptorSetLayoutBinding& vkDescriptorSetLayoutBinding = vkDescriptorSetLayoutBindings[descriptorSetLayoutBindingIndex];
 			vkDescriptorSetLayoutBinding.binding = descriptorSetLayoutBindingIndex;
-			vkDescriptorSetLayoutBinding.descriptorType = getVkDescriptorType(descriptorSetLayoutBinding.descriptorType);
+			vkDescriptorSetLayoutBinding.descriptorType = getDescriptorType(descriptorSetLayoutBinding.descriptorType);
 			vkDescriptorSetLayoutBinding.descriptorCount = descriptorSetLayoutBinding.descriptorCount;
-			vkDescriptorSetLayoutBinding.stageFlags = getVkShaderStageFlagBits(descriptorSetLayoutBinding.shaderStages);
+			vkDescriptorSetLayoutBinding.stageFlags = getShaderStageFlagBits(descriptorSetLayoutBinding.shaderStages);
 			vkDescriptorSetLayoutBinding.pImmutableSamplers = nullptr;
 		}
 
 		descriptorSetLayoutCreateInfo.pBindings = &vkDescriptorSetLayoutBindings[0];
 
-		const VkResult result = vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, nullptr, &object);
+		const VkResult result = vkCreateDescriptorSetLayout(device.device, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan descriptor set layout ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout ([]).", string_VkResult(result));
 	}
 
-	VulkanDescriptorSetLayout::~VulkanDescriptorSetLayout() {
+	VK::DescriptorSetLayout::~DescriptorSetLayout() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyDescriptorSetLayout(device, object, nullptr);
+		vkDestroyDescriptorSetLayout(device.device, descriptorSetLayout, nullptr);
 	}
 }

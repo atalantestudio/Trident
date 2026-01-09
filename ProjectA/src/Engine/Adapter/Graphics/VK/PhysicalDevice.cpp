@@ -1,68 +1,115 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	static std::string formatPhysicalDeviceType(VkPhysicalDeviceType physicalDeviceType) {
+	static view<char8> formatPhysicalDeviceType(VkPhysicalDeviceType physicalDeviceType) {
 		switch (physicalDeviceType) {
-			case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-				return "(integrated GPU)";
-			case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-				return "(discrete GPU)";
-			case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
-				return "(virtual GPU)";
-			case VK_PHYSICAL_DEVICE_TYPE_CPU:
-				return "(CPU)";
-			default:
-				return "(unknown type)";
+			case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU: return "(integrated GPU)";
+			case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU: return "(discrete GPU)";
+			case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU: return "(virtual GPU)";
+			case VK_PHYSICAL_DEVICE_TYPE_CPU: return "(CPU)";
+			default: return "(unknown type)";
 		}
 	}
 
-	VulkanPhysicalDevice::VulkanPhysicalDevice(VkPhysicalDevice physicalDevice) :
-		ObjectWrapper(physicalDevice)
+	void VK::PhysicalDevice::enumerateQueueFamilyProperties(const sequence<VkQueueFamilyProperties>& queueFamilies) {
+		for (uint32 queueFamilyIndex = 0; queueFamilyIndex < queueFamilies.count(); queueFamilyIndex += 1) {
+			const VkQueueFamilyProperties& queueFamily = queueFamilies[queueFamilyIndex];
+
+			ProjectA::GraphicsAdapter::logger.info(
+				"Properties for queue family []:\n"
+				"- Queue count: []\n"
+				"- Queue flags: []",
+				queueFamilyIndex,
+				queueFamily.queueCount,
+				string_VkQueueFlags(queueFamily.queueFlags)
+			);
+		}
+	}
+
+	uint32 VK::PhysicalDevice::calculateGraphicsQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
+		if (queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+			return 1;
+		}
+
+		return 0;
+	}
+
+	uint32 VK::PhysicalDevice::calculateComputeQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
+		if (queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+			return 1;
+		}
+
+		return 0;
+	}
+
+	uint32 VK::PhysicalDevice::calculateTransferQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
+		if (queueFamilyProperties.queueFlags & VK_QUEUE_TRANSFER_BIT) {
+			// Prefer queues which don't support graphics or compute, so that transfers are non-blocking regarding other operations.
+			if (!(queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT) && !(queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT)) {
+				return 3;
+			}
+
+			return 2;
+		}
+
+		if (queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT || queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+			return 1;
+		}
+
+		return 1;
+	}
+
+	VK::PhysicalDevice::PhysicalDevice(VkPhysicalDevice physicalDevice) :
+		physicalDevice(physicalDevice)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkGetPhysicalDeviceProperties(object, &properties);
+		vkGetPhysicalDeviceProperties(physicalDevice, &properties);
 
-		const std::string physicalDeviceType = formatPhysicalDeviceType(properties.deviceType);
+		const view<char8> physicalDeviceType = formatPhysicalDeviceType(properties.deviceType);
 
-		ENGINE_INFO("Using [] [].", properties.deviceName, physicalDeviceType);
+		ProjectA::GraphicsAdapter::logger.info("Using [] [].", properties.deviceName, physicalDeviceType);
 
 		selectQueueFamilyIndices();
 
 		uint32 extensionPropertyCount = 0;
 		VkResult result;
 
-		result = vkEnumerateDeviceExtensionProperties(object, nullptr, &extensionPropertyCount, nullptr);
+		result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionPropertyCount, nullptr);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan device extension properties ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of device extension properties ([]).", string_VkResult(result));
 
 		sequence<VkExtensionProperties> extensionProperties(extensionPropertyCount);
 
-		result = vkEnumerateDeviceExtensionProperties(object, nullptr, &extensionPropertyCount, &extensionProperties[0]);
+		result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionPropertyCount, &extensionProperties[0]);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan device extension properties ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate device extension properties ([]).", string_VkResult(result));
 
 		enabledExtensionNames.resize(extensionPropertyCount);
 
 		#ifdef DEBUG_ENUMERATE_DEVICE_EXTENSIONS
-			ENGINE_INFO("Enabled device extensions:");
+			ProjectA::GraphicsAdapter::logger.info("Enabled device extensions:");
 
 			for (uint32 extensionPropertiesIndex = 0; extensionPropertiesIndex < extensionProperties.count; extensionPropertiesIndex += 1) {
-				ENGINE_INFO("- [] (spec version: [])", extensionProperties[extensionPropertiesIndex].extensionName, extensionProperties[extensionPropertiesIndex].specVersion);
+				ProjectA::GraphicsAdapter::logger.info("- [] (spec version: [])", extensionProperties[extensionPropertiesIndex].extensionName, extensionProperties[extensionPropertiesIndex].specVersion);
 
 				enabledExtensionNames[extensionPropertiesIndex] = extensionProperties[extensionPropertiesIndex].extensionName;
 			}
 		#endif
 
-		vkGetPhysicalDeviceFeatures(object, &features);
-		vkGetPhysicalDeviceMemoryProperties(object, &memoryProperties);
+		vkGetPhysicalDeviceFeatures(physicalDevice, &features);
+		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
 
 		setLimits();
 	}
 
-	void VulkanPhysicalDevice::setLimits() {
+	void VK::PhysicalDevice::setLimits() {
 		limits.bufferImageGranularity = properties.limits.bufferImageGranularity;
 		limits.lineWidthGranularity = properties.limits.lineWidthGranularity;
 		limits.maxBoundDescriptorSetCount = properties.limits.maxBoundDescriptorSets;
@@ -88,16 +135,16 @@ namespace ProjectA {
 		limits.pointSizeGranularity = properties.limits.pointSizeGranularity;
 	}
 
-	void VulkanPhysicalDevice::selectQueueFamilyIndices() {
+	void VK::PhysicalDevice::selectQueueFamilyIndices() {
 		uint32 queueFamilyCount;
 
-		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyCount, nullptr);
+		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
 
-		ENGINE_ASSERT(queueFamilyCount > 0, "Could not find queues for this physical device.");
+		ADAPTER_ASSERT(queueFamilyCount > 0, "Failed to find queues for this physical device.");
 
 		sequence<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
 
-		vkGetPhysicalDeviceQueueFamilyProperties(object, &queueFamilyCount, &queueFamilies[0]);
+		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, &queueFamilies[0]);
 
 		#ifdef BUILD_MODE_DEBUG
 			enumerateQueueFamilyProperties(queueFamilies);
@@ -110,7 +157,7 @@ namespace ProjectA {
 		for (uint32 queueFamilyIndex = 0; queueFamilyIndex < queueFamilyCount; queueFamilyIndex += 1) {
 			const VkQueueFamilyProperties& queueFamily = queueFamilies[queueFamilyIndex];
 
-			ENGINE_ASSERT(queueFamily.queueCount > 0, "Queue family [] has no queues.", queueFamilyIndex);
+			ADAPTER_ASSERT(queueFamily.queueCount > 0, "Queue family [] has no queues.", queueFamilyIndex);
 
 			const uint32 graphicsQueueFamilyScore = calculateGraphicsQueueFamilyScore(queueFamily);
 
@@ -134,56 +181,8 @@ namespace ProjectA {
 			}
 		}
 
-		ENGINE_ASSERT(maxGraphicsQueueFamilyScore > 0, "Failed to find a Vulkan graphics queue family.");
-		ENGINE_ASSERT(maxComputeQueueFamilyScore > 0, "Failed to find a Vulkan compute queue family.");
-		ENGINE_ASSERT(maxTransferQueueFamilyScore > 0, "Failed to find a Vulkan transfer queue family.");
-	}
-
-	void VulkanPhysicalDevice::enumerateQueueFamilyProperties(const sequence<VkQueueFamilyProperties>& queueFamilies) {
-		for (uint32 queueFamilyIndex = 0; queueFamilyIndex < queueFamilies.count(); queueFamilyIndex += 1) {
-			const VkQueueFamilyProperties& queueFamily = queueFamilies[queueFamilyIndex];
-
-			ENGINE_INFO(
-				"Properties for queue family []:\n"
-				"- Queue count: []\n"
-				"- Queue flags: []",
-				queueFamilyIndex,
-				queueFamily.queueCount,
-				string_VkQueueFlags(queueFamily.queueFlags)
-			);
-		}
-	}
-
-	uint32 VulkanPhysicalDevice::calculateGraphicsQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
-		if (queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-			return 1;
-		}
-
-		return 0;
-	}
-
-	uint32 VulkanPhysicalDevice::calculateComputeQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
-		if (queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) {
-			return 1;
-		}
-
-		return 0;
-	}
-
-	uint32 VulkanPhysicalDevice::calculateTransferQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties) {
-		if (queueFamilyProperties.queueFlags & VK_QUEUE_TRANSFER_BIT) {
-			// Prefer queues which don't support graphics or compute, so that transfers are non-blocking regarding other operations.
-			if (!(queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT) && !(queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT)) {
-				return 3;
-			}
-
-			return 2;
-		}
-
-		if (queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT || queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) {
-			return 1;
-		}
-
-		return 1;
+		ADAPTER_ASSERT(maxGraphicsQueueFamilyScore > 0, "Failed to find a graphics queue family.");
+		ADAPTER_ASSERT(maxComputeQueueFamilyScore > 0, "Failed to find a compute queue family.");
+		ADAPTER_ASSERT(maxTransferQueueFamilyScore > 0, "Failed to find a transfer queue family.");
 	}
 }

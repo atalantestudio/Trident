@@ -3,7 +3,7 @@
 #include "Engine/API/Rendering/CullMode.hpp"
 
 namespace ProjectA {
-	static VkCullModeFlagBits getVkCullMode(CullMode cullMode) {
+	static VkCullModeFlagBits getCullMode(CullMode cullMode) {
 		static constexpr VkCullModeFlagBits vkCullModes[] = {
 			VK_CULL_MODE_NONE,
 			VK_CULL_MODE_FRONT_BIT,

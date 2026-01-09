@@ -1,37 +1,40 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
-#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/Image.hpp"
 #include "Engine/Adapter/Graphics/VK/Swapchain.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	VulkanSwapchain::VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const SwapchainDescriptor& descriptor) :
-		Swapchain(descriptor),
-		physicalDevice(physicalDevice),
-		device(device),
-		surface(surface)
+	VK::Swapchain::Swapchain(const SwapchainDescriptor& descriptor, const VK::Surface& surface, const VK::Device& device) :
+		ProjectA::Swapchain(descriptor),
+		surface(surface),
+		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		recreate(descriptor);
 	}
 
-	VulkanSwapchain::~VulkanSwapchain() {
-		for (const ref<ImageView> imageView : imageViews) {
+	VK::Swapchain::~Swapchain() {
+		for (const ref<ProjectA::ImageView> imageView : imageViews) {
 			imageView.~shared_ptr();
 		}
+
 		// The swapchain images are automatically destroyed with the swapchain.
-		vkDestroySwapchainKHR(device.object, object, nullptr);
+		vkDestroySwapchainKHR(device.device, swapchain, nullptr);
 	}
 
-	uint32 VulkanSwapchain::getImageCount() const {
+	uint32 VK::Swapchain::getImageCount() const {
 		return imageCount;
 	}
 
-	void VulkanSwapchain::update(const SwapchainDescriptor& descriptor) {
+	void VK::Swapchain::update(const SwapchainDescriptor& descriptor) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		for (const ref<ImageView> imageView : imageViews) {
+		for (const ref<ProjectA::ImageView> imageView : imageViews) {
 			imageView.~shared_ptr();
 		}
 
@@ -39,18 +42,18 @@ namespace ProjectA {
 	}
 
 	// NOTE: ~59Mb in Release mode.
-	void VulkanSwapchain::recreate(const SwapchainDescriptor& descriptor) {
+	void VK::Swapchain::recreate(const SwapchainDescriptor& descriptor) {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
 		VkResult result;
 
 		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat();
 
-		ENGINE_INFO("Swapchain format is []/[].", string_VkFormat(surfaceFormat.format), string_VkColorSpaceKHR(surfaceFormat.colorSpace));
+		ProjectA::GraphicsAdapter::logger.info("Swapchain format is []/[].", string_VkFormat(surfaceFormat.format), string_VkColorSpaceKHR(surfaceFormat.colorSpace));
 
 		const VkPresentModeKHR presentMode = surface.selectPresentMode(descriptor.vSync);
 
-		ENGINE_INFO("Swapchain present mode is [].", string_VkPresentModeKHR(presentMode));
+		ProjectA::GraphicsAdapter::logger.info("Swapchain present mode is [].", string_VkPresentModeKHR(presentMode));
 
 		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities();
 
@@ -60,7 +63,7 @@ namespace ProjectA {
 			imageCount = min(imageCount, surfaceCapabilities.maxImageCount);
 		}
 
-		ENGINE_INFO("Swapchain image count is [].", imageCount);
+		ProjectA::GraphicsAdapter::logger.info("Swapchain image count is [].", imageCount);
 
 		if (surfaceCapabilities.currentExtent.width == max<uint32>() && surfaceCapabilities.currentExtent.height == max<uint32>()) {
 			extent = *pointer_cast<const Extent2D*>(&surfaceCapabilities.currentExtent);
@@ -70,15 +73,15 @@ namespace ProjectA {
 			extent.height = clamp(descriptor.extent.height, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
 		}
 
-		ENGINE_INFO("Swapchain image extent is ([], []).", extent.width, extent.height);
+		ProjectA::GraphicsAdapter::logger.info("Swapchain image extent is ([], []).", extent.width, extent.height);
 
-		const VkSwapchainKHR oldSwapchain = object;
+		const VkSwapchainKHR oldSwapchain = swapchain;
 
 		VkSwapchainCreateInfoKHR swapchainCreateInfo{};
 		swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		swapchainCreateInfo.pNext = nullptr;
 		swapchainCreateInfo.flags = 0;
-		swapchainCreateInfo.surface = surface.object;
+		swapchainCreateInfo.surface = surface.surface;
 		swapchainCreateInfo.minImageCount = imageCount;
 		swapchainCreateInfo.imageFormat = surfaceFormat.format;
 		swapchainCreateInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -94,27 +97,27 @@ namespace ProjectA {
 		swapchainCreateInfo.clipped = VK_TRUE;
 		swapchainCreateInfo.oldSwapchain = oldSwapchain;
 
-		result = vkCreateSwapchainKHR(device.object, &swapchainCreateInfo, nullptr, &object);
+		result = vkCreateSwapchainKHR(device.device, &swapchainCreateInfo, nullptr, &swapchain);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create swapchain ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create swapchain ([]).", string_VkResult(result));
 
-		vkDestroySwapchainKHR(device.object, oldSwapchain, nullptr);
+		vkDestroySwapchainKHR(device.device, oldSwapchain, nullptr);
 
-		result = vkGetSwapchainImagesKHR(device.object, object, &imageCount, nullptr);
+		result = vkGetSwapchainImagesKHR(device.device, swapchain, &imageCount, nullptr);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain image count ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get swapchain image count ([]).", string_VkResult(result));
 
 		sequence<VkImage> vkImages(imageCount);
 
-		result = vkGetSwapchainImagesKHR(device.object, object, &imageCount, &vkImages[0]);
+		result = vkGetSwapchainImagesKHR(device.device, swapchain, &imageCount, &vkImages[0]);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to get swapchain images ([]).", string_VkResult(result));
 
-		images = sequence<ref<Image>>(imageCount);
-		imageViews = sequence<ref<ImageView>>(imageCount);
+		images = sequence<ref<ProjectA::Image>>(imageCount);
+		imageViews = sequence<ref<ProjectA::ImageView>>(imageCount);
 
 		for (uint32 imageIndex = 0; imageIndex < imageCount; imageIndex += 1) {
-			images[imageIndex] = createRef<VulkanImage>(device.object, vkImages[imageIndex], surfaceFormat.format, extent);
+			images[imageIndex] = createRef<VK::Image>(device, vkImages[imageIndex], surfaceFormat.format, extent);
 		}
 
 		createImageViews();

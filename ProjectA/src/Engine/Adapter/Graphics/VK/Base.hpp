@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
@@ -11,3 +14,31 @@
 #endif
 
 #include "Engine/Adapter/Graphics/VK/procedures.hpp"
+
+namespace ProjectA::VK {
+	class Buffer;
+	class CommandBuffer;
+	class CommandEncoder;
+	class CommandPool;
+	class ComputePipeline;
+	class DescriptorSet;
+	class DescriptorSetLayout;
+	class Device;
+	class Fence;
+	class Framebuffer;
+	class GraphicsAdapter;
+	class Image;
+	class ImageView;
+	class Instance;
+	class PhysicalDevice;
+	class Pipeline;
+	class PipelineLayout;
+	class Queue;
+	class RenderPass;
+	class RenderPipeline;
+	class Sampler;
+	class Semaphore;
+	class ShaderModule;
+	class Surface;
+	class Swapchain;
+}

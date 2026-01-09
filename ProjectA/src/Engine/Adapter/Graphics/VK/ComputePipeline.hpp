@@ -1,17 +1,20 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/Pipeline.hpp"
-
 #include "Engine/API/Rendering/ComputePipeline.hpp"
 
 namespace ProjectA {
-	class VulkanComputePipeline final : public VulkanPipeline, public ComputePipeline {
+	class VK::ComputePipeline final : public VK::Pipeline, public ProjectA::ComputePipeline {
 		public:
-			explicit VulkanComputePipeline(VkDevice device, const ComputePipelineDescriptor& descriptor);
+			explicit ComputePipeline(const ComputePipelineDescriptor& descriptor, const VK::Device& device);
 
-			~VulkanComputePipeline() final override;
+			~ComputePipeline() final override;
 
 		private:
-			const VkDevice device;
+			const VK::Device& device;
 	};
 }

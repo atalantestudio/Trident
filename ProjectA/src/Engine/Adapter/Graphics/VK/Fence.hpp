@@ -1,16 +1,22 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/API/Rendering/Fence.hpp"
 
 namespace ProjectA {
-	class VulkanFence final : public Fence, public ObjectWrapper<VkFence> {
+	class VK::Fence final : public ProjectA::Fence {
 		public:
-			explicit VulkanFence(VkDevice device, bool signaled);
+			explicit Fence(const VK::Device& device, bool signaled);
 
-			~VulkanFence() final override;
+			~Fence() final override;
+
+		public:
+			VkFence fence;
 
 		private:
-			const VkDevice device;
+			const VK::Device& device;
 	};
 }

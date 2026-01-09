@@ -3,7 +3,7 @@
 #include "Engine/API/Rendering/PrimitiveTopology.hpp"
 
 namespace ProjectA {
-	static VkPrimitiveTopology getVkPrimitiveTopology(PrimitiveTopology primitiveTopology) {
+	static VkPrimitiveTopology getPrimitiveTopology(PrimitiveTopology primitiveTopology) {
 		static constexpr VkPrimitiveTopology vkPrimitiveTopologies[] = {
 			VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
 			VK_PRIMITIVE_TOPOLOGY_LINE_LIST,

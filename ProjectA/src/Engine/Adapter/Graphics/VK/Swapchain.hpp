@@ -1,19 +1,19 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/Adapter/Graphics/VK/ImageView.hpp"
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
+#include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
 #include "Engine/Adapter/Graphics/VK/Surface.hpp"
-
-#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/Swapchain.hpp"
 
 namespace ProjectA {
-	class VulkanDevice;
-
-	class VulkanSwapchain final : public Swapchain, public ObjectWrapper<VkSwapchainKHR> {
+	class VK::Swapchain final : public ProjectA::Swapchain {
 		public:
-			explicit VulkanSwapchain(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const SwapchainDescriptor& descriptor);
+			explicit Swapchain(const SwapchainDescriptor& descriptor, const VK::Surface& surface, const VK::Device& device);
 
-			~VulkanSwapchain() final override;
+			~Swapchain() final override;
 
 			uint32 getImageCount() const final override;
 
@@ -22,10 +22,12 @@ namespace ProjectA {
 		private:
 			void recreate(const SwapchainDescriptor& descriptor);
 
+		public:
+			VkSwapchainKHR swapchain;
+
 		private:
-			const VulkanPhysicalDevice& physicalDevice;
-			const VulkanDevice& device;
-			const VulkanSurface& surface;
+			const VK::Surface& surface;
+			const VK::Device& device;
 			uint32 imageCount = 0;
 	};
 }

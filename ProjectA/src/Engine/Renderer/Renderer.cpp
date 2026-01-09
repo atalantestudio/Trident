@@ -61,7 +61,7 @@ namespace ProjectA {
 				case GraphicsAPI::VK: {
 					ENGINE_INFO("Using Vulkan graphics adapter.");
 
-					adapter = createScope<VulkanGraphicsAdapter>(projectDescriptor, window);
+					adapter = createScope<VK::GraphicsAdapter>(projectDescriptor, window);
 
 					break;
 				}

@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/BlendFactor.hpp"
@@ -12,17 +15,12 @@
 #include "Engine/Adapter/Graphics/VK/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/VK/VertexInputAttributeType.hpp"
-
-#ifdef BUILD_MODE_DEBUG
-	#include "Engine/API/Rendering/SampleCount.hpp"
-#endif
-
-#include "Engine/Renderer/Renderer.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	VulkanRenderPipeline::VulkanRenderPipeline(VkDevice device, const RenderPipelineDescriptor& descriptor) :
-		VulkanPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS),
-		RenderPipeline(descriptor),
+	VK::RenderPipeline::RenderPipeline(const RenderPipelineDescriptor& descriptor, const VK::Device& device) :
+		ProjectA::RenderPipeline(descriptor),
+		VK::Pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -30,7 +28,7 @@ namespace ProjectA {
 		static constexpr VkSampleMask sampleMask = max<VkSampleMask>();
 
 		const ref<Subpass> subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
-		const ref<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(descriptor.renderPass);
+		const ref<VK::RenderPass> renderPass = std::static_pointer_cast<VK::RenderPass>(descriptor.renderPass);
 
 		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
@@ -43,7 +41,7 @@ namespace ProjectA {
 			VkVertexInputBindingDescription vertexInputBindingDescription{};
 			vertexInputBindingDescription.binding = vertexInputBindingIndex;
 			vertexInputBindingDescription.stride = vertexInputBinding.getStride();
-			vertexInputBindingDescription.inputRate = getVkVertexInputRate(vertexInputBinding.getInputRate());
+			vertexInputBindingDescription.inputRate = getVertexInputRate(vertexInputBinding.getInputRate());
 
 			const std::vector<VertexInputAttribute>& attributes = vertexInputBinding.getAttributes();
 
@@ -51,7 +49,7 @@ namespace ProjectA {
 				VkVertexInputAttributeDescription vertexInputAttributeDescription{};
 				vertexInputAttributeDescription.location = location;
 				vertexInputAttributeDescription.binding = vertexInputBindingIndex;
-				vertexInputAttributeDescription.format = getVkFormat(attribute.type);
+				vertexInputAttributeDescription.format = getFormat(attribute.type);
 				vertexInputAttributeDescription.offset = attribute.offset;
 
 				vertexInputAttributeDescriptions.emplace_back(vertexInputAttributeDescription);
@@ -75,21 +73,21 @@ namespace ProjectA {
 		inputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		inputAssemblyStateCreateInfo.pNext = nullptr;
 		inputAssemblyStateCreateInfo.flags = 0;
-		inputAssemblyStateCreateInfo.topology = getVkPrimitiveTopology(descriptor.primitiveTopology);
+		inputAssemblyStateCreateInfo.topology = getPrimitiveTopology(descriptor.primitiveTopology);
 		inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
 
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float32>(renderPass->surface->window.getSize()[0]);
-		viewport.height = static_cast<float32>(renderPass->surface->window.getSize()[1]);
+		viewport.width = static_cast<float32>(renderPass->surface.window.getSize()[0]);
+		viewport.height = static_cast<float32>(renderPass->surface.window.getSize()[1]);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
 		VkRect2D scissor{};
 		scissor.offset = {0, 0};
-		scissor.extent.width = renderPass->surface->window.getSize()[0];
-		scissor.extent.height = renderPass->surface->window.getSize()[1];
+		scissor.extent.width = renderPass->surface.window.getSize()[0];
+		scissor.extent.height = renderPass->surface.window.getSize()[1];
 
 		VkPipelineViewportStateCreateInfo viewportStateCreateInfo{};
 		viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -106,9 +104,9 @@ namespace ProjectA {
 		rasterizationStateCreateInfo.flags = 0;
 		rasterizationStateCreateInfo.depthClampEnable = VK_FALSE;
 		rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
-		rasterizationStateCreateInfo.polygonMode = getVkPolygonMode(descriptor.polygonMode);
-		rasterizationStateCreateInfo.cullMode = getVkCullMode(descriptor.cullMode);
-		rasterizationStateCreateInfo.frontFace = getVkFrontFace(descriptor.frontFace);
+		rasterizationStateCreateInfo.polygonMode = getPolygonMode(descriptor.polygonMode);
+		rasterizationStateCreateInfo.cullMode = getCullMode(descriptor.cullMode);
+		rasterizationStateCreateInfo.frontFace = getFrontFace(descriptor.frontFace);
 		rasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;
 		rasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f;
 		rasterizationStateCreateInfo.depthBiasClamp = 0.0f;
@@ -141,8 +139,8 @@ namespace ProjectA {
 
 			VkPipelineColorBlendAttachmentState& colorBlendAttachmentState = colorBlendAttachmentStates[colorBlendAttachmentIndex];
 			colorBlendAttachmentState.blendEnable = colorBlendAttachment.blend;
-			colorBlendAttachmentState.srcColorBlendFactor = getVkBlendFactor(colorBlendAttachment.srcColorBlendFactor);
-			colorBlendAttachmentState.dstColorBlendFactor = getVkBlendFactor(colorBlendAttachment.dstColorBlendFactor);
+			colorBlendAttachmentState.srcColorBlendFactor = getBlendFactor(colorBlendAttachment.srcColorBlendFactor);
+			colorBlendAttachmentState.dstColorBlendFactor = getBlendFactor(colorBlendAttachment.dstColorBlendFactor);
 			colorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
 			colorBlendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
 			colorBlendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
@@ -163,7 +161,7 @@ namespace ProjectA {
 		colorBlendStateCreateInfo.blendConstants[2] = 0.0f;
 		colorBlendStateCreateInfo.blendConstants[3] = 0.0f;
 
-		const sequence<VkDynamicState> dynamicStates = getVkDynamicStates(descriptor.dynamicState);
+		const sequence<VkDynamicState> dynamicStates = getDynamicStates(descriptor.dynamicState);
 
 		VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo{};
 		dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -173,8 +171,8 @@ namespace ProjectA {
 		dynamicStateCreateInfo.pDynamicStates = &dynamicStates[0];
 
 		const sequence<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos = {
-			std::static_pointer_cast<VulkanShaderModule>(descriptor.vertexShaderModule)->object,
-			std::static_pointer_cast<VulkanShaderModule>(descriptor.fragmentShaderModule)->object,
+			std::static_pointer_cast<VK::ShaderModule>(descriptor.vertexShaderModule)->createInfo,
+			std::static_pointer_cast<VK::ShaderModule>(descriptor.fragmentShaderModule)->createInfo,
 		};
 
 		VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo{};
@@ -233,20 +231,20 @@ namespace ProjectA {
 
 		graphicsPipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
 		graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
-		graphicsPipelineCreateInfo.layout = std::static_pointer_cast<VulkanPipelineLayout>(descriptor.pipelineLayout)->object;
-		graphicsPipelineCreateInfo.renderPass = renderPass->object;
+		graphicsPipelineCreateInfo.layout = std::static_pointer_cast<VK::PipelineLayout>(descriptor.pipelineLayout)->pipelineLayout;
+		graphicsPipelineCreateInfo.renderPass = renderPass->renderPass;
 		graphicsPipelineCreateInfo.subpass = descriptor.subpassIndex;
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		graphicsPipelineCreateInfo.basePipelineIndex = -1;
 
-		const VkResult result = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &object);
+		const VkResult result = vkCreateGraphicsPipelines(device.device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &pipeline);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan graphics pipeline ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create graphics pipeline ([]).", string_VkResult(result));
 	}
 
-	VulkanRenderPipeline::~VulkanRenderPipeline() {
+	VK::RenderPipeline::~RenderPipeline() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyPipeline(device, object, nullptr);
+		vkDestroyPipeline(device.device, pipeline, nullptr);
 	}
 }

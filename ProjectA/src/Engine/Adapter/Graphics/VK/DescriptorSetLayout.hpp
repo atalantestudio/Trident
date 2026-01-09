@@ -1,16 +1,22 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/API/Rendering/DescriptorSetLayout.hpp"
 
 namespace ProjectA {
-	class VulkanDescriptorSetLayout final : public DescriptorSetLayout, public ObjectWrapper<VkDescriptorSetLayout> {
+	class VK::DescriptorSetLayout final : public ProjectA::DescriptorSetLayout {
 		public:
-			explicit VulkanDescriptorSetLayout(VkDevice device, const sequence<DescriptorSetLayoutBinding>& descriptorSetLayoutBindings);
+			explicit DescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& descriptorSetLayoutBindings, const VK::Device& device);
 
-			~VulkanDescriptorSetLayout() final override;
+			~DescriptorSetLayout() final override;
+
+		public:
+			VkDescriptorSetLayout descriptorSetLayout;
 
 		private:
-			const VkDevice device;
+			const VK::Device& device;
 	};
 }

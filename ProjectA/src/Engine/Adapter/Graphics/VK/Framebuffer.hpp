@@ -1,16 +1,21 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/Framebuffer.hpp"
 
 namespace ProjectA {
-	class VulkanFramebuffer final : public Framebuffer, public ObjectWrapper<VkFramebuffer> {
+	class VK::Framebuffer final : public ProjectA::Framebuffer {
 		public:
-			explicit VulkanFramebuffer(VkDevice device, const FramebufferDescriptor& descriptor);
+			explicit Framebuffer(const FramebufferDescriptor& descriptor, const VK::Device& device);
 
-			~VulkanFramebuffer() final override;
+			~Framebuffer() final override;
+
+		public:
+			VkFramebuffer framebuffer;
 
 		private:
-			VkDevice device;
+			const VK::Device& device;
 	};
 }

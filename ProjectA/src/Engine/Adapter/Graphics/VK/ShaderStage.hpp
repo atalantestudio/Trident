@@ -1,9 +1,13 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/ShaderStage.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
-namespace ProjectA {
-	static VkShaderStageFlagBits getVkShaderStageFlagBits(ShaderStage shaderStage) {
+namespace ProjectA::VK {
+	inline VkShaderStageFlagBits getShaderStageFlagBits(ShaderStage shaderStage) {
 		VkShaderStageFlags vkShaderStageFlags = 0;
 
 		if (shaderStage & ShaderStage::VERTEX) {
@@ -18,7 +22,7 @@ namespace ProjectA {
 			vkShaderStageFlags |= VK_SHADER_STAGE_COMPUTE_BIT;
 		}
 
-		DEBUG_ASSERT(vkShaderStageFlags != 0);
+		ADAPTER_ASSERT(vkShaderStageFlags != 0, "Undefined shader stage flag.");
 
 		return static_cast<VkShaderStageFlagBits>(vkShaderStageFlags);
 	}

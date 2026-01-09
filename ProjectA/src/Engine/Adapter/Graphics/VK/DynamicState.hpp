@@ -1,9 +1,12 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/DynamicState.hpp"
 
-namespace ProjectA {
-	sequence<VkDynamicState> getVkDynamicStates(DynamicState dynamicState) {
+namespace ProjectA::VK {
+	inline sequence<VkDynamicState> getDynamicStates(DynamicState dynamicState) {
 		const uint32 dynamicStateCount = countSetBits(static_cast<uint32>(dynamicState));
 
 		sequence<VkDynamicState> dynamicStates(dynamicStateCount);

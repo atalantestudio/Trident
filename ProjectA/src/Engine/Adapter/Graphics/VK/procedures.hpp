@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 namespace ProjectA {
@@ -72,7 +75,7 @@ namespace ProjectA {
 	extern PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;
 	extern PFN_vkWaitForFences vkWaitForFences;
 
-	// NOTE: These functions are deprecated by Vulkan 1.1.
+	// These functions are deprecated by Vulkan 1.1.
 	#if VULKAN_VERSION < VULKAN_VERSION_1_1
 		extern PFN_vkGetPhysicalDeviceFeatures vkGetPhysicalDeviceFeatures;
 		extern PFN_vkGetPhysicalDeviceMemoryProperties vkGetPhysicalDeviceMemoryProperties;
@@ -80,7 +83,7 @@ namespace ProjectA {
 		extern PFN_vkGetPhysicalDeviceQueueFamilyProperties vkGetPhysicalDeviceQueueFamilyProperties;
 	#endif
 
-	// NOTE: These functions are deprecated by Vulkan 1.2.
+	// These functions are deprecated by Vulkan 1.2.
 	#if VULKAN_VERSION < VULKAN_VERSION_1_2
 		extern PFN_vkCmdBeginRenderPass vkCmdBeginRenderPass;
 		extern PFN_vkCmdEndRenderPass vkCmdEndRenderPass;
@@ -88,7 +91,7 @@ namespace ProjectA {
 		extern PFN_vkCreateRenderPass vkCreateRenderPass;
 	#endif
 
-	// NOTE: These functions are deprecated by Vulkan 1.4.
+	// These functions are deprecated by Vulkan 1.4.
 	#if VULKAN_VERSION < VULKAN_VERSION_1_4
 		extern PFN_vkCreateFramebuffer vkCreateFramebuffer;
 		extern PFN_vkDestroyFramebuffer vkDestroyFramebuffer;

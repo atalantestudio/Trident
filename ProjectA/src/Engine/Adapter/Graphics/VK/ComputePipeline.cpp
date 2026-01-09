@@ -1,13 +1,17 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	VulkanComputePipeline::VulkanComputePipeline(VkDevice device, const ComputePipelineDescriptor& descriptor) :
-		VulkanPipeline(VK_PIPELINE_BIND_POINT_COMPUTE),
-		ComputePipeline(descriptor),
+	VK::ComputePipeline::ComputePipeline(const ComputePipelineDescriptor& descriptor, const VK::Device& device) :
+		ProjectA::ComputePipeline(descriptor),
+		VK::Pipeline(VK_PIPELINE_BIND_POINT_COMPUTE),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -16,19 +20,19 @@ namespace ProjectA {
 		computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 		computePipelineCreateInfo.pNext = nullptr;
 		computePipelineCreateInfo.flags = 0;
-		computePipelineCreateInfo.stage = std::static_pointer_cast<VulkanShaderModule>(descriptor.computeShaderModule)->object;
-		computePipelineCreateInfo.layout = std::static_pointer_cast<VulkanPipelineLayout>(descriptor.pipelineLayout)->object;
+		computePipelineCreateInfo.stage = std::static_pointer_cast<VK::ShaderModule>(descriptor.computeShaderModule)->createInfo;
+		computePipelineCreateInfo.layout = std::static_pointer_cast<VK::PipelineLayout>(descriptor.pipelineLayout)->pipelineLayout;
 		computePipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 		computePipelineCreateInfo.basePipelineIndex = 0;
 
-		const VkResult result = vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &object);
+		const VkResult result = vkCreateComputePipelines(device.device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &pipeline);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan compute pipeline ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create compute pipeline ([]).", string_VkResult(result));
 	}
 
-	VulkanComputePipeline::~VulkanComputePipeline() {
+	VK::ComputePipeline::~ComputePipeline() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyPipeline(device, object, nullptr);
+		vkDestroyPipeline(device.device, pipeline, nullptr);
 	}
 }

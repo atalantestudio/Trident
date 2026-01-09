@@ -8,24 +8,29 @@
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/Fence.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageLayout.hpp"
+#include "Engine/Adapter/Graphics/VK/ImageView.hpp"
+#include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
+#include "Engine/Adapter/Graphics/VK/Queue.hpp"
 #include "Engine/Adapter/Graphics/VK/Sampler.hpp"
 #include "Engine/Adapter/Graphics/VK/Semaphore.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
+#include "Engine/Adapter/Graphics/VK/Surface.hpp"
 #include "Engine/Adapter/Graphics/VK/Swapchain.hpp"
 
 namespace ProjectA {
 	// TODO: Client-side extension request.
-	const std::vector<const char8*> VulkanDevice::enabledExtensionNames = {
+	const sequence<const char8*> VK::Device::ENABLED_EXTENSION_NAMES = {
 		VK_KHR_MAINTENANCE_1_EXTENSION_NAME,
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 	};
 
 	// NOTE: ~3Mb in Release mode.
-	VulkanDevice::VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface) :
+	VK::Device::Device(const VK::PhysicalDevice& physicalDevice, const VK::Surface& surface) :
 		physicalDevice(physicalDevice)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		// TODO: Replace with sequence<T>.
 		std::vector<uint32> queueFamilyIndices = {
 			physicalDevice.graphicsQueueFamilyIndex,
 			physicalDevice.computeQueueFamilyIndex,
@@ -58,52 +63,52 @@ namespace ProjectA {
 		deviceCreateInfo.flags = 0;
 		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32>(deviceQueueCreateInfos.count());
 		deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfos[0];
-		deviceCreateInfo.enabledExtensionCount = static_cast<uint32>(enabledExtensionNames.size());
-		deviceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
+		deviceCreateInfo.enabledExtensionCount = static_cast<uint32>(ENABLED_EXTENSION_NAMES.count());
+		deviceCreateInfo.ppEnabledExtensionNames = &ENABLED_EXTENSION_NAMES[0];
 		deviceCreateInfo.pEnabledFeatures = &physicalDevice.features;
 
-		const VkResult result = vkCreateDevice(physicalDevice.object, &deviceCreateInfo, nullptr, &object);
+		const VkResult result = vkCreateDevice(physicalDevice.physicalDevice, &deviceCreateInfo, nullptr, &device);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan device ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create device ([]).", string_VkResult(result));
 
-		queues[0] = createRef<VulkanQueue>(*this, physicalDevice.graphicsQueueFamilyIndex);
-		queues[1] = createRef<VulkanQueue>(*this, physicalDevice.computeQueueFamilyIndex);
-		queues[2] = createRef<VulkanQueue>(*this, physicalDevice.transferQueueFamilyIndex);
+		queues[0] = createRef<VK::Queue>(*this, physicalDevice.graphicsQueueFamilyIndex);
+		queues[1] = createRef<VK::Queue>(*this, physicalDevice.computeQueueFamilyIndex);
+		queues[2] = createRef<VK::Queue>(*this, physicalDevice.transferQueueFamilyIndex);
 
-		vkGetPhysicalDeviceMemoryProperties(physicalDevice.object, &memoryProperties);
+		vkGetPhysicalDeviceMemoryProperties(physicalDevice.physicalDevice, &memoryProperties);
 	}
 
-	VulkanDevice::~VulkanDevice() {
+	VK::Device::~Device() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		// Destroy the command pools before the device.
-		for (const ref<VulkanQueue> queue : queues) {
+		for (const ref<VK::Queue> queue : queues) {
 			queue.~shared_ptr();
 		}
 
 		for (const VkDescriptorPool descriptorPool : descriptorPools) {
-			vkDestroyDescriptorPool(object, descriptorPool, nullptr);
+			vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 		}
 
-		vkDestroyDevice(object, nullptr);
+		vkDestroyDevice(device, nullptr);
 	}
 
-	ref<PhysicalDevice> VulkanDevice::getPhysicalDevice() const {
-		return createRef<VulkanPhysicalDevice>(physicalDevice);
+	ref<PhysicalDevice> VK::Device::getPhysicalDevice() const {
+		return createRef<VK::PhysicalDevice>(physicalDevice);
 	}
 
-	ref<Queue> VulkanDevice::getQueue(QueueFamilyCapability queueFamilyCapability) const {
+	ref<Queue> VK::Device::getQueue(QueueFamilyCapability queueFamilyCapability) const {
 		return queues[static_cast<uint32>(queueFamilyCapability)];
 	}
 
-	AcquireNextImageStatus VulkanDevice::acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {
+	AcquireNextImageStatus VK::Device::acquireNextImage(ref<ProjectA::Swapchain> swapchain, ref<ProjectA::Semaphore> semaphore, uint32& imageIndex) const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		const VkResult result = vkAcquireNextImageKHR(
-			object,
-			std::static_pointer_cast<VulkanSwapchain>(swapchain)->object,
+			device,
+			std::static_pointer_cast<VK::Swapchain>(swapchain)->swapchain,
 			max<uint64>(),
-			std::static_pointer_cast<VulkanSemaphore>(semaphore)->object,
+			std::static_pointer_cast<VK::Semaphore>(semaphore)->semaphore,
 			VK_NULL_HANDLE,
 			&imageIndex
 		);
@@ -116,13 +121,13 @@ namespace ProjectA {
 			case VK_ERROR_OUT_OF_DATE_KHR:
 				return AcquireNextImageStatus::ERROR_OUT_OF_DATE;
 			default:
-				ENGINE_ASSERT(false, "Unhandled status.");
+				ADAPTER_ASSERT(false, "Unhandled status.");
 
 				return AcquireNextImageStatus::ERROR_UNHANDLED;
 		}
 	}
 
-	sequence<ref<DescriptorSet>> VulkanDevice::allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) {
+	sequence<ref<DescriptorSet>> VK::Device::allocateDescriptorSets(const sequence<ref<ProjectA::DescriptorSetLayout>>& descriptorSetLayouts) {
 		VkResult result;
 
 		const uint32 descriptorSetCount = static_cast<uint32>(descriptorSetLayouts.count());
@@ -131,13 +136,13 @@ namespace ProjectA {
 		sequence<uint32> descriptorCountPerType(static_cast<uint32>(DescriptorType::count));
 
 		for (uint32 descriptorSetLayoutIndex = 0; descriptorSetLayoutIndex < descriptorSetLayouts.count(); descriptorSetLayoutIndex += 1) {
-			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetLayoutIndex];
+			const ref<ProjectA::DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetLayoutIndex];
 
 			for (const DescriptorSetLayoutBinding descriptorSetLayoutBinding : descriptorSetLayout->bindings) {
 				descriptorCountPerType[static_cast<uint32>(descriptorSetLayoutBinding.descriptorType)] += descriptorSetLayoutBinding.descriptorCount;
 			}
 
-			vkDescriptorSetLayouts[descriptorSetLayoutIndex] = std::static_pointer_cast<VulkanDescriptorSetLayout>(descriptorSetLayout)->object;
+			vkDescriptorSetLayouts[descriptorSetLayoutIndex] = std::static_pointer_cast<VK::DescriptorSetLayout>(descriptorSetLayout)->descriptorSetLayout;
 		}
 
 		uint32 descriptorPoolSizeCount = 0;
@@ -172,9 +177,9 @@ namespace ProjectA {
 
 		VkDescriptorPool descriptorPool;
 
-		result = vkCreateDescriptorPool(object, &descriptorPoolCreateInfo, nullptr, &descriptorPool);
+		result = vkCreateDescriptorPool(device, &descriptorPoolCreateInfo, nullptr, &descriptorPool);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan descriptor pool ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create descriptor pool ([]).", string_VkResult(result));
 
 		descriptorPools.emplace_back(descriptorPool);
 
@@ -187,22 +192,22 @@ namespace ProjectA {
 
 		sequence<VkDescriptorSet> vkDescriptorSets(descriptorSetCount);
 
-		result = vkAllocateDescriptorSets(object, &descriptorSetAllocateInfo, &vkDescriptorSets[0]);
+		result = vkAllocateDescriptorSets(device, &descriptorSetAllocateInfo, &vkDescriptorSets[0]);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to allocate Vulkan descriptor sets ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to allocate descriptor sets ([]).", string_VkResult(result));
 
-		sequence<ref<DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
+		sequence<ref<ProjectA::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 
 		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
-			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
+			const ref<ProjectA::DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
+			const ref<VK::DescriptorSet> descriptorSet = createRef<VK::DescriptorSet>(vkDescriptorSets[descriptorSetIndex]);
 
-			ref<VulkanDescriptorSet> descriptorSet = createRef<VulkanDescriptorSet>(vkDescriptorSets[descriptorSetIndex]);
-			descriptorSet->bindings = sequence<VulkanDescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
+			descriptorSet->bindings = sequence<VK::DescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
 
 			for (uint32 descriptorSetBindingIndex = 0; descriptorSetBindingIndex < descriptorSet->bindings.count(); descriptorSetBindingIndex += 1) {
 				const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = descriptorSetLayout->bindings[descriptorSetBindingIndex];
 
-				VulkanDescriptorSet::DescriptorSetBinding& vkDescriptorSetBinding = descriptorSet->bindings[descriptorSetBindingIndex];
+				VK::DescriptorSet::DescriptorSetBinding& vkDescriptorSetBinding = descriptorSet->bindings[descriptorSetBindingIndex];
 				vkDescriptorSetBinding.descriptorType = descriptorSetLayoutBinding.descriptorType;
 			}
 
@@ -212,28 +217,22 @@ namespace ProjectA {
 		return descriptorSets;
 	}
 
-	void VulkanDevice::resetFence(ref<Fence> fence) const {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+	void VK::Device::resetFence(ref<ProjectA::Fence> fence) const {
+		const VkResult result = vkResetFences(device, 1, &std::static_pointer_cast<VK::Fence>(fence)->fence);
 
-		const VkResult result = vkResetFences(
-			object,
-			1,
-			&std::static_pointer_cast<VulkanFence>(fence)->object
-		);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to reset Vulkan fence ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to reset fence ([]).", string_VkResult(result));
 	}
 
-	void VulkanDevice::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
+	void VK::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
 		uint64 descriptorBufferInfoCount = 0;
 		uint64 descriptorImageInfoCount = 0;
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
-			const ref<VulkanDescriptorSet> descriptorSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet);
+			const ref<VK::DescriptorSet> descriptorSet = std::static_pointer_cast<VK::DescriptorSet>(writeDescriptorSet.descriptorSet);
 
-			ENGINE_ASSERT(writeDescriptorSet.bindingIndex < descriptorSet->bindings.count(), "This descriptor set doesn't have binding index [].", writeDescriptorSet.bindingIndex);
+			ADAPTER_ASSERT(writeDescriptorSet.bindingIndex < descriptorSet->bindings.count(), "This descriptor set doesn't have binding index [].", writeDescriptorSet.bindingIndex);
 
-			const VulkanDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
+			const VK::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
 				descriptorBufferInfoCount += writeDescriptorSet.descriptorBuffers.count();
@@ -242,7 +241,7 @@ namespace ProjectA {
 				descriptorImageInfoCount += writeDescriptorSet.descriptorImages.count();
 			}
 			else {
-				ENGINE_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
+				ADAPTER_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
 			}
 		}
 
@@ -256,16 +255,16 @@ namespace ProjectA {
 
 		while (writeDescriptorSetIndex < writeDescriptorSets.count()) {
 			const WriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[writeDescriptorSetIndex];
-			const ref<VulkanDescriptorSet> descriptorSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet);
-			const VulkanDescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
+			const ref<VK::DescriptorSet> descriptorSet = std::static_pointer_cast<VK::DescriptorSet>(writeDescriptorSet.descriptorSet);
+			const VK::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			VkWriteDescriptorSet& vkWriteDescriptorSet = vkWriteDescriptorSets[writeDescriptorSetIndex];
 			vkWriteDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			vkWriteDescriptorSet.pNext = nullptr;
-			vkWriteDescriptorSet.dstSet = std::static_pointer_cast<VulkanDescriptorSet>(writeDescriptorSet.descriptorSet)->object;
+			vkWriteDescriptorSet.dstSet = std::static_pointer_cast<VK::DescriptorSet>(writeDescriptorSet.descriptorSet)->descriptorSet;
 			vkWriteDescriptorSet.dstBinding = writeDescriptorSet.bindingIndex;
 			vkWriteDescriptorSet.dstArrayElement = 0;
-			vkWriteDescriptorSet.descriptorType = getVkDescriptorType(descriptorSetBinding.descriptorType);
+			vkWriteDescriptorSet.descriptorType = getDescriptorType(descriptorSetBinding.descriptorType);
 
 			if (isBufferDescriptorType(descriptorSetBinding.descriptorType)) {
 				const uint32 descriptorBufferCount = static_cast<uint32>(writeDescriptorSet.descriptorBuffers.count());
@@ -274,7 +273,7 @@ namespace ProjectA {
 					const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
 
 					VkDescriptorBufferInfo& descriptorBufferInfo = descriptorBufferInfos[descriptorBufferInfoOffset + descriptorBufferIndex];
-					descriptorBufferInfo.buffer = std::static_pointer_cast<VulkanBuffer>(descriptorBuffer.buffer)->object;
+					descriptorBufferInfo.buffer = std::static_pointer_cast<VK::Buffer>(descriptorBuffer.buffer)->buffer;
 					descriptorBufferInfo.offset = descriptorBuffer.offset;
 					descriptorBufferInfo.range = descriptorBuffer.size;
 				}
@@ -289,19 +288,19 @@ namespace ProjectA {
 
 				for (uint32 descriptorImageIndex = 0; descriptorImageIndex < descriptorImageCount; descriptorImageIndex += 1) {
 					const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
-					const ref<VulkanImageView> imageView = std::static_pointer_cast<VulkanImageView>(descriptorImage.imageView);
+					const ref<VK::ImageView> imageView = std::static_pointer_cast<VK::ImageView>(descriptorImage.imageView);
 
 					VkDescriptorImageInfo& descriptorImageInfo = descriptorImageInfos[descriptorImageInfoOffset + descriptorImageIndex];
 
 					if (descriptorImage.sampler != nullptr) {
-						descriptorImageInfo.sampler = std::static_pointer_cast<VulkanSampler>(descriptorImage.sampler)->object;
+						descriptorImageInfo.sampler = std::static_pointer_cast<VK::Sampler>(descriptorImage.sampler)->sampler;
 					}
 					else {
 						descriptorImageInfo.sampler = nullptr;
 					}
 
-					descriptorImageInfo.imageView = imageView->object;
-					descriptorImageInfo.imageLayout = getVkImageLayout(descriptorImage.imageLayout);
+					descriptorImageInfo.imageView = imageView->imageView;
+					descriptorImageInfo.imageLayout = getImageLayout(descriptorImage.imageLayout);
 				}
 
 				vkWriteDescriptorSet.descriptorCount = descriptorImageCount;
@@ -310,7 +309,7 @@ namespace ProjectA {
 				descriptorImageInfoOffset += descriptorImageCount;
 			}
 			else {
-				ENGINE_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
+				ADAPTER_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
 			}
 
 			vkWriteDescriptorSet.pTexelBufferView = nullptr;
@@ -318,32 +317,18 @@ namespace ProjectA {
 			writeDescriptorSetIndex += 1;
 		}
 
-		vkUpdateDescriptorSets(
-			object,
-			static_cast<uint32>(vkWriteDescriptorSets.count()),
-			&vkWriteDescriptorSets[0],
-			0,
-			nullptr
-		);
+		vkUpdateDescriptorSets(device, static_cast<uint32>(vkWriteDescriptorSets.count()), &vkWriteDescriptorSets[0], 0, nullptr);
 	}
 
-	void VulkanDevice::waitForFence(ref<Fence> fence) const {
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+	void VK::Device::waitForFence(ref<ProjectA::Fence> fence) const {
+		const VkResult result = vkWaitForFences(device, 1, &std::static_pointer_cast<VK::Fence>(fence)->fence, VK_TRUE, max<uint64>());
 
-		const VkResult result = vkWaitForFences(
-			object,
-			1,
-			&std::static_pointer_cast<VulkanFence>(fence)->object,
-			VK_TRUE,
-			max<uint64>()
-		);
-
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to wait for Vulkan fence ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to wait for fence ([]).", string_VkResult(result));
 	}
 
-	void VulkanDevice::waitIdle() const {
-		const VkResult result = vkDeviceWaitIdle(object);
+	void VK::Device::waitIdle() const {
+		const VkResult result = vkDeviceWaitIdle(device);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to idle wait ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to wait for device idle state ([]).", string_VkResult(result));
 	}
 }

@@ -1,16 +1,22 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/API/Rendering/Semaphore.hpp"
 
 namespace ProjectA {
-	class VulkanSemaphore final : public Semaphore, public ObjectWrapper<VkSemaphore> {
+	class VK::Semaphore final : public ProjectA::Semaphore {
 		public:
-			explicit VulkanSemaphore(VkDevice device);
+			explicit Semaphore(const VK::Device& device);
 
-			~VulkanSemaphore() final override;
+			~Semaphore() final override;
+
+		public:
+			VkSemaphore semaphore;
 
 		private:
-			const VkDevice device;
+			const VK::Device& device;
 	};
 }

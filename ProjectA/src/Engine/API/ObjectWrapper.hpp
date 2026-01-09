@@ -1,6 +1,7 @@
 #pragma once
 
 namespace ProjectA {
+	// TODO: Deprecate.
 	template<typename T>
 	class ObjectWrapper {
 		public:

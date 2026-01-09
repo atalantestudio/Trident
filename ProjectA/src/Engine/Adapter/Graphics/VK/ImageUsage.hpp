@@ -1,9 +1,12 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/ImageUsage.hpp"
 
-namespace ProjectA {
-	static VkImageUsageFlagBits getVkImageUsageFlagBits(ImageUsage imageUsage) {
+namespace ProjectA::VK {
+	inline VkImageUsageFlagBits getImageUsageFlagBits(ImageUsage imageUsage) {
 		VkImageUsageFlags vkImageUsageFlags = 0;
 
 		if (imageUsage & ImageUsage::TRANSFER_SRC) {

@@ -1,17 +1,22 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/API/Rendering/Descriptor/ImageViewDescriptor.hpp"
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/API/Rendering/ImageView.hpp"
 
 namespace ProjectA {
-	class VulkanImageView final : public ImageView, public ObjectWrapper<VkImageView> {
+	class VK::ImageView final : public ProjectA::ImageView {
 		public:
-			explicit VulkanImageView(const ImageViewDescriptor& descriptor, const Image* image, VkDevice device);
+			explicit ImageView(const ImageViewDescriptor& descriptor, const ProjectA::Image* image, const VK::Device& device);
 
-			~VulkanImageView() final override;
+			~ImageView() final override;
+
+		public:
+			VkImageView imageView;
 
 		private:
-			const VkDevice device;
+			const VK::Device& device;
 	};
 }

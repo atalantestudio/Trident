@@ -1,17 +1,22 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
-#include "Engine/API/Rendering/Descriptor/SamplerDescriptor.hpp"
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/API/Rendering/Sampler.hpp"
 
 namespace ProjectA {
-	class VulkanSampler final : public Sampler, public ObjectWrapper<VkSampler> {
+	class VK::Sampler final : public ProjectA::Sampler {
 		public:
-			explicit VulkanSampler(VkDevice device, const SamplerDescriptor& descriptor);
+			explicit Sampler(const SamplerDescriptor& descriptor, const VK::Device& device);
 
-			~VulkanSampler() final override;
+			~Sampler() final override;
+
+		public:
+			VkSampler sampler;
 
 		private:
-			VkDevice device;
+			const VK::Device& device;
 	};
 }

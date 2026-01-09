@@ -1,17 +1,19 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
-#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageFormat.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageLayout.hpp"
 #include "Engine/Adapter/Graphics/VK/RenderPass.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	// TODO(subpass-refactor): Vulkan can make optimizations if we explicitly tell it that we don't care about the depth data post-rendering.
-	VulkanRenderPass::VulkanRenderPass(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface, const VulkanDevice& device, const RenderPassDescriptor& descriptor) :
-		RenderPass(descriptor),
-		physicalDevice(physicalDevice),
-		device(device),
-		surface(&surface)
+	VK::RenderPass::RenderPass(const RenderPassDescriptor& descriptor, const VK::Surface& surface, const VK::Device& device) :
+		ProjectA::RenderPass(descriptor),
+		surface(surface),
+		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -36,7 +38,7 @@ namespace ProjectA {
 
 			VkAttachmentDescription& attachmentDescription = attachmentDescriptions[attachmentIndex];
 			attachmentDescription.flags = 0;
-			attachmentDescription.format = getVkFormat(attachment.format);
+			attachmentDescription.format = getFormat(attachment.format);
 			attachmentDescription.samples = static_cast<VkSampleCountFlagBits>(attachment.sampleCount);
 			attachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(attachment.loadOperation);
 			attachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(attachment.storeOperation);
@@ -56,7 +58,7 @@ namespace ProjectA {
 				attachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			}
 
-			attachmentDescription.finalLayout = getVkImageLayout(attachment.finalLayout);
+			attachmentDescription.finalLayout = getImageLayout(attachment.finalLayout);
 
 			if (isColorAttachment(attachmentIndex) && attachment.sampleCount > 1) {
 				// Create resolve attachment description.
@@ -93,7 +95,7 @@ namespace ProjectA {
 
 				VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset + colorAttachmentReferenceIndex];
 				attachmentReference.attachment = colorAttachmentReference.index;
-				attachmentReference.layout = getVkImageLayout(colorAttachmentReference.layout);
+				attachmentReference.layout = getImageLayout(colorAttachmentReference.layout);
 			}
 
 			relativeAttachmentReferenceOffset += subpass->getColorAttachmentReferenceCount();
@@ -103,7 +105,7 @@ namespace ProjectA {
 
 				VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset];
 				attachmentReference.attachment = depthStencilAttachmentReference.index;
-				attachmentReference.layout = getVkImageLayout(depthStencilAttachmentReference.layout);
+				attachmentReference.layout = getImageLayout(depthStencilAttachmentReference.layout);
 
 				relativeAttachmentReferenceOffset += 1;
 			}
@@ -124,7 +126,7 @@ namespace ProjectA {
 
 				VkAttachmentReference& attachmentReference = attachmentReferences[relativeAttachmentReferenceOffset + inputAttachmentReferenceIndex];
 				attachmentReference.attachment = inputAttachmentReference.index;
-				attachmentReference.layout = getVkImageLayout(inputAttachmentReference.layout);
+				attachmentReference.layout = getImageLayout(inputAttachmentReference.layout);
 			}
 
 			relativeAttachmentReferenceOffset += subpass->getInputAttachmentReferenceCount();
@@ -201,18 +203,18 @@ namespace ProjectA {
 		renderPassCreateInfo.dependencyCount = static_cast<uint32>(subpassDependencies.count());
 		renderPassCreateInfo.pDependencies = &subpassDependencies[0];
 
-		const VkResult result = vkCreateRenderPass(device.object, &renderPassCreateInfo, nullptr, &object);
+		const VkResult result = vkCreateRenderPass(device.device, &renderPassCreateInfo, nullptr, &renderPass);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan render pass ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create render pass ([]).", string_VkResult(result));
 	}
 
-	VulkanRenderPass::~VulkanRenderPass() {
+	VK::RenderPass::~RenderPass() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyRenderPass(device.object, object, nullptr);
+		vkDestroyRenderPass(device.device, renderPass, nullptr);
 	}
 
-	bool VulkanRenderPass::isColorAttachment(uint32 attachmentIndex) const {
+	bool VK::RenderPass::isColorAttachment(uint32 attachmentIndex) const {
 		for (const ref<Subpass> subpass : subpasses) {
 			for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
 				if (colorAttachmentReference.index == attachmentIndex) {

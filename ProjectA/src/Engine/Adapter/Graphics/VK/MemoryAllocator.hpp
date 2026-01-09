@@ -1,6 +1,7 @@
-﻿#pragma once
+﻿// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
 
-#include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
+#pragma once
 
 namespace ProjectA {
 	#define UNDEFINED_MEMORY_TYPE_INDEX max<uint32>()
@@ -38,7 +39,7 @@ namespace ProjectA {
 
 	class MemoryAllocator {
 		public:
-			static void initialize(const VulkanPhysicalDevice& physicalDevice);
+			static void initialize(const VK::PhysicalDevice& physicalDevice);
 
 			static void destroy();
 
@@ -76,7 +77,7 @@ namespace ProjectA {
 			static constexpr VkDeviceSize DEFAULT_MEMORY_ALLOCATION_SIZE = 16000000;
 
 		private:
-			static const VulkanPhysicalDevice* physicalDevice;
+			static const VK::PhysicalDevice* physicalDevice;
 
 			// Allocated buffer and image memory allocations.
 			static std::vector<MemoryAllocation> memoryAllocations;

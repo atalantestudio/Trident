@@ -1,9 +1,13 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/Semaphore.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	VulkanSemaphore::VulkanSemaphore(VkDevice device) :
+	VK::Semaphore::Semaphore(const VK::Device& device) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -13,14 +17,14 @@ namespace ProjectA {
 		semaphoreCreateInfo.pNext = nullptr;
 		semaphoreCreateInfo.flags = 0;
 
-		const VkResult result = vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &object);
+		const VkResult result = vkCreateSemaphore(device.device, &semaphoreCreateInfo, nullptr, &semaphore);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan semaphore ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create semaphore ([]).", string_VkResult(result));
 	}
 
-	VulkanSemaphore::~VulkanSemaphore() {
+	VK::Semaphore::~Semaphore() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroySemaphore(device, object, nullptr);
+		vkDestroySemaphore(device.device, semaphore, nullptr);
 	}
 }

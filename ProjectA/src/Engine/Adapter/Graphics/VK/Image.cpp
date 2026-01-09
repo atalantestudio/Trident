@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/Image.hpp"
@@ -5,14 +8,15 @@
 #include "Engine/Adapter/Graphics/VK/ImageType.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageUsage.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageView.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	VulkanImage::VulkanImage(VkDevice device, const ImageDescriptor& descriptor) :
-		Image(descriptor),
+	VK::Image::Image(const ImageDescriptor& descriptor, const VK::Device& device) :
+		ProjectA::Image(descriptor),
 		device(device),
 		swapchainImage(false),
-		type(getVkImageType(descriptor.type)),
-		format(getVkFormat(descriptor.format))
+		type(getImageType(descriptor.type)),
+		format(VK::getFormat(descriptor.format))
 	{
 		VkImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -27,7 +31,7 @@ namespace ProjectA {
 		imageCreateInfo.arrayLayers = layerCount;
 		imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(getSampleCount());
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageCreateInfo.usage = getVkImageUsageFlagBits(descriptor.usage);
+		imageCreateInfo.usage = getImageUsageFlagBits(descriptor.usage);
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageCreateInfo.queueFamilyIndexCount = 0;
 		imageCreateInfo.pQueueFamilyIndices = nullptr;
@@ -35,71 +39,71 @@ namespace ProjectA {
 		// initialLayout must either be VK_IMAGE_LAYOUT_UNDEFINED or VK_IMAGE_LAYOUT_PREINITIALIZED.
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		const VkResult result = vkCreateImage(device, &imageCreateInfo, nullptr, &object);
+		const VkResult result = vkCreateImage(device.device, &imageCreateInfo, nullptr, &image);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create image ([]).", string_VkResult(result));
 
 		VkMemoryRequirements memoryRequirements;
 
-		vkGetImageMemoryRequirements(device, object, &memoryRequirements);
+		vkGetImageMemoryRequirements(device.device, image, &memoryRequirements);
 
 		VkMemoryPropertyFlags memoryPropertyFlags = static_cast<VkMemoryPropertyFlags>(descriptor.memoryProperties);
 		uint32 memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 
 		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
-			ENGINE_WARNING("Failed to find DEVICE_LOCAL | LAZILY_ALLOCATED memory for Vulkan image. Falling back to DEVICE_LOCAL | HOST_VISIBLE memory.");
+			ProjectA::GraphicsAdapter::logger.warning("Failed to find DEVICE_LOCAL|LAZILY_ALLOCATED memory for image. Falling back to DEVICE_LOCAL|HOST_VISIBLE memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
 			memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 		}
 
 		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
-			ENGINE_WARNING("Failed to find DEVICE_LOCAL | HOST_VISIBLE memory for Vulkan image. Falling back to HOST_VISIBLE | HOST_COHERENT memory.");
+			ProjectA::GraphicsAdapter::logger.warning("Failed to find DEVICE_LOCAL|HOST_VISIBLE memory for image. Falling back to HOST_VISIBLE|HOST_COHERENT memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 			memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 		}
 
 		if ((memoryPropertyFlags == (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) && memoryTypeIndex == UNDEFINED_MEMORY_TYPE_INDEX) {
-			ENGINE_WARNING("Failed to find DEVICE_LOCAL | HOST_VISIBLE memory for Vulkan image. Falling back to DEVICE_LOCAL memory.");
+			ProjectA::GraphicsAdapter::logger.warning("Failed to find DEVICE_LOCAL|HOST_VISIBLE memory for image. Falling back to DEVICE_LOCAL memory.");
 
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 			memoryTypeIndex = MemoryAllocator::findSuitableMemoryType(memoryRequirements, memoryPropertyFlags);
 		}
 
-		DEBUG_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX);
+		ADAPTER_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX, "Undefined memory type index.");
 
-		memorySuballocation = MemoryAllocator::suballocateImage(device, object, memoryTypeIndex, memoryRequirements);
+		memorySuballocation = MemoryAllocator::suballocateImage(device.device, image, memoryTypeIndex, memoryRequirements);
 	}
 
-	VulkanImage::VulkanImage(VkDevice device, VkImage image, VkFormat format, Extent2D extent) :
-		Image(createSwapchainImageDescriptor(extent)),
-		ObjectWrapper(image),
+	VK::Image::Image(const VK::Device& device, VkImage image, VkFormat format, Extent2D extent) :
+		ProjectA::Image(createSwapchainImageDescriptor(extent)),
+		image(image),
 		device(device),
 		swapchainImage(true),
 		type(VK_IMAGE_TYPE_2D),
 		format(format)
 	{}
 
-	VulkanImage::~VulkanImage() {
+	VK::Image::~Image() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		if (swapchainImage) {
 			return;
 		}
 
-		vkDestroyImage(device, object, nullptr);
+		vkDestroyImage(device.device, image, nullptr);
 
-		MemoryAllocator::freeSuballocation(device, memorySuballocation.allocationIndex);
+		MemoryAllocator::freeSuballocation(device.device, memorySuballocation.allocationIndex);
 	}
 
-	ref<ImageView> VulkanImage::createViewInternal(const ImageViewDescriptor& descriptor, const Image* image) const {
+	ref<ImageView> VK::Image::createViewInternal(const ImageViewDescriptor& descriptor, const ProjectA::Image* image) const {
 		DEBUG_DESCRIPTOR_GUARD(descriptor, image);
 
-		return createRef<VulkanImageView>(descriptor, image, device);
+		return createRef<VK::ImageView>(descriptor, image, device);
 	}
 
-	ImageDescriptor VulkanImage::createSwapchainImageDescriptor(Extent2D extent) {
+	ImageDescriptor VK::Image::createSwapchainImageDescriptor(Extent2D extent) {
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.extent.width = extent.width;
 		imageDescriptor.extent.height = extent.height;

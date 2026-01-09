@@ -1,51 +1,51 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/Instance.hpp"
-#include "Engine/Adapter/Graphics/VK/PipelineLayout.hpp"
-#include "Engine/Adapter/Graphics/VK/RenderPass.hpp"
+#include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
 #include "Engine/Adapter/Graphics/VK/Surface.hpp"
-
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
-#include "Engine/API/Window/Window.hpp"
 
 namespace ProjectA {
-	class VulkanGraphicsAdapter final : public GraphicsAdapter {
+	class VK::GraphicsAdapter final : public ProjectA::GraphicsAdapter {
 		public:
-			explicit VulkanGraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window);
+			explicit GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window);
 
-			~VulkanGraphicsAdapter() final override;
+			~GraphicsAdapter() final override;
 
-			ref<Buffer> createBuffer(const BufferDescriptor& descriptor) const final override;
+			ref<ProjectA::Buffer> createBuffer(const BufferDescriptor& descriptor) const final override;
 
-			ref<ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const final override;
+			ref<ProjectA::ComputePipeline> createComputePipeline(const ComputePipelineDescriptor& descriptor) const final override;
 
-			ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const final override;
+			ref<ProjectA::DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const final override;
 
-			ref<Fence> createFence() const final override;
+			ref<ProjectA::Fence> createFence() const final override;
 
-			ref<Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor) const final override;
+			ref<ProjectA::Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor) const final override;
 
-			ref<Image> createImage(const ImageDescriptor& descriptor) const final override;
+			ref<ProjectA::Image> createImage(const ImageDescriptor& descriptor) const final override;
 
-			ref<PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const final override;
+			ref<ProjectA::PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const final override;
 
-			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const final override;
+			ref<ProjectA::RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const final override;
 
-			ref<RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const final override;
+			ref<ProjectA::RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const final override;
 
-			ref<Sampler> createSampler(const SamplerDescriptor& descriptor) const final override;
+			ref<ProjectA::Sampler> createSampler(const SamplerDescriptor& descriptor) const final override;
 
-			ref<Semaphore> createSemaphore() const final override;
+			ref<ProjectA::Semaphore> createSemaphore() const final override;
 
-			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const final override;
-			ref<ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const final override;
+			ref<ProjectA::ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const final override;
+			ref<ProjectA::ShaderModule> createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const final override;
 
-			ref<Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const final override;
+			ref<ProjectA::Swapchain> createSwapchain(const SwapchainDescriptor& descriptor) const final override;
 
-			ref<Device> getDevice() const final override;
+			ref<ProjectA::Device> getDevice() const final override;
 
-			ref<Surface> getSurface() const final override;
+			ref<ProjectA::Surface> getSurface() const final override;
 
 		private:
 			void* getProcedure(VkInstance instance, view<char8> procedureName) const;
@@ -56,9 +56,9 @@ namespace ProjectA {
 
 		private:
 			PlatformLibrary vulkan1Library;
-			ref<VulkanInstance> instance;
-			ref<VulkanSurface> surface;
-			ref<VulkanPhysicalDevice> physicalDevice;
-			ref<VulkanDevice> device;
+			ref<VK::Instance> instance;
+			ref<VK::Surface> surface;
+			ref<VK::PhysicalDevice> physicalDevice;
+			ref<VK::Device> device;
 	};
 }

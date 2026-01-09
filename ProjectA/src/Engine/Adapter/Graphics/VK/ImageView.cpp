@@ -1,25 +1,29 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/Image.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageFormat.hpp"
-#include "Engine/Adapter/Graphics/VK/ImageType.hpp"
 #include "Engine/Adapter/Graphics/VK/ImageView.hpp"
+#include "Engine/Adapter/Graphics/VK/ImageViewType.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	VulkanImageView::VulkanImageView(const ImageViewDescriptor& descriptor, const Image* image, VkDevice device) :
-		ImageView(descriptor, image),
+	VK::ImageView::ImageView(const ImageViewDescriptor& descriptor, const ProjectA::Image* image, const VK::Device& device) :
+		ProjectA::ImageView(descriptor, image),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const VulkanImage* vkImage = static_cast<const VulkanImage*>(image);
+		const VK::Image* vkImage = static_cast<const VK::Image*>(image);
 
 		VkImageViewCreateInfo imageViewCreateInfo{};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.pNext = nullptr;
 		imageViewCreateInfo.flags = 0;
-		imageViewCreateInfo.image = vkImage->object;
-		imageViewCreateInfo.viewType = getVkImageViewType(vkImage->type, image->getLayerCount());
+		imageViewCreateInfo.image = vkImage->image;
+		imageViewCreateInfo.viewType = getImageViewType(vkImage->type, image->getLayerCount());
 		imageViewCreateInfo.format = vkImage->format;
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -44,14 +48,14 @@ namespace ProjectA {
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 		imageViewCreateInfo.subresourceRange.layerCount = image->getLayerCount();
 
-		const VkResult result = vkCreateImageView(device, &imageViewCreateInfo, nullptr, &object);
+		const VkResult result = vkCreateImageView(device.device, &imageViewCreateInfo, nullptr, &imageView);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create image view ([]).", string_VkResult(result));
 	}
 
-	VulkanImageView::~VulkanImageView() {
+	VK::ImageView::~ImageView() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyImageView(device, object, nullptr);
+		vkDestroyImageView(device.device, imageView, nullptr);
 	}
 }

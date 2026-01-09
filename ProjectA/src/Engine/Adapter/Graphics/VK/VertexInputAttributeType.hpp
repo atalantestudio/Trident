@@ -1,9 +1,12 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/VertexInputAttributeType.hpp"
 
-namespace ProjectA {
-	VkFormat getVkFormat(VertexInputAttributeType vertexInputAttributeType) {
+namespace ProjectA::VK {
+	inline VkFormat getFormat(VertexInputAttributeType vertexInputAttributeType) {
 		static constexpr VkFormat VERTEX_INPUT_ATTRIBUTE_TYPES[] = {
 			VK_FORMAT_R8_SINT,
 			VK_FORMAT_R8_UINT,

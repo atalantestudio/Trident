@@ -1,11 +1,15 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderStage.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	VulkanShaderModule::VulkanShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code, VkDevice device) :
-		ShaderModule(descriptor),
+	VK::ShaderModule::ShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code, const VK::Device& device) :
+		ProjectA::ShaderModule(descriptor),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -17,21 +21,21 @@ namespace ProjectA {
 		shaderModuleCreateInfo.codeSize = code.count();
 		shaderModuleCreateInfo.pCode = pointer_cast<const uint32*>(&code[0]);
 
-		const VkResult result = vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, &object.module);
+		const VkResult result = vkCreateShaderModule(device.device, &shaderModuleCreateInfo, nullptr, &createInfo.module);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan shader module ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create shader module ([]).", string_VkResult(result));
 
-		object.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		object.pNext = nullptr;
-		object.flags = 0;
-		object.stage = getVkShaderStageFlagBits(descriptor.stage);
-		object.pName = &descriptor.entryPoint[0];
-		object.pSpecializationInfo = nullptr;
+		createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		createInfo.pNext = nullptr;
+		createInfo.flags = 0;
+		createInfo.stage = getShaderStageFlagBits(descriptor.stage);
+		createInfo.pName = &descriptor.entryPoint[0];
+		createInfo.pSpecializationInfo = nullptr;
 	}
 
-	VulkanShaderModule::~VulkanShaderModule() {
+	VK::ShaderModule::~ShaderModule() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyShaderModule(device, object.module, nullptr);
+		vkDestroyShaderModule(device.device, createInfo.module, nullptr);
 	}
 }

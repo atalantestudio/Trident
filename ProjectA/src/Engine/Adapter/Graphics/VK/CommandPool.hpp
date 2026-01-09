@@ -1,18 +1,21 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
-
-#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/CommandPool.hpp"
 
 namespace ProjectA {
-	class VulkanCommandPool final : public CommandPool, public ObjectWrapper<VkCommandPool> {
+	class VK::CommandPool final : public ProjectA::CommandPool {
 		public:
-			explicit VulkanCommandPool(VkDevice device, uint32 queueFamilyIndex);
+			explicit CommandPool(const VK::Device& device, uint32 queueFamilyIndex);
 
-			~VulkanCommandPool() final override;
+			~CommandPool() final override;
+
+		public:
+			VkCommandPool commandPool;
 
 		private:
-			const VkDevice device;
+			const VK::Device& device;
 	};
 }

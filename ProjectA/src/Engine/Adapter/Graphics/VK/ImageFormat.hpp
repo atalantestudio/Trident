@@ -1,9 +1,13 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/API/Rendering/ImageFormat.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
-namespace ProjectA {
-	static VkFormat getVkFormat(ImageFormat imageFormat) {
+namespace ProjectA::VK {
+	inline VkFormat getFormat(ImageFormat imageFormat) {
 		static constexpr VkFormat vkFormats[] = {
 			VK_FORMAT_R8_UNORM,
 			VK_FORMAT_R8G8B8_UNORM,
@@ -20,7 +24,7 @@ namespace ProjectA {
 		return vkFormats[static_cast<uint8>(imageFormat)];
 	}
 
-	static ImageFormat fromVkFormat(VkFormat format) {
+	inline ImageFormat fromFormat(VkFormat format) {
 		switch (format) {
 			case VK_FORMAT_R8_UNORM:
 				return ImageFormat::R8_UNORM;
@@ -42,14 +46,15 @@ namespace ProjectA {
 				return ImageFormat::D32_SFLOAT_S8_UINT;
 			case VK_FORMAT_D24_UNORM_S8_UINT:
 				return ImageFormat::D24_UNORM_S8_UINT;
-			default:
-				ENGINE_ASSERT(false, "Unhandled Vulkan format.");
+			default: {
+				ADAPTER_ASSERT(false, "Unhandled image format.");
 
 				return static_cast<ImageFormat>(0);
+			}
 		}
 	}
 
-	static bool isDepthFormat(VkFormat format) {
+	inline bool isDepthFormat(VkFormat format) {
 		return (
 			format == VK_FORMAT_D32_SFLOAT ||
 			format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
@@ -57,7 +62,7 @@ namespace ProjectA {
 		);
 	}
 
-	static bool isStencilFormat(VkFormat format) {
+	inline bool isStencilFormat(VkFormat format) {
 		return (
 			format == VK_FORMAT_S8_UINT ||
 			format == VK_FORMAT_D16_UNORM_S8_UINT ||

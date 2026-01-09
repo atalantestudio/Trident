@@ -1,14 +1,17 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/CommandBuffer.hpp"
 
 namespace ProjectA {
-	class VulkanCommandBuffer final : public CommandBuffer, public ObjectWrapper<const VkCommandBuffer> {
+	class VK::CommandBuffer final : public ProjectA::CommandBuffer {
 		public:
-			explicit VulkanCommandBuffer(VkCommandBuffer commandBuffer, VkPipelineStageFlags pipelineStageFlags, uint32 commandCount);
+			explicit CommandBuffer(VkCommandBuffer commandBuffer, VkPipelineStageFlags pipelineStageFlags, uint32 commandCount);
 
 		public:
+			VkCommandBuffer commandBuffer;
 			const VkPipelineStageFlags pipelineStageFlags;
 	};
 }

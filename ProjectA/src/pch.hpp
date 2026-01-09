@@ -1,4 +1,7 @@
-﻿#pragma once
+﻿// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#pragma once
 
 // TODO: Conditionally import per module.
 #include <array>

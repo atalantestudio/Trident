@@ -1,43 +1,40 @@
 #pragma once
 
-#include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
-#include "Engine/Adapter/Graphics/VK/Queue.hpp"
-#include "Engine/Adapter/Graphics/VK/Surface.hpp"
-
-#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/Device.hpp"
 
 namespace ProjectA {
-	class VulkanDevice final : public Device, public ObjectWrapper<VkDevice> {
+	class VK::Device final : public ProjectA::Device {
 		public:
-			explicit VulkanDevice(const VulkanPhysicalDevice& physicalDevice, const VulkanSurface& surface);
+			explicit Device(const VK::PhysicalDevice& physicalDevice, const VK::Surface& surface);
 
-			~VulkanDevice() final override;
+			~Device() final override;
 
-			AcquireNextImageStatus acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const final override;
+			AcquireNextImageStatus acquireNextImage(ref<ProjectA::Swapchain> swapchain, ref<ProjectA::Semaphore> semaphore, uint32& imageIndex) const final override;
 
-			sequence<ref<DescriptorSet>> allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) final override;
+			sequence<ref<ProjectA::DescriptorSet>> allocateDescriptorSets(const sequence<ref<ProjectA::DescriptorSetLayout>>& descriptorSetLayouts) final override;
 
-			ref<PhysicalDevice> getPhysicalDevice() const final override;
+			ref<ProjectA::PhysicalDevice> getPhysicalDevice() const final override;
 
-			ref<Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const final override;
+			ref<ProjectA::Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const final override;
 
-			void resetFence(ref<Fence> fence) const final override;
+			void resetFence(ref<ProjectA::Fence> fence) const final override;
 
 			void updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const final override;
 
-			void waitForFence(ref<Fence> fence) const final override;
+			void waitForFence(ref<ProjectA::Fence> fence) const final override;
 
 			void waitIdle() const final override;
 
 		private:
-			static const std::vector<const char8*> enabledExtensionNames;
+			static const sequence<const char8*> ENABLED_EXTENSION_NAMES;
+
+		public:
+			VkDevice device;
 
 		private:
-			const VulkanPhysicalDevice& physicalDevice;
-
+			const VK::PhysicalDevice& physicalDevice;
 			VkPhysicalDeviceMemoryProperties memoryProperties;
 			std::vector<VkDescriptorPool> descriptorPools;
-			std::array<ref<VulkanQueue>, 3> queues;
+			ref<VK::Queue> queues[3];
 	};
 }

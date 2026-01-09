@@ -1,16 +1,16 @@
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/Pipeline.hpp"
 
 namespace ProjectA {
-	class VulkanPipeline : public Pipeline, public ObjectWrapper<VkPipeline> {
+	class VK::Pipeline : public ProjectA::Pipeline {
 		public:
-			explicit VulkanPipeline(VkPipelineBindPoint bindPoint) :
+			explicit Pipeline(VkPipelineBindPoint bindPoint) :
 				bindPoint(bindPoint)
 			{}
 
 		public:
+			VkPipeline pipeline;
 			VkPipelineBindPoint bindPoint;
 	};
 }

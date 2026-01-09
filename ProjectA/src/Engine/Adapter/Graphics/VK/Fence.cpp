@@ -1,9 +1,13 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/Fence.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	VulkanFence::VulkanFence(VkDevice device, bool signaled) :
+	VK::Fence::Fence(const VK::Device& device, bool signaled) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -17,14 +21,14 @@ namespace ProjectA {
 			fenceCreateInfo.flags |= VK_FENCE_CREATE_SIGNALED_BIT;
 		}
 
-		const VkResult result = vkCreateFence(device, &fenceCreateInfo, nullptr, &object);
+		const VkResult result = vkCreateFence(device.device, &fenceCreateInfo, nullptr, &fence);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan fence ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create fence ([]).", string_VkResult(result));
 	}
 
-	VulkanFence::~VulkanFence() {
+	VK::Fence::~Fence() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyFence(device, object, nullptr);
+		vkDestroyFence(device.device, fence, nullptr);
 	}
 }

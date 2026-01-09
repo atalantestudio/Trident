@@ -1,23 +1,27 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/Adapter/Graphics/VK/Device.hpp"
 #include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
-
 #include "Engine/API/Rendering/Buffer.hpp"
 
 namespace ProjectA {
-	class VulkanBuffer final : public Buffer, public ObjectWrapper<VkBuffer> {
+	class VK::Buffer final : public ProjectA::Buffer {
 		public:
-			explicit VulkanBuffer(VkDevice device, const BufferDescriptor& descriptor);
+			explicit Buffer(const BufferDescriptor& descriptor, const VK::Device& device);
 
-			~VulkanBuffer() final override;
+			~Buffer() final override;
 
 			void unmap() const final override;
 
 			void* getMappedRange(uint64 offset, uint64 size) const final override;
 
+		public:
+			VkBuffer buffer;
+
 		private:
-			VkDevice device;
+			const VK::Device& device;
 			MemorySuballocation memorySuballocation;
 	};
 }

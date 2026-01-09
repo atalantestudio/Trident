@@ -1,20 +1,15 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-#include "Engine/API/ObjectWrapper.hpp"
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
 
 // #define DEBUG_ENUMERATE_DEVICE_EXTENSIONS
 
 namespace ProjectA {
-	class VulkanPhysicalDevice final : public PhysicalDevice, public ObjectWrapper<VkPhysicalDevice> {
-		public:
-			explicit VulkanPhysicalDevice(VkPhysicalDevice physicalDevice);
-
+	class VK::PhysicalDevice final : public ProjectA::PhysicalDevice {
 		private:
-			void setLimits();
-
-			void selectQueueFamilyIndices();
-
 			static void enumerateQueueFamilyProperties(const sequence<VkQueueFamilyProperties>& queueFamilies);
 
 			static uint32 calculateGraphicsQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties);
@@ -24,12 +19,19 @@ namespace ProjectA {
 			static uint32 calculateTransferQueueFamilyScore(const VkQueueFamilyProperties& queueFamilyProperties);
 
 		public:
-			std::vector<const char8*> enabledExtensionNames;
+			explicit PhysicalDevice(VkPhysicalDevice physicalDevice);
 
+		private:
+			void setLimits();
+
+			void selectQueueFamilyIndices();
+
+		public:
+			VkPhysicalDevice physicalDevice;
+			std::vector<const char8*> enabledExtensionNames;
 			uint32 graphicsQueueFamilyIndex;
 			uint32 computeQueueFamilyIndex;
 			uint32 transferQueueFamilyIndex;
-
 			VkPhysicalDeviceFeatures features;
 			VkPhysicalDeviceMemoryProperties memoryProperties;
 			VkPhysicalDeviceProperties properties;

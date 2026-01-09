@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/Buffer.hpp"
@@ -9,21 +12,24 @@
 #include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/VK/Image.hpp"
 #include "Engine/Adapter/Graphics/VK/MemoryAllocator.hpp"
+#include "Engine/Adapter/Graphics/VK/PipelineLayout.hpp"
+#include "Engine/Adapter/Graphics/VK/RenderPass.hpp"
 #include "Engine/Adapter/Graphics/VK/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/VK/Sampler.hpp"
 #include "Engine/Adapter/Graphics/VK/Semaphore.hpp"
 #include "Engine/Adapter/Graphics/VK/ShaderModule.hpp"
+#include "Engine/Adapter/Graphics/VK/Swapchain.hpp"
 
 namespace ProjectA {
-	VulkanGraphicsAdapter::VulkanGraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window) :
-		GraphicsAdapter(window),
+	VK::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window) :
+		ProjectA::GraphicsAdapter(window),
 		vulkan1Library(Platform::openLibrary("vulkan-1.dll"))
 	{
 		logger = ConsoleLogger(std::cout, LogLevel::ALL, "VULKAN");
 
 		loadBaseProcedures();
 
-		instance = createRef<VulkanInstance>(projectDescriptor);
+		instance = createRef<VK::Instance>(projectDescriptor);
 
 		loadInstanceProcedures();
 
@@ -31,98 +37,98 @@ namespace ProjectA {
 			instance->createDebugUtilsMessenger();
 		#endif
 
-		surface = createRef<VulkanSurface>(instance->object, window);
-		physicalDevice = createRef<VulkanPhysicalDevice>(instance->selectPhysicalDevice());
-		device = createRef<VulkanDevice>(*physicalDevice, *surface);
+		surface = createRef<VK::Surface>(window, *instance);
+		physicalDevice = createRef<VK::PhysicalDevice>(instance->selectPhysicalDevice());
+		device = createRef<VK::Device>(*physicalDevice, *surface);
 
-		surface->setPhysicalDevice(physicalDevice->object);
+		surface->setPhysicalDevice(*physicalDevice);
 		surface->checkPresentQueueFamilyIndex(physicalDevice->graphicsQueueFamilyIndex);
 
 		MemoryAllocator::initialize(*physicalDevice);
 	}
 
-	VulkanGraphicsAdapter::~VulkanGraphicsAdapter() {
+	VK::GraphicsAdapter::~GraphicsAdapter() {
 		MemoryAllocator::destroy();
 	}
 
-	ref<Buffer> VulkanGraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
-		return createRef<VulkanBuffer>(device->object, descriptor);
+	ref<Buffer> VK::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
+		return createRef<VK::Buffer>(descriptor, *device);
 	}
 
-	ref<ComputePipeline> VulkanGraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
-		return createRef<VulkanComputePipeline>(device->object, descriptor);
+	ref<ComputePipeline> VK::GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
+		return createRef<VK::ComputePipeline>(descriptor, *device);
 	}
 
-	ref<DescriptorSetLayout> VulkanGraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
-		return createRef<VulkanDescriptorSetLayout>(device->object, bindings);
+	ref<DescriptorSetLayout> VK::GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
+		return createRef<VK::DescriptorSetLayout>(bindings, *device);
 	}
 
-	ref<Fence> VulkanGraphicsAdapter::createFence() const {
-		return createRef<VulkanFence>(device->object, true);
+	ref<Fence> VK::GraphicsAdapter::createFence() const {
+		return createRef<VK::Fence>(*device, true);
 	}
 
-	ref<Framebuffer> VulkanGraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
-		return createRef<VulkanFramebuffer>(device->object, descriptor);
+	ref<Framebuffer> VK::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
+		return createRef<VK::Framebuffer>(descriptor, *device);
 	}
 
-	ref<Image> VulkanGraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
-		return createRef<VulkanImage>(device->object, descriptor);
+	ref<Image> VK::GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
+		return createRef<VK::Image>(descriptor, *device);
 	}
 
-	ref<PipelineLayout> VulkanGraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
-		return createRef<VulkanPipelineLayout>(device->object, descriptor);
+	ref<PipelineLayout> VK::GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
+		return createRef<VK::PipelineLayout>(descriptor, *device);
 	}
 
-	ref<RenderPass> VulkanGraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
-		return createRef<VulkanRenderPass>(*physicalDevice, *surface, *device, descriptor);
+	ref<RenderPass> VK::GraphicsAdapter::createRenderPass(const RenderPassDescriptor& descriptor) const {
+		return createRef<VK::RenderPass>(descriptor, *surface, *device);
 	}
 
-	ref<RenderPipeline> VulkanGraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
-		return createRef<VulkanRenderPipeline>(device->object, descriptor);
+	ref<RenderPipeline> VK::GraphicsAdapter::createRenderPipeline(const RenderPipelineDescriptor& descriptor) const {
+		return createRef<VK::RenderPipeline>(descriptor, *device);
 	}
 
-	ref<Sampler> VulkanGraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
-		return createRef<VulkanSampler>(device->object, descriptor);
+	ref<Sampler> VK::GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
+		return createRef<VK::Sampler>(descriptor, *device);
 	}
 
-	ref<Semaphore> VulkanGraphicsAdapter::createSemaphore() const {
-		return createRef<VulkanSemaphore>(device->object);
+	ref<Semaphore> VK::GraphicsAdapter::createSemaphore() const {
+		return createRef<VK::Semaphore>(*device);
 	}
 
-	ref<ShaderModule> VulkanGraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
+	ref<ShaderModule> VK::GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, ref<ShaderModuleAsset> asset) const {
 		// TODO: Add support for SPIR-V shader module assets.
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		return nullptr;
 	}
 
-	ref<ShaderModule> VulkanGraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
-		return createRef<VulkanShaderModule>(descriptor, code, device->object);
+	ref<ShaderModule> VK::GraphicsAdapter::createShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) const {
+		return createRef<VK::ShaderModule>(descriptor, code, *device);
 	}
 
-	ref<Swapchain> VulkanGraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return createRef<VulkanSwapchain>(*physicalDevice, *surface, *device, descriptor);
+	ref<Swapchain> VK::GraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
+		return createRef<VK::Swapchain>(descriptor, *surface, *device);
 	}
 
-	ref<Device> VulkanGraphicsAdapter::getDevice() const {
+	ref<Device> VK::GraphicsAdapter::getDevice() const {
 		return device;
 	}
 
-	ref<Surface> VulkanGraphicsAdapter::getSurface() const {
+	ref<Surface> VK::GraphicsAdapter::getSurface() const {
 		return surface;
 	}
 
-	void* VulkanGraphicsAdapter::getProcedure(VkInstance instance, view<char8> procedureName) const {
+	void* VK::GraphicsAdapter::getProcedure(VkInstance instance, view<char8> procedureName) const {
 		static const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = pointer_cast<PFN_vkGetInstanceProcAddr>(vulkan1Library.getProcedure("vkGetInstanceProcAddr"));
 
 		const PFN_vkVoidFunction procedure = vkGetInstanceProcAddr(instance, &procedureName[0]);
 
-		ENGINE_ASSERT(procedure != nullptr, "Cannot find address for procedure \"[]\".", procedureName);
+		ADAPTER_ASSERT(procedure != nullptr, "Cannot find address for procedure \"[]\".", procedureName);
 
 		return procedure;
 	}
 
-	void VulkanGraphicsAdapter::loadBaseProcedures() const {
+	void VK::GraphicsAdapter::loadBaseProcedures() const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(getProcedure(nullptr, #procedure))
@@ -133,10 +139,10 @@ namespace ProjectA {
 		#undef LOAD_PROCEDURE
 	}
 
-	void VulkanGraphicsAdapter::loadInstanceProcedures() const {
+	void VK::GraphicsAdapter::loadInstanceProcedures() const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(getProcedure(instance->object, #procedure))
+		#define LOAD_PROCEDURE(procedure) procedure = static_cast<decltype(procedure)>(getProcedure(instance->instance, #procedure))
 
 		LOAD_PROCEDURE(vkAllocateCommandBuffers);
 		LOAD_PROCEDURE(vkAllocateDescriptorSets);

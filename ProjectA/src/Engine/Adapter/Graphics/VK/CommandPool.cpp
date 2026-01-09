@@ -1,9 +1,14 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/CommandPool.hpp"
+#include "Engine/Adapter/Graphics/VK/Device.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	VulkanCommandPool::VulkanCommandPool(VkDevice device, uint32 queueFamilyIndex) :
+	VK::CommandPool::CommandPool(const VK::Device& device, uint32 queueFamilyIndex) :
 		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -14,14 +19,14 @@ namespace ProjectA {
 		commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndex;
 
-		const VkResult result = vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &object);
+		const VkResult result = vkCreateCommandPool(device.device, &commandPoolCreateInfo, nullptr, &commandPool);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan command pool ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create command pool ([]).", string_VkResult(result));
 	}
 
-	VulkanCommandPool::~VulkanCommandPool() {
+	VK::CommandPool::~CommandPool() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		vkDestroyCommandPool(device, object, nullptr);
+		vkDestroyCommandPool(device.device, commandPool, nullptr);
 	}
 }

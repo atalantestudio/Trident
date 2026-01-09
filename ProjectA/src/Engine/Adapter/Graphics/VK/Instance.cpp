@@ -1,19 +1,76 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/VK/Instance.hpp"
-
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
+	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
+		void VK::Instance::checkInstanceLayers() {
+			VkResult result;
+			uint32 layerPropertyCount;
+
+			result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
+
+			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of instance layer properties ([]).", string_VkResult(result));
+
+			std::vector<VkLayerProperties> layerProperties(layerPropertyCount);
+
+			result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
+
+			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate instance layer properties ([]).", string_VkResult(result));
+
+			for (const VkLayerProperties& layerProperties : layerProperties) {
+				ProjectA::GraphicsAdapter::logger.info("- []", layerProperties.layerName);
+			}
+		}
+	#endif
+
+	#ifdef DEBUG_ENABLE_MESSENGER
+		VkBool32 VK::Instance::debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+			// "Unloading layer library..." messages happen after the logger's destruction.
+			if (strncmp(pCallbackData->pMessage, "Unloading layer library", 24) != 0) {
+				return VK_FALSE;
+			}
+
+			switch (messageSeverity) {
+				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: {
+					ProjectA::GraphicsAdapter::logger.trace(__FILE__, __LINE__, pCallbackData->pMessage);
+
+					break;
+				}
+				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT: {
+					ProjectA::GraphicsAdapter::logger.info(pCallbackData->pMessage);
+
+					break;
+				}
+				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT: {
+					ProjectA::GraphicsAdapter::logger.warning(pCallbackData->pMessage);
+
+					break;
+				}
+				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT: {
+					ProjectA::GraphicsAdapter::logger.error(__func__, __FILE__, __LINE__, pCallbackData->pMessage);
+
+					break;
+				}
+			}
+
+			return VK_FALSE;
+		}
+	#endif
+
 	// TODO: Client-side validation layer request.
 	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-		const std::vector<const char8*> VulkanInstance::enabledLayerNames = {
+		const sequence<const char8*> VK::Instance::ENABLED_LAYER_NAMES = {
 			"VK_LAYER_KHRONOS_validation",
 		};
 	#endif
 
 	// NOTE: ~25Mb in Release mode.
-	VulkanInstance::VulkanInstance(const ProjectDescriptor& projectDescriptor)
+	VK::Instance::Instance(const ProjectDescriptor& projectDescriptor)
 		#ifdef DEBUG_ENABLE_MESSENGER
 			: debugUtilsMessengerCreateInfo{}
 		#endif
@@ -66,8 +123,8 @@ namespace ProjectA {
 		instanceCreateInfo.pApplicationInfo = &applicationInfo;
 
 		#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-			instanceCreateInfo.enabledLayerCount = static_cast<uint32>(enabledLayerNames.size());
-			instanceCreateInfo.ppEnabledLayerNames = enabledLayerNames.data();
+			instanceCreateInfo.enabledLayerCount = static_cast<uint32>(ENABLED_LAYER_NAMES.count());
+			instanceCreateInfo.ppEnabledLayerNames = &ENABLED_LAYER_NAMES[0];
 		#else
 			instanceCreateInfo.enabledLayerCount = 0;
 			instanceCreateInfo.ppEnabledLayerNames = nullptr;
@@ -87,66 +144,45 @@ namespace ProjectA {
 
 		VkResult result;
 
-		result = vkCreateInstance(&instanceCreateInfo, nullptr, &object);
+		result = vkCreateInstance(&instanceCreateInfo, nullptr, &instance);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan instance ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create instance ([]).", string_VkResult(result));
 	}
 
-	#ifdef DEBUG_ENABLE_MESSENGER
-		void VulkanInstance::createDebugUtilsMessenger() {
-			const VkResult result = vkCreateDebugUtilsMessengerEXT(object, &debugUtilsMessengerCreateInfo, nullptr, &debugUtilsMessenger);
-
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to create Vulkan debug messenger.");
-		}
-	#endif
-
-	VulkanInstance::~VulkanInstance() {
+	VK::Instance::~Instance() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		#ifdef DEBUG_ENABLE_MESSENGER
-			vkDestroyDebugUtilsMessengerEXT(object, debugUtilsMessenger, nullptr);
+			vkDestroyDebugUtilsMessengerEXT(instance, debugUtilsMessenger, nullptr);
 		#endif
 
-		vkDestroyInstance(object, nullptr);
+		vkDestroyInstance(instance, nullptr);
 	}
 
-	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
-		void VulkanInstance::checkInstanceLayers() {
-			uint32 layerPropertyCount;
-			VkResult result;
+	#ifdef DEBUG_ENABLE_MESSENGER
+		void VK::Instance::createDebugUtilsMessenger() {
+			const VkResult result = vkCreateDebugUtilsMessengerEXT(instance, &debugUtilsMessengerCreateInfo, nullptr, &debugUtilsMessenger);
 
-			result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, nullptr);
-
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan instance layer properties ([]).", string_VkResult(result));
-
-			std::vector<VkLayerProperties> layerProperties(layerPropertyCount);
-
-			result = vkEnumerateInstanceLayerProperties(&layerPropertyCount, layerProperties.data());
-
-			ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan instance layer properties ([]).", string_VkResult(result));
-
-			/* for (uint32 layerPropertyIndex = 0; layerPropertyIndex < layerPropertyCount; layerPropertyIndex += 1) {
-				ENGINE_INFO("- []", layerProperties[layerPropertyIndex].layerName);
-			} */
+			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create debug messenger ([]).", string_VkResult(result));
 		}
 	#endif
 
-	VkPhysicalDevice VulkanInstance::selectPhysicalDevice() const {
+	VkPhysicalDevice VK::Instance::selectPhysicalDevice() const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		uint32 physicalDeviceCount;
 		VkResult result;
 
-		result = vkEnumeratePhysicalDevices(object, &physicalDeviceCount, nullptr);
+		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to find the number of Vulkan physical devices ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to find the number of physical devices ([]).", string_VkResult(result));
 		DEBUG_ASSERT(physicalDeviceCount > 0);
 
 		sequence<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
 
-		result = vkEnumeratePhysicalDevices(object, &physicalDeviceCount, &physicalDevices[0]);
+		result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, &physicalDevices[0]);
 
-		ENGINE_ASSERT(result == VK_SUCCESS, "Failed to enumerate Vulkan physical devices ([]).", string_VkResult(result));
+		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate physical devices ([]).", string_VkResult(result));
 
 		VkPhysicalDeviceProperties physicalDeviceProperties;
 		uint32 maxPhysicalDeviceScore = 0;
@@ -157,7 +193,7 @@ namespace ProjectA {
 		#endif
 
 		#ifdef DEBUG_ENUMERATE_PHYSICAL_DEVICES
-			ENGINE_INFO("Physical devices:");
+			ProjectA::GraphicsAdapter::logger.info("Available physical devices:");
 		#endif
 
 		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count(); physicalDeviceIndex += 1) {
@@ -196,16 +232,16 @@ namespace ProjectA {
 						break;
 				}
 
-				ENGINE_INFO("- [] ([])", physicalDeviceProperties.deviceName, physicalDeviceType);
+				ProjectA::GraphicsAdapter::logger.info("- [] ([])", physicalDeviceProperties.deviceName, physicalDeviceType);
 			#endif
 		}
 
-		ENGINE_ASSERT(maxPhysicalDeviceScore > 0, "Could not select a suitable physical device.");
+		ADAPTER_ASSERT(maxPhysicalDeviceScore > 0, "Could not select a suitable physical device.");
 
 		return physicalDevices[bestPhysicalDeviceIndex];
 	}
 
-	uint32 VulkanInstance::calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties) const {
+	uint32 VK::Instance::calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties) const {
 		#if PREFERRED_GPU_TYPE == GPU_TYPE_DISCRETE
 			if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
 				return 1;
@@ -220,38 +256,4 @@ namespace ProjectA {
 
 		return 0;
 	}
-
-	#ifdef DEBUG_ENABLE_MESSENGER
-		VkBool32 VulkanInstance::debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
-			// TODO: Don't proceed if the logger has already been freed.
-			if (strncmp(pCallbackData->pMessage, "Unloading layer library", 24) != 0) {
-				return VK_FALSE;
-			}
-
-			switch (messageSeverity) {
-				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: {
-					GraphicsAdapter::logger.trace(__FILE__, __LINE__, pCallbackData->pMessage);
-
-					break;
-				}
-				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT: {
-					GraphicsAdapter::logger.info(pCallbackData->pMessage);
-
-					break;
-				}
-				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT: {
-					GraphicsAdapter::logger.warning(pCallbackData->pMessage);
-
-					break;
-				}
-				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT: {
-					GraphicsAdapter::logger.error(__func__, __FILE__, __LINE__, pCallbackData->pMessage);
-
-					break;
-				}
-			}
-
-			return VK_FALSE;
-		}
-	#endif
 }
