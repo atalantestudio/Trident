@@ -1,4 +1,7 @@
-﻿#include "pch.hpp"
+﻿// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#include "pch.hpp"
 
 #include "Engine/Adapter/Window/Win32/base.hpp"
 
