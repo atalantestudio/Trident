@@ -70,10 +70,11 @@ namespace ProjectA {
 	#endif
 
 	// NOTE: ~25Mb in Release mode.
-	VK::Instance::Instance(const ProjectDescriptor& projectDescriptor)
+	VK::Instance::Instance(const ProjectDescriptor& projectDescriptor, const ApplicationProperties& properties) :
 		#ifdef DEBUG_ENABLE_MESSENGER
-			: debugUtilsMessengerCreateInfo{}
+			debugUtilsMessengerCreateInfo{},
 		#endif
+		preferIntegratedGpu(properties.PreferIntegratedGPU)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -242,17 +243,13 @@ namespace ProjectA {
 	}
 
 	uint32 VK::Instance::calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties) const {
-		#if PREFERRED_GPU_TYPE == GPU_TYPE_DISCRETE
-			if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
-				return 1;
-			}
-		#endif
+		if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+			return 1 + !preferIntegratedGpu;
+		}
 
-		#if PREFERRED_GPU_TYPE == GPU_TYPE_INTEGRATED
-			if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
-				return 1;
-			}
-		#endif
+		if (physicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
+			return 1 + preferIntegratedGpu;
+		}
 
 		return 0;
 	}

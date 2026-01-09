@@ -30,10 +30,8 @@ namespace ProjectA {
 		return graphicsApi;
 	}
 
-	void Renderer::initialize(const ProjectDescriptor& projectDescriptor, const Window& window, GraphicsAPI graphicsApi, bool vSync) {
-		Renderer::graphicsApi = graphicsApi;
-
-		switch (Renderer::graphicsApi) {
+	void Renderer::initialize(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) {
+		switch (properties.GraphicsAPI) {
 			case GraphicsAPI::CPU: {
 				ENGINE_ERROR_UNSUPPORTED();
 
@@ -43,7 +41,7 @@ namespace ProjectA {
 				case GraphicsAPI::DX12: {
 					ENGINE_INFO("Using DirectX 12 graphics adapter.");
 
-					adapter = createScope<DX12::GraphicsAdapter>(projectDescriptor, window);
+					adapter = createScope<DX12::GraphicsAdapter>(projectDescriptor, window, properties);
 
 					break;
 				}
@@ -52,7 +50,7 @@ namespace ProjectA {
 				case GraphicsAPI::GL: {
 					ENGINE_INFO("Using OpenGL [] graphics adapter.", OPENGL_VERSION);
 
-					adapter = createScope<GL::GraphicsAdapter>(projectDescriptor, window);
+					adapter = createScope<GL::GraphicsAdapter>(projectDescriptor, window, properties);
 
 					break;
 				}
@@ -61,7 +59,7 @@ namespace ProjectA {
 				case GraphicsAPI::VK: {
 					ENGINE_INFO("Using Vulkan graphics adapter.");
 
-					adapter = createScope<VK::GraphicsAdapter>(projectDescriptor, window);
+					adapter = createScope<VK::GraphicsAdapter>(projectDescriptor, window, properties);
 
 					break;
 				}
@@ -70,10 +68,12 @@ namespace ProjectA {
 
 		DEBUG_ASSERT(adapter != nullptr);
 
+		graphicsApi = properties.GraphicsAPI;
+
 		SwapchainDescriptor swapchainDescriptor{};
 		swapchainDescriptor.extent.width = window.getSize()[0];
 		swapchainDescriptor.extent.height = window.getSize()[1];
-		swapchainDescriptor.vSync = vSync;
+		swapchainDescriptor.vSync = properties.VerticalSync;
 
 		swapchain = adapter->createSwapchain(swapchainDescriptor);
 

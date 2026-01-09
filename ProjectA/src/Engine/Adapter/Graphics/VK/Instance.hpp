@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Rendering/Instance.hpp"
+#include "Engine/Application/ApplicationProperties.hpp"
 #include "Engine/Application/ProjectDescriptor.hpp"
 
 #ifdef BUILD_MODE_DEBUG
@@ -22,7 +23,7 @@ namespace ProjectA {
 			#endif
 
 		public:
-			explicit Instance(const ProjectDescriptor& projectDescriptor);
+			explicit Instance(const ProjectDescriptor& projectDescriptor, const ApplicationProperties& properties);
 
 			~Instance() final override;
 
@@ -50,5 +51,6 @@ namespace ProjectA {
 			#endif
 
 			std::vector<const char8*> enabledExtensionNames;
+			bool preferIntegratedGpu;
 	};
 }

@@ -12,7 +12,7 @@
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 
 namespace ProjectA {
-	DX12::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window) :
+	DX12::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) :
 		ProjectA::GraphicsAdapter(window)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);

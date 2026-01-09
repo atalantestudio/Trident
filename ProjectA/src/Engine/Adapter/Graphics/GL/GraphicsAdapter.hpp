@@ -8,6 +8,7 @@
 #include "Engine/Adapter/Graphics/GL/Surface.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/API/Window/Window.hpp"
+#include "Engine/Application/ApplicationProperties.hpp"
 
 namespace ProjectA {
 	class GL::GraphicsAdapter final : public ProjectA::GraphicsAdapter {
@@ -15,7 +16,7 @@ namespace ProjectA {
 			static constexpr GLenum defaultFramebufferDrawBuffer = GL_FRONT_LEFT;
 
 		public:
-			explicit GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window);
+			explicit GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties);
 
 			ref<ProjectA::Buffer> createBuffer(const BufferDescriptor& descriptor) const final override;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 extern "C" {
-	#if PREFERRED_GPU_TYPE == GPU_TYPE_DISCRETE
+	#ifdef GL_PREFER_INTEGRATED_GPU
 		// NOTE: AmdPowerXpressRequestHighPerformance seems to be recognized even if no AMD card is available.
 		__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 

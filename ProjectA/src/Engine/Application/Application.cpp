@@ -69,13 +69,9 @@ namespace ProjectA {
 			// If the property file cannot be found, create a new one with default values.
 			Writer propertyFileWriter = Filesystem::openWriter(propertyFilePath);
 
-			const std::string defaultFileData = PropertyFile::getDefaultFileData();
+			const view<char8> defaultFileData = PropertyFile::getDefaultFileData();
 
-			sequence<uint8> data(defaultFileData.size());
-
-			std::copy(defaultFileData.begin(), defaultFileData.end(), &data[0]);
-
-			propertyFileWriter.write(&data[0], data.count());
+			propertyFileWriter.write(pointer_cast<const uint8*>(&defaultFileData[0]), defaultFileData.count());
 
 			ENGINE_INFO("Created new property file with default values.");
 		}
@@ -106,7 +102,7 @@ namespace ProjectA {
 
 		window = new Window(windowDescriptor);
 
-		Renderer::initialize(projectDescriptor, *window, properties->GraphicsAPI, properties->VSync);
+		Renderer::initialize(projectDescriptor, *window, *properties);
 
 		if (projectType == ProjectType::MAIN) {
 			ENGINE_INFO("Loading assets.");
@@ -326,7 +322,7 @@ namespace ProjectA {
 		SwapchainDescriptor swapchainDescriptor;
 		swapchainDescriptor.extent.width = event.getWidth();
 		swapchainDescriptor.extent.height = event.getHeight();
-		swapchainDescriptor.vSync = properties->VSync;
+		swapchainDescriptor.vSync = properties->VerticalSync;
 
 		Renderer::getSwapchain()->update(swapchainDescriptor);
 

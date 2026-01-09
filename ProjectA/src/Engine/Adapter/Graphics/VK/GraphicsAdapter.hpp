@@ -8,11 +8,12 @@
 #include "Engine/Adapter/Graphics/VK/PhysicalDevice.hpp"
 #include "Engine/Adapter/Graphics/VK/Surface.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/Application/ApplicationProperties.hpp"
 
 namespace ProjectA {
 	class VK::GraphicsAdapter final : public ProjectA::GraphicsAdapter {
 		public:
-			explicit GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window);
+			explicit GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties);
 
 			~GraphicsAdapter() final override;
 

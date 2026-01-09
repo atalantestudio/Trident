@@ -6,13 +6,13 @@
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
 #include "Engine/Adapter/Graphics/DX12/Surface.hpp"
-
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/Application/ApplicationProperties.hpp"
 
 namespace ProjectA {
 	class DX12::GraphicsAdapter final : public ProjectA::GraphicsAdapter {
 		public:
-			explicit GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window);
+			explicit GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties);
 
 			ref<ProjectA::Buffer> createBuffer(const BufferDescriptor& descriptor) const final override;
 

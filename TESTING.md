@@ -4,7 +4,7 @@ All of the following criteria must be regularly tested:
 
 - Desktop and laptop
 - All build configurations
-- All PREFERRED_GPU_TYPE values
+- All GPU types (discrete and integrated)
 - OpenGL graphics adapter
 	- All OPENGL_VERSION values
 	- All GL_SOURCE_FROM_SPIRV values

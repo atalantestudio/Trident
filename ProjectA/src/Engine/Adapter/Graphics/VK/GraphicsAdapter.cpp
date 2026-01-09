@@ -21,7 +21,7 @@
 #include "Engine/Adapter/Graphics/VK/Swapchain.hpp"
 
 namespace ProjectA {
-	VK::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window) :
+	VK::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) :
 		ProjectA::GraphicsAdapter(window),
 		vulkan1Library(Platform::openLibrary("vulkan-1.dll"))
 	{
@@ -29,7 +29,7 @@ namespace ProjectA {
 
 		loadBaseProcedures();
 
-		instance = createRef<VK::Instance>(projectDescriptor);
+		instance = createRef<VK::Instance>(projectDescriptor, properties);
 
 		loadInstanceProcedures();
 

@@ -16,12 +16,16 @@
 #include "Engine/Adapter/Graphics/GL/Swapchain.hpp"
 
 namespace ProjectA {
-	GL::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window) :
+	GL::GraphicsAdapter::GraphicsAdapter(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties) :
 		ProjectA::GraphicsAdapter(window)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		logger = ConsoleLogger(std::cout, LogLevel::ALL, "OPENGL");
+
+		if (properties.PreferIntegratedGPU) {
+			logger.warning("GPU selection can only be done at compile-time. Please enable the GL_PREFER_INTEGRATED_GPU macro instead.");
+		}
 
 		instance = createRef<GL::Instance>(window);
 		instance->makeCurrent();

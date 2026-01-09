@@ -3,10 +3,6 @@
 #include "Engine/config_defines.hpp"
 
 namespace ProjectA {
-	// The physical device preferred by the application.
-	// There is no guarantee that it will be selected at runtime.
-	#define PREFERRED_GPU_TYPE GPU_TYPE_DISCRETE
-
 	// TODO: Implement setting.
 	// Prioritize selection of CPU graphics adapters.
 	// #define PREFER_SOFTWARE_ADAPTER
@@ -22,6 +18,12 @@ namespace ProjectA {
 
 	// Toggle OpenGL graphics adapter.
 	#define ENABLE_GL_ADAPTER
+
+	// Whether to prioritize integrated GPUs over discrete GPUs.
+	// This does not guarantee that an integrated GPU will be selected at runtime.
+	// 
+	// NOTE: Use this instead of the PreferIntegratedGPU project property. GPU selection for a GL context can only be done at compile-time.
+	// #define GL_PREFER_INTEGRATED_GPU
 
 	// If enabled, OpenGL shaders will be sourced from SPIR-V binaries.
 	// If disabled, they will be sourced from GLSL strings.

@@ -13,7 +13,7 @@ namespace ProjectA {
 		public:
 			static GraphicsAPI getGraphicsApi();
 
-			static void initialize(const ProjectDescriptor& projectDescriptor, const Window& window, GraphicsAPI graphicsAPI, bool vSync);
+			static void initialize(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties);
 
 		public:
 			virtual void build() = 0;

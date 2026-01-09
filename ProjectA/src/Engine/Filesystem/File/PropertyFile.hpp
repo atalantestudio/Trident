@@ -5,12 +5,13 @@
 namespace ProjectA {
 	class PropertyFile final {
 		public:
-			static std::string getDefaultFileData() {
+			static view<char8> getDefaultFileData() {
 				return (
-					"GraphicsAPI: 2\n"
+					"GraphicsAPI: Vulkan\n"
+					"PreferIntegratedGPU: 0\n"
 					"WindowWidth: 1280\n"
 					"WindowHeight: 720\n"
-					"VSync: true"
+					"VerticalSync: 1"
 				);
 			}
 
@@ -28,18 +29,26 @@ namespace ProjectA {
 			}
 
 			template<>
-			static bool parseValueString(view<char8> valueString, view<char8> propertyName) {
-				if (valueString == "true") {
-					return true;
+			static GraphicsAPI parseValueString(view<char8> valueString, view<char8> propertyName) {
+				if (valueString == "CPU") {
+					return GraphicsAPI::CPU;
 				}
 
-				if (valueString == "false") {
-					return false;
+				if (valueString == "DirectX12") {
+					return GraphicsAPI::DX12;
 				}
 
-				ENGINE_ERROR("Invalid value \"[]\" for property \"[]\".", valueString, propertyName);
+				if (valueString == "OpenGL") {
+					return GraphicsAPI::GL;
+				}
 
-				return false;
+				if (valueString == "Vulkan") {
+					return GraphicsAPI::VK;
+				}
+
+				ENGINE_ASSERT(false, "Invalid value \"[]\" for property \"[]\".", valueString, propertyName);
+
+				return static_cast<GraphicsAPI>(0);
 			}
 
 		public:
@@ -57,9 +66,10 @@ namespace ProjectA {
 
 			void readProperties(ApplicationProperties* properties) {
 				properties->GraphicsAPI = getProperty<GraphicsAPI>("GraphicsAPI");
+				properties->PreferIntegratedGPU = getProperty<bool>("PreferIntegratedGPU");
 				properties->WindowWidth = getProperty<uint32>("WindowWidth");
 				properties->WindowHeight = getProperty<uint32>("WindowHeight");
-				properties->VSync = getProperty<bool>("VSync");
+				properties->VerticalSync = getProperty<bool>("VerticalSync");
 			}
 
 		private:
@@ -87,7 +97,7 @@ namespace ProjectA {
 					return parseValueString<T>(trimmedValue, propertyName);
 				}
 
-				ENGINE_ERROR("Could not find the value for \"[]\" in the property file.", propertyName);
+				ENGINE_ASSERT(false, "Could not find the value for \"[]\" in the property file.", propertyName);
 
 				return static_cast<T>(-1);
 			}
