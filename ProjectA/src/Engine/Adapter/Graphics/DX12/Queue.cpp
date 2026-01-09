@@ -7,7 +7,6 @@
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/DX12/Queue.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
-
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {

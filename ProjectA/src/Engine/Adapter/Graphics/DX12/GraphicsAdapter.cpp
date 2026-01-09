@@ -19,9 +19,10 @@ namespace ProjectA {
 
 		logger = ConsoleLogger(std::cout, LogLevel::ALL, "DIRECTX 12");
 
-		instance = createRef<DX12::Instance>();
+		instance = createRef<DX12::Instance>(properties);
 		surface = createRef<DX12::Surface>(window);
-		device = createRef<DX12::Device>(*instance);
+		physicalDevice = createRef<DX12::PhysicalDevice>(*instance);
+		device = createRef<DX12::Device>(*instance, *physicalDevice);
 	}
 
 	ref<Buffer> DX12::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {

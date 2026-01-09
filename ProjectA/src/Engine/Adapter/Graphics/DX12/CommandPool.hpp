@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
-
 #include "Engine/API/Rendering/CommandPool.hpp"
 
 namespace ProjectA {

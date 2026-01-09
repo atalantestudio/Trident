@@ -5,7 +5,6 @@
 
 #include "Engine/Adapter/Graphics/DX12/CommandPool.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
-
 #include "Engine/API/Rendering/CommandEncoder.hpp"
 
 namespace ProjectA {

@@ -21,6 +21,7 @@ namespace ProjectA::DX12 {
 	class GraphicsAdapter;
 	class Image;
 	class Instance;
+	class PhysicalDevice;
 	class PipelineLayout;
 	class Queue;
 	class RenderPipeline;

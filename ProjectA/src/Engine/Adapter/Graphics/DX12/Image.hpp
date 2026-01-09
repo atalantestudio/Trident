@@ -5,7 +5,6 @@
 
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
-
 #include "Engine/API/Rendering/Image.hpp"
 
 namespace ProjectA {

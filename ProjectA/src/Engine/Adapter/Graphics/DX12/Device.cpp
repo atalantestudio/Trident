@@ -6,17 +6,18 @@
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Queue.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
-
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	DX12::Device::Device(const DX12::Instance& instance) {
+	DX12::Device::Device(const DX12::Instance& instance, const DX12::PhysicalDevice& physicalDevice) :
+		physicalDevice(physicalDevice)
+	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		HRESULT result = -1;
 
 		#ifndef PREFER_SOFTWARE_ADAPTER
-			result = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
+			result = D3D12CreateDevice(physicalDevice.adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
 		#endif
 
 		if (FAILED(result)) {
@@ -63,9 +64,7 @@ namespace ProjectA {
 	}
 
 	ref<PhysicalDevice> DX12::Device::getPhysicalDevice() const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
+		return createRef<DX12::PhysicalDevice>(physicalDevice);
 	}
 
 	ref<ProjectA::Queue> DX12::Device::getQueue(QueueFamilyCapability queueFamilyCapability) const {

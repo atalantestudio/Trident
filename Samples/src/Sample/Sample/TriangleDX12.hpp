@@ -105,8 +105,8 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "fragment";
 
-				const ref<ShaderModule> vertexShaderModule = loadHlslShaderModule(SHADER_CODE, vertexShaderModuleDescriptor);
-				const ref<ShaderModule> fragmentShaderModule = loadHlslShaderModule(SHADER_CODE, fragmentShaderModuleDescriptor);
+				const ref<ShaderModule> vertexShaderModule = loadHlslShaderModule(vertexShaderModuleDescriptor, SHADER_CODE);
+				const ref<ShaderModule> fragmentShaderModule = loadHlslShaderModule(fragmentShaderModuleDescriptor, SHADER_CODE);
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;

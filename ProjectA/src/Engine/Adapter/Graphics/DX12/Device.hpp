@@ -5,13 +5,13 @@
 
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
-
+#include "Engine/Adapter/Graphics/DX12/PhysicalDevice.hpp"
 #include "Engine/API/Rendering/Device.hpp"
 
 namespace ProjectA {
 	class DX12::Device final : public ProjectA::Device {
 		public:
-			explicit Device(const DX12::Instance& instance);
+			explicit Device(const DX12::Instance& instance, const DX12::PhysicalDevice& physicalDevice);
 
 			~Device() final override;
 
@@ -19,7 +19,7 @@ namespace ProjectA {
 
 			sequence<ref<DescriptorSet>> allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) final override;
 
-			ref<PhysicalDevice> getPhysicalDevice() const final override;
+			ref<ProjectA::PhysicalDevice> getPhysicalDevice() const final override;
 
 			ref<ProjectA::Queue> getQueue(QueueFamilyCapability queueFamilyCapability) const final override;
 
@@ -37,5 +37,6 @@ namespace ProjectA {
 		private:
 			ref<ProjectA::Queue> queues[3];
 			HANDLE fenceEvent;
+			const DX12::PhysicalDevice& physicalDevice;
 	};
 }

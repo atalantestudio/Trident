@@ -4,13 +4,24 @@
 #pragma once
 
 #include "Engine/API/Rendering/Instance.hpp"
+#include "Engine/Application/ApplicationProperties.hpp"
 
 namespace ProjectA {
 	class DX12::Instance final : public ProjectA::Instance {
 		public:
-			explicit Instance();
+			explicit Instance(const ApplicationProperties& properties);
+
+			IDXGIAdapter* selectAdapter() const;
+
+		private:
+			bool isIntegratedAdapter(const DXGI_ADAPTER_DESC& adapterDescriptor) const;
+
+			uint32 calculateAdapterScore(const DXGI_ADAPTER_DESC& adapterDescriptor) const;
 
 		public:
 			ComPtr<IDXGIFactory4> factory;
+
+		private:
+			bool preferIntegratedGpu;
 	};
 }

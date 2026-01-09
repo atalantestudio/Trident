@@ -4,7 +4,6 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
-
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {

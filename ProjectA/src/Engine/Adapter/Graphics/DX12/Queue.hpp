@@ -6,7 +6,6 @@
 #include "Engine/Adapter/Graphics/DX12/CommandPool.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
-
 #include "Engine/API/Rendering/Queue.hpp"
 
 namespace ProjectA {

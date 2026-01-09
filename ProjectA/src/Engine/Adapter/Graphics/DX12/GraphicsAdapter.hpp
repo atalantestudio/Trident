@@ -48,6 +48,7 @@ namespace ProjectA {
 		private:
 			ref<DX12::Instance> instance;
 			ref<DX12::Surface> surface;
+			ref<DX12::PhysicalDevice> physicalDevice;
 			ref<DX12::Device> device;
 	};
 }
