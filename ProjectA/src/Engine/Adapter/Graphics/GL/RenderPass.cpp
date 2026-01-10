@@ -42,5 +42,13 @@ namespace ProjectA {
 		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachmentCount);
 
 		ADAPTER_ASSERT(totalColorAttachmentCount < static_cast<uint32>(maxColorAttachmentCount), "A render pass cannot contain more than [] color attachments.", maxColorAttachmentCount);
+
+		for (const ref<Subpass> subpass : descriptor.subpasses) {
+			if (subpass->getResolveAttachmentReferenceCount() > 0) {
+				multisample = true;
+
+				break;
+			}
+		}
 	}
 }

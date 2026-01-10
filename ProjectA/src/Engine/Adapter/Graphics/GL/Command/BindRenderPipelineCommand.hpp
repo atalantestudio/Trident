@@ -48,19 +48,24 @@ namespace ProjectA {
 					glLineWidth(renderPipeline->lineWidth);
 				}
 
-				if (renderPipeline->minSampleShading != 0.0f) {
+				if (renderPipeline->multisample) {
 					glEnable(GL_MULTISAMPLE);
-					glEnable(GL_SAMPLE_SHADING);
 
-					#if OPENGL_VERSION >= OPENGL_VERSION_4_0
-						glMinSampleShading(renderPipeline->minSampleShading);
-					#else
-						ENGINE_ERROR_UNSUPPORTED();
-					#endif
+					if (renderPipeline->minSampleShading != 0.0f) {
+						glEnable(GL_SAMPLE_SHADING);
+
+						#if OPENGL_VERSION >= OPENGL_VERSION_4_0
+							glMinSampleShading(renderPipeline->minSampleShading);
+						#else
+							ENGINE_ERROR_UNSUPPORTED();
+						#endif
+					}
+					else {
+						glDisable(GL_SAMPLE_SHADING);
+					}
 				}
 				else {
 					glDisable(GL_MULTISAMPLE);
-					glDisable(GL_SAMPLE_SHADING);
 				}
 
 				for (uint32 drawBufferIndex = 0; drawBufferIndex < renderPipeline->drawBuffers.count(); drawBufferIndex += 1) {

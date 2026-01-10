@@ -37,6 +37,7 @@ namespace ProjectA {
 			const GLboolean depthWrite;
 			const GLenum depthFunc;
 
+			const bool multisample;
 			const bool dynamicLineWidth;
 
 			const uint32 subpassIndex;

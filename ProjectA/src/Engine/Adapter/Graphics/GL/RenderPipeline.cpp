@@ -9,6 +9,7 @@
 #include "Engine/Adapter/Graphics/GL/FrontFace.hpp"
 #include "Engine/Adapter/Graphics/GL/PolygonMode.hpp"
 #include "Engine/Adapter/Graphics/GL/PrimitiveTopology.hpp"
+#include "Engine/Adapter/Graphics/GL/RenderPass.hpp"
 #include "Engine/Adapter/Graphics/GL/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/GL/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/GL/VertexInputAttributeType.hpp"
@@ -29,6 +30,7 @@ namespace ProjectA {
 		depthTest(descriptor.depthStencilState.depthTest),
 		depthWrite(descriptor.depthStencilState.depthWrite),
 		depthFunc(getDepthFunc(descriptor.depthStencilState.compareOperation)),
+		multisample(std::static_pointer_cast<GL::RenderPass>(descriptor.renderPass)->multisample),
 		dynamicLineWidth(descriptor.dynamicState & DynamicState::LINE_WIDTH),
 		subpassIndex(descriptor.subpassIndex)
 	{

@@ -10,11 +10,8 @@ namespace ProjectA {
 		public:
 			explicit RenderPass(const RenderPassDescriptor& descriptor);
 
-			uint32 getPresentSourceAttachmentIndex() const {
-				return presentSourceAttachmentIndex;
-			}
-
-		private:
+		public:
 			uint32 presentSourceAttachmentIndex = max<uint32>();
+			bool multisample = false;
 	};
 }

@@ -16,13 +16,12 @@ namespace ProjectA {
 
 			void execute() const final override {
 				const ref<GL::RenderPass> renderPass = std::static_pointer_cast<GL::RenderPass>(framebuffer->getRenderPass());
-				const uint32 presentSourceAttachmentIndex = renderPass->getPresentSourceAttachmentIndex();
 
-				if (presentSourceAttachmentIndex == max<uint32>()) {
+				if (renderPass->presentSourceAttachmentIndex == max<uint32>()) {
 					return;
 				}
 
-				const GLenum readBuffer = GL_COLOR_ATTACHMENT0 + presentSourceAttachmentIndex;
+				const GLenum readBuffer = GL_COLOR_ATTACHMENT0 + renderPass->presentSourceAttachmentIndex;
 				const Extent2D extent = framebuffer->getExtent();
 
 				#if OPENGL_VERSION >= OPENGL_VERSION_4_5
