@@ -8,8 +8,11 @@ namespace ProjectA {
 	void Physics2DRenderer::build() {
 		setupRenderPass();
 
-		recreateMultisampleImage();
-		recreateMultisampleImageView();
+		if (layerInput->swapchainImage == nullptr) {
+			recreateMultisampleImage();
+			recreateMultisampleImageView();
+		}
+
 		recreateDepthStencilImage();
 		recreateDepthStencilImageView();
 		recreateFramebuffers();
@@ -68,9 +71,9 @@ namespace ProjectA {
 		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
 		swapchainAttachment.storeOperation = StoreOperation::STORE;
 
-		// TODO: Use ImageLayout::COLOR_ATTACHMENT_OPTIMAL.
-		// swapchainAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+		// TODO(layer-superposition)
+		swapchainAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+		// swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
 
 		Attachment depthStencilAttachment{};
 		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
@@ -111,17 +114,17 @@ namespace ProjectA {
 		multisampleAttachmentImageDescriptor.mipLevelCount = 1;
 		multisampleAttachmentImageDescriptor.layerCount = 1;
 
-		multisampleImage = renderPass->createColorAttachmentImage(multisampleAttachmentImageDescriptor, 0);
+		layerInput->swapchainImage = renderPass->createColorAttachmentImage(multisampleAttachmentImageDescriptor, 0);
 	}
 
 	void Physics2DRenderer::recreateMultisampleImageView() {
 		ImageViewDescriptor multisampleImageViewDescriptor{};
 		multisampleImageViewDescriptor.mipLevelOffset = 0;
-		multisampleImageViewDescriptor.mipLevelCount = multisampleImage->getMipLevelCount();
+		multisampleImageViewDescriptor.mipLevelCount = layerInput->swapchainImage->getMipLevelCount();
 		multisampleImageViewDescriptor.layerOffset = 0;
-		multisampleImageViewDescriptor.layerCount = multisampleImage->getLayerCount();
+		multisampleImageViewDescriptor.layerCount = layerInput->swapchainImage->getLayerCount();
 
-		multisampleImageView = multisampleImage->createView(multisampleImageViewDescriptor);
+		layerInput->swapchainImageView = layerInput->swapchainImage->createView(multisampleImageViewDescriptor);
 	}
 
 	void Physics2DRenderer::recreateDepthStencilImage() {
@@ -155,7 +158,7 @@ namespace ProjectA {
 
 		FramebufferDescriptor framebufferDescriptor{};
 		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = {multisampleImageView, depthStencilImageView, nullptr};
+		framebufferDescriptor.imageViews = {layerInput->swapchainImageView, depthStencilImageView, nullptr};
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
@@ -1244,8 +1247,11 @@ namespace ProjectA {
 	#endif
 
 	void Physics2DRenderer::resize(WindowResizeEvent& event) {
-		recreateMultisampleImage();
-		recreateMultisampleImageView();
+		if (layerInput->swapchainImage == nullptr) {
+			recreateMultisampleImage();
+			recreateMultisampleImageView();
+		}
+
 		recreateDepthStencilImage();
 		recreateDepthStencilImageView();
 		recreateFramebuffers();

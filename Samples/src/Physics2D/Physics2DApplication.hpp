@@ -4,9 +4,8 @@
 
 #include "Engine/entry_point.hpp"
 
-// #include "Layer/GUI/StatisticsLayer.hpp"
-
-#include "Layer/Sample/RollingBall.hpp"
+#include "Layer/GUI/StatisticsLayer.hpp"
+#include "Layer/Sample/Boxes.hpp"
 
 namespace ProjectA {
 	class Physics2DApplication : public Application {
@@ -15,7 +14,7 @@ namespace ProjectA {
 				Application(projectDescriptor)
 			{
 				registerLayer<SampleLayer>();
-				// registerLayer<StatisticsLayer>();
+				registerLayer<StatisticsLayer>();
 			}
 	};
 

@@ -3,6 +3,10 @@
 #include "Engine/Layer/LayerStack.hpp"
 
 namespace ProjectA {
+	uint32 LayerStack::count() const {
+		return static_cast<uint32>(layers.size());
+	}
+
 	void LayerStack::pushLayer(ref<Layer> layer) {
 		layers.emplace(layers.begin() + layerInsertionIndex, layer);
 

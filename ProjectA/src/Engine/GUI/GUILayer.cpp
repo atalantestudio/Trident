@@ -5,7 +5,9 @@
 #include "Engine/GUI/GUILayer.hpp"
 
 namespace ProjectA {
-	void GUILayer::build() {
+	void GUILayer::postConstruct() {
+		renderer.layerInput = input;
+
 		renderer.setLayer(this);
 		renderer.build();
 
@@ -17,13 +19,18 @@ namespace ProjectA {
 		renderer.registerTextureArrayLayer(defaultImageLayer);
 
 		registerAssets();
-	}
 
-	void GUILayer::postConstruct() {
 		renderer.flushTextureArrayStagingBuffer();
 
 		textureArrayFlushed = true;
 	}
+
+	// TODO
+	/* void GUILayer::postConstruct() {
+		renderer.flushTextureArrayStagingBuffer();
+
+		textureArrayFlushed = true;
+	} */
 
 	FontID GUILayer::loadFontAsset(view<char8> assetName) {
 		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->findFontAsset(assetName);

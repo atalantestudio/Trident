@@ -7,8 +7,10 @@ namespace ProjectA {
 	void GUIRenderer::build() {
 		setupRenderPass();
 
-		createSwapchainImage();
-		createSwapchainImageView();
+		if (layerInput->swapchainImage == nullptr) {
+			createSwapchainImage();
+			createSwapchainImageView();
+		}
 
 		recreateFramebuffers();
 
@@ -128,9 +130,9 @@ namespace ProjectA {
 		swapchainAttachment.format = getSurface()->getFormat();
 		swapchainAttachment.sampleCount = 8;
 
-		// TODO: Use LoadOperation::LOAD.
-		// swapchainAttachment.loadOperation = LoadOperation::LOAD;
-		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+		// TODO(layer-superposition)
+		swapchainAttachment.loadOperation = LoadOperation::LOAD;
+		// swapchainAttachment.loadOperation = LoadOperation::CLEAR;
 
 		swapchainAttachment.storeOperation = StoreOperation::STORE;
 		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
@@ -163,7 +165,7 @@ namespace ProjectA {
 
 		FramebufferDescriptor framebufferDescriptor{};
 		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = {swapchainImageView, nullptr};
+		framebufferDescriptor.imageViews = {layerInput->swapchainImageView, nullptr};
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
@@ -261,17 +263,17 @@ namespace ProjectA {
 		swapchainImageDescriptor.mipLevelCount = 1;
 		swapchainImageDescriptor.layerCount = 1;
 
-		swapchainImage = renderPass->createColorAttachmentImage(swapchainImageDescriptor, 0);
+		layerInput->swapchainImage = renderPass->createColorAttachmentImage(swapchainImageDescriptor, 0);
 	}
 
 	void GUIRenderer::createSwapchainImageView() {
 		ImageViewDescriptor swapchainImageViewDescriptor{};
 		swapchainImageViewDescriptor.mipLevelOffset = 0;
-		swapchainImageViewDescriptor.mipLevelCount = swapchainImage->getMipLevelCount();
+		swapchainImageViewDescriptor.mipLevelCount = layerInput->swapchainImage->getMipLevelCount();
 		swapchainImageViewDescriptor.layerOffset = 0;
-		swapchainImageViewDescriptor.layerCount = swapchainImage->getLayerCount();
+		swapchainImageViewDescriptor.layerCount = layerInput->swapchainImage->getLayerCount();
 
-		swapchainImageView = swapchainImage->createView(swapchainImageViewDescriptor);
+		layerInput->swapchainImageView = layerInput->swapchainImage->createView(swapchainImageViewDescriptor);
 	}
 
 	void GUIRenderer::createTextureArrayImageView() {
@@ -588,8 +590,10 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::resize(WindowResizeEvent& event) {
-		createSwapchainImage();
-		createSwapchainImageView();
+		if (layerInput->swapchainImage == nullptr) {
+			createSwapchainImage();
+			createSwapchainImageView();
+		}
 
 		recreateFramebuffers();
 

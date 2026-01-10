@@ -150,15 +150,16 @@ namespace ProjectA {
 				void renderFeatures(ref<CommandEncoder> commandEncoder) const;
 			#endif
 
+		public:
+			LayerInput* layerInput;
+
 		private:
 			const Scene2D* scene = nullptr;
 
 			ref<RenderPass> renderPass;
 
-			ref<Image> multisampleImage;
 			ref<Image> depthStencilImage;
 
-			ref<ImageView> multisampleImageView;
 			ref<ImageView> depthStencilImageView;
 
 			sequence<ref<Framebuffer>> framebuffers;

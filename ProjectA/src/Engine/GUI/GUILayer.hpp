@@ -27,7 +27,7 @@ namespace ProjectA {
 			};
 
 		public:
-			void build() final override;
+			void build() final override {}
 
 			// Client-side build method.
 			virtual void registerAssets() {}

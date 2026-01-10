@@ -83,6 +83,9 @@ namespace ProjectA {
 
 			void updateCameraProjection() const;
 
+		public:
+			LayerInput* layerInput;
+
 		private:
 			ref<RenderPass> renderPass;
 
@@ -107,10 +110,8 @@ namespace ProjectA {
 			ref<Buffer> glyphSubcomponentBuffer;
 			ref<Buffer> textureArrayStagingBuffer;
 
-			ref<Image> swapchainImage;
 			ref<Image> textureArrayImage;
 
-			ref<ImageView> swapchainImageView;
 			ref<ImageView> textureArrayImageView;
 
 			ref<Sampler> nearestSampler;

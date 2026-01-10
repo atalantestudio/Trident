@@ -2,6 +2,7 @@
 
 #include "Engine/API/Event/Event.hpp"
 #include "Engine/API/Rendering/CommandEncoder.hpp"
+#include "Engine/Layer/LayerInput.hpp"
 
 namespace ProjectA {
 	class Application;
@@ -28,6 +29,9 @@ namespace ProjectA {
 			virtual void postRender();
 
 			virtual void onEvent(Event& event);
+
+		public:
+			LayerInput* input;
 
 		private:
 			const Application* application;

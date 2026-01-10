@@ -5,6 +5,8 @@
 namespace ProjectA {
 	class LayerStack {
 		public:
+			uint32 count() const;
+
 			void pushLayer(ref<Layer> layer);
 
 			void removeLayer(ref<Layer> layer);

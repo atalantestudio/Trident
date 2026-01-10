@@ -121,6 +121,7 @@ namespace ProjectA {
 			HighResolutionTimer timer;
 			Window* window = nullptr;
 			LayerStack layerStack;
+			LayerInput lastLayerInput;
 			std::vector<ref<Process>> processes;
 
 			sequence<void*> consoleArguments;

@@ -166,6 +166,8 @@ namespace ProjectA {
 		PROFILE_SCOPE("Application post-construct");
 
 		for (const ref<Layer> layer : layerStack) {
+			layer->input = &lastLayerInput;
+
 			layer->postConstruct();
 		}
 	}
