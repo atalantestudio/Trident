@@ -2,9 +2,7 @@
 
 #define ENGINE_STATIC_ASSERT static_assert
 
-// TODO
-// #ifdef BUILD_MODE_PROFILE
-#if 0
+#if BUILD_MODE == BUILD_MODE_PROFILE
 	#include "Engine/Profile/Profiler.hpp"
 	#include "Engine/Profile/ProfileTimer.hpp"
 
@@ -34,7 +32,6 @@
 	#define PROFILE_SCOPE(...)
 #endif
 
-// TODO: Check min C++ version for this code.
 #define BIND(function) [this](auto&&... arguments) { \
 	return this->function(std::forward<decltype(arguments)>(arguments)...); \
 }

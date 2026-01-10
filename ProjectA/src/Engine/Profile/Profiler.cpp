@@ -18,43 +18,30 @@ namespace ProjectA {
 
 		std::replace(name.begin(), name.end(), '"', '\'');
 
-		// Write event name.
-		stream << "{\"name\":\"" << name << "\",";
-
-		// Write event category.
-		stream << "\"cat\":\"Scope\",";
-
-		// Write event type.
-		stream << "\"ph\":\"X\",";
-
-		// Write event time stamp.
-		stream << "\"ts\":" << event.start << ',';
-
-		// Write event duration.
-		stream << "\"dur\":" << (event.end - event.start) << ',';
-
-		// Write process ID.
-		stream << "\"pid\":0,";
-
-		// Write thread ID.
-		stream << "\"tid\":" << event.threadId << '}';
+		stream << "{\"name\": \"" << name << "\",";
+		stream << "\"cat\": \"Scope\",";
+		stream << "\"ph\": \"X\",";
+		stream << "\"ts\": " << event.start << ',';
+		stream << "\"dur\": " << (event.end - event.start) << ',';
+		stream << "\"pid\": 0,";
+		stream << "\"tid\": " << event.threadId << '}';
 
 		firstEvent = false;
 	}
 
 	Profiler::Profiler(view<char8> path) {
-		stream.open(path.data());
+		stream.open(&path[0]);
 
-		ENGINE_ASSERT(stream.is_open(), "Could not open the profiler output stream.");
+		ENGINE_ASSERT(stream.is_open(), "Failed to open the profiler output stream.");
 
-		// Write header.
 		stream << "{\"traceEvents\":[";
 	}
 
 	Profiler::~Profiler() {
-		// Write footer.
 		stream << "]}";
 
 		stream.close();
+
+		firstEvent = true;
 	}
 }

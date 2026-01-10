@@ -15,14 +15,14 @@ int main(int argc, char** argv) {
 	ProjectA::Application* application;
 
 	{
-		PROFILER("Trace/ProfileStart.json");
+		PROFILER("Trace/ApplicationStart.json");
 
 		application = ProjectA::createApplication(static_cast<ProjectA::uint32>(argc), argv);
 		application->postConstruct();
 	}
 
 	{
-		PROFILER("Trace/processes.json");
+		PROFILER("Trace/ProcessRun.json");
 
 		const int code = application->runProcesses();
 
@@ -34,13 +34,13 @@ int main(int argc, char** argv) {
 	}
 
 	if (application->hasLayers()) {
-		PROFILER("Trace/ProfileRun.json");
+		PROFILER("Trace/ApplicationRun.json");
 
 		application->loop();
 	}
 
 	{
-		PROFILER("Trace/ProfileEnd.json");
+		PROFILER("Trace/ApplicationEnd.json");
 
 		delete application;
 	}
