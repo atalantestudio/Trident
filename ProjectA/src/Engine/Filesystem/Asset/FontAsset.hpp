@@ -46,6 +46,11 @@ namespace ProjectA {
 
 				const std::list<std::pair<const uint16, uint32>, std::allocator<std::pair<const uint16, uint32>>>::const_iterator glyphIndex = unicodeMap.find(codePoint);
 
+				if (glyphIndex == unicodeMap.end()) {
+					// Encountered a UTF-16 code point that's not supported by the font.
+					return glyphs[0];
+				}
+
 				return glyphs[glyphIndex->second];
 			}
 

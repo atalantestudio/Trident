@@ -1133,9 +1133,10 @@ namespace ProjectA {
 			return firstByte;
 		}
 
-		// TODO: For now, decode to .noglyph if UTF-24 or UTF-32 code points are encountered.
-		//       These unhandled code points are assumed to take up 3 bytes (UTF-24).
-		// ENGINE_ASSERT(firstByte >> 5 == 0b110, "Code points larger than UTF-16 are unhandled.");
+		// TODO
+		// For now, decode to .noglyph if UTF-24 or UTF-32 code points are encountered.
+		// These unhandled code points are assumed to take up 3 bytes (UTF-24).
+		// ENGINE_ASSERT(firstByte >> 5 == 0b110, "Encountered a UTF-24 or UTF-34 code point.");
 		if (firstByte >> 5 != 0b110) {
 			byteOffset += 2;
 
