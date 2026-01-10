@@ -60,20 +60,27 @@ namespace ProjectA {
 			void createDynamicEntity(const Entity2DDescriptor& descriptor) {
 				const Entity entity = createEntity(descriptor);
 				const ref<Material> material = getMaterial(entity);
+
 				RigidBody2D& rigidBody = getRigidBody(entity);
+				rigidBody.linearVelocity = descriptor.linearVelocity;
+				rigidBody.angularVelocity = descriptor.angularVelocity;
 
 				const float32 m = descriptor.mass;
 
-				rigidBody.linearVelocity = descriptor.linearVelocity;
-				rigidBody.angularVelocity = descriptor.angularVelocity;
-				rigidBody.inverseMass = 1.0f / m;
+				if (m == 0.0_kg) {
+					rigidBody.inverseMass = 0.0_kg;
+					rigidBody.inverseInertia = 0.0f;
+				}
+				else {
+					rigidBody.inverseMass = 1.0f / m;
 
-				const float32 area = descriptor.geometry->calculateMass(material->density, rigidBody.scale) * 2.0f;
+					const float32 area = descriptor.geometry->calculateMass(material->density, rigidBody.scale) * 2.0f;
 
-				// TODO: Is this correct? See https://github.com/erincatto/box2d-lite/blob/227b71b6974ea57ab7e96d40f6374287bd6a0e77/src/Body.cpp#L47.
-				const float32 I = m * area / 12.0f;
+					// TODO: Is this correct? See https://github.com/erincatto/box2d-lite/blob/227b71b6974ea57ab7e96d40f6374287bd6a0e77/src/Body.cpp#L47.
+					const float32 I = m * area / 12.0f;
 
-				rigidBody.inverseInertia = 1.0f / I;
+					rigidBody.inverseInertia = 1.0f / I;
+				}
 
 				ecs.setComponent<DynamicEntityTag>(entity, {});
 			}

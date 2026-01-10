@@ -9,5 +9,7 @@ namespace ProjectA {
 		GJK2DOutput gjkOutput;
 		SAT2DOutput satOutput;
 		ContactManifold2D contactManifold;
+
+		bool debug;
 	};
 }

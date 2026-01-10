@@ -75,6 +75,8 @@ namespace ProjectA {
 				typeB = rigidBodyA.geometry->type;
 			}
 
+			visualizationData->debug = entityPair.A == 0 && entityPair.B == 1;
+
 			if (
 				!COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)](
 					rigidBodyA,
@@ -126,8 +128,9 @@ namespace ProjectA {
 				continue;
 			}
 
-			// TODO: Integrate gravity like in https://web.archive.org/web/20161201054257/https://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html.
-			//       This looks like Velocity Verlet for gravity to me?
+			// TODO
+			// Integrate gravity like in https://web.archive.org/web/20161201054257/https://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html.
+			// This looks like Velocity Verlet for gravity to me?
 			// rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * halfDeltaTime;
 			rigidBody.linearVelocity += (rigidBody.force * rigidBody.inverseMass + G) * deltaTime;
 			// rigidBody.angularVelocity += rigidBody.torque * rigidBody.inverseInertia * halfDeltaTime;
@@ -147,7 +150,7 @@ namespace ProjectA {
 			pair.contactManifold.tangent = perpendicularRight(pair.contactManifold.normal);
 			pair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
 
-			for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.getContactCount(); contactPointIndex += 1) {
+			for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.contactCount; contactPointIndex += 1) {
 				Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
 
 				// Distance from the contact to the entity's COM.
@@ -197,12 +200,11 @@ namespace ProjectA {
 		for (uint32 iteration = 0; iteration < SEQUENTIAL_IMPULSE_ITERATION_COUNT; iteration += 1) {
 			for (std::pair<const EntityPairKey, EntityContactPair2D>& entityContactPair : entityContactPairs) {
 				EntityContactPair2D& pair = entityContactPair.second;
-
 				RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
 				RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
 				vec2<float32> relativeVelocity;
 
-				for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.getContactCount(); contactPointIndex += 1) {
+				for (uint8 contactPointIndex = 0; contactPointIndex < pair.contactManifold.contactCount; contactPointIndex += 1) {
 					Contact2D& contact = pair.contactManifold.contacts[contactPointIndex];
 
 					// Calculate the relative velocity at the contact point.
@@ -216,6 +218,7 @@ namespace ProjectA {
 						const float32 oldNormalValue = contact.accumulatedNormalImpulse;
 
 						contact.accumulatedNormalImpulse = max(0.0f, contact.accumulatedNormalImpulse + normalImpulseLength);
+
 						normalImpulseLength = contact.accumulatedNormalImpulse - oldNormalValue;
 					#else
 						normalImpulseLength = max(0.0f, normalImpulseLength);
@@ -239,6 +242,7 @@ namespace ProjectA {
 						const float32 oldTangentValue = contact.accumulatedTangentImpulse;
 
 						contact.accumulatedTangentImpulse = clamp(contact.accumulatedTangentImpulse + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
+
 						tangentImpulseLength = contact.accumulatedTangentImpulse - oldTangentValue;
 					#else
 						const float32 maxTangentImpulseLength = pair.combinedFriction * normalImpulseLength;
@@ -285,30 +289,58 @@ namespace ProjectA {
 		}
 	}
 
-	void PhysicsEngine2D::mergeContactManifolds(EntityContactPair2D& entityContactPair, const ContactManifold2D& contactManifold) {
+	void PhysicsEngine2D::mergeContactManifolds(EntityContactPair2D& entityContactPair, const ContactManifold2D& newContactManifold) {
 		ContactManifold2D mergedContactManifold;
+		uint32 contactIndex = 0;
+		uint32 previousContactIndex = 0;
 
-		for (uint32 contactIndex = 0; contactIndex < contactManifold.getContactCount(); contactIndex += 1) {
-			const Contact2D& contact = contactManifold.contacts[contactIndex];
+		while (contactIndex < newContactManifold.contactCount) {
+			const Contact2D& cNew = newContactManifold.contacts[contactIndex];
 
-			mergedContactManifold.contacts[contactIndex] = contact;
+			int k = -1;
+			int j = 0;
+
+			while (j < newContactManifold.contactCount) {
+				const Contact2D& cOld = entityContactPair.contactManifold.contacts[j];
+
+				if (cNew.id == cOld.id) {
+					k = j;
+
+					break;
+				}
+
+				j += 1;
+			}
+
+			if (k == -1) {
+				mergedContactManifold.contacts[contactIndex] = newContactManifold.contacts[contactIndex];
+
+				contactIndex += 1;
+
+				continue;
+			}
+
+			mergedContactManifold.contacts[contactIndex] = cNew;
 
 			#ifdef WARM_STARTING
-				for (uint32 previousContactIndex = 0; previousContactIndex < entityContactPair.contactManifold.getContactCount(); previousContactIndex += 1) {
-					const Contact2D& previousContact = entityContactPair.contactManifold.contacts[previousContactIndex];
+				const Contact2D& cOld = entityContactPair.contactManifold.contacts[k];
 
-					if (contact == previousContact) {
-						mergedContactManifold.contacts[contactIndex].accumulatedNormalImpulse = previousContact.accumulatedNormalImpulse;
-						mergedContactManifold.contacts[contactIndex].accumulatedTangentImpulse = previousContact.accumulatedTangentImpulse;
-
-						break;
-					}
-				}
+				mergedContactManifold.contacts[contactIndex].accumulatedNormalImpulse = cOld.accumulatedNormalImpulse;
+				mergedContactManifold.contacts[contactIndex].accumulatedTangentImpulse = cOld.accumulatedTangentImpulse;
 			#endif
+
+			contactIndex += 1;
 		}
 
-		entityContactPair.contactManifold = mergedContactManifold;
-		entityContactPair.contactManifold.setContactCount(contactManifold.getContactCount());
-		entityContactPair.contactManifold.normal = contactManifold.normal;
+		contactIndex = 0;
+
+		while (contactIndex < newContactManifold.contactCount) {
+			entityContactPair.contactManifold.contacts[contactIndex] = mergedContactManifold.contacts[contactIndex];
+
+			contactIndex += 1;
+		}
+
+		entityContactPair.contactManifold.contactCount = newContactManifold.contactCount;
+		entityContactPair.contactManifold.normal = newContactManifold.normal;
 	}
 }

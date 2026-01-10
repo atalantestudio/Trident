@@ -4,16 +4,26 @@ namespace ProjectA {
 	struct Contact2DID {
 		static constexpr uint32 NULL_EDGE_INDEX = max<uint32>();
 
+		// The edge is represented in a clockwise order, so the normal is pointing left.
 		uint32 referenceEdge0Index = NULL_EDGE_INDEX;
 		uint32 referenceEdge1Index = NULL_EDGE_INDEX;
+
+		// The edge is represented in a clockwise order, so the normal is pointing left.
 		uint32 incidentEdge0Index = NULL_EDGE_INDEX;
 		uint32 incidentEdge1Index = NULL_EDGE_INDEX;
 
 		bool operator ==(const Contact2DID& other) const {
 			return (
-				*pointer_cast<const uint64*>(&referenceEdge0Index) == *pointer_cast<const uint64*>(&other.referenceEdge0Index) &&
-				*pointer_cast<const uint64*>(&incidentEdge0Index) == *pointer_cast<const uint64*>(&other.incidentEdge0Index)
+				referenceEdge0Index == other.referenceEdge0Index &&
+				referenceEdge1Index == other.referenceEdge1Index &&
+				incidentEdge0Index == other.incidentEdge0Index &&
+				incidentEdge1Index == other.incidentEdge1Index
 			);
+		}
+
+		void flip() {
+			std::swap(referenceEdge0Index, referenceEdge1Index);
+			std::swap(incidentEdge0Index, incidentEdge1Index);
 		}
 	};
 

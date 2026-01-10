@@ -312,6 +312,7 @@ namespace ProjectA {
 		ENGINE_ASSERT(presentStatus == PresentStatus::SUCCESS, "Unhandled present status.");
 	}
 
+	// TODO: Handle resize events with layer superposition.
 	void Application::resize() {
 		window->waitMessage();
 

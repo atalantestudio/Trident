@@ -5,7 +5,7 @@
 #include "Engine/entry_point.hpp"
 
 #include "Layer/GUI/StatisticsLayer.hpp"
-#include "Layer/Sample/Boxes.hpp"
+#include "Layer/Sample/Stacking.hpp"
 
 namespace ProjectA {
 	class Physics2DApplication : public Application {

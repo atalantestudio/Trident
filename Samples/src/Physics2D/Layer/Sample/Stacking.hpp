@@ -14,8 +14,9 @@ namespace ProjectA {
 				floorDescriptor.friction = 0.2f;
 				floorDescriptor.geometry = squareGeometry;
 				floorDescriptor.fillColor = {0.957f, 0.997f, 0.859f, 1.0f};
+				floorDescriptor.mass = 0.0_kg;
 
-				scene.createStaticEntity(floorDescriptor);
+				scene.createDynamicEntity(floorDescriptor);
 
 				Entity2DDescriptor boxDescriptor{};
 				boxDescriptor.mass = 1.0_kg;
@@ -24,7 +25,8 @@ namespace ProjectA {
 				boxDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 
 				for (uint32 boxIndex = 0; boxIndex < 10; boxIndex += 1) {
-					boxDescriptor.position = {random<float32>(-0.1_m, 0.1_m), 0.51_m + boxIndex * 1.05f};
+					// boxDescriptor.position = {random<float32>(-0.1_m, 0.1_m), 0.51_m + boxIndex * 1.05f};
+					boxDescriptor.position = {0.0_m, 0.51_m + boxIndex * 1.05f};
 
 					scene.createDynamicEntity(boxDescriptor);
 				}

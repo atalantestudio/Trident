@@ -10,7 +10,7 @@
 #define ACCUMULATE_IMPULSES
 
 // TODO: Fix warm starting.
-// #define WARM_STARTING
+#define WARM_STARTING
 
 namespace ProjectA {
 	struct PhysicsEngine2DDescriptor {
@@ -46,6 +46,8 @@ namespace ProjectA {
 		private:
 			static constexpr uint32 SEQUENTIAL_IMPULSE_ITERATION_COUNT = 10;
 			static constexpr float32 ALLOWED_PENETRATION = 0.01f;
+
+			// Gravitational constant.
 			static inline const vec2<float32> G = {0.0f, -9.80665f};
 
 		private:

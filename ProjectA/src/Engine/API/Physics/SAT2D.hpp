@@ -35,21 +35,16 @@ namespace ProjectA {
 		// TODO: Expose edge normals from ConvexHullGeometry.
 		for (uint32 edgeIndex = 0; edgeIndex < geometry->edges.count(); edgeIndex += 1) {
 			const Edge& edge = geometry->edges[edgeIndex];
-			const vec2<float32>& a = geometry->vertices[edge.indexA];
-			const vec2<float32>& b = geometry->vertices[edge.indexB];
-
+			const vec2<float32> a = geometry->vertices[edge.indexA];
+			const vec2<float32> b = geometry->vertices[edge.indexB];
 			const vec2<float32> d = edgeNormalClockwise(a, b) * R;
-
 			const vec2<float32> s = B.geometry->support(-d);
-			const vec2<float32> sT = multiplyTransform(s, B.transform);
-
 			const vec2<float32> aT = multiplyTransform(a, A.transform);
 			const vec2<float32> bT = multiplyTransform(b, A.transform);
-
+			const vec2<float32> sT = multiplyTransform(s, B.transform);
 			const float32 separation = signedDistanceLinePoint(aT, bT, sT);
 
-			// NOTE: Use >= to account restore B as the reference body if possible.
-			if (separation >= output.separation) {
+			if (separation > output.separation) {
 				output.separation = separation;
 				output.normal = d;
 				output.referenceEdge.edge[0] = aT;
@@ -67,10 +62,12 @@ namespace ProjectA {
 	}
 
 	// Separating Axis Theorem algorithm implementation in 2D.
+	// 
 	// TODO: Basic optimizations:
-	//       - Don't test the same separating axis multiple times
-	//       - Don't test parallel axes (https://dyn4j.org/2010/01/sat)
-	//       - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases. But what if the separation axis changes e.g. due to rotation?
+	// - Don't test the same separating axis multiple times
+	// - Don't test parallel axes (https://dyn4j.org/2010/01/sat)
+	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
+	//   But what if the separation axis changes e.g. due to rotation?
 	static SAT2DOutput SAT2D(const RigidBody2D& A, const RigidBody2D& B) {
 		SAT2DOutput output;
 		output.separation = min<float32>();
@@ -89,7 +86,7 @@ namespace ProjectA {
 		}
 
 		// Correct normal direction.
-		output.normal = output.normal * mat2x2<float32>::rotation(-output.incidentBody->rotation);
+		output.normal *= mat2x2<float32>::rotation(-output.incidentBody->rotation);
 
 		return output;
 	}

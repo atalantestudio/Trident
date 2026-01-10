@@ -370,8 +370,8 @@ namespace ProjectA {
 	}
 
 	static float32 signedDistanceLinePoint(const vec2<float32>& a, const vec2<float32>& b, const vec2<float32>& p) {
-		const vec2<float32> ap = p - a;
 		const vec2<float32> ab = b - a;
+		const vec2<float32> ap = p - a;
 
 		return parallelogramArea(ab, ap) / length(ab);
 	}
