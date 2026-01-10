@@ -22,7 +22,7 @@ namespace ProjectA {
 
 		if (FAILED(result)) {
 			#ifndef PREFER_SOFTWARE_ADAPTER
-				ProjectA::GraphicsAdapter::logger.warning("Failed to create device using the primary display adapter. Falling back to a WARP adapter.");
+				ADAPTER_WARNING("Failed to create device using the primary display adapter. Falling back to a WARP adapter.");
 			#endif
 
 			ComPtr<IDXGIAdapter> adapter;

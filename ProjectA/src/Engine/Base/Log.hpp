@@ -25,10 +25,15 @@ namespace ProjectA {
 		} \
 	}
 
+	#define ADAPTER_TRACE(...) ::ProjectA::GraphicsAdapter::logger.trace(__FILE__, __LINE__, __VA_ARGS__)
+	#define ADAPTER_DEBUG(...) ::ProjectA::GraphicsAdapter::logger.debug(__VA_ARGS__)
+	#define ADAPTER_INFO(...) ::ProjectA::GraphicsAdapter::logger.info(__VA_ARGS__)
+	#define ADAPTER_WARNING(...) ::ProjectA::GraphicsAdapter::logger.warning(__VA_ARGS__)
+	#define ADAPTER_ERROR(...) ::ProjectA::GraphicsAdapter::logger.error(__func__, __FILE__, __LINE__, __VA_ARGS__)
+
 	#define ADAPTER_ASSERT(condition, ...) { \
 		if (!(condition)) { \
-			::ProjectA::GraphicsAdapter::logger.error(__func__, __FILE__, __LINE__, __VA_ARGS__); \
-			\
+			ADAPTER_ERROR(__VA_ARGS__); \
 			BREAKPOINT(); \
 		} \
 	}
@@ -38,6 +43,12 @@ namespace ProjectA {
 	#define ENGINE_INFO(...)
 	#define ENGINE_WARNING(...)
 	#define ENGINE_ERROR(...)
+
+	#define ADAPTER_TRACE(...)
+	#define ADAPTER_DEBUG(...)
+	#define ADAPTER_INFO(...)
+	#define ADAPTER_WARNING(...)
+	#define ADAPTER_ERROR(...)
 
 	#define DEBUG_ASSERT(...)
 	#define ENGINE_ASSERT(...)

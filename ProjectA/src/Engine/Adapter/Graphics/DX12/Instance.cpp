@@ -59,7 +59,7 @@ namespace ProjectA {
 
 		adapterIndex = 0;
 
-		ProjectA::GraphicsAdapter::logger.info("Available adapters:");
+		ADAPTER_INFO("Available adapters:");
 
 		while (adapterIndex < adapters.size()) {
 			IDXGIAdapter* adapter = adapters[adapterIndex];
@@ -77,9 +77,9 @@ namespace ProjectA {
 
 			const LPCSTR description = ConvertUTF16ToUTF8(adapterDescriptor.Description);
 
-			ProjectA::GraphicsAdapter::logger.info("- []", description);
+			ADAPTER_INFO("- []", description);
 
-			LocalFree((void*) &description);
+			delete[] description;
 
 			adapterIndex += 1;
 		}

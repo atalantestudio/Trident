@@ -17,8 +17,8 @@ namespace ProjectA {
 	void MemoryAllocator::initialize(const VK::PhysicalDevice& physicalDevice) {
 		MemoryAllocator::physicalDevice = &physicalDevice;
 
-		ProjectA::GraphicsAdapter::logger.debug("Buffer image granularity: []", physicalDevice.properties.limits.bufferImageGranularity);
-		ProjectA::GraphicsAdapter::logger.debug("Max. memory allocation count: []", physicalDevice.properties.limits.maxMemoryAllocationCount);
+		ADAPTER_DEBUG("Buffer image granularity: []", physicalDevice.properties.limits.bufferImageGranularity);
+		ADAPTER_DEBUG("Max. memory allocation count: []", physicalDevice.properties.limits.maxMemoryAllocationCount);
 
 		currentBufferMemoryAllocationIndices = sequence<uint32>(physicalDevice.memoryProperties.memoryTypeCount);
 		std::fill(currentBufferMemoryAllocationIndices.begin(), currentBufferMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
@@ -46,7 +46,7 @@ namespace ProjectA {
 			for (uint32 memoryHeapIndex = 0; memoryHeapIndex < physicalDevice->memoryProperties.memoryHeapCount; memoryHeapIndex += 1) {
 				const VkMemoryHeap& memoryHeap = physicalDevice->memoryProperties.memoryHeaps[memoryHeapIndex];
 
-				ProjectA::GraphicsAdapter::logger.debug(
+				ADAPTER_DEBUG(
 					"Memory heap []:\n"
 					"- Size: [] ([])\n"
 					"- Flags: []",
@@ -62,7 +62,7 @@ namespace ProjectA {
 			for (uint32 memoryTypeIndex = 0; memoryTypeIndex < physicalDevice->memoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
 				const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
 
-				ProjectA::GraphicsAdapter::logger.debug(
+				ADAPTER_DEBUG(
 					"- Memory type []:\n"
 					"- Property flags: []\n"
 					"- Heap: []",
@@ -120,8 +120,8 @@ namespace ProjectA {
 		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentBufferMemoryAllocationIndices);
 		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		ProjectA::GraphicsAdapter::logger.info("Creating new memory suballocation ([]) for buffer resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
-		ProjectA::GraphicsAdapter::logger.debug(
+		ADAPTER_INFO("Creating new memory suballocation ([]) for buffer resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
+		ADAPTER_DEBUG(
 			"- Offset = []\n"
 			"- Required size = []\n"
 			"- Size = [] ([])\n"
@@ -147,8 +147,8 @@ namespace ProjectA {
 		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentImageMemoryAllocationIndices);
 		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
-		ProjectA::GraphicsAdapter::logger.info("Created new memory suballocation ([]) for image resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
-		ProjectA::GraphicsAdapter::logger.debug(
+		ADAPTER_INFO("Created new memory suballocation ([]) for image resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
+		ADAPTER_DEBUG(
 			"- Offset = []\n"
 			"- Required size = []\n"
 			"- Size = [] ([])\n"
@@ -183,7 +183,7 @@ namespace ProjectA {
 
 			ADAPTER_ASSERT(result == VK_SUCCESS, "Could not map memory. ([])", string_VkResult(result));
 
-			ProjectA::GraphicsAdapter::logger.info(
+			ADAPTER_INFO(
 				"Mapped range ([], []) of memory allocation [].",
 				0,
 				memoryAllocation.size,
@@ -206,7 +206,7 @@ namespace ProjectA {
 
 			if (!(memoryType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
 				// TODO: Expose vkFlushMappedMemoryRanges to the graphics adapter.
-				ProjectA::GraphicsAdapter::logger.warning("Non-coherent memory must be manually flushed.");
+				ADAPTER_WARNING("Non-coherent memory must be manually flushed.");
 
 				/*VkMappedMemoryRange mappedMemoryRange{};
 				mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -223,7 +223,7 @@ namespace ProjectA {
 
 			vkUnmapMemory(device, memoryAllocation.memory);
 
-			ProjectA::GraphicsAdapter::logger.info("Unmapped memory allocation [].", memoryAllocationIndex);
+			ADAPTER_INFO("Unmapped memory allocation [].", memoryAllocationIndex);
 
 			memoryAllocation.mappedRange = nullptr;
 			memoryAllocation.mappedSuballocationCount = 0;
@@ -253,7 +253,7 @@ namespace ProjectA {
 				}
 			}
 
-			ProjectA::GraphicsAdapter::logger.info("Freed memory allocation [].", memoryAllocationIndex);
+			ADAPTER_INFO("Freed memory allocation [].", memoryAllocationIndex);
 
 			freeMemoryAllocationIndices.emplace_back(memoryAllocationIndex);
 
@@ -262,7 +262,7 @@ namespace ProjectA {
 
 		memoryAllocation.suballocationCount -= 1;
 
-		ProjectA::GraphicsAdapter::logger.info("Freed suballocation from memory allocation []. The active suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
+		ADAPTER_INFO("Freed suballocation from memory allocation []. The active suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
 	}
 
 	uint32 MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size) {
@@ -276,8 +276,8 @@ namespace ProjectA {
 			freeMemoryAllocationIndices.pop_back();
 		}
 
-		ProjectA::GraphicsAdapter::logger.info("Creating new memory allocation [].", memoryAllocationIndex);
-		ProjectA::GraphicsAdapter::logger.debug(
+		ADAPTER_INFO("Creating new memory allocation [].", memoryAllocationIndex);
+		ADAPTER_DEBUG(
 			"- Property flags = []\n"
 			"- Size = [] ([])",
 			string_VkMemoryPropertyFlags(physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex].propertyFlags),
@@ -338,7 +338,7 @@ namespace ProjectA {
 		// If the current memory allocation cannot fully hold this suballocation, close it and open a new one.
 		// In some cases the aligned offset can be larger than size of the allocation.
 		if (offset > currentMemoryAllocation->size || currentMemoryAllocation->size - offset < size) {
-			ProjectA::GraphicsAdapter::logger.warning(
+			ADAPTER_WARNING(
 				"Remaining size in memory allocation [] ([]) is insufficient for suballocation with size [] and alignment [] (base size = []).",
 				currentMemoryAllocationIndex,
 				currentMemoryAllocation->size - offset,

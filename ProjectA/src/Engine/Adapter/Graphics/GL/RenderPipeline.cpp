@@ -35,7 +35,7 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		if (descriptor.cullMode == CullMode::FRONT_AND_BACK) {
-			ProjectA::GraphicsAdapter::logger.warning("Cull mode is FRONT_AND_BACK; discarding polygon mode.");
+			ADAPTER_WARNING("Cull mode is FRONT_AND_BACK; discarding polygon mode.");
 		}
 
 		const ref<GL::ShaderModule> vertexShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.vertexShaderModule);

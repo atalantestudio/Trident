@@ -114,7 +114,7 @@ namespace ProjectA {
 				}
 			}
 
-			ProjectA::GraphicsAdapter::logger.warning("V-Sync is disabled but no matching present mode was found. Reverting to FIFO present mode.");
+			ADAPTER_WARNING("V-Sync is disabled but no matching present mode was found. Reverting to FIFO present mode.");
 
 			return VK_PRESENT_MODE_FIFO_KHR;
 		}

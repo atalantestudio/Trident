@@ -49,11 +49,11 @@ namespace ProjectA {
 
 		const VkSurfaceFormatKHR surfaceFormat = surface.selectFormat();
 
-		ProjectA::GraphicsAdapter::logger.info("Swapchain format is []/[].", string_VkFormat(surfaceFormat.format), string_VkColorSpaceKHR(surfaceFormat.colorSpace));
+		ADAPTER_INFO("Swapchain format is []/[].", string_VkFormat(surfaceFormat.format), string_VkColorSpaceKHR(surfaceFormat.colorSpace));
 
 		const VkPresentModeKHR presentMode = surface.selectPresentMode(descriptor.vSync);
 
-		ProjectA::GraphicsAdapter::logger.info("Swapchain present mode is [].", string_VkPresentModeKHR(presentMode));
+		ADAPTER_INFO("Swapchain present mode is [].", string_VkPresentModeKHR(presentMode));
 
 		const VkSurfaceCapabilitiesKHR surfaceCapabilities = surface.getCapabilities();
 
@@ -63,7 +63,7 @@ namespace ProjectA {
 			imageCount = min(imageCount, surfaceCapabilities.maxImageCount);
 		}
 
-		ProjectA::GraphicsAdapter::logger.info("Swapchain image count is [].", imageCount);
+		ADAPTER_INFO("Swapchain image count is [].", imageCount);
 
 		if (surfaceCapabilities.currentExtent.width == max<uint32>() && surfaceCapabilities.currentExtent.height == max<uint32>()) {
 			extent = *pointer_cast<const Extent2D*>(&surfaceCapabilities.currentExtent);
@@ -73,7 +73,7 @@ namespace ProjectA {
 			extent.height = clamp(descriptor.extent.height, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
 		}
 
-		ProjectA::GraphicsAdapter::logger.info("Swapchain image extent is ([], []).", extent.width, extent.height);
+		ADAPTER_INFO("Swapchain image extent is ([], []).", extent.width, extent.height);
 
 		const VkSwapchainKHR oldSwapchain = swapchain;
 

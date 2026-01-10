@@ -18,8 +18,8 @@ namespace ProjectA {
 
 		const LPCSTR description = ConvertUTF16ToUTF8(adapterDescriptor.Description);
 
-		ProjectA::GraphicsAdapter::logger.info("Using [].", description);
+		ADAPTER_INFO("Using [].", description);
 
-		LocalFree((void*) &description);
+		delete[] description;
 	}
 }

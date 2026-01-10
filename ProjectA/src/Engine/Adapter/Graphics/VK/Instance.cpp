@@ -23,7 +23,7 @@ namespace ProjectA {
 			ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to enumerate instance layer properties ([]).", string_VkResult(result));
 
 			for (const VkLayerProperties& layerProperties : layerProperties) {
-				ProjectA::GraphicsAdapter::logger.info("- []", layerProperties.layerName);
+				ADAPTER_INFO("- []", layerProperties.layerName);
 			}
 		}
 	#endif
@@ -37,22 +37,22 @@ namespace ProjectA {
 
 			switch (messageSeverity) {
 				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: {
-					ProjectA::GraphicsAdapter::logger.trace(__FILE__, __LINE__, pCallbackData->pMessage);
+					ADAPTER_TRACE(__FILE__, __LINE__, pCallbackData->pMessage);
 
 					break;
 				}
 				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT: {
-					ProjectA::GraphicsAdapter::logger.info(pCallbackData->pMessage);
+					ADAPTER_INFO(pCallbackData->pMessage);
 
 					break;
 				}
 				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT: {
-					ProjectA::GraphicsAdapter::logger.warning(pCallbackData->pMessage);
+					ADAPTER_WARNING(pCallbackData->pMessage);
 
 					break;
 				}
 				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT: {
-					ProjectA::GraphicsAdapter::logger.error(__func__, __FILE__, __LINE__, pCallbackData->pMessage);
+					ADAPTER_ERROR(__func__, __FILE__, __LINE__, pCallbackData->pMessage);
 
 					break;
 				}
@@ -194,7 +194,7 @@ namespace ProjectA {
 		#endif
 
 		#ifdef DEBUG_ENUMERATE_PHYSICAL_DEVICES
-			ProjectA::GraphicsAdapter::logger.info("Available physical devices:");
+			ADAPTER_INFO("Available physical devices:");
 		#endif
 
 		for (uint32 physicalDeviceIndex = 0; physicalDeviceIndex < physicalDevices.count(); physicalDeviceIndex += 1) {
@@ -233,7 +233,7 @@ namespace ProjectA {
 						break;
 				}
 
-				ProjectA::GraphicsAdapter::logger.info("- [] ([])", physicalDeviceProperties.deviceName, physicalDeviceType);
+				ADAPTER_INFO("- [] ([])", physicalDeviceProperties.deviceName, physicalDeviceType);
 			#endif
 		}
 

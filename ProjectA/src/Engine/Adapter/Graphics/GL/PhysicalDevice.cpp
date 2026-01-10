@@ -13,7 +13,7 @@ namespace ProjectA {
 			const GLchar* renderer = pointer_cast<const GLchar*>(glGetString(GL_RENDERER));
 			const GLchar* version = pointer_cast<const GLchar*>(glGetString(GL_VERSION));
 
-			ProjectA::GraphicsAdapter::logger.info("Using [] [] [].", vendor, renderer, version);
+			ADAPTER_INFO("Using [] [] [].", vendor, renderer, version);
 		#endif
 
 		setLimits();

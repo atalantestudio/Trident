@@ -21,7 +21,7 @@ namespace ProjectA {
 		for (uint32 queueFamilyIndex = 0; queueFamilyIndex < queueFamilies.count(); queueFamilyIndex += 1) {
 			const VkQueueFamilyProperties& queueFamily = queueFamilies[queueFamilyIndex];
 
-			ProjectA::GraphicsAdapter::logger.info(
+			ADAPTER_INFO(
 				"Properties for queue family []:\n"
 				"- Queue count: []\n"
 				"- Queue flags: []",
@@ -74,7 +74,7 @@ namespace ProjectA {
 
 		const view<char8> physicalDeviceType = formatPhysicalDeviceType(properties.deviceType);
 
-		ProjectA::GraphicsAdapter::logger.info("Using [] [].", properties.deviceName, physicalDeviceType);
+		ADAPTER_INFO("Using [] [].", properties.deviceName, physicalDeviceType);
 
 		selectQueueFamilyIndices();
 
@@ -94,10 +94,10 @@ namespace ProjectA {
 		enabledExtensionNames.resize(extensionPropertyCount);
 
 		#ifdef DEBUG_ENUMERATE_DEVICE_EXTENSIONS
-			ProjectA::GraphicsAdapter::logger.info("Enabled device extensions:");
+			ADAPTER_INFO("Enabled device extensions:");
 
 			for (uint32 extensionPropertiesIndex = 0; extensionPropertiesIndex < extensionProperties.count; extensionPropertiesIndex += 1) {
-				ProjectA::GraphicsAdapter::logger.info("- [] (spec version: [])", extensionProperties[extensionPropertiesIndex].extensionName, extensionProperties[extensionPropertiesIndex].specVersion);
+				ADAPTER_INFO("- [] (spec version: [])", extensionProperties[extensionPropertiesIndex].extensionName, extensionProperties[extensionPropertiesIndex].specVersion);
 
 				enabledExtensionNames[extensionPropertiesIndex] = extensionProperties[extensionPropertiesIndex].extensionName;
 			}
