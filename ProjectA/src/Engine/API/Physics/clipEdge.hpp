@@ -9,7 +9,7 @@ namespace ProjectA {
 		const float32 d0 = dot(edge.edge[0].position, normal) - offset;
 		const float32 d1 = dot(edge.edge[1].position, normal) - offset;
 
-		ClipFeature2D clippedEdge;
+		ClipFeature2D clippedEdge{};
 		uint32 clippedEdgeVertexCount = 0;
 
 		if (d0 <= 0.0f) {

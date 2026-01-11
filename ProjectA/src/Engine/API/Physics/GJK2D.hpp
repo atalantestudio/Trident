@@ -289,7 +289,7 @@ namespace ProjectA {
 			i += 1;
 		}
 
-		GJK2DOutput output;
+		GJK2DOutput output{};
 
 		const float32 div = 1.0f / s.divisor;
 
@@ -316,20 +316,20 @@ namespace ProjectA {
 		}
 
 		output.closestFeatureA.vertex = s[0].vA;
-		output.closestFeatureA.setVertexCount(1);
+		output.closestFeatureA.vertexCount = 1;
 
 		output.closestFeatureB.vertex = s[0].vB;
-		output.closestFeatureB.setVertexCount(1);
+		output.closestFeatureB.vertexCount = 1;
 
 		if (s.count == 2) {
 			if (s[0].iA != s[1].iA) {
 				output.closestFeatureA.edge[1] = s[1].vA;
-				output.closestFeatureA.setVertexCount(2);
+				output.closestFeatureA.vertexCount = 2;
 			}
 
 			if (s[0].iB != s[1].iB) {
 				output.closestFeatureB.edge[1] = s[1].vB;
-				output.closestFeatureB.setVertexCount(2);
+				output.closestFeatureB.vertexCount = 2;
 			}
 		}
 

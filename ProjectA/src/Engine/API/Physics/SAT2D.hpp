@@ -69,9 +69,9 @@ namespace ProjectA {
 	// - Reuse the separation axis from the last run to make the algorithm O(1) in non-intersection cases.
 	//   But what if the separation axis changes e.g. due to rotation?
 	static SAT2DOutput SAT2D(const RigidBody2D& A, const RigidBody2D& B) {
-		SAT2DOutput output;
+		SAT2DOutput output{};
 		output.separation = min<float32>();
-		output.referenceEdge.setVertexCount(2);
+		output.referenceEdge.vertexCount = 2;
 
 		queryEdgeDirections(A, B, output);
 
