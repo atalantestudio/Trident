@@ -6,6 +6,7 @@
 #include "Engine/API/Geometry/PointGeometry2D.hpp"
 #include "Engine/API/Physics/Collider/Collider2D.hpp"
 #include "Engine/API/Physics/Contact/ContactManifold.hpp"
+#include "Engine/API/Physics/GJK2D.hpp"
 #include "Engine/API/Physics/SATCircleConvexHull2D.hpp"
 
 namespace ProjectA {

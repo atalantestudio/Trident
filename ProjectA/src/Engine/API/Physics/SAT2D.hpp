@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Geometry/ConvexHullGeometry2D.hpp"
+#include "Engine/API/Physics/Feature2D.hpp"
 #include "Engine/API/Physics/RigidBody2D.hpp"
 
 namespace ProjectA {

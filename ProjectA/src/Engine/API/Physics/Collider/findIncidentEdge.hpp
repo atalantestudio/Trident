@@ -5,7 +5,7 @@
 
 namespace ProjectA {
 	// Finds and returns the incident edge feature on a convex hull.
-	ClipFeature2D findIncidentEdge(const RigidBody2D& incidentBody, vec2<float32> referenceEdgeNormal) {
+	inline ClipFeature2D findIncidentEdge(const RigidBody2D& incidentBody, vec2<float32> referenceEdgeNormal) {
 		const ref<ConvexHullGeometry2D> geometry = std::static_pointer_cast<ConvexHullGeometry2D>(incidentBody.geometry);
 		const mat2x2<float32> R = transpose(mat2x2<float32>::rotation(incidentBody.rotation)); // R == RotT
 
