@@ -6,11 +6,8 @@ namespace ProjectA {
 	static constexpr uint8 GJK_2D_CONDITIONAL_ITERATION_LIMIT = 8;
 
 	static void handleSimplex1(sim2<float32>& s, vec2<float32>& d) {
-		// TODO: Use structured bindings here, e.g.:
-		// const vec2<float32>& [b, a] = s;
-
-		const vec2<float32>& a = s[1];
-		const vec2<float32>& b = s[0];
+		const vec2<float32> a = s[1];
+		const vec2<float32> b = s[0];
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ao = -a;
 
@@ -25,12 +22,9 @@ namespace ProjectA {
 	}
 
 	static bool handleSimplex2(sim2<float32>& s, vec2<float32>& d) {
-		// TODO: Use structured bindings here, e.g.:
-		// const vec2<float32>& [c, b, a] = s;
-
-		const vec2<float32>& a = s[2];
-		const vec2<float32>& b = s[1];
-		const vec2<float32>& c = s[0];
+		const vec2<float32> a = s[2];
+		const vec2<float32> b = s[1];
+		const vec2<float32> c = s[0];
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ac = c - a;
 		const vec2<float32> ao = -a;

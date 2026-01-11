@@ -24,7 +24,7 @@ namespace ProjectA {
 				boxDescriptor.fillColor = {0.902f, 0.867f, 1.0f, 1.0f};
 
 				for (uint32 boxIndex = 0; boxIndex < 10; boxIndex += 1) {
-					boxDescriptor.position = {random<float32>(-0.05_m, 0.05_m), 0.51_m + boxIndex * 1.05f};
+					boxDescriptor.position = {random<float32>(-0.1_m, 0.1_m), 0.51_m + boxIndex * 1.05f};
 
 					scene.createDynamicEntity(boxDescriptor);
 				}

@@ -1,14 +1,10 @@
 #pragma once
 
 #include "Engine/API/Camera/Camera.hpp"
+#include "Engine/API/Physics/Axis.hpp"
 
 namespace ProjectA {
 	class PerspectiveCamera : public Camera {
-		private:
-			static const inline vec3<float32> RIGHT = {1.0f, 0.0f, 0.0f};
-			static const inline vec3<float32> UP = {0.0f, 1.0f, 0.0f};
-			static const inline vec3<float32> FORWARD = {0.0f, 0.0f, 1.0f};
-
 		public:
 			const vec3<float32>& getPosition() const {
 				return position;

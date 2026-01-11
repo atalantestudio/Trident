@@ -75,8 +75,8 @@ namespace ProjectA {
 		public:
 			explicit SeparationFunction(const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, const Feature2D& closestFeatureA, const Feature2D& closestFeatureB) {
 				if (closestFeatureA.getVertexCount() == 1 && closestFeatureB.getVertexCount() == 1) {
-					const vec2<float32>& a = closestFeatureA.vertex;
-					const vec2<float32>& b = closestFeatureB.vertex;
+					const vec2<float32> a = closestFeatureA.vertex;
+					const vec2<float32> b = closestFeatureB.vertex;
 
 					// TODO: Does it need to be normalized?
 					separatingAxis = normalized(b - a);
@@ -112,8 +112,8 @@ namespace ProjectA {
 				const PhysicalObjectCopy2D& edgeObject = *objects[_edgeObjectIndex];
 				const PhysicalObjectCopy2D& vertexObject = *objects[_vertexObjectIndex];
 
-				const vec2<float32>& edgeLocalPoint0 = edgeObject.geometry->vertices[edgeFeature->edgeIndices[0]];
-				const vec2<float32>& edgeLocalPoint1 = edgeObject.geometry->vertices[edgeFeature->edgeIndices[1]];
+				const vec2<float32> edgeLocalPoint0 = edgeObject.geometry->vertices[edgeFeature->edgeIndices[0]];
+				const vec2<float32> edgeLocalPoint1 = edgeObject.geometry->vertices[edgeFeature->edgeIndices[1]];
 
 				separatingAxis = perpendicularRight(edgeLocalPoint1 - edgeLocalPoint0);
 				localPoint = lerp(edgeLocalPoint0, edgeLocalPoint1, 0.5f);
@@ -161,7 +161,7 @@ namespace ProjectA {
 	MinSeparationOutput findMinVertexVertexSeparation(const SeparationFunction& separationFunction, const PhysicalObjectCopy2D& A, const PhysicalObjectCopy2D& B, uint32 edgeObjectIndex, uint32 vertexObjectIndex) {
 		MinSeparationOutput output;
 
-		const vec2<float32>& axis = separationFunction.separatingAxis;
+		const vec2<float32> axis = separationFunction.separatingAxis;
 
 		// TODO: The support with canceled rotation doesn't seem to be necessary here.
 		const vec2<float32> a = multiplyTransform(A.geometry->vertices[0], A.transform);

@@ -1,15 +1,14 @@
 #pragma once
 
 #include "Engine/API/Physics/EntityPair.hpp"
-#include "Engine/API/Scene/Scene2D.hpp"
 
 #ifdef BUILD_MODE_DEBUG
 	#include "Engine/API/Physics/VisualizationData.hpp"
 #endif
 
-#define ACCUMULATE_IMPULSES
+#include "Engine/API/Scene/Scene2D.hpp"
 
-// TODO: Fix warm starting.
+#define ACCUMULATE_IMPULSES
 #define WARM_STARTING
 
 namespace ProjectA {

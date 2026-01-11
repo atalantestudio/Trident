@@ -1,6 +1,6 @@
 #include "pch.hpp"
 
-#include "Engine/API/Physics/Collider/Collider2D.hpp"
+#include "Engine/API/Physics/Collider/Collider2DTable.hpp"
 #include "Engine/API/Physics/PhysicsEngine2D.hpp"
 
 namespace ProjectA {

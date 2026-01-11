@@ -35,8 +35,8 @@ namespace ProjectA {
 
 	// Calculates the closest point to the origin on a line formed by the simplex s.
 	static void ClosestPointLineOrigin(Simplex2& s) {
-		const vec2<float32>& a = s[0].v;
-		const vec2<float32>& b = s[1].v;
+		const vec2<float32> a = s[0].v;
+		const vec2<float32> b = s[1].v;
 		const vec2<float32> ab = b - a;
 
 		const float32 uAB = dot(-a, ab);
@@ -71,9 +71,9 @@ namespace ProjectA {
 
 	// Calculates the closest point to the origin on a triangle formed by the simplex s.
 	static void ClosestPointTriangleOrigin(Simplex2& s) {
-		const vec2<float32>& a = s[0].v;
-		const vec2<float32>& b = s[1].v;
-		const vec2<float32>& c = s[2].v;
+		const vec2<float32> a = s[0].v;
+		const vec2<float32> b = s[1].v;
+		const vec2<float32> c = s[2].v;
 		const vec2<float32> ab = b - a;
 		const vec2<float32> ac = c - a;
 

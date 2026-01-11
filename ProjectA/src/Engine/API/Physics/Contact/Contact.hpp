@@ -2,23 +2,18 @@
 
 namespace ProjectA {
 	struct Contact2DID {
-		static constexpr uint32 NULL_EDGE_INDEX = max<uint32>();
+		static constexpr uint16 NULL_EDGE_INDEX = max<uint16>();
 
-		// The edge is represented in a clockwise order, so the normal is pointing left.
-		uint32 referenceEdge0Index = NULL_EDGE_INDEX;
-		uint32 referenceEdge1Index = NULL_EDGE_INDEX;
+		// The edge is represented in a clockwise order, so the normal is pointing left (outside of the body).
+		uint16 referenceEdge0Index = NULL_EDGE_INDEX;
+		uint16 referenceEdge1Index = NULL_EDGE_INDEX;
 
-		// The edge is represented in a clockwise order, so the normal is pointing left.
-		uint32 incidentEdge0Index = NULL_EDGE_INDEX;
-		uint32 incidentEdge1Index = NULL_EDGE_INDEX;
+		// The edge is represented in a clockwise order, so the normal is pointing left (outside of the body).
+		uint16 incidentEdge0Index = NULL_EDGE_INDEX;
+		uint16 incidentEdge1Index = NULL_EDGE_INDEX;
 
 		bool operator ==(const Contact2DID& other) const {
-			return (
-				referenceEdge0Index == other.referenceEdge0Index &&
-				referenceEdge1Index == other.referenceEdge1Index &&
-				incidentEdge0Index == other.incidentEdge0Index &&
-				incidentEdge1Index == other.incidentEdge1Index
-			);
+			return *pointer_cast<const uint64*>(this) == *pointer_cast<const uint64*>(&other);
 		}
 
 		void flip() {
@@ -47,9 +42,5 @@ namespace ProjectA {
 
 		float32 accumulatedNormalImpulse = 0.0f;
 		float32 accumulatedTangentImpulse = 0.0f;
-
-		bool operator ==(const Contact2D& other) const {
-			return id == other.id;
-		}
 	};
 }

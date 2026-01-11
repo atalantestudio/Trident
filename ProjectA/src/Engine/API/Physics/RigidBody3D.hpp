@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Geometry/3D/Geometry3D.hpp"
+#include "Engine/API/Physics/Axis.hpp"
 
 namespace ProjectA {
 	class RigidBody3D {
@@ -8,16 +9,16 @@ namespace ProjectA {
 			void updateTransform() {
 				transform =
 					mat4x4<float32>::scaling(scale) *
-					mat4x4<float32>::rotation({1.0f, 0.0f, 0.0f}, -rotation[0]) *
-					mat4x4<float32>::rotation({0.0f, 1.0f, 0.0f}, -rotation[1]) *
-					mat4x4<float32>::rotation({0.0f, 0.0f, 1.0f}, -rotation[2]) *
+					mat4x4<float32>::rotation(RIGHT, -rotation[0]) *
+					mat4x4<float32>::rotation(UP, -rotation[1]) *
+					mat4x4<float32>::rotation(FORWARD, -rotation[2]) *
 					mat4x4<float32>::translation(position);
 			}
 
 		public:
 			mat4x4<float32> transform = mat4x4<float32>::identity();
 
-			// Position of the center of mass, in world-space.
+			// Position of the center of mass in world-space.
 			vec3<float32> position = {0.0_m, 0.0_m, 0.0_m};
 
 			vec3<float32> rotation = {0.0_rad, 0.0_rad, 0.0_rad};
