@@ -4,7 +4,7 @@
 #include "Engine/API/Physics/PhysicsEngine2D.hpp"
 
 namespace ProjectA {
-	vec2<float32> PhysicsEngine2D::calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, const Contact2D& contact) {
+	inline vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, const Contact2D& contact) {
 		return B.linearVelocity + cross(contact.rB, -B.angularVelocity) - A.linearVelocity - cross(contact.rA, -A.angularVelocity);
 	}
 
@@ -75,8 +75,6 @@ namespace ProjectA {
 				typeB = rigidBodyA.geometry->type;
 			}
 
-			visualizationData->debug = entityPair.A == 0 && entityPair.B == 1;
-
 			if (
 				!COLLIDER_2D_TABLE[static_cast<uint32>(typeA)][static_cast<uint32>(typeB)](
 					rigidBodyA,
@@ -144,8 +142,8 @@ namespace ProjectA {
 		for (std::pair<const EntityPairKey, EntityContactPair2D>& entityContactPair : entityContactPairs) {
 			EntityContactPair2D& pair = entityContactPair.second;
 
-			const RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
-			const RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
+			RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
+			RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
 
 			pair.contactManifold.tangent = perpendicularRight(pair.contactManifold.normal);
 			pair.combinedFriction = sqrt(rigidBodyA.friction * rigidBodyB.friction);
@@ -159,7 +157,7 @@ namespace ProjectA {
 
 				const float32 inverseMassSum = rigidBodyA.inverseMass + rigidBodyB.inverseMass;
 
-				// Precompute normal mass, tangent mass, and bias.
+				// Precompute normal mass, tangent mass and bias.
 				const float32 rnA = dot(contact.rA, pair.contactManifold.normal);
 				const float32 rnB = dot(contact.rB, pair.contactManifold.normal);
 
@@ -179,18 +177,15 @@ namespace ProjectA {
 
 				contact.massTangent = 1.0f / massTangent;
 
-				const float32 penetrationBias = (rigidBodyA.geometry->getPenetrationBias() + rigidBodyB.geometry->getPenetrationBias()) * 0.5f;
+				const float32 penetrationBias = avg(rigidBodyA.geometry->getPenetrationBias(), rigidBodyB.geometry->getPenetrationBias());
 
 				contact.bias = -penetrationBias * inverseDeltaTime * min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
 				#ifdef ACCUMULATE_IMPULSES
-					RigidBody2D& rigidBodyA = scene->getRigidBody(pair.A);
-					RigidBody2D& rigidBodyB = scene->getRigidBody(pair.B);
-
 					const vec2<float32> impulse = pair.contactManifold.normal * contact.accumulatedNormalImpulse + pair.contactManifold.tangent * contact.accumulatedTangentImpulse;
 
 					rigidBodyA.applyImpulse(-impulse, contact.rA);
-					rigidBodyB.applyImpulse(impulse, contact.rA);
+					rigidBodyB.applyImpulse(impulse, contact.rB);
 				#endif
 			}
 		}
@@ -217,7 +212,7 @@ namespace ProjectA {
 					#ifdef ACCUMULATE_IMPULSES
 						const float32 oldNormalValue = contact.accumulatedNormalImpulse;
 
-						contact.accumulatedNormalImpulse = max(0.0f, contact.accumulatedNormalImpulse + normalImpulseLength);
+						contact.accumulatedNormalImpulse = max(0.0f, oldNormalValue + normalImpulseLength);
 
 						normalImpulseLength = contact.accumulatedNormalImpulse - oldNormalValue;
 					#else
@@ -241,7 +236,7 @@ namespace ProjectA {
 						const float32 maxTangentImpulseLength = pair.combinedFriction * contact.accumulatedNormalImpulse;
 						const float32 oldTangentValue = contact.accumulatedTangentImpulse;
 
-						contact.accumulatedTangentImpulse = clamp(contact.accumulatedTangentImpulse + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
+						contact.accumulatedTangentImpulse = clamp(oldTangentValue + tangentImpulseLength, -maxTangentImpulseLength, maxTangentImpulseLength);
 
 						tangentImpulseLength = contact.accumulatedTangentImpulse - oldTangentValue;
 					#else
@@ -300,7 +295,7 @@ namespace ProjectA {
 			int k = -1;
 			int j = 0;
 
-			while (j < newContactManifold.contactCount) {
+			while (j < entityContactPair.contactManifold.contactCount) {
 				const Contact2D& cOld = entityContactPair.contactManifold.contacts[j];
 
 				if (cNew.id == cOld.id) {

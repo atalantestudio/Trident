@@ -166,10 +166,6 @@ namespace ProjectA {
 			return false;
 		}
 
-		if (visualizationData->debug) {
-			// BREAKPOINT();
-		}
-
 		ClipFeature2D incidentEdge = findIncidentEdge(*satOutput.incidentBody, satOutput.normal);
 
 		const vec2<float32> referenceRightEdgeNormal = normalized(satOutput.referenceEdge.edge[1] - satOutput.referenceEdge.edge[0]);
@@ -193,13 +189,13 @@ namespace ProjectA {
 		contactManifold->normal = satOutput.normal;
 
 		if (satOutput.referenceBody == &B) {
-			// The normal must point towards the incident body and away from the reference body.
-			contactManifold->normal = -contactManifold->normal;
+			contactManifold->normal *= -1.0f;
 		}
 
 		const float32 referenceNormalOffset = dot(satOutput.referenceEdge.edge[0], satOutput.normal);
-		uint32 contactCount = 0;
+
 		uint32 vertexIndex = 0;
+		uint32 contactCount = 0;
 
 		// Keep all vertices below the reference edge, then move them to the reference edge's line.
 		while (vertexIndex < 2) {

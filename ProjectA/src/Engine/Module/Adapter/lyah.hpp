@@ -397,4 +397,8 @@ namespace ProjectA {
 			0.0f,            0.0f, -coordinateSystem * nearPlane * farPlane / range, 0.0f,
 		};
 	}
+
+	inline float32 avg(float32 a, float32 b) {
+		return (a + b) * 0.5f;
+	}
 }

@@ -23,9 +23,6 @@ namespace ProjectA {
 
 	// A simulated physics world.
 	class PhysicsEngine2D {
-		private:
-			static vec2<float32> calculateRelativeVelocity(const RigidBody2D& A, const RigidBody2D& B, const Contact2D& contact);
-
 		public:
 			explicit PhysicsEngine2D(const PhysicsEngine2DDescriptor& descriptor);
 
@@ -54,10 +51,9 @@ namespace ProjectA {
 			Scene2D* scene;
 			std::vector<EntityPair> entityPairs;
 			std::unordered_map<EntityPairKey, EntityContactPair2D> entityContactPairs;
-
-			const float32 deltaTime;
-			const float32 inverseDeltaTime;
-			const float32 halfDeltaTime;
+			float32 deltaTime;
+			float32 inverseDeltaTime;
+			float32 halfDeltaTime;
 
 			#ifdef BUILD_MODE_DEBUG
 				VisualizationData2D* const visualizationData = nullptr;
