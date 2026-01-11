@@ -87,12 +87,12 @@ namespace ProjectA {
 		windowDescriptor.name = formatWindowName(projectDescriptor.name, sharedMemoryData->instanceCount);
 		windowDescriptor.size.width = properties->WindowWidth;
 		windowDescriptor.size.height = properties->WindowHeight;
-		windowDescriptor.keyDownEventListener = BIND(Application::onEvent);
-		windowDescriptor.keyUpEventListener = BIND(Application::onEvent);
-		windowDescriptor.mouseDownEventListener = BIND(Application::onEvent);
-		windowDescriptor.mouseMoveEventListener = BIND(Application::onEvent);
-		windowDescriptor.mouseUpEventListener = BIND(Application::onEvent);
-		windowDescriptor.mouseWheelEventListener = BIND(Application::onEvent);
+		windowDescriptor.keyDownEventListener = BIND(Application::propagateEventFrontToBack);
+		windowDescriptor.keyUpEventListener = BIND(Application::propagateEventFrontToBack);
+		windowDescriptor.mouseDownEventListener = BIND(Application::propagateEventFrontToBack);
+		windowDescriptor.mouseMoveEventListener = BIND(Application::propagateEventFrontToBack);
+		windowDescriptor.mouseUpEventListener = BIND(Application::propagateEventFrontToBack);
+		windowDescriptor.mouseWheelEventListener = BIND(Application::propagateEventFrontToBack);
 		windowDescriptor.windowCloseEventListener = BIND(Application::onWindowClose);
 		windowDescriptor.windowResizeEventListener = BIND(Application::onWindowResize);
 
@@ -329,15 +329,18 @@ namespace ProjectA {
 
 		Renderer::getSwapchain()->update(swapchainDescriptor);
 
+		lastLayerInput.swapchainImage = nullptr;
+		lastLayerInput.swapchainImageView = nullptr;
+
 		// Propagate the event to the layer stack.
-		onEvent(event);
+		propagateEventBackToFront(event);
 	}
 
 	void Application::close() {
 		looping = false;
 	}
 
-	void Application::onEvent(Event& event) {
+	void Application::propagateEventFrontToBack(Event& event) {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		for (std::vector<ref<Layer>>::const_reverse_iterator layerIterator = layerStack.rbegin(); layerIterator != layerStack.rend(); layerIterator += 1) {
@@ -345,6 +348,15 @@ namespace ProjectA {
 				break;
 			}
 
+			(*layerIterator)->onEvent(event);
+		}
+	}
+
+	void Application::propagateEventBackToFront(Event& event) {
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		for (std::vector<ref<Layer>>::const_iterator layerIterator = layerStack.begin(); layerIterator != layerStack.end(); layerIterator += 1) {
+			// event.handled is ignored in back to front scenarios.
 			(*layerIterator)->onEvent(event);
 		}
 	}

@@ -89,7 +89,8 @@ namespace ProjectA {
 
 			void close();
 
-			void onEvent(Event& event);
+			void propagateEventFrontToBack(Event& event);
+			void propagateEventBackToFront(Event& event);
 
 			void onWindowResize(WindowResizeEvent& event);
 
