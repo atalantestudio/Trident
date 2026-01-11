@@ -2,13 +2,24 @@
 
 namespace ProjectA {
 	class StatisticsLayer : public GUILayer {
+		private:
+			static constexpr uint32 FRAME_DELAY = 165;
+
 		public:
 			void registerAssets() override {
-				font = loadFontAsset("test-regular");
+				textStyle.color = 0xffffffff;
+				textStyle.font = loadFontAsset("test-regular");
+				textStyle.fontSize = 18.0f;
 
-				textStyle.color = 0x000000ff;
-				textStyle.font = font;
-				textStyle.fontSize = 16.0f;
+				containerStyle.size = {FIT, FIT};
+				containerStyle.padding = {8.0_px, 8.0_px};
+				containerStyle.layoutDirection = VERTICAL;
+				containerStyle.color = 0x00000000;
+
+				panelStyle.size = {FIT, FIT};
+				panelStyle.padding = {4.0_px, 4.0_px};
+				panelStyle.layoutDirection = VERTICAL;
+				panelStyle.color = 0x22222275;
 
 				framesPerSecond = getApplication()->getFramesPerSecond();
 			}
@@ -18,31 +29,17 @@ namespace ProjectA {
 					framesPerSecond = getApplication()->getFramesPerSecond();
 				}
 
-				GUIText(Logger::format("FPS: []", framesPerSecond), textStyle);
-
-				/* GUIComponent({212_px, EXPAND}, {8_px, 8_px}, VERTICAL, 8_px) {
-					GUIComponent({196_px, 96_px}, {12_px, 12_px}, VERTICAL, 0_px, gray) {
-						const sequence<char8> fps = Logger::format("FPS: []", framesPerSecond);
-
-						GUIText(fps, textStyle);
+				GUIComponent(containerStyle) {
+					GUIComponent(panelStyle) {
+						GUIText(Logger::format("FPS: []", framesPerSecond), textStyle);
 					}
-
-					GUIComponent({196_px, 148_px}, {12_px, 12_px}, VERTICAL, 8_px, gray) {
-						for (uint8 i = 0; i < 2; i += 1) {
-							GUIComponent({EXPAND, 24_px}, lightGray);
-						}
-					}
-				} */
+				}
 			}
 
 		private:
-			static constexpr uint32 FRAME_DELAY = 165;
-			// static inline const vec4<float32> GRAY = {0.122f, 0.122f, 0.122f, 1.0f};
-			// static inline const vec4<float32> LIGHT_GRAY = {0.196f, 0.204f, 0.196f, 1.0f};
-
-		private:
-			FontID font;
 			TextStyle textStyle;
+			ContainerStyle containerStyle;
+			ContainerStyle panelStyle;
 			float64 framesPerSecond;
 	};
 }
