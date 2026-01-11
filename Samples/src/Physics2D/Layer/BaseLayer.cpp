@@ -6,8 +6,10 @@
 
 namespace ProjectA {
 	BaseLayer::BaseLayer() :
-		physicsEngine(getPhysicsEngineDescriptor()),
-		visualizationData{}
+		physicsEngine(getPhysicsEngineDescriptor())
+		#ifdef BUILD_MODE_DEBUG
+			, visualizationData{}
+		#endif
 	{}
 
 	void BaseLayer::postConstruct() {
