@@ -5,10 +5,6 @@
 namespace ProjectA {
 	// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html
 	namespace TrueTypeFont {
-		// A shortFrac is an int16_t with a bias of 14. This means it can represent numbers between 1.999 (0x7fff) and -2.0 (0x8000).
-		// 1.0 is stored as 16384 (0x4000) and -1.0 is stored as -16384 (0xc000).
-		typedef sint16 shortFrac;
-
 		// 16.16-bit signed fixed-point number.
 		struct Fixed {
 			uint16 fraction;
