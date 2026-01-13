@@ -18,8 +18,10 @@ namespace ProjectA::DX12 {
 	class CommandPool;
 	class Device;
 	class Fence;
+	class Framebuffer;
 	class GraphicsAdapter;
 	class Image;
+	class ImageView;
 	class Instance;
 	class PhysicalDevice;
 	class PipelineLayout;

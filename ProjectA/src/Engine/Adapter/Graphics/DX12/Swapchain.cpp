@@ -100,5 +100,7 @@ namespace ProjectA {
 			rtvDescriptorHandle.ptr += rtvDescriptorSize;
 			imageIndex += 1;
 		}
+
+		createImageViews();
 	}
 }

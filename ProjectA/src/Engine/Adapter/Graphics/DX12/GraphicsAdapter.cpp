@@ -5,7 +5,9 @@
 
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
+#include "Engine/Adapter/Graphics/DX12/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
+#include "Engine/Adapter/Graphics/DX12/Image.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
@@ -46,15 +48,11 @@ namespace ProjectA {
 	}
 
 	ref<Framebuffer> DX12::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
+		return createRef<DX12::Framebuffer>(descriptor);
 	}
 
 	ref<Image> DX12::GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
+		return createRef<DX12::Image>(descriptor);
 	}
 
 	ref<PipelineLayout> DX12::GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
