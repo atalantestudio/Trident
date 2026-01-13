@@ -91,9 +91,8 @@ namespace ProjectA {
 
 		ADAPTER_ASSERT(code == WAIT_OBJECT_0, "Failed to wait for event.");
 
-		// TODO: Reset fence?
-		/* result = idleFence->fence->Signal(0);
+		result = idleFence->fence->Signal(0);
 
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to reset queue idle fence."); */
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to reset queue idle fence.");
 	}
 }

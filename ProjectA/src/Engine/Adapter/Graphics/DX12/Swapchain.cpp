@@ -22,7 +22,7 @@ namespace ProjectA {
 
 		const HRESULT result = instance.factory->MakeWindowAssociation(surface.window, DXGI_MWA_NO_ALT_ENTER);
 
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to disable fullscreen transitions.");	
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to make window association.");
 	}
 
 	uint32 DX12::Swapchain::getImageCount() const {
@@ -35,6 +35,12 @@ namespace ProjectA {
 		for (const ref<ProjectA::ImageView> imageView : imageViews) {
 			imageView.~shared_ptr();
 		}
+
+		for (const ref<ProjectA::Image> image : images) {
+			image.~shared_ptr();
+		}
+
+		swapChain.Reset();
 
 		recreate(descriptor);
 	}
