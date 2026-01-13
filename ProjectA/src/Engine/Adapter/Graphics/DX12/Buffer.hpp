@@ -11,6 +11,8 @@ namespace ProjectA {
 		public:
 			explicit Buffer(const BufferDescriptor& descriptor, const DX12::Device& device);
 
+			~Buffer() final override;
+
 			void unmap() const final override;
 
 			void* getMappedRange(uint64 offset, uint64 size) const final override;

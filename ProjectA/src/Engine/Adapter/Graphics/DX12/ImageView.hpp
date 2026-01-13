@@ -11,10 +11,10 @@ namespace ProjectA {
 		public:
 			explicit ImageView(const ImageViewDescriptor& descriptor, const ProjectA::Image* image) :
 				ProjectA::ImageView(descriptor, image),
-				image(*static_cast<const DX12::Image*>(image))
+				image(static_cast<const DX12::Image*>(image))
 			{}
 
 		private:
-			const DX12::Image& image;
+			const DX12::Image* image;
 	};
 }
