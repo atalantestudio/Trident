@@ -192,13 +192,29 @@ namespace ProjectA {
 		std::string pathString = "Asset/Shader/";
 		pathString += path;
 
-		if (
-			graphicsApi == GraphicsAPI::VK
-			#ifdef GL_SOURCE_FROM_SPIRV
-				|| graphicsApi == GraphicsAPI::GL
-			#endif
-		) {
-			pathString += ".spv";
+		switch (graphicsApi) {
+			case GraphicsAPI::DX12: {
+				pathString += ".hlsl";
+
+				break;
+			}
+			case GraphicsAPI::GL: {
+				#ifdef GL_SOURCE_FROM_SPIRV
+					pathString += ".spv";
+				#endif
+
+				break;
+			}
+			case GraphicsAPI::VK: {
+				pathString += ".spv";
+
+				break;
+			}
+			default: {
+				ENGINE_ERROR_UNSUPPORTED();
+
+				break;
+			}
 		}
 
 		path = view<char8>(&pathString[0], pathString.size());
@@ -206,12 +222,6 @@ namespace ProjectA {
 		const sequence<char8> code = Filesystem::openTextBuffer(&path[0]);
 
 		return adapter->createShaderModule(descriptor, view<char8>(&code[0], code.count()));
-	}
-
-	ref<ShaderModule> Renderer::loadHlslShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) {
-		DEBUG_ASSERT(graphicsApi == GraphicsAPI::DX12);
-
-		return adapter->createShaderModule(descriptor, code);
 	}
 
 	void Renderer::setImageIndex(uint32 imageIndex) {
