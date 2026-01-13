@@ -38,6 +38,16 @@ namespace ProjectA {
 
 				tsl::GLSLGenerator(context, glslDescriptor);
 
+				{
+					const std::string glslPathString = std::filesystem::path(directoryEntry.path()).replace_extension("glsl").string();
+
+					std::ofstream stream(glslPathString);
+
+					stream << glslDescriptor.glslCode;
+
+					stream.close();
+				}
+
 				ShaderModuleAssetDescriptor shaderModuleAssetDescriptor{};
 				shaderModuleAssetDescriptor.identifier = AssetLibrary::createAssetIdentifier();
 				shaderModuleAssetDescriptor.version = {1, 0, 0};
