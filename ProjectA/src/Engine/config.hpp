@@ -19,10 +19,9 @@ namespace ProjectA {
 	// Toggle OpenGL graphics adapter.
 	#define ENABLE_GL_ADAPTER
 
-	// Whether to prioritize integrated GPUs over discrete GPUs.
-	// This does not guarantee that an integrated GPU will be selected at runtime.
+	// Whether to prioritize integrated GPUs over discrete GPUs when using the OpenGL graphics adapter.
 	// 
-	// NOTE: Use this instead of the PreferIntegratedGPU project property. GPU selection for a GL context can only be done at compile-time.
+	// NOTE: Use this instead of the PreferIntegratedGPU project property. GPU selection for a GL context can't be done at runtime.
 	// #define GL_PREFER_INTEGRATED_GPU
 
 	// If enabled, OpenGL shaders will be sourced from SPIR-V binaries.

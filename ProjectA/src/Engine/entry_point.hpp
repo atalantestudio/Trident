@@ -1,13 +1,9 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
-extern "C" {
-	#ifdef GL_PREFER_INTEGRATED_GPU
-		// NOTE: AmdPowerXpressRequestHighPerformance seems to be recognized even if no AMD card is available.
-		__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-
-		__declspec(dllexport) unsigned int NvOptimusEnablement = 1;
-	#endif
-}
+#include "Engine/Exports.hpp"
 
 extern ProjectA::Application* createApplication(ProjectA::uint32 argumentCount, ProjectA::char8** argumentValues);
 
