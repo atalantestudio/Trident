@@ -31,7 +31,12 @@ namespace ProjectA {
 			}
 
 			template<typename AttributeType>
-			constexpr void registerAttribute() {
+			constexpr void registerAttribute(view<char8> hlslSemanticName) {
+				registerAttribute<AttributeType>(hlslSemanticName, 0);
+			}
+
+			template<typename AttributeType>
+			constexpr void registerAttribute(view<char8> hlslSemanticName, uint32 hlslSemanticIndex) {
 				constexpr uint32 alignment = getAlignment<AttributeType>();
 
 				uint32 remainder = offset % alignment;
@@ -44,6 +49,8 @@ namespace ProjectA {
 				VertexInputAttribute vertexInputAttribute{};
 				vertexInputAttribute.type = getVertexInputAttributeType<AttributeType>();
 				vertexInputAttribute.offset = offset;
+				vertexInputAttribute.hlslSemanticName = hlslSemanticName;
+				vertexInputAttribute.hlslSemanticIndex = hlslSemanticIndex;
 
 				attributes.emplace_back(vertexInputAttribute);
 
@@ -61,33 +68,33 @@ namespace ProjectA {
 			}
 
 			template<>
-			constexpr void registerAttribute<mat3x3<float32>>() {
-				registerAttribute<vec3<float32>>();
-				registerAttribute<vec3<float32>>();
-				registerAttribute<vec3<float32>>();
+			constexpr void registerAttribute<mat3x3<float32>>(view<char8> hlslSemanticName) {
+				registerAttribute<vec3<float32>>(hlslSemanticName, 0);
+				registerAttribute<vec3<float32>>(hlslSemanticName, 1);
+				registerAttribute<vec3<float32>>(hlslSemanticName, 2);
 			}
 
 			template<>
-			constexpr void registerAttribute<mat3x3<float64>>() {
-				registerAttribute<vec3<float64>>();
-				registerAttribute<vec3<float64>>();
-				registerAttribute<vec3<float64>>();
+			constexpr void registerAttribute<mat3x3<float64>>(view<char8> hlslSemanticName) {
+				registerAttribute<vec3<float64>>(hlslSemanticName, 0);
+				registerAttribute<vec3<float64>>(hlslSemanticName, 1);
+				registerAttribute<vec3<float64>>(hlslSemanticName, 2);
 			}
 
 			template<>
-			constexpr void registerAttribute<mat4x4<float32>>() {
-				registerAttribute<vec4<float32>>();
-				registerAttribute<vec4<float32>>();
-				registerAttribute<vec4<float32>>();
-				registerAttribute<vec4<float32>>();
+			constexpr void registerAttribute<mat4x4<float32>>(view<char8> hlslSemanticName) {
+				registerAttribute<vec4<float32>>(hlslSemanticName, 0);
+				registerAttribute<vec4<float32>>(hlslSemanticName, 1);
+				registerAttribute<vec4<float32>>(hlslSemanticName, 2);
+				registerAttribute<vec4<float32>>(hlslSemanticName, 3);
 			}
 
 			template<>
-			constexpr void registerAttribute<mat4x4<float64>>() {
-				registerAttribute<vec4<float64>>();
-				registerAttribute<vec4<float64>>();
-				registerAttribute<vec4<float64>>();
-				registerAttribute<vec4<float64>>();
+			constexpr void registerAttribute<mat4x4<float64>>(view<char8> hlslSemanticName) {
+				registerAttribute<vec4<float64>>(hlslSemanticName, 0);
+				registerAttribute<vec4<float64>>(hlslSemanticName, 1);
+				registerAttribute<vec4<float64>>(hlslSemanticName, 2);
+				registerAttribute<vec4<float64>>(hlslSemanticName, 3);
 			}
 
 		private:

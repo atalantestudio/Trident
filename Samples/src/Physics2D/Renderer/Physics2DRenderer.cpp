@@ -364,13 +364,13 @@ namespace ProjectA {
 
 	void Physics2DRenderer::createFillRenderPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
+		vertexInputBinding.registerAttribute<svec2<float32>>("");
 
 		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<mat3x3<float32>>();
-		instanceInputBinding.registerAttribute<vec4<float32>>();
-		instanceInputBinding.registerAttribute<vec4<float32>>();
-		instanceInputBinding.registerAttribute<float32>();
+		instanceInputBinding.registerAttribute<mat3x3<float32>>("");
+		instanceInputBinding.registerAttribute<vec4<float32>>("");
+		instanceInputBinding.registerAttribute<vec4<float32>>("");
+		instanceInputBinding.registerAttribute<float32>("");
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -412,14 +412,14 @@ namespace ProjectA {
 
 	void Physics2DRenderer::createStrokeRenderPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
+		vertexInputBinding.registerAttribute<svec2<float32>>("");
 
 		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<mat3x3<float32>>();
-		instanceInputBinding.registerAttribute<vec4<float32>>();
-		instanceInputBinding.registerAttribute<vec4<float32>>();
-		instanceInputBinding.registerAttribute<float32>();
-		instanceInputBinding.registerAttribute<uint32>();
+		instanceInputBinding.registerAttribute<mat3x3<float32>>("");
+		instanceInputBinding.registerAttribute<vec4<float32>>("");
+		instanceInputBinding.registerAttribute<vec4<float32>>("");
+		instanceInputBinding.registerAttribute<float32>("");
+		instanceInputBinding.registerAttribute<uint32>("");
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -461,7 +461,7 @@ namespace ProjectA {
 
 	void Physics2DRenderer::createCenterOfMassRenderPipeline() {
 		VertexInputBinding centerOfMassVertexInputBinding(InputRate::VERTEX);
-		centerOfMassVertexInputBinding.registerAttribute<vec3<float32>>();
+		centerOfMassVertexInputBinding.registerAttribute<vec3<float32>>("");
 
 		ShaderModuleDescriptor centerOfMassVertexShaderModuleDescriptor{};
 		centerOfMassVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -501,11 +501,11 @@ namespace ProjectA {
 
 	void Physics2DRenderer::createPlaceholderFillRenderPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
+		vertexInputBinding.registerAttribute<svec2<float32>>("");
 
 		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<mat3x3<float32>>();
-		instanceInputBinding.registerAttribute<vec4<float32>>();
+		instanceInputBinding.registerAttribute<mat3x3<float32>>("");
+		instanceInputBinding.registerAttribute<vec4<float32>>("");
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -569,10 +569,10 @@ namespace ProjectA {
 
 	void Physics2DRenderer::createPlaceholderStrokeRenderPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
+		vertexInputBinding.registerAttribute<svec2<float32>>("");
 
 		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<mat3x3<float32>>();
+		instanceInputBinding.registerAttribute<mat3x3<float32>>("");
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -636,7 +636,7 @@ namespace ProjectA {
 
 	void Physics2DRenderer::createPlaceholderCenterOfMassRenderPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<svec2<float32>>();
+		vertexInputBinding.registerAttribute<svec2<float32>>("");
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;

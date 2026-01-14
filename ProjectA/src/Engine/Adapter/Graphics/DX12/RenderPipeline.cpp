@@ -132,28 +132,8 @@ namespace ProjectA {
 				const VertexInputAttribute& vertexInputAttribute = vertexInputAttributes[vertexInputAttributeIndex];
 
 				D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = inputElementDescriptors[inputElementDescriptorIndex];
-
-				// TODO (debug-only)
-				switch (vertexInputAttributeIndex) {
-					case 0: {
-						inputElementDescriptor.SemanticName = "POSITION";
-
-						break;
-					}
-					case 1: {
-						inputElementDescriptor.SemanticName = "COLOR";
-
-						break;
-					}
-					default: {
-						inputElementDescriptor.SemanticName = "";
-
-						break;
-					}
-				}
-
-				inputElementDescriptor.SemanticIndex = 0;
-
+				inputElementDescriptor.SemanticName = &vertexInputAttribute.hlslSemanticName[0];
+				inputElementDescriptor.SemanticIndex = vertexInputAttribute.hlslSemanticIndex;
 				inputElementDescriptor.Format = getVertexInputAttributeType(vertexInputAttribute.type);
 				inputElementDescriptor.InputSlot = vertexInputBindingIndex;
 				inputElementDescriptor.AlignedByteOffset = vertexInputAttribute.offset;

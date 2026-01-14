@@ -75,8 +75,8 @@ namespace ProjectA {
 				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
 				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-				vertexInputBinding.registerAttribute<svec2<float32>>();
-				vertexInputBinding.registerAttribute<vec3<float32>>();
+				vertexInputBinding.registerAttribute<svec2<float32>>("POSITION");
+				vertexInputBinding.registerAttribute<vec3<float32>>("COLOR");
 
 				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
