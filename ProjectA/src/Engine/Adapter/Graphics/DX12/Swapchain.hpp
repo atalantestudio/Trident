@@ -26,9 +26,9 @@ namespace ProjectA {
 
 		public:
 			ComPtr<IDXGISwapChain3> swapChain;
-			ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
+			ComPtr<ID3D12DescriptorHeap> renderTargetViewDescriptorHeap;
 			uint32 imageCount = 3;
-			uint32 rtvDescriptorSize;
+			uint32 renderTargetViewDescriptorSize;
 
 		private:
 			const DX12::Instance& instance;

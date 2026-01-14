@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/HeapType.hpp"
-#include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
+#include "Engine/Adapter/Graphics/DX12/ResourceStates.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
@@ -37,11 +37,11 @@ namespace ProjectA {
 		resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 		const D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_NONE;
-		const D3D12_RESOURCE_STATES resourceState = getResourceState(descriptor.usage);
+		const D3D12_RESOURCE_STATES resourceStates = getBufferResourceStates(descriptor.usage);
 
-		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, resourceState, nullptr, IID_PPV_ARGS(&resource));
+		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, resourceStates, nullptr, IID_PPV_ARGS(&resource));
 
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed resource.");
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed buffer resource.");
 	}
 
 	DX12::Buffer::~Buffer() {

@@ -74,7 +74,6 @@ namespace ProjectA {
 		}
 
 		graphicsPipelineStateDescriptor.SampleMask = max<UINT>();
-
 		graphicsPipelineStateDescriptor.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 		graphicsPipelineStateDescriptor.RasterizerState.CullMode = getCullMode(descriptor.cullMode);
 		graphicsPipelineStateDescriptor.RasterizerState.FrontCounterClockwise = descriptor.frontFace == FrontFace::COUNTER_CLOCKWISE;
@@ -89,7 +88,6 @@ namespace ProjectA {
 		graphicsPipelineStateDescriptor.RasterizerState.AntialiasedLineEnable = FALSE;
 		graphicsPipelineStateDescriptor.RasterizerState.ForcedSampleCount = 0;
 		graphicsPipelineStateDescriptor.RasterizerState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
-
 		graphicsPipelineStateDescriptor.DepthStencilState.DepthEnable = descriptor.depthStencilState.depthTest;
 		graphicsPipelineStateDescriptor.DepthStencilState.DepthWriteMask = static_cast<D3D12_DEPTH_WRITE_MASK>(descriptor.depthStencilState.depthWrite);
 		graphicsPipelineStateDescriptor.DepthStencilState.DepthFunc = static_cast<D3D12_COMPARISON_FUNC>(static_cast<uint8>(descriptor.depthStencilState.compareOperation) + 1);
@@ -149,10 +147,8 @@ namespace ProjectA {
 
 		graphicsPipelineStateDescriptor.InputLayout.pInputElementDescs = &inputElementDescriptors[0];
 		graphicsPipelineStateDescriptor.InputLayout.NumElements = static_cast<UINT>(inputElementDescriptors.count());
-
 		graphicsPipelineStateDescriptor.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 		graphicsPipelineStateDescriptor.PrimitiveTopologyType = getPrimitiveTopologyType(descriptor.primitiveTopology);
-
 		graphicsPipelineStateDescriptor.NumRenderTargets = descriptor.renderPass->getAttachmentCount();
 
 		uint32 attachmentIndex = 0;

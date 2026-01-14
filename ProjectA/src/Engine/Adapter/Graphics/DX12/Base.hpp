@@ -27,6 +27,7 @@ namespace ProjectA::DX12 {
 	class PipelineLayout;
 	class Queue;
 	class RenderPipeline;
+	class Sampler;
 	class ShaderModule;
 	class Surface;
 	class Swapchain;

@@ -10,7 +10,7 @@
 namespace ProjectA {
 	class DX12::Image final : public ProjectA::Image {
 		public:
-			explicit Image(const ImageDescriptor& descriptor);
+			explicit Image(const ImageDescriptor& descriptor, const DX12::Device& device);
 
 			// NOTE: Render Target View constructor
 			explicit Image(const DX12::Device& device, const DX12::Swapchain& swapchain, uint32 imageIndex, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle);

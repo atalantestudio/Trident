@@ -39,6 +39,10 @@ namespace ProjectA {
 			}
 		}
 
+		#ifdef BUILD_MODE_DEBUG
+			ComPtr<ID3DBlob> errorBlob;
+		#endif
+
 		result = D3DCompile(
 			&code[0],
 			code.count(),
@@ -50,9 +54,23 @@ namespace ProjectA {
 			flags,
 			0,
 			&blob,
-			nullptr
+			#ifdef BUILD_MODE_DEBUG
+				&errorBlob
+			#else
+				nullptr
+			#endif
 		);
 
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to compile shader.");
+		if (FAILED(result)) {
+			#ifdef BUILD_MODE_DEBUG
+				if (errorBlob) {
+					const view<char8> error(pointer_cast<const char8*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
+
+					ADAPTER_ASSERT(false, "Failed to compile shader: []", error);
+				}
+			#else
+				ADAPTER_ASSERT(false, "Failed to compile shader.");
+			#endif
+		}
 	}
 }

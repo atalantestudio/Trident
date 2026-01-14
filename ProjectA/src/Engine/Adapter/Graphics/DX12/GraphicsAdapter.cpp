@@ -10,6 +10,7 @@
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/RenderPipeline.hpp"
+#include "Engine/Adapter/Graphics/DX12/Sampler.hpp"
 #include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 
@@ -38,9 +39,7 @@ namespace ProjectA {
 	}
 
 	ref<DescriptorSetLayout> DX12::GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
+		return createRef<DescriptorSetLayout>(bindings);
 	}
 
 	ref<Fence> DX12::GraphicsAdapter::createFence() const {
@@ -52,7 +51,7 @@ namespace ProjectA {
 	}
 
 	ref<Image> DX12::GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
-		return createRef<DX12::Image>(descriptor);
+		return createRef<DX12::Image>(descriptor, *device);
 	}
 
 	ref<PipelineLayout> DX12::GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
@@ -68,9 +67,7 @@ namespace ProjectA {
 	}
 
 	ref<Sampler> DX12::GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
+		return createRef<DX12::Sampler>(descriptor, *device);
 	}
 
 	ref<Semaphore> DX12::GraphicsAdapter::createSemaphore() const {

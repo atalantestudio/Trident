@@ -8,6 +8,7 @@
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/RenderPipeline.hpp"
+#include "Engine/Adapter/Graphics/DX12/ResourceStates.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/Renderer/Renderer.hpp"
@@ -48,10 +49,10 @@ namespace ProjectA {
 
 		commandList->ResourceBarrier(1, &resourceBarrier);
 
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptorHandle = swapchain->rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		rtvDescriptorHandle.ptr += Renderer::getImageIndex() * swapchain->rtvDescriptorSize;
+		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetViewDescriptorHandle = swapchain->renderTargetViewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		renderTargetViewDescriptorHandle.ptr += Renderer::getImageIndex() * swapchain->renderTargetViewDescriptorSize;
 
-		commandList->OMSetRenderTargets(1, &rtvDescriptorHandle, false, nullptr);
+		commandList->OMSetRenderTargets(1, &renderTargetViewDescriptorHandle, false, nullptr);
 
 		ADAPTER_ASSERT(descriptor.clearValues.count() == 1, "Too many clear values.");
 
@@ -61,7 +62,7 @@ namespace ProjectA {
 		rectangle.right = swapchain->getExtent().width;
 		rectangle.bottom = swapchain->getExtent().height;
 
-		commandList->ClearRenderTargetView(rtvDescriptorHandle, descriptor.clearValues[0].color, 1, &rectangle);
+		commandList->ClearRenderTargetView(renderTargetViewDescriptorHandle, descriptor.clearValues[0].color, 1, &rectangle);
 
 		commandCount += 1;
 	}
@@ -115,7 +116,31 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::copyBufferToImage(ref<ProjectA::Buffer> sourceBuffer, ref<ProjectA::Image> destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		const ref<DX12::Buffer> srcBuffer = std::static_pointer_cast<DX12::Buffer>(sourceBuffer);
+		const ref<DX12::Image> dstImage = std::static_pointer_cast<DX12::Image>(destinationImage);
+		const D3D12_RESOURCE_DESC srcBufferResourceDescriptor = srcBuffer->resource->GetDesc();
+		const D3D12_RESOURCE_DESC dstImageResourceDescriptor = dstImage->resource->GetDesc();
+
+		D3D12_TEXTURE_COPY_LOCATION bufferCopyLocation{};
+		bufferCopyLocation.pResource = srcBuffer->resource.Get();
+		bufferCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+		bufferCopyLocation.PlacedFootprint.Footprint.Format = dstImageResourceDescriptor.Format;
+		bufferCopyLocation.PlacedFootprint.Footprint.Width = static_cast<UINT>(dstImageResourceDescriptor.Width);
+		bufferCopyLocation.PlacedFootprint.Footprint.Height = srcBufferResourceDescriptor.Height;
+		bufferCopyLocation.PlacedFootprint.Footprint.Depth = srcBufferResourceDescriptor.DepthOrArraySize;
+		bufferCopyLocation.PlacedFootprint.Footprint.RowPitch = static_cast<UINT>(srcBufferResourceDescriptor.Width);
+
+		D3D12_TEXTURE_COPY_LOCATION textureCopyLocation{};
+		textureCopyLocation.pResource = dstImage->resource.Get();
+		textureCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+
+		for (const BufferImageCopyRegion& copyRegion : copyRegions) {
+			bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset;
+
+			textureCopyLocation.SubresourceIndex = copyRegion.imageMipLevel + copyRegion.imageLayerOffset;
+
+			commandList->CopyTextureRegion(&textureCopyLocation, copyRegion.imageOffsetX, copyRegion.imageOffsetY, copyRegion.imageOffsetZ, &bufferCopyLocation, nullptr);
+		}
 
 		commandCount += 1;
 	}
@@ -145,7 +170,20 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::setImageMemoryBarrier(ref<ProjectA::Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		if (newLayout == ImageLayout::TRANSFER_DST_OPTIMAL) {
+			// Transitions to D3D12_RESOURCE_STATE_COPY_DEST are handled implicitly.
+			return;
+		}
+
+		D3D12_RESOURCE_BARRIER resourceBarrier{};
+		resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		resourceBarrier.Transition.pResource = std::static_pointer_cast<DX12::Image>(image)->resource.Get();
+		resourceBarrier.Transition.Subresource = 0;
+		resourceBarrier.Transition.StateBefore = getImageTransitionResourceStates(image->getLayout());
+		resourceBarrier.Transition.StateAfter = getImageTransitionResourceStates(newLayout);
+
+		commandList->ResourceBarrier(1, &resourceBarrier);
 
 		commandCount += 1;
 	}

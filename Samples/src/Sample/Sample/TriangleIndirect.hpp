@@ -75,8 +75,8 @@ namespace ProjectA {
 				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
 				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-				vertexInputBinding.registerAttribute<svec2<float32>>();
-				vertexInputBinding.registerAttribute<vec3<float32>>();
+				vertexInputBinding.registerAttribute<svec2<float32>>("POSITION");
+				vertexInputBinding.registerAttribute<vec3<float32>>("COLOR");
 
 				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -86,8 +86,8 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/Vertex2DRGB.vert");
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/ColorRGB.frag");
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Triangle/Triangle.vert");
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Triangle/Triangle.frag");
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;

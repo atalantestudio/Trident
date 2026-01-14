@@ -58,9 +58,7 @@ namespace ProjectA {
 	}
 
 	sequence<ref<DescriptorSet>> DX12::Device::allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return {};
+		return sequence<ref<DescriptorSet>>(descriptorSetLayouts.count());
 	}
 
 	ref<PhysicalDevice> DX12::Device::getPhysicalDevice() const {
@@ -77,9 +75,7 @@ namespace ProjectA {
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
 	}
 
-	void DX12::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-	}
+	void DX12::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {}
 
 	void DX12::Device::waitForFence(ref<ProjectA::Fence> fence) const {
 		// TODO: Move this inside Queue::submit().

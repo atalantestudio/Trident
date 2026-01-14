@@ -58,11 +58,13 @@ namespace ProjectA {
 // This feature is not yet implemented.
 #define ENGINE_ERROR_UNIMPLEMENTED() { \
 	ENGINE_ERROR("This feature is not yet implemented."); \
+	BREAKPOINT(); \
 	ABORT(); \
 }
 
 // This feature is not supported.
 #define ENGINE_ERROR_UNSUPPORTED() { \
 	ENGINE_ERROR("This feature is not supported."); \
+	BREAKPOINT(); \
 	ABORT(); \
 }

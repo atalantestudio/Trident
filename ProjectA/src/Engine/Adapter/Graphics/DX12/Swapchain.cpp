@@ -82,28 +82,28 @@ namespace ProjectA {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to move swapchain.");
 
-		D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDescriptor{};
-		rtvDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		rtvDescriptorHeapDescriptor.NumDescriptors = imageCount;
-		rtvDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		rtvDescriptorHeapDescriptor.NodeMask = 0;
+		D3D12_DESCRIPTOR_HEAP_DESC renderTargetViewDescriptorHeapDescriptor{};
+		renderTargetViewDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+		renderTargetViewDescriptorHeapDescriptor.NumDescriptors = imageCount;
+		renderTargetViewDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		renderTargetViewDescriptorHeapDescriptor.NodeMask = 0;
 
-		result = device.device->CreateDescriptorHeap(&rtvDescriptorHeapDescriptor, IID_PPV_ARGS(&rtvDescriptorHeap));
+		result = device.device->CreateDescriptorHeap(&renderTargetViewDescriptorHeapDescriptor, IID_PPV_ARGS(&renderTargetViewDescriptorHeap));
 
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create RTV descriptor heap.");
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create render target view descriptor heap.");
 
-		rtvDescriptorSize = device.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		renderTargetViewDescriptorSize = device.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 		images = sequence<ref<ProjectA::Image>>(imageCount);
 		imageViews = sequence<ref<ProjectA::ImageView>>(imageCount);
 
 		uint32 imageIndex = 0;
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptorHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetViewDescriptorHandle = renderTargetViewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
 		while (imageIndex < imageCount) {
-			images[imageIndex] = createRef<DX12::Image>(device, *this, imageIndex, rtvDescriptorHandle);
+			images[imageIndex] = createRef<DX12::Image>(device, *this, imageIndex, renderTargetViewDescriptorHandle);
 
-			rtvDescriptorHandle.ptr += rtvDescriptorSize;
+			renderTargetViewDescriptorHandle.ptr += renderTargetViewDescriptorSize;
 			imageIndex += 1;
 		}
 
