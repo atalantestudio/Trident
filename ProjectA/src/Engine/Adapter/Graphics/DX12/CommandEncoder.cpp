@@ -6,6 +6,7 @@
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandBuffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
+#include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
@@ -197,7 +198,7 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::drawIndexed(uint32 indexCount, uint32 instanceCount, uint32 indexOffset, sint32 indexBias, uint32 instanceOffset) {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		commandList->DrawIndexedInstanced(indexCount, instanceCount, indexOffset, indexBias, instanceOffset);
 
 		commandCount += 1;
 	}
@@ -248,7 +249,14 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::bindIndexBuffer(ref<ProjectA::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		const ref<DX12::Buffer> buffer = std::static_pointer_cast<DX12::Buffer>(indexBuffer);
+
+		D3D12_INDEX_BUFFER_VIEW indexBufferView{};
+		indexBufferView.BufferLocation = buffer->resource->GetGPUVirtualAddress();
+		indexBufferView.SizeInBytes = static_cast<UINT>(offset - buffer->size);
+		indexBufferView.Format = getIndexBufferFormat(indexTypeSize);
+
+		commandList->IASetIndexBuffer(&indexBufferView);
 
 		commandCount += 1;
 	}

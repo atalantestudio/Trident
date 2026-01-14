@@ -3,8 +3,8 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
-#include "Engine/Adapter/Graphics/DX12/ImageFormat.hpp"
 #include "Engine/Adapter/Graphics/DX12/Queue.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
@@ -59,7 +59,7 @@ namespace ProjectA {
 		DXGI_SWAP_CHAIN_DESC1 swapchainDescriptor{};
 		swapchainDescriptor.Width = descriptor.extent.width;
 		swapchainDescriptor.Height = descriptor.extent.height;
-		swapchainDescriptor.Format = getFormat(surface.getFormat());
+		swapchainDescriptor.Format = getImageFormat(surface.getFormat());
 		swapchainDescriptor.Stereo = false;
 		swapchainDescriptor.SampleDesc.Count = 1;
 		swapchainDescriptor.SampleDesc.Quality = 0;

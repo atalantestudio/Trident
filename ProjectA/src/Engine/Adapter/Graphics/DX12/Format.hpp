@@ -7,7 +7,7 @@
 #include "Engine/API/Rendering/ImageFormat.hpp"
 
 namespace ProjectA::DX12 {
-	inline DXGI_FORMAT getFormat(ImageFormat imageFormat) {
+	inline DXGI_FORMAT getImageFormat(ImageFormat imageFormat) {
 		switch (imageFormat) {
 			case ImageFormat::R8_UNORM:
 				return DXGI_FORMAT_R8_UNORM;
@@ -38,6 +38,18 @@ namespace ProjectA::DX12 {
 				ADAPTER_ASSERT(false, "Undefined format.");
 
 				return DXGI_FORMAT_UNKNOWN;
+		}
+	}
+
+	inline DXGI_FORMAT getIndexBufferFormat(uint8 indexTypeSize) {
+		switch (indexTypeSize) {
+			case sizeof(uint16): return DXGI_FORMAT_R16_UINT;
+			case sizeof(uint32): return DXGI_FORMAT_R32_UINT;
+			default: {
+				ADAPTER_ASSERT(false, "Unsupported index type size.");
+
+				return DXGI_FORMAT_UNKNOWN;
+			}
 		}
 	}
 }

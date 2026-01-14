@@ -66,17 +66,6 @@ namespace ProjectA {
 		commands.emplace_back(createRef<GL::BindDescriptorSetsCommand>(descriptorSets));
 	}
 
-	void GL::CommandEncoder::bindIndexBuffer(ref<ProjectA::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
-		indexOffset = static_cast<uint32>(offset);
-		indexType = getIndexType(indexTypeSize);
-		this->indexTypeSize = indexTypeSize;
-
-		commands.emplace_back(createRef<GL::BindIndexBufferCommand>(
-			renderPipeline->vertexArray,
-			std::static_pointer_cast<GL::Buffer>(indexBuffer)->buffer
-		));
-	}
-
 	void GL::CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<ProjectA::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
 		commands.emplace_back(createRef<GL::BindVertexBufferCommand>(
 			renderPipeline->vertexArray,
@@ -232,5 +221,16 @@ namespace ProjectA {
 		indexOffset = 0;
 		indexType = 0;
 		indexTypeSize = 0;
+	}
+
+	void GL::CommandEncoder::bindIndexBuffer(ref<ProjectA::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
+		indexOffset = static_cast<uint32>(offset);
+		indexType = getIndexType(indexTypeSize);
+		this->indexTypeSize = indexTypeSize;
+
+		commands.emplace_back(createRef<GL::BindIndexBufferCommand>(
+			renderPipeline->vertexArray,
+			std::static_pointer_cast<GL::Buffer>(indexBuffer)->buffer
+		));
 	}
 }

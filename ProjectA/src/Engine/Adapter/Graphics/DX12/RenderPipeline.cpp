@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/DX12/BlendFactor.hpp"
 #include "Engine/Adapter/Graphics/DX12/CullMode.hpp"
-#include "Engine/Adapter/Graphics/DX12/ImageFormat.hpp"
+#include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/PrimitiveTopology.hpp"
 #include "Engine/Adapter/Graphics/DX12/PrimitiveTopologyType.hpp"
@@ -160,7 +160,7 @@ namespace ProjectA {
 		while (attachmentIndex < descriptor.renderPass->getAttachmentCount()) {
 			const Attachment& attachment = descriptor.renderPass->getAttachment(attachmentIndex);
 
-			graphicsPipelineStateDescriptor.RTVFormats[attachmentIndex] = getFormat(attachment.format);
+			graphicsPipelineStateDescriptor.RTVFormats[attachmentIndex] = getImageFormat(attachment.format);
 
 			attachmentIndex += 1;
 		}
