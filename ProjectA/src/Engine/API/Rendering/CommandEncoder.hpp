@@ -67,7 +67,7 @@ namespace ProjectA {
 			virtual void setViewport(vec2<float32> origin, vec2<float32> size, float32 minDepth, float32 maxDepth) = 0;
 
 			// Draws primitives.
-			// - `vertexCount` is the number of total vertices to draw.
+			// - `vertexCount` is the number of vertices to draw per instance.
 			// - `instanceCount` is the number of instances to draw.
 			// - `vertexOffset` is the offset in vertex units in vertex rate attributes at which to start drawing.
 			// - `instanceOffset` is the offset of the first instance, in instance units.
@@ -81,7 +81,7 @@ namespace ProjectA {
 			virtual void drawIndirect(ref<Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) = 0;
 
 			// Draws primitives with indexed vertices.
-			// - `indexCount` is the number of total indices to draw.
+			// - `indexCount` is the number of indices to draw per instance.
 			// - `instanceCount` is the number of instances to draw.
 			// - `indexOffset` is the offset of the first index, in index units.
 			// - `indexBias` is a value added to the index before indexing into the vertex buffer.

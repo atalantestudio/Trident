@@ -2,7 +2,7 @@
 
 namespace ProjectA {
 	struct DrawIndexedIndirectCommand {
-		// The number of vertices to draw.
+		// The number of vertices to draw per instance.
 		uint32 indexCount;
 
 		// The number of instances to draw.

@@ -2,7 +2,7 @@
 
 namespace ProjectA {
 	struct DrawIndirectCommand {
-		// The number of vertices to draw.
+		// The number of vertices to draw per instance.
 		uint32 vertexCount;
 
 		// The number of instances to draw.
