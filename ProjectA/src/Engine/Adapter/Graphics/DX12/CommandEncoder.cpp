@@ -387,7 +387,7 @@ namespace ProjectA {
 
 		D3D12_INDEX_BUFFER_VIEW indexBufferView{};
 		indexBufferView.BufferLocation = buffer->resource->GetGPUVirtualAddress();
-		indexBufferView.SizeInBytes = static_cast<UINT>(offset - buffer->size);
+		indexBufferView.SizeInBytes = static_cast<UINT>(buffer->size - offset);
 		indexBufferView.Format = getIndexBufferFormat(indexTypeSize);
 
 		commandList->IASetIndexBuffer(&indexBufferView);
