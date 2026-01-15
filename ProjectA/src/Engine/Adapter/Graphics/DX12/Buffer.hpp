@@ -19,5 +19,6 @@ namespace ProjectA {
 
 		public:
 			ComPtr<ID3D12Resource> resource;
+			ComPtr<ID3D12CommandSignature> commandSignature = nullptr;
 	};
 }

@@ -12,10 +12,13 @@
 #include "Engine/Adapter/Graphics/DX12/ResourceStates.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/API/Rendering/DrawIndexedIndirectCommand.hpp"
+#include "Engine/API/Rendering/DrawIndirectCommand.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
 	DX12::CommandEncoder::CommandEncoder(const CommandBufferDescriptor& descriptor, const DX12::Device& device, const DX12::CommandPool& commandPool) :
+		device(device),
 		commandAllocator(commandPool.commandAllocator)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -273,7 +276,32 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::drawIndirect(ref<ProjectA::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		ADAPTER_ASSERT(buffer->usage & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
+
+		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
+
+		if (!indirectBuffer->commandSignature) {
+			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor = {};
+			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
+
+			D3D12_COMMAND_SIGNATURE_DESC commandSignatureDescriptor{};
+			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
+			commandSignatureDescriptor.NumArgumentDescs = 1;
+			commandSignatureDescriptor.ByteStride = sizeof(DrawIndirectCommand);
+
+			const HRESULT result = device.device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");
+		}
+
+		commandList->ExecuteIndirect(
+			indirectBuffer->commandSignature.Get(),
+			drawCount,
+			std::static_pointer_cast<DX12::Buffer>(buffer)->resource.Get(),
+			bufferOffset,
+			nullptr,
+			0
+		);
 
 		commandCount += 1;
 	}
@@ -285,7 +313,32 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::drawIndexedIndirect(ref<ProjectA::Buffer> buffer, uint64 bufferOffset, uint32 drawCount, uint32 stride) {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		ADAPTER_ASSERT(buffer->usage & BufferUsage::INDIRECT, "The buffer is not an indirect buffer.");
+
+		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
+
+		if (!indirectBuffer->commandSignature) {
+			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor = {};
+			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+
+			D3D12_COMMAND_SIGNATURE_DESC commandSignatureDescriptor{};
+			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
+			commandSignatureDescriptor.NumArgumentDescs = 1;
+			commandSignatureDescriptor.ByteStride = sizeof(DrawIndexedIndirectCommand);
+
+			const HRESULT result = device.device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command signature.");
+		}
+
+		commandList->ExecuteIndirect(
+			indirectBuffer->commandSignature.Get(),
+			drawCount,
+			std::static_pointer_cast<DX12::Buffer>(buffer)->resource.Get(),
+			bufferOffset,
+			nullptr,
+			0
+		);
 
 		commandCount += 1;
 	}

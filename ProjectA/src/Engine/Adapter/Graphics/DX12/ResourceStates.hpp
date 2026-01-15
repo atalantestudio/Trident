@@ -16,30 +16,12 @@ namespace ProjectA::DX12 {
 			resourceStates |= D3D12_RESOURCE_STATE_COPY_SOURCE;
 		}
 
-		// TODO: D3D12_RESOURCE_STATE_COPY_DEST can only be used with D3D12_HEAP_TYPE_READBACK.
-		/* if (bufferUsage & BufferUsage::TRANSFER_DST) {
-			resourceStates |= D3D12_RESOURCE_STATE_COPY_DEST;
-		} */
-
 		if (bufferUsage & BufferUsage::UNIFORM) {
 			resourceStates |= D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
 		}
 
 		if (bufferUsage & BufferUsage::STORAGE) {
 			resourceStates |= D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
-		}
-
-		if (bufferUsage & BufferUsage::INDEX) {
-			resourceStates |= D3D12_RESOURCE_STATE_INDEX_BUFFER;
-		}
-
-		// TODO: It seems this type cannot be used as the initial resource state and must instead be transitioned into via a resource barrier.
-		/* if (bufferUsage & BufferUsage::VERTEX) {
-			resourceStates |= D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-		} */
-
-		if (bufferUsage & BufferUsage::INDIRECT) {
-			resourceStates |= D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
 		}
 
 		return resourceStates;
