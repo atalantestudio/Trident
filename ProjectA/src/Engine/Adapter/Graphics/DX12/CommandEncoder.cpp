@@ -6,6 +6,7 @@
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandBuffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
+#include "Engine/Adapter/Graphics/DX12/DescriptorSet.hpp"
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceStates.hpp"
@@ -84,7 +85,48 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::bindDescriptorSets(ref<ProjectA::PipelineLayout> pipelineLayout, const sequence<ref<ProjectA::DescriptorSet>>& descriptorSets) {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		// TODO: Replace with sequence<T>.
+		std::vector<ID3D12DescriptorHeap*> descriptorHeaps;
+
+		UINT descriptorSetIndex = 0;
+
+		while (descriptorSetIndex < descriptorSets.count()) {
+			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
+
+			if (descriptorSet->shaderResourceViewDescriptorHeap) {
+				descriptorHeaps.emplace_back(descriptorSet->shaderResourceViewDescriptorHeap.Get());
+			}
+
+			if (descriptorSet->samplerDescriptorHeap) {
+				descriptorHeaps.emplace_back(descriptorSet->samplerDescriptorHeap.Get());
+			}
+
+			descriptorSetIndex += 1;
+		}
+
+		commandList->SetDescriptorHeaps(static_cast<UINT>(descriptorHeaps.size()), &descriptorHeaps[0]);
+
+		descriptorSetIndex = 0;
+
+		UINT rootParameterIndex = 0;
+
+		while (descriptorSetIndex < descriptorSets.count()) {
+			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
+
+			if (descriptorSet->shaderResourceViewDescriptorHeap) {
+				commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorSet->shaderResourceViewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+				rootParameterIndex += 1;
+			}
+
+			if (descriptorSet->samplerDescriptorHeap) {
+				commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+				rootParameterIndex += 1;
+			}
+
+			descriptorSetIndex += 1;
+		}
 
 		commandCount += 1;
 	}

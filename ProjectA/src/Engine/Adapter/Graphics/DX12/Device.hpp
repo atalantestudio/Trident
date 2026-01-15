@@ -17,7 +17,7 @@ namespace ProjectA {
 
 			AcquireNextImageStatus acquireNextImage(ref<ProjectA::Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const final override;
 
-			sequence<ref<DescriptorSet>> allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) final override;
+			sequence<ref<ProjectA::DescriptorSet>> allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) final override;
 
 			ref<ProjectA::PhysicalDevice> getPhysicalDevice() const final override;
 

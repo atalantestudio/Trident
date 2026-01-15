@@ -3,7 +3,9 @@
 
 #include "pch.hpp"
 
+#include "Engine/Adapter/Graphics/DX12/DescriptorSet.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
+#include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/Queue.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
@@ -58,7 +60,73 @@ namespace ProjectA {
 	}
 
 	sequence<ref<DescriptorSet>> DX12::Device::allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) {
-		return sequence<ref<DescriptorSet>>(descriptorSetLayouts.count());
+		HRESULT result;
+		sequence<ref<ProjectA::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
+		UINT descriptorSetIndex = 0;
+		UINT bindingIndex = 0;
+		UINT shaderResourceViewDescriptorCount = 0;
+		UINT samplerDescriptorCount = 0;
+
+		while (descriptorSetIndex < descriptorSetLayouts.count()) {
+			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
+
+			bindingIndex = 0;
+			samplerDescriptorCount = 0;
+			shaderResourceViewDescriptorCount = 0;
+
+			const ref<DX12::DescriptorSet> descriptorSet = createRef<DX12::DescriptorSet>();
+			descriptorSet->bindings = sequence<DX12::DescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
+
+			for (const DescriptorSetLayoutBinding& binding : descriptorSetLayout->bindings) {
+				if (binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER) {
+					shaderResourceViewDescriptorCount += binding.descriptorCount;
+					samplerDescriptorCount += binding.descriptorCount;
+				}
+				else {
+					ENGINE_ERROR_UNIMPLEMENTED();
+				}
+			}
+
+			if (shaderResourceViewDescriptorCount > 0) {
+				D3D12_DESCRIPTOR_HEAP_DESC shaderResourceViewDescriptorHeapDescriptor{};
+				shaderResourceViewDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+				shaderResourceViewDescriptorHeapDescriptor.NumDescriptors = shaderResourceViewDescriptorCount;
+				shaderResourceViewDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+				shaderResourceViewDescriptorHeapDescriptor.NodeMask = 0;
+
+				result = device->CreateDescriptorHeap(&shaderResourceViewDescriptorHeapDescriptor, IID_PPV_ARGS(&descriptorSet->shaderResourceViewDescriptorHeap));
+
+				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create shader resource view descriptor heap.");
+			}
+
+			if (samplerDescriptorCount > 0) {
+				D3D12_DESCRIPTOR_HEAP_DESC samplerDescriptorHeapDescriptor{};
+				samplerDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+				samplerDescriptorHeapDescriptor.NumDescriptors = samplerDescriptorCount;
+				samplerDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+				samplerDescriptorHeapDescriptor.NodeMask = 0;
+
+				result = device->CreateDescriptorHeap(&samplerDescriptorHeapDescriptor, IID_PPV_ARGS(&descriptorSet->samplerDescriptorHeap));
+
+				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create sampler descriptor heap.");
+			}
+
+			while (bindingIndex < descriptorSetLayout->bindings.count()) {
+				const DescriptorSetLayoutBinding& binding = descriptorSetLayout->bindings[bindingIndex];
+
+				DX12::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[bindingIndex];
+				descriptorSetBinding.descriptorType = binding.descriptorType;
+				descriptorSetBinding.descriptorCount = binding.descriptorCount;
+
+				bindingIndex += 1;
+			}
+
+			descriptorSets[descriptorSetIndex] = descriptorSet;
+
+			descriptorSetIndex += 1;
+		}
+
+		return descriptorSets;
 	}
 
 	ref<PhysicalDevice> DX12::Device::getPhysicalDevice() const {
@@ -75,7 +143,60 @@ namespace ProjectA {
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
 	}
 
-	void DX12::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {}
+	void DX12::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
+		UINT writeDescriptorSetIndex = 0;
+
+		while (writeDescriptorSetIndex < writeDescriptorSets.count()) {
+			const WriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[writeDescriptorSetIndex];
+			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
+			const DX12::DescriptorSet::DescriptorSetBinding& binding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
+
+			if (isBufferDescriptorType(binding.descriptorType)) {
+				UINT descriptorBufferIndex = 0;
+
+				while (descriptorBufferIndex < writeDescriptorSet.descriptorBuffers.count()) {
+					const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
+
+					ENGINE_ERROR_UNIMPLEMENTED();
+
+					descriptorBufferIndex += 1;
+				}
+			}
+			else if (isImageDescriptorType(binding.descriptorType)) {
+				UINT descriptorImageIndex = 0;
+
+				while (descriptorImageIndex < writeDescriptorSet.descriptorImages.count()) {
+					const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
+					const DX12::Image* image = static_cast<const DX12::Image*>(descriptorImage.imageView->getImage());
+
+					ADAPTER_ASSERT(image->getType() == ImageType::TEXTURE_2D, "Images other than TEXTURE_2D are not supported.");
+
+					D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor = {};
+					shaderResourceViewDescriptor.Format = getImageFormat(image->getFormat());
+					shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+					shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+					// TODO
+					// shaderResourceViewDescriptor.Texture2D.MostDetailedMip = descriptorImage.imageView->getMipLevelOffset();
+
+					shaderResourceViewDescriptor.Texture2D.MipLevels = descriptorImage.imageView->getMipLevelCount();
+
+					// TODO
+					// shaderResourceViewDescriptor.Texture2D.PlaneSlice = descriptorImage.imageView->getLayerOffset();
+					// shaderResourceViewDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+
+					device->CreateShaderResourceView(image->resource.Get(), &shaderResourceViewDescriptor, descriptorSet->shaderResourceViewDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+					descriptorImageIndex += 1;
+				}
+			}
+			else {
+				ADAPTER_ASSERT(false, "The descriptor must either have a buffer type or an image type.");
+			}
+
+			writeDescriptorSetIndex += 1;
+		}
+	}
 
 	void DX12::Device::waitForFence(ref<ProjectA::Fence> fence) const {
 		// TODO: Move this inside Queue::submit().
