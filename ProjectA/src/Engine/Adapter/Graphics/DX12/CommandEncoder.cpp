@@ -162,15 +162,12 @@ namespace ProjectA {
 		const ref<DX12::Image> dstImage = std::static_pointer_cast<DX12::Image>(destinationImage);
 		const D3D12_RESOURCE_DESC srcBufferResourceDescriptor = srcBuffer->resource->GetDesc();
 		const D3D12_RESOURCE_DESC dstImageResourceDescriptor = dstImage->resource->GetDesc();
+		const UINT channelCount = getChannelCount(dstImage->getFormat());
 
 		D3D12_TEXTURE_COPY_LOCATION bufferCopyLocation{};
 		bufferCopyLocation.pResource = srcBuffer->resource.Get();
 		bufferCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 		bufferCopyLocation.PlacedFootprint.Footprint.Format = dstImageResourceDescriptor.Format;
-		bufferCopyLocation.PlacedFootprint.Footprint.Width = static_cast<UINT>(dstImageResourceDescriptor.Width);
-		bufferCopyLocation.PlacedFootprint.Footprint.Height = srcBufferResourceDescriptor.Height;
-		bufferCopyLocation.PlacedFootprint.Footprint.Depth = srcBufferResourceDescriptor.DepthOrArraySize;
-		bufferCopyLocation.PlacedFootprint.Footprint.RowPitch = static_cast<UINT>(srcBufferResourceDescriptor.Width);
 
 		D3D12_TEXTURE_COPY_LOCATION textureCopyLocation{};
 		textureCopyLocation.pResource = dstImage->resource.Get();
@@ -178,8 +175,12 @@ namespace ProjectA {
 
 		for (const BufferImageCopyRegion& copyRegion : copyRegions) {
 			bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset;
+			bufferCopyLocation.PlacedFootprint.Footprint.Width = static_cast<UINT>(dstImageResourceDescriptor.Width);
+			bufferCopyLocation.PlacedFootprint.Footprint.Height = dstImageResourceDescriptor.Height;
+			bufferCopyLocation.PlacedFootprint.Footprint.Depth = dstImageResourceDescriptor.DepthOrArraySize;
+			bufferCopyLocation.PlacedFootprint.Footprint.RowPitch = bufferCopyLocation.PlacedFootprint.Footprint.Width * channelCount;
 
-			textureCopyLocation.SubresourceIndex = copyRegion.imageMipLevel + copyRegion.imageLayerOffset;
+			textureCopyLocation.SubresourceIndex = copyRegion.imageLayerOffset * dstImage->getMipLevelCount() + copyRegion.imageMipLevel;
 
 			commandList->CopyTextureRegion(&textureCopyLocation, copyRegion.imageOffsetX, copyRegion.imageOffsetY, copyRegion.imageOffsetZ, &bufferCopyLocation, nullptr);
 		}
