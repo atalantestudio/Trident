@@ -9,6 +9,10 @@
 #include <dxgi1_6.h>
 #include <wrl.h>
 
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxgi.lib")
+
 namespace ProjectA::DX12 {
 	using Microsoft::WRL::ComPtr;
 

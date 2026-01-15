@@ -95,9 +95,9 @@ project "ProjectA"
 		}
 
 		links {
-			"d3d12.lib",
-			"d3dcompiler.lib",
-			"dxgi.lib",
+			-- "d3d12.lib",
+			-- "d3dcompiler.lib",
+			-- "dxgi.lib",
 		}
 
 	filter "configurations:Debug"
