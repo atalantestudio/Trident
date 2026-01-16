@@ -71,11 +71,19 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				const AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
-				const ref<ShaderModuleAsset> vertexShaderModuleAsset = assetLibrary->findShaderModuleAsset("Screen");
+				ref<ShaderModule> vertexShaderModule;
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, vertexShaderModuleAsset);
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/Gradient.frag");
+				if (getGraphicsApi() == GraphicsAPI::GL) {
+					const AssetLibrary* assetLibrary = getLayer()->getApplication()->getAssetLibrary();
+					const ref<ShaderModuleAsset> vertexShaderModuleAsset = assetLibrary->findShaderModuleAsset("Screen");
+
+					vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, vertexShaderModuleAsset);
+				}
+				else {
+					vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Image/Image.vert");
+				}
+
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Gradient/Gradient.frag");
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;
