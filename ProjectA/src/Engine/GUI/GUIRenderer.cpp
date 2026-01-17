@@ -3,14 +3,18 @@
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/GUI/GUIRenderer.hpp"
 
+// #define ENABLE_GUI_ANTIALIASING
+
 namespace ProjectA {
 	void GUIRenderer::build() {
 		setupRenderPass();
 
-		if (layerInput->swapchainImage == nullptr) {
-			createSwapchainImage();
-			createSwapchainImageView();
-		}
+		#ifdef ENABLE_GUI_ANTIALIASING
+			if (layerInput->swapchainImage == nullptr) {
+				createSwapchainImage();
+				createSwapchainImageView();
+			}
+		#endif
 
 		recreateFramebuffers();
 
@@ -128,11 +132,16 @@ namespace ProjectA {
 	void GUIRenderer::setupRenderPass() {
 		Attachment swapchainAttachment{};
 		swapchainAttachment.format = getSurface()->getFormat();
-		swapchainAttachment.sampleCount = 8;
+
+		#ifdef ENABLE_GUI_ANTIALIASING
+			swapchainAttachment.sampleCount = 8;
+		#else
+			swapchainAttachment.sampleCount = 1;
+		#endif
 
 		// TODO(layer-superposition)
-		swapchainAttachment.loadOperation = LoadOperation::LOAD;
-		// swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+		// swapchainAttachment.loadOperation = LoadOperation::LOAD;
+		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
 
 		swapchainAttachment.storeOperation = StoreOperation::STORE;
 		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
@@ -146,14 +155,19 @@ namespace ProjectA {
 
 		const ref<Subpass> subpass = createSubpass(subpassDescriptor);
 
-		SubpassDependency subpassDependency{};
-		subpassDependency.sourceSubpassIndex = SubpassDependency::EXTERNAL_SUBPASS;
-		subpassDependency.destinationSubpassIndex = 0;
+		#ifdef ENABLE_GUI_ANTIALIASING
+			SubpassDependency subpassDependency{};
+			subpassDependency.sourceSubpassIndex = SubpassDependency::EXTERNAL_SUBPASS;
+			subpassDependency.destinationSubpassIndex = 0;
+		#endif
 
 		RenderPassDescriptor renderPassDescriptor{};
 		renderPassDescriptor.attachments = {swapchainAttachment};
 		renderPassDescriptor.subpasses = {subpass};
-		renderPassDescriptor.subpassDependencies = {subpassDependency};
+
+		#ifdef ENABLE_GUI_ANTIALIASING
+			renderPassDescriptor.subpassDependencies = {subpassDependency};
+		#endif
 
 		renderPass = createRenderPass(renderPassDescriptor);
 	}
@@ -165,12 +179,22 @@ namespace ProjectA {
 
 		FramebufferDescriptor framebufferDescriptor{};
 		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = {layerInput->swapchainImageView, nullptr};
+
+		#ifdef ENABLE_GUI_ANTIALIASING
+			framebufferDescriptor.imageViews = {layerInput->swapchainImageView, nullptr};
+		#else
+			framebufferDescriptor.imageViews = {nullptr};
+		#endif
+
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
 		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
-			framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
+			#ifdef ENABLE_GUI_ANTIALIASING
+				framebufferDescriptor.imageViews[1] = swapchain->getImageView(framebufferIndex);
+			#else
+				framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
+			#endif
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
 		}
@@ -376,7 +400,13 @@ namespace ProjectA {
 		subcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;
 		subcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		subcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
-		subcomponentRenderPipelineDescriptor.minSampleShading = 0.5f;
+
+		#ifdef ENABLE_GUI_ANTIALIASING
+			subcomponentRenderPipelineDescriptor.minSampleShading = 1.0f;
+		#else
+			subcomponentRenderPipelineDescriptor.minSampleShading = 0.0f;
+		#endif
+
 		subcomponentRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		subcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		subcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
@@ -422,7 +452,13 @@ namespace ProjectA {
 		glyphSubcomponentRenderPipelineDescriptor.cullMode = CullMode::BACK;
 		glyphSubcomponentRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		glyphSubcomponentRenderPipelineDescriptor.lineWidth = 1.0f;
-		glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 1.0f;
+
+		#ifdef ENABLE_GUI_ANTIALIASING
+			glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 1.0f;
+		#else
+			glyphSubcomponentRenderPipelineDescriptor.minSampleShading = 0.0f;
+		#endif
+
 		glyphSubcomponentRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
 		glyphSubcomponentRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		glyphSubcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
@@ -558,7 +594,7 @@ namespace ProjectA {
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor{};
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-		beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}};
+		beginRenderPassDescriptor.clearValues = {{0.04f, 0.04f, 0.04f, 1.0f}};
 
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 		const float32 width = static_cast<float32>(swapchainExtent.width);
@@ -590,10 +626,12 @@ namespace ProjectA {
 	}
 
 	void GUIRenderer::resize(WindowResizeEvent& event) {
-		if (layerInput->swapchainImage == nullptr) {
-			createSwapchainImage();
-			createSwapchainImageView();
-		}
+		#ifdef ENABLE_GUI_ANTIALIASING
+			if (layerInput->swapchainImage == nullptr) {
+				createSwapchainImage();
+				createSwapchainImageView();
+			}
+		#endif
 
 		recreateFramebuffers();
 
