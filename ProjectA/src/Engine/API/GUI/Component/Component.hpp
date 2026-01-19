@@ -3,11 +3,9 @@
 
 #pragma once
 
-#include "Engine/API/GUI/GUILayer.hpp"
-
 namespace ProjectA {
 	class GUIComponent {
 		public:
-			virtual void render(GUILayer& layer, std::function<void(const ContainerStyle&)> openComponent, std::function<void()> closeComponent, std::function<void(GUILayer&)> renderChildren) const = 0;
+			virtual void render(std::function<void(const ContainerStyle&)> openComponent, std::function<void()> closeComponent, std::function<void()> renderChildren) const = 0;
 	};
 }

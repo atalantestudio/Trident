@@ -129,5 +129,5 @@ namespace ProjectA {
 	#define GUIComponent(component) for (bool _opened = (openComponent(component), true); _opened; _opened = false, closeComponent())
 
 	// Specific to objects extending GUIComponent.
-	#define GUIComponentClass(component, renderChildren) component.render(*this, BIND(openComponent), BIND(closeComponent), renderChildren)
+	#define GUIComponentClass(component, renderChildren) component.render(BIND(openComponent), BIND(closeComponent), renderChildren)
 }

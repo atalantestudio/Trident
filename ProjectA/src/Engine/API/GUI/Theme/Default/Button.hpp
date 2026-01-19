@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/GUI/Component/Component.hpp"
+#include "Engine/API/GUI/GUILayer.hpp"
 
 namespace ProjectA {
 	class Button : public GUIComponent {
@@ -24,10 +25,10 @@ namespace ProjectA {
 				style.eventListeners = &eventListeners;
 			}
 
-			void render(GUILayer& layer, std::function<void(const ContainerStyle&)> openComponent, std::function<void()> closeComponent, std::function<void(GUILayer&)> renderChildren) const override {
+			void render(std::function<void(const ContainerStyle&)> openComponent, std::function<void()> closeComponent, std::function<void()> renderChildren) const override {
 				GUIComponent(containerStyle) {
 					GUIComponent(style) {
-						renderChildren(layer);
+						renderChildren();
 					}
 				}
 			}

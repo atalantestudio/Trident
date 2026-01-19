@@ -17,8 +17,8 @@ namespace ProjectA {
 
 			void GUI() override {
 				GUIComponent(windowStyle) {
-					GUIComponentClass(button, [&](GUILayer& layer) {
-						layer.GUIText("Click me, I'm a button.", textStyle);
+					GUIComponentClass(button, [&]() {
+						GUIText("Click me, I'm a button.", textStyle);
 					});
 				}
 			}
