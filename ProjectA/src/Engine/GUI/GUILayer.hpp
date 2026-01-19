@@ -47,7 +47,10 @@ namespace ProjectA {
 
 		protected:
 			FontID loadFontAsset(view<char8> assetName);
+			FontID loadImageAsset(view<char8> assetName);
 
+			// Loads a PNG image and returns its identifier.
+			// TODO(deprecated)
 			ImageID loadImage(view<char8> path);
 
 			void openComponent(const ContainerStyle& style);

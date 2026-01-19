@@ -1,3 +1,6 @@
+// Copyright 2025 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 #include "Engine/Filesystem/File/TTFFile.hpp"
@@ -11,21 +14,14 @@ namespace ProjectA {
 	};
 
 	class GenerateSDFGlyphMapProcess {
-		private:
+		public:
 			struct FontStorage {
-				uint32 outputGlyphSize;
-
-				// Size of the area occupied by the SDF spread.
 				uint32 spreadFactor;
-
-				sint32 ascent;
-				sint32 descent;
+				uint32 outputGlyphSize;
+				sint32 lineHeight;
 			};
 
-			struct GlyphBuffer {
-				sint32 minCoordinateX;
-				sint32 minCoordinateY;
-				uint32 dimension;
+			struct alignas(8) GlyphBuffer {
 				uint32 edgeCount;
 			};
 
@@ -39,15 +35,6 @@ namespace ProjectA {
 				bool curved;
 			};
 
-		private:
-			static constexpr uint64 MAX_GLYPH_COUNT = 2048;
-			static constexpr Extent2D GLYPH_MAP_IMAGE_EXTENT = {2048, 2048};
-			static constexpr uint32 GLYPH_SUBIMAGE_DIMENSION = 64;
-			static constexpr uint32 SPREAD_FACTOR = 0;
-
-		private:
-			static uint64 computeMaxGlyphByteSize(const sequence<TrueTypeFont::Glyph>& glyphs);
-
 		public:
 			explicit GenerateSDFGlyphMapProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& sdfGlyphMap);
 
@@ -57,7 +44,7 @@ namespace ProjectA {
 			void createGlyphOffsetBuffer();
 
 			void createGlyphImage();
-			void createGlyphMapImage();
+			void createGlyphMapImage(Extent2D extent);
 
 			void createGlyphImageView();
 			void createGlyphMapImageView();
@@ -79,9 +66,7 @@ namespace ProjectA {
 			ref<Buffer> glyphBuffer;
 			ref<Buffer> glyphOffsetBuffer;
 
-			// Used for generating the distance field for each glyph.
 			ref<Image> glyphImage;
-
 			ref<Image> glyphMapImage;
 
 			ref<ImageView> glyphImageView;

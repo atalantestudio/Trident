@@ -1,3 +1,6 @@
+// Copyright 2025 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/Filesystem/Filesystem.hpp"
@@ -6,31 +9,85 @@
 #include "GenerateSDFGlyphMapProcess.hpp"
 
 namespace ProjectA {
-	uint64 GenerateSDFGlyphMapProcess::computeMaxGlyphByteSize(const sequence<TrueTypeFont::Glyph>& glyphs) {
+	static bool calculateGlyphMapLayout(Extent2D glyphMapExtent, const File<FileFormat::TTF>& file, view<TrueTypeFont::Glyph> glyphView, uint32 spreadFactor) {
+		const sint16 lineHeight = file.ascent - file.descent;
+		const float32 inverseLineHeight = static_cast<float32>(1.0 / lineHeight * 64.0);
+		const vec2<float32> spread = {spreadFactor * 2.0f, spreadFactor * 2.0f};
+
+		uint32 x = 0;
+		uint32 y = 0;
+		uint32 rowHeight = 0;
+
+		for (const TrueTypeFont::Glyph& glyph : glyphView) {
+			if (glyph.emptyOrUnparsed()) {
+				continue;
+			}
+
+			// The glyph size in TTF space.
+			const vec2<float32> glyphFontSize = {static_cast<float32>(glyph.max.x - glyph.min.x), static_cast<float32>(glyph.max.y - glyph.min.y)};
+
+			// The glyph size on the glyph map, in pixels.
+			const vec2<float32> rawGlyphTexelSize = glyphFontSize * inverseLineHeight;
+
+			// The glyph size on the glyph map, in pixels. Including the spread of the distance field.
+			const vec2<float32> spreadGlyphTexelSize = rawGlyphTexelSize + spread;
+
+			// TODO(lyah): Add vec<C, T> ceil(vec<C, T>, vec<C, T>).
+			const uint32 glyphWidth = static_cast<uint32>(ceil(spreadGlyphTexelSize[0]));
+			const uint32 glyphHeight = static_cast<uint32>(ceil(spreadGlyphTexelSize[1]));
+
+			x += glyphWidth;
+			rowHeight = max(rowHeight, glyphHeight);
+
+			if (x >= glyphMapExtent[0]) {
+				x = 0;
+				y += rowHeight;
+				rowHeight = 0;
+			}
+
+			if (y >= glyphMapExtent.height) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	static uint64 calculateGlyphBufferSize(const File<FileFormat::TTF>& file, view<TrueTypeFont::Glyph> glyphView) {
 		uint64 maxGlyphEdgeCount = 0;
 
-		for (const TrueTypeFont::Glyph& glyph : glyphs) {
+		for (const TrueTypeFont::Glyph& glyph : glyphView) {
 			maxGlyphEdgeCount = max(maxGlyphEdgeCount, glyph.edges.count());
 		}
 
-		return sizeof(GlyphBuffer) + maxGlyphEdgeCount * sizeof(GlyphEdge);
+		return sizeof(GenerateSDFGlyphMapProcess::GlyphBuffer) + maxGlyphEdgeCount * sizeof(GenerateSDFGlyphMapProcess::GlyphEdge);
 	}
 
 	GenerateSDFGlyphMapProcess::GenerateSDFGlyphMapProcess(const File<FileFormat::TTF>& file, SDFGlyphMap& output) {
-		ENGINE_ASSERT(file.glyphs.count() < MAX_GLYPH_COUNT, "The input font must have less than [] glyphs.", MAX_GLYPH_COUNT);
+		static constexpr uint32 GLYPH_SUBIMAGE_DIMENSION = 64;
+		static constexpr uint32 spreadFactor = 7;
 
-		output.extent = GLYPH_MAP_IMAGE_EXTENT;
-		output.glyphs = sequence<Glyph>(file.glyphs.count());
+		const view<TrueTypeFont::Glyph> glyphView(&file.glyphs[0], file.glyphs.count());
+
+		output.extent = {2048, 2048};
+		output.glyphs = sequence<Glyph>(glyphView.count());
+
+		if (!calculateGlyphMapLayout(output.extent, file, glyphView, spreadFactor)) {
+			ENGINE_ASSERT(false, "The glyph map is too small.");
+
+			return;
+		}
+
+		const uint64 glyphBufferSize = calculateGlyphBufferSize(file, glyphView);
 
 		createFontBuffer();
-		createGlyphBuffer(computeMaxGlyphByteSize(file.glyphs));
-
+		createGlyphBuffer(glyphBufferSize);
 		createGlyphOffsetBuffer();
 
 		createGlyphImage();
 		createGlyphImageView();
 
-		createGlyphMapImage();
+		createGlyphMapImage(output.extent);
 		createGlyphMapImageView();
 
 		createDescriptorSetLayoutsAndSets();
@@ -54,12 +111,12 @@ namespace ProjectA {
 		ref<CommandEncoder> commandEncoder;
 
 		const ref<Buffer> fontStagingBuffer = Renderer::createStagingBuffer(sizeof(FontStorage));
+		const TrueTypeFont::FWord lineHeight = file.ascent - file.descent + file.lineGap;
 
 		FontStorage* fontStagingBufferMappedRange = fontStagingBuffer->map<FontStorage>(0, fontStagingBuffer->size);
+		fontStagingBufferMappedRange->spreadFactor = spreadFactor;
 		fontStagingBufferMappedRange->outputGlyphSize = GLYPH_SUBIMAGE_DIMENSION;
-		fontStagingBufferMappedRange->spreadFactor = SPREAD_FACTOR;
-		fontStagingBufferMappedRange->ascent = file.ascent;
-		fontStagingBufferMappedRange->descent = file.descent;
+		fontStagingBufferMappedRange->lineHeight = static_cast<sint32>(lineHeight);
 
 		fontStagingBuffer->unmap();
 
@@ -77,78 +134,81 @@ namespace ProjectA {
 		computeQueue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
 		computeQueue->waitIdle();
 
-		float32 xOffset = 0;
-		float32 yOffset = 0;
+		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 
 		const ref<Fence> writeBufferFence = Renderer::createFence();
 		const Extent3D& glyphMapExtent = glyphMapImage->getExtent();
-		const float32 lineHeight = static_cast<float32>(file.ascent - file.descent);
+		const float32 inverseLineHeight = static_cast<float32>(1.0 / lineHeight);
+		const float32 scale = inverseLineHeight * static_cast<float32>(GLYPH_SUBIMAGE_DIMENSION);
+		const float32 inverseGlyphMapWidth = static_cast<float32>(1.0 / glyphMapExtent.width);
+		const float32 inverseGlyphMapHeight = static_cast<float32>(1.0 / glyphMapExtent.height);
 
-		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
+		uint32 x = 0;
+		uint32 y = 0;
+		uint32 rowHeight = 0;
+		uint16 glyphIndex = 0;
+		uint16 edgeIndex;
 
-		for (uint16 glyphIndex = 0; glyphIndex < file.glyphs.count(); glyphIndex += 1) {
-			const TrueTypeFont::Glyph& trueTypeGlyph = file.glyphs[glyphIndex];
-			const TrueTypeFont::longHorMetric& hMetric = file.hMetrics[glyphIndex];
+		while (glyphIndex < glyphView.count()) {
+			const TrueTypeFont::Glyph& glyph = glyphView[glyphIndex];
+			const TrueTypeFont::longHorMetric& horizontalMetric = file.hMetrics[glyphIndex];
 
-			Glyph& glyph = output.glyphs[glyphIndex];
-			glyph.width = trueTypeGlyph.max.x - trueTypeGlyph.min.x;
-			glyph.advanceWidth = hMetric.advanceWidth;
-			glyph.leftSideBearing = hMetric.leftSideBearing;
-			glyph.whitespace = trueTypeGlyph.emptyOrUnparsed();
+			Glyph& outputGlyph = output.glyphs[glyphIndex];
+			outputGlyph.width = glyph.max.x - glyph.min.x;
+			outputGlyph.advanceWidth = horizontalMetric.advanceWidth;
+			outputGlyph.height = glyph.max.y - glyph.min.y;
+			outputGlyph.leftSideBearing = horizontalMetric.leftSideBearing;
+			outputGlyph.topSideBearing = file.ascent - glyph.max.y;
+			outputGlyph.whitespace = glyph.emptyOrUnparsed();
 
-			if (glyph.whitespace) {
+			if (outputGlyph.whitespace) {
+				glyphIndex += 1;
+
 				continue;
 			}
 
-			// Glyph height in FUnits.
-			const uint16 glyphHeight = trueTypeGlyph.max.y - trueTypeGlyph.min.y;
+			// The glyph size in TTF units.
+			const vec2<float32> ttfUnitSize = {static_cast<float32>(outputGlyph.width), static_cast<float32>(outputGlyph.height)};
 
-			// Glyph dimension (the largest between width and height) in FUnits.
-			const uint16 glyphDimension = max(glyph.width, glyphHeight);
+			// The glyph size on the glyph map, in pixels.
+			const vec2<float32> rawGlyphTexelSize = ttfUnitSize * scale;
 
-			// Glyph dimension on the high resolution image.
-			// const float32 glyphHighResolutionDimension = (float32) glyph.width / (float32) glyphImage->getWidth() * (float32) glyphDimension;
+			// The glyph size on the glyph map, in pixels. Including the spread of the distance field.
+			const vec2<float32> spreadGlyphTexelSize = rawGlyphTexelSize + vec2<float32>(spreadFactor * 2.0f, spreadFactor * 2.0f);
 
-			// Glyph signed distance field width in pixels.
-			// const float32 glyphSdfWidth = static_cast<float32>(glyph.width) / glyphDimension * GLYPH_SUBIMAGE_DIMENSION;
+			// TODO(lyah): Add vec<C, T> ceil(vec<C, T>, vec<C, T>).
+			const uint32 glyphWidth = static_cast<uint32>(ceil(spreadGlyphTexelSize[0]));
+			const uint32 glyphHeight = static_cast<uint32>(ceil(spreadGlyphTexelSize[1]));
 
-			glyphMappedRange->minCoordinateX = trueTypeGlyph.min.x;
-			glyphMappedRange->minCoordinateY = trueTypeGlyph.min.y;
-			glyphMappedRange->dimension = glyphDimension;
-			glyphMappedRange->edgeCount = static_cast<uint32>(trueTypeGlyph.edges.count());
+			if (x + glyphWidth >= glyphMapExtent.width) {
+				x = 0;
+				y += rowHeight;
+				rowHeight = 0;
+			}
+
+			glyphMappedRange->edgeCount = static_cast<uint32>(glyph.edges.count());
 
 			GlyphEdge* glyphEdgeMappedRange = pointer_cast<GlyphEdge*>(glyphMappedRange + 1);
 
-			for (uint32 edgeIndex = 0; edgeIndex < trueTypeGlyph.edges.count(); edgeIndex += 1) {
-				const TrueTypeFont::Edge& edge = trueTypeGlyph.edges[edgeIndex];
+			edgeIndex = 0;
 
-				glyphEdgeMappedRange[edgeIndex].startX = edge.start.x;
-				glyphEdgeMappedRange[edgeIndex].startY = edge.start.y;
-				glyphEdgeMappedRange[edgeIndex].endX = edge.end.x;
-				glyphEdgeMappedRange[edgeIndex].endY = edge.end.y;
-				glyphEdgeMappedRange[edgeIndex].controlX = edge.control.x;
-				glyphEdgeMappedRange[edgeIndex].controlY = edge.control.y;
-				glyphEdgeMappedRange[edgeIndex].curved = edge.curved;
+			while (edgeIndex < glyph.edges.count()) {
+				const TrueTypeFont::Edge& edge = glyph.edges[edgeIndex];
+
+				GlyphEdge& glyphEdge = glyphEdgeMappedRange[edgeIndex];
+				glyphEdge.startX = edge.start.x - glyph.min.x;
+				glyphEdge.startY = glyph.max.y - edge.start.y;
+				glyphEdge.endX = edge.end.x - glyph.min.x;
+				glyphEdge.endY = glyph.max.y - edge.end.y;
+				glyphEdge.controlX = edge.control.x - glyph.min.x;
+				glyphEdge.controlY = glyph.max.y - edge.control.y;
+				glyphEdge.curved = edge.curved;
+
+				edgeIndex += 1;
 			}
 
-			float32 width = static_cast<float32>(trueTypeGlyph.max.x - trueTypeGlyph.min.x);
-			width /= lineHeight;
-			width *= GLYPH_SUBIMAGE_DIMENSION;
-
-			if (xOffset + width >= glyphMapExtent.width) {
-				xOffset = 0;
-				yOffset += GLYPH_SUBIMAGE_DIMENSION;
-			}
-
-			glyph.minCoordinate.x = xOffset / glyphMapExtent.width;
-			glyph.minCoordinate.y = yOffset / glyphMapExtent.height;
-
-			glyph.maxCoordinate.x = (xOffset + width) / glyphMapExtent.width;
-			glyph.maxCoordinate.y = (yOffset + GLYPH_SUBIMAGE_DIMENSION) / glyphMapExtent.height;
-
-			glyphOffsetMappedRange[0] = static_cast<uint32>(xOffset);
-			glyphOffsetMappedRange[1] = static_cast<uint32>(yOffset);
-			glyphOffsetMappedRange[2] = SPREAD_FACTOR;
+			glyphOffsetMappedRange[0] = x;
+			glyphOffsetMappedRange[1] = y;
 
 			device->resetFence(writeBufferFence);
 
@@ -162,14 +222,22 @@ namespace ProjectA {
 
 			commandEncoder->bindComputePipeline(glyphSdfComputePipeline);
 			commandEncoder->bindDescriptorSets(glyphSdfPipelineLayout, {glyphSdfDescriptorSet});
-
-			// TODO: Support custom glyph sub-image dimension (multiply down). See GlyphDistanceField.comp.
 			commandEncoder->dispatch(8, 8, 1);
 
 			computeQueue->submit({commandEncoder->end()}, nullptr, nullptr, writeBufferFence);
+
+			rowHeight = max(rowHeight, glyphHeight);
+
+			outputGlyph.minCoordinate.x = static_cast<float32>(x + spreadFactor) * inverseGlyphMapWidth;
+			outputGlyph.minCoordinate.y = static_cast<float32>(y + spreadFactor) * inverseGlyphMapHeight;
+			outputGlyph.maxCoordinate.x = static_cast<float32>(x + spreadFactor + ceil(rawGlyphTexelSize[0])) * inverseGlyphMapWidth;
+			outputGlyph.maxCoordinate.y = static_cast<float32>(y + spreadFactor + ceil(rawGlyphTexelSize[1])) * inverseGlyphMapHeight;
+
+			x += glyphWidth;
+
 			computeQueue->waitIdle();
 
-			xOffset += ceil(width) + SPREAD_FACTOR * 2;
+			glyphIndex += 1;
 		}
 
 		BufferDescriptor glyphMapStagingBufferDescriptor{};
@@ -223,7 +291,6 @@ namespace ProjectA {
 		glyphBufferDescriptor.persistent = true;
 
 		glyphBuffer = Renderer::createBuffer(glyphBufferDescriptor);
-
 		glyphMappedRange = glyphBuffer->map<GlyphBuffer>(0, glyphBuffer->size);
 	}
 
@@ -235,7 +302,6 @@ namespace ProjectA {
 		glyphOffsetBufferDescriptor.persistent = true;
 
 		glyphOffsetBuffer = Renderer::createBuffer(glyphOffsetBufferDescriptor);
-
 		glyphOffsetMappedRange = glyphOffsetBuffer->map<uint32>(0, glyphOffsetBuffer->size);
 	}
 
@@ -316,13 +382,13 @@ namespace ProjectA {
 		glyphImageComputePipeline = Renderer::createComputePipeline(glyphImageComputePipelineDescriptor);
 	}
 
-	void GenerateSDFGlyphMapProcess::createGlyphMapImage() {
+	void GenerateSDFGlyphMapProcess::createGlyphMapImage(Extent2D extent) {
 		// Contains every glyph distance fields.
 		ImageDescriptor glyphMapImageDescriptor{};
 		glyphMapImageDescriptor.type = ImageType::TEXTURE_2D;
 		glyphMapImageDescriptor.format = ImageFormat::R8_UNORM;
-		glyphMapImageDescriptor.extent.width = GLYPH_MAP_IMAGE_EXTENT.width;
-		glyphMapImageDescriptor.extent.height = GLYPH_MAP_IMAGE_EXTENT.height;
+		glyphMapImageDescriptor.extent.width = extent.width;
+		glyphMapImageDescriptor.extent.height = extent.height;
 		glyphMapImageDescriptor.extent.depth = 1;
 		glyphMapImageDescriptor.mipLevelCount = 1;
 		glyphMapImageDescriptor.layerCount = 1;
@@ -374,8 +440,13 @@ namespace ProjectA {
 	void GenerateSDFGlyphMapProcess::updateDescriptorSets() const {
 		DescriptorBuffer fontDescriptorBuffer{};
 		fontDescriptorBuffer.buffer = fontBuffer;
-		fontDescriptorBuffer.offset = 0;
-		fontDescriptorBuffer.size = fontBuffer->size;
+		fontDescriptorBuffer.offset = offsetof(FontStorage, lineHeight);
+		fontDescriptorBuffer.size = sizeof(FontStorage::lineHeight);
+
+		DescriptorBuffer fontDescriptorOffsetBuffer{};
+		fontDescriptorOffsetBuffer.buffer = fontBuffer;
+		fontDescriptorOffsetBuffer.offset = 0;
+		fontDescriptorOffsetBuffer.size = sizeof(FontStorage::spreadFactor) + sizeof(FontStorage::outputGlyphSize);
 
 		DescriptorBuffer glyphDescriptorBuffer{};
 		glyphDescriptorBuffer.buffer = glyphBuffer;
@@ -423,7 +494,7 @@ namespace ProjectA {
 		WriteDescriptorSet glyphSdfFontWriteDescriptorSet{};
 		glyphSdfFontWriteDescriptorSet.descriptorSet = glyphSdfDescriptorSet;
 		glyphSdfFontWriteDescriptorSet.bindingIndex = 2;
-		glyphSdfFontWriteDescriptorSet.descriptorBuffers = {fontDescriptorBuffer};
+		glyphSdfFontWriteDescriptorSet.descriptorBuffers = {fontDescriptorOffsetBuffer};
 
 		WriteDescriptorSet glyphSdfGlyphOffsetWriteDescriptorSet{};
 		glyphSdfGlyphOffsetWriteDescriptorSet.descriptorSet = glyphSdfDescriptorSet;

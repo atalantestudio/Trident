@@ -209,7 +209,7 @@ namespace ProjectA {
 					glyph.minCoordinate.y = byteStream.read<float32>();
 					glyph.maxCoordinate.x = byteStream.read<float32>();
 					glyph.maxCoordinate.y = byteStream.read<float32>();
-					glyph.whitespace = (glyph.minCoordinate.x == glyph.maxCoordinate.x && glyph.minCoordinate.y == glyph.maxCoordinate.y);
+					glyph.whitespace = glyph.minCoordinate.x == glyph.maxCoordinate.x && glyph.minCoordinate.y == glyph.maxCoordinate.y;
 				}
 
 				for (Glyph& glyph : fontAssetDescriptor.glyphs) {
@@ -221,7 +221,15 @@ namespace ProjectA {
 				}
 
 				for (Glyph& glyph : fontAssetDescriptor.glyphs) {
+					glyph.height = byteStream.read<uint16>();
+				}
+
+				for (Glyph& glyph : fontAssetDescriptor.glyphs) {
 					glyph.leftSideBearing = byteStream.read<sint16>();
+				}
+
+				for (Glyph& glyph : fontAssetDescriptor.glyphs) {
+					glyph.topSideBearing = byteStream.read<sint16>();
 				}
 
 				const uint64 unicodeMapOffset = byteStream.getByteOffset();

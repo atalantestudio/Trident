@@ -1,24 +1,24 @@
-#version 450
+// Copyright 2025 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
 
-struct Edge {
-	ivec2 start;
-	ivec2 end;
-	ivec2 control;
-	bool curved;
-};
+#version 430
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
+struct Edge {
+	// TODO: Pack x/y into 1x int.
+	ivec2 start;
+	ivec2 end;
+	ivec2 control;
+
+	bool curved;
+};
+
 layout(set = 0, binding = 0) buffer readonly Font {
-	uint outputGlyphSize;
-	uint spreadFactor;
-	int ascent;
-	int descent;
+	int lineHeight;
 } font;
 
 layout(set = 0, binding = 1) buffer readonly Glyph {
-	ivec2 minCoordinate;
-	uint dimension;
 	uint edgeCount;
 	Edge edges[];
 } glyph;
@@ -26,43 +26,19 @@ layout(set = 0, binding = 1) buffer readonly Glyph {
 layout(set = 0, binding = 2, r8) uniform writeonly image2D glyphImage;
 
 void main() {
-	// Size of the a glyph part in the map.
-	uvec2 outputImageSize = uvec2(font.outputGlyphSize, font.outputGlyphSize);
-
-	uvec2 imageCoordinate = gl_GlobalInvocationID.xy;
+	uvec2 glyphImageCoordinate = gl_GlobalInvocationID.xy;
 	uvec2 glyphImageSize = imageSize(glyphImage);
 
-	if (imageCoordinate.x >= glyphImageSize.x || imageCoordinate.y >= glyphImageSize.y) {
+	if (glyphImageCoordinate.x >= glyphImageSize.x || glyphImageCoordinate.y >= glyphImageSize.y) {
 		return;
 	}
 
-	vec2 glyphCoordinate = imageCoordinate;
-
-	uvec2 scaledSpreadFactor = outputImageSize * font.spreadFactor;
-
-	// Add spread offset.
-	glyphCoordinate.x -= scaledSpreadFactor.x;
-	glyphCoordinate.y += scaledSpreadFactor.y;
-
-	// Flip glyph Y coordinate.
-	glyphCoordinate.y = glyphImageSize.y - glyphCoordinate.y;
-
-	uint lineHeight = font.ascent - font.descent;
-
-	glyphCoordinate /= glyphImageSize;
-	glyphCoordinate *= lineHeight + scaledSpreadFactor;
-
-	// Remove left padding.
-	glyphCoordinate.x += glyph.minCoordinate.x;
-
-	// Add font descent.
-	glyphCoordinate.y += font.descent;
-
-	vec4 texel = vec4(0.0, 0.0, 0.0, 1.0);
-	vec2 p = glyphCoordinate;
+	vec2 p = vec2(glyphImageCoordinate) / glyphImageSize * font.lineHeight;
 	int windingNumber = 0;
+	uint edgeIndex = 0;
 
-	for (uint edgeIndex = 0; edgeIndex < glyph.edgeCount; edgeIndex += 1) {
+	// See https://gabormakesgames.com/blog_fonts_rasterization.html.
+	while (edgeIndex < glyph.edgeCount) {
 		Edge edge = glyph.edges[edgeIndex];
 		vec2 a = edge.start;
 		vec2 b = edge.end;
@@ -94,13 +70,11 @@ void main() {
 			float w = 1.0 - u - v;
 
 			// Test if the current texel is inside the triangle.
-			//if (u >= 0.0f && u <= 1.0f && v >= 0.0f && v <= 1.0f && w >= 0.0f && w <= 1.0f) {
 			if (0.0 < u && u < 1.0 && 0.0 < v && v < 1.0 && 0.0 < w && w < 1.0) {
 				vec2 controlToStart = a - c;
 				vec2 controlToEnd = b - c;
+				vec2 uw = u * vec2(0.5, 0.0) + w;
 				float crossProduct = controlToStart.x * controlToEnd.y - controlToStart.y * controlToEnd.x;
-
-				vec2 uw = vec2(0.5f, 0.0f) * u + vec2(0, 0) * v + vec2(1, 1) * w;
 				float coordinate = uw.x * uw.x - uw.y;
 
 				if (crossProduct < 0.0) {
@@ -115,9 +89,11 @@ void main() {
 				}
 			}
 		}
+
+		edgeIndex += 1;
 	}
 
-	texel.r = float(windingNumber > 0);
+	float r = float(windingNumber < 0);
 
-	imageStore(glyphImage, ivec2(imageCoordinate), texel);
+	imageStore(glyphImage, ivec2(glyphImageCoordinate), vec4(r, 0.0, 0.0, 1.0));
 }

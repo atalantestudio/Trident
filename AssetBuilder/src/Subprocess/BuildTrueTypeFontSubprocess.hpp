@@ -42,7 +42,8 @@ namespace ProjectA {
 
 				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count());
 				const uint64 outputSize =
-					7 * sizeof(uint32) + (4 * sizeof(float32) + 3 * sizeof(uint16)) * glyphCount +
+					sizeof(uint32) * 7 +
+					(sizeof(svec2<float32>) * 2 + sizeof(uint16) * 3 + sizeof(sint16) * 2) * glyphCount +
 					(sizeof(uint16) + sizeof(uint32)) * file.unicodeMap.size();
 
 				uint32 glyphMapImageAssetIdentifier;
@@ -63,38 +64,38 @@ namespace ProjectA {
 				outputByteStream.jump(sizeof(uint16));
 				outputByteStream.write<uint32>(glyphCount);
 
-				for (uint32 glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
-					const Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
-
+				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
 					outputByteStream.write<float32>(glyph.minCoordinate.x);
 					outputByteStream.write<float32>(glyph.minCoordinate.y);
 					outputByteStream.write<float32>(glyph.maxCoordinate.x);
 					outputByteStream.write<float32>(glyph.maxCoordinate.y);
 				}
 
-				for (uint32 glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
-					const Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
-
+				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
 					outputByteStream.write<uint16>(glyph.width);
 				}
 
-				for (uint32 glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
-					const Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
-
+				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
 					outputByteStream.write<uint16>(glyph.advanceWidth);
 				}
 
-				for (uint32 glyphIndex = 0; glyphIndex < glyphCount; glyphIndex += 1) {
-					const Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
+				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
+					outputByteStream.write<uint16>(glyph.height);
+				}
 
+				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
 					outputByteStream.write<sint16>(glyph.leftSideBearing);
 				}
 
-				for (const auto& unicodeEntry : file.unicodeMap) {
+				for (const Glyph& glyph : fontAssetDescriptor.glyphs) {
+					outputByteStream.write<sint16>(glyph.topSideBearing);
+				}
+
+				for (const std::pair<uint16, uint32>& unicodeEntry : file.unicodeMap) {
 					outputByteStream.write<uint16>(unicodeEntry.first);
 				}
 
-				for (const auto& unicodeEntry : file.unicodeMap) {
+				for (const std::pair<uint16, uint32>& unicodeEntry : file.unicodeMap) {
 					outputByteStream.write<uint32>(unicodeEntry.second);
 				}
 

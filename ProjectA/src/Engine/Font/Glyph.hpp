@@ -9,14 +9,20 @@ namespace ProjectA {
 		// Bottom-right coordinate on the glyph map.
 		svec2<float32> maxCoordinate;
 
-		// (TTF) In FUnits.
+		// In TTF units.
 		uint16 width;
 
-		// (TTF) In FUnits.
+		// In TTF units.
 		uint16 advanceWidth;
 
-		// (TTF) In FUnits.
+		// In TTF units.
+		uint16 height;
+
+		// In TTF units.
 		sint16 leftSideBearing;
+
+		// In TTF units.
+		sint16 topSideBearing;
 
 		// Spaces, tabs, etc.
 		bool whitespace;

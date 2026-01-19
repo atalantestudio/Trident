@@ -33,14 +33,14 @@ namespace ProjectA {
 	} */
 
 	FontID GUILayer::loadFontAsset(view<char8> assetName) {
-		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->findFontAsset(assetName);
-
 		ENGINE_ASSERT(fontCount < MAX_FONT_COUNT, "Too many fonts loaded.");
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
+		const ref<FontAsset> fontAsset = getApplication()->getAssetLibrary()->findFontAsset(assetName);
+
 		fonts[fontCount].fontAsset = fontAsset;
 
-		TextureArrayLayer glyphMapImageLayer;
+		TextureArrayLayer glyphMapImageLayer{};
 		glyphMapImageLayer.width = fontAsset->getGlyphMapImage()->getExtent().width;
 		glyphMapImageLayer.height = fontAsset->getGlyphMapImage()->getExtent().height;
 		glyphMapImageLayer.data = fontAsset->getGlyphMapImage()->getData();
@@ -53,13 +53,26 @@ namespace ProjectA {
 		return fontId;
 	}
 
+	FontID GUILayer::loadImageAsset(view<char8> assetName) {
+		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
+
+		const ref<ImageAsset> imageAsset = getApplication()->getAssetLibrary()->findImageAsset(assetName);
+
+		TextureArrayLayer imageLayer{};
+		imageLayer.width = imageAsset->getExtent().width;
+		imageLayer.height = imageAsset->getExtent().height;
+		imageLayer.data = imageAsset->getData();
+
+		return renderer.registerTextureArrayLayer(imageLayer);
+	}
+
 	ImageID GUILayer::loadImage(view<char8> path) {
 		ENGINE_ASSERT(!textureArrayFlushed, "Images can only be added when constructing the layer.");
 
 		const sequence<uint8> data = Filesystem::openByteBuffer(path);
 		const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(data);
 
-		TextureArrayLayer imageLayer;
+		TextureArrayLayer imageLayer{};
 		imageLayer.width = file.extent.width;
 		imageLayer.height = file.extent.height;
 		imageLayer.data = file.data;
@@ -842,20 +855,19 @@ namespace ProjectA {
 			codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
 
 			const Glyph& glyph = (*data.fontAsset)[codePoint];
-			const float32 advanceWidth = ceil(glyph.advanceWidth * data.lineHeight);
 			const vec2<float32> startTextureCoordinate = {glyph.minCoordinate.x, glyph.minCoordinate.y};
 			const vec2<float32> endTextureCoordinate = {glyph.maxCoordinate.x, glyph.maxCoordinate.y};
 
-			TextCharacter textCharacter;
-			textCharacter.offset = {characterOffset.x + glyph.leftSideBearing * data.lineHeight, characterOffset.y};
-			textCharacter.size = {glyph.width * data.lineHeight, data.fontSize};
+			TextCharacter textCharacter{};
+			textCharacter.offset = {characterOffset.x + glyph.leftSideBearing * data.lineHeight, characterOffset.y + glyph.topSideBearing * data.lineHeight};
+			textCharacter.size = {glyph.width * data.lineHeight, glyph.height * data.lineHeight};
 			textCharacter.textureTransform =
 				mat3x3<float32>::scaling((endTextureCoordinate - startTextureCoordinate) * imageScale) *
 				mat3x3<float32>::translation(startTextureCoordinate * imageScale);
 
 			textCharacters.emplace_back(textCharacter);
 
-			characterOffset.x += advanceWidth;
+			characterOffset.x += glyph.advanceWidth * data.lineHeight;
 		}
 	}
 

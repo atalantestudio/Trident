@@ -22,19 +22,18 @@ namespace ProjectA {
 
 				imageStyle.size = {256_px, 256_px};
 				imageStyle.image = image;
-				imageStyle.borderRadius = 8.0f;
 
 				titleStyle.color = 0x000000ff;
 				titleStyle.font = fontBold;
-				titleStyle.fontSize = 28.0f;
+				titleStyle.fontSize = 28_px;
 
 				paragraphStyle.color = 0x000000ff;
 				paragraphStyle.font = fontRegular;
-				paragraphStyle.fontSize = 20.0f;
+				paragraphStyle.fontSize = 20_px;
 
 				legendStyle.color = 0x757575ff;
 				legendStyle.font = fontRegularItalic;
-				legendStyle.fontSize = 16.0f;
+				legendStyle.fontSize = 16_px;
 			}
 
 			void GUI() override {

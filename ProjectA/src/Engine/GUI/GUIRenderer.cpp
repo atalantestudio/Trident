@@ -320,7 +320,7 @@ namespace ProjectA {
 
 	void GUIRenderer::createLinearSampler() {
 		SamplerDescriptor linearSamplerDescriptor{};
-		linearSamplerDescriptor.magFilter = SamplerFilter::NEAREST;
+		linearSamplerDescriptor.magFilter = SamplerFilter::LINEAR;
 		linearSamplerDescriptor.minFilter = SamplerFilter::LINEAR;
 
 		linearSampler = createSampler(linearSamplerDescriptor);

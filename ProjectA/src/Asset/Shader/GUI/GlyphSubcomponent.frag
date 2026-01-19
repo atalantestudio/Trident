@@ -4,7 +4,17 @@
 // const vec4 DROP_SHADOW_COLOR = vec4(vec3(0.4), 1.0);
 
 const float ALPHA_THRESHOLD = 0.5;
-const float SMOOTHNESS = 0.25;
+
+// NOTE
+// 64 is the default font size.
+// For this size, 0.05 is a good smoothness value.
+// For sizes below 64, the smoothness value increases exponentially.
+// 32 -> 0.1 (up to 0.15)
+// 28 -> ~0.15
+// 16 -> 0.2 (up to 0.25)
+// For sizes above, the smoothness stays the same (e.g. ~0.05 for 112px).
+// TODO: Dynamically update the smoothness. Also try playing with the alpha threshold.
+const float SMOOTHNESS = 0.15;
 
 in VertexOutput {
 	layout(location = 0) vec3 textureCoordinate;
@@ -22,7 +32,7 @@ void main() {
 		texture(textureArraySampler, vertexOutput.textureCoordinate).r
 	);
 
-	fragment = vertexOutput.color * value;
+	fragment = value * vertexOutput.color;
 
 	/* float offsetDistance = texture(glyphMapSampler, vertexOutput.imageCoordinate.xy - DROP_SHADOW_OFFSET).r;
 	float dropShadow = smoothstep(0.0, 1.0, offsetDistance);

@@ -1,4 +1,7 @@
-#version 450
+// Copyright 2025 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#version 430
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
@@ -7,73 +10,61 @@ layout(set = 0, binding = 0, r8) uniform readonly image2D glyphImage;
 layout(set = 0, binding = 1, r8) uniform writeonly image2D glyphMapImage;
 
 layout(set = 0, binding = 2) buffer readonly Font {
+	uint spreadFactor;
 	uint outputGlyphSize;
 } font;
 
 layout(set = 0, binding = 3) buffer readonly Glyph {
 	uvec2 offset;
-	uint spreadFactor;
 } glyph;
 
 void main() {
-	// Size of the a glyph part in the map.
-	uvec2 outputImageSize = uvec2(font.outputGlyphSize, font.outputGlyphSize);
+	uvec2 glyphImageCoordinate = gl_GlobalInvocationID.xy;
+	uvec2 glyphSize = uvec2(font.outputGlyphSize);
 
-	uvec2 glyphMapImageCoordinate = gl_GlobalInvocationID.xy;
-
-	// Make sure that the coordinate is inside the glyph sub-image.
-	if (glyphMapImageCoordinate.x >= outputImageSize.x || glyphMapImageCoordinate.y >= outputImageSize.y) {
+	if (glyphImageCoordinate.x >= glyphSize.x || glyphImageCoordinate.y >= glyphSize.y) {
 		return;
 	}
 
-	uvec2 glyphImageSize = imageSize(glyphImage);
+	const uint spread = font.spreadFactor * font.outputGlyphSize;
 
-	// TODO: Support custom output image size (multiply up).
-	uvec2 inputTexelCoordinate = uvec2(glyphMapImageCoordinate * outputImageSize + outputImageSize / 2);
-
-	vec4 inputTexel = imageLoad(glyphImage, ivec2(inputTexelCoordinate));
-	vec4 outputTexel = vec4(0.0, 0.0, 0.0, 1.0);
-
-	const uint spread = outputImageSize.x * glyph.spreadFactor;
-
-	uvec2 sampleStart = uvec2(
-		max(0, int(inputTexelCoordinate.x) - int(spread)),
-		max(0, int(inputTexelCoordinate.y) - int(spread))
-	);
-
-	uvec2 sampleEnd = uvec2(
-		min(glyphImageSize.x - 1, inputTexelCoordinate.x + spread),
-		min(glyphImageSize.y - 1, inputTexelCoordinate.y + spread)
-	);
-
+	ivec2 inputTexelCoordinate = ivec2((glyphImageCoordinate - font.spreadFactor) * font.outputGlyphSize);
+	float inputColor = imageLoad(glyphImage, inputTexelCoordinate).r;
 	uint closestSquareDistance = max(1, spread * spread);
 
-	if (glyph.spreadFactor > 0) {
-		for (uint y = sampleStart.y; y < sampleEnd.y; y += glyph.spreadFactor) {
-			for (uint x = sampleStart.x; x < sampleEnd.x; x += glyph.spreadFactor) {
-				uvec2 sampleCoordinate = uvec2(x, y);
+	if (font.spreadFactor > 0) {
+		ivec2 sampleStart = inputTexelCoordinate - int(spread);
+		ivec2 sampleEnd = inputTexelCoordinate + int(spread);
+		int x;
+		int y = sampleStart.y;
 
-				float r = imageLoad(glyphImage, ivec2(sampleCoordinate)).r;
+		while (y < sampleEnd.y) {
+			x = sampleStart.x;
 
-				if (r == inputTexel.r) {
+			while (x < sampleEnd.x) {
+				ivec2 sampleCoordinate = ivec2(x, y);
+				float r = imageLoad(glyphImage, sampleCoordinate).r;
+
+				if (r == inputColor) {
+					x += int(font.spreadFactor);
+
 					continue;
 				}
 
-				uvec2 power = ivec2(pow(ivec2(inputTexelCoordinate - sampleCoordinate), uvec2(2, 2)));
+				uvec2 power = uvec2(pow(inputTexelCoordinate - sampleCoordinate, uvec2(2)));
 				uint squareDistance = power.x + power.y;
 
 				closestSquareDistance = min(closestSquareDistance, squareDistance);
+
+				x += int(font.spreadFactor);
 			}
+
+			y += int(font.spreadFactor);
 		}
 	}
 
-	float closestDistance = sqrt(closestSquareDistance);
+	float closestDistance = sqrt(closestSquareDistance) * ((inputColor - 0.5) * 2.0);
+	float r = closestDistance / spread * 0.5 + 0.5;
 
-	if (inputTexel.r != 1.0) {
-		closestDistance *= -1.0;
-	}
-
-	outputTexel.r = (closestDistance / spread) * 0.5 + 0.5;
-
-	imageStore(glyphMapImage, ivec2(glyph.offset + glyphMapImageCoordinate), outputTexel);
+	imageStore(glyphMapImage, ivec2(glyph.offset + glyphImageCoordinate), vec4(r, 0.0, 0.0, 1.0));
 }
