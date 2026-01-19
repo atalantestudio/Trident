@@ -21,6 +21,7 @@ namespace ProjectA {
 
 				style.size = {GUILayer::FIT, GUILayer::FIT};
 				style.padding = {10_px, 8_px};
+				style.layoutDirection = VERTICAL;
 				style.color = 0x0a0a0aff;
 				style.eventListeners = &eventListeners;
 			}

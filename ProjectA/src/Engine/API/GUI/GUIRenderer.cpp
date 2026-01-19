@@ -140,8 +140,8 @@ namespace ProjectA {
 		#endif
 
 		// TODO(layer-superposition)
-		// swapchainAttachment.loadOperation = LoadOperation::LOAD;
-		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
+		swapchainAttachment.loadOperation = LoadOperation::LOAD;
+		// swapchainAttachment.loadOperation = LoadOperation::CLEAR;
 
 		swapchainAttachment.storeOperation = StoreOperation::STORE;
 		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
@@ -582,19 +582,17 @@ namespace ProjectA {
 
 	void GUIRenderer::render(ref<CommandEncoder> commandEncoder) const {
 		if (subcomponentCount == 0 && glyphSubcomponentCount == 0) {
-			ENGINE_WARNING("No GUI components to render.");
-
 			// TODO
 			// If no commands have been encoded, the attachments will not be transitioned into the final layout.
 			// Handle properly the case where the command buffer is empty.
-			BREAKPOINT();
+			ENGINE_ASSERT(false, "No GUI components to render.");
 
 			return;
 		}
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor{};
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-		beginRenderPassDescriptor.clearValues = {{0.04f, 0.04f, 0.04f, 1.0f}};
+		beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 0.0f}};
 
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 		const float32 width = static_cast<float32>(swapchainExtent.width);
