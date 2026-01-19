@@ -157,6 +157,7 @@ namespace ProjectA {
 		rootComponent.layoutSpacing = 0_px;
 		rootComponent.color = 0xffffffff;
 		rootComponent.image = 0;
+		rootComponent.pointerType = PointerType::DEFAULT;
 		rootComponent.outlineSize = 0_px;
 		rootComponent.outlineColor = 0x00000000;
 		rootComponent.borderRadius = 0.0f;
@@ -216,6 +217,7 @@ namespace ProjectA {
 		component.layoutSpacing = style.layoutSpacing;
 		component.color = style.color;
 		component.image = style.image;
+		component.pointerType = style.pointerType;
 		component.outlineSize = style.outlineSize;
 		component.outlineColor = style.outlineColor;
 		component.borderRadius = style.borderRadius;
@@ -254,6 +256,7 @@ namespace ProjectA {
 		textComponent.layoutSpacing = 0_px;
 		textComponent.color = textStyle.color;
 		textComponent.image = fonts[textStyle.font].glyphMapImageId;
+		textComponent.pointerType = PointerType::DEFAULT;
 		textComponent.outlineSize = 0_px;
 		textComponent.outlineColor = 0x00000000;
 		textComponent.borderRadius = 0.0f;
@@ -955,7 +958,7 @@ namespace ProjectA {
 			}
 		}
 
-		return max<uint32>();
+		return 0;
 	}
 
 	bool GUILayer::IsIntersecting(const GUIContainer& component, const vec2<float32>& point) {
@@ -968,28 +971,34 @@ namespace ProjectA {
 	}
 
 	void GUILayer::DispatchMouseEvents() {
-		const sint32* mousePositionInteger = getApplication()->getWindow()->getMousePosition();
+		const Window* window = getApplication()->getWindow();
+		const sint32* mousePositionInteger = window->getMousePosition();
 		const uint32 lastHoveredComponentIndex = GetHoveredComponentIndex();
 
 		MouseMoveEvent mouseMoveEvent(mousePositionInteger[0], mousePositionInteger[1]);
 
-		if (hoveredComponentIndex != max<uint32>() && hoveredComponentIndex != lastHoveredComponentIndex) {
+		if (hoveredComponentIndex > 0 && hoveredComponentIndex < max<uint32>() && hoveredComponentIndex != lastHoveredComponentIndex) {
 			// Dispatch mouse leave event.
 			const GUIContainer& component = components[hoveredComponentIndex];
 			component.eventListeners->onMouseLeave(mouseMoveEvent);
 		}
 
-		if (lastHoveredComponentIndex != max<uint32>() && lastHoveredComponentIndex != hoveredComponentIndex) {
+		if (lastHoveredComponentIndex < max<uint32>() && lastHoveredComponentIndex != hoveredComponentIndex) {
 			// Dispatch mouse hover (= mouse enter) event.
 			const GUIContainer& component = components[lastHoveredComponentIndex];
-			component.eventListeners->onMouseHover(mouseMoveEvent);
+
+			if (lastHoveredComponentIndex > 0) {
+				component.eventListeners->onMouseHover(mouseMoveEvent);
+			}
+
+			window->updatePointerType(component.pointerType);
 		}
 
 		hoveredComponentIndex = lastHoveredComponentIndex;
 	}
 
 	bool GUILayer::onMouseDown(MouseDownEvent& event) {
-		if (hoveredComponentIndex != max<uint32>()) {
+		if (hoveredComponentIndex > 0 && hoveredComponentIndex < max<uint32>()) {
 			// Dispatch mouse down event.
 			const GUIContainer& component = components[hoveredComponentIndex];
 			component.eventListeners->onMouseDown(event);
@@ -1001,7 +1010,7 @@ namespace ProjectA {
 	}
 
 	bool GUILayer::onMouseUp(MouseUpEvent& event) {
-		if (mouseDownComponentIndex != max<uint32>()) {
+		if (mouseDownComponentIndex > 0 && mouseDownComponentIndex < max<uint32>()) {
 			// Dispatch a mouse down event.
 			const GUIContainer& component = components[mouseDownComponentIndex];
 			component.eventListeners->onMouseUp(event);

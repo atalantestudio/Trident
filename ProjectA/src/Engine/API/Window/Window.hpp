@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/API/Window/Descriptor/WindowDescriptor.hpp"
+#include "Engine/API/Window/PointerType.hpp"
 
 namespace ProjectA {
 	class Window {
@@ -45,6 +46,8 @@ namespace ProjectA {
 			void processMessages() const;
 
 			void waitMessage() const;
+
+			void updatePointerType(PointerType pointerType) const;
 
 		// TODO: Make data and key map private?
 		public:

@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Window/Win32/base.hpp"
+#include "Engine/Adapter/Window/Win32/PointerType.hpp"
 #include "Engine/Adapter/Window/Win32/WndProc.hpp"
 
 #include "Engine/API/Window/Window.hpp"
@@ -263,5 +264,13 @@ namespace ProjectA {
 
 	void Window::waitMessage() const {
 		WIN32_ASSERT(WaitMessage() != 0);
+	}
+
+	void Window::updatePointerType(PointerType pointerType) const {
+		const LPWSTR lpCursorName = getWin32CursorName(pointerType);
+
+		windowClass->hCursor = LoadCursorW(nullptr, lpCursorName);
+
+		WIN32_ASSERT(windowClass->hCursor != nullptr);
 	}
 }

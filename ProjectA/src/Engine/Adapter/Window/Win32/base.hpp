@@ -159,8 +159,7 @@ namespace ProjectA {
 
 		const LPCSTR message = ConvertUTF16ToUTF8(buffer);
 
-		ENGINE_ERROR(message);
-		BREAKPOINT();
+		ENGINE_ASSERT(false, message);
 
 		LocalFree(buffer);
 		LocalFree((void*) &message);

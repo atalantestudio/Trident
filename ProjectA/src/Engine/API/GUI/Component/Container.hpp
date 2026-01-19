@@ -6,6 +6,7 @@
 #include "Engine/API/GUI/LayoutDirection.hpp"
 #include "Engine/API/GUI/Size.hpp"
 #include "Engine/API/GUI/Subcomponent.hpp"
+#include "Engine/API/Window/PointerType.hpp"
 
 namespace ProjectA {
 	struct TextCharacter {
@@ -33,6 +34,10 @@ namespace ProjectA {
 		LayoutDirection layoutDirection;
 		float32 layoutSpacing;
 		ImageID image;
+
+		// The type of the pointer to display when hovering over the component.
+		PointerType pointerType;
+
 		float32 outlineSize;
 		Color outlineColor = 0x00000000;
 		float32 borderRadius;

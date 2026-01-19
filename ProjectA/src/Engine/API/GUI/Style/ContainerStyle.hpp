@@ -4,6 +4,7 @@
 #include "Engine/API/GUI/ID.hpp"
 #include "Engine/API/GUI/LayoutDirection.hpp"
 #include "Engine/API/GUI/Size.hpp"
+#include "Engine/API/Window/PointerType.hpp"
 
 namespace ProjectA {
 	struct ContainerStyle {
@@ -18,6 +19,7 @@ namespace ProjectA {
 		ImageID image = 0;
 		float32 outlineSize = 0_px;
 		Color outlineColor = 0x00000000;
+		PointerType pointerType = PointerType::DEFAULT;
 
 		// TODO(deprecated)
 		float32 borderRadius = 0.0f;
