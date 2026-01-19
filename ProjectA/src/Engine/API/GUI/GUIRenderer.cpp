@@ -1,7 +1,7 @@
 #include "pch.hpp"
 
 #include "Engine/Filesystem/Filesystem.hpp"
-#include "Engine/GUI/GUIRenderer.hpp"
+#include "Engine/API/GUI/GUIRenderer.hpp"
 
 // #define ENABLE_GUI_ANTIALIASING
 

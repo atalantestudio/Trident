@@ -23,11 +23,11 @@ namespace ProjectA {
 
 				listItemTitleStyle.color = 0xa5a5a5ff;
 				listItemTitleStyle.font = loadFontAsset("test-bold");
-				listItemTitleStyle.fontSize = 22_px;
+				listItemTitleStyle.fontSize = 24_px;
 
 				listItemDescriptionStyle.color = 0xa5a5a5ff;
 				listItemDescriptionStyle.font = loadFontAsset("test-regular");
-				listItemDescriptionStyle.fontSize = 16_px;
+				listItemDescriptionStyle.fontSize = 18_px;
 			}
 
 			void GUI() override {

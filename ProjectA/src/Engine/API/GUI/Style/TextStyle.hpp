@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Engine/GUI/EventListeners.hpp"
-#include "Engine/GUI/ID.hpp"
+#include "Engine/API/GUI/EventListeners.hpp"
+#include "Engine/API/GUI/ID.hpp"
 
 namespace ProjectA {
 	struct TextStyle {

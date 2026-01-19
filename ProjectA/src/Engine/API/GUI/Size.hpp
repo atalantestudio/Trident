@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/GUI/FillMode.hpp"
+#include "Engine/API/GUI/FillMode.hpp"
 
 namespace ProjectA {
 	class Size1D {

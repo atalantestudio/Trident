@@ -33,8 +33,8 @@
 #include "Engine/Filesystem/Stream/BitStream.hpp"
 
 // GUI
-#include "Engine/GUI/GUILayer.hpp"
-#include "Engine/GUI/GUIRenderer.hpp"
+#include "Engine/API/GUI/GUILayer.hpp"
+#include "Engine/API/GUI/GUIRenderer.hpp"
 
 // Renderer
 #include "Engine/API/Rendering/Buffer.hpp"

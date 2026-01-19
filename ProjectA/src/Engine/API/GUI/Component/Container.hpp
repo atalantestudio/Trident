@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Engine/GUI/AnchorPoint.hpp"
-#include "Engine/GUI/ID.hpp"
-#include "Engine/GUI/EventListeners.hpp"
-#include "Engine/GUI/LayoutDirection.hpp"
-#include "Engine/GUI/Size.hpp"
-#include "Engine/GUI/Subcomponent.hpp"
+#include "Engine/API/GUI/AnchorPoint.hpp"
+#include "Engine/API/GUI/ID.hpp"
+#include "Engine/API/GUI/EventListeners.hpp"
+#include "Engine/API/GUI/LayoutDirection.hpp"
+#include "Engine/API/GUI/Size.hpp"
+#include "Engine/API/GUI/Subcomponent.hpp"
 
 namespace ProjectA {
 	struct TextCharacter {

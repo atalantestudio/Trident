@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Engine/GUI/Component/Container.hpp"
-#include "Engine/GUI/ComponentStyle/ContainerStyle.hpp"
-#include "Engine/GUI/ComponentStyle/TextStyle.hpp"
-#include "Engine/GUI/GUIRenderer.hpp"
-#include "Engine/GUI/ID.hpp"
+#include "Engine/API/GUI/Component/Container.hpp"
+#include "Engine/API/GUI/Style/ContainerStyle.hpp"
+#include "Engine/API/GUI/Style/TextStyle.hpp"
+#include "Engine/API/GUI/GUIRenderer.hpp"
+#include "Engine/API/GUI/ID.hpp"
 #include "Engine/Layer/Layer.hpp"
 
 namespace ProjectA {
@@ -53,6 +53,7 @@ namespace ProjectA {
 			// TODO(deprecated)
 			ImageID loadImage(view<char8> path);
 
+		public:
 			void openComponent(const ContainerStyle& style);
 
 			void GUIText(const std::string& string, const TextStyle& textStyle);
@@ -94,7 +95,7 @@ namespace ProjectA {
 		public:
 			static uint16 decodeUtf16CodePoint(const char8* string, uint32& byteOffset);
 
-		protected:
+		public:
 			// Shrink towards the layout direction.
 			static constexpr float32 FIT = -2.0f;
 
@@ -126,4 +127,7 @@ namespace ProjectA {
 	};
 
 	#define GUIComponent(component) for (bool _opened = (openComponent(component), true); _opened; _opened = false, closeComponent())
+
+	// Specific to objects extending GUIComponent.
+	#define GUIComponentClass(component, renderChildren) component.render(*this, BIND(openComponent), BIND(closeComponent), renderChildren)
 }
