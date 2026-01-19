@@ -6,7 +6,7 @@
 #include "Engine/API/Window/PointerType.hpp"
 
 namespace ProjectA {
-	static LPWSTR getWin32CursorName(PointerType pointerType) {
+	inline LPWSTR getWin32CursorName(PointerType pointerType) {
 		switch (pointerType) {
 			case PointerType::DEFAULT: return IDC_ARROW;
 			case PointerType::INTERACTIVE: return IDC_HAND;
