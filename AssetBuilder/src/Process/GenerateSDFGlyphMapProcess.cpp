@@ -373,7 +373,7 @@ namespace ProjectA {
 		computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		computeShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> computeShaderModule = Renderer::loadShaderModule(computeShaderModuleDescriptor, "GlyphImage.comp");
+		const ref<ShaderModule> computeShaderModule = Renderer::loadShaderModule(computeShaderModuleDescriptor, "RasterizeGlyph.comp");
 
 		ComputePipelineDescriptor glyphImageComputePipelineDescriptor{};
 		glyphImageComputePipelineDescriptor.pipelineLayout = glyphImagePipelineLayout;
@@ -421,7 +421,7 @@ namespace ProjectA {
 		computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 		computeShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> computeShaderModule = Renderer::loadShaderModule(computeShaderModuleDescriptor, "GlyphDistanceField.comp");
+		const ref<ShaderModule> computeShaderModule = Renderer::loadShaderModule(computeShaderModuleDescriptor, "DistanceField.comp");
 
 		ComputePipelineDescriptor glyphSdfComputePipelineDescriptor{};
 		glyphSdfComputePipelineDescriptor.pipelineLayout = glyphSdfPipelineLayout;

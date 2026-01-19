@@ -1,7 +1,9 @@
+#version 430
+
 // Copyright 2025 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-#version 430
+// TODO: Change to a generic distance field shader.
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
