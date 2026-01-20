@@ -176,12 +176,25 @@ namespace ProjectA {
 
 					D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor = {};
 					shaderResourceViewDescriptor.Format = getImageFormat(image->getFormat());
-					shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-					shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-					shaderResourceViewDescriptor.Texture2D.MostDetailedMip = descriptorImage.imageView->getMipLevelOffset();
-					shaderResourceViewDescriptor.Texture2D.MipLevels = descriptorImage.imageView->getMipLevelCount();
-					shaderResourceViewDescriptor.Texture2D.PlaneSlice = 0;
-					shaderResourceViewDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+
+					if (image->getLayerCount() > 1) {
+						shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+						shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+						shaderResourceViewDescriptor.Texture2DArray.MostDetailedMip = descriptorImage.imageView->getMipLevelOffset();
+						shaderResourceViewDescriptor.Texture2DArray.MipLevels = descriptorImage.imageView->getMipLevelCount();
+						shaderResourceViewDescriptor.Texture2DArray.FirstArraySlice = descriptorImage.imageView->getLayerOffset();
+						shaderResourceViewDescriptor.Texture2DArray.ArraySize = descriptorImage.imageView->getLayerCount();
+						shaderResourceViewDescriptor.Texture2DArray.PlaneSlice = 0;
+						shaderResourceViewDescriptor.Texture2DArray.ResourceMinLODClamp = 0.0f;
+					}
+					else {
+						shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+						shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+						shaderResourceViewDescriptor.Texture2D.MostDetailedMip = descriptorImage.imageView->getMipLevelOffset();
+						shaderResourceViewDescriptor.Texture2D.MipLevels = descriptorImage.imageView->getMipLevelCount();
+						shaderResourceViewDescriptor.Texture2D.PlaneSlice = 0;
+						shaderResourceViewDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+					}
 
 					device->CreateShaderResourceView(image->resource.Get(), &shaderResourceViewDescriptor, descriptorHeapOffset);
 

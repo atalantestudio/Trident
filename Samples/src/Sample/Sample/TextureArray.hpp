@@ -258,8 +258,8 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "VertexOffset2DUVTextureIndex.vert");
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "TextureArray.frag");
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/TextureArray/TextureArray.vert");
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/TextureArray/TextureArray.frag");
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;

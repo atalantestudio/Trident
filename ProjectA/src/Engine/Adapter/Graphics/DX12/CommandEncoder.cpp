@@ -177,15 +177,22 @@ namespace ProjectA {
 		textureCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 
 		for (const BufferImageCopyRegion& copyRegion : copyRegions) {
-			bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset;
-			bufferCopyLocation.PlacedFootprint.Footprint.Width = static_cast<UINT>(dstImageResourceDescriptor.Width);
-			bufferCopyLocation.PlacedFootprint.Footprint.Height = dstImageResourceDescriptor.Height;
-			bufferCopyLocation.PlacedFootprint.Footprint.Depth = dstImageResourceDescriptor.DepthOrArraySize;
+			bufferCopyLocation.PlacedFootprint.Footprint.Width = dstImage->getExtent().width;
+			bufferCopyLocation.PlacedFootprint.Footprint.Height = dstImage->getExtent().height;
+			bufferCopyLocation.PlacedFootprint.Footprint.Depth = dstImage->getExtent().depth;
 			bufferCopyLocation.PlacedFootprint.Footprint.RowPitch = bufferCopyLocation.PlacedFootprint.Footprint.Width * channelCount;
 
-			textureCopyLocation.SubresourceIndex = copyRegion.imageLayerOffset * dstImage->getMipLevelCount() + copyRegion.imageMipLevel;
+			UINT layerIndex = copyRegion.imageLayerOffset;
 
-			commandList->CopyTextureRegion(&textureCopyLocation, copyRegion.imageOffsetX, copyRegion.imageOffsetY, copyRegion.imageOffsetZ, &bufferCopyLocation, nullptr);
+			while (layerIndex < copyRegion.imageLayerCount) {
+				bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset + dstImage->getExtent().width * dstImage->getExtent().height * dstImage->getExtent().depth * channelCount * layerIndex;
+
+				textureCopyLocation.SubresourceIndex = layerIndex;
+
+				commandList->CopyTextureRegion(&textureCopyLocation, copyRegion.imageOffsetX, copyRegion.imageOffsetY, copyRegion.imageOffsetZ, &bufferCopyLocation, nullptr);
+
+				layerIndex += 1;
+			}
 		}
 
 		commandCount += 1;
