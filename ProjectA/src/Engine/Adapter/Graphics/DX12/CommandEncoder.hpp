@@ -9,12 +9,6 @@
 
 namespace ProjectA {
 	class DX12::CommandEncoder final : public ProjectA::CommandEncoder {
-		private:
-			struct GraphicsImageTransitionBarrier {
-				ref<ProjectA::Image> image;
-				ImageLayout newLayout;
-			};
-
 		public:
 			explicit CommandEncoder(const CommandBufferDescriptor& descriptor, const DX12::Device& device, const DX12::CommandPool& commandPool);
 
@@ -67,16 +61,11 @@ namespace ProjectA {
 		protected:
 			void bindIndexBuffer(ref<ProjectA::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) final override;
 
-			void executeGraphicsImageTransitionBarrier(const GraphicsImageTransitionBarrier& barrier) const;
-
 		private:
 			const DX12::Device& device;
 			ComPtr<ID3D12CommandAllocator> commandAllocator;
 			ComPtr<ID3D12GraphicsCommandList> commandList;
 			uint32 commandCount = 0;
 			bool computePipelineBound = false;
-
-			// These transitions are scheduled due to the current queue not being able to execute them.
-			std::vector<GraphicsImageTransitionBarrier> scheduledGraphicsImageTransitionBarriers;
 	};
 }

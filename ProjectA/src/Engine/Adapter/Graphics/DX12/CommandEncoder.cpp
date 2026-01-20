@@ -89,12 +89,6 @@ namespace ProjectA {
 		commandList->SetGraphicsRootSignature(pipeline->pipelineLayout->rootSignature.Get());
 		commandList->IASetPrimitiveTopology(pipeline->primitiveTopology);
 
-		for (const GraphicsImageTransitionBarrier& barrier : scheduledGraphicsImageTransitionBarriers) {
-			executeGraphicsImageTransitionBarrier(barrier);
-		}
-
-		scheduledGraphicsImageTransitionBarriers.clear();
-
 		commandCount += 1;
 	}
 
@@ -255,28 +249,35 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::setImageMemoryBarrier(ref<ProjectA::Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
-		if (newLayout == ImageLayout::TRANSFER_DST_OPTIMAL) {
-			// Transitions to D3D12_RESOURCE_STATE_COPY_DEST are handled implicitly.
-			return;
-		}
-
 		if (image->getLayout() == newLayout) {
 			ADAPTER_WARNING("Ignored transition resource barrier to the same layout.");
 
 			return;
 		}
 
-		GraphicsImageTransitionBarrier barrier{};
-		barrier.image = image;
-		barrier.newLayout = newLayout;
-
-		if (newLayout == ImageLayout::SHADER_READ_ONLY_OPTIMAL && computePipelineBound) {
-			scheduledGraphicsImageTransitionBarriers.emplace_back(barrier);
-
+		if (newLayout == ImageLayout::TRANSFER_DST_OPTIMAL) {
+			// Transitions to D3D12_RESOURCE_STATE_COPY_DEST are handled implicitly.
 			return;
 		}
 
-		executeGraphicsImageTransitionBarrier(barrier);
+		if (newLayout == ImageLayout::SHADER_READ_ONLY_OPTIMAL && computePipelineBound) {
+			// This transition can't be execute by the compute queue.
+			return;
+		}
+
+		D3D12_RESOURCE_BARRIER resourceBarrier{};
+		resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		resourceBarrier.Transition.pResource = std::static_pointer_cast<DX12::Image>(image)->resource.Get();
+		resourceBarrier.Transition.Subresource = 0;
+		resourceBarrier.Transition.StateBefore = getImageTransitionResourceStates(image->getLayout());
+		resourceBarrier.Transition.StateAfter = getImageTransitionResourceStates(newLayout);
+
+		commandList->ResourceBarrier(1, &resourceBarrier);
+
+		image->setLayout(newLayout);
+
+		commandCount += 1;
 	}
 
 	void DX12::CommandEncoder::setLineWidth(float32 lineWidth) {
@@ -439,19 +440,5 @@ namespace ProjectA {
 		commandList->IASetIndexBuffer(&indexBufferView);
 
 		commandCount += 1;
-	}
-
-	void DX12::CommandEncoder::executeGraphicsImageTransitionBarrier(const GraphicsImageTransitionBarrier& barrier) const {
-		D3D12_RESOURCE_BARRIER resourceBarrier{};
-		resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		resourceBarrier.Transition.pResource = std::static_pointer_cast<DX12::Image>(barrier.image)->resource.Get();
-		resourceBarrier.Transition.Subresource = 0;
-		resourceBarrier.Transition.StateBefore = getImageTransitionResourceStates(barrier.image->getLayout());
-		resourceBarrier.Transition.StateAfter = getImageTransitionResourceStates(barrier.newLayout);
-
-		commandList->ResourceBarrier(1, &resourceBarrier);
-
-		barrier.image->setLayout(barrier.newLayout);
 	}
 }
