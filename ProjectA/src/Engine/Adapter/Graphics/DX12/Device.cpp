@@ -163,6 +163,9 @@ namespace ProjectA {
 				}
 			}
 			else if (isImageDescriptorType(binding.descriptorType)) {
+				static const UINT descriptorHeapIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+				D3D12_CPU_DESCRIPTOR_HANDLE descriptorHeapOffset = descriptorSet->shaderResourceViewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 				UINT descriptorImageIndex = 0;
 
 				while (descriptorImageIndex < writeDescriptorSet.descriptorImages.count()) {
@@ -175,18 +178,14 @@ namespace ProjectA {
 					shaderResourceViewDescriptor.Format = getImageFormat(image->getFormat());
 					shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 					shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-
-					// TODO
-					// shaderResourceViewDescriptor.Texture2D.MostDetailedMip = descriptorImage.imageView->getMipLevelOffset();
-
+					shaderResourceViewDescriptor.Texture2D.MostDetailedMip = descriptorImage.imageView->getMipLevelOffset();
 					shaderResourceViewDescriptor.Texture2D.MipLevels = descriptorImage.imageView->getMipLevelCount();
+					shaderResourceViewDescriptor.Texture2D.PlaneSlice = 0;
+					shaderResourceViewDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
 
-					// TODO
-					// shaderResourceViewDescriptor.Texture2D.PlaneSlice = descriptorImage.imageView->getLayerOffset();
-					// shaderResourceViewDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
+					device->CreateShaderResourceView(image->resource.Get(), &shaderResourceViewDescriptor, descriptorHeapOffset);
 
-					device->CreateShaderResourceView(image->resource.Get(), &shaderResourceViewDescriptor, descriptorSet->shaderResourceViewDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-
+					descriptorHeapOffset.ptr += descriptorHeapIncrementSize;
 					descriptorImageIndex += 1;
 				}
 			}

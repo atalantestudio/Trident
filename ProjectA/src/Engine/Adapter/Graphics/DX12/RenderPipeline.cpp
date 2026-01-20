@@ -130,13 +130,19 @@ namespace ProjectA {
 				const VertexInputAttribute& vertexInputAttribute = vertexInputAttributes[vertexInputAttributeIndex];
 
 				D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = inputElementDescriptors[inputElementDescriptorIndex];
-				inputElementDescriptor.SemanticName = &vertexInputAttribute.hlslSemanticName[0];
-				inputElementDescriptor.SemanticIndex = vertexInputAttribute.hlslSemanticIndex;
+				inputElementDescriptor.SemanticName = "VERTEX_INPUT_ATTRIBUTE";
+				inputElementDescriptor.SemanticIndex = inputElementDescriptorIndex;
 				inputElementDescriptor.Format = getVertexInputAttributeType(vertexInputAttribute.type);
 				inputElementDescriptor.InputSlot = vertexInputBindingIndex;
 				inputElementDescriptor.AlignedByteOffset = vertexInputAttribute.offset;
 				inputElementDescriptor.InputSlotClass = static_cast<D3D12_INPUT_CLASSIFICATION>(vertexInputBinding.getInputRate());
-				inputElementDescriptor.InstanceDataStepRate = 0;
+
+				if (vertexInputBinding.getInputRate() == InputRate::INSTANCE) {
+					inputElementDescriptor.InstanceDataStepRate = 1;
+				}
+				else {
+					inputElementDescriptor.InstanceDataStepRate = 0;
+				}
 
 				inputElementDescriptorIndex += 1;
 				vertexInputAttributeIndex += 1;

@@ -30,11 +30,13 @@ namespace ProjectA {
 				return maxAlignment;
 			}
 
+			// TODO: Deprecate.
 			template<typename AttributeType>
-			constexpr void registerAttribute(view<char8> hlslSemanticName) {
+			constexpr void registerAttribute(view<char8> hlslSemanticName = "") {
 				registerAttribute<AttributeType>(hlslSemanticName, 0);
 			}
 
+			// TODO: Deprecate `hlslSemanticName` and `hlslSemanticIndex`.
 			template<typename AttributeType>
 			constexpr void registerAttribute(view<char8> hlslSemanticName, uint32 hlslSemanticIndex) {
 				constexpr uint32 alignment = getAlignment<AttributeType>();

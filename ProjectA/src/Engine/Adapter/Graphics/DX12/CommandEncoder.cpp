@@ -137,11 +137,11 @@ namespace ProjectA {
 	void DX12::CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<ProjectA::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
 		const ComPtr<ID3D12Resource>& resource = std::static_pointer_cast<DX12::Buffer>(vertexBuffer)->resource;
 
-		ADAPTER_ASSERT(offset < resource->GetDesc().Width, "The vertex buffer bind offset is overflowing.");
+		ADAPTER_ASSERT(offset < vertexBuffer->size, "The vertex buffer bind offset is overflowing.");
 
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 		vertexBufferView.BufferLocation = resource->GetGPUVirtualAddress();
-		vertexBufferView.SizeInBytes = static_cast<UINT>(resource->GetDesc().Width - offset);
+		vertexBufferView.SizeInBytes = static_cast<UINT>(vertexBuffer->size - offset);
 		vertexBufferView.StrideInBytes = stride;
 
 		commandList->IASetVertexBuffers(bindingIndex, 1, &vertexBufferView);

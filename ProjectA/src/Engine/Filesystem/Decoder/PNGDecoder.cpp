@@ -157,7 +157,7 @@ namespace ProjectA {
 				default: {
 					const char8* typeString = pointer_cast<const char8*>(&type);
 
-					ENGINE_WARNING("Ignoring unsupported PNG chunk of type \"[][][][]\".", typeString[0], typeString[1], typeString[2], typeString[3]);
+					ENGINE_WARNING("Ignoring unsupported PNG chunk \"[][][][]\".", typeString[0], typeString[1], typeString[2], typeString[3]);
 
 					stream.jump(byteLength);
 
