@@ -10,6 +10,10 @@ namespace ProjectA::DX12 {
 	inline D3D12_RESOURCE_FLAGS getImageResourceFlags(ImageUsage imageUsage) {
 		D3D12_RESOURCE_FLAGS resourceFlags = D3D12_RESOURCE_FLAG_NONE;
 
+		if (imageUsage & ImageUsage::STORAGE) {
+			resourceFlags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+		}
+
 		if (imageUsage & ImageUsage::COLOR_ATTACHMENT) {
 			resourceFlags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		}

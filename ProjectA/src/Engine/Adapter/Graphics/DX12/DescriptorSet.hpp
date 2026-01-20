@@ -16,7 +16,7 @@ namespace ProjectA {
 
 		public:
 			sequence<DescriptorSetBinding> bindings;
-			ComPtr<ID3D12DescriptorHeap> shaderResourceViewDescriptorHeap = nullptr;
+			ComPtr<ID3D12DescriptorHeap> cbvSrvUavViewDescriptorHeap = nullptr;
 			ComPtr<ID3D12DescriptorHeap> samplerDescriptorHeap = nullptr;
 	};
 }

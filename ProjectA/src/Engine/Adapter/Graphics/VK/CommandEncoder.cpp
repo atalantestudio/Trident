@@ -251,7 +251,7 @@ namespace ProjectA {
 			&imageMemoryBarrier
 		);
 
-		vkImage->setLayout(newLayout);
+		image->setLayout(newLayout);
 
 		commandCount += 1;
 	}

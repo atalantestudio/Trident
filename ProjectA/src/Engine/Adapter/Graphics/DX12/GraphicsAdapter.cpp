@@ -4,6 +4,7 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
+#include "Engine/Adapter/Graphics/DX12/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/Framebuffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
@@ -33,9 +34,7 @@ namespace ProjectA {
 	}
 
 	ref<ComputePipeline> DX12::GraphicsAdapter::createComputePipeline(const ComputePipelineDescriptor& descriptor) const {
-		ENGINE_ERROR_UNIMPLEMENTED();
-
-		return nullptr;
+		return createRef<DX12::ComputePipeline>(descriptor, *device);
 	}
 
 	ref<DescriptorSetLayout> DX12::GraphicsAdapter::createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const {

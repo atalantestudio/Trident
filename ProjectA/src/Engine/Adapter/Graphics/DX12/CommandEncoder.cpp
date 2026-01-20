@@ -6,6 +6,7 @@
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandBuffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/CommandEncoder.hpp"
+#include "Engine/Adapter/Graphics/DX12/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/DescriptorSet.hpp"
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/RenderPipeline.hpp"
@@ -72,8 +73,12 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::bindComputePipeline(ref<ProjectA::ComputePipeline> computePipeline) {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		const ref<DX12::ComputePipeline> pipeline = std::static_pointer_cast<DX12::ComputePipeline>(computePipeline);
 
+		commandList->SetPipelineState(pipeline->pipelineState.Get());
+		commandList->SetComputeRootSignature(pipeline->pipelineLayout->rootSignature.Get());
+
+		computePipelineBound = true;
 		commandCount += 1;
 	}
 
@@ -83,6 +88,12 @@ namespace ProjectA {
 		commandList->SetPipelineState(pipeline->pipelineState.Get());
 		commandList->SetGraphicsRootSignature(pipeline->pipelineLayout->rootSignature.Get());
 		commandList->IASetPrimitiveTopology(pipeline->primitiveTopology);
+
+		for (const GraphicsImageTransitionBarrier& barrier : scheduledGraphicsImageTransitionBarriers) {
+			executeGraphicsImageTransitionBarrier(barrier);
+		}
+
+		scheduledGraphicsImageTransitionBarriers.clear();
 
 		commandCount += 1;
 	}
@@ -96,8 +107,8 @@ namespace ProjectA {
 		while (descriptorSetIndex < descriptorSets.count()) {
 			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
 
-			if (descriptorSet->shaderResourceViewDescriptorHeap) {
-				descriptorHeaps.emplace_back(descriptorSet->shaderResourceViewDescriptorHeap.Get());
+			if (descriptorSet->cbvSrvUavViewDescriptorHeap) {
+				descriptorHeaps.emplace_back(descriptorSet->cbvSrvUavViewDescriptorHeap.Get());
 			}
 
 			if (descriptorSet->samplerDescriptorHeap) {
@@ -113,22 +124,43 @@ namespace ProjectA {
 
 		UINT rootParameterIndex = 0;
 
-		while (descriptorSetIndex < descriptorSets.count()) {
-			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
+		if (computePipelineBound) {
+			while (descriptorSetIndex < descriptorSets.count()) {
+				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
 
-			if (descriptorSet->shaderResourceViewDescriptorHeap) {
-				commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorSet->shaderResourceViewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				if (descriptorSet->cbvSrvUavViewDescriptorHeap) {
+					commandList->SetComputeRootDescriptorTable(rootParameterIndex, descriptorSet->cbvSrvUavViewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
-				rootParameterIndex += 1;
+					rootParameterIndex += 1;
+				}
+
+				if (descriptorSet->samplerDescriptorHeap) {
+					commandList->SetComputeRootDescriptorTable(rootParameterIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+					rootParameterIndex += 1;
+				}
+
+				descriptorSetIndex += 1;
 			}
+		}
+		else {
+			while (descriptorSetIndex < descriptorSets.count()) {
+				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
 
-			if (descriptorSet->samplerDescriptorHeap) {
-				commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				if (descriptorSet->cbvSrvUavViewDescriptorHeap) {
+					commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorSet->cbvSrvUavViewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
-				rootParameterIndex += 1;
+					rootParameterIndex += 1;
+				}
+
+				if (descriptorSet->samplerDescriptorHeap) {
+					commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+					rootParameterIndex += 1;
+				}
+
+				descriptorSetIndex += 1;
 			}
-
-			descriptorSetIndex += 1;
 		}
 
 		commandCount += 1;
@@ -205,7 +237,7 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		commandList->Dispatch(groupCountX, groupCountY, groupCountZ);
 
 		commandCount += 1;
 	}
@@ -228,17 +260,23 @@ namespace ProjectA {
 			return;
 		}
 
-		D3D12_RESOURCE_BARRIER resourceBarrier{};
-		resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		resourceBarrier.Transition.pResource = std::static_pointer_cast<DX12::Image>(image)->resource.Get();
-		resourceBarrier.Transition.Subresource = 0;
-		resourceBarrier.Transition.StateBefore = getImageTransitionResourceStates(image->getLayout());
-		resourceBarrier.Transition.StateAfter = getImageTransitionResourceStates(newLayout);
+		if (image->getLayout() == newLayout) {
+			ADAPTER_WARNING("Ignored transition resource barrier to the same layout.");
 
-		commandList->ResourceBarrier(1, &resourceBarrier);
+			return;
+		}
 
-		commandCount += 1;
+		GraphicsImageTransitionBarrier barrier{};
+		barrier.image = image;
+		barrier.newLayout = newLayout;
+
+		if (newLayout == ImageLayout::SHADER_READ_ONLY_OPTIMAL && computePipelineBound) {
+			scheduledGraphicsImageTransitionBarriers.emplace_back(barrier);
+
+			return;
+		}
+
+		executeGraphicsImageTransitionBarrier(barrier);
 	}
 
 	void DX12::CommandEncoder::setLineWidth(float32 lineWidth) {
@@ -387,6 +425,7 @@ namespace ProjectA {
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to reset command list.");
 
 		commandCount = 0;
+		computePipelineBound = false;
 	}
 
 	void DX12::CommandEncoder::bindIndexBuffer(ref<ProjectA::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
@@ -400,5 +439,19 @@ namespace ProjectA {
 		commandList->IASetIndexBuffer(&indexBufferView);
 
 		commandCount += 1;
+	}
+
+	void DX12::CommandEncoder::executeGraphicsImageTransitionBarrier(const GraphicsImageTransitionBarrier& barrier) const {
+		D3D12_RESOURCE_BARRIER resourceBarrier{};
+		resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		resourceBarrier.Transition.pResource = std::static_pointer_cast<DX12::Image>(barrier.image)->resource.Get();
+		resourceBarrier.Transition.Subresource = 0;
+		resourceBarrier.Transition.StateBefore = getImageTransitionResourceStates(barrier.image->getLayout());
+		resourceBarrier.Transition.StateAfter = getImageTransitionResourceStates(barrier.newLayout);
+
+		commandList->ResourceBarrier(1, &resourceBarrier);
+
+		barrier.image->setLayout(barrier.newLayout);
 	}
 }

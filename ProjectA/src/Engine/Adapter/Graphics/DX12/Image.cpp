@@ -41,9 +41,9 @@ namespace ProjectA {
 		resourceDescriptor.Flags = getImageResourceFlags(descriptor.usage);
 
 		const D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_NONE;
-		const D3D12_RESOURCE_STATES resourceState = getImageResourceStates(descriptor.usage, layout);
+		const D3D12_RESOURCE_STATES initialResourceState = getImageResourceStates(descriptor.usage, layout);
 
-		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, resourceState, nullptr, IID_PPV_ARGS(&resource));
+		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceState, nullptr, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed image resource.");
 	}

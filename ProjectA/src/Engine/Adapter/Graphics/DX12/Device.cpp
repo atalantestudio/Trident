@@ -64,37 +64,48 @@ namespace ProjectA {
 		sequence<ref<ProjectA::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 		UINT descriptorSetIndex = 0;
 		UINT bindingIndex = 0;
-		UINT shaderResourceViewDescriptorCount = 0;
 		UINT samplerDescriptorCount = 0;
+		UINT cbvSrvUavViewDescriptorCount = 0;
 
 		while (descriptorSetIndex < descriptorSetLayouts.count()) {
 			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
 
 			bindingIndex = 0;
 			samplerDescriptorCount = 0;
-			shaderResourceViewDescriptorCount = 0;
+			cbvSrvUavViewDescriptorCount = 0;
 
-			const ref<DX12::DescriptorSet> descriptorSet = createRef<DX12::DescriptorSet>();
+			ref<DX12::DescriptorSet> descriptorSet = createRef<DX12::DescriptorSet>();
 			descriptorSet->bindings = sequence<DX12::DescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
 
 			for (const DescriptorSetLayoutBinding& binding : descriptorSetLayout->bindings) {
-				if (binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER) {
-					shaderResourceViewDescriptorCount += binding.descriptorCount;
-					samplerDescriptorCount += binding.descriptorCount;
-				}
-				else {
-					ENGINE_ERROR_UNIMPLEMENTED();
+				switch (binding.descriptorType) {
+					case DescriptorType::COMBINED_IMAGE_SAMPLER: {
+						cbvSrvUavViewDescriptorCount += binding.descriptorCount;
+						samplerDescriptorCount += binding.descriptorCount;
+
+						break;
+					}
+					case DescriptorType::STORAGE_IMAGE: {
+						cbvSrvUavViewDescriptorCount += binding.descriptorCount;
+
+						break;
+					}
+					default: {
+						ADAPTER_ASSERT(false, "Unsupported descriptor type.");
+
+						break;
+					}
 				}
 			}
 
-			if (shaderResourceViewDescriptorCount > 0) {
-				D3D12_DESCRIPTOR_HEAP_DESC shaderResourceViewDescriptorHeapDescriptor{};
-				shaderResourceViewDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-				shaderResourceViewDescriptorHeapDescriptor.NumDescriptors = shaderResourceViewDescriptorCount;
-				shaderResourceViewDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-				shaderResourceViewDescriptorHeapDescriptor.NodeMask = 0;
+			if (cbvSrvUavViewDescriptorCount > 0) {
+				D3D12_DESCRIPTOR_HEAP_DESC cbvSrvUavDescriptorHeapDescriptor{};
+				cbvSrvUavDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+				cbvSrvUavDescriptorHeapDescriptor.NumDescriptors = cbvSrvUavViewDescriptorCount;
+				cbvSrvUavDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+				cbvSrvUavDescriptorHeapDescriptor.NodeMask = 0;
 
-				result = device->CreateDescriptorHeap(&shaderResourceViewDescriptorHeapDescriptor, IID_PPV_ARGS(&descriptorSet->shaderResourceViewDescriptorHeap));
+				result = device->CreateDescriptorHeap(&cbvSrvUavDescriptorHeapDescriptor, IID_PPV_ARGS(&descriptorSet->cbvSrvUavViewDescriptorHeap));
 
 				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create shader resource view descriptor heap.");
 			}
@@ -165,7 +176,7 @@ namespace ProjectA {
 			else if (isImageDescriptorType(binding.descriptorType)) {
 				static const UINT descriptorHeapIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-				D3D12_CPU_DESCRIPTOR_HANDLE descriptorHeapOffset = descriptorSet->shaderResourceViewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+				D3D12_CPU_DESCRIPTOR_HANDLE descriptorHeapOffset = descriptorSet->cbvSrvUavViewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 				UINT descriptorImageIndex = 0;
 
 				while (descriptorImageIndex < writeDescriptorSet.descriptorImages.count()) {

@@ -44,6 +44,8 @@ namespace ProjectA::DX12 {
 
 		if (imageUsage & ImageUsage::STORAGE) {
 			resourceStates |= D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
+
+			layout = ImageLayout::GENERAL;
 		}
 
 		if (imageUsage & ImageUsage::COLOR_ATTACHMENT) {
@@ -68,14 +70,11 @@ namespace ProjectA::DX12 {
 	inline D3D12_RESOURCE_STATES getImageTransitionResourceStates(ImageLayout imageLayout) {
 		switch (imageLayout) {
 			case ImageLayout::UNDEFINED: return D3D12_RESOURCE_STATE_COMMON;
-			case ImageLayout::GENERAL: return D3D12_RESOURCE_STATE_GENERIC_READ;
+			case ImageLayout::GENERAL: return D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 			case ImageLayout::COLOR_ATTACHMENT_OPTIMAL: return D3D12_RESOURCE_STATE_RENDER_TARGET;
 			case ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL: return D3D12_RESOURCE_STATE_RENDER_TARGET | D3D12_RESOURCE_STATE_DEPTH_WRITE;
 			case ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL: return D3D12_RESOURCE_STATE_DEPTH_READ;
-			case ImageLayout::SHADER_READ_ONLY_OPTIMAL: {
-				// TODO: Include D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE?
-				return D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-			}
+			case ImageLayout::SHADER_READ_ONLY_OPTIMAL: return D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
 			case ImageLayout::TRANSFER_SRC_OPTIMAL: return D3D12_RESOURCE_STATE_COPY_SOURCE;
 			case ImageLayout::TRANSFER_DST_OPTIMAL: return D3D12_RESOURCE_STATE_COPY_DEST;
 			case ImageLayout::PRESENT_SRC: return D3D12_RESOURCE_STATE_PRESENT;

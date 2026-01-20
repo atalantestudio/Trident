@@ -24,11 +24,10 @@ namespace ProjectA {
 
 		ADAPTER_ASSERT(descriptor.colorBlendState.attachments.size() <= 8 && descriptor.renderPass->getAttachmentCount() <= 8, "Too many color blend attachments.");
 
-		HRESULT result;
-
-		const ref<DX12::PipelineLayout> pipelineLayout = std::static_pointer_cast<DX12::PipelineLayout>(descriptor.pipelineLayout);
 		const ref<DX12::ShaderModule> vertexShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.vertexShaderModule);
 		const ref<DX12::ShaderModule> fragmentShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.fragmentShaderModule);
+
+		HRESULT result;
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescriptor{};
 		graphicsPipelineStateDescriptor.pRootSignature = pipelineLayout->rootSignature.Get();

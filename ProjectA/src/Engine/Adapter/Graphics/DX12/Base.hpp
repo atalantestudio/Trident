@@ -20,6 +20,7 @@ namespace ProjectA::DX12 {
 	class CommandBuffer;
 	class CommandEncoder;
 	class CommandPool;
+	class ComputePipeline;
 	class DescriptorSet;
 	class Device;
 	class Fence;

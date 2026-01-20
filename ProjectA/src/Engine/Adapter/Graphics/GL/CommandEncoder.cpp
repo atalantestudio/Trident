@@ -129,7 +129,7 @@ namespace ProjectA {
 
 		commands.emplace_back(createRef<GL::SetImageMemoryBarrierCommand>(barrier));
 
-		std::static_pointer_cast<GL::Image>(image)->setLayout(newLayout);
+		image->setLayout(newLayout);
 	}
 
 	void GL::CommandEncoder::setLineWidth(float32 lineWidth) {

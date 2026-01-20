@@ -154,8 +154,8 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/Vertex2DUV.vert");
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/TextureRGBAFlipY.frag");
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/ComputeShader/ComputeShader.vert");
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/ComputeShader/ComputeShader.frag");
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;
@@ -256,7 +256,7 @@ namespace ProjectA {
 				computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 				computeShaderModuleDescriptor.entryPoint = "main";
 
-				const ref<ShaderModule> computeShaderModule = loadShaderModule(computeShaderModuleDescriptor, "ImageUVGradient.comp");
+				const ref<ShaderModule> computeShaderModule = loadShaderModule(computeShaderModuleDescriptor, "Sample/ComputeShader/ComputeShader.comp");
 
 				ComputePipelineDescriptor computePipelineDescriptor{};
 				computePipelineDescriptor.pipelineLayout = pipelineLayout;

@@ -15,10 +15,8 @@ namespace ProjectA::DX12 {
 			return D3D12_SHADER_VISIBILITY_PIXEL;
 		}
 
-		if (shaderStage == ShaderStage::COMPUTE) {
-			return D3D12_SHADER_VISIBILITY_DOMAIN;
-		}
-
+		// Compute queues always use D3D12_SHADER_VISIBILITY_ALL because they have only one active shader stage.
+		// See https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_shader_visibility#remarks.
 		return D3D12_SHADER_VISIBILITY_ALL;
 	}
 }

@@ -45,54 +45,63 @@ namespace ProjectA {
 				const DescriptorSetLayoutBinding& binding = descriptorSetLayout->bindings[bindingIndex];
 				const D3D12_SHADER_VISIBILITY shaderVisibility = getShaderVisibility(binding.shaderStages);
 
-				if (binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER) {
-					D3D12_DESCRIPTOR_RANGE1& imageDescriptorRange = descriptorRanges[descriptorRangeIndex];
-					imageDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-					imageDescriptorRange.NumDescriptors = binding.descriptorCount;
-					imageDescriptorRange.BaseShaderRegister = bindingIndex;
-					imageDescriptorRange.RegisterSpace = 0;
-					imageDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
-					imageDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+				switch (binding.descriptorType) {
+					case DescriptorType::COMBINED_IMAGE_SAMPLER: {
+						D3D12_DESCRIPTOR_RANGE1& imageDescriptorRange = descriptorRanges[descriptorRangeIndex];
+						imageDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+						imageDescriptorRange.NumDescriptors = binding.descriptorCount;
+						imageDescriptorRange.BaseShaderRegister = bindingIndex;
+						imageDescriptorRange.RegisterSpace = 0;
+						imageDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
+						imageDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-					D3D12_ROOT_PARAMETER1& imageRootParameter = rootParameters[rootParameterIndex];
-					imageRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-					imageRootParameter.DescriptorTable.NumDescriptorRanges = 1;
-					imageRootParameter.DescriptorTable.pDescriptorRanges = &imageDescriptorRange;
-					imageRootParameter.ShaderVisibility = shaderVisibility;
+						D3D12_ROOT_PARAMETER1& imageRootParameter = rootParameters[rootParameterIndex];
+						imageRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+						imageRootParameter.DescriptorTable.NumDescriptorRanges = 1;
+						imageRootParameter.DescriptorTable.pDescriptorRanges = &imageDescriptorRange;
+						imageRootParameter.ShaderVisibility = shaderVisibility;
 
-					rootParameterIndex += 1;
-					descriptorRangeIndex += 1;
+						rootParameterIndex += 1;
+						descriptorRangeIndex += 1;
 
-					D3D12_DESCRIPTOR_RANGE1& samplerDescriptorRange = descriptorRanges[descriptorRangeIndex];
-					samplerDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-					samplerDescriptorRange.NumDescriptors = binding.descriptorCount;
-					samplerDescriptorRange.BaseShaderRegister = bindingIndex;
-					samplerDescriptorRange.RegisterSpace = 0;
-					samplerDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
-					samplerDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+						D3D12_DESCRIPTOR_RANGE1& samplerDescriptorRange = descriptorRanges[descriptorRangeIndex];
+						samplerDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+						samplerDescriptorRange.NumDescriptors = binding.descriptorCount;
+						samplerDescriptorRange.BaseShaderRegister = bindingIndex;
+						samplerDescriptorRange.RegisterSpace = 0;
+						samplerDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
+						samplerDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-					D3D12_ROOT_PARAMETER1& samplerRootParameter = rootParameters[rootParameterIndex];
-					samplerRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-					samplerRootParameter.DescriptorTable.NumDescriptorRanges = 1;
-					samplerRootParameter.DescriptorTable.pDescriptorRanges = &samplerDescriptorRange;
-					samplerRootParameter.ShaderVisibility = shaderVisibility;
-				}
-				else {
-					ENGINE_ERROR_UNIMPLEMENTED();
+						D3D12_ROOT_PARAMETER1& samplerRootParameter = rootParameters[rootParameterIndex];
+						samplerRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+						samplerRootParameter.DescriptorTable.NumDescriptorRanges = 1;
+						samplerRootParameter.DescriptorTable.pDescriptorRanges = &samplerDescriptorRange;
+						samplerRootParameter.ShaderVisibility = shaderVisibility;
 
-					/* D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeIndex];
-					descriptorRange.RangeType = getDescriptorRangeType(binding.descriptorType);
-					descriptorRange.NumDescriptors = binding.descriptorCount;
-					descriptorRange.BaseShaderRegister = bindingIndex;
-					descriptorRange.RegisterSpace = 0;
-					descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
-					descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+						break;
+					}
+					case DescriptorType::STORAGE_IMAGE: {
+						D3D12_DESCRIPTOR_RANGE1& imageDescriptorRange = descriptorRanges[descriptorRangeIndex];
+						imageDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+						imageDescriptorRange.NumDescriptors = binding.descriptorCount;
+						imageDescriptorRange.BaseShaderRegister = bindingIndex;
+						imageDescriptorRange.RegisterSpace = 0;
+						imageDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
+						imageDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-					D3D12_ROOT_PARAMETER1& rootParameter = rootParameters[rootParameterIndex];
-					rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-					rootParameter.DescriptorTable.NumDescriptorRanges = 1;
-					rootParameter.DescriptorTable.pDescriptorRanges = &descriptorRange;
-					rootParameter.ShaderVisibility = getShaderVisibility(binding.shaderStages); */
+						D3D12_ROOT_PARAMETER1& imageRootParameter = rootParameters[rootParameterIndex];
+						imageRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+						imageRootParameter.DescriptorTable.NumDescriptorRanges = 1;
+						imageRootParameter.DescriptorTable.pDescriptorRanges = &imageDescriptorRange;
+						imageRootParameter.ShaderVisibility = shaderVisibility;
+
+						break;
+					}
+					default: {
+						ADAPTER_ASSERT(false, "Unsupported descriptor type.");
+
+						break;
+					}
 				}
 
 				rootParameterIndex += 1;
