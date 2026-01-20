@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ProjectA {
-	class DemoLayer1 : public GUILayer {
+	class SampleLayer : public GUILayer {
 		public:
 			void GUI() override {
 				ContainerStyle blue{};

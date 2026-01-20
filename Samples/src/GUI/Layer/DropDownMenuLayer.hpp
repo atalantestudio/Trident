@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 namespace ProjectA {
-	class DropDownMenuLayer : public GUILayer {
+	class SampleLayer : public GUILayer {
 		public:
 			void registerAssets() override {
 				font = loadFontAsset("test-regular");
