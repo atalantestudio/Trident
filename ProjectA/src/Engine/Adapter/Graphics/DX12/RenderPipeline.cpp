@@ -157,17 +157,40 @@ namespace ProjectA {
 		graphicsPipelineStateDescriptor.PrimitiveTopologyType = getPrimitiveTopologyType(descriptor.primitiveTopology);
 		graphicsPipelineStateDescriptor.NumRenderTargets = descriptor.renderPass->getAttachmentCount();
 
-		uint32 attachmentIndex = 0;
+		UINT attachmentIndex = 0;
+		UINT subpassIndex = 0;
+		UINT colorAttachmentReferenceIndex;
 
-		while (attachmentIndex < descriptor.renderPass->getAttachmentCount()) {
-			const Attachment& attachment = descriptor.renderPass->getAttachment(attachmentIndex);
+		while (subpassIndex < descriptor.renderPass->getSubpassCount()) {
+			const ref<Subpass> subpass = descriptor.renderPass->getSubpass(subpassIndex);
+			const sequence<AttachmentReference>& colorAttachmentReferences = subpass->getColorAttachmentReferences();
 
-			graphicsPipelineStateDescriptor.RTVFormats[attachmentIndex] = getImageFormat(attachment.format);
+			colorAttachmentReferenceIndex = 0;
 
-			attachmentIndex += 1;
+			while (colorAttachmentReferenceIndex < colorAttachmentReferences.count()) {
+				const uint32 colorAttachmentIndex = colorAttachmentReferences[colorAttachmentReferenceIndex].index;
+
+				if (colorAttachmentIndex != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+					const Attachment& colorAttachment = descriptor.renderPass->getAttachment(colorAttachmentIndex);
+
+					graphicsPipelineStateDescriptor.RTVFormats[attachmentIndex] = getImageFormat(colorAttachment.format);
+				}
+
+				attachmentIndex += 1;
+				colorAttachmentReferenceIndex += 1;
+			}
+
+			if (subpass->hasDepthStencilAttachmentReference()) {
+				ADAPTER_ASSERT(graphicsPipelineStateDescriptor.DSVFormat == DXGI_FORMAT_UNKNOWN, "Depth stencil format is already provided.");
+
+				const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();
+				const Attachment& depthStencilAttachment = descriptor.renderPass->getAttachment(depthStencilAttachmentReference.index);
+
+				graphicsPipelineStateDescriptor.DSVFormat = getImageFormat(depthStencilAttachment.format);
+			}
+
+			subpassIndex += 1;
 		}
-
-		graphicsPipelineStateDescriptor.DSVFormat = DXGI_FORMAT_UNKNOWN;
 
 		// TODO: Set correct sample count (depends on the render pass).
 		graphicsPipelineStateDescriptor.SampleDesc.Count = 1;

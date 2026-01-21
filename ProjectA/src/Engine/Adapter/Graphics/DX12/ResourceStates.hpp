@@ -55,7 +55,7 @@ namespace ProjectA::DX12 {
 		}
 
 		if (imageUsage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
-			resourceStates |= D3D12_RESOURCE_STATE_RENDER_TARGET;
+			resourceStates |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
 
 			layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}

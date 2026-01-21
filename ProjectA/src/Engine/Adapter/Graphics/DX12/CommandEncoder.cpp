@@ -9,6 +9,8 @@
 #include "Engine/Adapter/Graphics/DX12/ComputePipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/DescriptorSet.hpp"
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
+#include "Engine/Adapter/Graphics/DX12/Framebuffer.hpp"
+#include "Engine/Adapter/Graphics/DX12/ImageView.hpp"
 #include "Engine/Adapter/Graphics/DX12/RenderPipeline.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceStates.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
@@ -41,33 +43,31 @@ namespace ProjectA {
 	void DX12::CommandEncoder::begin() const {}
 
 	void DX12::CommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
-		const ref<DX12::Swapchain> swapchain = std::static_pointer_cast<DX12::Swapchain>(Renderer::getSwapchain());
+		framebuffer = std::static_pointer_cast<DX12::Framebuffer>(descriptor.framebuffer);
 
-		// TODO: Set correct resource barriers.
-		D3D12_RESOURCE_BARRIER resourceBarrier{};
-		resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		resourceBarrier.Transition.pResource = swapchain->getImage(Renderer::getImageIndex())->resource.Get();
-		resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-		resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-
-		commandList->ResourceBarrier(1, &resourceBarrier);
-
-		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetViewDescriptorHandle = swapchain->renderTargetViewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		renderTargetViewDescriptorHandle.ptr += Renderer::getImageIndex() * swapchain->renderTargetViewDescriptorSize;
-
-		commandList->OMSetRenderTargets(1, &renderTargetViewDescriptorHandle, false, nullptr);
-
-		ADAPTER_ASSERT(descriptor.clearValues.count() == 1, "Too many clear values.");
+		setRenderTargets();
 
 		D3D12_RECT rectangle{};
 		rectangle.left = 0;
 		rectangle.top = 0;
-		rectangle.right = swapchain->getExtent().width;
-		rectangle.bottom = swapchain->getExtent().height;
+		rectangle.right = framebuffer->getExtent().width;
+		rectangle.bottom = framebuffer->getExtent().height;
 
-		commandList->ClearRenderTargetView(renderTargetViewDescriptorHandle, descriptor.clearValues[0].color, 1, &rectangle);
+		UINT imageViewIndex = 0;
+
+		while (imageViewIndex < descriptor.clearValues.count()) {
+			const ClearValue& clearValue = descriptor.clearValues[imageViewIndex];
+			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[imageViewIndex]);
+
+			if (isDepthFormat(imageView->getImage()->getFormat())) {
+				commandList->ClearDepthStencilView(imageView->cpuDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, clearValue.depth, static_cast<UINT8>(clearValue.stencil), 1, &rectangle);
+			}
+			else {
+				commandList->ClearRenderTargetView(imageView->cpuDescriptorHandle, clearValue.color, 1, &rectangle);
+			}
+
+			imageViewIndex += 1;
+		}
 
 		commandCount += 1;
 	}
@@ -413,18 +413,19 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::endRenderPass() {
-		const ref<DX12::Swapchain> swapchain = std::static_pointer_cast<DX12::Swapchain>(Renderer::getSwapchain());
+		if (presentRenderTargetIndex < framebuffer->imageViews.count()) {
+			const DX12::Image* image = static_cast<const DX12::Image*>(framebuffer->imageViews[presentRenderTargetIndex]->getImage());
 
-		// TODO: Set correct resource barriers.
-		D3D12_RESOURCE_BARRIER resourceBarrier{};
-		resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		resourceBarrier.Transition.pResource = swapchain->getImage(Renderer::getImageIndex())->resource.Get();
-		resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+			D3D12_RESOURCE_BARRIER resourceBarrier{};
+			resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			resourceBarrier.Transition.pResource = image->resource.Get();
+			resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 
-		commandList->ResourceBarrier(1, &resourceBarrier);
+			commandList->ResourceBarrier(1, &resourceBarrier);
+		}
 
 		commandCount += 1;
 	}
@@ -450,6 +451,9 @@ namespace ProjectA {
 
 		commandCount = 0;
 		computePipelineBound = false;
+		framebuffer = nullptr;
+		subpassIndex = 0;
+		presentRenderTargetIndex = max<UINT>();
 	}
 
 	void DX12::CommandEncoder::bindIndexBuffer(ref<ProjectA::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
@@ -463,5 +467,76 @@ namespace ProjectA {
 		commandList->IASetIndexBuffer(&indexBufferView);
 
 		commandCount += 1;
+	}
+
+	void DX12::CommandEncoder::setRenderTargets() {
+		presentRenderTargetIndex = max<UINT>();
+
+		const ref<RenderPass> renderPass = framebuffer->getRenderPass();
+		const ref<Subpass> subpass = renderPass->getSubpass(subpassIndex);
+		const sequence<AttachmentReference>& colorAttachmentReferences = subpass->getColorAttachmentReferences();
+
+		UINT renderTargetCount = 0;
+
+		for (const AttachmentReference& colorAttachmentReference : colorAttachmentReferences) {
+			if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+				continue;
+			}
+
+			renderTargetCount += 1;
+		}
+
+		sequence<D3D12_CPU_DESCRIPTOR_HANDLE> renderTargetViewHandles(renderTargetCount);
+		UINT renderTargetIndex = 0;
+		UINT colorAttachmentIndex = 0;
+
+		while (renderTargetIndex < renderTargetCount) {
+			const AttachmentReference& colorAttachmentReference = colorAttachmentReferences[renderTargetIndex];
+
+			if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+				renderTargetIndex += 1;
+
+				continue;
+			}
+
+			const Attachment& colorAttachment = renderPass->getAttachment(colorAttachmentReference.index);
+
+			if (colorAttachment.finalLayout == ImageLayout::PRESENT_SRC) {
+				presentRenderTargetIndex = colorAttachmentReference.index;
+			}
+
+			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[colorAttachmentReference.index]);
+
+			renderTargetViewHandles[colorAttachmentIndex] = imageView->cpuDescriptorHandle;
+			colorAttachmentIndex += 1;
+			renderTargetIndex += 1;
+		}
+
+		if (presentRenderTargetIndex < framebuffer->imageViews.count()) {
+			const DX12::Image* image = static_cast<const DX12::Image*>(framebuffer->imageViews[presentRenderTargetIndex]->getImage());
+
+			D3D12_RESOURCE_BARRIER resourceBarrier{};
+			resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			resourceBarrier.Transition.pResource = image->resource.Get();
+			resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+			resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+			commandList->ResourceBarrier(1, &resourceBarrier);
+		}
+
+		D3D12_CPU_DESCRIPTOR_HANDLE depthStencilViewHandle{};
+		D3D12_CPU_DESCRIPTOR_HANDLE* depthStencilViewHandlePointer = nullptr;
+
+		if (subpass->hasDepthStencilAttachmentReference()) {
+			const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();
+			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[depthStencilAttachmentReference.index]);
+
+			depthStencilViewHandle = imageView->cpuDescriptorHandle;
+			depthStencilViewHandlePointer = &depthStencilViewHandle;
+		}
+
+		commandList->OMSetRenderTargets(renderTargetCount, &renderTargetViewHandles[0], false, depthStencilViewHandlePointer);
 	}
 }

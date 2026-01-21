@@ -40,7 +40,7 @@ namespace ProjectA {
 				DEBUG_DESCRIPTOR_GUARD(descriptor, image);
 			}
 
-		private:
+		protected:
 			const Image* image;
 			uint32 mipLevelOffset;
 			uint32 mipLevelCount;

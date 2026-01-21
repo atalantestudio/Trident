@@ -61,11 +61,16 @@ namespace ProjectA {
 		protected:
 			void bindIndexBuffer(ref<ProjectA::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) final override;
 
+			void setRenderTargets();
+
 		private:
 			const DX12::Device& device;
 			ComPtr<ID3D12CommandAllocator> commandAllocator;
 			ComPtr<ID3D12GraphicsCommandList> commandList;
 			uint32 commandCount = 0;
 			bool computePipelineBound = false;
+			ref<DX12::Framebuffer> framebuffer = nullptr;
+			UINT subpassIndex = 0;
+			UINT presentRenderTargetIndex = max<UINT>();
 	};
 }

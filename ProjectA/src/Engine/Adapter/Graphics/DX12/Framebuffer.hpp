@@ -9,5 +9,8 @@ namespace ProjectA {
 	class DX12::Framebuffer final : public ProjectA::Framebuffer {
 		public:
 			explicit Framebuffer(const FramebufferDescriptor& descriptor);
+
+		public:
+			sequence<ref<ProjectA::ImageView>> imageViews;
 	};
 }

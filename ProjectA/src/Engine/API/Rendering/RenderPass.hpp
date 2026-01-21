@@ -93,7 +93,6 @@ namespace ProjectA {
 		protected:
 			sequence<Attachment> attachments;
 			sequence<ref<Subpass>> subpasses;
-
 			uint32 attachmentReferenceCount = 0;
 	};
 }

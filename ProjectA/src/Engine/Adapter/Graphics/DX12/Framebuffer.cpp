@@ -7,6 +7,7 @@
 
 namespace ProjectA {
 	DX12::Framebuffer::Framebuffer(const FramebufferDescriptor& descriptor) :
-		ProjectA::Framebuffer(descriptor)
+		ProjectA::Framebuffer(descriptor),
+		imageViews(descriptor.imageViews)
 	{}
 }

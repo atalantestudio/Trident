@@ -28,7 +28,7 @@ namespace ProjectA {
 
 			ref<ProjectA::PipelineLayout> createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const final override;
 
-			ref<ProjectA::RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const final override;
+			ref<RenderPass> createRenderPass(const RenderPassDescriptor& descriptor) const final override;
 
 			ref<ProjectA::RenderPipeline> createRenderPipeline(const RenderPipelineDescriptor& descriptor) const final override;
 

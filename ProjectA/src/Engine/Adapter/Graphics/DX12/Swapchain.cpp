@@ -92,18 +92,14 @@ namespace ProjectA {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create render target view descriptor heap.");
 
-		renderTargetViewDescriptorSize = device.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
 		images = sequence<ref<ProjectA::Image>>(imageCount);
 		imageViews = sequence<ref<ProjectA::ImageView>>(imageCount);
 
-		uint32 imageIndex = 0;
-		D3D12_CPU_DESCRIPTOR_HANDLE renderTargetViewDescriptorHandle = renderTargetViewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		UINT imageIndex = 0;
 
 		while (imageIndex < imageCount) {
-			images[imageIndex] = createRef<DX12::Image>(device, *this, imageIndex, renderTargetViewDescriptorHandle);
+			images[imageIndex] = createRef<DX12::Image>(device, *this, imageIndex, renderTargetViewDescriptorHeap);
 
-			renderTargetViewDescriptorHandle.ptr += renderTargetViewDescriptorSize;
 			imageIndex += 1;
 		}
 

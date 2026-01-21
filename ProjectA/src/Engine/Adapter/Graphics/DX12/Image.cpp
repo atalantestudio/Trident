@@ -13,8 +13,28 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
+	ImageDescriptor DX12::Image::createSwapchainImageDescriptor(Extent2D extent) {
+		ImageDescriptor imageDescriptor{};
+		imageDescriptor.extent.width = extent.width;
+		imageDescriptor.extent.height = extent.height;
+		imageDescriptor.extent.depth = 1;
+		imageDescriptor.mipLevelCount = 1;
+		imageDescriptor.layerCount = 1;
+
+		// These properties aren't used when creating a swapchain image.
+		imageDescriptor.type = ImageType::TEXTURE_2D;
+		imageDescriptor.format = ImageFormat::B8G8R8A8_UNORM;
+		imageDescriptor.sampleCount = 1;
+		imageDescriptor.usage = static_cast<ImageUsage>(0);
+		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		return imageDescriptor;
+	}
+
 	DX12::Image::Image(const ImageDescriptor& descriptor, const DX12::Device& device) :
-		ProjectA::Image(descriptor)
+		ProjectA::Image(descriptor),
+		usage(descriptor.usage),
+		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -43,12 +63,49 @@ namespace ProjectA {
 		const D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_NONE;
 		const D3D12_RESOURCE_STATES initialResourceState = getImageResourceStates(descriptor.usage, layout);
 
-		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceState, nullptr, IID_PPV_ARGS(&resource));
+		D3D12_CLEAR_VALUE optimizedClearValue;
+
+		const D3D12_CLEAR_VALUE* optimizedClearValuePointer = nullptr;
+
+		if (isDepthFormat(descriptor.format)) {
+			optimizedClearValue.Format = resourceDescriptor.Format;
+			optimizedClearValue.DepthStencil.Depth = 0.0f;
+			optimizedClearValue.DepthStencil.Stencil = 0;
+
+			optimizedClearValuePointer = &optimizedClearValue;
+		}
+
+		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceState, optimizedClearValuePointer, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed image resource.");
+
+		if (descriptor.usage & ImageUsage::COLOR_ATTACHMENT || descriptor.usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
+			D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDescriptor{};
+
+			if (descriptor.usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
+				descriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+			}
+			else {
+				descriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+			}
+
+			descriptorHeapDescriptor.NumDescriptors = 1;
+			descriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+			descriptorHeapDescriptor.NodeMask = 0;
+
+			result = device.device->CreateDescriptorHeap(&descriptorHeapDescriptor, IID_PPV_ARGS(&descriptorHeap));
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create descriptor heap for attachment image.");
+		}
 	}
 
-	DX12::Image::Image(const DX12::Device& device, const DX12::Swapchain& swapchain, uint32 imageIndex, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle) {
+	DX12::Image::Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT imageIndex, ComPtr<ID3D12DescriptorHeap> descriptorHeap) :
+		ProjectA::Image(createSwapchainImageDescriptor(swapchain.getExtent())),
+		descriptorHeap(descriptorHeap),
+		usage(static_cast<ImageUsage>(0)),
+		swapchainImageIndex(imageIndex),
+		device(device)
+	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		HRESULT result;
@@ -56,11 +113,9 @@ namespace ProjectA {
 		result = swapchain.swapChain->GetBuffer(imageIndex, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get buffer for render target view.");
-
-		device.device->CreateRenderTargetView(resource.Get(), nullptr, cpuDescriptorHandle);
 	}
 
 	ref<ProjectA::ImageView> DX12::Image::createViewInternal(const ImageViewDescriptor& descriptor, const ProjectA::Image* image) const {
-		return createRef<DX12::ImageView>(descriptor, image);
+		return createRef<DX12::ImageView>(descriptor, image, device);
 	}
 }

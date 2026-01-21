@@ -9,16 +9,25 @@
 
 namespace ProjectA {
 	class DX12::Image final : public ProjectA::Image {
+		private:
+			static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent);
+
 		public:
 			explicit Image(const ImageDescriptor& descriptor, const DX12::Device& device);
 
 			// NOTE: Render Target View constructor
-			explicit Image(const DX12::Device& device, const DX12::Swapchain& swapchain, uint32 imageIndex, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle);
+			explicit Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT imageIndex, ComPtr<ID3D12DescriptorHeap> descriptorHeap);
 
 		protected:
 			ref<ProjectA::ImageView> createViewInternal(const ImageViewDescriptor& descriptor, const ProjectA::Image* image) const final override;
 
 		public:
 			ComPtr<ID3D12Resource> resource;
+			ComPtr<ID3D12DescriptorHeap> descriptorHeap;
+			ImageUsage usage;
+			UINT swapchainImageIndex;
+
+		private:
+			const DX12::Device& device;
 	};
 }
