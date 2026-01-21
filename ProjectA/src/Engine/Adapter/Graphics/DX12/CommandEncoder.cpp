@@ -161,12 +161,10 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<ProjectA::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
-		const ComPtr<ID3D12Resource>& resource = std::static_pointer_cast<DX12::Buffer>(vertexBuffer)->resource;
-
-		ADAPTER_ASSERT(offset < vertexBuffer->size, "The vertex buffer bind offset is overflowing.");
+		ADAPTER_ASSERT(offset < vertexBuffer->size, "The vertex buffer offset is overflowing.");
 
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-		vertexBufferView.BufferLocation = resource->GetGPUVirtualAddress();
+		vertexBufferView.BufferLocation = std::static_pointer_cast<DX12::Buffer>(vertexBuffer)->resource->GetGPUVirtualAddress() + offset;
 		vertexBufferView.SizeInBytes = static_cast<UINT>(vertexBuffer->size - offset);
 		vertexBufferView.StrideInBytes = stride;
 
@@ -455,11 +453,11 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::bindIndexBuffer(ref<ProjectA::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
-		const ref<DX12::Buffer> buffer = std::static_pointer_cast<DX12::Buffer>(indexBuffer);
+		ADAPTER_ASSERT(offset < indexBuffer->size, "The index buffer offset is overflowing.");
 
 		D3D12_INDEX_BUFFER_VIEW indexBufferView{};
-		indexBufferView.BufferLocation = buffer->resource->GetGPUVirtualAddress();
-		indexBufferView.SizeInBytes = static_cast<UINT>(buffer->size - offset);
+		indexBufferView.BufferLocation = std::static_pointer_cast<DX12::Buffer>(indexBuffer)->resource->GetGPUVirtualAddress() + offset;
+		indexBufferView.SizeInBytes = static_cast<UINT>(indexBuffer->size - offset);
 		indexBufferView.Format = getIndexBufferFormat(indexTypeSize);
 
 		commandList->IASetIndexBuffer(&indexBufferView);

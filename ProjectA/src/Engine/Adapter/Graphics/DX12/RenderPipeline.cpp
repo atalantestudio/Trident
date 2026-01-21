@@ -134,12 +134,13 @@ namespace ProjectA {
 				inputElementDescriptor.Format = getVertexInputAttributeType(vertexInputAttribute.type);
 				inputElementDescriptor.InputSlot = vertexInputBindingIndex;
 				inputElementDescriptor.AlignedByteOffset = vertexInputAttribute.offset;
-				inputElementDescriptor.InputSlotClass = static_cast<D3D12_INPUT_CLASSIFICATION>(vertexInputBinding.getInputRate());
 
 				if (vertexInputBinding.getInputRate() == InputRate::INSTANCE) {
+					inputElementDescriptor.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
 					inputElementDescriptor.InstanceDataStepRate = 1;
 				}
 				else {
+					inputElementDescriptor.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
 					inputElementDescriptor.InstanceDataStepRate = 0;
 				}
 
