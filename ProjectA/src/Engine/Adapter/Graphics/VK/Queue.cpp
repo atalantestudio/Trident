@@ -76,7 +76,7 @@ namespace ProjectA {
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to submit queue ([]).", string_VkResult(result));
 	}
 
-	PresentStatus VK::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, ref<ProjectA::Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const {
+	PresentStatus VK::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, const sequence<uint32>& imageIndices, ref<ProjectA::Semaphore> waitSemaphore) const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		sequence<const VkSwapchainKHR*> vkSwapchains(swapchains.count());

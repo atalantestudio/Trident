@@ -16,7 +16,7 @@ namespace ProjectA {
 
 			void submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<ProjectA::Fence> fence) const final override;
 
-			PresentStatus present(const sequence<ref<ProjectA::Swapchain>>& swapchains, ref<Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const final override;
+			PresentStatus present(const sequence<ref<ProjectA::Swapchain>>& swapchains, const sequence<uint32>& imageIndices, ref<Semaphore> waitSemaphore) const final override;
 
 			void waitIdle() const final override;
 

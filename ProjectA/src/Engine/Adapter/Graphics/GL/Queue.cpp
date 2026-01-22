@@ -32,7 +32,7 @@ namespace ProjectA {
 		}
 	}
 
-	PresentStatus GL::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, ref<Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const {
+	PresentStatus GL::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, const sequence<uint32>& imageIndices, ref<Semaphore> waitSemaphore) const {
 		instance.swapBuffers();
 
 		return PresentStatus::SUCCESS;

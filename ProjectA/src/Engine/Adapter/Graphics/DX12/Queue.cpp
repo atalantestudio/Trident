@@ -72,7 +72,7 @@ namespace ProjectA {
 		}
 	}
 
-	PresentStatus DX12::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, ref<Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const {
+	PresentStatus DX12::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, const sequence<uint32>& imageIndices, ref<Semaphore> waitSemaphore) const {
 		HRESULT result;
 
 		for (const ref<ProjectA::Swapchain> swapchain : swapchains) {
