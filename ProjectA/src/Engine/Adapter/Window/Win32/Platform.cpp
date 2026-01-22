@@ -21,10 +21,14 @@ namespace ProjectA {
 	}
 
 	void Platform::fatalExit(uint32 code, view<char8> message) {
+		sint32 result;
+
 		const LPCWSTR titleString = ConvertUTF8ToUTF16(windowName);
 		const LPCWSTR messageString = ConvertUTF8ToUTF16(&message[0]);
 
-		WIN32_ASSERT(MessageBoxW(nullptr, messageString, titleString, MB_OK | MB_ICONERROR) != 0);
+		result = MessageBoxW(nullptr, messageString, titleString, MB_OK | MB_ICONERROR);
+
+		WIN32_ASSERT(result != 0);
 
 		free((void*) titleString);
 		free((void*) messageString);

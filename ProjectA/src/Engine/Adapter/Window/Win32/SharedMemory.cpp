@@ -44,9 +44,12 @@ namespace ProjectA {
 	}
 
 	SharedMemory::~SharedMemory() {
+		BOOL result;
 		Win32SharedMemoryData* sharedMemoryData = static_cast<Win32SharedMemoryData*>(data);
 
-		WIN32_ASSERT(CloseHandle(sharedMemoryData->hFileMappingObject) != 0);
+		result = CloseHandle(sharedMemoryData->hFileMappingObject);
+
+		WIN32_ASSERT(result != 0);
 
 		delete data;
 
@@ -70,6 +73,10 @@ namespace ProjectA {
 	}
 
 	void SharedMemory::unmap(void* data) const {
-		WIN32_ASSERT(UnmapViewOfFile(data) != 0);
+		BOOL result;
+
+		result = UnmapViewOfFile(data);
+
+		WIN32_ASSERT(result != 0);
 	}
 }

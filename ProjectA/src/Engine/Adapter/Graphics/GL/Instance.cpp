@@ -17,6 +17,8 @@ namespace ProjectA {
 	GL::Instance::Instance(const Window& window) {
 		const Win32WindowData* windowData = static_cast<const Win32WindowData*>(window.data);
 
+		BOOL result;
+
 		hDC = windowData->hDC;
 
 		PIXELFORMATDESCRIPTOR pfd{};
@@ -41,7 +43,7 @@ namespace ProjectA {
 		pfd.cDepthBits = 24;
 		pfd.cStencilBits = 8;
 		pfd.cAuxBuffers = 0;
-		pfd.iLayerType = 0;
+		pfd.iLayerType = PFD_MAIN_PLANE;
 		pfd.bReserved = 0;
 		pfd.dwLayerMask = 0;
 		pfd.dwVisibleMask = 0;
@@ -51,7 +53,9 @@ namespace ProjectA {
 
 		WIN32_ASSERT(format != 0);
 
-		WIN32_ASSERT(SetPixelFormat(hDC, format, &pfd) == TRUE);
+		result = SetPixelFormat(hDC, format, &pfd);
+
+		WIN32_ASSERT(result == TRUE);
 
 		const PFNWGLCREATECONTEXTPROC wglCreateContext = static_cast<PFNWGLCREATECONTEXTPROC>(getWglProcedure("wglCreateContext"));
 
@@ -61,15 +65,21 @@ namespace ProjectA {
 
 		wglMakeCurrent = static_cast<PFNWGLMAKECURRENTPROC>(getWglProcedure("wglMakeCurrent"));
 
-		WIN32_ASSERT(wglMakeCurrent(hDC, dummyHGLRC) == TRUE);
+		result = wglMakeCurrent(hDC, dummyHGLRC);
+
+		WIN32_ASSERT(result == TRUE);
 
 		const PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = static_cast<PFNWGLCREATECONTEXTATTRIBSARBPROC>(getProcedure("wglCreateContextAttribsARB"));
 
-		WIN32_ASSERT(wglMakeCurrent(hDC, nullptr) == TRUE);
+		result = wglMakeCurrent(hDC, nullptr);
+
+		WIN32_ASSERT(result == TRUE);
 
 		wglDeleteContext = static_cast<PFNWGLDELETECONTEXTPROC>(getWglProcedure("wglDeleteContext"));
 
-		WIN32_ASSERT(wglDeleteContext(dummyHGLRC) == TRUE);
+		result = wglDeleteContext(dummyHGLRC);
+
+		WIN32_ASSERT(result == TRUE);
 
 		#ifdef DEBUG_ENABLE_MESSENGER
 			constexpr sint32 flags = WGL_CONTEXT_DEBUG_BIT_ARB;
@@ -92,8 +102,15 @@ namespace ProjectA {
 	}
 
 	GL::Instance::~Instance() {
-		WIN32_ASSERT(wglMakeCurrent(hDC, nullptr) == TRUE);
-		WIN32_ASSERT(wglDeleteContext(hGLRC) == TRUE);
+		BOOL result;
+		
+		result = wglMakeCurrent(hDC, nullptr);
+
+		WIN32_ASSERT(result == TRUE);
+
+		result = wglDeleteContext(hGLRC);
+
+		WIN32_ASSERT(result == TRUE);
 	}
 
 	void* GL::Instance::getProcedure(view<char8> procedureName) const {
@@ -109,10 +126,16 @@ namespace ProjectA {
 	}
 
 	void GL::Instance::makeCurrent() const {
-		WIN32_ASSERT(wglMakeCurrent(hDC, hGLRC) == TRUE);
+		BOOL result;
+		
+		result = wglMakeCurrent(hDC, hGLRC);
+
+		WIN32_ASSERT(result == TRUE);
 	}
 
 	void GL::Instance::setSwapInterval(sint32 interval) const {
+		BOOL result;
+
 		static const PFNWGLGETEXTENSIONSSTRINGEXTPROC wglGetExtensionsStringEXT = static_cast<PFNWGLGETEXTENSIONSSTRINGEXTPROC>(getProcedure("wglGetExtensionsStringEXT"));
 		static const std::string extensionsString = wglGetExtensionsStringEXT();
 
@@ -120,10 +143,16 @@ namespace ProjectA {
 
 		static const PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = static_cast<PFNWGLSWAPINTERVALEXTPROC>(getProcedure("wglSwapIntervalEXT"));
 
-		WIN32_ASSERT(wglSwapIntervalEXT(interval) == TRUE);
+		result = wglSwapIntervalEXT(interval);
+
+		WIN32_ASSERT(result == TRUE);
 	}
 
 	void GL::Instance::swapBuffers() const {
-		WIN32_ASSERT(SwapBuffers(hDC) == TRUE);
+		BOOL result;
+
+		result = SwapBuffers(hDC);
+
+		WIN32_ASSERT(result == TRUE);
 	}
 }

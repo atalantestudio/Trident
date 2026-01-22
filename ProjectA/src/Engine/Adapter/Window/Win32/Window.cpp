@@ -15,6 +15,8 @@ namespace ProjectA {
 	static uint32 windowCount = 0;
 
 	static void registerWindowClass() {
+		ATOM result;
+
 		const HINSTANCE hInstance = GetInstance();
 
 		WNDCLASSEX wndClass{};
@@ -31,29 +33,38 @@ namespace ProjectA {
 		wndClass.lpszClassName = lpszWndClassExName;
 		wndClass.hIconSm = nullptr;
 
-		WIN32_ASSERT(RegisterClassExW(&wndClass) != 0);
+		result = RegisterClassExW(&wndClass);
+
+		WIN32_ASSERT(result != 0);
 
 		windowClass = new WindowClass();
 		windowClass->className = wndClass.lpszClassName;
 		windowClass->hCursor = LoadCursorW(nullptr, IDC_ARROW);
 
-		// ENGINE_DEBUG("Registered window class.");
+		WIN32_ASSERT(windowClass->hCursor != nullptr);
 	}
 
 	static void unregisterWindowClass() {
+		BOOL result;
+
 		const HINSTANCE hInstance = GetInstance();
 
-		WIN32_ASSERT(DestroyCursor(windowClass->hCursor));
-		WIN32_ASSERT(UnregisterClassW(windowClass->className, hInstance));
+		result = DestroyCursor(windowClass->hCursor);
+
+		WIN32_ASSERT(result != 0);
+
+		result = UnregisterClassW(windowClass->className, hInstance);
+
+		WIN32_ASSERT(result != 0);
 
 		delete windowClass;
 
 		windowClass = nullptr;
-
-		// ENGINE_DEBUG("Unregistered window class.");
 	}
 
 	Window::Window(const WindowDescriptor& descriptor) {
+		BOOL result;
+
 		if (windowClass == nullptr) {
 			registerWindowClass();
 		}
@@ -68,7 +79,9 @@ namespace ProjectA {
 		constexpr BOOL bMenu = FALSE;
 		constexpr DWORD dwExStyle = WS_EX_APPWINDOW;
 
-		WIN32_ASSERT(AdjustWindowRectEx(&rect, dwStyle, bMenu, dwExStyle) != 0);
+		result = AdjustWindowRectEx(&rect, dwStyle, bMenu, dwExStyle);
+
+		WIN32_ASSERT(result != 0);
 
 		const LPCWSTR lpWindowName = ConvertUTF8ToUTF16(&descriptor.name[0]);
 		constexpr sint32 X = CW_USEDEFAULT;
@@ -119,21 +132,39 @@ namespace ProjectA {
 
 		windowData->keyMap = sequence<bool>(static_cast<uint32>(KeyCode::count));
 
-		WIN32_ASSERT(SetPropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, windowClass));
-		WIN32_ASSERT(SetPropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData));
+		result = SetPropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING, windowClass);
+
+		WIN32_ASSERT(result != 0);
+
+		result = SetPropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING, windowData);
+
+		WIN32_ASSERT(result != 0);
 
 		windowCount += 1;
 	}
 
 	Window::~Window() {
+		sint32 releaseDeviceContextResult;
+		HANDLE removePropertyResult;
+		BOOL destroyWindowResult;
+
 		const Win32WindowData* windowData = static_cast<const Win32WindowData*>(data);
 
-		WIN32_ASSERT(ReleaseDC(windowData->hWnd, windowData->hDC) != 0);
+		releaseDeviceContextResult = ReleaseDC(windowData->hWnd, windowData->hDC);
 
-		WIN32_ASSERT(RemovePropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING) != nullptr);
-		WIN32_ASSERT(RemovePropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING) != nullptr);
+		WIN32_ASSERT(releaseDeviceContextResult != 0);
 
-		WIN32_ASSERT(DestroyWindow(windowData->hWnd));
+		removePropertyResult = RemovePropW(windowData->hWnd, WINDOW_CLASS_DATA_PROPERTY_STRING);
+
+		WIN32_ASSERT(removePropertyResult != nullptr);
+
+		removePropertyResult = RemovePropW(windowData->hWnd, WINDOW_DATA_PROPERTY_STRING);
+
+		WIN32_ASSERT(removePropertyResult != nullptr);
+
+		destroyWindowResult = DestroyWindow(windowData->hWnd);
+
+		WIN32_ASSERT(destroyWindowResult != 0);
 
 		if (windowCount == 1) {
 			unregisterWindowClass();
@@ -199,16 +230,26 @@ namespace ProjectA {
 	}
 
 	void Window::lockPointer() const {
-		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
-
+		BOOL result;
 		RECT rect;
 
-		WIN32_ASSERT(GetClientRect(windowData->hWnd, &rect) != 0);
+		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
-		WIN32_ASSERT(ClientToScreen(windowData->hWnd, pointer_cast<LPPOINT>(&rect.left)) != 0);
-		WIN32_ASSERT(ClientToScreen(windowData->hWnd, pointer_cast<LPPOINT>(&rect.right)) != 0);
+		result = GetClientRect(windowData->hWnd, &rect);
 
-		WIN32_ASSERT(ClipCursor(&rect) != 0);
+		WIN32_ASSERT(result != 0);
+
+		result = ClientToScreen(windowData->hWnd, pointer_cast<LPPOINT>(&rect.left));
+
+		WIN32_ASSERT(result != 0);
+
+		result = ClientToScreen(windowData->hWnd, pointer_cast<LPPOINT>(&rect.right));
+
+		WIN32_ASSERT(result != 0);
+
+		result = ClipCursor(&rect);
+
+		WIN32_ASSERT(result != 0);
 
 		ShowCursor(false);
 
@@ -218,9 +259,13 @@ namespace ProjectA {
 	}
 
 	void Window::unlockPointer() const {
+		BOOL result;
+
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 
-		WIN32_ASSERT(ClipCursor(nullptr) != 0);
+		result = ClipCursor(nullptr);
+
+		WIN32_ASSERT(result != 0);
 
 		ShowCursor(true);
 
@@ -230,6 +275,7 @@ namespace ProjectA {
 	void Window::processMessages() const {
 		Win32WindowData* windowData = static_cast<Win32WindowData*>(data);
 		MSG msg;
+		BOOL result;
 
 		while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			if (msg.message == WM_QUIT) {
@@ -257,13 +303,22 @@ namespace ProjectA {
 			windowData->cursorX = point.x;
 			windowData->cursorY = point.y;
 
-			WIN32_ASSERT(ClientToScreen(windowData->hWnd, &point) != 0);
-			WIN32_ASSERT(SetCursorPos(point.x, point.y) != 0);
+			result = ClientToScreen(windowData->hWnd, &point);
+
+			WIN32_ASSERT(result != 0);
+
+			result = SetCursorPos(point.x, point.y);
+
+			WIN32_ASSERT(result != 0);
 		}
 	}
 
 	void Window::waitMessage() const {
-		WIN32_ASSERT(WaitMessage() != 0);
+		BOOL result;
+
+		result = WaitMessage();
+
+		WIN32_ASSERT(result != 0);
 	}
 
 	void Window::updatePointerType(PointerType pointerType) const {

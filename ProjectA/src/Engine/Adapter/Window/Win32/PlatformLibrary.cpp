@@ -26,18 +26,22 @@ namespace ProjectA {
 	}
 
 	PlatformLibrary::~PlatformLibrary() {
+		BOOL result;
+
 		const HMODULE hLibModule = static_cast<const Win32PlatformLibraryData*>(data)->hLibModule;
 
-		WIN32_ASSERT(FreeLibrary(hLibModule) != 0);
+		result = FreeLibrary(hLibModule);
+
+		WIN32_ASSERT(result != 0);
 	}
 
 	void* PlatformLibrary::getProcedure(view<char8> procedureName) const {
 		static const HMODULE hLibModule = static_cast<const Win32PlatformLibraryData*>(data)->hLibModule;
 
-		const FARPROC proc = GetProcAddress(hLibModule, &procedureName[0]);
+		const FARPROC procedure = GetProcAddress(hLibModule, &procedureName[0]);
 
-		WIN32_ASSERT(proc != nullptr);
+		WIN32_ASSERT(procedure != nullptr);
 
-		return proc;
+		return procedure;
 	}
 }

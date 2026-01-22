@@ -9,23 +9,31 @@
 
 namespace ProjectA {
 	HighResolutionTimer::HighResolutionTimer() {
+		BOOL result;
 		LARGE_INTEGER performanceCount;
 
-		WIN32_ASSERT(QueryPerformanceCounter(&performanceCount) != 0);
+		result = QueryPerformanceCounter(&performanceCount);
+
+		WIN32_ASSERT(result != 0);
 
 		startTime = performanceCount.QuadPart;
 
 		LARGE_INTEGER frequency;
 
-		WIN32_ASSERT(QueryPerformanceFrequency(&frequency) != 0);
+		result = QueryPerformanceFrequency(&frequency);
+
+		WIN32_ASSERT(result != 0);
 
 		timeFrequency = frequency.QuadPart;
 	}
 
 	float64 HighResolutionTimer::getCurrentTime() const {
 		LARGE_INTEGER currentTime;
+		BOOL result;
 
-		WIN32_ASSERT(QueryPerformanceCounter(&currentTime) != 0);
+		result = QueryPerformanceCounter(&currentTime);
+
+		WIN32_ASSERT(result != 0);
 
 		return static_cast<float64>(currentTime.QuadPart - startTime) / timeFrequency;
 	}

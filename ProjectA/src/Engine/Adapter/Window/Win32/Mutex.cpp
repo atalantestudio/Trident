@@ -31,11 +31,14 @@ namespace ProjectA {
 	}
 
 	Mutex::~Mutex() {
+		Win32MutexData* mutexData = static_cast<Win32MutexData*>(data);
+		BOOL result;
+
 		release();
 
-		Win32MutexData* mutexData = static_cast<Win32MutexData*>(data);
+		result = CloseHandle(mutexData->hMutex);
 
-		WIN32_ASSERT(CloseHandle(mutexData->hMutex) != 0);
+		WIN32_ASSERT(result != 0);
 
 		delete data;
 
@@ -43,16 +46,20 @@ namespace ProjectA {
 	}
 
 	void Mutex::acquire() const {
+		DWORD result;
 		Win32MutexData* mutexData = static_cast<Win32MutexData*>(data);
 
-		WIN32_ASSERT(WaitForSingleObject(mutexData->hMutex, INFINITE) == WAIT_OBJECT_0);
+		result = WaitForSingleObject(mutexData->hMutex, INFINITE);
+
+		WIN32_ASSERT(result == WAIT_OBJECT_0);
 	}
 
 	void Mutex::release() const {
+		DWORD result;
 		Win32MutexData* mutexData = static_cast<Win32MutexData*>(data);
 
-		const DWORD event = ReleaseMutex(mutexData->hMutex);
+		result = ReleaseMutex(mutexData->hMutex);
 
-		WIN32_ASSERT(event != WAIT_FAILED);
+		WIN32_ASSERT(result != WAIT_FAILED);
 	}
 }
