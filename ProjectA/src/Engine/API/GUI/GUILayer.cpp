@@ -6,8 +6,6 @@
 
 namespace ProjectA {
 	void GUILayer::postConstruct() {
-		renderer.layerInput = input;
-
 		renderer.setLayer(this);
 		renderer.build();
 

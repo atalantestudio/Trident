@@ -63,9 +63,7 @@ namespace ProjectA {
 			void createSubcomponentBuffer();
 			void createGlyphSubcomponentBuffer();
 			void createTextureArrayStagingBuffer();
-			void createSwapchainImage();
 			void createTextureArrayImage();
-			void createSwapchainImageView();
 			void createTextureArrayImageView();
 			void createNearestSampler();
 			void createLinearSampler();
@@ -82,9 +80,6 @@ namespace ProjectA {
 			void updateDescriptorSets() const;
 
 			void updateCameraProjection() const;
-
-		public:
-			LayerInput* layerInput;
 
 		private:
 			ref<RenderPass> renderPass;
