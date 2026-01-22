@@ -259,17 +259,6 @@ namespace ProjectA {
 
 		const AcquireNextImageStatus acquireNextImageStatus = device->acquireNextImage(swapchain, acquireNextImageSemaphore, imageIndex);
 
-		if (acquireNextImageStatus == AcquireNextImageStatus::ERROR_OUT_OF_DATE) {
-			ENGINE_DEBUG("Recreating out-of-date swapchain.");
-
-			// TODO: This path doesn't seem to be called.
-			DEBUG_ASSERT(false);
-
-			resize();
-
-			return;
-		}
-
 		ENGINE_ASSERT(acquireNextImageStatus == AcquireNextImageStatus::SUBOPTIMAL || acquireNextImageStatus == AcquireNextImageStatus::SUCCESS, "Failed to acquire the next swapchain image.");
 
 		Renderer::setImageIndex(imageIndex);
@@ -286,24 +275,11 @@ namespace ProjectA {
 		const ref<CommandBuffer> commandBuffer = commandEncoder->end();
 		const ref<Queue> graphicsQueue = device->getQueue(QueueFamilyCapability::GRAPHICS);
 
-		graphicsQueue->submit(
-			{commandBuffer},
-			acquireNextImageSemaphore, // Must be waited on before submitting.
-			finishedRenderSemaphore, // Will be signaled once the command buffer has finished executing.
-			flightFence // Will be signaled once the command buffer has finished executing.
-		);
+		graphicsQueue->submit({commandBuffer}, acquireNextImageSemaphore, finishedRenderSemaphore, flightFence);
 
-		const PresentStatus presentStatus = graphicsQueue->present(
-			{swapchain},
-			finishedRenderSemaphore, // Must be waited on before presenting.
-			{imageIndex}
-		);
+		const PresentStatus presentStatus = graphicsQueue->present({swapchain}, {imageIndex}, finishedRenderSemaphore);
 
 		if (presentStatus == PresentStatus::ERROR_OUT_OF_DATE || presentStatus == PresentStatus::SUBOPTIMAL || windowResized) {
-			ENGINE_INFO("Recreating the swapchain.");
-
-			windowResized = false;
-
 			resize();
 
 			return;
@@ -314,6 +290,8 @@ namespace ProjectA {
 
 	// TODO: Handle resize events with layer superposition.
 	void Application::resize() {
+		windowResized = false;
+
 		window->waitMessage();
 
 		const ref<Device> device = Renderer::getDevice();
