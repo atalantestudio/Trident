@@ -81,6 +81,7 @@ namespace ProjectA {
 		image(image),
 		device(device),
 		swapchainImage(true),
+		type(VK_IMAGE_TYPE_2D),
 		format(format)
 	{}
 
