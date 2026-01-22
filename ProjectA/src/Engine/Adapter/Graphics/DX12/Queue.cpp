@@ -27,13 +27,13 @@ namespace ProjectA {
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command queue.");
 
 		idleFence = createRef<DX12::Fence>(device, 0);
-		idleEvent = CreateEvent(nullptr, false, false, nullptr);
+		completionEvent = CreateEvent(nullptr, false, false, L"Completion event");
 
-		WIN32_ASSERT(idleEvent != nullptr);
+		WIN32_ASSERT(completionEvent != nullptr);
 	}
 
 	DX12::Queue::~Queue() {
-		const BOOL result = CloseHandle(idleEvent);
+		const BOOL result = CloseHandle(completionEvent);
 
 		WIN32_ASSERT(result != 0);
 	}
@@ -44,7 +44,8 @@ namespace ProjectA {
 
 	void DX12::Queue::submit(const sequence<ref<ProjectA::CommandBuffer>>& commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<ProjectA::Fence> fence) const {
 		sequence<ID3D12CommandList*> commandLists(commandBuffers.count());
-		uint32 commandListIndex = 0;
+		UINT commandListIndex = 0;
+		HRESULT result;
 
 		while (commandListIndex < commandLists.count()) {
 			commandLists[commandListIndex] = std::static_pointer_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList.Get();
@@ -54,12 +55,21 @@ namespace ProjectA {
 
 		commandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.count()), &commandLists[0]);
 
-		// TODO
-		/* if (fence != nullptr) {
-			const HRESULT result = commandQueue->Signal(std::static_pointer_cast<DX12::Fence>(fence)->fence.Get(), 1);
+		if (fence != nullptr) {
+			const ref<DX12::Fence> _fence = std::static_pointer_cast<DX12::Fence>(fence);
+
+			result = commandQueue->Signal(_fence->fence.Get(), 1);
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
-		} */
+
+			result = _fence->fence->SetEventOnCompletion(1, completionEvent);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set event on fence completion.");
+
+			const DWORD code = WaitForSingleObject(completionEvent, INFINITE);
+
+			WIN32_ASSERT(code == WAIT_OBJECT_0);
+		}
 	}
 
 	PresentStatus DX12::Queue::present(const sequence<ref<ProjectA::Swapchain>>& swapchains, ref<Semaphore> waitSemaphore, const sequence<uint32>& imageIndices) const {
@@ -79,17 +89,18 @@ namespace ProjectA {
 	void DX12::Queue::waitIdle() const {
 		HRESULT result;
 
+		// TODO: We may not even need the idle fence if the completion event is set right after submit().
 		result = commandQueue->Signal(idleFence->fence.Get(), 1);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to queue idle fence.");
 
-		result = idleFence->fence->SetEventOnCompletion(1, idleEvent);
+		result = idleFence->fence->SetEventOnCompletion(1, completionEvent);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set event on fence completion.");
 
-		const DWORD code = WaitForSingleObject(idleEvent, INFINITE);
+		const DWORD code = WaitForSingleObject(completionEvent, INFINITE);
 
-		ADAPTER_ASSERT(code == WAIT_OBJECT_0, "Failed to wait for event.");
+		WIN32_ASSERT(code == WAIT_OBJECT_0);
 
 		result = idleFence->fence->Signal(0);
 

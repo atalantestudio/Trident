@@ -4,8 +4,8 @@
 #pragma once
 
 #include "Engine/Adapter/Graphics/DX12/CommandPool.hpp"
-#include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
+#include "Engine/Adapter/Graphics/DX12/Fence.hpp"
 #include "Engine/API/Rendering/Queue.hpp"
 
 namespace ProjectA {
@@ -30,6 +30,6 @@ namespace ProjectA {
 		private:
 			const DX12::Device& device;
 			ref<DX12::Fence> idleFence;
-			HANDLE idleEvent;
+			HANDLE completionEvent;
 	};
 }

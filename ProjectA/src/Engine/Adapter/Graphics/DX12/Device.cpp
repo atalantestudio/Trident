@@ -42,13 +42,13 @@ namespace ProjectA {
 		queues[1] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COMPUTE);
 		queues[2] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_COPY);
 
-		fenceEvent = CreateEvent(nullptr, false, false, nullptr);
+		waitEvent = CreateEvent(nullptr, false, false, L"Wait event");
 
-		WIN32_ASSERT(fenceEvent != nullptr);
+		WIN32_ASSERT(waitEvent != nullptr);
 	}
 
 	DX12::Device::~Device() {
-		const BOOL result = CloseHandle(fenceEvent);
+		const BOOL result = CloseHandle(waitEvent);
 
 		WIN32_ASSERT(result != 0);
 	}
@@ -151,7 +151,7 @@ namespace ProjectA {
 	void DX12::Device::resetFence(ref<ProjectA::Fence> fence) const {
 		const HRESULT result = std::static_pointer_cast<DX12::Fence>(fence)->fence->Signal(0);
 
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to reset fence.");
 	}
 
 	void DX12::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
@@ -222,26 +222,15 @@ namespace ProjectA {
 	}
 
 	void DX12::Device::waitForFence(ref<ProjectA::Fence> fence) const {
-		// TODO: Move this inside Queue::submit().
-		const ref<DX12::Queue> queue = std::static_pointer_cast<DX12::Queue>(getQueue(QueueFamilyCapability::GRAPHICS));
-
 		HRESULT result;
 
-		result = queue->commandQueue->Signal(std::static_pointer_cast<DX12::Fence>(fence)->fence.Get(), 1);
-
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
-
-		result = ResetEvent(fenceEvent);
-
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to reset event.");
-
-		result = std::static_pointer_cast<DX12::Fence>(fence)->fence->SetEventOnCompletion(1, fenceEvent);
+		result = std::static_pointer_cast<DX12::Fence>(fence)->fence->SetEventOnCompletion(1, waitEvent);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set event on fence completion.");
 
-		const DWORD code = WaitForSingleObject(fenceEvent, INFINITE);
+		const DWORD code = WaitForSingleObject(waitEvent, INFINITE);
 
-		ADAPTER_ASSERT(code == WAIT_OBJECT_0, "Failed to wait for event.");
+		WIN32_ASSERT(code == WAIT_OBJECT_0);
 	}
 
 	void DX12::Device::waitIdle() const {

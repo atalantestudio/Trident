@@ -36,7 +36,7 @@ namespace ProjectA {
 
 		private:
 			ref<ProjectA::Queue> queues[3];
-			HANDLE fenceEvent;
+			HANDLE waitEvent;
 			const DX12::PhysicalDevice& physicalDevice;
 	};
 }
