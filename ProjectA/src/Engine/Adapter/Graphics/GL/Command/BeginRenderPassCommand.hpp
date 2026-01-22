@@ -37,12 +37,13 @@ namespace ProjectA {
 
 				// Clear attachments with a load operation of LoadOperation::CLEAR.
 				for (uint32 attachmentIndex = 0; attachmentIndex < descriptor.clearValues.count(); attachmentIndex += 1) {
-					const ClearValue& clearValue = descriptor.clearValues[attachmentIndex];
 					const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
 
 					if (attachment.loadOperation != LoadOperation::CLEAR) {
 						continue;
 					}
+
+					const ClearValue& clearValue = descriptor.clearValues[attachmentIndex];
 
 					if (isDepthFormat(attachment.format)) {
 						#if OPENGL_VERSION >= OPENGL_VERSION_4_5

@@ -27,40 +27,48 @@ namespace ProjectA::DX12 {
 		return resourceStates;
 	}
 
-	inline D3D12_RESOURCE_STATES getImageResourceStates(ImageUsage imageUsage, ImageLayout& layout) {
+	inline D3D12_RESOURCE_STATES getImageResourceStates(ImageUsage usage, ImageLayout& layout, uint8 sampleCount) {
+		if (sampleCount > 1) {
+			if (usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
+				return D3D12_RESOURCE_STATE_DEPTH_WRITE;
+			}
+
+			return D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
+		}
+
 		D3D12_RESOURCE_STATES resourceStates = D3D12_RESOURCE_STATE_COMMON;
 
-		if (imageUsage & ImageUsage::TRANSFER_SRC) {
+		if (usage & ImageUsage::TRANSFER_SRC) {
 			resourceStates |= D3D12_RESOURCE_STATE_COPY_SOURCE;
 
 			layout = ImageLayout::TRANSFER_SRC_OPTIMAL;
 		}
 
-		if (imageUsage & ImageUsage::TRANSFER_DST) {
+		if (usage & ImageUsage::TRANSFER_DST) {
 			resourceStates |= D3D12_RESOURCE_STATE_COPY_DEST;
 
 			layout = ImageLayout::TRANSFER_DST_OPTIMAL;
 		}
 
-		if (imageUsage & ImageUsage::STORAGE) {
+		if (usage & ImageUsage::STORAGE) {
 			resourceStates |= D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
 
 			layout = ImageLayout::GENERAL;
 		}
 
-		if (imageUsage & ImageUsage::COLOR_ATTACHMENT) {
+		if (usage & ImageUsage::COLOR_ATTACHMENT) {
 			resourceStates |= D3D12_RESOURCE_STATE_RENDER_TARGET;
 
 			layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 		}
 
-		if (imageUsage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
+		if (usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
 			resourceStates |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
 
 			layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}
 
-		if (imageUsage & ImageUsage::INPUT_ATTACHMENT) {
+		if (usage & ImageUsage::INPUT_ATTACHMENT) {
 			resourceStates |= D3D12_RESOURCE_STATE_RENDER_TARGET;
 		}
 

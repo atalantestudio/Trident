@@ -3,7 +3,6 @@
 #include "Engine/Renderer/Renderer.hpp"
 
 namespace ProjectA {
-	// TODO: Fix multisample on OpenGL (see Engine/API/Rendering/RenderPass.hpp:66).
 	class SampleRenderer : public Renderer {
 		private:
 			struct Vertex {
@@ -135,8 +134,8 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/Vertex2DRGB.vert");
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/ColorRGB.frag");
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Multisampling/Multisampling.vert");
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Multisampling/Multisampling.frag");
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;

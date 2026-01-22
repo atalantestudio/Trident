@@ -24,6 +24,7 @@ namespace ProjectA {
 
 		ADAPTER_ASSERT(descriptor.colorBlendState.attachments.size() <= 8 && descriptor.renderPass->getAttachmentCount() <= 8, "Too many color blend attachments.");
 
+		const ref<Subpass> subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
 		const ref<DX12::ShaderModule> vertexShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.vertexShaderModule);
 		const ref<DX12::ShaderModule> fragmentShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.fragmentShaderModule);
 
@@ -192,9 +193,7 @@ namespace ProjectA {
 			subpassIndex += 1;
 		}
 
-		// TODO: Set correct sample count (depends on the render pass).
-		graphicsPipelineStateDescriptor.SampleDesc.Count = 1;
-
+		graphicsPipelineStateDescriptor.SampleDesc.Count = static_cast<UINT>(subpass->getRasterizationSampleCount());
 		graphicsPipelineStateDescriptor.SampleDesc.Quality = 0;
 		graphicsPipelineStateDescriptor.NodeMask = 0;
 		graphicsPipelineStateDescriptor.CachedPSO.pCachedBlob = nullptr;

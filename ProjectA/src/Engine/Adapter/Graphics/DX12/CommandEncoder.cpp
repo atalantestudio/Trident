@@ -53,11 +53,21 @@ namespace ProjectA {
 		rectangle.right = framebuffer->getExtent().width;
 		rectangle.bottom = framebuffer->getExtent().height;
 
-		UINT imageViewIndex = 0;
+		const ref<RenderPass> renderPass = framebuffer->getRenderPass();
 
-		while (imageViewIndex < descriptor.clearValues.count()) {
-			const ClearValue& clearValue = descriptor.clearValues[imageViewIndex];
-			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[imageViewIndex]);
+		UINT attachmentIndex = 0;
+
+		while (attachmentIndex < renderPass->getAttachmentCount()) {
+			const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
+
+			if (attachment.loadOperation != LoadOperation::CLEAR) {
+				attachmentIndex += 1;
+
+				continue;
+			}
+
+			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[attachmentIndex]);
+			const ClearValue& clearValue = descriptor.clearValues[attachmentIndex];
 
 			if (isDepthFormat(imageView->getImage()->getFormat())) {
 				commandList->ClearDepthStencilView(imageView->cpuDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, clearValue.depth, static_cast<UINT8>(clearValue.stencil), 1, &rectangle);
@@ -66,7 +76,7 @@ namespace ProjectA {
 				commandList->ClearRenderTargetView(imageView->cpuDescriptorHandle, clearValue.color, 1, &rectangle);
 			}
 
-			imageViewIndex += 1;
+			attachmentIndex += 1;
 		}
 
 		commandCount += 1;
@@ -414,12 +424,51 @@ namespace ProjectA {
 
 	void DX12::CommandEncoder::endRenderPass() {
 		if (presentRenderTargetIndex < framebuffer->imageViews.count()) {
-			const DX12::Image* image = static_cast<const DX12::Image*>(framebuffer->imageViews[presentRenderTargetIndex]->getImage());
+			const DX12::Image* presentImage = static_cast<const DX12::Image*>(framebuffer->imageViews[presentRenderTargetIndex]->getImage());
+
+			if (presentImage->getSampleCount() > 1) {
+				const ref<Subpass> subpass = framebuffer->getRenderPass()->getSubpass(subpassIndex);
+				const DX12::Image* resolveImage = presentImage;
+
+				presentImage = static_cast<const DX12::Image*>(framebuffer->imageViews[subpass->getResolveAttachmentReferenceCount() + presentRenderTargetIndex]->getImage());
+
+				sequence<D3D12_RESOURCE_BARRIER> resourceBarriers(2);
+
+				D3D12_RESOURCE_BARRIER& resolveResourceBarrier = resourceBarriers[0];
+				resolveResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				resolveResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+				resolveResourceBarrier.Transition.pResource = resolveImage->resource.Get();
+				resolveResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+				resolveResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+				resolveResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
+
+				D3D12_RESOURCE_BARRIER& presentResourceBarrier = resourceBarriers[1];
+				presentResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				presentResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+				presentResourceBarrier.Transition.pResource = presentImage->resource.Get();
+				presentResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+				presentResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+				presentResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RESOLVE_DEST;
+
+				commandList->ResourceBarrier(2, &resourceBarriers[0]);
+				commandList->ResolveSubresource(presentImage->resource.Get(), 0, resolveImage->resource.Get(), 0, getImageFormat(presentImage->getFormat()));
+
+				D3D12_RESOURCE_BARRIER resourceBarrier{};
+				resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+				resourceBarrier.Transition.pResource = presentImage->resource.Get();
+				resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+				resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RESOLVE_DEST;
+				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+				// TODO: Skip RENDER_TARGET -> PRESENT and instead transition directly from RESOLVE_DEST to PRESENT.
+				commandList->ResourceBarrier(1, &resourceBarrier);
+			}
 
 			D3D12_RESOURCE_BARRIER resourceBarrier{};
 			resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			resourceBarrier.Transition.pResource = image->resource.Get();
+			resourceBarrier.Transition.pResource = presentImage->resource.Get();
 			resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 			resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 			resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -520,14 +569,21 @@ namespace ProjectA {
 			resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			resourceBarrier.Transition.pResource = image->resource.Get();
 			resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-			resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 			resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+			if (image->getSampleCount() > 1) {
+				resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
+			}
+			else {
+				resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+			}
 
 			commandList->ResourceBarrier(1, &resourceBarrier);
 		}
 
+		const D3D12_CPU_DESCRIPTOR_HANDLE* depthStencilViewHandlePointer = nullptr;
+
 		D3D12_CPU_DESCRIPTOR_HANDLE depthStencilViewHandle{};
-		D3D12_CPU_DESCRIPTOR_HANDLE* depthStencilViewHandlePointer = nullptr;
 
 		if (subpass->hasDepthStencilAttachmentReference()) {
 			const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();

@@ -61,16 +61,23 @@ namespace ProjectA {
 		resourceDescriptor.Flags = getImageResourceFlags(descriptor.usage);
 
 		const D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_NONE;
-		const D3D12_RESOURCE_STATES initialResourceState = getImageResourceStates(descriptor.usage, layout);
-
-		D3D12_CLEAR_VALUE optimizedClearValue;
-
+		const D3D12_RESOURCE_STATES initialResourceState = getImageResourceStates(descriptor.usage, layout, sampleCount);
 		const D3D12_CLEAR_VALUE* optimizedClearValuePointer = nullptr;
 
+		D3D12_CLEAR_VALUE optimizedClearValue{};
+		optimizedClearValue.Format = resourceDescriptor.Format;
+
 		if (isDepthFormat(descriptor.format)) {
-			optimizedClearValue.Format = resourceDescriptor.Format;
 			optimizedClearValue.DepthStencil.Depth = 0.0f;
 			optimizedClearValue.DepthStencil.Stencil = 0;
+
+			optimizedClearValuePointer = &optimizedClearValue;
+		}
+		else if (descriptor.usage & ImageUsage::COLOR_ATTACHMENT || descriptor.usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
+			optimizedClearValue.Color[0] = 0.0f;
+			optimizedClearValue.Color[1] = 0.0f;
+			optimizedClearValue.Color[2] = 0.0f;
+			optimizedClearValue.Color[3] = 1.0f;
 
 			optimizedClearValuePointer = &optimizedClearValue;
 		}

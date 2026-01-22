@@ -44,12 +44,6 @@ namespace ProjectA {
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed buffer resource.");
 	}
 
-	DX12::Buffer::~Buffer() {
-		const HRESULT result = resource->Release();
-
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to release buffer resource.");
-	}
-
 	void DX12::Buffer::unmap() const {
 		resource->Unmap(0, nullptr);
 	}

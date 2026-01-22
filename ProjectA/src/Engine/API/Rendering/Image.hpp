@@ -72,7 +72,10 @@ namespace ProjectA {
 			Extent3D extent;
 			uint32 mipLevelCount;
 			uint32 layerCount;
+
+			// NOTE: Compressed value.
 			uint8 sampleCount : 6;
+
 			ImageLayout layout = ImageLayout::UNDEFINED;
 	};
 }

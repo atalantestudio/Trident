@@ -2,7 +2,7 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "../Sample/Image.hpp"
+#include "../Sample/Multisampling.hpp"
 
 namespace ProjectA {
 	class SampleLayer : public Layer {

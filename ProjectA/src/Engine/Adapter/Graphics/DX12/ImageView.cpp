@@ -44,17 +44,29 @@ namespace ProjectA {
 
 		switch (image->getType()) {
 			case ImageType::TEXTURE_2D: {
-				if (layerCount > 1) {
-					renderTargetViewDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-					renderTargetViewDescriptor.Texture2DArray.MipSlice = mipLevelOffset;
-					renderTargetViewDescriptor.Texture2DArray.FirstArraySlice = layerOffset;
-					renderTargetViewDescriptor.Texture2DArray.ArraySize = layerCount;
-					renderTargetViewDescriptor.Texture2DArray.PlaneSlice = 0;
+				if (image->getSampleCount() > 1) {
+					if (layerCount > 1) {
+						renderTargetViewDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY;
+						renderTargetViewDescriptor.Texture2DMSArray.FirstArraySlice = layerOffset;
+						renderTargetViewDescriptor.Texture2DMSArray.ArraySize = layerCount;
+					}
+					else {
+						renderTargetViewDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
+					}
 				}
 				else {
-					renderTargetViewDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-					renderTargetViewDescriptor.Texture2D.MipSlice = mipLevelOffset;
-					renderTargetViewDescriptor.Texture2D.PlaneSlice = 0;
+					if (layerCount > 1) {
+						renderTargetViewDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+						renderTargetViewDescriptor.Texture2DArray.MipSlice = mipLevelOffset;
+						renderTargetViewDescriptor.Texture2DArray.FirstArraySlice = layerOffset;
+						renderTargetViewDescriptor.Texture2DArray.ArraySize = layerCount;
+						renderTargetViewDescriptor.Texture2DArray.PlaneSlice = 0;
+					}
+					else {
+						renderTargetViewDescriptor.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+						renderTargetViewDescriptor.Texture2D.MipSlice = mipLevelOffset;
+						renderTargetViewDescriptor.Texture2D.PlaneSlice = 0;
+					}
 				}
 
 				break;
@@ -76,15 +88,27 @@ namespace ProjectA {
 
 		switch (image->getType()) {
 			case ImageType::TEXTURE_2D: {
-				if (layerCount > 1) {
-					depthStencilViewDescriptor.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
-					depthStencilViewDescriptor.Texture2DArray.MipSlice = mipLevelOffset;
-					depthStencilViewDescriptor.Texture2DArray.FirstArraySlice = layerOffset;
-					depthStencilViewDescriptor.Texture2DArray.ArraySize = layerCount;
+				if (image->getSampleCount() > 1) {
+					if (layerCount > 1) {
+						depthStencilViewDescriptor.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
+						depthStencilViewDescriptor.Texture2DMSArray.FirstArraySlice = layerOffset;
+						depthStencilViewDescriptor.Texture2DMSArray.ArraySize = layerCount;
+					}
+					else {
+						depthStencilViewDescriptor.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
+					}
 				}
 				else {
-					depthStencilViewDescriptor.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-					depthStencilViewDescriptor.Texture2D.MipSlice = mipLevelOffset;
+					if (layerCount > 1) {
+						depthStencilViewDescriptor.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+						depthStencilViewDescriptor.Texture2DArray.MipSlice = mipLevelOffset;
+						depthStencilViewDescriptor.Texture2DArray.FirstArraySlice = layerOffset;
+						depthStencilViewDescriptor.Texture2DArray.ArraySize = layerCount;
+					}
+					else {
+						depthStencilViewDescriptor.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+						depthStencilViewDescriptor.Texture2D.MipSlice = mipLevelOffset;
+					}
 				}
 
 				break;

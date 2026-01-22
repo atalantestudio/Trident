@@ -24,7 +24,6 @@
 #include "Engine/Adapter/Graphics/GL/procedures.hpp"
 
 namespace ProjectA::GL {
-	// Commands
 	class BeginRenderPassCommand;
 	class BindComputePipelineCommand;
 	class BindDescriptorSetsCommand;
@@ -54,10 +53,6 @@ namespace ProjectA::GL {
 	class ComputePipeline;
 	class DescriptorSet;
 	class Device;
-
-	// TODO
-	// class DrawBuffer;
-
 	class Fence;
 	class Framebuffer;
 	class GraphicsAdapter;
