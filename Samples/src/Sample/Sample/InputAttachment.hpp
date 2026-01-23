@@ -211,8 +211,8 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/Vertex2DRGB.vert");
-				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/ColorRGB.frag");
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Triangle/Triangle.vert");
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Triangle/Triangle.frag");
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;
@@ -253,33 +253,8 @@ namespace ProjectA {
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
 
-				ref<ShaderModule> vertexShaderModule;
-				ref<ShaderModule> fragmentShaderModule;
-
-				switch (getGraphicsApi()) {
-					case GraphicsAPI::CPU: {
-						ENGINE_ERROR_UNSUPPORTED();
-
-						break;
-					}
-					case GraphicsAPI::DX12: {
-						ENGINE_ERROR_UNIMPLEMENTED();
-
-						break;
-					}
-					case GraphicsAPI::GL: {
-						vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/ScreenUV.vert");
-						fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/TextureRGBA.frag");
-
-						break;
-					}
-					case GraphicsAPI::VK: {
-						vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/Screen.vert");
-						fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/ScreenInputAttachment.frag");
-
-						break;
-					}
-				}
+				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/InputAttachment/InputAttachment.vert");
+				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/InputAttachment/InputAttachment.frag");
 
 				ColorBlendAttachment colorBlendAttachment{};
 				colorBlendAttachment.blend = false;

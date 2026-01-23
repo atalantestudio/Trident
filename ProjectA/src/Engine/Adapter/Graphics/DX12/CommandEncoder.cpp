@@ -276,7 +276,9 @@ namespace ProjectA {
 	}
 
 	void DX12::CommandEncoder::nextSubpass() {
-		ENGINE_ERROR_UNIMPLEMENTED();
+		subpassIndex += 1;
+
+		setRenderTargets();
 
 		commandCount += 1;
 	}

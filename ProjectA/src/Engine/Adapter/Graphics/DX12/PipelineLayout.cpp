@@ -97,6 +97,40 @@ namespace ProjectA {
 
 						break;
 					}
+					case DescriptorType::UNIFORM_BUFFER: {
+						D3D12_DESCRIPTOR_RANGE1& bufferDescriptorRange = descriptorRanges[descriptorRangeIndex];
+						bufferDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+						bufferDescriptorRange.NumDescriptors = binding.descriptorCount;
+						bufferDescriptorRange.BaseShaderRegister = bindingIndex;
+						bufferDescriptorRange.RegisterSpace = 0;
+						bufferDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
+						bufferDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+						D3D12_ROOT_PARAMETER1& bufferRootParameter = rootParameters[rootParameterIndex];
+						bufferRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+						bufferRootParameter.DescriptorTable.NumDescriptorRanges = 1;
+						bufferRootParameter.DescriptorTable.pDescriptorRanges = &bufferDescriptorRange;
+						bufferRootParameter.ShaderVisibility = shaderVisibility;
+
+						break;
+					}
+					case DescriptorType::INPUT_ATTACHMENT: {
+						D3D12_DESCRIPTOR_RANGE1& bufferDescriptorRange = descriptorRanges[descriptorRangeIndex];
+						bufferDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+						bufferDescriptorRange.NumDescriptors = binding.descriptorCount;
+						bufferDescriptorRange.BaseShaderRegister = bindingIndex;
+						bufferDescriptorRange.RegisterSpace = 0;
+						bufferDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
+						bufferDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+						D3D12_ROOT_PARAMETER1& bufferRootParameter = rootParameters[rootParameterIndex];
+						bufferRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+						bufferRootParameter.DescriptorTable.NumDescriptorRanges = 1;
+						bufferRootParameter.DescriptorTable.pDescriptorRanges = &bufferDescriptorRange;
+						bufferRootParameter.ShaderVisibility = shaderVisibility;
+
+						break;
+					}
 					default: {
 						ADAPTER_ASSERT(false, "Unsupported descriptor type.");
 

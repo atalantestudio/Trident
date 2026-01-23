@@ -90,6 +90,16 @@ namespace ProjectA {
 
 						break;
 					}
+					case DescriptorType::UNIFORM_BUFFER: {
+						cbvSrvUavViewDescriptorCount += binding.descriptorCount;
+
+						break;
+					}
+					case DescriptorType::INPUT_ATTACHMENT: {
+						cbvSrvUavViewDescriptorCount += binding.descriptorCount;
+
+						break;
+					}
 					default: {
 						ADAPTER_ASSERT(false, "Unsupported descriptor type.");
 
