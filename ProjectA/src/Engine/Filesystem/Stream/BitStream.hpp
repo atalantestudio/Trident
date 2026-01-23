@@ -70,7 +70,7 @@ namespace ProjectA {
 				bitBuffer >>= jumpBitCount;
 			}
 
-			// Returns the next bits from the stream without updating the offsets.
+			// Returns the next bits from the stream without advancing the internal offset.
 			// The bit count must be <= the number of bits in T.
 			// The bit count must be <= MAX_READ_OR_PEEK_BIT_COUNT.
 			// The bit count must be <= the remaining bits in the stream.

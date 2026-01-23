@@ -19,7 +19,7 @@ namespace ProjectA {
 				return data + byteOffset;
 			}
 
-			// Returns the next bytes from the stream without updating the offsets.
+			// Returns the next bytes from the stream without advancing the internal offset.
 			// The byte size of T must be <= the remaining bytes in the stream.
 			template<typename T>
 			T peek(bool swapEndianness = false) const {

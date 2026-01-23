@@ -1,13 +1,15 @@
 #pragma once
 
 namespace ProjectA {
+	// A generic data stream.
 	class Stream {
 		public:
 			template<typename T>
 			static constexpr T byteswap(T value) {
 				switch (sizeof(T)) {
-					case 1:
+					case 1: {
 						return value;
+					}
 					case 2: {
 						const uint16 valueInteger = *pointer_cast<const uint16*>(&value);
 
@@ -23,10 +25,11 @@ namespace ProjectA {
 
 						return *pointer_cast<const T*>(&valueInteger);
 					}
-					default:
+					default: {
 						ENGINE_ASSERT(false, "Unable to byteswap value.");
 
 						return value;
+					}
 				}
 			}
 

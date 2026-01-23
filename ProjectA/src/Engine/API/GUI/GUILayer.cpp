@@ -232,11 +232,13 @@ namespace ProjectA {
 		}
 	}
 
-	void GUILayer::GUIText(const std::string& string, const TextStyle& textStyle) {
+	void GUILayer::GUIText(const sequence<char8>& text, const TextStyle& textStyle) {
+		UTF8Stream stream(text);
+
 		const uint32 componentIndex = static_cast<uint32>(components.size());
 		const uint32 parentIndex = openComponentIndices.back();
-		const float32 preferredWidth = static_cast<float32>(calculateTextPreferredWidth(string, textStyle));
-		const float32 minimumWidth = static_cast<float32>(calculateTextMinimumWidth(string, textStyle));
+		const uint32 preferredWidth = calculateTextPreferredWidth(stream, textStyle);
+		const uint32 minimumWidth = calculateTextMinimumWidth(stream, textStyle);
 
 		GUIContainer& parent = components[parentIndex];
 
@@ -244,11 +246,11 @@ namespace ProjectA {
 		textComponent.parentIndex = parentIndex;
 		textComponent.origin = parent.origin;
 		textComponent.size.width.fillMode = FillMode::FIT;
-		textComponent.size.width.value = preferredWidth;
+		textComponent.size.width.value = static_cast<float32>(preferredWidth);
 		textComponent.size.height.fillMode = FillMode::FIT;
 		textComponent.size.height.value = textStyle.fontSize;
-		textComponent.maximumSize = {preferredWidth, textStyle.fontSize};
-		textComponent.minimumSize = {minimumWidth, textStyle.fontSize};
+		textComponent.maximumSize = {static_cast<float32>(preferredWidth), textStyle.fontSize};
+		textComponent.minimumSize = {static_cast<float32>(minimumWidth), textStyle.fontSize};
 		textComponent.padding = {0_px, 0_px};
 		textComponent.layoutDirection = HORIZONTAL;
 		textComponent.layoutSpacing = 0_px;
@@ -259,7 +261,7 @@ namespace ProjectA {
 		textComponent.outlineColor = 0x00000000;
 		textComponent.borderRadius = 0.0f;
 		textComponent.textComponent = true;
-		textComponent.text = string;
+		textComponent.text = text;
 		textComponent.font = textStyle.font;
 		textComponent.fontSize = textStyle.fontSize;
 		textComponent.eventListeners = textStyle.eventListeners;
@@ -722,18 +724,16 @@ namespace ProjectA {
 	}
 
 	void GUILayer::WrapText(GUIContainer& textComponent) {
-		const char8* stringPointer = textComponent.text.data();
 		const FontData& fontData = fonts[textComponent.font];
 		const FontAsset& fontAsset = *fontData.fontAsset;
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(fontData.glyphMapImageId);
 		const vec2<float32> imageSize = {static_cast<float32>(imageExtent.width), static_cast<float32>(imageExtent.height)};
 		const float32 lineHeight = textComponent.fontSize / fontAsset.getLineHeight();
-		const uint32 characterCount = getCharacterCount(textComponent.text);
 
 		svec2<float32> characterOffset = textComponent.origin;
 		uint32 lineCount = 1;
-		uint32 wordByteOffset = 0;
-		uint32 wordByteLength = 0;
+		uint64 wordByteOffset = 0;
+		uint64 wordByteLength = 0;
 		float32 wordCharacterOffsetX = 0.0f;
 		float32 postWordAdvanceWidth = 0.0f;
 		float32 postWordAdvanceHeight = 0.0f;
@@ -745,13 +745,14 @@ namespace ProjectA {
 		defaultGlyphSubcomponent.layerIndex = fontData.glyphMapImageId;
 		defaultGlyphSubcomponent.color = textComponent.color.value;
 
-		uint32 byteOffset = 0;
-		uint16 codePoint;
+		uint32 codePoint;
 
-		while (byteOffset < textComponent.text.size()) {
-			const uint32 previousByteOffset = byteOffset;
+		UTF8Stream stream(textComponent.text);
 
-			codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
+		while (stream.getRemainingByteSize() > 0) {
+			const uint64 previousByteOffset = stream.getByteOffset();
+
+			codePoint = stream.read();
 
 			if (codePoint == '\n') {
 				lineCount += 1;
@@ -775,13 +776,13 @@ namespace ProjectA {
 						characterOffset.x = 0.0f;
 						characterOffset.y += textComponent.fontSize;
 						lineCount += 1;
-						wordByteLength += byteOffset - previousByteOffset;
+						wordByteLength += stream.getByteOffset() - previousByteOffset;
 						flushCurrentWord = true;
 
-						while (byteOffset < textComponent.text.size()) {
-							const uint32 previousByteOffset = byteOffset;
+						while (stream.getRemainingByteSize() > 0) {
+							const uint64 previousByteOffset = stream.getByteOffset();
 
-							codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
+							codePoint = stream.read();
 
 							const Glyph& glyph = fontAsset[codePoint];
 
@@ -789,7 +790,7 @@ namespace ProjectA {
 								break;
 							}
 
-							wordByteLength += byteOffset - previousByteOffset;
+							wordByteLength += stream.getByteOffset() - previousByteOffset;
 						}
 					}
 				}
@@ -797,7 +798,7 @@ namespace ProjectA {
 
 			if (flushCurrentWord) {
 				FlushWordData flushWordData;
-				flushWordData.word = view<char8>(&textComponent.text[wordByteOffset], wordByteLength);
+				flushWordData.stream = UTF8Stream(view<char8>(pointer_cast<const char8*>(&stream.getData()[wordByteOffset]), wordByteLength));
 				flushWordData.fontAsset = &fontAsset;
 				flushWordData.imageSize = imageSize;
 				flushWordData.fontSize = textComponent.fontSize;
@@ -805,7 +806,7 @@ namespace ProjectA {
 
 				FlushWord(flushWordData, textComponent.characters, characterOffset);
 
-				wordByteOffset = byteOffset;
+				wordByteOffset = stream.getByteOffset();
 				wordByteLength = 0;
 				flushCurrentWord = false;
 
@@ -827,12 +828,12 @@ namespace ProjectA {
 				continue;
 			}
 
-			wordByteLength += byteOffset - previousByteOffset;
+			wordByteLength += stream.getByteOffset() - previousByteOffset;
 		}
 
-		if (wordByteLength > 0 && wordByteOffset + wordByteLength == textComponent.text.size()) {
+		if (wordByteLength > 0 && wordByteOffset + wordByteLength == stream.getByteSize()) {
 			FlushWordData flushWordData;
-			flushWordData.word = view<char8>(&textComponent.text[wordByteOffset], wordByteLength);
+			flushWordData.stream = UTF8Stream(view<char8>(pointer_cast<const char8*>(&stream.getData()[wordByteOffset]), wordByteLength));
 			flushWordData.fontAsset = &fontAsset;
 			flushWordData.imageSize = imageSize;
 			flushWordData.fontSize = textComponent.fontSize;
@@ -844,16 +845,13 @@ namespace ProjectA {
 		textComponent.size.height.value = textComponent.fontSize * lineCount;
 	}
 
-	void GUILayer::FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) {
-		const char8* stringPointer = &data.word[0];
-
-		uint32 byteOffset = 0;
-		uint16 codePoint;
+	void GUILayer::FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset) {
+		uint32 codePoint;
 
 		const vec2<float32> imageScale = data.imageSize / renderer.TEXTURE_ARRAY_MAX_SIZE;
 
-		while (byteOffset < data.word.count()) {
-			codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
+		while (data.stream.getRemainingByteSize() > 0) {
+			codePoint = data.stream.read();
 
 			const Glyph& glyph = (*data.fontAsset)[codePoint];
 			const vec2<float32> startTextureCoordinate = {glyph.minCoordinate.x, glyph.minCoordinate.y};
@@ -1052,19 +1050,19 @@ namespace ProjectA {
 		renderer.registerSubcomponent(subcomponent);
 	}
 
-	uint32 GUILayer::calculateTextPreferredWidth(const std::string& string, const TextStyle& textStyle) const {
-		const char8* stringPointer = string.data();
+	uint32 GUILayer::calculateTextPreferredWidth(UTF8Stream& stream, const TextStyle& textStyle) const {
 		const ref<FontAsset> fontAsset = fonts[textStyle.font].fontAsset;
 		const float32 lineHeight = static_cast<float32>(fontAsset->getLineHeight());
 
-		uint32 byteOffset = 0;
-		uint16 codePoint;
+		uint32 codePoint;
 		uint32 preferredWidth = 0;
 		uint32 lineWidth = 0;
 		bool firstLineGlyph = true;
 
-		while (byteOffset < string.size()) {
-			codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
+		stream.seek(0);
+
+		while (stream.getRemainingByteSize() > 0) {
+			codePoint = stream.read();
 
 			if (codePoint == '\n') {
 				preferredWidth = max(preferredWidth, lineWidth);
@@ -1092,22 +1090,20 @@ namespace ProjectA {
 		return max(preferredWidth, lineWidth);
 	}
 
-	uint32 GUILayer::calculateTextMinimumWidth(const std::string& string, const TextStyle& textStyle) const {
-		const char8* stringPointer = string.data();
+	uint32 GUILayer::calculateTextMinimumWidth(UTF8Stream& stream, const TextStyle& textStyle) const {
 		const FontAsset& fontAsset = *fonts[textStyle.font].fontAsset;
 		const float32 lineHeight = textStyle.fontSize / fontAsset.getLineHeight();
 
+		uint32 codePoint;
 		uint32 minimumWordWidth = 0;
 		uint32 currentWordWidth = 0;
 		const Glyph* glyph = nullptr;
-
 		bool closeWord = false;
 
-		uint32 byteOffset = 0;
-		uint16 codePoint;
+		stream.seek(0);
 
-		while (byteOffset < string.size()) {
-			codePoint = decodeUtf16CodePoint(stringPointer, byteOffset);
+		while (stream.getRemainingByteSize() > 0) {
+			codePoint = stream.read();
 
 			if (codePoint == '\n') {
 				closeWord = true;
@@ -1133,48 +1129,5 @@ namespace ProjectA {
 		}
 
 		return max(minimumWordWidth, currentWordWidth);
-	}
-
-	uint32 GUILayer::getCharacterCount(const std::string& string) {
-		const char8* stringPointer = string.data();
-
-		uint32 characterCount = 0;
-		uint32 byteOffset = 0;
-
-		while (byteOffset < string.size()) {
-			decodeUtf16CodePoint(stringPointer, byteOffset);
-
-			characterCount += 1;
-		}
-
-		return characterCount;
-	}
-
-	uint16 GUILayer::decodeUtf16CodePoint(const char8* string, uint32& byteOffset) {
-		const uint8 firstByte = string[byteOffset];
-
-		byteOffset += 1;
-
-		if (~firstByte & 0b10000000) {
-			return firstByte;
-		}
-
-		// TODO
-		// For now, decode to .noglyph if UTF-24 or UTF-32 code points are encountered.
-		// These unhandled code points are assumed to take up 3 bytes (UTF-24).
-		// ENGINE_ASSERT(firstByte >> 5 == 0b110, "Encountered a UTF-24 or UTF-32 code point.");
-		if (firstByte >> 5 != 0b110) {
-			byteOffset += 2;
-
-			return 0;
-		}
-
-		const uint8 secondByte = string[byteOffset];
-
-		byteOffset += 1;
-
-		const uint16 codePoint = ((firstByte & 0b11111) << 6) | secondByte;
-
-		return codePoint;
 	}
 }

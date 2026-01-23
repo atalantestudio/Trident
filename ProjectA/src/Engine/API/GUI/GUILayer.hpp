@@ -5,6 +5,7 @@
 #include "Engine/API/GUI/Style/TextStyle.hpp"
 #include "Engine/API/GUI/GUIRenderer.hpp"
 #include "Engine/API/GUI/ID.hpp"
+#include "Engine/Filesystem/Stream/UTF8Stream.hpp"
 #include "Engine/Layer/Layer.hpp"
 
 namespace ProjectA {
@@ -16,7 +17,7 @@ namespace ProjectA {
 			};
 
 			struct FlushWordData {
-				view<char8> word;
+				UTF8Stream stream;
 
 				const FontAsset* fontAsset;
 				vec2<float32> imageSize;
@@ -56,7 +57,7 @@ namespace ProjectA {
 		public:
 			void openComponent(const ContainerStyle& style);
 
-			void GUIText(const std::string& string, const TextStyle& textStyle);
+			void GUIText(const sequence<char8>& text, const TextStyle& textStyle);
 
 			void closeComponent();
 
@@ -73,7 +74,7 @@ namespace ProjectA {
 			void GrowAndShrinkSizingHeightsRecursive(uint32 parentIndex);
 			void WrapTextChildrenRecursive(uint32 parentIndex);
 			void WrapText(GUIContainer& textComponent);
-			void FlushWord(const FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
+			void FlushWord(FlushWordData& data, std::vector<TextCharacter>& textCharacters, svec2<float32>& characterOffset);
 			void PositionsAndAlignment(GUIContainer& component, svec2<float32> origin);
 			uint32 GetHoveredComponentIndex() const;
 			static bool IsIntersecting(const GUIContainer& component, const vec2<float32>& point);
@@ -85,15 +86,9 @@ namespace ProjectA {
 			bool onMouseUp(MouseUpEvent& event);
 			bool onWindowResize(WindowResizeEvent& event);
 
-			uint32 calculateTextPreferredWidth(const std::string& string, const TextStyle& textStyle) const;
+			uint32 calculateTextPreferredWidth(UTF8Stream& stream, const TextStyle& textStyle) const;
 
-			uint32 calculateTextMinimumWidth(const std::string& string, const TextStyle& textStyle) const;
-
-		private:
-			static uint32 getCharacterCount(const std::string& string);
-
-		public:
-			static uint16 decodeUtf16CodePoint(const char8* string, uint32& byteOffset);
+			uint32 calculateTextMinimumWidth(UTF8Stream& stream, const TextStyle& textStyle) const;
 
 		public:
 			// Shrink towards the layout direction.

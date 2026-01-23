@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "BuildGlyphMapImageSubprocess.hpp"
 
@@ -192,11 +192,14 @@ namespace ProjectA {
 				fontAssetDescriptor.lineHeight = ASCENT - DESCENT + LINE_GAP;
 				fontAssetDescriptor.glyphs = sequence<Glyph>(144);
 
-				for (uint32 glyphIndex = 0; glyphIndex < fontAssetDescriptor.glyphs.count(); glyphIndex += 1) {
-					uint32 byteOffset = 0;
+				UTF8Stream stream;
 
+				for (uint32 glyphIndex = 0; glyphIndex < fontAssetDescriptor.glyphs.count(); glyphIndex += 1) {
 					const BitmapGlyph& bitmapGlyph = BITMAP_GLYPHS[glyphIndex];
-					const uint16 codePoint = GUILayer::decodeUtf16CodePoint(bitmapGlyph.codePoint, byteOffset);
+
+					stream = UTF8Stream(view<char8>(bitmapGlyph.codePoint));
+
+					const uint32 codePoint = stream.peek();
 
 					Glyph& glyph = fontAssetDescriptor.glyphs[glyphIndex];
 					glyph.minCoordinate.x = bitmapGlyph.minCoordinate.x / file.extent.width;
@@ -210,7 +213,7 @@ namespace ProjectA {
 					glyph.topSideBearing = bitmapGlyph.topSideBearing;
 					glyph.whitespace = codePoint == ' ';
 
-					fontAssetDescriptor.unicodeMap.insert({codePoint, glyphIndex});
+					fontAssetDescriptor.unicodeMap.insert({static_cast<uint16>(codePoint), glyphIndex});
 				}
 
 				const uint32 glyphCount = static_cast<uint32>(fontAssetDescriptor.glyphs.count());

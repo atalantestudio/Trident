@@ -46,7 +46,7 @@ namespace ProjectA {
 
 		// Exclusive to text components.
 		bool textComponent;
-		std::string text;
+		sequence<char8> text;
 		std::vector<TextCharacter> characters;
 		FontID font;
 		float32 fontSize;
