@@ -2,7 +2,7 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "../Sample/Multisampling.hpp"
+#include "../Sample/Triangle.hpp"
 
 namespace ProjectA {
 	class SampleLayer : public Layer {
@@ -18,7 +18,6 @@ namespace ProjectA {
 
 			void onEvent(Event& event) override {
 				EventDispatcher eventDispatcher(event);
-
 				eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 			}
 

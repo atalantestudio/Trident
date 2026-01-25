@@ -6,24 +6,26 @@ struct VertexInput {
 	float4 color : VERTEX_INPUT_ATTRIBUTE8;
 };
 
-struct Camera {
-	float3x3 projection;
-};
-
 struct VertexOutput {
 	float4 position : SV_Position;
 	float3 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE1;
 	nointerpolation float4 color : VERTEX_OUTPUT_ATTRIBUTE2;
 };
 
-Camera camera : register(c0);
+struct Camera {
+	float3x3 projection;
+};
+
+cbuffer Camera : register(b0) {
+	Camera camera;
+}
 
 VertexOutput main(VertexInput input) {
 	float3 vertex = float3(input.vertexAndTextureCoordinate.xy, 1.0);
 	float3 textureCoordinate = float3(input.vertexAndTextureCoordinate.zw, 1.0);
 
 	VertexOutput output;
-	output.position = float4(mul(mul(camera.projection, input.worldTransform), vertex), 1.0);
+	output.position = float4(mul(camera.projection, mul(input.worldTransform, vertex)), 1.0);
 	output.textureCoordinate = mul(input.textureTransform, textureCoordinate);
 	output.textureCoordinate.z = float(input.layerIndex);
 	output.color = input.color;

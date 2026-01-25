@@ -209,14 +209,14 @@ namespace ProjectA {
 			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
 			const DX12::DescriptorSet::DescriptorSetBinding& binding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
-			D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = descriptorSet->viewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-			viewDescriptorHandle.ptr += binding.viewDescriptorOffset * viewDescriptorHandleIncrementSize;
-
-			D3D12_CPU_DESCRIPTOR_HANDLE samplerDescriptorHandle = descriptorSet->samplerDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-			samplerDescriptorHandle.ptr += binding.samplerDescriptorOffset * samplerDescriptorHandleIncrementSize;
-
 			switch (binding.descriptorType) {
 				case DescriptorType::COMBINED_IMAGE_SAMPLER: {
+					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = descriptorSet->viewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+					viewDescriptorHandle.ptr += binding.viewDescriptorOffset * viewDescriptorHandleIncrementSize;
+
+					D3D12_CPU_DESCRIPTOR_HANDLE samplerDescriptorHandle = descriptorSet->samplerDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+					samplerDescriptorHandle.ptr += binding.samplerDescriptorOffset * samplerDescriptorHandleIncrementSize;
+
 					UINT descriptorImageIndex = 0;
 
 					while (descriptorImageIndex < writeDescriptorSet.descriptorImages.count()) {
@@ -259,6 +259,9 @@ namespace ProjectA {
 					break;
 				}
 				case DescriptorType::UNIFORM_BUFFER: {
+					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = descriptorSet->viewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+					viewDescriptorHandle.ptr += binding.viewDescriptorOffset * viewDescriptorHandleIncrementSize;
+
 					UINT descriptorBufferIndex = 0;
 
 					while (descriptorBufferIndex < writeDescriptorSet.descriptorBuffers.count()) {
@@ -278,6 +281,9 @@ namespace ProjectA {
 					break;
 				}
 				case DescriptorType::INPUT_ATTACHMENT: {
+					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = descriptorSet->viewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+					viewDescriptorHandle.ptr += binding.viewDescriptorOffset * viewDescriptorHandleIncrementSize;
+
 					UINT descriptorImageIndex = 0;
 
 					while (descriptorImageIndex < writeDescriptorSet.descriptorImages.count()) {

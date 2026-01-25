@@ -12,8 +12,8 @@ struct VertexInput {
 
 struct VertexOutput {
 	float4 position : SV_Position;
-	nointerpolation float4 color : VERTEX_OUTPUT_ATTRIBUTE1;
-	float3 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE2;
+	float3 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE1;
+	nointerpolation float4 color : VERTEX_OUTPUT_ATTRIBUTE2;
 };
 
 struct Camera {
@@ -30,9 +30,9 @@ VertexOutput main(VertexInput input) {
 
 	VertexOutput output;
 	output.position = float4(mul(camera.projection, mul(input.worldTransform, vertex)), 1.0);
-	output.color = input.color;
 	output.textureCoordinate = mul(input.textureTransform, textureCoordinate);
 	output.textureCoordinate.z = float(input.layerIndex);
+	output.color = input.color;
 
 	return output;
 }

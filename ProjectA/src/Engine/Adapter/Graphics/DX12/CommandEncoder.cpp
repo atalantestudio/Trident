@@ -126,18 +126,22 @@ namespace ProjectA {
 
 		descriptorSetIndex = 0;
 
+		UINT rootParameterIndex = 0;
+
 		if (computePipelineBound) {
 			while (descriptorSetIndex < descriptorSets.count()) {
 				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
 
 				if (descriptorSet->viewDescriptorHeap) {
-					commandList->SetComputeRootDescriptorTable(descriptorSetIndex, descriptorSet->viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+					commandList->SetComputeRootDescriptorTable(rootParameterIndex, descriptorSet->viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+					rootParameterIndex += 1;
 				}
-				else if (descriptorSet->samplerDescriptorHeap) {
-					commandList->SetComputeRootDescriptorTable(descriptorSetIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-				}
-				else {
-					ADAPTER_ASSERT(false, "The descriptor set is not associated with a descriptor heap.");
+
+				if (descriptorSet->samplerDescriptorHeap) {
+					commandList->SetComputeRootDescriptorTable(rootParameterIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+					rootParameterIndex += 1;
 				}
 
 				descriptorSetIndex += 1;
@@ -148,13 +152,15 @@ namespace ProjectA {
 				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
 
 				if (descriptorSet->viewDescriptorHeap) {
-					commandList->SetGraphicsRootDescriptorTable(descriptorSetIndex, descriptorSet->viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+					commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorSet->viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+					rootParameterIndex += 1;
 				}
-				else if (descriptorSet->samplerDescriptorHeap) {
-					commandList->SetGraphicsRootDescriptorTable(descriptorSetIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-				}
-				else {
-					ADAPTER_ASSERT(false, "The descriptor set is not associated with a descriptor heap.");
+
+				if (descriptorSet->samplerDescriptorHeap) {
+					commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+					rootParameterIndex += 1;
 				}
 
 				descriptorSetIndex += 1;
@@ -194,7 +200,6 @@ namespace ProjectA {
 		const D3D12_RESOURCE_DESC srcBufferResourceDescriptor = srcBuffer->resource->GetDesc();
 		const D3D12_RESOURCE_DESC dstImageResourceDescriptor = dstImage->resource->GetDesc();
 		const UINT channelCount = getChannelCount(dstImage->getFormat());
-		const UINT layerArea = dstImage->getExtent().width * dstImage->getExtent().height * dstImage->getExtent().depth * channelCount;
 
 		D3D12_TEXTURE_COPY_LOCATION bufferCopyLocation{};
 		bufferCopyLocation.pResource = srcBuffer->resource.Get();
@@ -216,9 +221,9 @@ namespace ProjectA {
 			layerIndex = 0;
 
 			while (layerIndex < copyRegion.imageLayerCount) {
-				textureCopyLocation.SubresourceIndex = copyRegion.imageLayerOffset + layerIndex;
+				bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset;
 
-				bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset + layerArea * textureCopyLocation.SubresourceIndex;
+				textureCopyLocation.SubresourceIndex = copyRegion.imageLayerOffset + layerIndex;
 
 				commandList->CopyTextureRegion(&textureCopyLocation, copyRegion.imageOffsetX, copyRegion.imageOffsetY, copyRegion.imageOffsetZ, &bufferCopyLocation, nullptr);
 

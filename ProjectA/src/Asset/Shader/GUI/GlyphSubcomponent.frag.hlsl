@@ -4,8 +4,8 @@ struct VertexOutput {
 	nointerpolation float4 color : VERTEX_OUTPUT_ATTRIBUTE2;
 };
 
-Texture2DArray<float4> imageArray : register(t1);
-SamplerState imageArraySamplerState : register(s1);
+Texture2DArray<float4> imageArray : register(t0);
+SamplerState imageArraySamplerState : register(s0);
 
 float4 main(VertexOutput input) : SV_Target {
 	const float ALPHA_THRESHOLD = 0.5;
