@@ -19,9 +19,6 @@ namespace ProjectA {
 
 			void update(const SwapchainDescriptor& descriptor) final override;
 
-			// TODO (debug-only)
-			ref<DX12::Image> getImage(uint32 imageIndex) const;
-
 		private:
 			void recreate(const SwapchainDescriptor& descriptor);
 

@@ -67,7 +67,7 @@ namespace ProjectA {
 	}
 
 	ref<Sampler> DX12::GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
-		return createRef<DX12::Sampler>(descriptor, *memoryAllocator);
+		return createRef<DX12::Sampler>(descriptor);
 	}
 
 	ref<Semaphore> DX12::GraphicsAdapter::createSemaphore() const {

@@ -46,10 +46,6 @@ namespace ProjectA {
 		recreate(descriptor);
 	}
 
-	ref<DX12::Image> DX12::Swapchain::getImage(uint32 imageIndex) const {
-		return std::static_pointer_cast<DX12::Image>(images[imageIndex]);
-	}
-
 	void DX12::Swapchain::recreate(const SwapchainDescriptor& descriptor) {
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 

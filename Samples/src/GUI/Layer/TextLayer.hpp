@@ -7,19 +7,13 @@ namespace ProjectA {
 				textStyle.color = 0xffffffff;
 				textStyle.font = loadFontAsset("test-regular");
 				textStyle.fontSize = 96_px;
-
-				imageStyle.size = {1920_px, 1920_px};
-				imageStyle.image = loadImageAsset("test-regular");
 			}
 
 			void GUI() override {
-				// GUIComponent(imageStyle);
-
-				GUIText("Quá trình mã hóa vàâ", textStyle);
+				GUIText("Quá trình mã hóa vàâ.", textStyle);
 			}
 
 		private:
 			TextStyle textStyle;
-			ContainerStyle imageStyle;
 	};
 }
