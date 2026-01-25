@@ -270,7 +270,9 @@ namespace ProjectA {
 
 						D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDescriptor{};
 						constantBufferViewDescriptor.BufferLocation = buffer->resource->GetGPUVirtualAddress() + descriptorBuffer.offset;
-						constantBufferViewDescriptor.SizeInBytes = static_cast<UINT>(descriptorBuffer.size);
+
+						// NOTE: Constant buffer views need to be aligned to 256.
+						constantBufferViewDescriptor.SizeInBytes = (static_cast<UINT>(descriptorBuffer.size) + 255) & ~255;
 
 						device->CreateConstantBufferView(&constantBufferViewDescriptor, viewDescriptorHandle);
 

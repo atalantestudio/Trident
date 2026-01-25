@@ -168,11 +168,7 @@ namespace ProjectA {
 
 	void GUIRenderer::createCameraBuffer() {
 		BufferDescriptor cameraBufferDescriptor{};
-
-		// TODO: Dumb DX12
-		// cameraBufferDescriptor.size = sizeof(Camera);
-		cameraBufferDescriptor.size = 256;
-
+		cameraBufferDescriptor.size = sizeof(Camera);
 		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
 		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		cameraBufferDescriptor.persistent = true;

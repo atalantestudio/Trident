@@ -26,7 +26,14 @@ namespace ProjectA {
 		D3D12_RESOURCE_DESC resourceDescriptor{};
 		resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 		resourceDescriptor.Alignment = 0;
+
 		resourceDescriptor.Width = descriptor.size;
+
+		if (descriptor.usage & BufferUsage::UNIFORM) {
+			// NOTE: Constant buffer views need to be aligned to 256.
+			resourceDescriptor.Width = (descriptor.size + 255) & ~255;
+		}
+
 		resourceDescriptor.Height = 1;
 		resourceDescriptor.DepthOrArraySize = 1;
 		resourceDescriptor.MipLevels = 1;
