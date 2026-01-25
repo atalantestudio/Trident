@@ -15,119 +15,112 @@ namespace ProjectA {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		HRESULT result;
+
 		UINT rootParameterCount = 0;
-		UINT descriptorRangeCount = 0;
+		UINT rootParameterOffset = 0;
+		UINT samplerRootParameterIndex = 0;
+
+		UINT viewDescriptorRangeCount = 0;
+		UINT samplerDescriptorRangeCount = 0;
+		UINT descriptorRangeOffset = 0;
+		UINT samplerDescriptorRangeOffset = 0;
+
+		UINT constantBufferViewShaderRegister = 0;
+		UINT shaderResourceViewShaderRegister = 0;
+		UINT samplerShaderRegister = 0;
+
+		ShaderStage samplerShaderStages{};
 
 		for (const ref<DescriptorSetLayout> descriptorSetLayout : descriptor.descriptorSetLayouts) {
 			for (const DescriptorSetLayoutBinding& binding : descriptorSetLayout->bindings) {
 				if (binding.descriptorType == DescriptorType::COMBINED_IMAGE_SAMPLER) {
-					// Samplers and shader resource views cannot be mixed within a descriptor table.
-					rootParameterCount += 1;
-					descriptorRangeCount += 1;
+					samplerDescriptorRangeCount += 1;
 				}
 
-				rootParameterCount += 1;
-				descriptorRangeCount += 1;
+				viewDescriptorRangeCount += 1;
 			}
+
+			rootParameterCount += 1;
+		}
+
+		if (samplerDescriptorRangeCount > 0) {
+			samplerRootParameterIndex = rootParameterCount;
+			samplerDescriptorRangeOffset = viewDescriptorRangeCount;
+			rootParameterCount += 1;
 		}
 
 		sequence<D3D12_ROOT_PARAMETER1> rootParameters(rootParameterCount);
-		sequence<D3D12_DESCRIPTOR_RANGE1> descriptorRanges(descriptorRangeCount);
-
-		UINT rootParameterIndex = 0;
-		UINT descriptorRangeIndex = 0;
-		UINT bindingIndex = 0;
+		sequence<D3D12_DESCRIPTOR_RANGE1> descriptorRanges(viewDescriptorRangeCount + samplerDescriptorRangeCount);
 
 		for (const ref<DescriptorSetLayout> descriptorSetLayout : descriptor.descriptorSetLayouts) {
-			bindingIndex = 0;
+			const UINT descriptorRangeStart = descriptorRangeOffset;
+			ShaderStage viewShaderStages{};
 
-			while (bindingIndex < descriptorSetLayout->bindings.count()) {
-				const DescriptorSetLayoutBinding& binding = descriptorSetLayout->bindings[bindingIndex];
-				const D3D12_SHADER_VISIBILITY shaderVisibility = getShaderVisibility(binding.shaderStages);
+			for (const DescriptorSetLayoutBinding& binding : descriptorSetLayout->bindings) {
+				viewShaderStages |= binding.shaderStages;
 
 				switch (binding.descriptorType) {
 					case DescriptorType::COMBINED_IMAGE_SAMPLER: {
-						D3D12_DESCRIPTOR_RANGE1& imageDescriptorRange = descriptorRanges[descriptorRangeIndex];
+						D3D12_DESCRIPTOR_RANGE1& imageDescriptorRange = descriptorRanges[descriptorRangeOffset];
 						imageDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 						imageDescriptorRange.NumDescriptors = binding.descriptorCount;
-						imageDescriptorRange.BaseShaderRegister = bindingIndex;
+						imageDescriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
 						imageDescriptorRange.RegisterSpace = 0;
 						imageDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						imageDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						D3D12_ROOT_PARAMETER1& imageRootParameter = rootParameters[rootParameterIndex];
-						imageRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-						imageRootParameter.DescriptorTable.NumDescriptorRanges = 1;
-						imageRootParameter.DescriptorTable.pDescriptorRanges = &imageDescriptorRange;
-						imageRootParameter.ShaderVisibility = shaderVisibility;
+						shaderResourceViewShaderRegister += 1;
 
-						rootParameterIndex += 1;
-						descriptorRangeIndex += 1;
-
-						D3D12_DESCRIPTOR_RANGE1& samplerDescriptorRange = descriptorRanges[descriptorRangeIndex];
+						D3D12_DESCRIPTOR_RANGE1& samplerDescriptorRange = descriptorRanges[samplerDescriptorRangeOffset];
 						samplerDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
 						samplerDescriptorRange.NumDescriptors = binding.descriptorCount;
-						samplerDescriptorRange.BaseShaderRegister = bindingIndex;
+						samplerDescriptorRange.BaseShaderRegister = samplerShaderRegister;
 						samplerDescriptorRange.RegisterSpace = 0;
 						samplerDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						samplerDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						D3D12_ROOT_PARAMETER1& samplerRootParameter = rootParameters[rootParameterIndex];
-						samplerRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-						samplerRootParameter.DescriptorTable.NumDescriptorRanges = 1;
-						samplerRootParameter.DescriptorTable.pDescriptorRanges = &samplerDescriptorRange;
-						samplerRootParameter.ShaderVisibility = shaderVisibility;
+						samplerDescriptorRangeOffset += 1;
+						samplerShaderRegister += 1;
+						samplerShaderStages |= binding.shaderStages;
 
 						break;
 					}
 					case DescriptorType::STORAGE_IMAGE: {
-						D3D12_DESCRIPTOR_RANGE1& imageDescriptorRange = descriptorRanges[descriptorRangeIndex];
-						imageDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+						D3D12_DESCRIPTOR_RANGE1& imageDescriptorRange = descriptorRanges[descriptorRangeOffset];
+						imageDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 						imageDescriptorRange.NumDescriptors = binding.descriptorCount;
-						imageDescriptorRange.BaseShaderRegister = bindingIndex;
+						imageDescriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
 						imageDescriptorRange.RegisterSpace = 0;
 						imageDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						imageDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						D3D12_ROOT_PARAMETER1& imageRootParameter = rootParameters[rootParameterIndex];
-						imageRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-						imageRootParameter.DescriptorTable.NumDescriptorRanges = 1;
-						imageRootParameter.DescriptorTable.pDescriptorRanges = &imageDescriptorRange;
-						imageRootParameter.ShaderVisibility = shaderVisibility;
+						shaderResourceViewShaderRegister += 1;
 
 						break;
 					}
 					case DescriptorType::UNIFORM_BUFFER: {
-						D3D12_DESCRIPTOR_RANGE1& bufferDescriptorRange = descriptorRanges[descriptorRangeIndex];
+						D3D12_DESCRIPTOR_RANGE1& bufferDescriptorRange = descriptorRanges[descriptorRangeOffset];
 						bufferDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 						bufferDescriptorRange.NumDescriptors = binding.descriptorCount;
-						bufferDescriptorRange.BaseShaderRegister = bindingIndex;
+						bufferDescriptorRange.BaseShaderRegister = constantBufferViewShaderRegister;
 						bufferDescriptorRange.RegisterSpace = 0;
 						bufferDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						bufferDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						D3D12_ROOT_PARAMETER1& bufferRootParameter = rootParameters[rootParameterIndex];
-						bufferRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-						bufferRootParameter.DescriptorTable.NumDescriptorRanges = 1;
-						bufferRootParameter.DescriptorTable.pDescriptorRanges = &bufferDescriptorRange;
-						bufferRootParameter.ShaderVisibility = shaderVisibility;
+						constantBufferViewShaderRegister += 1;
 
 						break;
 					}
 					case DescriptorType::INPUT_ATTACHMENT: {
-						D3D12_DESCRIPTOR_RANGE1& bufferDescriptorRange = descriptorRanges[descriptorRangeIndex];
+						D3D12_DESCRIPTOR_RANGE1& bufferDescriptorRange = descriptorRanges[descriptorRangeOffset];
 						bufferDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 						bufferDescriptorRange.NumDescriptors = binding.descriptorCount;
-						bufferDescriptorRange.BaseShaderRegister = bindingIndex;
+						bufferDescriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
 						bufferDescriptorRange.RegisterSpace = 0;
 						bufferDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						bufferDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						D3D12_ROOT_PARAMETER1& bufferRootParameter = rootParameters[rootParameterIndex];
-						bufferRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-						bufferRootParameter.DescriptorTable.NumDescriptorRanges = 1;
-						bufferRootParameter.DescriptorTable.pDescriptorRanges = &bufferDescriptorRange;
-						bufferRootParameter.ShaderVisibility = shaderVisibility;
+						shaderResourceViewShaderRegister += 1;
 
 						break;
 					}
@@ -138,15 +131,29 @@ namespace ProjectA {
 					}
 				}
 
-				rootParameterIndex += 1;
-				descriptorRangeIndex += 1;
-				bindingIndex += 1;
+				descriptorRangeOffset += 1;
 			}
+
+			D3D12_ROOT_PARAMETER1& rootParameter = rootParameters[rootParameterOffset];
+			rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			rootParameter.DescriptorTable.NumDescriptorRanges = descriptorRangeOffset - descriptorRangeStart;
+			rootParameter.DescriptorTable.pDescriptorRanges = &descriptorRanges[descriptorRangeStart];
+			rootParameter.ShaderVisibility = getShaderVisibility(viewShaderStages);
+
+			rootParameterOffset += 1;
+		}
+
+		if (samplerDescriptorRangeCount > 0) {
+			D3D12_ROOT_PARAMETER1& samplerRootParameter = rootParameters[samplerRootParameterIndex];
+			samplerRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+			samplerRootParameter.DescriptorTable.NumDescriptorRanges = samplerDescriptorRangeCount;
+			samplerRootParameter.DescriptorTable.pDescriptorRanges = &descriptorRanges[viewDescriptorRangeCount];
+			samplerRootParameter.ShaderVisibility = getShaderVisibility(samplerShaderStages);
 		}
 
 		D3D12_VERSIONED_ROOT_SIGNATURE_DESC versionedRootSignatureDescriptor{};
-		versionedRootSignatureDescriptor.Version = D3D_ROOT_SIGNATURE_VERSION_1_0;
-		versionedRootSignatureDescriptor.Desc_1_1.NumParameters = static_cast<UINT>(rootParameters.count());
+		versionedRootSignatureDescriptor.Version = D3D_ROOT_SIGNATURE_VERSION_1_1;
+		versionedRootSignatureDescriptor.Desc_1_1.NumParameters = rootParameterCount;
 		versionedRootSignatureDescriptor.Desc_1_1.pParameters = &rootParameters[0];
 		versionedRootSignatureDescriptor.Desc_1_1.NumStaticSamplers = 0;
 		versionedRootSignatureDescriptor.Desc_1_1.pStaticSamplers = nullptr;

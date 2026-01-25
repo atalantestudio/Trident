@@ -11,12 +11,16 @@ namespace ProjectA {
 		public:
 			struct DescriptorSetBinding {
 				DescriptorType descriptorType;
-				uint32 descriptorCount;
+				UINT descriptorCount;
+
+				// Offset from the start of the heap allocated in DescriptorSet.
+				UINT viewDescriptorOffset;
+				UINT samplerDescriptorOffset;
 			};
 
 		public:
 			sequence<DescriptorSetBinding> bindings;
-			ComPtr<ID3D12DescriptorHeap> cbvSrvUavViewDescriptorHeap = nullptr;
+			ComPtr<ID3D12DescriptorHeap> viewDescriptorHeap = nullptr;
 			ComPtr<ID3D12DescriptorHeap> samplerDescriptorHeap = nullptr;
 	};
 }

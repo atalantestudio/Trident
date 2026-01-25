@@ -1033,7 +1033,7 @@ namespace ProjectA {
 		const vec2<float32> decimalSize = {size.width.value, size.height.value};
 		const Extent2D imageExtent = renderer.getTextureArrayLayerExtent(imageId);
 
-		GUISubcomponent subcomponent;
+		GUISubcomponent subcomponent{};
 		subcomponent.minBounds = {decimalOrigin[0], decimalOrigin[1]};
 		subcomponent.maxBounds = {decimalOrigin[0] + decimalSize[0], decimalOrigin[1] + decimalSize[1]};
 		subcomponent.worldTransform = mat3x3<float32>::scaling(decimalSize) * mat3x3<float32>::translation(decimalOrigin);

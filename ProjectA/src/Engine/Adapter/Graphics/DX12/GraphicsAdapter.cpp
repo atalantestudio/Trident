@@ -27,6 +27,7 @@ namespace ProjectA {
 		surface = createRef<DX12::Surface>(window);
 		physicalDevice = createRef<DX12::PhysicalDevice>(*instance);
 		device = createRef<DX12::Device>(*instance, *physicalDevice);
+		memoryAllocator = createRef<DX12::MemoryAllocator>(*device);
 	}
 
 	ref<Buffer> DX12::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {
@@ -50,7 +51,7 @@ namespace ProjectA {
 	}
 
 	ref<Image> DX12::GraphicsAdapter::createImage(const ImageDescriptor& descriptor) const {
-		return createRef<DX12::Image>(descriptor, *device);
+		return createRef<DX12::Image>(descriptor, *device, memoryAllocator);
 	}
 
 	ref<PipelineLayout> DX12::GraphicsAdapter::createPipelineLayout(const PipelineLayoutDescriptor& descriptor) const {
@@ -66,7 +67,7 @@ namespace ProjectA {
 	}
 
 	ref<Sampler> DX12::GraphicsAdapter::createSampler(const SamplerDescriptor& descriptor) const {
-		return createRef<DX12::Sampler>(descriptor, *device);
+		return createRef<DX12::Sampler>(descriptor, *memoryAllocator);
 	}
 
 	ref<Semaphore> DX12::GraphicsAdapter::createSemaphore() const {
@@ -84,7 +85,7 @@ namespace ProjectA {
 	}
 
 	ref<Swapchain> DX12::GraphicsAdapter::createSwapchain(const SwapchainDescriptor& descriptor) const {
-		return createRef<DX12::Swapchain>(descriptor, *instance, *surface, *device);
+		return createRef<DX12::Swapchain>(descriptor, *instance, *surface, *device, memoryAllocator);
 	}
 
 	ref<Device> DX12::GraphicsAdapter::getDevice() const {

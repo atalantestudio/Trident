@@ -4,13 +4,13 @@
 #include "pch.hpp"
 
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
+#include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #include "Engine/Adapter/Graphics/DX12/HeapType.hpp"
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
 #include "Engine/Adapter/Graphics/DX12/ImageView.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceDimension.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceFlags.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceStates.hpp"
-#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
 	ImageDescriptor DX12::Image::createSwapchainImageDescriptor(Extent2D extent) {
@@ -31,10 +31,11 @@ namespace ProjectA {
 		return imageDescriptor;
 	}
 
-	DX12::Image::Image(const ImageDescriptor& descriptor, const DX12::Device& device) :
+	DX12::Image::Image(const ImageDescriptor& descriptor, const DX12::Device& device, ref<DX12::MemoryAllocator> memoryAllocator) :
 		ProjectA::Image(descriptor),
 		usage(descriptor.usage),
-		device(device)
+		device(device),
+		memoryAllocator(memoryAllocator)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -85,33 +86,13 @@ namespace ProjectA {
 		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceState, optimizedClearValuePointer, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed image resource.");
-
-		if (descriptor.usage & ImageUsage::COLOR_ATTACHMENT || descriptor.usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
-			D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDescriptor{};
-
-			if (descriptor.usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
-				descriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-			}
-			else {
-				descriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-			}
-
-			descriptorHeapDescriptor.NumDescriptors = 1;
-			descriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-			descriptorHeapDescriptor.NodeMask = 0;
-
-			result = device.device->CreateDescriptorHeap(&descriptorHeapDescriptor, IID_PPV_ARGS(&descriptorHeap));
-
-			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create descriptor heap for attachment image.");
-		}
 	}
 
-	DX12::Image::Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT imageIndex, ComPtr<ID3D12DescriptorHeap> descriptorHeap) :
+	DX12::Image::Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT imageIndex, ref<DX12::MemoryAllocator> memoryAllocator) :
 		ProjectA::Image(createSwapchainImageDescriptor(swapchain.getExtent())),
-		descriptorHeap(descriptorHeap),
 		usage(static_cast<ImageUsage>(0)),
-		swapchainImageIndex(imageIndex),
-		device(device)
+		device(device),
+		memoryAllocator(memoryAllocator)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -123,6 +104,6 @@ namespace ProjectA {
 	}
 
 	ref<ProjectA::ImageView> DX12::Image::createViewInternal(const ImageViewDescriptor& descriptor, const ProjectA::Image* image) const {
-		return createRef<DX12::ImageView>(descriptor, image, device);
+		return createRef<DX12::ImageView>(descriptor, image, memoryAllocator);
 	}
 }

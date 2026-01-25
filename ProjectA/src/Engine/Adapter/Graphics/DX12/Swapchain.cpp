@@ -10,11 +10,12 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	DX12::Swapchain::Swapchain(const SwapchainDescriptor& descriptor, const DX12::Instance& instance, const DX12::Surface& surface, const DX12::Device& device) :
+	DX12::Swapchain::Swapchain(const SwapchainDescriptor& descriptor, const DX12::Instance& instance, const DX12::Surface& surface, const DX12::Device& device, ref<DX12::MemoryAllocator> memoryAllocator) :
 		ProjectA::Swapchain(descriptor),
 		instance(instance),
 		surface(surface),
-		device(device)
+		device(device),
+		memoryAllocator(memoryAllocator)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
@@ -82,23 +83,13 @@ namespace ProjectA {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to move swapchain.");
 
-		D3D12_DESCRIPTOR_HEAP_DESC renderTargetViewDescriptorHeapDescriptor{};
-		renderTargetViewDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		renderTargetViewDescriptorHeapDescriptor.NumDescriptors = imageCount;
-		renderTargetViewDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		renderTargetViewDescriptorHeapDescriptor.NodeMask = 0;
-
-		result = device.device->CreateDescriptorHeap(&renderTargetViewDescriptorHeapDescriptor, IID_PPV_ARGS(&renderTargetViewDescriptorHeap));
-
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create render target view descriptor heap.");
-
 		images = sequence<ref<ProjectA::Image>>(imageCount);
 		imageViews = sequence<ref<ProjectA::ImageView>>(imageCount);
 
 		UINT imageIndex = 0;
 
 		while (imageIndex < imageCount) {
-			images[imageIndex] = createRef<DX12::Image>(device, *this, imageIndex, renderTargetViewDescriptorHeap);
+			images[imageIndex] = createRef<DX12::Image>(device, *this, imageIndex, memoryAllocator);
 
 			imageIndex += 1;
 		}

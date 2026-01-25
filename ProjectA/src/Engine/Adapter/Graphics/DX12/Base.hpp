@@ -16,6 +16,8 @@
 namespace ProjectA::DX12 {
 	using Microsoft::WRL::ComPtr;
 
+	struct DescriptorHeapAllocation;
+
 	class Buffer;
 	class CommandBuffer;
 	class CommandEncoder;
@@ -29,6 +31,7 @@ namespace ProjectA::DX12 {
 	class Image;
 	class ImageView;
 	class Instance;
+	class MemoryAllocator;
 	class PhysicalDevice;
 	class PipelineLayout;
 	class Queue;

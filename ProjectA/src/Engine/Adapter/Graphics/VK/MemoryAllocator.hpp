@@ -10,7 +10,7 @@ namespace ProjectA {
 	// #define DEBUG_ENUMERATE_HEAPS
 	// #define DEBUG_ENUMERATE_TYPES
 
-	struct MemoryAllocation {
+	struct VK::MemoryAllocation {
 		VkDeviceMemory memory;
 		VkDeviceSize offset;
 		VkDeviceSize size;
@@ -31,13 +31,13 @@ namespace ProjectA {
 		void* mappedRange;
 	};
 
-	struct MemorySuballocation {
+	struct VK::MemorySuballocation {
 		uint32 allocationIndex;
 		VkDeviceSize offset;
 		VkDeviceSize size;
 	};
 
-	class MemoryAllocator {
+	class VK::MemoryAllocator {
 		public:
 			static void initialize(const VK::PhysicalDevice& physicalDevice);
 
@@ -54,11 +54,11 @@ namespace ProjectA {
 			// Finds a suitable memory type for the requirements, and returns its index.
 			static uint32 findSuitableMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags);
 
-			static MemorySuballocation suballocateBuffer(VkDevice device, VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
+			static VK::MemorySuballocation suballocateBuffer(VkDevice device, VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
 
-			static MemorySuballocation suballocateImage(VkDevice device, VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
+			static VK::MemorySuballocation suballocateImage(VkDevice device, VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements);
 
-			static void* mapSuballocation(VkDevice device, const MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size);
+			static void* mapSuballocation(VkDevice device, const VK::MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size);
 
 			static void unmapSuballocation(VkDevice device, uint32 memoryAllocationIndex);
 
@@ -70,7 +70,7 @@ namespace ProjectA {
 
 			// Creates and returns a suballocation from a memory allocation.
 			// If isBuffer is false, the suballocation is done on image memory.
-			static MemorySuballocation suballocate(VkDevice device, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices);
+			static VK::MemorySuballocation suballocate(VkDevice device, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices);
 
 		private:
 			// Memory allocations have a default size of 16Mb.
@@ -80,7 +80,7 @@ namespace ProjectA {
 			static const VK::PhysicalDevice* physicalDevice;
 
 			// Allocated buffer and image memory allocations.
-			static std::vector<MemoryAllocation> memoryAllocations;
+			static std::vector<VK::MemoryAllocation> memoryAllocations;
 
 			// TODO: Try Merging with currentImageMemoryAllocationIndices.
 			// Indices of the currently active buffer memory allocations per memory type.

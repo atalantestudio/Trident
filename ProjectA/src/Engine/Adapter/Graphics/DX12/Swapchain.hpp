@@ -6,13 +6,14 @@
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Image.hpp"
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
+#include "Engine/Adapter/Graphics/DX12/MemoryAllocator.hpp"
 #include "Engine/Adapter/Graphics/DX12/Surface.hpp"
 #include "Engine/API/Rendering/Swapchain.hpp"
 
 namespace ProjectA {
 	class DX12::Swapchain final : public ProjectA::Swapchain {
 		public:
-			explicit Swapchain(const SwapchainDescriptor& descriptor, const DX12::Instance& instance, const DX12::Surface& surface, const DX12::Device& device);
+			explicit Swapchain(const SwapchainDescriptor& descriptor, const DX12::Instance& instance, const DX12::Surface& surface, const DX12::Device& device, ref<DX12::MemoryAllocator> memoryAllocator);
 
 			uint32 getImageCount() const final override;
 
@@ -26,12 +27,12 @@ namespace ProjectA {
 
 		public:
 			ComPtr<IDXGISwapChain3> swapChain;
-			ComPtr<ID3D12DescriptorHeap> renderTargetViewDescriptorHeap;
 			UINT imageCount = 3;
 
 		private:
 			const DX12::Instance& instance;
 			const DX12::Surface& surface;
 			const DX12::Device& device;
+			ref<DX12::MemoryAllocator> memoryAllocator;
 	};
 }

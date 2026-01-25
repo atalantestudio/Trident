@@ -5,6 +5,7 @@
 
 #include "Engine/Adapter/Graphics/DX12/Device.hpp"
 #include "Engine/Adapter/Graphics/DX12/Instance.hpp"
+#include "Engine/Adapter/Graphics/DX12/MemoryAllocator.hpp"
 #include "Engine/Adapter/Graphics/DX12/Surface.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 #include "Engine/Application/ApplicationProperties.hpp"
@@ -50,5 +51,6 @@ namespace ProjectA {
 			ref<DX12::Surface> surface;
 			ref<DX12::PhysicalDevice> physicalDevice;
 			ref<DX12::Device> device;
+			ref<DX12::MemoryAllocator> memoryAllocator;
 	};
 }

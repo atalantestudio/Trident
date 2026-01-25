@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include "Engine/Adapter/Graphics/DX12/Device.hpp"
+#include "Engine/Adapter/Graphics/DX12/MemoryAllocator.hpp"
 #include "Engine/API/Rendering/Sampler.hpp"
 
 namespace ProjectA {
 	class DX12::Sampler final : public ProjectA::Sampler {
 		public:
-			explicit Sampler(const SamplerDescriptor& descriptor, const DX12::Device& device);
+			explicit Sampler(const SamplerDescriptor& descriptor, DX12::MemoryAllocator& memoryAllocator);
 
-		private:
-			D3D12_CPU_DESCRIPTOR_HANDLE samplerHandle;
+		public:
+			D3D12_SAMPLER_DESC samplerDescriptor;
 	};
 }

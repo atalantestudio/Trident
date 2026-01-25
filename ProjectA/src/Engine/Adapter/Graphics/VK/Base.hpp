@@ -16,6 +16,9 @@
 #include "Engine/Adapter/Graphics/VK/procedures.hpp"
 
 namespace ProjectA::VK {
+	struct MemoryAllocation;
+	struct MemorySuballocation;
+
 	class Buffer;
 	class CommandBuffer;
 	class CommandEncoder;
@@ -30,6 +33,7 @@ namespace ProjectA::VK {
 	class Image;
 	class ImageView;
 	class Instance;
+	class MemoryAllocator;
 	class PhysicalDevice;
 	class Pipeline;
 	class PipelineLayout;

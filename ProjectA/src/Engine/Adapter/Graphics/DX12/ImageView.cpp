@@ -8,13 +8,11 @@
 #include "Engine/Adapter/Graphics/DX12/ResourceDimension.hpp"
 
 namespace ProjectA {
-	DX12::ImageView::ImageView(const ImageViewDescriptor& descriptor, const ProjectA::Image* image, const DX12::Device& device) :
+	DX12::ImageView::ImageView(const ImageViewDescriptor& descriptor, const ProjectA::Image* image, ref<DX12::MemoryAllocator> memoryAllocator) :
 		ProjectA::ImageView(descriptor, image),
 		image(static_cast<const DX12::Image*>(image)),
-		device(device)
+		memoryAllocator(memoryAllocator)
 	{
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
-
 		if (this->image->usage == 0) {
 			createSwapchainRenderTargetView();
 		}
@@ -27,18 +25,10 @@ namespace ProjectA {
 	}
 
 	void DX12::ImageView::createSwapchainRenderTargetView() {
-		cpuDescriptorHandle = image->descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		cpuDescriptorHandle.ptr += image->swapchainImageIndex * device.device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-		device.device->CreateRenderTargetView(image->resource.Get(), nullptr, cpuDescriptorHandle);
+		cpuDescriptorHandle = memoryAllocator->allocateRenderTargetView(image->resource.Get(), nullptr);
 	}
 
 	void DX12::ImageView::createRenderTargetView() {
-		// TODO: Find how to set the mip level count in the render target view descriptor.
-		ADAPTER_ASSERT(mipLevelCount == 1, "Cannot create a view of a render target image with multiple mip levels.");
-
-		cpuDescriptorHandle = image->descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-
 		D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDescriptor{};
 		renderTargetViewDescriptor.Format = getImageFormat(image->getFormat());
 
@@ -73,15 +63,10 @@ namespace ProjectA {
 			}
 		}
 
-		device.device->CreateRenderTargetView(image->resource.Get(), &renderTargetViewDescriptor, cpuDescriptorHandle);
+		cpuDescriptorHandle = memoryAllocator->allocateRenderTargetView(image->resource.Get(), &renderTargetViewDescriptor);
 	}
 
 	void DX12::ImageView::createDepthStencilView() {
-		// TODO: Find how to set the mip level count in the render target view descriptor.
-		ADAPTER_ASSERT(mipLevelCount == 1, "Cannot create a view of a depth stencil image with multiple mip levels.");
-
-		cpuDescriptorHandle = image->descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-
 		D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilViewDescriptor{};
 		depthStencilViewDescriptor.Format = getImageFormat(image->getFormat());
 		depthStencilViewDescriptor.Flags = D3D12_DSV_FLAG_NONE;
@@ -115,6 +100,6 @@ namespace ProjectA {
 			}
 		}
 
-		device.device->CreateDepthStencilView(image->resource.Get(), &depthStencilViewDescriptor, cpuDescriptorHandle);
+		cpuDescriptorHandle = memoryAllocator->allocateDepthStencilView(image->resource.Get(), &depthStencilViewDescriptor);
 	}
 }

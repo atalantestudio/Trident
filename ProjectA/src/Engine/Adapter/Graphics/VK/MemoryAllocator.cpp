@@ -8,14 +8,14 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	const VK::PhysicalDevice* MemoryAllocator::physicalDevice;
-	std::vector<MemoryAllocation> MemoryAllocator::memoryAllocations;
-	sequence<uint32> MemoryAllocator::currentBufferMemoryAllocationIndices;
-	sequence<uint32> MemoryAllocator::currentImageMemoryAllocationIndices;
-	std::vector<uint32> MemoryAllocator::freeMemoryAllocationIndices;
+	const VK::PhysicalDevice* VK::MemoryAllocator::physicalDevice;
+	std::vector<VK::MemoryAllocation> VK::MemoryAllocator::memoryAllocations;
+	sequence<uint32> VK::MemoryAllocator::currentBufferMemoryAllocationIndices;
+	sequence<uint32> VK::MemoryAllocator::currentImageMemoryAllocationIndices;
+	std::vector<uint32> VK::MemoryAllocator::freeMemoryAllocationIndices;
 
-	void MemoryAllocator::initialize(const VK::PhysicalDevice& physicalDevice) {
-		MemoryAllocator::physicalDevice = &physicalDevice;
+	void VK::MemoryAllocator::initialize(const VK::PhysicalDevice& physicalDevice) {
+		VK::MemoryAllocator::physicalDevice = &physicalDevice;
 
 		ADAPTER_DEBUG("Buffer image granularity: []", physicalDevice.properties.limits.bufferImageGranularity);
 		ADAPTER_DEBUG("Max. memory allocation count: []", physicalDevice.properties.limits.maxMemoryAllocationCount);
@@ -37,12 +37,12 @@ namespace ProjectA {
 		#endif
 	}
 
-	void MemoryAllocator::destroy() {
+	void VK::MemoryAllocator::destroy() {
 		physicalDevice = nullptr;
 	}
 
 	#ifdef BUILD_MODE_DEBUG
-		void MemoryAllocator::enumerateMemoryHeaps() {
+		void VK::MemoryAllocator::enumerateMemoryHeaps() {
 			for (uint32 memoryHeapIndex = 0; memoryHeapIndex < physicalDevice->memoryProperties.memoryHeapCount; memoryHeapIndex += 1) {
 				const VkMemoryHeap& memoryHeap = physicalDevice->memoryProperties.memoryHeaps[memoryHeapIndex];
 
@@ -58,7 +58,7 @@ namespace ProjectA {
 			}
 		}
 
-		void MemoryAllocator::enumerateMemoryTypes() {
+		void VK::MemoryAllocator::enumerateMemoryTypes() {
 			for (uint32 memoryTypeIndex = 0; memoryTypeIndex < physicalDevice->memoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
 				const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryTypeIndex];
 
@@ -73,7 +73,7 @@ namespace ProjectA {
 			}
 		}
 
-		sequence<char8> MemoryAllocator::formatSize(uint64 size) {
+		sequence<char8> VK::MemoryAllocator::formatSize(uint64 size) {
 			const float64 decimalSize = static_cast<float64>(size);
 
 			if (size >= 1000000000000) {
@@ -94,7 +94,7 @@ namespace ProjectA {
 		}
 	#endif
 
-	uint32 MemoryAllocator::findSuitableMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) {
+	uint32 VK::MemoryAllocator::findSuitableMemoryType(const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags memoryPropertyFlags) {
 		uint32 suitableMemoryTypeIndex = UNDEFINED_MEMORY_TYPE_INDEX;
 
 		for (uint32 memoryTypeIndex = 0; memoryTypeIndex < physicalDevice->memoryProperties.memoryTypeCount; memoryTypeIndex += 1) {
@@ -116,9 +116,9 @@ namespace ProjectA {
 		return suitableMemoryTypeIndex;
 	}
 
-	MemorySuballocation MemoryAllocator::suballocateBuffer(VkDevice device, VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
-		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentBufferMemoryAllocationIndices);
-		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
+	VK::MemorySuballocation VK::MemoryAllocator::suballocateBuffer(VkDevice device, VkBuffer buffer, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
+		const VK::MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentBufferMemoryAllocationIndices);
+		VK::MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
 		ADAPTER_INFO("Creating new memory suballocation ([]) for buffer resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
 		ADAPTER_DEBUG(
@@ -143,9 +143,9 @@ namespace ProjectA {
 		return memorySuballocation;
 	}
 
-	MemorySuballocation MemoryAllocator::suballocateImage(VkDevice device, VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
-		const MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentImageMemoryAllocationIndices);
-		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
+	VK::MemorySuballocation VK::MemoryAllocator::suballocateImage(VkDevice device, VkImage image, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements) {
+		const VK::MemorySuballocation memorySuballocation = suballocate(device, memoryTypeIndex, memoryRequirements, currentImageMemoryAllocationIndices);
+		VK::MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
 		ADAPTER_INFO("Created new memory suballocation ([]) for image resource inside memory allocation [].", memoryAllocation.suballocationCount, memorySuballocation.allocationIndex);
 		ADAPTER_DEBUG(
@@ -170,8 +170,8 @@ namespace ProjectA {
 		return memorySuballocation;
 	}
 
-	void* MemoryAllocator::mapSuballocation(VkDevice device, const MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size) {
-		MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
+	void* VK::MemoryAllocator::mapSuballocation(VkDevice device, const VK::MemorySuballocation& memorySuballocation, VkDeviceSize offset, VkDeviceSize size) {
+		VK::MemoryAllocation& memoryAllocation = memoryAllocations[memorySuballocation.allocationIndex];
 
 		ADAPTER_ASSERT(size > 0, "The mapping size must not be 0.");
 		ADAPTER_ASSERT(offset <= memoryAllocation.offset, "The mapping offset is outside of the used range for the memory allocation.");
@@ -198,8 +198,8 @@ namespace ProjectA {
 		return static_cast<void*>(mappedRange);
 	}
 
-	void MemoryAllocator::unmapSuballocation(VkDevice device, uint32 memoryAllocationIndex) {
-		MemoryAllocation& memoryAllocation = memoryAllocations[memoryAllocationIndex];
+	void VK::MemoryAllocator::unmapSuballocation(VkDevice device, uint32 memoryAllocationIndex) {
+		VK::MemoryAllocation& memoryAllocation = memoryAllocations[memoryAllocationIndex];
 
 		if (memoryAllocation.mappedSuballocationCount <= 1) {
 			const VkMemoryType memoryType = physicalDevice->memoryProperties.memoryTypes[memoryAllocation.memoryTypeIndex];
@@ -234,8 +234,8 @@ namespace ProjectA {
 		memoryAllocation.mappedSuballocationCount -= 1;
 	}
 
-	void MemoryAllocator::freeSuballocation(VkDevice device, uint32 memoryAllocationIndex) {
-		MemoryAllocation& memoryAllocation = memoryAllocations[memoryAllocationIndex];
+	void VK::MemoryAllocator::freeSuballocation(VkDevice device, uint32 memoryAllocationIndex) {
+		VK::MemoryAllocation& memoryAllocation = memoryAllocations[memoryAllocationIndex];
 
 		if (memoryAllocation.suballocationCount <= 1) {
 			vkFreeMemory(device, memoryAllocation.memory, nullptr);
@@ -265,7 +265,7 @@ namespace ProjectA {
 		ADAPTER_INFO("Freed suballocation from memory allocation []. The active suballocation count is now [].", memoryAllocationIndex, memoryAllocation.suballocationCount);
 	}
 
-	uint32 MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size) {
+	uint32 VK::MemoryAllocator::createAllocation(VkDevice device, uint32 memoryTypeIndex, VkDeviceSize size) {
 		const VkDeviceSize allocationSize = std::max(size, DEFAULT_MEMORY_ALLOCATION_SIZE);
 
 		uint32 memoryAllocationIndex = static_cast<uint32>(memoryAllocations.size());
@@ -314,7 +314,7 @@ namespace ProjectA {
 		return memoryAllocationIndex;
 	}
 
-	MemorySuballocation MemoryAllocator::suballocate(VkDevice device, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices) {
+	VK::MemorySuballocation VK::MemoryAllocator::suballocate(VkDevice device, uint32 memoryTypeIndex, const VkMemoryRequirements& memoryRequirements, sequence<uint32>& currentMemoryAllocationIndices) {
 		uint32 currentMemoryAllocationIndex = currentMemoryAllocationIndices[memoryTypeIndex];
 
 		const VkDeviceSize size = std::max(memoryRequirements.size, memoryRequirements.alignment);
@@ -353,7 +353,7 @@ namespace ProjectA {
 			offset = 0;
 		}
 
-		MemorySuballocation memorySuballocation{};
+		VK::MemorySuballocation memorySuballocation{};
 		memorySuballocation.allocationIndex = currentMemoryAllocationIndex;
 		memorySuballocation.offset = offset;
 		memorySuballocation.size = size;

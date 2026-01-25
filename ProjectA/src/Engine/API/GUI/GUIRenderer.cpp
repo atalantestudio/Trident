@@ -168,7 +168,11 @@ namespace ProjectA {
 
 	void GUIRenderer::createCameraBuffer() {
 		BufferDescriptor cameraBufferDescriptor{};
-		cameraBufferDescriptor.size = sizeof(Camera);
+
+		// TODO: Dumb DX12
+		// cameraBufferDescriptor.size = sizeof(Camera);
+		cameraBufferDescriptor.size = 256;
+
 		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
 		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		cameraBufferDescriptor.persistent = true;
@@ -304,17 +308,17 @@ namespace ProjectA {
 
 	void GUIRenderer::createSubcomponentRenderPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<vec4<float32>>(""); // Vertex position and texture coordinate
+		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
 
 		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<vec4<float32>>(""); // Bounds
-		instanceInputBinding.registerAttribute<mat3x3<float32>>(""); // World transform
-		instanceInputBinding.registerAttribute<mat3x3<float32>>(""); // Texture transform
-		instanceInputBinding.registerAttribute<vec4<float32>>(""); // Color
-		instanceInputBinding.registerAttribute<vec4<float32>>(""); // Outline color
-		instanceInputBinding.registerAttribute<uint32>(""); // Texture array layer index
-		instanceInputBinding.registerAttribute<float32>(""); // Outline size
-		instanceInputBinding.registerAttribute<float32>(""); // Border radius
+		instanceInputBinding.registerAttribute<vec4<float32>>(); // Bounds
+		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
+		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
+		instanceInputBinding.registerAttribute<vec4<float32>>(); // Color
+		instanceInputBinding.registerAttribute<vec4<float32>>(); // Outline color
+		instanceInputBinding.registerAttribute<uint32>(); // Texture array layer index
+		instanceInputBinding.registerAttribute<float32>(); // Outline size
+		instanceInputBinding.registerAttribute<float32>(); // Border radius
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -354,13 +358,13 @@ namespace ProjectA {
 
 	void GUIRenderer::createGlyphSubcomponentRenderPipeline() {
 		VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-		vertexInputBinding.registerAttribute<vec4<float32>>(""); // Vertex position and texture coordinate
+		vertexInputBinding.registerAttribute<vec4<float32>>(); // Vertex position and texture coordinate
 
 		VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-		instanceInputBinding.registerAttribute<mat3x3<float32>>(""); // World transform
-		instanceInputBinding.registerAttribute<mat3x3<float32>>(""); // Texture transform
-		instanceInputBinding.registerAttribute<uint32>(""); // Layer index
-		instanceInputBinding.registerAttribute<vec4<float32>>(""); // Color
+		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // World transform
+		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
+		instanceInputBinding.registerAttribute<uint32>(); // Layer index
+		instanceInputBinding.registerAttribute<vec4<float32>>(); // Color
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;

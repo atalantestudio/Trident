@@ -111,8 +111,8 @@ namespace ProjectA {
 		while (descriptorSetIndex < descriptorSets.count()) {
 			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
 
-			if (descriptorSet->cbvSrvUavViewDescriptorHeap) {
-				descriptorHeaps.emplace_back(descriptorSet->cbvSrvUavViewDescriptorHeap.Get());
+			if (descriptorSet->viewDescriptorHeap) {
+				descriptorHeaps.emplace_back(descriptorSet->viewDescriptorHeap.Get());
 			}
 
 			if (descriptorSet->samplerDescriptorHeap) {
@@ -126,22 +126,18 @@ namespace ProjectA {
 
 		descriptorSetIndex = 0;
 
-		UINT rootParameterIndex = 0;
-
 		if (computePipelineBound) {
 			while (descriptorSetIndex < descriptorSets.count()) {
 				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
 
-				if (descriptorSet->cbvSrvUavViewDescriptorHeap) {
-					commandList->SetComputeRootDescriptorTable(rootParameterIndex, descriptorSet->cbvSrvUavViewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-
-					rootParameterIndex += 1;
+				if (descriptorSet->viewDescriptorHeap) {
+					commandList->SetComputeRootDescriptorTable(descriptorSetIndex, descriptorSet->viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 				}
-
-				if (descriptorSet->samplerDescriptorHeap) {
-					commandList->SetComputeRootDescriptorTable(rootParameterIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-
-					rootParameterIndex += 1;
+				else if (descriptorSet->samplerDescriptorHeap) {
+					commandList->SetComputeRootDescriptorTable(descriptorSetIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				}
+				else {
+					ADAPTER_ASSERT(false, "The descriptor set is not associated with a descriptor heap.");
 				}
 
 				descriptorSetIndex += 1;
@@ -151,16 +147,14 @@ namespace ProjectA {
 			while (descriptorSetIndex < descriptorSets.count()) {
 				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
 
-				if (descriptorSet->cbvSrvUavViewDescriptorHeap) {
-					commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorSet->cbvSrvUavViewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-
-					rootParameterIndex += 1;
+				if (descriptorSet->viewDescriptorHeap) {
+					commandList->SetGraphicsRootDescriptorTable(descriptorSetIndex, descriptorSet->viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 				}
-
-				if (descriptorSet->samplerDescriptorHeap) {
-					commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-
-					rootParameterIndex += 1;
+				else if (descriptorSet->samplerDescriptorHeap) {
+					commandList->SetGraphicsRootDescriptorTable(descriptorSetIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				}
+				else {
+					ADAPTER_ASSERT(false, "The descriptor set is not associated with a descriptor heap.");
 				}
 
 				descriptorSetIndex += 1;
@@ -200,6 +194,7 @@ namespace ProjectA {
 		const D3D12_RESOURCE_DESC srcBufferResourceDescriptor = srcBuffer->resource->GetDesc();
 		const D3D12_RESOURCE_DESC dstImageResourceDescriptor = dstImage->resource->GetDesc();
 		const UINT channelCount = getChannelCount(dstImage->getFormat());
+		const UINT layerArea = dstImage->getExtent().width * dstImage->getExtent().height * dstImage->getExtent().depth * channelCount;
 
 		D3D12_TEXTURE_COPY_LOCATION bufferCopyLocation{};
 		bufferCopyLocation.pResource = srcBuffer->resource.Get();
@@ -210,18 +205,20 @@ namespace ProjectA {
 		textureCopyLocation.pResource = dstImage->resource.Get();
 		textureCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 
-		for (const BufferImageCopyRegion& copyRegion : copyRegions) {
-			bufferCopyLocation.PlacedFootprint.Footprint.Width = dstImage->getExtent().width;
-			bufferCopyLocation.PlacedFootprint.Footprint.Height = dstImage->getExtent().height;
-			bufferCopyLocation.PlacedFootprint.Footprint.Depth = dstImage->getExtent().depth;
-			bufferCopyLocation.PlacedFootprint.Footprint.RowPitch = bufferCopyLocation.PlacedFootprint.Footprint.Width * channelCount;
+		UINT layerIndex;
 
-			UINT layerIndex = copyRegion.imageLayerOffset;
+		for (const BufferImageCopyRegion& copyRegion : copyRegions) {
+			bufferCopyLocation.PlacedFootprint.Footprint.Width = copyRegion.imageExtent.width;
+			bufferCopyLocation.PlacedFootprint.Footprint.Height = copyRegion.imageExtent.height;
+			bufferCopyLocation.PlacedFootprint.Footprint.Depth = copyRegion.imageExtent.depth;
+			bufferCopyLocation.PlacedFootprint.Footprint.RowPitch = copyRegion.imageExtent.width * channelCount;
+
+			layerIndex = 0;
 
 			while (layerIndex < copyRegion.imageLayerCount) {
-				bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset + dstImage->getExtent().width * dstImage->getExtent().height * dstImage->getExtent().depth * channelCount * layerIndex;
+				textureCopyLocation.SubresourceIndex = copyRegion.imageLayerOffset + layerIndex;
 
-				textureCopyLocation.SubresourceIndex = layerIndex;
+				bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset + layerArea * textureCopyLocation.SubresourceIndex;
 
 				commandList->CopyTextureRegion(&textureCopyLocation, copyRegion.imageOffsetX, copyRegion.imageOffsetY, copyRegion.imageOffsetZ, &bufferCopyLocation, nullptr);
 
@@ -250,7 +247,7 @@ namespace ProjectA {
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
 		if (!indirectBuffer->commandSignature) {
-			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor = {};
+			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor{};
 			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
 
 			D3D12_COMMAND_SIGNATURE_DESC commandSignatureDescriptor{};
@@ -362,7 +359,7 @@ namespace ProjectA {
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
 		if (!indirectBuffer->commandSignature) {
-			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor = {};
+			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor{};
 			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
 
 			D3D12_COMMAND_SIGNATURE_DESC commandSignatureDescriptor{};
@@ -399,7 +396,7 @@ namespace ProjectA {
 		const ref<DX12::Buffer> indirectBuffer = std::static_pointer_cast<DX12::Buffer>(buffer);
 
 		if (!indirectBuffer->commandSignature) {
-			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor = {};
+			D3D12_INDIRECT_ARGUMENT_DESC indirectArgumentDescriptor{};
 			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
 
 			D3D12_COMMAND_SIGNATURE_DESC commandSignatureDescriptor{};
