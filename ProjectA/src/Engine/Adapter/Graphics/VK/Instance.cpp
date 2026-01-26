@@ -30,14 +30,9 @@ namespace ProjectA {
 
 	#ifdef DEBUG_ENABLE_MESSENGER
 		VkBool32 VK::Instance::debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
-			// "Unloading layer library..." messages happen after the logger's destruction.
-			if (strncmp(pCallbackData->pMessage, "Unloading layer library", 24) != 0) {
-				return VK_FALSE;
-			}
-
 			switch (messageSeverity) {
 				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: {
-					ADAPTER_TRACE(__FILE__, __LINE__, pCallbackData->pMessage);
+					ADAPTER_TRACE(pCallbackData->pMessage);
 
 					break;
 				}
@@ -52,7 +47,7 @@ namespace ProjectA {
 					break;
 				}
 				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT: {
-					ADAPTER_ERROR(__func__, __FILE__, __LINE__, pCallbackData->pMessage);
+					ADAPTER_ERROR(pCallbackData->pMessage);
 
 					break;
 				}

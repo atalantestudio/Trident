@@ -10,6 +10,11 @@
 
 namespace ProjectA {
 	class DX12::Device final : public ProjectA::Device {
+		private:
+			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+				static void messageCallback(D3D12_MESSAGE_CATEGORY category, D3D12_MESSAGE_SEVERITY severity, D3D12_MESSAGE_ID id, LPCSTR description, void* context);
+			#endif
+
 		public:
 			explicit Device(const DX12::Instance& instance, const DX12::PhysicalDevice& physicalDevice);
 
@@ -38,5 +43,10 @@ namespace ProjectA {
 			ref<ProjectA::Queue> queues[3];
 			HANDLE waitEvent;
 			const DX12::PhysicalDevice& physicalDevice;
+
+			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+				ID3D12InfoQueue1* infoQueue;
+				DWORD messageCallbackCookie;
+			#endif
 	};
 }

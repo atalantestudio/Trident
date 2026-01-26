@@ -14,6 +14,34 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
+	#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+		void DX12::Device::messageCallback(D3D12_MESSAGE_CATEGORY category, D3D12_MESSAGE_SEVERITY severity, D3D12_MESSAGE_ID id, LPCSTR description, void* context) {
+			switch (severity) {
+				case D3D12_MESSAGE_SEVERITY_CORRUPTION:
+				case D3D12_MESSAGE_SEVERITY_ERROR: {
+					ADAPTER_ERROR(description);
+
+					break;
+				}
+				case D3D12_MESSAGE_SEVERITY_WARNING: {
+					ADAPTER_WARNING(description);
+
+					break;
+				}
+				case D3D12_MESSAGE_SEVERITY_INFO: {
+					ADAPTER_INFO(description);
+
+					break;
+				}
+				case D3D12_MESSAGE_SEVERITY_MESSAGE: {
+					ADAPTER_TRACE(description);
+
+					break;
+				}
+			}
+		}
+	#endif
+
 	DX12::Device::Device(const DX12::Instance& instance, const DX12::PhysicalDevice& physicalDevice) :
 		physicalDevice(physicalDevice)
 	{
@@ -48,12 +76,40 @@ namespace ProjectA {
 		waitEvent = CreateEvent(nullptr, false, false, L"Wait event");
 
 		WIN32_ASSERT(waitEvent != nullptr);
+
+		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+			result = device->QueryInterface(IID_PPV_ARGS(&infoQueue));
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to query info queue interface.");
+
+			result = infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set severity breakpoint.");
+
+			result = infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set severity breakpoint.");
+
+			result = infoQueue->RegisterMessageCallback(messageCallback, D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, &messageCallbackCookie);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to register message callback.");
+		#endif
 	}
 
 	DX12::Device::~Device() {
-		const BOOL result = CloseHandle(waitEvent);
+		HRESULT result;
+
+		result = CloseHandle(waitEvent);
 
 		WIN32_ASSERT(result != 0);
+
+		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+			result = infoQueue->UnregisterMessageCallback(messageCallbackCookie);
+
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to unregister message callback.");
+
+			infoQueue->Release();
+		#endif
 	}
 
 	AcquireNextImageStatus DX12::Device::acquireNextImage(ref<ProjectA::Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {

@@ -110,18 +110,18 @@ namespace ProjectA {
 		void GL::GraphicsAdapter::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 			switch (severity) {
 				case GL_DEBUG_SEVERITY_NOTIFICATION: {
-					logger.info(message);
+					ADAPTER_INFO(message);
 
 					break;
 				}
 				case GL_DEBUG_SEVERITY_LOW:
 				case GL_DEBUG_SEVERITY_MEDIUM: {
-					logger.warning(message);
+					ADAPTER_WARNING(message);
 
 					break;
 				}
 				case GL_DEBUG_SEVERITY_HIGH: {
-					logger.error(__func__, __FILE__, __LINE__, message);
+					ADAPTER_ERROR(message);
 
 					break;
 				}
