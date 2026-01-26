@@ -7,7 +7,7 @@
 #include "Engine/API/Rendering/PhysicalDevice.hpp"
 
 namespace ProjectA {
-	class DX12::PhysicalDevice : public ProjectA::PhysicalDevice {
+	class DX12::PhysicalDevice final : public ProjectA::PhysicalDevice {
 		public:
 			explicit PhysicalDevice(const DX12::Instance& instance);
 

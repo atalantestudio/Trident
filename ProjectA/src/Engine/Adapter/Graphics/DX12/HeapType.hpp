@@ -9,7 +9,6 @@
 namespace ProjectA::DX12 {
 	inline D3D12_HEAP_TYPE getHeapType(MemoryProperty memoryProperties) {
 		if (memoryProperties & MemoryProperty::HOST_VISIBLE) {
-			// TODO: Return D3D12_HEAP_TYPE_READBACK instead?
 			return D3D12_HEAP_TYPE_UPLOAD;
 		}
 

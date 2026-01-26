@@ -201,6 +201,8 @@ namespace ProjectA {
 			case GraphicsAPI::GL: {
 				#ifdef GL_SOURCE_FROM_SPIRV
 					pathString += ".spv";
+				#else
+					pathString += ".glsl";
 				#endif
 
 				break;

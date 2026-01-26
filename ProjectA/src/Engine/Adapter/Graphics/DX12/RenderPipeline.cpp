@@ -158,39 +158,29 @@ namespace ProjectA {
 		graphicsPipelineStateDescriptor.PrimitiveTopologyType = getPrimitiveTopologyType(descriptor.primitiveTopology);
 		graphicsPipelineStateDescriptor.NumRenderTargets = descriptor.renderPass->getAttachmentCount();
 
-		UINT attachmentIndex = 0;
-		UINT subpassIndex = 0;
-		UINT colorAttachmentReferenceIndex;
+		const sequence<AttachmentReference>& colorAttachmentReferences = subpass->getColorAttachmentReferences();
 
-		while (subpassIndex < descriptor.renderPass->getSubpassCount()) {
-			const ref<Subpass> subpass = descriptor.renderPass->getSubpass(subpassIndex);
-			const sequence<AttachmentReference>& colorAttachmentReferences = subpass->getColorAttachmentReferences();
+		UINT renderTargetIndex = 0;
 
-			colorAttachmentReferenceIndex = 0;
-
-			while (colorAttachmentReferenceIndex < colorAttachmentReferences.count()) {
-				const uint32 colorAttachmentIndex = colorAttachmentReferences[colorAttachmentReferenceIndex].index;
-
-				if (colorAttachmentIndex != AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
-					const Attachment& colorAttachment = descriptor.renderPass->getAttachment(colorAttachmentIndex);
-
-					graphicsPipelineStateDescriptor.RTVFormats[attachmentIndex] = getImageFormat(colorAttachment.format);
-				}
-
-				attachmentIndex += 1;
-				colorAttachmentReferenceIndex += 1;
+		for (const AttachmentReference& colorAttachmentReference : subpass->getColorAttachmentReferences()) {
+			if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+				continue;
 			}
 
-			if (subpass->hasDepthStencilAttachmentReference()) {
-				ADAPTER_ASSERT(graphicsPipelineStateDescriptor.DSVFormat == DXGI_FORMAT_UNKNOWN, "Depth stencil format is already provided.");
+			const Attachment& colorAttachment = descriptor.renderPass->getAttachment(colorAttachmentReference.index);
 
-				const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();
-				const Attachment& depthStencilAttachment = descriptor.renderPass->getAttachment(depthStencilAttachmentReference.index);
+			graphicsPipelineStateDescriptor.RTVFormats[renderTargetIndex] = getImageFormat(colorAttachment.format);
 
-				graphicsPipelineStateDescriptor.DSVFormat = getImageFormat(depthStencilAttachment.format);
-			}
+			renderTargetIndex += 1;
+		}
 
-			subpassIndex += 1;
+		if (subpass->hasDepthStencilAttachmentReference()) {
+			ADAPTER_ASSERT(graphicsPipelineStateDescriptor.DSVFormat == DXGI_FORMAT_UNKNOWN, "Depth stencil format is already provided.");
+
+			const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();
+			const Attachment& depthStencilAttachment = descriptor.renderPass->getAttachment(depthStencilAttachmentReference.index);
+
+			graphicsPipelineStateDescriptor.DSVFormat = getImageFormat(depthStencilAttachment.format);
 		}
 
 		graphicsPipelineStateDescriptor.SampleDesc.Count = static_cast<UINT>(subpass->getRasterizationSampleCount());

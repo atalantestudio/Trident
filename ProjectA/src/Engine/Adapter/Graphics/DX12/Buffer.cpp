@@ -31,7 +31,7 @@ namespace ProjectA {
 
 		if (descriptor.usage & BufferUsage::UNIFORM) {
 			// NOTE: Constant buffer views need to be aligned to 256.
-			resourceDescriptor.Width = (descriptor.size + 255) & ~255;
+			resourceDescriptor.Width = (descriptor.size + D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1);
 		}
 
 		resourceDescriptor.Height = 1;
@@ -44,11 +44,18 @@ namespace ProjectA {
 		resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 		const D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_NONE;
-		const D3D12_RESOURCE_STATES resourceStates = getBufferResourceStates(descriptor.usage);
 
-		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, resourceStates, nullptr, IID_PPV_ARGS(&resource));
+		D3D12_RESOURCE_STATES initialResourceStates = getBufferResourceStates(descriptor.usage);
+
+		if (heapProperties.Type == D3D12_HEAP_TYPE_READBACK) {
+			initialResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
+		}
+
+		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceStates, nullptr, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed buffer resource.");
+
+		heapType = heapProperties.Type;
 	}
 
 	void DX12::Buffer::unmap() const {

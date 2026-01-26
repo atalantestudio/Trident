@@ -62,14 +62,14 @@ namespace ProjectA {
 		resourceDescriptor.Flags = getImageResourceFlags(descriptor.usage);
 
 		const D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_NONE;
-		const D3D12_RESOURCE_STATES initialResourceState = getImageResourceStates(descriptor.usage, layout, sampleCount);
+		const D3D12_RESOURCE_STATES initialResourceStates = getImageResourceStates(descriptor.usage, layout, getSampleCount());
 		const D3D12_CLEAR_VALUE* optimizedClearValuePointer = nullptr;
 
 		D3D12_CLEAR_VALUE optimizedClearValue{};
 		optimizedClearValue.Format = resourceDescriptor.Format;
 
 		if (isDepthFormat(descriptor.format)) {
-			optimizedClearValue.DepthStencil.Depth = 0.0f;
+			optimizedClearValue.DepthStencil.Depth = 1.0f;
 			optimizedClearValue.DepthStencil.Stencil = 0;
 
 			optimizedClearValuePointer = &optimizedClearValue;
@@ -83,7 +83,7 @@ namespace ProjectA {
 			optimizedClearValuePointer = &optimizedClearValue;
 		}
 
-		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceState, optimizedClearValuePointer, IID_PPV_ARGS(&resource));
+		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceStates, optimizedClearValuePointer, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed image resource.");
 	}

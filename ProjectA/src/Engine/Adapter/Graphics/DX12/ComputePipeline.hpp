@@ -8,7 +8,7 @@
 #include "Engine/API/Rendering/ComputePipeline.hpp"
 
 namespace ProjectA {
-	class DX12::ComputePipeline : public ProjectA::ComputePipeline {
+	class DX12::ComputePipeline final : public ProjectA::ComputePipeline {
 		public:
 			explicit ComputePipeline(const ComputePipelineDescriptor& descriptor, const DX12::Device& device);
 

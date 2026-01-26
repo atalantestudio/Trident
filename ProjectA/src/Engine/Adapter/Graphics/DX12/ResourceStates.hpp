@@ -10,21 +10,15 @@
 
 namespace ProjectA::DX12 {
 	inline D3D12_RESOURCE_STATES getBufferResourceStates(BufferUsage bufferUsage) {
-		D3D12_RESOURCE_STATES resourceStates = D3D12_RESOURCE_STATE_COMMON;
-
 		if (bufferUsage & BufferUsage::TRANSFER_SRC) {
-			resourceStates |= D3D12_RESOURCE_STATE_COPY_SOURCE;
+			return D3D12_RESOURCE_STATE_COPY_SOURCE;
 		}
 
 		if (bufferUsage & BufferUsage::UNIFORM) {
-			resourceStates |= D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
+			return D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
 		}
 
-		if (bufferUsage & BufferUsage::STORAGE) {
-			resourceStates |= D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
-		}
-
-		return resourceStates;
+		return D3D12_RESOURCE_STATE_COMMON;
 	}
 
 	inline D3D12_RESOURCE_STATES getImageResourceStates(ImageUsage usage, ImageLayout& layout, uint8 sampleCount) {
@@ -67,8 +61,7 @@ namespace ProjectA::DX12 {
 
 			layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}
-
-		if (usage & ImageUsage::INPUT_ATTACHMENT) {
+		else if (usage & ImageUsage::INPUT_ATTACHMENT) {
 			resourceStates |= D3D12_RESOURCE_STATE_RENDER_TARGET;
 		}
 

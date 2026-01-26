@@ -86,39 +86,52 @@ namespace ProjectA {
 						break;
 					}
 					case DescriptorType::STORAGE_IMAGE: {
-						D3D12_DESCRIPTOR_RANGE1& imageDescriptorRange = descriptorRanges[descriptorRangeOffset];
-						imageDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-						imageDescriptorRange.NumDescriptors = binding.descriptorCount;
-						imageDescriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
-						imageDescriptorRange.RegisterSpace = 0;
-						imageDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
-						imageDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
+						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+						descriptorRange.NumDescriptors = binding.descriptorCount;
+						descriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
+						descriptorRange.RegisterSpace = 0;
+						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
+						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 						shaderResourceViewShaderRegister += 1;
 
 						break;
 					}
 					case DescriptorType::UNIFORM_BUFFER: {
-						D3D12_DESCRIPTOR_RANGE1& bufferDescriptorRange = descriptorRanges[descriptorRangeOffset];
-						bufferDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-						bufferDescriptorRange.NumDescriptors = binding.descriptorCount;
-						bufferDescriptorRange.BaseShaderRegister = constantBufferViewShaderRegister;
-						bufferDescriptorRange.RegisterSpace = 0;
-						bufferDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
-						bufferDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
+						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+						descriptorRange.NumDescriptors = binding.descriptorCount;
+						descriptorRange.BaseShaderRegister = constantBufferViewShaderRegister;
+						descriptorRange.RegisterSpace = 0;
+						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
+						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 						constantBufferViewShaderRegister += 1;
 
 						break;
 					}
+					case DescriptorType::STORAGE_BUFFER: {
+						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
+						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+						descriptorRange.NumDescriptors = binding.descriptorCount;
+						descriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
+						descriptorRange.RegisterSpace = 0;
+						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
+						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+						shaderResourceViewShaderRegister += 1;
+
+						break;
+					}
 					case DescriptorType::INPUT_ATTACHMENT: {
-						D3D12_DESCRIPTOR_RANGE1& bufferDescriptorRange = descriptorRanges[descriptorRangeOffset];
-						bufferDescriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-						bufferDescriptorRange.NumDescriptors = binding.descriptorCount;
-						bufferDescriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
-						bufferDescriptorRange.RegisterSpace = 0;
-						bufferDescriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
-						bufferDescriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
+						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+						descriptorRange.NumDescriptors = binding.descriptorCount;
+						descriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
+						descriptorRange.RegisterSpace = 0;
+						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
+						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 						shaderResourceViewShaderRegister += 1;
 

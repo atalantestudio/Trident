@@ -18,5 +18,6 @@ namespace ProjectA {
 		public:
 			ComPtr<ID3D12Resource> resource;
 			ComPtr<ID3D12CommandSignature> commandSignature = nullptr;
+			D3D12_HEAP_TYPE heapType;
 	};
 }

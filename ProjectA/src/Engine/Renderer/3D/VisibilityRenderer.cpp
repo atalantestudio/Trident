@@ -507,31 +507,7 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		ref<ShaderModule> vertexShaderModule;
-
-		switch (getGraphicsApi()) {
-			case GraphicsAPI::CPU: {
-				ENGINE_ERROR_UNSUPPORTED();
-
-				break;
-			}
-			case GraphicsAPI::DX12: {
-				ENGINE_ERROR_UNIMPLEMENTED();
-
-				break;
-			}
-			case GraphicsAPI::GL: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Visibility/VisibilityGL.vert");
-
-				break;
-			}
-			case GraphicsAPI::VK: {
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Visibility/VisibilityVK.vert");
-
-				break;
-			}
-		}
-
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Visibility/Visibility.vert");;
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Visibility/Visibility.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
@@ -567,29 +543,8 @@ namespace ProjectA {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		ref<ShaderModule> vertexShaderModule;
-		ref<ShaderModule> fragmentShaderModule;
-
-		switch (getGraphicsApi()) {
-			case GraphicsAPI::DX12:
-				ENGINE_ERROR_UNIMPLEMENTED();
-
-				break;
-			case GraphicsAPI::GL:
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/ScreenUV.vert");
-				fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Visibility/VisibilityDebugGL.frag");
-
-				break;
-			case GraphicsAPI::VK:
-				vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/Screen.vert");
-				fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Visibility/VisibilityDebugVK.frag");
-
-				break;
-			default:
-				ENGINE_ERROR_UNSUPPORTED();
-
-				break;
-		}
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Visibility/VisibilityDebug.vert");
+		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Visibility/VisibilityDebug.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = false;

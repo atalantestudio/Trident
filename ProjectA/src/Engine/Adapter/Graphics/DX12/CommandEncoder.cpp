@@ -106,26 +106,21 @@ namespace ProjectA {
 		// TODO: Replace with sequence<T>.
 		std::vector<ID3D12DescriptorHeap*> descriptorHeaps;
 
-		UINT descriptorSetIndex = 0;
+		for (const ref<ProjectA::DescriptorSet> descriptorSet : descriptorSets) {
+			const ref<DX12::DescriptorSet> _descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSet);
 
-		while (descriptorSetIndex < descriptorSets.count()) {
-			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
-
-			if (descriptorSet->viewDescriptorHeap) {
-				descriptorHeaps.emplace_back(descriptorSet->viewDescriptorHeap.Get());
+			if (_descriptorSet->viewDescriptorHeap) {
+				descriptorHeaps.emplace_back(_descriptorSet->viewDescriptorHeap.Get());
 			}
 
-			if (descriptorSet->samplerDescriptorHeap) {
-				descriptorHeaps.emplace_back(descriptorSet->samplerDescriptorHeap.Get());
+			if (_descriptorSet->samplerDescriptorHeap) {
+				descriptorHeaps.emplace_back(_descriptorSet->samplerDescriptorHeap.Get());
 			}
-
-			descriptorSetIndex += 1;
 		}
 
 		commandList->SetDescriptorHeaps(static_cast<UINT>(descriptorHeaps.size()), &descriptorHeaps[0]);
 
-		descriptorSetIndex = 0;
-
+		UINT descriptorSetIndex = 0;
 		UINT rootParameterIndex = 0;
 
 		if (computePipelineBound) {
@@ -187,8 +182,24 @@ namespace ProjectA {
 		const ref<DX12::Buffer> srcBuffer = std::static_pointer_cast<DX12::Buffer>(sourceBuffer);
 		const ref<DX12::Buffer> dstBuffer = std::static_pointer_cast<DX12::Buffer>(destinationBuffer);
 
-		for (const BufferCopyRegion& copyRegion : copyRegions) {
-			commandList->CopyBufferRegion(dstBuffer->resource.Get(), copyRegion.destinationOffset, srcBuffer->resource.Get(), copyRegion.sourceOffset, copyRegion.size);
+		// NOTE
+		// D3D12_HEAP_TYPE_UPLOAD heaps only allow CPU writes.
+		// The source and destination buffers are mapped to emulate a GPU copy command.
+		if (dstBuffer->heapType == D3D12_HEAP_TYPE_UPLOAD) {
+			uint8* sourceMappedRange = srcBuffer->map<uint8>(0, srcBuffer->size);
+			uint8* destinationMappedRange = dstBuffer->map<uint8>(0, dstBuffer->size);
+
+			for (const BufferCopyRegion& copyRegion : copyRegions) {
+				std::copy_n(sourceMappedRange + copyRegion.sourceOffset, copyRegion.size, destinationMappedRange + copyRegion.destinationOffset);
+			}
+
+			srcBuffer->unmap();
+			dstBuffer->unmap();
+		}
+		else {
+			for (const BufferCopyRegion& copyRegion : copyRegions) {
+				commandList->CopyBufferRegion(dstBuffer->resource.Get(), copyRegion.destinationOffset, srcBuffer->resource.Get(), copyRegion.sourceOffset, copyRegion.size);
+			}
 		}
 
 		commandCount += 1;

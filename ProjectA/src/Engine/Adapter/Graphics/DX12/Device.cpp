@@ -98,6 +98,11 @@ namespace ProjectA {
 
 						break;
 					}
+					case DescriptorType::STORAGE_BUFFER: {
+						viewDescriptorCount += binding.descriptorCount;
+
+						break;
+					}
 					case DescriptorType::INPUT_ATTACHMENT: {
 						viewDescriptorCount += binding.descriptorCount;
 
@@ -160,6 +165,11 @@ namespace ProjectA {
 						break;
 					}
 					case DescriptorType::UNIFORM_BUFFER: {
+						viewDescriptorOffset += binding.descriptorCount;
+
+						break;
+					}
+					case DescriptorType::STORAGE_BUFFER: {
 						viewDescriptorOffset += binding.descriptorCount;
 
 						break;
@@ -272,9 +282,36 @@ namespace ProjectA {
 						constantBufferViewDescriptor.BufferLocation = buffer->resource->GetGPUVirtualAddress() + descriptorBuffer.offset;
 
 						// NOTE: Constant buffer views need to be aligned to 256.
-						constantBufferViewDescriptor.SizeInBytes = (static_cast<UINT>(descriptorBuffer.size) + 255) & ~255;
+						constantBufferViewDescriptor.SizeInBytes = (static_cast<UINT>(descriptorBuffer.size) + D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1);
 
 						device->CreateConstantBufferView(&constantBufferViewDescriptor, viewDescriptorHandle);
+
+						viewDescriptorHandle.ptr += viewDescriptorHandleIncrementSize;
+						descriptorBufferIndex += 1;
+					}
+
+					break;
+				}
+				case DescriptorType::STORAGE_BUFFER: {
+					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = descriptorSet->viewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+					viewDescriptorHandle.ptr += binding.viewDescriptorOffset * viewDescriptorHandleIncrementSize;
+
+					UINT descriptorBufferIndex = 0;
+
+					while (descriptorBufferIndex < writeDescriptorSet.descriptorBuffers.count()) {
+						const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
+						const ref<DX12::Buffer> buffer = std::static_pointer_cast<DX12::Buffer>(descriptorBuffer.buffer);
+
+						D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
+						shaderResourceViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
+						shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+						shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+						shaderResourceViewDescriptor.Buffer.FirstElement = 0;
+						shaderResourceViewDescriptor.Buffer.NumElements = static_cast<UINT>(buffer->size);
+						shaderResourceViewDescriptor.Buffer.StructureByteStride = 1;
+						shaderResourceViewDescriptor.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+
+						device->CreateShaderResourceView(buffer->resource.Get(), &shaderResourceViewDescriptor, viewDescriptorHandle);
 
 						viewDescriptorHandle.ptr += viewDescriptorHandleIncrementSize;
 						descriptorBufferIndex += 1;
@@ -296,6 +333,10 @@ namespace ProjectA {
 
 						D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
 						shaderResourceViewDescriptor.Format = getImageFormat(image->getFormat());
+
+						if (shaderResourceViewDescriptor.Format == DXGI_FORMAT_D32_FLOAT) {
+							shaderResourceViewDescriptor.Format = DXGI_FORMAT_R32_FLOAT;
+						}
 
 						if (image->getLayerCount() > 1) {
 							shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
