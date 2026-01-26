@@ -26,7 +26,10 @@ namespace ProjectA {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command queue.");
 
-		idleFence = createRef<DX12::Fence>(device, 0);
+		FenceDescriptor fenceDescriptor{};
+		fenceDescriptor.signaled = false;
+
+		idleFence = createRef<DX12::Fence>(fenceDescriptor, device);
 		completionEvent = CreateEvent(nullptr, false, false, L"Completion event");
 
 		WIN32_ASSERT(completionEvent != nullptr);

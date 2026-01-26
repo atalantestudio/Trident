@@ -21,7 +21,7 @@ namespace ProjectA {
 
 			ref<ProjectA::DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const final override;
 
-			ref<ProjectA::Fence> createFence() const final override;
+			ref<ProjectA::Fence> createFence(const FenceDescriptor& descriptor) const final override;
 
 			ref<ProjectA::Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor) const final override;
 

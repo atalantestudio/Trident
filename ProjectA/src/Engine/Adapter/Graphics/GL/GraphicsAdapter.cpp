@@ -54,8 +54,8 @@ namespace ProjectA {
 		return createRef<GL::Buffer>(descriptor);
 	}
 
-	ref<Fence> GL::GraphicsAdapter::createFence() const {
-		return createRef<GL::Fence>(true);
+	ref<Fence> GL::GraphicsAdapter::createFence(const FenceDescriptor& descriptor) const {
+		return createRef<GL::Fence>(descriptor);
 	}
 
 	ref<Framebuffer> GL::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {

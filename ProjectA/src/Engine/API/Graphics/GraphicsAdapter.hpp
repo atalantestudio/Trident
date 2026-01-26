@@ -3,6 +3,7 @@
 #include "Engine/API/Graphics/GraphicsAPI.hpp"
 #include "Engine/API/Rendering/ComputePipeline.hpp"
 #include "Engine/API/Rendering/Descriptor/ComputePipelineDescriptor.hpp"
+#include "Engine/API/Rendering/Descriptor/FenceDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/PipelineLayoutDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
 #include "Engine/API/Rendering/Descriptor/SamplerDescriptor.hpp"
@@ -30,7 +31,7 @@ namespace ProjectA {
 
 			virtual ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings) const = 0;
 
-			virtual ref<Fence> createFence() const = 0;
+			virtual ref<Fence> createFence(const FenceDescriptor& descriptor) const = 0;
 
 			virtual ref<Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor) const = 0;
 

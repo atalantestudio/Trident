@@ -136,7 +136,10 @@ namespace ProjectA {
 
 		commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
 
-		const ref<Fence> writeBufferFence = Renderer::createFence();
+		FenceDescriptor writeBufferFenceDescriptor{};
+		writeBufferFenceDescriptor.signaled = true;
+
+		const ref<Fence> writeBufferFence = Renderer::createFence(writeBufferFenceDescriptor);
 		const Extent3D& glyphMapExtent = glyphMapImage->getExtent();
 		const float32 inverseLineHeight = static_cast<float32>(1.0 / lineHeight);
 		const float32 scale = inverseLineHeight * static_cast<float32>(GLYPH_SUBIMAGE_DIMENSION);

@@ -9,7 +9,7 @@
 namespace ProjectA {
 	class VK::Fence final : public ProjectA::Fence {
 		public:
-			explicit Fence(const VK::Device& device, bool signaled);
+			explicit Fence(const FenceDescriptor& descriptor, const VK::Device& device);
 
 			~Fence() final override;
 

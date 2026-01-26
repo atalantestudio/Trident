@@ -63,8 +63,8 @@ namespace ProjectA {
 		return createRef<VK::DescriptorSetLayout>(bindings, *device);
 	}
 
-	ref<Fence> VK::GraphicsAdapter::createFence() const {
-		return createRef<VK::Fence>(*device, true);
+	ref<Fence> VK::GraphicsAdapter::createFence(const FenceDescriptor& descriptor) const {
+		return createRef<VK::Fence>(descriptor, *device);
 	}
 
 	ref<Framebuffer> VK::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {

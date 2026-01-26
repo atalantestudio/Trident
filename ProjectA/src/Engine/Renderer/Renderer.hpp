@@ -38,7 +38,7 @@ namespace ProjectA {
 
 			static ref<DescriptorSetLayout> createDescriptorSetLayout(const sequence<DescriptorSetLayoutBinding>& bindings);
 
-			static ref<Fence> createFence();
+			static ref<Fence> createFence(const FenceDescriptor& descriptor);
 
 			static ref<Framebuffer> createFramebuffer(const FramebufferDescriptor& descriptor);
 

@@ -7,10 +7,11 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	GL::Fence::Fence(bool signaled) :
+	GL::Fence::Fence(const FenceDescriptor& descriptor) :
+		ProjectA::Fence(descriptor),
 		sync(nullptr)
 	{
-		if (!signaled) {
+		if (!descriptor.signaled) {
 			create();
 		}
 	}

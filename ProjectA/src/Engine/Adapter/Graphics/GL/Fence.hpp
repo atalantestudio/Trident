@@ -8,7 +8,7 @@
 namespace ProjectA {
 	class GL::Fence final : public ProjectA::Fence {
 		public:
-			explicit Fence(bool signaled);
+			explicit Fence(const FenceDescriptor& descriptor);
 
 			void create();
 

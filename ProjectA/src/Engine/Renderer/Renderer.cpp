@@ -82,11 +82,14 @@ namespace ProjectA {
 
 		const ref<Queue> graphicsQueue = adapter->getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 
+		FenceDescriptor flightFenceDescriptor{};
+		flightFenceDescriptor.signaled = true;
+
 		uint32 frameInFlightIndex = 0;
 
 		while (frameInFlightIndex < Application::MAX_FRAMES_IN_FLIGHT) {
 			commandEncoders[frameInFlightIndex] = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
-			flightFences[frameInFlightIndex] = adapter->createFence();
+			flightFences[frameInFlightIndex] = adapter->createFence(flightFenceDescriptor);
 			acquireNextImageSemaphores[frameInFlightIndex] = adapter->createSemaphore();
 			finishedRenderSemaphores[frameInFlightIndex] = adapter->createSemaphore();
 
@@ -137,8 +140,8 @@ namespace ProjectA {
 		return adapter->createDescriptorSetLayout(bindings);
 	}
 
-	ref<Fence> Renderer::createFence() {
-		return adapter->createFence();
+	ref<Fence> Renderer::createFence(const FenceDescriptor& descriptor) {
+		return adapter->createFence(descriptor);
 	}
 
 	ref<Framebuffer> Renderer::createFramebuffer(const FramebufferDescriptor& descriptor) {

@@ -1,24 +1,8 @@
 #include "pch.hpp"
 
 #ifdef BUILD_MODE_DEBUG
-	#include "Engine/API/Rendering/Descriptor/AttachmentImageDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/BeginRenderPassDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/BufferDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/CommandBufferDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/ComputePipelineDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/FramebufferDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/ImageDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/ImageViewDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/PipelineLayoutDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/RenderPassDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/RenderPipelineDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/SamplerDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/ShaderModuleDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/SubpassDescriptor.hpp"
-	#include "Engine/API/Rendering/Descriptor/SwapchainDescriptor.hpp"
 	#include "Engine/API/Rendering/SampleCount.hpp"
 	#include "Engine/Renderer/Renderer.hpp"
-	#include "Engine/Validation/Descriptor.hpp"
 #endif
 
 namespace ProjectA {
@@ -138,6 +122,13 @@ namespace ProjectA {
 			}
 
 			ENGINE_ASSERT(errorCount == 0, "Compute pipeline descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
+		}
+
+		void DescriptorGuard(const FenceDescriptor& descriptor) {
+			uint32 warningCount = 0;
+			uint32 errorCount = 0;
+
+			ENGINE_ASSERT(errorCount == 0, "Fence descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 		}
 
 		void DescriptorGuard(const FramebufferDescriptor& descriptor) {

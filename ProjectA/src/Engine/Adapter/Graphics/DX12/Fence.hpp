@@ -9,7 +9,7 @@
 namespace ProjectA {
 	class DX12::Fence final : public ProjectA::Fence {
 		public:
-			explicit Fence(const DX12::Device& device, uint64 initialValue);
+			explicit Fence(const FenceDescriptor& descriptor, const DX12::Device& device);
 
 		public:
 			ComPtr<ID3D12Fence> fence;

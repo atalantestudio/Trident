@@ -42,8 +42,8 @@ namespace ProjectA {
 		return createRef<DescriptorSetLayout>(bindings);
 	}
 
-	ref<Fence> DX12::GraphicsAdapter::createFence() const {
-		return createRef<DX12::Fence>(*device, 1);
+	ref<Fence> DX12::GraphicsAdapter::createFence(const FenceDescriptor& descriptor) const {
+		return createRef<DX12::Fence>(descriptor, *device);
 	}
 
 	ref<Framebuffer> DX12::GraphicsAdapter::createFramebuffer(const FramebufferDescriptor& descriptor) const {

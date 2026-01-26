@@ -10,6 +10,7 @@ namespace ProjectA {
 		struct CommandBufferDescriptor;
 		struct ComputePipelineDescriptor;
 		struct FramebufferDescriptor;
+		struct FenceDescriptor;
 		struct ImageDescriptor;
 		struct ImageViewDescriptor;
 		struct PipelineLayoutDescriptor;
@@ -26,6 +27,7 @@ namespace ProjectA {
 		void DescriptorGuard(const BufferDescriptor& descriptor);
 		void DescriptorGuard(const CommandBufferDescriptor& descriptor);
 		void DescriptorGuard(const ComputePipelineDescriptor& descriptor);
+		void DescriptorGuard(const FenceDescriptor& descriptor);
 		void DescriptorGuard(const FramebufferDescriptor& descriptor);
 		void DescriptorGuard(const ImageDescriptor& descriptor);
 		void DescriptorGuard(const ImageViewDescriptor& descriptor, const Image* image);

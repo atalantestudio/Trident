@@ -7,10 +7,12 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	DX12::Fence::Fence(const DX12::Device& device, uint64 initialValue) {
+	DX12::Fence::Fence(const FenceDescriptor& descriptor, const DX12::Device& device) :
+		ProjectA::Fence(descriptor)
+	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const HRESULT result = device.device->CreateFence(initialValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+		const HRESULT result = device.device->CreateFence(descriptor.signaled, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create fence.");
 	}

@@ -7,7 +7,8 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace ProjectA {
-	VK::Fence::Fence(const VK::Device& device, bool signaled) :
+	VK::Fence::Fence(const FenceDescriptor& descriptor, const VK::Device& device) :
+		ProjectA::Fence(descriptor),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
@@ -17,7 +18,7 @@ namespace ProjectA {
 		fenceCreateInfo.pNext = nullptr;
 		fenceCreateInfo.flags = 0;
 
-		if (signaled) {
+		if (descriptor.signaled) {
 			fenceCreateInfo.flags |= VK_FENCE_CREATE_SIGNALED_BIT;
 		}
 
