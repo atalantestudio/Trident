@@ -86,7 +86,7 @@ namespace ProjectA {
 		graphicsQueue->submit({commandBuffer}, nullptr, nullptr, nullptr);
 		graphicsQueue->waitIdle();
 
-		textureArrayStagingBuffer->~Buffer();
+		textureArrayStagingBuffer.~shared_ptr();
 	}
 
 	uint32 GUIRenderer::registerTextureArrayLayer(const TextureArrayLayer& layer) {
@@ -126,6 +126,7 @@ namespace ProjectA {
 		swapchainAttachment.sampleCount = 1;
 
 		// TODO(layer-superposition)
+		// TODO: Using LOAD when this layer is the only one registered will generate non-blocking errors from the Vulkan validation layers.
 		swapchainAttachment.loadOperation = LoadOperation::LOAD;
 		// swapchainAttachment.loadOperation = LoadOperation::CLEAR;
 

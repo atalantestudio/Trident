@@ -82,12 +82,33 @@ namespace ProjectA {
 
 		const ref<Queue> graphicsQueue = adapter->getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 
-		for (uint32 frameIndex = 0; frameIndex < Application::MAX_FRAMES_IN_FLIGHT; frameIndex += 1) {
-			commandEncoders[frameIndex] = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
-			flightFences[frameIndex] = adapter->createFence();
-			acquireNextImageSemaphores[frameIndex] = adapter->createSemaphore();
-			finishedRenderSemaphores[frameIndex] = adapter->createSemaphore();
+		uint32 frameInFlightIndex = 0;
+
+		while (frameInFlightIndex < Application::MAX_FRAMES_IN_FLIGHT) {
+			commandEncoders[frameInFlightIndex] = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
+			flightFences[frameInFlightIndex] = adapter->createFence();
+			acquireNextImageSemaphores[frameInFlightIndex] = adapter->createSemaphore();
+			finishedRenderSemaphores[frameInFlightIndex] = adapter->createSemaphore();
+
+			frameInFlightIndex += 1;
 		}
+	}
+
+	void Renderer::deinitialize() {
+		uint32 frameInFlightIndex = 0;
+
+		while (frameInFlightIndex < Application::MAX_FRAMES_IN_FLIGHT) {
+			finishedRenderSemaphores[frameInFlightIndex].~shared_ptr();
+			acquireNextImageSemaphores[frameInFlightIndex].~shared_ptr();
+			flightFences[frameInFlightIndex].~shared_ptr();
+			commandEncoders[frameInFlightIndex].~shared_ptr();
+
+			frameInFlightIndex += 1;
+		}
+
+		swapchain.~shared_ptr();
+
+		adapter->~GraphicsAdapter();
 	}
 
 	void Renderer::resize(WindowResizeEvent& event) {}

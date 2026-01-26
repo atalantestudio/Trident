@@ -29,6 +29,10 @@ namespace ProjectA {
 		return layerInsertionIndex > 0;
 	}
 
+	void LayerStack::clear() {
+		layers.clear();
+	}
+
 	ref<Layer> LayerStack::operator [](std::size_t index) const {
 		ENGINE_ASSERT(index < layers.size(), "Index overflow.");
 

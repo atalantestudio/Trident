@@ -13,6 +13,8 @@ namespace ProjectA {
 
 			bool hasLayers() const;
 
+			void clear();
+
 			ref<Layer> operator [](std::size_t index) const;
 
 			std::vector<ref<Layer>>::iterator begin();

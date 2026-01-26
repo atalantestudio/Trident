@@ -108,7 +108,9 @@ namespace ProjectA {
 			static constexpr float64 INVERSE_FIXED_DELTA_TIME = 1.0 / FIXED_DELTA_TIME;
 
 		public:
-			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 2;
+			// Since Vulkan SDK 1.4.313, having less semaphores than swapchain images can cause the warning below to appear:
+			// "VkSemaphore is being signaled by VkQueue, but it may still be in use by VkSwapchainKHR".
+			static constexpr uint32 MAX_FRAMES_IN_FLIGHT = 3;
 
 		private:
 			struct SharedMemoryData {

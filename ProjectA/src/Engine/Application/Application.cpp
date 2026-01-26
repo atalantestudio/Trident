@@ -113,6 +113,17 @@ namespace ProjectA {
 	}
 
 	Application::~Application() {
+		for (const ref<Layer> layer : layerStack) {
+			layer.~shared_ptr();
+		}
+
+		lastLayerInput.swapchainImageView.~shared_ptr();
+		lastLayerInput.swapchainImage.~shared_ptr();
+
+		layerStack.clear();
+
+		Renderer::deinitialize();
+
 		mutex->acquire();
 
 		sharedMemoryData->instanceCount -= 1;
@@ -231,7 +242,8 @@ namespace ProjectA {
 		render(frameTimeAccumulator);
 
 		frameIndex += 1;
-		frameInFlightIndex = (frameInFlightIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+		frameInFlightIndex += 1;
+		frameInFlightIndex %= MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void Application::update(float64 deltaTime, float64 inverseDeltaTime) {

@@ -15,6 +15,8 @@ namespace ProjectA {
 
 			static void initialize(const ProjectDescriptor& projectDescriptor, const Window& window, const ApplicationProperties& properties);
 
+			static void deinitialize();
+
 		public:
 			virtual void build() = 0;
 

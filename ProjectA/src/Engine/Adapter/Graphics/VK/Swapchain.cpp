@@ -10,6 +10,7 @@
 namespace ProjectA {
 	VK::Swapchain::Swapchain(const SwapchainDescriptor& descriptor, const VK::Surface& surface, const VK::Device& device) :
 		ProjectA::Swapchain(descriptor),
+		swapchain{},
 		surface(surface),
 		device(device)
 	{
