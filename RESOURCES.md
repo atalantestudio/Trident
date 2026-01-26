@@ -1,5 +1,11 @@
 # Resources
 
+## Architecture
+
+| Title | Author(s) | Date | Links |
+| - | - | - | - |
+| *Pre-defined C/C++ Compiler Macros* | Bjorn Reese<br />Nicole Trudeau | February 3, 2014 | [Website](https://sourceforge.net/projects/predef) |
+
 ## Compression
 
 ### ZLIB/DEFLATE
@@ -8,12 +14,6 @@
 | - | - | - | - |
 | *ZLIB Compressed Data Format Specification version 3.3* | Peter Deutsch<br />Jean-loup Gailly | May 1996 | [Website](https://datatracker.ietf.org/doc/html/rfc1950) |
 | *DEFLATE Compressed Data Format Specification version 1.3* | Peter Deutsch | May 1996 | [Website](https://datatracker.ietf.org/doc/html/rfc1951) |
-
-## Context
-
-| Title | Author(s) | Date | Links |
-| - | - | - | - |
-| *Pre-defined C/C++ Compiler Macros* | Bjorn Reese<br />Nicole Trudeau | February 3, 2014 | [Website](https://sourceforge.net/projects/predef) |
 
 ## ECS
 
@@ -161,6 +161,12 @@
 | - | - | - | - |
 | *Improved Alpha-Tested Magnification for Vector Textures and Special Effects* | Chris Green | 2007 | [Paper](https://cdn.fastly.steamstatic.com/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf) |
 | *Distance field fonts* | libGDX | - | [Article](https://libgdx.com/wiki/graphics/2d/fonts/distance-field-fonts) |
+
+### UTF-8
+
+| Title | Author(s) | Date | Links |
+| - | - | - | - |
+| *A Branchless UTF-8 Decoder* | Chris Wellons | 2017 | [Article](https://nullprogram.com/blog/2017/10/06) |
 
 ## UI
 
