@@ -4,6 +4,7 @@
 #include "Engine/Renderer/3D/SceneRenderer.hpp"
 
 namespace ProjectA {
+	// TODO: This sample is outdated.
 	class ForwardRenderer3D : public SceneRenderer<Scene3D> {
 		private:
 			struct Transform {
@@ -126,13 +127,8 @@ namespace ProjectA {
 				}
 			}
 
-			void setScene(const Scene3D* scene) override {
-				SceneRenderer::setScene(scene);
-
-				const ComponentPool<RigidBody3D>& rigidBodyPool = scene->getComponentPool<RigidBody3D>();
-				const ComponentPool<ref<Geometry3D>>& geometryPool = scene->getComponentPool<ref<Geometry3D>>();
-
-				const uint64 transformBufferSize = rigidBodyPool.componentCount * sizeof(mat4x4<float32>);
+			void postSetScene() override {
+				const uint64 transformBufferSize = scene->getInstanceCount() * sizeof(mat4x4<float32>);
 
 				BufferDescriptor transformBufferDescriptor{};
 				transformBufferDescriptor.size = transformBufferSize;
@@ -144,18 +140,18 @@ namespace ProjectA {
 
 				transformMappedRange = transformBuffer->map<Transform>(0, transformBuffer->size);
 
-				for (Entity entity = 0; entity <= scene->getLastEntity(); entity += 1) {
+				for (Entity entity = 0; entity < scene->getInstanceCount(); entity += 1) {
 					updateTransform(entity);
 				}
 
 				uint64 vertexPositionBufferSize = 0;
 				uint64 vertexPositionIndexBufferSize = 0;
 
-				for (uint32 geometryIndex = 0; geometryIndex < geometryPool.componentCount; geometryIndex += 1) {
-					const ref<Geometry3D> geometry = geometryPool.components[geometryIndex];
+				for (uint32 geometryIndex = 0; geometryIndex < scene->getGeometryCount(); geometryIndex += 1) {
+					const ref<Geometry3D> geometry = scene->getGeometry(geometryIndex);
 
-					vertexPositionBufferSize += geometry->getVertexPositionComponents().count * sizeof(float32);
-					vertexPositionIndexBufferSize += geometry->getVertexPositionIndices().count * sizeof(uint32);
+					vertexPositionBufferSize += geometry->getVertexPositionComponents().count() * sizeof(float32);
+					vertexPositionIndexBufferSize += geometry->getVertexPositionIndices().count() * sizeof(uint32);
 				}
 
 				const ref<Buffer> vertexPositionStagingBuffer = createStagingBuffer(vertexPositionBufferSize);
@@ -169,14 +165,14 @@ namespace ProjectA {
 				uint64 vertexPositionOffset = 0;
 				uint64 vertexPositionIndexOffset = 0;
 
-				for (uint32 geometryIndex = 0; geometryIndex < geometryPool.componentCount; geometryIndex += 1) {
-					const ref<Geometry3D> geometry = geometryPool.components[geometryIndex];
+				for (uint32 geometryIndex = 0; geometryIndex < scene->getGeometryCount(); geometryIndex += 1) {
+					const ref<Geometry3D> geometry = scene->getGeometry(geometryIndex);
 
 					std::copy(geometry->getVertexPositionComponents().begin(), geometry->getVertexPositionComponents().end(), vertexPositionMappedRange + vertexPositionOffset);
 					std::copy(geometry->getVertexPositionIndices().begin(), geometry->getVertexPositionIndices().end(), vertexPositionIndexMappedRange + vertexPositionIndexOffset);
 
-					vertexPositionOffset += geometry->getVertexPositionComponents().count;
-					vertexPositionIndexOffset += geometry->getVertexPositionIndices().count;
+					vertexPositionOffset += geometry->getVertexPositionComponents().count();
+					vertexPositionIndexOffset += geometry->getVertexPositionIndices().count();
 				}
 
 				vertexPositionStagingBuffer->unmap();
@@ -260,10 +256,10 @@ namespace ProjectA {
 					for (uint32 geometryIndex = 0; geometryIndex < rigidBody.geometryIndex; geometryIndex += 1) {
 						const ref<Geometry3D> geometry = geometryPool.components[geometryIndex];
 
-						indexOffset += static_cast<uint32>(geometry->getVertexPositionIndices().count);
+						indexOffset += static_cast<uint32>(geometry->getVertexPositionIndices().count());
 					}
 
-					commandEncoder->drawIndexed(static_cast<uint32>(geometry->getVertexPositionIndices().count), 1, indexOffset, instanceOffset, 0);
+					commandEncoder->drawIndexed(static_cast<uint32>(geometry->getVertexPositionIndices().count()), 1, indexOffset, instanceOffset, 0);
 				}
 
 				commandEncoder->endRenderPass();
@@ -275,12 +271,14 @@ namespace ProjectA {
 			}
 
 			void updateTransform(Entity entity) {
-				transformMappedRange[entity].transform = scene->getRigidBody(entity).transform;
+				transformMappedRange[entity].transform = scene->getInstance(entity).transform;
 			}
 
 			void updateCamera() {
-				cameraMappedRange->projection = camera->projection;
+				cameraMappedRange->projection = getCameraController<PerspectiveCamera>().getCamera().getProjection();
 			}
+
+			void postSetCameraController() override {}
 
 		private:
 			void recreateFramebuffers() {
@@ -294,7 +292,7 @@ namespace ProjectA {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count; framebufferIndex += 1) {
+				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);

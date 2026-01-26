@@ -96,7 +96,7 @@ namespace ProjectA {
 		#ifdef DEBUG_ENUMERATE_DEVICE_EXTENSIONS
 			ADAPTER_INFO("Enabled device extensions:");
 
-			for (uint32 extensionPropertiesIndex = 0; extensionPropertiesIndex < extensionProperties.count; extensionPropertiesIndex += 1) {
+			for (uint32 extensionPropertiesIndex = 0; extensionPropertiesIndex < extensionProperties.count(); extensionPropertiesIndex += 1) {
 				ADAPTER_INFO("- [] (spec version: [])", extensionProperties[extensionPropertiesIndex].extensionName, extensionProperties[extensionPropertiesIndex].specVersion);
 
 				enabledExtensionNames[extensionPropertiesIndex] = extensionProperties[extensionPropertiesIndex].extensionName;
