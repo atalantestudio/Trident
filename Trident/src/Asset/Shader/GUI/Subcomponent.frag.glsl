@@ -17,7 +17,7 @@ float RoundedBoxSignedDistance(vec2 delta, vec2 halfSize, float r) {
 	return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - r;
 }
 
-layout(origin_upper_left) in;
+layout(origin_upper_left) in vec4 gl_FragCoord;
 
 in FragmentInput {
 	layout(location = 0) flat vec4 bounds;
