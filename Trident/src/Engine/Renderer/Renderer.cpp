@@ -120,6 +120,11 @@ namespace Trident {
 		swapchain.~shared_ptr();
 
 		adapter->~GraphicsAdapter();
+
+		commandEncoders = sequence<ref<CommandEncoder>>();
+		flightFences = sequence<ref<Fence>>();
+		acquireNextImageSemaphores = sequence<ref<Semaphore>>();
+		finishedRenderSemaphores = sequence<ref<Semaphore>>();
 	}
 
 	void Renderer::resize(WindowResizeEvent& event) {}
