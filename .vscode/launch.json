@@ -10,8 +10,7 @@
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/bin/windows_x86_64_Debug/Samples",
 			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Debug)"
+			"console": "integratedTerminal"
 		},
 		{
 			"name": "Run Samples (Profile)",
@@ -22,8 +21,7 @@
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/bin/windows_x86_64_Profile/Samples",
 			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Profile)"
+			"console": "integratedTerminal"
 		},
 		{
 			"name": "Run Samples (Release)",
@@ -34,8 +32,7 @@
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/bin/windows_x86_64_Release/Samples",
 			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Release)"
+			"console": "integratedTerminal"
 		},
 		{
 			"name": "Run AssetBuilder (Debug)",
@@ -49,8 +46,7 @@
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/AssetBuilder",
 			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Debug)"
+			"console": "integratedTerminal"
 		},
 		{
 			"name": "Run AssetBuilder (Profile)",
@@ -64,8 +60,7 @@
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/AssetBuilder",
 			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Profile)"
+			"console": "integratedTerminal"
 		},
 		{
 			"name": "Run AssetBuilder (Release)",
@@ -79,8 +74,7 @@
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/AssetBuilder",
 			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Release)"
+			"console": "integratedTerminal"
 		},
 		{
 			"name": "Run TSL LSP Server (Debug)",
@@ -91,8 +85,7 @@
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/ProjectA/vendor/tsl",
 			"environment": [],
-			"console": "integratedTerminal",
-			"preLaunchTask": "Build (Debug)"
+			"console": "integratedTerminal"
 		}
 	]
 }

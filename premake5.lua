@@ -8,9 +8,7 @@ workspace "ProjectA"
 		"Release",
 	}
 
-	flags {
-		"MultiProcessorCompile",
-	}
+	multiprocessorcompile "on"
 
 outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
 vulkansdk = os.getenv("VULKAN_SDK")

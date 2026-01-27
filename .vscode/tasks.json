@@ -2,9 +2,9 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Generate Windows Project Files (Visual Studio 2022)",
+			"label": "Generate Windows Project Files (Visual Studio 2026)",
 			"type": "process",
-			"command": "scripts/Windows/premake5_vs2022.bat",
+			"command": "scripts/Windows/premake5_vs2026.bat",
 			"group": {
 				"kind": "build"
 			},
