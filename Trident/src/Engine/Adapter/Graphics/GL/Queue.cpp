@@ -7,6 +7,7 @@
 #include "Engine/Adapter/Graphics/GL/CommandEncoder.hpp"
 #include "Engine/Adapter/Graphics/GL/Device.hpp"
 #include "Engine/Adapter/Graphics/GL/Queue.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
 	GL::Queue::Queue(const GL::Instance& instance, const GL::Device& device) :
@@ -18,7 +19,7 @@ namespace Trident {
 		return createRef<GL::CommandEncoder>(descriptor, device);
 	}
 
-	void GL::Queue::submit(const sequence<ref<Trident::CommandBuffer>>& commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Trident::Fence> fence) const {
+	void GL::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Trident::Fence> fence) const {
 		for (const ref<Trident::CommandBuffer> commandBuffer : commandBuffers) {
 			const ref<GL::CommandBuffer> glCommandBuffer = std::static_pointer_cast<GL::CommandBuffer>(commandBuffer);
 
@@ -32,7 +33,9 @@ namespace Trident {
 		}
 	}
 
-	PresentStatus GL::Queue::present(const sequence<ref<Trident::Swapchain>>& swapchains, const sequence<uint32>& imageIndices, ref<Semaphore> waitSemaphore) const {
+	PresentStatus GL::Queue::present(view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const {
+		ADAPTER_ASSERT(swapchains.count() == presentableImageIndices.count(), "There must be 1 presentable image index per swapchain.");
+
 		instance.swapBuffers();
 
 		return PresentStatus::SUCCESS;

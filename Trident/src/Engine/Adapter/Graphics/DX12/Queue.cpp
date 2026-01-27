@@ -45,7 +45,7 @@ namespace Trident {
 		return createRef<DX12::CommandEncoder>(descriptor, device, commandPool);
 	}
 
-	void DX12::Queue::submit(const sequence<ref<Trident::CommandBuffer>>& commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Trident::Fence> fence) const {
+	void DX12::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers, ref<Semaphore> waitSemaphore, ref<Semaphore> signalSemaphore, ref<Trident::Fence> fence) const {
 		sequence<ID3D12CommandList*> commandLists(commandBuffers.count());
 		UINT commandListIndex = 0;
 		HRESULT result;
@@ -75,7 +75,9 @@ namespace Trident {
 		}
 	}
 
-	PresentStatus DX12::Queue::present(const sequence<ref<Trident::Swapchain>>& swapchains, const sequence<uint32>& imageIndices, ref<Semaphore> waitSemaphore) const {
+	PresentStatus DX12::Queue::present(view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Semaphore> waitSemaphore) const {
+		ADAPTER_ASSERT(swapchains.count() == presentableImageIndices.count(), "There must be 1 presentable image index per swapchain.");
+
 		HRESULT result;
 
 		for (const ref<Trident::Swapchain> swapchain : swapchains) {

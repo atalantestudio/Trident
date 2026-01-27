@@ -26,7 +26,7 @@ namespace Trident {
 		return createRef<VK::CommandEncoder>(descriptor, device, commandPool);
 	}
 
-	void VK::Queue::submit(const sequence<ref<Trident::CommandBuffer>>& commandBuffers, ref<Trident::Semaphore> waitSemaphore, ref<Trident::Semaphore> signalSemaphore, ref<Trident::Fence> fence) const {
+	void VK::Queue::submit(view<ref<Trident::CommandBuffer>> commandBuffers, ref<Trident::Semaphore> waitSemaphore, ref<Trident::Semaphore> signalSemaphore, ref<Trident::Fence> fence) const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		// TODO: One wait destination stage mask per wait semaphore, but the pipeline stage flags is stored into the command buffer.
@@ -76,8 +76,10 @@ namespace Trident {
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to submit queue ([]).", string_VkResult(result));
 	}
 
-	PresentStatus VK::Queue::present(const sequence<ref<Trident::Swapchain>>& swapchains, const sequence<uint32>& imageIndices, ref<Trident::Semaphore> waitSemaphore) const {
+	PresentStatus VK::Queue::present(view<ref<Trident::Swapchain>> swapchains, view<uint32> presentableImageIndices, ref<Trident::Semaphore> waitSemaphore) const {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		ADAPTER_ASSERT(swapchains.count() == presentableImageIndices.count(), "There must be 1 presentable image index per swapchain.");
 
 		sequence<const VkSwapchainKHR*> vkSwapchains(swapchains.count());
 
@@ -92,7 +94,7 @@ namespace Trident {
 		presentInfo.pWaitSemaphores = &std::static_pointer_cast<VK::Semaphore>(waitSemaphore)->semaphore;
 		presentInfo.swapchainCount = static_cast<uint32>(vkSwapchains.count());
 		presentInfo.pSwapchains = vkSwapchains[0];
-		presentInfo.pImageIndices = &imageIndices[0];
+		presentInfo.pImageIndices = &presentableImageIndices[0];
 		presentInfo.pResults = nullptr;
 
 		const VkResult result = vkQueuePresentKHR(queue, &presentInfo);
