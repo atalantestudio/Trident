@@ -83,7 +83,7 @@ namespace Trident {
 					vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, vertexShaderModuleAsset);
 				}
 				else {
-					vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Image/Image.vert");
+					vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Gradient/Gradient.vert");
 				}
 
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Gradient/Gradient.frag");
