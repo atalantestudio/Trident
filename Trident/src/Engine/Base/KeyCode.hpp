@@ -4,7 +4,9 @@
 #pragma once
 
 namespace Trident {
-	#undef DELETE
+	#if OPERATING_SYSTEM == OPERATING_SYSTEM_WINDOWS
+		#undef DELETE
+	#endif
 
 	enum class KeyCode : uint16 {
 		SPACE			= 32,
