@@ -1,6 +1,6 @@
 #version 430
 
-// Copyright 2025 Atalante Studio.
+// Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;

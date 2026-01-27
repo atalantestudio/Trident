@@ -1,4 +1,7 @@
-﻿#include "pch.hpp"
+﻿// Copyright 2025 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#include "pch.hpp"
 
 #include "Engine/API/Event/Mouse/MouseDownEvent.hpp"
 #include "Engine/API/Event/Mouse/MouseMoveEvent.hpp"

@@ -1,12 +1,15 @@
+// Copyright 2025 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #pragma once
 
 namespace Trident {
 	class ScriptEntity {
 		public:
-			/*template<typename T>
+			/* template<typename T>
 			const T& getComponent() const {
 				return ecs.getComponent<T>(this);
-			}*/
+			} */
 
 			virtual void onConstruct() {}
 

@@ -1,5 +1,8 @@
 #version 440
 
+// Copyright 2025 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 in VertexOutput {
 	layout(location = 0) vec3 textureCoordinate;
 	layout(location = 1) flat vec4 color;

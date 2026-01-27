@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 struct VertexOutput {
 	float4 position : SV_Position;
 	float3 textureCoordinate : VERTEX_OUTPUT_ATTRIBUTE1;

@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 struct VertexInput {
 	float4 vertexAndTextureCoordinate : VERTEX_INPUT_ATTRIBUTE0;
 	float3x3 worldTransform : VERTEX_INPUT_ATTRIBUTE1;

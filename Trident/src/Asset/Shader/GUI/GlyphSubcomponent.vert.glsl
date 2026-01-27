@@ -1,5 +1,8 @@
 #version 440
 
+// Copyright 2025 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 layout(location = 0) in vec4 vertexAndTextureCoordinate;
 layout(location = 1) in mat3x3 worldTransform;
 layout(location = 4) in mat3x3 textureTransform;

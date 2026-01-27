@@ -1,3 +1,6 @@
+// Copyright 2025 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "Trident.hpp"
 
 #include "Engine/entry_point.hpp"

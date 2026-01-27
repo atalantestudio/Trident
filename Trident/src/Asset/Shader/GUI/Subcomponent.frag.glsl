@@ -1,5 +1,8 @@
 #version 440
 
+// Copyright 2025 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 float lengthSquared(vec2 a) {
 	return dot(a, a);
 }

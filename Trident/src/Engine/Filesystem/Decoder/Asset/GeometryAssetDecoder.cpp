@@ -1,3 +1,6 @@
+// Copyright 2025 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 #include "pch.hpp"
 
 #include "Engine/API/Geometry/3D/Geometry3D.hpp"
