@@ -5,20 +5,20 @@
 
 namespace Trident {
 	enum class PrimitiveTopology : uint8 {
-		// Specifies a series of separate point primitives.
-		POINT_LIST = 0,
+		/// Specifies a list of point primitives.
+		POINT_LIST,
 
-		// Specifies a series of separate line primitives.
-		LINE_LIST = 1,
+		/// Specifies a list of line primitives.
+		LINE_LIST,
 
-		// Specifies a series of connected line primitives with consecutive lines sharing a vertex.
-		LINE_STRIP = 2,
+		/// Specifies a list of line primitives where each consecutive line pair shares a vertex.
+		LINE_STRIP,
 
-		// Specifies a series of separate triangle primitives.
-		TRIANGLE_LIST = 3,
+		/// Specifies a list of triangle primitives.
+		TRIANGLE_LIST,
 
-		// Specifies a series of connected triangle primitives with consecutive triangles sharing an edge.
-		TRIANGLE_STRIP = 4,
+		/// Specifies a list of triangle primitives where each consecutive triangle pair shares an edge.
+		TRIANGLE_STRIP,
 
 		// TODO
 		// On Vulkan, TRIANGLE_FAN is only supported with an extension.
