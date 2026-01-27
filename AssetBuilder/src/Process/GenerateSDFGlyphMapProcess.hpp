@@ -6,7 +6,7 @@
 #include "Engine/Filesystem/File/TTFFile.hpp"
 #include "Engine/Font/Glyph.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	struct SDFGlyphMap {
 		sequence<uint8> data;
 		Extent2D extent;

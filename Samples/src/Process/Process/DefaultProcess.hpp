@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ProjectA.hpp"
+#include "Trident.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class DefaultProcess : public Process {
 		public:
 			sint32 main(const sequence<void*>& arguments) override {

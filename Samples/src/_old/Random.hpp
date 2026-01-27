@@ -2,7 +2,7 @@
 
 #include <random>
 
-#include "ProjectA.hpp"
+#include "Trident.hpp"
 
 class Random {
 	private:
@@ -16,7 +16,7 @@ class Random {
 		static T get();
 
 		template<>
-		static ProjectA::float32 Random::get() {
-			return static_cast<ProjectA::float32>(distribution(mt)) / ProjectA::max<ProjectA::uint32>();
+		static Trident::float32 Random::get() {
+			return static_cast<Trident::float32>(distribution(mt)) / Trident::max<Trident::uint32>();
 		}
 }; */

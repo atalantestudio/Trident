@@ -1,12 +1,12 @@
 #pragma once
 
-#include "ProjectA.hpp"
+#include "Trident.hpp"
 
 #include "Engine/entry_point.hpp"
 
 #include "Process/DefaultProcess.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class ProcessApplication : public Application {
 		public:
 			ProcessApplication(const ProjectDescriptor& projectDescriptor) :
@@ -16,10 +16,10 @@ namespace ProjectA {
 			}
 	};
 
-	Application* ProjectA::createApplication(uint32 argumentCount, char8** argumentValues) {
+	Application* Trident::createApplication(uint32 argumentCount, char8** argumentValues) {
 		ProjectDescriptor projectDescriptor{};
 		projectDescriptor.type = ProjectType::MAIN;
-		projectDescriptor.name = "ProjectA Sample";
+		projectDescriptor.name = "Trident Sample";
 		projectDescriptor.version = {1, 0, 0};
 
 		return new ProcessApplication(projectDescriptor);

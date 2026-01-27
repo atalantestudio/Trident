@@ -4,7 +4,7 @@
 
 #include "../Sample/Triangle.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class SampleLayer : public Layer {
 		public:
 			void build() override {

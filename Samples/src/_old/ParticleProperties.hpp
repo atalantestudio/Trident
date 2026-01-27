@@ -1,15 +1,15 @@
 /* #pragma once
 
-#include "ProjectA.hpp"
+#include "Trident.hpp"
 
 struct ParticleProperties {
-	ProjectA::vec2<ProjectA::float32> position;
-	ProjectA::vec2<ProjectA::float32> linearVelocity;
-	ProjectA::vec2<ProjectA::float32> linearVelocityBias;
-	ProjectA::vec4<ProjectA::float32> startColor;
-	ProjectA::vec4<ProjectA::float32> endColor;
-	ProjectA::float32 lifetime = 1.0f;
-	ProjectA::float32 startSize;
-	ProjectA::float32 endSize;
-	ProjectA::float32 sizeBias;
+	Trident::vec2<Trident::float32> position;
+	Trident::vec2<Trident::float32> linearVelocity;
+	Trident::vec2<Trident::float32> linearVelocityBias;
+	Trident::vec4<Trident::float32> startColor;
+	Trident::vec4<Trident::float32> endColor;
+	Trident::float32 lifetime = 1.0f;
+	Trident::float32 startSize;
+	Trident::float32 endSize;
+	Trident::float32 sizeBias;
 }; */

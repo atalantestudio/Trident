@@ -8,7 +8,7 @@
 
 #include "GenerateSDFGlyphMapProcess.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	static bool calculateGlyphMapLayout(Extent2D glyphMapExtent, const File<FileFormat::TTF>& file, view<TrueTypeFont::Glyph> glyphView, uint32 spreadFactor) {
 		const sint16 lineHeight = file.ascent - file.descent;
 		const float32 inverseLineHeight = static_cast<float32>(1.0 / lineHeight * 64.0);

@@ -1,0 +1,272 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#pragma once
+
+namespace Trident {
+	extern PFNGLATTACHSHADERPROC glAttachShader;
+	extern PFNGLBINDBUFFERPROC glBindBuffer;
+	extern PFNGLCREATEPROGRAMPROC glCreateProgram;
+	extern PFNGLCREATESHADERPROC glCreateShader;
+	extern PFNGLCULLFACEPROC glCullFace;
+	extern PFNGLDELETEBUFFERSPROC glDeleteBuffers;
+	extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
+	extern PFNGLDELETESHADERPROC glDeleteShader;
+	extern PFNGLDELETETEXTURESPROC glDeleteTextures;
+	extern PFNGLDEPTHFUNCPROC glDepthFunc;
+	extern PFNGLDEPTHMASKPROC glDepthMask;
+	extern PFNGLDETACHSHADERPROC glDetachShader;
+	extern PFNGLDISABLEPROC glDisable;
+	extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
+	extern PFNGLENABLEPROC glEnable;
+	extern PFNGLFRONTFACEPROC glFrontFace;
+	extern PFNGLFINISHPROC glFinish;
+	extern PFNGLGENTEXTURESPROC glGenTextures;
+	extern PFNGLGETFLOATVPROC glGetFloatv;
+	extern PFNGLGETINTEGERVPROC glGetIntegerv;
+	extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
+	extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
+	extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
+	extern PFNGLGETSHADERIVPROC glGetShaderiv;
+
+	#if BUILD_MODE_DEBUG
+		extern PFNGLGETSTRINGPROC glGetString;
+	#endif
+
+	extern PFNGLLINEWIDTHPROC glLineWidth;
+	extern PFNGLLINKPROGRAMPROC glLinkProgram;
+	extern PFNGLPIXELSTOREIPROC glPixelStorei;
+	extern PFNGLPOLYGONMODEPROC glPolygonMode;
+	extern PFNGLSCISSORPROC glScissor;
+	extern PFNGLUSEPROGRAMPROC glUseProgram;
+	extern PFNGLVIEWPORTPROC glViewport;
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_3_0
+		extern PFNGLBINDBUFFERRANGEPROC glBindBufferRange;
+		extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
+		extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
+		extern PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers;
+		extern PFNGLDELETEVERTEXARRAYSPROC glDeleteVertexArrays;
+		extern PFNGLDISABLEIPROC glDisablei;
+		extern PFNGLENABLEIPROC glEnablei;
+		extern PFNGLGETINTEGERI_VPROC glGetIntegeri_v;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_3_2
+		extern PFNGLCLIENTWAITSYNCPROC glClientWaitSync;
+		extern PFNGLDELETESYNCPROC glDeleteSync;
+		extern PFNGLFENCESYNCPROC glFenceSync;
+		extern PFNGLPROVOKINGVERTEXPROC glProvokingVertex;
+		extern PFNGLSAMPLERPARAMETERIPROC glSamplerParameteri;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_3_3
+		extern PFNGLBINDSAMPLERPROC glBindSampler;
+		extern PFNGLDELETESAMPLERSPROC glDeleteSamplers;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_0
+		extern PFNGLBLENDFUNCIPROC glBlendFunci;
+		extern PFNGLMINSAMPLESHADINGPROC glMinSampleShading;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_2
+		extern PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
+		extern PFNGLMEMORYBARRIERPROC glMemoryBarrier;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_3
+		#ifdef DEBUG_ENABLE_MESSENGER
+			extern PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
+			extern PFNGLDEBUGMESSAGEINSERTPROC glDebugMessageInsert;
+		#endif
+
+		extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
+		extern PFNGLDISPATCHCOMPUTEINDIRECTPROC glDispatchComputeIndirect;
+
+		// TODO: Write a texture view abstraction for older GL versions.
+		extern PFNGLTEXTUREVIEWPROC glTextureView;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLGETTEXTURESUBIMAGEPROC glGetTextureSubImage;
+		extern PFNGLVERTEXARRAYELEMENTBUFFERPROC glVertexArrayElementBuffer;
+	#endif
+
+	#ifdef GL_SOURCE_FROM_SPIRV
+		#if OPENGL_VERSION >= OPENGL_VERSION_4_6
+			extern PFNGLSHADERBINARYPROC glShaderBinary;
+			extern PFNGLSPECIALIZESHADERPROC glSpecializeShader;
+		#endif
+	#else
+		#if OPENGL_VERSION >= OPENGL_VERSION_2_0
+			extern PFNGLCOMPILESHADERPROC glCompileShader;
+			extern PFNGLSHADERSOURCEPROC glShaderSource;
+		#endif
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLCOPYNAMEDBUFFERSUBDATAPROC glCopyNamedBufferSubData;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
+		extern PFNGLCOPYBUFFERSUBDATAPROC glCopyBufferSubData;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLCREATEBUFFERSPROC glCreateBuffers;
+		extern PFNGLGETNAMEDBUFFERPARAMETERIVPROC glGetNamedBufferParameteriv;
+		extern PFNGLUNMAPNAMEDBUFFERPROC glUnmapNamedBuffer;
+	#else
+		extern PFNGLGENBUFFERSPROC glGenBuffers;
+		extern PFNGLGETBUFFERPARAMETERIVPROC glGetBufferParameteriv;
+		extern PFNGLUNMAPBUFFERPROC glUnmapBuffer;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
+		extern PFNGLCREATETEXTURESPROC glCreateTextures;
+
+		#ifdef BUILD_MODE_DEBUG
+			extern PFNGLGETTEXTUREPARAMETERIVPROC glGetTextureParameteriv;
+		#endif
+
+		extern PFNGLTEXTUREPARAMETERIPROC glTextureParameteri;
+		extern PFNGLTEXTURESUBIMAGE1DPROC glTextureSubImage1D;
+		extern PFNGLTEXTURESUBIMAGE2DPROC glTextureSubImage2D;
+		extern PFNGLTEXTURESUBIMAGE3DPROC glTextureSubImage3D;
+	#else
+		extern PFNGLACTIVETEXTUREPROC glActiveTexture;
+		extern PFNGLBINDTEXTUREPROC glBindTexture;
+
+		#ifdef BUILD_MODE_DEBUG
+			extern PFNGLGETTEXPARAMETERIVPROC glGetTexParameteriv;
+		#endif
+
+		extern PFNGLTEXPARAMETERIPROC glTexParameteri;
+		extern PFNGLTEXSUBIMAGE1DPROC glTexSubImage1D;
+		extern PFNGLTEXSUBIMAGE2DPROC glTexSubImage2D;
+		extern PFNGLTEXSUBIMAGE3DPROC glTexSubImage3D;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLBLITNAMEDFRAMEBUFFERPROC glBlitNamedFramebuffer;
+
+		#ifdef BUILD_MODE_DEBUG
+			extern PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC glCheckNamedFramebufferStatus;
+		#endif
+
+		extern PFNGLCLEARNAMEDFRAMEBUFFERFIPROC glClearNamedFramebufferfi;
+		extern PFNGLCLEARNAMEDFRAMEBUFFERFVPROC glClearNamedFramebufferfv;
+		extern PFNGLCLEARNAMEDFRAMEBUFFERIVPROC glClearNamedFramebufferiv;
+		extern PFNGLCLEARNAMEDFRAMEBUFFERUIVPROC glClearNamedFramebufferuiv;
+		extern PFNGLCREATEFRAMEBUFFERSPROC glCreateFramebuffers;
+		extern PFNGLNAMEDFRAMEBUFFERTEXTUREPROC glNamedFramebufferTexture;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+		extern PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
+
+		#ifdef BUILD_MODE_DEBUG
+			extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
+		#endif
+
+		extern PFNGLCLEARBUFFERFIPROC glClearBufferfi;
+		extern PFNGLCLEARBUFFERFVPROC glClearBufferfv;
+		extern PFNGLCLEARBUFFERIVPROC glClearBufferiv;
+		extern PFNGLCLEARBUFFERUIVPROC glClearBufferuiv;
+		extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
+		extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLCREATESAMPLERSPROC glCreateSamplers;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_3_3
+		extern PFNGLGENSAMPLERSPROC glGenSamplers;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLCREATEVERTEXARRAYSPROC glCreateVertexArrays;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+		extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_2
+		extern PFNGLDRAWARRAYSINSTANCEDBASEINSTANCEPROC glDrawArraysInstancedBaseInstance;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
+		extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
+	#else
+		extern PFNGLDRAWARRAYSPROC glDrawArrays;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_2
+		extern PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXBASEINSTANCEPROC glDrawElementsInstancedBaseVertexBaseInstance;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_3_2
+		extern PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXPROC glDrawElementsInstancedBaseVertex;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_3_1
+		extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced;
+	#else
+		extern PFNGLDRAWELEMENTSPROC glDrawElements;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLENABLEVERTEXARRAYATTRIBPROC glEnableVertexArrayAttrib;
+	#else
+		extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLMAPNAMEDBUFFERRANGEPROC glMapNamedBufferRange;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
+		extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_3
+		extern PFNGLMULTIDRAWARRAYSINDIRECTPROC glMultiDrawArraysIndirect;
+		extern PFNGLMULTIDRAWELEMENTSINDIRECTPROC glMultiDrawElementsIndirect;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_4_0
+		extern PFNGLDRAWARRAYSINDIRECTPROC glDrawArraysIndirect;
+		extern PFNGLDRAWELEMENTSINDIRECTPROC glDrawElementsIndirect;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLNAMEDBUFFERSTORAGEPROC glNamedBufferStorage;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_4_4
+		extern PFNGLBUFFERSTORAGEPROC glBufferStorage;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLNAMEDFRAMEBUFFERREADBUFFERPROC glNamedFramebufferReadBuffer;
+	#else
+		extern PFNGLDRAWBUFFERPROC glDrawBuffer;
+		extern PFNGLREADBUFFERPROC glReadBuffer;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLTEXTURESTORAGE2DPROC glTextureStorage2D;
+		extern PFNGLTEXTURESTORAGE3DPROC glTextureStorage3D;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_4_2
+		extern PFNGLTEXSTORAGE2DPROC glTexStorage2D;
+		extern PFNGLTEXSTORAGE3DPROC glTexStorage3D;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLTEXTURESTORAGE2DMULTISAMPLEPROC glTextureStorage2DMultisample;
+		extern PFNGLTEXTURESTORAGE3DMULTISAMPLEPROC glTextureStorage3DMultisample;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+		extern PFNGLTEXSTORAGE2DMULTISAMPLEPROC glTexStorage2DMultisample;
+		extern PFNGLTEXSTORAGE3DMULTISAMPLEPROC glTexStorage3DMultisample;
+	#endif
+
+	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
+		extern PFNGLVERTEXARRAYATTRIBBINDINGPROC glVertexArrayAttribBinding;
+		extern PFNGLVERTEXARRAYATTRIBFORMATPROC glVertexArrayAttribFormat;
+		extern PFNGLVERTEXARRAYATTRIBIFORMATPROC glVertexArrayAttribIFormat;
+		extern PFNGLVERTEXARRAYATTRIBLFORMATPROC glVertexArrayAttribLFormat;
+		extern PFNGLVERTEXARRAYBINDINGDIVISORPROC glVertexArrayBindingDivisor;
+		extern PFNGLVERTEXARRAYVERTEXBUFFERPROC glVertexArrayVertexBuffer;
+	#elif OPENGL_VERSION >= OPENGL_VERSION_4_3
+		extern PFNGLBINDVERTEXBUFFERPROC glBindVertexBuffer;
+		extern PFNGLVERTEXATTRIBBINDINGPROC glVertexAttribBinding;
+		extern PFNGLVERTEXATTRIBFORMATPROC glVertexAttribFormat;
+		extern PFNGLVERTEXATTRIBIFORMATPROC glVertexAttribIFormat;
+		extern PFNGLVERTEXATTRIBLFORMATPROC glVertexAttribLFormat;
+		extern PFNGLVERTEXBINDINGDIVISORPROC glVertexBindingDivisor;
+	#endif
+}

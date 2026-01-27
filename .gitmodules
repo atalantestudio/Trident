@@ -1,17 +1,17 @@
-[submodule "ProjectA/vendor/Base"]
-	path = ProjectA/vendor/Base
+[submodule "Trident/vendor/Base"]
+	path = Trident/vendor/Base
 	url = git@github.com:atalantestudio/ModuleBase
 	branch = main
-[submodule "ProjectA/vendor/lyah"]
-	path = ProjectA/vendor/lyah
+[submodule "Trident/vendor/lyah"]
+	path = Trident/vendor/lyah
 	url = git@github.com:atalantestudio/lyah
 	branch = main
-[submodule "ProjectA/vendor/scroll"]
-	path = ProjectA/vendor/scroll
+[submodule "Trident/vendor/scroll"]
+	path = Trident/vendor/scroll
 	url = git@github.com:atalantestudio/scroll
 	branch = main
-[submodule "ProjectA/vendor/tsl"]
-	path = ProjectA/vendor/tsl
+[submodule "Trident/vendor/tsl"]
+	path = Trident/vendor/tsl
 	url = git@github.com:atalantestudio/tsl
 	branch = main
 [submodule "Samples/Asset"]

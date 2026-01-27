@@ -2,7 +2,7 @@
 
 #include "../BaseLayer.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class SampleLayer : public BaseLayer {
 		public:
 			void build() override {

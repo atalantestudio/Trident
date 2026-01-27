@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ProjectA.hpp"
+#include "Trident.hpp"
 
 #include "../Renderer/Physics2DRenderer.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	#define VISUALIZE_MODE_NONE 0
 	#define VISUALIZE_MODE_CONTACT_MANIFOLD 1
 	#define VISUALIZE_MODE_CLOSEST_POINTS 2

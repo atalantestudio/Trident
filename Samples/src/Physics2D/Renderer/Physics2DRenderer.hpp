@@ -4,7 +4,7 @@
 #include "Engine/API/Scene/Scene2D.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	// Toggle vertex/edge feature rendering.
 	// #define SHOW_FEATURES
 

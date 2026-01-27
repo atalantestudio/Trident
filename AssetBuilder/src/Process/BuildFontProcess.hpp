@@ -5,7 +5,7 @@
 #include "Subprocess/BuildDefaultFontSubprocess.hpp"
 #include "Subprocess/BuildTrueTypeFontSubprocess.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class BuildFontProcess : public Process {
 		private:
 			static constexpr uint32 PROJECT_INPUT_PATH_ARGUMENT_INDEX = 1;

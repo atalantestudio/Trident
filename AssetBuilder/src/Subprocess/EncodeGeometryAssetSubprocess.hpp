@@ -4,7 +4,7 @@
 #include "Engine/Filesystem/Filesystem.hpp"
 #include "Engine/Filesystem/File/FBXFile.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	// TODO: Assert that FBX nodes exist before using them.
 	static void EncodeGeometryAssetSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {
 		const sequence<char8> path = directoryEntry.path().string();

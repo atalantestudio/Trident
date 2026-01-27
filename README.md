@@ -1,6 +1,6 @@
-# ProjectA
+# Trident
 
-ProjectA is a game engine made for technical teams. Its low-level API allows developers to create high performance games and applications.
+Trident is a game engine made for technical teams. Its low-level API allows developers to create high performance games and applications.
 
 ### Features
 
@@ -25,13 +25,13 @@ Premake is the only library that's not managed by the studio.
 
 ## Install (Windows)
 
-Clone the repository, then run [scripts/Windows/premake5_vs2022.bat](https://github.com/atalantestudio/ProjectA/tree/main/scripts/Windows/premake5_vs2022.bat). This will clone the Lyah submodule, copy the necessary files from the OpenGL Registry and create a Visual Studio solution file (.sln) for the project.
+Clone the repository, then run [scripts/Windows/premake5_vs2022.bat](https://github.com/atalantestudio/Trident/tree/main/scripts/Windows/premake5_vs2022.bat). This will clone the Lyah submodule, copy the necessary files from the OpenGL Registry and create a Visual Studio 2026 solution file (.slnx) for the project.
 It also adds the repository to the list of Git safe directories.
 
 Make sure that the Vulkan SDK is installed (the engine will search for the `VULKAN_SDK` environment variable).
 
 At the time of writing, some resources are not present in the repository:
-- `ProjectA/src/Asset/Font/**`: Test fonts for the GUI and text renderers.
+- `Trident/src/Asset/Font/**`: Test fonts for the GUI and text renderers.
 - `AssetBuilder/AssetBuilder.tpr`: Configuration file for the AssetBuilder project.
 - `Samples/Samples.tpr`: Configuration file for the Samples project.
 
@@ -63,4 +63,4 @@ VSync: true
 
 ## Resources
 
-See [RESOURCES.md](https://github.com/atalantestudio/ProjectA/blob/main/RESOURCES.md) for a list of websites, articles, videos, slides, books, specifications and papers that helped me develop this project.
+See [RESOURCES.md](https://github.com/atalantestudio/Trident/blob/main/RESOURCES.md) for a list of websites, articles, videos, slides, books, specifications and papers that helped me develop this project.

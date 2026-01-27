@@ -2,7 +2,7 @@
 
 #include "Engine/API/Scene/Scene3D.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	static Scene3D createScene(const AssetLibrary& assetLibrary) {
 		Scene3D scene;
 

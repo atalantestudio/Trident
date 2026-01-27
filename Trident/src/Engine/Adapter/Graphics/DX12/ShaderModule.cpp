@@ -1,0 +1,76 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
+#include "pch.hpp"
+
+#include "Engine/Adapter/Graphics/DX12/ShaderModule.hpp"
+#include "Engine/API/Graphics/GraphicsAdapter.hpp"
+
+namespace Trident {
+	DX12::ShaderModule::ShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code) :
+		Trident::ShaderModule(descriptor)
+	{
+		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+
+		HRESULT result;
+		UINT flags = 0;
+
+		#ifdef BUILD_MODE_DEBUG
+			flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+		#endif
+
+		LPCSTR target;
+
+		switch (descriptor.stage) {
+			case ShaderStage::VERTEX: {
+				target = "vs_5_0";
+
+				break;
+			}
+			case ShaderStage::FRAGMENT: {
+				target = "ps_5_0";
+
+				break;
+			}
+			case ShaderStage::COMPUTE: {
+				target = "cs_5_0";
+
+				break;
+			}
+		}
+
+		#ifdef BUILD_MODE_DEBUG
+			ComPtr<ID3DBlob> errorBlob;
+		#endif
+
+		result = D3DCompile(
+			&code[0],
+			code.count(),
+			nullptr,
+			nullptr,
+			nullptr,
+			&descriptor.entryPoint[0],
+			target,
+			flags,
+			0,
+			&blob,
+			#ifdef BUILD_MODE_DEBUG
+				&errorBlob
+			#else
+				nullptr
+			#endif
+		);
+
+		if (FAILED(result)) {
+			#ifdef BUILD_MODE_DEBUG
+				if (errorBlob) {
+					const view<char8> error(pointer_cast<const char8*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
+
+					ADAPTER_ASSERT(false, "Failed to compile shader: []", error);
+				}
+			#else
+				ADAPTER_ASSERT(false, "Failed to compile shader.");
+			#endif
+		}
+	}
+}

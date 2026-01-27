@@ -2,7 +2,7 @@
 
 #include "Engine/API/GUI/Theme/Default/Button.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class SampleLayer : public GUILayer {
 		public:
 			void registerAssets() override {

@@ -2,7 +2,7 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class SampleRenderer : public Renderer {
 		private:
 			static constexpr char8* IMAGE_ASSET_NAME = "DefaultFont";

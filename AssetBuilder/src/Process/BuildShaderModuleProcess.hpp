@@ -6,7 +6,7 @@
 #include "tsl/compile.hpp"
 #include "tsl/Generator/GLSLGenerator.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class BuildShaderModuleProcess : public Process {
 		private:
 			sint32 processFile(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {

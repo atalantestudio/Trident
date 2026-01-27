@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace ProjectA {
+namespace Trident {
 	class StatisticsLayer : public GUILayer {
 		private:
 			static constexpr uint32 FRAME_DELAY = 165;

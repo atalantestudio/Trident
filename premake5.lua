@@ -1,4 +1,4 @@
-workspace "ProjectA"
+workspace "Trident"
 	architecture "x86_64"
 	startproject "Samples"
 
@@ -17,21 +17,21 @@ vulkansdk = os.getenv("VULKAN_SDK")
 -- os.execute("git config --global --add safe.directory *")
 -- os.execute("git submodule update --init")
 
---[[ os.mkdir("ProjectA/vendor/API/GL")
-os.mkdir("ProjectA/vendor/API/KHR")
+--[[ os.mkdir("Trident/vendor/API/GL")
+os.mkdir("Trident/vendor/API/KHR")
 
 -- Download required files from the OpenGL Registry.
-local glcorearbresult = http.download("https://registry.khronos.org/OpenGL/api/GL/glcorearb.h", "ProjectA/vendor/API/GL/glcorearb.h")
-local glextresult = http.download("https://registry.khronos.org/OpenGL/api/GL/glext.h", "ProjectA/vendor/API/GL/glext.h")
-local wglextresult = http.download("https://registry.khronos.org/OpenGL/api/GL/wglext.h", "ProjectA/vendor/API/GL/wglext.h")
-local khrplatformresult = http.download("https://raw.githubusercontent.com/KhronosGroup/EGL-Registry/refs/heads/main/api/KHR/khrplatform.h", "ProjectA/vendor/API/KHR/khrplatform.h")
+local glcorearbresult = http.download("https://registry.khronos.org/OpenGL/api/GL/glcorearb.h", "Trident/vendor/API/GL/glcorearb.h")
+local glextresult = http.download("https://registry.khronos.org/OpenGL/api/GL/glext.h", "Trident/vendor/API/GL/glext.h")
+local wglextresult = http.download("https://registry.khronos.org/OpenGL/api/GL/wglext.h", "Trident/vendor/API/GL/wglext.h")
+local khrplatformresult = http.download("https://raw.githubusercontent.com/KhronosGroup/EGL-Registry/refs/heads/main/api/KHR/khrplatform.h", "Trident/vendor/API/KHR/khrplatform.h")
 
 printf("Fetching glcorearb.h: %s", glcorearbresult)
 printf("Fetching glext.h: %s", glextresult)
 printf("Fetching wglext.h: %s", wglextresult)
 printf("Fetching khrplatform.h: %s", khrplatformresult) ]]--
 
-project "ProjectA"
+project "Trident"
 	location "%{prj.name}"
 	kind "StaticLib"
 	language "C++"
@@ -137,7 +137,7 @@ project "Samples"
 	objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
 	dependson {
-		"ProjectA",
+		"Trident",
 	}
 
 	files {
@@ -146,17 +146,17 @@ project "Samples"
 	}
 
 	includedirs {
-		"ProjectA/src",
-		"ProjectA/vendor/API",
-		"ProjectA/vendor/Base",
-		"ProjectA/vendor/lyah",
-		"ProjectA/vendor/scroll",
-		"ProjectA/vendor/tsl",
+		"Trident/src",
+		"Trident/vendor/API",
+		"Trident/vendor/Base",
+		"Trident/vendor/lyah",
+		"Trident/vendor/scroll",
+		"Trident/vendor/tsl",
 		vulkansdk .. "/Include", -- TODO: Temporary
 	}
 
 	links {
-		"ProjectA",
+		"Trident",
 	}
 
 	defines {
@@ -215,7 +215,7 @@ project "AssetBuilder"
 	objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
 	dependson {
-		"ProjectA",
+		"Trident",
 	}
 
 	files {
@@ -224,17 +224,17 @@ project "AssetBuilder"
 	}
 
 	includedirs {
-		"ProjectA/src",
-		"ProjectA/vendor/API",
-		"ProjectA/vendor/Base",
-		"ProjectA/vendor/lyah",
-		"ProjectA/vendor/scroll",
-		"ProjectA/vendor/tsl",
+		"Trident/src",
+		"Trident/vendor/API",
+		"Trident/vendor/Base",
+		"Trident/vendor/lyah",
+		"Trident/vendor/scroll",
+		"Trident/vendor/tsl",
 		vulkansdk .. "/Include", -- TODO: Temporary
 	}
 
 	links {
-		"ProjectA",
+		"Trident",
 	}
 
 	defines {
@@ -273,7 +273,7 @@ project "AssetBuilder"
 		optimize "on"
 
 project "tslc"
-	location "ProjectA/vendor/tsl"
+	location "Trident/vendor/tsl"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
@@ -283,30 +283,30 @@ project "tslc"
 	objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
 	dependson {
-		"ProjectA",
+		"Trident",
 	}
 
 	files {
-		"ProjectA/vendor/tsl/**.cpp",
-		"ProjectA/vendor/tsl/**.hpp",
+		"Trident/vendor/tsl/**.cpp",
+		"Trident/vendor/tsl/**.hpp",
 	}
 
 	removefiles {
-		"ProjectA/vendor/tsl/tsl/LSP/lsp.cpp",
+		"Trident/vendor/tsl/tsl/LSP/lsp.cpp",
 	}
 
 	includedirs {
-		"ProjectA/src",
-		"ProjectA/vendor/API", -- TODO: Remove.
-		"ProjectA/vendor/Base",
-		"ProjectA/vendor/lyah", -- TODO: Remove.
-		"ProjectA/vendor/scroll",
-		"ProjectA/vendor/tsl",
+		"Trident/src",
+		"Trident/vendor/API", -- TODO: Remove.
+		"Trident/vendor/Base",
+		"Trident/vendor/lyah", -- TODO: Remove.
+		"Trident/vendor/scroll",
+		"Trident/vendor/tsl",
 		vulkansdk .. "/Include", -- TODO: Remove.
 	}
 
 	links {
-		"ProjectA",
+		"Trident",
 	}
 
 	filter "system:windows"
@@ -337,7 +337,7 @@ project "tslc"
 		optimize "on"
 
 project "tsllsp"
-	location "ProjectA/vendor/tsl"
+	location "Trident/vendor/tsl"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
@@ -347,30 +347,30 @@ project "tsllsp"
 	objdir ("obj/" .. outputdir .. "/%{prj.name}")
 
 	dependson {
-		"ProjectA",
+		"Trident",
 	}
 
 	files {
-		"ProjectA/vendor/tsl/**.cpp",
-		"ProjectA/vendor/tsl/**.hpp",
+		"Trident/vendor/tsl/**.cpp",
+		"Trident/vendor/tsl/**.hpp",
 	}
 
 	removefiles {
-		"ProjectA/vendor/tsl/tsl/tslc.cpp",
+		"Trident/vendor/tsl/tsl/tslc.cpp",
 	}
 
 	includedirs {
-		"ProjectA/src",
-		"ProjectA/vendor/API", -- TODO: Remove.
-		"ProjectA/vendor/Base",
-		"ProjectA/vendor/lyah", -- TODO: Remove.
-		"ProjectA/vendor/scroll",
-		"ProjectA/vendor/tsl",
+		"Trident/src",
+		"Trident/vendor/API", -- TODO: Remove.
+		"Trident/vendor/Base",
+		"Trident/vendor/lyah", -- TODO: Remove.
+		"Trident/vendor/scroll",
+		"Trident/vendor/tsl",
 		vulkansdk .. "/Include", -- TODO: Remove.
 	}
 
 	links {
-		"ProjectA",
+		"Trident",
 	}
 
 	postbuildcommands {

@@ -2,7 +2,7 @@
 
 #include "Engine/Filesystem/Asset/AssetLibrary.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class BuildGlyphMapImageSubprocess {
 		private:
 			static constexpr uint64 TIM_HEADER_SIZE = 9 * sizeof(uint32);

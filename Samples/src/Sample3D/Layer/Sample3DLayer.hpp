@@ -6,7 +6,7 @@
 
 #include "../Scene/Suzanne.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class Sample3DLayer : public Layer {
 		private:
 			static constexpr float32 MOVEMENT_SPEED = 0.5f;

@@ -19,7 +19,7 @@
 			"type": "process",
 			"command": "MSBuild.exe",
 			"args": [
-				"ProjectA.sln",
+				"Trident.slnx",
 				"/t:Build",
 				"/property:Configuration=Debug"
 			],
@@ -38,7 +38,7 @@
 			"type": "process",
 			"command": "MSBuild.exe",
 			"args": [
-				"ProjectA.sln",
+				"Trident.slnx",
 				"/t:Build",
 				"/property:Configuration=Profile"
 			],
@@ -57,7 +57,7 @@
 			"type": "process",
 			"command": "MSBuild.exe",
 			"args": [
-				"ProjectA.sln",
+				"Trident.slnx",
 				"/t:Build",
 				"/property:Configuration=Release"
 			],

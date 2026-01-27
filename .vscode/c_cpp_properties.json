@@ -3,12 +3,12 @@
 		{
 			"name": "Debug",
 			"includePath": [
-				"ProjectA/src",
-				"ProjectA/vendor/API",
-				"ProjectA/vendor/Base",
-				"ProjectA/vendor/lyah",
-				"ProjectA/vendor/scroll",
-				"ProjectA/vendor/tsl",
+				"Trident/src",
+				"Trident/vendor/API",
+				"Trident/vendor/Base",
+				"Trident/vendor/lyah",
+				"Trident/vendor/scroll",
+				"Trident/vendor/tsl",
 				"${env:VULKAN_SDK}/Include"
 			],
 			"defines": [
@@ -21,12 +21,12 @@
 		{
 			"name": "Profile",
 			"includePath": [
-				"ProjectA/src",
-				"ProjectA/vendor/API",
-				"ProjectA/vendor/Base",
-				"ProjectA/vendor/lyah",
-				"ProjectA/vendor/scroll",
-				"ProjectA/vendor/tsl",
+				"Trident/src",
+				"Trident/vendor/API",
+				"Trident/vendor/Base",
+				"Trident/vendor/lyah",
+				"Trident/vendor/scroll",
+				"Trident/vendor/tsl",
 				"${env:VULKAN_SDK}/Include"
 			],
 			"defines": [
@@ -39,12 +39,12 @@
 		{
 			"name": "Release",
 			"includePath": [
-				"ProjectA/src",
-				"ProjectA/vendor/API",
-				"ProjectA/vendor/Base",
-				"ProjectA/vendor/lyah",
-				"ProjectA/vendor/scroll",
-				"ProjectA/vendor/tsl",
+				"Trident/src",
+				"Trident/vendor/API",
+				"Trident/vendor/Base",
+				"Trident/vendor/lyah",
+				"Trident/vendor/scroll",
+				"Trident/vendor/tsl",
 				"${env:VULKAN_SDK}/Include"
 			],
 			"defines": [

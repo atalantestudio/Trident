@@ -2,7 +2,7 @@
 
 #include "BuildGlyphMapImageSubprocess.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class BuildDefaultFontSubprocess {
 		private:
 			struct BitmapGlyph {
@@ -168,7 +168,7 @@ namespace ProjectA {
 
 		public:
 			explicit BuildDefaultFontSubprocess(const std::filesystem::path& assetOutputPath) {
-				const sequence<uint8> buffer = Filesystem::openByteBuffer("../ProjectA/src/Asset/Image/quiver.png");
+				const sequence<uint8> buffer = Filesystem::openByteBuffer("../Trident/src/Asset/Image/quiver.png");
 				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(buffer);
 
 				ENGINE_ASSERT(file.format == ImageFormat::R8G8B8A8_UNORM, "The default font must be created from an RGBA PNG.");

@@ -3,7 +3,7 @@
 #include "BuildGlyphMapImageSubprocess.hpp"
 #include "../Process/GenerateSDFGlyphMapProcess.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class BuildTrueTypeFontSubprocess {
 		public:
 			explicit BuildTrueTypeFontSubprocess(const std::filesystem::directory_entry& directoryEntry, const std::filesystem::path& assetOutputPath) {

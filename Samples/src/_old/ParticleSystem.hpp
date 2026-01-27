@@ -1,33 +1,33 @@
 /* #pragma once
 
-#include "ProjectA.hpp"
+#include "Trident.hpp"
 
 #include "ParticleProperties.hpp"
 
 class ParticleSystem {
 	public:
-		ParticleSystem(ProjectA::uint32 maxParticles);
+		ParticleSystem(Trident::uint32 maxParticles);
 
-		void update(ProjectA::float32 deltaTime);
-		void render(const ProjectA::OrthographicCamera& camera);
+		void update(Trident::float32 deltaTime);
+		void render(const Trident::OrthographicCamera& camera);
 
 		void emitParticle(const ParticleProperties& properties);
 
 	private:
 		struct Particle {
-			ProjectA::vec2<ProjectA::float32> position;
-			ProjectA::vec2<ProjectA::float32> linearVelocity;
-			ProjectA::vec4<ProjectA::float32> startColor;
-			ProjectA::vec4<ProjectA::float32> endColor;
-			ProjectA::float32 rotation = 0.0f;
-			ProjectA::float32 startSize;
-			ProjectA::float32 endSize;
-			ProjectA::float32 lifetime = 1.0f;
-			ProjectA::float32 remainingLife = 0.0f;
+			Trident::vec2<Trident::float32> position;
+			Trident::vec2<Trident::float32> linearVelocity;
+			Trident::vec4<Trident::float32> startColor;
+			Trident::vec4<Trident::float32> endColor;
+			Trident::float32 rotation = 0.0f;
+			Trident::float32 startSize;
+			Trident::float32 endSize;
+			Trident::float32 lifetime = 1.0f;
+			Trident::float32 remainingLife = 0.0f;
 			bool active = false;
 		};
 
 		std::vector<Particle> particlePool;
 
-		ProjectA::uint32 poolIndex;
+		Trident::uint32 poolIndex;
 }; */

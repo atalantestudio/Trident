@@ -1,12 +1,12 @@
 #pragma once
 
-#include "ProjectA.hpp"
+#include "Trident.hpp"
 
 #include "Engine/entry_point.hpp"
 
 #include "Layer/OptionMenu.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class GUIApplication : public Application {
 		public:
 			explicit GUIApplication(const ProjectDescriptor& projectDescriptor) :
@@ -16,10 +16,10 @@ namespace ProjectA {
 			}
 	};
 
-	Application* ProjectA::createApplication(uint32 argumentCount, char8** argumentValues) {
+	Application* Trident::createApplication(uint32 argumentCount, char8** argumentValues) {
 		ProjectDescriptor projectDescriptor{};
 		projectDescriptor.type = ProjectType::MAIN;
-		projectDescriptor.name = "ProjectA Sample";
+		projectDescriptor.name = "Trident Sample";
 		projectDescriptor.version = {1, 0, 0};
 
 		return new GUIApplication(projectDescriptor);

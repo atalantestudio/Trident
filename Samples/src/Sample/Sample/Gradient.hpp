@@ -2,7 +2,7 @@
 
 #include "Engine/Renderer/Renderer.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class SampleRenderer : public Renderer {
 		public:
 			void build() override {

@@ -1,4 +1,4 @@
-#include "ProjectA.hpp"
+#include "Trident.hpp"
 
 #include "Engine/entry_point.hpp"
 
@@ -6,7 +6,7 @@
 #include "Process/BuildGeometryProcess.hpp"
 #include "Process/BuildShaderModuleProcess.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	class AssetBuilderApplication : public Application {
 		public:
 			explicit AssetBuilderApplication(const ProjectDescriptor& projectDescriptor, uint32 argumentCount, char8** argumentValues) :
@@ -23,7 +23,7 @@ namespace ProjectA {
 	Application* createApplication(uint32 argumentCount, char8** argumentValues) {
 		ProjectDescriptor projectDescriptor{};
 		projectDescriptor.type = ProjectType::BUILD;
-		projectDescriptor.name = "ProjectA Asset Builder";
+		projectDescriptor.name = "Trident Asset Builder";
 
 		return new AssetBuilderApplication(projectDescriptor, argumentCount, argumentValues);
 	}

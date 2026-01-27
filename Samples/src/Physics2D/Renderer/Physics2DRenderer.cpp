@@ -4,7 +4,7 @@
 
 #include "Engine/API/Material/ColorFillStrokeMaterial.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	void Physics2DRenderer::build() {
 		setupRenderPass();
 

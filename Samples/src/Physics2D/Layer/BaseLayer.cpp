@@ -4,7 +4,7 @@
 
 #include "BaseLayer.hpp"
 
-namespace ProjectA {
+namespace Trident {
 	BaseLayer::BaseLayer() :
 		physicsEngine(getPhysicsEngineDescriptor())
 		#ifdef BUILD_MODE_DEBUG
