@@ -13,24 +13,6 @@ workspace "Trident"
 outputdir = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
 vulkansdk = os.getenv("VULKAN_SDK")
 
--- Checkout submodules.
--- os.execute("git config --global --add safe.directory *")
--- os.execute("git submodule update --init")
-
---[[ os.mkdir("Trident/vendor/API/GL")
-os.mkdir("Trident/vendor/API/KHR")
-
--- Download required files from the OpenGL Registry.
-local glcorearbresult = http.download("https://registry.khronos.org/OpenGL/api/GL/glcorearb.h", "Trident/vendor/API/GL/glcorearb.h")
-local glextresult = http.download("https://registry.khronos.org/OpenGL/api/GL/glext.h", "Trident/vendor/API/GL/glext.h")
-local wglextresult = http.download("https://registry.khronos.org/OpenGL/api/GL/wglext.h", "Trident/vendor/API/GL/wglext.h")
-local khrplatformresult = http.download("https://raw.githubusercontent.com/KhronosGroup/EGL-Registry/refs/heads/main/api/KHR/khrplatform.h", "Trident/vendor/API/KHR/khrplatform.h")
-
-printf("Fetching glcorearb.h: %s", glcorearbresult)
-printf("Fetching glext.h: %s", glextresult)
-printf("Fetching wglext.h: %s", wglextresult)
-printf("Fetching khrplatform.h: %s", khrplatformresult) ]]--
-
 project "Trident"
 	location "%{prj.name}"
 	kind "StaticLib"
