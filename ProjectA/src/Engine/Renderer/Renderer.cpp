@@ -21,10 +21,10 @@ namespace ProjectA {
 	scope<GraphicsAdapter> Renderer::adapter = nullptr;
 	uint32 Renderer::imageIndex = 0;
 	ref<Swapchain> Renderer::swapchain = nullptr;
-	std::array<ref<CommandEncoder>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::commandEncoders;
-	std::array<ref<Fence>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::flightFences;
-	std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::acquireNextImageSemaphores;
-	std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> Renderer::finishedRenderSemaphores;
+	sequence<ref<CommandEncoder>> Renderer::commandEncoders;
+	sequence<ref<Fence>> Renderer::flightFences;
+	sequence<ref<Semaphore>> Renderer::acquireNextImageSemaphores;
+	sequence<ref<Semaphore>> Renderer::finishedRenderSemaphores;
 
 	GraphicsAPI Renderer::getGraphicsApi() {
 		return graphicsApi;
@@ -76,6 +76,11 @@ namespace ProjectA {
 		swapchainDescriptor.vSync = properties.VerticalSync;
 
 		swapchain = adapter->createSwapchain(swapchainDescriptor);
+
+		commandEncoders = sequence<ref<CommandEncoder>>(Application::MAX_FRAMES_IN_FLIGHT);
+		flightFences = sequence<ref<Fence>>(Application::MAX_FRAMES_IN_FLIGHT);
+		acquireNextImageSemaphores = sequence<ref<Semaphore>>(Application::MAX_FRAMES_IN_FLIGHT);
+		finishedRenderSemaphores = sequence<ref<Semaphore>>(Application::MAX_FRAMES_IN_FLIGHT);
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;

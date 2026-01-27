@@ -101,9 +101,10 @@ namespace ProjectA {
 			const GUIContainer& component = components[componentIndex];
 
 			if (component.textComponent) {
-				GUIGlyphSubcomponent defaultGlyphSubcomponent;
+				GUIGlyphSubcomponent defaultGlyphSubcomponent{};
 				defaultGlyphSubcomponent.color = component.color.value;
 				defaultGlyphSubcomponent.layerIndex = fonts[component.font].glyphMapImageId;
+				defaultGlyphSubcomponent.fontSize = component.fontSize;
 
 				const vec2<float32> origin = {component.origin.x, component.origin.y};
 
@@ -741,9 +742,10 @@ namespace ProjectA {
 		bool flushCurrentWord = false;
 		bool flushBeforeNewLine = false;
 
-		GUIGlyphSubcomponent defaultGlyphSubcomponent;
+		GUIGlyphSubcomponent defaultGlyphSubcomponent{};
 		defaultGlyphSubcomponent.layerIndex = fontData.glyphMapImageId;
 		defaultGlyphSubcomponent.color = textComponent.color.value;
+		defaultGlyphSubcomponent.fontSize = textComponent.fontSize;
 
 		uint32 codePoint;
 

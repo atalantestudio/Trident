@@ -362,6 +362,7 @@ namespace ProjectA {
 		instanceInputBinding.registerAttribute<mat3x3<float32>>(); // Texture transform
 		instanceInputBinding.registerAttribute<uint32>(); // Layer index
 		instanceInputBinding.registerAttribute<vec4<float32>>(); // Color
+		instanceInputBinding.registerAttribute<float32>(); // Font size
 
 		ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;

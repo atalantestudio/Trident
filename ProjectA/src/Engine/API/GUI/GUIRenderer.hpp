@@ -19,8 +19,8 @@ namespace ProjectA {
 			};
 
 		public:
-			static constexpr uint32 MAX_SUBCOMPONENTS = 512;
-			static constexpr uint32 MAX_GLYPH_SUBCOMPONENTS = 512;
+			static constexpr uint32 MAX_SUBCOMPONENTS = 2048;
+			static constexpr uint32 MAX_GLYPH_SUBCOMPONENTS = 2048;
 			static constexpr uint32 VERTEX_BUFFER_SIZE = 6 * sizeof(Vertex);
 			static constexpr uint32 INDEX_BUFFER_SIZE = 6 * sizeof(uint16);
 			static constexpr uint32 SUBCOMPONENT_BUFFER_SIZE = MAX_SUBCOMPONENTS * sizeof(GUISubcomponent);

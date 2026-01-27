@@ -60,7 +60,7 @@ namespace ProjectA {
 				commandEncoder->bindDescriptorSets(pipelineLayout, {arrayTextureDescriptorSet});
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->bindVertexBuffer(1, instanceBuffer, 0, sizeof(Instance));
-				commandEncoder->draw(24, 4, 0, 0);
+				commandEncoder->draw(6, 4, 0, 0);
 				commandEncoder->endRenderPass();
 			}
 

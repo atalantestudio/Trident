@@ -38,12 +38,6 @@ namespace ProjectA::DX12 {
 			layout = ImageLayout::TRANSFER_SRC_OPTIMAL;
 		}
 
-		if (usage & ImageUsage::TRANSFER_DST) {
-			resourceStates |= D3D12_RESOURCE_STATE_COPY_DEST;
-
-			layout = ImageLayout::TRANSFER_DST_OPTIMAL;
-		}
-
 		if (usage & ImageUsage::STORAGE) {
 			resourceStates |= D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
 
@@ -60,9 +54,6 @@ namespace ProjectA::DX12 {
 			resourceStates |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
 
 			layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-		}
-		else if (usage & ImageUsage::INPUT_ATTACHMENT) {
-			resourceStates |= D3D12_RESOURCE_STATE_RENDER_TARGET;
 		}
 
 		return resourceStates;

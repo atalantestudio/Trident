@@ -324,6 +324,42 @@ namespace ProjectA {
 
 					break;
 				}
+				case DescriptorType::STORAGE_IMAGE: {
+					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = descriptorSet->viewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+					viewDescriptorHandle.ptr += binding.viewDescriptorOffset * viewDescriptorHandleIncrementSize;
+
+					UINT descriptorImageIndex = 0;
+
+					while (descriptorImageIndex < writeDescriptorSet.descriptorImages.count()) {
+						const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
+						const DX12::Image* image = static_cast<const DX12::Image*>(descriptorImage.imageView->getImage());
+
+						ADAPTER_ASSERT(image->getType() == ImageType::TEXTURE_2D, "Images other than TEXTURE_2D are not supported.");
+
+						D3D12_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDescriptor{};
+						unorderedAccessViewDescriptor.Format = getImageFormat(image->getFormat());
+
+						if (image->getLayerCount() > 1) {
+							unorderedAccessViewDescriptor.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+							unorderedAccessViewDescriptor.Texture2DArray.MipSlice = descriptorImage.imageView->getMipLevelOffset();
+							unorderedAccessViewDescriptor.Texture2DArray.FirstArraySlice = descriptorImage.imageView->getLayerOffset();
+							unorderedAccessViewDescriptor.Texture2DArray.ArraySize = descriptorImage.imageView->getLayerCount();
+							unorderedAccessViewDescriptor.Texture2DArray.PlaneSlice = 0;
+						}
+						else {
+							unorderedAccessViewDescriptor.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+							unorderedAccessViewDescriptor.Texture2D.MipSlice = descriptorImage.imageView->getMipLevelOffset();
+							unorderedAccessViewDescriptor.Texture2D.PlaneSlice = 0;
+						}
+
+						device->CreateUnorderedAccessView(image->resource.Get(), nullptr, &unorderedAccessViewDescriptor, viewDescriptorHandle);
+
+						viewDescriptorHandle.ptr += viewDescriptorHandleIncrementSize;
+						descriptorImageIndex += 1;
+					}
+
+					break;
+				}
 				case DescriptorType::UNIFORM_BUFFER: {
 					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = descriptorSet->viewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 					viewDescriptorHandle.ptr += binding.viewDescriptorOffset * viewDescriptorHandleIncrementSize;

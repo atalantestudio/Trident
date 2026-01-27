@@ -18,5 +18,6 @@ namespace ProjectA {
 		mat3x3<float32> textureWorld;
 		uint32 layerIndex;
 		vec4<float32> color;
+		float32 fontSize;
 	};
 }

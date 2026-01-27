@@ -224,6 +224,8 @@ namespace ProjectA {
 		UINT layerIndex;
 
 		for (const BufferImageCopyRegion& copyRegion : copyRegions) {
+			const UINT64 layerSize = copyRegion.imageExtent.width * copyRegion.imageExtent.height * copyRegion.imageExtent.depth * channelCount;
+
 			bufferCopyLocation.PlacedFootprint.Footprint.Width = copyRegion.imageExtent.width;
 			bufferCopyLocation.PlacedFootprint.Footprint.Height = copyRegion.imageExtent.height;
 			bufferCopyLocation.PlacedFootprint.Footprint.Depth = copyRegion.imageExtent.depth;
@@ -232,9 +234,9 @@ namespace ProjectA {
 			layerIndex = 0;
 
 			while (layerIndex < copyRegion.imageLayerCount) {
-				bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset;
-
 				textureCopyLocation.SubresourceIndex = copyRegion.imageLayerOffset + layerIndex;
+
+				bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset + layerSize * textureCopyLocation.SubresourceIndex;
 
 				commandList->CopyTextureRegion(&textureCopyLocation, copyRegion.imageOffsetX, copyRegion.imageOffsetY, copyRegion.imageOffsetZ, &bufferCopyLocation, nullptr);
 
@@ -303,13 +305,8 @@ namespace ProjectA {
 			return;
 		}
 
-		if (newLayout == ImageLayout::TRANSFER_DST_OPTIMAL) {
-			// Transitions to D3D12_RESOURCE_STATE_COPY_DEST are handled implicitly.
-			return;
-		}
-
-		if (newLayout == ImageLayout::SHADER_READ_ONLY_OPTIMAL && computePipelineBound) {
-			// This transition can't be execute by the compute queue.
+		if (computePipelineBound && newLayout == ImageLayout::SHADER_READ_ONLY_OPTIMAL) {
+			// This transition can't be executed by the compute queue.
 			return;
 		}
 
@@ -317,7 +314,7 @@ namespace ProjectA {
 		resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		resourceBarrier.Transition.pResource = std::static_pointer_cast<DX12::Image>(image)->resource.Get();
-		resourceBarrier.Transition.Subresource = 0;
+		resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 		resourceBarrier.Transition.StateBefore = getImageTransitionResourceStates(image->getLayout());
 		resourceBarrier.Transition.StateAfter = getImageTransitionResourceStates(newLayout);
 
@@ -584,7 +581,6 @@ namespace ProjectA {
 			resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			resourceBarrier.Transition.pResource = image->resource.Get();
 			resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-			resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
 			if (image->getSampleCount() > 1) {
 				resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
@@ -592,6 +588,8 @@ namespace ProjectA {
 			else {
 				resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 			}
+
+			resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
 			commandList->ResourceBarrier(1, &resourceBarrier);
 		}

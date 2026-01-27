@@ -87,7 +87,7 @@ namespace ProjectA {
 					}
 					case DescriptorType::STORAGE_IMAGE: {
 						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
-						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
 						descriptorRange.NumDescriptors = binding.descriptorCount;
 						descriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
 						descriptorRange.RegisterSpace = 0;

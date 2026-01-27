@@ -1,24 +1,9 @@
 #version 440
 
-// const vec2 DROP_SHADOW_OFFSET = vec2(0.0, 0.001);
-// const vec4 DROP_SHADOW_COLOR = vec4(vec3(0.4), 1.0);
-
-const float ALPHA_THRESHOLD = 0.5;
-
-// NOTE
-// 64 is the default font size.
-// For this size, 0.05 is a good smoothness value.
-// For sizes below 64, the smoothness value increases exponentially.
-// 32 -> 0.1 (up to 0.15)
-// 28 -> ~0.15
-// 16 -> 0.2 (up to 0.25)
-// For sizes above, the smoothness stays the same (e.g. ~0.05 for 112px).
-// TODO: Dynamically update the smoothness. Also try playing with the alpha threshold.
-const float SMOOTHNESS = 0.15;
-
 in VertexOutput {
 	layout(location = 0) vec3 textureCoordinate;
 	layout(location = 1) flat vec4 color;
+	layout(location = 2) flat float fontSize;
 } vertexOutput;
 
 layout(set = 0, binding = 1) uniform sampler2DArray textureArraySampler;
@@ -26,12 +11,16 @@ layout(set = 0, binding = 1) uniform sampler2DArray textureArraySampler;
 layout(location = 0) out vec4 fragment;
 
 void main() {
-	float value = smoothstep(ALPHA_THRESHOLD - SMOOTHNESS, ALPHA_THRESHOLD + SMOOTHNESS, texture(textureArraySampler, vertexOutput.textureCoordinate).r);
+	const float MIN_THRESHOLD_MULTIPLIER = 1.0 / 64.0 * -0.04;
+	const float MIN_SMOOTHNESS_MULTIPLIER = 1.0 / 64.0 * 0.05;
 
-	fragment = value * vertexOutput.color;
+	uint smallFontSize = uint(vertexOutput.fontSize < 64.0);
+	float inverseFontSize = 64.0 - vertexOutput.fontSize;
+	float threshold = smallFontSize * inverseFontSize * MIN_THRESHOLD_MULTIPLIER + 0.5;
+	float smoothness = smallFontSize * inverseFontSize * MIN_SMOOTHNESS_MULTIPLIER + 0.05;
 
-	/* float offsetDistance = texture(glyphMapSampler, vertexOutput.imageCoordinate.xy - DROP_SHADOW_OFFSET).r;
-	float dropShadow = smoothstep(0.0, 1.0, offsetDistance);
+	float _sample = texture(textureArraySampler, vertexOutput.textureCoordinate).r;
+	float _distance = smoothstep(threshold - smoothness, threshold + smoothness, _sample);
 
-	fragment = mix(DROP_SHADOW_COLOR * dropShadow, fragment, fragment.a); */
+	fragment = _distance * vertexOutput.color;
 }

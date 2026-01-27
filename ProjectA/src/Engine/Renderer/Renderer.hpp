@@ -92,23 +92,12 @@ namespace ProjectA {
 		private:
 			static GraphicsAPI graphicsApi;
 			static scope<GraphicsAdapter> adapter;
-
 			static uint32 imageIndex;
-
-			// TODO: Use scope.
 			static ref<Swapchain> swapchain;
-
-			// TODO: Use scope.
-			static std::array<ref<CommandEncoder>, Application::MAX_FRAMES_IN_FLIGHT> commandEncoders;
-
-			// TODO: Use scope.
-			static std::array<ref<Fence>, Application::MAX_FRAMES_IN_FLIGHT> flightFences;
-
-			// TODO: Use scope.
-			static std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> acquireNextImageSemaphores;
-
-			// TODO: Use scope.
-			static std::array<ref<Semaphore>, Application::MAX_FRAMES_IN_FLIGHT> finishedRenderSemaphores;
+			static sequence<ref<CommandEncoder>> commandEncoders;
+			static sequence<ref<Fence>> flightFences;
+			static sequence<ref<Semaphore>> acquireNextImageSemaphores;
+			static sequence<ref<Semaphore>> finishedRenderSemaphores;
 
 		private:
 			const Layer* layer;
