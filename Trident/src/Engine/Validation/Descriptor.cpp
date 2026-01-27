@@ -4,12 +4,26 @@
 #include "pch.hpp"
 
 #ifdef BUILD_MODE_DEBUG
-	#include "Engine/API/Rendering/SampleCount.hpp"
 	#include "Engine/Renderer/Renderer.hpp"
 #endif
 
 namespace Trident {
 	#ifdef BUILD_MODE_DEBUG
+		static bool validateSampleCount(uint8 sampleCount) {
+			switch (sampleCount) {
+				case 1:
+				case 2:
+				case 4:
+				case 8:
+				case 16:
+				case 32:
+				case 64:
+					return true;
+				default:
+					return false;
+			}
+		}
+
 		void DescriptorGuard(const AttachmentImageDescriptor& descriptor) {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
