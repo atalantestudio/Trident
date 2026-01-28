@@ -234,9 +234,9 @@ namespace Trident {
 			layerIndex = 0;
 
 			while (layerIndex < copyRegion.imageLayerCount) {
-				textureCopyLocation.SubresourceIndex = copyRegion.imageLayerOffset + layerIndex;
+				bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset + layerSize * layerIndex;
 
-				bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset + layerSize * textureCopyLocation.SubresourceIndex;
+				textureCopyLocation.SubresourceIndex = copyRegion.imageLayerOffset + layerIndex;
 
 				commandList->CopyTextureRegion(&textureCopyLocation, copyRegion.imageOffsetX, copyRegion.imageOffsetY, copyRegion.imageOffsetZ, &bufferCopyLocation, nullptr);
 
