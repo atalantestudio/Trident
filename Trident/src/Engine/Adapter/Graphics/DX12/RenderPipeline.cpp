@@ -24,11 +24,11 @@ namespace Trident {
 
 		ADAPTER_ASSERT(descriptor.colorBlendState.attachments.size() <= 8 && descriptor.renderPass->getAttachmentCount() <= 8, "Too many color blend attachments.");
 
+		HRESULT result;
+
 		const ref<Subpass> subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
 		const ref<DX12::ShaderModule> vertexShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.vertexShaderModule);
 		const ref<DX12::ShaderModule> fragmentShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.fragmentShaderModule);
-
-		HRESULT result;
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescriptor{};
 		graphicsPipelineStateDescriptor.pRootSignature = pipelineLayout->rootSignature.Get();
@@ -42,8 +42,6 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.HS.BytecodeLength = 0;
 		graphicsPipelineStateDescriptor.GS.pShaderBytecode = nullptr;
 		graphicsPipelineStateDescriptor.GS.BytecodeLength = 0;
-
-		// TODO: Set correct stream output.
 		graphicsPipelineStateDescriptor.StreamOutput.pSODeclaration = nullptr;
 		graphicsPipelineStateDescriptor.StreamOutput.NumEntries = 0;
 		graphicsPipelineStateDescriptor.StreamOutput.pBufferStrides = nullptr;
@@ -53,7 +51,7 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.BlendState.AlphaToCoverageEnable = FALSE;
 		graphicsPipelineStateDescriptor.BlendState.IndependentBlendEnable = FALSE;
 
-		uint32 renderTargetBlendDescriptorIndex = 0;
+		UINT renderTargetBlendDescriptorIndex = 0;
 
 		while (renderTargetBlendDescriptorIndex < descriptor.colorBlendState.attachments.size()) {
 			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[renderTargetBlendDescriptorIndex];
@@ -103,32 +101,22 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.DepthStencilState.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
 		graphicsPipelineStateDescriptor.DepthStencilState.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
 
-		uint32 inputElementDescriptorIndex = 0;
-		uint32 vertexInputBindingIndex = 0;
-		uint32 vertexInputAttributeIndex = 0;
+		UINT inputElementDescriptorIndex = 0;
 
-		while (vertexInputBindingIndex < descriptor.vertexInputBindings.count()) {
-			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
-
-			inputElementDescriptorIndex += static_cast<uint32>(vertexInputBinding.getAttributes().size());
-
-			vertexInputBindingIndex += 1;
+		for (const VertexInputBinding& vertexInputBinding : descriptor.vertexInputBindings) {
+			inputElementDescriptorIndex += static_cast<UINT>(vertexInputBinding.getAttributes().size());
 		}
 
 		sequence<D3D12_INPUT_ELEMENT_DESC> inputElementDescriptors(inputElementDescriptorIndex);
+		UINT vertexInputBindingIndex = 0;
 
 		inputElementDescriptorIndex = 0;
-		vertexInputBindingIndex = 0;
 
 		while (vertexInputBindingIndex < descriptor.vertexInputBindings.count()) {
 			const VertexInputBinding& vertexInputBinding = descriptor.vertexInputBindings[vertexInputBindingIndex];
 			const std::vector<VertexInputAttribute>& vertexInputAttributes = vertexInputBinding.getAttributes();
 
-			vertexInputAttributeIndex = 0;
-
-			while (vertexInputAttributeIndex < vertexInputAttributes.size()) {
-				const VertexInputAttribute& vertexInputAttribute = vertexInputAttributes[vertexInputAttributeIndex];
-
+			for (const VertexInputAttribute& vertexInputAttribute : vertexInputAttributes) {
 				D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = inputElementDescriptors[inputElementDescriptorIndex];
 				inputElementDescriptor.SemanticName = "VERTEX_INPUT_ATTRIBUTE";
 				inputElementDescriptor.SemanticIndex = inputElementDescriptorIndex;
@@ -146,7 +134,6 @@ namespace Trident {
 				}
 
 				inputElementDescriptorIndex += 1;
-				vertexInputAttributeIndex += 1;
 			}
 
 			vertexInputBindingIndex += 1;
