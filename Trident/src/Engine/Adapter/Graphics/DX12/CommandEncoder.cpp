@@ -529,6 +529,46 @@ namespace Trident {
 		const ref<Subpass> subpass = renderPass->getSubpass(subpassIndex);
 		const sequence<AttachmentReference>& colorAttachmentReferences = subpass->getColorAttachmentReferences();
 
+		if (subpass->getInputAttachmentReferenceCount() > 0) {
+			const sequence<AttachmentReference>& inputAttachmentReferences = subpass->getInputAttachmentReferences();
+
+			sequence<D3D12_RESOURCE_BARRIER> resourceBarriers(subpass->getInputAttachmentReferenceCount());
+			UINT inputAttachmentReferenceIndex = 0;
+
+			while (inputAttachmentReferenceIndex < inputAttachmentReferences.count()) {
+				const AttachmentReference& inputAttachmentReference = inputAttachmentReferences[inputAttachmentReferenceIndex];
+
+				if (inputAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+					ENGINE_ERROR_UNIMPLEMENTED();
+
+					inputAttachmentReferenceIndex += 1;
+
+					continue;
+				}
+
+				const DX12::Image* image = static_cast<const DX12::Image*>(framebuffer->imageViews[inputAttachmentReference.index]->getImage());
+
+				D3D12_RESOURCE_BARRIER& resourceBarrier = resourceBarriers[inputAttachmentReferenceIndex];
+				resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+				resourceBarrier.Transition.pResource = image->resource.Get();
+				resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+				if (isDepthFormat(image->getFormat())) {
+					resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+				}
+				else {
+					resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+				}
+
+				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
+				inputAttachmentReferenceIndex += 1;
+			}
+
+			commandList->ResourceBarrier(static_cast<UINT>(resourceBarriers.count()), &resourceBarriers[0]);
+		}
+
 		UINT renderTargetCount = 0;
 
 		for (const AttachmentReference& colorAttachmentReference : colorAttachmentReferences) {
@@ -540,6 +580,7 @@ namespace Trident {
 		}
 
 		sequence<D3D12_CPU_DESCRIPTOR_HANDLE> renderTargetViewHandles(renderTargetCount);
+		std::vector<D3D12_RESOURCE_BARRIER> resourceBarriers;
 		UINT renderTargetIndex = 0;
 		UINT colorAttachmentIndex = 0;
 
@@ -547,43 +588,57 @@ namespace Trident {
 			const AttachmentReference& colorAttachmentReference = colorAttachmentReferences[renderTargetIndex];
 
 			if (colorAttachmentReference.index == AttachmentReference::UNUSED_ATTACHMENT_INDEX) {
+				ENGINE_ERROR_UNIMPLEMENTED();
+
 				renderTargetIndex += 1;
 
 				continue;
 			}
 
 			const Attachment& colorAttachment = renderPass->getAttachment(colorAttachmentReference.index);
+			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[colorAttachmentReference.index]);
+			const DX12::Image* image = static_cast<const DX12::Image*>(imageView->getImage());
 
 			if (colorAttachment.finalLayout == ImageLayout::PRESENT_SRC) {
 				presentRenderTargetIndex = colorAttachmentReference.index;
+
+				D3D12_RESOURCE_BARRIER resourceBarrier{};
+				resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+				resourceBarrier.Transition.pResource = image->resource.Get();
+				resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+				if (image->getSampleCount() > 1) {
+					resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
+				}
+				else {
+					resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+				}
+
+				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+				resourceBarriers.emplace_back(resourceBarrier);
 			}
 
-			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[colorAttachmentReference.index]);
+			if (image->usage & ImageUsage::INPUT_ATTACHMENT) {
+				D3D12_RESOURCE_BARRIER resourceBarrier{};
+				resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+				resourceBarrier.Transition.pResource = image->resource.Get();
+				resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+				resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+				resourceBarriers.emplace_back(resourceBarrier);
+			}
 
 			renderTargetViewHandles[colorAttachmentIndex] = imageView->cpuDescriptorHandle;
 			colorAttachmentIndex += 1;
 			renderTargetIndex += 1;
 		}
 
-		if (presentRenderTargetIndex < framebuffer->imageViews.count()) {
-			const DX12::Image* image = static_cast<const DX12::Image*>(framebuffer->imageViews[presentRenderTargetIndex]->getImage());
-
-			D3D12_RESOURCE_BARRIER resourceBarrier{};
-			resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			resourceBarrier.Transition.pResource = image->resource.Get();
-			resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-			if (image->getSampleCount() > 1) {
-				resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
-			}
-			else {
-				resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-			}
-
-			resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-
-			commandList->ResourceBarrier(1, &resourceBarrier);
+		if (resourceBarriers.size() > 0) {
+			commandList->ResourceBarrier(static_cast<UINT>(resourceBarriers.size()), &resourceBarriers[0]);
 		}
 
 		const D3D12_CPU_DESCRIPTOR_HANDLE* depthStencilViewHandlePointer = nullptr;
@@ -593,6 +648,19 @@ namespace Trident {
 		if (subpass->hasDepthStencilAttachmentReference()) {
 			const AttachmentReference& depthStencilAttachmentReference = subpass->getDepthStencilAttachmentReference();
 			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[depthStencilAttachmentReference.index]);
+			const DX12::Image* image = static_cast<const DX12::Image*>(imageView->getImage());
+
+			if (image->usage & ImageUsage::INPUT_ATTACHMENT) {
+				D3D12_RESOURCE_BARRIER resourceBarrier{};
+				resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+				resourceBarrier.Transition.pResource = image->resource.Get();
+				resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+				resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+
+				commandList->ResourceBarrier(1, &resourceBarrier);
+			}
 
 			depthStencilViewHandle = imageView->cpuDescriptorHandle;
 			depthStencilViewHandlePointer = &depthStencilViewHandle;

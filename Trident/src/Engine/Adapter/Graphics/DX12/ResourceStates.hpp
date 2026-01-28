@@ -30,6 +30,10 @@ namespace Trident::DX12 {
 			return D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
 		}
 
+		if (usage & ImageUsage::INPUT_ATTACHMENT) {
+			return D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		}
+
 		D3D12_RESOURCE_STATES resourceStates = D3D12_RESOURCE_STATE_COMMON;
 
 		if (usage & ImageUsage::TRANSFER_SRC) {
