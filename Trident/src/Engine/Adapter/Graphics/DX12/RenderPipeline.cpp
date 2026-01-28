@@ -156,7 +156,7 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.InputLayout.NumElements = static_cast<UINT>(inputElementDescriptors.count());
 		graphicsPipelineStateDescriptor.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 		graphicsPipelineStateDescriptor.PrimitiveTopologyType = getPrimitiveTopologyType(descriptor.primitiveTopology);
-		graphicsPipelineStateDescriptor.NumRenderTargets = descriptor.renderPass->getAttachmentCount();
+		graphicsPipelineStateDescriptor.NumRenderTargets = subpass->getColorAttachmentReferenceCount();
 
 		const sequence<AttachmentReference>& colorAttachmentReferences = subpass->getColorAttachmentReferences();
 
