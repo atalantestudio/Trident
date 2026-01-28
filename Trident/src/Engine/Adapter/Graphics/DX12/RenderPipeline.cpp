@@ -75,10 +75,10 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 		graphicsPipelineStateDescriptor.RasterizerState.CullMode = getCullMode(descriptor.cullMode);
 		graphicsPipelineStateDescriptor.RasterizerState.FrontCounterClockwise = descriptor.frontFace == FrontFace::COUNTER_CLOCKWISE;
-		graphicsPipelineStateDescriptor.RasterizerState.DepthBias = 0;
-		graphicsPipelineStateDescriptor.RasterizerState.DepthBiasClamp = 0.0f;
-		graphicsPipelineStateDescriptor.RasterizerState.SlopeScaledDepthBias = 0.0f;
-		graphicsPipelineStateDescriptor.RasterizerState.DepthClipEnable = FALSE;
+		graphicsPipelineStateDescriptor.RasterizerState.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
+		graphicsPipelineStateDescriptor.RasterizerState.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
+		graphicsPipelineStateDescriptor.RasterizerState.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+		graphicsPipelineStateDescriptor.RasterizerState.DepthClipEnable = TRUE;
 
 		// TODO: Set correct multisample state (depends on the render pass).
 		graphicsPipelineStateDescriptor.RasterizerState.MultisampleEnable = FALSE;
@@ -90,8 +90,8 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.DepthStencilState.DepthWriteMask = static_cast<D3D12_DEPTH_WRITE_MASK>(descriptor.depthStencilState.depthWrite);
 		graphicsPipelineStateDescriptor.DepthStencilState.DepthFunc = static_cast<D3D12_COMPARISON_FUNC>(static_cast<uint8>(descriptor.depthStencilState.compareOperation) + 1);
 		graphicsPipelineStateDescriptor.DepthStencilState.StencilEnable = FALSE;
-		graphicsPipelineStateDescriptor.DepthStencilState.StencilReadMask = 0;
-		graphicsPipelineStateDescriptor.DepthStencilState.StencilWriteMask = 0;
+		graphicsPipelineStateDescriptor.DepthStencilState.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
+		graphicsPipelineStateDescriptor.DepthStencilState.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
 		graphicsPipelineStateDescriptor.DepthStencilState.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
 		graphicsPipelineStateDescriptor.DepthStencilState.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
 		graphicsPipelineStateDescriptor.DepthStencilState.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
