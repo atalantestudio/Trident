@@ -117,14 +117,14 @@ namespace Trident {
 			frameInFlightIndex += 1;
 		}
 
-		swapchain.~shared_ptr();
-
-		adapter->~GraphicsAdapter();
-
 		commandEncoders = sequence<ref<CommandEncoder>>();
 		flightFences = sequence<ref<Fence>>();
 		acquireNextImageSemaphores = sequence<ref<Semaphore>>();
 		finishedRenderSemaphores = sequence<ref<Semaphore>>();
+
+		swapchain.~shared_ptr();
+
+		adapter->~GraphicsAdapter();
 	}
 
 	void Renderer::resize(WindowResizeEvent& event) {}

@@ -43,7 +43,9 @@ namespace Trident {
 			rootParameterCount += 1;
 		}
 
-		if (samplerDescriptorRangeCount > 0) {
+		samplerDescriptorTable = samplerDescriptorRangeCount > 0;
+
+		if (samplerDescriptorTable) {
 			samplerRootParameterIndex = rootParameterCount;
 			samplerDescriptorRangeOffset = viewDescriptorRangeCount;
 			rootParameterCount += 1;
@@ -156,7 +158,7 @@ namespace Trident {
 			rootParameterOffset += 1;
 		}
 
-		if (samplerDescriptorRangeCount > 0) {
+		if (samplerDescriptorTable) {
 			D3D12_ROOT_PARAMETER1& samplerRootParameter = rootParameters[samplerRootParameterIndex];
 			samplerRootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 			samplerRootParameter.DescriptorTable.NumDescriptorRanges = samplerDescriptorRangeCount;

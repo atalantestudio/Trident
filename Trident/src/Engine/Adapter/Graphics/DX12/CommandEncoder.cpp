@@ -47,7 +47,8 @@ namespace Trident {
 
 		setRenderTargets();
 
-		D3D12_RECT rectangle{};
+		// TODO: Restore.
+		/* D3D12_RECT rectangle{};
 		rectangle.left = 0;
 		rectangle.top = 0;
 		rectangle.right = framebuffer->getExtent().width;
@@ -77,7 +78,7 @@ namespace Trident {
 			}
 
 			attachmentIndex += 1;
-		}
+		} */
 
 		commandCount += 1;
 	}
@@ -99,32 +100,23 @@ namespace Trident {
 		commandList->SetGraphicsRootSignature(pipeline->pipelineLayout->rootSignature.Get());
 		commandList->IASetPrimitiveTopology(pipeline->primitiveTopology);
 
+		samplerDescriptorTable = pipeline->pipelineLayout->samplerDescriptorTable;
+
 		commandCount += 1;
 	}
 
 	void DX12::CommandEncoder::bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, const sequence<ref<Trident::DescriptorSet>>& descriptorSets) {
-		// TODO: Replace with sequence<T>.
-		std::vector<ID3D12DescriptorHeap*> descriptorHeaps;
+		ID3D12DescriptorHeap* viewDescriptorHeap = device.memoryAllocator->getCurrentViewDescriptorHeapAllocation().descriptorHeap;
+		ID3D12DescriptorHeap* samplerDescriptorHeap = device.memoryAllocator->getCurrentSamplerDescriptorHeapAllocation().descriptorHeap;
+		ID3D12DescriptorHeap* descriptorHeaps[2] = {viewDescriptorHeap, samplerDescriptorHeap};
 
-		for (const ref<Trident::DescriptorSet> descriptorSet : descriptorSets) {
-			const ref<DX12::DescriptorSet> _descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSet);
+		commandList->SetDescriptorHeaps(2, &descriptorHeaps[0]);
 
-			if (_descriptorSet->viewDescriptorHeap) {
-				descriptorHeaps.emplace_back(_descriptorSet->viewDescriptorHeap.Get());
-			}
-
-			if (_descriptorSet->samplerDescriptorHeap) {
-				descriptorHeaps.emplace_back(_descriptorSet->samplerDescriptorHeap.Get());
-			}
-		}
-
-		commandList->SetDescriptorHeaps(static_cast<UINT>(descriptorHeaps.size()), &descriptorHeaps[0]);
-
-		UINT descriptorSetIndex = 0;
 		UINT rootParameterIndex = 0;
 
 		if (computePipelineBound) {
-			while (descriptorSetIndex < descriptorSets.count()) {
+			// TODO: Restore.
+			/* while (descriptorSetIndex < descriptorSets.count()) {
 				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
 
 				if (descriptorSet->viewDescriptorHeap) {
@@ -140,26 +132,25 @@ namespace Trident {
 				}
 
 				descriptorSetIndex += 1;
-			}
+			} */
 		}
 		else {
-			while (descriptorSetIndex < descriptorSets.count()) {
-				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
+			while (rootParameterIndex < descriptorSets.count()) {
+				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[rootParameterIndex]);
 
-				if (descriptorSet->viewDescriptorHeap) {
-					commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorSet->viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+				descriptorOffset.ptr += descriptorSet->viewDescriptorHandleOffset * device.memoryAllocator->viewDescriptorHandleIncrementSize;
 
-					rootParameterIndex += 1;
-				}
+				commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorOffset);
 
-				if (descriptorSet->samplerDescriptorHeap) {
-					commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-
-					rootParameterIndex += 1;
-				}
-
-				descriptorSetIndex += 1;
+				rootParameterIndex += 1;
 			}
+
+			// TODO
+			/* if (samplerDescriptorTable) {
+				// Bind sampler descriptor table to the last root parameter.
+				commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+			} */
 		}
 
 		commandCount += 1;
@@ -515,6 +506,7 @@ namespace Trident {
 		framebuffer = nullptr;
 		subpassIndex = 0;
 		presentRenderTargetIndex = max<UINT>();
+		samplerDescriptorTable = false;
 	}
 
 	void DX12::CommandEncoder::bindIndexBuffer(ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {

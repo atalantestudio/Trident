@@ -119,85 +119,17 @@ namespace Trident {
 	}
 
 	sequence<ref<DescriptorSet>> DX12::Device::allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) {
-		HRESULT result;
 		sequence<ref<Trident::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 		UINT descriptorSetIndex = 0;
-		UINT bindingIndex = 0;
-		UINT samplerDescriptorCount = 0;
-		UINT viewDescriptorCount = 0;
 
 		while (descriptorSetIndex < descriptorSetLayouts.count()) {
 			const ref<DescriptorSetLayout> descriptorSetLayout = descriptorSetLayouts[descriptorSetIndex];
 
-			bindingIndex = 0;
-			samplerDescriptorCount = 0;
-			viewDescriptorCount = 0;
-
 			ref<DX12::DescriptorSet> descriptorSet = createRef<DX12::DescriptorSet>();
 			descriptorSet->bindings = sequence<DX12::DescriptorSet::DescriptorSetBinding>(descriptorSetLayout->bindings.count());
+			descriptorSet->viewDescriptorHandleOffset = static_cast<UINT64>(memoryAllocator->getCurrentViewDescriptorHeapAllocation().descriptorOffset);
 
-			for (const DescriptorSetLayoutBinding& binding : descriptorSetLayout->bindings) {
-				switch (binding.descriptorType) {
-					case DescriptorType::COMBINED_IMAGE_SAMPLER: {
-						viewDescriptorCount += binding.descriptorCount;
-						samplerDescriptorCount += binding.descriptorCount;
-
-						break;
-					}
-					case DescriptorType::STORAGE_IMAGE: {
-						viewDescriptorCount += binding.descriptorCount;
-
-						break;
-					}
-					case DescriptorType::UNIFORM_BUFFER: {
-						viewDescriptorCount += binding.descriptorCount;
-
-						break;
-					}
-					case DescriptorType::STORAGE_BUFFER: {
-						viewDescriptorCount += binding.descriptorCount;
-
-						break;
-					}
-					case DescriptorType::INPUT_ATTACHMENT: {
-						viewDescriptorCount += binding.descriptorCount;
-
-						break;
-					}
-					default: {
-						ADAPTER_ASSERT(false, "Unsupported descriptor type.");
-
-						break;
-					}
-				}
-			}
-
-			if (viewDescriptorCount > 0) {
-				D3D12_DESCRIPTOR_HEAP_DESC cbvSrvUavDescriptorHeapDescriptor{};
-				cbvSrvUavDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-				cbvSrvUavDescriptorHeapDescriptor.NumDescriptors = viewDescriptorCount;
-				cbvSrvUavDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-				cbvSrvUavDescriptorHeapDescriptor.NodeMask = 0;
-
-				result = device->CreateDescriptorHeap(&cbvSrvUavDescriptorHeapDescriptor, IID_PPV_ARGS(&descriptorSet->viewDescriptorHeap));
-
-				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create CBV/SRV/UAV descriptor heap.");
-			}
-
-			if (samplerDescriptorCount > 0) {
-				D3D12_DESCRIPTOR_HEAP_DESC samplerDescriptorHeapDescriptor{};
-				samplerDescriptorHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-				samplerDescriptorHeapDescriptor.NumDescriptors = samplerDescriptorCount;
-				samplerDescriptorHeapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-				samplerDescriptorHeapDescriptor.NodeMask = 0;
-
-				result = device->CreateDescriptorHeap(&samplerDescriptorHeapDescriptor, IID_PPV_ARGS(&descriptorSet->samplerDescriptorHeap));
-
-				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create sampler descriptor heap.");
-			}
-
-			UINT viewDescriptorOffset = 0;
-			UINT samplerDescriptorOffset = 0;
+			UINT bindingIndex = 0;
 
 			while (bindingIndex < descriptorSetLayout->bindings.count()) {
 				const DescriptorSetLayoutBinding& binding = descriptorSetLayout->bindings[bindingIndex];
@@ -205,48 +137,12 @@ namespace Trident {
 				DX12::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[bindingIndex];
 				descriptorSetBinding.descriptorType = binding.descriptorType;
 				descriptorSetBinding.descriptorCount = binding.descriptorCount;
-				descriptorSetBinding.viewDescriptorOffset = viewDescriptorOffset;
-				descriptorSetBinding.samplerDescriptorOffset = samplerDescriptorOffset;
-
-				switch (binding.descriptorType) {
-					case DescriptorType::COMBINED_IMAGE_SAMPLER: {
-						viewDescriptorOffset += binding.descriptorCount;
-						samplerDescriptorOffset += binding.descriptorCount;
-
-						break;
-					}
-					case DescriptorType::STORAGE_IMAGE: {
-						viewDescriptorOffset += binding.descriptorCount;
-
-						break;
-					}
-					case DescriptorType::UNIFORM_BUFFER: {
-						viewDescriptorOffset += binding.descriptorCount;
-
-						break;
-					}
-					case DescriptorType::STORAGE_BUFFER: {
-						viewDescriptorOffset += binding.descriptorCount;
-
-						break;
-					}
-					case DescriptorType::INPUT_ATTACHMENT: {
-						viewDescriptorOffset += binding.descriptorCount;
-
-						break;
-					}
-					default: {
-						ADAPTER_ASSERT(false, "Unsupported descriptor type.");
-
-						break;
-					}
-				}
+				descriptorSetBinding.viewDescriptorHandleOffset = memoryAllocator->allocateView(binding.descriptorCount);
 
 				bindingIndex += 1;
 			}
 
 			descriptorSets[descriptorSetIndex] = descriptorSet;
-
 			descriptorSetIndex += 1;
 		}
 
@@ -268,190 +164,83 @@ namespace Trident {
 	}
 
 	void DX12::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
-		const UINT viewDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		const UINT samplerDescriptorHandleIncrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
 			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
 			const DX12::DescriptorSet::DescriptorSetBinding& binding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
 			switch (binding.descriptorType) {
 				case DescriptorType::COMBINED_IMAGE_SAMPLER: {
-					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = descriptorSet->viewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-					viewDescriptorHandle.ptr += binding.viewDescriptorOffset * viewDescriptorHandleIncrementSize;
-
-					D3D12_CPU_DESCRIPTOR_HANDLE samplerDescriptorHandle = descriptorSet->samplerDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-					samplerDescriptorHandle.ptr += binding.samplerDescriptorOffset * samplerDescriptorHandleIncrementSize;
-
+					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
 					UINT descriptorImageIndex = 0;
 
 					while (descriptorImageIndex < writeDescriptorSet.descriptorImages.count()) {
 						const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
-						const DX12::Image* image = static_cast<const DX12::Image*>(descriptorImage.imageView->getImage());
-
-						D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
-						shaderResourceViewDescriptor.Format = getImageFormat(image->getFormat());
-
-						if (image->getLayerCount() > 1) {
-							shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-							shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-							shaderResourceViewDescriptor.Texture2DArray.MostDetailedMip = descriptorImage.imageView->getMipLevelOffset();
-							shaderResourceViewDescriptor.Texture2DArray.MipLevels = descriptorImage.imageView->getMipLevelCount();
-							shaderResourceViewDescriptor.Texture2DArray.FirstArraySlice = descriptorImage.imageView->getLayerOffset();
-							shaderResourceViewDescriptor.Texture2DArray.ArraySize = descriptorImage.imageView->getLayerCount();
-							shaderResourceViewDescriptor.Texture2DArray.PlaneSlice = 0;
-							shaderResourceViewDescriptor.Texture2DArray.ResourceMinLODClamp = 0.0f;
-						}
-						else {
-							shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-							shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-							shaderResourceViewDescriptor.Texture2D.MostDetailedMip = descriptorImage.imageView->getMipLevelOffset();
-							shaderResourceViewDescriptor.Texture2D.MipLevels = descriptorImage.imageView->getMipLevelCount();
-							shaderResourceViewDescriptor.Texture2D.PlaneSlice = 0;
-							shaderResourceViewDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
-						}
-
-						device->CreateShaderResourceView(image->resource.Get(), &shaderResourceViewDescriptor, viewDescriptorHandle);
-
 						const ref<DX12::Sampler> sampler = std::static_pointer_cast<DX12::Sampler>(descriptorImage.sampler);
 
-						device->CreateSampler(&sampler->samplerDescriptor, samplerDescriptorHandle);
+						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
+						memoryAllocator->allocateSampler(&sampler->samplerDescriptor);
 
-						viewDescriptorHandle.ptr += viewDescriptorHandleIncrementSize;
-						samplerDescriptorHandle.ptr += samplerDescriptorHandleIncrementSize;
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 						descriptorImageIndex += 1;
 					}
 
 					break;
 				}
 				case DescriptorType::STORAGE_IMAGE: {
-					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = descriptorSet->viewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-					viewDescriptorHandle.ptr += binding.viewDescriptorOffset * viewDescriptorHandleIncrementSize;
-
+					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
 					UINT descriptorImageIndex = 0;
 
 					while (descriptorImageIndex < writeDescriptorSet.descriptorImages.count()) {
 						const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
-						const DX12::Image* image = static_cast<const DX12::Image*>(descriptorImage.imageView->getImage());
 
-						ADAPTER_ASSERT(image->getType() == ImageType::TEXTURE_2D, "Images other than TEXTURE_2D are not supported.");
+						memoryAllocator->writeStorageImage(viewDescriptorHandle, descriptorImage);
 
-						D3D12_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDescriptor{};
-						unorderedAccessViewDescriptor.Format = getImageFormat(image->getFormat());
-
-						if (image->getLayerCount() > 1) {
-							unorderedAccessViewDescriptor.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
-							unorderedAccessViewDescriptor.Texture2DArray.MipSlice = descriptorImage.imageView->getMipLevelOffset();
-							unorderedAccessViewDescriptor.Texture2DArray.FirstArraySlice = descriptorImage.imageView->getLayerOffset();
-							unorderedAccessViewDescriptor.Texture2DArray.ArraySize = descriptorImage.imageView->getLayerCount();
-							unorderedAccessViewDescriptor.Texture2DArray.PlaneSlice = 0;
-						}
-						else {
-							unorderedAccessViewDescriptor.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-							unorderedAccessViewDescriptor.Texture2D.MipSlice = descriptorImage.imageView->getMipLevelOffset();
-							unorderedAccessViewDescriptor.Texture2D.PlaneSlice = 0;
-						}
-
-						device->CreateUnorderedAccessView(image->resource.Get(), nullptr, &unorderedAccessViewDescriptor, viewDescriptorHandle);
-
-						viewDescriptorHandle.ptr += viewDescriptorHandleIncrementSize;
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 						descriptorImageIndex += 1;
 					}
 
 					break;
 				}
 				case DescriptorType::UNIFORM_BUFFER: {
-					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = descriptorSet->viewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-					viewDescriptorHandle.ptr += binding.viewDescriptorOffset * viewDescriptorHandleIncrementSize;
-
+					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
 					UINT descriptorBufferIndex = 0;
 
 					while (descriptorBufferIndex < writeDescriptorSet.descriptorBuffers.count()) {
 						const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
-						const ref<DX12::Buffer> buffer = std::static_pointer_cast<DX12::Buffer>(descriptorBuffer.buffer);
 
-						D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDescriptor{};
-						constantBufferViewDescriptor.BufferLocation = buffer->resource->GetGPUVirtualAddress() + descriptorBuffer.offset;
+						memoryAllocator->writeUniformBuffer(viewDescriptorHandle, descriptorBuffer);
 
-						// NOTE: Constant buffer views need to be aligned to 256.
-						constantBufferViewDescriptor.SizeInBytes = (static_cast<UINT>(descriptorBuffer.size) + D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1);
-
-						device->CreateConstantBufferView(&constantBufferViewDescriptor, viewDescriptorHandle);
-
-						viewDescriptorHandle.ptr += viewDescriptorHandleIncrementSize;
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 						descriptorBufferIndex += 1;
 					}
 
 					break;
 				}
 				case DescriptorType::STORAGE_BUFFER: {
-					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = descriptorSet->viewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-					viewDescriptorHandle.ptr += binding.viewDescriptorOffset * viewDescriptorHandleIncrementSize;
-
+					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
 					UINT descriptorBufferIndex = 0;
 
 					while (descriptorBufferIndex < writeDescriptorSet.descriptorBuffers.count()) {
 						const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
-						const ref<DX12::Buffer> buffer = std::static_pointer_cast<DX12::Buffer>(descriptorBuffer.buffer);
 
-						D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
-						shaderResourceViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
-						shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-						shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-						shaderResourceViewDescriptor.Buffer.FirstElement = 0;
-						shaderResourceViewDescriptor.Buffer.NumElements = static_cast<UINT>(buffer->size);
-						shaderResourceViewDescriptor.Buffer.StructureByteStride = 1;
-						shaderResourceViewDescriptor.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+						memoryAllocator->writeStorageBuffer(viewDescriptorHandle, descriptorBuffer);
 
-						device->CreateShaderResourceView(buffer->resource.Get(), &shaderResourceViewDescriptor, viewDescriptorHandle);
-
-						viewDescriptorHandle.ptr += viewDescriptorHandleIncrementSize;
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 						descriptorBufferIndex += 1;
 					}
 
 					break;
 				}
 				case DescriptorType::INPUT_ATTACHMENT: {
-					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = descriptorSet->viewDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-					viewDescriptorHandle.ptr += binding.viewDescriptorOffset * viewDescriptorHandleIncrementSize;
-
+					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
 					UINT descriptorImageIndex = 0;
 
 					while (descriptorImageIndex < writeDescriptorSet.descriptorImages.count()) {
 						const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
-						const DX12::Image* image = static_cast<const DX12::Image*>(descriptorImage.imageView->getImage());
 
-						ADAPTER_ASSERT(image->getType() == ImageType::TEXTURE_2D, "Images other than TEXTURE_2D are not supported.");
+						memoryAllocator->writeInputAttachment(viewDescriptorHandle, descriptorImage);
 
-						D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
-						shaderResourceViewDescriptor.Format = getImageFormat(image->getFormat());
-
-						if (shaderResourceViewDescriptor.Format == DXGI_FORMAT_D32_FLOAT) {
-							shaderResourceViewDescriptor.Format = DXGI_FORMAT_R32_FLOAT;
-						}
-
-						if (image->getLayerCount() > 1) {
-							shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-							shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-							shaderResourceViewDescriptor.Texture2DArray.MostDetailedMip = descriptorImage.imageView->getMipLevelOffset();
-							shaderResourceViewDescriptor.Texture2DArray.MipLevels = descriptorImage.imageView->getMipLevelCount();
-							shaderResourceViewDescriptor.Texture2DArray.FirstArraySlice = descriptorImage.imageView->getLayerOffset();
-							shaderResourceViewDescriptor.Texture2DArray.ArraySize = descriptorImage.imageView->getLayerCount();
-							shaderResourceViewDescriptor.Texture2DArray.PlaneSlice = 0;
-							shaderResourceViewDescriptor.Texture2DArray.ResourceMinLODClamp = 0.0f;
-						}
-						else {
-							shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-							shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-							shaderResourceViewDescriptor.Texture2D.MostDetailedMip = descriptorImage.imageView->getMipLevelOffset();
-							shaderResourceViewDescriptor.Texture2D.MipLevels = descriptorImage.imageView->getMipLevelCount();
-							shaderResourceViewDescriptor.Texture2D.PlaneSlice = 0;
-							shaderResourceViewDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
-						}
-
-						device->CreateShaderResourceView(image->resource.Get(), &shaderResourceViewDescriptor, viewDescriptorHandle);
-
-						viewDescriptorHandle.ptr += viewDescriptorHandleIncrementSize;
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 						descriptorImageIndex += 1;
 					}
 
@@ -482,5 +271,9 @@ namespace Trident {
 		for (const ref<Trident::Queue> queue : queues) {
 			queue->waitIdle();
 		}
+	}
+
+	void DX12::Device::setMemoryAllocator(ref<DX12::MemoryAllocator> memoryAllocator) {
+		this->memoryAllocator = memoryAllocator;
 	}
 }

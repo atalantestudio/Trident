@@ -12,15 +12,11 @@ namespace Trident {
 			struct DescriptorSetBinding {
 				DescriptorType descriptorType;
 				UINT descriptorCount;
-
-				// Offset from the start of the heap allocated in DescriptorSet.
-				UINT viewDescriptorOffset;
-				UINT samplerDescriptorOffset;
+				D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandleOffset;
 			};
 
 		public:
 			sequence<DescriptorSetBinding> bindings;
-			ComPtr<ID3D12DescriptorHeap> viewDescriptorHeap = nullptr;
-			ComPtr<ID3D12DescriptorHeap> samplerDescriptorHeap = nullptr;
+			UINT64 viewDescriptorHandleOffset;
 	};
 }

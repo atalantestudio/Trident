@@ -28,6 +28,8 @@ namespace Trident {
 		physicalDevice = createRef<DX12::PhysicalDevice>(*instance);
 		device = createRef<DX12::Device>(*instance, *physicalDevice);
 		memoryAllocator = createRef<DX12::MemoryAllocator>(*device);
+
+		device->setMemoryAllocator(memoryAllocator);
 	}
 
 	ref<Buffer> DX12::GraphicsAdapter::createBuffer(const BufferDescriptor& descriptor) const {

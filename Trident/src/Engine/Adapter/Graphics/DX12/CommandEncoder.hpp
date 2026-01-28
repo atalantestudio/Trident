@@ -69,6 +69,7 @@ namespace Trident {
 			ComPtr<ID3D12GraphicsCommandList> commandList;
 			uint32 commandCount = 0;
 			bool computePipelineBound = false;
+			bool samplerDescriptorTable = false;
 			ref<DX12::Framebuffer> framebuffer = nullptr;
 			UINT subpassIndex = 0;
 			UINT presentRenderTargetIndex = max<UINT>();

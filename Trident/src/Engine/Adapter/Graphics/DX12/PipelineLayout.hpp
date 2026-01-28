@@ -13,5 +13,6 @@ namespace Trident {
 
 		public:
 			ComPtr<ID3D12RootSignature> rootSignature;
+			bool samplerDescriptorTable;
 	};
 }
