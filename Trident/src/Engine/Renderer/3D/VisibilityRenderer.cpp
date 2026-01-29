@@ -510,7 +510,14 @@ namespace Trident {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Visibility/Visibility.vert");;
+		#ifdef GL_SOURCE_FROM_SPIRV
+			if (Renderer::getGraphicsApi() == GraphicsAPI::GL) {
+				// TODO: Create a pair of SPIR-V shaders compatible with the OpenGL adapter.
+				ENGINE_WARNING("The Visibility.*.spv shaders are not compatible with the OpenGL adapter.");
+			}
+		#endif
+
+		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Visibility/Visibility.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Visibility/Visibility.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
