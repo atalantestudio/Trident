@@ -31,7 +31,9 @@ namespace Trident::DX12 {
 		}
 
 		if (usage & ImageUsage::INPUT_ATTACHMENT) {
-			return D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+			// TODO(debug-only)
+			return D3D12_RESOURCE_STATE_COMMON;
+			// return D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		}
 
 		D3D12_RESOURCE_STATES resourceStates = D3D12_RESOURCE_STATE_COMMON;

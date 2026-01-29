@@ -19,9 +19,9 @@ namespace Trident {
 
 		public:
 			D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle;
+			const DX12::Image* image;
 
 		private:
-			const DX12::Image* image;
 			ref<DX12::MemoryAllocator> memoryAllocator;
 	};
 }

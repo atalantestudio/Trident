@@ -86,6 +86,14 @@ namespace Trident {
 		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceStates, optimizedClearValuePointer, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed image resource.");
+
+		// TODO(debug-only)
+		if (isDepthFormat(descriptor.format)) {
+			resource->SetName(L"Depth stencil attachment image");
+		}
+		else {
+			resource->SetName(L"Visibility image");
+		}
 	}
 
 	DX12::Image::Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT imageIndex, ref<DX12::MemoryAllocator> memoryAllocator) :
@@ -101,6 +109,13 @@ namespace Trident {
 		result = swapchain.swapChain->GetBuffer(imageIndex, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get buffer for render target view.");
+
+		const sequence<char8> name = Logger::format("Swapchain image []", imageIndex);
+		const LPWSTR wideName = ConvertUTF8ToUTF16(&name[0]);
+
+		result = resource->SetName(wideName);
+
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set name on image resource.");
 	}
 
 	ref<Trident::ImageView> DX12::Image::createViewInternal(const ImageViewDescriptor& descriptor, const Trident::Image* image) const {

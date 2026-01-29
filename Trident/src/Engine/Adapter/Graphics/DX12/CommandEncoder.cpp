@@ -24,6 +24,8 @@ namespace Trident {
 		device(device),
 		commandAllocator(commandPool.commandAllocator)
 	{
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		ADAPTER_ASSERT(descriptor.usage != CommandBufferUsage::SIMULTANEOUS_USE, "SIMULTANEOUS_USE is not supported on command lists.");
@@ -43,20 +45,45 @@ namespace Trident {
 	void DX12::CommandEncoder::begin() const {}
 
 	void DX12::CommandEncoder::beginRenderPass(const BeginRenderPassDescriptor& descriptor) {
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
 		framebuffer = std::static_pointer_cast<DX12::Framebuffer>(descriptor.framebuffer);
 
-		setRenderTargets();
+		const ref<RenderPass> renderPass = framebuffer->getRenderPass();
 
-		// TODO: Restore.
-		/* D3D12_RECT rectangle{};
+		UINT attachmentIndex = 0;
+
+		D3D12_RECT rectangle{};
 		rectangle.left = 0;
 		rectangle.top = 0;
 		rectangle.right = framebuffer->getExtent().width;
 		rectangle.bottom = framebuffer->getExtent().height;
 
-		const ref<RenderPass> renderPass = framebuffer->getRenderPass();
+		sequence<D3D12_RESOURCE_BARRIER> resourceBarriers(renderPass->getAttachmentCount());
 
-		UINT attachmentIndex = 0;
+		while (attachmentIndex < renderPass->getAttachmentCount()) {
+			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[attachmentIndex]);
+
+			D3D12_RESOURCE_BARRIER& resourceBarrier = resourceBarriers[attachmentIndex];
+			resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			resourceBarrier.Transition.pResource = imageView->image->resource.Get();
+			resourceBarrier.Transition.Subresource = imageView->getLayerOffset();
+			resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+
+			if (isDepthFormat(imageView->image->getFormat())) {
+				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+			}
+			else {
+				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			}
+
+			attachmentIndex += 1;
+		}
+
+		commandList->ResourceBarrier(static_cast<UINT>(resourceBarriers.count()), &resourceBarriers[0]);
+
+		attachmentIndex = 0;
 
 		while (attachmentIndex < renderPass->getAttachmentCount()) {
 			const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
@@ -78,7 +105,9 @@ namespace Trident {
 			}
 
 			attachmentIndex += 1;
-		} */
+		}
+
+		setRenderTargets();
 
 		commandCount += 1;
 	}
@@ -115,24 +144,21 @@ namespace Trident {
 		UINT rootParameterIndex = 0;
 
 		if (computePipelineBound) {
-			// TODO: Restore.
-			/* while (descriptorSetIndex < descriptorSets.count()) {
-				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[descriptorSetIndex]);
+			while (rootParameterIndex < descriptorSets.count()) {
+				const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(descriptorSets[rootParameterIndex]);
 
-				if (descriptorSet->viewDescriptorHeap) {
-					commandList->SetComputeRootDescriptorTable(rootParameterIndex, descriptorSet->viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+				descriptorOffset.ptr += descriptorSet->viewDescriptorHandleOffset * device.memoryAllocator->viewDescriptorHandleIncrementSize;
 
-					rootParameterIndex += 1;
-				}
+				commandList->SetComputeRootDescriptorTable(rootParameterIndex, descriptorOffset);
 
-				if (descriptorSet->samplerDescriptorHeap) {
-					commandList->SetComputeRootDescriptorTable(rootParameterIndex, descriptorSet->samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				rootParameterIndex += 1;
+			}
 
-					rootParameterIndex += 1;
-				}
-
-				descriptorSetIndex += 1;
-			} */
+			if (samplerDescriptorTable) {
+				// Bind sampler descriptor table to the last root parameter.
+				commandList->SetComputeRootDescriptorTable(rootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+			}
 		}
 		else {
 			while (rootParameterIndex < descriptorSets.count()) {
@@ -146,11 +172,10 @@ namespace Trident {
 				rootParameterIndex += 1;
 			}
 
-			// TODO
-			/* if (samplerDescriptorTable) {
+			if (samplerDescriptorTable) {
 				// Bind sampler descriptor table to the last root parameter.
 				commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-			} */
+			}
 		}
 
 		commandCount += 1;
@@ -427,53 +452,52 @@ namespace Trident {
 
 	void DX12::CommandEncoder::endRenderPass() {
 		if (presentRenderTargetIndex < framebuffer->imageViews.count()) {
-			const DX12::Image* presentImage = static_cast<const DX12::Image*>(framebuffer->imageViews[presentRenderTargetIndex]->getImage());
+			ref<DX12::ImageView> presentImageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[presentRenderTargetIndex]);
+			D3D12_RESOURCE_STATES presentRenderTargetResourceState = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-			if (presentImage->getSampleCount() > 1) {
+			if (presentImageView->image->getSampleCount() > 1) {
 				const ref<Subpass> subpass = framebuffer->getRenderPass()->getSubpass(subpassIndex);
-				const DX12::Image* resolveImage = presentImage;
+				const ref<DX12::ImageView> resolveImageView = presentImageView;
 
-				presentImage = static_cast<const DX12::Image*>(framebuffer->imageViews[subpass->getResolveAttachmentReferenceCount() + presentRenderTargetIndex]->getImage());
+				presentImageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[subpass->getResolveAttachmentReferenceCount() + presentRenderTargetIndex]);
 
-				sequence<D3D12_RESOURCE_BARRIER> resourceBarriers(2);
+				D3D12_RESOURCE_BARRIER resourceBarriers[2];
 
 				D3D12_RESOURCE_BARRIER& resolveResourceBarrier = resourceBarriers[0];
 				resolveResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 				resolveResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				resolveResourceBarrier.Transition.pResource = resolveImage->resource.Get();
-				resolveResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+				resolveResourceBarrier.Transition.pResource = resolveImageView->image->resource.Get();
+				resolveResourceBarrier.Transition.Subresource = resolveImageView->getLayerOffset();
 				resolveResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 				resolveResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
 
 				D3D12_RESOURCE_BARRIER& presentResourceBarrier = resourceBarriers[1];
 				presentResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 				presentResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				presentResourceBarrier.Transition.pResource = presentImage->resource.Get();
-				presentResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+				presentResourceBarrier.Transition.pResource = presentImageView->image->resource.Get();
+				presentResourceBarrier.Transition.Subresource = presentImageView->getLayerOffset();
 				presentResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 				presentResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RESOLVE_DEST;
 
 				commandList->ResourceBarrier(2, &resourceBarriers[0]);
-				commandList->ResolveSubresource(presentImage->resource.Get(), 0, resolveImage->resource.Get(), 0, getImageFormat(presentImage->getFormat()));
 
-				D3D12_RESOURCE_BARRIER resourceBarrier{};
-				resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				resourceBarrier.Transition.pResource = presentImage->resource.Get();
-				resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-				resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RESOLVE_DEST;
-				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+				presentRenderTargetResourceState = D3D12_RESOURCE_STATE_RESOLVE_DEST;
 
-				// TODO: Skip RENDER_TARGET -> PRESENT and instead transition directly from RESOLVE_DEST to PRESENT.
-				commandList->ResourceBarrier(1, &resourceBarrier);
+				commandList->ResolveSubresource(
+					presentImageView->image->resource.Get(),
+					presentImageView->getLayerOffset(),
+					resolveImageView->image->resource.Get(),
+					resolveImageView->getLayerOffset(),
+					getImageFormat(presentImageView->image->getFormat())
+				);
 			}
 
 			D3D12_RESOURCE_BARRIER resourceBarrier{};
 			resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			resourceBarrier.Transition.pResource = presentImage->resource.Get();
-			resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-			resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			resourceBarrier.Transition.pResource = presentImageView->image->resource.Get();
+			resourceBarrier.Transition.Subresource = presentImageView->getLayerOffset();
+			resourceBarrier.Transition.StateBefore = presentRenderTargetResourceState;
 			resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 
 			commandList->ResourceBarrier(1, &resourceBarrier);
@@ -523,6 +547,12 @@ namespace Trident {
 	}
 
 	void DX12::CommandEncoder::setRenderTargets() {
+		// NOTE
+		// On the first subpass, all attachments that need to be cleared (even those not used by this subpass)
+		// have been transitioned into:
+		// - RENDER_TARGET for color attachments
+		// - DEPTH_WRITE for depth/stencil attachments.
+
 		presentRenderTargetIndex = max<UINT>();
 
 		const ref<RenderPass> renderPass = framebuffer->getRenderPass();
@@ -602,25 +632,27 @@ namespace Trident {
 			if (colorAttachment.finalLayout == ImageLayout::PRESENT_SRC) {
 				presentRenderTargetIndex = colorAttachmentReference.index;
 
-				D3D12_RESOURCE_BARRIER resourceBarrier{};
-				resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				resourceBarrier.Transition.pResource = image->resource.Get();
-				resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+				if (colorAttachment.loadOperation != LoadOperation::CLEAR) {
+					D3D12_RESOURCE_BARRIER resourceBarrier{};
+					resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+					resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+					resourceBarrier.Transition.pResource = image->resource.Get();
+					resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-				if (image->getSampleCount() > 1) {
-					resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
+					if (image->getSampleCount() > 1) {
+						resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
+					}
+					else {
+						resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+					}
+
+					resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+					resourceBarriers.emplace_back(resourceBarrier);
 				}
-				else {
-					resourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-				}
-
-				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-
-				resourceBarriers.emplace_back(resourceBarrier);
 			}
 
-			if (image->usage & ImageUsage::INPUT_ATTACHMENT) {
+			if (image->usage & ImageUsage::INPUT_ATTACHMENT && colorAttachment.loadOperation != LoadOperation::CLEAR) {
 				D3D12_RESOURCE_BARRIER resourceBarrier{};
 				resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 				resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
@@ -650,7 +682,7 @@ namespace Trident {
 			const ref<DX12::ImageView> imageView = std::static_pointer_cast<DX12::ImageView>(framebuffer->imageViews[depthStencilAttachmentReference.index]);
 			const DX12::Image* image = static_cast<const DX12::Image*>(imageView->getImage());
 
-			if (image->usage & ImageUsage::INPUT_ATTACHMENT) {
+			if (image->usage & ImageUsage::INPUT_ATTACHMENT && renderPass->getAttachment(depthStencilAttachmentReference.index).loadOperation != LoadOperation::CLEAR) {
 				D3D12_RESOURCE_BARRIER resourceBarrier{};
 				resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 				resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;

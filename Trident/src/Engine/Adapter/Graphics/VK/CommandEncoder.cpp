@@ -29,6 +29,8 @@ namespace Trident {
 		commandBufferUsageFlag(getCommandBufferUsageFlag(descriptor.usage)),
 		limits(std::dynamic_pointer_cast<VK::PhysicalDevice>(device.getPhysicalDevice())->getLimits())
 	{
+		DEBUG_DESCRIPTOR_GUARD(descriptor);
+
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
 		VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
