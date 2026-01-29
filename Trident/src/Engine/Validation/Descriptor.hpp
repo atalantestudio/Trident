@@ -33,7 +33,7 @@ namespace Trident {
 		void DescriptorGuard(const FenceDescriptor& descriptor);
 		void DescriptorGuard(const FramebufferDescriptor& descriptor);
 		void DescriptorGuard(const ImageDescriptor& descriptor);
-		void DescriptorGuard(const ImageViewDescriptor& descriptor, const Image* image);
+		void DescriptorGuard(const ImageViewDescriptor& descriptor, Image* image);
 		void DescriptorGuard(const PipelineLayoutDescriptor& descriptor);
 		void DescriptorGuard(const RenderPassDescriptor& descriptor);
 		void DescriptorGuard(const RenderPipelineDescriptor& descriptor);

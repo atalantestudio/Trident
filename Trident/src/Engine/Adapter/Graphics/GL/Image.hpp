@@ -13,7 +13,7 @@ namespace Trident {
 			~Image() final override;
 
 		protected:
-			ref<Trident::ImageView> createViewInternal(const ImageViewDescriptor& descriptor, const Trident::Image* image) const final override;
+			ref<Trident::ImageView> createViewInternal(const ImageViewDescriptor& descriptor, Trident::Image* image) final override;
 
 		public:
 			GLuint texture;

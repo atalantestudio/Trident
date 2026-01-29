@@ -97,7 +97,7 @@ namespace Trident {
 		MemoryAllocator::freeSuballocation(device.device, memorySuballocation.allocationIndex);
 	}
 
-	ref<ImageView> VK::Image::createViewInternal(const ImageViewDescriptor& descriptor, const Trident::Image* image) const {
+	ref<ImageView> VK::Image::createViewInternal(const ImageViewDescriptor& descriptor, Trident::Image* image) {
 		DEBUG_DESCRIPTOR_GUARD(descriptor, image);
 
 		return createRef<VK::ImageView>(descriptor, image, device);

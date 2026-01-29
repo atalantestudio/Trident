@@ -9,7 +9,7 @@
 namespace Trident {
 	class VK::ImageView final : public Trident::ImageView {
 		public:
-			explicit ImageView(const ImageViewDescriptor& descriptor, const Trident::Image* image, const VK::Device& device);
+			explicit ImageView(const ImageViewDescriptor& descriptor, Trident::Image* image, const VK::Device& device);
 
 			~ImageView() final override;
 

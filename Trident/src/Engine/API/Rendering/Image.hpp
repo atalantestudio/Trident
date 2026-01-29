@@ -51,7 +51,7 @@ namespace Trident {
 				this->layout = layout;
 			}
 
-			ref<ImageView> createView(const ImageViewDescriptor& descriptor) const {
+			ref<ImageView> createView(const ImageViewDescriptor& descriptor) {
 				return createViewInternal(descriptor, this);
 			}
 
@@ -67,7 +67,7 @@ namespace Trident {
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 			}
 
-			virtual ref<ImageView> createViewInternal(const ImageViewDescriptor& descriptor, const Image* image) const = 0;
+			virtual ref<ImageView> createViewInternal(const ImageViewDescriptor& descriptor, Image* image) = 0;
 
 		protected:
 			ImageType type;

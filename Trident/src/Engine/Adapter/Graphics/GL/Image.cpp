@@ -139,7 +139,7 @@ namespace Trident {
 		glDeleteTextures(1, &texture);
 	}
 
-	ref<ImageView> GL::Image::createViewInternal(const ImageViewDescriptor& descriptor, const Trident::Image* image) const {
+	ref<ImageView> GL::Image::createViewInternal(const ImageViewDescriptor& descriptor, Trident::Image* image) {
 		DEBUG_DESCRIPTOR_GUARD(descriptor, image);
 
 		return createRef<GL::ImageView>(descriptor, image);

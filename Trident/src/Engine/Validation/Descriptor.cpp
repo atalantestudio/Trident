@@ -302,7 +302,7 @@ namespace Trident {
 			ENGINE_ASSERT(errorCount == 0, "Image descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 		}
 
-		void DescriptorGuard(const ImageViewDescriptor& descriptor, const Image* image) {
+		void DescriptorGuard(const ImageViewDescriptor& descriptor, Image* image) {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 

@@ -12,7 +12,7 @@ namespace Trident {
 		public:
 			virtual ~ImageView() = default;
 
-			const Image* getImage() const {
+			Image* getImage() {
 				return image;
 			}
 
@@ -33,7 +33,7 @@ namespace Trident {
 			}
 
 		protected:
-			explicit ImageView(const ImageViewDescriptor& descriptor, const Image* image) :
+			explicit ImageView(const ImageViewDescriptor& descriptor, Image* image) :
 				image(image),
 				mipLevelOffset(descriptor.mipLevelOffset),
 				mipLevelCount(descriptor.mipLevelCount),
@@ -44,7 +44,7 @@ namespace Trident {
 			}
 
 		protected:
-			const Image* image;
+			Image* image;
 			uint32 mipLevelOffset;
 			uint32 mipLevelCount;
 			uint32 layerOffset;

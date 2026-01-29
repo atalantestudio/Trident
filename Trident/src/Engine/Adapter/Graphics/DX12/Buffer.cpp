@@ -5,7 +5,7 @@
 
 #include "Engine/Adapter/Graphics/DX12/Buffer.hpp"
 #include "Engine/Adapter/Graphics/DX12/HeapType.hpp"
-#include "Engine/Adapter/Graphics/DX12/ResourceStates.hpp"
+#include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
@@ -45,7 +45,7 @@ namespace Trident {
 
 		const D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_NONE;
 
-		D3D12_RESOURCE_STATES initialResourceStates = getBufferResourceStates(descriptor.usage);
+		D3D12_RESOURCE_STATES initialResourceStates = getBufferResourceState(descriptor.usage);
 
 		if (heapProperties.Type == D3D12_HEAP_TYPE_READBACK) {
 			initialResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;

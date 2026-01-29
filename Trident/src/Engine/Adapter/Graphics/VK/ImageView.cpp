@@ -10,36 +10,36 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	VK::ImageView::ImageView(const ImageViewDescriptor& descriptor, const Trident::Image* image, const VK::Device& device) :
+	VK::ImageView::ImageView(const ImageViewDescriptor& descriptor, Trident::Image* image, const VK::Device& device) :
 		Trident::ImageView(descriptor, image),
 		device(device)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		const VK::Image* vkImage = static_cast<const VK::Image*>(image);
+		const VK::Image* _image = static_cast<const VK::Image*>(image);
 
 		VkImageViewCreateInfo imageViewCreateInfo{};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.pNext = nullptr;
 		imageViewCreateInfo.flags = 0;
-		imageViewCreateInfo.image = vkImage->image;
-		imageViewCreateInfo.viewType = getImageViewType(vkImage->type, image->getLayerCount());
-		imageViewCreateInfo.format = vkImage->format;
+		imageViewCreateInfo.image = _image->image;
+		imageViewCreateInfo.viewType = getImageViewType(_image->type, image->getLayerCount());
+		imageViewCreateInfo.format = _image->format;
 		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
 		imageViewCreateInfo.subresourceRange.aspectMask = 0;
 
-		if (isDepthFormat(vkImage->format)) {
+		if (isDepthFormat(_image->format)) {
 			imageViewCreateInfo.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
 		}
 
-		if (isStencilFormat(vkImage->format)) {
+		if (isStencilFormat(_image->format)) {
 			imageViewCreateInfo.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
 		}
 
-		if (!isDepthFormat(vkImage->format) && !isStencilFormat(vkImage->format)) {
+		if (!isDepthFormat(_image->format) && !isStencilFormat(_image->format)) {
 			imageViewCreateInfo.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
 		}
 

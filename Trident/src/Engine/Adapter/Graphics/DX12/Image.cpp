@@ -10,7 +10,7 @@
 #include "Engine/Adapter/Graphics/DX12/ImageView.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceDimension.hpp"
 #include "Engine/Adapter/Graphics/DX12/ResourceFlags.hpp"
-#include "Engine/Adapter/Graphics/DX12/ResourceStates.hpp"
+#include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
 
 namespace Trident {
 	ImageDescriptor DX12::Image::createSwapchainImageDescriptor(Extent2D extent) {
@@ -33,6 +33,7 @@ namespace Trident {
 
 	DX12::Image::Image(const ImageDescriptor& descriptor, const DX12::Device& device, ref<DX12::MemoryAllocator> memoryAllocator) :
 		Trident::Image(descriptor),
+		resourceState(getImageResourceState(descriptor.usage, layout, getSampleCount())),
 		usage(descriptor.usage),
 		device(device),
 		memoryAllocator(memoryAllocator)
@@ -62,7 +63,6 @@ namespace Trident {
 		resourceDescriptor.Flags = getImageResourceFlags(descriptor.usage);
 
 		const D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_NONE;
-		const D3D12_RESOURCE_STATES initialResourceStates = getImageResourceStates(descriptor.usage, layout, getSampleCount());
 		const D3D12_CLEAR_VALUE* optimizedClearValuePointer = nullptr;
 
 		D3D12_CLEAR_VALUE optimizedClearValue{};
@@ -83,7 +83,7 @@ namespace Trident {
 			optimizedClearValuePointer = &optimizedClearValue;
 		}
 
-		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, initialResourceStates, optimizedClearValuePointer, IID_PPV_ARGS(&resource));
+		result = device.device->CreateCommittedResource(&heapProperties, heapFlags, &resourceDescriptor, resourceState, optimizedClearValuePointer, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed image resource.");
 
@@ -98,6 +98,7 @@ namespace Trident {
 
 	DX12::Image::Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT imageIndex, ref<DX12::MemoryAllocator> memoryAllocator) :
 		Trident::Image(createSwapchainImageDescriptor(swapchain.getExtent())),
+		resourceState(D3D12_RESOURCE_STATE_PRESENT),
 		usage(static_cast<ImageUsage>(0)),
 		device(device),
 		memoryAllocator(memoryAllocator)
@@ -118,7 +119,7 @@ namespace Trident {
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set name on image resource.");
 	}
 
-	ref<Trident::ImageView> DX12::Image::createViewInternal(const ImageViewDescriptor& descriptor, const Trident::Image* image) const {
+	ref<Trident::ImageView> DX12::Image::createViewInternal(const ImageViewDescriptor& descriptor, Trident::Image* image) {
 		return createRef<DX12::ImageView>(descriptor, image, memoryAllocator);
 	}
 }

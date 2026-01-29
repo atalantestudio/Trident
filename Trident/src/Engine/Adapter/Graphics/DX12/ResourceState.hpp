@@ -9,7 +9,7 @@
 #include "Engine/API/Rendering/ImageUsage.hpp"
 
 namespace Trident::DX12 {
-	inline D3D12_RESOURCE_STATES getBufferResourceStates(BufferUsage bufferUsage) {
+	inline D3D12_RESOURCE_STATES getBufferResourceState(BufferUsage bufferUsage) {
 		if (bufferUsage & BufferUsage::TRANSFER_SRC) {
 			return D3D12_RESOURCE_STATE_COPY_SOURCE;
 		}
@@ -21,19 +21,16 @@ namespace Trident::DX12 {
 		return D3D12_RESOURCE_STATE_COMMON;
 	}
 
-	inline D3D12_RESOURCE_STATES getImageResourceStates(ImageUsage usage, ImageLayout& layout, uint8 sampleCount) {
-		if (sampleCount > 1) {
+	inline D3D12_RESOURCE_STATES getImageResourceState(ImageUsage usage, ImageLayout& layout, uint8 sampleCount) {
+		// TODO(debug-only)
+		return D3D12_RESOURCE_STATE_COMMON;
+
+		/* if (sampleCount > 1) {
 			if (usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
 				return D3D12_RESOURCE_STATE_DEPTH_WRITE;
 			}
 
 			return D3D12_RESOURCE_STATE_RESOLVE_SOURCE;
-		}
-
-		if (usage & ImageUsage::INPUT_ATTACHMENT) {
-			// TODO(debug-only)
-			return D3D12_RESOURCE_STATE_COMMON;
-			// return D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		}
 
 		D3D12_RESOURCE_STATES resourceStates = D3D12_RESOURCE_STATE_COMMON;
@@ -62,10 +59,10 @@ namespace Trident::DX12 {
 			layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}
 
-		return resourceStates;
+		return resourceStates; */
 	}
 
-	inline D3D12_RESOURCE_STATES getImageTransitionResourceStates(ImageLayout imageLayout) {
+	inline D3D12_RESOURCE_STATES getImageTransitionResourceState(ImageLayout imageLayout) {
 		switch (imageLayout) {
 			case ImageLayout::UNDEFINED: return D3D12_RESOURCE_STATE_COMMON;
 			case ImageLayout::GENERAL: return D3D12_RESOURCE_STATE_UNORDERED_ACCESS;

@@ -8,27 +8,28 @@
 #include "Engine/Adapter/Graphics/DX12/ResourceDimension.hpp"
 
 namespace Trident {
-	DX12::ImageView::ImageView(const ImageViewDescriptor& descriptor, const Trident::Image* image, ref<DX12::MemoryAllocator> memoryAllocator) :
+	DX12::ImageView::ImageView(const ImageViewDescriptor& descriptor, Trident::Image* image, ref<DX12::MemoryAllocator> memoryAllocator) :
 		Trident::ImageView(descriptor, image),
-		image(static_cast<const DX12::Image*>(image)),
 		memoryAllocator(memoryAllocator)
 	{
-		if (this->image->usage == 0) {
-			createSwapchainRenderTargetView();
+		const DX12::Image* _image = static_cast<const DX12::Image*>(image);
+
+		if (_image->usage == 0) {
+			createSwapchainRenderTargetView(_image);
 		}
-		else if (this->image->usage & ImageUsage::COLOR_ATTACHMENT) {
-			createRenderTargetView();
+		else if (_image->usage & ImageUsage::COLOR_ATTACHMENT) {
+			createRenderTargetView(_image);
 		}
-		else if (this->image->usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
-			createDepthStencilView();
+		else if (_image->usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
+			createDepthStencilView(_image);
 		}
 	}
 
-	void DX12::ImageView::createSwapchainRenderTargetView() {
+	void DX12::ImageView::createSwapchainRenderTargetView(const DX12::Image* image) {
 		cpuDescriptorHandle = memoryAllocator->allocateRenderTargetView(image->resource.Get(), nullptr);
 	}
 
-	void DX12::ImageView::createRenderTargetView() {
+	void DX12::ImageView::createRenderTargetView(const DX12::Image* image) {
 		D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDescriptor{};
 		renderTargetViewDescriptor.Format = getImageFormat(image->getFormat());
 
@@ -66,7 +67,7 @@ namespace Trident {
 		cpuDescriptorHandle = memoryAllocator->allocateRenderTargetView(image->resource.Get(), &renderTargetViewDescriptor);
 	}
 
-	void DX12::ImageView::createDepthStencilView() {
+	void DX12::ImageView::createDepthStencilView(const DX12::Image* image) {
 		D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilViewDescriptor{};
 		depthStencilViewDescriptor.Format = getImageFormat(image->getFormat());
 		depthStencilViewDescriptor.Flags = D3D12_DSV_FLAG_NONE;
