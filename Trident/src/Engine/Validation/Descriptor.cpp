@@ -3,12 +3,14 @@
 
 #include "pch.hpp"
 
-#ifdef BUILD_MODE_DEBUG
+// #ifdef BUILD_MODE_DEBUG
+#if 1
 	#include "Engine/Renderer/Renderer.hpp"
 #endif
 
 namespace Trident {
-	#ifdef BUILD_MODE_DEBUG
+	#if 1
+	// #ifdef BUILD_MODE_DEBUG
 		static bool validateSampleCount(uint8 sampleCount) {
 			switch (sampleCount) {
 				case 1:
@@ -85,10 +87,10 @@ namespace Trident {
 					ENGINE_ERROR("descriptor.framebuffer.renderPass must be a valid RenderPass.");
 				}
 				else {
-					if (descriptor.clearValues.count() != renderPass->getAttachmentCount()) {
+					if (descriptor.clearValues.count() > renderPass->getAttachmentReferenceCount()) {
 						errorCount += 1;
 
-						ENGINE_ERROR("descriptor.clearValues must have one entry per attachment declared in descriptor.framebuffer.renderPass.");
+						ENGINE_ERROR("descriptor.clearValues.count must be smaller than the number of attachment references in descriptor.framebuffer.renderPass.");
 					}
 				}
 			}
