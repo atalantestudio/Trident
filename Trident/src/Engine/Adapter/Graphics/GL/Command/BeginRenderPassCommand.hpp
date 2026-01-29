@@ -25,21 +25,26 @@ namespace Trident {
 					ENGINE_ERROR_UNSUPPORTED();
 				#endif
 
-				// Bind every attachment for clearing.
 				sequence<GLenum> bufs(renderPass->getAttachmentCount());
+				uint32 bufIndex = 0;
 
-				for (uint32 bufIndex = 0; bufIndex < bufs.count(); bufIndex += 1) {
+				while (bufIndex < bufs.count()) {
 					bufs[bufIndex] = GL_COLOR_ATTACHMENT0 + bufIndex;
+
+					bufIndex += 1;
 				}
 
 				// TODO(draw-buffers): Use glNamedFramebufferDrawBuffers in OpenGL 4.5+.
 				glDrawBuffers(static_cast<GLsizei>(bufs.count()), &bufs[0]);
 
-				// Clear attachments with a load operation of LoadOperation::CLEAR.
-				for (uint32 attachmentIndex = 0; attachmentIndex < descriptor.clearValues.count(); attachmentIndex += 1) {
+				uint32 attachmentIndex = 0;
+
+				while (attachmentIndex < descriptor.clearValues.count()) {
 					const Attachment& attachment = renderPass->getAttachment(attachmentIndex);
 
 					if (attachment.loadOperation != LoadOperation::CLEAR) {
+						attachmentIndex += 1;
+
 						continue;
 					}
 
@@ -81,6 +86,8 @@ namespace Trident {
 							ENGINE_ERROR_UNSUPPORTED();
 						#endif
 					}
+
+					attachmentIndex += 1;
 				}
 
 				GL::NextSubpassCommand::setDrawBuffers(renderPass->getSubpass(0));
