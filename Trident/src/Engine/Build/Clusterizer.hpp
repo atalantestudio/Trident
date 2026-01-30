@@ -12,6 +12,9 @@ namespace Trident {
 	struct ClusteredInstance {
 		mat4x4<float32> transform;
 		uint32 geometryIndex;
+		uint32 materialIndex;
+
+		// Use as an offset in the index buffer to access the start of the geometry used by this instance.
 		sint32 clusterOffset;
 	};
 
@@ -140,6 +143,7 @@ namespace Trident {
 			ClusteredInstance& clusteredInstance = clusteredScene.instances[instanceIndex];
 			clusteredInstance.transform = instance.transform;
 			clusteredInstance.geometryIndex = instance.geometryIndex;
+			clusteredInstance.materialIndex = instance.materialIndex;
 			clusteredInstance.clusterOffset = clusteredGeometry.clusterOffset - clusterOffset;
 
 			for (uint32 clusterIndex = 0; clusterIndex < clusteredGeometry.clusterCount; clusterIndex += 1) {

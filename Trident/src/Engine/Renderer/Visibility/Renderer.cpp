@@ -9,20 +9,21 @@
 
 #include "Engine/Renderer/Visibility/DepthStencilImage.hpp"
 #include "Engine/Renderer/Visibility/MaterialIndexImage.hpp"
+#include "Engine/Renderer/Visibility/RenderPass.hpp"
 #include "Engine/Renderer/Visibility/VisibilityImage.hpp"
 
 namespace Trident {
 	void VisibilityRenderer::build() {
-		_createRenderPass();
+		renderPass = _createRenderPass();
 
 		visibilityImage = createVisibilityImage();
 		visibilityImageView = createVisibilityImageView();
 
-		depthStencilImage = createDepthStencilImage();
-		depthStencilImageView = createDepthStencilImageView();
-
 		materialIndexImage = createMaterialIndexImage();
 		materialIndexImageView = createMaterialIndexImageView();
+
+		depthStencilImage = createDepthStencilImage();
+		depthStencilImageView = createDepthStencilImageView();
 
 		recreateFramebuffers();
 
@@ -72,6 +73,7 @@ namespace Trident {
 	void VisibilityRenderer::render(ref<CommandEncoder> commandEncoder) const {
 		const ClearValue swapchainClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 		const ClearValue visibilityClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
+		const ClearValue materialIndexClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
 		ClearValue depthStencilClearValue{};
 		depthStencilClearValue.depth = 1.0f;
@@ -79,7 +81,7 @@ namespace Trident {
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor{};
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-		beginRenderPassDescriptor.clearValues = {swapchainClearValue, visibilityClearValue, depthStencilClearValue};
+		beginRenderPassDescriptor.clearValues = {swapchainClearValue, visibilityClearValue, materialIndexClearValue, depthStencilClearValue};
 
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 		const float32 width = static_cast<float32>(swapchainExtent.width);
@@ -112,12 +114,11 @@ namespace Trident {
 		visibilityImage = createVisibilityImage();
 		visibilityImageView = createVisibilityImageView();
 
+		materialIndexImage = createMaterialIndexImage();
+		materialIndexImageView = createMaterialIndexImageView();
+
 		depthStencilImage = createDepthStencilImage();
 		depthStencilImageView = createDepthStencilImageView();
-
-		// TODO: Reset to 0 instead.
-		// materialIndexImage = createMaterialIndexImage();
-		// materialIndexImageView = createMaterialIndexImageView();
 
 		recreateFramebuffers();
 
@@ -145,13 +146,6 @@ namespace Trident {
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 	}
 
-	void VisibilityRenderer::_createRenderPass() {
-		ref<Subpass> visibilitySubpass = createSubpass(getVisibilitySubpassDescriptor());
-		ref<Subpass> debugSubpass = createSubpass(getDebugSubpassDescriptor());
-
-		renderPass = createRenderPass(getRenderPassDescriptor(getSurface(), visibilitySubpass, debugSubpass));
-	}
-
 	void VisibilityRenderer::recreateFramebuffers() {
 		const ref<Swapchain> swapchain = getSwapchain();
 
@@ -159,7 +153,7 @@ namespace Trident {
 
 		FramebufferDescriptor framebufferDescriptor{};
 		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = {nullptr, visibilityImageView, depthStencilImageView};
+		framebufferDescriptor.imageViews = {nullptr, visibilityImageView, materialIndexImageView, depthStencilImageView};
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
@@ -227,6 +221,11 @@ namespace Trident {
 		visibilityBinding.descriptorCount = 1;
 		visibilityBinding.shaderStages = ShaderStage::FRAGMENT;
 
+		DescriptorSetLayoutBinding materialIndexBinding{};
+		materialIndexBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
+		materialIndexBinding.descriptorCount = 1;
+		materialIndexBinding.shaderStages = ShaderStage::FRAGMENT;
+
 		DescriptorSetLayoutBinding depthStencilBinding{};
 		depthStencilBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
 		depthStencilBinding.descriptorCount = 1;
@@ -265,6 +264,7 @@ namespace Trident {
 		debugDescriptorSetLayout = createDescriptorSetLayout({
 			cameraBinding,
 			visibilityBinding,
+			materialIndexBinding,
 			depthStencilBinding,
 			vertexPositionComponentBinding,
 			vertexNormalComponentBinding,
@@ -394,14 +394,14 @@ namespace Trident {
 		DEBUG_ASSERT(scene != nullptr);
 
 		BufferDescriptor instanceBufferDescriptor{};
-		instanceBufferDescriptor.size = scene->instances.count() * sizeof(Instance);
+		instanceBufferDescriptor.size = scene->instances.count() * sizeof(ClusteredInstance);
 		instanceBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		instanceBufferDescriptor.persistent = true;
 
 		instanceBuffer = createBuffer(instanceBufferDescriptor);
 
-		instanceMappedRange = instanceBuffer->map<Instance>(0, instanceBuffer->size);
+		instanceMappedRange = instanceBuffer->map<ClusteredInstance>(0, instanceBuffer->size);
 	}
 
 	void VisibilityRenderer::createGeometryBuffer() {
@@ -434,8 +434,11 @@ namespace Trident {
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Visibility/Visibility.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Visibility/Visibility.frag");
 
-		ColorBlendAttachment colorBlendAttachment{};
-		colorBlendAttachment.blend = false;
+		ColorBlendAttachment visibilityColorBlendAttachment{};
+		visibilityColorBlendAttachment.blend = false;
+
+		ColorBlendAttachment materialIndexColorBlendAttachment{};
+		materialIndexColorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor visibilityRenderPipelineDescriptor{};
 		visibilityRenderPipelineDescriptor.pipelineLayout = visibilityPipelineLayout;
@@ -447,7 +450,7 @@ namespace Trident {
 		visibilityRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		visibilityRenderPipelineDescriptor.lineWidth = 1.0f;
 		visibilityRenderPipelineDescriptor.minSampleShading = 0.0f;
-		visibilityRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		visibilityRenderPipelineDescriptor.colorBlendState.attachments = {visibilityColorBlendAttachment, materialIndexColorBlendAttachment};
 		visibilityRenderPipelineDescriptor.depthStencilState.depthTest = true;
 		visibilityRenderPipelineDescriptor.depthStencilState.depthWrite = true;
 		visibilityRenderPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::LESS;
@@ -470,8 +473,8 @@ namespace Trident {
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Visibility/VisibilityDebug.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Visibility/VisibilityDebug.frag");
 
-		ColorBlendAttachment colorBlendAttachment{};
-		colorBlendAttachment.blend = false;
+		ColorBlendAttachment swapchainColorBlendAttachment{};
+		swapchainColorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor debugRenderPipelineDescriptor{};
 		debugRenderPipelineDescriptor.pipelineLayout = debugPipelineLayout;
@@ -483,7 +486,7 @@ namespace Trident {
 		debugRenderPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
 		debugRenderPipelineDescriptor.lineWidth = 1.0f;
 		debugRenderPipelineDescriptor.minSampleShading = 0.0f;
-		debugRenderPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+		debugRenderPipelineDescriptor.colorBlendState.attachments = {swapchainColorBlendAttachment};
 		debugRenderPipelineDescriptor.depthStencilState.depthTest = false;
 		debugRenderPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
 		debugRenderPipelineDescriptor.renderPass = renderPass;
@@ -601,7 +604,7 @@ namespace Trident {
 
 		sourceOffset += clusterBuffer->size;
 
-		Instance* instanceMappedRange = pointer_cast<Instance*>(mappedRange + sourceOffset);
+		ClusteredInstance* instanceMappedRange = pointer_cast<ClusteredInstance*>(mappedRange + sourceOffset);
 
 		fillInstanceBuffer(instanceMappedRange);
 
@@ -678,20 +681,11 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::fillClusterBuffer(Cluster* mappedRange) const {
-		for (uint32 clusterIndex = 0; clusterIndex < scene->clusters.count(); clusterIndex += 1) {
-			mappedRange[clusterIndex].instanceIndex = scene->clusters[clusterIndex].instanceIndex;
-		}
+		std::copy(scene->clusters.begin(), scene->clusters.end(), mappedRange);
 	}
 
-	void VisibilityRenderer::fillInstanceBuffer(Instance* mappedRange) const {
-		for (uint32 instanceIndex = 0; instanceIndex < scene->instances.count(); instanceIndex += 1) {
-			const auto& instance = scene->instances[instanceIndex];
-			const auto& geometry = scene->geometries[instance.geometryIndex];
-
-			mappedRange[instanceIndex].transform = instance.transform;
-			mappedRange[instanceIndex].geometryIndex = instance.geometryIndex;
-			mappedRange[instanceIndex].clusterOffset = instance.clusterOffset;
-		}
+	void VisibilityRenderer::fillInstanceBuffer(ClusteredInstance* mappedRange) const {
+		std::copy(scene->instances.begin(), scene->instances.end(), mappedRange);
 	}
 
 	void VisibilityRenderer::fillGeometryBuffer(Geometry* mappedRange) const {
@@ -789,32 +783,32 @@ namespace Trident {
 
 		WriteDescriptorSet debugVertexPositionComponentWriteDescriptorSet{};
 		debugVertexPositionComponentWriteDescriptorSet.descriptorSet = debugDescriptorSet;
-		debugVertexPositionComponentWriteDescriptorSet.bindingIndex = 3;
+		debugVertexPositionComponentWriteDescriptorSet.bindingIndex = 4;
 		debugVertexPositionComponentWriteDescriptorSet.descriptorBuffers = {vertexPositionComponentDescriptorBuffer};
 
 		WriteDescriptorSet debugVertexNormalComponentWriteDescriptorSet{};
 		debugVertexNormalComponentWriteDescriptorSet.descriptorSet = debugDescriptorSet;
-		debugVertexNormalComponentWriteDescriptorSet.bindingIndex = 4;
+		debugVertexNormalComponentWriteDescriptorSet.bindingIndex = 5;
 		debugVertexNormalComponentWriteDescriptorSet.descriptorBuffers = {vertexNormalComponentDescriptorBuffer};
 
 		WriteDescriptorSet debugVertexTextureCoordinateComponentWriteDescriptorSet{};
 		debugVertexTextureCoordinateComponentWriteDescriptorSet.descriptorSet = debugDescriptorSet;
-		debugVertexTextureCoordinateComponentWriteDescriptorSet.bindingIndex = 5;
+		debugVertexTextureCoordinateComponentWriteDescriptorSet.bindingIndex = 6;
 		debugVertexTextureCoordinateComponentWriteDescriptorSet.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer};
 
 		WriteDescriptorSet debugVertexPositionIndexWriteDescriptorSet{};
 		debugVertexPositionIndexWriteDescriptorSet.descriptorSet = debugDescriptorSet;
-		debugVertexPositionIndexWriteDescriptorSet.bindingIndex = 6;
+		debugVertexPositionIndexWriteDescriptorSet.bindingIndex = 7;
 		debugVertexPositionIndexWriteDescriptorSet.descriptorBuffers = {vertexPositionIndexDescriptorBuffer};
 
 		WriteDescriptorSet debugVertexNormalIndexWriteDescriptorSet{};
 		debugVertexNormalIndexWriteDescriptorSet.descriptorSet = debugDescriptorSet;
-		debugVertexNormalIndexWriteDescriptorSet.bindingIndex = 7;
+		debugVertexNormalIndexWriteDescriptorSet.bindingIndex = 8;
 		debugVertexNormalIndexWriteDescriptorSet.descriptorBuffers = {vertexNormalIndexDescriptorBuffer};
 
 		WriteDescriptorSet debugVertexTextureCoordinateIndexWriteDescriptorSet{};
 		debugVertexTextureCoordinateIndexWriteDescriptorSet.descriptorSet = debugDescriptorSet;
-		debugVertexTextureCoordinateIndexWriteDescriptorSet.bindingIndex = 8;
+		debugVertexTextureCoordinateIndexWriteDescriptorSet.bindingIndex = 9;
 		debugVertexTextureCoordinateIndexWriteDescriptorSet.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer};
 
 		getDevice()->updateDescriptorSets({
@@ -840,6 +834,11 @@ namespace Trident {
 		visibilityDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 		visibilityDescriptorImage.sampler = nullptr;
 
+		DescriptorImage materialIndexDescriptorImage{};
+		materialIndexDescriptorImage.imageView = materialIndexImageView;
+		materialIndexDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+		materialIndexDescriptorImage.sampler = nullptr;
+
 		DescriptorImage depthStencilDescriptorImage{};
 		depthStencilDescriptorImage.imageView = depthStencilImageView;
 		depthStencilDescriptorImage.imageLayout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL;
@@ -850,13 +849,19 @@ namespace Trident {
 		debugVisibilityWriteDescriptorSet.bindingIndex = 1;
 		debugVisibilityWriteDescriptorSet.descriptorImages = {visibilityDescriptorImage};
 
+		WriteDescriptorSet debugMaterialIndexWriteDescriptorSet{};
+		debugMaterialIndexWriteDescriptorSet.descriptorSet = debugDescriptorSet;
+		debugMaterialIndexWriteDescriptorSet.bindingIndex = 2;
+		debugMaterialIndexWriteDescriptorSet.descriptorImages = {materialIndexDescriptorImage};
+
 		WriteDescriptorSet debugDepthStencilWriteDescriptorSet{};
 		debugDepthStencilWriteDescriptorSet.descriptorSet = debugDescriptorSet;
-		debugDepthStencilWriteDescriptorSet.bindingIndex = 2;
+		debugDepthStencilWriteDescriptorSet.bindingIndex = 3;
 		debugDepthStencilWriteDescriptorSet.descriptorImages = {depthStencilDescriptorImage};
 
 		getDevice()->updateDescriptorSets({
 			debugVisibilityWriteDescriptorSet,
+			debugMaterialIndexWriteDescriptorSet,
 			debugDepthStencilWriteDescriptorSet,
 		});
 	}

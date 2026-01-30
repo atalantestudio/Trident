@@ -8,10 +8,11 @@
 
 namespace Trident {
 	struct InstanceDescriptor {
-		uint32 geometryIndex;
 		vec3<float32> position = {0.0_m, 0.0_m, 0.0_m};
 		vec3<float32> rotation = {0.0_rad, 0.0_rad, 0.0_rad};
 		vec3<float32> scale = {1.0f, 1.0f, 1.0f};
+		uint32 geometryIndex;
+		uint32 materialIndex;
 	};
 
 	class Scene3D : public Scene {
@@ -84,6 +85,7 @@ namespace Trident {
 				rigidBody.rotation = descriptor.rotation;
 				rigidBody.scale = descriptor.scale;
 				rigidBody.geometryIndex = descriptor.geometryIndex;
+				rigidBody.materialIndex = descriptor.materialIndex;
 
 				rigidBody.updateTransform();
 

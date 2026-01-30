@@ -9,23 +9,17 @@ namespace Trident {
 	ref<Image> VisibilityRenderer::createMaterialIndexImage() const {
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 
-		ImageDescriptor materialIndexImageDescriptor{};
-		materialIndexImageDescriptor.type = ImageType::TEXTURE_2D;
-		materialIndexImageDescriptor.format = ImageFormat::R32_UINT;
-		materialIndexImageDescriptor.extent.width = swapchainExtent.width;
-		materialIndexImageDescriptor.extent.height = swapchainExtent.height;
-		materialIndexImageDescriptor.extent.depth = 1;
-		materialIndexImageDescriptor.mipLevelCount = 1;
-		materialIndexImageDescriptor.layerCount = 1;
-		materialIndexImageDescriptor.sampleCount = 1;
+		AttachmentImageDescriptor materialIndexAttachmentImageDescriptor{};
+		materialIndexAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
+		materialIndexAttachmentImageDescriptor.extent.width = swapchainExtent.width;
+		materialIndexAttachmentImageDescriptor.extent.height = swapchainExtent.height;
+		materialIndexAttachmentImageDescriptor.extent.depth = 1;
+		materialIndexAttachmentImageDescriptor.mipLevelCount = 1;
+		materialIndexAttachmentImageDescriptor.layerCount = 1;
 
-		// TODO: Figure out correct usage and memory properties.
-		materialIndexImageDescriptor.usage = ImageUsage::STORAGE;
-		materialIndexImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+		SET_DEBUG_NAME(materialIndexAttachmentImageDescriptor, "Material index image");
 
-		SET_DEBUG_NAME(materialIndexImageDescriptor, "Material index image");
-
-		return createImage(materialIndexImageDescriptor);
+		return renderPass->createInputAttachmentImage(materialIndexAttachmentImageDescriptor, MATERIAL_INDEX_ATTACHMENT_INDEX);
 	}
 
 	ref<ImageView> VisibilityRenderer::createMaterialIndexImageView() {

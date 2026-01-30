@@ -19,7 +19,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(depthStencilAttachmentImageDescriptor, "Depth stencil image");
 
-		return renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, 0);
+		return renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, VISIBILITY_SUBPASS_INDEX);
 	}
 
 	ref<ImageView> VisibilityRenderer::createDepthStencilImageView() {

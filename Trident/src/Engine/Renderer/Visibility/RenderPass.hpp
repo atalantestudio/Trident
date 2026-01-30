@@ -3,46 +3,59 @@
 
 #pragma once
 
+#include "Engine/Renderer/Visibility/Renderer.hpp"
+
 namespace Trident {
-	SubpassDescriptor getVisibilitySubpassDescriptor() {
+	ref<Subpass> VisibilityRenderer::createVisibilitySubpass() const {
 		AttachmentReference writeVisibilityAttachmentReference{};
-		writeVisibilityAttachmentReference.index = 1;
+		writeVisibilityAttachmentReference.index = VISIBILITY_ATTACHMENT_INDEX;
 		writeVisibilityAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
+		AttachmentReference writeMaterialIndexAttachmentReference{};
+		writeMaterialIndexAttachmentReference.index = MATERIAL_INDEX_ATTACHMENT_INDEX;
+		writeMaterialIndexAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
 		AttachmentReference writeDepthStencilAttachmentReference{};
-		writeDepthStencilAttachmentReference.index = 2;
+		writeDepthStencilAttachmentReference.index = DEPTH_STENCIL_ATTACHMENT_INDEX;
 		writeDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 		SubpassDescriptor visibilitySubpassDescriptor{};
-		visibilitySubpassDescriptor.colorAttachmentReferences = {writeVisibilityAttachmentReference};
+		visibilitySubpassDescriptor.colorAttachmentReferences = {writeVisibilityAttachmentReference, writeMaterialIndexAttachmentReference};
 		visibilitySubpassDescriptor.depthStencilAttachmentReference = writeDepthStencilAttachmentReference;
 
-		return visibilitySubpassDescriptor;
+		return createSubpass(visibilitySubpassDescriptor);
 	}
 
-	SubpassDescriptor getDebugSubpassDescriptor() {
+	ref<Subpass> VisibilityRenderer::createDebugSubpass() const {
 		AttachmentReference writeSwapchainAttachmentReference{};
-		writeSwapchainAttachmentReference.index = 0;
+		writeSwapchainAttachmentReference.index = SWAPCHAIN_ATTACHMENT_INDEX;
 		writeSwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
 		AttachmentReference readVisibilityAttachmentReference{};
-		readVisibilityAttachmentReference.index = 1;
+		readVisibilityAttachmentReference.index = VISIBILITY_ATTACHMENT_INDEX;
 		readVisibilityAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 
+		AttachmentReference readMaterialIndexAttachmentReference{};
+		readMaterialIndexAttachmentReference.index = MATERIAL_INDEX_ATTACHMENT_INDEX;
+		readMaterialIndexAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
+
 		AttachmentReference readDepthStencilAttachmentReference{};
-		readDepthStencilAttachmentReference.index = 2;
+		readDepthStencilAttachmentReference.index = DEPTH_STENCIL_ATTACHMENT_INDEX;
 		readDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
 		SubpassDescriptor debugSubpassDescriptor{};
 		debugSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
-		debugSubpassDescriptor.inputAttachmentReferences = {readVisibilityAttachmentReference, readDepthStencilAttachmentReference};
+		debugSubpassDescriptor.inputAttachmentReferences = {readVisibilityAttachmentReference, readMaterialIndexAttachmentReference, readDepthStencilAttachmentReference};
 
-		return debugSubpassDescriptor;
+		return createSubpass(debugSubpassDescriptor);
 	}
 
-	RenderPassDescriptor getRenderPassDescriptor(ref<Surface> surface, ref<Subpass> visibilitySubpass, ref<Subpass> debugSubpass) {
+	ref<RenderPass> VisibilityRenderer::_createRenderPass() const {
+		const ref<Subpass> visibilitySubpass = createVisibilitySubpass();
+		const ref<Subpass> debugSubpass = createDebugSubpass();
+
 		Attachment swapchainAttachment{};
-		swapchainAttachment.format = surface->getFormat();
+		swapchainAttachment.format = getSurface()->getFormat();
 		swapchainAttachment.sampleCount = 1;
 		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
 		swapchainAttachment.storeOperation = StoreOperation::STORE;
@@ -54,6 +67,13 @@ namespace Trident {
 		visibilityAttachment.loadOperation = LoadOperation::CLEAR;
 		visibilityAttachment.storeOperation = StoreOperation::UNDEFINED;
 		visibilityAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
+		Attachment materialIndexAttachment{};
+		materialIndexAttachment.format = ImageFormat::R32_UINT;
+		materialIndexAttachment.sampleCount = 1;
+		materialIndexAttachment.loadOperation = LoadOperation::CLEAR;
+		materialIndexAttachment.storeOperation = StoreOperation::UNDEFINED;
+		materialIndexAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
 		Attachment depthStencilAttachment{};
 		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
@@ -67,10 +87,10 @@ namespace Trident {
 		subpassDependency.destinationSubpassIndex = 0;
 
 		RenderPassDescriptor renderPassDescriptor{};
-		renderPassDescriptor.attachments = {swapchainAttachment, visibilityAttachment, depthStencilAttachment};
+		renderPassDescriptor.attachments = {swapchainAttachment, visibilityAttachment, materialIndexAttachment, depthStencilAttachment};
 		renderPassDescriptor.subpasses = {visibilitySubpass, debugSubpass};
 		renderPassDescriptor.subpassDependencies = {subpassDependency};
 
-		return renderPassDescriptor;
+		return createRenderPass(renderPassDescriptor);
 	}
 }

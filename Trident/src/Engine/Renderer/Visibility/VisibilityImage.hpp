@@ -19,7 +19,7 @@ namespace Trident {
 
 		SET_DEBUG_NAME(visibilityAttachmentImageDescriptor, "Visibility image");
 
-		return renderPass->createInputAttachmentImage(visibilityAttachmentImageDescriptor, 1);
+		return renderPass->createInputAttachmentImage(visibilityAttachmentImageDescriptor, VISIBILITY_ATTACHMENT_INDEX);
 	}
 
 	ref<ImageView> VisibilityRenderer::createVisibilityImageView() {

@@ -19,24 +19,17 @@ namespace Trident {
 				vec3<float32> position;
 			};
 
-			struct Cluster {
-				uint32 instanceIndex;
-			};
-
 			struct Geometry {
 				uint32 vertexOffset;
 				uint32 clusterCount;
 			};
 
-			struct Instance {
-				mat4x4<float32> transform;
-				uint32 geometryIndex;
-
-				// Use as an offset in the index buffer to access the start of the geometry used by this instance.
-				sint32 clusterOffset;
-			};
-
 		private:
+			static constexpr uint32 SWAPCHAIN_ATTACHMENT_INDEX = 0;
+			static constexpr uint32 VISIBILITY_ATTACHMENT_INDEX = 1;
+			static constexpr uint32 MATERIAL_INDEX_ATTACHMENT_INDEX = 2;
+			static constexpr uint32 DEPTH_STENCIL_ATTACHMENT_INDEX = 3;
+
 			static constexpr uint32 VISIBILITY_SUBPASS_INDEX = 0;
 			static constexpr uint32 DEBUG_SUBPASS_INDEX = 1;
 
@@ -62,15 +55,18 @@ namespace Trident {
 			void onEvent(Event& event) override;
 
 		private:
-			void _createRenderPass();
+			ref<RenderPass> _createRenderPass() const;
+
+			ref<Subpass> createVisibilitySubpass() const;
+			ref<Subpass> createDebugSubpass() const;
 
 			ref<Image> createVisibilityImage() const;
-			ref<Image> createDepthStencilImage() const;
 			ref<Image> createMaterialIndexImage() const;
+			ref<Image> createDepthStencilImage() const;
 
 			ref<ImageView> createVisibilityImageView();
-			ref<ImageView> createDepthStencilImageView();
 			ref<ImageView> createMaterialIndexImageView();
+			ref<ImageView> createDepthStencilImageView();
 
 			void recreateFramebuffers();
 
@@ -105,7 +101,7 @@ namespace Trident {
 			void fillVertexNormalIndexBuffer(uint32* mappedRange) const;
 			void fillVertexTextureCoordinateIndexBuffer(uint32* mappedRange) const;
 			void fillClusterBuffer(Cluster* mappedRange) const;
-			void fillInstanceBuffer(Instance* mappedRange) const;
+			void fillInstanceBuffer(ClusteredInstance* mappedRange) const;
 			void fillGeometryBuffer(Geometry* mappedRange) const;
 
 			void updateBufferDescriptorSets();
@@ -156,6 +152,6 @@ namespace Trident {
 
 			DrawIndirectCommand* indirectMappedRange;
 			Camera* cameraMappedRange;
-			Instance* instanceMappedRange;
+			ClusteredInstance* instanceMappedRange;
 	};
 }

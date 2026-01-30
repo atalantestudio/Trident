@@ -14,9 +14,10 @@ namespace Trident {
 		const uint32 suzanneGeometryIndex = scene.registerGeometry(suzanneGeometry);
 
 		InstanceDescriptor suzanneInstanceDescriptor{};
-		suzanneInstanceDescriptor.geometryIndex = suzanneGeometryIndex;
 		suzanneInstanceDescriptor.position = {0.0_m, 0.0_m, 0.0_m};
 		suzanneInstanceDescriptor.rotation = {pi<float32>() * -0.5f, 0.0_rad, pi<float32>()};
+		suzanneInstanceDescriptor.geometryIndex = suzanneGeometryIndex;
+		suzanneInstanceDescriptor.materialIndex = 1;
 
 		scene.registerInstance(suzanneInstanceDescriptor);
 

@@ -30,5 +30,6 @@ namespace Trident {
 			vec3<float32> scale = {1.0f, 1.0f, 1.0f};
 
 			uint32 geometryIndex;
+			uint32 materialIndex;
 	};
 }
