@@ -132,9 +132,10 @@ namespace Trident {
 		multisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
 		multisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
 
-		sequence<VkPipelineColorBlendAttachmentState> colorBlendAttachmentStates(descriptor.colorBlendState.attachments.size());
+		sequence<VkPipelineColorBlendAttachmentState> colorBlendAttachmentStates(descriptor.colorBlendState.attachments.count());
+		uint32 colorBlendAttachmentIndex = 0;
 
-		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < colorBlendAttachmentStates.count(); colorBlendAttachmentIndex += 1) {
+		while (colorBlendAttachmentIndex < colorBlendAttachmentStates.count()) {
 			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
 
 			VkPipelineColorBlendAttachmentState& colorBlendAttachmentState = colorBlendAttachmentStates[colorBlendAttachmentIndex];
@@ -146,6 +147,8 @@ namespace Trident {
 			colorBlendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
 			colorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
 			colorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+
+			colorBlendAttachmentIndex += 1;
 		}
 
 		VkPipelineColorBlendStateCreateInfo colorBlendStateCreateInfo{};

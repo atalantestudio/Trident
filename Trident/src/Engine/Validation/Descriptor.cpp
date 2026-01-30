@@ -3,14 +3,12 @@
 
 #include "pch.hpp"
 
-// #ifdef BUILD_MODE_DEBUG
-#if 1
+#ifdef BUILD_MODE_DEBUG
 	#include "Engine/Renderer/Renderer.hpp"
 #endif
 
 namespace Trident {
-	#if 1
-	// #ifdef BUILD_MODE_DEBUG
+	#ifdef BUILD_MODE_DEBUG
 		static bool validateSampleCount(uint8 sampleCount) {
 			switch (sampleCount) {
 				case 1:
@@ -87,6 +85,12 @@ namespace Trident {
 					ENGINE_ERROR("descriptor.framebuffer.renderPass must be a valid RenderPass.");
 				}
 				else {
+					if (descriptor.clearValues.count() < renderPass->getAttachmentCount()) {
+						errorCount += 1;
+
+						ENGINE_ERROR("descriptor.clearValues.count must be greater than or equal to the number of attachments in descriptor.framebuffer.renderPass.");
+					}
+
 					if (descriptor.clearValues.count() > renderPass->getAttachmentReferenceCount()) {
 						errorCount += 1;
 
@@ -504,7 +508,7 @@ namespace Trident {
 
 			uint32 colorBlendAttachmentIndex = 0;
 
-			for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.size(); colorBlendAttachmentIndex += 1) {
+			for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.count(); colorBlendAttachmentIndex += 1) {
 				const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
 
 				if (colorBlendAttachment.blend != true && colorBlendAttachment.blend != false) {
@@ -572,7 +576,15 @@ namespace Trident {
 					ENGINE_ERROR("descriptor.subpassIndex must be lesser than the number of subpasses in descriptor.renderPass.");
 				}
 				else {
-					if (descriptor.depthStencilState.depthTest && !descriptor.renderPass->getSubpass(descriptor.subpassIndex)->hasDepthStencilAttachmentReference()) {
+					const ref<Subpass> subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
+
+					if (descriptor.colorBlendState.attachments.count() != subpass->getColorAttachmentReferenceCount()) {
+						errorCount += 1;
+
+						ENGINE_ERROR("descriptor.colorBlendState.attachments must have as many entries as the subpass's color attachment references.");
+					}
+
+					if (descriptor.depthStencilState.depthTest && !subpass->hasDepthStencilAttachmentReference()) {
 						warningCount += 1;
 
 						ENGINE_WARNING("descriptor.depthStencilState.depthTest is true but the subpass does not contain a depth stencil attachment.");

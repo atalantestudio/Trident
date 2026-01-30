@@ -26,7 +26,7 @@ namespace Trident {
 		polygonMode(getPolygonMode(descriptor.polygonMode)),
 		lineWidth(descriptor.lineWidth),
 		minSampleShading(descriptor.minSampleShading),
-		drawBuffers(descriptor.colorBlendState.attachments.size()),
+		drawBuffers(descriptor.colorBlendState.attachments.count()),
 		depthTest(descriptor.depthStencilState.depthTest),
 		depthWrite(descriptor.depthStencilState.depthWrite),
 		depthFunc(getDepthFunc(descriptor.depthStencilState.compareOperation)),
@@ -158,7 +158,7 @@ namespace Trident {
 			}
 		}
 
-		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.size(); colorBlendAttachmentIndex += 1) {
+		for (uint32 colorBlendAttachmentIndex = 0; colorBlendAttachmentIndex < descriptor.colorBlendState.attachments.count(); colorBlendAttachmentIndex += 1) {
 			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[colorBlendAttachmentIndex];
 
 			DrawBuffer& drawBuffer = drawBuffers[colorBlendAttachmentIndex];

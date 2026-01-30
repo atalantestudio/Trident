@@ -17,7 +17,7 @@
 
 namespace Trident {
 	struct ColorBlendState {
-		std::vector<ColorBlendAttachment> attachments;
+		view<ColorBlendAttachment> attachments;
 	};
 
 	struct DepthStencilState {

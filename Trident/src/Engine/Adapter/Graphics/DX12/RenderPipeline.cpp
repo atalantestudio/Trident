@@ -22,13 +22,14 @@ namespace Trident {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		ADAPTER_ASSERT(descriptor.colorBlendState.attachments.size() <= 8 && descriptor.renderPass->getAttachmentCount() <= 8, "Too many color blend attachments.");
-
 		HRESULT result;
 
 		const ref<Subpass> subpass = descriptor.renderPass->getSubpass(descriptor.subpassIndex);
 		const ref<DX12::ShaderModule> vertexShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.vertexShaderModule);
 		const ref<DX12::ShaderModule> fragmentShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.fragmentShaderModule);
+
+		ADAPTER_ASSERT(subpass->getColorAttachmentReferenceCount() <= 8, "Too many color attachment references.");
+		ADAPTER_ASSERT(descriptor.colorBlendState.attachments.count() <= 8, "Too many color blend attachments.");
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescriptor{};
 		graphicsPipelineStateDescriptor.pRootSignature = pipelineLayout->rootSignature;
@@ -53,7 +54,7 @@ namespace Trident {
 
 		UINT renderTargetBlendDescriptorIndex = 0;
 
-		while (renderTargetBlendDescriptorIndex < descriptor.colorBlendState.attachments.size()) {
+		while (renderTargetBlendDescriptorIndex < descriptor.colorBlendState.attachments.count()) {
 			const ColorBlendAttachment& colorBlendAttachment = descriptor.colorBlendState.attachments[renderTargetBlendDescriptorIndex];
 
 			D3D12_RENDER_TARGET_BLEND_DESC& renderTargetBlendDescriptor = graphicsPipelineStateDescriptor.BlendState.RenderTarget[renderTargetBlendDescriptorIndex];
