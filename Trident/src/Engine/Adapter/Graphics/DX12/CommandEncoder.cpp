@@ -15,6 +15,7 @@
 #include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
 #include "Engine/Adapter/Graphics/DX12/Swapchain.hpp"
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
+#include "Engine/API/Rendering/DispatchIndirectCommand.hpp"
 #include "Engine/API/Rendering/DrawIndexedIndirectCommand.hpp"
 #include "Engine/API/Rendering/DrawIndirectCommand.hpp"
 #include "Engine/Renderer/Renderer.hpp"
@@ -300,9 +301,10 @@ namespace Trident {
 			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
 
 			D3D12_COMMAND_SIGNATURE_DESC commandSignatureDescriptor{};
-			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
+			commandSignatureDescriptor.ByteStride = sizeof(DispatchIndirectCommand);
 			commandSignatureDescriptor.NumArgumentDescs = 1;
-			commandSignatureDescriptor.ByteStride = sizeof(DrawIndirectCommand);
+			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
+			commandSignatureDescriptor.NodeMask = 0;
 
 			const HRESULT result = device.device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
 
@@ -412,9 +414,10 @@ namespace Trident {
 			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
 
 			D3D12_COMMAND_SIGNATURE_DESC commandSignatureDescriptor{};
-			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
-			commandSignatureDescriptor.NumArgumentDescs = 1;
 			commandSignatureDescriptor.ByteStride = sizeof(DrawIndirectCommand);
+			commandSignatureDescriptor.NumArgumentDescs = drawCount;
+			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
+			commandSignatureDescriptor.NodeMask = 0;
 
 			const HRESULT result = device.device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
 
@@ -449,9 +452,10 @@ namespace Trident {
 			indirectArgumentDescriptor.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
 
 			D3D12_COMMAND_SIGNATURE_DESC commandSignatureDescriptor{};
-			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
-			commandSignatureDescriptor.NumArgumentDescs = 1;
 			commandSignatureDescriptor.ByteStride = sizeof(DrawIndexedIndirectCommand);
+			commandSignatureDescriptor.NumArgumentDescs = drawCount;
+			commandSignatureDescriptor.pArgumentDescs = &indirectArgumentDescriptor;
+			commandSignatureDescriptor.NodeMask = 0;
 
 			const HRESULT result = device.device->CreateCommandSignature(&commandSignatureDescriptor, nullptr, IID_PPV_ARGS(&indirectBuffer->commandSignature));
 
