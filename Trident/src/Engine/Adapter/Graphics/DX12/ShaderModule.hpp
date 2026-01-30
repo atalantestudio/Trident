@@ -10,7 +10,9 @@ namespace Trident {
 		public:
 			explicit ShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> code);
 
+			~ShaderModule() final override;
+
 		public:
-			ComPtr<ID3DBlob> blob;
+			ID3DBlob* blob;
 	};
 }

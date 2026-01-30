@@ -12,8 +12,10 @@ namespace Trident {
 		public:
 			explicit ComputePipeline(const ComputePipelineDescriptor& descriptor, const DX12::Device& device);
 
+			~ComputePipeline() final override;
+
 		public:
+			ID3D12PipelineState* pipelineState;
 			ref<DX12::PipelineLayout> pipelineLayout;
-			ComPtr<ID3D12PipelineState> pipelineState;
 	};
 }

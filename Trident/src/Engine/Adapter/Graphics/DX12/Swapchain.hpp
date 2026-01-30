@@ -15,6 +15,8 @@ namespace Trident {
 		public:
 			explicit Swapchain(const SwapchainDescriptor& descriptor, const DX12::Instance& instance, const DX12::Surface& surface, const DX12::Device& device, ref<DX12::MemoryAllocator> memoryAllocator);
 
+			~Swapchain() final override;
+
 			uint32 getImageCount() const final override;
 
 			void update(const SwapchainDescriptor& descriptor) final override;
@@ -23,7 +25,7 @@ namespace Trident {
 			void recreate(const SwapchainDescriptor& descriptor);
 
 		public:
-			ComPtr<IDXGISwapChain3> swapChain;
+			IDXGISwapChain3* swapChain;
 			UINT imageCount = 3;
 
 		private:

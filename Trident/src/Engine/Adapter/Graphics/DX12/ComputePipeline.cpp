@@ -18,7 +18,7 @@ namespace Trident {
 		HRESULT result;
 
 		D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStateDescriptor{};
-		computePipelineStateDescriptor.pRootSignature = pipelineLayout->rootSignature.Get();
+		computePipelineStateDescriptor.pRootSignature = pipelineLayout->rootSignature;
 		computePipelineStateDescriptor.CS.pShaderBytecode = computeShaderModule->blob->GetBufferPointer();
 		computePipelineStateDescriptor.CS.BytecodeLength = computeShaderModule->blob->GetBufferSize();
 		computePipelineStateDescriptor.NodeMask = 0;
@@ -29,5 +29,9 @@ namespace Trident {
 		result = device.device->CreateComputePipelineState(&computePipelineStateDescriptor, IID_PPV_ARGS(&pipelineState));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create compute pipeline state.");
+	}
+
+	DX12::ComputePipeline::~ComputePipeline() {
+		pipelineState->Release();
 	}
 }

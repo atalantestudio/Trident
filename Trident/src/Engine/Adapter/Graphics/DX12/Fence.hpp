@@ -11,7 +11,9 @@ namespace Trident {
 		public:
 			explicit Fence(const FenceDescriptor& descriptor, const DX12::Device& device);
 
+			~Fence() final override;
+
 		public:
-			ComPtr<ID3D12Fence> fence;
+			ID3D12Fence* fence;
 	};
 }

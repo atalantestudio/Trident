@@ -36,9 +36,13 @@ namespace Trident {
 	}
 
 	DX12::Queue::~Queue() {
-		const BOOL result = CloseHandle(completionEvent);
+		HRESULT result;
+
+		result = CloseHandle(completionEvent);
 
 		WIN32_ASSERT(result != 0);
+
+		commandQueue->Release();
 	}
 
 	ref<Trident::CommandEncoder> DX12::Queue::createCommandEncoder(const CommandBufferDescriptor& descriptor) const {
@@ -51,7 +55,7 @@ namespace Trident {
 		HRESULT result;
 
 		while (commandListIndex < commandLists.count()) {
-			commandLists[commandListIndex] = std::static_pointer_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList.Get();
+			commandLists[commandListIndex] = std::static_pointer_cast<DX12::CommandBuffer>(commandBuffers[commandListIndex])->commandList;
 
 			commandListIndex += 1;
 		}
@@ -61,7 +65,7 @@ namespace Trident {
 		if (fence != nullptr) {
 			const ref<DX12::Fence> _fence = std::static_pointer_cast<DX12::Fence>(fence);
 
-			result = commandQueue->Signal(_fence->fence.Get(), 1);
+			result = commandQueue->Signal(_fence->fence, 1);
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to fence.");
 
@@ -95,7 +99,7 @@ namespace Trident {
 		HRESULT result;
 
 		// TODO: We may not even need the idle fence if the completion event is set right after submit().
-		result = commandQueue->Signal(idleFence->fence.Get(), 1);
+		result = commandQueue->Signal(idleFence->fence, 1);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to add signal to queue idle fence.");
 

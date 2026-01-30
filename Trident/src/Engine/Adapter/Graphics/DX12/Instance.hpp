@@ -11,6 +11,8 @@ namespace Trident {
 		public:
 			explicit Instance(const ApplicationProperties& properties);
 
+			~Instance() final override;
+
 			IDXGIAdapter* selectAdapter() const;
 
 		private:
@@ -19,7 +21,7 @@ namespace Trident {
 			uint32 calculateAdapterScore(const DXGI_ADAPTER_DESC& adapterDescriptor) const;
 
 		public:
-			ComPtr<IDXGIFactory4> factory;
+			IDXGIFactory4* factory;
 
 		private:
 			bool preferIntegratedGpu;

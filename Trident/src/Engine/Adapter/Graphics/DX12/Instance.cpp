@@ -16,15 +16,14 @@ namespace Trident {
 		UINT flags = 0;
 
 		#ifdef BUILD_MODE_DEBUG
-			{
-				ComPtr<ID3D12Debug> debug;
+			ID3D12Debug* debug;
 
-				result = D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
+			result = D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
 
-				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get debug interface.");
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get debug interface.");
 
-				debug->EnableDebugLayer();
-			}
+			debug->EnableDebugLayer();
+			debug->Release();
 
 			flags |= DXGI_CREATE_FACTORY_DEBUG;
 		#endif
@@ -32,6 +31,10 @@ namespace Trident {
 		result = CreateDXGIFactory2(flags, IID_PPV_ARGS(&factory));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create factory.");
+	}
+
+	DX12::Instance::~Instance() {
+		factory->Release();
 	}
 
 	IDXGIAdapter* DX12::Instance::selectAdapter() const {

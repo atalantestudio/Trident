@@ -174,10 +174,10 @@ namespace Trident {
 		versionedRootSignatureDescriptor.Desc_1_1.pStaticSamplers = nullptr;
 		versionedRootSignatureDescriptor.Desc_1_1.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
-		ComPtr<ID3DBlob> blob;
+		ID3DBlob* blob;
 
 		#ifdef BUILD_MODE_DEBUG
-			ComPtr<ID3DBlob> errorBlob;
+			ID3DBlob* errorBlob;
 		#endif
 
 		result = D3D12SerializeVersionedRootSignature(
@@ -196,6 +196,8 @@ namespace Trident {
 					const view<char8> error(pointer_cast<const char8*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
 
 					ADAPTER_ASSERT(false, "Failed to serialize root signature: []", error);
+
+					errorBlob->Release();
 				}
 			#else
 				ADAPTER_ASSERT(false, "Failed to serialize root signature.");
@@ -205,5 +207,11 @@ namespace Trident {
 		result = device.device->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create root signature.");
+
+		blob->Release();
+	}
+
+	DX12::PipelineLayout::~PipelineLayout() {
+		rootSignature->Release();
 	}
 }

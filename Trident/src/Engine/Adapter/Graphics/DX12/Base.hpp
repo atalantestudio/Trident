@@ -14,8 +14,6 @@
 #pragma comment(lib, "dxgi.lib")
 
 namespace Trident::DX12 {
-	using Microsoft::WRL::ComPtr;
-
 	struct DescriptorHeapAllocation;
 
 	class Buffer;

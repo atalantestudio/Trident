@@ -24,7 +24,7 @@ namespace Trident {
 			void waitIdle() const final override;
 
 		public:
-			ComPtr<ID3D12CommandQueue> commandQueue;
+			ID3D12CommandQueue* commandQueue;
 			DX12::CommandPool commandPool;
 
 		private:

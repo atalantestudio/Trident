@@ -58,15 +58,17 @@ namespace Trident {
 				ADAPTER_WARNING("Failed to create device using the primary display adapter. Falling back to a WARP adapter.");
 			#endif
 
-			ComPtr<IDXGIAdapter> adapter;
+			IDXGIAdapter* adapter;
 
 			result = instance.factory->EnumWarpAdapter(IID_PPV_ARGS(&adapter));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to enumerate WARP adapter.");
 
-			result = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
+			result = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create device using the WARP adapter.");
+
+			adapter->Release();
 		}
 
 		queues[0] = createRef<DX12::Queue>(*this, D3D12_COMMAND_LIST_TYPE_DIRECT);
@@ -110,6 +112,8 @@ namespace Trident {
 
 			infoQueue->Release();
 		#endif
+
+		device->Release();
 	}
 
 	AcquireNextImageStatus DX12::Device::acquireNextImage(ref<Trident::Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const {

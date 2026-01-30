@@ -19,11 +19,13 @@ namespace Trident {
 			// NOTE: Render Target View constructor
 			explicit Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT imageIndex, ref<DX12::MemoryAllocator> memoryAllocator);
 
+			~Image() final override;
+
 		protected:
 			ref<Trident::ImageView> createViewInternal(const ImageViewDescriptor& descriptor, Trident::Image* image) final override;
 
 		public:
-			ComPtr<ID3D12Resource> resource;
+			ID3D12Resource* resource;
 			D3D12_RESOURCE_STATES resourceState;
 			ImageUsage usage;
 

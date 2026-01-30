@@ -26,6 +26,10 @@ namespace Trident {
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to make window association.");
 	}
 
+	DX12::Swapchain::~Swapchain() {
+		swapChain->Release();
+	}
+
 	uint32 DX12::Swapchain::getImageCount() const {
 		return imageCount;
 	}
@@ -41,7 +45,7 @@ namespace Trident {
 			image.~shared_ptr();
 		}
 
-		swapChain.Reset();
+		swapChain->Release();
 
 		recreate(descriptor);
 	}
@@ -69,15 +73,17 @@ namespace Trident {
 
 		const ref<DX12::Queue> graphicsQueue = std::static_pointer_cast<DX12::Queue>(device.getQueue(QueueFamilyCapability::GRAPHICS));
 
-		ComPtr<IDXGISwapChain1> swapChain1;
+		IDXGISwapChain1* swapChain1;
 
-		result = instance.factory->CreateSwapChainForHwnd(graphicsQueue->commandQueue.Get(), surface.window, &swapchainDescriptor, nullptr, nullptr, &swapChain1);
+		result = instance.factory->CreateSwapChainForHwnd(graphicsQueue->commandQueue, surface.window, &swapchainDescriptor, nullptr, nullptr, &swapChain1);
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create swapchain.");
 
-		result = swapChain1.As(&swapChain);
+		result = swapChain1->QueryInterface(&swapChain);
 
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to move swapchain.");
+		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to query swapchain interface.");
+
+		swapChain1->Release();
 
 		images = sequence<ref<Trident::Image>>(imageCount);
 		imageViews = sequence<ref<Trident::ImageView>>(imageCount);

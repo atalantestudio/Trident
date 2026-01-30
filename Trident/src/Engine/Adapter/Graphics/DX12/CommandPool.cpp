@@ -10,10 +10,14 @@ namespace Trident {
 	DX12::CommandPool::CommandPool(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE type) :
 		type(type)
 	{
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+		HRESULT result;
 
-		const HRESULT result = device.device->CreateCommandAllocator(type, IID_PPV_ARGS(&commandAllocator));
+		result = device.device->CreateCommandAllocator(type, IID_PPV_ARGS(&commandAllocator));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command allocator.");
+	}
+
+	DX12::CommandPool::~CommandPool() {
+		commandAllocator->Release();
 	}
 }

@@ -69,7 +69,7 @@ namespace Trident {
 			shaderResourceViewDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
 		}
 
-		device.device->CreateShaderResourceView(image->resource.Get(), &shaderResourceViewDescriptor, descriptorHandle);
+		device.device->CreateShaderResourceView(image->resource, &shaderResourceViewDescriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::writeStorageImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const {
@@ -93,7 +93,7 @@ namespace Trident {
 			unorderedAccessViewDescriptor.Texture2D.PlaneSlice = 0;
 		}
 
-		device.device->CreateUnorderedAccessView(image->resource.Get(), nullptr, &unorderedAccessViewDescriptor, descriptorHandle);
+		device.device->CreateUnorderedAccessView(image->resource, nullptr, &unorderedAccessViewDescriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::writeUniformBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
@@ -160,7 +160,7 @@ namespace Trident {
 			shaderResourceViewDescriptor.Texture2D.ResourceMinLODClamp = 0.0f;
 		}
 
-		device.device->CreateShaderResourceView(image->resource.Get(), &shaderResourceViewDescriptor, descriptorHandle);
+		device.device->CreateShaderResourceView(image->resource, &shaderResourceViewDescriptor, descriptorHandle);
 	}
 
 	D3D12_CPU_DESCRIPTOR_HANDLE DX12::MemoryAllocator::allocateSampler(const D3D12_SAMPLER_DESC* descriptor) {

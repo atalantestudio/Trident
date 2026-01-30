@@ -9,27 +9,26 @@
 
 namespace Trident {
 	DX12::ImageView::ImageView(const ImageViewDescriptor& descriptor, Trident::Image* image, ref<DX12::MemoryAllocator> memoryAllocator) :
-		Trident::ImageView(descriptor, image),
-		memoryAllocator(memoryAllocator)
+		Trident::ImageView(descriptor, image)
 	{
 		const DX12::Image* _image = static_cast<const DX12::Image*>(image);
 
 		if (_image->usage == 0) {
-			createSwapchainRenderTargetView(_image);
+			createSwapchainRenderTargetView(_image, memoryAllocator);
 		}
 		else if (_image->usage & ImageUsage::COLOR_ATTACHMENT) {
-			createRenderTargetView(_image);
+			createRenderTargetView(_image, memoryAllocator);
 		}
 		else if (_image->usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
-			createDepthStencilView(_image);
+			createDepthStencilView(_image, memoryAllocator);
 		}
 	}
 
-	void DX12::ImageView::createSwapchainRenderTargetView(const DX12::Image* image) {
-		cpuDescriptorHandle = memoryAllocator->allocateRenderTargetView(image->resource.Get(), nullptr);
+	void DX12::ImageView::createSwapchainRenderTargetView(const DX12::Image* image, ref<DX12::MemoryAllocator> memoryAllocator) {
+		descriptorHandle = memoryAllocator->allocateRenderTargetView(image->resource, nullptr);
 	}
 
-	void DX12::ImageView::createRenderTargetView(const DX12::Image* image) {
+	void DX12::ImageView::createRenderTargetView(const DX12::Image* image, ref<DX12::MemoryAllocator> memoryAllocator) {
 		D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDescriptor{};
 		renderTargetViewDescriptor.Format = getImageFormat(image->getFormat());
 
@@ -64,10 +63,10 @@ namespace Trident {
 			}
 		}
 
-		cpuDescriptorHandle = memoryAllocator->allocateRenderTargetView(image->resource.Get(), &renderTargetViewDescriptor);
+		descriptorHandle = memoryAllocator->allocateRenderTargetView(image->resource, &renderTargetViewDescriptor);
 	}
 
-	void DX12::ImageView::createDepthStencilView(const DX12::Image* image) {
+	void DX12::ImageView::createDepthStencilView(const DX12::Image* image, ref<DX12::MemoryAllocator> memoryAllocator) {
 		D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilViewDescriptor{};
 		depthStencilViewDescriptor.Format = getImageFormat(image->getFormat());
 		depthStencilViewDescriptor.Flags = D3D12_DSV_FLAG_NONE;
@@ -101,6 +100,6 @@ namespace Trident {
 			}
 		}
 
-		cpuDescriptorHandle = memoryAllocator->allocateDepthStencilView(image->resource.Get(), &depthStencilViewDescriptor);
+		descriptorHandle = memoryAllocator->allocateDepthStencilView(image->resource, &depthStencilViewDescriptor);
 	}
 }

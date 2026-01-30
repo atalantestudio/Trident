@@ -40,7 +40,7 @@ namespace Trident {
 		}
 
 		#ifdef BUILD_MODE_DEBUG
-			ComPtr<ID3DBlob> errorBlob;
+			ID3DBlob* errorBlob;
 		#endif
 
 		result = D3DCompile(
@@ -67,10 +67,16 @@ namespace Trident {
 					const view<char8> error(pointer_cast<const char8*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
 
 					ADAPTER_ASSERT(false, "Failed to compile shader: []", error);
+
+					errorBlob->Release();
 				}
 			#else
 				ADAPTER_ASSERT(false, "Failed to compile shader.");
 			#endif
 		}
+	}
+
+	DX12::ShaderModule::~ShaderModule() {
+		blob->Release();
 	}
 }

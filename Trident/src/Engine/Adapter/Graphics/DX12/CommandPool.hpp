@@ -11,8 +11,10 @@ namespace Trident {
 		public:
 			explicit CommandPool(const DX12::Device& device, D3D12_COMMAND_LIST_TYPE type);
 
+			~CommandPool() final override;
+
 		public:
-			ComPtr<ID3D12CommandAllocator> commandAllocator;
+			ID3D12CommandAllocator* commandAllocator;
 			D3D12_COMMAND_LIST_TYPE type;
 	};
 }

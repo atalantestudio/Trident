@@ -31,7 +31,7 @@ namespace Trident {
 		const ref<DX12::ShaderModule> fragmentShaderModule = std::static_pointer_cast<DX12::ShaderModule>(descriptor.fragmentShaderModule);
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDescriptor{};
-		graphicsPipelineStateDescriptor.pRootSignature = pipelineLayout->rootSignature.Get();
+		graphicsPipelineStateDescriptor.pRootSignature = pipelineLayout->rootSignature;
 		graphicsPipelineStateDescriptor.VS.pShaderBytecode = vertexShaderModule->blob->GetBufferPointer();
 		graphicsPipelineStateDescriptor.VS.BytecodeLength = vertexShaderModule->blob->GetBufferSize();
 		graphicsPipelineStateDescriptor.PS.pShaderBytecode = fragmentShaderModule->blob->GetBufferPointer();
@@ -180,5 +180,9 @@ namespace Trident {
 		result = device.device->CreateGraphicsPipelineState(&graphicsPipelineStateDescriptor, IID_PPV_ARGS(&pipelineState));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create graphics pipeline state.");
+	}
+
+	DX12::RenderPipeline::~RenderPipeline() {
+		pipelineState->Release();
 	}
 }

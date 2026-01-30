@@ -11,9 +11,11 @@ namespace Trident {
 		public:
 			explicit RenderPipeline(const RenderPipelineDescriptor& descriptor, const DX12::Device& device);
 
+			~RenderPipeline() final override;
+
 		public:
+			ID3D12PipelineState* pipelineState;
 			ref<DX12::PipelineLayout> pipelineLayout;
-			ComPtr<ID3D12PipelineState> pipelineState;
 			D3D_PRIMITIVE_TOPOLOGY primitiveTopology;
 	};
 }

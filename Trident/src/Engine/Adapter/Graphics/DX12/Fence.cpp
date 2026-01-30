@@ -10,10 +10,14 @@ namespace Trident {
 	DX12::Fence::Fence(const FenceDescriptor& descriptor, const DX12::Device& device) :
 		Trident::Fence(descriptor)
 	{
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+		HRESULT result;
 
-		const HRESULT result = device.device->CreateFence(descriptor.signaled, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+		result = device.device->CreateFence(descriptor.signaled, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create fence.");
+	}
+
+	DX12::Fence::~Fence() {
+		fence->Release();
 	}
 }

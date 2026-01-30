@@ -119,6 +119,10 @@ namespace Trident {
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set name on image resource.");
 	}
 
+	DX12::Image::~Image() {
+		resource->Release();
+	}
+
 	ref<Trident::ImageView> DX12::Image::createViewInternal(const ImageViewDescriptor& descriptor, Trident::Image* image) {
 		return createRef<DX12::ImageView>(descriptor, image, memoryAllocator);
 	}

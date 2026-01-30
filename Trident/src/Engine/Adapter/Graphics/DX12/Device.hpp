@@ -40,7 +40,7 @@ namespace Trident {
 			void setMemoryAllocator(ref<DX12::MemoryAllocator> memoryAllocator);
 
 		public:
-			ComPtr<ID3D12Device> device;
+			ID3D12Device* device;
 			ref<DX12::MemoryAllocator> memoryAllocator;
 
 		private:

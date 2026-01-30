@@ -11,8 +11,12 @@ namespace Trident {
 		public:
 			explicit PipelineLayout(const PipelineLayoutDescriptor& descriptor, const DX12::Device& device);
 
+			~PipelineLayout() final override;
+
 		public:
-			ComPtr<ID3D12RootSignature> rootSignature;
+			ID3D12RootSignature* rootSignature;
+
+			// TODO: Replace by an offset into the descriptor table.
 			bool samplerDescriptorTable;
 	};
 }

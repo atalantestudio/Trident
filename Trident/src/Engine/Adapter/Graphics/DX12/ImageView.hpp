@@ -13,14 +13,11 @@ namespace Trident {
 			explicit ImageView(const ImageViewDescriptor& descriptor, Trident::Image* image, ref<DX12::MemoryAllocator> memoryAllocator);
 
 		private:
-			void createSwapchainRenderTargetView(const DX12::Image* image);
-			void createRenderTargetView(const DX12::Image* image);
-			void createDepthStencilView(const DX12::Image* image);
+			void createSwapchainRenderTargetView(const DX12::Image* image, ref<DX12::MemoryAllocator> memoryAllocator);
+			void createRenderTargetView(const DX12::Image* image, ref<DX12::MemoryAllocator> memoryAllocator);
+			void createDepthStencilView(const DX12::Image* image, ref<DX12::MemoryAllocator> memoryAllocator);
 
 		public:
-			D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle;
-
-		private:
-			ref<DX12::MemoryAllocator> memoryAllocator;
+			D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle;
 	};
 }

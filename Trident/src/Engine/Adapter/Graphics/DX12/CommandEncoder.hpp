@@ -12,6 +12,8 @@ namespace Trident {
 		public:
 			explicit CommandEncoder(const CommandBufferDescriptor& descriptor, const DX12::Device& device, const DX12::CommandPool& commandPool);
 
+			~CommandEncoder() final override;
+
 			void begin() const final override;
 
 			void beginRenderPass(const BeginRenderPassDescriptor& descriptor) final override;
@@ -65,8 +67,8 @@ namespace Trident {
 
 		private:
 			const DX12::Device& device;
-			ComPtr<ID3D12CommandAllocator> commandAllocator;
-			ComPtr<ID3D12GraphicsCommandList> commandList;
+			ID3D12GraphicsCommandList* commandList;
+			ID3D12CommandAllocator* commandAllocator;
 			uint32 commandCount = 0;
 			bool computePipelineBound = false;
 			bool samplerDescriptorTable = false;
