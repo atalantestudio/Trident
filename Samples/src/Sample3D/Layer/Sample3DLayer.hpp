@@ -5,7 +5,7 @@
 
 #include "Engine/API/Camera/Controller/FlyCameraController.hpp"
 #include "Engine/Layer/Layer.hpp"
-#include "Engine/Renderer/3D/VisibilityRenderer.hpp"
+#include "Engine/Renderer/Visibility/Renderer.hpp"
 
 #include "../Scene/Suzanne.hpp"
 

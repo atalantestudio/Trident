@@ -34,5 +34,9 @@ namespace Trident {
 
 		// TODO: Replace by new MemoryResourceType enum.
 		MemoryProperty memoryProperties;
+
+		#if defined(BUILD_MODE_DEBUG)
+			view<char8> name;
+		#endif
 	};
 }

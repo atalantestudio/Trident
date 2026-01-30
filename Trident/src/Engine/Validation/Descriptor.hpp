@@ -5,6 +5,8 @@
 
 namespace Trident {
 	#ifdef BUILD_MODE_DEBUG
+		#define SET_DEBUG_NAME(descriptor, value) descriptor.name = value
+
 		class Image;
 
 		struct AttachmentImageDescriptor;
@@ -46,6 +48,8 @@ namespace Trident {
 
 		#define DEBUG_DESCRIPTOR_GUARD DescriptorGuard
 	#else
+		#define SET_DEBUG_NAME(descriptor, value)
+
 		#define DEBUG_DESCRIPTOR_GUARD
 	#endif
 }

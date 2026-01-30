@@ -4,16 +4,26 @@
 #include "pch.hpp"
 
 #include "Engine/API/Camera/PerspectiveCamera.hpp"
-#include "Engine/Renderer/3D/VisibilityRenderer.hpp"
+#include "Engine/Renderer/Visibility/Renderer.hpp"
+#include "Engine/Renderer/Visibility/RenderPass.hpp"
+
+#include "Engine/Renderer/Visibility/DepthStencilImage.hpp"
+#include "Engine/Renderer/Visibility/MaterialIndexImage.hpp"
+#include "Engine/Renderer/Visibility/VisibilityImage.hpp"
 
 namespace Trident {
 	void VisibilityRenderer::build() {
-		setupRenderPass();
+		_createRenderPass();
 
-		recreateVisibilityImage();
-		recreateVisibilityImageView();
-		recreateDepthStencilImage();
-		recreateDepthStencilImageView();
+		visibilityImage = createVisibilityImage();
+		visibilityImageView = createVisibilityImageView();
+
+		depthStencilImage = createDepthStencilImage();
+		depthStencilImageView = createDepthStencilImageView();
+
+		materialIndexImage = createMaterialIndexImage();
+		materialIndexImageView = createMaterialIndexImageView();
+
 		recreateFramebuffers();
 
 		createCameraDescriptorSetLayout();
@@ -99,10 +109,16 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::resize(WindowResizeEvent& event) {
-		recreateVisibilityImage();
-		recreateVisibilityImageView();
-		recreateDepthStencilImage();
-		recreateDepthStencilImageView();
+		visibilityImage = createVisibilityImage();
+		visibilityImageView = createVisibilityImageView();
+
+		depthStencilImage = createDepthStencilImage();
+		depthStencilImageView = createDepthStencilImageView();
+
+		// TODO: Reset to 0 instead.
+		// materialIndexImage = createMaterialIndexImage();
+		// materialIndexImageView = createMaterialIndexImageView();
+
 		recreateFramebuffers();
 
 		updateDebugInputAttachmentDescriptorSets();
@@ -129,117 +145,11 @@ namespace Trident {
 		eventDispatcher.dispatch<WindowResizeEvent>(BIND(onWindowResize));
 	}
 
-	void VisibilityRenderer::setupRenderPass() {
-		Attachment swapchainAttachment{};
-		swapchainAttachment.format = getSurface()->getFormat();
-		swapchainAttachment.sampleCount = 1;
-		swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-		swapchainAttachment.storeOperation = StoreOperation::STORE;
-		swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+	void VisibilityRenderer::_createRenderPass() {
+		ref<Subpass> visibilitySubpass = createSubpass(getVisibilitySubpassDescriptor());
+		ref<Subpass> debugSubpass = createSubpass(getDebugSubpassDescriptor());
 
-		Attachment visibilityAttachment{};
-		visibilityAttachment.format = ImageFormat::R32_UINT;
-		visibilityAttachment.sampleCount = 1;
-		visibilityAttachment.loadOperation = LoadOperation::CLEAR;
-		visibilityAttachment.storeOperation = StoreOperation::UNDEFINED;
-		visibilityAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-		Attachment depthStencilAttachment{};
-		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
-		depthStencilAttachment.sampleCount = 1;
-		depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
-		depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
-		depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		AttachmentReference writeSwapchainAttachmentReference{};
-		writeSwapchainAttachmentReference.index = 0;
-		writeSwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-		AttachmentReference writeVisibilityAttachmentReference{};
-		writeVisibilityAttachmentReference.index = 1;
-		writeVisibilityAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
-		AttachmentReference writeDepthStencilAttachmentReference{};
-		writeDepthStencilAttachmentReference.index = 2;
-		writeDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
- 
-		AttachmentReference readVisibilityAttachmentReference{};
-		readVisibilityAttachmentReference.index = 1;
-		readVisibilityAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-
-		AttachmentReference readDepthStencilAttachmentReference{};
-		readDepthStencilAttachmentReference.index = 2;
-		readDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-
-		SubpassDescriptor visibilitySubpassDescriptor{};
-		visibilitySubpassDescriptor.colorAttachmentReferences = {writeVisibilityAttachmentReference};
-		visibilitySubpassDescriptor.depthStencilAttachmentReference = writeDepthStencilAttachmentReference;
-
-		SubpassDescriptor debugSubpassDescriptor{};
-		debugSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
-		debugSubpassDescriptor.inputAttachmentReferences = {readVisibilityAttachmentReference, readDepthStencilAttachmentReference};
-
-		const ref<Subpass> visibilitySubpass = createSubpass(visibilitySubpassDescriptor);
-		const ref<Subpass> debugSubpass = createSubpass(debugSubpassDescriptor);
-
-		SubpassDependency subpassDependency{};
-		subpassDependency.sourceSubpassIndex = SubpassDependency::EXTERNAL_SUBPASS;
-		subpassDependency.destinationSubpassIndex = 0;
-
-		RenderPassDescriptor renderPassDescriptor{};
-		renderPassDescriptor.attachments = {swapchainAttachment, visibilityAttachment, depthStencilAttachment};
-		renderPassDescriptor.subpasses = {visibilitySubpass, debugSubpass};
-		renderPassDescriptor.subpassDependencies = {subpassDependency};
-
-		renderPass = createRenderPass(renderPassDescriptor);
-	}
-
-	void VisibilityRenderer::recreateVisibilityImage() {
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-
-		AttachmentImageDescriptor visibilityAttachmentImageDescriptor{};
-		visibilityAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		visibilityAttachmentImageDescriptor.extent.width = swapchainExtent.width;
-		visibilityAttachmentImageDescriptor.extent.height = swapchainExtent.height;
-		visibilityAttachmentImageDescriptor.extent.depth = 1;
-		visibilityAttachmentImageDescriptor.mipLevelCount = 1;
-		visibilityAttachmentImageDescriptor.layerCount = 1;
-
-		visibilityImage = renderPass->createInputAttachmentImage(visibilityAttachmentImageDescriptor, 1);
-	}
-
-	void VisibilityRenderer::recreateVisibilityImageView() {
-		ImageViewDescriptor visibilityImageViewDescriptor{};
-		visibilityImageViewDescriptor.mipLevelOffset = 0;
-		visibilityImageViewDescriptor.mipLevelCount = visibilityImage->getMipLevelCount();
-		visibilityImageViewDescriptor.layerOffset = 0;
-		visibilityImageViewDescriptor.layerCount = visibilityImage->getLayerCount();
-
-		visibilityImageView = visibilityImage->createView(visibilityImageViewDescriptor);
-	}
-
-	void VisibilityRenderer::recreateDepthStencilImage() {
-		const Extent2D swapchainExtent = getSwapchain()->getExtent();
-
-		AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
-		depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
-		depthStencilAttachmentImageDescriptor.extent.width = swapchainExtent.width;
-		depthStencilAttachmentImageDescriptor.extent.height = swapchainExtent.height;
-		depthStencilAttachmentImageDescriptor.extent.depth = 1;
-		depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
-		depthStencilAttachmentImageDescriptor.layerCount = 1;
-
-		depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, VISIBILITY_SUBPASS_INDEX);
-	}
-
-	void VisibilityRenderer::recreateDepthStencilImageView() {
-		ImageViewDescriptor depthStencilImageViewDescriptor{};
-		depthStencilImageViewDescriptor.mipLevelOffset = 0;
-		depthStencilImageViewDescriptor.mipLevelCount = depthStencilImage->getMipLevelCount();
-		depthStencilImageViewDescriptor.layerOffset = 0;
-		depthStencilImageViewDescriptor.layerCount = depthStencilImage->getLayerCount();
-
-		depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
+		renderPass = createRenderPass(getRenderPassDescriptor(getSurface(), visibilitySubpass, debugSubpass));
 	}
 
 	void VisibilityRenderer::recreateFramebuffers() {
@@ -253,10 +163,14 @@ namespace Trident {
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
-		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
+		uint32 framebufferIndex = 0;
+
+		while (framebufferIndex < framebuffers.count()) {
 			framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+
+			framebufferIndex += 1;
 		}
 	}
 

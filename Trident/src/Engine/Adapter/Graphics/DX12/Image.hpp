@@ -17,7 +17,7 @@ namespace Trident {
 			explicit Image(const ImageDescriptor& descriptor, const DX12::Device& device, ref<DX12::MemoryAllocator> memoryAllocator);
 
 			// NOTE: Render Target View constructor
-			explicit Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT imageIndex, ref<DX12::MemoryAllocator> memoryAllocator);
+			explicit Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT index, ref<DX12::MemoryAllocator> memoryAllocator);
 
 			~Image() final override;
 

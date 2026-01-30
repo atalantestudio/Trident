@@ -87,16 +87,20 @@ namespace Trident {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed image resource.");
 
-		// TODO(debug-only)
-		if (isDepthFormat(descriptor.format)) {
-			resource->SetName(L"Depth stencil attachment image");
-		}
-		else {
-			resource->SetName(L"Visibility image");
-		}
+		#if defined(BUILD_MODE_DEBUG)
+			if (descriptor.name.count() > 0) {
+				const LPWSTR name = ConvertUTF8ToUTF16(&descriptor.name[0]);
+
+				result = resource->SetName(name);
+
+				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set name on image resource.");
+
+				free(name);
+			}
+		#endif
 	}
 
-	DX12::Image::Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT imageIndex, ref<DX12::MemoryAllocator> memoryAllocator) :
+	DX12::Image::Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT index, ref<DX12::MemoryAllocator> memoryAllocator) :
 		Trident::Image(createSwapchainImageDescriptor(swapchain.getExtent())),
 		resourceState(D3D12_RESOURCE_STATE_PRESENT),
 		usage(static_cast<ImageUsage>(0)),
@@ -107,16 +111,20 @@ namespace Trident {
 
 		HRESULT result;
 
-		result = swapchain.swapChain->GetBuffer(imageIndex, IID_PPV_ARGS(&resource));
+		result = swapchain.swapChain->GetBuffer(index, IID_PPV_ARGS(&resource));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to get buffer for render target view.");
 
-		const sequence<char8> name = Logger::format("Swapchain image []", imageIndex);
-		const LPWSTR wideName = ConvertUTF8ToUTF16(&name[0]);
+		#if defined(BUILD_MODE_DEBUG)
+			const sequence<char8> descriptorName = Logger::format("Swapchain image []", index);
+			const LPWSTR name = ConvertUTF8ToUTF16(&descriptorName[0]);
 
-		result = resource->SetName(wideName);
+			result = resource->SetName(name);
 
-		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set name on image resource.");
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set name on image resource.");
+
+			free(name);
+		#endif
 	}
 
 	DX12::Image::~Image() {

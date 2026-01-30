@@ -11,5 +11,9 @@ namespace Trident {
 		Extent3D extent;
 		uint32 mipLevelCount;
 		uint32 layerCount;
+
+		#if defined(BUILD_MODE_DEBUG)
+			view<char8> name;
+		#endif
 	};
 }

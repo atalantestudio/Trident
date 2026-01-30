@@ -23,17 +23,17 @@ namespace Trident {
 				uint32 instanceIndex;
 			};
 
+			struct Geometry {
+				uint32 vertexOffset;
+				uint32 clusterCount;
+			};
+
 			struct Instance {
 				mat4x4<float32> transform;
 				uint32 geometryIndex;
 
 				// Use as an offset in the index buffer to access the start of the geometry used by this instance.
 				sint32 clusterOffset;
-			};
-
-			struct Geometry {
-				uint32 vertexOffset;
-				uint32 clusterCount;
 			};
 
 		private:
@@ -62,12 +62,16 @@ namespace Trident {
 			void onEvent(Event& event) override;
 
 		private:
-			void setupRenderPass();
+			void _createRenderPass();
 
-			void recreateVisibilityImage();
-			void recreateVisibilityImageView();
-			void recreateDepthStencilImage();
-			void recreateDepthStencilImageView();
+			ref<Image> createVisibilityImage() const;
+			ref<Image> createDepthStencilImage() const;
+			ref<Image> createMaterialIndexImage() const;
+
+			ref<ImageView> createVisibilityImageView();
+			ref<ImageView> createDepthStencilImageView();
+			ref<ImageView> createMaterialIndexImageView();
+
 			void recreateFramebuffers();
 
 			void createCameraDescriptorSetLayout();
@@ -113,9 +117,11 @@ namespace Trident {
 			ref<RenderPass> renderPass;
 
 			ref<Image> visibilityImage;
-			ref<ImageView> visibilityImageView;
-
+			ref<Image> materialIndexImage;
 			ref<Image> depthStencilImage;
+
+			ref<ImageView> visibilityImageView;
+			ref<ImageView> materialIndexImageView;
 			ref<ImageView> depthStencilImageView;
 
 			sequence<ref<Framebuffer>> framebuffers;
