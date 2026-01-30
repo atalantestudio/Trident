@@ -80,6 +80,9 @@ namespace Trident {
 			// TODO: Deprecate.
 			static ref<ShaderModule> loadShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path);
 
+			// TODO: Deprecate.
+			static ref<ShaderModule> loadInternalShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path);
+
 			static void setImageIndex(uint32 imageIndex);
 
 		public:

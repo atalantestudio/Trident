@@ -263,6 +263,10 @@ namespace Trident {
 		return adapter->createShaderModule(descriptor, view<char8>(&code[0], code.count()));
 	}
 
+	ref<ShaderModule> Renderer::loadInternalShaderModule(const ShaderModuleDescriptor& descriptor, view<char8> path) {
+		return loadShaderModule(descriptor, Logger::format("../../../../../Trident/src/Asset/Shader/[]", path));
+	}
+
 	void Renderer::setImageIndex(uint32 imageIndex) {
 		Renderer::imageIndex = imageIndex;
 	}

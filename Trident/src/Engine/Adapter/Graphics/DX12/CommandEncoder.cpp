@@ -659,7 +659,7 @@ namespace Trident {
 			if (colorAttachment.finalLayout == ImageLayout::PRESENT_SRC) {
 				presentRenderTargetIndex = colorAttachmentReference.index;
 
-				if (colorAttachment.loadOperation != LoadOperation::CLEAR) {
+				if (colorAttachment.loadOperation != LoadOperation::CLEAR && image->resourceState != D3D12_RESOURCE_STATE_RENDER_TARGET) {
 					D3D12_RESOURCE_BARRIER resourceBarrier{};
 					resourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 					resourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;

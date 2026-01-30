@@ -328,8 +328,8 @@ namespace Trident {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "../../../../../Trident/src/Asset/Shader/GUI/Subcomponent.vert");
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "../../../../../Trident/src/Asset/Shader/GUI/Subcomponent.frag");
+		const ref<ShaderModule> vertexShaderModule = loadInternalShaderModule(vertexShaderModuleDescriptor, "GUI/Subcomponent.vert");
+		const ref<ShaderModule> fragmentShaderModule = loadInternalShaderModule(fragmentShaderModuleDescriptor, "GUI/Subcomponent.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = true;
@@ -375,8 +375,8 @@ namespace Trident {
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
 
-		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "../../../../../Trident/src/Asset/Shader/GUI/GlyphSubcomponent.vert");
-		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "../../../../../Trident/src/Asset/Shader/GUI/GlyphSubcomponent.frag");
+		const ref<ShaderModule> vertexShaderModule = loadInternalShaderModule(vertexShaderModuleDescriptor, "GUI/GlyphSubcomponent.vert");
+		const ref<ShaderModule> fragmentShaderModule = loadInternalShaderModule(fragmentShaderModuleDescriptor, "GUI/GlyphSubcomponent.frag");
 
 		ColorBlendAttachment colorBlendAttachment{};
 		colorBlendAttachment.blend = true;
