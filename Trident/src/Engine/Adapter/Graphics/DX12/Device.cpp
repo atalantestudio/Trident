@@ -14,7 +14,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+	#if defined(BUILD_MODE_DEBUG) && defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 		void DX12::Device::messageCallback(D3D12_MESSAGE_CATEGORY category, D3D12_MESSAGE_SEVERITY severity, D3D12_MESSAGE_ID id, LPCSTR description, void* context) {
 			switch (severity) {
 				case D3D12_MESSAGE_SEVERITY_CORRUPTION:
@@ -79,7 +79,7 @@ namespace Trident {
 
 		WIN32_ASSERT(waitEvent != nullptr);
 
-		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+		#if defined(BUILD_MODE_DEBUG) && defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 			result = device->QueryInterface(IID_PPV_ARGS(&infoQueue));
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to query info queue interface.");
@@ -105,7 +105,7 @@ namespace Trident {
 
 		WIN32_ASSERT(result != 0);
 
-		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+		#if defined(BUILD_MODE_DEBUG) && defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 			result = infoQueue->UnregisterMessageCallback(messageCallbackCookie);
 
 			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to unregister message callback.");

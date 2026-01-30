@@ -12,7 +12,7 @@
 namespace Trident {
 	class DX12::Device final : public Trident::Device {
 		private:
-			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+			#if defined(BUILD_MODE_DEBUG) && defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 				static void messageCallback(D3D12_MESSAGE_CATEGORY category, D3D12_MESSAGE_SEVERITY severity, D3D12_MESSAGE_ID id, LPCSTR description, void* context);
 			#endif
 
@@ -48,7 +48,7 @@ namespace Trident {
 			HANDLE waitEvent;
 			const DX12::PhysicalDevice& physicalDevice;
 
-			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
+			#if defined(BUILD_MODE_DEBUG) && defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 				ID3D12InfoQueue1* infoQueue;
 				DWORD messageCallbackCookie;
 			#endif
