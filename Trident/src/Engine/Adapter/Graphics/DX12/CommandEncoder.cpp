@@ -211,27 +211,31 @@ namespace Trident {
 	}
 
 	void DX12::CommandEncoder::copyBufferToBuffer(ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) {
-		const ref<DX12::Buffer> srcBuffer = std::static_pointer_cast<DX12::Buffer>(sourceBuffer);
-		const ref<DX12::Buffer> dstBuffer = std::static_pointer_cast<DX12::Buffer>(destinationBuffer);
+		const ref<DX12::Buffer> _destinationBuffer = std::static_pointer_cast<DX12::Buffer>(destinationBuffer);
 
 		// NOTE
 		// D3D12_HEAP_TYPE_UPLOAD heaps only allow CPU writes.
 		// The source and destination buffers are mapped to emulate a GPU copy command.
-		if (dstBuffer->heapType == D3D12_HEAP_TYPE_UPLOAD) {
-			uint8* sourceMappedRange = srcBuffer->map<uint8>(0, srcBuffer->size);
-			uint8* destinationMappedRange = dstBuffer->map<uint8>(0, dstBuffer->size);
+		if (_destinationBuffer->heapType == D3D12_HEAP_TYPE_UPLOAD) {
+			const uint8* sourceMappedRange = sourceBuffer->map<uint8>(0, sourceBuffer->size);
+			uint8* destinationMappedRange = destinationBuffer->map<uint8>(0, destinationBuffer->size);
 
 			for (const BufferCopyRegion& copyRegion : copyRegions) {
 				std::copy_n(sourceMappedRange + copyRegion.sourceOffset, copyRegion.size, destinationMappedRange + copyRegion.destinationOffset);
 			}
 
-			srcBuffer->unmap();
-			dstBuffer->unmap();
+			sourceBuffer->unmap();
+			destinationBuffer->unmap();
+
+			commandCount += 1;
+
+			return;
 		}
-		else {
-			for (const BufferCopyRegion& copyRegion : copyRegions) {
-				commandList->CopyBufferRegion(dstBuffer->resource.Get(), copyRegion.destinationOffset, srcBuffer->resource.Get(), copyRegion.sourceOffset, copyRegion.size);
-			}
+
+		const ref<DX12::Buffer> _sourceBuffer = std::static_pointer_cast<DX12::Buffer>(sourceBuffer);
+
+		for (const BufferCopyRegion& copyRegion : copyRegions) {
+			commandList->CopyBufferRegion(_destinationBuffer->resource, copyRegion.destinationOffset, _sourceBuffer->resource, copyRegion.sourceOffset, copyRegion.size);
 		}
 
 		commandCount += 1;
@@ -245,7 +249,7 @@ namespace Trident {
 		const UINT channelCount = getChannelCount(dstImage->getFormat());
 
 		D3D12_TEXTURE_COPY_LOCATION bufferCopyLocation{};
-		bufferCopyLocation.pResource = srcBuffer->resource.Get();
+		bufferCopyLocation.pResource = srcBuffer->resource;
 		bufferCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 		bufferCopyLocation.PlacedFootprint.Footprint.Format = dstImageResourceDescriptor.Format;
 
@@ -312,9 +316,9 @@ namespace Trident {
 		}
 
 		commandList->ExecuteIndirect(
-			indirectBuffer->commandSignature.Get(),
+			indirectBuffer->commandSignature,
 			1,
-			std::static_pointer_cast<DX12::Buffer>(buffer)->resource.Get(),
+			indirectBuffer->resource,
 			bufferOffset,
 			nullptr,
 			0
@@ -425,9 +429,9 @@ namespace Trident {
 		}
 
 		commandList->ExecuteIndirect(
-			indirectBuffer->commandSignature.Get(),
+			indirectBuffer->commandSignature,
 			drawCount,
-			std::static_pointer_cast<DX12::Buffer>(buffer)->resource.Get(),
+			indirectBuffer->resource,
 			bufferOffset,
 			nullptr,
 			0
@@ -463,9 +467,9 @@ namespace Trident {
 		}
 
 		commandList->ExecuteIndirect(
-			indirectBuffer->commandSignature.Get(),
+			indirectBuffer->commandSignature,
 			drawCount,
-			std::static_pointer_cast<DX12::Buffer>(buffer)->resource.Get(),
+			indirectBuffer->resource,
 			bufferOffset,
 			nullptr,
 			0

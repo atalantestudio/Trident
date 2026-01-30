@@ -120,7 +120,7 @@ namespace Trident {
 		shaderResourceViewDescriptor.Buffer.StructureByteStride = 1;
 		shaderResourceViewDescriptor.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
-		device.device->CreateShaderResourceView(buffer->resource.Get(), &shaderResourceViewDescriptor, descriptorHandle);
+		device.device->CreateShaderResourceView(buffer->resource, &shaderResourceViewDescriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::writeInputAttachment(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const {

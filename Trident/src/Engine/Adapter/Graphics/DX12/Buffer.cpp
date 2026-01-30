@@ -58,6 +58,14 @@ namespace Trident {
 		heapType = heapProperties.Type;
 	}
 
+	DX12::Buffer::~Buffer() {
+		resource->Release();
+
+		if (commandSignature) {
+			commandSignature->Release();
+		}
+	}
+
 	void DX12::Buffer::unmap() const {
 		resource->Unmap(0, nullptr);
 	}
