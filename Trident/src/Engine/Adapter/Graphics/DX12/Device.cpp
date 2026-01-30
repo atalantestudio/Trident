@@ -168,6 +168,8 @@ namespace Trident {
 	}
 
 	void DX12::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
+		DEBUG_DESCRIPTOR_GUARD(writeDescriptorSets);
+
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
 			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
 			const DX12::DescriptorSet::DescriptorSetBinding& binding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];

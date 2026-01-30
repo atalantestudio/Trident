@@ -23,6 +23,7 @@ namespace Trident {
 		struct ShaderModuleDescriptor;
 		struct SubpassDescriptor;
 		struct SwapchainDescriptor;
+		struct WriteDescriptorSet;
 
 		// API descriptor validators for debug mode.
 		void DescriptorGuard(const AttachmentImageDescriptor& descriptor);
@@ -41,6 +42,7 @@ namespace Trident {
 		void DescriptorGuard(const ShaderModuleDescriptor& descriptor);
 		void DescriptorGuard(const SubpassDescriptor& descriptor);
 		void DescriptorGuard(const SwapchainDescriptor& descriptor);
+		void DescriptorGuard(view<WriteDescriptorSet> writeDescriptorSets);
 
 		#define DEBUG_DESCRIPTOR_GUARD DescriptorGuard
 	#else

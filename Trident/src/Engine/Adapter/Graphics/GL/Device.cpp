@@ -67,6 +67,8 @@ namespace Trident {
 	}
 
 	void GL::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
+		DEBUG_DESCRIPTOR_GUARD(writeDescriptorSets);
+
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {
 			const ref<GL::DescriptorSet> descriptorSet = std::static_pointer_cast<GL::DescriptorSet>(writeDescriptorSet.descriptorSet);
 			GL::DescriptorSet::DescriptorSetBinding& descriptorSetBinding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];

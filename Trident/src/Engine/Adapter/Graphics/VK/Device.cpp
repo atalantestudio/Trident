@@ -227,6 +227,8 @@ namespace Trident {
 	}
 
 	void VK::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
+		DEBUG_DESCRIPTOR_GUARD(writeDescriptorSets);
+
 		uint64 descriptorBufferInfoCount = 0;
 		uint64 descriptorImageInfoCount = 0;
 

@@ -308,28 +308,28 @@ namespace Trident {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
+			if (descriptor.mipLevelOffset + descriptor.mipLevelCount > image->getMipLevelCount()) {
+				errorCount += 1;
+
+				ENGINE_ERROR("descriptor.mipLevelOffset and descriptor.mipLevelCount must represent a valid mip level range.");
+			}
+
 			if (descriptor.mipLevelCount == 0) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.mipLevelCount must be greater than 0.");
 			}
 
-			if (descriptor.mipLevelCount > image->getMipLevelCount()) {
+			if (descriptor.layerOffset + descriptor.layerCount > image->getLayerCount()) {
 				errorCount += 1;
 
-				ENGINE_ERROR("descriptor.mipLevelCount must be less than the number of mip levels on the image.");
+				ENGINE_ERROR("descriptor.layerOffset and descriptor.layerCount must represent a valid layer range.");
 			}
 
 			if (descriptor.layerCount == 0) {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.layerCount must be greater than 0.");
-			}
-
-			if (descriptor.layerCount > image->getLayerCount()) {
-				errorCount += 1;
-
-				ENGINE_ERROR("descriptor.layerCount must be less than the number of layers on the image.");
 			}
 
 			ENGINE_ASSERT(errorCount == 0, "Image view descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
@@ -696,6 +696,27 @@ namespace Trident {
 			}
 
 			ENGINE_ASSERT(errorCount == 0, "Swapchain descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
+		}
+
+		void DescriptorGuard(view<WriteDescriptorSet> writeDescriptorSets) {
+			uint32 warningCount = 0;
+			uint32 errorCount = 0;
+
+			uint32 writeDescriptorSetIndex = 0;
+
+			while (writeDescriptorSetIndex < writeDescriptorSets.count()) {
+				const WriteDescriptorSet& writeDescriptorSet = writeDescriptorSets[writeDescriptorSetIndex];
+
+				if (writeDescriptorSet.descriptorSet == nullptr) {
+					errorCount += 1;
+
+					ENGINE_ERROR("writeDescriptorSets[[]].descriptorSet must be a valid DescriptorSet.", writeDescriptorSetIndex);
+				}
+
+				writeDescriptorSetIndex += 1;
+			}
+
+			ENGINE_ASSERT(errorCount == 0, "Some write descriptor sets are invalid ([] warnings and [] errors).", warningCount, errorCount);
 		}
 	#endif
 }
