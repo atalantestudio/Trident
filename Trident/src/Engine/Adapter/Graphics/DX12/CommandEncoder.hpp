@@ -69,6 +69,7 @@ namespace Trident {
 			const DX12::Device& device;
 			ID3D12GraphicsCommandList* commandList;
 			ID3D12CommandAllocator* commandAllocator;
+			CommandBufferUsage usage;
 			uint32 commandCount = 0;
 			bool computePipelineBound = false;
 			bool samplerDescriptorTable = false;

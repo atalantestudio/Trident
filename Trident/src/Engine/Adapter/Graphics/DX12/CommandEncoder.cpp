@@ -23,7 +23,8 @@
 namespace Trident {
 	DX12::CommandEncoder::CommandEncoder(const CommandBufferDescriptor& descriptor, const DX12::Device& device, const DX12::CommandPool& commandPool) :
 		device(device),
-		commandAllocator(commandPool.commandAllocator)
+		commandAllocator(commandPool.commandAllocator),
+		usage(descriptor.usage)
 	{
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
@@ -259,8 +260,6 @@ namespace Trident {
 		textureCopyLocation.pResource = dstImage->resource;
 		textureCopyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 
-		UINT layerIndex;
-
 		for (const BufferImageCopyRegion& copyRegion : copyRegions) {
 			const UINT64 layerSize = copyRegion.imageExtent.width * copyRegion.imageExtent.height * copyRegion.imageExtent.depth * channelCount;
 
@@ -269,7 +268,7 @@ namespace Trident {
 			bufferCopyLocation.PlacedFootprint.Footprint.Depth = copyRegion.imageExtent.depth;
 			bufferCopyLocation.PlacedFootprint.Footprint.RowPitch = copyRegion.imageExtent.width * channelCount;
 
-			layerIndex = 0;
+			UINT layerIndex = 0;
 
 			while (layerIndex < copyRegion.imageLayerCount) {
 				bufferCopyLocation.PlacedFootprint.Offset = copyRegion.bufferOffset + layerSize * layerIndex;
@@ -552,6 +551,10 @@ namespace Trident {
 	}
 
 	void DX12::CommandEncoder::reset() {
+		if (commandCount == 0 && usage == CommandBufferUsage::ONE_TIME_SUBMIT) {
+			return;
+		}
+
 		HRESULT result;
 
 		result = commandAllocator->Reset();

@@ -27,6 +27,7 @@ namespace Trident {
 
 		UINT constantBufferViewShaderRegister = 0;
 		UINT shaderResourceViewShaderRegister = 0;
+		UINT unorderedAccessViewShaderRegister = 0;
 		UINT samplerShaderRegister = 0;
 
 		ShaderStage samplerShaderStages{};
@@ -91,12 +92,12 @@ namespace Trident {
 						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
 						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
 						descriptorRange.NumDescriptors = binding.descriptorCount;
-						descriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
+						descriptorRange.BaseShaderRegister = unorderedAccessViewShaderRegister;
 						descriptorRange.RegisterSpace = 0;
 						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						shaderResourceViewShaderRegister += 1;
+						unorderedAccessViewShaderRegister += 1;
 
 						break;
 					}
