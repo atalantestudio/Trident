@@ -1,2 +1,3 @@
-"%VULKAN_SDK%\Bin\glslc.exe" DistanceField.comp -o DistanceField.comp.spv
-"%VULKAN_SDK%\Bin\glslc.exe" RasterizeGlyph.comp -o RasterizeGlyph.comp.spv
+"%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=comp DistanceField.comp.glsl -o DistanceField.comp.spv
+
+"%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=comp RasterizeGlyph.comp.glsl -o RasterizeGlyph.comp.spv
