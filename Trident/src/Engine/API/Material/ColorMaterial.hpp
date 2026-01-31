@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "Engine/API/Material/Material.hpp"
+#include "Engine/API/Material/PhysicsMaterial.hpp"
 
 namespace Trident {
-	struct ColorMaterial : public Material {
+	struct ColorMaterial : public PhysicsMaterial {
 		vec4<float32> color;
 	};
 }

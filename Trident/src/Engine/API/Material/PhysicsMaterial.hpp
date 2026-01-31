@@ -15,7 +15,7 @@ namespace Trident {
 	// | Pillow     | 0.1     | 0.2         |
 	// | Static     | 0.0     | 0.4         |
 
-	struct Material {
+	struct PhysicsMaterial {
 		// Mass is assumed to be uniformly distributed.
 		float32 density = 1.0f;
 

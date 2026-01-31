@@ -35,7 +35,7 @@ namespace Trident {
 			explicit Scene2D() {
 				ecs.registerComponent<RigidBody2D>();
 				ecs.registerComponent<ref<Geometry2D>>();
-				ecs.registerComponent<ref<Material>>();
+				ecs.registerComponent<ref<PhysicsMaterial>>();
 				ecs.registerComponent<DynamicEntityTag>();
 				ecs.registerComponent<StaticEntityTag>();
 			}
@@ -56,13 +56,13 @@ namespace Trident {
 				return ecs.getComponent<ref<Geometry2D>>(entity);
 			}
 
-			ref<Material> getMaterial(Entity entity) const {
-				return ecs.getComponent<ref<Material>>(entity);
+			ref<PhysicsMaterial> getMaterial(Entity entity) const {
+				return ecs.getComponent<ref<PhysicsMaterial>>(entity);
 			}
 
 			void createDynamicEntity(const Entity2DDescriptor& descriptor) {
 				const Entity entity = createEntity(descriptor);
-				const ref<Material> material = getMaterial(entity);
+				const ref<PhysicsMaterial> material = getMaterial(entity);
 
 				RigidBody2D& rigidBody = getRigidBody(entity);
 				rigidBody.linearVelocity = descriptor.linearVelocity;
@@ -102,8 +102,8 @@ namespace Trident {
 				ecs.setComponent<ref<Geometry2D>>(entity, geometry);
 			}
 
-			void setMaterial(Entity entity, ref<Material> material) {
-				ecs.setComponent<ref<Material>>(entity, material);
+			void setMaterial(Entity entity, ref<PhysicsMaterial> material) {
+				ecs.setComponent<ref<PhysicsMaterial>>(entity, material);
 			}
 
 		private:
@@ -124,7 +124,7 @@ namespace Trident {
 				ENGINE_ASSERT(material->density > 0.0f, "Invalid material density.");
 				ENGINE_ASSERT(material->restitution >= 0.0f && material->restitution <= 1.0f, "Invalid material restitution.");
 
-				setMaterial(entity, std::static_pointer_cast<Material>(material));
+				setMaterial(entity, std::static_pointer_cast<PhysicsMaterial>(material));
 
 				RigidBody2D rigidBody{};
 				rigidBody.position = descriptor.position;

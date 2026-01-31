@@ -894,7 +894,7 @@ namespace Trident {
 		for (uint32 instanceIndex = 0; instanceIndex < instanceCount; instanceIndex += 1) {
 			const Entity entity = rigidBodyPool.componentIndexToEntity[instanceIndex];
 			const ref<Geometry2D> geometry = scene.getGeometry(entity);
-			const ref<Material> material = scene.getMaterial(entity);
+			const ref<PhysicsMaterial> material = scene.getMaterial(entity);
 
 			for (uint32 vertexIndex = 0; vertexIndex < geometry->vertices.count(); vertexIndex += 1) {
 				const vec2<float32>& vertex = geometry->vertices[vertexIndex];
