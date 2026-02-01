@@ -18,23 +18,38 @@ namespace Trident {
 		const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
 		const uint32 stoolGeometryIndex = scene.registerGeometry(stoolGeometry);
 
+		MaterialPipelineDescriptor testMaterialPipelineDescriptor{};
+		testMaterialPipelineDescriptor.shaderModulePath = "";
+		testMaterialPipelineDescriptor.descriptorSetLayoutBindings = {};
+
+		const uint32 testMaterialPipelineIndex = scene.registerMaterialPipeline(testMaterialPipelineDescriptor);
+
+		MaterialDescriptor testMaterialDescriptor{};
+		testMaterialDescriptor.pipelineIndex = testMaterialPipelineIndex;
+		testMaterialDescriptor.writeDescriptorSets = {};
+
+		uint32 testMaterialIndex = scene.registerMaterial(testMaterialDescriptor);
+
+		// Ignore default material.
+		testMaterialIndex += 1;
+
 		InstanceDescriptor lemon1InstanceDescriptor{};
 		lemon1InstanceDescriptor.position = {-0.1_m, 0.0_m, 0.3_m};
 		lemon1InstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
 		lemon1InstanceDescriptor.geometryIndex = lemonGeometryIndex;
-		lemon1InstanceDescriptor.materialIndex = 1;
+		lemon1InstanceDescriptor.materialIndex = testMaterialIndex;
 
 		InstanceDescriptor lemon2InstanceDescriptor{};
 		lemon2InstanceDescriptor.position = {0.0_m, 0.0_m, 0.3_m};
 		lemon2InstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
 		lemon2InstanceDescriptor.geometryIndex = lemonGeometryIndex;
-		lemon2InstanceDescriptor.materialIndex = 2;
+		lemon2InstanceDescriptor.materialIndex = testMaterialIndex;
 
 		InstanceDescriptor stoolInstanceDescriptor{};
 		stoolInstanceDescriptor.position = {0.5_m, -0.225_m, 1.0_m};
 		stoolInstanceDescriptor.rotation = {pi<float32>() * 0.5f, 0.3_rad, 0.0_rad};
 		stoolInstanceDescriptor.geometryIndex = stoolGeometryIndex;
-		stoolInstanceDescriptor.materialIndex = 3;
+		stoolInstanceDescriptor.materialIndex = testMaterialIndex;
 
 		scene.registerInstance(lemon1InstanceDescriptor);
 		scene.registerInstance(lemon2InstanceDescriptor);

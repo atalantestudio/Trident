@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Engine/API/Material/Material.hpp"
+#include "Engine/API/Material/MaterialPipelineDescriptor.hpp"
 #include "Engine/API/Physics/RigidBody3D.hpp"
 #include "Engine/API/Scene/Scene.hpp"
 
@@ -18,11 +20,15 @@ namespace Trident {
 	class Scene3D : public Scene {
 		private:
 			static constexpr uint32 MAX_GEOMETRY_COUNT = 4;
+			static constexpr uint32 MAX_MATERIAL_COUNT = 4;
+			static constexpr uint32 MAX_MATERIAL_PIPELINE_COUNT = 4;
 			static constexpr uint32 MAX_INSTANCE_COUNT = 4;
 
 		public:
 			explicit Scene3D() :
 				geometries(MAX_GEOMETRY_COUNT),
+				materials(MAX_MATERIAL_COUNT),
+				materialPipelineDescriptors(MAX_MATERIAL_PIPELINE_COUNT),
 				instances(MAX_INSTANCE_COUNT)
 			{}
 
@@ -73,6 +79,33 @@ namespace Trident {
 				return geometryIndex;
 			}
 
+			// Registers the provided material pipeline and returns its index in the material pipeline array.
+			uint32 registerMaterialPipeline(const MaterialPipelineDescriptor& descriptor) {
+				DEBUG_ASSERT(materialPipelineCount < MAX_MATERIAL_PIPELINE_COUNT);
+
+				const uint32 materialPipelineIndex = materialPipelineCount;
+
+				materialPipelineDescriptors[materialPipelineIndex] = descriptor;
+
+				materialPipelineCount += 1;
+
+				return 0;
+			}
+
+			// Registers the provided material and returns its index in the material array.
+			uint32 registerMaterial(const MaterialDescriptor& descriptor) {
+				DEBUG_ASSERT(materialCount < MAX_MATERIAL_COUNT);
+
+				const uint32 materialIndex = materialCount;
+				const ref<Material> material = createRef<Material>(descriptor);
+
+				materials[materialIndex] = material;
+
+				materialCount += 1;
+
+				return 0;
+			}
+
 			// Registers the provided instance and returns its index in the instance array.
 			uint32 registerInstance(const InstanceDescriptor& descriptor) {
 				DEBUG_ASSERT(descriptor.geometryIndex < geometryCount);
@@ -109,11 +142,31 @@ namespace Trident {
 				return count;
 			}
 
-		private:
-			sequence<RigidBody3D> instances;
-			sequence<ref<Geometry3D>> geometries;
+			const sequence<ref<Material>>& getMaterials() const {
+				return materials;
+			}
 
-			uint32 instanceCount = 0;
+			uint32 getMaterialCount() const {
+				return materialCount;
+			}
+
+			const sequence<MaterialPipelineDescriptor>& getMaterialPipelineDescriptors() const {
+				return materialPipelineDescriptors;
+			}
+
+			uint32 getMaterialPipelineCount() const {
+				return materialPipelineCount;
+			}
+
+		private:
+			sequence<ref<Geometry3D>> geometries;
+			sequence<ref<Material>> materials;
+			sequence<MaterialPipelineDescriptor> materialPipelineDescriptors;
+			sequence<RigidBody3D> instances;
+
 			uint32 geometryCount = 0;
+			uint32 materialCount = 0;
+			uint32 materialPipelineCount = 0;
+			uint32 instanceCount = 0;
 	};
 }

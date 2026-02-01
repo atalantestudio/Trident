@@ -242,7 +242,11 @@ namespace Trident {
 			LOAD_PROCEDURE(vkDestroyDebugUtilsMessengerEXT);
 		#endif
 
-		#ifdef VULKAN_USE_VK_KHR_surface
+		#if defined(VULKAN_USE_VK_EXT_debug_utils)
+			LOAD_PROCEDURE(vkSetDebugUtilsObjectNameEXT);
+		#endif
+
+		#if defined(VULKAN_USE_VK_KHR_surface)
 			LOAD_PROCEDURE(vkDestroySurfaceKHR);
 			LOAD_PROCEDURE(vkGetPhysicalDeviceSurfaceCapabilitiesKHR);
 			LOAD_PROCEDURE(vkGetPhysicalDeviceSurfaceFormatsKHR);
@@ -250,7 +254,7 @@ namespace Trident {
 			LOAD_PROCEDURE(vkGetPhysicalDeviceSurfaceSupportKHR);
 		#endif
 
-		#ifdef VULKAN_USE_VK_KHR_swapchain
+		#if defined(VULKAN_USE_VK_KHR_swapchain)
 			LOAD_PROCEDURE(vkAcquireNextImageKHR);
 			LOAD_PROCEDURE(vkCreateSwapchainKHR);
 			LOAD_PROCEDURE(vkDestroySwapchainKHR);

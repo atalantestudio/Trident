@@ -89,6 +89,8 @@ namespace Trident {
 			void createClusterBuffer();
 			void createInstanceBuffer();
 			void createGeometryBuffer();
+			ref<Buffer> createMaterialCountBuffer() const;
+			void createMaterialPipelines();
 
 			void allocateDescriptorSets();
 
@@ -150,8 +152,13 @@ namespace Trident {
 			ref<Buffer> instanceBuffer;
 			ref<Buffer> geometryBuffer;
 
+			// Number of pixels used per material.
+			ref<Buffer> materialCountBuffer;
+
 			DrawIndirectCommand* indirectMappedRange;
 			Camera* cameraMappedRange;
 			ClusteredInstance* instanceMappedRange;
+
+			sequence<ref<ComputePipeline>> materialPipelines;
 	};
 }

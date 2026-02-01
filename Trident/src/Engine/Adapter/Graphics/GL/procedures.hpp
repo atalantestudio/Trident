@@ -84,6 +84,10 @@ namespace Trident {
 		extern PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
 		extern PFNGLDISPATCHCOMPUTEINDIRECTPROC glDispatchComputeIndirect;
 
+		#if defined(BUILD_MODE_DEBUG)
+			extern PFNGLOBJECTLABELPROC glObjectLabel;
+		#endif
+
 		// TODO: Write a texture view abstraction for older GL versions.
 		extern PFNGLTEXTUREVIEWPROC glTextureView;
 	#endif

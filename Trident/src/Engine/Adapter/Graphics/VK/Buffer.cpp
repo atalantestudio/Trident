@@ -15,6 +15,8 @@ namespace Trident {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		VkResult result;
+
 		VkBufferCreateInfo bufferCreateInfo{};
 		bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferCreateInfo.pNext = nullptr;
@@ -25,7 +27,7 @@ namespace Trident {
 		bufferCreateInfo.queueFamilyIndexCount = 0;
 		bufferCreateInfo.pQueueFamilyIndices = nullptr;
 
-		const VkResult result = vkCreateBuffer(device.device, &bufferCreateInfo, nullptr, &buffer);
+		result = vkCreateBuffer(device.device, &bufferCreateInfo, nullptr, &buffer);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create buffer ([]).", string_VkResult(result));
 
@@ -53,6 +55,21 @@ namespace Trident {
 		ADAPTER_ASSERT(memoryTypeIndex != UNDEFINED_MEMORY_TYPE_INDEX, "Undefined memory type index.");
 
 		memorySuballocation = MemoryAllocator::suballocateBuffer(device.device, buffer, memoryTypeIndex, memoryRequirements);
+
+		#if defined(BUILD_MODE_DEBUG)
+			if (descriptor.name.count() > 0) {
+				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
+				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+				debugUtilsObjectNameInfo.pNext = nullptr;
+				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_BUFFER;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) buffer;
+				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
+
+				result = vkSetDebugUtilsObjectNameEXT(device.device, &debugUtilsObjectNameInfo);
+
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
+			}
+		#endif
 	}
 
 	VK::Buffer::~Buffer() {

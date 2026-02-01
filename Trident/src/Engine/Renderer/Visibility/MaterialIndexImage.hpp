@@ -17,7 +17,7 @@ namespace Trident {
 		materialIndexAttachmentImageDescriptor.mipLevelCount = 1;
 		materialIndexAttachmentImageDescriptor.layerCount = 1;
 
-		SET_DEBUG_NAME(materialIndexAttachmentImageDescriptor, "Material index image");
+		SET_DEBUG_NAME(materialIndexAttachmentImageDescriptor, "Material index");
 
 		return renderPass->createInputAttachmentImage(materialIndexAttachmentImageDescriptor, MATERIAL_INDEX_ATTACHMENT_INDEX);
 	}
@@ -29,7 +29,7 @@ namespace Trident {
 		materialIndexImageViewDescriptor.layerOffset = 0;
 		materialIndexImageViewDescriptor.layerCount = 1;
 
-		SET_DEBUG_NAME(materialIndexImageViewDescriptor, "Material index image view");
+		SET_DEBUG_NAME(materialIndexImageViewDescriptor, "Material index");
 
 		return materialIndexImage->createView(materialIndexImageViewDescriptor);
 	}

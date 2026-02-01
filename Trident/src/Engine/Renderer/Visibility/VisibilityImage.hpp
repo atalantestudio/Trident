@@ -17,7 +17,7 @@ namespace Trident {
 		visibilityAttachmentImageDescriptor.mipLevelCount = 1;
 		visibilityAttachmentImageDescriptor.layerCount = 1;
 
-		SET_DEBUG_NAME(visibilityAttachmentImageDescriptor, "Visibility image");
+		SET_DEBUG_NAME(visibilityAttachmentImageDescriptor, "Visibility");
 
 		return renderPass->createInputAttachmentImage(visibilityAttachmentImageDescriptor, VISIBILITY_ATTACHMENT_INDEX);
 	}
@@ -29,7 +29,7 @@ namespace Trident {
 		visibilityImageViewDescriptor.layerOffset = 0;
 		visibilityImageViewDescriptor.layerCount = 1;
 
-		SET_DEBUG_NAME(visibilityImageViewDescriptor, "Visibility image view");
+		SET_DEBUG_NAME(visibilityImageViewDescriptor, "Visibility");
 
 		return visibilityImage->createView(visibilityImageViewDescriptor);
 	}

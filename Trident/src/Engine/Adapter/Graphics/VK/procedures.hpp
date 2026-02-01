@@ -107,7 +107,11 @@ namespace Trident {
 		extern PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
 	#endif
 
-	#ifdef VULKAN_USE_VK_KHR_surface
+	#if defined(VULKAN_USE_VK_EXT_debug_utils)
+		extern PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT;
+	#endif
+
+	#if defined(VULKAN_USE_VK_KHR_surface)
 		extern PFN_vkDestroySurfaceKHR vkDestroySurfaceKHR;
 		extern PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR vkGetPhysicalDeviceSurfaceCapabilitiesKHR;
 		extern PFN_vkGetPhysicalDeviceSurfaceFormatsKHR vkGetPhysicalDeviceSurfaceFormatsKHR;
@@ -115,7 +119,7 @@ namespace Trident {
 		extern PFN_vkGetPhysicalDeviceSurfaceSupportKHR vkGetPhysicalDeviceSurfaceSupportKHR;
 	#endif
 
-	#ifdef VULKAN_USE_VK_KHR_swapchain
+	#if defined(VULKAN_USE_VK_KHR_swapchain)
 		extern PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR;
 		extern PFN_vkCreateSwapchainKHR vkCreateSwapchainKHR;
 		extern PFN_vkDestroySwapchainKHR vkDestroySwapchainKHR;

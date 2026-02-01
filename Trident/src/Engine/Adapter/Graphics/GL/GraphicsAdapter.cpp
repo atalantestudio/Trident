@@ -221,6 +221,11 @@ namespace Trident {
 
 			LOAD_PROCEDURE(glDispatchCompute);
 			LOAD_PROCEDURE(glDispatchComputeIndirect);
+
+			#if defined(BUILD_MODE_DEBUG)
+				LOAD_PROCEDURE(glObjectLabel);
+			#endif
+
 			LOAD_PROCEDURE(glTextureView);
 		#endif
 

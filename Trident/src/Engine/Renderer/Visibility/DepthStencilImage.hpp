@@ -17,7 +17,7 @@ namespace Trident {
 		depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
 		depthStencilAttachmentImageDescriptor.layerCount = 1;
 
-		SET_DEBUG_NAME(depthStencilAttachmentImageDescriptor, "Depth stencil image");
+		SET_DEBUG_NAME(depthStencilAttachmentImageDescriptor, "Depth stencil");
 
 		return renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, VISIBILITY_SUBPASS_INDEX);
 	}
@@ -29,7 +29,7 @@ namespace Trident {
 		depthStencilImageViewDescriptor.layerOffset = 0;
 		depthStencilImageViewDescriptor.layerCount = 1;
 
-		SET_DEBUG_NAME(depthStencilImageViewDescriptor, "Depth stencil image view");
+		SET_DEBUG_NAME(depthStencilImageViewDescriptor, "Depth stencil");
 
 		return depthStencilImage->createView(depthStencilImageViewDescriptor);
 	}

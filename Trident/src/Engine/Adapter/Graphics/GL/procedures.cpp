@@ -85,6 +85,11 @@ namespace Trident {
 
 		PFNGLDISPATCHCOMPUTEPROC glDispatchCompute;
 		PFNGLDISPATCHCOMPUTEINDIRECTPROC glDispatchComputeIndirect;
+
+		#if defined(BUILD_MODE_DEBUG)
+			PFNGLOBJECTLABELPROC glObjectLabel;
+		#endif
+
 		PFNGLTEXTUREVIEWPROC glTextureView;
 	#endif
 

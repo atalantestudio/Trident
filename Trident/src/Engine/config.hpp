@@ -53,6 +53,10 @@ namespace Trident {
 	// Desired Vulkan version. Note that the runtime device might not have this version.
 	#define VULKAN_VERSION VULKAN_VERSION_1_0
 
+	#if defined(BUILD_MODE_DEBUG)
+		#define VULKAN_USE_VK_EXT_debug_utils
+	#endif
+
 	#define VULKAN_USE_VK_KHR_surface
 	#define VULKAN_USE_VK_KHR_swapchain
 

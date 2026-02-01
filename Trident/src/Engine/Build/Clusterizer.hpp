@@ -4,59 +4,22 @@
 #pragma once
 
 #include "Engine/API/Scene/Scene3D.hpp"
+#include "Engine/Build/Cluster.hpp"
+#include "Engine/Build/ClusteredGeometry.hpp"
+#include "Engine/Build/ClusteredInstance.hpp"
+#include "Engine/Build/ClusteredScene.hpp"
 
 namespace Trident {
 	static constexpr uint32 CLUSTER_TRIANGLE_COUNT = 128;
 	static constexpr uint32 CLUSTER_INDEX_COUNT = CLUSTER_TRIANGLE_COUNT * 3;
-
-	struct ClusteredInstance {
-		mat4x4<float32> transform;
-		uint32 geometryIndex;
-		uint32 materialIndex;
-
-		// Use as an offset in the index buffer to access the start of the geometry used by this instance.
-		sint32 clusterOffset;
-	};
-
-	struct Cluster {
-		uint32 instanceIndex;
-	};
-
-	struct ClusteredGeometry {
-		uint32 vertexCount;
-
-		// Per instance cluster count.
-		uint32 clusterCount;
-
-		// Index of the first cluster belonging to this geometry.
-		uint32 clusterOffset;
-
-		// Number of instances using this geometry.
-		uint32 instanceCount;
-
-		// Offset to be added to the index before indexing into the vertex buffer.
-		uint32 vertexOffset;
-	};
-
-	struct ClusteredScene {
-		sequence<Cluster> clusters;
-		sequence<ClusteredGeometry> geometries;
-		sequence<ClusteredInstance> instances;
-
-		sequence<float32> vertexPositionComponents;
-		sequence<float32> vertexNormalComponents;
-		sequence<float32> vertexTextureCoordinateComponents;
-
-		sequence<uint32> vertexPositionIndices;
-		sequence<uint32> vertexNormalIndices;
-		sequence<uint32> vertexTextureCoordinateIndices;
-	};
 
 	static ClusteredScene clusterizeScene(const Scene3D& scene) {
 		const sequence<ref<Geometry3D>>& geometries = scene.getGeometries();
 
 		ClusteredScene clusteredScene{};
 		clusteredScene.geometries = sequence<ClusteredGeometry>(scene.getGeometryCount());
+		clusteredScene.materials = scene.getMaterials();
+		clusteredScene.materialPipelineDescriptors = scene.getMaterialPipelineDescriptors();
 
 		uint64 totalVertexPositionComponentCount = 0;
 		uint64 totalVertexNormalComponentCount = 0;
@@ -66,10 +29,10 @@ namespace Trident {
 		uint32 totalInstanceCount = 0;
 
 		uint32 clusterOffset = 0;
+		uint32 geometryIndex = 0;
 
-		for (uint32 geometryIndex = 0; geometryIndex < scene.getGeometryCount(); geometryIndex += 1) {
+		while (geometryIndex < scene.getGeometryCount()) {
 			const ref<Geometry3D> geometry = geometries[geometryIndex];
-
 			const uint64 indexCount = geometry->getVertexPositionIndices().count();
 
 			// TODO: Position indices SHOULD BE AS MANY as normal indices (and texture coordinate indices?).
@@ -92,6 +55,7 @@ namespace Trident {
 			totalInstanceCount += instanceCount;
 
 			clusterOffset += clusterCount;
+			geometryIndex += 1;
 		}
 
 		clusteredScene.clusters = sequence<Cluster>(totalClusterCount);
@@ -107,36 +71,42 @@ namespace Trident {
 		uint32 vertexPositionComponentOffset = 0;
 		uint32 vertexNormalComponentOffset = 0;
 		uint32 vertexTextureCoordinateComponentOffset = 0;
-
 		uint32 vertexOffset = 0;
 
-		// Cluster-wise index offset, including degenerate indices.
+		// Index offset relative to the parent cluster. Includes degenerate indices.
 		uint32 indexOffset = 0;
 
-		for (uint32 geometryIndex = 0; geometryIndex < scene.getGeometryCount(); geometryIndex += 1) {
+		geometryIndex = 0;
+
+		while (geometryIndex < scene.getGeometryCount()) {
 			const ref<Geometry3D> geometry = geometries[geometryIndex];
 
 			ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[geometryIndex];
 			clusteredGeometry.vertexOffset = vertexOffset;
 
-			std::copy(geometry->getVertexPositionComponents().begin(), geometry->getVertexPositionComponents().end(), clusteredScene.vertexPositionComponents.begin() + vertexPositionComponentOffset);
-			std::copy(geometry->getVertexNormalComponents().begin(), geometry->getVertexNormalComponents().end(), clusteredScene.vertexNormalComponents.begin() + vertexNormalComponentOffset);
-			std::copy(geometry->getVertexTextureCoordinateComponents().begin(), geometry->getVertexTextureCoordinateComponents().end(), clusteredScene.vertexTextureCoordinateComponents.begin() + vertexTextureCoordinateComponentOffset);
+			std::copy(geometry->getVertexPositionComponents().begin(), geometry->getVertexPositionComponents().end(), &clusteredScene.vertexPositionComponents[vertexPositionComponentOffset]);
+			std::copy(geometry->getVertexNormalComponents().begin(), geometry->getVertexNormalComponents().end(), &clusteredScene.vertexNormalComponents[vertexNormalComponentOffset]);
+			std::copy(geometry->getVertexTextureCoordinateComponents().begin(), geometry->getVertexTextureCoordinateComponents().end(), &clusteredScene.vertexTextureCoordinateComponents[vertexTextureCoordinateComponentOffset]);
 
-			std::copy(geometry->getVertexPositionIndices().begin(), geometry->getVertexPositionIndices().end(), clusteredScene.vertexPositionIndices.begin() + indexOffset);
-			std::copy(geometry->getVertexNormalIndices().begin(), geometry->getVertexNormalIndices().end(), clusteredScene.vertexNormalIndices.begin() + indexOffset);
-			std::copy(geometry->getVertexTextureCoordinateIndices().begin(), geometry->getVertexTextureCoordinateIndices().end(), clusteredScene.vertexTextureCoordinateIndices.begin() + indexOffset);
+			std::copy(geometry->getVertexPositionIndices().begin(), geometry->getVertexPositionIndices().end(), &clusteredScene.vertexPositionIndices[indexOffset]);
+			std::copy(geometry->getVertexNormalIndices().begin(), geometry->getVertexNormalIndices().end(), &clusteredScene.vertexNormalIndices[indexOffset]);
+			std::copy(geometry->getVertexTextureCoordinateIndices().begin(), geometry->getVertexTextureCoordinateIndices().end(), &clusteredScene.vertexTextureCoordinateIndices[indexOffset]);
 
 			vertexOffset += clusteredGeometry.vertexCount;
 			indexOffset += clusteredGeometry.clusterCount * CLUSTER_INDEX_COUNT;
 			vertexPositionComponentOffset += static_cast<uint32>(geometry->getVertexPositionComponents().count());
 			vertexNormalComponentOffset += static_cast<uint32>(geometry->getVertexNormalComponents().count());
 			vertexTextureCoordinateComponentOffset += static_cast<uint32>(geometry->getVertexTextureCoordinateComponents().count());
+
+			geometryIndex += 1;
 		}
+
+		uint32 instanceIndex = 0;
+		uint32 clusterIndex;
 
 		clusterOffset = 0;
 
-		for (uint32 instanceIndex = 0; instanceIndex < scene.getInstanceCount(); instanceIndex += 1) {
+		while (instanceIndex < scene.getInstanceCount()) {
 			const RigidBody3D& instance = scene.getInstance(instanceIndex);
 			const ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[instance.geometryIndex];
 
@@ -146,12 +116,17 @@ namespace Trident {
 			clusteredInstance.materialIndex = instance.materialIndex;
 			clusteredInstance.clusterOffset = clusteredGeometry.clusterOffset - clusterOffset;
 
-			for (uint32 clusterIndex = 0; clusterIndex < clusteredGeometry.clusterCount; clusterIndex += 1) {
+			clusterIndex = 0;
+
+			while (clusterIndex < clusteredGeometry.clusterCount) {
 				Cluster& cluster = clusteredScene.clusters[clusterOffset + clusterIndex];
 				cluster.instanceIndex = instanceIndex;
+
+				clusterIndex += 1;
 			}
 
 			clusterOffset += clusteredGeometry.clusterCount;
+			instanceIndex += 1;
 		}
 
 		return clusteredScene;

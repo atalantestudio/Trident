@@ -17,5 +17,9 @@ namespace Trident {
 		// Indicates if the buffer is going to be mapped for the application's lifetime.
 		// Only used by OpenGL.
 		bool persistent = false;
+
+		#if defined(BUILD_MODE_DEBUG)
+			view<char8> name;
+		#endif
 	};
 }

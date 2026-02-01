@@ -8,7 +8,9 @@
 #include "Engine/Renderer/Visibility/RenderPass.hpp"
 
 #include "Engine/Renderer/Visibility/DepthStencilImage.hpp"
+#include "Engine/Renderer/Visibility/MaterialCountBuffer.hpp"
 #include "Engine/Renderer/Visibility/MaterialIndexImage.hpp"
+#include "Engine/Renderer/Visibility/MaterialPipeline.hpp"
 #include "Engine/Renderer/Visibility/RenderPass.hpp"
 #include "Engine/Renderer/Visibility/VisibilityImage.hpp"
 
@@ -61,6 +63,10 @@ namespace Trident {
 
 		updateBufferDescriptorSets();
 		updateDebugInputAttachmentDescriptorSets();
+
+		materialCountBuffer = createMaterialCountBuffer();
+
+		createMaterialPipelines();
 	}
 
 	void VisibilityRenderer::postSetCameraController() {

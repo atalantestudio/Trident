@@ -56,6 +56,18 @@ namespace Trident {
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create committed buffer resource.");
 
 		heapType = heapProperties.Type;
+
+		#if defined(BUILD_MODE_DEBUG)
+			if (descriptor.name.count() > 0) {
+				const LPWSTR name = ConvertUTF8ToUTF16(&descriptor.name[0]);
+
+				result = resource->SetName(name);
+
+				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set name on resource.");
+
+				free(name);
+			}
+		#endif
 	}
 
 	DX12::Buffer::~Buffer() {
