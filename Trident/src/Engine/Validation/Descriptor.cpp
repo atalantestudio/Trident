@@ -216,12 +216,6 @@ namespace Trident {
 
 					ENGINE_ERROR("descriptor.imageViews[[]] must have been created with a height greater than or equal to descriptor.extent.height.", imageViewIndex);
 				}
-
-				if (descriptor.layerCount > imageView->getLayerCount()) {
-					errorCount += 1;
-
-					ENGINE_ERROR("descriptor.imageViews[[]] must have been created with a layer count greater than or equal to descriptor.layerCount.", imageViewIndex);
-				}
 			}
 
 			if (descriptor.extent.width == 0) {
@@ -234,12 +228,6 @@ namespace Trident {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.extent.height must be greater than 0.");
-			}
-
-			if (descriptor.layerCount == 0) {
-				errorCount += 1;
-
-				ENGINE_ERROR("descriptor.layerCount must be greater than 0.");
 			}
 
 			if (descriptor.name.count() == 0) {

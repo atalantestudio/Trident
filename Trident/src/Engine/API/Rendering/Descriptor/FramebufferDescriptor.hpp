@@ -11,7 +11,6 @@ namespace Trident {
 		ref<RenderPass> renderPass;
 		sequence<ref<ImageView>> imageViews;
 		Extent2D extent;
-		uint32 layerCount;
 
 		#if defined(BUILD_MODE_DEBUG)
 			view<char8> name;

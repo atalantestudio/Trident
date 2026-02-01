@@ -171,7 +171,6 @@ namespace Trident {
 		framebufferDescriptor.renderPass = renderPass;
 		framebufferDescriptor.imageViews = {layerInput->swapchainImageView, depthStencilImageView, nullptr};
 		framebufferDescriptor.extent = swapchain->getExtent();
-		framebufferDescriptor.layerCount = 1;
 
 		uint32 framebufferIndex = 0;
 

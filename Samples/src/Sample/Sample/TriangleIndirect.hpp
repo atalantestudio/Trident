@@ -200,7 +200,6 @@ namespace Trident {
 				framebufferDescriptor.renderPass = renderPass;
 				framebufferDescriptor.imageViews = {nullptr};
 				framebufferDescriptor.extent = swapchain->getExtent();
-				framebufferDescriptor.layerCount = 1;
 
 				uint32 framebufferIndex = 0;
 

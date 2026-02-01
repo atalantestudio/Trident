@@ -29,7 +29,7 @@ namespace Trident {
 		framebufferCreateInfo.pAttachments = &imageViews[0];
 		framebufferCreateInfo.width = descriptor.extent.width;
 		framebufferCreateInfo.height = descriptor.extent.height;
-		framebufferCreateInfo.layers = descriptor.layerCount;
+		framebufferCreateInfo.layers = 1;
 
 		result = vkCreateFramebuffer(device.device, &framebufferCreateInfo, nullptr, &framebuffer);
 

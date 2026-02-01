@@ -19,15 +19,10 @@ namespace Trident {
 				return extent;
 			}
 
-			uint32 getLayerCount() const {
-				return layerCount;
-			}
-
 		protected:
 			explicit Framebuffer(const FramebufferDescriptor& descriptor) :
 				renderPass(descriptor.renderPass),
-				extent(descriptor.extent),
-				layerCount(descriptor.layerCount)
+				extent(descriptor.extent)
 			{
 				DEBUG_DESCRIPTOR_GUARD(descriptor);
 			}
@@ -35,6 +30,5 @@ namespace Trident {
 		protected:
 			ref<RenderPass> renderPass;
 			Extent2D extent;
-			uint32 layerCount;
 	};
 }
