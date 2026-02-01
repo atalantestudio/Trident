@@ -25,8 +25,8 @@ namespace Trident {
 
 					ref<ImageView> inputImageView = image->createView(imageViewDescriptor);
 
-					imageViewDescriptor.mipLevelOffset = 1;
-					imageViewDescriptor.mipLevelCount = image->getMipLevelCount() - 1;
+					imageViewDescriptor.layerOffset = 1;
+					imageViewDescriptor.layerCount = image->getLayerCount() - 1;
 
 					ref<ImageView> outputImageView = image->createView(imageViewDescriptor);
 
@@ -110,8 +110,8 @@ namespace Trident {
 				imageDescriptor.type = ImageType::TEXTURE_2D;
 				imageDescriptor.format = file.format;
 				imageDescriptor.extent = file.extent;
-				imageDescriptor.mipLevelCount = 2;
-				imageDescriptor.layerCount = 1;
+				imageDescriptor.mipLevelCount = 1;
+				imageDescriptor.layerCount = 2;
 				imageDescriptor.sampleCount = 1;
 				imageDescriptor.usage = ImageUsage::TRANSFER_DST | ImageUsage::SAMPLED | ImageUsage::STORAGE;
 				imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
@@ -147,9 +147,9 @@ namespace Trident {
 
 			void setupImageView() {
 				ImageViewDescriptor imageViewDescriptor{};
-				imageViewDescriptor.mipLevelOffset = 1;
+				imageViewDescriptor.mipLevelOffset = 0;
 				imageViewDescriptor.mipLevelCount = 1;
-				imageViewDescriptor.layerOffset = 0;
+				imageViewDescriptor.layerOffset = 1;
 				imageViewDescriptor.layerCount = 1;
 
 				imageView = image->createView(imageViewDescriptor);
