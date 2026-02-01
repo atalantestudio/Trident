@@ -31,7 +31,7 @@ namespace Trident {
 				return static_cast<uint32>(colorAttachmentReferences.count());
 			}
 
-			const sequence<AttachmentReference>& getColorAttachmentReferences() const {
+			view<AttachmentReference> getColorAttachmentReferences() const {
 				return colorAttachmentReferences;
 			}
 
@@ -47,7 +47,7 @@ namespace Trident {
 				return static_cast<uint32>(inputAttachmentReferences.count());
 			}
 
-			const sequence<AttachmentReference>& getInputAttachmentReferences() const {
+			view<AttachmentReference> getInputAttachmentReferences() const {
 				return inputAttachmentReferences;
 			}
 

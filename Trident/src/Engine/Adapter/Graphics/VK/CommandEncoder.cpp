@@ -124,7 +124,7 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	void VK::CommandEncoder::bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, const sequence<ref<Trident::DescriptorSet>>& descriptorSets) {
+	void VK::CommandEncoder::bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, view<ref<Trident::DescriptorSet>> descriptorSets) {
 		sequence<VkDescriptorSet> vkDescriptorSets(descriptorSets.count());
 
 		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
@@ -157,7 +157,7 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	void VK::CommandEncoder::copyBufferToBuffer(ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) {
+	void VK::CommandEncoder::copyBufferToBuffer(ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
 		vkCmdCopyBuffer(
 			commandBuffer,
 			std::static_pointer_cast<VK::Buffer>(sourceBuffer)->buffer,
@@ -169,7 +169,7 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	void VK::CommandEncoder::copyBufferToImage(ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
+	void VK::CommandEncoder::copyBufferToImage(ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
 		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions);
 
 		vkCmdCopyBufferToImage(
@@ -184,7 +184,7 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	void VK::CommandEncoder::copyImageToBuffer(ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) {
+	void VK::CommandEncoder::copyImageToBuffer(ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
 		const sequence<VkBufferImageCopy> bufferImageCopies = parseBufferImageCopyRegions(copyRegions);
 
 		vkCmdCopyImageToBuffer(
@@ -357,10 +357,11 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	sequence<VkBufferImageCopy> VK::CommandEncoder::parseBufferImageCopyRegions(const sequence<BufferImageCopyRegion>& copyRegions) {
+	sequence<VkBufferImageCopy> VK::CommandEncoder::parseBufferImageCopyRegions(view<BufferImageCopyRegion> copyRegions) {
 		sequence<VkBufferImageCopy> bufferImageCopies(copyRegions.count());
+		uint32 bufferImageCopyIndex = 0;
 
-		for (uint32 bufferImageCopyIndex = 0; bufferImageCopyIndex < bufferImageCopies.count(); bufferImageCopyIndex += 1) {
+		while (bufferImageCopyIndex < bufferImageCopies.count()) {
 			const BufferImageCopyRegion& copyRegion = copyRegions[bufferImageCopyIndex];
 			VkBufferImageCopy& bufferImageCopy = bufferImageCopies[bufferImageCopyIndex];
 
@@ -375,6 +376,8 @@ namespace Trident {
 			bufferImageCopy.imageOffset.y = copyRegion.imageOffsetY;
 			bufferImageCopy.imageOffset.z = copyRegion.imageOffsetZ;
 			bufferImageCopy.imageExtent = *pointer_cast<const VkExtent3D*>(&copyRegion.imageExtent);
+
+			bufferImageCopyIndex += 1;
 		}
 
 		return bufferImageCopies;

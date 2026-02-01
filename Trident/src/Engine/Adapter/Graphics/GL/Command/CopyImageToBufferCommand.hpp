@@ -9,11 +9,13 @@
 namespace Trident {
 	class GL::CopyImageToBufferCommand final : public GL::Command {
 		public:
-			explicit CopyImageToBufferCommand(ref<GL::Image> sourceImage, ref<GL::Buffer> destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) :
+			explicit CopyImageToBufferCommand(ref<GL::Image> sourceImage, ref<GL::Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) :
 				sourceImage(sourceImage),
 				destinationBuffer(destinationBuffer),
-				copyRegions(copyRegions)
-			{}
+				copyRegions(copyRegions.count())
+			{
+				std::copy(copyRegions.begin(), copyRegions.end(), &this->copyRegions[0]);
+			}
 
 			void execute() const final override {
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, destinationBuffer->buffer);

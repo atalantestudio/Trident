@@ -153,7 +153,7 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, const sequence<ref<Trident::DescriptorSet>>& descriptorSets) {
+	void DX12::CommandEncoder::bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, view<ref<Trident::DescriptorSet>> descriptorSets) {
 		ID3D12DescriptorHeap* viewDescriptorHeap = device.memoryAllocator->getCurrentViewDescriptorHeapAllocation().descriptorHeap;
 		ID3D12DescriptorHeap* samplerDescriptorHeap = device.memoryAllocator->getCurrentSamplerDescriptorHeapAllocation().descriptorHeap;
 		ID3D12DescriptorHeap* descriptorHeaps[2] = {viewDescriptorHeap, samplerDescriptorHeap};
@@ -213,7 +213,7 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::copyBufferToBuffer(ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) {
+	void DX12::CommandEncoder::copyBufferToBuffer(ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
 		const ref<DX12::Buffer> _destinationBuffer = std::static_pointer_cast<DX12::Buffer>(destinationBuffer);
 
 		// NOTE
@@ -244,7 +244,7 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::copyBufferToImage(ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
+	void DX12::CommandEncoder::copyBufferToImage(ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
 		const ref<DX12::Buffer> srcBuffer = std::static_pointer_cast<DX12::Buffer>(sourceBuffer);
 		const ref<DX12::Image> dstImage = std::static_pointer_cast<DX12::Image>(destinationImage);
 		const D3D12_RESOURCE_DESC srcBufferResourceDescriptor = srcBuffer->resource->GetDesc();
@@ -284,7 +284,7 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::copyImageToBuffer(ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) {
+	void DX12::CommandEncoder::copyImageToBuffer(ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
 		ENGINE_ERROR_UNIMPLEMENTED();
 
 		commandCount += 1;
@@ -591,10 +591,10 @@ namespace Trident {
 
 		const ref<RenderPass> renderPass = framebuffer->getRenderPass();
 		const ref<Subpass> subpass = renderPass->getSubpass(subpassIndex);
-		const sequence<AttachmentReference>& colorAttachmentReferences = subpass->getColorAttachmentReferences();
+		const view<AttachmentReference> colorAttachmentReferences = subpass->getColorAttachmentReferences();
 
 		if (subpass->getInputAttachmentReferenceCount() > 0) {
-			const sequence<AttachmentReference>& inputAttachmentReferences = subpass->getInputAttachmentReferences();
+			const view<AttachmentReference> inputAttachmentReferences = subpass->getInputAttachmentReferences();
 
 			sequence<D3D12_RESOURCE_BARRIER> resourceBarriers(subpass->getInputAttachmentReferenceCount());
 			UINT inputAttachmentReferenceIndex = 0;

@@ -22,7 +22,7 @@ namespace Trident {
 		return AcquireNextImageStatus::SUCCESS;
 	}
 
-	sequence<ref<Trident::DescriptorSet>> GL::Device::allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) {
+	sequence<ref<Trident::DescriptorSet>> GL::Device::allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
 		sequence<ref<Trident::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 
 		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
@@ -66,7 +66,7 @@ namespace Trident {
 		std::static_pointer_cast<GL::Fence>(fence)->reset();
 	}
 
-	void GL::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
+	void GL::Device::updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
 		DEBUG_DESCRIPTOR_GUARD(writeDescriptorSets);
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {

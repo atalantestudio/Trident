@@ -62,7 +62,7 @@ namespace Trident {
 		commands.emplace_back(createRef<GL::BindRenderPipelineCommand>(this->renderPipeline));
 	}
 
-	void GL::CommandEncoder::bindDescriptorSets(ref<PipelineLayout> pipelineLayout, const sequence<ref<Trident::DescriptorSet>>& descriptorSets) {
+	void GL::CommandEncoder::bindDescriptorSets(ref<PipelineLayout> pipelineLayout, view<ref<Trident::DescriptorSet>> descriptorSets) {
 		commands.emplace_back(createRef<GL::BindDescriptorSetsCommand>(descriptorSets));
 	}
 
@@ -76,7 +76,7 @@ namespace Trident {
 		));
 	}
 
-	void GL::CommandEncoder::copyBufferToBuffer(ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) {
+	void GL::CommandEncoder::copyBufferToBuffer(ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) {
 		commands.emplace_back(createRef<GL::CopyBufferToBufferCommand>(
 			std::static_pointer_cast<GL::Buffer>(sourceBuffer),
 			std::static_pointer_cast<GL::Buffer>(destinationBuffer),
@@ -84,7 +84,7 @@ namespace Trident {
 		));
 	}
 
-	void GL::CommandEncoder::copyBufferToImage(ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) {
+	void GL::CommandEncoder::copyBufferToImage(ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, view<BufferImageCopyRegion> copyRegions) {
 		commands.emplace_back(createRef<GL::CopyBufferToImageCommand>(
 			std::static_pointer_cast<GL::Buffer>(sourceBuffer),
 			std::static_pointer_cast<GL::Image>(destinationImage),
@@ -92,7 +92,7 @@ namespace Trident {
 		));
 	}
 
-	void GL::CommandEncoder::copyImageToBuffer(ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) {
+	void GL::CommandEncoder::copyImageToBuffer(ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) {
 		commands.emplace_back(createRef<GL::CopyImageToBufferCommand>(
 			std::static_pointer_cast<GL::Image>(sourceImage),
 			std::static_pointer_cast<GL::Buffer>(destinationBuffer),

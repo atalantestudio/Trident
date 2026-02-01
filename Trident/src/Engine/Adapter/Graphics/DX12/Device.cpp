@@ -122,7 +122,7 @@ namespace Trident {
 		return AcquireNextImageStatus::SUCCESS;
 	}
 
-	sequence<ref<DescriptorSet>> DX12::Device::allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) {
+	sequence<ref<DescriptorSet>> DX12::Device::allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) {
 		sequence<ref<Trident::DescriptorSet>> descriptorSets(descriptorSetLayouts.count());
 		UINT descriptorSetIndex = 0;
 
@@ -167,7 +167,7 @@ namespace Trident {
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to reset fence.");
 	}
 
-	void DX12::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
+	void DX12::Device::updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
 		DEBUG_DESCRIPTOR_GUARD(writeDescriptorSets);
 
 		for (const WriteDescriptorSet& writeDescriptorSet : writeDescriptorSets) {

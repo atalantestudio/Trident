@@ -10,11 +10,13 @@
 namespace Trident {
 	class GL::CopyBufferToBufferCommand final : public GL::Command {
 		public:
-			explicit CopyBufferToBufferCommand(ref<GL::Buffer> sourceBuffer, ref<GL::Buffer> destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) :
+			explicit CopyBufferToBufferCommand(ref<GL::Buffer> sourceBuffer, ref<GL::Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) :
 				sourceBuffer(sourceBuffer),
 				destinationBuffer(destinationBuffer),
-				copyRegions(copyRegions)
-			{}
+				copyRegions(copyRegions.count())
+			{
+				std::copy(copyRegions.begin(), copyRegions.end(), &this->copyRegions[0]);
+			}
 
 			void execute() const final override {
 				#if OPENGL_VERSION < OPENGL_VERSION_4_5

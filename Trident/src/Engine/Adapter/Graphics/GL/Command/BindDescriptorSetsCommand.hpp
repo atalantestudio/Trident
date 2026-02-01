@@ -15,9 +15,11 @@
 namespace Trident {
 	class GL::BindDescriptorSetsCommand final : public GL::Command {
 		public:
-			explicit BindDescriptorSetsCommand(const sequence<ref<Trident::DescriptorSet>>& descriptorSets) :
-				descriptorSets(descriptorSets)
-			{}
+			explicit BindDescriptorSetsCommand(view<ref<Trident::DescriptorSet>> descriptorSets) :
+				descriptorSets(descriptorSets.count())
+			{
+				std::copy(descriptorSets.begin(), descriptorSets.end(), &this->descriptorSets[0]);
+			}
 
 			void execute() const final override {
 				uint32 descriptorSetLayoutOffset = 0;

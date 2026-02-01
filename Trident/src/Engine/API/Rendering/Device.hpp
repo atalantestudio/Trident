@@ -18,7 +18,7 @@ namespace Trident {
 			// Acquires the next available swapchain image and writes its index to imageIndex.
 			virtual AcquireNextImageStatus acquireNextImage(ref<Swapchain> swapchain, ref<Semaphore> semaphore, uint32& imageIndex) const = 0;
 
-			virtual sequence<ref<DescriptorSet>> allocateDescriptorSets(const sequence<ref<DescriptorSetLayout>>& descriptorSetLayouts) = 0;
+			virtual sequence<ref<DescriptorSet>> allocateDescriptorSets(view<ref<DescriptorSetLayout>> descriptorSetLayouts) = 0;
 
 			virtual ref<PhysicalDevice> getPhysicalDevice() const = 0;
 
@@ -26,7 +26,7 @@ namespace Trident {
 
 			virtual void resetFence(ref<Fence> fence) const = 0;
 
-			virtual void updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const = 0;
+			virtual void updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const = 0;
 
 			virtual void waitForFence(ref<Fence> fence) const = 0;
 

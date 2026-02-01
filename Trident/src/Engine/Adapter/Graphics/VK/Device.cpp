@@ -130,7 +130,7 @@ namespace Trident {
 		}
 	}
 
-	sequence<ref<DescriptorSet>> VK::Device::allocateDescriptorSets(const sequence<ref<Trident::DescriptorSetLayout>>& descriptorSetLayouts) {
+	sequence<ref<DescriptorSet>> VK::Device::allocateDescriptorSets(view<ref<Trident::DescriptorSetLayout>> descriptorSetLayouts) {
 		VkResult result;
 
 		const uint32 descriptorSetCount = static_cast<uint32>(descriptorSetLayouts.count());
@@ -226,7 +226,7 @@ namespace Trident {
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to reset fence ([]).", string_VkResult(result));
 	}
 
-	void VK::Device::updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const {
+	void VK::Device::updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const {
 		DEBUG_DESCRIPTOR_GUARD(writeDescriptorSets);
 
 		uint64 descriptorBufferInfoCount = 0;

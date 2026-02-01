@@ -14,7 +14,7 @@ namespace Trident {
 
 			AcquireNextImageStatus acquireNextImage(ref<Trident::Swapchain> swapchain, ref<Trident::Semaphore> semaphore, uint32& imageIndex) const final override;
 
-			sequence<ref<Trident::DescriptorSet>> allocateDescriptorSets(const sequence<ref<Trident::DescriptorSetLayout>>& descriptorSetLayouts) final override;
+			sequence<ref<Trident::DescriptorSet>> allocateDescriptorSets(view<ref<Trident::DescriptorSetLayout>> descriptorSetLayouts) final override;
 
 			ref<Trident::PhysicalDevice> getPhysicalDevice() const final override;
 
@@ -22,7 +22,7 @@ namespace Trident {
 
 			void resetFence(ref<Trident::Fence> fence) const final override;
 
-			void updateDescriptorSets(const sequence<WriteDescriptorSet>& writeDescriptorSets) const final override;
+			void updateDescriptorSets(view<WriteDescriptorSet> writeDescriptorSets) const final override;
 
 			void waitForFence(ref<Trident::Fence> fence) const final override;
 

@@ -21,15 +21,15 @@ namespace Trident {
 
 			void bindRenderPipeline(ref<Trident::RenderPipeline> renderPipeline) final override;
 
-			void bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, const sequence<ref<Trident::DescriptorSet>>& descriptorSets) final override;
+			void bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, view<ref<Trident::DescriptorSet>> descriptorSets) final override;
 
 			void bindVertexBuffer(uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset, uint32 stride) final override;
 
-			void copyBufferToBuffer(ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) final override;
+			void copyBufferToBuffer(ref<Trident::Buffer> sourceBuffer, ref<Trident::Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) final override;
 
-			void copyBufferToImage(ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) final override;
+			void copyBufferToImage(ref<Trident::Buffer> sourceBuffer, ref<Trident::Image> destinationImage, view<BufferImageCopyRegion> copyRegions) final override;
 
-			void copyImageToBuffer(ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) final override;
+			void copyImageToBuffer(ref<Trident::Image> sourceImage, ref<Trident::Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) final override;
 
 			void dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) final override;
 
@@ -62,7 +62,7 @@ namespace Trident {
 		protected:
 			void bindIndexBuffer(ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) final override;
 
-			static sequence<VkBufferImageCopy> parseBufferImageCopyRegions(const sequence<BufferImageCopyRegion>& copyRegions);
+			static sequence<VkBufferImageCopy> parseBufferImageCopyRegions(view<BufferImageCopyRegion> copyRegions);
 
 		private:
 			VkCommandBuffer commandBuffer;

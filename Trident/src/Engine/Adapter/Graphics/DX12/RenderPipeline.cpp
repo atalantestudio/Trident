@@ -146,7 +146,7 @@ namespace Trident {
 		graphicsPipelineStateDescriptor.PrimitiveTopologyType = getPrimitiveTopologyType(descriptor.primitiveTopology);
 		graphicsPipelineStateDescriptor.NumRenderTargets = subpass->getColorAttachmentReferenceCount();
 
-		const sequence<AttachmentReference>& colorAttachmentReferences = subpass->getColorAttachmentReferences();
+		const view<AttachmentReference> colorAttachmentReferences = subpass->getColorAttachmentReferences();
 
 		UINT renderTargetIndex = 0;
 

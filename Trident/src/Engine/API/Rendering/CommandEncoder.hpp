@@ -33,7 +33,7 @@ namespace Trident {
 
 			// Binds descriptor sets to the command buffer.
 			// The pipeline bind point is taken from the currently bound pipeline.
-			virtual void bindDescriptorSets(ref<PipelineLayout> pipelineLayout, const sequence<ref<DescriptorSet>>& descriptorSets) = 0;
+			virtual void bindDescriptorSets(ref<PipelineLayout> pipelineLayout, view<ref<DescriptorSet>> descriptorSets) = 0;
 
 			// Binds the provided index buffer.
 			// The `offset` is in bytes and must be a multiple of IndexType.
@@ -45,11 +45,11 @@ namespace Trident {
 			// `stride` is only used by OpenGL when calling glBindVertexBuffer.
 			virtual void bindVertexBuffer(uint32 bindingIndex, ref<Buffer> vertexBuffer, uint64 offset, uint32 stride) = 0;
 
-			virtual void copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, const sequence<BufferCopyRegion>& copyRegions) = 0;
+			virtual void copyBufferToBuffer(ref<Buffer> sourceBuffer, ref<Buffer> destinationBuffer, view<BufferCopyRegion> copyRegions) = 0;
 
-			virtual void copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
+			virtual void copyBufferToImage(ref<Buffer> sourceBuffer, ref<Image> destinationImage, view<BufferImageCopyRegion> copyRegions) = 0;
 
-			virtual void copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, const sequence<BufferImageCopyRegion>& copyRegions) = 0;
+			virtual void copyImageToBuffer(ref<Image> sourceImage, ref<Buffer> destinationBuffer, view<BufferImageCopyRegion> copyRegions) = 0;
 
 			virtual void dispatch(uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ) = 0;
 
