@@ -46,8 +46,14 @@ namespace Trident {
 		// Swapchain images are not associated with client-side usage.
 		imageDescriptor.usage = static_cast<ImageUsage>(0);
 
-		for (uint32 imageIndex = 0; imageIndex < images.count(); imageIndex += 1) {
+		uint32 imageIndex = 0;
+
+		while (imageIndex < images.count()) {
+			SET_DEBUG_NAME(imageDescriptor, Logger::format("Swapchain image []", imageIndex));
+
 			images[imageIndex] = createRef<GL::Image>(imageDescriptor);
+
+			imageIndex += 1;
 		}
 
 		createImageViews();

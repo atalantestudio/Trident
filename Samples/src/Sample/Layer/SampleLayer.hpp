@@ -5,7 +5,7 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "../Sample/MipLevels.hpp"
+#include "../Sample/ComputeShader.hpp"
 
 namespace Trident {
 	class SampleLayer : public Layer {

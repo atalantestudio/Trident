@@ -9,19 +9,19 @@
 
 namespace Trident {
 	class VK::Image final : public Trident::Image {
+		private:
+			static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent, uint32 index);
+
 		public:
 			explicit Image(const ImageDescriptor& descriptor, const VK::Device& device);
 
 			// Render target constructor (wrapper around a swapchain image).
-			explicit Image(const VK::Device& device, VkImage image, VkFormat format, Extent2D extent);
+			explicit Image(const VK::Device& device, VkImage image, VkFormat format, Extent2D extent, uint32 index);
 
 			~Image() final override;
 
 		protected:
 			ref<Trident::ImageView> createViewInternal(const ImageViewDescriptor& descriptor, Trident::Image* image) final override;
-
-		private:
-			static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent);
 
 		public:
 			VkImage image;

@@ -117,8 +117,12 @@ namespace Trident {
 		images = sequence<ref<Trident::Image>>(imageCount);
 		imageViews = sequence<ref<Trident::ImageView>>(imageCount);
 
-		for (uint32 imageIndex = 0; imageIndex < imageCount; imageIndex += 1) {
-			images[imageIndex] = createRef<VK::Image>(device, vkImages[imageIndex], surfaceFormat.format, extent);
+		uint32 imageIndex = 0;
+
+		while (imageIndex < imageCount) {
+			images[imageIndex] = createRef<VK::Image>(device, vkImages[imageIndex], surfaceFormat.format, extent, imageIndex);
+
+			imageIndex += 1;
 		}
 
 		createImageViews();

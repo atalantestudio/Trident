@@ -11,7 +11,7 @@
 namespace Trident {
 	class DX12::Image final : public Trident::Image {
 		private:
-			static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent);
+			static ImageDescriptor createSwapchainImageDescriptor(Extent2D extent, UINT index);
 
 		public:
 			explicit Image(const ImageDescriptor& descriptor, const DX12::Device& device, ref<DX12::MemoryAllocator> memoryAllocator);

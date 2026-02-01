@@ -350,7 +350,7 @@ namespace Trident {
 
 	void DX12::CommandEncoder::setImageMemoryBarrier(ref<Trident::Image> image, ImageLayout newLayout, PipelineStage sourceStage, PipelineStage destinationStage) {
 		const ref<DX12::Image> _image = std::static_pointer_cast<DX12::Image>(image);
-		const D3D12_RESOURCE_STATES newResourceState = getImageTransitionResourceState(newLayout);
+		D3D12_RESOURCE_STATES newResourceState = getImageTransitionResourceState(newLayout);
 
 		if (_image->resourceState == newResourceState) {
 			ADAPTER_WARNING("Ignored transition resource barrier to the same layout.");
@@ -359,8 +359,7 @@ namespace Trident {
 		}
 
 		if (computePipelineBound && newLayout == ImageLayout::SHADER_READ_ONLY_OPTIMAL) {
-			// This transition can't be executed by the compute queue.
-			return;
+			newResourceState = D3D12_RESOURCE_STATE_COMMON;
 		}
 
 		D3D12_RESOURCE_BARRIER resourceBarrier{};

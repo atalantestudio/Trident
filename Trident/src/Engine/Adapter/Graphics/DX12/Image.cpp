@@ -13,7 +13,7 @@
 #include "Engine/Adapter/Graphics/DX12/ResourceState.hpp"
 
 namespace Trident {
-	ImageDescriptor DX12::Image::createSwapchainImageDescriptor(Extent2D extent) {
+	ImageDescriptor DX12::Image::createSwapchainImageDescriptor(Extent2D extent, UINT index) {
 		ImageDescriptor imageDescriptor{};
 		imageDescriptor.extent.width = extent.width;
 		imageDescriptor.extent.height = extent.height;
@@ -27,6 +27,8 @@ namespace Trident {
 		imageDescriptor.sampleCount = 1;
 		imageDescriptor.usage = static_cast<ImageUsage>(0);
 		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		SET_DEBUG_NAME(imageDescriptor, Logger::format("Swapchin image []", index));
 
 		return imageDescriptor;
 	}
@@ -101,7 +103,7 @@ namespace Trident {
 	}
 
 	DX12::Image::Image(const DX12::Device& device, const DX12::Swapchain& swapchain, UINT index, ref<DX12::MemoryAllocator> memoryAllocator) :
-		Trident::Image(createSwapchainImageDescriptor(swapchain.getExtent())),
+		Trident::Image(createSwapchainImageDescriptor(swapchain.getExtent(), index)),
 		resourceState(D3D12_RESOURCE_STATE_PRESENT),
 		usage(static_cast<ImageUsage>(0)),
 		device(device),

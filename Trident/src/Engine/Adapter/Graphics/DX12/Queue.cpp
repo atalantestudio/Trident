@@ -26,10 +26,12 @@ namespace Trident {
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create command queue.");
 
-		FenceDescriptor fenceDescriptor{};
-		fenceDescriptor.signaled = false;
+		FenceDescriptor idleFenceDescriptor{};
+		idleFenceDescriptor.signaled = false;
 
-		idleFence = createRef<DX12::Fence>(fenceDescriptor, device);
+		SET_DEBUG_NAME(idleFenceDescriptor, "Queue idle fence");
+
+		idleFence = createRef<DX12::Fence>(idleFenceDescriptor, device);
 		completionEvent = CreateEvent(nullptr, false, false, L"Completion event");
 
 		WIN32_ASSERT(completionEvent != nullptr);

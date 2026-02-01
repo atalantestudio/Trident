@@ -11,6 +11,26 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
+	ImageDescriptor VK::Image::createSwapchainImageDescriptor(Extent2D extent, uint32 index) {
+		ImageDescriptor imageDescriptor{};
+		imageDescriptor.extent.width = extent.width;
+		imageDescriptor.extent.height = extent.height;
+		imageDescriptor.extent.depth = 1;
+		imageDescriptor.mipLevelCount = 1;
+		imageDescriptor.layerCount = 1;
+
+		// These properties aren't used when creating a swapchain image.
+		imageDescriptor.type = ImageType::TEXTURE_2D;
+		imageDescriptor.format = ImageFormat::B8G8R8A8_UNORM;
+		imageDescriptor.sampleCount = 1;
+		imageDescriptor.usage = static_cast<ImageUsage>(0);
+		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		SET_DEBUG_NAME(imageDescriptor, Logger::format("Swapchain image []", index));
+
+		return imageDescriptor;
+	}
+
 	VK::Image::Image(const ImageDescriptor& descriptor, const VK::Device& device) :
 		Trident::Image(descriptor),
 		device(device),
@@ -76,8 +96,8 @@ namespace Trident {
 		memorySuballocation = MemoryAllocator::suballocateImage(device.device, image, memoryTypeIndex, memoryRequirements);
 	}
 
-	VK::Image::Image(const VK::Device& device, VkImage image, VkFormat format, Extent2D extent) :
-		Trident::Image(createSwapchainImageDescriptor(extent)),
+	VK::Image::Image(const VK::Device& device, VkImage image, VkFormat format, Extent2D extent, uint32 index) :
+		Trident::Image(createSwapchainImageDescriptor(extent, index)),
 		image(image),
 		device(device),
 		swapchainImage(true),
@@ -101,23 +121,5 @@ namespace Trident {
 		DEBUG_DESCRIPTOR_GUARD(descriptor, image);
 
 		return createRef<VK::ImageView>(descriptor, image, device);
-	}
-
-	ImageDescriptor VK::Image::createSwapchainImageDescriptor(Extent2D extent) {
-		ImageDescriptor imageDescriptor{};
-		imageDescriptor.extent.width = extent.width;
-		imageDescriptor.extent.height = extent.height;
-		imageDescriptor.extent.depth = 1;
-		imageDescriptor.mipLevelCount = 1;
-		imageDescriptor.layerCount = 1;
-
-		// These properties aren't used when creating a swapchain image.
-		imageDescriptor.type = ImageType::TEXTURE_2D;
-		imageDescriptor.format = ImageFormat::B8G8R8A8_UNORM;
-		imageDescriptor.sampleCount = 1;
-		imageDescriptor.usage = static_cast<ImageUsage>(0);
-		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
-
-		return imageDescriptor;
 	}
 }

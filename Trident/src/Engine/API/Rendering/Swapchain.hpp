@@ -39,13 +39,19 @@ namespace Trident {
 				imageViewDescriptor.mipLevelOffset = 0;
 				imageViewDescriptor.layerOffset = 0;
 
-				for (uint32 imageViewIndex = 0; imageViewIndex < imageViews.count(); imageViewIndex += 1) {
+				uint32 imageViewIndex = 0;
+
+				while (imageViewIndex < imageViews.count()) {
 					const ref<Image> image = images[imageViewIndex];
 
 					imageViewDescriptor.mipLevelCount = image->getMipLevelCount();
 					imageViewDescriptor.layerCount = image->getLayerCount();
 
-					imageViews[imageViewIndex] = images[imageViewIndex]->createView(imageViewDescriptor);
+					SET_DEBUG_NAME(imageViewDescriptor, Logger::format("Swapchain image view []", imageViewIndex));
+
+					imageViews[imageViewIndex] = image->createView(imageViewDescriptor);
+
+					imageViewIndex += 1;
 				}
 			}
 

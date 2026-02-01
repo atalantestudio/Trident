@@ -72,6 +72,8 @@ namespace Trident {
 				imageDescriptor.usage = ImageUsage::STORAGE | ImageUsage::SAMPLED;
 				imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
+				SET_DEBUG_NAME(imageDescriptor, "Output");
+
 				image = createImage(imageDescriptor);
 			}
 
@@ -81,6 +83,8 @@ namespace Trident {
 				imageViewDescriptor.mipLevelCount = image->getMipLevelCount();
 				imageViewDescriptor.layerOffset = 0;
 				imageViewDescriptor.layerCount = image->getLayerCount();
+
+				SET_DEBUG_NAME(imageViewDescriptor, "Output");
 
 				imageView = image->createView(imageViewDescriptor);
 			}
@@ -142,6 +146,8 @@ namespace Trident {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 				pipelineLayoutDescriptor.descriptorSetLayouts = {imageDescriptorSetLayout};
 
+				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Render pipeline layout");
+
 				pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 			}
 
@@ -153,9 +159,13 @@ namespace Trident {
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
 
+				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Vertex shader module");
+
 				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fragment shader module");
 
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/ComputeShader/ComputeShader.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/ComputeShader/ComputeShader.frag");
@@ -180,6 +190,8 @@ namespace Trident {
 				renderPipelineDescriptor.renderPass = renderPass;
 				renderPipelineDescriptor.subpassIndex = 0;
 
+				SET_DEBUG_NAME(renderPipelineDescriptor, "Render pipeline");
+
 				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 			}
 
@@ -198,6 +210,8 @@ namespace Trident {
 				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
+				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
+
 				vertexBuffer = createBuffer(vertexBufferDescriptor);
 
 				BufferCopyRegion vertexBufferCopyRegion{};
@@ -207,6 +221,8 @@ namespace Trident {
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
 
 				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
@@ -253,11 +269,15 @@ namespace Trident {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 				pipelineLayoutDescriptor.descriptorSetLayouts = {imageDescriptorSetLayout};
 
+				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Compute pipeline layout");
+
 				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
 				ShaderModuleDescriptor computeShaderModuleDescriptor{};
 				computeShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
 				computeShaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(computeShaderModuleDescriptor, "Compute shader module");
 
 				const ref<ShaderModule> computeShaderModule = loadShaderModule(computeShaderModuleDescriptor, "Sample/ComputeShader/ComputeShader.comp");
 
@@ -265,10 +285,14 @@ namespace Trident {
 				computePipelineDescriptor.pipelineLayout = pipelineLayout;
 				computePipelineDescriptor.computeShaderModule = computeShaderModule;
 
+				SET_DEBUG_NAME(computePipelineDescriptor, "Compute pipeline");
+
 				const ref<ComputePipeline> computePipeline = createComputePipeline(computePipelineDescriptor);
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				SET_DEBUG_NAME(commandBufferDescriptor, "Compute command buffer");
 
 				const ref<Queue> computeQueue = getDevice()->getQueue(QueueFamilyCapability::COMPUTE);
 				const ref<CommandEncoder> commandEncoder = computeQueue->createCommandEncoder(commandBufferDescriptor);
@@ -297,10 +321,16 @@ namespace Trident {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
+				uint32 framebufferIndex = 0;
+
+				while (framebufferIndex < framebuffers.count()) {
+					SET_DEBUG_NAME(framebufferDescriptor, Logger::format("In flight framebuffer []", framebufferIndex));
+
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+
+					framebufferIndex += 1;
 				}
 			}
 

@@ -169,7 +169,7 @@ namespace Trident {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
 
-			if (descriptor.name.count() > 0) {
+			if (descriptor.name.count() == 0) {
 				warningCount += 1;
 
 				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this fence.");
@@ -242,7 +242,7 @@ namespace Trident {
 				ENGINE_ERROR("descriptor.layerCount must be greater than 0.");
 			}
 
-			if (descriptor.name.count() > 0) {
+			if (descriptor.name.count() == 0) {
 				warningCount += 1;
 
 				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this framebuffer.");

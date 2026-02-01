@@ -73,6 +73,8 @@ namespace Trident {
 
 		graphicsApi = properties.GraphicsAPI;
 
+		const ref<Queue> graphicsQueue = adapter->getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
+
 		SwapchainDescriptor swapchainDescriptor{};
 		swapchainDescriptor.extent.width = window.getSize()[0];
 		swapchainDescriptor.extent.height = window.getSize()[1];
@@ -85,19 +87,36 @@ namespace Trident {
 		acquireNextImageSemaphores = sequence<ref<Semaphore>>(Application::MAX_FRAMES_IN_FLIGHT);
 		finishedRenderSemaphores = sequence<ref<Semaphore>>(Application::MAX_FRAMES_IN_FLIGHT);
 
-		CommandBufferDescriptor commandBufferDescriptor{};
-		commandBufferDescriptor.usage = CommandBufferUsage::AUTO;
+		CommandBufferDescriptor inFlightCommandBufferDescriptor{};
+		inFlightCommandBufferDescriptor.usage = CommandBufferUsage::AUTO;
 
-		const ref<Queue> graphicsQueue = adapter->getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
-
-		FenceDescriptor flightFenceDescriptor{};
-		flightFenceDescriptor.signaled = true;
+		FenceDescriptor inFlightFenceDescriptor{};
+		inFlightFenceDescriptor.signaled = true;
 
 		uint32 frameInFlightIndex = 0;
 
+		#if defined(BUILD_MODE_DEBUG)
+			sequence<char8> name;
+		#endif
+
 		while (frameInFlightIndex < Application::MAX_FRAMES_IN_FLIGHT) {
-			commandEncoders[frameInFlightIndex] = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
-			flightFences[frameInFlightIndex] = adapter->createFence(flightFenceDescriptor);
+			#if defined(BUILD_MODE_DEBUG)
+				name = Logger::format("In flight command buffer []", frameInFlightIndex);
+
+				inFlightCommandBufferDescriptor.name = name;
+
+				commandEncoders[frameInFlightIndex] = graphicsQueue->createCommandEncoder(inFlightCommandBufferDescriptor);
+
+				name = Logger::format("In flight fence []", frameInFlightIndex);
+
+				inFlightFenceDescriptor.name = name;
+
+				flightFences[frameInFlightIndex] = adapter->createFence(inFlightFenceDescriptor);
+			#else
+				commandEncoders[frameInFlightIndex] = graphicsQueue->createCommandEncoder(inFlightCommandBufferDescriptor);
+				flightFences[frameInFlightIndex] = adapter->createFence(inFlightFenceDescriptor);
+			#endif
+
 			acquireNextImageSemaphores[frameInFlightIndex] = adapter->createSemaphore();
 			finishedRenderSemaphores[frameInFlightIndex] = adapter->createSemaphore();
 
@@ -141,6 +160,8 @@ namespace Trident {
 		stagingBufferDescriptor.usage = BufferUsage::TRANSFER_SRC;
 		stagingBufferDescriptor.memoryProperties = MemoryProperty::HOST_VISIBLE | MemoryProperty::HOST_COHERENT;
 		stagingBufferDescriptor.persistent = persistent;
+
+		SET_DEBUG_NAME(stagingBufferDescriptor, "Staging buffer");
 
 		return createBuffer(stagingBufferDescriptor);
 	}
