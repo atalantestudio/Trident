@@ -9,7 +9,7 @@ namespace Trident {
 	ref<Buffer> VisibilityRenderer::createMaterialCountBuffer() const {
 		BufferDescriptor materialCountBufferDescriptor{};
 		materialCountBufferDescriptor.size = sizeof(uint32) * scene->materials.count();
-		materialCountBufferDescriptor.usage = BufferUsage::STORAGE;
+		materialCountBufferDescriptor.usage = BufferUsage::READ_WRITE_STORAGE;
 		materialCountBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 		materialCountBufferDescriptor.persistent = false;
 

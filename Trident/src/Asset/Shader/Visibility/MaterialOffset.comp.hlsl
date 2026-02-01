@@ -1,4 +1,4 @@
-RWByteAddressBuffer materialCountBuffer : register(u0);
+ByteAddressBuffer materialCountBuffer : register(t0);
 RWByteAddressBuffer materialOffsetBuffer : register(u1);
 // RWByteAddressBuffer materialStoreOffsetBuffer : register(u2);
 // RWByteAddressBuffer materialIndirectBuffer : register(u3);

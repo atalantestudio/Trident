@@ -6,47 +6,33 @@
 namespace Trident {
 	// See https://stackoverflow.com/a/77070649/17136841.
 	enum class DescriptorType : uint8 {
-		COMBINED_IMAGE_SAMPLER = 1,
-		STORAGE_IMAGE = 3,
-		UNIFORM_BUFFER = 6,
-		STORAGE_BUFFER = 7,
-		INPUT_ATTACHMENT = 10,
+		COMBINED_IMAGE_SAMPLER,
+		STORAGE_IMAGE,
+		INPUT_ATTACHMENT,
+		UNIFORM_BUFFER,
 
-		// TODO: Add SAMPLER.
-		// TODO: Add SAMPLED_IMAGE.
+		// NOTE: (DirectX 12) Maps to a shader resource view.
+		READ_ONLY_STORAGE_BUFFER,
+
+		// NOTE: (DirectX 12) Maps to a unordered access view.
+		READ_WRITE_STORAGE_BUFFER,
 
 		count,
 	};
 
 	static bool isBufferDescriptorType(DescriptorType descriptorType) {
+		static constexpr DescriptorType firstBufferDescriptorType = DescriptorType::UNIFORM_BUFFER;
+
 		DEBUG_ASSERT(descriptorType < DescriptorType::count);
 
-		switch (descriptorType) {
-			case DescriptorType::COMBINED_IMAGE_SAMPLER:
-			case DescriptorType::STORAGE_IMAGE:
-			case DescriptorType::INPUT_ATTACHMENT:
-				return false;
-			case DescriptorType::UNIFORM_BUFFER:
-			case DescriptorType::STORAGE_BUFFER:
-				return true;
-		}
-
-		return false;
+		return descriptorType >= firstBufferDescriptorType;
 	}
 
 	static bool isImageDescriptorType(DescriptorType descriptorType) {
+		static constexpr DescriptorType lastImageDescriptorType = DescriptorType::INPUT_ATTACHMENT;
+
 		DEBUG_ASSERT(descriptorType < DescriptorType::count);
 
-		switch (descriptorType) {
-			case DescriptorType::COMBINED_IMAGE_SAMPLER:
-			case DescriptorType::STORAGE_IMAGE:
-			case DescriptorType::INPUT_ATTACHMENT:
-				return true;
-			case DescriptorType::UNIFORM_BUFFER:
-			case DescriptorType::STORAGE_BUFFER:
-				return false;
-		}
-
-		return false;
+		return descriptorType <= lastImageDescriptorType;
 	}
 }

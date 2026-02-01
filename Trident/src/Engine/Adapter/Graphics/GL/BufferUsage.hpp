@@ -20,7 +20,11 @@ namespace Trident::GL {
 			return GL_UNIFORM_BUFFER;
 		}
 
-		if (bufferUsage & BufferUsage::STORAGE) {
+		if (bufferUsage & BufferUsage::READ_ONLY_STORAGE) {
+			return GL_SHADER_STORAGE_BUFFER;
+		}
+
+		if (bufferUsage & BufferUsage::READ_WRITE_STORAGE) {
 			return GL_SHADER_STORAGE_BUFFER;
 		}
 

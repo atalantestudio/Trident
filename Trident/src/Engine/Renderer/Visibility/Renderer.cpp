@@ -4,9 +4,6 @@
 #include "pch.hpp"
 
 #include "Engine/API/Camera/PerspectiveCamera.hpp"
-#include "Engine/Renderer/Visibility/Renderer.hpp"
-#include "Engine/Renderer/Visibility/RenderPass.hpp"
-
 #include "Engine/Renderer/Visibility/DepthStencilImage.hpp"
 #include "Engine/Renderer/Visibility/MaterialCountBuffer.hpp"
 #include "Engine/Renderer/Visibility/MaterialIndexImage.hpp"
@@ -14,6 +11,7 @@
 #include "Engine/Renderer/Visibility/MaterialOffsetPipeline.hpp"
 #include "Engine/Renderer/Visibility/MaterialOffsetPipelineLayout.hpp"
 #include "Engine/Renderer/Visibility/MaterialPipeline.hpp"
+#include "Engine/Renderer/Visibility/Renderer.hpp"
 #include "Engine/Renderer/Visibility/RenderPass.hpp"
 #include "Engine/Renderer/Visibility/VisibilityImage.hpp"
 
@@ -36,6 +34,7 @@ namespace Trident {
 		createClusterDescriptorSetLayout();
 		createInstanceDescriptorSetLayout();
 		createDebugDescriptorSetLayout();
+		materialOffsetDescriptorSetLayout = createMaterialOffsetDescriptorSetLayout();
 
 		allocateDescriptorSets();
 
@@ -61,13 +60,13 @@ namespace Trident {
 		createClusterBuffer();
 		createInstanceBuffer();
 		createGeometryBuffer();
+		materialCountBuffer = createMaterialCountBuffer();
+		materialOffsetBuffer = createMaterialOffsetBuffer();
 
 		fillSceneBuffers();
 
 		updateBufferDescriptorSets();
 		updateDebugInputAttachmentDescriptorSets();
-
-		materialCountBuffer = createMaterialCountBuffer();
 
 		materialOffsetPipelineLayout = createMaterialOffsetPipelineLayout();
 		materialOffsetPipeline = createMaterialOffsetPipeline();
@@ -192,17 +191,17 @@ namespace Trident {
 
 	void VisibilityRenderer::createClusterDescriptorSetLayout() {
 		DescriptorSetLayoutBinding vertexPositionComponentBinding{};
-		vertexPositionComponentBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexPositionComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		vertexPositionComponentBinding.descriptorCount = 1;
 		vertexPositionComponentBinding.shaderStages = ShaderStage::VERTEX;
 
 		DescriptorSetLayoutBinding vertexBinding{};
-		vertexBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		vertexBinding.descriptorCount = 1;
 		vertexBinding.shaderStages = ShaderStage::VERTEX;
 
 		DescriptorSetLayoutBinding clusterBinding{};
-		clusterBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		clusterBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		clusterBinding.descriptorCount = 1;
 		clusterBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
 
@@ -211,12 +210,12 @@ namespace Trident {
 
 	void VisibilityRenderer::createInstanceDescriptorSetLayout() {
 		DescriptorSetLayoutBinding instanceBinding{};
-		instanceBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		instanceBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		instanceBinding.descriptorCount = 1;
 		instanceBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
 
 		DescriptorSetLayoutBinding geometryBinding{};
-		geometryBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		geometryBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		geometryBinding.descriptorCount = 1;
 		geometryBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
 
@@ -245,32 +244,32 @@ namespace Trident {
 		depthStencilBinding.shaderStages = ShaderStage::FRAGMENT;
 
 		DescriptorSetLayoutBinding vertexPositionComponentBinding{};
-		vertexPositionComponentBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexPositionComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		vertexPositionComponentBinding.descriptorCount = 1;
 		vertexPositionComponentBinding.shaderStages = ShaderStage::FRAGMENT;
 
 		DescriptorSetLayoutBinding vertexNormalComponentBinding{};
-		vertexNormalComponentBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexNormalComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		vertexNormalComponentBinding.descriptorCount = 1;
 		vertexNormalComponentBinding.shaderStages = ShaderStage::FRAGMENT;
 
 		DescriptorSetLayoutBinding vertexTextureCoordinateComponentBinding{};
-		vertexTextureCoordinateComponentBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexTextureCoordinateComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		vertexTextureCoordinateComponentBinding.descriptorCount = 1;
 		vertexTextureCoordinateComponentBinding.shaderStages = ShaderStage::FRAGMENT;
 
 		DescriptorSetLayoutBinding vertexPositionIndexBinding{};
-		vertexPositionIndexBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexPositionIndexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		vertexPositionIndexBinding.descriptorCount = 1;
 		vertexPositionIndexBinding.shaderStages = ShaderStage::FRAGMENT;
 
 		DescriptorSetLayoutBinding vertexNormalIndexBinding{};
-		vertexNormalIndexBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexNormalIndexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		vertexNormalIndexBinding.descriptorCount = 1;
 		vertexNormalIndexBinding.shaderStages = ShaderStage::FRAGMENT;
 
 		DescriptorSetLayoutBinding vertexTextureCoordinateIndexBinding{};
-		vertexTextureCoordinateIndexBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		vertexTextureCoordinateIndexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		vertexTextureCoordinateIndexBinding.descriptorCount = 1;
 		vertexTextureCoordinateIndexBinding.shaderStages = ShaderStage::FRAGMENT;
 
@@ -339,7 +338,7 @@ namespace Trident {
 
 		BufferDescriptor vertexPositionComponentBufferDescriptor{};
 		vertexPositionComponentBufferDescriptor.size = scene->vertexPositionComponents.count() * sizeof(float32);
-		vertexPositionComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexPositionComponentBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		vertexPositionComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		SET_DEBUG_NAME(vertexPositionComponentBufferDescriptor, "Vertex position component");
@@ -352,7 +351,7 @@ namespace Trident {
 
 		BufferDescriptor vertexNormalComponentBufferDescriptor{};
 		vertexNormalComponentBufferDescriptor.size = scene->vertexNormalComponents.count() * sizeof(float32);
-		vertexNormalComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexNormalComponentBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		vertexNormalComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		SET_DEBUG_NAME(vertexNormalComponentBufferDescriptor, "Vertex normal component");
@@ -365,7 +364,7 @@ namespace Trident {
 
 		BufferDescriptor vertexTextureCoordinateComponentBufferDescriptor{};
 		vertexTextureCoordinateComponentBufferDescriptor.size = scene->vertexTextureCoordinateComponents.count() * sizeof(float32);
-		vertexTextureCoordinateComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexTextureCoordinateComponentBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		vertexTextureCoordinateComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		SET_DEBUG_NAME(vertexTextureCoordinateComponentBufferDescriptor, "Vertex texture coordinate component");
@@ -378,7 +377,7 @@ namespace Trident {
 
 		BufferDescriptor vertexPositionIndexBufferDescriptor{};
 		vertexPositionIndexBufferDescriptor.size = scene->vertexPositionIndices.count() * sizeof(uint32);
-		vertexPositionIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexPositionIndexBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		vertexPositionIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		SET_DEBUG_NAME(vertexPositionIndexBufferDescriptor, "Vertex position index");
@@ -391,7 +390,7 @@ namespace Trident {
 
 		BufferDescriptor vertexNormalIndexBufferDescriptor{};
 		vertexNormalIndexBufferDescriptor.size = scene->vertexNormalIndices.count() * sizeof(uint32);
-		vertexNormalIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexNormalIndexBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		vertexNormalIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		SET_DEBUG_NAME(vertexNormalIndexBufferDescriptor, "Vertex normal index");
@@ -404,7 +403,7 @@ namespace Trident {
 
 		BufferDescriptor vertexTextureCoordinateIndexBufferDescriptor{};
 		vertexTextureCoordinateIndexBufferDescriptor.size = scene->vertexTextureCoordinateIndices.count() * sizeof(uint32);
-		vertexTextureCoordinateIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		vertexTextureCoordinateIndexBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		vertexTextureCoordinateIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		SET_DEBUG_NAME(vertexTextureCoordinateIndexBufferDescriptor, "Vertex texture coordinate index");
@@ -417,7 +416,7 @@ namespace Trident {
 
 		BufferDescriptor clusterBufferDescriptor{};
 		clusterBufferDescriptor.size = scene->clusters.count() * sizeof(Cluster);
-		clusterBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		clusterBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		clusterBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		SET_DEBUG_NAME(clusterBufferDescriptor, "Cluster");
@@ -430,7 +429,7 @@ namespace Trident {
 
 		BufferDescriptor instanceBufferDescriptor{};
 		instanceBufferDescriptor.size = scene->instances.count() * sizeof(ClusteredInstance);
-		instanceBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		instanceBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		instanceBufferDescriptor.persistent = true;
 
@@ -446,7 +445,7 @@ namespace Trident {
 
 		BufferDescriptor geometryBufferDescriptor{};
 		geometryBufferDescriptor.size = scene->geometries.count() * sizeof(Geometry);
-		geometryBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		geometryBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		geometryBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		SET_DEBUG_NAME(geometryBufferDescriptor, "Geometry");
@@ -552,12 +551,14 @@ namespace Trident {
 			clusterDescriptorSetLayout,
 			instanceDescriptorSetLayout,
 			debugDescriptorSetLayout,
+			materialOffsetDescriptorSetLayout,
 		});
 
 		cameraDescriptorSet = descriptorSets[0];
 		clusterDescriptorSet = descriptorSets[1];
 		instanceDescriptorSet = descriptorSets[2];
 		debugDescriptorSet = descriptorSets[3];
+		materialOffsetDescriptorSet = descriptorSets[4];
 	}
 
 	void VisibilityRenderer::fillSceneBuffers() const {
@@ -803,6 +804,16 @@ namespace Trident {
 		vertexTextureCoordinateIndexDescriptorBuffer.offset = 0;
 		vertexTextureCoordinateIndexDescriptorBuffer.size = vertexTextureCoordinateIndexBuffer->size;
 
+		DescriptorBuffer materialCountDescriptorBuffer{};
+		materialCountDescriptorBuffer.buffer = materialCountBuffer;
+		materialCountDescriptorBuffer.offset = 0;
+		materialCountDescriptorBuffer.size = materialCountBuffer->size;
+
+		DescriptorBuffer materialOffsetDescriptorBuffer{};
+		materialOffsetDescriptorBuffer.buffer = materialOffsetBuffer;
+		materialOffsetDescriptorBuffer.offset = 0;
+		materialOffsetDescriptorBuffer.size = materialOffsetBuffer->size;
+
 		WriteDescriptorSet cameraWriteDescriptorSet{};
 		cameraWriteDescriptorSet.descriptorSet = cameraDescriptorSet;
 		cameraWriteDescriptorSet.bindingIndex = 0;
@@ -868,13 +879,26 @@ namespace Trident {
 		debugVertexTextureCoordinateIndexWriteDescriptorSet.bindingIndex = 9;
 		debugVertexTextureCoordinateIndexWriteDescriptorSet.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer};
 
+		WriteDescriptorSet materialCountWriteDescriptorSet{};
+		materialCountWriteDescriptorSet.descriptorSet = materialOffsetDescriptorSet;
+		materialCountWriteDescriptorSet.bindingIndex = 0;
+		materialCountWriteDescriptorSet.descriptorBuffers = {materialCountDescriptorBuffer};
+
+		WriteDescriptorSet materialOffsetWriteDescriptorSet{};
+		materialOffsetWriteDescriptorSet.descriptorSet = materialOffsetDescriptorSet;
+		materialOffsetWriteDescriptorSet.bindingIndex = 1;
+		materialOffsetWriteDescriptorSet.descriptorBuffers = {materialOffsetDescriptorBuffer};
+
 		getDevice()->updateDescriptorSets({
 			cameraWriteDescriptorSet,
 			vertexPositionComponentWriteDescriptorSet,
 			vertexPositionIndexWriteDescriptorSet,
+
 			clusterWriteDescriptorSet,
+
 			instanceWriteDescriptorSet,
 			geometryWriteDescriptorSet,
+
 			debugCameraWriteDescriptorSet,
 			debugVertexPositionComponentWriteDescriptorSet,
 			debugVertexNormalComponentWriteDescriptorSet,
@@ -882,6 +906,9 @@ namespace Trident {
 			debugVertexPositionIndexWriteDescriptorSet,
 			debugVertexNormalIndexWriteDescriptorSet,
 			debugVertexTextureCoordinateIndexWriteDescriptorSet,
+
+			materialCountWriteDescriptorSet,
+			materialOffsetWriteDescriptorSet,
 		});
 	}
 

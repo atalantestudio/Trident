@@ -108,7 +108,7 @@ namespace Trident {
 		device.device->CreateConstantBufferView(&constantBufferViewDescriptor, descriptorHandle);
 	}
 
-	void DX12::MemoryAllocator::writeStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
+	void DX12::MemoryAllocator::writeReadOnlyStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
 		const ref<DX12::Buffer> buffer = std::static_pointer_cast<DX12::Buffer>(descriptorBuffer.buffer);
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDescriptor{};
@@ -121,6 +121,21 @@ namespace Trident {
 		shaderResourceViewDescriptor.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
 		device.device->CreateShaderResourceView(buffer->resource, &shaderResourceViewDescriptor, descriptorHandle);
+	}
+
+	void DX12::MemoryAllocator::writeReadWriteStorageBuffer(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorBuffer& descriptorBuffer) const {
+		const ref<DX12::Buffer> buffer = std::static_pointer_cast<DX12::Buffer>(descriptorBuffer.buffer);
+
+		D3D12_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDescriptor{};
+		unorderedAccessViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
+		unorderedAccessViewDescriptor.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+		unorderedAccessViewDescriptor.Buffer.FirstElement = 0;
+		unorderedAccessViewDescriptor.Buffer.NumElements = static_cast<UINT>(descriptorBuffer.buffer->size);
+		unorderedAccessViewDescriptor.Buffer.StructureByteStride = 1;
+		unorderedAccessViewDescriptor.Buffer.CounterOffsetInBytes = 0;
+		unorderedAccessViewDescriptor.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+
+		device.device->CreateUnorderedAccessView(buffer->resource, nullptr, &unorderedAccessViewDescriptor, descriptorHandle);
 	}
 
 	void DX12::MemoryAllocator::writeInputAttachment(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const {

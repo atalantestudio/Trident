@@ -43,6 +43,10 @@ namespace Trident {
 		resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		resourceDescriptor.Flags = D3D12_RESOURCE_FLAG_NONE;
 
+		if (descriptor.usage & BufferUsage::READ_WRITE_STORAGE) {
+			resourceDescriptor.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+		}
+
 		const D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_NONE;
 
 		D3D12_RESOURCE_STATES initialResourceStates = getBufferResourceState(descriptor.usage);

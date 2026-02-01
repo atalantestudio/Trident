@@ -222,14 +222,29 @@ namespace Trident {
 
 					break;
 				}
-				case DescriptorType::STORAGE_BUFFER: {
+				case DescriptorType::READ_ONLY_STORAGE_BUFFER: {
 					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
 					UINT descriptorBufferIndex = 0;
 
 					while (descriptorBufferIndex < writeDescriptorSet.descriptorBuffers.count()) {
 						const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
 
-						memoryAllocator->writeStorageBuffer(viewDescriptorHandle, descriptorBuffer);
+						memoryAllocator->writeReadOnlyStorageBuffer(viewDescriptorHandle, descriptorBuffer);
+
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+						descriptorBufferIndex += 1;
+					}
+
+					break;
+				}
+				case DescriptorType::READ_WRITE_STORAGE_BUFFER: {
+					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
+					UINT descriptorBufferIndex = 0;
+
+					while (descriptorBufferIndex < writeDescriptorSet.descriptorBuffers.count()) {
+						const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
+
+						memoryAllocator->writeReadWriteStorageBuffer(viewDescriptorHandle, descriptorBuffer);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 						descriptorBufferIndex += 1;

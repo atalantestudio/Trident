@@ -286,7 +286,7 @@ namespace Trident {
 	void GenerateSDFGlyphMapProcess::createFontBuffer() {
 		BufferDescriptor fontBufferDescriptor{};
 		fontBufferDescriptor.size = sizeof(FontStorage);
-		fontBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		fontBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		fontBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
 		SET_DEBUG_NAME(fontBufferDescriptor, "Font");
@@ -297,7 +297,7 @@ namespace Trident {
 	void GenerateSDFGlyphMapProcess::createGlyphBuffer(uint64 size) {
 		BufferDescriptor glyphBufferDescriptor{};
 		glyphBufferDescriptor.size = size;
-		glyphBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		glyphBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		glyphBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		glyphBufferDescriptor.persistent = true;
 
@@ -310,7 +310,7 @@ namespace Trident {
 	void GenerateSDFGlyphMapProcess::createGlyphOffsetBuffer() {
 		BufferDescriptor glyphOffsetBufferDescriptor{};
 		glyphOffsetBufferDescriptor.size = 3 * sizeof(float32);
-		glyphOffsetBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
+		glyphOffsetBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 		glyphOffsetBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		glyphOffsetBufferDescriptor.persistent = true;
 
@@ -352,12 +352,12 @@ namespace Trident {
 
 	void GenerateSDFGlyphMapProcess::createDescriptorSetLayoutsAndSets() {
 		DescriptorSetLayoutBinding fontBufferBinding{};
-		fontBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		fontBufferBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		fontBufferBinding.descriptorCount = 1;
 		fontBufferBinding.shaderStages = ShaderStage::COMPUTE;
 
 		DescriptorSetLayoutBinding glyphBufferBinding{};
-		glyphBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		glyphBufferBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		glyphBufferBinding.descriptorCount = 1;
 		glyphBufferBinding.shaderStages = ShaderStage::COMPUTE;
 
@@ -372,7 +372,7 @@ namespace Trident {
 		glyphMapImageBinding.shaderStages = ShaderStage::COMPUTE;
 
 		DescriptorSetLayoutBinding glyphOffsetBufferBinding{};
-		glyphOffsetBufferBinding.descriptorType = DescriptorType::STORAGE_BUFFER;
+		glyphOffsetBufferBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
 		glyphOffsetBufferBinding.descriptorCount = 1;
 		glyphOffsetBufferBinding.shaderStages = ShaderStage::COMPUTE;
 

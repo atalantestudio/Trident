@@ -12,9 +12,15 @@ namespace Trident {
 
 		UNIFORM = BIT(4),
 		STORAGE = BIT(5),
-		INDEX = BIT(6),
-		VERTEX = BIT(7),
-		INDIRECT = BIT(8),
+
+		READ_ONLY_STORAGE = BIT(6),
+
+		// The buffer may be written to by the device.
+		READ_WRITE_STORAGE = BIT(7),
+
+		INDEX = BIT(8),
+		VERTEX = BIT(9),
+		INDIRECT = BIT(10),
 	};
 
 	AS_FLAG(BufferUsage);

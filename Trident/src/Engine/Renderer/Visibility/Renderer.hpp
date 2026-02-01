@@ -74,6 +74,7 @@ namespace Trident {
 			void createClusterDescriptorSetLayout();
 			void createInstanceDescriptorSetLayout();
 			void createDebugDescriptorSetLayout();
+			ref<DescriptorSetLayout> createMaterialOffsetDescriptorSetLayout() const;
 
 			void createVisibilityPipelineLayout();
 			void createDebugPipelineLayout();
@@ -134,11 +135,13 @@ namespace Trident {
 			ref<DescriptorSetLayout> clusterDescriptorSetLayout;
 			ref<DescriptorSetLayout> instanceDescriptorSetLayout;
 			ref<DescriptorSetLayout> debugDescriptorSetLayout;
+			ref<DescriptorSetLayout> materialOffsetDescriptorSetLayout;
 
 			ref<DescriptorSet> cameraDescriptorSet;
 			ref<DescriptorSet> clusterDescriptorSet;
 			ref<DescriptorSet> instanceDescriptorSet;
 			ref<DescriptorSet> debugDescriptorSet;
+			ref<DescriptorSet> materialOffsetDescriptorSet;
 
 			ref<PipelineLayout> visibilityPipelineLayout;
 			ref<PipelineLayout> debugPipelineLayout;
