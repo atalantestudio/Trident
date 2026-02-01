@@ -76,6 +76,8 @@ namespace Trident {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
+		SET_DEBUG_NAME(commandBufferDescriptor, "Texture array copy command buffer");
+
 		const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 		const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
 
@@ -163,10 +165,16 @@ namespace Trident {
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
-		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
+		uint32 framebufferIndex = 0;
+
+		while (framebufferIndex < framebuffers.count()) {
+			SET_DEBUG_NAME(framebufferDescriptor, Logger::format("In flight framebuffer []", framebufferIndex));
+
 			framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+
+			framebufferIndex += 1;
 		}
 	}
 
@@ -176,6 +184,8 @@ namespace Trident {
 		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
 		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		cameraBufferDescriptor.persistent = true;
+
+		SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
 
 		cameraBuffer = createBuffer(cameraBufferDescriptor);
 
@@ -188,6 +198,8 @@ namespace Trident {
 		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
+		SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex");
+
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 	}
 
@@ -196,6 +208,8 @@ namespace Trident {
 		indexBufferDescriptor.size = INDEX_BUFFER_SIZE;
 		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
 		indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		SET_DEBUG_NAME(indexBufferDescriptor, "Index");
 
 		indexBuffer = createBuffer(indexBufferDescriptor);
 	}
@@ -206,6 +220,8 @@ namespace Trident {
 		subcomponentBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 		subcomponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		subcomponentBufferDescriptor.persistent = true;
+
+		SET_DEBUG_NAME(subcomponentBufferDescriptor, "Subcomponent");
 
 		subcomponentBuffer = createBuffer(subcomponentBufferDescriptor);
 
@@ -218,6 +234,8 @@ namespace Trident {
 		glyphSubcomponentBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 		glyphSubcomponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		glyphSubcomponentBufferDescriptor.persistent = true;
+
+		SET_DEBUG_NAME(glyphSubcomponentBufferDescriptor, "Glyph subcomponent");
 
 		glyphSubcomponentBuffer = createBuffer(glyphSubcomponentBufferDescriptor);
 
@@ -243,15 +261,19 @@ namespace Trident {
 		textureArrayImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
 		textureArrayImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
+		SET_DEBUG_NAME(textureArrayImageDescriptor, "Texture array");
+
 		textureArrayImage = createImage(textureArrayImageDescriptor);
 	}
 
 	void GUIRenderer::createTextureArrayImageView() {
 		ImageViewDescriptor textureArrayImageViewDescriptor{};
 		textureArrayImageViewDescriptor.mipLevelOffset = 0;
-		textureArrayImageViewDescriptor.mipLevelCount = textureArrayImage->getMipLevelCount();
+		textureArrayImageViewDescriptor.mipLevelCount = 1;
 		textureArrayImageViewDescriptor.layerOffset = 0;
 		textureArrayImageViewDescriptor.layerCount = textureArrayImage->getLayerCount();
+		
+		SET_DEBUG_NAME(textureArrayImageViewDescriptor, "Texture array");
 
 		textureArrayImageView = textureArrayImage->createView(textureArrayImageViewDescriptor);
 	}
@@ -296,12 +318,16 @@ namespace Trident {
 		PipelineLayoutDescriptor subcomponentPipelineLayoutDescriptor{};
 		subcomponentPipelineLayoutDescriptor.descriptorSetLayouts = {subcomponentDescriptorSetLayout};
 
+		SET_DEBUG_NAME(subcomponentPipelineLayoutDescriptor, "Subcomponent");
+
 		subcomponentPipelineLayout = createPipelineLayout(subcomponentPipelineLayoutDescriptor);
 	}
 
 	void GUIRenderer::createGlyphSubcomponentPipelineLayout() {
 		PipelineLayoutDescriptor glyphSubcomponentPipelineLayoutDescriptor{};
 		glyphSubcomponentPipelineLayoutDescriptor.descriptorSetLayouts = {glyphSubcomponentDescriptorSetLayout};
+
+		SET_DEBUG_NAME(glyphSubcomponentPipelineLayoutDescriptor, "Glyph subcomponent");
 
 		glyphSubcomponentPipelineLayout = createPipelineLayout(glyphSubcomponentPipelineLayoutDescriptor);
 	}
@@ -324,9 +350,13 @@ namespace Trident {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
+		SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Subcomponent vertex");
+
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Subcomponent fragment");
 
 		const ref<ShaderModule> vertexShaderModule = loadInternalShaderModule(vertexShaderModuleDescriptor, "GUI/Subcomponent.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadInternalShaderModule(fragmentShaderModuleDescriptor, "GUI/Subcomponent.frag");
@@ -353,6 +383,8 @@ namespace Trident {
 		subcomponentRenderPipelineDescriptor.renderPass = renderPass;
 		subcomponentRenderPipelineDescriptor.subpassIndex = 0;
 
+		SET_DEBUG_NAME(subcomponentRenderPipelineDescriptor, "Subcomponent");
+
 		subcomponentRenderPipeline = createRenderPipeline(subcomponentRenderPipelineDescriptor);
 	}
 
@@ -371,9 +403,13 @@ namespace Trident {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
+		SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Glyph subcomponent vertex");
+
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Glyph subcomponent fragment");
 
 		const ref<ShaderModule> vertexShaderModule = loadInternalShaderModule(vertexShaderModuleDescriptor, "GUI/GlyphSubcomponent.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadInternalShaderModule(fragmentShaderModuleDescriptor, "GUI/GlyphSubcomponent.frag");
@@ -399,6 +435,8 @@ namespace Trident {
 		glyphSubcomponentRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 		glyphSubcomponentRenderPipelineDescriptor.renderPass = renderPass;
 		glyphSubcomponentRenderPipelineDescriptor.subpassIndex = 0;
+
+		SET_DEBUG_NAME(glyphSubcomponentRenderPipelineDescriptor, "Glyph subcomponent");
 
 		glyphSubcomponentRenderPipeline = createRenderPipeline(glyphSubcomponentRenderPipelineDescriptor);
 	}
@@ -447,6 +485,8 @@ namespace Trident {
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
 
 		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);

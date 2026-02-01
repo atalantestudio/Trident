@@ -172,6 +172,8 @@ namespace Trident {
 		uint32 framebufferIndex = 0;
 
 		while (framebufferIndex < framebuffers.count()) {
+			SET_DEBUG_NAME(framebufferDescriptor, Logger::format("In flight framebuffer []", framebufferIndex));
+
 			framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
@@ -291,12 +293,16 @@ namespace Trident {
 		PipelineLayoutDescriptor visibilityPipelineLayoutDescriptor{};
 		visibilityPipelineLayoutDescriptor.descriptorSetLayouts = {cameraDescriptorSetLayout, clusterDescriptorSetLayout, instanceDescriptorSetLayout};
 
+		SET_DEBUG_NAME(visibilityPipelineLayoutDescriptor, "Visibility");
+
 		visibilityPipelineLayout = createPipelineLayout(visibilityPipelineLayoutDescriptor);
 	}
 
 	void VisibilityRenderer::createDebugPipelineLayout() {
 		PipelineLayoutDescriptor debugPipelineLayoutDescriptor{};
 		debugPipelineLayoutDescriptor.descriptorSetLayouts = {debugDescriptorSetLayout, clusterDescriptorSetLayout, instanceDescriptorSetLayout};
+
+		SET_DEBUG_NAME(debugPipelineLayoutDescriptor, "Debug");
 
 		debugPipelineLayout = createPipelineLayout(debugPipelineLayoutDescriptor);
 	}
@@ -307,6 +313,8 @@ namespace Trident {
 		indirectBufferDescriptor.usage = BufferUsage::INDIRECT;
 		indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		indirectBufferDescriptor.persistent = true;
+
+		SET_DEBUG_NAME(indirectBufferDescriptor, "Indirect");
 
 		indirectBuffer = createBuffer(indirectBufferDescriptor);
 
@@ -319,6 +327,8 @@ namespace Trident {
 		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
 		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		cameraBufferDescriptor.persistent = true;
+
+		SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
 
 		cameraBuffer = createBuffer(cameraBufferDescriptor);
 
@@ -333,6 +343,8 @@ namespace Trident {
 		vertexPositionComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexPositionComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
+		SET_DEBUG_NAME(vertexPositionComponentBufferDescriptor, "Vertex position component");
+
 		vertexPositionComponentBuffer = createBuffer(vertexPositionComponentBufferDescriptor);
 	}
 
@@ -343,6 +355,8 @@ namespace Trident {
 		vertexNormalComponentBufferDescriptor.size = scene->vertexNormalComponents.count() * sizeof(float32);
 		vertexNormalComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexNormalComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		SET_DEBUG_NAME(vertexNormalComponentBufferDescriptor, "Vertex normal component");
 
 		vertexNormalComponentBuffer = createBuffer(vertexNormalComponentBufferDescriptor);
 	}
@@ -355,6 +369,8 @@ namespace Trident {
 		vertexTextureCoordinateComponentBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexTextureCoordinateComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
+		SET_DEBUG_NAME(vertexTextureCoordinateComponentBufferDescriptor, "Vertex texture coordinate component");
+
 		vertexTextureCoordinateComponentBuffer = createBuffer(vertexTextureCoordinateComponentBufferDescriptor);
 	}
 
@@ -365,6 +381,8 @@ namespace Trident {
 		vertexPositionIndexBufferDescriptor.size = scene->vertexPositionIndices.count() * sizeof(uint32);
 		vertexPositionIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexPositionIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		SET_DEBUG_NAME(vertexPositionIndexBufferDescriptor, "Vertex position index");
 
 		vertexPositionIndexBuffer = createBuffer(vertexPositionIndexBufferDescriptor);
 	}
@@ -377,6 +395,8 @@ namespace Trident {
 		vertexNormalIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexNormalIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
+		SET_DEBUG_NAME(vertexNormalIndexBufferDescriptor, "Vertex normal index");
+
 		vertexNormalIndexBuffer = createBuffer(vertexNormalIndexBufferDescriptor);
 	}
 
@@ -387,6 +407,8 @@ namespace Trident {
 		vertexTextureCoordinateIndexBufferDescriptor.size = scene->vertexTextureCoordinateIndices.count() * sizeof(uint32);
 		vertexTextureCoordinateIndexBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		vertexTextureCoordinateIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		SET_DEBUG_NAME(vertexTextureCoordinateIndexBufferDescriptor, "Vertex texture coordinate index");
 
 		vertexTextureCoordinateIndexBuffer = createBuffer(vertexTextureCoordinateIndexBufferDescriptor);
 	}
@@ -399,6 +421,8 @@ namespace Trident {
 		clusterBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		clusterBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
+		SET_DEBUG_NAME(clusterBufferDescriptor, "Cluster");
+
 		clusterBuffer = createBuffer(clusterBufferDescriptor);
 	}
 
@@ -410,6 +434,8 @@ namespace Trident {
 		instanceBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		instanceBufferDescriptor.persistent = true;
+
+		SET_DEBUG_NAME(instanceBufferDescriptor, "Instance");
 
 		instanceBuffer = createBuffer(instanceBufferDescriptor);
 
@@ -424,6 +450,8 @@ namespace Trident {
 		geometryBufferDescriptor.usage = BufferUsage::STORAGE | BufferUsage::TRANSFER_DST;
 		geometryBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
+		SET_DEBUG_NAME(geometryBufferDescriptor, "Geometry");
+
 		geometryBuffer = createBuffer(geometryBufferDescriptor);
 	}
 
@@ -432,9 +460,13 @@ namespace Trident {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
+		SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Visibility vertex");
+
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Visibility fragment");
 
 		#ifdef GL_SOURCE_FROM_SPIRV
 			if (Renderer::getGraphicsApi() == GraphicsAPI::GL) {
@@ -470,6 +502,8 @@ namespace Trident {
 		visibilityRenderPipelineDescriptor.renderPass = renderPass;
 		visibilityRenderPipelineDescriptor.subpassIndex = VISIBILITY_SUBPASS_INDEX;
 
+		SET_DEBUG_NAME(visibilityRenderPipelineDescriptor, "Visibility");
+
 		visibilityRenderPipeline = createRenderPipeline(visibilityRenderPipelineDescriptor);
 	}
 
@@ -478,9 +512,13 @@ namespace Trident {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
+		SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Debug vertex");
+
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Debug fragment");
 
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Visibility/VisibilityDebug.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Visibility/VisibilityDebug.frag");
@@ -503,6 +541,8 @@ namespace Trident {
 		debugRenderPipelineDescriptor.dynamicState = DynamicState::SCISSOR | DynamicState::VIEWPORT;
 		debugRenderPipelineDescriptor.renderPass = renderPass;
 		debugRenderPipelineDescriptor.subpassIndex = DEBUG_SUBPASS_INDEX;
+
+		SET_DEBUG_NAME(debugRenderPipelineDescriptor, "Debug");
 
 		debugRenderPipeline = createRenderPipeline(debugRenderPipelineDescriptor);
 	}
@@ -641,6 +681,8 @@ namespace Trident {
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
+		SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command encoder");
+
 		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
 
@@ -701,9 +743,13 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::fillGeometryBuffer(Geometry* mappedRange) const {
-		for (uint32 geometryIndex = 0; geometryIndex < scene->geometries.count(); geometryIndex += 1) {
+		uint32 geometryIndex = 0;
+
+		while (geometryIndex < scene->geometries.count()) {
 			mappedRange[geometryIndex].vertexOffset = scene->geometries[geometryIndex].vertexOffset;
 			mappedRange[geometryIndex].clusterCount = scene->geometries[geometryIndex].clusterCount;
+
+			geometryIndex += 1;
 		}
 	}
 

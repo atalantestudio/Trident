@@ -117,15 +117,19 @@ namespace Trident {
 		multisampleAttachmentImageDescriptor.mipLevelCount = 1;
 		multisampleAttachmentImageDescriptor.layerCount = 1;
 
+		SET_DEBUG_NAME(multisampleAttachmentImageDescriptor, "Multisample attachment");
+
 		layerInput->swapchainImage = renderPass->createColorAttachmentImage(multisampleAttachmentImageDescriptor, 0);
 	}
 
 	void Physics2DRenderer::recreateMultisampleImageView() {
 		ImageViewDescriptor multisampleImageViewDescriptor{};
 		multisampleImageViewDescriptor.mipLevelOffset = 0;
-		multisampleImageViewDescriptor.mipLevelCount = layerInput->swapchainImage->getMipLevelCount();
+		multisampleImageViewDescriptor.mipLevelCount = 1;
 		multisampleImageViewDescriptor.layerOffset = 0;
-		multisampleImageViewDescriptor.layerCount = layerInput->swapchainImage->getLayerCount();
+		multisampleImageViewDescriptor.layerCount = 1;
+
+		SET_DEBUG_NAME(multisampleImageViewDescriptor, "Multisample attachment");
 
 		layerInput->swapchainImageView = layerInput->swapchainImage->createView(multisampleImageViewDescriptor);
 	}
@@ -141,15 +145,19 @@ namespace Trident {
 		depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
 		depthStencilAttachmentImageDescriptor.layerCount = 1;
 
+		SET_DEBUG_NAME(depthStencilAttachmentImageDescriptor, "Depth stencil attachment");
+
 		depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, 0);
 	}
 
 	void Physics2DRenderer::recreateDepthStencilImageView() {
 		ImageViewDescriptor depthStencilImageViewDescriptor{};
 		depthStencilImageViewDescriptor.mipLevelOffset = 0;
-		depthStencilImageViewDescriptor.mipLevelCount = depthStencilImage->getMipLevelCount();
+		depthStencilImageViewDescriptor.mipLevelCount = 1;
 		depthStencilImageViewDescriptor.layerOffset = 0;
-		depthStencilImageViewDescriptor.layerCount = depthStencilImage->getLayerCount();
+		depthStencilImageViewDescriptor.layerCount = 1;
+
+		SET_DEBUG_NAME(depthStencilImageViewDescriptor, "Depth stencil attachment");
 
 		depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
 	}
@@ -165,10 +173,16 @@ namespace Trident {
 		framebufferDescriptor.extent = swapchain->getExtent();
 		framebufferDescriptor.layerCount = 1;
 
-		for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
+		uint32 framebufferIndex = 0;
+
+		while (framebufferIndex < framebuffers.count()) {
+			SET_DEBUG_NAME(framebufferDescriptor, Logger::format("In flight framebuffer []", framebufferIndex));
+
 			framebufferDescriptor.imageViews[2] = swapchain->getImageView(framebufferIndex);
 
 			framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+
+			framebufferIndex += 1;
 		}
 	}
 
@@ -177,6 +191,8 @@ namespace Trident {
 		vertexBufferDescriptor.size = size;
 		vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 		vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+		SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex");
 
 		vertexBuffer = createBuffer(vertexBufferDescriptor);
 	}
@@ -187,6 +203,8 @@ namespace Trident {
 		instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 		instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		instanceBufferDescriptor.persistent = true;
+
+		SET_DEBUG_NAME(instanceBufferDescriptor, "Instance");
 
 		instanceBuffer = createBuffer(instanceBufferDescriptor);
 
@@ -200,6 +218,8 @@ namespace Trident {
 		centerOfMassBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		centerOfMassBufferDescriptor.persistent = true;
 
+		SET_DEBUG_NAME(centerOfMassBufferDescriptor, "Center of mass");
+
 		centerOfMassBuffer = createBuffer(centerOfMassBufferDescriptor);
 
 		centerOfMassBufferMappedRange = centerOfMassBuffer->map<CenterOfMass>(0, centerOfMassBuffer->size);
@@ -211,6 +231,8 @@ namespace Trident {
 		indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
 		indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
+		SET_DEBUG_NAME(indexBufferDescriptor, "Index");
+
 		indexBuffer = createBuffer(indexBufferDescriptor);		
 	}
 
@@ -220,6 +242,8 @@ namespace Trident {
 		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
 		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		cameraBufferDescriptor.persistent = true;
+
+		SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
 
 		cameraBuffer = createBuffer(cameraBufferDescriptor);
 
@@ -234,6 +258,8 @@ namespace Trident {
 		viewBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		viewBufferDescriptor.persistent = true;
 
+		SET_DEBUG_NAME(viewBufferDescriptor, "View");
+
 		viewBuffer = createBuffer(viewBufferDescriptor);
 
 		viewBufferMappedRange = viewBuffer->map<View>(0, viewBuffer->size);
@@ -245,6 +271,8 @@ namespace Trident {
 		placeholderBufferDescriptor.usage = BufferUsage::UNIFORM;
 		placeholderBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 		placeholderBufferDescriptor.persistent = true;
+
+		SET_DEBUG_NAME(placeholderBufferDescriptor, "Placeholder");
 
 		placeholderBuffer = createBuffer(placeholderBufferDescriptor);
 
@@ -260,6 +288,8 @@ namespace Trident {
 			closestPointBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 			closestPointBufferDescriptor.persistent = true;
 
+			SET_DEBUG_NAME(closestPointBufferDescriptor, "Closest point");
+
 			closestPointBuffer = createBuffer(closestPointBufferDescriptor);
 
 			closestPointBufferMappedRange = closestPointBuffer->map<Vertex>(0, closestPointBuffer->size);
@@ -274,6 +304,8 @@ namespace Trident {
 			vertexFeatureBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 			vertexFeatureBufferDescriptor.persistent = true;
 
+			SET_DEBUG_NAME(vertexFeatureBufferDescriptor, "Vertex feature");
+
 			vertexFeatureBuffer = createBuffer(vertexFeatureBufferDescriptor);
 
 			vertexFeatureBufferMappedRange = vertexFeatureBuffer->map<Vertex>(0, vertexFeatureBuffer->size);
@@ -285,6 +317,8 @@ namespace Trident {
 			edgeFeatureBufferDescriptor.usage = BufferUsage::VERTEX;
 			edgeFeatureBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
 			edgeFeatureBufferDescriptor.persistent = true;
+
+			SET_DEBUG_NAME(edgeFeatureBufferDescriptor, "Edge feature");
 
 			edgeFeatureBuffer = createBuffer(edgeFeatureBufferDescriptor);
 
@@ -319,12 +353,16 @@ namespace Trident {
 		PipelineLayoutDescriptor cameraViewPipelineLayoutDescriptor{};
 		cameraViewPipelineLayoutDescriptor.descriptorSetLayouts = {cameraViewDescriptorSetLayout};
 
+		SET_DEBUG_NAME(cameraViewPipelineLayoutDescriptor, "Camera view");
+
 		cameraViewPipelineLayout = createPipelineLayout(cameraViewPipelineLayoutDescriptor);
 	}
 
 	void Physics2DRenderer::createPlaceholderPipelineLayout() {
 		PipelineLayoutDescriptor placeholderPipelineLayoutDescriptor{};
 		placeholderPipelineLayoutDescriptor.descriptorSetLayouts = {cameraViewDescriptorSetLayout, placeholderDescriptorSetLayout};
+
+		SET_DEBUG_NAME(placeholderPipelineLayoutDescriptor, "Placeholder");
 
 		placeholderPipelineLayout = createPipelineLayout(placeholderPipelineLayoutDescriptor);
 	}
@@ -334,9 +372,13 @@ namespace Trident {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
+		SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Grid vertex");
+
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Grid fragment");
 
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Base/ScreenUVNDC.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Grid.frag");
@@ -362,6 +404,8 @@ namespace Trident {
 		gridRenderPipelineDescriptor.renderPass = renderPass;
 		gridRenderPipelineDescriptor.subpassIndex = 0;
 
+		SET_DEBUG_NAME(gridRenderPipelineDescriptor, "Grid");
+
 		gridRenderPipeline = createRenderPipeline(gridRenderPipelineDescriptor);
 	}
 
@@ -379,9 +423,13 @@ namespace Trident {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
+		SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Fill vertex");
+
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fill fragment");
 
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/Fill.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Base/FragmentRGBA.frag");
@@ -410,6 +458,8 @@ namespace Trident {
 		fillRenderPipelineDescriptor.renderPass = renderPass;
 		fillRenderPipelineDescriptor.subpassIndex = 0;
 
+		SET_DEBUG_NAME(fillRenderPipelineDescriptor, "Fill");
+
 		fillRenderPipeline = createRenderPipeline(fillRenderPipelineDescriptor);
 	}
 
@@ -428,9 +478,13 @@ namespace Trident {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
+		SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Stroke vertex");
+
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Stroke fragment");
 
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/Stroke.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Stroke.frag");
@@ -459,6 +513,8 @@ namespace Trident {
 		strokeRenderPipelineDescriptor.renderPass = renderPass;
 		strokeRenderPipelineDescriptor.subpassIndex = 0;
 
+		SET_DEBUG_NAME(strokeRenderPipelineDescriptor, "Stroke");
+
 		strokeRenderPipeline = createRenderPipeline(strokeRenderPipelineDescriptor);
 	}
 
@@ -470,9 +526,13 @@ namespace Trident {
 		centerOfMassVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		centerOfMassVertexShaderModuleDescriptor.entryPoint = "main";
 
+		SET_DEBUG_NAME(centerOfMassVertexShaderModuleDescriptor, "Center of mass vertex");
+
 		ShaderModuleDescriptor centerOfMassFragmentShaderModuleDescriptor{};
 		centerOfMassFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		centerOfMassFragmentShaderModuleDescriptor.entryPoint = "main";
+
+		SET_DEBUG_NAME(centerOfMassFragmentShaderModuleDescriptor, "Center of mass fragment");
 
 		const ref<ShaderModule> vertexShaderModule = loadShaderModule(centerOfMassVertexShaderModuleDescriptor, "Physics2D/CenterOfMass.vert");
 		const ref<ShaderModule> fragmentShaderModule = loadShaderModule(centerOfMassFragmentShaderModuleDescriptor, "Physics2D/CenterOfMass.frag");
@@ -499,6 +559,8 @@ namespace Trident {
 		centerOfMassRenderPipelineDescriptor.renderPass = renderPass;
 		centerOfMassRenderPipelineDescriptor.subpassIndex = 0;
 
+		SET_DEBUG_NAME(centerOfMassRenderPipelineDescriptor, "Center of mass");
+
 		centerOfMassRenderPipeline = createRenderPipeline(centerOfMassRenderPipelineDescriptor);
 	}
 
@@ -514,9 +576,13 @@ namespace Trident {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
+		SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Placeholder fill vertex");
+
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Placeholder fill fragment");
 
 		ref<ShaderModule> vertexShaderModule;
 
@@ -567,6 +633,8 @@ namespace Trident {
 		placeholderFillRenderPipelineDescriptor.renderPass = renderPass;
 		placeholderFillRenderPipelineDescriptor.subpassIndex = 0;
 
+		SET_DEBUG_NAME(placeholderFillRenderPipelineDescriptor, "Placeholder fill");
+
 		placeholderFillRenderPipeline = createRenderPipeline(placeholderFillRenderPipelineDescriptor);
 	}
 
@@ -581,9 +649,13 @@ namespace Trident {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
+		SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Placeholder stroke vertex");
+
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Placeholder stroke fragment");
 
 		ref<ShaderModule> vertexShaderModule;
 
@@ -634,6 +706,8 @@ namespace Trident {
 		placeholderStrokeRenderPipelineDescriptor.renderPass = renderPass;
 		placeholderStrokeRenderPipelineDescriptor.subpassIndex = 0;
 
+		SET_DEBUG_NAME(placeholderStrokeRenderPipelineDescriptor, "Placeholder stroke");
+
 		placeholderStrokeRenderPipeline = createRenderPipeline(placeholderStrokeRenderPipelineDescriptor);
 	}
 
@@ -645,9 +719,13 @@ namespace Trident {
 		vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 		vertexShaderModuleDescriptor.entryPoint = "main";
 
+		SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Placeholder center of mass vertex");
+
 		ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 		fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 		fragmentShaderModuleDescriptor.entryPoint = "main";
+
+		SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Placeholder center of mass fragment");
 
 		ref<ShaderModule> vertexShaderModule;
 
@@ -696,6 +774,8 @@ namespace Trident {
 		placeholderCenterOfMassRenderPipelineDescriptor.renderPass = renderPass;
 		placeholderCenterOfMassRenderPipelineDescriptor.subpassIndex = 0;
 
+		SET_DEBUG_NAME(placeholderCenterOfMassRenderPipelineDescriptor, "Placeholder center of mass");
+
 		placeholderCenterOfMassRenderPipeline = createRenderPipeline(placeholderCenterOfMassRenderPipelineDescriptor);
 	}
 
@@ -708,9 +788,13 @@ namespace Trident {
 			vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 			vertexShaderModuleDescriptor.entryPoint = "main";
 
+			SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Distance vertex");
+
 			ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 			fragmentShaderModuleDescriptor.entryPoint = "main";
+
+			SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Distance fragment");
 
 			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/Distance.vert");
 			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/Distance.frag");
@@ -735,6 +819,8 @@ namespace Trident {
 			distanceRenderPipelineDescriptor.renderPass = renderPass;
 			distanceRenderPipelineDescriptor.subpassIndex = 0;
 
+			SET_DEBUG_NAME(distanceRenderPipelineDescriptor, "Distance");
+
 			distanceRenderPipeline = createRenderPipeline(distanceRenderPipelineDescriptor);
 		}
 	#endif
@@ -748,9 +834,13 @@ namespace Trident {
 			vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 			vertexShaderModuleDescriptor.entryPoint = "main";
 
+			SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Vertex feature vertex");
+
 			ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 			fragmentShaderModuleDescriptor.entryPoint = "main";
+
+			SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Vertex feature fragment");
 
 			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/VertexFeature.vert");
 			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/VertexFeature.frag");
@@ -775,6 +865,8 @@ namespace Trident {
 			vertexFeatureRenderPipelineDescriptor.renderPass = renderPass;
 			vertexFeatureRenderPipelineDescriptor.subpassIndex = 0;
 
+			SET_DEBUG_NAME(vertexFeatureRenderPipelineDescriptor, "Vertex feature");
+
 			vertexFeatureRenderPipeline = createRenderPipeline(vertexFeatureRenderPipelineDescriptor);
 		}
 
@@ -786,9 +878,13 @@ namespace Trident {
 			vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 			vertexShaderModuleDescriptor.entryPoint = "main";
 
+			SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Edge feature vertex");
+
 			ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 			fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 			fragmentShaderModuleDescriptor.entryPoint = "main";
+
+			SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Edge feature fragment");
 
 			const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Physics2D/EdgeFeature.vert");
 			const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Physics2D/EdgeFeature.frag");
@@ -812,6 +908,8 @@ namespace Trident {
 			edgeFeatureRenderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 			edgeFeatureRenderPipelineDescriptor.renderPass = renderPass;
 			edgeFeatureRenderPipelineDescriptor.subpassIndex = 0;
+
+			SET_DEBUG_NAME(edgeFeatureRenderPipelineDescriptor, "Edge feature");
 
 			edgeFeatureRenderPipeline = createRenderPipeline(edgeFeatureRenderPipelineDescriptor);
 		}
@@ -842,6 +940,8 @@ namespace Trident {
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+		SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
 
 		const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 		const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
