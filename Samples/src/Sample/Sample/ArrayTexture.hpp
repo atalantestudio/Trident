@@ -117,11 +117,11 @@ namespace Trident {
 
 				ImageViewDescriptor imageViewDescriptor{};
 				imageViewDescriptor.mipLevelOffset = 0;
-				imageViewDescriptor.mipLevelCount = imageDescriptor.mipLevelCount;
+				imageViewDescriptor.mipLevelCount = 1;
 				imageViewDescriptor.layerOffset = 0;
-				imageViewDescriptor.layerCount = imageDescriptor.layerCount;
+				imageViewDescriptor.layerCount = 1;
 
-				SET_DEBUG_NAME(imageViewDescriptor, "Array texture view");
+				SET_DEBUG_NAME(imageViewDescriptor, "Array texture");
 
 				for (uint32 assetIndex = 0; assetIndex < assets.count(); assetIndex += 1) {
 					const sequence<uint8> assetBuffer = Filesystem::openByteBuffer(ASSET_PATHS[assetIndex]);

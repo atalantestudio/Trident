@@ -25,6 +25,10 @@ namespace Trident {
 		imageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT;
 		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
+		#if defined(BUILD_MODE_DEBUG)
+			imageDescriptor.name = descriptor.name;
+		#endif
+
 		return Renderer::createImage(imageDescriptor);
 	}
 
@@ -74,6 +78,10 @@ namespace Trident {
 		}
 
 		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+
+		#if defined(BUILD_MODE_DEBUG)
+			imageDescriptor.name = descriptor.name;
+		#endif
 
 		return Renderer::createImage(imageDescriptor);
 	}

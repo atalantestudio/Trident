@@ -95,6 +95,8 @@ namespace Trident {
 				imageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
 				imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
+				SET_DEBUG_NAME(imageDescriptor, "Image");
+
 				image = createImage(imageDescriptor);
 
 				BufferImageCopyRegion bufferImageCopyRegion{};
@@ -109,6 +111,8 @@ namespace Trident {
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				SET_DEBUG_NAME(commandBufferDescriptor, "Image copy command buffer");
 
 				const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 				const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
@@ -127,9 +131,11 @@ namespace Trident {
 			void setupImageView() {
 				ImageViewDescriptor imageViewDescriptor{};
 				imageViewDescriptor.mipLevelOffset = 0;
-				imageViewDescriptor.mipLevelCount = image->getMipLevelCount();
+				imageViewDescriptor.mipLevelCount = 1;
 				imageViewDescriptor.layerOffset = 0;
-				imageViewDescriptor.layerCount = image->getLayerCount();
+				imageViewDescriptor.layerCount = 1;
+
+				SET_DEBUG_NAME(imageViewDescriptor, "Image view");
 
 				imageView = image->createView(imageViewDescriptor);
 			}
@@ -153,10 +159,16 @@ namespace Trident {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
+				uint32 framebufferIndex = 0;
+
+				while (framebufferIndex < framebuffers.count()) {
+					SET_DEBUG_NAME(framebufferDescriptor, Logger::format("In flight framebuffer []", framebufferIndex));
+
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+
+					framebufferIndex += 1;
 				}
 			}
 
@@ -193,6 +205,8 @@ namespace Trident {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 				pipelineLayoutDescriptor.descriptorSetLayouts = {imageDescriptorSetLayout};
 
+				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Pipeline layout");
+
 				pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 			}
 
@@ -201,9 +215,13 @@ namespace Trident {
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
 
+				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Vertex shader module");
+
 				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fragment shader module");
 
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Image/Image.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Image/Image.frag");
@@ -228,6 +246,8 @@ namespace Trident {
 				renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 				renderPipelineDescriptor.renderPass = renderPass;
 				renderPipelineDescriptor.subpassIndex = 0;
+
+				SET_DEBUG_NAME(renderPipelineDescriptor, "Render pipeline");
 
 				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 			}

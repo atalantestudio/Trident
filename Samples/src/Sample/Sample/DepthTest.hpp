@@ -110,15 +110,19 @@ namespace Trident {
 				depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
 				depthStencilAttachmentImageDescriptor.layerCount = 1;
 
+				SET_DEBUG_NAME(depthStencilAttachmentImageDescriptor, "Depth stencil image");
+
 				depthStencilImage = renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, 0);
 			}
 
 			void recreateDepthStencilImageView() {
 				ImageViewDescriptor depthStencilImageViewDescriptor{};
 				depthStencilImageViewDescriptor.mipLevelOffset = 0;
-				depthStencilImageViewDescriptor.mipLevelCount = depthStencilImage->getMipLevelCount();
+				depthStencilImageViewDescriptor.mipLevelCount = 1;
 				depthStencilImageViewDescriptor.layerOffset = 0;
-				depthStencilImageViewDescriptor.layerCount = depthStencilImage->getLayerCount();
+				depthStencilImageViewDescriptor.layerCount = 1;
+
+				SET_DEBUG_NAME(depthStencilImageViewDescriptor, "Depth stencil image view");
 
 				depthStencilImageView = depthStencilImage->createView(depthStencilImageViewDescriptor);
 			}
@@ -134,15 +138,23 @@ namespace Trident {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
+				uint32 framebufferIndex = 0;
+
+				while (framebufferIndex < framebuffers.count()) {
+					SET_DEBUG_NAME(framebufferDescriptor, Logger::format("In flight framebuffer []", framebufferIndex));
+
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+
+					framebufferIndex += 1;
 				}
 			}
 
 			void setupRenderPipeline() {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
+
+				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Pipeline layout");
 
 				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
@@ -156,9 +168,13 @@ namespace Trident {
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
 
+				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Vertex shader module");
+
 				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fragment shader module");
 
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/DepthTest/DepthTest.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/DepthTest/DepthTest.frag");
@@ -184,6 +200,8 @@ namespace Trident {
 				renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 				renderPipelineDescriptor.renderPass = renderPass;
 				renderPipelineDescriptor.subpassIndex = 0;
+
+				SET_DEBUG_NAME(renderPipelineDescriptor, "Render pipeline");
 
 				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 			}
@@ -212,10 +230,14 @@ namespace Trident {
 				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
+				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
+
 				BufferDescriptor instanceBufferDescriptor{};
 				instanceBufferDescriptor.size = INSTANCE_BUFFER_SIZE;
 				instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 				instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+				SET_DEBUG_NAME(instanceBufferDescriptor, "Instance buffer");
 
 				vertexBuffer = createBuffer(vertexBufferDescriptor);
 				instanceBuffer = createBuffer(instanceBufferDescriptor);
@@ -232,6 +254,8 @@ namespace Trident {
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
 
 				const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 				const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);

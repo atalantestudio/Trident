@@ -116,15 +116,19 @@ namespace Trident {
 				textureArrayImageDescriptor.usage = ImageUsage::SAMPLED | ImageUsage::TRANSFER_DST;
 				textureArrayImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
+				SET_DEBUG_NAME(textureArrayImageDescriptor, "Texture array");
+
 				textureArrayImage = createImage(textureArrayImageDescriptor);
 			}
 
 			void createTextureArrayImageView() {
 				ImageViewDescriptor textureArrayImageViewDescriptor{};
 				textureArrayImageViewDescriptor.mipLevelOffset = 0;
-				textureArrayImageViewDescriptor.mipLevelCount = textureArrayImage->getMipLevelCount();
+				textureArrayImageViewDescriptor.mipLevelCount = 1;
 				textureArrayImageViewDescriptor.layerOffset = 0;
 				textureArrayImageViewDescriptor.layerCount = textureArrayImage->getLayerCount();
+
+				SET_DEBUG_NAME(textureArrayImageViewDescriptor, "Texture array");
 
 				textureArrayImageView = textureArrayImage->createView(textureArrayImageViewDescriptor);
 			}
@@ -169,6 +173,8 @@ namespace Trident {
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
 
+				SET_DEBUG_NAME(commandBufferDescriptor, "Image copy command buffer");
+
 				const ref<Queue> graphicsQueue = getDevice()->getQueue(QueueFamilyCapability::GRAPHICS);
 				const ref<CommandEncoder> commandEncoder = graphicsQueue->createCommandEncoder(commandBufferDescriptor);
 
@@ -194,10 +200,16 @@ namespace Trident {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
+				uint32 framebufferIndex = 0;
+
+				while (framebufferIndex < framebuffers.count()) {
+					SET_DEBUG_NAME(framebufferDescriptor, Logger::format("In flight framebuffer []", framebufferIndex));
+
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+
+					framebufferIndex += 1;
 				}
 			}
 
@@ -242,6 +254,8 @@ namespace Trident {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 				pipelineLayoutDescriptor.descriptorSetLayouts = {textureArrayDescriptorSetLayout};
 
+				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Pipeline layout");
+
 				pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 			}
 
@@ -257,9 +271,13 @@ namespace Trident {
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
 
+				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Vertex shader module");
+
 				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fragment shader module");
 
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/TextureArray/TextureArray.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/TextureArray/TextureArray.frag");
@@ -283,6 +301,8 @@ namespace Trident {
 				renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 				renderPipelineDescriptor.renderPass = renderPass;
 				renderPipelineDescriptor.subpassIndex = 0;
+
+				SET_DEBUG_NAME(renderPipelineDescriptor, "Render pipeline");
 
 				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 			}
@@ -317,10 +337,14 @@ namespace Trident {
 				vertexBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 
+				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
+
 				BufferDescriptor instanceBufferDescriptor{};
 				instanceBufferDescriptor.size = INSTANCE_BUFFER_SIZE;
 				instanceBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
 				instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+
+				SET_DEBUG_NAME(instanceBufferDescriptor, "Instance buffer");
 
 				vertexBuffer = createBuffer(vertexBufferDescriptor);
 				instanceBuffer = createBuffer(instanceBufferDescriptor);
@@ -337,6 +361,8 @@ namespace Trident {
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
 
 				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);

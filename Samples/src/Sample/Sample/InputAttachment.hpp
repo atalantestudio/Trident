@@ -135,15 +135,19 @@ namespace Trident {
 				attachmentImageDescriptor.mipLevelCount = 1;
 				attachmentImageDescriptor.layerCount = 1;
 
+				SET_DEBUG_NAME(attachmentImageDescriptor, "Image");
+
 				image = renderPass->createInputAttachmentImage(attachmentImageDescriptor, 1);
 			}
 
 			void recreateImageView() {
 				ImageViewDescriptor imageViewDescriptor{};
 				imageViewDescriptor.mipLevelOffset = 0;
-				imageViewDescriptor.mipLevelCount = image->getMipLevelCount();
+				imageViewDescriptor.mipLevelCount = 1;
 				imageViewDescriptor.layerOffset = 0;
-				imageViewDescriptor.layerCount = image->getLayerCount();
+				imageViewDescriptor.layerCount = 1;
+
+				SET_DEBUG_NAME(imageViewDescriptor, "Image view");
 
 				imageView = image->createView(imageViewDescriptor);
 			}
@@ -159,10 +163,16 @@ namespace Trident {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
+				uint32 framebufferIndex = 0;
+
+				while (framebufferIndex < framebuffers.count()) {
+					SET_DEBUG_NAME(framebufferDescriptor, Logger::format("In flight framebuffer []", framebufferIndex));
+
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+
+					framebufferIndex += 1;
 				}
 			}
 
@@ -198,6 +208,8 @@ namespace Trident {
 			void createWriteImagePipelineLayout() {
 				PipelineLayoutDescriptor writeImagePipelineLayoutDescriptor{};
 
+				SET_DEBUG_NAME(writeImagePipelineLayoutDescriptor, "Image write");
+
 				writeImagePipelineLayout = createPipelineLayout(writeImagePipelineLayoutDescriptor);
 			}
 
@@ -210,9 +222,13 @@ namespace Trident {
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
 
+				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Image write vertex");
+
 				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Image write fragment");
 
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Triangle/Triangle.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Triangle/Triangle.frag");
@@ -237,12 +253,16 @@ namespace Trident {
 				writeImageRenderPipelineDescriptor.renderPass = renderPass;
 				writeImageRenderPipelineDescriptor.subpassIndex = WRITE_IMAGE_SUBPASS_INDEX;
 
+				SET_DEBUG_NAME(writeImageRenderPipelineDescriptor, "Image write");
+
 				writeImageRenderPipeline = createRenderPipeline(writeImageRenderPipelineDescriptor);
 			}
 
 			void createReadImagePipelineLayout() {
 				PipelineLayoutDescriptor readImagePipelineLayoutDescriptor{};
 				readImagePipelineLayoutDescriptor.descriptorSetLayouts = {imageDescriptorSetLayout};
+
+				SET_DEBUG_NAME(readImagePipelineLayoutDescriptor, "Image read");
 
 				readImagePipelineLayout = createPipelineLayout(readImagePipelineLayoutDescriptor);
 			}
@@ -252,9 +272,13 @@ namespace Trident {
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
 
+				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Image read vertex");
+
 				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Image read fragment");
 
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/InputAttachment/InputAttachment.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/InputAttachment/InputAttachment.frag");
@@ -278,6 +302,8 @@ namespace Trident {
 				readImageRenderPipelineDescriptor.renderPass = renderPass;
 				readImageRenderPipelineDescriptor.subpassIndex = READ_IMAGE_SUBPASS_INDEX;
 
+				SET_DEBUG_NAME(readImageRenderPipelineDescriptor, "Image read");
+
 				readImageRenderPipeline = createRenderPipeline(readImageRenderPipelineDescriptor);
 			}
 
@@ -300,6 +326,8 @@ namespace Trident {
 				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 				vertexBufferDescriptor.persistent = false;
 
+				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
+
 				vertexBuffer = createBuffer(vertexBufferDescriptor);
 
 				BufferCopyRegion vertexBufferCopyRegion{};
@@ -309,6 +337,8 @@ namespace Trident {
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
 
 				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
@@ -324,23 +354,15 @@ namespace Trident {
 
 		private:
 			ref<RenderPass> renderPass;
-
 			ref<Image> image;
-
 			ref<ImageView> imageView;
-
 			sequence<ref<Framebuffer>> framebuffers;
-
 			ref<DescriptorSetLayout> imageDescriptorSetLayout;
-
 			ref<DescriptorSet> imageDescriptorSet;
-
 			ref<PipelineLayout> writeImagePipelineLayout;
 			ref<PipelineLayout> readImagePipelineLayout;
-
 			ref<RenderPipeline> writeImageRenderPipeline;
 			ref<RenderPipeline> readImageRenderPipeline;
-
 			ref<Buffer> vertexBuffer;
 	};
 }

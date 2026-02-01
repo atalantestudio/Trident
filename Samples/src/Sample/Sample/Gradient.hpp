@@ -64,15 +64,21 @@ namespace Trident {
 			void setupRenderPipeline() {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 
+				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Pipeline layout");
+
 				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
 				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
 
+				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Vertex shader module");
+
 				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fragment shader module");
 
 				ref<ShaderModule> vertexShaderModule;
 
@@ -107,6 +113,8 @@ namespace Trident {
 				renderPipelineDescriptor.renderPass = renderPass;
 				renderPipelineDescriptor.subpassIndex = 0;
 
+				SET_DEBUG_NAME(renderPipelineDescriptor, "Render pipeline");
+
 				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 			}
 
@@ -121,10 +129,16 @@ namespace Trident {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
+				uint32 framebufferIndex = 0;
+
+				while (framebufferIndex < framebuffers.count()) {
+					SET_DEBUG_NAME(framebufferDescriptor, Logger::format("In flight framebuffer []", framebufferIndex));
+
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+
+					framebufferIndex += 1;
 				}
 			}
 

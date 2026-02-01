@@ -77,6 +77,8 @@ namespace Trident {
 			void setupRenderPipeline() {
 				PipelineLayoutDescriptor pipelineLayoutDescriptor{};
 
+				SET_DEBUG_NAME(pipelineLayoutDescriptor, "Pipeline layout");
+
 				const ref<PipelineLayout> pipelineLayout = createPipelineLayout(pipelineLayoutDescriptor);
 
 				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
@@ -87,9 +89,13 @@ namespace Trident {
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
 				vertexShaderModuleDescriptor.entryPoint = "main";
 
+				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Vertex shader module");
+
 				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
 				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
 				fragmentShaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Fragment shader module");
 
 				const ref<ShaderModule> vertexShaderModule = loadShaderModule(vertexShaderModuleDescriptor, "Sample/Triangle/Triangle.vert");
 				const ref<ShaderModule> fragmentShaderModule = loadShaderModule(fragmentShaderModuleDescriptor, "Sample/Triangle/Triangle.frag");
@@ -113,6 +119,8 @@ namespace Trident {
 				renderPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 				renderPipelineDescriptor.renderPass = renderPass;
 				renderPipelineDescriptor.subpassIndex = 0;
+
+				SET_DEBUG_NAME(renderPipelineDescriptor, "Render pipeline");
 
 				renderPipeline = createRenderPipeline(renderPipelineDescriptor);
 			}
@@ -143,11 +151,15 @@ namespace Trident {
 				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 				vertexBufferDescriptor.persistent = false;
 
+				SET_DEBUG_NAME(vertexBufferDescriptor, "Vertex buffer");
+
 				BufferDescriptor indexBufferDescriptor{};
 				indexBufferDescriptor.size = INDEX_COUNT * sizeof(uint16);
 				indexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
 				indexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 				indexBufferDescriptor.persistent = false;
+
+				SET_DEBUG_NAME(indexBufferDescriptor, "Index buffer");
 
 				vertexBuffer = createBuffer(vertexBufferDescriptor);
 				indexBuffer = createBuffer(indexBufferDescriptor);
@@ -164,6 +176,8 @@ namespace Trident {
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
+
+				SET_DEBUG_NAME(commandBufferDescriptor, "Buffer copy command buffer");
 
 				const ref<Queue> transferQueue = getDevice()->getQueue(QueueFamilyCapability::TRANSFER);
 				const ref<CommandEncoder> commandEncoder = transferQueue->createCommandEncoder(commandBufferDescriptor);
@@ -189,10 +203,16 @@ namespace Trident {
 				framebufferDescriptor.extent = swapchain->getExtent();
 				framebufferDescriptor.layerCount = 1;
 
-				for (uint32 framebufferIndex = 0; framebufferIndex < framebuffers.count(); framebufferIndex += 1) {
+				uint32 framebufferIndex = 0;
+
+				while (framebufferIndex < framebuffers.count()) {
+					SET_DEBUG_NAME(framebufferDescriptor, Logger::format("In flight framebuffer []", framebufferIndex));
+
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
 					framebuffers[framebufferIndex] = createFramebuffer(framebufferDescriptor);
+
+					framebufferIndex += 1;
 				}
 			}
 

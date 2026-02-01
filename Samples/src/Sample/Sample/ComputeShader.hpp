@@ -80,9 +80,9 @@ namespace Trident {
 			void setupImageView() {
 				ImageViewDescriptor imageViewDescriptor{};
 				imageViewDescriptor.mipLevelOffset = 0;
-				imageViewDescriptor.mipLevelCount = image->getMipLevelCount();
+				imageViewDescriptor.mipLevelCount = 1;
 				imageViewDescriptor.layerOffset = 0;
-				imageViewDescriptor.layerCount = image->getLayerCount();
+				imageViewDescriptor.layerCount = 1;
 
 				SET_DEBUG_NAME(imageViewDescriptor, "Output");
 

@@ -5,7 +5,7 @@
 
 #include "Engine/Layer/Layer.hpp"
 
-#include "../Sample/ComputeShader.hpp"
+#include "../Sample/TriangleIndexedIndirect.hpp"
 
 namespace Trident {
 	class SampleLayer : public Layer {
