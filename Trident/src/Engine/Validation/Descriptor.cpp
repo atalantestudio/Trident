@@ -118,12 +118,24 @@ namespace Trident {
 				ENGINE_ERROR("descriptor.persistent must be either true or false.");
 			}
 
+			if (descriptor.name.count() == 0) {
+				warningCount += 1;
+
+				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this buffer.");
+			}
+
 			ENGINE_ASSERT(errorCount == 0, "Buffer descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 		}
 
 		void DescriptorGuard(const CommandBufferDescriptor& descriptor) {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
+
+			if (descriptor.name.count() == 0) {
+				warningCount += 1;
+
+				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this command buffer.");
+			}
 
 			ENGINE_ASSERT(errorCount == 0, "Command buffer descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 		}
@@ -144,12 +156,24 @@ namespace Trident {
 				ENGINE_ERROR("descriptor.computeShaderModule must be a valid compute ShaderModule.");
 			}
 
+			if (descriptor.name.count() == 0) {
+				warningCount += 1;
+
+				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this compute pipeline.");
+			}
+
 			ENGINE_ASSERT(errorCount == 0, "Compute pipeline descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 		}
 
 		void DescriptorGuard(const FenceDescriptor& descriptor) {
 			uint32 warningCount = 0;
 			uint32 errorCount = 0;
+
+			if (descriptor.name.count() > 0) {
+				warningCount += 1;
+
+				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this fence.");
+			}
 
 			ENGINE_ASSERT(errorCount == 0, "Fence descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 		}
@@ -216,6 +240,12 @@ namespace Trident {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.layerCount must be greater than 0.");
+			}
+
+			if (descriptor.name.count() > 0) {
+				warningCount += 1;
+
+				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this framebuffer.");
 			}
 
 			ENGINE_ASSERT(errorCount == 0, "Framebuffer descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
@@ -305,6 +335,12 @@ namespace Trident {
 				ENGINE_ERROR("descriptor.sampleCount must either be 1 or a power of 2 (up to 64).");
 			}
 
+			if (descriptor.name.count() == 0) {
+				warningCount += 1;
+
+				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this image.");
+			}
+
 			ENGINE_ASSERT(errorCount == 0, "Image descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 		}
 
@@ -336,6 +372,12 @@ namespace Trident {
 				ENGINE_ERROR("descriptor.layerCount must be greater than 0.");
 			}
 
+			if (descriptor.name.count() == 0) {
+				warningCount += 1;
+
+				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this image view.");
+			}
+
 			ENGINE_ASSERT(errorCount == 0, "Image view descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 		}
 
@@ -361,6 +403,12 @@ namespace Trident {
 						ENGINE_ERROR("descriptor.descriptorSetLayouts[[]]->bindings[[]].descriptorCount must not be 0.", descriptorSetLayoutIndex, descriptorSetLayoutBindingIndex);
 					}
 				}
+			}
+
+			if (descriptor.name.count() == 0) {
+				warningCount += 1;
+
+				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this pipeline layout.");
 			}
 
 			ENGINE_ASSERT(errorCount == 0, "Pipeline layout descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
@@ -592,6 +640,12 @@ namespace Trident {
 				}
 			}
 
+			if (descriptor.name.count() == 0) {
+				warningCount += 1;
+
+				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this render pipeline.");
+			}
+
 			ENGINE_ASSERT(errorCount == 0, "Render pipeline descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);
 		}
 
@@ -622,6 +676,12 @@ namespace Trident {
 				errorCount += 1;
 
 				ENGINE_ERROR("descriptor.entryPoint must not be empty.");
+			}
+
+			if (descriptor.name.count() == 0) {
+				warningCount += 1;
+
+				ENGINE_WARNING("descriptor.name should provide a unique name to help identify this shader module.");
 			}
 
 			ENGINE_ASSERT(errorCount == 0, "Shader module descriptor is invalid ([] warnings and [] errors).", warningCount, errorCount);

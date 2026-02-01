@@ -13,6 +13,7 @@ namespace Trident {
 		Trident::Framebuffer(descriptor),
 		device(device)
 	{
+		VkResult result;
 		sequence<VkImageView> imageViews(descriptor.imageViews.count());
 
 		for (uint32 attachmentImageViewIndex = 0; attachmentImageViewIndex < descriptor.imageViews.count(); attachmentImageViewIndex += 1) {
@@ -30,9 +31,24 @@ namespace Trident {
 		framebufferCreateInfo.height = descriptor.extent.height;
 		framebufferCreateInfo.layers = descriptor.layerCount;
 
-		const VkResult result = vkCreateFramebuffer(device.device, &framebufferCreateInfo, nullptr, &framebuffer);
+		result = vkCreateFramebuffer(device.device, &framebufferCreateInfo, nullptr, &framebuffer);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create framebuffer ([]).", string_VkResult(result));
+
+		#if defined(BUILD_MODE_DEBUG)
+			if (descriptor.name.count() > 0) {
+				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
+				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+				debugUtilsObjectNameInfo.pNext = nullptr;
+				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_FRAMEBUFFER;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) framebuffer;
+				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
+
+				result = vkSetDebugUtilsObjectNameEXT(device.device, &debugUtilsObjectNameInfo);
+
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
+			}
+		#endif
 	}
 
 	VK::Framebuffer::~Framebuffer() {

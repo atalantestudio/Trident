@@ -10,5 +10,9 @@ namespace Trident {
 	struct ComputePipelineDescriptor {
 		ref<PipelineLayout> pipelineLayout;
 		ref<ShaderModule> computeShaderModule;
+
+		#if defined(BUILD_MODE_DEBUG)
+			view<char8> name;
+		#endif
 	};
 }

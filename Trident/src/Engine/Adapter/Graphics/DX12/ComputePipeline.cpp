@@ -29,6 +29,18 @@ namespace Trident {
 		result = device.device->CreateComputePipelineState(&computePipelineStateDescriptor, IID_PPV_ARGS(&pipelineState));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create compute pipeline state.");
+
+		#if defined(BUILD_MODE_DEBUG)
+			if (descriptor.name.count() > 0) {
+				const LPWSTR name = ConvertUTF8ToUTF16(&descriptor.name[0]);
+
+				result = pipelineState->SetName(name);
+
+				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set pipeline state name.");
+
+				free(name);
+			}
+		#endif
 	}
 
 	DX12::ComputePipeline::~ComputePipeline() {

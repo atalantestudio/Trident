@@ -93,7 +93,7 @@ namespace Trident {
 
 				result = resource->SetName(name);
 
-				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set name on resource.");
+				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set resource name.");
 
 				free(name);
 			}

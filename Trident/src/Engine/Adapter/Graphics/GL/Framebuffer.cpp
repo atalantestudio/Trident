@@ -125,6 +125,12 @@ namespace Trident {
 			ADAPTER_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
 		#endif
 
+		#if defined(BUILD_MODE_DEBUG)
+			if (descriptor.name.count() > 0) {
+				glObjectLabel(GL_FRAMEBUFFER, framebuffer, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
+			}
+		#endif
+
 		#if OPENGL_VERSION >= OPENGL_VERSION_3_0 && defined(OPENGL_UNBIND_AFTER_USE)
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		#endif

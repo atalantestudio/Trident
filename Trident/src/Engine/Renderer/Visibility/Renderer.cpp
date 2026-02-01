@@ -10,6 +10,9 @@
 #include "Engine/Renderer/Visibility/DepthStencilImage.hpp"
 #include "Engine/Renderer/Visibility/MaterialCountBuffer.hpp"
 #include "Engine/Renderer/Visibility/MaterialIndexImage.hpp"
+#include "Engine/Renderer/Visibility/MaterialOffsetBuffer.hpp"
+#include "Engine/Renderer/Visibility/MaterialOffsetPipeline.hpp"
+#include "Engine/Renderer/Visibility/MaterialOffsetPipelineLayout.hpp"
 #include "Engine/Renderer/Visibility/MaterialPipeline.hpp"
 #include "Engine/Renderer/Visibility/RenderPass.hpp"
 #include "Engine/Renderer/Visibility/VisibilityImage.hpp"
@@ -65,6 +68,9 @@ namespace Trident {
 		updateDebugInputAttachmentDescriptorSets();
 
 		materialCountBuffer = createMaterialCountBuffer();
+
+		materialOffsetPipelineLayout = createMaterialOffsetPipelineLayout();
+		materialOffsetPipeline = createMaterialOffsetPipeline();
 
 		createMaterialPipelines();
 	}

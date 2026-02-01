@@ -31,7 +31,7 @@ namespace Trident {
 	{
 		DEBUG_DESCRIPTOR_GUARD(descriptor);
 
-		PROFILE_SCOPE(FUNCTION_SIGNATURE);
+		VkResult result;
 
 		VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
 		commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -40,9 +40,24 @@ namespace Trident {
 		commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		commandBufferAllocateInfo.commandBufferCount = 1;
 
-		const VkResult result = vkAllocateCommandBuffers(device.device, &commandBufferAllocateInfo, &commandBuffer);
+		result = vkAllocateCommandBuffers(device.device, &commandBufferAllocateInfo, &commandBuffer);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create command buffer ([]).", string_VkResult(result));
+
+		#if defined(BUILD_MODE_DEBUG)
+			if (descriptor.name.count() > 0) {
+				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
+				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+				debugUtilsObjectNameInfo.pNext = nullptr;
+				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_COMMAND_BUFFER;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) commandBuffer;
+				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
+
+				result = vkSetDebugUtilsObjectNameEXT(device.device, &debugUtilsObjectNameInfo);
+
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
+			}
+		#endif
 	}
 
 	VK::CommandEncoder::~CommandEncoder() {

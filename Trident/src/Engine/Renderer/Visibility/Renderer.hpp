@@ -74,10 +74,16 @@ namespace Trident {
 			void createClusterDescriptorSetLayout();
 			void createInstanceDescriptorSetLayout();
 			void createDebugDescriptorSetLayout();
+
 			void createVisibilityPipelineLayout();
 			void createDebugPipelineLayout();
+			ref<PipelineLayout> createMaterialOffsetPipelineLayout() const;
+
 			void createVisibilityRenderPipeline();
 			void createDebugRenderPipeline();
+			ref<ComputePipeline> createMaterialOffsetPipeline() const;
+			void createMaterialPipelines();
+
 			void createIndirectBuffer();
 			void createCameraBuffer();
 			void createVertexPositionComponentBuffer();
@@ -90,7 +96,7 @@ namespace Trident {
 			void createInstanceBuffer();
 			void createGeometryBuffer();
 			ref<Buffer> createMaterialCountBuffer() const;
-			void createMaterialPipelines();
+			ref<Buffer> createMaterialOffsetBuffer() const;
 
 			void allocateDescriptorSets();
 
@@ -136,9 +142,11 @@ namespace Trident {
 
 			ref<PipelineLayout> visibilityPipelineLayout;
 			ref<PipelineLayout> debugPipelineLayout;
+			ref<PipelineLayout> materialOffsetPipelineLayout;
 
 			ref<RenderPipeline> visibilityRenderPipeline;
 			ref<RenderPipeline> debugRenderPipeline;
+			ref<ComputePipeline> materialOffsetPipeline;
 
 			ref<Buffer> indirectBuffer;
 			ref<Buffer> cameraBuffer;
@@ -154,6 +162,9 @@ namespace Trident {
 
 			// Number of pixels used per material.
 			ref<Buffer> materialCountBuffer;
+
+			// Offset of the first pixel used per material.
+			ref<Buffer> materialOffsetBuffer;
 
 			DrawIndirectCommand* indirectMappedRange;
 			Camera* cameraMappedRange;

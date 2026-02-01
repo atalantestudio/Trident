@@ -15,7 +15,7 @@ namespace Trident {
 		HRESULT result;
 		UINT flags = 0;
 
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 		#endif
 
@@ -39,14 +39,18 @@ namespace Trident {
 			}
 		}
 
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			ID3DBlob* errorBlob;
 		#endif
 
 		result = D3DCompile(
 			&code[0],
 			code.count(),
-			nullptr,
+			#if defined(BUILD_MODE_DEBUG)
+				&descriptor.name[0],
+			#else
+				nullptr,
+			#endif
 			nullptr,
 			nullptr,
 			&descriptor.entryPoint[0],
@@ -54,26 +58,24 @@ namespace Trident {
 			flags,
 			0,
 			&blob,
-			#ifdef BUILD_MODE_DEBUG
+			#if defined(BUILD_MODE_DEBUG)
 				&errorBlob
 			#else
 				nullptr
 			#endif
 		);
 
-		if (FAILED(result)) {
-			#ifdef BUILD_MODE_DEBUG
-				if (errorBlob) {
-					const view<char8> error(pointer_cast<const char8*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
+		#if defined(BUILD_MODE_DEBUG)
+			if (errorBlob) {
+				const view<char8> error(pointer_cast<const char8*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
 
-					ADAPTER_ASSERT(false, "Failed to compile shader: []", error);
+				ADAPTER_ASSERT(false, "Failed to compile shader: []", error);
 
-					errorBlob->Release();
-				}
-			#else
-				ADAPTER_ASSERT(false, "Failed to compile shader.");
-			#endif
-		}
+				errorBlob->Release();
+			}
+		#else
+			ADAPTER_ASSERT(SUCCEEDED(result), "Failed to compile shader.");
+		#endif
 	}
 
 	DX12::ShaderModule::~ShaderModule() {

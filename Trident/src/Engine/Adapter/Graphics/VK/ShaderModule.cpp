@@ -14,6 +14,8 @@ namespace Trident {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		VkResult result;
+
 		VkShaderModuleCreateInfo shaderModuleCreateInfo{};
 		shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		shaderModuleCreateInfo.pNext = nullptr;
@@ -21,9 +23,24 @@ namespace Trident {
 		shaderModuleCreateInfo.codeSize = code.count();
 		shaderModuleCreateInfo.pCode = pointer_cast<const uint32*>(&code[0]);
 
-		const VkResult result = vkCreateShaderModule(device.device, &shaderModuleCreateInfo, nullptr, &createInfo.module);
+		result = vkCreateShaderModule(device.device, &shaderModuleCreateInfo, nullptr, &createInfo.module);
 
 		ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to create shader module ([]).", string_VkResult(result));
+
+		#if defined(BUILD_MODE_DEBUG)
+			if (descriptor.name.count() > 0) {
+				VkDebugUtilsObjectNameInfoEXT debugUtilsObjectNameInfo{};
+				debugUtilsObjectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+				debugUtilsObjectNameInfo.pNext = nullptr;
+				debugUtilsObjectNameInfo.objectType = VK_OBJECT_TYPE_SHADER_MODULE;
+				debugUtilsObjectNameInfo.objectHandle = (uint64) createInfo.module;
+				debugUtilsObjectNameInfo.pObjectName = &descriptor.name[0];
+
+				result = vkSetDebugUtilsObjectNameEXT(device.device, &debugUtilsObjectNameInfo);
+
+				ADAPTER_ASSERT(result == VK_SUCCESS, "Failed to set object name ([]).", string_VkResult(result));
+			}
+		#endif
 
 		createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		createInfo.pNext = nullptr;

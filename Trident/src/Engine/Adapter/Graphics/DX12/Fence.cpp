@@ -15,6 +15,18 @@ namespace Trident {
 		result = device.device->CreateFence(descriptor.signaled, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 
 		ADAPTER_ASSERT(SUCCEEDED(result), "Failed to create fence.");
+
+		#if defined(BUILD_MODE_DEBUG)
+			if (descriptor.name.count() > 0) {
+				const LPWSTR name = ConvertUTF8ToUTF16(&descriptor.name[0]);
+
+				result = fence->SetName(name);
+
+				ADAPTER_ASSERT(SUCCEEDED(result), "Failed to set fence name.");
+
+				free(name);
+			}
+		#endif
 	}
 
 	DX12::Fence::~Fence() {

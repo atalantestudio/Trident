@@ -5,7 +5,11 @@
 
 namespace Trident {
 	struct FenceDescriptor {
-		// Whether the fence is created in the signaled or unsignaled state.
+		/// Whether the fence is created in the signaled or unsignaled state.
 		bool signaled;
+
+		#if defined(BUILD_MODE_DEBUG)
+			view<char8> name;
+		#endif
 	};
 }

@@ -45,5 +45,9 @@ namespace Trident {
 		DynamicState dynamicState;
 		ref<RenderPass> renderPass;
 		uint32 subpassIndex;
+
+		#if defined(BUILD_MODE_DEBUG)
+			view<char8> name;
+		#endif
 	};
 }

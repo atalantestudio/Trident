@@ -36,6 +36,12 @@ namespace Trident {
 			glCompileShader(shader);
 		#endif
 
+		#if defined(BUILD_MODE_DEBUG)
+			if (descriptor.name.count() > 0) {
+				glObjectLabel(GL_SHADER, shader, static_cast<GLsizei>(descriptor.name.count()), &descriptor.name[0]);
+			}
+		#endif
+
 		checkCompileStatus();
 	}
 
