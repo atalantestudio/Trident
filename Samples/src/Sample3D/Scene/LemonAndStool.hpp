@@ -18,20 +18,25 @@ namespace Trident {
 		const uint32 lemonGeometryIndex = scene.registerGeometry(lemonGeometry);
 		const uint32 stoolGeometryIndex = scene.registerGeometry(stoolGeometry);
 
+		MaterialPipelineDescriptor defaultMaterialPipelineDescriptor{};
+		defaultMaterialPipelineDescriptor.shaderModulePath = "";
+		defaultMaterialPipelineDescriptor.descriptorSetLayoutBindings = {};
+
+		MaterialDescriptor defaultMaterialDescriptor{};
+		defaultMaterialDescriptor.pipelineIndex = scene.registerMaterialPipeline(defaultMaterialPipelineDescriptor);
+		defaultMaterialDescriptor.writeDescriptorSets = {};
+
+		const uint32 defaultMaterialIndex = scene.registerMaterial(defaultMaterialDescriptor);
+
 		MaterialPipelineDescriptor testMaterialPipelineDescriptor{};
 		testMaterialPipelineDescriptor.shaderModulePath = "";
 		testMaterialPipelineDescriptor.descriptorSetLayoutBindings = {};
 
-		const uint32 testMaterialPipelineIndex = scene.registerMaterialPipeline(testMaterialPipelineDescriptor);
-
 		MaterialDescriptor testMaterialDescriptor{};
-		testMaterialDescriptor.pipelineIndex = testMaterialPipelineIndex;
+		testMaterialDescriptor.pipelineIndex = scene.registerMaterialPipeline(testMaterialPipelineDescriptor);
 		testMaterialDescriptor.writeDescriptorSets = {};
 
-		uint32 testMaterialIndex = scene.registerMaterial(testMaterialDescriptor);
-
-		// Ignore default material.
-		testMaterialIndex += 1;
+		const uint32 testMaterialIndex = scene.registerMaterial(testMaterialDescriptor);
 
 		InstanceDescriptor lemon1InstanceDescriptor{};
 		lemon1InstanceDescriptor.position = {-0.1_m, 0.0_m, 0.3_m};

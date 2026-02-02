@@ -89,7 +89,7 @@ namespace Trident {
 
 				materialPipelineCount += 1;
 
-				return 0;
+				return materialPipelineIndex;
 			}
 
 			// Registers the provided material and returns its index in the material array.
@@ -103,7 +103,7 @@ namespace Trident {
 
 				materialCount += 1;
 
-				return 0;
+				return materialIndex;
 			}
 
 			// Registers the provided instance and returns its index in the instance array.

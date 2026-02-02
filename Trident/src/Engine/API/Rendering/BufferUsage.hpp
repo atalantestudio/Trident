@@ -5,22 +5,19 @@
 
 namespace Trident {
 	enum class BufferUsage : uint16 {
-		TRANSFER_SRC = BIT(0), // 0001
-		TRANSFER_DST = BIT(1), // 0010
+		TRANSFER_SRC = BIT(0),
+		TRANSFER_DST = BIT(1),
+		UNIFORM = BIT(2),
 
-		// NOTE: BIT(2) and BIT(3) are omitted to allow easy casting to VkBufferUsageFlagBits.
-
-		UNIFORM = BIT(4),
-		STORAGE = BIT(5),
-
-		READ_ONLY_STORAGE = BIT(6),
+		// The buffer will only be read by the device.
+		READ_ONLY_STORAGE = BIT(3),
 
 		// The buffer may be written to by the device.
-		READ_WRITE_STORAGE = BIT(7),
+		READ_WRITE_STORAGE = BIT(4),
 
-		INDEX = BIT(8),
-		VERTEX = BIT(9),
-		INDIRECT = BIT(10),
+		INDEX = BIT(5),
+		VERTEX = BIT(6),
+		INDIRECT = BIT(7),
 	};
 
 	AS_FLAG(BufferUsage);

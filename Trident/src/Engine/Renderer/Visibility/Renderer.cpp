@@ -4,16 +4,20 @@
 #include "pch.hpp"
 
 #include "Engine/API/Camera/PerspectiveCamera.hpp"
+#include "Engine/Renderer/Visibility/CameraBuffer.hpp"
 #include "Engine/Renderer/Visibility/DepthStencilImage.hpp"
 #include "Engine/Renderer/Visibility/MaterialCountBuffer.hpp"
 #include "Engine/Renderer/Visibility/MaterialIndexImage.hpp"
+#include "Engine/Renderer/Visibility/MaterialIndirectBuffer.hpp"
 #include "Engine/Renderer/Visibility/MaterialOffsetBuffer.hpp"
+#include "Engine/Renderer/Visibility/MaterialOffsetDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Visibility/MaterialOffsetPipeline.hpp"
 #include "Engine/Renderer/Visibility/MaterialOffsetPipelineLayout.hpp"
 #include "Engine/Renderer/Visibility/MaterialPipeline.hpp"
 #include "Engine/Renderer/Visibility/Renderer.hpp"
 #include "Engine/Renderer/Visibility/RenderPass.hpp"
 #include "Engine/Renderer/Visibility/VisibilityImage.hpp"
+#include "Engine/Renderer/Visibility/VisibilityIndirectBuffer.hpp"
 
 namespace Trident {
 	void VisibilityRenderer::build() {
@@ -44,8 +48,10 @@ namespace Trident {
 		createVisibilityRenderPipeline();
 		createDebugRenderPipeline();
 
-		createIndirectBuffer();
-		createCameraBuffer();
+		visibilityIndirectBuffer = createVisibilityIndirectBuffer();
+
+		cameraBuffer = createCameraBuffer();
+		cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
 
 		updateViewport();
 	}
@@ -62,6 +68,7 @@ namespace Trident {
 		createGeometryBuffer();
 		materialCountBuffer = createMaterialCountBuffer();
 		materialOffsetBuffer = createMaterialOffsetBuffer();
+		materialIndirectBuffer = createMaterialIndirectBuffer();
 
 		fillSceneBuffers();
 
@@ -106,7 +113,7 @@ namespace Trident {
 		{
 			commandEncoder->bindRenderPipeline(visibilityRenderPipeline);
 			commandEncoder->bindDescriptorSets(visibilityPipelineLayout, {cameraDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
-			commandEncoder->drawIndirect(indirectBuffer, 0, 1, 0);
+			commandEncoder->drawIndirect(visibilityIndirectBuffer, 0, 1, 0);
 		}
 
 		commandEncoder->nextSubpass();
@@ -303,34 +310,6 @@ namespace Trident {
 		SET_DEBUG_NAME(debugPipelineLayoutDescriptor, "Debug");
 
 		debugPipelineLayout = createPipelineLayout(debugPipelineLayoutDescriptor);
-	}
-
-	void VisibilityRenderer::createIndirectBuffer() {
-		BufferDescriptor indirectBufferDescriptor{};
-		indirectBufferDescriptor.size = sizeof(DrawIndirectCommand);
-		indirectBufferDescriptor.usage = BufferUsage::INDIRECT;
-		indirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		indirectBufferDescriptor.persistent = true;
-
-		SET_DEBUG_NAME(indirectBufferDescriptor, "Indirect");
-
-		indirectBuffer = createBuffer(indirectBufferDescriptor);
-
-		indirectMappedRange = indirectBuffer->map<DrawIndirectCommand>(0, indirectBuffer->size);
-	}
-
-	void VisibilityRenderer::createCameraBuffer() {
-		BufferDescriptor cameraBufferDescriptor{};
-		cameraBufferDescriptor.size = sizeof(Camera);
-		cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
-		cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-		cameraBufferDescriptor.persistent = true;
-
-		SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
-
-		cameraBuffer = createBuffer(cameraBufferDescriptor);
-
-		cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
 	}
 
 	void VisibilityRenderer::createVertexPositionComponentBuffer() {
@@ -562,7 +541,15 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::fillSceneBuffers() const {
-		fillIndirectBuffer();
+		{
+			DrawIndirectCommand* visibilityIndirectMappedRange = visibilityIndirectBuffer->map<DrawIndirectCommand>(0, visibilityIndirectBuffer->size);
+			visibilityIndirectMappedRange->vertexCount = CLUSTER_INDEX_COUNT;
+			visibilityIndirectMappedRange->instanceCount = static_cast<uint32>(scene->clusters.count());
+			visibilityIndirectMappedRange->vertexOffset = 0;
+			visibilityIndirectMappedRange->instanceOffset = 0;
+
+			visibilityIndirectBuffer->unmap();
+		}
 
 		const ref<Buffer> stagingBuffer = createStagingBuffer(
 			vertexPositionComponentBuffer->size +
@@ -703,13 +690,6 @@ namespace Trident {
 		transferQueue->waitIdle();
 	}
 
-	void VisibilityRenderer::fillIndirectBuffer() const {
-		indirectMappedRange[0].vertexCount = CLUSTER_INDEX_COUNT;
-		indirectMappedRange[0].instanceCount = static_cast<uint32>(scene->clusters.count());
-		indirectMappedRange[0].vertexOffset = 0;
-		indirectMappedRange[0].instanceOffset = 0;
-	}
-
 	void VisibilityRenderer::fillVertexPositionComponentBuffer(float32* mappedRange) const {
 		std::copy(scene->vertexPositionComponents.begin(), scene->vertexPositionComponents.end(), mappedRange);
 	}
@@ -814,6 +794,11 @@ namespace Trident {
 		materialOffsetDescriptorBuffer.offset = 0;
 		materialOffsetDescriptorBuffer.size = materialOffsetBuffer->size;
 
+		DescriptorBuffer materialIndirectDescriptorBuffer{};
+		materialIndirectDescriptorBuffer.buffer = materialIndirectBuffer;
+		materialIndirectDescriptorBuffer.offset = 0;
+		materialIndirectDescriptorBuffer.size = materialIndirectBuffer->size;
+
 		WriteDescriptorSet cameraWriteDescriptorSet{};
 		cameraWriteDescriptorSet.descriptorSet = cameraDescriptorSet;
 		cameraWriteDescriptorSet.bindingIndex = 0;
@@ -889,6 +874,11 @@ namespace Trident {
 		materialOffsetWriteDescriptorSet.bindingIndex = 1;
 		materialOffsetWriteDescriptorSet.descriptorBuffers = {materialOffsetDescriptorBuffer};
 
+		WriteDescriptorSet materialIndirectWriteDescriptorSet{};
+		materialIndirectWriteDescriptorSet.descriptorSet = materialOffsetDescriptorSet;
+		materialIndirectWriteDescriptorSet.bindingIndex = 2;
+		materialIndirectWriteDescriptorSet.descriptorBuffers = {materialIndirectDescriptorBuffer};
+
 		getDevice()->updateDescriptorSets({
 			cameraWriteDescriptorSet,
 			vertexPositionComponentWriteDescriptorSet,
@@ -909,6 +899,7 @@ namespace Trident {
 
 			materialCountWriteDescriptorSet,
 			materialOffsetWriteDescriptorSet,
+			materialIndirectWriteDescriptorSet,
 		});
 	}
 
