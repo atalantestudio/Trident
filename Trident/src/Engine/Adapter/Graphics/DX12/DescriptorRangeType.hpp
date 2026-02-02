@@ -10,7 +10,8 @@ namespace Trident::DX12 {
 	D3D12_DESCRIPTOR_RANGE_TYPE getDescriptorRangeType(DescriptorType descriptorType) {
 		switch (descriptorType) {
 			case DescriptorType::COMBINED_IMAGE_SAMPLER: return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-			case DescriptorType::STORAGE_IMAGE: return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			case DescriptorType::READ_ONLY_STORAGE_IMAGE: return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+			case DescriptorType::STORAGE_IMAGE: return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
 			case DescriptorType::INPUT_ATTACHMENT: return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 			case DescriptorType::UNIFORM_BUFFER: return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 			case DescriptorType::READ_ONLY_STORAGE_BUFFER: return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;

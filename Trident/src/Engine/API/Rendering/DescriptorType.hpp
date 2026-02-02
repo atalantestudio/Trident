@@ -7,14 +7,14 @@ namespace Trident {
 	// See https://stackoverflow.com/a/77070649/17136841.
 	enum class DescriptorType : uint8 {
 		COMBINED_IMAGE_SAMPLER,
+		READ_ONLY_STORAGE_IMAGE,
+
+		// TODO: Separate from READ_ONLY_STORAGE_IMAGE.
 		STORAGE_IMAGE,
+
 		INPUT_ATTACHMENT,
 		UNIFORM_BUFFER,
-
-		// NOTE: (DirectX 12) Maps to a shader resource view.
 		READ_ONLY_STORAGE_BUFFER,
-
-		// NOTE: (DirectX 12) Maps to a unordered access view.
 		READ_WRITE_STORAGE_BUFFER,
 
 		count,

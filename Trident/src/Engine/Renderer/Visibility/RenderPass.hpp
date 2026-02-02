@@ -63,13 +63,6 @@ namespace Trident {
 		visibilityAttachment.storeOperation = StoreOperation::UNDEFINED;
 		visibilityAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
-		Attachment materialCoordinateAttachment{};
-		materialCoordinateAttachment.format = ImageFormat::R32_UINT;
-		materialCoordinateAttachment.sampleCount = 1;
-		materialCoordinateAttachment.loadOperation = LoadOperation::CLEAR;
-		materialCoordinateAttachment.storeOperation = StoreOperation::UNDEFINED;
-		materialCoordinateAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
 		Attachment depthStencilAttachment{};
 		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
 		depthStencilAttachment.sampleCount = 1;
@@ -85,7 +78,6 @@ namespace Trident {
 		renderPassDescriptor.attachments = {
 			swapchainAttachment,
 			visibilityAttachment,
-			materialCoordinateAttachment,
 			depthStencilAttachment,
 		};
 		renderPassDescriptor.subpasses = {

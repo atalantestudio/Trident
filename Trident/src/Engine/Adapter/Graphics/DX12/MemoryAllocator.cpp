@@ -72,7 +72,7 @@ namespace Trident {
 		device.device->CreateShaderResourceView(image->resource, &shaderResourceViewDescriptor, descriptorHandle);
 	}
 
-	void DX12::MemoryAllocator::writeStorageImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const {
+	void DX12::MemoryAllocator::writeReadWriteStorageImage(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, const DescriptorImage& descriptorImage) const {
 		const DX12::Image* image = static_cast<const DX12::Image*>(descriptorImage.imageView->getImage());
 
 		ADAPTER_ASSERT(image->getType() == ImageType::TEXTURE_2D, "Images other than TEXTURE_2D are not supported.");

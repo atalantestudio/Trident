@@ -162,6 +162,7 @@ namespace Trident {
 
 		samplerDescriptorTable = pipeline->pipelineLayout->samplerDescriptorTable;
 
+		computePipelineBound = false;
 		commandCount += 1;
 	}
 
@@ -629,7 +630,9 @@ namespace Trident {
 				resourceBarrier.Transition.pResource = image->resource;
 				resourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 				resourceBarrier.Transition.StateBefore = image->resourceState;
-				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
+				// TODO: Don't apply NON_PIXEL_SHADER_RESOURCE if the resource is only visible to fragment shaders.
+				resourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 
 				image->resourceState = resourceBarrier.Transition.StateAfter;
 

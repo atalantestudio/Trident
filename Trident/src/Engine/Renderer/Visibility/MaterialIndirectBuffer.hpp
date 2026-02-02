@@ -8,7 +8,7 @@
 namespace Trident {
 	ref<Buffer> VisibilityRenderer::createMaterialIndirectBuffer() const {
 		BufferDescriptor materialIndirectBufferDescriptor{};
-		materialIndirectBufferDescriptor.size = scene->materials.count();
+		materialIndirectBufferDescriptor.size = sizeof(DispatchIndirectCommand) * scene->materials.count();
 		materialIndirectBufferDescriptor.usage = BufferUsage::READ_WRITE_STORAGE;
 		materialIndirectBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 		materialIndirectBufferDescriptor.persistent = false;

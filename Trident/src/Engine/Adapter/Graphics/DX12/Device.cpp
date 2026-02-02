@@ -189,9 +189,18 @@ namespace Trident {
 
 					break;
 				}
+				case DescriptorType::READ_ONLY_STORAGE_IMAGE: {
+					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
+						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
+
+						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
+					}
+
+					break;
+				}
 				case DescriptorType::STORAGE_IMAGE: {
 					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
-						memoryAllocator->writeStorageImage(viewDescriptorHandle, descriptorImage);
+						memoryAllocator->writeReadWriteStorageImage(viewDescriptorHandle, descriptorImage);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
 					}

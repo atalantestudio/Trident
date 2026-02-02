@@ -88,6 +88,19 @@ namespace Trident {
 
 						break;
 					}
+					case DescriptorType::READ_ONLY_STORAGE_IMAGE: {
+						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
+						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+						descriptorRange.NumDescriptors = binding.descriptorCount;
+						descriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
+						descriptorRange.RegisterSpace = 0;
+						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
+						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+						shaderResourceViewShaderRegister += 1;
+
+						break;
+					}
 					case DescriptorType::STORAGE_IMAGE: {
 						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
 						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;

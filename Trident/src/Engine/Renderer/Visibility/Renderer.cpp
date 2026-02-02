@@ -5,11 +5,15 @@
 
 #include "Engine/API/Camera/PerspectiveCamera.hpp"
 #include "Engine/Renderer/Visibility/CameraBuffer.hpp"
+#include "Engine/Renderer/Visibility/DebugDescriptorSetLayout.hpp"
 #include "Engine/Renderer/Visibility/DebugPipeline.hpp"
 #include "Engine/Renderer/Visibility/DebugPipelineLayout.hpp"
 #include "Engine/Renderer/Visibility/DepthStencilImage.hpp"
+#include "Engine/Renderer/Visibility/MaterialCoordinateBuffer.hpp"
+#include "Engine/Renderer/Visibility/MaterialCoordinateDescriptorSetLayout.hpp"
+#include "Engine/Renderer/Visibility/MaterialCoordinatePipeline.hpp"
+#include "Engine/Renderer/Visibility/MaterialCoordinatePipelineLayout.hpp"
 #include "Engine/Renderer/Visibility/MaterialCountBuffer.hpp"
-#include "Engine/Renderer/Visibility/MaterialCoordinateImage.hpp"
 #include "Engine/Renderer/Visibility/MaterialIndirectBuffer.hpp"
 #include "Engine/Renderer/Visibility/MaterialOffsetBuffer.hpp"
 #include "Engine/Renderer/Visibility/MaterialOffsetDescriptorSetLayout.hpp"
@@ -29,13 +33,12 @@ namespace Trident {
 		renderPass = _createRenderPass();
 
 		visibilityImage = createVisibilityImage();
-		visibilityImageView = createVisibilityImageView();
-
-		materialCoordinateImage = createMaterialCoordinateImage();
-		materialCoordinateImageView = createMaterialCoordinateImageView();
-
 		depthStencilImage = createDepthStencilImage();
+
+		visibilityImageView = createVisibilityImageView();
 		depthStencilImageView = createDepthStencilImageView();
+
+		materialCoordinateBuffer = createMaterialCoordinateBuffer();
 
 		recreateFramebuffers();
 
@@ -43,15 +46,20 @@ namespace Trident {
 		createClusterDescriptorSetLayout();
 		createInstanceDescriptorSetLayout();
 		visibilityMaterialCountDescriptorSetLayout = createVisibilityMaterialCountDescriptorSetLayout();
-		createDebugDescriptorSetLayout();
 		materialOffsetDescriptorSetLayout = createMaterialOffsetDescriptorSetLayout();
+		materialCoordinateDescriptorSetLayout = createMaterialCoordinateDescriptorSetLayout();
+		debugDescriptorSetLayout = createDebugDescriptorSetLayout();
 
 		allocateDescriptorSets();
 
 		visibilityPipelineLayout = createVisibilityPipelineLayout();
+		materialOffsetPipelineLayout = createMaterialOffsetPipelineLayout();
+		materialCoordinatePipelineLayout = createMaterialCoordinatePipelineLayout();
 		debugPipelineLayout = createDebugPipelineLayout();
 
 		visibilityPipeline = createVisibilityPipeline();
+		materialOffsetPipeline = createMaterialOffsetPipeline();
+		materialCoordinatePipeline = createMaterialCoordinatePipeline();
 		debugPipeline = createDebugPipeline();
 
 		visibilityIndirectBuffer = createVisibilityIndirectBuffer();
@@ -81,9 +89,6 @@ namespace Trident {
 		updateBufferDescriptorSets();
 		updateDebugInputAttachmentDescriptorSets();
 
-		materialOffsetPipelineLayout = createMaterialOffsetPipelineLayout();
-		materialOffsetPipeline = createMaterialOffsetPipeline();
-
 		createMaterialPipelines();
 	}
 
@@ -97,7 +102,6 @@ namespace Trident {
 	void VisibilityRenderer::render(ref<CommandEncoder> commandEncoder) const {
 		const ClearValue swapchainClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 		const ClearValue visibilityClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
-		const ClearValue materialCoordinateClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
 		ClearValue depthStencilClearValue{};
 		depthStencilClearValue.depth = 1.0f;
@@ -105,7 +109,7 @@ namespace Trident {
 
 		BeginRenderPassDescriptor beginRenderPassDescriptor{};
 		beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-		beginRenderPassDescriptor.clearValues = {swapchainClearValue, visibilityClearValue, materialCoordinateClearValue, depthStencilClearValue};
+		beginRenderPassDescriptor.clearValues = {swapchainClearValue, visibilityClearValue, depthStencilClearValue};
 
 		const Extent2D swapchainExtent = getSwapchain()->getExtent();
 		const float32 width = static_cast<float32>(swapchainExtent.width);
@@ -117,12 +121,29 @@ namespace Trident {
 
 		// Visibility subpass
 		{
+			// Write pixel visibility and count per material.
 			commandEncoder->bindRenderPipeline(visibilityPipeline);
 			commandEncoder->bindDescriptorSets(visibilityPipelineLayout, {cameraDescriptorSet, clusterDescriptorSet, instanceDescriptorSet, visibilityMaterialCountDescriptorSet});
 			commandEncoder->drawIndirect(visibilityIndirectBuffer, 0, 1, 0);
+
+			commandEncoder->nextSubpass();
+
+			// Get the material pixel offsets with a prefix sum and write indirect arguments for each material pipeline.
+			commandEncoder->bindComputePipeline(materialOffsetPipeline);
+			commandEncoder->bindDescriptorSets(materialOffsetPipelineLayout, {materialOffsetDescriptorSet});
+			commandEncoder->dispatch(1, 1, 1);
 		}
 
-		commandEncoder->nextSubpass();
+		// Re-order the pixels per material index.
+		{
+			const Extent2D extent = getSwapchain()->getExtent();
+			const uint32 groupCountX = static_cast<uint32>(ceil(static_cast<float32>(extent.width) / 16.0f));
+			const uint32 groupCountY = static_cast<uint32>(ceil(static_cast<float32>(extent.height) / 16.0f));
+
+			commandEncoder->bindComputePipeline(materialCoordinatePipeline);
+			commandEncoder->bindDescriptorSets(materialCoordinatePipelineLayout, {materialCoordinateDescriptorSet});
+			commandEncoder->dispatch(groupCountX, groupCountY, 1);
+		}
 
 		// Debug subpass
 		{
@@ -136,13 +157,12 @@ namespace Trident {
 
 	void VisibilityRenderer::resize(WindowResizeEvent& event) {
 		visibilityImage = createVisibilityImage();
-		visibilityImageView = createVisibilityImageView();
-
-		materialCoordinateImage = createMaterialCoordinateImage();
-		materialCoordinateImageView = createMaterialCoordinateImageView();
-
 		depthStencilImage = createDepthStencilImage();
+
+		visibilityImageView = createVisibilityImageView();
 		depthStencilImageView = createDepthStencilImageView();
+
+		materialCoordinateBuffer = createMaterialCoordinateBuffer();
 
 		recreateFramebuffers();
 
@@ -177,7 +197,7 @@ namespace Trident {
 
 		FramebufferDescriptor framebufferDescriptor{};
 		framebufferDescriptor.renderPass = renderPass;
-		framebufferDescriptor.imageViews = {nullptr, visibilityImageView, materialCoordinateImageView, depthStencilImageView};
+		framebufferDescriptor.imageViews = {nullptr, visibilityImageView, depthStencilImageView};
 		framebufferDescriptor.extent = swapchain->getExtent();
 
 		uint32 framebufferIndex = 0;
@@ -233,65 +253,6 @@ namespace Trident {
 		geometryBinding.shaderStages = ShaderStage::VERTEX | ShaderStage::FRAGMENT;
 
 		instanceDescriptorSetLayout = createDescriptorSetLayout({instanceBinding, geometryBinding});
-	}
-
-	void VisibilityRenderer::createDebugDescriptorSetLayout() {
-		DescriptorSetLayoutBinding cameraBinding{};
-		cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-		cameraBinding.descriptorCount = 1;
-		cameraBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		DescriptorSetLayoutBinding visibilityBinding{};
-		visibilityBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
-		visibilityBinding.descriptorCount = 1;
-		visibilityBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		DescriptorSetLayoutBinding depthStencilBinding{};
-		depthStencilBinding.descriptorType = DescriptorType::INPUT_ATTACHMENT;
-		depthStencilBinding.descriptorCount = 1;
-		depthStencilBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		DescriptorSetLayoutBinding vertexPositionComponentBinding{};
-		vertexPositionComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-		vertexPositionComponentBinding.descriptorCount = 1;
-		vertexPositionComponentBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		DescriptorSetLayoutBinding vertexNormalComponentBinding{};
-		vertexNormalComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-		vertexNormalComponentBinding.descriptorCount = 1;
-		vertexNormalComponentBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		DescriptorSetLayoutBinding vertexTextureCoordinateComponentBinding{};
-		vertexTextureCoordinateComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-		vertexTextureCoordinateComponentBinding.descriptorCount = 1;
-		vertexTextureCoordinateComponentBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		DescriptorSetLayoutBinding vertexPositionIndexBinding{};
-		vertexPositionIndexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-		vertexPositionIndexBinding.descriptorCount = 1;
-		vertexPositionIndexBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		DescriptorSetLayoutBinding vertexNormalIndexBinding{};
-		vertexNormalIndexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-		vertexNormalIndexBinding.descriptorCount = 1;
-		vertexNormalIndexBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		DescriptorSetLayoutBinding vertexTextureCoordinateIndexBinding{};
-		vertexTextureCoordinateIndexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
-		vertexTextureCoordinateIndexBinding.descriptorCount = 1;
-		vertexTextureCoordinateIndexBinding.shaderStages = ShaderStage::FRAGMENT;
-
-		debugDescriptorSetLayout = createDescriptorSetLayout({
-			cameraBinding,
-			visibilityBinding,
-			depthStencilBinding,
-			vertexPositionComponentBinding,
-			vertexNormalComponentBinding,
-			vertexTextureCoordinateComponentBinding,
-			vertexPositionIndexBinding,
-			vertexNormalIndexBinding,
-			vertexTextureCoordinateIndexBinding,
-		});
 	}
 
 	void VisibilityRenderer::createVertexPositionComponentBuffer() {
@@ -420,16 +381,18 @@ namespace Trident {
 			clusterDescriptorSetLayout,
 			instanceDescriptorSetLayout,
 			visibilityMaterialCountDescriptorSetLayout,
-			debugDescriptorSetLayout,
 			materialOffsetDescriptorSetLayout,
+			materialCoordinateDescriptorSetLayout,
+			debugDescriptorSetLayout,
 		});
 
 		cameraDescriptorSet = descriptorSets[0];
 		clusterDescriptorSet = descriptorSets[1];
 		instanceDescriptorSet = descriptorSets[2];
 		visibilityMaterialCountDescriptorSet = descriptorSets[3];
-		debugDescriptorSet = descriptorSets[4];
-		materialOffsetDescriptorSet = descriptorSets[5];
+		materialOffsetDescriptorSet = descriptorSets[4];
+		materialCoordinateDescriptorSet = descriptorSets[5];
+		debugDescriptorSet = descriptorSets[6];
 	}
 
 	void VisibilityRenderer::fillSceneBuffers() const {
@@ -776,6 +739,28 @@ namespace Trident {
 		materialIndirectWriteDescriptorSet.bindingIndex = 2;
 		materialIndirectWriteDescriptorSet.descriptorBuffers = {materialIndirectDescriptorBuffer};
 
+		// Material coordinate pipeline
+
+		WriteDescriptorSet materialCoordinateCameraWriteDescriptorSet{};
+		materialCoordinateCameraWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
+		materialCoordinateCameraWriteDescriptorSet.bindingIndex = 0;
+		materialCoordinateCameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
+
+		WriteDescriptorSet materialCoordinateClusterWriteDescriptorSet{};
+		materialCoordinateClusterWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
+		materialCoordinateClusterWriteDescriptorSet.bindingIndex = 2;
+		materialCoordinateClusterWriteDescriptorSet.descriptorBuffers = {clusterDescriptorBuffer};
+
+		WriteDescriptorSet materialCoordinateInstanceWriteDescriptorSet{};
+		materialCoordinateInstanceWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
+		materialCoordinateInstanceWriteDescriptorSet.bindingIndex = 3;
+		materialCoordinateInstanceWriteDescriptorSet.descriptorBuffers = {instanceDescriptorBuffer};
+
+		WriteDescriptorSet materialCoordinateMaterialOffsetWriteDescriptorSet{};
+		materialCoordinateMaterialOffsetWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
+		materialCoordinateMaterialOffsetWriteDescriptorSet.bindingIndex = 4;
+		materialCoordinateMaterialOffsetWriteDescriptorSet.descriptorBuffers = {materialOffsetDescriptorBuffer};
+
 		getDevice()->updateDescriptorSets({
 			cameraWriteDescriptorSet,
 			vertexPositionComponentWriteDescriptorSet,
@@ -799,6 +784,11 @@ namespace Trident {
 			materialCountWriteDescriptorSet,
 			materialOffsetWriteDescriptorSet,
 			materialIndirectWriteDescriptorSet,
+
+			materialCoordinateCameraWriteDescriptorSet,
+			materialCoordinateClusterWriteDescriptorSet,
+			materialCoordinateInstanceWriteDescriptorSet,
+			materialCoordinateMaterialOffsetWriteDescriptorSet,
 		});
 	}
 
@@ -813,6 +803,21 @@ namespace Trident {
 		depthStencilDescriptorImage.imageLayout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		depthStencilDescriptorImage.sampler = nullptr;
 
+		DescriptorBuffer materialCoordinateDescriptorBuffer{};
+		materialCoordinateDescriptorBuffer.buffer = materialCoordinateBuffer;
+		materialCoordinateDescriptorBuffer.offset = 0;
+		materialCoordinateDescriptorBuffer.size = materialCoordinateBuffer->size;
+
+		WriteDescriptorSet materialCoordinateVisibilityWriteDescriptorSet{};
+		materialCoordinateVisibilityWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
+		materialCoordinateVisibilityWriteDescriptorSet.bindingIndex = 1;
+		materialCoordinateVisibilityWriteDescriptorSet.descriptorImages = {visibilityDescriptorImage};
+
+		WriteDescriptorSet materialCoordinateMaterialCoordinateWriteDescriptorSet{};
+		materialCoordinateMaterialCoordinateWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;
+		materialCoordinateMaterialCoordinateWriteDescriptorSet.bindingIndex = 5;
+		materialCoordinateMaterialCoordinateWriteDescriptorSet.descriptorBuffers = {materialCoordinateDescriptorBuffer};
+
 		WriteDescriptorSet debugVisibilityWriteDescriptorSet{};
 		debugVisibilityWriteDescriptorSet.descriptorSet = debugDescriptorSet;
 		debugVisibilityWriteDescriptorSet.bindingIndex = 1;
@@ -824,6 +829,8 @@ namespace Trident {
 		debugDepthStencilWriteDescriptorSet.descriptorImages = {depthStencilDescriptorImage};
 
 		getDevice()->updateDescriptorSets({
+			materialCoordinateVisibilityWriteDescriptorSet,
+			materialCoordinateMaterialCoordinateWriteDescriptorSet,
 			debugVisibilityWriteDescriptorSet,
 			debugDepthStencilWriteDescriptorSet,
 		});

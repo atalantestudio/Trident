@@ -1,18 +1,22 @@
-struct View {
+struct Camera {
+	float4x4 projectionView;
+	float nearPlane;
+	float farPlane;
 	uint2 viewport;
+	float3 position;
 };
 
 static const uint TRIANGLE_INDEX_BIT_COUNT = 7;
 
-cbuffer View : register(b0) {
-	View view;
+cbuffer Camera : register(b0) {
+	Camera camera;
 }
 
 Texture2D<uint> visibilityImage : register(t0);
 ByteAddressBuffer clusterBuffer : register(t1);
 ByteAddressBuffer instanceBuffer : register(t2);
 RWByteAddressBuffer materialOffsetBuffer : register(u0);
-RWTexture2D<uint> materialCoordinateImage : register(u1);
+RWByteAddressBuffer materialCoordinateBuffer : register(u1);
 
 uint fetchInstanceIndex(uint clusterIndex) {
 	return clusterBuffer.Load(clusterIndex * 4);
@@ -26,7 +30,7 @@ uint fetchMaterialIndex(uint instanceIndex) {
 void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	uint2 position = globalInvocationIndex.xy;
 
-	if (any(position >= view.viewport)) {
+	if (any(position >= camera.viewport)) {
 		return;
 	}
 
@@ -40,7 +44,11 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 		materialIndex = fetchMaterialIndex(instanceIndex);
 	}
 
-	uint materialOffset = InterlockedAdd(materialOffsetBuffer.Load(materialIndex * 4), 1);
+	uint materialOffset;
 
-	materialCoordinateImage[materialOffset] = position;
+	materialOffsetBuffer.InterlockedAdd(materialIndex * 4, 1, materialOffset);
+
+	uint flatPosition = globalInvocationIndex.y * 16 + globalInvocationIndex.x;
+
+	materialCoordinateBuffer.Store(materialOffset * 4, flatPosition);
 }
