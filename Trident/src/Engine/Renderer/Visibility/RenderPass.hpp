@@ -11,19 +11,12 @@ namespace Trident {
 		writeVisibilityAttachmentReference.index = VISIBILITY_ATTACHMENT_INDEX;
 		writeVisibilityAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
-		AttachmentReference writeMaterialIndexAttachmentReference{};
-		writeMaterialIndexAttachmentReference.index = MATERIAL_INDEX_ATTACHMENT_INDEX;
-		writeMaterialIndexAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
-
 		AttachmentReference writeDepthStencilAttachmentReference{};
 		writeDepthStencilAttachmentReference.index = DEPTH_STENCIL_ATTACHMENT_INDEX;
 		writeDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 		SubpassDescriptor visibilitySubpassDescriptor{};
-		visibilitySubpassDescriptor.colorAttachmentReferences = {
-			writeVisibilityAttachmentReference,
-			writeMaterialIndexAttachmentReference,
-		};
+		visibilitySubpassDescriptor.colorAttachmentReferences = {writeVisibilityAttachmentReference};
 		visibilitySubpassDescriptor.depthStencilAttachmentReference = writeDepthStencilAttachmentReference;
 
 		return createSubpass(visibilitySubpassDescriptor);
@@ -38,10 +31,6 @@ namespace Trident {
 		readVisibilityAttachmentReference.index = VISIBILITY_ATTACHMENT_INDEX;
 		readVisibilityAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 
-		AttachmentReference readMaterialIndexAttachmentReference{};
-		readMaterialIndexAttachmentReference.index = MATERIAL_INDEX_ATTACHMENT_INDEX;
-		readMaterialIndexAttachmentReference.layout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
-
 		AttachmentReference readDepthStencilAttachmentReference{};
 		readDepthStencilAttachmentReference.index = DEPTH_STENCIL_ATTACHMENT_INDEX;
 		readDepthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_READ_ONLY_OPTIMAL;
@@ -50,7 +39,6 @@ namespace Trident {
 		debugSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
 		debugSubpassDescriptor.inputAttachmentReferences = {
 			readVisibilityAttachmentReference,
-			readMaterialIndexAttachmentReference,
 			readDepthStencilAttachmentReference,
 		};
 
@@ -75,12 +63,12 @@ namespace Trident {
 		visibilityAttachment.storeOperation = StoreOperation::UNDEFINED;
 		visibilityAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
-		Attachment materialIndexAttachment{};
-		materialIndexAttachment.format = ImageFormat::R32_UINT;
-		materialIndexAttachment.sampleCount = 1;
-		materialIndexAttachment.loadOperation = LoadOperation::CLEAR;
-		materialIndexAttachment.storeOperation = StoreOperation::UNDEFINED;
-		materialIndexAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+		Attachment materialCoordinateAttachment{};
+		materialCoordinateAttachment.format = ImageFormat::R32_UINT;
+		materialCoordinateAttachment.sampleCount = 1;
+		materialCoordinateAttachment.loadOperation = LoadOperation::CLEAR;
+		materialCoordinateAttachment.storeOperation = StoreOperation::UNDEFINED;
+		materialCoordinateAttachment.finalLayout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
 		Attachment depthStencilAttachment{};
 		depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
@@ -97,7 +85,7 @@ namespace Trident {
 		renderPassDescriptor.attachments = {
 			swapchainAttachment,
 			visibilityAttachment,
-			materialIndexAttachment,
+			materialCoordinateAttachment,
 			depthStencilAttachment,
 		};
 		renderPassDescriptor.subpasses = {

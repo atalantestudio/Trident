@@ -174,95 +174,62 @@ namespace Trident {
 			const ref<DX12::DescriptorSet> descriptorSet = std::static_pointer_cast<DX12::DescriptorSet>(writeDescriptorSet.descriptorSet);
 			const DX12::DescriptorSet::DescriptorSetBinding& binding = descriptorSet->bindings[writeDescriptorSet.bindingIndex];
 
+			D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
+
 			switch (binding.descriptorType) {
 				case DescriptorType::COMBINED_IMAGE_SAMPLER: {
-					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
-					UINT descriptorImageIndex = 0;
-
-					while (descriptorImageIndex < writeDescriptorSet.descriptorImages.count()) {
-						const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
+					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
 						const ref<DX12::Sampler> sampler = std::static_pointer_cast<DX12::Sampler>(descriptorImage.sampler);
 
 						memoryAllocator->writeImage(viewDescriptorHandle, descriptorImage);
 						memoryAllocator->allocateSampler(&sampler->samplerDescriptor);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						descriptorImageIndex += 1;
 					}
 
 					break;
 				}
 				case DescriptorType::STORAGE_IMAGE: {
-					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
-					UINT descriptorImageIndex = 0;
-
-					while (descriptorImageIndex < writeDescriptorSet.descriptorImages.count()) {
-						const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
-
+					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
 						memoryAllocator->writeStorageImage(viewDescriptorHandle, descriptorImage);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						descriptorImageIndex += 1;
 					}
 
 					break;
 				}
 				case DescriptorType::UNIFORM_BUFFER: {
-					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
-					UINT descriptorBufferIndex = 0;
-
-					while (descriptorBufferIndex < writeDescriptorSet.descriptorBuffers.count()) {
-						const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
-
+					for (const DescriptorBuffer& descriptorBuffer : writeDescriptorSet.descriptorBuffers) {
 						memoryAllocator->writeUniformBuffer(viewDescriptorHandle, descriptorBuffer);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						descriptorBufferIndex += 1;
 					}
 
 					break;
 				}
 				case DescriptorType::READ_ONLY_STORAGE_BUFFER: {
-					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
-					UINT descriptorBufferIndex = 0;
-
-					while (descriptorBufferIndex < writeDescriptorSet.descriptorBuffers.count()) {
-						const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
-
+					for (const DescriptorBuffer& descriptorBuffer : writeDescriptorSet.descriptorBuffers) {
 						memoryAllocator->writeReadOnlyStorageBuffer(viewDescriptorHandle, descriptorBuffer);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						descriptorBufferIndex += 1;
 					}
 
 					break;
 				}
 				case DescriptorType::READ_WRITE_STORAGE_BUFFER: {
-					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
-					UINT descriptorBufferIndex = 0;
-
-					while (descriptorBufferIndex < writeDescriptorSet.descriptorBuffers.count()) {
-						const DescriptorBuffer& descriptorBuffer = writeDescriptorSet.descriptorBuffers[descriptorBufferIndex];
-
+					for (const DescriptorBuffer& descriptorBuffer : writeDescriptorSet.descriptorBuffers) {
 						memoryAllocator->writeReadWriteStorageBuffer(viewDescriptorHandle, descriptorBuffer);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						descriptorBufferIndex += 1;
 					}
 
 					break;
 				}
 				case DescriptorType::INPUT_ATTACHMENT: {
-					D3D12_CPU_DESCRIPTOR_HANDLE viewDescriptorHandle = binding.viewDescriptorHandleOffset;
-					UINT descriptorImageIndex = 0;
-
-					while (descriptorImageIndex < writeDescriptorSet.descriptorImages.count()) {
-						const DescriptorImage& descriptorImage = writeDescriptorSet.descriptorImages[descriptorImageIndex];
-
+					for (const DescriptorImage& descriptorImage : writeDescriptorSet.descriptorImages) {
 						memoryAllocator->writeInputAttachment(viewDescriptorHandle, descriptorImage);
 
 						viewDescriptorHandle.ptr += memoryAllocator->viewDescriptorHandleIncrementSize;
-						descriptorImageIndex += 1;
 					}
 
 					break;

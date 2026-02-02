@@ -27,7 +27,7 @@ namespace Trident {
 		private:
 			static constexpr uint32 SWAPCHAIN_ATTACHMENT_INDEX = 0;
 			static constexpr uint32 VISIBILITY_ATTACHMENT_INDEX = 1;
-			static constexpr uint32 MATERIAL_INDEX_ATTACHMENT_INDEX = 2;
+			static constexpr uint32 MATERIAL_COORDINATE_ATTACHMENT_INDEX = 2;
 			static constexpr uint32 DEPTH_STENCIL_ATTACHMENT_INDEX = 3;
 
 			static constexpr uint32 VISIBILITY_SUBPASS_INDEX = 0;
@@ -61,11 +61,11 @@ namespace Trident {
 			ref<Subpass> createDebugSubpass() const;
 
 			ref<Image> createVisibilityImage() const;
-			ref<Image> createMaterialIndexImage() const;
+			ref<Image> createMaterialCoordinateImage() const;
 			ref<Image> createDepthStencilImage() const;
 
 			ref<ImageView> createVisibilityImageView();
-			ref<ImageView> createMaterialIndexImageView();
+			ref<ImageView> createMaterialCoordinateImageView();
 			ref<ImageView> createDepthStencilImageView();
 
 			void recreateFramebuffers();
@@ -73,15 +73,16 @@ namespace Trident {
 			void createCameraDescriptorSetLayout();
 			void createClusterDescriptorSetLayout();
 			void createInstanceDescriptorSetLayout();
+			ref<DescriptorSetLayout> createVisibilityMaterialCountDescriptorSetLayout() const;
 			void createDebugDescriptorSetLayout();
 			ref<DescriptorSetLayout> createMaterialOffsetDescriptorSetLayout() const;
 
-			void createVisibilityPipelineLayout();
-			void createDebugPipelineLayout();
+			ref<PipelineLayout> createVisibilityPipelineLayout() const;
+			ref<PipelineLayout> createDebugPipelineLayout() const;
 			ref<PipelineLayout> createMaterialOffsetPipelineLayout() const;
 
-			void createVisibilityRenderPipeline();
-			void createDebugRenderPipeline();
+			ref<RenderPipeline> createVisibilityPipeline() const;
+			ref<RenderPipeline> createDebugPipeline() const;
 			ref<ComputePipeline> createMaterialOffsetPipeline() const;
 			void createMaterialPipelines();
 
@@ -122,11 +123,14 @@ namespace Trident {
 			ref<RenderPass> renderPass;
 
 			ref<Image> visibilityImage;
-			ref<Image> materialIndexImage;
+
+			// Screen pixels sorted by material index.
+			ref<Image> materialCoordinateImage;
+
 			ref<Image> depthStencilImage;
 
 			ref<ImageView> visibilityImageView;
-			ref<ImageView> materialIndexImageView;
+			ref<ImageView> materialCoordinateImageView;
 			ref<ImageView> depthStencilImageView;
 
 			sequence<ref<Framebuffer>> framebuffers;
@@ -134,12 +138,14 @@ namespace Trident {
 			ref<DescriptorSetLayout> cameraDescriptorSetLayout;
 			ref<DescriptorSetLayout> clusterDescriptorSetLayout;
 			ref<DescriptorSetLayout> instanceDescriptorSetLayout;
+			ref<DescriptorSetLayout> visibilityMaterialCountDescriptorSetLayout;
 			ref<DescriptorSetLayout> debugDescriptorSetLayout;
 			ref<DescriptorSetLayout> materialOffsetDescriptorSetLayout;
 
 			ref<DescriptorSet> cameraDescriptorSet;
 			ref<DescriptorSet> clusterDescriptorSet;
 			ref<DescriptorSet> instanceDescriptorSet;
+			ref<DescriptorSet> visibilityMaterialCountDescriptorSet;
 			ref<DescriptorSet> debugDescriptorSet;
 			ref<DescriptorSet> materialOffsetDescriptorSet;
 
@@ -147,8 +153,8 @@ namespace Trident {
 			ref<PipelineLayout> debugPipelineLayout;
 			ref<PipelineLayout> materialOffsetPipelineLayout;
 
-			ref<RenderPipeline> visibilityRenderPipeline;
-			ref<RenderPipeline> debugRenderPipeline;
+			ref<RenderPipeline> visibilityPipeline;
+			ref<RenderPipeline> debugPipeline;
 			ref<ComputePipeline> materialOffsetPipeline;
 
 			ref<Buffer> visibilityIndirectBuffer;

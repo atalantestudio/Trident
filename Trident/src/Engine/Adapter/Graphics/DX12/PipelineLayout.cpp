@@ -131,12 +131,18 @@ namespace Trident {
 						D3D12_DESCRIPTOR_RANGE1& descriptorRange = descriptorRanges[descriptorRangeOffset];
 						descriptorRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
 						descriptorRange.NumDescriptors = binding.descriptorCount;
-						descriptorRange.BaseShaderRegister = shaderResourceViewShaderRegister;
+						descriptorRange.BaseShaderRegister = unorderedAccessViewShaderRegister;
+
+						if (binding.shaderStages & ShaderStage::FRAGMENT) {
+							// NOTE: UAV registers live in the same name space as outputs, so they must be bound to at least 'u1'.
+							descriptorRange.BaseShaderRegister += 1;
+						}
+
 						descriptorRange.RegisterSpace = 0;
 						descriptorRange.Flags = D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
 						descriptorRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						shaderResourceViewShaderRegister += 1;
+						unorderedAccessViewShaderRegister += 1;
 
 						break;
 					}
