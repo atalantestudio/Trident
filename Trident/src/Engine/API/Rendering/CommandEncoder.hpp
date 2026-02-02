@@ -31,8 +31,10 @@ namespace Trident {
 
 			virtual void bindRenderPipeline(ref<RenderPipeline> renderPipeline) = 0;
 
-			// Binds descriptor sets to the command buffer.
-			// The pipeline bind point is taken from the currently bound pipeline.
+			/// Binds descriptor sets to the command buffer.
+			/// 
+			/// NOTE: The pipeline layout could have been taken from the current pipeline as well,
+			/// but in Vulkan this operation requires a valid layout. This method asks for a layout to make sure the user keeps it around at runtime.
 			virtual void bindDescriptorSets(ref<PipelineLayout> pipelineLayout, view<ref<DescriptorSet>> descriptorSets) = 0;
 
 			// Binds the provided index buffer.
