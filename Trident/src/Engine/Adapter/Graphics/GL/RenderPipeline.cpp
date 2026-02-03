@@ -36,10 +36,6 @@ namespace Trident {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		if (descriptor.cullMode == CullMode::FRONT_AND_BACK) {
-			ADAPTER_WARNING("Cull mode is FRONT_AND_BACK; discarding polygon mode.");
-		}
-
 		const ref<GL::ShaderModule> vertexShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.vertexShaderModule);
 		const ref<GL::ShaderModule> fragmentShaderModule = std::static_pointer_cast<GL::ShaderModule>(descriptor.fragmentShaderModule);
 

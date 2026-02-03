@@ -7,22 +7,15 @@
 #include "Engine/API/Rendering/CullMode.hpp"
 
 namespace Trident::DX12 {
-	D3D12_CULL_MODE getCullMode(CullMode cullMode) {
-		switch (cullMode) {
-			case CullMode::NONE:
-				return D3D12_CULL_MODE_NONE;
-			case CullMode::FRONT:
-				return D3D12_CULL_MODE_FRONT;
-			case CullMode::BACK:
-				return D3D12_CULL_MODE_BACK;
-			case CullMode::FRONT_AND_BACK:
-				ADAPTER_ASSERT(false, "FRONT_AND_BACK cull mode is not supported.");
+	inline D3D12_CULL_MODE getCullMode(CullMode cullMode) {
+		static constexpr D3D12_CULL_MODE CULL_MODES[] = {
+			D3D12_CULL_MODE_NONE,
+			D3D12_CULL_MODE_FRONT,
+			D3D12_CULL_MODE_BACK,
+		};
 
-				return D3D12_CULL_MODE_NONE;
-			default:
-				ADAPTER_ASSERT(false, "Undefined cull mode.");
+		ADAPTER_ASSERT(cullMode < CullMode::count, "Invalid cull mode.");
 
-				return D3D12_CULL_MODE_NONE;
-		}
+		return CULL_MODES[static_cast<uint8>(cullMode)];
 	}
 }
