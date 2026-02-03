@@ -30,8 +30,8 @@ namespace Trident {
 			static constexpr uint32 DEPTH_STENCIL_ATTACHMENT_INDEX = 2;
 
 			static constexpr uint32 VISIBILITY_SUBPASS_INDEX = 0;
-			static constexpr uint32 DEBUG_SUBPASS_INDEX = 1;
-			static constexpr uint32 OUTPUT_SUBPASS_INDEX = 2;
+			static constexpr uint32 OUTPUT_SUBPASS_INDEX = 1;
+			static constexpr uint32 DEBUG_SUBPASS_INDEX = 2;
 
 		public:
 			void build() override;

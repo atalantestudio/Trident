@@ -8,10 +8,14 @@ in VertexOutput {
 	layout(location = 1) flat uint materialIndex;
 } vertexOutput;
 
+layout(set = 3, binding = 0) buffer writeonly MaterialCountBuffer {
+	uint materialCountBuffer[];
+};
+
 layout(location = 0) out uint visibility;
-layout(location = 1) out uint materialIndex;
 
 void main() {
 	visibility = vertexOutput.visibility;
-	materialIndex = vertexOutput.materialIndex;
+
+	atomicAdd(materialCountBuffer[vertexOutput.materialIndex], 1);
 }

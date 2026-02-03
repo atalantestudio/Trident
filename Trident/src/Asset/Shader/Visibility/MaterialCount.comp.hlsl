@@ -1,12 +1,16 @@
 // Copyright 2026 Atalante Studio.
 // Distributed under the GNU GPL v3 License.
 
-struct View {
+struct Camera {
+	float4x4 projectionView;
+	float nearPlane;
+	float farPlane;
 	uint2 viewport;
+	float3 position;
 };
 
-cbuffer View : register(b0) {
-	View view;
+cbuffer Camera : register(b0) {
+	Camera camera;
 }
 
 RWTexture2D<uint> materialIndexImage : register(u0);
@@ -16,7 +20,7 @@ RWByteAddressBuffer materialCountBuffer : register(u1);
 void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 	uint2 position = globalInvocationIndex.xy;
 
-	if (any(position >= view.viewport)) {
+	if (any(position >= camera.viewport)) {
 		return;
 	}
 

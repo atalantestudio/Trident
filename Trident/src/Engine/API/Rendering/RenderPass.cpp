@@ -22,7 +22,7 @@ namespace Trident {
 		imageDescriptor.mipLevelCount = descriptor.mipLevelCount;
 		imageDescriptor.layerCount = descriptor.layerCount;
 		imageDescriptor.sampleCount = attachment.sampleCount;
-		imageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT;
+		imageDescriptor.usage = ImageUsage::COLOR_ATTACHMENT | ImageUsage::TRANSIENT_ATTACHMENT | descriptor.additionalUsage;
 		imageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
 
 		#if defined(BUILD_MODE_DEBUG)
@@ -53,7 +53,7 @@ namespace Trident {
 		imageDescriptor.mipLevelCount = descriptor.mipLevelCount;
 		imageDescriptor.layerCount = descriptor.layerCount;
 		imageDescriptor.sampleCount = attachment.sampleCount;
-		imageDescriptor.usage = ImageUsage::DEPTH_STENCIL_ATTACHMENT;
+		imageDescriptor.usage = ImageUsage::DEPTH_STENCIL_ATTACHMENT | descriptor.additionalUsage;
 
 		bool isInputAttachment = false;
 
@@ -99,7 +99,7 @@ namespace Trident {
 		imageDescriptor.mipLevelCount = descriptor.mipLevelCount;
 		imageDescriptor.layerCount = descriptor.layerCount;
 		imageDescriptor.sampleCount = attachment.sampleCount;
-		imageDescriptor.usage = ImageUsage::INPUT_ATTACHMENT;
+		imageDescriptor.usage = ImageUsage::INPUT_ATTACHMENT | descriptor.additionalUsage;
 
 		if (isDepthFormat(attachment.format)) {
 			imageDescriptor.usage |= ImageUsage::DEPTH_STENCIL_ATTACHMENT;

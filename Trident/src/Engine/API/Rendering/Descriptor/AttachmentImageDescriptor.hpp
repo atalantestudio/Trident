@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Engine/API/Rendering/ImageType.hpp"
+#include "Engine/API/Rendering/ImageUsage.hpp"
 
 namespace Trident {
 	struct AttachmentImageDescriptor {
@@ -11,6 +12,7 @@ namespace Trident {
 		Extent3D extent;
 		uint32 mipLevelCount;
 		uint32 layerCount;
+		ImageUsage additionalUsage;
 
 		#if defined(BUILD_MODE_DEBUG)
 			view<char8> name;

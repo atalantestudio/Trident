@@ -10,6 +10,7 @@ namespace Trident::VK {
 	inline VkDescriptorType getDescriptorType(DescriptorType descriptorType) {
 		switch (descriptorType) {
 			case DescriptorType::COMBINED_IMAGE_SAMPLER: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			case DescriptorType::READ_ONLY_STORAGE_IMAGE: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 			case DescriptorType::STORAGE_IMAGE: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 			case DescriptorType::UNIFORM_BUFFER: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			case DescriptorType::READ_ONLY_STORAGE_BUFFER: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;

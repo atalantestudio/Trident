@@ -164,7 +164,7 @@ namespace Trident {
 			}
 
 			VkDescriptorPoolSize& vkDescriptorPoolSize = vkDescriptorPoolSizes[descriptorPoolSizeIndex];
-			vkDescriptorPoolSize.type = static_cast<VkDescriptorType>(descriptorType);
+			vkDescriptorPoolSize.type = getDescriptorType(static_cast<DescriptorType>(descriptorType));
 			vkDescriptorPoolSize.descriptorCount = descriptorCountPerType[descriptorType];
 
 			descriptorPoolSizeIndex += 1;
@@ -323,6 +323,8 @@ namespace Trident {
 		}
 
 		vkUpdateDescriptorSets(device, static_cast<uint32>(vkWriteDescriptorSets.count()), &vkWriteDescriptorSets[0], 0, nullptr);
+
+		BREAKPOINT();
 	}
 
 	void VK::Device::waitForFence(ref<Trident::Fence> fence) const {

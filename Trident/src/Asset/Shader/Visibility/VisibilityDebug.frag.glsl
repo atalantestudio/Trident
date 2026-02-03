@@ -103,23 +103,22 @@ layout(binding = 0) uniform readonly CameraBuffer {
 };
 layout(binding = 1) uniform usampler2D visibilityImage;
 layout(binding = 2) uniform usampler2D materialIndexImage;
-layout(binding = 3) uniform sampler2D depthStencilImage;
-layout(binding = 4) buffer readonly VertexPositionComponentBuffer {
+layout(binding = 3) buffer readonly VertexPositionComponentBuffer {
 	float vertexPositionComponentBuffer[];
 };
-layout(binding = 5) buffer readonly VertexNormalComponentBuffer {
+layout(binding = 4) buffer readonly VertexNormalComponentBuffer {
 	float vertexNormalComponentBuffer[];
 };
-layout(binding = 6) buffer readonly VertexTextureCoordinateComponentBuffer {
+layout(binding = 5) buffer readonly VertexTextureCoordinateComponentBuffer {
 	float vertexTextureCoordinateComponentBuffer[];
 };
-layout(binding = 7) buffer readonly VertexPositionIndexBuffer {
+layout(binding = 6) buffer readonly VertexPositionIndexBuffer {
 	uint vertexPositionIndexBuffer[];
 };
-layout(binding = 8) buffer readonly VertexNormalIndexBuffer {
+layout(binding = 7) buffer readonly VertexNormalIndexBuffer {
 	uint vertexNormalIndexBuffer[];
 };
-layout(binding = 9) buffer readonly VertexTextureCoordinateIndexBuffer {
+layout(binding = 8) buffer readonly VertexTextureCoordinateIndexBuffer {
 	uint vertexTextureCoordinateIndexBuffer[];
 };
 layout(binding = 12) buffer readonly ClusterBuffer {
@@ -388,8 +387,20 @@ vec3 visualizeBlinnPhongShading(Triangle triangle, Instance instance, vec2 coord
 void main() {
 	uint visibility = texture(visibilityImage, vertexOutput.textureCoordinate).r;
 
-	if (visibility == 0 && VISUALIZATION_MODE != VISUALIZATION_MODE_MATERIAL_INDEX) {
-		fragment = vec4(vec3(VISUALIZATION_MODE == VISUALIZATION_MODE_LINEAR_DEPTH), 1.0);
+	if (visibility == 0) {
+		if (VISUALIZATION_MODE == VISUALIZATION_MODE_MATERIAL_INDEX) {
+			fragment = vec4(uintToColor(1), 1.0);
+
+			return;
+		}
+
+		if (VISUALIZATION_MODE == VISUALIZATION_MODE_LINEAR_DEPTH) {
+			fragment = vec4(1.0, 1.0, 1.0, 1.0);
+
+			return;
+		}
+
+		fragment = vec4(0.0, 0.0, 0.0, 1.0);
 
 		return;
 	}
@@ -432,9 +443,7 @@ void main() {
 		color = uintToColor(instance.geometryIndex + 1);
 	}
 	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_MATERIAL_INDEX) {
-		uint materialIndex = texture(materialIndexImage, vertexOutput.textureCoordinate).r;
-
-		color = uintToColor(materialIndex + 1);
+		color = uintToColor(instance.materialIndex + 1);
 	}
 	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_TRIANGLE_NORMAL) {
 		color = visualizeTriangleNormal(triangle, instance);

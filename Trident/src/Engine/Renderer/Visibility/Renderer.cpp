@@ -158,6 +158,7 @@ namespace Trident {
 
 			while (materialPipelineIndex < scene->materialPipelineDescriptors.count()) {
 				commandEncoder->bindComputePipeline(materialPipelines[materialPipelineIndex]);
+				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialPipelineIndex], {materialBaseDescriptorSet});
 
 				const MaterialPipelineDescriptor& materialPipeline = scene->materialPipelineDescriptors[materialPipelineIndex];
 
@@ -783,12 +784,12 @@ namespace Trident {
 
 		WriteDescriptorSet materialBaseClusterWriteDescriptorSet{};
 		materialBaseClusterWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseClusterWriteDescriptorSet.bindingIndex = 3;
+		materialBaseClusterWriteDescriptorSet.bindingIndex = 4;
 		materialBaseClusterWriteDescriptorSet.descriptorBuffers = {clusterDescriptorBuffer};
 
 		WriteDescriptorSet materialBaseInstanceWriteDescriptorSet{};
 		materialBaseInstanceWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
-		materialBaseInstanceWriteDescriptorSet.bindingIndex = 4;
+		materialBaseInstanceWriteDescriptorSet.bindingIndex = 5;
 		materialBaseInstanceWriteDescriptorSet.descriptorBuffers = {instanceDescriptorBuffer};
 
 		getDevice()->updateDescriptorSets({
@@ -827,9 +828,14 @@ namespace Trident {
 	}
 
 	void VisibilityRenderer::updateDebugInputAttachmentDescriptorSets() {
+		DescriptorImage outputGeneralDescriptorImage{};
+		outputGeneralDescriptorImage.imageView = outputImageView;
+		outputGeneralDescriptorImage.imageLayout = ImageLayout::GENERAL;
+		outputGeneralDescriptorImage.sampler = nullptr;
+
 		DescriptorImage outputDescriptorImage{};
 		outputDescriptorImage.imageView = outputImageView;
-		outputDescriptorImage.imageLayout = ImageLayout::GENERAL;
+		outputDescriptorImage.imageLayout = ImageLayout::SHADER_READ_ONLY_OPTIMAL;
 		outputDescriptorImage.sampler = nullptr;
 
 		DescriptorImage visibilityDescriptorImage{};
@@ -865,7 +871,7 @@ namespace Trident {
 		WriteDescriptorSet materialBaseOutputWriteDescriptorSet{};
 		materialBaseOutputWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;
 		materialBaseOutputWriteDescriptorSet.bindingIndex = 2;
-		materialBaseOutputWriteDescriptorSet.descriptorImages = {outputDescriptorImage};
+		materialBaseOutputWriteDescriptorSet.descriptorImages = {outputGeneralDescriptorImage};
 
 		WriteDescriptorSet materialBaseVisibilityWriteDescriptorSet{};
 		materialBaseVisibilityWriteDescriptorSet.descriptorSet = materialBaseDescriptorSet;

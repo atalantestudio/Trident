@@ -16,6 +16,7 @@ namespace Trident {
 		visibilityAttachmentImageDescriptor.extent.depth = 1;
 		visibilityAttachmentImageDescriptor.mipLevelCount = 1;
 		visibilityAttachmentImageDescriptor.layerCount = 1;
+		visibilityAttachmentImageDescriptor.additionalUsage = ImageUsage::STORAGE;
 
 		SET_DEBUG_NAME(visibilityAttachmentImageDescriptor, "Visibility");
 

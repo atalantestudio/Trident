@@ -96,24 +96,23 @@ layout(set = 0, binding = 0) uniform readonly CameraBuffer {
 	Camera camera;
 };
 layout(set = 0, binding = 1, input_attachment_index = 0) uniform usubpassInput visibilityImage;
-layout(set = 0, binding = 2, input_attachment_index = 1) uniform usubpassInput materialIndexImage;
-layout(set = 0, binding = 3, input_attachment_index = 2) uniform subpassInput depthStencilImage;
-layout(set = 0, binding = 4) buffer readonly VertexPositionComponentBuffer {
+layout(set = 0, binding = 2, input_attachment_index = 1) uniform subpassInput depthStencilImage;
+layout(set = 0, binding = 3) buffer readonly VertexPositionComponentBuffer {
 	float vertexPositionComponentBuffer[];
 };
-layout(set = 0, binding = 5) buffer readonly VertexNormalComponentBuffer {
+layout(set = 0, binding = 4) buffer readonly VertexNormalComponentBuffer {
 	float vertexNormalComponentBuffer[];
 };
-layout(set = 0, binding = 6) buffer readonly VertexTextureCoordinateComponentBuffer {
+layout(set = 0, binding = 5) buffer readonly VertexTextureCoordinateComponentBuffer {
 	float vertexTextureCoordinateComponentBuffer[];
 };
-layout(set = 0, binding = 7) buffer readonly VertexPositionIndexBuffer {
+layout(set = 0, binding = 6) buffer readonly VertexPositionIndexBuffer {
 	uint vertexPositionIndexBuffer[];
 };
-layout(set = 0, binding = 8) buffer readonly VertexNormalIndexBuffer {
+layout(set = 0, binding = 7) buffer readonly VertexNormalIndexBuffer {
 	uint vertexNormalIndexBuffer[];
 };
-layout(set = 0, binding = 9) buffer readonly VertexTextureCoordinateIndexBuffer {
+layout(set = 0, binding = 8) buffer readonly VertexTextureCoordinateIndexBuffer {
 	uint vertexTextureCoordinateIndexBuffer[];
 };
 layout(set = 1, binding = 2) buffer readonly ClusterBuffer {
@@ -382,8 +381,20 @@ vec3 visualizeBlinnPhongShading(Triangle triangle, Instance instance, vec2 coord
 void main() {
 	uint visibility = subpassLoad(visibilityImage).r;
 
-	if (visibility == 0 && VISUALIZATION_MODE != VISUALIZATION_MODE_MATERIAL_INDEX) {
-		fragment = vec4(vec3(VISUALIZATION_MODE == VISUALIZATION_MODE_LINEAR_DEPTH), 1.0);
+	if (visibility == 0) {
+		if (VISUALIZATION_MODE == VISUALIZATION_MODE_MATERIAL_INDEX) {
+			fragment = vec4(uintToColor(1), 1.0);
+
+			return;
+		}
+
+		if (VISUALIZATION_MODE == VISUALIZATION_MODE_LINEAR_DEPTH) {
+			fragment = vec4(1.0, 1.0, 1.0, 1.0);
+
+			return;
+		}
+
+		fragment = vec4(0.0, 0.0, 0.0, 1.0);
 
 		return;
 	}
@@ -426,9 +437,7 @@ void main() {
 		color = uintToColor(instance.geometryIndex + 1);
 	}
 	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_MATERIAL_INDEX) {
-		uint materialIndex = subpassLoad(materialIndexImage).r;
-
-		color = uintToColor(materialIndex + 1);
+		color = uintToColor(instance.materialIndex + 1);
 	}
 	else if (VISUALIZATION_MODE == VISUALIZATION_MODE_TRIANGLE_NORMAL) {
 		color = visualizeTriangleNormal(triangle, instance);
