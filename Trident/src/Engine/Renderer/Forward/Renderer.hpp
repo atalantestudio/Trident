@@ -9,12 +9,12 @@
 namespace Trident {
 	class ForwardRenderer : public SceneRenderer<Scene3D> {
 		private:
-			struct Transform {
-				mat4x4<float32> transform;
-			};
-
 			struct Camera {
 				mat4x4<float32> projectionView;
+			};
+
+			struct Instance {
+				mat4x4<float32> transform;
 			};
 
 		public:
@@ -23,41 +23,13 @@ namespace Trident {
 				createFramebuffers();
 				createCameraBuffer();
 
-				DescriptorSetLayoutBinding cameraBinding{};
-				cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
-				cameraBinding.descriptorCount = 1;
-				cameraBinding.shaderStages = ShaderStage::VERTEX;
+				forwardDescriptorSetLayout = createForwardDescriptorSetLayout();
+				forwardPipelineLayout = createForwardPipelineLayout();
 
-				cameraDescriptorSetLayout = createDescriptorSetLayout({cameraBinding});
-
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({cameraDescriptorSetLayout});
-
-				cameraDescriptorSet = descriptorSets[0];
-
-				DescriptorBuffer cameraDescriptorBuffer{};
-				cameraDescriptorBuffer.buffer = cameraBuffer;
-				cameraDescriptorBuffer.offset = 0;
-				cameraDescriptorBuffer.size = cameraBuffer->size;
-
-				WriteDescriptorSet cameraWriteDescriptorSet{};
-				cameraWriteDescriptorSet.descriptorSet = cameraDescriptorSet;
-				cameraWriteDescriptorSet.bindingIndex = 0;
-				cameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
-
-				getDevice()->updateDescriptorSets({cameraWriteDescriptorSet});
-
-				PipelineLayoutDescriptor forwardPipelineLayoutDescriptor{};
-				forwardPipelineLayoutDescriptor.descriptorSetLayouts = {cameraDescriptorSetLayout};
-
-				SET_DEBUG_NAME(forwardPipelineLayoutDescriptor, "Forward");
-
-				forwardPipelineLayout = createPipelineLayout(forwardPipelineLayoutDescriptor);
+				allocateDescriptorSets();
 
 				VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
 				instanceInputBinding.registerAttribute<mat4x4<float32>>();
-
-				VertexInputBinding vertexInputBinding(InputRate::VERTEX);
-				vertexInputBinding.registerAttribute<svec3<float32>>();
 
 				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
 				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
@@ -76,7 +48,7 @@ namespace Trident {
 
 				RenderPipelineDescriptor forwardPipelineDescriptor{};
 				forwardPipelineDescriptor.pipelineLayout = forwardPipelineLayout;
-				forwardPipelineDescriptor.vertexInputBindings = {instanceInputBinding, vertexInputBinding};
+				forwardPipelineDescriptor.vertexInputBindings = {instanceInputBinding};
 				forwardPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(vertexShaderModuleDescriptor, "Forward/Forward.vert");
 				forwardPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(fragmentShaderModuleDescriptor, "Forward/Forward.frag");
 				forwardPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
@@ -97,18 +69,16 @@ namespace Trident {
 			}
 
 			void postSetScene() override {
-				const uint64 transformBufferSize = sizeof(Transform) * scene->getInstanceCount();
+				BufferDescriptor instanceBufferDescriptor{};
+				instanceBufferDescriptor.size = sizeof(Instance) * scene->getInstanceCount();
+				instanceBufferDescriptor.usage = BufferUsage::VERTEX;
+				instanceBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+				instanceBufferDescriptor.persistent = true;
 
-				BufferDescriptor transformBufferDescriptor{};
-				transformBufferDescriptor.size = transformBufferSize;
-				transformBufferDescriptor.usage = BufferUsage::VERTEX;
-				transformBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-				transformBufferDescriptor.persistent = true;
+				SET_DEBUG_NAME(instanceBufferDescriptor, "Instance");
 
-				SET_DEBUG_NAME(transformBufferDescriptor, "Transform");
-
-				transformBuffer = createBuffer(transformBufferDescriptor);
-				transformMappedRange = transformBuffer->map<Transform>(0, transformBuffer->size);
+				instanceBuffer = createBuffer(instanceBufferDescriptor);
+				instanceMappedRange = instanceBuffer->map<Instance>(0, instanceBuffer->size);
 
 				Entity entity = 0;
 
@@ -120,6 +90,10 @@ namespace Trident {
 
 				uint64 vertexPositionComponentBufferSize = 0;
 				uint64 vertexPositionIndexBufferSize = 0;
+				uint64 vertexNormalComponentBufferSize = 0;
+				uint64 vertexNormalIndexBufferSize = 0;
+				uint64 vertexTextureCoordinateComponentBufferSize = 0;
+				uint64 vertexTextureCoordinateIndexBufferSize = 0;
 				uint32 geometryIndex = 0;
 
 				while (geometryIndex < scene->getGeometryCount()) {
@@ -127,17 +101,30 @@ namespace Trident {
 
 					vertexPositionComponentBufferSize += sizeof(float32) * geometry->getVertexPositionComponents().count();
 					vertexPositionIndexBufferSize += sizeof(uint32) * geometry->getVertexPositionIndices().count();
+					vertexNormalComponentBufferSize += sizeof(float32) * geometry->getVertexNormalComponents().count();
+					vertexNormalIndexBufferSize += sizeof(uint32) * geometry->getVertexNormalIndices().count();
+					vertexTextureCoordinateComponentBufferSize += sizeof(float32) * geometry->getVertexTextureCoordinateComponents().count();
+					vertexTextureCoordinateIndexBufferSize += sizeof(uint32) * geometry->getVertexTextureCoordinateIndices().count();
 
 					geometryIndex += 1;
 				}
 
-				const ref<Buffer> stagingBuffer = createStagingBuffer(vertexPositionComponentBufferSize + vertexPositionIndexBufferSize);
+				const ref<Buffer> stagingBuffer = createStagingBuffer(
+					vertexPositionComponentBufferSize +
+					vertexPositionIndexBufferSize +
+					vertexNormalComponentBufferSize +
+					vertexNormalIndexBufferSize +
+					vertexTextureCoordinateComponentBufferSize +
+					vertexTextureCoordinateIndexBufferSize
+				);
 
 				uint8* mappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
 				float32* vertexPositionComponentMappedRange = pointer_cast<float32*>(mappedRange);
 				uint32* vertexPositionIndexMappedRange = pointer_cast<uint32*>(mappedRange + vertexPositionComponentBufferSize);
-				uint64 vertexPositionComponentOffset = 0;
-				uint64 vertexPositionIndexOffset = 0;
+				float32* vertexNormalComponentMappedRange = pointer_cast<float32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize);
+				uint32* vertexNormalIndexMappedRange = pointer_cast<uint32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize);
+				float32* vertexTextureCoordinateComponentMappedRange = pointer_cast<float32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize);
+				uint32* vertexTextureCoordinateIndexMappedRange = pointer_cast<uint32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize);
 
 				geometryIndex = 0;
 
@@ -145,12 +132,24 @@ namespace Trident {
 					const ref<Geometry3D> geometry = scene->getGeometry(geometryIndex);
 					const view<float32> vertexPositionComponents = geometry->getVertexPositionComponents();
 					const view<uint32> vertexPositionIndices = geometry->getVertexPositionIndices();
+					const view<float32> vertexNormalComponents = geometry->getVertexNormalComponents();
+					const view<uint32> vertexNormalIndices = geometry->getVertexNormalIndices();
+					const view<float32> vertexTextureCoordinateComponents = geometry->getVertexTextureCoordinateComponents();
+					const view<uint32> vertexTextureCoordinateIndices = geometry->getVertexTextureCoordinateIndices();
 
-					std::copy(vertexPositionComponents.begin(), vertexPositionComponents.end(), &vertexPositionComponentMappedRange[vertexPositionComponentOffset]);
-					std::copy(vertexPositionIndices.begin(), vertexPositionIndices.end(), &vertexPositionIndexMappedRange[vertexPositionIndexOffset]);
+					std::copy(vertexPositionComponents.begin(), vertexPositionComponents.end(), vertexPositionComponentMappedRange);
+					std::copy(vertexPositionIndices.begin(), vertexPositionIndices.end(), vertexPositionIndexMappedRange);
+					std::copy(vertexNormalComponents.begin(), vertexNormalComponents.end(), vertexNormalComponentMappedRange);
+					std::copy(vertexNormalIndices.begin(), vertexNormalIndices.end(), vertexNormalIndexMappedRange);
+					std::copy(vertexTextureCoordinateComponents.begin(), vertexTextureCoordinateComponents.end(), vertexTextureCoordinateComponentMappedRange);
+					std::copy(vertexTextureCoordinateIndices.begin(), vertexTextureCoordinateIndices.end(), vertexTextureCoordinateIndexMappedRange);
 
-					vertexPositionComponentOffset += vertexPositionComponents.count();
-					vertexPositionIndexOffset += vertexPositionIndices.count();
+					vertexPositionComponentMappedRange += vertexPositionComponents.count();
+					vertexPositionIndexMappedRange += vertexPositionIndices.count();
+					vertexNormalComponentMappedRange += vertexNormalComponents.count();
+					vertexNormalIndexMappedRange += vertexNormalIndices.count();
+					vertexTextureCoordinateComponentMappedRange += vertexTextureCoordinateComponents.count();
+					vertexTextureCoordinateIndexMappedRange += vertexTextureCoordinateIndices.count();
 					geometryIndex += 1;
 				}
 
@@ -158,7 +157,7 @@ namespace Trident {
 
 				BufferDescriptor vertexPositionComponentBufferDescriptor{};
 				vertexPositionComponentBufferDescriptor.size = vertexPositionComponentBufferSize;
-				vertexPositionComponentBufferDescriptor.usage = BufferUsage::VERTEX | BufferUsage::TRANSFER_DST;
+				vertexPositionComponentBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 				vertexPositionComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 				vertexPositionComponentBufferDescriptor.persistent = false;
 
@@ -168,13 +167,53 @@ namespace Trident {
 
 				BufferDescriptor vertexPositionIndexBufferDescriptor{};
 				vertexPositionIndexBufferDescriptor.size = vertexPositionIndexBufferSize;
-				vertexPositionIndexBufferDescriptor.usage = BufferUsage::INDEX | BufferUsage::TRANSFER_DST;
+				vertexPositionIndexBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 				vertexPositionIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 				vertexPositionIndexBufferDescriptor.persistent = false;
 
 				SET_DEBUG_NAME(vertexPositionIndexBufferDescriptor, "Vertex position index");
 
 				vertexPositionIndexBuffer = createBuffer(vertexPositionIndexBufferDescriptor);
+
+				BufferDescriptor vertexNormalComponentBufferDescriptor{};
+				vertexNormalComponentBufferDescriptor.size = vertexNormalComponentBufferSize;
+				vertexNormalComponentBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
+				vertexNormalComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+				vertexNormalComponentBufferDescriptor.persistent = false;
+
+				SET_DEBUG_NAME(vertexNormalComponentBufferDescriptor, "Vertex normal component");
+
+				vertexNormalComponentBuffer = createBuffer(vertexNormalComponentBufferDescriptor);
+
+				BufferDescriptor vertexNormalIndexBufferDescriptor{};
+				vertexNormalIndexBufferDescriptor.size = vertexNormalIndexBufferSize;
+				vertexNormalIndexBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
+				vertexNormalIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+				vertexNormalIndexBufferDescriptor.persistent = false;
+
+				SET_DEBUG_NAME(vertexNormalIndexBufferDescriptor, "Vertex normal index");
+
+				vertexNormalIndexBuffer = createBuffer(vertexNormalIndexBufferDescriptor);
+
+				BufferDescriptor vertexTextureCoordinateComponentBufferDescriptor{};
+				vertexTextureCoordinateComponentBufferDescriptor.size = vertexTextureCoordinateComponentBufferSize;
+				vertexTextureCoordinateComponentBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
+				vertexTextureCoordinateComponentBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+				vertexTextureCoordinateComponentBufferDescriptor.persistent = false;
+
+				SET_DEBUG_NAME(vertexTextureCoordinateComponentBufferDescriptor, "Vertex texture coordinate component");
+
+				vertexTextureCoordinateComponentBuffer = createBuffer(vertexTextureCoordinateComponentBufferDescriptor);
+
+				BufferDescriptor vertexTextureCoordinateIndexBufferDescriptor{};
+				vertexTextureCoordinateIndexBufferDescriptor.size = vertexTextureCoordinateIndexBufferSize;
+				vertexTextureCoordinateIndexBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
+				vertexTextureCoordinateIndexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
+				vertexTextureCoordinateIndexBufferDescriptor.persistent = false;
+
+				SET_DEBUG_NAME(vertexTextureCoordinateIndexBufferDescriptor, "Vertex texture coordinate index");
+
+				vertexTextureCoordinateIndexBuffer = createBuffer(vertexTextureCoordinateIndexBufferDescriptor);
 
 				BufferCopyRegion vertexPositionComponentBufferCopyRegion{};
 				vertexPositionComponentBufferCopyRegion.sourceOffset = 0;
@@ -185,6 +224,26 @@ namespace Trident {
 				vertexPositionIndexBufferCopyRegion.sourceOffset = vertexPositionComponentBufferSize;
 				vertexPositionIndexBufferCopyRegion.destinationOffset = 0;
 				vertexPositionIndexBufferCopyRegion.size = vertexPositionIndexBufferSize;
+
+				BufferCopyRegion vertexNormalComponentBufferCopyRegion{};
+				vertexNormalComponentBufferCopyRegion.sourceOffset = vertexPositionComponentBufferSize + vertexPositionIndexBufferSize;
+				vertexNormalComponentBufferCopyRegion.destinationOffset = 0;
+				vertexNormalComponentBufferCopyRegion.size = vertexNormalComponentBufferSize;
+
+				BufferCopyRegion vertexNormalIndexBufferCopyRegion{};
+				vertexNormalIndexBufferCopyRegion.sourceOffset = vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize;
+				vertexNormalIndexBufferCopyRegion.destinationOffset = 0;
+				vertexNormalIndexBufferCopyRegion.size = vertexNormalIndexBufferSize;
+
+				BufferCopyRegion vertexTextureCoordinateComponentBufferCopyRegion{};
+				vertexTextureCoordinateComponentBufferCopyRegion.sourceOffset = vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize;
+				vertexTextureCoordinateComponentBufferCopyRegion.destinationOffset = 0;
+				vertexTextureCoordinateComponentBufferCopyRegion.size = vertexTextureCoordinateComponentBufferSize;
+
+				BufferCopyRegion vertexTextureCoordinateIndexBufferCopyRegion{};
+				vertexTextureCoordinateIndexBufferCopyRegion.sourceOffset = vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize;
+				vertexTextureCoordinateIndexBufferCopyRegion.destinationOffset = 0;
+				vertexTextureCoordinateIndexBufferCopyRegion.size = vertexTextureCoordinateIndexBufferSize;
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -197,9 +256,15 @@ namespace Trident {
 				commandEncoder->begin();
 				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexPositionComponentBuffer, {vertexPositionComponentBufferCopyRegion});
 				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexPositionIndexBuffer, {vertexPositionIndexBufferCopyRegion});
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexNormalComponentBuffer, {vertexNormalComponentBufferCopyRegion});
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexNormalIndexBuffer, {vertexNormalIndexBufferCopyRegion});
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexTextureCoordinateComponentBuffer, {vertexTextureCoordinateComponentBufferCopyRegion});
+				commandEncoder->copyBufferToBuffer(stagingBuffer, vertexTextureCoordinateIndexBuffer, {vertexTextureCoordinateIndexBufferCopyRegion});
 
 				queue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
 				queue->waitIdle();
+
+				updateDescriptorSets();
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
@@ -213,10 +278,8 @@ namespace Trident {
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(forwardPipeline);
-				commandEncoder->bindDescriptorSets(forwardPipelineLayout, {cameraDescriptorSet});
-				commandEncoder->bindVertexBuffer(0, transformBuffer, 0, sizeof(Transform));
-				commandEncoder->bindVertexBuffer(1, vertexPositionComponentBuffer, 0, sizeof(svec3<float32>));
-				commandEncoder->bindIndexBuffer<uint32>(vertexPositionIndexBuffer, 0);
+				commandEncoder->bindDescriptorSets(forwardPipelineLayout, {forwardDescriptorSet});
+				commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 
@@ -241,7 +304,7 @@ namespace Trident {
 						geometryIndex += 1;
 					}
 
-					commandEncoder->drawIndexed(static_cast<uint32>(geometry->getVertexPositionIndices().count()), 1, indexOffset, instanceIndex, 0);
+					commandEncoder->draw(static_cast<uint32>(geometry->getVertexPositionIndices().count()), 1, indexOffset, instanceIndex);
 
 					instanceIndex += 1;
 				}
@@ -255,7 +318,7 @@ namespace Trident {
 			}
 
 			void updateTransform(Entity entity) {
-				transformMappedRange[entity].transform = scene->getInstance(entity).transform;
+				instanceMappedRange[entity].transform = scene->getInstance(entity).transform;
 			}
 
 			void updateCamera() {
@@ -333,6 +396,150 @@ namespace Trident {
 				cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
 			}
 
+			ref<DescriptorSetLayout> createForwardDescriptorSetLayout() const {
+				DescriptorSetLayoutBinding cameraBinding{};
+				cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
+				cameraBinding.descriptorCount = 1;
+				cameraBinding.shaderStages = ShaderStage::VERTEX;
+
+				DescriptorSetLayoutBinding vertexPositionComponentBinding{};
+				vertexPositionComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
+				vertexPositionComponentBinding.descriptorCount = 1;
+				vertexPositionComponentBinding.shaderStages = ShaderStage::VERTEX;
+
+				DescriptorSetLayoutBinding vertexPositionIndexBinding{};
+				vertexPositionIndexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
+				vertexPositionIndexBinding.descriptorCount = 1;
+				vertexPositionIndexBinding.shaderStages = ShaderStage::VERTEX;
+
+				DescriptorSetLayoutBinding vertexNormalComponentBinding{};
+				vertexNormalComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
+				vertexNormalComponentBinding.descriptorCount = 1;
+				vertexNormalComponentBinding.shaderStages = ShaderStage::VERTEX;
+
+				DescriptorSetLayoutBinding vertexNormalIndexBinding{};
+				vertexNormalIndexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
+				vertexNormalIndexBinding.descriptorCount = 1;
+				vertexNormalIndexBinding.shaderStages = ShaderStage::VERTEX;
+
+				DescriptorSetLayoutBinding vertexTextureCoordinateComponentBinding{};
+				vertexTextureCoordinateComponentBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
+				vertexTextureCoordinateComponentBinding.descriptorCount = 1;
+				vertexTextureCoordinateComponentBinding.shaderStages = ShaderStage::VERTEX;
+
+				DescriptorSetLayoutBinding vertexTextureCoordinateIndexBinding{};
+				vertexTextureCoordinateIndexBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_BUFFER;
+				vertexTextureCoordinateIndexBinding.descriptorCount = 1;
+				vertexTextureCoordinateIndexBinding.shaderStages = ShaderStage::VERTEX;
+
+				return createDescriptorSetLayout({
+					cameraBinding,
+					vertexPositionComponentBinding,
+					vertexPositionIndexBinding,
+					vertexNormalComponentBinding,
+					vertexNormalIndexBinding,
+					vertexTextureCoordinateComponentBinding,
+					vertexTextureCoordinateIndexBinding,
+				});
+			}
+
+			ref<PipelineLayout> createForwardPipelineLayout() const {
+				PipelineLayoutDescriptor forwardPipelineLayoutDescriptor{};
+				forwardPipelineLayoutDescriptor.descriptorSetLayouts = {forwardDescriptorSetLayout};
+
+				SET_DEBUG_NAME(forwardPipelineLayoutDescriptor, "Forward");
+
+				return createPipelineLayout(forwardPipelineLayoutDescriptor);
+			}
+
+			void allocateDescriptorSets() {
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({forwardDescriptorSetLayout});
+
+				forwardDescriptorSet = descriptorSets[0];
+			}
+
+			void updateDescriptorSets() const {
+				DescriptorBuffer cameraDescriptorBuffer{};
+				cameraDescriptorBuffer.buffer = cameraBuffer;
+				cameraDescriptorBuffer.offset = 0;
+				cameraDescriptorBuffer.size = cameraBuffer->size;
+
+				DescriptorBuffer vertexPositionComponentDescriptorBuffer{};
+				vertexPositionComponentDescriptorBuffer.buffer = vertexPositionComponentBuffer;
+				vertexPositionComponentDescriptorBuffer.offset = 0;
+				vertexPositionComponentDescriptorBuffer.size = vertexPositionComponentBuffer->size;
+
+				DescriptorBuffer vertexPositionIndexDescriptorBuffer{};
+				vertexPositionIndexDescriptorBuffer.buffer = vertexPositionIndexBuffer;
+				vertexPositionIndexDescriptorBuffer.offset = 0;
+				vertexPositionIndexDescriptorBuffer.size = vertexPositionIndexBuffer->size;
+
+				DescriptorBuffer vertexNormalComponentDescriptorBuffer{};
+				vertexNormalComponentDescriptorBuffer.buffer = vertexNormalComponentBuffer;
+				vertexNormalComponentDescriptorBuffer.offset = 0;
+				vertexNormalComponentDescriptorBuffer.size = vertexNormalComponentBuffer->size;
+
+				DescriptorBuffer vertexNormalIndexDescriptorBuffer{};
+				vertexNormalIndexDescriptorBuffer.buffer = vertexNormalIndexBuffer;
+				vertexNormalIndexDescriptorBuffer.offset = 0;
+				vertexNormalIndexDescriptorBuffer.size = vertexNormalIndexBuffer->size;
+
+				DescriptorBuffer vertexTextureCoordinateComponentDescriptorBuffer{};
+				vertexTextureCoordinateComponentDescriptorBuffer.buffer = vertexTextureCoordinateComponentBuffer;
+				vertexTextureCoordinateComponentDescriptorBuffer.offset = 0;
+				vertexTextureCoordinateComponentDescriptorBuffer.size = vertexTextureCoordinateComponentBuffer->size;
+
+				DescriptorBuffer vertexTextureCoordinateIndexDescriptorBuffer{};
+				vertexTextureCoordinateIndexDescriptorBuffer.buffer = vertexTextureCoordinateIndexBuffer;
+				vertexTextureCoordinateIndexDescriptorBuffer.offset = 0;
+				vertexTextureCoordinateIndexDescriptorBuffer.size = vertexTextureCoordinateIndexBuffer->size;
+
+				WriteDescriptorSet cameraWriteDescriptorSet{};
+				cameraWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				cameraWriteDescriptorSet.bindingIndex = 0;
+				cameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
+
+				WriteDescriptorSet vertexPositionComponentWriteDescriptorSet{};
+				vertexPositionComponentWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				vertexPositionComponentWriteDescriptorSet.bindingIndex = 1;
+				vertexPositionComponentWriteDescriptorSet.descriptorBuffers = {vertexPositionComponentDescriptorBuffer};
+
+				WriteDescriptorSet vertexPositionIndexWriteDescriptorSet{};
+				vertexPositionIndexWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				vertexPositionIndexWriteDescriptorSet.bindingIndex = 2;
+				vertexPositionIndexWriteDescriptorSet.descriptorBuffers = {vertexPositionIndexDescriptorBuffer};
+
+				WriteDescriptorSet vertexNormalComponentWriteDescriptorSet{};
+				vertexNormalComponentWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				vertexNormalComponentWriteDescriptorSet.bindingIndex = 3;
+				vertexNormalComponentWriteDescriptorSet.descriptorBuffers = {vertexNormalComponentDescriptorBuffer};
+
+				WriteDescriptorSet vertexNormalIndexWriteDescriptorSet{};
+				vertexNormalIndexWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				vertexNormalIndexWriteDescriptorSet.bindingIndex = 4;
+				vertexNormalIndexWriteDescriptorSet.descriptorBuffers = {vertexNormalIndexDescriptorBuffer};
+
+				WriteDescriptorSet vertexTextureCoordinateComponentWriteDescriptorSet{};
+				vertexTextureCoordinateComponentWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				vertexTextureCoordinateComponentWriteDescriptorSet.bindingIndex = 5;
+				vertexTextureCoordinateComponentWriteDescriptorSet.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer};
+
+				WriteDescriptorSet vertexTextureCoordinateIndexWriteDescriptorSet{};
+				vertexTextureCoordinateIndexWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				vertexTextureCoordinateIndexWriteDescriptorSet.bindingIndex = 6;
+				vertexTextureCoordinateIndexWriteDescriptorSet.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer};
+
+				getDevice()->updateDescriptorSets({
+					cameraWriteDescriptorSet,
+					vertexPositionComponentWriteDescriptorSet,
+					vertexPositionIndexWriteDescriptorSet,
+					vertexNormalComponentWriteDescriptorSet,
+					vertexNormalIndexWriteDescriptorSet,
+					vertexTextureCoordinateComponentWriteDescriptorSet,
+					vertexTextureCoordinateIndexWriteDescriptorSet,
+				});
+			}
+
 		private:
 			ref<RenderPass> renderPass;
 
@@ -342,20 +549,20 @@ namespace Trident {
 
 			ref<RenderPipeline> forwardPipeline;
 
-			ref<DescriptorSetLayout> cameraDescriptorSetLayout;
+			ref<DescriptorSetLayout> forwardDescriptorSetLayout;
 
-			ref<DescriptorSet> cameraDescriptorSet;
+			ref<DescriptorSet> forwardDescriptorSet;
 
 			ref<Buffer> cameraBuffer;
-			ref<Buffer> transformBuffer;
+			ref<Buffer> instanceBuffer;
 			ref<Buffer> vertexPositionComponentBuffer;
 			ref<Buffer> vertexPositionIndexBuffer;
-			ref<Buffer> vertexNormalBuffer;
+			ref<Buffer> vertexNormalComponentBuffer;
 			ref<Buffer> vertexNormalIndexBuffer;
-			ref<Buffer> vertexTextureCoordinateBuffer;
+			ref<Buffer> vertexTextureCoordinateComponentBuffer;
 			ref<Buffer> vertexTextureCoordinateIndexBuffer;
 
 			Camera* cameraMappedRange = nullptr;
-			Transform* transformMappedRange = nullptr;
+			Instance* instanceMappedRange = nullptr;
 	};
 }
