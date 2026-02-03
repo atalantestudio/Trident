@@ -323,8 +323,6 @@ namespace Trident {
 		}
 
 		vkUpdateDescriptorSets(device, static_cast<uint32>(vkWriteDescriptorSets.count()), &vkWriteDescriptorSets[0], 0, nullptr);
-
-		BREAKPOINT();
 	}
 
 	void VK::Device::waitForFence(ref<Trident::Fence> fence) const {
