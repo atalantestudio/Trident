@@ -20,8 +20,14 @@ namespace Trident {
 		public:
 			void build() override {
 				_createRenderPass();
+
+				depthStencilImage = createDepthStencilImage();
+				depthStencilImageView = createDepthStencilImageView();
+
 				createFramebuffers();
-				createCameraBuffer();
+
+				cameraBuffer = createCameraBuffer();
+				cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
 
 				forwardDescriptorSetLayout = createForwardDescriptorSetLayout();
 				forwardPipelineLayout = createForwardPipelineLayout();
@@ -58,7 +64,9 @@ namespace Trident {
 				forwardPipelineDescriptor.lineWidth = 1.0f;
 				forwardPipelineDescriptor.minSampleShading = 0.0f;
 				forwardPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-				forwardPipelineDescriptor.depthStencilState.depthTest = false;
+				forwardPipelineDescriptor.depthStencilState.depthTest = true;
+				forwardPipelineDescriptor.depthStencilState.depthWrite = true;
+				forwardPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::LESS;
 				forwardPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
 				forwardPipelineDescriptor.renderPass = renderPass;
 				forwardPipelineDescriptor.subpassIndex = 0;
@@ -272,9 +280,13 @@ namespace Trident {
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);
 
+				ClearValue depthStencilClearValue{};
+				depthStencilClearValue.depth = 1.0f;
+				depthStencilClearValue.stencil = 0;
+
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
+				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, depthStencilClearValue};
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->bindRenderPipeline(forwardPipeline);
@@ -313,6 +325,9 @@ namespace Trident {
 			}
 
 			void resize(WindowResizeEvent& event) override {
+				depthStencilImage = createDepthStencilImage();
+				depthStencilImageView = createDepthStencilImageView();
+
 				createFramebuffers();
 				updateCamera();
 			}
@@ -335,18 +350,30 @@ namespace Trident {
 				swapchainAttachment.format = getSurface()->getFormat();
 				swapchainAttachment.sampleCount = 1;
 				swapchainAttachment.loadOperation = LoadOperation::CLEAR;
-				swapchainAttachment.storeOperation = StoreOperation::STORE;
+				swapchainAttachment.storeOperation = StoreOperation::UNDEFINED;
 				swapchainAttachment.finalLayout = ImageLayout::PRESENT_SRC;
+
+				Attachment depthStencilAttachment{};
+				depthStencilAttachment.format = ImageFormat::D32_SFLOAT;
+				depthStencilAttachment.sampleCount = 1;
+				depthStencilAttachment.loadOperation = LoadOperation::CLEAR;
+				depthStencilAttachment.storeOperation = StoreOperation::UNDEFINED;
+				depthStencilAttachment.finalLayout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 				AttachmentReference colorAttachmentReference{};
 				colorAttachmentReference.index = 0;
 				colorAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
 
+				AttachmentReference depthStencilAttachmentReference{};
+				depthStencilAttachmentReference.index = 1;
+				depthStencilAttachmentReference.layout = ImageLayout::DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
 				SubpassDescriptor subpassDescriptor{};
 				subpassDescriptor.colorAttachmentReferences = {colorAttachmentReference};
+				subpassDescriptor.depthStencilAttachmentReference = depthStencilAttachmentReference;
 
 				RenderPassDescriptor renderPassDescriptor{};
-				renderPassDescriptor.attachments = {swapchainAttachment};
+				renderPassDescriptor.attachments = {swapchainAttachment, depthStencilAttachment};
 				renderPassDescriptor.subpasses = {createSubpass(subpassDescriptor)};
 
 				renderPass = createRenderPass(renderPassDescriptor);
@@ -359,7 +386,7 @@ namespace Trident {
 
 				FramebufferDescriptor framebufferDescriptor{};
 				framebufferDescriptor.renderPass = renderPass;
-				framebufferDescriptor.imageViews = {nullptr};
+				framebufferDescriptor.imageViews = {nullptr, depthStencilImageView};
 				framebufferDescriptor.extent = swapchain->getExtent();
 
 				#if defined(BUILD_MODE_DEBUG)
@@ -383,7 +410,35 @@ namespace Trident {
 				}
 			}
 
-			void createCameraBuffer() {
+			ref<Image> createDepthStencilImage() const {
+				const Extent2D extent = getSwapchain()->getExtent();
+
+				AttachmentImageDescriptor depthStencilAttachmentImageDescriptor{};
+				depthStencilAttachmentImageDescriptor.type = ImageType::TEXTURE_2D;
+				depthStencilAttachmentImageDescriptor.extent.width = extent.width;
+				depthStencilAttachmentImageDescriptor.extent.height = extent.height;
+				depthStencilAttachmentImageDescriptor.extent.depth = 1;
+				depthStencilAttachmentImageDescriptor.mipLevelCount = 1;
+				depthStencilAttachmentImageDescriptor.layerCount = 1;
+
+				SET_DEBUG_NAME(depthStencilAttachmentImageDescriptor, "Depth stencil");
+
+				return renderPass->createDepthStencilAttachmentImage(depthStencilAttachmentImageDescriptor, 0);
+			}
+
+			ref<ImageView> createDepthStencilImageView() const {
+				ImageViewDescriptor depthStencilImageViewDescriptor{};
+				depthStencilImageViewDescriptor.mipLevelOffset = 0;
+				depthStencilImageViewDescriptor.mipLevelCount = 1;
+				depthStencilImageViewDescriptor.layerOffset = 0;
+				depthStencilImageViewDescriptor.layerCount = 1;
+
+				SET_DEBUG_NAME(depthStencilImageViewDescriptor, "Depth stencil");
+
+				return depthStencilImage->createView(depthStencilImageViewDescriptor);
+			}
+
+			ref<Buffer> createCameraBuffer() const {
 				BufferDescriptor cameraBufferDescriptor{};
 				cameraBufferDescriptor.size = sizeof(Camera);
 				cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
@@ -392,8 +447,7 @@ namespace Trident {
 
 				SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
 
-				cameraBuffer = createBuffer(cameraBufferDescriptor);
-				cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
+				return createBuffer(cameraBufferDescriptor);
 			}
 
 			ref<DescriptorSetLayout> createForwardDescriptorSetLayout() const {
@@ -561,6 +615,10 @@ namespace Trident {
 			ref<Buffer> vertexNormalIndexBuffer;
 			ref<Buffer> vertexTextureCoordinateComponentBuffer;
 			ref<Buffer> vertexTextureCoordinateIndexBuffer;
+
+			ref<Image> depthStencilImage;
+
+			ref<ImageView> depthStencilImageView;
 
 			Camera* cameraMappedRange = nullptr;
 			Instance* instanceMappedRange = nullptr;

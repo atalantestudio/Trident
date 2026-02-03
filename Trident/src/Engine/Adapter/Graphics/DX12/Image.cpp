@@ -70,17 +70,17 @@ namespace Trident {
 		D3D12_CLEAR_VALUE optimizedClearValue{};
 		optimizedClearValue.Format = resourceDescriptor.Format;
 
-		if (isDepthFormat(descriptor.format)) {
-			optimizedClearValue.DepthStencil.Depth = 1.0f;
-			optimizedClearValue.DepthStencil.Stencil = 0;
-
-			optimizedClearValuePointer = &optimizedClearValue;
-		}
-		else if (descriptor.usage & ImageUsage::COLOR_ATTACHMENT || descriptor.usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
+		if (descriptor.usage & ImageUsage::COLOR_ATTACHMENT) {
 			optimizedClearValue.Color[0] = 0.0f;
 			optimizedClearValue.Color[1] = 0.0f;
 			optimizedClearValue.Color[2] = 0.0f;
 			optimizedClearValue.Color[3] = 1.0f;
+
+			optimizedClearValuePointer = &optimizedClearValue;
+		}
+		else if (descriptor.usage & ImageUsage::DEPTH_STENCIL_ATTACHMENT) {
+			optimizedClearValue.DepthStencil.Depth = 1.0f;
+			optimizedClearValue.DepthStencil.Stencil = 0;
 
 			optimizedClearValuePointer = &optimizedClearValue;
 		}
