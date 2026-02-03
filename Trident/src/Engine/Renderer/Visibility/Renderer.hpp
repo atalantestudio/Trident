@@ -31,6 +31,7 @@ namespace Trident {
 
 			static constexpr uint32 VISIBILITY_SUBPASS_INDEX = 0;
 			static constexpr uint32 DEBUG_SUBPASS_INDEX = 1;
+			static constexpr uint32 OUTPUT_SUBPASS_INDEX = 2;
 
 		public:
 			void build() override;
@@ -56,34 +57,44 @@ namespace Trident {
 		private:
 			ref<RenderPass> _createRenderPass() const;
 
+			void createFrameResources();
+
 			ref<Subpass> createVisibilitySubpass() const;
+			ref<Subpass> createOutputSubpass() const;
 			ref<Subpass> createDebugSubpass() const;
 
 			ref<Image> createVisibilityImage() const;
+			ref<Image> createOutputImage() const;
 			ref<Image> createDepthStencilImage() const;
 
 			ref<ImageView> createVisibilityImageView();
+			ref<ImageView> createOutputImageView();
 			ref<ImageView> createDepthStencilImageView();
 
 			void recreateFramebuffers();
 
-			void createCameraDescriptorSetLayout();
-			void createClusterDescriptorSetLayout();
-			void createInstanceDescriptorSetLayout();
+			ref<DescriptorSetLayout> createCameraDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createClusterDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createInstanceDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createVisibilityMaterialCountDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createMaterialOffsetDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createMaterialCoordinateDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createMaterialBaseDescriptorSetLayout() const;
+			ref<DescriptorSetLayout> createOutputDescriptorSetLayout() const;
 			ref<DescriptorSetLayout> createDebugDescriptorSetLayout() const;
 
 			ref<PipelineLayout> createVisibilityPipelineLayout() const;
 			ref<PipelineLayout> createMaterialOffsetPipelineLayout() const;
 			ref<PipelineLayout> createMaterialCoordinatePipelineLayout() const;
+			void createMaterialPipelineLayouts();
+			ref<PipelineLayout> createOutputPipelineLayout() const;
 			ref<PipelineLayout> createDebugPipelineLayout() const;
 
 			ref<RenderPipeline> createVisibilityPipeline() const;
 			ref<ComputePipeline> createMaterialOffsetPipeline() const;
 			ref<ComputePipeline> createMaterialCoordinatePipeline() const;
 			void createMaterialPipelines();
+			ref<RenderPipeline> createOutputPipeline() const;
 			ref<RenderPipeline> createDebugPipeline() const;
 
 			ref<Buffer> createVisibilityIndirectBuffer() const;
@@ -123,12 +134,6 @@ namespace Trident {
 		private:
 			ref<RenderPass> renderPass;
 
-			ref<Image> visibilityImage;
-			ref<Image> depthStencilImage;
-
-			ref<ImageView> visibilityImageView;
-			ref<ImageView> depthStencilImageView;
-
 			sequence<ref<Framebuffer>> framebuffers;
 
 			ref<DescriptorSetLayout> cameraDescriptorSetLayout;
@@ -137,6 +142,8 @@ namespace Trident {
 			ref<DescriptorSetLayout> visibilityMaterialCountDescriptorSetLayout;
 			ref<DescriptorSetLayout> materialOffsetDescriptorSetLayout;
 			ref<DescriptorSetLayout> materialCoordinateDescriptorSetLayout;
+			ref<DescriptorSetLayout> materialBaseDescriptorSetLayout;
+			ref<DescriptorSetLayout> outputDescriptorSetLayout;
 			ref<DescriptorSetLayout> debugDescriptorSetLayout;
 
 			ref<DescriptorSet> cameraDescriptorSet;
@@ -145,16 +152,22 @@ namespace Trident {
 			ref<DescriptorSet> visibilityMaterialCountDescriptorSet;
 			ref<DescriptorSet> materialOffsetDescriptorSet;
 			ref<DescriptorSet> materialCoordinateDescriptorSet;
+			ref<DescriptorSet> materialBaseDescriptorSet;
+			ref<DescriptorSet> outputDescriptorSet;
 			ref<DescriptorSet> debugDescriptorSet;
 
 			ref<PipelineLayout> visibilityPipelineLayout;
 			ref<PipelineLayout> materialOffsetPipelineLayout;
 			ref<PipelineLayout> materialCoordinatePipelineLayout;
+			sequence<ref<PipelineLayout>> materialPipelineLayouts;
+			ref<PipelineLayout> outputPipelineLayout;
 			ref<PipelineLayout> debugPipelineLayout;
 
 			ref<RenderPipeline> visibilityPipeline;
 			ref<ComputePipeline> materialOffsetPipeline;
 			ref<ComputePipeline> materialCoordinatePipeline;
+			sequence<ref<ComputePipeline>> materialPipelines;
+			ref<RenderPipeline> outputPipeline;
 			ref<RenderPipeline> debugPipeline;
 
 			ref<Buffer> visibilityIndirectBuffer;
@@ -182,9 +195,15 @@ namespace Trident {
 			// TODO: Use 1D image instead.
 			ref<Buffer> materialCoordinateBuffer;
 
+			ref<Image> visibilityImage;
+			ref<Image> outputImage;
+			ref<Image> depthStencilImage;
+
+			ref<ImageView> visibilityImageView;
+			ref<ImageView> outputImageView;
+			ref<ImageView> depthStencilImageView;
+
 			Camera* cameraMappedRange;
 			ClusteredInstance* instanceMappedRange;
-
-			sequence<ref<ComputePipeline>> materialPipelines;
 	};
 }

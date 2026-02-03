@@ -19,7 +19,7 @@ namespace Trident {
 		const uint32 stoolGeometryIndex = scene.registerGeometry(stoolGeometry);
 
 		MaterialPipelineDescriptor defaultMaterialPipelineDescriptor{};
-		defaultMaterialPipelineDescriptor.shaderModulePath = "";
+		defaultMaterialPipelineDescriptor.shaderModulePath = "Visibility/Material/Default";
 		defaultMaterialPipelineDescriptor.descriptorSetLayoutBindings = {};
 
 		MaterialDescriptor defaultMaterialDescriptor{};
@@ -29,7 +29,7 @@ namespace Trident {
 		const uint32 defaultMaterialIndex = scene.registerMaterial(defaultMaterialDescriptor);
 
 		MaterialPipelineDescriptor testMaterialPipelineDescriptor{};
-		testMaterialPipelineDescriptor.shaderModulePath = "";
+		testMaterialPipelineDescriptor.shaderModulePath = "Visibility/Material/Test";
 		testMaterialPipelineDescriptor.descriptorSetLayoutBindings = {};
 
 		MaterialDescriptor testMaterialDescriptor{};

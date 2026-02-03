@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 RWByteAddressBuffer materialCountBuffer : register(u0);
 RWByteAddressBuffer materialOffsetBuffer : register(u1);
 RWByteAddressBuffer materialIndirectBuffer : register(u2);

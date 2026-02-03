@@ -18,8 +18,11 @@ namespace Trident {
 
 		ClusteredScene clusteredScene{};
 		clusteredScene.geometries = sequence<ClusteredGeometry>(scene.getGeometryCount());
-		clusteredScene.materials = scene.getMaterials();
-		clusteredScene.materialPipelineDescriptors = scene.getMaterialPipelineDescriptors();
+		clusteredScene.materials = sequence<ref<Material>>(scene.getMaterialCount());
+		clusteredScene.materialPipelineDescriptors = sequence<MaterialPipelineDescriptor>(scene.getMaterialPipelineCount());
+
+		std::copy_n(scene.getMaterials().begin(), clusteredScene.materials.count(), &clusteredScene.materials[0]);
+		std::copy_n(scene.getMaterialPipelineDescriptors().begin(), clusteredScene.materialPipelineDescriptors.count(), &clusteredScene.materialPipelineDescriptors[0]);
 
 		uint64 totalVertexPositionComponentCount = 0;
 		uint64 totalVertexNormalComponentCount = 0;

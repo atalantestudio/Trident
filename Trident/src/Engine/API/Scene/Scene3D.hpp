@@ -95,10 +95,12 @@ namespace Trident {
 			// Registers the provided material and returns its index in the material array.
 			uint32 registerMaterial(const MaterialDescriptor& descriptor) {
 				DEBUG_ASSERT(materialCount < MAX_MATERIAL_COUNT);
+				DEBUG_ASSERT(descriptor.pipelineIndex < materialPipelineDescriptors.count());
 
 				const uint32 materialIndex = materialCount;
 				const ref<Material> material = createRef<Material>(descriptor);
 
+				materialPipelineDescriptors[descriptor.pipelineIndex].materialCount += 1;
 				materials[materialIndex] = material;
 
 				materialCount += 1;

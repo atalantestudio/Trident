@@ -22,6 +22,17 @@ namespace Trident {
 		return createSubpass(visibilitySubpassDescriptor);
 	}
 
+	ref<Subpass> VisibilityRenderer::createOutputSubpass() const {
+		AttachmentReference writeSwapchainAttachmentReference{};
+		writeSwapchainAttachmentReference.index = SWAPCHAIN_ATTACHMENT_INDEX;
+		writeSwapchainAttachmentReference.layout = ImageLayout::COLOR_ATTACHMENT_OPTIMAL;
+
+		SubpassDescriptor outputSubpassDescriptor{};
+		outputSubpassDescriptor.colorAttachmentReferences = {writeSwapchainAttachmentReference};
+
+		return createSubpass(outputSubpassDescriptor);
+	}
+
 	ref<Subpass> VisibilityRenderer::createDebugSubpass() const {
 		AttachmentReference writeSwapchainAttachmentReference{};
 		writeSwapchainAttachmentReference.index = SWAPCHAIN_ATTACHMENT_INDEX;
@@ -47,6 +58,7 @@ namespace Trident {
 
 	ref<RenderPass> VisibilityRenderer::_createRenderPass() const {
 		const ref<Subpass> visibilitySubpass = createVisibilitySubpass();
+		const ref<Subpass> outputSubpass = createOutputSubpass();
 		const ref<Subpass> debugSubpass = createDebugSubpass();
 
 		Attachment swapchainAttachment{};
@@ -82,6 +94,7 @@ namespace Trident {
 		};
 		renderPassDescriptor.subpasses = {
 			visibilitySubpass,
+			outputSubpass,
 			debugSubpass,
 		};
 		renderPassDescriptor.subpassDependencies = {subpassDependency};

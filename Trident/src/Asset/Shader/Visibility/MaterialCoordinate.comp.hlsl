@@ -1,3 +1,6 @@
+// Copyright 2026 Atalante Studio.
+// Distributed under the GNU GPL v3 License.
+
 struct Camera {
 	float4x4 projectionView;
 	float nearPlane;
@@ -48,7 +51,7 @@ void main(uint3 globalInvocationIndex : SV_DispatchThreadID) {
 
 	materialOffsetBuffer.InterlockedAdd(materialIndex * 4, 1, materialOffset);
 
-	uint flatPosition = globalInvocationIndex.y * 16 + globalInvocationIndex.x;
+	uint packedCoordinate = (globalInvocationIndex.x << 16) | globalInvocationIndex.y;
 
-	materialCoordinateBuffer.Store(materialOffset * 4, flatPosition);
+	materialCoordinateBuffer.Store(materialOffset * 4, packedCoordinate);
 }

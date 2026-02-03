@@ -11,5 +11,8 @@ namespace Trident {
 		view<char8> shaderModulePath;
 
 		view<DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+
+		/// Number of materials using this pipeline.
+		uint32 materialCount = 0;
 	};
 }
