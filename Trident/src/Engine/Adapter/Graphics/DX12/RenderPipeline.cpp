@@ -5,6 +5,7 @@
 
 #include "Engine/Adapter/Graphics/DX12/BlendFactor.hpp"
 #include "Engine/Adapter/Graphics/DX12/CullMode.hpp"
+#include "Engine/Adapter/Graphics/DX12/FillMode.hpp"
 #include "Engine/Adapter/Graphics/DX12/Format.hpp"
 #include "Engine/Adapter/Graphics/DX12/PipelineLayout.hpp"
 #include "Engine/Adapter/Graphics/DX12/PrimitiveTopology.hpp"
@@ -73,7 +74,7 @@ namespace Trident {
 		}
 
 		graphicsPipelineStateDescriptor.SampleMask = max<UINT>();
-		graphicsPipelineStateDescriptor.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+		graphicsPipelineStateDescriptor.RasterizerState.FillMode = getFillMode(descriptor.polygonMode);
 		graphicsPipelineStateDescriptor.RasterizerState.CullMode = getCullMode(descriptor.cullMode);
 		graphicsPipelineStateDescriptor.RasterizerState.FrontCounterClockwise = descriptor.frontFace == FrontFace::COUNTER_CLOCKWISE;
 		graphicsPipelineStateDescriptor.RasterizerState.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
