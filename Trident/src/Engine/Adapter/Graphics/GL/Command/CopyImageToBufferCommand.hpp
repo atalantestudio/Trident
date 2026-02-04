@@ -43,7 +43,7 @@ namespace Trident {
 									copyRegion.imageExtent.depth * copyRegion.imageLayerCount,
 									sourceImage->format,
 									GL_UNSIGNED_BYTE,
-									static_cast<GLsizei>(destinationBuffer->size),
+									static_cast<GLsizei>(destinationBuffer->getSize()),
 									(GLvoid*) copyRegion.bufferOffset
 								);
 							#else

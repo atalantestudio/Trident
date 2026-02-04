@@ -70,7 +70,7 @@ namespace Trident {
 		visibilityIndirectBuffer = createVisibilityIndirectBuffer();
 
 		cameraBuffer = createCameraBuffer();
-		cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
+		cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->getSize());
 
 		updateViewport();
 	}
@@ -369,7 +369,7 @@ namespace Trident {
 
 		instanceBuffer = createBuffer(instanceBufferDescriptor);
 
-		instanceMappedRange = instanceBuffer->map<ClusteredInstance>(0, instanceBuffer->size);
+		instanceMappedRange = instanceBuffer->map<ClusteredInstance>(0, instanceBuffer->getSize());
 	}
 
 	void VisibilityRenderer::createGeometryBuffer() {
@@ -411,7 +411,7 @@ namespace Trident {
 
 	void VisibilityRenderer::fillSceneBuffers() const {
 		{
-			DrawIndirectCommand* visibilityIndirectMappedRange = visibilityIndirectBuffer->map<DrawIndirectCommand>(0, visibilityIndirectBuffer->size);
+			DrawIndirectCommand* visibilityIndirectMappedRange = visibilityIndirectBuffer->map<DrawIndirectCommand>(0, visibilityIndirectBuffer->getSize());
 			visibilityIndirectMappedRange->vertexCount = CLUSTER_INDEX_COUNT;
 			visibilityIndirectMappedRange->instanceCount = static_cast<uint32>(scene->clusters.count());
 			visibilityIndirectMappedRange->vertexOffset = 0;
@@ -421,18 +421,18 @@ namespace Trident {
 		}
 
 		const ref<Buffer> stagingBuffer = createStagingBuffer(
-			vertexPositionComponentBuffer->size +
-			vertexNormalComponentBuffer->size +
-			vertexTextureCoordinateComponentBuffer->size +
-			vertexPositionIndexBuffer->size +
-			vertexNormalIndexBuffer->size +
-			vertexTextureCoordinateIndexBuffer->size +
-			clusterBuffer->size +
-			instanceBuffer->size +
-			geometryBuffer->size
+			vertexPositionComponentBuffer->getSize() +
+			vertexNormalComponentBuffer->getSize() +
+			vertexTextureCoordinateComponentBuffer->getSize() +
+			vertexPositionIndexBuffer->getSize() +
+			vertexNormalIndexBuffer->getSize() +
+			vertexTextureCoordinateIndexBuffer->getSize() +
+			clusterBuffer->getSize() +
+			instanceBuffer->getSize() +
+			geometryBuffer->getSize()
 		);
 
-		uint8* mappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
+		uint8* mappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->getSize());
 		uint64 sourceOffset = 0;
 
 		float32* vertexPositionComponentMappedRange = pointer_cast<float32*>(mappedRange + sourceOffset);
@@ -442,9 +442,9 @@ namespace Trident {
 		BufferCopyRegion vertexPositionComponentBufferCopyRegion{};
 		vertexPositionComponentBufferCopyRegion.sourceOffset = sourceOffset;
 		vertexPositionComponentBufferCopyRegion.destinationOffset = 0;
-		vertexPositionComponentBufferCopyRegion.size = vertexPositionComponentBuffer->size;
+		vertexPositionComponentBufferCopyRegion.size = vertexPositionComponentBuffer->getSize();
 
-		sourceOffset += vertexPositionComponentBuffer->size;
+		sourceOffset += vertexPositionComponentBuffer->getSize();
 
 		float32* vertexNormalComponentMappedRange = pointer_cast<float32*>(mappedRange + sourceOffset);
 
@@ -453,9 +453,9 @@ namespace Trident {
 		BufferCopyRegion vertexNormalComponentBufferCopyRegion{};
 		vertexNormalComponentBufferCopyRegion.sourceOffset = sourceOffset;
 		vertexNormalComponentBufferCopyRegion.destinationOffset = 0;
-		vertexNormalComponentBufferCopyRegion.size = vertexNormalComponentBuffer->size;
+		vertexNormalComponentBufferCopyRegion.size = vertexNormalComponentBuffer->getSize();
 
-		sourceOffset += vertexNormalComponentBuffer->size;
+		sourceOffset += vertexNormalComponentBuffer->getSize();
 
 		float32* vertexTextureCoordinateComponentMappedRange = pointer_cast<float32*>(mappedRange + sourceOffset);
 
@@ -464,9 +464,9 @@ namespace Trident {
 		BufferCopyRegion vertexTextureCoordinateComponentBufferCopyRegion{};
 		vertexTextureCoordinateComponentBufferCopyRegion.sourceOffset = sourceOffset;
 		vertexTextureCoordinateComponentBufferCopyRegion.destinationOffset = 0;
-		vertexTextureCoordinateComponentBufferCopyRegion.size = vertexTextureCoordinateComponentBuffer->size;
+		vertexTextureCoordinateComponentBufferCopyRegion.size = vertexTextureCoordinateComponentBuffer->getSize();
 
-		sourceOffset += vertexTextureCoordinateComponentBuffer->size;
+		sourceOffset += vertexTextureCoordinateComponentBuffer->getSize();
 
 		uint32* vertexPositionIndexMappedRange = pointer_cast<uint32*>(mappedRange + sourceOffset);
 
@@ -475,9 +475,9 @@ namespace Trident {
 		BufferCopyRegion vertexPositionIndexBufferCopyRegion{};
 		vertexPositionIndexBufferCopyRegion.sourceOffset = sourceOffset;
 		vertexPositionIndexBufferCopyRegion.destinationOffset = 0;
-		vertexPositionIndexBufferCopyRegion.size = vertexPositionIndexBuffer->size;
+		vertexPositionIndexBufferCopyRegion.size = vertexPositionIndexBuffer->getSize();
 
-		sourceOffset += vertexPositionIndexBuffer->size;
+		sourceOffset += vertexPositionIndexBuffer->getSize();
 
 		uint32* vertexNormalIndexMappedRange = pointer_cast<uint32*>(mappedRange + sourceOffset);
 
@@ -486,9 +486,9 @@ namespace Trident {
 		BufferCopyRegion vertexNormalIndexBufferCopyRegion{};
 		vertexNormalIndexBufferCopyRegion.sourceOffset = sourceOffset;
 		vertexNormalIndexBufferCopyRegion.destinationOffset = 0;
-		vertexNormalIndexBufferCopyRegion.size = vertexNormalIndexBuffer->size;
+		vertexNormalIndexBufferCopyRegion.size = vertexNormalIndexBuffer->getSize();
 
-		sourceOffset += vertexNormalIndexBuffer->size;
+		sourceOffset += vertexNormalIndexBuffer->getSize();
 
 		uint32* vertexTextureCoordinateIndexMappedRange = pointer_cast<uint32*>(mappedRange + sourceOffset);
 
@@ -497,9 +497,9 @@ namespace Trident {
 		BufferCopyRegion vertexTextureCoordinateIndexBufferCopyRegion{};
 		vertexTextureCoordinateIndexBufferCopyRegion.sourceOffset = sourceOffset;
 		vertexTextureCoordinateIndexBufferCopyRegion.destinationOffset = 0;
-		vertexTextureCoordinateIndexBufferCopyRegion.size = vertexTextureCoordinateIndexBuffer->size;
+		vertexTextureCoordinateIndexBufferCopyRegion.size = vertexTextureCoordinateIndexBuffer->getSize();
 
-		sourceOffset += vertexTextureCoordinateIndexBuffer->size;
+		sourceOffset += vertexTextureCoordinateIndexBuffer->getSize();
 
 		Cluster* clusterMappedRange = pointer_cast<Cluster*>(mappedRange + sourceOffset);
 
@@ -508,9 +508,9 @@ namespace Trident {
 		BufferCopyRegion clusterBufferCopyRegion{};
 		clusterBufferCopyRegion.sourceOffset = sourceOffset;
 		clusterBufferCopyRegion.destinationOffset = 0;
-		clusterBufferCopyRegion.size = clusterBuffer->size;
+		clusterBufferCopyRegion.size = clusterBuffer->getSize();
 
-		sourceOffset += clusterBuffer->size;
+		sourceOffset += clusterBuffer->getSize();
 
 		ClusteredInstance* instanceMappedRange = pointer_cast<ClusteredInstance*>(mappedRange + sourceOffset);
 
@@ -519,9 +519,9 @@ namespace Trident {
 		BufferCopyRegion instanceBufferCopyRegion{};
 		instanceBufferCopyRegion.sourceOffset = sourceOffset;
 		instanceBufferCopyRegion.destinationOffset = 0;
-		instanceBufferCopyRegion.size = instanceBuffer->size;
+		instanceBufferCopyRegion.size = instanceBuffer->getSize();
 
-		sourceOffset += instanceBuffer->size;
+		sourceOffset += instanceBuffer->getSize();
 
 		Geometry* geometryMappedRange = pointer_cast<Geometry*>(mappedRange + sourceOffset);
 
@@ -530,7 +530,7 @@ namespace Trident {
 		BufferCopyRegion geometryBufferCopyRegion{};
 		geometryBufferCopyRegion.sourceOffset = sourceOffset;
 		geometryBufferCopyRegion.destinationOffset = 0;
-		geometryBufferCopyRegion.size = geometryBuffer->size;
+		geometryBufferCopyRegion.size = geometryBuffer->getSize();
 
 		stagingBuffer->unmap();
 
@@ -606,67 +606,67 @@ namespace Trident {
 		DescriptorBuffer cameraDescriptorBuffer{};
 		cameraDescriptorBuffer.buffer = cameraBuffer;
 		cameraDescriptorBuffer.offset = 0;
-		cameraDescriptorBuffer.size = cameraBuffer->size;
+		cameraDescriptorBuffer.size = cameraBuffer->getSize();
 
 		DescriptorBuffer clusterDescriptorBuffer{};
 		clusterDescriptorBuffer.buffer = clusterBuffer;
 		clusterDescriptorBuffer.offset = 0;
-		clusterDescriptorBuffer.size = clusterBuffer->size;
+		clusterDescriptorBuffer.size = clusterBuffer->getSize();
 
 		DescriptorBuffer instanceDescriptorBuffer{};
 		instanceDescriptorBuffer.buffer = instanceBuffer;
 		instanceDescriptorBuffer.offset = 0;
-		instanceDescriptorBuffer.size = instanceBuffer->size;
+		instanceDescriptorBuffer.size = instanceBuffer->getSize();
 
 		DescriptorBuffer geometryDescriptorBuffer{};
 		geometryDescriptorBuffer.buffer = geometryBuffer;
 		geometryDescriptorBuffer.offset = 0;
-		geometryDescriptorBuffer.size = geometryBuffer->size;
+		geometryDescriptorBuffer.size = geometryBuffer->getSize();
 
 		DescriptorBuffer vertexPositionComponentDescriptorBuffer{};
 		vertexPositionComponentDescriptorBuffer.buffer = vertexPositionComponentBuffer;
 		vertexPositionComponentDescriptorBuffer.offset = 0;
-		vertexPositionComponentDescriptorBuffer.size = vertexPositionComponentBuffer->size;
+		vertexPositionComponentDescriptorBuffer.size = vertexPositionComponentBuffer->getSize();
 
 		DescriptorBuffer vertexNormalComponentDescriptorBuffer{};
 		vertexNormalComponentDescriptorBuffer.buffer = vertexNormalComponentBuffer;
 		vertexNormalComponentDescriptorBuffer.offset = 0;
-		vertexNormalComponentDescriptorBuffer.size = vertexNormalComponentBuffer->size;
+		vertexNormalComponentDescriptorBuffer.size = vertexNormalComponentBuffer->getSize();
 
 		DescriptorBuffer vertexTextureCoordinateComponentDescriptorBuffer{};
 		vertexTextureCoordinateComponentDescriptorBuffer.buffer = vertexTextureCoordinateComponentBuffer;
 		vertexTextureCoordinateComponentDescriptorBuffer.offset = 0;
-		vertexTextureCoordinateComponentDescriptorBuffer.size = vertexTextureCoordinateComponentBuffer->size;
+		vertexTextureCoordinateComponentDescriptorBuffer.size = vertexTextureCoordinateComponentBuffer->getSize();
 
 		DescriptorBuffer vertexPositionIndexDescriptorBuffer{};
 		vertexPositionIndexDescriptorBuffer.buffer = vertexPositionIndexBuffer;
 		vertexPositionIndexDescriptorBuffer.offset = 0;
-		vertexPositionIndexDescriptorBuffer.size = vertexPositionIndexBuffer->size;
+		vertexPositionIndexDescriptorBuffer.size = vertexPositionIndexBuffer->getSize();
 
 		DescriptorBuffer vertexNormalIndexDescriptorBuffer{};
 		vertexNormalIndexDescriptorBuffer.buffer = vertexNormalIndexBuffer;
 		vertexNormalIndexDescriptorBuffer.offset = 0;
-		vertexNormalIndexDescriptorBuffer.size = vertexNormalIndexBuffer->size;
+		vertexNormalIndexDescriptorBuffer.size = vertexNormalIndexBuffer->getSize();
 
 		DescriptorBuffer vertexTextureCoordinateIndexDescriptorBuffer{};
 		vertexTextureCoordinateIndexDescriptorBuffer.buffer = vertexTextureCoordinateIndexBuffer;
 		vertexTextureCoordinateIndexDescriptorBuffer.offset = 0;
-		vertexTextureCoordinateIndexDescriptorBuffer.size = vertexTextureCoordinateIndexBuffer->size;
+		vertexTextureCoordinateIndexDescriptorBuffer.size = vertexTextureCoordinateIndexBuffer->getSize();
 
 		DescriptorBuffer materialCountDescriptorBuffer{};
 		materialCountDescriptorBuffer.buffer = materialCountBuffer;
 		materialCountDescriptorBuffer.offset = 0;
-		materialCountDescriptorBuffer.size = materialCountBuffer->size;
+		materialCountDescriptorBuffer.size = materialCountBuffer->getSize();
 
 		DescriptorBuffer materialOffsetDescriptorBuffer{};
 		materialOffsetDescriptorBuffer.buffer = materialOffsetBuffer;
 		materialOffsetDescriptorBuffer.offset = 0;
-		materialOffsetDescriptorBuffer.size = materialOffsetBuffer->size;
+		materialOffsetDescriptorBuffer.size = materialOffsetBuffer->getSize();
 
 		DescriptorBuffer materialIndirectDescriptorBuffer{};
 		materialIndirectDescriptorBuffer.buffer = materialIndirectBuffer;
 		materialIndirectDescriptorBuffer.offset = 0;
-		materialIndirectDescriptorBuffer.size = materialIndirectBuffer->size;
+		materialIndirectDescriptorBuffer.size = materialIndirectBuffer->getSize();
 
 		WriteDescriptorSet cameraWriteDescriptorSet{};
 		cameraWriteDescriptorSet.descriptorSet = cameraDescriptorSet;
@@ -851,7 +851,7 @@ namespace Trident {
 		DescriptorBuffer materialCoordinateDescriptorBuffer{};
 		materialCoordinateDescriptorBuffer.buffer = materialCoordinateBuffer;
 		materialCoordinateDescriptorBuffer.offset = 0;
-		materialCoordinateDescriptorBuffer.size = materialCoordinateBuffer->size;
+		materialCoordinateDescriptorBuffer.size = materialCoordinateBuffer->getSize();
 
 		WriteDescriptorSet materialCoordinateVisibilityWriteDescriptorSet{};
 		materialCoordinateVisibilityWriteDescriptorSet.descriptorSet = materialCoordinateDescriptorSet;

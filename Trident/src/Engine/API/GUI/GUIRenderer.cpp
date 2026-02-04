@@ -188,7 +188,7 @@ namespace Trident {
 
 		cameraBuffer = createBuffer(cameraBufferDescriptor);
 
-		cameraBufferMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
+		cameraBufferMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->getSize());
 	}
 
 	void GUIRenderer::createVertexBuffer() {
@@ -224,7 +224,7 @@ namespace Trident {
 
 		subcomponentBuffer = createBuffer(subcomponentBufferDescriptor);
 
-		subcomponentBufferMappedRange = subcomponentBuffer->map<GUISubcomponent>(0, subcomponentBuffer->size);
+		subcomponentBufferMappedRange = subcomponentBuffer->map<GUISubcomponent>(0, subcomponentBuffer->getSize());
 	}
 
 	void GUIRenderer::createGlyphSubcomponentBuffer() {
@@ -238,13 +238,13 @@ namespace Trident {
 
 		glyphSubcomponentBuffer = createBuffer(glyphSubcomponentBufferDescriptor);
 
-		glyphSubcomponentBufferMappedRange = glyphSubcomponentBuffer->map<GUIGlyphSubcomponent>(0, glyphSubcomponentBuffer->size);
+		glyphSubcomponentBufferMappedRange = glyphSubcomponentBuffer->map<GUIGlyphSubcomponent>(0, glyphSubcomponentBuffer->getSize());
 	}
 
 	void GUIRenderer::createTextureArrayStagingBuffer() {
 		textureArrayStagingBuffer = createStagingBuffer(TEXTURE_ARRAY_MAX_WIDTH * TEXTURE_ARRAY_MAX_HEIGHT * TEXTURE_ARRAY_MAX_LAYER_COUNT * TEXTURE_ARRAY_LAYER_BPP);
 
-		textureArrayStagingBufferMappedRange = textureArrayStagingBuffer->map<uint8>(0, textureArrayStagingBuffer->size);
+		textureArrayStagingBufferMappedRange = textureArrayStagingBuffer->map<uint8>(0, textureArrayStagingBuffer->getSize());
 	}
 
 	void GUIRenderer::createTextureArrayImage() {
@@ -450,7 +450,7 @@ namespace Trident {
 	void GUIRenderer::copyBuffers() const {
 		const ref<Buffer> stagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE);
 
-		uint8* mappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
+		uint8* mappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->getSize());
 
 		Vertex* vertexMappedRange = pointer_cast<Vertex*>(mappedRange);
 		vertexMappedRange[0].position = {0.0f, 0.0f};
@@ -475,12 +475,12 @@ namespace Trident {
 		BufferCopyRegion vertexBufferCopyRegion{};
 		vertexBufferCopyRegion.sourceOffset = 0;
 		vertexBufferCopyRegion.destinationOffset = 0;
-		vertexBufferCopyRegion.size = vertexBuffer->size;
+		vertexBufferCopyRegion.size = vertexBuffer->getSize();
 
 		BufferCopyRegion indexBufferCopyRegion{};
-		indexBufferCopyRegion.sourceOffset = vertexBuffer->size;
+		indexBufferCopyRegion.sourceOffset = vertexBuffer->getSize();
 		indexBufferCopyRegion.destinationOffset = 0;
-		indexBufferCopyRegion.size = indexBuffer->size;
+		indexBufferCopyRegion.size = indexBuffer->getSize();
 
 		CommandBufferDescriptor commandBufferDescriptor{};
 		commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -504,7 +504,7 @@ namespace Trident {
 		DescriptorBuffer cameraDescriptorBuffer{};
 		cameraDescriptorBuffer.buffer = cameraBuffer;
 		cameraDescriptorBuffer.offset = 0;
-		cameraDescriptorBuffer.size = cameraBuffer->size;
+		cameraDescriptorBuffer.size = cameraBuffer->getSize();
 
 		DescriptorImage nearestTextureArrayDescriptorImage{};
 		nearestTextureArrayDescriptorImage.imageView = textureArrayImageView;

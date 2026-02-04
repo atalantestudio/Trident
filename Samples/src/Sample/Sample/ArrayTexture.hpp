@@ -139,7 +139,7 @@ namespace Trident {
 
 				const ref<Buffer> stagingBuffer = createStagingBuffer(stagingBufferSize);
 
-				uint8* stagingBufferMappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
+				uint8* stagingBufferMappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->getSize());
 
 				for (const File<FileFormat::PNG>& asset : assets) {
 					std::copy(asset.data.begin(), asset.data.end(), stagingBufferMappedRange);
@@ -310,7 +310,7 @@ namespace Trident {
 			void createBuffers() {
 				const ref<Buffer> stagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE + INSTANCE_BUFFER_SIZE);
 
-				uint8* stagingBufferMappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
+				uint8* stagingBufferMappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->getSize());
 
 				Vertex* vertexStagingBufferMappedRange = pointer_cast<Vertex*>(stagingBufferMappedRange);
 				vertexStagingBufferMappedRange[0].position = {-0.5f,  0.5f};
@@ -352,12 +352,12 @@ namespace Trident {
 				BufferCopyRegion vertexBufferCopyRegion{};
 				vertexBufferCopyRegion.sourceOffset = 0;
 				vertexBufferCopyRegion.destinationOffset = 0;
-				vertexBufferCopyRegion.size = vertexBuffer->size;
+				vertexBufferCopyRegion.size = vertexBuffer->getSize();
 
 				BufferCopyRegion instanceBufferCopyRegion{};
-				instanceBufferCopyRegion.sourceOffset = vertexBuffer->size;
+				instanceBufferCopyRegion.sourceOffset = vertexBuffer->getSize();
 				instanceBufferCopyRegion.destinationOffset = 0;
-				instanceBufferCopyRegion.size = instanceBuffer->size;
+				instanceBufferCopyRegion.size = instanceBuffer->getSize();
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;

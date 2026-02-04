@@ -214,11 +214,11 @@ namespace Trident {
 	}
 
 	void DX12::CommandEncoder::bindVertexBuffer(uint32 bindingIndex, ref<Trident::Buffer> vertexBuffer, uint64 offset, uint32 stride) {
-		ADAPTER_ASSERT(offset < vertexBuffer->size, "The vertex buffer offset is overflowing.");
+		ADAPTER_ASSERT(offset < vertexBuffer->getSize(), "The vertex buffer offset is overflowing.");
 
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 		vertexBufferView.BufferLocation = std::static_pointer_cast<DX12::Buffer>(vertexBuffer)->resource->GetGPUVirtualAddress() + offset;
-		vertexBufferView.SizeInBytes = static_cast<UINT>(vertexBuffer->size - offset);
+		vertexBufferView.SizeInBytes = static_cast<UINT>(vertexBuffer->getSize() - offset);
 		vertexBufferView.StrideInBytes = stride;
 
 		commandList->IASetVertexBuffers(bindingIndex, 1, &vertexBufferView);
@@ -233,8 +233,8 @@ namespace Trident {
 		// D3D12_HEAP_TYPE_UPLOAD heaps only allow CPU writes.
 		// The source and destination buffers are mapped to emulate a GPU copy command.
 		if (_destinationBuffer->heapType == D3D12_HEAP_TYPE_UPLOAD) {
-			const uint8* sourceMappedRange = sourceBuffer->map<uint8>(0, sourceBuffer->size);
-			uint8* destinationMappedRange = destinationBuffer->map<uint8>(0, destinationBuffer->size);
+			const uint8* sourceMappedRange = sourceBuffer->map<uint8>(0, sourceBuffer->getSize());
+			uint8* destinationMappedRange = destinationBuffer->map<uint8>(0, destinationBuffer->getSize());
 
 			for (const BufferCopyRegion& copyRegion : copyRegions) {
 				std::copy_n(sourceMappedRange + copyRegion.sourceOffset, copyRegion.size, destinationMappedRange + copyRegion.destinationOffset);
@@ -586,11 +586,11 @@ namespace Trident {
 	}
 
 	void DX12::CommandEncoder::bindIndexBuffer(ref<Trident::Buffer> indexBuffer, uint64 offset, uint8 indexTypeSize) {
-		ADAPTER_ASSERT(offset < indexBuffer->size, "The index buffer offset is overflowing.");
+		ADAPTER_ASSERT(offset < indexBuffer->getSize(), "The index buffer offset is overflowing.");
 
 		D3D12_INDEX_BUFFER_VIEW indexBufferView{};
 		indexBufferView.BufferLocation = std::static_pointer_cast<DX12::Buffer>(indexBuffer)->resource->GetGPUVirtualAddress() + offset;
-		indexBufferView.SizeInBytes = static_cast<UINT>(indexBuffer->size - offset);
+		indexBufferView.SizeInBytes = static_cast<UINT>(indexBuffer->getSize() - offset);
 		indexBufferView.Format = getIndexBufferFormat(indexTypeSize);
 
 		commandList->IASetIndexBuffer(&indexBufferView);

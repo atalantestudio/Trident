@@ -183,7 +183,7 @@ namespace Trident {
 			void createBuffers() {
 				const ref<Buffer> stagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE);
 
-				Vertex* vertexStagingBufferMappedRange = stagingBuffer->map<Vertex>(0, stagingBuffer->size);
+				Vertex* vertexStagingBufferMappedRange = stagingBuffer->map<Vertex>(0, stagingBuffer->getSize());
 				vertexStagingBufferMappedRange[0].position = {-0.5f, -0.5f};
 				vertexStagingBufferMappedRange[0].color = {1.0f, 0.0f, 0.0f};
 				vertexStagingBufferMappedRange[1].position = {0.0f, 0.5f};
@@ -205,7 +205,7 @@ namespace Trident {
 				BufferCopyRegion vertexBufferCopyRegion{};
 				vertexBufferCopyRegion.sourceOffset = 0;
 				vertexBufferCopyRegion.destinationOffset = 0;
-				vertexBufferCopyRegion.size = vertexBuffer->size;
+				vertexBufferCopyRegion.size = vertexBuffer->getSize();
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;

@@ -79,7 +79,7 @@ namespace Trident {
 				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->findImageAsset(IMAGE_ASSET_NAME);
 				const ref<Buffer> imageAssetStagingBuffer = createStagingBuffer(imageAsset->getData().count());
 
-				uint8* imageAssetStagingBufferMappedRange = imageAssetStagingBuffer->map<uint8>(0, imageAssetStagingBuffer->size);
+				uint8* imageAssetStagingBufferMappedRange = imageAssetStagingBuffer->map<uint8>(0, imageAssetStagingBuffer->getSize());
 
 				std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), imageAssetStagingBufferMappedRange);
 

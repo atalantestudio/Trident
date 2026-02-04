@@ -33,14 +33,14 @@ namespace Trident {
 				vertexDescriptorSet = descriptorSets[0];
 
 				cameraBuffer = createCameraBuffer();
-				cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
+				cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->getSize());
 			}
 
 			void postSetScene() override {
 				createMaterialObjects();
 
 				instanceBuffer = createInstanceBuffer();
-				instanceMappedRange = instanceBuffer->map<Instance>(0, instanceBuffer->size);
+				instanceMappedRange = instanceBuffer->map<Instance>(0, instanceBuffer->getSize());
 
 				Entity entity = 0;
 
@@ -79,7 +79,7 @@ namespace Trident {
 					vertexTextureCoordinateIndexBufferSize
 				);
 
-				uint8* mappedRange = vertexStagingBuffer->map<uint8>(0, vertexStagingBuffer->size);
+				uint8* mappedRange = vertexStagingBuffer->map<uint8>(0, vertexStagingBuffer->getSize());
 				float32* vertexPositionComponentMappedRange = pointer_cast<float32*>(mappedRange);
 				uint32* vertexPositionIndexMappedRange = pointer_cast<uint32*>(mappedRange + vertexPositionComponentBufferSize);
 				float32* vertexNormalComponentMappedRange = pointer_cast<float32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize);
@@ -113,7 +113,7 @@ namespace Trident {
 				vertexStagingBuffer->unmap();
 
 				BufferDescriptor vertexBufferDescriptor{};
-				vertexBufferDescriptor.size = vertexStagingBuffer->size;
+				vertexBufferDescriptor.size = vertexStagingBuffer->getSize();
 				vertexBufferDescriptor.usage = BufferUsage::READ_ONLY_STORAGE | BufferUsage::TRANSFER_DST;
 				vertexBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL;
 				vertexBufferDescriptor.persistent = false;
@@ -125,7 +125,7 @@ namespace Trident {
 				BufferCopyRegion vertexBufferCopyRegion{};
 				vertexBufferCopyRegion.sourceOffset = 0;
 				vertexBufferCopyRegion.destinationOffset = 0;
-				vertexBufferCopyRegion.size = vertexBuffer->size;
+				vertexBufferCopyRegion.size = vertexBuffer->getSize();
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;
@@ -469,7 +469,7 @@ namespace Trident {
 				DescriptorBuffer cameraDescriptorBuffer{};
 				cameraDescriptorBuffer.buffer = cameraBuffer;
 				cameraDescriptorBuffer.offset = 0;
-				cameraDescriptorBuffer.size = cameraBuffer->size;
+				cameraDescriptorBuffer.size = cameraBuffer->getSize();
 
 				DescriptorBuffer vertexPositionComponentDescriptorBuffer{};
 				vertexPositionComponentDescriptorBuffer.buffer = vertexBuffer;

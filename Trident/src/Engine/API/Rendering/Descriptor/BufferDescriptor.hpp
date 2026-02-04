@@ -8,7 +8,7 @@
 
 namespace Trident {
 	struct BufferDescriptor {
-		// Size of the buffer in bytes.
+		/// Size in bytes of the buffer.
 		uint64 size;
 
 		BufferUsage usage;

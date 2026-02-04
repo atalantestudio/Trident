@@ -128,7 +128,7 @@ namespace Trident {
 			void createBuffers() {
 				const ref<Buffer> stagingBuffer = createStagingBuffer(VERTEX_BUFFER_SIZE + INDEX_BUFFER_SIZE + INDIRECT_BUFFER_SIZE);
 
-				uint8* stagingBufferMappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->size);
+				uint8* stagingBufferMappedRange = stagingBuffer->map<uint8>(0, stagingBuffer->getSize());
 
 				Vertex* vertexStagingBufferMappedRange = pointer_cast<Vertex*>(stagingBufferMappedRange);
 				vertexStagingBufferMappedRange[0].position = {-0.5f, -0.5f};
@@ -183,17 +183,17 @@ namespace Trident {
 				BufferCopyRegion vertexBufferCopyRegion{};
 				vertexBufferCopyRegion.sourceOffset = 0;
 				vertexBufferCopyRegion.destinationOffset = 0;
-				vertexBufferCopyRegion.size = vertexBuffer->size;
+				vertexBufferCopyRegion.size = vertexBuffer->getSize();
 
 				BufferCopyRegion indexBufferCopyRegion{};
-				indexBufferCopyRegion.sourceOffset = vertexBuffer->size;
+				indexBufferCopyRegion.sourceOffset = vertexBuffer->getSize();
 				indexBufferCopyRegion.destinationOffset = 0;
-				indexBufferCopyRegion.size = indexBuffer->size;
+				indexBufferCopyRegion.size = indexBuffer->getSize();
 
 				BufferCopyRegion indirectBufferCopyRegion{};
-				indirectBufferCopyRegion.sourceOffset = vertexBuffer->size + indexBuffer->size;
+				indirectBufferCopyRegion.sourceOffset = vertexBuffer->getSize() + indexBuffer->getSize();
 				indirectBufferCopyRegion.destinationOffset = 0;
-				indirectBufferCopyRegion.size = indirectBuffer->size;
+				indirectBufferCopyRegion.size = indirectBuffer->getSize();
 
 				CommandBufferDescriptor commandBufferDescriptor{};
 				commandBufferDescriptor.usage = CommandBufferUsage::ONE_TIME_SUBMIT;

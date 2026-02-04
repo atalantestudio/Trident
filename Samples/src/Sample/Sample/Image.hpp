@@ -81,7 +81,7 @@ namespace Trident {
 
 				const ref<Buffer> imageStagingBuffer = createStagingBuffer(file.data.count());
 
-				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->size);
+				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->getSize());
 
 				std::copy(file.data.begin(), file.data.end(), imageStagingBufferMappedRange);
 

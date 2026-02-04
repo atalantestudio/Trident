@@ -11,14 +11,19 @@ namespace Trident {
 		public:
 			virtual ~Buffer() = default;
 
-			// Maps a range of the buffer to CPU memory.
-			// `size` must be given in bytes. It is not multiplied by the size of T.
+			/// Returns the size in bytes of the buffer.
+			uint64 getSize() const {
+				return size;
+			}
+
+			/// Maps a range of the buffer to CPU memory.
+			/// The offset and size must be provided in bytes.
 			template<typename T>
 			T* map(uint64 offset, uint64 size) const {
 				return static_cast<T*>(getMappedRange(offset, size));
 			}
 
-			// Unmaps the buffer.
+			/// Unmaps the buffer.
 			virtual void unmap() const = 0;
 
 		protected:
@@ -33,9 +38,10 @@ namespace Trident {
 			virtual void* getMappedRange(uint64 offset, uint64 size) const = 0;
 
 		public:
-			const uint64 size;
+			// NOTE: Only used for debug assertions.
+			BufferUsage usage;
 
-			// NOTE: This member is only used for assertions in the OpenGL adapter.
-			const BufferUsage usage;
+		protected:
+			uint64 size;
 	};
 }
