@@ -115,8 +115,8 @@ namespace Trident {
 		shaderResourceViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
 		shaderResourceViewDescriptor.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 		shaderResourceViewDescriptor.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		shaderResourceViewDescriptor.Buffer.FirstElement = 0;
-		shaderResourceViewDescriptor.Buffer.NumElements = static_cast<UINT>(buffer->size);
+		shaderResourceViewDescriptor.Buffer.FirstElement = descriptorBuffer.offset;
+		shaderResourceViewDescriptor.Buffer.NumElements = static_cast<UINT>(descriptorBuffer.size);
 		shaderResourceViewDescriptor.Buffer.StructureByteStride = 1;
 		shaderResourceViewDescriptor.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
@@ -129,8 +129,8 @@ namespace Trident {
 		D3D12_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDescriptor{};
 		unorderedAccessViewDescriptor.Format = DXGI_FORMAT_UNKNOWN;
 		unorderedAccessViewDescriptor.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-		unorderedAccessViewDescriptor.Buffer.FirstElement = 0;
-		unorderedAccessViewDescriptor.Buffer.NumElements = static_cast<UINT>(descriptorBuffer.buffer->size);
+		unorderedAccessViewDescriptor.Buffer.FirstElement = descriptorBuffer.offset;
+		unorderedAccessViewDescriptor.Buffer.NumElements = static_cast<UINT>(descriptorBuffer.size);
 		unorderedAccessViewDescriptor.Buffer.StructureByteStride = 1;
 		unorderedAccessViewDescriptor.Buffer.CounterOffsetInBytes = 0;
 		unorderedAccessViewDescriptor.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
