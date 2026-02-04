@@ -26,57 +26,19 @@ namespace Trident {
 
 				createFramebuffers();
 
+				vertexDescriptorSetLayout = createVertexDescriptorSetLayout();
+
+				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({vertexDescriptorSetLayout});
+
+				vertexDescriptorSet = descriptorSets[0];
+
 				cameraBuffer = createCameraBuffer();
 				cameraMappedRange = cameraBuffer->map<Camera>(0, cameraBuffer->size);
-
-				forwardDescriptorSetLayout = createForwardDescriptorSetLayout();
-				forwardPipelineLayout = createForwardPipelineLayout();
-
-				allocateDescriptorSets();
-
-				VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
-				instanceInputBinding.registerAttribute<mat4x4<float32>>();
-
-				ShaderModuleDescriptor vertexShaderModuleDescriptor{};
-				vertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
-				vertexShaderModuleDescriptor.entryPoint = "main";
-
-				SET_DEBUG_NAME(vertexShaderModuleDescriptor, "Forward vertex");
-
-				ShaderModuleDescriptor fragmentShaderModuleDescriptor{};
-				fragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
-				fragmentShaderModuleDescriptor.entryPoint = "main";
-
-				SET_DEBUG_NAME(fragmentShaderModuleDescriptor, "Forward fragment");
-
-				ColorBlendAttachment colorBlendAttachment{};
-				colorBlendAttachment.blend = false;
-
-				RenderPipelineDescriptor forwardPipelineDescriptor{};
-				forwardPipelineDescriptor.pipelineLayout = forwardPipelineLayout;
-				forwardPipelineDescriptor.vertexInputBindings = {instanceInputBinding};
-				forwardPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(vertexShaderModuleDescriptor, "Forward/Forward.vert");
-				forwardPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(fragmentShaderModuleDescriptor, "Forward/Forward.frag");
-				forwardPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
-				forwardPipelineDescriptor.polygonMode = PolygonMode::FILL;
-				forwardPipelineDescriptor.cullMode = CullMode::BACK;
-				forwardPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
-				forwardPipelineDescriptor.lineWidth = 1.0f;
-				forwardPipelineDescriptor.minSampleShading = 0.0f;
-				forwardPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
-				forwardPipelineDescriptor.depthStencilState.depthTest = true;
-				forwardPipelineDescriptor.depthStencilState.depthWrite = true;
-				forwardPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::LESS;
-				forwardPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
-				forwardPipelineDescriptor.renderPass = renderPass;
-				forwardPipelineDescriptor.subpassIndex = 0;
-
-				SET_DEBUG_NAME(forwardPipelineDescriptor, "Forward");
-
-				forwardPipeline = createRenderPipeline(forwardPipelineDescriptor);
 			}
 
 			void postSetScene() override {
+				createMaterialObjects();
+
 				BufferDescriptor instanceBufferDescriptor{};
 				instanceBufferDescriptor.size = sizeof(Instance) * scene->getInstanceCount();
 				instanceBufferDescriptor.usage = BufferUsage::VERTEX;
@@ -96,25 +58,21 @@ namespace Trident {
 					entity += 1;
 				}
 
+				view<ref<Geometry3D>> geometries = scene->getGeometries();
 				uint64 vertexPositionComponentBufferSize = 0;
 				uint64 vertexPositionIndexBufferSize = 0;
 				uint64 vertexNormalComponentBufferSize = 0;
 				uint64 vertexNormalIndexBufferSize = 0;
 				uint64 vertexTextureCoordinateComponentBufferSize = 0;
 				uint64 vertexTextureCoordinateIndexBufferSize = 0;
-				uint32 geometryIndex = 0;
 
-				while (geometryIndex < scene->getGeometryCount()) {
-					const ref<Geometry3D> geometry = scene->getGeometry(geometryIndex);
-
+				for (const ref<Geometry3D> geometry : geometries) {
 					vertexPositionComponentBufferSize += sizeof(float32) * geometry->getVertexPositionComponents().count();
 					vertexPositionIndexBufferSize += sizeof(uint32) * geometry->getVertexPositionIndices().count();
 					vertexNormalComponentBufferSize += sizeof(float32) * geometry->getVertexNormalComponents().count();
 					vertexNormalIndexBufferSize += sizeof(uint32) * geometry->getVertexNormalIndices().count();
 					vertexTextureCoordinateComponentBufferSize += sizeof(float32) * geometry->getVertexTextureCoordinateComponents().count();
 					vertexTextureCoordinateIndexBufferSize += sizeof(uint32) * geometry->getVertexTextureCoordinateIndices().count();
-
-					geometryIndex += 1;
 				}
 
 				const ref<Buffer> stagingBuffer = createStagingBuffer(
@@ -134,10 +92,7 @@ namespace Trident {
 				float32* vertexTextureCoordinateComponentMappedRange = pointer_cast<float32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize);
 				uint32* vertexTextureCoordinateIndexMappedRange = pointer_cast<uint32*>(mappedRange + vertexPositionComponentBufferSize + vertexPositionIndexBufferSize + vertexNormalComponentBufferSize + vertexNormalIndexBufferSize + vertexTextureCoordinateComponentBufferSize);
 
-				geometryIndex = 0;
-
-				while (geometryIndex < scene->getGeometryCount()) {
-					const ref<Geometry3D> geometry = scene->getGeometry(geometryIndex);
+				for (const ref<Geometry3D> geometry : geometries) {
 					const view<float32> vertexPositionComponents = geometry->getVertexPositionComponents();
 					const view<uint32> vertexPositionIndices = geometry->getVertexPositionIndices();
 					const view<float32> vertexNormalComponents = geometry->getVertexNormalComponents();
@@ -158,7 +113,6 @@ namespace Trident {
 					vertexNormalIndexMappedRange += vertexNormalIndices.count();
 					vertexTextureCoordinateComponentMappedRange += vertexTextureCoordinateComponents.count();
 					vertexTextureCoordinateIndexMappedRange += vertexTextureCoordinateIndices.count();
-					geometryIndex += 1;
 				}
 
 				stagingBuffer->unmap();
@@ -280,42 +234,47 @@ namespace Trident {
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);
 
+				const ClearValue swapchainClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
+
 				ClearValue depthStencilClearValue{};
 				depthStencilClearValue.depth = 1.0f;
 				depthStencilClearValue.stencil = 0;
 
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}, depthStencilClearValue};
+				beginRenderPassDescriptor.clearValues = {swapchainClearValue, depthStencilClearValue};
 
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
-				commandEncoder->bindRenderPipeline(forwardPipeline);
-				commandEncoder->bindDescriptorSets(forwardPipelineLayout, {forwardDescriptorSet});
-				commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
+				commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
 
-				const view<RigidBody3D> rigidBodyPool = scene->getInstances();
-				const view<ref<Geometry3D>> geometryPool = scene->getGeometries();
+				const view<ref<Geometry3D>> geometries = scene->getGeometries();
+				const view<Material> materials = scene->getMaterials();
+				const view<MaterialReference> materialReferences = scene->getMaterialReferences();
+				const view<RigidBody3D> instances = scene->getInstances();
 
 				uint32 instanceIndex = 0;
 				uint32 geometryIndex;
 				uint32 indexOffset;
 
 				while (instanceIndex < scene->getInstanceCount()) {
-					const RigidBody3D& rigidBody = rigidBodyPool[instanceIndex];
-					const ref<Geometry3D> geometry = geometryPool[rigidBody.geometryIndex];
+					const RigidBody3D& instance = instances[instanceIndex];
+					const ref<Geometry3D> geometry = geometries[instance.geometryIndex];
+					const MaterialReference& materialReference = materialReferences[instance.materialReferenceIndex];
 
 					geometryIndex = 0;
 					indexOffset = 0;
 
-					while (geometryIndex < rigidBody.geometryIndex) {
-						const ref<Geometry3D> geometry = geometryPool[geometryIndex];
+					while (geometryIndex < instance.geometryIndex) {
+						const ref<Geometry3D> geometry = geometries[geometryIndex];
 
 						indexOffset += static_cast<uint32>(geometry->getVertexPositionIndices().count());
 						geometryIndex += 1;
 					}
 
+					commandEncoder->bindRenderPipeline(materialPipelines[materialReference.materialIndex]);
+					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialReference.materialIndex], {vertexDescriptorSet, materialDescriptorSets[materialReference.materialIndex]});
 					commandEncoder->draw(static_cast<uint32>(geometry->getVertexPositionIndices().count()), 1, indexOffset, instanceIndex);
 
 					instanceIndex += 1;
@@ -333,15 +292,11 @@ namespace Trident {
 			}
 
 			void updateTransform(Entity entity) {
-				instanceMappedRange[entity].transform = scene->getInstance(entity).transform;
+				instanceMappedRange[entity].transform = scene->getInstances()[entity].transform;
 			}
 
 			void updateCamera() {
 				cameraMappedRange->projectionView = getCameraController<PerspectiveCamera>().getCamera().getProjectionView();
-			}
-
-			void postSetCameraController() override {
-				updateCamera();
 			}
 
 		private:
@@ -373,7 +328,10 @@ namespace Trident {
 				subpassDescriptor.depthStencilAttachmentReference = depthStencilAttachmentReference;
 
 				RenderPassDescriptor renderPassDescriptor{};
-				renderPassDescriptor.attachments = {swapchainAttachment, depthStencilAttachment};
+				renderPassDescriptor.attachments = {
+					swapchainAttachment,
+					depthStencilAttachment,
+				};
 				renderPassDescriptor.subpasses = {createSubpass(subpassDescriptor)};
 
 				renderPass = createRenderPass(renderPassDescriptor);
@@ -399,7 +357,7 @@ namespace Trident {
 					#if defined(BUILD_MODE_DEBUG)
 						name = Logger::format("In flight framebuffer []", framebufferIndex);
 
-						framebufferDescriptor.name = name;
+						SET_DEBUG_NAME(framebufferDescriptor, name);
 					#endif
 
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
@@ -438,19 +396,7 @@ namespace Trident {
 				return depthStencilImage->createView(depthStencilImageViewDescriptor);
 			}
 
-			ref<Buffer> createCameraBuffer() const {
-				BufferDescriptor cameraBufferDescriptor{};
-				cameraBufferDescriptor.size = sizeof(Camera);
-				cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
-				cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
-				cameraBufferDescriptor.persistent = true;
-
-				SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
-
-				return createBuffer(cameraBufferDescriptor);
-			}
-
-			ref<DescriptorSetLayout> createForwardDescriptorSetLayout() const {
+			ref<DescriptorSetLayout> createVertexDescriptorSetLayout() const {
 				DescriptorSetLayoutBinding cameraBinding{};
 				cameraBinding.descriptorType = DescriptorType::UNIFORM_BUFFER;
 				cameraBinding.descriptorCount = 1;
@@ -497,19 +443,96 @@ namespace Trident {
 				});
 			}
 
-			ref<PipelineLayout> createForwardPipelineLayout() const {
-				PipelineLayoutDescriptor forwardPipelineLayoutDescriptor{};
-				forwardPipelineLayoutDescriptor.descriptorSetLayouts = {forwardDescriptorSetLayout};
+			void createMaterialObjects() {
+				const view<Material> materials = scene->getMaterials();
 
-				SET_DEBUG_NAME(forwardPipelineLayoutDescriptor, "Forward");
+				materialDescriptorSetLayouts = sequence<ref<DescriptorSetLayout>>(materials.count());
+				materialDescriptorSets = sequence<ref<DescriptorSet>>(materials.count());
+				materialPipelineLayouts = sequence<ref<PipelineLayout>>(materials.count());
+				materialPipelines = sequence<ref<RenderPipeline>>(materials.count());
 
-				return createPipelineLayout(forwardPipelineLayoutDescriptor);
+				uint32 materialIndex = 0;
+
+				PipelineLayoutDescriptor materialPipelineLayoutDescriptor{};
+
+				VertexInputBinding instanceInputBinding(InputRate::INSTANCE);
+				instanceInputBinding.registerAttribute<mat4x4<float32>>();
+
+				ShaderModuleDescriptor materialVertexShaderModuleDescriptor{};
+				materialVertexShaderModuleDescriptor.stage = ShaderStage::VERTEX;
+				materialVertexShaderModuleDescriptor.entryPoint = "main";
+
+				SET_DEBUG_NAME(materialVertexShaderModuleDescriptor, "Material vertex");
+
+				ShaderModuleDescriptor materialFragmentShaderModuleDescriptor{};
+				materialFragmentShaderModuleDescriptor.stage = ShaderStage::FRAGMENT;
+				materialFragmentShaderModuleDescriptor.entryPoint = "main";
+
+				ColorBlendAttachment colorBlendAttachment{};
+				colorBlendAttachment.blend = false;
+
+				RenderPipelineDescriptor materialPipelineDescriptor{};
+				materialPipelineDescriptor.vertexInputBindings = {instanceInputBinding};
+				materialPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(materialVertexShaderModuleDescriptor, "Forward/Forward.vert");
+				materialPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+				materialPipelineDescriptor.polygonMode = PolygonMode::FILL;
+				materialPipelineDescriptor.cullMode = CullMode::BACK;
+				materialPipelineDescriptor.frontFace = FrontFace::CLOCKWISE;
+				materialPipelineDescriptor.lineWidth = 1.0f;
+				materialPipelineDescriptor.minSampleShading = 0.0f;
+				materialPipelineDescriptor.colorBlendState.attachments = {colorBlendAttachment};
+				materialPipelineDescriptor.depthStencilState.depthTest = true;
+				materialPipelineDescriptor.depthStencilState.depthWrite = true;
+				materialPipelineDescriptor.depthStencilState.compareOperation = CompareOperation::LESS;
+				materialPipelineDescriptor.dynamicState = DynamicState::VIEWPORT | DynamicState::SCISSOR;
+				materialPipelineDescriptor.renderPass = renderPass;
+				materialPipelineDescriptor.subpassIndex = 0;
+
+				#if defined(BUILD_MODE_DEBUG)
+					sequence<char8> name;
+				#endif
+
+				while (materialIndex < materials.count()) {
+					const Material& material = materials[materialIndex];
+
+					#if defined(BUILD_MODE_DEBUG)
+						name = Logger::format("Material [] fragment", materialIndex);
+
+						SET_DEBUG_NAME(materialFragmentShaderModuleDescriptor, name);
+
+						name = Logger::format("Material []", materialIndex);
+
+						SET_DEBUG_NAME(materialPipelineLayoutDescriptor, name);
+						SET_DEBUG_NAME(materialPipelineDescriptor, name);
+					#endif
+
+					materialDescriptorSetLayouts[materialIndex] = createDescriptorSetLayout(material.descriptorSetLayoutBindings);
+
+					materialPipelineLayoutDescriptor.descriptorSetLayouts = {vertexDescriptorSetLayout, materialDescriptorSetLayouts[materialIndex]};
+
+					materialPipelineLayouts[materialIndex] = createPipelineLayout(materialPipelineLayoutDescriptor);
+
+					materialPipelineDescriptor.pipelineLayout = materialPipelineLayouts[materialIndex];
+					materialPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(materialFragmentShaderModuleDescriptor, material.shaderModulePath);
+
+					materialPipelines[materialIndex] = createRenderPipeline(materialPipelineDescriptor);
+
+					materialIndex += 1;
+				}
+
+				materialDescriptorSets = getDevice()->allocateDescriptorSets(materialDescriptorSetLayouts);
 			}
 
-			void allocateDescriptorSets() {
-				const sequence<ref<DescriptorSet>> descriptorSets = getDevice()->allocateDescriptorSets({forwardDescriptorSetLayout});
+			ref<Buffer> createCameraBuffer() const {
+				BufferDescriptor cameraBufferDescriptor{};
+				cameraBufferDescriptor.size = sizeof(Camera);
+				cameraBufferDescriptor.usage = BufferUsage::UNIFORM;
+				cameraBufferDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::HOST_VISIBLE;
+				cameraBufferDescriptor.persistent = true;
 
-				forwardDescriptorSet = descriptorSets[0];
+				SET_DEBUG_NAME(cameraBufferDescriptor, "Camera");
+
+				return createBuffer(cameraBufferDescriptor);
 			}
 
 			void updateDescriptorSets() const {
@@ -549,37 +572,37 @@ namespace Trident {
 				vertexTextureCoordinateIndexDescriptorBuffer.size = vertexTextureCoordinateIndexBuffer->size;
 
 				WriteDescriptorSet cameraWriteDescriptorSet{};
-				cameraWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				cameraWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
 				cameraWriteDescriptorSet.bindingIndex = 0;
 				cameraWriteDescriptorSet.descriptorBuffers = {cameraDescriptorBuffer};
 
 				WriteDescriptorSet vertexPositionComponentWriteDescriptorSet{};
-				vertexPositionComponentWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				vertexPositionComponentWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
 				vertexPositionComponentWriteDescriptorSet.bindingIndex = 1;
 				vertexPositionComponentWriteDescriptorSet.descriptorBuffers = {vertexPositionComponentDescriptorBuffer};
 
 				WriteDescriptorSet vertexPositionIndexWriteDescriptorSet{};
-				vertexPositionIndexWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				vertexPositionIndexWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
 				vertexPositionIndexWriteDescriptorSet.bindingIndex = 2;
 				vertexPositionIndexWriteDescriptorSet.descriptorBuffers = {vertexPositionIndexDescriptorBuffer};
 
 				WriteDescriptorSet vertexNormalComponentWriteDescriptorSet{};
-				vertexNormalComponentWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				vertexNormalComponentWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
 				vertexNormalComponentWriteDescriptorSet.bindingIndex = 3;
 				vertexNormalComponentWriteDescriptorSet.descriptorBuffers = {vertexNormalComponentDescriptorBuffer};
 
 				WriteDescriptorSet vertexNormalIndexWriteDescriptorSet{};
-				vertexNormalIndexWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				vertexNormalIndexWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
 				vertexNormalIndexWriteDescriptorSet.bindingIndex = 4;
 				vertexNormalIndexWriteDescriptorSet.descriptorBuffers = {vertexNormalIndexDescriptorBuffer};
 
 				WriteDescriptorSet vertexTextureCoordinateComponentWriteDescriptorSet{};
-				vertexTextureCoordinateComponentWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				vertexTextureCoordinateComponentWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
 				vertexTextureCoordinateComponentWriteDescriptorSet.bindingIndex = 5;
 				vertexTextureCoordinateComponentWriteDescriptorSet.descriptorBuffers = {vertexTextureCoordinateComponentDescriptorBuffer};
 
 				WriteDescriptorSet vertexTextureCoordinateIndexWriteDescriptorSet{};
-				vertexTextureCoordinateIndexWriteDescriptorSet.descriptorSet = forwardDescriptorSet;
+				vertexTextureCoordinateIndexWriteDescriptorSet.descriptorSet = vertexDescriptorSet;
 				vertexTextureCoordinateIndexWriteDescriptorSet.bindingIndex = 6;
 				vertexTextureCoordinateIndexWriteDescriptorSet.descriptorBuffers = {vertexTextureCoordinateIndexDescriptorBuffer};
 
@@ -594,18 +617,22 @@ namespace Trident {
 				});
 			}
 
+			void postSetCameraController() override {}
+
 		private:
 			ref<RenderPass> renderPass;
 
 			sequence<ref<Framebuffer>> framebuffers;
 
-			ref<PipelineLayout> forwardPipelineLayout;
+			ref<DescriptorSetLayout> vertexDescriptorSetLayout;
+			sequence<ref<DescriptorSetLayout>> materialDescriptorSetLayouts;
 
-			ref<RenderPipeline> forwardPipeline;
+			ref<DescriptorSet> vertexDescriptorSet;
+			sequence<ref<DescriptorSet>> materialDescriptorSets;
 
-			ref<DescriptorSetLayout> forwardDescriptorSetLayout;
+			sequence<ref<PipelineLayout>> materialPipelineLayouts;
 
-			ref<DescriptorSet> forwardDescriptorSet;
+			sequence<ref<RenderPipeline>> materialPipelines;
 
 			ref<Buffer> cameraBuffer;
 			ref<Buffer> instanceBuffer;

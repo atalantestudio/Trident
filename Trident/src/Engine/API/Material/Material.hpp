@@ -3,20 +3,13 @@
 
 #pragma once
 
-#include "Engine/API/Material/MaterialDescriptor.hpp"
 #include "Engine/API/Rendering/DescriptorSet.hpp"
 
 namespace Trident {
-	class Material {
-		public:
-			explicit Material(const MaterialDescriptor& descriptor) :
-				writeDescriptorSets(descriptor.writeDescriptorSets.count())
-			{}
+	struct Material {
+		// Path to an internal shader module. Relative to "Trident/src/Asset/Shader/".
+		sequence<char8> shaderModulePath;
 
-		protected:
-			sequence<WriteDescriptorSet> writeDescriptorSets;
-
-		private:
-			uint32 pipelineIndex;
+		sequence<DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
 	};
 }

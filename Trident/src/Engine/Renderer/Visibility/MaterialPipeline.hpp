@@ -7,7 +7,7 @@
 
 namespace Trident {
 	void VisibilityRenderer::createMaterialPipelines() {
-		materialPipelines = sequence<ref<ComputePipeline>>(scene->materialPipelineDescriptors.count());
+		materialPipelines = sequence<ref<ComputePipeline>>(scene->materials.count());
 
 		ShaderModuleDescriptor materialShaderModuleDescriptor{};
 		materialShaderModuleDescriptor.stage = ShaderStage::COMPUTE;
@@ -30,7 +30,7 @@ namespace Trident {
 			#endif
 
 			materialPipelineDescriptor.pipelineLayout = materialPipelineLayouts[materialPipelineIndex];
-			materialPipelineDescriptor.computeShaderModule = loadInternalShaderModule(materialShaderModuleDescriptor, scene->materialPipelineDescriptors[materialPipelineIndex].shaderModulePath);
+			materialPipelineDescriptor.computeShaderModule = loadInternalShaderModule(materialShaderModuleDescriptor, scene->materials[materialPipelineIndex].shaderModulePath);
 
 			materialPipelines[materialPipelineIndex] = createComputePipeline(materialPipelineDescriptor);
 

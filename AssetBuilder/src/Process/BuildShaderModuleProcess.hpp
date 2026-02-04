@@ -221,7 +221,7 @@ namespace Trident {
 				logger(std::cout, LogLevel::ALL, "")
 			{}
 
-			sint32 main(const sequence<void*>& arguments) override {
+			sint32 main(view<void*> arguments) override {
 				const std::filesystem::path rootInputPath = pointer_cast<const char8*>(arguments[PROJECT_INPUT_PATH_ARGUMENT_INDEX]);
 				const std::filesystem::path rootOutputPath = pointer_cast<const char8*>(arguments[PROJECT_OUTPUT_PATH_ARGUMENT_INDEX]);
 				const std::filesystem::path assetOutputPath = rootOutputPath / "Asset/";

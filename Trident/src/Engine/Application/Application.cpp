@@ -187,10 +187,12 @@ namespace Trident {
 	}
 
 	sint32 Application::runProcesses() const {
+		const view<void*> arguments = consoleArguments;
+
 		sint32 code = 0;
 
 		for (const ref<Process> process : processes) {
-			code = process->main(consoleArguments);
+			code = process->main(arguments);
 
 			if (code != 0) {
 				ENGINE_DEBUG("Process [] exited with code [].", process->getId(), code);

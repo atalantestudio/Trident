@@ -7,7 +7,7 @@
 
 namespace Trident {
 	void VisibilityRenderer::createMaterialPipelineLayouts() {
-		materialPipelineLayouts = sequence<ref<PipelineLayout>>(scene->materialPipelineDescriptors.count());
+		materialPipelineLayouts = sequence<ref<PipelineLayout>>(scene->materials.count());
 
 		PipelineLayoutDescriptor materialPipelineLayoutDescriptor{};
 		materialPipelineLayoutDescriptor.descriptorSetLayouts = {materialBaseDescriptorSetLayout};

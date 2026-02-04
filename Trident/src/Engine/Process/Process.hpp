@@ -16,7 +16,7 @@ namespace Trident {
 			}
 
 			// NOTE: Implement to run a process computation.
-			virtual sint32 main(const sequence<void*>& arguments) = 0;
+			virtual sint32 main(view<void*> arguments) = 0;
 
 		private:
 			// Index of this process in the application process list.

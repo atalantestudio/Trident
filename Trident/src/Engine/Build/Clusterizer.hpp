@@ -14,15 +14,16 @@ namespace Trident {
 	static constexpr uint32 CLUSTER_INDEX_COUNT = CLUSTER_TRIANGLE_COUNT * 3;
 
 	static ClusteredScene clusterizeScene(const Scene3D& scene) {
-		const sequence<ref<Geometry3D>>& geometries = scene.getGeometries();
-
 		ClusteredScene clusteredScene{};
 		clusteredScene.geometries = sequence<ClusteredGeometry>(scene.getGeometryCount());
-		clusteredScene.materials = sequence<ref<Material>>(scene.getMaterialCount());
-		clusteredScene.materialPipelineDescriptors = sequence<MaterialPipelineDescriptor>(scene.getMaterialPipelineCount());
+		clusteredScene.materials = sequence<Material>(scene.getMaterialCount());
+		clusteredScene.materialReferences = sequence<MaterialReference>(scene.getMaterialReferenceCount());
 
 		std::copy_n(scene.getMaterials().begin(), clusteredScene.materials.count(), &clusteredScene.materials[0]);
-		std::copy_n(scene.getMaterialPipelineDescriptors().begin(), clusteredScene.materialPipelineDescriptors.count(), &clusteredScene.materialPipelineDescriptors[0]);
+		std::copy_n(scene.getMaterialReferences().begin(), clusteredScene.materialReferences.count(), &clusteredScene.materialReferences[0]);
+
+		const view<ref<Geometry3D>> geometries = scene.getGeometries();
+		const view<RigidBody3D> instances = scene.getInstances();
 
 		uint64 totalVertexPositionComponentCount = 0;
 		uint64 totalVertexNormalComponentCount = 0;
@@ -109,14 +110,17 @@ namespace Trident {
 
 		clusterOffset = 0;
 
-		while (instanceIndex < scene.getInstanceCount()) {
-			const RigidBody3D& instance = scene.getInstance(instanceIndex);
+		while (instanceIndex < instances.count()) {
+			const RigidBody3D& instance = instances[instanceIndex];
 			const ClusteredGeometry& clusteredGeometry = clusteredScene.geometries[instance.geometryIndex];
 
 			ClusteredInstance& clusteredInstance = clusteredScene.instances[instanceIndex];
 			clusteredInstance.transform = instance.transform;
 			clusteredInstance.geometryIndex = instance.geometryIndex;
-			clusteredInstance.materialIndex = instance.materialIndex;
+
+			// TODO: Pack material index + material reference index?
+			clusteredInstance.materialIndex = instance.materialReferenceIndex;
+
 			clusteredInstance.clusterOffset = clusteredGeometry.clusterOffset - clusterOffset;
 
 			clusterIndex = 0;

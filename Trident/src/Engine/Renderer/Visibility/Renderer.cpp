@@ -153,27 +153,27 @@ namespace Trident {
 
 		// Material subpass
 		{
-			uint32 materialPipelineIndex = 0;
-			uint32 materialIndex;
+			uint32 materialIndex = 0;
+			uint32 materialReferenceIndex;
 
-			while (materialPipelineIndex < scene->materialPipelineDescriptors.count()) {
-				commandEncoder->bindComputePipeline(materialPipelines[materialPipelineIndex]);
-				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialPipelineIndex], {materialBaseDescriptorSet});
+			while (materialIndex < scene->materials.count()) {
+				commandEncoder->bindComputePipeline(materialPipelines[materialIndex]);
+				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialIndex], {materialBaseDescriptorSet});
 
-				const MaterialPipelineDescriptor& materialPipeline = scene->materialPipelineDescriptors[materialPipelineIndex];
+				const Material& material = scene->materials[materialIndex];
 
-				materialIndex = 0;
+				materialReferenceIndex = 0;
 
-				while (materialIndex < materialPipeline.materialCount) {
+				while (materialReferenceIndex < /* TODO: material.referenceCount */ 1) {
 					// TODO: Custom material descriptor sets.
 					// commandEncoder->bindDescriptorSets(materialPipeline.descriptorSetLayoutBindings);
 
-					commandEncoder->dispatchIndirect(materialIndirectBuffer, sizeof(DispatchIndirectCommand) * materialPipelineIndex);
+					commandEncoder->dispatchIndirect(materialIndirectBuffer, sizeof(DispatchIndirectCommand) * materialIndex);
 
-					materialIndex += 1;
+					materialReferenceIndex += 1;
 				}
 
-				materialPipelineIndex += 1;
+				materialIndex += 1;
 			}
 		}
 

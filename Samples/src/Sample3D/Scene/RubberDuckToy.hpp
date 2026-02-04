@@ -3,21 +3,57 @@
 
 #pragma once
 
+#include "Engine/API/Material/Material.hpp"
 #include "Engine/API/Scene/Scene3D.hpp"
 
 namespace Trident {
 	static Scene3D createScene(const AssetLibrary& assetLibrary) {
 		Scene3D scene;
 
-		const ref<GeometryAsset> geometryAsset = assetLibrary.findGeometryAsset("rubber_duck_toy_4k");
+		const ref<GeometryAsset> geometryAsset = assetLibrary.findGeometryAsset("rubber_duck_toy_1k");
 		const ref<Geometry3D> geometry = createRef<Geometry3D>(geometryAsset);
 		const uint32 geometryIndex = scene.registerGeometry(geometry);
+
+		DescriptorSetLayoutBinding armBinding{};
+		armBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE;
+		armBinding.descriptorCount = 1;
+		armBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		DescriptorSetLayoutBinding diffuseBinding{};
+		diffuseBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE;
+		diffuseBinding.descriptorCount = 1;
+		diffuseBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		DescriptorSetLayoutBinding normalBinding{};
+		normalBinding.descriptorType = DescriptorType::READ_ONLY_STORAGE_IMAGE;
+		normalBinding.descriptorCount = 1;
+		normalBinding.shaderStages = ShaderStage::FRAGMENT;
+
+		Material pbrMaterial{};
+		pbrMaterial.shaderModulePath = "Material/PBR.frag";
+		pbrMaterial.descriptorSetLayoutBindings = {
+			armBinding,
+			diffuseBinding,
+			normalBinding,
+		};
+
+		const uint32 pbrMaterialIndex = scene.registerMaterial(pbrMaterial);
+
+		MaterialReference pbrMaterialReference{};
+		pbrMaterialReference.materialIndex = pbrMaterialIndex;
+		pbrMaterialReference.descriptorImagePaths = {
+			"Asset/Geometry/rubber_duck_toy_1k/textures/rubber_duck_toy_arm_1k.png",
+			"Asset/Geometry/rubber_duck_toy_1k/textures/rubber_duck_toy_diff_1k.png",
+			"Asset/Geometry/rubber_duck_toy_1k/textures/rubber_duck_toy_nor_gl_1k.png",
+		};
+
+		const uint32 pbrMaterialReferenceIndex = scene.registerMaterialReference(pbrMaterialReference);
 
 		InstanceDescriptor instanceDescriptor{};
 		instanceDescriptor.position = {0.0_m, -0.125_m, 0.0_m};
 		instanceDescriptor.rotation = {pi<float32>() * 0.5f, -pi<float32>() * 0.5f, 0.0_rad};
 		instanceDescriptor.geometryIndex = geometryIndex;
-		instanceDescriptor.materialIndex = 1;
+		instanceDescriptor.materialReferenceIndex = pbrMaterialReferenceIndex;
 
 		scene.registerInstance(instanceDescriptor);
 
