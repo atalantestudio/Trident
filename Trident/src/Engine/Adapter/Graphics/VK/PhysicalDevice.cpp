@@ -133,6 +133,8 @@ namespace Trident {
 		limits.maxVertexInputBindingCount = properties.limits.maxVertexInputBindings;
 		limits.maxVertexInputBindingStride = properties.limits.maxVertexInputBindingStride;
 		limits.pointSizeGranularity = properties.limits.pointSizeGranularity;
+		limits.minUniformBufferOffsetAlignment = properties.limits.minUniformBufferOffsetAlignment;
+		limits.minStorageBufferOffsetAlignment = properties.limits.minStorageBufferOffsetAlignment;
 	}
 
 	void VK::PhysicalDevice::selectQueueFamilyIndices() {

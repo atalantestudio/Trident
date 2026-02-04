@@ -11,6 +11,9 @@ namespace Trident {
 		public:
 			explicit PhysicalDevice(const DX12::Instance& instance);
 
+		private:
+			void setLimits();
+
 		public:
 			IDXGIAdapter* adapter;
 	};

@@ -10,17 +10,57 @@ namespace Trident {
 	static Scene3D createScene(const AssetLibrary& assetLibrary) {
 		Scene3D scene;
 
-		const vec3<float32> size = {1.0_m, 1.0_m, 0.0_m};
-		const ref<Geometry3D> wallGeometry = createRef<BoxGeometry3D>(size);
-		const uint32 wallGeometryIndex = scene.registerGeometry(wallGeometry);
+		Geometry3DDescriptor geometryDescriptor{};
+		geometryDescriptor.vertexPositionComponents = {
+			-0.5f,  0.5f,  0.0f,
+			 0.5f,  0.5f,  0.0f,
+			 0.5f, -0.5f,  0.0f,
+			-0.5f, -0.5f,  0.0f,
+		};
+		geometryDescriptor.vertexPositionIndices = {
+			0, 1, 2,
+			0, 2, 3,
+		};
+		geometryDescriptor.vertexNormalComponents = {
+			0.0f,  0.0f, -1.0f,
+		};
+		geometryDescriptor.vertexNormalIndices = {
+			0, 0, 0,
+			0, 0, 0,
+		};
+		geometryDescriptor.vertexTextureCoordinateComponents = {
+			0.0f, 0.0f,
+			1.0f, 0.0f,
+			0.0f, 1.0f,
+			1.0f, 1.0f,
+		};
+		geometryDescriptor.vertexTextureCoordinateIndices = {
+			0, 1, 2,
+			0, 2, 3,
+		};
 
-		InstanceDescriptor wallInstanceDescriptor{};
-		wallInstanceDescriptor.position = {0.0_m, 0.0_m, 0.4_m};
-		wallInstanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
-		wallInstanceDescriptor.geometryIndex = wallGeometryIndex;
-		wallInstanceDescriptor.materialIndex = 1;
+		const ref<Geometry3D> geometry = createRef<Geometry3D>(geometryDescriptor);
+		const uint32 geometryIndex = scene.registerGeometry(geometry);
 
-		scene.registerInstance(wallInstanceDescriptor);
+		Material pbrMaterial{};
+		pbrMaterial.shaderModulePath = "Material/PBR.frag";
+		pbrMaterial.descriptorSetLayoutBindings = {};
+
+		const uint32 pbrMaterialIndex = scene.registerMaterial(pbrMaterial);
+
+		MaterialReference pbrMaterialReference{};
+		pbrMaterialReference.materialIndex = pbrMaterialIndex;
+		pbrMaterialReference.descriptorImagePaths = {};
+
+		const uint32 pbrMaterialReferenceIndex = scene.registerMaterialReference(pbrMaterialReference);
+
+		InstanceDescriptor instanceDescriptor{};
+		instanceDescriptor.position = {0.0_m, 0.0_m, 0.4_m};
+		instanceDescriptor.rotation = {0.0_rad, 0.0_rad, 0.0_rad};
+		instanceDescriptor.geometryIndex = geometryIndex;
+		instanceDescriptor.materialReferenceIndex = pbrMaterialReferenceIndex;
+
+		scene.registerInstance(instanceDescriptor);
 
 		return scene;
 	}

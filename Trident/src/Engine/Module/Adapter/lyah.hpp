@@ -308,6 +308,7 @@ namespace Trident {
 	}
 
 	using lyah::abs;
+	using lyah::ceil;
 	using lyah::clamp;
 	using lyah::cos;
 	using lyah::epsilon;
@@ -403,5 +404,10 @@ namespace Trident {
 
 	inline float32 avg(float32 a, float32 b) {
 		return (a + b) * 0.5f;
+	}
+
+	template<typename T>
+	inline T ceil(T value, T multiplier) {
+		return (value + multiplier - 1) & ~(multiplier - 1);
 	}
 }

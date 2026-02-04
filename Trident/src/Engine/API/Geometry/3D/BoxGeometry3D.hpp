@@ -71,10 +71,10 @@ namespace Trident {
 			};
 
 			static inline const sequence<float32> VERTEX_TEXTURE_COORDINATE_COMPONENTS = {
-				0, 0,
-				1, 0,
-				0, 1,
-				1, 1,
+				0.0f, 0.0f,
+				1.0f, 0.0f,
+				0.0f, 1.0f,
+				1.0f, 1.0f,
 			};
 
 			static inline const sequence<uint32> VERTEX_TEXTURE_COORDINATE_INDICES = {

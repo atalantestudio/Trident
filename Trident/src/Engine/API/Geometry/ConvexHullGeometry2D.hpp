@@ -35,9 +35,8 @@ namespace Trident {
 					{-0.5f, -0.5f}, // Bottom left
 				};
 				squareGeometryDescriptor.indices = {
-					0, 1,
-					2, 0,
-					2, 3,
+					0, 1, 2,
+					0, 2, 3,
 				};
 				squareGeometryDescriptor.edges = {
 					{0, 1}, // Top

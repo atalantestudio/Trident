@@ -9,17 +9,29 @@ namespace Trident {
 	static Scene3D createScene(const AssetLibrary& assetLibrary) {
 		Scene3D scene;
 
-		const ref<GeometryAsset> suzanneGeometryAsset = assetLibrary.findGeometryAsset("suzanne");
-		const ref<Geometry3D> suzanneGeometry = createRef<Geometry3D>(suzanneGeometryAsset);
-		const uint32 suzanneGeometryIndex = scene.registerGeometry(suzanneGeometry);
+		const ref<GeometryAsset> geometryAsset = assetLibrary.findGeometryAsset("suzanne");
+		const ref<Geometry3D> geometry = createRef<Geometry3D>(geometryAsset);
+		const uint32 geometryIndex = scene.registerGeometry(geometry);
 
-		InstanceDescriptor suzanneInstanceDescriptor{};
-		suzanneInstanceDescriptor.position = {0.0_m, 0.0_m, 0.0_m};
-		suzanneInstanceDescriptor.rotation = {pi<float32>() * -0.5f, 0.0_rad, pi<float32>()};
-		suzanneInstanceDescriptor.geometryIndex = suzanneGeometryIndex;
-		suzanneInstanceDescriptor.materialIndex = 1;
+		Material pbrMaterial{};
+		pbrMaterial.shaderModulePath = "Material/PBR.frag";
+		pbrMaterial.descriptorSetLayoutBindings = {};
 
-		scene.registerInstance(suzanneInstanceDescriptor);
+		const uint32 pbrMaterialIndex = scene.registerMaterial(pbrMaterial);
+
+		MaterialReference pbrMaterialReference{};
+		pbrMaterialReference.materialIndex = pbrMaterialIndex;
+		pbrMaterialReference.descriptorImagePaths = {};
+
+		const uint32 pbrMaterialReferenceIndex = scene.registerMaterialReference(pbrMaterialReference);
+
+		InstanceDescriptor instanceDescriptor{};
+		instanceDescriptor.position = {0.0_m, 0.0_m, 0.0_m};
+		instanceDescriptor.rotation = {pi<float32>() * -0.5f, 0.0_rad, pi<float32>()};
+		instanceDescriptor.geometryIndex = geometryIndex;
+		instanceDescriptor.materialReferenceIndex = pbrMaterialReferenceIndex;
+
+		scene.registerInstance(instanceDescriptor);
 
 		return scene;
 	}

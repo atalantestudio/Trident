@@ -21,5 +21,14 @@ namespace Trident {
 		ADAPTER_INFO("Using [].", description);
 
 		delete[] description;
+
+		setLimits();
+	}
+
+	void DX12::PhysicalDevice::setLimits() {
+		// TODO: Set other limits.
+
+		limits.minUniformBufferOffsetAlignment = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
+		limits.minStorageBufferOffsetAlignment = D3D12_RAW_UAV_SRV_BYTE_ALIGNMENT;
 	}
 }
