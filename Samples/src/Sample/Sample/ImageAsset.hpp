@@ -160,8 +160,16 @@ namespace Trident {
 
 				uint32 framebufferIndex = 0;
 
+				#if defined(BUILD_MODE_DEBUG)
+					sequence<char8> name;
+				#endif
+
 				while (framebufferIndex < framebuffers.count()) {
-					SET_DEBUG_NAME(framebufferDescriptor, Logger::format("In flight framebuffer []", framebufferIndex));
+					#if defined(BUILD_MODE_DEBUG)
+						name = Logger::format("In flight framebuffer []", framebufferIndex);
+
+						SET_DEBUG_NAME(framebufferDescriptor, name);
+					#endif
 
 					framebufferDescriptor.imageViews[0] = swapchain->getImageView(framebufferIndex);
 
