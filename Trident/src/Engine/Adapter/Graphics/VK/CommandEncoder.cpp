@@ -139,7 +139,7 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	void VK::CommandEncoder::bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, view<ref<Trident::DescriptorSet>> descriptorSets) {
+	void VK::CommandEncoder::bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<Trident::DescriptorSet>> descriptorSets) {
 		sequence<VkDescriptorSet> vkDescriptorSets(descriptorSets.count());
 
 		for (uint32 descriptorSetIndex = 0; descriptorSetIndex < descriptorSets.count(); descriptorSetIndex += 1) {
@@ -150,7 +150,7 @@ namespace Trident {
 			commandBuffer,
 			pipeline->bindPoint,
 			std::static_pointer_cast<VK::PipelineLayout>(pipelineLayout)->pipelineLayout,
-			0,
+			descriptorSetIndexOffset,
 			static_cast<uint32>(vkDescriptorSets.count()),
 			&vkDescriptorSets[0],
 			0,

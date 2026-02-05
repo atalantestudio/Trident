@@ -62,7 +62,8 @@ namespace Trident {
 		commands.emplace_back(createRef<GL::BindRenderPipelineCommand>(this->renderPipeline));
 	}
 
-	void GL::CommandEncoder::bindDescriptorSets(ref<PipelineLayout> pipelineLayout, view<ref<Trident::DescriptorSet>> descriptorSets) {
+	void GL::CommandEncoder::bindDescriptorSets(ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<Trident::DescriptorSet>> descriptorSets) {
+		// TODO: Add support for descriptorSetIndexOffset.
 		commands.emplace_back(createRef<GL::BindDescriptorSetsCommand>(descriptorSets));
 	}
 

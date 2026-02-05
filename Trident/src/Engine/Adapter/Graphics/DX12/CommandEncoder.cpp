@@ -166,7 +166,7 @@ namespace Trident {
 		commandCount += 1;
 	}
 
-	void DX12::CommandEncoder::bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, view<ref<Trident::DescriptorSet>> descriptorSets) {
+	void DX12::CommandEncoder::bindDescriptorSets(ref<Trident::PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<Trident::DescriptorSet>> descriptorSets) {
 		ID3D12DescriptorHeap* viewDescriptorHeap = device.memoryAllocator->getCurrentViewDescriptorHeapAllocation().descriptorHeap;
 		ID3D12DescriptorHeap* samplerDescriptorHeap = device.memoryAllocator->getCurrentSamplerDescriptorHeapAllocation().descriptorHeap;
 		ID3D12DescriptorHeap* descriptorHeaps[2] = {viewDescriptorHeap, samplerDescriptorHeap};
@@ -182,14 +182,14 @@ namespace Trident {
 				D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 				descriptorOffset.ptr += descriptorSet->viewDescriptorHandleOffset * device.memoryAllocator->viewDescriptorHandleIncrementSize;
 
-				commandList->SetComputeRootDescriptorTable(rootParameterIndex, descriptorOffset);
+				commandList->SetComputeRootDescriptorTable(descriptorSetIndexOffset + rootParameterIndex, descriptorOffset);
 
 				rootParameterIndex += 1;
 			}
 
 			if (samplerDescriptorTable) {
 				// Bind sampler descriptor table to the last root parameter.
-				commandList->SetComputeRootDescriptorTable(rootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				commandList->SetComputeRootDescriptorTable(descriptorSetIndexOffset + rootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 			}
 		}
 		else {
@@ -199,14 +199,14 @@ namespace Trident {
 				D3D12_GPU_DESCRIPTOR_HANDLE descriptorOffset = viewDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 				descriptorOffset.ptr += descriptorSet->viewDescriptorHandleOffset * device.memoryAllocator->viewDescriptorHandleIncrementSize;
 
-				commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, descriptorOffset);
+				commandList->SetGraphicsRootDescriptorTable(descriptorSetIndexOffset + rootParameterIndex, descriptorOffset);
 
 				rootParameterIndex += 1;
 			}
 
 			if (samplerDescriptorTable) {
 				// Bind sampler descriptor table to the last root parameter.
-				commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+				commandList->SetGraphicsRootDescriptorTable(descriptorSetIndexOffset + rootParameterIndex, samplerDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 			}
 		}
 

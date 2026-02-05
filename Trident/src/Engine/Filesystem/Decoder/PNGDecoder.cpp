@@ -74,11 +74,11 @@ namespace Trident {
 				case STRING_TO_LITTLE_ENDIAN_UINT32("IHDR"): {
 					file.extent.width = stream.read<uint32>();
 
-					ENGINE_ASSERT(file.extent.width > 0, "The width must be > 0.");
+					ENGINE_ASSERT(file.extent.width > 0, "The width must not be 0.");
 
 					file.extent.height = stream.read<uint32>();
 
-					ENGINE_ASSERT(file.extent.height > 0, "The height must be > 0.");
+					ENGINE_ASSERT(file.extent.height > 0, "The height must not be 0.");
 
 					file.extent.depth = 1;
 
@@ -86,65 +86,56 @@ namespace Trident {
 					// Valid values are 1, 2, 4, 8, and 16, although not all values are allowed for all color types.
 					const uint8 bitDepth = stream.read<uint8>();
 
-					ENGINE_ASSERT(
-						bitDepth == 1 ||
-						bitDepth == 2 ||
-						bitDepth == 4 ||
-						bitDepth == 8 ||
-						bitDepth == 16,
-						"Undefined bit depth ([]).", static_cast<sint32>(bitDepth)
-					);
-					ENGINE_ASSERT(bitDepth == 8, "Unsupported bit depth ([]).", static_cast<sint32>(bitDepth));
+					ENGINE_ASSERT(bitDepth == 1 || bitDepth == 2 || bitDepth == 4 || bitDepth == 8 || bitDepth == 16, "Undefined bit depth ([]).", static_cast<uint32>(bitDepth));
 
 					// PNG image type.
 					// Valid values are 0, 2, 3, 4, and 6.
 					const uint8 colorType = stream.read<uint8>();
 
-					ENGINE_ASSERT(
-						colorType == 0 ||
-						colorType == 2 ||
-						colorType == 3 ||
-						colorType == 4 ||
-						colorType == 6,
-						"Undefined color type ([]).", static_cast<sint32>(colorType)
-					);
-					ENGINE_ASSERT(colorType == 0 || colorType == 2 || colorType == 6, "Unsupported color type ([]).", static_cast<sint32>(colorType));
+					ENGINE_ASSERT(colorType == 0 || colorType == 2 || colorType == 3 || colorType == 4 || colorType == 6, "Undefined color type ([]).", static_cast<uint32>(colorType));
 
 					switch (colorType) {
-						case 0:
+						case 0: {
 							channelCount = 1;
 
 							break;
-						case 2:
+						}
+						case 2: {
 							channelCount = 3;
 
 							break;
-						case 6:
+						}
+						case 6: {
 							channelCount = 4;
 
 							break;
+						}
 					}
-
-					file.format = findUnormFormat(channelCount);
 
 					// Method used to compress the image data.
 					// Only compression method 0 (deflate/inflate compression with a sliding window of at most 32768 bytes) is defined.
 					const uint8 compressionMethod = stream.read<uint8>();
 
-					ENGINE_ASSERT(compressionMethod == 0, "Undefined compression method ([]).", static_cast<sint32>(compressionMethod));
+					ENGINE_ASSERT(compressionMethod == 0, "Undefined compression method ([]).", static_cast<uint32>(compressionMethod));
 
 					// Preprocessing method applied to the image data before compression.
 					// Only filter method 0 (adaptive filtering with five basic filter types) is defined.
 					const uint8 filterMethod = stream.read<uint8>();
 
-					ENGINE_ASSERT(filterMethod == 0, "Undefined filter method ([]).", static_cast<sint32>(filterMethod));
+					ENGINE_ASSERT(filterMethod == 0, "Undefined filter method ([]).", static_cast<uint32>(filterMethod));
 
 					// Transmission order of the image data.
 					// Two values are defined: 0 (no interlace) or 1 (Adam7 interlace).
 					const uint8 interlaceMethod = stream.read<uint8>();
 
-					ENGINE_ASSERT(interlaceMethod == 0 || interlaceMethod == 1, "Undefined interlace method ([]).", static_cast<sint32>(interlaceMethod));
-					ENGINE_ASSERT(interlaceMethod == 0, "Unsupported interlace method ([]).", static_cast<sint32>(interlaceMethod));
+					ENGINE_ASSERT(interlaceMethod == 0 || interlaceMethod == 1, "Undefined interlace method ([]).", static_cast<uint32>(interlaceMethod));
+
+					// NOTE: Current support.
+					ENGINE_ASSERT(bitDepth == 8, "Unsupported bit depth ([]).", static_cast<uint32>(bitDepth));
+					ENGINE_ASSERT(colorType == 0 || colorType == 2 || colorType == 6, "Unsupported color type ([]).", static_cast<uint32>(colorType));
+					ENGINE_ASSERT(interlaceMethod == 0, "Unsupported interlace method ([]).", static_cast<uint32>(interlaceMethod));
+
+					file.format = findUnormFormat(channelCount);
 
 					break;
 				}

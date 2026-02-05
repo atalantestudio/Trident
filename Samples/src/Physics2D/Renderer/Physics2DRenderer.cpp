@@ -1231,13 +1231,13 @@ namespace Trident {
 
 	void Physics2DRenderer::renderGrid(ref<CommandEncoder> commandEncoder) const {
 		commandEncoder->bindRenderPipeline(gridRenderPipeline);
-		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
+		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 		commandEncoder->draw(3, 1, 0, 0);
 	}
 
 	void Physics2DRenderer::renderScene(ref<CommandEncoder> commandEncoder) const {
 		commandEncoder->bindRenderPipeline(fillRenderPipeline);
-		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
+		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 
 		const ComponentPool<RigidBody2D>& rigidBodyPool = scene->getComponentPool<RigidBody2D>();
@@ -1262,7 +1262,7 @@ namespace Trident {
 		}
 
 		commandEncoder->bindRenderPipeline(strokeRenderPipeline);
-		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
+		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 
 		instanceIndex = 0;
 		vertexOffset = 0;
@@ -1290,7 +1290,7 @@ namespace Trident {
 		updateCentersOfMass();
 
 		commandEncoder->bindRenderPipeline(centerOfMassRenderPipeline);
-		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
+		commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, 0, sizeof(CenterOfMass));
 		commandEncoder->draw(instanceCount, 1, 0, 0);
 	}
@@ -1311,19 +1311,19 @@ namespace Trident {
 		const ref<Geometry2D> geometry = scene->getGeometry(selectedInstanceIndex);
 
 		commandEncoder->bindRenderPipeline(placeholderCenterOfMassRenderPipeline);
-		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, {cameraViewDescriptorSet, placeholderDescriptorSet});
+		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
 		commandEncoder->bindVertexBuffer(0, centerOfMassBuffer, selectedInstanceIndex * sizeof(CenterOfMass), sizeof(CenterOfMass));
 		commandEncoder->draw(1, 1, 0, 0);
 
 		commandEncoder->bindRenderPipeline(placeholderFillRenderPipeline);
-		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, {cameraViewDescriptorSet, placeholderDescriptorSet});
+		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
 		commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(Vertex), sizeof(Vertex));
 		commandEncoder->bindVertexBuffer(1, instanceBuffer, selectedInstanceIndex * sizeof(Instance), sizeof(Instance));
 		commandEncoder->drawIndexed(geometry->getIndexCount(), 1, 0, 0, 0);
 
 		commandEncoder->bindRenderPipeline(placeholderStrokeRenderPipeline);
-		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, {cameraViewDescriptorSet, placeholderDescriptorSet});
+		commandEncoder->bindDescriptorSets(placeholderPipelineLayout, 0, {cameraViewDescriptorSet, placeholderDescriptorSet});
 		commandEncoder->bindVertexBuffer(0, vertexBuffer, vertexOffset * sizeof(Vertex), sizeof(Vertex));
 		commandEncoder->bindVertexBuffer(1, instanceBuffer, selectedInstanceIndex * sizeof(Instance), sizeof(Instance));
 		commandEncoder->draw(geometry->getVertexCount() + 1, 1, 0, 0);
@@ -1332,7 +1332,7 @@ namespace Trident {
 	#if defined(SHOW_DISTANCE)
 		void Physics2DRenderer::renderDistance(ref<CommandEncoder> commandEncoder) const {
 			commandEncoder->bindRenderPipeline(distanceRenderPipeline);
-			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
+			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 			commandEncoder->bindVertexBuffer(0, closestPointBuffer, 0, sizeof(Vertex));
 			commandEncoder->draw(2, 1, 0, 0);
 		}
@@ -1342,14 +1342,14 @@ namespace Trident {
 		void Physics2DRenderer::renderFeatures(ref<CommandEncoder> commandEncoder) const {
 			if (vertexFeatureCount > 0) {
 				commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
-				commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
+				commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 				commandEncoder->bindVertexBuffer(0, vertexFeatureBuffer, 0, sizeof(Vertex));
 				commandEncoder->draw(vertexFeatureCount, 1, 0, 0);
 			}
 
 			if (edgeFeatureCount > 0) {
 				commandEncoder->bindRenderPipeline(edgeFeatureRenderPipeline);
-				commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
+				commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, 0, {cameraViewDescriptorSet});
 				commandEncoder->bindVertexBuffer(0, edgeFeatureBuffer, 0, sizeof(Vertex));
 				commandEncoder->draw(edgeFeatureCount * 2, 1, 0, 0);
 			}

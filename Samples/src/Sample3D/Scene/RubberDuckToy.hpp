@@ -42,9 +42,9 @@ namespace Trident {
 		MaterialReference pbrMaterialReference{};
 		pbrMaterialReference.materialIndex = pbrMaterialIndex;
 		pbrMaterialReference.descriptorImagePaths = {
-			"Asset/Geometry/rubber_duck_toy_1k/textures/rubber_duck_toy_arm_1k.png",
-			"Asset/Geometry/rubber_duck_toy_1k/textures/rubber_duck_toy_diff_1k.png",
-			"Asset/Geometry/rubber_duck_toy_1k/textures/rubber_duck_toy_nor_gl_1k.png",
+			"Asset/Image/rubber_duck_toy_1k/textures/rubber_duck_toy_arm_1k.png",
+			"Asset/Image/rubber_duck_toy_1k/textures/rubber_duck_toy_diff_1k.png",
+			"Asset/Image/rubber_duck_toy_1k/textures/rubber_duck_toy_nor_gl_1k.png",
 		};
 
 		const uint32 pbrMaterialReferenceIndex = scene.registerMaterialReference(pbrMaterialReference);

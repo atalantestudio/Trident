@@ -220,13 +220,13 @@ namespace Trident {
 			commandEncoder->reset();
 			commandEncoder->begin();
 			commandEncoder->bindComputePipeline(glyphImageComputePipeline);
-			commandEncoder->bindDescriptorSets(glyphImagePipelineLayout, {glyphImageDescriptorSet});
+			commandEncoder->bindDescriptorSets(glyphImagePipelineLayout, 0, {glyphImageDescriptorSet});
 
 			// TODO: Dispatch less groups depending on the size of the area occupied by the glyph.
 			commandEncoder->dispatch(128, 128, 1);
 
 			commandEncoder->bindComputePipeline(glyphSdfComputePipeline);
-			commandEncoder->bindDescriptorSets(glyphSdfPipelineLayout, {glyphSdfDescriptorSet});
+			commandEncoder->bindDescriptorSets(glyphSdfPipelineLayout, 0, {glyphSdfDescriptorSet});
 			commandEncoder->dispatch(8, 8, 1);
 
 			computeQueue->submit({commandEncoder->end()}, nullptr, nullptr, writeBufferFence);

@@ -64,7 +64,7 @@ namespace Trident {
 				// Read image subpass.
 				{
 					commandEncoder->bindRenderPipeline(readImageRenderPipeline);
-					commandEncoder->bindDescriptorSets(readImagePipelineLayout, {imageDescriptorSet});
+					commandEncoder->bindDescriptorSets(readImagePipelineLayout, 0, {imageDescriptorSet});
 					commandEncoder->draw(3, 1, 0, 0);
 				}
 

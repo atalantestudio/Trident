@@ -586,7 +586,7 @@ namespace Trident {
 
 		if (subcomponentCount > 0) {
 			commandEncoder->bindRenderPipeline(subcomponentRenderPipeline);
-			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, {subcomponentDescriptorSet});
+			commandEncoder->bindDescriptorSets(subcomponentPipelineLayout, 0, {subcomponentDescriptorSet});
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, subcomponentBuffer, 0, sizeof(GUISubcomponent));
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);
@@ -595,7 +595,7 @@ namespace Trident {
 
 		if (glyphSubcomponentCount > 0) {
 			commandEncoder->bindRenderPipeline(glyphSubcomponentRenderPipeline);
-			commandEncoder->bindDescriptorSets(glyphSubcomponentPipelineLayout, {glyphSubcomponentDescriptorSet});
+			commandEncoder->bindDescriptorSets(glyphSubcomponentPipelineLayout, 0, {glyphSubcomponentDescriptorSet});
 			commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 			commandEncoder->bindVertexBuffer(1, glyphSubcomponentBuffer, 0, sizeof(GUIGlyphSubcomponent));
 			commandEncoder->bindIndexBuffer<uint16>(indexBuffer, 0);

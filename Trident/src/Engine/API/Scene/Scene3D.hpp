@@ -27,6 +27,7 @@ namespace Trident {
 		public:
 			explicit Scene3D() :
 				geometries(MAX_GEOMETRY_COUNT),
+				vertexPositionIndexOffsets(MAX_GEOMETRY_COUNT),
 				materials(MAX_MATERIAL_COUNT),
 				materialReferences(MAX_MATERIAL_REFERENCE_COUNT),
 				instances(MAX_INSTANCE_COUNT)
@@ -40,6 +41,12 @@ namespace Trident {
 				return geometryCount;
 			}
 
+			uint32 getVertexPositionIndexOffset(uint32 geometryIndex) const {
+				DEBUG_ASSERT(geometryIndex < geometryCount);
+
+				return vertexPositionIndexOffsets[geometryIndex];
+			}
+
 			view<Material> getMaterials() const {
 				return view<Material>(&materials[0], materialCount);
 			}
@@ -48,16 +55,31 @@ namespace Trident {
 				return materialCount;
 			}
 
-			view<MaterialReference> getMaterialReferences() const {
-				return view<MaterialReference>(&materialReferences[0], materialReferenceCount);
-			}
-
 			uint32 getMaterialReferenceCount() const {
 				return materialReferenceCount;
 			}
 
+			const sequence<std::vector<MaterialReference>>& getAllMaterialReferences() const {
+				return materialReferences;
+			}
+
+			view<MaterialReference> getMaterialReferences(uint32 materialIndex) const {
+				const std::vector<MaterialReference>& references = materialReferences[materialIndex];
+
+				if (references.size() == 0) {
+					return {};
+				}
+
+				return view<MaterialReference>(&references[0], references.size());
+			}
+
 			view<RigidBody3D> getInstances() const {
 				return view<RigidBody3D>(&instances[0], instanceCount);
+			}
+
+			uint32 getInstanceIndex(uint32 materialReferenceIndex) const {
+				// TODO
+				return 0;
 			}
 
 			uint32 getInstanceCount() const {
@@ -97,6 +119,10 @@ namespace Trident {
 
 				rigidBody.updateTransform();
 
+				// const MaterialReference& materialReference = 
+
+				// materialReferenceIndexToInstanceIndex[]
+
 				instanceCount += 1;
 
 				return instanceIndex;
@@ -109,6 +135,9 @@ namespace Trident {
 
 				geometries[geometryIndex] = geometry;
 				geometryCount += 1;
+
+				vertexPositionIndexOffsets[geometryIndex] = vertexPositionIndexOffset;
+				vertexPositionIndexOffset += static_cast<uint32>(geometry->getVertexPositionIndices().count());
 
 				return geometryIndex;
 			}
@@ -126,10 +155,11 @@ namespace Trident {
 
 			uint32 registerMaterialReference(const MaterialReference& materialReference) {
 				DEBUG_ASSERT(materialReferenceCount < MAX_MATERIAL_REFERENCE_COUNT);
+				DEBUG_ASSERT(materialReference.materialIndex < MAX_MATERIAL_COUNT);
 
 				const uint32 materialReferenceIndex = materialReferenceCount;
 
-				materialReferences[materialReferenceIndex] = materialReference;
+				materialReferences[materialReference.materialIndex].emplace_back(materialReference);
 				materialReferenceCount += 1;
 
 				return materialReferenceIndex;
@@ -137,10 +167,13 @@ namespace Trident {
 
 		private:
 			sequence<ref<Geometry3D>> geometries;
+			sequence<uint32> vertexPositionIndexOffsets;
 			sequence<Material> materials;
-			sequence<MaterialReference> materialReferences;
+			sequence<std::vector<MaterialReference>> materialReferences;
+			sequence<std::vector<uint32>> materialReferenceIndexToInstanceIndex;
 			sequence<RigidBody3D> instances;
 			uint32 geometryCount = 0;
+			uint32 vertexPositionIndexOffset = 0;
 			uint32 materialCount = 0;
 			uint32 materialReferenceCount = 0;
 			uint32 instanceCount = 0;

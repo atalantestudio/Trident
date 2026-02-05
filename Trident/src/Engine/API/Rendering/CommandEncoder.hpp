@@ -35,7 +35,7 @@ namespace Trident {
 			/// 
 			/// NOTE: The pipeline layout could have been taken from the current pipeline as well,
 			/// but in Vulkan this operation requires a valid layout. This method asks for a layout to make sure the user keeps it around at runtime.
-			virtual void bindDescriptorSets(ref<PipelineLayout> pipelineLayout, view<ref<DescriptorSet>> descriptorSets) = 0;
+			virtual void bindDescriptorSets(ref<PipelineLayout> pipelineLayout, uint32 descriptorSetIndexOffset, view<ref<DescriptorSet>> descriptorSets) = 0;
 
 			// Binds the provided index buffer.
 			// The `offset` is in bytes and must be a multiple of IndexType.

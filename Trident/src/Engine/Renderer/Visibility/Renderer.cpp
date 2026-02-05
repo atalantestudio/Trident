@@ -129,13 +129,13 @@ namespace Trident {
 		{
 			// Write pixel visibility and count per material.
 			commandEncoder->bindRenderPipeline(visibilityPipeline);
-			commandEncoder->bindDescriptorSets(visibilityPipelineLayout, {cameraDescriptorSet, clusterDescriptorSet, instanceDescriptorSet, visibilityMaterialCountDescriptorSet});
+			commandEncoder->bindDescriptorSets(visibilityPipelineLayout, 0, {cameraDescriptorSet, clusterDescriptorSet, instanceDescriptorSet, visibilityMaterialCountDescriptorSet});
 			commandEncoder->drawIndirect(visibilityIndirectBuffer, 0, 1, 0);
 		}
 
 		// Get the material pixel offsets with a prefix sum and write indirect arguments for each material pipeline.
 		commandEncoder->bindComputePipeline(materialOffsetPipeline);
-		commandEncoder->bindDescriptorSets(materialOffsetPipelineLayout, {materialOffsetDescriptorSet});
+		commandEncoder->bindDescriptorSets(materialOffsetPipelineLayout, 0, {materialOffsetDescriptorSet});
 		commandEncoder->dispatch(1, 1, 1);
 
 		commandEncoder->setImageMemoryBarrier(visibilityImage, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
@@ -147,7 +147,7 @@ namespace Trident {
 			const uint32 groupCountY = static_cast<uint32>(ceil(static_cast<float32>(extent.height) / 16.0f));
 
 			commandEncoder->bindComputePipeline(materialCoordinatePipeline);
-			commandEncoder->bindDescriptorSets(materialCoordinatePipelineLayout, {materialCoordinateDescriptorSet});
+			commandEncoder->bindDescriptorSets(materialCoordinatePipelineLayout, 0, {materialCoordinateDescriptorSet});
 			commandEncoder->dispatch(groupCountX, groupCountY, 1);
 		}
 
@@ -158,15 +158,14 @@ namespace Trident {
 
 			while (materialIndex < scene->materials.count()) {
 				commandEncoder->bindComputePipeline(materialPipelines[materialIndex]);
-				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialIndex], {materialBaseDescriptorSet});
+				commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialIndex], 0, {materialBaseDescriptorSet});
 
 				const Material& material = scene->materials[materialIndex];
 
 				materialReferenceIndex = 0;
 
 				while (materialReferenceIndex < /* TODO: material.referenceCount */ 1) {
-					// TODO: Custom material descriptor sets.
-					// commandEncoder->bindDescriptorSets(materialPipeline.descriptorSetLayoutBindings);
+					// TODO: Bind custom material descriptor sets.
 
 					commandEncoder->dispatchIndirect(materialIndirectBuffer, sizeof(DispatchIndirectCommand) * materialIndex);
 
@@ -182,12 +181,12 @@ namespace Trident {
 		#if 1
 			// Output subpass
 			commandEncoder->bindRenderPipeline(outputPipeline);
-			commandEncoder->bindDescriptorSets(outputPipelineLayout, {outputDescriptorSet});
+			commandEncoder->bindDescriptorSets(outputPipelineLayout, 0, {outputDescriptorSet});
 			commandEncoder->draw(3, 1, 0, 0);
 		#else
 			// Debug subpass
 			commandEncoder->bindRenderPipeline(debugPipeline);
-			commandEncoder->bindDescriptorSets(debugPipelineLayout, {debugDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
+			commandEncoder->bindDescriptorSets(debugPipelineLayout, 0, {debugDescriptorSet, clusterDescriptorSet, instanceDescriptorSet});
 			commandEncoder->draw(3, 1, 0, 0);
 		#endif
 

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Engine/API/Rendering/DescriptorSet.hpp"
+#include "Engine/API/Rendering/DescriptorSetLayout.hpp"
 
 namespace Trident {
 	struct Material {

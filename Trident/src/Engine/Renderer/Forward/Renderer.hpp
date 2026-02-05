@@ -51,6 +51,12 @@ namespace Trident {
 				}
 
 				view<ref<Geometry3D>> geometries = scene->getGeometries();
+				uint64 vertexPositionComponentBufferSize = 0;
+				uint64 vertexPositionIndexBufferSize = 0;
+				uint64 vertexNormalComponentBufferSize = 0;
+				uint64 vertexNormalIndexBufferSize = 0;
+				uint64 vertexTextureCoordinateComponentBufferSize = 0;
+				uint64 vertexTextureCoordinateIndexBufferSize = 0;
 
 				for (const ref<Geometry3D> geometry : geometries) {
 					vertexPositionComponentBufferSize += sizeof(float32) * geometry->getVertexPositionComponents().count();
@@ -141,13 +147,17 @@ namespace Trident {
 				queue->submit({commandEncoder->end()}, nullptr, nullptr, nullptr);
 				queue->waitIdle();
 
-				updateDescriptorSets();
+				updateDescriptorSets(vertexPositionComponentBufferSize, vertexPositionIndexBufferSize, vertexNormalComponentBufferSize, vertexNormalIndexBufferSize, vertexTextureCoordinateComponentBufferSize, vertexTextureCoordinateIndexBufferSize);
 			}
 
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
 				const float32 height = static_cast<float32>(swapchainExtent.height);
+
+				const view<ref<Geometry3D>> geometries = scene->getGeometries();
+				const view<Material> materials = scene->getMaterials();
+				const view<RigidBody3D> instances = scene->getInstances();
 
 				const ClearValue swapchainClearValue = {0.0f, 0.0f, 0.0f, 1.0f};
 
@@ -159,43 +169,36 @@ namespace Trident {
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
 				beginRenderPassDescriptor.clearValues = {swapchainClearValue, depthStencilClearValue};
 
+				uint32 materialIndex = 0;
+
 				commandEncoder->beginRenderPass(beginRenderPassDescriptor);
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
+				commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
 
-				// TODO
-				// commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
+				while (materialIndex < materials.count()) {
+					commandEncoder->bindRenderPipeline(materialPipelines[materialIndex]);
+					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialIndex], 0, {vertexDescriptorSet});
 
-				const view<ref<Geometry3D>> geometries = scene->getGeometries();
-				const view<Material> materials = scene->getMaterials();
-				const view<MaterialReference> materialReferences = scene->getMaterialReferences();
-				const view<RigidBody3D> instances = scene->getInstances();
+					const view<MaterialReference> materialReferences = scene->getMaterialReferences(materialIndex);
 
-				uint32 instanceIndex = 0;
-				uint32 geometryIndex;
-				uint32 indexOffset;
+					uint32 materialReferenceIndex = 0;
 
-				while (instanceIndex < scene->getInstanceCount()) {
-					const RigidBody3D& instance = instances[instanceIndex];
-					const ref<Geometry3D> geometry = geometries[instance.geometryIndex];
-					const MaterialReference& materialReference = materialReferences[instance.materialReferenceIndex];
+					while (materialReferenceIndex < materialReferences.count()) {
+						commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialIndex], 1, {materialDescriptorSets[materialReferenceIndex]});
 
-					geometryIndex = 0;
-					indexOffset = 0;
+						const uint32 instanceIndex = scene->getInstanceIndex(materialReferenceIndex);
+						const RigidBody3D& instance = instances[instanceIndex];
+						const ref<Geometry3D> geometry = geometries[instance.geometryIndex];
+						const uint32 vertexCount = static_cast<uint32>(geometry->getVertexPositionIndices().count());
+						const uint32 indexOffset = scene->getVertexPositionIndexOffset(instance.geometryIndex);
 
-					while (geometryIndex < instance.geometryIndex) {
-						const ref<Geometry3D> geometry = geometries[geometryIndex];
+						commandEncoder->draw(vertexCount, 1, indexOffset, instanceIndex);
 
-						indexOffset += static_cast<uint32>(geometry->getVertexPositionIndices().count());
-						geometryIndex += 1;
+						materialReferenceIndex += 1;
 					}
 
-					commandEncoder->bindRenderPipeline(materialPipelines[materialReference.materialIndex]);
-					commandEncoder->bindVertexBuffer(0, instanceBuffer, 0, sizeof(Instance));
-					commandEncoder->bindDescriptorSets(materialPipelineLayouts[materialReference.materialIndex], {vertexDescriptorSet/* , materialDescriptorSets[materialReference.materialIndex] */});
-					commandEncoder->draw(static_cast<uint32>(geometry->getVertexPositionIndices().count()), 1, indexOffset, instanceIndex);
-
-					instanceIndex += 1;
+					materialIndex += 1;
 				}
 
 				commandEncoder->endRenderPass();
@@ -380,8 +383,7 @@ namespace Trident {
 				materialDescriptorSets = sequence<ref<DescriptorSet>>(materials.count());
 				materialPipelineLayouts = sequence<ref<PipelineLayout>>(materials.count());
 				materialPipelines = sequence<ref<RenderPipeline>>(materials.count());
-
-				uint32 materialIndex = 0;
+				materialDescriptorSetLayoutBindingImages = sequence<sequence<ref<Image>>>(materials.count());
 
 				PipelineLayoutDescriptor materialPipelineLayoutDescriptor{};
 
@@ -418,12 +420,32 @@ namespace Trident {
 				materialPipelineDescriptor.renderPass = renderPass;
 				materialPipelineDescriptor.subpassIndex = 0;
 
+				ImageDescriptor materialDescriptorSetLayoutBindingImageDescriptor{};
+				materialDescriptorSetLayoutBindingImageDescriptor.type = ImageType::TEXTURE_2D;
+				materialDescriptorSetLayoutBindingImageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
+				materialDescriptorSetLayoutBindingImageDescriptor.extent.width = 4096;
+				materialDescriptorSetLayoutBindingImageDescriptor.extent.height = 4096;
+				materialDescriptorSetLayoutBindingImageDescriptor.extent.depth = 1;
+				materialDescriptorSetLayoutBindingImageDescriptor.mipLevelCount = 1;
+				materialDescriptorSetLayoutBindingImageDescriptor.sampleCount = 1;
+				materialDescriptorSetLayoutBindingImageDescriptor.usage = ImageUsage::STORAGE;
+				materialDescriptorSetLayoutBindingImageDescriptor.memoryProperties = MemoryProperty::DEVICE_LOCAL | MemoryProperty::LAZILY_ALLOCATED;
+
 				#if defined(BUILD_MODE_DEBUG)
 					sequence<char8> name;
 				#endif
 
+				uint32 materialIndex = 0;
+				uint32 imageFileIndex = 0;
+
+				// TODO: Use assets instead.
+				sequence<File<FileFormat::PNG>> imageFiles(scene->getMaterialReferenceCount());
+
+				uint64 imageStagingBufferSize = 0;
+
 				while (materialIndex < materials.count()) {
 					const Material& material = materials[materialIndex];
+					const view<MaterialReference> materialReferences = scene->getMaterialReferences(materialIndex);
 
 					#if defined(BUILD_MODE_DEBUG)
 						name = Logger::format("Material [] fragment", materialIndex);
@@ -447,10 +469,47 @@ namespace Trident {
 
 					materialPipelines[materialIndex] = createRenderPipeline(materialPipelineDescriptor);
 
+					sequence<ref<Image>>& bindingImages = materialDescriptorSetLayoutBindingImages[materialIndex];
+
+					bindingImages = sequence<ref<Image>>(material.descriptorSetLayoutBindings.count());
+
+					uint32 descriptorSetLayoutBindingIndex = 0;
+
+					while (descriptorSetLayoutBindingIndex < material.descriptorSetLayoutBindings.count()) {
+						const DescriptorSetLayoutBinding& descriptorSetLayoutBinding = material.descriptorSetLayoutBindings[descriptorSetLayoutBindingIndex];
+
+						DEBUG_ASSERT(descriptorSetLayoutBinding.descriptorType == DescriptorType::READ_ONLY_STORAGE_IMAGE);
+						DEBUG_ASSERT(descriptorSetLayoutBinding.shaderStages == ShaderStage::FRAGMENT);
+
+						materialDescriptorSetLayoutBindingImageDescriptor.layerCount = descriptorSetLayoutBinding.descriptorCount;
+
+						bindingImages[descriptorSetLayoutBindingIndex] = createImage(materialDescriptorSetLayoutBindingImageDescriptor);
+
+						uint32 materialReferenceIndex = 0;
+
+						while (materialReferenceIndex < materialReferences.count()) {
+							const MaterialReference& materialReference = materialReferences[materialReferenceIndex];
+							const sequence<uint8> buffer = Filesystem::openByteBuffer(materialReference.descriptorImagePaths[descriptorSetLayoutBindingIndex]);
+
+							imageFiles[imageFileIndex] = Filesystem::decode<FileFormat::PNG>(buffer);
+
+							imageStagingBufferSize += imageFiles[imageFileIndex].data.count();
+
+							imageFileIndex += 1;
+							materialReferenceIndex += 1;
+						}
+
+						descriptorSetLayoutBindingIndex += 1;
+					}
+
 					materialIndex += 1;
 				}
 
 				materialDescriptorSets = getDevice()->allocateDescriptorSets(materialDescriptorSetLayouts);
+
+				const ref<Buffer> imageStagingBuffer = createStagingBuffer(imageStagingBufferSize);
+
+				BREAKPOINT();
 			}
 
 			ref<Buffer> createCameraBuffer() const {
@@ -465,7 +524,7 @@ namespace Trident {
 				return createBuffer(cameraBufferDescriptor);
 			}
 
-			void updateDescriptorSets() const {
+			void updateDescriptorSets(uint64 vertexPositionComponentBufferSize, uint64 vertexPositionIndexBufferSize, uint64 vertexNormalComponentBufferSize, uint64 vertexNormalIndexBufferSize, uint64 vertexTextureCoordinateComponentBufferSize, uint64 vertexTextureCoordinateIndexBufferSize) const {
 				DescriptorBuffer cameraDescriptorBuffer{};
 				cameraDescriptorBuffer.buffer = cameraBuffer;
 				cameraDescriptorBuffer.offset = 0;
@@ -564,9 +623,12 @@ namespace Trident {
 
 			sequence<ref<RenderPipeline>> materialPipelines;
 
-			ref<Buffer> cameraBuffer;
-			ref<Buffer> instanceBuffer;
 			ref<Buffer> vertexBuffer;
+			ref<Buffer> instanceBuffer;
+			ref<Buffer> cameraBuffer;
+
+			// 1 layered image per material descriptor binding.
+			sequence<sequence<ref<Image>>> materialDescriptorSetLayoutBindingImages;
 
 			ref<Image> depthStencilImage;
 
@@ -574,12 +636,5 @@ namespace Trident {
 
 			Camera* cameraMappedRange = nullptr;
 			Instance* instanceMappedRange = nullptr;
-
-			uint64 vertexPositionComponentBufferSize = 0;
-			uint64 vertexPositionIndexBufferSize = 0;
-			uint64 vertexNormalComponentBufferSize = 0;
-			uint64 vertexNormalIndexBufferSize = 0;
-			uint64 vertexTextureCoordinateComponentBufferSize = 0;
-			uint64 vertexTextureCoordinateIndexBufferSize = 0;
 	};
 }

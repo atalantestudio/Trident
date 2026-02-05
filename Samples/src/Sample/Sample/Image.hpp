@@ -41,7 +41,7 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 				commandEncoder->bindRenderPipeline(renderPipeline);
-				commandEncoder->bindDescriptorSets(pipelineLayout, {imageDescriptorSet});
+				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {imageDescriptorSet});
 				commandEncoder->draw(3, 1, 0, 0);
 				commandEncoder->endRenderPass();
 			}

@@ -48,7 +48,7 @@ namespace Trident {
 				commandEncoder->setViewport({0.0f, height}, {width, -height}, 0.0f, 1.0f);
 				commandEncoder->setScissor(0, 0, swapchainExtent);
 				commandEncoder->bindRenderPipeline(renderPipeline);
-				commandEncoder->bindDescriptorSets(pipelineLayout, {imageDescriptorSet});
+				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {imageDescriptorSet});
 				commandEncoder->bindVertexBuffer(0, vertexBuffer, 0, sizeof(Vertex));
 				commandEncoder->draw(3, 1, 0, 0);
 				commandEncoder->endRenderPass();
@@ -321,7 +321,7 @@ namespace Trident {
 				commandEncoder->begin();
 				commandEncoder->setImageMemoryBarrier(outputImage, ImageLayout::GENERAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 				commandEncoder->bindComputePipeline(computePipeline);
-				commandEncoder->bindDescriptorSets(pipelineLayout, {imageDescriptorSet});
+				commandEncoder->bindDescriptorSets(pipelineLayout, 0, {imageDescriptorSet});
 				commandEncoder->dispatchIndirect(indirectBuffer, 0);
 				commandEncoder->setImageMemoryBarrier(outputImage, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
