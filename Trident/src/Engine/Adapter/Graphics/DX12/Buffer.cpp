@@ -14,6 +14,11 @@ namespace Trident {
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
+		if (descriptor.usage & BufferUsage::UNIFORM) {
+			// NOTE: Constant buffer views need to be aligned to 256.
+			size = (descriptor.size + D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1);
+		}
+
 		HRESULT result;
 
 		D3D12_HEAP_PROPERTIES heapProperties{};
@@ -26,14 +31,7 @@ namespace Trident {
 		D3D12_RESOURCE_DESC resourceDescriptor{};
 		resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 		resourceDescriptor.Alignment = 0;
-
-		resourceDescriptor.Width = descriptor.size;
-
-		if (descriptor.usage & BufferUsage::UNIFORM) {
-			// NOTE: Constant buffer views need to be aligned to 256.
-			resourceDescriptor.Width = (descriptor.size + D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1);
-		}
-
+		resourceDescriptor.Width = size;
 		resourceDescriptor.Height = 1;
 		resourceDescriptor.DepthOrArraySize = 1;
 		resourceDescriptor.MipLevels = 1;

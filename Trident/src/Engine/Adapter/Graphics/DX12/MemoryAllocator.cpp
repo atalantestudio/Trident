@@ -101,9 +101,7 @@ namespace Trident {
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDescriptor{};
 		constantBufferViewDescriptor.BufferLocation = buffer->resource->GetGPUVirtualAddress() + descriptorBuffer.offset;
-
-		// NOTE: Constant buffer views need to be aligned to 256.
-		constantBufferViewDescriptor.SizeInBytes = (static_cast<UINT>(descriptorBuffer.size) + D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1);
+		constantBufferViewDescriptor.SizeInBytes = static_cast<UINT>(descriptorBuffer.size);
 
 		device.device->CreateConstantBufferView(&constantBufferViewDescriptor, descriptorHandle);
 	}
