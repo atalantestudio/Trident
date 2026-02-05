@@ -19,20 +19,28 @@ namespace Trident {
 
 		SET_DEBUG_NAME(visibilityFragmentShaderModuleDescriptor, "Visibility fragment");
 
-		#if defined(GL_SOURCE_FROM_SPIRV)
-			if (Renderer::getGraphicsApi() == GraphicsAPI::GL) {
-				// TODO: Create a pair of SPIR-V shaders compatible with the OpenGL adapter.
-				ENGINE_WARNING("The Visibility.*.spv shaders are not compatible with the OpenGL adapter.");
-			}
-		#endif
-
 		ColorBlendAttachment visibilityColorBlendAttachment{};
 		visibilityColorBlendAttachment.blend = false;
 
 		RenderPipelineDescriptor visibilityPipelineDescriptor{};
 		visibilityPipelineDescriptor.pipelineLayout = visibilityPipelineLayout;
-		visibilityPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(visibilityVertexShaderModuleDescriptor, "Visibility/Visibility.vert");
-		visibilityPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(visibilityFragmentShaderModuleDescriptor, "Visibility/Visibility.frag");
+
+		#if defined(GL_SOURCE_FROM_SPIRV)
+			// TODO: Write OpenGL shaders.
+			ENGINE_ERROR_UNIMPLEMENTED();
+
+			if (Renderer::getGraphicsApi() == GraphicsAPI::GL) {
+				visibilityPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(visibilityVertexShaderModuleDescriptor, "Visibility/VisibilityGL.vert");
+				visibilityPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(visibilityFragmentShaderModuleDescriptor, "Visibility/VisibilityGL.frag");
+			}
+			else {
+		#endif
+				visibilityPipelineDescriptor.vertexShaderModule = loadInternalShaderModule(visibilityVertexShaderModuleDescriptor, "Visibility/Visibility.vert");
+				visibilityPipelineDescriptor.fragmentShaderModule = loadInternalShaderModule(visibilityFragmentShaderModuleDescriptor, "Visibility/Visibility.frag");
+		#if defined(GL_SOURCE_FROM_SPIRV)
+			}
+		#endif
+
 		visibilityPipelineDescriptor.primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
 		visibilityPipelineDescriptor.polygonMode = PolygonMode::FILL;
 		visibilityPipelineDescriptor.cullMode = CullMode::BACK;

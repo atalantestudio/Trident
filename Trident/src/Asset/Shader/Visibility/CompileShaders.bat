@@ -1,7 +1,11 @@
+@REM TODO: Write OpenGL shaders.
+@REM "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=vert Visibility.vert.glsl -o VisibilityGL.vert.spv
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=vert VisibilityVK.vert.glsl -o Visibility.vert.spv
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=frag Visibility.frag.glsl -o Visibility.frag.spv
 
+@REM "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=vert VisibilityDebug.vert.glsl -o VisibilityDebugGL.vert.spv
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=vert VisibilityDebugVK.vert.glsl -o VisibilityDebug.vert.spv
+@REM "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=frag VisibilityDebug.frag.glsl -o VisibilityDebugGL.frag.spv
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=frag VisibilityDebugVK.frag.glsl -o VisibilityDebug.frag.spv
 
 "%VULKAN_SDK%\Bin\glslc.exe" -fshader-stage=vert Output.vert.glsl -o Output.vert.spv
