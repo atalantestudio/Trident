@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	#ifdef BUILD_MODE_DEBUG
+	#if defined(BUILD_MODE_DEBUG)
 		class ScopeTimer {
 			public:
 				ScopeTimer() :

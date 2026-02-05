@@ -8,7 +8,7 @@
 
 namespace Trident {
 	GL::PhysicalDevice::PhysicalDevice() {
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			const GLchar* vendor = pointer_cast<const GLchar*>(glGetString(GL_VENDOR));
 			const GLchar* renderer = pointer_cast<const GLchar*>(glGetString(GL_RENDERER));
 			const GLchar* version = pointer_cast<const GLchar*>(glGetString(GL_VERSION));

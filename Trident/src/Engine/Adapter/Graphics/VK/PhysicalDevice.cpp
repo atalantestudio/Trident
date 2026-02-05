@@ -93,7 +93,7 @@ namespace Trident {
 
 		enabledExtensionNames.resize(extensionPropertyCount);
 
-		#ifdef DEBUG_ENUMERATE_DEVICE_EXTENSIONS
+		#if defined(DEBUG_ENUMERATE_DEVICE_EXTENSIONS)
 			ADAPTER_INFO("Enabled device extensions:");
 
 			for (uint32 extensionPropertiesIndex = 0; extensionPropertiesIndex < extensionProperties.count(); extensionPropertiesIndex += 1) {
@@ -148,7 +148,7 @@ namespace Trident {
 
 		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, &queueFamilies[0]);
 
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			enumerateQueueFamilyProperties(queueFamilies);
 		#endif
 

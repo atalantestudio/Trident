@@ -9,7 +9,7 @@
 
 #include <vulkan/vulkan.h>
 
-#ifdef BUILD_MODE_DEBUG
+#if defined(BUILD_MODE_DEBUG)
 	#include <vulkan/vk_enum_string_helper.h>
 #endif
 

@@ -81,7 +81,7 @@ namespace Trident {
 
 		WIN32_ASSERT(result == TRUE);
 
-		#ifdef DEBUG_ENABLE_MESSENGER
+		#if defined(DEBUG_ENABLE_MESSENGER)
 			constexpr sint32 flags = WGL_CONTEXT_DEBUG_BIT_ARB;
 		#else
 			constexpr sint32 flags = 0;

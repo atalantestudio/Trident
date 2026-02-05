@@ -72,7 +72,7 @@ namespace Trident {
 
 	static void PrintLastError();
 
-	#ifdef BUILD_MODE_DEBUG
+	#if defined(BUILD_MODE_DEBUG)
 		#define WIN32_ASSERT(condition) { \
 			if (!(condition)) { \
 				PrintLastError(); \

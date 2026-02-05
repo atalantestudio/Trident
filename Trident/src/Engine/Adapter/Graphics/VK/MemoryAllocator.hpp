@@ -43,7 +43,7 @@ namespace Trident {
 
 			static void destroy();
 
-			#ifdef BUILD_MODE_DEBUG
+			#if defined(BUILD_MODE_DEBUG)
 				static void enumerateMemoryHeaps();
 
 				static void enumerateMemoryTypes();

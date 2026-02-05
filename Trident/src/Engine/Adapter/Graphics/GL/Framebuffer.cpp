@@ -111,7 +111,7 @@ namespace Trident {
 		}
 
 		// Verify the status of the framebuffer.
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			GLenum status = 0;
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5

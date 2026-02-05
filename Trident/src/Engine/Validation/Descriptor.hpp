@@ -4,7 +4,7 @@
 #pragma once
 
 namespace Trident {
-	#ifdef BUILD_MODE_DEBUG
+	#if defined(BUILD_MODE_DEBUG)
 		#define SET_DEBUG_NAME(descriptor, value) descriptor.name = value
 
 		class Image;

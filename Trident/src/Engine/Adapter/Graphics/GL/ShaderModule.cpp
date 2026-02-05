@@ -16,7 +16,7 @@ namespace Trident {
 
 		ADAPTER_ASSERT(descriptor.stage == ShaderStage::VERTEX, "Only vertex shaders can be loaded as .tsm assets.");
 
-		#ifdef GL_SOURCE_FROM_SPIRV
+		#if defined(GL_SOURCE_FROM_SPIRV)
 			// TODO
 			ENGINE_ERROR_UNIMPLEMENTED();
 		#else
@@ -53,7 +53,7 @@ namespace Trident {
 
 		GLsizei length = static_cast<GLsizei>(code.count());
 
-		#ifdef GL_SOURCE_FROM_SPIRV
+		#if defined(GL_SOURCE_FROM_SPIRV)
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_6
 				glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, &code[0], length);
 

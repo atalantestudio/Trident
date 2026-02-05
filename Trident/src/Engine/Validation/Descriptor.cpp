@@ -3,12 +3,12 @@
 
 #include "pch.hpp"
 
-#ifdef BUILD_MODE_DEBUG
+#if defined(BUILD_MODE_DEBUG)
 	#include "Engine/Renderer/Renderer.hpp"
 #endif
 
 namespace Trident {
-	#ifdef BUILD_MODE_DEBUG
+	#if defined(BUILD_MODE_DEBUG)
 		static bool validateSampleCount(uint8 sampleCount) {
 			switch (sampleCount) {
 				case 1:

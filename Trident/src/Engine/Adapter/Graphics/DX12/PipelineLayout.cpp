@@ -209,14 +209,14 @@ namespace Trident {
 
 		ID3DBlob* blob;
 
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			ID3DBlob* errorBlob;
 		#endif
 
 		result = D3D12SerializeVersionedRootSignature(
 			&versionedRootSignatureDescriptor,
 			&blob,
-			#ifdef BUILD_MODE_DEBUG
+			#if defined(BUILD_MODE_DEBUG)
 				&errorBlob
 			#else
 				nullptr
@@ -224,7 +224,7 @@ namespace Trident {
 		);
 
 		if (FAILED(result)) {
-			#ifdef BUILD_MODE_DEBUG
+			#if defined(BUILD_MODE_DEBUG)
 				if (errorBlob) {
 					const view<char8> error(pointer_cast<const char8*>(errorBlob->GetBufferPointer()), errorBlob->GetBufferSize());
 

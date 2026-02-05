@@ -60,7 +60,7 @@ namespace Trident {
 		#endif
 
 		// Verify that the buffer has an immutable storage.
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			GLint immutableStorage = GL_FALSE;
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5

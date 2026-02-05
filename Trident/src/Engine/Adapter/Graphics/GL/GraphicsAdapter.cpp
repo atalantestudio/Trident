@@ -106,7 +106,7 @@ namespace Trident {
 		return createRef<GL::Swapchain>(descriptor, *instance, *surface);
 	}
 
-	#ifdef DEBUG_ENABLE_MESSENGER
+	#if defined(DEBUG_ENABLE_MESSENGER)
 		void GL::GraphicsAdapter::debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 			switch (severity) {
 				case GL_DEBUG_SEVERITY_NOTIFICATION: {
@@ -214,7 +214,7 @@ namespace Trident {
 		#endif
 
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_3
-			#ifdef DEBUG_ENABLE_MESSENGER
+			#if defined(DEBUG_ENABLE_MESSENGER)
 				LOAD_PROCEDURE(glDebugMessageCallback);
 				LOAD_PROCEDURE(glDebugMessageInsert);
 			#endif
@@ -234,7 +234,7 @@ namespace Trident {
 			LOAD_PROCEDURE(glVertexArrayElementBuffer);
 		#endif
 
-		#ifdef GL_SOURCE_FROM_SPIRV
+		#if defined(GL_SOURCE_FROM_SPIRV)
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_6
 				LOAD_PROCEDURE(glShaderBinary);
 				LOAD_PROCEDURE(glSpecializeShader);
@@ -266,7 +266,7 @@ namespace Trident {
 			LOAD_PROCEDURE(glBindTextureUnit);
 			LOAD_PROCEDURE(glCreateTextures);
 
-			#ifdef BUILD_MODE_DEBUG
+			#if defined(BUILD_MODE_DEBUG)
 				LOAD_PROCEDURE(glGetTextureParameteriv);
 			#endif
 
@@ -278,7 +278,7 @@ namespace Trident {
 			LOAD_PROCEDURE(glActiveTexture);
 			LOAD_PROCEDURE(glBindTexture);
 
-			#ifdef BUILD_MODE_DEBUG
+			#if defined(BUILD_MODE_DEBUG)
 				LOAD_PROCEDURE(glGetTexParameteriv);
 			#endif
 
@@ -291,7 +291,7 @@ namespace Trident {
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 			LOAD_PROCEDURE(glBlitNamedFramebuffer);
 
-			#ifdef BUILD_MODE_DEBUG
+			#if defined(BUILD_MODE_DEBUG)
 				LOAD_PROCEDURE(glCheckNamedFramebufferStatus);
 			#endif
 
@@ -304,7 +304,7 @@ namespace Trident {
 		#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 			LOAD_PROCEDURE(glBlitFramebuffer);
 
-			#ifdef BUILD_MODE_DEBUG
+			#if defined(BUILD_MODE_DEBUG)
 				LOAD_PROCEDURE(glCheckFramebufferStatus);
 			#endif
 

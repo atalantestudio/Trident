@@ -59,7 +59,7 @@ namespace Trident {
 
 			void setScene(const Scene2D& scene);
 
-			#ifdef SHOW_DISTANCE
+			#if defined(SHOW_DISTANCE)
 				void setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const;
 			#endif
 
@@ -70,7 +70,7 @@ namespace Trident {
 
 			void setPlaceholderOffset(const vec2<float32>& offset) const;
 
-			#ifdef SHOW_FEATURES
+			#if defined(SHOW_FEATURES)
 				void registerFeature(const Feature2D& feature);
 			#endif
 
@@ -101,11 +101,11 @@ namespace Trident {
 			void createViewBuffer();
 			void createPlaceholderBuffer();
 
-			#ifdef SHOW_DISTANCE
+			#if defined(SHOW_DISTANCE)
 				void createClosestPointBuffer();
 			#endif
 
-			#ifdef SHOW_FEATURES
+			#if defined(SHOW_FEATURES)
 				void createVertexFeatureBuffer();
 				void createEdgeFeatureBuffer();
 			#endif
@@ -122,11 +122,11 @@ namespace Trident {
 			void createPlaceholderStrokeRenderPipeline();
 			void createPlaceholderCenterOfMassRenderPipeline();
 
-			#ifdef SHOW_DISTANCE
+			#if defined(SHOW_DISTANCE)
 				void createDistanceRenderPipeline();
 			#endif
 
-			#ifdef SHOW_FEATURES
+			#if defined(SHOW_FEATURES)
 				void createVertexFeatureRenderPipeline();
 				void createEdgeFeatureRenderPipeline();
 			#endif
@@ -145,11 +145,11 @@ namespace Trident {
 			void renderScene(ref<CommandEncoder> commandEncoder) const;
 			void renderSelectedInstancePlaceholder(ref<CommandEncoder> commandEncoder) const;
 
-			#ifdef SHOW_DISTANCE
+			#if defined(SHOW_DISTANCE)
 				void renderDistance(ref<CommandEncoder> commandEncoder) const;
 			#endif
 
-			#ifdef SHOW_FEATURES
+			#if defined(SHOW_FEATURES)
 				void renderFeatures(ref<CommandEncoder> commandEncoder) const;
 			#endif
 
@@ -184,11 +184,11 @@ namespace Trident {
 			ref<RenderPipeline> placeholderStrokeRenderPipeline;
 			ref<RenderPipeline> placeholderCenterOfMassRenderPipeline;
 
-			#ifdef SHOW_DISTANCE
+			#if defined(SHOW_DISTANCE)
 				ref<RenderPipeline> distanceRenderPipeline;
 			#endif
 
-			#ifdef SHOW_FEATURES
+			#if defined(SHOW_FEATURES)
 				ref<RenderPipeline> vertexFeatureRenderPipeline;
 				ref<RenderPipeline> edgeFeatureRenderPipeline;
 			#endif
@@ -197,11 +197,11 @@ namespace Trident {
 			ref<Buffer> viewBuffer;
 			ref<Buffer> placeholderBuffer;
 
-			#ifdef SHOW_DISTANCE
+			#if defined(SHOW_DISTANCE)
 				ref<Buffer> closestPointBuffer;
 			#endif
 
-			#ifdef SHOW_FEATURES
+			#if defined(SHOW_FEATURES)
 				ref<Buffer> vertexFeatureBuffer;
 				ref<Buffer> edgeFeatureBuffer;
 			#endif
@@ -215,11 +215,11 @@ namespace Trident {
 			View* viewBufferMappedRange = nullptr;
 			Placeholder* placeholderBufferMappedRange = nullptr;
 
-			#ifdef SHOW_DISTANCE
+			#if defined(SHOW_DISTANCE)
 				Vertex* closestPointBufferMappedRange = nullptr;
 			#endif
 
-			#ifdef SHOW_FEATURES
+			#if defined(SHOW_FEATURES)
 				Vertex* vertexFeatureBufferMappedRange = nullptr;
 				Vertex* edgeFeatureBufferMappedRange = nullptr;
 			#endif
@@ -232,7 +232,7 @@ namespace Trident {
 
 			uint32 selectedInstanceIndex = max<uint32>();
 
-			#ifdef SHOW_FEATURES
+			#if defined(SHOW_FEATURES)
 				uint32 vertexFeatureCount = 0;
 				uint32 edgeFeatureCount = 0;
 			#endif

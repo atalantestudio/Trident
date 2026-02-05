@@ -101,7 +101,7 @@ namespace Trident {
 		PFN_vkCreateWin32SurfaceKHR vkCreateWin32SurfaceKHR;
 	#endif
 
-	#ifdef DEBUG_ENABLE_MESSENGER
+	#if defined(DEBUG_ENABLE_MESSENGER)
 		PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
 		PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
 	#endif

@@ -140,7 +140,7 @@ namespace Trident {
 					}
 				}
 
-				#ifdef OPENGL_UNBIND_AFTER_USE
+				#if defined(OPENGL_UNBIND_AFTER_USE)
 					glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 					#if OPENGL_VERSION < OPENGL_VERSION_4_5

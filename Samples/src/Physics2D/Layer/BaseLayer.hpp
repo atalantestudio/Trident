@@ -49,7 +49,7 @@ namespace Trident {
 		private:
 			PhysicsEngine2D physicsEngine;
 
-			#ifdef BUILD_MODE_DEBUG
+			#if defined(BUILD_MODE_DEBUG)
 				VisualizationData2D visualizationData;
 			#endif
 

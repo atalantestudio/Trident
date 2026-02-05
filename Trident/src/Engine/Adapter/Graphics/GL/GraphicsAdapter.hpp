@@ -52,7 +52,7 @@ namespace Trident {
 		private:
 			void loadProcedures() const;
 
-			#ifdef DEBUG_ENABLE_MESSENGER
+			#if defined(DEBUG_ENABLE_MESSENGER)
 				static void debugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 			#endif
 

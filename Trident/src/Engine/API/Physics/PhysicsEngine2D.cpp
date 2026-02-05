@@ -15,7 +15,7 @@ namespace Trident {
 		deltaTime(static_cast<float32>(descriptor.deltaTime)),
 		inverseDeltaTime(static_cast<float32>(1.0 / descriptor.deltaTime)),
 		halfDeltaTime(static_cast<float32>(descriptor.deltaTime * 0.5))
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			, visualizationData(descriptor.visualizationData)
 		#endif
 	{}
@@ -83,7 +83,7 @@ namespace Trident {
 					rigidBodyA,
 					rigidBodyB,
 					&entityContactPair.contactManifold
-					#ifdef BUILD_MODE_DEBUG
+					#if defined(BUILD_MODE_DEBUG)
 						, visualizationData
 					#endif
 				)
@@ -94,7 +94,7 @@ namespace Trident {
 				continue;
 			}
 
-			#ifdef BUILD_MODE_DEBUG
+			#if defined(BUILD_MODE_DEBUG)
 				if (visualizationData != nullptr) {
 					visualizationData->contactManifold = entityContactPair.contactManifold;
 				}
@@ -184,7 +184,7 @@ namespace Trident {
 
 				contact.bias = -penetrationBias * inverseDeltaTime * min(0.0f, contact.separation + ALLOWED_PENETRATION);
 
-				#ifdef ACCUMULATE_IMPULSES
+				#if defined(ACCUMULATE_IMPULSES)
 					const vec2<float32> impulse = pair.contactManifold.normal * contact.accumulatedNormalImpulse + pair.contactManifold.tangent * contact.accumulatedTangentImpulse;
 
 					rigidBodyA.applyImpulse(-impulse, contact.rA);
@@ -212,7 +212,7 @@ namespace Trident {
 
 					float32 normalImpulseLength = (-relativeVelocityTowardsNormal + contact.bias) * contact.massNormal;
 
-					#ifdef ACCUMULATE_IMPULSES
+					#if defined(ACCUMULATE_IMPULSES)
 						const float32 oldNormalValue = contact.accumulatedNormalImpulse;
 
 						contact.accumulatedNormalImpulse = max(0.0f, oldNormalValue + normalImpulseLength);
@@ -235,7 +235,7 @@ namespace Trident {
 
 					float32 tangentImpulseLength = -relativeVelocityTowardsTangent * contact.massTangent;
 
-					#ifdef ACCUMULATE_IMPULSES
+					#if defined(ACCUMULATE_IMPULSES)
 						const float32 maxTangentImpulseLength = pair.combinedFriction * contact.accumulatedNormalImpulse;
 						const float32 oldTangentValue = contact.accumulatedTangentImpulse;
 
@@ -320,7 +320,7 @@ namespace Trident {
 
 			mergedContactManifold.contacts[contactIndex] = cNew;
 
-			#ifdef WARM_STARTING
+			#if defined(WARM_STARTING)
 				const Contact2D& cOld = entityContactPair.contactManifold.contacts[k];
 
 				mergedContactManifold.contacts[contactIndex].accumulatedNormalImpulse = cOld.accumulatedNormalImpulse;

@@ -7,7 +7,7 @@ namespace Trident {
 	extern ConsoleLogger engineLogger;
 }
 
-#ifdef BUILD_MODE_DEBUG
+#if defined(BUILD_MODE_DEBUG)
 	#define ENGINE_TRACE(...) ::Trident::engineLogger.trace(__FILE__, __LINE__, __VA_ARGS__)
 	#define ENGINE_DEBUG(...) ::Trident::engineLogger.debug(__VA_ARGS__)
 	#define ENGINE_INFO(...) ::Trident::engineLogger.info(__VA_ARGS__)

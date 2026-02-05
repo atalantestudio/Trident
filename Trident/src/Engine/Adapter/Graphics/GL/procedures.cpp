@@ -78,7 +78,7 @@ namespace Trident {
 	#endif
 
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_3
-		#ifdef DEBUG_ENABLE_MESSENGER
+		#if defined(DEBUG_ENABLE_MESSENGER)
 			PFNGLDEBUGMESSAGECALLBACKPROC glDebugMessageCallback;
 			PFNGLDEBUGMESSAGEINSERTPROC glDebugMessageInsert;
 		#endif
@@ -98,7 +98,7 @@ namespace Trident {
 		PFNGLVERTEXARRAYELEMENTBUFFERPROC glVertexArrayElementBuffer;
 	#endif
 
-	#ifdef GL_SOURCE_FROM_SPIRV
+	#if defined(GL_SOURCE_FROM_SPIRV)
 		#if OPENGL_VERSION >= OPENGL_VERSION_4_6
 			PFNGLSHADERBINARYPROC glShaderBinary;
 			PFNGLSPECIALIZESHADERPROC glSpecializeShader;
@@ -130,7 +130,7 @@ namespace Trident {
 		PFNGLBINDTEXTUREUNITPROC glBindTextureUnit;
 		PFNGLCREATETEXTURESPROC glCreateTextures;
 
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			PFNGLGETTEXTUREPARAMETERIVPROC glGetTextureParameteriv;
 		#endif
 
@@ -142,7 +142,7 @@ namespace Trident {
 		PFNGLACTIVETEXTUREPROC glActiveTexture;
 		PFNGLBINDTEXTUREPROC glBindTexture;
 
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			PFNGLGETTEXPARAMETERIVPROC glGetTexParameteriv;
 		#endif
 
@@ -155,7 +155,7 @@ namespace Trident {
 	#if OPENGL_VERSION >= OPENGL_VERSION_4_5
 		PFNGLBLITNAMEDFRAMEBUFFERPROC glBlitNamedFramebuffer;
 
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC glCheckNamedFramebufferStatus;
 		#endif
 
@@ -168,7 +168,7 @@ namespace Trident {
 	#elif OPENGL_VERSION >= OPENGL_VERSION_3_0
 		PFNGLBLITFRAMEBUFFERPROC glBlitFramebuffer;
 
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
 		#endif
 

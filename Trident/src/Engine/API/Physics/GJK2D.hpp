@@ -283,7 +283,7 @@ namespace Trident {
 			s[s.count] = vertex;
 			s.count += 1;
 
-			#ifdef BUILD_MODE_DEBUG
+			#if defined(BUILD_MODE_DEBUG)
 				if (i == GJK_2D_ITERATION_LIMIT - 1) {
 					ENGINE_WARNING("GJK 2D: Iteration limit reached.");
 				}

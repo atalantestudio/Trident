@@ -101,7 +101,7 @@ namespace Trident {
 		}
 
 		// Verify that the texture has an immutable format.
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			GLint immutableFormat = GL_FALSE;
 
 			#if OPENGL_VERSION >= OPENGL_VERSION_4_5

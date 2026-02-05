@@ -189,7 +189,7 @@ namespace Trident {
 					}
 				}
 
-				#ifdef TTF_FIX_INVERTED_CONTOURS
+				#if defined(TTF_FIX_INVERTED_CONTOURS)
 					if (numberOfContours == 1) {
 						std::vector<ContourPoint>& contour = contours[0];
 

@@ -33,7 +33,7 @@ namespace Trident {
 
 		loadInstanceProcedures();
 
-		#ifdef DEBUG_ENABLE_MESSENGER
+		#if defined(DEBUG_ENABLE_MESSENGER)
 			instance->createDebugUtilsMessenger();
 		#endif
 
@@ -237,7 +237,7 @@ namespace Trident {
 			LOAD_PROCEDURE(vkCreateWin32SurfaceKHR);
 		#endif
 
-		#ifdef DEBUG_ENABLE_MESSENGER
+		#if defined(DEBUG_ENABLE_MESSENGER)
 			LOAD_PROCEDURE(vkCreateDebugUtilsMessengerEXT);
 			LOAD_PROCEDURE(vkDestroyDebugUtilsMessengerEXT);
 		#endif

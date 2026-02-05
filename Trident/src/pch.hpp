@@ -14,13 +14,13 @@
 #include <sstream>
 
 // TODO: Conditionally import per module.
-#ifdef BUILD_MODE_DEBUG
+#if defined(BUILD_MODE_DEBUG)
 	#include <chrono>
 	#include <iomanip>
 #endif
 
 // TODO: Conditionally import per module.
-#ifdef BUILD_MODE_PROFILE
+#if defined(BUILD_MODE_PROFILE)
 	#include <algorithm>
 	#include <thread>
 #endif
@@ -43,15 +43,15 @@
 	#include "Engine/Base/Windows.hpp"
 #endif
 
-#ifdef ENABLE_DX12_ADAPTER
+#if defined(ENABLE_DX12_ADAPTER)
 	#include "Engine/Adapter/Graphics/DX12/Base.hpp"
 #endif
 
-#ifdef ENABLE_GL_ADAPTER
+#if defined(ENABLE_GL_ADAPTER)
 	#include "Engine/Adapter/Graphics/GL/Base.hpp"
 #endif
 
-#ifdef ENABLE_VK_ADAPTER
+#if defined(ENABLE_VK_ADAPTER)
 	#include "Engine/Adapter/Graphics/VK/Base.hpp"
 #endif
 

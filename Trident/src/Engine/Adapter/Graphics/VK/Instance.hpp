@@ -7,18 +7,18 @@
 #include "Engine/Application/ApplicationProperties.hpp"
 #include "Engine/Application/ProjectDescriptor.hpp"
 
-#ifdef BUILD_MODE_DEBUG
+#if defined(BUILD_MODE_DEBUG)
 	#define DEBUG_ENUMERATE_PHYSICAL_DEVICES
 #endif
 
 namespace Trident {
 	class VK::Instance final : public Trident::Instance {
 		private:
-			#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
+			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 				static void checkInstanceLayers();
 			#endif
 
-			#ifdef DEBUG_ENABLE_MESSENGER
+			#if defined(DEBUG_ENABLE_MESSENGER)
 				static VkBool32 debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
 			#endif
 
@@ -27,7 +27,7 @@ namespace Trident {
 
 			~Instance() final override;
 
-			#ifdef DEBUG_ENABLE_MESSENGER
+			#if defined(DEBUG_ENABLE_MESSENGER)
 				void createDebugUtilsMessenger();
 			#endif
 
@@ -37,7 +37,7 @@ namespace Trident {
 			uint32 calculatePhysicalDeviceScore(const VkPhysicalDeviceProperties& physicalDeviceProperties) const;
 
 		private:
-			#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
+			#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 				static const sequence<const char8*> ENABLED_LAYER_NAMES;
 			#endif
 
@@ -45,7 +45,7 @@ namespace Trident {
 			VkInstance instance;
 
 		private:
-			#ifdef DEBUG_ENABLE_MESSENGER
+			#if defined(DEBUG_ENABLE_MESSENGER)
 				VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfo;
 				VkDebugUtilsMessengerEXT debugUtilsMessenger;
 			#endif

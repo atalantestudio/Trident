@@ -60,7 +60,7 @@ namespace Trident {
 	#define VULKAN_USE_VK_KHR_surface
 	#define VULKAN_USE_VK_KHR_swapchain
 
-	#ifdef ENABLE_GL_ADAPTER
+	#if defined(ENABLE_GL_ADAPTER)
 		#if OPENGL_VERSION < OPENGL_VERSION_2_0
 			#error "OpenGL versions older than 2.0 cannot be used."
 		#endif

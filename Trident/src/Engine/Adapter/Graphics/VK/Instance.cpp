@@ -7,7 +7,7 @@
 #include "Engine/API/Graphics/GraphicsAdapter.hpp"
 
 namespace Trident {
-	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
+	#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 		void VK::Instance::checkInstanceLayers() {
 			VkResult result;
 			uint32 layerPropertyCount;
@@ -28,7 +28,7 @@ namespace Trident {
 		}
 	#endif
 
-	#ifdef DEBUG_ENABLE_MESSENGER
+	#if defined(DEBUG_ENABLE_MESSENGER)
 		VkBool32 VK::Instance::debugUtilsMessengerUserCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
 			switch (messageSeverity) {
 				case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: {
@@ -58,7 +58,7 @@ namespace Trident {
 	#endif
 
 	// TODO: Client-side validation layer request.
-	#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
+	#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 		const sequence<const char8*> VK::Instance::ENABLED_LAYER_NAMES = {
 			"VK_LAYER_KHRONOS_validation",
 		};
@@ -66,18 +66,18 @@ namespace Trident {
 
 	// NOTE: ~25Mb in Release mode.
 	VK::Instance::Instance(const ProjectDescriptor& projectDescriptor, const ApplicationProperties& properties) :
-		#ifdef DEBUG_ENABLE_MESSENGER
+		#if defined(DEBUG_ENABLE_MESSENGER)
 			debugUtilsMessengerCreateInfo{},
 		#endif
 		preferIntegratedGpu(properties.PreferIntegratedGPU)
 	{
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
+		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 			checkInstanceLayers();
 		#endif
 
-		#ifdef DEBUG_ENABLE_MESSENGER
+		#if defined(DEBUG_ENABLE_MESSENGER)
 			debugUtilsMessengerCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 			debugUtilsMessengerCreateInfo.messageSeverity =
 				VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
@@ -103,7 +103,7 @@ namespace Trident {
 		VkInstanceCreateInfo instanceCreateInfo{};
 		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 
-		#ifdef DEBUG_ENABLE_MESSENGER
+		#if defined(DEBUG_ENABLE_MESSENGER)
 			instanceCreateInfo.pNext = &debugUtilsMessengerCreateInfo;
 		#else
 			instanceCreateInfo.pNext = nullptr;
@@ -112,7 +112,7 @@ namespace Trident {
 		instanceCreateInfo.flags = 0;
 		instanceCreateInfo.pApplicationInfo = &applicationInfo;
 
-		#ifdef DEBUG_ENABLE_VALIDATION_LAYERS
+		#if defined(DEBUG_ENABLE_VALIDATION_LAYERS)
 			instanceCreateInfo.enabledLayerCount = static_cast<uint32>(ENABLED_LAYER_NAMES.count());
 			instanceCreateInfo.ppEnabledLayerNames = &ENABLED_LAYER_NAMES[0];
 		#else
@@ -125,7 +125,7 @@ namespace Trident {
 			enabledExtensionNames.emplace_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 		#endif
 
-		#ifdef DEBUG_ENABLE_MESSENGER
+		#if defined(DEBUG_ENABLE_MESSENGER)
 			enabledExtensionNames.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		#endif
 
@@ -142,14 +142,14 @@ namespace Trident {
 	VK::Instance::~Instance() {
 		PROFILE_SCOPE(FUNCTION_SIGNATURE);
 
-		#ifdef DEBUG_ENABLE_MESSENGER
+		#if defined(DEBUG_ENABLE_MESSENGER)
 			vkDestroyDebugUtilsMessengerEXT(instance, debugUtilsMessenger, nullptr);
 		#endif
 
 		vkDestroyInstance(instance, nullptr);
 	}
 
-	#ifdef DEBUG_ENABLE_MESSENGER
+	#if defined(DEBUG_ENABLE_MESSENGER)
 		void VK::Instance::createDebugUtilsMessenger() {
 			const VkResult result = vkCreateDebugUtilsMessengerEXT(instance, &debugUtilsMessengerCreateInfo, nullptr, &debugUtilsMessenger);
 
@@ -178,11 +178,11 @@ namespace Trident {
 		uint32 maxPhysicalDeviceScore = 0;
 		uint32 bestPhysicalDeviceIndex = 0;
 
-		#ifdef DEBUG_ENUMERATE_PHYSICAL_DEVICES
+		#if defined(DEBUG_ENUMERATE_PHYSICAL_DEVICES)
 			std::string physicalDeviceType;
 		#endif
 
-		#ifdef DEBUG_ENUMERATE_PHYSICAL_DEVICES
+		#if defined(DEBUG_ENUMERATE_PHYSICAL_DEVICES)
 			ADAPTER_INFO("Available physical devices:");
 		#endif
 
@@ -198,7 +198,7 @@ namespace Trident {
 				bestPhysicalDeviceIndex = physicalDeviceIndex;
 			}
 
-			#ifdef DEBUG_ENUMERATE_PHYSICAL_DEVICES
+			#if defined(DEBUG_ENUMERATE_PHYSICAL_DEVICES)
 				switch (physicalDeviceProperties.deviceType) {
 					case VK_PHYSICAL_DEVICE_TYPE_OTHER:
 						physicalDeviceType = "unknown type";

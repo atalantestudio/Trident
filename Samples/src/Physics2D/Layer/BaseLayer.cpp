@@ -10,7 +10,7 @@
 namespace Trident {
 	BaseLayer::BaseLayer() :
 		physicsEngine(getPhysicsEngineDescriptor())
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			, visualizationData{}
 		#endif
 	{}
@@ -59,7 +59,7 @@ namespace Trident {
 					contactManifold.edge[contactIndex] = visualizationData.contactManifold.contacts[contactIndex].position;
 				}
 
-				#ifdef SHOW_FEATURES
+				#if defined(SHOW_FEATURES)
 					renderer.registerFeature(contactManifold);
 				#endif
 			}
@@ -70,11 +70,11 @@ namespace Trident {
 				const vec2<float32>& closestA = visualizationData.satOutput.incidentSupportPoint;
 				const vec2<float32> closestB = closestA - visualizationData.satOutput.normal * visualizationData.satOutput.separation;
 
-				#ifdef SHOW_DISTANCE
+				#if defined(SHOW_DISTANCE)
 					renderer.setClosestPoints(closestA, closestB);
 				#endif
 
-				#ifdef SHOW_FEATURES
+				#if defined(SHOW_FEATURES)
 					Feature2D vertexFeatureA{};
 					vertexFeatureA.setVertexCount(1);
 					vertexFeatureA.vertex = closestA;
@@ -91,7 +91,7 @@ namespace Trident {
 
 		#if VISUALIZE_MODE == VISUALIZE_MODE_REFERENCE_EDGE_TOUCHING
 			if (visualizationData.satOutput.separation <= 0.0f) {
-				#ifdef SHOW_FEATURES
+				#if defined(SHOW_FEATURES)
 					renderer.registerFeature(visualizationData.satOutput.referenceEdge);
 				#endif
 			}
@@ -106,7 +106,7 @@ namespace Trident {
 		PhysicsEngine2DDescriptor descriptor{};
 		descriptor.deltaTime = Application::getFixedDeltaTime();
 
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			descriptor.visualizationData = &visualizationData;
 		#endif
 

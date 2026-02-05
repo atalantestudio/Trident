@@ -14,7 +14,7 @@ namespace Trident {
 		const RigidBody2D& A,
 		const RigidBody2D& B,
 		ContactManifold2D* contactManifold
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			, VisualizationData2D* visualizationData
 		#endif
 	) {
@@ -26,7 +26,7 @@ namespace Trident {
 
 		const GJK2DOutput gjkOutput = GJK2D(pointA, B);
 
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			visualizationData->gjkOutput = gjkOutput;
 		#endif
 
@@ -47,7 +47,7 @@ namespace Trident {
 
 		const SAT2DOutput satOutput = SATCircleConvexHull2D(A, B);
 
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			visualizationData->satOutput = satOutput;
 		#endif
 

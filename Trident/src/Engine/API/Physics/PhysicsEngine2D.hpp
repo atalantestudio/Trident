@@ -5,7 +5,7 @@
 
 #include "Engine/API/Physics/EntityPair.hpp"
 
-#ifdef BUILD_MODE_DEBUG
+#if defined(BUILD_MODE_DEBUG)
 	#include "Engine/API/Physics/VisualizationData.hpp"
 #endif
 
@@ -18,7 +18,7 @@ namespace Trident {
 	struct PhysicsEngine2DDescriptor {
 		float64 deltaTime;
 
-		#ifdef BUILD_MODE_DEBUG
+		#if defined(BUILD_MODE_DEBUG)
 			VisualizationData2D* visualizationData;
 		#endif
 	};
@@ -57,7 +57,7 @@ namespace Trident {
 			float32 inverseDeltaTime;
 			float32 halfDeltaTime;
 
-			#ifdef BUILD_MODE_DEBUG
+			#if defined(BUILD_MODE_DEBUG)
 				VisualizationData2D* const visualizationData = nullptr;
 			#endif
 	};

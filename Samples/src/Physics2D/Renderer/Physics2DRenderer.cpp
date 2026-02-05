@@ -24,11 +24,11 @@ namespace Trident {
 		createViewBuffer();
 		createPlaceholderBuffer();
 
-		#ifdef SHOW_DISTANCE
+		#if defined(SHOW_DISTANCE)
 			createClosestPointBuffer();
 		#endif
 
-		#ifdef SHOW_FEATURES
+		#if defined(SHOW_FEATURES)
 			createVertexFeatureBuffer();
 			createEdgeFeatureBuffer();
 		#endif
@@ -52,11 +52,11 @@ namespace Trident {
 		createPlaceholderStrokeRenderPipeline();
 		createPlaceholderCenterOfMassRenderPipeline();
 
-		#ifdef SHOW_DISTANCE
+		#if defined(SHOW_DISTANCE)
 			createDistanceRenderPipeline();
 		#endif
 
-		#ifdef SHOW_FEATURES
+		#if defined(SHOW_FEATURES)
 			createVertexFeatureRenderPipeline();
 			createEdgeFeatureRenderPipeline();
 		#endif
@@ -287,7 +287,7 @@ namespace Trident {
 		placeholderBufferMappedRange->offset = {0.0f, 0.0f};
 	}
 
-	#ifdef SHOW_DISTANCE
+	#if defined(SHOW_DISTANCE)
 		void Physics2DRenderer::createClosestPointBuffer() {
 			BufferDescriptor closestPointBufferDescriptor{};
 			closestPointBufferDescriptor.size = 2 * sizeof(Vertex);
@@ -303,7 +303,7 @@ namespace Trident {
 		}
 	#endif
 
-	#ifdef SHOW_FEATURES
+	#if defined(SHOW_FEATURES)
 		void Physics2DRenderer::createVertexFeatureBuffer() {
 			BufferDescriptor vertexFeatureBufferDescriptor{};
 			vertexFeatureBufferDescriptor.size = 2 * sizeof(Vertex);
@@ -786,7 +786,7 @@ namespace Trident {
 		placeholderCenterOfMassRenderPipeline = createRenderPipeline(placeholderCenterOfMassRenderPipelineDescriptor);
 	}
 
-	#ifdef SHOW_DISTANCE
+	#if defined(SHOW_DISTANCE)
 		void Physics2DRenderer::createDistanceRenderPipeline() {
 			VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 			vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -832,7 +832,7 @@ namespace Trident {
 		}
 	#endif
 
-	#ifdef SHOW_FEATURES
+	#if defined(SHOW_FEATURES)
 		void Physics2DRenderer::createVertexFeatureRenderPipeline() {
 			VertexInputBinding vertexInputBinding(InputRate::VERTEX);
 			vertexInputBinding.registerAttribute<svec2<float32>>();
@@ -1032,7 +1032,7 @@ namespace Trident {
 		copyBuffers(stagingBuffer);
 	}
 
-	#ifdef SHOW_DISTANCE
+	#if defined(SHOW_DISTANCE)
 		void Physics2DRenderer::setClosestPoints(const vec2<float32>& closestPointA, const vec2<float32>& closestPointB) const {
 			closestPointBufferMappedRange[0].position = {closestPointA[0], closestPointA[1]};
 			closestPointBufferMappedRange[1].position = {closestPointB[0], closestPointB[1]};
@@ -1062,7 +1062,7 @@ namespace Trident {
 		placeholderBufferMappedRange->offset = {offset[0], offset[1]};
 	}
 
-	#ifdef SHOW_FEATURES
+	#if defined(SHOW_FEATURES)
 		void Physics2DRenderer::registerFeature(const Feature2D& feature) {
 			switch (feature.getVertexCount()) {
 				case 1:
@@ -1214,11 +1214,11 @@ namespace Trident {
 		renderGrid(commandEncoder);
 		renderScene(commandEncoder);
 
-		#ifdef SHOW_DISTANCE
+		#if defined(SHOW_DISTANCE)
 			renderDistance(commandEncoder);
 		#endif
 
-		#ifdef SHOW_FEATURES
+		#if defined(SHOW_FEATURES)
 			renderFeatures(commandEncoder);
 		#endif
 
@@ -1329,7 +1329,7 @@ namespace Trident {
 		commandEncoder->draw(geometry->getVertexCount() + 1, 1, 0, 0);
 	}
 
-	#ifdef SHOW_DISTANCE
+	#if defined(SHOW_DISTANCE)
 		void Physics2DRenderer::renderDistance(ref<CommandEncoder> commandEncoder) const {
 			commandEncoder->bindRenderPipeline(distanceRenderPipeline);
 			commandEncoder->bindDescriptorSets(cameraViewPipelineLayout, {cameraViewDescriptorSet});
@@ -1338,7 +1338,7 @@ namespace Trident {
 		}
 	#endif
 
-	#ifdef SHOW_FEATURES
+	#if defined(SHOW_FEATURES)
 		void Physics2DRenderer::renderFeatures(ref<CommandEncoder> commandEncoder) const {
 			if (vertexFeatureCount > 0) {
 				commandEncoder->bindRenderPipeline(vertexFeatureRenderPipeline);
@@ -1371,12 +1371,12 @@ namespace Trident {
 	}
 
 	void Physics2DRenderer::clearRegisteredData() {
-		#ifdef SHOW_DISTANCE
+		#if defined(SHOW_DISTANCE)
 			closestPointBufferMappedRange[0].position = {0.0f, 0.0f};
 			closestPointBufferMappedRange[1].position = {0.0f, 0.0f};
 		#endif
 
-		#ifdef SHOW_FEATURES
+		#if defined(SHOW_FEATURES)
 			vertexFeatureCount = 0;
 			edgeFeatureCount = 0;
 		#endif

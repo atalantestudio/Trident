@@ -3,15 +3,15 @@
 
 #include "pch.hpp"
 
-#ifdef ENABLE_DX12_ADAPTER
+#if defined(ENABLE_DX12_ADAPTER)
 	#include "Engine/Adapter/Graphics/DX12/GraphicsAdapter.hpp"
 #endif
 
-#ifdef ENABLE_GL_ADAPTER
+#if defined(ENABLE_GL_ADAPTER)
 	#include "Engine/Adapter/Graphics/GL/GraphicsAdapter.hpp"
 #endif
 
-#ifdef ENABLE_VK_ADAPTER
+#if defined(ENABLE_VK_ADAPTER)
 	#include "Engine/Adapter/Graphics/VK/GraphicsAdapter.hpp"
 #endif
 
@@ -40,7 +40,7 @@ namespace Trident {
 
 				break;
 			}
-			#ifdef ENABLE_DX12_ADAPTER
+			#if defined(ENABLE_DX12_ADAPTER)
 				case GraphicsAPI::DX12: {
 					ENGINE_INFO("Using DirectX 12 graphics adapter.");
 
@@ -49,7 +49,7 @@ namespace Trident {
 					break;
 				}
 			#endif
-			#ifdef ENABLE_GL_ADAPTER
+			#if defined(ENABLE_GL_ADAPTER)
 				case GraphicsAPI::GL: {
 					ENGINE_INFO("Using OpenGL [] graphics adapter.", OPENGL_VERSION);
 
@@ -58,7 +58,7 @@ namespace Trident {
 					break;
 				}
 			#endif
-			#ifdef ENABLE_VK_ADAPTER
+			#if defined(ENABLE_VK_ADAPTER)
 				case GraphicsAPI::VK: {
 					ENGINE_INFO("Using Vulkan graphics adapter.");
 
@@ -257,7 +257,7 @@ namespace Trident {
 				break;
 			}
 			case GraphicsAPI::GL: {
-				#ifdef GL_SOURCE_FROM_SPIRV
+				#if defined(GL_SOURCE_FROM_SPIRV)
 					pathString += ".spv";
 				#else
 					pathString += ".glsl";

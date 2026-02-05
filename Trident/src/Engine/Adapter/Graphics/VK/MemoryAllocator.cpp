@@ -26,12 +26,12 @@ namespace Trident {
 		currentImageMemoryAllocationIndices = sequence<uint32>(physicalDevice.memoryProperties.memoryTypeCount);
 		std::fill(currentImageMemoryAllocationIndices.begin(), currentImageMemoryAllocationIndices.end(), UNDEFINED_MEMORY_ALLOCATION_INDEX);
 
-		#ifdef BUILD_MODE_DEBUG
-			#ifdef DEBUG_ENUMERATE_HEAPS
+		#if defined(BUILD_MODE_DEBUG)
+			#if defined(DEBUG_ENUMERATE_HEAPS)
 				enumerateMemoryHeaps();
 			#endif
 
-			#ifdef DEBUG_ENUMERATE_TYPES
+			#if defined(DEBUG_ENUMERATE_TYPES)
 				enumerateMemoryTypes();
 			#endif
 		#endif
@@ -41,7 +41,7 @@ namespace Trident {
 		physicalDevice = nullptr;
 	}
 
-	#ifdef BUILD_MODE_DEBUG
+	#if defined(BUILD_MODE_DEBUG)
 		void VK::MemoryAllocator::enumerateMemoryHeaps() {
 			for (uint32 memoryHeapIndex = 0; memoryHeapIndex < physicalDevice->memoryProperties.memoryHeapCount; memoryHeapIndex += 1) {
 				const VkMemoryHeap& memoryHeap = physicalDevice->memoryProperties.memoryHeaps[memoryHeapIndex];
