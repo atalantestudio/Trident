@@ -8,7 +8,7 @@
 namespace Trident {
 	class SampleRenderer : public Renderer {
 		private:
-			static constexpr char8* IMAGE_ASSET_NAME = "DefaultFont";
+			static constexpr view<char8> IMAGE_ASSET_NAME = "DefaultFont";
 
 		public:
 			void build() override {
@@ -77,17 +77,42 @@ namespace Trident {
 
 			void loadImageAsset() {
 				const ref<ImageAsset> imageAsset = getLayer()->getApplication()->getAssetLibrary()->findImageAsset(IMAGE_ASSET_NAME);
-				const ref<Buffer> imageAssetStagingBuffer = createStagingBuffer(imageAsset->getData().count());
 
-				uint8* imageAssetStagingBufferMappedRange = imageAssetStagingBuffer->map<uint8>(0, imageAssetStagingBuffer->getSize());
+				ImageFormat imageFormat = imageAsset->getFormat();
 
-				std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), imageAssetStagingBufferMappedRange);
+				switch (imageAsset->getFormat()) {
+					case ImageFormat::R8_UNORM:
+					case ImageFormat::R8G8B8A8_UNORM: {
+						break;
+					}
+					case ImageFormat::R8G8B8_UNORM: {
+						imageFormat = ImageFormat::R8G8B8A8_UNORM;
 
-				imageAssetStagingBuffer->unmap();
+						break;
+					}
+					default: {
+						ENGINE_ERROR_UNSUPPORTED();
+
+						break;
+					}
+				}
+
+				const ref<Buffer> imageStagingBuffer = createStagingBuffer(imageAsset->getExtent().width * imageAsset->getExtent().height * imageAsset->getExtent().depth * imageAsset->getLayerCount() * getChannelCount(imageFormat));
+
+				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->getSize());
+
+				if (imageAsset->getFormat() == ImageFormat::R8G8B8_UNORM) {
+					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(imageAsset->getData(), imageStagingBufferMappedRange, imageStagingBuffer->getSize());
+				}
+				else {
+					std::copy(imageAsset->getData().begin(), imageAsset->getData().end(), imageStagingBufferMappedRange);
+				}
+
+				imageStagingBuffer->unmap();
 
 				ImageDescriptor imageDescriptor{};
 				imageDescriptor.type = ImageType::TEXTURE_2D;
-				imageDescriptor.format = ImageFormat::R8G8B8A8_UNORM;
+				imageDescriptor.format = imageFormat;
 				imageDescriptor.extent = imageAsset->getExtent();
 				imageDescriptor.mipLevelCount = imageAsset->getMipLevelCount();
 				imageDescriptor.layerCount = imageAsset->getLayerCount();
@@ -119,7 +144,7 @@ namespace Trident {
 
 				commandEncoder->begin();
 				commandEncoder->setImageMemoryBarrier(image, ImageLayout::TRANSFER_DST_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
-				commandEncoder->copyBufferToImage(imageAssetStagingBuffer, image, {bufferImageCopyRegion});
+				commandEncoder->copyBufferToImage(imageStagingBuffer, image, {bufferImageCopyRegion});
 				commandEncoder->setImageMemoryBarrier(image, ImageLayout::SHADER_READ_ONLY_OPTIMAL, PipelineStage::ALL_COMMANDS, PipelineStage::ALL_COMMANDS);
 
 				const ref<CommandBuffer> commandBuffer = commandEncoder->end();

@@ -179,7 +179,7 @@ namespace Trident {
 
 				sequence<uint8> data(file.data.count() / 4);
 
-				convertRGBAToRed(file.data, data);
+				convert<ImageFormat::R8G8B8A8_UNORM, ImageFormat::R8_UNORM>(file.data, &data[0], data.count());
 
 				ImageAssetDescriptor glyphMapImageAssetDescriptor{};
 				glyphMapImageAssetDescriptor.format = ImageFormat::R8_UNORM;

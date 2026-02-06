@@ -288,20 +288,34 @@ namespace Trident {
 				imageAssetDescriptor.identifier = byteStream.read<uint32>();
 				imageAssetDescriptor.version = byteStream.read<VersionNumber>();
 				imageAssetDescriptor.format = static_cast<ImageFormat>(byteStream.read<uint32>());
-
-				ENGINE_ASSERT(imageAssetDescriptor.format == ImageFormat::R8G8B8A8_UNORM, "Image formats other than R8G8B8A8_UNORM are not supported yet.");
-
 				imageAssetDescriptor.extent = byteStream.read<Extent3D>();
 				imageAssetDescriptor.mipLevelCount = byteStream.read<uint32>();
 				imageAssetDescriptor.layerCount = byteStream.read<uint32>();
 
-				static constexpr uint8 CHANNEL_COUNT = 4;
+				const uint8 channelCount = getChannelCount(imageAssetDescriptor.format);
 
-				imageAssetDescriptor.data = sequence<uint8>(imageAssetDescriptor.layerCount * imageAssetDescriptor.extent.width * imageAssetDescriptor.extent.height * imageAssetDescriptor.extent.depth * CHANNEL_COUNT);
+				imageAssetDescriptor.data = sequence<uint8>(imageAssetDescriptor.extent.width * imageAssetDescriptor.extent.height * imageAssetDescriptor.extent.depth * imageAssetDescriptor.layerCount * channelCount);
 
-				const uint64 maxIterationCount = byteStream.getRemainingSize();
+				switch (imageAssetDescriptor.format) {
+					case ImageFormat::R8_UNORM: {
+						std::copy_n(byteStream.getBytePosition(), imageAssetDescriptor.data.count(), &imageAssetDescriptor.data[0]);
 
-				Filesystem::QOIDecoderContentOnly(byteStream, imageAssetDescriptor.data, CHANNEL_COUNT, maxIterationCount);
+						byteStream.jump(imageAssetDescriptor.data.count());
+
+						break;
+					}
+					case ImageFormat::R8G8B8_UNORM:
+					case ImageFormat::R8G8B8A8_UNORM: {
+						Filesystem::QOIDecoderContentOnly(byteStream, imageAssetDescriptor.data, channelCount, byteStream.getRemainingSize());
+
+						break;
+					}
+					default: {
+						ENGINE_ERROR_UNSUPPORTED();
+
+						break;
+					}
+				}
 
 				return createRef<ImageAsset>(imageAssetDescriptor);
 			}

@@ -8,7 +8,7 @@
 namespace Trident {
 	class SampleRenderer : public Renderer {
 		private:
-			static constexpr char8* IMAGE_PATH = "Asset/Image/Zelda.png";
+			static constexpr view<char8> IMAGE_PATH = "Asset/Image/Zelda.png";
 
 		public:
 			void build() override {
@@ -31,7 +31,7 @@ namespace Trident {
 			void render(ref<CommandEncoder> commandEncoder) const override {
 				BeginRenderPassDescriptor beginRenderPassDescriptor{};
 				beginRenderPassDescriptor.framebuffer = framebuffers[getImageIndex()];
-				beginRenderPassDescriptor.clearValues = {{1.0f, 1.0f, 1.0f, 1.0f}};
+				beginRenderPassDescriptor.clearValues = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 				const Extent2D swapchainExtent = getSwapchain()->getExtent();
 				const float32 width = static_cast<float32>(swapchainExtent.width);
@@ -79,18 +79,41 @@ namespace Trident {
 				const sequence<uint8> buffer = Filesystem::openByteBuffer(IMAGE_PATH);
 				const File<FileFormat::PNG> file = Filesystem::decode<FileFormat::PNG>(buffer);
 
-				const ref<Buffer> imageStagingBuffer = createStagingBuffer(file.data.count());
+				ImageFormat imageFormat = file.format;
+
+				switch (file.format) {
+					case ImageFormat::R8_UNORM:
+					case ImageFormat::R8G8B8A8_UNORM: {
+						break;
+					}
+					case ImageFormat::R8G8B8_UNORM: {
+						imageFormat = ImageFormat::R8G8B8A8_UNORM;
+
+						break;
+					}
+					default: {
+						ENGINE_ERROR_UNSUPPORTED();
+
+						break;
+					}
+				}
+
+				const ref<Buffer> imageStagingBuffer = createStagingBuffer(file.extent.width * file.extent.height * getChannelCount(imageFormat));
 
 				uint8* imageStagingBufferMappedRange = imageStagingBuffer->map<uint8>(0, imageStagingBuffer->getSize());
 
-				std::copy(file.data.begin(), file.data.end(), imageStagingBufferMappedRange);
+				if (file.format == ImageFormat::R8G8B8_UNORM) {
+					convert<ImageFormat::R8G8B8_UNORM, ImageFormat::R8G8B8A8_UNORM>(file.data, imageStagingBufferMappedRange, imageStagingBuffer->getSize());
+				}
+				else {
+					std::copy(file.data.begin(), file.data.end(), imageStagingBufferMappedRange);
+				}
 
 				imageStagingBuffer->unmap();
 
-				// NOTE: On Vulkan, the data of an RGB image must first be copied to an RGBA image which supports TRANSFER_DST usage.
 				ImageDescriptor imageDescriptor{};
 				imageDescriptor.type = ImageType::TEXTURE_2D;
-				imageDescriptor.format = file.format;
+				imageDescriptor.format = imageFormat;
 				imageDescriptor.extent = file.extent;
 				imageDescriptor.mipLevelCount = 1;
 				imageDescriptor.layerCount = 1;

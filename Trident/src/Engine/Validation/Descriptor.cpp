@@ -257,6 +257,12 @@ namespace Trident {
 				ENGINE_ERROR("descriptor.format must be a valid ImageFormat value.");
 			}
 
+			if (descriptor.format == ImageFormat::R8G8B8_UNORM) {
+				errorCount += 1;
+
+				ENGINE_ERROR("descriptor.format must not be R8G8B8_UNORM.");
+			}
+
 			if (descriptor.extent.width == 0) {
 				errorCount += 1;
 

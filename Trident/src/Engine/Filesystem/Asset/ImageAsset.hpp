@@ -15,6 +15,7 @@ namespace Trident {
 		Extent3D extent;
 
 		// The number of LOD available for minified sampling of the image.
+		// TODO: Mip level count is not handled at the moment and must be set to 1.
 		uint32 mipLevelCount;
 
 		// The number of layers in the image.
