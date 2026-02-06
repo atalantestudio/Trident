@@ -65,6 +65,7 @@ namespace Trident {
 
 		uint64 compressedDataSize = 0;
 		uint8 channelCount = 0;
+		uint8 bitDepth;
 
 		while (stream.getRemainingSize() > 0) {
 			const uint32 byteLength = stream.read<uint32>();
@@ -82,9 +83,10 @@ namespace Trident {
 
 					file.extent.depth = 1;
 
-					// Number of bytes per sample or per palette index (not per pixel).
+					// NOTE: (= channel bit count)
+					// Number of bits per sample or per palette index, not the total number of bits per pixel.
 					// Valid values are 1, 2, 4, 8, and 16, although not all values are allowed for all color types.
-					const uint8 bitDepth = stream.read<uint8>();
+					bitDepth = stream.read<uint8>();
 
 					ENGINE_ASSERT(bitDepth == 1 || bitDepth == 2 || bitDepth == 4 || bitDepth == 8 || bitDepth == 16, "Undefined bit depth ([]).", static_cast<uint32>(bitDepth));
 
@@ -135,7 +137,7 @@ namespace Trident {
 					ENGINE_ASSERT(colorType == 0 || colorType == 2 || colorType == 6, "Unsupported color type ([]).", static_cast<uint32>(colorType));
 					ENGINE_ASSERT(interlaceMethod == 0, "Unsupported interlace method ([]).", static_cast<uint32>(interlaceMethod));
 
-					file.format = findUnormFormat(channelCount);
+					file.format = findUnormFormat(channelCount, bitDepth);
 
 					break;
 				}
@@ -185,8 +187,8 @@ namespace Trident {
 
 		BitStream<StreamOperation::READ> inflateBitStream(&compressedData[0], compressedDataSize, Endianness::LITTLE_ENDIAN);
 
-		const uint64 filteredDataSize = file.extent.width * file.extent.height * channelCount;
-		const uint64 unfilteredDataSize = filteredDataSize + file.extent.height;
+		const uint64 filteredDataSize = file.extent.width * file.extent.height * channelCount * (bitDepth / 8);
+		const uint64 unfilteredDataSize = filteredDataSize + file.extent.height * (bitDepth / 8);
 
 		const sequence<uint8> unfilteredData = inflateBitStream.inflate<uint8>(unfilteredDataSize);
 
